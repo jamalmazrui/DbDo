@@ -39,9 +39,11 @@ param(
 
 $ErrorActionPreference = 'Stop'
 
-# Build a timestamped log path.
+# Build a timestamped log path in the current directory. This lets
+# you cd to the repo before running and find the log right next to
+# the source you just tagged, instead of hunting through %TEMP%.
 $sStamp = Get-Date -Format 'yyyyMMdd-HHmmss'
-$sLogPath = Join-Path $env:TEMP "tagReleases-$sStamp.log"
+$sLogPath = Join-Path $PWD.Path "tagReleases-$sStamp.log"
 
 # Start transcript logging. If anything goes wrong launching the
 # transcript, we still want a useful error message on the console.

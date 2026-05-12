@@ -28,6 +28,8 @@ Microsoft Office is optional. It is required only when you use the Export-Data c
 
 Download `DbDuo_setup.exe` from <https://github.com/JamalMazrui/DbDuo/releases/latest/download/DbDuo_setup.exe> and run it. (That URL always points to the latest published release.) Accept the defaults. The Welcome page carries a brief MIT license summary; the Select Destination Location page proposes `C:\Program Files\DbDuo`, which you can change. The Installing step silently fetches any missing driver. On the Finish page you can launch DbDuo immediately and open the documentation; both checkboxes are checked by default.
 
+If you would rather have the full source bundle than just the installer, download <https://github.com/JamalMazrui/DbDuo/archive/main.zip>. That URL returns a zip containing the entire current main branch — the C# source, the Inno Setup script, the build script, the documentation in both Markdown and HTML, the License, and the bundled `sample.db`.
+
 Setup creates five Start Menu entries — DbDuo (both modes), DbDuo (GUI only) with hotkey Alt+Control+G, DbDuo (CLI only) with hotkey Alt+Control+L, DbDuo (read-only), and DbDuo sample database (opens the bundled `sample.db`). Setup also creates one Desktop shortcut, DbDuo with hotkey Alt+Control+D. Use the Desktop hotkey, Alt+Control+D (D for Desktop), from anywhere in Windows to bring DbDuo to the foreground or, if it is not running, to launch a fresh copy.
 
 ## Quick start: a guided tour of `sample.db`
