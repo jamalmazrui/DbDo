@@ -3966,6 +3966,416 @@ namespace DbDuo
     }
 
     // =====================================================================
+    // LbcDialog: "Layout by Code" dialog builder.
+    //
+    // A reusable WinForms dialog that callers build by adding one
+    // control at a time. Each addX() method appends a labeled row
+    // to a vertical stack, returns the inner editing control, and
+    // wires its accessible name from the label so screen readers
+    // announce the field correctly when the user tabs into it.
+    //
+    // After adding all controls, the caller invokes runOkCancel()
+    // which appends an OK/Cancel button band, shows the dialog
+    // modally, and returns true on OK. The caller then reads the
+    // final values directly from the control references it kept.
+    //
+    // Borrowed pattern from Jamal Mazrui's Layout by Code system
+    // (LbC), which exists in C#, Python, and AutoIt versions and
+    // codifies the practice of laying out screen-reader-friendly
+    // dialogs by composing simple "add this control" calls in
+    // sequence rather than using a designer file.
+    //
+    // Conventions:
+    //   - Each control gets a Label above it (not beside it). This
+    //     gives a uniform vertical rhythm and ensures the label is
+    //     in the screen-reader's reading order before the control.
+    //   - The label text passes through unchanged (caller may
+    //     include '&' for mnemonic letters); the control's
+    //     AccessibleName is set to the label with '&' and ':'
+    //     stripped, so JAWS announces a clean form-field label.
+    //   - TabIndex is assigned in add order. Labels are skipped
+    //     in tab traversal automatically (WinForms Labels aren't
+    //     focusable).
+    //   - The dialog auto-sizes its width to the widest control,
+    //     up to a cap, and scrolls vertically when contents
+    //     exceed the cap.
+    //   - runOkCancel() makes OK the default (AcceptButton, Enter
+    //     activates) and Cancel the dismiss (CancelButton, Escape
+    //     dismisses).
+    //
+    // Typical usage:
+    //
+    //   LbcDialog oDlg = new LbcDialog("Configuration", this);
+    //   TextBox   tbMode = oDlg.addTextLine("UI mode", "both");
+    //   CheckBox  cbBeep = oDlg.addCheckBox("Beep on errors", true);
+    //   TextBox   tbNote = oDlg.addTextMemo("Startup note", "");
+    //   if (oDlg.runOkCancel())
+    //   {
+    //       string sMode  = tbMode.Text;
+    //       bool   bBeep  = cbBeep.Checked;
+    //       string sNote  = tbNote.Text;
+    //       // ... persist or apply
+    //   }
+    // =====================================================================
+    public class LbcDialog : IDisposable
+    {
+        // Layout constants. Sized for screen-reader users who often
+        // run at 125-150% display scaling -- generous padding makes
+        // the dialog readable without crowding labels into controls.
+        private const int DefaultDialogWidth  = 520;
+        private const int DefaultMaxHeight    = 600;
+        private const int DefaultPadding      = 12;
+        private const int DefaultRowGap       = 6;   // vertical gap between rows
+        private const int DefaultLabelHeight  = 18;
+        private const int DefaultLineHeight   = 24;  // single-line TextBox
+        private const int DefaultMemoHeight   = 96;  // multi-line TextBox
+        private const int DefaultListHeight   = 100; // ListBox
+        private const int DefaultButtonWidth  = 90;
+        private const int DefaultButtonHeight = 28;
+
+        private Form oForm;
+        private IWin32Window oOwner;
+        private FlowLayoutPanel oStack;
+        private int iTabIndex;
+        private Control oFirstFocusable;
+
+        public LbcDialog(string sTitle, IWin32Window oOwnerWindow)
+        {
+            oOwner = oOwnerWindow;
+            oForm = new Form();
+            oForm.Text = sTitle ?? "";
+            oForm.AccessibleName = sTitle ?? "";
+            oForm.StartPosition = FormStartPosition.CenterParent;
+            oForm.FormBorderStyle = FormBorderStyle.Sizable;
+            oForm.MaximizeBox = false;
+            oForm.MinimizeBox = false;
+            oForm.ShowInTaskbar = false;
+            oForm.KeyPreview = true;
+            oForm.MinimumSize = new Size(360, 200);
+            oForm.ClientSize = new Size(DefaultDialogWidth, 200); // height adjusts later
+
+            // Vertical FlowLayoutPanel as the form's main container.
+            // AutoScroll on so dialogs with many fields scroll instead
+            // of overflowing the screen.
+            oStack = new FlowLayoutPanel();
+            oStack.FlowDirection = FlowDirection.TopDown;
+            oStack.WrapContents = false;
+            oStack.AutoScroll = true;
+            oStack.Dock = DockStyle.Fill;
+            oStack.Padding = new Padding(DefaultPadding);
+            oForm.Controls.Add(oStack);
+
+            iTabIndex = 0;
+            oFirstFocusable = null;
+        }
+
+        // ------- Add helpers -------
+        //
+        // Each adds one labeled control to the vertical stack and
+        // returns the inner control so the caller can stash a
+        // reference, attach event handlers, or query values later.
+
+        // addLabel: standalone explanatory text. No editable control.
+        // Useful for section headers or paragraph-style hints.
+        public Label addLabel(string sText)
+        {
+            Label lbl = new Label();
+            lbl.Text = sText ?? "";
+            lbl.AutoSize = false;
+            lbl.Size = new Size(innerWidth(), DefaultLabelHeight);
+            lbl.Margin = new Padding(0, 0, 0, DefaultRowGap);
+            lbl.TextAlign = ContentAlignment.MiddleLeft;
+            oStack.Controls.Add(lbl);
+            return lbl;
+        }
+
+        // addTextLine: single-line text input. Returns the TextBox.
+        public TextBox addTextLine(string sLabel, string sValue)
+        {
+            addFieldLabel(sLabel);
+            TextBox tb = new TextBox();
+            tb.AccessibleName = cleanLabel(sLabel);
+            tb.Text = sValue ?? "";
+            tb.Size = new Size(innerWidth(), DefaultLineHeight);
+            tb.TabIndex = iTabIndex++;
+            tb.Margin = new Padding(0, 0, 0, DefaultRowGap);
+            oStack.Controls.Add(tb);
+            if (oFirstFocusable == null) oFirstFocusable = tb;
+            return tb;
+        }
+
+        // addTextMemo: multi-line text input. Returns the TextBox.
+        // Use this for free-form notes, descriptions, anything that
+        // could span multiple lines.
+        public TextBox addTextMemo(string sLabel, string sValue)
+        {
+            addFieldLabel(sLabel);
+            TextBox tb = new TextBox();
+            tb.AccessibleName = cleanLabel(sLabel);
+            tb.Text = sValue ?? "";
+            tb.Multiline = true;
+            tb.AcceptsReturn = true;
+            tb.AcceptsTab = false;  // Tab moves focus, doesn't insert
+            tb.ScrollBars = ScrollBars.Vertical;
+            tb.WordWrap = true;
+            tb.Size = new Size(innerWidth(), DefaultMemoHeight);
+            tb.TabIndex = iTabIndex++;
+            tb.Margin = new Padding(0, 0, 0, DefaultRowGap);
+            oStack.Controls.Add(tb);
+            if (oFirstFocusable == null) oFirstFocusable = tb;
+            return tb;
+        }
+
+        // addCheckBox: boolean toggle. Returns the CheckBox. The
+        // label is part of the checkbox itself (WinForms convention),
+        // so no separate Label is emitted.
+        public CheckBox addCheckBox(string sLabel, bool bValue)
+        {
+            CheckBox cb = new CheckBox();
+            cb.Text = sLabel ?? "";
+            cb.AccessibleName = cleanLabel(sLabel);
+            cb.Checked = bValue;
+            cb.AutoSize = false;
+            cb.Size = new Size(innerWidth(), DefaultLineHeight);
+            cb.TabIndex = iTabIndex++;
+            cb.Margin = new Padding(0, 0, 0, DefaultRowGap);
+            oStack.Controls.Add(cb);
+            if (oFirstFocusable == null) oFirstFocusable = cb;
+            return cb;
+        }
+
+        // addListBox: pick-one list. Returns the ListBox. The names
+        // argument supplies the visible items; sSelected is the
+        // initial selection (matched by string).
+        public ListBox addListBox(string sLabel, IList<string> lNames, string sSelected)
+        {
+            addFieldLabel(sLabel);
+            ListBox lb = new ListBox();
+            lb.AccessibleName = cleanLabel(sLabel);
+            lb.Size = new Size(innerWidth(), DefaultListHeight);
+            lb.TabIndex = iTabIndex++;
+            lb.Margin = new Padding(0, 0, 0, DefaultRowGap);
+            if (lNames != null)
+            {
+                foreach (string sN in lNames) lb.Items.Add(sN);
+                int iSel = -1;
+                if (!string.IsNullOrEmpty(sSelected))
+                {
+                    for (int i = 0; i < lb.Items.Count; i++)
+                    {
+                        if (string.Equals(lb.Items[i].ToString(), sSelected,
+                                StringComparison.OrdinalIgnoreCase))
+                        { iSel = i; break; }
+                    }
+                }
+                if (iSel < 0 && lb.Items.Count > 0) iSel = 0;
+                if (iSel >= 0) lb.SelectedIndex = iSel;
+            }
+            oStack.Controls.Add(lb);
+            if (oFirstFocusable == null) oFirstFocusable = lb;
+            return lb;
+        }
+
+        // addComboBox: a drop-down version of pick-one. Returns the
+        // ComboBox. More compact than a ListBox; appropriate when
+        // the choices are well known and few. DropDownStyle is set
+        // to DropDownList so the user can only pick from the list.
+        public ComboBox addComboBox(string sLabel, IList<string> lNames, string sSelected)
+        {
+            addFieldLabel(sLabel);
+            ComboBox cb = new ComboBox();
+            cb.AccessibleName = cleanLabel(sLabel);
+            cb.DropDownStyle = ComboBoxStyle.DropDownList;
+            cb.Size = new Size(innerWidth(), DefaultLineHeight);
+            cb.TabIndex = iTabIndex++;
+            cb.Margin = new Padding(0, 0, 0, DefaultRowGap);
+            if (lNames != null)
+            {
+                foreach (string sN in lNames) cb.Items.Add(sN);
+                int iSel = -1;
+                if (!string.IsNullOrEmpty(sSelected))
+                {
+                    for (int i = 0; i < cb.Items.Count; i++)
+                    {
+                        if (string.Equals(cb.Items[i].ToString(), sSelected,
+                                StringComparison.OrdinalIgnoreCase))
+                        { iSel = i; break; }
+                    }
+                }
+                if (iSel < 0 && cb.Items.Count > 0) iSel = 0;
+                if (iSel >= 0) cb.SelectedIndex = iSel;
+            }
+            oStack.Controls.Add(cb);
+            if (oFirstFocusable == null) oFirstFocusable = cb;
+            return cb;
+        }
+
+        // addRadioButton: one option in a radio-button group. The
+        // first call after a non-RadioButton control starts a new
+        // group automatically (WinForms convention: consecutive
+        // RadioButtons in the same container form one group). Set
+        // bChecked on whichever you want pre-selected.
+        public RadioButton addRadioButton(string sLabel, bool bChecked)
+        {
+            RadioButton rb = new RadioButton();
+            rb.Text = sLabel ?? "";
+            rb.AccessibleName = cleanLabel(sLabel);
+            rb.Checked = bChecked;
+            rb.AutoSize = false;
+            rb.Size = new Size(innerWidth(), DefaultLineHeight);
+            rb.TabIndex = iTabIndex++;
+            rb.Margin = new Padding(0, 0, 0, DefaultRowGap);
+            oStack.Controls.Add(rb);
+            if (oFirstFocusable == null) oFirstFocusable = rb;
+            return rb;
+        }
+
+        // addSeparator: a thin horizontal divider, for visually
+        // grouping related fields. Carries no accessible content.
+        public void addSeparator()
+        {
+            Label sep = new Label();
+            sep.Size = new Size(innerWidth(), 2);
+            sep.BorderStyle = BorderStyle.Fixed3D;
+            sep.Margin = new Padding(0, DefaultRowGap, 0, DefaultRowGap);
+            oStack.Controls.Add(sep);
+        }
+
+        // ------- Finish and show -------
+
+        // runOkCancel: add an OK/Cancel button band at the bottom,
+        // show the dialog modally, and return true if the user
+        // pressed OK (or Enter on a control whose AcceptButton
+        // routes to OK), false on Cancel/Escape/close.
+        public bool runOkCancel()
+        {
+            return runWithButtons(new string[] { "OK", "Cancel" }) == "OK";
+        }
+
+        // runWithButtons: more flexible -- specify the button labels
+        // explicitly. The first label is the AcceptButton (Enter).
+        // The last label is the CancelButton (Escape) IF its label
+        // matches "Cancel" or "Close"; otherwise no CancelButton
+        // is set (Escape does nothing). Returns the label of the
+        // button the user pressed, or "" on Escape/close-box.
+        public string runWithButtons(string[] aButtonLabels)
+        {
+            // Layout: a single-row FlowLayoutPanel at the bottom
+            // of the form (docked Bottom), independent of the
+            // main stack. This way it stays put when the stack
+            // scrolls.
+            FlowLayoutPanel oButtonRow = new FlowLayoutPanel();
+            oButtonRow.FlowDirection = FlowDirection.RightToLeft;
+            oButtonRow.AutoSize = false;
+            oButtonRow.Dock = DockStyle.Bottom;
+            oButtonRow.Height = DefaultButtonHeight + DefaultPadding * 2;
+            oButtonRow.Padding = new Padding(DefaultPadding);
+
+            string sResult = "";
+            Button oAcceptBtn = null;
+            Button oCancelBtn = null;
+
+            // We add buttons right-to-left so the visual order
+            // reads left-to-right as given (first label leftmost).
+            // RightToLeft FlowDirection puts the first-added at
+            // the right; we want first-given at the left, so add
+            // in reverse.
+            for (int i = aButtonLabels.Length - 1; i >= 0; i--)
+            {
+                string sLabel = aButtonLabels[i] ?? "";
+                Button btn = new Button();
+                btn.Text = "&" + sLabel.Replace("&", "");
+                btn.AccessibleName = sLabel.Replace("&", "");
+                btn.Size = new Size(DefaultButtonWidth, DefaultButtonHeight);
+                btn.TabIndex = iTabIndex++;
+                btn.Margin = new Padding(DefaultRowGap, 0, 0, 0);
+                btn.UseVisualStyleBackColor = true;
+
+                // Capture label-of-this-button by value for the closure.
+                string sCaptured = sLabel.Replace("&", "");
+                btn.Click += delegate(object o, EventArgs e) {
+                    sResult = sCaptured;
+                    oForm.DialogResult = DialogResult.OK;
+                    oForm.Close();
+                };
+                oButtonRow.Controls.Add(btn);
+                if (i == 0) oAcceptBtn = btn;  // first-given = leftmost = default
+                if (string.Equals(sCaptured, "Cancel", StringComparison.OrdinalIgnoreCase)
+                    || string.Equals(sCaptured, "Close", StringComparison.OrdinalIgnoreCase))
+                    oCancelBtn = btn;
+            }
+            oForm.Controls.Add(oButtonRow);
+            if (oAcceptBtn != null) oForm.AcceptButton = oAcceptBtn;
+            if (oCancelBtn != null) oForm.CancelButton = oCancelBtn;
+
+            // Size the form to fit its content, capped at MaxHeight.
+            int iContentHeight = computeStackHeight();
+            int iTotalHeight = iContentHeight + oButtonRow.Height + 8;
+            if (iTotalHeight > DefaultMaxHeight) iTotalHeight = DefaultMaxHeight;
+            if (iTotalHeight < 160) iTotalHeight = 160;
+            oForm.ClientSize = new Size(DefaultDialogWidth, iTotalHeight);
+
+            if (oFirstFocusable != null) oForm.ActiveControl = oFirstFocusable;
+            oForm.ShowDialog(oOwner);
+            return sResult;
+        }
+
+        // Owning form / outer access for callers who need to tweak
+        // something the high-level API doesn't expose.
+        public Form form { get { return oForm; } }
+
+        public void Dispose()
+        {
+            if (oForm != null) { oForm.Dispose(); oForm = null; }
+        }
+
+        // ------- Internal helpers (kept private) -------
+
+        // The horizontal space inside the stack panel for a control,
+        // accounting for padding and a scrollbar reservation.
+        private int innerWidth()
+        {
+            return DefaultDialogWidth - DefaultPadding * 2 - 24;
+        }
+
+        // Strip '&' mnemonic markers and trailing ':' from a label
+        // before using it as an AccessibleName, so screen readers
+        // announce the clean text.
+        private string cleanLabel(string sLabel)
+        {
+            if (string.IsNullOrEmpty(sLabel)) return "";
+            string s = sLabel.Replace("&", "");
+            if (s.EndsWith(":")) s = s.Substring(0, s.Length - 1);
+            return s.Trim();
+        }
+
+        // Add a small Label above a field control. Reused by every
+        // add method that wants a separate caption.
+        private void addFieldLabel(string sText)
+        {
+            if (string.IsNullOrEmpty(sText)) return;
+            Label lbl = new Label();
+            lbl.Text = sText;
+            lbl.AutoSize = false;
+            lbl.Size = new Size(innerWidth(), DefaultLabelHeight);
+            lbl.Margin = new Padding(0, 0, 0, 0);
+            lbl.TextAlign = ContentAlignment.MiddleLeft;
+            oStack.Controls.Add(lbl);
+        }
+
+        // Sum the heights of all controls in the stack, plus their
+        // margins. Used to choose an initial dialog height that
+        // matches the content (capped at MaxHeight).
+        private int computeStackHeight()
+        {
+            int iTotal = oStack.Padding.Vertical;
+            foreach (Control c in oStack.Controls)
+                iTotal += c.Height + c.Margin.Vertical;
+            return iTotal + 8;
+        }
+    }
+
+    // =====================================================================
     // RecordEditDialog: dynamic per-column field editor. Builds a
     // label + text box per column from a list of column names. The
     // caller passes initial values and an editable-flags list (false
@@ -4560,6 +4970,7 @@ namespace DbDuo
         private ToolStripMenuItem miToolsOpenFolder;
         private ToolStripMenuItem miToolsConsole;
         private ToolStripMenuItem miToolsInvokeSql;
+        private ToolStripMenuItem miToolsEditConfig;
 
         private ToolStripMenuItem miHelp;
         private ToolStripMenuItem miHelpContents;
@@ -4569,6 +4980,7 @@ namespace DbDuo
         private ToolStripMenuItem miHelpTestReader;
         private ToolStripMenuItem miHelpTraceCommand;
         private ToolStripMenuItem miHelpLog;
+        private ToolStripMenuItem miHelpWebSite;
         private ToolStripMenuItem miHelpAbout;
 
         // ------- Constructor / lifecycle -------
@@ -5045,6 +5457,7 @@ namespace DbDuo
             miToolsTestDriver = addItem(miTools, "Test-&Driver (probe ODBC and OLE DB)", "Test-Driver", Keys.None,                       toolsTestDriverClicked);
             miToolsOpenFolder = addItem(miTools, "Open-FileFolder (Explorer at database)", "Open-FileFolder", Keys.Alt | Keys.OemPipe,  toolsOpenFolderClicked);
             addSep(miTools);
+            miToolsEditConfig = addItem(miTools, "&Edit-Configuration (opens DbDuo.ini)", "Edit-Configuration", Keys.F12,             toolsEditConfigClicked);
             miToolsConsole    = addItem(miTools, "Enter-&Console (dot prompt)",  "Enter-Console",     Keys.Control | Keys.Oemtilde,    toolsConsoleClicked);
 
             miHelp = addMenu("Hel&p");
@@ -5057,6 +5470,7 @@ namespace DbDuo
             miHelpTraceCommand = addItem(miHelp, "Toggle &Trace-Command mode", "Trace-Command",     Keys.Alt | Keys.Control | Keys.F1,  helpTraceCommandClicked);
             addSep(miHelp);
             miHelpLog          = addItem(miHelp, "Show &Log location",          "Show-Log",          Keys.None,                          helpLogClicked);
+            miHelpWebSite      = addItem(miHelp, "Open-We&bSite (DbDuo on GitHub)", "Open-WebSite",  Keys.None,                          helpWebSiteClicked);
             miHelpAbout        = addItem(miHelp, "&About",                    "About",             Keys.Alt | Keys.F1,                 helpAboutClicked);
 
             // Get-Property: secondary alias on Shift+F6 (EdSharp's
@@ -8566,6 +8980,268 @@ namespace DbDuo
             DotPromptHost.enter(this);
         }
 
+        // Edit-Configuration: open a Configuration Settings dialog
+        // with one control per common option. The dialog uses the
+        // Layout by Code (LbcDialog) helper for consistent layout
+        // and accessibility. OK writes the changes to the per-user
+        // DbDuo.ini at %LOCALAPPDATA%\DbDuo\DbDuo.ini and reminds
+        // the user that some changes take effect on next launch.
+        // An "Open file..." button is provided for raw editing,
+        // useful for [Keys] overrides and other settings the GUI
+        // doesn't expose yet.
+        //
+        // Bound to F12.
+        //
+        // Common settings exposed in the GUI:
+        //   - uiMode (gui / cli / both)
+        //   - default Markdown reading level for exports (informational)
+        //   - "Open file..." escape hatch to the raw .ini
+        //
+        // Settings deliberately not exposed (managed automatically
+        // or only relevant for power users):
+        //   - [Session] last-opened state (DbDuo writes it itself)
+        //   - [Folders] last-used directories (DbDuo writes it itself)
+        //   - [Keys] hotkey overrides (rare; raw editing is fine)
+        private void toolsEditConfigClicked(object oSender, EventArgs oArgs)
+        {
+            string sUserIni = configIniPath();
+            if (string.IsNullOrEmpty(sUserIni)) return;
+            ensureConfigIniExists(sUserIni);
+
+            // Read current values from the ini, with sensible defaults
+            // if the keys are missing.
+            string sCurrentUiMode = readIniValue(sUserIni, "General", "uiMode", "both");
+
+            LbcDialog oDlg = new LbcDialog("Edit-Configuration", this);
+            try
+            {
+                oDlg.addLabel("Settings stored in: " + sUserIni);
+                oDlg.addLabel("Most changes take effect the next time DbDuo starts.");
+                oDlg.addSeparator();
+
+                // uiMode is a pick-from-three -- ComboBox is perfect.
+                ComboBox cbUiMode = oDlg.addComboBox(
+                    "UI mode at launch (overridden by -cli / -gui / -both):",
+                    new string[] { "both", "gui", "cli" },
+                    sCurrentUiMode);
+
+                oDlg.addSeparator();
+                oDlg.addLabel("For [Keys] overrides and advanced settings, use the");
+                oDlg.addLabel("\"Open file...\" button to edit DbDuo.ini directly.");
+
+                string sResult = oDlg.runWithButtons(new string[] { "OK", "Open file...", "Cancel" });
+                if (string.Equals(sResult, "OK", StringComparison.OrdinalIgnoreCase))
+                {
+                    string sNewUiMode = (cbUiMode.SelectedItem ?? "both").ToString();
+                    writeIniValue(sUserIni, "General", "uiMode", sNewUiMode);
+                    LiveRegion.say("Configuration saved");
+                    DbDuoLog.write("Edit-Configuration saved: uiMode=" + sNewUiMode);
+                    MessageBox.Show(this,
+                        "Configuration saved to " + sUserIni
+                        + "\n\nRestart DbDuo for the new uiMode to take effect.",
+                        "Edit-Configuration",
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                else if (string.Equals(sResult, "Open file...", StringComparison.OrdinalIgnoreCase))
+                {
+                    openIniInTextEditor(sUserIni);
+                }
+                // Cancel / Escape / close: do nothing.
+            }
+            finally
+            {
+                oDlg.Dispose();
+            }
+        }
+
+        // Helper: path of the per-user DbDuo.ini. Returns null and
+        // shows an error dialog if %LOCALAPPDATA% is unavailable.
+        private string configIniPath()
+        {
+            string sBase = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+            if (string.IsNullOrEmpty(sBase))
+            {
+                MessageBox.Show(this,
+                    "%LOCALAPPDATA% is not set. Cannot locate per-user DbDuo.ini.",
+                    "Edit-Configuration", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return null;
+            }
+            string sDir = Path.Combine(sBase, "DbDuo");
+            try { if (!Directory.Exists(sDir)) Directory.CreateDirectory(sDir); }
+            catch { }
+            return Path.Combine(sDir, "DbDuo.ini");
+        }
+
+        // Helper: ensure DbDuo.ini exists at the given path. Seeds
+        // from the shipped template next to the EXE if available,
+        // otherwise writes a minimal stub.
+        private void ensureConfigIniExists(string sUserIni)
+        {
+            if (File.Exists(sUserIni)) return;
+            string sShipped = Path.Combine(
+                Path.GetDirectoryName(Application.ExecutablePath) ?? ".",
+                "DbDuo.ini");
+            if (File.Exists(sShipped))
+            {
+                try { File.Copy(sShipped, sUserIni, false); }
+                catch (Exception oExC)
+                {
+                    DbDuoLog.write("Edit-Configuration: could not copy shipped ini: " + oExC.Message);
+                }
+            }
+            if (!File.Exists(sUserIni))
+            {
+                try
+                {
+                    File.WriteAllText(sUserIni,
+                        "; DbDuo per-user configuration." + Environment.NewLine +
+                        "; Edit this file to change uiMode, override hotkeys," + Environment.NewLine +
+                        "; or inspect remembered Session/Folders state." + Environment.NewLine +
+                        "; Restart DbDuo for changes to take effect." + Environment.NewLine +
+                        Environment.NewLine +
+                        "[General]" + Environment.NewLine +
+                        "uiMode = both" + Environment.NewLine +
+                        Environment.NewLine +
+                        "[Keys]" + Environment.NewLine +
+                        "; Command-Name = Key+Combo" + Environment.NewLine);
+                }
+                catch (Exception oExW)
+                {
+                    MessageBox.Show(this, "Could not create " + sUserIni + ": " + oExW.Message,
+                        "Edit-Configuration", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        // Open the configuration .ini in the system default handler.
+        // Falls back to Notepad if the shell call fails. Shared by
+        // the "Open file..." button and (for backward compat) any
+        // CLI/menu entry that wants to bypass the dialog.
+        private void openIniInTextEditor(string sUserIni)
+        {
+            try
+            {
+                System.Diagnostics.Process.Start(sUserIni);
+                LiveRegion.say("Opened DbDuo.ini for editing");
+                DbDuoLog.write("Edit-Configuration opened: " + sUserIni);
+            }
+            catch
+            {
+                try { System.Diagnostics.Process.Start("notepad.exe", "\"" + sUserIni + "\""); }
+                catch (Exception oEx2)
+                {
+                    MessageBox.Show(this, "Could not open the file in Notepad: " + oEx2.Message,
+                        "Edit-Configuration", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        // Read one value from the ini. Returns sDefault if the key
+        // doesn't exist, the file is unreadable, or the value is
+        // empty. Section is matched case-insensitively (the ini may
+        // be hand-written with mixed case).
+        private static string readIniValue(string sPath, string sSection, string sKey, string sDefault)
+        {
+            if (!File.Exists(sPath)) return sDefault;
+            string[] aLines;
+            try { aLines = File.ReadAllLines(sPath); } catch { return sDefault; }
+            string sHeader = "[" + sSection + "]";
+            bool bInSection = false;
+            foreach (string sLine in aLines)
+            {
+                string sTrim = sLine.Trim();
+                if (sTrim.Length == 0) continue;
+                if (sTrim.StartsWith(";") || sTrim.StartsWith("#")) continue;
+                if (sTrim.StartsWith("["))
+                {
+                    bInSection = sTrim.Equals(sHeader, StringComparison.OrdinalIgnoreCase);
+                    continue;
+                }
+                if (!bInSection) continue;
+                int iEq = sTrim.IndexOf('=');
+                if (iEq <= 0) continue;
+                string sName = sTrim.Substring(0, iEq).Trim();
+                string sValue = sTrim.Substring(iEq + 1).Trim();
+                if (string.Equals(sName, sKey, StringComparison.OrdinalIgnoreCase))
+                    return string.IsNullOrEmpty(sValue) ? sDefault : sValue;
+            }
+            return sDefault;
+        }
+
+        // Write one value into the ini, preserving every other
+        // section/line that is already there. Adds the section
+        // and/or key if missing. Removes the key (and only the
+        // key) if the value is empty -- callers can pass "" to
+        // clear a setting back to the default.
+        //
+        // This is the same algorithm as IniSession.write, but
+        // exposed as a static helper so the configuration dialog
+        // can use it without depending on the IniSession class's
+        // particular file path.
+        private static void writeIniValue(string sPath, string sSection, string sKey, string sValue)
+        {
+            string sHeader = "[" + sSection + "]";
+            List<string> lLines = new List<string>();
+            if (File.Exists(sPath))
+            {
+                try { lLines.AddRange(File.ReadAllLines(sPath)); } catch { return; }
+            }
+
+            int iSectionStart = -1;
+            int iSectionEnd = -1;
+            for (int i = 0; i < lLines.Count; i++)
+            {
+                string sTrim = lLines[i].Trim();
+                if (sTrim.Equals(sHeader, StringComparison.OrdinalIgnoreCase))
+                {
+                    iSectionStart = i;
+                    iSectionEnd = lLines.Count;
+                    for (int j = i + 1; j < lLines.Count; j++)
+                    {
+                        string sJ = lLines[j].Trim();
+                        if (sJ.StartsWith("[")) { iSectionEnd = j; break; }
+                    }
+                    break;
+                }
+            }
+
+            if (iSectionStart < 0)
+            {
+                if (lLines.Count > 0 && lLines[lLines.Count - 1].Trim().Length > 0)
+                    lLines.Add("");
+                lLines.Add(sHeader);
+                if (!string.IsNullOrEmpty(sValue)) lLines.Add(sKey + " = " + sValue);
+            }
+            else
+            {
+                int iFound = -1;
+                for (int i = iSectionStart + 1; i < iSectionEnd; i++)
+                {
+                    string sT = lLines[i].Trim();
+                    if (sT.Length == 0) continue;
+                    if (sT.StartsWith(";") || sT.StartsWith("#")) continue;
+                    int iEq = sT.IndexOf('=');
+                    if (iEq <= 0) continue;
+                    string sN = sT.Substring(0, iEq).Trim();
+                    if (string.Equals(sN, sKey, StringComparison.OrdinalIgnoreCase))
+                    { iFound = i; break; }
+                }
+                if (iFound >= 0)
+                {
+                    if (string.IsNullOrEmpty(sValue)) lLines.RemoveAt(iFound);
+                    else                              lLines[iFound] = sKey + " = " + sValue;
+                }
+                else if (!string.IsNullOrEmpty(sValue))
+                {
+                    lLines.Insert(iSectionStart + 1, sKey + " = " + sValue);
+                }
+            }
+
+            try { File.WriteAllLines(sPath, lLines.ToArray()); }
+            catch (Exception oEx)
+            { DbDuoLog.write("writeIniValue FAILED: " + sPath + " -- " + oEx.Message); }
+        }
+
         // Open-FileFolder: open Windows Explorer at the folder containing
         // the currently open database file. EdSharp / FileDir convention
         // (Alt+Backslash). If no database is open, opens %USERPROFILE%
@@ -8779,6 +9455,29 @@ namespace DbDuo
                     MessageBox.Show(this, "Could not open Notepad: " + oEx.Message,
                         "Show-Log", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
+            }
+        }
+
+        // Open-WebSite: open the DbDuo project page in the system's
+        // default browser. The URL is the same one referenced from
+        // the About dialog and the License/README. No tracking;
+        // straight Process.Start("https://...") which on Windows
+        // delegates to the default HTTP handler.
+        private void helpWebSiteClicked(object oSender, EventArgs oArgs)
+        {
+            const string sUrl = "https://github.com/JamalMazrui/DbDuo";
+            try
+            {
+                System.Diagnostics.Process.Start(sUrl);
+                LiveRegion.say("Opened DbDuo on GitHub");
+                DbDuoLog.write("Open-WebSite: " + sUrl);
+            }
+            catch (Exception oEx)
+            {
+                MessageBox.Show(this,
+                    "Could not open the browser:\n\n" + oEx.Message
+                    + "\n\nThe URL is:\n" + sUrl,
+                    "Open-WebSite", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
