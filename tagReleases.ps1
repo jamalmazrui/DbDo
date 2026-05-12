@@ -174,11 +174,35 @@ function publishOne {
         Write-Host ("  mtime:   {0}" -f $oExe.LastWriteTime)
 
         # 3. Check for uncommitted changes.
+        #
+        # Filter out the script's own log file from the porcelain
+        # output. Because we write the log into $PWD.Path (so it
+        # lands next to the source we are tagging), the very act of
+        # Start-Transcript creates a new untracked file that git
+        # status notices. Without filtering, the dirty check trips
+        # on the script's own footprint -- the log file shows up as
+        # the only "uncommitted change" the very first time the
+        # script runs in a clean repo. We also recommend listing
+        # tagReleases-*.log in .gitignore for a permanent fix, but
+        # filtering here means the script works even on repos that
+        # have not been .gitignore-updated yet.
         $sStatus = & git status --porcelain 2>&1 | Out-String
         if ($LASTEXITCODE -ne 0) {
             throw "git status failed."
         }
-        $sStatus = $sStatus.TrimEnd()
+        # Drop any line referencing the script's own log file. Match
+        # is loose -- any porcelain line whose path mentions
+        # "tagReleases-" and ends in ".log" is treated as the
+        # script's footprint. This covers both the current run's log
+        # ("?? tagReleases-20260511-192605.log") and any older log
+        # files that were not cleaned up.
+        $aLines = $sStatus -split "`r?`n"
+        $aFiltered = @()
+        foreach ($sLine in $aLines) {
+            if ($sLine -match 'tagReleases-[\d\-]+\.log\s*$') { continue }
+            if ($sLine.Trim().Length -gt 0) { $aFiltered += $sLine }
+        }
+        $sStatus = ($aFiltered -join "`n").TrimEnd()
         if ($sStatus) {
             if ($AllowDirty) {
                 Write-Host "WARN: working tree has uncommitted changes. Proceeding anyway (-AllowDirty)." -ForegroundColor Yellow
@@ -189,7 +213,7 @@ function publishOne {
                 throw "Working tree at $sRepoPath has uncommitted changes. Either commit them (so the tag matches the .exe) or re-run with -AllowDirty."
             }
         } else {
-            Write-Host "Working tree is clean."
+            Write-Host "Working tree is clean (log files ignored)."
         }
 
         # 4. Create or confirm tag, then push.

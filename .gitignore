@@ -1,0 +1,16 @@
+# Logs from tagReleases.ps1. The script writes a timestamped log
+# into the repo root on each run; those logs are session-local
+# and should not be tracked.
+tagReleases-*.log
+
+# Visual Studio / MSBuild scratch.
+bin/
+obj/
+*.suo
+*.user
+.vs/
+
+# Backup files some editors leave behind.
+*~
+*.bak
+*.tmp
