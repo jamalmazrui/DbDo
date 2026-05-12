@@ -1,6 +1,8 @@
 ﻿# DbDuo Reference
 
-Version 1.0.19. Source and releases: <https://github.com/JamalMazrui/DbDuo>.
+**Manage databases in popular file formats, with synchronized interfaces between CLI and GUI modes, designed to maximize productivity for keyboard users of Windows.**
+
+Version 1.0.20. Source and releases: <https://github.com/JamalMazrui/DbDuo>.
 
 ## How DbDuo is organized
 
@@ -8,7 +10,7 @@ DbDuo runs in two interfaces — a WinForms GUI and a dot-prompt CLI — simulta
 
 The GUI is a single Windows form containing a menu bar, a ListView data grid in the center, and a status bar at the bottom. Standard Windows conventions apply: Alt activates the menu bar; single-letter mnemonics open each top-level menu (File, Record, View, Schema, Tools, Help). Every menu command is reachable through both a hotkey and a click; no command is mouse-only.
 
-The data grid is a virtual-mode ListView in Details view with FullRowSelect on. Arrow keys move between rows; Tab and Shift+Tab move between columns within the current row. Each column move triggers a live-region announcement of the form "ColumnHeader: value" so screen readers name the column you just entered. Type-ahead is enabled: typing a letter while focus is on the grid jumps to the next row whose current column starts with that letter.
+The data grid is a virtual-mode ListView in Details view with FullRowSelect on. Arrow keys move between rows; Tab and Shift+Tab move between columns within the current row. Each column move triggers a live-region announcement of the form "ColumnHeader: value" so screen readers name the column you just entered.
 
 The status bar at the bottom carries three items in this order: the word "marked" (only when the current row has its marked flag set), the row position "row N of M", and "updated YYYY-MM-DD" (only when the current row has an updated column). Two spaces separate the sections so the screen reader pauses naturally between them. Use the JAWS Insert+PageDown command to read the whole status bar at once.
 
@@ -31,6 +33,18 @@ In CLI-only mode these chords work the same way; without a GUI, the "switch to G
 Setup creates five Start Menu shortcuts and one Desktop shortcut. The plain **DbDuo** shortcut opens both GUI and console, which is the default mode. Use the Alt+Control+G hotkey on the **DbDuo (GUI only)** shortcut (G for GUI) to launch the GUI without a console; use Alt+Control+L on the **DbDuo (CLI only)** shortcut (L for cLi) to launch the dot prompt without a GUI. The **DbDuo (read-only)** shortcut opens databases with the lock on. The **DbDuo sample database** shortcut opens the bundled `sample.db` directly so you can try DbDuo without your own data.
 
 Use the Desktop hotkey, Alt+Control+D (D for Desktop), from anywhere in Windows to activate a running instance or launch a fresh one. DbDuo is single-instance: a second press of Alt+Control+D wakes the existing window rather than spawning a duplicate.
+
+## Keyboard navigation in the data grid
+
+The ListView in the center of the GUI uses three families of key gestures: arrow keys for row movement, Tab and Shift+Tab for column movement within a row, and any unmodified letter or digit for type-ahead jumping.
+
+Use the arrow keys to step row by row. Use the PageUp and PageDown keys to jump by a screenful at a time. Use Home and End to jump to the first and last row.
+
+Use the Tab key to advance to the next column within the current row, or Shift+Tab to move backward. After each Tab, DbDuo announces the new column with its header and current value, in the form "ColumnHeader: value." Note that Control+Tab and Control+Shift+Tab do something different — those cycle among recently-visited tables rather than columns; DbDuo lets the form-level Switch-Table command handle those rather than the ListView.
+
+Use any unmodified letter key, lowercase or uppercase, to jump to the next row whose current column begins with that letter. Type two or more letters in quick succession to extend the search prefix; for example, typing "dr" on the `teachers` table jumps to the first row beginning with "Dr." (such as "Dr. Ada Lovelace"). The search wraps around at the end of the list and starts over from the top. The comparison is case-insensitive, so lowercase a and capital A both jump to rows starting with A; capital letters are not reserved for any other purpose.
+
+This convention is deliberate. Other accessibility-focused tools — FileDir, for one — assign Shift-letter chords like Shift+D, Shift+L, and Shift+S to menu commands and accept that those specific capital letters cannot be used for type-ahead navigation. DbDuo takes the opposite approach: every capital letter remains a type-ahead key, and every menu hotkey involving a letter uses Control or Alt (often combined with Shift) as the modifier. The trade-off costs DbDuo a few possible one-key chord names, but it preserves the entire alphabet for quickly jumping around large recordsets — a workflow that matters more once a database has a few thousand rows.
 
 ## File menu
 

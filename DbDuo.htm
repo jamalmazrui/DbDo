@@ -180,6 +180,9 @@ id="toc-switching-between-modes">Switching between modes</a></li>
 <li><a href="#starting-dbduo" id="toc-starting-dbduo">Starting
 DbDuo</a></li>
 </ul></li>
+<li><a href="#keyboard-navigation-in-the-data-grid"
+id="toc-keyboard-navigation-in-the-data-grid">Keyboard navigation in the
+data grid</a></li>
 <li><a href="#file-menu" id="toc-file-menu">File menu</a></li>
 <li><a href="#record-menu" id="toc-record-menu">Record menu</a></li>
 <li><a href="#view-menu" id="toc-view-menu">View menu</a></li>
@@ -212,7 +215,10 @@ id="toc-bundled-documentation">Bundled documentation</a></li>
 </ul>
 </nav>
 <h1 id="dbduo-reference">DbDuo Reference</h1>
-<p>Version 1.0.19. Source and releases: <a
+<p><strong>Manage databases in popular file formats, with synchronized
+interfaces between CLI and GUI modes, designed to maximize productivity
+for keyboard users of Windows.</strong></p>
+<p>Version 1.0.20. Source and releases: <a
 href="https://github.com/JamalMazrui/DbDuo"
 class="uri">https://github.com/JamalMazrui/DbDuo</a>.</p>
 <h2 id="how-dbduo-is-organized">How DbDuo is organized</h2>
@@ -229,9 +235,7 @@ click; no command is mouse-only.</p>
 FullRowSelect on. Arrow keys move between rows; Tab and Shift+Tab move
 between columns within the current row. Each column move triggers a
 live-region announcement of the form “ColumnHeader: value” so screen
-readers name the column you just entered. Type-ahead is enabled: typing
-a letter while focus is on the grid jumps to the next row whose current
-column starts with that letter.</p>
+readers name the column you just entered.</p>
 <p>The status bar at the bottom carries three items in this order: the
 word “marked” (only when the current row has its marked flag set), the
 row position “row N of M”, and “updated YYYY-MM-DD” (only when the
@@ -282,6 +286,41 @@ your own data.</p>
 in Windows to activate a running instance or launch a fresh one. DbDuo
 is single-instance: a second press of Alt+Control+D wakes the existing
 window rather than spawning a duplicate.</p>
+<h2 id="keyboard-navigation-in-the-data-grid">Keyboard navigation in the
+data grid</h2>
+<p>The ListView in the center of the GUI uses three families of key
+gestures: arrow keys for row movement, Tab and Shift+Tab for column
+movement within a row, and any unmodified letter or digit for type-ahead
+jumping.</p>
+<p>Use the arrow keys to step row by row. Use the PageUp and PageDown
+keys to jump by a screenful at a time. Use Home and End to jump to the
+first and last row.</p>
+<p>Use the Tab key to advance to the next column within the current row,
+or Shift+Tab to move backward. After each Tab, DbDuo announces the new
+column with its header and current value, in the form “ColumnHeader:
+value.” Note that Control+Tab and Control+Shift+Tab do something
+different — those cycle among recently-visited tables rather than
+columns; DbDuo lets the form-level Switch-Table command handle those
+rather than the ListView.</p>
+<p>Use any unmodified letter key, lowercase or uppercase, to jump to the
+next row whose current column begins with that letter. Type two or more
+letters in quick succession to extend the search prefix; for example,
+typing “dr” on the <code>teachers</code> table jumps to the first row
+beginning with “Dr.” (such as “Dr. Ada Lovelace”). The search wraps
+around at the end of the list and starts over from the top. The
+comparison is case-insensitive, so lowercase a and capital A both jump
+to rows starting with A; capital letters are not reserved for any other
+purpose.</p>
+<p>This convention is deliberate. Other accessibility-focused tools —
+FileDir, for one — assign Shift-letter chords like Shift+D, Shift+L, and
+Shift+S to menu commands and accept that those specific capital letters
+cannot be used for type-ahead navigation. DbDuo takes the opposite
+approach: every capital letter remains a type-ahead key, and every menu
+hotkey involving a letter uses Control or Alt (often combined with
+Shift) as the modifier. The trade-off costs DbDuo a few possible one-key
+chord names, but it preserves the entire alphabet for quickly jumping
+around large recordsets — a workflow that matters more once a database
+has a few thousand rows.</p>
 <h2 id="file-menu">File menu</h2>
 <p>Use the New-Database command, Control+Shift+N (N for New, Shift to
 distinguish it from Control+N which makes a new row), to create an empty

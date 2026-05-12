@@ -24,7 +24,7 @@
 ; =====================================================================
 
 #define AppName       "DbDuo"
-#define AppVersion    "1.0.19"
+#define AppVersion    "1.0.20"
 #define AppPublisher  "Jamal Mazrui"
 #define AppUrl        "https://github.com/JamalMazrui/DbDuo"
 #define AppExeName    "DbDuo.exe"

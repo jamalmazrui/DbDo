@@ -49,7 +49,7 @@ namespace DbDuo
     // =====================================================================
     public static class BuildInfo
     {
-        public const string VersionString = "1.0.19";
+        public const string VersionString = "1.0.20";
     }
 
     // =====================================================================
@@ -4512,6 +4512,28 @@ namespace DbDuo
         // default behavior is to move focus to the next control;
         // we override it for in-row column navigation, then
         // announce the new column.
+        //
+        // Type-ahead navigation works automatically for ALL letter
+        // keys -- both lowercase and uppercase -- because the
+        // ListView's virtual-mode SearchForVirtualItem event fires
+        // on each unmodified character keypress, regardless of
+        // capitalization, and our gridSearchForVirtualItem handler
+        // uses OrdinalIgnoreCase matching. The user can press 'a'
+        // or 'A' interchangeably to jump to the next row whose
+        // current column starts with that letter; typing several
+        // characters in quick succession extends the search prefix.
+        //
+        // For this to remain true, DbDuo must NEVER bind a bare
+        // Shift+letter combination as a menu hotkey -- doing so
+        // would cause the form's ProcessCmdKey to intercept the
+        // shifted key before the ListView could feed it to
+        // SearchForVirtualItem, stealing capital-letter type-ahead.
+        // All Shift+letter hotkeys in DbDuo are combined with
+        // Control or Alt (verified by inspection of buildMenus).
+        // This is a deliberate trade compared with FileDir, which
+        // binds Shift+D / Shift+L / Shift+S to menu commands and
+        // accepts that those particular capitals cannot type-ahead.
+        // In DbDuo, every capital letter remains a navigation key.
         private void gridKeyDown(object oSender, KeyEventArgs oArgs)
         {
             if (oArgs.KeyCode == Keys.Tab)
@@ -7490,13 +7512,24 @@ namespace DbDuo
 
         private void helpAboutClicked(object oSender, EventArgs oArgs)
         {
+            // The About dialog is the right place for the long-form
+            // tagline because it is on-demand (Alt+F1), not part of
+            // launch or routine navigation. Keep the rest of the UI
+            // -- window title, status bar, column announcements,
+            // menu tooltips -- terse.
             HelpDialog.show(this, "About DbDuo",
                 "DbDuo " + BuildInfo.VersionString + "\n"
-                + "Dual-mode (GUI + dot-prompt CLI) database manager.\n"
+                + "\n"
+                + "Manage databases in popular file formats, with synchronized\n"
+                + "interfaces between CLI and GUI modes, designed to maximize\n"
+                + "productivity for keyboard users of Windows.\n"
+                + "\n"
                 + "C# / .NET Framework 4.8 / x64 / WinForms.\n"
                 + "Database access via ADODB COM interop.\n"
+                + "Built around Microsoft's PowerShell verb taxonomy.\n"
                 + "\n"
-                + "Built around Microsoft's PowerShell-canonical verb taxonomy.\n");
+                + "https://github.com/JamalMazrui/DbDuo\n"
+                + "MIT License.\n");
         }
     }
 

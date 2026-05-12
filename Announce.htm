@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Announce</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid #1a1a1a;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<h1 id="introducing-dbduo">Introducing DbDuo</h1>
+<p><strong>DbDuo: Manage databases in popular file formats, with
+synchronized interfaces between CLI and GUI modes, designed to maximize
+productivity for keyboard users of Windows.</strong></p>
+<p>I have been working on a small Windows tool for managing databases
+from the keyboard, and I would like to share an initial release.</p>
+<p>DbDuo runs as both a WinForms GUI and a dot-prompt CLI at the same
+time, over a single shared database connection. The GUI uses a ListView
+grid that JAWS, NVDA, and Narrator can read cell by cell; the CLI is a
+PowerShell-flavored prompt where commands use Verb-Noun names like
+<code>Step-Record</code>, <code>Show-Table</code>,
+<code>Set-Mark</code>, <code>Sort-Object</code>,
+<code>Invoke-Sql</code>, <code>Enter-Child</code>. Either mode can drive
+any database the other can; pressing <strong>Alt+GraveAccent</strong>
+switches from the CLI to the GUI, and
+<strong>Control+GraveAccent</strong> switches the other way.</p>
+<p>A few characteristics that might interest other accessibility-focused
+developers:</p>
+<ul>
+<li><strong>One connection, two interfaces.</strong> Edits made in the
+dot prompt show up immediately in the ListView, and the reverse. There
+is no synchronization step and no second copy of the data.</li>
+<li><strong>Native ADO.</strong> SQLite via ODBC, Access, Excel, and
+dBASE via the Access Database Engine, plain CSV and TSV via the Jet text
+driver. The recordset, filter, and sort are first-class objects, not
+query-string artifacts.</li>
+<li><strong>Drill navigation.</strong> <code>Enter-Child</code>
+(Control+E) finds child tables by foreign-key naming convention, opens
+the unique match, and filters to the related rows.
+<code>Exit-Child</code> (Control+Shift+E) pops back to the parent’s
+exact row.</li>
+<li><strong>PowerShell verb taxonomy.</strong> Every command is a single
+Verb-Noun pair; aliases line up with both dBASE dot commands
+(<code>skip</code>, <code>locate</code>, <code>replace</code>) and
+SQLite shell commands (<code>.read</code>, <code>.output</code>).</li>
+<li><strong>Multi-format export.</strong> <code>Export-Data</code>
+(Control+Shift+X) writes xlsx, docx, filtered HTML, csv, and tsv in any
+combination, in a single call. xlsx and docx use Word and Excel via
+late-bound COM; csv and tsv use native code with no Office
+dependency.</li>
+<li><strong>JAWS-canonical key names</strong> throughout the menus,
+help, and status messages: UpArrow, DownArrow, NumPad0 through NumPad9,
+GraveAccent, Minus rather than Dash, modifiers always in alpha order
+(Alt+Control+Shift).</li>
+<li><strong>Single-instance with hotkey wake-up.</strong> A second
+launch activates the running window rather than starting a duplicate.
+The Desktop shortcut on Alt+Control+D activates from anywhere.</li>
+</ul>
+<p>Project home and downloads:</p>
+<ul>
+<li><strong>Project page (source, issues, discussion):</strong> <a
+href="https://github.com/JamalMazrui/DbDuo"
+class="uri">https://github.com/JamalMazrui/DbDuo</a></li>
+<li><strong>Direct installer download (always the latest
+release):</strong> <a
+href="https://github.com/JamalMazrui/DbDuo/releases/latest/download/DbDuo_setup.exe"
+class="uri">https://github.com/JamalMazrui/DbDuo/releases/latest/download/DbDuo_setup.exe</a></li>
+<li><strong>Full project as a single zip (current main branch):</strong>
+<a href="https://github.com/JamalMazrui/DbDuo/archive/main.zip"
+class="uri">https://github.com/JamalMazrui/DbDuo/archive/main.zip</a></li>
+</ul>
+<p>The first URL is the entry point for browsing source and reporting
+issues. The second is a stable direct download that does not change as
+new versions ship; pasted into a browser, it downloads the current
+<code>DbDuo_setup.exe</code> immediately, with no clicking through
+release pages. The third returns a zip archive containing the entire
+current main branch, including the C# source, the Inno Setup script, the
+build script, the documentation in Markdown and HTML, the License, and
+the bundled sample database.</p>
+<p>Released under the MIT License.</p>
+<p>I would welcome feedback from blind and low-vision developers
+especially — keyboard ergonomics, screen-reader announcements,
+command-name choices, anything that helps the tool fit how people
+actually work.</p>
+</body>
+</html>
