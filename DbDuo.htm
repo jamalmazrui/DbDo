@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>DbDuo User Guide</title>
+  <style>
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">DbDuo User Guide</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#dbduo-reference" id="toc-dbduo-reference">DbDuo
+Reference</a>
+<ul>
+<li><a href="#how-dbduo-is-organized"
+id="toc-how-dbduo-is-organized">How DbDuo is organized</a>
+<ul>
+<li><a href="#switching-between-modes"
+id="toc-switching-between-modes">Switching between modes</a></li>
+<li><a href="#starting-dbduo" id="toc-starting-dbduo">Starting
+DbDuo</a></li>
+</ul></li>
+<li><a href="#file-menu" id="toc-file-menu">File menu</a></li>
+<li><a href="#record-menu" id="toc-record-menu">Record menu</a></li>
+<li><a href="#view-menu" id="toc-view-menu">View menu</a></li>
+<li><a href="#schema-menu" id="toc-schema-menu">Schema menu</a></li>
+<li><a href="#tools-menu" id="toc-tools-menu">Tools menu</a></li>
+<li><a href="#help-menu" id="toc-help-menu">Help menu</a></li>
+<li><a href="#commands-available-only-at-the-dot-prompt"
+id="toc-commands-available-only-at-the-dot-prompt">Commands available
+only at the dot prompt</a></li>
+<li><a href="#mnemonic-hotkey-groups"
+id="toc-mnemonic-hotkey-groups">Mnemonic hotkey groups</a>
+<ul>
+<li><a href="#function-key-family"
+id="toc-function-key-family">Function-key family</a></li>
+<li><a href="#control-letter-family"
+id="toc-control-letter-family">Control-letter family</a></li>
+<li><a href="#alt-family" id="toc-alt-family">Alt family</a></li>
+<li><a href="#navigation-family" id="toc-navigation-family">Navigation
+family</a></li>
+<li><a href="#graveaccent-family"
+id="toc-graveaccent-family">GraveAccent family</a></li>
+</ul></li>
+<li><a href="#standard-fields" id="toc-standard-fields">Standard
+fields</a></li>
+<li><a href="#persistence" id="toc-persistence">Persistence</a></li>
+<li><a href="#logging" id="toc-logging">Logging</a></li>
+<li><a href="#bundled-documentation"
+id="toc-bundled-documentation">Bundled documentation</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="dbduo-reference">DbDuo Reference</h1>
+<p>Version 1.0.19. Source and releases: <a
+href="https://github.com/JamalMazrui/DbDuo"
+class="uri">https://github.com/JamalMazrui/DbDuo</a>.</p>
+<h2 id="how-dbduo-is-organized">How DbDuo is organized</h2>
+<p>DbDuo runs in two interfaces — a WinForms GUI and a dot-prompt CLI —
+simultaneously by default. Both interfaces drive the same ADO database
+connection, so a change in one shows up immediately in the other.</p>
+<p>The GUI is a single Windows form containing a menu bar, a ListView
+data grid in the center, and a status bar at the bottom. Standard
+Windows conventions apply: Alt activates the menu bar; single-letter
+mnemonics open each top-level menu (File, Record, View, Schema, Tools,
+Help). Every menu command is reachable through both a hotkey and a
+click; no command is mouse-only.</p>
+<p>The data grid is a virtual-mode ListView in Details view with
+FullRowSelect on. Arrow keys move between rows; Tab and Shift+Tab move
+between columns within the current row. Each column move triggers a
+live-region announcement of the form “ColumnHeader: value” so screen
+readers name the column you just entered. Type-ahead is enabled: typing
+a letter while focus is on the grid jumps to the next row whose current
+column starts with that letter.</p>
+<p>The status bar at the bottom carries three items in this order: the
+word “marked” (only when the current row has its marked flag set), the
+row position “row N of M”, and “updated YYYY-MM-DD” (only when the
+current row has an updated column). Two spaces separate the sections so
+the screen reader pauses naturally between them. Use the JAWS
+Insert+PageDown command to read the whole status bar at once.</p>
+<p>The window title is
+<code>DbDuo - &lt;database&gt; - &lt;table&gt;</code>, with
+<code>(read-only)</code> inserted after the database name when the lock
+is on.</p>
+<p>The Shift+F10 context menu in the data grid duplicates the most
+common record-level commands: Set-Record, Show-Record, Copy-Record,
+Remove-Record, Set-Mark, Clear-Mark, and Get-Property. Mouse users can
+right-click to reach the same items.</p>
+<p>The CLI is a Windows console window running a dot prompt. Each line
+is a single Verb-Noun command, optionally with an argument; bare SQL is
+also accepted directly. The prompt is the current table’s name followed
+by a dot. Use the Get-Help command, F1 from the GUI or <code>help</code>
+at the prompt, to see the command index;
+<code>help &lt;command&gt;</code> shows details for one command. Use the
+Out-File command, <code>Out-File path.txt</code> (output, tee, or
+<code>o</code> are aliases), to capture the next commands’ output to a
+file while keeping it on screen at the same time.</p>
+<h3 id="switching-between-modes">Switching between modes</h3>
+<p>Three grave-accent chords coordinate the GUI/CLI relationship. JAWS
+calls the unshifted key above Tab “GraveAccent.”</p>
+<p>Use the Enter-Console command, Control+GraveAccent, from the GUI menu
+to open or focus the dot prompt console. Use Alt+GraveAccent (a global
+hotkey) from inside the console to bring the GUI forward; this chord
+acts only when the console has focus, so it does not yank focus from
+Word or any other application. Use Alt+Control+GraveAccent (also global)
+from anywhere in Windows to toggle between GUI and console, whichever is
+not currently in front.</p>
+<p>In CLI-only mode these chords work the same way; without a GUI, the
+“switch to GUI” chords simply have nothing to bring forward.</p>
+<h3 id="starting-dbduo">Starting DbDuo</h3>
+<p>Setup creates five Start Menu shortcuts and one Desktop shortcut. The
+plain <strong>DbDuo</strong> shortcut opens both GUI and console, which
+is the default mode. Use the Alt+Control+G hotkey on the <strong>DbDuo
+(GUI only)</strong> shortcut (G for GUI) to launch the GUI without a
+console; use Alt+Control+L on the <strong>DbDuo (CLI only)</strong>
+shortcut (L for cLi) to launch the dot prompt without a GUI. The
+<strong>DbDuo (read-only)</strong> shortcut opens databases with the
+lock on. The <strong>DbDuo sample database</strong> shortcut opens the
+bundled <code>sample.db</code> directly so you can try DbDuo without
+your own data.</p>
+<p>Use the Desktop hotkey, Alt+Control+D (D for Desktop), from anywhere
+in Windows to activate a running instance or launch a fresh one. DbDuo
+is single-instance: a second press of Alt+Control+D wakes the existing
+window rather than spawning a duplicate.</p>
+<h2 id="file-menu">File menu</h2>
+<p>Use the New-Database command, Control+Shift+N (N for New, Shift to
+distinguish it from Control+N which makes a new row), to create an empty
+SQLite database at a chosen path. Use the Open-Database command,
+Control+O (O for Open), to bring up a file dialog and choose an existing
+database; DbDuo recognizes <code>.db</code>, <code>.sqlite</code>,
+<code>.sqlite3</code>, <code>.mdb</code>, <code>.accdb</code>,
+<code>.xlsx</code>, <code>.xls</code>, <code>.dbf</code>,
+<code>.csv</code>, <code>.tsv</code>, and <code>.txt</code> files.</p>
+<p>Use the Save-DatabaseAs command, Control+S (S for Save), to write a
+copy of the open database to a new path and switch DbDuo to the new
+file. Use the Backup-Database command, Control+Shift+S, to write the
+same copy but keep the original open (S for Save, Shift to distinguish a
+backup snapshot from a Save-As). The Close-Database File command,
+Control+F4 (the MDI close convention), closes the open file without
+exiting DbDuo.</p>
+<p>Use the Import-Data command, Control+Shift+I (I for Import), to bring
+a delimited file into the open database; for now this is a reserved menu
+entry, and importing is done by running an Invoke-Sql statement
+directly. Use the Export-Data command, Control+Shift+X (X for eXport),
+to write the current view to one or more files. At the dot prompt,
+<code>Export-Data</code> with no argument writes a single xlsx file into
+the database’s folder, named after the current table;
+<code>Export-Data xlsx docx html csv</code> (or the single-letter
+shortcuts <code>x d h c</code>) writes one file of each kind in one
+call. After each export, DbDuo opens the result in its default Windows
+application so you immediately hear what was produced. The xlsx and docx
+formats use Word and Excel through late-bound COM and therefore need
+Microsoft Office; csv, tsv, and plain HTML work without Office.</p>
+<p>Use the Out-Printer command, Control+P (P for Print), to print the
+current view; this is reserved for a future release. For now, export to
+HTML or docx and print from the corresponding application.</p>
+<p>Use the Exit-Application command, Alt+F4 (the Windows-standard
+close-program key), to close DbDuo entirely. The dot prompt’s
+<code>quit</code> and <code>q</code> commands map to Exit-Application as
+well; <code>exit</code>, <code>x</code>, and <code>bye</code> map to
+Exit-Console, which leaves the dot prompt but keeps the GUI running.</p>
+<h2 id="record-menu">Record menu</h2>
+<p>Every Record-menu command operates on the current row.</p>
+<p>Use the New-Record command, Control+N (N for New), to add a row.
+DbDuo shows an edit dialog with one line per distinct field; bookkeeping
+fields (<code>added</code>, <code>updated</code>, <code>observed</code>,
+<code>marked</code>, the primary key) get their default values
+automatically. Use the Set-Record command, F2 (the Windows-standard
+rename key), to edit the current row. Use the Remove-Record command,
+Control+D (D for Delete), to remove the current row; the Delete key
+alone is a secondary binding so the gridlike Excel and Outlook
+convention works too.</p>
+<p>Use the Update-Field command, Control+R (R for Replace), to do a
+find-and-replace across rows: pick a column, type the find string and
+the replace string, choose the scope (current row, filtered rows, or all
+rows), and DbDuo updates every match through ADO so the same triggers
+fire as for a SQL UPDATE.</p>
+<p>Use the Show-Record command, plain Enter, to hear every column of the
+current row at once. Use the Copy-Record command, Control+Shift+C (Shift
+turns the native clipboard’s Control+C into row-copy), to duplicate the
+current row as a new record. Use the Open-Cell command, Control+Enter
+(extends Enter into “open as URL”), to treat the current cell’s value as
+a URL or a file path and open it in its default Windows application;
+useful when a database column holds links to PDFs, screenshots, or web
+pages.</p>
+<p>Use the Jump-Record command, Control+J (J for Jump), to find a row.
+Type an ADO Filter expression and DbDuo positions the cursor on the
+first match without changing the filter; for example,
+<code>name LIKE '%bridge%'</code> or <code>marked = true</code>. Use the
+Jump-RecordAgain command, F3 (the Windows-standard find-next key), to
+step to the next match; use the Jump-RecordPrevious command, Shift+F3,
+to step backward.</p>
+<p>Use the Set-Mark command, Control+M (M for Mark), to set the boolean
+<code>marked</code> column on the current row; when marked is true, the
+status bar reads “marked.” Use the Clear-Mark command, Control+Shift+M,
+to clear it. Marks are useful for accumulating an ad-hoc selection
+across navigation; combine with <code>filter marked</code> at the dot
+prompt to scope subsequent commands.</p>
+<p>Use the Set-Position command, Control+G (G for Go-to), to jump to a
+row number; out-of-range values clamp to the first or last row.</p>
+<p>DbDuo offers two navigation directions between related tables. The
+first goes child to parent: use the Show-Related command (no hotkey,
+available from the Record menu) when the current row has a foreign-key
+column like <code>app_id</code> and you want to jump to the
+corresponding parent row in the <code>apps</code> table.</p>
+<p>The second goes parent to child: use the Enter-Child command,
+Control+E (E for Enter), to drill from the current parent row into a
+child table whose schema includes the parent’s primary-key column name.
+If exactly one child table matches, DbDuo opens it directly; otherwise
+it presents an alphabetized listbox so you can pick. The child table
+opens with its last-used sort order restored and a filter applied that
+shows only the rows whose foreign key matches this parent’s primary key.
+The drill stack is unbounded; you can Enter-Child several levels deep.
+Use the Exit-Child command, Control+Shift+E, to pop back one level.
+DbDuo restores the parent’s sort, filter, and exact row position each
+time.</p>
+<p>Use the Save-Bookmark command, Control+K (K for booKmark), to
+remember the current row by primary key. Use the Restore-Bookmark
+command, Alt+K (Alt is the inverse of Save), to return to it later; use
+the Clear-Bookmark command, Control+Shift+K, to forget it. DbDuo holds
+one named bookmark per session.</p>
+<h2 id="view-menu">View menu</h2>
+<p>Use the Select-Record command, Control+F (F for Filter), to apply a
+filter expression to the current table. The dialog accepts the same ADO
+Filter dialect the dot prompt uses; the row count, status bar, and
+ListView all update together. Use the Reset-Filter command,
+Control+Shift+F (Shift inverts the Filter), to clear it.</p>
+<p>Use the Sort-Ascending command, Alt+A (A for Ascending), to sort by
+the current column alphabetically; use Alt+Shift+A for Sort-Descending.
+Use the Sort-OldestFirst command, Alt+D (D for Date), to sort by the
+table’s <code>updated</code> column oldest first; use Alt+Shift+D for
+Sort-RecentFirst. Use the Sort-Object command, Alt+Shift+O (O for
+Object, the PowerShell noun for a sortable thing), to type an arbitrary
+ADO Sort expression like <code>name ASC, year DESC</code>. Use the
+Reset-Sort command (no hotkey, View menu) to clear the sort so the
+recordset returns to its natural order.</p>
+<p>Use the Select-Column command (no hotkey, View menu) to choose which
+columns appear in the ListView for the current table. The dialog accepts
+a comma-separated list of column names; columns missing from the list
+are still accessible through Show-Record and Set-Record. By default,
+DbDuo hides primary-key and foreign-key columns (any column ending in
+<code>_id</code> or named <code>id</code>) along with the bookkeeping
+columns (added, updated, marked, look, unq).</p>
+<p>Use the Update-View command, F5 (the browser-standard refresh key),
+to re-query the database from disk; useful when another tool has written
+to the file while DbDuo had it open.</p>
+<h2 id="schema-menu">Schema menu</h2>
+<p>Use the Select-Table command, F4 (F4 = MDI “switch document”), to
+bring up a listbox of base tables. Use the Select-View command,
+Shift+F4, for views only. Use the Switch-Table command, Control+Tab, to
+cycle among recently-visited base tables in most-recently-used order,
+like Control+Tab cycles tabs in a browser; Control+Shift+Tab cycles
+backward. Use the Switch-Object command, Control+F6 (F6 = cycle panes),
+to cycle through all tables and views without the MRU filter;
+Control+Shift+F6 cycles backward.</p>
+<p>Use the Show-Schema command (no hotkey, Schema menu) to print the
+database’s CREATE TABLE and CREATE VIEW statements to a dialog; this is
+long output, usually called from the dot prompt as <code>schema</code>.
+Use the Get-Property command, Alt+Enter (the Windows-standard properties
+chord), to open a dialog summarizing the current table: row count,
+column count, primary key, inferred foreign keys, and any cached
+settings.</p>
+<h2 id="tools-menu">Tools menu</h2>
+<p>Use the Test-Database command (no hotkey, Tools menu) to run an
+integrity probe on the open database
+(<code>PRAGMA integrity_check</code> for SQLite, or the equivalent for
+the active provider). Use the Measure-Table command (no hotkey) to print
+row counts and per-column statistics for the current table.</p>
+<p>Use the Invoke-Sql command, Control+Q (Q for Query), to run any SQL
+statement. SELECTs display the result as a new recordset;
+INSERT/UPDATE/DELETE/DDL run via ADO Connection.Execute. The dot
+prompt’s <code>;</code> and <code>*</code> aliases map to the same
+command.</p>
+<p>Use the Lock-Database command, Control+F7 (F7 = lock convention), to
+toggle the recordset between editable and read-only; the window title
+shows the change. Use the Test-Driver command (no hotkey) to print which
+ODBC and OLE DB providers Windows currently has registered, useful when
+troubleshooting a failed Open-Database. Use the Open-FileFolder command,
+Alt+Backslash (the backslash key evokes Windows paths), to open Explorer
+at the database file’s folder with the file pre-selected.</p>
+<p>Use the Enter-Console command, Control+GraveAccent, to open or focus
+the dot prompt console from the GUI.</p>
+<h2 id="help-menu">Help menu</h2>
+<p>Use the Get-Help command, F1 (the standard help key), for help. With
+no argument, F1 shows the command index; from the dot prompt,
+<code>help &lt;topic&gt;</code> shows details for one command.</p>
+<p>Use the Get-Verb command (no hotkey) to see the PowerShell verb
+taxonomy with each verb’s category and a brief description, so you
+recognize the naming conventions DbDuo follows. Use the Show-Command
+command, Alt+F10 (F10 = menu, Alt for “alternative menu”), to open a
+command picker: an alphabetized list of every command, with its current
+hotkey and a one-line description. The Alt+F10 chord echoes the EdSharp
+and FileDir convention of an “alternate menu” reachable through the
+Alt+F10 hotkey.</p>
+<p>Use the Show-Status command, Control+F1 (F1 for help, Control for
+“where am I”), to hear the current row, table, filter, and sort state in
+detail. Use the Test-Reader command (no hotkey) to probe DbDuo’s three
+speech paths (JAWS direct via COM, NVDA direct via the controller-client
+DLL, and the UIA live-region fallback for Narrator) and confirm which
+one is working with your screen reader.</p>
+<p>Use the Trace-Command command, Alt+Control+F1 (F1 family for
+help-related; Alt+Control for “deep trace”), to toggle a mode that logs
+every command dispatch with its arguments before execution. Use the
+Show-Log command (no hotkey) to print the path of
+<code>DbDuo.log</code>, the per-session log file (truncated at every
+startup). Use the About command, Alt+F1, to read the version number and
+a brief credits block.</p>
+<h2 id="commands-available-only-at-the-dot-prompt">Commands available
+only at the dot prompt</h2>
+<p>A few commands have no GUI counterpart because they manage the dot
+prompt itself.</p>
+<p>Use the Exit-Console command, <code>exit</code> (or <code>x</code> or
+<code>bye</code>), to leave the dot prompt while the GUI keeps running.
+Use the Switch-Focus command, <code>gui</code> (or <code>focus</code> or
+<code>window</code>), to bring the GUI forward from the console.</p>
+<p>Use the Out-File command, <code>Out-File path.txt</code> (with
+aliases <code>output</code>, <code>tee</code>, and <code>o</code>), to
+send subsequent output to a file while also keeping it on screen. The
+<code>-a</code> flag appends rather than overwriting;
+<code>Out-File stdout</code> restores the screen-only behavior; bare
+<code>Out-File</code> reports the current target. The simultaneous
+screen-and-file teeing lets the screen-reader user follow what is being
+captured.</p>
+<p>Use the Invoke-Script command, <code>Invoke-Script path.txt</code>
+(with aliases <code>read</code>, <code>script</code>, and
+<code>i</code>), to run a file of dot-prompt commands. Blank lines and
+lines beginning with <code>#</code> or <code>;</code> are treated as
+comments. Errors are reported per line but do not stop the script.
+Out-File and Invoke-Script combine well:</p>
+<pre><code>Out-File monthly_report.txt
+Invoke-Script monthly_report.dbduo
+Out-File stdout</code></pre>
+<h2 id="mnemonic-hotkey-groups">Mnemonic hotkey groups</h2>
+<p>This section restates every hotkey in the program, grouped by the
+part of the keyboard it lives on. Use it as a quick visual
+reference.</p>
+<h3 id="function-key-family">Function-key family</h3>
+<p>F1 is help (Get-Help); Control+F1 is “where am I” (Show-Status);
+Alt+F1 is identification (About); Alt+Control+F1 is deep-help
+(Trace-Command). F2 edits the current row (Set-Record). F3 is find next
+(Jump-RecordAgain); Shift+F3 inverts it (Jump-RecordPrevious). F4 picks
+a table (Select-Table); Shift+F4 picks a view (Select-View); Control+F4
+closes the open file (Close-Database). F5 refreshes (Update-View).
+Control+F6 cycles all objects (Switch-Object); Control+Shift+F6 cycles
+backward. Control+F7 toggles the lock (Lock-Database). Alt+F4 closes the
+program (Exit-Application). Alt+F10 opens the alternate menu
+(Show-Command).</p>
+<h3 id="control-letter-family">Control-letter family</h3>
+<p>Control+C is reserved for native clipboard, so the ListView’s own
+cell-copy still works. Control+D removes the current row (D for Delete).
+Control+E enters a child table (E for Enter); Control+Shift+E exits back
+to the parent. Control+F filters (F for Filter); Control+Shift+F resets
+the filter. Control+G goes to a row number (G for Go-to). Control+J
+jumps to a row by criteria (J for Jump). Control+K saves a bookmark (K
+for booKmark); Control+Shift+K clears it. Control+M sets the mark (M for
+Mark); Control+Shift+M clears it. Control+N adds a row (N for New);
+Control+Shift+N creates a new database. Control+O opens a file (O for
+Open). Control+P prints (P for Print). Control+Q opens the SQL editor (Q
+for Query). Control+R replaces values across rows (R for Replace).
+Control+S saves the database to a new path (S for Save); Control+Shift+S
+takes a backup snapshot. Control+Shift+C duplicates the current row
+(Shift modifies native copy into row-copy). Control+Shift+I imports data
+(I for Import). Control+Shift+X exports data (X for eXport).</p>
+<h3 id="alt-family">Alt family</h3>
+<p>Alt+A sorts ascending (A for Ascending); Alt+Shift+A sorts
+descending. Alt+D sorts by date oldest first (D for Date); Alt+Shift+D
+sorts by date most recent first. Alt+K restores the saved bookmark.
+Alt+Shift+O sorts by an arbitrary expression (O for Object). Alt+Enter
+shows properties (Windows convention). Alt+Backslash opens the file’s
+folder in Explorer (backslash evokes Windows paths).</p>
+<h3 id="navigation-family">Navigation family</h3>
+<p>Tab and Shift+Tab move between columns in the current row. The arrow
+keys move between rows. Enter shows the full row (Show-Record);
+Control+Enter opens the cell’s content as a URL or path (Open-Cell).
+Control+Tab cycles among recently-visited tables; Control+Shift+Tab
+cycles backward. Alt+Home and Alt+End jump to the first or last marked
+row; Alt+UpArrow and Alt+DownArrow step among marked rows.</p>
+<h3 id="graveaccent-family">GraveAccent family</h3>
+<p>Control+GraveAccent is the GUI menu hotkey for Enter-Console (open
+the dot prompt). Alt+GraveAccent is a global hotkey: when the console
+has focus, it brings the GUI forward. Alt+Control+GraveAccent is a
+global hotkey that always acts: it toggles between GUI and console,
+whichever is not currently in front.</p>
+<h2 id="standard-fields">Standard fields</h2>
+<p>DbDuo follows a convention for table design that the bundled
+<code>sample.db</code> illustrates and that the user manual recommends
+for new databases. Each table has the following “standard fields” in
+this order, with the “distinct fields” (the substantive columns)
+interleaved among them:</p>
+<ol type="1">
+<li><code>&lt;table&gt;_id</code> — the primary key, integer,
+autoincrement.</li>
+<li><code>added</code> — datetime, default
+<code>current_timestamp</code>. When the row was created.</li>
+<li><code>updated</code> — datetime, default
+<code>current_timestamp</code>. Most recent change.</li>
+<li>Foreign-key columns (<code>&lt;parent&gt;_id</code>, for child
+tables only).</li>
+<li><code>observed</code> — datetime, default
+<code>current_timestamp</code>. When the data behind the row was
+observed (often different from when it was entered).</li>
+<li><code>method</code> — text. How this row was added or observed
+(e.g., “import”, “manual”, “scrape”).</li>
+<li><strong>Distinct fields</strong> — the substantive columns this
+table is actually for.</li>
+<li><code>notes</code> — text. Free-form annotations.</li>
+<li><code>tags</code> — text. Comma-separated tag list for ad-hoc
+grouping.</li>
+<li><code>marked</code> — boolean, default 0. The flag the Set-Mark
+command toggles.</li>
+<li><code>look</code> — computed text. A pipe-joined rendering of the
+table’s most identifying distinct fields; appears in listboxes and
+quick-search displays.</li>
+</ol>
+<p>DbDuo hides every column ending in <code>_id</code> (primary and
+foreign keys), bare <code>id</code>, and the bookkeeping columns (added,
+updated, marked, look) from the ListView by default. Use the
+Select-Column command to override on a per-table basis.</p>
+<h2 id="persistence">Persistence</h2>
+<p>Between sessions, DbDuo remembers the last opened database and table
+(relaunch goes straight there), per-table
+sort/filter/position/Select-Column lists within a session (the
+<code>TableSettings</code> cache), and one named bookmark per session.
+Settings live in <code>%LOCALAPPDATA%\DbDuo\DbDuo.ini</code>. Successful
+and failed writes are logged.</p>
+<h2 id="logging">Logging</h2>
+<p>DbDuo writes a per-session log to
+<code>%LOCALAPPDATA%\DbDuo\DbDuo.log</code> (truncated at every program
+start). The log records database opens, table switches, errors, and the
+result of Alt+GraveAccent and Alt+Control+GraveAccent hotkey
+registration. Use the Show-Log command (no hotkey) to print the exact
+path.</p>
+<h2 id="bundled-documentation">Bundled documentation</h2>
+<ul>
+<li><code>README.md</code> and <code>README.htm</code> — summary and
+quick start with a guided tour of <code>sample.db</code>.</li>
+<li><code>DbDuo.md</code> and <code>DbDuo.htm</code> — this
+reference.</li>
+<li><code>License.md</code> and <code>License.htm</code> — MIT License
+text.</li>
+<li><code>sample.db</code> — the bundled SQLite sample database
+(teachers, classes, students, enrollments).</li>
+</ul>
+</body>
+</html>
