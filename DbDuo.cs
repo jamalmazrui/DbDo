@@ -49,7 +49,7 @@ namespace DbDuo
     // =====================================================================
     public static class BuildInfo
     {
-        public const string VersionString = "1.0.20";
+        public const string VersionString = "1.0.21";
     }
 
     // =====================================================================
@@ -1521,7 +1521,229 @@ namespace DbDuo
             return lResult;
         }
 
-        // ------- Recordset properties (forwarders) -------
+        // actualPrimaryKey: look up the actual primary-key column of
+        // a named table from the database's own schema metadata,
+        // rather than guessing from the table-name singularization.
+        //
+        // The schema-truth approach matters because English-plural
+        // rules are irregular: a table named "classes" has PK
+        // "class_id" (not "classe_id" or "classes_id"); a table
+        // named "cities" has PK "city_id" (not "citie_id"); a
+        // table named "teachers" happens to work with naive
+        // s-stripping. Rather than enumerate plural rules, we
+        // read the real metadata.
+        //
+        // Strategy:
+        //   1. SQLite -- query "PRAGMA table_info(<table>)" through
+        //      ADO and look for the row with pk > 0. This is the
+        //      authoritative source for SQLite.
+        //   2. ADOX fallback -- for Access and other providers
+        //      that expose ADOX.Catalog, ask for the table's
+        //      primary-key Keys collection and read the first
+        //      column from it.
+        //
+        // Returns the actual column name (preserving case) or null
+        // if no PK can be determined. For composite primary keys
+        // returns the FIRST column of the key.
+        public string actualPrimaryKey(string sTable)
+        {
+            if (!isOpen() || string.IsNullOrEmpty(sTable)) return null;
+
+            // SQLite path. PRAGMA returns one row per column; the
+            // 'pk' column is 0 for non-PK columns and a 1-based
+            // ordinal for PK columns. We want pk = 1 (or, for
+            // composite keys, the column with the smallest pk).
+            string sExt = currentExtensionForSql();
+            if (sExt == "db" || sExt == "sqlite" || sExt == "sqlite3")
+            {
+                string sQuoted = "\"" + sTable.Replace("\"", "\"\"") + "\"";
+                dynamic oRs = null;
+                try
+                {
+                    oRs = createComObject("ADODB.Recordset");
+                    oRs.Open("PRAGMA table_info(" + sQuoted + ")", oConn,
+                        0 /* adOpenForwardOnly */, 1 /* adLockReadOnly */, 1 /* adCmdText */);
+                    string sFirstPk = null;
+                    int iFirstPkOrdinal = int.MaxValue;
+                    while (!(bool)oRs.EOF)
+                    {
+                        try
+                        {
+                            // Fields: cid, name, type, notnull, dflt_value, pk
+                            int iPk = 0;
+                            try { iPk = Convert.ToInt32(oRs.Fields["pk"].Value); } catch { iPk = 0; }
+                            if (iPk > 0 && iPk < iFirstPkOrdinal)
+                            {
+                                object oN = oRs.Fields["name"].Value;
+                                if (oN != null && oN != DBNull.Value)
+                                {
+                                    sFirstPk = oN.ToString();
+                                    iFirstPkOrdinal = iPk;
+                                }
+                            }
+                        }
+                        catch { }
+                        oRs.MoveNext();
+                    }
+                    try { oRs.Close(); } catch { }
+                    if (!string.IsNullOrEmpty(sFirstPk)) return sFirstPk;
+                }
+                catch (Exception oEx)
+                {
+                    try { DbDuoLog.write("actualPrimaryKey PRAGMA failed: " + oEx.Message); } catch { }
+                }
+                finally { releaseCom(oRs); }
+            }
+
+            // ADOX path: applies to Access and other ADOX-friendly
+            // providers, and is also a fallback when PRAGMA fails.
+            try
+            {
+                if (oCatalog == null)
+                    oCatalog = createComObject("ADOX.Catalog");
+                try { oCatalog.ActiveConnection = oConn; } catch { }
+                dynamic oTable = oCatalog.Tables[sTable];
+                dynamic oKeys = oTable.Keys;
+                int iKeyCount = (int)oKeys.Count;
+                const int iAdKeyPrimary = 1;
+                for (int i = 0; i < iKeyCount; i++)
+                {
+                    dynamic oKey = oKeys[i];
+                    int iType = 0;
+                    try { iType = Convert.ToInt32(oKey.Type); } catch { iType = 0; }
+                    if (iType != iAdKeyPrimary) continue;
+                    dynamic oCols = oKey.Columns;
+                    if ((int)oCols.Count == 0) continue;
+                    return (string)oCols[0].Name;
+                }
+            }
+            catch { }
+
+            return null;
+        }
+
+        // queryColumnValues: run a SELECT on a side connection to
+        // pull values from one column of one table, with an optional
+        // WHERE clause. Returns up to iMaxRows results as strings.
+        // Used by Show-Object's related-records section to fetch
+        // the 'look' values of child rows efficiently, without
+        // touching the user's current recordset.
+        //
+        // We deliberately issue a parametric SQL query rather than
+        // re-using the ADO client-side .Filter mechanism: the
+        // server-side WHERE clause is O(matching rows) and lets
+        // SQLite use any indexes on the FK column, while .Filter
+        // is O(total rows in child table) because it post-filters
+        // a fully-loaded client-cursor recordset. For Show-Object's
+        // hot-path display this is the right choice.
+        //
+        // Returns iCountFound by reference so the caller can
+        // distinguish "20 of 25 rows shown" from "exactly 20 rows
+        // exist". Set iMaxRows to a large value (or int.MaxValue)
+        // to get all rows.
+        //
+        // sTable and sColumn are quoted as identifiers per the
+        // back-end's convention; sWhereExpr and sWhereValue go
+        // through quoteSqlLiteral if you supply them, so caller
+        // doesn't have to worry about SQL injection from FK values.
+        public List<string> queryColumnValues(
+            string sTable, string sColumn,
+            string sWhereColumn, string sWhereValue,
+            int iMaxRows, out int iCountFound)
+        {
+            iCountFound = 0;
+            List<string> lValues = new List<string>();
+            if (!isOpen() || string.IsNullOrEmpty(sTable) || string.IsNullOrEmpty(sColumn))
+                return lValues;
+
+            // Build the SQL. Use double-quoted identifiers, which
+            // SQLite (default), Access (also accepts), and ANSI
+            // SQL all support. Single-quote string literals with
+            // apostrophe doubling.
+            string sExt = currentExtensionForSql();
+            StringBuilder oSb = new StringBuilder();
+            oSb.Append("SELECT ");
+            oSb.Append(quoteIdentifier(sColumn, sExt));
+            oSb.Append(" FROM ");
+            oSb.Append(quoteIdentifier(sTable, sExt));
+            if (!string.IsNullOrEmpty(sWhereColumn))
+            {
+                oSb.Append(" WHERE ");
+                oSb.Append(quoteIdentifier(sWhereColumn, sExt));
+                if (string.IsNullOrEmpty(sWhereValue))
+                {
+                    oSb.Append(" IS NULL");
+                }
+                else
+                {
+                    // If the value parses as a number, leave bare;
+                    // otherwise single-quote with apostrophe doubling.
+                    double dN;
+                    if (double.TryParse(sWhereValue,
+                            System.Globalization.NumberStyles.Any,
+                            System.Globalization.CultureInfo.InvariantCulture,
+                            out dN))
+                    { oSb.Append(" = "); oSb.Append(sWhereValue); }
+                    else
+                    { oSb.Append(" = '"); oSb.Append(sWhereValue.Replace("'", "''")); oSb.Append("'"); }
+                }
+            }
+
+            dynamic oRs = null;
+            try
+            {
+                oRs = createComObject("ADODB.Recordset");
+                // Server-side cursor for this fetch: we only need
+                // forward-only reads and we don't want to disturb
+                // the manager's client-side cursor settings.
+                oRs.Open(oSb.ToString(), oConn,
+                    0 /* adOpenForwardOnly */,
+                    1 /* adLockReadOnly */,
+                    1 /* adCmdText */);
+                while (!(bool)oRs.EOF)
+                {
+                    iCountFound++;
+                    if (lValues.Count < iMaxRows)
+                    {
+                        object oV;
+                        try { oV = oRs.Fields[0].Value; } catch { oV = null; }
+                        lValues.Add((oV == null || oV == DBNull.Value) ? "" : oV.ToString());
+                    }
+                    oRs.MoveNext();
+                }
+                try { oRs.Close(); } catch { }
+            }
+            catch (Exception oEx)
+            {
+                // Caller may want to know the query failed (e.g.,
+                // 'look' column doesn't exist on this table). The
+                // out param iCountFound stays at 0 and the list
+                // stays empty; log for diagnostics.
+                try { DbDuoLog.write("queryColumnValues failed: " + oEx.Message + " SQL=" + oSb.ToString()); }
+                catch { }
+            }
+            finally
+            {
+                releaseCom(oRs);
+            }
+            return lValues;
+        }
+
+        // Current connection's extension key, used by
+        // queryColumnValues to pick identifier-quoting style.
+        // Falls back to "db" (SQLite) when nothing else fits.
+        private string currentExtensionForSql()
+        {
+            if (string.IsNullOrEmpty(sFilePath)) return "db";
+            string sExt = Path.GetExtension(sFilePath).TrimStart('.').ToLowerInvariant();
+            switch (sExt)
+            {
+                case "db": case "sqlite": case "sqlite3": return "db";
+                case "mdb": case "accdb": return "accdb";
+                case "dbf": return "dbf";
+                default: return "db";
+            }
+        }
         public bool eof
         {
             get
@@ -2215,9 +2437,15 @@ namespace DbDuo
             string sExt = Path.GetExtension(sDestPath).TrimStart('.').ToLowerInvariant();
             switch (sExt)
             {
+                // Plain-text tabular.
                 case "csv": exportDelimited(sDestPath, ","); break;
                 case "tsv":
                 case "tab": exportDelimited(sDestPath, "\t"); break;
+                case "md":
+                case "markdown":
+                    exportMarkdown(sDestPath);
+                    break;
+                // Document formats.
                 case "html":
                 case "htm": exportHtml(sDestPath); break;
                 case "xlsx":
@@ -2228,10 +2456,21 @@ namespace DbDuo
                 case "doc":
                     exportWord(sDestPath, sExt, false);
                     break;
+                // Database formats. Closes the "every input format
+                // is also an export format" loop: anything DbDuo can
+                // open, it can also write.
+                case "db":
+                case "sqlite":
+                case "sqlite3":
+                case "mdb":
+                case "accdb":
+                case "dbf":
+                    exportDatabase(sDestPath, sExt);
+                    break;
                 default:
                     throw new Exception("exportData: unsupported format ." + sExt
-                        + ". Supported: csv, tsv, html, htm, xlsx, docx. "
-                        + "xlsx and docx require Microsoft Office (Excel and Word).");
+                        + ". Supported: csv, tsv, md, html, xlsx, docx, db, sqlite, mdb, accdb, dbf. "
+                        + "xlsx and docx require Microsoft Office.");
             }
         }
 
@@ -2258,8 +2497,8 @@ namespace DbDuo
             if (sExt.Length == 0) sExt = "xlsx";
 
             // Normalize dbDot single-letter shortcuts and bare extension
-            // names. The user can type "Export-Data x d h c" or
-            // "xlsx docx" -- both work. Dots are stripped.
+            // names. The user can type "Export-Data x d h c m" or
+            // "xlsx docx markdown" -- both work. Dots are stripped.
             sExt = sExt.Replace(".", " ").Replace(",", " ").ToLowerInvariant();
             List<string> lFormats = new List<string>();
             foreach (string sToken in sExt.Split(new[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries))
@@ -2270,6 +2509,10 @@ namespace DbDuo
                 else if (sNorm == "h") sNorm = "html";
                 else if (sNorm == "c") sNorm = "csv";
                 else if (sNorm == "t") sNorm = "tsv";
+                else if (sNorm == "m" || sNorm == "markdown") sNorm = "md";
+                else if (sNorm == "s" || sNorm == "sqlite" || sNorm == "sqlite3") sNorm = "db";
+                else if (sNorm == "a" || sNorm == "access" || sNorm == "accdb") sNorm = "mdb";
+                else if (sNorm == "b" || sNorm == "dbase") sNorm = "dbf";
                 if (!lFormats.Contains(sNorm)) lFormats.Add(sNorm);
             }
 
@@ -2291,17 +2534,18 @@ namespace DbDuo
 
             List<string> lWritten = new List<string>();
 
-            // Group: spreadsheet (xlsx/csv share an Excel session in
-            // dbDot; we keep them separate for clarity but still drive
-            // through a single Excel app instance per call).
+            // Group all wanted formats.
             bool bWantXlsx = lFormats.Contains("xlsx");
             bool bWantCsv  = lFormats.Contains("csv");
             bool bWantTsv  = lFormats.Contains("tsv");
+            bool bWantMd   = lFormats.Contains("md");
             bool bWantDocx = lFormats.Contains("docx");
             bool bWantHtml = lFormats.Contains("html") || lFormats.Contains("htm");
+            bool bWantDb   = lFormats.Contains("db");
+            bool bWantMdb  = lFormats.Contains("mdb");
+            bool bWantDbf  = lFormats.Contains("dbf");
 
-            // Spreadsheet outputs: xlsx via Excel COM if available;
-            // csv/tsv via native code (faster and doesn't need Office).
+            // Plain-text tabular outputs (native, no Office needed).
             if (bWantCsv)
             {
                 string sP = uniqueExportPath(sDir, sBase, "csv");
@@ -2314,6 +2558,14 @@ namespace DbDuo
                 exportDelimited(sP, "\t");
                 lWritten.Add(sP);
             }
+            if (bWantMd)
+            {
+                string sP = uniqueExportPath(sDir, sBase, "md");
+                exportMarkdown(sP);
+                lWritten.Add(sP);
+            }
+
+            // Spreadsheet output via Excel COM.
             if (bWantXlsx)
             {
                 string sP = uniqueExportPath(sDir, sBase, "xlsx");
@@ -2321,8 +2573,7 @@ namespace DbDuo
                 lWritten.Add(sP);
             }
 
-            // Document outputs: docx and Word-filtered html share a
-            // Word session. dbDot's approach.
+            // Document outputs via Word COM.
             if (bWantDocx)
             {
                 string sP = uniqueExportPath(sDir, sBase, "docx");
@@ -2333,6 +2584,26 @@ namespace DbDuo
             {
                 string sP = uniqueExportPath(sDir, sBase, "html");
                 exportWord(sP, "html", true);
+                lWritten.Add(sP);
+            }
+
+            // Database outputs via fresh ADODB.Connection.
+            if (bWantDb)
+            {
+                string sP = uniqueExportPath(sDir, sBase, "db");
+                exportDatabase(sP, "db");
+                lWritten.Add(sP);
+            }
+            if (bWantMdb)
+            {
+                string sP = uniqueExportPath(sDir, sBase, "accdb");
+                exportDatabase(sP, "accdb");
+                lWritten.Add(sP);
+            }
+            if (bWantDbf)
+            {
+                string sP = uniqueExportPath(sDir, sBase, "dbf");
+                exportDatabase(sP, "dbf");
                 lWritten.Add(sP);
             }
 
@@ -2532,6 +2803,522 @@ namespace DbDuo
                 releaseCom(oDoc);
                 releaseCom(oApp);
             }
+        }
+
+        // exportDatabase: write the current recordset to a new
+        // database file in one of the formats DbDuo can also OPEN
+        // (SQLite, Access, dBASE). This closes the "every input
+        // format is also an export format" loop. The new file gets
+        // exactly one table, named after the source table.
+        //
+        // Strategy: open a fresh ADODB.Connection to the target
+        // file using DbDuo's own buildConnectString helper (so the
+        // same provider mapping that drives openDatabase drives the
+        // export); issue CREATE TABLE with TEXT columns for every
+        // field (a permissive type that all three back-ends accept
+        // and that round-trips screen-reader values cleanly); then
+        // INSERT one row at a time. The original recordset is not
+        // disturbed.
+        //
+        // For SQLite (.db / .sqlite / .sqlite3), the file is
+        // created on disk first (SQLite ODBC opens an existing path
+        // or implicitly creates one). For Access (.mdb / .accdb),
+        // ADOX.Catalog.Create is the canonical way to create a
+        // fresh database file. For dBASE (.dbf), the connection is
+        // to the parent folder and the .dbf file is created by the
+        // CREATE TABLE statement itself.
+        //
+        // Requires the appropriate driver installed: SQLite ODBC
+        // for .db / .sqlite, ACE for .mdb / .accdb / .dbf. The
+        // installer already handles those.
+        public void exportDatabase(string sDestPath, string sExt)
+        {
+            if (!hasRecordset()) throw new InvalidOperationException("No recordset open.");
+            if (string.IsNullOrEmpty(sDestPath)) throw new ArgumentException("exportDatabase requires a path.");
+            string sExtLower = (sExt ?? "").ToLowerInvariant().TrimStart('.');
+
+            // Make sure the destination folder exists.
+            string sDir = Path.GetDirectoryName(sDestPath);
+            if (!string.IsNullOrEmpty(sDir) && !Directory.Exists(sDir))
+                Directory.CreateDirectory(sDir);
+
+            // For Access we must create the empty database file via
+            // ADOX before we can connect to it; for SQLite the ODBC
+            // driver implicitly creates an empty file on open; for
+            // dBASE the file is created by the CREATE TABLE itself.
+            if (sExtLower == "mdb" || sExtLower == "accdb")
+            {
+                // Don't overwrite silently.
+                if (File.Exists(sDestPath))
+                    throw new IOException("Target file already exists: " + sDestPath);
+                createEmptyAccessFile(sDestPath, sExtLower);
+            }
+            else if (sExtLower == "db" || sExtLower == "sqlite" || sExtLower == "sqlite3")
+            {
+                if (File.Exists(sDestPath))
+                    throw new IOException("Target file already exists: " + sDestPath);
+                // The SQLite ODBC driver creates the database file
+                // on Open() if it doesn't exist. Nothing to do here.
+            }
+
+            object oBookmark = bookmark;
+            List<string> lFields = getDisplayFieldNames();
+            if (lFields.Count == 0) lFields = getFieldNames();
+
+            // Build the connection string using the same logic as
+            // openDatabase so the providers and modes line up
+            // exactly. The buildConnectString takes a ref string
+            // for table-name extraction; we don't need it for
+            // export, but the method signature requires the slot.
+            string sUnusedTable = "";
+            bool bIsFolder = (sExtLower == "dbf");
+            // For dBASE, the connection is to the folder, not the
+            // file. We construct the same way buildConnectString
+            // expects for a folder.
+            string sConnPath = sDestPath;
+            string sTableName = sCurrentTable;
+            if (string.IsNullOrEmpty(sTableName)) sTableName = "Export";
+            if (sExtLower == "dbf")
+            {
+                // dBASE table names: max 8 chars, no extension, no spaces.
+                sTableName = sanitizeDbaseTableName(sTableName);
+            }
+            string sConnect = buildConnectStringForExport(sConnPath, sExtLower, sTableName);
+
+            dynamic oConnExport = null;
+            try
+            {
+                oConnExport = createComObject("ADODB.Connection");
+                oConnExport.CursorLocation = AdoConstants.adUseClient;
+                oConnExport.Open(sConnect);
+
+                // Build CREATE TABLE. TEXT columns are the safest
+                // universal type. SQLite is dynamically typed, so
+                // TEXT is fine. Access (Jet/ACE) accepts TEXT as a
+                // synonym for the longest variable-length text
+                // column it offers. dBASE accepts CHAR(n) and
+                // MEMO; we use MEMO so very long fields don't
+                // truncate.
+                string sCreateSql = buildCreateTableSql(sTableName, lFields, sExtLower);
+                oConnExport.Execute(sCreateSql);
+
+                // Insert rows.
+                string sInsertSql = buildInsertSql(sTableName, lFields, sExtLower);
+
+                moveFirst();
+                while (!eof)
+                {
+                    // Build the parameterized INSERT each time; we
+                    // do this rather than prepared statements
+                    // because late-bound ADO parameterization is
+                    // awkward, and the values are already strings
+                    // from getFieldValue. Escape single quotes
+                    // and embedded delimiters per back-end.
+                    List<string> lValues = new List<string>();
+                    foreach (string sN in lFields)
+                        lValues.Add(quoteSqlLiteral(getFieldValue(sN), sExtLower));
+                    string sFullSql = sInsertSql.Replace("@@VALUES@@", string.Join(",", lValues));
+                    oConnExport.Execute(sFullSql);
+                    moveNext();
+                }
+            }
+            finally
+            {
+                if (oBookmark != null) try { bookmark = oBookmark; } catch { }
+                try { if (oConnExport != null) oConnExport.Close(); } catch { }
+                releaseCom(oConnExport);
+            }
+        }
+
+        // Build a connection string for an EXPORT target. Differs
+        // from buildConnectString only in that the dBASE / text
+        // cases want to point at the destination folder, not at the
+        // destination file. For SQLite, Access, Excel we just reuse
+        // the same provider strings.
+        private static string buildConnectStringForExport(string sPath, string sExt, string sTable)
+        {
+            switch (sExt)
+            {
+                case "db":
+                case "sqlite":
+                case "sqlite3":
+                    return string.Format("DRIVER=SQLite3 ODBC Driver;Database={0};", sPath);
+
+                case "mdb":
+                case "accdb":
+                    return string.Format(
+                        "Provider={0};Data Source={1};Persist Security Info=False;",
+                        DefaultProvider, sPath);
+
+                case "dbf":
+                    // Point at the parent folder.
+                    string sFolder = Path.GetDirectoryName(sPath);
+                    if (string.IsNullOrEmpty(sFolder)) sFolder = Environment.CurrentDirectory;
+                    return string.Format(
+                        "Provider={0};Data Source={1};Extended Properties=\"dBASE IV;\"",
+                        DefaultProvider, sFolder);
+
+                default:
+                    throw new Exception("exportDatabase: unsupported format ." + sExt);
+            }
+        }
+
+        // Create an empty .mdb / .accdb file via ADOX.Catalog.Create.
+        // This is the canonical way to fabricate a fresh Access
+        // database without having to ship a stub file.
+        private static void createEmptyAccessFile(string sPath, string sExt)
+        {
+            dynamic oCat = null;
+            try
+            {
+                oCat = createComObject("ADOX.Catalog");
+                string sConn = string.Format(
+                    "Provider={0};Data Source={1};",
+                    DefaultProvider, sPath);
+                oCat.Create(sConn);
+            }
+            catch (Exception oEx)
+            {
+                throw new Exception("Could not create Access database: " + oEx.Message
+                    + " (Is ADOX installed? It's part of MDAC/ACE.)", oEx);
+            }
+            finally
+            {
+                releaseCom(oCat);
+            }
+        }
+
+        // dBASE limits table (file) names to 8 characters and a
+        // small character set. Truncate and replace forbidden
+        // characters with underscore.
+        private static string sanitizeDbaseTableName(string sName)
+        {
+            if (string.IsNullOrEmpty(sName)) return "EXPORT";
+            StringBuilder oSb = new StringBuilder();
+            foreach (char c in sName.ToUpperInvariant())
+            {
+                if (oSb.Length >= 8) break;
+                if ((c >= 'A' && c <= 'Z') || (c >= '0' && c <= '9') || c == '_')
+                    oSb.Append(c);
+                else
+                    oSb.Append('_');
+            }
+            if (oSb.Length == 0) return "EXPORT";
+            return oSb.ToString();
+        }
+
+        // Build CREATE TABLE statement appropriate for each
+        // back-end. All fields are text-typed for portability.
+        private string buildCreateTableSql(string sTable, List<string> lFields, string sExt)
+        {
+            StringBuilder oSb = new StringBuilder();
+            oSb.Append("CREATE TABLE ");
+            oSb.Append(quoteIdentifier(sTable, sExt));
+            oSb.Append(" (");
+            for (int i = 0; i < lFields.Count; i++)
+            {
+                if (i > 0) oSb.Append(", ");
+                oSb.Append(quoteIdentifier(lFields[i], sExt));
+                oSb.Append(' ');
+                // Column type per back-end:
+                //   SQLite -- TEXT (dynamic typing makes this no
+                //     constraint anyway).
+                //   Access -- MEMO (long text).
+                //   dBASE -- MEMO (variable-length text, stored in
+                //     a separate .dbt file alongside the .dbf).
+                if (sExt == "db" || sExt == "sqlite" || sExt == "sqlite3")
+                    oSb.Append("TEXT");
+                else if (sExt == "mdb" || sExt == "accdb")
+                    oSb.Append("MEMO");
+                else // dbf
+                    oSb.Append("MEMO");
+            }
+            oSb.Append(')');
+            return oSb.ToString();
+        }
+
+        // Build the INSERT template, with the literal "@@VALUES@@"
+        // placeholder where the per-row value list will be spliced.
+        private string buildInsertSql(string sTable, List<string> lFields, string sExt)
+        {
+            StringBuilder oSb = new StringBuilder();
+            oSb.Append("INSERT INTO ");
+            oSb.Append(quoteIdentifier(sTable, sExt));
+            oSb.Append(" (");
+            for (int i = 0; i < lFields.Count; i++)
+            {
+                if (i > 0) oSb.Append(", ");
+                oSb.Append(quoteIdentifier(lFields[i], sExt));
+            }
+            oSb.Append(") VALUES (@@VALUES@@)");
+            return oSb.ToString();
+        }
+
+        // Quote an identifier per back-end:
+        //   SQLite -- double quotes (ANSI SQL).
+        //   Access -- square brackets.
+        //   dBASE  -- bare, uppercased, no special characters.
+        private static string quoteIdentifier(string sName, string sExt)
+        {
+            if (sExt == "mdb" || sExt == "accdb")
+                return "[" + sName.Replace("]", "") + "]";
+            if (sExt == "dbf")
+                return sanitizeDbaseTableName(sName);
+            // SQLite default.
+            return "\"" + sName.Replace("\"", "\"\"") + "\"";
+        }
+
+        // Quote a literal value as a SQL string. NULL handling
+        // differs slightly per back-end but SQL standard NULL is
+        // accepted everywhere.
+        private static string quoteSqlLiteral(string sValue, string sExt)
+        {
+            if (sValue == null) return "NULL";
+            // All three back-ends accept SQL-standard apostrophe
+            // doubling for embedded quotes within a single-quoted
+            // string literal.
+            return "'" + sValue.Replace("'", "''") + "'";
+        }
+
+        // exportMarkdown: write the current recordset as a GitHub-
+        // flavored Markdown table. No external library needed --
+        // the format is line-based plain text with pipe delimiters
+        // and a header-separator row. Useful for pasting into a
+        // README, an issue, a chat message, or any Markdown editor.
+        public void exportMarkdown(string sDestPath)
+        {
+            if (!hasRecordset()) throw new InvalidOperationException("No recordset open.");
+            object oBookmark = bookmark;
+            List<string> lFields = getDisplayFieldNames();
+            if (lFields.Count == 0) lFields = getFieldNames();
+
+            using (StreamWriter oW = new StreamWriter(sDestPath, false, new UTF8Encoding(true)))
+            {
+                // Optional title line.
+                if (!string.IsNullOrEmpty(sCurrentTable))
+                {
+                    oW.WriteLine("# " + sCurrentTable);
+                    oW.WriteLine();
+                }
+                // Header row.
+                oW.Write("|");
+                foreach (string sN in lFields) { oW.Write(" "); oW.Write(escapeMarkdownCell(sN)); oW.Write(" |"); }
+                oW.WriteLine();
+                // Separator row.
+                oW.Write("|");
+                foreach (string sN in lFields) { oW.Write(" --- |"); }
+                oW.WriteLine();
+                // Value rows.
+                moveFirst();
+                while (!eof)
+                {
+                    oW.Write("|");
+                    foreach (string sN in lFields)
+                    {
+                        oW.Write(" ");
+                        oW.Write(escapeMarkdownCell(getFieldValue(sN)));
+                        oW.Write(" |");
+                    }
+                    oW.WriteLine();
+                    moveNext();
+                }
+            }
+            if (oBookmark != null) bookmark = oBookmark;
+        }
+
+        // Escape a cell value for safe inclusion in a Markdown
+        // table cell: pipes become \|, embedded newlines become
+        // a <br> so the row doesn't collapse, and the original
+        // newline/CR are stripped.
+        private static string escapeMarkdownCell(string sValue)
+        {
+            if (sValue == null) return "";
+            return sValue
+                .Replace("|", "\\|")
+                .Replace("\r\n", "<br>")
+                .Replace("\n", "<br>")
+                .Replace("\r", "<br>");
+        }
+
+        // importMarkdown: read a GitHub-flavored Markdown file
+        // containing one or more pipe-delimited tables, and append
+        // every value row into the currently-open recordset.
+        //
+        // Parse rules, deliberately lenient:
+        //   * Lines starting with '|' (after trimming whitespace)
+        //     are table rows.
+        //   * The first table row is the header.
+        //   * The second table row is the separator (---, :---,
+        //     ---:, etc.); it is skipped.
+        //   * Any subsequent | rows are value rows.
+        //   * Header cell names are matched case-insensitively to
+        //     columns in the currently-open table. Cells with no
+        //     matching column are dropped silently.
+        //   * Within a cell, "<br>" (case-insensitive) is converted
+        //     back to a single newline, and "\|" back to a literal
+        //     pipe. This is the inverse of escapeMarkdownCell.
+        //   * If the file contains multiple tables (separated by
+        //     blank lines), they all import; later tables append
+        //     onto the same target.
+        //
+        // The current-table must already be open. The bookkeeping
+        // columns (added, updated, marked, the primary key) take
+        // their DEFAULT values automatically -- the import only
+        // sets columns the Markdown header names.
+        //
+        // Returns the number of rows successfully inserted.
+        public int importMarkdown(string sSourcePath)
+        {
+            if (!hasRecordset()) throw new InvalidOperationException("No recordset open. Use Open-Database first.");
+            if (string.IsNullOrEmpty(sSourcePath)) throw new ArgumentException("importMarkdown requires a path.");
+            if (!File.Exists(sSourcePath)) throw new FileNotFoundException("Markdown file not found.", sSourcePath);
+            if (readOnly) throw new InvalidOperationException("The database is locked (read-only). Toggle the Lock-Database command first.");
+
+            // Read every line. Files are usually small (Markdown
+            // tables are rarely millions of rows); ReadAllLines is
+            // acceptable.
+            string[] aLines;
+            try { aLines = File.ReadAllLines(sSourcePath, Encoding.UTF8); }
+            catch (Exception oEx) { throw new Exception("Could not read " + sSourcePath + ": " + oEx.Message, oEx); }
+
+            int iInserted = 0;
+            List<string> lHeaders = null;
+            bool bSawSeparator = false;
+
+            // Get the destination's column set so we can match by
+            // name. ADO column-name comparison is case-insensitive.
+            List<string> lAllDestFields = getFieldNames();
+            HashSet<string> hDestFields = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (string sN in lAllDestFields) hDestFields.Add(sN);
+
+            for (int iLine = 0; iLine < aLines.Length; iLine++)
+            {
+                string sLine = (aLines[iLine] ?? "").Trim();
+                if (sLine.Length == 0)
+                {
+                    // Blank line ends one table; next | line starts another.
+                    lHeaders = null;
+                    bSawSeparator = false;
+                    continue;
+                }
+                if (!sLine.StartsWith("|")) continue;   // not a table row
+
+                List<string> lCells = splitMarkdownRow(sLine);
+
+                if (lHeaders == null)
+                {
+                    // First table row in this group = header.
+                    lHeaders = lCells;
+                    bSawSeparator = false;
+                    continue;
+                }
+                if (!bSawSeparator)
+                {
+                    // The separator row is all dashes/colons. Don't
+                    // be strict; any cell that is purely [-:\s] is
+                    // accepted as separator. If the row doesn't
+                    // look like one, treat it as the first value
+                    // row (some Markdown dialects omit the separator).
+                    bool bAllSep = true;
+                    foreach (string sCell in lCells)
+                    {
+                        string sT = sCell.Trim();
+                        if (sT.Length == 0) continue;
+                        foreach (char c in sT)
+                        {
+                            if (c != '-' && c != ':' && c != ' ') { bAllSep = false; break; }
+                        }
+                        if (!bAllSep) break;
+                    }
+                    bSawSeparator = true;
+                    if (bAllSep) continue;
+                    // Otherwise fall through and treat the cells
+                    // as a value row.
+                }
+
+                // Value row. Build column->value pairs by header.
+                Dictionary<string, string> dRow = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                for (int iCell = 0; iCell < lCells.Count && iCell < lHeaders.Count; iCell++)
+                {
+                    string sCol = lHeaders[iCell].Trim();
+                    if (!hDestFields.Contains(sCol)) continue;
+                    dRow[sCol] = unescapeMarkdownCell(lCells[iCell]).Trim();
+                }
+                if (dRow.Count == 0) continue;
+
+                // Insert via ADO AddNew so column defaults fire.
+                try
+                {
+                    oRecordset.AddNew();
+                    foreach (KeyValuePair<string, string> oPair in dRow)
+                    {
+                        try { oRecordset.Fields[oPair.Key].Value = oPair.Value; }
+                        catch { /* skip un-settable cells */ }
+                    }
+                    oRecordset.Update();
+                    iInserted++;
+                }
+                catch
+                {
+                    // Cancel and continue; one bad row shouldn't
+                    // sink the whole import.
+                    try { oRecordset.CancelUpdate(); } catch { }
+                }
+            }
+
+            return iInserted;
+        }
+
+        // Split a Markdown table row on unescaped pipe characters.
+        // Strips the leading and trailing pipes if present, treats
+        // \| as a literal pipe inside a cell.
+        private static List<string> splitMarkdownRow(string sLine)
+        {
+            // Remove surrounding pipes.
+            string s = sLine.Trim();
+            if (s.StartsWith("|")) s = s.Substring(1);
+            if (s.EndsWith("|") && !s.EndsWith("\\|")) s = s.Substring(0, s.Length - 1);
+
+            List<string> lCells = new List<string>();
+            StringBuilder oSb = new StringBuilder();
+            int iPos = 0;
+            while (iPos < s.Length)
+            {
+                char c = s[iPos];
+                if (c == '\\' && iPos + 1 < s.Length && s[iPos + 1] == '|')
+                {
+                    oSb.Append('|');
+                    iPos += 2;
+                    continue;
+                }
+                if (c == '|')
+                {
+                    lCells.Add(oSb.ToString());
+                    oSb.Clear();
+                    iPos++;
+                    continue;
+                }
+                oSb.Append(c);
+                iPos++;
+            }
+            lCells.Add(oSb.ToString());
+            return lCells;
+        }
+
+        // Invert escapeMarkdownCell: <br> back to newline; \| back
+        // to |. Case-insensitive on the <br>.
+        private static string unescapeMarkdownCell(string sCell)
+        {
+            if (sCell == null) return "";
+            string s = sCell;
+            // Replace <br>, <br/>, <br /> (any case).
+            s = System.Text.RegularExpressions.Regex.Replace(
+                s, @"<br\s*/?>", "\n",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+            // Note: splitMarkdownRow already handled \| -> | when
+            // splitting on pipe boundaries; here we leave \| alone
+            // in case any leaked through.
+            return s;
         }
 
         private void exportDelimited(string sDestPath, string sDelim)
@@ -2866,6 +3653,35 @@ namespace DbDuo
             dKeyToMenu[oKey] = oItem;
             dCommandToKey[sCommand] = oKey;
             dMenuToCommand[oItem] = sCommand;
+            oItem.ShortcutKeyDisplayString = friendlyKey(oKey);
+            string sBase = oItem.Text.Replace("&", "");
+            if (sBase.EndsWith("...")) sBase = sBase.Substring(0, sBase.Length - 3).TrimEnd();
+            oItem.AccessibleName = sBase + "   " + friendlyKey(oKey);
+        }
+
+        // registerDisplayOnly: show a chord in the menu UI without
+        // routing it through the form-level dispatcher. Use this for
+        // hotkeys that are dispatched locally by a specific control
+        // (the data grid's KeyDown handler in DbDuo's case), so the
+        // chord only fires when that control has focus. The menu
+        // text and AccessibleName carry the chord exactly as
+        // register() would, so JAWS still announces "Shift+F" along
+        // with the menu item.
+        //
+        // This is the pattern FileDir uses for its Shift+D /
+        // Shift+L / Shift+S shortcuts: the menu shows the chord,
+        // but the listbox's own KeyDown handler is what actually
+        // recognizes the keystroke. Form-level ProcessCmdKey never
+        // sees the chord, so capital letters typed in text boxes
+        // and dialogs are not intercepted.
+        public static void registerDisplayOnly(Keys oKey, ToolStripMenuItem oItem, string sCommand)
+        {
+            dMenuToCommand[oItem] = sCommand;
+            if (oKey == Keys.None) return;
+            // Record the command->key mapping so help screens and
+            // the chord-summary table can find this binding, but
+            // DON'T add to dKeyToMenu (form-level dispatch table).
+            dCommandToKey[sCommand] = oKey;
             oItem.ShortcutKeyDisplayString = friendlyKey(oKey);
             string sBase = oItem.Text.Replace("&", "");
             if (sBase.EndsWith("...")) sBase = sBase.Substring(0, sBase.Length - 3).TrimEnd();
@@ -4162,21 +4978,21 @@ namespace DbDuo
             miRecRemove      = addItem(miRecord, "Remove-Record",          "Remove-Record",       Keys.Control | Keys.D,              recRemoveClicked);
             miRecUpdateField = addItem(miRecord, "Update-Field (&Replace across rows)...", "Update-Field", Keys.Control | Keys.R,        recUpdateFieldClicked);
             addSep(miRecord);
-            miRecShow        = addItem(miRecord, "Show-Record",            "Show-Record",         Keys.Enter,                         recShowClicked);
+            miRecShow        = addItem(miRecord, "Show-&Object (examine current record)", "Show-Object",  Keys.Enter,                         recShowClicked);
             miRecCopy        = addItem(miRecord, "&Copy-Record (duplicate current row as new record)", "Copy-Record",         Keys.Control | Keys.Shift | Keys.C, recCopyClicked);
             miRecOpenCell    = addItem(miRecord, "&Open-Cell (URL or path in cell)", "Open-Cell", Keys.Control | Keys.Enter,         recOpenCellClicked);
             addSep(miRecord);
-            miRecFind        = addItem(miRecord, "&Jump-Record...",         "Jump-Record",         Keys.Control | Keys.J,              recFindClicked);
+            miRecFind        = addItemLocal(miRecord, "&Jump-Record...",         "Jump-Record",         Keys.Shift | Keys.J,                recFindClicked);
             miRecFindNext    = addItem(miRecord, "Jump Next",              "Jump-RecordAgain",    Keys.F3,                            recFindNextClicked);
             miRecFindPrev    = addItem(miRecord, "Jump Previous",          "Jump-RecordPrevious", Keys.Shift | Keys.F3,               recFindPrevClicked);
             addSep(miRecord);
-            miRecMark        = addItem(miRecord, "Set-&Mark (current row)", "Set-Mark",            Keys.Control | Keys.M,              recMarkClicked);
-            miRecUnmark      = addItem(miRecord, "Clear-&Mark (current row)", "Clear-Mark",        Keys.Control | Keys.Shift | Keys.M, recUnmarkClicked);
+            miRecMark        = addItemLocal(miRecord, "Set-&Mark (current row)", "Set-Mark",            Keys.Shift | Keys.M,                recMarkClicked);
+            miRecUnmark      = addItemLocal(miRecord, "Clear-Mark / &Unmark (current row)", "Clear-Mark", Keys.Shift | Keys.U,             recUnmarkClicked);
             addSep(miRecord);
-            miRecGoTo        = addItem(miRecord, "Set-Position (&go to row)...", "Set-Position",   Keys.Control | Keys.G,              recGoToClicked);
+            miRecGoTo        = addItemLocal(miRecord, "Set-Position (&go to row)...", "Set-Position",   Keys.Shift | Keys.G,                recGoToClicked);
             miRecRelated     = addItem(miRecord, "Show-Related (jump to FK target)...", "Show-Related", Keys.None,                     recRelatedClicked);
-            miRecEnterChild  = addItem(miRecord, "&Enter-Child (drill to related child rows)...", "Enter-Child", Keys.Control | Keys.E, recEnterChildClicked);
-            miRecExitChild   = addItem(miRecord, "E&xit-Child (return to parent row)", "Exit-Child", Keys.Control | Keys.Shift | Keys.E, recExitChildClicked);
+            miRecEnterChild  = addItemLocal(miRecord, "&Enter-Child (drill to related child rows)...", "Enter-Child", Keys.Shift | Keys.E, recEnterChildClicked);
+            miRecExitChild   = addItemLocal(miRecord, "E&xit-Child (return to parent row)", "Exit-Child", Keys.Shift | Keys.X, recExitChildClicked);
             addSep(miRecord);
             miRecBookmark    = addItem(miRecord, "&Save-Bookmark (current row)",  "Save-Bookmark",     Keys.Control | Keys.K,              recBookmarkClicked);
             miRecGotoBookmark= addItem(miRecord, "Restore-Bookmark (return to saved row)", "Restore-Bookmark", Keys.Alt | Keys.K,        recGotoBookmarkClicked);
@@ -4190,10 +5006,10 @@ namespace DbDuo
             KeyMap.registerAlias(Keys.Delete, miRecRemove);
 
             miView = addMenu("&View");
-            miViewSelect       = addItem(miView, "Select-Record (filter)...",          "Select-Record",     Keys.Control | Keys.F,              viewSelectClicked);
-            miViewResetFilter  = addItem(miView, "Reset filter",                       "Reset-Filter",      Keys.Control | Keys.Shift | Keys.F, viewResetFilterClicked);
+            miViewSelect       = addItemLocal(miView, "Select-Record (&filter)...",        "Select-Record",     Keys.Shift | Keys.F,                viewSelectClicked);
+            miViewResetFilter  = addItemLocal(miView, "&Reset filter",                     "Reset-Filter",      Keys.Shift | Keys.R,                viewResetFilterClicked);
             addSep(miView);
-            miViewFormat       = addItem(miView, "Sort-&Object (custom sort)...",       "Sort-Object",       Keys.Alt | Keys.Shift | Keys.O,     viewFormatClicked);
+            miViewFormat       = addItemLocal(miView, "&Sort-Object (custom sort)...",     "Sort-Object",       Keys.Shift | Keys.S,                viewFormatClicked);
             miViewSortAsc      = addItem(miView, "Sort &ascending by current column (alpha)", "Sort-Ascending",  Keys.Alt | Keys.A,                  viewSortAscClicked);
             miViewSortDesc     = addItem(miView, "Sort &descending by current column (alpha)", "Sort-Descending", Keys.Alt | Keys.Shift | Keys.A,    viewSortDescClicked);
             miViewSortRecent   = addItem(miView, "Sort by date updated (most recent first)", "Sort-RecentFirst", Keys.Alt | Keys.Shift | Keys.D,    viewSortRecentClicked);
@@ -4268,6 +5084,22 @@ namespace DbDuo
             return oItem;
         }
 
+        // addItemLocal: like addItem, but the chord is dispatched
+        // locally by a specific control (the data grid in DbDuo)
+        // rather than by the form's ProcessCmdKey. The menu UI
+        // still shows the chord and JAWS still announces it; the
+        // form-level KeyMap dispatch table simply doesn't claim
+        // it. Used for the Shift+Letter family so capital letters
+        // typed in text boxes and dialogs are not intercepted.
+        private ToolStripMenuItem addItemLocal(ToolStripMenuItem oParent, string sText, string sCommand, Keys oKey, EventHandler oHandler)
+        {
+            ToolStripMenuItem oItem = new ToolStripMenuItem(sText);
+            oItem.Click += oHandler;
+            oParent.DropDownItems.Add(oItem);
+            KeyMap.registerDisplayOnly(oKey, oItem, sCommand);
+            return oItem;
+        }
+
         private void addSep(ToolStripMenuItem oParent)
         {
             oParent.DropDownItems.Add(new ToolStripSeparator());
@@ -4329,7 +5161,7 @@ namespace DbDuo
             grid.KeyDown += gridKeyDown;
 
             ctxGrid = new ContextMenuStrip();
-            ctxGrid.Items.Add("Show-Record", null, recShowClicked);
+            ctxGrid.Items.Add("Show-Object", null, recShowClicked);
             ctxGrid.Items.Add("Set-Record...", null, recSetClicked);
             ctxGrid.Items.Add("Remove-Record", null, recRemoveClicked);
             ctxGrid.Items.Add("-");
@@ -4513,29 +5345,29 @@ namespace DbDuo
         // we override it for in-row column navigation, then
         // announce the new column.
         //
-        // Type-ahead navigation works automatically for ALL letter
-        // keys -- both lowercase and uppercase -- because the
-        // ListView's virtual-mode SearchForVirtualItem event fires
-        // on each unmodified character keypress, regardless of
-        // capitalization, and our gridSearchForVirtualItem handler
-        // uses OrdinalIgnoreCase matching. The user can press 'a'
-        // or 'A' interchangeably to jump to the next row whose
-        // current column starts with that letter; typing several
-        // characters in quick succession extends the search prefix.
+        // This handler also recognizes the bare Shift+Letter
+        // shortcut family. Because the dispatch lives on the
+        // ListView's own KeyDown event, the chord only fires when
+        // the data grid has focus. When focus is in a text box,
+        // dialog edit field, combo box, or the menu bar, this
+        // handler does not run, so capital letters typed into
+        // those controls reach them as plain character input --
+        // no focus check is needed at the dispatch site. The
+        // pattern is borrowed from FileDir.cs's MdiChild.
+        // ListBox_KeyDown.
         //
-        // For this to remain true, DbDuo must NEVER bind a bare
-        // Shift+letter combination as a menu hotkey -- doing so
-        // would cause the form's ProcessCmdKey to intercept the
-        // shifted key before the ListView could feed it to
-        // SearchForVirtualItem, stealing capital-letter type-ahead.
-        // All Shift+letter hotkeys in DbDuo are combined with
-        // Control or Alt (verified by inspection of buildMenus).
-        // This is a deliberate trade compared with FileDir, which
-        // binds Shift+D / Shift+L / Shift+S to menu commands and
-        // accepts that those particular capitals cannot type-ahead.
-        // In DbDuo, every capital letter remains a navigation key.
+        // Type-ahead navigation in the data grid is case-
+        // insensitive: lowercase letters jump to rows by initial
+        // character through the ListView's virtual-mode
+        // SearchForVirtualItem event. The Shift+Letter shortcuts
+        // override capital letters for those nine specific
+        // letters (E F G J M R S U X); lowercase forms of the
+        // same letters continue to type-ahead. The user-side
+        // convention: lowercase to navigate, uppercase to
+        // shortcut.
         private void gridKeyDown(object oSender, KeyEventArgs oArgs)
         {
+            // Tab / Shift+Tab: in-row column navigation.
             if (oArgs.KeyCode == Keys.Tab)
             {
                 // Control+Tab and Control+Shift+Tab are reserved for
@@ -4552,6 +5384,61 @@ namespace DbDuo
                 announceCurrentColumn();
                 oArgs.Handled = true;
                 oArgs.SuppressKeyPress = true;
+                return;
+            }
+
+            // Bare Shift+Letter shortcut family. Only the nine
+            // letters below are bound; any other Shift+Letter falls
+            // through to the ListView, which feeds the character
+            // to its virtual-mode SearchForVirtualItem for type-
+            // ahead navigation. The corresponding menu items have
+            // ShortcutKeyDisplayString set so the chord appears in
+            // the menu UI and JAWS announces it; the dispatch
+            // happens here, not through the form-level KeyMap.
+            if (oArgs.Shift && !oArgs.Control && !oArgs.Alt)
+            {
+                ToolStripMenuItem oTarget = null;
+                switch (oArgs.KeyCode)
+                {
+                    case Keys.E: oTarget = miRecEnterChild;    break;
+                    case Keys.F: oTarget = miViewSelect;       break;
+                    case Keys.G: oTarget = miRecGoTo;          break;
+                    case Keys.J: oTarget = miRecFind;          break;
+                    case Keys.M: oTarget = miRecMark;          break;
+                    case Keys.R: oTarget = miViewResetFilter;  break;
+                    case Keys.S: oTarget = miViewFormat;       break;
+                    case Keys.U: oTarget = miRecUnmark;        break;
+                    case Keys.X: oTarget = miRecExitChild;     break;
+                }
+                if (oTarget != null)
+                {
+                    if (!oTarget.Enabled)
+                    {
+                        string sCmd = oTarget.Text.Replace("&", "");
+                        if (sCmd.EndsWith("...")) sCmd = sCmd.Substring(0, sCmd.Length - 3).TrimEnd();
+                        LiveRegion.say(sCmd + " is unavailable right now (open a database file or select a table first)");
+                    }
+                    else if (KeyMap.bTraceMode)
+                    {
+                        // Trace-Command mode: show what the chord
+                        // would have done instead of doing it. Mirrors
+                        // the form-level tryDispatch behavior so the
+                        // Shift+Letter family is traceable too.
+                        string sCmd = KeyMap.dMenuToCommand.ContainsKey(oTarget)
+                            ? KeyMap.dMenuToCommand[oTarget]
+                            : oTarget.Text.Replace("&", "");
+                        MessageBox.Show(this,
+                            string.Format("Trace-Command:\n\nKey: Shift+{0}\nCommand: {1}", oArgs.KeyCode, sCmd),
+                            "Trace-Command", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    }
+                    else
+                    {
+                        oTarget.PerformClick();
+                    }
+                    oArgs.Handled = true;
+                    oArgs.SuppressKeyPress = true;
+                    return;
+                }
             }
         }
 
@@ -5264,16 +6151,27 @@ namespace DbDuo
 
             public static string read(string sKey)
             {
-                string sResult = readFrom(iniPath(), sKey);
-                if (!string.IsNullOrEmpty(sResult)) return sResult;
-                return readFrom(legacyIniPath(), sKey);
+                return read("Session", sKey);
             }
 
-            private static string readFrom(string sPath, string sKey)
+            // Read a key from any section in the per-user ini.
+            // Falls back to the legacy EXE-dir ini if the per-user
+            // file has no value. Used by IniSession for [Session]
+            // and by IniFolders for [Folders]; both share the
+            // same physical file.
+            public static string read(string sSection, string sKey)
+            {
+                string sResult = readFrom(iniPath(), sSection, sKey);
+                if (!string.IsNullOrEmpty(sResult)) return sResult;
+                return readFrom(legacyIniPath(), sSection, sKey);
+            }
+
+            private static string readFrom(string sPath, string sSection, string sKey)
             {
                 if (!File.Exists(sPath)) return "";
                 string[] aLines;
                 try { aLines = File.ReadAllLines(sPath); } catch { return ""; }
+                string sHeader = "[" + sSection + "]";
                 bool bInSection = false;
                 foreach (string sLine in aLines)
                 {
@@ -5282,7 +6180,7 @@ namespace DbDuo
                     if (sTrim.StartsWith(";") || sTrim.StartsWith("#")) continue;
                     if (sTrim.StartsWith("["))
                     {
-                        bInSection = sTrim.Equals("[Session]", StringComparison.OrdinalIgnoreCase);
+                        bInSection = sTrim.Equals(sHeader, StringComparison.OrdinalIgnoreCase);
                         continue;
                     }
                     if (!bInSection) continue;
@@ -5303,7 +6201,16 @@ namespace DbDuo
             // not, removing it if value is empty.
             public static void write(string sKey, string sValue)
             {
+                write("Session", sKey, sValue);
+            }
+
+            // Write a key=value into any section of the per-user
+            // ini. Preserves any other sections that may already
+            // exist. Removes the key if value is empty.
+            public static void write(string sSection, string sKey, string sValue)
+            {
                 string sPath = iniPath();
+                string sHeader = "[" + sSection + "]";
                 List<string> lLines = new List<string>();
                 if (File.Exists(sPath))
                 {
@@ -5315,7 +6222,7 @@ namespace DbDuo
                 for (int i = 0; i < lLines.Count; i++)
                 {
                     string sTrim = lLines[i].Trim();
-                    if (sTrim.Equals("[Session]", StringComparison.OrdinalIgnoreCase))
+                    if (sTrim.Equals(sHeader, StringComparison.OrdinalIgnoreCase))
                     {
                         iSectionStart = i;
                         iSectionEnd = lLines.Count;
@@ -5332,7 +6239,7 @@ namespace DbDuo
                 {
                     if (lLines.Count > 0 && lLines[lLines.Count - 1].Trim().Length > 0)
                         lLines.Add("");
-                    lLines.Add("[Session]");
+                    lLines.Add(sHeader);
                     if (!string.IsNullOrEmpty(sValue))
                         lLines.Add(sKey + " = " + sValue);
                 }
@@ -5366,16 +6273,81 @@ namespace DbDuo
                 try
                 {
                     File.WriteAllLines(sPath, lLines.ToArray());
-                    DbDuoLog.write("Session ini write: " + sPath + " [" + sKey + "] = " + sValue);
+                    DbDuoLog.write("Ini write [" + sSection + "] " + sKey + " = " + sValue);
                 }
                 catch (Exception oEx)
                 {
-                    DbDuoLog.write("Session ini write FAILED: " + sPath + " -- " + oEx.Message);
+                    DbDuoLog.write("Ini write FAILED: " + sPath + " -- " + oEx.Message);
                 }
             }
 
             public static string lastDatabase { get { return read("lastDatabase"); } set { write("lastDatabase", value); } }
             public static string lastTable    { get { return read("lastTable");    } set { write("lastTable",    value); } }
+        }
+
+        // =====================================================================
+        // IniFolders: persists the last-used folder for each kind
+        // of file dialog (Open, Save-As, Import, Export), so the
+        // next invocation of the same dialog opens in the same
+        // place the user worked in last. Uses the same per-user
+        // DbDuo.ini that IniSession uses, but a [Folders] section.
+        //
+        // Kinds:
+        //   open       -- New-Database, Open-Database, Save-DatabaseAs,
+        //                 Backup-Database. All four operate on
+        //                 whole-database files; one shared "open"
+        //                 folder is more useful than four separate
+        //                 ones because users typically keep all
+        //                 their databases together.
+        //   import     -- Import-Data source files (Markdown).
+        //   export     -- Export-Data target files.
+        //
+        // If no remembered value exists, callers fall back to
+        // (in order): the folder of the currently-open database,
+        // the user's Documents folder.
+        // =====================================================================
+        public static class IniFolders
+        {
+            public static string openFolder
+            {
+                get { return IniSession.read("Folders", "open"); }
+                set { IniSession.write("Folders", "open", value ?? ""); }
+            }
+            public static string importFolder
+            {
+                get { return IniSession.read("Folders", "import"); }
+                set { IniSession.write("Folders", "import", value ?? ""); }
+            }
+            public static string exportFolder
+            {
+                get { return IniSession.read("Folders", "export"); }
+                set { IniSession.write("Folders", "export", value ?? ""); }
+            }
+
+            // bestDirectory: choose a sensible initial directory for
+            // a dialog, given a preferred remembered folder, the
+            // folder of the currently-open database (if any), and
+            // the user's Documents folder as last resort. Returns
+            // the first option that actually exists on disk.
+            public static string bestDirectory(string sRemembered, string sFallbackDbPath)
+            {
+                if (!string.IsNullOrEmpty(sRemembered) && Directory.Exists(sRemembered))
+                    return sRemembered;
+                if (!string.IsNullOrEmpty(sFallbackDbPath))
+                {
+                    string sParent = Path.GetDirectoryName(sFallbackDbPath);
+                    if (!string.IsNullOrEmpty(sParent) && Directory.Exists(sParent))
+                        return sParent;
+                }
+                try
+                {
+                    string sDocs = Environment.GetFolderPath(Environment.SpecialFolder.MyDocuments);
+                    if (!string.IsNullOrEmpty(sDocs) && Directory.Exists(sDocs))
+                        return sDocs;
+                }
+                catch { }
+                return ""; // let Windows pick
+            }
         }
 
         // =====================================================================
@@ -5388,7 +6360,13 @@ namespace DbDuo
                 oFd.Title = "New Database File";
                 oFd.Filter = "SQLite Database (*.db)|*.db|All Files (*.*)|*.*";
                 oFd.DefaultExt = "db";
+                // Initial folder: last folder the user opened or saved
+                // a database from, falling back to the current
+                // database's folder, then Documents.
+                string sCurDb = (db != null) ? db.filePath : null;
+                oFd.InitialDirectory = IniFolders.bestDirectory(IniFolders.openFolder, sCurDb);
                 if (oFd.ShowDialog(this) != DialogResult.OK) return;
+                IniFolders.openFolder = Path.GetDirectoryName(oFd.FileName);
                 try
                 {
                     if (File.Exists(oFd.FileName)) File.Delete(oFd.FileName);
@@ -5415,7 +6393,17 @@ namespace DbDuo
                            + "|dBASE (*.dbf)|*.dbf"
                            + "|CSV / Text (*.csv;*.tsv;*.txt)|*.csv;*.tsv;*.txt"
                            + "|All Files (*.*)|*.*";
+                // Initial folder: last folder the user opened a
+                // database from, falling back to the currently-open
+                // database's folder, then Documents. If the user
+                // already opened a file last session, we also fill
+                // in its name as the suggested filename for one-
+                // press re-open (rare workflow, but the user is
+                // free to clear it).
+                string sCurDb = (db != null) ? db.filePath : null;
+                oFd.InitialDirectory = IniFolders.bestDirectory(IniFolders.openFolder, sCurDb);
                 if (oFd.ShowDialog(this) != DialogResult.OK) return;
+                IniFolders.openFolder = Path.GetDirectoryName(oFd.FileName);
                 try
                 {
                     DbDuoLog.write("File > Open: " + oFd.FileName);
@@ -5463,7 +6451,25 @@ namespace DbDuo
                 string sExt = Path.GetExtension(db.filePath).TrimStart('.');
                 oFd.Filter = "Same format (*." + sExt + ")|*." + sExt + "|All Files (*.*)|*.*";
                 oFd.DefaultExt = sExt;
+                // Default folder = the currently-open database's folder
+                // (the Save-As is typically a copy alongside the
+                // original). Default filename = the source file's
+                // name, leaving the user one keystroke from a
+                // sensible "FooBackup.db" or similar by editing it.
+                oFd.InitialDirectory = IniFolders.bestDirectory("", db.filePath);
+                string sLeaf = Path.GetFileNameWithoutExtension(db.filePath);
+                if (!string.IsNullOrEmpty(sLeaf))
+                {
+                    // Suggest "<original>-copy" so we don't overwrite
+                    // the original by mistake when the user just
+                    // presses Enter.
+                    string sSuggest = sLeaf + "-copy";
+                    if (sTitle.IndexOf("Backup", StringComparison.OrdinalIgnoreCase) >= 0)
+                        sSuggest = sLeaf + "-backup-" + DateTime.Now.ToString("yyyyMMdd");
+                    oFd.FileName = sSuggest;
+                }
                 if (oFd.ShowDialog(this) != DialogResult.OK) return;
+                IniFolders.openFolder = Path.GetDirectoryName(oFd.FileName);
                 try
                 {
                     db.saveAs(oFd.FileName);
@@ -5500,8 +6506,38 @@ namespace DbDuo
 
         private void fileImportClicked(object oSender, EventArgs oArgs)
         {
-            MessageBox.Show(this, "Import-Data: please use Invoke-Sql for now.",
-                "Import-Data", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            if (db == null || !db.hasRecordset())
+            {
+                MessageBox.Show(this, "Open a database and pick a target table first.",
+                    "Import-Data", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            using (OpenFileDialog oFd = new OpenFileDialog())
+            {
+                oFd.Title = "Import-Data into " + (db.currentTable ?? "current table");
+                oFd.Filter = "Markdown table (*.md;*.markdown)|*.md;*.markdown"
+                           + "|All Files (*.*)|*.*";
+                oFd.DefaultExt = "md";
+                // Default folder: last import folder, else the
+                // current database's folder, else Documents.
+                oFd.InitialDirectory = IniFolders.bestDirectory(IniFolders.importFolder, db.filePath);
+                if (oFd.ShowDialog(this) != DialogResult.OK) return;
+                IniFolders.importFolder = Path.GetDirectoryName(oFd.FileName);
+                try
+                {
+                    int iCount = db.importMarkdown(oFd.FileName);
+                    DbDuoLog.write("Imported " + iCount + " row(s) from " + oFd.FileName);
+                    invokeRefresh();
+                    MessageBox.Show(this,
+                        "Imported " + iCount + " row(s) into " + db.currentTable + ".",
+                        "Import-Data", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (Exception oEx)
+                {
+                    MessageBox.Show(this, oEx.Message, "Import-Data",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
         }
 
         private void fileExportClicked(object oSender, EventArgs oArgs)
@@ -5512,15 +6548,23 @@ namespace DbDuo
                 oFd.Title = "Export-Data";
                 oFd.Filter = "Excel workbook (*.xlsx)|*.xlsx"
                            + "|Word document (*.docx)|*.docx"
-                           + "|HTML (filtered) (*.html)|*.html"
+                           + "|HTML, filtered (*.html)|*.html"
+                           + "|Markdown table (*.md)|*.md"
                            + "|CSV (*.csv)|*.csv"
                            + "|TSV (*.tsv)|*.tsv"
+                           + "|SQLite database (*.db)|*.db"
+                           + "|Access database (*.accdb)|*.accdb"
+                           + "|dBASE table (*.dbf)|*.dbf"
                            + "|All Files (*.*)|*.*";
                 oFd.DefaultExt = "xlsx";
+                // Default folder: last export folder, else current
+                // database's folder, else Documents.
+                oFd.InitialDirectory = IniFolders.bestDirectory(IniFolders.exportFolder, db.filePath);
                 // Suggest a filename based on the current table.
                 if (!string.IsNullOrEmpty(db.currentTable))
                     oFd.FileName = db.currentTable;
                 if (oFd.ShowDialog(this) != DialogResult.OK) return;
+                IniFolders.exportFolder = Path.GetDirectoryName(oFd.FileName);
                 try
                 {
                     db.exportData(oFd.FileName);
@@ -5659,24 +6703,252 @@ namespace DbDuo
             }
         }
 
+        // Show-Object: open a read-only, multi-line view of the
+        // currently-selected row. Three sections, separated by a
+        // blank line:
+        //
+        //   1. The fields visible in the listview, one per line,
+        //      in the form "field-name = value".
+        //   2. For each PARENT row reached via outbound foreign-key
+        //      column on this row: "Related <parent-table>:" header
+        //      followed by the parent's look value indented under it.
+        //      Skipped if this table has no FK columns.
+        //   3. For each CHILD TABLE that references this row: a
+        //      "Related <child-table>:" header followed by the look
+        //      values of every matching child row, one per line.
+        //      Capped at 25 per table with an "(N more)" footer so
+        //      a heavily-related parent doesn't produce a wall of
+        //      text. The user can press Shift+E to drill in for
+        //      the full list.
+        //
+        // The look column is DbDuo's standard "summary" calculated
+        // column -- a SQLite stored-generated text that concatenates
+        // a handful of substantive fields with " | " separators,
+        // designed to be a screen-reader-friendly one-line
+        // representation of a record. Tables without a look column
+        // fall back to "(no look column)" placeholders.
+        //
+        // The dialog is dismissed by OK (Enter) or Escape.
+        //
+        // Bound to Enter from the data grid for one-key access.
+        // Get-Property (Alt+Enter) remains the way to see EVERY
+        // field including hidden bookkeeping columns.
         private void recShowClicked(object oSender, EventArgs oArgs)
         {
             if (db == null || !db.hasRecordset()) return;
             if (db.eof || db.bof) return;
-            StringBuilder oSb = new StringBuilder();
-            // Distinct (substantive) fields first.
-            List<string> lDistinct = db.getDistinctFieldNames();
-            List<string> lMetadata = db.getMetadataFieldNames();
-            foreach (string sCol in lDistinct)
-                oSb.AppendLine(sCol + " = " + formatFieldValueForDisplay(db.getFieldValue(sCol), sCol));
-            if (lMetadata.Count > 0)
+
+            // SECTION 1: the listview's visible columns.
+            // Pull headers from the listview directly so the dialog
+            // matches what the user is looking at. Fallback to the
+            // manager's display-fields list if the listview isn't
+            // built yet (CLI session). The separator is " = " --
+            // dbDot/dBASE convention.
+            List<string> lFields = new List<string>();
+            if (grid != null && grid.Columns.Count > 0)
             {
-                oSb.AppendLine();
-                oSb.AppendLine("--- metadata ---");
-                foreach (string sCol in lMetadata)
-                    oSb.AppendLine(sCol + " = " + formatFieldValueForDisplay(db.getFieldValue(sCol), sCol));
+                foreach (ColumnHeader oCol in grid.Columns)
+                    lFields.Add(oCol.Text);
             }
-            HelpDialog.show(this, "Show-Record (row " + db.absolutePosition + ")", oSb.ToString());
+            else
+            {
+                lFields = db.getDisplayFieldNames();
+                if (lFields.Count == 0) lFields = db.getFieldNames();
+            }
+
+            StringBuilder oSb = new StringBuilder();
+            foreach (string sCol in lFields)
+            {
+                string sValue = formatFieldValueForDisplay(db.getFieldValue(sCol), sCol);
+                oSb.Append(sCol);
+                oSb.Append(" = ");
+                oSb.AppendLine(sValue);
+            }
+
+            // SECTIONS 2 and 3: related records. Skip silently if
+            // the current row has no usable primary key, since
+            // neither direction makes sense without one.
+            appendRelatedRecords(oSb);
+
+            HelpDialog.show(this, "Show-Object (row " + db.absolutePosition + ")", oSb.ToString());
+        }
+
+        // appendRelatedRecords: extend a Show-Object output with
+        // the related-records sections. Two passes:
+        //   (a) Outbound FKs on the current row -- columns named
+        //       "<parent>_id" or "<plural-parent>_id". For each,
+        //       fetch the single parent row's look value and emit
+        //       it under a "Related <parent-table>:" header.
+        //   (b) Other base tables that reference the current row
+        //       via a column named like this table's PK. For each,
+        //       fetch up to 25 look values matching the FK and emit
+        //       them under a "Related <child-table>:" header.
+        //
+        // The query path is DbDuoManager.queryColumnValues, which
+        // issues a direct SELECT on the live connection so SQLite
+        // can use its own indexes (if any are defined on the FK
+        // columns) -- much cheaper than loading the whole child
+        // recordset to client-side and filtering.
+        private void appendRelatedRecords(StringBuilder oSb)
+        {
+            const int iMaxPerSection = 25;
+            const string sNoLook = "(no look column on this table)";
+
+            string sCurrentTable = db.currentTable ?? "";
+            if (string.IsNullOrEmpty(sCurrentTable)) return;
+            List<string> lCurrentCols = db.getFieldNames();
+            if (lCurrentCols.Count == 0) return;
+
+            // Try schema metadata first for the current table's PK,
+            // then fall back to the naming convention. This makes
+            // Show-Object's child-section work even for tables
+            // whose names have irregular English plurals
+            // (e.g. classes -> class_id, cities -> city_id).
+            string sCurrentPk = db.actualPrimaryKey(sCurrentTable);
+            if (string.IsNullOrEmpty(sCurrentPk))
+                sCurrentPk = computePrimaryKeyColumn(sCurrentTable, lCurrentCols);
+            string sCurrentPkValue = "";
+            if (!string.IsNullOrEmpty(sCurrentPk))
+            {
+                try { sCurrentPkValue = db.getFieldValue(sCurrentPk) ?? ""; }
+                catch { sCurrentPkValue = ""; }
+            }
+
+            List<string> lAllTables = db.getTableNames();
+
+            // -------------------------------------------------------
+            // SECTION 2: outbound FKs -> parents. For every column on
+            // the current row whose name ends in "_id" and matches
+            // some other table's PK, fetch that parent's look value.
+            // -------------------------------------------------------
+            bool bAnyParent = false;
+            foreach (string sCol in lCurrentCols)
+            {
+                if (string.Equals(sCol, sCurrentPk, StringComparison.OrdinalIgnoreCase))
+                    continue;  // skip our own PK
+                if (!sCol.EndsWith(Metadata.PrimaryKeySuffix, StringComparison.OrdinalIgnoreCase))
+                    continue;  // not an FK by naming convention
+
+                // The FK value on the current row.
+                string sFkValue = "";
+                try { sFkValue = db.getFieldValue(sCol) ?? ""; }
+                catch { sFkValue = ""; }
+                if (string.IsNullOrEmpty(sFkValue)) continue;
+
+                // Find the parent table. The convention: an FK named
+                // "<parent_singular>_id" points to table "<parent_plural>"
+                // (e.g. teacher_id -> teachers). We also accept
+                // "<parent_table>_id" without pluralization.
+                string sParentTable = findParentTableForFk(sCol, lAllTables);
+                if (string.IsNullOrEmpty(sParentTable)) continue;
+
+                // Fetch the parent's look value via direct SQL.
+                int iFound;
+                List<string> lLook = db.queryColumnValues(
+                    sParentTable, "look", sCol, sFkValue, 1, out iFound);
+
+                if (!bAnyParent)
+                {
+                    if (oSb.Length > 0) oSb.AppendLine();  // blank separator
+                    bAnyParent = true;
+                }
+                oSb.Append("Related ");
+                oSb.Append(sParentTable);
+                oSb.AppendLine(":");
+                if (iFound == 0)
+                    oSb.AppendLine("  (parent not found)");
+                else if (lLook.Count > 0 && !string.IsNullOrEmpty(lLook[0]))
+                    oSb.AppendLine("  " + lLook[0]);
+                else
+                    oSb.AppendLine("  " + sNoLook);
+            }
+
+            // -------------------------------------------------------
+            // SECTION 3: child tables -> records pointing to me. For
+            // every other base table that has a column named the
+            // same as MY primary key, list its look values where
+            // <fk> = <my-pk-value>.
+            // -------------------------------------------------------
+            if (string.IsNullOrEmpty(sCurrentPk) || string.IsNullOrEmpty(sCurrentPkValue))
+                return;  // no PK -> no children to find
+
+            foreach (string sChildTable in lAllTables)
+            {
+                if (string.Equals(sChildTable, sCurrentTable, StringComparison.OrdinalIgnoreCase))
+                    continue;
+                List<string> lChildCols = db.getColumnsOfTable(sChildTable);
+                bool bHasFk = false;
+                foreach (string sChildCol in lChildCols)
+                {
+                    if (string.Equals(sChildCol, sCurrentPk, StringComparison.OrdinalIgnoreCase))
+                    { bHasFk = true; break; }
+                }
+                if (!bHasFk) continue;
+
+                // Issue the query.
+                int iFound;
+                List<string> lLook = db.queryColumnValues(
+                    sChildTable, "look", sCurrentPk, sCurrentPkValue,
+                    iMaxPerSection, out iFound);
+                if (iFound == 0) continue;  // no related rows; skip
+
+                oSb.AppendLine();
+                oSb.Append("Related ");
+                oSb.Append(sChildTable);
+                oSb.AppendLine(":");
+                if (lLook.Count == 0)
+                {
+                    // Found rows but couldn't fetch look values --
+                    // child table is missing the look column.
+                    // Emit a placeholder count so the user knows.
+                    oSb.AppendLine("  (" + iFound + " row(s) -- " + sNoLook + ")");
+                }
+                else
+                {
+                    foreach (string sLook in lLook)
+                    {
+                        if (string.IsNullOrEmpty(sLook))
+                            oSb.AppendLine("  (empty look)");
+                        else
+                            oSb.AppendLine("  " + sLook);
+                    }
+                    if (iFound > lLook.Count)
+                    {
+                        int iMore = iFound - lLook.Count;
+                        oSb.AppendLine("  (... " + iMore + " more; use Enter-Child to see all)");
+                    }
+                }
+            }
+        }
+
+        // findParentTableForFk: given an FK column like "teacher_id"
+        // or "class_id", find which table it points to. Inverts
+        // the lookup by asking each candidate table whether its
+        // actual primary-key column is the FK we're looking up.
+        //
+        // Uses actualPrimaryKey() to read the schema's own metadata
+        // (PRAGMA table_info for SQLite, ADOX.Keys for Access),
+        // so it works for any English plural irregularity --
+        // "classes" -> "class_id", "cities" -> "city_id" -- as
+        // long as the schema actually defines a PK. Falls back to
+        // the naming-convention rule computePrimaryKeyColumn for
+        // tables with no declared PK.
+        private string findParentTableForFk(string sFkColumn, List<string> lAllTables)
+        {
+            if (string.IsNullOrEmpty(sFkColumn)) return null;
+            foreach (string sT in lAllTables)
+            {
+                string sPk = db.actualPrimaryKey(sT);
+                if (string.IsNullOrEmpty(sPk))
+                {
+                    List<string> lCols = db.getColumnsOfTable(sT);
+                    sPk = computePrimaryKeyColumn(sT, lCols);
+                }
+                if (!string.IsNullOrEmpty(sPk)
+                    && string.Equals(sPk, sFkColumn, StringComparison.OrdinalIgnoreCase))
+                    return sT;
+            }
+            return null;
         }
 
         // Format a field value for display in Show-Record. The recordset
@@ -7733,7 +9005,7 @@ namespace DbDuo
             {
                 case "step-record":      cmdStepRecord(sRest);     break;
                 case "set-position":     cmdSetPosition(sRest);    break;
-                case "show-record":      cmdShowRecord(sRest);     break;
+                case "show-object":      cmdShowObject(sRest);     break;
                 case "show-table":       cmdShowTable(sRest);      break;
                 case "show-schema":      cmdShowSchema(sRest);     break;
                 case "show-status":      printRowSummary();        break;
@@ -7773,6 +9045,7 @@ namespace DbDuo
                 case "save-databaseas":  cmdSaveAs(sRest);         break;
                 case "backup-database":  cmdSaveAs(sRest);         break;
                 case "export-data":      cmdExportData(sRest);     break;
+                case "import-data":      cmdImportData(sRest);     break;
                 case "open-database":    cmdOpenDatabase(sRest);   break;
                 case "close-database":   cmdCloseDatabase();       break;
                 case "invoke-sql":       cmdInvokeSql(sRest);      break;
@@ -8054,7 +9327,7 @@ namespace DbDuo
                 case "b": case "bot": case "bottom": case "last": return "step-record-last";
                 case "skip":                         return "step-record"; // dBASE: SKIP n
                 case "g": case "#": case "goto":     return "set-position";
-                case "=": case "display": case "show": case "disp": return "show-record";
+                case "=": case "display": case "show": case "disp": return "show-object";
                 case "l": case "list":               return "show-table";
                 case "schema":                       return "show-schema";
                 case "status": case "?":             return "show-status";
@@ -8273,23 +9546,184 @@ namespace DbDuo
             printRowSummary();
         }
 
-        private static void cmdShowRecord(string sArg)
+        // Show-Object: print the current row's fields, one per line,
+        // in the form "field-name = value". After the fields, list
+        // related records grouped by table -- parent rows reached
+        // via outbound foreign keys, then child rows that reference
+        // this one. The GUI equivalent opens the same content in a
+        // read-only dialog (bound to Enter).
+        //
+        // Argument grammar:
+        //   Show-Object              all display fields + related records
+        //   Show-Object col1,col2    only the named columns; no related
+        //   Show-Object all          every field of the recordset; no related
+        //
+        // The named-columns and 'all' modes are intended for
+        // scripting where the user wants a precise field set, so
+        // they skip the related-records section.
+        private static void cmdShowObject(string sArg)
         {
             if (!requireRecordset()) return;
             if (db.recordCount == 0) { Console.WriteLine("(no records)"); return; }
             List<string> lAll = db.getFieldNames();
+            string sArgTrim = sArg.Trim();
+            bool bShowRelated = (sArgTrim.Length == 0);
+
             List<string> lWanted = new List<string>();
-            if (sArg.Length > 0)
+            if (sArgTrim.Equals("all", StringComparison.OrdinalIgnoreCase))
             {
-                foreach (string s in sArg.Split(','))
+                lWanted = lAll;
+            }
+            else if (sArgTrim.Length > 0)
+            {
+                foreach (string s in sArgTrim.Split(','))
                 {
                     string sT = s.Trim();
                     if (lAll.Contains(sT)) lWanted.Add(sT);
                 }
             }
-            if (lWanted.Count == 0) lWanted = lAll;
+            if (lWanted.Count == 0)
+            {
+                lWanted = db.getDisplayFieldNames();
+                if (lWanted.Count == 0) lWanted = lAll;
+            }
+
             foreach (string sCol in lWanted)
                 Console.WriteLine(string.Format("  {0} = {1}", sCol, db.getFieldValue(sCol)));
+
+            if (bShowRelated)
+                cmdShowObjectRelated();
+        }
+
+        // Print the related-records section of Show-Object to the
+        // CLI. Mirrors the GUI's appendRelatedRecords logic but
+        // writes directly to Console.
+        private static void cmdShowObjectRelated()
+        {
+            const int iMaxPerSection = 25;
+            const string sNoLook = "(no look column on this table)";
+
+            string sCurrentTable = db.currentTable ?? "";
+            if (string.IsNullOrEmpty(sCurrentTable)) return;
+            List<string> lCurrentCols = db.getFieldNames();
+            if (lCurrentCols.Count == 0) return;
+
+            string sCurrentPk = db.actualPrimaryKey(sCurrentTable);
+            if (string.IsNullOrEmpty(sCurrentPk))
+                sCurrentPk = computePrimaryKeyColumnStatic(sCurrentTable, lCurrentCols);
+            string sCurrentPkValue = "";
+            if (!string.IsNullOrEmpty(sCurrentPk))
+            {
+                try { sCurrentPkValue = db.getFieldValue(sCurrentPk) ?? ""; }
+                catch { sCurrentPkValue = ""; }
+            }
+            List<string> lAllTables = db.getTableNames();
+
+            // Outbound FK -> parent.
+            bool bAnyEmitted = false;
+            foreach (string sCol in lCurrentCols)
+            {
+                if (string.Equals(sCol, sCurrentPk, StringComparison.OrdinalIgnoreCase)) continue;
+                if (!sCol.EndsWith(Metadata.PrimaryKeySuffix, StringComparison.OrdinalIgnoreCase)) continue;
+
+                string sFkValue = "";
+                try { sFkValue = db.getFieldValue(sCol) ?? ""; }
+                catch { sFkValue = ""; }
+                if (string.IsNullOrEmpty(sFkValue)) continue;
+
+                string sParentTable = findParentTableForFkStatic(sCol, lAllTables);
+                if (string.IsNullOrEmpty(sParentTable)) continue;
+
+                int iFound;
+                List<string> lLook = db.queryColumnValues(
+                    sParentTable, "look", sCol, sFkValue, 1, out iFound);
+
+                if (!bAnyEmitted) { Console.WriteLine(); bAnyEmitted = true; }
+                Console.WriteLine("Related " + sParentTable + ":");
+                if (iFound == 0)
+                    Console.WriteLine("  (parent not found)");
+                else if (lLook.Count > 0 && !string.IsNullOrEmpty(lLook[0]))
+                    Console.WriteLine("  " + lLook[0]);
+                else
+                    Console.WriteLine("  " + sNoLook);
+            }
+
+            // Inbound FK -> children.
+            if (string.IsNullOrEmpty(sCurrentPk) || string.IsNullOrEmpty(sCurrentPkValue))
+                return;
+
+            foreach (string sChildTable in lAllTables)
+            {
+                if (string.Equals(sChildTable, sCurrentTable, StringComparison.OrdinalIgnoreCase)) continue;
+                List<string> lChildCols = db.getColumnsOfTable(sChildTable);
+                bool bHasFk = false;
+                foreach (string sChildCol in lChildCols)
+                {
+                    if (string.Equals(sChildCol, sCurrentPk, StringComparison.OrdinalIgnoreCase))
+                    { bHasFk = true; break; }
+                }
+                if (!bHasFk) continue;
+
+                int iFound;
+                List<string> lLook = db.queryColumnValues(
+                    sChildTable, "look", sCurrentPk, sCurrentPkValue,
+                    iMaxPerSection, out iFound);
+                if (iFound == 0) continue;
+
+                Console.WriteLine();
+                Console.WriteLine("Related " + sChildTable + ":");
+                if (lLook.Count == 0)
+                {
+                    Console.WriteLine("  (" + iFound + " row(s) -- " + sNoLook + ")");
+                }
+                else
+                {
+                    foreach (string sLook in lLook)
+                        Console.WriteLine("  " + (string.IsNullOrEmpty(sLook) ? "(empty look)" : sLook));
+                    if (iFound > lLook.Count)
+                    {
+                        int iMore = iFound - lLook.Count;
+                        Console.WriteLine("  (... " + iMore + " more; use Enter-Child to see all)");
+                    }
+                }
+            }
+        }
+
+        // Static counterparts to the form instance methods, used by
+        // the CLI dispatcher. Behaviorally identical -- just relocated.
+        private static string computePrimaryKeyColumnStatic(string sTable, List<string> lCols)
+        {
+            if (string.IsNullOrEmpty(sTable)) return null;
+            string sLowerTable = sTable.ToLowerInvariant();
+            string sSingular = (sLowerTable.EndsWith("s") && sLowerTable.Length > 1)
+                ? sLowerTable.Substring(0, sLowerTable.Length - 1) : sLowerTable;
+            string sPkPlural = sSingular + Metadata.PrimaryKeySuffix;
+            foreach (string sCol in lCols)
+                if (sCol.ToLowerInvariant() == sPkPlural) return sCol;
+            string sPkBare = sLowerTable + Metadata.PrimaryKeySuffix;
+            foreach (string sCol in lCols)
+                if (sCol.ToLowerInvariant() == sPkBare) return sCol;
+            foreach (string sCol in lCols)
+                if (sCol.ToLowerInvariant() == "id") return sCol;
+            return null;
+        }
+
+        private static string findParentTableForFkStatic(string sFkColumn, List<string> lAllTables)
+        {
+            if (string.IsNullOrEmpty(sFkColumn)) return null;
+            foreach (string sT in lAllTables)
+            {
+                string sPk = db.actualPrimaryKey(sT);
+                if (string.IsNullOrEmpty(sPk))
+                {
+                    List<string> lCols = db.getColumnsOfTable(sT);
+                    sPk = computePrimaryKeyColumnStatic(sT, lCols);
+                }
+                if (!string.IsNullOrEmpty(sPk)
+                    && string.Equals(sPk, sFkColumn, StringComparison.OrdinalIgnoreCase))
+                    return sT;
+            }
+            return null;
         }
 
         // Show-Table: print rows from the current recordset.
@@ -9070,6 +10504,29 @@ namespace DbDuo
             catch (Exception oEx) { Console.WriteLine("Error: " + oEx.Message); }
         }
 
+        // cmdImportData: read a Markdown table file and append its
+        // rows to the currently-open table. Header cell names are
+        // matched case-insensitively to columns; cells with no
+        // matching column are dropped.
+        //
+        //   Import-Data path\to\file.md
+        //
+        // For non-Markdown formats, use Invoke-Sql with INSERT INTO
+        // ... SELECT or the database's own native import path.
+        private static void cmdImportData(string sArg)
+        {
+            if (!requireRecordset()) return;
+            string sPath = (sArg ?? "").Trim();
+            if (sPath.Length == 0) { Console.WriteLine("Import-Data requires a file path. Currently supports .md (Markdown table)."); return; }
+            try
+            {
+                int iCount = db.importMarkdown(sPath);
+                Console.WriteLine("Imported " + iCount + " row(s) into " + db.currentTable + ".");
+                refresh();
+            }
+            catch (Exception oEx) { Console.WriteLine("Error: " + oEx.Message); }
+        }
+
         private static void cmdOpenDatabase(string sArg)
         {
             string sPath = sArg.Trim();
@@ -9187,8 +10644,8 @@ namespace DbDuo
             Console.WriteLine("    Set-Position N        (g N, #N)");
             Console.WriteLine();
             Console.WriteLine("  DISPLAY");
-            Console.WriteLine("    Show-Record           (=, display)");
-            Console.WriteLine("    Show-Record col1,col2");
+            Console.WriteLine("    Show-Object           (=, display, disp)");
+            Console.WriteLine("    Show-Object col1,col2");
             Console.WriteLine("    Show-Table            (l, list)");
             Console.WriteLine("    Show-Table all");
             Console.WriteLine("    Show-Schema [table]");
@@ -9291,14 +10748,22 @@ namespace DbDuo
                          + "Out-of-range values clamp to the first or last row.\n"
                          + "Percent form (50%) is accepted in the GUI Set-Position\n"
                          + "dialog but not at the dot prompt.";
-                case "show-record":
-                    return "Show-Record - print the current row's column values.\n\n"
-                         + "  Show-Record            All columns of the current row.\n"
-                         + "  Show-Record col1,col2  Specific columns only.\n"
-                         + "  =                      Same as bare Show-Record.\n"
-                         + "  disp                   dBASE-style alias.\n\n"
-                         + "Long values are wrapped. Binary fields show length and\n"
-                         + "type only.";
+                case "show-object":
+                    return "Show-Object - examine the current row.\n\n"
+                         + "  Show-Object            Display fields + related records.\n"
+                         + "  Show-Object col1,col2  Just the named columns (no related).\n"
+                         + "  Show-Object all        Every field of the recordset (no related).\n"
+                         + "  =, disp                Same as bare Show-Object.\n\n"
+                         + "The bare form prints two sections:\n"
+                         + "  1. Each visible field on the current row, as 'name = value'.\n"
+                         + "  2. Related records, grouped by table. Each parent reached\n"
+                         + "     by an outbound foreign key contributes one line. Each\n"
+                         + "     child table that references this row contributes up to\n"
+                         + "     25 'look' values; an '(... N more)' footer appears when\n"
+                         + "     more rows exist. Use Enter-Child (Shift+E) to drill in\n"
+                         + "     for the full child list.\n\n"
+                         + "In the GUI, Show-Object is bound to Enter and opens a read-\n"
+                         + "only dialog. Binary fields show length only.";
                 case "show-table":
                     return "Show-Table - print rows of the current table. Argument\n"
                          + "grammar mirrors dBASE LIST [scope] [FIELDS list]:\n\n"
@@ -9729,34 +11194,18 @@ namespace DbDuo
             return oApp;
         }
 
-        // Attach to a running Office instance if one exists, else
-        // create a new one. Mirrors the EdSharp.COM.GetOrCreateObject
-        // pattern. Useful for users who already have Word or Excel
-        // open: we drive the existing instance rather than spawning
-        // a second .exe. The out parameter bCreated reports whether
-        // a new instance was created (so the caller can decide
-        // whether to Quit it after use).
-        //
-        // GetActiveObject is the underlying Win32 call; we reach it
-        // through Marshal.BindToMoniker for the rotating-objects
-        // table. This is a best-effort path: if it fails for any
-        // reason, fall through to createApp.
-        public static dynamic getOrCreateApp(string sProgId, out bool bCreated)
-        {
-            bCreated = false;
-            try
-            {
-                // Marshal.GetActiveObject is in System.Runtime.InteropServices.
-                object oExisting = Marshal.GetActiveObject(sProgId);
-                if (oExisting != null) return (dynamic)oExisting;
-            }
-            catch
-            {
-                // No running instance -- fall through and create one.
-            }
-            bCreated = true;
-            return createApp(sProgId);
-        }
+        // Note: DbDuo never attaches to a running Office instance.
+        // We always CreateObject a fresh one and Quit() it when we
+        // are done with the export. Attaching to a running instance
+        // would risk:
+        //   - mutating settings (DisplayAlerts, AutomationSecurity)
+        //     that the user has tuned for their own session,
+        //   - leaving SaveAs / Quit side effects on documents the
+        //     user has open in their editor,
+        //   - non-deterministic behavior depending on whether Word
+        //     or Excel happens to be running.
+        // The cost is starting a hidden process per export, which
+        // is acceptable.
 
         // Silence on-screen alerts on a freshly-created Office app
         // so unattended automation doesn't stall on a dialog. Each
