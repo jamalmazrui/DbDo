@@ -11,6 +11,14 @@
 # download the .exe from the source-tree view or get the latest from
 # the Releases page.
 
+# ---- JAWS source files (live inside DbDuo_JAWS.zip in the repo) ---
+# The repo ships DbDuo_JAWS.zip containing DbDuo.jkm and DbDuo.jss.
+# Developers who need to edit those files unzip them locally; the
+# loose copies should NOT be tracked. DbDuo_JAWS.zip is the single
+# source of truth in version control.
+DbDuo.jkm
+DbDuo.jss
+
 # ---- Build logs and scratch ---------------------------------------
 # buildDbDuo.cmd writes a fresh log on each run.
 buildDbDuo.log

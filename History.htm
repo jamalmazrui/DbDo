@@ -240,7 +240,112 @@ current feature set, see <code>Announce.md</code> or
 <code>DbDuo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDuo to open this file in
 your browser, or type <code>history</code> at the dot prompt.</p>
-<h2 id="v1.0.48-current">v1.0.48 (current)</h2>
+<h2 id="v1.0.51-current">v1.0.51 (current)</h2>
+<p>Inno Setup compile fix. v1.0.50’s <code>CurStepChanged</code>
+procedure contained a Pascal block comment whose second line read
+<code>[Run] entry invokes DbDuo.exe...</code>. Inno Setup’s preprocessor
+scans every line at column 0 (after stripping leading whitespace) for
+<code>[Section]</code> tags BEFORE Pascal-comment parsing happens, so a
+line whose first non-whitespace token is the literal <code>[Run]</code>
+is treated as a section header even when it lives inside a
+<code>(* ... *)</code> block comment. The compiler reported “Invalid
+section tag” at the offending line.</p>
+<p>The fix is to rephrase the comment so no line begins with a bracketed
+section name: <code>[Run] entry</code> became
+<code>Run-section entry</code>. Other Pascal comments in the file
+mention <code>[Run]</code>, <code>[Setup]</code>,
+<code>[UninstallRun]</code>, <code>[Tasks]</code> etc., but in every
+case the bracketed token is preceded by other text on the same line
+(e.g. <code>Requires the [Setup] directive...</code>), so the bracket is
+not the first token and the preprocessor leaves them alone. Only the one
+offending line needed editing.</p>
+<h2 id="v1.0.50">v1.0.50</h2>
+<p>Two changes: NVDA add-on manifest format fix, and JAWS files
+repackaged as a single zip in the repo.</p>
+<p><strong>NVDA add-on manifest now follows the documented
+format.</strong> v1.0.46-v1.0.49 produced a <code>manifest.ini</code>
+that NVDA rejected with an “invalid format” error at install time.
+Comparing against the working AIChatbot add-on uploaded for reference
+revealed two problems: string values containing spaces and special
+characters (the <code>summary</code>, <code>description</code>, and
+<code>author</code> fields) were not enclosed in quotes; and the zip
+contained a standalone <code>appModules/</code> directory entry. The
+NVDA Developer Guide is explicit that “all string values must be
+enclosed in quotes” in the manifest, and the working reference includes
+no standalone directory entries. v1.0.50 fixes both: free-form text
+fields (<code>summary</code>, <code>description</code>,
+<code>author</code>) are now quoted (triple-quoted for the multi-line
+description), identifier-like fields (<code>name</code>,
+<code>url</code>, <code>version</code>, <code>docFileName</code>,
+version strings, <code>updateChannel</code>) remain unquoted matching
+the AIChatbot reference, double-quote characters inside the description
+were replaced with single quotes to avoid embedded-quote parse
+ambiguity, and the zip is repacked listing only files (no standalone
+directory entry). Add-on internal version bumped to 1.0.2 so existing
+1.0.1 installs (the broken version) see this as an upgrade.</p>
+<p><strong>JAWS files now ship as DbDuo_JAWS.zip.</strong> Previously
+the repo carried <code>DbDuo.jkm</code> (the JAWS keymap) and
+<code>DbDuo.jss</code> (the JAWS script) as two loose files alongside
+DbDuo.cs and DbDuo_setup.iss. v1.0.50 replaces them in the repo with a
+single <code>DbDuo_JAWS.zip</code> archive containing both, keeping the
+repo’s top level less cluttered. At install time Inno Setup’s
+<code>[Files]</code> section drops <code>DbDuo_JAWS.zip</code> into
+<code>{app}</code>, and a new Pascal procedure
+<code>ExtractJawsArchive</code> (called from
+<code>CurStepChanged(ssPostInstall)</code>, before the Finish-page
+checkbox runs) extracts the zip in place. The result is identical to
+v1.0.49’s install layout: <code>DbDuo.jkm</code> and
+<code>DbDuo.jss</code> sit alongside <code>DbDuo.exe</code>, and the
+<code>DbDuo.exe --install-jaws-settings</code> command (run as the
+Finish-page checkbox) reads them from there.</p>
+<p>The extraction uses Inno Setup’s built-in <code>ExtractArchive</code>
+Pascal function (Inno Setup 6.4+, January 2025) with the new
+<code>[Setup]</code> directive <code>ArchiveExtraction=full</code>. The
+“full” mode loads Inno Setup’s bundled <code>is7z.dll</code> (compiled
+from 7-Zip source by the Inno Setup maintainer), which handles
+<code>.zip</code> natively. <strong>No external unzip tool is
+shipped</strong> — no <code>7z.exe</code>, no <code>unzip.exe</code>, no
+DLLs the project would need to track or update. The
+<code>.gitignore</code> now lists <code>DbDuo.jkm</code> and
+<code>DbDuo.jss</code> as ignored: developers who need to edit those
+files unzip them locally, edit, then re-zip into
+<code>DbDuo_JAWS.zip</code>. Only <code>DbDuo_JAWS.zip</code> is the
+version-controlled source of truth.</p>
+<h2 id="v1.0.49">v1.0.49</h2>
+<p>NVDA add-on install dialog now actually appears at end of setup.
+<strong>Diagnosis:</strong> The Finish-page checkbox “Install NVDA
+add-on” was wired to invoke <code>DbDuo.exe --install-nvda-addon</code>,
+which then called <code>Process.Start</code> on
+<code>DbDuo.nvda-addon</code> with <code>UseShellExecute = true</code>
+and returned 0 immediately. Inno Setup’s
+<code>waituntilterminated</code> waited for DbDuo.exe to exit — but
+DbDuo.exe exits as soon as it has handed the file off to Windows, BEFORE
+the shell-execute resolution has located the .nvda-addon file handler
+and launched NVDA’s dialog. The result: at the speed of the installer’s
+wizard, the NVDA dialog often never appeared, or appeared briefly behind
+the installer-completed page where the user couldn’t see it.</p>
+<p><strong>Fix:</strong> Cut DbDuo.exe out of the chain at install time.
+The <code>[Run]</code> entry now points <code>FileName</code> directly
+at <code>{app}\DbDuo.nvda-addon</code> and uses Inno Setup’s
+<code>shellexec</code> flag, which is exactly the documented mechanism
+for “open this non-executable file with its file association.” Combined
+with <code>waituntilterminated</code>, this lets Inno Setup do the
+ShellExecuteEx call itself with proper handle tracking — NVDA opens its
+standard “Install this add-on?” dialog, the user confirms or cancels,
+NVDA finishes its add-on install, AND ONLY THEN does the wizard’s Finish
+page complete.</p>
+<p>If NVDA is not installed at all (no <code>.nvda-addon</code> file
+association registered), Windows shows its “How do you want to open this
+file?” picker, which the user can dismiss; this is acceptable since the
+user wouldn’t have NVDA add-on integration to lose anyway.</p>
+<p>The C# <code>--install-nvda-addon</code> flag in DbDuo.exe is
+unchanged and still supported. It’s how the user re-installs the add-on
+later from outside the installer, and it works fine in that context
+because the user is interactive and there is no parallel “wizard
+completion” race. The flag will continue to be available for the Help
+menu’s “Re-install NVDA Add-on” command and for command-line
+invocation.</p>
+<h2 id="v1.0.48">v1.0.48</h2>
 <p>Inno Setup compile fix. <code>DbDuo_setup.iss</code> line 499 called
 the Pascal procedure <code>InstallJawsSettings</code>, which was removed
 in v1.0.40 when JAWS settings install moved from Inno Setup’s

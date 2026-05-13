@@ -24,7 +24,7 @@
 ; =====================================================================
 
 #define AppName       "DbDuo"
-#define AppVersion    "1.0.48"
+#define AppVersion    "1.0.51"
 #define AppPublisher  "Jamal Mazrui"
 #define AppUrl        "https://github.com/JamalMazrui/DbDuo"
 #define AppExeName    "DbDuo.exe"
@@ -94,6 +94,16 @@ SetupIconFile=DbDuo.ico
 
 MinVersion=10.0
 
+; Enable .zip archive extraction support. The "full" method allows
+; the [Files] section extractarchive flag and the Pascal Scripting
+; ExtractArchive() function to handle .zip files (not just .7z, the
+; default supported format). Inno Setup 6.4+ ships the necessary
+; is7z.dll internally; nothing external needed. We use this to
+; bundle DbDuo's JAWS files (DbDuo.jkm, DbDuo.jss) inside
+; DbDuo_JAWS.zip rather than tracking them as two loose files in
+; the GitHub repo.
+ArchiveExtraction=full
+
 ; CloseApplications + RestartApplications enables Inno Setup's
 ; running-app detection. When the user runs DbDuo_setup.exe via
 ; the Elevate-Version (F11) command while DbDuo is already running,
@@ -159,8 +169,14 @@ Source: "License.md";   DestDir: "{app}"; Flags: ignoreversion
 Source: "License.htm";  DestDir: "{app}"; Flags: ignoreversion
 Source: "sample.db";    DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDuo.ini";    DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist
-Source: "DbDuo.jkm";    DestDir: "{app}"; Flags: ignoreversion
-Source: "DbDuo.jss";    DestDir: "{app}"; Flags: ignoreversion
+;
+; DbDuo_JAWS.zip contains DbDuo.jkm and DbDuo.jss at its root. We
+; ship the zip rather than the two loose files so the GitHub repo
+; stays uncluttered. The zip is extracted into {app} at install
+; time by the Pascal procedure ExtractJawsArchive (see [Code]
+; below), called from CurStepChanged(ssPostInstall) BEFORE the
+; JAWS settings installer runs.
+Source: "DbDuo_JAWS.zip"; DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDuo.nvda-addon"; DestDir: "{app}"; Flags: ignoreversion
 Source: "nvdaControllerClient.dll"; DestDir: "{app}"; Flags: ignoreversion
 
@@ -187,11 +203,15 @@ Name: "{autodesktop}\{#AppName}"; \
 
 [Run]
 ; The four entries below appear as checkboxes on the installer's
-; Finish page in this exact order. The first two delegate to
-; DbDuo.exe's --install-jaws-settings and --install-nvda-addon
-; modes; the C# implementation of those modes lives in DbDuo.cs
-; (class JawsSettingsInstaller and the Main flag handler) so the
-; same logic can be re-run later from the Help menu.
+; Finish page in this exact order. Entry 1 delegates to
+; DbDuo.exe's --install-jaws-settings mode; the C# implementation
+; lives in DbDuo.cs (class JawsSettingsInstaller) so the same
+; logic can be re-run later from the Help menu. Entry 2 hands
+; DbDuo.nvda-addon to its Windows file association via Inno
+; Setup's shellexec flag so NVDA shows its native add-on install
+; dialog directly (see the comment block on entry 2 for why this
+; replaced the v1.0.45-v1.0.48 approach of going through
+; DbDuo.exe --install-nvda-addon).
 ;
 ; 1. Install JAWS settings (checked by default).
 FileName: "{app}\{#AppExeName}"; \
@@ -201,11 +221,35 @@ FileName: "{app}\{#AppExeName}"; \
   Flags: postinstall waituntilterminated runhidden skipifsilent
 
 ; 2. Install NVDA add-on (checked by default).
-FileName: "{app}\{#AppExeName}"; \
-  Parameters: "--install-nvda-addon"; \
+;
+; This entry uses Inno Setup's shellexec flag to hand the
+; .nvda-addon file directly to its Windows file association,
+; rather than going through DbDuo.exe --install-nvda-addon as
+; v1.0.45-v1.0.48 did. The CLI flag in DbDuo.exe is still
+; supported (it's how the Help menu's Re-install NVDA Add-on
+; command works), but routing through it at install time was
+; subtly broken: DbDuo.exe called Process.Start with
+; UseShellExecute=true and then exited immediately with code 0,
+; satisfying Inno Setup's "waituntilterminated" wait before the
+; shell-execute resolution had completed. NVDA's add-on install
+; dialog therefore never appeared even when NVDA was running and
+; correctly registered as the .nvda-addon handler.
+;
+; Using shellexec directly here lets Inno Setup do the shell-
+; execute itself, which is what shellexec is designed for: it
+; uses ShellExecuteEx with proper handle tracking. NVDA opens its
+; standard "Install this add-on?" dialog, the user confirms or
+; cancels, NVDA finishes, and only then does Inno Setup move on.
+;
+; If NVDA is not installed (no .nvda-addon file association),
+; Windows shows its "How do you want to open this file?" picker.
+; That is acceptable: the user can dismiss it (NVDA is not in
+; use anyway) or pick an app. The Description below mentions
+; the "recommended if you use NVDA" condition.
+FileName: "{app}\DbDuo.nvda-addon"; \
   WorkingDir: "{app}"; \
   Description: "Install NVDA add-on for {#AppName} (recommended if you use NVDA)"; \
-  Flags: postinstall waituntilterminated skipifsilent
+  Flags: postinstall shellexec waituntilterminated skipifsilent
 
 ; 3. Launch DbDuo (checked by default).
 FileName: "{app}\{#AppExeName}"; \
@@ -453,7 +497,56 @@ end;
    install later from Help > Install JAWS Settings without re-
    running the full installer. *)
 
-(* --- Post-install hook: run driver installers and JAWS settings --- *)
+(* --- Post-install hook: extract JAWS archive, run driver installers --- *)
+
+(* Extract DbDuo_JAWS.zip into {app}. The zip contains DbDuo.jkm
+   and DbDuo.jss at its root; after extraction these sit alongside
+   DbDuo.exe just as they did when shipped as loose files in
+   v1.0.49 and earlier. DbDuo.exe --install-jaws-settings (run as
+   the Finish-page checkbox) then reads them from {app} and copies
+   them into each per-version JAWS settings folder.
+
+   Requires the [Setup] directive ArchiveExtraction=full so Inno
+   Setup's bundled is7z.dll can handle the .zip format (the default
+   "basic" extraction only supports .7z). Uses Inno Setup's built-
+   in Pascal ExtractArchive function (Inno Setup 6.4.0+). No
+   external unzip tool is shipped with DbDuo.
+
+   On failure we surface a non-fatal SuppressibleMsgBox: DbDuo
+   still works for non-JAWS users even without these files.
+*)
+procedure ExtractJawsArchive;
+var
+  sZipPath: String;
+  sDestDir: String;
+begin
+  sZipPath := ExpandConstant('{app}\DbDuo_JAWS.zip');
+  sDestDir := ExpandConstant('{app}');
+  if not FileExists(sZipPath) then
+  begin
+    SuppressibleMsgBox(
+      'DbDuo_JAWS.zip was not found in the installation folder.'#13#10#13#10
+      + 'JAWS keymap and script files will not be available. If you'#13#10
+      + 'use JAWS, re-run the installer.'#13#10#13#10
+      + 'DbDuo itself is fine and will run.',
+      mbInformation, MB_OK, IDOK);
+    exit;
+  end;
+  try
+    (* FullPaths=False: the zip is flat (no subdirectories), so
+       this is the same as True for our case, but False is more
+       defensive against future zip layouts. Empty Password and
+       nil OnExtractionProgress: no password, no progress UI. *)
+    ExtractArchive(sZipPath, sDestDir, '', False, nil);
+  except
+    SuppressibleMsgBox(
+      'Failed to extract DbDuo_JAWS.zip:'#13#10#13#10
+      + GetExceptionMessage + #13#10#13#10
+      + 'JAWS keymap and script files will not be available.'#13#10
+      + 'DbDuo itself is fine and will run.',
+      mbInformation, MB_OK, IDOK);
+  end;
+end;
 
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
@@ -465,6 +558,11 @@ begin
   end;
 
   if CurStep <> ssPostInstall then exit;
+
+  (* Extract JAWS keymap and script files BEFORE the Finish-page
+     Run-section entry invokes DbDuo.exe --install-jaws-settings;
+     that command needs DbDuo.jkm and DbDuo.jss in {app}. *)
+  ExtractJawsArchive;
 
   if bInstallSqliteOdbc then
   begin

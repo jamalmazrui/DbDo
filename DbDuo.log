@@ -1,0 +1,192 @@
+14:40:24  DbDuo log initialized at 2026-05-13 14:40:24
+14:40:24  Executable: C:\dbduo\DbDuo.exe
+14:40:24  Working directory: c:\dbduo
+14:40:24  Command line: 
+14:40:24  uiMode: Both (from DbDuo.ini)
+14:40:24  Form created (uiMode=Both).
+14:40:24  Restoring last session: C:\accaudit1\KDP_data\AccAudit.db (table: rules)
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_rules_rule_id" ON "rules" ("rule_id")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_rules_marked" ON "rules" ("marked")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_apps_app_id" ON "apps" ("app_id")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_apps_marked" ON "apps" ("marked")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_lookups_lookup_id" ON "lookups" ("lookup_id")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_lookups_marked" ON "lookups" ("marked")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_screens_screen_id" ON "screens" ("screen_id")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_screens_app_id" ON "screens" ("app_id")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_screens_marked" ON "screens" ("marked")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_audits_audit_id" ON "audits" ("audit_id")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_audits_app_id" ON "audits" ("app_id")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_audits_marked" ON "audits" ("marked")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_controls_control_id" ON "controls" ("control_id")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_controls_screen_id" ON "controls" ("screen_id")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_controls_marked" ON "controls" ("marked")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_tasks_task_id" ON "tasks" ("task_id")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_tasks_audit_id" ON "tasks" ("audit_id")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_tasks_marked" ON "tasks" ("marked")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_states_state_id" ON "states" ("state_id")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_states_control_id" ON "states" ("control_id")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_states_marked" ON "states" ("marked")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_steps_step_id" ON "steps" ("step_id")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_steps_task_id" ON "steps" ("task_id")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_steps_control_id" ON "steps" ("control_id")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_steps_marked" ON "steps" ("marked")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_problems_problem_id" ON "problems" ("problem_id")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_problems_audit_id" ON "problems" ("audit_id")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_problems_screen_id" ON "problems" ("screen_id")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_problems_control_id" ON "problems" ("control_id")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_problems_rule_id" ON "problems" ("rule_id")
+14:40:24  ensureRecommendedIndexes: CREATE INDEX IF NOT EXISTS "idx_problems_marked" ON "problems" ("marked")
+14:40:24  Session restored.
+14:40:24  Entering Application.Run message loop.
+14:40:24  uiMode=both: spawning dot-prompt console window.
+14:40:24  Alt+GraveAccent registered as switch-to-GUI hotkey.
+14:40:24  Alt+Control+GraveAccent registered as toggle hotkey.
+14:41:05  Ini write [RecentFile1] path = C:\accaudit1\KDP_data\AccAudit.db
+14:41:05  Ini write [RecentFile1] lastTable = rules
+14:41:05  Ini write [RecentFile1] t1_name = rules
+14:41:05  Ini write [RecentFile1] t1_filter = 
+14:41:05  Ini write [RecentFile1] t1_sort = 
+14:41:05  Ini write [RecentFile1] t1_position = 2
+14:41:05  Ini write [RecentFile1] t2_name = 
+14:41:05  Ini write [RecentFile1] t2_filter = 
+14:41:05  Ini write [RecentFile1] t2_sort = 
+14:41:05  Ini write [RecentFile1] t2_position = 
+14:41:05  Ini write [RecentFile1] t3_name = 
+14:41:05  Ini write [RecentFile1] t3_filter = 
+14:41:05  Ini write [RecentFile1] t3_sort = 
+14:41:05  Ini write [RecentFile1] t3_position = 
+14:41:05  Ini write [RecentFile1] t4_name = 
+14:41:05  Ini write [RecentFile1] t4_filter = 
+14:41:05  Ini write [RecentFile1] t4_sort = 
+14:41:05  Ini write [RecentFile1] t4_position = 
+14:41:05  Ini write [RecentFile1] t5_name = 
+14:41:05  Ini write [RecentFile1] t5_filter = 
+14:41:05  Ini write [RecentFile1] t5_sort = 
+14:41:05  Ini write [RecentFile1] t5_position = 
+14:41:05  Ini write [RecentFile1] t6_name = 
+14:41:05  Ini write [RecentFile1] t6_filter = 
+14:41:05  Ini write [RecentFile1] t6_sort = 
+14:41:05  Ini write [RecentFile1] t6_position = 
+14:41:05  Ini write [RecentFile1] t7_name = 
+14:41:05  Ini write [RecentFile1] t7_filter = 
+14:41:05  Ini write [RecentFile1] t7_sort = 
+14:41:05  Ini write [RecentFile1] t7_position = 
+14:41:05  Ini write [RecentFile1] t8_name = 
+14:41:05  Ini write [RecentFile1] t8_filter = 
+14:41:05  Ini write [RecentFile1] t8_sort = 
+14:41:05  Ini write [RecentFile1] t8_position = 
+14:41:05  Ini write [RecentFile1] t9_name = 
+14:41:05  Ini write [RecentFile1] t9_filter = 
+14:41:05  Ini write [RecentFile1] t9_sort = 
+14:41:05  Ini write [RecentFile1] t9_position = 
+14:41:05  Ini write [RecentFile1] t10_name = 
+14:41:05  Ini write [RecentFile1] t10_filter = 
+14:41:05  Ini write [RecentFile1] t10_sort = 
+14:41:05  Ini write [RecentFile1] t10_position = 
+14:41:05  Ini write [RecentFile1] t11_name = 
+14:41:05  Ini write [RecentFile1] t11_filter = 
+14:41:05  Ini write [RecentFile1] t11_sort = 
+14:41:05  Ini write [RecentFile1] t11_position = 
+14:41:05  Ini write [RecentFile1] t12_name = 
+14:41:05  Ini write [RecentFile1] t12_filter = 
+14:41:05  Ini write [RecentFile1] t12_sort = 
+14:41:05  Ini write [RecentFile1] t12_position = 
+14:41:05  Ini write [RecentFile1] t13_name = 
+14:41:05  Ini write [RecentFile1] t13_filter = 
+14:41:05  Ini write [RecentFile1] t13_sort = 
+14:41:05  Ini write [RecentFile1] t13_position = 
+14:41:05  Ini write [RecentFile1] t14_name = 
+14:41:05  Ini write [RecentFile1] t14_filter = 
+14:41:05  Ini write [RecentFile1] t14_sort = 
+14:41:05  Ini write [RecentFile1] t14_position = 
+14:41:05  Ini write [RecentFile1] t15_name = 
+14:41:05  Ini write [RecentFile1] t15_filter = 
+14:41:05  Ini write [RecentFile1] t15_sort = 
+14:41:05  Ini write [RecentFile1] t15_position = 
+14:41:05  Ini write [RecentFile1] t16_name = 
+14:41:05  Ini write [RecentFile1] t16_filter = 
+14:41:05  Ini write [RecentFile1] t16_sort = 
+14:41:05  Ini write [RecentFile1] t16_position = 
+14:41:05  Ini write [RecentFile1] t17_name = 
+14:41:05  Ini write [RecentFile1] t17_filter = 
+14:41:05  Ini write [RecentFile1] t17_sort = 
+14:41:05  Ini write [RecentFile1] t17_position = 
+14:41:05  Ini write [RecentFile1] t18_name = 
+14:41:05  Ini write [RecentFile1] t18_filter = 
+14:41:05  Ini write [RecentFile1] t18_sort = 
+14:41:05  Ini write [RecentFile1] t18_position = 
+14:41:05  Ini write [RecentFile1] t19_name = 
+14:41:05  Ini write [RecentFile1] t19_filter = 
+14:41:05  Ini write [RecentFile1] t19_sort = 
+14:41:05  Ini write [RecentFile1] t19_position = 
+14:41:05  Ini write [RecentFile1] t20_name = 
+14:41:05  Ini write [RecentFile1] t20_filter = 
+14:41:05  Ini write [RecentFile1] t20_sort = 
+14:41:05  Ini write [RecentFile1] t20_position = 
+14:41:05  Ini write [RecentFile1] t21_name = 
+14:41:05  Ini write [RecentFile1] t21_filter = 
+14:41:05  Ini write [RecentFile1] t21_sort = 
+14:41:05  Ini write [RecentFile1] t21_position = 
+14:41:05  Ini write [RecentFile1] t22_name = 
+14:41:05  Ini write [RecentFile1] t22_filter = 
+14:41:05  Ini write [RecentFile1] t22_sort = 
+14:41:05  Ini write [RecentFile1] t22_position = 
+14:41:05  Ini write [RecentFile1] t23_name = 
+14:41:05  Ini write [RecentFile1] t23_filter = 
+14:41:05  Ini write [RecentFile1] t23_sort = 
+14:41:05  Ini write [RecentFile1] t23_position = 
+14:41:05  Ini write [RecentFile1] t24_name = 
+14:41:05  Ini write [RecentFile1] t24_filter = 
+14:41:05  Ini write [RecentFile1] t24_sort = 
+14:41:05  Ini write [RecentFile1] t24_position = 
+14:41:05  Ini write [RecentFile1] t25_name = 
+14:41:05  Ini write [RecentFile1] t25_filter = 
+14:41:05  Ini write [RecentFile1] t25_sort = 
+14:41:05  Ini write [RecentFile1] t25_position = 
+14:41:05  Ini write [RecentFile1] t26_name = 
+14:41:05  Ini write [RecentFile1] t26_filter = 
+14:41:05  Ini write [RecentFile1] t26_sort = 
+14:41:05  Ini write [RecentFile1] t26_position = 
+14:41:05  Ini write [RecentFile1] t27_name = 
+14:41:05  Ini write [RecentFile1] t27_filter = 
+14:41:05  Ini write [RecentFile1] t27_sort = 
+14:41:05  Ini write [RecentFile1] t27_position = 
+14:41:05  Ini write [RecentFile1] t28_name = 
+14:41:05  Ini write [RecentFile1] t28_filter = 
+14:41:05  Ini write [RecentFile1] t28_sort = 
+14:41:05  Ini write [RecentFile1] t28_position = 
+14:41:05  Ini write [RecentFile1] t29_name = 
+14:41:05  Ini write [RecentFile1] t29_filter = 
+14:41:05  Ini write [RecentFile1] t29_sort = 
+14:41:05  Ini write [RecentFile1] t29_position = 
+14:41:05  Ini write [RecentFile1] t30_name = 
+14:41:05  Ini write [RecentFile1] t30_filter = 
+14:41:05  Ini write [RecentFile1] t30_sort = 
+14:41:05  Ini write [RecentFile1] t30_position = 
+14:41:05  Ini write [RecentFile1] t31_name = 
+14:41:05  Ini write [RecentFile1] t31_filter = 
+14:41:05  Ini write [RecentFile1] t31_sort = 
+14:41:05  Ini write [RecentFile1] t31_position = 
+14:41:05  Ini write [RecentFile1] t32_name = 
+14:41:05  Ini write [RecentFile1] t32_filter = 
+14:41:05  Ini write [RecentFile1] t32_sort = 
+14:41:05  Ini write [RecentFile1] t32_position = 
+14:41:05  Ini write [RecentFile2] path = 
+14:41:05  Ini write [RecentFile2] lastTable = 
+14:41:05  Ini write [RecentFile3] path = 
+14:41:05  Ini write [RecentFile3] lastTable = 
+14:41:05  Ini write [RecentFile4] path = 
+14:41:05  Ini write [RecentFile4] lastTable = 
+14:41:05  Ini write [RecentFile5] path = 
+14:41:05  Ini write [RecentFile5] lastTable = 
+14:41:05  Ini write [RecentFile6] path = 
+14:41:05  Ini write [RecentFile6] lastTable = 
+14:41:05  Ini write [RecentFile7] path = 
+14:41:05  Ini write [RecentFile7] lastTable = 
+14:41:05  Ini write [RecentFile8] path = 
+14:41:05  Ini write [RecentFile8] lastTable = 
+14:41:05  Ini write [RecentFile9] path = 
+14:41:05  Ini write [RecentFile9] lastTable = 
+14:41:05  Ini write [RecentFile10] path = 
+14:41:05  Ini write [RecentFile10] lastTable = 
+14:41:05  Application.Run returned. Exiting normally.

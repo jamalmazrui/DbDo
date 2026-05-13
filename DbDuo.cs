@@ -49,7 +49,7 @@ namespace DbDuo
     // =====================================================================
     public static class BuildInfo
     {
-        public const string VersionString = "1.0.48";
+        public const string VersionString = "1.0.51";
     }
 
     // =====================================================================

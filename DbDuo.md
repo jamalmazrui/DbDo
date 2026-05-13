@@ -2,7 +2,7 @@
 
 **An accessible, keyboard-first database manager for Windows.** DbDuo opens SQLite, Microsoft Access, Excel, dBASE, and delimited-text files through one consistent set of PowerShell-flavored commands, in a GUI window and a dot-prompt console at the same time. JAWS, NVDA, and Narrator are all first-class through dedicated speech paths; every command is reachable by keyboard.
 
-Version 1.0.48. Source and releases: <https://github.com/JamalMazrui/DbDuo>.
+Version 1.0.51. Source and releases: <https://github.com/JamalMazrui/DbDuo>.
 
 ## How DbDuo is organized
 

@@ -4,7 +4,33 @@ This file is the chronological record of DbDuo releases. The most recent release
 
 Press **Shift+F1** inside DbDuo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.48 (current)
+## v1.0.51 (current)
+
+Inno Setup compile fix. v1.0.50's `CurStepChanged` procedure contained a Pascal block comment whose second line read `[Run] entry invokes DbDuo.exe...`. Inno Setup's preprocessor scans every line at column 0 (after stripping leading whitespace) for `[Section]` tags BEFORE Pascal-comment parsing happens, so a line whose first non-whitespace token is the literal `[Run]` is treated as a section header even when it lives inside a `(* ... *)` block comment. The compiler reported "Invalid section tag" at the offending line.
+
+The fix is to rephrase the comment so no line begins with a bracketed section name: `[Run] entry` became `Run-section entry`. Other Pascal comments in the file mention `[Run]`, `[Setup]`, `[UninstallRun]`, `[Tasks]` etc., but in every case the bracketed token is preceded by other text on the same line (e.g. `Requires the [Setup] directive...`), so the bracket is not the first token and the preprocessor leaves them alone. Only the one offending line needed editing.
+
+## v1.0.50
+
+Two changes: NVDA add-on manifest format fix, and JAWS files repackaged as a single zip in the repo.
+
+**NVDA add-on manifest now follows the documented format.** v1.0.46-v1.0.49 produced a `manifest.ini` that NVDA rejected with an "invalid format" error at install time. Comparing against the working AIChatbot add-on uploaded for reference revealed two problems: string values containing spaces and special characters (the `summary`, `description`, and `author` fields) were not enclosed in quotes; and the zip contained a standalone `appModules/` directory entry. The NVDA Developer Guide is explicit that "all string values must be enclosed in quotes" in the manifest, and the working reference includes no standalone directory entries. v1.0.50 fixes both: free-form text fields (`summary`, `description`, `author`) are now quoted (triple-quoted for the multi-line description), identifier-like fields (`name`, `url`, `version`, `docFileName`, version strings, `updateChannel`) remain unquoted matching the AIChatbot reference, double-quote characters inside the description were replaced with single quotes to avoid embedded-quote parse ambiguity, and the zip is repacked listing only files (no standalone directory entry). Add-on internal version bumped to 1.0.2 so existing 1.0.1 installs (the broken version) see this as an upgrade.
+
+**JAWS files now ship as DbDuo_JAWS.zip.** Previously the repo carried `DbDuo.jkm` (the JAWS keymap) and `DbDuo.jss` (the JAWS script) as two loose files alongside DbDuo.cs and DbDuo_setup.iss. v1.0.50 replaces them in the repo with a single `DbDuo_JAWS.zip` archive containing both, keeping the repo's top level less cluttered. At install time Inno Setup's `[Files]` section drops `DbDuo_JAWS.zip` into `{app}`, and a new Pascal procedure `ExtractJawsArchive` (called from `CurStepChanged(ssPostInstall)`, before the Finish-page checkbox runs) extracts the zip in place. The result is identical to v1.0.49's install layout: `DbDuo.jkm` and `DbDuo.jss` sit alongside `DbDuo.exe`, and the `DbDuo.exe --install-jaws-settings` command (run as the Finish-page checkbox) reads them from there.
+
+The extraction uses Inno Setup's built-in `ExtractArchive` Pascal function (Inno Setup 6.4+, January 2025) with the new `[Setup]` directive `ArchiveExtraction=full`. The "full" mode loads Inno Setup's bundled `is7z.dll` (compiled from 7-Zip source by the Inno Setup maintainer), which handles `.zip` natively. **No external unzip tool is shipped** — no `7z.exe`, no `unzip.exe`, no DLLs the project would need to track or update. The `.gitignore` now lists `DbDuo.jkm` and `DbDuo.jss` as ignored: developers who need to edit those files unzip them locally, edit, then re-zip into `DbDuo_JAWS.zip`. Only `DbDuo_JAWS.zip` is the version-controlled source of truth.
+
+## v1.0.49
+
+NVDA add-on install dialog now actually appears at end of setup. **Diagnosis:** The Finish-page checkbox "Install NVDA add-on" was wired to invoke `DbDuo.exe --install-nvda-addon`, which then called `Process.Start` on `DbDuo.nvda-addon` with `UseShellExecute = true` and returned 0 immediately. Inno Setup's `waituntilterminated` waited for DbDuo.exe to exit — but DbDuo.exe exits as soon as it has handed the file off to Windows, BEFORE the shell-execute resolution has located the .nvda-addon file handler and launched NVDA's dialog. The result: at the speed of the installer's wizard, the NVDA dialog often never appeared, or appeared briefly behind the installer-completed page where the user couldn't see it.
+
+**Fix:** Cut DbDuo.exe out of the chain at install time. The `[Run]` entry now points `FileName` directly at `{app}\DbDuo.nvda-addon` and uses Inno Setup's `shellexec` flag, which is exactly the documented mechanism for "open this non-executable file with its file association." Combined with `waituntilterminated`, this lets Inno Setup do the ShellExecuteEx call itself with proper handle tracking — NVDA opens its standard "Install this add-on?" dialog, the user confirms or cancels, NVDA finishes its add-on install, AND ONLY THEN does the wizard's Finish page complete.
+
+If NVDA is not installed at all (no `.nvda-addon` file association registered), Windows shows its "How do you want to open this file?" picker, which the user can dismiss; this is acceptable since the user wouldn't have NVDA add-on integration to lose anyway.
+
+The C# `--install-nvda-addon` flag in DbDuo.exe is unchanged and still supported. It's how the user re-installs the add-on later from outside the installer, and it works fine in that context because the user is interactive and there is no parallel "wizard completion" race. The flag will continue to be available for the Help menu's "Re-install NVDA Add-on" command and for command-line invocation.
+
+## v1.0.48
 
 Inno Setup compile fix. `DbDuo_setup.iss` line 499 called the Pascal procedure `InstallJawsSettings`, which was removed in v1.0.40 when JAWS settings install moved from Inno Setup's `[Code]` section to the C# class `JawsSettingsInstaller`. The v1.0.40 cleanup left an orphaned call site that referenced both the deleted function AND a `[Tasks]` entry (`jawsSettings`) that had also been removed. The Inno Setup compiler reported it as `Unknown identifier 'InstallJawsSettings'` at line 499. Removed the dead block; the JAWS settings install path is unaffected because the Finish-page `[Run]` entry at line 197 already invokes `DbDuo.exe --install-jaws-settings` as a postinstall checkbox.
 
