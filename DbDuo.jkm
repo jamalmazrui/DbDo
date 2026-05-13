@@ -1,0 +1,131 @@
+﻿; DbDuo.jkm -- JAWS key map for DbDuo.exe
+;
+; Purpose: tell JAWS to pass certain key combinations directly to
+; DbDuo instead of running JAWS's default handlers for them. DbDuo
+; provides its own table-style cell navigation (Alt+Control+arrow
+; family) inside a virtual-mode ListView; without this key map,
+; JAWS intercepts those chords and either runs its own table-
+; navigation script (which says "Not in a table") or runs an
+; unrelated default action.
+;
+; This file is loaded together with the compiled DbDuo.jsb whenever
+; DbDuo.exe gains foreground focus, layering on top of the default
+; key map. The bindings here invoke a Script named PassDbDuoKey,
+; defined in DbDuo.jsb, whose body is one line: a call to the JAWS
+; built-in Function TypeCurrentScriptKey(), which passes the current
+; keystroke through to the application as if no script were running.
+; The Function cannot be invoked from a JKM directly (the JKM format
+; requires a Script name on the right-hand side), which is why the
+; wrapping Script exists.
+;
+; The [Common Keys] section applies to every keyboard layout
+; (desktop and laptop). The [Keyboard Layouts] section at the
+; bottom tells JAWS the Common section is the layout source for
+; both modes.
+;
+; To customize a specific binding, change the right-hand side of
+; the relevant line to any other Script name JAWS can resolve.
+
+[Common Keys]
+
+; -----------------------------------------------------------------
+; Virtual cell navigation (the primary reason this file exists).
+; DbDuo announces each cell with screen-reader-style direction-
+; aware framing; JAWS's own table-reading chords don't recognize
+; the virtual-mode ListView as a table, so we hand the chords
+; directly to DbDuo.
+; -----------------------------------------------------------------
+Alt+Control+Home=PassDbDuoKey
+Alt+Control+End=PassDbDuoKey
+Alt+Control+RightArrow=PassDbDuoKey
+Alt+Control+LeftArrow=PassDbDuoKey
+Alt+Control+DownArrow=PassDbDuoKey
+Alt+Control+UpArrow=PassDbDuoKey
+Alt+Control+PageDown=PassDbDuoKey
+Alt+Control+PageUp=PassDbDuoKey
+Alt+Control+NumPad5=PassDbDuoKey
+
+; -----------------------------------------------------------------
+; Alt-letter command chords. DbDuo binds many Alt+Letter chords as
+; one-keystroke command aliases (Alt+R = Recent Files, Alt+P = Say
+; Path, Alt+Z = Say Status, Alt+Y = Say Yield, Alt+T = Table
+; Statistics, Alt+C = Frequency Chart, Alt+L = Choose Visible
+; Columns, Alt+A = Sort Ascending, Alt+D = Sort by Date, Alt+E =
+; Extract Regex, Alt+K = Go to Bookmark). JAWS by default lets the
+; Alt chord open the menu bar; we pass it through so DbDuo's menu-
+; level Alt mnemonic does NOT fire and the form-level handler runs.
+; -----------------------------------------------------------------
+Alt+A=PassDbDuoKey
+Alt+C=PassDbDuoKey
+Alt+D=PassDbDuoKey
+Alt+E=PassDbDuoKey
+Alt+K=PassDbDuoKey
+Alt+L=PassDbDuoKey
+Alt+P=PassDbDuoKey
+Alt+R=PassDbDuoKey
+Alt+T=PassDbDuoKey
+Alt+Y=PassDbDuoKey
+Alt+Z=PassDbDuoKey
+Alt+Shift+A=PassDbDuoKey
+Alt+Shift+D=PassDbDuoKey
+Alt+Shift+R=PassDbDuoKey
+
+; -----------------------------------------------------------------
+; Parent-child drill family. Alt+RightArrow / Alt+LeftArrow /
+; Alt+Home each have a meaningful DbDuo binding (Enter Child
+; Table / Exit Child Table / Exit to Root Table) that JAWS would
+; otherwise intercept for navigation announcements.
+; -----------------------------------------------------------------
+Alt+RightArrow=PassDbDuoKey
+Alt+LeftArrow=PassDbDuoKey
+Alt+Home=PassDbDuoKey
+Alt+End=PassDbDuoKey
+
+; -----------------------------------------------------------------
+; Search-family chords. Control+F / Control+J / Control+F3 open
+; the three search dialogs; F3 / Shift+F3 repeat the last search.
+; JAWS has a default Control+F binding in some contexts that we
+; want DbDuo to take instead.
+; -----------------------------------------------------------------
+Control+F=PassDbDuoKey
+Control+J=PassDbDuoKey
+Control+Shift+F=PassDbDuoKey
+Control+Shift+J=PassDbDuoKey
+Control+F3=PassDbDuoKey
+Control+Shift+F3=PassDbDuoKey
+F3=PassDbDuoKey
+Shift+F3=PassDbDuoKey
+
+; -----------------------------------------------------------------
+; Marked-row navigation. Control+Home / Control+End / Control+Up /
+; Control+Down jump among marked rows in DbDuo; JAWS would otherwise
+; treat Control+Home/End as document-start/document-end speech and
+; Control+Up/Down as say-prior-paragraph / say-next-paragraph.
+; -----------------------------------------------------------------
+Control+Home=PassDbDuoKey
+Control+End=PassDbDuoKey
+Control+UpArrow=PassDbDuoKey
+Control+DownArrow=PassDbDuoKey
+
+; -----------------------------------------------------------------
+; Bulk-mark span chords. Shift+Home / Shift+End mark every row
+; from the first or current through the current or last; Alt+Shift
+; variants unmark.
+; -----------------------------------------------------------------
+Shift+Home=PassDbDuoKey
+Shift+End=PassDbDuoKey
+Alt+Shift+Home=PassDbDuoKey
+Alt+Shift+End=PassDbDuoKey
+
+; -----------------------------------------------------------------
+; Say-X family on Shift+letter (data-list only in DbDuo).
+; -----------------------------------------------------------------
+Shift+D=PassDbDuoKey
+Shift+L=PassDbDuoKey
+Shift+T=PassDbDuoKey
+Shift+Y=PassDbDuoKey
+Shift+F4=PassDbDuoKey
+
+[Keyboard Layouts]
+Desktop=Common
+Laptop=Common

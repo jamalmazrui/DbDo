@@ -1,0 +1,2186 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>DbDuo - History</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
+    pre > code.sourceCode { white-space: pre; position: relative; }
+    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span:empty { height: 1.2em; }
+    .sourceCode { overflow: visible; }
+    code.sourceCode > span { color: inherit; text-decoration: inherit; }
+    div.sourceCode { margin: 1em 0; }
+    pre.sourceCode { margin: 0; }
+    @media screen {
+    div.sourceCode { overflow: auto; }
+    }
+    @media print {
+    pre > code.sourceCode { white-space: pre-wrap; }
+    pre > code.sourceCode > span { text-indent: -5em; padding-left: 5em; }
+    }
+    pre.numberSource code
+      { counter-reset: source-line 0; }
+    pre.numberSource code > span
+      { position: relative; left: -4em; counter-increment: source-line; }
+    pre.numberSource code > span > a:first-child::before
+      { content: counter(source-line);
+        position: relative; left: -1em; text-align: right; vertical-align: baseline;
+        border: none; display: inline-block;
+        -webkit-touch-callout: none; -webkit-user-select: none;
+        -khtml-user-select: none; -moz-user-select: none;
+        -ms-user-select: none; user-select: none;
+        padding: 0 4px; width: 4em;
+        color: #aaaaaa;
+      }
+    pre.numberSource { margin-left: 3em; border-left: 1px solid #aaaaaa;  padding-left: 4px; }
+    div.sourceCode
+      {   }
+    @media screen {
+    pre > code.sourceCode > span > a:first-child::before { text-decoration: underline; }
+    }
+    code span.al { color: #ff0000; font-weight: bold; } /* Alert */
+    code span.an { color: #60a0b0; font-weight: bold; font-style: italic; } /* Annotation */
+    code span.at { color: #7d9029; } /* Attribute */
+    code span.bn { color: #40a070; } /* BaseN */
+    code span.bu { color: #008000; } /* BuiltIn */
+    code span.cf { color: #007020; font-weight: bold; } /* ControlFlow */
+    code span.ch { color: #4070a0; } /* Char */
+    code span.cn { color: #880000; } /* Constant */
+    code span.co { color: #60a0b0; font-style: italic; } /* Comment */
+    code span.cv { color: #60a0b0; font-weight: bold; font-style: italic; } /* CommentVar */
+    code span.do { color: #ba2121; font-style: italic; } /* Documentation */
+    code span.dt { color: #902000; } /* DataType */
+    code span.dv { color: #40a070; } /* DecVal */
+    code span.er { color: #ff0000; font-weight: bold; } /* Error */
+    code span.ex { } /* Extension */
+    code span.fl { color: #40a070; } /* Float */
+    code span.fu { color: #06287e; } /* Function */
+    code span.im { color: #008000; font-weight: bold; } /* Import */
+    code span.in { color: #60a0b0; font-weight: bold; font-style: italic; } /* Information */
+    code span.kw { color: #007020; font-weight: bold; } /* Keyword */
+    code span.op { color: #666666; } /* Operator */
+    code span.ot { color: #007020; } /* Other */
+    code span.pp { color: #bc7a00; } /* Preprocessor */
+    code span.sc { color: #4070a0; } /* SpecialChar */
+    code span.ss { color: #bb6688; } /* SpecialString */
+    code span.st { color: #4070a0; } /* String */
+    code span.va { color: #19177c; } /* Variable */
+    code span.vs { color: #4070a0; } /* VerbatimString */
+    code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">DbDuo - History</h1>
+</header>
+<h1 id="dbduo-history-of-changes">DbDuo History of Changes</h1>
+<p>This file is the chronological record of DbDuo releases. The most
+recent release is at the top. For the overview of what DbDuo is and the
+current feature set, see <code>Announce.md</code> or
+<code>README.md</code>. For the full reference, see
+<code>DbDuo.md</code>.</p>
+<p>Press <strong>Shift+F1</strong> inside DbDuo to open this file in
+your browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="v1.0.48-current">v1.0.48 (current)</h2>
+<p>Inno Setup compile fix. <code>DbDuo_setup.iss</code> line 499 called
+the Pascal procedure <code>InstallJawsSettings</code>, which was removed
+in v1.0.40 when JAWS settings install moved from Inno Setup’s
+<code>[Code]</code> section to the C# class
+<code>JawsSettingsInstaller</code>. The v1.0.40 cleanup left an orphaned
+call site that referenced both the deleted function AND a
+<code>[Tasks]</code> entry (<code>jawsSettings</code>) that had also
+been removed. The Inno Setup compiler reported it as
+<code>Unknown identifier 'InstallJawsSettings'</code> at line 499.
+Removed the dead block; the JAWS settings install path is unaffected
+because the Finish-page <code>[Run]</code> entry at line 197 already
+invokes <code>DbDuo.exe --install-jaws-settings</code> as a postinstall
+checkbox.</p>
+<p>A separate audit of the <code>[Code]</code> section confirmed no
+other dangling references to v1.0.39-era Pascal procedures.
+<code>CurUninstallStepChanged</code> is kept intact: it duplicates the
+work done by the <code>[UninstallRun]</code> call to
+<code>DbDuo.exe --uninstall-jaws-settings</code>, but harmlessly — the
+first to run deletes the log file, the second sees the missing log and
+exits early. The redundancy is defense in depth: if DbDuo.exe is missing
+or fails at uninstall time, the Pascal procedure still cleans up the
+JAWS settings files via the log it reads directly.</p>
+<h2 id="v1.0.47">v1.0.47</h2>
+<p>Two doc-and-label improvements driven by user review.</p>
+<p><strong>No “Object” in GUI command labels.</strong> The word “Object”
+was scrubbed from every user-facing GUI command label, dialog title, and
+context-menu entry. The PowerShell canonical command names
+(<code>Show-Object</code>, <code>Sort-Object</code>,
+<code>Select-Object</code>, <code>Switch-Object</code>,
+<code>Switch-ObjectPrevious</code>) remain unchanged — they are the
+third <code>addItem</code> argument used at the dot prompt, where the
+Verb-Noun pattern is the convention. The renames:</p>
+<ul>
+<li>“Examine Record (field-by-field)” → “Show Record
+(field-by-field)”</li>
+<li>“Next Object (any table or view)” → “Next Table or View”</li>
+<li>“Previous Object (any table or view)” → “Previous Table or
+View”</li>
+<li>Right-click context-menu entry “Show-Object” → “Show Record”</li>
+<li>HelpDialog title from Show Record → “Show Record (row N)” (was
+“Show-Object (row N)”)</li>
+<li>MessageBox caption on Switch failure → “Next Table or View” (was
+“Switch-Object”)</li>
+<li>The dot-prompt help text for <code>Show-Object</code> now says “In
+the GUI, this command is labeled ‘Show Record’ and is bound to Enter”
+(previously referred to the GUI label as Show-Object)</li>
+</ul>
+<p>Same scrub applied to <code>DbDuo.md</code> (the user guide),
+<code>README.md</code>, and <code>Announce.md</code>. The H2 section
+“Show-Object and the look column” in the developer reference became
+“Show Record and the look column” with the canonical name still
+mentioned in the body.</p>
+<p><strong>Dedicated scripting section in DbDuo.md and announcement in
+Announce.md.</strong> v1.0.46 documented the snippet feature inline in
+the Misc menu section. v1.0.47 promotes it to its own H2 section,
+“Scripting with JScript .NET snippets”, positioned between the SQL
+reference section and the Help menu section. The new section covers:
+where snippets live (<code>%APPDATA%\DbDuo\Snippets\</code>); file-type
+behavior (.js executes, everything else displays as reference text); the
+three commands (Invoke / Edit / Open Folder); the editor configuration
+(<code>[Snippets] editor=</code>); the <code>frm</code> and
+<code>db</code> globals and default imports visible to scripts; return
+value semantics; error handling; four sample snippets; and the
+power-and-responsibility note that snippets run with full DbDuo process
+privileges (no sandbox). The Misc-menu section now defers depth to the
+new H2 with a single short paragraph pointing readers downstream. The
+Announce.md gained a “Snippet scripting” bullet in the “What sets DbDuo
+apart” section — high-level only, no technical depth — plus a mention of
+the snippet commands in the Misc-menu line of the Top-level menu
+structure.</p>
+<h2 id="v1.0.46">v1.0.46</h2>
+<p>Three changes: NVDA add-on belt-and-suspenders binding for the
+table-navigation chords, a <code>.gitignore</code> overhaul that matches
+how the source tree is actually distributed, and a tagRelease script
+rewrite that no longer needs editing between releases.</p>
+<p><strong>NVDA add-on: table-navigation chords now reliably pass
+through.</strong> v1.0.40-v1.0.45 shipped the NVDA add-on with bindings
+registered only via <code>bindGesture</code> in <code>__init__</code>.
+In practice some users found those bindings not taking effect —
+Alt+Control+arrow still triggered NVDA’s “Not in a table” instead of
+moving DbDuo’s virtual cell cursor. The fix is belt-and-suspenders: the
+add-on now declares both a class-level <code>__gestures</code>
+dictionary (NVDA’s older but most-supported binding mechanism, walked on
+every gesture lookup regardless of instance state) AND keeps the
+<code>bindGesture</code> loop in <code>__init__</code>. Both
+registrations point to the same <code>script_passThrough</code> method.
+The gesture list itself moved to a module-level
+<code>_passThroughGestures</code> tuple so both registrations share one
+source of truth. The <code>bindGesture</code> loop is wrapped in a
+try/except so a single malformed gesture id can no longer kill the whole
+<code>__init__</code> and prevent any bindings from working. Add-on
+version bumped to 1.0.1 so existing 1.0.0 installs see this as an
+upgrade rather than a re-install.</p>
+<p><strong>.gitignore overhaul.</strong> The previous .gitignore was
+minimal (just <code>bin/</code>, <code>obj/</code>, <code>*.suo</code>,
+etc.) and missed several patterns important to this project’s actual
+release workflow. The new version: ignores transient build artifacts
+(<code>buildDbDuo.log</code>, <code>tagRelease-*.log</code>); explicitly
+ignores <code>tagRelease.cmd</code> and <code>tagRelease.ps1</code>
+since they are maintainer-only convenience scripts, not part of any
+release; ignores leftover MSBuild / NuGet scratch from the
+v1.0.42-v1.0.43 era (<code>bin/</code>, <code>obj/</code>,
+<code>packages/</code>, <code>DbDuo.csproj</code>,
+<code>App.config</code>) so a stale dev checkout cannot accidentally
+re-commit them; ignores editor backup patterns and Windows file-system
+clutter. Does NOT ignore <code>*.exe</code> or <code>*.dll</code> —
+<code>DbDuo.exe</code>, <code>DbDuo_setup.exe</code>, and
+<code>nvdaControllerClient.dll</code> are intentionally tracked because
+the project distributes them both via the source tree and via GitHub
+Releases.</p>
+<p><strong>tagRelease.ps1: singular, version-dynamic, version-aware
+dirty check.</strong> Three changes to the release-tagging script: (1)
+The version is now read at runtime from <code>DbDuo_setup.iss</code>’s
+<code>#define AppVersion</code> line rather than hardcoded — this means
+the script can be re-run for every future release without per-release
+maintenance. (2) Dropped the multi-repo <code>$aReleases</code> array
+and <code>publishOne</code> function; the script now operates on exactly
+one repo (DbDuo) and one asset (<code>DbDuo_setup.exe</code>), with
+everything inline. (3) The dirty-tree check now filters not just
+<code>tagRelease-*.log</code> but also <code>buildDbDuo.log</code>,
+<code>DbDuo.exe</code>, <code>DbDuo_setup.exe</code>, and
+<code>dbDuoEval.dll</code> — these are tracked-but-rebuilt artifacts
+that commonly appear as “modified” immediately after a build, which is
+the expected state right before a release tag. Pacific time (Seattle) is
+noted explicitly in the log header for the record.
+<code>tagRelease.cmd</code> is a thin launcher that
+bypass-policy-invokes the .ps1; its log-location comment was updated
+from <code>%TEMP%</code> to <code>.\</code> to match where
+Start-Transcript actually writes.</p>
+<h2 id="v1.0.45">v1.0.45</h2>
+<p>Bug-fix release on top of v1.0.44’s scripting course-correction.
+Three changes.</p>
+<p><strong>Compile fix: <code>IniSession</code> reference
+scoping.</strong> v1.0.44’s
+<code>SnippetHelper.getEditorCommand()</code> called
+<code>IniSession.read("Snippets", "editor")</code> as if
+<code>IniSession</code> were a top-level class in the DbDuo namespace.
+It is not — <code>IniSession</code> is a public static class nested
+inside <code>DbDuoForm</code>. v1.0.44’s csc.exe call failed with
+<code>CS0103: The name 'IniSession' does not exist in the current context</code>.
+The fix is the qualified reference
+<code>DbDuoForm.IniSession.read(...)</code>. The same pattern is
+documented in a comment near <code>IniValidation.load()</code> (around
+line 6178), but I missed it when writing SnippetHelper.</p>
+<p><strong>Drop Save Snippet menu item.</strong> EdSharp’s Save Snippet
+captures the editor’s currently-selected (or whole-document) text and
+writes it to a snippet file. That workflow has no equivalent in DbDuo —
+DbDuo is a database manager, not a text editor; there is no “current
+selection” of text to capture. The v1.0.44 “Save Snippet” implementation
+just opened an empty file in Notepad, which is redundant with what the
+user can do from Open Snippet Folder plus Explorer’s New &gt; Text
+Document. Removed entirely. Alt+S is no longer bound to anything.</p>
+<p><strong>Edit Snippet now covers the “create new” case too.</strong>
+Picks an existing snippet if any exist; if the folder is empty, jumps
+straight to a Save File dialog. When the folder has existing snippets, a
+sentinel entry <code>[New snippet...]</code> appears at the top of the
+pick list (square brackets are conventional in screen-reader UI for
+non-data list options; they also sort before any real filename so the
+entry stays at the top in OrdinalIgnoreCase order). Picking that entry
+opens a Save File dialog seeded to the Snippets folder. Either way the
+chosen path is opened in the editor.</p>
+<p><strong>Camel Type cleanup.</strong> The v1.0.44 dev preview used
+<code>o</code> prefix for non-COM .NET object variables
+(<code>oSfd</code>, <code>oDlg</code>, <code>oPsi</code>,
+<code>oEx</code>, <code>oResult</code>, etc.). Camel Type reserves the
+<code>o</code> prefix for COM objects or true <code>object</code>-typed
+variants; for specifically-typed .NET classes the prefix should be the
+class name in lower camel case or a common abbreviation. Updated
+throughout the new snippet code: <code>sfd</code> (SaveFileDialog),
+<code>dlg</code> (LbcDialog), <code>psi</code> (ProcessStartInfo),
+<code>ex</code> (Exception), <code>lb</code> (ListBox),
+<code>dirInfo</code> / <code>aFileInfos</code>, <code>asm</code>,
+<code>methodInfo</code>, <code>jsType</code>, <code>result</code>. The
+JScript globals exposed to user snippets follow the same rule:
+<code>frm</code> (form, VB-era abbreviation) and <code>db</code>
+(database manager, conventional abbreviation), not <code>oForm</code> /
+<code>oDb</code>. The dbDuoEval.js parameter names became
+<code>frmArg</code> / <code>dbArg</code> so the user-script-visible
+scope variables <code>frm</code> / <code>db</code> are free.</p>
+<p><strong>Updated snippet examples</strong> for the JScript globals
+rename:</p>
+<div class="sourceCode" id="cb1"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb1-1"><a href="#cb1-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Count rows in current table.</span></span>
+<span id="cb1-2"><a href="#cb1-2" aria-hidden="true" tabindex="-1"></a>db<span class="op">.</span><span class="at">recordCount</span><span class="op">;</span></span></code></pre></div>
+<div class="sourceCode" id="cb2"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Apply a filter, refresh, show the new count.</span></span>
+<span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a>db<span class="op">.</span><span class="at">filter</span> <span class="op">=</span> <span class="st">&quot;City = &#39;Seattle&#39;&quot;</span><span class="op">;</span></span>
+<span id="cb2-3"><a href="#cb2-3" aria-hidden="true" tabindex="-1"></a>frm<span class="op">.</span><span class="fu">refresh</span>()<span class="op">;</span></span>
+<span id="cb2-4"><a href="#cb2-4" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;Filtered to &quot;</span> <span class="op">+</span> db<span class="op">.</span><span class="at">recordCount</span> <span class="op">+</span> <span class="st">&quot; rows.&quot;</span><span class="op">;</span></span></code></pre></div>
+<div class="sourceCode" id="cb3"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Trigger a form action via late-bound dispatch.</span></span>
+<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>frm<span class="op">.</span><span class="fu">recBookmarkClicked</span>(<span class="kw">null</span><span class="op">,</span> <span class="kw">null</span>)<span class="op">;</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;Bookmark saved at row &quot;</span> <span class="op">+</span> db<span class="op">.</span><span class="at">absolutePosition</span><span class="op">;</span></span></code></pre></div>
+<div class="sourceCode" id="cb4"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Iterate and dump first-column values.</span></span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> aLines <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a>db<span class="op">.</span><span class="fu">moveFirst</span>()<span class="op">;</span></span>
+<span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (<span class="op">!</span>db<span class="op">.</span><span class="at">EOF</span>) {</span>
+<span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a>  aLines<span class="op">.</span><span class="fu">push</span>(db<span class="op">.</span><span class="fu">getFieldValue</span>(<span class="dv">0</span>))<span class="op">;</span></span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a>  db<span class="op">.</span><span class="fu">moveNext</span>()<span class="op">;</span></span>
+<span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a>aLines<span class="op">.</span><span class="fu">slice</span>(<span class="dv">0</span><span class="op">,</span> <span class="dv">20</span>)<span class="op">.</span><span class="fu">join</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)<span class="op">;</span></span></code></pre></div>
+<h2 id="v1.0.44">v1.0.44</h2>
+<p>A course-correction release. The Roslyn C# scripting feature from
+v1.0.42-v1.0.43 is rolled back; in its place is the EdSharp-style Save /
+Invoke / Edit Snippet pattern using JScript .NET. The change is driven
+by three problems with the Roslyn approach: it shipped 12 NuGet runtime
+DLLs totaling ~25-30 MB; it required an MSBuild + NuGet build-system
+migration; and it added a custom multi-textbox script dialog when
+standard Windows controls plus the user’s own editor were the natively
+accessible answer all along. The new approach matches the explicit ask:
+standard controls, no shipped runtime DLLs beyond a tiny support
+assembly, no custom UI.</p>
+<p><strong>Build system reverted to bare csc.exe.</strong>
+<code>DbDuo.csproj</code> and <code>App.config</code> are gone.
+<code>buildDbDuo.cmd</code> is back to the bare csc.exe pattern from
+v1.0.41 with one addition: it also runs <code>jsc.exe</code> (the
+JScript .NET compiler, ships with every .NET Framework 4.x install at
+<code>%SystemRoot%\Microsoft.NET\Framework64\v4.0.30319\jsc.exe</code>)
+to compile a tiny <code>dbDuoEval.js</code> source file into
+<code>dbDuoEval.dll</code>. The C# build then takes
+<code>/reference:dbDuoEval.dll</code> so DbDuo.exe can call into the
+JScript .NET scripting engine. Two compiler invocations total. No NuGet,
+no MSBuild, no binding redirects.</p>
+<p><strong>Install footprint dropped back to v1.0.41 levels.</strong>
+The 12 Roslyn DLLs are gone from the installer’s [Files] section. The
+new <code>dbDuoEval.dll</code> is about 10 KB. Net change from v1.0.43:
+~25-30 MB removed, 10 KB added. The <code>[InstallDelete]</code> section
+explicitly removes the stale Roslyn DLLs and
+<code>DbDuo.exe.config</code> from the install folder when upgrading
+from v1.0.42 or v1.0.43, so the install folder reflects only what DbDuo
+actually uses.</p>
+<p><strong>Scripting: EdSharp’s Save / Invoke / View Snippet pattern,
+adapted for DbDuo.</strong> The custom multi-textbox scripting dialog
+from v1.0.42-v1.0.43 is gone. Four new menu items appear at the bottom
+of the Misc menu (right above Edit Configuration):</p>
+<ul>
+<li><strong>Save Snippet (Alt+S)</strong> opens a standard Save File
+dialog seeded to the Snippets folder. The user types a filename and
+extension (.js for executable snippets, .txt/.sql/anything else for
+reference snippets), confirms with the standard OK button. DbDuo then
+opens the new file in the user’s editor of choice — Notepad by default;
+override via <code>DbDuo.ini [Snippets] editor=</code>. The editor
+handles all the text-entry UI; DbDuo doesn’t supply one.</li>
+<li><strong>Invoke Snippet (Alt+V)</strong> scans the Snippets folder,
+pops the existing standard <code>LbcDialog</code> listbox-pick UI (same
+one used by Choose Table, Recent Files, etc.) to let the user pick a
+file, then runs it. .js files are evaluated as JScript .NET via the
+dbDuoEval.dll support assembly; everything else is read and its contents
+displayed in a standard MessageBox as reference text. Script output
+(last expression value, or <code>ERROR: ...</code> on compile/runtime
+failure) is displayed in a MessageBox so the screen reader reads it
+through the standard dialog focus path.</li>
+<li><strong>Edit Snippet (Alt+Shift+V)</strong> pops the same LbcDialog
+pick and opens the chosen file in the user’s editor.</li>
+<li><strong>Open Snippet Folder</strong> shell-executes
+<code>%APPDATA%\DbDuo\Snippets\</code> so the user can manage files from
+their preferred shell.</li>
+</ul>
+<p><strong>Scripting language: JScript .NET.</strong> Frozen but stable
+— Microsoft has not added features since 2005 but has not deprecated it
+either; it ships with every .NET Framework 4.x install. (This is JScript
+.NET, the compiled-to-CIL language, NOT the deprecated classic JScript
+that runs under MSScriptControl and has had its underlying engine
+changed in Windows 11 24H2.) Snippets have full access to the .NET
+Framework Class Library and to DbDuo’s running form. The eval scope has
+two pre-injected variables:</p>
+<ul>
+<li><code>oForm</code> — the running <code>DbDuoForm</code>.</li>
+<li><code>oDb</code> — shortcut for <code>oForm.db</code> (the
+<code>DbDuoManager</code>).</li>
+</ul>
+<p>The dbDuoEval.dll support file pre-imports <code>DbDuo</code>,
+<code>System</code>, <code>System.Collections</code>,
+<code>System.Data</code>, <code>System.IO</code>,
+<code>System.Reflection</code>, <code>System.Text</code>,
+<code>System.Text.RegularExpressions</code>,
+<code>System.Windows.Forms</code>. Snippets can use any type in those
+namespaces directly without <code>import</code> statements.</p>
+<p><strong>Snippet folder location.</strong>
+<code>%APPDATA%\DbDuo\Snippets\</code>. Created on first access. Lives
+under roaming application data so it survives DbDuo upgrades and
+uninstalls; the user’s snippets are their data, not the
+application’s.</p>
+<p><strong>No facade between snippets and DbDuo internals.</strong> The
+form’s <code>db</code> field was made public back in v1.0.42 and stays
+public. Snippets call <code>oForm.&lt;anything&gt;</code> and
+<code>oDb.&lt;anything&gt;</code> directly. Internal helper methods that
+are private to DbDuoForm remain private — but every public method on the
+form is reachable, every public method on DbDuoManager is reachable, and
+every type in the imported namespaces is reachable. JScript’s late-bound
+dispatch means snippets don’t need to know exact .NET method signatures
+to invoke methods correctly.</p>
+<p><strong>Example .js snippets:</strong></p>
+<div class="sourceCode" id="cb5"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Count rows in current table.</span></span>
+<span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a>oDb<span class="op">.</span><span class="at">recordCount</span><span class="op">;</span></span></code></pre></div>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Apply a filter, refresh, and show the new count.</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a>oDb<span class="op">.</span><span class="at">filter</span> <span class="op">=</span> <span class="st">&quot;City = &#39;Seattle&#39;&quot;</span><span class="op">;</span></span>
+<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a>oForm<span class="op">.</span><span class="fu">refresh</span>()<span class="op">;</span></span>
+<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;Filtered to &quot;</span> <span class="op">+</span> oDb<span class="op">.</span><span class="at">recordCount</span> <span class="op">+</span> <span class="st">&quot; rows.&quot;</span><span class="op">;</span></span></code></pre></div>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Open a database programmatically.</span></span>
+<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a>oForm<span class="op">.</span><span class="fu">openDatabaseAndApplyState</span>(<span class="st">&quot;C:</span><span class="sc">\\</span><span class="st">Data</span><span class="sc">\\</span><span class="st">northwind.db&quot;</span><span class="op">,</span> <span class="kw">null</span>)<span class="op">;</span></span>
+<span id="cb7-3"><a href="#cb7-3" aria-hidden="true" tabindex="-1"></a>oDb<span class="op">.</span><span class="at">currentTable</span><span class="op">;</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Iterate and dump first-column values.</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> aLines <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>oDb<span class="op">.</span><span class="fu">moveFirst</span>()<span class="op">;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (<span class="op">!</span>oDb<span class="op">.</span><span class="at">EOF</span>) {</span>
+<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a>  aLines<span class="op">.</span><span class="fu">push</span>(oDb<span class="op">.</span><span class="fu">getFieldValue</span>(<span class="dv">0</span>))<span class="op">;</span></span>
+<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>  oDb<span class="op">.</span><span class="fu">moveNext</span>()<span class="op">;</span></span>
+<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a>aLines<span class="op">.</span><span class="fu">slice</span>(<span class="dv">0</span><span class="op">,</span> <span class="dv">20</span>)<span class="op">.</span><span class="fu">join</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)<span class="op">;</span></span></code></pre></div>
+<p>The last expression of a JScript snippet is the value returned to
+DbDuo and shown in the MessageBox. To produce multi-line output, build a
+string and let it fall through as the final expression.</p>
+<p><strong>.txt and other non-.js snippets</strong> are useful for
+canned SQL fragments, reference notes, templated text. Invoke Snippet
+displays them in a MessageBox where the screen reader reads them
+line-by-line; the user can copy from there if they want to paste into a
+SQL window.</p>
+<p><strong>Why this is materially better than the Roslyn v1.0.43
+design.</strong> Standard Windows controls only — no custom multi-line
+edit/output dialog; the user writes scripts in their own editor (which
+they already trust to be accessible). No 25-30 MB of shipped DLLs. No
+build-system complexity. Snippets persist as files rather than
+dialog-bound text, so the user can version them, copy them between
+machines, share them, edit them outside DbDuo. The EdSharp precedent
+confirms this pattern works well for screen-reader-driven workflows;
+DbDuo just inherits it.</p>
+<p><strong>Compatibility note for users on v1.0.42-v1.0.43.</strong> The
+Roslyn-era script dialog and Help &gt; Run C# Script menu item are gone.
+If you had scripts in mind that you were going to enter via that dialog,
+write them as .js files in the Snippets folder instead and invoke them
+with Alt+V. The expressive power is the same in practice — JScript .NET
+has all the language features needed for the kinds of snippets DbDuo
+scripting is meant to support (database iteration, filter setup, form
+action triggering, simple data transformation).</p>
+<h2 id="v1.0.43">v1.0.43</h2>
+<p>A focused fix-up release on top of v1.0.42’s build-system switch and
+scripting feature. Three changes, all about NVDA.</p>
+<p><strong>NVDA controller DLL rename:
+<code>nvdaControllerClient64.dll</code> →
+<code>nvdaControllerClient.dll</code>.</strong> Starting in NVDA 2026.1
+(released May 6, 2026), NVDA’s controller-client zip ships the 64-bit
+DLL inside <code>x64/</code> with the unsuffixed name
+<code>nvdaControllerClient.dll</code>. The architecture suffix (64 / 32
+/ arm64) is now derived from the folder the file lives in, not the
+filename. NVDA’s own current C# example uses the unsuffixed name in its
+<code>DllImport</code> declarations. DbDuo follows suit: the three
+<code>DllImport</code> attributes in <code>LiveRegion</code>
+(testIfRunning, speakText, cancelSpeech) now reference
+<code>nvdaControllerClient.dll</code>. The diagnostic message printed by
+Test-Reader also updated. Comments throughout were updated to reflect
+the new naming.</p>
+<p><strong>Build script DLL-extraction fix.</strong> v1.0.42’s
+<code>buildDbDuo.cmd</code> searched the NVDA controller-client zip
+recursively for a file literally named
+<code>nvdaControllerClient64.dll</code>. That file does not exist in
+NVDA 2026.1’s zip. The download succeeded, the recursive search came
+back empty, and the build script printed “WARNING: NVDA controller DLL
+download failed” and continued without the DLL. The new logic looks
+specifically in the archive’s <code>x64/</code> folder, accepts EITHER
+<code>nvdaControllerClient.dll</code> (modern NVDA 2026.1+) OR
+<code>nvdaControllerClient64.dll</code> (older NVDA 2025.x and earlier),
+and falls back to a recursive search if neither is in <code>x64/</code>
+directly. The file is always written out as
+<code>nvdaControllerClient.dll</code> to match the
+<code>DllImport</code> declarations. The warning message on failure now
+also points users to the upstream URL so they can fetch the file
+manually if their build machine is offline.</p>
+<p><strong>Installer cleanup for upgraders.</strong> A new
+<code>[InstallDelete]</code> section removes the legacy
+<code>nvdaControllerClient64.dll</code> from the install folder when
+upgrading from v1.0.40 - v1.0.42. The legacy file is harmless (no DbDuo
+code references it anymore) but cluttering. New installs are
+unaffected.</p>
+<h2 id="v1.0.42">v1.0.42</h2>
+<p>A two-part release: the build system switches from bare
+<code>csc.exe</code> to MSBuild + NuGet (no behavior change in the
+produced DbDuo.exe by itself), and on that new foundation the C#
+scripting feature lands.</p>
+<p><strong>Build system: MSBuild + NuGet, replacing bare
+csc.exe.</strong> Adding the Roslyn scripting package as a NuGet
+dependency with about a dozen transitive packages required this change —
+<code>csc.exe</code> alone cannot resolve transitive references or
+generate the binding redirects those packages need to coexist with .NET
+Framework 4.8’s built-in <code>System.*</code> shims. The new
+<code>DbDuo.csproj</code> is the old-style format (not the .NET
+SDK-style); it lists
+<code>Microsoft.CodeAnalysis.CSharp.Scripting</code> 4.12.0 as the only
+<code>PackageReference</code> and pulls in everything else transitively.
+<code>AutoGenerateBindingRedirects = true</code> in the csproj tells
+MSBuild to write the appropriate <code>&lt;assemblyBinding&gt;</code>
+block into <code>DbDuo.exe.config</code> so the NuGet
+<code>System.Memory</code>, <code>System.Buffers</code>,
+<code>System.Collections.Immutable</code>,
+<code>System.Runtime.CompilerServices.Unsafe</code>, etc., resolve
+correctly at runtime. The new <code>buildDbDuo.cmd</code> walks the same
+Visual Studio 2022 / 2019 install paths the old script did but invokes
+<code>msbuild.exe</code> rather than <code>csc.exe</code> directly. It
+also bootstraps <code>nuget.exe</code> from <code>dist.nuget.org</code>
+if not on PATH. The NVDA controller-client DLL download step is
+unchanged. The compiler underneath is still <code>csc.exe</code>;
+MSBuild just orchestrates it.</p>
+<p><strong>Install footprint grew by about 25-30 MB.</strong> This is
+the honest cost of bundling Roslyn. The new <code>[Files]</code> entries
+cover the ~12 NuGet runtime DLLs
+(<code>Microsoft.CodeAnalysis.dll</code>,
+<code>Microsoft.CodeAnalysis.CSharp.dll</code>,
+<code>Microsoft.CodeAnalysis.Scripting.dll</code>,
+<code>Microsoft.CodeAnalysis.CSharp.Scripting.dll</code>,
+<code>System.Collections.Immutable.dll</code>,
+<code>System.Reflection.Metadata.dll</code>,
+<code>System.Memory.dll</code>, <code>System.Buffers.dll</code>,
+<code>System.Runtime.CompilerServices.Unsafe.dll</code>,
+<code>System.Numerics.Vectors.dll</code>,
+<code>System.Threading.Tasks.Extensions.dll</code>,
+<code>System.Text.Encoding.CodePages.dll</code>) plus the
+<code>DbDuo.exe.config</code> binding-redirect file. Roslyn does not
+slow DbDuo startup — the assemblies are JIT-compiled on first use of the
+scripting feature, not at launch — and the increase is bounded; no
+further package growth is planned.</p>
+<p><strong><code>nvdaControllerClient64.dll</code> now properly
+installed.</strong> A latent bug from v1.0.40-v1.0.41: the build script
+placed the DLL alongside DbDuo.exe in the build folder, but the
+installer’s <code>[Files]</code> section did not list it, so installed
+copies did NOT receive it. Added now. Existing v1.0.41 installs that
+worked on the developer’s own machine but did not speak through NVDA on
+other machines should be upgraded.</p>
+<p><strong>Help &gt; Run C# Script (Alt+F12).</strong> New menu item,
+new dialog. The dialog has a multi-line monospace script editor
+(TabIndex 0, accessible as “Script”), a multi-line read-only output pane
+(TabIndex 1, accessible as “Output”), a Run button (Alt+R), a Clear
+Output button (Alt+C), and a Close button. The dialog is modeless so the
+user can leave it open and run multiple scripts against the same
+database session.</p>
+<p><strong>Globals exposed to scripts:</strong> - <code>oForm</code> —
+the running <code>DbDuoForm</code>. The form’s <code>db</code> field is
+now public so scripts can reach <code>oForm.db</code> directly. -
+<code>oDb</code> — shortcut for <code>oForm.db</code> (the
+<code>DbDuoManager</code> instance). - <code>say</code> —
+<code>Action&lt;string&gt;</code> that calls
+<code>LiveRegion.sayForced</code>. Speaks through the screen reader
+regardless of the Extra Speech toggle. - <code>sayBack</code> —
+<code>Action&lt;string&gt;</code> that appends a line to the dialog’s
+output pane. The natural target for script status messages.</p>
+<p><strong>Default imports:</strong> <code>System</code>,
+<code>System.Collections.Generic</code>, <code>System.IO</code>,
+<code>System.Linq</code>, <code>System.Text</code>,
+<code>System.Windows.Forms</code>, <code>DbDuo</code>. The script can
+<code>using</code> any other namespace if it needs to.</p>
+<p><strong>Error handling.</strong> Compile-time errors (syntax, unknown
+identifier, type mismatch) catch as
+<code>CompilationErrorException</code> and the dialog appends one line
+per diagnostic with file/line/column info. Runtime errors catch as their
+actual exception type and the dialog appends
+<code>Runtime error: &lt;TypeName&gt;: &lt;Message&gt;</code>. The
+script process is not affected — the user can fix the script and Run
+again.</p>
+<p><strong>Threading.</strong> Roslyn scripting is async-only. The Run
+button wraps the eval in <code>Task.Run(...)</code> plus
+<code>.GetAwaiter().GetResult()</code> so the eval runs off-thread; the
+UI thread blocks during the eval but does NOT deadlock the
+SynchronizationContext as it would with a direct <code>.Result</code>.
+For long-running scripts the UI will be unresponsive — this is
+intentional simplicity; users running multi-minute scripts can fork to a
+<code>Task</code> inside the script itself.</p>
+<p><strong>On the design choice (C# vs JScript via
+MSScriptControl).</strong> I considered routing scripting through the
+<code>MSScriptControl</code> COM object hosting a legacy JScript engine
+— the same pattern EdSharp uses for JScript. JScript would avoid the
+25-30 MB Roslyn footprint and would not require an MSBuild migration.
+Reasons against: Microsoft has been actively deprecating JScript
+(Windows 11 24H2 changed JScript behavior in October 2024 in ways that
+broke working VBScript+JScript hybrids); JScript syntax is ES3-era with
+none of modern JavaScript’s amenities, would be a stylistic regression
+from the C# the host is written in; runtime-only error reporting versus
+Roslyn’s compile-time diagnostics is much worse for screen-reader
+workflow where every error you hit costs review time; and “all
+privileges” requires the host objects to be
+<code>[ComVisible(true)]</code> either way, so the visibility surgery is
+comparable. The 25-30 MB is a real cost but a one-time cost, and pays
+for a feature on a foundation Microsoft is actively maintaining.</p>
+<p><strong>No facade between scripts and DbDuo internals.</strong>
+Scripts call <code>oForm.&lt;anything&gt;</code> and
+<code>oDb.&lt;anything&gt;</code> directly. No translation layer, no
+permission wrapper. The user runs code in their own process; this is a
+power-user tool by design. The only visibility change was making
+<code>DbDuoForm.db</code> public. The rest of the host surface is
+already public.</p>
+<p><strong>Example uses:</strong></p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode csharp"><code class="sourceCode cs"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Count rows.</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="fu">sayBack</span><span class="op">(</span><span class="st">&quot;Row count: &quot;</span> <span class="op">+</span> oDb<span class="op">.</span><span class="fu">recordCount</span><span class="op">);</span></span></code></pre></div>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode csharp"><code class="sourceCode cs"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Iterate, log first-column values.</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a>oDb<span class="op">.</span><span class="fu">moveFirst</span><span class="op">();</span></span>
+<span id="cb10-3"><a href="#cb10-3" aria-hidden="true" tabindex="-1"></a><span class="dt">var</span> aLines <span class="op">=</span> <span class="kw">new</span> List<span class="op">&lt;</span><span class="dt">string</span><span class="op">&gt;();</span></span>
+<span id="cb10-4"><a href="#cb10-4" aria-hidden="true" tabindex="-1"></a><span class="kw">while</span> <span class="op">(!</span>oDb<span class="op">.</span><span class="fu">EOF</span><span class="op">)</span></span>
+<span id="cb10-5"><a href="#cb10-5" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb10-6"><a href="#cb10-6" aria-hidden="true" tabindex="-1"></a>    aLines<span class="op">.</span><span class="fu">Add</span><span class="op">(</span>oDb<span class="op">.</span><span class="fu">getFieldValue</span><span class="op">(</span><span class="dv">0</span><span class="op">));</span></span>
+<span id="cb10-7"><a href="#cb10-7" aria-hidden="true" tabindex="-1"></a>    oDb<span class="op">.</span><span class="fu">moveNext</span><span class="op">();</span></span>
+<span id="cb10-8"><a href="#cb10-8" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
+<span id="cb10-9"><a href="#cb10-9" aria-hidden="true" tabindex="-1"></a><span class="fu">sayBack</span><span class="op">(</span><span class="dt">string</span><span class="op">.</span><span class="fu">Join</span><span class="op">(</span><span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span><span class="op">,</span> aLines<span class="op">.</span><span class="fu">Take</span><span class="op">(</span><span class="dv">20</span><span class="op">)));</span></span></code></pre></div>
+<div class="sourceCode" id="cb11"><pre
+class="sourceCode csharp"><code class="sourceCode cs"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Trigger a form action.</span></span>
+<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>oForm<span class="op">.</span><span class="fu">recBookmarkClicked</span><span class="op">(</span><span class="kw">null</span><span class="op">,</span> <span class="kw">null</span><span class="op">);</span></span>
+<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a><span class="fu">sayBack</span><span class="op">(</span><span class="st">&quot;Bookmark saved at row &quot;</span> <span class="op">+</span> oDb<span class="op">.</span><span class="fu">absolutePosition</span><span class="op">);</span></span></code></pre></div>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode csharp"><code class="sourceCode cs"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="co">// Apply a filter via the manager.</span></span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>oDb<span class="op">.</span><span class="fu">filter</span> <span class="op">=</span> <span class="st">&quot;City = &#39;Seattle&#39;&quot;</span><span class="op">;</span></span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>oForm<span class="op">.</span><span class="fu">refresh</span><span class="op">();</span></span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a><span class="fu">sayBack</span><span class="op">(</span><span class="st">&quot;Filtered to &quot;</span> <span class="op">+</span> oDb<span class="op">.</span><span class="fu">recordCount</span> <span class="op">+</span> <span class="st">&quot; rows.&quot;</span><span class="op">);</span></span></code></pre></div>
+<h2 id="v1.0.41">v1.0.41</h2>
+<p>A focused release on NVDA parity with JAWS. The previous release
+wired NVDA speech (downloaded <code>nvdaControllerClient64.dll</code>
+during build and placed it next to DbDuo.exe) but left the NVDA add-on
+as a placeholder. This release ships the actual add-on.</p>
+<p><strong>NVDA add-on bundled.</strong> <code>DbDuo.nvda-addon</code>
+now ships in <code>{app}\DbDuo.nvda-addon</code> and the Finish-page
+checkbox “Install NVDA add-on for DbDuo” is checked by default. The
+add-on contains a <code>manifest.ini</code> (name=dbDuo, summary,
+version 1.0.0, minimumNVDAVersion 2019.3, lastTestedNVDAVersion 2026.1),
+an <code>appModules/DbDuo.py</code> Python module, and a
+<code>readme.html</code>. The Python <code>AppModule</code> class
+subclasses <code>appModuleHandler.AppModule</code> and binds 49 keyboard
+gestures — exactly the same set the JAWS DbDuo.jkm covers — to a single
+<code>script_passThrough</code> method whose body is one line,
+<code>gesture.send()</code>. That is the NVDA equivalent of the JAWS
+Function <code>TypeCurrentScriptKey()</code> that the existing
+DbDuo.jss/DbDuo.jsb pair calls. The chord coverage is identical:
+virtual-cell navigation, Alt-letter command shortcuts, parent-child
+drill, three search families, marked-row navigation, bulk-mark span, and
+the Say-X data-list chords. Without this add-on, NVDA would intercept
+Alt+Control+arrow for its own table-navigation commands and DbDuo’s
+virtual-mode ListView would report “Not in a table”; with the add-on,
+NVDA steps out of DbDuo’s way for exactly the chord set DbDuo needs.</p>
+<p><strong><code>--install-nvda-addon</code> CLI flag
+implemented.</strong> The placeholder from v1.0.40 is replaced. The flag
+locates <code>DbDuo.nvda-addon</code> next to DbDuo.exe and opens it via
+<code>ProcessStartInfo.UseShellExecute = true</code>. Windows hands the
+file to NVDA via the <code>.nvda-addon</code> file association NVDA
+registers at install time. NVDA then shows its standard “Install this
+add-on?” dialog where the user confirms. Failure modes are handled
+cleanly: missing add-on file (rare; installer always places it) prints a
+clear message and exits non-zero; missing file association (NVDA not
+installed) catches the <code>Win32Exception</code> and points the user
+to nvaccess.org.</p>
+<p><strong>Build script (no change).</strong>
+<code>buildDbDuo.cmd</code> continues to download
+<code>nvdaControllerClient64.dll</code> from
+<code>download.nvaccess.org/releases/stable/nvda_2026.1_controllerClient.zip</code>
+and place it next to DbDuo.exe. With the add-on now installed and the
+DLL bundled, both halves of NVDA support (chord pass-through and direct
+speech) work end-to-end.</p>
+<p><strong>Re-running the install later.</strong> The same UX pattern as
+JAWS — to re-install the add-on after upgrading NVDA, the user
+double-clicks <code>DbDuo.nvda-addon</code> in the install folder, or
+runs <code>DbDuo.exe --install-nvda-addon</code> from a command prompt.
+The add-on update workflow is NVDA’s standard one.</p>
+<p><strong>Not in this release (deferred):</strong> C# scripting
+feature. See the proposal below; that is genuinely substantial work and
+deserves a focused turn.</p>
+<h2 id="v1.0.40">v1.0.40</h2>
+<p>A broad polish release. Six families of changes: installer task
+reordering, NVDA controller-client DLL bundling, command-name
+consistency cleanup, dot-prompt cleanup, the Extra Speech toggle, and a
+new Help &gt; Open Sample Database entry. Plus a structural move: the
+JAWS settings install/uninstall logic migrated from Pascal Script in the
+.iss to a C# <code>JawsSettingsInstaller</code> class, so the same code
+can be re-run from the menu without re-running the full installer.</p>
+<p><strong>Post-install task list reordered.</strong> The installer’s
+Finish page now shows four checkboxes in this order: (1) Install JAWS
+settings for DbDuo (checked by default — recommended if you use JAWS);
+(2) Install NVDA add-on for DbDuo (unchecked — not yet implemented,
+returns a “planned for a future release” message); (3) Launch DbDuo now
+(checked by default); (4) Read the DbDuo README (checked by default).
+The README link is the README.htm, not the longer DbDuo.htm reference
+document, since most users want the brief introduction at first run. The
+<code>[Tasks]</code> section that previously exposed the JAWS install as
+a Ready-page checkbox is gone — the install is now a Finish-page action
+delegated to <code>DbDuo.exe --install-jaws-settings</code>. The
+matching <code>[UninstallRun]</code> entry calls
+<code>DbDuo.exe --uninstall-jaws-settings</code>.</p>
+<p><strong>JAWS install logic migrated to C#.</strong> The Pascal Script
+<code>InstallJawsSettings</code>, <code>FindScompilePath</code>, and
+<code>CurUninstallStepChanged</code> procedures (~170 lines in v1.0.39’s
+DbDuo_setup.iss) are gone. The same algorithm is now in a
+<code>JawsSettingsInstaller</code> static class in DbDuo.cs:
+registry-first scompile.exe lookup with Program Files fallback,
+enumeration of
+<code>%APPDATA%\Freedom Scientific\JAWS\*\Settings\*</code>, copy of
+DbDuo.jkm and DbDuo.jss into each (version, language) folder, scompile
+invocation with output capture, and persistent log of placed paths at
+<code>%APPDATA%\DbDuo\jawsSettings.log</code>. Three new CLI flags
+expose the work: <code>--install-jaws-settings</code> (runs the install
+and exits), <code>--install-nvda-addon</code> (placeholder, prints “not
+yet implemented”), and <code>--uninstall-jaws-settings</code> (reads the
+log and removes only the files DbDuo placed). The advantage of the move:
+a user who upgrades JAWS to a new year-version can re-run the install
+manually without finding the original DbDuo installer.</p>
+<p><strong>NVDA controller-client DLL bundling.</strong> NVDA’s end-user
+distribution does not include <code>nvdaControllerClient64.dll</code>;
+the DLL lives only in NVDA’s source distribution at
+<code>extras/controllerClient/</code>. The DbDuo build script
+(<code>buildDbDuo.cmd</code>) now downloads the official
+<code>nvda_2026.1_controllerClient.zip</code> from
+<code>download.nvaccess.org/releases/stable/</code> via PowerShell
+<code>Invoke-WebRequest</code>, extracts it via
+<code>Expand-Archive</code>, finds the 64-bit DLL via
+<code>Get-ChildItem -Recurse</code>, and places it next to
+<code>DbDuo.exe</code>. Idempotent (skips if already present); graceful
+on failure (warns but continues). The DbDuo P/Invoke declarations for
+<code>nvdaController_testIfRunning</code>,
+<code>nvdaController_speakText</code>, and
+<code>nvdaController_cancelSpeech</code> were already in place from
+earlier releases — the speech-failure-with-NVDA symptom you may have
+observed was the missing DLL, not a code defect. With the DLL bundled,
+NVDA direct speech works through the same code path as JAWS speech.</p>
+<p><strong>Command-name consistency cleanup.</strong> Eleven dialog
+titles and MessageBox captions previously displayed the PowerShell
+verb-noun canonical name (e.g., <code>"Open-Database File"</code>,
+<code>"Set-Position"</code>, <code>"Save-Bookmark"</code>,
+<code>"Restore-Bookmark"</code>, <code>"Select-Record"</code>,
+<code>"Switch-Table"</code>, <code>"Step-InitialChange"</code>,
+<code>"New-Chart"</code>, <code>"Test-Driver"</code>,
+<code>"Edit-Configuration"</code>, <code>"Select-Column"</code>) while
+their menu labels used the natural-English form
+(<code>"Open Database"</code>, <code>"Go to Row"</code>,
+<code>"Save Bookmark"</code>, etc.). The mismatch was audible: a
+screen-reader user invoking a command from the menu and then hearing an
+error dialog would hear two different names for what they thought was
+one command. All eleven captions now match the menu labels. Three form
+captions also fixed: <code>"Select-Record (filter)"</code> →
+<code>"Filter Records"</code>, <code>"Sort-Object (custom sort)"</code>
+→ <code>"Custom Sort"</code>, <code>"Show-Command"</code> →
+<code>"Command Picker"</code>. Two “not yet implemented” MessageBoxes
+(<code>Compare-Database</code>, <code>Out-Printer</code>) also re-titled
+to match their menu labels.</p>
+<p><strong>First/Top label redundancy fixed.</strong> Navigate menu
+items <code>"&amp;First Record (top)"</code> and
+<code>"&amp;Last Record (bottom)"</code> had parenthetical synonyms that
+the screen reader read aloud as additional words — “First Record top”
+and “Last Record bottom”. The parentheticals are gone; the labels are
+now simply <code>"&amp;First Record"</code> and
+<code>"&amp;Last Record"</code>. Same treatment for Help menu’s
+<code>"&amp;Where Am I (Show Status)"</code> →
+<code>"&amp;Where Am I"</code> (the parenthetical was literally the
+canonical command name, which adds nothing).</p>
+<p><strong>Legacy dBASE dot-prompt aliases dropped.</strong> The
+<code>resolveAlias</code> table previously accepted <code>t</code> /
+<code>top</code> / <code>bottom</code> / <code>b</code> (covered by
+<code>first</code> / <code>last</code>), <code>=</code> /
+<code>display</code> (covered by <code>show</code>), <code>use</code> /
+<code>@</code> (covered by <code>table</code>), and <code>#</code>
+(covered by <code>g</code> / <code>go</code> / <code>goto</code>). All
+gone; the non-dBASE-shaped aliases remain for the same actions.
+<code>skip</code> is retained — that verb has no clean replacement and
+isn’t ambiguous. The matching dead branches in
+<code>cmdStepRecord</code>’s switch (<code>case "top":</code>,
+<code>case "bottom":</code>) also removed.</p>
+<p><strong>Dot-prompt command echo removed.</strong> When
+<code>Command Echo</code> was on, the dot prompt previously printed a
+<code>[Canonical-Name]</code> marker line before each command’s output.
+That’s noise — the user’s own typed line plus the command’s stdout
+output is already plenty of confirmation, and the extra line just slows
+screen-reader review of recent output. Command Echo is now GUI-only. The
+GUI’s announcement path through <code>LiveRegion.say</code> is
+unchanged.</p>
+<p><strong>Bare-Enter row summary trimmed.</strong> Pressing Enter alone
+at the dot prompt previously printed
+<code>[teachers] row 8 of 25  filter: ...  sort: ...</code>. Three of
+those pieces are redundant when the user already knows which table is
+open and presses Enter for a quick position check. The new bare-Enter
+output is just <code>8 of 25</code> — table name omitted, the word
+<code>row</code> omitted, filter and sort omitted. The full summary is
+still available by typing <code>status</code> (or <code>?</code>), which
+calls the unchanged <code>printRowSummary</code> function. The banner at
+dot-prompt startup also still shows the full summary.</p>
+<p><strong>“Spelling:” prefix dropped on the spell-on-double-press
+paths.</strong> Both <code>virtSayCurrent</code> (Alt+Control+NumPad5
+double-press) and <code>speakOrSpell</code> (Say-X family double-press)
+used to lead the spelled output with a literal word
+<code>"Spelling: "</code>. The spaced-out characters that follow are
+themselves a clear cue that the speech is a spelling; the prefix only
+added a word of noise. Now just the spaced characters.</p>
+<p><strong>Two control-operation hints dropped.</strong> The Filter
+Records dialog’s <code>AccessibleDescription</code> was
+<code>"Type filter text, choose a column and match mode, then press OK."</code>
+and the Custom Sort dialog’s was
+<code>"Choose a sort column and direction, then press OK."</code>. Both
+empty now. Screen-reader users already know how to operate standard
+controls; the hints were just noise read once when the dialog
+opened.</p>
+<p><strong>Extra Speech toggle.</strong> The EdSharp / FileDir model. A
+new menu item Toggle Extra Speech (Help menu, Alt+Shift+S) and matching
+<code>Toggle-Extra-Speech</code> dot-prompt command flip a
+<code>LiveRegion.bExtraSpeechEnabled</code> flag that gates every
+<code>LiveRegion.say</code> call. When off, DbDuo’s direct speech
+(status announcements, command echo, virtual-cell readouts, the “DbDuo
+ready” startup announcement, etc.) is suppressed but the screen reader’s
+natural focus and selection announcements still fire. The setting is
+persisted to <code>DbDuo.ini [General] extraSpeech</code> and loaded at
+form construction. A new <code>LiveRegion.sayForced</code> method
+bypasses the gate for two narrow cases: the Toggle-Extra-Speech
+command’s own confirmation (so you always hear “Extra speech off” when
+turning it off), and the Test-Reader command (whose purpose is to verify
+speech). The companion <code>Toggle-Extra-Speech-Log</code> from EdSharp
+is not implemented in this release — the conflict-resolution work it
+would need isn’t worth the marginal benefit.</p>
+<p><strong>Help &gt; Open Sample Database.</strong> A new Help menu item
+opens <code>{app}\sample.db</code> via the same
+<code>openDatabaseAndApplyState</code> code path File &gt; Open Database
+uses, so all the normal post-open behaviors (Recent Files entry, status
+announcement, etc.) apply. If the sample is missing (rare — it ships
+with every installer), a clean information MessageBox explains where to
+find it.</p>
+<p><strong>Not in this release (deferred):</strong> C# scripting feature
+via Roslyn. The CSharp-Scripting-Tutorial.md and the design conversation
+deserve a focused turn rather than a tacked-on implementation. Coming in
+a follow-up release.</p>
+<h2 id="v1.0.39">v1.0.39</h2>
+<p>JAWS settings install correctness fix. The v1.0.38 release shipped a
+JKM-only approach that turned out not to work: the JKM bindings
+referenced <code>TypeCurrentScriptKey</code> directly, but that name is
+a JAWS <em>Function</em>, not a <em>Script</em>, and JKM right-hand
+sides can only invoke Scripts. Loading the JKM produced “Unknown call to
+TypeCurrentScriptKey” from JAWS for every bound chord. This release adds
+the missing piece: a tiny script source file (<code>DbDuo.jss</code>)
+defining a one-line wrapper Script called <code>PassDbDuoKey</code>, and
+installer logic to compile it to <code>DbDuo.jsb</code> in each JAWS
+year-version’s settings folder.</p>
+<p><strong>Why the JKM-only approach failed.</strong> The Freedom
+Scientific scripting documentation states: “JAWS first searches the
+application script file for the script name found in the key map file. …
+When JAWS does not find the name of the script attached to the keystroke
+… an unknown script call error message occurs.” The JAWS Function
+<code>TypeCurrentScriptKey()</code> (which passes the current keystroke
+through to the application as if no script were running) is the right
+primitive, but it can only be invoked from inside a Script body — never
+from a JKM line directly. The standard idiom, confirmed in EdSharp’s own
+JSS (which defines a Script called <code>SilentKey</code> that wraps the
+same call), is to write a one-line Script and reference it by name from
+the JKM.</p>
+<p><strong>The new three-file approach.</strong> Each (JAWS
+year-version, language) settings folder now receives three files:</p>
+<ul>
+<li><code>DbDuo.jkm</code> — every binding’s right-hand side changed
+from <code>TypeCurrentScriptKey</code> to <code>PassDbDuoKey</code> (49
+replacements).</li>
+<li><code>DbDuo.jss</code> — JAWS script source. The complete contents
+are three lines: <code>Script PassDbDuoKey ()</code> /
+<code>TypeCurrentScriptKey ()</code> / <code>EndScript</code>. No
+Include directives, no Use directives, no constant references — the
+smallest possible JSS that does the job.</li>
+<li><code>DbDuo.jsb</code> — compiled binary produced by JAWS’s own
+<code>scompile.exe</code>. Generated locally per-folder during
+install.</li>
+</ul>
+<p><strong>Per-version compilation.</strong> JSB compilation is
+JAWS-version-sensitive: a JSB compiled against JAWS 2024’s compiler
+isn’t guaranteed to load cleanly in JAWS 2026. The installer therefore
+compiles <code>DbDuo.jss</code> separately in each settings folder,
+using the <code>scompile.exe</code> shipped with that specific JAWS
+year-version. The Pascal procedure <code>FindScompilePath</code>
+resolves the compiler path for a given version by checking
+<code>HKLM\Software\Freedom Scientific\JAWS\&lt;version&gt;\Target</code>
+first (the canonical source), then falling back to
+<code>{pf}\Freedom Scientific\JAWS\&lt;version&gt;</code> if the
+registry value is missing. The compilation itself uses Inno Setup’s
+standard <code>Exec</code> with <code>SW_HIDE</code> (so no console
+window flashes) and <code>ewWaitUntilTerminated</code> (so all three
+files for each (version, language) pair are in place before moving to
+the next). Working directory is set to the settings folder so scompile
+both reads the JSS from there and writes the JSB alongside.</p>
+<p><strong>Uninstaller updates.</strong> The
+<code>jawsSettings.log</code> file now records every JKM, JSS, and JSB
+path the installer wrote — three lines per (version, language) pair
+instead of one. <code>CurUninstallStepChanged</code> reads the log and
+removes each path listed, preserving exact symmetry: only files we
+installed are removed.</p>
+<p><strong>Updated documentation.</strong> The “JAWS settings for DbDuo”
+section in DbDuo.md now describes all three files, explains why the
+wrapping Script is needed, gives a four-line manual-install recipe for
+users who want to skip the installer, and notes that scompile.exe lookup
+falls back to the standard Program Files location if registry detection
+fails.</p>
+<p><strong>Backward compatibility.</strong> Users running the v1.0.39
+installer over a v1.0.38 install will get the new three-file bundle plus
+the working JSB. There’s no migration logic needed beyond what the
+installer already does — copying the JKM is idempotent, and the JSS /
+JSB are simply new files. The uninstall log overwrites any previous
+v1.0.38 log so subsequent uninstall removes the right set.</p>
+<h2 id="v1.0.38">v1.0.38</h2>
+<p>JAWS settings integration. JAWS has its own table-navigation chord
+set on Alt+Control+arrow and by default intercepts those chords before
+DbDuo sees them — pressing Alt+Control+RightArrow inside DbDuo without
+any settings adjustment gives “Not in a table” instead of moving the
+virtual cursor. The fix is a JAWS key map file (<code>DbDuo.jkm</code>)
+that tells JAWS to pass those chords directly to DbDuo, plus the same
+treatment for the Alt-letter command family, the search-family chords,
+marked-row navigation, and bulk-mark spans. This release ships the key
+map file and adds an opt-out checkbox to the installer that places it in
+the right JAWS user-settings folders automatically.</p>
+<p><strong><code>DbDuo.jkm</code> added to the bundle.</strong>
+Plain-text JAWS key map. Each binding uses the special action
+<code>TypeCurrentScriptKey</code>, which means “send this key to the
+application as if no JAWS script were running.” Sections covered:</p>
+<ul>
+<li><em>Virtual cell navigation</em> (the primary reason this file
+exists): Alt+Control + Home / End / RightArrow / LeftArrow / DownArrow /
+UpArrow / PageDown / PageUp / NumPad5</li>
+<li><em>Alt-letter command chords</em>: Alt+A / C / D / E / K / L / P /
+R / T / Y / Z plus Alt+Shift+A / D / R</li>
+<li><em>Parent-child drill</em>: Alt+RightArrow / LeftArrow / Home /
+End</li>
+<li><em>Three search families</em>: Control+F / J / F3 plus their Shift
+variants, and F3 / Shift+F3 dispatcher</li>
+<li><em>Marked-row navigation</em>: Control+Home / End / UpArrow /
+DownArrow</li>
+<li><em>Bulk-mark spans</em>: Shift+Home / End plus Alt+Shift
+variants</li>
+<li><em>Say-X data-list chords</em>: Shift+D / L / T / Y / F4</li>
+</ul>
+<p>The <code>[Keyboard Layouts]</code> section maps Desktop and Laptop
+both to the Common section, so a single key list applies regardless of
+which JAWS layout the user prefers.</p>
+<p><strong>Installer integration.</strong> The
+<code>DbDuo_setup.iss</code> script now bundles <code>DbDuo.jkm</code>
+and adds a <code>[Tasks]</code> entry named <code>jawsSettings</code>
+with the description “Install JAWS settings for DbDuo (recommended if
+you use JAWS)”. The task is checked by default and appears on the Ready
+page under the heading “Screen reader integration:”. Users who don’t run
+JAWS, or who prefer to install the key map by hand, can uncheck it.</p>
+<p>The Pascal Script <code>InstallJawsSettings</code> procedure runs at
+<code>ssPostInstall</code> if the task is selected. It enumerates
+<code>%APPDATA%\Freedom Scientific\JAWS\*</code> via
+<code>FindFirst</code> / <code>FindNext</code> (not registry — JAWS’s
+registry layout has shifted across the year-numbering transitions, but
+the AppData folder layout has been stable since JAWS 6 in 2006). For
+each year subfolder it enumerates the <code>Settings\*</code> subfolders
+(language codes like <code>enu</code>, <code>esp</code>,
+<code>deu</code>) and copies <code>DbDuo.jkm</code> into each one. The
+list of paths actually written is logged to
+<code>%APPDATA%\DbDuo\jawsSettings.log</code> so the uninstaller can
+target exactly those paths.</p>
+<p><strong>Uninstall.</strong> The new
+<code>CurUninstallStepChanged</code> procedure reads
+<code>jawsSettings.log</code>, deletes each path it lists, removes the
+log itself, and tries to remove the <code>%APPDATA%\DbDuo</code> folder
+(which <code>RemoveDir</code> only succeeds at if it’s empty —
+preserving any other DbDuo state files the user may have there). The
+uninstaller does NOT enumerate JAWS folders independently and delete
+every <code>DbDuo.jkm</code> it finds; it only removes the ones we
+installed.</p>
+<p><strong>Documentation.</strong> A new “JAWS settings for DbDuo”
+section in <code>DbDuo.md</code> (between Virtual cell navigation and
+File menu) explains the why, the what, and the how — including the
+manual-install path for users who want to copy the file themselves. The
+Installation section of <code>README.md</code> mentions the checkbox and
+the rationale.</p>
+<p><strong>NVDA and Narrator status.</strong> NVDA has the same
+chord-interception problem and would need an add-on (a
+<code>.nvda-addon</code> file). That work is planned for a future
+release. Narrator cannot be scripted at all; Narrator users will hear
+DbDuo’s announcements layered with whatever Narrator says by default,
+which is less polished but functional.</p>
+<p><strong>Compatibility.</strong> Tested for JAWS 2024 and later. The
+folder enumeration pattern works back to JAWS 6, but older JAWS versions
+(pre-Unicode era) used different settings paths that this installer
+doesn’t enumerate.</p>
+<h2 id="v1.0.37">v1.0.37</h2>
+<p>A maintenance release. Two items: code warnings cleared, and a
+portable-SQL-baseline section added to the reference document.</p>
+<p><strong>CS0414 warnings cleared.</strong> The v1.0.36 build produced
+two compiler warnings for the form-scope fields
+<code>sLastFindRegexColumn</code> and <code>sLastFindKind</code>, both
+flagged as “assigned but never used.” These were legacy carryovers from
+the v1.0.32 search-restructure that should have been removed at the
+time. A related field <code>sLastFindCriteria</code> on
+<code>DbDuoForm</code> was in the same state (assigned once, never
+read). All three are now gone from <code>DbDuoForm</code>, along with
+their three write sites. The
+<code>DotPromptHost.sLastFindCriteria</code> static field is a different
+field in a different class and is unaffected — it remains in active use
+for the CLI’s find-next path. The form’s per-family last-term state
+continues to work through <code>sLastJumpSubstring</code> /
+<code>sLastFindSubstring</code> / <code>sLastFindRegex</code> plus
+<code>sLastSearchKind</code>; the removed fields were entirely
+redundant.</p>
+<p><strong>Portable SQL baseline section added to DbDuo.md.</strong> A
+new subsection at the top of the SQL reference, “A portable SQL baseline
+that works everywhere,” explains which SQL forms run unchanged across
+SQLite, Access, Excel, dBASE, and CSV/TSV. The framing is honest about
+what “portable” actually means here: it’s not “Jet 4.0 SQL works on
+SQLite” (which would be wrong — Jet has Microsoft-specific syntax for
+wildcards, string concatenation, date literals, boolean literals, and
+row-limiting that fails on SQLite), but rather “a careful ANSI SQL-92
+subset works everywhere.” The section gives worked examples for SELECT,
+INSERT, UPDATE, DELETE, JOIN, and CREATE TABLE in the portable subset,
+lists the specific portability gotchas users will hit (LIKE wildcards,
+concatenation, date literals, boolean literals, LIMIT vs. TOP,
+identifier quoting), and points to two external references for users who
+want the full per-dialect details:</p>
+<ul>
+<li>Microsoft Jet 4.0 / Access SQL reference at
+<code>learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/microsoft-jet-sql-reference</code></li>
+<li>SQLite SQL syntax reference at <code>sqlite.org/lang.html</code>
+(and the railroad diagrams at
+<code>sqlite.org/syntaxdiagrams.html</code>)</li>
+</ul>
+<p>The section explicitly notes that most users will not need to go
+beyond the portable subset — Filter Records (Shift+F) covers the great
+majority of ad-hoc filtering through ADO Filter expressions without
+needing custom SQL at all. Run SQL exists for the cases when you do, and
+the per-dialect subsections below the new “portable baseline” section
+cover the full feature surface of each engine.</p>
+<h2 id="v1.0.36">v1.0.36</h2>
+<p>A repositioning release. After three releases of substantial
+accessibility work (Recent Files, the redesigned case-sensitive search
+dialogs, virtual cell navigation, the double-press-spells convention,
+the column-prompt model), the user-facing description of DbDuo had
+drifted out of step with what the tool actually is. The README opened
+with “Manage your databases by keyboard”; the About dialog described
+“synchronized interfaces between CLI and GUI modes”; the Announce file
+led with “for keyboard users of Windows.” All accurate, but none of them
+surfaced the accessibility work to the audience most likely to value
+it.</p>
+<p>This release brings the user-facing copy in line with reality. No
+code or behavior changes — only documentation and presentation
+strings.</p>
+<p><strong>README.md rewritten.</strong> The opening paragraph now leads
+with “An accessible, keyboard-first database manager for Windows” and
+explicitly names JAWS, NVDA, and Narrator. A new “Who this is for”
+section sits second, telling screen-reader users directly that the tool
+is built for them and reassuring sighted developers that the speech work
+doesn’t get in their way (DbDuo is silent unless a screen reader is
+running). The “What DbDuo lets you do” section now includes the virtual
+cell cursor, the spell-on-second-press convention, the three search
+families, and Recent Files. The Quick Start tour was rewritten
+end-to-end to use current chord assignments — the previous version still
+used Shift+E for Enter-Child, Shift+X for Exit-Child, and Shift+M /
+Shift+U for marking, all of which were superseded in earlier
+releases.</p>
+<p><strong>Announce.md rewritten.</strong> Same accessibility-first
+repositioning. Lead paragraph names JAWS, NVDA, and Narrator. New “Who
+DbDuo is for” section. “What sets DbDuo apart” replaces a generic
+feature list with the actual differentiators: virtual table cursor,
+double-press-spells, three-family search with persistent history,
+dual-interface synchronization, Recent Files with per-table state,
+parent-child drill. Menu summaries updated to use natural-English menu
+labels (the v1.0.33 layout: File / Edit / Navigate / Query / Misc /
+Help).</p>
+<p><strong>DbDuo.md tagline updated.</strong> The reference document’s
+opening tagline now matches the README opening.</p>
+<p><strong>About dialog rewritten.</strong> The Help &gt; About DbDuo
+dialog (Alt+F1) now leads with “An accessible, keyboard-first database
+manager for Windows” and explicitly mentions screen-reader-first design,
+JAWS / NVDA / Narrator support, table-style cell navigation, and the
+double-press-spells convention. The PowerShell and ADO architecture
+notes are kept but moved below the user-facing description.</p>
+<p><strong>Installer welcome page updated.</strong> Inno Setup’s
+<code>WelcomeLabel2</code> now describes DbDuo as “an accessible,
+keyboard-first database manager for Windows” with first-class
+screen-reader support, before the license note and driver-install
+note.</p>
+<p><strong>Naming decision.</strong> The name “DbDuo” is retained. A
+naming analysis weighed candidates including “DbAcc,” “DbAccess,”
+“DbA11y,” “DbVoice,” “DbReader,” and “DbEcho” against the criteria of
+audience signaling, distinctiveness, screen-reader pronunciation,
+trademark adjacency, and database-category clarity. “DbAccess” has
+serious adjacency problems with Microsoft Access. “DbAcc” reads as
+unfinished. “DbA11y” is insider jargon that doesn’t pronounce cleanly.
+“DbVoice” misleads about whether the tool produces TTS itself.
+“DbReader” implies read-only. “DbEcho” was the strongest alternative,
+but doesn’t beat DbDuo cleanly enough to justify the costs of renaming.
+The conclusion: keep DbDuo as a serviceable name and let the README
+opening, the tagline, and the About dialog carry the audience-signaling
+work that a short name cannot.</p>
+<h2 id="v1.0.35">v1.0.35</h2>
+<p>A documentation release. The DbDuo reference (<code>DbDuo.md</code>)
+was substantially out of date — it still described the old Record / View
+/ Schema / Tools menu structure, mentioned chord assignments that had
+been changed in the last three releases, and gave no coverage at all of
+virtual cell navigation, the case-sensitive search dialogs, or Recent
+Files. This release rewrites the affected sections so the reference
+matches v1.0.34’s actual behavior.</p>
+<p><strong>Updated sections in <code>DbDuo.md</code>.</strong> Every
+menu section now uses the correct menu name (File / Edit / Navigate /
+Query / Misc / Help) and the correct visible-label DbDuo names that
+v1.0.33 introduced; for example, “Show-Object” is now described as
+“Examine Record,” “Set-Mark” as “Mark Record,” “Reset-Filter” as “Clear
+Filter,” etc. The PowerShell canonical name stays current in the
+dot-prompt reference but no longer leaks into menu descriptions.</p>
+<p><strong>New section: Virtual cell navigation.</strong> A dedicated
+section between “Keyboard navigation in the data list” and the menu
+reference explains the Alt+Control + extended-key chord family with all
+eight chords laid out, the direction-aware announcement behavior
+(vertical move → “Row N: value”; horizontal move → “Header: value”;
+corner jump → “Row N, Header: value”), and the double-press-spells
+convention applied across the Say-X family. The section also describes
+the cursor’s two-way synchronization with the listview row selection and
+how column-aware commands (Sort, Open Cell Value, Next Initial Change,
+Jump to Match) default to the column under virtual focus.</p>
+<p><strong>Updated section: Keyboard navigation in the data
+list.</strong> Now explains the three independent navigation modes — row
+navigation with arrows, column-announcement-only navigation with Tab,
+and cell-level virtual navigation with Alt+Control+arrow. The previous
+version incorrectly described Tab as a column-targeting mechanism for
+commands; that has not been true since v1.0.33. Tab is now correctly
+described as announcement-only with no command-targeting role.</p>
+<p><strong>Updated section: Mnemonic hotkey groups.</strong> All seven
+subsections refreshed:</p>
+<ul>
+<li><strong>Bare Shift+Letter family</strong> now lists 5 chords (F, G,
+J, R, S) instead of 9 — the parent-child drill and mark/unmark pairs
+moved to Alt+arrow and Control+M/U respectively.</li>
+<li><strong>Function-key family</strong> updated to cover the three
+search families on F3 / Control+F3 with their reverse variants, the
+unified F3 / Shift+F3 search-again dispatcher, and the new F11 = Check
+for Update binding.</li>
+<li><strong>Control-letter family</strong> covers all three search
+families (Control+F, Control+J, Control+F3) with their Shift variants,
+plus the new Control+M / Control+U mark pair.</li>
+<li><strong>Alt-letter family</strong> now correctly lists Alt+R as
+Recent Files and Alt+Shift+R as Related Records (these flipped in
+v1.0.33).</li>
+<li><strong>New: Alt+Control extended-key family</strong> documents the
+virtual-cursor chord set with its rationale.</li>
+<li><strong>New: Alt+arrow family (parent-child drill)</strong> explains
+Alt+Right / Alt+Left / Alt+Home for Enter Child Table / Exit Child Table
+/ Exit to Root Table.</li>
+<li><strong>Navigation family</strong> corrected to describe Tab as
+announcement-only and to drop references to per-cell-targeting from
+arrow keys.</li>
+</ul>
+<p><strong>No code changes in this release.</strong> Only documentation.
+DbDuo.cs is at v1.0.35 only to match the bundle and history-file version
+line; the binary behavior is identical to v1.0.34.</p>
+<h2 id="v1.0.34">v1.0.34</h2>
+<p>Virtual cell-level navigation in the data list, with
+screen-reader-style direction-aware announcements and the
+double-press-spells convention for speech-only commands.</p>
+<p><strong>The virtual cursor.</strong> A second navigation cursor —
+separate from the listview’s row selection — that tracks a
+<code>(row, column)</code> pair. The listview itself only has row
+selection (the .NET ListView with <code>MultiSelect=false</code> has no
+per-cell focus concept), so the virtual cursor lives entirely in DbDuo’s
+state and announcements. The user moves it with Alt+Control + arrow /
+Home / End / PageUp / PageDown chords. Each movement triggers a speech
+announcement of the resulting cell value, with direction-aware
+framing.</p>
+<p><strong>Chord family.</strong> All six Alt+Control combinations on
+the extended arrow / numpad cluster — per your “exception about
+Alt+Control combinations for this navigation family because the
+extended-arrow / numpad keys do not make sense for desktop shortcut
+hotkeys”:</p>
+<ul>
+<li><strong>Alt+Control+Home</strong> = top-left cell (row 1, column
+0)</li>
+<li><strong>Alt+Control+End</strong> = bottom-right cell (last row, last
+column)</li>
+<li><strong>Alt+Control+RightArrow</strong> / <strong>LeftArrow</strong>
+= next / previous column, same row</li>
+<li><strong>Alt+Control+DownArrow</strong> / <strong>UpArrow</strong> =
+next / previous row, same column</li>
+<li><strong>Alt+Control+PageDown</strong> = last row, current
+column</li>
+<li><strong>Alt+Control+PageUp</strong> = first row, current column</li>
+<li><strong>Alt+Control+Numpad5</strong> (or Alt+Control+Clear, which is
+what Numpad5 maps to with NumLock off) = announce current cell</li>
+</ul>
+<p><strong>Direction-aware announcements.</strong> Per the JAWS / NVDA
+table-reading idiom:</p>
+<ul>
+<li><strong>Vertical move</strong> (row changed only): say
+<code>Row N: value</code> — the column is implied by context, just the
+row index and the new value</li>
+<li><strong>Horizontal move</strong> (column changed only): say
+<code>Header: value</code> — the row stays the same, hear the new
+column’s header and value</li>
+<li><strong>Corner jump</strong> (both changed, from Home or End): say
+<code>Row N, Header: value</code> — explicit on both axes</li>
+<li><strong>Repeat or refresh</strong> (neither changed, from Numpad5
+single-press): say <code>Header: value</code> — full context for the
+current cell</li>
+</ul>
+<p>The previous row and column are tracked in
+<code>iPrevVirtualRow</code> / <code>iPrevVirtualCol</code>; comparison
+to the current row/column determines what to announce.</p>
+<p><strong>Double-press spells.</strong> EdSharp / FileDir convention:
+press a speech-only chord twice in succession to spell the spoken text
+character by character. DbDuo now does this through a shared
+<code>speakOrSpell(text, chordId)</code> helper that tracks the
+last-pressed chord identity and timestamp. A second press within 1.5
+seconds of the same chord spells the text instead of repeating it.
+Applied to:</p>
+<ul>
+<li><strong>Alt+Control+Numpad5</strong> = say or spell the current
+virtual cell</li>
+<li><strong>Say Status</strong> (Alt+Z), <strong>Say Path</strong>
+(Alt+P), <strong>Say Yield</strong> (Alt+Y) — the per-session-state
+speech commands</li>
+<li><strong>Say Tables</strong> (Shift+F4), <strong>Say Marked</strong>
+(Shift+L)</li>
+<li><strong>Say Date</strong> (Shift+D), <strong>Say Type</strong>
+(Shift+T), <strong>Say Yield Marked</strong> (Shift+Y)</li>
+</ul>
+<p>The spell output inserts spaces between characters so the screen
+reader pronounces each one separately; <code>space</code> is the literal
+word for whitespace; punctuation is announced as-is by most screen
+readers.</p>
+<p><strong>Virtual cursor synchronization.</strong> Two cursors must
+stay in sync to avoid confusion:</p>
+<ul>
+<li><strong>F5 (Refresh View)</strong> resets virtual focus to (row 1,
+column 0) and resyncs the listview row selection. The user hears
+“Refreshed.”</li>
+<li><strong>Opening a database file or switching tables</strong> also
+resets virtual to (row 1, column 0).</li>
+<li><strong>Regular Down / Up arrow</strong> moves the listview’s row
+selection; the virtual row follows (column stays put). This is the
+natural case — you’re scrolling through rows, the virtual cursor’s row
+index follows.</li>
+<li><strong>Alt+Control+Arrow</strong> moves the virtual cursor first,
+then syncs the listview’s row selection on any row change. So when the
+user uses table-navigation chords, the visible selection follows
+them.</li>
+</ul>
+<p>The two paths are mediated by <code>bSuppressCellChanged</code>: a
+programmatic listview-selection update sets the flag, so the
+cell-changed handler doesn’t echo the change back into the virtual
+cursor or re-fire the announcement.</p>
+<p><strong>Column-prompt dialogs default to the virtual column.</strong>
+Per your spec, “When a command is issued that prompts for a column name,
+it should default to the column with virtual focus.” The four affected
+commands now use <code>virtCurrentColumnName()</code> as the default
+selection in their column-picker <code>addPickBox</code>:</p>
+<ul>
+<li><strong>Sort Ascending / Sort Descending</strong> (Alt+A /
+Alt+Shift+A) default the picker to whatever column the user just had
+under virtual focus</li>
+<li><strong>Next Initial Change</strong> defaults the same way</li>
+<li><strong>Open Cell Value</strong> defaults the same way — useful
+because the user can virtually navigate to a URL column, press
+Control+Enter, and just hit Enter on the picker to confirm</li>
+<li><strong>Jump to Match in One Column</strong> (Control+J) uses the
+prior Jump column first, falling back to the virtual column, then to the
+first column</li>
+</ul>
+<p>In every case, just pressing Enter in the picker accepts the default
+— making the picker effectively a confirmation step rather than a
+friction-adding extra click.</p>
+<p><strong>Tab-announced cursor remains for screen-reader
+Tab-hop.</strong> The original <code>iCurrentColumnIndex</code> field is
+unchanged in scope: Tab inside a focused row still hops across cell
+announcements (the screen-reader-friendly “what’s the value here, what’s
+the next value over” workflow). Tab does not move the virtual cursor and
+does not target commands. The two cursors are independent: Tab
+announces, Alt+Control+arrow navigates.</p>
+<p><strong>Implementation summary.</strong> New helpers added to
+DbDuoForm: <code>virtCellValue(row, col)</code>,
+<code>virtSyncListSelection(row)</code>, <code>virtResetToTop()</code>,
+<code>virtSyncFromListSelection()</code>,
+<code>virtMoveTo(row, col)</code>, <code>virtSayCurrent(chordId)</code>,
+<code>virtCurrentColumnName()</code>,
+<code>speakOrSpell(text, chordId)</code>. State:
+<code>iVirtualRow</code>, <code>iVirtualCol</code>,
+<code>iPrevVirtualRow</code>, <code>iPrevVirtualCol</code>, plus the
+spell-tracker pair <code>iLastSpeechChord</code> /
+<code>iLastSpeechTicks</code> and the <code>DoublePressMillis</code>
+constant (1500). Eight chord intercepts added to
+<code>ProcessCmdKey</code> before the dispatch routing. Eight Say-X
+handler call-sites switched from <code>LiveRegion.say</code> to
+<code>speakOrSpell</code> with unique chord IDs (101-108).</p>
+<h2 id="v1.0.33">v1.0.33</h2>
+<p>Four major user-visible improvements: the redesigned search dialogs,
+Recent Files, the listview-appropriate column-prompt model, and
+DbDuo-name menu labels.</p>
+<p><strong>Search dialogs now have a Text input, a Recent list, and a
+Case-sensitive checkbox.</strong> Each of the three search families —
+Jump to Match in One Column, Find Across All Columns, Find Regex Across
+All Columns — uses the same dialog layout: optional column listbox (Jump
+only), Text input (with the prior term as default), Recent listbox (up
+to 10 entries, most-recent first; <code>[Aa]</code> suffix marks entries
+that were case-sensitive), Case-sensitive checkbox (off by default), OK
+/ Cancel. Selecting a Recent entry copies its text into the Text input
+AND sets the Case-sensitive checkbox to how that term was last used.
+Double-clicking a Recent entry acts as OK. Recent histories are
+persisted to per-user DbDuo.ini under <code>[RecentJump]</code>,
+<code>[RecentFind]</code>, <code>[RecentFindRegex]</code> sections; each
+section holds up to 10 (term, case-sensitive) pairs as
+<code>termN</code> / <code>caseN</code> keys. The list is move-to-front
+(using a term again shifts it to the top rather than appearing
+twice).</p>
+<p><strong>Per-family last-search-term defaults.</strong> When the user
+invokes Control+J the dialog’s Text input contains the last Jump
+substring (NOT the last Find or Regex substring). Same logic for
+Control+F and Control+F3. The per-family state has always existed in the
+code; the dialog redesign just surfaces it correctly. The F3 / Shift+F3
+search-again dispatcher continues to repeat whichever family was last
+used.</p>
+<p><strong>Recent Files dialog on Alt+R.</strong> A new File menu item
+(“Recent Files…”) shows up to the last 10 database files opened, with
+the last-active table noted in the display. Selecting one reopens the
+file, restores the saved table (silently falling back to the first base
+table if it no longer exists), and applies the saved filter / sort /
+position for that table. Any individual restore step that can no longer
+apply (filter references a dropped column, position out of range, etc.)
+is silently skipped per the spec. Recent file state is persisted to
+per-user DbDuo.ini under <code>[RecentFile1..10]</code> sections; each
+section holds the path, last-active table, and per-table state (filter,
+sort, position) under indexed <code>tN_name</code> /
+<code>tN_filter</code> / <code>tN_sort</code> / <code>tN_position</code>
+keys. Capture happens in <code>OnFormClosing</code>, so closing DbDuo
+always saves the current view for the next session.</p>
+<p><strong>Alt+R reassignment.</strong> Last release had Alt+R as a
+global alias for Show-Related. With Recent Files claiming the Alt+R
+slot, Show-Related moves to <strong>Alt+Shift+R</strong> — same “R for
+Related” mnemonic, modified-form chord since Recent took the
+primary.</p>
+<p><strong>Listview-appropriate column-prompt model.</strong> Several
+commands previously read a “current column” from the Tab-tracked
+<code>iCurrentColumnIndex</code> field. This worked but had a hidden
+coupling that wasn’t visible to a screen-reader user: pressing Tab moved
+an invisible cursor, then a sort command would silently use whatever
+column Tab had landed on. Per Jamal’s spec (“the program has to prompt
+for a column name”), the affected commands now prompt via standard LBC
+dialog with <code>addPickBox</code>:</p>
+<ul>
+<li><strong>Sort Ascending / Sort Descending</strong> prompt for a
+column</li>
+<li><strong>Next Initial Change</strong> prompts for a column to
+track</li>
+<li><strong>Open Cell Value</strong> prompts for a column whose cell to
+open</li>
+</ul>
+<p>The Tab-announced column index still exists for the screen-reader
+speech helper (<code>announceCurrentColumn</code>), which speaks the
+column header and value as the user hops across cells in a focused row.
+But Tab no longer <em>targets</em> commands. Commands always prompt.</p>
+<p><strong>Menu labels rewritten to DbDuo names.</strong> Per Jamal’s
+spec: in the menu system, the visible label uses the DbDuo (natural
+English) name, not the PowerShell canonical. The PowerShell name (third
+addItem argument) stays unchanged for dot-prompt usage, so
+<code>find</code> / <code>Find</code> and <code>sort-ascending</code> /
+<code>Sort-Ascending</code> both still work as you’d expect. The mapping
+follows: if a command has an EdSharp/FileDir equivalent, the menu label
+uses that (e.g., Get-Help → “Help Contents”); otherwise Proper Case with
+spaces (e.g., Show-Object → “Examine Record”, Get-Property → “Table
+Properties”, Reset-Filter → “Clear Filter”, Sort-Object → “Custom Sort”,
+Set-Mark → “Mark Record”, Show-Status → “Where Am I”, Trace-Command →
+“Toggle Key Describer Mode”, Show-History → “Version History”,
+Test-Reader → “Test Screen Reader Speech”, Update-Field → “Find and
+Replace Across Rows”). Every menu label that previously read like a
+PowerShell token is now natural English. Dot-prompt usage is
+unchanged.</p>
+<p><strong>Per-table state captured on form close.</strong> A new
+<code>OnFormClosing</code> override reads the currently-open database’s
+path, table, filter, sort, and position, and writes them to RecentFiles
+before exit. Failures at any step are silently swallowed so they never
+block form close. The next session’s Recent Files dialog can use this to
+restore the user’s view.</p>
+<p><strong>SearchHistory helper class.</strong> Public static class
+inside DbDuoForm with <code>load(section)</code>,
+<code>record(section, term, caseSensitive)</code>,
+<code>save(section, list)</code> methods. Move-to-front semantics;
+10-entry cap; <code>(term, caseSensitive)</code> pair storage. Used by
+all three search dialogs.</p>
+<p><strong>RecentFiles helper class.</strong> Public static class with
+<code>loadAll()</code> / <code>recordOpen(path)</code> /
+<code>recordTableState(path, table, filter, sort, position)</code> /
+<code>saveAll(list)</code> methods. <code>FileState</code> and
+<code>TableState</code> inner classes.
+<code>openDatabaseAndApplyState(path, state)</code> is a shared helper
+used by both File &gt; Open and File &gt; Recent Files to apply
+per-table restore.</p>
+<p><strong>Both helper classes designed for reuse.</strong> They live in
+<code>DbDuo.cs</code> for now per Jamal’s request to keep the LBC
+library co-located, but are written as self-contained static classes
+with no DbDuo-specific assumptions beyond IniSession (which is also
+general-purpose). Future .NET projects should be able to lift them out
+as-is.</p>
+<h2 id="v1.0.32">v1.0.32</h2>
+<p>A substantial reorganization of the search-command family plus a
+small set of new Alt+Letter mnemonics.</p>
+<p><strong>Three distinct search families, each with forward / reverse
+chord pairs, plus a unified “search again” dispatcher.</strong> The
+previous design conflated column-scoped find (which had been on
+Control+F) with across-all-columns find (which was missing). The new
+layout separates them cleanly:</p>
+<ul>
+<li><strong>Jump-Record</strong> on <strong>Control+J</strong> (forward)
+and <strong>Control+Shift+J</strong> (reverse). Prompts an LbcDialog
+with a column listbox and a substring textbox. Matches
+case-insensitively against the chosen column only. Useful for “show me
+the row where Email contains ‘jamal’.” The dbDot SEEK / dBASE FIND
+heritage command.</li>
+<li><strong>Find</strong> on <strong>Control+F</strong> (forward) and
+<strong>Control+Shift+F</strong> (reverse). Prompts only for a
+substring; matches across every visible column. The universal Office /
+browser Control+F idiom, “show me any row that mentions X
+anywhere.”</li>
+<li><strong>Find-Regex</strong> on <strong>Control+F3</strong> (forward)
+and <strong>Control+Shift+F3</strong> (reverse). Prompts only for a .NET
+regex; matches across every visible column.</li>
+<li><strong>F3</strong> (forward) and <strong>Shift+F3</strong>
+(reverse) now repeat whichever family was most recently invoked.
+Internal <code>sLastSearchKind</code> tracker has values “jump”, “find”,
+or “regex”; the new <code>recSearchAgain</code> dispatcher switches on
+it.</li>
+</ul>
+<p>The Find / Find-Regex matching logic walks the recordset row-by-row
+in C# (using the client-cursor recordset’s O(N) memory traversal)
+checking every visible column for
+<code>IndexOf(...IgnoreCase) &gt;= 0</code> for Find, or
+<code>Regex.IsMatch</code> for Find-Regex. Jump-Record uses the same
+walk but scoped to one column. All three preserve the original cursor
+position when no match is found.</p>
+<p>The legacy column-picker on Find-Regex’s dialog is gone; the spec is
+now “across all columns” for both Find and Find-Regex. Column-scoped
+regex remains reachable via <code>Invoke-Sql</code> with a
+<code>WHERE column REGEXP pattern</code> clause for SQLite or comparable
+SQL constructs.</p>
+<p><strong>Menu items reorganized.</strong> New menu items in the
+Navigate menu: Find / Find Previous / Jump-Record / Jump-Record Previous
+/ Find-Regex / Find-Regex Previous / Search-Next / Search-Previous. The
+legacy “Jump Next” and “Jump Previous” (which were really “search-again
+forward/reverse” with the Jump label) are replaced by the cleaner
+Search-Next / Search-Previous naming since they now dispatch across all
+three families.</p>
+<p><strong>Bare-Shift+J data-list alias retained.</strong> Still works
+from the data list and routes to Jump-Record (the column-scoped command)
+for muscle memory continuity.</p>
+<p><strong>Alt+Letter audit and four new mnemonic chords added.</strong>
+ProcessCmdKey dispatches form-level chords BEFORE menu accelerators are
+processed in WinForms, so even Alt+Letter chords whose letter is a
+main-menu accelerator (Alt+F for File, Alt+E for Edit, Alt+P for Help)
+can host commands — but to keep the chord layout clean and documentable,
+the new bindings all use letters that aren’t main-menu accelerators. The
+main menus use F / E / N / Q / M / P; the new chords below use other
+letters.</p>
+<ul>
+<li><strong>Alt+R</strong> = Show-Related (R for Related)</li>
+<li><strong>Alt+T</strong> = Measure-Table (T for Table)</li>
+<li><strong>Alt+C</strong> = New-Chart (C for Chart)</li>
+<li><strong>Alt+L</strong> = Show-Table (L for List)</li>
+</ul>
+<p>These are global aliases for commands whose canonical menu home was a
+no-hotkey menu item; the Alt+Letter chord gives them keyboard reach.</p>
+<p><strong>Alt+F = Reset-Filter alias dropped.</strong> Last release’s
+v1.0.29 had added Alt+F as a global alias for Reset-Filter to “round out
+the F-modifier family,” but the actual ergonomic case for it was thin —
+the bare Shift+R chord from the data list is sufficient — and the chord
+collides with the File menu accelerator on the visible-menu-accelerators
+reading. Dropping it leaves Alt+F doing what it does in every other
+Windows app: opening the File menu.</p>
+<p><strong>CLI alias table expanded for the new search
+canonicals.</strong> <code>f</code> / <code>find</code> →
+<code>find</code> (across-all-columns substring, was
+<code>jump-record</code>); <code>j</code> / <code>jump</code> →
+<code>jump-record</code> (one-column substring);
+<code>find-previous</code>, <code>find-next</code>,
+<code>find-again</code>, <code>again</code>, <code>previous-match</code>
+route to the appropriate canonical. The CLI dispatcher gains
+<code>case "find"</code>, <code>case "find-previous"</code>,
+<code>case "search-next"</code>, <code>case "search-previous"</code>
+entries. Existing CLI find handlers (which use ADO Find LIKE syntax for
+the dot-prompt’s text-only workflow) continue to handle these — the
+column-listbox dialog is a GUI affordance that doesn’t fit the dot
+prompt.</p>
+<h2 id="v1.0.31">v1.0.31</h2>
+<p>Cleanup of the bare-Shift+Letter chord family. Last release’s v1.0.30
+introduced Alt+RightArrow / Alt+LeftArrow / Alt+Home for the
+parent-child drill commands, but mistakenly kept Shift+E and Shift+X
+registered as data-list aliases. The point of the Alt+arrow chords was
+to <em>replace</em> the bare-Letter chords on E and X, freeing those
+slots for future commands. Likewise for Set-Mark / Clear-Mark on
+Control+M / Control+U: the legacy Shift+M / Shift+U aliases were kept by
+mistake and have now been removed.</p>
+<p><strong>Four bare-Shift+Letter slots freed for future
+commands.</strong> Shift+E, Shift+M, Shift+U, and Shift+X are now
+unbound and reserved. The bare-Shift+Letter family now uses only five
+letters from the data list: <strong>Shift+F</strong> for Select-Record
+(filter), <strong>Shift+G</strong> for Set-Position (go to row),
+<strong>Shift+J</strong> for Jump-Record (find),
+<strong>Shift+R</strong> for Reset-Filter, <strong>Shift+S</strong> for
+Sort-Object (custom sort). Each of these has a primary command whose
+canonical chord uses a different modifier; the bare-Shift+Letter chord
+is a data-list-only ergonomic shortcut. The freed E, M, U, X slots
+remain available for future mnemonic-driven additions without disturbing
+existing convention.</p>
+<p><strong>Menu labels cleaned up.</strong> The “(or Shift+E from data
+list)” and “(or Shift+X from data list)” notes added in v1.0.30 are
+gone, since those chords no longer exist. Same for the “(or Shift+M from
+data list)” / “(or Shift+U from data list)” notes on the Set-Mark /
+Clear-Mark menu items. Each menu label now states only its canonical
+chord.</p>
+<p><strong>Confirmed chord summary for the parent-child drill
+family:</strong></p>
+<ul>
+<li><strong>Alt+RightArrow</strong> = Enter-Child (drill into related
+child rows)</li>
+<li><strong>Alt+LeftArrow</strong> = Exit-Child (return to parent row,
+one level)</li>
+<li><strong>Alt+Home</strong> = Exit-ChildToRoot (pop entire drill
+stack)</li>
+</ul>
+<p>And for the row-marking family (single-row operations):</p>
+<ul>
+<li><strong>Control+M</strong> = Set-Mark (mark current row)</li>
+<li><strong>Control+U</strong> = Clear-Mark (unmark current row)</li>
+</ul>
+<p>The bulk marking family (multi-row span operations) was already
+complete in v1.0.30 and is unchanged: Shift+DownArrow / Shift+UpArrow /
+Alt+Shift+DownArrow / Alt+Shift+UpArrow for tag-and-move; Shift+Home /
+Shift+End / Alt+Shift+Home / Alt+Shift+End for span tagging; Control+A /
+Control+Shift+A / Control+I for all-tag / all-untag / invert-tag.</p>
+<h2 id="v1.0.30">v1.0.30</h2>
+<p>Four related improvements focusing on the parent-child drill family,
+the marking chord pair, and Elevate-Version robustness.</p>
+<p><strong>Parent-child drill family moved to Alt+arrow chords.</strong>
+Enter-Child is now on <strong>Alt+RightArrow</strong>, Exit-Child on
+<strong>Alt+LeftArrow</strong>. A new <strong>Alt+Home =
+Exit-ChildToRoot</strong> command pops the entire drill stack and
+returns to the topmost ancestor in one step, with a confirmation
+announcement of how many levels were popped (“Returned to root (3
+levels)”). The arrow chords are global; they work from anywhere in the
+form. The bare Shift+E / Shift+X chords remain as data-list-only aliases
+via the grid-keydown switch, preserving the bare-Shift+Letter family
+parity with FileDir. Menu labels mention the alternate chord for
+discoverability: “Enter-Child (drill to related child rows; Shift+E from
+data list)…” and similar for Exit-Child.</p>
+<p><strong>Set-Mark / Clear-Mark pair moved to Control+M /
+Control+U</strong> for chord symmetry. Previously Shift+M / Shift+U,
+which worked but had an asymmetric feel — marking and unmarking should
+be parallel operations with parallel chords. Control+M / Control+U gives
+that parallelism: mark and unmark differ only by the letter, not by an
+added modifier. The bare Shift+M / Shift+U chords remain registered in
+the grid-keydown switch as data-list aliases, so muscle memory from
+earlier versions still works. Mentioned in the menu labels: “Set-Mark
+(current row; Shift+M from data list)” and similar.</p>
+<p><strong>Control+E and Control+Shift+E freed.</strong> Both chord
+slots are now unbound for future use. Extract-Regex (which previously
+occupied Control+Shift+E) moved to <strong>Alt+E</strong> — “E for
+Extract” mnemonic preserved, just with the Alt modifier instead.
+Control+E was already free in the menu system but had no global
+alternative; the move now leaves both quadrants of the E family
+available.</p>
+<p><strong>Elevate-Version hardened with scrape fallback.</strong> The
+GitHub Releases REST API at
+<code>https://api.github.com/repos/JamalMazrui/DbDuo/releases/latest</code>
+is genuinely public — no credentials required — and returns standard
+JSON. However, GitHub’s unauthenticated rate limit is 60 requests per
+hour per IP, which is plenty for one user invoking Elevate-Version once
+a week but could trip on shared / corporate / VPN IPs. As a fallback,
+Elevate-Version now also implements an HTML-scrape path: hit
+<code>https://github.com/JamalMazrui/DbDuo/releases/latest</code> with
+<code>AllowAutoRedirect=false</code> and read the 302 Location header,
+whose final URL segment is the version tag (the GitHub site redirects
+<code>/releases/latest</code> to <code>/releases/tag/v1.0.30</code> or
+similar). The fallback uses no credentials and is not subject to the
+REST API rate limit. The API path is tried first; on any failure
+(network error, 403 rate-limit, malformed JSON, empty
+<code>tag_name</code>), the code falls through to the scrape path
+silently.</p>
+<p><strong>FileDir-style marking family confirmed complete.</strong>
+Audit of the existing chord set against the FileDir tag conventions
+shows every chord already implemented: Shift+DownArrow = Mark and next,
+Shift+UpArrow = Mark and previous, Alt+Shift+DownArrow = Unmark and
+next, Alt+Shift+UpArrow = Unmark and previous, Shift+Home = Mark to top,
+Shift+End = Mark to bottom, Alt+Shift+Home = Unmark to top,
+Alt+Shift+End = Unmark to bottom, Control+A = Mark all, Control+Shift+A
+= Unmark all, Control+I = Invert marks. The <code>&gt;</code> and
+<code>&lt;</code> aliases for Mark-and-Next / Unmark-and-Next (FileDir’s
+keyboard shorthand) are also wired. No additions needed here — only the
+Set-Mark / Clear-Mark pair (which is the single-row operation) was
+updated.</p>
+<h2 id="v1.0.29">v1.0.29</h2>
+<p>Five related improvements that round out the EdSharp / FileDir
+alignment and the keyboard ergonomics of the F-modifier family.</p>
+<p><strong>The F-modifier family is now complete without
+File-Find.</strong> Following Jamal’s “no Alt+Control combinations for
+in-app commands” rule (Alt+Control is reserved for Windows global
+hotkeys, like the desktop shortcut Alt+Control+D), the in-app F-family
+uses four chords: <strong>Control+F = Jump-Record</strong> (universal
+find idiom), <strong>Control+Shift+F = Find-Regex</strong> (regex
+variant), <strong>Shift+F = Select-Record / Filter</strong>
+(bare-Shift+Letter from the data list), <strong>Alt+F =
+Reset-Filter</strong> (the natural “undo filter,” works anywhere).
+Alt+Shift+F is deliberately unbound for future use. The File-Find
+proposal from earlier planning was dropped — its function is covered by
+the existing Open-Database / Switch-Table picker on F4.</p>
+<p><strong>Command Echo setting.</strong> A new
+<code>[Options] commandEcho</code> setting in DbDuo.ini (default Y)
+controls whether DbDuo announces each command’s canonical name as it
+runs. EdSharp’s <code>ExtraSpeech=Y</code> is the model. In the GUI, the
+announcement goes through the LiveRegion so the screen reader speaks the
+command name before the command body executes; in the CLI, the
+dispatcher prints a <code>[Step-Record-First]</code>-style marker line
+before running. The setting is toggleable through the Edit-Configuration
+dialog (F12) — a new checkbox sits next to the uiMode picker, with
+focus-tip status text describing what the option does. Takes effect
+immediately on save; no restart needed. The cache is invalidated when
+the user changes the value, so the next command reflects the new
+setting.</p>
+<p><strong>Every command reachable from the dot prompt by both
+PowerShell and DbDuo names.</strong> Most commands already had this
+through their canonical Verb-Noun names; the gaps were the casual
+single-word forms users expect. Added aliases include <code>lock</code>,
+<code>new</code>, <code>save</code>,
+<code>import</code>/<code>in</code>,
+<code>compare</code>/<code>diff</code>, <code>print</code>,
+<code>chart</code>, <code>config</code>/<code>settings</code>,
+<code>console</code>, <code>web</code>/<code>website</code>,
+<code>folder</code>/<code>explorer</code>, <code>log</code>,
+<code>reader</code>, <code>commands</code>/<code>command-picker</code>,
+<code>about</code>, <code>readme</code>, <code>cell</code>,
+<code>update</code>/<code>replace</code>,
+<code>initial-change</code>/<code>initial</code>,
+<code>switch</code>/<code>next-table</code>, <code>prev-table</code>,
+<code>next-object</code>, <code>prev-object</code>,
+<code>elevate</code>/<code>update-app</code>, <code>restore</code>. CLI
+dispatch entries added for the canonicals <code>about-dbduo</code>,
+<code>elevate-version</code>, <code>show-readme</code>,
+<code>show-log</code>, <code>open-website</code>,
+<code>open-filefolder</code>, <code>enter-console</code> with
+corresponding <code>cmd*</code> handler functions. The rule per Jamal’s
+guideline: aliases include the first letter, first word, or first two
+words of a longer command where the abbreviation is unambiguous.</p>
+<p><strong><code>[ConnectStrings]</code> section in DbDuo.ini.</strong>
+A new section maps each supported file extension to the ADODB
+connection-string template DbDuo will use. The <code>{path}</code>
+placeholder is replaced with the full file path at connection time;
+<code>{folder}</code> is replaced with the directory containing the file
+(used by drivers that open a folder of files rather than a single file,
+such as the Jet text driver and dBASE). The shipped template documents
+the defaults for every extension — db / sqlite / sqlite3 (ch-werner
+SQLite ODBC), mdb / accdb (ACE OLEDB), xls / xlsx / xlsm (ACE Excel),
+dbf (ACE dBASE), csv / tsv (ACE Text). The DbDuoManager code consults
+the [ConnectStrings] section first (per-user file then shipped template)
+and falls back to the hard-coded defaults if the section is missing or
+empty — so existing installations keep working without configuration.
+Advanced users can switch SQLite to a different ODBC driver name, change
+Excel’s IMEX setting for stricter type detection, or otherwise
+customize, all without recompiling.</p>
+<p><strong>Elevate-Version command on F11.</strong> EdSharp’s F11 and
+FileDir’s F11 are the model. The command checks the GitHub Releases API
+for the latest release tag, compares it to the locally compiled
+<code>BuildInfo.VersionString</code>, and if newer, downloads
+<code>https://github.com/JamalMazrui/DbDuo/releases/latest/download/DbDuo_setup.exe</code>
+to TEMP and launches it. The Inno Setup installer detects the running
+DbDuo (via the existing <code>Local\DbDuo.SingleInstance</code> mutex,
+now declared as the installer’s <code>AppMutex</code>) and offers to
+close the running process before continuing, then re-launches DbDuo
+after installation completes (<code>CloseApplications=yes</code>,
+<code>RestartApplications=yes</code>). The user gets three confirmation
+steps: the version-found dialog, the download-and-run dialog, and Inno
+Setup’s own close-the-running-app dialog. The TLS 1.2 fix is applied
+before the API call (.NET 4.8 defaults to a mix of TLS versions; GitHub
+requires 1.2+). A no-Newtonsoft regex parses <code>tag_name</code> from
+the JSON response.</p>
+<p><strong>Menu-label “…” convention applied.</strong> Per Jamal’s
+reminder of the Windows convention: menu items leading to dialogs
+requiring input use a trailing “…”, items that fire immediately do not.
+Audit of the existing menu labels found two that needed the suffix:
+<strong>Show-Command (alternate menu)</strong> opens a picker, so now
+reads “Show-Command (alternate menu)…”. <strong>Elevate-Version (check
+for an update)</strong> opens a confirmation dialog before downloading,
+so now reads “Elevate-Version (check for an update)…”. Every other menu
+label was already in the correct form.</p>
+<p><strong>Menu rebalance after these changes.</strong> Final counts
+after the v1.0.29 additions: File 14, Edit 11, Navigate 11, Query 17,
+Misc 13, Help 12. Still in the comparable-count range Jamal asked for,
+with Help gaining one item (Elevate-Version) and the rest unchanged.</p>
+<h2 id="v1.0.28">v1.0.28</h2>
+<p>Three small but useful changes: a build-fix release that also adds an
+extensive SQL reference section to the user manual and tightens
+command-name conformance to the EdSharp/FileDir 2-3-word convention.</p>
+<p><strong>Build fix.</strong> The new <code>case "yield":</code> alias
+I added for the speech-only <code>say-yield</code> command in v1.0.27
+collided with the long-standing <code>case "yield":</code> for
+<code>measure-table</code> (the count-rows command from the dbDot
+heritage). C# rejects duplicate switch-case labels as CS0152, breaking
+the build. The fix drops my new alias and keeps the existing chain:
+typing <code>count</code>, <code>y</code>, or <code>yield</code> at the
+dot prompt continues to give the verbose multi-line measure-table
+output; typing <code>say-yield</code> explicitly gives the one-line
+speech-only summary. Both commands remain in the codebase serving
+different purposes.</p>
+<p><strong>Command-name 2-3-word conformance.</strong> Two commands had
+bare single-word menu labels or canonical names, out of step with the
+EdSharp / FileDir convention where every command is 2-3 words (EdSharp
+uses “Exit EdSharp” / “About EdSharp”; FileDir uses “Exit FileDir” /
+“About FileDir”). Fixed by renaming: “Exit” → “Exit DbDuo” in the File
+menu label (canonical command name stays <code>Exit-Application</code>);
+“About” → “About DbDuo” in the Help menu, and the canonical command name
+becomes <code>About-DbDuo</code>. Every other DbDuo command was already
+2-3 words via PowerShell Verb-Noun naming.</p>
+<p><strong>SQL reference section in DbDuo.md.</strong> A new section,
+“SQL reference: what Invoke-Sql actually runs,” documents the dialect
+surface for each of DbDuo’s four backends. The headline takeaway: SQLite
+gives you the <strong>full modern SQL surface</strong> — window
+functions with OVER, CTEs including recursive, UPSERT, JSON1, RETURNING,
+all of it — because the ch-werner ODBC driver is a pass-through to the
+SQLite library itself. There is no JET 4.0 limit on SQLite operations;
+JET is only involved for Access, Excel, dBASE, and CSV/TSV files.</p>
+<p>The section also documents the SELECT vs Execute code path:
+SELECT-shaped statements open an ADODB.Recordset which DbDuo
+materializes into a <code>List&lt;List&lt;string&gt;&gt;</code> via the
+C# loop
+<code>while (!oRs.EOF) { ...oRs.Fields[i].Value...; oRs.MoveNext(); }</code>;
+INSERT/UPDATE/DELETE/DDL run via
+<code>oConn.Execute(sql, out iAffected, adExecuteNoRecords | adCmdText)</code>
+and announce the affected-row count. The captured result grid is fully
+materialized in C# memory and can be redirected with <code>tee</code> /
+<code>output</code> to a file from the dot prompt.</p>
+<p>Access SQL, Excel SQL, and dBASE SQL each get their own subsection
+covering the gotchas: Access uses IIF instead of CASE, <code>*</code>
+and <code>?</code> instead of <code>%</code> and <code>_</code> for
+LIKE, <code>&amp;</code> instead of <code>||</code> for concatenation,
+hash-delimited dates <code>#2025-05-12#</code>. Excel adds the
+<code>$</code> suffix to sheet names and the HDR=Yes / IMEX=1
+type-coercion gotchas. dBASE keeps the 10-character identifier limit.
+CSV and TSV get a SELECT-only Jet text driver. The section closes with a
+practical recommendation: for non-trivial analytical SQL, work in
+SQLite; reserve the other backends for genuine files of that type.</p>
+<h2 id="v1.0.27">v1.0.27</h2>
+<p>This release adopts as many EdSharp / FileDir command and hotkey
+conventions as practical for DbDuo’s domain. The headline changes are a
+new speech-only command family on the Query menu, the universal
+Control+F find chord, the EdSharp Key Describer convention on
+Control+F1, and FileDir’s Extract-Regex and Shift+Letter additions.</p>
+<p><strong>Speech-only command family.</strong> Eight new commands speak
+a piece of state through the LiveRegion without changing focus,
+selection, or recordset position. Each mirrors FileDir’s “Say X”
+pattern: Say-Status on Alt+Z (table, row position, filter, sort),
+Say-Path on Alt+P (database file path), Say-Yield on Alt+Y (row count
+and filter), Say-Tables on Shift+F4 (session-visited tables), Say-Marked
+on Shift+L (list look-values of marked rows), Say-Date on Shift+D
+(updated value of current row), Say-Type on Shift+T (table or view name
+with row position), Say-YieldMarked on Shift+Y (count of marked rows).
+All live on the Query menu — your suggestion that Query was the right
+home for speech-only commands.</p>
+<p><strong>Control+F = Jump-Record.</strong> The universal Find chord
+across Office, browsers, and File Explorer. Bare Shift+J remains as a
+secondary alias for muscle memory and parity with the bare Shift+Letter
+data-list family. Control+Shift+F is the regex variant (Find-Regex).
+Shift+F is still Filter (Select-Record); Shift+R is still Reset-Filter.
+The F-family is fully populated: Control+F find, Control+Shift+F regex
+find, Shift+F filter, Shift+R reset filter, F3 / Shift+F3 find-again,
+Control+F3 / Control+Shift+F3 regex find-again.</p>
+<p><strong>Control+F1 = Trace-Command toggle (Key Describer).</strong>
+EdSharp and FileDir both use Control+F1 for “Key Describer” — a mode
+where pressing any key announces the chord and its bound command without
+firing the command. DbDuo’s Trace-Command does the same thing;
+previously it was on Alt+Control+F1, now on Control+F1 by convention.
+Show-Status / “Where am I” still has a menu home but no longer occupies
+the convention slot — its function is available via <code>?</code>
+(Show-Where) and Alt+Z (Say-Status).</p>
+<p><strong>Extract-Regex on Control+Shift+E.</strong> EdSharp and
+FileDir both use Control+Shift+E for “Extract with Regular Expression.”
+DbDuo’s Extract-Regex walks every visible row, finds every regex match
+across every visible column, and copies all matches to the clipboard
+(one per line). Useful for pulling email addresses, URLs, IDs, or any
+pattern out of free-text columns without writing SQL. Lives on the Misc
+menu.</p>
+<p><strong>Six new bare Shift+Letter chords matching FileDir.</strong>
+Shift+A = Copy-Row (current row as TSV to clipboard, parallels FileDir’s
+Append-to-Clipboard); Shift+D = Say-Date (parallels FileDir’s Say-Date);
+Shift+I = Step-InitialChange (next row whose current column starts with
+a different letter, parallels FileDir’s Initial-Change); Shift+L =
+Say-Marked (parallels FileDir’s List-Tagged); Shift+T = Say-Type
+(parallels FileDir’s Say-Type); Shift+Y = Say-YieldMarked (parallels
+FileDir’s Yield-Tagged). The bare Shift+Letter family is now 15 letters
+strong (A, D, E, F, G, I, J, L, M, R, S, T, U, X, Y).</p>
+<p><strong>Menu rebalance.</strong> The Query menu was getting heavy
+with speech-only commands added; Measure-Table, New-Chart,
+Select-Column, Extract-Regex, Copy-Row, and Step-InitialChange moved to
+Misc. Query is now read-only-inspection commands (Show-<em>,
+Get-Property, Say-</em>, Select-Record/filter, Sort family). Misc is
+utilities and operations that do things. Counts are now approximately
+balanced: File 14, Edit 11, Navigate 11, Query 17, Misc 13, Help 11.</p>
+<p><strong>The Step-Record “first” alias fix from v1.0.26</strong> is
+preserved. Typing <code>first</code>, <code>top</code>, <code>t</code>,
+<code>last</code>, <code>bottom</code>, <code>b</code>,
+<code>next</code>, <code>n</code>, <code>+</code>,
+<code>previous</code>, <code>p</code>, <code>-</code> at the dot prompt
+all do what you’d expect.</p>
+<p><strong>Shift+F4 changed.</strong> It was Select-View (focus-changing
+picker). Now Say-Tables (speech-only, no focus change), matching
+FileDir’s “Say Windows Open” on the same chord. Select-View remains
+accessible from the File menu without a hotkey; Switch-Object
+(Control+F6) is the recommended way to cycle through all tables and
+views including views.</p>
+<p><strong>DbDuo-Commands.md retired.</strong> That document had grown
+stale and overlapped with DbDuo.md and the alignment analysis in
+EdSharp-FileDir-Shared.md. Removed from the bundle.</p>
+<h2 id="v1.0.26">v1.0.26</h2>
+<p>Top-level menu reorganization to match the FileDir / EdSharp
+convention: <strong>File</strong> / <strong>Edit</strong> /
+<strong>Navigate</strong> / <strong>Query</strong> /
+<strong>Misc</strong> / <strong>Help</strong>. Every existing leaf
+command is reparented under one of these six menus, grouped by purpose.
+The old File / Record / View / Schema / Tools / Help layout is
+retired.</p>
+<p><strong>File</strong> holds database-file operations (New, Open, Save
+As, Close, Backup, Compare, Import, Export, Print) and the cross-file
+navigation cluster (Select-Table on F4, Select-View on Shift+F4,
+Switch-Table on Control+Tab, Switch-TablePrevious on Control+Shift+Tab,
+Switch-Object on Control+F6, Switch-ObjectPrevious on Control+Shift+F6,
+Exit on Alt+F4). This matches EdSharp’s File menu, which carries Current
+Windows (F4) by the same logic.</p>
+<p><strong>Edit</strong> holds the data-modifying commands: New-Record
+(Control+N), Set-Record (F2), Remove-Record (Control+D), Copy-Record
+(Control+Shift+C), Update-Field (Control+R), plus the marks family
+(Set-Mark on Shift+M, Clear-Mark on Shift+U), the bookmarks family
+(Save-Bookmark on Control+K, Restore-Bookmark on Alt+K, Clear-Bookmark
+on Control+Shift+K), and Open-Cell (Control+Enter). The bookmark chord
+family matches EdSharp exactly.</p>
+<p><strong>Navigate</strong> holds movement commands: Step-Record-First,
+Step-Record-Last, Step-Record-Next, Step-Record-Previous (each with a
+menu home for discoverability; CLI equivalents remain
+<code>first</code>, <code>last</code>, <code>next</code>,
+<code>previous</code>). Set-Position on Shift+G for go-to-row. The Find
+/ Jump family on Shift+J (Jump-Record), F3 (Jump-RecordAgain), Shift+F3
+(Jump-RecordPrevious), Control+Shift+J (Find-Regex), Control+F3
+(Find-RegexAgain), Control+Shift+F3 (Find-RegexPrevious) — matches
+EdSharp’s find chords. Enter-Child (Shift+E) and Exit-Child (Shift+X)
+for parent-child drill.</p>
+<p><strong>Query</strong> holds read-only inspection commands:
+Show-Object on Enter, Get-Property on Alt+Enter, Show-Related,
+Show-Schema. Measure-Table for row count and stats. New-Chart for Excel
+frequency charts. Then the filter / sort / column-visibility cluster:
+Select-Record on Shift+F (filter), Reset-Filter on Shift+R, Sort-Object
+on Shift+S, Sort-Ascending on Alt+A, Sort-Descending on Alt+Shift+A,
+Sort-OldestFirst on Alt+D, Sort-RecentFirst on Alt+Shift+D, Reset-Sort,
+Select-Column. The sort-by-column chord family mirrors FileDir’s Alt+A /
+Alt+Shift+A / Alt+D / Alt+Shift+D / Alt+S / Alt+Shift+S / Alt+T /
+Alt+Shift+T column-sort family.</p>
+<p><strong>Misc</strong> is the utility menu: Update-View on F5, Toggle
+Lock on Control+F7, Invoke-Sql on Control+Q, Test-Database, Test-Driver,
+Open-FileFolder on Alt+Backslash, Enter-Console on Control+GraveAccent,
+Edit-Configuration on F12.</p>
+<p><strong>Help</strong> is essentially unchanged, plus a new History
+entry: F1 (Help Contents), <strong>Shift+F1 (History of
+Changes)</strong> — new, matching EdSharp/FileDir convention;
+Show-Readme; PowerShell Verb Reference; Alt+F10 (Show-Command alternate
+menu); Control+F1 (Show-Status / where am I); Test-Reader;
+Alt+Control+F1 (Trace-Command toggle); Show-Log; Open-WebSite; Alt+F1
+(About).</p>
+<p><strong>Step-Record alias bug fixed.</strong> Typing
+<code>first</code> at the dot prompt no longer silently moves to the
+next row. The compound-alias collapse that mapped
+<code>step-record-first</code> to bare <code>step-record</code> was
+dropping the direction argument; the dispatcher now explicitly handles
+each compound verb with its direction. The CLI commands that move you
+around: <code>first</code> (or <code>top</code>, or <code>t</code>) for
+the first row, <code>last</code> (or <code>bottom</code>, or
+<code>b</code>) for the last, <code>next</code> (or <code>n</code>, or
+<code>+</code>) for forward one row, <code>previous</code> (or
+<code>p</code>, or <code>-</code>) for back one row, <code>g 5</code>
+(or <code>goto 5</code>) for absolute row 5, plain <code>5</code> for
+relative jump (positive forward, negative backward).</p>
+<p><strong>Release notes moved out of README.md.</strong> Previously
+every release’s “What’s new” section accumulated in README.md. They now
+live in this History.md file (rendered to History.htm next to the EXE).
+README.md stays focused on what DbDuo is right now and how to install
+it, without growing forever.</p>
+<h2 id="v1.0.24">v1.0.24</h2>
+<p>This release tightened the installer’s shortcut policy, cleaned up
+the CLI alias table to align with dbDot.vbs, and upgraded the Record
+edit dialog with type-aware validation and configurable regex
+constraints.</p>
+<p><strong>Single shortcut policy.</strong> The installer now creates
+exactly one shortcut: a desktop entry bound to Alt+Control+D. No Start
+Menu folder, no GUI-only or CLI-only variants. The shortcut launches
+DbDuo if not running, and brings the existing instance to the foreground
+on subsequent presses (single-instance handoff via
+<code>-activate</code>). The user reaches GUI-only or CLI-only modes
+from inside DbDuo via Misc &gt; Edit-Configuration, not from external
+launchers.</p>
+<p><strong>CLI alias table aligned with dbDot.vbs.</strong> Every
+retained alias is either a single letter, a single word, or a hyphenated
+full-word combo. Vowel-dropped abbreviations are gone: type
+<code>previous</code> not <code>prev</code>, <code>delete</code> not
+<code>del</code>, <code>display</code> not <code>disp</code>,
+<code>properties</code> not <code>props</code>, <code>average</code> not
+<code>avg</code>, <code>calculate</code> not <code>calc</code>,
+<code>replace</code> (removed entirely — there’s no dbDot equivalent).
+Legacy dBASE aliases that overlap with a dbDot alias are dropped (e.g.,
+dBASE’s <code>locate</code> gives way to dbDot’s <code>find</code>). The
+result is a smaller, more predictable set that a dbDot user can already
+type.</p>
+<p><strong>Type-aware Record edit dialog.</strong> New-Record and
+Set-Record now validate field values against their declared types before
+committing. Integer columns reject non-integer text with a clear
+“expected an integer, got ‘X’” message; real-number columns parse with
+thousands-separator tolerance; date-time columns parse and re-format to
+ISO <code>yyyy-MM-dd</code> (or <code>yyyy-MM-dd HH:mm:ss</code> for
+datetime). Validation failures keep the dialog open with focus on the
+offending field; corrections take a single Tab and retry.</p>
+<p><strong>Regex field validation from DbDuo.ini.</strong> A new INI
+schema lets you declare a regex constraint for any column of any
+table:</p>
+<pre><code>[Validation:students]
+email = ^[^@\s]+@[^@\s]+\.[a-z]+$
+year = ^(Freshman|Sophomore|Junior|Senior)$</code></pre>
+<p>The record edit dialog refuses OK if a non-empty value doesn’t match.
+The error message names the field and shows the required pattern.
+Constraints are scoped per table, so the same column name can have
+different regexes in different tables.</p>
+<p><strong>Inline single-line field layout.</strong> Single-line columns
+in the record edit dialog now use a “Label: ____textbox____” layout
+where the label and the textbox share one row. Multi-line memo columns
+keep the label-above layout. The two layouts are intentional:
+single-line fields read fast under JAWS (one Tab stop announces “Label:
+value”); multi-line memos need the row width for the tall textbox.</p>
+<h2 id="v1.0.22">v1.0.22</h2>
+<p>This was a hotkey alignment release. The headline changes were
+unified Find-again, FileDir-style marked-row navigation, and
+bulk-marking span chords.</p>
+<p><strong>F3 and Shift+F3 now repeat whichever Find variant was last
+invoked.</strong> Earlier versions tied F3 to plain Jump-Record only and
+Control+F3 to Find-Regex. EdSharp’s convention is to have one pair of
+find-again chords handle both kinds based on what was last fired; DbDuo
+now matches. The dedicated Control+F3 / Control+Shift+F3 chords still
+force a regex repeat specifically.</p>
+<p><strong>Marked-row navigation moved to FileDir’s
+Control+Home/End/UpArrow/DownArrow family.</strong> Earlier versions
+used Alt+Home/End/UpArrow/DownArrow as a workaround for DataGridView’s
+reserved Control+arrow chords. The switch to ListView made the cleaner
+Control+ family available, so DbDuo now follows FileDir’s tagged-record
+convention directly. The ListView’s MultiSelect=false +
+FullRowSelect=true configuration means Control+Home/End behave like
+Home/End natively (Control is a no-op) and Control+Up/Down only move the
+focus indicator without changing the selected row — invisible to screen
+readers — so commandeering these chords doesn’t break anything
+observable.</p>
+<p><strong>New bulk-mark chords: Shift+Home, Shift+End, Alt+Shift+Home,
+Alt+Shift+End.</strong> Mark every row from the first row through the
+current row (Shift+Home) or from the current row through the last
+(Shift+End); unmark the same spans with Alt+Shift+Home and
+Alt+Shift+End. FileDir uses the same chord family for tagging spans of
+files; DbDuo applies it to record-level marking. Each operation
+announces “Marked N rows” or “Unmarked N rows; M already in that state”
+through the live region.</p>
+<h2 id="v1.0.21">v1.0.21</h2>
+<p>This release shifted the most-used commands from the Control-letter
+family to bare Shift+Letter chords that fire only from the data list,
+plus a substantial set of new features.</p>
+<p><strong>Bare Shift+Letter one-key shortcuts from the data
+list.</strong> Nine commands you reach for constantly are now a single
+keypress. Shift+E enters a child table; Shift+X exits one. Shift+F
+filters; Shift+R resets the filter. Shift+J jumps to a row by criteria;
+Shift+G goes to a row number. Shift+M marks the current row; Shift+U
+unmarks it. Shift+S sorts by an arbitrary expression. Lowercase letters
+in the same range still navigate type-ahead, since the Shift+Letter
+chords are only intercepted when the data list has focus.</p>
+<p><strong>Show-Object with automatic Related Records.</strong> Press
+Enter on a row to open a read-only view of every visible field as
+<code>name = value</code>, plus an automatic Related Records section. A
+teacher row shows the teacher’s classes; an enrollment row shows the
+student and the class it ties together. The related records use each
+table’s <code>look</code> summary column so a short line identifies each
+one. The lookup uses real
+<code>SELECT look FROM &lt;child&gt; WHERE &lt;fk&gt; = &lt;value&gt;</code>
+queries through the live ADO connection, so any FK indexes in the schema
+are used. Up to 25 related rows per table show; an
+<code>(... N more)</code> footer signals truncation, and Enter-Child
+opens the full child list.</p>
+<p><strong>Schema-driven multi-line edit fields.</strong> SQLite columns
+declared <code>textmemo</code> (case-insensitive, in CREATE TABLE) now
+get a tall multi-line text box in the New-Record and Set-Record dialogs;
+columns declared <code>textline</code> (or any non-memo text) get a
+single-line text box. The decision comes from
+<code>PRAGMA table_info</code>, so the schema controls the UI without
+any per-column hand-tuning. SQLite stores <code>textline</code> and
+<code>textmemo</code> with the same TEXT affinity as plain
+<code>TEXT</code>, so the convention is purely a hint that round-trips
+through the schema metadata. Access tables get the same distinction via
+ADOX <code>Type</code> codes (<code>adLongVarWChar</code> = memo).</p>
+<p><strong>Markdown round-trip.</strong> Export-Data to a
+<code>.md</code> file now produces a GitHub-flavored Markdown table that
+you can paste into a README, an issue, or a chat message. Import-Data
+reads that same format back in, matching header cells to columns by
+name, decoding <code>&lt;br&gt;</code> to newline and <code>\|</code> to
+a literal pipe. Hand a table to a colleague, get an edited one back,
+append the changes.</p>
+<p><strong>Every input format is also an export format.</strong>
+Export-Data writes to SQLite, Access, and dBASE as well as the existing
+xlsx, docx, HTML, Markdown, csv, and tsv. The SQLite, Access, and dBASE
+paths open a separate ADODB connection to a fresh file, issue
+<code>CREATE TABLE</code> with portable text-typed columns, and INSERT
+row by row, without disturbing your open recordset.</p>
+<p><strong>Smart defaults across every file dialog.</strong> Each kind
+of file dialog (Open, Save, Import, Export) remembers the folder you
+last used and opens there next time. Save-As suggests
+<code>&lt;original&gt;-copy</code> as the filename so a stray Enter
+doesn’t overwrite the source; Backup suggests
+<code>&lt;original&gt;-backup-yyyyMMdd</code>. Export pre-fills the
+filename with the current table’s name. Folders persist across DbDuo
+runs in a <code>[Folders]</code> section of the per-user
+<code>DbDuo.ini</code>.</p>
+<p><strong>Edit-Configuration dialog and Open-WebSite menu
+item.</strong> The new Misc &gt; Edit-Configuration command (F12) opens
+a small dialog for changing the most common settings, with one tunable
+per row, focus-tip hints in a status bar at the bottom of the dialog,
+and an “Open file…” button that falls back to raw .ini editing for
+advanced settings. The new Help &gt; Open-WebSite command launches the
+DbDuo GitHub page in the default browser.</p>
+<p><strong>Custom executable icon.</strong> DbDuo.exe ships with a
+multi-resolution icon (16/24/32/48/64/128/256 pixels) showing a blue
+database cylinder above a dark console with a <code>&gt;_</code> prompt,
+on a soft slate plate. The same icon is used by the installer, Start
+Menu entries, taskbar, and Alt+Tab list.</p>
+<p><strong>Layout by Code dialog framework.</strong> A new
+<code>LbcDialog</code> class provides a reusable widget-by-widget dialog
+builder. Common patterns now compose as: construct the dialog with a
+title, call <code>addInputBox</code> / <code>addMemoBox</code> /
+<code>addCheckBox</code> / <code>addComboPickBox</code> /
+<code>addPickBox</code> / <code>addNumericUpDown</code> once per row
+(each call optionally taking a focus-tip string), then
+<code>runOkCancel()</code>. Each control is registered by name so
+handlers can retrieve siblings without parameter passing, and a
+focus-tip status bar announces the tip via UIA when the user tabs
+through. Used by Edit-Configuration and the rebuilt New-Record /
+Set-Record dialogs.</p>
+<h2 id="earlier-releases">Earlier releases</h2>
+<p>Earlier versions of DbDuo are tracked in the project’s git history.
+The major milestones, in order: 1.0.5 first dual-interface release (CLI
++ GUI sharing one ADO connection); 1.0.10 ADODB recordset filter and
+sort wired through; 1.0.15 multi-format Import-Data / Export-Data (xlsx,
+docx, csv, tsv, md, htm); 1.0.18 Show-Object with Related-Records
+section; 1.0.20 schema-driven textline / textmemo edit fields and FK
+auto-index creation; 1.0.21 the bare Shift+Letter family and the Layout
+by Code dialog framework. Versions 1.0.23 and 1.0.25 were internal
+build-fix releases.</p>
+</body>
+</html>

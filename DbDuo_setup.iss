@@ -24,7 +24,7 @@
 ; =====================================================================
 
 #define AppName       "DbDuo"
-#define AppVersion    "1.0.20"
+#define AppVersion    "1.0.48"
 #define AppPublisher  "Jamal Mazrui"
 #define AppUrl        "https://github.com/JamalMazrui/DbDuo"
 #define AppExeName    "DbDuo.exe"
@@ -32,14 +32,14 @@
 
 ; HotKey is the Inno Setup HotKey: directive value (Ctrl syntax
 ; required by Inno Setup). HotKeyDisplay is the same key in DbDuo's
-; preferred "Alt+Control+D" notation for human-readable tooltips
-; and comments.
+; user-facing notation (Control instead of Ctrl, alpha-ordered).
+; Only the Desktop "activate" shortcut is hotkey-bound. The Start
+; Menu "GUI only" and "CLI only" shortcuts are deliberately NOT
+; hotkey-bound so the global keyboard hotkey space has just one
+; DbDuo entry: Alt+Control+D, which performs a single-instance
+; foreground handoff (see [Icons] below).
 #define HotKey        "Alt+Ctrl+D"
 #define HotKeyDisplay "Alt+Control+D"
-#define HotKeyGui     "Alt+Ctrl+G"
-#define HotKeyGuiDisp "Alt+Control+G"
-#define HotKeyCli     "Alt+Ctrl+L"
-#define HotKeyCliDisp "Alt+Control+L"
 
 ; Direct download URLs. SQLite ODBC: the publisher republishes the
 ; same filename on each underlying SQLite-version bump, so we do not
@@ -63,11 +63,14 @@ AppCopyright={#AppCopyright}
 VersionInfoVersion={#AppVersion}
 
 DefaultDirName={autopf}\{#AppName}
-DefaultGroupName={#AppName}
+; No Start Menu folder is created -- the installer's [Icons] section
+; declares only the single desktop shortcut with Alt+Control+D as
+; its hotkey. DefaultGroupName is not set because no {group}\ items
+; exist. DisableProgramGroupPage=yes hides the (now-unused) "select
+; Start Menu folder" page in the install wizard.
 DisableProgramGroupPage=yes
 UsePreviousAppDir=yes
 DisableDirPage=no
-UsePreviousGroup=yes
 
 OutputDir=.
 OutputBaseFilename={#AppName}_setup
@@ -85,7 +88,25 @@ Uninstallable=yes
 UninstallDisplayIcon={app}\{#AppExeName}
 UninstallDisplayName={#AppName} {#AppVersion}
 
+; The installer EXE itself uses DbDuo.ico, so DbDuo_setup.exe and the
+; uninstaller and any Start Menu entries all carry the same icon.
+SetupIconFile=DbDuo.ico
+
 MinVersion=10.0
+
+; CloseApplications + RestartApplications enables Inno Setup's
+; running-app detection. When the user runs DbDuo_setup.exe via
+; the Elevate-Version (F11) command while DbDuo is already running,
+; the installer detects the process by AppMutex name and offers a
+; "close the running DbDuo" dialog before continuing. Setting
+; RestartApplications=yes also re-launches DbDuo at the end if it
+; was closed during setup, so the user returns to a running app.
+; AppMutex must match a mutex DbDuo creates at startup (see
+; DbDuoForm.cs single-instance handoff).
+CloseApplications=yes
+RestartApplications=yes
+CloseApplicationsFilter=DbDuo.exe
+AppMutex=Local\DbDuo.SingleInstance
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -95,10 +116,41 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 ; (so we do not need a separate License page). The driver-install
 ; behavior is mentioned so the user knows what to expect during
 ; the Installing step.
-WelcomeLabel2=This will install [name/ver] on your computer.%n%n[name] is licensed under the MIT License: free to use, copy, modify, and distribute; provided "as is" with no warranty. The full license text is installed as License.htm.%n%nSetup will silently install the SQLite ODBC driver and the Microsoft Access Database Engine if either is missing; existing drivers are left alone.%n%nIt is recommended that you close all other applications before continuing.
+WelcomeLabel2=This will install [name/ver] on your computer.%n%n[name] is an accessible, keyboard-first database manager for Windows. It opens SQLite, Microsoft Access, Excel, dBASE, and delimited-text files, with first-class support for JAWS, NVDA, and Narrator.%n%n[name] is licensed under the MIT License: free to use, copy, modify, and distribute; provided "as is" with no warranty. The full license text is installed as License.htm.%n%nSetup will silently install the SQLite ODBC driver and the Microsoft Access Database Engine if either is missing; existing drivers are left alone.%n%nIt is recommended that you close all other applications before continuing.
+
+[InstallDelete]
+; Cleanup on upgrade. Several files from earlier DbDuo releases are
+; no longer referenced and should be removed so the install folder
+; reflects only files DbDuo actually uses.
+;
+; v1.0.40-v1.0.42: NVDA controller-client DLL had a legacy 64-suffixed
+; name. v1.0.43+ uses the modern unsuffixed name.
+Type: files; Name: "{app}\nvdaControllerClient64.dll"
+;
+; v1.0.42-v1.0.43 bundled the Roslyn C# scripting assemblies; v1.0.44
+; rolled that back in favor of JScript .NET (no shipped runtime DLLs).
+; The 12 assemblies below plus DbDuo.exe.config and the App.config
+; binding-redirect file are all obsolete from v1.0.44 onward.
+Type: files; Name: "{app}\DbDuo.exe.config"
+Type: files; Name: "{app}\App.config"
+Type: files; Name: "{app}\Microsoft.CodeAnalysis.dll"
+Type: files; Name: "{app}\Microsoft.CodeAnalysis.CSharp.dll"
+Type: files; Name: "{app}\Microsoft.CodeAnalysis.Scripting.dll"
+Type: files; Name: "{app}\Microsoft.CodeAnalysis.CSharp.Scripting.dll"
+Type: files; Name: "{app}\System.Collections.Immutable.dll"
+Type: files; Name: "{app}\System.Reflection.Metadata.dll"
+Type: files; Name: "{app}\System.Memory.dll"
+Type: files; Name: "{app}\System.Buffers.dll"
+Type: files; Name: "{app}\System.Runtime.CompilerServices.Unsafe.dll"
+Type: files; Name: "{app}\System.Numerics.Vectors.dll"
+Type: files; Name: "{app}\System.Threading.Tasks.Extensions.dll"
+Type: files; Name: "{app}\System.Text.Encoding.CodePages.dll"
+Type: files; Name: "{app}\Microsoft.CSharp.dll"
 
 [Files]
 Source: "DbDuo.exe";    DestDir: "{app}"; Flags: ignoreversion
+Source: "dbDuoEval.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "DbDuo.ico";    DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDuo.md";     DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDuo.htm";    DestDir: "{app}"; Flags: ignoreversion
 Source: "README.md";    DestDir: "{app}"; Flags: ignoreversion
@@ -107,51 +159,25 @@ Source: "License.md";   DestDir: "{app}"; Flags: ignoreversion
 Source: "License.htm";  DestDir: "{app}"; Flags: ignoreversion
 Source: "sample.db";    DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDuo.ini";    DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist
+Source: "DbDuo.jkm";    DestDir: "{app}"; Flags: ignoreversion
+Source: "DbDuo.jss";    DestDir: "{app}"; Flags: ignoreversion
+Source: "DbDuo.nvda-addon"; DestDir: "{app}"; Flags: ignoreversion
+Source: "nvdaControllerClient.dll"; DestDir: "{app}"; Flags: ignoreversion
+
+; (No [Tasks] section. The JAWS settings install is exposed as a
+; checkbox on the Finish page via [Run] above, delegating the work
+; to DbDuo.exe --install-jaws-settings rather than duplicating the
+; install logic in Pascal Script.)
 
 [Icons]
-Name: "{group}\{#AppName}"; \
-  Filename: "{app}\{#AppExeName}"; \
-  WorkingDir: "{app}"; \
-  Comment: "Dual-mode (GUI + dot-prompt CLI) database manager"
-
-Name: "{group}\{#AppName} (GUI only)"; \
-  Filename: "{app}\{#AppExeName}"; \
-  WorkingDir: "{app}"; \
-  Parameters: "-gui"; \
-  HotKey: {#HotKeyGui}; \
-  Comment: "Launch GUI only ({#HotKeyGuiDisp})"
-
-Name: "{group}\{#AppName} (CLI only)"; \
-  Filename: "{app}\{#AppExeName}"; \
-  WorkingDir: "{app}"; \
-  Parameters: "-cli"; \
-  HotKey: {#HotKeyCli}; \
-  Comment: "Launch dot-prompt console only ({#HotKeyCliDisp})"
-
-Name: "{group}\{#AppName} (read-only)"; \
-  Filename: "{app}\{#AppExeName}"; \
-  WorkingDir: "{app}"; \
-  Parameters: "-readonly"; \
-  Comment: "Open files read-only"
-
-Name: "{group}\{#AppName} sample database"; \
-  Filename: "{app}\{#AppExeName}"; \
-  WorkingDir: "{app}"; \
-  Parameters: """{app}\sample.db"""; \
-  Comment: "Open the bundled sample database"
-
-Name: "{group}\{#AppName} documentation"; \
-  Filename: "{app}\DbDuo.htm"; \
-  WorkingDir: "{app}"; \
-  Comment: "User manual"
-
-Name: "{group}\Uninstall {#AppName}"; \
-  Filename: "{uninstallexe}"; \
-  Comment: "Remove {#AppName} from this computer"
-
-; Desktop shortcut with Alt+Control+D hotkey. -activate performs a
-; single-instance handoff: a second press wakes the running instance
-; to the foreground rather than launching a duplicate.
+; Single shortcut policy: the only DbDuo shortcut the installer
+; creates is the desktop one with the Alt+Control+D hotkey. The
+; -activate parameter performs a single-instance handoff: the
+; first press of Alt+Control+D launches DbDuo; subsequent presses
+; bring the existing instance to the foreground rather than
+; launching a duplicate. No Start Menu folder, no GUI-only or
+; CLI-only or read-only variants -- the user reaches those modes
+; from inside DbDuo, not from external launchers.
 Name: "{autodesktop}\{#AppName}"; \
   Filename: "{app}\{#AppExeName}"; \
   WorkingDir: "{app}"; \
@@ -160,14 +186,48 @@ Name: "{autodesktop}\{#AppName}"; \
   Comment: "Dual-mode database manager ({#HotKeyDisplay})"
 
 [Run]
+; The four entries below appear as checkboxes on the installer's
+; Finish page in this exact order. The first two delegate to
+; DbDuo.exe's --install-jaws-settings and --install-nvda-addon
+; modes; the C# implementation of those modes lives in DbDuo.cs
+; (class JawsSettingsInstaller and the Main flag handler) so the
+; same logic can be re-run later from the Help menu.
+;
+; 1. Install JAWS settings (checked by default).
+FileName: "{app}\{#AppExeName}"; \
+  Parameters: "--install-jaws-settings"; \
+  WorkingDir: "{app}"; \
+  Description: "Install JAWS settings for {#AppName} (recommended if you use JAWS)"; \
+  Flags: postinstall waituntilterminated runhidden skipifsilent
+
+; 2. Install NVDA add-on (checked by default).
+FileName: "{app}\{#AppExeName}"; \
+  Parameters: "--install-nvda-addon"; \
+  WorkingDir: "{app}"; \
+  Description: "Install NVDA add-on for {#AppName} (recommended if you use NVDA)"; \
+  Flags: postinstall waituntilterminated skipifsilent
+
+; 3. Launch DbDuo (checked by default).
 FileName: "{app}\{#AppExeName}"; \
   WorkingDir: "{app}"; \
   Description: "Launch {#AppName} now (or use the desktop hotkey {#HotKeyDisplay} anytime)"; \
   Flags: nowait postinstall skipifsilent
 
-FileName: "{app}\DbDuo.htm"; \
-  Description: "Read documentation for {#AppName}"; \
+; 4. Open README (checked by default).
+FileName: "{app}\README.htm"; \
+  Description: "Read the {#AppName} README"; \
   Flags: postinstall shellexec skipifsilent
+
+[UninstallRun]
+; Symmetric to the JAWS-install [Run] entry above. Removes only
+; the files DbDuo placed in the JAWS settings folders, tracked
+; via the install-time log at %APPDATA%\DbDuo\jawsSettings.log.
+; runhidden so no console window flashes during uninstall; ignored
+; if DbDuo.exe is already deleted (the install probably failed).
+FileName: "{app}\{#AppExeName}"; \
+  Parameters: "--uninstall-jaws-settings"; \
+  WorkingDir: "{app}"; \
+  Flags: runhidden waituntilterminated skipifdoesntexist
 
 [Code]
 (* --------------------------------------------------------------------
@@ -376,7 +436,24 @@ begin
   end;
 end;
 
-(* --- Post-install hook: run driver installers --- *)
+(* JAWS settings install (moved from Pascal to C# in v1.0.40):
+   The work that v1.0.39's InstallJawsSettings + FindScompilePath +
+   CurUninstallStepChanged Pascal procedures did is now in
+   DbDuo.cs class JawsSettingsInstaller, invoked via
+       DbDuo.exe --install-jaws-settings
+   from the [Run] section above, and via
+       DbDuo.exe --uninstall-jaws-settings
+   from the [UninstallRun] section below. The C# implementation
+   uses the same algorithm (registry-first scompile lookup with
+   Program Files fallback, enumerate %APPDATA%\Freedom Scientific\
+   JAWS\*\Settings\*, copy + scompile, log the paths placed) and
+   the same uninstall log location ({userappdata}\DbDuo\
+   jawsSettings.log) so the upgrade from v1.0.39 to v1.0.40 is
+   transparent. The advantage of the move: the user can re-run the
+   install later from Help > Install JAWS Settings without re-
+   running the full installer. *)
+
+(* --- Post-install hook: run driver installers and JAWS settings --- *)
 
 procedure CurStepChanged(CurStep: TSetupStep);
 begin
@@ -413,4 +490,45 @@ begin
         + 'DbDuo is still installed and will work for SQLite files.',
         mbInformation, MB_OK, IDOK);
   end;
+
+  (* JAWS settings install is handled in [Run] above as a Finish-page
+     postinstall checkbox (item 1 of 4), which invokes
+     DbDuo.exe --install-jaws-settings. The C# implementation lives
+     in class JawsSettingsInstaller in DbDuo.cs. The previous Pascal
+     InstallJawsSettings procedure was removed in v1.0.40 along with
+     the [Tasks] entry that gated it; the call site here is a no-op
+     now. *)
+end;
+
+(* --------------------------------------------------------------------
+   Uninstall: remove only the JKMs we installed. The log file written
+   by InstallJawsSettings holds the absolute paths of every DbDuo.jkm
+   we placed. We read it, delete each path, then delete the log
+   itself. If the user customized the JKM in place, we still remove
+   it -- the file's name is reserved for the application by JAWS, and
+   leaving an orphan after DbDuo is gone would just clutter the JAWS
+   settings folders. If the user moved their changes to a different
+   filename first, those changes are untouched.
+   ----------------------------------------------------------------- *)
+
+procedure CurUninstallStepChanged(CurUninstallStep: TUninstallStep);
+var
+  sLogPath: String;
+  oLog: TArrayOfString;
+  i: Integer;
+begin
+  if CurUninstallStep <> usUninstall then exit;
+  sLogPath := ExpandConstant('{userappdata}\DbDuo\jawsSettings.log');
+  if not FileExists(sLogPath) then exit;
+  if not LoadStringsFromFile(sLogPath, oLog) then exit;
+  for i := 0 to GetArrayLength(oLog) - 1 do
+  begin
+    if FileExists(oLog[i]) then
+      DeleteFile(oLog[i]);
+  end;
+  DeleteFile(sLogPath);
+  (* Try to remove the {userappdata}\DbDuo folder if it's now empty.
+     RemoveDir returns False if non-empty, which is fine -- the user
+     may have other DbDuo state in there. *)
+  RemoveDir(ExtractFileDir(sLogPath));
 end;
