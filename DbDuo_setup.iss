@@ -24,7 +24,7 @@
 ; =====================================================================
 
 #define AppName       "DbDuo"
-#define AppVersion    "1.0.51"
+#define AppVersion    "1.0.58"
 #define AppPublisher  "Jamal Mazrui"
 #define AppUrl        "https://github.com/JamalMazrui/DbDuo"
 #define AppExeName    "DbDuo.exe"
@@ -248,7 +248,7 @@ FileName: "{app}\{#AppExeName}"; \
 ; the "recommended if you use NVDA" condition.
 FileName: "{app}\DbDuo.nvda-addon"; \
   WorkingDir: "{app}"; \
-  Description: "Install NVDA add-on for {#AppName} (recommended if you use NVDA)"; \
+  Description: "Install NVDA add-on (NVDA must be running; restart NVDA after install for it to take effect)"; \
   Flags: postinstall shellexec waituntilterminated skipifsilent
 
 ; 3. Launch DbDuo (checked by default).

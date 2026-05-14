@@ -49,7 +49,7 @@ namespace DbDuo
     // =====================================================================
     public static class BuildInfo
     {
-        public const string VersionString = "1.0.51";
+        public const string VersionString = "1.0.58";
     }
 
     // =====================================================================
@@ -12179,7 +12179,7 @@ namespace DbDuo
             }
             if (lAll.Count < 2)
             {
-                LiveRegion.say("Only one object in this database");
+                LiveRegion.say("Only one table or view in this database");
                 return;
             }
             string sCurrent = db.currentTable;
@@ -18048,6 +18048,7 @@ namespace DbDuo
                     // silently; the user starts with no database open.
                     string sSavedDb = DbDuoForm.IniSession.lastDatabase;
                     string sSavedTbl = DbDuoForm.IniSession.lastTable;
+                    bool bRestoredSomething = false;
                     if (!string.IsNullOrEmpty(sSavedDb) && System.IO.File.Exists(sSavedDb))
                     {
                         try
@@ -18065,6 +18066,7 @@ namespace DbDuo
                             }
                             oForm.invokeRefresh();
                             DbDuoLog.write("Session restored.");
+                            bRestoredSomething = true;
                         }
                         catch (Exception oEx)
                         {
@@ -18072,6 +18074,40 @@ namespace DbDuo
                             // Don't show a dialog -- the user didn't ask
                             // to open this file; we did. Just log and
                             // start empty.
+                        }
+                    }
+
+                    // First-run fallback: if the ini has no [Session]
+                    // lastDatabase entry (the file has never been written
+                    // to disk, or a fresh install replaced the install
+                    // folder), open {app}\sample.db so the user has
+                    // something to look at on first launch. Silent
+                    // failure: if sample.db is missing or unreadable,
+                    // start with an empty form just as before.
+                    if (!bRestoredSomething && string.IsNullOrEmpty(sSavedDb))
+                    {
+                        try
+                        {
+                            string sAppFolder = System.IO.Path.GetDirectoryName(
+                                System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
+                            string sDefaultSample = System.IO.Path.Combine(sAppFolder, "sample.db");
+                            if (System.IO.File.Exists(sDefaultSample))
+                            {
+                                DbDuoLog.write("First-run default: opening " + sDefaultSample);
+                                oForm.Db.openDatabase(sDefaultSample, null, bReadOnly);
+                                if (!oForm.Db.hasRecordset())
+                                {
+                                    List<string> lT = oForm.Db.getTableNames();
+                                    if (lT.Count == 0) lT = oForm.Db.getViewNames();
+                                    if (lT.Count > 0) oForm.Db.selectTable(lT[0]);
+                                }
+                                oForm.invokeRefresh();
+                                DbDuoLog.write("First-run default database opened.");
+                            }
+                        }
+                        catch (Exception oEx)
+                        {
+                            DbDuoLog.write("First-run default-open failed: " + oEx.Message);
                         }
                     }
                 }

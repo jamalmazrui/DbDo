@@ -338,9 +338,15 @@ chords through to the application rather than intercepting them for
 table-navigation or browse-mode commands. Without the JAWS settings,
 JAWS reads Alt+Control+arrow as a JAWS table-navigation command. Without
 the NVDA add-on, NVDA does the same. The installer offers to install
-both as Finish-page checkboxes (both checked by default); you can re-run
-either install later from Help &gt; Install JAWS Settings or by
-double-clicking <code>DbDuo.nvda-addon</code> in the install folder.</p>
+both as Finish-page checkboxes (both checked by default). The JAWS
+install just works; for the NVDA add-on to install, NVDA itself must be
+the currently-running screen reader, since NVDA owns the
+<code>.nvda-addon</code> file handler. If you ran the installer while
+using JAWS, dismiss the NVDA-install dialog if it appears, switch to
+NVDA, and re-install the add-on later from the DbDuo Help menu’s
+“Re-install NVDA Add-on” command (which invokes
+<code>DbDuo.exe --install-nvda-addon</code>) or by double-clicking
+<code>DbDuo.nvda-addon</code> in the install folder.</p>
 <p>Every command is reachable through both a menu and a hotkey. Menu
 items show their hotkey at the right edge, so navigating menus is also
 how you learn the keyboard. Single-letter mnemonics open each top-level

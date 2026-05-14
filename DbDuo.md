@@ -2,7 +2,7 @@
 
 **An accessible, keyboard-first database manager for Windows.** DbDuo opens SQLite, Microsoft Access, Excel, dBASE, and delimited-text files through one consistent set of PowerShell-flavored commands, in a GUI window and a dot-prompt console at the same time. JAWS, NVDA, and Narrator are all first-class through dedicated speech paths; every command is reachable by keyboard.
 
-Version 1.0.51. Source and releases: <https://github.com/JamalMazrui/DbDuo>.
+Version 1.0.58. Source and releases: <https://github.com/JamalMazrui/DbDuo>.
 
 ## How DbDuo is organized
 
@@ -107,7 +107,13 @@ If you customize the JKM in place and re-install DbDuo, your changes will be ove
 
 If you uninstall DbDuo, the installer removes only the three files it placed. Other JKMs or JSBs you placed yourself in those folders are not touched.
 
-**NVDA support is planned for a future release.** NVDA has the same issue — it intercepts Alt+Control+arrow for its own table-navigation commands. The fix for NVDA is an add-on (`.nvda-addon` file). Until that ships, NVDA users can work around the problem by pressing NVDA+F2 (single-press pass-through) before each Alt+Control+arrow chord, which sends the next keystroke directly to the application.
+**NVDA add-on.** DbDuo ships a `.nvda-addon` package that performs the same pass-through role for NVDA that the JKM and JSB do for JAWS. The add-on registers an app module that, when DbDuo.exe is the foreground process, hands every chord DbDuo cares about (Alt+Control+arrow, Alt+arrow, Alt+letter, Control+F/J/F3, and the rest of the DbDuo.jkm key map) back to DbDuo via `gesture.send()` instead of running NVDA's own table-navigation or browse-mode commands.
+
+NVDA must be running for the add-on to install. The installer's Finish-page checkbox "Install NVDA add-on" hands the `DbDuo.nvda-addon` file to its Windows file association, which is registered to NVDA at NVDA install time. If NVDA is the active screen reader, NVDA's standard "Install this add-on?" dialog appears, and the user confirms or cancels. If JAWS or Narrator is the active screen reader (with NVDA installed but not running), the file association still launches NVDA, but the install dialog may not surface reliably; in that case, dismiss the installer's Finish page, switch to NVDA, then double-click `DbDuo.nvda-addon` in the install folder to install manually. The Help menu's "Re-install NVDA Add-on" command (which invokes `DbDuo.exe --install-nvda-addon`) does the same thing on demand.
+
+After install, restart NVDA (NVDA menu > Restart) so the new app module is picked up. NVDA does not need to be restarted again for future updates of the same add-on.
+
+If the add-on does not appear to take effect — Alt+Control+arrow still triggers NVDA's "Not in a table" speech — set NVDA's log level to "Debug" (NVDA menu > Preferences > Settings > General > Log level), restart NVDA, then open DbDuo and press the chord. Open NVDA's log (NVDA menu > Tools > View log) and search for lines beginning `DbDuo app module:`. Absence of those lines means NVDA never matched the app module to DbDuo.exe; presence of them confirms the module loaded and the bindings were registered. Forward the log to the project for diagnosis.
 
 **Narrator does not support scripts or add-ons.** Narrator users will get less polished cell-level navigation than JAWS or NVDA users; the virtual-cursor announcements still fire, but Narrator may layer its own announcement on top.
 

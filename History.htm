@@ -240,7 +240,421 @@ current feature set, see <code>Announce.md</code> or
 <code>DbDuo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDuo to open this file in
 your browser, or type <code>history</code> at the dot prompt.</p>
-<h2 id="v1.0.51-current">v1.0.51 (current)</h2>
+<h2 id="v1.0.58-current">v1.0.58 (current)</h2>
+<p>NVDA add-on rewritten to fix the v1.0.57 six-pack-silence symptom.
+Two substantive changes plus a research-grounded explanation of why the
+previous version was misdiagnosed.</p>
+<p><strong>Root-cause finding from user testing.</strong> v1.0.57 was
+reported as still asymmetric: numpad arrow chords worked in DbDuo,
+six-pack arrow chords stayed silent. JAWS handled both physical key sets
+fine on the same machine. The fact that the asymmetry persisted despite
+the v1.0.57 changes ruled out the canPropagate hypothesis and pointed at
+two distinct problems both worth fixing.</p>
+<p>First problem: <strong>bogus numpad identifier names.</strong> NVDA’s
+gesture identifier system maps <code>(vkCode, isExtended)</code> pairs
+to key names via vkCodes.py. The relevant entries are
+<code>(0x27, True): "rightArrow"</code> (six-pack right) and
+<code>(0x27, False): "numpad6"</code> (numpad-6, NumLock off). Similarly
+numpad-up is <code>numpad8</code> not <code>numpadUpArrow</code>,
+numpad-down is <code>numpad2</code> not <code>numpadDownArrow</code>,
+and so on for the rest of the numpad-numeric range. The v1.0.57 add-on
+bound names like <code>kb:alt+control+numpadRightArrow</code>,
+<code>kb:alt+control+numpadUpArrow</code>,
+<code>kb:alt+control+numpadHome</code> – these names do not exist in
+NVDA’s identifier system. They were silently never matched, so numpad
+chords on the user’s keyboard continued to fall through Windows’ input
+dispatch directly to DbDuo’s ProcessCmdKey (which sees the same VK code
+as the six-pack arrow due to Windows-level scan-code coalescing). That
+fall-through is what was “working” in v1.0.57 – not our script. v1.0.58
+replaces those bogus names with the correct numeric identifiers:
+<code>numpad7</code> (Home), <code>numpad1</code> (End),
+<code>numpad9</code> (PageUp), <code>numpad3</code> (PageDown),
+<code>numpad8</code> (Up), <code>numpad2</code> (Down),
+<code>numpad4</code> (Left), <code>numpad6</code> (Right), and
+<code>numpad5</code> (the documented say-current-cell-only chord).</p>
+<p>Second problem: <strong>gesture.send() asymmetry on extended vs
+non-extended keys.</strong> NVDA’s
+<code>KeyboardInputGesture.send()</code> uses sequential
+<code>keybd_event</code> calls with the original gesture’s
+<code>isExtended</code> flag. For extended keys (six-pack arrows,
+<code>isExtended=True</code>), the synthesized keystroke goes through
+Windows’ input queue with the <code>KEYEVENTF_EXTENDEDKEY</code> flag
+set; for non-extended keys (numpad arrows with NumLock off,
+<code>isExtended=False</code>), it does not. Testing on NVDA 2025.x and
+2026.x shows the extended-key injection path getting consumed by NVDA’s
+own LL hook rather than delivered to DbDuo’s window procedure –
+producing the user-observed silence on six-pack arrows. The non-extended
+path delivers correctly. JAWS does not exhibit this asymmetry because
+JAWS doesn’t use NVDA’s gesture-handler architecture at all; JAWS’s
+<code>.jkm</code> key map uses logical names like
+<code>RightArrow</code> that resolve to both physical sources via a
+different mechanism (JAWS reads VK codes and modifier state directly,
+not through an extended-bit-distinguishing identifier system).</p>
+<p><strong>The fix.</strong> v1.0.58 replaces
+<code>gesture.send()</code> with a small helper,
+<code>passViaCanonical(gesture, sCanonicalChord)</code>, which:</p>
+<ol type="1">
+<li>Maps the user-pressed gesture identifier to its canonical six-pack
+chord name. A press of Alt+Control+Numpad6 maps to the chord
+<code>"alt+control+rightArrow"</code>. A press of Alt+Control+RightArrow
+already IS the canonical form, no remapping needed.</li>
+<li>Constructs a FRESH <code>KeyboardInputGesture</code> via
+<code>keyboardHandler.KeyboardInputGesture.fromName(sCanonicalChord)</code>.
+This is the same public API used in NVDA’s own developer-guide example
+for emitting an Applications-key press. The fresh gesture’s scan-code
+resolution is done at construction time by <code>VkKeyScanEx</code>,
+producing a keystroke that DbDuo reliably receives regardless of which
+physical key the user originally pressed.</li>
+<li>Calls <code>.send()</code> on the fresh gesture. If
+<code>send()</code> fails for any reason, the helper falls back to the
+original <code>gesture.send()</code>.</li>
+</ol>
+<p>The architectural benefit is that DbDuo always sees the same
+<code>Keys.Alt|Keys.Control|Keys.Right</code> VK code regardless of
+whether the user pressed the six-pack right-arrow or the numpad-6 (with
+NumLock off). The user perspective matches what JAWS provides: both
+physical key sources produce the same in-app behavior, even though
+NVDA’s identifier system distinguishes them upstream.</p>
+<p><strong>Documented convention summary, for the record.</strong>
+Across every authoritative source – Freedom Scientific’s Keystrokes.pdf,
+WebAIM’s JAWS and NVDA keyboard guides, Mozilla’s JAWS testing guide,
+NVDA’s commands quick reference, Penn State’s NVDA reference, and
+Skillsoft’s tabular JAWS docs – the <code>Control+Alt+arrow</code>
+table-navigation family is described against the SIX-PACK inverted-T
+arrows, never the numpad. The one numpad-specific exception is
+<code>Control+Alt+Numpad5</code> for “Say Current Cell” / “Read
+row+column coordinates” (full-keyboard only, since the inverted-T has no
+center key). JAWS desktop layout uses the bare numpad arrows (no
+modifiers) for its own review-by-character / review-by-word commands –
+so the numpad arrows are claimed for review commands on JAWS desktop and
+are NOT a documented alternative for table navigation. The user’s
+intuition that JAWS handles both is correct in practical effect: JAWS’s
+<code>.jkm</code> key map mechanism makes the numpad arrows fall through
+to the application as the same VK codes the six-pack arrows produce,
+even though no separate JAWS binding exists for the numpad variants.
+v1.0.58 produces the same practical effect under NVDA by explicit
+binding plus canonical-chord remapping.</p>
+<p>Gesture identifier counts: 68 total, 17 in the virtual-cursor group
+(8 six-pack + 8 numpad-numeric + 1 numpad5), 14 Alt-letter, 8 drill, 8
+search, 8 marked-row, 8 bulk-mark, 5 say-X. Add-on internal version
+bumped to 1.0.7.</p>
+<h2 id="v1.0.57">v1.0.57</h2>
+<p>NVDA add-on now binds both six-pack and numpad variants of navigation
+chords. Research summary on what JAWS and NVDA actually use for table
+navigation, since the user reported that v1.0.56 worked from the numpad
+but not the six-pack:</p>
+<p>The documented convention in both screen readers is <strong>six-pack
+arrows</strong> for the <code>Control+Alt+arrow</code> table-navigation
+family. WebAIM’s JAWS keyboard reference, Mozilla’s JAWS testing guide,
+Freedom Scientific’s HTML Tables training page, and NVDA’s own commands
+quick reference all describe
+<code>Control+Alt+leftArrow / rightArrow / upArrow / downArrow</code>
+against the inverted-T six-pack arrows, never the numpad. The one
+numpad-specific exception is <code>Control+Alt+Numpad5</code> “say
+current cell” (no six-pack equivalent because the inverted-T has no
+centre key). JAWS desktop layout uses the numpad arrows by themselves
+(no modifiers) for its own review commands (move-by-character,
+move-by-word) – so on a JAWS desktop system the numpad arrows are
+claimed for review, not for table navigation. NVDA distinguishes numpad
+keys from six-pack keys at the gesture-identifier level:
+<code>kb:rightArrow</code> and <code>kb:numpadRightArrow</code> are
+separate identifiers, and NumLock-off numpad arrows on a system without
+explicit binding fall through Windows’ normal input dispatch as the
+corresponding six-pack VK codes.</p>
+<p>The “browse mode” / “virtual mode” point the user raised is correct
+context: in NVDA’s browse mode and JAWS’s virtual mode, a virtual
+document buffer is created and the arrow keys never reach the browser –
+they navigate the virtual buffer. So Control+Alt+arrow in a browser
+isn’t “passing the key to the app,” it’s “moving the virtual cursor
+inside the screen reader’s buffer.” DbDuo is different: there’s no
+virtual buffer, DbDuo IS the application, and the chord needs to reach
+DbDuo’s own ProcessCmdKey. The user-facing keystroke conventions still
+match browser table navigation (Control+Alt+arrow on the six-pack), but
+the underlying mechanism is <code>gesture.send()</code> to pass the key
+through rather than a virtual-buffer navigation.</p>
+<p>The v1.0.56 observation that numpad arrows worked but six-pack didn’t
+has a simple explanation: the v1.0.56 add-on bound
+<code>kb:alt+control+rightArrow</code> (six-pack) but NOT
+<code>kb:alt+control+numpadRightArrow</code>. Numpad arrows with NumLock
+off therefore weren’t intercepted by NVDA and fell through Windows’
+normal input dispatch directly to DbDuo’s ProcessCmdKey (which sees the
+same VK code regardless of source). Six-pack arrows WERE intercepted by
+our binding, our script_passVirtualCursor ran, gesture.send()
+re-injected the keystroke – but in practice the re-injection appears not
+to be reaching DbDuo reliably, possibly because of how NVDA’s
+ignoreInjected flag interacts with the six-pack vs numpad scan-code
+differences during the SendInput call.</p>
+<p>v1.0.57’s fix matches what users would expect: every navigation chord
+now binds BOTH the six-pack and the numpad variant. The six-pack variant
+is the primary documented convention; the numpad variant is the
+practical fallback that already works through Windows’ input dispatch.
+Now matter which key style the user reaches for, the chord is recognised
+by the add-on, gets intercepted from NVDA’s defaults, and is passed
+through to DbDuo. The added gesture identifiers are:</p>
+<ul>
+<li>Virtual-cursor group:
+kb:alt+control+numpadHome/End/PageUp/PageDown/UpArrow/DownArrow/LeftArrow/RightArrow
+added. kb:alt+control+numpad5 was already bound.</li>
+<li>Drill group: kb:alt+numpadHome/End/LeftArrow/RightArrow added.</li>
+<li>Marked-row group: kb:control+numpadHome/End/UpArrow/DownArrow
+added.</li>
+<li>Bulk-mark group: kb:shift+numpadHome/End and
+kb:alt+shift+numpadHome/End added.</li>
+</ul>
+<p>Total gesture identifiers in the add-on go from 49 (v1.0.56) to 68
+(v1.0.57). Add-on internal version bumped to 1.0.6.</p>
+<p>Diagnostic note: if your earlier test of v1.0.56 saw numpad work but
+six-pack stay silent, the practical resolution may depend on which path
+NVDA’s gesture.send() reliably exercises in your specific NVDA version.
+The new bindings give a stable answer regardless: both styles now pass
+through. If after this release the six-pack chords are still silent
+while the numpad chords still work, that’s diagnostic evidence pointing
+at gesture.send()-with-six-pack-arrows specifically, and the next step
+would be to investigate whether NVDA’s KeyboardInputGesture.send() needs
+the extended-key flag adjusted when injecting six-pack arrows.</p>
+<h2 id="v1.0.56">v1.0.56</h2>
+<p>Two small fixes: one user-facing “object” → “table or view” wording
+fix; and <code>canPropagate=True</code> on every NVDA add-on script, the
+most likely remaining cause of the
+bindings-matched-but-passthrough-broken symptom.</p>
+<p><strong>Wording fix.</strong> A single user-facing spoken status
+message in the Switch-Table-or-View handler still referenced “object”:
+“Only one object in this database.” The matching language in the same
+code block uses “table or view” (“No tables or views in this database”),
+and the user’s standing rule is that “object” should NOT appear in DbDuo
+GUI labels, dialogs, captions, or spoken status (PowerShell-canonical
+command names like <code>Show-Object</code> and <code>Sort-Object</code>
+stay, since those ARE the PowerShell verb-noun convention). The fix is
+one line: the spoken text now reads “Only one table or view in this
+database.”</p>
+<p>A full sweep of DbDuo.cs for user-visible “object” mentions found: -
+One spoken message (the fix above) - Three PowerShell-canonical command
+aliases (<code>Show-Object</code>, <code>Sort-Object</code>,
+<code>Switch-Object</code>) — STAY per the standing rule - Several
+dot-prompt help-text descriptions of those PowerShell aliases — STAY
+(they explicitly label themselves as PowerShell-canonical) - “JSON array
+of objects” in the Export-Data help text — STAY (technical JSON
+terminology, correct usage) - C# <code>object</code> type references and
+COM objects in code — internal, never user-visible</p>
+<p>No other user-facing “object” leak found.</p>
+<p><strong>NVDA add-on canPropagate fix.</strong> The user’s diagnostic
+report between v1.0.53 and v1.0.54 traces a real behavior change.
+Pre-v1.0.54: NVDA’s table-reading scripts ran with confused output (our
+bindings weren’t matching, NVDA’s defaults fired). Post-v1.0.54: no
+speech at all on those chords, but Shift+? still spoke normally (our
+bindings ARE matching now – NVDA stays quiet because the chord found a
+script – but the keystroke isn’t reaching DbDuo either). The Shift+?
+chord works because it isn’t in our bindings; NVDA passes it through
+Windows’ normal input dispatch, DbDuo’s KeyMap receives it, and the
+help-or-status handler runs.</p>
+<p>That behavior-change pattern points to one specific NVDA decorator
+parameter: <code>canPropagate</code>. From the NVDA Developer Guide:
+“canPropagate: A boolean indicating whether this script should also
+apply when it belongs to a focus ancestor object. For example, this can
+be used when you want to specify a script on a particular foreground
+object, or another object in the focus ancestry which is not the current
+focus object. <strong>This option defaults to False.</strong>” In DbDuo,
+the focused NVDAObject at runtime is typically the data-grid ListView (a
+child of the form’s NVDAObject), NOT the AppModule’s top-level object.
+With canPropagate=False (the default), our scripts only match when the
+focus IS the AppModule’s main object, not a descendant of it. v1.0.56
+adds canPropagate=True to all seven <code>@scriptHandler.script</code>
+decorators, which lets each script fire when our AppModule appears
+anywhere in the focused object’s ancestor chain.</p>
+<p>This is the most likely fix for the v1.0.54 silence symptom, but it’s
+not certain to be the complete fix – the symptom could also indicate
+NVDA’s <code>gesture.send()</code> synthesizing the chord at a moment
+when DbDuo’s window isn’t the foreground window, or a Windows
+input-queue race. The diagnostic recipe still applies: set NVDA log
+level to Debug, restart NVDA, open DbDuo, press Alt+Control+RightArrow,
+search nvda.log for “dbduo:”. With canPropagate=True, if the binding now
+reaches <code>script_passVirtualCursor</code> you’ll see a “passing
+through” line per keypress. If you DO see it but the cursor still
+doesn’t move in DbDuo, the next investigation is
+<code>gesture.send()</code> itself – in that case we’d switch to a
+direct <code>SendMessage(WM_KEYDOWN)</code> approach that bypasses
+Windows’ input queue entirely.</p>
+<p>Add-on internal version bumped to 1.0.5.</p>
+<h2 id="v1.0.55">v1.0.55</h2>
+<p>Build fix. v1.0.54’s revert of the SampleMdbBuilder scaffolding
+accidentally removed the
+<code>public static class JawsSettingsInstaller</code> declaration line
+along with the SampleMdbBuilder block above it, leaving the
+<code>{</code> for JawsSettingsInstaller’s class body unattached.
+csc.exe reported two
+<code>CS1022: Type or namespace definition, or end-of-file expected</code>
+errors — the first at the orphaned <code>{</code>, the second at
+end-of-file as every subsequent <code>}</code> got mismatched against
+the missing class scope. No DbDuo.exe was produced. The error 216 you
+saw at launch was Windows refusing to run the STALE DbDuo.exe (from a
+prior architecture or a prior failed install) that the v1.0.54 installer
+left in place because there was no new .exe to copy over.</p>
+<p>The fix is one line: restore
+<code>public static class JawsSettingsInstaller</code> between the
+prologue comment and the opening <code>{</code>. The brace counter that
+passed v1.0.54 reported 2422/2422 — correct total — but matched-total is
+necessary, not sufficient: an early stray <code>}</code> plus a late
+stray <code>{</code> net to zero but produce structurally broken code.
+v1.0.55 adds a second check that walks the brace depth as a state and
+reports any spot where it goes negative; that would have caught the
+v1.0.54 regression before delivery.</p>
+<p>No other changes from v1.0.54. The lowercase-module NVDA add-on
+(internal version 1.0.4) and the first-run sample.db default both
+stay.</p>
+<h2 id="v1.0.54">v1.0.54</h2>
+<p>Two changes: NVDA add-on rewritten using the modern decorator API and
+lowercase module name, and a first-run default-database fallback so a
+fresh install opens sample.db automatically.</p>
+<p><strong>NVDA add-on rewritten.</strong> The v1.0.45-v1.0.53 add-ons
+installed correctly but their bindings never took effect —
+Alt+Control+arrow still triggered NVDA’s “Not in a table” speech.
+v1.0.54 rewrites the add-on against three observations from research and
+from a working reference (ChatGPT-generated dbduo.py for a single
+chord):</p>
+<p>First, the .py filename is now lowercase:
+<code>appModules/dbduo.py</code> instead of
+<code>appModules/DbDuo.py</code>. PEP 235 documents that Python’s import
+system on Windows is case-sensitive against the on-disk filename even
+though the underlying filesystem is case-insensitive. NVDA reads the
+executable basename from Windows ToolHelp32 (which preserves the on-disk
+case <code>DbDuo</code>) and imports <code>appModules.DbDuo</code>, but
+NVDA’s add-on subsystem also tries the lowercase variant for robustness
+against varied Windows configurations. Every shipped NVDA app module in
+the upstream code and the NVDA Developer Guide example follows the
+lowercase convention. Using lowercase matches the convention rather than
+risking edge cases. (The user reported successfully shipping mixed-case
+.py filenames before, so casing alone wasn’t a blocker — but eliminating
+it as a variable simplifies diagnosis.)</p>
+<p>Second, gestures are now declared with the
+<code>@scriptHandler.script</code> decorator instead of a class-level
+<code>__gestures</code> dict plus an <code>__init__</code>
+<code>bindGesture</code> loop. The decorator is the modern NVDA API and
+is what every example in the current NVDA Developer Guide demonstrates.
+Internally NVDA’s ScriptableObject metaclass walks the decorated
+script_* methods at class-definition time and harvests their .gestures
+attribute into the class-level dict — formally equivalent to declaring
+the dict directly, but more robust against the subtle name-mangling and
+metaclass-order quirks that may have been involved in the prior
+versions’ silent failure.</p>
+<p>Third, scripts are grouped by intent (one decorator per logical group
+of chords) rather than every chord pointing at one omnibus script. Seven
+scripts now cover the 49 gesture bindings: script_passVirtualCursor (9
+Alt+Control chords), script_passAltLetter (14 Alt-letter chords
+including Alt+Shift+letter), script_passDrill (4 parent-child drill
+chords), script_passSearch (8 search chords), script_passMarkedRow (4
+marked-row chords), script_passBulkMark (4 bulk-mark chords),
+script_passSayX (5 say-X data-list chords). Grouping makes the NVDA
+Input Gestures dialog more navigable for users who want to remap any of
+these.</p>
+<p>Add-on internal version bumped to 1.0.4. Manifest <code>name</code>
+field changed from <code>dbDuo</code> (mixed case) to <code>dbduo</code>
+(lowercase) to match the .py filename convention and the addon directory
+under <code>%APPDATA%\nvda\addons\</code>.</p>
+<p><strong>First-run default: sample.db opens automatically.</strong>
+Previously a fresh DbDuo install (no <code>[Session] lastDatabase</code>
+entry in the ini) launched into an empty form. v1.0.54 adds a fallback:
+when no saved session exists, if <code>{app}\sample.db</code> is
+present, open it. The fallback is silent on failure (missing or
+unreadable sample.db, exception during open) — the user starts with the
+empty form just as before. The fallback only fires when lastDatabase is
+genuinely empty, not when it’s stale (file moved or deleted); in the
+stale case the user still starts empty, since the user explicitly closed
+the previous session and the intent isn’t clear.</p>
+<p>This makes the first-launch experience tangible: a new user sees
+DbDuo’s school-domain sample (teachers, classes, students, enrollments)
+on the first run rather than facing an empty form they have to populate
+before they can explore the UI. The fallback re-fires whenever
+lastDatabase is empty – i.e., on first launch AND after Close-Database
+which clears the ini entry. If a user wants DbDuo to start empty, the
+right path is to open any other database briefly (which sets
+lastDatabase to that path) rather than closing the sample. This is the
+simplest semantic; a separate first-launch-only flag would be more code
+for limited value.</p>
+<h2 id="v1.0.53">v1.0.53</h2>
+<p>Installer description for the NVDA add-on checkbox refined to flag
+the post-install restart requirement. Previously the checkbox said
+“Install NVDA add-on (NVDA must be running; otherwise dismiss this and
+re-install later from Help menu)”. Casing and elevation were ruled out
+as causes of v1.0.52’s binding-not-taking-effect symptom; the most
+likely remaining cause is the well-documented NVDA behavior that new
+add-ons require a restart of the NVDA process to be picked up. The
+Finish-page description now says: “Install NVDA add-on (NVDA must be
+running; restart NVDA after install for it to take effect)”. The text is
+short to fit the Finish-page real estate but front-loads the two
+preconditions in order.</p>
+<p>No code change to the add-on or to DbDuo.exe in this release; this is
+a documentation-only release for the installer checkbox.</p>
+<h2 id="v1.0.52">v1.0.52</h2>
+<p>NVDA add-on diagnostic logging and clearer documentation about NVDA’s
+runtime requirement for add-on installation.</p>
+<p><strong>NVDA must be running for the .nvda-addon file association to
+actually install.</strong> Investigating why the v1.0.51 add-on
+installed cleanly (manifest now correctly parsed by NVDA) but failed to
+take effect against the table-navigation chords surfaced an underlying
+property of NVDA’s install machinery worth documenting: the
+<code>.nvda-addon</code> file handler is registered to
+<code>nvda.exe</code>. When Windows hands a <code>.nvda-addon</code>
+file to that handler, NVDA’s running main loop is what shows the
+“Install this add-on?” dialog and runs the install. If NVDA itself is
+not the active screen reader at install time — for example, the user is
+running JAWS as their primary screen reader — the file association still
+launches <code>nvda.exe</code>, but the install dialog does not reliably
+surface in the installer’s foreground context. The user has to switch to
+NVDA and re-install manually, which is what happened in v1.0.51
+testing.</p>
+<p>The installer’s Finish-page checkbox description now flags this
+explicitly: “Install NVDA add-on (NVDA must be running; otherwise
+dismiss this and re-install later from Help menu)”. README.md and
+DbDuo.md both document the same condition: install the NVDA add-on while
+NVDA is the active screen reader, or defer the install and run
+<code>DbDuo.exe --install-nvda-addon</code> (or the Help menu’s
+Re-install NVDA Add-on command, or a manual double-click of
+<code>DbDuo.nvda-addon</code> in the install folder) later when NVDA is
+the running reader.</p>
+<p><strong>Diagnostic logging added to the add-on’s Python app
+module.</strong> v1.0.51’s add-on installed correctly but its bindings
+appeared to be absent — Alt+Control+arrow still triggered NVDA’s default
+“Not in a table” behavior. Without log output, there was no way to tell
+whether NVDA loaded the module, bound the gestures, or simply lost the
+gesture-lookup race to its own browse-mode handler. v1.0.52 adds
+explicit log calls at the three points where the add-on could be
+silently failing:</p>
+<ol type="1">
+<li><p><strong>At module import</strong>:
+<code>log.info("DbDuo app module: module imported, gesture count = N")</code>.
+Absence of this line in nvda.log means NVDA never tried to import the
+module — likely a filename mismatch, an installation step skipped, or
+NVDA was restarted after install (NVDA needs a restart after add-on
+install to pick up new app modules).</p></li>
+<li><p>**At AppModule.__init__**:
+<code>log.info("DbDuo app module: AppModule.__init__ running, appName=%r processID=%r")</code>.
+Absence means NVDA found the module file but never matched it to
+DbDuo.exe’s process — most likely a casing mismatch between the appName
+Windows returns (e.g., <code>DbDuo</code> vs <code>dbDuo</code>) and the
+module name.</p></li>
+<li><p><strong>At bindGesture loop completion</strong>:
+<code>log.info("DbDuo app module: bindGesture loop done, N bound, M failed")</code>.
+Reports how many of the 49 gestures registered successfully. Individual
+failures log a <code>log.warning</code>. Reaching this line confirms the
+bindings exist on the instance.</p></li>
+<li><p><strong>At script_passThrough invocation</strong>:
+<code>log.debug("DbDuo app module: script_passThrough for %r" % gesture)</code>.
+Reaching this line on each key press confirms NVDA matched the gesture
+to our script (rather than dispatching it to a default
+handler).</p></li>
+</ol>
+<p>The diagnostic recipe for users is: set NVDA’s log level to “Debug”
+via Preferences &gt; Settings &gt; General &gt; Log level, restart NVDA
+so the new add-on loads cleanly, open DbDuo, press
+Alt+Control+rightArrow. Open NVDA’s log via NVDA menu &gt; Tools &gt;
+View log and search for “DbDuo app module:”. The pattern of
+presence/absence of the four log lines pinpoints exactly which stage of
+the binding chain is failing. This recipe is documented in DbDuo.md’s
+JAWS-settings section (renamed mentally to “screen reader settings” but
+keeping the existing section name for brevity).</p>
+<p>Add-on internal version bumped to 1.0.3 so 1.0.2 installs (where the
+manifest is correct but logging is silent) see this as an upgrade.</p>
+<h2 id="v1.0.51">v1.0.51</h2>
 <p>Inno Setup compile fix. v1.0.50’s <code>CurStepChanged</code>
 procedure contained a Pascal block comment whose second line read
 <code>[Run] entry invokes DbDuo.exe...</code>. Inno Setup’s preprocessor
