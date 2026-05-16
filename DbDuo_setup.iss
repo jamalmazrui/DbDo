@@ -24,7 +24,7 @@
 ; =====================================================================
 
 #define AppName       "DbDuo"
-#define AppVersion    "1.0.58"
+#define AppVersion    "1.0.69"
 #define AppPublisher  "Jamal Mazrui"
 #define AppUrl        "https://github.com/JamalMazrui/DbDuo"
 #define AppExeName    "DbDuo.exe"
@@ -156,19 +156,45 @@ Type: files; Name: "{app}\System.Numerics.Vectors.dll"
 Type: files; Name: "{app}\System.Threading.Tasks.Extensions.dll"
 Type: files; Name: "{app}\System.Text.Encoding.CodePages.dll"
 Type: files; Name: "{app}\Microsoft.CSharp.dll"
+;
+; v1.0.58 and earlier shipped dbDuoEval.dll as the JScript .NET support
+; module. v1.0.59 renames it to DbDuo.dll. Remove the old file on
+; upgrade so the install folder doesn't carry an unused DLL.
+Type: files; Name: "{app}\dbDuoEval.dll"
 
 [Files]
 Source: "DbDuo.exe";    DestDir: "{app}"; Flags: ignoreversion
-Source: "dbDuoEval.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "DbDuo.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDuo.ico";    DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDuo.md";     DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDuo.htm";    DestDir: "{app}"; Flags: ignoreversion
 Source: "README.md";    DestDir: "{app}"; Flags: ignoreversion
 Source: "README.htm";   DestDir: "{app}"; Flags: ignoreversion
+Source: "Announce.md";  DestDir: "{app}"; Flags: ignoreversion
+Source: "Announce.htm"; DestDir: "{app}"; Flags: ignoreversion
+Source: "History.md";   DestDir: "{app}"; Flags: ignoreversion
+Source: "History.htm";  DestDir: "{app}"; Flags: ignoreversion
 Source: "License.md";   DestDir: "{app}"; Flags: ignoreversion
 Source: "License.htm";  DestDir: "{app}"; Flags: ignoreversion
-Source: "sample.db";    DestDir: "{app}"; Flags: ignoreversion
+Source: "CamelType_CSharp.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "sample.db";     DestDir: "{app}"; Flags: ignoreversion
+Source: "northwind.db";  DestDir: "{app}"; Flags: ignoreversion
+Source: "chinook.db";    DestDir: "{app}"; Flags: ignoreversion
+Source: "collection.db"; DestDir: "{app}"; Flags: ignoreversion
+Source: "cellar.db";     DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDuo.ini";    DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist
+;
+; Scripts: example scripts of each of the three DbDuo script types
+; that DbDuo seeds into %APPDATA%\DbDuo\Scripts on first access
+; (see ScriptHelper.seedSampleScriptsIfNew in DbDuo.cs).
+;   .js   -- JScript .NET, full computational power, host objects
+;   .sql  -- SQL batch run through invokeSql
+;   .duo  -- DbDuo command batch dispatched line-by-line as if at
+;            the dot prompt
+; Source flag recursesubdirs isn't needed -- it's a flat folder.
+Source: "Scripts\*.js";  DestDir: "{app}\Scripts"; Flags: ignoreversion
+Source: "Scripts\*.sql"; DestDir: "{app}\Scripts"; Flags: ignoreversion
+Source: "Scripts\*.duo"; DestDir: "{app}\Scripts"; Flags: ignoreversion
 ;
 ; DbDuo_JAWS.zip contains DbDuo.jkm and DbDuo.jss at its root. We
 ; ship the zip rather than the two loose files so the GitHub repo

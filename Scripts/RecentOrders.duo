@@ -1,0 +1,23 @@
+# Description: Open the orders table, filter to the most recent calendar
+# year, sort by order_date most-recent-first, and report the result
+# count via speech. Useful as a quick "what landed in the last year?"
+# probe -- the script leaves you at the first row of the filtered set
+# so you can browse from there.
+#
+# Adjust the cutoff date in the filter line to match the period you
+# care about. The leading '?' on the clear-filter line means "continue
+# on error" -- harmless if no filter is currently active.
+#
+# Syntax: each non-blank, non-comment line is dispatched as if you
+# typed it at the dot prompt. The natural DbDuo dot-prompt language
+# is used here (table, filter, sort, status, etc.) rather than the
+# underlying PowerShell-style canonical verbs (select-table,
+# select-record, sort-object). Either form works; the natural form
+# is shorter and more readable.
+
+table orders
+?clear-filter
+filter order_date >= '2024-01-01'
+sort order_date desc
+say-yield
+sort-filter

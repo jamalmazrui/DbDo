@@ -248,8 +248,13 @@ id="toc-keyboard-navigation-in-the-data-list">Keyboard navigation in the
 data list</a></li>
 <li><a href="#virtual-cell-navigation"
 id="toc-virtual-cell-navigation">Virtual cell navigation</a></li>
+<li><a href="#screen-reader-settings"
+id="toc-screen-reader-settings">Screen-reader settings</a>
+<ul>
 <li><a href="#jaws-settings-for-dbduo"
 id="toc-jaws-settings-for-dbduo">JAWS settings for DbDuo</a></li>
+<li><a href="#nvda-add-on" id="toc-nvda-add-on">NVDA add-on</a></li>
+</ul></li>
 <li><a href="#file-menu" id="toc-file-menu">File menu</a></li>
 <li><a href="#edit-menu" id="toc-edit-menu">Edit menu</a></li>
 <li><a href="#navigate-menu" id="toc-navigate-menu">Navigate
@@ -263,9 +268,6 @@ Invoke-Sql actually runs</a>
 <li><a href="#a-portable-sql-baseline-that-works-everywhere"
 id="toc-a-portable-sql-baseline-that-works-everywhere">A portable SQL
 baseline that works everywhere</a></li>
-<li><a href="#how-invoke-sql-is-implemented"
-id="toc-how-invoke-sql-is-implemented">How Invoke-Sql is
-implemented</a></li>
 <li><a href="#sqlite-full-modern-sql"
 id="toc-sqlite-full-modern-sql">SQLite: full modern SQL</a></li>
 <li><a href="#access-.mdb-.accdb-jetace-sql"
@@ -279,30 +281,26 @@ id="toc-dbase-.dbf-minimal-sql">dBASE (.dbf): minimal SQL</a></li>
 <li><a href="#csv-and-tsv-select-only-jet-text-driver"
 id="toc-csv-and-tsv-select-only-jet-text-driver">CSV and TSV:
 SELECT-only Jet text driver</a></li>
-<li><a href="#how-dbduo-captures-the-result-in-c"
-id="toc-how-dbduo-captures-the-result-in-c">How DbDuo captures the
-result in C</a></li>
 <li><a href="#practical-recommendation"
 id="toc-practical-recommendation">Practical recommendation</a></li>
 </ul></li>
-<li><a href="#scripting-with-jscript-.net-snippets"
-id="toc-scripting-with-jscript-.net-snippets">Scripting with JScript
-.NET snippets</a>
+<li><a href="#scripting" id="toc-scripting">Scripting</a>
 <ul>
-<li><a href="#where-snippets-live" id="toc-where-snippets-live">Where
-snippets live</a></li>
-<li><a href="#file-types" id="toc-file-types">File types</a></li>
-<li><a href="#the-three-commands" id="toc-the-three-commands">The three
-commands</a></li>
-<li><a href="#editor" id="toc-editor">Editor</a></li>
-<li><a href="#what-a-jscript-snippet-sees"
-id="toc-what-a-jscript-snippet-sees">What a JScript snippet
-sees</a></li>
-<li><a href="#what-a-snippet-returns"
-id="toc-what-a-snippet-returns">What a snippet returns</a></li>
+<li><a href="#where-scripts-live" id="toc-where-scripts-live">Where
+scripts live</a></li>
+<li><a href="#the-three-file-types" id="toc-the-three-file-types">The
+three file types</a></li>
+<li><a href="#the-chord-altv" id="toc-the-chord-altv">The chord —
+Alt+V</a></li>
+<li><a href="#editing-scripts" id="toc-editing-scripts">Editing
+scripts</a></li>
+<li><a href="#opening-the-scripts-folder"
+id="toc-opening-the-scripts-folder">Opening the Scripts folder</a></li>
+<li><a href="#bundled-sample-scripts"
+id="toc-bundled-sample-scripts">Bundled sample scripts</a></li>
 <li><a href="#errors" id="toc-errors">Errors</a></li>
-<li><a href="#sample-snippets" id="toc-sample-snippets">Sample
-snippets</a></li>
+<li><a href="#writing-your-own" id="toc-writing-your-own">Writing your
+own</a></li>
 <li><a href="#power-and-responsibility"
 id="toc-power-and-responsibility">Power and responsibility</a></li>
 </ul></li>
@@ -333,7 +331,18 @@ family</a></li>
 id="toc-graveaccent-family">GraveAccent family</a></li>
 </ul></li>
 <li><a href="#standard-fields" id="toc-standard-fields">Standard
-fields</a></li>
+fields</a>
+<ul>
+<li><a href="#example-schema-using-the-standard-fields"
+id="toc-example-schema-using-the-standard-fields">Example schema using
+the standard fields</a></li>
+</ul></li>
+<li><a href="#bundled-sample-databases"
+id="toc-bundled-sample-databases">Bundled sample databases</a>
+<ul>
+<li><a href="#updated-timestamp-triggers"
+id="toc-updated-timestamp-triggers">Updated-timestamp triggers</a></li>
+</ul></li>
 <li><a href="#persistence" id="toc-persistence">Persistence</a></li>
 <li><a href="#logging" id="toc-logging">Logging</a></li>
 <li><a href="#bundled-documentation"
@@ -343,21 +352,46 @@ id="toc-bundled-documentation">Bundled documentation</a></li>
 <ul>
 <li><a href="#requirements" id="toc-requirements">Requirements</a></li>
 <li><a href="#build-steps" id="toc-build-steps">Build steps</a></li>
-<li><a href="#release-process" id="toc-release-process">Release
-process</a></li>
 <li><a href="#architecture-one-connection-two-interfaces"
 id="toc-architecture-one-connection-two-interfaces">Architecture: one
 connection, two interfaces</a></li>
-<li><a href="#ado-client-cursor-and-sqlite-indexing"
-id="toc-ado-client-cursor-and-sqlite-indexing">ADO client cursor and
-SQLite indexing</a></li>
+<li><a href="#coding-style" id="toc-coding-style">Coding style</a></li>
+<li><a href="#layout-by-code" id="toc-layout-by-code">Layout by Code</a>
+<ul>
+<li><a
+href="#the-conceptual-model-bands-the-layout-cursor-and-dialog-units"
+id="toc-the-conceptual-model-bands-the-layout-cursor-and-dialog-units">The
+conceptual model: bands, the layout cursor, and dialog units</a></li>
+<li><a href="#why-lbc-matters-for-a-screen-reader-audience"
+id="toc-why-lbc-matters-for-a-screen-reader-audience">Why LbC matters
+for a screen-reader audience</a></li>
+<li><a href="#anatomy-of-an-lbc-dialog"
+id="toc-anatomy-of-an-lbc-dialog">Anatomy of an LbC dialog</a></li>
+<li><a href="#the-add-control-vocabulary"
+id="toc-the-add-control-vocabulary">The add-control vocabulary</a></li>
+<li><a href="#run-methods" id="toc-run-methods">Run methods</a></li>
+<li><a href="#looking-up-controls-by-name"
+id="toc-looking-up-controls-by-name">Looking up controls by
+name</a></li>
+<li><a href="#focus-tips-and-the-status-bar"
+id="toc-focus-tips-and-the-status-bar">Focus tips and the status
+bar</a></li>
+<li><a href="#comparison-with-the-original-lbc-implementations"
+id="toc-comparison-with-the-original-lbc-implementations">Comparison
+with the original LbC implementations</a></li>
+<li><a href="#open-ended-extension"
+id="toc-open-ended-extension">Open-ended extension</a></li>
+<li><a href="#edsharp-style-text-edit-hotkeys"
+id="toc-edsharp-style-text-edit-hotkeys">EdSharp-style text-edit
+hotkeys</a></li>
+</ul></li>
+<li><a href="#gui-versus-cli-response-patterns"
+id="toc-gui-versus-cli-response-patterns">GUI versus CLI response
+patterns</a></li>
 <li><a
 href="#office-automation-always-createobject-never-getactiveobject"
 id="toc-office-automation-always-createobject-never-getactiveobject">Office
 automation: always CreateObject, never GetActiveObject</a></li>
-<li><a href="#show-record-and-the-look-column"
-id="toc-show-record-and-the-look-column">Show Record and the look
-column</a></li>
 <li><a href="#file-layout" id="toc-file-layout">File layout</a></li>
 </ul></li>
 </ul>
@@ -369,8 +403,7 @@ and delimited-text files through one consistent set of
 PowerShell-flavored commands, in a GUI window and a dot-prompt console
 at the same time. JAWS, NVDA, and Narrator are all first-class through
 dedicated speech paths; every command is reachable by keyboard.</p>
-<p>Version 1.0.58. Source and releases: <a
-href="https://github.com/JamalMazrui/DbDuo"
+<p>Source and releases: <a href="https://github.com/JamalMazrui/DbDuo"
 class="uri">https://github.com/JamalMazrui/DbDuo</a>.</p>
 <h2 id="how-dbduo-is-organized">How DbDuo is organized</h2>
 <p>DbDuo runs in two interfaces — a WinForms GUI and a dot-prompt CLI —
@@ -425,15 +458,10 @@ not currently in front.</p>
 <p>In CLI-only mode these chords work the same way; without a GUI, the
 “switch to GUI” chords simply have nothing to bring forward.</p>
 <h3 id="starting-dbduo">Starting DbDuo</h3>
-<p>Setup creates five Start Menu shortcuts and one Desktop shortcut. The
-plain <strong>DbDuo</strong> shortcut opens both GUI and console, which
-is the default mode. The <strong>DbDuo (GUI only)</strong>,
-<strong>DbDuo (CLI only)</strong>, <strong>DbDuo (read-only)</strong>,
-and <strong>DbDuo sample database</strong> shortcuts cover the variant
-launch modes.</p>
-<p>Use the Desktop hotkey, Alt+Control+D (D for Desktop), from anywhere
-in Windows to activate a running instance or launch a fresh one. DbDuo
-is single-instance: a second press of Alt+Control+D wakes the existing
+<p>The installer creates a single shortcut, DbDuo, with hotkey
+Alt+Control+D (D for Desktop). Use the hotkey from anywhere in Windows
+to activate a running instance or launch a fresh one. DbDuo is
+single-instance: a second press of Alt+Control+D wakes the existing
 window rather than spawning a duplicate.</p>
 <h2 id="keyboard-navigation-in-the-data-list">Keyboard navigation in the
 data list</h2>
@@ -493,34 +521,49 @@ only) says “Row N: value”; a horizontal move (column changed only) says
 “Header: value”; a corner jump (both changed, from Home or End) says
 “Row N, Header: value”. This matches the JAWS / NVDA table-reading
 convention.</p>
-<p>The double-press-spells convention applies to all speech-only
-commands, not just Numpad5: press Say Status (Alt+Z), Say Path (Alt+P),
-Say Yield (Alt+Y), Say Tables (Shift+F4), Say Marked (Shift+L), Say Date
-(Shift+D), Say Type (Shift+T), or Say Marked Yield (Shift+Y) twice
-within 1.5 seconds to hear the text spelled out character by
-character.</p>
+<p>The <strong>double-press dialog</strong> convention applies to every
+speech-only command. Press the command once to hear the text through
+your screen reader without moving keyboard focus. Press the same chord
+again within two seconds to open an information dialog with a read-only
+multi-line textbox containing the text plus an OK button — useful for
+reviewing long status, paths, or values that don’t fit comfortably in a
+single speech announcement. The dialog’s textbox supports normal
+text-navigation and Control+C copy. The two-second window is
+deliberately more forgiving than the JAWS and NVDA defaults (around 500
+milliseconds) so a thinking pause between presses still counts as one
+gesture. Commands that participate: Say Status (Alt+Z), Say Path
+(Alt+P), Say Yield (Alt+Y), Say Tables (Shift+F4), Say Marked
+(Alt+Shift+M), Say Updated (Shift+D), Say Notes (Shift+N), Say Tags
+(Shift+T), Say Column from Cursor (Shift+L), Say Marked Yield
+(Shift+Y).</p>
 <p>The virtual cursor synchronizes with the listview row selection in
 both directions: pressing plain Down/Up arrow updates the listview’s row
 selection, and the virtual row follows along with the column unchanged.
 Pressing Alt+Control+arrow moves the virtual cursor first, then moves
 the listview’s row selection to match — so you can see the row you’re
 virtually browsing.</p>
-<p>The virtual cursor resets to (row 1, first column) whenever a table
-is freshly opened or the view is refreshed with F5.</p>
+<p>The virtual cursor’s column and row are <strong>remembered per
+table</strong> within a session and across sessions. When you switch to
+a different table (and later return), DbDuo restores the row and column
+you were on. When you open a database file, every previously-visited
+table’s filter, sort, position, and virtual column are restored —
+switching to any one of them via Choose Table, Control+Tab, or the dot
+prompt picks up the saved state, not row 1. The F5 Refresh command still
+resets the virtual cursor to (row 1, first column) by design.</p>
 <p><strong>Column-aware commands default to the virtual column.</strong>
 When a command needs a column — Sort Ascending, Sort Descending, Open
 Cell Value, Next Initial Change, Jump to Match in One Column — its
 picker dialog defaults to the column currently under virtual focus. Just
 press Enter in the picker to accept that column, or arrow up/down to
 pick a different one.</p>
-<h2 id="jaws-settings-for-dbduo">JAWS settings for DbDuo</h2>
+<h2 id="screen-reader-settings">Screen-reader settings</h2>
+<h3 id="jaws-settings-for-dbduo">JAWS settings for DbDuo</h3>
 <p>JAWS has its own table-navigation chord set on Alt+Control+arrow, and
 by default JAWS intercepts those chords before the focused application
-sees them. When you press Alt+Control+RightArrow inside DbDuo without
-any settings adjustment, JAWS doesn’t recognize the virtual-mode
-ListView as a table and announces “Not in a table” instead of letting
-DbDuo run its virtual-cell command. The same applies to several other
-DbDuo chords on Alt-letter and Shift-letter combinations.</p>
+sees them. Without an adjustment, pressing Alt+Control+RightArrow inside
+DbDuo gives “Not in a table” instead of moving the virtual cursor. The
+same applies to several other DbDuo chords on Alt-letter and
+Shift-letter combinations.</p>
 <p>The fix is a three-file JAWS settings bundle:</p>
 <ul>
 <li><code>DbDuo.jkm</code> — JAWS key map. Maps the chords DbDuo wants
@@ -533,17 +576,12 @@ keystroke through to the application as if no script were running.</li>
 JAWS’s <code>scompile.exe</code>. JAWS loads this at run-time and
 resolves the <code>PassDbDuoKey</code> reference in the JKM.</li>
 </ul>
-<p>The reason the JSS-and-JSB pair is needed (rather than just the JKM)
-is that the JKM format requires a Script name on the right-hand side of
-each binding. <code>TypeCurrentScriptKey()</code> is a JAWS
-<em>Function</em> — callable from inside Scripts but not from a JKM
-directly. So we wrap it in a one-line Script.</p>
 <p><strong>Automatic install.</strong> The DbDuo installer offers to
-install this bundle automatically. On the Ready page you’ll see a
-checkbox “Install JAWS settings for DbDuo (recommended if you use JAWS)”
-which is checked by default. Selecting it does three things for every
-JAWS year-version present on your system, in every language subfolder
-inside each version’s <code>Settings</code> folder:</p>
+install this bundle automatically. The Finish-page checkbox “Install
+JAWS settings for DbDuo (recommended if you use JAWS)” is checked by
+default. Selecting it does three things for every JAWS year-version
+present on your system, in every language subfolder inside each
+version’s <code>Settings</code> folder:</p>
 <ol type="1">
 <li>Copy <code>DbDuo.jkm</code> to the settings folder.</li>
 <li>Copy <code>DbDuo.jss</code> to the settings folder.</li>
@@ -562,9 +600,9 @@ JSS):</p>
 copy DbDuo.jss &quot;%APPDATA%\Freedom Scientific\JAWS\&lt;year&gt;\Settings\enu\&quot;
 cd &quot;%APPDATA%\Freedom Scientific\JAWS\&lt;year&gt;\Settings\enu&quot;
 &quot;%PROGRAMFILES%\Freedom Scientific\JAWS\&lt;year&gt;\scompile.exe&quot; DbDuo.jss</code></pre>
-<p>where <code>&lt;year&gt;</code> is your JAWS year-version (2024,
-2025, etc.). The settings work from JAWS’s next launch (or, if JAWS is
-already running, when DbDuo next gains focus).</p>
+<p>where <code>&lt;year&gt;</code> is your JAWS year-version. The
+settings work from JAWS’s next launch (or, if JAWS is already running,
+when DbDuo next gains focus).</p>
 <p>The chords passed through to DbDuo include: the virtual-cursor family
 (Alt+Control + arrows, Home, End, PageUp, PageDown, NumPad5); the
 parent-child drill family (Alt+RightArrow, Alt+LeftArrow, Alt+Home); the
@@ -582,14 +620,12 @@ hand after each DbDuo upgrade.</p>
 <p>If you uninstall DbDuo, the installer removes only the three files it
 placed. Other JKMs or JSBs you placed yourself in those folders are not
 touched.</p>
-<p><strong>NVDA add-on.</strong> DbDuo ships a <code>.nvda-addon</code>
-package that performs the same pass-through role for NVDA that the JKM
-and JSB do for JAWS. The add-on registers an app module that, when
-DbDuo.exe is the foreground process, hands every chord DbDuo cares about
-(Alt+Control+arrow, Alt+arrow, Alt+letter, Control+F/J/F3, and the rest
-of the DbDuo.jkm key map) back to DbDuo via <code>gesture.send()</code>
-instead of running NVDA’s own table-navigation or browse-mode
-commands.</p>
+<h3 id="nvda-add-on">NVDA add-on</h3>
+<p>DbDuo ships a <code>.nvda-addon</code> package that performs the same
+pass-through role for NVDA that the JKM and JSB do for JAWS. The add-on
+registers an app module that, when DbDuo.exe is the foreground process,
+hands every chord DbDuo cares about back to DbDuo instead of running
+NVDA’s own table-navigation or browse-mode commands.</p>
 <p>NVDA must be running for the add-on to install. The installer’s
 Finish-page checkbox “Install NVDA add-on” hands the
 <code>DbDuo.nvda-addon</code> file to its Windows file association,
@@ -613,12 +649,11 @@ level), restart NVDA, then open DbDuo and press the chord. Open NVDA’s
 log (NVDA menu &gt; Tools &gt; View log) and search for lines beginning
 <code>DbDuo app module:</code>. Absence of those lines means NVDA never
 matched the app module to DbDuo.exe; presence of them confirms the
-module loaded and the bindings were registered. Forward the log to the
-project for diagnosis.</p>
+module loaded and the bindings were registered.</p>
 <p><strong>Narrator does not support scripts or add-ons.</strong>
-Narrator users will get less polished cell-level navigation than JAWS or
-NVDA users; the virtual-cursor announcements still fire, but Narrator
-may layer its own announcement on top.</p>
+Narrator users get less polished cell-level navigation than JAWS or NVDA
+users; the virtual-cursor announcements still fire, but Narrator may
+layer its own announcement on top.</p>
 <h2 id="file-menu">File menu</h2>
 <p>Use the New-Database command, Control+Shift+N (N for New, Shift to
 distinguish it from Control+N which makes a new row), to create an empty
@@ -649,8 +684,7 @@ file. The dialog suggests <code>&lt;original&gt;-copy</code> as the
 filename so a stray Enter doesn’t overwrite the source. Use the
 Backup-Database command, Control+Shift+S, to write the same copy but
 keep the original open; the suggested filename is
-<code>&lt;original&gt;-backup-yyyyMMdd</code> (S for Save, Shift to
-distinguish a backup snapshot from a Save-As). The Close-Database
+<code>&lt;original&gt;-backup-yyyyMMdd</code>. The Close-Database
 command, Control+F4 (the MDI close convention), closes the open file
 without exiting DbDuo.</p>
 <p>Use the Import-Data command, Control+Shift+I (I for Import), to read
@@ -682,9 +716,7 @@ Table</strong> / <strong>Previous Visited Table</strong> (Control+Tab /
 Control+Shift+Tab) cycle among recently-opened tables in MRU order, and
 <strong>Next Object</strong> / <strong>Previous Object</strong>
 (Control+F6 / Control+Shift+F6) cycle through every table and view
-without the MRU filter. These commands live in the File menu because
-choosing what’s on screen is a file-level operation (and EdSharp uses F4
-for “Current Windows” on the same logic).</p>
+without the MRU filter.</p>
 <p>Use the Print command, Control+P (P for Print), to print the current
 view; this is reserved for a future release. For now, export to HTML or
 docx and print from the corresponding application.</p>
@@ -698,13 +730,13 @@ Exit-Console, which leaves the dot prompt but keeps the GUI running.</p>
 noted.</p>
 <p>Use the New Record command, Control+N (N for New), to add a row.
 DbDuo shows an edit dialog with one line per distinct field; bookkeeping
-fields (<code>added</code>, <code>updated</code>, <code>observed</code>,
-<code>marked</code>, the primary key) get their default values
-automatically. Use the Edit Record command, F2 (the Windows-standard
-rename key), to edit the current row. Use the Delete Record command,
-Control+D (D for Delete), to remove the current row; the Delete key
-alone is a secondary binding so the Excel and Outlook convention works
-too.</p>
+fields (<code>added</code>, <code>updated</code>, <code>marked</code>,
+the primary key, <code>look</code>, <code>unq</code>) get their default
+values automatically. Use the Edit Record command, F2 (the
+Windows-standard rename key), to edit the current row. Use the Delete
+Record command, Control+D (D for Delete), to remove the current row; the
+Delete key alone is a secondary binding so the Excel and Outlook
+convention works too.</p>
 <p>Use the Duplicate Record command, Control+Shift+C (Shift turns the
 native clipboard’s Control+C into row-copy), to clone the current row as
 a new record.</p>
@@ -812,12 +844,18 @@ character.</p>
 <li>Say Path (Alt+P) — the open database file’s full path</li>
 <li>Say Yield (Alt+Y) — row count and active filter</li>
 <li>Say Tables (Shift+F4) — tables visited in this session</li>
-<li>Say Marked (Shift+L) — the <code>look</code> values of every marked
+<li>Say Marked (Alt+Shift+M) — the <code>look</code> values of every
+marked row</li>
+<li>Say Updated (Shift+D) — the <code>updated</code> value of the
+current row, in a human-friendly local-time form
+(<code>December 14, 1963 at 5:42 AM</code>); the underlying SQLite text
+is unchanged</li>
+<li>Say Notes (Shift+N) — the <code>notes</code> field of the current
 row</li>
-<li>Say Date (Shift+D) — the <code>updated</code> value of the current
+<li>Say Tags (Shift+T) — the <code>tags</code> field of the current
 row</li>
-<li>Say Type (Shift+T) — whether the current object is a table or view,
-plus the row position</li>
+<li>Say Column from Cursor (Shift+L) — values of the current virtual
+column starting at the current row, semicolon-separated</li>
 <li>Say Marked Yield (Shift+Y) — count of marked rows</li>
 </ul>
 <p><strong>Shape commands.</strong> Use the Filter Records command,
@@ -847,6 +885,39 @@ window title shows the change.</p>
 per-column statistics for the current table. Use the Frequency Chart
 command (no hotkey; Alt+C as an alias) to render a frequency-by-column
 chart in Excel for analysis.</p>
+<p>Use the Describe Column command, Control+Shift+D (D for Describe), to
+compute descriptive statistics for the column under the virtual cursor.
+DbDuo walks the column, detects whether the values look numeric,
+date-like, boolean-like, or text, and reports the statistics that fit.
+Numeric columns get count, unique, minimum, maximum, range, mean,
+median, sample standard deviation, Q1, Q3, IQR, mode (if unambiguous),
+and a skew indicator. Date columns get earliest, latest, median, and
+span. Boolean-like columns (<code>0/1</code>, <code>Y/N</code>,
+<code>true/false</code>) get true and false counts with percentages.
+Text columns get unique count, shortest/longest/mean length, and a
+top-10 frequency table. The report opens in the same multi-line
+read-only dialog used by speech commands on double-press; press
+Control+C inside the textbox to copy the whole report.</p>
+<p>Use the Plot Column command, Control+Shift+P (P for Plot), to produce
+an Excel chart matched to the data type of the column under the virtual
+cursor. DbDuo runs the same data-type detection Describe Column uses and
+chooses a chart shape from it. Numeric columns can plot as a histogram
+(Sturges-binned distribution) or as a box-and-whisker plot (Tukey’s
+five-number summary as a single compact shape); a small dialog prompts
+you to pick one. Date columns can plot as a timeline (count by month or
+by day for short spans, line chart), as counts-per-calendar-year (column
+chart), or as counts-by-month-of-year (column chart for seasonal
+patterns). Boolean columns auto-pick a pie chart of true / false
+proportions. Text columns auto-pick a horizontal Pareto bar of the top
+15 most frequent values. When there is only one sensible chart shape for
+the data type, DbDuo skips the picker and generates it directly. The
+.xlsx file is written next to the database file with a name like
+<code>customers-region-pareto.xlsx</code>, then opened in Excel; from
+there you can polish the chart, copy it to other documents, or change
+the chart type by hand. Plot Column requires Excel to be installed (same
+dependency as Frequency Chart). The existing Frequency &amp;Chart
+command (Alt+C) remains for when you want to pick any column from a list
+and produce a column chart of value counts, regardless of data type.</p>
 <p>Use the Choose Visible Columns command (no hotkey; Alt+L as an alias)
 to pick which columns appear in the data list for the current table.
 Hidden columns are still accessible through Show Record and Edit
@@ -856,14 +927,21 @@ Extract), to walk every visible row, run a .NET regex against every
 visible column, and copy every match to the clipboard one per line.
 Useful for pulling email addresses, URLs, or IDs out of free-text
 columns.</p>
-<p>Use the Copy Row as TSV to Clipboard command, Shift+A (FileDir’s
-Shift+A = “Append to Clipboard”), to copy the current row’s visible
-columns to the clipboard as tab-separated values for pasting into Excel,
-Word tables, or chat clients.</p>
-<p>Use the Next Initial Change command, Shift+I (FileDir’s Shift+I =
-“Initial Change”), to jump to the next row whose value in a chosen
-column starts with a different first letter. The column picker defaults
-to the column under virtual focus.</p>
+<p>Use the Copy Cell to Clipboard command, Shift+C, to copy the current
+virtual cell (the cell under the Alt+Control+arrow cursor) to the
+Windows clipboard, replacing whatever was there. Use the Append Cell to
+Clipboard command, Shift+A, to append the current virtual cell to the
+clipboard separated by a blank line (two CRLF), so you can accumulate
+values from multiple cells across rows or columns. If the clipboard is
+empty, Append acts the same as Copy.</p>
+<p>Use the Copy Row as TSV to Clipboard command (no hotkey, accessed
+through the Misc menu) to copy the current row’s visible columns as
+tab-separated values for pasting into Excel, Word tables, or chat
+clients. The label lacks a mnemonic letter because the only candidates
+fall mid-word — DbDuo prefers no mnemonic to a mid-word one.</p>
+<p>Use the Next Initial Change command, Shift+I, to jump to the next row
+whose value in a chosen column starts with a different first letter. The
+column picker defaults to the column under virtual focus.</p>
 <p>Use the Run SQL command, Control+Q (Q for Query), to run any SQL
 statement. SELECTs display the result as a new recordset;
 INSERT/UPDATE/DELETE/DDL run via ADO Connection.Execute. The dot
@@ -879,31 +957,86 @@ evokes Windows paths), to open Explorer at the database file’s folder
 with the file pre-selected.</p>
 <p>Use the Open Dot Prompt command, Control+GraveAccent, to open or
 focus the dot prompt console from the GUI.</p>
-<p>Use the Invoke Snippet command, Alt+V (V for inVoke), to pick and run
-one of your saved snippets. Use the Edit Snippet command, Alt+Shift+V,
-to edit an existing snippet or create a new one. Use the Open Snippet
-Folder command (no hotkey) to launch Explorer at the snippet folder. See
-the Scripting with JScript .NET snippets section below for the full
-reference.</p>
-<p>Use the Edit Configuration command, F12 (the Windows-standard
-“settings” key), to open DbDuo.ini in your default editor for hotkey
-customizations and connection-string overrides.</p>
+<p>Use the Invoke Script command, Alt+V (V for inVoke), to pick and run
+one of your saved scripts. Use the Edit Script command, Alt+Shift+V, to
+edit an existing script or create a new one. Use the Open Script Folder
+command (no hotkey) to launch Explorer at the script folder. See the
+Scripting section below for the full reference.</p>
+<p>Use the Configuration Settings command, Alt+Shift+C (matching the
+EdSharp and FileDir convention; F12 also works as a legacy alias), to
+open the per-user DbDuo.ini settings dialog. The dialog exposes a
+curated subset of the settings the program reads — the UI mode, the
+Command Echo toggle, and a “Field Validation…” button that opens a
+sub-dialog for per-field regex patterns on the current table. The dialog
+also has an “Open file…” button that launches the raw DbDuo.ini in your
+default text editor for advanced settings (<code>[Keys]</code> hotkey
+overrides, connection-string overrides, and operational housekeeping
+keys that DbDuo writes itself).</p>
+<p>Use the Start Mark Anchor command, F8, to record the current row as
+the start of a mark range. Then move to another row (above or below —
+direction does not matter) and press Complete Mark to Anchor, Shift+F8,
+to set the marked flag on every row in the range, inclusive. Use the
+parallel Start Unmark Anchor command, Alt+F8, and Complete Unmark to
+Anchor, Alt+Shift+F8, to do the same for clearing marks. The two anchors
+are independent, so you can stage a mark range and an unmark range
+without one gesture clobbering the other. Both anchors are
+direction-agnostic and transient: they reset when you close the
+database, and each “Complete” command refuses with a clear message if
+its anchor was set on a different table than the currently-open one. The
+pattern parallels EdSharp’s Start/Complete Selection family (F8 /
+Shift+F8) and FileDir’s Start Tag or Untag / Complete Tag / Complete
+Untag, with DbDuo’s “Mark” terminology and the additional independent
+unmark-anchor for symmetry.</p>
+<p>Use the Say Position command, Alt+Delete, to hear the current cell’s
+column header and row number — for example, “Column: name, Row: 30”.
+Speech-only; does not move focus. This is the JAWS convention for “say
+cursor position”, reframed in DbDuo terms to mean the virtual cell (the
+cell under the Alt+Control+arrow cursor). Single-press speaks;
+double-press shows the same text in the multi-line dialog used by the
+other speech-only commands.</p>
+<p>Use the Say Sort and Filter command, Shift+8 (the asterisk key;
+Numpad-asterisk also works), to hear the active sort order and filter
+criteria for the current table. Either or both may be empty; the speech
+explicitly says “(none)” rather than going silent, so you always get
+confirmation. Single-press speaks; double-press shows the same text in
+the multi-line dialog.</p>
+Use the Say Kin command, Shift+K (K for Kin — relatives by foreign key),
+to hear the <code>look</code> field of every related record. The
+announcement covers both directions: every parent reached by an outbound
+foreign-key column on the current row, and every child that points back
+via an inbound foreign key. Parent entries are listed first as “Parents:
+<table>
+: <look>;
+<table>
+: <look>“; children follow as”Children:
+<table>
+<p>(N): <look>, <look>, …“. Single-press speaks via the screen reader;
+double-press shows the same content in the multi-line dialog, useful
+when the parent row has many children. The Say Kin command is read-only
+and does not move the cursor or change the open table; for an
+interactive jump to a specific related record, use the existing
+Show-Related command (Alt+Shift+R) instead.</p>
+<p>Field validation: each editable field can have a regex pattern stored
+in DbDuo.ini under a <code>[Validation:&lt;table&gt;]</code> section.
+When the pattern is set, both the Edit Record dialog (F2) and the Edit
+Field dialog (Shift+F2) refuse non-matching input. DbDuo uses .NET regex
+syntax (the established powerful pattern language, the same one Find
+Regex uses) — examples appear in the sub-dialog. Empty pattern means no
+constraint.</p>
 <h2 id="sql-reference-what-invoke-sql-actually-runs">SQL reference: what
 Invoke-Sql actually runs</h2>
 <p>A common question worth answering precisely: when you press Control+Q
 for Run SQL, what SQL dialect does the database engine understand? The
-answer depends entirely on which kind of file you have open, because
-DbDuo uses three different drivers under the ADO ConnectionString and
-each one parses SQL differently.</p>
+answer depends on which kind of file you have open, because DbDuo uses
+three different drivers under the ADO ConnectionString and each one
+parses SQL differently.</p>
 <h3 id="a-portable-sql-baseline-that-works-everywhere">A portable SQL
 baseline that works everywhere</h3>
 <p>Most users do not need a SQL deep-dive. The basics — selecting rows,
 inserting rows, updating values, deleting rows — work across every
 database format DbDuo opens (SQLite, Access, Excel-as-queryable, dBASE,
-CSV/TSV-as-readable) when you stay inside a careful ANSI SQL-92 subset.
-If you write SQL that fits the patterns below, the same statement will
-run unchanged against any of these formats, and you will rarely hit a
-dialect difference.</p>
+CSV/TSV-as-readable) when you stay inside a careful ANSI SQL-92
+subset.</p>
 <div class="sourceCode" id="cb2"><pre
 class="sourceCode sql"><code class="sourceCode sql"><span id="cb2-1"><a href="#cb2-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- SELECT rows</span></span>
 <span id="cb2-2"><a href="#cb2-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> first_name, last_name <span class="kw">FROM</span> teachers <span class="kw">WHERE</span> <span class="dt">year</span> <span class="op">=</span> <span class="st">&#39;Senior&#39;</span> <span class="kw">ORDER</span> <span class="kw">BY</span> last_name;</span>
@@ -932,148 +1065,77 @@ class="sourceCode sql"><code class="sourceCode sql"><span id="cb2-1"><a href="#c
 or <code>TOP</code> (Access — these are NOT interchangeable);
 <code>INNER JOIN</code> and <code>LEFT JOIN</code> on equality
 conditions; <code>COUNT</code>, <code>SUM</code>, <code>AVG</code>,
-<code>MIN</code>, <code>MAX</code>; the comparison operators
-<code>=</code>, <code>&lt;&gt;</code>, <code>&lt;</code>,
-<code>&gt;</code>, <code>&lt;=</code>, <code>&gt;=</code>; the boolean
-connectives <code>AND</code>, <code>OR</code>, <code>NOT</code>;
-<code>IS NULL</code> and <code>IS NOT NULL</code>; <code>BETWEEN</code>
-and <code>IN</code>; the simple <code>LIKE</code> patterns (but see the
-wildcard note below); <code>INSERT INTO ... VALUES (...)</code>;
-<code>UPDATE ... SET ... WHERE ...</code>;
-<code>DELETE FROM ... WHERE ...</code>; <code>CREATE TABLE</code> with
-<code>INTEGER</code>, <code>TEXT</code>, <code>REAL</code>,
-<code>DATETIME</code> types; and <code>DROP TABLE</code>.</p>
+<code>MIN</code>, <code>MAX</code>; comparison and boolean operators;
+<code>IS NULL</code>, <code>IS NOT NULL</code>, <code>BETWEEN</code>,
+<code>IN</code>; simple <code>LIKE</code> (but see the wildcard note
+below); the usual DML and the simple <code>CREATE TABLE</code> /
+<code>DROP TABLE</code>.</p>
 <p><strong>Watch for these portability gotchas</strong> when you cross
 between SQLite and the Access/Excel/dBASE side:</p>
 <ul>
 <li><strong>LIKE wildcards differ.</strong> SQLite uses ANSI wildcards
-<code>%</code> (any number of characters) and <code>_</code> (one
-character). Jet/Access uses <code>*</code> and <code>?</code> in its
-default mode. When you’re writing portable SQL, prefer the ANSI form —
-and if it fails on an Access file, the legacy Jet wildcard set is what’s
-expected.</li>
+<code>%</code> and <code>_</code>. Jet/Access uses <code>*</code> and
+<code>?</code>.</li>
 <li><strong>String concatenation differs.</strong> SQLite uses
-<code>||</code> (ANSI); Jet uses <code>&amp;</code> (Microsoft) or
-<code>+</code>. Neither dialect accepts the other’s operator.</li>
+<code>||</code>; Jet uses <code>&amp;</code>.</li>
 <li><strong>Date literals differ.</strong> SQLite uses ISO strings:
 <code>'2026-01-15'</code>. Jet uses pound-sign delimiters:
-<code>#1/15/2026#</code>. There is no portable date literal short of
-building the value with the engine’s own date functions.</li>
+<code>#1/15/2026#</code>.</li>
 <li><strong>Boolean literals differ.</strong> SQLite treats
-<code>1</code> and <code>0</code> as boolean (and recent versions accept
-<code>TRUE</code> and <code>FALSE</code>); Jet uses <code>True</code>
+<code>1</code> and <code>0</code> as boolean; Jet uses <code>True</code>
 and <code>False</code>.</li>
 <li><strong>Row-limiting differs.</strong> SQLite uses
-<code>LIMIT N</code>; Jet uses <code>SELECT TOP N</code> at the start of
-the column list. These are not interchangeable.</li>
+<code>LIMIT N</code>; Jet uses <code>SELECT TOP N</code>.</li>
 <li><strong>Identifier quoting differs.</strong> SQLite accepts
-double-quotes or square brackets around identifiers; Jet prefers square
-brackets and treats double-quoted text as a string literal in some
-configurations. If your column or table name has a space or a reserved
-word in it, square brackets are the more portable choice.</li>
+double-quotes or square brackets; Jet prefers square brackets.</li>
 </ul>
-<p>For most uses of Run SQL — quick row counts, ad-hoc filters,
-occasional updates — the portable subset is more than enough. The
-dialect-specific subsections below cover the cases when you want to use
-a feature that does not exist in the portable subset.</p>
 <p><strong>External references:</strong></p>
 <ul>
-<li><strong>Microsoft Jet 4.0 / Access SQL reference</strong> (canonical
-Microsoft documentation for the dialect used with <code>.mdb</code>,
-<code>.accdb</code>, <code>.xlsx</code>, <code>.dbf</code>,
-<code>.csv</code>, and <code>.tsv</code> files): <a
+<li><strong>Microsoft Jet 4.0 / Access SQL reference</strong>: <a
 href="https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/microsoft-jet-sql-reference"
 class="uri">https://learn.microsoft.com/en-us/office/client-developer/access/desktop-database-reference/microsoft-jet-sql-reference</a></li>
-<li><strong>SQLite SQL syntax reference</strong> (canonical SQLite
-documentation, comprehensive language coverage): <a
+<li><strong>SQLite SQL syntax reference</strong>: <a
 href="https://sqlite.org/lang.html"
 class="uri">https://sqlite.org/lang.html</a></li>
-<li><strong>SQLite syntax diagrams</strong> (railroad-style diagrams of
-every statement form): <a href="https://sqlite.org/syntaxdiagrams.html"
+<li><strong>SQLite syntax diagrams</strong>: <a
+href="https://sqlite.org/syntaxdiagrams.html"
 class="uri">https://sqlite.org/syntaxdiagrams.html</a></li>
 </ul>
-<h3 id="how-invoke-sql-is-implemented">How Invoke-Sql is
-implemented</h3>
-<p>DbDuo holds a single ADODB.Connection (created via late-bound COM as
-<code>ADODB.Connection</code>). When you submit a SQL statement through
-Invoke-Sql, DbDuo passes the text directly to the connection. The
-execution path depends on whether the statement returns rows.</p>
-<p>For data-returning statements (anything starting with SELECT, plus
-WITH/CTE queries, PRAGMA queries on SQLite, and a few others), DbDuo
-opens a fresh ADODB.Recordset on the SQL text, with adOpenStatic +
-adLockReadOnly + adCmdText cursor and lock flags. The recordset is then
-enumerated row by row through dynamic late binding:
-<code>while (!oRs.EOF) { for each field in oRs.Fields: read oRs.Fields[i].Value; oRs.MoveNext(); }</code>.
-Each row’s cells are pushed into a List&lt;List<string>&gt;; the column
-names are pulled from <code>oRs.Fields[i].Name</code>. The result is
-presented in a multi-line dialog (or printed to the console at the dot
-prompt) as a fixed-width grid. The returned data is fully captured in
-managed C# memory — it does not have to be displayed as a recordset to
-be useful; the same code path supports redirecting the result to a file
-via the <code>tee</code> / <code>output</code> aliases in the CLI.</p>
-<p>For action queries (INSERT, UPDATE, DELETE, CREATE TABLE, DROP TABLE,
-CREATE INDEX, REINDEX, VACUUM, ALTER TABLE, ATTACH, DETACH, BEGIN,
-COMMIT, ROLLBACK, PRAGMA-as-set, anything that doesn’t return rows),
-DbDuo calls
-<code>oConn.Execute(sql, out iAffected, adExecuteNoRecords | adCmdText)</code>
-instead. The <code>iAffected</code> out-parameter receives the count of
-rows touched, which DbDuo announces in the status bar (“3 rows
-updated”). No recordset is opened, no result grid is shown.</p>
-<p>Invoke-Sql does not auto-detect which path to take from the SQL text;
-it tries the SELECT path first and falls back to Execute on a known
-error. This means even slightly unusual statements like
-<code>INSERT ... RETURNING ...</code> (SQLite 3.35+) or
-<code>WITH ... DELETE</code> (a recursive CTE wrapping a DELETE) get the
-chance to surface their result rows when the engine produces them.</p>
-<p>The ADO recordset captured by Invoke-Sql is independent of DbDuo’s
-main data list. The main recordset (which the F4 picker selected) keeps
-its position, filter, and sort. Invoke-Sql results are a separate view
-shown in a popup or printed inline.</p>
 <h3 id="sqlite-full-modern-sql">SQLite: full modern SQL</h3>
 <p>When the open file is .db / .sqlite / .sqlite3, DbDuo connects
-through the ch-werner SQLite ODBC driver. This driver is a thin
-pass-through to the SQLite library itself (currently SQLite 3.43+ in the
-bundled installer). There is no SQL translation layer: whatever the
-library version supports, you can type into Invoke-Sql.</p>
-<p>That means the full modern SQLite SQL surface is available. The
-basics — SELECT / INSERT / UPDATE / DELETE / CREATE TABLE / DROP TABLE /
-CREATE INDEX / CREATE VIEW / CREATE TRIGGER / ALTER TABLE / VACUUM /
-REINDEX / ANALYZE — all work. So do the modern features that some people
-don’t realize SQLite supports: window functions with the OVER clause
-(since 3.25), including row_number(), rank(), dense_rank(),
-percent_rank(), cume_dist(), ntile(), lag(), lead(), first_value(),
-last_value(), nth_value(), and ordinary aggregates used as window
-functions; the EXCLUDE clause; GROUPS frame types; window chaining; and
-PRECEDING/FOLLOWING boundaries in RANGE frames (since 3.28). Common
-Table Expressions (WITH) including recursive CTEs work. UPSERT
-(<code>INSERT ... ON CONFLICT ... DO UPDATE</code>) works. The JSON1
-functions (json_extract, json_each, json_array, json_object,
-json_group_array, json_set) work. The RETURNING clause on
-INSERT/UPDATE/DELETE works (since SQLite 3.35). FTS5 full-text search
-works if the database was built with FTS5 tables. R-Tree, generated
-columns, partial indexes, expression indexes — all work.</p>
-<p>PRAGMA statements work both as data-returning queries (when they’re
-shaped like <code>PRAGMA table_info(foo)</code>, which returns a result
-set DbDuo will render as a grid) and as setters (when they’re shaped
-like <code>PRAGMA journal_mode = WAL</code>, which DbDuo runs through
-Execute). PRAGMAs are how you inspect schema metadata and how you adjust
-performance characteristics like journal mode, cache size, and
-foreign-key enforcement.</p>
+through the ch-werner SQLite ODBC driver. There is no SQL translation
+layer: the full SQLite SQL surface is available, including:</p>
+<ul>
+<li>Window functions with the OVER clause (since 3.25):
+<code>row_number()</code>, <code>rank()</code>,
+<code>dense_rank()</code>, etc.</li>
+<li>Common Table Expressions (WITH), including recursive CTEs.</li>
+<li>UPSERT (<code>INSERT ... ON CONFLICT ... DO UPDATE</code>).</li>
+<li>JSON1 functions: <code>json_extract</code>, <code>json_each</code>,
+<code>json_array</code>, <code>json_object</code>, etc.</li>
+<li>RETURNING clause on INSERT/UPDATE/DELETE (since 3.35).</li>
+<li>FTS5 full-text search if the database was built with FTS5
+tables.</li>
+<li>R-Tree, generated columns, partial indexes, expression indexes.</li>
+</ul>
+<p>PRAGMA statements work both as data-returning queries (when shaped
+like <code>PRAGMA table_info(foo)</code>, which returns a result set
+DbDuo will render as a grid) and as setters (when shaped like
+<code>PRAGMA journal_mode = WAL</code>, which DbDuo runs through
+Execute).</p>
 <p>The few things SQLite genuinely lacks compared to PostgreSQL or SQL
-Server: there are no stored procedures (you use views and triggers
-instead), no row-level security, no native UUID type (use TEXT or BLOB),
-and only a limited ALTER TABLE (ADD COLUMN works since forever, RENAME
-COLUMN since 3.25, DROP COLUMN since 3.35 — but only one column at a
-time and with some restrictions on referenced columns).</p>
+Server: no stored procedures (use views and triggers instead), no
+row-level security, no native UUID type, and only a limited ALTER
+TABLE.</p>
 <p>Sample SQLite queries that work in Invoke-Sql against
 <code>sample.db</code>:</p>
 <div class="sourceCode" id="cb3"><pre
 class="sourceCode sql"><code class="sourceCode sql"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- Recursive CTE walking a hierarchy</span></span>
 <span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a><span class="kw">WITH</span> RECURSIVE child_of(<span class="kw">id</span>, name, <span class="fu">depth</span>) <span class="kw">AS</span> (</span>
-<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">SELECT</span> <span class="kw">id</span>, full_name, <span class="dv">0</span> <span class="kw">FROM</span> teachers <span class="kw">WHERE</span> <span class="kw">id</span> <span class="op">=</span> <span class="dv">1</span></span>
+<span id="cb3-3"><a href="#cb3-3" aria-hidden="true" tabindex="-1"></a>  <span class="kw">SELECT</span> teacher_id, name, <span class="dv">0</span> <span class="kw">FROM</span> teachers <span class="kw">WHERE</span> teacher_id <span class="op">=</span> <span class="dv">1</span></span>
 <span id="cb3-4"><a href="#cb3-4" aria-hidden="true" tabindex="-1"></a>  <span class="kw">UNION</span> <span class="kw">ALL</span></span>
-<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">SELECT</span> t.<span class="kw">id</span>, t.full_name, c.<span class="fu">depth</span> <span class="op">+</span> <span class="dv">1</span></span>
-<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">FROM</span> teachers t <span class="kw">JOIN</span> child_of c <span class="kw">ON</span> t.mentor_id <span class="op">=</span> c.<span class="kw">id</span></span>
+<span id="cb3-5"><a href="#cb3-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">SELECT</span> t.teacher_id, t.name, c.<span class="fu">depth</span> <span class="op">+</span> <span class="dv">1</span></span>
+<span id="cb3-6"><a href="#cb3-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">FROM</span> teachers t <span class="kw">JOIN</span> child_of c <span class="kw">ON</span> t.teacher_id <span class="op">=</span> c.<span class="kw">id</span></span>
 <span id="cb3-7"><a href="#cb3-7" aria-hidden="true" tabindex="-1"></a>)</span>
 <span id="cb3-8"><a href="#cb3-8" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> child_of;</span>
 <span id="cb3-9"><a href="#cb3-9" aria-hidden="true" tabindex="-1"></a></span>
@@ -1082,86 +1144,56 @@ class="sourceCode sql"><code class="sourceCode sql"><span id="cb3-1"><a href="#c
 <span id="cb3-12"><a href="#cb3-12" aria-hidden="true" tabindex="-1"></a>       <span class="fu">RANK</span>() <span class="kw">OVER</span> (<span class="kw">PARTITION</span> <span class="kw">BY</span> class_id <span class="kw">ORDER</span> <span class="kw">BY</span> grade <span class="kw">DESC</span>) <span class="kw">AS</span> class_rank</span>
 <span id="cb3-13"><a href="#cb3-13" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> enrollments;</span>
 <span id="cb3-14"><a href="#cb3-14" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">-- JSON1: extract a field from a JSON column</span></span>
-<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">id</span>, json_extract(metadata, <span class="st">&#39;$.address.city&#39;</span>) <span class="kw">AS</span> city</span>
-<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> students <span class="kw">WHERE</span> json_extract(metadata, <span class="st">&#39;$.active&#39;</span>) <span class="op">=</span> <span class="dv">1</span>;</span>
+<span id="cb3-15"><a href="#cb3-15" aria-hidden="true" tabindex="-1"></a><span class="co">-- UPSERT</span></span>
+<span id="cb3-16"><a href="#cb3-16" aria-hidden="true" tabindex="-1"></a><span class="kw">INSERT</span> <span class="kw">INTO</span> students (student_id, name) <span class="kw">VALUES</span> (<span class="dv">42</span>, <span class="st">&#39;New&#39;</span>)</span>
+<span id="cb3-17"><a href="#cb3-17" aria-hidden="true" tabindex="-1"></a><span class="kw">ON</span> CONFLICT (student_id) DO <span class="kw">UPDATE</span> <span class="kw">SET</span> name <span class="op">=</span> excluded.name;</span>
 <span id="cb3-18"><a href="#cb3-18" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">-- UPSERT</span></span>
-<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a><span class="kw">INSERT</span> <span class="kw">INTO</span> students (<span class="kw">id</span>, full_name) <span class="kw">VALUES</span> (<span class="dv">42</span>, <span class="st">&#39;New&#39;</span>)</span>
-<span id="cb3-21"><a href="#cb3-21" aria-hidden="true" tabindex="-1"></a><span class="kw">ON</span> CONFLICT (<span class="kw">id</span>) DO <span class="kw">UPDATE</span> <span class="kw">SET</span> full_name <span class="op">=</span> excluded.full_name;</span>
-<span id="cb3-22"><a href="#cb3-22" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb3-23"><a href="#cb3-23" aria-hidden="true" tabindex="-1"></a><span class="co">-- PRAGMA returning a result set</span></span>
-<span id="cb3-24"><a href="#cb3-24" aria-hidden="true" tabindex="-1"></a>PRAGMA table_info(students);</span></code></pre></div>
-<p>All of these return rows that Invoke-Sql renders in the result
-grid.</p>
+<span id="cb3-19"><a href="#cb3-19" aria-hidden="true" tabindex="-1"></a><span class="co">-- PRAGMA returning a result set</span></span>
+<span id="cb3-20"><a href="#cb3-20" aria-hidden="true" tabindex="-1"></a>PRAGMA table_info(students);</span></code></pre></div>
 <h3 id="access-.mdb-.accdb-jetace-sql">Access (.mdb / .accdb): Jet/ACE
 SQL</h3>
 <p>When the open file is .mdb or .accdb, DbDuo connects through the
-Microsoft ACE OLEDB provider (the modern Jet replacement, which Office
-installs as part of Office or via the standalone Access Database Engine
-redistributable). This driver runs <strong>Access SQL</strong>, not
-standard SQL. The differences from SQLite or ANSI SQL are substantial
-and worth knowing.</p>
+Microsoft ACE OLEDB provider. This driver runs <strong>Access
+SQL</strong>, not standard SQL. The differences from SQLite or ANSI SQL
+are substantial.</p>
 <p>Access SQL uses <code>IIF(condition, then, else)</code> instead of
-<code>CASE WHEN ... THEN ... ELSE ... END</code> (although Access did
-finally add CASE in recent versions, IIF is the older idiom). String
-concatenation is <code>&amp;</code> not <code>||</code>. Wildcards in
-LIKE are <code>*</code> (zero or more characters) and <code>?</code>
-(single character), not the SQL-standard <code>%</code> and
+<code>CASE WHEN ... THEN ... ELSE ... END</code>. String concatenation
+is <code>&amp;</code> not <code>||</code>. Wildcards in LIKE are
+<code>*</code> and <code>?</code>, not <code>%</code> and
 <code>_</code>. Date literals are delimited with hash marks:
-<code>#2025-05-12#</code> not <code>'2025-05-12'</code>. Booleans are
-TRUE and FALSE (or -1 and 0); SQLite-style 1/0 won’t auto-cast.</p>
-<p>Access SQL supports SELECT, INSERT, UPDATE, DELETE, CREATE TABLE,
-DROP TABLE, CREATE INDEX, ALTER TABLE. It supports inner and outer
-joins, GROUP BY, HAVING, ORDER BY. It does NOT support CTEs (no WITH
-clause), window functions (no OVER clause), or RETURNING. It has a
-different set of built-in functions: Format(), DateSerial(), DateDiff(),
-DatePart(), Nz() (the null-coalesce, equivalent to COALESCE for a single
-null check), Iif(), and a few hundred others mostly drawn from VBA. The
-PRAGMA family doesn’t exist; equivalent metadata comes from system
-tables like MSysObjects (which is typically hidden and requires admin
-rights to query).</p>
-<p>Sample Access SQL queries:</p>
+<code>#2025-05-12#</code>. Booleans are TRUE and FALSE.</p>
+<p>Access SQL supports the basics but lacks CTEs (no WITH clause),
+window functions (no OVER clause), and RETURNING. It has a different set
+of built-in functions: <code>Format()</code>, <code>DateSerial()</code>,
+<code>DateDiff()</code>, <code>DatePart()</code>, <code>Nz()</code>
+(null-coalesce), and many more drawn from VBA.</p>
 <div class="sourceCode" id="cb4"><pre
 class="sourceCode sql"><code class="sourceCode sql"><span id="cb4-1"><a href="#cb4-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- IIF instead of CASE</span></span>
-<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="kw">id</span>, full_name, IIF(grade <span class="op">&gt;=</span> <span class="dv">90</span>, <span class="st">&#39;A&#39;</span>, IIF(grade <span class="op">&gt;=</span> <span class="dv">80</span>, <span class="st">&#39;B&#39;</span>, <span class="st">&#39;C&#39;</span>)) <span class="kw">AS</span> letter</span>
+<span id="cb4-2"><a href="#cb4-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> student_id, name, IIF(grade <span class="op">&gt;=</span> <span class="dv">90</span>, <span class="st">&#39;A&#39;</span>, IIF(grade <span class="op">&gt;=</span> <span class="dv">80</span>, <span class="st">&#39;B&#39;</span>, <span class="st">&#39;C&#39;</span>)) <span class="kw">AS</span> letter</span>
 <span id="cb4-3"><a href="#cb4-3" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> students;</span>
 <span id="cb4-4"><a href="#cb4-4" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-5"><a href="#cb4-5" aria-hidden="true" tabindex="-1"></a><span class="co">-- LIKE with Access wildcards</span></span>
-<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> students <span class="kw">WHERE</span> full_name <span class="kw">LIKE</span> <span class="st">&#39;Sm*&#39;</span>;</span>
+<span id="cb4-6"><a href="#cb4-6" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> students <span class="kw">WHERE</span> name <span class="kw">LIKE</span> <span class="st">&#39;Sm*&#39;</span>;</span>
 <span id="cb4-7"><a href="#cb4-7" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb4-8"><a href="#cb4-8" aria-hidden="true" tabindex="-1"></a><span class="co">-- Date literal with hash delimiters</span></span>
 <span id="cb4-9"><a href="#cb4-9" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> enrollments <span class="kw">WHERE</span> updated <span class="op">&gt;=</span> #<span class="dv">2024</span><span class="op">-</span><span class="dv">01</span><span class="op">-</span><span class="dv">01</span>#;</span>
 <span id="cb4-10"><a href="#cb4-10" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">-- Concatenation with &amp;</span></span>
-<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> first_name &amp; <span class="st">&#39; &#39;</span> &amp; last_name <span class="kw">AS</span> full_name <span class="kw">FROM</span> teachers;</span>
-<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb4-14"><a href="#cb4-14" aria-hidden="true" tabindex="-1"></a><span class="co">-- Aggregate with TOP (Access&#39;s LIMIT)</span></span>
-<span id="cb4-15"><a href="#cb4-15" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> TOP <span class="dv">10</span> class_id, <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> n <span class="kw">FROM</span> enrollments</span>
-<span id="cb4-16"><a href="#cb4-16" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> class_id <span class="kw">ORDER</span> <span class="kw">BY</span> n <span class="kw">DESC</span>;</span></code></pre></div>
+<span id="cb4-11"><a href="#cb4-11" aria-hidden="true" tabindex="-1"></a><span class="co">-- Aggregate with TOP (Access&#39;s LIMIT)</span></span>
+<span id="cb4-12"><a href="#cb4-12" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> TOP <span class="dv">10</span> class_id, <span class="fu">COUNT</span>(<span class="op">*</span>) <span class="kw">AS</span> n <span class="kw">FROM</span> enrollments</span>
+<span id="cb4-13"><a href="#cb4-13" aria-hidden="true" tabindex="-1"></a><span class="kw">GROUP</span> <span class="kw">BY</span> class_id <span class="kw">ORDER</span> <span class="kw">BY</span> n <span class="kw">DESC</span>;</span></code></pre></div>
 <p>The hardest gotcha is the wildcard difference: queries copy-pasted
 from a SQLite tutorial often use <code>%</code> and <code>_</code> and
-silently match nothing in Access. DbDuo doesn’t translate; what you type
-is what runs.</p>
+silently match nothing in Access.</p>
 <h3 id="excel-.xlsx-.xls-a-subset-of-jet-sql">Excel (.xlsx / .xls): a
 subset of Jet SQL</h3>
-<p>Excel files open through the same ACE OLEDB provider as Access, with
-<code>Extended Properties="Excel 12.0 Xml;HDR=Yes;IMEX=1"</code>
-appended. The SQL surface is a deliberately restricted subset of Jet SQL
-— the engine treats each worksheet as a table, with the sheet name
-(followed by a <code>$</code>) acting as the table identifier. SELECT,
-basic WHERE, GROUP BY, ORDER BY, and joins between sheets in the same
-file all work. Most INSERTs and UPDATEs work, though there are quirks
-around named ranges and protected sheets. CREATE TABLE creates a new
-sheet; DROP TABLE removes a sheet. No CTEs, no window functions, no
-triggers (Excel doesn’t have triggers as a concept).</p>
+<p>Excel files open through the same ACE OLEDB provider as Access. The
+engine treats each worksheet as a table, with the sheet name (followed
+by a <code>$</code>) as the table identifier. SELECT, basic WHERE, GROUP
+BY, ORDER BY, and joins between sheets in the same file all work. Most
+INSERTs and UPDATEs work. CREATE TABLE creates a new sheet; DROP TABLE
+removes a sheet. No CTEs, no window functions.</p>
 <p>Worksheet names with spaces or special characters must be bracketed:
-<code>SELECT * FROM [Sheet 1$]</code>. A named range or a specific range
-is selectable with <code>SELECT * FROM [Sheet1$A1:D100]</code>. The
-HDR=Yes flag treats the first row as column headers; if your sheet
-doesn’t have headers, set HDR=No in the connection string and refer to
-columns as F1, F2, F3 (which the engine auto-names).</p>
-<p>Sample Excel SQL:</p>
+<code>SELECT * FROM [Sheet 1$]</code>.</p>
 <div class="sourceCode" id="cb5"><pre
 class="sourceCode sql"><code class="sourceCode sql"><span id="cb5-1"><a href="#cb5-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- Read everything from a sheet</span></span>
 <span id="cb5-2"><a href="#cb5-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> [Students$];</span>
@@ -1170,238 +1202,315 @@ class="sourceCode sql"><code class="sourceCode sql"><span id="cb5-1"><a href="#c
 <span id="cb5-5"><a href="#cb5-5" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> [Students$A1<span class="ch">:D50</span>] <span class="kw">WHERE</span> grade <span class="op">&gt;</span> <span class="dv">80</span>;</span>
 <span id="cb5-6"><a href="#cb5-6" aria-hidden="true" tabindex="-1"></a></span>
 <span id="cb5-7"><a href="#cb5-7" aria-hidden="true" tabindex="-1"></a><span class="co">-- Join across two sheets in the same workbook</span></span>
-<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> s.full_name, e.class_id</span>
-<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> [Students$] <span class="kw">AS</span> s <span class="kw">INNER</span> <span class="kw">JOIN</span> [Enrollments$] <span class="kw">AS</span> e <span class="kw">ON</span> s.<span class="kw">id</span> <span class="op">=</span> e.student_id;</span></code></pre></div>
-<p>The biggest practical limit with Excel is that the engine is much
-slower than SQLite for non-trivial queries (each cell is a string-typed
-Variant that has to be coerced), and it sometimes guesses column types
-from the first 8 rows in a way that surprises you. If you have a numeric
-column where the first 8 rows happen to be empty, the engine may type
-the column as text and refuse to compare it numerically. IMEX=1
-mitigates this but doesn’t fix it entirely.</p>
+<span id="cb5-8"><a href="#cb5-8" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> s.name, e.class_id</span>
+<span id="cb5-9"><a href="#cb5-9" aria-hidden="true" tabindex="-1"></a><span class="kw">FROM</span> [Students$] <span class="kw">AS</span> s <span class="kw">INNER</span> <span class="kw">JOIN</span> [Enrollments$] <span class="kw">AS</span> e <span class="kw">ON</span> s.student_id <span class="op">=</span> e.student_id;</span></code></pre></div>
 <h3 id="dbase-.dbf-minimal-sql">dBASE (.dbf): minimal SQL</h3>
-<p>dBASE files open through ACE OLEDB with
-<code>Extended Properties="dBASE IV;HDR=No;IMEX=1"</code>. The
-connection is to the folder containing the .dbf, not the file itself;
-each .dbf in the folder becomes a table. The SQL surface is the smallest
-of the four backends: SELECT with WHERE, ORDER BY, GROUP BY, basic
-INSERT, UPDATE, DELETE, simple CREATE TABLE, DROP TABLE. No CTEs, no
-window functions, no joins more complex than INNER JOIN, no triggers.
-dBASE field naming rules apply: identifiers max 10 characters, no spaces
-or hyphens, only A-Z 0-9 and underscore.</p>
-<div class="sourceCode" id="cb6"><pre
-class="sourceCode sql"><code class="sourceCode sql"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- Simple SELECT against a .dbf in the connected folder</span></span>
-<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> students <span class="kw">WHERE</span> grade <span class="op">&gt;</span> <span class="dv">80</span> <span class="kw">ORDER</span> <span class="kw">BY</span> full_name;</span>
-<span id="cb6-3"><a href="#cb6-3" aria-hidden="true" tabindex="-1"></a></span>
-<span id="cb6-4"><a href="#cb6-4" aria-hidden="true" tabindex="-1"></a><span class="co">-- INSERT (subject to dBASE field-length rules)</span></span>
-<span id="cb6-5"><a href="#cb6-5" aria-hidden="true" tabindex="-1"></a><span class="kw">INSERT</span> <span class="kw">INTO</span> students (<span class="kw">id</span>, full_name) <span class="kw">VALUES</span> (<span class="dv">99</span>, <span class="st">&#39;New Student&#39;</span>);</span></code></pre></div>
-<p>dBASE is a legacy format and DbDuo supports it primarily so people
-with old data files can read them. New data should generally go into
-SQLite.</p>
+<p>dBASE files open through ACE OLEDB. The connection is to the folder
+containing the .dbf, not the file itself; each .dbf in the folder
+becomes a table. The SQL surface is the smallest of the four backends:
+SELECT with WHERE, ORDER BY, GROUP BY, basic INSERT, UPDATE, DELETE,
+simple CREATE TABLE, DROP TABLE. dBASE field naming rules apply:
+identifiers max 10 characters, no spaces or hyphens.</p>
 <h3 id="csv-and-tsv-select-only-jet-text-driver">CSV and TSV:
 SELECT-only Jet text driver</h3>
 <p>When the open file is .csv or .tsv, DbDuo connects through the Jet
-text driver (<code>Microsoft.ACE.OLEDB.12.0</code> with
-<code>Extended Properties="text;HDR=Yes;FMT=Delimited"</code> for CSV,
-or <code>FMT=TabDelimited</code> for TSV). The connection is to the
-folder containing the file. The driver is read-mostly: SELECT works
-well, INSERT works in a limited fashion (the engine appends new lines
-but cannot easily UPDATE in place or DELETE rows), and structural
-commands like CREATE TABLE or ALTER TABLE don’t apply (you’d just save a
-new CSV instead).</p>
+text driver. The driver is read-mostly: SELECT works well, INSERT works
+in a limited fashion, and structural commands like CREATE TABLE or ALTER
+TABLE don’t apply.</p>
 <p>The most useful pattern is to read a CSV with Invoke-Sql for
 analysis, and use Import-Data to copy into SQLite for any non-trivial
 work.</p>
-<div class="sourceCode" id="cb7"><pre
-class="sourceCode sql"><code class="sourceCode sql"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="co">-- Read a CSV as a result set</span></span>
-<span id="cb7-2"><a href="#cb7-2" aria-hidden="true" tabindex="-1"></a><span class="kw">SELECT</span> <span class="op">*</span> <span class="kw">FROM</span> [students.csv] <span class="kw">WHERE</span> grade <span class="op">&gt;</span> <span class="dv">80</span>;</span></code></pre></div>
-<h3 id="how-dbduo-captures-the-result-in-c">How DbDuo captures the
-result in C</h3>
-<p>For SELECTs, the result-capture loop in C# looks essentially like
-this (paraphrased from the actual code in <code>cmdInvokeSql</code> /
-<code>invokeSqlClicked</code>):</p>
-<div class="sourceCode" id="cb8"><pre
-class="sourceCode csharp"><code class="sourceCode cs"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a>dynamic oRs <span class="op">=</span> oConn<span class="op">.</span><span class="fu">Execute</span><span class="op">(</span>sSql<span class="op">);</span>   <span class="co">// returns Recordset for SELECT</span></span>
-<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a><span class="kw">if</span> <span class="op">(</span>oRs <span class="op">==</span> <span class="kw">null</span><span class="op">)</span> <span class="kw">return</span><span class="op">;</span></span>
-<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a><span class="dt">int</span> iFieldCount <span class="op">=</span> <span class="op">(</span><span class="dt">int</span><span class="op">)</span>oRs<span class="op">.</span><span class="fu">Fields</span><span class="op">.</span><span class="fu">Count</span><span class="op">;</span></span>
-<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a>List<span class="op">&lt;</span><span class="dt">string</span><span class="op">&gt;</span> lHeaders <span class="op">=</span> <span class="kw">new</span> List<span class="op">&lt;</span><span class="dt">string</span><span class="op">&gt;();</span></span>
-<span id="cb8-5"><a href="#cb8-5" aria-hidden="true" tabindex="-1"></a><span class="kw">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> iFieldCount<span class="op">;</span> i<span class="op">++)</span></span>
-<span id="cb8-6"><a href="#cb8-6" aria-hidden="true" tabindex="-1"></a>    lHeaders<span class="op">.</span><span class="fu">Add</span><span class="op">((</span><span class="dt">string</span><span class="op">)</span>oRs<span class="op">.</span><span class="fu">Fields</span><span class="op">[</span>i<span class="op">].</span><span class="fu">Name</span><span class="op">);</span></span>
-<span id="cb8-7"><a href="#cb8-7" aria-hidden="true" tabindex="-1"></a>List<span class="op">&lt;</span>List<span class="op">&lt;</span><span class="dt">string</span><span class="op">&gt;&gt;</span> aaRows <span class="op">=</span> <span class="kw">new</span> List<span class="op">&lt;</span>List<span class="op">&lt;</span><span class="dt">string</span><span class="op">&gt;&gt;();</span></span>
-<span id="cb8-8"><a href="#cb8-8" aria-hidden="true" tabindex="-1"></a><span class="kw">while</span> <span class="op">(!</span>oRs<span class="op">.</span><span class="fu">EOF</span><span class="op">)</span></span>
-<span id="cb8-9"><a href="#cb8-9" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb8-10"><a href="#cb8-10" aria-hidden="true" tabindex="-1"></a>    List<span class="op">&lt;</span><span class="dt">string</span><span class="op">&gt;</span> lRow <span class="op">=</span> <span class="kw">new</span> List<span class="op">&lt;</span><span class="dt">string</span><span class="op">&gt;();</span></span>
-<span id="cb8-11"><a href="#cb8-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">for</span> <span class="op">(</span><span class="dt">int</span> i <span class="op">=</span> <span class="dv">0</span><span class="op">;</span> i <span class="op">&lt;</span> iFieldCount<span class="op">;</span> i<span class="op">++)</span></span>
-<span id="cb8-12"><a href="#cb8-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
-<span id="cb8-13"><a href="#cb8-13" aria-hidden="true" tabindex="-1"></a>        <span class="dt">object</span> oV <span class="op">=</span> oRs<span class="op">.</span><span class="fu">Fields</span><span class="op">[</span>i<span class="op">].</span><span class="fu">Value</span><span class="op">;</span></span>
-<span id="cb8-14"><a href="#cb8-14" aria-hidden="true" tabindex="-1"></a>        lRow<span class="op">.</span><span class="fu">Add</span><span class="op">(</span>oV <span class="op">==</span> <span class="kw">null</span> <span class="op">||</span> oV <span class="op">==</span> DBNull<span class="op">.</span><span class="fu">Value</span> <span class="op">?</span> <span class="st">&quot;&quot;</span> <span class="op">:</span> oV<span class="op">.</span><span class="fu">ToString</span><span class="op">());</span></span>
-<span id="cb8-15"><a href="#cb8-15" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb8-16"><a href="#cb8-16" aria-hidden="true" tabindex="-1"></a>    aaRows<span class="op">.</span><span class="fu">Add</span><span class="op">(</span>lRow<span class="op">);</span></span>
-<span id="cb8-17"><a href="#cb8-17" aria-hidden="true" tabindex="-1"></a>    oRs<span class="op">.</span><span class="fu">MoveNext</span><span class="op">();</span></span>
-<span id="cb8-18"><a href="#cb8-18" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span>
-<span id="cb8-19"><a href="#cb8-19" aria-hidden="true" tabindex="-1"></a>oRs<span class="op">.</span><span class="fu">Close</span><span class="op">();</span></span></code></pre></div>
-<p>The result is a fully materialized in-memory grid (a
-List&lt;List<string>&gt;), so anything Invoke-Sql can show you, the rest
-of DbDuo can also operate on (count, export to clipboard, export to
-file). The dot prompt <code>tee filename.tsv</code> redirection captures
-the same grid as a tab-separated file; the
-<code>output filename.tsv</code> redirection does the same. The grid is
-text-typed at the C# layer regardless of the underlying SQL types —
-DbDuo’s accessibility-first design treats every cell as a
-screen-readable string, and conversions to numeric or date types happen
-at display time, not at fetch time.</p>
 <h3 id="practical-recommendation">Practical recommendation</h3>
 <p>For non-trivial analytical SQL — anything involving CTEs, window
 functions, recursive queries, JSON extraction, or modern SQL features —
 open the data in SQLite (either by saving a SQLite file directly or by
 using Import-Data from another format) and use Invoke-Sql against that.
 SQLite gives you the most expressive SQL of the four backends, the
-fastest engine, and the smallest set of dialect surprises. Reserve
-Access SQL queries for genuine .accdb files; Excel SQL for genuine .xlsx
-exploration; dBASE for legacy data import. CSV and TSV are best used for
-read-only intake into SQLite.</p>
-<h2 id="scripting-with-jscript-.net-snippets">Scripting with JScript
-.NET snippets</h2>
-<p>DbDuo’s snippet feature lets you write small JScript .NET scripts
-that run inside the DbDuo process with full access to the running form
-and recordset. The pattern is the same one EdSharp pioneered: a folder
-of plain text files; you write them in your own editor; you invoke them
-from a standard listbox dialog. No custom script editor inside DbDuo, no
-shipped scripting runtime — just one ~10 KB support DLL
-(<code>dbDuoEval.dll</code>) compiled at build time from
-<code>dbDuoEval.js</code> by <code>jsc.exe</code>, the JScript .NET
-compiler that ships with every .NET Framework 4.x install.</p>
-<h3 id="where-snippets-live">Where snippets live</h3>
-<p>Snippets are plain files under
-<code>%APPDATA%\DbDuo\Snippets\</code>. The folder is created on first
-access; it lives under your roaming application data so it survives
-DbDuo upgrades and uninstalls. Snippets are your data, not the
-application’s. You can copy the folder between machines, version it in
-your own git repo, or share individual files with other users.</p>
-<h3 id="file-types">File types</h3>
-<p>Files ending in <code>.js</code> are executed as JScript .NET. Files
-with any other extension (<code>.txt</code>, <code>.sql</code>,
-<code>.md</code>, etc.) are shown as plain text in a MessageBox; useful
-for canned SQL fragments, templated row data, or reference notes. The
-file extension is the only thing that decides whether DbDuo treats a
-file as a script or as reference text.</p>
-<h3 id="the-three-commands">The three commands</h3>
-<p>Use the Invoke Snippet command, Alt+V (V for inVoke), to pick and run
-a snippet. A standard listbox dialog shows every file in the folder,
-sorted alphabetically. Pick one, press OK, and DbDuo runs it. Script
-output (the last expression’s value, or <code>ERROR: ...</code> on
-failure) is shown in a MessageBox.</p>
-<p>Use the Edit Snippet command, Alt+Shift+V, to edit an existing
-snippet or create a new one. If the folder has existing snippets the
-same listbox appears with a <code>[New snippet...]</code> entry at the
-top; picking that brings up a standard Save File dialog to name the new
-file. If the folder is empty the Save File dialog appears directly.
-Either way the chosen file opens in your editor.</p>
-<p>Use the Open Snippet Folder command (no hotkey by default) to launch
-Explorer at the snippet folder. Useful for renaming, deleting, or
-copying files outside DbDuo’s UI.</p>
-<h3 id="editor">Editor</h3>
+fastest engine, and the smallest set of dialect surprises.</p>
+<h2 id="scripting">Scripting</h2>
+<p>DbDuo’s scripting feature lets you save and re-run units of work —
+computations, queries, command workflows — without having to remember or
+retype them. The model is one folder, one chord (Alt+V), and three file
+extensions that pick the right execution engine for the kind of work you
+want to do. The pattern is the same one EdSharp and FileDir pioneered
+for their snippet systems: a folder of plain text files; you write them
+in your own editor; you invoke them from a standard listbox dialog.
+DbDuo extends the pattern by recognizing three distinct file types and
+dispatching to the engine that matches each.</p>
+<h3 id="where-scripts-live">Where scripts live</h3>
+<p>Scripts live under <code>%APPDATA%\DbDuo\Scripts\</code>. The folder
+is created on first access; it lives under your roaming application data
+so it survives DbDuo upgrades and uninstalls. On first launch DbDuo
+seeds the folder with the bundled sample scripts (described at the end
+of this section). A <code>.seeded</code> sentinel file in the folder
+records that seeding has run, so deleting a sample does not cause it to
+reappear later. To re-seed (to recover a deleted sample or pick up a new
+one bundled with a future release), delete the <code>.seeded</code> file
+and any matching scripts, then invoke any script command.</p>
+<h3 id="the-three-file-types">The three file types</h3>
+<p>The extension on a script file determines which engine runs it. The
+picker shows the extension on every row, so you always know what kind of
+script you’re picking before you press Enter.</p>
+<p><strong><code>.js</code></strong> — JScript .NET. A general-purpose
+computational language that runs inside the DbDuo process with full
+access to the running form and recordset. The script has two
+pre-injected host variables, <code>db</code> (a
+<code>DbDuoManager</code> — the open database) and <code>frm</code> (a
+<code>DbDuoForm</code> — the GUI window). The DbDuo.dll support module
+pre-imports <code>System</code>, <code>System.Collections</code>,
+<code>System.Data</code>, <code>System.IO</code>,
+<code>System.Reflection</code>, <code>System.Text</code>,
+<code>System.Text.RegularExpressions</code>, and
+<code>System.Windows.Forms</code>, so a script can use any type in those
+namespaces directly without its own <code>import</code> statements. The
+value of the last expression in the script is what DbDuo gets back; if
+it’s a string, that string is displayed in the result dialog. Use
+<code>.js</code> when you want to do computation: iterate over rows,
+transform values, build a report string, talk to the COM bridge, format
+output. This is the most powerful and the most code-heavy of the
+three.</p>
+<p><strong><code>.sql</code></strong> — SQL batch. A list of SQL
+statements separated by <code>;</code>. Each statement is run in order
+through the same <code>invokeSql</code> pipeline that powers the
+Invoke-Sql command. SELECT results are rendered as text tables; UPDATE /
+INSERT / DELETE return their row counts; PRAGMA output is shown
+verbatim. Statements that error abort the batch with an error message
+identifying the failing statement number. Line comments starting with
+<code>--</code> and block comments <code>/* ... */</code> are stripped
+before parsing. The first line is conventionally a
+<code>-- Description: &lt;one-line summary&gt;</code> comment so the
+picker has context. Use <code>.sql</code> when you want to ask the
+database something or change data: saved queries, repeatable reports,
+scheduled cleanups.</p>
+<p><strong><code>.duo</code></strong> — DbDuo command batch. A list of
+dot-prompt commands, one per line, dispatched as if you had typed each
+line at the dot prompt. The execution surface is the entire DbDuo
+command set, not just SQL — so a <code>.duo</code> script can open a
+database, switch tables, set filters and sorts, mark and unmark rows,
+speak status to the screen reader, export results, and so on. Use the
+<strong>natural dot-prompt language</strong> in <code>.duo</code>
+scripts — the short, single-word aliases like <code>path</code>,
+<code>status</code>, <code>tables-list</code>, <code>sort-filter</code>,
+<code>table &lt;name&gt;</code>, <code>filter &lt;expr&gt;</code>,
+<code>sort &lt;expr&gt;</code>, <code>find &lt;text&gt;</code>,
+<code>jump &lt;expr&gt;</code>, <code>next</code>,
+<code>previous</code>, <code>mark</code>, <code>unmark</code>,
+<code>add</code>, <code>edit</code>, <code>delete</code>,
+<code>schema</code>, <code>kin</code> — rather than the underlying
+canonical PowerShell-style verbs (<code>say-path</code>,
+<code>say-status</code>, <code>say-tables</code>,
+<code>select-table</code>, <code>select-record</code>,
+<code>sort-object</code>, etc.). Either form works because the
+dispatcher resolves aliases, but the natural form is shorter, more
+readable, and matches what you type interactively. Lines starting with
+<code>#</code> or <code>--</code> are comments. Blank lines are skipped.
+A leading <code>?</code> on a line means “continue on error” — useful
+for commands whose failure is harmless (e.g. clearing a filter when no
+filter is active). By default an error on any other line aborts the
+batch and the rest of the file is not run. Each line’s output is
+captured and accumulated in the result dialog. Use <code>.duo</code>
+when you want to automate a workflow you would otherwise execute as a
+sequence of menu commands or dot-prompt entries.</p>
+<p>The mental model is: <code>.js</code> is “compute”; <code>.sql</code>
+is “query”; <code>.duo</code> is “do.” Each surface serves a different
+question.</p>
+<p>The <code>.duo</code> extension is reserved for DbDuo’s command-batch
+format. It does not collide with any major file type. Two alternatives
+were considered: <code>.dbd</code> (collides with ER/Studio Repository
+files and some InterBase backup formats) and <code>.dot</code> (collides
+with Graphviz graphs and Microsoft Word templates). <code>.duo</code>
+was chosen because the namespace is clean and the extension is
+recognizable as DbDuo’s own.</p>
+<h3 id="the-chord-altv">The chord — Alt+V</h3>
+<p>Use the Invoke Script command, Alt+V, to pick and run a script. A
+standard <code>LbcDialog</code> listbox shows every <code>.js</code>,
+<code>.sql</code>, and <code>.duo</code> file in the folder, sorted
+alphabetically, each row showing the full filename including extension.
+Type into the filter box to narrow the list; press Enter or click OK to
+run the highlighted script. The result (script output for
+<code>.js</code>, query results for <code>.sql</code>, accumulated
+command output for <code>.duo</code>, or an <code>ERROR: ...</code>
+message on failure) appears in a read-only multi-line memo dialog that
+screen readers can navigate line by line, word by word, or character by
+character.</p>
+<p>The chord is named “Invoke Script” rather than “Invoke File” or
+“Invoke Query” because “script” generalizes naturally to all three
+engines — a JScript script, a SQL script, and a DbDuo command script are
+all <em>scripts</em> in the recipe-for-doing-something sense, even when
+the engines differ.</p>
+<h3 id="editing-scripts">Editing scripts</h3>
+<p>Use the Edit Script command, Alt+Shift+V, to edit an existing script
+or create a new one. If the folder has existing scripts, the picker
+appears with a <code>[New script...]</code> entry at the top; picking
+that opens a Save File dialog whose Filter list offers JScript .NET, SQL
+batch, DbDuo command batch, or any-extension. When you save a new
+script, DbDuo seeds it with a starter template appropriate to the
+extension: a header comment block plus one example construct that runs
+successfully out of the box. After the file is created, your default
+editor opens on it.</p>
 <p>The default editor is Notepad. To override, put a line in
 <code>DbDuo.ini</code>:</p>
-<div class="sourceCode" id="cb9"><pre
-class="sourceCode ini"><code class="sourceCode ini"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Snippets]</span></span>
-<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a><span class="dt">editor </span><span class="ot">=</span><span class="st"> C:\Program Files\Notepad++\notepad++.exe</span></span></code></pre></div>
-<p>Any text editor that accepts a file path as a command-line argument
-works. EdSharp, Notepad++, gedit, Visual Studio Code, and so on.</p>
-<h3 id="what-a-jscript-snippet-sees">What a JScript snippet sees</h3>
-<p>Inside the script’s eval scope, two pre-injected variables are
-visible:</p>
+<div class="sourceCode" id="cb6"><pre
+class="sourceCode ini"><code class="sourceCode ini"><span id="cb6-1"><a href="#cb6-1" aria-hidden="true" tabindex="-1"></a><span class="kw">[Scripts]</span></span>
+<span id="cb6-2"><a href="#cb6-2" aria-hidden="true" tabindex="-1"></a><span class="dt">editor </span><span class="ot">=</span><span class="st"> C:\Program Files\Notepad++\notepad++.exe</span></span></code></pre></div>
+<h3 id="opening-the-scripts-folder">Opening the Scripts folder</h3>
+<p>Use the Open Script Folder command (no hotkey by default) to launch
+Explorer at the script folder. Useful when you want to copy a script in
+from elsewhere, rename a batch of files, or check on the
+<code>.seeded</code> sentinel.</p>
+<h3 id="bundled-sample-scripts">Bundled sample scripts</h3>
+<p>DbDuo ships with two examples of each script type. They demonstrate
+the typical shape and idioms of each engine and serve as starting points
+for your own work.</p>
+<p><strong><code>.js</code> samples (computation):</strong></p>
 <ul>
-<li><code>frm</code> — the running <code>DbDuoForm</code>. Every public
-method and property of the form is reachable.</li>
-<li><code>db</code> — shortcut for <code>frm.db</code> (the
-<code>DbDuoManager</code>). Every public method and property of the
-recordset manager.</li>
+<li><p><strong><code>CopyRowToClipboard.js</code></strong> — acts on the
+current row. Iterates the visible fields, builds a
+<code>name = value</code> listing, and puts it on the Windows clipboard.
+Demonstrates: row access via <code>db.getFieldValue</code>, the
+<code>StringBuilder</code> idiom, calling <code>frm.invokeMessage</code>
+for screen-reader confirmation.</p></li>
+<li><p><strong><code>MarkRowsMatchingRegex.js</code></strong> — acts on
+the whole filtered view. Walks every row, tests every visible field
+against a regex, and marks each row whose values match. Demonstrates:
+iteration over the recordset, regex matching, conditional field updates
+via <code>db.setFieldValue</code> + <code>db.update</code>, the “soft
+search” idiom of marking matches you can later scope commands
+to.</p></li>
 </ul>
-<p>The dbDuoEval.dll support module pre-imports <code>System</code>,
-<code>System.Collections</code>, <code>System.Data</code>,
-<code>System.IO</code>, <code>System.Reflection</code>,
-<code>System.Text</code>, <code>System.Text.RegularExpressions</code>,
-and <code>System.Windows.Forms</code>. Snippets can use any type in
-those namespaces directly without their own <code>import</code>
-statements. JScript’s late-bound dispatch resolves member access at
-runtime, so snippets don’t need to know exact .NET method signatures —
-just write <code>db.recordCount</code>, <code>frm.refresh()</code>,
-etc.</p>
-<h3 id="what-a-snippet-returns">What a snippet returns</h3>
-<p>The last expression of the snippet is the value DbDuo gets back. If
-it’s a string, that string is shown in the MessageBox. If it’s a number
-or other type, <code>.ToString()</code> is called. If the snippet has no
-value (only side effects), the MessageBox shows
-<code>(no output)</code>. To produce multi-line output, build a string
-with newlines and let it fall through as the final expression.</p>
+<p><strong><code>.sql</code> samples (queries):</strong></p>
+<ul>
+<li><p><strong><code>SchemaOverview.sql</code></strong> — three SELECTs
+against <code>sqlite_master</code> printing every table, view, and named
+index in the open database. Demonstrates: catalog introspection, the
+<code>UNION ALL</code> style for grouping related results, leading
+<code>--</code> comments for description.</p></li>
+<li><p><strong><code>NorthwindRowCounts.sql</code></strong> — one SELECT
+per Northwind table, combined with <code>UNION ALL</code> and ordered by
+row count. Demonstrates: per-table count, multiple counts in one result,
+the leading description-comment convention.</p></li>
+</ul>
+<p><strong><code>.duo</code> samples (workflows):</strong></p>
+<ul>
+<li><p><strong><code>RecentOrders.duo</code></strong> — switches to the
+orders table, filters to the most recent calendar year, sorts
+most-recent-first, and reports the result count via speech. Uses native
+dot-prompt aliases (<code>table</code>, <code>filter</code>,
+<code>sort</code>, <code>sort-filter</code>) instead of canonical
+PowerShell-style verbs. Demonstrates: multi-step workflow, the
+<code>?</code> continue-on-error prefix on the clear-filter line,
+speech-only verbs at the end as a screen-reader confirmation.</p></li>
+<li><p><strong><code>StatusSnapshot.duo</code></strong> — runs five
+speech-only commands in a row (<code>path</code>,
+<code>tables-list</code>, <code>status</code>, <code>sort-filter</code>,
+<code>say-yield</code>) to print a complete “where am I” snapshot. Uses
+the natural dot-prompt aliases throughout — only <code>say-yield</code>
+keeps its canonical form because no shorter alias exists for the
+one-line row-count summary. Demonstrates: pure-read workflow, the
+speech-only command family, scriptable as a warm-up routine when sitting
+down to a workspace.</p></li>
+</ul>
 <h3 id="errors">Errors</h3>
-<p>Compile-time errors (syntax, unknown identifier, type mismatch) and
-runtime errors (null reference, division by zero, etc.) are both caught
-and returned to DbDuo as a string starting with <code>ERROR:</code>. The
-MessageBox shows this with the error icon. The script never throws out
-to DbDuo, so the UI stays responsive — fix the script and Invoke
-again.</p>
-<h3 id="sample-snippets">Sample snippets</h3>
-<p>Verify scripting works:</p>
-<div class="sourceCode" id="cb10"><pre
-class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;Current table: &quot;</span> <span class="op">+</span> db<span class="op">.</span><span class="at">currentTable</span> <span class="op">+</span> <span class="st">&quot;, &quot;</span> <span class="op">+</span> db<span class="op">.</span><span class="at">recordCount</span> <span class="op">+</span> <span class="st">&quot; rows.&quot;</span><span class="op">;</span></span></code></pre></div>
+<p>Compile-time errors and runtime errors in <code>.js</code> scripts
+are caught and returned as a string starting with <code>ERROR:</code>.
+The result dialog shows it with the error icon. The script never throws
+out to DbDuo, so the UI stays responsive.</p>
+<p>For <code>.sql</code> batches, an error on any statement aborts the
+batch; the result dialog shows the output of every statement that ran
+before the error plus the error message identifying which statement
+failed.</p>
+<p>For <code>.duo</code> batches, by default an error on any line aborts
+the batch; the result dialog shows the output of every line that ran
+before the error plus the error message identifying the failing line. To
+let a specific line fail without aborting, prefix it with <code>?</code>
+(“continue on error”). This is useful for commands like
+<code>reset-filter</code> whose failure is harmless (no filter was
+active) but should not stop the rest of the script.</p>
+<h3 id="writing-your-own">Writing your own</h3>
+<p>A trivial script that just verifies things work:</p>
+<div class="sourceCode" id="cb7"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb7-1"><a href="#cb7-1" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;Current table: &quot;</span> <span class="op">+</span> db<span class="op">.</span><span class="at">currentTable</span> <span class="op">+</span> <span class="st">&quot;, &quot;</span> <span class="op">+</span> db<span class="op">.</span><span class="at">recordCount</span> <span class="op">+</span> <span class="st">&quot; rows.&quot;</span><span class="op">;</span></span></code></pre></div>
 <p>Count rows then change the filter:</p>
-<div class="sourceCode" id="cb11"><pre
-class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb11-1"><a href="#cb11-1" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> iBefore <span class="op">=</span> db<span class="op">.</span><span class="at">recordCount</span><span class="op">;</span></span>
-<span id="cb11-2"><a href="#cb11-2" aria-hidden="true" tabindex="-1"></a>db<span class="op">.</span><span class="at">filter</span> <span class="op">=</span> <span class="st">&quot;City = &#39;Seattle&#39;&quot;</span><span class="op">;</span></span>
-<span id="cb11-3"><a href="#cb11-3" aria-hidden="true" tabindex="-1"></a>frm<span class="op">.</span><span class="fu">refresh</span>()<span class="op">;</span></span>
-<span id="cb11-4"><a href="#cb11-4" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;Filtered from &quot;</span> <span class="op">+</span> iBefore <span class="op">+</span> <span class="st">&quot; to &quot;</span> <span class="op">+</span> db<span class="op">.</span><span class="at">recordCount</span> <span class="op">+</span> <span class="st">&quot; rows.&quot;</span><span class="op">;</span></span></code></pre></div>
-<p>Walk every row and collect first-column values (capped at 20 lines
-for the MessageBox):</p>
-<div class="sourceCode" id="cb12"><pre
-class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> aLines <span class="op">=</span> []<span class="op">;</span></span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>db<span class="op">.</span><span class="fu">moveFirst</span>()<span class="op">;</span></span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (<span class="op">!</span>db<span class="op">.</span><span class="at">EOF</span>) {</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>  aLines<span class="op">.</span><span class="fu">push</span>(db<span class="op">.</span><span class="fu">getFieldValue</span>(<span class="dv">0</span>))<span class="op">;</span></span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>  db<span class="op">.</span><span class="fu">moveNext</span>()<span class="op">;</span></span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>}</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>aLines<span class="op">.</span><span class="fu">slice</span>(<span class="dv">0</span><span class="op">,</span> <span class="dv">20</span>)<span class="op">.</span><span class="fu">join</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)<span class="op">;</span></span></code></pre></div>
-<p>Trigger a form action:</p>
-<div class="sourceCode" id="cb13"><pre
-class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a>frm<span class="op">.</span><span class="fu">recBookmarkClicked</span>(<span class="kw">null</span><span class="op">,</span> <span class="kw">null</span>)<span class="op">;</span></span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;Bookmark saved at row &quot;</span> <span class="op">+</span> db<span class="op">.</span><span class="at">absolutePosition</span><span class="op">;</span></span></code></pre></div>
+<div class="sourceCode" id="cb8"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb8-1"><a href="#cb8-1" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> iBefore <span class="op">=</span> db<span class="op">.</span><span class="at">recordCount</span><span class="op">;</span></span>
+<span id="cb8-2"><a href="#cb8-2" aria-hidden="true" tabindex="-1"></a>db<span class="op">.</span><span class="at">filter</span> <span class="op">=</span> <span class="st">&quot;City = &#39;Seattle&#39;&quot;</span><span class="op">;</span></span>
+<span id="cb8-3"><a href="#cb8-3" aria-hidden="true" tabindex="-1"></a>frm<span class="op">.</span><span class="fu">invokeRefresh</span>()<span class="op">;</span></span>
+<span id="cb8-4"><a href="#cb8-4" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;Filtered from &quot;</span> <span class="op">+</span> iBefore <span class="op">+</span> <span class="st">&quot; to &quot;</span> <span class="op">+</span> db<span class="op">.</span><span class="at">recordCount</span> <span class="op">+</span> <span class="st">&quot; rows.&quot;</span><span class="op">;</span></span></code></pre></div>
+<p>Walk every row and collect a chosen column’s values (capped at 20
+lines for the MessageBox):</p>
+<div class="sourceCode" id="cb9"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb9-1"><a href="#cb9-1" aria-hidden="true" tabindex="-1"></a><span class="kw">var</span> aLines <span class="op">=</span> []<span class="op">;</span></span>
+<span id="cb9-2"><a href="#cb9-2" aria-hidden="true" tabindex="-1"></a>db<span class="op">.</span><span class="fu">moveFirst</span>()<span class="op">;</span></span>
+<span id="cb9-3"><a href="#cb9-3" aria-hidden="true" tabindex="-1"></a><span class="cf">while</span> (<span class="op">!</span>db<span class="op">.</span><span class="at">eof</span>) {</span>
+<span id="cb9-4"><a href="#cb9-4" aria-hidden="true" tabindex="-1"></a>  aLines<span class="op">.</span><span class="fu">push</span>(db<span class="op">.</span><span class="fu">getFieldValue</span>(<span class="st">&quot;name&quot;</span>))<span class="op">;</span></span>
+<span id="cb9-5"><a href="#cb9-5" aria-hidden="true" tabindex="-1"></a>  db<span class="op">.</span><span class="fu">moveNext</span>()<span class="op">;</span></span>
+<span id="cb9-6"><a href="#cb9-6" aria-hidden="true" tabindex="-1"></a>}</span>
+<span id="cb9-7"><a href="#cb9-7" aria-hidden="true" tabindex="-1"></a>aLines<span class="op">.</span><span class="fu">slice</span>(<span class="dv">0</span><span class="op">,</span> <span class="dv">20</span>)<span class="op">.</span><span class="fu">join</span>(<span class="st">&quot;</span><span class="sc">\n</span><span class="st">&quot;</span>)<span class="op">;</span></span></code></pre></div>
+<p>Trigger a form action (programmatic Save Bookmark):</p>
+<div class="sourceCode" id="cb10"><pre
+class="sourceCode javascript"><code class="sourceCode javascript"><span id="cb10-1"><a href="#cb10-1" aria-hidden="true" tabindex="-1"></a>frm<span class="op">.</span><span class="fu">recBookmarkClicked</span>(<span class="kw">null</span><span class="op">,</span> <span class="kw">null</span>)<span class="op">;</span></span>
+<span id="cb10-2"><a href="#cb10-2" aria-hidden="true" tabindex="-1"></a><span class="st">&quot;Bookmark saved at row &quot;</span> <span class="op">+</span> db<span class="op">.</span><span class="at">absolutePosition</span><span class="op">;</span></span></code></pre></div>
 <h3 id="power-and-responsibility">Power and responsibility</h3>
-<p>Snippets run in the DbDuo process with all the privileges DbDuo has.
-There is no facade or sandbox. A snippet can call
+<p>Scripts run in the DbDuo process with all the privileges DbDuo has.
+There is no facade or sandbox. A script can call
 <code>Environment.Exit</code>, read or write files, launch other
 programs, modify the database. This is intentional for power-user
-automation; treat snippets the same way you would treat shell scripts or
+automation; treat scripts the same way you would treat shell scripts or
 PowerShell scripts you run on your own machine.</p>
 <h2 id="help-menu">Help menu</h2>
-<p>Use the Help Contents command, F1 (the standard help key), for help.
+<p>Use the Documentation command, F1 (the standard help key), for help.
 With no argument, F1 shows the command index; from the dot prompt,
-<code>help &lt;topic&gt;</code> shows details for one command.</p>
+<code>help &lt;topic&gt;</code> shows details for one command. The menu
+label matches EdSharp and FileDir: “Documentation”.</p>
 <p>Use the PowerShell Verb Reference command (no hotkey) to see the
 PowerShell verb taxonomy with each verb’s category and a brief
-description, so you recognize the naming conventions DbDuo follows. Use
-the Command Picker command, Alt+F10 (F10 = menu, Alt for “alternative
-menu”), to open an alphabetized list of every command with its current
-hotkey and a one-line description. The Alt+F10 chord echoes the EdSharp
-and FileDir convention.</p>
+description. Use the Alternate Menu command, Alt+F10, to open an
+alphabetized list of every command with its current hotkey and a
+one-line summary. EdSharp and FileDir use the same command name; the
+chord and behavior are consistent across the three apps. The picker
+includes a detail panel below the list that shows the summary plus an
+optional longer description for the selected command — pick a command in
+the list and read what it does before pressing Enter to run it.</p>
+<p>Every command in DbDuo carries one-line summary metadata and an
+optional multi-line description, modeled on the EdSharp and FileDir
+convention. The summary appears in three places: in the menu status bar
+when the item has focus (so screen readers announce it as you arrow
+through the menus), inline after the chord in the Alternate Menu, and as
+the “Summary:” line in the Key Describer trace. The optional
+description, when present, gives the longer “why” or “gotchas” of the
+command and shows up in the Alternate Menu detail panel and at the
+bottom of the Key Describer trace. Commands without an explicit summary
+fall back to their menu label (minus the ampersand mnemonic markers) so
+every command is at least minimally self-describing.</p>
 <p>Use the Where Am I command (no hotkey by default) to hear the current
 row, table, filter, and sort state in detail. Use the Test Screen Reader
 Speech command to probe DbDuo’s three speech paths (JAWS direct via COM,
 NVDA direct via the controller-client DLL, and the UIA live-region
 fallback for Narrator) and confirm which one is working with your screen
 reader.</p>
-<p>Use the Toggle Key Describer Mode command, Control+F1 (F1 for help,
-Control for “describe rather than fire”), to switch into a mode where
-every hotkey press announces the chord and its bound command instead of
-running it; press Control+F1 again to leave the mode. Use the Show Log
-Location command to print the path of <code>DbDuo.log</code>, the
-per-session log file. Use the Version History command, Shift+F1, to read
-the chronological list of releases and what changed in each. Use the
-Readme Guide command to open <code>README.md</code> in your browser. Use
-the Open Website command to open the DbDuo GitHub page. Use the Check
-for Update command, F11, to ask GitHub for the latest release and offer
-to download and install it. Use the About DbDuo command, Alt+F1, to read
-the version number and a brief credits block.</p>
+<p>Use the Key Describer command, Control+F1 (F1 for help, Control for
+“describe rather than fire”), to switch into a mode where every hotkey
+press announces the chord and its bound command instead of running it;
+press Control+F1 again to leave the mode. Use the Show Log Location
+command to print the path of <code>DbDuo.log</code>, the per-session log
+file. Use the History of Changes command, Shift+F1, to read the
+chronological list of releases and what changed in each. Use the Readme
+Guide command to open <code>README.md</code> in your browser. Use the
+Open Website command to open the DbDuo GitHub page. Use the Elevate
+Version command, F11, to ask GitHub for the latest release and offer to
+download and install it. Use the About command, Alt+F1, to read the
+version number and a brief credits block. The Help-menu commands
+carrying chords use the same name and chord as their EdSharp and FileDir
+counterparts (Documentation, History of Changes, Key Describer, Elevate
+Version, About, Alternate Menu).</p>
+<p>The Help menu also hosts one-keystroke commands to open each of the
+three bundled sample databases: <strong>Open Sample Database</strong>
+(sample.db, the small school domain), <strong>Open Northwind
+Sample</strong> (the classic Microsoft sales sample), and <strong>Open
+Chinook Sample</strong> (the classic music-store sample). All three open
+via the same code path File &gt; Open Database uses, so the usual
+post-open behaviors apply. See “Bundled sample databases” below for
+what’s in each.</p>
 <h2 id="commands-available-only-at-the-dot-prompt">Commands available
 only at the dot prompt</h2>
 <p>A few commands have no GUI counterpart because they manage the dot
@@ -1415,57 +1524,46 @@ aliases <code>output</code>, <code>tee</code>, and <code>o</code>), to
 send subsequent output to a file while also keeping it on screen. The
 <code>-a</code> flag appends rather than overwriting;
 <code>Out-File stdout</code> restores the screen-only behavior; bare
-<code>Out-File</code> reports the current target. The simultaneous
-screen-and-file teeing lets the screen-reader user follow what is being
-captured.</p>
+<code>Out-File</code> reports the current target.</p>
 <p>Use the Invoke-Script command, <code>Invoke-Script path.txt</code>
 (with aliases <code>read</code>, <code>script</code>, and
 <code>i</code>), to run a file of dot-prompt commands. Blank lines and
 lines beginning with <code>#</code> or <code>;</code> are treated as
-comments. Errors are reported per line but do not stop the script.
-Out-File and Invoke-Script combine well:</p>
+comments. Errors are reported per line but do not stop the script.</p>
 <pre><code>Out-File monthly_report.txt
 Invoke-Script monthly_report.dbduo
 Out-File stdout</code></pre>
 <h2 id="mnemonic-hotkey-groups">Mnemonic hotkey groups</h2>
 <p>This section restates every hotkey in the program, grouped by the
-part of the keyboard it lives on. Use it as a quick visual
-reference.</p>
+part of the keyboard it lives on.</p>
 <h3 id="bare-shiftletter-family">Bare Shift+Letter family</h3>
 <p>Five one-key shortcuts fire from the data list only (so capital
 letters typed in dialogs are not affected): Shift+F filters (Filter
 Records); Shift+G goes to a row (Go to Row); Shift+J as a synonym for
 Jump to Match in One Column; Shift+R resets the filter (Clear Filter);
-Shift+S sorts by an arbitrary expression (Custom Sort). The
-previously-bound Shift+E (Enter-Child), Shift+M (Mark), Shift+U
-(Unmark), and Shift+X (Exit-Child) chords are no longer in this family —
-the parent-child drill moved to the Alt+arrow chord pair, and the
-mark/unmark pair moved to Control+M / Control+U for symmetry, freeing
-the bare Shift+E, M, U, and X slots for future use.</p>
+Shift+S sorts by an arbitrary expression (Custom Sort).</p>
 <h3 id="function-key-family">Function-key family</h3>
-<p>F1 is help (Help Contents); Shift+F1 is Version History; Alt+F1 is
-About DbDuo; Control+F1 is Toggle Key Describer Mode. F2 edits the
-current row (Edit Record). F3 is search next (repeats whichever search
-family was last invoked: Find, Jump, or Regex); Shift+F3 is search
-previous. Control+F3 is Find Regex Across All Columns; Control+Shift+F3
-is the reverse. F4 picks a table (Choose Table); Shift+F4 is Say Tables;
-Control+F4 closes the open file (Close Database). F5 refreshes (Refresh
-View) and resets the virtual cursor. Control+F6 cycles all objects (Next
-Object); Control+Shift+F6 cycles backward. Control+F7 toggles the lock
-(Toggle Read-Only Lock). F11 checks for an update (Check for Update).
-Alt+F4 closes the program (Exit DbDuo). Alt+F10 opens the Command
-Picker. F12 opens Edit Configuration.</p>
+<p>F1 is Documentation; Shift+F1 is History of Changes; Alt+F1 is About;
+Control+F1 is Key Describer. F2 edits the current row; Shift+F2 edits
+just the current field (virtual cell). F3 is search next; Shift+F3 is
+search previous. Control+F3 is Find Regex Across All Columns;
+Control+Shift+F3 is the reverse. F4 picks a table; Shift+F4 is Say
+Tables; Control+F4 closes the open file. F5 refreshes and resets the
+virtual cursor. Control+F6 cycles all objects; Control+Shift+F6 cycles
+backward. Control+F7 toggles the lock. F11 is Elevate Version. Alt+F4
+closes the program. Alt+F10 opens the Alternate Menu. F12 is a legacy
+alias for Configuration Options (now on Alt+Shift+C, the same chord
+EdSharp and FileDir use for their Configuration Options command).</p>
 <h3 id="control-letter-family">Control-letter family</h3>
 <p>Control+C is reserved for native clipboard. Control+D deletes the
-current row (D for Delete). Control+F is Find Across All Columns;
-Control+Shift+F is the reverse. Control+J is Jump to Match in One
-Column; Control+Shift+J is the reverse. Control+K saves a bookmark;
-Control+Shift+K clears it. Control+M marks the current row; Control+U
-unmarks it. Control+N adds a row (N for New); Control+Shift+N creates a
-new database. Control+O opens a file (O for Open). Control+P prints.
-Control+Q runs SQL (Q for Query). Control+R is Find and Replace Across
-Rows. Control+S saves the database to a new path; Control+Shift+S takes
-a backup snapshot. Control+Shift+C duplicates the current row.
+current row. Control+F is Find Across All Columns; Control+Shift+F is
+the reverse. Control+J is Jump to Match in One Column; Control+Shift+J
+is the reverse. Control+K saves a bookmark; Control+Shift+K clears it.
+Control+M marks the current row; Control+U unmarks it. Control+N adds a
+row; Control+Shift+N creates a new database. Control+O opens a file.
+Control+P prints. Control+Q runs SQL. Control+R is Find and Replace
+Across Rows. Control+S saves the database to a new path; Control+Shift+S
+takes a backup snapshot. Control+Shift+C duplicates the current row.
 Control+Shift+I imports a Markdown table; Control+Shift+X exports data.
 Control+Enter is Open Cell Value.</p>
 <h3 id="alt-letter-family">Alt-letter family</h3>
@@ -1480,11 +1578,6 @@ Explorer.</p>
 <h3
 id="altcontrol-extended-key-family-virtual-cell-navigation">Alt+Control
 extended-key family (virtual cell navigation)</h3>
-<p>This is the screen-reader table-navigation family. The Alt+Control
-combination is reserved for desktop global hotkeys elsewhere in Windows,
-but extended-arrow / numpad keys don’t make sense as global hotkeys, so
-DbDuo uses this combination for cell-level navigation inside the data
-list.</p>
 <p>Alt+Control+Home moves to the top-left cell; Alt+Control+End moves to
 the bottom-right. Alt+Control+RightArrow / LeftArrow / DownArrow /
 UpArrow move one cell in the named direction. Alt+Control+PageDown moves
@@ -1493,20 +1586,18 @@ first row. Alt+Control+Numpad5 announces the current cell, or spells it
 on a second press.</p>
 <h3 id="altarrow-family-parent-child-drill">Alt+arrow family
 (parent-child drill)</h3>
-<p>Alt+RightArrow drills into a child table (Enter Child Table).
-Alt+LeftArrow returns to the parent row (Exit Child Table). Alt+Home
-pops the entire drill stack (Exit to Root Table).</p>
+<p>Alt+RightArrow drills into a child table. Alt+LeftArrow returns to
+the parent row. Alt+Home pops the entire drill stack.</p>
 <h3 id="navigation-family">Navigation family</h3>
 <p>Tab and Shift+Tab move an announcement-only column cursor across the
-current row — the screen reader announces “Column: value” without
-changing the visible selection. The arrow keys move the listview’s row
-selection. Enter opens Show Record on the current row. Control+Tab
-cycles among recently-visited tables; Control+Shift+Tab cycles backward.
-Control+Home and Control+End jump to the first or last marked row;
-Control+UpArrow and Control+DownArrow step among marked rows. Shift+Home
-and Shift+End bulk-mark every row from the first through the current, or
-the current through the last; Alt+Shift+Home and Alt+Shift+End unmark
-the same spans.</p>
+current row. The arrow keys move the listview’s row selection. Enter
+opens Show Record on the current row. Control+Tab cycles among
+recently-visited tables; Control+Shift+Tab cycles backward. Control+Home
+and Control+End jump to the first or last marked row; Control+UpArrow
+and Control+DownArrow step among marked rows. Shift+Home and Shift+End
+bulk-mark every row from the first through the current, or the current
+through the last; Alt+Shift+Home and Alt+Shift+End unmark the same
+spans.</p>
 <h3 id="graveaccent-family">GraveAccent family</h3>
 <p>Control+GraveAccent is the GUI menu hotkey for Open Dot Prompt.
 Alt+GraveAccent is a global hotkey: when the console has focus, it
@@ -1514,41 +1605,54 @@ brings the GUI forward. Alt+Control+GraveAccent is a global hotkey that
 always acts: it toggles between GUI and console, whichever is not
 currently in front.</p>
 <h2 id="standard-fields">Standard fields</h2>
-<p>DbDuo follows a convention for table design that the bundled
-<code>sample.db</code> illustrates and that the user manual recommends
-for new databases. Each table has the following “standard fields” in
-this order, with the “distinct fields” (the substantive columns)
-interleaved among them:</p>
+<p>DbDuo follows a convention for table design that the bundled sample
+databases illustrate and that the user manual recommends for new
+databases. Each table has the following “standard fields” in this order,
+with the “distinct fields” (the substantive columns) interleaved among
+them:</p>
 <ol type="1">
 <li><code>&lt;table&gt;_id</code> — the primary key, integer,
-autoincrement.</li>
+autoincrement (e.g., <code>teacher_id</code> in the
+<code>teachers</code> table).</li>
 <li><code>added</code> — datetime, default
 <code>current_timestamp</code>. When the row was created.</li>
 <li><code>updated</code> — datetime, default
 <code>current_timestamp</code>. Most recent change.</li>
+<li><code>url</code> — textline. A hyperlink, file path, or other
+openable reference associated with this row (added v1.0.66). Opened by
+the Open Url command (Ctrl+Shift+U) or read aloud by Say Url
+(Shift+U).</li>
+<li><code>tags</code> — textmemo. Comma-separated tag list for ad-hoc
+grouping. Read aloud by Say Tags (Shift+T).</li>
+<li><code>notes</code> — textmemo. Free-form annotations. Read aloud by
+Say Notes (Shift+N).</li>
 <li>Foreign-key columns (<code>&lt;parent&gt;_id</code>, for child
 tables only).</li>
-<li><code>observed</code> — datetime, default
-<code>current_timestamp</code>. When the data behind the row was
-observed (often different from when it was entered).</li>
-<li><code>method</code> — text. How this row was added or observed
-(e.g., “import”, “manual”, “scrape”).</li>
 <li><strong>Distinct fields</strong> — the substantive columns this
 table is actually for.</li>
-<li><code>notes</code> — text. Free-form annotations.</li>
-<li><code>tags</code> — text. Comma-separated tag list for ad-hoc
-grouping.</li>
 <li><code>marked</code> — boolean, default 0. The flag the Set-Mark
 command toggles.</li>
 <li><code>look</code> — computed text. A pipe-joined rendering of the
 most identifying distinct fields, designed for screen-reader
-readability. Appears in listboxes, quick-search displays, and
-Show-Object’s Related Records section.</li>
-<li><code>unq</code> — computed text (optional). Like <code>look</code>
-but optimized for uniqueness rather than readability. Used by
-upsert-style imports as a natural deduplication key.</li>
+readability. Appears in listboxes, quick-search displays, and Show
+Record’s Related Records section.</li>
+<li><code>unq</code> — computed text. Like <code>look</code> but
+optimized for uniqueness rather than readability. The intent is that the
+combination of column values in <code>unq</code> can confidently be
+considered unique for a row, so that an upsert-style command can update
+an existing row if <code>unq</code> matches, or insert a new row
+otherwise.</li>
 </ol>
-<p>The <code>look</code> column is what makes Show-Object’s Related
+<p>The TEXTLINE / TEXTMEMO type names on <code>url</code>,
+<code>tags</code>, and <code>notes</code> aren’t standard SQLite types —
+they’re convention labels DbDuo reads from
+<code>PRAGMA table_info</code>. SQLite’s type affinity treats all three
+as TEXT for storage. The difference is that DbDuo’s Edit Record dialog
+renders a single-line input box for TEXT/TEXTLINE columns and a
+multi-line memo widget for any type containing “memo”. Use TEXTMEMO for
+<code>tags</code> and <code>notes</code> so the editor handles their
+potentially-long content gracefully.</p>
+<p>The <code>look</code> column is what makes Show Record’s Related
 Records section informative. When DbDuo lists “Related students:” or
 “Related classes:”, each line is one matching row’s <code>look</code>
 value, so a single short string identifies who or what each related
@@ -1557,16 +1661,204 @@ the right header but with a <code>(N row(s) -- no look column)</code>
 placeholder.</p>
 <p>DbDuo hides every column ending in <code>_id</code> (primary and
 foreign keys), bare <code>id</code>, and the bookkeeping columns (added,
-updated, marked, look, unq) from the list by default. Use the
-Select-Column command to override on a per-table basis.</p>
+updated, marked, look, unq) from the listview by default. As of v1.0.68,
+<code>url</code>, <code>tags</code>, and <code>notes</code> are also
+hidden by default — they’re “extended” data per row that the user
+reaches via the Say-X family (Say Url, Say Tags, Say Notes) or edits via
+Edit Record (F2 Edit Cell or Ctrl+E Edit Record, which both show the
+FULL field set). Use the Select Columns command (Alt+S) to override on a
+per-table basis; the override persists across sessions via
+DbDuo.ini.</p>
+<h3 id="example-schema-using-the-standard-fields">Example schema using
+the standard fields</h3>
+<p>The <code>teachers</code> table from <code>sample.db</code>:</p>
+<div class="sourceCode" id="cb12"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> teachers (</span>
+<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    teacher_id  <span class="dt">integer</span>  <span class="kw">primary</span> <span class="kw">key</span> autoincrement,</span>
+<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    added       datetime <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> <span class="fu">current_timestamp</span>,</span>
+<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    updated     datetime <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> <span class="fu">current_timestamp</span>,</span>
+<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    name        text     <span class="kw">not</span> <span class="kw">null</span>,</span>
+<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    department  text,</span>
+<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    email       text,</span>
+<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    office      text,</span>
+<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    notes       text,</span>
+<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    tags        text,</span>
+<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    marked      <span class="dt">integer</span>  <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> <span class="dv">0</span>,</span>
+<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    look text <span class="kw">generated</span> always <span class="kw">as</span> (</span>
+<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        <span class="fu">rtrim</span>(</span>
+<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>            iif(<span class="fu">length</span>(name)<span class="op">&gt;</span><span class="dv">0</span>,       name       <span class="op">||</span> <span class="st">&#39; | &#39;</span>, <span class="st">&#39;&#39;</span>) <span class="op">||</span></span>
+<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>            iif(<span class="fu">length</span>(department)<span class="op">&gt;</span><span class="dv">0</span>, department <span class="op">||</span> <span class="st">&#39; | &#39;</span>, <span class="st">&#39;&#39;</span>) <span class="op">||</span></span>
+<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>            iif(<span class="fu">length</span>(office)<span class="op">&gt;</span><span class="dv">0</span>,     office     <span class="op">||</span> <span class="st">&#39; | &#39;</span>, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>            <span class="st">&#39; | &#39;</span></span>
+<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    ) stored,</span>
+<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    unq text <span class="kw">generated</span> always <span class="kw">as</span> (</span>
+<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>        <span class="fu">rtrim</span>(</span>
+<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>            iif(<span class="fu">length</span>(name)<span class="op">&gt;</span><span class="dv">0</span>,  name  <span class="op">||</span> <span class="st">&#39; | &#39;</span>, <span class="st">&#39;&#39;</span>) <span class="op">||</span></span>
+<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>            iif(<span class="fu">length</span>(email)<span class="op">&gt;</span><span class="dv">0</span>, email,           <span class="st">&#39;&#39;</span>),</span>
+<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>            <span class="st">&#39; | &#39;</span></span>
+<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    ) stored</span>
+<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
+<h2 id="bundled-sample-databases">Bundled sample databases</h2>
+<p>DbDuo ships five SQLite sample databases, each adapted to the
+standard column conventions described above. The Help menu has
+one-keystroke commands to open each one (see “Help menu” above); all
+five open via the same code path File &gt; Open Database uses. The first
+three are “textbook” databases borrowed from the broader SQLite
+community; the latter two are “hobbyist” databases that DbDuo author
+Jamal Mazrui assembled based on research into the most popular
+real-world personal database categories.</p>
+<p><strong><code>sample.db</code></strong> — a small school domain. Four
+tables: <code>teachers</code>, <code>classes</code>,
+<code>students</code>, <code>enrollments</code>. Three rows each —
+twelve rows total — just enough to demonstrate parent-child
+relationships (a teacher teaches classes; students enroll in classes
+through the enrollments junction table). The minimum that exercises
+every standard column, the parent-child drill, and the related-records
+view. Opens automatically on first launch from a clean install.</p>
+<p><strong><code>northwind.db</code></strong> — the classic Microsoft
+Northwind sales sample, adapted to DbDuo’s column conventions. Eight
+tables: <code>categories</code> (8 rows), <code>suppliers</code> (10),
+<code>products</code> (24), <code>customers</code> (12),
+<code>employees</code> (9), <code>orders</code> (14),
+<code>order_details</code> (21), <code>shippers</code> (3) — 101 rows
+total. Rich parent-child shape: a category has products, a supplier has
+products, a customer places orders, an employee handles orders, an order
+has order_details, a shipper ships orders. Useful for exercising DbDuo’s
+parent-child drill against multi-level relationships with realistic row
+counts. <strong>DbDuo’s adaptations are minimal and trivial</strong>:
+every table has <code>&lt;table&gt;_id</code> primary keys (the
+canonical Northwind uses <code>CategoryID</code>,
+<code>SupplierID</code>, etc. — same idea, snake_case naming); the
+standard columns <code>added</code>, <code>updated</code>,
+<code>marked</code>, <code>notes</code>, <code>tags</code>,
+<code>look</code>, <code>unq</code>, and (new in v1.0.68)
+<code>url</code> are appended to each table; <code>notes</code> and
+<code>tags</code> are declared as <code>TEXTMEMO</code> so DbDuo’s Edit
+Record dialog renders a multi-line memo widget for them. The substantive
+columns (company, contact, city, country, phone for customers;
+first_name, last_name, title for employees; and so on) are preserved
+verbatim. Learn more about the canonical Microsoft Northwind:</p>
+<ul>
+<li>Microsoft Learn — <a
+href="https://learn.microsoft.com/en-us/dotnet/framework/data/adonet/ef/loading-related-objects">Northwind
+sample database overview</a></li>
+<li>GitHub — <a
+href="https://github.com/microsoft/sql-server-samples/tree/master/samples/databases/northwind-pubs">microsoft/sql-server-samples
+/ Northwind</a></li>
+<li>Wikipedia — <a
+href="https://en.wikipedia.org/wiki/Northwind_Traders">Northwind Traders
+sample</a></li>
+</ul>
+<p><strong><code>chinook.db</code></strong> — the classic Chinook
+music-store sample, adapted to DbDuo’s column conventions. Nine tables:
+<code>genres</code> (14 rows), <code>media_types</code> (5),
+<code>artists</code> (20), <code>albums</code> (20), <code>tracks</code>
+(33), <code>employees</code> (8), <code>customers</code> (15),
+<code>invoices</code> (17), <code>invoice_items</code> (26) — 158 rows
+total. Three-deep parent-child chains (artist → album → track; customer
+→ invoice → invoice_item) make this database the best for stress-testing
+the deeper drill stacks and the related-records view at multiple levels.
+<strong>DbDuo’s adaptations are minimal and trivial</strong> — same
+shape as the Northwind adaptation: primary keys are
+<code>&lt;table&gt;_id</code>; standard columns <code>added</code>,
+<code>updated</code>, <code>marked</code>, <code>notes</code>,
+<code>tags</code>, <code>look</code>, <code>unq</code>, <code>url</code>
+are appended; <code>notes</code> and <code>tags</code> are upgraded to
+<code>TEXTMEMO</code>. The substantive columns (name, title, artist_id,
+album_id, genre_id, etc.) are preserved verbatim. Learn more about the
+canonical Chinook:</p>
+<ul>
+<li>GitHub — <a
+href="https://github.com/lerocha/chinook-database">lerocha/chinook-database</a>
+(Luis Rocha’s reference repository; the SQL Server, MySQL, PostgreSQL,
+Oracle, and SQLite variants live here)</li>
+<li>SQLite Tutorial — <a
+href="https://www.sqlitetutorial.net/sqlite-sample-database/">Chinook
+sample database</a> (with a clear ER diagram description)</li>
+</ul>
+<p><strong><code>collection.db</code></strong> — a personal music
+collection. Three tables: <code>artists</code> (8 rows),
+<code>albums</code> (16), <code>tracks</code> (22). Models a domain that
+hobbyist software like CLZ Music, MyMusicCollection, and Musicnizer have
+refined for decades: per-album metadata (title, release year, format,
+label, catalog number, genre), per-artist metadata (sort name, country,
+active years), per-track metadata (track number, title, duration).
+Includes fields for personal ratings, physical location, and loan
+tracking. Useful as a template for building your own collection
+database; the schema generalizes naturally to books, DVDs, or any other
+catalogable hobby. The schema differs from <code>chinook.db</code> by
+emphasizing per-album collector fields (loan status, location, rating,
+catalog number) rather than per-track sales data.</p>
+<p><strong><code>cellar.db</code></strong> — a personal wine cellar.
+Three tables: <code>wines</code> (8 rows), <code>bottles</code> (10),
+<code>tastings</code> (4). Models the data model that CellarTracker,
+eSommelier, and VinCellar have refined: a wine identity (producer +
+vintage + varietal + region) is separate from the individual bottles you
+own (each with a bin location, purchase price, source, and consumption
+status), and tasting notes are stored separately so the same wine can
+have multiple tastings over years of aging. The standout analytical
+feature is the <strong>drink-window query</strong> — for every wine in
+the cellar, where does it sit in its drinkable range? — bundled as
+<code>Scripts/WineDrinkWindow.sql</code>. This database illustrates how
+a relational schema serves a real workflow that no flat list or
+spreadsheet can: “find the wines closest to the end of their drink
+window” is one ORDER-BY clause away.</p>
+<p>All five databases use the same column conventions, so navigation
+commands and column-hiding rules behave consistently across them. The
+five are complementary rather than alternatives: <code>sample.db</code>
+is the gentle introduction; <code>northwind.db</code> is the relational
+textbook example; <code>chinook.db</code> is the deeper-hierarchy stress
+test; <code>collection.db</code> and <code>cellar.db</code> are starting
+points for hobbyist users who want to track their own real-world
+things.</p>
+<h3 id="updated-timestamp-triggers">Updated-timestamp triggers</h3>
+<p>Each bundled database carries one SQLite trigger per table (named
+<code>dbduo_&lt;table&gt;_updated</code>) that maintains the
+<code>updated</code> column automatically. The trigger fires
+<code>AFTER UPDATE</code> and bumps
+<code>updated = current_timestamp</code> only when one of the
+substantive columns actually changed in value. The <code>marked</code>,
+<code>added</code>, <code>updated</code>, <code>look</code>, and
+<code>unq</code> columns are deliberately excluded from the substantive
+set, so toggling the <code>marked</code> flag (Control+M / Control+U, or
+any of the range-mark commands) does NOT bump the timestamp —
+<code>marked</code> is a UI flag, not a content edit, and bumping the
+timestamp on every Mark Record would scramble “sort by recently edited”
+for users who use marking as a working-set tool.</p>
+<p>The check uses <code>OLD.col IS NOT NEW.col</code> for each
+substantive column, joined by <code>OR</code>, so the trigger correctly
+skips both the “ADO only writes one column” case (Mark Record updates
+only <code>marked</code>) and the “Edit Record writes every column with
+values unchanged” case (the F2 dialog hands every field back even if
+untouched). NULLs are handled correctly because <code>IS NOT</code> is
+null-safe in SQLite, unlike the regular <code>&lt;&gt;</code>
+operator.</p>
+<p>For users creating their own tables, the same trigger pattern is
+recommended:</p>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TRIGGER</span> dbduo_<span class="op">&lt;</span><span class="kw">table</span><span class="op">&gt;</span>_updated</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">AFTER</span> <span class="kw">UPDATE</span> <span class="kw">ON</span> <span class="op">&lt;</span><span class="kw">table</span><span class="op">&gt;</span></span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="cf">FOR</span> <span class="kw">EACH</span> <span class="kw">ROW</span></span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="kw">OLD</span>.<span class="ot">&quot;col1&quot;</span> <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NEW</span>.<span class="ot">&quot;col1&quot;</span></span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>  <span class="kw">OR</span> <span class="kw">OLD</span>.<span class="ot">&quot;col2&quot;</span> <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NEW</span>.<span class="ot">&quot;col2&quot;</span></span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="co">-- one OLD/NEW comparison per substantive column;</span></span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">-- omit marked, added, updated, look, unq</span></span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a><span class="cf">BEGIN</span></span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    <span class="kw">UPDATE</span> <span class="op">&lt;</span><span class="kw">table</span><span class="op">&gt;</span> <span class="kw">SET</span> updated <span class="op">=</span> <span class="fu">current_timestamp</span> <span class="kw">WHERE</span> <span class="dt">rowid</span> <span class="op">=</span> <span class="kw">NEW</span>.<span class="dt">rowid</span>;</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span>;</span></code></pre></div>
+<p>DbDuo itself does not write to <code>updated</code>; the timestamp
+behavior comes entirely from these triggers. The same pattern works on
+Access (using <code>ON UPDATE</code> data macros) but DbDuo does not
+ship Access samples, so the trigger SQL above is SQLite-specific.</p>
 <h2 id="persistence">Persistence</h2>
 <p>Between sessions, DbDuo remembers the last opened database and table
 (relaunch goes straight there), the last folder used for each kind of
 file dialog (open/save/import/export remembered separately), per-table
-sort/filter/position/Select-Column lists within a session (the
-<code>TableSettings</code> cache), and one named bookmark per session.
-Settings live in <code>%LOCALAPPDATA%\DbDuo\DbDuo.ini</code>. Successful
-and failed writes are logged.</p>
+sort/filter/position/Select-Column lists within a session, and one named
+bookmark per session. Settings live in
+<code>%LOCALAPPDATA%\DbDuo\DbDuo.ini</code>.</p>
 <p>The shipped <code>DbDuo.ini</code> next to the executable holds
 configuration that ships with the install: <code>[General]</code> for
 <code>uiMode</code>, <code>[Keys]</code> for hotkey overrides. The
@@ -1578,19 +1870,22 @@ precedence.</p>
 <p>DbDuo writes a per-session log to
 <code>%LOCALAPPDATA%\DbDuo\DbDuo.log</code> (truncated at every program
 start). The log records database opens, table switches, errors, and the
-result of Alt+GraveAccent and Alt+Control+GraveAccent hotkey
-registration. Use the Show-Log command (no hotkey) to print the exact
-path.</p>
+result of hotkey registration. Use the Show-Log command (no hotkey) to
+print the exact path.</p>
 <h2 id="bundled-documentation">Bundled documentation</h2>
 <ul>
 <li><code>README.md</code> and <code>README.htm</code> — summary and
 quick start with a guided tour of <code>sample.db</code>.</li>
+<li><code>Announce.md</code> and <code>Announce.htm</code> — release
+announcement.</li>
 <li><code>DbDuo.md</code> and <code>DbDuo.htm</code> — this
 reference.</li>
+<li><code>History.md</code> and <code>History.htm</code> — chronological
+release notes.</li>
 <li><code>License.md</code> and <code>License.htm</code> — MIT License
 text.</li>
-<li><code>sample.db</code> — the bundled SQLite sample database
-(teachers, classes, students, enrollments).</li>
+<li><code>CamelType_CSharp.md</code> — coding conventions used inside
+<code>DbDuo.cs</code>, for developers.</li>
 </ul>
 <h1 id="development">Development</h1>
 <p>This section is for anyone building DbDuo from source or extending
@@ -1601,44 +1896,27 @@ Windows x64. Compilation needs <code>csc.exe</code> from the .NET
 Framework 4.8 developer pack (Microsoft ships this in standalone form
 for free) — no Visual Studio required. Inno Setup 6 is used to build the
 installer. Pandoc is used to render the Markdown docs to HTML at release
-time. None of these tools needs to be on the user’s machine; they live
-in the build environment only.</p>
+time.</p>
 <h2 id="build-steps">Build steps</h2>
 <pre><code>buildDbDuo.cmd</code></pre>
 <p>This single batch file compiles <code>DbDuo.cs</code> to
-<code>DbDuo.exe</code> with the right <code>csc.exe</code> flags:
-<code>/target:winexe</code>, <code>/platform:x64</code>,
+<code>DbDuo.exe</code> with the right <code>csc.exe</code> flags
+(<code>/target:winexe</code>, <code>/platform:x64</code>,
 <code>/optimize+</code>, references to
 <code>System.Windows.Forms.dll</code>, <code>System.Drawing.dll</code>,
-and the Microsoft accessibility assembly. The build script auto-locates
+and the Microsoft accessibility assembly), plus <code>jsc.exe</code> for
+the tiny <code>DbDuo.dll</code> support assembly (compiled from
+<code>DbDuo.js</code>). The build script auto-locates
 <code>csc.exe</code> by walking the .NET Framework install path; if your
 developer pack is in a non-standard location, edit the
 <code>set csc_path=</code> line at the top.</p>
 <pre><code>&quot;%ProgramFiles(x86)%\Inno Setup 6\ISCC.exe&quot; DbDuo_setup.iss</code></pre>
 <p>This compiles the installer. <code>DbDuo_setup.iss</code> is a
-vanilla Inno Setup script with a five-page wizard (Welcome → SelectDir →
-Ready → Installing → Finish), a <code>CurStepChanged</code> hook that
+standard Inno Setup script with a Welcome → SelectDir → Ready →
+Installing → Finish wizard, a <code>CurStepChanged</code> hook that
 fetches the SQLite ODBC and ACE drivers on the Installing step, and
-<code>[Files]</code> entries for the eight bundled artifacts. The output
-is <code>DbDuo_setup.exe</code> in the project root.</p>
-<h2 id="release-process">Release process</h2>
-<pre><code>tagRelease.cmd</code></pre>
-<p>Runs the bundled <code>tagRelease.ps1</code>, which: checks for
-<code>git</code> and <code>gh</code> on PATH; verifies
-<code>gh auth status</code>; reads the version from
-<code>DbDuo_setup.iss</code>; checks for uncommitted changes (ignoring
-its own log file); creates the <code>v&lt;version&gt;</code> git tag and
-pushes it; calls
-<code>gh release create v&lt;version&gt; DbDuo_setup.exe --generate-notes --latest</code>;
-and HEAD-checks
-<code>https://github.com/JamalMazrui/DbDuo/releases/latest/download/DbDuo_setup.exe</code>
-to confirm the asset is downloadable. The log goes to
-<code>tagRelease-&lt;timestamp&gt;.log</code> in the current
-directory.</p>
-<p>The release URL <code>releases/latest/download/DbDuo_setup.exe</code>
-is stable: every new release with that asset inherits the URL
-automatically, so the documentation never has to be updated for a
-version bump.</p>
+<code>[Files]</code> entries for the bundled artifacts. The output is
+<code>DbDuo_setup.exe</code> in the project root.</p>
 <h2 id="architecture-one-connection-two-interfaces">Architecture: one
 connection, two interfaces</h2>
 <p>The GUI form (<code>DbDuoForm</code>) and the dot-prompt CLI
@@ -1652,102 +1930,600 @@ objects. When an edit is committed in either interface, the manager’s
 notification path tells the form to refresh its list view; the next
 dot-prompt command sees the new state automatically because it queries
 the same connection.</p>
-<p><code>CursorLocation = adUseClient</code> (3) is set on every
+<p><code>CursorLocation = adUseClient</code> is set on every
 Connection.Open. This means filter, sort, and bookmark operations happen
 client-side after the recordset is fetched. The benefit is that the same
 code path works against SQLite, Access, Excel, and dBASE without
 per-provider quirks. The cost is that <code>.Filter</code> does not push
-down to the database engine — see the SQLite indexing discussion
-below.</p>
-<h2 id="ado-client-cursor-and-sqlite-indexing">ADO client cursor and
-SQLite indexing</h2>
-<p>A natural question is whether adding indexes to foreign-key columns
-in a SQLite database would speed up Enter-Child’s drill-down. The answer
-is no, given DbDuo’s current implementation.</p>
-<p>Enter-Child works by opening a fresh recordset on the child table
-with bare <code>SELECT * FROM &lt;child&gt;</code>, then calling
-<code>.Filter = "&lt;fk&gt; = &lt;value&gt;"</code> on the resulting
-client-cursor recordset. Microsoft’s ADO documentation states that the
-Filter property on a client-side cursor “operates entirely in client
-memory” — the full result set is already in the recordset’s in-memory
-copy when the SELECT returns, and Filter just hides non-matching rows
-from view. SQLite’s query planner never sees the FK predicate, so any
-index on the FK column is unused.</p>
-<p>For Show-Object’s Related Records section, by contrast, DbDuo uses
-<code>DbDuoManager.queryColumnValues</code> which builds a real
-<code>SELECT look FROM &lt;child&gt; WHERE &lt;fk&gt; = &lt;value&gt;</code>
-SQL statement and executes it server-side. This path does benefit from
-FK indexes if they exist in the schema. The difference matters: at one
-row per Show-Object invocation, the WHERE-clause path is essentially
-free regardless of child-table size; the client-cursor path is O(total
-rows in child table) every time.</p>
-<p>A future optimization would be to convert Enter-Child to the
-WHERE-clause approach as well — open the child recordset with
-<code>WHERE &lt;fk&gt; = &lt;value&gt;</code> instead of bare SELECT.
-This would make Enter-Child fast on large child tables, but would
-require careful handling of how subsequent Set-Record edits and
-Update-View round-trip through the bounded recordset.</p>
+down to the database engine.</p>
+<h2 id="coding-style">Coding style</h2>
+<p>DbDuo.cs follows the <strong>Camel Type</strong> coding conventions
+documented in <code>CamelType_CSharp.md</code>. Key points:</p>
+<ul>
+<li>Hungarian-prefixed lower camel case variable names:
+<code>sName</code>, <code>iCount</code>, <code>bFound</code>,
+<code>aRows</code>, etc.</li>
+<li>The prefix <code>o</code> is reserved for COM objects only;
+managed-type instances use a class-name prefix instead.</li>
+<li>Constants follow the same naming pattern as variables (no
+<code>c_</code> prefix), but are declared with <code>const</code> or
+<code>static readonly</code> on lines separate from the variables.</li>
+<li>Methods rather than subprocedures; methods that return values where
+practical.</li>
+<li><code>using</code> directives at the top of the file, alphabetized
+within their group.</li>
+<li><code>foreach</code> over <code>for</code> when iterating a
+collection.</li>
+</ul>
+<p>Read <code>CamelType_CSharp.md</code> for the full set of rules.</p>
+<h2 id="layout-by-code">Layout by Code</h2>
+<p>DbDuo uses an approach called Layout by Code (LbC) for every dialog
+it creates. The idea is that a programmer composes a dialog by writing a
+sequence of “add this control” calls in code, in the order the user will
+encounter them — rather than dragging boxes around in a visual designer
+or hand-writing pixel coordinates. The result is dialogs that are
+screen-reader-friendly by construction: tab order matches reading order,
+every input control has a label that the reader announces, and the
+layout flows from top to bottom in one pass.</p>
+<p>The concept was developed by Jamal Mazrui (the original author of
+DbDuo) starting in 2006, with an AutoIt implementation that established
+the vocabulary still in use today. Layout by Code has since been ported
+to several languages — wxPython, JScript .NET (the Homer Application
+Framework), and now C# in DbDuo. Each port keeps the same intuition: a
+dialog is a vertical stack of labeled controls, the programmer writes
+them out one at a time, and the framework handles the spacing, the
+focus-tip plumbing, the tab indices, and the accept/cancel wiring. What
+is notable about DbDuo’s port is that it preserves the
+<strong>vocabulary</strong> of the earlier ports — methods like
+<code>addInputBox</code>, <code>addMemoBox</code>,
+<code>addPickBox</code>, <code>addComboPickBox</code> — so a programmer
+who learned LbC in AutoIt or wxPython can pick up the C# version without
+retraining.</p>
+<h3
+id="the-conceptual-model-bands-the-layout-cursor-and-dialog-units">The
+conceptual model: bands, the layout cursor, and dialog units</h3>
+<p>The earlier LbC implementations talk in terms of three concepts that
+are worth introducing because they underpin the API even where the C#
+port hides them behind a simpler stack.</p>
+<p>A <strong>band</strong> is a horizontal row of related controls — for
+example, a Label plus an associated TextBox, or a Label plus an
+associated ComboBox. The Microsoft Official Guidelines for User
+Interface Design, published in the late 1990s and based on years of
+usability research, specify how much horizontal and vertical space
+should separate the controls within a band, between consecutive bands,
+and around the dialog’s edges. The original AutoIt LbC implementation
+exposed bands and groups as first-class objects with their own ID
+numbers, addressable via functions like <code>_lbcStartBand</code> and
+<code>_lbcStartHGroup</code>. The Python version simplified this: each
+call to an <code>Add*</code> method starts a new band; adding a
+separator advances to the next group. DbDuo’s C# port simplifies further
+still: every control added with one of the <code>addX</code> methods is
+its own band, stacked vertically. The horizontal-band model is still
+available — <code>addInlineInputBox</code> puts a label and a textbox on
+a single row — but the default is one control per row, top to
+bottom.</p>
+<p>A <strong>layout cursor</strong> is the invisible point on the dialog
+where the next control will be placed. In the original AutoIt port the
+cursor was an addressable global state — <code>$nLbcCol</code> and
+<code>$nLbcRow</code> for column and row — and one could move it
+manually with <code>_lbcCtrlSetLeft</code> or
+<code>_lbcCtrlSetTop</code>. In the C# port the cursor is an
+implementation detail managed by a <code>FlowLayoutPanel</code> plus a
+vertical-stack <code>Panel</code>; the programmer never sees it. What
+survived from the older implementations is the <em>concept</em> that
+controls are added sequentially and spacing is automatic.</p>
+<p>A <strong>dialog unit</strong> is the Microsoft-defined measurement
+that LbC uses internally for spacing decisions. A horizontal dialog unit
+is a quarter of the average character width of the system font; a
+vertical dialog unit is an eighth of the average character height. The
+guidelines specify three dialog units between a label and its associated
+control, four between related controls in the same group, and seven
+between unrelated controls in consecutive groups. DbDuo’s C# port
+encodes these in named constants — <code>DefaultButtonHeight</code>,
+<code>DefaultLineHeight</code>, <code>DefaultPadding</code>,
+<code>DefaultRowGap</code>, <code>DefaultListHeight</code>,
+<code>DefaultMemoHeight</code>, and so on — rather than recomputing from
+font metrics, because modern Windows dialogs are dpi-aware and the
+WinForms framework’s own font scaling handles the dialog-unit-to-pixel
+translation for us.</p>
+<h3 id="why-lbc-matters-for-a-screen-reader-audience">Why LbC matters
+for a screen-reader audience</h3>
+<p>Visual dialog editors — the kind that ships with Visual Studio for
+WinForms, or with Glade for Gtk — produce dialogs whose controls are
+positioned by pixel coordinates the programmer specified by dragging
+boxes around. The pixel coordinates fix the visual layout but say
+nothing about reading order; in WinForms, reading order is governed by
+<code>TabIndex</code>, which a sighted programmer might forget to set,
+or set inconsistently with the visual layout. A screen-reader user
+navigating that dialog with Tab will visit controls in
+<code>TabIndex</code> order, not visual order, and the mismatch is one
+of the most common accessibility bugs in commercial software.</p>
+<p>LbC eliminates the problem by construction: there is no separate
+<code>TabIndex</code> to forget. Each <code>add*</code> call increments
+an internal <code>iTabIndex</code> and assigns it to the new control.
+Reading order is the order of <code>add*</code> calls, which is also the
+order in which the programmer is thinking about the form. The visual
+layout is a deterministic function of the same sequence. The two cannot
+drift apart.</p>
+<p>A second screen-reader benefit is the <strong>focus-tip
+plumbing</strong>. Each <code>add*</code> method takes an optional
+<code>sTip</code> parameter that is wired to a status bar at the bottom
+of the dialog. When the user tabs into the control, the tip text is
+written to the status bar; screen readers announce status-bar changes
+through their live-region facility, so the tip is read aloud
+automatically without forcing a popup dialog. This pattern is borrowed
+directly from Homer LbC (the JScript .NET port) which introduced it
+specifically because JAWS suppresses ordinary WinForms tooltips on tab
+navigation; status-bar messages, by contrast, are reliably
+announced.</p>
+<p>A third benefit is the <strong>memo/AcceptButton
+coordination</strong>. When the user is typing into a multi-line TextBox
+(one created via <code>addMemoBox</code> or <code>addTextMemo</code>),
+pressing Enter should insert a newline rather than submit the dialog.
+The framework arranges this transparently: while focus is on a memo
+control, the form’s <code>AcceptButton</code> is temporarily cleared, so
+Enter is delivered to the textbox as a newline insertion; on
+<code>LostFocus</code> the <code>AcceptButton</code> is restored, so
+Enter from single-line fields still submits. The Homer LbC convention is
+preserved in the C# port verbatim — programmers don’t have to think
+about it.</p>
+<h3 id="anatomy-of-an-lbc-dialog">Anatomy of an LbC dialog</h3>
+<p>The typical usage pattern in DbDuo is one <code>using</code> block
+per dialog:</p>
+<div class="sourceCode" id="cb16"><pre
+class="sourceCode csharp"><code class="sourceCode cs"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> <span class="op">(</span>LbcDialog dlg <span class="op">=</span> <span class="kw">new</span> <span class="fu">LbcDialog</span><span class="op">(</span><span class="st">&quot;Configuration&quot;</span><span class="op">,</span> <span class="kw">this</span><span class="op">))</span></span>
+<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    TextBox  tbMode  <span class="op">=</span> dlg<span class="op">.</span><span class="fu">addInputBox</span><span class="op">(</span><span class="st">&quot;UI mode:&quot;</span><span class="op">,</span>       <span class="st">&quot;both&quot;</span><span class="op">,</span> <span class="st">&quot;How DbDuo launches&quot;</span><span class="op">);</span></span>
+<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    CheckBox cbBeep  <span class="op">=</span> dlg<span class="op">.</span><span class="fu">addCheckBox</span><span class="op">(</span><span class="st">&quot;&amp;Beep on errors&quot;</span><span class="op">,</span> <span class="kw">true</span><span class="op">,</span>  <span class="st">&quot;Audible cue on failure&quot;</span><span class="op">);</span></span>
+<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    TextBox  tbNote  <span class="op">=</span> dlg<span class="op">.</span><span class="fu">addMemoBox</span><span class="op">(</span><span class="st">&quot;Startup note:&quot;</span><span class="op">,</span>   <span class="st">&quot;&quot;</span><span class="op">,</span>     <span class="st">&quot;Free-form text shown at launch&quot;</span><span class="op">);</span></span>
+<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="op">(</span>dlg<span class="op">.</span><span class="fu">runOkCancel</span><span class="op">())</span></span>
+<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">string</span> sMode <span class="op">=</span> tbMode<span class="op">.</span><span class="fu">Text</span><span class="op">;</span></span>
+<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">bool</span>   bBeep <span class="op">=</span> cbBeep<span class="op">.</span><span class="fu">Checked</span><span class="op">;</span></span>
+<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>        <span class="dt">string</span> sNote <span class="op">=</span> tbNote<span class="op">.</span><span class="fu">Text</span><span class="op">;</span></span>
+<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">// ... persist or apply</span></span>
+<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<p>Each line maps to one decision: what kind of control, what its label
+says, what the initial value is, what tip to surface when the user tabs
+into it. The framework handles everything else — label placement,
+accessible-name wiring, tab order, button-band insertion, modal
+presentation, and disposal. The <code>using</code> block ensures the
+underlying WinForms <code>Form</code> is disposed when control leaves
+the block.</p>
+<p>The <code>runOkCancel()</code> call is the natural close. It appends
+an OK button and a Cancel button at the bottom, runs the dialog modally,
+and returns <code>true</code> when the user pressed OK (or Enter from
+any single-line field) or <code>false</code> for Cancel, Escape, or
+close. For dialogs with more buttons or different labels,
+<code>runWithButtons(new string[] { "Apply", "Apply All", "Cancel" })</code>
+is the more general form; it returns the label of the button the user
+pressed, or <code>""</code> if the user closed via the system menu. Per
+a convention added in v1.0.61, when only ONE button label is given
+(typically <code>"OK"</code> for a read-only memo dialog), that one
+button is wired as both the <code>AcceptButton</code> and the
+<code>CancelButton</code>, so Escape closes the dialog the same way
+pressing OK does.</p>
+<h3 id="the-add-control-vocabulary">The add-control vocabulary</h3>
+<p>DbDuo’s LbcDialog exposes the following methods for assembling a
+dialog. Two naming patterns coexist: the <strong>bare-control
+adders</strong> (<code>addLabel</code>, <code>addTextBox</code>,
+<code>addCheckBox</code>) and the <strong>labeled-control
+adders</strong> that mirror the Homer LbC naming
+(<code>addInputBox</code>, <code>addMemoBox</code>,
+<code>addPickBox</code>, <code>addComboPickBox</code>). The labeled
+adders emit a <code>Label</code> first and then call the bare adder;
+both flavors are kept because some sites favor the explicit two-call
+form, others favor the compact one-call form.</p>
+<p><code>addLabel(string sText)</code> adds a static text label as its
+own row. Useful for paragraphs of instruction at the top of a dialog or
+above a group of fields. Returns the <code>Label</code>.</p>
+<p><code>addInputBox(string sLabel, string sValue, string sTip)</code>
+adds a label, a single-line <code>TextBox</code> below it, and registers
+the tip with the status bar. Returns the <code>TextBox</code>. The
+textbox’s <code>AccessibleName</code> is set from the label so screen
+readers announce the field correctly on tab-in. This is the workhorse
+method for editing scalar values: names, paths, single integers, simple
+regex patterns.</p>
+<p><code>addInlineInputBox(string sLabel, string sValue, string sTip)</code>
+is the horizontal variant: label and textbox on a single row, sharing
+the same band. Used in the Edit Record dialog where vertical density
+matters and there are many short fields.</p>
+<p><code>addMemoBox(string sLabel, string sValue, string sTip)</code>
+adds a label and a multi-line <code>TextBox</code> (96 pixels tall by
+default) suitable for longer text — notes, tags, descriptions. While
+focus is inside the memo, the dialog’s <code>AcceptButton</code> is
+temporarily cleared so Enter inserts a newline rather than submitting;
+<code>LostFocus</code> restores it. Returns the
+<code>TextBox</code>.</p>
+<p><code>addCheckBox(string sLabel, bool bValue, string sTip)</code>
+adds a labeled checkbox. The label is part of the checkbox itself
+(WinForms checkboxes have an integral label), so there is no separate
+Label row. Tab moves into the checkbox, Spacebar toggles it. Returns the
+<code>CheckBox</code>.</p>
+<p><code>addListBox(IList&lt;string&gt; lNames, string sSelected, string sTip)</code>
+and the labeled variant
+<code>addPickBox(string sLabel, IList&lt;string&gt; lNames, string sSelected, string sTip)</code>
+add a single-selection list box (100 pixels tall by default). Arrow keys
+navigate; Enter from inside the list activates the AcceptButton. Returns
+the <code>ListBox</code>. The <code>sSelected</code> parameter
+pre-selects an item by its display string.</p>
+<p><code>addComboBox(IList&lt;string&gt; lNames, string sSelected, string sTip)</code>
+and the labeled variant <code>addComboPickBox(string sLabel, ...)</code>
+add a drop-down list with no free-text entry
+(<code>ComboBoxStyle.DropDownList</code>). Returns the
+<code>ComboBox</code>. Used for closed sets of choices: file extensions,
+encodings, sort orders.</p>
+<p><code>addRadioButton(string sLabel, bool bChecked, string sTip)</code>
+adds a single radio button. Multiple radio buttons added consecutively
+automatically form a group (WinForms scopes radio-button
+mutual-exclusion by container parent, and the LbC stack-panel is one
+container). The first-added or any with <code>bChecked=true</code> is
+initially selected.</p>
+<p><code>addNumericUpDown(string sLabel, int iValue, int iMin, int iMax, string sTip)</code>
+adds a spin control for bounded integer input. Useful for counts and
+limits.</p>
+<p><code>addSeparator()</code> inserts a thin horizontal line between
+rows. Acts as a visual group divider; corresponds to the Microsoft
+seven-dialog-unit spacing between unrelated controls.</p>
+<h3 id="run-methods">Run methods</h3>
+<p>After all controls are added, the caller invokes one of two run
+methods to make the dialog visible and modal.</p>
+<p><code>runOkCancel()</code> appends OK and Cancel buttons in a
+right-justified band at the bottom of the dialog, sets OK as the
+<code>AcceptButton</code> and Cancel as the <code>CancelButton</code>,
+shows the dialog, and returns <code>true</code> if the user dismissed it
+with OK or <code>false</code> for any other reason (Cancel, Escape,
+Alt+F4, system menu close).</p>
+<p><code>runWithButtons(string[] aButtonLabels)</code> is the general
+form. It appends every label in the array as a button (right-justified,
+first-listed on the left), sets the first one as the
+<code>AcceptButton</code>, and sets any button whose label is
+<code>Cancel</code> or <code>Close</code> as the
+<code>CancelButton</code>. It returns the label of the button the user
+pressed. When only one button label is provided, that one button is
+wired as both Accept and Cancel so Escape closes the dialog like
+clicking OK would.</p>
+<p>The same returned form is also available after the run via the
+<code>form</code> property, in case the caller needs to inspect or tweak
+something the high-level API doesn’t expose (such as adding an
+Icon).</p>
+<h3 id="looking-up-controls-by-name">Looking up controls by name</h3>
+<p>Every control added to an LbC dialog is registered in a
+<code>widgets</code> dictionary keyed by an auto-generated name of the
+form <code>&lt;Kind&gt;_&lt;CleanedLabel&gt;</code> — for example,
+<code>TextBox_UI_mode</code>, <code>CheckBox_Beep_on_errors</code>. Two
+convenience access patterns are supported:</p>
+<ul>
+<li><strong>By reference:</strong> the <code>addX</code> methods return
+the inner control; the caller can keep a local variable and read its
+properties after <code>runOkCancel</code>. This is the common
+pattern.</li>
+<li><strong>By name:</strong> the <code>findControl(string)</code>
+method, plus typed accessors <code>getTextBox(string)</code>,
+<code>getCheckBox(string)</code>, <code>getComboBox(string)</code>,
+<code>getListBox(string)</code>, <code>getRadioButton(string)</code>,
+<code>getNumericUpDown(string)</code>, and
+<code>getLabel(string)</code>. These return the registered control or
+<code>null</code> if no widget by that name was added. Useful in generic
+event handlers that receive only the sender, or in walker code
+(validation, import/export) that iterates over the dialog’s controls
+without keeping references.</li>
+</ul>
+<h3 id="focus-tips-and-the-status-bar">Focus tips and the status
+bar</h3>
+<p>Each <code>addX</code> method accepts an optional <code>sTip</code>
+string. When the user tabs into the control, the tip is written to the
+dialog’s bottom status bar (<code>lblStatusBar</code>), where screen
+readers announce it as a live-region update. The mechanism is a
+<code>GotFocus</code> handler attached during <code>addX</code>;
+<code>LostFocus</code> clears the bar. The pattern lets the programmer
+add inline help without the user having to read a separate “?” button —
+the help comes to the user when they need it, in the same line of speech
+that the reader uses for the focus event.</p>
+<p>The tip text is also assigned as the control’s
+<code>ToolTipText</code> so mouse users hovering on the field see the
+same text as a tooltip popup. JAWS frequently suppresses tooltip popups
+during keyboard navigation, which is why the status bar is the primary
+delivery channel.</p>
+<h3 id="comparison-with-the-original-lbc-implementations">Comparison
+with the original LbC implementations</h3>
+<p>The DbDuo C# port intentionally simplifies what the original AutoIt
+LbC offered. The AutoIt version exposed bands and groups as first-class
+objects with manipulation functions (<code>_lbcStartBand</code>,
+<code>_lbcBandHCenter</code>, <code>_lbcBandEvenSpace</code>,
+<code>_lbcWinRespace</code>, and dozens more), allowed precise
+pixel-level positioning of controls after the fact, and let the
+programmer change widths or heights with reference-band alignment. The
+DbDuo port omits these because:</p>
+<ul>
+<li>WinForms anchors and Dock properties make most band-respacing
+unnecessary — the form resizes the right way automatically.</li>
+<li>Most DbDuo dialogs are small (under ten controls), so the gymnastics
+of fine alignment is not needed.</li>
+<li>A simpler API is easier to teach to contributors who haven’t seen
+the AutoIt original.</li>
+</ul>
+<p>What is preserved across all four LbC ports — AutoIt, wxPython,
+JScript .NET (Homer), and C# (DbDuo) — is the <strong>practice</strong>
+of writing dialogs as a sequence of <code>addX</code> calls in reading
+order, with labels above or beside each control, tips wired to a status
+bar, tab order = call order, and submit/cancel wiring handled by the
+framework. A programmer fluent in one port can read code in any of the
+others and find the same shape.</p>
+<p>Convenience-dialog wrappers like the Python port’s
+<code>DialogShow</code>, <code>DialogConfirm</code>,
+<code>DialogInput</code>, <code>DialogPick</code>,
+<code>DialogMultiInput</code>, and <code>DialogBrowseForFolder</code>
+are not provided as named methods in the C# port — DbDuo’s call sites
+typically need only <code>runOkCancel</code> plus one or two add calls,
+so the wrappers would only save a few characters. The patterns are
+documented here in case a contributor wants to add them.</p>
+<h3 id="open-ended-extension">Open-ended extension</h3>
+<p>LbcDialog is a public class (in <code>DbDuo.cs</code>, line 5668
+onward). It is reusable outside the DbDuo command set — a script invoked
+via <code>Invoke-Script</code> could in principle construct its own
+LbcDialog through the C# COM bridge, though no bundled script currently
+does so. If you write a new GUI command for DbDuo and need a custom
+dialog, use LbcDialog. Do not hand-roll a Form with manual TabIndex
+assignment; the screen-reader-friendliness will degrade.</p>
+<h3 id="edsharp-style-text-edit-hotkeys">EdSharp-style text-edit
+hotkeys</h3>
+<p>Inside every LbcDialog, single-line text inputs (added via
+<code>addInputBox</code>, <code>addInlineInputBox</code>,
+<code>addTextLine</code>) and multi-line memos (added via
+<code>addMemoBox</code>, <code>addMemo</code>, <code>addTextMemo</code>)
+recognize a set of EdSharp-style hotkeys in addition to the standard
+Windows text-editing chords. The added chords are non-conflicting — they
+only act when the corresponding standard chord would have done nothing,
+or they bind to chords (F8, Ctrl+F8, Ctrl+D) that have no standard
+meaning in a TextBox.</p>
+<p>The pattern is adapted verbatim from Jamal Mazrui’s HomerLbc
+framework (<code>HomerLbc_40.js</code> lines 995–1162), which itself
+derives from EdSharp’s text-editor conventions. The shared idea: when a
+screen-reader user navigates by character or word, the absence of a
+visible cursor and the difficulty of selecting precise ranges makes the
+standard Windows clipboard hotkeys awkward; line-oriented and “mark
+start / mark end” workflows fit screen-reader navigation better.</p>
+<p>The hotkey set is uniform across all text-edit contexts in LbcDialog.
+The following table lists the chord, what it does when text is selected,
+and what it does when no text is selected (the asymmetry preserves
+backward compatibility with the standard Copy / Cut behavior).</p>
+<table>
+<colgroup>
+<col style="width: 12%" />
+<col style="width: 30%" />
+<col style="width: 56%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Chord</th>
+<th>With selection</th>
+<th>Without selection</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Ctrl+C</td>
+<td>Copy selection (standard)</td>
+<td>Copy the current line</td>
+</tr>
+<tr class="even">
+<td>Alt+C</td>
+<td>Append selection to clipboard</td>
+<td>Append the current line to clipboard</td>
+</tr>
+<tr class="odd">
+<td>Ctrl+X</td>
+<td>Cut selection (standard)</td>
+<td>Cut the current line; speak the next line</td>
+</tr>
+<tr class="even">
+<td>Alt+X</td>
+<td>Cut and append</td>
+<td>Cut current line and append to clipboard</td>
+</tr>
+<tr class="odd">
+<td>F8</td>
+<td>(same)</td>
+<td>Mark start of selection at the caret</td>
+</tr>
+<tr class="even">
+<td>Shift+F8</td>
+<td>(same)</td>
+<td>Complete selection from saved start to caret</td>
+</tr>
+<tr class="odd">
+<td>Ctrl+F8</td>
+<td>Copy ALL text in the field to the clipboard</td>
+<td></td>
+</tr>
+<tr class="even">
+<td>Alt+F8</td>
+<td>Speak ALL text in the field via the live region</td>
+<td></td>
+</tr>
+<tr class="odd">
+<td>Ctrl+D</td>
+<td>Delete the current line; speak the next line as feedback</td>
+<td></td>
+</tr>
+</tbody>
+</table>
+<p>Notes on the workflow:</p>
+<ul>
+<li>“Append to clipboard” (Alt+C, Alt+X) is the hotkey that EdSharp and
+Homer made famous: you copy or cut a line, navigate elsewhere, and copy
+or cut another line, and the clipboard accumulates them all in order,
+each on its own line. Useful when collecting several pieces of text from
+across a memo into a single destination.</li>
+<li>The F8 / Shift+F8 mark-start / mark-end pair is the
+screen-reader-friendly alternative to “Shift+arrow keys to extend a
+selection.” Mark the start with F8, navigate freely (the selection is
+not yet drawn), then press Shift+F8 at the end point and the framework
+selects the entire range at once. JAWS, NVDA, and Narrator announce both
+the start character (at F8 time) and the final length (at Shift+F8
+time).</li>
+<li>Ctrl+F8 / Alt+F8 “all text” operations are the natural complement to
+the line operations: Ctrl+C copies a line, Ctrl+F8 copies everything;
+Alt+C reads (well, appends) a line, Alt+F8 reads everything aloud.</li>
+<li>Ctrl+D deletes the current line without putting anything on the
+clipboard — useful for cleanup work where the deleted line is not worth
+keeping. The next line is read aloud so the user knows where the caret
+ended up.</li>
+</ul>
+<p><strong>Master enable flag:</strong> the entire set is controlled by
+<code>[Lbc] extraKeys</code> in <code>DbDuo.ini</code>. Default is
+<code>Y</code> (on). Set to <code>N</code> to disable the EdSharp
+hotkeys entirely and let standard Windows text-edit behavior pass
+through unchanged. The setting is read once on first use and cached for
+the session.</p>
+<p><strong>Status bar feedback:</strong> every hotkey updates the
+dialog’s status bar with a short label (<code>Copy Line</code>,
+<code>Append to Clipboard</code>, <code>Cut Line</code>,
+<code>Start Selection</code>, <code>Complete Selection</code>,
+<code>Copy All</code>, <code>Read All</code>, <code>Delete Line</code>).
+The live region echoes the action via a brief utterance (typically the
+operation name plus the affected text or character count) so the screen
+reader confirms each action without the user having to look at the
+status bar.</p>
+<h2 id="gui-versus-cli-response-patterns">GUI versus CLI response
+patterns</h2>
+<p>DbDuo operates in two modes: a Windows Forms GUI with a ListView
+grid, menus, and modal dialogs, and a dot prompt running in a console
+window. Most commands work in both modes, with the same canonical verb
+name and the same effect on the database. The user-visible response is
+different in each mode by design — the GUI uses focus changes,
+status-bar updates, dialogs, and the screen-reader live region; the CLI
+prints lines of text to stdout and reads input from stdin. The
+principle: <strong>same data effect, mode-appropriate
+confirmation</strong>.</p>
+<p>The remainder of this section walks through the command families and
+describes how each fits the GUI / CLI duality. Where a command does not
+reasonably apply in one mode, the table notes it explicitly.</p>
+<p><strong>Navigation commands</strong> (Step-Record family,
+Set-Position, Find, Jump-Record, Search-Next, Search-Previous,
+Step-InitialChange). GUI: move the listview row selection and the ADO
+cursor; the cell-changed handler speaks the new row via the live region.
+CLI: print the new row’s summary (column-equals-value pairs from the
+display fields) on stdout. The data-layer behavior is identical — same
+ADO MoveNext / MovePrevious / AbsolutePosition call — only the
+confirmation differs.</p>
+<p><strong>Display commands</strong> (Show-Object, Show-Table,
+Show-Schema, Show-Status, Show-Related, Show-Log, Show-History,
+Show-Readme). GUI: open a read-only LbcDialog with a multi-line TextBox
+containing the requested content; OK to dismiss; Control+C inside the
+TextBox copies. CLI: print the same content to stdout, one line per row,
+with field-name prefix where helpful. Some commands have a GUI-only
+LbcDialog form (Show-Object, Show-Related) and a CLI-equivalent
+multi-line text dump; some are inherently textual (Show-Schema,
+Show-Log) and use the same wording in both.</p>
+<p><strong>Speech-only commands</strong> (Say-Status, Say-Path,
+Say-Yield, Say-Tables, Say-Marked, Say-Updated, Say-Notes, Say-Tags,
+Say-Column, Say-Position, Say-SortFilter, Say-YieldMarked). GUI: push
+text through the LiveRegion (JAWS COM, NVDA controller DLL, or UIA
+live-region fallback) so the screen reader speaks it without moving
+focus. Double-press the same chord within two seconds: open a read-only
+multi-line LbcDialog with the same text, useful for review and Control+C
+copy. CLI: print the same text to stdout. The “double-press shows
+dialog” gesture has no CLI analog and is silently dropped — pressing the
+verb twice in a CLI session just prints the same lines twice, which is
+harmless.</p>
+<p><strong>Edit commands that mutate one row</strong> (New-Record,
+Set-Record, Set-Cell, Remove-Record, Copy-Record, Set-Mark, Clear-Mark,
+Save-Bookmark, Restore-Bookmark, Clear-Bookmark). GUI: open an LbcDialog
+with per-field TextBoxes (<code>RecordEditDialog</code> for full row,
+single TextBox for Set-Cell), validate, OK commits, Cancel discards. The
+dialog respects per-field regex patterns from
+<code>[Validation:&lt;table&gt;]</code>. CLI: take the
+column-equals-value pairs on the command line
+(<code>set-cell email = a@b.com</code>) or for full row editing print
+each editable field and prompt for a new value at the prompt; same
+validation. No-arg CLI invocations of New-Record fall back to prompting
+line by line; this works but is uncommon — the typical CLI editing path
+is Set-Cell or Set-Field with the value on the command line.</p>
+<p><strong>Edit commands that mutate many rows</strong> (Update-Field,
+Mark-Range, Unmark-Range, Step-InitialChange, Extract-Regex). GUI:
+prompt for any missing parameters in an LbcDialog (find/replace strings,
+column, regex), execute the batch, refresh the listview, speak a summary
+like “Marked 17 of 22 rows (rows 5 to 26).” CLI: take parameters on the
+command line, run the batch, print the same summary to stdout. The batch
+logic is identical — only the input-collection layer differs.</p>
+<p><strong>Table-level commands</strong> (Open-Database, Close-Database,
+Select-Table, Backup-Database, Save-DatabaseAs, Test-Database,
+Test-Driver, Get-Table, Sync-Session, Update-View). GUI: OpenFileDialog
+or LbcDialog for inputs; status-bar update on completion. CLI: take a
+path or table name on the command line; print a one-line confirmation on
+completion. Test-Database and Test-Driver are inherently textual reports
+(lists of integrity-check results or driver-presence checks); both modes
+show the same lines, the GUI in an LbcDialog and the CLI on stdout.</p>
+<p><strong>Filter and sort commands</strong> (Select-Record,
+Reset-Filter, Sort-Object, Reset-Sort, Select-Column). GUI: LbcDialog
+for criteria input, with helpful prompt labels. CLI: take the criteria
+string directly (<code>select-record where year &gt; 2020</code>). Both
+apply the same ADO Filter / Sort properties; the listview refreshes in
+GUI mode, the CLI prints the new row count.</p>
+<p><strong>File-export commands</strong> (Export-Data, Import-Data,
+New-Chart, New-Plot, Out-File). GUI: SaveFileDialog or LbcDialog for
+output path, then run the Office-COM or file-writing path; open the
+result in the default app on completion. CLI: take the output path on
+the command line, write the file, print the saved path on stdout.
+New-Plot is the meaningful asymmetry: charts inherently need a graphical
+viewer, so the CLI form prints the Describe-Column textual summary
+instead and tells the user to invoke the command from the GUI to see the
+chart. New-Chart works the same way.</p>
+<p><strong>Configuration and meta commands</strong> (Edit-Configuration,
+About-DbDuo, Get-Help, Get-Verb, Switch-KeyDescriber, Switch-Focus,
+Enter-Console, Exit-Application, Exit-Console, Exit-Child, Enter-Child,
+Elevate-Version). GUI: LbcDialog or message box. CLI: print the
+equivalent text to stdout, or in the case of Edit-Configuration, bounce
+to the GUI dialog if a form is available (Both mode) or print the .ini
+path for hand-editing in CLI-only mode. Switch-Focus is GUI-specific in
+effect (brings the form to the foreground) but is meaningful from CLI
+when both UIs are running.</p>
+<p><strong>Commands without a meaningful CLI form</strong>:
+Open-FileFolder (launches Windows Explorer — works from either mode, but
+the action is the same shell-execute), Switch-Focus (no-op in CLI-only
+mode; prints a notice), Enter-Console (a no-op when issued from the CLI;
+prints “already at the dot prompt”). The reverse — commands that exist
+GUI-only and have no CLI verb — is now a closed set: there are none.
+Every menu item in DbDuo has a canonical verb that the dot prompt
+accepts.</p>
+<p><strong>The general rule</strong>: every command’s data effect is
+mode-independent; every command’s confirmation layer is
+mode-appropriate; every CLI invocation accepts unique prefix matches
+against canonical verbs (so <code>first</code> resolves to
+<code>step-record-first</code> if no other canonical starts with
+<code>first</code>, <code>meas col</code> resolves to
+<code>measure-column</code>, and so on). Where a typed prefix is
+ambiguous, the CLI prints the candidate list so the user can
+disambiguate by typing more characters.</p>
 <h2
 id="office-automation-always-createobject-never-getactiveobject">Office
 automation: always CreateObject, never GetActiveObject</h2>
-<p>DbDuo never attaches to a running Word or Excel instance via
-<code>Marshal.GetActiveObject</code> or <code>GetObject</code>. Every
-Office-using export path (<code>exportSpreadsheet</code>,
-<code>exportWord</code>) calls <code>Activator.CreateInstance</code> to
-make a fresh hidden instance, drives it to produce the requested file,
-then calls <code>Quit()</code> and releases the COM object. The
-reasons:</p>
-<ul>
-<li>Attaching to a running instance would mutate settings the user has
-tuned for their session — <code>DisplayAlerts</code>,
-<code>AutomationSecurity</code>, <code>ScreenUpdating</code>.</li>
-<li>Driving a running instance through SaveAs and Quit risks side
-effects on documents the user has open in their editor.</li>
-<li>The behavior would be non-deterministic depending on whether Word or
-Excel happens to be running when DbDuo’s export runs.</li>
-</ul>
-<p>The cost is one Word.exe or Excel.exe process per export.
-Acceptable.</p>
-<h2 id="show-record-and-the-look-column">Show Record and the look
-column</h2>
-<p>The Show Record command’s Related Records section uses each child
-table’s <code>look</code> column to identify rows. (The canonical
-PowerShell-style command name is <code>Show-Object</code>, available at
-the dot prompt and as an alias inside DbDuo.) The <code>look</code>
-column is a SQLite stored-generated text column that concatenates a
-handful of substantive fields with ” | ” separators — for
-<code>sample.db</code>’s <code>teachers</code> table, it’s
-<code>name || ' | ' || department || ' | ' || office</code>, yielding
-strings like
-<code>Dr. Ada Lovelace | Computer Science | Babbage Hall 204</code>. The
-convention is documented at the top of <code>DbDuo.cs</code> in the
-<code>Metadata</code> class.</p>
-<p>The companion <code>unq</code> column (also a stored-generated text)
-is similar but optimized for uniqueness rather than readability: it
-concatenates only the fields that together determine identity, in a form
-suitable for natural-key deduplication during imports. <code>unq</code>
-is not yet used by any DbDuo command at this writing; it’s an extension
-point for a future Import-Data upsert mode.</p>
-<p><code>findParentTableForFk</code> discovers parent tables by
-inverting the lookup: rather than guessing English plural rules (“class”
-→ “classes”, “city” → “cities”), it asks the schema itself which table
-has the FK column as its primary key. The PK comes from
-<code>actualPrimaryKey</code>, which reads
-<code>PRAGMA table_info</code> for SQLite and
-<code>ADOX.Catalog.Tables[t].Keys</code> for Access. This handles every
-plural irregularity correctly because it reads the schema’s own truth
-rather than applying heuristics.</p>
+<p>DbDuo never attaches to a running Word or Excel instance. Every
+Office-using export path makes a fresh hidden instance, drives it to
+produce the requested file, then calls <code>Quit()</code> and releases
+the COM object. The reasons: attaching to a running instance would
+mutate settings the user has tuned for their session, driving a running
+instance through SaveAs and Quit risks side effects on documents the
+user has open, and the behavior would be non-deterministic depending on
+whether Word or Excel happens to be running.</p>
 <h2 id="file-layout">File layout</h2>
-<pre><code>DbDuo.cs             single-file C# source, ~11,000 lines
-DbDuo_setup.iss      Inno Setup installer script
-buildDbDuo.cmd       compile DbDuo.exe via csc.exe
-tagRelease.cmd      Windows wrapper for tagRelease.ps1
-tagRelease.ps1      PowerShell release-cutting script
-DbDuo.ini            shipped configuration (uiMode, [Keys] overrides)
-sample.db            bundled SQLite sample (teachers/classes/students/enrollments)
-README.md, README.htm     summary and quick start
-DbDuo.md, DbDuo.htm       this reference
-License.md, License.htm   MIT License
-Announce.md, Announce.htm release announcement</code></pre>
+<pre><code>DbDuo.cs                    single-file C# source
+DbDuo_setup.iss             Inno Setup installer script
+buildDbDuo.cmd              compile DbDuo.exe via csc.exe (+ jsc.exe for DbDuo.dll)
+DbDuo.js                    JScript .NET source for the script support assembly
+DbDuo.ini                   shipped configuration (uiMode, [Keys] overrides)
+sample.db                   small school sample (teachers/classes/students/enrollments)
+northwind.db                Northwind sales sample, adapted
+chinook.db                  Chinook music-store sample, adapted
+SampleScripts/             three example .js scripts seeded into %APPDATA% on first run
+README.md, README.htm       summary and quick start
+DbDuo.md, DbDuo.htm         this reference
+License.md, License.htm     MIT License
+Announce.md, Announce.htm   release announcement
+History.md, History.htm     chronological release notes
+CamelType_CSharp.md         coding conventions used inside DbDuo.cs</code></pre>
 </body>
 </html>

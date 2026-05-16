@@ -4,14 +4,20 @@ rem buildDbDuo.cmd - build script for DbDuo.exe (v1.0.44 and later).
 rem
 rem Compiles two assemblies with the stock .NET Framework compilers:
 rem
-rem   1. dbDuoEval.dll -- JScript .NET support module, compiled from
-rem      dbDuoEval.js by jsc.exe. Used by the Help > Invoke Snippet
+rem   1. DbDuo.dll -- JScript .NET support module, compiled from
+rem      DbDuo.js by jsc.exe. Used by the Help > Invoke Snippet
 rem      feature to run user-written .js snippets against the running
 rem      DbDuoForm and DbDuoManager.
 rem
 rem   2. DbDuo.exe -- the main WinForms application, compiled from
-rem      DbDuo.cs by csc.exe with /reference:dbDuoEval.dll so it can
-rem      call DbDuoScripting.JS.Eval(...) from C#.
+rem      DbDuo.cs by csc.exe. The exe calls DbDuo.JS.runScript(...)
+rem      via reflection (Assembly.LoadFrom + GetType + GetMethod),
+rem      so csc.exe does NOT take /reference:DbDuo.dll at compile time.
+rem      Avoiding the compile-time reference also prevents an assembly-
+rem      name collision at load time: the EXE is also named DbDuo,
+rem      so Assembly.Load("DbDuo") would resolve to DbDuo.exe instead
+rem      of DbDuo.dll. We use Assembly.LoadFrom with the full path to
+rem      DbDuo.dll for an unambiguous load.
 rem
 rem ---------- Why bare compilers, not MSBuild + NuGet ----------
 rem
@@ -23,7 +29,7 @@ rem feature it enabled. v1.0.44 follows EdSharp's model: JScript .NET
 rem via jsc.exe. JScript .NET ships with every .NET 4.x install in the
 rem v4.0.30319 framework folder; no NuGet package, no shipped DLLs,
 rem no binding redirects. The whole scripting subsystem is one ~10 KB
-rem dbDuoEval.dll plus the snippet folder.
+rem DbDuo.dll plus the snippet folder.
 rem
 rem ---------- Compiler search order ----------
 rem
@@ -49,8 +55,8 @@ echo Working directory: %CD% >> "!log!"
 echo. >> "!log!"
 
 rem ---- check source files ----
-if not exist "DbDuo.cs"      goto :no_dbduo_cs
-if not exist "dbDuoEval.js"  goto :no_eval_js
+if not exist "DbDuo.cs"  goto :no_dbduo_cs
+if not exist "DbDuo.js"  goto :no_dbduo_js
 goto :have_sources
 
 :no_dbduo_cs
@@ -59,14 +65,14 @@ echo ERROR: DbDuo.cs not found in script directory.
 popd
 exit /b 1
 
-:no_eval_js
-echo ERROR: dbDuoEval.js not found. >> "!log!"
-echo ERROR: dbDuoEval.js not found in script directory.
+:no_dbduo_js
+echo ERROR: DbDuo.js not found. >> "!log!"
+echo ERROR: DbDuo.js not found in script directory.
 popd
 exit /b 1
 
 :have_sources
-echo Found: DbDuo.cs, dbDuoEval.js >> "!log!"
+echo Found: DbDuo.cs, DbDuo.js >> "!log!"
 
 rem ---- locate csc.exe ----
 rem Prefer Roslyn from Visual Studio Build Tools / VS 2022/2019, fall
@@ -146,33 +152,33 @@ if errorlevel 1 (
 )
 :have_nvda_dll
 
-rem ---- compile dbDuoEval.js -> dbDuoEval.dll (JScript .NET) ----
+rem ---- compile DbDuo.js -> DbDuo.dll (JScript .NET) ----
 rem
-rem /target:library so the result is a DLL we can reference from C#.
+rem /target:library so the result is a DLL we can load at runtime.
 rem /reference: omitted -- jsc.exe auto-resolves mscorlib, System,
 rem System.Windows.Forms, etc., from the framework directory.
 rem /platform:anycpu so the DLL can be loaded by either x86 or x64
 rem hosts (DbDuo is x64 but anycpu is the convention for class libs).
 rem /out: names the assembly explicitly.
 rem
-rem Note: when JScript .NET source imports the DbDuo namespace, jsc
-rem must be able to resolve "DbDuo" to a real assembly. Since DbDuo.exe
-rem does not exist on the first build pass, we compile dbDuoEval.js
-rem WITHOUT the "import DbDuo;" line on first pass. The user-script
-rem eval scope picks up DbDuo types at runtime via the oForm and oDb
-rem parameters (typed as Object) and JScript's late-bound dispatch.
-rem No compile-time reference to DbDuo.exe is needed.
+rem The DLL is loaded by DbDuo.exe at run time via Assembly.LoadFrom,
+rem not at compile time. No /reference: to DbDuo.dll is passed to
+rem csc.exe below, because a same-name compile-time reference would
+rem create an assembly-name collision with DbDuo.exe at load time.
 echo. >> "!log!"
-echo Compiling dbDuoEval.js -> dbDuoEval.dll ... >> "!log!"
-echo Compiling dbDuoEval.js -> dbDuoEval.dll ...
-"!jsc!" /target:library /platform:anycpu /nologo /out:dbDuoEval.dll dbDuoEval.js >> "!log!" 2>&1
+echo Compiling DbDuo.js -> DbDuo.dll ... >> "!log!"
+echo Compiling DbDuo.js -> DbDuo.dll ...
+"!jsc!" /target:library /platform:anycpu /nologo /out:DbDuo.dll DbDuo.js >> "!log!" 2>&1
 if errorlevel 1 goto :build_failed
-echo dbDuoEval.dll built.
+echo DbDuo.dll built.
 
 rem ---- compile DbDuo.cs -> DbDuo.exe ----
 rem
-rem /reference:dbDuoEval.dll so the C# code can call
-rem DbDuoScripting.JS.Eval(...).
+rem No /reference:DbDuo.dll: the C# code calls DbDuo.JS.runScript via
+rem reflection (Assembly.LoadFrom + GetType + GetMethod), so no
+rem compile-time reference is needed. Avoiding /reference: here also
+rem prevents an assembly-name collision at load time, since both the
+rem EXE and the snippet DLL have the simple name "DbDuo".
 rem
 rem Everything else is the same as v1.0.41 and earlier: csc.exe
 rem auto-resolves framework references from csc.rsp.
@@ -180,10 +186,10 @@ echo. >> "!log!"
 echo Compiling DbDuo.cs -> DbDuo.exe ... >> "!log!"
 echo Compiling DbDuo.cs -> DbDuo.exe ...
 if exist DbDuo.ico (
-    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32icon:DbDuo.ico /reference:dbDuoEval.dll /out:DbDuo.exe DbDuo.cs >> "!log!" 2>&1
+    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32icon:DbDuo.ico /out:DbDuo.exe DbDuo.cs >> "!log!" 2>&1
 ) else (
     echo NOTE: DbDuo.ico not found; building without embedded icon. >> "!log!"
-    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /reference:dbDuoEval.dll /out:DbDuo.exe DbDuo.cs >> "!log!" 2>&1
+    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /out:DbDuo.exe DbDuo.cs >> "!log!" 2>&1
 )
 if errorlevel 1 goto :build_failed
 echo DbDuo.exe built.
@@ -204,7 +210,7 @@ echo WARNING: pandoc not found on PATH. Install with: winget install JohnMacFarl
 echo.
 echo Build complete. Artifacts in this directory:
 echo   DbDuo.exe       -- the application
-echo   dbDuoEval.dll   -- JScript .NET scripting support
+echo   DbDuo.dll       -- JScript .NET scripting support
 echo   nvdaControllerClient.dll -- NVDA controller-client DLL
 popd
 endlocal
