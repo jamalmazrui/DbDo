@@ -4,13 +4,993 @@ This file is the chronological record of DbDuo releases. The most recent release
 
 Press **Shift+F1** inside DbDuo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.69 (current)
+## v1.0.104 (current)
+
+**`DbDuo.ini` now drives hotkey bindings and command descriptions.** New `[Hotkeys]` section in FileDir style. Each line is `Command Name=Modifiers+Key, Imperative description.` Modifiers are always Alt, Control, Shift, in alphabetical order, in full-word spelling. Descriptions are single imperative sentences that weave common synonyms and -- where natural -- reinforce the chord-letter mnemonic. All 106 chord-bound commands are now in the file.
+
+The loader is an **override layer** on top of compiled-in defaults: if `DbDuo.ini` is missing, DbDuo still runs with the v1.0.103 defaults; if it's present, file entries win. Each entry overrides the chord AND sets the status-bar / key-describer description (`KeyMap.dCommandToSummary`). You can edit `DbDuo.ini` in any text editor, restart DbDuo, hear the change.
+
+**Friendly key names supported.** The loader translates user-friendly key tokens to the .NET `Keys` enum names before parsing: `Apostrophe` -> `OemQuotes`, `Backslash` -> `OemPipe`, `Backspace` -> `Back`, `UpArrow` -> `Up`, `Ctrl` -> `Control`, `Esc` -> `Escape`, plus the other Oem-prefixed punctuation. You don't need to memorize the C# enum names; the human-readable names from FileDir's `Hotkeys.ini` work as written.
+
+**Alternate-chord syntax supported.** A description line may include `, or X` to declare additional chord(s) for the same command (e.g., `Beginning Tagged=Shift+B, or Control+Home, Go to beginning tagged item`). The parser locates the first comma whose tail is NOT `or ...` as the chord/description boundary. The DbDuo `[Hotkeys]` ships without alternate chords today; the parser tolerates them for future use.
+
+**Backward-compatible parsing.** `[Hotkeys]` is the modern section name; the historical `[Keys]` (chord-only, no description) is still accepted.
+
+**Distribution adjustment.** `DbDuo.exe` and `DbDuo_setup.exe` are no longer included in the shipped zip. You rebuild them locally.
+
+**Validated**: brace and paren balance at 26275 lines; chord-conflict audit clean; all 106 `[Hotkeys]` entries match registered commands.
+
+## v1.0.103
+
+Bug fixes from user testing of v1.0.102.
+
+**Alt+Shift+F (Filter Records) didn't work.** Root cause: the menu item was registered via `addItemLocal` instead of `addItem`. The "local" variant uses `KeyMap.registerDisplayOnly` which shows the chord in the menu but never adds it to the form-level dispatch table. Pressing the chord did nothing. Fixed by changing Filter Records, Clear Filter, and Go to Record to use the regular `addItem` registration.
+
+**Alt+D (Database Summary) showed an unresolved or stale file path.** The summary printed `db.filePath` literally -- whatever was passed to openDatabase, which could be relative or no longer exist. Fixed by resolving the path with `Path.GetFullPath` and adding a "(file not found at this path)" line when the resolved path doesn't exist. This catches the case where the manager's stored path is no longer reachable on disk.
+
+**Alt+O / Alt+Shift+O (Order Records / Reverse Order) not behaving correctly.** Possible cause: menu items weren't being explicitly enabled, so chord dispatch may have fallen through to other handlers. Fixed by adding explicit `Enabled = bHasTable` for `miOrderRecords` and `miReverseOrder`, and `Enabled = bOpen` for `miFileOpenSelect` (Open Recordset, Ctrl+Shift+O). The bindings themselves were correct; this hardens the enable state.
+
+**Menu labels no longer carry descriptive parentheticals.** Per the menu-name guideline (a menu label should be only the command name in title case, 2-4 words), 137 menu items had their parenthetical descriptions stripped. The descriptions remain available via the status bar (which pulls from `KeyMap.summaryFor`) and the key describer mode -- they just don't clutter the menu label itself anymore.
+
+**JAWS "Not Selected" announcement on listview load.** Root cause: in virtual mode, `grid.Items[iIndex].Selected = true` operates on a placeholder object that doesn't persist. Removed the no-op line; `SelectedIndices.Add` is the API that actually sets the selection in virtual mode. Also: `bGridFirstPopulate` is now reset when the displayed table changes (tracked via `sLastGridTable`), so the workaround that announces "Row 1 of N -- first column value" via LiveRegion fires once per table switch, not just on database open.
+
+**Validated**: brace and paren balance at 26153 lines; chord-conflict audit clean.
+
+## v1.0.102
+
+Build fixes. v1.0.101 didn't compile cleanly; this version makes the source actually build.
+
+**Errors fixed:**
+
+1. Variable shadowing in recClearBookmarkClicked — renamed an inner `sLook` to `sLookText` to avoid the conflict with the outer `sLook` declared in the same method.
+
+2. `LbcDialog.addInputBox` missing 2-arg overload — added an overload taking just `(sLabel, sValue)` (the 3-arg form with `sTip` was the only one defined; the Replace handler called the 2-arg form).
+
+3. `db.getField` / `db.setField` — the DbDuoManager API exposes `getFieldValue` and `setFieldValue`. The Replace Column / Regex Replace handler had been calling non-existent methods. Fixed to use the correct names.
+
+4. `RegexParseException` — that type was added in .NET 7; DbDuo targets .NET Framework 4.8 where regex parse errors throw `System.ArgumentException`. Fixed the catch clause.
+
+5. Orphaned `miSortRecords` field declaration removed (the warning becomes silent).
+
+**Validated**: brace and paren balance at 26110 lines. The compilation errors from v1.0.101 are resolved.
+
+## v1.0.101
+
+Big design pass driven by user analysis of mnemonic-rule compliance, terminology consistency, and screen-reader UX.
+
+**Listview "Unselected" fix.** A real screen-reader bug. When DbDuo opened with a previously-opened database, the listview was first presented with VirtualListSize=0 and got focus before updateGrid populated rows. JAWS announced "Unselected" for the listview's initial empty state and didn't re-announce when the selection landed. Fix: a first-populate workaround that explicitly announces "Row 1 of N" (with the first column's value) via LiveRegion when the listview transitions from empty to non-empty, so the user hears actual data instead of silence following the stale "Unselected" announcement.
+
+**Drop holdover aliases.** Pre-publicized-alpha means there's no installed user base; old command names are simply obsolete, not aliases. Removed: `sort-records` (alias for order-records), `remove` (alias for delete-record), `restore` (alias for restore-bookmark which itself is retired).
+
+**Column rename: `updated` -> `modified`.** Aligns with the Windows / SharePoint / Office convention (File Explorer's "Date modified," SharePoint's Modified column) over the SQL Rails/Django `updated_at` convention. The DbDuo audience is Windows screen-reader users, for whom "modified" is the vocabulary heard daily. Centralized standard-column names into Metadata constants (`ModifiedColumn`, `LookColumn`, `UrlColumn`, `AddedColumn`, etc.) so future renames need only update the constant.
+
+**Drop Say Kin, Say Record, Say Web entirely.** Say Kin's "kin" terminology was idiosyncratic; foreign-key relationships are read by Say Related (Shift+R) instead. Say Record (Shift+Space) was redundant with the screen reader's built-in row read-line command. Say Web is replaced by Say URL (Shift+U) -- the column rename `url -> web` was reverted (user prefers "url").
+
+**New: Say Goto on Shift+G.** Speaks the most recent Jump Record search string (column + substring). Completes the "current state" Shift+letter family alongside Say Filter (Shift+F) and Say Order (Shift+O).
+
+**New: Toggle Marked on Ctrl+Space.** The Windows ListView convention is Ctrl+Space to toggle the focused item's selection state. Since DbDuo uses the marked column as its multi-select equivalent, the chord maps directly. Solves the workflow gap where there was no single-keystroke way to flip the current record's mark.
+
+**Say-X chord moves**:
+
+| Chord | Command | Was |
+|---|---|---|
+| Shift+M | Say Modified | Say Marked (moved) |
+| Alt+M | Say Marked | (new chord for existing command) |
+| Shift+U | Say URL | Say Updated (renamed) |
+| Ctrl+Shift+U | Open URL | Ctrl+U |
+| Shift+G | Say Goto | (new) |
+| Ctrl+Space | Toggle Marked | (new) |
+
+**Mark anchor command renames**: "Set Mark Anchor" -> "Start Mark", "Mark Range" -> "Complete Mark", "Set Unmark Anchor" -> "Start Unmark". Aligns with EdSharp / FileDir terminology.
+
+**Graphics Table -> Graphics Grid.** User's terminology rule: "Table" is schema-level, "Grid" is the displayed columns x rows (after filter and sort). The chart command operates on the displayed grid, not the schema-level table.
+
+**Save/Export/Edit Settings shuffle** (full reshuffle motivated by mnemonic-rule + dropping past-convention concerns):
+
+- `Export Database` -> **`Save Database`** -- the operation IS Save-As semantically; Save is the rule-compliant S verb.
+- Save Database chord: was Alt+Shift+E, now **Ctrl+S** (cross-app Save convention, rule-compliant S).
+- Export Data chord: was Alt+E, now **Alt+X** (eXport letter family, rule-compliant).
+- Edit Settings chord: was Alt+Shift+S, now **Alt+Shift+E** (rule-compliant E for Edit, the verb-letter).
+
+**Multi-bookmark feature.** Replaces the single-bookmark system with a per-session list. Each bookmark stores the table name, the ADO bookmark, the row position at save time, and the **look-value** at save time (one of the use cases the user pointed out for the look concept). The list dialog shows entries as "table -- look-value (row N)". Session-lifetime only: closing the database or app clears all bookmarks (ADO bookmarks are tied to the recordset that produced them, so cross-session persistence requires saving primary-key values instead -- deferred).
+
+New chord assignments:
+
+- **Ctrl+B = Save Bookmark** -- append current record to bookmark list
+- **Alt+B = List Bookmarks** -- listbox dialog showing all saved; Enter navigates (switches table if needed)
+- **Ctrl+Shift+B = Clear Bookmark** -- chooser when multiple ("Clear All" default, or "Clear Selected"); direct clear when only one
+
+The old "Restore Bookmark" command is retired -- it was a single-bookmark thing. The new List Bookmarks (Alt+B) is more general.
+
+**Table Summary (Alt+T) reimplemented as columns-overview.** Previously this slot held a misnamed field-and-statistic picker. New behavior: lists every column in the current table in **natural (schema-defined) order**, one line per column packing maximum info -- name plus declared type plus key/null/foreign-key/default constraints. Implementation: new `DbDuoManager.SchemaColumn` class and `getSchemaColumns(table)` method that queries SQLite's `PRAGMA table_info` plus `PRAGMA foreign_key_list`, with fallback to ADO Fields-collection (name + type only) for non-SQLite backends.
+
+**Free chord slots** (after all the moves above):
+- Alt+E, Alt+Shift+S
+- Shift+W, Shift+K, Shift+Space, Shift+E
+- Ctrl+U
+
+These are reserved for future commands.
+
+**Documented standard-column constants** in `Metadata`: `AddedColumn` ("added"), `MarkedColumn` ("marked"), `ModifiedColumn` ("modified"), `NotesColumn` ("notes"), `LookColumn` ("look"), `TagsColumn` ("tags"), `UrlColumn` ("url"), `UnqColumn` ("unq"). Any code that references these standard columns should use the constants, not string literals -- this is the flexibility hook the user asked for to make further fine-tuning straightforward.
+
+**Validated**: brace and paren balance at 26087 lines; chord-conflict audit clean.
+
+## v1.0.100
+
+**Sort chooser symmetric to Filter chooser.** When pressing Alt+O or Alt+Shift+O and a sort is already active, a chooser dialog appears with four buttons (Clear is the default):
+
+- **Clear** (Alt+C, default) -- empty db.sort and close
+- **Reset** (Alt+R) -- discard current sort, open the listbox to pick fresh
+- **Add** (Alt+A) -- append the chosen column to the existing sort expression (multi-column sort)
+- **Cancel** (Alt+N) -- close without changes
+
+When no sort is active, the chooser doesn't appear -- the chord goes directly to the listbox (Reset behavior). Same two-keystroke clearing pattern as Filter: Alt+O, Enter.
+
+The Add button enables multi-column sort. Choose Order Records (Alt+O), pick "title", get sorted by title. Choose Order Records again, pick Add, pick "year": now sorted by `title ASC, year ASC`. Mix ascending and descending by which chord (Alt+O vs Alt+Shift+O) you press at the Add step. Status announces "Added order on X" / "Added reverse order on X" to confirm the direction at each step.
+
+This makes Shift+F (Say Filter) and Shift+O (Say Order) more useful: they reveal the current state, and the chooser dialogs offer the obvious next-step actions on that state without forcing the user to manually edit ADO sort/filter strings.
+
+**Validated**: brace and paren balance at 25655 lines; chord-conflict audit clean.
+
+## v1.0.99
+
+**Edit Settings moves to Alt+Shift+S.** Ctrl+, was a Mac convention that violated the strict mnemonic rule on Windows. New chord is rule-compliant (S = first letter of Settings) and Windows-native (no funny punctuation chord). Menu label updated to "&Edit Settings..." for the natural verb-noun verb-noun pattern that matches Edit Record / Edit Cell / Edit Script.
+
+**Sort Records → Order Records, with listbox-of-columns dialog.** The new behavior:
+
+- **Alt+O = Order Records** -- sort ascending. Opens a listbox of all field names (alpha-sorted, including hidden columns), with the current virtual column as the default focus. Press Enter to sort by the focused column, or arrow to a different one and Enter.
+- **Alt+Shift+O = Reverse Order** -- same listbox UX, sorts descending.
+
+The key feature: **sorting by hidden columns works directly**. Today (before this change) you had to display a column, sort, then optionally hide it. Now the listbox shows every field regardless of visibility.
+
+The natural-English aliases `sort` and `sort-records` still resolve to `order-records` at the dot prompt for users who think Sort first.
+
+**Switch Mark → Invert Marked.** The menu label was already "Invert Marked"; canonical name and dot-prompt token now match (I-letter rule-compliant on Ctrl+I).
+
+**L-family Say commands rewritten as Rest commands** (from cursor, not from row 1):
+
+- Ctrl+L = **Say Column Rest** (current column, from cursor down)
+- Ctrl+Shift+L = **Say Column Rest Marked**
+- Alt+L = **Say Records Rest** (renamed from Say Rows -- entity vocabulary alignment)
+- Alt+Shift+L = **Say Records Rest Marked** (renamed from Say Rows Marked)
+
+The "Rest" in the name means "from this point onward." This is genuinely more useful than start-from-row-1 in most workflows -- a user is usually focused on a row of interest and wants to hear what comes after. CLI users can override with an `all` argument when row-1 start is needed.
+
+**New Say-X commands for standard columns:**
+
+- **Shift+D = Say Database** (replaces Shift+P = Say Path). Single-press announces the filename for fast 'where am I'; double-press opens a dialog with the full path.
+- **Shift+O = Say Order**. The sort-expression counterpart to Say Filter (Shift+F).
+- **Shift+Space = Say Record**. The gap-filler: speaks the current row's full content (all displayed columns) in one utterance. Slots between Say Cell (one cell) and Say Records Rest (many records).
+- **Shift+U = Say Updated** (moved from Shift+D; rule-compliant U).
+- **Shift+W = Say Web** (renamed from Say URL; reclaims the retired Window Summary stub slot; rule-compliant W).
+
+The Say Web handler accepts both `web` and `url` column names for transitional compatibility -- the canonical column rename `url -> web` is being held pending user decision.
+
+**Say Status (Shift+Z) leads with Marked state.** When the current record is marked, the announcement now begins with "Marked." before the table / row / filter / sort details. This implements the user's design where Shift+Z is the bottom-of-the-UI status read with the marked indicator prominent.
+
+**Filter Records redesigned with action chooser.** When pressing Alt+Shift+F and a filter is ALREADY active, a chooser dialog appears first with six buttons (Clear is the default):
+
+- **Clear** (Alt+C, default) -- set filter to empty; close
+- **And** (Alt+A) -- open blank form; result wraps "(old) AND (new)"
+- **Or** (Alt+O within dialog) -- open blank form; result wraps "(old) OR (new)"
+- **Edit** (Alt+E) -- open form pre-populated with current values; replace
+- **Reset** (Alt+R) -- open blank form; replace
+- **Cancel** (Alt+N) -- close without changes
+
+When no filter is active, the chooser doesn't appear -- Alt+Shift+F goes directly to a blank field form. This implements the user's request for at-most-two-keystroke filter clearing (Alt+Shift+F, then Enter to accept the Clear default) and adds incremental filter composition via And / Or.
+
+**Window Summary stub retired.** Was a deferred-not-implemented stub on Shift+W. Replaced by Say Web.
+
+**Validated**: brace and paren balance at 25590 lines; chord-conflict audit clean.
+
+## v1.0.98
+
+**Strict mnemonic rule audit and cleanup.** The user re-stated the chord-letter rule: the letter must be the first letter of one of the words in the canonical command name, with rare conventional exceptions documented in source. A full audit of all 135 chord bindings found 16 violations (down to 3 after this cleanup).
+
+**Renames to make first letters rule-compliant.** Two clear-cut cases where the canonical name was wrong relative to what the menu said and what the user understands:
+
+- `Select Record` -> **`Filter Records`** (the menu label was already "Filter Records..."; canonical and dot-prompt token were the misnamed "Select Record" / "select-record" -- a PowerShell `Select-` verb holdover that didn't match the actual semantics)
+- `Update Column` -> **`Replace Column`** (the menu label was already "Replace Column"; matches Ctrl+R chord)
+
+These bring the canonical names into sync with the menus and chord-letters at the same time.
+
+**New L-family convention for multi-cell speech commands.** The four new Say commands from v1.0.97 had no rule-compliant first letter (Say Column / Say Column Marked / Say Rows / Say Rows Marked share only S, M, and consonants like C and R that were taken). Following the K-for-Bookmark precedent of a "conventional exception letter," L is now the documented exception for **multi-cell linear sweeps** (List / Look / Linear-read):
+
+- **Ctrl+L** = Say Column
+- **Ctrl+Shift+L** = Say Column Marked
+- **Alt+L** = Say Rows
+- **Alt+Shift+L** = Say Rows Marked
+
+This groups the four into a clean L-family. Shift+L stays Say Look (the existing "L for Look" command speaking the current row's summary), so the L convention is now consistently "list / look / linear sweep" across the speech family.
+
+The earlier v1.0.97 bindings (Shift+E / G / V / X) were rule-violations and have been removed.
+
+**Bookmark chords migrated K to B.** The user's observation: B is the rule-compliant first-letter of "Bookmark", and the K-for-booKmark convention was inherited from older app conventions. Moving to B follows the strict rule and frees the K-family. Shift+K stays Say Kin (K is K's first letter, rule-compliant).
+
+- Save Bookmark: **Ctrl+B** (was Ctrl+K)
+- Restore Bookmark: **Alt+B** (was Alt+K)
+- Clear Bookmark: **Ctrl+Shift+B** (was Ctrl+Shift+K)
+
+K-family is now wide open. Three free chords saved for future commands whose names start with K.
+
+**Documented conventional exceptions** (in source comments at the binding sites):
+
+- **B = Bookmark** (now strictly rule-compliant since the rename; "K for booKmark" is retired)
+- **L = List / Look / Linear-sweep** for multi-cell speech commands (Say Column family)
+- **V = inVoke** (V-sound exception for Invoke Script / Edit Script paired commands)
+- **C = Configuration** for Edit Settings (EdSharp / FileDir convention)
+- **K = Kin** in Say Kin (rule-compliant on its own, just shares the letter family the bookmarks left)
+- **Z = ZZZ / hush / sleep / silent-mode** for speech-toggles and read-only mode (Say Status, Toggle Read Only, Toggle Extra Speech, Toggle Command Echo)
+- **X = eXtract** for Extract Regex
+- **Q = Query** for Invoke SQL
+- **G = Goto** for Set Position (cross-app convention)
+
+**Three remaining rule-violations** flagged for user decision (not auto-renamed in this version):
+
+1. **Append Record (Alt+Shift+C)** -- letter C, name letters A or R. C from "Clipboard" (it appends to the clipboard buffer) is a stretch; options are to rename to a C-starting name like "Concatenate Record" (awkward), remap to a different chord, or accept C as a clipboard-family convention.
+2. **Switch Mark (Ctrl+I)** -- letter I, name letters S or M. The menu label is "Invert Marked (toggle every record)"; renaming canonical to "Invert Marked" would make I rule-compliant.
+3. **Say Updated (Shift+D)** -- letter D, name letters S or U. The column is called "updated" but contains a date; renaming canonical to "Say Date" would make D rule-compliant.
+
+These three need user judgment before I touch them.
+
+**Statistics / Graphics chord adjustments** from earlier in v1.0.97 retained:
+
+| Chord | Command |
+|---|---|
+| Alt+S | Select Columns (new) |
+| Alt+Shift+S | Sort Records |
+| Alt+T | Table Summary (renamed from Statistics Table) |
+| Alt+D | Database Summary |
+| Alt+G | Graphics Column (primary) |
+| Alt+Shift+G | Graphics Table |
+| Alt+Shift+F | Filter Records |
+| Alt+Shift+E | Export Database (primary chord; Ctrl+Shift+S binding dropped) |
+| Ctrl+R | Replace Column (renamed from Update Column) |
+| Ctrl+Shift+R | Regex Replace |
+| Ctrl+Shift+S | Statistics Column (replaces Save-As convention; see push-back below) |
+| Ctrl+Shift+G | Graphics Column (secondary; Alt+G is primary) |
+| Ctrl+Shift+X | Extract Regex |
+
+**Push-back on Ctrl+Shift+S.** This chord is the universal cross-application Save-As convention (Word, Excel, every browser save-page-as, every IDE save-file-as). Repurposing it to Statistics Column will surprise new users who reflexively press Ctrl+Shift+S expecting Save-As. The user's argument that DbDuo auto-saves so Save-As isn't critical is fair, and Export Database remains on Alt+Shift+E. Filed here so it's visible to anyone reviewing the design.
+
+**Renames affecting dot-prompt tokens** (token = lowercase-with-hyphens form):
+
+- `remove-record` -> `delete-record`
+- `remove-record-force` -> `delete-record-force`
+- `statistics-table` -> `table-summary`
+- `update-column` -> `replace-column`
+- `select-record` -> `filter-records`
+- `save-databaseas` -> `export-database` (v1.0.97)
+- `measure-column` -> `statistics-column` (v1.0.97)
+- `measure-table` -> `table-summary` (v1.0.97 and again this version)
+- `new-plot` -> `graphics-column` (v1.0.97)
+- `new-chart` -> `graphics-table` (v1.0.97)
+
+**Select Columns** new feature (carried over from in-progress v1.0.97): per-table column visibility picker. Alt+S. Dialog with one checkbox per column plus four buttons: OK, Select All, Select None (revert to default), Cancel. Persists per-table via the existing `db.setSelectList()` infrastructure.
+
+**Four new speech commands** (carried over): Say Column, Say Column Marked, Say Rows, Say Rows Marked. Now on L-family chords. saySayColumn behavior changed from "sweep starting at current row" to "sweep starting at row 1" per the user's clarification that "all cells in the current column" means the whole column.
+
+**Validated**: brace and paren balance at 25278 lines; chord-conflict audit clean.
+
+## v1.0.97
+
+**Three big design themes**: (1) analytical command name family aligned around Statistics and Graphics with Column / Table scope, (2) the marks-aware scope-prompt design rule established and applied to Remove Record as the first example, (3) Save Database As renamed Export Database with secondary Alt+Shift+E chord.
+
+**Statistics / Graphics command renames.** The user's "statistics on the virtual column/displayed table" and "graphics on the same" framing pointed at the right name structure. The Measure-* / New-Plot / New-Chart family was renamed:
+
+- `Measure Column` -> **`Statistics Column`** (Alt+S; current virtual column, all visible/filtered rows)
+- `Measure Table` -> **`Statistics Table`** (Alt+Shift+S NEW; all visible columns x all visible rows)
+- `New Plot` -> **`Graphics Column`** (Alt+G)
+- `New Chart` -> **`Graphics Table`** (Alt+Shift+G NEW)
+- `Measure Longest` / `Maximum` / `Minimum` / `Shortest` / `Field` -> `Statistics Longest` / `Maximum` / `Minimum` / `Shortest` / `Field`
+
+The pattern: **`<Verb> Column` for one-column scope, `<Verb> Table` for full-view scope**. The naming maps cleanly to a single mnemonic letter family: S for Statistics (Alt+S / Alt+Shift+S), G for Graphics (Alt+G / Alt+Shift+G). The "Table" in the name means "the currently filtered + sorted view of the table" -- not the whole underlying table; clearing the filter changes what counts.
+
+Dot-prompt canonical tokens followed: `measure-column` -> `statistics-column`, `new-plot` -> `graphics-column`, etc. The dispatch switch labels and the alias mappings (`longest` -> `statistics-longest`, `max` -> `statistics-maximum`, `chart` -> `graphics-table`, etc.) all updated together.
+
+**Sort Records moved from Alt+Shift+S to Alt+Shift+O.** Alt+Shift+S was needed for Statistics Table to keep the S-family symmetric. O is for ORDER (the SQL ORDER BY mnemonic) -- standard convention for sort. Alt+Shift+O is one-handed and free.
+
+**Save Database As -> Export Database.** A user filtered to 50 of 1000 rows wants Export Data to write 50 rows; Save Database As writes all 1000 -- so Save-As is conceptually "Export the whole database, ignoring filter." Renamed to make the relationship to Export Data clear:
+
+- `Save Database As` -> **`Export Database`** (Ctrl+Shift+S kept as the cross-app Save-As convention; Alt+Shift+E added as the new productivity chord parallel to Alt+E = Export Data)
+- The dot-prompt canonical token `save-databaseas` -> `export-database`
+- The `save` and `save-as` natural-English aliases now resolve to `export-database`
+
+The Ctrl+Shift+S binding stays because Save-As is one of the most universal cross-application Windows conventions; new users approaching DbDuo expect it to work out of the box.
+
+**Marks-aware scope-prompt system established.** This is the design rule the user requested for commands that can act on either the current record or a marked set:
+
+> A scope-flexible command operates on the current record by default with no prompt. When marks exist in the current filtered view, the command prompts the user to choose: act on current record (the default, safer choice for destructive ops), or on the N marked records, or cancel.
+
+Implementation:
+
+- New `countMarkedInFilter()` helper counts records whose 'marked' value is truthy within the currently filtered set. Iterates through the recordset (which already respects the active filter) and restores position via bookmark on exit.
+
+- New `ScopeChoice` enum (Current / Marked / Cancel) and `promptScope(string sCommandName)` helper. The GUI version uses an LbcDialog with three buttons: "&Current record (default)", "&Marked records (N records)" (count interpolated), "Ca&ncel". Returns the user's choice. If no records are marked, returns Current immediately without prompting -- the default-and-fast path.
+
+- **Remove Record (Ctrl+D)** was retrofitted as the first marks-aware command, matching the user's named example. When no marks exist: standard "Remove the current record?" confirmation (unchanged). When marks exist: scope prompt first, then either single-record confirm or a count-aware bulk-delete confirm ("Remove 7 marked records? This cannot be undone."). Bulk deletes iterate marked positions in reverse so deletions don't shift indices of records not yet processed.
+
+**Category catalog for the marks-aware retrofit.** The audit identified four categories of commands by their relationship to record scope:
+
+- **Category A (single-record always)**: Edit Record, Edit Cell, Copy Record, Copy Record as New, Open Cell, Show Record, Say-X commands, Set Mark, Clear Mark. These operate on the current record by their nature; no scope prompt makes sense.
+
+- **Category B (scope-flexible)**: Remove Record (this version), Append Record, Send Mail, Copy Record / Copy Record as New (multi-record forms), Update Column with marked-rows scope, Regex Replace with marked-rows scope. v1.0.97 retrofits only Remove Record; the rest follow in v1.0.98+.
+
+- **Category C (set operations)**: Sort Records, Filter Records, Export Data, Statistics Table, Graphics Table. These operate on the whole visible set; the user changes scope by changing the filter, not by picking a different command.
+
+- **Category D (cell scope)**: Copy Visible Cells, Update Column, Regex Replace. These are column-scoped within visible rows; the marks-aware retrofit (Category B) for Update Column / Regex Replace will add an optional "marked rows only" scope on top.
+
+**Validated**: brace and paren balance at 25032 lines; chord-conflict audit clean.
+
+## v1.0.96
+
+**Chord reassignments for productivity and mnemonic strength.**
+
+- **Ctrl+Shift+R** is now **Regex Replace**, a new command (was Toggle Read Only). Mnemonic: R for Regex; the Shift modifier marks it as the "power version" companion to Ctrl+R = Update Column (substring replace). Regex Replace interprets the find text as a .NET regex pattern and supports `$1`, `$2` back-references in the replacement.
+
+- **Alt+Z** is now **Toggle Read Only** (was Say Status). The user re-assessed: read-only is a rare-use toggle and the more-valuable Ctrl+Shift+R slot belongs to regex-replace. Alt+Z is a one-handed chord appropriate for a "set once and forget" feature.
+
+- **Shift+Z** is now **Say Status** (was Alt+Z). Joins the Say-X family (Shift+A through Shift+Y, all Say commands), which has the consistent "Shift+letter = speech-only, never moves focus" pattern. Z for Status is intuitive ("zoom out, see status").
+
+**Import / Export promoted to bare Alt chords for one-handed productivity.**
+
+- **Alt+I** = Import Data (was Ctrl+Shift+I)
+- **Alt+E** = Export Data (was Ctrl+Shift+X)
+
+Ctrl+I and Ctrl+E stay where they were -- Switch Mark and Edit Record, both high-frequency core operations that earn their bare-Ctrl status.
+
+**Extract Regex moved to Ctrl+Shift+X.** Was Ctrl+Shift+E. The new chord X = eXtract is a stronger mnemonic. Ctrl+Shift+E is now free.
+
+**Update Column actually implemented.** Was a placeholder stub since the rename in v1.0.95. Now provides a working find-and-replace dialog: search text, replacement text, case-sensitive checkbox, dry-run checkbox. Operates over the current virtual column for all currently-filtered rows (clear the filter to apply across the whole table). Reports the number of cells changed. Ctrl+R.
+
+**Regex Replace** (new) is the regex companion to Update Column. Same dialog plus the search text is interpreted as a .NET regex pattern. Supports back-references (`$1`, `$2`) in the replacement. Same scope rules. Ctrl+Shift+R.
+
+**Filter Records dialog redesigned for one-step clearing.** The user's principle: "at most a two-step keyboard way of clearing an existing filter and restoring access to all records." Implementation:
+
+- The dialog pre-populates with the user's last filter values (text, column, mode). Re-opening Alt+Shift+F when a filter is active lets the user edit the existing filter rather than re-typing it from scratch.
+- A new **Clear** button (Alt+C) clears the filter and closes the dialog in one keystroke. Total to clear: **Alt+Shift+F, Alt+C** -- exactly two keystrokes as specified.
+- The original OK and Cancel buttons retain their roles (OK applies the dialog's values; Cancel discards and closes).
+- Status announcements report the outcome: "Filter cleared", "No filter applied", or "Filter applied. N records match."
+
+**Statistics scope clarification** in the history (documenting the decision rather than changing code). Two natural scopes exist for column statistics:
+
+1. **The virtual column the user is focused on, applied to currently-filtered rows.** This is the productive default for "tell me about what I'm looking at." Measure Column (Alt+S) and Describe Column (also Alt+S, currently aliased) do this.
+
+2. **The entire table, all rows.** Measure Table is for this database-summary use case (menu only).
+
+The user can change scope deliberately by clearing the filter (Alt+Shift+F, Alt+C) before invoking the statistic. Statistical announcements report scope ("Median X over N visible rows; Y total when filter cleared") so the user always knows what they're hearing about.
+
+**Shift+letter family expanded.** Z is no longer unused -- Shift+Z = Say Status puts it in the Say-X consistent pattern. All Say-X commands follow the rule "Shift+letter is speech-only, never moves focus, returns the user to wherever they were."
+
+**Validated**: brace and paren balance at 24866 lines; chord-conflict audit clean.
+
+## v1.0.95
+
+**Pre-publicized-release cleanup pass.** The user clarified: DbDuo's GitHub repo is currently alpha and only a handful of blind developers have seen it. There is no installed user base to preserve compatibility with. Focus is the cleanest possible design at first publicized announcement (Facebook, LinkedIn, etc.). This version drops a half-dozen back-compat aliases that existed only to preserve muscle memory across renames in v1.0.86 / v1.0.91 / v1.0.94, since muscle memory is no longer a constraint.
+
+**Aliases removed**:
+
+- `set-record` → was rename alias for `edit-record` (v1.0.86)
+- `set-cell` → was rename alias for `edit-cell` (v1.0.86)
+- `switch-keydescriber` → was rename alias for `toggle-keyhelp` (v1.0.91)
+- `edit-configuration` → was rename alias for `edit-settings` (v1.0.91)
+- `step-initialchange` → was rename alias for `jump-nextinitial` (v1.0.91)
+- `update-field` → was rename alias for `update-column` (this version)
+- The "Pre-v1.0.86 name; still accepted" line in `edit-record` help text
+
+The "natural English" aliases that aren't backward-compat (e.g., `update` / `replace` → update-column, `delete` → remove-record, `add` / `append` → new-record, `describer` / `keydescriber` → toggle-keyhelp) are kept; those reflect natural user intent rather than legacy command names.
+
+**Update Field → Update Column.** The command was named "Update Field" but its actual semantics is column-scoped find-and-replace within one column; the menu label already said "Replace Column". Renamed to make the canonical name match what the operation does:
+
+- Canonical: "Update Field" → **"Update Column"**
+- Dot-prompt token: `update-field` → `update-column`
+- C# identifiers: `recUpdateFieldClicked` → `recUpdateColumnClicked`, `miRecUpdateField` → `miRecUpdateColumn`
+- The `update` / `replace` natural-English aliases continue to point at the canonical token (now `update-column`).
+
+**Toggle Read Only restored** as a runtime feature. v1.0.91 removed the GUI Lock-Database toggle while keeping the `-readonly` command-line flag, which was asymmetric. The user re-affirmed the feature's value: anyone running DbDuo can edit data they have write access to; the read-only toggle is for the user's own protection against accidental edits while browsing.
+
+Implementation:
+- **Ctrl+Shift+R** to toggle (mnemonic: "R for read-only")
+- Menu item on Misc menu: "Toggle Read &Only"
+- Click handler `toggleReadOnlyClicked` reopens the database with the flipped flag, clears the drill stack (its row identities are invalid in the new connection)
+- Settings dialog gets a "Read Only" checkbox alongside Command Echo and Extra Speech. Toggling it in Settings applies immediately via the same code path.
+- CLI command: `toggle-readonly`, `read-only`, `readonly` (with optional `on` / `off` / `1` / `0` / `yes` / `no` argument; bare invocation toggles)
+- Help-table entry documents all surfaces (menu, chord, settings checkbox, CLI command, command-line flag)
+- The `-readonly` command-line flag is preserved, so CLI startup and runtime are at parity
+
+**Optional quotes for file paths**. The user's principle: "enclosing quotes for a string should be optional if the command line can be parsed without ambiguity." Added `resolvePathArg(sArg)` helper: tests `File.Exists(sUnquoted)` and `Directory.Exists(sUnquoted)` first, returning the unquoted path if it identifies an existing filesystem entry; falls back to the v1.0.94 quote-aware tokenizer when no existing file matches. Applied to:
+
+- `cmdOpenDatabase` -- `open database C:\My Stuff\foo.db` works without quotes
+- `cmdImportData` -- same for the Markdown-import file path
+
+Export-Data wasn't retrofitted because export paths don't exist yet at command time (they're being created), so File.Exists can't disambiguate. The v1.0.94 `unquote` approach there is correct.
+
+**Dot-prompt CLI prompt helpers** added as infrastructure for future LBC-dialog-equivalents work. Three new static helpers:
+
+- `promptChoiceCli(prompt, options, default)` -- numbered choice list. Prints each option as `  N. label`, marks the default with `(default)`, prompts with `Number or text [N]: `, accepts the number or a substring of the label (case-insensitive), or "cancel"/"quit"/"q" to abort. Returns the 0-based index.
+- `promptYesNoCli(prompt, default)` -- yes/no with `[Y/n]` or `[y/N]` default display; returns true/false/null.
+- `promptTextCli(prompt, default)` -- single text input with `[default]` shown in brackets.
+
+These are infrastructure. The existing GUI-dialog commands (Find, Jump, Sort Records, Settings, Open Recordset, Recent Files, etc.) will be retrofitted incrementally to use these helpers when invoked from the dot prompt with no arguments. The first round of retrofits will land in v1.0.96+.
+
+**Terminology audit completed**. The Record/Field/Column/Cell/Table/Row nouns are now internally consistent across all canonical names:
+
+- **Cell** = single value at a row+column intersection. Cell-scoped commands: Open Cell, Edit Cell, Append Cell, Copy Cell, Copy Visible Cells, Say Cell.
+- **Column** = vertical slice of values across rows. Column-scoped commands: Measure Column, Say Column, Select Column, Update Column (formerly misnamed Update Field).
+- **Record** = whole logical entity (one row's worth of fields). Record-scoped commands: New Record, Edit Record, Append Record, Copy Record, Copy Record as New, Remove Record, Remove Record Force, Select Record, Jump Record, Jump Previous Record, Step Record First/Last/Next/Previous, Sort Records.
+- **Table** = named collection of records. Table-scoped: Measure Table, Say Tables, Select Table, Switch Table, Switch Previous Table.
+- **Field** is reserved for schema-level concepts (a column's definition, not its data). Currently only used in code (Get Field, Set Field) and in the Update Field validators dialog.
+
+The user's "noun matches layout user sees" rule led to the question of whether navigation commands should say Record or Row. The current Record-named navigation (Step Record First/Last/Next/Previous, Jump Record, Jump Previous Record) is kept because the navigation semantically targets a whole record's worth of data even though the visual unit is a row. The audit found this internally consistent; no further renames were warranted.
+
+**Validated**: brace and paren balance at 24626 lines; chord-conflict audit clean.
+
+## v1.0.94
+
+**Dot-prompt case-insensitivity confirmed and documented.** The user clarified that the CLI should be case-insensitive for command names and parameter keywords (matching `cmd.exe` convention), while quoted strings preserve their content verbatim. An audit confirmed that case-insensitivity for command verbs was already correctly implemented in v1.0.93:
+
+- `dispatch()` calls `aTokens[0].ToLowerInvariant()` before alias resolution
+- `expandUniquePrefix()` calls `sTyped.ToLowerInvariant()` before matching against the canonical-verb table
+- `resolveAlias()` switches on the lowercased input
+
+So all of these resolve to the same internal canonical token: `edit settings`, `Edit Settings`, `EDIT SETTINGS`, `Edit-Settings`, `EDIT-SETTINGS`, `JUMP record`, `Say SORT filter`. This was already working; v1.0.94 documents it explicitly in the dot-prompt help index (bare `help` now prints a CONVENTIONS section as its first item) so users know they can type however they prefer.
+
+**Quote-aware tokenization** added to the dot-prompt parser. The previous whitespace-split tokenizer treated quote characters literally, so `find regex "Hello World"` shattered the quoted phrase into pieces and the embedded space was lost on rejoin. v1.0.94 introduces three new helpers:
+
+- `splitArgsRespectingQuotes(string sLine)` returns a `string[]` of tokens honoring double-quoted regions. Whitespace inside quotes stays inside the token. Surrounding quotes are stripped on the way out. Doubled quotes inside a quoted region (`""`) unescape to a single literal quote. Single quotes are NOT treated as token boundaries, since users commonly type single quotes inside SQL fragments.
+
+- `joinArgsRespectingQuotes(string[] aTokens, int iStart)` is the inverse: rebuild a remainder string from a tokenized array, re-quoting any token that contains whitespace or quote characters so the result round-trips through `splitArgsRespectingQuotes` losslessly. Used by `tryDispatchPrefix` when it peels off the verb tokens and needs to pass the rest along to the next dispatch level.
+
+- `unquote(string sArg)` strips surrounding double quotes from a single argument and unescapes doubled inner quotes. For command handlers that take a "rest of the line" string argument that might be quoted (file paths most commonly), this is the simplest opt-in.
+
+**Handlers updated to be quote-aware**:
+
+- `cmdOpenDatabase`: file path can now be `open database "C:\My Stuff\foo.db"`. Previously the literal quotes were passed to `db.openDatabase()` and the open would fail.
+- `cmdImportData`: same fix for the Markdown-import file path.
+- `cmdExportData`: the legacy-single-path form correctly detects path extensions on the unquoted form, and the export call uses the unquoted path.
+- `cmdFindRegex`: the `<column> <pattern>` parse uses `splitArgsRespectingQuotes`, so `find regex Notes "stays \"in\" quotes"` works (note: in the user's typed string, two double quotes in a row inside the outer quotes become a literal double quote in the pattern).
+- `tryDispatchPrefix`: the prefix matcher uses the quote-aware tokenizer when peeling off the verb tokens, so the trailing arguments survive the rejoin intact.
+
+**The Find / Jump / Search / Say-X handlers that take a single string argument** were not retrofitted. Their typical usage is a single unquoted token; adding `unquote()` to all of them is mechanical and the user can request a sweep when they actually hit a case that bites. The case-insensitivity guarantee for command verbs is independent of these handler details and works regardless.
+
+**Dot-prompt CLI help index** (`help` with no argument) now begins with a CONVENTIONS section explaining case-insensitivity and quoting rules with concrete examples. Users no longer have to discover these by trial and error.
+
+**Validated**: brace and paren balance at 24370 lines; chord-conflict audit clean.
+
+## v1.0.93
+
+**Proper AP-style Title Case applied to canonical names.** The user clarified that "Title Case" in the user-facing UI should follow standard publishing convention -- principal words capitalized, short articles/prepositions/conjunctions lowercased when not first or last. Two names from v1.0.92 needed adjusting:
+
+- `Copy Record As New` → `Copy Record as New` ("as" is a mid-title 2-letter conjunction)
+- `Exit Child To Root` → `Exit Child to Root` ("to" is a mid-title 2-letter preposition)
+
+`Save Database As` stays as-is because "As" is the last word, and AP convention always capitalizes the last word.
+
+A focused audit of all 129 multi-word canonical names confirmed zero remaining short-word issues. The rule applied: lowercase articles (a, an, the), short coordinating conjunctions (and, but, or, nor, for, yet, so), and short prepositions (≤3 letters: in, on, at, to, by, of, as, up) when they appear mid-title; capitalize everything else including all 4+-letter prepositions.
+
+**Dot prompt now prefers multi-word interpretation over single-token aliases.** When the user types `edit settings export.csv`, the previous dispatcher would resolve "edit" as the bare alias for "edit-record" and try to dispatch as `edit-record settings export.csv` -- wrong. The new dispatcher runs `tryDispatchPrefix` before single-token alias resolution when the input line has 2+ space-separated tokens. If a multi-token prefix matches a canonical command, that wins; only when no multi-token interpretation applies does the bare-alias path run (so single-word input like `edit` still resolves to `edit-record` as before).
+
+This means **lowercase-with-spaces** is now the easy-to-type default at the dot prompt: `edit settings`, `jump record`, `say sort filter`, `find regex`, `save bookmark`. The hyphenated PowerShell-style form (`edit-settings`, `jump-record`, etc.) continues to work for users who prefer it. Both forms route to the same internal canonical token. (Some run-together canonical tokens like `exit-childtoroot` and `save-databaseas` still expect their hyphens between bare-words only; teaching the prefix matcher to also split run-together tokens is deferred to a future version.)
+
+**README updated** with explicit audience positioning. Windows screen reader and keyboard users are named as the top-priority audience. The "developer-culture conventions as alternatives" position is now documented: both the lowercase-with-spaces dot-prompt input form AND the PowerShell-flavored hyphenated form are first-class. The C# implementation continues to follow Camel Type. Three independent layers (user-facing names, dot-prompt input, internal code identifiers), each with its own convention chosen for its audience. The GitHub project URL (https://github.com/JamalMazrui/DbDuo) is now in both the README and the CLI About output.
+
+The outdated Alt+Shift+S reference for Toggle Extra Speech (the chord since v1.0.91 is Alt+Shift+Z) was also corrected in the README.
+
+**NuGet case-conversion library research.** Investigated candidate libraries CaseConverter (markcastle, v2.0.1, ~4M downloads via the CaseExtensions sibling package; both maintained), Minerals.StringCases (SzymonHalucha), Simple.CaseConverter, CaseON, and CaseDotNet. All convert between programmer-identifier conventions (camelCase, snake_case, kebab-case, PascalCase, Train-Case) with zero dependencies and broad .NET Framework / .NET Standard compatibility. **None of them implement proper AP-style Title Case** -- all "ToTitleCase" methods are naive "capitalize first letter of every word" wrappers around `TextInfo.ToTitleCase`. That's a different problem (mechanical case-conversion of identifiers) from natural-language Title Case (which requires knowing which words are articles/prepositions/conjunctions). Conclusion: not worth a NuGet dependency. The Title Case rules live in the source as documented logic future maintainers can adjust. The case-conversion problem for DbDuo is small enough that a global dictionary isn't needed either; the dot-prompt prefix matcher plus the helpful 60-entry alias table already cover both lowercase-with-spaces and hyphenated input.
+
+**Validated**: brace and paren balance at 24210 lines; chord-conflict audit clean.
+
+## v1.0.92
+
+**Canonical command names rewritten as Title Case With Spaces.** The user clarified that "title case" meant book-title convention (space-separated words with each word capitalized) for the user-facing form, while underlying C# code stays in Camel Type. Previous versions used Pascal-Case-With-Hyphens (`Edit-Settings`, `Toggle-KeyHelp`, `Jump-NextInitial`) as both the canonical display form and the dot-prompt input form; v1.0.92 separates these.
+
+**New canonical display form** (what command echo speaks, what Key Help announces, what the Alternate Menu lists, what MessageBox titles show): `Edit Settings`, `Toggle Key Help`, `Jump Next Initial`, `Save Database As`, `Switch Previous Table`, etc.
+
+**Dot-prompt input form is unchanged**: `edit-settings`, `toggle-keyhelp`, `jump-nextinitial`. The dot prompt is command-line syntax, not user-facing prose; whitespace would break the tokenizer. Users at the dot prompt continue to type hyphenated lowercase tokens.
+
+**289 canonical-name replacements** applied across all `addItem(...)` and `add(...)` help-table calls. Awkward Pascal-second-half words got natural word ordering at the same time:
+
+- `Save-DatabaseAs` → **Save Database As**
+- `Copy-RecordAsNew` → **Copy Record As New**
+- `Switch-TablePrevious` → **Switch Previous Table**
+- `Switch-ObjectPrevious` → **Switch Previous Object**
+- `Jump-RecordPrevious` → **Jump Previous Record**
+- `Jump-RecordAgain` → **Jump Record Again**
+- `Find-RegexPrevious` → **Find Previous Regex**
+- `Find-RegexAgain` → **Find Regex Again**
+- `Exit-ChildToRoot` → **Exit Child To Root**
+- `Copy-VisibleCells` → **Copy Visible Cells**
+- `Open-WebSite` → **Open Website** (single-word; modern convention)
+- `Open-CellarDatabase` / `Chinook` / `Collection` / `Northwind` / `Sample` → **Open Cellar/Chinook/Collection/Northwind/Sample Database**
+- `Open-FileFolder` → **Open File Folder**
+- `Open-ScriptFolder` → **Open Script Folder**
+- `About-DbDuo` → **About DbDuo**
+- `Invoke-Sql` → **Invoke SQL** (uppercased acronym)
+- `Open-Url`, `Say-Url` → **Open URL**, **Say URL**
+- `Say-Id` → **Say ID**
+
+**Acronym handling**: SQL, URL, and ID are uppercased to match common usage; everything else is initial-cap each word.
+
+**Backward-compatibility normalization** added to `KeyMap.summaryFor` and `KeyMap.descriptionFor`. Both lookups now compare a normalized key (hyphens collapsed to spaces, lowercased) so that older documentation, scripts, or muscle memory using the hyphenated form continue to find help: `Get-Help "Edit-Settings"` still works at the dot prompt and returns the same description that `Get-Help "Edit Settings"` does.
+
+**Dot-prompt error messages updated** where they referenced canonical names (e.g. `"Step-Record: count must be an integer."` is now `"Step Record: count must be an integer."`). The dot-prompt input verbs themselves (typed by the user) stay hyphenated.
+
+**Three special cases worth knowing about** for future maintenance:
+
+1. The `Step-Record` dot-prompt verb (an internal-only command with `next`/`previous`/`first`/`last` sub-arguments) keeps its hyphenated input form because it's never bound to a GUI menu item. Only its user-facing error/help text uses the Title-Case display form.
+
+2. The `Find-Previous`, `Jump-Record`, `Find-Regex`, etc. references that appeared **inside description prose** ("Find-Previous goes backward") were updated to match the new canonical form ("Find Previous goes backward"). This catches the descriptions that explain one command in terms of another.
+
+3. The `Measure-Field`, `Measure-Longest`, `Measure-Maximum`, `Measure-Minimum`, `Measure-Shortest` MessageBox titles were renamed to Title Case even though those names aren't bound to menu items. They appear in the `toolsMeasureClicked` flow as dialog titles, so they're user-facing and follow the same convention.
+
+**No chord changes this version.** No new commands; no removed commands. The visible difference is in spoken / displayed command names. Anyone whose muscle memory is "Ctrl+, opens Settings" continues to be served unchanged.
+
+**Validated**: brace and paren balance at 24194 lines; chord-conflict audit clean.
+
+## v1.0.91
+
+**Rollback marker:** v1.0.90 is the last version that maximized EdSharp/FileDir command-name and chord conventions. If anything in v1.0.91 or later feels wrong, rolling back to v1.0.90 restores the EdSharp/FileDir-maximized baseline (Edit-Configuration, Switch-KeyDescriber, Step-InitialChange, Save-Path on Shift+P, Lock-Database on Ctrl+F7, Toggle-Extra-Speech on Alt+Shift+X).
+
+The user's clarification ("relax the constraint to maximize EdSharp/FileDir conventions; optimize for DbDuo coherence first") guided this version. The renames below reflect that shift.
+
+**Toggle-Extra-Speech rebound to Alt+Shift+Z.** From Alt+Shift+X. The "zzz / hush" mnemonic was the user's suggestion; the new chord matches the introduced sibling Toggle-Command-Echo.
+
+**Toggle-Command-Echo added on Ctrl+Shift+Z.** New Help-menu item with click handler that mirrors helpExtraSpeechClicked: toggles `[Options] commandEcho` in DbDuo.ini, invalidates the runtime cache, force-speaks "Command echo on" / "off" through the live region, and updates its menu Checked state. Default ON, so new users hear command names by default; advanced users who find it noisy turn it off in one chord. Startup-time check-state initialization makes the menu reflect the persisted setting.
+
+**Command-echo has no effect in CLI/dot-prompt mode** — confirmed and documented in the help-table entry and a code comment. The `commandEcho` function is only called from the `addItem` / `addItemLocal` menu wrappers, not from the dot-prompt dispatcher. CLI users typed the command name themselves and shouldn't need it echoed back.
+
+**Settings dialog now has both speech toggles.** The Settings dialog (renamed from "Configuration Options" -- see below) exposes Command Echo and Extra Speech as checkboxes. OK saves both to DbDuo.ini, applies the runtime state immediately, and refreshes the corresponding menu Checked states.
+
+**Lock-Database removed entirely.** The user reframed the design assumption: anyone running DbDuo has full read-write authority over the data they opened. View-only commands (Say-Cell, Say-Position, etc.) let cautious users browse without risk; the explicit read-write/read-only toggle is overhead. Removed: menu item, field declaration, click handler, Enabled update, command-table entry, dot-prompt `lock` alias. The two `InvalidOperationException` messages that referenced Lock-Database now say "The database was opened read-only. Close it and reopen without the -readonly flag to enable editing." The `-readonly` command-line flag is preserved -- users who want to launch DbDuo with a database opened read-only from disk can still do `DbDuo.exe -readonly path`.
+
+**Renames** (with backward-compat aliases in the dot prompt so existing scripts and muscle memory keep working):
+
+- **Edit-Configuration → Edit-Settings** (menu label "Configuration Options..." → "&Settings..."). "Settings" is the defacto modern convention across Windows itself, macOS Ventura+, VS Code, Slack, Discord, and every Electron-generation app. One syllable shorter than "Configuration" and "Preferences"; scans faster for screen readers; matches new-user expectations regardless of background. Bound to **Ctrl+, (comma)** -- modern Windows convention -- with the menu entry still accessible without a chord.
+- **Switch-KeyDescriber → Toggle-KeyHelp** (menu label "&Key Describer" → "&Key Help"). "Key Describer" was an EdSharp-ism that newcomers can't guess; "Key Help" is self-documenting. The verb change from `Switch-` to `Toggle-` aligns with the Toggle-Extra-Speech / Toggle-Command-Echo pattern established this version.
+- **Step-InitialChange → Jump-NextInitial** (menu label "Next Initial Change (column-aware)..." → "Jump to Next Initial (where first letter changes)..."). Step-InitialChange was opaque jargon; Jump-NextInitial joins the established Jump-Record / Jump-RecordPrevious family of content-navigation commands.
+
+**On the audience analysis behind these choices** (recorded so future renaming has a reference): DbDuo's realistic user base splits into three tiers. Tier 1 is blind/visually-impaired technical users who already use EdSharp/FileDir daily and have PowerShell exposure -- they benefit from verb-noun naming and accept EdSharp conventions. Tier 2 is blind/visually-impaired non-technical users who manage personal data and know Microsoft Office conventions if anything -- they benefit from Office-aligned chords (Ctrl+S, Ctrl+P, Ctrl+F, F1 help) and clear menu labels over clever mnemonics. Tier 3 is sighted developers building accessible software who use DbDuo as a tool and reference -- they benefit from predictable command vocabulary.
+
+Where EdSharp conventions (Tier 1) and modern Windows conventions (Tier 2/3) overlap, both serve all tiers. Where they diverge, the modern conventions usually win because Tier 1 users adapt easily, the modern names expand the user base, and documentation is easier when names are self-evident. This version applies that principle: rename the jargon (Configuration, KeyDescriber, InitialChange), keep the pattern (PowerShell verb-noun), add the modern chord (Ctrl+, for Settings) without removing the menu access.
+
+**Brace and paren balance verified.** 24164 lines. No chord conflicts.
+
+## v1.0.90
+
+**Documentation pass following the v1.0.89 Narrator confirmation.** The user reports that v1.0.89 successfully speaks through JAWS, NVDA, and Narrator on Windows 11, closing the eight-round investigation that began in v1.0.76. This version consolidates what was learned and protects against future regressions.
+
+**No functional code changes.** The `dispatchNativeUiaNotification` per-call host-creation pattern from v1.0.87 is preserved as-is. ChatGPT's findings document (`Direct_Screen_Reader_Speech_Findings.md`, generated during the same investigation that produced the reference WinForms sample) is included under `chatgpt_reference/` for future maintainers. Its "Most Important Behavioral Finding" section is the empirical evidence that **reusing a provider for multiple announcements causes screen readers to silently drop later events**, even with unique activity IDs and even when the text differs. ChatGPT specifically tested provider reuse and confirmed it breaks Narrator and NVDA after the first announcement; only fresh-per-call works.
+
+This means a pool of N reused hosts (a tempting optimization to avoid HWND churn) is not safe: the dedupe heuristic appears to be per-source-HWND, so any reuse pattern will eventually drop announcements when two consecutive calls land on the same host. The cost of fresh-per-call is small in absolute terms -- creating a 1x1 Control with an HWND is on the order of tenths of a millisecond and a few KB of managed memory, and the retention ring caps live hosts at 5. For a database manager where announcements fire on user actions rather than in tight loops, the cost is invisible.
+
+**Updated comment block** on `dispatchNativeUiaNotification` now explicitly warns against "optimizing" the path to a reused host, citing ChatGPT's empirical finding. A future maintainer looking at the per-call allocation and thinking "this is wasteful" will see the warning before they break Narrator.
+
+**JAWS COM and NVDA controller-client paths preserved exactly as before.** Per the user's request following the v1.0.89 success: the direct-API paths remain primary in `sayForced`. `isJawsRunning() && jawsSay(...)` is tried first; if JAWS isn't running, `isNvdaRunning() && nvdaSay(...)` is tried next; only if neither reader is detected does the native UIA dispatch fire as the third-tier fallback (which is also the only path that reaches Narrator). All four functions (`jawsSay`, `nvdaSay`, `isJawsRunning`, `isNvdaRunning`) are unchanged. If future problems with the UIA path arise -- a Windows update changes the dedupe heuristic, NVDA's controller-client adds a new failure mode, anything -- the direct-API paths are still there to fall back on cleanly.
+
+**Pool-design investigation summary** (recorded in case it ever needs revisiting): briefly explored replacing per-call creation with a pool of 3 hosts cycled round-robin. The thought was that three different source HWNDs would defeat the dedupe heuristic for any reasonable sequence of repeated announcements. The risk: if dedupe is per-source-HWND rather than over the most-recent-N sources, the pool would work fine until two consecutive announcements happened to land on the same host (a sequence of 4 same-text announcements with a pool of 3 means the 4th repeats the 1st host's text -- silent drop). That's an intermittent failure mode that would be hard to debug later. ChatGPT's empirical finding explicitly tested provider reuse and found it breaks, so the pool was reverted before shipping. Future revisiting only makes sense if a Windows update changes the dedupe behavior in a documented way.
+
+**chatgpt_reference/ folder** in the install tree now contains: the seven C# / manifest files (`AnnouncerProvider.cs`, `NotificationHostControl.cs`, `MainForm.cs`, `Program.cs`, `UiaNativeMethods.cs`, `DiagnosticLogger.cs`, `app.manifest`) plus the findings markdown. The whole bundle is preserved as the canonical record of how the native UIA path was discovered.
+
+## v1.0.89
+
+**Namespace clash fix for v1.0.87's UIA code.** The build error on v1.0.88:
+
+```
+DbDuo.cs(740,13): error CS0104: 'AutomationNotificationKind' is an ambiguous
+  reference between 'System.Windows.Forms.Automation.AutomationNotificationKind'
+  and 'System.Windows.Automation.AutomationNotificationKind'
+DbDuo.cs(741,13): error CS0104: 'AutomationNotificationProcessing' is an
+  ambiguous reference...
+```
+
+Two `using` directives in DbDuo.cs both pull in enum types of the same name:
+
+- `using System.Windows.Forms.Automation;` -- added much earlier for `AutomationLiveSetting` (used by the hidden Label that DbDuo's legacy `say()` path mutates).
+- `using System.Windows.Automation;` -- added in v1.0.87 for the `IRawElementProviderSimple` / `AutomationNotificationKind` / `AutomationNotificationProcessing` infrastructure the native dispatch path needs.
+
+Both namespaces define `AutomationNotificationKind` and `AutomationNotificationProcessing` independently (they're distinct types in distinct assemblies that happen to share names). The compiler can't pick one without a fully-qualified reference.
+
+**Fix:** every use of these two enum names in the native-dispatch code is now fully qualified as `System.Windows.Automation.AutomationNotificationKind` / `System.Windows.Automation.AutomationNotificationProcessing`. Five sites total: the `UiaNative.UiaRaiseNotificationEvent` P/Invoke signature (two parameters) and the `dispatchNativeUiaNotification` method (three uses: declaring the local, the ternary that selects between `ImportantMostRecent` and `All`, and the argument to the P/Invoke). The other UIA types (`IRawElementProviderSimple`, `ProviderOptions`, `AutomationInteropProvider`) live only in `System.Windows.Automation.Provider`, so no qualification is needed for them.
+
+No behavioral change. v1.0.87's native UIA dispatch (NotificationHostControl / AnnouncerProvider / UiaNative) is the same; only the type-resolution at compile time is fixed.
+
+## v1.0.88
+
+**Build-script fix for v1.0.87's UIA references.** v1.0.87 added two new `/reference:` entries to `buildDbDuo.cmd` for `UIAutomationProvider.dll` and `UIAutomationTypes.dll`, passing the bare DLL names and assuming csc.exe would resolve them through `csc.rsp`. It doesn't -- csc.exe's response file lists a fixed set of common framework assemblies, and these two are not in it. The build failed with:
+
+```
+error CS0006: Metadata file 'UIAutomationProvider.dll' could not be found
+error CS0006: Metadata file 'UIAutomationTypes.dll' could not be found
+```
+
+A stale or empty `DbDuo.exe` from a previous successful build was left on disk, and running it triggered Windows's misleading "Unsupported 16-Bit Application" dialog -- which appears when the loader sees a truncated or zero-byte MZ image, not because the file is actually 16-bit.
+
+**The fix:** `buildDbDuo.cmd` now resolves both DLLs by probing the standard reference-assemblies folder hierarchy and the runtime GAC, then passes full paths to csc:
+
+1. **Primary location**: `C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.8\` -- present whenever the .NET Framework 4.8 Developer Pack is installed.
+2. **Earlier-version fallback**: same folder under v4.7.2 / v4.7.1 / v4.7 / v4.6.2 / v4.6.1 / v4.6 / v4.5.2 / v4.5.1 / v4.5. The API surface of these two assemblies has been stable since 4.5.
+3. **Runtime GAC fallback**: `%SystemRoot%\Microsoft.NET\assembly\GAC_MSIL\UIAutomationProvider\v4.0_4.0.0.0__31bf3856ad364e35\UIAutomationProvider.dll` and the matching path for `UIAutomationTypes`. Always present on Windows 10+, since UIA itself depends on these assemblies being installed.
+
+If neither source is reachable, the build aborts with a clear message pointing to the .NET Framework 4.8 Developer Pack download. Both resolved paths are written to `buildDbDuo.log` so future build failures are diagnosable.
+
+**Defensive cleanup:** `buildDbDuo.cmd` now deletes any existing `DbDuo.exe` before compile, so a failed build leaves no half-written executable behind. This prevents the "Unsupported 16-Bit Application" dialog from surfacing when the user runs DbDuo after a build failure they may not have noticed.
+
+No code changes in `DbDuo.cs` this version -- the v1.0.87 native UIA dispatch (NotificationHostControl / AnnouncerProvider / UiaNative) is unchanged. Once this build succeeds, Narrator should hear DbDuo announcements as JAWS and NVDA already do.
+
+## v1.0.87
+
+**UIA Notification breakthrough -- Narrator now works.** The user obtained a working reference WinForms .NET Framework 4.8 sample from ChatGPT that reaches JAWS, NVDA, and Narrator simultaneously on Windows 11. This version adopts ChatGPT's technique into DbDuo's `LiveRegion` speech path.
+
+**The fundamental shift:** previous versions called `AccessibleObject.RaiseAutomationNotification` via reflection (the managed wrapper). That API on .NET Framework 4.8 only works for four control types (Label / LinkLabel / GroupBox / ProgressBar) per Microsoft documentation, and even those don't reach Narrator reliably. v1.0.87 replaces the managed path entirely with **native P/Invoke against `UIAutomationCore.dll`'s `UiaRaiseNotificationEvent`**, supplying a custom `IRawElementProviderSimple` anchored to a real window via `WM_GETOBJECT`. The native function has none of the managed wrapper's restrictions; the screen reader's UIA listener picks up the event directly.
+
+**Implementation:**
+
+- New top-level class `NotificationHostControl : Control` -- 1x1 invisible Control that overrides `WndProc` to return its `AnnouncerProvider` when UIA queries the window via `WM_GETOBJECT` (0x003D). Each notification gets a fresh host (anti-dedupe sequence number, retained on a 5-deep ring so UIA's async source-lookup completes successfully).
+- New top-level class `AnnouncerProvider : IRawElementProviderSimple` -- implements the minimal-but-complete property set UIA expects (Name, AutomationId, ControlType=Text, FrameworkId, IsControlElement, IsContentElement). `HostRawElementProvider` anchors via `AutomationInteropProvider.HostProviderFromHandle`.
+- New top-level class `UiaNative` -- P/Invoke binding for `UiaRaiseNotificationEvent` in `UIAutomationCore.dll`.
+- `LiveRegion.dispatchNativeUiaNotification` is the new private worker. It marshals to the UI thread if needed, creates a fresh host, calls the native function, and retains the last 5 hosts before disposing.
+- `LiveRegion.sayUiaString`, `sayUiaStringForced`, and `raiseUiaNotification` (the legacy entry point used by `sayViaUia` inside the dual `say()` pipeline) all route through `dispatchNativeUiaNotification`. The reflection-cached `MethodInfo` and probe flag are gone.
+
+**Build change:** `buildDbDuo.cmd` now adds `/reference:UIAutomationProvider.dll /reference:UIAutomationTypes.dll` so csc.exe resolves the `IRawElementProviderSimple` interface and `AutomationNotificationKind` / `AutomationNotificationProcessing` enums. These assemblies are part of .NET Framework 4.8 and ship on every modern Windows machine.
+
+**Reference files** preserved under `chatgpt_reference/` in the build folder for documentation: `AnnouncerProvider.cs`, `NotificationHostControl.cs`, `MainForm.cs`, `Program.cs`, `UiaNativeMethods.cs`, `DiagnosticLogger.cs`, `app.manifest`. Adapted from ChatGPT's `uia_notify_winforms_repeat_fix` sample.
+
+**README updated** to reflect that all three screen readers now work via the corrected UIA path. JAWS and NVDA continue to be served first by their direct-API paths (FreedomSci.JawsApi.SayString and nvdaControllerClient.dll) for lowest latency; the UIA path is the universal fallback that reaches Narrator and any other UIA-listening reader.
+
+**Test UIA Speech command** stays removed from the Help menu (v1.0.86 dropped it). The native dispatch path is exercised on every `LiveRegion.say` / `sayForced` / `sayUiaString` call now, so any DbDuo operation that announces also serves as a Narrator test.
+
+**Earlier eight rounds of speech-path debugging** (v1.0.76 - v1.0.86) were guided by the assumption that the managed `RaiseAutomationNotification` was the right API. Microsoft's documentation says so, the reference samples on the dotnet/winforms repo say so, and Kelly Ford's WPF demo demonstrates the equivalent path working on .NET 8. But on .NET Framework 4.8 the managed dispatch is unreliable for Narrator; only native P/Invoke through `UIAutomationCore.dll` reaches all three readers consistently. Lesson: when a working reference sample exists, read its actual source rather than the API docs that lead to a different implementation.
+
+**The wxPython equivalent** (also generated by ChatGPT, attempted by the user) reaches JAWS but not NVDA or Narrator. Inspection shows the wxPython version doesn't intercept `WM_GETOBJECT` on its host window; comtypes' `COMObject` provider is created but UIA can't verify it's associated with a real window in the tree. JAWS apparently doesn't verify; NVDA and Narrator do. Making wxPython work would require subclassing the panel's window procedure, which is a different complexity tier and not relevant to DbDuo. The native-P/Invoke technique remains a WinForms specialty.
+
+## v1.0.86
+
+**Major chord-and-command reorganization** per the user's spec in temp.txt. The pattern of dedicated Alt+letter ascending / Alt+Shift+letter descending sort chords for each standard column is retired; one universal Sort-Records dialog on Alt+Shift+S handles every sorting need by defaulting to the virtual column with an opt-in Descending checkbox.
+
+**Commands dropped entirely** (menu items, field declarations, click handlers, dot-prompt help entries, and the `SortDialog` Custom-Sort class): `Sort-Object`, `Sort-Ascending`, `Sort-Descending`, `Sort-ById`, `Sort-ByIdReverse`, `Sort-ByLook`, `Sort-ByLookReverse`, `Sort-ByTags`, `Sort-ByTagsReverse`, `Sort-ByUrl`, `Sort-ByUrlReverse`, `Sort-OldestFirst`, `Sort-RecentFirst`. The single `Sort-Records` command on Alt+Shift+S replaces all thirteen.
+
+**Sort-Records dialog flipped** to match the spec: checkbox is "Descending order" (default OFF, meaning ascending), so the natural default is ascending and the user opts in to descending.
+
+**Verb rename — Set-* → Edit-***. Internal verbs renamed: `Set-Cell` → `Edit-Cell`, `Set-Record` → `Edit-Record`. Menu labels were already "Edit Cell" and "Edit Record"; this aligns the verb spoken by the command-echo feature with the visible label. Dot-prompt commands `set-cell` and `set-record` retained as backward-compat aliases that redirect to `edit-cell` / `edit-record`. Detail help for `Set-Record` updated to show the new canonical name with a note about the alias.
+
+**F2 row-sync bug fix** (carried from v1.0.85): `recSetCellClicked` explicitly resyncs `db.absolutePosition = iVirtualRow` both before reading the cell value and again before committing the update, so F2 always edits the row the user hears after Alt+Control+arrow navigation regardless of background sync drift.
+
+**Test UIA Speech menu item removed entirely** (carried from v1.0.85): the diagnostic produced no audible result on tested configurations; the underlying `LiveRegion.sayUiaString` machinery stays in place as silent future-compatibility code.
+
+**Chord rebinds:**
+
+- `Open-Url` rebound from Ctrl+Shift+U to **Ctrl+U** (per spec). `Clear-Mark` (Unmark Record) lost its Ctrl+U chord to make room; reachable via the menu or via `Switch-Mark` (Ctrl+I) which toggles.
+- `Save-DatabaseAs` rebound from Ctrl+S to **Ctrl+Shift+S** (per spec). `Backup-Database` lost its Ctrl+Shift+S chord and is now menu-only.
+- `Append-Record` bound to **Alt+Shift+C** (previously unbound). `Edit-Configuration` (Configuration Options) lost its Alt+Shift+C chord; reachable through the Misc menu.
+- `Say-Updated` bound to **Shift+D** (previously unbound).
+- `Say-Added` (Shift+A) re-added — v1.0.85 had dropped this assuming the Added column was being abandoned, but the spec retains it.
+
+**Chords explicitly left as-is** (per user clarification): `Say-Path` stays on **Shift+P**, not Alt+P. Double-pressing Say-Path opens the existing `speakOrShow` memo dialog from which the path can be copied via Ctrl+C (Windows's "copy current line if no selection" convention). Alt+P and Alt+Shift+P are unassigned.
+
+**Deferred per spec's bracketed editorial comments** — items the user marked with square-bracket annotations indicating either ambiguous intent or new functionality requiring more than chord-rebinding:
+
+- All G-family commands (`Say Go to`, `Go to Record` with rich target syntax including "+3" / "-10" / "20%" / "+5%" / "-5%", `Repeat Go`, `Graphics Output`)
+- `Shift+J = Say Jump` with target-substring semantics
+- `Alt+K = List Bookmarks` (picker dialog)
+- `Control+L = List Column` (all values starting from first)
+- `Alt+Shift+N = New Database` (interactive schema builder merging with standard columns)
+- `Alt+Shift+Q = Query History` (10 most recent picker)
+- `Control+Shift+E = Extract Column` (semantics unclear vs existing `Extract-Regex` on the same chord)
+- `Control+Shift+R = Regex Replace` (in current column)
+
+These remain on the queue for future versions. Brace and paren balance verified at `brace=0, paren=0, lines=23971`. Chord-conflict audit passes cleanly.
+
+## v1.0.85
+
+**Naming fixes, F2 functional fix, plus partial chord reorganization.** The chord reshuffle the user requested has several ambiguous pieces that need clarification before completion; this version ships the unambiguous fixes and flags the remaining questions.
+
+**Done in this version:**
+
+- **Test UIA Speech menu item removed entirely** (field declaration, menu binding, click handler all gone). The UIA-path machinery in `LiveRegion` stays in place as a best-effort future-compatibility layer, but the user-facing diagnostic is gone since it produces no audible result on current configurations.
+- **Internal verb renamed: `Set-Cell` → `Edit-Cell`, `Set-Record` → `Edit-Record`.** Nine `Set-Cell` occurrences and four `Set-Record` occurrences updated across click handlers, dialog titles, and the command-name help table. Menu labels were already "Edit Cell" and "Edit Record"; this brings the verb that the command-echo feature speaks into alignment with the visible label.
+- **F2 row-sync bug fixed.** `recSetCellClicked` now explicitly synchronizes `db.absolutePosition` to `iVirtualRow` both before reading the field's value into the dialog and again before committing the update. The previous code relied on the existing sync paths (via `virtSyncListSelection` and `virtSyncFromListSelection`) but those don't fire on every code path; under filters, sorts, or background refreshes the cursor could drift. Defense in depth: F2 now always edits the row the user can actually hear via Alt+Control+arrow navigation.
+- **Say-Added (Shift+A) dropped entirely** — menu item, field declaration, and handler removed. Shift+A is now unassigned.
+- **Say-Updated bound to Shift+D** (was `Keys.None` since v1.0.67's wave-2 work).
+
+**Still pending — need user clarification:**
+
+1. **Where does Database Summary move?** Currently Alt+D. The user wants Alt+D for Sort-ByUpdated. The user suggested Alt+S, but Alt+S is already taken by `Measure-Column` (Statistics from Column). Options: (a) move Measure-Column elsewhere and give Database Summary Alt+S, (b) move Database Summary to a different chord entirely (e.g. Ctrl+Alt+D), or (c) leave Database Summary on Alt+D and pick a different chord for Sort-ByUpdated.
+2. **Url commands' chord home.** Currently the url-family lives on U: `Say-Url` (Shift+U), `Sort-ByUrl` (Alt+U), `Sort-ByUrlReverse` (Alt+Shift+U), `Open-Url` (Ctrl+Shift+U). The user suggested moving them to A-family chords now that Say-Added is gone. Question: keep url commands on U-family chords, or move them to A-family chords (Shift+A, Alt+A, Alt+Shift+A) where Say-Added used to be? If the latter, the new url chords would coexist with the existing `Sort-Ascending` (Alt+A) and `Sort-Descending` (Alt+Shift+A) which prompt for a column.
+3. **Generic sort placement.** Two "generic sort" commands exist: `Sort-Object` (currently Shift+S, full multi-column Custom Sort dialog) and `Sort-Ascending` / `Sort-Descending` (Alt+A / Alt+Shift+A, single-column prompt with direction). User wants "the generic sort" on Alt+Shift+S. Which of the two should land there?
+4. **Sort-ByUpdated chord.** Pending the answers above. Provisional plan if Database Summary moves successfully: Sort-ByUpdated on Alt+D, Sort-ByUpdatedReverse on Alt+Shift+D.
+
+The four pending items interact; I'd rather answer all of them in one round than ship a partial reshuffle that needs another correction pass. Tell me your preference on each and I'll do them together.
+
+## v1.0.84
+
+**Mystery resolved.** The reason Alt+W appeared to produce JAWS speech in DbDuo while the standalone UIA_WinForms_test app was silent: the speech the user heard from DbDuo's Alt+W was the **command echo** feature, which announces every GUI command's name through the JAWS direct-API path. JAWS was saying "Test UIA Speech" — the menu item's label as echoed by DbDuo's command-announcement system, not the UIA Notification's announcement payload. The Notification event itself was silent for JAWS in DbDuo too, just as it was in the test app.
+
+This means **the entire UIA Notification code path has been dead code** on .NET Framework 4.8 WinForms for the user's Windows 11 configuration. JAWS and NVDA support has been functioning correctly through their direct-API paths (`FreedomSci.JawsApi.SayString` and `nvdaControllerClient.dll`) the entire time. The `sayUiaString` family, the legacy `sayViaUia` fallback inside `say()`, and the Test UIA Speech menu item have all been firing the Notification event without anyone hearing it.
+
+**v1.0.84 keeps the UIA code in place** as a best-effort path that may benefit from future Windows or Narrator improvements, but adjusts user-facing surfaces to reflect reality:
+
+- **Alt+W chord removed from Test UIA Speech.** The chord was prime hotkey real estate that should be available for a feature that actually works. The Test UIA Speech menu item remains under Help, reachable through the menu, renamed to "Test UIA Speech (diagnostic)" so its purpose is clear.
+- **History entry is honest about the eight-round investigation.** No claim that the UIA path works for any reader on the tested configuration. If a future Windows update changes that, users can verify via the diagnostic menu item.
+
+The accessibility story DbDuo offers is: **JAWS and NVDA fully supported via direct APIs. Narrator support is best-effort via the documented UIA pattern; on current .NET Framework 4.8 WinForms / Windows 11 builds, the path does not reach Narrator in our testing.** README already reflects this from v1.0.83.
+
+**Investigation lessons documented for future reference:**
+
+1. When a feature appears to work, verify what the screen reader is actually saying — not just that "something" was spoken. Asking the user to read back the exact phrase would have resolved this in round one rather than round nine.
+2. Microsoft's documentation contains the definitive answer for .NET Framework 4.8 UIA behavior (Label, LinkLabel, GroupBox, ProgressBar are the only controls whose AccessibleObjects support the UIA Notification event). Web research at the start would have saved several rounds of source-priority experimentation.
+3. Command-echo features that announce menu item names are easy to mistake for the announcements those menu items make.
+
+Returning to actual database features next.
+
+## v1.0.83
+
+**Narrator status: best-effort.** After v1.0.82's source-priority fix (Label first, matching Microsoft's documented pattern) and eight rounds of attempted variations across v1.0.76 through v1.0.82, user testing on Windows 11 confirms Narrator still does not hear DbDuo's UIA Notification announcements. JAWS and NVDA work reliably via both their direct-API paths and (in v1.0.82+) the corrected UIA Notification path. Narrator does not.
+
+The investigation is concluded with this honest assessment: **DbDuo's UIA path is implemented per Microsoft's documented pattern**, but Narrator on Windows 11's current builds does not reliably honor `RaiseAutomationNotification` events from .NET Framework 4.8 WinForms apps the same way it does from .NET 6+ WPF apps. Kelly Ford's reference WPF demo built against .NET 8 reaches all three readers on the same machine where DbDuo's .NET Framework 4.8 build reaches only JAWS and NVDA. The runtime appears to be the discriminator; moving DbDuo to .NET 8 would bundle a 70-100 MB runtime, which is not acceptable per project policy.
+
+**Changes in this version:**
+
+- **README updated** to honestly state JAWS and NVDA are fully supported; Narrator is best-effort through the UIA path.
+- **Tested-with line updated** to reflect actual test results rather than aspirational support.
+- The `Test UIA Speech` command (Alt+W) is retained as a diagnostic. Users who want to know whether their particular Windows / Narrator configuration hears DbDuo can press it to find out. If a future Windows or Narrator update improves UIA Notification dispatch, DbDuo should benefit automatically without any further code changes -- the path is wired correctly per the documentation.
+
+**Looking forward:** the Narrator question is now off the active investigation list. DbDuo development can return to actual database features. Wave-3 commands, additional standard-column features, schema-introspection improvements, and the broader data-management roadmap are the next priorities.
+
+## v1.0.82
+
+**Root cause found.** Web research surfaced Microsoft's own documentation (https://learn.microsoft.com/en-us/dotnet/framework/whats-new/whats-new-in-accessibility) and the dotnet/winforms issue tracker (issue #4494). The documented constraint:
+
+> On .NET Framework 4.8, `AccessibleObject.RaiseAutomationNotification` is only honored by the AccessibleObject implementations of four controls: **Label, LinkLabel, GroupBox, and ProgressBar**. Calling it on any other control's `AccessibleObject` -- including a `Form`'s, a `Button`'s, a `TextBox`'s, or a `ListView`'s -- silently no-ops. The method returns success but no UIA event is dispatched.
+
+This is the root cause of seven rounds of debugging that started in v1.0.76. DbDuo's pure-UIA path (`sayUiaString` and friends) was raising the notification from the form's `AccessibleObject` from v1.0.78 onward, which silently no-ops. JAWS still spoke for Alt+W in user testing because DbDuo's legacy `say()` path mutates the hidden Label's `Text` from various places around the same time, which JAWS picks up as a separate `LiveRegionChanged` event. The Notification event from `sayUiaString` itself was never dispatched.
+
+The Microsoft-documented working pattern, copied verbatim from the .NET Framework "what's new in accessibility" page:
+
+```csharp
+raiseMethod.Invoke(progressBar1.AccessibilityObject,
+    new object[3] { /*Other*/ 4, /*All*/ 2, "The progress is 50%." });
+```
+
+A `ProgressBar`'s `AccessibilityObject`. Not a Form's, not a Button's.
+
+**Fix in `LiveRegion.raiseUiaNotificationNow`:** source priority reversed. The hidden Label is now the primary source. The form's AccessibilityObject remains as a last-resort fallback only because some path could in principle exist where the Label is unavailable (e.g., CLI-only launch), though such fallback firing is expected to silently no-op on .NET Framework 4.8.
+
+This is the same Label that `LiveRegion.attach` has been creating since v1.0.59 -- 1x1, tucked under the MenuStrip, `LiveSetting=Assertive`. It's a Label, so its `AccessibleObject` has the UIA Notification provider implementation. The previous "improvement" of using the form as source was a regression I shipped through five versions without realizing.
+
+**What this means for Narrator:** if Narrator was the problem all along because the WinForms UIA bridge on .NET Framework 4.8 has limited notification dispatch, Narrator should now hear the notification when sayUiaString fires from the Label. Whether Narrator does or doesn't pick this up is now testable cleanly.
+
+**Companion test app `UIA_WinForms_test.cs`** updated with the same fix: fires from the hidden Label, not the form. If the test app speaks for JAWS/NVDA/Narrator after this fix, the documentation-confirmed pattern is verified end to end. If only JAWS and NVDA speak and Narrator stays silent, then Narrator has an additional quirk specific to it -- but at minimum the JAWS and NVDA path will be working correctly via UIA Notification, not just incidentally through the LiveRegionChanged event from other code paths.
+
+## v1.0.81
+
+**Manifest added — declaring Windows 10/11 support.** The v1.0.80 test apps revealed an unexpected result: with the parameter count corrected to three, `AccessibleObject.RaiseAutomationNotification` returned `False` on every WinForms call (no exception, but the underlying UIA infrastructure rejected the call). The WPF test returned `SUCCESS` on every call but still produced no speech. Both apps logged `Environment.OSVersion = Microsoft Windows NT 6.2.9200.0` — that's Windows 8's version string, returned for any process that lacks an application manifest declaring newer-Windows support.
+
+This is the documented behavior of Windows's "version lying" feature: starting with Windows 8.1, unmanifested processes get Windows 8's reported version regardless of the actual OS. UIA 1.1 features added in Windows 10 1709 (Notification events specifically) check this manifested version and refuse to dispatch when the caller claims to be Windows 8 or older — silently, with `RaiseAutomationNotification` returning `False`.
+
+This explains:
+
+- Why the test .exes returned `False` / no-speech in v1.0.80.
+- Why JAWS and NVDA in the v1.0.76 testing of DbDuo's Alt+W appeared to "hear" the test message — they were actually responding to other accessibility events fired by the focus change into the menu and back, not the UIA Notification itself.
+- Why Narrator has been silent through all five rounds of attempted fixes — Narrator depends exclusively on the UIA Notification dispatch, which was being rejected at the manifest-version check.
+
+**Fix:** `DbDuo.manifest` ships now and is embedded via `csc /win32manifest:DbDuo.manifest` in `buildDbDuo.cmd`. The manifest declares Windows 10 (Id `{8e0f7a12-...}`) and earlier supportedOS GUIDs, requested execution level `asInvoker`, and per-monitor DPI awareness. The installer (`DbDuo_setup.iss`) ships `DbDuo.manifest` alongside `DbDuo.exe` and `DbDuo.ico` so it's visible in the install folder for diagnostic purposes, though Windows reads it from the .exe's embedded resource at runtime, not the disk file.
+
+**No other code changes.** The `LiveRegion` class still has the three-argument call from v1.0.80; that's correct and stays. The hypothesis is that v1.0.80's three-argument call was correct and the silent rejection was happening one layer above the parameter count. v1.0.81 tests that.
+
+If v1.0.81's Alt+W reaches Narrator (and JAWS and NVDA continue to hear it), the manifest hypothesis is confirmed and we can simplify DbDuo's speech architecture confidently. If Narrator is still silent, we need to look at the next layer — possibly Narrator's notification-source filter, or per-app verbosity policy.
+
+The companion `uia_test_apps.zip` is updated with `UIA_test.manifest` and modified build scripts that embed it. The WinForms test now also calls `GetLastWin32Error()` after every `Invoke` and logs the error code, so if `RaiseAutomationNotification` still returns `False`, the log will tell us the specific failure reason. The wxPython build script cleans `dist\` and `build\` before running PyInstaller to avoid the `PermissionError: Access is denied` that locked the previous .exe.
+
+## v1.0.80
+
+**Real fix for Narrator silence: three-argument call, not four.** Investigation triggered by the user's WinForms UIA test build, which JAWS reported "Parameter count mismatch" on every button. Microsoft's documentation and the dotnet/winforms GitHub repository both confirm: `AccessibleObject.RaiseAutomationNotification` takes three parameters (`AutomationNotificationKind`, `AutomationNotificationProcessing`, `string notificationText`), not four. The WPF equivalent `UIElementAutomationPeer.RaiseNotificationEvent` does take four; the activityId fourth parameter is set to `string.Empty` internally by WinForms.
+
+DbDuo's reflection invocations in `raiseUiaNotification` (used by the legacy `sayViaUia` Narrator-fallback path) and `raiseUiaNotificationNow` (used by v1.0.76's `sayUiaString`) had been passing four args from day one. Both call sites had `try/catch { /* swallow */ }` wrappers that hid the `TargetParameterCountException` thrown on every invocation. **JAWS and NVDA never noticed** because their direct-API paths (`FreedomSci.JawsApi.SayString` and `nvdaControllerClient.dll`) run first in `sayForced` and succeed; the broken UIA fallback never executes when those readers are running. **Narrator was the only path that depended on the UIA call**, and every invocation hit the exception silently.
+
+Both call sites in `DbDuo.cs` now pass exactly three arguments. The `sActivityId` parameter is removed from the helper chain `sayUiaString` → `raiseUiaNotificationWithMode` → `raiseUiaNotificationNow` since it no longer maps to any actual API parameter. Comments explain the WinForms vs WPF signature difference so this mistake doesn't recur.
+
+**An open question remains about v1.0.76 testing.** The user reported that v1.0.76's Alt+W (`sayUiaString`) made JAWS and NVDA speak "Test UIA speech" — but if every reflection invocation was throwing, neither reader should have heard anything via that code path. The only way speech could have reached them is if `MethodInfo.Invoke` was leniently accepting four args against a three-arg method (unlikely but not impossible) or if a parallel code path was firing in the same window of time. v1.0.80 will test cleanly: if Alt+W now reaches Narrator too, the three-arg fix is the answer; if Narrator still stays silent, we have a different problem to solve and JAWS/NVDA's previous success must have come from a path we haven't accounted for.
+
+**Test apps updated:**
+
+- **UIA_WinForms_test.cs** rewritten with the correct three-argument signature plus runtime logging. Every notification attempt writes a timestamped line to `uia_winforms_test.log` next to the .exe — button label, processing-mode value, reflection-lookup result, Invoke return value or exception type and message. Whatever happens, the log makes it visible.
+- **build_UIA_WPF_test.cmd** rewritten to reference WPF assemblies from the **runtime** location `%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\WPF\` instead of the Developer-Pack reference-assemblies folder. The runtime location is always present on Windows 10 1903+ and Windows 11 without needing any developer-pack install. Both build scripts now log full compiler output to `<scriptname>.log` so build failures are visible offline.
+
+The WinForms test should now produce speech on every button when run with JAWS, NVDA, or Narrator active. The WPF test should now build on a stock Windows 11 machine.
+
+## v1.0.79
+
+**Two more strategies attempted to make Narrator hear `sayUiaString`,** since v1.0.78's two changes (form-as-source, processing-mode=All) didn't reach Narrator on the user's Windows 11 setup:
+
+- **Deferred firing via `BeginInvoke`.** Narrator on Windows 11 can drop UIA notifications fired during the exact moment of menu-strip dismissal because it's busy processing the menu-close events. The notification now posts through the form's message queue rather than firing inline; it runs one message-loop turn later, after the menu-close events have drained. JAWS and NVDA are unaffected (they'd have heard the notification synchronously too). Synchronous path preserved as a fallback if `BeginInvoke` throws or if the form is unavailable.
+- **Source priority: `ActiveControl` > form > Label.** v1.0.78 used the form's `AccessibilityObject` as the notification source. v1.0.79 prefers `frmOwner.ActiveControl` first — whatever control has real focus when the notification fires (the listview, an input box, a dialog control). Narrator targets notifications by proximity to the focused element, so firing from the focused element itself is the most reliable way to reach Narrator. Falls back to the form's AccessibleObject (v1.0.78's source), then to the Label, in that order.
+
+This is still hypothesis-driven — Narrator's UIA event handling is under-documented and varies across Windows 11 builds. If Narrator still doesn't hear Alt+W after this build, the next candidates are:
+
+- Change `AutomationNotificationKind` from `Other` (4) to `ActionCompleted` (2). Some screen readers treat the two values differently; Narrator may prefer the more specific kind.
+- Change the processing mode to `ImportantAll` (0). Both `MostRecent` (3) and `All` (2) have been tried; `ImportantAll` is the one remaining mainstream option.
+- Add a UIA notification listener to the test command's own handler to confirm the notification is actually being raised on the wire (currently we have no visibility into whether the notification reaches the UIA event bus at all — Narrator's silence could mean it never received the event, OR it received it and chose not to speak).
+
+Diagnostic confirmation that may inform the next attempt: the user's Test-Reader diagnostic dialog reported `Windows reports any screen reader active: no` even with Narrator running. `SystemParametersInfo SPI_GETSCREENREADER` doesn't reliably detect Narrator (Microsoft hasn't documented why); this means DbDuo's existing detection logic mostly falls through to the UIA path for Narrator. The UIA path itself is the question.
+
+## v1.0.78
+
+**Narrator now hears `sayUiaString`.** Investigation of why the user's JAWS and NVDA picked up Alt+W's UIA notification but Narrator stayed silent yielded two probable causes; both are addressed in this build:
+
+- **Notification source changed from the 1x1 Label to the form itself.** Narrator is particular about which UIA element raises a notification: it honors notifications from top-level windows reliably, but tends to ignore them from marginal hidden controls. The Label (`lbl`, 1x1, tucked under the MenuStrip) had worked for JAWS and NVDA because both readers are permissive about source. The new `frmOwner` field on `LiveRegion` captures the form at `attach` time and `raiseUiaNotificationWithMode` uses the form's `AccessibilityObject` as the notification source. Falls back to the Label only if the form reference is unavailable.
+- **Processing mode changed from `MostRecent` (3) to `All` (2).** The legacy `sayViaUia` path (DbDuo's existing Narrator fallback inside `sayForced`) was already using `All` and getting through to Narrator; the new `sayUiaString` was using `MostRecent` for "polite queuing." Narrator may filter `MostRecent` differently from `All`. Switched the polite variant to `All` to match the path that's known to work for Narrator. `sayUiaStringForced` continues to use `ImportantMostRecent` (1) since interrupt behavior is the point of that variant.
+
+These changes are honest hypotheses, not guarantees — Narrator's notification handling is under-documented, and the only way to be sure is to test on a machine with Narrator running. If Narrator still stays silent, the next candidate is `ImportantAll` (0) or a different `AutomationNotificationKind` value than `Other` (4).
+
+**EdSharp / FileDir chord conventions enforced.** Per the user's reminder, EdSharp and FileDir both use Alt+Shift+C for "Configuration Options" and Alt+C for cell-level "Append to Clipboard." DbDuo's bindings now match:
+
+- **Alt+C** = Append Cell to Clipboard (unchanged, already in this configuration)
+- **Alt+Shift+C** = Configuration Options... (restored — v1.0.77 had moved this to no-chord to resolve a conflict with Append Record)
+- **Append Record** moves off Alt+Shift+C to no-chord, reachable via the Edit menu
+
+Verified against `EdSharp.cs` and `FileDir.cs`: both have `menuMiscConfigurationOptions` bound to "Alt+Shift+C" with the label "Configuration Options" or "Configuration Options ...". DbDuo's label "Configuration Options..." matches exactly.
+
+The Append Record chord change is a minor regression for users who used it. It's a rare command (collecting multiple records onto the clipboard with a separator); the menu access remains and the dot-prompt verb `append-record` still works. EdSharp/FileDir don't have an analogous record-level command, so dropping the chord respects the convention rather than inventing a new chord that DbDuo would need to defend long-term.
+
+A full audit of `addItem` chord assignments after this build confirms no duplicate chord registrations remain.
+
+## v1.0.77
+
+**Two fixes from in-use testing of v1.0.76:**
+
+**Alt+Shift+C chord conflict resolved.** v1.0.69 wave-2 introduced `Append Record` on Alt+Shift+C, but an older `Edit-Configuration` command (Configuration Options dialog, on the Misc menu) had been holding the same chord. WinForms' shortcut registration prints a warning at startup when the same chord is registered twice via a menu strip; the user saw that message on first load of v1.0.76. Resolution: `Edit-Configuration` lost the chord (set to `Keys.None`) — it's an infrequent setup command and remains reachable via the Misc menu and the dot prompt. `Append Record` keeps Alt+Shift+C as originally specified.
+
+A full audit of `addItem` chord assignments confirms no other duplicates remain after this fix.
+
+**Test UIA Speech command revised.** Two changes per user feedback:
+
+- **Chord changed from no-chord to Alt+W**, since JAWS auto-reads dialog text and the user reported difficulty distinguishing the direct-speech announcement from any dialog content that followed. Alt+W keeps the listview focused so the user hears only the UIA announcement.
+- **Follow-up explanatory dialog removed.** The handler now just fires `LiveRegion.sayUiaString` and returns. No MessageBox, no focus change. The shortened announcement text is "Pure UIA speech test. RaiseAutomationNotification only, no JAWS or NVDA specific API." If the user hears it, the path works.
+
+The original `Test Screen Reader Speech` (Test-Reader) command is unchanged — it continues to show its diagnostic MessageBox after speaking, because that path's whole purpose is to report which reader was detected and which API path was used. The two test commands now have complementary roles: Test-Reader for diagnostic detail, Test UIA Speech for fast pass/fail of the pure-UIA path.
+
+## v1.0.76
+
+**Pure-UIA speech path exposed as `sayUiaString` and `sayUiaStringForced`** on `LiveRegion`. Both methods fire `AccessibleObject.RaiseAutomationNotification` directly, bypassing JAWS's FreedomSci COM API, NVDA's controller-client DLL, and the Label/LiveRegionChanged intermediary. JAWS, NVDA, and Narrator all listen to the UIA Notification event in their default modes, so this path reaches all three without DbDuo needing to detect which reader is running.
+
+- `sayUiaString(sText)` uses the **MostRecent** processing mode (3) — polite, queues behind current speech.
+- `sayUiaStringForced(sText)` uses **ImportantMostRecent** (1) — interrupts current speech.
+
+These are separate from the existing `say()` and `sayForced()` methods, which continue to prefer per-reader APIs when JAWS or NVDA is detected. Nothing was removed; the new methods are an additional path the caller chooses explicitly. The activity-id string passed to the UIA event is `"DbDuo-Uia"` for the polite variant and `"DbDuo-Uia-Important"` for the interrupting variant, distinct from the existing `"DbDuo"` activity id so screen readers can distinguish the two pipelines if their announcement-history is being inspected.
+
+**Approach traces to** the WPF technique described by Kelly Ford in his UIANotifications demo (https://github.com/kellylford/TheWorkBench/tree/main/UiaNotifyDemo). The WinForms equivalent uses `AccessibleObject.RaiseAutomationNotification` instead of WPF's `UIElementAutomationPeer.RaiseNotificationEvent`, but the underlying UIA event is the same. DbDuo had a UIA path internally already (used in its Narrator fallback inside `sayViaUia`), but it was not exposed for direct caller invocation and it hardcoded the `All` processing mode (2); the new methods give callers explicit control over the polite-vs-interrupting choice.
+
+**New menu command Test-UIA Speech** under Help, no chord. Invokes `LiveRegion.sayUiaString` with a known test message and then displays an explanatory dialog so the user can compare its behavior to Test-Reader (which prefers JAWS COM and NVDA controller-client paths). Useful for diagnosing which speech path reaches a particular reader configuration.
+
+## v1.0.75
+
+**Inix format added as a supported import and export option.** The Inix format (extended .ini) is plain text with three powerful additions beyond classic .ini: multi-line string values (plain form starting after `key=` on its own line, or fenced form with `` ` `` or `"""` delimiters); sections that can be either a dictionary of dictionaries (named sections like `[Replace dog with cat]`) or a list of records (anonymous `[]` or numbered `[RecordNNN]`); and an implicit `[Global]` section for top-level keys before the first explicit section. No escape characters, no doubled quotes, no backslash sequences — values are stored verbatim. The format is the work of Jamal Mazrui in the KeyLine toolkit; DbDuo adopts it as another import and export format.
+
+DbDuo's Export Data now writes .inix as a list-of-records file, choosing the leading-zero width on the `[RecordNNN]` section name so that ASCII sort of section names matches numeric order: 5 records use `[Record1..5]`, 99 records use `[Record01..99]`, 999 records use `[Record001..999]`. NULL values are omitted from a record (no `key=` line at all), rather than written as an empty value. The output uses UTF-8 with BOM and CRLF line endings, the same as DbDuo's other text-file outputs.
+
+Import Data now accepts .inix files and inserts each section's pairs as a row in the current table. Keys that don't match a column on the target table are silently skipped (matching how the Markdown import handles unknown columns). The implicit `[Global]` section is treated as document metadata and skipped when the file has more than one section, which is the typical case for table-shaped .inix files.
+
+**One new static class on `DbDuo.cs`: `InixCodec`.** Public API:
+
+- `static List<Section> read(string sPath)` — parses an .inix file.
+- `static void writeAsConfig(string sPath, List<Section> lSections)` — writes named-section .inix.
+- `static void writeAsTable(string sPath, List<string> lFields, List<Dictionary<string,string>> lRows)` — writes list-of-records .inix.
+
+The codec is independent of `DbDuoManager`, so other tools or scripts in the DbDuo ecosystem can use it as a standalone format library.
+
+**New section "The Inix file format" in DbDuo.md** documents the format with examples covering all three forms (plain multi-line, fenced multi-line, list-of-records), the comment syntax including `[;Section]` for commenting out a whole section, the implicit `[Global]` section, and the use cases.
+
+**README updated** to state DbDuo's positioning goal explicitly: to be the most screen-reader-accessible and keyboard-accessible general-purpose relational-database manager available. The accessibility consideration is the design, not a layer applied on top.
+
+## v1.0.74
+
+**Two FileDir-style mark-and-move chords retired** to eliminate conflict with the data list's type-to-search. The chord `>` (Shift+Period) had been "Mark and next"; the chord `<` (Shift+Comma) had been "Unmark and next." Each had an alternate binding that's free of typeahead-search conflict, so retiring them costs nothing functionally. The surviving mark-and-move chords:
+
+- **Shift+DownArrow** — Mark and next
+- **Shift+UpArrow** — Mark and previous
+- **Alt+Shift+DownArrow** — Unmark and next
+- **Alt+Shift+UpArrow** — Unmark and previous
+
+Each of these is safe in the data list because Shift+arrow has no native meaning on a single-select ListView, so the chord can't conflict with typeahead-search (which only consumes printable characters).
+
+**Audit of remaining typeahead-search conflicts:** fifteen Shift+letter commands are still bound, none with an alternate chord. They are: Say-Path (Shift+P), Say-Yield (Shift+Y), Say-Marked (Shift+M), Say-Notes (Shift+N), Say-Tags (Shift+T), Say-Kin (Shift+K), Say-Added (Shift+A), Say-Cell (Shift+C), Say-Filter (Shift+F), Say-Id (Shift+I), Say-Look (Shift+L), Say-Related (Shift+R), Say-Url (Shift+U), Window-Summary (Shift+W, still a deferred stub), and Sort-Object (Shift+S, the multi-column Custom Sort). Each is the only binding for its command. Resolving the conflict requires either accepting that Shift+letter typeahead is unavailable in the data list (the current state) or moving the Say-X family to a different modifier set, which would break the mnemonic that the user deliberately chose for Shift+letter assignments. **The user's question — "are there any printable characters being used as hotkeys which do not have another hotkey that does the same thing?" — has the answer: yes, all fifteen Shift+letter hotkeys listed above.** Resolution deferred for user decision since the trade-off is a matter of design preference, not a technical bug.
+
+**Indexes auto-created on sortable standard columns.** `ensureRecommendedIndexes` already created `CREATE INDEX IF NOT EXISTS` on foreign-key columns and the `marked` column. v1.0.74 extends the criteria to cover the standard columns that are reachable via Alt+letter Sort-by hotkeys plus the timestamp columns commonly used as sort targets: `look` (Alt+L), `tags` (Alt+T), `url` (Alt+U), `added`, `updated`. The id column already has SQLite's implicit rowid-alias index, so it's excluded. Index names follow the existing convention `idx_<table>_<column>`. The IF-NOT-EXISTS guard keeps the operation idempotent across opens; databases opened before v1.0.74 will get the new indexes added the next time they're opened in v1.0.74 or later.
+
+## v1.0.73
+
+**Database Summary (Alt+D)** replaces the stub from v1.0.67. A read-only memo dialog opens with one line per table, each followed by an indented list of related tables — parents (where this table's rows point to another table) and children (where another table's rows point back). Every name carries a record count in parentheses. The currently-open table is listed first so the user opens the dialog already on the table they're thinking about; the rest follow alphabetically. Format example:
+
+```
+classes (3 records)
+  parent: teachers (3)
+  child:  enrollments (3)
+
+enrollments (3 records)
+  parent: classes (3)
+  parent: students (3)
+
+students (3 records)
+  child:  enrollments (3)
+
+teachers (3 records)
+  child:  classes (3)
+```
+
+The relation analysis follows DbDuo's column-naming convention (column `<other>_id` references table `<other>s`) rather than walking `PRAGMA foreign_key_list`, so the same algorithm works for .db, .xlsx, .csv, and any other tabular source where the convention has been adopted. Plain text throughout — no "schema," "primary key," "FK," or other database-internals language. The chord moved from the v1.0.67 stub's `Shift+D` to `Alt+D` per the user's spec; `Shift+D` is now free.
+
+**Find-in-pick-list: Ctrl+J, F3, Shift+F3.** Pick-list dialogs (Choose Table, Choose Database, Alternate Menu, Pick Field) now have the same find-and-advance chords as the data list. Ctrl+J prompts for a case-insensitive substring; F3 advances to the next match wrapping at the end; Shift+F3 retreats wrapping at the start. The substring persists across F3 presses for as long as the dialog is open. Implementation: a KeyDown handler attached to every ListBox added via `addListBox` / `addPickBox`, plus a single `sListSearchTerm` field on the `LbcDialog` that holds the most-recent substring. The dialog used by Ctrl+J is a tiny vanilla Form (one Label, one TextBox, one OK button, one Cancel button) rather than a nested LbcDialog — avoids event-routing complications when an LbcDialog hosts a ListBox that itself spawns a search dialog. The chord mapping mirrors the data list's: Ctrl+J = Jump-to (find first match from top), F3 / Shift+F3 = Find-Next / Find-Previous.
+
+**One new helper on `DbDuoManager`:** `countRowsOfTable(string sTable)` returns the row count via `SELECT COUNT(*) FROM <table>`, or -1 on any error. Read-only; doesn't disturb the current recordset's position, filter, or sort. Used by Database Summary; available to other consumers that want a cheap row count without opening a recordset.
+
+## v1.0.72
+
+**House style applies to developer documentation too.** The lowercase-url convention from v1.0.71 now reaches code comments and the History.md entries. Thirteen code comments in DbDuo.cs had "URL" lowercased to "url"; History.md had two cases corrected (Wikipedia URLs → urls, URL-encoding → url-encoding). Variable names continue to use Camel Type casing — `sUrl`, `lUrls` — since variable naming follows a separate convention.
+
+**Three additions to the Terminology section in DbDuo.md:**
+
+- "Database" used broadly — covers .xlsx, .csv, and .db. SQLite .db is the default for full functionality (triggers, generated columns, foreign-key drill, the standard-column convention); other formats are bridged via the Import Data and Export Data commands with as much of the listview experience preserved as the format supports. Standard columns can't be assumed on .xlsx or .csv tables; commands that use them already check via `hasField` and announce a clear refusal when absent.
+- Key-name convention — DbDuo follows the Freedom Scientific / JAWS names: Control, Alt, Shift, Enter, Escape, UpArrow, DownArrow, F1-F12, Apostrophe, Asterisk, and so on. Combinations written with `+` and no spaces. The convention matches what JAWS announces aloud when a key is pressed.
+- Camel Type for code — DbDuo's source follows the Camel Type style; the full specification is in `CamelType_CSharp.md` (markdown source) and `CamelType_CSharp.htm` (Pandoc-rendered HTML, new in this build). The build pipeline now generates the HTML alongside `DbDuo.htm` and `History.htm`; the installer bundles both.
+
+**Standard-column accesses audit.** A fresh audit of `db.getFieldValue("look")`, `db.getFieldValue("notes")`, etc. confirmed all such accesses are systematically guarded: either by an explicit `db.hasField(...)` check in the preceding lines (the Say-X family, Mail Record, Open Url) or by a try/catch with graceful fallback (loops that walk rows for batch operations, where one missing field shouldn't abort the whole loop). No unguarded paths would error on .xlsx / .csv tables.
+
+## v1.0.71
+
+**"url" lowercase as ordinary English.** Per the user's house style: write **url** in lowercase as a regular English noun in prose (sentences, dialog labels, tooltips, status-bar messages, live-region announcements that aren't sentence-initial), and **Url** in title case where title-casing applies (command names like Open Url and Say Url, menu labels like "Sort by Url"). The convention follows the same path natural English took with *laser*, *radar*, *scuba*, and *sonar* — words that began as acronyms but settled into lowercase ordinary nouns once the original expansion stopped being foreground knowledge for most users. Most people who type a url into their browser have never thought about what the letters stand for; calling the thing a "url" rather than a "URL" matches lived experience. Also matters for screen readers: "URL" gets spelled out as three letters (U-R-L), while "url" reads as one syllable (earl), which is faster and less interrupting in the audio stream for frequently-issued commands like Open Url and Say Url.
+
+**User-visible strings normalized:** six places in `DbDuo.cs` had uppercase URL in user-facing text. All six lowercased:
+
+- Open Cell Value menu label: "(URL or path)" → "(url or path)"
+- Open Cell Value column-picker tooltip: "opens the URL, file path, or folder path" → "opens the url, file path, or folder path" (the same string also had "current row" → "current record" applied per the v1.0.70 terminology rule)
+- Open-Cell "not a match" announcement: "Not a URL, file, or folder" → "Not a url, file, or folder"
+- Extract Regex dialog label: "pulling emails, URLs, or IDs" → "pulling emails, urls, or IDs"
+- Open Url failure MessageBox title text: "Could not open URL" → "Could not open url"
+- Self-update notification body: "The URL is:" → "The url is:"
+
+Two more in `DbDuo.md` prose normalized:
+
+- "open as URL" / "URL or a file path" in the Open Cell Value section → "open as url" / "url or a file path"
+- "URLs" in the Extract Regex description → "urls"
+
+Code comments containing "URL" were left alone — those are developer-facing and the lowercase-url convention is a user-facing style rule.
+
+**A new subsection in DbDuo.md's Terminology section** articulates the convention with two paragraphs: one explaining the laser/radar/scuba lineage and one explaining the screen-reader speech consideration. The convention is now documented so future contributions (and future Claudes) know the house style.
+
+**Command names unchanged:** Open Url, Say Url, Sort by Url, Sort-ByUrl / Sort-ByUrlReverse canonical names — all keep their title-case "Url" because title-casing applies to those layers (menu labels, canonical PowerShell-style verb names).
+
+## v1.0.70
+
+**Terminology rule formalized and applied.** After researching how end-user database products handle the "row vs record / column vs field / cell" naming question (Microsoft Access, FileMaker Pro, dBASE / FoxPro, the ADODB API all favor record / field for end-user-facing commands; PostgreSQL / SQL Server / Oracle documentation favors row / column; DBeaver uses both depending on the view mode — "Table view" vs "Record view"), DbDuo now articulates and enforces a deliberate context-driven mixture:
+
+- **Record** for actions that treat a row as a complete entity (New, Edit, Delete, Copy, Append, Mail, Mark, Unmark, Find, Jump). End-user-friendly, matches every dominant end-user database product, and matches ADODB's own internal vocabulary.
+- **Cell** for actions on a single value at the row-column intersection (Edit Cell, Copy Cell, Append Cell, Open Cell, Say Cell). Used when the user is operating at the listview's grid crosshair.
+- **Column** for actions that sweep vertically through one attribute (Sort by Column, Replace Column, Statistics from Column, Output Graphics, Select Columns, Sort-by-X shortcuts). Used when the user is operating on one attribute considered across all records.
+- **Field** for named attributes in a vertical-stack dialog (the Edit Record / New Record dialogs lay out one field per line; "column" would force mental translation back to the listview view, so "field" reads naturally there). Also used for individual attributes referred to by name: the `url` field, the `notes` field.
+- **Row** restricted to geometric / spatial references and screen-reader navigation announcements ("Row N column M," "Table has no rows," "Go to Row," "20 of 25 rows shown"). Avoid in command names; use "Record" instead.
+- **Table** for the schema-level object as a unit of navigation.
+
+The principle behind these choices: *the noun matches the layout the user sees when invoking the command*. In the listview's grid, the user sees rows, columns, cells. When the user opens an Edit Record dialog, the layout rotates 90 degrees — fields stack vertically — and "column" would force a mental translation, so we say "field" instead. When the action treats the whole record as one thing, "Record" reads naturally regardless of layout.
+
+**Specific user-facing changes:**
+
+- `Copy-Row` command renamed to `Copy-VisibleCells` ("Copy Visible Cells as TSV to Clipboard"). This differentiates it from `Copy-Record` (which copies ALL fields including hidden ones); the new name communicates the actual difference — Copy Record gets the full record, Copy Visible Cells gets only what's in the listview. `copy-row` remains as a backward-compatible dot-prompt alias.
+- `Invert Marked` parenthetical: "(toggle every row)" → "(toggle every record)"
+- `Mark All` and `Unmark All` parentheticals: "(every row in filtered view)" → "(every record in filtered view)"
+- `Copy Record` parenthetical: "(current row to clipboard)" → "(current record to clipboard)"
+- `Mail Record` parenthetical: "(from current row)" → "(from current record)"
+- `Open Url` parenthetical: "(current row's url column)" → "(current record's url field)" — also fixes the inner noun: the `url` attribute is named, so "field" not "column."
+- Seven Say-X menu labels normalized: Say-Notes / Say-Tags / Say-Added / Say-Id / Say-Look / Say-Related / Say-Url all changed from "current row's X" patterns to "current record's X" patterns, with the redundant trailing "field" word removed.
+
+**New "Terminology" section in DbDuo.md** (immediately after "How DbDuo is organized") documents the rule with examples and acknowledges that users who prefer SQL-canonical vocabulary can use the dot-prompt aliases (`find`, `new`, `edit`, `delete`, `copy`, `mark`, `unmark`) which use SQL-style verb naming. The acknowledgment matters: forty-plus years of database work spans both vocabulary traditions, and a single user may shift between them depending on whether they're writing SQL or operating the listview by keyboard.
+
+## v1.0.69
 
 **The wave-2 commands from the v1.0.65 spec are complete.** Thirteen new commands wired up in this build, finishing the last pending block:
 
 - **Append Record (Alt+Shift+C)** — like Copy Record but appends to the existing clipboard contents (separator: blank line). Each record renders as "field: value" lines so the clipboard accumulates several rows in human-readable form.
 - **New Copy (Ctrl+Shift+N)** — duplicates the current row. Opens the New Record dialog pre-filled with the current row's distinct field values; the user reviews, edits, and OK inserts as a new row. The `unq` column is cleared in the pre-fill since stored generated columns must be unique.
-- **Mail Record (Ctrl+Shift+M)** — scans the current row for an email-like column (containing 'email', 'e_mail', or 'mail' in the column name), then launches the system mail client via `mailto:` with the subject populated from `look` and body from `notes`. Uses `Uri.EscapeDataString` for proper URL-encoding of subject and body per RFC 6068.
+- **Mail Record (Ctrl+Shift+M)** — scans the current row for an email-like column (containing 'email', 'e_mail', or 'mail' in the column name), then launches the system mail client via `mailto:` with the subject populated from `look` and body from `notes`. Uses `Uri.EscapeDataString` for proper url-encoding of subject and body per RFC 6068.
 - **Open New Recordset (Ctrl+Shift+O)** — prompts for a SQL SELECT or WITH statement and opens the result as a read-only recordset. Find, Filter, Sort, Say-X all work; Mark, Edit, Delete refuse because the result has no table identity. Useful for ad-hoc views that don't justify creating a permanent SQLite VIEW. New method `openSqlRecordset` on `DbDuoManager` does the work; calls `oRecordset.Open(sql, conn, adOpenStatic, adLockReadOnly, adCmdText)` against ADODB, sets a synthetic current-table name `(ad-hoc SELECT)` so dialogs and status bars have something to display.
 - **Eight Sort-by-standard-column shortcuts.** Each pair Alt+letter / Alt+Shift+letter sorts by a fixed standard column ascending or descending: Alt+I / Alt+Shift+I = Sort by Id (the table's actual primary key, resolved via `actualPrimaryKey`), Alt+L / Alt+Shift+L = Sort by Look, Alt+T / Alt+Shift+T = Sort by Tags, Alt+U / Alt+Shift+U = Sort by Url. Convenience aliases over Sort-Object so the user doesn't have to pick the column through a dialog for the standards that always exist on DbDuo-convention tables. All eight thread through a single helper `sortByFixedColumn` that sets `db.sort` and refreshes.
 
@@ -74,7 +1054,7 @@ All three refuse with a clear message if the current table is a view (read-only)
 
 **Find searches all columns, not just displayed.** Per the v1.0.65 spec the user reiterated this turn: Find, Reverse Find, Extract with Regex, Regex Find, and Reverse Regex Find now walk the FULL field set when searching, so hidden columns like `notes`, `tags`, `url`, and the bookkeeping timestamps are reachable. The Replace and Jump families still operate on the current virtual column only. Touched `findAcrossColumns`, `findRegexAcrossColumns`, and `extractRegexClicked`; each previously called `getDisplayFieldNames()` and now calls `getFieldNames()`.
 
-**Standard-column schema refresh for three bundled databases.** `sample.db`, `collection.db`, and `cellar.db` rebuilt with the v1.0.66 standard-column sequence: `<table>_id, added, updated, url, tags, notes, look, unq`. The new `url` column carries SQLite declared type `TEXTLINE` so DbDuo renders a single-line input box in Edit Record; `tags` and `notes` carry `TEXTMEMO` so they get the multi-line memo widget. Each row's data was rewritten to populate the new look/url/tags/notes fields with real content — sort names and Wikipedia URLs for the music collection, producer websites for the wine cellar, school emails for the students/teachers. The two textbook databases (`northwind.db`, `chinook.db`) were left untouched to preserve their canonical adapt-of-canonical-SQL-sample identity; ask if you want those regenerated too.
+**Standard-column schema refresh for three bundled databases.** `sample.db`, `collection.db`, and `cellar.db` rebuilt with the v1.0.66 standard-column sequence: `<table>_id, added, updated, url, tags, notes, look, unq`. The new `url` column carries SQLite declared type `TEXTLINE` so DbDuo renders a single-line input box in Edit Record; `tags` and `notes` carry `TEXTMEMO` so they get the multi-line memo widget. Each row's data was rewritten to populate the new look/url/tags/notes fields with real content — sort names and Wikipedia urls for the music collection, producer websites for the wine cellar, school emails for the students/teachers. The two textbook databases (`northwind.db`, `chinook.db`) were left untouched to preserve their canonical adapt-of-canonical-SQL-sample identity; ask if you want those regenerated too.
 
 **Select-list persistence to DbDuo.ini.** The per-table column selection set via Alt+S now survives across sessions. `RecentFiles.TableState` gained an `sSelectList` field; `loadSection` reads `t<n>_selectlist` from the section; `saveAll` writes the same key; `recordAllTableStates` pulls from the manager's `TableSettings.sSelectList` cache; `seedTableSettings` accepts the new parameter and restores the manager's cache when the database is reopened.
 

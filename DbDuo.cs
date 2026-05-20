@@ -36,6 +36,8 @@ using System.Text;
 using System.Threading;
 using System.Windows.Forms;
 using System.Windows.Forms.Automation;
+using System.Windows.Automation;
+using System.Windows.Automation.Provider;
 using Microsoft.CSharp.RuntimeBinder;
 
 namespace DbDuo
@@ -49,7 +51,7 @@ namespace DbDuo
     // =====================================================================
     public static class BuildInfo
     {
-        public const string VersionString = "1.0.69";
+        public const string VersionString = "1.0.104";
     }
 
     // =====================================================================
@@ -103,15 +105,20 @@ namespace DbDuo
     public static class LiveRegion
     {
         private static Label lbl;
+        // Form reference saved at attach time so the pure-UIA path can
+        // raise notifications from the form's AccessibleObject rather
+        // than the 1x1 Label's. Narrator is particular about
+        // notification source: it tends to honor notifications from
+        // a top-level window's AccessibleObject and ignore them from
+        // marginal hidden controls. JAWS and NVDA are more permissive
+        // and pick up either source.
+        private static Form frmOwner;
 
-        // Cache the reflection lookup of RaiseAutomationNotification so
-        // we don't probe AccessibleObject's metadata every call. The
-        // method exists from Windows 10 Fall Creators Update onward
-        // (.NET 4.7.1+) and is invoked dynamically because its
-        // signature uses internal-only enum types until later .NET
-        // versions exposed them.
-        private static System.Reflection.MethodInfo miRaiseNotification;
-        private static bool bNotificationProbed;
+        // Reflection cache for AccessibleObject.RaiseAutomationNotification
+        // was removed in v1.0.87 when the UIA path switched to native
+        // P/Invoke against UIAutomationCore.dll. See dispatchNativeUia
+        // Notification and the NotificationHostControl / AnnouncerProvider
+        // classes below.
 
         // Attach the live region to a form. Called once during form
         // construction. The Label is a real on-screen control with
@@ -128,6 +135,7 @@ namespace DbDuo
         public static void attach(Form frm)
         {
             if (lbl != null) return;
+            frmOwner = frm;
             lbl = new Label();
             lbl.AutoSize = false;
             lbl.Size = new Size(1, 1);
@@ -420,38 +428,348 @@ namespace DbDuo
             catch { }
         }
 
-        // Invoke AccessibleObject.RaiseAutomationNotification by
-        // reflection. The method accepts (kind, processing, text,
-        // activityId). We pass kind=4 (Other), processing=2 (All),
-        // and a unique activity id so screen readers don't dedupe.
+        // raiseUiaNotification: legacy entry point used by sayViaUia
+        // (which is invoked from say() as a Narrator-only fallback when
+        // neither JAWS COM nor NVDA controller-client is reachable).
+        // The historical reflection-on-Label path was a documented
+        // dead end on .NET Framework 4.8: only Label / LinkLabel /
+        // GroupBox / ProgressBar honor AccessibleObject.RaiseAutomation
+        // Notification on that runtime, and even then the dispatch did
+        // not reach Narrator reliably on Windows 11.
+        //
+        // v1.0.87 replaces the body with a native-P/Invoke call to
+        // UiaRaiseNotificationEvent against a fresh per-call custom
+        // IRawElementProviderSimple. That technique reaches all three
+        // readers (verified by ChatGPT's reference sample, which the
+        // user confirmed worked end to end). The reflection path is
+        // gone; the method signature stays so sayViaUia's call site
+        // doesn't have to change.
         private static void raiseUiaNotification(string sText)
         {
+            dispatchNativeUiaNotification(sText, /*All*/ 2);
+        }
+
+        // sayUiaString: pure-UIA speech path. Fires the UIA
+        // RaiseAutomationNotification event directly, without going
+        // through JAWS COM, NVDA controller client, or the Label/
+        // LiveRegionChanged intermediary. Use for testing the UIA
+        // path in isolation or when the caller wants a single,
+        // simple announcement that doesn't depend on JAWS or NVDA
+        // being detected.
+        //
+        // Reaches JAWS, NVDA, and Narrator in their UIA-listening
+        // modes (which is their default). Does NOT go through
+        // JAWS's FreedomSci.JawsApi.SayString or NVDA's
+        // nvdaControllerClient.dll, so this path is independent of
+        // any per-screen-reader API.
+        //
+        // Inspired by the WPF approach in Kelly Ford's UIANotifications
+        // demo (https://github.com/kellylford/TheWorkBench/tree/main/UiaNotifyDemo).
+        // The WinForms equivalent uses AccessibleObject's
+        // RaiseAutomationNotification instead of WPF's
+        // UIElementAutomationPeer.RaiseNotificationEvent, but the
+        // underlying UIA event is the same.
+        //
+        // Source element: the form's own AccessibleObject (not the
+        // hidden 1x1 Label that the legacy say() path uses). Narrator
+        // honors notifications from top-level windows but tends to
+        // ignore them from marginal hidden controls. JAWS and NVDA
+        // accept either. Processing mode is "All" (value 2), matching
+        // the behavior of the legacy sayViaUia path that DbDuo's
+        // Narrator fallback was already using successfully -- "All"
+        // means deliver to every listener without queue restrictions.
+        // sayUiaString: pure-UIA speech path. Fires the UIA
+        // notification event directly via native UIAutomationCore.dll,
+        // bypassing JAWS COM, NVDA controller client, and the legacy
+        // reflection-on-AccessibleObject technique that previous
+        // versions (v1.0.76 - v1.0.86) used. The new path is adapted
+        // from ChatGPT's verified reference sample which reaches
+        // JAWS, NVDA, and Narrator on the same machine.
+        //
+        // Why it works where the managed RaiseAutomationNotification
+        // failed: on .NET Framework 4.8, AccessibleObject.RaiseAutomation
+        // Notification is honored only by Label / LinkLabel / GroupBox /
+        // ProgressBar, and even those reach Narrator inconsistently.
+        // The native UiaRaiseNotificationEvent (in UIAutomationCore.dll)
+        // has no such restriction; given a fully-implemented
+        // IRawElementProviderSimple anchored to a real window through
+        // WM_GETOBJECT, the screen reader's UIA listener picks the
+        // event up directly.
+        //
+        // Reaches JAWS, NVDA, and Narrator in their UIA-listening
+        // modes. Does NOT go through JAWS's FreedomSci.JawsApi.SayString
+        // or NVDA's nvdaControllerClient.dll.
+        public static void sayUiaString(string sText)
+        {
+            dispatchNativeUiaNotification(sText, /*All*/ 2);
+        }
+
+        // sayUiaStringForced: like sayUiaString but uses the
+        // ImportantMostRecent processing mode, which screen readers
+        // treat as "interrupt current speech and say this now." Use
+        // for time-critical announcements (errors, completion of a
+        // long operation the user is waiting on).
+        public static void sayUiaStringForced(string sText)
+        {
+            dispatchNativeUiaNotification(sText, /*ImportantMostRecent*/ 1);
+        }
+
+        // dispatchNativeUiaNotification: the actual native UIA path.
+        // Adapted from ChatGPT-generated reference sample (which the
+        // user confirmed works for JAWS, NVDA, and Narrator on Windows
+        // 11 with .NET Framework 4.8). Bypasses the managed
+        // AccessibleObject.RaiseAutomationNotification API entirely.
+        //
+        //   1. Create a fresh hidden NotificationHostControl (custom
+        //      Control subclass that overrides WndProc to respond to
+        //      WM_GETOBJECT by returning a custom IRawElementProvider
+        //      Simple). The control is added to the form's Controls
+        //      so it has a real window handle; UIA's source-validity
+        //      check passes because WM_GETOBJECT returns a provider
+        //      genuinely associated with the hwnd.
+        //   2. Call UiaRaiseNotificationEvent (P/Invoke into
+        //      UIAutomationCore.dll) with the provider as the source.
+        //   3. Retain the host on a small ring so it survives long
+        //      enough for the screen reader's async UIA listener to
+        //      finish reading the Name property. We keep the last 5
+        //      hosts before disposing the oldest. The unique sequence
+        //      number on each host also prevents UIA from deduping
+        //      "same source + same text" pairs.
+        //
+        // Threading: must run on the UI thread (creating Controls and
+        // adding to frmOwner.Controls is a UI-thread operation). If
+        // called from a worker thread, marshal via frmOwner.BeginInvoke.
+        //
+        // Why a fresh host per call (and not a reused pool): ChatGPT's
+        // empirical investigation (uia_notify_winforms_repeat_fix
+        // sample, "Most Important Behavioral Finding" in its findings
+        // doc) determined that reusing a provider for multiple
+        // announcements causes screen readers / UIA to silently drop
+        // later events, even when the text differs. The dedupe
+        // heuristic appears to operate per-source-HWND, so any reuse
+        // -- whether a single host or a small pool cycled
+        // round-robin -- will eventually drop announcements when two
+        // consecutive calls land on the same host. A fresh control
+        // per call is the only pattern proven to work for JAWS, NVDA,
+        // and Narrator simultaneously.
+        //
+        // The cost is small in absolute terms: creating a 1x1 Control
+        // with an HWND is on the order of tenths of a millisecond and
+        // a few KB of managed memory. The retention ring caps the live
+        // host count at 5; older hosts are disposed and their HWNDs
+        // released. For a database manager where announcements fire
+        // on user actions (cell moves, refreshes, edits), this is
+        // invisible in normal usage. Do not "optimize" this to a
+        // shared host -- it has been tried and it breaks Narrator and
+        // NVDA after the first announcement.
+        private static System.Collections.Generic.List<NotificationHostControl> lOldHosts
+            = new System.Collections.Generic.List<NotificationHostControl>();
+        private static int iNotificationSequence;
+
+        private static void dispatchNativeUiaNotification(string sText, int iProcessing)
+        {
+            if (string.IsNullOrEmpty(sText)) return;
+            if (frmOwner == null || frmOwner.IsDisposed) return;
+            if (frmOwner.InvokeRequired)
+            {
+                try
+                {
+                    frmOwner.BeginInvoke(new Action(delegate()
+                    {
+                        dispatchNativeUiaNotification(sText, iProcessing);
+                    }));
+                }
+                catch { /* form may be tearing down; non-fatal */ }
+                return;
+            }
             try
             {
-                if (!bNotificationProbed)
+                iNotificationSequence++;
+                NotificationHostControl host = new NotificationHostControl(
+                    iNotificationSequence, sText);
+                host.Left = 0;
+                host.Top = 0;
+                frmOwner.Controls.Add(host);
+                host.CreateControl();  // force hwnd allocation
+                lOldHosts.Add(host);
+
+                // Retain the last 5 hosts. Disposing immediately can
+                // cause UIA / the screen reader to lose the source
+                // before reading the Name property asynchronously.
+                while (lOldHosts.Count > 5)
                 {
-                    bNotificationProbed = true;
-                    miRaiseNotification = typeof(AccessibleObject)
-                        .GetMethod("RaiseAutomationNotification");
+                    NotificationHostControl old = lOldHosts[0];
+                    lOldHosts.RemoveAt(0);
+                    try
+                    {
+                        if (frmOwner != null && !frmOwner.IsDisposed)
+                            frmOwner.Controls.Remove(old);
+                    }
+                    catch { }
+                    try { old.Dispose(); } catch { }
                 }
-                if (miRaiseNotification == null) return;
-                if (lbl == null) return;
-                AccessibleObject oAo = lbl.AccessibilityObject;
-                if (oAo == null) return;
-                // Args: (AutomationNotificationKind, AutomationNotificationProcessing, string, string)
-                // Pass the enum values as ints since the enum types
-                // may be internal on some .NET 4.8 SKUs.
-                object[] aArgs = new object[]
-                {
-                    /*AutomationNotificationKind.Other*/ 4,
-                    /*AutomationNotificationProcessing.All*/ 2,
+
+                // Fully qualify the enum types: both
+                // System.Windows.Forms.Automation and
+                // System.Windows.Automation define same-named enums
+                // (AutomationNotificationKind, AutomationNotification
+                // Processing). The UIAutomationCore.dll P/Invoke
+                // expects the System.Windows.Automation versions.
+                System.Windows.Automation.AutomationNotificationProcessing proc =
+                    (iProcessing == 1)
+                        ? System.Windows.Automation.AutomationNotificationProcessing.ImportantMostRecent
+                        : System.Windows.Automation.AutomationNotificationProcessing.All;
+                string sActivityId = "DbDuo." + iNotificationSequence.ToString() + "." + Guid.NewGuid().ToString("N");
+                UiaNative.UiaRaiseNotificationEvent(
+                    host.ProviderAnnouncer,
+                    System.Windows.Automation.AutomationNotificationKind.Other,
+                    proc,
                     sText,
-                    "DbDuo"
-                };
-                miRaiseNotification.Invoke(oAo, aArgs);
+                    sActivityId);
             }
-            catch { /* reflection-path failures are non-fatal */ }
+            catch { /* native UIA dispatch failures are non-fatal */ }
         }
+    }
+
+    // =====================================================================
+    // Native UIA dispatch helpers (v1.0.87). Adapted from ChatGPT's
+    // reference sample that the user confirmed reaches JAWS, NVDA, and
+    // Narrator simultaneously on Windows 11 with .NET Framework 4.8.
+    //
+    // NotificationHostControl is a 1x1 invisible Control that owns a
+    // genuine HWND. By overriding WndProc to respond to WM_GETOBJECT,
+    // it returns a custom IRawElementProviderSimple (AnnouncerProvider)
+    // when UIA queries the window. UIA / the screen reader sees a
+    // legitimate UIA element in the tree, so when we call
+    // UiaRaiseNotificationEvent against that provider, the event
+    // reaches all three readers.
+    //
+    // AnnouncerProvider is the IRawElementProviderSimple implementation.
+    // It exposes a minimal but complete set of UIA properties: Name
+    // (the message text), AutomationId, ControlType=Text, FrameworkId,
+    // IsControlElement=true, IsContentElement=true. HostRawElementProvider
+    // anchors the provider to the host window via
+    // AutomationInteropProvider.HostProviderFromHandle.
+    //
+    // UiaNative.UiaRaiseNotificationEvent is a P/Invoke binding to the
+    // native function in UIAutomationCore.dll. The managed wrapper
+    // AccessibleObject.RaiseAutomationNotification on .NET Framework
+    // 4.8 only works for four specific control types (Label, LinkLabel,
+    // GroupBox, ProgressBar) and even then doesn't reach Narrator
+    // reliably; the native function has no such restriction.
+    // =====================================================================
+    public class NotificationHostControl : Control
+    {
+        private const int c_iWmGetObject = 0x003D;
+        private AnnouncerProvider providerAnnouncer;
+        public int iSequence;
+        public string sMessageText;
+
+        public NotificationHostControl(int iSeq, string sMsg)
+        {
+            this.TabStop = false;
+            this.Width = 1;
+            this.Height = 1;
+            this.Text = "DbDuo notification host " + iSeq.ToString();
+            this.AccessibleName = sMsg;
+            this.iSequence = iSeq;
+            this.sMessageText = sMsg;
+            this.providerAnnouncer = null;
+        }
+
+        public AnnouncerProvider ProviderAnnouncer
+        {
+            get
+            {
+                ensureProvider();
+                return providerAnnouncer;
+            }
+        }
+
+        protected override void OnHandleCreated(EventArgs e)
+        {
+            base.OnHandleCreated(e);
+            ensureProvider();
+        }
+
+        protected override void WndProc(ref Message m)
+        {
+            if (m.Msg == c_iWmGetObject)
+            {
+                ensureProvider();
+                m.Result = AutomationInteropProvider.ReturnRawElementProvider(
+                    this.Handle, m.WParam, m.LParam, providerAnnouncer);
+                return;
+            }
+            base.WndProc(ref m);
+        }
+
+        private void ensureProvider()
+        {
+            if (providerAnnouncer == null && this.IsHandleCreated)
+            {
+                providerAnnouncer = new AnnouncerProvider(this.Handle, iSequence, sMessageText);
+            }
+        }
+    }
+
+    public class AnnouncerProvider : IRawElementProviderSimple
+    {
+        private const int c_iAutomationIdProperty   = 30011;
+        private const int c_iControlTypeProperty    = 30003;
+        private const int c_iFrameworkIdProperty    = 30024;
+        private const int c_iIsContentElementProperty = 30017;
+        private const int c_iIsControlElementProperty = 30016;
+        private const int c_iNameProperty           = 30005;
+        private const int c_iTextControlType        = 50020;
+
+        private IntPtr hWindow;
+        private int iSequence;
+        private string sName;
+
+        public AnnouncerProvider(IntPtr hWnd, int iSeq, string sNameIn)
+        {
+            this.hWindow = hWnd;
+            this.iSequence = iSeq;
+            this.sName = sNameIn;
+        }
+
+        public ProviderOptions ProviderOptions
+        {
+            get { return ProviderOptions.ServerSideProvider; }
+        }
+
+        public IRawElementProviderSimple HostRawElementProvider
+        {
+            get { return AutomationInteropProvider.HostProviderFromHandle(hWindow); }
+        }
+
+        public object GetPatternProvider(int iPatternId)
+        {
+            return null;
+        }
+
+        public object GetPropertyValue(int iPropertyId)
+        {
+            if (iPropertyId == c_iNameProperty)              return sName;
+            if (iPropertyId == c_iAutomationIdProperty)      return "DbDuoNotification" + iSequence.ToString();
+            if (iPropertyId == c_iControlTypeProperty)       return c_iTextControlType;
+            if (iPropertyId == c_iFrameworkIdProperty)       return "WinForms";
+            if (iPropertyId == c_iIsControlElementProperty)  return true;
+            if (iPropertyId == c_iIsContentElementProperty)  return true;
+            return null;
+        }
+    }
+
+    public static class UiaNative
+    {
+        [DllImport("UIAutomationCore.dll", PreserveSig = true)]
+        public static extern int UiaRaiseNotificationEvent(
+            IRawElementProviderSimple provider,
+            System.Windows.Automation.AutomationNotificationKind notificationKind,
+            System.Windows.Automation.AutomationNotificationProcessing notificationProcessing,
+            [MarshalAs(UnmanagedType.BStr)] string displayString,
+            [MarshalAs(UnmanagedType.BStr)] string activityId);
     }
 
     // =====================================================================
@@ -1390,7 +1708,7 @@ namespace DbDuo
         public static readonly string[] StandardHiddenColumns = new string[]
         {
             "added",
-            "updated",
+            "modified",
             "marked",
             "look",
             "unq",
@@ -1411,7 +1729,7 @@ namespace DbDuo
         public static readonly string[] BookkeepingColumns = new string[]
         {
             "added",
-            "updated",
+            "modified",
             "observed",
             "method",
             "look",
@@ -1422,8 +1740,18 @@ namespace DbDuo
         };
 
         public const string PrimaryKeySuffix = "_id";
-        public const string MarkedColumn = "marked";
-        public const string NotesColumn = "notes";
+        // Centralized standard-column names. Code that references
+        // these calculated/auto-managed columns should use the
+        // constants here instead of string literals so a future
+        // rename only needs to change the constant value.
+        public const string AddedColumn    = "added";
+        public const string MarkedColumn   = "marked";
+        public const string ModifiedColumn = "modified";
+        public const string NotesColumn    = "notes";
+        public const string LookColumn     = "look";
+        public const string TagsColumn     = "tags";
+        public const string UrlColumn      = "url";
+        public const string UnqColumn      = "unq";
 
         // Standard date-sort column resolution. dbDot's standard for
         // "when did this row last change" is 'updated' (the
@@ -1431,10 +1759,10 @@ namespace DbDuo
         // also a timestamp but records "when was this entity last
         // seen by the data-collection method" -- a different
         // semantic. 'added' is the row-creation timestamp; useful as
-        // a fallback when 'updated' is absent.
+        // a fallback when 'modified' is absent.
         public static readonly string[] DateSortColumns = new string[]
         {
-            "updated",
+            "modified",
             "added",
             "observed"
         };
@@ -1541,6 +1869,441 @@ namespace DbDuo
                 }
             }
             return sbOut.ToString();
+        }
+    }
+
+    // =====================================================================
+    // InixCodec: read and write .inix files. Inix is DbDuo's extended .ini
+    // format -- a friendlier serialization than JSON or TOML for both
+    // configuration data and tabular data, designed to be readable and
+    // editable in any plain-text editor.
+    //
+    // SYNTAX
+    //
+    // Sections: [SectionName] on a line. Sections in order; the file is
+    // a list of dictionaries. If the first line of the file is a key=value
+    // pair without a section header, an implicit "[Global]" section is
+    // assumed.
+    //
+    // Keys and values: key=value on a line. Whitespace around key and
+    // value is trimmed. Empty value (key=) starts a multi-line value
+    // that runs until the next key, the next section header, or EOF.
+    //
+    // Multi-line values, plain form:  key=  followed by lines verbatim
+    // until a line that contains '=' (a new key) or '[' (a new section)
+    // or end-of-file. Cannot contain lines whose first non-whitespace
+    // character is '=' or '['.
+    //
+    // Multi-line values, fenced form:  key=`  on a line by itself, then
+    // value lines verbatim, then a single `  on a line by itself to
+    // close. Python-style key="""  ...  """ is equivalent. The fenced
+    // form is the reliable way to embed '=' or '[' characters in a value.
+    //
+    // Comments: lines whose first non-whitespace character is ';' are
+    // ignored at the top level. A section can be commented out with
+    // [;SectionName] -- the whole section's body is skipped.
+    //
+    // Anonymous sections: [] (or just [Record], with optional NNN suffix)
+    // implies a list-of-records table. Each anonymous or [RecordNNN]
+    // section is one row. The keys of the first such section are the
+    // column headers; subsequent sections may include any subset.
+    //
+    // Encoding: UTF-8 with BOM. Line terminators: CRLF. Verbatim
+    // multi-line content preserves whatever line endings the source has.
+    //
+    // EXAMPLES
+    //
+    // Configuration form (dictionary of dictionaries):
+    //
+    //   ; Top-level "global" keys are an implicit [Global] section.
+    //   IgnoreCase = True
+    //
+    //   [Replace dog with cat]
+    //   find = dog
+    //   replace = Cat
+    //
+    //   [Replace sheep with goat]
+    //   find = Sheep
+    //   replace = goat
+    //
+    // Table form (list of records):
+    //
+    //   [Record01]
+    //   name = Alice
+    //   notes =
+    //   Alice's notes
+    //   over two lines.
+    //
+    //   [Record02]
+    //   name = Bob
+    //   notes = single-line note
+    //
+    // The leading-zero width on [RecordNNN] section names matches the
+    // record count: 5 records -> [Record1..5], 99 records -> [Record01..99],
+    // 999 records -> [Record001..999]. ASCII sort of section names then
+    // matches numeric order.
+    // =====================================================================
+    public static class InixCodec
+    {
+        // A single key/value pair, preserving order within a section.
+        public class Pair
+        {
+            public string Key;
+            public string Value;
+            public Pair(string sK, string sV) { Key = sK; Value = sV; }
+        }
+
+        // A single section: name plus ordered list of pairs. Order of
+        // pairs is preserved on round-trip.
+        public class Section
+        {
+            public string Name;
+            public List<Pair> Pairs = new List<Pair>();
+            public Section(string sName) { Name = sName; }
+
+            // Lookup is case-insensitive on the key (matches the .ini
+            // convention). Returns null if the key is absent.
+            public string get(string sKey)
+            {
+                foreach (Pair p in Pairs)
+                    if (string.Equals(p.Key, sKey, StringComparison.OrdinalIgnoreCase))
+                        return p.Value;
+                return null;
+            }
+
+            // Returns the full ordered list of keys.
+            public List<string> keys()
+            {
+                List<string> l = new List<string>();
+                foreach (Pair p in Pairs) l.Add(p.Key);
+                return l;
+            }
+        }
+
+        // Parse an .inix file. The returned list of sections preserves
+        // file order. Implicit "[Global]" is created if the file starts
+        // with key=value pairs before any explicit section header. The
+        // returned list is empty if the file has no sections and no
+        // top-level keys.
+        public static List<Section> read(string sPath)
+        {
+            if (string.IsNullOrEmpty(sPath)) throw new ArgumentException("InixCodec.read requires a path.");
+            if (!File.Exists(sPath)) throw new FileNotFoundException(".inix file not found.", sPath);
+            string[] aLines = File.ReadAllLines(sPath, new UTF8Encoding(true));
+            return parseLines(aLines);
+        }
+
+        // parseLines: the actual state machine. Separated from read so
+        // unit tests can drive it without disk I/O.
+        public static List<Section> parseLines(string[] aLines)
+        {
+            List<Section> lSections = new List<Section>();
+            Section secCurrent = null;       // null means "no section yet"
+            string sPendingKey = null;       // multi-line value accumulator state
+            StringBuilder sbValue = null;
+            string sFenceToken = null;       // "`" or "\"\"\"" when inside a fenced value
+            bool bSkipSection = false;       // section commented out via [;Name]
+
+            // Helper to commit a pending multi-line value to the
+            // current section. Strips the LAST trailing newline so that
+            // the value doesn't carry an extra CRLF from the closing
+            // line break.
+            Action commitPending = delegate()
+            {
+                if (sPendingKey == null) return;
+                string sFinal = (sbValue != null) ? sbValue.ToString() : "";
+                // Drop one trailing newline if present.
+                if (sFinal.EndsWith("\r\n")) sFinal = sFinal.Substring(0, sFinal.Length - 2);
+                else if (sFinal.EndsWith("\n")) sFinal = sFinal.Substring(0, sFinal.Length - 1);
+                if (secCurrent != null && !bSkipSection)
+                    secCurrent.Pairs.Add(new Pair(sPendingKey, sFinal));
+                sPendingKey = null;
+                sbValue = null;
+                sFenceToken = null;
+            };
+
+            for (int i = 0; i < aLines.Length; i++)
+            {
+                string sRaw = aLines[i] ?? "";
+
+                // Fenced multi-line value: accept the line VERBATIM
+                // until a closing fence appears on a line by itself.
+                if (sFenceToken != null)
+                {
+                    if (sRaw.Trim() == sFenceToken)
+                    {
+                        // Closing fence: commit and exit fenced mode.
+                        commitPending();
+                        continue;
+                    }
+                    if (sbValue.Length > 0) sbValue.Append("\r\n");
+                    sbValue.Append(sRaw);
+                    continue;
+                }
+
+                string sTrim = sRaw.Trim();
+
+                // Plain multi-line value: accumulate lines until we see
+                // a line that looks like a section header or a key=
+                // line. The plain form requires that continuation lines
+                // do NOT start with '[' or contain '=' as a meaningful
+                // separator. Comment lines (starting with ';') in plain-
+                // multi-line mode are treated as ordinary value content.
+                if (sPendingKey != null)
+                {
+                    bool bLooksLikeSection = sTrim.StartsWith("[") && sTrim.EndsWith("]");
+                    bool bLooksLikeKey = !sTrim.StartsWith(";")
+                                         && sTrim.IndexOf('=') > 0
+                                         && !looksLikePartOfValue(sTrim);
+                    if (bLooksLikeSection || bLooksLikeKey)
+                    {
+                        commitPending();
+                        // Fall through to process this line as the new
+                        // section or key.
+                    }
+                    else
+                    {
+                        if (sbValue.Length > 0) sbValue.Append("\r\n");
+                        sbValue.Append(sRaw);
+                        continue;
+                    }
+                }
+
+                // Section header.
+                if (sTrim.StartsWith("[") && sTrim.EndsWith("]") && sTrim.Length >= 2)
+                {
+                    string sInner = sTrim.Substring(1, sTrim.Length - 2);
+                    bSkipSection = sInner.StartsWith(";");
+                    if (bSkipSection)
+                    {
+                        // We still create a section with an empty name
+                        // and no pairs, but mark it skipped so we don't
+                        // store anything? Simpler: just don't create a
+                        // section at all -- the comment-out is total.
+                        secCurrent = null;
+                        continue;
+                    }
+                    if (sInner.Length == 0)
+                    {
+                        // Anonymous section in a list -- assign a
+                        // Record<N> name based on position. The N is
+                        // (count of unnamed/recordNNN sections + 1)
+                        // counting only data-bearing sections.
+                        int iN = countAnonymousOrRecord(lSections) + 1;
+                        sInner = "Record" + iN;
+                    }
+                    secCurrent = new Section(sInner);
+                    lSections.Add(secCurrent);
+                    continue;
+                }
+
+                // Skip comment and blank lines outside a value.
+                if (sTrim.Length == 0) continue;
+                if (sTrim.StartsWith(";") || sTrim.StartsWith("#")) continue;
+                if (bSkipSection) continue;
+
+                // Key=Value line.
+                int iEq = sRaw.IndexOf('=');
+                if (iEq <= 0) continue;  // not a valid key=value
+                string sKey = sRaw.Substring(0, iEq).Trim();
+                string sVal = sRaw.Substring(iEq + 1);
+
+                // If no section opened yet, create an implicit
+                // [Global] section.
+                if (secCurrent == null)
+                {
+                    secCurrent = new Section("Global");
+                    lSections.Add(secCurrent);
+                }
+
+                string sValTrim = sVal.Trim();
+                // Fenced multi-line starts with key=` or key=""" on a
+                // line by itself (the equals is part of the line; the
+                // fence token is the entire remainder).
+                if (sValTrim == "`" || sValTrim == "\"\"\"")
+                {
+                    sPendingKey = sKey;
+                    sbValue = new StringBuilder();
+                    sFenceToken = sValTrim;
+                    continue;
+                }
+                // Plain multi-line starts with key= (empty value on
+                // this line). The accumulator gathers subsequent lines
+                // until the next key= or section header.
+                if (sValTrim.Length == 0)
+                {
+                    sPendingKey = sKey;
+                    sbValue = new StringBuilder();
+                    continue;
+                }
+                // Single-line value.
+                secCurrent.Pairs.Add(new Pair(sKey, sValTrim));
+            }
+
+            // EOF: commit any open multi-line value.
+            commitPending();
+            return lSections;
+        }
+
+        // looksLikePartOfValue: a heuristic to keep the plain-multi-line
+        // parser from prematurely closing a value when a continuation
+        // line happens to contain an '=' character. We only treat
+        // 'x=y' as a key if the part before '=' is a plausible
+        // identifier (letters, digits, underscores). For values that
+        // contain natural-language text with arbitrary '=', users
+        // should use the fenced form.
+        private static bool looksLikePartOfValue(string sLine)
+        {
+            int iEq = sLine.IndexOf('=');
+            if (iEq <= 0) return true;
+            string sBefore = sLine.Substring(0, iEq).Trim();
+            if (sBefore.Length == 0) return true;
+            foreach (char c in sBefore)
+            {
+                if (!char.IsLetterOrDigit(c) && c != '_' && c != ' ' && c != '-')
+                    return true;
+            }
+            return false;
+        }
+
+        private static int countAnonymousOrRecord(List<Section> l)
+        {
+            int n = 0;
+            foreach (Section s in l)
+                if (s.Name != null && s.Name.StartsWith("Record",
+                    StringComparison.OrdinalIgnoreCase)) n++;
+            return n;
+        }
+
+        // ----------------------------------------------------------------
+        // Write helpers. Output is UTF-8 with BOM and CRLF line endings,
+        // matching the rest of DbDuo's text-file conventions.
+        // ----------------------------------------------------------------
+
+        // Choose the right fence for a value: prefer plain multi-line
+        // (no fence) when the value has no '=' or '[' that would
+        // confuse the plain parser; prefer ` when '"""' is in the
+        // value; prefer """ when "`" is in the value; fall back to
+        // ` as a default for fenced values.
+        private static string chooseFence(string sValue)
+        {
+            if (sValue == null) return null;
+            bool bHasEq     = sValue.IndexOf('=') >= 0;
+            bool bHasBkt    = sValue.IndexOf('[') >= 0;
+            bool bMultiline = sValue.IndexOf('\n') >= 0 || sValue.IndexOf('\r') >= 0;
+            if (!bMultiline && !bHasEq && !bHasBkt) return null;  // single-line literal OK
+            if (!bMultiline) return "`";  // single-line but with = or [ -> fence it for safety
+            // Multi-line. Choose a fence not present as a sole line.
+            bool bBacktickFree = !containsSoleLine(sValue, "`");
+            bool bTriquoteFree = !containsSoleLine(sValue, "\"\"\"");
+            if (bBacktickFree) return "`";
+            if (bTriquoteFree) return "\"\"\"";
+            // Both candidate fences collide. Backtick is rare in
+            // real-world text; prefer it and hope.
+            return "`";
+        }
+
+        private static bool containsSoleLine(string sValue, string sToken)
+        {
+            // Split on \n; a "sole line" is one whose trim equals the token.
+            int i = 0;
+            while (i < sValue.Length)
+            {
+                int j = sValue.IndexOf('\n', i);
+                int end = (j < 0) ? sValue.Length : j;
+                string sLine = sValue.Substring(i, end - i).TrimEnd('\r').Trim();
+                if (sLine == sToken) return true;
+                i = (j < 0) ? sValue.Length : j + 1;
+            }
+            return false;
+        }
+
+        // writeAsConfig: serialize a list of named sections as an
+        // .inix configuration file. Sections are written in the order
+        // given; pairs within each section in the order given.
+        public static void writeAsConfig(string sPath, List<Section> lSections)
+        {
+            if (string.IsNullOrEmpty(sPath)) throw new ArgumentException("writeAsConfig requires a path.");
+            if (lSections == null) throw new ArgumentNullException("lSections");
+            using (StreamWriter w = new StreamWriter(sPath, false, new UTF8Encoding(true)))
+            {
+                w.NewLine = "\r\n";
+                bool bFirst = true;
+                foreach (Section sec in lSections)
+                {
+                    if (sec == null) continue;
+                    if (!bFirst) w.WriteLine();
+                    bFirst = false;
+                    if (!string.IsNullOrEmpty(sec.Name)
+                        && !string.Equals(sec.Name, "Global", StringComparison.OrdinalIgnoreCase))
+                        w.WriteLine("[" + sec.Name + "]");
+                    writePairs(w, sec.Pairs);
+                }
+            }
+        }
+
+        // writeAsTable: serialize a sequence of records as an .inix
+        // list-of-records file. The leading-zero width on the section
+        // name [RecordNNN] is chosen so ASCII sort matches numeric
+        // order. Pairs within each record are written in the order
+        // they appear in lFields; values missing from a record are
+        // simply omitted (no "key=" with empty value).
+        public static void writeAsTable(string sPath, List<string> lFields,
+                                        List<Dictionary<string, string>> lRows)
+        {
+            if (string.IsNullOrEmpty(sPath)) throw new ArgumentException("writeAsTable requires a path.");
+            if (lFields == null || lRows == null) throw new ArgumentNullException();
+            int n = lRows.Count;
+            int iWidth = (n == 0) ? 1 : (int)Math.Floor(Math.Log10(n)) + 1;
+            string sFmt = "D" + iWidth;
+            using (StreamWriter w = new StreamWriter(sPath, false, new UTF8Encoding(true)))
+            {
+                w.NewLine = "\r\n";
+                for (int i = 0; i < n; i++)
+                {
+                    if (i > 0) w.WriteLine();
+                    w.WriteLine("[Record" + (i + 1).ToString(sFmt) + "]");
+                    Dictionary<string, string> dRow = lRows[i];
+                    if (dRow == null) continue;
+                    List<Pair> lPairs = new List<Pair>();
+                    foreach (string sF in lFields)
+                    {
+                        string sV;
+                        if (!dRow.TryGetValue(sF, out sV)) continue;
+                        if (sV == null) continue;
+                        lPairs.Add(new Pair(sF, sV));
+                    }
+                    writePairs(w, lPairs);
+                }
+            }
+        }
+
+        private static void writePairs(StreamWriter w, List<Pair> lPairs)
+        {
+            foreach (Pair p in lPairs)
+            {
+                string sKey = p.Key ?? "";
+                string sVal = p.Value ?? "";
+                string sFence = chooseFence(sVal);
+                if (sFence == null)
+                {
+                    // Single-line value, safe to write inline.
+                    w.WriteLine(sKey + " = " + sVal);
+                }
+                else
+                {
+                    // Fenced form, even if value happens to be single
+                    // line -- chooseFence returns non-null when the
+                    // single line contains '=' or '['.
+                    w.WriteLine(sKey + "=" + sFence);
+                    // Write value lines verbatim. Normalize line
+                    // endings to CRLF so the output is a Windows file.
+                    string sNormalized = sVal.Replace("\r\n", "\n").Replace("\r", "\n");
+                    foreach (string sLn in sNormalized.Split('\n'))
+                        w.WriteLine(sLn);
+                    w.WriteLine(sFence);
+                }
+            }
         }
     }
 
@@ -1710,12 +2473,22 @@ namespace DbDuo
 
         // ensureRecommendedIndexes: for every base table in the
         // currently-open SQLite database, issue CREATE INDEX IF
-        // NOT EXISTS on each foreign-key column (any column whose
-        // name ends in '_id' but is not the table's own primary key)
-        // and on any column named 'marked'. The IF NOT EXISTS guard
-        // means re-opening a database is idempotent -- only the
-        // first open of a database adds indexes; subsequent opens
-        // do nothing observable.
+        // NOT EXISTS on the columns that benefit from being indexed
+        // in DbDuo's typical access patterns:
+        //
+        //   - Foreign-key columns (any column whose name ends in
+        //     '_id' and is not the table's own primary key) -- used
+        //     by Show-Object's related-records lookup.
+        //   - The 'marked' column -- used by filters and the
+        //     bulk-mark / unmark operations.
+        //   - Standard sortable columns reachable via the Alt+letter
+        //     Sort-by hotkeys: look (Alt+L), tags (Alt+T), url (Alt+
+        //     U), plus added and updated which are common sort
+        //     targets from the Custom Sort dialog.
+        //
+        // The IF NOT EXISTS guard means re-opening a database is
+        // idempotent -- only the first open of a database adds
+        // indexes; subsequent opens do nothing observable.
         //
         // The naming convention is idx_<table>_<column>. SQLite
         // requires index names unique across the whole database,
@@ -1786,7 +2559,20 @@ namespace DbDuo
                                  && !string.Equals(sCol, "id", StringComparison.OrdinalIgnoreCase);
                     bool bIsMarked = string.Equals(sCol, Metadata.MarkedColumn,
                                                     StringComparison.OrdinalIgnoreCase);
-                    if (!bIsFk && !bIsMarked) continue;
+                    // Standard columns reachable via the Alt+letter
+                    // Sort-by hotkeys (added v1.0.69): look (Alt+L),
+                    // tags (Alt+T), url (Alt+U). Also added and
+                    // updated which are sortable from the Custom Sort
+                    // dialog and are very common sort targets. The PK
+                    // already has SQLite's implicit rowid-alias
+                    // index, so id is excluded.
+                    bool bIsSortableStandard =
+                        string.Equals(sCol, "look",    StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(sCol, "tags",    StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(sCol, "url",     StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(sCol, "added",   StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(sCol, "modified", StringComparison.OrdinalIgnoreCase);
+                    if (!bIsFk && !bIsMarked && !bIsSortableStandard) continue;
 
                     string sIdxName = "idx_" + sTable + "_" + sCol;
                     string sSql = "CREATE INDEX IF NOT EXISTS \""
@@ -2515,6 +3301,38 @@ namespace DbDuo
             return lResult;
         }
 
+        // countRowsOfTable: return the number of rows in a named table
+        // by running SELECT COUNT(*) FROM <table>. Returns -1 on any
+        // error (table absent, provider quirk). Read-only; doesn't
+        // disturb the current recordset's position, filter, or sort.
+        //
+        // Used by Database Summary (Alt+D) to report per-table totals.
+        public long countRowsOfTable(string sTable)
+        {
+            if (!isOpen() || string.IsNullOrEmpty(sTable)) return -1;
+            dynamic oRs = null;
+            try
+            {
+                string sQuoted = "[" + sTable.Replace("]", "]]") + "]";
+                oRs = createComObject("ADODB.Recordset");
+                oRs.Open("SELECT COUNT(*) AS n FROM " + sQuoted, oConn,
+                    0 /* adOpenForwardOnly */, 1 /* adLockReadOnly */, 1 /* adCmdText */);
+                if ((bool)oRs.EOF) return 0;
+                object v = oRs.Fields[0].Value;
+                long n = (v == null || v == DBNull.Value) ? 0 : Convert.ToInt64(v);
+                try { oRs.Close(); } catch { }
+                return n;
+            }
+            catch
+            {
+                return -1;
+            }
+            finally
+            {
+                if (oRs != null) releaseCom(oRs);
+            }
+        }
+
         // actualPrimaryKey: look up the actual primary-key column of
         // a named table from the database's own schema metadata,
         // rather than guessing from the table-name singularization.
@@ -2782,6 +3600,142 @@ namespace DbDuo
                 case 129: case 130: case 200: case 202: return "textline";
                 default: return "";
             }
+        }
+
+        // SchemaColumn: structural metadata for one column. Used by
+        // Table Summary (Alt+T) to render a per-column overview line
+        // packing the maximum useful info: name, type, key/null/FK
+        // status, default. Populated from PRAGMA table_info plus
+        // PRAGMA foreign_key_list on SQLite; falls back to a minimal
+        // (name + type) version on other backends.
+        public class SchemaColumn
+        {
+            public string name;
+            public string dataType;       // declared type, e.g. "TEXT" / "INTEGER"
+            public bool   isPrimaryKey;
+            public bool   notNull;
+            public string defaultValue;   // empty if none
+            public string foreignKeyRef;  // "tableName.columnName" or empty
+        }
+
+        // getSchemaColumns: return one SchemaColumn per column of the
+        // given table, in natural (schema-defined) order. SQLite path
+        // queries PRAGMA table_info plus PRAGMA foreign_key_list. For
+        // other backends, returns just name + type from the open
+        // recordset's Fields collection (no FK / PK / NOT NULL detail).
+        // Returns an empty list on failure.
+        public List<SchemaColumn> getSchemaColumns(string sTable)
+        {
+            List<SchemaColumn> lResult = new List<SchemaColumn>();
+            if (!isOpen() || string.IsNullOrEmpty(sTable)) return lResult;
+
+            string sExt = currentExtensionForSql();
+            if (sExt == "db" || sExt == "sqlite" || sExt == "sqlite3")
+            {
+                // PRAGMA table_info: cid(0), name(1), type(2),
+                // notnull(3), dflt_value(4), pk(5).
+                string sQuoted = "\"" + sTable.Replace("\"", "\"\"") + "\"";
+                dynamic oRs = null;
+                try
+                {
+                    oRs = createComObject("ADODB.Recordset");
+                    oRs.Open("PRAGMA table_info(" + sQuoted + ")", oConn,
+                        0 /* adOpenForwardOnly */, 1 /* adLockReadOnly */, 1 /* adCmdText */);
+                    while (!(bool)oRs.EOF)
+                    {
+                        SchemaColumn sc = new SchemaColumn();
+                        try { sc.name = oRs.Fields["name"].Value.ToString(); } catch { sc.name = ""; }
+                        try { sc.dataType = (oRs.Fields["type"].Value ?? "").ToString(); } catch { sc.dataType = ""; }
+                        try
+                        {
+                            object v = oRs.Fields["notnull"].Value;
+                            if (v != null) sc.notNull = Convert.ToInt32(v) != 0;
+                        }
+                        catch { }
+                        try
+                        {
+                            object v = oRs.Fields["dflt_value"].Value;
+                            if (v != null && v != DBNull.Value) sc.defaultValue = v.ToString();
+                            else sc.defaultValue = "";
+                        }
+                        catch { sc.defaultValue = ""; }
+                        try
+                        {
+                            object v = oRs.Fields["pk"].Value;
+                            if (v != null) sc.isPrimaryKey = Convert.ToInt32(v) != 0;
+                        }
+                        catch { }
+                        if (!string.IsNullOrEmpty(sc.name)) lResult.Add(sc);
+                        oRs.MoveNext();
+                    }
+                    try { oRs.Close(); } catch { }
+                }
+                catch (Exception ex)
+                {
+                    try { DbDuoLog.write("getSchemaColumns PRAGMA failed: " + ex.Message); }
+                    catch { }
+                }
+                finally { releaseCom(oRs); }
+
+                // PRAGMA foreign_key_list returns one row per FK
+                // constraint: id(0), seq(1), table(2), from(3), to(4).
+                // The 'from' column maps to one of our SchemaColumns.
+                dynamic oFk = null;
+                try
+                {
+                    oFk = createComObject("ADODB.Recordset");
+                    oFk.Open("PRAGMA foreign_key_list(" + sQuoted + ")", oConn,
+                        0, 1, 1);
+                    while (!(bool)oFk.EOF)
+                    {
+                        string sFrom = "", sToTable = "", sToColumn = "";
+                        try { sFrom = (oFk.Fields["from"].Value ?? "").ToString(); } catch { }
+                        try { sToTable = (oFk.Fields["table"].Value ?? "").ToString(); } catch { }
+                        try { sToColumn = (oFk.Fields["to"].Value ?? "").ToString(); } catch { }
+                        if (!string.IsNullOrEmpty(sFrom) && !string.IsNullOrEmpty(sToTable))
+                        {
+                            foreach (SchemaColumn sc in lResult)
+                            {
+                                if (string.Equals(sc.name, sFrom, StringComparison.OrdinalIgnoreCase))
+                                {
+                                    sc.foreignKeyRef = string.IsNullOrEmpty(sToColumn)
+                                        ? sToTable
+                                        : (sToTable + "." + sToColumn);
+                                    break;
+                                }
+                            }
+                        }
+                        oFk.MoveNext();
+                    }
+                    try { oFk.Close(); } catch { }
+                }
+                catch { }
+                finally { releaseCom(oFk); }
+
+                return lResult;
+            }
+
+            // Non-SQLite fallback: minimal (name + declared type) via
+            // the open recordset's Fields collection. No FK / PK info.
+            if (oRecordset != null)
+            {
+                try
+                {
+                    dynamic oFields = oRecordset.Fields;
+                    int iCount = (int)oFields.Count;
+                    for (int i = 0; i < iCount; i++)
+                    {
+                        dynamic oF = oFields[i];
+                        SchemaColumn sc = new SchemaColumn();
+                        try { sc.name = (string)oF.Name; } catch { sc.name = ""; }
+                        try { sc.dataType = adoxTypeToDeclaredName(Convert.ToInt32(oF.Type)); }
+                        catch { sc.dataType = ""; }
+                        if (!string.IsNullOrEmpty(sc.name)) lResult.Add(sc);
+                    }
+                }
+                catch { }
+            }
+            return lResult;
         }
 
 
@@ -3729,6 +4683,9 @@ namespace DbDuo
                 case "markdown":
                     exportMarkdown(sDestPath);
                     break;
+                case "inix":
+                    exportInix(sDestPath);
+                    break;
                 // Document formats.
                 case "html":
                 case "htm": exportHtml(sDestPath); break;
@@ -3753,7 +4710,7 @@ namespace DbDuo
                     break;
                 default:
                     throw new Exception("exportData: unsupported format ." + sExt
-                        + ". Supported: csv, tsv, md, html, xlsx, docx, db, sqlite, mdb, accdb, dbf. "
+                        + ". Supported: csv, tsv, md, inix, html, xlsx, docx, db, sqlite, mdb, accdb, dbf. "
                         + "xlsx and docx require Microsoft Office.");
             }
         }
@@ -5043,7 +6000,7 @@ namespace DbDuo
             if (!hasRecordset()) throw new InvalidOperationException("No recordset open. Use Open-Database first.");
             if (string.IsNullOrEmpty(sSourcePath)) throw new ArgumentException("importMarkdown requires a path.");
             if (!File.Exists(sSourcePath)) throw new FileNotFoundException("Markdown file not found.", sSourcePath);
-            if (readOnly) throw new InvalidOperationException("The database is locked (read-only). Toggle the Lock-Database command first.");
+            if (readOnly) throw new InvalidOperationException("The database was opened read-only. Close it and reopen without the -readonly flag to enable editing.");
 
             // Read every line. Files are usually small (Markdown
             // tables are rarely millions of rows); ReadAllLines is
@@ -5220,6 +6177,87 @@ namespace DbDuo
             bool bNeedsQuote = sValue.Contains(sDelim) || sValue.Contains("\"") || sValue.Contains("\n") || sValue.Contains("\r");
             if (!bNeedsQuote) return sValue;
             return "\"" + sValue.Replace("\"", "\"\"") + "\"";
+        }
+
+        // exportInix: walk the current recordset and write rows to an
+        // .inix file in list-of-records form. Each record becomes a
+        // [RecordNNN] section; NULL values are omitted (no "key=" line
+        // at all rather than an empty value). The encoding is UTF-8
+        // with BOM and CRLF line endings, matching DbDuo's text-file
+        // conventions. Inix's leading-zero width on the section name
+        // is chosen so ASCII sort of section names matches numeric
+        // order across the file.
+        //
+        // The exported file can be read back by an .inix-aware tool
+        // or by DbDuo's Import Data command. It is also readable as
+        // plain text in any editor -- the design goal of the format.
+        private void exportInix(string sDestPath)
+        {
+            object bookmarkObj = bookmark;
+            List<string> lFields = getFieldNames();
+            List<Dictionary<string, string>> lRows = new List<Dictionary<string, string>>();
+            moveFirst();
+            while (!eof)
+            {
+                Dictionary<string, string> dRow = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                foreach (string sN in lFields)
+                {
+                    string sV = getFieldValue(sN);
+                    if (sV != null) dRow[sN] = sV;
+                }
+                lRows.Add(dRow);
+                moveNext();
+            }
+            InixCodec.writeAsTable(sDestPath, lFields, lRows);
+            if (bookmarkObj != null) bookmark = bookmarkObj;
+        }
+
+        // importInix: read an .inix file (list-of-records form or
+        // [RecordNNN] form) and insert each section as a row in the
+        // current table. Keys that don't match any column on the
+        // target table are silently skipped (matching importMarkdown's
+        // tolerance). Returns the number of rows successfully inserted.
+        public int importInix(string sSourcePath)
+        {
+            if (!hasRecordset()) throw new InvalidOperationException("No recordset open. Use Open-Database first.");
+            if (string.IsNullOrEmpty(sSourcePath)) throw new ArgumentException("importInix requires a path.");
+            if (!File.Exists(sSourcePath)) throw new FileNotFoundException(".inix file not found.", sSourcePath);
+            if (readOnly) throw new InvalidOperationException("The database was opened read-only. Close it and reopen without the -readonly flag to enable editing.");
+
+            List<InixCodec.Section> lSections = InixCodec.read(sSourcePath);
+
+            // Map case-insensitively to destination column names.
+            List<string> lAllDest = getFieldNames();
+            HashSet<string> hDest = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (string sN in lAllDest) hDest.Add(sN);
+
+            int iInserted = 0;
+            foreach (InixCodec.Section sec in lSections)
+            {
+                if (sec == null || sec.Pairs.Count == 0) continue;
+                // Skip the implicit Global section if it appears in
+                // an otherwise table-shaped file -- it's almost
+                // certainly a header for the document, not a row.
+                if (string.Equals(sec.Name, "Global", StringComparison.OrdinalIgnoreCase) && lSections.Count > 1) continue;
+
+                try
+                {
+                    oRecordset.AddNew();
+                    foreach (InixCodec.Pair p in sec.Pairs)
+                    {
+                        if (!hDest.Contains(p.Key)) continue;
+                        try { oRecordset.Fields[p.Key].Value = p.Value; }
+                        catch { /* skip un-settable cells */ }
+                    }
+                    oRecordset.Update();
+                    iInserted++;
+                }
+                catch
+                {
+                    try { oRecordset.CancelUpdate(); } catch { }
+                }
+            }
+            return iInserted;
         }
 
         private void exportHtml(string sDestPath)
@@ -5507,9 +6545,9 @@ namespace DbDuo
         // dCommandToSummary: one-line summary per canonical verb,
         // verb-first plain text. Used by the menu status bar (when the
         // item has focus), by Alt+F10 Alternate Menu (inline after the
-        // chord), and by Control+F1 Key Describer (on its own line).
+        // chord), and by Control+F1 Key Help (on its own line).
         // dCommandToDescription: optional multi-line description used
-        // in the Alternate Menu's detail pane. (Key Describer itself
+        // in the Alternate Menu's detail pane. (Key Help itself
         // uses only the one-line summary -- a longer description would
         // be too verbose for a screen-reader announcement, so the
         // detail pane is the canonical surface for the long form.)
@@ -5519,12 +6557,12 @@ namespace DbDuo
             new Dictionary<string, string>();
         public static List<string> lConflicts = new List<string>();
 
-        // Key Describer mode. When true, hotkeys are intercepted and
+        // Key Help mode. When true, hotkeys are intercepted and
         // their (command, chord, description) triple is announced via
         // the live region instead of executing the command. The user
-        // toggles this via Ctrl+F1 (Help > Key Describer) or the dot-
-        // prompt verb Switch-KeyDescriber. Pattern mirrors EdSharp and
-        // FileDir's Key Describer mode exactly.
+        // toggles this via Ctrl+F1 (Help > Key Help) or the dot-
+        // prompt verb Toggle-KeyHelp. Pattern mirrors EdSharp and
+        // FileDir's Key Help mode exactly.
         public static bool bKeyDescriber = false;
 
         public static void register(Keys key, ToolStripMenuItem mi, string sCommand)
@@ -5555,6 +6593,19 @@ namespace DbDuo
         // markers and trailing "...") when no explicit summary is
         // registered. Always returns a non-empty string so callers
         // never need to null-check.
+        // normalizeCommandKey: collapse "Edit-Settings", "Edit Settings",
+        // "edit-settings", "edit settings" all to a single canonical
+        // lookup key. Used by summaryFor and descriptionFor so that
+        // older documentation, scripts, or muscle memory using the
+        // hyphenated form (the v1.0.91 and earlier canonical form)
+        // keeps finding help for the same commands renamed in v1.0.92
+        // to Title Case With Spaces.
+        private static string normalizeCommandKey(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return "";
+            return s.Replace("-", " ").Replace("_", " ").Trim().ToLowerInvariant();
+        }
+
         public static string summaryFor(string sCommand)
         {
             if (string.IsNullOrEmpty(sCommand)) return "";
@@ -5563,10 +6614,19 @@ namespace DbDuo
                 string s = dCommandToSummary[sCommand];
                 if (!string.IsNullOrEmpty(s)) return s;
             }
+            // v1.0.92: also try a normalized lookup so the historical
+            // hyphenated form ("Edit-Settings") finds the same entry
+            // as the Title-Case-with-spaces form ("Edit Settings").
+            string sNorm = normalizeCommandKey(sCommand);
+            foreach (KeyValuePair<string, string> kv in dCommandToSummary)
+            {
+                if (normalizeCommandKey(kv.Key) == sNorm && !string.IsNullOrEmpty(kv.Value))
+                    return kv.Value;
+            }
             // Fallback to the menu label.
             foreach (KeyValuePair<ToolStripMenuItem, string> kv in dMenuToCommand)
             {
-                if (kv.Value == sCommand)
+                if (kv.Value == sCommand || normalizeCommandKey(kv.Value) == sNorm)
                 {
                     string sLbl = kv.Key.Text.Replace("&", "");
                     if (sLbl.EndsWith("...")) sLbl = sLbl.Substring(0, sLbl.Length - 3).TrimEnd();
@@ -5583,8 +6643,16 @@ namespace DbDuo
         public static string descriptionFor(string sCommand)
         {
             if (string.IsNullOrEmpty(sCommand)) return "";
-            return dCommandToDescription.ContainsKey(sCommand)
-                ? dCommandToDescription[sCommand] : "";
+            if (dCommandToDescription.ContainsKey(sCommand))
+                return dCommandToDescription[sCommand];
+            // v1.0.92: also try a normalized lookup -- see summaryFor.
+            string sNorm = normalizeCommandKey(sCommand);
+            foreach (KeyValuePair<string, string> kv in dCommandToDescription)
+            {
+                if (normalizeCommandKey(kv.Key) == sNorm)
+                    return kv.Value;
+            }
+            return "";
         }
 
         // registerDisplayOnly: show a chord in the menu UI without
@@ -5638,6 +6706,56 @@ namespace DbDuo
             dKeyToMenu[key] = mi;
         }
 
+        // friendlyToKeysName: translate the friendly names DbDuo.ini
+        // uses ("Apostrophe", "Backslash", "Backspace") to the .NET
+        // Keys enum names that KeysConverter understands ("OemQuotes",
+        // "OemPipe", "Back"). Tokens already matching enum names
+        // pass through unchanged. Case-insensitive.
+        private static string friendlyToKeysName(string sTok)
+        {
+            switch (sTok.ToLowerInvariant())
+            {
+                case "ctrl":          return "Control";
+                case "esc":           return "Escape";
+                case "del":           return "Delete";
+                case "ins":           return "Insert";
+                case "apostrophe":    return "OemQuotes";
+                case "quote":         return "OemQuotes";
+                case "backslash":     return "OemPipe";
+                case "backtick":      return "Oemtilde";
+                case "tilde":         return "Oemtilde";
+                case "comma":         return "Oemcomma";
+                case "period":        return "OemPeriod";
+                case "semicolon":     return "OemSemicolon";
+                case "slash":         return "OemQuestion";
+                case "asterisk":      return "Multiply";
+                case "minus":         return "OemMinus";
+                case "dash":          return "OemMinus";
+                case "equals":        return "Oemplus";
+                case "plus":          return "Oemplus";
+                case "leftbracket":   return "OemOpenBrackets";
+                case "rightbracket":  return "OemCloseBrackets";
+                case "backspace":     return "Back";
+                case "uparrow":       return "Up";
+                case "downarrow":     return "Down";
+                case "leftarrow":     return "Left";
+                case "rightarrow":    return "Right";
+                case "numpad5":       return "NumPad5";
+                default:              return sTok;
+            }
+        }
+
+        // normalizeKeyText: translate the friendly tokens in a chord
+        // expression (Control+Shift+Apostrophe -> Control+Shift+OemQuotes)
+        // before handing to KeysConverter.
+        private static string normalizeKeyText(string sText)
+        {
+            string[] parts = sText.Split('+');
+            for (int i = 0; i < parts.Length; i++)
+                parts[i] = friendlyToKeysName(parts[i].Trim());
+            return string.Join("+", parts);
+        }
+
         public static bool overrideKey(string sCommand, string sKeyText)
         {
             ToolStripMenuItem mi = null;
@@ -5661,12 +6779,17 @@ namespace DbDuo
                 return true;
             }
 
+            // Translate friendly tokens (Apostrophe, Backslash, Ctrl,
+            // Backspace) into the Keys enum spelling KeysConverter
+            // expects, then convert.
+            string sForConverter = normalizeKeyText(sTrim);
+
             Keys key;
             try
             {
                 key = (Keys)System.ComponentModel.TypeDescriptor
                     .GetConverter(typeof(Keys))
-                    .ConvertFromString(sTrim);
+                    .ConvertFromString(sForConverter);
             }
             catch
             {
@@ -5711,19 +6834,19 @@ namespace DbDuo
             }
             if (bKeyDescriber)
             {
-                // Key Describer mode: announce the (command, chord,
+                // Key Help mode: announce the (command, chord,
                 // description) triple via the live region and SWALLOW
                 // the keystroke. The command itself does not run --
-                // EXCEPT for the Key Describer toggle itself, which
+                // EXCEPT for the Key Help toggle itself, which
                 // must always execute so the user can turn the mode
                 // off. Matches EdSharp's exception at line 1640 of
                 // EdSharp.cs and FileDir's ClickOrDescribe at line
                 // 7533 of FileDir.cs: "if (KeyDescriber && sLabel
-                // != 'Key Describer')". Without this exception, the
+                // != 'Key Help')". Without this exception, the
                 // mode could be entered but never exited, blocking
                 // the user from quitting the application.
                 string sCmd = dMenuToCommand.ContainsKey(mi) ? dMenuToCommand[mi] : mi.Text.Replace("&", "");
-                if (sCmd == "Switch-KeyDescriber")
+                if (sCmd == "Toggle Key Help")
                 {
                     mi.PerformClick();
                     return true;
@@ -6019,6 +7142,11 @@ namespace DbDuo
         private FlowLayoutPanel             pnlStack;
         private Label                       lblStatusBar;
         private int                         iTabIndex;
+        // Most-recent case-insensitive substring searched via Ctrl+J
+        // inside a pick-list. F3 / Shift+F3 advance / retreat through
+        // matches. Shared across all list boxes in this dialog so the
+        // user can chain searches across multiple lists.
+        private string                      sListSearchTerm = "";
 
         public LbcDialog(string sTitle, IWin32Window ownerWindow)
         {
@@ -6215,6 +7343,13 @@ namespace DbDuo
             return tb;
         }
 
+        // 2-arg overload (no tip). Convenient for dialogs where the
+        // label is self-explanatory and no extra tooltip is needed.
+        public TextBox addInputBox(string sLabel, string sValue)
+        {
+            return addInputBox(sLabel, sValue, null);
+        }
+
         // addTextLine: alias for addInputBox without a tip. Kept
         // for backward compatibility with the earlier API.
         public TextBox addTextLine(string sLabel, string sValue)
@@ -6302,11 +7437,130 @@ namespace DbDuo
             Label lblLast = currentLabelOrNull();
             if (lblLast != null) lb.AccessibleName = lblLast.AccessibleName;
             lb.GotFocus += handleGotFocus;
+            // Find-in-list keys. Ctrl+J prompts for a case-insensitive
+            // substring; F3 advances to the next match; Shift+F3 the
+            // previous. Mirrors the data list's Jump-to and Find-Next
+            // chords. Useful when picking from long lists (Alternate
+            // Menu, Choose Table on a large schema).
+            lb.KeyDown += new KeyEventHandler(handleListBoxFindKeys);
             registerWidget(lb, "ListBox", lb.AccessibleName);
             if (!string.IsNullOrEmpty(sTip)) dFocusTips[lb] = sTip;
             pnlStack.Controls.Add(lb);
             if (ctlFirstFocusable == null) ctlFirstFocusable = lb;
             return lb;
+        }
+
+        // handleListBoxFindKeys: KeyDown handler attached to every
+        // ListBox added via addListBox / addPickBox. Intercepts the
+        // three find-in-list chords; defers everything else to the
+        // ListBox's normal handling.
+        private void handleListBoxFindKeys(object sender, KeyEventArgs evArgs)
+        {
+            ListBox lb = sender as ListBox;
+            if (lb == null) return;
+            Keys k = evArgs.KeyData;
+            if (k == (Keys.Control | Keys.J))
+            { promptAndFindInListBox(lb); evArgs.Handled = true; evArgs.SuppressKeyPress = true; }
+            else if (k == Keys.F3)
+            { findNextInListBox(lb, true); evArgs.Handled = true; evArgs.SuppressKeyPress = true; }
+            else if (k == (Keys.Shift | Keys.F3))
+            { findNextInListBox(lb, false); evArgs.Handled = true; evArgs.SuppressKeyPress = true; }
+        }
+
+        // Ctrl+J: prompt for a case-insensitive substring, then jump
+        // to the first item containing it. The substring is stored
+        // in sListSearchTerm so subsequent F3 / Shift+F3 can advance.
+        private void promptAndFindInListBox(ListBox lb)
+        {
+            string sPrompt = "Find substring (case-insensitive):";
+            string sInitial = sListSearchTerm ?? "";
+            // Simple inline input: a tiny modal dialog with one input
+            // box. We don't recurse into LbcDialog because nesting
+            // would complicate event routing; a vanilla Form is fine.
+            using (Form prompt = new Form())
+            {
+                prompt.Text = "Find in list";
+                prompt.AccessibleName = "Find in list";
+                prompt.FormBorderStyle = FormBorderStyle.FixedDialog;
+                prompt.StartPosition = FormStartPosition.CenterParent;
+                prompt.MinimizeBox = false;
+                prompt.MaximizeBox = false;
+                prompt.ClientSize = new Size(400, 110);
+                prompt.KeyPreview = true;
+                Label lbl = new Label();
+                lbl.Text = sPrompt;
+                lbl.AutoSize = true;
+                lbl.Location = new Point(12, 12);
+                TextBox tb = new TextBox();
+                tb.Text = sInitial;
+                tb.SelectAll();
+                tb.Location = new Point(12, 36);
+                tb.Size = new Size(376, 20);
+                tb.AccessibleName = "Find substring";
+                Button btnOk = new Button();
+                btnOk.Text = "&OK";
+                btnOk.DialogResult = DialogResult.OK;
+                btnOk.Location = new Point(232, 70);
+                Button btnCancel = new Button();
+                btnCancel.Text = "&Cancel";
+                btnCancel.DialogResult = DialogResult.Cancel;
+                btnCancel.Location = new Point(313, 70);
+                prompt.Controls.Add(lbl);
+                prompt.Controls.Add(tb);
+                prompt.Controls.Add(btnOk);
+                prompt.Controls.Add(btnCancel);
+                prompt.AcceptButton = btnOk;
+                prompt.CancelButton = btnCancel;
+                if (prompt.ShowDialog(frm) != DialogResult.OK) return;
+                sListSearchTerm = tb.Text ?? "";
+            }
+            if (string.IsNullOrEmpty(sListSearchTerm)) return;
+            // Start search from item 0 (Ctrl+J is "find first match
+            // from the top," not "find next from current position").
+            int iFound = findInListBoxFrom(lb, 0, true, sListSearchTerm);
+            if (iFound < 0)
+                LiveRegion.say("No match for \"" + sListSearchTerm + "\"");
+            else
+            { lb.SelectedIndex = iFound; lb.Focus(); }
+        }
+
+        // F3 / Shift+F3: advance / retreat through matches of the
+        // stored search term. If no search term is set, silently say
+        // so (don't pop up a dialog -- F3 is a navigation key, not a
+        // configuration key).
+        private void findNextInListBox(ListBox lb, bool bForward)
+        {
+            if (string.IsNullOrEmpty(sListSearchTerm))
+            { LiveRegion.say("No find substring set; press Control+J first"); return; }
+            int iFrom = lb.SelectedIndex + (bForward ? 1 : -1);
+            if (iFrom < 0) iFrom = lb.Items.Count - 1;
+            if (iFrom >= lb.Items.Count) iFrom = 0;
+            int iFound = findInListBoxFrom(lb, iFrom, bForward, sListSearchTerm);
+            if (iFound < 0)
+                LiveRegion.say("No more matches for \"" + sListSearchTerm + "\"");
+            else
+                lb.SelectedIndex = iFound;
+        }
+
+        // findInListBoxFrom: case-insensitive substring search through
+        // the ListBox starting at iFrom, wrapping at the boundary.
+        // Returns the index of the match or -1 if none.
+        private static int findInListBoxFrom(ListBox lb, int iFrom, bool bForward, string sNeedle)
+        {
+            int n = lb.Items.Count;
+            if (n == 0 || string.IsNullOrEmpty(sNeedle)) return -1;
+            if (iFrom < 0) iFrom = 0;
+            if (iFrom >= n) iFrom = n - 1;
+            string sLowerNeedle = sNeedle.ToLowerInvariant();
+            for (int i = 0; i < n; i++)
+            {
+                int j = bForward
+                    ? (iFrom + i) % n
+                    : ((iFrom - i) % n + n) % n;
+                string sItem = (lb.Items[j] ?? "").ToString().ToLowerInvariant();
+                if (sItem.Contains(sLowerNeedle)) return j;
+            }
+            return -1;
         }
 
         // addPickBox: labeled pick-one list. Equivalent to AddPickBox
@@ -7490,7 +8744,7 @@ namespace DbDuo
         private static Dictionary<string, Dictionary<string, string>> dByTable;
         private static bool bLoaded = false;
 
-        // Reset is used by the Edit-Configuration dialog after a
+        // Reset is used by the Edit-Settings dialog after a
         // save, to invalidate the cache so subsequent dialogs pick
         // up the new regexes.
         public static void reset()
@@ -7596,6 +8850,11 @@ namespace DbDuo
         public string sFilterText;
         public string sFilterColumn;
         public string sMatchMode;
+        // bClearRequested: the user clicked Clear (Alt+C) rather than
+        // OK. Caller treats this as "set an empty filter and close",
+        // restoring the full unfiltered view. Distinct from Cancel
+        // (DialogResult.Cancel = "do nothing").
+        public bool bClearRequested;
 
         public FilterDialog(List<string> lColumns, string sCurrentText, string sCurrentColumn, string sCurrentMode)
         {
@@ -7659,26 +8918,47 @@ namespace DbDuo
             cbMode.SelectedItem = (sCurrentMode != null && cbMode.Items.Contains(sCurrentMode)) ? (object)sCurrentMode : (object)"Contains";
             this.Controls.Add(cbMode);
 
+            // Three-button row: OK (default, Enter), Clear (Alt+C),
+            // Cancel (Escape). Clear restores the full unfiltered
+            // view with one keystroke; the user's typed input is
+            // discarded.
             Button btnOk = new Button();
             btnOk.Text = "&OK";
             btnOk.DialogResult = DialogResult.OK;
-            btnOk.Size = new Size(90, 28);
-            btnOk.Location = new Point(240, 150);
+            btnOk.Size = new Size(80, 28);
+            btnOk.Location = new Point(150, 150);
             btnOk.TabIndex = 3;
             btnOk.UseVisualStyleBackColor = true;
             btnOk.Click += (s, e) => {
                 sFilterText = tbFilter.Text;
                 sFilterColumn = cbCol.SelectedItem as string;
                 sMatchMode = cbMode.SelectedItem as string;
+                bClearRequested = false;
             };
             this.Controls.Add(btnOk);
 
+            Button btnClear = new Button();
+            btnClear.Text = "&Clear";
+            btnClear.Size = new Size(80, 28);
+            btnClear.Location = new Point(240, 150);
+            btnClear.TabIndex = 4;
+            btnClear.UseVisualStyleBackColor = true;
+            btnClear.Click += (s, e) => {
+                bClearRequested = true;
+                sFilterText = "";
+                sFilterColumn = "All columns";
+                sMatchMode = "Contains";
+                this.DialogResult = DialogResult.OK;
+                this.Close();
+            };
+            this.Controls.Add(btnClear);
+
             Button btnCancel = new Button();
-            btnCancel.Text = "&Cancel";
+            btnCancel.Text = "Ca&ncel";
             btnCancel.DialogResult = DialogResult.Cancel;
-            btnCancel.Size = new Size(90, 28);
-            btnCancel.Location = new Point(336, 150);
-            btnCancel.TabIndex = 4;
+            btnCancel.Size = new Size(80, 28);
+            btnCancel.Location = new Point(330, 150);
+            btnCancel.TabIndex = 5;
             btnCancel.UseVisualStyleBackColor = true;
             this.Controls.Add(btnCancel);
 
@@ -7686,96 +8966,6 @@ namespace DbDuo
             this.CancelButton = btnCancel;
             this.ActiveControl = tbFilter;
             tbFilter.SelectAll();
-        }
-    }
-
-    // =====================================================================
-    // SortDialog: Sort-Object dialog. Column chooser plus ascending /
-    // descending toggle. The user picks a column from the recordset's
-    // current field set; the dialog returns "col ASC" or "col DESC"
-    // (the form expected by ADODB Recordset.Sort).
-    //
-    // descending radio buttons.
-    // =====================================================================
-    public class SortDialog : Form
-    {
-        public string sSortColumn;
-        public bool bAscending;
-
-        public SortDialog(List<string> lColumns, string sCurrentColumn, bool bCurrentAsc)
-        {
-            this.Text = "Custom Sort";
-            this.AccessibleName = "Sort records";
-            this.AccessibleDescription = "";
-            this.StartPosition = FormStartPosition.CenterParent;
-            this.ClientSize = new Size(440, 180);
-            this.FormBorderStyle = FormBorderStyle.FixedDialog;
-            this.MaximizeBox = false;
-            this.MinimizeBox = false;
-            this.ShowInTaskbar = false;
-            this.KeyPreview = true;
-
-            Label lbl1 = new Label();
-            lbl1.Text = "&Column:";
-            lbl1.Location = new Point(12, 16);
-            lbl1.Size = new Size(110, 20);
-            this.Controls.Add(lbl1);
-
-            ComboBox cbCol = new ComboBox();
-            cbCol.AccessibleName = "Sort column";
-            cbCol.Location = new Point(130, 13);
-            cbCol.Size = new Size(290, 23);
-            cbCol.TabIndex = 0;
-            cbCol.DropDownStyle = ComboBoxStyle.DropDownList;
-            foreach (string s in lColumns) cbCol.Items.Add(s);
-            if (lColumns.Count > 0)
-                cbCol.SelectedItem = (sCurrentColumn != null && cbCol.Items.Contains(sCurrentColumn))
-                    ? (object)sCurrentColumn : (object)lColumns[0];
-            this.Controls.Add(cbCol);
-
-            RadioButton rbAsc = new RadioButton();
-            rbAsc.Text = "&Ascending";
-            rbAsc.AccessibleName = "Ascending";
-            rbAsc.Location = new Point(130, 50);
-            rbAsc.Size = new Size(140, 22);
-            rbAsc.TabIndex = 1;
-            rbAsc.Checked = bCurrentAsc;
-            this.Controls.Add(rbAsc);
-
-            RadioButton rbDesc = new RadioButton();
-            rbDesc.Text = "&Descending";
-            rbDesc.AccessibleName = "Descending";
-            rbDesc.Location = new Point(280, 50);
-            rbDesc.Size = new Size(140, 22);
-            rbDesc.TabIndex = 2;
-            rbDesc.Checked = !bCurrentAsc;
-            this.Controls.Add(rbDesc);
-
-            Button btnOk = new Button();
-            btnOk.Text = "&OK";
-            btnOk.DialogResult = DialogResult.OK;
-            btnOk.Size = new Size(90, 28);
-            btnOk.Location = new Point(240, 130);
-            btnOk.TabIndex = 3;
-            btnOk.UseVisualStyleBackColor = true;
-            btnOk.Click += (s, e) => {
-                sSortColumn = cbCol.SelectedItem as string;
-                bAscending = rbAsc.Checked;
-            };
-            this.Controls.Add(btnOk);
-
-            Button btnCancel = new Button();
-            btnCancel.Text = "&Cancel";
-            btnCancel.DialogResult = DialogResult.Cancel;
-            btnCancel.Size = new Size(90, 28);
-            btnCancel.Location = new Point(336, 130);
-            btnCancel.TabIndex = 4;
-            btnCancel.UseVisualStyleBackColor = true;
-            this.Controls.Add(btnCancel);
-
-            this.AcceptButton = btnOk;
-            this.CancelButton = btnCancel;
-            this.ActiveControl = cbCol;
         }
     }
 
@@ -8081,6 +9271,19 @@ namespace DbDuo
         // is unused. The field has been removed; if you're reading
         // an older commit and miss it, that's why.
         private bool bSuppressCellChanged;
+        // bGridFirstPopulate: true at startup until updateGrid sees a
+        // nonzero record count. When the transition from zero to
+        // nonzero happens, we explicitly announce row 1's content
+        // via LiveRegion so the screen reader hears actual data
+        // instead of the empty-list "Unselected" state JAWS reads on
+        // the freshly-built listview before any row is selected.
+        private bool bGridFirstPopulate = true;
+        // sLastGridTable: the table whose data the grid currently
+        // shows. updateGrid compares this to db.currentTable and
+        // resets bGridFirstPopulate when the table changes -- so the
+        // JAWS "Unselected" announcement workaround fires once per
+        // table switch, not just on initial database open.
+        private string sLastGridTable = "";
 
         // Tab-announced column index. The ListView has no per-cell
         // focus, but for screen-reader users it's useful to be able
@@ -8246,6 +9449,7 @@ namespace DbDuo
         private ToolStripMenuItem miRecSearchAgain;   // F3: repeat last search (whichever family)
         private ToolStripMenuItem miRecSearchPrev;    // Shift+F3: repeat last search reverse
         private ToolStripMenuItem miRecMark;
+        private ToolStripMenuItem miRecToggleMark;     // Ctrl+Space
         private ToolStripMenuItem miRecUnmark;
         // v1.0.67 wave-2 new commands:
         private ToolStripMenuItem miRecMarkAll;       // Ctrl+A: Mark every row in current filtered view
@@ -8253,7 +9457,9 @@ namespace DbDuo
         private ToolStripMenuItem miRecInvertMarked;  // Ctrl+I: Invert mark state on every row
         private ToolStripMenuItem miRecRemoveForce;   // Ctrl+Shift+D: Delete without confirmation
         private ToolStripMenuItem miRecOpenUrl;       // Ctrl+Shift+U: Open the 'url' column value
-        private ToolStripMenuItem miSortRecords;      // Alt+Shift+S: Sort by current virtual column (with checkbox)
+        // miSortRecords retired in v1.0.99 (Sort Records became Order Records).
+        private ToolStripMenuItem miOrderRecords;     // Alt+O: Order Records ascending (listbox of columns)
+        private ToolStripMenuItem miReverseOrder;     // Alt+Shift+O: Reverse Order (sort descending)
         // v1.0.69 wave-2 new commands:
         private ToolStripMenuItem miRecAppend;        // Alt+Shift+C: Append record to clipboard
         private ToolStripMenuItem miRecNewCopy;       // Ctrl+Shift+N: Duplicate current record for editing
@@ -8265,14 +9471,10 @@ namespace DbDuo
         // over Sort-Object so the user doesn't have to pick the column
         // through a dialog for the standard columns that always exist
         // on DbDuo-convention tables.
-        private ToolStripMenuItem miSortById;         // Alt+I: Sort by <table>_id ascending
-        private ToolStripMenuItem miSortByIdRev;      // Alt+Shift+I: Sort by <table>_id descending
-        private ToolStripMenuItem miSortByLook;       // Alt+L: Sort by look ascending
-        private ToolStripMenuItem miSortByLookRev;    // Alt+Shift+L: Sort by look descending
-        private ToolStripMenuItem miSortByTags;       // Alt+T: Sort by tags ascending
-        private ToolStripMenuItem miSortByTagsRev;    // Alt+Shift+T: Sort by tags descending
-        private ToolStripMenuItem miSortByUrl;        // Alt+U: Sort by url ascending
-        private ToolStripMenuItem miSortByUrlRev;     // Alt+Shift+U: Sort by url descending
+        // Per-column sort field declarations dropped in v1.0.86. The
+        // standard-column sort shortcuts (Alt+I/L/T/U + Alt+Shift+*)
+        // and their reverse pairs were retired in favor of the
+        // single universal Sort-Records dialog on Alt+Shift+S.
         private ToolStripMenuItem miRecMarkAnchor;
         private ToolStripMenuItem miRecMarkToAnchor;
         private ToolStripMenuItem miRecUnmarkAnchor;
@@ -8281,7 +9483,8 @@ namespace DbDuo
         private ToolStripMenuItem miRecEnterChild;
         private ToolStripMenuItem miRecExitChild;
         private ToolStripMenuItem miRecExitChildToRoot;
-        private ToolStripMenuItem miRecUpdateField;
+        private ToolStripMenuItem miRecUpdateColumn;
+        private ToolStripMenuItem miRecRegexReplace;
         private ToolStripMenuItem miRecGoTo;
         private ToolStripMenuItem miRecBookmark;
         private ToolStripMenuItem miRecGotoBookmark;
@@ -8290,11 +9493,7 @@ namespace DbDuo
 
         private ToolStripMenuItem miViewSelect;
         private ToolStripMenuItem miViewResetFilter;
-        private ToolStripMenuItem miViewFormat;
-        private ToolStripMenuItem miViewSortAsc;
-        private ToolStripMenuItem miViewSortDesc;
-        private ToolStripMenuItem miViewSortRecent;
-        private ToolStripMenuItem miViewSortOldest;
+        // miViewFormat/SortAsc/SortDesc/SortRecent/SortOldest dropped in v1.0.86.
         private ToolStripMenuItem miViewResetSort;
         private ToolStripMenuItem miViewUpdate;
         private ToolStripMenuItem miViewSelectColumn;
@@ -8311,7 +9510,8 @@ namespace DbDuo
         private ToolStripMenuItem miToolsTest;
         private ToolStripMenuItem miToolsMeasure;
         private ToolStripMenuItem miToolsChart;
-        private ToolStripMenuItem miToolsLock;
+        // miToolsLock removed in v1.0.91 along with the Lock-Database
+        // toggle.
         private ToolStripMenuItem miToolsTestDriver;
         private ToolStripMenuItem miToolsOpenFolder;
         private ToolStripMenuItem miToolsConsole;
@@ -8335,6 +9535,8 @@ namespace DbDuo
         private ToolStripMenuItem miHelpCollectionDb;
         private ToolStripMenuItem miHelpCellarDb;
         private ToolStripMenuItem miHelpExtraSpeech;
+        private ToolStripMenuItem miHelpCommandEcho;
+        private ToolStripMenuItem miToggleReadOnly;
         // (miHelpRunScript removed in v1.0.44. The script menu items
         // miMiscInvokeScript / miMiscEditScript / miMiscOpenScriptFolder
         // live in the Misc menu, not Help.)
@@ -8369,15 +9571,22 @@ namespace DbDuo
         // pushes a state summary through LiveRegion without changing
         // focus, selection, or recordset position. FileDir-style.
         private ToolStripMenuItem miSaySayStatus;
-        private ToolStripMenuItem miSaySayPath;
+        // miSaySayPath retired v1.0.99 (replaced by Say Database on Shift+D).
+        private ToolStripMenuItem miSaySayDatabase;     // Shift+D
+        private ToolStripMenuItem miSaySayOrder;        // Shift+O
+        private ToolStripMenuItem miSaySayGoto;         // Shift+G
+        // miSaySayRecord retired v1.0.101.
         private ToolStripMenuItem miSaySayYield;
         private ToolStripMenuItem miSaySayTables;
         private ToolStripMenuItem miSaySayMarked;
-        private ToolStripMenuItem miSaySayUpdated;
+        private ToolStripMenuItem miSaySayModified;
         private ToolStripMenuItem miSaySayNotes;
         private ToolStripMenuItem miSaySayTags;
         private ToolStripMenuItem miSaySayColumn;
-        private ToolStripMenuItem miSaySayKin;
+        private ToolStripMenuItem miSaySayColumnMarked;
+        private ToolStripMenuItem miSaySayRows;
+        private ToolStripMenuItem miSaySayRowsMarked;
+        // miSaySayKin retired v1.0.101.
         private ToolStripMenuItem miSaySaySortFilter;
         private ToolStripMenuItem miSaySayPosition;
         private ToolStripMenuItem miSaySayClipboard;
@@ -8392,7 +9601,7 @@ namespace DbDuo
         private ToolStripMenuItem miSaySayUrl;        // Shift+U
         // v1.0.67 deferred trio (stubs):
         private ToolStripMenuItem miMiscDatabaseSummary; // Shift+D
-        private ToolStripMenuItem miMiscWindowSummary;   // Shift+W
+        // miMiscWindowSummary retired v1.0.99 (Shift+W is now Say Web).
         private ToolStripMenuItem miRecPickValue;        // Ctrl+F2
 
         // Action commands added this turn to align with FileDir
@@ -8400,8 +9609,9 @@ namespace DbDuo
         private ToolStripMenuItem miCopyRow;
         private ToolStripMenuItem miCellAppend;
         private ToolStripMenuItem miCellCopy;
-        private ToolStripMenuItem miStepInitialChange;
+        private ToolStripMenuItem miJumpNextInitial;
         private ToolStripMenuItem miDescribeColumn;
+        private ToolStripMenuItem miSelectColumns;
         private ToolStripMenuItem miPlotColumn;
         private ToolStripMenuItem miExtractRegex;
 
@@ -8426,6 +9636,8 @@ namespace DbDuo
             updateMenuEnabled();
             updateStatusBar();
             if (miHelpExtraSpeech != null) miHelpExtraSpeech.Checked = LiveRegion.bExtraSpeechEnabled;
+            if (miHelpCommandEcho != null) miHelpCommandEcho.Checked = isCommandEchoOn();
+            if (miToggleReadOnly != null && db != null) miToggleReadOnly.Checked = db.readOnly;
         }
 
         // OnShown fires after the form is first displayed and has a
@@ -8762,29 +9974,24 @@ namespace DbDuo
             if (key == (Keys.Alt | Keys.Shift | Keys.End))
             { evArgs.Handled = true; evArgs.SuppressKeyPress = true; bulkMark(BulkMark.UnmarkToEnd);   return; }
 
-            // FileDir-style "tag and move" chords. These only fire
-            // when the data list has focus, so that typing > or <
-            // (or Shift+UpArrow/DownArrow) inside a dialog text box
-            // works as normal character/selection input.
+            // Mark-and-move chords for the data list. The user can
+            // mark or unmark the current record and step to the next
+            // (or previous) record in a single keystroke. The
+            // FileDir-style > and < bindings were retired in v1.0.74
+            // to eliminate conflict with the data list's type-to-
+            // search: typing > or < to mark would also enter those
+            // characters into the search buffer. The Shift+arrow
+            // family is the surviving binding because Shift+arrow has
+            // no native meaning on a single-select ListView (so the
+            // chord is unambiguous).
             //
-            //   >                       = Mark and next
-            //   <                       = Unmark and next
-            //   Shift+DownArrow         = Mark and next (alternate)
+            //   Shift+DownArrow         = Mark and next
             //   Shift+UpArrow           = Mark and previous
             //   Alt+Shift+DownArrow     = Unmark and next
             //   Alt+Shift+UpArrow       = Unmark and previous
-            //
-            // The ListView's MultiSelect=false config makes
-            // Shift+UpArrow / Shift+DownArrow no-ops natively, so
-            // we can claim them. Alt+Shift+ arrows have no native
-            // ListView meaning either.
             bool bGridFocused = (this.ActiveControl == grid);
             if (bGridFocused)
             {
-                if (key == (Keys.Shift | Keys.OemPeriod))
-                { evArgs.Handled = true; evArgs.SuppressKeyPress = true; markAndMove(true,  true);  return; }
-                if (key == (Keys.Shift | Keys.Oemcomma))
-                { evArgs.Handled = true; evArgs.SuppressKeyPress = true; markAndMove(false, true);  return; }
                 if (key == (Keys.Shift | Keys.Down))
                 { evArgs.Handled = true; evArgs.SuppressKeyPress = true; markAndMove(true,  true);  return; }
                 if (key == (Keys.Shift | Keys.Up))
@@ -8844,7 +10051,7 @@ namespace DbDuo
         }
 
         // invokeEditConfiguration: public wrapper around the private
-        // Edit-Configuration click handler so the dot-prompt's
+        // Edit-Settings click handler so the dot-prompt's
         // edit-configuration verb can pop the GUI dialog when a
         // form is available.
         public void invokeEditConfiguration()
@@ -8944,80 +10151,96 @@ namespace DbDuo
 
             // ===== File menu: database files + cross-file movement =====
             miFile = addMenu("&File");
-            miFileNew     = addItem(miFile, "&New Database...",           "New-Database",     Keys.None,                            fileNewClicked);
-            miFileOpen    = addItem(miFile, "&Open Database...",          "Open-Database",    Keys.Control | Keys.O,                fileOpenClicked);
+            miFileNew     = addItem(miFile, "&New Database...",           "New Database",     Keys.None,                            fileNewClicked);
+            miFileOpen    = addItem(miFile, "&Open Database...",          "Open Database",    Keys.Control | Keys.O,                fileOpenClicked);
             // Open New Recordset: prompt for a SQL SELECT and present
             // its result as the current recordset. The recordset is
             // read-only (no table identity, so Mark/Edit/Delete won't
             // work) but Find / Filter / Sort / Say-X all do. Useful
             // for "give me a join of these tables I want to browse"
             // workflows that don't justify creating a permanent view.
-            miFileOpenSelect = addItem(miFile, "Open New &Recordset (ad-hoc SELECT)...", "Open-Recordset", Keys.Control | Keys.Shift | Keys.O, fileOpenSelectClicked);
-            miFileRecent  = addItem(miFile, "&Recent Files...",           "Recent-Files",     Keys.Alt | Keys.R,                    fileRecentClicked);
-            miFileSaveAs  = addItem(miFile, "&Save Database As...",       "Save-DatabaseAs",  Keys.Control | Keys.S,                fileSaveAsClicked);
-            miFileClose   = addItem(miFile, "&Close Database",            "Close-Database",   Keys.Control | Keys.F4,               fileCloseClicked);
+            miFileOpenSelect = addItem(miFile, "Open New &Recordset...", "Open Recordset", Keys.Control | Keys.Shift | Keys.O, fileOpenSelectClicked);
+            miFileRecent  = addItem(miFile, "&Recent Files...",           "Recent Files",     Keys.Alt | Keys.R,                    fileRecentClicked);
+            // Export Database: primary chord Alt+Shift+E (parallel to
+            // Alt+E = Export Data productivity pair). Ctrl+Shift+S was
+            // the earlier primary, but the user moved it to Statistics
+            // Column for that command's S-letter family.
+            miFileSaveAs  = addItem(miFile, "&Save Database...",         "Save Database",    Keys.Control | Keys.S,                fileSaveAsClicked);
+            miFileClose   = addItem(miFile, "&Close Database",            "Close Database",   Keys.Control | Keys.F4,               fileCloseClicked);
             addSep(miFile);
-            miFileBackup  = addItem(miFile, "&Backup Database...",        "Backup-Database",  Keys.Control | Keys.Shift | Keys.S,   fileBackupClicked);
-            miFileCompare = addItem(miFile, "Co&mpare Database...",       "Compare-Database", Keys.None,                            fileCompareClicked);
+            miFileBackup  = addItem(miFile, "&Backup Database...",        "Backup Database",  Keys.None,                            fileBackupClicked);
+            miFileCompare = addItem(miFile, "Co&mpare Database...",       "Compare Database", Keys.None,                            fileCompareClicked);
             addSep(miFile);
-            miFileImport  = addItem(miFile, "&Import Data...",            "Import-Data",      Keys.Control | Keys.Shift | Keys.I,   fileImportClicked);
-            miFileExport  = addItem(miFile, "&Export Data...",            "Export-Data",      Keys.Control | Keys.Shift | Keys.X,   fileExportClicked);
+            // Alt+I = Import Data, Alt+E = Export Data. The Alt+
+            // letter slots are clean one-handed productivity chords
+            // for the I/E mnemonic family. (Ctrl+I and Ctrl+E are
+            // already used for Invert Marked and Edit Record, which
+            // are high-frequency core operations that should keep
+            // their plain-Ctrl chords.)
+            miFileImport  = addItem(miFile, "&Import Data...",            "Import Data",      Keys.Alt | Keys.I,                    fileImportClicked);
+            miFileExport  = addItem(miFile, "E&xport Data...",            "Export Data",      Keys.Alt | Keys.X,                    fileExportClicked);
             addSep(miFile);
-            miFilePrint   = addItem(miFile, "&Print...",                  "Out-Printer",      Keys.Control | Keys.P,                filePrintClicked);
+            miFilePrint   = addItem(miFile, "&Print...",                  "Out Printer",      Keys.Control | Keys.P,                filePrintClicked);
             addSep(miFile);
             // Switch-Table family lives in File because choosing
             // which file/table is on screen is a file-level operation,
             // and EdSharp's File menu carries Current Windows (F4)
             // by the same logic.
-            miSchemaSelectTable = addItem(miFile, "Choose &Table...",           "Select-Table",         Keys.F4,                            schemaSelectTableClicked);
-            miSchemaSelectView  = addItem(miFile, "Choose &View...",            "Select-View",          Keys.None,                          schemaSelectViewClicked);
-            miSchemaSwitch      = addItem(miFile, "Next Visited Table",         "Switch-Table",         Keys.Control | Keys.Tab,            schemaSwitchClicked);
-            miSchemaSwitchPrev  = addItem(miFile, "Previous Visited Table",     "Switch-TablePrevious", Keys.Control | Keys.Shift | Keys.Tab, schemaSwitchPrevClicked);
-            miSchemaSwitchAll     = addItem(miFile, "Next Table or View",     "Switch-Object",         Keys.Control | Keys.F6,            schemaSwitchAllClicked);
-            miSchemaSwitchAllPrev = addItem(miFile, "Previous Table or View", "Switch-ObjectPrevious", Keys.Control | Keys.Shift | Keys.F6, schemaSwitchAllPrevClicked);
+            miSchemaSelectTable = addItem(miFile, "Choose &Table...",           "Select Table",         Keys.F4,                            schemaSelectTableClicked);
+            miSchemaSelectView  = addItem(miFile, "Choose &View...",            "Select View",          Keys.None,                          schemaSelectViewClicked);
+            miSchemaSwitch      = addItem(miFile, "Next Visited Table",         "Switch Table",         Keys.Control | Keys.Tab,            schemaSwitchClicked);
+            miSchemaSwitchPrev  = addItem(miFile, "Previous Visited Table",     "Switch Previous Table", Keys.Control | Keys.Shift | Keys.Tab, schemaSwitchPrevClicked);
+            miSchemaSwitchAll     = addItem(miFile, "Next Table or View",     "Switch Object",         Keys.Control | Keys.F6,            schemaSwitchAllClicked);
+            miSchemaSwitchAllPrev = addItem(miFile, "Previous Table or View", "Switch Previous Object", Keys.Control | Keys.Shift | Keys.F6, schemaSwitchAllPrevClicked);
             addSep(miFile);
-            miFileExit    = addItem(miFile, "E&xit DbDuo",                "Exit-Application", Keys.Alt | Keys.F4,                   fileExitClicked);
+            miFileExit    = addItem(miFile, "E&xit DbDuo",                "Exit Application", Keys.Alt | Keys.F4,                   fileExitClicked);
 
             // ===== Edit menu: modify the data =====
             miEdit = addMenu("&Edit");
-            miRecNew         = addItem(miEdit, "&New Record...",                          "New-Record",          Keys.Control | Keys.N,              recNewClicked);
-            miRecSet         = addItem(miEdit, "&Edit Record...",                         "Set-Record",          Keys.Control | Keys.E,              recSetClicked);
+            miRecNew         = addItem(miEdit, "&New Record...",                          "New Record",          Keys.Control | Keys.N,              recNewClicked);
+            miRecSet         = addItem(miEdit, "&Edit Record...",                         "Edit Record",          Keys.Control | Keys.E,              recSetClicked);
             // Edit Cell: single-field editor for the virtual cell
             // under the Alt+Control+arrow cursor. Same regex
             // validation as Edit Record (via [Validation:<table>]
             // sections of DbDuo.ini) but only one field is shown.
             // Mnemonic "F" for field; Shift+F2 since F2 is Edit
             // Record.
-            miRecSetCell     = addItem(miEdit, "Edit &Cell (current virtual cell)...",    "Set-Cell",            Keys.F2,                            recSetCellClicked);
-            miRecRemove      = addItem(miEdit, "&Delete Record (with confirmation)",      "Remove-Record",       Keys.Control | Keys.D,              recRemoveClicked);
-            miRecRemoveForce = addItem(miEdit, "Delete Without Confir&mation",            "Remove-RecordForce",  Keys.Control | Keys.Shift | Keys.D, recRemoveForceClicked);
-            miRecCopy        = addItem(miEdit, "Copy &Record (current row to clipboard)", "Copy-Record",         Keys.Control | Keys.Shift | Keys.C, recCopyClicked);
+            miRecSetCell     = addItem(miEdit, "Edit &Cell...",    "Edit Cell",            Keys.F2,                            recSetCellClicked);
+            miRecRemove      = addItem(miEdit, "&Delete Record",      "Delete Record",       Keys.Control | Keys.D,              recRemoveClicked);
+            miRecRemoveForce = addItem(miEdit, "Delete Without Confir&mation",            "Delete Record Force",  Keys.Control | Keys.Shift | Keys.D, recRemoveForceClicked);
+            miRecCopy        = addItem(miEdit, "Copy &Record", "Copy Record",         Keys.Control | Keys.Shift | Keys.C, recCopyClicked);
             // Append Record: like Copy Record but adds to the
             // existing clipboard contents rather than replacing.
             // Useful for collecting several rows from across the
             // database into one clipboard payload. Each appended
             // record is separated by a blank line.
-            miRecAppend      = addItem(miEdit, "Append Recor&d to Clipboard",             "Append-Record",       Keys.Alt | Keys.Shift | Keys.C,     recAppendClicked);
+            miRecAppend      = addItem(miEdit, "Append Recor&d to Clipboard",             "Append Record",       Keys.Alt | Keys.Shift | Keys.C,     recAppendClicked);
             // New Copy: duplicate the current row. Pre-fills the New
             // Record dialog with all visible field values from the
             // current row; the user reviews, edits as needed, and
             // OK inserts as a new row. Primary key and 'unq' are
             // cleared automatically since both must be unique.
-            miRecNewCopy     = addItem(miEdit, "Ne&w Copy (duplicate current record)...", "Copy-RecordAsNew",    Keys.Control | Keys.Shift | Keys.N, recNewCopyClicked);
+            miRecNewCopy     = addItem(miEdit, "Ne&w Copy...", "Copy Record as New",    Keys.Control | Keys.Shift | Keys.N, recNewCopyClicked);
             // Mail Record: build a mailto: URI from the current row.
             // Uses the first email-like column found (looking for
             // 'email', 'e_mail', 'mail') for the address; uses the
             // 'look' column for the subject; uses the 'notes' column
             // for the body. Falls back gracefully if any are missing.
-            miRecMail        = addItem(miEdit, "&Mail Record (open mailto: from current row)", "Send-Mail",      Keys.Control | Keys.Shift | Keys.M, recMailClicked);
-            miRecUpdateField = addItem(miEdit, "&Replace Column (find and replace in current virtual column)...", "Update-Field", Keys.Control | Keys.R, recUpdateFieldClicked);
+            miRecMail        = addItem(miEdit, "&Mail Record", "Send Mail",  Keys.Control | Keys.Shift | Keys.M, recMailClicked);
+            miRecUpdateColumn = addItem(miEdit, "&Replace Column...", "Replace Column", Keys.Control | Keys.R, recUpdateColumnClicked);
+            // Regex Replace: same as Update Column but interprets the
+            // search text as a .NET regex pattern and supports $1, $2
+            // back-references in the replacement. Ctrl+Shift+R as the
+            // "power version" companion to Ctrl+R = Update Column.
+            miRecRegexReplace = addItem(miEdit, "Re&gex Replace...", "Regex Replace", Keys.Control | Keys.Shift | Keys.R, recRegexReplaceClicked);
             addSep(miEdit);
             // Marks: per-row boolean flags. Control+M / Control+U is
             // the canonical chord pair, chosen for symmetry (mark and
             // unmark differ only by the letter, not by an added
             // modifier).
-            miRecMark        = addItem(miEdit, "&Mark Record",                            "Set-Mark",            Keys.Control | Keys.M,              recMarkClicked);
-            miRecUnmark      = addItem(miEdit, "&Unmark Record",                          "Clear-Mark",          Keys.Control | Keys.U,              recUnmarkClicked);
+            miRecMark        = addItem(miEdit, "&Mark Record",                            "Set Mark",            Keys.Control | Keys.M,              recMarkClicked);
+            miRecToggleMark  = addItem(miEdit, "&Toggle Marked",          "Toggle Marked",       Keys.Control | Keys.Space,          recToggleMarkClicked);
+            miRecUnmark      = addItem(miEdit, "&Unmark Record",                          "Clear Mark",          Keys.None,                          recUnmarkClicked);
             // Bulk mark operations (v1.0.67). All operate on the
             // current filtered view -- they set, clear, or invert the
             // 'marked' column for every row currently visible. The
@@ -9025,9 +10248,9 @@ namespace DbDuo
             // convention: Ctrl+letter is the primary action, Ctrl+
             // Shift+letter is the variant. Ctrl+I (Invert) is on its
             // own because it doesn't have a paired counterpart.
-            miRecMarkAll     = addItem(miEdit, "Mark &All (every row in filtered view)",   "Set-MarkAll",         Keys.Control | Keys.A,              recMarkAllClicked);
-            miRecUnmarkAll   = addItem(miEdit, "U&nmark All (every row in filtered view)", "Clear-MarkAll",       Keys.Control | Keys.Shift | Keys.A, recUnmarkAllClicked);
-            miRecInvertMarked= addItem(miEdit, "&Invert Marked (toggle every row)",        "Switch-Mark",         Keys.Control | Keys.I,              recInvertMarkedClicked);
+            miRecMarkAll     = addItem(miEdit, "Mark &All",   "Set Mark All",         Keys.Control | Keys.A,              recMarkAllClicked);
+            miRecUnmarkAll   = addItem(miEdit, "U&nmark All", "Clear Mark All",       Keys.Control | Keys.Shift | Keys.A, recUnmarkAllClicked);
+            miRecInvertMarked= addItem(miEdit, "&Invert Marked",     "Invert Marked",         Keys.Control | Keys.I,              recInvertMarkedClicked);
             // F8 / Shift+F8 / Alt+F8 / Alt+Shift+F8 -- range mark
             // and range unmark families. Two INDEPENDENT anchors:
             // one for marking (F8 to set, Shift+F8 to complete) and
@@ -9041,31 +10264,37 @@ namespace DbDuo
             // Untag, but with two distinct anchors so the user can
             // build a mark range and an unmark range without one
             // gesture clobbering the other.
-            miRecMarkAnchor      = addItem(miEdit, "Start Mark &Anchor",                  "Set-MarkAnchor",      Keys.F8,                            recMarkAnchorClicked);
-            miRecMarkToAnchor    = addItem(miEdit, "Complete Mark to Anchor",             "Mark-Range",          Keys.Shift | Keys.F8,               recMarkToAnchorClicked);
-            miRecUnmarkAnchor    = addItem(miEdit, "Start Unmark Anchor",                 "Set-UnmarkAnchor",    Keys.Alt | Keys.F8,                 recUnmarkAnchorClicked);
-            miRecUnmarkToAnchor  = addItem(miEdit, "Complete Unmark to Anchor",           "Unmark-Range",        Keys.Alt | Keys.Shift | Keys.F8,    recUnmarkToAnchorClicked);
+            miRecMarkAnchor      = addItem(miEdit, "&Start Mark",                  "Start Mark",      Keys.F8,                            recMarkAnchorClicked);
+            miRecMarkToAnchor    = addItem(miEdit, "Complete &Mark",             "Complete Mark",          Keys.Shift | Keys.F8,               recMarkToAnchorClicked);
+            miRecUnmarkAnchor    = addItem(miEdit, "Start &Unmark",                 "Start Unmark",    Keys.Alt | Keys.F8,                 recUnmarkAnchorClicked);
+            miRecUnmarkToAnchor  = addItem(miEdit, "Complete Unmark to Anchor",           "Unmark Range",        Keys.Alt | Keys.Shift | Keys.F8,    recUnmarkToAnchorClicked);
             addSep(miEdit);
             // Bookmarks: EdSharp's Set/Clear/Go-to Bookmark trio
             // on Control+K / Control+Shift+K / Alt+K. Identical
             // chord family in DbDuo.
-            miRecBookmark    = addItem(miEdit, "&Save Bookmark",                          "Save-Bookmark",       Keys.Control | Keys.K,              recBookmarkClicked);
-            miRecGotoBookmark= addItem(miEdit, "&Go to Bookmark",                         "Restore-Bookmark",    Keys.Alt | Keys.K,                  recGotoBookmarkClicked);
-            miRecClearBookmark=addItem(miEdit, "&Clear Bookmark",                         "Clear-Bookmark",      Keys.Control | Keys.Shift | Keys.K, recClearBookmarkClicked);
+            // Bookmark commands: B-family chords. v1.0.98 moved these
+            // from K to B (B is the rule-compliant first-letter of
+            // Bookmark; K was a "booKmark" conventional exception
+            // from earlier app conventions). Migrating to B frees
+            // the K-family for future use and follows the strict
+            // mnemonic rule throughout.
+            miRecBookmark    = addItem(miEdit, "&Save Bookmark",                          "Save Bookmark",       Keys.Control | Keys.B,              recBookmarkClicked);
+            miRecGotoBookmark= addItem(miEdit, "&List Bookmarks...",                       "List Bookmarks",      Keys.Alt | Keys.B,                  recGotoBookmarkClicked);
+            miRecClearBookmark=addItem(miEdit, "&Clear Bookmark",                         "Clear Bookmark",      Keys.Control | Keys.Shift | Keys.B, recClearBookmarkClicked);
             addSep(miEdit);
-            // Open Cell Value: open the URL, file path, or folder
+            // Open Cell Value: open the url, file path, or folder
             // path stored in a cell of the current row.
-            miRecOpenCell    = addItem(miEdit, "&Open Cell Value (URL or path)...",       "Open-Cell",           Keys.Control | Keys.Enter,          recOpenCellClicked);
+            miRecOpenCell    = addItem(miEdit, "&Open Cell Value...",       "Open Cell",           Keys.Control | Keys.Enter,          recOpenCellClicked);
             // Open Url: open the row's 'url' column with the system
             // default handler (browser, mail client, file opener).
             // Convenience chord for the most common Open-Cell case --
             // saves the user from having to navigate to the url cell
             // first.
-            miRecOpenUrl     = addItem(miEdit, "Open &Url (current row's url column)",    "Open-Url",            Keys.Control | Keys.Shift | Keys.U, recOpenUrlClicked);
+            miRecOpenUrl     = addItem(miEdit, "Open &Url",   "Open URL",            Keys.Control | Keys.Shift | Keys.U, recOpenUrlClicked);
             // Pick Value: v1.0.67 deferred stub. The chord (Ctrl+F2)
             // is reserved so the menu doesn't drift and the user can
             // discover the planned command.
-            miRecPickValue   = addItem(miEdit, "Pick &Value (deferred -- not yet implemented)", "Pick-Value", Keys.Control | Keys.F2,            recPickValueStub);
+            miRecPickValue   = addItem(miEdit, "Pick &Value", "Pick Value", Keys.Control | Keys.F2,            recPickValueStub);
 
             // ===== Navigate menu: move around the data =====
             miNavigate = addMenu("&Navigate");
@@ -9073,11 +10302,11 @@ namespace DbDuo
             // Names follow EdSharp/FileDir convention; chords are
             // unset (the listview's arrow keys handle next/previous
             // and Control+Home/End handle first/last natively).
-            miNavFirst       = addItem(miNavigate, "&First Record",                          "Step-Record-First",    Keys.None,                          navFirstClicked);
-            miNavLast        = addItem(miNavigate, "&Last Record",                           "Step-Record-Last",     Keys.None,                          navLastClicked);
-            miNavNext        = addItem(miNavigate, "&Next Record",                        "Step-Record-Next",     Keys.None,                          navNextClicked);
-            miNavPrev        = addItem(miNavigate, "&Previous Record",                    "Step-Record-Previous", Keys.None,                          navPrevClicked);
-            miRecGoTo        = addItemLocal(miNavigate, "&Go to Record...",               "Set-Position",         Keys.Control | Keys.G,              recGoToClicked);
+            miNavFirst       = addItem(miNavigate, "&First Record",                          "Step Record First",    Keys.None,                          navFirstClicked);
+            miNavLast        = addItem(miNavigate, "&Last Record",                           "Step Record Last",     Keys.None,                          navLastClicked);
+            miNavNext        = addItem(miNavigate, "&Next Record",                        "Step Record Next",     Keys.None,                          navNextClicked);
+            miNavPrev        = addItem(miNavigate, "&Previous Record",                    "Step Record Previous", Keys.None,                          navPrevClicked);
+            miRecGoTo        = addItem(miNavigate, "&Go to Record...",                    "Set Position",         Keys.Control | Keys.G,              recGoToClicked);
             addSep(miNavigate);
             // Search families. Three distinct families with their
             // own chord pairs, plus a unified F3 / Shift+F3 "repeat
@@ -9097,52 +10326,73 @@ namespace DbDuo
             //
             // F3 / Shift+F3 repeat whichever family was most recently
             // invoked; sLastSearchKind routes the dispatch.
-            miRecFind         = addItem(miNavigate, "&Find Record (search all columns)...",        "Find",                Keys.Control | Keys.F,              recFindAllClicked);
-            miRecFindPrev     = addItem(miNavigate, "&Reverse Find (search backward, all columns)", "Find-Previous",      Keys.Control | Keys.Shift | Keys.F, recFindAllPrevClicked);
-            miRecJump         = addItem(miNavigate, "&Jump to Record (match in current column)...", "Jump-Record",        Keys.Control | Keys.J,              recJumpClicked);
-            miRecJumpPrev     = addItem(miNavigate, "Re&verse Jump (search backward, current column)", "Jump-RecordPrevious", Keys.Control | Keys.Shift | Keys.J, recJumpPrevClicked);
-            miRecFindRegex    = addItem(miNavigate, "Find Re&gex (search all columns by pattern)...", "Find-Regex",       Keys.Control | Keys.F3,             recFindRegexClicked);
-            miRecFindRegexPrev = addItem(miNavigate, "Reverse Re&gex Find (search backward, all columns)", "Find-RegexPrevious", Keys.Control | Keys.Shift | Keys.F3, recFindRegexPrevClicked);
-            miRecSearchAgain  = addItem(miNavigate, "Search &Next (repeat last search forward)",   "Search-Next",         Keys.F3,                            recSearchNextClicked);
-            miRecSearchPrev   = addItem(miNavigate, "&Search Previous (repeat last search reverse)", "Search-Previous",   Keys.Shift | Keys.F3,               recSearchPrevClicked);
+            miRecFind         = addItem(miNavigate, "&Find Record...",        "Find",                Keys.Control | Keys.F,              recFindAllClicked);
+            miRecFindPrev     = addItem(miNavigate, "&Reverse Find", "Find Previous",      Keys.Control | Keys.Shift | Keys.F, recFindAllPrevClicked);
+            miRecJump         = addItem(miNavigate, "&Jump to Record...", "Jump Record",        Keys.Control | Keys.J,              recJumpClicked);
+            miRecJumpPrev     = addItem(miNavigate, "Re&verse Jump", "Jump Previous Record", Keys.Control | Keys.Shift | Keys.J, recJumpPrevClicked);
+            miRecFindRegex    = addItem(miNavigate, "Find Re&gex...", "Find Regex",       Keys.Control | Keys.F3,             recFindRegexClicked);
+            miRecFindRegexPrev = addItem(miNavigate, "Reverse Re&gex Find", "Find Previous Regex", Keys.Control | Keys.Shift | Keys.F3, recFindRegexPrevClicked);
+            miRecSearchAgain  = addItem(miNavigate, "Search &Next",   "Search Next",         Keys.F3,                            recSearchNextClicked);
+            miRecSearchPrev   = addItem(miNavigate, "&Search Previous", "Search Previous",   Keys.Shift | Keys.F3,               recSearchPrevClicked);
             addSep(miNavigate);
             // Parent-child drill family. Alt+RightArrow enters a
             // child table from the current row's foreign-key target;
             // Alt+LeftArrow exits back to the parent row that drilled
             // in. Alt+Home pops all the way back to the topmost
             // ancestor.
-            miRecEnterChild      = addItem(miNavigate, "&Enter Child Table (drill into related rows)...", "Enter-Child",      Keys.Alt | Keys.Right, recEnterChildClicked);
-            miRecExitChild       = addItem(miNavigate, "E&xit Child Table (return to parent row)",        "Exit-Child",       Keys.Alt | Keys.Left,  recExitChildClicked);
-            miRecExitChildToRoot = addItem(miNavigate, "Exit to &Root Table (pop entire drill stack)",    "Exit-ChildToRoot", Keys.Alt | Keys.Home,  recExitChildToRootClicked);
+            miRecEnterChild      = addItem(miNavigate, "&Enter Child Table...", "Enter Child",      Keys.Alt | Keys.Right, recEnterChildClicked);
+            miRecExitChild       = addItem(miNavigate, "E&xit Child Table",        "Exit Child",       Keys.Alt | Keys.Left,  recExitChildClicked);
+            miRecExitChildToRoot = addItem(miNavigate, "Exit to &Root Table",    "Exit Child to Root", Keys.Alt | Keys.Home,  recExitChildToRootClicked);
 
             // ===== Query menu: read aspects of the data =====
             miQuery = addMenu("&Query");
             // Read-only inspection of current record / table / schema.
-            miRecShow        = addItem(miQuery, "&Show Record (field-by-field)",  "Show-Object",   Keys.Enter,                       recShowClicked);
-            miSchemaProperties  = addItem(miQuery, "Table &Properties",              "Get-Property",  Keys.Alt | Keys.Enter,            schemaPropertiesClicked);
-            miRecRelated     = addItem(miQuery, "&Related Records (follow FK)...",   "Show-Related",  Keys.None,                        recRelatedClicked);
-            miSchemaShow     = addItem(miQuery, "&Show Schema (all tables)",         "Show-Schema",   Keys.None,                        schemaShowClicked);
+            miRecShow        = addItem(miQuery, "&Show Record",  "Show Object",   Keys.Enter,                       recShowClicked);
+            miSchemaProperties  = addItem(miQuery, "Table &Properties",              "Get Property",  Keys.Alt | Keys.Enter,            schemaPropertiesClicked);
+            miRecRelated     = addItem(miQuery, "&Related Records...",   "Show Related",  Keys.None,                        recRelatedClicked);
+            miSchemaShow     = addItem(miQuery, "&Show Schema",         "Show Schema",   Keys.None,                        schemaShowClicked);
             addSep(miQuery);
             // Say-X family: speaks state without changing focus or
             // recordset position. FileDir's Say-X family is the model.
-            miSaySayStatus       = addItem(miQuery, "Say Status (table, row, filter, sort)",   "Say-Status",       Keys.Alt | Keys.Z,                 saySayStatus);
-            miSaySayPath         = addItem(miQuery, "Say &Path (database file path)",          "Say-Path",         Keys.Shift | Keys.P,               saySayPath);
-            miSaySayYield        = addItem(miQuery, "Say &Yield (row count and filter)",       "Say-Yield",        Keys.Shift | Keys.Y,               saySayYield);
-            miSaySayTables       = addItem(miQuery, "Say Tables (visited this session)",      "Say-Tables",        Keys.Shift | Keys.F4,              saySayTables);
+            miSaySayStatus       = addItem(miQuery, "Say Status",   "Say Status",       Keys.Shift | Keys.Z,               saySayStatus);
+            miSaySayDatabase     = addItem(miQuery, "Say &Database",        "Say Database",     Keys.Shift | Keys.D,               saySayDatabase);
+            miSaySayOrder        = addItem(miQuery, "Say &Order",      "Say Order",        Keys.Shift | Keys.O,               saySayOrder);
+            miSaySayGoto         = addItem(miQuery, "Say &Goto",      "Say Goto",         Keys.Shift | Keys.G,               saySayGoto);
+            // Say Record retired in v1.0.101. Shift+Space is free. The
+            // screen reader's built-in line-read command (e.g. JAWS
+            // Ins+Down) reads the listview row's columns natively, so
+            // a DbDuo-specific Say Record was redundant.
+            // Say Path retired in v1.0.99 (covered by Say Database on
+            // Shift+D, single-press = name, double-press = full path).
+            miSaySayYield        = addItem(miQuery, "Say &Yield",       "Say Yield",        Keys.Shift | Keys.Y,               saySayYield);
+            miSaySayTables       = addItem(miQuery, "Say Tables",      "Say Tables",        Keys.Shift | Keys.F4,              saySayTables);
             // Say Marked moved off Shift+L (which is now Say Column from
             // Cursor) to Alt+Shift+M. Mark Record itself uses Control+M.
-            miSaySayMarked       = addItem(miQuery, "Say &Marked (look-values of marked rows)", "Say-Marked",      Keys.Shift | Keys.M,               saySayMarked);
+            miSaySayMarked       = addItem(miQuery, "Say &Marked", "Say Marked",      Keys.Alt | Keys.M,                 saySayMarked);
             // Shift+D: Say Updated -- the 'updated' value, rendered in
             // a human-friendly local-time form. Replaces the previous
             // raw-text Say Date.
-            miSaySayUpdated      = addItem(miQuery, "Say Updated (human-friendly local-time)", "Say-Updated",       Keys.None,                         saySayUpdated);
+            miSaySayModified     = addItem(miQuery, "Say &Modified", "Say Modified",       Keys.Shift | Keys.M,               saySayModified);
             // Shift+N: Say Notes -- the 'notes' field of the current row.
-            miSaySayNotes        = addItem(miQuery, "Say &Notes (current row's notes field)",  "Say-Notes",        Keys.Shift | Keys.N,               saySayNotes);
+            miSaySayNotes        = addItem(miQuery, "Say &Notes",  "Say Notes",        Keys.Shift | Keys.N,               saySayNotes);
             // Shift+T: Say Tags -- the 'tags' field of the current row.
-            miSaySayTags         = addItem(miQuery, "Say &Tags (current row's tags field)",    "Say-Tags",         Keys.Shift | Keys.T,               saySayTags);
+            miSaySayTags         = addItem(miQuery, "Say &Tags",    "Say Tags",         Keys.Shift | Keys.T,               saySayTags);
             // Shift+L: Say Column from Cursor -- vertical sweep of the
             // current virtual column, starting at the current cell.
-            miSaySayColumn       = addItem(miQuery, "Say Column from Cursor (virtual column)", "Say-Column",       Keys.None,                         saySayColumn);
+            // The Say-X family for multi-cell sweeps uses the L
+            // convention -- L for List / Look / Linear-sweep, the
+            // same accepted-exception logic that gives bookmark
+            // commands the K letter. The first-letter rule wouldn't
+            // accept E/G/V/X for these commands (none of those
+            // letters appear in "Say Column" or "Say Rows"), and the
+            // S/C/R/M letters are all heavily used elsewhere. L
+            // names the activity ("linear list down the column" or
+            // "linear list across the rows") in the same way K
+            // names the bookmark family.
+            miSaySayColumn       = addItem(miQuery, "Say Column &Rest",   "Say Column Rest",         Keys.Control | Keys.L,             saySayColumn);
+            miSaySayColumnMarked = addItem(miQuery, "Say Column Rest &Marked", "Say Column Rest Marked", Keys.Control | Keys.Shift | Keys.L,saySayColumnMarked);
+            miSaySayRows         = addItem(miQuery, "Say Rec&ords Rest", "Say Records Rest",        Keys.Alt | Keys.L,                 saySayRows);
+            miSaySayRowsMarked   = addItem(miQuery, "Say Records Rest Marked", "Say Records Rest Marked", Keys.Alt | Keys.Shift | Keys.L,    saySayRowsMarked);
             // Shift+K: Say Kin -- speak the 'look' values of every
             // related record (both directions: parents reached by
             // outbound FK columns, and children that point back to
@@ -9152,19 +10402,22 @@ namespace DbDuo
             // the current table. Single-press speaks via the live
             // region; double-press shows the same content in the
             // multi-line dialog used by other speech-only commands.
-            miSaySayKin          = addItem(miQuery, "Say &Kin (look values of all related records)", "Say-Kin", Keys.Shift | Keys.K, saySayKin);
+            // Say Kin retired in v1.0.101. Shift+K is now free. The
+            // foreign-key relationship readout is still available via
+            // Say Related (Shift+R), which is a separate command with
+            // a clearer name.
             // Shift+8 (the asterisk key) -- Say Sort and Filter. JAWS
             // calls Shift+8 "asterisk"; the symbol evokes "everything
             // about how the data is being shaped" which is what this
             // command reports. Numpad-asterisk (Keys.Multiply) is a
             // hidden alias for users with a numeric keypad.
-            miSaySaySortFilter   = addItem(miQuery, "Say &Sort and Filter (active sort and filter)", "Say-SortFilter", Keys.Shift | Keys.D8,         saySaySortFilter);
+            miSaySaySortFilter   = addItem(miQuery, "Say &Sort and Filter", "Say Sort Filter", Keys.Shift | Keys.D8,         saySaySortFilter);
             // Alt+Delete: JAWS-style "say cursor position." Speaks the
             // current virtual column's header followed by the current
             // (1-based) row number. The single most useful "where am
             // I" probe when reading a wide grid; gives the user a
             // self-orientation anchor without moving focus.
-            miSaySayPosition     = addItem(miQuery, "Say Position (column header and row number)", "Say-Position", Keys.Alt | Keys.Delete,            saySayPosition);
+            miSaySayPosition     = addItem(miQuery, "Say Position", "Say Position", Keys.Alt | Keys.Delete,            saySayPosition);
             // Alt+Apostrophe (JAWS calls Keys.OemQuotes "Apostrophe"):
             // speak the current Windows clipboard contents. Mirrors
             // FileDir's Alt+' = "Clipboard" command in the Query
@@ -9172,8 +10425,8 @@ namespace DbDuo
             // or other shell data, the speech says "(non-text
             // clipboard)" rather than nothing. Double-press opens
             // the read-only memo dialog for line-by-line review.
-            miSaySayClipboard    = addItem(miQuery, "Say &Clipboard (current text on the clipboard)", "Say-Clipboard", Keys.Alt | Keys.OemQuotes,    saySayClipboard);
-            miSaySayYieldMarked  = addItem(miQuery, "Say Marked Yield (count of marked rows)", "Say-YieldMarked",  Keys.None,                          saySayYieldMarked);
+            miSaySayClipboard    = addItem(miQuery, "Say &Clipboard", "Say Clipboard", Keys.Alt | Keys.OemQuotes,    saySayClipboard);
+            miSaySayYieldMarked  = addItem(miQuery, "Say Marked Yield", "Say Yield Marked",  Keys.None,                          saySayYieldMarked);
             // v1.0.67 Say-X family completions. Each speaks one piece
             // of state without changing recordset position. The chord
             // family is Shift+Letter where Letter is the first letter
@@ -9181,68 +10434,55 @@ namespace DbDuo
             // Related, Url. Long values can be reviewed with a second
             // press (LbcDialog with a multi-line TextBox) via the
             // shared speakOrShow helper.
-            miSaySayAdded        = addItem(miQuery, "Say A&dded (current row's added timestamp)",     "Say-Added",   Keys.Shift | Keys.A,                saySayAdded);
-            miSaySayCell         = addItem(miQuery, "Say Ce&ll (current virtual cell's value)",       "Say-Cell",    Keys.Shift | Keys.C,                saySayCell);
-            miSaySayFilter       = addItem(miQuery, "Say &Filter (active filter expression)",         "Say-Filter",  Keys.Shift | Keys.F,                saySayFilter);
-            miSaySayId           = addItem(miQuery, "Say &Id (current row's primary key value)",      "Say-Id",      Keys.Shift | Keys.I,                saySayId);
-            miSaySayLook         = addItem(miQuery, "Say &Look (current row's look value)",           "Say-Look",    Keys.Shift | Keys.L,                saySayLook);
-            miSaySayRelated      = addItem(miQuery, "Say &Related (foreign-key neighbors of current row)", "Say-Related", Keys.Shift | Keys.R,           saySayRelated);
-            miSaySayUrl          = addItem(miQuery, "Say &Url (current row's url value)",             "Say-Url",     Keys.Shift | Keys.U,                saySayUrl);
+            miSaySayAdded        = addItem(miQuery, "Say A&dded",     "Say Added",   Keys.Shift | Keys.A,                saySayAdded);
+            miSaySayCell         = addItem(miQuery, "Say Ce&ll",       "Say Cell",    Keys.Shift | Keys.C,                saySayCell);
+            miSaySayFilter       = addItem(miQuery, "Say &Filter",         "Say Filter",  Keys.Shift | Keys.F,                saySayFilter);
+            miSaySayId           = addItem(miQuery, "Say &Id",      "Say ID",      Keys.Shift | Keys.I,                saySayId);
+            miSaySayLook         = addItem(miQuery, "Say &Look",           "Say Look",    Keys.Shift | Keys.L,                saySayLook);
+            miSaySayRelated      = addItem(miQuery, "Say &Related", "Say Related", Keys.Shift | Keys.R,           saySayRelated);
+            miSaySayUrl          = addItem(miQuery, "Say &URL",          "Say URL",      Keys.Shift | Keys.U,                saySayUrl);
             addSep(miQuery);
-            // Filter / Sort -- data-shaping commands. FileDir's
-            // Alpha Order / Date Order chord block on Alt+A / Alt+D
-            // is the model; DbDuo's Sort Ascending / Sort Oldest First
-            // mirror those exactly.
-            miViewSelect     = addItemLocal(miQuery, "&Filter Records...",                          "Select-Record",     Keys.Alt | Keys.Shift | Keys.F,     viewSelectClicked);
-            miViewResetFilter= addItemLocal(miQuery, "&Clear Filter",                               "Reset-Filter",      Keys.None,                          viewResetFilterClicked);
+            // Filter / Sort -- data-shaping commands. As of v1.0.86
+            // all per-column sort shortcuts are dropped (the
+            // Alt+letter / Alt+Shift+letter pattern is retired); the
+            // single Sort-Records dialog on Alt+Shift+S handles every
+            // sorting case by defaulting to the virtual column and
+            // offering an opt-in Descending checkbox.
+            miViewSelect     = addItem(miQuery, "&Filter Records...",                               "Filter Records",     Keys.Alt | Keys.Shift | Keys.F,     viewSelectClicked);
+            miViewResetFilter= addItem(miQuery, "&Clear Filter",                                    "Reset Filter",      Keys.None,                          viewResetFilterClicked);
             addSep(miQuery);
-            miViewFormat     = addItemLocal(miQuery, "Custom &Sort...",                             "Sort-Object",       Keys.Shift | Keys.S,                viewFormatClicked);
-            miViewSortAsc    = addItem(miQuery, "&Ascending Order by Column...",                    "Sort-Ascending",    Keys.Alt | Keys.A,                  viewSortAscClicked);
-            miViewSortDesc   = addItem(miQuery, "&Descending Order by Column...",                   "Sort-Descending",   Keys.Alt | Keys.Shift | Keys.A,     viewSortDescClicked);
-            miViewSortRecent = addItem(miQuery, "Sort by Date Updated (most recent first)",         "Sort-RecentFirst",  Keys.None,                          viewSortRecentClicked);
-            miViewSortOldest = addItem(miQuery, "Sort by Date Updated (oldest first)",              "Sort-OldestFirst",  Keys.None,                          viewSortOldestClicked);
-            miViewResetSort  = addItem(miQuery, "Clear Sor&t",                                      "Reset-Sort",        Keys.None,                          viewResetSortClicked);
-            // Sort Records: new in v1.0.67. Sorts the recordset by the
-            // CURRENT virtual column. A simple dialog presents one
-            // checkbox -- "Ascending" -- which is OFF by default. The
-            // default (descending) matches the most common use case:
-            // sort the column to see the largest / latest values
-            // first.  Distinct from Custom Sort (multi-column dialog)
-            // and from Sort-Ascending / Sort-Descending (which prompt
-            // for column).
-            miSortRecords    = addItem(miQuery, "Sor&t Records by Current Column...",            "Sort-Records",      Keys.Alt | Keys.Shift | Keys.S,     sortRecordsClicked);
-            // Sort-by-standard-column shortcuts. Each ascending/
-            // descending pair uses Alt+letter / Alt+Shift+letter
-            // where letter starts the column name:
-            //   Alt+I / Alt+Shift+I    Sort by <table>_id
-            //   Alt+L / Alt+Shift+L    Sort by look
-            //   Alt+T / Alt+Shift+T    Sort by tags
-            //   Alt+U / Alt+Shift+U    Sort by url
-            // The 'id' command uses the table's actual primary key
-            // column (which is <table>_id by convention) so it works
-            // regardless of singular/plural form. The others use
-            // their literal column names.
-            miSortById       = addItem(miQuery, "Sort by &Id (table's primary key, ascending)",       "Sort-ById",        Keys.Alt | Keys.I,                  sortByIdClicked);
-            miSortByIdRev    = addItem(miQuery, "Sort by Id (descending)",                            "Sort-ByIdReverse", Keys.Alt | Keys.Shift | Keys.I,     sortByIdRevClicked);
-            miSortByLook     = addItem(miQuery, "Sort by Loo&k (ascending)",                          "Sort-ByLook",      Keys.Alt | Keys.L,                  sortByLookClicked);
-            miSortByLookRev  = addItem(miQuery, "Sort by Look (descending)",                          "Sort-ByLookReverse", Keys.Alt | Keys.Shift | Keys.L,   sortByLookRevClicked);
-            miSortByTags     = addItem(miQuery, "Sor&t by Tags (ascending)",                          "Sort-ByTags",      Keys.Alt | Keys.T,                  sortByTagsClicked);
-            miSortByTagsRev  = addItem(miQuery, "Sort by Tags (descending)",                          "Sort-ByTagsReverse", Keys.Alt | Keys.Shift | Keys.T,   sortByTagsRevClicked);
-            miSortByUrl      = addItem(miQuery, "Sort by U&rl (ascending)",                           "Sort-ByUrl",       Keys.Alt | Keys.U,                  sortByUrlClicked);
-            miSortByUrlRev   = addItem(miQuery, "Sort by Url (descending)",                           "Sort-ByUrlReverse", Keys.Alt | Keys.Shift | Keys.U,    sortByUrlRevClicked);
+            miViewResetSort  = addItem(miQuery, "Clear Sor&t",                                      "Reset Sort",        Keys.None,                          viewResetSortClicked);
+            // Sort Records: the universal sort. Defaults to the
+            // current virtual column with an opt-in Descending
+            // checkbox. Replaces the entire family of per-column
+            // sort shortcuts (Sort-Ascending, Sort-Descending,
+            // Sort-Object, Sort-ById, Sort-ByLook, Sort-ByTags,
+            // Sort-ByUrl, Sort-OldestFirst, Sort-RecentFirst) that
+            // earlier versions provided. Their handlers are removed.
+            miOrderRecords   = addItem(miQuery, "&Order Records...",  "Order Records",   Keys.Alt | Keys.O,                  orderRecordsClicked);
+            miReverseOrder   = addItem(miQuery, "&Reverse Order...", "Reverse Order",  Keys.Alt | Keys.Shift | Keys.O,     reverseOrderClicked);
 
             // ===== Misc menu: utilities, tools, settings =====
             miMisc = addMenu("&Misc");
-            miViewUpdate     = addItem(miMisc, "&Refresh View",                          "Update-View",       Keys.F5,                            viewUpdateClicked);
-            miToolsLock      = addItem(miMisc, "Toggle Read-On&ly Lock",                 "Lock-Database",     Keys.Control | Keys.F7,             toolsLockClicked);
+            miViewUpdate     = addItem(miMisc, "&Refresh View",                          "Update View",       Keys.F5,                            viewUpdateClicked);
+            // Toggle Read Only: flip the database between read-write
+            // and read-only at runtime. Restored in v1.0.95; v1.0.96
+            // moved from Ctrl+Shift+R to Alt+Z per the user's
+            // assessment that read-only is a rare-use toggle and the
+            // Ctrl+Shift+R slot is better used for the more-common
+            // regex-replace operation. Alt+Z is also one-handed which
+            // is appropriate for a setting you flip once and forget.
+            miToggleReadOnly = addItem(miMisc, "Toggle Read &Only",                       "Toggle Read Only",  Keys.Alt | Keys.Z,                  toggleReadOnlyClicked);
             // v1.0.67 deferred stubs. The chords are reserved so the
             // menu stays stable and the user can discover the planned
             // commands. The handlers display "Not yet implemented."
-            miMiscDatabaseSummary = addItem(miMisc, "Database Summary (deferred -- not yet implemented)", "Database-Summary", Keys.Shift | Keys.D, miscDatabaseSummaryStub);
-            miMiscWindowSummary   = addItem(miMisc, "Window Summary (deferred -- not yet implemented)",   "Window-Summary",   Keys.Shift | Keys.W, miscWindowSummaryStub);
+            miMiscDatabaseSummary = addItem(miMisc, "&Database Summary", "Database Summary", Keys.Alt | Keys.D, miscDatabaseSummaryClicked);
+            // Window Summary stub retired v1.0.99. Shift+W is now Say Web.
+            // If a future window-info command is added, it should use a
+            // chord whose letter appears in its command name.
             addSep(miMisc);
             // Analytical utilities.
-            miToolsMeasure   = addItem(miMisc, "Table &Statistics",                      "Measure-Table",     Keys.None,                          toolsMeasureClicked);
+            miToolsMeasure   = addItem(miMisc, "&Table Summary",                      "Table Summary",     Keys.Alt | Keys.T,                  toolsMeasureClicked);
             // Describe Column: descriptive statistics for the current
             // virtual column. Numeric columns get Tukey's five-number
             // summary plus mean / SD / mode / skew; date columns get
@@ -9253,20 +10493,26 @@ namespace DbDuo
             // commands use on double-press: multi-line read-only
             // TextBox plus an OK button, focus-stealing, Control+C
             // copies the whole report.
-            miDescribeColumn = addItem(miMisc, "&Statistics from Column (current virtual column)",        "Measure-Column", Keys.Alt | Keys.S,                  describeColumnClicked);
+            miDescribeColumn = addItem(miMisc, "S&tatistics Column",        "Statistics Column", Keys.Control | Keys.Shift | Keys.S, describeColumnClicked);
+            // Select Columns: per-table visibility picker. Alt+S as
+            // the S-letter productivity primary; the dialog has one
+            // checkbox per column, plus Select All / Select None /
+            // OK / Cancel buttons. Persists with the table (uses
+            // the existing db.setSelectList mechanism).
+            miSelectColumns = addItem(miMisc, "&Select Columns to Display...",  "Select Columns",   Keys.Alt | Keys.S,                  selectColumnsClicked);
             // Plot Column: graphical sibling of Describe Column. Picks
             // a chart type from the column's detected data type --
             // numeric -> histogram or box plot; date -> timeline or
             // by-year or by-month; boolean -> pie; text -> Pareto bar.
             // Writes an .xlsx to the database folder and opens it in
             // Excel, same pattern as the Frequency Chart command.
-            miPlotColumn = addItem(miMisc, "&Graphics Output (plot current virtual column)...", "New-Plot",         Keys.Alt | Keys.G,                  plotColumnClicked);
-            miToolsChart     = addItem(miMisc, "Frequency &Chart (column to Excel)...",  "New-Chart",         Keys.None,                          toolsChartClicked);
-            miViewSelectColumn = addItem(miMisc, "Choose &Visible Columns...",           "Select-Column",     Keys.None,                          viewSelectColumnClicked);
+            miPlotColumn = addItem(miMisc, "&Graphics Column...", "Graphics Column",         Keys.Alt | Keys.G,                  plotColumnClicked);
+            miToolsChart     = addItem(miMisc, "Graphics &Grid...",  "Graphics Grid",         Keys.Alt | Keys.Shift | Keys.G,     toolsChartClicked);
+            miViewSelectColumn = addItem(miMisc, "Choose &Visible Columns...",           "Select Column",     Keys.None,                          viewSelectColumnClicked);
             // Extract Matches: walk every visible row, find every
             // regex match across every visible column, copy matches
             // to the clipboard. Alt+E ("E for Extract").
-            miExtractRegex   = addItem(miMisc, "&Extract with Regex (matches to clipboard)...", "Extract-Regex", Keys.Control | Keys.Shift | Keys.E, extractRegexClicked);
+            miExtractRegex   = addItem(miMisc, "&Extract with Regex...", "Extract Regex", Keys.Control | Keys.Shift | Keys.X, extractRegexClicked);
             addSep(miMisc);
             // Cell clipboard family. Operate on the virtual cell (the
             // cell under the Alt+Control+arrow cursor). Shift+A appends,
@@ -9274,17 +10520,17 @@ namespace DbDuo
             // has no hotkey or mnemonic letter -- the word "Copy" is
             // taken (Control+C) and no other letter in the label is a
             // legitimate Camel-Type mnemonic.
-            miCellAppend     = addItem(miMisc, "Append &Cell to Clipboard",                "Append-Cell",    Keys.Alt | Keys.C,                  cellAppendClicked);
-            miCellCopy       = addItem(miMisc, "&Copy Cell to Clipboard",                  "Copy-Cell",      Keys.Control | Keys.C,              cellCopyClicked);
-            miCopyRow        = addItem(miMisc, "Copy Row as TSV to Clipboard",            "Copy-Row",       Keys.None,                          copyRowClicked);
-            miStepInitialChange = addItem(miMisc, "Next &Initial Change (column-aware)...", "Step-InitialChange", Keys.None,                         stepInitialChangeClicked);
+            miCellAppend     = addItem(miMisc, "Append &Cell to Clipboard",                "Append Cell",    Keys.Alt | Keys.C,                  cellAppendClicked);
+            miCellCopy       = addItem(miMisc, "&Copy Cell to Clipboard",                  "Copy Cell",      Keys.Control | Keys.C,              cellCopyClicked);
+            miCopyRow        = addItem(miMisc, "Copy &Visible Cells as TSV to Clipboard",   "Copy Visible Cells", Keys.None,                          copyRowClicked);
+            miJumpNextInitial = addItem(miMisc, "Jump to Next &Initial...", "Jump Next Initial", Keys.None,                         jumpNextInitialClicked);
             addSep(miMisc);
-            miToolsInvokeSql = addItem(miMisc, "Run S&QL...",                            "Invoke-Sql",        Keys.Control | Keys.Q,              toolsInvokeSqlClicked);
-            miToolsTest      = addItem(miMisc, "&Test Integrity",                        "Test-Database",     Keys.None,                          toolsTestClicked);
-            miToolsTestDriver= addItem(miMisc, "Test &Drivers (ODBC and OLE DB)",        "Test-Driver",       Keys.None,                          toolsTestDriverClicked);
+            miToolsInvokeSql = addItem(miMisc, "Run S&QL...",                            "Invoke SQL",        Keys.Control | Keys.Q,              toolsInvokeSqlClicked);
+            miToolsTest      = addItem(miMisc, "&Test Integrity",                        "Test Database",     Keys.None,                          toolsTestClicked);
+            miToolsTestDriver= addItem(miMisc, "Test &Drivers",        "Test Driver",       Keys.None,                          toolsTestDriverClicked);
             addSep(miMisc);
-            miToolsOpenFolder= addItem(miMisc, "Open in E&xplorer",                      "Open-FileFolder",   Keys.Alt | Keys.OemPipe,            toolsOpenFolderClicked);
-            miToolsConsole   = addItem(miMisc, "Open D&ot Prompt",                       "Enter-Console",     Keys.Control | Keys.Oemtilde,       toolsConsoleClicked);
+            miToolsOpenFolder= addItem(miMisc, "Open in E&xplorer",                      "Open File Folder",   Keys.Alt | Keys.OemPipe,            toolsOpenFolderClicked);
+            miToolsConsole   = addItem(miMisc, "Open D&ot Prompt",                       "Enter Console",     Keys.Control | Keys.Oemtilde,       toolsConsoleClicked);
             addSep(miMisc);
             // Script family. Adapted from EdSharp's Invoke / View
             // Script pattern. Scripts are plain files in
@@ -9297,72 +10543,78 @@ namespace DbDuo
             // handles both modifying an existing script and creating
             // a new one (via a "[New script...]" entry at the top of
             // the pick list).
-            miMiscInvokeScript     = addItem(miMisc, "In&voke Script...",                     "Invoke-Script",     Keys.Alt | Keys.V,                  miscInvokeScriptClicked);
-            miMiscEditScript       = addItem(miMisc, "Edit Sni&ppet...",                       "Edit-Script",       Keys.Alt | Keys.Shift | Keys.V,     miscEditScriptClicked);
-            miMiscOpenScriptFolder = addItem(miMisc, "Open Script &Folder",                   "Open-ScriptFolder", Keys.None,                          miscOpenScriptFolderClicked);
+            miMiscInvokeScript     = addItem(miMisc, "In&voke Script...",                     "Invoke Script",     Keys.Alt | Keys.V,                  miscInvokeScriptClicked);
+            miMiscEditScript       = addItem(miMisc, "Edit Sni&ppet...",                       "Edit Script",       Keys.Alt | Keys.Shift | Keys.V,     miscEditScriptClicked);
+            miMiscOpenScriptFolder = addItem(miMisc, "Open Script &Folder",                   "Open Script Folder", Keys.None,                          miscOpenScriptFolderClicked);
             addSep(miMisc);
-            // Configuration Options: Alt+Shift+C matches the EdSharp
+            // Edit-Settings dialog: Alt+Shift+C matches the EdSharp
             // and FileDir convention exactly -- same label, same
             // chord. F12 is kept as a hidden alias via
             // KeyMap.registerAlias below for users with the chord in
             // muscle memory from earlier DbDuo versions.
-            miToolsEditConfig= addItem(miMisc, "Confi&guration Options...",                "Edit-Configuration", Keys.Alt | Keys.Shift | Keys.C,    toolsEditConfigClicked);
+            miToolsEditConfig= addItem(miMisc, "&Edit Settings...",          "Edit Settings", Keys.Alt | Keys.Shift | Keys.E,    toolsEditConfigClicked);
 
             // ===== Help menu =====
             miHelp = addMenu("&Help");
-            miHelpContents     = addItem(miHelp, "&Documentation",                       "Get-Help",          Keys.F1,                            helpContentsClicked);
+            miHelpContents     = addItem(miHelp, "&Documentation",                       "Get Help",          Keys.F1,                            helpContentsClicked);
             // Shift+F1 -- Version History. EdSharp and FileDir
             // both use this chord for the same purpose.
-            miHelpHistory      = addItem(miHelp, "&History of Changes",                  "Show-History",      Keys.Shift | Keys.F1,               helpHistoryClicked);
-            miHelpReadme       = addItem(miHelp, "&Readme Guide",                        "Show-Readme",       Keys.None,                          helpReadmeClicked);
+            miHelpHistory      = addItem(miHelp, "&History of Changes",                  "Show History",      Keys.Shift | Keys.F1,               helpHistoryClicked);
+            miHelpReadme       = addItem(miHelp, "&Readme Guide",                        "Show Readme",       Keys.None,                          helpReadmeClicked);
             // Open Sample Database: a one-keystroke tour entry point.
             // The installer ships sample.db (teachers, classes,
             // students, enrollments) alongside the executable; this
             // command opens it via the same code path File > Open
             // Database uses, so all the normal post-open behaviors
             // (filter restore, status announcement, etc.) apply.
-            miHelpSampleDb     = addItem(miHelp, "Open &Sample Database",                "Open-SampleDatabase", Keys.None,                        helpSampleDbClicked);
+            miHelpSampleDb     = addItem(miHelp, "Open &Sample Database",                "Open Sample Database", Keys.None,                        helpSampleDbClicked);
             // Open Northwind Sample and Open Chinook Sample: parallel
             // commands for the two larger bundled databases. Both use
             // the same code path as Open Sample Database. Northwind is
             // the classic Microsoft sales sample (8 tables, 101 rows);
             // Chinook is the classic music-store sample (9 tables, 158
             // rows, with three-deep parent-child chains).
-            miHelpNorthwindDb  = addItem(miHelp, "Open &Northwind Sample",               "Open-NorthwindDatabase", Keys.None,                     helpNorthwindDbClicked);
-            miHelpChinookDb    = addItem(miHelp, "Open Ch&inook Sample",                 "Open-ChinookDatabase",   Keys.None,                     helpChinookDbClicked);
+            miHelpNorthwindDb  = addItem(miHelp, "Open &Northwind Sample",               "Open Northwind Database", Keys.None,                     helpNorthwindDbClicked);
+            miHelpChinookDb    = addItem(miHelp, "Open Ch&inook Sample",                 "Open Chinook Database",   Keys.None,                     helpChinookDbClicked);
             // Hobbyist sample databases new in v1.0.63.
             //   collection.db -- music collection (artists, albums,
             //     tracks, plus collector fields for rating, location,
             //     loan tracking).
             //   cellar.db -- wine cellar (wines, bottles, tastings,
             //     with drink-window data and per-bottle inventory).
-            miHelpCollectionDb = addItem(miHelp, "Open &Music Collection",                "Open-CollectionDatabase",Keys.None,                     helpCollectionDbClicked);
-            miHelpCellarDb     = addItem(miHelp, "Open Wine &Cellar",                     "Open-CellarDatabase",    Keys.None,                     helpCellarDbClicked);
-            miHelpVerbs        = addItem(miHelp, "PowerShell &Verb Reference",           "Get-Verb",          Keys.None,                          helpVerbsClicked);
+            miHelpCollectionDb = addItem(miHelp, "Open &Music Collection",                "Open Collection Database",Keys.None,                     helpCollectionDbClicked);
+            miHelpCellarDb     = addItem(miHelp, "Open Wine &Cellar",                     "Open Cellar Database",    Keys.None,                     helpCellarDbClicked);
+            miHelpVerbs        = addItem(miHelp, "PowerShell &Verb Reference",           "Get Verb",          Keys.None,                          helpVerbsClicked);
             addSep(miHelp);
-            miHelpShowCommand  = addItem(miHelp, "Alternate Menu...",                        "Alternate-Menu",    Keys.Alt | Keys.F10,                helpShowCommandClicked);
-            // Control+F1 = Key Describer toggle. EdSharp and FileDir
-            // both use Control+F1 for "Key Describer" with the same
+            miHelpShowCommand  = addItem(miHelp, "Alternate Menu...",                        "Alternate Menu",    Keys.Alt | Keys.F10,                helpShowCommandClicked);
+            // Control+F1 = Key Help toggle. EdSharp and FileDir
+            // both use Control+F1 for "Key Help" with the same
             // toggle pattern: announce on/off via the screen reader,
             // and when on, intercept hotkeys to announce them rather
             // than execute them.
-            miHelpTraceCommand = addItem(miHelp, "&Key Describer",                       "Switch-KeyDescriber", Keys.Control | Keys.F1,             helpTraceCommandClicked);
-            miHelpStatus       = addItem(miHelp, "&Where Am I",                            "Show-Status",       Keys.None,                          helpStatusClicked);
-            miHelpTestReader   = addItem(miHelp, "&Test Screen Reader Speech",           "Test-Reader",       Keys.None,                          helpTestReaderClicked);
+            miHelpTraceCommand = addItem(miHelp, "&Key Help",                       "Toggle Key Help", Keys.Control | Keys.F1,             helpTraceCommandClicked);
+            miHelpStatus       = addItem(miHelp, "&Where Am I",                            "Show Status",       Keys.None,                          helpStatusClicked);
+            miHelpTestReader   = addItem(miHelp, "&Test Screen Reader Speech",           "Test Reader",       Keys.None,                          helpTestReaderClicked);
             // Toggle-Extra-Speech: silence DbDuo's direct speech
             // messages without affecting the screen reader's natural
             // focus and selection announcements. EdSharp/FileDir's
-            // model. Alt+Shift+S is free (data-list Shift+S is the
-            // local Sort handler; Alt+Shift+S is global).
-            miHelpExtraSpeech  = addItem(miHelp, "Toggle E&xtra Speech",                 "Toggle-Extra-Speech", Keys.Alt | Keys.Shift | Keys.X,   helpExtraSpeechClicked);
+            // model. The "zzz" mnemonic on Alt+Shift+Z reads as a
+            // hush -- speech going to sleep. Default ON.
+            miHelpExtraSpeech   = addItem(miHelp, "Toggle E&xtra Speech",                "Toggle Extra Speech", Keys.Alt | Keys.Shift | Keys.Z,    helpExtraSpeechClicked);
+            // Toggle-Command-Echo: silence the spoken canonical command
+            // name that fires from menu/hotkey activations just before
+            // the command body runs. Mirrors the Extra Speech toggle's
+            // mnemonic (Ctrl+Shift+Z is the keyboard companion to
+            // Alt+Shift+Z, both "z for hushed speech"). Default ON.
+            miHelpCommandEcho   = addItem(miHelp, "Toggle &Command Echo",                "Toggle Command Echo", Keys.Control | Keys.Shift | Keys.Z, helpCommandEchoClicked);
             addSep(miHelp);
-            miHelpLog          = addItem(miHelp, "Show &Log Location",                   "Show-Log",          Keys.None,                          helpLogClicked);
-            miHelpWebSite      = addItem(miHelp, "Open We&bsite (DbDuo on GitHub)",      "Open-WebSite",      Keys.None,                          helpWebSiteClicked);
+            miHelpLog          = addItem(miHelp, "Show &Log Location",                   "Show Log",          Keys.None,                          helpLogClicked);
+            miHelpWebSite      = addItem(miHelp, "Open We&bsite",      "Open Website",      Keys.None,                          helpWebSiteClicked);
             // Elevate-Version: check GitHub for a newer DbDuo_setup.exe
             // and offer to download / install. EdSharp's F11 and
             // FileDir's F11 are the model.
-            miHelpElevate      = addItem(miHelp, "&Elevate Version...",                  "Elevate-Version",   Keys.F11,                           helpElevateClicked);
-            miHelpAbout        = addItem(miHelp, "&About",                                  "About-DbDuo",       Keys.Alt | Keys.F1,                 helpAboutClicked);
+            miHelpElevate      = addItem(miHelp, "&Elevate Version...",                  "Elevate Version",   Keys.F11,                           helpElevateClicked);
+            miHelpAbout        = addItem(miHelp, "&About",                                  "About DbDuo",       Keys.Alt | Keys.F1,                 helpAboutClicked);
 
             // Delete key as a secondary binding for Remove-Record.
             // The primary menu shortcut is Control+D (shown next to
@@ -9370,7 +10622,7 @@ namespace DbDuo
             // idiom (Excel tables, Outlook lists).
             KeyMap.registerAlias(Keys.Delete, miRecRemove);
 
-            // F12: legacy alias for Configuration Options (now on
+            // F12: legacy alias for Edit-Settings (now on
             // Alt+Shift+C to match the EdSharp / FileDir convention).
             // Hidden in the menu (Alt+Shift+C is shown there) but
             // continues to work for users with the chord in muscle
@@ -9386,6 +10638,14 @@ namespace DbDuo
             // Get-Property: secondary alias on Shift+F6 (EdSharp's
             // "Go to Contents" -- structural where-am-I).
             KeyMap.registerAlias(Keys.Shift | Keys.F6, miSchemaProperties);
+
+            // Graphics Column: secondary chord Ctrl+Shift+G, parallel
+            // to Ctrl+Shift+S = Statistics Column. The user wanted
+            // both analytical chords on the Ctrl+Shift+letter family
+            // alongside their one-handed Alt+letter primaries (Alt+G
+            // = Graphics Column, Alt+S was Statistics Column before
+            // it was reassigned to Select Columns).
+            KeyMap.registerAlias(Keys.Control | Keys.Shift | Keys.G, miPlotColumn);
 
             // Jump-Record: secondary alias on Shift+J for muscle
             // Shift+J: data-list alias for Jump-Record (single-column
@@ -9465,133 +10725,167 @@ namespace DbDuo
             };
 
             // ===== File menu =====
-            add("New-Database",       "Create a new empty database file", "");
-            add("Open-Database",      "Open a database file", "");
-            add("Close-Database",     "Close the currently open database", "");
-            add("Save-DatabaseAs",    "Save the open database under a new path", "");
-            add("Backup-Database",    "Write a timestamped copy of the open database", "");
-            add("Import-Data",        "Import rows from a CSV, TSV, or other database into a new table",
+            add("New Database",       "Create a new empty database file", "");
+            add("Open Database",      "Open a database file", "");
+            add("Close Database",     "Close the currently open database", "");
+            add("Save Database",    "Export the open database to another path (whole database, ignores filter)", "");
+            add("Backup Database",    "Write a timestamped copy of the open database", "");
+            add("Import Data",        "Import rows from a CSV, TSV, or other database into a new table",
                 "Auto-detects the input file's delimiter and creates a destination table with all-text columns.");
-            add("Export-Data",        "Export the current table or query to CSV, TSV, JSON, or another format",
+            add("Export Data",        "Export the current table or query to CSV, TSV, JSON, or another format",
                 "Choose the destination file extension to pick the format; row order and filter match what is visible.");
-            add("Open-FileFolder",    "Open the folder containing the open database in Windows Explorer", "");
-            add("Exit-Application",   "Close DbDuo", "");
+            add("Open File Folder",    "Open the folder containing the open database in Windows Explorer", "");
+            add("Exit Application",   "Close DbDuo", "");
 
             // ===== Edit menu =====
-            add("New-Record",         "Add a new row to the current table",
+            add("New Record",         "Add a new row to the current table",
                 "Opens an Edit-Record dialog with empty values for the substantive (non-housekeeping) fields. Validation rules from [Validation:<table>] in DbDuo.ini are applied.");
-            add("Set-Record",         "Edit every field of the current row",
+            add("Edit Record",         "Edit every field of the current row",
                 "Opens an Edit-Record dialog with the current row's values in editable text boxes for substantive fields. Validation rules apply.");
-            add("Set-Cell",           "Edit just the field under the virtual cursor",
+            add("Edit Cell",           "Edit just the field under the virtual cursor",
                 "Opens a single-field dialog for the cell under the Alt+Control+arrow cursor. Same regex validation as the full-row editor but faster when only one value needs to change.");
-            add("Remove-Record",      "Delete the current row", "");
-            add("Copy-Record",        "Duplicate the current row as a new row", "");
-            add("Set-Mark",           "Set the 'marked' flag on the current row", "");
-            add("Clear-Mark",         "Clear the 'marked' flag on the current row", "");
-            add("Set-MarkAnchor",     "Drop a mark anchor at the current row",
+            add("Delete Record",      "Delete the current record (or marked records, when marks exist)",
+                "Ctrl+D, or the dbDot-style alias 'delete', 'remove', or 'd'. When no records are marked, prompts to delete the current record. When at least one record is marked in the current filtered set, first prompts to choose the scope: current record (default), all N marked records, or cancel.");
+            add("Copy Record",        "Duplicate the current row as a new row", "");
+            add("Set Mark",           "Set the 'marked' flag on the current row", "");
+            add("Clear Mark",         "Clear the 'marked' flag on the current row", "");
+            add("Start Mark",     "Drop a mark anchor at the current row",
                 "F8 sets the anchor; Shift+F8 marks every row from the anchor to the current row (direction-agnostic).");
-            add("Mark-Range",         "Mark every row from the F8 anchor to the current row",
+            add("Complete Mark",         "Mark every row from the F8 anchor to the current row",
                 "Inclusive range. Direction does not matter: the anchor can be above or below the current row. Skips rows already marked.");
-            add("Set-UnmarkAnchor",   "Drop an unmark anchor at the current row",
+            add("Start Unmark",   "Drop an unmark anchor at the current row",
                 "Alt+F8 sets the unmark anchor; Alt+Shift+F8 unmarks every row from that anchor to the current row. Independent of the mark anchor.");
-            add("Unmark-Range",       "Unmark every row from the Alt+F8 anchor to the current row",
+            add("Unmark Range",       "Unmark every row from the Alt+F8 anchor to the current row",
                 "Inclusive range, direction-agnostic. Skips rows already unmarked.");
-            add("Save-Bookmark",      "Save the current row position as a session bookmark", "");
-            add("Restore-Bookmark",   "Jump to the row saved by Save-Bookmark", "");
-            add("Clear-Bookmark",     "Forget the saved bookmark", "");
+            add("Save Bookmark",      "Save the current row position as a session bookmark", "");
+            add("List Bookmarks",     "Show saved bookmarks in a listbox; navigate to the selected one",
+                "Alt+B. Each entry shows table -- look value (row N). Bookmarks are session-lifetime: closing the database clears them. Save with Ctrl+B; clear with Ctrl+Shift+B.");
+            add("Clear Bookmark",     "Forget the saved bookmark", "");
 
             // ===== Navigate menu =====
-            add("Step-Record-Next",   "Move down one row", "");
-            add("Step-Record-Prev",   "Move up one row", "");
-            add("Step-Record-First",  "Move to the first row", "");
-            add("Step-Record-Last",   "Move to the last row", "");
-            add("Set-Position",       "Jump to a specific row by number", "");
-            add("Step-InitialChange", "Move to the next row where the first display field's initial letter changes",
+            add("Step Record Next",   "Move down one row", "");
+            add("Step Record Previous",   "Move up one row", "");
+            add("Step Record First",  "Move to the first row", "");
+            add("Step Record Last",   "Move to the last row", "");
+            add("Set Position",       "Jump to a specific row by number", "");
+            add("Jump Next Initial", "Move to the next row where the first display field's initial letter changes",
                 "Useful in alphabetically sorted lists for moving by letter group.");
             add("Find",               "Search across all columns for a substring",
-                "Case-insensitive substring match against every visible column. Find-Previous goes backward.");
-            add("Find-Previous",      "Find-Previous (backward search across all columns)", "");
-            add("Find-Regex",         "Search across all columns with a .NET regex pattern", "");
-            add("Find-RegexPrevious", "Find-Regex backward", "");
-            add("Find-RegexAgain",    "Repeat the last Find-Regex forward", "");
-            add("Jump-Record",        "Search within one chosen column for a substring", "");
-            add("Jump-RecordPrevious","Jump-Record backward", "");
-            add("Jump-RecordAgain",   "Repeat the last Jump-Record", "");
-            add("Search-Next",        "Repeat the last Find forward", "");
-            add("Search-Previous",    "Repeat the last Find backward", "");
+                "Case-insensitive substring match against every visible column. Find Previous goes backward.");
+            add("Find Previous",      "Find Previous (backward search across all columns)", "");
+            add("Find Regex",         "Search across all columns with a .NET regex pattern", "");
+            add("Find Previous Regex", "Find Regex backward", "");
+            add("Find Regex Again",    "Repeat the last Find Regex forward", "");
+            add("Jump Record",        "Search within one chosen column for a substring", "");
+            add("Jump Previous Record","Jump Record backward", "");
+            add("Jump Record Again",   "Repeat the last Jump Record", "");
+            add("Search Next",        "Repeat the last Find forward", "");
+            add("Search Previous",    "Repeat the last Find backward", "");
 
             // ===== Query menu =====
-            add("Show-Object",        "Show the current row's fields plus parent and child related records",
+            add("Show Object",        "Show the current row's fields plus parent and child related records",
                 "Walks both directions of the foreign-key graph: parents reached by outbound FK columns, and children that point back via inbound FKs. Read-only multi-line dialog.");
-            add("Show-Schema",        "Show the schema (columns and types) of the current table", "");
-            add("Show-Table",         "Show every row of the current table in a single read-only text view", "");
-            add("Show-Related",       "Jump to one related table via an outbound foreign key", "");
-            add("Show-Status",        "Show the table, row, filter, and sort in a read-only dialog", "");
-            add("Say-Status",         "Speak the table, row count, filter, and sort", "");
-            add("Say-Path",           "Speak the open database's full path", "");
-            add("Say-Yield",          "Speak the current row count (after filter)", "");
-            add("Say-Tables",         "Speak the visited-tables list", "");
-            add("Say-Marked",         "Speak the 'look' values of every marked row", "");
-            add("Say-YieldMarked",    "Speak the count of marked rows", "");
-            add("Say-Updated",        "Speak the current row's 'updated' value in human-friendly local time", "");
-            add("Say-Notes",          "Speak the current row's 'notes' field", "");
-            add("Say-Tags",           "Speak the current row's 'tags' field", "");
-            add("Say-Column",         "Speak each value of the column under the virtual cursor", "");
-            add("Say-Position",       "Speak the column header and 1-based row number of the virtual cell",
+            add("Show Schema",        "Show the schema (columns and types) of the current table", "");
+            add("Show Table",         "Show every row of the current table in a single read-only text view", "");
+            add("Show Related",       "Jump to one related table via an outbound foreign key", "");
+            add("Show Status",        "Show the table, row, filter, and sort in a read-only dialog", "");
+            add("Say Status",         "Speak the table, row count, filter, and sort", "");
+            add("Say Database",       "Speak the open database's name (single-press) or full path (double-press)",
+                "Shift+D. Replaces Say Path. Single-press announces just the filename for fast 'where am I' checks; double-press opens a memo dialog with the full path that can be copied via Ctrl+C.");
+            add("Say Order",          "Speak the active sort/order expression",
+                "Shift+O. Counterpart to Say Filter (Shift+F). Reports 'No order applied' when nothing is sorted.");
+            add("Say URL",            "Speak the current record's url field",
+                "Shift+U. Reports '(empty)' when the field is blank.");
+            add("Say Yield",          "Speak the current row count (after filter)", "");
+            add("Say Tables",         "Speak the visited-tables list", "");
+            add("Say Marked",         "Speak the 'look' values of every marked row",
+                "Alt+M. Compact list of look-values for marked rows; complements Say Records Rest Marked (Alt+Shift+L) which gives full content.");
+            add("Say Yield Marked",    "Speak the count of marked rows", "");
+            add("Say Modified",        "Speak the current row's 'modified' value in human-friendly local time",
+                "Shift+M. Reads the standard 'modified' timestamp column. Falls back to 'added' if 'modified' is absent.");
+            add("Say Notes",          "Speak the current row's 'notes' field", "");
+            add("Say Tags",           "Speak the current row's 'tags' field", "");
+            add("Say Goto",           "Speak the most recently used Jump search string",
+                "Shift+G. Companion to Say Filter (Shift+F) and Say Order (Shift+O) -- reveals the current state of the Ctrl+J Jump Record search. Reports 'No jump search active' when there's no remembered string.");
+            add("Say Column Rest",         "Speak every value of the current virtual column, from the cursor row down",
+                "Ctrl+L. Cap of 25 values in spoken form with 'plus N more' footer; double-press for the full list. Position and virtual cursor unchanged. Use Say Column Rest Marked (Ctrl+Shift+L) for the marked-rows-only version. CLI: 'say-column-rest all' overrides the from-cursor default to list every visible row.");
+            add("Say Column Rest Marked",  "Speak the current virtual column for marked rows only, from cursor down",
+                "Ctrl+Shift+L. Same format as Say Column Rest with a '(marked from cursor)' suffix. Reports 'No marked records from here' when nothing is marked at or after the cursor.");
+            add("Say Records Rest",        "Speak every visible record in full, from the cursor row down (all displayed columns)",
+                "Alt+L. Each record formatted as 'Record N -- col1: val1; col2: val2; ...' with newlines between records. Cap 25 in spoken form; double-press for the full list.");
+            add("Say Records Rest Marked", "Speak full marked records from the cursor row down",
+                "Alt+Shift+L. Like Say Records Rest but only marked records. The full-detail companion to Say Marked (Alt+M), which speaks only the look column.");
+            add("Say Position",       "Speak the column header and 1-based row number of the virtual cell",
                 "JAWS-style 'say cursor position' for the listview. Speech-only; does not move focus. Double-press opens the same text in a read-only multi-line dialog.");
-            add("Say-Clipboard",      "Speak the current Windows clipboard text",
+            add("Say Clipboard",      "Speak the current Windows clipboard text",
                 "Mirrors FileDir's Alt+Apostrophe Clipboard command. Plain text only; non-text and empty clipboards announce that fact rather than going silent. Double-press opens the read-only memo dialog for line-by-line review of long pasted content.");
-            add("Say-SortFilter",     "Speak the current sort and filter, or '(none)' for each",
+            add("Say Sort Filter",     "Speak the current sort and filter, or '(none)' for each",
                 "Single-press speaks; double-press opens the same text in the multi-line dialog. Useful when the filter or sort string is long.");
-            add("Say-Kin",            "Speak the 'look' field of every related record (parents and children)",
-                "Both directions of the foreign-key graph. Parents listed first as 'Parents: <table>: <look>; ...'; children follow as 'Children: <table> (N): <look>, ...'. Capped at 25 children per related table for speech. Single-press speaks; double-press opens the multi-line dialog.");
-            add("Select-Record",      "Filter to rows matching a SQL-style WHERE expression", "");
-            add("Reset-Filter",       "Clear the active filter", "");
-            add("Sort-Object",        "Sort by a chosen column", "");
-            add("Reset-Sort",         "Clear the active sort", "");
-            add("Sort-Ascending",     "Sort the current table by the chosen column, ascending", "");
-            add("Sort-Descending",    "Sort the current table by the chosen column, descending", "");
-            add("Sort-RecentFirst",   "Sort by 'updated' descending (most recent first)", "");
-            add("Sort-OldestFirst",   "Sort by 'updated' ascending (oldest first)", "");
+            add("Filter Records",      "Filter to rows matching a SQL-style WHERE expression", "");
+            add("Reset Filter",       "Clear the active filter", "");
+            add("Order Records",       "Sort the current table by a chosen column, ascending",
+                "Alt+O. Shows a list box of all field names (alpha-sorted, including hidden columns), with the current virtual column as the default. Press Enter to sort by the default, or arrow + Enter to pick another. Sorting by hidden columns is the main feature -- no need to display, sort, then re-hide.");
+            add("Reverse Order",       "Sort the current table by a chosen column, descending",
+                "Alt+Shift+O. Same listbox UX as Order Records but sorts descending. The 'Reverse' in the name refers to descending order (high-to-low).");
+            add("Reset Sort",         "Clear the active sort", "");
 
             // ===== Misc menu =====
-            add("Update-View",        "Refresh the visible row set from the database", "");
-            add("Lock-Database",      "Toggle the database between read-write and read-only", "");
-            add("Measure-Table",      "Print row count, column count, and storage statistics for the open database", "");
-            add("Measure-Column",     "Print descriptive statistics for the column under the virtual cursor",
+            add("Update View",        "Refresh the visible row set from the database", "");
+            add("Table Summary",      "Print row count, column count, and storage statistics for the open database", "");
+            add("Statistics Column",     "Print descriptive statistics for the column under the virtual cursor",
                 "Type-aware: numeric columns get count/min/max/mean/median/stdev; date columns get range and modal year; text columns get cardinality and top-N most-frequent values.");
-            add("New-Chart",          "Open the current table as a frequency chart in Excel", "");
-            add("New-Plot",           "Plot the column under the virtual cursor as an Excel chart",
+            add("Select Columns",        "Choose which columns are visible in the grid (per-table)",
+                "Alt+S. Opens a dialog with one checkbox per column in the current table; the user picks which columns to display. Three quick-action buttons: Select All (every column), Select None (revert to DbDuo's default visible-columns rule), OK (apply selection). The choice persists with the table via the SelectList mechanism.");
+            add("Graphics Grid",          "Open the current table as a frequency chart in Excel", "");
+            add("Graphics Column",           "Plot the column under the virtual cursor as an Excel chart",
                 "Type-aware: numeric -> histogram or box plot, date -> timeline or seasonal, boolean -> pie, text -> Pareto bar.");
-            add("Copy-Cell",          "Copy the value of the cell under the virtual cursor to the clipboard", "");
-            add("Append-Cell",        "Append the value of the cell under the virtual cursor to the clipboard", "");
-            add("Copy-Row",           "Copy the current row to the clipboard as tab-separated values", "");
-            add("Edit-Configuration", "Open the Configuration Options dialog",
+            add("Copy Cell",          "Copy the value of the cell under the virtual cursor to the clipboard", "");
+            add("Append Cell",        "Append the value of the cell under the virtual cursor to the clipboard", "");
+            add("Copy Visible Cells",  "Copy the current record's visible cells to the clipboard as tab-separated values. Hidden columns (added, updated, look, unq, url, tags, notes, marked) are skipped; use Copy Record for the full set.", "");
+            add("Edit Settings", "Open the Settings dialog",
                 "Exposes UI Mode, Command Echo, and a Field Validation... sub-dialog for per-field regex patterns on the current table. 'Open file...' button edits DbDuo.ini directly for advanced settings. Same name and chord (Alt+Shift+C) as in EdSharp and FileDir.");
             add("Switch-Focus",       "Switch focus between the GUI window and the console", "");
-            add("Enter-Console",      "Send focus to the dot prompt console", "");
+            add("Enter Console",      "Send focus to the dot prompt console", "");
             add("Exit-Console",       "Close the dot prompt and return to the GUI", "");
-            add("Enter-Child",        "Drill into a child related table from the current row", "");
-            add("Exit-Child",         "Return from a child drill-down to the parent table", "");
-            add("Exit-ChildToRoot",   "Return from any drill-down depth to the original table", "");
-            add("Invoke-Sql",         "Run an ad-hoc SQL statement against the open database", "");
-            add("Invoke-Script",      "Run a script from the Scripts folder (.js, .sql, or .duo)",
+            add("Enter Child",        "Drill into a child related table from the current row", "");
+            add("Exit Child",         "Return from a child drill-down to the parent table", "");
+            add("Exit Child to Root",   "Return from any drill-down depth to the original table", "");
+            add("Invoke SQL",         "Run an ad-hoc SQL statement against the open database", "");
+            add("Invoke Script",      "Run a script from the Scripts folder (.js, .sql, or .duo)",
                 "The picker shows every .js (JScript .NET), .sql (SQL batch), and .duo (DbDuo command batch) file in %APPDATA%\\DbDuo\\Scripts. Type to filter the list; press Enter to run. The file extension determines the engine: .js gets full computational power and host objects (db, frm); .sql runs a semicolon-separated batch of statements; .duo dispatches each line through the dot-prompt as if you had typed it.");
 
             // ===== Help menu =====
-            add("Get-Help",           "Open the documentation in the default browser",
+            add("Get Help",           "Open the documentation in the default browser",
                 "Menu label: Documentation. F1, matching EdSharp and FileDir.");
-            add("Show-History",       "Open the history of changes in the default browser",
+            add("Show History",       "Open the history of changes in the default browser",
                 "Menu label: History of Changes. Shift+F1, matching EdSharp and FileDir.");
-            add("Show-Readme",        "Open the bundled readme.htm", "");
-            add("About-DbDuo",        "Show the version, author, and license",
+            add("Show Readme",        "Open the bundled readme.htm", "");
+            add("About DbDuo",        "Show the version, author, and license",
                 "Menu label: About. Alt+F1, matching EdSharp and FileDir.");
-            add("Switch-KeyDescriber", "Toggle Key Describer (Ctrl+F1)",
-                "When Key Describer is on, pressing a hotkey announces the command, chord, and summary instead of running the command. Press Ctrl+F1 again to turn it off. Same name and chord as EdSharp and FileDir.");
-            add("Alternate-Menu",     "Pick a command from a flat, filterable list",
+            add("Toggle Key Help", "Toggle Key Help (Ctrl+F1)",
+                "When Key Help is on, pressing a hotkey announces the command, chord, and summary instead of running the command. Press Ctrl+F1 again to turn it off. Same name and chord as EdSharp and FileDir.");
+            add("Alternate Menu",     "Pick a command from a flat, filterable list",
                 "Single alphabetized list of every command with its hotkey and one-line description. Type to filter, arrow to navigate, Enter to run. Same name and chord (Alt+F10) as EdSharp and FileDir.");
-            add("Show-Log",           "Open the DbDuo session log", "");
-            add("Elevate-Version",    "Check for a newer version on GitHub and offer to install it",
+            add("Show Log",           "Open the DbDuo session log", "");
+            add("Toggle Extra Speech",
+                "Toggle DbDuo's direct speech (status, command echo, cell readouts)",
+                "When ON, DbDuo speaks status messages, command names, and cell readouts through the screen reader. When OFF, the screen reader still announces focus and selection changes naturally but DbDuo's additional commentary is suppressed. Default ON. Persisted in DbDuo.ini [General] extraSpeech. Alt+Shift+Z to toggle; the 'zzz' mnemonic reads as a hush.");
+            add("Toggle Command Echo",
+                "Toggle whether each menu/hotkey command's name is spoken before it runs",
+                "When ON, every command activated through the menu or a hotkey announces its canonical name through the screen reader just before executing. When OFF, commands run silently and you hear only their direct effects. Default ON. Persisted in DbDuo.ini [Options] commandEcho. Ctrl+Shift+Z to toggle; the keyboard companion to Alt+Shift+Z (Extra Speech). Note: this toggle has no effect in CLI / dot-prompt mode, where the user has explicitly typed the command and shouldn't need it echoed back.");
+            add("Toggle Read Only",
+                "Flip the database between read-write and read-only at runtime",
+                "When ON, the database is opened read-only and edit commands fail with a clear error message. Use this to browse data without risk of accidental edits. Alt+Z to toggle in the GUI; at the dot prompt type 'toggle-readonly', 'read-only', or 'readonly' (with optional 'on'/'off' argument). Also exposed as a checkbox in the Settings dialog and as the -readonly command-line flag at launch.");
+            add("Replace Column",
+                "Substring find-and-replace within the current virtual column, over visible rows",
+                "Opens a dialog prompting for find text, replacement text, case-sensitivity, and an optional dry-run mode. Operates only on the currently filtered rows; clear the filter (Alt+Shift+F, Alt+C) to apply across the whole table. Ctrl+R is the GUI chord; menu label 'Replace Column'.");
+            add("Regex Replace",
+                "Regex find-and-replace within the current virtual column, over visible rows",
+                "Same as Update Column but interprets the find text as a .NET regex pattern and supports $1, $2 back-references in the replacement. Ctrl+Shift+R is the GUI chord ('power version' of Ctrl+R).");
+            add("Extract Regex",
+                "Extract all regex matches in the current virtual column to the clipboard",
+                "Opens a dialog for the regex pattern; produces a newline-separated list of matches across all visible rows and copies to the clipboard. Ctrl+Shift+X for 'eXtract'. Does not modify any data.");
+            add("Elevate Version",    "Check for a newer version on GitHub and offer to install it",
                 "Menu label: Elevate Version. F11, matching EdSharp and FileDir.");
         }
 
@@ -9612,9 +10906,9 @@ namespace DbDuo
         // Extended addItem with summary and optional description.
         // The summary is one line of verb-first plain text shown on
         // the menu status bar when the item has focus, in the Alt+
-        // F10 Alternate Menu, and in the Control+F1 Key Describer.
+        // F10 Alternate Menu, and in the Control+F1 Key Help.
         // The description, if non-empty, is the longer form shown in
-        // the Alternate Menu's detail pane and in the Key Describer
+        // the Alternate Menu's detail pane and in the Key Help
         // trace.
         private ToolStripMenuItem addItem(ToolStripMenuItem miParent, string sText, string sCommand, Keys key, EventHandler evHandler,
             string sSummary, string sDescription)
@@ -9710,8 +11004,8 @@ namespace DbDuo
         // Command Echo: speak the canonical command name through the
         // live region just before the command runs. Setting lives in
         // [Options] commandEcho; default Y. Off-by-toggle for users
-        // who find the confirmation noisy. Key Describer mode (Ctrl+F1)
-        // is the more verbose cousin: Key Describer announces command,
+        // who find the confirmation noisy. Key Help mode (Ctrl+F1)
+        // is the more verbose cousin: Key Help announces command,
         // chord, and summary, and SUPPRESSES the command body; echo
         // announces just the name and RUNS the body.
         private static bool bCommandEchoCached = false;
@@ -9820,9 +11114,9 @@ namespace DbDuo
             ctxGrid = new ContextMenuStrip();
             ctxGrid.Items.Add("Show Record", null, recShowClicked);
             ctxGrid.Items.Add("Set-Record...", null, recSetClicked);
-            ctxGrid.Items.Add("Remove-Record", null, recRemoveClicked);
+            ctxGrid.Items.Add("Delete Record", null, recRemoveClicked);
             ctxGrid.Items.Add("-");
-            ctxGrid.Items.Add("Copy-Record", null, recCopyClicked);
+            ctxGrid.Items.Add("Copy Record", null, recCopyClicked);
             grid.ContextMenuStrip = ctxGrid;
 
             this.Controls.Add(grid);
@@ -10083,13 +11377,13 @@ namespace DbDuo
                     // menu items as their ShortcutKeys (Say-X family),
                     // so the WinForms dispatch fires them and this
                     // parallel handler is no longer needed for those
-                    // letters. We keep Shift+J (Jump-Record) and Shift+S
-                    // (Sort-Object / Custom Sort) for backward
-                    // compatibility -- they have parallel Control-chord
-                    // bindings (Ctrl+J, Shift+S) so the Shift+Letter
-                    // form is the secondary chord.
+                    // letters. We keep Shift+J (Jump-Record) for
+                    // backward compatibility -- it has a parallel
+                    // Control-chord binding (Ctrl+J) so the Shift+Letter
+                    // form is the secondary chord. Shift+S → Sort-Object
+                    // was dropped in v1.0.86 along with Sort-Object
+                    // itself (universal Sort-Records replaced it).
                     case Keys.J: target = miRecJump;          break;
-                    case Keys.S: target = miViewFormat;       break;
                 }
                 if (target != null)
                 {
@@ -10101,7 +11395,7 @@ namespace DbDuo
                     }
                     else if (KeyMap.bKeyDescriber)
                     {
-                        // Key Describer mode: announce the (command,
+                        // Key Help mode: announce the (command,
                         // chord, summary) triple via the live region
                         // and SWALLOW the keystroke. Mirrors the
                         // KeyMap.tryDispatch behavior so the Shift+
@@ -10515,9 +11809,21 @@ namespace DbDuo
                 {
                     grid.VirtualListSize = 0;
                     grid.Columns.Clear();
+                    sLastGridTable = "";
                     updateStatusBar();
                     updateMenuEnabled();
                     return;
+                }
+
+                // Detect table change. When the user switches to a
+                // different table, we want the JAWS "Unselected"
+                // workaround to fire again -- the listview repaints
+                // and JAWS reads the new state.
+                string sCurTable = db.currentTable ?? "";
+                if (!string.Equals(sCurTable, sLastGridTable, StringComparison.OrdinalIgnoreCase))
+                {
+                    bGridFirstPopulate = true;
+                    sLastGridTable = sCurTable;
                 }
 
                 List<string> lFields = db.getDisplayFieldNames();
@@ -10591,12 +11897,50 @@ namespace DbDuo
                         grid.SelectedIndices.Clear();
                         if (iIndex >= 0 && iIndex < grid.VirtualListSize)
                         {
+                            // Virtual ListView: SelectedIndices.Add
+                            // is the API that actually persists the
+                            // selection; grid.Items[i].Selected on a
+                            // virtual item returns a placeholder and
+                            // doesn't stick. FocusedItem is set after
+                            // selection so the listview's UIA cursor
+                            // is on the correct row.
                             grid.SelectedIndices.Add(iIndex);
                             grid.EnsureVisible(iIndex);
-                            grid.FocusedItem = grid.Items[iIndex];
+                            try { grid.FocusedItem = grid.Items[iIndex]; } catch { }
                         }
                     }
                     catch { }
+
+                    // First-populate workaround: when the listview
+                    // transitions from empty to non-empty (initial
+                    // database open), JAWS may have already read the
+                    // listview's prior empty state as "Unselected" and
+                    // not re-announce when the selection lands. We
+                    // explicitly announce the first row's content via
+                    // LiveRegion so the user hears actual data rather
+                    // than silence following "Unselected."
+                    if (bGridFirstPopulate && iCount > 0)
+                    {
+                        bGridFirstPopulate = false;
+                        try
+                        {
+                            string sFirstColValue = "";
+                            if (grid.Columns.Count > 0)
+                            {
+                                string sHeader = grid.Columns[0].Text;
+                                sFirstColValue = db.getFieldValue(sHeader) ?? "";
+                            }
+                            // Use a short announcement -- just the
+                            // first column's value plus the row count
+                            // -- so the user gets immediate context
+                            // without a lengthy speech blob.
+                            string sAnnounce = "Row 1 of " + iCount;
+                            if (!string.IsNullOrEmpty(sFirstColValue))
+                                sAnnounce = sFirstColValue + ", " + sAnnounce;
+                            LiveRegion.say(sAnnounce);
+                        }
+                        catch { }
+                    }
                 }
 
                 // Column tracker resets to first column whenever the
@@ -10689,11 +12033,11 @@ namespace DbDuo
             }
 
             string sUpdated = "";
-            if (db.hasField("updated"))
+            if (db.hasField("modified"))
             {
                 try
                 {
-                    string sRaw = db.getFieldValue("updated") ?? "";
+                    string sRaw = db.getFieldValue("modified") ?? "";
                     if (sRaw.Length > 0)
                     {
                         DateTime dt;
@@ -10759,7 +12103,8 @@ namespace DbDuo
             if (miRecMarkToAnchor != null) miRecMarkToAnchor.Enabled = bWritable && bHasTable;
             if (miRecUnmarkAnchor != null) miRecUnmarkAnchor.Enabled = bWritable && bHasTable;
             if (miRecUnmarkToAnchor != null) miRecUnmarkToAnchor.Enabled = bWritable && bHasTable;
-            miRecUpdateField.Enabled = bWritable && bHasTable;
+            miRecUpdateColumn.Enabled = bWritable && bHasTable;
+            if (miRecRegexReplace != null) miRecRegexReplace.Enabled = bWritable && bHasTable;
             miRecRelated.Enabled = bHasTable;
             miRecEnterChild.Enabled = bHasTable;
             // Exit-Child is enabled only when there is something on
@@ -10768,19 +12113,20 @@ namespace DbDuo
             miRecExitChildToRoot.Enabled = bHasTable && drillStack.Count > 0;
             miRecGoTo.Enabled = bHasTable;
             miRecBookmark.Enabled = bHasTable;
-            miRecGotoBookmark.Enabled = bHasTable && bookmarkSaved != null;
-            miRecClearBookmark.Enabled = bookmarkSaved != null;
+            miRecGotoBookmark.Enabled = bHasTable && lBookmarks.Count > 0;
+            miRecClearBookmark.Enabled = lBookmarks.Count > 0;
             miRecOpenCell.Enabled = bHasTable;
 
             miViewSelect.Enabled = bHasTable;
             miViewResetFilter.Enabled = bHasTable && db.filter.Length > 0;
-            miViewFormat.Enabled = bHasTable;
-            miViewSortAsc.Enabled = bHasTable;
-            miViewSortDesc.Enabled = bHasTable;
-            miViewSortRecent.Enabled = bHasTable;
-            miViewSortOldest.Enabled = bHasTable;
             miViewResetSort.Enabled = bHasTable && db.sort.Length > 0;
             miViewUpdate.Enabled = bHasTable;
+            // Order / Reverse Order: explicit enable so the listbox
+            // dialog is reachable both via menu and chord whenever a
+            // recordset is loaded.
+            if (miOrderRecords != null) miOrderRecords.Enabled = bHasTable;
+            if (miReverseOrder != null) miReverseOrder.Enabled = bHasTable;
+            if (miFileOpenSelect != null) miFileOpenSelect.Enabled = bOpen;
 
             miSchemaSelectTable.Enabled = bOpen;
             miSchemaSelectView.Enabled = bOpen;
@@ -10794,9 +12140,9 @@ namespace DbDuo
             miToolsMeasure.Enabled = bHasTable;
             miToolsChart.Enabled = bHasTable;
             if (miDescribeColumn != null) miDescribeColumn.Enabled = bHasTable;
+            if (miSelectColumns != null) miSelectColumns.Enabled = bHasTable;
             if (miPlotColumn != null) miPlotColumn.Enabled = bHasTable;
             miToolsInvokeSql.Enabled = bOpen;
-            miToolsLock.Enabled = bOpen;
             // miToolsTestDriver, miToolsOpenFolder, and miToolsConsole are always enabled.
         }
 
@@ -11408,9 +12754,18 @@ namespace DbDuo
         // Path, Yield, Status). Live in the Query menu by convention.
         // =======================================================================
 
-        // saySayStatus: Alt+Z. Speak the table name, row position,
-        // and any active filter / sort. FileDir's Alt+Z = "Say Status."
-        // EdSharp's Alt+Z = "Status." Equivalent purpose in DbDuo.
+        // saySayStatus: Shift+Z. Speak status info, leading with the
+        // marked state when the current record is marked (so the user
+        // hears "Marked" first if it applies, before the other status
+        // details). Z is the conventional exception letter for "ZZZ /
+        // bottom of the UI" status-bar commands.
+        //
+        // Output format:
+        //   "Marked. <table> row N of M; filter: ...; sort: ..."
+        //   "<table> row N of M; filter: ...; sort: ..."   (unmarked)
+        //
+        // The screen reader user can interrupt at any point with their
+        // reader's silence key, so even verbose status is fine.
         private void saySayStatus(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
@@ -11418,6 +12773,18 @@ namespace DbDuo
             if (!db.hasRecordset())
             { speakOrShow("Status", db.filePath ?? "Database open, no table selected", 101); return; }
             StringBuilder sb = new StringBuilder();
+            // Marked state at the front so the user hears it first.
+            // Only announce when true (matching the status bar
+            // convention of showing 'marked' only when set).
+            if (db.hasField(Metadata.MarkedColumn))
+            {
+                try
+                {
+                    string sM = db.getFieldValue(Metadata.MarkedColumn) ?? "";
+                    if (isMarkedTrue(sM)) sb.Append("Marked. ");
+                }
+                catch { }
+            }
             sb.Append(db.currentTable ?? "(no table)");
             sb.Append(" row ").Append(db.absolutePosition).Append(" of ").Append(db.recordCount);
             if (db.filter.Length > 0) sb.Append("; filter: ").Append(db.filter);
@@ -11425,14 +12792,84 @@ namespace DbDuo
             speakOrShow("Status", sb.ToString(), 101);
         }
 
-        // saySayPath: Alt+P. Speak the path of the currently-open
-        // database file. FileDir's Alt+P = "Say Path."
-        private void saySayPath(object sender, EventArgs evArgs)
+        // saySayDatabase: Shift+D. Speak the database name (single-
+        // press) or full path (double-press). Replaces Say Path on
+        // Shift+P. The name-then-path pattern follows speakOrShow's
+        // toggleable single-tap / double-tap convention.
+        private void saySayDatabase(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
             { LiveRegion.say("No database open"); return; }
             string sPath = db.filePath ?? "(unknown)";
-            speakOrShow("Database Path", sPath, 102);
+            string sName = Path.GetFileName(sPath);
+            // Single-press: name only. Double-press: full path
+            // (speakOrShow's standard memo dialog handles this).
+            speakOrShow("Database", sName + " -- full path: " + sPath, 124);
+        }
+
+        // saySayOrder: Shift+O. Speak the active sort/order
+        // expression. Counterpart to Say Filter (Shift+F).
+        private void saySayOrder(object sender, EventArgs evArgs)
+        {
+            if (db == null || !db.isOpen())
+            { LiveRegion.say("No database open"); return; }
+            if (!db.hasRecordset())
+            { LiveRegion.say("No table selected"); return; }
+            string s = db.sort ?? "";
+            if (s.Length == 0)
+            { LiveRegion.say("No order applied"); return; }
+            speakOrShow("Order", "order: " + s, 125);
+        }
+
+        // saySayGoto: Shift+G. Speak the most recently used Jump
+        // Record search string (the substring used by Ctrl+J to
+        // navigate within a column). Companion to Say Filter and Say
+        // Order; reveals the current state of the column-substring
+        // search target. Reports a clear no-state message when the
+        // user has not yet performed a Jump.
+        private void saySayGoto(object sender, EventArgs evArgs)
+        {
+            if (string.IsNullOrEmpty(sLastJumpSubstring))
+            { LiveRegion.say("No jump search active"); return; }
+            string sCol = string.IsNullOrEmpty(sLastJumpColumn) ? "(any column)" : sLastJumpColumn;
+            speakOrShow("Goto", sCol + ": \"" + sLastJumpSubstring + "\"", 127);
+        }
+
+        // saySayRecord: Shift+Space. Speak the current record's full
+        // content -- every displayed column's value -- as a single
+        // utterance. The orthogonal sibling of Say Cell (one cell),
+        // Say Column Rest (one column), Say Records Rest (many full
+        // records). This is the "say one full record" gap-filler.
+        //
+        // Format: "Record N: col1: val1; col2: val2; ..."
+        private void saySayRecord(object sender, EventArgs evArgs)
+        {
+            if (db == null || !db.hasRecordset() || db.recordCount == 0)
+            { LiveRegion.say("No record selected"); return; }
+            List<string> lDispCols = db.getDisplayFieldNames();
+            if (lDispCols == null || lDispCols.Count == 0)
+            { LiveRegion.say("No columns visible"); return; }
+            StringBuilder sb = new StringBuilder();
+            sb.Append("Record ").Append(db.absolutePosition).Append(": ");
+            for (int j = 0; j < lDispCols.Count; j++)
+            {
+                if (j > 0) sb.Append("; ");
+                string sVal = "";
+                try { sVal = db.getFieldValue(lDispCols[j]) ?? ""; } catch { }
+                if (string.IsNullOrEmpty(sVal)) sVal = "(blank)";
+                sb.Append(lDispCols[j]).Append(": ").Append(sVal);
+            }
+            speakOrShow("Record", sb.ToString(), 126);
+        }
+
+        // saySayPath: Shift+P retired in v1.0.99 (replaced by Say
+        // Database on Shift+D, which gives both the name and the
+        // path via the single-press / double-press dialog
+        // convention). The handler remains for callers who may
+        // reference it, but the chord and menu item are gone.
+        private void saySayPath(object sender, EventArgs evArgs)
+        {
+            saySayDatabase(sender, evArgs);
         }
 
         // saySayYield: Alt+Y. Speak the record count and any active
@@ -11525,7 +12962,7 @@ namespace DbDuo
             speakOrShow("Marked Rows", sb.ToString(), 105);
         }
 
-        // saySayUpdated: Shift+D. Speak the 'updated' value of the
+        // saySayModified: Shift+M. Speak the 'modified' value of the
         // current row in a human-friendly local-time form. The
         // underlying SQLite text (e.g., "2026-05-15 13:42:00") is
         // never modified -- this only affects speech output.
@@ -11536,19 +12973,19 @@ namespace DbDuo
         //   - seconds dropped from any time portion
         //   - non-date string -> spoken verbatim as a fallback
         //
-        // If the table has no 'updated' column we fall back to
+        // If the table has no 'modified' column we fall back to
         // 'added' (the other standard date column).
-        private void saySayUpdated(object sender, EventArgs evArgs)
+        private void saySayModified(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
             { LiveRegion.say("No record selected"); return; }
-            string sCol = db.hasField("updated") ? "updated" : (db.hasField("added") ? "added" : null);
+            string sCol = db.hasField("modified") ? "modified" : (db.hasField("added") ? "added" : null);
             if (sCol == null)
             { LiveRegion.say("No date column in this table"); return; }
             string sVal = db.getFieldValue(sCol);
             string sSpoken = formatDateHumanFriendly(sVal);
             if (string.IsNullOrEmpty(sSpoken)) sSpoken = "(empty)";
-            speakOrShow("Updated", sCol + ": " + sSpoken, 106);
+            speakOrShow("Modified", sCol + ": " + sSpoken, 106);
         }
 
         // formatDateHumanFriendly: parse the SQLite-text date / datetime
@@ -11647,6 +13084,9 @@ namespace DbDuo
 
         // --- v1.0.67 Say-X family completions ---
         // saySayAdded: speak the 'added' timestamp of the current row.
+        // Re-added in v1.0.86 per user spec; v1.0.85 had dropped this
+        // assuming the Added column was being abandoned, but the spec
+        // in temp.txt explicitly retains Shift+A = Say Added.
         private void saySayAdded(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
@@ -11780,59 +13220,96 @@ namespace DbDuo
             return sb.ToString().Trim();
         }
 
-        // saySayUrl: speak the 'url' field of the current row.
+        // saySayUrl: speak the 'url' field of the current record.
+        // Shift+U. The 'url' column is the standard one DbDuo
+        // recognizes; tables without it report so.
         private void saySayUrl(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
             { LiveRegion.say("No record selected"); return; }
-            if (!db.hasField("url"))
+            if (!db.hasField(Metadata.UrlColumn))
             { LiveRegion.say("This table has no url column"); return; }
-            string sVal = db.getFieldValue("url");
+            string sVal = db.getFieldValue(Metadata.UrlColumn);
             if (string.IsNullOrEmpty(sVal)) sVal = "(empty)";
-            speakOrShow("Url", "url: " + sVal, 122);
+            speakOrShow("URL", Metadata.UrlColumn + ": " + sVal, 122);
         }
 
-        // saySayColumn: Shift+L. Sweep down the current virtual column
-        // starting at the current virtual row, speaking the column
-        // header and a semicolon-separated list of values. Cap at 25
-        // rows with a "plus N more" footer so the announcement stays
-        // tractable; the dialog (double-press) shows the full list.
-        // The virtual cursor and ADO position are left unchanged.
+        // saySayColumn: Shift+E. Speak every cell of the current
+        // virtual column, top to bottom of the visible filtered rows.
+        // The list is capped at 25 in the spoken form with a "plus N
+        // more" footer; the double-press dialog shows the full list.
+        // Position and virtual cursor are left unchanged.
+        //
+        // v1.0.98: changed to start at row 1 (was: start at current
+        // virtual row). The user's clarification was that this should
+        // speak "all cells in the current column" -- meaning the full
+        // column from the top of the view, not just from where the
+        // cursor happens to be.
         private void saySayColumn(object sender, EventArgs evArgs)
+        {
+            saySayColumnCommon(false);
+        }
+
+        // saySayColumnMarked: Shift+G. Like saySayColumn but only
+        // speaks cells of rows whose marked field is truthy. If no
+        // rows are marked, says so.
+        private void saySayColumnMarked(object sender, EventArgs evArgs)
+        {
+            saySayColumnCommon(true);
+        }
+
+        private void saySayColumnCommon(bool bMarkedOnly)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
             { LiveRegion.say("No record selected"); return; }
             if (grid == null || iVirtualCol < 0 || iVirtualCol >= grid.Columns.Count)
             { LiveRegion.say("No column under virtual cursor"); return; }
+            if (bMarkedOnly && !db.hasField(Metadata.MarkedColumn))
+            { LiveRegion.say("This table has no marked column"); return; }
+
             string sHeader = grid.Columns[iVirtualCol].Text;
-            object original = null;
-            try { original = db.bookmark; } catch { }
+            // v1.0.99: start at the current virtual row (the "Rest" in
+            // the command name means "the rest of the column from here
+            // down"). For from-row-1 behavior, dot-prompt users can
+            // pass an "all" argument: say-column-rest all.
+            int iStart = (iVirtualRow >= 1) ? iVirtualRow : 1;
+            object oOriginal = null;
+            try { oOriginal = db.bookmark; } catch { }
             const int iMaxAnnounce = 25;
             List<string> lValues = new List<string>();
-            int iStart = (iVirtualRow >= 1) ? iVirtualRow : 1;
             int iTotal = 0;
             try
             {
                 for (int i = iStart; i <= db.recordCount; i++)
                 {
-                    iTotal++;
-                    if (lValues.Count >= iMaxAnnounce) continue;
                     try
                     {
                         db.absolutePosition = i;
+                        if (bMarkedOnly)
+                        {
+                            if (!isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn))) continue;
+                        }
+                        iTotal++;
+                        if (lValues.Count >= iMaxAnnounce) continue;
                         string sVal = db.getFieldValue(sHeader);
                         if (string.IsNullOrEmpty(sVal)) sVal = "(blank)";
                         lValues.Add(sVal);
                     }
-                    catch { lValues.Add("(error)"); }
+                    catch { if (lValues.Count < iMaxAnnounce) lValues.Add("(error)"); }
                 }
             }
             finally
             {
-                if (original != null) try { db.bookmark = original; } catch { }
+                if (oOriginal != null) try { db.bookmark = oOriginal; } catch { }
+            }
+            if (iTotal == 0)
+            {
+                LiveRegion.say(bMarkedOnly ? "No marked records from here." : "No records visible from here.");
+                return;
             }
             StringBuilder sb = new StringBuilder();
-            sb.Append(sHeader).Append(": ");
+            sb.Append(sHeader);
+            sb.Append(bMarkedOnly ? " (marked from cursor): " : " (from cursor): ");
             for (int i = 0; i < lValues.Count; i++)
             {
                 if (i > 0) sb.Append("; ");
@@ -11840,7 +13317,91 @@ namespace DbDuo
             }
             if (iTotal > lValues.Count)
                 sb.Append("; plus ").Append(iTotal - lValues.Count).Append(" more");
-            speakOrShow("Column from Cursor", sb.ToString(), 111);
+            speakOrShow(bMarkedOnly ? "Say Column Rest Marked" : "Say Column Rest",
+                sb.ToString(), bMarkedOnly ? 112 : 111);
+        }
+
+        // saySayRows: Shift+V. Speak every visible row in full -- each
+        // row's value across every displayed column, formatted as
+        // "col1: val1; col2: val2; ..." for one row, then a newline
+        // between rows. Capped at 25 rows; double-press shows full.
+        // Position and virtual cursor are left unchanged.
+        private void saySayRows(object sender, EventArgs evArgs)
+        {
+            saySayRowsCommon(false);
+        }
+
+        // saySayRowsMarked: Shift+X. Like saySayRows but only marked.
+        private void saySayRowsMarked(object sender, EventArgs evArgs)
+        {
+            saySayRowsCommon(true);
+        }
+
+        private void saySayRowsCommon(bool bMarkedOnly)
+        {
+            if (db == null || !db.hasRecordset() || db.recordCount == 0)
+            { LiveRegion.say("No record selected"); return; }
+            if (bMarkedOnly && !db.hasField(Metadata.MarkedColumn))
+            { LiveRegion.say("This table has no marked column"); return; }
+
+            List<string> lDispCols = db.getDisplayFieldNames();
+            if (lDispCols.Count == 0)
+            { LiveRegion.say("No columns visible"); return; }
+            // v1.0.99: start at the current row (the "Rest" in the
+            // command name). Renamed from Say Rows to Say Records Rest
+            // for consistency with the rest of DbDuo's entity vocabulary.
+            int iStart = (iVirtualRow >= 1) ? iVirtualRow : 1;
+            object oOriginal = null;
+            try { oOriginal = db.bookmark; } catch { }
+            const int iMaxAnnounce = 25;
+            List<string> lRows = new List<string>();
+            int iTotal = 0;
+            try
+            {
+                for (int i = iStart; i <= db.recordCount; i++)
+                {
+                    try
+                    {
+                        db.absolutePosition = i;
+                        if (bMarkedOnly)
+                        {
+                            if (!isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn))) continue;
+                        }
+                        iTotal++;
+                        if (lRows.Count >= iMaxAnnounce) continue;
+                        StringBuilder sbRow = new StringBuilder();
+                        for (int j = 0; j < lDispCols.Count; j++)
+                        {
+                            if (j > 0) sbRow.Append("; ");
+                            string sVal = db.getFieldValue(lDispCols[j]);
+                            if (string.IsNullOrEmpty(sVal)) sVal = "(blank)";
+                            sbRow.Append(lDispCols[j]).Append(": ").Append(sVal);
+                        }
+                        lRows.Add(sbRow.ToString());
+                    }
+                    catch { if (lRows.Count < iMaxAnnounce) lRows.Add("(error)"); }
+                }
+            }
+            finally
+            {
+                if (oOriginal != null) try { db.bookmark = oOriginal; } catch { }
+            }
+            if (iTotal == 0)
+            {
+                LiveRegion.say(bMarkedOnly ? "No marked records from here." : "No records visible from here.");
+                return;
+            }
+            StringBuilder sb = new StringBuilder();
+            sb.Append(bMarkedOnly ? "Marked records from cursor: " : "Records from cursor: ");
+            for (int i = 0; i < lRows.Count; i++)
+            {
+                if (i > 0) sb.Append("\n");
+                sb.Append("Record ").Append(iStart + i).Append(" -- ").Append(lRows[i]);
+            }
+            if (iTotal > lRows.Count)
+                sb.Append("\nplus ").Append(iTotal - lRows.Count).Append(" more");
+            speakOrShow(bMarkedOnly ? "Say Records Rest Marked" : "Say Records Rest",
+                sb.ToString(), bMarkedOnly ? 114 : 113);
         }
 
         // saySayPosition: Alt+Delete. JAWS-style "say cursor position":
@@ -12116,6 +13677,98 @@ namespace DbDuo
         // anyway, and linear-prose is more navigable).
         // =======================================================================
 
+        // selectColumnsClicked: Alt+S. Show a dialog with one
+        // checkbox per column in the current table; the user picks
+        // which columns are visible in the grid. The result is
+        // stored via db.setSelectList(), which the existing
+        // db.getDisplayFieldNames() consults when populating the
+        // grid. Persists with the table.
+        //
+        // Behavior:
+        //   - "Select All" button (Alt+A) checks every box.
+        //   - "Select None" button (Alt+N) clears every box; equivalent
+        //     to "revert to default visible columns" because the rule-
+        //     based default applies when no select list is stored.
+        //   - "OK" applies the selection.
+        //   - "Cancel" leaves the current selection unchanged.
+        //
+        // The dialog is built with LbcDialog and one addCheckBox call
+        // per column. For tables with many columns, the dialog scrolls.
+        private void selectColumnsClicked(object sender, EventArgs evArgs)
+        {
+            if (db == null || !db.hasRecordset())
+            {
+                LiveRegion.say("No database open.");
+                return;
+            }
+            string sTable = db.currentTable;
+            if (string.IsNullOrEmpty(sTable))
+            {
+                LiveRegion.say("No table selected.");
+                return;
+            }
+            List<string> lAllColumns = db.getFieldNames();
+            List<string> lCurrentlyVisible = db.getDisplayFieldNames();
+            HashSet<string> hVisible = new HashSet<string>(lCurrentlyVisible, StringComparer.OrdinalIgnoreCase);
+
+            using (LbcDialog dlg = new LbcDialog("Select Columns (" + sTable + ")", this))
+            {
+                dlg.addLabel("Choose which columns to display:");
+                List<CheckBox> lCbs = new List<CheckBox>();
+                foreach (string sCol in lAllColumns)
+                {
+                    CheckBox cb = dlg.addCheckBox(sCol, hVisible.Contains(sCol), null);
+                    lCbs.Add(cb);
+                }
+                string sBtn = dlg.runWithButtons(new string[] { "&OK", "Select &All", "Select &None", "Ca&ncel" });
+                if (string.IsNullOrEmpty(sBtn) || sBtn.IndexOf("ancel", StringComparison.OrdinalIgnoreCase) >= 0)
+                    return;
+                if (sBtn.IndexOf("All", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    // Select All: apply all columns then store. Reopen
+                    // the dialog so the user can see the new state and
+                    // optionally narrow it before OK -- but a simpler
+                    // implementation just applies and closes.
+                    List<string> lAll = new List<string>(lAllColumns);
+                    db.setSelectList(sTable, string.Join(", ", lAll.ToArray()));
+                    invokeRefresh();
+                    LiveRegion.sayForced("Selected all " + lAll.Count + " columns.");
+                    return;
+                }
+                if (sBtn.IndexOf("None", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    // Select None: clear the select list -- the default
+                    // rule-based visibility applies, which is the
+                    // user's natural "fresh start" state.
+                    db.setSelectList(sTable, "");
+                    invokeRefresh();
+                    LiveRegion.sayForced("Reset to default visible columns.");
+                    return;
+                }
+                // OK: collect checked column names and store them.
+                List<string> lSelected = new List<string>();
+                for (int i = 0; i < lAllColumns.Count; i++)
+                {
+                    if (lCbs[i].Checked) lSelected.Add(lAllColumns[i]);
+                }
+                if (lSelected.Count == 0)
+                {
+                    DialogResult res = MessageBox.Show(this,
+                        "No columns selected. Reset to default visible columns?",
+                        "Select Columns",
+                        MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    if (res != DialogResult.Yes) return;
+                    db.setSelectList(sTable, "");
+                }
+                else
+                {
+                    db.setSelectList(sTable, string.Join(", ", lSelected.ToArray()));
+                }
+                invokeRefresh();
+                LiveRegion.sayForced("Showing " + lSelected.Count + " column" + (lSelected.Count == 1 ? "" : "s") + ".");
+            }
+        }
+
         private void describeColumnClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
@@ -12280,7 +13933,7 @@ namespace DbDuo
                 MessageBox.Show(this,
                     "Could not create plot:\r\n\r\n" + ex.Message
                     + "\r\n\r\nNote: Plot Column requires Excel to be installed.",
-                    "New-Plot", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    "Graphics Column", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -12720,7 +14373,7 @@ namespace DbDuo
 
         // =======================================================================
         // Action commands new in this turn (not speech-only). Extract,
-        // Copy-Row, Step-Initial-Change, plus the wrapper handlers for
+        // Copy Row, Jump Next Initial, plus the wrapper handlers for
         // menu items that route to them.
         // =======================================================================
 
@@ -12749,10 +14402,10 @@ namespace DbDuo
                 Clipboard.SetText(sb.ToString());
                 LiveRegion.say("Row copied to clipboard");
             }
-            catch (Exception ex) { LiveRegion.say("Copy-Row: " + ex.Message); }
+            catch (Exception ex) { LiveRegion.say("Copy Row: " + ex.Message); }
         }
 
-        // stepInitialChange: jump to the next row whose value in a
+        // jumpNextInitial: jump to the next row whose value in a
         // user-picked column differs in its first character from the
         // current row. FileDir's Shift+I = "Initial Change." Useful
         // for skipping through alphabetically sorted data: jump from
@@ -12763,7 +14416,7 @@ namespace DbDuo
         // highlight a "current column" so reading it from a state
         // var would be a hidden coupling that screen-reader users
         // can't see.
-        private void stepInitialChangeClicked(object sender, EventArgs evArgs)
+        private void jumpNextInitialClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
             { LiveRegion.say("No record selected"); return; }
@@ -12816,18 +14469,18 @@ namespace DbDuo
         // matching substring from every visible column. EdSharp's
         // Control+Shift+E = "Extract with Regular Expression."
         // FileDir's Control+Shift+E = same. Each match goes on its
-        // own line. Useful for pulling email addresses, URLs, IDs,
+        // own line. Useful for pulling email addresses, urls, IDs,
         // or any pattern out of free-text columns.
         private void extractRegexClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
             { LiveRegion.say("No table selected"); return; }
             string sPattern;
-            using (LbcDialog dlg = new LbcDialog("Extract-Regex", this))
+            using (LbcDialog dlg = new LbcDialog("Extract Regex", this))
             {
                 dlg.addLabel("Extract every match of a .NET regex from every visible cell");
                 dlg.addLabel("in the current filtered view. Matches go to the clipboard,");
-                dlg.addLabel("one per line. Useful for pulling emails, URLs, or IDs out");
+                dlg.addLabel("one per line. Useful for pulling emails, urls, or IDs out");
                 dlg.addLabel("of free-text columns.");
                 dlg.addSeparator();
                 TextBox tbPat = dlg.addInlineInputBox("Regex pattern",
@@ -12845,7 +14498,7 @@ namespace DbDuo
             catch (Exception ex)
             {
                 MessageBox.Show(this, "Invalid regex: " + ex.Message,
-                    "Extract-Regex", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    "Extract Regex", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -12891,7 +14544,7 @@ namespace DbDuo
                 Clipboard.SetText(sbOut.ToString());
                 LiveRegion.say(iMatches + " match" + (iMatches == 1 ? "" : "es") + " copied to clipboard");
             }
-            catch (Exception ex) { LiveRegion.say("Extract-Regex clipboard error: " + ex.Message); }
+            catch (Exception ex) { LiveRegion.say("Extract Regex clipboard error: " + ex.Message); }
         }
 
         // Cycle through the list of tables visited in this session.
@@ -12963,6 +14616,18 @@ namespace DbDuo
         // calls KeyMap.overrideKey for each. Reports unknown commands,
         // parse failures, and conflicts in a single startup dialog.
         // =====================================================================
+        // applyIniOverrides: read DbDuo.ini's [Hotkeys] section and
+        // apply each Command-Name=Chord, Description line as an
+        // override. The chord overrides the in-code default; the
+        // description goes into KeyMap.dCommandToSummary so the
+        // status bar, key describer, and Alt+F10 Alternate Menu all
+        // pick up the new text. Lines without a comma are treated as
+        // chord-only (no description override). Unknown command
+        // names are reported via the conflicts dialog.
+        //
+        // The historical [Keys] section name is also accepted, for
+        // any older DbDuo.ini files; the modern section is [Hotkeys]
+        // to match FileDir's convention.
         private void applyIniOverrides()
         {
             string sIniPath = Path.Combine(
@@ -12973,7 +14638,7 @@ namespace DbDuo
             string[] aLines = null;
             try { aLines = File.ReadAllLines(sIniPath); } catch { return; }
 
-            bool bInKeysSection = false;
+            bool bInHotkeys = false;
             foreach (string sLine in aLines)
             {
                 string sTrim = sLine.Trim();
@@ -12981,14 +14646,35 @@ namespace DbDuo
                 if (sTrim.StartsWith(";") || sTrim.StartsWith("#")) continue;
                 if (sTrim.StartsWith("["))
                 {
-                    bInKeysSection = sTrim.Equals("[Keys]", StringComparison.OrdinalIgnoreCase);
+                    bInHotkeys = sTrim.Equals("[Hotkeys]", StringComparison.OrdinalIgnoreCase)
+                                 || sTrim.Equals("[Keys]", StringComparison.OrdinalIgnoreCase);
                     continue;
                 }
-                if (!bInKeysSection) continue;
+                if (!bInHotkeys) continue;
                 int iEq = sTrim.IndexOf('=');
                 if (iEq <= 0) continue;
                 string sCommand = sTrim.Substring(0, iEq).Trim();
-                string sKeyText = sTrim.Substring(iEq + 1).Trim();
+                string sRest    = sTrim.Substring(iEq + 1).Trim();
+                // Split sRest into chord and description on the first
+                // comma -- but only if that comma is not followed by
+                // "or " (alternate-chord syntax: "Shift+B, or Control+Home, Description").
+                // For DbDuo we don't currently use alternate-chord syntax
+                // in the shipped file, but the parser tolerates it: the
+                // chord runs up to the first comma whose tail is NOT
+                // "or ...".
+                string sKeyText = sRest;
+                string sDescr = "";
+                int iComma = findChordCommaSplit(sRest);
+                if (iComma > 0)
+                {
+                    sKeyText = sRest.Substring(0, iComma).Trim();
+                    sDescr   = sRest.Substring(iComma + 1).Trim();
+                    // Strip a trailing period from the description if
+                    // present, for status-bar uniformity. The .ini
+                    // file is allowed to have periods or not.
+                    if (sDescr.EndsWith(".")) sDescr = sDescr.Substring(0, sDescr.Length - 1);
+                }
+
                 bool bKnown = false;
                 foreach (string s in KeyMap.dCommandToKey.Keys) { if (s == sCommand) { bKnown = true; break; } }
                 if (!bKnown)
@@ -13001,7 +14687,10 @@ namespace DbDuo
                     KeyMap.lConflicts.Add(string.Format("Unknown command: '{0}'", sCommand));
                     continue;
                 }
-                KeyMap.overrideKey(sCommand, sKeyText);
+                if (!string.IsNullOrEmpty(sKeyText))
+                    KeyMap.overrideKey(sCommand, sKeyText);
+                if (!string.IsNullOrEmpty(sDescr))
+                    KeyMap.dCommandToSummary[sCommand] = sDescr;
             }
 
             if (KeyMap.lConflicts.Count > 0)
@@ -13013,6 +14702,37 @@ namespace DbDuo
                 HelpDialog.show(this, "DbDuo.ini issues", sb.ToString());
                 KeyMap.lConflicts.Clear();
             }
+        }
+
+        // findChordCommaSplit: locate the comma that separates the
+        // chord (e.g., "Control+Shift+F") from the description
+        // (e.g., "Filter records to those matching a where condition").
+        // Skip any comma immediately followed by " or " (alternate-
+        // chord syntax used in FileDir's Hotkeys.ini, kept for
+        // compatibility). Returns -1 if no separator comma is
+        // present (line is chord-only).
+        private static int findChordCommaSplit(string sRest)
+        {
+            int i = 0;
+            while (i < sRest.Length)
+            {
+                int iComma = sRest.IndexOf(',', i);
+                if (iComma < 0) return -1;
+                // Look past the comma and any whitespace; if "or " follows,
+                // this comma is inside the chord alternates; skip past it.
+                int j = iComma + 1;
+                while (j < sRest.Length && char.IsWhiteSpace(sRest[j])) j++;
+                if (j + 2 < sRest.Length
+                    && (sRest[j] == 'o' || sRest[j] == 'O')
+                    && (sRest[j+1] == 'r' || sRest[j+1] == 'R')
+                    && char.IsWhiteSpace(sRest[j+2]))
+                {
+                    i = iComma + 1;
+                    continue;
+                }
+                return iComma;
+            }
+            return -1;
         }
 
         // =====================================================================
@@ -13749,6 +15469,11 @@ namespace DbDuo
             {
                 DbDuoLog.write("Opening: " + sPath);
                 drillStack.Clear();
+                // Reset the first-populate flag so the JAWS "Unselected"
+                // workaround fires once for this new database.
+                bGridFirstPopulate = true;
+                // Session-lifetime bookmarks: clear on database open.
+                lBookmarks.Clear();
                 db.openDatabase(sPath, null, false);
 
                 // Pre-seed the manager's in-session per-table cache
@@ -13801,7 +15526,7 @@ namespace DbDuo
             }
         }
 
-        private void fileSaveAsClicked(object sender, EventArgs evArgs) { saveAsCommon("Save Database As"); }
+        private void fileSaveAsClicked(object sender, EventArgs evArgs) { saveAsCommon("Save Database"); }
         private void fileBackupClicked(object sender, EventArgs evArgs) { saveAsCommon("Backup Database"); }
 
         // helpSampleDbClicked, helpNorthwindDbClicked, helpChinookDbClicked:
@@ -13942,13 +15667,14 @@ namespace DbDuo
             if (db == null || !db.hasRecordset())
             {
                 MessageBox.Show(this, "Open a database and pick a target table first.",
-                    "Import-Data", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Import Data", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             using (OpenFileDialog dlgFile = new OpenFileDialog())
             {
                 dlgFile.Title = "Import Data into " + (db.currentTable ?? "current table");
                 dlgFile.Filter = "Markdown table (*.md;*.markdown)|*.md;*.markdown"
+                           + "|Inix file (*.inix)|*.inix"
                            + "|All Files (*.*)|*.*";
                 dlgFile.DefaultExt = "md";
                 // Default folder: last import folder, else the
@@ -13958,12 +15684,17 @@ namespace DbDuo
                 IniFolders.importFolder = Path.GetDirectoryName(dlgFile.FileName);
                 try
                 {
-                    int iCount = db.importMarkdown(dlgFile.FileName);
+                    string sExt = Path.GetExtension(dlgFile.FileName).TrimStart('.').ToLowerInvariant();
+                    int iCount;
+                    if (sExt == "inix")
+                        iCount = db.importInix(dlgFile.FileName);
+                    else
+                        iCount = db.importMarkdown(dlgFile.FileName);
                     DbDuoLog.write("Imported " + iCount + " row(s) from " + dlgFile.FileName);
                     invokeRefresh();
                     MessageBox.Show(this,
                         "Imported " + iCount + " row(s) into " + db.currentTable + ".",
-                        "Import-Data", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        "Import Data", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
@@ -13983,6 +15714,7 @@ namespace DbDuo
                            + "|Word document (*.docx)|*.docx"
                            + "|HTML, filtered (*.html)|*.html"
                            + "|Markdown table (*.md)|*.md"
+                           + "|Inix file (*.inix)|*.inix"
                            + "|CSV (*.csv)|*.csv"
                            + "|TSV (*.tsv)|*.tsv"
                            + "|SQLite database (*.db)|*.db"
@@ -14031,7 +15763,7 @@ namespace DbDuo
             if (db == null || !db.hasRecordset() || db.readOnly) return;
             if (db.currentIsView) {
                 MessageBox.Show(this, "Cannot insert into a view (read-only).",
-                    "New-Record", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "New Record", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             // For New-Record, show only distinct (substantive) fields.
@@ -14047,7 +15779,7 @@ namespace DbDuo
                 dInitial[s] = "";
                 lEditable.Add(true);
             }
-            using (RecordEditDialog dlg = new RecordEditDialog("New-Record", lFields, dInitial, lEditable, db))
+            using (RecordEditDialog dlg = new RecordEditDialog("New Record", lFields, dInitial, lEditable, db))
             {
                 if (dlg.showDialog(this) != DialogResult.OK) return;
                 try
@@ -14072,7 +15804,7 @@ namespace DbDuo
             if (db == null || !db.hasRecordset() || db.readOnly) return;
             if (db.currentIsView) {
                 MessageBox.Show(this, "Cannot edit a view (read-only).",
-                    "Set-Record", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Edit Record", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             if (db.eof || db.bof) return;
@@ -14096,7 +15828,7 @@ namespace DbDuo
                 dInitial[s] = db.getFieldValue(s);
                 lEditable.Add(false);  // bookkeeping shown read-only
             }
-            using (RecordEditDialog dlg = new RecordEditDialog("Set-Record", lFields, dInitial, lEditable, db))
+            using (RecordEditDialog dlg = new RecordEditDialog("Edit Record", lFields, dInitial, lEditable, db))
             {
                 if (dlg.showDialog(this) != DialogResult.OK) return;
                 try
@@ -14136,7 +15868,7 @@ namespace DbDuo
             if (db == null || !db.hasRecordset() || db.readOnly) return;
             if (db.currentIsView) {
                 MessageBox.Show(this, "Cannot edit a view (read-only).",
-                    "Set-Cell", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Edit Cell", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             if (db.eof || db.bof) return;
@@ -14151,29 +15883,49 @@ namespace DbDuo
             // Refuse on metadata fields (system-managed) and route
             // 'marked' to the proper toggle commands.
             string sColLower = sColumn.ToLowerInvariant();
-            if (sColLower == "added" || sColLower == "updated")
+            if (sColLower == "added" || sColLower == "modified")
             {
                 MessageBox.Show(this,
                     "Field \"" + sColumn + "\" is system-managed and cannot be edited directly.\r\n\r\n"
                     + "The database updates it automatically.",
-                    "Set-Cell", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Edit Cell", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             if (sColLower == "marked")
             {
                 MessageBox.Show(this,
                     "Use Mark Record (Control+M) or Unmark Record (Control+U) to change the \"marked\" field.",
-                    "Set-Cell", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Edit Cell", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            string sOriginal = db.getFieldValue(sColumn) ?? "";
+            string sOriginal;
+            // Defense-in-depth: explicitly position the recordset on
+            // iVirtualRow before reading the field. The normal sync
+            // paths (virtSyncListSelection from virtMoveTo, and
+            // virtSyncFromListSelection from gridSelectedIndexChanged)
+            // should already keep db.absolutePosition aligned with
+            // iVirtualRow, but if any code path desyncs them (e.g.
+            // a filter or sort applied since the last virtual move,
+            // a stale selection event during refresh), the user's F2
+            // would edit the wrong row silently. This guard makes
+            // F2 always edit the virtual cell the user can hear.
+            try
+            {
+                if (iVirtualRow >= 1 && iVirtualRow <= db.recordCount
+                    && db.absolutePosition != iVirtualRow)
+                {
+                    db.absolutePosition = iVirtualRow;
+                }
+            }
+            catch { /* if positioning fails, fall through and let getFieldValue throw or return empty */ }
+            sOriginal = db.getFieldValue(sColumn) ?? "";
             string sConfiguredRegex = null;
             try { sConfiguredRegex = IniValidation.lookup(db.currentTable, sColumn); }
             catch { sConfiguredRegex = null; }
 
             string sNewValue;
-            using (LbcDialog dlg = new LbcDialog("Set-Cell", this))
+            using (LbcDialog dlg = new LbcDialog("Edit Cell", this))
             {
                 dlg.addLabel("Editing field \"" + sColumn + "\" of row "
                     + db.absolutePosition + " of " + db.recordCount + ".");
@@ -14211,7 +15963,7 @@ namespace DbDuo
                     MessageBox.Show(this,
                         "The validation pattern in DbDuo.ini is invalid:\r\n\r\n"
                         + exRegex.Message + "\r\n\r\nPattern: " + sConfiguredRegex,
-                        "Set-Cell", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        "Edit Cell", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
                 }
                 if (!bMatch)
@@ -14219,13 +15971,26 @@ namespace DbDuo
                     MessageBox.Show(this,
                         "Value does not match the required pattern for \"" + sColumn + "\":\r\n\r\n"
                         + sConfiguredRegex,
-                        "Set-Cell", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        "Edit Cell", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
             }
 
             try
             {
+                // Resync the recordset to iVirtualRow once more, in
+                // case the dialog being open let any background event
+                // (refresh, sort, filter) shift the cursor while we
+                // waited for the user.
+                try
+                {
+                    if (iVirtualRow >= 1 && iVirtualRow <= db.recordCount
+                        && db.absolutePosition != iVirtualRow)
+                    {
+                        db.absolutePosition = iVirtualRow;
+                    }
+                }
+                catch { /* fall through */ }
                 db.setFieldValue(sColumn, sNewValue);
                 db.update();
                 invokeRefresh();
@@ -14235,26 +16000,185 @@ namespace DbDuo
             {
                 try { db.cancelUpdate(); } catch { }
                 MessageBox.Show(this, ex.Message,
-                    "Set-Cell", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    "Edit Cell", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
+        // countMarkedInFilter: count records whose 'marked' column
+        // value is truthy WITHIN the currently filtered set. The
+        // counting iterates the recordset (which already reflects
+        // the active filter), then restores the position. Returns 0
+        // if the current table has no 'marked' column.
+        //
+        // Used by every Category B command (scope-flexible commands
+        // like Remove Record, Copy Record, Send Mail, etc.) to decide
+        // whether to offer the marks-vs-current scope choice.
+        private int countMarkedInFilter()
+        {
+            if (db == null || !db.hasRecordset()) return 0;
+            if (!db.hasField(Metadata.MarkedColumn)) return 0;
+            int iCount = 0;
+            object oOriginal = null;
+            try { oOriginal = db.bookmark; } catch { }
+            try
+            {
+                int iCap = db.recordCount;
+                for (int i = 1; i <= iCap; i++)
+                {
+                    try
+                    {
+                        db.absolutePosition = i;
+                        if (isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn))) iCount++;
+                    }
+                    catch { }
+                }
+            }
+            finally
+            {
+                if (oOriginal != null) try { db.bookmark = oOriginal; } catch { }
+            }
+            return iCount;
+        }
+
+        // ScopeChoice: result type for promptScope.
+        public enum ScopeChoice { Current, Marked, Cancel }
+
+        // promptScope: marks-aware scope chooser for Category B
+        // commands (those that can act on a single record OR on the
+        // set of marked records). The design rule applied throughout
+        // DbDuo:
+        //
+        //   If no records are marked in the current filtered view,
+        //   the command acts on the current record with no prompt.
+        //
+        //   If marks exist, present a numbered choice with the
+        //   current-record option as the default (the safer / smaller
+        //   scope, especially for destructive operations):
+        //
+        //       Remove Record:
+        //         1. Current record only (default)
+        //         2. All 7 marked records
+        //         3. Cancel
+        //
+        //   The user can type the number, type a unique word from a
+        //   choice ("current", "marked", "cancel"), or just press
+        //   Enter to accept the default.
+        //
+        // This is the GUI version (uses LBC dialog buttons). The
+        // dot-prompt CLI uses promptChoiceCli with the same labels
+        // and ordering for consistency across surfaces.
+        //
+        // sCommandName: shown in the dialog title (e.g., "Remove
+        // Record") so the user always sees which command is about to
+        // run.
+        private ScopeChoice promptScope(string sCommandName)
+        {
+            int iMarked = countMarkedInFilter();
+            if (iMarked == 0) return ScopeChoice.Current;
+
+            using (LbcDialog dlg = new LbcDialog(sCommandName, this))
+            {
+                dlg.addLabel("Marks are present. Choose the scope:");
+                string sMarkedLabel = (iMarked == 1)
+                    ? "&Marked record (1 record)"
+                    : "&Marked records (" + iMarked + " records)";
+                string sBtn = dlg.runWithButtons(new string[] {
+                    "&Current record (default)",
+                    sMarkedLabel,
+                    "Ca&ncel"
+                });
+                if (string.IsNullOrEmpty(sBtn) || sBtn.IndexOf("ancel", StringComparison.OrdinalIgnoreCase) >= 0)
+                    return ScopeChoice.Cancel;
+                if (sBtn.IndexOf("arked", StringComparison.OrdinalIgnoreCase) >= 0)
+                    return ScopeChoice.Marked;
+                return ScopeChoice.Current;
+            }
+        }
+
+        // recRemoveClicked: delete a record (or marked records) with
+        // confirmation. Ctrl+D. The marks-aware scope prompt fires
+        // only when marks exist; if no marks are set, the command
+        // proceeds with the current-record interpretation directly,
+        // showing only the standard "Delete the current record?"
+        // confirmation.
+        //
+        // For deleting marked records, a second confirmation includes
+        // the count -- e.g., "Delete 7 marked records?" -- because
+        // bulk deletes are higher-stakes than single-record deletes.
+        // The user must explicitly type the count or click Yes; there
+        // is no "force" option in the GUI bulk path.
+        //
+        // Implementation note: marked records are deleted in reverse
+        // absolute-position order so deletions don't shift indices
+        // of records-not-yet-processed.
         private void recRemoveClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.readOnly) return;
             if (db.eof || db.bof) return;
-            DialogResult res = MessageBox.Show(this,
-                "Remove the current record?", "Remove-Record",
+
+            ScopeChoice scope = promptScope("Delete Record");
+            if (scope == ScopeChoice.Cancel) return;
+
+            if (scope == ScopeChoice.Current)
+            {
+                DialogResult res = MessageBox.Show(this,
+                    "Delete the current record?", "Delete Record",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
+                if (res != DialogResult.Yes) return;
+                try
+                {
+                    db.deleteCurrent();
+                    invokeRefresh();
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, ex.Message, "Delete Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                return;
+            }
+
+            // Marked-records path.
+            int iMarked = countMarkedInFilter();
+            DialogResult res2 = MessageBox.Show(this,
+                "Delete " + iMarked + " marked record" + (iMarked == 1 ? "" : "s") + "?\n\n"
+                + "This cannot be undone.",
+                "Delete Marked Records",
                 MessageBoxButtons.YesNo, MessageBoxIcon.Warning);
-            if (res != DialogResult.Yes) return;
+            if (res2 != DialogResult.Yes) return;
             try
             {
-                db.deleteCurrent();
+                List<int> lMarkedPositions = new List<int>();
+                object oOriginal = null;
+                try { oOriginal = db.bookmark; } catch { }
+                try
+                {
+                    int iCap = db.recordCount;
+                    for (int i = 1; i <= iCap; i++)
+                    {
+                        db.absolutePosition = i;
+                        if (isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn)))
+                            lMarkedPositions.Add(i);
+                    }
+                }
+                finally
+                {
+                    if (oOriginal != null) try { db.bookmark = oOriginal; } catch { }
+                }
+                // Delete in reverse so earlier positions remain valid.
+                lMarkedPositions.Sort();
+                lMarkedPositions.Reverse();
+                int iDeleted = 0;
+                foreach (int iPos in lMarkedPositions)
+                {
+                    try { db.absolutePosition = iPos; db.deleteCurrent(); iDeleted++; }
+                    catch { }
+                }
                 invokeRefresh();
+                LiveRegion.sayForced("Deleted " + iDeleted + " marked record" + (iDeleted == 1 ? "" : "s") + ".");
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message, "Delete Record", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, ex.Message, "Delete Marked Records", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -14686,7 +16610,7 @@ namespace DbDuo
 
         // Open-Cell: take the value in the currently focused grid cell
         // and try to open it. Behavior:
-        //   - URL (starts with http://, https://, file://, mailto:): open
+        //   - url (starts with http://, https://, file://, mailto:): open
         //     in the system default browser via Process.Start.
         //   - Existing file path: open in its default associated app
         //     (Process.Start lets the shell pick the handler).
@@ -14714,7 +16638,7 @@ namespace DbDuo
                 ListBox lb = dlg.addPickBox(
                     "&Column whose cell value to open:",
                     lFields, sDefault,
-                    "The command opens the URL, file path, or folder path stored in this column of the current row");
+                    "The command opens the url, file path, or folder path stored in this column of the current record");
                 if (!dlg.runOkCancel()) return;
                 if (lb.SelectedItem == null) return;
                 sColName = lb.SelectedItem.ToString();
@@ -14741,7 +16665,7 @@ namespace DbDuo
                 }
                 else
                 {
-                    LiveRegion.say("Not a URL, file, or folder: " + sValue);
+                    LiveRegion.say("Not a url, file, or folder: " + sValue);
                 }
             }
             catch (Exception ex)
@@ -15306,7 +17230,7 @@ namespace DbDuo
                     MessageBox.Show(this,
                         "No prior search. Use Control+F to Find, Control+J to Jump-Record, "
                         + "or Control+F3 to Find-Regex first.",
-                        "Search-Next", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        "Search Next", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     break;
             }
         }
@@ -15319,7 +17243,7 @@ namespace DbDuo
             if (db == null || !db.hasRecordset()) return;
             int iCount = db.recordCount;
             if (iCount <= 0) { MessageBox.Show(this, "No rows.", "Go to Row", MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
-            string sInput = promptText("Set-Position",
+            string sInput = promptText("Set Position",
                 "Row number (1 to " + iCount + ", or use a percent like 50% for half-way):",
                 (db.absolutePosition).ToString());
             if (string.IsNullOrEmpty(sInput)) return;
@@ -15345,11 +17269,22 @@ namespace DbDuo
             catch (Exception ex) { MessageBox.Show(this, ex.Message, "Go to Row", MessageBoxButtons.OK, MessageBoxIcon.Error); }
         }
 
-        // Save-Bookmark: remember the current row's bookmark so the user
-        // can wander and return. Bound to Control+K by EdSharp convention
-        // for "Set Bookmark." Only one bookmark slot is kept; saving a
-        // new one replaces any previous.
-        private object bookmarkSaved;
+        // Multi-bookmark support (v1.0.101). Each bookmark records
+        // the table name, the ADO bookmark variant (which lets us
+        // jump back to the record within the same recordset), and
+        // the look-value at the time of save (for display in the
+        // Bookmarks listbox). Session-lifetime only: when the
+        // database is closed or a table is switched, bookmarks for
+        // the abandoned recordset become stale; we clear them at
+        // database-open time to avoid the user picking a stale one.
+        private class BookmarkEntry
+        {
+            public string sTable;
+            public object oBookmark;
+            public string sLook;        // look-value at save time
+            public int    iRowAtSave;   // 1-based row number when saved
+        }
+        private List<BookmarkEntry> lBookmarks = new List<BookmarkEntry>();
         // Step-Record menu items. Each fires the manager's
         // corresponding navigation method, then refreshes the
         // ListView and announces position via the status bar.
@@ -15360,14 +17295,14 @@ namespace DbDuo
         {
             if (db == null || !db.hasRecordset()) return;
             try { db.moveFirst(); invokeRefresh(); }
-            catch (Exception ex) { LiveRegion.say("Step-Record-First: " + ex.Message); }
+            catch (Exception ex) { LiveRegion.say("Step Record First: " + ex.Message); }
         }
 
         private void navLastClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset()) return;
             try { db.moveLast(); invokeRefresh(); }
-            catch (Exception ex) { LiveRegion.say("Step-Record-Last: " + ex.Message); }
+            catch (Exception ex) { LiveRegion.say("Step Record Last: " + ex.Message); }
         }
 
         private void navNextClicked(object sender, EventArgs evArgs)
@@ -15378,7 +17313,7 @@ namespace DbDuo
                 if (db.absolutePosition < db.recordCount) db.absolutePosition = db.absolutePosition + 1;
                 invokeRefresh();
             }
-            catch (Exception ex) { LiveRegion.say("Step-Record-Next: " + ex.Message); }
+            catch (Exception ex) { LiveRegion.say("Step Record Next: " + ex.Message); }
         }
 
         private void navPrevClicked(object sender, EventArgs evArgs)
@@ -15389,45 +17324,148 @@ namespace DbDuo
                 if (db.absolutePosition > 1) db.absolutePosition = db.absolutePosition - 1;
                 invokeRefresh();
             }
-            catch (Exception ex) { LiveRegion.say("Step-Record-Previous: " + ex.Message); }
+            catch (Exception ex) { LiveRegion.say("Step Record Previous: " + ex.Message); }
         }
 
+        // Save-Bookmark (Ctrl+B): add the current record to the
+        // bookmark list. The look-value (if available) is captured
+        // for display in the bookmark listbox; otherwise we fall
+        // back to "row N" as the bookmark's identifier.
         private void recBookmarkClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset()) return;
             try
             {
-                bookmarkSaved = db.bookmark;
-                string sMsg = "Bookmark saved at row " + db.absolutePosition;
+                BookmarkEntry be = new BookmarkEntry();
+                be.sTable = db.currentTable;
+                be.oBookmark = db.bookmark;
+                be.iRowAtSave = db.absolutePosition;
+                if (db.hasField(Metadata.LookColumn))
+                    try { be.sLook = db.getFieldValue(Metadata.LookColumn) ?? ""; } catch { be.sLook = ""; }
+                else
+                    be.sLook = "";
+                lBookmarks.Add(be);
+                string sLabel = string.IsNullOrEmpty(be.sLook)
+                    ? ("row " + be.iRowAtSave)
+                    : be.sLook;
+                string sMsg = "Bookmark saved: " + sLabel + " (" + lBookmarks.Count + " total)";
                 lblStatus.Text = sMsg;
                 LiveRegion.say(sMsg);
             }
             catch (Exception ex) { MessageBox.Show(this, ex.Message, "Save Bookmark", MessageBoxButtons.OK, MessageBoxIcon.Error); }
         }
 
-        // Restore-Bookmark: jump back to the saved row. Bound to Alt+K by
-        // EdSharp convention for "Go to Bookmark."
+        // List-Bookmarks (Alt+B): show the bookmark list in a listbox
+        // dialog. Each entry shows "table -- look-value (row N)".
+        // Selecting one and pressing OK navigates to that record.
         private void recGotoBookmarkClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset()) return;
-            if (bookmarkSaved == null)
-            { MessageBox.Show(this, "No bookmark saved. Use Save-Bookmark (Control+K) first.", "Go to Bookmark", MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
+            if (lBookmarks.Count == 0)
+            {
+                MessageBox.Show(this, "No bookmarks saved yet.",
+                    "List Bookmarks", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            // Build display strings -- one per bookmark. Format:
+            //   "<table> -- <look> (row N)"
+            // If no look-value, omit the dash:
+            //   "<table> (row N)"
+            List<string> lDisplay = new List<string>();
+            foreach (BookmarkEntry be in lBookmarks)
+            {
+                string sLook = string.IsNullOrEmpty(be.sLook) ? "" : (" -- " + be.sLook);
+                lDisplay.Add(be.sTable + sLook + " (row " + be.iRowAtSave + ")");
+            }
+            int iChosen = -1;
+            using (LbcDialog dlg = new LbcDialog("List Bookmarks", this))
+            {
+                dlg.addLabel("Select a bookmark to navigate to:");
+                ListBox lb = dlg.addListBox("Bookmarks", lDisplay, lDisplay[0]);
+                if (!dlg.runOkCancel()) return;
+                iChosen = lb.SelectedIndex;
+            }
+            if (iChosen < 0 || iChosen >= lBookmarks.Count) return;
+            BookmarkEntry chosen = lBookmarks[iChosen];
+            // If we're on a different table, switch tables first.
+            if (!string.Equals(chosen.sTable, db.currentTable, StringComparison.OrdinalIgnoreCase))
+            {
+                try { db.selectTable(chosen.sTable); }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, "Could not switch to table '" + chosen.sTable + "': " + ex.Message,
+                        "List Bookmarks", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    return;
+                }
+            }
             try
             {
-                db.bookmark = bookmarkSaved;
+                db.bookmark = chosen.oBookmark;
                 invokeRefresh();
-                LiveRegion.say("Returned to bookmarked row " + db.absolutePosition);
+                LiveRegion.say("Returned to row " + db.absolutePosition + " in " + chosen.sTable);
             }
-            catch (Exception ex) { MessageBox.Show(this, ex.Message, "Go to Bookmark", MessageBoxButtons.OK, MessageBoxIcon.Error); }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "List Bookmarks", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
-        // Clear-Bookmark: forget the saved row. Bound to Control+Shift+K
-        // by EdSharp convention for "Clear Bookmark."
+        // Clear-Bookmark (Ctrl+Shift+B): if one bookmark, clear it
+        // directly. If multiple, show a chooser (Clear All as
+        // default; or pick one to clear).
         private void recClearBookmarkClicked(object sender, EventArgs evArgs)
         {
-            bookmarkSaved = null;
-            lblStatus.Text = "Bookmark cleared.";
-            LiveRegion.say("Bookmark cleared");
+            if (lBookmarks.Count == 0)
+            {
+                LiveRegion.say("No bookmarks to clear");
+                return;
+            }
+            if (lBookmarks.Count == 1)
+            {
+                lBookmarks.Clear();
+                lblStatus.Text = "Bookmark cleared.";
+                LiveRegion.say("Bookmark cleared");
+                return;
+            }
+            // Multiple: chooser
+            List<string> lDisplay = new List<string>();
+            foreach (BookmarkEntry be in lBookmarks)
+            {
+                string sLookText = string.IsNullOrEmpty(be.sLook) ? "" : (" -- " + be.sLook);
+                lDisplay.Add(be.sTable + sLookText + " (row " + be.iRowAtSave + ")");
+            }
+            int iChosen = -1;
+            string sBtn = null;
+            using (LbcDialog dlg = new LbcDialog("Clear Bookmark", this))
+            {
+                dlg.addLabel("Clear all bookmarks (default), or select one to clear:");
+                ListBox lb = dlg.addListBox("Bookmarks", lDisplay, lDisplay[0]);
+                sBtn = dlg.runWithButtons(new string[] {
+                    "Clear &All",
+                    "Clear &Selected",
+                    "Ca&ncel"
+                });
+                if (string.IsNullOrEmpty(sBtn)
+                    || sBtn.IndexOf("ancel", StringComparison.OrdinalIgnoreCase) >= 0)
+                    return;
+                if (sBtn.IndexOf("All", StringComparison.OrdinalIgnoreCase) >= 0)
+                {
+                    int n = lBookmarks.Count;
+                    lBookmarks.Clear();
+                    lblStatus.Text = "Bookmarks cleared (" + n + ").";
+                    LiveRegion.say("Cleared " + n + " bookmarks");
+                    return;
+                }
+                iChosen = lb.SelectedIndex;
+            }
+            if (iChosen < 0 || iChosen >= lBookmarks.Count) return;
+            BookmarkEntry removed = lBookmarks[iChosen];
+            lBookmarks.RemoveAt(iChosen);
+            string sLook = string.IsNullOrEmpty(removed.sLook)
+                ? ("row " + removed.iRowAtSave) : removed.sLook;
+            string sMsg = "Bookmark cleared: " + sLook + " (" + lBookmarks.Count + " remaining)";
+            lblStatus.Text = sMsg;
+            LiveRegion.say(sMsg);
         }
 
         // Helper: prompt for a single line of text. Returns null if the
@@ -15487,17 +17525,132 @@ namespace DbDuo
         // =====================================================================
         // VIEW menu handlers
         // =====================================================================
+        // viewSelectClicked: open the Filter Records dialog. The
+        // dialog is pre-populated with the user's last filter input
+        // (sLastFilterText / sLastFilterColumn / sLastMatchMode), so
+        // re-opening Alt+Shift+F when a filter is active lets the
+        // user edit the existing filter rather than re-typing it. The
+        // dialog's Clear button (Alt+C) clears the filter and closes
+        // in one step, restoring the full unfiltered view in two
+        // keystrokes total (Alt+Shift+F, Alt+C).
+        private string sLastFilterText = "";
+        private string sLastFilterColumn = "All columns";
+        private string sLastMatchMode = "Contains";
+
+        // viewSelectClicked: Alt+Shift+F. Two-phase design:
+        //   Phase 1: when a filter is already active, show a chooser
+        //     dialog with action buttons (Clear / And / Or / Edit /
+        //     Reset / Cancel). Clear is the default (Enter).
+        //   Phase 2: based on the action, possibly open the
+        //     field-by-field form (And/Or = blank, Edit = pre-
+        //     populated, Reset = blank).
+        //
+        // The And/Or actions wrap the EXISTING db.filter SQL expression
+        // and the newly-built one in parens, joining with " AND " or
+        // " OR " to compose more complex filters incrementally.
+        //
+        // When no filter is currently active, the chooser doesn't
+        // appear (there's nothing to clear / combine with). We go
+        // directly to the blank field form (Reset behavior).
         private void viewSelectClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset()) return;
-            using (FilterDialog dlg = new FilterDialog(db.getFieldNames(), "", "All columns", "Contains"))
+
+            string sExistingFilter = db.filter ?? "";
+            bool bFilterActive = !string.IsNullOrEmpty(sExistingFilter);
+
+            string sAction = "Reset"; // default when no filter active
+
+            if (bFilterActive)
             {
-                if (dlg.ShowDialog(this) != DialogResult.OK) return;
-                string sExpr = buildFilterExpression(dlg.sFilterText, dlg.sFilterColumn, dlg.sMatchMode, db.getFieldNames());
+                using (LbcDialog dlg = new LbcDialog("Filter Records", this))
+                {
+                    dlg.addLabel("A filter is active:");
+                    dlg.addLabel(sExistingFilter);
+                    dlg.addLabel("");
+                    dlg.addLabel("Choose an action:");
+                    string sBtn = dlg.runWithButtons(new string[] {
+                        "&Clear",       // default; sets filter = ""
+                        "&And",         // open form; result: (old) AND (new)
+                        "&Or",          // open form; result: (old) OR (new)
+                        "&Edit",        // open form pre-populated; replace
+                        "&Reset",       // open blank form; replace
+                        "Ca&ncel"
+                    });
+                    if (string.IsNullOrEmpty(sBtn)
+                        || sBtn.IndexOf("ancel", StringComparison.OrdinalIgnoreCase) >= 0)
+                        return;
+                    if (sBtn.IndexOf("lear", StringComparison.OrdinalIgnoreCase) >= 0)
+                        sAction = "Clear";
+                    else if (sBtn.IndexOf("And", StringComparison.OrdinalIgnoreCase) >= 0)
+                        sAction = "And";
+                    else if (sBtn.StartsWith("&O", StringComparison.OrdinalIgnoreCase)
+                          || sBtn.Equals("Or", StringComparison.OrdinalIgnoreCase)
+                          || sBtn.Equals("&Or", StringComparison.OrdinalIgnoreCase))
+                        sAction = "Or";
+                    else if (sBtn.IndexOf("dit", StringComparison.OrdinalIgnoreCase) >= 0)
+                        sAction = "Edit";
+                    else if (sBtn.IndexOf("eset", StringComparison.OrdinalIgnoreCase) >= 0)
+                        sAction = "Reset";
+                    else
+                        return;
+                }
+            }
+
+            // Phase 2: handle the chosen action.
+            if (sAction == "Clear")
+            {
                 try
                 {
-                    db.filter = sExpr;
+                    db.filter = "";
                     invokeRefresh();
+                    sLastFilterText = "";
+                    LiveRegion.sayForced("Filter cleared. " + db.recordCount + " records visible.");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, ex.Message, "Filter Records", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                return;
+            }
+
+            // For And/Or/Reset, open a BLANK form. For Edit, pre-
+            // populate with the last typed values.
+            bool bPrePopulate = (sAction == "Edit");
+            string sInitText = bPrePopulate ? sLastFilterText : "";
+            string sInitCol = bPrePopulate ? sLastFilterColumn : "All columns";
+            string sInitMode = bPrePopulate ? sLastMatchMode : "Contains";
+
+            using (FilterDialog dlg = new FilterDialog(
+                db.getFieldNames(), sInitText, sInitCol, sInitMode))
+            {
+                if (dlg.ShowDialog(this) != DialogResult.OK) return;
+                sLastFilterText = dlg.sFilterText ?? "";
+                sLastFilterColumn = dlg.sFilterColumn ?? "All columns";
+                sLastMatchMode = dlg.sMatchMode ?? "Contains";
+
+                string sNewExpr = buildFilterExpression(sLastFilterText, sLastFilterColumn, sLastMatchMode, db.getFieldNames());
+
+                // Combine with existing filter for And/Or; otherwise
+                // the new expression replaces the old.
+                string sFinalExpr;
+                if (sAction == "And" && !string.IsNullOrEmpty(sNewExpr))
+                    sFinalExpr = "(" + sExistingFilter + ") AND (" + sNewExpr + ")";
+                else if (sAction == "Or" && !string.IsNullOrEmpty(sNewExpr))
+                    sFinalExpr = "(" + sExistingFilter + ") OR (" + sNewExpr + ")";
+                else
+                    sFinalExpr = sNewExpr;
+
+                try
+                {
+                    db.filter = sFinalExpr;
+                    invokeRefresh();
+                    if (dlg.bClearRequested)
+                        LiveRegion.sayForced("Filter cleared. " + db.recordCount + " records visible.");
+                    else if (string.IsNullOrEmpty(sFinalExpr))
+                        LiveRegion.sayForced("No filter applied. " + db.recordCount + " records visible.");
+                    else
+                        LiveRegion.sayForced("Filter applied. " + db.recordCount + " records match.");
                 }
                 catch (Exception ex)
                 {
@@ -15536,126 +17689,13 @@ namespace DbDuo
             invokeRefresh();
         }
 
-        private void viewFormatClicked(object sender, EventArgs evArgs)
-        {
-            if (db == null || !db.hasRecordset()) return;
-            List<string> lFields = db.getFieldNames();
-            if (lFields.Count == 0) return;
-            using (SortDialog dlg = new SortDialog(lFields, lFields[0], true))
-            {
-                if (dlg.ShowDialog(this) != DialogResult.OK) return;
-                string sExpr = dlg.sSortColumn + (dlg.bAscending ? " ASC" : " DESC");
-                try
-                {
-                    db.sort = sExpr;
-                    invokeRefresh();
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(this, ex.Message, "Custom Sort", MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-        }
-
-        private void viewSortAscClicked(object sender, EventArgs evArgs) { sortByPickedColumn(true); }
-        private void viewSortDescClicked(object sender, EventArgs evArgs) { sortByPickedColumn(false); }
-
-        // Sort by the table's "updated" or "added" timestamp column,
-        // following DbDuo's standard-bookkeeping-columns convention.
-        // Most-recent-first is the typical use case ("show me what
-        // changed lately"), so Alt+Shift+D = recent-first; Alt+D =
-        // oldest-first as the inverse.
-        //
-        // Resolution: prefer 'updated' when present, else 'added',
-        // else 'observed'. If none of the three exist on the current
-        // table, the sort is refused with a brief notice (the user can
-        // fall back to Alt+A on a column they navigate to).
-        private void viewSortRecentClicked(object sender, EventArgs evArgs) { sortByDateColumn(false); }
-        private void viewSortOldestClicked(object sender, EventArgs evArgs) { sortByDateColumn(true); }
-
-        private void sortByDateColumn(bool bOldestFirst)
-        {
-            if (db == null || !db.hasRecordset()) return;
-            string sCol = pickDateColumn();
-            if (sCol == null)
-            {
-                LiveRegion.say("No updated, added, or observed column on this table");
-                MessageBox.Show(this,
-                    "This table does not have an 'updated', 'added', or 'observed' column. "
-                    + "Date-sort needs one of these. Use Alt+A to sort by another column instead.",
-                    "Sort by date", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
-            try
-            {
-                db.sort = sCol + (bOldestFirst ? " ASC" : " DESC");
-                invokeRefresh();
-                LiveRegion.say("Sorted by " + sCol + ", " + (bOldestFirst ? "oldest first" : "most recent first"));
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(this, ex.Message, "Sort by date", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        // Find the best timestamp column for date-sort. DbDuo's
-        // standard bookkeeping columns are 'added', 'updated',
-        // 'observed' (see Metadata.BookkeepingColumns); 'updated' is
-        // the freshest signal of "when did this row last change," so
-        // we prefer it. Returns null if none of the three exist.
-        private string pickDateColumn()
-        {
-            if (db == null || !db.hasRecordset()) return null;
-            foreach (string sName in Metadata.DateSortColumns)
-                if (db.hasField(sName)) return sName;
-            return null;
-        }
-
-        // sortByPickedColumn: prompt for a column via LBC dialog,
-        // then sort by it. Per Jamal's listview-not-grid spec,
-        // Sort-Ascending and Sort-Descending no longer read the
-        // Tab-tracked "current column" -- that's a screen-reader
-        // announcement helper, not a command-targeting mechanism.
-        // The user always picks the column explicitly.
-        private void sortByPickedColumn(bool bAsc)
-        {
-            if (db == null || !db.hasRecordset()) return;
-            List<string> lCols = db.getDisplayFieldNames();
-            if (lCols == null || lCols.Count == 0)
-            {
-                LiveRegion.say("No columns to sort by");
-                return;
-            }
-            // Default to the column under virtual focus. Pressing
-            // Enter accepts it; the user can arrow up/down through
-            // the listbox to pick a different column.
-            string sDefault = virtCurrentColumnName();
-            if (string.IsNullOrEmpty(sDefault) || !lCols.Contains(sDefault)) sDefault = lCols[0];
-            LbcDialog dlg = new LbcDialog(bAsc ? "Sort Ascending" : "Sort Descending", this);
-            try
-            {
-                ListBox lb = dlg.addPickBox(
-                    "&Column to sort by " + (bAsc ? "ascending:" : "descending:"),
-                    lCols, sDefault,
-                    "Pick the column whose values determine the row order");
-                if (!dlg.runOkCancel()) return;
-                if (lb.SelectedItem == null) return;
-                string sCol = lb.SelectedItem.ToString();
-                try
-                {
-                    db.sort = sCol + (bAsc ? " ASC" : " DESC");
-                    invokeRefresh();
-                    LiveRegion.say("Sorted by " + sCol + (bAsc ? ", ascending" : ", descending"));
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show(this, ex.Message,
-                        bAsc ? "Sort Ascending" : "Sort Descending",
-                        MessageBoxButtons.OK, MessageBoxIcon.Error);
-                }
-            }
-            finally { dlg.Dispose(); }
-        }
+        // viewFormatClicked, viewSortAscClicked, viewSortDescClicked,
+        // viewSortRecentClicked, viewSortOldestClicked, sortByPickedColumn,
+        // sortByDateColumn, pickDateColumn -- all removed in v1.0.86
+        // along with their menu items. The universal Sort-Records
+        // command (Alt+Shift+S, sortRecordsClicked elsewhere in this
+        // file) handles every sort case by defaulting to the current
+        // virtual column and offering an opt-in Descending checkbox.
 
         private void viewResetSortClicked(object sender, EventArgs evArgs)
         {
@@ -15687,12 +17727,12 @@ namespace DbDuo
         // =====================================================================
         private void schemaSelectTableClicked(object sender, EventArgs evArgs)
         {
-            selectFromList(db == null ? null : db.getTableNames(), "Select-Table", "table");
+            selectFromList(db == null ? null : db.getTableNames(), "Select Table", "table");
         }
 
         private void schemaSelectViewClicked(object sender, EventArgs evArgs)
         {
-            selectFromList(db == null ? null : db.getViewNames(), "Select-View", "view");
+            selectFromList(db == null ? null : db.getViewNames(), "Select View", "view");
         }
 
         // Shared body of Select-Table and Select-View. Each prompts
@@ -15834,7 +17874,7 @@ namespace DbDuo
                 sb.AppendLine("Views (" + lViews.Count + "):");
                 foreach (string sN in lViews) sb.AppendLine("  " + sN);
             }
-            HelpDialog.show(this, "Show-Schema", sb.ToString());
+            HelpDialog.show(this, "Show Schema", sb.ToString());
         }
 
         // =====================================================================
@@ -15855,12 +17895,44 @@ namespace DbDuo
             setMarkValue(false);
         }
 
+        // recToggleMarkClicked: Ctrl+Space. Flip the current record's
+        // mark state. Matches the Windows ListView convention where
+        // Ctrl+Space toggles the focused item's selection state.
+        // Since DbDuo uses the 'marked' column as its functional
+        // equivalent of multi-select, the mapping is direct.
+        // Announces the new state through the live region.
+        private void recToggleMarkClicked(object sender, EventArgs evArgs)
+        {
+            if (db == null || !db.hasRecordset() || db.readOnly) return;
+            if (db.currentIsView)
+            {
+                MessageBox.Show(this, "Cannot mark rows of a view (read-only).",
+                    "Toggle Marked",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            if (db.eof || db.bof) return;
+            if (!db.hasField(Metadata.MarkedColumn))
+            {
+                MessageBox.Show(this,
+                    "Current table has no '" + Metadata.MarkedColumn + "' column. "
+                    + "Toggle Marked requires the standard metadata column.",
+                    "Toggle Marked",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            bool bCurrent;
+            try { bCurrent = isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn) ?? ""); }
+            catch { bCurrent = false; }
+            setMarkValue(!bCurrent);
+        }
+
         private void setMarkValue(bool bValue)
         {
             if (db == null || !db.hasRecordset() || db.readOnly) return;
             if (db.currentIsView) {
                 MessageBox.Show(this, "Cannot mark rows of a view (read-only).",
-                    bValue ? "Set-Mark" : "Clear-Mark",
+                    bValue ? "Set Mark" : "Clear Mark",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -15870,7 +17942,7 @@ namespace DbDuo
                 MessageBox.Show(this,
                     "Current table has no '" + Metadata.MarkedColumn + "' column. "
                     + "Set-Mark and Clear-Mark require the standard metadata column.",
-                    bValue ? "Set-Mark" : "Clear-Mark",
+                    bValue ? "Set Mark" : "Clear Mark",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -15884,7 +17956,7 @@ namespace DbDuo
             {
                 try { db.cancelUpdate(); } catch { }
                 MessageBox.Show(this, ex.Message,
-                    bValue ? "Set-Mark" : "Clear-Mark",
+                    bValue ? "Set Mark" : "Clear Mark",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -16008,7 +18080,7 @@ namespace DbDuo
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, "Could not open URL: " + ex.Message, "Open Url",
+                MessageBox.Show(this, "Could not open url: " + ex.Message, "Open Url",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -16031,106 +18103,320 @@ namespace DbDuo
         // for the column. This command takes its column from the
         // current virtual cursor's position so it's a "sort this
         // column right now" gesture.
-        private void sortRecordsClicked(object sender, EventArgs evArgs)
+        // orderRecordsClicked: Alt+O. Sort records by a chosen column
+        // ascending. The dialog shows an alpha-sorted listbox of ALL
+        // field names (including hidden columns -- the user can sort
+        // by columns they don't currently display), focused on the
+        // current virtual column. Press Enter to sort by the focused
+        // (default) column, or arrow + Enter to pick another.
+        //
+        // Sorting by hidden columns is the key feature: today users
+        // need to display a column, sort, then optionally hide it
+        // again. The all-fields listbox eliminates that workflow.
+        private void orderRecordsClicked(object sender, EventArgs evArgs)
+        {
+            orderRecordsCommon(false);
+        }
+
+        // reverseOrderClicked: Alt+Shift+O. Same listbox flow as Order
+        // Records but sort descending.
+        private void reverseOrderClicked(object sender, EventArgs evArgs)
+        {
+            orderRecordsCommon(true);
+        }
+
+        private void orderRecordsCommon(bool bDescending)
         {
             if (db == null || !db.hasRecordset()) return;
-            // Resolve the current virtual column the same way
-            // announceCurrentColumn does: grid.Columns is the
-            // displayed subset; iCurrentColumnIndex points into it;
-            // the column's header text equals the field name.
-            string sCol = "";
+
+            string sExistingSort = db.sort ?? "";
+            bool bSortActive = !string.IsNullOrEmpty(sExistingSort);
+
+            // Action determination, symmetric to viewSelectClicked:
+            //   - No sort active: go straight to listbox (Reset).
+            //   - Sort active: chooser with Clear (default) / Reset /
+            //     Add / Cancel. Clear empties db.sort and closes; Add
+            //     appends the next chosen column to the existing
+            //     expression (multi-column sort); Reset opens the
+            //     listbox to start fresh.
+            string sAction = "Reset";
+
+            if (bSortActive)
+            {
+                using (LbcDialog dlg = new LbcDialog(
+                    bDescending ? "Reverse Order" : "Order Records", this))
+                {
+                    dlg.addLabel("A sort is active:");
+                    dlg.addLabel(sExistingSort);
+                    dlg.addLabel("");
+                    dlg.addLabel("Choose an action:");
+                    string sBtn = dlg.runWithButtons(new string[] {
+                        "&Clear",       // default; sets sort = ""
+                        "&Reset",       // discard, open listbox fresh
+                        "&Add",         // append to existing sort
+                        "Ca&ncel"
+                    });
+                    if (string.IsNullOrEmpty(sBtn)
+                        || sBtn.IndexOf("ancel", StringComparison.OrdinalIgnoreCase) >= 0)
+                        return;
+                    if (sBtn.IndexOf("lear", StringComparison.OrdinalIgnoreCase) >= 0)
+                        sAction = "Clear";
+                    else if (sBtn.IndexOf("eset", StringComparison.OrdinalIgnoreCase) >= 0)
+                        sAction = "Reset";
+                    else if (sBtn.IndexOf("dd", StringComparison.OrdinalIgnoreCase) >= 0)
+                        sAction = "Add";
+                    else
+                        return;
+                }
+            }
+
+            if (sAction == "Clear")
+            {
+                try
+                {
+                    db.sort = "";
+                    invokeRefresh();
+                    LiveRegion.sayForced("Sort cleared. " + db.recordCount + " records in original order.");
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, ex.Message, "Order Records",
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                return;
+            }
+
+            // For Reset and Add, we need to pick a column from the
+            // listbox. The default selection is the current virtual
+            // column (consistent with the original UX).
+            string sCurrentCol = "";
             if (grid != null && grid.Columns.Count > 0)
             {
                 int iCol = iCurrentColumnIndex;
                 if (iCol < 0 || iCol >= grid.Columns.Count) iCol = 0;
-                sCol = grid.Columns[iCol].Text;
+                sCurrentCol = grid.Columns[iCol].Text;
             }
-            if (string.IsNullOrEmpty(sCol))
-            { LiveRegion.say("No virtual column at cursor"); return; }
-            bool bAscending = false;  // OFF by default per spec
-            using (LbcDialog dlg = new LbcDialog("Sort Records", this))
+            List<string> lAllFields = db.getFieldNames();
+            if (lAllFields == null || lAllFields.Count == 0)
+            { LiveRegion.say("No columns to sort by"); return; }
+            List<string> lSorted = new List<string>(lAllFields);
+            lSorted.Sort(StringComparer.OrdinalIgnoreCase);
+
+            int iDefault = 0;
+            for (int i = 0; i < lSorted.Count; i++)
             {
-                dlg.addLabel("Sort by column: " + sCol);
-                CheckBox cb = dlg.addCheckBox("&Ascending order (otherwise descending)", bAscending);
-                if (!dlg.runOkCancel()) return;
-                bAscending = cb.Checked;
+                if (string.Equals(lSorted[i], sCurrentCol, StringComparison.OrdinalIgnoreCase))
+                { iDefault = i; break; }
             }
-            string sExpr = sCol + (bAscending ? " ASC" : " DESC");
+
+            string sTitle = bDescending ? "Reverse Order" : "Order Records";
+            string sChosen = null;
+            using (LbcDialog dlg = new LbcDialog(sTitle, this))
+            {
+                dlg.addLabel((bDescending ? "Sort descending by column:" : "Sort ascending by column:"));
+                ListBox lb = dlg.addListBox("Columns", lSorted, lSorted[iDefault]);
+                if (!dlg.runOkCancel()) return;
+                if (lb.SelectedIndex < 0) return;
+                sChosen = lb.SelectedItem == null ? null : lb.SelectedItem.ToString();
+            }
+            if (string.IsNullOrEmpty(sChosen)) return;
+
+            // Build the new clause and either replace or append.
+            string sNewClause = sChosen + (bDescending ? " DESC" : " ASC");
+            string sFinalSort;
+            if (sAction == "Add")
+                sFinalSort = sExistingSort + ", " + sNewClause;
+            else
+                sFinalSort = sNewClause;
+
             try
             {
-                db.sort = sExpr;
+                db.sort = sFinalSort;
                 invokeRefresh();
-                LiveRegion.say("Sorted by " + sCol + (bAscending ? ", ascending" : ", descending"));
+                string sVerb = (sAction == "Add")
+                    ? (bDescending ? "Added reverse order on " : "Added order on ")
+                    : (bDescending ? "Reverse-ordered by " : "Ordered by ");
+                LiveRegion.sayForced(sVerb + sChosen + ". " + db.recordCount + " records.");
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message, "Sort Records",
+                MessageBox.Show(this, ex.Message, sTitle,
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
-        // --- Misc deferred stubs ---
-        private void miscDatabaseSummaryStub(object sender, EventArgs evArgs)
+        // Legacy entry point retained because other code paths still
+        // reference sortRecordsClicked. Delegates to the ascending path.
+        private void sortRecordsClicked(object sender, EventArgs evArgs)
         {
-            LiveRegion.say("Database Summary is deferred; not yet implemented");
+            orderRecordsClicked(sender, evArgs);
+        }
+
+        // --- Misc deferred stubs ---
+        // --- Database Summary (Alt+D) ---
+        // Memo dialog listing every table with its record count, then
+        // its related tables (those connected via foreign keys, in
+        // either direction). Plain text, no schema jargon -- the goal
+        // is a fast human/screen-reader overview of what's in the
+        // database and how the tables relate.
+        //
+        // Relations follow DbDuo's column-naming convention rather
+        // than walking PRAGMA foreign_key_list, so the same algorithm
+        // works for .db, .xlsx, .csv, and any other tabular source
+        // where the convention has been adopted. Two directions:
+        //
+        //   - Outbound: this table has a column named '<other>_id'
+        //     and a table named '<other>s' or '<other>' exists.
+        //     Those are this table's parents (each row of this table
+        //     points to one row of the other).
+        //   - Inbound: another table has a column named '<this_
+        //     singular>_id'. Those are this table's children (rows
+        //     of the other table point back to rows here).
+        //
+        // The current table is the first one listed for screen-
+        // reader convenience -- the user opens the dialog already
+        // thinking about it.
+        private void miscDatabaseSummaryClicked(object sender, EventArgs evArgs)
+        {
+            if (db == null || !db.isOpen())
+            { LiveRegion.say("No database open"); return; }
+            List<string> lAllTables = db.getTableAndViewNames();
+            if (lAllTables == null || lAllTables.Count == 0)
+            { LiveRegion.say("Database has no tables"); return; }
+
+            // Order: current table first, then the rest alphabetically.
+            string sCurrent = db.currentTable ?? "";
+            List<string> lOrdered = new List<string>();
+            if (!string.IsNullOrEmpty(sCurrent) && lAllTables.Contains(sCurrent))
+                lOrdered.Add(sCurrent);
+            List<string> lRest = new List<string>();
+            foreach (string s in lAllTables)
+                if (!string.Equals(s, sCurrent, StringComparison.OrdinalIgnoreCase))
+                    lRest.Add(s);
+            lRest.Sort(StringComparer.OrdinalIgnoreCase);
+            lOrdered.AddRange(lRest);
+
+            // Precompute row counts and PK-stems for every table so the
+            // inbound-FK pass can use cached values.
+            Dictionary<string, long> dCounts = new Dictionary<string, long>();
+            Dictionary<string, string> dPkStem = new Dictionary<string, string>();  // table -> singular stem (e.g. "classes" -> "class")
+            Dictionary<string, List<string>> dCols = new Dictionary<string, List<string>>();
+            foreach (string sT in lAllTables)
+            {
+                dCounts[sT] = db.countRowsOfTable(sT);
+                List<string> lTcols = db.getColumnsOfTable(sT);
+                dCols[sT] = lTcols;
+                string sPk = db.actualPrimaryKey(sT);
+                if (string.IsNullOrEmpty(sPk)) sPk = computePrimaryKeyColumn(sT, lTcols);
+                if (!string.IsNullOrEmpty(sPk) && sPk.EndsWith(Metadata.PrimaryKeySuffix, StringComparison.OrdinalIgnoreCase))
+                    dPkStem[sT] = sPk.Substring(0, sPk.Length - Metadata.PrimaryKeySuffix.Length);
+                else
+                    dPkStem[sT] = "";
+            }
+
+            StringBuilder sb = new StringBuilder();
+            // Resolve to full path. Reporting the actual filesystem
+            // location (not the relative path passed to openDatabase)
+            // matches what the user expects to read in this summary.
+            string sShownPath = db.filePath ?? "";
+            try
+            {
+                if (!string.IsNullOrEmpty(sShownPath))
+                    sShownPath = Path.GetFullPath(sShownPath);
+            }
+            catch { }
+            sb.AppendLine("Database: " + sShownPath);
+            // If the file doesn't exist at that resolved path, note
+            // it -- this catches the case where the path stored on
+            // the manager is no longer reachable on disk.
+            try
+            {
+                if (!string.IsNullOrEmpty(sShownPath) && !File.Exists(sShownPath))
+                    sb.AppendLine("  (file not found at this path)");
+            }
+            catch { }
+            sb.AppendLine("Tables: " + lAllTables.Count);
+            sb.AppendLine();
+            foreach (string sT in lOrdered)
+            {
+                long nCount = dCounts.ContainsKey(sT) ? dCounts[sT] : -1;
+                string sCountStr = (nCount < 0) ? "?" : nCount.ToString();
+                sb.AppendLine(sT + " (" + sCountStr + " record" + (nCount == 1 ? "" : "s") + ")");
+
+                // Outbound: this table's columns named "<other>_id" pointing to a known table.
+                List<string> lOutbound = new List<string>();
+                List<string> lMyCols = dCols.ContainsKey(sT) ? dCols[sT] : new List<string>();
+                string sMyPk = db.actualPrimaryKey(sT);
+                foreach (string sCol in lMyCols)
+                {
+                    if (string.Equals(sCol, sMyPk, StringComparison.OrdinalIgnoreCase)) continue;
+                    if (!sCol.EndsWith(Metadata.PrimaryKeySuffix, StringComparison.OrdinalIgnoreCase)) continue;
+                    string sParent = findParentTableForFk(sCol, lAllTables);
+                    if (string.IsNullOrEmpty(sParent)) continue;
+                    if (string.Equals(sParent, sT, StringComparison.OrdinalIgnoreCase)) continue;
+                    if (!lOutbound.Contains(sParent)) lOutbound.Add(sParent);
+                }
+
+                // Inbound: other tables have a column named "<this_stem>_id".
+                List<string> lInbound = new List<string>();
+                string sMyStem = dPkStem.ContainsKey(sT) ? dPkStem[sT] : "";
+                if (!string.IsNullOrEmpty(sMyStem))
+                {
+                    string sFkLookFor = sMyStem + Metadata.PrimaryKeySuffix;
+                    foreach (string sOther in lAllTables)
+                    {
+                        if (string.Equals(sOther, sT, StringComparison.OrdinalIgnoreCase)) continue;
+                        List<string> lOtherCols = dCols.ContainsKey(sOther) ? dCols[sOther] : new List<string>();
+                        foreach (string sCol in lOtherCols)
+                        {
+                            if (string.Equals(sCol, sFkLookFor, StringComparison.OrdinalIgnoreCase))
+                            { lInbound.Add(sOther); break; }
+                        }
+                    }
+                }
+
+                if (lOutbound.Count == 0 && lInbound.Count == 0)
+                {
+                    sb.AppendLine("  (no related tables)");
+                }
+                else
+                {
+                    lOutbound.Sort(StringComparer.OrdinalIgnoreCase);
+                    lInbound.Sort(StringComparer.OrdinalIgnoreCase);
+                    foreach (string sParent in lOutbound)
+                    {
+                        long n = dCounts.ContainsKey(sParent) ? dCounts[sParent] : -1;
+                        string sN = (n < 0) ? "?" : n.ToString();
+                        sb.AppendLine("  parent: " + sParent + " (" + sN + ")");
+                    }
+                    foreach (string sChild in lInbound)
+                    {
+                        long n = dCounts.ContainsKey(sChild) ? dCounts[sChild] : -1;
+                        string sN = (n < 0) ? "?" : n.ToString();
+                        sb.AppendLine("  child:  " + sChild + " (" + sN + ")");
+                    }
+                }
+                sb.AppendLine();
+            }
+
+            using (LbcDialog dlg = new LbcDialog("Database Summary", this))
+            {
+                dlg.addMemoBox("&Summary", sb.ToString().TrimEnd(),
+                    "Read-only overview. Each table shows its record count and its related tables, with the related tables' record counts in parentheses.");
+                dlg.runWithButtons(new string[] { "OK" });
+            }
         }
         private void miscWindowSummaryStub(object sender, EventArgs evArgs)
         {
             LiveRegion.say("Window Summary is deferred; not yet implemented");
         }
 
-        // --- v1.0.69 Sort-by-standard-column shortcuts ---
-        // Each pair (Alt+letter / Alt+Shift+letter) sorts by a fixed
-        // standard column ascending or descending. Internally each is
-        // a thin wrapper around sortByFixedColumn which sets db.sort
-        // and refreshes.
-        private void sortByFixedColumn(string sColName, bool bAscending, string sLabel)
-        {
-            if (db == null || !db.hasRecordset()) return;
-            if (string.IsNullOrEmpty(sColName))
-            { LiveRegion.say(sLabel + ": no such column on this table"); return; }
-            if (!db.hasField(sColName))
-            { LiveRegion.say("This table has no " + sColName + " column"); return; }
-            string sExpr = sColName + (bAscending ? " ASC" : " DESC");
-            try
-            {
-                db.sort = sExpr;
-                invokeRefresh();
-                LiveRegion.say(sLabel + (bAscending ? ", ascending" : ", descending"));
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(this, ex.Message, sLabel,
-                    MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
-
-        // For Sort-ById, resolve the actual primary key. Tables that
-        // follow DbDuo's convention have <table>_id; non-conforming
-        // tables may use a different column name.
-        private string getCurrentPrimaryKey()
-        {
-            if (db == null || !db.hasRecordset()) return null;
-            try { return db.actualPrimaryKey(db.currentTable); }
-            catch { return null; }
-        }
-
-        private void sortByIdClicked(object sender, EventArgs evArgs)
-        { sortByFixedColumn(getCurrentPrimaryKey(), true,  "Sort by Id"); }
-        private void sortByIdRevClicked(object sender, EventArgs evArgs)
-        { sortByFixedColumn(getCurrentPrimaryKey(), false, "Sort by Id"); }
-        private void sortByLookClicked(object sender, EventArgs evArgs)
-        { sortByFixedColumn("look", true,  "Sort by Look"); }
-        private void sortByLookRevClicked(object sender, EventArgs evArgs)
-        { sortByFixedColumn("look", false, "Sort by Look"); }
-        private void sortByTagsClicked(object sender, EventArgs evArgs)
-        { sortByFixedColumn("tags", true,  "Sort by Tags"); }
-        private void sortByTagsRevClicked(object sender, EventArgs evArgs)
-        { sortByFixedColumn("tags", false, "Sort by Tags"); }
-        private void sortByUrlClicked(object sender, EventArgs evArgs)
-        { sortByFixedColumn("url", true,  "Sort by Url"); }
-        private void sortByUrlRevClicked(object sender, EventArgs evArgs)
-        { sortByFixedColumn("url", false, "Sort by Url"); }
+        // The per-column sort handlers (sortByFixedColumn,
+        // getCurrentPrimaryKey, sortByIdClicked, sortByIdRevClicked,
+        // sortByLookClicked, sortByLookRevClicked, sortByTagsClicked,
+        // sortByTagsRevClicked, sortByUrlClicked, sortByUrlRevClicked)
+        // were removed in v1.0.86 along with their menu items. The
+        // universal Sort-Records dialog (Alt+Shift+S) replaces them.
 
         // --- Open New Recordset (Ctrl+Shift+O) ---
         // Prompt for an arbitrary SQL SELECT and open its result as a
@@ -16246,7 +18532,7 @@ namespace DbDuo
         // accordingly. Restores the user's row position when done.
         private void applyAnchorRange(bool bMark)
         {
-            string sVerb = bMark ? "Mark-Range" : "Unmark-Range";
+            string sVerb = bMark ? "Complete Mark" : "Unmark Range";
             int iAnchor = bMark ? iMarkAnchor : iUnmarkAnchor;
             string sAnchorTable = bMark ? sMarkAnchorTable : sUnmarkAnchorTable;
             string sKindWord = bMark ? "mark" : "unmark";
@@ -16363,7 +18649,7 @@ namespace DbDuo
                     + "Show-Related uses the convention that any column ending "
                     + "in '_id' (other than the table's own primary key) refers "
                     + "to another table by the prefix.",
-                    "Show-Related", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Show Related", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -16378,7 +18664,7 @@ namespace DbDuo
             }
             if (!lCandidates.Contains(sCurrent)) sCurrent = lCandidates[0];
 
-            string sChosen = promptListChoice("Show-Related",
+            string sChosen = promptListChoice("Show Related",
                 "Choose a foreign-key column:", lCandidates, sCurrent);
             if (string.IsNullOrEmpty(sChosen)) return;
 
@@ -16410,7 +18696,7 @@ namespace DbDuo
                 MessageBox.Show(this,
                     "Cannot find target table for column '" + sChosen + "'.\n\n"
                     + "Looked for table named '" + sTarget + "'.",
-                    "Show-Related", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Show Related", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -16429,7 +18715,7 @@ namespace DbDuo
             {
                 MessageBox.Show(this,
                     "Could not navigate to related rows: " + ex.Message,
-                    "Show-Related", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    "Show Related", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -16547,7 +18833,7 @@ namespace DbDuo
             if (db.eof || db.bof)
             {
                 MessageBox.Show(this, "No current row to drill from.",
-                    "Enter-Child", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Enter Child", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -16563,7 +18849,7 @@ namespace DbDuo
                     "Cannot determine the primary-key column for '" + sParentTable + "'.\n\n"
                     + "Enter-Child uses the convention '<table>_id' (or 'id') for the\n"
                     + "primary key. The current table has no column matching this pattern.",
-                    "Enter-Child", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Enter Child", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -16575,7 +18861,7 @@ namespace DbDuo
                 MessageBox.Show(this,
                     "The current row has no value for '" + sParentPk + "'.\n\n"
                     + "Enter-Child requires the parent row to have a primary-key value.",
-                    "Enter-Child", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Enter Child", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -16606,7 +18892,7 @@ namespace DbDuo
                     "No child tables found that reference '" + sParentPk + "'.\n\n"
                     + "Enter-Child looks for other tables that have a column with the\n"
                     + "same name as this table's primary key.",
-                    "Enter-Child", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Enter Child", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -16617,7 +18903,7 @@ namespace DbDuo
             }
             else
             {
-                sChosen = promptListChoice("Enter-Child",
+                sChosen = promptListChoice("Enter Child",
                     "Choose a child table to drill into:", lChildren, lChildren[0]);
                 if (string.IsNullOrEmpty(sChosen)) return;
             }
@@ -16646,7 +18932,7 @@ namespace DbDuo
                 {
                     MessageBox.Show(this,
                         "Could not apply filter '" + sFkFilter + "': " + exFilter.Message,
-                        "Enter-Child", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        "Enter Child", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
                 // Position at the top of the filtered set.
                 try { db.moveFirst(); } catch { }
@@ -16658,7 +18944,7 @@ namespace DbDuo
                 if (drillStack.Count > 0) drillStack.Pop();
                 MessageBox.Show(this,
                     "Could not open child table '" + sChosen + "': " + ex.Message,
-                    "Enter-Child", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    "Enter Child", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -16670,7 +18956,7 @@ namespace DbDuo
                 MessageBox.Show(this,
                     "Nothing to exit -- the drill-down stack is empty.\n\n"
                     + "Exit-Child returns from a child table opened via Enter-Child.",
-                    "Exit-Child", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Exit Child", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -16730,7 +19016,7 @@ namespace DbDuo
             {
                 MessageBox.Show(this,
                     "Could not return to parent table '" + entry.sParentTable + "': " + ex.Message,
-                    "Exit-Child", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    "Exit Child", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -16756,7 +19042,7 @@ namespace DbDuo
             {
                 MessageBox.Show(this,
                     "Already at the root -- the drill-down stack is empty.",
-                    "Exit-ChildToRoot", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Exit Child to Root", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             int iLevels = drillStack.Count;
@@ -16786,24 +19072,191 @@ namespace DbDuo
         // does not generate SQL UPDATE. This means it goes through the
         // same update triggers as a Set-Record edit.
         // =====================================================================
-        private void recUpdateFieldClicked(object sender, EventArgs evArgs)
+        // recUpdateColumnClicked: substring find-and-replace within
+        // the current virtual column, applied to all visible rows
+        // (i.e., respects the active filter and sort). Prompts for
+        // a search text and a replacement text via a small LBC dialog
+        // with a Case-Sensitive checkbox and a Dry-Run checkbox.
+        // Result message reports the count of cells affected.
+        //
+        // Scope clarification: this command operates ONLY on the
+        // currently filtered rows. To replace across all rows, the
+        // user should clear the filter first (Alt+Shift+F, Alt+C).
+        //
+        // For regex replacement, see recRegexReplaceClicked (bound
+        // to Ctrl+Shift+R).
+        private void recUpdateColumnClicked(object sender, EventArgs evArgs)
         {
-            if (db == null || !db.hasRecordset() || db.readOnly) return;
-            if (db.currentIsView) {
-                MessageBox.Show(this, "Cannot update fields of a view (read-only).",
-                    "Update-Field", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            recReplaceCommon(false);
+        }
+
+        // recRegexReplaceClicked: .NET-regex find-and-replace within
+        // the current virtual column, applied to all visible rows.
+        // Identical UX to Update Column but interprets the search
+        // text as a regex pattern and supports back-references in
+        // the replacement ($1, $2, etc.).
+        private void recRegexReplaceClicked(object sender, EventArgs evArgs)
+        {
+            recReplaceCommon(true);
+        }
+
+        // recReplaceCommon: shared implementation for Update Column
+        // and Regex Replace. The only difference is whether the
+        // search text is interpreted as a literal substring or a
+        // .NET regex pattern.
+        private void recReplaceCommon(bool bIsRegex)
+        {
+            if (db == null || !db.hasRecordset())
+            {
+                LiveRegion.sayForced("No database open.");
                 return;
             }
-            // For now, surface a placeholder dialog. Full implementation
-            // is a future iteration: needs find/replace dialog with
-            // column picker, scope, case-sensitivity, and dry-run preview.
-            MessageBox.Show(this,
-                "Update-Field is not yet implemented in this build.\n\n"
-                + "It will provide a find-and-replace dialog with column, "
-                + "scope (current/filtered/all rows), and dry-run preview.\n\n"
-                + "For now, use Tools > Invoke-Sql to run an UPDATE statement "
-                + "directly.",
-                "Update-Field", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            if (db.readOnly)
+            {
+                LiveRegion.sayForced("Database is read-only. Press Alt+Z to toggle read-only off, then try again.");
+                return;
+            }
+            if (db.currentIsView)
+            {
+                MessageBox.Show(this, "Cannot update cells of a view (read-only).",
+                    bIsRegex ? "Regex Replace" : "Replace Column",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            string sColumn = currentVirtualColumnName();
+            if (string.IsNullOrEmpty(sColumn))
+            {
+                LiveRegion.sayForced("No virtual column selected.");
+                return;
+            }
+
+            string sTitle = bIsRegex ? "Regex Replace" : "Replace Column";
+            string sSearchLabel = bIsRegex ? "Regex pattern" : "Find text";
+
+            using (LbcDialog dlg = new LbcDialog(sTitle + " (column: " + sColumn + ")", this))
+            {
+                TextBox tbFind = dlg.addInputBox(sSearchLabel + ":", "");
+                TextBox tbRepl = dlg.addInputBox("Replace with"
+                    + (bIsRegex ? " (use $1, $2 for groups)" : "")
+                    + ":", "");
+                CheckBox cbCase = dlg.addCheckBox("Case-&sensitive", false, null);
+                CheckBox cbDry  = dlg.addCheckBox("&Dry run (count only, no changes)", false,
+                    "Run the replacement but do not write changes. Useful for sanity-checking how many cells would be affected before committing.");
+                string sBtn = dlg.runWithButtons(new string[] { "OK", "Cancel" });
+                if (!string.Equals(sBtn, "OK", StringComparison.OrdinalIgnoreCase)) return;
+
+                string sFind = tbFind.Text ?? "";
+                string sRepl = tbRepl.Text ?? "";
+                if (sFind.Length == 0)
+                {
+                    LiveRegion.sayForced("Find text empty. Nothing to do.");
+                    return;
+                }
+                bool bCase = cbCase.Checked;
+                bool bDry  = cbDry.Checked;
+
+                int iChanged = 0;
+                int iScanned = 0;
+                try
+                {
+                    System.Text.RegularExpressions.Regex regex = null;
+                    if (bIsRegex)
+                    {
+                        System.Text.RegularExpressions.RegexOptions opts =
+                            System.Text.RegularExpressions.RegexOptions.None;
+                        if (!bCase) opts |= System.Text.RegularExpressions.RegexOptions.IgnoreCase;
+                        regex = new System.Text.RegularExpressions.Regex(sFind, opts);
+                    }
+
+                    int iSavePos = db.absolutePosition;
+                    db.moveFirst();
+                    while (!db.eof)
+                    {
+                        iScanned++;
+                        string sCur = db.getFieldValue(sColumn) ?? "";
+                        string sNew;
+                        bool bMatch;
+                        if (bIsRegex)
+                        {
+                            bMatch = regex.IsMatch(sCur);
+                            sNew = bMatch ? regex.Replace(sCur, sRepl) : sCur;
+                        }
+                        else
+                        {
+                            StringComparison sc = bCase ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+                            bMatch = sCur.IndexOf(sFind, sc) >= 0;
+                            sNew = bMatch ? stringReplace(sCur, sFind, sRepl, sc) : sCur;
+                        }
+                        if (bMatch && sNew != sCur)
+                        {
+                            iChanged++;
+                            if (!bDry)
+                            {
+                                db.setFieldValue(sColumn, sNew);
+                                db.update();
+                            }
+                        }
+                        db.moveNext();
+                    }
+                    if (iSavePos >= 0) db.absolutePosition = iSavePos;
+                    invokeRefresh();
+
+                    string sResult = (bDry ? "Dry run: " : "")
+                        + iChanged + " of " + iScanned + " cells "
+                        + (bDry ? "would be" : "were")
+                        + " changed.";
+                    LiveRegion.sayForced(sResult);
+                    MessageBox.Show(this, sResult, sTitle,
+                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                }
+                catch (ArgumentException exRx)
+                {
+                    // ArgumentException covers regex parse failures
+                    // in .NET Framework 4.8 (RegexParseException was
+                    // not added until .NET 7).
+                    MessageBox.Show(this, "Invalid regex: " + exRx.Message, sTitle,
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+                catch (Exception ex)
+                {
+                    MessageBox.Show(this, ex.Message, sTitle,
+                        MessageBoxButtons.OK, MessageBoxIcon.Error);
+                }
+            }
+        }
+
+        // stringReplace: case-aware substring replace helper. String.
+        // Replace doesn't take a StringComparison argument until .NET
+        // Standard 2.1; on .NET Framework 4.8 we implement it manually.
+        private static string stringReplace(string sIn, string sFind, string sRepl, StringComparison sc)
+        {
+            if (string.IsNullOrEmpty(sFind)) return sIn;
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            int iStart = 0;
+            while (true)
+            {
+                int i = sIn.IndexOf(sFind, iStart, sc);
+                if (i < 0) { sb.Append(sIn.Substring(iStart)); break; }
+                sb.Append(sIn.Substring(iStart, i - iStart));
+                sb.Append(sRepl);
+                iStart = i + sFind.Length;
+            }
+            return sb.ToString();
+        }
+
+        // currentVirtualColumnName: returns the name of the column the
+        // virtual cell cursor is currently on, or "" if no virtual
+        // column is selected. Falls back to the first visible column
+        // if the cursor is off.
+        private string currentVirtualColumnName()
+        {
+            if (db == null || !db.hasRecordset()) return "";
+            int iCol = iVirtualCol;
+            if (iCol < 0) iCol = 0;
+            List<string> lCols = db.getFieldNames();
+            if (lCols == null || lCols.Count == 0) return "";
+            if (iCol >= lCols.Count) iCol = lCols.Count - 1;
+            return lCols[iCol];
         }
 
         // =====================================================================
@@ -16917,7 +19370,7 @@ namespace DbDuo
                 string sMsg = "Dropped (not column names of this table): "
                     + string.Join(", ", lDropped.ToArray());
                 LiveRegion.say(sMsg);
-                MessageBox.Show(this, sMsg, "Select-Column",
+                MessageBox.Show(this, sMsg, "Select Column",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
@@ -16935,7 +19388,7 @@ namespace DbDuo
             using (Form dlg = new Form())
             {
                 dlg.Text = "Select-Column (visible columns)";
-                dlg.AccessibleName = "Select-Column";
+                dlg.AccessibleName = "Select Column";
                 dlg.StartPosition = FormStartPosition.CenterParent;
                 dlg.ClientSize = new Size(560, 160);
                 dlg.FormBorderStyle = FormBorderStyle.Sizable;
@@ -17064,14 +19517,14 @@ namespace DbDuo
                 db.invokeSql("PRAGMA integrity_check", sbOut);
                 string sResult = sbOut.ToString();
                 if (isShortResult(sResult))
-                    MessageBox.Show(this, sResult.Trim(), "Test-Database",
+                    MessageBox.Show(this, sResult.Trim(), "Test Database",
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                 else
-                    HelpDialog.show(this, "Test-Database", sResult);
+                    HelpDialog.show(this, "Test Database", sResult);
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message, "Test-Database", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, ex.Message, "Test Database", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -17088,33 +19541,70 @@ namespace DbDuo
             return iLines < 10;
         }
 
+        // toolsMeasureClicked: Table Summary (Alt+T). Lists the
+        // current table's columns in natural (schema-defined) order.
+        // Each line packs maximum info: name (type, [constraints]).
+        // For screen-reader users, this is the structural overview
+        // they reach for when first opening a table or returning to
+        // an unfamiliar one. Output goes to the multi-line dialog so
+        // it can be reviewed line-by-line.
+        //
+        // Constraints noted (when available from schema):
+        //   - primary key
+        //   - not null
+        //   - foreign key references (showing target table)
+        //   - default value
+        //
+        // Per the screen-reader-first rule: maximum info per line,
+        // never cryptic, but no superfluous words.
         private void toolsMeasureClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset()) return;
-            string sChosenField = promptListChoice("Measure-Field", "Choose a field:", db.getFieldNames(), null);
-            if (string.IsNullOrEmpty(sChosenField)) return;
-            List<string> lStats = new List<string> { "count", "longest", "shortest", "min", "max", "sum", "avg" };
-            string sChosenStat = promptListChoice("Measure-Field", "Choose a statistic:", lStats, "count");
-            if (string.IsNullOrEmpty(sChosenStat)) return;
+            string sTable = db.currentTable;
+            if (string.IsNullOrEmpty(sTable)) return;
+            StringBuilder sb = new StringBuilder();
+            sb.Append("Table: ").Append(sTable).AppendLine();
+            sb.AppendLine();
+            sb.Append("Records: ").Append(db.recordCount);
+            if (db.filter.Length > 0) sb.Append(" (after filter)");
+            sb.AppendLine();
+            sb.AppendLine();
+            sb.AppendLine("Columns (in natural order):");
+
+            // Collect column info. The DbDuoManager keeps a list of
+            // schema metadata per table; for SQLite this is taken
+            // from PRAGMA table_info. We render one line per column.
             try
             {
-                DbDuoManager.FieldStatistic stat2 = db.measureField(sChosenField, sChosenStat);
-                StringBuilder sb = new StringBuilder();
-                sb.AppendLine("Field: " + stat2.fieldName);
-                sb.AppendLine("Statistic: " + stat2.statistic);
-                sb.AppendLine("Value: " + stat2.value);
-                if (stat2.recordPosition > 0) sb.AppendLine("At row: " + stat2.recordPosition);
-                string sResult = sb.ToString();
-                if (isShortResult(sResult))
-                    MessageBox.Show(this, sResult.Trim(), "Measure-Field",
-                        MessageBoxButtons.OK, MessageBoxIcon.Information);
+                List<DbDuoManager.SchemaColumn> lCols = db.getSchemaColumns(sTable);
+                if (lCols == null || lCols.Count == 0)
+                {
+                    sb.AppendLine("  (no column metadata available)");
+                }
                 else
-                    HelpDialog.show(this, "Measure-Field", sResult);
+                {
+                    foreach (DbDuoManager.SchemaColumn sc in lCols)
+                    {
+                        List<string> lParts = new List<string>();
+                        if (!string.IsNullOrEmpty(sc.dataType)) lParts.Add(sc.dataType);
+                        if (sc.isPrimaryKey) lParts.Add("primary key");
+                        if (sc.notNull) lParts.Add("not null");
+                        if (!string.IsNullOrEmpty(sc.foreignKeyRef))
+                            lParts.Add("foreign key -> " + sc.foreignKeyRef);
+                        if (!string.IsNullOrEmpty(sc.defaultValue))
+                            lParts.Add("default " + sc.defaultValue);
+                        string sLine = "  " + sc.name;
+                        if (lParts.Count > 0)
+                            sLine += " (" + string.Join(", ", lParts.ToArray()) + ")";
+                        sb.AppendLine(sLine);
+                    }
+                }
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message, "Measure-Field", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                sb.AppendLine("  (error reading schema: " + ex.Message + ")");
             }
+            HelpDialog.show(this, "Table Summary", sb.ToString());
         }
 
         // New-Chart: produce a frequency bar chart of how often each
@@ -17141,13 +19631,13 @@ namespace DbDuo
             if (db == null || !db.hasRecordset())
             {
                 MessageBox.Show(this, "Open a table first.",
-                    "New-Chart", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Graphics Grid", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             if (db.recordCount == 0)
             {
                 MessageBox.Show(this, "No records to chart in the current filter.",
-                    "New-Chart", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Graphics Grid", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -17160,7 +19650,7 @@ namespace DbDuo
             if (lCols.Count == 0) return;
 
             string sColumn;
-            using (LbcDialog dlg = new LbcDialog("New-Chart", this))
+            using (LbcDialog dlg = new LbcDialog("Graphics Grid", this))
             {
                 dlg.addLabel("Choose a column to chart. The chart will show how often");
                 dlg.addLabel("each distinct value appears in the current filtered view.");
@@ -17195,7 +19685,7 @@ namespace DbDuo
                 MessageBox.Show(this,
                     "Could not create chart:\n\n" + ex.Message
                     + "\n\nNote: New-Chart requires Excel to be installed.",
-                    "New-Chart", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    "Graphics Grid", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -17212,15 +19702,15 @@ namespace DbDuo
                     sbOut.WriteLine("(" + iAffected + " record(s) affected)");
                 string sResult = sbOut.ToString();
                 if (isShortResult(sResult))
-                    MessageBox.Show(this, sResult.Trim(), "Invoke-Sql",
+                    MessageBox.Show(this, sResult.Trim(), "Invoke SQL",
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                 else
-                    HelpDialog.show(this, "Invoke-Sql", sResult);
+                    HelpDialog.show(this, "Invoke SQL", sResult);
                 if (iAffected >= 0) invokeRefresh();
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message, "Invoke-Sql", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                MessageBox.Show(this, ex.Message, "Invoke SQL", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -17228,8 +19718,8 @@ namespace DbDuo
         {
             using (Form dlg = new Form())
             {
-                dlg.Text = "Invoke-Sql";
-                dlg.AccessibleName = "Invoke-Sql";
+                dlg.Text = "Invoke SQL";
+                dlg.AccessibleName = "Invoke SQL";
                 dlg.StartPosition = FormStartPosition.CenterParent;
                 dlg.ClientSize = new Size(640, 320);
                 dlg.FormBorderStyle = FormBorderStyle.Sizable;
@@ -17290,25 +19780,10 @@ namespace DbDuo
             }
         }
 
-        private void toolsLockClicked(object sender, EventArgs evArgs)
-        {
-            if (db == null || !db.isOpen()) return;
-            string sPath = db.filePath;
-            string sTable = db.currentTable;
-            bool bWasReadOnly = db.readOnly;
-            try
-            {
-                db.close();
-                db.openDatabase(sPath, sTable, !bWasReadOnly);
-                invokeRefresh();
-                MessageBox.Show(this, "Database is now " + (db.readOnly ? "read-only" : "read-write") + ".",
-                    "Lock-Database", MessageBoxButtons.OK, MessageBoxIcon.Information);
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show(this, ex.Message, "Lock-Database", MessageBoxButtons.OK, MessageBoxIcon.Error);
-            }
-        }
+        // toolsLockClicked removed in v1.0.91 along with the
+        // Lock-Database toggle. The -readonly command-line flag
+        // remains; users who want to open a database read-only can
+        // launch with DbDuo.exe -readonly path.
 
         private void toolsTestDriverClicked(object sender, EventArgs evArgs)
         {
@@ -17362,7 +19837,7 @@ namespace DbDuo
                 sb.AppendLine("    https://www.microsoft.com/en-us/download/details.aspx?id=54920");
             }
 
-            HelpDialog.show(this, "Test-Driver", sb.ToString());
+            HelpDialog.show(this, "Test Driver", sb.ToString());
         }
 
         private static bool checkOdbcDriver(string sName)
@@ -17394,7 +19869,7 @@ namespace DbDuo
             DotPromptHost.enter(this);
         }
 
-        // Edit-Configuration: open a Configuration Options dialog
+        // Edit-Settings: open a Settings dialog
         // with one control per common option. The dialog uses the
         // Layout by Code (LbcDialog) helper for consistent layout
         // and accessibility. OK writes the changes to the per-user
@@ -17426,12 +19901,17 @@ namespace DbDuo
             // if the keys are missing.
             string sCurrentUiMode = readIniValue(sUserIni, "General", "uiMode", "both");
             string sCurrentEcho   = readIniValue(sUserIni, "Options", "commandEcho", "Y");
+            string sCurrentExtra  = readIniValue(sUserIni, "General", "extraSpeech", "Y");
             bool bCurrentEcho = !(sCurrentEcho.Equals("N", StringComparison.OrdinalIgnoreCase)
                               || sCurrentEcho.Equals("No", StringComparison.OrdinalIgnoreCase)
                               || sCurrentEcho.Equals("0", StringComparison.Ordinal)
                               || sCurrentEcho.Equals("False", StringComparison.OrdinalIgnoreCase));
+            bool bCurrentExtra = !(sCurrentExtra.Equals("N", StringComparison.OrdinalIgnoreCase)
+                              || sCurrentExtra.Equals("No", StringComparison.OrdinalIgnoreCase)
+                              || sCurrentExtra.Equals("0", StringComparison.Ordinal)
+                              || sCurrentExtra.Equals("False", StringComparison.OrdinalIgnoreCase));
 
-            LbcDialog dlg = new LbcDialog("Configuration Options", this);
+            LbcDialog dlg = new LbcDialog("Settings", this);
             try
             {
                 dlg.addLabel("Settings stored in: " + sUserIni);
@@ -17451,11 +19931,36 @@ namespace DbDuo
                 // canonical command name through the live region
                 // just before each command runs. EdSharp's
                 // 'ExtraSpeech=Y' setting is the model. Takes effect
-                // on the next command, no restart needed.
+                // on the next command, no restart needed. Also bound
+                // to Ctrl+Shift+Z on the Help menu.
                 CheckBox cbEcho = dlg.addCheckBox(
                     "Command Echo (speak each command name as it runs)",
                     bCurrentEcho,
-                    "When ON, every menu/hotkey command announces its name through the screen reader before executing. Off-by-toggle for users who prefer less speech.");
+                    "When ON, every menu/hotkey command announces its name through the screen reader before executing. Off-by-toggle for users who prefer less speech. Has no effect in CLI / dot-prompt mode.");
+
+                // Extra Speech toggle. ON by default; controls whether
+                // DbDuo's status messages, cell readouts, and the
+                // command echo itself reach the screen reader. When
+                // OFF, the screen reader still narrates focus and
+                // selection changes -- the toggle silences only the
+                // commentary DbDuo adds on top. Also bound to
+                // Alt+Shift+Z on the Help menu.
+                CheckBox cbExtra = dlg.addCheckBox(
+                    "Extra Speech (DbDuo's status messages and cell readouts)",
+                    bCurrentExtra,
+                    "When ON, DbDuo speaks status messages, command echo, and virtual-cell readouts through the screen reader. When OFF, the screen reader still announces focus and selection changes naturally but DbDuo's commentary is suppressed.");
+
+                // Read-Only toggle (v1.0.95). Mirrors the
+                // -readonly command-line flag so the CLI startup
+                // option and the runtime setting are at parity.
+                // The checkbox reflects the CURRENT database's
+                // read-only status; toggling it applies immediately
+                // by reopening the database in the new mode.
+                bool bCurrentReadOnly = (db != null && db.isOpen()) ? db.readOnly : false;
+                CheckBox cbReadOnly = dlg.addCheckBox(
+                    "Read Only (protect open database from edits)",
+                    bCurrentReadOnly,
+                    "When ON, the database is opened read-only and edit commands fail with a clear error message. Use this to browse data without risk of accidental edits. Also bound to Ctrl+Shift+R on the Misc menu. Takes effect immediately by reopening the connection.");
 
                 dlg.addSeparator();
                 dlg.addLabel("For [Keys] overrides and advanced settings, use the");
@@ -17474,16 +19979,31 @@ namespace DbDuo
                 {
                     string sNewUiMode = (cbUiMode.SelectedItem ?? "both").ToString();
                     string sNewEcho = cbEcho.Checked ? "Y" : "N";
+                    string sNewExtra = cbExtra.Checked ? "Y" : "N";
                     writeIniValue(sUserIni, "General", "uiMode", sNewUiMode);
                     writeIniValue(sUserIni, "Options", "commandEcho", sNewEcho);
+                    writeIniValue(sUserIni, "General", "extraSpeech", sNewExtra);
                     invalidateCommandEchoCache();
+                    LiveRegion.bExtraSpeechEnabled = cbExtra.Checked;
+                    if (miHelpExtraSpeech != null) miHelpExtraSpeech.Checked = LiveRegion.bExtraSpeechEnabled;
+                    if (miHelpCommandEcho != null) miHelpCommandEcho.Checked = isCommandEchoOn();
+                    // Read-Only delta: if the dialog setting differs
+                    // from the current connection state, reopen the
+                    // database with the new flag. Skip if no db open.
+                    if (db != null && db.isOpen() && cbReadOnly.Checked != db.readOnly)
+                    {
+                        toggleReadOnlyClicked(null, EventArgs.Empty);
+                    }
                     LiveRegion.say("Configuration saved");
-                    DbDuoLog.write("Edit-Configuration saved: uiMode=" + sNewUiMode + "; commandEcho=" + sNewEcho);
+                    DbDuoLog.write("Edit-Settings saved: uiMode=" + sNewUiMode
+                        + "; commandEcho=" + sNewEcho
+                        + "; extraSpeech=" + sNewExtra
+                        + "; readOnly=" + (cbReadOnly.Checked ? "Y" : "N"));
                     MessageBox.Show(this,
                         "Configuration saved to " + sUserIni
                         + "\n\nuiMode takes effect on next DbDuo launch."
-                        + "\nCommand Echo takes effect immediately.",
-                        "Edit-Configuration",
+                        + "\nCommand Echo, Extra Speech, and Read Only take effect immediately.",
+                        "Edit Settings",
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 else if (string.Equals(sResult, "Field Validation...",
@@ -17542,7 +20062,7 @@ namespace DbDuo
             foreach (string sCol in lAllFields)
             {
                 string sLow = sCol.ToLowerInvariant();
-                if (sLow == "added" || sLow == "updated" || sLow == "marked") continue;
+                if (sLow == "added" || sLow == "modified" || sLow == "marked") continue;
                 lEditableFields.Add(sCol);
             }
             if (lEditableFields.Count == 0)
@@ -17626,7 +20146,7 @@ namespace DbDuo
             {
                 MessageBox.Show(this,
                     "%LOCALAPPDATA% is not set. Cannot locate per-user DbDuo.ini.",
-                    "Configuration Options", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    "Settings", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return null;
             }
             string sDir = Path.Combine(sBase, "DbDuo");
@@ -17649,7 +20169,7 @@ namespace DbDuo
                 try { File.Copy(sShipped, sUserIni, false); }
                 catch (Exception exC)
                 {
-                    DbDuoLog.write("Edit-Configuration: could not copy shipped ini: " + exC.Message);
+                    DbDuoLog.write("Edit-Settings: could not copy shipped ini: " + exC.Message);
                 }
             }
             if (!File.Exists(sUserIni))
@@ -17671,7 +20191,7 @@ namespace DbDuo
                 catch (Exception exW)
                 {
                     MessageBox.Show(this, "Could not create " + sUserIni + ": " + exW.Message,
-                        "Configuration Options", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        "Settings", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -17686,7 +20206,7 @@ namespace DbDuo
             {
                 System.Diagnostics.Process.Start(sUserIni);
                 LiveRegion.say("Opened DbDuo.ini for editing");
-                DbDuoLog.write("Edit-Configuration opened: " + sUserIni);
+                DbDuoLog.write("Edit-Settings opened: " + sUserIni);
             }
             catch
             {
@@ -17694,7 +20214,7 @@ namespace DbDuo
                 catch (Exception ex2)
                 {
                     MessageBox.Show(this, "Could not open the file in Notepad: " + ex2.Message,
-                        "Configuration Options", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        "Settings", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
@@ -17831,7 +20351,7 @@ namespace DbDuo
             }
             catch (Exception ex)
             {
-                MessageBox.Show(this, ex.Message, "Open-FileFolder", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                MessageBox.Show(this, ex.Message, "Open File Folder", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -17903,7 +20423,7 @@ namespace DbDuo
                     MessageBox.Show(this,
                         "Could not open the Readme:\n\n" + ex.Message
                         + "\n\nThe file exists at:\n" + sPath,
-                        "Show-Readme",
+                        "Show Readme",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
@@ -17913,7 +20433,7 @@ namespace DbDuo
                     "README.htm was not found next to DbDuo.exe.\n\n"
                     + "Expected location:\n" + sPath + "\n\n"
                     + "Reinstall DbDuo or copy README.htm from the source bundle.",
-                    "Show-Readme",
+                    "Show Readme",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
@@ -17940,7 +20460,7 @@ namespace DbDuo
                     MessageBox.Show(this,
                         "Could not open the History:\n\n" + ex.Message
                         + "\n\nThe file exists at:\n" + sPath,
-                        "Show-History",
+                        "Show History",
                         MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 }
             }
@@ -17950,14 +20470,14 @@ namespace DbDuo
                     "History.htm was not found next to DbDuo.exe.\n\n"
                     + "Expected location:\n" + sPath + "\n\n"
                     + "Reinstall DbDuo or copy History.htm from the source bundle.",
-                    "Show-History",
+                    "Show History",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
         }
 
         private void helpVerbsClicked(object sender, EventArgs evArgs)
         {
-            HelpDialog.show(this, "Get-Verb",
+            HelpDialog.show(this, "Get Verb",
                 "PowerShell-canonical verbs used in DbDuo:\n\n"
                 + "  COMMON      New, Get, Set, Remove, Show, Copy, Find, Select, Format,\n"
                 + "              Enter, Exit, Step, Open, Close, Lock, Add, Group, Reset\n"
@@ -18053,7 +20573,7 @@ namespace DbDuo
             // speech, so it must speak even when Extra-Speech is off.
             LiveRegion.sayForced("Speech path test. If you hear this, the speech pipeline is working.");
             string sDiag = LiveRegion.speechDiagnostic();
-            MessageBox.Show(this, sDiag, "Test-Reader",
+            MessageBox.Show(this, sDiag, "Test Reader",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
@@ -18078,6 +20598,72 @@ namespace DbDuo
             LiveRegion.sayForced(LiveRegion.bExtraSpeechEnabled
                 ? "Extra speech on"
                 : "Extra speech off");
+        }
+
+        // helpCommandEchoClicked: toggle whether DbDuo speaks the
+        // canonical command name through the live region just before
+        // each menu/hotkey command runs. Mirrors helpExtraSpeechClicked
+        // -- same pattern of runtime toggle, persistent ini write, and
+        // forced confirmation announcement. The setting is persisted
+        // in DbDuo.ini [Options] commandEcho. CLI/dot-prompt commands
+        // don't go through the addItem wrappers that fire commandEcho,
+        // so this toggle has no effect there -- intentional, since the
+        // user explicitly typed the command and shouldn't need it
+        // echoed back at them.
+        private void helpCommandEchoClicked(object sender, EventArgs evArgs)
+        {
+            string sUserIni = Path.Combine(Path.GetDirectoryName(
+                System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "", "DbDuo.ini");
+            bool bNew = !isCommandEchoOn();
+            try { writeIniValue(sUserIni, "Options", "commandEcho", bNew ? "Y" : "N"); }
+            catch { /* best-effort persist */ }
+            invalidateCommandEchoCache();
+            miHelpCommandEcho.Checked = bNew;
+            LiveRegion.sayForced(bNew
+                ? "Command echo on"
+                : "Command echo off");
+        }
+
+        // toggleReadOnlyClicked: flip the open database between
+        // read-write and read-only at runtime. Restored in v1.0.95
+        // after being removed in v1.0.91. The reasoning for restoring:
+        // the -readonly command-line flag was kept, so the feature
+        // exists; making it inaccessible from the GUI was inconsistent.
+        // Anyone running DbDuo can already edit data they have write
+        // access to; the read-only toggle is for the user's own
+        // protection against accidental edits while browsing.
+        //
+        // Implementation: close the connection, reopen at the new
+        // read-only setting. Drill stack from the previous open is
+        // invalid in the new connection, so clear it. The current
+        // table is preserved.
+        private void toggleReadOnlyClicked(object sender, EventArgs evArgs)
+        {
+            if (db == null || !db.isOpen())
+            {
+                LiveRegion.sayForced("No database open. Use Open Database first.");
+                return;
+            }
+            string sPath = db.filePath;
+            string sTable = db.currentTable;
+            bool bWasReadOnly = db.readOnly;
+            try
+            {
+                db.close();
+                db.openDatabase(sPath, sTable, !bWasReadOnly);
+                clearDrillStack();
+                invokeRefresh();
+                bool bNowRO = db.readOnly;
+                if (miToggleReadOnly != null) miToggleReadOnly.Checked = bNowRO;
+                LiveRegion.sayForced(bNowRO
+                    ? "Read only on. Database is now protected from edits."
+                    : "Read only off. Database is now writable.");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "Toggle Read Only",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
         }
 
         // =====================================================================
@@ -18336,22 +20922,22 @@ namespace DbDuo
             }
         }
 
-        // helpTraceCommandClicked: Ctrl+F1 toggles Key Describer mode.
+        // helpTraceCommandClicked: Ctrl+F1 toggles Key Help mode.
         // When the mode flips, announce the new state via the live
         // region (NO MessageBox, NO dialog -- the announcement is the
         // entire user feedback). The menu item's Checked state mirrors
         // the flag so a sighted glance at the Help menu shows whether
-        // Key Describer is currently on. Matches EdSharp's and
-        // FileDir's Key Describer behavior verbatim.
+        // Key Help is currently on. Matches EdSharp's and
+        // FileDir's Key Help behavior verbatim.
         //
         // Method name retains the historical "helpTraceCommandClicked"
         // because that's what the menu builder wires it to; the user-
-        // facing name is "Key Describer" everywhere.
+        // facing name is "Key Help" everywhere.
         private void helpTraceCommandClicked(object sender, EventArgs evArgs)
         {
             KeyMap.bKeyDescriber = !KeyMap.bKeyDescriber;
             miHelpTraceCommand.Checked = KeyMap.bKeyDescriber;
-            LiveRegion.say(KeyMap.bKeyDescriber ? "Key Describer On" : "No Key Describer");
+            LiveRegion.say(KeyMap.bKeyDescriber ? "Key Help On" : "No Key Help");
         }
 
         private void helpLogClicked(object sender, EventArgs evArgs)
@@ -18361,7 +20947,7 @@ namespace DbDuo
             {
                 MessageBox.Show(this,
                     "Logging is disabled (no writable location).",
-                    "Show-Log", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Show Log", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             string sExists = File.Exists(sLogPath) ? "(exists)" : "(not yet written)";
@@ -18371,20 +20957,20 @@ namespace DbDuo
                         + "table switches, errors) are recorded with timestamps.";
             DialogResult res = MessageBox.Show(this,
                 sMsg + "\n\nOpen the log file in Notepad now?",
-                "Show-Log", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
+                "Show Log", MessageBoxButtons.YesNo, MessageBoxIcon.Information);
             if (res == DialogResult.Yes && File.Exists(sLogPath))
             {
                 try { System.Diagnostics.Process.Start("notepad.exe", "\"" + sLogPath + "\""); }
                 catch (Exception ex)
                 {
                     MessageBox.Show(this, "Could not open Notepad: " + ex.Message,
-                        "Show-Log", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                        "Show Log", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 }
             }
         }
 
         // Open-WebSite: open the DbDuo project page in the system's
-        // default browser. The URL is the same one referenced from
+        // default browser. The url is the same one referenced from
         // the About dialog and the License/README. No tracking;
         // straight Process.Start("https://...") which on Windows
         // delegates to the default HTTP handler.
@@ -18401,8 +20987,8 @@ namespace DbDuo
             {
                 MessageBox.Show(this,
                     "Could not open the browser:\n\n" + ex.Message
-                    + "\n\nThe URL is:\n" + sUrl,
-                    "Open-WebSite", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    + "\n\nThe url is:\n" + sUrl,
+                    "Open Website", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
 
@@ -18542,7 +21128,7 @@ namespace DbDuo
             if (!AllocConsole())
             {
                 MessageBox.Show(owner, "Could not allocate console window.",
-                    "Enter-Console", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    "Enter Console", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
             bAllocated = true;
@@ -18718,18 +21304,51 @@ namespace DbDuo
         // cmdSayUpdated: console form of Say Updated. Prints the
         // 'updated' (or 'added') value in a human-friendly local-
         // time form. Uses the same DateTime parsing as the GUI.
-        private static void cmdSayUpdated()
+        private static void cmdSayModified()
         {
             if (!requireRecordset()) return;
-            string sCol = db.hasField("updated") ? "updated" : (db.hasField("added") ? "added" : null);
+            string sCol = db.hasField("modified") ? "modified" : (db.hasField("added") ? "added" : null);
             if (sCol == null) { Console.WriteLine("(no date column)"); return; }
             string sRaw = db.getFieldValue(sCol) ?? "";
             string sFmt = formatDateForConsole(sRaw);
             Console.WriteLine(sCol + ": " + (string.IsNullOrEmpty(sFmt) ? "(empty)" : sFmt));
         }
 
+        // cmdSayUrl: console form of Shift+U Say URL. Prints the url
+        // field of the current record, or reports its absence.
+        private static void cmdSayUrl()
+        {
+            if (!requireRecordset()) return;
+            if (!db.hasField(Metadata.UrlColumn))
+            { Console.WriteLine("(no url column)"); return; }
+            string sVal = db.getFieldValue(Metadata.UrlColumn) ?? "";
+            Console.WriteLine(Metadata.UrlColumn + ": " + (string.IsNullOrEmpty(sVal) ? "(empty)" : sVal));
+        }
+
+        // cmdSayGoto: console form of Shift+G Say Goto. Prints the
+        // most recent Jump search string (column + substring). The
+        // state is held on the form, so the console version
+        // doesn't have direct access; this is a no-op stub that
+        // prints a usability message instead.
+        private static void cmdSayGoto()
+        {
+            Console.WriteLine("(say-goto reads form state; use the GUI chord Shift+G)");
+        }
+
+        // cmdToggleMarked: console form of Ctrl+Space. Flip the
+        // current record's mark state in the recordset.
+        private static void cmdToggleMarked()
+        {
+            if (!requireRecordset()) return;
+            if (!db.hasField(Metadata.MarkedColumn))
+            { Console.WriteLine("(no marked column)"); return; }
+            string sCur = db.getFieldValue(Metadata.MarkedColumn) ?? "";
+            bool bCurrent = (sCur == "1" || sCur.ToLowerInvariant() == "true");
+            cmdSetMark(!bCurrent);
+        }
+
         // formatDateForConsole: minimal mirror of the form's
-        // formatDateHumanFriendly so cmdSayUpdated can print the same
+        // formatDateHumanFriendly so cmdSayModified can print the same
         // human-friendly form without crossing the form's surface.
         private static string formatDateForConsole(string sRaw)
         {
@@ -19270,21 +21889,21 @@ namespace DbDuo
                 try { Clipboard.SetText(sb.ToString()); Console.WriteLine("(copied to clipboard)"); }
                 catch { /* no clipboard in pure CLI mode */ }
             }
-            catch (Exception ex) { Console.WriteLine("Copy-Row: " + ex.Message); }
+            catch (Exception ex) { Console.WriteLine("Copy Row: " + ex.Message); }
         }
 
-        private static void cmdStepInitialChange()
+        private static void cmdJumpNextInitial()
         {
             // Pure-CLI version is meaningless without a "current
             // column" concept (the data list has Tab-driven column
             // focus; the CLI dot prompt does not). Print a hint.
-            Console.WriteLine("Step-InitialChange is a data-list command (GUI only).");
+            Console.WriteLine("Jump-NextInitial is a data-list command (GUI only).");
         }
 
         // Parse and dispatch one command line.
         // toCanonicalDisplay: format a lowercase hyphenated verb
         // ("step-record-first") into the user-visible canonical name
-        // ("Step-Record-First") for the Command Echo marker.
+        // ("Step Record First") for the Command Echo marker.
         private static string toCanonicalDisplay(string sVerb)
         {
             if (string.IsNullOrEmpty(sVerb)) return sVerb;
@@ -19319,8 +21938,8 @@ namespace DbDuo
         {
             "about-dbduo", "alternate-menu", "append-cell", "backup-database",
             "clear-bookmark", "clear-mark", "close-database",
-            "configuration", "copy-cell", "copy-record", "copy-row",
-            "edit-configuration", "elevate-version",
+            "configuration", "copy-cell", "copy-record", "copy-row", "copy-visiblecells",
+            "edit-settings", "elevate-version",
             "enter-child", "enter-console",
             "exit-application", "exit-child", "exit-childtoroot",
             "exit-console", "export-data", "extract-regex",
@@ -19329,32 +21948,39 @@ namespace DbDuo
             "get-field", "get-fieldname", "get-help",
             "get-property", "get-table", "get-verb",
             "import-data", "invoke-script", "invoke-sql",
+            "invert-marked",
             "jump-record", "jump-recordagain", "jump-recordprevious",
             "mark-range",
-            "measure-column", "measure-field", "measure-longest",
-            "measure-maximum", "measure-minimum", "measure-shortest",
-            "measure-table",
-            "new-chart", "new-plot", "new-record",
+            "statistics-column", "statistics-field", "statistics-longest",
+            "statistics-maximum", "statistics-minimum", "statistics-shortest",
+            "table-summary",
+            "graphics-grid", "graphics-column", "new-record",
             "open-database", "open-filefolder", "open-website",
-            "out-file", "remove-record", "reset-filter", "reset-sort",
-            "restore-bookmark", "save-bookmark", "save-databaseas",
-            "say-clipboard", "say-column", "say-kin", "say-marked", "say-notes", "say-path",
-            "say-position", "say-sortfilter", "say-status",
-            "say-tables", "say-tags", "say-updated", "say-yield",
+            "order-records", "out-file", "delete-record", "delete-record-force",
+            "reset-filter", "reset-sort", "reverse-order",
+            "list-bookmarks", "save-bookmark", "save-database",
+            "say-cell", "say-clipboard", "say-column",
+            "say-column-rest", "say-column-rest-marked",
+            "say-database", "say-goto", "say-marked", "say-modified", "say-notes",
+            "say-position", "say-records-rest", "say-records-rest-marked",
+            "say-sortfilter", "say-status",
+            "say-tables", "say-tags", "say-url", "say-yield",
             "say-yieldmarked",
+            "toggle-marked",
             "search-next", "search-previous",
-            "select-column", "select-record", "select-table",
-            "set-cell", "set-field", "set-mark", "set-markanchor",
-            "set-position", "set-record", "set-unmarkanchor",
+            "select-column", "filter-records", "select-table", "select-columns",
+            "edit-cell", "edit-record",
+            "set-field", "set-mark", "set-markanchor",
+            "set-position", "set-unmarkanchor",
             "show-history", "show-log", "show-object", "show-readme",
             "show-related", "show-schema", "show-status", "show-table",
             "sort-object",
-            "step-initialchange",
+            "jump-nextinitial",
             "step-record", "step-record-first", "step-record-last",
             "step-record-next", "step-record-prev",
-            "switch-focus", "switch-keydescriber", "sync-session",
+            "switch-focus", "toggle-keyhelp", "toggle-readonly", "sync-session",
             "test-database", "test-driver",
-            "unmark-range", "update-field", "update-view",
+            "unmark-range", "replace-column", "update-view",
         };
 
         // expandUniquePrefix: find the canonical verb that uniquely
@@ -19374,7 +22000,263 @@ namespace DbDuo
         // the user types "first" and resolveAlias maps it directly.
         // Prefix expansion handles the case where the user types
         // the BEGINNING of a canonical verb -- "step rec n" for
-        // "step-record-next", or "measure col" for "measure-column".
+        // "step-record-next", or "measure col" for "statistics-column".
+        // splitArgsRespectingQuotes: split a command-line into tokens,
+        // honoring double-quoted regions so that whitespace inside
+        // quotes is preserved as part of a single token. Surrounding
+        // quotes are stripped from each returned token; interior
+        // doubled-quotes are unescaped to a single quote (matching
+        // cmd.exe's convention for parameters that contain quote
+        // characters). Single quotes are NOT treated specially -- only
+        // double quotes group whitespace -- because users commonly
+        // type single quotes inside SQL fragments and shouldn't have
+        // those changes in meaning.
+        //
+        // Examples:
+        //   find regex "Hello World"      -> ["find", "regex", "Hello World"]
+        //   import "C:\Path With Space\f" -> ["import", "C:\Path With Space\f"]
+        //   sql SELECT * FROM 'Cells'     -> ["sql", "SELECT", "*", "FROM", "'Cells'"]
+        //   echo "She said ""hi""."       -> ["echo", "She said \"hi\"."]
+        //
+        // Case is preserved in every token; this routine does NOT
+        // lowercase. Lowercasing is the job of resolveAlias /
+        // expandUniquePrefix for command verbs, where case-
+        // insensitivity matters; argument data passes through verbatim.
+        private static string[] splitArgsRespectingQuotes(string sLine)
+        {
+            List<string> lTokens = new List<string>();
+            if (string.IsNullOrEmpty(sLine)) return lTokens.ToArray();
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            bool bInQuotes = false;
+            bool bHasContent = false;
+            for (int i = 0; i < sLine.Length; i++)
+            {
+                char ch = sLine[i];
+                if (ch == '"')
+                {
+                    if (bInQuotes && i + 1 < sLine.Length && sLine[i + 1] == '"')
+                    {
+                        // Doubled-quote inside a quoted region: literal quote.
+                        sb.Append('"');
+                        i++;
+                        bHasContent = true;
+                    }
+                    else
+                    {
+                        bInQuotes = !bInQuotes;
+                        bHasContent = true;   // even an empty "" yields a token
+                    }
+                }
+                else if ((ch == ' ' || ch == '\t') && !bInQuotes)
+                {
+                    if (bHasContent)
+                    {
+                        lTokens.Add(sb.ToString());
+                        sb.Length = 0;
+                        bHasContent = false;
+                    }
+                }
+                else
+                {
+                    sb.Append(ch);
+                    bHasContent = true;
+                }
+            }
+            if (bHasContent) lTokens.Add(sb.ToString());
+            return lTokens.ToArray();
+        }
+
+        // joinArgsRespectingQuotes: opposite of splitArgsRespectingQuotes.
+        // Used by tryDispatchPrefix to rebuild a remainder string after
+        // peeling off the leading verb tokens. Re-quotes any token that
+        // contains whitespace so the rebuilt line round-trips through
+        // a subsequent splitArgsRespectingQuotes call without losing
+        // structure. Embedded quotes are doubled (cmd.exe convention).
+        private static string joinArgsRespectingQuotes(string[] aTokens, int iStart)
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            for (int i = iStart; i < aTokens.Length; i++)
+            {
+                if (sb.Length > 0) sb.Append(' ');
+                string sTok = aTokens[i];
+                bool bNeedsQuotes = sTok.Length == 0 || sTok.IndexOfAny(
+                    new char[] { ' ', '\t' }) >= 0 || sTok.IndexOf('"') >= 0;
+                if (bNeedsQuotes)
+                {
+                    sb.Append('"');
+                    sb.Append(sTok.Replace("\"", "\"\""));
+                    sb.Append('"');
+                }
+                else
+                {
+                    sb.Append(sTok);
+                }
+            }
+            return sb.ToString();
+        }
+
+        // unquote: if a single string argument is surrounded by
+        // double quotes, strip them and unescape doubled quotes
+        // inside; otherwise return the input unchanged. Use this in
+        // command handlers that take one "rest of the line" argument
+        // when the user might quote it to include spaces. For multi-
+        // argument handlers, use splitArgsRespectingQuotes instead.
+        private static string unquote(string sArg)
+        {
+            if (string.IsNullOrEmpty(sArg)) return sArg;
+            string s = sArg.Trim();
+            if (s.Length >= 2 && s[0] == '"' && s[s.Length - 1] == '"')
+            {
+                s = s.Substring(1, s.Length - 2).Replace("\"\"", "\"");
+            }
+            return s;
+        }
+
+        // resolvePathArg: extract a file path from a "rest of the line"
+        // argument with optional quotes. The rule is "if the unquoted
+        // line resolves to an existing file, prefer that interpretation
+        // over tokenized parsing." This lets the user type
+        //
+        //     open database C:\My Stuff\foo.db
+        //
+        // without quotes when the result happens to be unambiguous.
+        // If the unquoted line is not an existing file, fall back to:
+        //
+        //   1. If sArg is a single quoted token, strip the quotes.
+        //   2. Otherwise return sArg trimmed (which the caller may
+        //      then pass to a file-open API that may itself report
+        //      "file not found" if the path is wrong).
+        //
+        // This is opt-in per handler -- the caller decides whether
+        // file-existence is a meaningful test for this argument.
+        private static string resolvePathArg(string sArg)
+        {
+            if (string.IsNullOrEmpty(sArg)) return sArg;
+            string sTrim = sArg.Trim();
+            string sUnquoted = unquote(sTrim);
+            // Test the unquoted line as a single path. System.IO.File
+            // is happy to handle either backslashes or forward slashes
+            // on Windows. We test File.Exists first, then Directory.
+            try
+            {
+                if (System.IO.File.Exists(sUnquoted)) return sUnquoted;
+                if (System.IO.Directory.Exists(sUnquoted)) return sUnquoted;
+            }
+            catch { /* malformed paths throw; fall through to fallback */ }
+            // Fallback: try tokenizing and using the first arg. If
+            // the user actually meant a multi-token argument list,
+            // they should quote.
+            string[] aArgs = splitArgsRespectingQuotes(sTrim);
+            if (aArgs.Length == 1) return aArgs[0];
+            // Multiple unquoted tokens AND no existing file. Best we
+            // can do: return the unquoted whole line and let the
+            // caller's open attempt report a clear "not found" error.
+            return sUnquoted;
+        }
+
+        // promptChoiceCli: dot-prompt equivalent of an LBC GUI pick
+        // list. Prints each option with a 1-based number, marks the
+        // default by trailing "(default)", and reads a line of user
+        // input. Returns the 0-based index of the selected option,
+        // or -1 if the user cancels or types invalid input.
+        //
+        // Conventions:
+        //   - Empty line accepts the default.
+        //   - User can type the number of the option (1..N).
+        //   - User can type a unique substring of an option's label
+        //     (case-insensitive); the first match wins.
+        //   - "cancel", "quit", "q" returns -1.
+        //
+        // Output example for prompt="Choose a sort field" with options
+        // ["title", "author", "year"] and iDefault=1:
+        //
+        //   Choose a sort field:
+        //     1. title
+        //     2. author (default)
+        //     3. year
+        //   Number or text [2]: _
+        public static int promptChoiceCli(string sPrompt, IList<string> lOptions, int iDefault)
+        {
+            if (lOptions == null || lOptions.Count == 0) return -1;
+            if (iDefault < 0 || iDefault >= lOptions.Count) iDefault = 0;
+            Console.WriteLine();
+            if (!string.IsNullOrEmpty(sPrompt))
+            {
+                Console.WriteLine(sPrompt + ":");
+            }
+            for (int i = 0; i < lOptions.Count; i++)
+            {
+                string sMark = (i == iDefault) ? " (default)" : "";
+                Console.WriteLine("  " + (i + 1).ToString() + ". " + lOptions[i] + sMark);
+            }
+            Console.Write("Number or text [" + (iDefault + 1).ToString() + "]: ");
+            string sInput = Console.ReadLine();
+            if (sInput == null) return -1;
+            sInput = sInput.Trim();
+            if (sInput.Length == 0) return iDefault;
+            if (sInput.Equals("cancel", StringComparison.OrdinalIgnoreCase)
+                || sInput.Equals("quit", StringComparison.OrdinalIgnoreCase)
+                || sInput.Equals("q", StringComparison.OrdinalIgnoreCase))
+                return -1;
+            int iNum;
+            if (int.TryParse(sInput, out iNum))
+            {
+                if (iNum >= 1 && iNum <= lOptions.Count) return iNum - 1;
+                Console.WriteLine("Out of range. Choose 1.." + lOptions.Count + ".");
+                return -1;
+            }
+            for (int i = 0; i < lOptions.Count; i++)
+            {
+                if (string.Equals(lOptions[i], sInput, StringComparison.OrdinalIgnoreCase))
+                    return i;
+            }
+            for (int i = 0; i < lOptions.Count; i++)
+            {
+                if (lOptions[i].IndexOf(sInput, StringComparison.OrdinalIgnoreCase) >= 0)
+                    return i;
+            }
+            Console.WriteLine("No option matches \"" + sInput + "\".");
+            return -1;
+        }
+
+        // promptYesNoCli: prints a yes/no question with a default
+        // shown as a capitalized letter. Empty line accepts default;
+        // "y/yes/true/1" returns true, "n/no/false/0" returns false,
+        // "cancel/quit/q" returns null. Up to 3 attempts before
+        // giving up.
+        public static bool? promptYesNoCli(string sPrompt, bool bDefault)
+        {
+            for (int iAttempt = 0; iAttempt < 3; iAttempt++)
+            {
+                Console.Write(sPrompt + " [" + (bDefault ? "Y/n" : "y/N") + "]: ");
+                string sInput = Console.ReadLine();
+                if (sInput == null) return null;
+                sInput = sInput.Trim().ToLowerInvariant();
+                if (sInput.Length == 0) return bDefault;
+                if (sInput == "y" || sInput == "yes" || sInput == "true" || sInput == "1") return true;
+                if (sInput == "n" || sInput == "no" || sInput == "false" || sInput == "0") return false;
+                if (sInput == "cancel" || sInput == "quit" || sInput == "q") return null;
+                Console.WriteLine("Please answer y or n.");
+            }
+            return null;
+        }
+
+        // promptTextCli: read a single line of input with an optional
+        // default. Returns the typed string, or sDefault on empty
+        // input, or null on EOF/cancel.
+        public static string promptTextCli(string sPrompt, string sDefault)
+        {
+            string sShown = (sDefault == null) ? "" : (" [" + sDefault + "]");
+            Console.Write(sPrompt + sShown + ": ");
+            string sInput = Console.ReadLine();
+            if (sInput == null) return null;
+            sInput = sInput.Trim();
+            if (sInput.Length == 0) return sDefault;
+            if (sInput.Equals("cancel", StringComparison.OrdinalIgnoreCase)
+                || sInput.Equals("quit", StringComparison.OrdinalIgnoreCase)) return null;
+            return sInput;
+        }
+
         private static string expandUniquePrefix(string sTyped)
         {
             if (string.IsNullOrEmpty(sTyped)) return null;
@@ -19427,9 +22309,12 @@ namespace DbDuo
         private static bool tryDispatchPrefix(string sLine)
         {
             if (string.IsNullOrEmpty(sLine)) return false;
-            // Split on whitespace, keep all the tokens.
-            string[] aTokens = sLine.Split(new char[] { ' ', '\t' },
-                StringSplitOptions.RemoveEmptyEntries);
+            // v1.0.94: split with quote awareness so that
+            // `find regex "Hello World"` is three tokens, and
+            // rejoining the trailing arguments preserves the literal
+            // spaces inside the quoted phrase. Previously a plain
+            // whitespace split shattered quoted regions.
+            string[] aTokens = splitArgsRespectingQuotes(sLine);
             if (aTokens.Length == 0) return false;
             int iCap = Math.Min(4, aTokens.Length);
             for (int iTake = 1; iTake <= iCap; iTake++)
@@ -19453,13 +22338,15 @@ namespace DbDuo
                     return true; // we "handled" it by reporting ambiguity
                 }
                 // Unique expansion: rebuild the line with the
-                // canonical verb plus the remaining tokens.
+                // canonical verb plus the remaining tokens. Use the
+                // quote-aware rejoiner so quoted strings round-trip
+                // back to the next dispatch() call without losing
+                // internal whitespace.
                 string sNewLine = sExpanded;
                 if (aTokens.Length > iTake)
                 {
-                    string[] aRest = new string[aTokens.Length - iTake];
-                    Array.Copy(aTokens, iTake, aRest, 0, aRest.Length);
-                    sNewLine = sExpanded + " " + string.Join(" ", aRest);
+                    string sRest = joinArgsRespectingQuotes(aTokens, iTake);
+                    sNewLine = sExpanded + " " + sRest;
                 }
                 dispatch(sNewLine);
                 return true;
@@ -19489,6 +22376,22 @@ namespace DbDuo
             string[] aTokens = sLine.Split(new[] { ' ' }, 2, StringSplitOptions.RemoveEmptyEntries);
             string sVerb = aTokens[0].ToLowerInvariant();
             string sRest = aTokens.Length > 1 ? aTokens[1].Trim() : "";
+
+            // v1.0.93: when the user types a multi-word line whose
+            // leading words match a multi-word canonical command
+            // ("edit settings", "jump previous record", "say sort
+            // filter"), prefer that interpretation over single-token
+            // alias resolution. Without this check, "edit settings
+            // export.csv" would dispatch as edit-record (the bare
+            // "edit" alias) with the rest of the line as a filename
+            // argument -- wrong. tryDispatchPrefix only succeeds when
+            // there is an unambiguous multi-token prefix match, so
+            // single-word commands like "edit" alone still fall
+            // through to the single-token alias path below.
+            string[] aSpaceTokens = sLine.Split(new char[] { ' ', '\t' },
+                StringSplitOptions.RemoveEmptyEntries);
+            if (aSpaceTokens.Length >= 2 && tryDispatchPrefix(sLine)) return;
+
             sVerb = resolveAlias(sVerb);
 
             // Command Echo is GUI-only. In the dot prompt the user's
@@ -19517,27 +22420,30 @@ namespace DbDuo
                 case "say-yield":        cmdSayYield();            break;
                 case "say-tables":       cmdSayTables();           break;
                 case "say-marked":       cmdSayMarked();           break;
-                case "say-updated":      cmdSayUpdated();          break;
+                case "say-modified":     cmdSayModified();         break;
+                case "say-url":          cmdSayUrl();              break;
+                case "say-goto":         cmdSayGoto();             break;
                 case "say-notes":        cmdSayNotes();            break;
                 case "say-tags":         cmdSayTags();             break;
                 case "say-column":       cmdSayColumn();           break;
                 case "say-position":     cmdSayPosition();         break;
                 case "say-clipboard":    cmdSayClipboard();        break;
                 case "say-sortfilter":   cmdSaySortFilter();       break;
-                case "say-kin":          cmdSayKin();              break;
                 case "say-yieldmarked":  cmdSayYieldMarked();      break;
+                case "toggle-marked":    cmdToggleMarked();        break;
                 // Action commands new this turn.
                 case "extract-regex":    cmdExtractRegex(sRest);   break;
-                case "copy-row":         cmdCopyRow();             break;
+                case "copy-visiblecells": cmdCopyRow();            break;
+                case "copy-row":         cmdCopyRow();             break;  // backward-compat alias
                 case "append-cell":      cmdAppendCell();          break;
                 case "copy-cell":        cmdCopyCell();            break;
-                case "step-initialchange": cmdStepInitialChange(); break;
+                case "jump-nextinitial": cmdJumpNextInitial(); break;
                 case "get-field":        cmdGetField(sRest);       break;
                 case "set-field":        cmdSetField(sRest);       break;
-                case "set-cell":         cmdSetCell(sRest);        break;
-                case "measure-column":   cmdMeasureColumn();       break;
-                case "new-plot":         cmdNewPlot(sRest);        break;
-                case "edit-configuration": cmdEditConfiguration(); break;
+                case "edit-cell":        cmdSetCell(sRest);        break;
+                case "statistics-column":   cmdMeasureColumn();       break;
+                case "graphics-column":         cmdNewPlot(sRest);        break;
+                case "edit-settings": cmdEditConfiguration(); break;
                 case "configuration":    cmdEditConfiguration();   break; // friendly alias
                 case "set-markanchor":   cmdSetMarkAnchor();       break;
                 case "set-unmarkanchor": cmdSetUnmarkAnchor();     break;
@@ -19553,14 +22459,16 @@ namespace DbDuo
                 case "find-regex":       cmdFindRegex(sRest);      break;
                 case "find-regexagain":  cmdFindRegexAgain();      break;
                 case "find-regexprevious": cmdFindRegexPrevious(); break;
-                case "select-record":    cmdSelectRecord(sRest);   break;
+                case "filter-records":    cmdSelectRecord(sRest);   break;
                 case "select-column":    cmdSelectColumn(sRest);   break;
                 case "reset-filter":     cmdResetFilter();         break;
                 case "sort-object":      cmdSortObject(sRest);     break;
+                case "order-records":    cmdOrderRecords(sRest);   break;
+                case "reverse-order":    cmdReverseOrder(sRest);   break;
                 case "reset-sort":       cmdResetSort();           break;
                 case "new-record":       cmdNewRecord();           break;
-                case "set-record":       cmdSetRecord();           break;
-                case "remove-record":    cmdRemoveRecord();        break;
+                case "edit-record":      cmdSetRecord();           break;
+                case "delete-record":    cmdRemoveRecord();        break;
                 case "copy-record":      cmdCopyRecord();          break;
                 case "select-table":     cmdSelectTable(sRest);    break;
                 case "get-table":        cmdGetTable();            break;
@@ -19571,19 +22479,19 @@ namespace DbDuo
                 case "enter-child":      cmdEnterChild();          break;
                 case "exit-child":       cmdExitChild();           break;
                 case "exit-childtoroot": cmdExitChildToRoot();     break;
-                case "update-field":     Console.WriteLine("(Update-Field is GUI-only in this build)"); break;
-                case "measure-table":    cmdMeasureTable();        break;
-                case "new-chart":        cmdNewChart(sRest);       break;
-                case "measure-field":    cmdMeasureField(sRest);   break;
-                case "measure-longest":  cmdMeasureLength(sRest, true);  break;
-                case "measure-shortest": cmdMeasureLength(sRest, false); break;
-                case "measure-maximum":  cmdMeasureExtreme(sRest, true); break;
-                case "measure-minimum":  cmdMeasureExtreme(sRest, false); break;
+                case "replace-column":     Console.WriteLine("(Update-Column is GUI-only in this build)"); break;
+                case "table-summary":    cmdMeasureTable();        break;
+                case "graphics-grid":        cmdNewChart(sRest);       break;
+                case "statistics-field":    cmdMeasureField(sRest);   break;
+                case "statistics-longest":  cmdMeasureLength(sRest, true);  break;
+                case "statistics-shortest": cmdMeasureLength(sRest, false); break;
+                case "statistics-maximum":  cmdMeasureExtreme(sRest, true); break;
+                case "statistics-minimum":  cmdMeasureExtreme(sRest, false); break;
                 case "get-fieldname":    cmdGetFieldNames();       break;
                 case "test-database":    cmdTestDatabase();        break;
                 case "test-driver":      cmdTestDriver();          break;
                 case "update-view":      cmdUpdateView();          break;
-                case "save-databaseas":  cmdSaveAs(sRest);         break;
+                case "save-database":  cmdSaveAs(sRest);         break;
                 case "backup-database":  cmdSaveAs(sRest);         break;
                 case "export-data":      cmdExportData(sRest);     break;
                 case "import-data":      cmdImportData(sRest);     break;
@@ -19591,13 +22499,17 @@ namespace DbDuo
                 case "close-database":   cmdCloseDatabase();       break;
                 case "invoke-sql":       cmdInvokeSql(sRest);      break;
                 case "save-bookmark":    cmdSaveBookmark();        break;
-                case "restore-bookmark": cmdRestoreBookmark();     break;
+                case "list-bookmarks":   cmdListBookmarks();       break;
                 case "clear-bookmark":   cmdClearBookmark();       break;
                 case "get-help":         cmdGetHelp(sRest);         break;
                 case "show-history":     cmdShowHistory();          break;
                 case "get-verb":         cmdGetVerb();             break;
                 case "alternate-menu":   cmdAlternateMenu();       break;
-                case "switch-keydescriber": cmdSwitchKeyDescriber(sRest); break;
+                case "toggle-keyhelp": cmdToggleKeyHelp(sRest); break;
+                case "toggle-readonly":  cmdToggleReadOnly(sRest); break;
+                case "toggle-read-only": cmdToggleReadOnly(sRest); break;
+                case "read-only":        cmdToggleReadOnly(sRest); break;
+                case "readonly":         cmdToggleReadOnly(sRest); break;
                 case "sync-session":     printRowSummary();        break;
                 case "out-file":         cmdOutFile(sRest);        break;
                 case "invoke-script":    cmdInvokeScript(sRest);   break;
@@ -19663,7 +22575,7 @@ namespace DbDuo
 
         // Elevate-Version: check GitHub for a newer DbDuo_setup.exe,
         // download it if found, and run the installer. EdSharp's F11
-        // and FileDir's F11 are the model. The download URL is the
+        // and FileDir's F11 are the model. The download url is the
         // stable "latest release" GitHub redirect; the version check
         // queries the GitHub Releases API for the tag of the latest
         // release. Inno Setup's installer detects a running DbDuo
@@ -19997,22 +22909,21 @@ namespace DbDuo
                 case "path":                         return "say-path";
                 case "tables-list":                  return "say-tables";
                 case "marked-list":                  return "say-marked";
-                case "updated":                      return "say-updated";
+                case "modified":                     return "say-modified";
                 case "notes":                        return "say-notes";
                 case "tags":                         return "say-tags";
                 case "position":                     return "say-position";
                 case "sort-filter":                  return "say-sortfilter";
-                case "kin": case "say-related":      return "say-kin";
                 case "yield-marked":                 return "say-yieldmarked";
                 // Action commands new this turn.
                 case "extract":                      return "extract-regex";
-                case "copy-row-tsv":                 return "copy-row";
+                case "copy-row": case "copy-row-tsv": return "copy-visiblecells";
                 // Edit
                 case "a": case "&": case "add": case "append":
                                                      return "new-record";
                 case "e": case "^": case "edit": case "modify":
-                                                     return "set-record";
-                case "d": case "delete":             return "remove-record";
+                                                     return "edit-record";
+                case "d": case "delete": return "delete-record";
                 case "copy":                         return "copy-record";
                 // Search families. Three distinct families with
                 // dedicated CLI canonicals:
@@ -20036,10 +22947,11 @@ namespace DbDuo
                 case "regex":                        return "find-regex";
                 case "regex-previous":               return "find-regexprevious";
                 // Filter / sort / column
-                case "filter": case "where":         return "select-record";
+                case "filter": case "where":         return "filter-records";
                 case "columns":                      return "select-column";
                 case "clear-filter":                 return "reset-filter";
-                case "sort": case "order":           return "sort-object";
+                case "sort": case "order":           return "order-records";
+                case "desc": case "descending":      return "reverse-order";
                 // Tables
                 case "table":                        return "select-table";
                 case "select-view":                  return "select-table";
@@ -20060,36 +22972,34 @@ namespace DbDuo
                 // Measurements: dbDot has count, yield, y, max, min,
                 // longest, shortest; sum and average go to Measure-Field.
                 case "count": case "y": case "yield":
-                                                     return "measure-table";
-                case "longest":                      return "measure-longest";
-                case "shortest":                     return "measure-shortest";
-                case "max": case "maximum":          return "measure-maximum";
-                case "min": case "minimum":          return "measure-minimum";
-                case "sum":                          return "measure-field"; // dbDot SUM
-                case "average":                      return "measure-field"; // dbDot AVERAGE
+                                                     return "table-summary";
+                case "longest":                      return "statistics-longest";
+                case "shortest":                     return "statistics-shortest";
+                case "max": case "maximum":          return "statistics-maximum";
+                case "min": case "minimum":          return "statistics-minimum";
+                case "sum":                          return "statistics-field"; // dbDot SUM
+                case "average":                      return "statistics-field"; // dbDot AVERAGE
                 case "fields":                       return "get-fieldname";
                 // File / driver
                 case "test":                         return "test-database";
                 case "drivers":                      return "test-driver";
                 case "requery": case "refresh":      return "update-view"; // dbDot REQUERY
                 case "backup":                       return "backup-database";
-                case "save-as":                      return "save-databaseas";
                 case "export": case "ex":            return "export-data"; // dbDot ex
                 case "open":                         return "open-database";
                 case "close":                        return "close-database";
                 // Bookmarks
                 case "bookmark":                     return "save-bookmark";
-                // Help / verbs / Key Describer
+                // Help / verbs / Key Help
                 case "help":                         return "get-help";
                 case "history":                      return "show-history";
                 case "verbs":                        return "get-verb";
-                // Key Describer mode aliases. The canonical verb is
-                // Switch-KeyDescriber; common spellings and the legacy
-                // trace-command name all map to it.
+                // Key Help mode aliases. The canonical verb is
+                // toggle-keyhelp; common spellings all map to it.
                 case "trace": case "trace-command":
                 case "key-describer": case "keydescriber":
                 case "describe-key": case "describer":
-                                                     return "switch-keydescriber";
+                                                     return "toggle-keyhelp";
                 case "sync":                         return "sync-session";
                 // Output redirection (SQLite .output / PowerShell Out-File)
                 case "output": case "tee": case "o":
@@ -20108,14 +23018,14 @@ namespace DbDuo
                 // Per Jamal's guideline, aliases include first letter,
                 // first word, or first two words of a longer command
                 // where the abbreviation is unambiguous.
-                case "lock":                         return "lock-database";
+                // (case "lock" dropped in v1.0.91 with lock-database.)
                 case "new":                          return "new-database";
-                case "save":                         return "save-databaseas";
+                case "save":                         return "save-database";
                 case "import": case "in":            return "import-data";
                 case "compare": case "diff":         return "compare-database";
                 case "print":                        return "out-printer";
-                case "chart":                        return "new-chart";
-                case "config": case "settings":      return "edit-configuration";
+                case "chart":                        return "graphics-grid";
+                case "config": case "settings":      return "edit-settings";
                 case "console":                      return "enter-console";
                 case "web": case "website":          return "open-website";
                 case "folder": case "explorer":      return "open-filefolder";
@@ -20127,9 +23037,9 @@ namespace DbDuo
                 case "about":                        return "about-dbduo";
                 case "readme":                       return "show-readme";
                 case "cell":                         return "open-cell";
-                case "update": case "replace":       return "update-field";
+                case "update": case "replace":       return "replace-column";
                 case "initial-change": case "initial":
-                                                     return "step-initialchange";
+                                                     return "jump-nextinitial";
                 case "switch": case "next-table":    return "switch-table";
                 case "prev-table": case "previous-table":
                                                      return "switch-tableprevious";
@@ -20137,7 +23047,7 @@ namespace DbDuo
                 case "prev-object": case "previous-object":
                                                      return "switch-objectprevious";
                 case "elevate": case "update-app":   return "elevate-version";
-                case "restore":                      return "restore-bookmark";
+                // restore alias retired in v1.0.101
                 case "clear-mark-all": case "clear-all":
                                                      return "clear-mark-all";
                 case "saved-bookmark": case "go-bookmark":
@@ -20220,7 +23130,7 @@ namespace DbDuo
             int iN = 1;
             if (sCount.Length > 0 && !int.TryParse(sCount, out iN))
             {
-                Console.WriteLine("Step-Record: count must be an integer.");
+                Console.WriteLine("Step Record: count must be an integer.");
                 return;
             }
             if (iN < 1) iN = 1;
@@ -20242,7 +23152,7 @@ namespace DbDuo
                     db.moveLast();
                     break;
                 default:
-                    Console.WriteLine("Step-Record argument: next [N] | previous [N] | first | last | <integer>");
+                    Console.WriteLine("Step Record argument: next [N] | previous [N] | first | last | <integer>");
                     return;
             }
             refresh();
@@ -20802,13 +23712,19 @@ namespace DbDuo
             if (sTrim.Length == 0)
             { Console.WriteLine("Find-Regex requires a pattern. Try: find-regex <column> <pattern>"); return; }
 
+            // v1.0.94: tokenize with quote awareness so the user can
+            // type `find-regex "*" "Hello World"` or `find-regex Notes
+            // "stays \"in\" quotes"` and have the pattern's internal
+            // whitespace and embedded quotes preserved. The previous
+            // IndexOf(' ') split treated everything literally including
+            // quote characters, breaking those forms.
+            string[] aArgs = splitArgsRespectingQuotes(sTrim);
+
             string sCol;
             string sPattern;
-            int iSpace = sTrim.IndexOf(' ');
-            if (iSpace > 0)
+            if (aArgs.Length >= 2)
             {
-                string sFirst = sTrim.Substring(0, iSpace);
-                string sRest = sTrim.Substring(iSpace + 1).Trim();
+                string sFirst = aArgs[0];
                 bool bIsCol = (sFirst == "*");
                 if (!bIsCol)
                 {
@@ -20816,15 +23732,27 @@ namespace DbDuo
                         if (string.Equals(sF, sFirst, StringComparison.OrdinalIgnoreCase))
                         { bIsCol = true; break; }
                 }
-                if (bIsCol && sRest.Length > 0)
-                { sCol = sFirst; sPattern = sRest; }
+                if (bIsCol)
+                {
+                    sCol = sFirst;
+                    // Rejoin remaining args -- if the user typed
+                    // multiple quoted/unquoted pieces beyond the
+                    // column name, treat them as the pattern (rare;
+                    // shouldn't usually happen, but is well-defined).
+                    sPattern = aArgs.Length == 2
+                        ? aArgs[1]
+                        : joinArgsRespectingQuotes(aArgs, 1);
+                }
                 else
-                { sCol = string.IsNullOrEmpty(sLastFindRegexColumnCli) ? "*" : sLastFindRegexColumnCli;
-                  sPattern = sTrim; }
+                {
+                    sCol = string.IsNullOrEmpty(sLastFindRegexColumnCli) ? "*" : sLastFindRegexColumnCli;
+                    sPattern = joinArgsRespectingQuotes(aArgs, 0);
+                }
             }
             else
             { sCol = string.IsNullOrEmpty(sLastFindRegexColumnCli) ? "*" : sLastFindRegexColumnCli;
-              sPattern = sTrim; }
+              // Single argument: respect surrounding quotes if any.
+              sPattern = aArgs.Length == 1 ? aArgs[0] : sTrim; }
 
             sLastFindRegexCli = sPattern;
             sLastFindRegexColumnCli = sCol;
@@ -20964,6 +23892,63 @@ namespace DbDuo
                 db.sort = sArg.Trim();
                 refresh();
                 Console.WriteLine("Sort: " + (db.sort.Length > 0 ? db.sort : "(none)"));
+                printRowSummary();
+            }
+            catch (Exception ex) { Console.WriteLine("Error: " + ex.Message); }
+        }
+
+        // cmdOrderRecords: dot-prompt equivalent of Alt+O. Takes a
+        // column name (case-insensitive); sorts ascending. With no
+        // argument, lists all field names and prompts the user to
+        // pick one (CLI equivalent of the GUI listbox).
+        private static void cmdOrderRecords(string sArg)
+        {
+            cmdOrderCommon(sArg, false);
+        }
+
+        // cmdReverseOrder: dot-prompt equivalent of Alt+Shift+O.
+        // Same as cmdOrderRecords but sorts descending.
+        private static void cmdReverseOrder(string sArg)
+        {
+            cmdOrderCommon(sArg, true);
+        }
+
+        private static void cmdOrderCommon(string sArg, bool bDescending)
+        {
+            if (!requireRecordset()) return;
+            string sCol = unquote((sArg ?? "").Trim());
+            if (sCol.Length == 0)
+            {
+                // Prompt with the alpha-sorted column list. The CLI
+                // analog of the GUI listbox: numbered choice using
+                // promptChoiceCli (added in v1.0.95).
+                List<string> lAll = db.getFieldNames();
+                List<string> lSorted = new List<string>(lAll);
+                lSorted.Sort(StringComparer.OrdinalIgnoreCase);
+                int iDefault = 0;
+                int iChoice = promptChoiceCli(
+                    bDescending ? "Reverse Order by column" : "Order Records by column",
+                    lSorted, iDefault);
+                if (iChoice < 0) { Console.WriteLine("Cancelled."); return; }
+                sCol = lSorted[iChoice];
+            }
+            // Validate column name (case-insensitive match against fields).
+            string sActual = null;
+            foreach (string sF in db.getFieldNames())
+            {
+                if (string.Equals(sF, sCol, StringComparison.OrdinalIgnoreCase))
+                { sActual = sF; break; }
+            }
+            if (sActual == null)
+            {
+                Console.WriteLine("No such column: \"" + sCol + "\".");
+                return;
+            }
+            try
+            {
+                db.sort = sActual + (bDescending ? " DESC" : " ASC");
+                refresh();
+                Console.WriteLine((bDescending ? "Reverse-ordered by " : "Ordered by ") + sActual + ".");
                 printRowSummary();
             }
             catch (Exception ex) { Console.WriteLine("Error: " + ex.Message); }
@@ -21265,7 +24250,7 @@ namespace DbDuo
             string sField = sArg.Trim();
             if (sField.Length == 0)
             {
-                Console.WriteLine((bLongest ? "Measure-Longest" : "Measure-Shortest") + " <field>");
+                Console.WriteLine((bLongest ? "Statistics Longest" : "Statistics Shortest") + " <field>");
                 return;
             }
             try
@@ -21287,7 +24272,7 @@ namespace DbDuo
             string sField = sArg.Trim();
             if (sField.Length == 0)
             {
-                Console.WriteLine((bMax ? "Measure-Maximum" : "Measure-Minimum") + " <field>");
+                Console.WriteLine((bMax ? "Statistics Maximum" : "Statistics Minimum") + " <field>");
                 return;
             }
             try
@@ -21379,22 +24364,26 @@ namespace DbDuo
             // contains a path separator or ends with a recognized
             // file extension, treat it as a single destination path.
             // Otherwise treat it as a dbDot-style extension list.
-            bool bLegacyPath = sTrim.Contains("\\")
-                            || sTrim.Contains("/")
-                            || sTrim.EndsWith(".csv", StringComparison.OrdinalIgnoreCase)
-                            || sTrim.EndsWith(".tsv", StringComparison.OrdinalIgnoreCase)
-                            || sTrim.EndsWith(".html", StringComparison.OrdinalIgnoreCase)
-                            || sTrim.EndsWith(".htm",  StringComparison.OrdinalIgnoreCase)
-                            || sTrim.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase)
-                            || sTrim.EndsWith(".docx", StringComparison.OrdinalIgnoreCase);
+            // v1.0.94: the detection happens on the unquoted form so
+            // paths like "C:\My Stuff\out.csv" (with embedded spaces)
+            // detect correctly.
+            string sUnquoted = unquote(sTrim);
+            bool bLegacyPath = sUnquoted.Contains("\\")
+                            || sUnquoted.Contains("/")
+                            || sUnquoted.EndsWith(".csv", StringComparison.OrdinalIgnoreCase)
+                            || sUnquoted.EndsWith(".tsv", StringComparison.OrdinalIgnoreCase)
+                            || sUnquoted.EndsWith(".html", StringComparison.OrdinalIgnoreCase)
+                            || sUnquoted.EndsWith(".htm",  StringComparison.OrdinalIgnoreCase)
+                            || sUnquoted.EndsWith(".xlsx", StringComparison.OrdinalIgnoreCase)
+                            || sUnquoted.EndsWith(".docx", StringComparison.OrdinalIgnoreCase);
 
             try
             {
                 if (bLegacyPath)
                 {
-                    db.exportData(sTrim);
-                    Console.WriteLine("Exported to " + sTrim);
-                    ComAutomation.shellOpen(sTrim);
+                    db.exportData(sUnquoted);
+                    Console.WriteLine("Exported to " + sUnquoted);
+                    ComAutomation.shellOpen(sUnquoted);
                     return;
                 }
 
@@ -21427,8 +24416,9 @@ namespace DbDuo
         private static void cmdImportData(string sArg)
         {
             if (!requireRecordset()) return;
-            string sPath = (sArg ?? "").Trim();
-            if (sPath.Length == 0) { Console.WriteLine("Import-Data requires a file path. Currently supports .md (Markdown table)."); return; }
+            // v1.0.95: optional-quote file path resolution.
+            string sPath = resolvePathArg(sArg ?? "");
+            if (string.IsNullOrEmpty(sPath)) { Console.WriteLine("Import-Data requires a file path. Currently supports .md (Markdown table)."); return; }
             try
             {
                 int iCount = db.importMarkdown(sPath);
@@ -21440,8 +24430,15 @@ namespace DbDuo
 
         private static void cmdOpenDatabase(string sArg)
         {
-            string sPath = sArg.Trim();
-            if (sPath.Length == 0) { Console.WriteLine("Open-Database requires a file path."); return; }
+            // v1.0.95: resolve the path argument with optional quoting.
+            // resolvePathArg() returns an existing file's path verbatim
+            // if the unquoted line happens to identify one, so the user
+            // can type "open database C:\My Stuff\foo.db" without
+            // quoting when there's no ambiguity. It falls back to the
+            // quote-aware tokenizer for cases where the line doesn't
+            // match an existing file.
+            string sPath = resolvePathArg(sArg);
+            if (string.IsNullOrEmpty(sPath)) { Console.WriteLine("Open-Database requires a file path."); return; }
             try
             {
                 // If a GUI form is up, clear its drill stack first --
@@ -21496,6 +24493,20 @@ namespace DbDuo
             Console.WriteLine("Bookmark cleared.");
         }
 
+        // cmdListBookmarks: CLI form is a no-op stub. The multi-
+        // bookmark feature lives on the form side (GUI Alt+B opens
+        // a listbox with look-values per entry); the CLI's single
+        // saved bookmark just reports its position.
+        private static void cmdListBookmarks()
+        {
+            if (bookmarkSaved == null)
+            {
+                Console.WriteLine("(no bookmarks; multi-bookmark requires the GUI Alt+B chord)");
+                return;
+            }
+            Console.WriteLine("(CLI tracks one bookmark; the GUI tracks multiple. Use Alt+B in the GUI for the full list.)");
+        }
+
         private static void cmdInvokeSql(string sArg)
         {
             if (!requireOpen()) return;
@@ -21547,8 +24558,25 @@ namespace DbDuo
             Console.WriteLine("DbDuo dot-prompt CLI commands. Aliases in parentheses.");
             Console.WriteLine("Type 'help <command>' for details on any command.");
             Console.WriteLine();
+            Console.WriteLine("  CONVENTIONS");
+            Console.WriteLine("    Commands are case-insensitive. Type them however you like:");
+            Console.WriteLine("        edit settings");
+            Console.WriteLine("        Edit Settings");
+            Console.WriteLine("        EDIT-SETTINGS");
+            Console.WriteLine("        edit-settings");
+            Console.WriteLine("    are all the same command. Multi-word commands accept either");
+            Console.WriteLine("    spaces (the readable default) or hyphens (PowerShell style).");
+            Console.WriteLine();
+            Console.WriteLine("    Quoted arguments preserve their content verbatim, including");
+            Console.WriteLine("    spaces and case:");
+            Console.WriteLine("        find regex Notes \"Hello World\"");
+            Console.WriteLine("        open database \"C:\\My Stuff\\foo.db\"");
+            Console.WriteLine("        invoke sql \"SELECT * FROM 'Cells'\"");
+            Console.WriteLine("    Inside a double-quoted argument, type two double quotes to");
+            Console.WriteLine("    embed a literal double quote.");
+            Console.WriteLine();
             Console.WriteLine("  NAVIGATION");
-            Console.WriteLine("    Step-Record next      (n, +)");
+            Console.WriteLine("    step-record next      (n, +)");
             Console.WriteLine("    Step-Record previous  (p, -, prev)");
             Console.WriteLine("    Step-Record first     (t, top)");
             Console.WriteLine("    Step-Record last      (b, bot, last)");
@@ -21577,7 +24605,8 @@ namespace DbDuo
             Console.WriteLine("    Select-Record \"col LIKE '%text%'\" (filter)");
             Console.WriteLine("    Reset-Filter                     (all)");
             Console.WriteLine("    Select-Column col1, col2         (cols, Select-Object)");
-            Console.WriteLine("    Sort-Object \"col ASC\"            (sort)");
+            Console.WriteLine("    Order-Records col                (sort ascending; bare command shows listbox)");
+            Console.WriteLine("    Reverse-Order col                (sort descending)");
             Console.WriteLine("    Reset-Sort");
             Console.WriteLine();
             Console.WriteLine("  TABLE / SCHEMA");
@@ -21622,7 +24651,7 @@ namespace DbDuo
             Console.WriteLine("  META");
             Console.WriteLine("    Get-Help              (help)");
             Console.WriteLine("    Get-Verb              (verbs)");
-            Console.WriteLine("    Switch-KeyDescriber on|off  (key-describer, trace)");
+            Console.WriteLine("    Toggle-KeyHelp on|off       (key-help, trace)");
             Console.WriteLine("    Sync-Session          (sync)");
             Console.WriteLine("    Switch-Focus          (gui, focus, window)  -- bring GUI window to foreground");
             Console.WriteLine("    Exit-Console          (exit, x, bye)        -- leave dot prompt; GUI keeps running");
@@ -21707,18 +24736,18 @@ namespace DbDuo
                          + "  a   &   add            Aliases.\n\n"
                          + "Primary-key columns the database manages (autoincrement) are\n"
                          + "shown read-only and left blank for the database to assign.";
-                case "set-record":
-                    return "Set-Record - edit the current row's values.\n\n"
-                         + "  Set-Record             Open the field editor on the current row.\n"
-                         + "  e   ^   edit           Aliases.\n\n"
+                case "edit-record":
+                    return "Edit Record - edit the current row's values.\n\n"
+                         + "  edit record            Open the field editor on the current row.\n"
+                         + "  e   ^   edit   modify  Aliases.\n\n"
                          + "Read-only columns (primary keys, view columns) are shown\n"
                          + "but cannot be changed.";
                 case "set-field":
-                    return "Set-Field name value - update a single column on the current row.\n\n"
-                         + "  Set-Field title \"New title\"\n"
-                         + "  Set-Field marked 1\n\n"
+                    return "Set Field name value - update a single column on the current row.\n\n"
+                         + "  set field title \"New title\"\n"
+                         + "  set field marked 1\n\n"
                          + "Strings with spaces must be quoted.";
-                case "remove-record":
+                case "delete-record":
                     return "Remove-Record - delete the current row.\n\n"
                          + "  Remove-Record          (alias: del, delete)\n\n"
                          + "Prompts for confirmation in the GUI; at the dot prompt the\n"
@@ -21752,7 +24781,7 @@ namespace DbDuo
                          + "  Jump-RecordAgain       (aliases: jump-next, find-next, F3 in GUI)\n"
                          + "  Jump-RecordPrevious    (aliases: jump-prev, find-prev, Shift+F3 in GUI)\n\n"
                          + "If no Jump-Record has been issued, prints a hint.";
-                case "select-record":
+                case "filter-records":
                     return "Select-Record - filter the current table to rows matching\n"
                          + "a SQL WHERE expression. Filtered out rows stay in the\n"
                          + "underlying table; only the visible recordset shrinks.\n\n"
@@ -21815,13 +24844,13 @@ namespace DbDuo
                          + "Marking sets the row's 'marked' column to 1. Useful with\n"
                          + "Select-Record \"marked = 1\" to view marked rows, or\n"
                          + "Update-Field to bulk-edit them.";
-                case "measure-table":
+                case "table-summary":
                     return "Measure-Table - count rows and bytes for each table in the\n"
                          + "current database.\n\n"
                          + "  Measure-Table          (alias: count, y)\n\n"
                          + "Output is one row per table with row count and approximate\n"
                          + "size in bytes (computed via the database engine's stats).";
-                case "measure-field":
+                case "statistics-field":
                     return "Measure-Field - compute a statistic on a column.\n\n"
                          + "  Measure-Field price                Default statistic (count).\n"
                          + "  Measure-Field price min\n"
@@ -21829,27 +24858,27 @@ namespace DbDuo
                          + "  Measure-Field price sum\n"
                          + "  Measure-Field price average\n\n"
                          + "Statistic names: count, min, max, sum, average, distinct.";
-                case "measure-longest":
+                case "statistics-longest":
                     return "Measure-Longest <field> - find the row with the longest\n"
                          + "string value in a column.\n\n"
                          + "  Measure-Longest notes              (alias: longest notes)\n\n"
                          + "Prints the longest value and the row position. Mirrors\n"
                          + "dbDot's 'longest' command. The current row pointer is\n"
                          + "saved and restored; the scan does not move it.";
-                case "measure-shortest":
+                case "statistics-shortest":
                     return "Measure-Shortest <field> - find the row with the shortest\n"
                          + "string value in a column.\n\n"
                          + "  Measure-Shortest notes             (alias: shortest notes)\n\n"
                          + "Useful for finding empty or near-empty values. Mirrors\n"
                          + "dbDot's 'shortest' command.";
-                case "measure-maximum":
+                case "statistics-maximum":
                     return "Measure-Maximum <field> - find the row with the maximum\n"
                          + "value in a column. Comparison uses the column's native\n"
                          + "type, so numeric columns compare numerically, date columns\n"
                          + "compare chronologically.\n\n"
                          + "  Measure-Maximum updated            (alias: max updated)\n\n"
                          + "Mirrors dbDot's 'max' command.";
-                case "measure-minimum":
+                case "statistics-minimum":
                     return "Measure-Minimum <field> - find the row with the minimum\n"
                          + "value in a column.\n\n"
                          + "  Measure-Minimum added              (alias: min added)\n\n"
@@ -21881,7 +24910,7 @@ namespace DbDuo
                          + "database. Picks up changes made by other connections or\n"
                          + "by Invoke-Sql in this session.\n\n"
                          + "  Update-View            (alias: refresh)";
-                case "update-field":
+                case "replace-column":
                     return "Update-Field - search-and-replace across rows of the\n"
                          + "current table.\n\n"
                          + "  Update-Field colName oldText newText\n\n"
@@ -21889,7 +24918,7 @@ namespace DbDuo
                          + "values with spaces. Use Save-DatabaseAs first if you are\n"
                          + "not sure of the impact -- the change is committed\n"
                          + "immediately.";
-                case "save-databaseas":
+                case "save-database":
                     return "Save-DatabaseAs - copy the current database to a new file.\n\n"
                          + "  Save-DatabaseAs newpath.db   (alias: save-as)\n\n"
                          + "Closes the current database, copies the file, and reopens\n"
@@ -21937,14 +24966,14 @@ namespace DbDuo
                          + "Only one bookmark slot exists; saving a new bookmark\n"
                          + "replaces any previous. The bookmark survives sort and\n"
                          + "filter changes (it is an ADO bookmark, not a row number).";
-                case "switch-keydescriber":
-                    return "Switch-KeyDescriber - toggle Key Describer mode.\n\n"
-                         + "When Key Describer is on, pressing a hotkey announces\n"
+                case "toggle-keyhelp":
+                    return "Toggle-KeyHelp - toggle Key Help mode.\n\n"
+                         + "When Key Help is on, pressing a hotkey announces\n"
                          + "the command, chord, and summary instead of running it.\n"
                          + "Useful for learning what a key does without firing it.\n\n"
-                         + "  Switch-KeyDescriber on\n"
-                         + "  Switch-KeyDescriber off\n"
-                         + "  Switch-KeyDescriber          Toggle.\n\n"
+                         + "  Toggle-KeyHelp on\n"
+                         + "  Toggle-KeyHelp off\n"
+                         + "  Toggle-KeyHelp                Toggle.\n\n"
                          + "GUI chord: Ctrl+F1. Aliases: key-describer, describer,\n"
                          + "trace, trace-command (legacy).";
                 case "get-verb":
@@ -22121,32 +25150,75 @@ namespace DbDuo
             foreach (string s in lLines) Console.WriteLine(s);
         }
 
-        // cmdSwitchKeyDescriber: console form of Ctrl+F1 Key Describer
+        // cmdToggleKeyHelp: console form of Ctrl+F1 Key Help
         // toggle. Argument forms:
-        //   switch-keydescriber on        Force on.
-        //   switch-keydescriber off       Force off.
-        //   switch-keydescriber           Toggle.
+        //   toggle-keyhelp on             Force on.
+        //   toggle-keyhelp off            Force off.
+        //   toggle-keyhelp                Toggle.
         // Both the GUI menu handler and this method flip the same
         // KeyMap.bKeyDescriber flag so the two surfaces stay in sync.
         // The console echo matches the live-region announcement
-        // ("Key Describer On" / "No Key Describer") so users hear the
+        // ("Key Help On" / "No Key Help") so users hear the
         // same wording regardless of which surface they used.
         //
-        // Note: if the user toggles Key Describer from the dot prompt
-        // while the GUI is also open, the Help menu's "Key Describer"
+        // Note: if the user toggles Key Help from the dot prompt
+        // while the GUI is also open, the Help menu's "Key Help"
         // check mark won't update until the next time the menu opens
         // (when WinForms re-evaluates it via miHelp_DropDownOpening).
         // The flag itself is the source of truth and is read live, so
         // the behavior is correct -- only the cosmetic check mark lags
         // briefly. Acceptable tradeoff for keeping the two surfaces
         // decoupled.
-        private static void cmdSwitchKeyDescriber(string sArg)
+        private static void cmdToggleKeyHelp(string sArg)
         {
             string s = sArg.Trim().ToLowerInvariant();
             if (s == "on") KeyMap.bKeyDescriber = true;
             else if (s == "off") KeyMap.bKeyDescriber = false;
             else KeyMap.bKeyDescriber = !KeyMap.bKeyDescriber;
-            Console.WriteLine(KeyMap.bKeyDescriber ? "Key Describer On" : "No Key Describer");
+            Console.WriteLine(KeyMap.bKeyDescriber ? "Key Help On" : "No Key Help");
+        }
+
+        // cmdToggleReadOnly: dot-prompt equivalent of the GUI Toggle
+        // Read Only command (Ctrl+Shift+R). Accepts optional "on" /
+        // "off" / "1" / "0" argument; bare invocation toggles. Reopens
+        // the database with the new flag and prints the new state.
+        // Drill stack is invalidated by the reopen (the new connection
+        // has a fresh row identity space).
+        private static void cmdToggleReadOnly(string sArg)
+        {
+            if (db == null || !db.isOpen())
+            {
+                Console.WriteLine("No database open. Use Open-Database first.");
+                return;
+            }
+            string s = (sArg ?? "").Trim().ToLowerInvariant();
+            bool bNew;
+            if (s == "on" || s == "true" || s == "1" || s == "yes" || s == "y")
+                bNew = true;
+            else if (s == "off" || s == "false" || s == "0" || s == "no" || s == "n")
+                bNew = false;
+            else
+                bNew = !db.readOnly;
+
+            if (bNew == db.readOnly)
+            {
+                Console.WriteLine("Read only is already " + (bNew ? "on" : "off") + ".");
+                return;
+            }
+            string sPath = db.filePath;
+            string sTable = db.currentTable;
+            try
+            {
+                db.close();
+                db.openDatabase(sPath, sTable, bNew);
+                if (frm != null && !frm.IsDisposed) frm.clearDrillStack();
+                refresh();
+                Console.WriteLine("Read only " + (db.readOnly ? "ON. Database is now protected from edits." : "OFF. Database is now writable."));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine("Toggle Read Only failed: " + ex.Message);
+            }
         }
     }
 
@@ -22311,7 +25383,7 @@ namespace DbDuo
                     + "\n\nCheck your internet connection and try again. You can also "
                     + "download the latest DbDuo_setup.exe directly from\n"
                     + "https://github.com/JamalMazrui/DbDuo/releases/latest",
-                    "Elevate-Version", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    "Elevate Version", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             if (string.IsNullOrEmpty(sLatestTag))
@@ -22321,7 +25393,7 @@ namespace DbDuo
                     + "The GitHub API returned a response but no recognizable\n"
                     + "tag_name field. Try again later, or download directly from\n"
                     + "https://github.com/JamalMazrui/DbDuo/releases/latest",
-                    "Elevate-Version", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    "Elevate Version", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
@@ -22336,7 +25408,7 @@ namespace DbDuo
                     "DbDuo is up to date.\n\n"
                     + "Installed version: " + sLocal + "\n"
                     + "Latest release:    " + sLatest,
-                    "Elevate-Version", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Elevate Version", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             if (iCmp < 0)
@@ -22350,7 +25422,7 @@ namespace DbDuo
                     + "Installed: " + sLocal + "\n"
                     + "Public:    " + sLatest + "\n\n"
                     + "No upgrade offered.",
-                    "Elevate-Version", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Elevate Version", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -22361,10 +25433,10 @@ namespace DbDuo
                 + "Available: " + sLatest + "\n\n"
                 + "Download and run the new installer now?\n\n"
                 + "The installer will offer to close this DbDuo before it proceeds.",
-                "Elevate-Version", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                "Elevate Version", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (answer != DialogResult.Yes) return;
 
-            // Step 4: download the installer to TEMP. The URL is the
+            // Step 4: download the installer to TEMP. The url is the
             // stable GitHub "latest release asset" redirect, which
             // does not change as new versions ship.
             string sTempPath = System.IO.Path.Combine(
@@ -22380,7 +25452,7 @@ namespace DbDuo
                     "Download failed.\n\n" + ex.Message
                     + "\n\nTry again, or download directly from\n"
                     + "https://github.com/JamalMazrui/DbDuo/releases/latest",
-                    "Elevate-Version", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    "Elevate Version", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
 
@@ -22405,7 +25477,7 @@ namespace DbDuo
                     + ex.Message
                     + "\n\nThe file is at:\n" + sTempPath
                     + "\n\nYou can run it manually.",
-                    "Elevate-Version", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    "Elevate Version", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 
@@ -22425,7 +25497,7 @@ namespace DbDuo
         //       https://github.com/JamalMazrui/DbDuo/releases/latest
         //       which GitHub redirects to the actual versioned page
         //       like /releases/tag/v1.0.29. The redirect target's
-        //       last URL segment IS the tag. This path also requires
+        //       last url segment IS the tag. This path also requires
         //       no credentials and is not subject to the REST API
         //       rate limit -- though it does count against the
         //       general anonymous-request limits announced in May
@@ -22469,7 +25541,7 @@ namespace DbDuo
             return match.Success ? match.Groups[1].Value : "";
         }
 
-        // fetchLatestTagViaScrape: the HTML-scrape fallback. The URL
+        // fetchLatestTagViaScrape: the HTML-scrape fallback. The url
         // https://github.com/JamalMazrui/DbDuo/releases/latest
         // returns a redirect (HTTP 302) whose Location header points
         // at the versioned release page such as
@@ -22480,9 +25552,9 @@ namespace DbDuo
         // The implementation is robust against three cases: the
         // server may issue a 302 (older GitHub), a 301 (newer
         // GitHub), or follow the redirect transparently. If we get
-        // a redirect status, the new URL is in the Location header
+        // a redirect status, the new url is in the Location header
         // and we don't bother fetching the body. If we don't get a
-        // redirect, we read the canonical URL from the final
+        // redirect, we read the canonical url from the final
         // response URI (WebClient or HttpWebResponse.ResponseUri).
         private static string fetchLatestTagViaScrape()
         {
@@ -22519,7 +25591,7 @@ namespace DbDuo
                     {
                         // No redirect; the request may have been
                         // followed transparently, in which case
-                        // ResponseUri is the resolved URL.
+                        // ResponseUri is the resolved url.
                         sFinalUrl = resp.ResponseUri != null ? resp.ResponseUri.AbsoluteUri : "";
                     }
                 }
@@ -22542,7 +25614,7 @@ namespace DbDuo
                 catch { /* both paths failed */ }
             }
             if (string.IsNullOrEmpty(sFinalUrl)) return "";
-            // Extract the last path segment from a URL like
+            // Extract the last path segment from a url like
             // https://github.com/JamalMazrui/DbDuo/releases/tag/v1.0.29
             try
             {
@@ -22562,7 +25634,7 @@ namespace DbDuo
 
 
         // downloadInstaller: download the stable "latest installer"
-        // asset to the given local path. The URL is GitHub's special
+        // asset to the given local path. The url is GitHub's special
         // /releases/latest/download/<filename> redirect that always
         // resolves to the most recent release's asset of that name.
         private static void downloadInstaller(string sLocalPath)

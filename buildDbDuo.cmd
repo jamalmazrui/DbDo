@@ -97,6 +97,72 @@ exit /b 1
 :have_csc
 echo C# compiler: !csc! >> "!log!"
 
+rem ---- locate UIA reference assemblies ----
+rem v1.0.87 adds native UIA dispatch (NotificationHostControl /
+rem AnnouncerProvider / UiaNative), which requires:
+rem   UIAutomationProvider.dll  (IRawElementProviderSimple interface)
+rem   UIAutomationTypes.dll     (AutomationNotificationKind / Processing)
+rem
+rem csc does not auto-resolve these from csc.rsp, so we pass them as
+rem /reference: with full paths. Two probe locations, in priority order:
+rem
+rem   1. .NET Framework 4.8 Developer Pack reference assemblies (most
+rem      machines that have csc also have these): C:\Program Files (x86)
+rem      \Reference Assemblies\Microsoft\Framework\.NETFramework\v4.8\.
+rem      This is the recommended source -- the reference-assembly DLLs
+rem      are metadata-only and what csc is designed to bind against.
+rem
+rem   2. GAC runtime DLLs as fallback: %WINDIR%\Microsoft.NET\assembly
+rem      \GAC_MSIL\<assembly>\v4.0_4.0.0.0__31bf3856ad364e35\<assembly>.dll.
+rem      Always present on Windows 10+. csc accepts them as references
+rem      even though they're the actual runtime images.
+rem
+rem If neither source is reachable, we abort with a clear message.
+set "uiaProv="
+set "uiaTypes="
+set "refDir=C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.8"
+if exist "!refDir!\UIAutomationProvider.dll" set "uiaProv=!refDir!\UIAutomationProvider.dll"
+if exist "!refDir!\UIAutomationTypes.dll"    set "uiaTypes=!refDir!\UIAutomationTypes.dll"
+
+rem Fallback to .NET Framework 4.7.2 / 4.7.1 / 4.7 / 4.6.2 reference
+rem assemblies if 4.8 isn't installed. The API surface for these two
+rem assemblies has been stable since 4.5.
+if not defined uiaProv (
+    for %%v in (v4.7.2 v4.7.1 v4.7 v4.6.2 v4.6.1 v4.6 v4.5.2 v4.5.1 v4.5) do (
+        if not defined uiaProv if exist "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\%%v\UIAutomationProvider.dll" set "uiaProv=C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\%%v\UIAutomationProvider.dll"
+        if not defined uiaTypes if exist "C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\%%v\UIAutomationTypes.dll" set "uiaTypes=C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\%%v\UIAutomationTypes.dll"
+    )
+)
+
+rem Fallback to the GAC runtime DLLs. Always present on Windows 10+.
+if not defined uiaProv if exist "%SystemRoot%\Microsoft.NET\assembly\GAC_MSIL\UIAutomationProvider\v4.0_4.0.0.0__31bf3856ad364e35\UIAutomationProvider.dll" set "uiaProv=%SystemRoot%\Microsoft.NET\assembly\GAC_MSIL\UIAutomationProvider\v4.0_4.0.0.0__31bf3856ad364e35\UIAutomationProvider.dll"
+if not defined uiaTypes if exist "%SystemRoot%\Microsoft.NET\assembly\GAC_MSIL\UIAutomationTypes\v4.0_4.0.0.0__31bf3856ad364e35\UIAutomationTypes.dll" set "uiaTypes=%SystemRoot%\Microsoft.NET\assembly\GAC_MSIL\UIAutomationTypes\v4.0_4.0.0.0__31bf3856ad364e35\UIAutomationTypes.dll"
+
+if not defined uiaProv (
+    echo ERROR: UIAutomationProvider.dll could not be located. >> "!log!"
+    echo Checked Reference Assemblies for .NET Framework 4.5 through 4.8 >> "!log!"
+    echo and the .NET 4.0 GAC under %SystemRoot%\Microsoft.NET\assembly. >> "!log!"
+    echo ERROR: UIAutomationProvider.dll not found. Install the .NET
+    echo Framework 4.8 Developer Pack from
+    echo   https://dotnet.microsoft.com/download/dotnet-framework/net48
+    echo or repair .NET Framework via Settings ^> Apps.
+    popd
+    exit /b 1
+)
+if not defined uiaTypes (
+    echo ERROR: UIAutomationTypes.dll could not be located. >> "!log!"
+    echo Checked Reference Assemblies for .NET Framework 4.5 through 4.8 >> "!log!"
+    echo and the .NET 4.0 GAC under %SystemRoot%\Microsoft.NET\assembly. >> "!log!"
+    echo ERROR: UIAutomationTypes.dll not found. Install the .NET
+    echo Framework 4.8 Developer Pack from
+    echo   https://dotnet.microsoft.com/download/dotnet-framework/net48
+    echo or repair .NET Framework via Settings ^> Apps.
+    popd
+    exit /b 1
+)
+echo UIAutomationProvider: !uiaProv! >> "!log!"
+echo UIAutomationTypes:    !uiaTypes! >> "!log!"
+
 rem ---- locate jsc.exe ----
 rem jsc.exe lives only in the Framework folder; there is no Roslyn
 rem JScript compiler. Prefer 64-bit, fall back to 32-bit.
@@ -180,16 +246,23 @@ rem compile-time reference is needed. Avoiding /reference: here also
 rem prevents an assembly-name collision at load time, since both the
 rem EXE and the snippet DLL have the simple name "DbDuo".
 rem
-rem Everything else is the same as v1.0.41 and earlier: csc.exe
-rem auto-resolves framework references from csc.rsp.
+rem As of v1.0.87, csc.exe is passed explicit /reference: paths for
+rem UIAutomationProvider.dll and UIAutomationTypes.dll (located above
+rem and stored in !uiaProv! and !uiaTypes!). Other framework
+rem references continue to auto-resolve from csc.rsp.
 echo. >> "!log!"
 echo Compiling DbDuo.cs -> DbDuo.exe ... >> "!log!"
 echo Compiling DbDuo.cs -> DbDuo.exe ...
+rem Delete any stale .exe first so a failed compile leaves no half-
+rem written executable that Windows might mistake for a 16-bit binary
+rem (the misleading "Unsupported 16-Bit Application" dialog appears
+rem when the loader sees an empty or truncated MZ image).
+if exist DbDuo.exe del /f /q DbDuo.exe
 if exist DbDuo.ico (
-    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32icon:DbDuo.ico /out:DbDuo.exe DbDuo.cs >> "!log!" 2>&1
+    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32icon:DbDuo.ico /win32manifest:DbDuo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /out:DbDuo.exe DbDuo.cs >> "!log!" 2>&1
 ) else (
     echo NOTE: DbDuo.ico not found; building without embedded icon. >> "!log!"
-    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /out:DbDuo.exe DbDuo.cs >> "!log!" 2>&1
+    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32manifest:DbDuo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /out:DbDuo.exe DbDuo.cs >> "!log!" 2>&1
 )
 if errorlevel 1 goto :build_failed
 echo DbDuo.exe built.

@@ -32,6 +32,46 @@ In CLI-only mode these chords work the same way; without a GUI, the "switch to G
 
 The installer creates a single shortcut, DbDuo, with hotkey Alt+Control+D (D for Desktop). Use the hotkey from anywhere in Windows to activate a running instance or launch a fresh one. DbDuo is single-instance: a second press of Alt+Control+D wakes the existing window rather than spawning a duplicate.
 
+## Terminology: row, column, record, field, cell
+
+DbDuo uses a small set of nouns deliberately. The words are not interchangeable, and they shift with the context in which the user is operating. The choices here match the dominant conventions of end-user database products (Microsoft Access, FileMaker Pro, dBASE/FoxPro, the ADODB API) rather than the strictly SQL-canonical vocabulary that PostgreSQL or Oracle documentation prefers. The goal is naturalness for the user reaching for the command, not theoretical purity.
+
+**Record.** The primary noun for "a complete entity stored as a row in a table." Used in command names for actions that act on a complete row of data: New Record, Edit Record, Delete Record, Copy Record, Append Record, New Copy, Mail Record, Mark Record, Unmark Record. Find (Ctrl+F) finds *a record*; Jump (Ctrl+J) jumps to *a record*. The Edit Record dialog's title is the operation; the inputs inside are fields (see below). The same noun the user sees in Microsoft Access, FileMaker, dBASE — and the noun ADODB uses internally for `Recordset.AddNew`, `Recordset.Delete`, and similar entity-level operations.
+
+**Cell.** The intersection of a record and a column — a single named value within one record, viewed in the listview's grid context. Used in command names for actions that act on one value at the row-and-column crosshair: Edit Cell (F2), Copy Cell (Ctrl+C), Append Cell (Alt+C), Open Cell (Ctrl+Enter), Say Cell (Shift+C). The virtual cursor moved by Alt+Control+arrow targets a cell.
+
+**Column.** A vertical slice of the listview — one attribute considered across all records. Used in command names for actions that sweep vertically through one attribute: Sort Ascending by Column, Sort Descending by Column, Sort Records (by current column), Replace Column, Statistics from Column (Alt+G), Output Graphics (plot a column), Select Columns (Alt+S — which columns are visible), the eight Sort-by-X shortcuts (Alt+I/L/T/U for id/look/tags/url). The screen reader's "row N column M" announcement uses "column" because that's the geometric description it speaks.
+
+**Field.** A named attribute on a single record, viewed as a labeled input in a vertical-stack dialog. The Edit Record and New Record dialogs lay out one field per line; that layout is intrinsically not a "column" layout, so the word "field" reads naturally there. Also used for individual attributes referred to by name: the `url` field, the `notes` field, the `tags` field. Say Notes and Say Tags target named fields. The choice of "field" inside dialogs follows Microsoft Access and FileMaker, both of which call vertical-stack labeled inputs "fields" even though the underlying ADODB API uses the same word for column-typed metadata.
+
+**Row.** The geometric unit of the listview — used mostly for screen-reader and navigation announcements. "Row N column M" is the live region's spatial readout. "Go to Row" (Set-Position) jumps by absolute position. "Table has no rows" announces emptiness. The status bar reports "20 of 25 rows shown" when a filter is active. Avoid "row" in command names that target the data semantically; use "record" instead. The exception is geometric scope descriptions inside parentheticals where the natural English reading wins ("every record in filtered view" — record because the action treats the row as an entity; the parenthetical describes scope geometrically but uses the same vocabulary).
+
+**Table.** A schema-level object holding a set of records of the same shape. The Choose Table command, Switch Table, Show Schema all use "table." Views (read-only result sets defined by a SELECT) are labeled distinctly as "views" in dialogs that distinguish; the Choose View command exists separately.
+
+The principle behind these choices: **the noun matches the layout the user sees when invoking the command.** In the listview's grid, the user sees rows, columns, and cells, so commands that act on those grid units use those words. When the user opens an Edit Record dialog, the layout rotates 90 degrees — fields stack vertically — and "column" would force a mental translation back to the listview view, so we say "field" instead. When the user issues an action that treats the whole record as one thing, the entity-level word "Record" reads naturally regardless of the layout being viewed.
+
+If you come from a SQL or PostgreSQL background and prefer "row/column" everywhere, every Record command has a dot-prompt alias using SQL vocabulary: `find`, `new`, `edit`, `delete`, `copy`, `mark`, `unmark` all work. Type `verbs` at the dot prompt for the full list.
+
+### A note on "url" — lowercase as ordinary English
+
+DbDuo writes **url** in lowercase as a regular English noun in prose (sentences, dialog labels, tooltips, status-bar messages, live-region announcements that aren't sentence-initial), and **Url** in title case where title-casing applies (command names like Open Url and Say Url, menu labels like "Sort by Url"). The lowercase convention follows the same path natural-English took with *laser*, *radar*, *scuba*, *sonar*, and *zip code* — words that started as acronyms (LASER for "Light Amplification by Stimulated Emission of Radiation"; RADAR for "Radio Detection And Ranging") and have settled into lowercase ordinary nouns now that the original expansion is no longer foreground knowledge for most users. Most people who type a url into their browser have never thought about what the letters stand for; calling the thing a "url" rather than a "URL" matches that lived experience.
+
+The convention also matters for screen readers, which read "URL" as "U-R-L" (three letters spelled out) but read "url" as one syllable, "earl." For commands users issue frequently — Open Url, Say Url, the eight Sort-by-X variants of which Sort by Url is one — the one-syllable rendering is faster and less interrupting in the audio stream.
+
+The house style applies to developer documentation as well: code comments and history entries write "url" in prose, "Url" in command names, and `sUrl` / `lUrls` in variable names per Camel Type's casing rules (see below).
+
+### "Database" used broadly
+
+In DbDuo, "database" covers more than SQLite .db files. The Open Database command also accepts .xlsx (Excel workbook), .csv (comma-separated values), and other tabular file formats; each sheet or file is presented as a table the user can browse with the same navigation commands. SQLite .db is the default for full functionality (triggers, generated columns, foreign-key drill, the standard-column convention) and is what new databases created through DbDuo use. Other formats are best thought of as data sources DbDuo can read and write through the Import Data and Export Data commands, with as much of the listview experience preserved as the format supports. Standard columns (`look`, `unq`, `added`, `updated`, `url`, `tags`, `notes`, `marked`) cannot be assumed to exist on tables from .xlsx or .csv sources; commands that use them check first via `hasField` and announce a clear refusal when the column is absent rather than producing an error.
+
+### Key-name convention
+
+Key combinations follow the Freedom Scientific / JAWS convention: **Control**, **Alt**, **Shift**, **Enter**, **Escape**, **Tab**, **Space**, **Backspace**, **Delete**, **Insert**, **Home**, **End**, **PageUp**, **PageDown**, **UpArrow**, **DownArrow**, **LeftArrow**, **RightArrow**, **F1** through **F12**, **Apostrophe** (the `'` key), **Asterisk** (Shift+8), and so on. Combinations are written with `+` and no spaces: `Control+F`, `Alt+Shift+S`, `Control+Shift+N`. The convention matches what JAWS announces aloud when a key is pressed, so the documentation reads the same way the user hears it.
+
+### Camel Type for code
+
+DbDuo's source code follows the **Camel Type** coding style — Hungarian-prefixed lower camel case, alphabetized variable blocks, lowercase keywords where the language permits, no subprocedures (every routine is a function). The full specification is in the included `CamelType_CSharp.md` / `CamelType_CSharp.htm` file. Examples: `sName` for a string, `iCount` for an integer, `bFound` for a boolean, `aRows` for an array, `lFields` for a list, `dCache` for a dictionary. Constants use a `c_` prefix: `c_sFormat`. The style is optimized for screen-reader productivity — prefixes let the listener identify a variable's type from the first syllable rather than having to track type declarations elsewhere.
+
 ## Keyboard navigation in the data list
 
 Three navigation modes operate independently in the data list: row navigation with arrow keys, column-announcement navigation with Tab, and cell-level virtual navigation with Alt+Control+arrow.
@@ -153,7 +193,7 @@ Use the Mark Record command, Control+M (M for Mark), to set the boolean `marked`
 
 Use the Save Bookmark command, Control+K (K for booKmark), to remember the current row by primary key. Use the Go to Bookmark command, Alt+K (Alt is the inverse of Save), to return to it later; use the Clear Bookmark command, Control+Shift+K, to forget it. DbDuo holds one named bookmark per session.
 
-Use the Open Cell Value command, Control+Enter (extends Enter into "open as URL"), to treat a cell's value as a URL or a file path and open it in its default Windows application. DbDuo prompts for the column (defaulting to the column under virtual focus, so just press Enter to accept); useful when a database column holds links to PDFs, screenshots, or web pages.
+Use the Open Cell Value command, Control+Enter (extends Enter into "open as url"), to treat a cell's value as a url or a file path and open it in its default Windows application. DbDuo prompts for the column (defaulting to the column under virtual focus, so just press Enter to accept); useful when a database column holds links to PDFs, screenshots, or web pages.
 
 ## Navigate menu
 
@@ -218,7 +258,7 @@ Use the Plot Column command, Control+Shift+P (P for Plot), to produce an Excel c
 
 Use the Choose Visible Columns command (no hotkey; Alt+L as an alias) to pick which columns appear in the data list for the current table. Hidden columns are still accessible through Show Record and Edit Record.
 
-Use the Extract Regex Matches to Clipboard command, Alt+E (E for Extract), to walk every visible row, run a .NET regex against every visible column, and copy every match to the clipboard one per line. Useful for pulling email addresses, URLs, or IDs out of free-text columns.
+Use the Extract Regex Matches to Clipboard command, Alt+E (E for Extract), to walk every visible row, run a .NET regex against every visible column, and copy every match to the clipboard one per line. Useful for pulling email addresses, urls, or IDs out of free-text columns.
 
 Use the Copy Cell to Clipboard command, Shift+C, to copy the current virtual cell (the cell under the Alt+Control+arrow cursor) to the Windows clipboard, replacing whatever was there. Use the Append Cell to Clipboard command, Shift+A, to append the current virtual cell to the clipboard separated by a blank line (two CRLF), so you can accumulate values from multiple cells across rows or columns. If the clipboard is empty, Append acts the same as Copy.
 
@@ -914,6 +954,47 @@ The remainder of this section walks through the command families and describes h
 ## Office automation: always CreateObject, never GetActiveObject
 
 DbDuo never attaches to a running Word or Excel instance. Every Office-using export path makes a fresh hidden instance, drives it to produce the requested file, then calls `Quit()` and releases the COM object. The reasons: attaching to a running instance would mutate settings the user has tuned for their session, driving a running instance through SaveAs and Quit risks side effects on documents the user has open, and the behavior would be non-deterministic depending on whether Word or Excel happens to be running.
+
+## The Inix file format
+
+DbDuo can import from and export to **.inix** files, an extended .ini format designed to be a friendlier serialization than JSON or TOML for both configuration data and tabular data. The defining feature: a .inix file is plain text in any editor, with no escape characters (no `\n` notations, no doubled quote marks, no JSON-style backslash escaping). What you see is what is stored.
+
+The format extends the familiar Windows .ini convention with three powerful additions:
+
+**Multi-line string values.** When a key's value spans multiple lines, two syntaxes are available. The plain form starts with `key=` and an empty value on that line; subsequent lines are part of the value until the next key or section header. The fenced form uses backtick or triple-quote delimiters on lines by themselves and accepts any character verbatim inside, including `=` and `[`. Example:
+
+```
+[notes]
+short_note = single line here
+long_note =
+This is a multi-line note.
+The plain form stops at the next key
+or section header.
+
+complex_note=`
+This value contains an = sign and a [bracket] on the next line:
+key=this is not a new key
+[this is not a new section]
+`
+```
+
+The fenced form is the reliable way to embed `=` or `[` characters in a value, since the plain form would interpret a line that looks like a key or section header as terminating the value.
+
+**Sections as either a dictionary or a list.** When sections have unique names (`[Replace dog with cat]`, `[Replace sheep with goat]`), the file is a dictionary of dictionaries — typical configuration use. When sections are anonymous (`[]`) or follow the `[RecordNNN]` pattern, the file is a list of records — tabular data. DbDuo's Export Data writes the list-of-records form when exporting a table, choosing the leading-zero width on the record number so that ASCII sort of section names matches numeric order: 5 records use `[Record1..5]`, 99 records use `[Record01..99]`, 999 records use `[Record001..999]`.
+
+**Implicit Global section.** If a .inix file starts with key=value lines before any explicit section header, those keys go in an implicit `[Global]` section. This is useful for configuration files where a few top-level settings apply to the whole file, with sections below defining individual operations.
+
+**Comment syntax.** A line whose first non-whitespace character is `;` or `#` is a comment. A section can be commented out by prefixing its name with `;` inside the brackets — `[;Replace dog with cat]` skips that section's entire body without requiring you to comment out each line. The semicolon at the start of `[;` is the comment-out marker; the rest of the section name is preserved so you can uncomment later by removing one character.
+
+Files are written with UTF-8 BOM and CRLF line endings, matching DbDuo's other text-file conventions. An .inix file can be opened in Notepad, read by a screen reader without any special viewer, and edited line by line.
+
+Use cases for .inix:
+
+- **Plain-text rendition of a small table** — exports the current view to a file you can read, search, edit, and re-import. The list-of-records form keeps each row visually separated by a blank line and a section header, which screen readers can navigate by heading-jump if rendered to Markdown or HTML.
+- **Configuration with multi-line values** — when settings need free-form text that JSON would force you to escape (think: a SQL query as a setting value, or a multi-paragraph description).
+- **Hand-authored tabular data** — easier to write by hand than CSV when individual cells have multi-line content; easier to read in an editor than JSON.
+
+The .inix format was originally designed for the KeyLine toolkit; DbDuo adopts it as another supported import and export format.
 
 ## File layout
 

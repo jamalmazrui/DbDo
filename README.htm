@@ -225,23 +225,55 @@ more</a></li>
 Windows.</strong> DbDuo opens SQLite, Microsoft Access, Excel, dBASE,
 and delimited-text files through one consistent set of
 PowerShell-flavored commands, in a GUI window and a dot-prompt console
-at the same time. JAWS, NVDA, and Narrator are all supported through
-dedicated speech paths, with table-style cell navigation,
+at the same time. JAWS, NVDA, and Narrator are all fully supported –
+JAWS and NVDA through their direct speech APIs (lowest latency); all
+three through DbDuo’s native UIA Notification dispatch (which uses
+P/Invoke against UIAutomationCore.dll, sidestepping the .NET Framework
+4.8 managed bridge’s limitations). Table-style cell navigation,
 direction-aware announcements, and the double-press-spells convention
-familiar from EdSharp and FileDir. Every command is reachable by
-keyboard.</p>
+from EdSharp and FileDir. Every command is reachable by keyboard.</p>
+<p>DbDuo’s goal is to be <strong>the most screen-reader-accessible and
+keyboard-accessible general-purpose relational-database manager
+available</strong> — full stop. The accessibility consideration is not a
+layer applied on top of an existing design; it is the design. Every
+command, layout decision, and announcement choice in DbDuo is made from
+a screen-reader-first and keyboard-first perspective, drawing on decades
+of experience with how blind professionals actually work with tabular
+data.</p>
 <h2 id="who-this-is-for">Who this is for</h2>
-<p>DbDuo is designed for people who work databases by keyboard. If you
-are a screen-reader user, a power-keyboard user, or anyone who finds
-mainstream database GUIs awkward to drive without a mouse, DbDuo is
-built for the way you actually work. Every menu announces its hotkey,
-every row change announces the new position, every cell move announces
-the column header and value, and the live region is wired through a
-JAWS-direct / NVDA-direct / UIA-fallback chain so speech reliably
-reaches your reader.</p>
+<p>DbDuo’s <strong>top-priority audience</strong> is <strong>Windows
+screen reader and keyboard users.</strong> Every menu announces its
+hotkey, every row change announces the new position, every cell move
+announces the column header and value, and the live region is wired
+through a JAWS-direct / NVDA-direct / UIA-fallback chain so speech
+reliably reaches your reader. If you are a screen-reader user, a
+power-keyboard user, or anyone who finds mainstream database GUIs
+awkward to drive without a mouse, DbDuo is built for the way you
+actually work.</p>
+<p>DbDuo also supports <strong>developer-culture conventions as
+alternatives</strong> wherever doing so doesn’t compromise the
+keyboard-and-speech experience. The dot prompt accepts both the readable
+lowercase-with-spaces form (<code>edit settings</code>,
+<code>jump record</code>, <code>say sort filter</code>) AND the
+PowerShell-flavored hyphenated form (<code>edit-settings</code>,
+<code>jump-record</code>, <code>say-sortfilter</code>). Pick whichever
+is faster for your fingers. The user-facing canonical name shown in
+menus, in command echo, and in MessageBox titles is the readable Title
+Case form (“Edit Settings”, “Jump Record”, “Say Sort Filter”), following
+standard publishing convention (lowercase short prepositions and
+articles when not first or last).</p>
+<p>The C# implementation follows Camel Type (Hungarian prefixes,
+lower-camelCase identifiers) — its own convention chosen for
+screen-reader productivity when reviewing source code. The user-facing
+names, the dot-prompt input forms, and the internal code identifiers are
+three independent layers that each follow their own appropriate
+convention.</p>
 <p>If you are a sighted developer who appreciates a keyboard-first tool
 with a built-in dot prompt, the speech work doesn’t get in your way —
-DbDuo is silent unless a screen reader is running.</p>
+DbDuo is silent unless a screen reader is running. The project is
+open-source under the MIT license at
+<strong>https://github.com/JamalMazrui/DbDuo</strong>; issues, pull
+requests, and feedback are welcome.</p>
 <h2 id="what-dbduo-lets-you-do">What DbDuo lets you do</h2>
 <p><strong>Open the database formats you actually have.</strong> SQLite
 (<code>.db</code>, <code>.sqlite</code>, <code>.sqlite3</code>),
@@ -348,18 +380,30 @@ most-used commands (Filter, Go to, Jump, Reset filter, Sort).</p>
 <p><strong>Turning DbDuo’s direct speech off.</strong> If you prefer to
 rely solely on your screen reader’s natural focus and selection
 announcements without DbDuo’s added commentary, use Help &gt; Toggle
-Extra Speech (Alt+Shift+S). When off, the screen reader still hears
-DbDuo through its own announcements — only the extra status /
-cell-position / command-echo speech is suppressed. The setting persists
-across launches.</p>
+Extra Speech (Alt+Shift+Z) — the “zzz / hush” mnemonic. There is also a
+separate Help &gt; Toggle Command Echo (Ctrl+Shift+Z) that silences just
+the spoken command name without affecting status announcements. When
+off, the screen reader still hears DbDuo through its own announcements —
+only the extra status / cell-position / command-echo speech is
+suppressed. Both settings persist across launches and can also be
+changed in Misc &gt; Settings (Ctrl+,).</p>
+<p><strong>Browsing data without risk of edits.</strong> Misc &gt;
+Toggle Read Only (Ctrl+Shift+R) flips the database between read-write
+and read-only at runtime. When read-only is on, edit commands fail with
+a clear error message and your underlying data is safe. Useful for
+auditing, demoing, or any time you just want to look. The state is also
+a checkbox in the Settings dialog, and the <code>-readonly</code>
+command-line flag opens DbDuo read-only from the start.</p>
 <h2 id="requirements">Requirements</h2>
 <p>64-bit Windows 10 or 11, with .NET Framework 4.8 (already present on
 current Windows). Microsoft Office is optional, needed only for Export
 Data’s xlsx, docx, and filtered-HTML output paths; csv, tsv, md, plain
 HTML, SQLite, Access, and dBASE export all work without it.</p>
-<p>Tested with JAWS, NVDA, and Narrator. Other screen readers that
-support the Microsoft UIA live-region pattern should also work through
-the fallback path.</p>
+<p>Tested with JAWS, NVDA, and Narrator – all three work through DbDuo’s
+native UIA Notification dispatch on Windows 10 / 11 with .NET Framework
+4.8. JAWS and NVDA additionally use their direct-API paths for
+lowest-latency announcement; the UIA path is the universal layer that
+also reaches Narrator and any other UIA-listening reader.</p>
 <h2 id="installation">Installation</h2>
 <p>Download <code>DbDuo_setup.exe</code> from <a
 href="https://github.com/JamalMazrui/DbDuo/releases/latest/download/DbDuo_setup.exe"

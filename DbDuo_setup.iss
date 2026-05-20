@@ -24,7 +24,7 @@
 ; =====================================================================
 
 #define AppName       "DbDuo"
-#define AppVersion    "1.0.69"
+#define AppVersion    "1.0.104"
 #define AppPublisher  "Jamal Mazrui"
 #define AppUrl        "https://github.com/JamalMazrui/DbDuo"
 #define AppExeName    "DbDuo.exe"
@@ -166,6 +166,7 @@ Type: files; Name: "{app}\dbDuoEval.dll"
 Source: "DbDuo.exe";    DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDuo.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDuo.ico";    DestDir: "{app}"; Flags: ignoreversion
+Source: "DbDuo.manifest"; DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDuo.md";     DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDuo.htm";    DestDir: "{app}"; Flags: ignoreversion
 Source: "README.md";    DestDir: "{app}"; Flags: ignoreversion
@@ -177,6 +178,7 @@ Source: "History.htm";  DestDir: "{app}"; Flags: ignoreversion
 Source: "License.md";   DestDir: "{app}"; Flags: ignoreversion
 Source: "License.htm";  DestDir: "{app}"; Flags: ignoreversion
 Source: "CamelType_CSharp.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "CamelType_CSharp.htm"; DestDir: "{app}"; Flags: ignoreversion
 Source: "sample.db";     DestDir: "{app}"; Flags: ignoreversion
 Source: "northwind.db";  DestDir: "{app}"; Flags: ignoreversion
 Source: "chinook.db";    DestDir: "{app}"; Flags: ignoreversion
