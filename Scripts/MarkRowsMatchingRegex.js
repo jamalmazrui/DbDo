@@ -15,7 +15,7 @@
 // are alphabetical by type; within each line, variables are
 // alphabetical.
 //
-// Host objects: db (DbDuoManager), frm (DbDuoForm).
+// Host objects: db (DbDoManager), frm (DbDoForm).
 
 const c_sPattern = "Seattle";   // <-- edit this
 
@@ -31,7 +31,7 @@ if (db.readOnly) {
 }
 else if (!db.hasField("marked")) {
   frm.invokeMessage("MarkRowsMatchingRegex: no 'marked' column");
-  "Current table has no 'marked' column. This script needs the standard DbDuo metadata column.";
+  "Current table has no 'marked' column. This script needs the standard DbDo metadata column.";
 }
 else {
   aFieldNames = db.getDisplayFieldNames();

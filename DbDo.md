@@ -1,20 +1,20 @@
-# DbDuo Reference
+# DbDo Reference
 
-**An accessible, keyboard-first database manager for Windows.** DbDuo opens SQLite, Microsoft Access, Excel, dBASE, and delimited-text files through one consistent set of PowerShell-flavored commands, in a GUI window and a dot-prompt console at the same time. JAWS, NVDA, and Narrator are all first-class through dedicated speech paths; every command is reachable by keyboard.
+**An accessible, keyboard-first database manager for Windows.** DbDo opens SQLite, Microsoft Access, Excel, dBASE, and delimited-text files through one consistent set of PowerShell-flavored commands, in a GUI window and a dot-prompt console at the same time. JAWS, NVDA, and Narrator are all first-class through dedicated speech paths; every command is reachable by keyboard.
 
-Source and releases: <https://github.com/JamalMazrui/DbDuo>.
+Source and releases: <https://github.com/JamalMazrui/DbDo>.
 
-## How DbDuo is organized
+## How DbDo is organized
 
-DbDuo runs in two interfaces — a WinForms GUI and a dot-prompt CLI — simultaneously by default. Both interfaces drive the same ADO database connection, so a change in one shows up immediately in the other.
+DbDo runs in two interfaces — a WinForms GUI and a dot-prompt CLI — simultaneously by default. Both interfaces drive the same ADO database connection, so a change in one shows up immediately in the other.
 
 The GUI is a single Windows form containing a menu bar, a data list in the center, and a status bar at the bottom. Standard Windows conventions apply: Alt activates the menu bar; single-letter mnemonics open each top-level menu (File, Edit, Navigate, Query, Misc, Help). Every menu command is reachable through both a hotkey and a click; no command is mouse-only.
 
-The data list is a virtual-mode ListView in Details view with FullRowSelect on. Arrow keys move between rows. There is no per-cell focus visually; for cell-level reading, DbDuo provides two complementary mechanisms: Tab and Shift+Tab move an **announcement-only** column cursor (the screen reader speaks the new column name and value without changing the visible focus), and **Alt+Control+arrow** drives a virtual table cursor that also moves the visible row selection (see "Virtual cell navigation" below).
+The data list is a virtual-mode ListView in Details view with FullRowSelect on. Arrow keys move between rows. There is no per-cell focus visually; for cell-level reading, DbDo provides two complementary mechanisms: Tab and Shift+Tab move an **announcement-only** column cursor (the screen reader speaks the new column name and value without changing the visible focus), and **Alt+Control+arrow** drives a virtual table cursor that also moves the visible row selection (see "Virtual cell navigation" below).
 
-The status bar at the bottom carries three items in this order: the word "marked" (only when the current row has its marked flag set), the row position "row N of M", and "updated YYYY-MM-DD" (only when the current row has an updated column). Two spaces separate the sections so the screen reader pauses naturally between them. Use the JAWS Insert+PageDown command to read the whole status bar at once.
+The status bar at the bottom carries three items in this order: the word "marked" (only when the current row has its marked flag set), the row position "row N of M", and "edited YYYY-MM-DD" (only when the current row has an edited column). Two spaces separate the sections so the screen reader pauses naturally between them. Use the JAWS Insert+PageDown command to read the whole status bar at once.
 
-The window title is `DbDuo - <database> - <table>`, with `(read-only)` inserted after the database name when the lock is on.
+The window title is `DbDo - <database> - <table>`, with `(read-only)` inserted after the database name when the lock is on.
 
 The Shift+F10 context menu in the data list duplicates the most common record-level commands.
 
@@ -24,17 +24,17 @@ The CLI is a Windows console window running a dot prompt. Each line is a single 
 
 Three grave-accent chords coordinate the GUI/CLI relationship. JAWS calls the unshifted key above Tab "GraveAccent."
 
-Use the Enter-Console command, Control+GraveAccent, from the GUI menu to open or focus the dot prompt console. Use Alt+GraveAccent (a global hotkey) from inside the console to bring the GUI forward; this chord acts only when the console has focus, so it does not yank focus from Word or any other application. Use Alt+Control+GraveAccent (also global) from anywhere in Windows to toggle between GUI and console, whichever is not currently in front.
+Use the Enter-Console command, Control+GraveAccent, from the GUI menu to open or focus the dot prompt console. Use Alt+Control+GraveAccent (a global hotkey) from anywhere in Windows to toggle between GUI and console, whichever is not currently in front — since DbDo is a single-instance application, this one chord covers both directions.
 
 In CLI-only mode these chords work the same way; without a GUI, the "switch to GUI" chords simply have nothing to bring forward.
 
-### Starting DbDuo
+### Starting DbDo
 
-The installer creates a single shortcut, DbDuo, with hotkey Alt+Control+D (D for Desktop). Use the hotkey from anywhere in Windows to activate a running instance or launch a fresh one. DbDuo is single-instance: a second press of Alt+Control+D wakes the existing window rather than spawning a duplicate.
+The installer creates a single shortcut, DbDo, with hotkey Alt+Control+D (D for Desktop). Use the hotkey from anywhere in Windows to activate a running instance or launch a fresh one. DbDo is single-instance: a second press of Alt+Control+D wakes the existing window rather than spawning a duplicate.
 
 ## Terminology: row, column, record, field, cell
 
-DbDuo uses a small set of nouns deliberately. The words are not interchangeable, and they shift with the context in which the user is operating. The choices here match the dominant conventions of end-user database products (Microsoft Access, FileMaker Pro, dBASE/FoxPro, the ADODB API) rather than the strictly SQL-canonical vocabulary that PostgreSQL or Oracle documentation prefers. The goal is naturalness for the user reaching for the command, not theoretical purity.
+DbDo uses a small set of nouns deliberately. The words are not interchangeable, and they shift with the context in which the user is operating. The choices here match the dominant conventions of end-user database products (Microsoft Access, FileMaker Pro, dBASE/FoxPro, the ADODB API) rather than the strictly SQL-canonical vocabulary that PostgreSQL or Oracle documentation prefers. The goal is naturalness for the user reaching for the command, not theoretical purity.
 
 **Record.** The primary noun for "a complete entity stored as a row in a table." Used in command names for actions that act on a complete row of data: New Record, Edit Record, Delete Record, Copy Record, Append Record, New Copy, Mail Record, Mark Record, Unmark Record. Find (Ctrl+F) finds *a record*; Jump (Ctrl+J) jumps to *a record*. The Edit Record dialog's title is the operation; the inputs inside are fields (see below). The same noun the user sees in Microsoft Access, FileMaker, dBASE — and the noun ADODB uses internally for `Recordset.AddNew`, `Recordset.Delete`, and similar entity-level operations.
 
@@ -54,7 +54,7 @@ If you come from a SQL or PostgreSQL background and prefer "row/column" everywhe
 
 ### A note on "url" — lowercase as ordinary English
 
-DbDuo writes **url** in lowercase as a regular English noun in prose (sentences, dialog labels, tooltips, status-bar messages, live-region announcements that aren't sentence-initial), and **Url** in title case where title-casing applies (command names like Open Url and Say Url, menu labels like "Sort by Url"). The lowercase convention follows the same path natural-English took with *laser*, *radar*, *scuba*, *sonar*, and *zip code* — words that started as acronyms (LASER for "Light Amplification by Stimulated Emission of Radiation"; RADAR for "Radio Detection And Ranging") and have settled into lowercase ordinary nouns now that the original expansion is no longer foreground knowledge for most users. Most people who type a url into their browser have never thought about what the letters stand for; calling the thing a "url" rather than a "URL" matches that lived experience.
+DbDo writes **url** in lowercase as a regular English noun in prose (sentences, dialog labels, tooltips, status-bar messages, live-region announcements that aren't sentence-initial), and **Url** in title case where title-casing applies (command names like Open Url and Say Url, menu labels like "Sort by Url"). The lowercase convention follows the same path natural-English took with *laser*, *radar*, *scuba*, *sonar*, and *zip code* — words that started as acronyms (LASER for "Light Amplification by Stimulated Emission of Radiation"; RADAR for "Radio Detection And Ranging") and have settled into lowercase ordinary nouns now that the original expansion is no longer foreground knowledge for most users. Most people who type a url into their browser have never thought about what the letters stand for; calling the thing a "url" rather than a "URL" matches that lived experience.
 
 The convention also matters for screen readers, which read "URL" as "U-R-L" (three letters spelled out) but read "url" as one syllable, "earl." For commands users issue frequently — Open Url, Say Url, the eight Sort-by-X variants of which Sort by Url is one — the one-syllable rendering is faster and less interrupting in the audio stream.
 
@@ -62,7 +62,7 @@ The house style applies to developer documentation as well: code comments and hi
 
 ### "Database" used broadly
 
-In DbDuo, "database" covers more than SQLite .db files. The Open Database command also accepts .xlsx (Excel workbook), .csv (comma-separated values), and other tabular file formats; each sheet or file is presented as a table the user can browse with the same navigation commands. SQLite .db is the default for full functionality (triggers, generated columns, foreign-key drill, the standard-column convention) and is what new databases created through DbDuo use. Other formats are best thought of as data sources DbDuo can read and write through the Import Data and Export Data commands, with as much of the listview experience preserved as the format supports. Standard columns (`look`, `unq`, `added`, `updated`, `url`, `tags`, `notes`, `marked`) cannot be assumed to exist on tables from .xlsx or .csv sources; commands that use them check first via `hasField` and announce a clear refusal when the column is absent rather than producing an error.
+In DbDo, "database" covers more than SQLite .db files. The Open Database command also accepts .xlsx (Excel workbook), .csv (comma-separated values), and other tabular file formats; each sheet or file is presented as a table the user can browse with the same navigation commands. SQLite .db is the default for full functionality (triggers, generated columns, foreign-key drill, the standard-column convention) and is what new databases created through DbDo use. Other formats are best thought of as data sources DbDo can read and write through the Import Data and Export Data commands, with as much of the listview experience preserved as the format supports. Standard columns (`look`, `unq`, `added`, `edited`, `url`, `tags`, `notes`, `marked`) cannot be assumed to exist on tables from .xlsx or .csv sources; commands that use them check first via `hasField` and announce a clear refusal when the column is absent rather than producing an error.
 
 ### Key-name convention
 
@@ -70,7 +70,7 @@ Key combinations follow the Freedom Scientific / JAWS convention: **Control**, *
 
 ### Camel Type for code
 
-DbDuo's source code follows the **Camel Type** coding style — Hungarian-prefixed lower camel case, alphabetized variable blocks, lowercase keywords where the language permits, no subprocedures (every routine is a function). The full specification is in the included `CamelType_CSharp.md` / `CamelType_CSharp.htm` file. Examples: `sName` for a string, `iCount` for an integer, `bFound` for a boolean, `aRows` for an array, `lFields` for a list, `dCache` for a dictionary. Constants use a `c_` prefix: `c_sFormat`. The style is optimized for screen-reader productivity — prefixes let the listener identify a variable's type from the first syllable rather than having to track type declarations elsewhere.
+DbDo's source code follows the **Camel Type** coding style — Hungarian-prefixed lower camel case, alphabetized variable blocks, lowercase keywords where the language permits, no subprocedures (every routine is a function). The full specification is in the included `CamelType_CSharp.md` / `CamelType_CSharp.htm` file. Examples: `sName` for a string, `iCount` for an integer, `bFound` for a boolean, `aRows` for an array, `lFields` for a list, `dCache` for a dictionary. Constants use a `c_` prefix: `c_sFormat`. The style is optimized for screen-reader productivity — prefixes let the listener identify a variable's type from the first syllable rather than having to track type declarations elsewhere.
 
 ## Keyboard navigation in the data list
 
@@ -80,11 +80,11 @@ Three navigation modes operate independently in the data list: row navigation wi
 
 **Type-ahead jump.** Use a lowercase letter to jump to the next row whose value in the column under Tab announcement begins with that letter. Type two or more letters in quick succession to extend the search prefix. The search wraps around at the end of the list and starts over from the top. Capital letters are reserved for bare-Shift+Letter command shortcuts (F, G, J, R, S — see "Mnemonic hotkey groups" below), so lowercase navigation is the convention for type-ahead.
 
-**Tab to hear cell values.** Use Tab and Shift+Tab to move an announcement-only column cursor across the current row. DbDuo announces "Column: value" after each Tab. The visible row selection does not change; this is purely a screen-reader convenience for hearing what's in each cell of the current row without changing where you are. Tab does NOT target commands; commands always prompt for a column (see Virtual cell navigation below for the command-targeting cursor).
+**Tab to hear cell values.** Use Tab and Shift+Tab to move an announcement-only column cursor across the current row. DbDo announces "Column: value" after each Tab. The visible row selection does not change; this is purely a screen-reader convenience for hearing what's in each cell of the current row without changing where you are. Tab does NOT target commands; commands always prompt for a column (see Virtual cell navigation below for the command-targeting cursor).
 
 ## Virtual cell navigation
 
-DbDuo overlays a screen-reader-style table cursor on the listview. The listview itself has no per-cell focus, so the virtual cursor lives in DbDuo's state and announcements; it tracks a `(row, column)` pair separate from the listview's row selection. Use it for table-style reading and for targeting column-aware commands.
+DbDo overlays a screen-reader-style table cursor on the listview. The listview itself has no per-cell focus, so the virtual cursor lives in DbDo's state and announcements; it tracks a `(row, column)` pair separate from the listview's row selection. Use it for table-style reading and for targeting column-aware commands.
 
 **Alt+Control + extended-key chords drive the virtual cursor:**
 
@@ -100,76 +100,76 @@ DbDuo overlays a screen-reader-style table cursor on the listview. The listview 
 
 Each movement triggers a speech announcement with **direction-aware framing**: a vertical move (row changed only) says "Row N: value"; a horizontal move (column changed only) says "Header: value"; a corner jump (both changed, from Home or End) says "Row N, Header: value". This matches the JAWS / NVDA table-reading convention.
 
-The **double-press dialog** convention applies to every speech-only command. Press the command once to hear the text through your screen reader without moving keyboard focus. Press the same chord again within two seconds to open an information dialog with a read-only multi-line textbox containing the text plus an OK button — useful for reviewing long status, paths, or values that don't fit comfortably in a single speech announcement. The dialog's textbox supports normal text-navigation and Control+C copy. The two-second window is deliberately more forgiving than the JAWS and NVDA defaults (around 500 milliseconds) so a thinking pause between presses still counts as one gesture. Commands that participate: Say Status (Alt+Z), Say Path (Alt+P), Say Yield (Alt+Y), Say Tables (Shift+F4), Say Marked (Alt+Shift+M), Say Updated (Shift+D), Say Notes (Shift+N), Say Tags (Shift+T), Say Column from Cursor (Shift+L), Say Marked Yield (Shift+Y).
+The **double-press dialog** convention applies to every speech-only command. Press the command once to hear the text through your screen reader without moving keyboard focus. Press the same chord again within two seconds to open an information dialog with a read-only multi-line textbox containing the text plus an OK button — useful for reviewing long status, paths, or values that don't fit comfortably in a single speech announcement. The dialog's textbox supports normal text-navigation and Control+C copy. The two-second window is deliberately more forgiving than the JAWS and NVDA defaults (around 500 milliseconds) so a thinking pause between presses still counts as one gesture. Commands that participate: Say Status (Alt+Z), Say Path (Alt+P), Say Yield (Alt+Y), Say Tables (Shift+F4), Say Marked (Alt+Shift+M), Say Edited (Shift+E), Say Notes (Shift+N), Say Tags (Shift+T), Say Column from Cursor (Shift+L), Say Marked Yield (Shift+Y).
 
 The virtual cursor synchronizes with the listview row selection in both directions: pressing plain Down/Up arrow updates the listview's row selection, and the virtual row follows along with the column unchanged. Pressing Alt+Control+arrow moves the virtual cursor first, then moves the listview's row selection to match — so you can see the row you're virtually browsing.
 
-The virtual cursor's column and row are **remembered per table** within a session and across sessions. When you switch to a different table (and later return), DbDuo restores the row and column you were on. When you open a database file, every previously-visited table's filter, sort, position, and virtual column are restored — switching to any one of them via Choose Table, Control+Tab, or the dot prompt picks up the saved state, not row 1. The F5 Refresh command still resets the virtual cursor to (row 1, first column) by design.
+The virtual cursor's column and row are **remembered per table** within a session and across sessions. When you switch to a different table (and later return), DbDo restores the row and column you were on. When you open a database file, every previously-visited table's filter, sort, position, and virtual column are restored — switching to any one of them via Choose Table, Control+Tab, or the dot prompt picks up the saved state, not row 1. The F5 Refresh command still resets the virtual cursor to (row 1, first column) by design.
 
 **Column-aware commands default to the virtual column.** When a command needs a column — Sort Ascending, Sort Descending, Open Cell Value, Next Initial Change, Jump to Match in One Column — its picker dialog defaults to the column currently under virtual focus. Just press Enter in the picker to accept that column, or arrow up/down to pick a different one.
 
 ## Screen-reader settings
 
-### JAWS settings for DbDuo
+### JAWS settings for DbDo
 
-JAWS has its own table-navigation chord set on Alt+Control+arrow, and by default JAWS intercepts those chords before the focused application sees them. Without an adjustment, pressing Alt+Control+RightArrow inside DbDuo gives "Not in a table" instead of moving the virtual cursor. The same applies to several other DbDuo chords on Alt-letter and Shift-letter combinations.
+JAWS has its own table-navigation chord set on Alt+Control+arrow, and by default JAWS intercepts those chords before the focused application sees them. Without an adjustment, pressing Alt+Control+RightArrow inside DbDo gives "Not in a table" instead of moving the virtual cursor. The same applies to several other DbDo chords on Alt-letter and Shift-letter combinations.
 
 The fix is a three-file JAWS settings bundle:
 
-- `DbDuo.jkm` — JAWS key map. Maps the chords DbDuo wants to take over to a Script named `PassDbDuoKey`.
-- `DbDuo.jss` — JAWS script source. Defines `PassDbDuoKey` as a one-line Script that calls the JAWS built-in `TypeCurrentScriptKey()`, which passes the current keystroke through to the application as if no script were running.
-- `DbDuo.jsb` — compiled binary of the above, produced by JAWS's `scompile.exe`. JAWS loads this at run-time and resolves the `PassDbDuoKey` reference in the JKM.
+- `DbDo.jkm` — JAWS key map. Maps the chords DbDo wants to take over to a Script named `PassDbDoKey`.
+- `DbDo.jss` — JAWS script source. Defines `PassDbDoKey` as a one-line Script that calls the JAWS built-in `TypeCurrentScriptKey()`, which passes the current keystroke through to the application as if no script were running.
+- `DbDo.jsb` — compiled binary of the above, produced by JAWS's `scompile.exe`. JAWS loads this at run-time and resolves the `PassDbDoKey` reference in the JKM.
 
-**Automatic install.** The DbDuo installer offers to install this bundle automatically. The Finish-page checkbox "Install JAWS settings for DbDuo (recommended if you use JAWS)" is checked by default. Selecting it does three things for every JAWS year-version present on your system, in every language subfolder inside each version's `Settings` folder:
+**Automatic install.** The DbDo installer offers to install this bundle automatically. The Finish-page checkbox "Install JAWS settings for DbDo (recommended if you use JAWS)" is checked by default. Selecting it does three things for every JAWS year-version present on your system, in every language subfolder inside each version's `Settings` folder:
 
-1. Copy `DbDuo.jkm` to the settings folder.
-2. Copy `DbDuo.jss` to the settings folder.
-3. Run `scompile.exe DbDuo.jss` from inside the settings folder to produce `DbDuo.jsb`.
+1. Copy `DbDo.jkm` to the settings folder.
+2. Copy `DbDo.jss` to the settings folder.
+3. Run `scompile.exe DbDo.jss` from inside the settings folder to produce `DbDo.jsb`.
 
 Compiling locally against each installed JAWS's own `scompile.exe` guarantees the binary is compatible with that JAWS version (JSB compilation is version-sensitive). If a JAWS installation can't be located via the registry, the installer falls back to `C:\Program Files\Freedom Scientific\JAWS\<year>\scompile.exe`.
 
 **Manual install** (or to recompile after editing the JSS):
 
 ```
-copy DbDuo.jkm "%APPDATA%\Freedom Scientific\JAWS\<year>\Settings\enu\"
-copy DbDuo.jss "%APPDATA%\Freedom Scientific\JAWS\<year>\Settings\enu\"
+copy DbDo.jkm "%APPDATA%\Freedom Scientific\JAWS\<year>\Settings\enu\"
+copy DbDo.jss "%APPDATA%\Freedom Scientific\JAWS\<year>\Settings\enu\"
 cd "%APPDATA%\Freedom Scientific\JAWS\<year>\Settings\enu"
-"%PROGRAMFILES%\Freedom Scientific\JAWS\<year>\scompile.exe" DbDuo.jss
+"%PROGRAMFILES%\Freedom Scientific\JAWS\<year>\scompile.exe" DbDo.jss
 ```
 
-where `<year>` is your JAWS year-version. The settings work from JAWS's next launch (or, if JAWS is already running, when DbDuo next gains focus).
+where `<year>` is your JAWS year-version. The settings work from JAWS's next launch (or, if JAWS is already running, when DbDo next gains focus).
 
-The chords passed through to DbDuo include: the virtual-cursor family (Alt+Control + arrows, Home, End, PageUp, PageDown, NumPad5); the parent-child drill family (Alt+RightArrow, Alt+LeftArrow, Alt+Home); the three search families (Control+F, Control+J, Control+F3 plus their Shift variants and F3 / Shift+F3); marked-row navigation (Control+Home, Control+End, Control+UpArrow, Control+DownArrow); bulk-mark spans (Shift+Home, Shift+End, plus Alt+Shift variants); and the Alt-letter command shortcuts (Alt+A, C, D, E, K, L, P, R, T, Y, Z plus relevant Alt+Shift variants).
+The chords passed through to DbDo include: the virtual-cursor family (Alt+Control + arrows, Home, End, PageUp, PageDown, NumPad5); the parent-child drill family (Alt+RightArrow, Alt+LeftArrow, Alt+Home); the three search families (Control+F, Control+J, Control+F3 plus their Shift variants and F3 / Shift+F3); marked-row navigation (Control+Home, Control+End, Control+UpArrow, Control+DownArrow); bulk-mark spans (Shift+Home, Shift+End, plus Alt+Shift variants); and the Alt-letter command shortcuts (Alt+A, C, D, E, K, L, P, R, T, Y, Z plus relevant Alt+Shift variants).
 
-If you customize the JKM in place and re-install DbDuo, your changes will be overwritten. To preserve customizations across updates, copy your modified version to a different filename and load both via JAWS's chain mechanism, or keep a copy outside the Settings folder and merge by hand after each DbDuo upgrade.
+If you customize the JKM in place and re-install DbDo, your changes will be overwritten. To preserve customizations across updates, copy your modified version to a different filename and load both via JAWS's chain mechanism, or keep a copy outside the Settings folder and merge by hand after each DbDo upgrade.
 
-If you uninstall DbDuo, the installer removes only the three files it placed. Other JKMs or JSBs you placed yourself in those folders are not touched.
+If you uninstall DbDo, the installer removes only the three files it placed. Other JKMs or JSBs you placed yourself in those folders are not touched.
 
 ### NVDA add-on
 
-DbDuo ships a `.nvda-addon` package that performs the same pass-through role for NVDA that the JKM and JSB do for JAWS. The add-on registers an app module that, when DbDuo.exe is the foreground process, hands every chord DbDuo cares about back to DbDuo instead of running NVDA's own table-navigation or browse-mode commands.
+DbDo ships a `.nvda-addon` package that performs the same pass-through role for NVDA that the JKM and JSB do for JAWS. The add-on registers an app module that, when DbDo.exe is the foreground process, hands every chord DbDo cares about back to DbDo instead of running NVDA's own table-navigation or browse-mode commands.
 
-NVDA must be running for the add-on to install. The installer's Finish-page checkbox "Install NVDA add-on" hands the `DbDuo.nvda-addon` file to its Windows file association, which is registered to NVDA at NVDA install time. If NVDA is the active screen reader, NVDA's standard "Install this add-on?" dialog appears, and the user confirms or cancels. If JAWS or Narrator is the active screen reader (with NVDA installed but not running), the file association still launches NVDA, but the install dialog may not surface reliably; in that case, dismiss the installer's Finish page, switch to NVDA, then double-click `DbDuo.nvda-addon` in the install folder to install manually. The Help menu's "Re-install NVDA Add-on" command (which invokes `DbDuo.exe --install-nvda-addon`) does the same thing on demand.
+NVDA must be running for the add-on to install. The installer's Finish-page checkbox "Install NVDA add-on" hands the `DbDo.nvda-addon` file to its Windows file association, which is registered to NVDA at NVDA install time. If NVDA is the active screen reader, NVDA's standard "Install this add-on?" dialog appears, and the user confirms or cancels. If JAWS or Narrator is the active screen reader (with NVDA installed but not running), the file association still launches NVDA, but the install dialog may not surface reliably; in that case, dismiss the installer's Finish page, switch to NVDA, then double-click `DbDo.nvda-addon` in the install folder to install manually. The Help menu's "Re-install NVDA Add-on" command (which invokes `DbDo.exe --install-nvda-addon`) does the same thing on demand.
 
 After install, restart NVDA (NVDA menu > Restart) so the new app module is picked up. NVDA does not need to be restarted again for future updates of the same add-on.
 
-If the add-on does not appear to take effect — Alt+Control+arrow still triggers NVDA's "Not in a table" speech — set NVDA's log level to "Debug" (NVDA menu > Preferences > Settings > General > Log level), restart NVDA, then open DbDuo and press the chord. Open NVDA's log (NVDA menu > Tools > View log) and search for lines beginning `DbDuo app module:`. Absence of those lines means NVDA never matched the app module to DbDuo.exe; presence of them confirms the module loaded and the bindings were registered.
+If the add-on does not appear to take effect — Alt+Control+arrow still triggers NVDA's "Not in a table" speech — set NVDA's log level to "Debug" (NVDA menu > Preferences > Settings > General > Log level), restart NVDA, then open DbDo and press the chord. Open NVDA's log (NVDA menu > Tools > View log) and search for lines beginning `DbDo app module:`. Absence of those lines means NVDA never matched the app module to DbDo.exe; presence of them confirms the module loaded and the bindings were registered.
 
 **Narrator does not support scripts or add-ons.** Narrator users get less polished cell-level navigation than JAWS or NVDA users; the virtual-cursor announcements still fire, but Narrator may layer its own announcement on top.
 
 ## File menu
 
-Use the New-Database command, Control+Shift+N (N for New, Shift to distinguish it from Control+N which makes a new row), to create an empty SQLite database at a chosen path. Use the Open-Database command, Control+O (O for Open), to bring up a file dialog and choose an existing database; DbDuo recognizes `.db`, `.sqlite`, `.sqlite3`, `.mdb`, `.accdb`, `.xlsx`, `.xls`, `.dbf`, `.csv`, `.tsv`, and `.txt` files.
+Use the New-Database command, Control+Shift+N (N for New, Shift to distinguish it from Control+N which makes a new row), to create an empty SQLite database at a chosen path. Use the Open-Database command, Control+O (O for Open), to bring up a file dialog and choose an existing database; DbDo recognizes `.db`, `.sqlite`, `.sqlite3`, `.mdb`, `.accdb`, `.xlsx`, `.xls`, `.dbf`, `.csv`, `.tsv`, and `.txt` files.
 
 Every file dialog remembers the folder you last used and opens there next time. New-Database, Open-Database, Save-DatabaseAs, and Backup-Database share one remembered "open" folder, since you typically keep your databases together. Import-Data and Export-Data remember their own folders separately. If no remembered value exists, the dialog falls back to the folder of the currently-open database, then to your Documents folder.
 
-Use the Recent Files command, Alt+R (R for Recent), to open one of the last ten database files DbDuo has seen. The dialog shows each path with the table that was active when the file was last closed; selecting an entry reopens the file, restores that table, and restores the per-table filter, sort, and row position. If any of those pieces no longer apply (the table was dropped, a filter column was removed, the row count shrank below the saved position), DbDuo silently skips the incongruity and reopens with the best-fitting state it can.
+Use the Recent Files command, Alt+R (R for Recent), to open one of the last ten database files DbDo has seen. The dialog shows each path with the table that was active when the file was last closed; selecting an entry reopens the file, restores that table, and restores the per-table filter, sort, and row position. If any of those pieces no longer apply (the table was dropped, a filter column was removed, the row count shrank below the saved position), DbDo silently skips the incongruity and reopens with the best-fitting state it can.
 
-Use the Save-DatabaseAs command, Control+S (S for Save), to write a copy of the open database to a new path and switch DbDuo to the new file. The dialog suggests `<original>-copy` as the filename so a stray Enter doesn't overwrite the source. Use the Backup-Database command, Control+Shift+S, to write the same copy but keep the original open; the suggested filename is `<original>-backup-yyyyMMdd`. The Close-Database command, Control+F4 (the MDI close convention), closes the open file without exiting DbDuo.
+Use the Save-DatabaseAs command, Control+S (S for Save), to write a copy of the open database to a new path and switch DbDo to the new file. The dialog suggests `<original>-copy` as the filename so a stray Enter doesn't overwrite the source. Use the Backup-Database command, Control+Shift+S, to write the same copy but keep the original open; the suggested filename is `<original>-backup-yyyyMMdd`. The Close-Database command, Control+F4 (the MDI close convention), closes the open file without exiting DbDo.
 
 Use the Import-Data command, Control+Shift+I (I for Import), to read a GitHub-flavored Markdown table file and append its rows into the currently-open table. Header cells are matched case-insensitively to columns in the destination; cells with no matching column are dropped silently. Embedded `<br>` decodes back to newline, `\|` back to a literal pipe. Multi-table files (separated by blank lines) all import; per-row errors do not stop the import.
 
-Use the Export-Data command, Control+Shift+X (X for eXport), to write the current filtered view to one or more files. Every input format DbDuo can open is also an export format: xlsx, docx, filtered HTML, Markdown table, csv, tsv, SQLite, Access, dBASE. The GUI prompts for one destination at a time; the dot prompt accepts a multi-format argument like `Export-Data xlsx docx md csv` (or the short forms `x d m c`). After each export, DbDuo opens the result in its default Windows application so you immediately hear what was produced.
+Use the Export-Data command, Control+Shift+X (X for eXport), to write the current filtered view to one or more files. Every input format DbDo can open is also an export format: xlsx, docx, filtered HTML, Markdown table, csv, tsv, SQLite, Access, dBASE. The GUI prompts for one destination at a time; the dot prompt accepts a multi-format argument like `Export-Data xlsx docx md csv` (or the short forms `x d m c`). After each export, DbDo opens the result in its default Windows application so you immediately hear what was produced.
 
 The xlsx and docx formats use Word and Excel through late-bound COM and therefore need Microsoft Office; csv, tsv, md, plain HTML, SQLite, Access, and dBASE all work without Office. SQLite, Access, and dBASE exports open a separate ADODB connection to a fresh file, issue `CREATE TABLE` with portable text-typed columns, and INSERT row by row — the user's open recordset is not disturbed.
 
@@ -177,23 +177,23 @@ The File menu also hosts the table-switching commands: **Choose Table** (F4) ope
 
 Use the Print command, Control+P (P for Print), to print the current view; this is reserved for a future release. For now, export to HTML or docx and print from the corresponding application.
 
-Use the Exit DbDuo command, Alt+F4 (the Windows-standard close-program key), to close DbDuo entirely. The dot prompt's `quit` and `q` commands map to Exit-Application as well; `exit`, `x`, and `bye` map to Exit-Console, which leaves the dot prompt but keeps the GUI running.
+Use the Exit DbDo command, Alt+F4 (the Windows-standard close-program key), to close DbDo entirely. The dot prompt's `quit` and `q` commands map to Exit-Application as well; `exit`, `x`, and `bye` map to Exit-Console, which leaves the dot prompt but keeps the GUI running.
 
 ## Edit menu
 
 Every Edit-menu command operates on the current row, except where noted.
 
-Use the New Record command, Control+N (N for New), to add a row. DbDuo shows an edit dialog with one line per distinct field; bookkeeping fields (`added`, `updated`, `marked`, the primary key, `look`, `unq`) get their default values automatically. Use the Edit Record command, F2 (the Windows-standard rename key), to edit the current row. Use the Delete Record command, Control+D (D for Delete), to remove the current row; the Delete key alone is a secondary binding so the Excel and Outlook convention works too.
+Use the New Record command, Control+N (N for New), to add a row. DbDo shows an edit dialog with one line per distinct field; bookkeeping fields (`added`, `edited`, `marked`, the primary key, `look`, `unq`) get their default values automatically. Use the Edit Record command, F2 (the Windows-standard rename key), to edit the current row. Use the Delete Record command, Control+D (D for Delete), to remove the current row; the Delete key alone is a secondary binding so the Excel and Outlook convention works too.
 
 Use the Duplicate Record command, Control+Shift+C (Shift turns the native clipboard's Control+C into row-copy), to clone the current row as a new record.
 
-Use the Find and Replace Across Rows command, Control+R (R for Replace), to do a find-and-replace: pick a column, type the find string and the replace string, choose the scope (current row, filtered rows, or all rows), and DbDuo updates every match through ADO so the same triggers fire as for a SQL UPDATE.
+Use the Find and Replace Across Rows command, Control+R (R for Replace), to do a find-and-replace: pick a column, type the find string and the replace string, choose the scope (current row, filtered rows, or all rows), and DbDo updates every match through ADO so the same triggers fire as for a SQL UPDATE.
 
 Use the Mark Record command, Control+M (M for Mark), to set the boolean `marked` column on the current row; when marked is true, the status bar reads "marked." Use the Unmark Record command, Control+U (U for Unmark), to clear it. Marks are useful for accumulating an ad-hoc selection across navigation; combine with `filter marked` at the dot prompt to scope subsequent commands.
 
-Use the Save Bookmark command, Control+K (K for booKmark), to remember the current row by primary key. Use the Go to Bookmark command, Alt+K (Alt is the inverse of Save), to return to it later; use the Clear Bookmark command, Control+Shift+K, to forget it. DbDuo holds one named bookmark per session.
+Use the Save Bookmark command, Control+K (K for booKmark), to remember the current row by primary key. Use the Go to Bookmark command, Alt+K (Alt is the inverse of Save), to return to it later; use the Clear Bookmark command, Control+Shift+K, to forget it. DbDo holds one named bookmark per session.
 
-Use the Open Cell Value command, Control+Enter (extends Enter into "open as url"), to treat a cell's value as a url or a file path and open it in its default Windows application. DbDuo prompts for the column (defaulting to the column under virtual focus, so just press Enter to accept); useful when a database column holds links to PDFs, screenshots, or web pages.
+Use the Open Cell Value command, Control+Enter (extends Enter into "open as url"), to treat a cell's value as a url or a file path and open it in its default Windows application. DbDo prompts for the column (defaulting to the column under virtual focus, so just press Enter to accept); useful when a database column holds links to PDFs, screenshots, or web pages.
 
 ## Navigate menu
 
@@ -209,13 +209,13 @@ Use the Jump to Match in One Column command, Control+J (J for Jump), to find a r
 
 Use the Find Regex Across All Columns command, Control+F3 (F3 = Windows-standard search; Control turns it into the regex variant), to find a row matching a .NET regular expression across any visible column. Same Text + Recent + Case-sensitive dialog as Find; the regex is validated before the search begins. Use Control+Shift+F3 for the reverse.
 
-Use the Search Next command, F3, to repeat whichever family was last invoked moving forward. Use Search Previous, Shift+F3, to repeat backward. DbDuo tracks the last-used family separately from the per-family last-term state, so a Jump followed by a Find followed by F3 repeats the Find, not the Jump.
+Use the Search Next command, F3, to repeat whichever family was last invoked moving forward. Use Search Previous, Shift+F3, to repeat backward. DbDo tracks the last-used family separately from the per-family last-term state, so a Jump followed by a Find followed by F3 repeats the Find, not the Jump.
 
 **Parent-child drill.** Two-way movement between related tables using foreign-key relationships.
 
-Use the Enter Child Table command, Alt+RightArrow (right-arrow = into the child), to drill from the current parent row into a child table whose schema includes the parent's primary-key column. If exactly one child table matches, DbDuo opens it directly; otherwise it presents an alphabetized listbox so you can pick. The child table opens with a filter applied that shows only the rows whose foreign key matches this parent's primary key.
+Use the Enter Child Table command, Alt+RightArrow (right-arrow = into the child), to drill from the current parent row into a child table whose schema includes the parent's primary-key column. If exactly one child table matches, DbDo opens it directly; otherwise it presents an alphabetized listbox so you can pick. The child table opens with a filter applied that shows only the rows whose foreign key matches this parent's primary key.
 
-Use the Exit Child Table command, Alt+LeftArrow (left-arrow = out of the child), to pop back one level. DbDuo restores the parent's sort, filter, and exact row position. The drill stack is unbounded; you can Enter Child Table several levels deep, then Exit Child Table back up the same way.
+Use the Exit Child Table command, Alt+LeftArrow (left-arrow = out of the child), to pop back one level. DbDo restores the parent's sort, filter, and exact row position. The drill stack is unbounded; you can Enter Child Table several levels deep, then Exit Child Table back up the same way.
 
 Use the Exit to Root Table command, Alt+Home, to pop the entire drill stack and return to the topmost ancestor in one keypress.
 
@@ -232,7 +232,7 @@ The Query menu contains read-only commands that report on the data without modif
 - Say Yield (Alt+Y) — row count and active filter
 - Say Tables (Shift+F4) — tables visited in this session
 - Say Marked (Alt+Shift+M) — the `look` values of every marked row
-- Say Updated (Shift+D) — the `updated` value of the current row, in a human-friendly local-time form (`December 14, 1963 at 5:42 AM`); the underlying SQLite text is unchanged
+- Say Edited (Shift+E) — the `edited` value of the current row, in a human-friendly local-time form (`December 14, 1963 at 5:42 AM`); the underlying SQLite text is unchanged
 - Say Notes (Shift+N) — the `notes` field of the current row
 - Say Tags (Shift+T) — the `tags` field of the current row
 - Say Column from Cursor (Shift+L) — values of the current virtual column starting at the current row, semicolon-separated
@@ -242,19 +242,19 @@ The Query menu contains read-only commands that report on the data without modif
 
 Use the Sort Ascending by Column command, Alt+A (A for Ascending), to sort by a chosen column alphabetically; use Alt+Shift+A for Sort Descending. Each prompts for the column with a listbox that defaults to the column under virtual focus — just press Enter to accept.
 
-Use the Sort by Date Updated (oldest first) command, Alt+D (D for Date), to sort by the table's `updated` column with the oldest at the top; use Alt+Shift+D for the most-recent-first variant. Use the Clear Sort command to drop the sort so the recordset returns to its natural order.
+Use the Sort by Date Edited (oldest first) command, Alt+D (D for Date), to sort by the table's `edited` column with the oldest at the top; use Alt+Shift+D for the most-recent-first variant. Use the Clear Sort command to drop the sort so the recordset returns to its natural order.
 
 ## Misc menu
 
-Use the Refresh View command, F5 (the browser-standard refresh key), to re-query the database from disk; useful when another tool has written to the file while DbDuo had it open. F5 also resets the virtual cursor to (row 1, first column).
+Use the Refresh View command, F5 (the browser-standard refresh key), to re-query the database from disk; useful when another tool has written to the file while DbDo had it open. F5 also resets the virtual cursor to (row 1, first column).
 
 Use the Toggle Read-Only Lock command, Control+F7 (F7 = lock convention), to switch the recordset between editable and read-only; the window title shows the change.
 
 Use the Table Statistics command (no hotkey) to print row counts and per-column statistics for the current table. Use the Frequency Chart command (no hotkey; Alt+C as an alias) to render a frequency-by-column chart in Excel for analysis.
 
-Use the Describe Column command, Control+Shift+D (D for Describe), to compute descriptive statistics for the column under the virtual cursor. DbDuo walks the column, detects whether the values look numeric, date-like, boolean-like, or text, and reports the statistics that fit. Numeric columns get count, unique, minimum, maximum, range, mean, median, sample standard deviation, Q1, Q3, IQR, mode (if unambiguous), and a skew indicator. Date columns get earliest, latest, median, and span. Boolean-like columns (`0/1`, `Y/N`, `true/false`) get true and false counts with percentages. Text columns get unique count, shortest/longest/mean length, and a top-10 frequency table. The report opens in the same multi-line read-only dialog used by speech commands on double-press; press Control+C inside the textbox to copy the whole report.
+Use the Describe Column command, Control+Shift+D (D for Describe), to compute descriptive statistics for the column under the virtual cursor. DbDo walks the column, detects whether the values look numeric, date-like, boolean-like, or text, and reports the statistics that fit. Numeric columns get count, unique, minimum, maximum, range, mean, median, sample standard deviation, Q1, Q3, IQR, mode (if unambiguous), and a skew indicator. Date columns get earliest, latest, median, and span. Boolean-like columns (`0/1`, `Y/N`, `true/false`) get true and false counts with percentages. Text columns get unique count, shortest/longest/mean length, and a top-10 frequency table. The report opens in the same multi-line read-only dialog used by speech commands on double-press; press Control+C inside the textbox to copy the whole report.
 
-Use the Plot Column command, Control+Shift+P (P for Plot), to produce an Excel chart matched to the data type of the column under the virtual cursor. DbDuo runs the same data-type detection Describe Column uses and chooses a chart shape from it. Numeric columns can plot as a histogram (Sturges-binned distribution) or as a box-and-whisker plot (Tukey's five-number summary as a single compact shape); a small dialog prompts you to pick one. Date columns can plot as a timeline (count by month or by day for short spans, line chart), as counts-per-calendar-year (column chart), or as counts-by-month-of-year (column chart for seasonal patterns). Boolean columns auto-pick a pie chart of true / false proportions. Text columns auto-pick a horizontal Pareto bar of the top 15 most frequent values. When there is only one sensible chart shape for the data type, DbDuo skips the picker and generates it directly. The .xlsx file is written next to the database file with a name like `customers-region-pareto.xlsx`, then opened in Excel; from there you can polish the chart, copy it to other documents, or change the chart type by hand. Plot Column requires Excel to be installed (same dependency as Frequency Chart). The existing Frequency &Chart command (Alt+C) remains for when you want to pick any column from a list and produce a column chart of value counts, regardless of data type.
+Use the Plot Column command, Control+Shift+P (P for Plot), to produce an Excel chart matched to the data type of the column under the virtual cursor. DbDo runs the same data-type detection Describe Column uses and chooses a chart shape from it. Numeric columns can plot as a histogram (Sturges-binned distribution) or as a box-and-whisker plot (Tukey's five-number summary as a single compact shape); a small dialog prompts you to pick one. Date columns can plot as a timeline (count by month or by day for short spans, line chart), as counts-per-calendar-year (column chart), or as counts-by-month-of-year (column chart for seasonal patterns). Boolean columns auto-pick a pie chart of true / false proportions. Text columns auto-pick a horizontal Pareto bar of the top 15 most frequent values. When there is only one sensible chart shape for the data type, DbDo skips the picker and generates it directly. The .xlsx file is written next to the database file with a name like `customers-region-pareto.xlsx`, then opened in Excel; from there you can polish the chart, copy it to other documents, or change the chart type by hand. Plot Column requires Excel to be installed (same dependency as Frequency Chart). The existing Frequency &Chart command (Alt+C) remains for when you want to pick any column from a list and produce a column chart of value counts, regardless of data type.
 
 Use the Choose Visible Columns command (no hotkey; Alt+L as an alias) to pick which columns appear in the data list for the current table. Hidden columns are still accessible through Show Record and Edit Record.
 
@@ -262,7 +262,7 @@ Use the Extract Regex Matches to Clipboard command, Alt+E (E for Extract), to wa
 
 Use the Copy Cell to Clipboard command, Shift+C, to copy the current virtual cell (the cell under the Alt+Control+arrow cursor) to the Windows clipboard, replacing whatever was there. Use the Append Cell to Clipboard command, Shift+A, to append the current virtual cell to the clipboard separated by a blank line (two CRLF), so you can accumulate values from multiple cells across rows or columns. If the clipboard is empty, Append acts the same as Copy.
 
-Use the Copy Row as TSV to Clipboard command (no hotkey, accessed through the Misc menu) to copy the current row's visible columns as tab-separated values for pasting into Excel, Word tables, or chat clients. The label lacks a mnemonic letter because the only candidates fall mid-word — DbDuo prefers no mnemonic to a mid-word one.
+Use the Copy Row as TSV to Clipboard command (no hotkey, accessed through the Misc menu) to copy the current row's visible columns as tab-separated values for pasting into Excel, Word tables, or chat clients. The label lacks a mnemonic letter because the only candidates fall mid-word — DbDo prefers no mnemonic to a mid-word one.
 
 Use the Next Initial Change command, Shift+I, to jump to the next row whose value in a chosen column starts with a different first letter. The column picker defaults to the column under virtual focus.
 
@@ -276,25 +276,25 @@ Use the Open Dot Prompt command, Control+GraveAccent, to open or focus the dot p
 
 Use the Invoke Script command, Alt+V (V for inVoke), to pick and run one of your saved scripts. Use the Edit Script command, Alt+Shift+V, to edit an existing script or create a new one. Use the Open Script Folder command (no hotkey) to launch Explorer at the script folder. See the Scripting section below for the full reference.
 
-Use the Configuration Settings command, Alt+Shift+C (matching the EdSharp and FileDir convention; F12 also works as a legacy alias), to open the per-user DbDuo.ini settings dialog. The dialog exposes a curated subset of the settings the program reads — the UI mode, the Command Echo toggle, and a "Field Validation..." button that opens a sub-dialog for per-field regex patterns on the current table. The dialog also has an "Open file..." button that launches the raw DbDuo.ini in your default text editor for advanced settings (`[Keys]` hotkey overrides, connection-string overrides, and operational housekeeping keys that DbDuo writes itself).
+Use the Configuration Settings command, Alt+Shift+C (matching the EdSharp and FileDir convention; F12 also works as a legacy alias), to open the per-user DbDo.inix settings dialog. The dialog exposes a curated subset of the settings the program reads — the UI mode, the Command Echo toggle, and a "Field Validation..." button that opens a sub-dialog for per-field regex patterns on the current table. The dialog also has an "Open file..." button that launches the raw DbDo.inix in your default text editor for advanced settings (`[Keys]` hotkey overrides, connection-string overrides, and operational housekeeping keys that DbDo writes itself).
 
-Use the Start Mark Anchor command, F8, to record the current row as the start of a mark range. Then move to another row (above or below — direction does not matter) and press Complete Mark to Anchor, Shift+F8, to set the marked flag on every row in the range, inclusive. Use the parallel Start Unmark Anchor command, Alt+F8, and Complete Unmark to Anchor, Alt+Shift+F8, to do the same for clearing marks. The two anchors are independent, so you can stage a mark range and an unmark range without one gesture clobbering the other. Both anchors are direction-agnostic and transient: they reset when you close the database, and each "Complete" command refuses with a clear message if its anchor was set on a different table than the currently-open one. The pattern parallels EdSharp's Start/Complete Selection family (F8 / Shift+F8) and FileDir's Start Tag or Untag / Complete Tag / Complete Untag, with DbDuo's "Mark" terminology and the additional independent unmark-anchor for symmetry.
+Use the Start Mark Anchor command, F8, to record the current row as the start of a mark range. Then move to another row (above or below — direction does not matter) and press Complete Mark to Anchor, Shift+F8, to set the marked flag on every row in the range, inclusive. Use the parallel Start Unmark Anchor command, Alt+F8, and Complete Unmark to Anchor, Alt+Shift+F8, to do the same for clearing marks. The two anchors are independent, so you can stage a mark range and an unmark range without one gesture clobbering the other. Both anchors are direction-agnostic and transient: they reset when you close the database, and each "Complete" command refuses with a clear message if its anchor was set on a different table than the currently-open one. The pattern parallels EdSharp's Start/Complete Selection family (F8 / Shift+F8) and FileDir's Start Tag or Untag / Complete Tag / Complete Untag, with DbDo's "Mark" terminology and the additional independent unmark-anchor for symmetry.
 
-Use the Say Position command, Alt+Delete, to hear the current cell's column header and row number — for example, "Column: name, Row: 30". Speech-only; does not move focus. This is the JAWS convention for "say cursor position", reframed in DbDuo terms to mean the virtual cell (the cell under the Alt+Control+arrow cursor). Single-press speaks; double-press shows the same text in the multi-line dialog used by the other speech-only commands.
+Use the Say Position command, Alt+Delete, to hear the current cell's column header and row number — for example, "Column: name, Row: 30". Speech-only; does not move focus. This is the JAWS convention for "say cursor position", reframed in DbDo terms to mean the virtual cell (the cell under the Alt+Control+arrow cursor). Single-press speaks; double-press shows the same text in the multi-line dialog used by the other speech-only commands.
 
 Use the Say Sort and Filter command, Shift+8 (the asterisk key; Numpad-asterisk also works), to hear the active sort order and filter criteria for the current table. Either or both may be empty; the speech explicitly says "(none)" rather than going silent, so you always get confirmation. Single-press speaks; double-press shows the same text in the multi-line dialog.
 
 Use the Say Kin command, Shift+K (K for Kin — relatives by foreign key), to hear the `look` field of every related record. The announcement covers both directions: every parent reached by an outbound foreign-key column on the current row, and every child that points back via an inbound foreign key. Parent entries are listed first as "Parents: <table>: <look>; <table>: <look>"; children follow as "Children: <table> (N): <look>, <look>, ...". Single-press speaks via the screen reader; double-press shows the same content in the multi-line dialog, useful when the parent row has many children. The Say Kin command is read-only and does not move the cursor or change the open table; for an interactive jump to a specific related record, use the existing Show-Related command (Alt+Shift+R) instead.
 
-Field validation: each editable field can have a regex pattern stored in DbDuo.ini under a `[Validation:<table>]` section. When the pattern is set, both the Edit Record dialog (F2) and the Edit Field dialog (Shift+F2) refuse non-matching input. DbDuo uses .NET regex syntax (the established powerful pattern language, the same one Find Regex uses) — examples appear in the sub-dialog. Empty pattern means no constraint.
+Field validation: each editable field can have a regex pattern stored in DbDo.inix under a `[Validation:<table>]` section. When the pattern is set, both the Edit Record dialog (F2) and the Edit Field dialog (Shift+F2) refuse non-matching input. DbDo uses .NET regex syntax (the established powerful pattern language, the same one Find Regex uses) — examples appear in the sub-dialog. Empty pattern means no constraint.
 
 ## SQL reference: what Invoke-Sql actually runs
 
-A common question worth answering precisely: when you press Control+Q for Run SQL, what SQL dialect does the database engine understand? The answer depends on which kind of file you have open, because DbDuo uses three different drivers under the ADO ConnectionString and each one parses SQL differently.
+A common question worth answering precisely: when you press Control+Q for Run SQL, what SQL dialect does the database engine understand? The answer depends on which kind of file you have open, because DbDo uses three different drivers under the ADO ConnectionString and each one parses SQL differently.
 
 ### A portable SQL baseline that works everywhere
 
-Most users do not need a SQL deep-dive. The basics — selecting rows, inserting rows, updating values, deleting rows — work across every database format DbDuo opens (SQLite, Access, Excel-as-queryable, dBASE, CSV/TSV-as-readable) when you stay inside a careful ANSI SQL-92 subset.
+Most users do not need a SQL deep-dive. The basics — selecting rows, inserting rows, updating values, deleting rows — work across every database format DbDo opens (SQLite, Access, Excel-as-queryable, dBASE, CSV/TSV-as-readable) when you stay inside a careful ANSI SQL-92 subset.
 
 ```sql
 -- SELECT rows
@@ -339,7 +339,7 @@ The portable subset includes: `SELECT` with `WHERE`, `ORDER BY`, `GROUP BY`, `HA
 
 ### SQLite: full modern SQL
 
-When the open file is .db / .sqlite / .sqlite3, DbDuo connects through the ch-werner SQLite ODBC driver. There is no SQL translation layer: the full SQLite SQL surface is available, including:
+When the open file is .db / .sqlite / .sqlite3, DbDo connects through the ch-werner SQLite ODBC driver. There is no SQL translation layer: the full SQLite SQL surface is available, including:
 
 - Window functions with the OVER clause (since 3.25): `row_number()`, `rank()`, `dense_rank()`, etc.
 - Common Table Expressions (WITH), including recursive CTEs.
@@ -349,7 +349,7 @@ When the open file is .db / .sqlite / .sqlite3, DbDuo connects through the ch-we
 - FTS5 full-text search if the database was built with FTS5 tables.
 - R-Tree, generated columns, partial indexes, expression indexes.
 
-PRAGMA statements work both as data-returning queries (when shaped like `PRAGMA table_info(foo)`, which returns a result set DbDuo will render as a grid) and as setters (when shaped like `PRAGMA journal_mode = WAL`, which DbDuo runs through Execute).
+PRAGMA statements work both as data-returning queries (when shaped like `PRAGMA table_info(foo)`, which returns a result set DbDo will render as a grid) and as setters (when shaped like `PRAGMA journal_mode = WAL`, which DbDo runs through Execute).
 
 The few things SQLite genuinely lacks compared to PostgreSQL or SQL Server: no stored procedures (use views and triggers instead), no row-level security, no native UUID type, and only a limited ALTER TABLE.
 
@@ -380,7 +380,7 @@ PRAGMA table_info(students);
 
 ### Access (.mdb / .accdb): Jet/ACE SQL
 
-When the open file is .mdb or .accdb, DbDuo connects through the Microsoft ACE OLEDB provider. This driver runs **Access SQL**, not standard SQL. The differences from SQLite or ANSI SQL are substantial.
+When the open file is .mdb or .accdb, DbDo connects through the Microsoft ACE OLEDB provider. This driver runs **Access SQL**, not standard SQL. The differences from SQLite or ANSI SQL are substantial.
 
 Access SQL uses `IIF(condition, then, else)` instead of `CASE WHEN ... THEN ... ELSE ... END`. String concatenation is `&` not `||`. Wildcards in LIKE are `*` and `?`, not `%` and `_`. Date literals are delimited with hash marks: `#2025-05-12#`. Booleans are TRUE and FALSE.
 
@@ -395,7 +395,7 @@ FROM students;
 SELECT * FROM students WHERE name LIKE 'Sm*';
 
 -- Date literal with hash delimiters
-SELECT * FROM enrollments WHERE updated >= #2024-01-01#;
+SELECT * FROM enrollments WHERE edited >= #2024-01-01#;
 
 -- Aggregate with TOP (Access's LIMIT)
 SELECT TOP 10 class_id, COUNT(*) AS n FROM enrollments
@@ -428,7 +428,7 @@ dBASE files open through ACE OLEDB. The connection is to the folder containing t
 
 ### CSV and TSV: SELECT-only Jet text driver
 
-When the open file is .csv or .tsv, DbDuo connects through the Jet text driver. The driver is read-mostly: SELECT works well, INSERT works in a limited fashion, and structural commands like CREATE TABLE or ALTER TABLE don't apply.
+When the open file is .csv or .tsv, DbDo connects through the Jet text driver. The driver is read-mostly: SELECT works well, INSERT works in a limited fashion, and structural commands like CREATE TABLE or ALTER TABLE don't apply.
 
 The most useful pattern is to read a CSV with Invoke-Sql for analysis, and use Import-Data to copy into SQLite for any non-trivial work.
 
@@ -438,37 +438,37 @@ For non-trivial analytical SQL — anything involving CTEs, window functions, re
 
 ## Scripting
 
-DbDuo's scripting feature lets you save and re-run units of work — computations, queries, command workflows — without having to remember or retype them. The model is one folder, one chord (Alt+V), and three file extensions that pick the right execution engine for the kind of work you want to do. The pattern is the same one EdSharp and FileDir pioneered for their snippet systems: a folder of plain text files; you write them in your own editor; you invoke them from a standard listbox dialog. DbDuo extends the pattern by recognizing three distinct file types and dispatching to the engine that matches each.
+DbDo's scripting feature lets you save and re-run units of work — computations, queries, command workflows — without having to remember or retype them. The model is one folder, one chord (Alt+V), and three file extensions that pick the right execution engine for the kind of work you want to do. The pattern is the same one EdSharp and FileDir pioneered for their snippet systems: a folder of plain text files; you write them in your own editor; you invoke them from a standard listbox dialog. DbDo extends the pattern by recognizing three distinct file types and dispatching to the engine that matches each.
 
 ### Where scripts live
 
-Scripts live under `%APPDATA%\DbDuo\Scripts\`. The folder is created on first access; it lives under your roaming application data so it survives DbDuo upgrades and uninstalls. On first launch DbDuo seeds the folder with the bundled sample scripts (described at the end of this section). A `.seeded` sentinel file in the folder records that seeding has run, so deleting a sample does not cause it to reappear later. To re-seed (to recover a deleted sample or pick up a new one bundled with a future release), delete the `.seeded` file and any matching scripts, then invoke any script command.
+Scripts live under `%APPDATA%\DbDo\Scripts\`. The folder is created on first access; it lives under your roaming application data so it survives DbDo upgrades and uninstalls. On first launch DbDo seeds the folder with the bundled sample scripts (described at the end of this section). A `.seeded` sentinel file in the folder records that seeding has run, so deleting a sample does not cause it to reappear later. To re-seed (to recover a deleted sample or pick up a new one bundled with a future release), delete the `.seeded` file and any matching scripts, then invoke any script command.
 
 ### The three file types
 
 The extension on a script file determines which engine runs it. The picker shows the extension on every row, so you always know what kind of script you're picking before you press Enter.
 
-**`.js`** — JScript .NET. A general-purpose computational language that runs inside the DbDuo process with full access to the running form and recordset. The script has two pre-injected host variables, `db` (a `DbDuoManager` — the open database) and `frm` (a `DbDuoForm` — the GUI window). The DbDuo.dll support module pre-imports `System`, `System.Collections`, `System.Data`, `System.IO`, `System.Reflection`, `System.Text`, `System.Text.RegularExpressions`, and `System.Windows.Forms`, so a script can use any type in those namespaces directly without its own `import` statements. The value of the last expression in the script is what DbDuo gets back; if it's a string, that string is displayed in the result dialog. Use `.js` when you want to do computation: iterate over rows, transform values, build a report string, talk to the COM bridge, format output. This is the most powerful and the most code-heavy of the three.
+**`.js`** — JScript .NET. A general-purpose computational language that runs inside the DbDo process with full access to the running form and recordset. The script has two pre-injected host variables, `db` (a `DbDoManager` — the open database) and `frm` (a `DbDoForm` — the GUI window). The DbDo.dll support module pre-imports `System`, `System.Collections`, `System.Data`, `System.IO`, `System.Reflection`, `System.Text`, `System.Text.RegularExpressions`, and `System.Windows.Forms`, so a script can use any type in those namespaces directly without its own `import` statements. The value of the last expression in the script is what DbDo gets back; if it's a string, that string is displayed in the result dialog. Use `.js` when you want to do computation: iterate over rows, transform values, build a report string, talk to the COM bridge, format output. This is the most powerful and the most code-heavy of the three.
 
 **`.sql`** — SQL batch. A list of SQL statements separated by `;`. Each statement is run in order through the same `invokeSql` pipeline that powers the Invoke-Sql command. SELECT results are rendered as text tables; UPDATE / INSERT / DELETE return their row counts; PRAGMA output is shown verbatim. Statements that error abort the batch with an error message identifying the failing statement number. Line comments starting with `--` and block comments `/* ... */` are stripped before parsing. The first line is conventionally a `-- Description: <one-line summary>` comment so the picker has context. Use `.sql` when you want to ask the database something or change data: saved queries, repeatable reports, scheduled cleanups.
 
-**`.duo`** — DbDuo command batch. A list of dot-prompt commands, one per line, dispatched as if you had typed each line at the dot prompt. The execution surface is the entire DbDuo command set, not just SQL — so a `.duo` script can open a database, switch tables, set filters and sorts, mark and unmark rows, speak status to the screen reader, export results, and so on. Use the **natural dot-prompt language** in `.duo` scripts — the short, single-word aliases like `path`, `status`, `tables-list`, `sort-filter`, `table <name>`, `filter <expr>`, `sort <expr>`, `find <text>`, `jump <expr>`, `next`, `previous`, `mark`, `unmark`, `add`, `edit`, `delete`, `schema`, `kin` — rather than the underlying canonical PowerShell-style verbs (`say-path`, `say-status`, `say-tables`, `select-table`, `select-record`, `sort-object`, etc.). Either form works because the dispatcher resolves aliases, but the natural form is shorter, more readable, and matches what you type interactively. Lines starting with `#` or `--` are comments. Blank lines are skipped. A leading `?` on a line means "continue on error" — useful for commands whose failure is harmless (e.g. clearing a filter when no filter is active). By default an error on any other line aborts the batch and the rest of the file is not run. Each line's output is captured and accumulated in the result dialog. Use `.duo` when you want to automate a workflow you would otherwise execute as a sequence of menu commands or dot-prompt entries.
+**`.dbdo`** — DbDo command batch. A list of dot-prompt commands, one per line, dispatched as if you had typed each line at the dot prompt. The execution surface is the entire DbDo command set, not just SQL — so a `.dbdo` script can open a database, switch tables, set filters and sorts, mark and unmark rows, speak status to the screen reader, export results, and so on. Use the **natural dot-prompt language** in `.dbdo` scripts — the short, single-word aliases like `path`, `status`, `tables-list`, `sort-filter`, `table <name>`, `filter <expr>`, `sort <expr>`, `find <text>`, `jump <expr>`, `next`, `previous`, `mark`, `unmark`, `add`, `edit`, `delete`, `schema`, `kin` — rather than the underlying canonical PowerShell-style verbs (`say-path`, `say-status`, `say-tables`, `select-table`, `select-record`, `sort-object`, etc.). Either form works because the dispatcher resolves aliases, but the natural form is shorter, more readable, and matches what you type interactively. Lines starting with `#` or `--` are comments. Blank lines are skipped. A leading `?` on a line means "continue on error" — useful for commands whose failure is harmless (e.g. clearing a filter when no filter is active). By default an error on any other line aborts the batch and the rest of the file is not run. Each line's output is captured and accumulated in the result dialog. Use `.dbdo` when you want to automate a workflow you would otherwise execute as a sequence of menu commands or dot-prompt entries.
 
-The mental model is: `.js` is "compute"; `.sql` is "query"; `.duo` is "do." Each surface serves a different question.
+The mental model is: `.js` is "compute"; `.sql` is "query"; `.dbdo` is "do." Each surface serves a different question.
 
-The `.duo` extension is reserved for DbDuo's command-batch format. It does not collide with any major file type. Two alternatives were considered: `.dbd` (collides with ER/Studio Repository files and some InterBase backup formats) and `.dot` (collides with Graphviz graphs and Microsoft Word templates). `.duo` was chosen because the namespace is clean and the extension is recognizable as DbDuo's own.
+The `.dbdo` extension is reserved for DbDo's command-batch format: it is simply the program's own name, so the association is unmistakable and the namespace is clean. Alternatives considered and rejected: `.dbd` (collides with ER/Studio Repository files and some InterBase backup formats), `.dot` (collides with Graphviz graphs and Microsoft Word templates), and `.duo` (an earlier choice, retired when the program's name settled as DbDo).
 
 ### The chord — Alt+V
 
-Use the Invoke Script command, Alt+V, to pick and run a script. A standard `LbcDialog` listbox shows every `.js`, `.sql`, and `.duo` file in the folder, sorted alphabetically, each row showing the full filename including extension. Type into the filter box to narrow the list; press Enter or click OK to run the highlighted script. The result (script output for `.js`, query results for `.sql`, accumulated command output for `.duo`, or an `ERROR: ...` message on failure) appears in a read-only multi-line memo dialog that screen readers can navigate line by line, word by word, or character by character.
+Use the Invoke Script command, Alt+V, to pick and run a script. A standard `LbcDialog` listbox shows every `.js`, `.sql`, and `.dbdo` file in the folder, sorted alphabetically, each row showing the full filename including extension. Type into the filter box to narrow the list; press Enter or click OK to run the highlighted script. The result (script output for `.js`, query results for `.sql`, accumulated command output for `.dbdo`, or an `ERROR: ...` message on failure) appears in a read-only multi-line memo dialog that screen readers can navigate line by line, word by word, or character by character.
 
-The chord is named "Invoke Script" rather than "Invoke File" or "Invoke Query" because "script" generalizes naturally to all three engines — a JScript script, a SQL script, and a DbDuo command script are all *scripts* in the recipe-for-doing-something sense, even when the engines differ.
+The chord is named "Invoke Script" rather than "Invoke File" or "Invoke Query" because "script" generalizes naturally to all three engines — a JScript script, a SQL script, and a DbDo command script are all *scripts* in the recipe-for-doing-something sense, even when the engines differ.
 
 ### Editing scripts
 
-Use the Edit Script command, Alt+Shift+V, to edit an existing script or create a new one. If the folder has existing scripts, the picker appears with a `[New script...]` entry at the top; picking that opens a Save File dialog whose Filter list offers JScript .NET, SQL batch, DbDuo command batch, or any-extension. When you save a new script, DbDuo seeds it with a starter template appropriate to the extension: a header comment block plus one example construct that runs successfully out of the box. After the file is created, your default editor opens on it.
+Use the Edit Script command, Alt+Shift+V, to edit an existing script or create a new one. If the folder has existing scripts, the picker appears with a `[New script...]` entry at the top; picking that opens a Save File dialog whose Filter list offers JScript .NET, SQL batch, DbDo command batch, or any-extension. When you save a new script, DbDo seeds it with a starter template appropriate to the extension: a header comment block plus one example construct that runs successfully out of the box. After the file is created, your default editor opens on it.
 
-The default editor is Notepad. To override, put a line in `DbDuo.ini`:
+The default editor is Notepad. To override, put a line in `DbDo.inix`:
 
 ```ini
 [Scripts]
@@ -481,7 +481,7 @@ Use the Open Script Folder command (no hotkey by default) to launch Explorer at 
 
 ### Bundled sample scripts
 
-DbDuo ships with two examples of each script type. They demonstrate the typical shape and idioms of each engine and serve as starting points for your own work.
+DbDo ships with two examples of each script type. They demonstrate the typical shape and idioms of each engine and serve as starting points for your own work.
 
 **`.js` samples (computation):**
 
@@ -495,19 +495,19 @@ DbDuo ships with two examples of each script type. They demonstrate the typical 
 
 - **`NorthwindRowCounts.sql`** — one SELECT per Northwind table, combined with `UNION ALL` and ordered by row count. Demonstrates: per-table count, multiple counts in one result, the leading description-comment convention.
 
-**`.duo` samples (workflows):**
+**`.dbdo` samples (workflows):**
 
-- **`RecentOrders.duo`** — switches to the orders table, filters to the most recent calendar year, sorts most-recent-first, and reports the result count via speech. Uses native dot-prompt aliases (`table`, `filter`, `sort`, `sort-filter`) instead of canonical PowerShell-style verbs. Demonstrates: multi-step workflow, the `?` continue-on-error prefix on the clear-filter line, speech-only verbs at the end as a screen-reader confirmation.
+- **`RecentOrders.dbdo`** — switches to the orders table, filters to the most recent calendar year, sorts most-recent-first, and reports the result count via speech. Uses native dot-prompt aliases (`table`, `filter`, `sort`, `sort-filter`) instead of canonical PowerShell-style verbs. Demonstrates: multi-step workflow, the `?` continue-on-error prefix on the clear-filter line, speech-only verbs at the end as a screen-reader confirmation.
 
-- **`StatusSnapshot.duo`** — runs five speech-only commands in a row (`path`, `tables-list`, `status`, `sort-filter`, `say-yield`) to print a complete "where am I" snapshot. Uses the natural dot-prompt aliases throughout — only `say-yield` keeps its canonical form because no shorter alias exists for the one-line row-count summary. Demonstrates: pure-read workflow, the speech-only command family, scriptable as a warm-up routine when sitting down to a workspace.
+- **`StatusSnapshot.dbdo`** — runs five speech-only commands in a row (`path`, `tables-list`, `status`, `sort-filter`, `say-yield`) to print a complete "where am I" snapshot. Uses the natural dot-prompt aliases throughout — only `say-yield` keeps its canonical form because no shorter alias exists for the one-line row-count summary. Demonstrates: pure-read workflow, the speech-only command family, scriptable as a warm-up routine when sitting down to a workspace.
 
 ### Errors
 
-Compile-time errors and runtime errors in `.js` scripts are caught and returned as a string starting with `ERROR:`. The result dialog shows it with the error icon. The script never throws out to DbDuo, so the UI stays responsive.
+Compile-time errors and runtime errors in `.js` scripts are caught and returned as a string starting with `ERROR:`. The result dialog shows it with the error icon. The script never throws out to DbDo, so the UI stays responsive.
 
 For `.sql` batches, an error on any statement aborts the batch; the result dialog shows the output of every statement that ran before the error plus the error message identifying which statement failed.
 
-For `.duo` batches, by default an error on any line aborts the batch; the result dialog shows the output of every line that ran before the error plus the error message identifying the failing line. To let a specific line fail without aborting, prefix it with `?` ("continue on error"). This is useful for commands like `reset-filter` whose failure is harmless (no filter was active) but should not stop the rest of the script.
+For `.dbdo` batches, by default an error on any line aborts the batch; the result dialog shows the output of every line that ran before the error plus the error message identifying the failing line. To let a specific line fail without aborting, prefix it with `?` ("continue on error"). This is useful for commands like `reset-filter` whose failure is harmless (no filter was active) but should not stop the rest of the script.
 
 
 
@@ -549,7 +549,7 @@ frm.recBookmarkClicked(null, null);
 
 ### Power and responsibility
 
-Scripts run in the DbDuo process with all the privileges DbDuo has. There is no facade or sandbox. A script can call `Environment.Exit`, read or write files, launch other programs, modify the database. This is intentional for power-user automation; treat scripts the same way you would treat shell scripts or PowerShell scripts you run on your own machine.
+Scripts run in the DbDo process with all the privileges DbDo has. There is no facade or sandbox. A script can call `Environment.Exit`, read or write files, launch other programs, modify the database. This is intentional for power-user automation; treat scripts the same way you would treat shell scripts or PowerShell scripts you run on your own machine.
 
 ## Help menu
 
@@ -557,11 +557,11 @@ Use the Documentation command, F1 (the standard help key), for help. With no arg
 
 Use the PowerShell Verb Reference command (no hotkey) to see the PowerShell verb taxonomy with each verb's category and a brief description. Use the Alternate Menu command, Alt+F10, to open an alphabetized list of every command with its current hotkey and a one-line summary. EdSharp and FileDir use the same command name; the chord and behavior are consistent across the three apps. The picker includes a detail panel below the list that shows the summary plus an optional longer description for the selected command — pick a command in the list and read what it does before pressing Enter to run it.
 
-Every command in DbDuo carries one-line summary metadata and an optional multi-line description, modeled on the EdSharp and FileDir convention. The summary appears in three places: in the menu status bar when the item has focus (so screen readers announce it as you arrow through the menus), inline after the chord in the Alternate Menu, and as the "Summary:" line in the Key Describer trace. The optional description, when present, gives the longer "why" or "gotchas" of the command and shows up in the Alternate Menu detail panel and at the bottom of the Key Describer trace. Commands without an explicit summary fall back to their menu label (minus the ampersand mnemonic markers) so every command is at least minimally self-describing.
+Every command in DbDo carries one-line summary metadata and an optional multi-line description, modeled on the EdSharp and FileDir convention. The summary appears in three places: in the menu status bar when the item has focus (so screen readers announce it as you arrow through the menus), inline after the chord in the Alternate Menu, and as the "Summary:" line in the Key Describer trace. The optional description, when present, gives the longer "why" or "gotchas" of the command and shows up in the Alternate Menu detail panel and at the bottom of the Key Describer trace. Commands without an explicit summary fall back to their menu label (minus the ampersand mnemonic markers) so every command is at least minimally self-describing.
 
-Use the Where Am I command (no hotkey by default) to hear the current row, table, filter, and sort state in detail. Use the Test Screen Reader Speech command to probe DbDuo's three speech paths (JAWS direct via COM, NVDA direct via the controller-client DLL, and the UIA live-region fallback for Narrator) and confirm which one is working with your screen reader.
+Use the Where Am I command (no hotkey by default) to hear the current row, table, filter, and sort state in detail. Use the Test Screen Reader Speech command to probe DbDo's three speech paths (JAWS direct via COM, NVDA direct via the controller-client DLL, and the UIA live-region fallback for Narrator) and confirm which one is working with your screen reader.
 
-Use the Key Describer command, Control+F1 (F1 for help, Control for "describe rather than fire"), to switch into a mode where every hotkey press announces the chord and its bound command instead of running it; press Control+F1 again to leave the mode. Use the Show Log Location command to print the path of `DbDuo.log`, the per-session log file. Use the History of Changes command, Shift+F1, to read the chronological list of releases and what changed in each. Use the Readme Guide command to open `README.md` in your browser. Use the Open Website command to open the DbDuo GitHub page. Use the Elevate Version command, F11, to ask GitHub for the latest release and offer to download and install it. Use the About command, Alt+F1, to read the version number and a brief credits block. The Help-menu commands carrying chords use the same name and chord as their EdSharp and FileDir counterparts (Documentation, History of Changes, Key Describer, Elevate Version, About, Alternate Menu).
+Use the Key Describer command, Control+F1 (F1 for help, Control for "describe rather than fire"), to switch into a mode where every hotkey press announces the chord and its bound command instead of running it; press Control+F1 again to leave the mode. Use the Show Log Location command to print the path of `DbDo.log`, the per-session log file. Use the History of Changes command, Shift+F1, to read the chronological list of releases and what changed in each. Use the Readme Guide command to open `README.md` in your browser. Use the Open Website command to open the DbDo GitHub page. Use the Elevate Version command, F11, to ask GitHub for the latest release and offer to download and install it. Use the About command, Alt+F1, to read the version number and a brief credits block. The Help-menu commands carrying chords use the same name and chord as their EdSharp and FileDir counterparts (Documentation, History of Changes, Key Describer, Elevate Version, About, Alternate Menu).
 
 The Help menu also hosts one-keystroke commands to open each of the three bundled sample databases: **Open Sample Database** (sample.db, the small school domain), **Open Northwind Sample** (the classic Microsoft sales sample), and **Open Chinook Sample** (the classic music-store sample). All three open via the same code path File > Open Database uses, so the usual post-open behaviors apply. See "Bundled sample databases" below for what's in each.
 
@@ -615,15 +615,15 @@ Tab and Shift+Tab move an announcement-only column cursor across the current row
 
 ### GraveAccent family
 
-Control+GraveAccent is the GUI menu hotkey for Open Dot Prompt. Alt+GraveAccent is a global hotkey: when the console has focus, it brings the GUI forward. Alt+Control+GraveAccent is a global hotkey that always acts: it toggles between GUI and console, whichever is not currently in front.
+Control+GraveAccent is the GUI menu hotkey for Open Dot Prompt. Alt+Control+GraveAccent is a global hotkey that always acts: it toggles between GUI and console, whichever is not currently in front. (The former Alt+GraveAccent console-to-GUI hotkey was dropped as redundant with the toggle, and to stop reserving a second system-wide chord.)
 
 ## Standard fields
 
-DbDuo follows a convention for table design that the bundled sample databases illustrate and that the user manual recommends for new databases. Each table has the following "standard fields" in this order, with the "distinct fields" (the substantive columns) interleaved among them:
+DbDo follows a convention for table design that the bundled sample databases illustrate and that the user manual recommends for new databases. Each table has the following "standard fields" in this order, with the "distinct fields" (the substantive columns) interleaved among them:
 
 1. `<table>_id` — the primary key, integer, autoincrement (e.g., `teacher_id` in the `teachers` table).
 2. `added` — datetime, default `current_timestamp`. When the row was created.
-3. `updated` — datetime, default `current_timestamp`. Most recent change.
+3. `edited` — datetime, default `current_timestamp`. Most recent change.
 4. `url` — textline. A hyperlink, file path, or other openable reference associated with this row (added v1.0.66). Opened by the Open Url command (Ctrl+Shift+U) or read aloud by Say Url (Shift+U).
 5. `tags` — textmemo. Comma-separated tag list for ad-hoc grouping. Read aloud by Say Tags (Shift+T).
 6. `notes` — textmemo. Free-form annotations. Read aloud by Say Notes (Shift+N).
@@ -633,11 +633,11 @@ DbDuo follows a convention for table design that the bundled sample databases il
 10. `look` — computed text. A pipe-joined rendering of the most identifying distinct fields, designed for screen-reader readability. Appears in listboxes, quick-search displays, and Show Record's Related Records section.
 11. `unq` — computed text. Like `look` but optimized for uniqueness rather than readability. The intent is that the combination of column values in `unq` can confidently be considered unique for a row, so that an upsert-style command can update an existing row if `unq` matches, or insert a new row otherwise.
 
-The TEXTLINE / TEXTMEMO type names on `url`, `tags`, and `notes` aren't standard SQLite types — they're convention labels DbDuo reads from `PRAGMA table_info`. SQLite's type affinity treats all three as TEXT for storage. The difference is that DbDuo's Edit Record dialog renders a single-line input box for TEXT/TEXTLINE columns and a multi-line memo widget for any type containing "memo". Use TEXTMEMO for `tags` and `notes` so the editor handles their potentially-long content gracefully.
+The TEXTLINE / TEXTMEMO type names on `url`, `tags`, and `notes` aren't standard SQLite types — they're convention labels DbDo reads from `PRAGMA table_info`. SQLite's type affinity treats all three as TEXT for storage. The difference is that DbDo's Edit Record dialog renders a single-line input box for TEXT/TEXTLINE columns and a multi-line memo widget for any type containing "memo". Use TEXTMEMO for `tags` and `notes` so the editor handles their potentially-long content gracefully.
 
-The `look` column is what makes Show Record's Related Records section informative. When DbDuo lists "Related students:" or "Related classes:", each line is one matching row's `look` value, so a single short string identifies who or what each related record is. Tables without a `look` column still show up under the right header but with a `(N row(s) -- no look column)` placeholder.
+The `look` column is what makes Show Record's Related Records section informative. When DbDo lists "Related students:" or "Related classes:", each line is one matching row's `look` value, so a single short string identifies who or what each related record is. Tables without a `look` column still show up under the right header but with a `(N row(s) -- no look column)` placeholder.
 
-DbDuo hides every column ending in `_id` (primary and foreign keys), bare `id`, and the bookkeeping columns (added, updated, marked, look, unq) from the listview by default. As of v1.0.68, `url`, `tags`, and `notes` are also hidden by default — they're "extended" data per row that the user reaches via the Say-X family (Say Url, Say Tags, Say Notes) or edits via Edit Record (F2 Edit Cell or Ctrl+E Edit Record, which both show the FULL field set). Use the Select Columns command (Alt+S) to override on a per-table basis; the override persists across sessions via DbDuo.ini.
+DbDo hides every column ending in `_id` (primary and foreign keys), bare `id`, and the bookkeeping columns (added, edited, marked, look, unq) from the listview by default. As of v1.0.68, `url`, `tags`, and `notes` are also hidden by default — they're "extended" data per row that the user reaches via the Say-X family (Say Url, Say Tags, Say Notes) or edits via Edit Record (F2 Edit Cell or Ctrl+E Edit Record, which both show the FULL field set). Use the Select Columns command (Alt+S) to override on a per-table basis; the override persists across sessions via DbDo.inix.
 
 ### Example schema using the standard fields
 
@@ -647,7 +647,7 @@ The `teachers` table from `sample.db`:
 CREATE TABLE teachers (
     teacher_id  integer  primary key autoincrement,
     added       datetime not null default current_timestamp,
-    updated     datetime not null default current_timestamp,
+    edited      datetime not null default current_timestamp,
     name        text     not null,
     department  text,
     email       text,
@@ -675,17 +675,17 @@ CREATE TABLE teachers (
 
 ## Bundled sample databases
 
-DbDuo ships five SQLite sample databases, each adapted to the standard column conventions described above. The Help menu has one-keystroke commands to open each one (see "Help menu" above); all five open via the same code path File > Open Database uses. The first three are "textbook" databases borrowed from the broader SQLite community; the latter two are "hobbyist" databases that DbDuo author Jamal Mazrui assembled based on research into the most popular real-world personal database categories.
+DbDo ships five SQLite sample databases, each adapted to the standard column conventions described above. The Help menu has one-keystroke commands to open each one (see "Help menu" above); all five open via the same code path File > Open Database uses. The first three are "textbook" databases borrowed from the broader SQLite community; the latter two are "hobbyist" databases that DbDo author Jamal Mazrui assembled based on research into the most popular real-world personal database categories.
 
 **`sample.db`** — a small school domain. Four tables: `teachers`, `classes`, `students`, `enrollments`. Three rows each — twelve rows total — just enough to demonstrate parent-child relationships (a teacher teaches classes; students enroll in classes through the enrollments junction table). The minimum that exercises every standard column, the parent-child drill, and the related-records view. Opens automatically on first launch from a clean install.
 
-**`northwind.db`** — the classic Microsoft Northwind sales sample, adapted to DbDuo's column conventions. Eight tables: `categories` (8 rows), `suppliers` (10), `products` (24), `customers` (12), `employees` (9), `orders` (14), `order_details` (21), `shippers` (3) — 101 rows total. Rich parent-child shape: a category has products, a supplier has products, a customer places orders, an employee handles orders, an order has order_details, a shipper ships orders. Useful for exercising DbDuo's parent-child drill against multi-level relationships with realistic row counts. **DbDuo's adaptations are minimal and trivial**: every table has `<table>_id` primary keys (the canonical Northwind uses `CategoryID`, `SupplierID`, etc. — same idea, snake_case naming); the standard columns `added`, `updated`, `marked`, `notes`, `tags`, `look`, `unq`, and (new in v1.0.68) `url` are appended to each table; `notes` and `tags` are declared as `TEXTMEMO` so DbDuo's Edit Record dialog renders a multi-line memo widget for them. The substantive columns (company, contact, city, country, phone for customers; first_name, last_name, title for employees; and so on) are preserved verbatim. Learn more about the canonical Microsoft Northwind:
+**`northwind.db`** — the classic Microsoft Northwind sales sample, adapted to DbDo's column conventions. Eight tables: `categories` (8 rows), `suppliers` (10), `products` (24), `customers` (12), `employees` (9), `orders` (14), `order_details` (21), `shippers` (3) — 101 rows total. Rich parent-child shape: a category has products, a supplier has products, a customer places orders, an employee handles orders, an order has order_details, a shipper ships orders. Useful for exercising DbDo's parent-child drill against multi-level relationships with realistic row counts. **DbDo's adaptations are minimal and trivial**: every table has `<table>_id` primary keys (the canonical Northwind uses `CategoryID`, `SupplierID`, etc. — same idea, snake_case naming); the standard columns `added`, `edited`, `marked`, `notes`, `tags`, `look`, `unq`, and (new in v1.0.68) `url` are appended to each table; `notes` and `tags` are declared as `TEXTMEMO` so DbDo's Edit Record dialog renders a multi-line memo widget for them. The substantive columns (company, contact, city, country, phone for customers; first_name, last_name, title for employees; and so on) are preserved verbatim. Learn more about the canonical Microsoft Northwind:
 
 - Microsoft Learn — [Northwind sample database overview](https://learn.microsoft.com/en-us/dotnet/framework/data/adonet/ef/loading-related-objects)
 - GitHub — [microsoft/sql-server-samples / Northwind](https://github.com/microsoft/sql-server-samples/tree/master/samples/databases/northwind-pubs)
 - Wikipedia — [Northwind Traders sample](https://en.wikipedia.org/wiki/Northwind_Traders)
 
-**`chinook.db`** — the classic Chinook music-store sample, adapted to DbDuo's column conventions. Nine tables: `genres` (14 rows), `media_types` (5), `artists` (20), `albums` (20), `tracks` (33), `employees` (8), `customers` (15), `invoices` (17), `invoice_items` (26) — 158 rows total. Three-deep parent-child chains (artist → album → track; customer → invoice → invoice_item) make this database the best for stress-testing the deeper drill stacks and the related-records view at multiple levels. **DbDuo's adaptations are minimal and trivial** — same shape as the Northwind adaptation: primary keys are `<table>_id`; standard columns `added`, `updated`, `marked`, `notes`, `tags`, `look`, `unq`, `url` are appended; `notes` and `tags` are upgraded to `TEXTMEMO`. The substantive columns (name, title, artist_id, album_id, genre_id, etc.) are preserved verbatim. Learn more about the canonical Chinook:
+**`chinook.db`** — the classic Chinook music-store sample, adapted to DbDo's column conventions. Nine tables: `genres` (14 rows), `media_types` (5), `artists` (20), `albums` (20), `tracks` (33), `employees` (8), `customers` (15), `invoices` (17), `invoice_items` (26) — 158 rows total. Three-deep parent-child chains (artist → album → track; customer → invoice → invoice_item) make this database the best for stress-testing the deeper drill stacks and the related-records view at multiple levels. **DbDo's adaptations are minimal and trivial** — same shape as the Northwind adaptation: primary keys are `<table>_id`; standard columns `added`, `edited`, `marked`, `notes`, `tags`, `look`, `unq`, `url` are appended; `notes` and `tags` are upgraded to `TEXTMEMO`. The substantive columns (name, title, artist_id, album_id, genre_id, etc.) are preserved verbatim. Learn more about the canonical Chinook:
 
 - GitHub — [lerocha/chinook-database](https://github.com/lerocha/chinook-database) (Luis Rocha's reference repository; the SQL Server, MySQL, PostgreSQL, Oracle, and SQLite variants live here)
 - SQLite Tutorial — [Chinook sample database](https://www.sqlitetutorial.net/sqlite-sample-database/) (with a clear ER diagram description)
@@ -696,79 +696,81 @@ DbDuo ships five SQLite sample databases, each adapted to the standard column co
 
 All five databases use the same column conventions, so navigation commands and column-hiding rules behave consistently across them. The five are complementary rather than alternatives: `sample.db` is the gentle introduction; `northwind.db` is the relational textbook example; `chinook.db` is the deeper-hierarchy stress test; `collection.db` and `cellar.db` are starting points for hobbyist users who want to track their own real-world things.
 
-### Updated-timestamp triggers
+### Edited-timestamp triggers
 
-Each bundled database carries one SQLite trigger per table (named `dbduo_<table>_updated`) that maintains the `updated` column automatically. The trigger fires `AFTER UPDATE` and bumps `updated = current_timestamp` only when one of the substantive columns actually changed in value. The `marked`, `added`, `updated`, `look`, and `unq` columns are deliberately excluded from the substantive set, so toggling the `marked` flag (Control+M / Control+U, or any of the range-mark commands) does NOT bump the timestamp — `marked` is a UI flag, not a content edit, and bumping the timestamp on every Mark Record would scramble "sort by recently edited" for users who use marking as a working-set tool.
+Each bundled database carries one SQLite trigger per table (named `trg_<table>_edited`) that maintains the `edited` column automatically. The trigger fires `AFTER UPDATE OF` the data-bearing columns and bumps `edited = CURRENT_TIMESTAMP` only when one of those columns actually changed in value. The `marked`, `added`, `edited`, `look`, and `unq` columns are deliberately excluded from the substantive set, so toggling the `marked` flag (Control+M / Control+U, or any of the range-mark commands) does NOT bump the timestamp — `marked` is a UI flag, not a content edit, and bumping the timestamp on every Mark Record would scramble "sort by recently edited" for users who use marking as a working-set tool.
 
 The check uses `OLD.col IS NOT NEW.col` for each substantive column, joined by `OR`, so the trigger correctly skips both the "ADO only writes one column" case (Mark Record updates only `marked`) and the "Edit Record writes every column with values unchanged" case (the F2 dialog hands every field back even if untouched). NULLs are handled correctly because `IS NOT` is null-safe in SQLite, unlike the regular `<>` operator.
 
 For users creating their own tables, the same trigger pattern is recommended:
 
 ```sql
-CREATE TRIGGER dbduo_<table>_updated
-AFTER UPDATE ON <table>
+CREATE TRIGGER trg_<table>_edited
+AFTER UPDATE OF "col1", "col2" -- the data-bearing columns, including notes, tags, url
+ON <table>
 FOR EACH ROW
 WHEN OLD."col1" IS NOT NEW."col1"
   OR OLD."col2" IS NOT NEW."col2"
-  -- one OLD/NEW comparison per substantive column;
-  -- omit marked, added, updated, look, unq
+  -- one OLD/NEW comparison per data-bearing column;
+  -- omit <singular>_id, marked, added, edited, look, unq
 BEGIN
-    UPDATE <table> SET updated = current_timestamp WHERE rowid = NEW.rowid;
+    UPDATE <table> SET edited = CURRENT_TIMESTAMP
+    WHERE <singular>_id = NEW.<singular>_id;
 END;
 ```
 
-DbDuo itself does not write to `updated`; the timestamp behavior comes entirely from these triggers. The same pattern works on Access (using `ON UPDATE` data macros) but DbDuo does not ship Access samples, so the trigger SQL above is SQLite-specific.
+DbDo itself does not write to `edited`; the timestamp behavior comes entirely from these triggers. The same pattern works on Access (using `ON UPDATE` data macros) but DbDo does not ship Access samples, so the trigger SQL above is SQLite-specific.
 
 ## Persistence
 
-Between sessions, DbDuo remembers the last opened database and table (relaunch goes straight there), the last folder used for each kind of file dialog (open/save/import/export remembered separately), per-table sort/filter/position/Select-Column lists within a session, and one named bookmark per session. Settings live in `%LOCALAPPDATA%\DbDuo\DbDuo.ini`.
+Between sessions, DbDo remembers the last opened database and table (relaunch goes straight there), the last folder used for each kind of file dialog (open/save/import/export remembered separately), per-table sort/filter/position/Select-Column lists within a session, and one named bookmark per session. Settings live in `%LOCALAPPDATA%\DbDo\DbDo.inix`.
 
-The shipped `DbDuo.ini` next to the executable holds configuration that ships with the install: `[General]` for `uiMode`, `[Keys]` for hotkey overrides. The per-user file in `%LOCALAPPDATA%\DbDuo\` holds session state: `[Session]` for last-opened, `[Folders]` for remembered directories. The two files coexist; per-user values take precedence.
+The shipped `DbDo.inix` next to the executable holds configuration that ships with the install: `[General]` for `uiMode`, `[Keys]` for hotkey overrides. The per-user file in `%LOCALAPPDATA%\DbDo\` holds session state: `[Session]` for last-opened, `[Folders]` for remembered directories. The two files coexist; per-user values take precedence.
 
 ## Logging
 
-DbDuo writes a per-session log to `%LOCALAPPDATA%\DbDuo\DbDuo.log` (truncated at every program start). The log records database opens, table switches, errors, and the result of hotkey registration. Use the Show-Log command (no hotkey) to print the exact path.
+DbDo writes a per-session log to `%LOCALAPPDATA%\DbDo\DbDo.log` (truncated at every program start). The log records database opens, table switches, errors, and the result of hotkey registration. Use the Show-Log command (no hotkey) to print the exact path.
 
 ## Bundled documentation
 
 - `README.md` and `README.htm` — summary and quick start with a guided tour of `sample.db`.
 - `Announce.md` and `Announce.htm` — release announcement.
-- `DbDuo.md` and `DbDuo.htm` — this reference.
+- `DbDo.md` and `DbDo.htm` — this reference.
 - `History.md` and `History.htm` — chronological release notes.
 - `License.md` and `License.htm` — MIT License text.
-- `CamelType_CSharp.md` — coding conventions used inside `DbDuo.cs`, for developers.
+- `CamelType_CSharp.md` — coding conventions used inside `DbDo.cs`, for developers.
 
 # Development
 
-This section is for anyone building DbDuo from source or extending it.
+This section is for anyone building DbDo from source or extending it.
 
 ## Requirements
 
-DbDuo is a single-file C# program targeting .NET Framework 4.8 on Windows x64. Compilation needs `csc.exe` from the .NET Framework 4.8 developer pack (Microsoft ships this in standalone form for free) — no Visual Studio required. Inno Setup 6 is used to build the installer. Pandoc is used to render the Markdown docs to HTML at release time.
+DbDo is a single-file C# program targeting .NET Framework 4.8 on Windows x64. Compilation needs `csc.exe` from the .NET Framework 4.8 developer pack (Microsoft ships this in standalone form for free) — no Visual Studio required. Inno Setup 6 is used to build the installer. Pandoc is used to render the Markdown docs to HTML at release time.
 
 ## Build steps
 
 ```
-buildDbDuo.cmd
+buildDbDo.cmd
 ```
 
-This single batch file compiles `DbDuo.cs` to `DbDuo.exe` with the right `csc.exe` flags (`/target:winexe`, `/platform:x64`, `/optimize+`, references to `System.Windows.Forms.dll`, `System.Drawing.dll`, and the Microsoft accessibility assembly), plus `jsc.exe` for the tiny `DbDuo.dll` support assembly (compiled from `DbDuo.js`). The build script auto-locates `csc.exe` by walking the .NET Framework install path; if your developer pack is in a non-standard location, edit the `set csc_path=` line at the top.
+This single batch file compiles `DbDo.cs` to `DbDo.exe` with the right `csc.exe` flags (`/target:winexe`, `/platform:x64`, `/optimize+`, references to `System.Windows.Forms.dll`, `System.Drawing.dll`, and the Microsoft accessibility assembly), plus `jsc.exe` for the tiny `DbDo.dll` support assembly (compiled from `DbDo.js`). The build script auto-locates `csc.exe` by walking the .NET Framework install path; if your developer pack is in a non-standard location, edit the `set csc_path=` line at the top.
 
 ```
-"%ProgramFiles(x86)%\Inno Setup 6\ISCC.exe" DbDuo_setup.iss
+"%ProgramFiles(x86)%\Inno Setup 6\ISCC.exe" DbDo_setup.iss
 ```
 
-This compiles the installer. `DbDuo_setup.iss` is a standard Inno Setup script with a Welcome → SelectDir → Ready → Installing → Finish wizard, a `CurStepChanged` hook that fetches the SQLite ODBC and ACE drivers on the Installing step, and `[Files]` entries for the bundled artifacts. The output is `DbDuo_setup.exe` in the project root.
+This compiles the installer. `DbDo_setup.iss` is a standard Inno Setup script with a Welcome → SelectDir → Ready → Installing → Finish wizard, a `CurStepChanged` hook that fetches the SQLite ODBC and ACE drivers on the Installing step, and `[Files]` entries for the bundled artifacts. The output is `DbDo_setup.exe` in the project root.
 
 ## Architecture: one connection, two interfaces
 
-The GUI form (`DbDuoForm`) and the dot-prompt CLI (`Program.cmdXxx` static methods) share one `DbDuoManager` instance. The manager owns the single `ADODB.Connection` and the active `ADODB.Recordset`. Both interfaces call manager methods (`openDatabase`, `selectTable`, `applyFilter`, etc.) rather than working directly with ADO objects. When an edit is committed in either interface, the manager's notification path tells the form to refresh its list view; the next dot-prompt command sees the new state automatically because it queries the same connection.
+The GUI form (`DbDoForm`) and the dot-prompt CLI (`Program.cmdXxx` static methods) share one `DbDoManager` instance. The manager owns the single `ADODB.Connection` and the active `ADODB.Recordset`. Both interfaces call manager methods (`openDatabase`, `selectTable`, `applyFilter`, etc.) rather than working directly with ADO objects. When an edit is committed in either interface, the manager's notification path tells the form to refresh its list view; the next dot-prompt command sees the new state automatically because it queries the same connection.
 
 `CursorLocation = adUseClient` is set on every Connection.Open. This means filter, sort, and bookmark operations happen client-side after the recordset is fetched. The benefit is that the same code path works against SQLite, Access, Excel, and dBASE without per-provider quirks. The cost is that `.Filter` does not push down to the database engine.
 
 ## Coding style
 
-DbDuo.cs follows the **Camel Type** coding conventions documented in `CamelType_CSharp.md`. Key points:
+DbDo.cs follows the **Camel Type** coding conventions documented in `CamelType_CSharp.md`. Key points:
 
 - Hungarian-prefixed lower camel case variable names: `sName`, `iCount`, `bFound`, `aRows`, etc.
 - The prefix `o` is reserved for COM objects only; managed-type instances use a class-name prefix instead.
@@ -781,19 +783,19 @@ Read `CamelType_CSharp.md` for the full set of rules.
 
 ## Layout by Code
 
-DbDuo uses an approach called Layout by Code (LbC) for every dialog it creates. The idea is that a programmer composes a dialog by writing a sequence of "add this control" calls in code, in the order the user will encounter them — rather than dragging boxes around in a visual designer or hand-writing pixel coordinates. The result is dialogs that are screen-reader-friendly by construction: tab order matches reading order, every input control has a label that the reader announces, and the layout flows from top to bottom in one pass.
+DbDo uses an approach called Layout by Code (LbC) for every dialog it creates. The idea is that a programmer composes a dialog by writing a sequence of "add this control" calls in code, in the order the user will encounter them — rather than dragging boxes around in a visual designer or hand-writing pixel coordinates. The result is dialogs that are screen-reader-friendly by construction: tab order matches reading order, every input control has a label that the reader announces, and the layout flows from top to bottom in one pass.
 
-The concept was developed by Jamal Mazrui (the original author of DbDuo) starting in 2006, with an AutoIt implementation that established the vocabulary still in use today. Layout by Code has since been ported to several languages — wxPython, JScript .NET (the Homer Application Framework), and now C# in DbDuo. Each port keeps the same intuition: a dialog is a vertical stack of labeled controls, the programmer writes them out one at a time, and the framework handles the spacing, the focus-tip plumbing, the tab indices, and the accept/cancel wiring. What is notable about DbDuo's port is that it preserves the **vocabulary** of the earlier ports — methods like `addInputBox`, `addMemoBox`, `addPickBox`, `addComboPickBox` — so a programmer who learned LbC in AutoIt or wxPython can pick up the C# version without retraining.
+The concept was developed by Jamal Mazrui (the original author of DbDo) starting in 2006, with an AutoIt implementation that established the vocabulary still in use today. Layout by Code has since been ported to several languages — wxPython, JScript .NET (the Homer Application Framework), and now C# in DbDo. Each port keeps the same intuition: a dialog is a vertical stack of labeled controls, the programmer writes them out one at a time, and the framework handles the spacing, the focus-tip plumbing, the tab indices, and the accept/cancel wiring. What is notable about DbDo's port is that it preserves the **vocabulary** of the earlier ports — methods like `addInputBox`, `addMemoBox`, `addPickBox`, `addComboPickBox` — so a programmer who learned LbC in AutoIt or wxPython can pick up the C# version without retraining.
 
 ### The conceptual model: bands, the layout cursor, and dialog units
 
 The earlier LbC implementations talk in terms of three concepts that are worth introducing because they underpin the API even where the C# port hides them behind a simpler stack.
 
-A **band** is a horizontal row of related controls — for example, a Label plus an associated TextBox, or a Label plus an associated ComboBox. The Microsoft Official Guidelines for User Interface Design, published in the late 1990s and based on years of usability research, specify how much horizontal and vertical space should separate the controls within a band, between consecutive bands, and around the dialog's edges. The original AutoIt LbC implementation exposed bands and groups as first-class objects with their own ID numbers, addressable via functions like `_lbcStartBand` and `_lbcStartHGroup`. The Python version simplified this: each call to an `Add*` method starts a new band; adding a separator advances to the next group. DbDuo's C# port simplifies further still: every control added with one of the `addX` methods is its own band, stacked vertically. The horizontal-band model is still available — `addInlineInputBox` puts a label and a textbox on a single row — but the default is one control per row, top to bottom.
+A **band** is a horizontal row of related controls — for example, a Label plus an associated TextBox, or a Label plus an associated ComboBox. The Microsoft Official Guidelines for User Interface Design, published in the late 1990s and based on years of usability research, specify how much horizontal and vertical space should separate the controls within a band, between consecutive bands, and around the dialog's edges. The original AutoIt LbC implementation exposed bands and groups as first-class objects with their own ID numbers, addressable via functions like `_lbcStartBand` and `_lbcStartHGroup`. The Python version simplified this: each call to an `Add*` method starts a new band; adding a separator advances to the next group. DbDo's C# port simplifies further still: every control added with one of the `addX` methods is its own band, stacked vertically. The horizontal-band model is still available — `addInlineInputBox` puts a label and a textbox on a single row — but the default is one control per row, top to bottom.
 
 A **layout cursor** is the invisible point on the dialog where the next control will be placed. In the original AutoIt port the cursor was an addressable global state — `$nLbcCol` and `$nLbcRow` for column and row — and one could move it manually with `_lbcCtrlSetLeft` or `_lbcCtrlSetTop`. In the C# port the cursor is an implementation detail managed by a `FlowLayoutPanel` plus a vertical-stack `Panel`; the programmer never sees it. What survived from the older implementations is the *concept* that controls are added sequentially and spacing is automatic.
 
-A **dialog unit** is the Microsoft-defined measurement that LbC uses internally for spacing decisions. A horizontal dialog unit is a quarter of the average character width of the system font; a vertical dialog unit is an eighth of the average character height. The guidelines specify three dialog units between a label and its associated control, four between related controls in the same group, and seven between unrelated controls in consecutive groups. DbDuo's C# port encodes these in named constants — `DefaultButtonHeight`, `DefaultLineHeight`, `DefaultPadding`, `DefaultRowGap`, `DefaultListHeight`, `DefaultMemoHeight`, and so on — rather than recomputing from font metrics, because modern Windows dialogs are dpi-aware and the WinForms framework's own font scaling handles the dialog-unit-to-pixel translation for us.
+A **dialog unit** is the Microsoft-defined measurement that LbC uses internally for spacing decisions. A horizontal dialog unit is a quarter of the average character width of the system font; a vertical dialog unit is an eighth of the average character height. The guidelines specify three dialog units between a label and its associated control, four between related controls in the same group, and seven between unrelated controls in consecutive groups. DbDo's C# port encodes these in named constants — `DefaultButtonHeight`, `DefaultLineHeight`, `DefaultPadding`, `DefaultRowGap`, `DefaultListHeight`, `DefaultMemoHeight`, and so on — rather than recomputing from font metrics, because modern Windows dialogs are dpi-aware and the WinForms framework's own font scaling handles the dialog-unit-to-pixel translation for us.
 
 ### Why LbC matters for a screen-reader audience
 
@@ -807,12 +809,12 @@ A third benefit is the **memo/AcceptButton coordination**. When the user is typi
 
 ### Anatomy of an LbC dialog
 
-The typical usage pattern in DbDuo is one `using` block per dialog:
+The typical usage pattern in DbDo is one `using` block per dialog:
 
 ```csharp
 using (LbcDialog dlg = new LbcDialog("Configuration", this))
 {
-    TextBox  tbMode  = dlg.addInputBox("UI mode:",       "both", "How DbDuo launches");
+    TextBox  tbMode  = dlg.addInputBox("UI mode:",       "both", "How DbDo launches");
     CheckBox cbBeep  = dlg.addCheckBox("&Beep on errors", true,  "Audible cue on failure");
     TextBox  tbNote  = dlg.addMemoBox("Startup note:",   "",     "Free-form text shown at launch");
     if (dlg.runOkCancel())
@@ -831,7 +833,7 @@ The `runOkCancel()` call is the natural close. It appends an OK button and a Can
 
 ### The add-control vocabulary
 
-DbDuo's LbcDialog exposes the following methods for assembling a dialog. Two naming patterns coexist: the **bare-control adders** (`addLabel`, `addTextBox`, `addCheckBox`) and the **labeled-control adders** that mirror the Homer LbC naming (`addInputBox`, `addMemoBox`, `addPickBox`, `addComboPickBox`). The labeled adders emit a `Label` first and then call the bare adder; both flavors are kept because some sites favor the explicit two-call form, others favor the compact one-call form.
+DbDo's LbcDialog exposes the following methods for assembling a dialog. Two naming patterns coexist: the **bare-control adders** (`addLabel`, `addTextBox`, `addCheckBox`) and the **labeled-control adders** that mirror the Homer LbC naming (`addInputBox`, `addMemoBox`, `addPickBox`, `addComboPickBox`). The labeled adders emit a `Label` first and then call the bare adder; both flavors are kept because some sites favor the explicit two-call form, others favor the compact one-call form.
 
 `addLabel(string sText)` adds a static text label as its own row. Useful for paragraphs of instruction at the top of a dialog or above a group of fields. Returns the `Label`.
 
@@ -878,19 +880,19 @@ The tip text is also assigned as the control's `ToolTipText` so mouse users hove
 
 ### Comparison with the original LbC implementations
 
-The DbDuo C# port intentionally simplifies what the original AutoIt LbC offered. The AutoIt version exposed bands and groups as first-class objects with manipulation functions (`_lbcStartBand`, `_lbcBandHCenter`, `_lbcBandEvenSpace`, `_lbcWinRespace`, and dozens more), allowed precise pixel-level positioning of controls after the fact, and let the programmer change widths or heights with reference-band alignment. The DbDuo port omits these because:
+The DbDo C# port intentionally simplifies what the original AutoIt LbC offered. The AutoIt version exposed bands and groups as first-class objects with manipulation functions (`_lbcStartBand`, `_lbcBandHCenter`, `_lbcBandEvenSpace`, `_lbcWinRespace`, and dozens more), allowed precise pixel-level positioning of controls after the fact, and let the programmer change widths or heights with reference-band alignment. The DbDo port omits these because:
 
 - WinForms anchors and Dock properties make most band-respacing unnecessary — the form resizes the right way automatically.
-- Most DbDuo dialogs are small (under ten controls), so the gymnastics of fine alignment is not needed.
+- Most DbDo dialogs are small (under ten controls), so the gymnastics of fine alignment is not needed.
 - A simpler API is easier to teach to contributors who haven't seen the AutoIt original.
 
-What is preserved across all four LbC ports — AutoIt, wxPython, JScript .NET (Homer), and C# (DbDuo) — is the **practice** of writing dialogs as a sequence of `addX` calls in reading order, with labels above or beside each control, tips wired to a status bar, tab order = call order, and submit/cancel wiring handled by the framework. A programmer fluent in one port can read code in any of the others and find the same shape.
+What is preserved across all four LbC ports — AutoIt, wxPython, JScript .NET (Homer), and C# (DbDo) — is the **practice** of writing dialogs as a sequence of `addX` calls in reading order, with labels above or beside each control, tips wired to a status bar, tab order = call order, and submit/cancel wiring handled by the framework. A programmer fluent in one port can read code in any of the others and find the same shape.
 
-Convenience-dialog wrappers like the Python port's `DialogShow`, `DialogConfirm`, `DialogInput`, `DialogPick`, `DialogMultiInput`, and `DialogBrowseForFolder` are not provided as named methods in the C# port — DbDuo's call sites typically need only `runOkCancel` plus one or two add calls, so the wrappers would only save a few characters. The patterns are documented here in case a contributor wants to add them.
+Convenience-dialog wrappers like the Python port's `DialogShow`, `DialogConfirm`, `DialogInput`, `DialogPick`, `DialogMultiInput`, and `DialogBrowseForFolder` are not provided as named methods in the C# port — DbDo's call sites typically need only `runOkCancel` plus one or two add calls, so the wrappers would only save a few characters. The patterns are documented here in case a contributor wants to add them.
 
 ### Open-ended extension
 
-LbcDialog is a public class (in `DbDuo.cs`, line 5668 onward). It is reusable outside the DbDuo command set — a script invoked via `Invoke-Script` could in principle construct its own LbcDialog through the C# COM bridge, though no bundled script currently does so. If you write a new GUI command for DbDuo and need a custom dialog, use LbcDialog. Do not hand-roll a Form with manual TabIndex assignment; the screen-reader-friendliness will degrade.
+LbcDialog is a public class (in `DbDo.cs`, line 5668 onward). It is reusable outside the DbDo command set — a script invoked via `Invoke-Script` could in principle construct its own LbcDialog through the C# COM bridge, though no bundled script currently does so. If you write a new GUI command for DbDo and need a custom dialog, use LbcDialog. Do not hand-roll a Form with manual TabIndex assignment; the screen-reader-friendliness will degrade.
 
 ### EdSharp-style text-edit hotkeys
 
@@ -919,13 +921,13 @@ Notes on the workflow:
 - Ctrl+F8 / Alt+F8 "all text" operations are the natural complement to the line operations: Ctrl+C copies a line, Ctrl+F8 copies everything; Alt+C reads (well, appends) a line, Alt+F8 reads everything aloud.
 - Ctrl+D deletes the current line without putting anything on the clipboard — useful for cleanup work where the deleted line is not worth keeping. The next line is read aloud so the user knows where the caret ended up.
 
-**Master enable flag:** the entire set is controlled by `[Lbc] extraKeys` in `DbDuo.ini`. Default is `Y` (on). Set to `N` to disable the EdSharp hotkeys entirely and let standard Windows text-edit behavior pass through unchanged. The setting is read once on first use and cached for the session.
+**Master enable flag:** the entire set is controlled by `[Lbc] extraKeys` in `DbDo.inix`. Default is `Y` (on). Set to `N` to disable the EdSharp hotkeys entirely and let standard Windows text-edit behavior pass through unchanged. The setting is read once on first use and cached for the session.
 
 **Status bar feedback:** every hotkey updates the dialog's status bar with a short label (`Copy Line`, `Append to Clipboard`, `Cut Line`, `Start Selection`, `Complete Selection`, `Copy All`, `Read All`, `Delete Line`). The live region echoes the action via a brief utterance (typically the operation name plus the affected text or character count) so the screen reader confirms each action without the user having to look at the status bar.
 
 ## GUI versus CLI response patterns
 
-DbDuo operates in two modes: a Windows Forms GUI with a ListView grid, menus, and modal dialogs, and a dot prompt running in a console window. Most commands work in both modes, with the same canonical verb name and the same effect on the database. The user-visible response is different in each mode by design — the GUI uses focus changes, status-bar updates, dialogs, and the screen-reader live region; the CLI prints lines of text to stdout and reads input from stdin. The principle: **same data effect, mode-appropriate confirmation**.
+DbDo operates in two modes: a Windows Forms GUI with a ListView grid, menus, and modal dialogs, and a dot prompt running in a console window. Most commands work in both modes, with the same canonical verb name and the same effect on the database. The user-visible response is different in each mode by design — the GUI uses focus changes, status-bar updates, dialogs, and the screen-reader live region; the CLI prints lines of text to stdout and reads input from stdin. The principle: **same data effect, mode-appropriate confirmation**.
 
 The remainder of this section walks through the command families and describes how each fits the GUI / CLI duality. Where a command does not reasonably apply in one mode, the table notes it explicitly.
 
@@ -945,19 +947,19 @@ The remainder of this section walks through the command families and describes h
 
 **File-export commands** (Export-Data, Import-Data, New-Chart, New-Plot, Out-File). GUI: SaveFileDialog or LbcDialog for output path, then run the Office-COM or file-writing path; open the result in the default app on completion. CLI: take the output path on the command line, write the file, print the saved path on stdout. New-Plot is the meaningful asymmetry: charts inherently need a graphical viewer, so the CLI form prints the Describe-Column textual summary instead and tells the user to invoke the command from the GUI to see the chart. New-Chart works the same way.
 
-**Configuration and meta commands** (Edit-Configuration, About-DbDuo, Get-Help, Get-Verb, Switch-KeyDescriber, Switch-Focus, Enter-Console, Exit-Application, Exit-Console, Exit-Child, Enter-Child, Elevate-Version). GUI: LbcDialog or message box. CLI: print the equivalent text to stdout, or in the case of Edit-Configuration, bounce to the GUI dialog if a form is available (Both mode) or print the .ini path for hand-editing in CLI-only mode. Switch-Focus is GUI-specific in effect (brings the form to the foreground) but is meaningful from CLI when both UIs are running.
+**Configuration and meta commands** (Edit-Configuration, About-DbDo, Get-Help, Get-Verb, Switch-KeyDescriber, Switch-Focus, Enter-Console, Exit-Application, Exit-Console, Exit-Child, Enter-Child, Elevate-Version). GUI: LbcDialog or message box. CLI: print the equivalent text to stdout, or in the case of Edit-Configuration, bounce to the GUI dialog if a form is available (Both mode) or print the .ini path for hand-editing in CLI-only mode. Switch-Focus is GUI-specific in effect (brings the form to the foreground) but is meaningful from CLI when both UIs are running.
 
-**Commands without a meaningful CLI form**: Open-FileFolder (launches Windows Explorer — works from either mode, but the action is the same shell-execute), Switch-Focus (no-op in CLI-only mode; prints a notice), Enter-Console (a no-op when issued from the CLI; prints "already at the dot prompt"). The reverse — commands that exist GUI-only and have no CLI verb — is now a closed set: there are none. Every menu item in DbDuo has a canonical verb that the dot prompt accepts.
+**Commands without a meaningful CLI form**: Open-FileFolder (launches Windows Explorer — works from either mode, but the action is the same shell-execute), Switch-Focus (no-op in CLI-only mode; prints a notice), Enter-Console (a no-op when issued from the CLI; prints "already at the dot prompt"). The reverse — commands that exist GUI-only and have no CLI verb — is now a closed set: there are none. Every menu item in DbDo has a canonical verb that the dot prompt accepts.
 
 **The general rule**: every command's data effect is mode-independent; every command's confirmation layer is mode-appropriate; every CLI invocation accepts unique prefix matches against canonical verbs (so `first` resolves to `step-record-first` if no other canonical starts with `first`, `meas col` resolves to `measure-column`, and so on). Where a typed prefix is ambiguous, the CLI prints the candidate list so the user can disambiguate by typing more characters.
 
 ## Office automation: always CreateObject, never GetActiveObject
 
-DbDuo never attaches to a running Word or Excel instance. Every Office-using export path makes a fresh hidden instance, drives it to produce the requested file, then calls `Quit()` and releases the COM object. The reasons: attaching to a running instance would mutate settings the user has tuned for their session, driving a running instance through SaveAs and Quit risks side effects on documents the user has open, and the behavior would be non-deterministic depending on whether Word or Excel happens to be running.
+DbDo never attaches to a running Word or Excel instance. Every Office-using export path makes a fresh hidden instance, drives it to produce the requested file, then calls `Quit()` and releases the COM object. The reasons: attaching to a running instance would mutate settings the user has tuned for their session, driving a running instance through SaveAs and Quit risks side effects on documents the user has open, and the behavior would be non-deterministic depending on whether Word or Excel happens to be running.
 
 ## The Inix file format
 
-DbDuo can import from and export to **.inix** files, an extended .ini format designed to be a friendlier serialization than JSON or TOML for both configuration data and tabular data. The defining feature: a .inix file is plain text in any editor, with no escape characters (no `\n` notations, no doubled quote marks, no JSON-style backslash escaping). What you see is what is stored.
+DbDo can import from and export to **.inix** files, an extended .ini format designed to be a friendlier serialization than JSON or TOML for both configuration data and tabular data. The defining feature: a .inix file is plain text in any editor, with no escape characters (no `\n` notations, no doubled quote marks, no JSON-style backslash escaping). What you see is what is stored. DbDo's own settings file, `DbDo.inix`, uses the format too: every classic .ini construct still works there, and the shipped template's `[ConnectStrings]` section demonstrates the fenced multi-line form for values that contain `=` characters. (On first launch after upgrading, a per-user `DbDo.ini` from an earlier version is renamed to `DbDo.inix` automatically; no conversion is needed because every classic ini file is already a valid Inix file.)
 
 The format extends the familiar Windows .ini convention with three powerful additions:
 
@@ -980,13 +982,13 @@ key=this is not a new key
 
 The fenced form is the reliable way to embed `=` or `[` characters in a value, since the plain form would interpret a line that looks like a key or section header as terminating the value.
 
-**Sections as either a dictionary or a list.** When sections have unique names (`[Replace dog with cat]`, `[Replace sheep with goat]`), the file is a dictionary of dictionaries — typical configuration use. When sections are anonymous (`[]`) or follow the `[RecordNNN]` pattern, the file is a list of records — tabular data. DbDuo's Export Data writes the list-of-records form when exporting a table, choosing the leading-zero width on the record number so that ASCII sort of section names matches numeric order: 5 records use `[Record1..5]`, 99 records use `[Record01..99]`, 999 records use `[Record001..999]`.
+**Sections as either a dictionary or a list.** When sections have unique names (`[Replace dog with cat]`, `[Replace sheep with goat]`), the file is a dictionary of dictionaries — typical configuration use. When sections are anonymous (`[]`) or follow the `[RecordNNN]` pattern, the file is a list of records — tabular data. DbDo's Export Data writes the list-of-records form when exporting a table, choosing the leading-zero width on the record number so that ASCII sort of section names matches numeric order: 5 records use `[Record1..5]`, 99 records use `[Record01..99]`, 999 records use `[Record001..999]`.
 
 **Implicit Global section.** If a .inix file starts with key=value lines before any explicit section header, those keys go in an implicit `[Global]` section. This is useful for configuration files where a few top-level settings apply to the whole file, with sections below defining individual operations.
 
 **Comment syntax.** A line whose first non-whitespace character is `;` or `#` is a comment. A section can be commented out by prefixing its name with `;` inside the brackets — `[;Replace dog with cat]` skips that section's entire body without requiring you to comment out each line. The semicolon at the start of `[;` is the comment-out marker; the rest of the section name is preserved so you can uncomment later by removing one character.
 
-Files are written with UTF-8 BOM and CRLF line endings, matching DbDuo's other text-file conventions. An .inix file can be opened in Notepad, read by a screen reader without any special viewer, and edited line by line.
+Files are written with UTF-8 BOM and CRLF line endings, matching DbDo's other text-file conventions. An .inix file can be opened in Notepad, read by a screen reader without any special viewer, and edited line by line.
 
 Use cases for .inix:
 
@@ -994,24 +996,24 @@ Use cases for .inix:
 - **Configuration with multi-line values** — when settings need free-form text that JSON would force you to escape (think: a SQL query as a setting value, or a multi-paragraph description).
 - **Hand-authored tabular data** — easier to write by hand than CSV when individual cells have multi-line content; easier to read in an editor than JSON.
 
-The .inix format was originally designed for the KeyLine toolkit; DbDuo adopts it as another supported import and export format.
+The .inix format was originally designed for the KeyLine toolkit; DbDo adopts it as another supported import and export format.
 
 ## File layout
 
 ```
-DbDuo.cs                    single-file C# source
-DbDuo_setup.iss             Inno Setup installer script
-buildDbDuo.cmd              compile DbDuo.exe via csc.exe (+ jsc.exe for DbDuo.dll)
-DbDuo.js                    JScript .NET source for the script support assembly
-DbDuo.ini                   shipped configuration (uiMode, [Keys] overrides)
+DbDo.cs                    single-file C# source
+DbDo_setup.iss             Inno Setup installer script
+buildDbDo.cmd              compile DbDo.exe via csc.exe (+ jsc.exe for DbDo.dll)
+DbDo.js                    JScript .NET source for the script support assembly
+DbDo.inix                   shipped configuration (uiMode, [Keys] overrides)
 sample.db                   small school sample (teachers/classes/students/enrollments)
 northwind.db                Northwind sales sample, adapted
 chinook.db                  Chinook music-store sample, adapted
 SampleScripts/             three example .js scripts seeded into %APPDATA% on first run
 README.md, README.htm       summary and quick start
-DbDuo.md, DbDuo.htm         this reference
+DbDo.md, DbDo.htm         this reference
 License.md, License.htm     MIT License
 Announce.md, Announce.htm   release announcement
 History.md, History.htm     chronological release notes
-CamelType_CSharp.md         coding conventions used inside DbDuo.cs
+CamelType_CSharp.md         coding conventions used inside DbDo.cs
 ```

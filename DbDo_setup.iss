@@ -1,7 +1,7 @@
 ﻿; =====================================================================
-; DbDuo installer script for Inno Setup 6.x
+; DbDo installer script for Inno Setup 6.x
 ;
-; Compile with Inno Setup IDE (ISCC.exe) to produce DbDuo_setup.exe.
+; Compile with Inno Setup IDE (ISCC.exe) to produce DbDo_setup.exe.
 ;
 ; Design notes (May 2026 revision):
 ;   - Minimal wizard: Welcome, Select Destination, Ready, Installing,
@@ -23,20 +23,20 @@
 ; conflict with InnoSetup constants like {tmp}, {app}.
 ; =====================================================================
 
-#define AppName       "DbDuo"
-#define AppVersion    "1.0.104"
+#define AppName       "DbDo"
+#define AppVersion    "1.0.105"
 #define AppPublisher  "Jamal Mazrui"
-#define AppUrl        "https://github.com/JamalMazrui/DbDuo"
-#define AppExeName    "DbDuo.exe"
+#define AppUrl        "https://github.com/JamalMazrui/DbDo"
+#define AppExeName    "DbDo.exe"
 #define AppCopyright  "Copyright (c) 2026 Jamal Mazrui. MIT License."
 
 ; HotKey is the Inno Setup HotKey: directive value (Ctrl syntax
-; required by Inno Setup). HotKeyDisplay is the same key in DbDuo's
+; required by Inno Setup). HotKeyDisplay is the same key in DbDo's
 ; user-facing notation (Control instead of Ctrl, alpha-ordered).
 ; Only the Desktop "activate" shortcut is hotkey-bound. The Start
 ; Menu "GUI only" and "CLI only" shortcuts are deliberately NOT
 ; hotkey-bound so the global keyboard hotkey space has just one
-; DbDuo entry: Alt+Control+D, which performs a single-instance
+; DbDo entry: Alt+Control+D, which performs a single-instance
 ; foreground handoff (see [Icons] below).
 #define HotKey        "Alt+Ctrl+D"
 #define HotKeyDisplay "Alt+Control+D"
@@ -88,9 +88,9 @@ Uninstallable=yes
 UninstallDisplayIcon={app}\{#AppExeName}
 UninstallDisplayName={#AppName} {#AppVersion}
 
-; The installer EXE itself uses DbDuo.ico, so DbDuo_setup.exe and the
+; The installer EXE itself uses DbDo.ico, so DbDo_setup.exe and the
 ; uninstaller and any Start Menu entries all carry the same icon.
-SetupIconFile=DbDuo.ico
+SetupIconFile=DbDo.ico
 
 MinVersion=10.0
 
@@ -99,24 +99,24 @@ MinVersion=10.0
 ; ExtractArchive() function to handle .zip files (not just .7z, the
 ; default supported format). Inno Setup 6.4+ ships the necessary
 ; is7z.dll internally; nothing external needed. We use this to
-; bundle DbDuo's JAWS files (DbDuo.jkm, DbDuo.jss) inside
-; DbDuo_JAWS.zip rather than tracking them as two loose files in
+; bundle DbDo's JAWS files (DbDo.jkm, DbDo.jss) inside
+; DbDo_JAWS.zip rather than tracking them as two loose files in
 ; the GitHub repo.
 ArchiveExtraction=full
 
 ; CloseApplications + RestartApplications enables Inno Setup's
-; running-app detection. When the user runs DbDuo_setup.exe via
-; the Elevate-Version (F11) command while DbDuo is already running,
+; running-app detection. When the user runs DbDo_setup.exe via
+; the Elevate-Version (F11) command while DbDo is already running,
 ; the installer detects the process by AppMutex name and offers a
-; "close the running DbDuo" dialog before continuing. Setting
-; RestartApplications=yes also re-launches DbDuo at the end if it
+; "close the running DbDo" dialog before continuing. Setting
+; RestartApplications=yes also re-launches DbDo at the end if it
 ; was closed during setup, so the user returns to a running app.
-; AppMutex must match a mutex DbDuo creates at startup (see
-; DbDuoForm.cs single-instance handoff).
+; AppMutex must match a mutex DbDo creates at startup (see
+; DbDoForm.cs single-instance handoff).
 CloseApplications=yes
 RestartApplications=yes
-CloseApplicationsFilter=DbDuo.exe
-AppMutex=Local\DbDuo.SingleInstance
+CloseApplicationsFilter=DbDo.exe
+AppMutex=Local\DbDo.SingleInstance
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -129,9 +129,9 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 WelcomeLabel2=This will install [name/ver] on your computer.%n%n[name] is an accessible, keyboard-first database manager for Windows. It opens SQLite, Microsoft Access, Excel, dBASE, and delimited-text files, with first-class support for JAWS, NVDA, and Narrator.%n%n[name] is licensed under the MIT License: free to use, copy, modify, and distribute; provided "as is" with no warranty. The full license text is installed as License.htm.%n%nSetup will silently install the SQLite ODBC driver and the Microsoft Access Database Engine if either is missing; existing drivers are left alone.%n%nIt is recommended that you close all other applications before continuing.
 
 [InstallDelete]
-; Cleanup on upgrade. Several files from earlier DbDuo releases are
+; Cleanup on upgrade. Several files from earlier DbDo releases are
 ; no longer referenced and should be removed so the install folder
-; reflects only files DbDuo actually uses.
+; reflects only files DbDo actually uses.
 ;
 ; v1.0.40-v1.0.42: NVDA controller-client DLL had a legacy 64-suffixed
 ; name. v1.0.43+ uses the modern unsuffixed name.
@@ -139,9 +139,9 @@ Type: files; Name: "{app}\nvdaControllerClient64.dll"
 ;
 ; v1.0.42-v1.0.43 bundled the Roslyn C# scripting assemblies; v1.0.44
 ; rolled that back in favor of JScript .NET (no shipped runtime DLLs).
-; The 12 assemblies below plus DbDuo.exe.config and the App.config
+; The 12 assemblies below plus DbDo.exe.config and the App.config
 ; binding-redirect file are all obsolete from v1.0.44 onward.
-Type: files; Name: "{app}\DbDuo.exe.config"
+Type: files; Name: "{app}\DbDo.exe.config"
 Type: files; Name: "{app}\App.config"
 Type: files; Name: "{app}\Microsoft.CodeAnalysis.dll"
 Type: files; Name: "{app}\Microsoft.CodeAnalysis.CSharp.dll"
@@ -158,17 +158,17 @@ Type: files; Name: "{app}\System.Text.Encoding.CodePages.dll"
 Type: files; Name: "{app}\Microsoft.CSharp.dll"
 ;
 ; v1.0.58 and earlier shipped dbDuoEval.dll as the JScript .NET support
-; module. v1.0.59 renames it to DbDuo.dll. Remove the old file on
+; module. v1.0.59 renames it to DbDo.dll. Remove the old file on
 ; upgrade so the install folder doesn't carry an unused DLL.
 Type: files; Name: "{app}\dbDuoEval.dll"
 
 [Files]
-Source: "DbDuo.exe";    DestDir: "{app}"; Flags: ignoreversion
-Source: "DbDuo.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "DbDuo.ico";    DestDir: "{app}"; Flags: ignoreversion
-Source: "DbDuo.manifest"; DestDir: "{app}"; Flags: ignoreversion
-Source: "DbDuo.md";     DestDir: "{app}"; Flags: ignoreversion
-Source: "DbDuo.htm";    DestDir: "{app}"; Flags: ignoreversion
+Source: "DbDo.exe";    DestDir: "{app}"; Flags: ignoreversion
+Source: "DbDo.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "DbDo.ico";    DestDir: "{app}"; Flags: ignoreversion
+Source: "DbDo.manifest"; DestDir: "{app}"; Flags: ignoreversion
+Source: "DbDo.md";     DestDir: "{app}"; Flags: ignoreversion
+Source: "DbDo.htm";    DestDir: "{app}"; Flags: ignoreversion
 Source: "README.md";    DestDir: "{app}"; Flags: ignoreversion
 Source: "README.htm";   DestDir: "{app}"; Flags: ignoreversion
 Source: "Announce.md";  DestDir: "{app}"; Flags: ignoreversion
@@ -179,49 +179,51 @@ Source: "License.md";   DestDir: "{app}"; Flags: ignoreversion
 Source: "License.htm";  DestDir: "{app}"; Flags: ignoreversion
 Source: "CamelType_CSharp.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "CamelType_CSharp.htm"; DestDir: "{app}"; Flags: ignoreversion
+Source: "NFB2026Convention.db"; DestDir: "{app}"; Flags: ignoreversion
+Source: "lookups.db"; DestDir: "{app}"; Flags: ignoreversion
 Source: "sample.db";     DestDir: "{app}"; Flags: ignoreversion
 Source: "northwind.db";  DestDir: "{app}"; Flags: ignoreversion
 Source: "chinook.db";    DestDir: "{app}"; Flags: ignoreversion
 Source: "collection.db"; DestDir: "{app}"; Flags: ignoreversion
 Source: "cellar.db";     DestDir: "{app}"; Flags: ignoreversion
-Source: "DbDuo.ini";    DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist
+Source: "DbDo.inix";   DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist
 ;
-; Scripts: example scripts of each of the three DbDuo script types
-; that DbDuo seeds into %APPDATA%\DbDuo\Scripts on first access
-; (see ScriptHelper.seedSampleScriptsIfNew in DbDuo.cs).
+; Scripts: example scripts of each of the three DbDo script types
+; that DbDo seeds into %APPDATA%\DbDo\Scripts on first access
+; (see ScriptHelper.seedSampleScriptsIfNew in DbDo.cs).
 ;   .js   -- JScript .NET, full computational power, host objects
 ;   .sql  -- SQL batch run through invokeSql
-;   .duo  -- DbDuo command batch dispatched line-by-line as if at
+;   .dbdo -- DbDo command batch dispatched line-by-line as if at
 ;            the dot prompt
 ; Source flag recursesubdirs isn't needed -- it's a flat folder.
 Source: "Scripts\*.js";  DestDir: "{app}\Scripts"; Flags: ignoreversion
 Source: "Scripts\*.sql"; DestDir: "{app}\Scripts"; Flags: ignoreversion
-Source: "Scripts\*.duo"; DestDir: "{app}\Scripts"; Flags: ignoreversion
+Source: "Scripts\*.dbdo"; DestDir: "{app}\Scripts"; Flags: ignoreversion
 ;
-; DbDuo_JAWS.zip contains DbDuo.jkm and DbDuo.jss at its root. We
+; DbDo_JAWS.zip contains DbDo.jkm and DbDo.jss at its root. We
 ; ship the zip rather than the two loose files so the GitHub repo
 ; stays uncluttered. The zip is extracted into {app} at install
 ; time by the Pascal procedure ExtractJawsArchive (see [Code]
 ; below), called from CurStepChanged(ssPostInstall) BEFORE the
 ; JAWS settings installer runs.
-Source: "DbDuo_JAWS.zip"; DestDir: "{app}"; Flags: ignoreversion
-Source: "DbDuo.nvda-addon"; DestDir: "{app}"; Flags: ignoreversion
+Source: "DbDo_JAWS.zip"; DestDir: "{app}"; Flags: ignoreversion
+Source: "DbDo.nvda-addon"; DestDir: "{app}"; Flags: ignoreversion
 Source: "nvdaControllerClient.dll"; DestDir: "{app}"; Flags: ignoreversion
 
 ; (No [Tasks] section. The JAWS settings install is exposed as a
 ; checkbox on the Finish page via [Run] above, delegating the work
-; to DbDuo.exe --install-jaws-settings rather than duplicating the
+; to DbDo.exe --install-jaws-settings rather than duplicating the
 ; install logic in Pascal Script.)
 
 [Icons]
-; Single shortcut policy: the only DbDuo shortcut the installer
+; Single shortcut policy: the only DbDo shortcut the installer
 ; creates is the desktop one with the Alt+Control+D hotkey. The
 ; -activate parameter performs a single-instance handoff: the
-; first press of Alt+Control+D launches DbDuo; subsequent presses
+; first press of Alt+Control+D launches DbDo; subsequent presses
 ; bring the existing instance to the foreground rather than
 ; launching a duplicate. No Start Menu folder, no GUI-only or
 ; CLI-only or read-only variants -- the user reaches those modes
-; from inside DbDuo, not from external launchers.
+; from inside DbDo, not from external launchers.
 Name: "{autodesktop}\{#AppName}"; \
   Filename: "{app}\{#AppExeName}"; \
   WorkingDir: "{app}"; \
@@ -232,14 +234,14 @@ Name: "{autodesktop}\{#AppName}"; \
 [Run]
 ; The four entries below appear as checkboxes on the installer's
 ; Finish page in this exact order. Entry 1 delegates to
-; DbDuo.exe's --install-jaws-settings mode; the C# implementation
-; lives in DbDuo.cs (class JawsSettingsInstaller) so the same
+; DbDo.exe's --install-jaws-settings mode; the C# implementation
+; lives in DbDo.cs (class JawsSettingsInstaller) so the same
 ; logic can be re-run later from the Help menu. Entry 2 hands
-; DbDuo.nvda-addon to its Windows file association via Inno
+; DbDo.nvda-addon to its Windows file association via Inno
 ; Setup's shellexec flag so NVDA shows its native add-on install
 ; dialog directly (see the comment block on entry 2 for why this
 ; replaced the v1.0.45-v1.0.48 approach of going through
-; DbDuo.exe --install-nvda-addon).
+; DbDo.exe --install-nvda-addon).
 ;
 ; 1. Install JAWS settings (checked by default).
 FileName: "{app}\{#AppExeName}"; \
@@ -252,11 +254,11 @@ FileName: "{app}\{#AppExeName}"; \
 ;
 ; This entry uses Inno Setup's shellexec flag to hand the
 ; .nvda-addon file directly to its Windows file association,
-; rather than going through DbDuo.exe --install-nvda-addon as
-; v1.0.45-v1.0.48 did. The CLI flag in DbDuo.exe is still
+; rather than going through DbDo.exe --install-nvda-addon as
+; v1.0.45-v1.0.48 did. The CLI flag in DbDo.exe is still
 ; supported (it's how the Help menu's Re-install NVDA Add-on
 ; command works), but routing through it at install time was
-; subtly broken: DbDuo.exe called Process.Start with
+; subtly broken: DbDo.exe called Process.Start with
 ; UseShellExecute=true and then exited immediately with code 0,
 ; satisfying Inno Setup's "waituntilterminated" wait before the
 ; shell-execute resolution had completed. NVDA's add-on install
@@ -274,12 +276,12 @@ FileName: "{app}\{#AppExeName}"; \
 ; That is acceptable: the user can dismiss it (NVDA is not in
 ; use anyway) or pick an app. The Description below mentions
 ; the "recommended if you use NVDA" condition.
-FileName: "{app}\DbDuo.nvda-addon"; \
+FileName: "{app}\DbDo.nvda-addon"; \
   WorkingDir: "{app}"; \
   Description: "Install NVDA add-on (NVDA must be running; restart NVDA after install for it to take effect)"; \
   Flags: postinstall shellexec waituntilterminated skipifsilent
 
-; 3. Launch DbDuo (checked by default).
+; 3. Launch DbDo (checked by default).
 FileName: "{app}\{#AppExeName}"; \
   WorkingDir: "{app}"; \
   Description: "Launch {#AppName} now (or use the desktop hotkey {#HotKeyDisplay} anytime)"; \
@@ -292,10 +294,10 @@ FileName: "{app}\README.htm"; \
 
 [UninstallRun]
 ; Symmetric to the JAWS-install [Run] entry above. Removes only
-; the files DbDuo placed in the JAWS settings folders, tracked
-; via the install-time log at %APPDATA%\DbDuo\jawsSettings.log.
+; the files DbDo placed in the JAWS settings folders, tracked
+; via the install-time log at %APPDATA%\DbDo\jawsSettings.log.
 ; runhidden so no console window flashes during uninstall; ignored
-; if DbDuo.exe is already deleted (the install probably failed).
+; if DbDo.exe is already deleted (the install probably failed).
 FileName: "{app}\{#AppExeName}"; \
   Parameters: "--uninstall-jaws-settings"; \
   WorkingDir: "{app}"; \
@@ -379,7 +381,7 @@ begin
      to fetch driver installers. Hidden if no downloads are needed. *)
   oDownloadPage := CreateDownloadPage(
     'Downloading database drivers',
-    'Setup is fetching one or more drivers DbDuo needs to read database files.',
+    'Setup is fetching one or more drivers DbDo needs to read database files.',
     nil);
 end;
 
@@ -495,10 +497,10 @@ begin
         SuppressibleMsgBox(
           'Failed to download one or more drivers:'#13#10#13#10
           + GetExceptionMessage + #13#10#13#10
-          + 'Setup will continue. DbDuo will install but some database '
+          + 'Setup will continue. DbDo will install but some database '
           + 'formats may not open until the missing drivers are added '
           + 'manually. Re-run this installer with a network connection, '
-          + 'or download the drivers from the URLs in DbDuo.md.',
+          + 'or download the drivers from the URLs in DbDo.md.',
           mbInformation, MB_OK, IDOK);
         Result := True;
       end;
@@ -511,15 +513,15 @@ end;
 (* JAWS settings install (moved from Pascal to C# in v1.0.40):
    The work that v1.0.39's InstallJawsSettings + FindScompilePath +
    CurUninstallStepChanged Pascal procedures did is now in
-   DbDuo.cs class JawsSettingsInstaller, invoked via
-       DbDuo.exe --install-jaws-settings
+   DbDo.cs class JawsSettingsInstaller, invoked via
+       DbDo.exe --install-jaws-settings
    from the [Run] section above, and via
-       DbDuo.exe --uninstall-jaws-settings
+       DbDo.exe --uninstall-jaws-settings
    from the [UninstallRun] section below. The C# implementation
    uses the same algorithm (registry-first scompile lookup with
    Program Files fallback, enumerate %APPDATA%\Freedom Scientific\
    JAWS\*\Settings\*, copy + scompile, log the paths placed) and
-   the same uninstall log location ({userappdata}\DbDuo\
+   the same uninstall log location ({userappdata}\DbDo\
    jawsSettings.log) so the upgrade from v1.0.39 to v1.0.40 is
    transparent. The advantage of the move: the user can re-run the
    install later from Help > Install JAWS Settings without re-
@@ -527,10 +529,10 @@ end;
 
 (* --- Post-install hook: extract JAWS archive, run driver installers --- *)
 
-(* Extract DbDuo_JAWS.zip into {app}. The zip contains DbDuo.jkm
-   and DbDuo.jss at its root; after extraction these sit alongside
-   DbDuo.exe just as they did when shipped as loose files in
-   v1.0.49 and earlier. DbDuo.exe --install-jaws-settings (run as
+(* Extract DbDo_JAWS.zip into {app}. The zip contains DbDo.jkm
+   and DbDo.jss at its root; after extraction these sit alongside
+   DbDo.exe just as they did when shipped as loose files in
+   v1.0.49 and earlier. DbDo.exe --install-jaws-settings (run as
    the Finish-page checkbox) then reads them from {app} and copies
    them into each per-version JAWS settings folder.
 
@@ -538,9 +540,9 @@ end;
    Setup's bundled is7z.dll can handle the .zip format (the default
    "basic" extraction only supports .7z). Uses Inno Setup's built-
    in Pascal ExtractArchive function (Inno Setup 6.4.0+). No
-   external unzip tool is shipped with DbDuo.
+   external unzip tool is shipped with DbDo.
 
-   On failure we surface a non-fatal SuppressibleMsgBox: DbDuo
+   On failure we surface a non-fatal SuppressibleMsgBox: DbDo
    still works for non-JAWS users even without these files.
 *)
 procedure ExtractJawsArchive;
@@ -548,15 +550,15 @@ var
   sZipPath: String;
   sDestDir: String;
 begin
-  sZipPath := ExpandConstant('{app}\DbDuo_JAWS.zip');
+  sZipPath := ExpandConstant('{app}\DbDo_JAWS.zip');
   sDestDir := ExpandConstant('{app}');
   if not FileExists(sZipPath) then
   begin
     SuppressibleMsgBox(
-      'DbDuo_JAWS.zip was not found in the installation folder.'#13#10#13#10
+      'DbDo_JAWS.zip was not found in the installation folder.'#13#10#13#10
       + 'JAWS keymap and script files will not be available. If you'#13#10
       + 'use JAWS, re-run the installer.'#13#10#13#10
-      + 'DbDuo itself is fine and will run.',
+      + 'DbDo itself is fine and will run.',
       mbInformation, MB_OK, IDOK);
     exit;
   end;
@@ -568,10 +570,10 @@ begin
     ExtractArchive(sZipPath, sDestDir, '', False, nil);
   except
     SuppressibleMsgBox(
-      'Failed to extract DbDuo_JAWS.zip:'#13#10#13#10
+      'Failed to extract DbDo_JAWS.zip:'#13#10#13#10
       + GetExceptionMessage + #13#10#13#10
       + 'JAWS keymap and script files will not be available.'#13#10
-      + 'DbDuo itself is fine and will run.',
+      + 'DbDo itself is fine and will run.',
       mbInformation, MB_OK, IDOK);
   end;
 end;
@@ -588,8 +590,8 @@ begin
   if CurStep <> ssPostInstall then exit;
 
   (* Extract JAWS keymap and script files BEFORE the Finish-page
-     Run-section entry invokes DbDuo.exe --install-jaws-settings;
-     that command needs DbDuo.jkm and DbDuo.jss in {app}. *)
+     Run-section entry invokes DbDo.exe --install-jaws-settings;
+     that command needs DbDo.jkm and DbDo.jss in {app}. *)
   ExtractJawsArchive;
 
   if bInstallSqliteOdbc then
@@ -599,7 +601,7 @@ begin
         'The SQLite ODBC driver did not install cleanly.'#13#10#13#10
         + 'You can install it later by downloading from:'#13#10
         + '  http://www.ch-werner.de/sqliteodbc/'#13#10#13#10
-        + 'DbDuo is still installed and will work for other formats.',
+        + 'DbDo is still installed and will work for other formats.',
         mbInformation, MB_OK, IDOK);
   end;
 
@@ -613,14 +615,14 @@ begin
         + '  winget install Microsoft.AccessDatabaseEngine.2016 --silent'#13#10#13#10
         + 'or download accessdatabaseengine_X64.exe from Microsoft and run '
         + 'it with the /passive flag.'#13#10#13#10
-        + 'DbDuo is still installed and will work for SQLite files.',
+        + 'DbDo is still installed and will work for SQLite files.',
         mbInformation, MB_OK, IDOK);
   end;
 
   (* JAWS settings install is handled in [Run] above as a Finish-page
      postinstall checkbox (item 1 of 4), which invokes
-     DbDuo.exe --install-jaws-settings. The C# implementation lives
-     in class JawsSettingsInstaller in DbDuo.cs. The previous Pascal
+     DbDo.exe --install-jaws-settings. The C# implementation lives
+     in class JawsSettingsInstaller in DbDo.cs. The previous Pascal
      InstallJawsSettings procedure was removed in v1.0.40 along with
      the [Tasks] entry that gated it; the call site here is a no-op
      now. *)
@@ -628,11 +630,11 @@ end;
 
 (* --------------------------------------------------------------------
    Uninstall: remove only the JKMs we installed. The log file written
-   by InstallJawsSettings holds the absolute paths of every DbDuo.jkm
+   by InstallJawsSettings holds the absolute paths of every DbDo.jkm
    we placed. We read it, delete each path, then delete the log
    itself. If the user customized the JKM in place, we still remove
    it -- the file's name is reserved for the application by JAWS, and
-   leaving an orphan after DbDuo is gone would just clutter the JAWS
+   leaving an orphan after DbDo is gone would just clutter the JAWS
    settings folders. If the user moved their changes to a different
    filename first, those changes are untouched.
    ----------------------------------------------------------------- *)
@@ -644,7 +646,7 @@ var
   i: Integer;
 begin
   if CurUninstallStep <> usUninstall then exit;
-  sLogPath := ExpandConstant('{userappdata}\DbDuo\jawsSettings.log');
+  sLogPath := ExpandConstant('{userappdata}\DbDo\jawsSettings.log');
   if not FileExists(sLogPath) then exit;
   if not LoadStringsFromFile(sLogPath, oLog) then exit;
   for i := 0 to GetArrayLength(oLog) - 1 do
@@ -653,8 +655,8 @@ begin
       DeleteFile(oLog[i]);
   end;
   DeleteFile(sLogPath);
-  (* Try to remove the {userappdata}\DbDuo folder if it's now empty.
+  (* Try to remove the {userappdata}\DbDo folder if it's now empty.
      RemoveDir returns False if non-empty, which is fine -- the user
-     may have other DbDuo state in there. *)
+     may have other DbDo state in there. *)
   RemoveDir(ExtractFileDir(sLogPath));
 end;

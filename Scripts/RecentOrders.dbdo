@@ -9,7 +9,7 @@
 # on error" -- harmless if no filter is currently active.
 #
 # Syntax: each non-blank, non-comment line is dispatched as if you
-# typed it at the dot prompt. The natural DbDuo dot-prompt language
+# typed it at the dot prompt. The natural DbDo dot-prompt language
 # is used here (table, filter, sort, status, etc.) rather than the
 # underlying PowerShell-style canonical verbs (select-table,
 # select-record, sort-object). Either form works; the natural form

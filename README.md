@@ -1,170 +1,59 @@
-# DbDuo
+﻿# DbDo -- the keyboard-first relational database manager
 
-**An accessible, keyboard-first database manager for Windows.** DbDuo opens SQLite, Microsoft Access, Excel, dBASE, and delimited-text files through one consistent set of PowerShell-flavored commands, in a GUI window and a dot-prompt console at the same time. JAWS, NVDA, and Narrator are all fully supported -- JAWS and NVDA through their direct speech APIs (lowest latency); all three through DbDuo's native UIA Notification dispatch (which uses P/Invoke against UIAutomationCore.dll, sidestepping the .NET Framework 4.8 managed bridge's limitations). Table-style cell navigation, direction-aware announcements, and the double-press-spells convention from EdSharp and FileDir. Every command is reachable by keyboard.
+**DbDo opens a relational database and lets you read it, reorder it, filter it, follow its relationships, and hand it to other people in whatever format they need -- entirely from the keyboard, with a screen reader doing the talking.** JAWS, NVDA, and Narrator are all first-class. Every command has a hotkey, every row and cell move is spoken, and a dot-prompt console rides alongside the GUI for one-off SQL.
 
-DbDuo's goal is to be **the most screen-reader-accessible and keyboard-accessible general-purpose relational-database manager available** — full stop. The accessibility consideration is not a layer applied on top of an existing design; it is the design. Every command, layout decision, and announcement choice in DbDuo is made from a screen-reader-first and keyboard-first perspective, drawing on decades of experience with how blind professionals actually work with tabular data.
+This build opens **NFB2026Convention.db** automatically on first launch (until you open something else, after which DbDo remembers your last file). It is built on the small, general schema DbDo favors, so the navigation habits you form here carry over to almost any data you keep.
 
-## Who this is for
+## Convention over configuration: five nouns and one junction
 
-DbDuo's **top-priority audience** is **Windows screen reader and keyboard users.** Every menu announces its hotkey, every row change announces the new position, every cell move announces the column header and value, and the live region is wired through a JAWS-direct / NVDA-direct / UIA-fallback chain so speech reliably reaches your reader. If you are a screen-reader user, a power-keyboard user, or anyone who finds mainstream database GUIs awkward to drive without a mouse, DbDuo is built for the way you actually work.
+Most of the relational worlds people actually keep -- a convention, a club roster, a project tracker, a contact book -- reduce to a handful of nouns and the relationships among them. DbDo leans into that. NFB2026Convention.db uses exactly five noun tables plus one junction, and every table shares the same standard columns (a primary key, `added`, `edited`, ..., `notes`, `tags`, `look`, `unq`, `marked`). Note: this database still uses the older bare-`id` primary-key shape; it is awaiting a schema redesign, after which its keys will follow the `<singular>_id` convention described below:
 
-DbDuo also supports **developer-culture conventions as alternatives** wherever doing so doesn't compromise the keyboard-and-speech experience. The dot prompt accepts both the readable lowercase-with-spaces form (`edit settings`, `jump record`, `say sort filter`) AND the PowerShell-flavored hyphenated form (`edit-settings`, `jump-record`, `say-sortfilter`). Pick whichever is faster for your fingers. The user-facing canonical name shown in menus, in command echo, and in MessageBox titles is the readable Title Case form ("Edit Settings", "Jump Record", "Say Sort Filter"), following standard publishing convention (lowercase short prepositions and articles when not first or last).
+- **contacts** -- every *party*, person or organization. Persons fill `first_name`/`last_name`; organizations leave those empty and fill `org_name`. A self-reference `organization_id` points a person at their employer, which is just another contact row -- so "who works where" needs no second table.
+- **places** -- venues, rooms, cities. A self-reference `parent_id` gives room-inside-venue-inside-city (here: the JW Marriott Austin's rooms inside the venue inside Austin).
+- **events** -- the convention and its sessions. A self-reference `parent_id` makes the convention the root event and each session a child; `place_id` says where it is held.
+- **projects** -- the cross-cutting combiners. The convention's tracks are projects; a project gathers sessions and people from across the other tables.
+- **associations** -- the universal junction, and the heart of the model. Each row carries a `role` plus nullable foreign keys to each noun: `contact_id`, `event_id`, `place_id`, `project_id`. One row can say "Mark Riccobono, as Presiding Officer, at the Opening General Session, in the Lone Star Grand Ballroom, under the Advocacy & Policy project." Because every link is a real declared foreign key, DbDo can drill each one in both directions.
 
-The C# implementation follows Camel Type (Hungarian prefixes, lower-camelCase identifiers) — its own convention chosen for screen-reader productivity when reviewing source code. The user-facing names, the dot-prompt input forms, and the internal code identifiers are three independent layers that each follow their own appropriate convention.
+The point is that you learn these five nouns once and navigate them everywhere. Organizations are not a separate concept from people; a venue, a room, and a city are all just places; the convention and its talks are all just events; and a project is simply a named purpose that ties chosen entities together.
 
-If you are a sighted developer who appreciates a keyboard-first tool with a built-in dot prompt, the speech work doesn't get in your way — DbDuo is silent unless a screen reader is running. The project is open-source under the MIT license at **https://github.com/JamalMazrui/DbDuo**; issues, pull requests, and feedback are welcome.
+## Valid values become comboboxes (the lookups table)
 
-## What DbDuo lets you do
+A **lookups** table defines the allowed values for a field, so the Record Edit dialog can present that field as a ComboBox -- the Windows control that works best from the keyboard, with type-ahead and arrow navigation that every screen reader announces cleanly -- instead of a bare text box. Each lookups row binds a value to a `tbl` and `fld` (with an optional `src` authority and a `descrip`). DbDo offers the combobox whenever a field has values defined.
 
-**Open the database formats you actually have.** SQLite (`.db`, `.sqlite`, `.sqlite3`), Microsoft Access (`.mdb`, `.accdb`), Excel workbooks (`.xlsx`, `.xls`), dBASE tables (`.dbf`), and delimited text (`.csv`, `.tsv`, `.txt`) all open through the same Open Database command. No driver paperwork; the setup program installs the SQLite ODBC driver and the Microsoft Access engine the first time they are needed.
+NFB2026Convention.db carries lookups for its own fields -- `contacts.kind` (person, org), `places.kind` (city, venue, room), `events.kind` (General Session, Division/Group Meeting, Seminar, ...), `projects.kind`/`status`, and `associations.role` (Speaker, Moderator, Panelist, ...). A separate, shared **lookups.db** ships alongside with global lists -- `state` and `country` -- bound to any table that has a field of that name, so they serve the other sample databases too (Northwind's `country` field gets a combobox with no per-database setup).
 
-**Read your data as a table, by cell.** A virtual cell cursor lets you navigate a row as a table — Alt+Control+RightArrow / LeftArrow move one column at a time within the current row; Alt+Control+DownArrow / UpArrow move one row at a time within the current column; Alt+Control+Home and End jump to the corners. Each move announces the resulting cell with direction-aware framing.
+## A guided tour by keyboard
 
-**Spell anything on a second press.** Press the Say Status command (Alt+Z), Say Path (Alt+P), Say Yield (Alt+Y), or any of the eight Say-X commands twice in succession to hear the text spelled character by character — the EdSharp and FileDir convention. The same applies to Alt+Control+Numpad5, which speaks or spells the current virtual cell.
+Launch DbDo. On a first run it opens NFB2026Convention.db on the **events** table and announces the row count.
 
-**Move around your data by keyboard alone.** Arrow keys step between rows; Tab and Shift+Tab move an announcement-only column cursor across the current row so you can hear what's in each cell. Lowercase letters jump to the next row whose value in the announced column starts with that letter, like type-ahead in any Windows list. Five capital-letter chords — Shift+F, Shift+G, Shift+J, Shift+R, Shift+S — trigger the most-used commands directly from the data list.
+**Read the schedule.** Arrow up and down to move between sessions; DbDo speaks each row. To hear one session field by field, use the virtual cell cursor: Alt+Control+RightArrow / LeftArrow step across columns announcing "header: value," and Alt+Control+Numpad5 says the current cell (twice to spell it).
 
-**See a record's full story at a glance.** Press Enter on a record to open Show Record — a read-only view of every visible field as `name = value`, plus an automatic Related Records section. If you are on a teacher, you see the teacher's classes. If you are on an enrollment, you see the student and the class it ties together. The related records use each table's `look` summary column, so a few words tell you who or what each one is.
+**Reorder and filter to the question you're asking.** Sort, Shift+S, with `day, start_time` for chronological order or `kind, start_time` to group by session type. Filter, Shift+F, with `day = '2026-07-05'` for one day, `kind = 'General Session'` for the plenaries, or `ticketed = 1` for what needs a ticket; Clear Filter is Shift+R. Find Across All Columns is Control+F; Jump to Match in one column is Control+J.
 
-**Drill from a parent record into its related child records, and back out.** From a teacher's row, Alt+RightArrow opens that teacher's classes — a filtered view of the `classes` table. Alt+RightArrow again from a class opens its students. Alt+LeftArrow returns to the exact parent row you came from, preserving sort and filter at each level. Alt+Home pops the entire drill stack at once.
+**See a record's whole story.** Press Enter on a session for Show Record: every field as `name = value`, then an automatic Related Records section. On a session you see its parent convention, its place, and the people associated with it; on a person you see their organization and the sessions they are part of.
 
-**Filter, sort, find — and search across three independent families.** Find (Control+F) for substring search across all visible columns; Jump to Match (Control+J) for substring within one column you pick; Find Regex (Control+F3) for .NET regex. Each family has its own dialog with a Text input, a Recent listbox of up to the last 10 terms, and a Case-sensitive checkbox. F3 / Shift+F3 repeat whichever family you most recently invoked.
+**Drill through the relationships.** Enter Child Table, Alt+RightArrow, opens the children of the current row: from a **project** it opens that track's associations (and onward to its sessions and people); from a **place** it opens the sessions held there; from a **contact** it opens that person's associations; from the convention **event** it opens its sessions. Alt+LeftArrow walks back to the exact parent row; Alt+Home pops the whole stack.
 
-**Resume your work across launches.** Use Recent Files, Alt+R, to reopen one of the last 10 database files. DbDuo restores not just the file but the last-active table, the filter expression, the sort order, and the row position. Anything that no longer applies (a dropped table, a renamed column) is silently skipped.
+**Pick from valid values.** When you edit a field that has a lookups list -- a session's `kind`, an association's `role`, a place's `kind` -- the editor is a combobox: arrow or type-ahead to a value, or type a new one. Country and state fields anywhere draw on the shared lookups.db.
 
-**Export to whatever your collaborators need.** Save Database As writes a copy of the open database. Export Data writes the current filtered view to xlsx, docx, filtered HTML, Markdown table, CSV, TSV, SQLite, Access, or dBASE — any format DbDuo can also open. Multiple formats in one call from the dot prompt: `Export-Data xlsx docx md csv` produces all four at once and opens each one in its default Windows application.
+**Hand it to someone else in their format.** Export Data, Control+Shift+X, writes the current filtered, sorted view to xlsx, docx, filtered HTML, Markdown, CSV, TSV, SQLite, Access, or dBASE. From the dot prompt, `Export-Data xlsx docx md csv` writes all four at once.
 
-**Round-trip with Markdown.** Export Data to `.md` writes a GitHub-flavored Markdown table that you can paste into a README, an issue, or a chat message. Import Data reads that same format back into the table, matching header cells to columns by name. So you can hand a Markdown table to a colleague, get an edited one back, and append the changes.
+## The included demo scripts
 
-**Talk to two interfaces at once.** The GUI window and the dot-prompt console drive the same live database connection. Edits in one appear immediately in the other. Use the GUI for browsing; use the dot prompt for one-off SQL, ad-hoc queries, or scripted batches. The grave-accent key family (Control, Alt, Alt+Control) coordinates jumping between them.
+Three SQL scripts in `Scripts` show the relational queries behind the views above; because this database still uses bare-`id` keys, its joins qualify the key by table (`events.id`, `places.id`):
 
-## How the accessibility design works
+- **ConventionSchedule.sql** -- the full schedule, each session with its place and the project it belongs to.
+- **SpeakerSessions.sql** -- every session a given person is part of, with their role (change the surname on the WHERE line).
+- **DayAtAGlance.sql** -- one day's sessions ordered by time and place, with a people count.
 
-Every meaningful state change speaks. Row movement announces "Row N of M, value." Cell movement (Alt+Control+arrow) announces with direction awareness as described above. Filter / sort / mark / unmark all announce their result.
+## The other sample databases -- the same column convention
 
-Three speech paths in priority order: JAWS via direct COM automation (when JAWS is running), NVDA via the official controller-client DLL (when NVDA is running), UIA live-region fallback for Narrator and anything else.
+The Help menu also opens five more databases, all migrated to the same standard columns (`<singular>_id` primary keys such as `teacher_id` and `wine_id`, with each foreign key carrying the same name as the parent primary key it references; `TEXTTIME` `added`/`edited` maintained by triggers; generated `look`/`unq`; `marked` last): the school `sample.db`, the classic `northwind.db` and `chinook.db`, a music `collection.db`, and a wine `cellar.db`. They keep their own domain tables -- the five-noun model is the favored shape for a *new* database, not a straitjacket for every domain -- but the keyboard moves are identical, which is the whole mission: whatever relational data you already know, DbDo gives a screen-reader and keyboard user full, efficient command of it.
 
-DbDuo ships JAWS settings (a JKM key map plus a compiled script binary) and an NVDA add-on. Both make their screen reader pass DbDuo's chords through to the application rather than intercepting them for table-navigation or browse-mode commands. The installer offers to install both as Finish-page checkboxes (both checked by default). The JAWS install just works; for the NVDA add-on to install, NVDA itself must be the currently-running screen reader, since NVDA owns the `.nvda-addon` file handler. If you ran the installer while using JAWS, dismiss the NVDA-install dialog if it appears, switch to NVDA, and re-install the add-on later from the DbDuo Help menu's "Re-install NVDA Add-on" command (which invokes `DbDuo.exe --install-nvda-addon`) or by double-clicking `DbDuo.nvda-addon` in the install folder.
+## Building this archive
 
-Every command is reachable through both a menu and a hotkey. Menu items show their hotkey at the right edge, so navigating menus is also how you learn the keyboard. Single-letter mnemonics open each top-level menu (File, Edit, Navigate, Query, Misc, Help).
-
-Lowercase letters never trigger a command in the data list — they always navigate. Capital letters trigger one-key shortcuts to the five most-used commands (Filter, Go to, Jump, Reset filter, Sort).
-
-**Turning DbDuo's direct speech off.** If you prefer to rely solely on your screen reader's natural focus and selection announcements without DbDuo's added commentary, use Help > Toggle Extra Speech (Alt+Shift+Z) — the "zzz / hush" mnemonic. There is also a separate Help > Toggle Command Echo (Ctrl+Shift+Z) that silences just the spoken command name without affecting status announcements. When off, the screen reader still hears DbDuo through its own announcements — only the extra status / cell-position / command-echo speech is suppressed. Both settings persist across launches and can also be changed in Misc > Settings (Ctrl+,).
-
-**Browsing data without risk of edits.** Misc > Toggle Read Only (Ctrl+Shift+R) flips the database between read-write and read-only at runtime. When read-only is on, edit commands fail with a clear error message and your underlying data is safe. Useful for auditing, demoing, or any time you just want to look. The state is also a checkbox in the Settings dialog, and the `-readonly` command-line flag opens DbDuo read-only from the start.
-
-## Requirements
-
-64-bit Windows 10 or 11, with .NET Framework 4.8 (already present on current Windows). Microsoft Office is optional, needed only for Export Data's xlsx, docx, and filtered-HTML output paths; csv, tsv, md, plain HTML, SQLite, Access, and dBASE export all work without it.
-
-Tested with JAWS, NVDA, and Narrator -- all three work through DbDuo's native UIA Notification dispatch on Windows 10 / 11 with .NET Framework 4.8. JAWS and NVDA additionally use their direct-API paths for lowest-latency announcement; the UIA path is the universal layer that also reaches Narrator and any other UIA-listening reader.
-
-## Installation
-
-Download `DbDuo_setup.exe` from <https://github.com/JamalMazrui/DbDuo/releases/latest/download/DbDuo_setup.exe> and run it. (That URL always points to the latest published release.) Accept the defaults. The Welcome page carries a brief MIT license summary; the Select Destination Location page proposes `C:\Program Files\DbDuo`, which you can change. On the Finish page you can launch DbDuo immediately and read the documentation; both checkboxes are checked by default. Two further Finish-page checkboxes offer to install the JAWS settings and the NVDA add-on.
-
-If you would rather have the full source bundle than the installer, download <https://github.com/JamalMazrui/DbDuo/archive/main.zip>. That URL returns a zip containing the entire current main branch.
-
-Setup creates a single shortcut, DbDuo, with hotkey Alt+Control+D. Use the hotkey, Alt+Control+D (D for Desktop), from anywhere in Windows to bring DbDuo to the foreground or, if it is not running, to launch a fresh copy.
-
-## Quick start: a guided tour of `sample.db`
-
-The bundled `sample.db` contains four related tables: `teachers`, `classes`, `students`, and `enrollments`. Teachers each teach one or more classes; students enroll in one or more classes through the `enrollments` junction table.
-
-### Open the sample database
-
-Use the hotkey Alt+Control+D to launch DbDuo. Use the Open Database command, Control+O, to bring up a file dialog and pick `C:\Program Files\DbDuo\sample.db`. DbDuo opens the database, lands on the `classes` table, and announces the row count.
-
-If the dot prompt console window did not open at the same time, use the Open Dot Prompt command, Control+GraveAccent (the unshifted key above Tab), to open it now.
-
-### See what tables are present
-
-Use the Choose Table command, F4, to bring up a listbox of base tables. Arrow keys move through `classes`, `enrollments`, `students`, `teachers`; Enter chooses one. To list tables from the dot prompt, type `tables` and press Enter.
-
-### Move around the data list
-
-The arrow keys move between rows. As you arrow up and down, DbDuo's screen-reader speech describes the row you land on.
-
-Try the cell-by-cell virtual cursor: press Alt+Control+RightArrow to move one column right within the current row. DbDuo announces "Header: value." Press it again to move to the next column. Press Alt+Control+DownArrow to move one row down within the current column; DbDuo announces "Row N: value." Press Alt+Control+Home to jump to the top-left, and Alt+Control+End to jump to the bottom-right. Use Alt+Control+Numpad5 to say the current cell value; press it twice in succession to spell it character by character.
-
-Type a lowercase letter to jump to the next row whose value in the announced column starts with that letter. Capital letters are reserved for one-key command shortcuts.
-
-### Show the current record
-
-Use the Show Record command, plain Enter, to open a read-only dialog with every visible field of the current row as `field = value`. Underneath the fields, DbDuo lists every related record grouped by table. OK or Escape closes the dialog.
-
-### Drill into a related child table
-
-Move to the `teachers` table, then arrow to the first row, Dr. Ada Lovelace. Use the Enter Child Table command, Alt+RightArrow, to drill into her classes. Press Alt+RightArrow again on a class to see its enrollments. Use Alt+LeftArrow to pop back; Alt+Home pops the whole stack at once.
-
-### Filter and sort
-
-Use the Filter Records command, Shift+F (F for Filter), to filter the view. Type an ADO expression like `year = 'Senior'` on the `students` table to see only seniors. Use the Clear Filter command, Shift+R (R for Reset), to clear it.
-
-Use the Sort Ascending command, Alt+A, to sort by a column alphabetically; DbDuo prompts for the column, defaulting to whichever column your virtual cursor is on. Alt+Shift+A sorts descending. Alt+D sorts by date (oldest first); Alt+Shift+D most-recent first. Shift+S takes a custom ADO sort expression like `name ASC, year DESC`.
-
-### Find and search
-
-DbDuo has three independent search families. Each remembers its own last-used term.
-
-Control+F is Find Across All Columns. The dialog has a Text input (defaulting to the last Find substring), a Recent listbox of up to 10 entries, and a Case-sensitive checkbox. Selecting a Recent entry copies its text into the Text input AND sets the Case-sensitive checkbox to match how that term was last used. Control+Shift+F searches backward.
-
-Control+J is Jump to Match in One Column — same dialog plus a column picker. Control+F3 is Find Regex Across All Columns — same dialog with regex semantics. F3 repeats whichever family you most recently invoked; Shift+F3 repeats backward.
-
-### Mark, bookmark, jump by row
-
-Control+M marks the current row; Control+U unmarks. Marked rows show "marked" in the status bar.
-
-Control+K saves a bookmark; Alt+K returns to it; Control+Shift+K clears it.
-
-Shift+G jumps to a row number. Out-of-range values clamp to the first or last row.
-
-### Recent Files
-
-Alt+R reopens one of the last 10 databases. DbDuo restores the file, the last-active table, the filter, the sort, and your row position from when you last closed it.
-
-### Export
-
-Control+Shift+X (X for eXport) produces files from the current view. The GUI prompts for a destination; the dot prompt accepts multiple formats at once:
-
-```
-Export-Data xlsx docx md csv
-```
-
-That writes four files into the database's folder, named after the current table, and opens each one in its default Windows application.
-
-### Round-trip with Markdown
-
-Export Data to a `.md` file produces a Markdown table; Import Data, Control+Shift+I, reads that same format back in. Header cells are matched to columns by name (case-insensitive); unrecognized columns are dropped, and per-row errors do not stop the import.
-
-### Switch between modes
-
-The grave-accent key — the unshifted character above Tab on US keyboards — coordinates the two modes. Control+GraveAccent opens the dot prompt. From inside the console, Alt+GraveAccent brings the GUI back forward. From anywhere in Windows, Alt+Control+GraveAccent toggles between the two modes. JAWS calls this key "GraveAccent."
-
-### Quit
-
-Alt+F4 (the Windows-standard close-program key), or `quit` at the dot prompt, closes DbDuo entirely. If you want to leave the dot prompt but keep the GUI running, type `exit` (or `x` or `bye`) instead.
-
-## Trying DbDuo on larger sample data
-
-Two further sample databases ship in the install folder for exercising DbDuo against more realistic shapes:
-
-- `northwind.db` — the classic Microsoft Northwind sales sample, adapted to DbDuo's standard column set. 8 tables, 101 rows.
-- `chinook.db` — the classic Chinook music-store sample, adapted to the same set. 9 tables, 158 rows, with three-deep parent-child chains.
-
-The Help menu has one-keystroke commands to open each: **Open Northwind Sample** and **Open Chinook Sample**, alongside the existing **Open Sample Database** that opens the original small `sample.db`. You can also open any of the three through File > Open Database. Try parent-child drills (artist → albums → tracks in Chinook; category → products → order details in Northwind) to see DbDuo's filtered-child-table navigation against larger row counts.
-
-## Learning more
-
-The full reference is in `DbDuo.htm` and `DbDuo.md`. Every menu, every command, and every hotkey appears there with its mnemonic and dot-prompt aliases. Version history is in `History.md` / `History.htm`.
-
-The coding style used inside `DbDuo.cs` is documented in `CamelType_CSharp.md`, included with the distribution.
+This is a **source distribution**: compile once with `buildDbDo.cmd` to produce `DbDo.exe`. Three Camel Type modules are included to wire in during that build -- `FkResolution.cs` (schema-truth relationship navigation), `Lookups.cs` (field comboboxes), and `ImportNormalization.cs` (convention-conforming import). See `DbDo_BuildNotes.md` for the integration steps.
 
 ## License
 
-MIT License. See `License.md`, or `License.htm` for the same text rendered in HTML.
-
-## Project home
-
-<https://github.com/JamalMazrui/DbDuo>
+MIT. See `License.md`.

@@ -13,7 +13,7 @@
 // on a single line per type; type lines are themselves ordered
 // alphabetically (a < s < sb).
 //
-// Host objects: db (DbDuoManager), frm (DbDuoForm).
+// Host objects: db (DbDoManager), frm (DbDoForm).
 
 var aFieldNames;
 var sName, sText, sValue;

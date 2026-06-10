@@ -1,16 +1,16 @@
-# DbDuo
+# DbDo
 
 Manage database files in a dual interface of console and graphical modes, maximizing productivity for screen reader and keyboard users.
 
-After decades of personal interest in how to achieve nonvisual usability in database management, I have developed a general-purpose program in this area with AI assistance. DbDuo is a free, open source program designed to boost productivity in the input, querying, and output of data.
+After decades of personal interest in how to achieve nonvisual usability in database management, I have developed a general-purpose program in this area with AI assistance. DbDo is a free, open source program designed to boost productivity in the input, querying, and output of data.
 
-- [DbDuo project page](https://github.com/JamalMazrui/DbDuo)
-- [DbDuo project archive](https://github.com/JamalMazrui/DbDuo/archive/main.zip)
-- [DbDuo executable installer](https://github.com/JamalMazrui/DbDuo/releases/latest/download/DbDuo_setup.exe)
+- [DbDo project page](https://github.com/JamalMazrui/DbDo)
+- [DbDo project archive](https://github.com/JamalMazrui/DbDo/archive/main.zip)
+- [DbDo executable installer](https://github.com/JamalMazrui/DbDo/releases/latest/download/DbDo_setup.exe)
 
-DbDuo defaults to an SQLite database file (`.db` extension), which supports management of related tables via either a command-line interface (like the memorable dBASE dot prompt) or a graphical user interface with a menu system and standard controls. You can easily switch between the two interface windows, depending on what technique is more convenient for the task at hand. Other database-like file formats are also supported, for import or export, including `.dbf`, `.mdb`, `.accdb`, `.xlsx`, `.csv`, and `.tsv`.
+DbDo defaults to an SQLite database file (`.db` extension), which supports management of related tables via either a command-line interface (like the memorable dBASE dot prompt) or a graphical user interface with a menu system and standard controls. You can easily switch between the two interface windows, depending on what technique is more convenient for the task at hand. Other database-like file formats are also supported, for import or export, including `.dbf`, `.mdb`, `.accdb`, `.xlsx`, `.csv`, and `.tsv`.
 
-Every DbDuo command can be accomplished efficiently from the keyboard. In addition, extensions for the JAWS and NVDA screen readers are bundled with the DbDuo installer to further optimize productivity. Advanced features include statistics, charts, and scripts.
+Every DbDo command can be accomplished efficiently from the keyboard. In addition, extensions for the JAWS and NVDA screen readers are bundled with the DbDo installer to further optimize productivity. Advanced features include statistics, charts, and scripts.
 
 ## Highlights
 
@@ -26,29 +26,31 @@ Every DbDuo command can be accomplished efficiently from the keyboard. In additi
 
 **One connection, two interfaces.** The GUI window and the dot-prompt console drive the same live ADO recordset. Edits made in the prompt show up immediately in the data list, and vice versa.
 
-**Snippet scripting.** Save small JavaScript or text snippets in your own editor, then invoke them inside DbDuo with a single keystroke (Alt+V). Scripts can automate bulk record edits, filter changes, custom reports — anything the database manager itself can do.
+**Snippet scripting.** Save small JavaScript or text snippets in your own editor, then invoke them inside DbDo with a single keystroke (Alt+V). Scripts can automate bulk record edits, filter changes, custom reports — anything the database manager itself can do.
 
 ## Sample databases
 
-DbDuo ships three SQLite sample databases adapted to its standard column conventions:
+DbDo ships five SQLite sample databases adapted to its standard column conventions (`<singular>_id` primary keys, `added`/`edited` timestamps maintained by triggers, generated `look`/`unq` columns):
 
 - `sample.db` — a small school domain (teachers, classes, students, enrollments) for first-launch exploration.
 - `northwind.db` — the classic Microsoft Northwind sales sample (categories, suppliers, products, customers, employees, orders, order details, shippers).
 - `chinook.db` — the classic Chinook music-store sample (artists, albums, tracks, genres, customers, invoices, invoice items).
+- `collection.db` — a personal music collection (artists, albums, tracks).
+- `cellar.db` — a personal wine cellar (wines, bottles, tastings).
 
-The two larger samples are useful for exercising DbDuo against real-shaped data with multiple parent-child relationships.
+The two larger samples are useful for exercising DbDo against real-shaped data with multiple parent-child relationships.
 
 ## Accessibility design
 
-Three speech paths in priority order: JAWS via direct COM, NVDA via the controller-client DLL, UIA live-region fallback for Narrator and anything else. The data list is a virtual-mode `ListView` in Details view, which all three readers handle as a familiar Details list. JAWS settings (a JKM key map plus a compiled script) and an NVDA add-on ship with the installer so that both screen readers pass DbDuo's chords through rather than intercepting them for their own table-navigation or browse-mode commands.
+Three speech paths in priority order: JAWS via direct COM, NVDA via the controller-client DLL, UIA live-region fallback for Narrator and anything else. The data list is a virtual-mode `ListView` in Details view, which all three readers handle as a familiar Details list. JAWS settings (a JKM key map plus a compiled script) and an NVDA add-on ship with the installer so that both screen readers pass DbDo's chords through rather than intercepting them for their own table-navigation or browse-mode commands.
 
 JAWS-canonical key names appear throughout the menus, help text, and status messages — UpArrow, DownArrow, NumPad0 through NumPad9, GraveAccent, Minus rather than Dash, modifiers always in alphabetical order (Alt+Control+Shift).
 
 ## Project home and downloads
 
-- **Source, issues, discussion:** <https://github.com/JamalMazrui/DbDuo>
-- **Latest installer (always points to the current release):** <https://github.com/JamalMazrui/DbDuo/releases/latest/download/DbDuo_setup.exe>
-- **Full project as a zip:** <https://github.com/JamalMazrui/DbDuo/archive/main.zip>
+- **Source, issues, discussion:** <https://github.com/JamalMazrui/DbDo>
+- **Latest installer (always points to the current release):** <https://github.com/JamalMazrui/DbDo/releases/latest/download/DbDo_setup.exe>
+- **Full project as a zip:** <https://github.com/JamalMazrui/DbDo/archive/main.zip>
 
 For per-release notes, see `History.md`. Released under the MIT License.
 

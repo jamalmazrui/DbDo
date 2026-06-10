@@ -1,5 +1,5 @@
 ﻿// =====================================================================
-// DbDuo.cs - dual-mode (GUI + dot-prompt CLI) database manager
+// DbDo.cs - dual-mode (GUI + dot-prompt CLI) database manager
 //
 // Browses SQLite, Microsoft Access, Excel, dBASE, and CSV files via
 // ADODB Connection and Recordset over COM interop. The same recordset
@@ -17,11 +17,11 @@
 // array, o other object). Constants named like variables but with
 // words like "Default" or "Initial" rather than the c_ prefix.
 //
-// Targets .NET Framework 4.8 / x64. Compiled by buildDbDuo.cmd as
+// Targets .NET Framework 4.8 / x64. Compiled by buildDbDo.cmd as
 // a /target:winexe /platform:x64. No external runtime dependencies
 // beyond ADODB (present on every Windows install since 2000) plus
 // the appropriate ODBC or OLE DB driver for whichever file format
-// the user opens. See DbDuo.md for deployment requirements.
+// the user opens. See DbDo.md for deployment requirements.
 // =====================================================================
 
 using System;
@@ -40,18 +40,18 @@ using System.Windows.Automation;
 using System.Windows.Automation.Provider;
 using Microsoft.CSharp.RuntimeBinder;
 
-namespace DbDuo
+namespace DbDo
 {
     // =====================================================================
     // BuildInfo: single source of truth for the application version
     // string. Update VersionString here on each release; the value
     // surfaces in the About dialog and (via VersionInfoVersion) in the
     // built EXE's file properties. The Inno Setup script reads its own
-    // copy of the same value from DbDuo_setup.iss; keep the two in sync.
+    // copy of the same value from DbDo_setup.iss; keep the two in sync.
     // =====================================================================
     public static class BuildInfo
     {
-        public const string VersionString = "1.0.104";
+        public const string VersionString = "1.0.105";
     }
 
     // =====================================================================
@@ -59,8 +59,8 @@ namespace DbDuo
     //
     // Purpose: a single global "speak this string" sink that works with
     // any active screen reader (JAWS, NVDA, Narrator, Windows Magnifier
-    // speech) without DbDuo having to know which one is in memory. The
-    // screen reader uses its own active voice; DbDuo's job is to raise
+    // speech) without DbDo having to know which one is in memory. The
+    // screen reader uses its own active voice; DbDo's job is to raise
     // the standard accessibility events that screen readers listen for.
     //
     // Mechanism (the right one for .NET Framework 4.8):
@@ -95,11 +95,11 @@ namespace DbDuo
     //   - Whether a particular screen reader actually announces depends
     //     on its verbosity settings.
     //   - The Label MUST be added to a form's Controls collection
-    //     before say() will reach a screen reader. DbDuoForm wires
+    //     before say() will reach a screen reader. DbDoForm wires
     //     this up in its constructor.
     //   - Polite (not Assertive) is the right choice: assertive
     //     interrupts whatever the screen reader is currently saying,
-    //     which would make DbDuo announcements rude. Polite queues
+    //     which would make DbDo announcements rude. Polite queues
     //     them after current speech.
     // =====================================================================
     public static class LiveRegion
@@ -174,7 +174,7 @@ namespace DbDuo
         //                cost of creating the COM object just to test.
         //
         //   2. NVDA:     nvdaControllerClient.dll P/Invoke. The DLL
-        //                must be shipped alongside DbDuo.exe. NVDA
+        //                must be shipped alongside DbDo.exe. NVDA
         //                does NOT expose a COM API; the controller
         //                client is the documented IPC channel.
         //                Detection: nvdaController_testIfRunning()
@@ -207,11 +207,11 @@ namespace DbDuo
         // fires for Narrator (and any other UIA-listening reader).
         public static void say(string sText)
         {
-            // Extra-Speech gate: when off, DbDuo's direct speech is
+            // Extra-Speech gate: when off, DbDo's direct speech is
             // suppressed but the screen reader's natural focus and
             // selection announcements still occur. The flag is toggled
             // by Toggle-Extra-Speech (Alt+Shift+S) and persisted to
-            // [General] extraSpeech in DbDuo.ini. The toggle command
+            // [General] extraSpeech in DbDo.inix. The toggle command
             // itself uses sayForced so the user always hears their
             // own action confirmed regardless of the flag's state.
             if (!bExtraSpeechEnabled) return;
@@ -238,7 +238,7 @@ namespace DbDuo
         }
 
         // Extra-Speech enabled flag. Public mutable so the toggle
-        // command can flip it. Loaded from DbDuo.ini at startup;
+        // command can flip it. Loaded from DbDo.inix at startup;
         // default true. Persisted on change.
         public static bool bExtraSpeechEnabled = true;
 
@@ -270,7 +270,7 @@ namespace DbDuo
             try { nvdaController_testIfRunning(); bNvdaDll = true; }
             catch (DllNotFoundException) { bNvdaDll = false; }
             catch { bNvdaDll = true; }
-            sb.AppendLine("nvdaControllerClient.dll loadable: " + (bNvdaDll ? "yes" : "no (drop the DLL next to DbDuo.exe to enable NVDA support)"));
+            sb.AppendLine("nvdaControllerClient.dll loadable: " + (bNvdaDll ? "yes" : "no (drop the DLL next to DbDo.exe to enable NVDA support)"));
             sb.AppendLine("NVDA running (controller client says so): " + (isNvdaRunning() ? "yes" : "no"));
             sb.AppendLine();
             // SystemParametersInfo SPI_GETSCREENREADER: a generic
@@ -350,8 +350,8 @@ namespace DbDuo
         // releases shipped it as nvdaControllerClient64.dll for x64
         // hosts and nvdaControllerClient32.dll for x86. NVDA's own
         // current C# example uses the unsuffixed name and that is
-        // what the DbDuo build script downloads and bundles. Place
-        // the DLL next to DbDuo.exe and the DllImport finds it via
+        // what the DbDo build script downloads and bundles. Place
+        // the DLL next to DbDo.exe and the DllImport finds it via
         // the standard Windows DLL search order. If the DLL is
         // missing, DllNotFoundException is caught silently and the
         // NVDA path is unavailable.
@@ -475,7 +475,7 @@ namespace DbDuo
         // honors notifications from top-level windows but tends to
         // ignore them from marginal hidden controls. JAWS and NVDA
         // accept either. Processing mode is "All" (value 2), matching
-        // the behavior of the legacy sayViaUia path that DbDuo's
+        // the behavior of the legacy sayViaUia path that DbDo's
         // Narrator fallback was already using successfully -- "All"
         // means deliver to every listener without queue restrictions.
         // sayUiaString: pure-UIA speech path. Fires the UIA
@@ -619,7 +619,7 @@ namespace DbDuo
                     (iProcessing == 1)
                         ? System.Windows.Automation.AutomationNotificationProcessing.ImportantMostRecent
                         : System.Windows.Automation.AutomationNotificationProcessing.All;
-                string sActivityId = "DbDuo." + iNotificationSequence.ToString() + "." + Guid.NewGuid().ToString("N");
+                string sActivityId = "DbDo." + iNotificationSequence.ToString() + "." + Guid.NewGuid().ToString("N");
                 UiaNative.UiaRaiseNotificationEvent(
                     host.ProviderAnnouncer,
                     System.Windows.Automation.AutomationNotificationKind.Other,
@@ -670,7 +670,7 @@ namespace DbDuo
             this.TabStop = false;
             this.Width = 1;
             this.Height = 1;
-            this.Text = "DbDuo notification host " + iSeq.ToString();
+            this.Text = "DbDo notification host " + iSeq.ToString();
             this.AccessibleName = sMsg;
             this.iSequence = iSeq;
             this.sMessageText = sMsg;
@@ -752,7 +752,7 @@ namespace DbDuo
         public object GetPropertyValue(int iPropertyId)
         {
             if (iPropertyId == c_iNameProperty)              return sName;
-            if (iPropertyId == c_iAutomationIdProperty)      return "DbDuoNotification" + iSequence.ToString();
+            if (iPropertyId == c_iAutomationIdProperty)      return "DbDoNotification" + iSequence.ToString();
             if (iPropertyId == c_iControlTypeProperty)       return c_iTextControlType;
             if (iPropertyId == c_iFrameworkIdProperty)       return "WinForms";
             if (iPropertyId == c_iIsControlElementProperty)  return true;
@@ -773,21 +773,21 @@ namespace DbDuo
     }
 
     // =====================================================================
-    // JawsSettingsInstaller: copy DbDuo.jkm and DbDuo.jss into every
+    // JawsSettingsInstaller: copy DbDo.jkm and DbDo.jss into every
     // installed JAWS user-settings folder and run scompile.exe to
-    // produce DbDuo.jsb there. The Pascal-Script equivalent that
-    // shipped with v1.0.39 worked but lived inside DbDuo_setup.iss;
+    // produce DbDo.jsb there. The Pascal-Script equivalent that
+    // shipped with v1.0.39 worked but lived inside DbDo_setup.iss;
     // moving it to C# lets the user re-trigger it later without
     // re-running the full installer, and consolidates the JAWS-
     // version-discovery logic in one place.
     //
     // Invoked two ways:
     //   - From the installer's [Run] section as
-    //     `DbDuo.exe --install-jaws-settings`, which runs the install
+    //     `DbDo.exe --install-jaws-settings`, which runs the install
     //     and exits without launching the GUI.
     //   - From the Help menu's "Install JAWS settings" command, which
     //     re-runs the install (for users who upgraded JAWS to a new
-    //     year-version after installing DbDuo).
+    //     year-version after installing DbDo).
     //
     // Returns a multi-line report of what was done. Caller chooses
     // whether to show it (the menu version pops a dialog; the CLI
@@ -829,7 +829,7 @@ namespace DbDuo
         // Run the install. Returns a human-readable report and, via
         // the iCopied / iCompiled out-parameters, totals the caller
         // can use for status text. Records every path placed in a
-        // log under %APPDATA%\DbDuo\jawsSettings.log so the matching
+        // log under %APPDATA%\DbDo\jawsSettings.log so the matching
         // uninstall path can remove exactly those files.
         public static string install(string sAppFolder, out int iCopied, out int iCompiled)
         {
@@ -848,16 +848,16 @@ namespace DbDuo
                 return sb.ToString();
             }
 
-            string sJkmSource = System.IO.Path.Combine(sAppFolder, "DbDuo.jkm");
-            string sJssSource = System.IO.Path.Combine(sAppFolder, "DbDuo.jss");
+            string sJkmSource = System.IO.Path.Combine(sAppFolder, "DbDo.jkm");
+            string sJssSource = System.IO.Path.Combine(sAppFolder, "DbDo.jss");
             if (!System.IO.File.Exists(sJkmSource))
             {
-                sb.AppendLine("DbDuo.jkm not found in " + sAppFolder + ".");
+                sb.AppendLine("DbDo.jkm not found in " + sAppFolder + ".");
                 return sb.ToString();
             }
             if (!System.IO.File.Exists(sJssSource))
             {
-                sb.AppendLine("DbDuo.jss not found in " + sAppFolder + ".");
+                sb.AppendLine("DbDo.jss not found in " + sAppFolder + ".");
                 return sb.ToString();
             }
 
@@ -871,9 +871,9 @@ namespace DbDuo
                 foreach (string sLangPath in System.IO.Directory.GetDirectories(sSettingsPath))
                 {
                     string sLang = System.IO.Path.GetFileName(sLangPath);
-                    string sJkmTarget = System.IO.Path.Combine(sLangPath, "DbDuo.jkm");
-                    string sJssTarget = System.IO.Path.Combine(sLangPath, "DbDuo.jss");
-                    string sJsbTarget = System.IO.Path.Combine(sLangPath, "DbDuo.jsb");
+                    string sJkmTarget = System.IO.Path.Combine(sLangPath, "DbDo.jkm");
+                    string sJssTarget = System.IO.Path.Combine(sLangPath, "DbDo.jss");
+                    string sJsbTarget = System.IO.Path.Combine(sLangPath, "DbDo.jsb");
 
                     bool bJkmOk = false, bJssOk = false, bJsbOk = false;
                     try { System.IO.File.Copy(sJkmSource, sJkmTarget, true); bJkmOk = true; iCopied++; lLog.Add(sJkmTarget); }
@@ -886,7 +886,7 @@ namespace DbDuo
                         try
                         {
                             System.Diagnostics.ProcessStartInfo psi =
-                                new System.Diagnostics.ProcessStartInfo(sScompile, "DbDuo.jss");
+                                new System.Diagnostics.ProcessStartInfo(sScompile, "DbDo.jss");
                             psi.WorkingDirectory = sLangPath;
                             psi.UseShellExecute = false;
                             psi.CreateNoWindow = true;
@@ -974,29 +974,29 @@ namespace DbDuo
         {
             return System.IO.Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                @"DbDuo\jawsSettings.log");
+                @"DbDo\jawsSettings.log");
         }
     }
 
     // =====================================================================
-    // ScriptHelper: file-system support for DbDuo's Invoke / Edit
+    // ScriptHelper: file-system support for DbDo's Invoke / Edit
     // Script commands. Modeled on EdSharp's script folder pattern.
-    // Scripts live as plain files under %APPDATA%\DbDuo\Scripts\.
+    // Scripts live as plain files under %APPDATA%\DbDo\Scripts\.
     // Files ending in .js are executed as JScript .NET via
-    // DbDuo.JS.runScript (in the separately-compiled DbDuo.dll);
+    // DbDo.JS.runScript (in the separately-compiled DbDo.dll);
     // all other extensions are treated as plain text and displayed in
     // a standard MessageBox as reference material.
     //
     // No custom script editor. The user edits scripts in their own
-    // preferred editor (Notepad by default; configurable in DbDuo.ini
+    // preferred editor (Notepad by default; configurable in DbDo.inix
     // under [Scripts] editor=path-to-editor). The Pick dialog for
     // choosing a script to invoke or edit reuses the existing
-    // LbcDialog used throughout DbDuo (Choose Table, Recent Files,
+    // LbcDialog used throughout DbDo (Choose Table, Recent Files,
     // etc.).
     //
     // (Note on EdSharp's "Save Script" command: it captured selected
     // or whole-document text from the current editor view and wrote
-    // it to a script file. DbDuo is not a text editor, so there is
+    // it to a script file. DbDo is not a text editor, so there is
     // no analogous "current selection" to capture. The Save Script
     // command from v1.0.44 dev preview is dropped here in favor of
     // Edit Script covering the new-file case too -- the user picks
@@ -1005,8 +1005,8 @@ namespace DbDuo
     // =====================================================================
     public static class ScriptHelper
     {
-        // Script folder under %APPDATA%\DbDuo\Scripts. Created on
-        // first access. Path is stable across DbDuo upgrades because
+        // Script folder under %APPDATA%\DbDo\Scripts. Created on
+        // first access. Path is stable across DbDo upgrades because
         // it lives under the user's roaming application data, not
         // the install folder.
         //
@@ -1022,7 +1022,7 @@ namespace DbDuo
         {
             string sDir = System.IO.Path.Combine(
                 Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                @"DbDuo\Scripts");
+                @"DbDo\Scripts");
             try { System.IO.Directory.CreateDirectory(sDir); }
             catch { /* tolerate; the caller will surface the error */ }
             seedSampleScriptsIfNew(sDir);
@@ -1031,8 +1031,8 @@ namespace DbDuo
 
         // seedSampleScriptsIfNew: one-time copy of the bundled
         // sample scripts into the user's script folder. Copies
-        // every .js, .sql, and .duo file from {app}\Scripts into
-        // %APPDATA%\DbDuo\Scripts. A .seeded sentinel file inside
+        // every .js, .sql, and .dbdo file from {app}\Scripts into
+        // %APPDATA%\DbDo\Scripts. A .seeded sentinel file inside
         // the user's script folder records that seeding has run,
         // so deleting a sample doesn't cause it to reappear on
         // the next launch.
@@ -1062,7 +1062,7 @@ namespace DbDuo
                 }
                 if (System.IO.Directory.Exists(sSrcFolder))
                 {
-                    string[] aPatterns = new string[] { "*.js", "*.sql", "*.duo" };
+                    string[] aPatterns = new string[] { "*.js", "*.sql", "*.dbdo" };
                     foreach (string sPattern in aPatterns)
                     {
                         string[] aSrcFiles = System.IO.Directory.GetFiles(sSrcFolder, sPattern);
@@ -1086,7 +1086,7 @@ namespace DbDuo
                 // copied. An empty source folder, a missing source
                 // folder, or permissions failures all count as "we
                 // tried" -- we won't retry on later runs.
-                try { System.IO.File.WriteAllText(sSentinel, "DbDuo script folder seeded.\r\n"); }
+                try { System.IO.File.WriteAllText(sSentinel, "DbDo script folder seeded.\r\n"); }
                 catch { /* tolerate */ }
             }
             catch
@@ -1097,16 +1097,16 @@ namespace DbDuo
         }
 
         // Editor command. The optional [Scripts] editor= setting in
-        // the per-user DbDuo.ini overrides; default is Notepad on
+        // the per-user DbDo.inix overrides; default is Notepad on
         // PATH. Returns the editor executable path or "notepad" if
         // no override.
         //
-        // IniSession lives nested inside DbDuoForm (where most ini
+        // IniSession lives nested inside DbDoForm (where most ini
         // access happens) so we reach it via the qualified name.
         // No new helper class is introduced for one call site.
         public static string getEditorCommand()
         {
-            string sIniEditor = DbDuoForm.IniSession.read("Scripts", "editor");
+            string sIniEditor = DbDoForm.IniSession.read("Scripts", "editor");
             if (!string.IsNullOrEmpty(sIniEditor)) return sIniEditor;
             return "notepad";
         }
@@ -1118,10 +1118,10 @@ namespace DbDuo
         // Prefix note: dirInfo / fileInfos here use the lower-camel
         // class-name prefix per Camel Type for non-COM .NET objects;
         // they are NOT prefixed "o" (which is for COM/Variant types).
-        // listScripts: return the names of every DbDuo script file
+        // listScripts: return the names of every DbDo script file
         // in the user's scripts folder. The recognized extensions
-        // are .js (JScript .NET), .sql (SQL batch), and .duo
-        // (DbDuo command batch). The .seeded sentinel and any other
+        // are .js (JScript .NET), .sql (SQL batch), and .dbdo
+        // (DbDo command batch). The .seeded sentinel and any other
         // file types are hidden. Returns names without paths, sorted
         // alphabetically case-insensitively.
         public static string[] listScripts()
@@ -1133,7 +1133,7 @@ namespace DbDuo
             foreach (System.IO.FileInfo fi in dirInfo.GetFiles())
             {
                 string sExt = fi.Extension.ToLowerInvariant();
-                if (sExt == ".js" || sExt == ".sql" || sExt == ".duo")
+                if (sExt == ".js" || sExt == ".sql" || sExt == ".dbdo")
                     lNames.Add(fi.Name);
             }
             lNames.Sort(StringComparer.OrdinalIgnoreCase);
@@ -1165,37 +1165,37 @@ namespace DbDuo
         // engine:
         //
         //   .js   -- JScript .NET. Load the file content and call
-        //            DbDuo.JS.runScript via reflection so DbDuo.cs
+        //            DbDo.JS.runScript via reflection so DbDo.cs
         //            does not need a compile-time reference to
-        //            DbDuo.dll's types. The script has access to
-        //            host objects `db` (DbDuoManager) and `frm`
-        //            (DbDuoForm) and can do arbitrary computation;
+        //            DbDo.dll's types. The script has access to
+        //            host objects `db` (DbDoManager) and `frm`
+        //            (DbDoForm) and can do arbitrary computation;
         //            the string it leaves on its last expression
         //            becomes the result.
         //
         //   .sql  -- SQL batch. Statements separated by ';' are run
-        //            in order through DbDuoManager.invokeSql, which
+        //            in order through DbDoManager.invokeSql, which
         //            handles both SELECT (renders rows) and DML
         //            (returns row count). All output is captured to
         //            a StringWriter and returned for display in the
         //            memo dialog.
         //
-        //   .duo  -- DbDuo command batch. Each non-blank, non-comment
+        //   .dbdo  -- DbDo command batch. Each non-blank, non-comment
         //            line is parsed and dispatched through the dot-
         //            prompt's resolver as if the user had typed it
         //            at the prompt. Comments start with '#' or '--'.
         //            stdout output from each command is captured and
         //            returned together.
         //
-        // The .duo extension is reserved for DbDuo's command-batch
+        // The .dbdo extension is reserved for DbDo's command-batch
         // format; it does not collide with any major file type. .dbd
         // was considered (collision with ER/Studio and InterBase),
         // .dot was considered (Graphviz, Word templates).
         //
         // The frm and db parameters are typed as object because at
         // this layer we don't need the static types -- the JScript
-        // engine takes them as Object[] anyway. frm IS a DbDuoForm
-        // and db IS a DbDuoManager at the call site.
+        // engine takes them as Object[] anyway. frm IS a DbDoForm
+        // and db IS a DbDoManager at the call site.
         //
         // Returns the result string (script output, or "ERROR: ..."
         // on failure).
@@ -1212,7 +1212,7 @@ namespace DbDuo
                     return runJScript(sBody, frm, db);
                 case ".sql":
                     return runSqlBatch(sBody, db);
-                case ".duo":
+                case ".dbdo":
                     return runDuoBatch(sBody, frm, db);
                 default:
                     // Unsupported extension. Return the file contents
@@ -1223,11 +1223,11 @@ namespace DbDuo
             }
         }
 
-        // runJScript: invoke DbDuo.JS.runScript via reflection so we
+        // runJScript: invoke DbDo.JS.runScript via reflection so we
         // don't take a compile-time dependency on the JScript
         // assembly's namespace from C#. We use Assembly.LoadFrom
-        // with the full path rather than Assembly.Load("DbDuo")
-        // because the running EXE is also named DbDuo and a
+        // with the full path rather than Assembly.Load("DbDo")
+        // because the running EXE is also named DbDo and a
         // simple-name load would resolve to it instead.
         private static string runJScript(string sBody, object frm, object db)
         {
@@ -1236,13 +1236,13 @@ namespace DbDuo
                 string sExePath = System.Reflection.Assembly.GetExecutingAssembly().Location;
                 string sDllPath = System.IO.Path.Combine(
                     System.IO.Path.GetDirectoryName(sExePath) ?? "",
-                    "DbDuo.dll");
+                    "DbDo.dll");
                 System.Reflection.Assembly asm = System.Reflection.Assembly.LoadFrom(sDllPath);
-                Type jsType = asm.GetType("DbDuo.JS");
-                if (jsType == null) return "ERROR: DbDuo.JS type not found in DbDuo.dll";
+                Type jsType = asm.GetType("DbDo.JS");
+                if (jsType == null) return "ERROR: DbDo.JS type not found in DbDo.dll";
                 System.Reflection.MethodInfo methodInfo = jsType.GetMethod("runScript",
                     new Type[] { typeof(string), typeof(object), typeof(object) });
-                if (methodInfo == null) return "ERROR: DbDuo.JS.runScript(string, object, object) not found";
+                if (methodInfo == null) return "ERROR: DbDo.JS.runScript(string, object, object) not found";
                 object result = methodInfo.Invoke(null, new object[] { sBody, frm, db });
                 return result != null ? result.ToString() : "";
             }
@@ -1262,7 +1262,7 @@ namespace DbDuo
         // file without confusing the parser.
         private static string runSqlBatch(string sBody, object db)
         {
-            DbDuoManager mgr = db as DbDuoManager;
+            DbDoManager mgr = db as DbDoManager;
             if (mgr == null) return "ERROR: no database manager available";
             if (!mgr.isOpen()) return "ERROR: no database open";
 
@@ -1631,18 +1631,18 @@ namespace DbDuo
 
     // =====================================================================
     // Metadata: convention-based names for the bookkeeping columns that
-    // appear on every well-formed DbDuo schema (modeled on Pax.db and the
+    // appear on every well-formed DbDo schema (modeled on Pax.db and the
     // older AccAudit schema).
     //
     // These are not enforced -- a SQLite database without them still works
-    // -- but when present, DbDuo treats them specially:
+    // -- but when present, DbDo treats them specially:
     //
     //   1. The Edit-Record dialog hides metadata fields by default and
     //      shows only 'distinct' (substantive) fields. Use the "more"
     //      checkbox to expose them.
     //
     //   2. New-Record skips them entirely; the database fills them in via
-    //      DEFAULT current_timestamp on added/updated/observed and
+    //      DEFAULT current_timestamp on added/edited/observed and
     //      DEFAULT 0 on marked.
     //
     //   3. Show-Object groups them in a separate "metadata" section at
@@ -1652,7 +1652,7 @@ namespace DbDuo
     //   4. Set-Mark / Clear-Mark work against the 'marked' column and
     //      do nothing if the table lacks one.
     //
-    //   5. The view_ prefix on a table name is the convention DbDuo uses
+    //   5. The view_ prefix on a table name is the convention DbDo uses
     //      to distinguish views from tables in the schema tree. ADOX
     //      Catalog.Tables enumeration returns both as the same kind of
     //      object; we filter on the Type property and on the prefix.
@@ -1665,13 +1665,13 @@ namespace DbDuo
     // =====================================================================
     public static class Metadata
     {
-        // DbDuo's standard-field convention. Verified against
+        // DbDo's standard-field convention. Verified against
         // Pax.db's seven canonical tables (apps, screens, controls,
         // rules, issues, states, lookups) and against dbDot.vbs's
         // fillFieldArrays (line 318): the column names suppressed
         // from the default data-list view are exactly:
         //
-        //   <table>_id, added, updated, marked, look, unq
+        //   <table>_id, added, edited, marked, look, unq
         //
         // 'look' and 'unq' are stored-generated (PRAGMA table_xinfo
         // hidden=2); the calculated-column auto-hide rule would
@@ -1694,7 +1694,7 @@ namespace DbDuo
         // they join the hidden set automatically.
         // StandardHiddenColumns: columns hidden from the listview by
         // default. The user reaches them via the Say-X family
-        // (Say-Added, Say-Updated, Say-Url, Say-Tags, Say-Notes,
+        // (Say-Added, Say-Edited, Say-Url, Say-Tags, Say-Notes,
         // Say-Look, Say-Id) and edits them via the Set-Record dialog
         // (F2 Edit Record), which shows the FULL field set including
         // hidden columns.
@@ -1704,11 +1704,11 @@ namespace DbDuo
         // "extended" data per row that bloats the listview if shown
         // unconditionally. The user can override via the Select
         // Columns command (Alt+S) and the override persists per
-        // table via the DbDuo.ini t<n>_selectlist entry.
+        // table via the DbDo.inix t<n>_selectlist entry.
         public static readonly string[] StandardHiddenColumns = new string[]
         {
             "added",
-            "modified",
+            "edited",
             "marked",
             "look",
             "unq",
@@ -1729,7 +1729,7 @@ namespace DbDuo
         public static readonly string[] BookkeepingColumns = new string[]
         {
             "added",
-            "modified",
+            "edited",
             "observed",
             "method",
             "look",
@@ -1745,24 +1745,24 @@ namespace DbDuo
         // constants here instead of string literals so a future
         // rename only needs to change the constant value.
         public const string AddedColumn    = "added";
-        public const string MarkedColumn   = "marked";
-        public const string ModifiedColumn = "modified";
-        public const string NotesColumn    = "notes";
+        public const string EditedColumn   = "edited";
         public const string LookColumn     = "look";
+        public const string MarkedColumn   = "marked";
+        public const string NotesColumn    = "notes";
         public const string TagsColumn     = "tags";
-        public const string UrlColumn      = "url";
         public const string UnqColumn      = "unq";
+        public const string UrlColumn      = "url";
 
         // Standard date-sort column resolution. dbDot's standard for
-        // "when did this row last change" is 'updated' (the
+        // "when did this row last change" is 'edited' (the
         // application-level "last edit" timestamp). 'observed' is
         // also a timestamp but records "when was this entity last
         // seen by the data-collection method" -- a different
         // semantic. 'added' is the row-creation timestamp; useful as
-        // a fallback when 'modified' is absent.
+        // a fallback when 'edited' is absent.
         public static readonly string[] DateSortColumns = new string[]
         {
-            "modified",
+            "edited",
             "added",
             "observed"
         };
@@ -1778,7 +1778,7 @@ namespace DbDuo
             foreach (string sN in StandardHiddenColumns)
                 if (sLower == sN) return true;
             // Key columns: any column ending in '_id' (primary or
-            // foreign key by DbDuo convention) and bare 'id'. These
+            // foreign key by DbDo convention) and bare 'id'. These
             // hold integer references that don't carry meaningful
             // display value -- the user navigates between related
             // rows via Show-Related (Control+J) rather than reading
@@ -1873,7 +1873,7 @@ namespace DbDuo
     }
 
     // =====================================================================
-    // InixCodec: read and write .inix files. Inix is DbDuo's extended .ini
+    // InixCodec: read and write .inix files. Inix is DbDo's extended .ini
     // format -- a friendlier serialization than JSON or TOML for both
     // configuration data and tabular data, designed to be readable and
     // editable in any plain-text editor.
@@ -2177,7 +2177,7 @@ namespace DbDuo
 
         // ----------------------------------------------------------------
         // Write helpers. Output is UTF-8 with BOM and CRLF line endings,
-        // matching the rest of DbDuo's text-file conventions.
+        // matching the rest of DbDo's text-file conventions.
         // ----------------------------------------------------------------
 
         // Choose the right fence for a value: prefer plain multi-line
@@ -2305,15 +2305,119 @@ namespace DbDuo
                 }
             }
         }
+
+        // writeValue: surgically set, replace, or remove ONE key in an
+        // .inix file, preserving every comment and every other line --
+        // unlike writeAsConfig, which rewrites the whole file and
+        // would drop comments. Used for the per-user settings file,
+        // where the shipped template's documentation comments must
+        // survive machine writes.
+        //
+        // Inix-aware in both directions: a value containing a newline
+        // is written in the fenced form (key=` ... `), an existing
+        // fenced value is replaced or removed as a whole block, and
+        // the scan skips over fenced blocks so a key= line INSIDE a
+        // fenced value is never mistaken for a real key. Pass an
+        // empty value to remove the key. Returns false on I/O failure
+        // so callers can log it (this class stays log-independent).
+        public static bool writeValue(string sPath, string sSection, string sKey, string sValue)
+        {
+            string sHeader = "[" + sSection + "]";
+            List<string> lLines = new List<string>();
+            if (File.Exists(sPath))
+            {
+                try { lLines.AddRange(File.ReadAllLines(sPath)); } catch { return false; }
+            }
+
+            int iSectionEnd = -1, iSectionStart = -1;
+            for (int i = 0; i < lLines.Count; i++)
+            {
+                string sTrim = lLines[i].Trim();
+                if (sTrim.Equals(sHeader, StringComparison.OrdinalIgnoreCase))
+                {
+                    iSectionStart = i;
+                    iSectionEnd = lLines.Count;
+                    for (int j = i + 1; j < lLines.Count; j++)
+                    {
+                        string sJ = lLines[j].Trim();
+                        if (sJ.StartsWith("[")) { iSectionEnd = j; break; }
+                    }
+                    break;
+                }
+            }
+
+            // Render the new value as one or more lines: fenced when
+            // it spans lines or itself contains '=' or '[' (the cases
+            // where the plain form is unreliable), plain otherwise.
+            List<string> lNewLines = new List<string>();
+            if (!string.IsNullOrEmpty(sValue))
+            {
+                bool bFenced = sValue.IndexOf('\n') >= 0
+                            || sValue.IndexOf('=') >= 0
+                            || sValue.TrimStart().StartsWith("[");
+                if (bFenced)
+                {
+                    lNewLines.Add(sKey + "=`");
+                    string sNormalized = sValue.Replace("\r\n", "\n").Replace("\r", "\n");
+                    foreach (string sLn in sNormalized.Split('\n')) lNewLines.Add(sLn);
+                    lNewLines.Add("`");
+                }
+                else lNewLines.Add(sKey + " = " + sValue);
+            }
+
+            if (iSectionStart < 0)
+            {
+                if (lLines.Count > 0 && lLines[lLines.Count - 1].Trim().Length > 0) lLines.Add("");
+                lLines.Add(sHeader);
+                lLines.AddRange(lNewLines);
+            }
+            else
+            {
+                int iFound = -1, iFoundEnd = -1;  // inclusive line range of the existing entry
+                for (int i = iSectionStart + 1; i < iSectionEnd; i++)
+                {
+                    string sT = lLines[i].Trim();
+                    if (sT.Length == 0) continue;
+                    if (sT.StartsWith(";") || sT.StartsWith("#")) continue;
+                    int iEq = sT.IndexOf('=');
+                    if (iEq <= 0) continue;
+                    string sName = sT.Substring(0, iEq).Trim();
+                    string sRest = sT.Substring(iEq + 1).Trim();
+                    bool bFenceOpen = (sRest == "`" || sRest == "\"\"\"");
+                    int iEntryEnd = i;
+                    if (bFenceOpen)
+                    {
+                        iEntryEnd = iSectionEnd - 1;  // unterminated fence: rest of section
+                        for (int j = i + 1; j < iSectionEnd; j++)
+                            if (lLines[j].Trim() == sRest) { iEntryEnd = j; break; }
+                    }
+                    if (string.Equals(sName, sKey, StringComparison.OrdinalIgnoreCase))
+                    { iFound = i; iFoundEnd = iEntryEnd; break; }
+                    i = iEntryEnd;  // skip past a fenced block belonging to another key
+                }
+                if (iFound >= 0)
+                {
+                    lLines.RemoveRange(iFound, iFoundEnd - iFound + 1);
+                    if (lNewLines.Count > 0) lLines.InsertRange(iFound, lNewLines);
+                }
+                else if (lNewLines.Count > 0)
+                {
+                    lLines.InsertRange(iSectionStart + 1, lNewLines);
+                }
+            }
+
+            try { File.WriteAllLines(sPath, lLines.ToArray()); return true; }
+            catch { return false; }
+        }
     }
 
     // =====================================================================
-    // DbDuoManager: the single source of truth for the current
+    // DbDoManager: the single source of truth for the current
     // recordset state (current position, filter, sort, bookmarks).
     //
     // Wraps a long-lived ADODB.Connection and a current ADODB.Recordset.
     // All COM calls are late-bound through dynamic, so no Interop.ADODB
-    // assembly is required at compile time and the resulting DbDuo.exe
+    // assembly is required at compile time and the resulting DbDo.exe
     // ships as a single self-contained binary.
     //
     // The recordset is opened CursorLocation = adUseClient and CursorType
@@ -2337,7 +2441,7 @@ namespace DbDuo
     // pattern dbDot.vbs uses and is the central reason we picked
     // ADODB over rolling our own cursor on top of System.Data.SQLite.
     // =====================================================================
-    public class DbDuoManager : IDisposable
+    public class DbDoManager : IDisposable
     {
         // ------- Constants -------
         private const int InitialFetchBatch = 1000;  // rows fetched per chunk for table loads
@@ -2356,7 +2460,7 @@ namespace DbDuo
         private string sFilePath;
 
         // ------- Constructor / Dispose -------
-        public DbDuoManager()
+        public DbDoManager()
         {
             sCurrentTable = "";
             sFilePath = "";
@@ -2464,7 +2568,7 @@ namespace DbDuo
             {
                 try { ensureRecommendedIndexes(); }
                 catch (Exception exIdx)
-                { try { DbDuoLog.write("ensureRecommendedIndexes failed: " + exIdx.Message); } catch { } }
+                { try { DbDoLog.write("ensureRecommendedIndexes failed: " + exIdx.Message); } catch { } }
             }
 
             if (!string.IsNullOrEmpty(sTable))
@@ -2474,7 +2578,7 @@ namespace DbDuo
         // ensureRecommendedIndexes: for every base table in the
         // currently-open SQLite database, issue CREATE INDEX IF
         // NOT EXISTS on the columns that benefit from being indexed
-        // in DbDuo's typical access patterns:
+        // in DbDo's typical access patterns:
         //
         //   - Foreign-key columns (any column whose name ends in
         //     '_id' and is not the table's own primary key) -- used
@@ -2498,11 +2602,11 @@ namespace DbDuo
         //
         // The walk uses sqlite_master to enumerate tables, then
         // PRAGMA table_info for each to discover columns. Both
-        // queries return ADODB recordsets in this DbDuo path.
+        // queries return ADODB recordsets in this DbDo path.
         // INDEX creation goes through oConn.Execute directly,
         // not a recordset.
         //
-        // Every created index is logged to DbDuoLog so the user
+        // Every created index is logged to DbDoLog so the user
         // can see what changed.
         private void ensureRecommendedIndexes()
         {
@@ -2571,7 +2675,7 @@ namespace DbDuo
                         string.Equals(sCol, "tags",    StringComparison.OrdinalIgnoreCase) ||
                         string.Equals(sCol, "url",     StringComparison.OrdinalIgnoreCase) ||
                         string.Equals(sCol, "added",   StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(sCol, "modified", StringComparison.OrdinalIgnoreCase);
+                        string.Equals(sCol, "edited", StringComparison.OrdinalIgnoreCase);
                     if (!bIsFk && !bIsMarked && !bIsSortableStandard) continue;
 
                     string sIdxName = "idx_" + sTable + "_" + sCol;
@@ -2583,11 +2687,11 @@ namespace DbDuo
                     {
                         oConn.Execute(sSql, Type.Missing,
                             128 /* adExecuteNoRecords */ | 1 /* adCmdText */);
-                        try { DbDuoLog.write("ensureRecommendedIndexes: " + sSql); } catch { }
+                        try { DbDoLog.write("ensureRecommendedIndexes: " + sSql); } catch { }
                     }
                     catch (Exception exSql)
                     {
-                        try { DbDuoLog.write("ensureRecommendedIndexes skip " + sIdxName + ": " + exSql.Message); } catch { }
+                        try { DbDoLog.write("ensureRecommendedIndexes skip " + sIdxName + ": " + exSql.Message); } catch { }
                     }
                 }
             }
@@ -2598,7 +2702,7 @@ namespace DbDuo
         // buildConnectString: per-extension connection-string assembly.
         // Mirrors dbDot.vbs lines 869-914 in spirit; the hard-coded
         // strings are now fallbacks behind a [ConnectStrings] section
-        // in DbDuo.ini that lets advanced users override on a per-
+        // in DbDo.inix that lets advanced users override on a per-
         // extension basis. The ini template substitutes {path} with
         // the full file path and {folder} with the parent folder; the
         // ini code never escapes characters in {path}, so the user
@@ -2609,7 +2713,7 @@ namespace DbDuo
         private string buildConnectString(string sPath, string sExt, bool bIsFolder, ref string sTable)
         {
             // First check the [ConnectStrings] section of the per-user
-            // DbDuo.ini for an override. Empty / missing value falls
+            // DbDo.inix for an override. Empty / missing value falls
             // through to the hard-coded defaults below.
             string sOverride = readConnectStringOverride(sExt);
             if (!string.IsNullOrEmpty(sOverride))
@@ -2680,7 +2784,7 @@ namespace DbDuo
         }
 
         // readConnectStringOverride: consult the [ConnectStrings]
-        // section of the per-user DbDuo.ini (with legacy fallback to
+        // section of the per-user DbDo.inix (with legacy fallback to
         // the shipped template next to the EXE) for an override of
         // the connection-string template for the given file
         // extension. Returns "" when no override is present.
@@ -2692,7 +2796,7 @@ namespace DbDuo
                 string sUserBase = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
                 if (!string.IsNullOrEmpty(sUserBase))
                 {
-                    string sIni = Path.Combine(sUserBase, "DbDuo", "DbDuo.ini");
+                    string sIni = Path.Combine(sUserBase, "DbDo", "DbDo.inix");
                     if (File.Exists(sIni))
                     {
                         string sV = readIniFromFile(sIni, "ConnectStrings", sExt);
@@ -2702,7 +2806,7 @@ namespace DbDuo
                 // Shipped template.
                 string sShipped = Path.Combine(
                     Path.GetDirectoryName(Application.ExecutablePath) ?? ".",
-                    "DbDuo.ini");
+                    "DbDo.inix");
                 if (File.Exists(sShipped))
                 {
                     string sV = readIniFromFile(sShipped, "ConnectStrings", sExt);
@@ -2713,32 +2817,25 @@ namespace DbDuo
             return "";
         }
 
-        // readIniFromFile: bare-bones section/key reader used by
-        // readConnectStringOverride. Not a full INI parser; handles
-        // the [Section] header, key = value lines, and ;/# comments.
+        // readIniFromFile: section/key reader used by
+        // readConnectStringOverride. Routed through InixCodec so a
+        // connection string can be written in the fenced multi-line
+        // Inix form (key` ... `), which sidesteps quoting problems
+        // for values that themselves contain '=' characters. A
+        // multi-line value is joined back to a single line, since a
+        // connection string is logically one line however it is
+        // written in the file.
         private static string readIniFromFile(string sPath, string sSection, string sKey)
         {
             try
             {
-                string sBracketed = "[" + sSection + "]";
-                bool bInSection = false;
-                foreach (string sRaw in File.ReadAllLines(sPath))
+                foreach (InixCodec.Section sec in InixCodec.read(sPath))
                 {
-                    string sLine = sRaw.Trim();
-                    if (sLine.Length == 0) continue;
-                    if (sLine.StartsWith(";") || sLine.StartsWith("#")) continue;
-                    if (sLine.StartsWith("[") && sLine.EndsWith("]"))
-                    {
-                        bInSection = sLine.Equals(sBracketed, StringComparison.OrdinalIgnoreCase);
-                        continue;
-                    }
-                    if (!bInSection) continue;
-                    int iEq = sLine.IndexOf('=');
-                    if (iEq <= 0) continue;
-                    string sK = sLine.Substring(0, iEq).Trim();
-                    string sV = sLine.Substring(iEq + 1).Trim();
-                    if (sK.Equals(sKey, StringComparison.OrdinalIgnoreCase))
-                        return sV;
+                    if (!string.Equals(sec.Name, sSection, StringComparison.OrdinalIgnoreCase)) continue;
+                    string sV = sec.get(sKey);
+                    if (sV == null) return "";
+                    sV = sV.Replace("\r\n", "").Replace("\n", "").Trim();
+                    return sV;
                 }
             }
             catch { }
@@ -2969,7 +3066,7 @@ namespace DbDuo
         }
 
         // Public list of tables visited in this session, in insertion
-        // order. Used by the Control+Tab cycle in DbDuoForm.
+        // order. Used by the Control+Tab cycle in DbDoForm.
         public List<string> visitedTableNames()
         {
             return new List<string>(lVisitedTables);
@@ -3050,7 +3147,7 @@ namespace DbDuo
             //   0 = normal, 1 = hidden via constraint, 2 = stored
             //   generated, 3 = virtual generated. Values 2 and 3
             //   are calculated columns; we mark them hidden in the
-            //   DbDuo display.
+            //   DbDo display.
             //
             // For non-SQLite databases (ACE, Excel, dBase), the
             // PRAGMA call fails silently; the only calculated
@@ -3283,7 +3380,7 @@ namespace DbDuo
             }
 
             // Fallback: open a no-row recordset to read field metadata.
-            // Quoting matches the rest of DbDuo's SQL emission.
+            // Quoting matches the rest of DbDo's SQL emission.
             try
             {
                 string sQuoted = "[" + sTable.Replace("]", "]]") + "]";
@@ -3402,7 +3499,7 @@ namespace DbDuo
                 }
                 catch (Exception ex)
                 {
-                    try { DbDuoLog.write("actualPrimaryKey PRAGMA failed: " + ex.Message); } catch { }
+                    try { DbDoLog.write("actualPrimaryKey PRAGMA failed: " + ex.Message); } catch { }
                 }
                 finally { releaseCom(oRs); }
             }
@@ -3494,7 +3591,7 @@ namespace DbDuo
         // affinity, so 'textmemo' stores identically to 'TEXT' --
         // the declared type is purely a hint for tools that read
         // the schema. PRAGMA table_info preserves it verbatim,
-        // so DbDuo can read it back and decide on the widget.
+        // so DbDo can read it back and decide on the widget.
         public bool isMultilineColumn(string sTable, string sColumn)
         {
             string sType = getColumnDeclaredType(sTable, sColumn);
@@ -3547,7 +3644,7 @@ namespace DbDuo
                 }
                 catch (Exception ex)
                 {
-                    try { DbDuoLog.write("loadColumnTypes PRAGMA failed: " + ex.Message); }
+                    try { DbDoLog.write("loadColumnTypes PRAGMA failed: " + ex.Message); }
                     catch { }
                 }
                 finally { releaseCom(oRs); }
@@ -3582,7 +3679,7 @@ namespace DbDuo
         }
 
         // adoxTypeToDeclaredName: translate ADOX Type integer codes
-        // to declared-type strings DbDuo recognizes. Only covers
+        // to declared-type strings DbDo recognizes. Only covers
         // the cases that affect the edit dialog's textline/textmemo
         // decision; everything else maps to "" (which yields the
         // default single-line behavior).
@@ -3672,7 +3769,7 @@ namespace DbDuo
                 }
                 catch (Exception ex)
                 {
-                    try { DbDuoLog.write("getSchemaColumns PRAGMA failed: " + ex.Message); }
+                    try { DbDoLog.write("getSchemaColumns PRAGMA failed: " + ex.Message); }
                     catch { }
                 }
                 finally { releaseCom(oRs); }
@@ -3835,7 +3932,7 @@ namespace DbDuo
                 // 'look' column doesn't exist on this table). The
                 // out param iCountFound stays at 0 and the list
                 // stays empty; log for diagnostics.
-                try { DbDuoLog.write("queryColumnValues failed: " + ex.Message + " SQL=" + sb.ToString()); }
+                try { DbDoLog.write("queryColumnValues failed: " + ex.Message + " SQL=" + sb.ToString()); }
                 catch { }
             }
             finally
@@ -4215,7 +4312,7 @@ namespace DbDuo
         //
         //   (B) Otherwise apply the default rules:
         //       1. Standard-visible columns (none currently) -- always shown.
-        //       2. Standard-hidden columns (added, updated, marked,
+        //       2. Standard-hidden columns (added, edited, marked,
         //          look, unq) -- always hidden.
         //       3. Any column ending in '_id' or named 'id' --
         //          always hidden (primary and foreign keys).
@@ -4393,7 +4490,7 @@ namespace DbDuo
         }
 
         // Distinct fields = field names that are NOT bookkeeping
-        // (added, updated, observed, notes, tags, marked) and NOT the
+        // (added, edited, observed, notes, tags, marked) and NOT the
         // primary-key column. These are the substantive content fields
         // and what the New-Record / Set-Record dialog shows by default.
         //
@@ -4698,7 +4795,7 @@ namespace DbDuo
                     exportWord(sDestPath, sExt, false);
                     break;
                 // Database formats. Closes the "every input format
-                // is also an export format" loop: anything DbDuo can
+                // is also an export format" loop: anything DbDo can
                 // open, it can also write.
                 case "db":
                 case "sqlite":
@@ -4974,8 +5071,8 @@ namespace DbDuo
         // user is currently viewing.
         //
         // Requires Excel installed (the .NET Framework 4.8 build of
-        // DbDuo has no native xlsx writer; Excel via late-bound COM
-        // is the established pattern in DbDuo). Throws InvalidOperation
+        // DbDo has no native xlsx writer; Excel via late-bound COM
+        // is the established pattern in DbDo). Throws InvalidOperation
         // with a human message if the ProgID isn't registered.
         //
         // Chart type: xlColumnClustered (51). Excel's default chart
@@ -5080,7 +5177,7 @@ namespace DbDuo
                 }
                 catch (Exception exModern)
                 {
-                    try { DbDuoLog.write("Chart Charts.Add path failed: " + exModern.Message); } catch { }
+                    try { DbDoLog.write("Chart Charts.Add path failed: " + exModern.Message); } catch { }
                 }
 
                 if (!bModernChart)
@@ -5115,7 +5212,7 @@ namespace DbDuo
                 oBook.SaveAs(sDestPath, 51 /* xlWorkbookDefault */);
                 oBook.Close(false);
 
-                try { DbDuoLog.write("Chart saved: " + sDestPath
+                try { DbDoLog.write("Chart saved: " + sDestPath
                     + " (" + iDistinct + " distinct values)"); } catch { }
                 return iDistinct;
             }
@@ -5438,7 +5535,7 @@ namespace DbDuo
                     }
                     catch (Exception exModern)
                     {
-                        try { DbDuoLog.write("Plot Charts.Add path failed: " + exModern.Message); } catch { }
+                        try { DbDoLog.write("Plot Charts.Add path failed: " + exModern.Message); } catch { }
                     }
                     if (!bModernChart)
                     {
@@ -5465,7 +5562,7 @@ namespace DbDuo
                 oBook.SaveAs(sDestPath, 51 /* xlWorkbookDefault */);
                 oBook.Close(false);
 
-                try { DbDuoLog.write("Plot saved: " + sDestPath
+                try { DbDoLog.write("Plot saved: " + sDestPath
                     + " (" + iDataRows + " data points, kind=" + sKind + ")"); } catch { }
                 return iDataRows;
             }
@@ -5636,13 +5733,13 @@ namespace DbDuo
         }
 
         // exportDatabase: write the current recordset to a new
-        // database file in one of the formats DbDuo can also OPEN
+        // database file in one of the formats DbDo can also OPEN
         // (SQLite, Access, dBASE). This closes the "every input
         // format is also an export format" loop. The new file gets
         // exactly one table, named after the source table.
         //
         // Strategy: open a fresh ADODB.Connection to the target
-        // file using DbDuo's own buildConnectString helper (so the
+        // file using DbDo's own buildConnectString helper (so the
         // same provider mapping that drives openDatabase drives the
         // export); issue CREATE TABLE with TEXT columns for every
         // field (a permissive type that all three back-ends accept
@@ -5990,7 +6087,7 @@ namespace DbDuo
         //     onto the same target.
         //
         // The current-table must already be open. The bookkeeping
-        // columns (added, updated, marked, the primary key) take
+        // columns (added, edited, marked, the primary key) take
         // their DEFAULT values automatically -- the import only
         // sets columns the Markdown header names.
         //
@@ -6183,13 +6280,13 @@ namespace DbDuo
         // .inix file in list-of-records form. Each record becomes a
         // [RecordNNN] section; NULL values are omitted (no "key=" line
         // at all rather than an empty value). The encoding is UTF-8
-        // with BOM and CRLF line endings, matching DbDuo's text-file
+        // with BOM and CRLF line endings, matching DbDo's text-file
         // conventions. Inix's leading-zero width on the section name
         // is chosen so ASCII sort of section names matches numeric
         // order across the file.
         //
         // The exported file can be read back by an .inix-aware tool
-        // or by DbDuo's Import Data command. It is also readable as
+        // or by DbDo's Import Data command. It is also readable as
         // plain text in any editor -- the design goal of the format.
         private void exportInix(string sDestPath)
         {
@@ -6658,7 +6755,7 @@ namespace DbDuo
         // registerDisplayOnly: show a chord in the menu UI without
         // routing it through the form-level dispatcher. Use this for
         // hotkeys that are dispatched locally by a specific control
-        // (the data grid's KeyDown handler in DbDuo's case), so the
+        // (the data grid's KeyDown handler in DbDo's case), so the
         // chord only fires when that control has focus. The menu
         // text and AccessibleName carry the chord exactly as
         // register() would, so JAWS still announces "Shift+F" along
@@ -6706,56 +6803,6 @@ namespace DbDuo
             dKeyToMenu[key] = mi;
         }
 
-        // friendlyToKeysName: translate the friendly names DbDuo.ini
-        // uses ("Apostrophe", "Backslash", "Backspace") to the .NET
-        // Keys enum names that KeysConverter understands ("OemQuotes",
-        // "OemPipe", "Back"). Tokens already matching enum names
-        // pass through unchanged. Case-insensitive.
-        private static string friendlyToKeysName(string sTok)
-        {
-            switch (sTok.ToLowerInvariant())
-            {
-                case "ctrl":          return "Control";
-                case "esc":           return "Escape";
-                case "del":           return "Delete";
-                case "ins":           return "Insert";
-                case "apostrophe":    return "OemQuotes";
-                case "quote":         return "OemQuotes";
-                case "backslash":     return "OemPipe";
-                case "backtick":      return "Oemtilde";
-                case "tilde":         return "Oemtilde";
-                case "comma":         return "Oemcomma";
-                case "period":        return "OemPeriod";
-                case "semicolon":     return "OemSemicolon";
-                case "slash":         return "OemQuestion";
-                case "asterisk":      return "Multiply";
-                case "minus":         return "OemMinus";
-                case "dash":          return "OemMinus";
-                case "equals":        return "Oemplus";
-                case "plus":          return "Oemplus";
-                case "leftbracket":   return "OemOpenBrackets";
-                case "rightbracket":  return "OemCloseBrackets";
-                case "backspace":     return "Back";
-                case "uparrow":       return "Up";
-                case "downarrow":     return "Down";
-                case "leftarrow":     return "Left";
-                case "rightarrow":    return "Right";
-                case "numpad5":       return "NumPad5";
-                default:              return sTok;
-            }
-        }
-
-        // normalizeKeyText: translate the friendly tokens in a chord
-        // expression (Control+Shift+Apostrophe -> Control+Shift+OemQuotes)
-        // before handing to KeysConverter.
-        private static string normalizeKeyText(string sText)
-        {
-            string[] parts = sText.Split('+');
-            for (int i = 0; i < parts.Length; i++)
-                parts[i] = friendlyToKeysName(parts[i].Trim());
-            return string.Join("+", parts);
-        }
-
         public static bool overrideKey(string sCommand, string sKeyText)
         {
             ToolStripMenuItem mi = null;
@@ -6779,17 +6826,12 @@ namespace DbDuo
                 return true;
             }
 
-            // Translate friendly tokens (Apostrophe, Backslash, Ctrl,
-            // Backspace) into the Keys enum spelling KeysConverter
-            // expects, then convert.
-            string sForConverter = normalizeKeyText(sTrim);
-
             Keys key;
             try
             {
                 key = (Keys)System.ComponentModel.TypeDescriptor
                     .GetConverter(typeof(Keys))
-                    .ConvertFromString(sForConverter);
+                    .ConvertFromString(sTrim);
             }
             catch
             {
@@ -6870,7 +6912,7 @@ namespace DbDuo
         // Format a Keys value as a hotkey display string for menus,
         // help screens, and trace messages.
         //
-        // Convention adopted by DbDuo:
+        // Convention adopted by DbDo:
         //   - Modifiers in alphabetical order (Alt, then Control, then
         //     Shift), each followed by '+'.
         //   - The base key follows. Letter keys are capitalized whether
@@ -6958,6 +7000,12 @@ namespace DbDuo
                 case Keys.CapsLock:         return "CapsLock";
                 case Keys.NumLock:          return "NumLock";
                 case Keys.Scroll:           return "ScrollLock";
+                // NumPad arithmetic keys -- JAWS conventions.
+                case Keys.Add:              return "NumPadPlus";
+                case Keys.Subtract:         return "NumPadMinus";
+                case Keys.Multiply:         return "NumPadStar";
+                case Keys.Divide:           return "NumPadSlash";
+                case Keys.Decimal:          return "NumPadDot";
             }
 
             // Function keys and anything else
@@ -7098,7 +7146,7 @@ namespace DbDuo
     // Typical usage:
     //
     //   LbcDialog dlg = new LbcDialog("Configuration", this);
-    //   TextBox   tbMode = dlg.addInputBox("UI mode", "both", "How DbDuo launches");
+    //   TextBox   tbMode = dlg.addInputBox("UI mode", "both", "How DbDo launches");
     //   CheckBox  cbBeep = dlg.addCheckBox("Beep on errors", true, "Audible cue on failure");
     //   TextBox   tbNote = dlg.addMemoBox("Startup note", "", "Free-form text shown at launch");
     //   if (dlg.runOkCancel())
@@ -7166,7 +7214,7 @@ namespace DbDuo
             // focused control is a TextBox or memo. The handler is
             // a no-op for other controls and for keystrokes that
             // don't match the EdSharp hotkey set. Master enable flag
-            // [Lbc] extraKeys in DbDuo.ini, defaults Y.
+            // [Lbc] extraKeys in DbDo.inix, defaults Y.
             frm.KeyDown += new KeyEventHandler(onFormKeyDown);
             frm.MinimumSize = new Size(360, 200);
             frm.ClientSize = new Size(DefaultDialogWidth, 200);
@@ -7891,7 +7939,7 @@ namespace DbDuo
         // Alt+ variants are unbound. Pattern adapted from HomerLbc's
         // EdSharp-style hotkeys; see HomerLbc_40.js lines 995-1162.
         //
-        // Master enable flag: [Lbc] extraKeys in DbDuo.ini, default Y.
+        // Master enable flag: [Lbc] extraKeys in DbDo.inix, default Y.
         // When N, all of the above hotkeys are passed through to
         // standard control handling.
 
@@ -7904,7 +7952,7 @@ namespace DbDuo
             {
                 string sIniPath = Path.Combine(
                     Path.GetDirectoryName(Application.ExecutablePath) ?? ".",
-                    "DbDuo.ini");
+                    "DbDo.inix");
                 if (!File.Exists(sIniPath)) { bExtraKeysCached = bDefault; return bDefault; }
                 bool bInLbcSection = false;
                 foreach (string sLine in File.ReadAllLines(sIniPath))
@@ -7934,7 +7982,7 @@ namespace DbDuo
         }
 
         // textEditEligible: is the focused control a single-line text
-        // box or a multi-line memo that DbDuo registered via the
+        // box or a multi-line memo that DbDo registered via the
         // standard add* methods? Pattern matches the Name prefix that
         // registerWidget assigns (TextBox_ or Memo_).
         private static TextBox textEditEligible(Control ctl)
@@ -8337,7 +8385,7 @@ namespace DbDuo
     // declare single-line columns as 'textline' and multi-line ones
     // as 'textmemo'. SQLite stores both with TEXT affinity (the
     // declared type is purely a hint for tools), but PRAGMA table_info
-    // round-trips the declared type verbatim, so DbDuo can read it
+    // round-trips the declared type verbatim, so DbDo can read it
     // back. Columns declared 'text' or anything else fall back to
     // single-line. Access provides the same distinction via ADOX
     // type codes (adLongVarWChar/adLongVarChar = memo).
@@ -8357,14 +8405,14 @@ namespace DbDuo
         private List<string>               lColumnNames;
         private List<TextBox>              lTextBoxes;
         private List<string>               lDeclaredTypes;
-        private DbDuoManager               mgr;
+        private DbDoManager               mgr;
         private string                     sTableName;
 
         public RecordEditDialog(string sTitle,
                                 List<string> lColumns,
                                 Dictionary<string, string> dInitial,
                                 List<bool> lEditable,
-                                DbDuoManager inputMgr)
+                                DbDoManager inputMgr)
         {
             ok = false;
             dValues = new Dictionary<string, string>();
@@ -8415,7 +8463,7 @@ namespace DbDuo
                 string sDisplay = convertForDisplay(sValue, sDeclared);
 
                 // Tip: type plus optional read-only marker plus the
-                // regex constraint string from DbDuo.ini if one is
+                // regex constraint string from DbDo.inix if one is
                 // configured for <table>.<column>.
                 string sRegex = lookupFieldRegex(sCol);
                 StringBuilder sbTip = new StringBuilder();
@@ -8495,7 +8543,7 @@ namespace DbDuo
 
         // validateValues: walk every editable field, parse its value
         // against its declared type, and (if a regex is configured
-        // for that field in DbDuo.ini) check Regex.IsMatch. Returns
+        // for that field in DbDo.inix) check Regex.IsMatch. Returns
         // true if all clean; otherwise false with sErr describing
         // the first failure and iOffending = index of the failing
         // textbox.
@@ -8531,7 +8579,7 @@ namespace DbDuo
                     try { bMatch = System.Text.RegularExpressions.Regex.IsMatch(sVal, sRegex); }
                     catch (Exception ex)
                     {
-                        sErr = "Field '" + sCol + "': invalid regex in DbDuo.ini: " + ex.Message;
+                        sErr = "Field '" + sCol + "': invalid regex in DbDo.inix: " + ex.Message;
                         iOffending = i;
                         return false;
                     }
@@ -8709,7 +8757,7 @@ namespace DbDuo
         }
 
         // lookupFieldRegex: read the regex constraint for <table>.<column>
-        // from DbDuo.ini. The config schema is one INI section per
+        // from DbDo.inix. The config schema is one INI section per
         // table named [Validation:<table>]; within it, each key is a
         // column name and each value is a .NET regex pattern. Example:
         //
@@ -8734,7 +8782,7 @@ namespace DbDuo
     }
 
     // IniValidation: load and look up per-field regex constraints
-    // from DbDuo.ini. The config schema is one section per table
+    // from DbDo.inix. The config schema is one section per table
     // named [Validation:<table>], with one key-value pair per
     // column where the key is the column name and the value is
     // a .NET regex pattern. The whole file is read lazily on
@@ -8768,8 +8816,8 @@ namespace DbDuo
         {
             bLoaded = true;
             dByTable = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
-            // Compute the per-user DbDuo.ini path directly. The
-            // matching helper inside DbDuoForm (IniSession.iniPath)
+            // Compute the per-user DbDo.inix path directly. The
+            // matching helper inside DbDoForm (IniSession.iniPath)
             // is private to that class; rather than expose it
             // publicly just for one caller, replicate the simple
             // path-build here. The path layout matches IniSession
@@ -8785,12 +8833,12 @@ namespace DbDuo
                     // unusual case where the user profile path is
                     // unset (portable installs, sandboxes, etc.)
                     string sExeDir = System.IO.Path.GetDirectoryName(Application.ExecutablePath) ?? ".";
-                    sIni = System.IO.Path.Combine(sExeDir, "DbDuo.ini");
+                    sIni = System.IO.Path.Combine(sExeDir, "DbDo.inix");
                 }
                 else
                 {
-                    string sDir = System.IO.Path.Combine(sBase, "DbDuo");
-                    sIni = System.IO.Path.Combine(sDir, "DbDuo.ini");
+                    string sDir = System.IO.Path.Combine(sBase, "DbDo");
+                    sIni = System.IO.Path.Combine(sDir, "DbDo.inix");
                 }
             }
             catch { return; }
@@ -8830,11 +8878,11 @@ namespace DbDuo
                     }
                     dCols[sKey] = sVal;
                 }
-                try { DbDuoLog.write("IniValidation loaded " + dByTable.Count + " table section(s)"); } catch { }
+                try { DbDoLog.write("IniValidation loaded " + dByTable.Count + " table section(s)"); } catch { }
             }
             catch (Exception ex)
             {
-                try { DbDuoLog.write("IniValidation load failed: " + ex.Message); } catch { }
+                try { DbDoLog.write("IniValidation load failed: " + ex.Message); } catch { }
             }
         }
     }
@@ -9207,7 +9255,7 @@ namespace DbDuo
     }
 
     // =====================================================================
-    // DbDuoForm: the WinForms GUI. Holds a single DbDuoManager
+    // DbDoForm: the WinForms GUI. Holds a single DbDoManager
     // instance; the recordset inside is the single source of truth
     // for current position, filter, sort, and current table. The
     // form's grid is a render-only mirror, rebuilt on each refresh.
@@ -9217,7 +9265,7 @@ namespace DbDuo
     // All such state lives in the recordset; the form reads it on
     // every render, which guarantees consistency between GUI and CLI.
     // =====================================================================
-    public class DbDuoForm : Form
+    public class DbDoForm : Form
     {
         // ------- Constants -------
         private const int InitialFormWidth = 1100;
@@ -9229,7 +9277,7 @@ namespace DbDuo
         // database/table/recordset via frm.db from script code.
         // Scripts get the same view of the data the form has -- no
         // facade in between.
-        public DbDuoManager db;
+        public DbDoManager db;
         // The main data view. A standard WinForms ListView in
         // Details mode is used instead of DataGridView because
         // screen readers (JAWS, NVDA, Narrator) read DataGridView
@@ -9264,7 +9312,7 @@ namespace DbDuo
         private ToolStripStatusLabel lblTable;
         private ContextMenuStrip ctxGrid;
 
-        // Note: an older DataGridView build of DbDuo carried a
+        // Note: an older DataGridView build of DbDo carried a
         // private 'oCurrentData' DataTable here as its data source.
         // The virtual-mode ListView reads rows directly from the
         // ADO recordset via RetrieveVirtualItem, so the DataTable
@@ -9470,7 +9518,7 @@ namespace DbDuo
         // column (ascending / descending). They're convenience aliases
         // over Sort-Object so the user doesn't have to pick the column
         // through a dialog for the standard columns that always exist
-        // on DbDuo-convention tables.
+        // on DbDo-convention tables.
         // Per-column sort field declarations dropped in v1.0.86. The
         // standard-column sort shortcuts (Alt+I/L/T/U + Alt+Shift+*)
         // and their reverse pairs were retired in favor of the
@@ -9579,7 +9627,7 @@ namespace DbDuo
         private ToolStripMenuItem miSaySayYield;
         private ToolStripMenuItem miSaySayTables;
         private ToolStripMenuItem miSaySayMarked;
-        private ToolStripMenuItem miSaySayModified;
+        private ToolStripMenuItem miSaySayEdited;
         private ToolStripMenuItem miSaySayNotes;
         private ToolStripMenuItem miSaySayTags;
         private ToolStripMenuItem miSaySayColumn;
@@ -9616,18 +9664,18 @@ namespace DbDuo
         private ToolStripMenuItem miExtractRegex;
 
         // ------- Constructor / lifecycle -------
-        public DbDuoForm() : this(Program.UiMode.Both) { }
+        public DbDoForm() : this(Program.UiMode.Both) { }
 
-        public DbDuoForm(Program.UiMode inputMode)
+        public DbDoForm(Program.UiMode inputMode)
         {
             mode = inputMode;
-            db = new DbDuoManager();
+            db = new DbDoManager();
             initializeForm();
             buildMenus();
             buildGrid();
             buildStatusBar();
             LiveRegion.attach(this);
-            // Load Extra-Speech setting from DbDuo.ini [General].
+            // Load Extra-Speech setting from DbDo.inix [General].
             // Default ON (Y) on first launch. Off explicitly via "N".
             string sExtra = IniSession.read("General", "extraSpeech");
             LiveRegion.bExtraSpeechEnabled = string.IsNullOrEmpty(sExtra)
@@ -9644,18 +9692,18 @@ namespace DbDuo
         // valid window handle. We use it to make a debug live-region
         // announcement so the user can confirm the live-region
         // pipeline is working with their screen reader. If they
-        // hear "Live: DbDuo ready" on launch, every other live-
+        // hear "Live: DbDo ready" on launch, every other live-
         // region announcement throughout the program will work too.
         //
-        // We also register the system-wide Alt+GraveAccent hotkey
-        // here, because RegisterHotKey requires the window to have
-        // a valid HWND -- which is only guaranteed once the form has
-        // been shown.
+        // We also register the system-wide Alt+Control+GraveAccent
+        // toggle hotkey here, because RegisterHotKey requires the
+        // window to have a valid HWND -- which is only guaranteed
+        // once the form has been shown.
         protected override void OnShown(EventArgs evArgs)
         {
             base.OnShown(evArgs);
-            LiveRegion.say("DbDuo ready");
-            registerSwitchToGuiHotKey();
+            LiveRegion.say("DbDo ready");
+            registerToggleHotKey();
         }
 
         // The mode the form was started in. Read by Program.Main right
@@ -9688,15 +9736,15 @@ namespace DbDuo
 
         protected override void Dispose(bool bDisposing)
         {
-            if (bDisposing) unregisterSwitchToGuiHotKey();
+            if (bDisposing) unregisterToggleHotKey();
             if (bDisposing && db != null) { try { db.Dispose(); } catch { } db = null; }
             base.Dispose(bDisposing);
         }
 
         // ---------------- Single-instance wake-up handling ----------------
         //
-        // When a second DbDuo.exe is launched with -activate (the desktop
-        // hotkey path), it broadcasts the registered "DbDuo.WakeUp" message
+        // When a second DbDo.exe is launched with -activate (the desktop
+        // hotkey path), it broadcasts the registered "DbDo.WakeUp" message
         // and exits. Every top-level window in the user session receives
         // the message; the first instance's WndProc here recognizes its
         // own ID and brings the window forward.
@@ -9706,7 +9754,7 @@ namespace DbDuo
         // hotkey). SetForegroundWindow then steals focus to the form.
         // Both calls are best-effort: SetForegroundWindow is allowed by
         // Windows only under specific conditions (e.g., when the calling
-        // process has foreground rights), but as long as DbDuo's own
+        // process has foreground rights), but as long as DbDo's own
         // process is invoking it on its own window, it succeeds.
         // ---------------- ----------------
 
@@ -9726,84 +9774,54 @@ namespace DbDuo
         private static extern IntPtr GetConsoleWindow();
         private const int SW_RESTORE = 9;
 
-        // Global hotkey: Alt+GraveAccent (Alt + the key above Tab).
-        // Registered system-wide on this form's HWND. When pressed
-        // anywhere in Windows, the form receives WM_HOTKEY. We only
-        // act on it when DbDuo's own dot-prompt console window is
-        // currently in the foreground -- otherwise we silently let
-        // the keystroke proceed (so Alt+GraveAccent doesn't randomly
-        // steal focus from Word, Excel, or any other application
-        // the user happens to be in).
-        //
-        // The hotkey is a one-way "switch from console to GUI"
-        // convenience. To go the other direction, the dot prompt's
-        // 'gui' / 'focus' / 'window' command works from the GUI
-        // already, and Alt+Tab works system-wide.
+        // Global hotkey: Alt+Control+GraveAccent = "toggle DbDo." From
+        // anywhere on Windows it activates either the GUI or the
+        // console, whichever is NOT currently foreground -- the global
+        // "summon DbDo" chord. Since DbDo is a single-instance app,
+        // this one chord covers both directions; the former
+        // Alt+GraveAccent console-to-GUI hotkey was dropped as
+        // redundant (and to stop reserving a system-wide chord that
+        // other applications may want). The pair is now:
+        //   Control+GraveAccent       GUI menu hotkey, GUI -> console
+        //   Alt+Control+GraveAccent   Global, toggle between them
         //
         // MOD_ALT = 1, MOD_CONTROL = 2 (combinable). VK_OEM_3 (grave/tilde)
         // = 0xC0 in Windows virtual-key terms (Keys.Oemtilde in .NET).
         private const int ModAlt = 0x1;
         private const int ModControl = 0x2;
         private const int VkOemGrave = 0xC0;  // grave accent / tilde, US layout
-        // Two hotkey IDs in the application-reserved 0x0000-0xBFFF range.
-        // We pick values well above the typical range used by other
-        // applications to minimize the chance of a numerical collision.
-        private const int HotKeyIdSwitchToGui = 0x4421;
+        // Hotkey ID in the application-reserved 0x0000-0xBFFF range,
+        // well above the typical range used by other applications to
+        // minimize the chance of a numerical collision.
         private const int HotKeyIdToggleWindow = 0x4422;
-        private bool bHotKeyRegistered = false;
         private bool bToggleHotKeyRegistered = false;
 
-        private void registerSwitchToGuiHotKey()
+        private void registerToggleHotKey()
         {
             try
             {
                 IntPtr hWnd = this.Handle;
                 if (hWnd == IntPtr.Zero) return;
-                // Hotkey 1: Alt+GraveAccent = "summon GUI." Acts only when
-                // DbDuo's console is foreground (polite to other apps).
-                bool bOk = RegisterHotKey(hWnd, HotKeyIdSwitchToGui, ModAlt, VkOemGrave);
+                bool bOk = RegisterHotKey(hWnd, HotKeyIdToggleWindow,
+                                          ModAlt | ModControl, VkOemGrave);
                 if (bOk)
                 {
-                    bHotKeyRegistered = true;
-                    DbDuoLog.write("Alt+GraveAccent registered as switch-to-GUI hotkey.");
-                }
-                else
-                {
-                    DbDuoLog.write("Alt+GraveAccent hotkey could not be registered (already in use system-wide). Switch via 'gui' / 'focus' at the dot prompt instead.");
-                }
-                // Hotkey 2: Alt+Control+GraveAccent = "toggle DbDuo." This
-                // one always acts: from anywhere on Windows it activates
-                // either the GUI or the console, whichever is NOT currently
-                // foreground (preferring the one that isn't already there).
-                // This is the global "summon DbDuo" chord. The trio is now:
-                //   Control+GraveAccent       GUI menu hotkey, GUI -> console
-                //   Alt+GraveAccent           Global, console -> GUI
-                //   Alt+Control+GraveAccent   Global, toggle between them
-                bool bOk2 = RegisterHotKey(hWnd, HotKeyIdToggleWindow,
-                                           ModAlt | ModControl, VkOemGrave);
-                if (bOk2)
-                {
                     bToggleHotKeyRegistered = true;
-                    DbDuoLog.write("Alt+Control+GraveAccent registered as toggle hotkey.");
+                    DbDoLog.write("Alt+Control+GraveAccent registered as toggle hotkey.");
                 }
                 else
                 {
-                    DbDuoLog.write("Alt+Control+GraveAccent hotkey could not be registered.");
+                    DbDoLog.write("Alt+Control+GraveAccent hotkey could not be registered.");
                 }
             }
             catch (Exception ex)
             {
-                DbDuoLog.write("Hotkey registration error: " + ex.Message);
+                DbDoLog.write("Hotkey registration error: " + ex.Message);
             }
         }
 
-        private void unregisterSwitchToGuiHotKey()
+        private void unregisterToggleHotKey()
         {
-            if (bHotKeyRegistered)
-            {
-                try { UnregisterHotKey(this.Handle, HotKeyIdSwitchToGui); } catch { }
-                bHotKeyRegistered = false;
-            }
             if (bToggleHotKeyRegistered)
             {
                 try { UnregisterHotKey(this.Handle, HotKeyIdToggleWindow); } catch { }
@@ -9827,20 +9845,6 @@ namespace DbDuo
             if (msg.Msg == WmHotKey)
             {
                 int iId = (int)msg.WParam;
-                if (iId == HotKeyIdSwitchToGui)
-                {
-                    // Only react if foreground is our own console. The
-                    // foreground check is what keeps Alt+GraveAccent from
-                    // randomly stealing focus when the user is in Word or
-                    // any other app.
-                    IntPtr hFg = GetForegroundWindow();
-                    IntPtr hCon = GetConsoleWindow();
-                    if (hFg != IntPtr.Zero && hCon != IntPtr.Zero && hFg == hCon)
-                    {
-                        bringForward();
-                    }
-                    return;
-                }
                 if (iId == HotKeyIdToggleWindow)
                 {
                     // The toggle: foreground is the GUI form (or any
@@ -9894,7 +9898,7 @@ namespace DbDuo
                 }
                 this.Activate();
                 SetForegroundWindow(hWnd);
-                DbDuoLog.write("Brought forward by external wake-up message.");
+                DbDoLog.write("Brought forward by external wake-up message.");
             }
             catch { }
         }
@@ -9902,8 +9906,8 @@ namespace DbDuo
 
         private void initializeForm()
         {
-            this.Text = "DbDuo";
-            this.AccessibleName = "DbDuo";
+            this.Text = "DbDo";
+            this.AccessibleName = "DbDo";
             // No AccessibleDescription. Screen readers read the title
             // and the focused control on form open; an extra description
             // becomes a "banner" that wastes time before the user can
@@ -10029,7 +10033,7 @@ namespace DbDuo
         }
 
         // ------- Public surface for the CLI thread -------
-        public DbDuoManager Db { get { return db; } }
+        public DbDoManager Db { get { return db; } }
 
         public void invokeRefresh()
         {
@@ -10136,7 +10140,7 @@ namespace DbDuo
         // =====================================================================
         // Menu construction. Every menu item is registered with
         // KeyMap and gets a default hotkey (or Keys.None for items
-        // without one). All hotkeys are user-overridable via DbDuo.ini.
+        // without one). All hotkeys are user-overridable via DbDo.inix.
         // =====================================================================
         private void buildMenus()
         {
@@ -10193,7 +10197,7 @@ namespace DbDuo
             miSchemaSwitchAll     = addItem(miFile, "Next Table or View",     "Switch Object",         Keys.Control | Keys.F6,            schemaSwitchAllClicked);
             miSchemaSwitchAllPrev = addItem(miFile, "Previous Table or View", "Switch Previous Object", Keys.Control | Keys.Shift | Keys.F6, schemaSwitchAllPrevClicked);
             addSep(miFile);
-            miFileExit    = addItem(miFile, "E&xit DbDuo",                "Exit Application", Keys.Alt | Keys.F4,                   fileExitClicked);
+            miFileExit    = addItem(miFile, "E&xit DbDo",                "Exit Application", Keys.Alt | Keys.F4,                   fileExitClicked);
 
             // ===== Edit menu: modify the data =====
             miEdit = addMenu("&Edit");
@@ -10202,7 +10206,7 @@ namespace DbDuo
             // Edit Cell: single-field editor for the virtual cell
             // under the Alt+Control+arrow cursor. Same regex
             // validation as Edit Record (via [Validation:<table>]
-            // sections of DbDuo.ini) but only one field is shown.
+            // sections of DbDo.inix) but only one field is shown.
             // Mnemonic "F" for field; Shift+F2 since F2 is Edit
             // Record.
             miRecSetCell     = addItem(miEdit, "Edit &Cell...",    "Edit Cell",            Keys.F2,                            recSetCellClicked);
@@ -10271,7 +10275,7 @@ namespace DbDuo
             addSep(miEdit);
             // Bookmarks: EdSharp's Set/Clear/Go-to Bookmark trio
             // on Control+K / Control+Shift+K / Alt+K. Identical
-            // chord family in DbDuo.
+            // chord family in DbDo.
             // Bookmark commands: B-family chords. v1.0.98 moved these
             // from K to B (B is the rule-compliant first-letter of
             // Bookmark; K was a "booKmark" conventional exception
@@ -10361,7 +10365,7 @@ namespace DbDuo
             // Say Record retired in v1.0.101. Shift+Space is free. The
             // screen reader's built-in line-read command (e.g. JAWS
             // Ins+Down) reads the listview row's columns natively, so
-            // a DbDuo-specific Say Record was redundant.
+            // a DbDo-specific Say Record was redundant.
             // Say Path retired in v1.0.99 (covered by Say Database on
             // Shift+D, single-press = name, double-press = full path).
             miSaySayYield        = addItem(miQuery, "Say &Yield",       "Say Yield",        Keys.Shift | Keys.Y,               saySayYield);
@@ -10369,10 +10373,10 @@ namespace DbDuo
             // Say Marked moved off Shift+L (which is now Say Column from
             // Cursor) to Alt+Shift+M. Mark Record itself uses Control+M.
             miSaySayMarked       = addItem(miQuery, "Say &Marked", "Say Marked",      Keys.Alt | Keys.M,                 saySayMarked);
-            // Shift+D: Say Updated -- the 'updated' value, rendered in
-            // a human-friendly local-time form. Replaces the previous
-            // raw-text Say Date.
-            miSaySayModified     = addItem(miQuery, "Say &Modified", "Say Modified",       Keys.Shift | Keys.M,               saySayModified);
+            // Shift+E: Say Edited -- the 'edited' value, rendered in
+            // a human-friendly local-time form, parallel to Shift+A
+            // for the 'added' value.
+            miSaySayEdited     = addItem(miQuery, "Say &Edited", "Say Edited",         Keys.Shift | Keys.E,               saySayEdited);
             // Shift+N: Say Notes -- the 'notes' field of the current row.
             miSaySayNotes        = addItem(miQuery, "Say &Notes",  "Say Notes",        Keys.Shift | Keys.N,               saySayNotes);
             // Shift+T: Say Tags -- the 'tags' field of the current row.
@@ -10534,11 +10538,11 @@ namespace DbDuo
             addSep(miMisc);
             // Script family. Adapted from EdSharp's Invoke / View
             // Script pattern. Scripts are plain files in
-            // %APPDATA%\DbDuo\Scripts; .js files are executed as
-            // JScript .NET via DbDuo.dll, all other extensions
+            // %APPDATA%\DbDo\Scripts; .js files are executed as
+            // JScript .NET via DbDo.dll, all other extensions
             // are displayed as reference text in a MessageBox.
             //
-            // No Save-Script command: DbDuo is not a text editor, so
+            // No Save-Script command: DbDo is not a text editor, so
             // there is no "current selection" to save. Edit Script
             // handles both modifying an existing script and creating
             // a new one (via a "[New script...]" entry at the top of
@@ -10551,7 +10555,7 @@ namespace DbDuo
             // and FileDir convention exactly -- same label, same
             // chord. F12 is kept as a hidden alias via
             // KeyMap.registerAlias below for users with the chord in
-            // muscle memory from earlier DbDuo versions.
+            // muscle memory from earlier DbDo versions.
             miToolsEditConfig= addItem(miMisc, "&Edit Settings...",          "Edit Settings", Keys.Alt | Keys.Shift | Keys.E,    toolsEditConfigClicked);
 
             // ===== Help menu =====
@@ -10595,7 +10599,7 @@ namespace DbDuo
             miHelpTraceCommand = addItem(miHelp, "&Key Help",                       "Toggle Key Help", Keys.Control | Keys.F1,             helpTraceCommandClicked);
             miHelpStatus       = addItem(miHelp, "&Where Am I",                            "Show Status",       Keys.None,                          helpStatusClicked);
             miHelpTestReader   = addItem(miHelp, "&Test Screen Reader Speech",           "Test Reader",       Keys.None,                          helpTestReaderClicked);
-            // Toggle-Extra-Speech: silence DbDuo's direct speech
+            // Toggle-Extra-Speech: silence DbDo's direct speech
             // messages without affecting the screen reader's natural
             // focus and selection announcements. EdSharp/FileDir's
             // model. The "zzz" mnemonic on Alt+Shift+Z reads as a
@@ -10610,11 +10614,11 @@ namespace DbDuo
             addSep(miHelp);
             miHelpLog          = addItem(miHelp, "Show &Log Location",                   "Show Log",          Keys.None,                          helpLogClicked);
             miHelpWebSite      = addItem(miHelp, "Open We&bsite",      "Open Website",      Keys.None,                          helpWebSiteClicked);
-            // Elevate-Version: check GitHub for a newer DbDuo_setup.exe
+            // Elevate-Version: check GitHub for a newer DbDo_setup.exe
             // and offer to download / install. EdSharp's F11 and
             // FileDir's F11 are the model.
             miHelpElevate      = addItem(miHelp, "&Elevate Version...",                  "Elevate Version",   Keys.F11,                           helpElevateClicked);
-            miHelpAbout        = addItem(miHelp, "&About",                                  "About DbDuo",       Keys.Alt | Keys.F1,                 helpAboutClicked);
+            miHelpAbout        = addItem(miHelp, "&About",                                  "About DbDo",       Keys.Alt | Keys.F1,                 helpAboutClicked);
 
             // Delete key as a secondary binding for Remove-Record.
             // The primary menu shortcut is Control+D (shown next to
@@ -10650,7 +10654,7 @@ namespace DbDuo
             // Jump-Record: secondary alias on Shift+J for muscle
             // Shift+J: data-list alias for Jump-Record (single-column
             // substring). Preserves the bare-Shift+Letter family
-            // muscle memory from earlier DbDuo versions, and parallels
+            // muscle memory from earlier DbDo versions, and parallels
             // the canonical Control+J binding. Note this binds to
             // miRecJump (the new column-listbox Jump-Record), NOT to
             // miRecFind (which is now the across-all-columns Find).
@@ -10735,11 +10739,11 @@ namespace DbDuo
             add("Export Data",        "Export the current table or query to CSV, TSV, JSON, or another format",
                 "Choose the destination file extension to pick the format; row order and filter match what is visible.");
             add("Open File Folder",    "Open the folder containing the open database in Windows Explorer", "");
-            add("Exit Application",   "Close DbDuo", "");
+            add("Exit Application",   "Close DbDo", "");
 
             // ===== Edit menu =====
             add("New Record",         "Add a new row to the current table",
-                "Opens an Edit-Record dialog with empty values for the substantive (non-housekeeping) fields. Validation rules from [Validation:<table>] in DbDuo.ini are applied.");
+                "Opens an Edit-Record dialog with empty values for the substantive (non-housekeeping) fields. Validation rules from [Validation:<table>] in DbDo.inix are applied.");
             add("Edit Record",         "Edit every field of the current row",
                 "Opens an Edit-Record dialog with the current row's values in editable text boxes for substantive fields. Validation rules apply.");
             add("Edit Cell",           "Edit just the field under the virtual cursor",
@@ -10801,8 +10805,8 @@ namespace DbDuo
             add("Say Marked",         "Speak the 'look' values of every marked row",
                 "Alt+M. Compact list of look-values for marked rows; complements Say Records Rest Marked (Alt+Shift+L) which gives full content.");
             add("Say Yield Marked",    "Speak the count of marked rows", "");
-            add("Say Modified",        "Speak the current row's 'modified' value in human-friendly local time",
-                "Shift+M. Reads the standard 'modified' timestamp column. Falls back to 'added' if 'modified' is absent.");
+            add("Say Edited",          "Speak the current row's 'edited' value in human-friendly local time",
+                "Shift+E. Reads the standard 'edited' timestamp column. Falls back to 'added' if 'edited' is absent.");
             add("Say Notes",          "Speak the current row's 'notes' field", "");
             add("Say Tags",           "Speak the current row's 'tags' field", "");
             add("Say Goto",           "Speak the most recently used Jump search string",
@@ -10835,15 +10839,15 @@ namespace DbDuo
             add("Statistics Column",     "Print descriptive statistics for the column under the virtual cursor",
                 "Type-aware: numeric columns get count/min/max/mean/median/stdev; date columns get range and modal year; text columns get cardinality and top-N most-frequent values.");
             add("Select Columns",        "Choose which columns are visible in the grid (per-table)",
-                "Alt+S. Opens a dialog with one checkbox per column in the current table; the user picks which columns to display. Three quick-action buttons: Select All (every column), Select None (revert to DbDuo's default visible-columns rule), OK (apply selection). The choice persists with the table via the SelectList mechanism.");
+                "Alt+S. Opens a dialog with one checkbox per column in the current table; the user picks which columns to display. Three quick-action buttons: Select All (every column), Select None (revert to DbDo's default visible-columns rule), OK (apply selection). The choice persists with the table via the SelectList mechanism.");
             add("Graphics Grid",          "Open the current table as a frequency chart in Excel", "");
             add("Graphics Column",           "Plot the column under the virtual cursor as an Excel chart",
                 "Type-aware: numeric -> histogram or box plot, date -> timeline or seasonal, boolean -> pie, text -> Pareto bar.");
             add("Copy Cell",          "Copy the value of the cell under the virtual cursor to the clipboard", "");
             add("Append Cell",        "Append the value of the cell under the virtual cursor to the clipboard", "");
-            add("Copy Visible Cells",  "Copy the current record's visible cells to the clipboard as tab-separated values. Hidden columns (added, updated, look, unq, url, tags, notes, marked) are skipped; use Copy Record for the full set.", "");
+            add("Copy Visible Cells",  "Copy the current record's visible cells to the clipboard as tab-separated values. Hidden columns (added, edited, look, unq, url, tags, notes, marked) are skipped; use Copy Record for the full set.", "");
             add("Edit Settings", "Open the Settings dialog",
-                "Exposes UI Mode, Command Echo, and a Field Validation... sub-dialog for per-field regex patterns on the current table. 'Open file...' button edits DbDuo.ini directly for advanced settings. Same name and chord (Alt+Shift+C) as in EdSharp and FileDir.");
+                "Exposes UI Mode, Command Echo, and a Field Validation... sub-dialog for per-field regex patterns on the current table. 'Open file...' button edits DbDo.inix directly for advanced settings. Same name and chord (Alt+Shift+C) as in EdSharp and FileDir.");
             add("Switch-Focus",       "Switch focus between the GUI window and the console", "");
             add("Enter Console",      "Send focus to the dot prompt console", "");
             add("Exit-Console",       "Close the dot prompt and return to the GUI", "");
@@ -10851,8 +10855,8 @@ namespace DbDuo
             add("Exit Child",         "Return from a child drill-down to the parent table", "");
             add("Exit Child to Root",   "Return from any drill-down depth to the original table", "");
             add("Invoke SQL",         "Run an ad-hoc SQL statement against the open database", "");
-            add("Invoke Script",      "Run a script from the Scripts folder (.js, .sql, or .duo)",
-                "The picker shows every .js (JScript .NET), .sql (SQL batch), and .duo (DbDuo command batch) file in %APPDATA%\\DbDuo\\Scripts. Type to filter the list; press Enter to run. The file extension determines the engine: .js gets full computational power and host objects (db, frm); .sql runs a semicolon-separated batch of statements; .duo dispatches each line through the dot-prompt as if you had typed it.");
+            add("Invoke Script",      "Run a script from the Scripts folder (.js, .sql, or .dbdo)",
+                "The picker shows every .js (JScript .NET), .sql (SQL batch), and .dbdo (DbDo command batch) file in %APPDATA%\\DbDo\\Scripts. Type to filter the list; press Enter to run. The file extension determines the engine: .js gets full computational power and host objects (db, frm); .sql runs a semicolon-separated batch of statements; .dbdo dispatches each line through the dot-prompt as if you had typed it.");
 
             // ===== Help menu =====
             add("Get Help",           "Open the documentation in the default browser",
@@ -10860,19 +10864,19 @@ namespace DbDuo
             add("Show History",       "Open the history of changes in the default browser",
                 "Menu label: History of Changes. Shift+F1, matching EdSharp and FileDir.");
             add("Show Readme",        "Open the bundled readme.htm", "");
-            add("About DbDuo",        "Show the version, author, and license",
+            add("About DbDo",        "Show the version, author, and license",
                 "Menu label: About. Alt+F1, matching EdSharp and FileDir.");
             add("Toggle Key Help", "Toggle Key Help (Ctrl+F1)",
                 "When Key Help is on, pressing a hotkey announces the command, chord, and summary instead of running the command. Press Ctrl+F1 again to turn it off. Same name and chord as EdSharp and FileDir.");
             add("Alternate Menu",     "Pick a command from a flat, filterable list",
                 "Single alphabetized list of every command with its hotkey and one-line description. Type to filter, arrow to navigate, Enter to run. Same name and chord (Alt+F10) as EdSharp and FileDir.");
-            add("Show Log",           "Open the DbDuo session log", "");
+            add("Show Log",           "Open the DbDo session log", "");
             add("Toggle Extra Speech",
-                "Toggle DbDuo's direct speech (status, command echo, cell readouts)",
-                "When ON, DbDuo speaks status messages, command names, and cell readouts through the screen reader. When OFF, the screen reader still announces focus and selection changes naturally but DbDuo's additional commentary is suppressed. Default ON. Persisted in DbDuo.ini [General] extraSpeech. Alt+Shift+Z to toggle; the 'zzz' mnemonic reads as a hush.");
+                "Toggle DbDo's direct speech (status, command echo, cell readouts)",
+                "When ON, DbDo speaks status messages, command names, and cell readouts through the screen reader. When OFF, the screen reader still announces focus and selection changes naturally but DbDo's additional commentary is suppressed. Default ON. Persisted in DbDo.inix [General] extraSpeech. Alt+Shift+Z to toggle; the 'zzz' mnemonic reads as a hush.");
             add("Toggle Command Echo",
                 "Toggle whether each menu/hotkey command's name is spoken before it runs",
-                "When ON, every command activated through the menu or a hotkey announces its canonical name through the screen reader just before executing. When OFF, commands run silently and you hear only their direct effects. Default ON. Persisted in DbDuo.ini [Options] commandEcho. Ctrl+Shift+Z to toggle; the keyboard companion to Alt+Shift+Z (Extra Speech). Note: this toggle has no effect in CLI / dot-prompt mode, where the user has explicitly typed the command and shouldn't need it echoed back.");
+                "When ON, every command activated through the menu or a hotkey announces its canonical name through the screen reader just before executing. When OFF, commands run silently and you hear only their direct effects. Default ON. Persisted in DbDo.inix [Options] commandEcho. Ctrl+Shift+Z to toggle; the keyboard companion to Alt+Shift+Z (Extra Speech). Note: this toggle has no effect in CLI / dot-prompt mode, where the user has explicitly typed the command and shouldn't need it echoed back.");
             add("Toggle Read Only",
                 "Flip the database between read-write and read-only at runtime",
                 "When ON, the database is opened read-only and edit commands fail with a clear error message. Use this to browse data without risk of accidental edits. Alt+Z to toggle in the GUI; at the dot prompt type 'toggle-readonly', 'read-only', or 'readonly' (with optional 'on'/'off' argument). Also exposed as a checkbox in the Settings dialog and as the -readonly command-line flag at launch.");
@@ -11974,21 +11978,21 @@ namespace DbDuo
         {
             if (db == null || !db.isOpen())
             {
-                this.Text = "DbDuo";
+                this.Text = "DbDo";
                 lblTable.Text = "";
                 lblStatus.Text = "";
                 return;
             }
-            // Window title format: "DbDuo - <database> [read-only] - <table>".
+            // Window title format: "DbDo - <database> [read-only] - <table>".
             // The program name is first so screen-reader title announcements
-            // and Alt+Tab previews start with "DbDuo", which is more useful
+            // and Alt+Tab previews start with "DbDo", which is more useful
             // than starting with whatever .db file is open. Read-only state
             // is appended to the database name so the user always knows when
             // they can't edit.
             string sBaseName = Path.GetFileName(db.filePath);
             string sTable = string.IsNullOrEmpty(db.currentTable) ? "(no table)" : db.currentTable;
             string sReadOnly = db.readOnly ? " (read-only)" : "";
-            this.Text = "DbDuo - " + sBaseName + sReadOnly + " - " + sTable;
+            this.Text = "DbDo - " + sBaseName + sReadOnly + " - " + sTable;
 
             if (!db.hasRecordset())
             {
@@ -12013,7 +12017,7 @@ namespace DbDuo
             //                appears only when true so the user
             //                hears it as a noteworthy signal.
             //   row N of M - the row-of-total counter.
-            //   updated    - the date portion of the 'updated'
+            //   edited     - the date portion of the 'edited'
             //                standard field (yyyy-MM-dd, no time).
             //
             // All three sections are separated by two spaces so the
@@ -12032,24 +12036,24 @@ namespace DbDuo
                 catch { }
             }
 
-            string sUpdated = "";
-            if (db.hasField("modified"))
+            string sEdited = "";
+            if (db.hasField("edited"))
             {
                 try
                 {
-                    string sRaw = db.getFieldValue("modified") ?? "";
+                    string sRaw = db.getFieldValue("edited") ?? "";
                     if (sRaw.Length > 0)
                     {
                         DateTime dt;
                         if (DateTime.TryParse(sRaw, out dt))
-                            sUpdated = "updated " + dt.ToString("yyyy-MM-dd");
+                            sEdited = "edited " + dt.ToString("yyyy-MM-dd");
                         else
                         {
                             // Fall back to first 10 characters if
                             // the value is already in yyyy-MM-dd
                             // form but TryParse didn't accept it
                             // (e.g. unusual culture settings).
-                            if (sRaw.Length >= 10) sUpdated = "updated " + sRaw.Substring(0, 10);
+                            if (sRaw.Length >= 10) sEdited = "edited " + sRaw.Substring(0, 10);
                         }
                     }
                 }
@@ -12059,7 +12063,7 @@ namespace DbDuo
             List<string> lParts = new List<string>();
             if (sMarked.Length > 0)  lParts.Add(sMarked);
             lParts.Add(string.Format("row {0} of {1}", db.absolutePosition, db.recordCount));
-            if (sUpdated.Length > 0) lParts.Add(sUpdated);
+            if (sEdited.Length > 0) lParts.Add(sEdited);
             lblStatus.Text = string.Join("  ", lParts.ToArray());
         }
 
@@ -12410,7 +12414,7 @@ namespace DbDuo
         }
 
         // The 'marked' column's truthy values across the database
-        // engines DbDuo speaks: SQLite stores it as integer 0/1,
+        // engines DbDo speaks: SQLite stores it as integer 0/1,
         // Jet/ACE as BIT True/False. ADO normalizes BIT to "True"/
         // "False" string when read through the dynamic late-bound
         // path. Normalize all of these to a single boolean.
@@ -12517,7 +12521,7 @@ namespace DbDuo
                         + (iChanged == 1 ? "" : "s")
                         + (iSkipped > 0 ? "; " + iSkipped + " already in that state" : "");
             LiveRegion.say(sMsg);
-            DbDuoLog.write("BulkMark " + jumpDir + ": " + sMsg);
+            DbDoLog.write("BulkMark " + jumpDir + ": " + sMsg);
         }
 
         // markAndMove: set or clear the 'marked' column on the
@@ -12526,7 +12530,7 @@ namespace DbDuo
         // a list and decide row by row whether to mark it, with the
         // focus advancing automatically after each decision. The
         // screen reader announces the new row as the ListView's
-        // focused item changes -- no extra speech from DbDuo is
+        // focused item changes -- no extra speech from DbDo is
         // needed for the move itself.
         //
         // Bound to:
@@ -12630,7 +12634,7 @@ namespace DbDuo
             string sMsg = sVerb + " " + iChanged + " row" + (iChanged == 1 ? "" : "s")
                         + (iSkipped > 0 ? "; " + iSkipped + " already in that state" : "");
             LiveRegion.say(sMsg);
-            DbDuoLog.write("MarkAll " + bMark + ": " + sMsg);
+            DbDoLog.write("MarkAll " + bMark + ": " + sMsg);
         }
 
         // invertMarks: flip the marked-state of every row in the
@@ -12679,7 +12683,7 @@ namespace DbDuo
             string sMsg = "Inverted marks on " + iFlipped + " row"
                         + (iFlipped == 1 ? "" : "s");
             LiveRegion.say(sMsg);
-            DbDuoLog.write("InvertMarks: " + sMsg);
+            DbDoLog.write("InvertMarks: " + sMsg);
         }
 
         // sayWhere: Show-Where -- read out the title bar, the
@@ -12691,14 +12695,14 @@ namespace DbDuo
         // for status bar, and various row-readers, but they're
         // three separate gestures and the result is announced in
         // the screen reader's own voice and order. A single chord
-        // that DbDuo composes itself gives the user a consistent
-        // summary in DbDuo's own LiveRegion path -- title, then
+        // that DbDo composes itself gives the user a consistent
+        // summary in DbDo's own LiveRegion path -- title, then
         // status, then per-column values for the current row,
         // separated by " | " so JAWS' pause-on-punctuation pacing
         // is natural.
         //
         // Only displayed columns are included (Select-Column's
-        // user override, or DbDuo's default visible columns); the
+        // user override, or DbDo's default visible columns); the
         // primary key and bookkeeping fields are not. To inspect
         // every column, including hidden ones, use Show-Object
         // (Enter) instead.
@@ -12741,7 +12745,7 @@ namespace DbDuo
             }
 
             string sMsg = sb.ToString();
-            if (sMsg.Length == 0) sMsg = "DbDuo, no database open";
+            if (sMsg.Length == 0) sMsg = "DbDo, no database open";
             LiveRegion.say(sMsg);
         }
 
@@ -12886,7 +12890,7 @@ namespace DbDuo
         }
 
         // saySayTables: Shift+F4. Speak the names of tables that
-        // have been opened in this DbDuo session. FileDir's Shift+F4 =
+        // have been opened in this DbDo session. FileDir's Shift+F4 =
         // "Say Windows Open." Speech-only -- does NOT open a picker.
         // The picker (Select-Table) is F4 by FileDir's Current Windows
         // convention. Shift+F4 is the "tell me without changing
@@ -12962,7 +12966,7 @@ namespace DbDuo
             speakOrShow("Marked Rows", sb.ToString(), 105);
         }
 
-        // saySayModified: Shift+M. Speak the 'modified' value of the
+        // saySayEdited: Shift+E. Speak the 'edited' value of the
         // current row in a human-friendly local-time form. The
         // underlying SQLite text (e.g., "2026-05-15 13:42:00") is
         // never modified -- this only affects speech output.
@@ -12973,19 +12977,19 @@ namespace DbDuo
         //   - seconds dropped from any time portion
         //   - non-date string -> spoken verbatim as a fallback
         //
-        // If the table has no 'modified' column we fall back to
+        // If the table has no 'edited' column we fall back to
         // 'added' (the other standard date column).
-        private void saySayModified(object sender, EventArgs evArgs)
+        private void saySayEdited(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
             { LiveRegion.say("No record selected"); return; }
-            string sCol = db.hasField("modified") ? "modified" : (db.hasField("added") ? "added" : null);
+            string sCol = db.hasField("edited") ? "edited" : (db.hasField("added") ? "added" : null);
             if (sCol == null)
             { LiveRegion.say("No date column in this table"); return; }
             string sVal = db.getFieldValue(sCol);
             string sSpoken = formatDateHumanFriendly(sVal);
             if (string.IsNullOrEmpty(sSpoken)) sSpoken = "(empty)";
-            speakOrShow("Modified", sCol + ": " + sSpoken, 106);
+            speakOrShow("Edited", sCol + ": " + sSpoken, 106);
         }
 
         // formatDateHumanFriendly: parse the SQLite-text date / datetime
@@ -13184,13 +13188,15 @@ namespace DbDuo
             speakOrShow("Related", sSummary, 121);
         }
 
-        // Lightweight related-summary builder. Lists parents (via
-        // outbound *_id columns) by look value. Falls back to PK
-        // value if no look column. Returns "" if nothing found.
-        // (Child enumeration deferred -- it's heavier and Say-Kin
-        // already provides the full version.)
+        // Related-summary builder. Lists parents (via outbound *_id
+        // columns) by look value, then child records (tables whose FK
+        // column matches the current table's primary-key name) with
+        // one look line per related record, capped per table. Falls
+        // back to PK value if no look column. Returns "" if nothing
+        // found.
         private string buildRelatedSummary()
         {
+            const int c_iChildCap = 5;
             StringBuilder sb = new StringBuilder();
             try
             {
@@ -13215,13 +13221,41 @@ namespace DbDuo
                                       ? lLook[0] : "(no look)";
                     sb.AppendLine(sParentTable + ": " + sLookVal);
                 }
+                // Child records: any table carrying a column named the
+                // same as this table's primary key (the contact_id-in-
+                // both-places convention). One look line per record.
+                string sPkValue = "";
+                if (!string.IsNullOrEmpty(sCurrentPk))
+                    try { sPkValue = db.getFieldValue(sCurrentPk) ?? ""; } catch { }
+                if (!string.IsNullOrEmpty(sPkValue))
+                {
+                    foreach (string sChildTable in lAllTables)
+                    {
+                        if (string.Equals(sChildTable, db.currentTable, StringComparison.OrdinalIgnoreCase))
+                            continue;
+                        bool bHasFk = false;
+                        foreach (string sChildCol in db.getColumnsOfTable(sChildTable))
+                            if (string.Equals(sChildCol, sCurrentPk, StringComparison.OrdinalIgnoreCase))
+                            { bHasFk = true; break; }
+                        if (!bHasFk) continue;
+                        int iFound;
+                        List<string> lLook = db.queryColumnValues(
+                            sChildTable, "look", sCurrentPk, sPkValue, c_iChildCap, out iFound);
+                        if (iFound <= 0) continue;
+                        sb.AppendLine(sChildTable + " (" + Str.plural("record", iFound) + "):");
+                        foreach (string sLook in lLook)
+                            sb.AppendLine("  " + (string.IsNullOrEmpty(sLook) ? "(no look)" : sLook));
+                        if (iFound > lLook.Count)
+                            sb.AppendLine("  ... and " + (iFound - lLook.Count) + " more");
+                    }
+                }
             }
             catch { }
             return sb.ToString().Trim();
         }
 
         // saySayUrl: speak the 'url' field of the current record.
-        // Shift+U. The 'url' column is the standard one DbDuo
+        // Shift+U. The 'url' column is the standard one DbDo
         // recognizes; tables without it report so.
         private void saySayUrl(object sender, EventArgs evArgs)
         {
@@ -13234,7 +13268,7 @@ namespace DbDuo
             speakOrShow("URL", Metadata.UrlColumn + ": " + sVal, 122);
         }
 
-        // saySayColumn: Shift+E. Speak every cell of the current
+        // saySayColumn: Ctrl+L. Speak every cell of the current
         // virtual column, top to bottom of the visible filtered rows.
         // The list is capped at 25 in the spoken form with a "plus N
         // more" footer; the double-press dialog shows the full list.
@@ -13349,7 +13383,7 @@ namespace DbDuo
             { LiveRegion.say("No columns visible"); return; }
             // v1.0.99: start at the current row (the "Rest" in the
             // command name). Renamed from Say Rows to Say Records Rest
-            // for consistency with the rest of DbDuo's entity vocabulary.
+            // for consistency with the rest of DbDo's entity vocabulary.
             int iStart = (iVirtualRow >= 1) ? iVirtualRow : 1;
             object oOriginal = null;
             try { oOriginal = db.bookmark; } catch { }
@@ -13433,10 +13467,10 @@ namespace DbDuo
         // the read-only memo dialog for line-by-line review of long
         // pasted content.
         //
-        // Why no file-drop-list handling like FileDir's: DbDuo is a
+        // Why no file-drop-list handling like FileDir's: DbDo is a
         // database tool, not a file manager. Copying file paths to
-        // DbDuo is not a meaningful workflow. The plain-text path
-        // covers every common DbDuo scenario (the user copies a row
+        // DbDo is not a meaningful workflow. The plain-text path
+        // covers every common DbDo scenario (the user copies a row
         // value with Shift+C, or pastes some text from another
         // app's window) and the simpler implementation has fewer
         // failure modes.
@@ -14616,23 +14650,27 @@ namespace DbDuo
         // calls KeyMap.overrideKey for each. Reports unknown commands,
         // parse failures, and conflicts in a single startup dialog.
         // =====================================================================
-        // applyIniOverrides: read DbDuo.ini's [Hotkeys] section and
-        // apply each Command-Name=Chord, Description line as an
-        // override. The chord overrides the in-code default; the
-        // description goes into KeyMap.dCommandToSummary so the
-        // status bar, key describer, and Alt+F10 Alternate Menu all
-        // pick up the new text. Lines without a comma are treated as
-        // chord-only (no description override). Unknown command
-        // names are reported via the conflicts dialog.
+        // applyIniOverrides: read DbDo.inix's [Hotkeys] section and
+        // apply each Command Name=Chord, Description line as a
+        // DESCRIPTION-ONLY override. The chord field is documentation
+        // only -- the actual bindings are compiled into addItem
+        // calls; .ini parsing imposes startup overhead and these
+        // bindings are not user-configurable in practice. Editing
+        // descriptions in the .ini and restarting picks up the new
+        // wording without a rebuild, which is the workflow we want.
+        //
+        // Each line's part after the first comma (that isn't followed
+        // by " or " for alternate-chord syntax) becomes the command's
+        // status-bar / key-describer text via KeyMap.dCommandToSummary.
         //
         // The historical [Keys] section name is also accepted, for
-        // any older DbDuo.ini files; the modern section is [Hotkeys]
+        // any older DbDo.inix files; the modern section is [Hotkeys]
         // to match FileDir's convention.
         private void applyIniOverrides()
         {
             string sIniPath = Path.Combine(
                 Path.GetDirectoryName(Application.ExecutablePath) ?? ".",
-                "DbDuo.ini");
+                "DbDo.inix");
             if (!File.Exists(sIniPath)) return;
 
             string[] aLines = null;
@@ -14655,62 +14693,22 @@ namespace DbDuo
                 if (iEq <= 0) continue;
                 string sCommand = sTrim.Substring(0, iEq).Trim();
                 string sRest    = sTrim.Substring(iEq + 1).Trim();
-                // Split sRest into chord and description on the first
-                // comma -- but only if that comma is not followed by
-                // "or " (alternate-chord syntax: "Shift+B, or Control+Home, Description").
-                // For DbDuo we don't currently use alternate-chord syntax
-                // in the shipped file, but the parser tolerates it: the
-                // chord runs up to the first comma whose tail is NOT
-                // "or ...".
-                string sKeyText = sRest;
-                string sDescr = "";
+                // Extract description after the first chord/description
+                // separator comma. If no comma, the line is chord-only
+                // (no description override) and we skip.
                 int iComma = findChordCommaSplit(sRest);
-                if (iComma > 0)
-                {
-                    sKeyText = sRest.Substring(0, iComma).Trim();
-                    sDescr   = sRest.Substring(iComma + 1).Trim();
-                    // Strip a trailing period from the description if
-                    // present, for status-bar uniformity. The .ini
-                    // file is allowed to have periods or not.
-                    if (sDescr.EndsWith(".")) sDescr = sDescr.Substring(0, sDescr.Length - 1);
-                }
-
-                bool bKnown = false;
-                foreach (string s in KeyMap.dCommandToKey.Keys) { if (s == sCommand) { bKnown = true; break; } }
-                if (!bKnown)
-                {
-                    foreach (KeyValuePair<ToolStripMenuItem, string> kv in KeyMap.dMenuToCommand)
-                        if (kv.Value == sCommand) { bKnown = true; break; }
-                }
-                if (!bKnown)
-                {
-                    KeyMap.lConflicts.Add(string.Format("Unknown command: '{0}'", sCommand));
-                    continue;
-                }
-                if (!string.IsNullOrEmpty(sKeyText))
-                    KeyMap.overrideKey(sCommand, sKeyText);
+                if (iComma <= 0) continue;
+                string sDescr = sRest.Substring(iComma + 1).Trim();
+                if (sDescr.EndsWith(".")) sDescr = sDescr.Substring(0, sDescr.Length - 1);
                 if (!string.IsNullOrEmpty(sDescr))
                     KeyMap.dCommandToSummary[sCommand] = sDescr;
-            }
-
-            if (KeyMap.lConflicts.Count > 0)
-            {
-                StringBuilder sb = new StringBuilder();
-                sb.AppendLine("DbDuo.ini key configuration issues:");
-                sb.AppendLine();
-                foreach (string s in KeyMap.lConflicts) sb.AppendLine("  - " + s);
-                HelpDialog.show(this, "DbDuo.ini issues", sb.ToString());
-                KeyMap.lConflicts.Clear();
             }
         }
 
         // findChordCommaSplit: locate the comma that separates the
-        // chord (e.g., "Control+Shift+F") from the description
-        // (e.g., "Filter records to those matching a where condition").
-        // Skip any comma immediately followed by " or " (alternate-
-        // chord syntax used in FileDir's Hotkeys.ini, kept for
-        // compatibility). Returns -1 if no separator comma is
-        // present (line is chord-only).
+        // chord from the description. Skip any comma immediately
+        // followed by " or " (alternate-chord syntax used by FileDir's
+        // Hotkeys.ini). Returns -1 if no separator comma is present.
         private static int findChordCommaSplit(string sRest)
         {
             int i = 0;
@@ -14718,8 +14716,6 @@ namespace DbDuo
             {
                 int iComma = sRest.IndexOf(',', i);
                 if (iComma < 0) return -1;
-                // Look past the comma and any whitespace; if "or " follows,
-                // this comma is inside the chord alternates; skip past it.
                 int j = iComma + 1;
                 while (j < sRest.Length && char.IsWhiteSpace(sRest[j])) j++;
                 if (j + 2 < sRest.Length
@@ -14736,7 +14732,7 @@ namespace DbDuo
         }
 
         // =====================================================================
-        // Session persistence: DbDuo.ini stores the last database file
+        // Session persistence: DbDo.inix stores the last database file
         // opened and the last table within it. On launch with no
         // command-line arguments specifying a different file, the
         // saved database is reopened automatically and the saved
@@ -14744,7 +14740,7 @@ namespace DbDuo
         //
         // The [Session] section is a simple key=value store managed by
         // IniSession (below). It coexists with the [Keys] and
-        // [General] sections in the same DbDuo.ini file. Writing
+        // [General] sections in the same DbDo.inix file. Writing
         // preserves other sections; we only rewrite the [Session]
         // block.
         //
@@ -14758,14 +14754,14 @@ namespace DbDuo
         {
             // Session state -- the user's last-opened database and
             // table -- is stored in a user-writable location so it
-            // survives across launches even when DbDuo.exe lives in
+            // survives across launches even when DbDo.exe lives in
             // a read-only directory (Program Files, network share,
             // user-locked install).
             //
-            // Location: %LOCALAPPDATA%\DbDuo\DbDuo.ini. Created on
+            // Location: %LOCALAPPDATA%\DbDo\DbDo.inix. Created on
             // first write. Read order on launch: if the per-user
             // file exists, use it; otherwise consult the EXE-dir
-            // DbDuo.ini for legacy installs.
+            // DbDo.inix for legacy installs.
             //
             // Why per-user: Program Files write attempts get UAC-
             // virtualized into VirtualStore (silently, sometimes,
@@ -14774,7 +14770,7 @@ namespace DbDuo
             // user accounts. Per-user is the only reliable answer.
             //
             // The [Keys] section and [General] uiMode setting still
-            // live next to the EXE in the deployed DbDuo.ini -- those
+            // live next to the EXE in the deployed DbDo.inix -- those
             // are configuration shipped with the install, not user
             // session state. Only [Session] migrated here.
             private static string iniPath()
@@ -14786,15 +14782,15 @@ namespace DbDuo
                     // Fall back to EXE dir so we at least try.
                     return Path.Combine(
                         Path.GetDirectoryName(Application.ExecutablePath) ?? ".",
-                        "DbDuo.ini");
+                        "DbDo.inix");
                 }
-                string sDir = Path.Combine(sBase, "DbDuo");
+                string sDir = Path.Combine(sBase, "DbDo");
                 try { if (!Directory.Exists(sDir)) Directory.CreateDirectory(sDir); }
                 catch { }
-                return Path.Combine(sDir, "DbDuo.ini");
+                return Path.Combine(sDir, "DbDo.inix");
             }
 
-            // Legacy read fallback: an older DbDuo may have written
+            // Legacy read fallback: an older DbDo may have written
             // the [Session] section next to the EXE. If the per-user
             // file is absent or doesn't have a Session value, look
             // there too.
@@ -14802,7 +14798,7 @@ namespace DbDuo
             {
                 return Path.Combine(
                     Path.GetDirectoryName(Application.ExecutablePath) ?? ".",
-                    "DbDuo.ini");
+                    "DbDo.inix");
             }
 
             public static string read(string sKey)
@@ -14825,33 +14821,23 @@ namespace DbDuo
             private static string readFrom(string sPath, string sSection, string sKey)
             {
                 if (!File.Exists(sPath)) return "";
-                string[] aLines;
-                try { aLines = File.ReadAllLines(sPath); } catch { return ""; }
-                string sHeader = "[" + sSection + "]";
-                bool bInSection = false;
-                foreach (string sLine in aLines)
+                try
                 {
-                    string sTrim = sLine.Trim();
-                    if (sTrim.Length == 0) continue;
-                    if (sTrim.StartsWith(";") || sTrim.StartsWith("#")) continue;
-                    if (sTrim.StartsWith("["))
+                    foreach (InixCodec.Section sec in InixCodec.read(sPath))
                     {
-                        bInSection = sTrim.Equals(sHeader, StringComparison.OrdinalIgnoreCase);
-                        continue;
+                        if (!string.Equals(sec.Name, sSection, StringComparison.OrdinalIgnoreCase)) continue;
+                        string sFound = sec.get(sKey);
+                        if (sFound == null) return "";
+                        if (sFound.IndexOf('\n') < 0) sFound = sFound.Trim();
+                        return sFound;
                     }
-                    if (!bInSection) continue;
-                    int iEq = sTrim.IndexOf('=');
-                    if (iEq <= 0) continue;
-                    string sName = sTrim.Substring(0, iEq).Trim();
-                    string sValue = sTrim.Substring(iEq + 1).Trim();
-                    if (string.Equals(sName, sKey, StringComparison.OrdinalIgnoreCase))
-                        return sValue;
                 }
+                catch { }
                 return "";
             }
 
-            // Write to the per-user file. Creates DbDuo.ini in
-            // %LOCALAPPDATA%\DbDuo\ if absent. Preserves any other
+            // Write to the per-user file. Creates DbDo.inix in
+            // %LOCALAPPDATA%\DbDo\ if absent. Preserves any other
             // sections that may already exist. Writes the [Session]
             // section, replacing the key if present, adding it if
             // not, removing it if value is empty.
@@ -14865,75 +14851,9 @@ namespace DbDuo
             // exist. Removes the key if value is empty.
             public static void write(string sSection, string sKey, string sValue)
             {
-                string sPath = iniPath();
-                string sHeader = "[" + sSection + "]";
-                List<string> lLines = new List<string>();
-                if (File.Exists(sPath))
+                if (!InixCodec.writeValue(iniPath(), sSection, sKey, sValue))
                 {
-                    try { lLines.AddRange(File.ReadAllLines(sPath)); } catch { return; }
-                }
-
-                int iSectionStart = -1;
-                int iSectionEnd = -1;
-                for (int i = 0; i < lLines.Count; i++)
-                {
-                    string sTrim = lLines[i].Trim();
-                    if (sTrim.Equals(sHeader, StringComparison.OrdinalIgnoreCase))
-                    {
-                        iSectionStart = i;
-                        iSectionEnd = lLines.Count;
-                        for (int j = i + 1; j < lLines.Count; j++)
-                        {
-                            string sJ = lLines[j].Trim();
-                            if (sJ.StartsWith("[")) { iSectionEnd = j; break; }
-                        }
-                        break;
-                    }
-                }
-
-                if (iSectionStart < 0)
-                {
-                    if (lLines.Count > 0 && lLines[lLines.Count - 1].Trim().Length > 0)
-                        lLines.Add("");
-                    lLines.Add(sHeader);
-                    if (!string.IsNullOrEmpty(sValue))
-                        lLines.Add(sKey + " = " + sValue);
-                }
-                else
-                {
-                    int iFound = -1;
-                    for (int i = iSectionStart + 1; i < iSectionEnd; i++)
-                    {
-                        string sT = lLines[i].Trim();
-                        if (sT.Length == 0) continue;
-                        if (sT.StartsWith(";") || sT.StartsWith("#")) continue;
-                        int iEq = sT.IndexOf('=');
-                        if (iEq <= 0) continue;
-                        string sN = sT.Substring(0, iEq).Trim();
-                        if (string.Equals(sN, sKey, StringComparison.OrdinalIgnoreCase))
-                        { iFound = i; break; }
-                    }
-                    if (iFound >= 0)
-                    {
-                        if (string.IsNullOrEmpty(sValue))
-                            lLines.RemoveAt(iFound);
-                        else
-                            lLines[iFound] = sKey + " = " + sValue;
-                    }
-                    else if (!string.IsNullOrEmpty(sValue))
-                    {
-                        lLines.Insert(iSectionStart + 1, sKey + " = " + sValue);
-                    }
-                }
-
-                try
-                {
-                    File.WriteAllLines(sPath, lLines.ToArray());
-                    DbDuoLog.write("Ini write [" + sSection + "] " + sKey + " = " + sValue);
-                }
-                catch (Exception ex)
-                {
-                    DbDuoLog.write("Ini write FAILED: " + sPath + " -- " + ex.Message);
+                    try { DbDoLog.write("IniSession.write FAILED: " + iniPath()); } catch { }
                 }
             }
 
@@ -14943,7 +14863,7 @@ namespace DbDuo
 
         // =====================================================================
         // SearchHistory: per-family recent-search list persisted to
-        // DbDuo.ini. Each family has its own section ([RecentJump],
+        // DbDo.inix. Each family has its own section ([RecentJump],
         // [RecentFind], [RecentFindRegex]) holding up to 10 entries.
         // Each entry is a (term, caseSensitive) pair stored as two
         // keys: termN and caseN where N is 1..10. Entry 1 is the
@@ -15040,7 +14960,7 @@ namespace DbDuo
         // RecentFiles: persists up to 10 recently opened database
         // file paths plus per-file state (last-active table, and
         // per-table filter / sort / position). All stored in the
-        // per-user DbDuo.ini, one section per file:
+        // per-user DbDo.inix, one section per file:
         //
         //   [RecentFile1]                  <- index 1 = most recent
         //   path        = C:\path\to\file.db
@@ -15085,7 +15005,7 @@ namespace DbDuo
                 // User-set comma-separated list of columns to show in
                 // the listview, per the Select Columns command
                 // (Alt+S). Empty string means "use the default rule-
-                // based selection." Persisted to DbDuo.ini as
+                // based selection." Persisted to DbDo.inix as
                 // t<n>_selectlist under the RecentFile section.
                 public string sSelectList = "";
             }
@@ -15204,7 +15124,7 @@ namespace DbDuo
             // calling recordTableState (with its loadAll + saveAll
             // pair) per table.
             public static void recordAllTableStates(string sPath, string sCurrentTable,
-                IEnumerable<KeyValuePair<string, DbDuoManager.TableSettings>> cacheEntries)
+                IEnumerable<KeyValuePair<string, DbDoManager.TableSettings>> cacheEntries)
             {
                 if (string.IsNullOrEmpty(sPath) || cacheEntries == null) return;
                 List<FileState> l = loadAll();
@@ -15216,10 +15136,10 @@ namespace DbDuo
                     f = findByPath(l, sPath);
                     if (f == null) return;
                 }
-                foreach (KeyValuePair<string, DbDuoManager.TableSettings> kvCache in cacheEntries)
+                foreach (KeyValuePair<string, DbDoManager.TableSettings> kvCache in cacheEntries)
                 {
                     string sTable = kvCache.Key;
-                    DbDuoManager.TableSettings cache = kvCache.Value;
+                    DbDoManager.TableSettings cache = kvCache.Value;
                     if (string.IsNullOrEmpty(sTable) || cache == null) continue;
                     TableState ts;
                     if (!f.dTables.TryGetValue(sTable, out ts))
@@ -15291,7 +15211,7 @@ namespace DbDuo
         // of file dialog (Open, Save-As, Import, Export), so the
         // next invocation of the same dialog opens in the same
         // place the user worked in last. Uses the same per-user
-        // DbDuo.ini that IniSession uses, but a [Folders] section.
+        // DbDo.inix that IniSession uses, but a [Folders] section.
         //
         // Kinds:
         //   open       -- New-Database, Open-Database, Save-DatabaseAs,
@@ -15415,7 +15335,7 @@ namespace DbDuo
         // last-active table (if it still exists) and that table's
         // filter / sort / position (silently skipping any piece
         // that no longer applies). The list is populated from the
-        // [RecentFile1..10] sections of DbDuo.ini.
+        // [RecentFile1..10] sections of DbDo.inix.
         private void fileRecentClicked(object sender, EventArgs evArgs)
         {
             List<RecentFiles.FileState> l = RecentFiles.loadAll();
@@ -15467,7 +15387,7 @@ namespace DbDuo
         {
             try
             {
-                DbDuoLog.write("Opening: " + sPath);
+                DbDoLog.write("Opening: " + sPath);
                 drillStack.Clear();
                 // Reset the first-populate flag so the JAWS "Unselected"
                 // workaround fires once for this new database.
@@ -15511,7 +15431,7 @@ namespace DbDuo
                     try { db.selectTable(sDesiredTable); } catch { }
                 }
                 invokeRefresh();
-                DbDuoLog.write("Open succeeded. Table: " + (db.currentTable ?? "(none)"));
+                DbDoLog.write("Open succeeded. Table: " + (db.currentTable ?? "(none)"));
                 IniSession.lastDatabase = sPath;
                 IniSession.lastTable    = db.currentTable ?? "";
                 // Record into Recent Files list (move-to-front).
@@ -15520,7 +15440,7 @@ namespace DbDuo
             }
             catch (Exception ex)
             {
-                DbDuoLog.write("Open failed: " + ex.Message);
+                DbDoLog.write("Open failed: " + ex.Message);
                 MessageBox.Show(this, ex.Message, "Open Database",
                     MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
@@ -15531,7 +15451,7 @@ namespace DbDuo
 
         // helpSampleDbClicked, helpNorthwindDbClicked, helpChinookDbClicked:
         // open one of the three bundled sample databases that ship in
-        // the DbDuo install folder. All three commands share one
+        // the DbDo install folder. All three commands share one
         // helper (openInstallSampleDb) so the open path, the file-
         // missing message, and the post-open behavior are identical
         // for every sample. The bundled samples are:
@@ -15539,10 +15459,10 @@ namespace DbDuo
         //                     students, enrollments) for first-launch
         //                     exploration. 4 tables, 3 rows each.
         //   - northwind.db  : classic Microsoft Northwind sales sample
-        //                     adapted to DbDuo standard columns.
+        //                     adapted to DbDo standard columns.
         //                     8 tables, 101 rows.
         //   - chinook.db    : classic Chinook music-store sample
-        //                     adapted to DbDuo standard columns.
+        //                     adapted to DbDo standard columns.
         //                     9 tables, 158 rows, three-deep chains.
         private void helpSampleDbClicked(object sender, EventArgs evArgs)
         {
@@ -15583,8 +15503,8 @@ namespace DbDuo
             if (!File.Exists(sPath))
             {
                 MessageBox.Show(this,
-                    sFileName + " not found in the DbDuo install folder:\n\n" + sPath
-                    + "\n\nIf you installed DbDuo via the regular installer the sample is normally placed here automatically.",
+                    sFileName + " not found in the DbDo install folder:\n\n" + sPath
+                    + "\n\nIf you installed DbDo via the regular installer the sample is normally placed here automatically.",
                     sTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -15643,7 +15563,7 @@ namespace DbDuo
             try { db.close(); } catch { }
             // Reset the drill stack so navigation state doesn't leak
             // across databases. The TableSettings cache inside
-            // DbDuoManager is cleared by db.close() itself.
+            // DbDoManager is cleared by db.close() itself.
             drillStack.Clear();
             iMarkAnchor = -1;
             sMarkAnchorTable = null;
@@ -15690,7 +15610,7 @@ namespace DbDuo
                         iCount = db.importInix(dlgFile.FileName);
                     else
                         iCount = db.importMarkdown(dlgFile.FileName);
-                    DbDuoLog.write("Imported " + iCount + " row(s) from " + dlgFile.FileName);
+                    DbDoLog.write("Imported " + iCount + " row(s) from " + dlgFile.FileName);
                     invokeRefresh();
                     MessageBox.Show(this,
                         "Imported " + iCount + " row(s) into " + db.currentTable + ".",
@@ -15733,7 +15653,7 @@ namespace DbDuo
                 try
                 {
                     db.exportData(dlgFile.FileName);
-                    DbDuoLog.write("Exported to " + dlgFile.FileName);
+                    DbDoLog.write("Exported to " + dlgFile.FileName);
                     // Open the result in its default application so
                     // the user sees their export immediately, matching
                     // dbDot's behavior.
@@ -15767,7 +15687,7 @@ namespace DbDuo
                 return;
             }
             // For New-Record, show only distinct (substantive) fields.
-            // The bookkeeping fields (added, updated, observed, marked, _id)
+            // The bookkeeping fields (added, edited, observed, marked, _id)
             // get filled in by DEFAULT clauses on the columns: added /
             // updated / observed default to current_timestamp; marked
             // defaults to 0; the primary key is auto-incremented.
@@ -15810,7 +15730,7 @@ namespace DbDuo
             if (db.eof || db.bof) return;
             // Show distinct fields editable, plus metadata fields read-only.
             // The user sees the housekeeping values for context but cannot
-            // edit them; SQLite triggers update 'updated' automatically.
+            // edit them; SQLite triggers update 'edited' automatically.
             List<string> lDistinct = db.getDistinctFieldNames();
             List<string> lMetadata = db.getMetadataFieldNames();
             List<string> lFields = new List<string>();
@@ -15854,11 +15774,11 @@ namespace DbDuo
         // Smaller, faster path than F2 Edit Record when the user only
         // needs to change one value. Applies the same regex
         // validation Edit Record uses, via the [Validation:<table>]
-        // section of DbDuo.ini -- if a pattern is configured for the
+        // section of DbDo.inix -- if a pattern is configured for the
         // current column, the new value must match it or the dialog
         // refuses with an error message.
         //
-        // Metadata columns (added, updated) are not editable; if the
+        // Metadata columns (added, edited) are not editable; if the
         // virtual cursor is on one of those, the dialog opens
         // read-only with a clear note. The 'marked' boolean column
         // routes to the existing Mark Record / Unmark Record commands
@@ -15883,7 +15803,7 @@ namespace DbDuo
             // Refuse on metadata fields (system-managed) and route
             // 'marked' to the proper toggle commands.
             string sColLower = sColumn.ToLowerInvariant();
-            if (sColLower == "added" || sColLower == "modified")
+            if (sColLower == "added" || sColLower == "edited")
             {
                 MessageBox.Show(this,
                     "Field \"" + sColumn + "\" is system-managed and cannot be edited directly.\r\n\r\n"
@@ -15930,7 +15850,7 @@ namespace DbDuo
                 dlg.addLabel("Editing field \"" + sColumn + "\" of row "
                     + db.absolutePosition + " of " + db.recordCount + ".");
                 if (!string.IsNullOrEmpty(sConfiguredRegex))
-                    dlg.addLabel("Required pattern (DbDuo.ini): " + sConfiguredRegex);
+                    dlg.addLabel("Required pattern (DbDo.inix): " + sConfiguredRegex);
                 dlg.addSeparator();
                 // Single-line for short values, memo box for long ones.
                 // The Camel-Type rule prefers a single-line input
@@ -15961,7 +15881,7 @@ namespace DbDuo
                 catch (Exception exRegex)
                 {
                     MessageBox.Show(this,
-                        "The validation pattern in DbDuo.ini is invalid:\r\n\r\n"
+                        "The validation pattern in DbDo.inix is invalid:\r\n\r\n"
                         + exRegex.Message + "\r\n\r\nPattern: " + sConfiguredRegex,
                         "Edit Cell", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     return;
@@ -16046,7 +15966,7 @@ namespace DbDuo
         // promptScope: marks-aware scope chooser for Category B
         // commands (those that can act on a single record OR on the
         // set of marked records). The design rule applied throughout
-        // DbDuo:
+        // DbDo:
         //
         //   If no records are marked in the current filtered view,
         //   the command acts on the current record with no prompt.
@@ -16200,7 +16120,7 @@ namespace DbDuo
         //      text. The user can press Shift+E to drill in for
         //      the full list.
         //
-        // The look column is DbDuo's standard "summary" calculated
+        // The look column is DbDo's standard "summary" calculated
         // column -- a SQLite stored-generated text that concatenates
         // a handful of substantive fields with " | " separators,
         // designed to be a screen-reader-friendly one-line
@@ -16263,7 +16183,7 @@ namespace DbDuo
         //       fetch up to 25 look values matching the FK and emit
         //       them under a "Related <child-table>:" header.
         //
-        // The query path is DbDuoManager.queryColumnValues, which
+        // The query path is DbDoManager.queryColumnValues, which
         // issues a direct SELECT on the live connection so SQLite
         // can use its own indexes (if any are defined on the FK
         // columns) -- much cheaper than loading the whole child
@@ -17201,7 +17121,7 @@ namespace DbDuo
 
         // Search-Next (F3): repeat whichever search family was last
         // invoked, forward. Shift+F3 is the reverse counterpart.
-        // EdSharp uses F3 / Shift+F3 for "find again" -- DbDuo
+        // EdSharp uses F3 / Shift+F3 for "find again" -- DbDo
         // generalizes this to also include the Jump family.
         private void recSearchNextClicked(object sender, EventArgs evArgs)
         {
@@ -17739,7 +17659,7 @@ namespace DbDuo
         // the user with a filtered list (tables-only or views-only),
         // then opens the chosen object and persists it to the
         // session ini. The "table vs view" distinction relies on
-        // DbDuo's view-name convention (a leading "view_" prefix on
+        // DbDo's view-name convention (a leading "view_" prefix on
         // a table name marks it as a view), since some ADODB
         // providers report views and base tables with identical
         // schema metadata.
@@ -17898,7 +17818,7 @@ namespace DbDuo
         // recToggleMarkClicked: Ctrl+Space. Flip the current record's
         // mark state. Matches the Windows ListView convention where
         // Ctrl+Space toggles the focused item's selection state.
-        // Since DbDuo uses the 'marked' column as its functional
+        // Since DbDo uses the 'marked' column as its functional
         // equivalent of multi-select, the mapping is direct.
         // Announces the new state through the live region.
         private void recToggleMarkClicked(object sender, EventArgs evArgs)
@@ -18260,7 +18180,7 @@ namespace DbDuo
         // is a fast human/screen-reader overview of what's in the
         // database and how the tables relate.
         //
-        // Relations follow DbDuo's column-naming convention rather
+        // Relations follow DbDo's column-naming convention rather
         // than walking PRAGMA foreign_key_list, so the same algorithm
         // works for .db, .xlsx, .csv, and any other tabular source
         // where the convention has been adopted. Two directions:
@@ -18725,7 +18645,7 @@ namespace DbDuo
         // child to parent via the row's foreign-key columns); these
         // commands operate in the opposite direction.
         //
-        // On Enter-Child, DbDuo finds every other table that has a
+        // On Enter-Child, DbDo finds every other table that has a
         // column matching the current table's primary-key name (the
         // dbDot convention <singular>_id). If exactly one such child
         // table exists, it is opened directly; if several, the user
@@ -19356,8 +19276,8 @@ namespace DbDuo
             string sStored = db.setSelectList(sCurrentTable, sResult);
 
             // Compute dropped names so we can tell the user.
-            List<string> lRequested = DbDuoManager.parseSelectList(sResult);
-            List<string> lAccepted = DbDuoManager.parseSelectList(sStored);
+            List<string> lRequested = DbDoManager.parseSelectList(sResult);
+            List<string> lAccepted = DbDoManager.parseSelectList(sStored);
             List<string> lDropped = new List<string>();
             HashSet<string> hAccepted = new HashSet<string>(lAccepted, StringComparer.OrdinalIgnoreCase);
             foreach (string sName in lRequested)
@@ -19571,19 +19491,19 @@ namespace DbDuo
             sb.AppendLine();
             sb.AppendLine("Columns (in natural order):");
 
-            // Collect column info. The DbDuoManager keeps a list of
+            // Collect column info. The DbDoManager keeps a list of
             // schema metadata per table; for SQLite this is taken
             // from PRAGMA table_info. We render one line per column.
             try
             {
-                List<DbDuoManager.SchemaColumn> lCols = db.getSchemaColumns(sTable);
+                List<DbDoManager.SchemaColumn> lCols = db.getSchemaColumns(sTable);
                 if (lCols == null || lCols.Count == 0)
                 {
                     sb.AppendLine("  (no column metadata available)");
                 }
                 else
                 {
-                    foreach (DbDuoManager.SchemaColumn sc in lCols)
+                    foreach (DbDoManager.SchemaColumn sc in lCols)
                     {
                         List<string> lParts = new List<string>();
                         if (!string.IsNullOrEmpty(sc.dataType)) lParts.Add(sc.dataType);
@@ -19783,7 +19703,7 @@ namespace DbDuo
         // toolsLockClicked removed in v1.0.91 along with the
         // Lock-Database toggle. The -readonly command-line flag
         // remains; users who want to open a database read-only can
-        // launch with DbDuo.exe -readonly path.
+        // launch with DbDo.exe -readonly path.
 
         private void toolsTestDriverClicked(object sender, EventArgs evArgs)
         {
@@ -19873,7 +19793,7 @@ namespace DbDuo
         // with one control per common option. The dialog uses the
         // Layout by Code (LbcDialog) helper for consistent layout
         // and accessibility. OK writes the changes to the per-user
-        // DbDuo.ini at %LOCALAPPDATA%\DbDuo\DbDuo.ini and reminds
+        // DbDo.inix at %LOCALAPPDATA%\DbDo\DbDo.inix and reminds
         // the user that some changes take effect on next launch.
         // An "Open file..." button is provided for raw editing,
         // useful for [Keys] overrides and other settings the GUI
@@ -19888,8 +19808,8 @@ namespace DbDuo
         //
         // Settings deliberately not exposed (managed automatically
         // or only relevant for power users):
-        //   - [Session] last-opened state (DbDuo writes it itself)
-        //   - [Folders] last-used directories (DbDuo writes it itself)
+        //   - [Session] last-opened state (DbDo writes it itself)
+        //   - [Folders] last-used directories (DbDo writes it itself)
         //   - [Keys] hotkey overrides (rare; raw editing is fine)
         private void toolsEditConfigClicked(object sender, EventArgs evArgs)
         {
@@ -19915,7 +19835,7 @@ namespace DbDuo
             try
             {
                 dlg.addLabel("Settings stored in: " + sUserIni);
-                dlg.addLabel("Most changes take effect the next time DbDuo starts.");
+                dlg.addLabel("Most changes take effect the next time DbDo starts.");
                 dlg.addSeparator();
 
                 // uiMode is a pick-from-three -- ComboBox is perfect.
@@ -19939,16 +19859,16 @@ namespace DbDuo
                     "When ON, every menu/hotkey command announces its name through the screen reader before executing. Off-by-toggle for users who prefer less speech. Has no effect in CLI / dot-prompt mode.");
 
                 // Extra Speech toggle. ON by default; controls whether
-                // DbDuo's status messages, cell readouts, and the
+                // DbDo's status messages, cell readouts, and the
                 // command echo itself reach the screen reader. When
                 // OFF, the screen reader still narrates focus and
                 // selection changes -- the toggle silences only the
-                // commentary DbDuo adds on top. Also bound to
+                // commentary DbDo adds on top. Also bound to
                 // Alt+Shift+Z on the Help menu.
                 CheckBox cbExtra = dlg.addCheckBox(
-                    "Extra Speech (DbDuo's status messages and cell readouts)",
+                    "Extra Speech (DbDo's status messages and cell readouts)",
                     bCurrentExtra,
-                    "When ON, DbDuo speaks status messages, command echo, and virtual-cell readouts through the screen reader. When OFF, the screen reader still announces focus and selection changes naturally but DbDuo's commentary is suppressed.");
+                    "When ON, DbDo speaks status messages, command echo, and virtual-cell readouts through the screen reader. When OFF, the screen reader still announces focus and selection changes naturally but DbDo's commentary is suppressed.");
 
                 // Read-Only toggle (v1.0.95). Mirrors the
                 // -readonly command-line flag so the CLI startup
@@ -19964,7 +19884,7 @@ namespace DbDuo
 
                 dlg.addSeparator();
                 dlg.addLabel("For [Keys] overrides and advanced settings, use the");
-                dlg.addLabel("\"Open file...\" button to edit DbDuo.ini directly.");
+                dlg.addLabel("\"Open file...\" button to edit DbDo.inix directly.");
                 if (db != null && db.hasRecordset() && !db.currentIsView
                     && !string.IsNullOrEmpty(db.currentTable))
                 {
@@ -19995,13 +19915,13 @@ namespace DbDuo
                         toggleReadOnlyClicked(null, EventArgs.Empty);
                     }
                     LiveRegion.say("Configuration saved");
-                    DbDuoLog.write("Edit-Settings saved: uiMode=" + sNewUiMode
+                    DbDoLog.write("Edit-Settings saved: uiMode=" + sNewUiMode
                         + "; commandEcho=" + sNewEcho
                         + "; extraSpeech=" + sNewExtra
                         + "; readOnly=" + (cbReadOnly.Checked ? "Y" : "N"));
                     MessageBox.Show(this,
                         "Configuration saved to " + sUserIni
-                        + "\n\nuiMode takes effect on next DbDuo launch."
+                        + "\n\nuiMode takes effect on next DbDo launch."
                         + "\nCommand Echo, Extra Speech, and Read Only take effect immediately.",
                         "Edit Settings",
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -20024,13 +19944,13 @@ namespace DbDuo
         }
 
         // openFieldValidationDialog: sub-dialog for editing the
-        // [Validation:<table>] section of DbDuo.ini for the current
+        // [Validation:<table>] section of DbDo.inix for the current
         // table. Each editable field gets one labeled input. The
         // input takes a .NET regex pattern (the same syntax used by
         // the Edit Record and Edit Cell validators) -- empty means
         // no constraint. OK saves; Cancel discards.
         //
-        // Why regex and not a simpler "picture" syntax: DbDuo already
+        // Why regex and not a simpler "picture" syntax: DbDo already
         // uses .NET regex for validation under the covers, and regex
         // is the established, powerful pattern syntax. A separate
         // mask-language would mean translating one of dBASE PICTURE,
@@ -20056,13 +19976,13 @@ namespace DbDuo
 
             string sTable = db.currentTable;
             // Editable fields = all fields minus the system metadata
-            // (added, updated, marked) that the user never types into.
+            // (added, edited, marked) that the user never types into.
             List<string> lAllFields = db.getFieldNames();
             List<string> lEditableFields = new List<string>();
             foreach (string sCol in lAllFields)
             {
                 string sLow = sCol.ToLowerInvariant();
-                if (sLow == "added" || sLow == "modified" || sLow == "marked") continue;
+                if (sLow == "added" || sLow == "edited" || sLow == "marked") continue;
                 lEditableFields.Add(sCol);
             }
             if (lEditableFields.Count == 0)
@@ -20137,7 +20057,7 @@ namespace DbDuo
             }
         }
 
-        // Helper: path of the per-user DbDuo.ini. Returns null and
+        // Helper: path of the per-user DbDo.inix. Returns null and
         // shows an error dialog if %LOCALAPPDATA% is unavailable.
         private string configIniPath()
         {
@@ -20145,17 +20065,17 @@ namespace DbDuo
             if (string.IsNullOrEmpty(sBase))
             {
                 MessageBox.Show(this,
-                    "%LOCALAPPDATA% is not set. Cannot locate per-user DbDuo.ini.",
+                    "%LOCALAPPDATA% is not set. Cannot locate per-user DbDo.inix.",
                     "Settings", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return null;
             }
-            string sDir = Path.Combine(sBase, "DbDuo");
+            string sDir = Path.Combine(sBase, "DbDo");
             try { if (!Directory.Exists(sDir)) Directory.CreateDirectory(sDir); }
             catch { }
-            return Path.Combine(sDir, "DbDuo.ini");
+            return Path.Combine(sDir, "DbDo.inix");
         }
 
-        // Helper: ensure DbDuo.ini exists at the given path. Seeds
+        // Helper: ensure DbDo.inix exists at the given path. Seeds
         // from the shipped template next to the EXE if available,
         // otherwise writes a minimal stub.
         private void ensureConfigIniExists(string sUserIni)
@@ -20163,13 +20083,13 @@ namespace DbDuo
             if (File.Exists(sUserIni)) return;
             string sShipped = Path.Combine(
                 Path.GetDirectoryName(Application.ExecutablePath) ?? ".",
-                "DbDuo.ini");
+                "DbDo.inix");
             if (File.Exists(sShipped))
             {
                 try { File.Copy(sShipped, sUserIni, false); }
                 catch (Exception exC)
                 {
-                    DbDuoLog.write("Edit-Settings: could not copy shipped ini: " + exC.Message);
+                    DbDoLog.write("Edit-Settings: could not copy shipped ini: " + exC.Message);
                 }
             }
             if (!File.Exists(sUserIni))
@@ -20177,10 +20097,10 @@ namespace DbDuo
                 try
                 {
                     File.WriteAllText(sUserIni,
-                        "; DbDuo per-user configuration." + Environment.NewLine +
+                        "; DbDo per-user configuration." + Environment.NewLine +
                         "; Edit this file to change uiMode, override hotkeys," + Environment.NewLine +
                         "; or inspect remembered Session/Folders state." + Environment.NewLine +
-                        "; Restart DbDuo for changes to take effect." + Environment.NewLine +
+                        "; Restart DbDo for changes to take effect." + Environment.NewLine +
                         Environment.NewLine +
                         "[General]" + Environment.NewLine +
                         "uiMode = both" + Environment.NewLine +
@@ -20205,8 +20125,8 @@ namespace DbDuo
             try
             {
                 System.Diagnostics.Process.Start(sUserIni);
-                LiveRegion.say("Opened DbDuo.ini for editing");
-                DbDuoLog.write("Edit-Settings opened: " + sUserIni);
+                LiveRegion.say("Opened DbDo.inix for editing");
+                DbDoLog.write("Edit-Settings opened: " + sUserIni);
             }
             catch
             {
@@ -20226,103 +20146,32 @@ namespace DbDuo
         private static string readIniValue(string sPath, string sSection, string sKey, string sDefault)
         {
             if (!File.Exists(sPath)) return sDefault;
-            string[] aLines;
-            try { aLines = File.ReadAllLines(sPath); } catch { return sDefault; }
-            string sHeader = "[" + sSection + "]";
-            bool bInSection = false;
-            foreach (string sLine in aLines)
+            try
             {
-                string sTrim = sLine.Trim();
-                if (sTrim.Length == 0) continue;
-                if (sTrim.StartsWith(";") || sTrim.StartsWith("#")) continue;
-                if (sTrim.StartsWith("["))
+                foreach (InixCodec.Section sec in InixCodec.read(sPath))
                 {
-                    bInSection = sTrim.Equals(sHeader, StringComparison.OrdinalIgnoreCase);
-                    continue;
-                }
-                if (!bInSection) continue;
-                int iEq = sTrim.IndexOf('=');
-                if (iEq <= 0) continue;
-                string sName = sTrim.Substring(0, iEq).Trim();
-                string sValue = sTrim.Substring(iEq + 1).Trim();
-                if (string.Equals(sName, sKey, StringComparison.OrdinalIgnoreCase))
+                    if (!string.Equals(sec.Name, sSection, StringComparison.OrdinalIgnoreCase)) continue;
+                    string sValue = sec.get(sKey);
+                    if (sValue == null) return sDefault;
+                    if (sValue.IndexOf('\n') < 0) sValue = sValue.Trim();
                     return string.IsNullOrEmpty(sValue) ? sDefault : sValue;
+                }
             }
+            catch { }
             return sDefault;
         }
 
-        // Write one value into the ini, preserving every other
-        // section/line that is already there. Adds the section
-        // and/or key if missing. Removes the key (and only the
-        // key) if the value is empty -- callers can pass "" to
-        // clear a setting back to the default.
-        //
-        // This is the same algorithm as IniSession.write, but
-        // exposed as a static helper so the configuration dialog
-        // can use it without depending on the IniSession class's
-        // particular file path.
+        // Write one value into the settings file, preserving every
+        // other section, comment, and line. Delegates to the shared
+        // Inix-aware writer: multi-line values (and values containing
+        // '=' or a leading '[') go out in the fenced form, existing
+        // fenced values are replaced or removed as whole blocks, and
+        // the key scan never misreads a key= line inside a fenced
+        // value. Pass "" to clear a setting back to the default.
         private static void writeIniValue(string sPath, string sSection, string sKey, string sValue)
         {
-            string sHeader = "[" + sSection + "]";
-            List<string> lLines = new List<string>();
-            if (File.Exists(sPath))
-            {
-                try { lLines.AddRange(File.ReadAllLines(sPath)); } catch { return; }
-            }
-
-            int iSectionStart = -1;
-            int iSectionEnd = -1;
-            for (int i = 0; i < lLines.Count; i++)
-            {
-                string sTrim = lLines[i].Trim();
-                if (sTrim.Equals(sHeader, StringComparison.OrdinalIgnoreCase))
-                {
-                    iSectionStart = i;
-                    iSectionEnd = lLines.Count;
-                    for (int j = i + 1; j < lLines.Count; j++)
-                    {
-                        string sJ = lLines[j].Trim();
-                        if (sJ.StartsWith("[")) { iSectionEnd = j; break; }
-                    }
-                    break;
-                }
-            }
-
-            if (iSectionStart < 0)
-            {
-                if (lLines.Count > 0 && lLines[lLines.Count - 1].Trim().Length > 0)
-                    lLines.Add("");
-                lLines.Add(sHeader);
-                if (!string.IsNullOrEmpty(sValue)) lLines.Add(sKey + " = " + sValue);
-            }
-            else
-            {
-                int iFound = -1;
-                for (int i = iSectionStart + 1; i < iSectionEnd; i++)
-                {
-                    string sT = lLines[i].Trim();
-                    if (sT.Length == 0) continue;
-                    if (sT.StartsWith(";") || sT.StartsWith("#")) continue;
-                    int iEq = sT.IndexOf('=');
-                    if (iEq <= 0) continue;
-                    string sN = sT.Substring(0, iEq).Trim();
-                    if (string.Equals(sN, sKey, StringComparison.OrdinalIgnoreCase))
-                    { iFound = i; break; }
-                }
-                if (iFound >= 0)
-                {
-                    if (string.IsNullOrEmpty(sValue)) lLines.RemoveAt(iFound);
-                    else                              lLines[iFound] = sKey + " = " + sValue;
-                }
-                else if (!string.IsNullOrEmpty(sValue))
-                {
-                    lLines.Insert(iSectionStart + 1, sKey + " = " + sValue);
-                }
-            }
-
-            try { File.WriteAllLines(sPath, lLines.ToArray()); }
-            catch (Exception ex)
-            { DbDuoLog.write("writeIniValue FAILED: " + sPath + " -- " + ex.Message); }
+            if (!InixCodec.writeValue(sPath, sSection, sKey, sValue))
+                DbDoLog.write("writeIniValue FAILED: " + sPath);
         }
 
         // Open-FileFolder: open Windows Explorer at the folder containing
@@ -20361,17 +20210,17 @@ namespace DbDuo
         private void helpContentsClicked(object sender, EventArgs evArgs)
         {
             // F1 opens the HTML version of the user guide in the
-            // default browser. The HTML lives next to DbDuo.exe and is
-            // generated by buildDbDuo.cmd via Pandoc from DbDuo.md.
+            // default browser. The HTML lives next to DbDo.exe and is
+            // generated by buildDbDo.cmd via Pandoc from DbDo.md.
             // Browsers expose far better navigation (heading-by-
             // heading, links, search, font scaling, screen-reader
             // table-of-contents) than an in-app TextBox could.
             //
-            // If DbDuo.htm is missing (e.g., somebody copied DbDuo.exe
+            // If DbDo.htm is missing (e.g., somebody copied DbDo.exe
             // alone), fall back to a brief text pointer rather than
             // failing silently.
             string sPath = System.IO.Path.Combine(
-                Application.StartupPath, "DbDuo.htm");
+                Application.StartupPath, "DbDo.htm");
             if (System.IO.File.Exists(sPath))
             {
                 try
@@ -20391,11 +20240,11 @@ namespace DbDuo
             else
             {
                 MessageBox.Show(this,
-                    "DbDuo.htm was not found next to DbDuo.exe.\n\n"
+                    "DbDo.htm was not found next to DbDo.exe.\n\n"
                     + "Expected location:\n" + sPath + "\n\n"
-                    + "If you installed DbDuo via the setup, the file "
+                    + "If you installed DbDo via the setup, the file "
                     + "should already be there. Otherwise, copy "
-                    + "DbDuo.htm from the bundle into the program folder.",
+                    + "DbDo.htm from the bundle into the program folder.",
                     "Help Contents",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -20403,8 +20252,8 @@ namespace DbDuo
 
         // Show-Readme: open README.htm (the quick-start / summary
         // guide) in the system browser. Equivalent to Get-Help
-        // (F1) but points at README.htm instead of DbDuo.htm.
-        // README is shorter and more introductory; DbDuo.htm is
+        // (F1) but points at README.htm instead of DbDo.htm.
+        // README is shorter and more introductory; DbDo.htm is
         // the full reference.
         private void helpReadmeClicked(object sender, EventArgs evArgs)
         {
@@ -20415,7 +20264,7 @@ namespace DbDuo
                 try
                 {
                     System.Diagnostics.Process.Start(sPath);
-                    DbDuoLog.write("Show-Readme: " + sPath);
+                    DbDoLog.write("Show-Readme: " + sPath);
                     return;
                 }
                 catch (Exception ex)
@@ -20430,9 +20279,9 @@ namespace DbDuo
             else
             {
                 MessageBox.Show(this,
-                    "README.htm was not found next to DbDuo.exe.\n\n"
+                    "README.htm was not found next to DbDo.exe.\n\n"
                     + "Expected location:\n" + sPath + "\n\n"
-                    + "Reinstall DbDuo or copy README.htm from the source bundle.",
+                    + "Reinstall DbDo or copy README.htm from the source bundle.",
                     "Show Readme",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -20452,7 +20301,7 @@ namespace DbDuo
                 try
                 {
                     System.Diagnostics.Process.Start(sPath);
-                    DbDuoLog.write("Show-History: " + sPath);
+                    DbDoLog.write("Show-History: " + sPath);
                     return;
                 }
                 catch (Exception ex)
@@ -20467,9 +20316,9 @@ namespace DbDuo
             else
             {
                 MessageBox.Show(this,
-                    "History.htm was not found next to DbDuo.exe.\n\n"
+                    "History.htm was not found next to DbDo.exe.\n\n"
                     + "Expected location:\n" + sPath + "\n\n"
-                    + "Reinstall DbDuo or copy History.htm from the source bundle.",
+                    + "Reinstall DbDo or copy History.htm from the source bundle.",
                     "Show History",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
@@ -20478,7 +20327,7 @@ namespace DbDuo
         private void helpVerbsClicked(object sender, EventArgs evArgs)
         {
             HelpDialog.show(this, "Get Verb",
-                "PowerShell-canonical verbs used in DbDuo:\n\n"
+                "PowerShell-canonical verbs used in DbDo:\n\n"
                 + "  COMMON      New, Get, Set, Remove, Show, Copy, Find, Select, Format,\n"
                 + "              Enter, Exit, Step, Open, Close, Lock, Add, Group, Reset\n"
                 + "  DATA        Backup, Restore, Import, Export, Update, Save, Compare,\n"
@@ -20486,7 +20335,7 @@ namespace DbDuo
                 + "  DIAGNOSTIC  Test, Measure, Resolve, Trace, Repair\n"
                 + "  LIFECYCLE   Invoke\n"
                 + "\n"
-                + "PowerShell discourages synonyms. DbDuo never uses:\n"
+                + "PowerShell discourages synonyms. DbDo never uses:\n"
                 + "  Delete (use Remove)        Create  (use New)         Read   (use Get)\n"
                 + "  Modify (use Set)           Cancel  (use Stop)        Search (use Find)\n"
                 + "\n"
@@ -20513,7 +20362,7 @@ namespace DbDuo
         // Doubles as a live-region pipeline test: if Show-Status
         // doesn't speak, the live region is broken regardless of
         // other announcements; if it does, every other live-region
-        // call in DbDuo will too.
+        // call in DbDo will too.
         private void helpStatusClicked(object sender, EventArgs evArgs)
         {
             string sMsg = buildStatusMessage();
@@ -20577,20 +20426,20 @@ namespace DbDuo
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        // helpExtraSpeechClicked: toggle whether DbDuo emits its own
+        // helpExtraSpeechClicked: toggle whether DbDo emits its own
         // direct speech messages (status announcements, command echo,
         // virtual-cell readouts) through the screen reader. When OFF
-        // the screen reader still hears DbDuo via its own natural
+        // the screen reader still hears DbDo via its own natural
         // focus and selection announcements; the toggle suppresses
-        // only the additional commentary DbDuo adds on top. EdSharp
+        // only the additional commentary DbDo adds on top. EdSharp
         // and FileDir both ship a similar toggle. The setting is
-        // persisted in DbDuo.ini [General] extraSpeech.
+        // persisted in DbDo.inix [General] extraSpeech.
         private void helpExtraSpeechClicked(object sender, EventArgs evArgs)
         {
             LiveRegion.bExtraSpeechEnabled = !LiveRegion.bExtraSpeechEnabled;
             miHelpExtraSpeech.Checked = LiveRegion.bExtraSpeechEnabled;
             string sUserIni = Path.Combine(Path.GetDirectoryName(
-                System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "", "DbDuo.ini");
+                System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "", "DbDo.inix");
             try { writeIniValue(sUserIni, "General", "extraSpeech", LiveRegion.bExtraSpeechEnabled ? "Y" : "N"); }
             catch { /* best-effort persist; the runtime state is the source of truth */ }
             // Force-speak the new state so the user hears confirmation
@@ -20600,12 +20449,12 @@ namespace DbDuo
                 : "Extra speech off");
         }
 
-        // helpCommandEchoClicked: toggle whether DbDuo speaks the
+        // helpCommandEchoClicked: toggle whether DbDo speaks the
         // canonical command name through the live region just before
         // each menu/hotkey command runs. Mirrors helpExtraSpeechClicked
         // -- same pattern of runtime toggle, persistent ini write, and
         // forced confirmation announcement. The setting is persisted
-        // in DbDuo.ini [Options] commandEcho. CLI/dot-prompt commands
+        // in DbDo.inix [Options] commandEcho. CLI/dot-prompt commands
         // don't go through the addItem wrappers that fire commandEcho,
         // so this toggle has no effect there -- intentional, since the
         // user explicitly typed the command and shouldn't need it
@@ -20613,7 +20462,7 @@ namespace DbDuo
         private void helpCommandEchoClicked(object sender, EventArgs evArgs)
         {
             string sUserIni = Path.Combine(Path.GetDirectoryName(
-                System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "", "DbDuo.ini");
+                System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "", "DbDo.inix");
             bool bNew = !isCommandEchoOn();
             try { writeIniValue(sUserIni, "Options", "commandEcho", bNew ? "Y" : "N"); }
             catch { /* best-effort persist */ }
@@ -20629,7 +20478,7 @@ namespace DbDuo
         // after being removed in v1.0.91. The reasoning for restoring:
         // the -readonly command-line flag was kept, so the feature
         // exists; making it inaccessible from the GUI was inconsistent.
-        // Anyone running DbDuo can already edit data they have write
+        // Anyone running DbDo can already edit data they have write
         // access to; the read-only toggle is for the user's own
         // protection against accidental edits while browsing.
         //
@@ -20668,14 +20517,14 @@ namespace DbDuo
 
         // =====================================================================
         // Script commands. EdSharp's Invoke / View Script pattern
-        // adapted for DbDuo. The user manages scripts as plain files
-        // in %APPDATA%\DbDuo\Scripts\, edited in their own choice of
-        // external editor (Notepad by default; override via DbDuo.ini
+        // adapted for DbDo. The user manages scripts as plain files
+        // in %APPDATA%\DbDo\Scripts\, edited in their own choice of
+        // external editor (Notepad by default; override via DbDo.inix
         // [Scripts] editor=). .js files are executed as JScript .NET
-        // against the running DbDuoForm; everything else is shown as
+        // against the running DbDoForm; everything else is shown as
         // plain text in a MessageBox.
         //
-        // No Save-Script command (DbDuo has no analogous "save
+        // No Save-Script command (DbDo has no analogous "save
         // selected text" workflow since it is not a text editor).
         // Edit Script handles both editing an existing file and
         // creating a new one via a "[New script...]" entry at the
@@ -20691,7 +20540,7 @@ namespace DbDuo
         private const string NewScriptSentinel = "[New script...]";
 
         // miscInvokeScriptClicked: pick a script from the folder
-        // and run it. .js -> JScript .NET execution via DbDuo.dll;
+        // and run it. .js -> JScript .NET execution via DbDo.dll;
         // everything else -> show file contents in a MessageBox as
         // reference text. Output (last expression value or
         // "ERROR: ..." string) is shown in a MessageBox so the screen
@@ -20797,7 +20646,7 @@ namespace DbDuo
             if (!ScriptHelper.openInEditor(sPath))
             {
                 MessageBox.Show(this,
-                    "Could not launch the editor. Set [Scripts] editor= in DbDuo.ini to a working editor path.",
+                    "Could not launch the editor. Set [Scripts] editor= in DbDo.inix to a working editor path.",
                     "Edit Script", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
@@ -20807,10 +20656,10 @@ namespace DbDuo
         // string on cancel. Used by miscEditScriptClicked when the
         // user wants a new script.
         //
-        // The filter list orders the three DbDuo script extensions
+        // The filter list orders the three DbDo script extensions
         // by frequency of expected use: JScript first (most
         // computational power), SQL second (most familiar), DuoBatch
-        // third (DbDuo-specific). The SaveFileDialog automatically
+        // third (DbDo-specific). The SaveFileDialog automatically
         // appends the matching extension when the user types a name
         // without one.
         //
@@ -20830,7 +20679,7 @@ namespace DbDuo
                 sfd.Filter =
                       "JScript .NET (*.js)|*.js"
                     + "|SQL batch (*.sql)|*.sql"
-                    + "|DbDuo command batch (*.duo)|*.duo"
+                    + "|DbDo command batch (*.dbdo)|*.dbdo"
                     + "|All Files (*.*)|*.*";
                 sfd.DefaultExt = "js";
                 sfd.AddExtension = true;
@@ -20868,7 +20717,7 @@ namespace DbDuo
                 case ".js":
                     return
                         "// Description: \r\n"
-                      + "// JScript .NET script. Host objects available: db (DbDuoManager), frm (DbDuoForm).\r\n"
+                      + "// JScript .NET script. Host objects available: db (DbDoManager), frm (DbDoForm).\r\n"
                       + "// Returns: the value of the last expression, displayed in the result dialog.\r\n"
                       + "\r\n"
                       + "var sb = new System.Text.StringBuilder();\r\n"
@@ -20882,10 +20731,10 @@ namespace DbDuo
                       + "-- SELECT results, DML row counts, and PRAGMA output all appear in the result dialog.\r\n"
                       + "\r\n"
                       + "SELECT 1 AS placeholder;\r\n";
-                case ".duo":
+                case ".dbdo":
                     return
                         "# Description: \r\n"
-                      + "# DbDuo command batch. Each non-blank, non-comment line is dispatched\r\n"
+                      + "# DbDo command batch. Each non-blank, non-comment line is dispatched\r\n"
                       + "# as if you had typed it at the dot prompt -- using the natural\r\n"
                       + "# dot-prompt language (path, status, sort-filter, table <name>,\r\n"
                       + "# filter <expr>, sort <expr>, etc.), not the underlying canonical\r\n"
@@ -20942,7 +20791,7 @@ namespace DbDuo
 
         private void helpLogClicked(object sender, EventArgs evArgs)
         {
-            string sLogPath = DbDuoLog.getLogPath();
+            string sLogPath = DbDoLog.getLogPath();
             if (string.IsNullOrEmpty(sLogPath))
             {
                 MessageBox.Show(this,
@@ -20951,7 +20800,7 @@ namespace DbDuo
                 return;
             }
             string sExists = File.Exists(sLogPath) ? "(exists)" : "(not yet written)";
-            string sMsg = "DbDuo log file:\n\n" + sLogPath + "\n\n" + sExists
+            string sMsg = "DbDo log file:\n\n" + sLogPath + "\n\n" + sExists
                         + "\n\nThe log is truncated to empty at every program startup, so it always\n"
                         + "reflects only the current session. Significant events (database opens,\n"
                         + "table switches, errors) are recorded with timestamps.";
@@ -20969,19 +20818,19 @@ namespace DbDuo
             }
         }
 
-        // Open-WebSite: open the DbDuo project page in the system's
+        // Open-WebSite: open the DbDo project page in the system's
         // default browser. The url is the same one referenced from
         // the About dialog and the License/README. No tracking;
         // straight Process.Start("https://...") which on Windows
         // delegates to the default HTTP handler.
         private void helpWebSiteClicked(object sender, EventArgs evArgs)
         {
-            const string sUrl = "https://github.com/JamalMazrui/DbDuo";
+            const string sUrl = "https://github.com/JamalMazrui/DbDo";
             try
             {
                 System.Diagnostics.Process.Start(sUrl);
-                LiveRegion.say("Opened DbDuo on GitHub");
-                DbDuoLog.write("Open-WebSite: " + sUrl);
+                LiveRegion.say("Opened DbDo on GitHub");
+                DbDoLog.write("Open-WebSite: " + sUrl);
             }
             catch (Exception ex)
             {
@@ -20999,8 +20848,8 @@ namespace DbDuo
             // launch or routine navigation. Keep the rest of the UI
             // -- window title, status bar, column announcements,
             // menu tooltips -- terse.
-            HelpDialog.show(this, "About DbDuo",
-                "DbDuo " + BuildInfo.VersionString + "\n"
+            HelpDialog.show(this, "About DbDo",
+                "DbDo " + BuildInfo.VersionString + "\n"
                 + "\n"
                 + "An accessible, keyboard-first database manager for Windows.\n"
                 + "Opens SQLite, Microsoft Access, Excel, dBASE, and delimited\n"
@@ -21017,14 +20866,14 @@ namespace DbDuo
                 + "Database access via ADODB COM interop.\n"
                 + "Built around Microsoft's PowerShell verb taxonomy.\n"
                 + "\n"
-                + "https://github.com/JamalMazrui/DbDuo\n"
+                + "https://github.com/JamalMazrui/DbDo\n"
                 + "MIT License.\n");
         }
 
         // Elevate-Version (F11): check the GitHub Releases API for
-        // a newer DbDuo version, and if found, download the latest
-        // DbDuo_setup.exe and run it. The Inno Setup installer
-        // detects the running DbDuo and offers to close it, so
+        // a newer DbDo version, and if found, download the latest
+        // DbDo_setup.exe and run it. The Inno Setup installer
+        // detects the running DbDo and offers to close it, so
         // no manual exit is required.
         private void helpElevateClicked(object sender, EventArgs evArgs)
         {
@@ -21036,8 +20885,8 @@ namespace DbDuo
     // DotPromptHost: dBase-tradition dot-prompt CLI in a side-by-side
     // Win32 console window.
     //
-    // Synchronization: every command operates on DbDuoForm.Db, which
-    // is the same DbDuoManager the GUI is rendering. After any state
+    // Synchronization: every command operates on DbDoForm.Db, which
+    // is the same DbDoManager the GUI is rendering. After any state
     // change, we call form.invokeRefresh() to redraw the grid. The
     // recordset is the single source of truth.
     //
@@ -21071,12 +20920,12 @@ namespace DbDuo
         private static bool bAllocated = false;
         private static bool bShouldExit = false;
         private static System.Threading.Thread inputThread;
-        private static DbDuoForm frm;
+        private static DbDoForm frm;
         // When running in CLI-only mode (Program.UiMode.Cli), there is
-        // no DbDuoForm. The host owns the DbDuoManager directly via
+        // no DbDoForm. The host owns the DbDoManager directly via
         // inputMgr. The 'db' accessor below returns the form's manager
         // when a form exists, otherwise this one.
-        private static DbDuoManager inputMgr;
+        private static DbDoManager inputMgr;
         private static string sLastFindCriteria = "";
         private static string sLastFindRegexCli = "";
         private static string sLastFindRegexColumnCli = "";
@@ -21095,7 +20944,7 @@ namespace DbDuo
         //
         // The recordset state lives in mgr; there is no form to refresh.
         // ====================================================================
-        public static void runStandalone(DbDuoManager mgr)
+        public static void runStandalone(DbDoManager mgr)
         {
             inputMgr = mgr;
             frm = null;
@@ -21115,7 +20964,7 @@ namespace DbDuo
         // runs on a background thread; the GUI keeps its own message loop.
         // ====================================================================
 
-        public static void enter(DbDuoForm owner)
+        public static void enter(DbDoForm owner)
         {
             frm = owner;
             if (bAllocated)
@@ -21151,7 +21000,7 @@ namespace DbDuo
             IntPtr hWnd2 = GetConsoleWindow();
             if (hWnd2 != IntPtr.Zero)
             {
-                SetWindowText(hWnd2, "DbDuo - Dot Prompt");
+                SetWindowText(hWnd2, "DbDo - Dot Prompt");
                 SetForegroundWindow(hWnd2);
             }
 
@@ -21200,7 +21049,7 @@ namespace DbDuo
         // begin typing. Detailed help is one keystroke away ("help").
         private static void printBanner()
         {
-            Console.WriteLine("DbDuo dot prompt. Type 'help' for commands, 'help <name>' for details.");
+            Console.WriteLine("DbDo dot prompt. Type 'help' for commands, 'help <name>' for details.");
             Console.WriteLine();
             printRowSummary();
         }
@@ -21211,7 +21060,7 @@ namespace DbDuo
         // (db comes from inputMgr).
         private static void printRowSummary()
         {
-            DbDuoManager dbMgr = db;
+            DbDoManager dbMgr = db;
             if (dbMgr == null) { Console.WriteLine("(no manager)"); return; }
             if (!dbMgr.isOpen()) { Console.WriteLine("(no database open)"); return; }
             string sTable = dbMgr.currentTable;
@@ -21230,7 +21079,7 @@ namespace DbDuo
         // an explicit Say-Status or Say-Yield command.
         private static void printPositionOnly()
         {
-            DbDuoManager dbMgr = db;
+            DbDoManager dbMgr = db;
             if (dbMgr == null) { Console.WriteLine("(no manager)"); return; }
             if (!dbMgr.isOpen()) { Console.WriteLine("(no database open)"); return; }
             if (string.IsNullOrEmpty(dbMgr.currentTable)) { Console.WriteLine("(no table selected)"); return; }
@@ -21239,7 +21088,7 @@ namespace DbDuo
 
         // =======================================================================
         // CLI implementations of the speech-only and new action commands.
-        // The GUI variants live on DbDuoForm and push through LiveRegion;
+        // The GUI variants live on DbDoForm and push through LiveRegion;
         // these CLI variants print the same content to the console.
         // =======================================================================
 
@@ -21301,13 +21150,13 @@ namespace DbDuo
             if (iCount == 0) Console.WriteLine("(no marked rows)");
         }
 
-        // cmdSayUpdated: console form of Say Updated. Prints the
-        // 'updated' (or 'added') value in a human-friendly local-
+        // cmdSayEdited: console form of Say Edited. Prints the
+        // 'edited' (or 'added') value in a human-friendly local-
         // time form. Uses the same DateTime parsing as the GUI.
-        private static void cmdSayModified()
+        private static void cmdSayEdited()
         {
             if (!requireRecordset()) return;
-            string sCol = db.hasField("modified") ? "modified" : (db.hasField("added") ? "added" : null);
+            string sCol = db.hasField("edited") ? "edited" : (db.hasField("added") ? "added" : null);
             if (sCol == null) { Console.WriteLine("(no date column)"); return; }
             string sRaw = db.getFieldValue(sCol) ?? "";
             string sFmt = formatDateForConsole(sRaw);
@@ -21348,7 +21197,7 @@ namespace DbDuo
         }
 
         // formatDateForConsole: minimal mirror of the form's
-        // formatDateHumanFriendly so cmdSayModified can print the same
+        // formatDateHumanFriendly so cmdSayEdited can print the same
         // human-friendly form without crossing the form's surface.
         private static string formatDateForConsole(string sRaw)
         {
@@ -21622,7 +21471,7 @@ namespace DbDuo
                 }
                 catch (Exception ex)
                 {
-                    Console.WriteLine("(invalid regex in DbDuo.ini: " + ex.Message + ")");
+                    Console.WriteLine("(invalid regex in DbDo.inix: " + ex.Message + ")");
                     return;
                 }
             }
@@ -21665,7 +21514,7 @@ namespace DbDuo
             {
                 if (original != null) try { db.bookmark = original; } catch { }
             }
-            Console.Write(DbDuoForm.buildColumnReportPublic(sCol, lRaw));
+            Console.Write(DbDoForm.buildColumnReportPublic(sCol, lRaw));
         }
 
         // cmdNewPlot: console form of Plot Column. Plotting requires
@@ -21705,7 +21554,7 @@ namespace DbDuo
             // Pure CLI fallback: just print the ini path.
             string sBase = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
             string sPath = string.IsNullOrEmpty(sBase) ? "" :
-                System.IO.Path.Combine(System.IO.Path.Combine(sBase, "DbDuo"), "DbDuo.ini");
+                System.IO.Path.Combine(System.IO.Path.Combine(sBase, "DbDo"), "DbDo.inix");
             Console.WriteLine("Configuration file: " + sPath);
             Console.WriteLine("Edit it directly with a text editor; values take effect on next launch.");
         }
@@ -21961,7 +21810,7 @@ namespace DbDuo
             "list-bookmarks", "save-bookmark", "save-database",
             "say-cell", "say-clipboard", "say-column",
             "say-column-rest", "say-column-rest-marked",
-            "say-database", "say-goto", "say-marked", "say-modified", "say-notes",
+            "say-database", "say-edited", "say-goto", "say-marked", "say-notes",
             "say-position", "say-records-rest", "say-records-rest-marked",
             "say-sortfilter", "say-status",
             "say-tables", "say-tags", "say-url", "say-yield",
@@ -22355,7 +22204,7 @@ namespace DbDuo
         }
 
         // Public wrapper for dispatch, used by ScriptHelper.runDuoBatch
-        // to execute each line of a .duo command-batch file as if the
+        // to execute each line of a .dbdo command-batch file as if the
         // user had typed it at the dot prompt. The wrapper is needed
         // because dispatch() is private; exposing it lets the script
         // engine reach the same code path without making the method
@@ -22420,7 +22269,7 @@ namespace DbDuo
                 case "say-yield":        cmdSayYield();            break;
                 case "say-tables":       cmdSayTables();           break;
                 case "say-marked":       cmdSayMarked();           break;
-                case "say-modified":     cmdSayModified();         break;
+                case "say-edited":       cmdSayEdited();         break;
                 case "say-url":          cmdSayUrl();              break;
                 case "say-goto":         cmdSayGoto();             break;
                 case "say-notes":        cmdSayNotes();            break;
@@ -22516,7 +22365,7 @@ namespace DbDuo
                 case "exit-console":     bShouldExit = true;       break;
                 case "exit-application": cmdExitApplication();      break;
                 case "switch-focus":     cmdSwitchFocus();          break;
-                case "about-dbduo":      cmdAboutDbDuo();          break;
+                case "about-dbduo":      cmdAboutDbDo();          break;
                 case "elevate-version":  cmdElevateVersion();      break;
                 case "show-readme":      cmdShowReadme();          break;
                 case "show-log":         cmdShowLog();             break;
@@ -22561,24 +22410,24 @@ namespace DbDuo
             }
         }
 
-        // About-DbDuo: print the version banner to the CLI. Mirrors
+        // About-DbDo: print the version banner to the CLI. Mirrors
         // the GUI About dialog. Always available.
-        private static void cmdAboutDbDuo()
+        private static void cmdAboutDbDo()
         {
             Console.WriteLine();
-            Console.WriteLine("DbDuo " + BuildInfo.VersionString);
+            Console.WriteLine("DbDo " + BuildInfo.VersionString);
             Console.WriteLine("Dual-interface (GUI + CLI) database manager.");
             Console.WriteLine("Designed for keyboard productivity and screen-reader accessibility.");
-            Console.WriteLine("Project: https://github.com/JamalMazrui/DbDuo");
+            Console.WriteLine("Project: https://github.com/JamalMazrui/DbDo");
             Console.WriteLine();
         }
 
-        // Elevate-Version: check GitHub for a newer DbDuo_setup.exe,
+        // Elevate-Version: check GitHub for a newer DbDo_setup.exe,
         // download it if found, and run the installer. EdSharp's F11
         // and FileDir's F11 are the model. The download url is the
         // stable "latest release" GitHub redirect; the version check
         // queries the GitHub Releases API for the tag of the latest
-        // release. Inno Setup's installer detects a running DbDuo
+        // release. Inno Setup's installer detects a running DbDo
         // and offers to close it, so we can run the installer
         // without first stopping the current process.
         private static void cmdElevateVersion()
@@ -22598,13 +22447,13 @@ namespace DbDuo
 
         private static void cmdShowLog()
         {
-            string sPath = DbDuoLog.getLogPath();
+            string sPath = DbDoLog.getLogPath();
             Console.WriteLine("Log: " + sPath);
         }
 
         private static void cmdOpenWebsite()
         {
-            try { System.Diagnostics.Process.Start("https://github.com/JamalMazrui/DbDuo"); Console.WriteLine("Opened DbDuo website."); }
+            try { System.Diagnostics.Process.Start("https://github.com/JamalMazrui/DbDo"); Console.WriteLine("Opened DbDo website."); }
             catch (Exception ex) { Console.WriteLine("Open-WebSite failed: " + ex.Message); }
         }
 
@@ -22682,7 +22531,7 @@ namespace DbDuo
             printRowSummary();
         }
 
-        // Exit-Application: shut down the entire DbDuo process,
+        // Exit-Application: shut down the entire DbDo process,
         // not just the dot prompt. Aliased to 'quit' / 'q' at the
         // dot prompt. The 'exit' / 'x' / 'bye' aliases still mean
         // "close the dot prompt and return to the GUI" via
@@ -22696,7 +22545,7 @@ namespace DbDuo
         // pump if one is running.
         private static void cmdExitApplication()
         {
-            Console.WriteLine("Exiting DbDuo.");
+            Console.WriteLine("Exiting DbDo.");
             bShouldExit = true;  // break the dot-prompt input loop
             try
             {
@@ -22870,7 +22719,7 @@ namespace DbDuo
         //   (1) Every alias here matches one in dbDot.vbs (the
         //       VBScript predecessor) unless it's a single-letter
         //       or single-word shorthand that fits the broader
-        //       DbDuo / PowerShell idiom.
+        //       DbDo / PowerShell idiom.
         //   (2) No vowel-dropped abbreviations: "previous" yes,
         //       "prev" no; "delete" yes, "del" no; "display" yes,
         //       "disp" no; "properties" yes, "props" no;
@@ -22909,7 +22758,7 @@ namespace DbDuo
                 case "path":                         return "say-path";
                 case "tables-list":                  return "say-tables";
                 case "marked-list":                  return "say-marked";
-                case "modified":                     return "say-modified";
+                case "edited":                       return "say-edited";
                 case "notes":                        return "say-notes";
                 case "tags":                         return "say-tags";
                 case "position":                     return "say-position";
@@ -22961,7 +22810,7 @@ namespace DbDuo
                 case "m": case "mark":               return "set-mark";
                 case "u": case "unmark":             return "clear-mark";
                 case "related":                      return "show-related";
-                // Parent-child drill (DbDuo addition; not in dbDot,
+                // Parent-child drill (DbDo addition; not in dbDot,
                 // but all single English words)
                 case "zoom": case "drill": case "enter":
                                                      return "enter-child";
@@ -23014,7 +22863,7 @@ namespace DbDuo
                 // Additional aliases to give every command both a
                 // PowerShell name (the canonical Verb-Noun, always
                 // reachable by typing the hyphenated form) and a
-                // shorter DbDuo / dbDot / English-natural alternate.
+                // shorter DbDo / dbDot / English-natural alternate.
                 // Per Jamal's guideline, aliases include first letter,
                 // first word, or first two words of a longer command
                 // where the abbreviation is unambiguous.
@@ -23068,7 +22917,7 @@ namespace DbDuo
 
         // Manager accessor: use the form's manager if a form exists,
         // otherwise the directly-owned manager (CLI-only mode).
-        private static DbDuoManager db
+        private static DbDoManager db
         {
             get
             {
@@ -23862,9 +23711,9 @@ namespace DbDuo
                 return;
             }
 
-            List<string> lRequested = DbDuoManager.parseSelectList(sExpr);
+            List<string> lRequested = DbDoManager.parseSelectList(sExpr);
             string sStored = db.setSelectList(sTable, sExpr);
-            List<string> lAccepted = DbDuoManager.parseSelectList(sStored);
+            List<string> lAccepted = DbDoManager.parseSelectList(sStored);
             HashSet<string> hAccepted = new HashSet<string>(lAccepted, StringComparer.OrdinalIgnoreCase);
             List<string> lDropped = new List<string>();
             foreach (string sName in lRequested)
@@ -24231,7 +24080,7 @@ namespace DbDuo
             string sStat = aT.Length > 1 ? aT[1] : "count";
             try
             {
-                DbDuoManager.FieldStatistic result = db.measureField(sField, sStat);
+                DbDoManager.FieldStatistic result = db.measureField(sField, sStat);
                 Console.WriteLine("Field: " + result.fieldName);
                 Console.WriteLine("Statistic: " + result.statistic);
                 Console.WriteLine("Value: " + result.value);
@@ -24255,7 +24104,7 @@ namespace DbDuo
             }
             try
             {
-                DbDuoManager.FieldStatistic stat = db.measureField(sField, bLongest ? "longest" : "shortest");
+                DbDoManager.FieldStatistic stat = db.measureField(sField, bLongest ? "longest" : "shortest");
                 Console.WriteLine(stat.value);
                 if (stat.recordPosition > 0) Console.WriteLine("At row: " + stat.recordPosition);
             }
@@ -24277,7 +24126,7 @@ namespace DbDuo
             }
             try
             {
-                DbDuoManager.FieldStatistic stat = db.measureField(sField, bMax ? "max" : "min");
+                DbDoManager.FieldStatistic stat = db.measureField(sField, bMax ? "max" : "min");
                 Console.WriteLine(stat.value);
                 if (stat.recordPosition > 0) Console.WriteLine("At row: " + stat.recordPosition);
             }
@@ -24555,7 +24404,7 @@ namespace DbDuo
         private static void printHelpIndex()
         {
             Console.WriteLine();
-            Console.WriteLine("DbDuo dot-prompt CLI commands. Aliases in parentheses.");
+            Console.WriteLine("DbDo dot-prompt CLI commands. Aliases in parentheses.");
             Console.WriteLine("Type 'help <command>' for details on any command.");
             Console.WriteLine();
             Console.WriteLine("  CONVENTIONS");
@@ -24655,7 +24504,7 @@ namespace DbDuo
             Console.WriteLine("    Sync-Session          (sync)");
             Console.WriteLine("    Switch-Focus          (gui, focus, window)  -- bring GUI window to foreground");
             Console.WriteLine("    Exit-Console          (exit, x, bye)        -- leave dot prompt; GUI keeps running");
-            Console.WriteLine("    Exit-Application      (quit, q)             -- close entire DbDuo program");
+            Console.WriteLine("    Exit-Application      (quit, q)             -- close entire DbDo program");
             Console.WriteLine();
         }
 
@@ -24723,7 +24572,7 @@ namespace DbDuo
                          + "definitions for one table.\n\n"
                          + "  Show-Schema            All tables and views in the database.\n"
                          + "  Show-Schema name       Detailed schema of the named table.\n\n"
-                         + "View names in DbDuo conventionally start with 'view_' and\n"
+                         + "View names in DbDo conventionally start with 'view_' and\n"
                          + "are opened read-only by Select-Table.";
                 case "show-status":
                     return "Show-Status - print a one-line summary of the current\n"
@@ -24886,7 +24735,7 @@ namespace DbDuo
                 case "get-fieldname":
                     return "Get-FieldName - print the full list of field (column)\n"
                          + "names for the current recordset, including standard\n"
-                         + "hidden ones (table_id, added, updated, marked, look, etc).\n\n"
+                         + "hidden ones (table_id, added, edited, marked, look, etc).\n\n"
                          + "  Get-FieldName                      (alias: fields)\n\n"
                          + "Useful before Measure-Maximum or similar when you don't\n"
                          + "remember the exact column name. Mirrors dbDot's 'fields'\n"
@@ -24900,7 +24749,7 @@ namespace DbDuo
                          + "corruption findings.";
                 case "test-driver":
                     return "Test-Driver - probe the system for ODBC and OLE DB providers\n"
-                         + "DbDuo can use, and report which file formats are accessible.\n\n"
+                         + "DbDo can use, and report which file formats are accessible.\n\n"
                          + "  Test-Driver            (alias: drivers)\n\n"
                          + "Useful when a particular file extension fails to open --\n"
                          + "the report says whether the underlying provider is\n"
@@ -24938,7 +24787,7 @@ namespace DbDuo
                          + "Export-Data export                  Alias.";
                 case "open-database":
                     return "Open-Database - open a database file. Despite the verb,\n"
-                         + "DbDuo treats any ADODB-readable tabular file as a\n"
+                         + "DbDo treats any ADODB-readable tabular file as a\n"
                          + "'database file' here -- .db, .mdb, .accdb, .xlsx, .csv,\n"
                          + ".dbf are all supported.\n\n"
                          + "  Open-Database path           (alias: open)\n\n"
@@ -24978,19 +24827,19 @@ namespace DbDuo
                          + "trace, trace-command (legacy).";
                 case "get-verb":
                     return "Get-Verb - print the list of PowerShell-canonical verbs\n"
-                         + "DbDuo uses, organized by category.";
+                         + "DbDo uses, organized by category.";
                 case "exit-console":
                     return "Exit-Console - leave the dot prompt and return to the GUI.\n"
                          + "In Both mode the GUI keeps running; the console window\n"
-                         + "closes. In CLI-only mode this exits DbDuo (no GUI to\n"
+                         + "closes. In CLI-only mode this exits DbDo (no GUI to\n"
                          + "return to).\n\n"
                          + "  exit                   Alias.\n"
                          + "  x                      Alias.\n"
                          + "  bye                    Alias.\n\n"
-                         + "Use 'quit' instead to exit the entire DbDuo program\n"
+                         + "Use 'quit' instead to exit the entire DbDo program\n"
                          + "(closing both the GUI and the dot prompt).";
                 case "exit-application":
-                    return "Exit-Application - shut down the entire DbDuo process.\n"
+                    return "Exit-Application - shut down the entire DbDo process.\n"
                          + "Closes the GUI form and ends the dot prompt at the\n"
                          + "same time. Equivalent to the File > Exit menu\n"
                          + "(Alt+F4) in the GUI.\n\n"
@@ -25031,7 +24880,7 @@ namespace DbDuo
                          + "  Enter-Child            From the current row.\n"
                          + "  zoom, drill, enter     Aliases.\n"
                          + "  Hotkey: Control+E      In the GUI.\n\n"
-                         + "DbDuo finds every other table that has a column with\n"
+                         + "DbDo finds every other table that has a column with\n"
                          + "the same name as this table's primary key (the dbDot\n"
                          + "convention <singular>_id, e.g. apps -> app_id). If\n"
                          + "exactly one child table matches, it opens directly;\n"
@@ -25050,7 +24899,7 @@ namespace DbDuo
                          + "  Exit-Child             Pop one level off the stack.\n"
                          + "  unzoom, back, undrill  Aliases.\n"
                          + "  Hotkey: Control+Shift+E In the GUI.\n\n"
-                         + "DbDuo restores the parent table's filter, sort, and\n"
+                         + "DbDo restores the parent table's filter, sort, and\n"
                          + "position from the cache, then re-finds the parent\n"
                          + "row by primary-key value (so the navigation is\n"
                          + "robust against intervening filter/sort changes or\n"
@@ -25062,7 +24911,7 @@ namespace DbDuo
                 case "switch-focus":
                     return "Switch-Focus - bring the GUI window to the foreground. The\n"
                          + "dot-prompt console stays open; Alt+Tab returns to it.\n"
-                         + "Equivalent to clicking the DbDuo GUI in the taskbar.\n\n"
+                         + "Equivalent to clicking the DbDo GUI in the taskbar.\n\n"
                          + "  gui                    Alias.\n"
                          + "  focus                  Alias.\n"
                          + "  window                 Alias.\n\n"
@@ -25108,7 +24957,7 @@ namespace DbDuo
         private static void cmdGetVerb()
         {
             Console.WriteLine();
-            Console.WriteLine("PowerShell-canonical verb categories used in DbDuo:");
+            Console.WriteLine("PowerShell-canonical verb categories used in DbDo:");
             Console.WriteLine();
             Console.WriteLine("  COMMON      New, Get, Set, Remove, Show, Copy, Find, Select, Format,");
             Console.WriteLine("              Enter, Exit, Step, Open, Close, Lock, Add, Reset, Clear");
@@ -25118,7 +24967,7 @@ namespace DbDuo
             Console.WriteLine("  LIFECYCLE   Invoke");
             Console.WriteLine("  OTHER       Sort");
             Console.WriteLine();
-            Console.WriteLine("DbDuo avoids non-canonical synonyms (Delete, Create, Read, Modify,");
+            Console.WriteLine("DbDo avoids non-canonical synonyms (Delete, Create, Read, Modify,");
             Console.WriteLine("Cancel, Search, etc.).");
             Console.WriteLine();
         }
@@ -25229,7 +25078,7 @@ namespace DbDuo
     // late-bound interop): keep COM objects typed as `dynamic`
     // throughout, instantiate via Type.GetTypeFromProgID + Activator,
     // silence interactive alerts so unattended automation does not
-    // stall on a dialog. Office is an optional dependency: DbDuo
+    // stall on a dialog. Office is an optional dependency: DbDo
     // proper runs without it; only Export-Data to xlsx, docx, and
     // filtered-HTML requires Excel and Word.
     // =====================================================================
@@ -25253,7 +25102,7 @@ namespace DbDuo
             return oApp;
         }
 
-        // Note: DbDuo never attaches to a running Office instance.
+        // Note: DbDo never attaches to a running Office instance.
         // We always CreateObject a fresh one and Quit() it when we
         // are done with the export. Attaching to a running instance
         // would risk:
@@ -25325,14 +25174,14 @@ namespace DbDuo
     }
 
     // =====================================================================
-    // DbDuoLog: lightweight runtime log. Truncated to empty at every
+    // DbDoLog: lightweight runtime log. Truncated to empty at every
     // program startup so the file always reflects only the current
     // session. Records database opens, table switches, errors, and
     // significant state changes.
     //
-    // Location: DbDuo.log next to the DbDuo.exe binary. If that
+    // Location: DbDo.log next to the DbDo.exe binary. If that
     // directory is not writable (e.g., Program Files install without
-    // admin rights), falls back to %TEMP%\DbDuo.log.
+    // admin rights), falls back to %TEMP%\DbDo.log.
     // =====================================================================
     // =====================================================================
     // ElevateVersion: implements the Help > Elevate-Version command (F11).
@@ -25341,12 +25190,12 @@ namespace DbDuo
     // the latest tag, compares it to the locally compiled BuildInfo.VersionString,
     // and only proceeds if a newer version is available. The download
     // target is the stable GitHub redirect that always points at the
-    // latest release's DbDuo_setup.exe asset. Inno Setup's installer
-    // detects the running DbDuo process and offers to close it, so
-    // the user doesn't have to exit DbDuo manually first.
+    // latest release's DbDo_setup.exe asset. Inno Setup's installer
+    // detects the running DbDo process and offers to close it, so
+    // the user doesn't have to exit DbDo manually first.
     //
     // Why a hand-rolled JSON parse instead of Newtonsoft / System.Text.Json:
-    // DbDuo is a single-file .NET 4.8 project with no NuGet dependencies.
+    // DbDo is a single-file .NET 4.8 project with no NuGet dependencies.
     // The version field is a single short string in a well-known shape;
     // a regex picks it out cleanly without dragging in 300 KB of library.
     // =====================================================================
@@ -25381,18 +25230,18 @@ namespace DbDuo
                 MessageBox.Show(miParent,
                     "Could not check for updates.\n\n" + ex.Message
                     + "\n\nCheck your internet connection and try again. You can also "
-                    + "download the latest DbDuo_setup.exe directly from\n"
-                    + "https://github.com/JamalMazrui/DbDuo/releases/latest",
+                    + "download the latest DbDo_setup.exe directly from\n"
+                    + "https://github.com/JamalMazrui/DbDo/releases/latest",
                     "Elevate Version", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             if (string.IsNullOrEmpty(sLatestTag))
             {
                 MessageBox.Show(miParent,
-                    "Could not determine the latest DbDuo version.\n\n"
+                    "Could not determine the latest DbDo version.\n\n"
                     + "The GitHub API returned a response but no recognizable\n"
                     + "tag_name field. Try again later, or download directly from\n"
-                    + "https://github.com/JamalMazrui/DbDuo/releases/latest",
+                    + "https://github.com/JamalMazrui/DbDo/releases/latest",
                     "Elevate Version", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
@@ -25405,7 +25254,7 @@ namespace DbDuo
             if (iCmp == 0)
             {
                 MessageBox.Show(miParent,
-                    "DbDuo is up to date.\n\n"
+                    "DbDo is up to date.\n\n"
                     + "Installed version: " + sLocal + "\n"
                     + "Latest release:    " + sLatest,
                     "Elevate Version", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -25418,7 +25267,7 @@ namespace DbDuo
                 // Inform but don't offer to "upgrade" to an older
                 // version.
                 MessageBox.Show(miParent,
-                    "DbDuo is running a newer version than the latest public release.\n\n"
+                    "DbDo is running a newer version than the latest public release.\n\n"
                     + "Installed: " + sLocal + "\n"
                     + "Public:    " + sLatest + "\n\n"
                     + "No upgrade offered.",
@@ -25428,11 +25277,11 @@ namespace DbDuo
 
             // Step 3: confirm with the user before downloading.
             DialogResult answer = MessageBox.Show(miParent,
-                "A newer DbDuo is available.\n\n"
+                "A newer DbDo is available.\n\n"
                 + "Installed: " + sLocal + "\n"
                 + "Available: " + sLatest + "\n\n"
                 + "Download and run the new installer now?\n\n"
-                + "The installer will offer to close this DbDuo before it proceeds.",
+                + "The installer will offer to close this DbDo before it proceeds.",
                 "Elevate Version", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (answer != DialogResult.Yes) return;
 
@@ -25441,7 +25290,7 @@ namespace DbDuo
             // does not change as new versions ship.
             string sTempPath = System.IO.Path.Combine(
                 System.IO.Path.GetTempPath(),
-                "DbDuo_setup_" + sLatest + ".exe");
+                "DbDo_setup_" + sLatest + ".exe");
             try
             {
                 downloadInstaller(sTempPath);
@@ -25451,7 +25300,7 @@ namespace DbDuo
                 MessageBox.Show(miParent,
                     "Download failed.\n\n" + ex.Message
                     + "\n\nTry again, or download directly from\n"
-                    + "https://github.com/JamalMazrui/DbDuo/releases/latest",
+                    + "https://github.com/JamalMazrui/DbDo/releases/latest",
                     "Elevate Version", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return;
             }
@@ -25463,8 +25312,8 @@ namespace DbDuo
                 psi.FileName = sTempPath;
                 psi.UseShellExecute = true; // allows UAC elevation if the installer manifest requests it
                 System.Diagnostics.Process.Start(psi);
-                // We do NOT exit DbDuo here. Inno Setup, when launched,
-                // will detect the running DbDuo.exe and offer to close
+                // We do NOT exit DbDo here. Inno Setup, when launched,
+                // will detect the running DbDo.exe and offer to close
                 // it via its standard "AppMutex" prompt. Letting the
                 // installer drive that flow means the user sees the
                 // confirmation dialog they expect and can cancel out
@@ -25482,10 +25331,10 @@ namespace DbDuo
         }
 
         // fetchLatestTag: determine the version tag of the latest
-        // public DbDuo release on GitHub. Two paths:
+        // public DbDo release on GitHub. Two paths:
         //
         //   (1) The public REST API at
-        //       https://api.github.com/repos/JamalMazrui/DbDuo/releases/latest
+        //       https://api.github.com/repos/JamalMazrui/DbDo/releases/latest
         //       This requires no credentials. It is the documented
         //       way to read public release metadata. GitHub's rate
         //       limit for unauthenticated requests is 60 per hour
@@ -25494,7 +25343,7 @@ namespace DbDuo
         //       limit could trip on shared / corporate / VPN IPs.
         //
         //   (2) Scrape the public release page HTML at
-        //       https://github.com/JamalMazrui/DbDuo/releases/latest
+        //       https://github.com/JamalMazrui/DbDo/releases/latest
         //       which GitHub redirects to the actual versioned page
         //       like /releases/tag/v1.0.29. The redirect target's
         //       last url segment IS the tag. This path also requires
@@ -25522,11 +25371,11 @@ namespace DbDuo
         // no credentials, returns JSON.
         private static string fetchLatestTagViaApi()
         {
-            const string sApiUrl = "https://api.github.com/repos/JamalMazrui/DbDuo/releases/latest";
+            const string sApiUrl = "https://api.github.com/repos/JamalMazrui/DbDo/releases/latest";
             string sBody;
             using (System.Net.WebClient wc = new System.Net.WebClient())
             {
-                wc.Headers.Add("User-Agent", "DbDuo-ElevateVersion/" + BuildInfo.VersionString);
+                wc.Headers.Add("User-Agent", "DbDo-ElevateVersion/" + BuildInfo.VersionString);
                 wc.Headers.Add("Accept", "application/vnd.github+json");
                 sBody = wc.DownloadString(sApiUrl);
             }
@@ -25542,10 +25391,10 @@ namespace DbDuo
         }
 
         // fetchLatestTagViaScrape: the HTML-scrape fallback. The url
-        // https://github.com/JamalMazrui/DbDuo/releases/latest
+        // https://github.com/JamalMazrui/DbDo/releases/latest
         // returns a redirect (HTTP 302) whose Location header points
         // at the versioned release page such as
-        // https://github.com/JamalMazrui/DbDuo/releases/tag/v1.0.29.
+        // https://github.com/JamalMazrui/DbDo/releases/tag/v1.0.29.
         // We capture the redirect via HttpWebRequest with
         // AllowAutoRedirect=false and read the final path segment.
         //
@@ -25558,12 +25407,12 @@ namespace DbDuo
         // response URI (WebClient or HttpWebResponse.ResponseUri).
         private static string fetchLatestTagViaScrape()
         {
-            const string sUrl = "https://github.com/JamalMazrui/DbDuo/releases/latest";
+            const string sUrl = "https://github.com/JamalMazrui/DbDo/releases/latest";
             string sFinalUrl = "";
             try
             {
                 System.Net.HttpWebRequest req = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(sUrl);
-                req.UserAgent = "DbDuo-ElevateVersion/" + BuildInfo.VersionString;
+                req.UserAgent = "DbDo-ElevateVersion/" + BuildInfo.VersionString;
                 req.AllowAutoRedirect = false;
                 req.Method = "GET";
                 req.Timeout = 15000;
@@ -25604,7 +25453,7 @@ namespace DbDuo
                 {
                     using (System.Net.WebClient wc = new System.Net.WebClient())
                     {
-                        wc.Headers.Add("User-Agent", "DbDuo-ElevateVersion/" + BuildInfo.VersionString);
+                        wc.Headers.Add("User-Agent", "DbDo-ElevateVersion/" + BuildInfo.VersionString);
                         wc.DownloadString(sUrl);
                         // WebClient doesn't expose ResponseUri directly,
                         // but for our use we accept the scrape failed
@@ -25615,7 +25464,7 @@ namespace DbDuo
             }
             if (string.IsNullOrEmpty(sFinalUrl)) return "";
             // Extract the last path segment from a url like
-            // https://github.com/JamalMazrui/DbDuo/releases/tag/v1.0.29
+            // https://github.com/JamalMazrui/DbDo/releases/tag/v1.0.29
             try
             {
                 Uri uri = new Uri(sFinalUrl);
@@ -25639,10 +25488,10 @@ namespace DbDuo
         // resolves to the most recent release's asset of that name.
         private static void downloadInstaller(string sLocalPath)
         {
-            const string sDownloadUrl = "https://github.com/JamalMazrui/DbDuo/releases/latest/download/DbDuo_setup.exe";
+            const string sDownloadUrl = "https://github.com/JamalMazrui/DbDo/releases/latest/download/DbDo_setup.exe";
             using (System.Net.WebClient wc = new System.Net.WebClient())
             {
-                wc.Headers.Add("User-Agent", "DbDuo-ElevateVersion/" + BuildInfo.VersionString);
+                wc.Headers.Add("User-Agent", "DbDo-ElevateVersion/" + BuildInfo.VersionString);
                 wc.DownloadFile(sDownloadUrl, sLocalPath);
             }
         }
@@ -25679,7 +25528,7 @@ namespace DbDuo
     }
 
 
-    public static class DbDuoLog
+    public static class DbDoLog
     {
         private static string sPath = "";
         private static readonly object lockObj = new object();
@@ -25687,7 +25536,7 @@ namespace DbDuo
         public static void init()
         {
             string sExeDir = Path.GetDirectoryName(Application.ExecutablePath) ?? ".";
-            string sCandidate = Path.Combine(sExeDir, "DbDuo.log");
+            string sCandidate = Path.Combine(sExeDir, "DbDo.log");
             try
             {
                 using (FileStream fs = File.Create(sCandidate)) { }
@@ -25698,7 +25547,7 @@ namespace DbDuo
                 // Fall back to TEMP if the exe directory is not writable.
                 try
                 {
-                    sCandidate = Path.Combine(Path.GetTempPath(), "DbDuo.log");
+                    sCandidate = Path.Combine(Path.GetTempPath(), "DbDo.log");
                     using (FileStream fs = File.Create(sCandidate)) { }
                     sPath = sCandidate;
                 }
@@ -25708,7 +25557,7 @@ namespace DbDuo
                     return;
                 }
             }
-            write("DbDuo log initialized at " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+            write("DbDo log initialized at " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
             write("Executable: " + Application.ExecutablePath);
             write("Working directory: " + Environment.CurrentDirectory);
         }
@@ -25732,13 +25581,13 @@ namespace DbDuo
 
     // =====================================================================
     // SingleInstance: detect-or-launch helper, used by the desktop-shortcut
-    // hotkey path (DbDuo.exe -activate).
+    // hotkey path (DbDo.exe -activate).
     //
     // Mechanism:
     //   1. A named, session-scoped Mutex serves as the "is anyone already
     //      running?" sentinel. The first instance acquires it and holds it
     //      for the life of the process; later launches see it taken.
-    //   2. A registered window message ("DbDuo.WakeUp") is broadcast by the
+    //   2. A registered window message ("DbDo.WakeUp") is broadcast by the
     //      second instance. The first instance's main form has a WndProc
     //      override that listens for the message and brings itself to the
     //      foreground when received.
@@ -25758,7 +25607,7 @@ namespace DbDuo
     //     "first."
     //
     // Scope:
-    //   The Mutex name is "Local\\DbDuo.SingleInstance" (no Global\\
+    //   The Mutex name is "Local\\DbDo.SingleInstance" (no Global\\
     //   prefix), which scopes it to the current Windows user session.
     //   Multiple users on the same machine each get their own first
     //   instance. Multiple Remote Desktop sessions of the same user
@@ -25766,12 +25615,12 @@ namespace DbDuo
     // =====================================================================
     public static class SingleInstance
     {
-        private const string MutexName = "Local\\DbDuo.SingleInstance";
-        public const string WakeUpMessageName = "DbDuo.WakeUp";
+        private const string MutexName = "Local\\DbDo.SingleInstance";
+        public const string WakeUpMessageName = "DbDo.WakeUp";
 
         // The cached message ID, looked up once via RegisterWindowMessage.
         // Both the broadcaster (second instance) and the listener (first
-        // instance, in DbDuoForm.WndProc) call RegisterWindowMessage with
+        // instance, in DbDoForm.WndProc) call RegisterWindowMessage with
         // the same string and get back the same numeric ID. Windows
         // guarantees this; the ID is unique per logon session.
         public static uint WakeUpMessage { get { return registerOnce(); } }
@@ -25845,12 +25694,12 @@ namespace DbDuo
     // Program: entry point with command-line argument parsing.
     //
     // Supported argument forms (mirroring dbDot.vbs and adding a few):
-    //   DbDuo.exe                            -- empty form
-    //   DbDuo.exe path                       -- open file (extension dispatch)
-    //   DbDuo.exe path table                 -- open file and switch to table
-    //   DbDuo.exe -cli path                  -- open and drop into dot prompt
-    //   DbDuo.exe -readonly path             -- open in read-only mode
-    //   DbDuo.exe -activate                  -- bring existing instance to
+    //   DbDo.exe                            -- empty form
+    //   DbDo.exe path                       -- open file (extension dispatch)
+    //   DbDo.exe path table                 -- open file and switch to table
+    //   DbDo.exe -cli path                  -- open and drop into dot prompt
+    //   DbDo.exe -readonly path             -- open in read-only mode
+    //   DbDo.exe -activate                  -- bring existing instance to
     //                                           the foreground if one is
     //                                           running, else launch fresh
     //                                           (used by the desktop hotkey)
@@ -25876,7 +25725,7 @@ namespace DbDuo
         [DllImport("kernel32.dll", SetLastError = true)]
         private static extern bool FreeConsole();
 
-        // uiMode values, parsed from DbDuo.ini [General] uiMode= or
+        // uiMode values, parsed from DbDo.inix [General] uiMode= or
         // overridden by command-line flags -cli / -gui / -both.
         public enum UiMode
         {
@@ -25885,13 +25734,13 @@ namespace DbDuo
             Cli  = 2,    // pure dot-prompt CLI, no GUI form
         }
 
-        // Read uiMode from DbDuo.ini [General] section. Default is Both.
+        // Read uiMode from DbDo.inix [General] section. Default is Both.
         // Returns the parsed enum value.
         private static UiMode readUiModeFromIni()
         {
             string sIniPath = Path.Combine(
                 Path.GetDirectoryName(Application.ExecutablePath) ?? ".",
-                "DbDuo.ini");
+                "DbDo.inix");
             if (!File.Exists(sIniPath)) return UiMode.Both;
 
             string[] aLines = null;
@@ -25931,8 +25780,34 @@ namespace DbDuo
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 
-                DbDuoLog.init();
-                DbDuoLog.write("Command line: " + string.Join(" ", aArgs));
+                DbDoLog.init();
+                DbDoLog.write("Command line: " + string.Join(" ", aArgs));
+
+                // One-time migration: the per-user settings file is now
+                // DbDo.inix (the extended-ini format with multi-line
+                // values). If only the old DbDo-dot-ini file exists in
+                // the per-user folder, rename it -- every classic ini
+                // file is already a valid Inix file, so the contents
+                // need no conversion.
+                try
+                {
+                    string sCfgBase = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
+                    if (!string.IsNullOrEmpty(sCfgBase))
+                    {
+                        string sCfgDir = System.IO.Path.Combine(sCfgBase, "DbDo");
+                        string sNewCfg = System.IO.Path.Combine(sCfgDir, "DbDo.inix");
+                        string sOldCfg = System.IO.Path.Combine(sCfgDir, "DbDo" + ".ini");
+                        if (System.IO.File.Exists(sOldCfg) && !System.IO.File.Exists(sNewCfg))
+                        {
+                            System.IO.File.Move(sOldCfg, sNewCfg);
+                            DbDoLog.write("Settings migrated to DbDo.inix.");
+                        }
+                    }
+                }
+                catch (Exception exMigrate)
+                {
+                    DbDoLog.write("Settings migration skipped: " + exMigrate.Message);
+                }
 
                 // Early-exit install flags. These run their action and
                 // exit without launching the UI. Used by the installer's
@@ -25956,7 +25831,7 @@ namespace DbDuo
                      || sArg.Equals("-install-nvda-addon", StringComparison.OrdinalIgnoreCase)
                      || sArg.Equals("/install-nvda-addon", StringComparison.OrdinalIgnoreCase))
                     {
-                        // Locate the .nvda-addon file shipped next to DbDuo.exe
+                        // Locate the .nvda-addon file shipped next to DbDo.exe
                         // and open it via its file association. NVDA registers
                         // itself as the handler for .nvda-addon during NVDA's own
                         // install, so Windows hands the file to NVDA which then
@@ -25971,7 +25846,7 @@ namespace DbDuo
                         // install an add-on and works on every NVDA install.
                         //
                         // Failure modes handled:
-                        //   - .nvda-addon missing next to DbDuo.exe (unusual --
+                        //   - .nvda-addon missing next to DbDo.exe (unusual --
                         //     the installer always ships it). Print a message
                         //     and exit non-zero.
                         //   - .nvda-addon present but no file association
@@ -25979,11 +25854,11 @@ namespace DbDuo
                         //     exit non-zero.
                         string sAppFolder = System.IO.Path.GetDirectoryName(
                             System.Reflection.Assembly.GetExecutingAssembly().Location);
-                        string sAddonPath = System.IO.Path.Combine(sAppFolder, "DbDuo.nvda-addon");
+                        string sAddonPath = System.IO.Path.Combine(sAppFolder, "DbDo.nvda-addon");
                         if (!System.IO.File.Exists(sAddonPath))
                         {
-                            Console.Error.WriteLine("DbDuo.nvda-addon not found at " + sAddonPath);
-                            Console.Error.WriteLine("This file is normally placed by the DbDuo installer.");
+                            Console.Error.WriteLine("DbDo.nvda-addon not found at " + sAddonPath);
+                            Console.Error.WriteLine("This file is normally placed by the DbDo installer.");
                             return 1;
                         }
                         try
@@ -26044,14 +25919,14 @@ namespace DbDuo
                     else if (sFile == null) sFile = sArg;
                     else if (sTable == null) sTable = sArg;
                 }
-                DbDuoLog.write("uiMode: " + inputMode + (bModeFromCli ? " (from command line)" : " (from DbDuo.ini)"));
+                DbDoLog.write("uiMode: " + inputMode + (bModeFromCli ? " (from command line)" : " (from DbDo.inix)"));
 
                 // ----- Single-instance handoff: -activate flag.
                 //
                 // The desktop-shortcut hotkey passes -activate. Behavior:
-                //   - If another DbDuo instance is already running, send it
+                //   - If another DbDo instance is already running, send it
                 //     a wake-up message and exit. The first instance brings
-                //     itself to the foreground (handled in DbDuoForm.WndProc).
+                //     itself to the foreground (handled in DbDoForm.WndProc).
                 //   - If no other instance is running, fall through to a
                 //     normal launch. The first instance acquires the
                 //     single-instance mutex and holds it for its lifetime.
@@ -26065,11 +25940,11 @@ namespace DbDuo
                 {
                     if (!SingleInstance.tryAcquire())
                     {
-                        DbDuoLog.write("-activate: another instance is running; sending wake-up.");
+                        DbDoLog.write("-activate: another instance is running; sending wake-up.");
                         SingleInstance.wakeUpFirstInstance();
                         return 0;
                     }
-                    DbDuoLog.write("-activate: no existing instance; launching as first instance.");
+                    DbDoLog.write("-activate: no existing instance; launching as first instance.");
                 }
 
                 // ----- CLI-only mode: no GUI form, attach parent console
@@ -26079,14 +25954,14 @@ namespace DbDuo
                 }
 
                 // ----- GUI mode (with or without integrated prompt panel)
-                DbDuoForm frm = new DbDuoForm(inputMode);
-                DbDuoLog.write("Form created (uiMode=" + inputMode + ").");
+                DbDoForm frm = new DbDoForm(inputMode);
+                DbDoLog.write("Form created (uiMode=" + inputMode + ").");
 
                 if (!string.IsNullOrEmpty(sFile))
                 {
                     try
                     {
-                        DbDuoLog.write("Opening database: " + sFile + (sTable != null ? " (table: " + sTable + ")" : "") + (bReadOnly ? " [read-only]" : ""));
+                        DbDoLog.write("Opening database: " + sFile + (sTable != null ? " (table: " + sTable + ")" : "") + (bReadOnly ? " [read-only]" : ""));
                         frm.Db.openDatabase(sFile, sTable, bReadOnly);
                         if (!frm.Db.hasRecordset())
                         {
@@ -26096,36 +25971,36 @@ namespace DbDuo
                             if (lT.Count > 0)
                             {
                                 frm.Db.selectTable(lT[0]);
-                                DbDuoLog.write("Auto-selected: " + lT[0]);
+                                DbDoLog.write("Auto-selected: " + lT[0]);
                             }
                         }
                         frm.invokeRefresh();
-                        DbDuoLog.write("Database opened successfully. Connect string: " + frm.Db.connectString);
+                        DbDoLog.write("Database opened successfully. Connect string: " + frm.Db.connectString);
                     }
                     catch (Exception ex)
                     {
-                        DbDuoLog.write("Open failed: " + ex.Message);
+                        DbDoLog.write("Open failed: " + ex.Message);
                         MessageBox.Show(frm,
                             "Could not open " + sFile + ":\n\n" + ex.Message,
-                            "DbDuo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                            "DbDo", MessageBoxButtons.OK, MessageBoxIcon.Error);
                     }
                 }
                 else
                 {
                     // No command-line file specified: try to restore the
-                    // last database and table from DbDuo.ini's [Session]
+                    // last database and table from DbDo.inix's [Session]
                     // section. Saved on Open-Database, Select-Table, and
                     // Close-Database. If the saved path no longer exists
                     // (file moved or deleted), the restore is skipped
                     // silently; the user starts with no database open.
-                    string sSavedDb = DbDuoForm.IniSession.lastDatabase;
-                    string sSavedTbl = DbDuoForm.IniSession.lastTable;
+                    string sSavedDb = DbDoForm.IniSession.lastDatabase;
+                    string sSavedTbl = DbDoForm.IniSession.lastTable;
                     bool bRestoredSomething = false;
                     if (!string.IsNullOrEmpty(sSavedDb) && System.IO.File.Exists(sSavedDb))
                     {
                         try
                         {
-                            DbDuoLog.write("Restoring last session: " + sSavedDb
+                            DbDoLog.write("Restoring last session: " + sSavedDb
                                 + (string.IsNullOrEmpty(sSavedTbl) ? "" : " (table: " + sSavedTbl + ")"));
                             frm.Db.openDatabase(sSavedDb,
                                 string.IsNullOrEmpty(sSavedTbl) ? null : sSavedTbl,
@@ -26137,12 +26012,12 @@ namespace DbDuo
                                 if (lT.Count > 0) frm.Db.selectTable(lT[0]);
                             }
                             frm.invokeRefresh();
-                            DbDuoLog.write("Session restored.");
+                            DbDoLog.write("Session restored.");
                             bRestoredSomething = true;
                         }
                         catch (Exception ex)
                         {
-                            DbDuoLog.write("Session restore failed: " + ex.Message);
+                            DbDoLog.write("Session restore failed: " + ex.Message);
                             // Don't show a dialog -- the user didn't ask
                             // to open this file; we did. Just log and
                             // start empty.
@@ -26152,21 +26027,21 @@ namespace DbDuo
                     // First-run fallback: if the ini has no [Session]
                     // lastDatabase entry (the file has never been written
                     // to disk, or a fresh install replaced the install
-                    // folder), open {app}\sample.db so the user has
-                    // something to look at on first launch. Silent
-                    // failure: if sample.db is missing or unreadable,
-                    // start with an empty form just as before.
+                    // folder), open {app}\NFB2026Convention.db so the user
+                    // has the showcase convention database to explore on
+                    // first launch. Silent failure: if the file is missing
+                    // or unreadable, start with an empty form just as before.
                     if (!bRestoredSomething && string.IsNullOrEmpty(sSavedDb))
                     {
                         try
                         {
                             string sAppFolder = System.IO.Path.GetDirectoryName(
                                 System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
-                            string sDefaultSample = System.IO.Path.Combine(sAppFolder, "sample.db");
+                            string sDefaultSample = System.IO.Path.Combine(sAppFolder, "NFB2026Convention.db");
                             if (System.IO.File.Exists(sDefaultSample))
                             {
-                                DbDuoLog.write("First-run default: opening " + sDefaultSample);
-                                frm.Db.openDatabase(sDefaultSample, null, bReadOnly);
+                                DbDoLog.write("First-run default: opening " + sDefaultSample);
+                                frm.Db.openDatabase(sDefaultSample, "events", bReadOnly);
                                 if (!frm.Db.hasRecordset())
                                 {
                                     List<string> lT = frm.Db.getTableNames();
@@ -26174,46 +26049,46 @@ namespace DbDuo
                                     if (lT.Count > 0) frm.Db.selectTable(lT[0]);
                                 }
                                 frm.invokeRefresh();
-                                DbDuoLog.write("First-run default database opened.");
+                                DbDoLog.write("First-run default database opened.");
                             }
                         }
                         catch (Exception ex)
                         {
-                            DbDuoLog.write("First-run default-open failed: " + ex.Message);
+                            DbDoLog.write("First-run default-open failed: " + ex.Message);
                         }
                     }
                 }
 
-                DbDuoLog.write("Entering Application.Run message loop.");
+                DbDoLog.write("Entering Application.Run message loop.");
                 // uiMode=both: spawn the dot-prompt console window in
                 // addition to the GUI form. The console runs on a worker
                 // thread that owns its AllocConsole-allocated console;
                 // the GUI runs on the main message loop. Both share
-                // frm.Db (the single DbDuoManager). User can Alt+Tab
+                // frm.Db (the single DbDoManager). User can Alt+Tab
                 // between the two windows.
                 if (inputMode == UiMode.Both)
                 {
-                    DbDuoLog.write("uiMode=both: spawning dot-prompt console window.");
+                    DbDoLog.write("uiMode=both: spawning dot-prompt console window.");
                     DotPromptHost.enter(frm);
                 }
                 Application.Run(frm);
-                DbDuoLog.write("Application.Run returned. Exiting normally.");
+                DbDoLog.write("Application.Run returned. Exiting normally.");
                 return 0;
             }
             catch (Exception ex)
             {
-                try { DbDuoLog.write("FATAL: " + ex.Message + " | " + ex.StackTrace); } catch { }
+                try { DbDoLog.write("FATAL: " + ex.Message + " | " + ex.StackTrace); } catch { }
                 MessageBox.Show("Fatal error:\n\n" + ex.Message + "\n\n" + ex.StackTrace,
-                    "DbDuo", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                    "DbDo", MessageBoxButtons.OK, MessageBoxIcon.Error);
                 return 1;
             }
         }
 
-        // CLI-only entry: no DbDuoForm created. Attach the launching
+        // CLI-only entry: no DbDoForm created. Attach the launching
         // terminal's console (or allocate one if launched detached) and
         // run the dot-prompt loop on the main thread.
         //
-        // The DbDuoManager and the DotPromptHost together do everything
+        // The DbDoManager and the DotPromptHost together do everything
         // the GUI provides except the visual grid -- including database
         // open, table select, record edit, sort/filter, and SQL.
         private static int runCliOnly(string sFile, string sTable, bool bReadOnly)
@@ -26240,12 +26115,12 @@ namespace DbDuo
             }
             catch { }
 
-            DbDuoLog.write("CLI-only mode: console " + (bAttached ? "attached" : "allocated"));
+            DbDoLog.write("CLI-only mode: console " + (bAttached ? "attached" : "allocated"));
 
-            // Open the database directly through a free DbDuoManager (no
+            // Open the database directly through a free DbDoManager (no
             // form). DotPromptHost.runStandalone takes a manager and
             // runs the loop until the user quits.
-            using (DbDuoManager mgr = new DbDuoManager())
+            using (DbDoManager mgr = new DbDoManager())
             {
                 if (!string.IsNullOrEmpty(sFile))
                 {

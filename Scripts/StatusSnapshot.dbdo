@@ -8,7 +8,7 @@
 # the filter, the sort, or the current row. Safe to run anywhere.
 #
 # Syntax: each non-blank, non-comment line is dispatched as if you
-# typed it at the dot prompt. Natural DbDuo dot-prompt aliases are
+# typed it at the dot prompt. Natural DbDo dot-prompt aliases are
 # used here (path, tables-list, status, sort-filter) rather than the
 # underlying canonical verbs (say-path, say-tables, say-status,
 # say-sortfilter). Either form works.

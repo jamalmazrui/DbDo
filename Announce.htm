@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>DbDuo</title>
+  <title>DbDo</title>
   <style>
     html {
       color: #1a1a1a;
@@ -166,27 +166,26 @@
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">DbDuo</h1>
+<h1 class="title">DbDo</h1>
 </header>
-<h1 id="dbduo">DbDuo</h1>
+<h1 id="dbdo">DbDo</h1>
 <p>Manage database files in a dual interface of console and graphical
 modes, maximizing productivity for screen reader and keyboard users.</p>
 <p>After decades of personal interest in how to achieve nonvisual
 usability in database management, I have developed a general-purpose
-program in this area with AI assistance. DbDuo is a free, open source
+program in this area with AI assistance. DbDo is a free, open source
 program designed to boost productivity in the input, querying, and
 output of data.</p>
 <ul>
-<li><a href="https://github.com/JamalMazrui/DbDuo">DbDuo project
+<li><a href="https://github.com/JamalMazrui/DbDo">DbDo project
 page</a></li>
-<li><a
-href="https://github.com/JamalMazrui/DbDuo/archive/main.zip">DbDuo
+<li><a href="https://github.com/JamalMazrui/DbDo/archive/main.zip">DbDo
 project archive</a></li>
 <li><a
-href="https://github.com/JamalMazrui/DbDuo/releases/latest/download/DbDuo_setup.exe">DbDuo
+href="https://github.com/JamalMazrui/DbDo/releases/latest/download/DbDo_setup.exe">DbDo
 executable installer</a></li>
 </ul>
-<p>DbDuo defaults to an SQLite database file (<code>.db</code>
+<p>DbDo defaults to an SQLite database file (<code>.db</code>
 extension), which supports management of related tables via either a
 command-line interface (like the memorable dBASE dot prompt) or a
 graphical user interface with a menu system and standard controls. You
@@ -195,10 +194,10 @@ technique is more convenient for the task at hand. Other database-like
 file formats are also supported, for import or export, including
 <code>.dbf</code>, <code>.mdb</code>, <code>.accdb</code>,
 <code>.xlsx</code>, <code>.csv</code>, and <code>.tsv</code>.</p>
-<p>Every DbDuo command can be accomplished efficiently from the
-keyboard. In addition, extensions for the JAWS and NVDA screen readers
-are bundled with the DbDuo installer to further optimize productivity.
-Advanced features include statistics, charts, and scripts.</p>
+<p>Every DbDo command can be accomplished efficiently from the keyboard.
+In addition, extensions for the JAWS and NVDA screen readers are bundled
+with the DbDo installer to further optimize productivity. Advanced
+features include statistics, charts, and scripts.</p>
 <h2 id="highlights">Highlights</h2>
 <p><strong>A virtual table cursor for the data list.</strong>
 Alt+Control plus arrow / Home / End / PageDown / PageUp / Numpad5 moves
@@ -226,13 +225,15 @@ last-active table, filter, sort, and row position.</p>
 the dot-prompt console drive the same live ADO recordset. Edits made in
 the prompt show up immediately in the data list, and vice versa.</p>
 <p><strong>Snippet scripting.</strong> Save small JavaScript or text
-snippets in your own editor, then invoke them inside DbDuo with a single
+snippets in your own editor, then invoke them inside DbDo with a single
 keystroke (Alt+V). Scripts can automate bulk record edits, filter
 changes, custom reports — anything the database manager itself can
 do.</p>
 <h2 id="sample-databases">Sample databases</h2>
-<p>DbDuo ships three SQLite sample databases adapted to its standard
-column conventions:</p>
+<p>DbDo ships five SQLite sample databases adapted to its standard
+column conventions (<code>&lt;singular&gt;_id</code> primary keys,
+<code>added</code>/<code>edited</code> timestamps maintained by
+triggers, generated <code>look</code>/<code>unq</code> columns):</p>
 <ul>
 <li><code>sample.db</code> — a small school domain (teachers, classes,
 students, enrollments) for first-launch exploration.</li>
@@ -242,8 +243,12 @@ order details, shippers).</li>
 <li><code>chinook.db</code> — the classic Chinook music-store sample
 (artists, albums, tracks, genres, customers, invoices, invoice
 items).</li>
+<li><code>collection.db</code> — a personal music collection (artists,
+albums, tracks).</li>
+<li><code>cellar.db</code> — a personal wine cellar (wines, bottles,
+tastings).</li>
 </ul>
-<p>The two larger samples are useful for exercising DbDuo against
+<p>The two larger samples are useful for exercising DbDo against
 real-shaped data with multiple parent-child relationships.</p>
 <h2 id="accessibility-design">Accessibility design</h2>
 <p>Three speech paths in priority order: JAWS via direct COM, NVDA via
@@ -251,7 +256,7 @@ the controller-client DLL, UIA live-region fallback for Narrator and
 anything else. The data list is a virtual-mode <code>ListView</code> in
 Details view, which all three readers handle as a familiar Details list.
 JAWS settings (a JKM key map plus a compiled script) and an NVDA add-on
-ship with the installer so that both screen readers pass DbDuo’s chords
+ship with the installer so that both screen readers pass DbDo’s chords
 through rather than intercepting them for their own table-navigation or
 browse-mode commands.</p>
 <p>JAWS-canonical key names appear throughout the menus, help text, and
@@ -261,15 +266,15 @@ order (Alt+Control+Shift).</p>
 <h2 id="project-home-and-downloads">Project home and downloads</h2>
 <ul>
 <li><strong>Source, issues, discussion:</strong> <a
-href="https://github.com/JamalMazrui/DbDuo"
-class="uri">https://github.com/JamalMazrui/DbDuo</a></li>
+href="https://github.com/JamalMazrui/DbDo"
+class="uri">https://github.com/JamalMazrui/DbDo</a></li>
 <li><strong>Latest installer (always points to the current
 release):</strong> <a
-href="https://github.com/JamalMazrui/DbDuo/releases/latest/download/DbDuo_setup.exe"
-class="uri">https://github.com/JamalMazrui/DbDuo/releases/latest/download/DbDuo_setup.exe</a></li>
+href="https://github.com/JamalMazrui/DbDo/releases/latest/download/DbDo_setup.exe"
+class="uri">https://github.com/JamalMazrui/DbDo/releases/latest/download/DbDo_setup.exe</a></li>
 <li><strong>Full project as a zip:</strong> <a
-href="https://github.com/JamalMazrui/DbDuo/archive/main.zip"
-class="uri">https://github.com/JamalMazrui/DbDuo/archive/main.zip</a></li>
+href="https://github.com/JamalMazrui/DbDo/archive/main.zip"
+class="uri">https://github.com/JamalMazrui/DbDo/archive/main.zip</a></li>
 </ul>
 <p>For per-release notes, see <code>History.md</code>. Released under
 the MIT License.</p>

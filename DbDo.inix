@@ -1,23 +1,40 @@
-﻿; DbDuo.ini - sample configuration
+; DbDo.inix - sample configuration
 ;
 ; Two copies of this file are used:
 ;
-;   1. The shipped template, next to DbDuo.exe, which provides defaults
+;   1. The shipped template, next to DbDo.exe, which provides defaults
 ;      and documents what every section is for. Edit-Configuration's
 ;      "Open file..." button DOES NOT touch this copy.
 ;
-;   2. The per-user file at %LOCALAPPDATA%\DbDuo\DbDuo.ini, which
-;      overrides the shipped template on a per-key basis. DbDuo writes
+;   2. The per-user file at %LOCALAPPDATA%\DbDo\DbDo.inix, which
+;      overrides the shipped template on a per-key basis. DbDo writes
 ;      to this copy when remembering the last opened database, the
 ;      last-used dialog folders, and any saved configuration changes.
 ;
-; Lines starting with ';' or '#' are comments. Section headers are in
-; square brackets. Keys are name = value with surrounding whitespace
-; trimmed; key names are case-insensitive.
+; The .inix extension is DbDo's extended ini format (Inix). Every
+; classic ini construct works: ';' or '#' comments, [Section]
+; headers, name = value lines with whitespace trimmed and
+; case-insensitive key names. Inix adds MULTI-LINE VALUES:
+;
+;   Fenced form (reliable for any content, including '=' signs):
+;     key=`
+;     first line of the value
+;     second line of the value
+;     `
+;   A triple-quote fence (three double-quote characters) works the
+;   same way. All fenced text is verbatim -- no escape characters.
+;
+;   Plain form (for simple text without '=' at line starts):
+;     key=
+;     first line
+;     second line
+;
+; The ConnectStrings section below uses the fenced form, because
+; connection strings are long and contain '=' characters.
 
 [General]
 
-; uiMode controls which surface(s) DbDuo presents at startup.
+; uiMode controls which surface(s) DbDo presents at startup.
 ;
 ;   both = GUI window AND a separate console window with the dot prompt.
 ;          Two distinct accessibility surfaces. Alt+Tab between them.
@@ -31,16 +48,23 @@ uiMode = both
 
 [Hotkeys]
 
-; Each line: Command Name=Modifiers+Key, Imperative description.
-; Modifiers are always Alt, Control, Shift (in that order). Keep
-; descriptions to one sentence in imperative voice, weaving common
-; synonyms where useful, and -- where natural -- reinforcing the
-; mnemonic between the chord letter and the command name.
+; Each line: Command Name=Chord, Imperative description.
 ;
-; DbDuo reads this section at startup. A command's chord is taken
-; from the value; the part after the comma becomes the command's
-; status-bar summary and key-describer text. Edit any line, restart
-; DbDuo, and the change takes effect.
+; The CHORD field is documentation only -- it shows the binding so
+; you and other readers know what to press. Bindings themselves are
+; compiled into the program and cannot be changed by editing this
+; file. Modifiers are always Alt, Control, Shift (in that order).
+; Key names use JAWS conventions (Apostrophe, Backslash, UpArrow,
+; NumPadPlus, GraveAccent, etc.) so they match what your screen
+; reader announces.
+;
+; The DESCRIPTION field IS loaded at startup. Edit the wording, save
+; the file, restart DbDo, and the new description appears in the
+; status bar (when a menu item is focused) and in key-describer mode
+; (Control+F1, press any chord to hear its name and description).
+; Keep descriptions to one sentence in imperative voice, weaving
+; common synonyms where useful, and -- where natural -- reinforcing
+; the mnemonic between the chord letter and the command name.
 
 ; ===== File menu =====
 Open Database=Control+O, Open a database file on disk
@@ -50,7 +74,7 @@ Save Database=Control+S, Save the open database to another file or format
 Close Database=Control+F4, Close the open database
 Import Data=Alt+I, Import records from a delimited or structured file into the current table
 Export Data=Alt+X, Export the current grid (visible columns and filtered rows) to a file
-Exit Application=Alt+F4, Exit (quit) DbDuo
+Exit Application=Alt+F4, Exit (quit) DbDo
 
 ; ===== Edit menu =====
 New Record=Control+N, Add a new record at the cursor row
@@ -118,10 +142,10 @@ Say Filter=Shift+F, Say the active filter expression
 Say Goto=Shift+G, Say the most recent Goto (jump) search target
 Say ID=Shift+I, Say the primary key of the current record
 Say Look=Shift+L, Say the look value distinguishing the current record
-Say Modified=Shift+M, Say when the current record was last modified
+Say Edited=Shift+E, Say when the current record was last edited
 Say Notes=Shift+N, Say the notes field of the current record
 Say Order=Shift+O, Say the active order (sort) expression
-Say Related=Shift+R, Say records related to the current one via foreign keys
+Say Related=Shift+R, Say the look value of each parent and child record related to the current one
 Say Tags=Shift+T, Say the tags field of the current record
 Say URL=Shift+U, Say the url field of the current record
 Say Yield=Shift+Y, Say the yield (record count) of the current filter
@@ -130,7 +154,7 @@ Say Marked=Alt+M, Say the marked records (their look values)
 Say Tables=Shift+F4, Say the list of tables visited this session
 Say Clipboard=Alt+Apostrophe, Say the current clipboard text
 Say Position=Alt+Delete, Say current position, record count, and percent through
-Say Sort Filter=Shift+D8, Say the active sort and filter expressions
+Say Sort Filter=Shift+8, Say the active sort and filter expressions
 Say Column Rest=Control+L, Say (list) the rest of the current column from the cursor down
 Say Column Rest Marked=Control+Shift+L, Say the rest of the current column for marked records only
 Say Records Rest=Alt+L, Say (list) the rest of the records in full from the cursor down
@@ -146,12 +170,12 @@ Select Columns=Alt+S, Select (choose) which columns are visible in the grid
 Update View=F5, Update (refresh) the visible rows from the database
 Extract Regex=Control+Shift+X, Extract matches of a regular expression to the clipboard
 Invoke SQL=Control+Q, Invoke an SQL query against the current database
-Invoke Script=Alt+V, Invoke a script file against DbDuo
+Invoke Script=Alt+V, Invoke a script file against DbDo
 Edit Script=Alt+Shift+V, Edit a script file in the configured text editor
-Edit Settings=Alt+Shift+E, Edit DbDuo settings stored in the configuration file
+Edit Settings=Alt+Shift+E, Edit DbDo settings stored in the configuration file
 Open File Folder=Alt+Backslash, Open the folder containing the current database in Windows Explorer
 Out Printer=Control+P, Output (print) the current grid to the default printer
-Enter Console=Control+Oemtilde, Enter (summon) the DbDuo console window
+Enter Console=Control+GraveAccent, Enter (summon) the DbDo console window
 
 ; ===== Toggles =====
 Toggle Read Only=Alt+Z, Toggle read-only mode to protect data from edits
@@ -160,15 +184,15 @@ Toggle Extra Speech=Alt+Shift+Z, Toggle extra speech messages on or off
 Toggle Key Help=Control+F1, Toggle key describer mode: pressing a key says its command instead of running it
 
 ; ===== Help menu =====
-Get Help=F1, Get (display) DbDuo documentation
-Show History=Shift+F1, Show the history of DbDuo fixes and enhancements
-About DbDuo=Alt+F1, About: display DbDuo version number and release date
+Get Help=F1, Get (display) DbDo documentation
+Show History=Shift+F1, Show the history of DbDo fixes and enhancements
+About DbDo=Alt+F1, About: display DbDo version number and release date
 Alternate Menu=Alt+F10, Alternate menu: pick a command to run from the complete alphabetized list
-Elevate Version=F11, Elevate (download and install) the latest DbDuo version
+Elevate Version=F11, Elevate (download and install) the latest DbDo version
 
 [Folders]
 
-; DbDuo writes to this section automatically to remember the folder
+; DbDo writes to this section automatically to remember the folder
 ; the user last visited in each kind of file dialog. The next time
 ; the same kind of dialog opens, it starts in the remembered folder
 ; instead of forcing the user to navigate back from the default.
@@ -184,11 +208,11 @@ Elevate Version=F11, Elevate (download and install) the latest DbDuo version
 ;
 ;   export  - File > Export-Data target files.
 ;
-; If a remembered folder no longer exists on disk, DbDuo falls back to
+; If a remembered folder no longer exists on disk, DbDo falls back to
 ; (in order) the folder of the currently-open database, then the user's
 ; Documents folder, then lets Windows pick.
 ;
-; You can edit these values to seed a starting folder, but DbDuo will
+; You can edit these values to seed a starting folder, but DbDo will
 ; overwrite them after the next dialog use.
 ;
 ; open   = C:\Users\you\Databases
@@ -197,7 +221,7 @@ Elevate Version=F11, Elevate (download and install) the latest DbDuo version
 
 [Session]
 
-; DbDuo writes to this section automatically to remember which database
+; DbDo writes to this section automatically to remember which database
 ; and table were last open, so the next launch returns to the same place.
 ; You can clear these by deleting the file, or override them with the
 ; -open <path> command-line flag.
@@ -207,23 +231,23 @@ Elevate Version=F11, Elevate (download and install) the latest DbDuo version
 
 [Options]
 
-; commandEcho controls whether DbDuo announces each command's name
+; commandEcho controls whether DbDo announces each command's name
 ; through the screen reader (GUI) or prints a [Command-Name] marker
 ; (CLI) just before the command runs. EdSharp's 'ExtraSpeech=Y'
 ; is the model. Default Y. Set to N if you find the confirmation
 ; noisy.
-commandEcho = Y
+commandEcho = N
 
 [ConnectStrings]
 
 ; Maps a file-extension token to the ADODB connection string used
-; when DbDuo opens a file with that extension. The literal substring
+; when DbDo opens a file with that extension. The literal substring
 ; "{path}" in a template is replaced with the full file path at
 ; connection time; "{folder}" is replaced with the directory
 ; containing the file (used by drivers that open a folder of files
 ; rather than a single file, such as the Jet text driver and dBASE).
 ;
-; The defaults below match the connection strings DbDuo's C# code
+; The defaults below match the connection strings DbDo's C# code
 ; uses internally; the ini values OVERRIDE the built-in defaults so
 ; an advanced user can switch drivers (for example, replace the
 ; SQLite ODBC driver name to point at a newer build, or change
@@ -234,32 +258,54 @@ commandEcho = Y
 ; SQLite databases (.db, .sqlite, .sqlite3). The ch-werner SQLite
 ; ODBC driver is a pass-through to the SQLite library version
 ; bundled with the driver -- full modern SQL surface available.
-db      = Driver={SQLite3 ODBC Driver};Database={path};
-sqlite  = Driver={SQLite3 ODBC Driver};Database={path};
-sqlite3 = Driver={SQLite3 ODBC Driver};Database={path};
+db=`
+Driver={SQLite3 ODBC Driver};Database={path};
+`
+sqlite=`
+Driver={SQLite3 ODBC Driver};Database={path};
+`
+sqlite3=`
+Driver={SQLite3 ODBC Driver};Database={path};
+`
 
 ; Microsoft Access (.mdb = Jet 4.0, .accdb = ACE). Access SQL
 ; dialect (IIF instead of CASE, * and ? for LIKE wildcards, etc.).
-mdb   = Provider=Microsoft.ACE.OLEDB.12.0;Data Source={path};Persist Security Info=False;
-accdb = Provider=Microsoft.ACE.OLEDB.12.0;Data Source={path};Persist Security Info=False;
+mdb=`
+Provider=Microsoft.ACE.OLEDB.12.0;Data Source={path};Persist Security Info=False;
+`
+accdb=`
+Provider=Microsoft.ACE.OLEDB.12.0;Data Source={path};Persist Security Info=False;
+`
 
 ; Excel (.xls = Excel 8.0 / Jet 4.0, .xlsx and .xlsm = Excel 12.0
 ; Xml / ACE). HDR=Yes treats the first row as column headers;
 ; change to HDR=No to refer to columns as F1, F2, F3 etc. IMEX=1
 ; coerces all columns to text on read, which mitigates the
 ; first-8-rows type-detection gotcha for sparse numeric columns.
-xls  = Provider=Microsoft.ACE.OLEDB.12.0;Data Source={path};Extended Properties="Excel 8.0;HDR=Yes;IMEX=1";
-xlsx = Provider=Microsoft.ACE.OLEDB.12.0;Data Source={path};Extended Properties="Excel 12.0 Xml;HDR=Yes;IMEX=1";
-xlsm = Provider=Microsoft.ACE.OLEDB.12.0;Data Source={path};Extended Properties="Excel 12.0 Macro;HDR=Yes;IMEX=1";
+xls=`
+Provider=Microsoft.ACE.OLEDB.12.0;Data Source={path};Extended Properties="Excel 8.0;HDR=Yes;IMEX=1";
+`
+xlsx=`
+Provider=Microsoft.ACE.OLEDB.12.0;Data Source={path};Extended Properties="Excel 12.0 Xml;HDR=Yes;IMEX=1";
+`
+xlsm=`
+Provider=Microsoft.ACE.OLEDB.12.0;Data Source={path};Extended Properties="Excel 12.0 Macro;HDR=Yes;IMEX=1";
+`
 
 ; dBASE (.dbf). The connection is to the folder containing the
 ; .dbf; each .dbf in the folder becomes a table. Field identifiers
 ; are 10 characters max, no spaces or hyphens.
-dbf = Provider=Microsoft.ACE.OLEDB.12.0;Data Source={folder};Extended Properties="dBASE IV;HDR=No;IMEX=1";
+dbf=`
+Provider=Microsoft.ACE.OLEDB.12.0;Data Source={folder};Extended Properties="dBASE IV;HDR=No;IMEX=1";
+`
 
 ; Plain-text delimited files (.csv, .tsv). The Jet text driver
 ; connects to the folder; each file in the folder becomes a table.
 ; CSV uses Delimited format; TSV uses TabDelimited. SELECT works
 ; well; INSERT is limited; UPDATE / DELETE are effectively absent.
-csv = Provider=Microsoft.ACE.OLEDB.12.0;Data Source={folder};Extended Properties="text;HDR=Yes;FMT=Delimited";
-tsv = Provider=Microsoft.ACE.OLEDB.12.0;Data Source={folder};Extended Properties="text;HDR=Yes;FMT=TabDelimited";
+csv=`
+Provider=Microsoft.ACE.OLEDB.12.0;Data Source={folder};Extended Properties="text;HDR=Yes;FMT=Delimited";
+`
+tsv=`
+Provider=Microsoft.ACE.OLEDB.12.0;Data Source={folder};Extended Properties="text;HDR=Yes;FMT=TabDelimited";
+`

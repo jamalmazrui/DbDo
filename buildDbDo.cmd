@@ -1,35 +1,35 @@
 @echo off
 rem ====================================================================
-rem buildDbDuo.cmd - build script for DbDuo.exe (v1.0.44 and later).
+rem buildDbDo.cmd - build script for DbDo.exe (v1.0.44 and later).
 rem
 rem Compiles two assemblies with the stock .NET Framework compilers:
 rem
-rem   1. DbDuo.dll -- JScript .NET support module, compiled from
-rem      DbDuo.js by jsc.exe. Used by the Help > Invoke Snippet
+rem   1. DbDo.dll -- JScript .NET support module, compiled from
+rem      DbDo.js by jsc.exe. Used by the Help > Invoke Snippet
 rem      feature to run user-written .js snippets against the running
-rem      DbDuoForm and DbDuoManager.
+rem      DbDoForm and DbDoManager.
 rem
-rem   2. DbDuo.exe -- the main WinForms application, compiled from
-rem      DbDuo.cs by csc.exe. The exe calls DbDuo.JS.runScript(...)
+rem   2. DbDo.exe -- the main WinForms application, compiled from
+rem      DbDo.cs by csc.exe. The exe calls DbDo.JS.runScript(...)
 rem      via reflection (Assembly.LoadFrom + GetType + GetMethod),
-rem      so csc.exe does NOT take /reference:DbDuo.dll at compile time.
+rem      so csc.exe does NOT take /reference:DbDo.dll at compile time.
 rem      Avoiding the compile-time reference also prevents an assembly-
-rem      name collision at load time: the EXE is also named DbDuo,
-rem      so Assembly.Load("DbDuo") would resolve to DbDuo.exe instead
-rem      of DbDuo.dll. We use Assembly.LoadFrom with the full path to
-rem      DbDuo.dll for an unambiguous load.
+rem      name collision at load time: the EXE is also named DbDo,
+rem      so Assembly.Load("DbDo") would resolve to DbDo.exe instead
+rem      of DbDo.dll. We use Assembly.LoadFrom with the full path to
+rem      DbDo.dll for an unambiguous load.
 rem
 rem ---------- Why bare compilers, not MSBuild + NuGet ----------
 rem
 rem v1.0.42 and v1.0.43 used MSBuild + NuGet to pull in the Roslyn
 rem C# scripting package (Microsoft.CodeAnalysis.CSharp.Scripting),
 rem which dragged about a dozen transitive DLLs (~25-30 MB) into the
-rem DbDuo install folder. That worked but was disproportionate to the
+rem DbDo install folder. That worked but was disproportionate to the
 rem feature it enabled. v1.0.44 follows EdSharp's model: JScript .NET
 rem via jsc.exe. JScript .NET ships with every .NET 4.x install in the
 rem v4.0.30319 framework folder; no NuGet package, no shipped DLLs,
 rem no binding redirects. The whole scripting subsystem is one ~10 KB
-rem DbDuo.dll plus the snippet folder.
+rem DbDo.dll plus the snippet folder.
 rem
 rem ---------- Compiler search order ----------
 rem
@@ -47,32 +47,32 @@ setlocal enableextensions enabledelayedexpansion
 
 pushd "%~dp0"
 
-set "log=buildDbDuo.log"
-echo DbDuo build log > "!log!"
+set "log=buildDbDo.log"
+echo DbDo build log > "!log!"
 echo Started at %DATE% %TIME% (Pacific time, Seattle) >> "!log!"
 echo Script directory: %~dp0 >> "!log!"
 echo Working directory: %CD% >> "!log!"
 echo. >> "!log!"
 
 rem ---- check source files ----
-if not exist "DbDuo.cs"  goto :no_dbduo_cs
-if not exist "DbDuo.js"  goto :no_dbduo_js
+if not exist "DbDo.cs"  goto :no_dbduo_cs
+if not exist "DbDo.js"  goto :no_dbduo_js
 goto :have_sources
 
 :no_dbduo_cs
-echo ERROR: DbDuo.cs not found. >> "!log!"
-echo ERROR: DbDuo.cs not found in script directory.
+echo ERROR: DbDo.cs not found. >> "!log!"
+echo ERROR: DbDo.cs not found in script directory.
 popd
 exit /b 1
 
 :no_dbduo_js
-echo ERROR: DbDuo.js not found. >> "!log!"
-echo ERROR: DbDuo.js not found in script directory.
+echo ERROR: DbDo.js not found. >> "!log!"
+echo ERROR: DbDo.js not found in script directory.
 popd
 exit /b 1
 
 :have_sources
-echo Found: DbDuo.cs, DbDuo.js >> "!log!"
+echo Found: DbDo.cs, DbDo.js >> "!log!"
 
 rem ---- locate csc.exe ----
 rem Prefer Roslyn from Visual Studio Build Tools / VS 2022/2019, fall
@@ -214,67 +214,67 @@ if errorlevel 1 (
     echo WARNING: NVDA controller DLL download failed; see %log%.
     echo Manual fallback: fetch x64\nvdaControllerClient.dll from
     echo   %nvdaUrl%
-    echo and place it next to DbDuo.exe.
+    echo and place it next to DbDo.exe.
 )
 :have_nvda_dll
 
-rem ---- compile DbDuo.js -> DbDuo.dll (JScript .NET) ----
+rem ---- compile DbDo.js -> DbDo.dll (JScript .NET) ----
 rem
 rem /target:library so the result is a DLL we can load at runtime.
 rem /reference: omitted -- jsc.exe auto-resolves mscorlib, System,
 rem System.Windows.Forms, etc., from the framework directory.
 rem /platform:anycpu so the DLL can be loaded by either x86 or x64
-rem hosts (DbDuo is x64 but anycpu is the convention for class libs).
+rem hosts (DbDo is x64 but anycpu is the convention for class libs).
 rem /out: names the assembly explicitly.
 rem
-rem The DLL is loaded by DbDuo.exe at run time via Assembly.LoadFrom,
-rem not at compile time. No /reference: to DbDuo.dll is passed to
+rem The DLL is loaded by DbDo.exe at run time via Assembly.LoadFrom,
+rem not at compile time. No /reference: to DbDo.dll is passed to
 rem csc.exe below, because a same-name compile-time reference would
-rem create an assembly-name collision with DbDuo.exe at load time.
+rem create an assembly-name collision with DbDo.exe at load time.
 echo. >> "!log!"
-echo Compiling DbDuo.js -> DbDuo.dll ... >> "!log!"
-echo Compiling DbDuo.js -> DbDuo.dll ...
-"!jsc!" /target:library /platform:anycpu /nologo /out:DbDuo.dll DbDuo.js >> "!log!" 2>&1
+echo Compiling DbDo.js -> DbDo.dll ... >> "!log!"
+echo Compiling DbDo.js -> DbDo.dll ...
+"!jsc!" /target:library /platform:anycpu /nologo /out:DbDo.dll DbDo.js >> "!log!" 2>&1
 if errorlevel 1 goto :build_failed
-echo DbDuo.dll built.
+echo DbDo.dll built.
 
-rem ---- compile DbDuo.cs -> DbDuo.exe ----
+rem ---- compile DbDo.cs -> DbDo.exe ----
 rem
-rem No /reference:DbDuo.dll: the C# code calls DbDuo.JS.runScript via
+rem No /reference:DbDo.dll: the C# code calls DbDo.JS.runScript via
 rem reflection (Assembly.LoadFrom + GetType + GetMethod), so no
 rem compile-time reference is needed. Avoiding /reference: here also
 rem prevents an assembly-name collision at load time, since both the
-rem EXE and the snippet DLL have the simple name "DbDuo".
+rem EXE and the snippet DLL have the simple name "DbDo".
 rem
 rem As of v1.0.87, csc.exe is passed explicit /reference: paths for
 rem UIAutomationProvider.dll and UIAutomationTypes.dll (located above
 rem and stored in !uiaProv! and !uiaTypes!). Other framework
 rem references continue to auto-resolve from csc.rsp.
 echo. >> "!log!"
-echo Compiling DbDuo.cs -> DbDuo.exe ... >> "!log!"
-echo Compiling DbDuo.cs -> DbDuo.exe ...
+echo Compiling DbDo.cs -> DbDo.exe ... >> "!log!"
+echo Compiling DbDo.cs -> DbDo.exe ...
 rem Delete any stale .exe first so a failed compile leaves no half-
 rem written executable that Windows might mistake for a 16-bit binary
 rem (the misleading "Unsupported 16-Bit Application" dialog appears
 rem when the loader sees an empty or truncated MZ image).
-if exist DbDuo.exe del /f /q DbDuo.exe
-if exist DbDuo.ico (
-    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32icon:DbDuo.ico /win32manifest:DbDuo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /out:DbDuo.exe DbDuo.cs >> "!log!" 2>&1
+if exist DbDo.exe del /f /q DbDo.exe
+if exist DbDo.ico (
+    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32icon:DbDo.ico /win32manifest:DbDo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /out:DbDo.exe DbDo.cs >> "!log!" 2>&1
 ) else (
-    echo NOTE: DbDuo.ico not found; building without embedded icon. >> "!log!"
-    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32manifest:DbDuo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /out:DbDuo.exe DbDuo.cs >> "!log!" 2>&1
+    echo NOTE: DbDo.ico not found; building without embedded icon. >> "!log!"
+    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32manifest:DbDo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /out:DbDo.exe DbDo.cs >> "!log!" 2>&1
 )
 if errorlevel 1 goto :build_failed
-echo DbDuo.exe built.
-dir DbDuo.exe | findstr DbDuo.exe
+echo DbDo.exe built.
+dir DbDo.exe | findstr DbDo.exe
 
 rem ---- generate HTML documentation ----
 echo. >> "!log!"
 echo Generating HTML documentation ... >> "!log!"
 where pandoc >nul 2>&1
 if errorlevel 1 goto :no_pandoc
-pandoc --standalone --toc --toc-depth=3 --metadata=title:"DbDuo User Guide" -o DbDuo.htm DbDuo.md >> "!log!" 2>&1
-pandoc --standalone --toc --toc-depth=3 --metadata=title:"DbDuo README" -o README.htm README.md >> "!log!" 2>&1
+pandoc --standalone --toc --toc-depth=3 --metadata=title:"DbDo User Guide" -o DbDo.htm DbDo.md >> "!log!" 2>&1
+pandoc --standalone --toc --toc-depth=3 --metadata=title:"DbDo README" -o README.htm README.md >> "!log!" 2>&1
 goto :doc_done
 :no_pandoc
 echo WARNING: pandoc not found on PATH. Install with: winget install JohnMacFarlane.Pandoc
@@ -282,8 +282,8 @@ echo WARNING: pandoc not found on PATH. Install with: winget install JohnMacFarl
 :doc_done
 echo.
 echo Build complete. Artifacts in this directory:
-echo   DbDuo.exe       -- the application
-echo   DbDuo.dll       -- JScript .NET scripting support
+echo   DbDo.exe       -- the application
+echo   DbDo.dll       -- JScript .NET scripting support
 echo   nvdaControllerClient.dll -- NVDA controller-client DLL
 popd
 endlocal

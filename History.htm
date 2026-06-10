@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>DbDuo History</title>
+  <title>DbDo History</title>
   <style>
     html {
       color: #1a1a1a;
@@ -230,17 +230,166 @@
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">DbDuo History</h1>
+<h1 class="title">DbDo History</h1>
 </header>
-<h1 id="dbduo-history-of-changes">DbDuo History of Changes</h1>
-<p>This file is the chronological record of DbDuo releases. The most
-recent release is at the top. For the overview of what DbDuo is, see
+<h1 id="dbdo-history-of-changes">DbDo History of Changes</h1>
+<p>This file is the chronological record of DbDo releases. The most
+recent release is at the top. For the overview of what DbDo is, see
 <code>Announce.md</code> or <code>README.md</code>. For the full
-reference, see <code>DbDuo.md</code>.</p>
-<p>Press <strong>Shift+F1</strong> inside DbDuo to open this file in
-your browser, or type <code>history</code> at the dot prompt.</p>
-<h2 id="v1.0.104-current">v1.0.104 (current)</h2>
-<p><strong><code>DbDuo.ini</code> now drives hotkey bindings and command
+reference, see <code>DbDo.md</code>.</p>
+<p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
+browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="v1.0.106-current">v1.0.106 (current)</h2>
+<p><strong>Primary keys follow the <code>&lt;singular&gt;_id</code>
+convention.</strong> Every sample database’s primary key is renamed from
+the bare <code>id</code> to the singular table name plus
+<code>_id</code> (<code>teacher_id</code>, <code>wine_id</code>,
+<code>order_detail_id</code>), so a foreign key now carries the SAME
+name as the parent primary key it references (<code>teacher_id</code> in
+<code>classes</code> references <code>teachers(teacher_id)</code>). The
+same key name on both ends of every relationship makes schemas,
+generated SQL, grep results, and – most importantly for this program –
+spoken column names self-identifying. Code already preferred
+<code>&lt;singular&gt;_id</code> discovery with a bare-<code>id</code>
+fallback; the fallback is retained for legacy databases.
+<code>NFB2026Convention.db</code> is deliberately NOT migrated – it
+awaits a separate schema redesign.</p>
+<p><strong><code>edited</code> replaces <code>modified</code> as the
+standard last-change column.</strong> Consistent with Control+E (Edit
+Record) and Alt+E (Edit menu). The <code>Metadata.ModifiedColumn</code>
+constant is renamed <code>EditedColumn</code>; the standard-hidden list,
+bookkeeping list, date-sort list, index-recommendation pass, status bar
+(“edited YYYY-MM-DD”), Edit Cell refusal message, and New Record skip
+list all follow.</p>
+<p><strong>Say Edited on Shift+E.</strong> The command formerly called
+Say Modified (Shift+M) is renamed Say Edited and rebound to Shift+E, the
+mnemonic parallel of Shift+A for Say Added. It speaks the
+<code>edited</code> timestamp in the same human-friendly local-time form
+(“April 15, 2026 at 5:42 PM”), falling back to <code>added</code> when
+the table has no <code>edited</code> column. Shift+M is now unbound.</p>
+<p><strong>Standard hidden columns confirmed as: <code>added</code>,
+<code>edited</code>, <code>notes</code>, <code>tags</code>,
+<code>url</code>, <code>look</code>, <code>unq</code>,
+<code>marked</code></strong> – plus the
+every-<code>_id</code>-and-bare-<code>id</code> key rule. (Same set as
+before, with <code>edited</code> in place of <code>modified</code>.)</p>
+<p><strong>Edited-timestamp triggers rewritten so marking never bumps
+the timestamp.</strong> Each sample-table trigger is now
+<code>AFTER UPDATE OF &lt;data columns&gt; ... WHEN OLD.col IS NOT NEW.col OR ...</code>:
+the OF list excludes <code>marked</code> (and the bookkeeping columns),
+so Mark Record (Control+M), Unmark Record (Control+U), Toggle Marked
+(Control+Space), and the range-mark commands leave <code>edited</code>
+untouched; the null-safe WHEN clause additionally skips no-op saves
+where the Edit Record dialog hands every field back unchanged. Verified
+by test: marking does not bump, a real edit does, a no-op save does
+not.</p>
+<p><strong><code>look</code> and <code>unq</code> redesigned per table
+across the sample databases.</strong> Previously most tables defined
+<code>look</code> and <code>unq</code> as the SAME expression, defeating
+their distinct purposes. Now <code>look</code> concatenates the few
+human-identifying columns (’ | ’ separated, empties skipped) while
+<code>unq</code> concatenates the uniqueness-defining columns (‘|’
+separated, positionally stable via coalesce, so a NULL keeps its slot
+and two rows can’t collide by omission). Example: chinook customers –
+look is first_name | last_name | company; unq is
+first_name|last_name|email. A <code>unq</code> index is created per
+table – UNIQUE where the data allows (every table except none; all
+passed), supporting upsert-style scripts that match on
+<code>unq</code>.</p>
+<p><strong>Say Related (Shift+R) now lists children too.</strong> One
+look line per related record: parents as before (“teachers: Anita Carver
+| acarver@school.edu”), then each child table as a header with up to
+five look lines and an “and N more” footer. Previously only parent rows
+were listed.</p>
+<p><strong>Companion design files updated to the new
+convention.</strong> <code>FkResolution.cs</code>,
+<code>ImportNormalization.cs</code>, and <code>Lookups.cs</code>
+(unwired design drops – only <code>DbDo.cs</code> is compiled) had
+headers written for the bare-<code>id</code> era; their comments now
+describe the <code>&lt;singular&gt;_id</code> convention.
+<code>rebuildSamples.py</code> is included as the regeneration script
+for the five migrated sample databases.</p>
+<p><strong>Documentation synchronized</strong>: <code>DbDo.md</code>
+(standard-fields section, trigger section with the new SQL pattern, Say
+Edited, sample-database descriptions), <code>README.md</code>
+(convention description; explicit note that the convention database
+still uses bare <code>id</code> pending redesign),
+<code>Announce.md</code> (now lists all five samples), and
+<code>DbDo.ini</code> (Say Edited entry; Say Related description).</p>
+<p><strong>Script extension renamed <code>.duo</code> -&gt;
+<code>.dbdo</code>.</strong> The command-batch extension is now simply
+the program’s own name – unmistakable association, clean namespace.
+<code>Scripts/RecentOrders.dbdo</code> and
+<code>Scripts/StatusSnapshot.dbdo</code> renamed; the Invoke Script
+picker, file-dialog filter, dispatcher, installer entries, and
+documentation all follow. No aliases for the old extension.</p>
+<p><strong>Global Alt+GraveAccent hotkey dropped.</strong> DbDo is a
+single-instance application, so the Alt+Control+GraveAccent toggle
+already covers both directions of GUI/console switching; the one-way
+console-to-GUI chord was redundant and reserved a second system-wide
+chord other applications may want. The pair is now Control+GraveAccent
+(GUI menu, GUI -&gt; console) and Alt+Control+GraveAccent (global
+toggle).</p>
+<p><strong>Settings file renamed <code>DbDo.ini</code> -&gt;
+<code>DbDo.inix</code>, now read as Inix.</strong> The per-user and
+shipped settings files use DbDo’s own extended-ini format. The settings
+readers (<code>readIniValue</code>, <code>readIniFromFile</code>,
+<code>IniSession.readFrom</code>) route through <code>InixCodec</code>,
+so any setting may hold a multi-line value in the fenced or plain Inix
+form. A new <code>InixCodec.writeValue</code> surgically sets, replaces,
+or removes one key while preserving all comments and other lines –
+fence-aware in both directions (a value containing a newline,
+<code>=</code>, or a leading <code>[</code> is written fenced; an
+existing fenced value is replaced or removed as a whole block; the key
+scan skips fenced blocks so a <code>key=</code> line inside a fenced
+value is never misread). Both writers (<code>writeIniValue</code> and
+<code>IniSession.write</code>) delegate to it. The shipped template
+demonstrates the payoff: every <code>[ConnectStrings]</code> entry is
+now fenced, the reliable form for values dense with <code>=</code>
+characters. On launch, a per-user <code>DbDo.ini</code> is renamed to
+<code>DbDo.inix</code> automatically (every classic ini file is already
+valid Inix, so no conversion is needed).</p>
+<p><strong>Design principle recorded: every table gets the full standard
+column set.</strong> Convention over configuration applies to DbDo’s own
+infrastructure tables too – the planned <code>maps</code> association
+table (and any future standard table) carries the complete roster
+including both <code>look</code> and <code>unq</code>, the same as every
+domain table.</p>
+<p><strong>Validated</strong>: trigger behavior tests pass on the
+rebuilt databases; foreign-key checks clean; the shipped DbDo.inix
+template round-trips through the Inix parser with all eleven fenced
+ConnectStrings values intact; brace and paren balance verified.</p>
+<h2 id="v1.0.105">v1.0.105</h2>
+<p><strong>Chord bindings are compiled-in only; .ini file is
+documentation for the chord field.</strong> v1.0.104 wired the .ini to
+drive both chords and descriptions; that imposed startup parsing
+overhead on a feature that is not user-configurable in practice (no one
+was going to edit chord bindings; EdSharp’s history confirms this).
+v1.0.105 reverses the chord-override half. Descriptions remain editable
+in <code>DbDo.ini</code> and load at startup – editing wording and
+restarting still works.</p>
+<p>The <code>Hotkeys</code> section header explains: the chord field
+documents the binding, the description field is loaded. Removed
+<code>friendlyToKeysName</code>, <code>normalizeKeyText</code>, and the
+KeysConverter-based parsing – dead code since the runtime never parses
+chord strings now.</p>
+<p><strong>JAWS-canonical key names in display.</strong>
+<code>friendlyKey()</code> (the function that renders a Keys value as
+text for the status bar, menu, and key describer) was already using JAWS
+conventions for most keys. Added the NumPad arithmetic family:
+<code>NumPadPlus</code> (Add), <code>NumPadMinus</code> (Subtract),
+<code>NumPadStar</code> (Multiply), <code>NumPadSlash</code> (Divide),
+<code>NumPadDot</code> (Decimal). And <code>Oemtilde</code> displays as
+<code>GraveAccent</code> (the standard English name). The point: when
+DbDo announces a chord, the user hears the same name JAWS uses for that
+key in their daily browsing.</p>
+<p><strong><code>DbDo.ini</code> Hotkeys section comment
+updated</strong> to explain the documentation-only role of the chord
+field.</p>
+<p><strong>Validated</strong>: brace and paren balance at 26188 lines;
+chord-conflict audit clean.</p>
+<h2 id="v1.0.104">v1.0.104</h2>
+<p><strong><code>DbDo.ini</code> now drives hotkey bindings and command
 descriptions.</strong> New <code>[Hotkeys]</code> section in FileDir
 style. Each line is
 <code>Command Name=Modifiers+Key, Imperative description.</code>
@@ -249,11 +398,11 @@ full-word spelling. Descriptions are single imperative sentences that
 weave common synonyms and – where natural – reinforce the chord-letter
 mnemonic. All 106 chord-bound commands are now in the file.</p>
 <p>The loader is an <strong>override layer</strong> on top of
-compiled-in defaults: if <code>DbDuo.ini</code> is missing, DbDuo still
+compiled-in defaults: if <code>DbDo.ini</code> is missing, DbDo still
 runs with the v1.0.103 defaults; if it’s present, file entries win. Each
 entry overrides the chord AND sets the status-bar / key-describer
 description (<code>KeyMap.dCommandToSummary</code>). You can edit
-<code>DbDuo.ini</code> in any text editor, restart DbDuo, hear the
+<code>DbDo.ini</code> in any text editor, restart DbDo, hear the
 change.</p>
 <p><strong>Friendly key names supported.</strong> The loader translates
 user-friendly key tokens to the .NET <code>Keys</code> enum names before
@@ -270,14 +419,14 @@ may include <code>, or X</code> to declare additional chord(s) for the
 same command (e.g.,
 <code>Beginning Tagged=Shift+B, or Control+Home, Go to beginning tagged item</code>).
 The parser locates the first comma whose tail is NOT <code>or ...</code>
-as the chord/description boundary. The DbDuo <code>[Hotkeys]</code>
-ships without alternate chords today; the parser tolerates them for
-future use.</p>
+as the chord/description boundary. The DbDo <code>[Hotkeys]</code> ships
+without alternate chords today; the parser tolerates them for future
+use.</p>
 <p><strong>Backward-compatible parsing.</strong> <code>[Hotkeys]</code>
 is the modern section name; the historical <code>[Keys]</code>
 (chord-only, no description) is still accepted.</p>
-<p><strong>Distribution adjustment.</strong> <code>DbDuo.exe</code> and
-<code>DbDuo_setup.exe</code> are no longer included in the shipped zip.
+<p><strong>Distribution adjustment.</strong> <code>DbDo.exe</code> and
+<code>DbDo_setup.exe</code> are no longer included in the shipped zip.
 You rebuild them locally.</p>
 <p><strong>Validated</strong>: brace and paren balance at 26275 lines;
 chord-conflict audit clean; all 106 <code>[Hotkeys]</code> entries match
@@ -338,12 +487,12 @@ an overload taking just <code>(sLabel, sValue)</code> (the 3-arg form
 with <code>sTip</code> was the only one defined; the Replace handler
 called the 2-arg form).</p></li>
 <li><p><code>db.getField</code> / <code>db.setField</code> — the
-DbDuoManager API exposes <code>getFieldValue</code> and
+DbDoManager API exposes <code>getFieldValue</code> and
 <code>setFieldValue</code>. The Replace Column / Regex Replace handler
 had been calling non-existent methods. Fixed to use the correct
 names.</p></li>
 <li><p><code>RegexParseException</code> — that type was added in .NET 7;
-DbDuo targets .NET Framework 4.8 where regex parse errors throw
+DbDo targets .NET Framework 4.8 where regex parse errors throw
 <code>System.ArgumentException</code>. Fixed the catch clause.</p></li>
 <li><p>Orphaned <code>miSortRecords</code> field declaration removed
 (the warning becomes silent).</p></li>
@@ -354,7 +503,7 @@ The compilation errors from v1.0.101 are resolved.</p>
 <p>Big design pass driven by user analysis of mnemonic-rule compliance,
 terminology consistency, and screen-reader UX.</p>
 <p><strong>Listview “Unselected” fix.</strong> A real screen-reader bug.
-When DbDuo opened with a previously-opened database, the listview was
+When DbDo opened with a previously-opened database, the listview was
 first presented with VirtualListSize=0 and got focus before updateGrid
 populated rows. JAWS announced “Unselected” for the listview’s initial
 empty state and didn’t re-announce when the selection landed. Fix: a
@@ -372,7 +521,7 @@ retired).</p>
 <code>modified</code>.</strong> Aligns with the Windows / SharePoint /
 Office convention (File Explorer’s “Date modified,” SharePoint’s
 Modified column) over the SQL Rails/Django <code>updated_at</code>
-convention. The DbDuo audience is Windows screen-reader users, for whom
+convention. The DbDo audience is Windows screen-reader users, for whom
 “modified” is the vocabulary heard daily. Centralized standard-column
 names into Metadata constants (<code>ModifiedColumn</code>,
 <code>LookColumn</code>, <code>UrlColumn</code>,
@@ -390,9 +539,9 @@ state” Shift+letter family alongside Say Filter (Shift+F) and Say Order
 (Shift+O).</p>
 <p><strong>New: Toggle Marked on Ctrl+Space.</strong> The Windows
 ListView convention is Ctrl+Space to toggle the focused item’s selection
-state. Since DbDuo uses the marked column as its multi-select
-equivalent, the chord maps directly. Solves the workflow gap where there
-was no single-keystroke way to flip the current record’s mark.</p>
+state. Since DbDo uses the marked column as its multi-select equivalent,
+the chord maps directly. Solves the workflow gap where there was no
+single-keystroke way to flip the current record’s mark.</p>
 <p><strong>Say-X chord moves</strong>:</p>
 <table>
 <thead>
@@ -484,7 +633,7 @@ field-and-statistic picker. New behavior: lists every column in the
 current table in <strong>natural (schema-defined) order</strong>, one
 line per column packing maximum info – name plus declared type plus
 key/null/foreign-key/default constraints. Implementation: new
-<code>DbDuoManager.SchemaColumn</code> class and
+<code>DbDoManager.SchemaColumn</code> class and
 <code>getSchemaColumns(table)</code> method that queries SQLite’s
 <code>PRAGMA table_info</code> plus
 <code>PRAGMA foreign_key_list</code>, with fallback to ADO
@@ -787,10 +936,10 @@ below)</td>
 universal cross-application Save-As convention (Word, Excel, every
 browser save-page-as, every IDE save-file-as). Repurposing it to
 Statistics Column will surprise new users who reflexively press
-Ctrl+Shift+S expecting Save-As. The user’s argument that DbDuo
-auto-saves so Save-As isn’t critical is fair, and Export Database
-remains on Alt+Shift+E. Filed here so it’s visible to anyone reviewing
-the design.</p>
+Ctrl+Shift+S expecting Save-As. The user’s argument that DbDo auto-saves
+so Save-As isn’t critical is fair, and Export Database remains on
+Alt+Shift+E. Filed here so it’s visible to anyone reviewing the
+design.</p>
 <p><strong>Renames affecting dot-prompt tokens</strong> (token =
 lowercase-with-hyphens form):</p>
 <ul>
@@ -884,7 +1033,7 @@ aliases now resolve to <code>export-database</code></li>
 </ul>
 <p>The Ctrl+Shift+S binding stays because Save-As is one of the most
 universal cross-application Windows conventions; new users approaching
-DbDuo expect it to work out of the box.</p>
+DbDo expect it to work out of the box.</p>
 <p><strong>Marks-aware scope-prompt system established.</strong> This is
 the design rule the user requested for commands that can act on either
 the current record or a marked set:</p>
@@ -1024,7 +1173,7 @@ focus, returns the user to wherever they were.”</p>
 chord-conflict audit clean.</p>
 <h2 id="v1.0.95">v1.0.95</h2>
 <p><strong>Pre-publicized-release cleanup pass.</strong> The user
-clarified: DbDuo’s GitHub repo is currently alpha and only a handful of
+clarified: DbDo’s GitHub repo is currently alpha and only a handful of
 blind developers have seen it. There is no installed user base to
 preserve compatibility with. Focus is the cleanest possible design at
 first publicized announcement (Facebook, LinkedIn, etc.). This version
@@ -1073,7 +1222,7 @@ aliases continue to point at the canonical token (now
 <p><strong>Toggle Read Only restored</strong> as a runtime feature.
 v1.0.91 removed the GUI Lock-Database toggle while keeping the
 <code>-readonly</code> command-line flag, which was asymmetric. The user
-re-affirmed the feature’s value: anyone running DbDuo can edit data they
+re-affirmed the feature’s value: anyone running DbDo can edit data they
 have write access to; the read-only toggle is for the user’s own
 protection against accidental edits while browsing.</p>
 <p>Implementation: - <strong>Ctrl+Shift+R</strong> to toggle (mnemonic:
@@ -1293,7 +1442,7 @@ AND the PowerShell-flavored hyphenated form are first-class. The C#
 implementation continues to follow Camel Type. Three independent layers
 (user-facing names, dot-prompt input, internal code identifiers), each
 with its own convention chosen for its audience. The GitHub project URL
-(https://github.com/JamalMazrui/DbDuo) is now in both the README and the
+(https://github.com/JamalMazrui/DbDo) is now in both the README and the
 CLI About output.</p>
 <p>The outdated Alt+Shift+S reference for Toggle Extra Speech (the chord
 since v1.0.91 is Alt+Shift+Z) was also corrected in the README.</p>
@@ -1311,7 +1460,7 @@ problem (mechanical case-conversion of identifiers) from
 natural-language Title Case (which requires knowing which words are
 articles/prepositions/conjunctions). Conclusion: not worth a NuGet
 dependency. The Title Case rules live in the source as documented logic
-future maintainers can adjust. The case-conversion problem for DbDuo is
+future maintainers can adjust. The case-conversion problem for DbDo is
 small enough that a global dictionary isn’t needed either; the
 dot-prompt prefix matcher plus the helpful 60-entry alias table already
 cover both lowercase-with-spaces and hyphenated input.</p>
@@ -1372,7 +1521,7 @@ Database</strong></li>
 Folder</strong></li>
 <li><code>Open-ScriptFolder</code> → <strong>Open Script
 Folder</strong></li>
-<li><code>About-DbDuo</code> → <strong>About DbDuo</strong></li>
+<li><code>About-DbDo</code> → <strong>About DbDo</strong></li>
 <li><code>Invoke-Sql</code> → <strong>Invoke SQL</strong> (uppercased
 acronym)</li>
 <li><code>Open-Url</code>, <code>Say-Url</code> → <strong>Open
@@ -1430,14 +1579,14 @@ restores the EdSharp/FileDir-maximized baseline (Edit-Configuration,
 Switch-KeyDescriber, Step-InitialChange, Save-Path on Shift+P,
 Lock-Database on Ctrl+F7, Toggle-Extra-Speech on Alt+Shift+X).</p>
 <p>The user’s clarification (“relax the constraint to maximize
-EdSharp/FileDir conventions; optimize for DbDuo coherence first”) guided
+EdSharp/FileDir conventions; optimize for DbDo coherence first”) guided
 this version. The renames below reflect that shift.</p>
 <p><strong>Toggle-Extra-Speech rebound to Alt+Shift+Z.</strong> From
 Alt+Shift+X. The “zzz / hush” mnemonic was the user’s suggestion; the
 new chord matches the introduced sibling Toggle-Command-Echo.</p>
 <p><strong>Toggle-Command-Echo added on Ctrl+Shift+Z.</strong> New
 Help-menu item with click handler that mirrors helpExtraSpeechClicked:
-toggles <code>[Options] commandEcho</code> in DbDuo.ini, invalidates the
+toggles <code>[Options] commandEcho</code> in DbDo.ini, invalidates the
 runtime cache, force-speaks “Command echo on” / “off” through the live
 region, and updates its menu Checked state. Default ON, so new users
 hear command names by default; advanced users who find it noisy turn it
@@ -1452,12 +1601,12 @@ and shouldn’t need it echoed back.</p>
 <p><strong>Settings dialog now has both speech toggles.</strong> The
 Settings dialog (renamed from “Configuration Options” – see below)
 exposes Command Echo and Extra Speech as checkboxes. OK saves both to
-DbDuo.ini, applies the runtime state immediately, and refreshes the
+DbDo.ini, applies the runtime state immediately, and refreshes the
 corresponding menu Checked states.</p>
 <p><strong>Lock-Database removed entirely.</strong> The user reframed
-the design assumption: anyone running DbDuo has full read-write
-authority over the data they opened. View-only commands (Say-Cell,
-Say-Position, etc.) let cautious users browse without risk; the explicit
+the design assumption: anyone running DbDo has full read-write authority
+over the data they opened. View-only commands (Say-Cell, Say-Position,
+etc.) let cautious users browse without risk; the explicit
 read-write/read-only toggle is overhead. Removed: menu item, field
 declaration, click handler, Enabled update, command-table entry,
 dot-prompt <code>lock</code> alias. The two
@@ -1465,8 +1614,8 @@ dot-prompt <code>lock</code> alias. The two
 Lock-Database now say “The database was opened read-only. Close it and
 reopen without the -readonly flag to enable editing.” The
 <code>-readonly</code> command-line flag is preserved – users who want
-to launch DbDuo with a database opened read-only from disk can still do
-<code>DbDuo.exe -readonly path</code>.</p>
+to launch DbDo with a database opened read-only from disk can still do
+<code>DbDo.exe -readonly path</code>.</p>
 <p><strong>Renames</strong> (with backward-compat aliases in the dot
 prompt so existing scripts and muscle memory keep working):</p>
 <ul>
@@ -1491,7 +1640,7 @@ Jump-NextInitial joins the established Jump-Record / Jump-RecordPrevious
 family of content-navigation commands.</li>
 </ul>
 <p><strong>On the audience analysis behind these choices</strong>
-(recorded so future renaming has a reference): DbDuo’s realistic user
+(recorded so future renaming has a reference): DbDo’s realistic user
 base splits into three tiers. Tier 1 is blind/visually-impaired
 technical users who already use EdSharp/FileDir daily and have
 PowerShell exposure – they benefit from verb-noun naming and accept
@@ -1499,7 +1648,7 @@ EdSharp conventions. Tier 2 is blind/visually-impaired non-technical
 users who manage personal data and know Microsoft Office conventions if
 anything – they benefit from Office-aligned chords (Ctrl+S, Ctrl+P,
 Ctrl+F, F1 help) and clear menu labels over clever mnemonics. Tier 3 is
-sighted developers building accessible software who use DbDuo as a tool
+sighted developers building accessible software who use DbDo as a tool
 and reference – they benefit from predictable command vocabulary.</p>
 <p>Where EdSharp conventions (Tier 1) and modern Windows conventions
 (Tier 2/3) overlap, both serve all tiers. Where they diverge, the modern
@@ -1582,17 +1731,17 @@ of how the native UIA path was discovered.</p>
 <h2 id="v1.0.89">v1.0.89</h2>
 <p><strong>Namespace clash fix for v1.0.87’s UIA code.</strong> The
 build error on v1.0.88:</p>
-<pre><code>DbDuo.cs(740,13): error CS0104: &#39;AutomationNotificationKind&#39; is an ambiguous
+<pre><code>DbDo.cs(740,13): error CS0104: &#39;AutomationNotificationKind&#39; is an ambiguous
   reference between &#39;System.Windows.Forms.Automation.AutomationNotificationKind&#39;
   and &#39;System.Windows.Automation.AutomationNotificationKind&#39;
-DbDuo.cs(741,13): error CS0104: &#39;AutomationNotificationProcessing&#39; is an
+DbDo.cs(741,13): error CS0104: &#39;AutomationNotificationProcessing&#39; is an
   ambiguous reference...</code></pre>
-<p>Two <code>using</code> directives in DbDuo.cs both pull in enum types
+<p>Two <code>using</code> directives in DbDo.cs both pull in enum types
 of the same name:</p>
 <ul>
 <li><code>using System.Windows.Forms.Automation;</code> – added much
 earlier for <code>AutomationLiveSetting</code> (used by the hidden Label
-that DbDuo’s legacy <code>say()</code> path mutates).</li>
+that DbDo’s legacy <code>say()</code> path mutates).</li>
 <li><code>using System.Windows.Automation;</code> – added in v1.0.87 for
 the <code>IRawElementProviderSimple</code> /
 <code>AutomationNotificationKind</code> /
@@ -1623,19 +1772,19 @@ only the type-resolution at compile time is fixed.</p>
 <h2 id="v1.0.88">v1.0.88</h2>
 <p><strong>Build-script fix for v1.0.87’s UIA references.</strong>
 v1.0.87 added two new <code>/reference:</code> entries to
-<code>buildDbDuo.cmd</code> for <code>UIAutomationProvider.dll</code>
-and <code>UIAutomationTypes.dll</code>, passing the bare DLL names and
+<code>buildDbDo.cmd</code> for <code>UIAutomationProvider.dll</code> and
+<code>UIAutomationTypes.dll</code>, passing the bare DLL names and
 assuming csc.exe would resolve them through <code>csc.rsp</code>. It
 doesn’t – csc.exe’s response file lists a fixed set of common framework
 assemblies, and these two are not in it. The build failed with:</p>
 <pre><code>error CS0006: Metadata file &#39;UIAutomationProvider.dll&#39; could not be found
 error CS0006: Metadata file &#39;UIAutomationTypes.dll&#39; could not be found</code></pre>
-<p>A stale or empty <code>DbDuo.exe</code> from a previous successful
+<p>A stale or empty <code>DbDo.exe</code> from a previous successful
 build was left on disk, and running it triggered Windows’s misleading
 “Unsupported 16-Bit Application” dialog – which appears when the loader
 sees a truncated or zero-byte MZ image, not because the file is actually
 16-bit.</p>
-<p><strong>The fix:</strong> <code>buildDbDuo.cmd</code> now resolves
+<p><strong>The fix:</strong> <code>buildDbDo.cmd</code> now resolves
 both DLLs by probing the standard reference-assemblies folder hierarchy
 and the runtime GAC, then passes full paths to csc:</p>
 <ol type="1">
@@ -1654,22 +1803,22 @@ installed.</li>
 </ol>
 <p>If neither source is reachable, the build aborts with a clear message
 pointing to the .NET Framework 4.8 Developer Pack download. Both
-resolved paths are written to <code>buildDbDuo.log</code> so future
-build failures are diagnosable.</p>
-<p><strong>Defensive cleanup:</strong> <code>buildDbDuo.cmd</code> now
-deletes any existing <code>DbDuo.exe</code> before compile, so a failed
+resolved paths are written to <code>buildDbDo.log</code> so future build
+failures are diagnosable.</p>
+<p><strong>Defensive cleanup:</strong> <code>buildDbDo.cmd</code> now
+deletes any existing <code>DbDo.exe</code> before compile, so a failed
 build leaves no half-written executable behind. This prevents the
 “Unsupported 16-Bit Application” dialog from surfacing when the user
-runs DbDuo after a build failure they may not have noticed.</p>
-<p>No code changes in <code>DbDuo.cs</code> this version – the v1.0.87
+runs DbDo after a build failure they may not have noticed.</p>
+<p>No code changes in <code>DbDo.cs</code> this version – the v1.0.87
 native UIA dispatch (NotificationHostControl / AnnouncerProvider /
 UiaNative) is unchanged. Once this build succeeds, Narrator should hear
-DbDuo announcements as JAWS and NVDA already do.</p>
+DbDo announcements as JAWS and NVDA already do.</p>
 <h2 id="v1.0.87">v1.0.87</h2>
 <p><strong>UIA Notification breakthrough – Narrator now works.</strong>
 The user obtained a working reference WinForms .NET Framework 4.8 sample
 from ChatGPT that reaches JAWS, NVDA, and Narrator simultaneously on
-Windows 11. This version adopts ChatGPT’s technique into DbDuo’s
+Windows 11. This version adopts ChatGPT’s technique into DbDo’s
 <code>LiveRegion</code> speech path.</p>
 <p><strong>The fundamental shift:</strong> previous versions called
 <code>AccessibleObject.RaiseAutomationNotification</code> via reflection
@@ -1711,7 +1860,7 @@ disposing.</li>
 <code>dispatchNativeUiaNotification</code>. The reflection-cached
 <code>MethodInfo</code> and probe flag are gone.</li>
 </ul>
-<p><strong>Build change:</strong> <code>buildDbDuo.cmd</code> now adds
+<p><strong>Build change:</strong> <code>buildDbDo.cmd</code> now adds
 <code>/reference:UIAutomationProvider.dll /reference:UIAutomationTypes.dll</code>
 so csc.exe resolves the <code>IRawElementProviderSimple</code> interface
 and <code>AutomationNotificationKind</code> /
@@ -1734,8 +1883,8 @@ reader.</p>
 <p><strong>Test UIA Speech command</strong> stays removed from the Help
 menu (v1.0.86 dropped it). The native dispatch path is exercised on
 every <code>LiveRegion.say</code> / <code>sayForced</code> /
-<code>sayUiaString</code> call now, so any DbDuo operation that
-announces also serves as a Narrator test.</p>
+<code>sayUiaString</code> call now, so any DbDo operation that announces
+also serves as a Narrator test.</p>
 <p><strong>Earlier eight rounds of speech-path debugging</strong>
 (v1.0.76 - v1.0.86) were guided by the assumption that the managed
 <code>RaiseAutomationNotification</code> was the right API. Microsoft’s
@@ -1754,7 +1903,7 @@ on its host window; comtypes’ <code>COMObject</code> provider is created
 but UIA can’t verify it’s associated with a real window in the tree.
 JAWS apparently doesn’t verify; NVDA and Narrator do. Making wxPython
 work would require subclassing the panel’s window procedure, which is a
-different complexity tier and not relevant to DbDuo. The native-P/Invoke
+different complexity tier and not relevant to DbDo. The native-P/Invoke
 technique remains a WinForms specialty.</p>
 <h2 id="v1.0.86">v1.0.86</h2>
 <p><strong>Major chord-and-command reorganization</strong> per the
@@ -1916,13 +2065,13 @@ round than ship a partial reshuffle that needs another correction pass.
 Tell me your preference on each and I’ll do them together.</p>
 <h2 id="v1.0.84">v1.0.84</h2>
 <p><strong>Mystery resolved.</strong> The reason Alt+W appeared to
-produce JAWS speech in DbDuo while the standalone UIA_WinForms_test app
-was silent: the speech the user heard from DbDuo’s Alt+W was the
+produce JAWS speech in DbDo while the standalone UIA_WinForms_test app
+was silent: the speech the user heard from DbDo’s Alt+W was the
 <strong>command echo</strong> feature, which announces every GUI
 command’s name through the JAWS direct-API path. JAWS was saying “Test
-UIA Speech” — the menu item’s label as echoed by DbDuo’s
+UIA Speech” — the menu item’s label as echoed by DbDo’s
 command-announcement system, not the UIA Notification’s announcement
-payload. The Notification event itself was silent for JAWS in DbDuo too,
+payload. The Notification event itself was silent for JAWS in DbDo too,
 just as it was in the test app.</p>
 <p>This means <strong>the entire UIA Notification code path has been
 dead code</strong> on .NET Framework 4.8 WinForms for the user’s Windows
@@ -1948,7 +2097,7 @@ investigation.</strong> No claim that the UIA path works for any reader
 on the tested configuration. If a future Windows update changes that,
 users can verify via the diagnostic menu item.</li>
 </ul>
-<p>The accessibility story DbDuo offers is: <strong>JAWS and NVDA fully
+<p>The accessibility story DbDo offers is: <strong>JAWS and NVDA fully
 supported via direct APIs. Narrator support is best-effort via the
 documented UIA pattern; on current .NET Framework 4.8 WinForms / Windows
 11 builds, the path does not reach Narrator in our testing.</strong>
@@ -1974,18 +2123,18 @@ mistake for the announcements those menu items make.</li>
 source-priority fix (Label first, matching Microsoft’s documented
 pattern) and eight rounds of attempted variations across v1.0.76 through
 v1.0.82, user testing on Windows 11 confirms Narrator still does not
-hear DbDuo’s UIA Notification announcements. JAWS and NVDA work reliably
+hear DbDo’s UIA Notification announcements. JAWS and NVDA work reliably
 via both their direct-API paths and (in v1.0.82+) the corrected UIA
 Notification path. Narrator does not.</p>
 <p>The investigation is concluded with this honest assessment:
-<strong>DbDuo’s UIA path is implemented per Microsoft’s documented
+<strong>DbDo’s UIA path is implemented per Microsoft’s documented
 pattern</strong>, but Narrator on Windows 11’s current builds does not
 reliably honor <code>RaiseAutomationNotification</code> events from .NET
 Framework 4.8 WinForms apps the same way it does from .NET 6+ WPF apps.
 Kelly Ford’s reference WPF demo built against .NET 8 reaches all three
-readers on the same machine where DbDuo’s .NET Framework 4.8 build
+readers on the same machine where DbDo’s .NET Framework 4.8 build
 reaches only JAWS and NVDA. The runtime appears to be the discriminator;
-moving DbDuo to .NET 8 would bundle a 70-100 MB runtime, which is not
+moving DbDo to .NET 8 would bundle a 70-100 MB runtime, which is not
 acceptable per project policy.</p>
 <p><strong>Changes in this version:</strong></p>
 <ul>
@@ -1995,13 +2144,13 @@ fully supported; Narrator is best-effort through the UIA path.</li>
 results rather than aspirational support.</li>
 <li>The <code>Test UIA Speech</code> command (Alt+W) is retained as a
 diagnostic. Users who want to know whether their particular Windows /
-Narrator configuration hears DbDuo can press it to find out. If a future
-Windows or Narrator update improves UIA Notification dispatch, DbDuo
+Narrator configuration hears DbDo can press it to find out. If a future
+Windows or Narrator update improves UIA Notification dispatch, DbDo
 should benefit automatically without any further code changes – the path
 is wired correctly per the documentation.</li>
 </ul>
 <p><strong>Looking forward:</strong> the Narrator question is now off
-the active investigation list. DbDuo development can return to actual
+the active investigation list. DbDo development can return to actual
 database features. Wave-3 commands, additional standard-column features,
 schema-introspection improvements, and the broader data-management
 roadmap are the next priorities.</p>
@@ -2022,15 +2171,14 @@ or a <code>ListView</code>’s – silently no-ops. The method returns
 success but no UIA event is dispatched.</p>
 </blockquote>
 <p>This is the root cause of seven rounds of debugging that started in
-v1.0.76. DbDuo’s pure-UIA path (<code>sayUiaString</code> and friends)
+v1.0.76. DbDo’s pure-UIA path (<code>sayUiaString</code> and friends)
 was raising the notification from the form’s
 <code>AccessibleObject</code> from v1.0.78 onward, which silently
-no-ops. JAWS still spoke for Alt+W in user testing because DbDuo’s
-legacy <code>say()</code> path mutates the hidden Label’s
-<code>Text</code> from various places around the same time, which JAWS
-picks up as a separate <code>LiveRegionChanged</code> event. The
-Notification event from <code>sayUiaString</code> itself was never
-dispatched.</p>
+no-ops. JAWS still spoke for Alt+W in user testing because DbDo’s legacy
+<code>say()</code> path mutates the hidden Label’s <code>Text</code>
+from various places around the same time, which JAWS picks up as a
+separate <code>LiveRegionChanged</code> event. The Notification event
+from <code>sayUiaString</code> itself was never dispatched.</p>
 <p>The Microsoft-documented working pattern, copied verbatim from the
 .NET Framework “what’s new in accessibility” page:</p>
 <div class="sourceCode" id="cb3"><pre
@@ -2087,22 +2235,22 @@ returning <code>False</code>.</p>
 <ul>
 <li>Why the test .exes returned <code>False</code> / no-speech in
 v1.0.80.</li>
-<li>Why JAWS and NVDA in the v1.0.76 testing of DbDuo’s Alt+W appeared
-to “hear” the test message — they were actually responding to other
+<li>Why JAWS and NVDA in the v1.0.76 testing of DbDo’s Alt+W appeared to
+“hear” the test message — they were actually responding to other
 accessibility events fired by the focus change into the menu and back,
 not the UIA Notification itself.</li>
 <li>Why Narrator has been silent through all five rounds of attempted
 fixes — Narrator depends exclusively on the UIA Notification dispatch,
 which was being rejected at the manifest-version check.</li>
 </ul>
-<p><strong>Fix:</strong> <code>DbDuo.manifest</code> ships now and is
-embedded via <code>csc /win32manifest:DbDuo.manifest</code> in
-<code>buildDbDuo.cmd</code>. The manifest declares Windows 10 (Id
+<p><strong>Fix:</strong> <code>DbDo.manifest</code> ships now and is
+embedded via <code>csc /win32manifest:DbDo.manifest</code> in
+<code>buildDbDo.cmd</code>. The manifest declares Windows 10 (Id
 <code>{8e0f7a12-...}</code>) and earlier supportedOS GUIDs, requested
 execution level <code>asInvoker</code>, and per-monitor DPI awareness.
-The installer (<code>DbDuo_setup.iss</code>) ships
-<code>DbDuo.manifest</code> alongside <code>DbDuo.exe</code> and
-<code>DbDuo.ico</code> so it’s visible in the install folder for
+The installer (<code>DbDo_setup.iss</code>) ships
+<code>DbDo.manifest</code> alongside <code>DbDo.exe</code> and
+<code>DbDo.ico</code> so it’s visible in the install folder for
 diagnostic purposes, though Windows reads it from the .exe’s embedded
 resource at runtime, not the disk file.</p>
 <p><strong>No other code changes.</strong> The <code>LiveRegion</code>
@@ -2112,7 +2260,7 @@ and the silent rejection was happening one layer above the parameter
 count. v1.0.81 tests that.</p>
 <p>If v1.0.81’s Alt+W reaches Narrator (and JAWS and NVDA continue to
 hear it), the manifest hypothesis is confirmed and we can simplify
-DbDuo’s speech architecture confidently. If Narrator is still silent, we
+DbDo’s speech architecture confidently. If Narrator is still silent, we
 need to look at the next layer — possibly Narrator’s notification-source
 filter, or per-app verbosity policy.</p>
 <p>The companion <code>uia_test_apps.zip</code> is updated with
@@ -2137,7 +2285,7 @@ three parameters (<code>AutomationNotificationKind</code>,
 <code>UIElementAutomationPeer.RaiseNotificationEvent</code> does take
 four; the activityId fourth parameter is set to
 <code>string.Empty</code> internally by WinForms.</p>
-<p>DbDuo’s reflection invocations in <code>raiseUiaNotification</code>
+<p>DbDo’s reflection invocations in <code>raiseUiaNotification</code>
 (used by the legacy <code>sayViaUia</code> Narrator-fallback path) and
 <code>raiseUiaNotificationNow</code> (used by v1.0.76’s
 <code>sayUiaString</code>) had been passing four args from day one. Both
@@ -2150,7 +2298,7 @@ direct-API paths (<code>FreedomSci.JawsApi.SayString</code> and
 executes when those readers are running. <strong>Narrator was the only
 path that depended on the UIA call</strong>, and every invocation hit
 the exception silently.</p>
-<p>Both call sites in <code>DbDuo.cs</code> now pass exactly three
+<p>Both call sites in <code>DbDo.cs</code> now pass exactly three
 arguments. The <code>sActivityId</code> parameter is removed from the
 helper chain <code>sayUiaString</code> →
 <code>raiseUiaNotificationWithMode</code> →
@@ -2236,7 +2384,7 @@ Test-Reader diagnostic dialog reported
 <code>Windows reports any screen reader active: no</code> even with
 Narrator running. <code>SystemParametersInfo SPI_GETSCREENREADER</code>
 doesn’t reliably detect Narrator (Microsoft hasn’t documented why); this
-means DbDuo’s existing detection logic mostly falls through to the UIA
+means DbDo’s existing detection logic mostly falls through to the UIA
 path for Narrator. The UIA path itself is the question.</p>
 <h2 id="v1.0.78">v1.0.78</h2>
 <p><strong>Narrator now hears <code>sayUiaString</code>.</strong>
@@ -2257,7 +2405,7 @@ at <code>attach</code> time and
 to the Label only if the form reference is unavailable.</li>
 <li><strong>Processing mode changed from <code>MostRecent</code> (3) to
 <code>All</code> (2).</strong> The legacy <code>sayViaUia</code> path
-(DbDuo’s existing Narrator fallback inside <code>sayForced</code>) was
+(DbDo’s existing Narrator fallback inside <code>sayForced</code>) was
 already using <code>All</code> and getting through to Narrator; the new
 <code>sayUiaString</code> was using <code>MostRecent</code> for “polite
 queuing.” Narrator may filter <code>MostRecent</code> differently from
@@ -2276,7 +2424,7 @@ different <code>AutomationNotificationKind</code> value than
 <p><strong>EdSharp / FileDir chord conventions enforced.</strong> Per
 the user’s reminder, EdSharp and FileDir both use Alt+Shift+C for
 “Configuration Options” and Alt+C for cell-level “Append to Clipboard.”
-DbDuo’s bindings now match:</p>
+DbDo’s bindings now match:</p>
 <ul>
 <li><strong>Alt+C</strong> = Append Cell to Clipboard (unchanged,
 already in this configuration)</li>
@@ -2289,13 +2437,13 @@ reachable via the Edit menu</li>
 <p>Verified against <code>EdSharp.cs</code> and <code>FileDir.cs</code>:
 both have <code>menuMiscConfigurationOptions</code> bound to
 “Alt+Shift+C” with the label “Configuration Options” or “Configuration
-Options …”. DbDuo’s label “Configuration Options…” matches exactly.</p>
+Options …”. DbDo’s label “Configuration Options…” matches exactly.</p>
 <p>The Append Record chord change is a minor regression for users who
 used it. It’s a rare command (collecting multiple records onto the
 clipboard with a separator); the menu access remains and the dot-prompt
 verb <code>append-record</code> still works. EdSharp/FileDir don’t have
 an analogous record-level command, so dropping the chord respects the
-convention rather than inventing a new chord that DbDuo would need to
+convention rather than inventing a new chord that DbDo would need to
 defend long-term.</p>
 <p>A full audit of <code>addItem</code> chord assignments after this
 build confirms no duplicate chord registrations remain.</p>
@@ -2342,7 +2490,7 @@ Both methods fire
 bypassing JAWS’s FreedomSci COM API, NVDA’s controller-client DLL, and
 the Label/LiveRegionChanged intermediary. JAWS, NVDA, and Narrator all
 listen to the UIA Notification event in their default modes, so this
-path reaches all three without DbDuo needing to detect which reader is
+path reaches all three without DbDo needing to detect which reader is
 running.</p>
 <ul>
 <li><code>sayUiaString(sText)</code> uses the
@@ -2356,10 +2504,10 @@ speech.</li>
 <code>sayForced()</code> methods, which continue to prefer per-reader
 APIs when JAWS or NVDA is detected. Nothing was removed; the new methods
 are an additional path the caller chooses explicitly. The activity-id
-string passed to the UIA event is <code>"DbDuo-Uia"</code> for the
-polite variant and <code>"DbDuo-Uia-Important"</code> for the
-interrupting variant, distinct from the existing <code>"DbDuo"</code>
-activity id so screen readers can distinguish the two pipelines if their
+string passed to the UIA event is <code>"DbDo-Uia"</code> for the polite
+variant and <code>"DbDo-Uia-Important"</code> for the interrupting
+variant, distinct from the existing <code>"DbDo"</code> activity id so
+screen readers can distinguish the two pipelines if their
 announcement-history is being inspected.</p>
 <p><strong>Approach traces to</strong> the WPF technique described by
 Kelly Ford in his UIANotifications demo
@@ -2367,7 +2515,7 @@ Kelly Ford in his UIANotifications demo
 The WinForms equivalent uses
 <code>AccessibleObject.RaiseAutomationNotification</code> instead of
 WPF’s <code>UIElementAutomationPeer.RaiseNotificationEvent</code>, but
-the underlying UIA event is the same. DbDuo had a UIA path internally
+the underlying UIA event is the same. DbDo had a UIA path internally
 already (used in its Narrator fallback inside <code>sayViaUia</code>),
 but it was not exposed for direct caller invocation and it hardcoded the
 <code>All</code> processing mode (2); the new methods give callers
@@ -2390,24 +2538,24 @@ can be either a dictionary of dictionaries (named sections like
 <code>[Global]</code> section for top-level keys before the first
 explicit section. No escape characters, no doubled quotes, no backslash
 sequences — values are stored verbatim. The format is the work of Jamal
-Mazrui in the KeyLine toolkit; DbDuo adopts it as another import and
+Mazrui in the KeyLine toolkit; DbDo adopts it as another import and
 export format.</p>
-<p>DbDuo’s Export Data now writes .inix as a list-of-records file,
+<p>DbDo’s Export Data now writes .inix as a list-of-records file,
 choosing the leading-zero width on the <code>[RecordNNN]</code> section
 name so that ASCII sort of section names matches numeric order: 5
 records use <code>[Record1..5]</code>, 99 records use
 <code>[Record01..99]</code>, 999 records use
 <code>[Record001..999]</code>. NULL values are omitted from a record (no
 <code>key=</code> line at all), rather than written as an empty value.
-The output uses UTF-8 with BOM and CRLF line endings, the same as
-DbDuo’s other text-file outputs.</p>
+The output uses UTF-8 with BOM and CRLF line endings, the same as DbDo’s
+other text-file outputs.</p>
 <p>Import Data now accepts .inix files and inserts each section’s pairs
 as a row in the current table. Keys that don’t match a column on the
 target table are silently skipped (matching how the Markdown import
 handles unknown columns). The implicit <code>[Global]</code> section is
 treated as document metadata and skipped when the file has more than one
 section, which is the typical case for table-shaped .inix files.</p>
-<p><strong>One new static class on <code>DbDuo.cs</code>:
+<p><strong>One new static class on <code>DbDo.cs</code>:
 <code>InixCodec</code>.</strong> Public API:</p>
 <ul>
 <li><code>static List&lt;Section&gt; read(string sPath)</code> — parses
@@ -2417,15 +2565,15 @@ an .inix file.</li>
 <li><code>static void writeAsTable(string sPath, List&lt;string&gt; lFields, List&lt;Dictionary&lt;string,string&gt;&gt; lRows)</code>
 — writes list-of-records .inix.</li>
 </ul>
-<p>The codec is independent of <code>DbDuoManager</code>, so other tools
-or scripts in the DbDuo ecosystem can use it as a standalone format
+<p>The codec is independent of <code>DbDoManager</code>, so other tools
+or scripts in the DbDo ecosystem can use it as a standalone format
 library.</p>
-<p><strong>New section “The Inix file format” in DbDuo.md</strong>
+<p><strong>New section “The Inix file format” in DbDo.md</strong>
 documents the format with examples covering all three forms (plain
 multi-line, fenced multi-line, list-of-records), the comment syntax
 including <code>[;Section]</code> for commenting out a whole section,
 the implicit <code>[Global]</code> section, and the use cases.</p>
-<p><strong>README updated</strong> to state DbDuo’s positioning goal
+<p><strong>README updated</strong> to state DbDo’s positioning goal
 explicitly: to be the most screen-reader-accessible and
 keyboard-accessible general-purpose relational-database manager
 available. The accessibility consideration is the design, not a layer
@@ -2500,8 +2648,8 @@ students (3 records)
 
 teachers (3 records)
   child:  classes (3)</code></pre>
-<p>The relation analysis follows DbDuo’s column-naming convention
-(column <code>&lt;other&gt;_id</code> references table
+<p>The relation analysis follows DbDo’s column-naming convention (column
+<code>&lt;other&gt;_id</code> references table
 <code>&lt;other&gt;s</code>) rather than walking
 <code>PRAGMA foreign_key_list</code>, so the same algorithm works for
 .db, .xlsx, .csv, and any other tabular source where the convention has
@@ -2524,7 +2672,7 @@ rather than a nested LbcDialog — avoids event-routing complications when
 an LbcDialog hosts a ListBox that itself spawns a search dialog. The
 chord mapping mirrors the data list’s: Ctrl+J = Jump-to (find first
 match from top), F3 / Shift+F3 = Find-Next / Find-Previous.</p>
-<p><strong>One new helper on <code>DbDuoManager</code>:</strong>
+<p><strong>One new helper on <code>DbDoManager</code>:</strong>
 <code>countRowsOfTable(string sTable)</code> returns the row count via
 <code>SELECT COUNT(*) FROM &lt;table&gt;</code>, or -1 on any error.
 Read-only; doesn’t disturb the current recordset’s position, filter, or
@@ -2533,13 +2681,13 @@ cheap row count without opening a recordset.</p>
 <h2 id="v1.0.72">v1.0.72</h2>
 <p><strong>House style applies to developer documentation too.</strong>
 The lowercase-url convention from v1.0.71 now reaches code comments and
-the History.md entries. Thirteen code comments in DbDuo.cs had “URL”
+the History.md entries. Thirteen code comments in DbDo.cs had “URL”
 lowercased to “url”; History.md had two cases corrected (Wikipedia URLs
 → urls, URL-encoding → url-encoding). Variable names continue to use
 Camel Type casing — <code>sUrl</code>, <code>lUrls</code> — since
 variable naming follows a separate convention.</p>
 <p><strong>Three additions to the Terminology section in
-DbDuo.md:</strong></p>
+DbDo.md:</strong></p>
 <ul>
 <li>“Database” used broadly — covers .xlsx, .csv, and .db. SQLite .db is
 the default for full functionality (triggers, generated columns,
@@ -2549,16 +2697,16 @@ listview experience preserved as the format supports. Standard columns
 can’t be assumed on .xlsx or .csv tables; commands that use them already
 check via <code>hasField</code> and announce a clear refusal when
 absent.</li>
-<li>Key-name convention — DbDuo follows the Freedom Scientific / JAWS
+<li>Key-name convention — DbDo follows the Freedom Scientific / JAWS
 names: Control, Alt, Shift, Enter, Escape, UpArrow, DownArrow, F1-F12,
 Apostrophe, Asterisk, and so on. Combinations written with
 <code>+</code> and no spaces. The convention matches what JAWS announces
 aloud when a key is pressed.</li>
-<li>Camel Type for code — DbDuo’s source follows the Camel Type style;
+<li>Camel Type for code — DbDo’s source follows the Camel Type style;
 the full specification is in <code>CamelType_CSharp.md</code> (markdown
 source) and <code>CamelType_CSharp.htm</code> (Pandoc-rendered HTML, new
 in this build). The build pipeline now generates the HTML alongside
-<code>DbDuo.htm</code> and <code>History.htm</code>; the installer
+<code>DbDo.htm</code> and <code>History.htm</code>; the installer
 bundles both.</li>
 </ul>
 <p><strong>Standard-column accesses audit.</strong> A fresh audit of
@@ -2588,7 +2736,7 @@ gets spelled out as three letters (U-R-L), while “url” reads as one
 syllable (earl), which is faster and less interrupting in the audio
 stream for frequently-issued commands like Open Url and Say Url.</p>
 <p><strong>User-visible strings normalized:</strong> six places in
-<code>DbDuo.cs</code> had uppercase URL in user-facing text. All six
+<code>DbDo.cs</code> had uppercase URL in user-facing text. All six
 lowercased:</p>
 <ul>
 <li>Open Cell Value menu label: “(URL or path)” → “(url or path)”</li>
@@ -2604,7 +2752,7 @@ terminology rule)</li>
 “Could not open url”</li>
 <li>Self-update notification body: “The URL is:” → “The url is:”</li>
 </ul>
-<p>Two more in <code>DbDuo.md</code> prose normalized:</p>
+<p>Two more in <code>DbDo.md</code> prose normalized:</p>
 <ul>
 <li>“open as URL” / “URL or a file path” in the Open Cell Value section
 → “open as url” / “url or a file path”</li>
@@ -2613,7 +2761,7 @@ terminology rule)</li>
 <p>Code comments containing “URL” were left alone — those are
 developer-facing and the lowercase-url convention is a user-facing style
 rule.</p>
-<p><strong>A new subsection in DbDuo.md’s Terminology section</strong>
+<p><strong>A new subsection in DbDo.md’s Terminology section</strong>
 articulates the convention with two paragraphs: one explaining the
 laser/radar/scuba lineage and one explaining the screen-reader speech
 consideration. The convention is now documented so future contributions
@@ -2629,7 +2777,7 @@ column vs field / cell” naming question (Microsoft Access, FileMaker
 Pro, dBASE / FoxPro, the ADODB API all favor record / field for
 end-user-facing commands; PostgreSQL / SQL Server / Oracle documentation
 favors row / column; DBeaver uses both depending on the view mode —
-“Table view” vs “Record view”), DbDuo now articulates and enforces a
+“Table view” vs “Record view”), DbDo now articulates and enforces a
 deliberate context-driven mixture:</p>
 <ul>
 <li><strong>Record</strong> for actions that treat a row as a complete
@@ -2689,8 +2837,8 @@ backward-compatible dot-prompt alias.</li>
 row’s X” patterns to “current record’s X” patterns, with the redundant
 trailing “field” word removed.</li>
 </ul>
-<p><strong>New “Terminology” section in DbDuo.md</strong> (immediately
-after “How DbDuo is organized”) documents the rule with examples and
+<p><strong>New “Terminology” section in DbDo.md</strong> (immediately
+after “How DbDo is organized”) documents the rule with examples and
 acknowledges that users who prefer SQL-canonical vocabulary can use the
 dot-prompt aliases (<code>find</code>, <code>new</code>,
 <code>edit</code>, <code>delete</code>, <code>copy</code>,
@@ -2724,8 +2872,8 @@ SQL SELECT or WITH statement and opens the result as a read-only
 recordset. Find, Filter, Sort, Say-X all work; Mark, Edit, Delete refuse
 because the result has no table identity. Useful for ad-hoc views that
 don’t justify creating a permanent SQLite VIEW. New method
-<code>openSqlRecordset</code> on <code>DbDuoManager</code> does the
-work; calls
+<code>openSqlRecordset</code> on <code>DbDoManager</code> does the work;
+calls
 <code>oRecordset.Open(sql, conn, adOpenStatic, adLockReadOnly, adCmdText)</code>
 against ADODB, sets a synthetic current-table name
 <code>(ad-hoc SELECT)</code> so dialogs and status bars have something
@@ -2737,7 +2885,7 @@ primary key, resolved via <code>actualPrimaryKey</code>), Alt+L /
 Alt+Shift+L = Sort by Look, Alt+T / Alt+Shift+T = Sort by Tags, Alt+U /
 Alt+Shift+U = Sort by Url. Convenience aliases over Sort-Object so the
 user doesn’t have to pick the column through a dialog for the standards
-that always exist on DbDuo-convention tables. All eight thread through a
+that always exist on DbDo-convention tables. All eight thread through a
 single helper <code>sortByFixedColumn</code> that sets
 <code>db.sort</code> and refreshes.</li>
 </ul>
@@ -2767,7 +2915,7 @@ the eventual real implementation.</p>
 <h2 id="v1.0.68">v1.0.68</h2>
 <p><strong>Northwind and Chinook adopt the v1.0.66 standard-column
 extensions.</strong> Both bundled “canonical” sample databases were
-upgraded in place to match DbDuo’s full standard-column convention.
+upgraded in place to match DbDo’s full standard-column convention.
 Discovery: both already had <code>&lt;table&gt;_id</code> primary keys,
 <code>added</code> / <code>updated</code> timestamps,
 <code>notes</code>, <code>tags</code>, <code>marked</code> columns, and
@@ -2779,7 +2927,7 @@ substantive fields. The <code>look</code> column in
 — exactly the right pipe-joined display nickname pattern. The only work
 for v1.0.68 was to <strong>add <code>url</code> (TEXTLINE)</strong> and
 <strong>upgrade <code>notes</code>/<code>tags</code> from
-<code>TEXT</code> to <code>TEXTMEMO</code></strong> so DbDuo’s Edit
+<code>TEXT</code> to <code>TEXTMEMO</code></strong> so DbDo’s Edit
 Record dialog renders the multi-line memo widget. The substantive
 columns (company, contact, city, country, phone for Northwind customers;
 name, title, artist_id for Chinook artists; etc.) are preserved
@@ -2790,13 +2938,13 @@ moved from “visible by default” to “hidden by default” so the listview
 matches the canonical schemas and isn’t cluttered: <code>url</code>,
 <code>tags</code>, <code>notes</code> now join <code>added</code>,
 <code>updated</code>, <code>marked</code>, <code>look</code>,
-<code>unq</code> in DbDuo’s <code>StandardHiddenColumns</code> set.
-Users who want any of those visible in their own databases can use the
-Select Columns command (Alt+S, v1.0.66) to override per-table; the
-override persists to DbDuo.ini via the
-<code>t&lt;n&gt;_selectlist</code> mechanism added in v1.0.66.</p>
+<code>unq</code> in DbDo’s <code>StandardHiddenColumns</code> set. Users
+who want any of those visible in their own databases can use the Select
+Columns command (Alt+S, v1.0.66) to override per-table; the override
+persists to DbDo.ini via the <code>t&lt;n&gt;_selectlist</code>
+mechanism added in v1.0.66.</p>
 <p><strong>Online documentation links for canonical samples.</strong>
-The “Bundled sample databases” section of DbDuo.md now includes external
+The “Bundled sample databases” section of DbDo.md now includes external
 links so users can learn more about the canonical Northwind and Chinook
 schemas and their broader uses:</p>
 <ul>
@@ -2806,12 +2954,12 @@ Wikipedia.</li>
 <li>Chinook: Luis Rocha’s <code>lerocha/chinook-database</code>
 reference repo, plus the SQLite Tutorial walkthrough.</li>
 </ul>
-<p>Both descriptions now explicitly enumerate DbDuo’s adaptations to
-make clear they’re minimal: same substantive columns, snake_case naming
-on the integer primary keys, standard columns appended, TEXTMEMO
-declared on notes/tags. The Foxbase-and-Clipper-era principle survives:
-real databases used for real work need certain things (timestamps,
-look-labels, free-text notes); DbDuo’s standard columns formalize those
+<p>Both descriptions now explicitly enumerate DbDo’s adaptations to make
+clear they’re minimal: same substantive columns, snake_case naming on
+the integer primary keys, standard columns appended, TEXTMEMO declared
+on notes/tags. The Foxbase-and-Clipper-era principle survives: real
+databases used for real work need certain things (timestamps,
+look-labels, free-text notes); DbDo’s standard columns formalize those
 needs without forcing users to redesign canonical sample schemas.</p>
 <p><strong>Mechanics of the upgrade.</strong> Each table got
 <code>ALTER TABLE … ADD COLUMN url TEXTLINE</code>. SQLite doesn’t
@@ -2927,7 +3075,7 @@ and <code>cellar.db</code> rebuilt with the v1.0.66 standard-column
 sequence:
 <code>&lt;table&gt;_id, added, updated, url, tags, notes, look, unq</code>.
 The new <code>url</code> column carries SQLite declared type
-<code>TEXTLINE</code> so DbDuo renders a single-line input box in Edit
+<code>TEXTLINE</code> so DbDo renders a single-line input box in Edit
 Record; <code>tags</code> and <code>notes</code> carry
 <code>TEXTMEMO</code> so they get the multi-line memo widget. Each row’s
 data was rewritten to populate the new look/url/tags/notes fields with
@@ -2937,7 +3085,7 @@ students/teachers. The two textbook databases
 (<code>northwind.db</code>, <code>chinook.db</code>) were left untouched
 to preserve their canonical adapt-of-canonical-SQL-sample identity; ask
 if you want those regenerated too.</p>
-<p><strong>Select-list persistence to DbDuo.ini.</strong> The per-table
+<p><strong>Select-list persistence to DbDo.ini.</strong> The per-table
 column selection set via Alt+S now survives across sessions.
 <code>RecentFiles.TableState</code> gained an <code>sSelectList</code>
 field; <code>loadSection</code> reads <code>t&lt;n&gt;_selectlist</code>
@@ -3043,7 +3191,7 @@ restriction; the Search Next / Search Previous unified family.</p>
 <h2 id="v1.0.64">v1.0.64</h2>
 <p><strong>Critical fix: Key Describer mode could not be
 exited.</strong> When Key Describer was on, Ctrl+F1 (the toggle chord)
-was intercepted by the describe-mode handler — DbDuo announced the chord
+was intercepted by the describe-mode handler — DbDo announced the chord
 and its summary instead of running the toggle. Result: the user could
 enter Key Describer but never leave, blocking application exit short of
 killing the process. The fix adds the same escape EdSharp and FileDir
@@ -3092,7 +3240,7 @@ Implementation lives on LbcDialog (not via TextBox subclassing): a
 form-level KeyDown handler with KeyPreview=true dispatches to twelve
 helper methods, gated by the focused control’s Name prefix
 (<code>TextBox_</code> or <code>Memo_</code>) and a master enable flag
-<code>[Lbc] extraKeys</code> in DbDuo.ini (default Y, cached on first
+<code>[Lbc] extraKeys</code> in DbDo.ini (default Y, cached on first
 read).</p>
 <p><strong>Two new hobbyist sample databases.</strong>
 <code>collection.db</code> is a personal music collection — three tables
@@ -3111,7 +3259,7 @@ status) from tasting notes (multiple over time). Seeded with 8 wines /
 10 bottle lots / 4 tasting notes. New canonical Help-menu commands
 <code>Open-CollectionDatabase</code> (Open Music Collection) and
 <code>Open-CellarDatabase</code> (Open Wine Cellar) parallel the
-existing sample-database openers. Documented in DbDuo.md’s “Bundled
+existing sample-database openers. Documented in DbDo.md’s “Bundled
 sample databases” section.</p>
 <p><strong>Wine drink-window analytical query bundled as a
 script.</strong> <code>Scripts/WineDrinkWindow.sql</code> is the
@@ -3120,7 +3268,7 @@ wine in the cellar with bottles still held, compute years remaining in
 its drink window, sort by urgency (closest to end of window first), and
 classify each as too-young / in-window / past-peak. The kind of query
 that no flat list or spreadsheet can answer naturally — one ORDER BY
-clause and a JOIN against the bottles inventory. Demonstrates DbDuo’s
+clause and a JOIN against the bottles inventory. Demonstrates DbDo’s
 value for hobbyist data: ad-hoc SQL serves real workflows.</p>
 <p><strong>Camel Type compliance for bundled <code>.js</code> script
 samples.</strong> <code>CopyRowToClipboard.js</code> and
@@ -3133,7 +3281,7 @@ alphabetically by type with type-lines themselves in alphabetical order
 (a &lt; b &lt; i &lt; regex &lt; s &lt; sb), the constant
 <code>c_sPattern</code> with the required <code>c_</code> prefix, and
 <code>for each (sName in aFieldNames)</code> for-each iteration instead
-of integer-indexed loops. The DbDuo.js support module was already Camel
+of integer-indexed loops. The DbDo.js support module was already Camel
 Type compliant and is unchanged.</p>
 <p><strong>Native dot-prompt syntax for bundled <code>.duo</code> script
 samples.</strong> The <code>.duo</code> files previously used
@@ -3147,12 +3295,12 @@ dot-prompt aliases (<code>table</code>, <code>filter</code>,
 <code>status</code>, <code>tables-list</code>, <code>sort-filter</code>)
 — matching what users type interactively at the dot prompt. Either form
 still works because the dispatcher resolves aliases, but the natural
-form is shorter, more readable, and consistent with the rest of DbDuo’s
+form is shorter, more readable, and consistent with the rest of DbDo’s
 dot-prompt vocabulary. The <code>.duo</code> starter template was also
 updated. <code>RecentOrders.duo</code> additionally replaces the
 invented <code>sort-recentfirst</code> (which didn’t exist) with the
 standard SQL-style <code>sort order_date desc</code>. The Scripting
-section of DbDuo.md was updated to make this convention explicit, with a
+section of DbDo.md was updated to make this convention explicit, with a
 recommended list of short forms.</p>
 <h2 id="v1.0.62">v1.0.62</h2>
 <p><strong>Key Describer now matches EdSharp and FileDir
@@ -3161,10 +3309,10 @@ behaviors that diverged from its EdSharp/FileDir model and made the
 feature unusable in practice: (1) toggling the mode opened a MessageBox
 confirmation dialog instead of announcing the new state to the screen
 reader; (2) when the mode was on and the user pressed a chord to be
-described, DbDuo opened another MessageBox showing the chord/command
-pair instead of speaking the information; (3) the canonical verb was
-named <code>Trace-Command</code> (mirrored in user-visible status
-strings as “trace mode” and “Trace-Command mode”), which both leaked an
+described, DbDo opened another MessageBox showing the chord/command pair
+instead of speaking the information; (3) the canonical verb was named
+<code>Trace-Command</code> (mirrored in user-visible status strings as
+“trace mode” and “Trace-Command mode”), which both leaked an
 implementation term into the UI and collided with the real PowerShell
 <code>Trace-Command</code> cmdlet.</p>
 <p>Studied EdSharp’s <code>menuItem_Click</code> (line 1640) and
@@ -3176,7 +3324,7 @@ dispatch that, when the flag is on and the click isn’t the Key Describer
 menu item itself, speaks three pieces of information — command name,
 chord, summary — and <em>swallows</em> the click without firing the
 command. No MessageBox anywhere. No tracing terminology.</p>
-<p>DbDuo now follows the same pattern. The
+<p>DbDo now follows the same pattern. The
 <code>helpTraceCommandClicked</code> menu handler (Control+F1) toggles
 <code>KeyMap.bKeyDescriber</code> and announces the new state via
 <code>LiveRegion.say</code>. The <code>KeyMap.tryDispatch</code> path
@@ -3187,7 +3335,7 @@ when on, call
 screen-reader pauses, in one utterance — and swallow the keystroke. The
 command does not run.</p>
 <p>The canonical verb is now <code>Switch-KeyDescriber</code>, matching
-DbDuo’s PowerShell-style verb-noun discipline (Switch- is an approved
+DbDo’s PowerShell-style verb-noun discipline (Switch- is an approved
 PowerShell verb for toggles, and KeyDescriber is the noun). The menu
 item’s user-visible label is still “Key Describer” verbatim per the
 EdSharp/FileDir alignment principle. Dot-prompt aliases
@@ -3226,13 +3374,13 @@ handle the <code>-ies</code> → <code>-y</code>,
 sample folder <code>SampleSnippets</code> is now
 <code>SampleScripts</code>. The user-facing motivation: “script”
 describes what these files do (executable code in JScript .NET that
-drives DbDuo via host objects), whereas “snippet” connotes a passive
-text fragment. EdSharp and FileDir use “Snippet” for their own paste-tag
-idiom which is different from DbDuo’s; the rename also disambiguates
-DbDuo from the editors. Variable names like
-<code>miMiscInvokeSnippet</code> are renamed to
-<code>miMiscInvokeScript</code>. 135 occurrences replaced across the C#
-source, 44 in DbDuo.md, 12 in History.md, 7 in the installer script.</p>
+drives DbDo via host objects), whereas “snippet” connotes a passive text
+fragment. EdSharp and FileDir use “Snippet” for their own paste-tag
+idiom which is different from DbDo’s; the rename also disambiguates DbDo
+from the editors. Variable names like <code>miMiscInvokeSnippet</code>
+are renamed to <code>miMiscInvokeScript</code>. 135 occurrences replaced
+across the C# source, 44 in DbDo.md, 12 in History.md, 7 in the
+installer script.</p>
 <p><strong>Invoke-Script output now uses the LbcDialog memo
 box.</strong> The script-output dialog was a <code>MessageBox</code>
 previously, which is unsuitable for line-by-line, word-by-word, or
@@ -3261,14 +3409,14 @@ open it — a non-standard convention. The label is now
 menu mnemonics are now: Alt+F (File), Alt+E (Edit), Alt+N (Navigate),
 Alt+Q (Query), Alt+M (Misc), Alt+H (Help). Each is unique and matches
 the Windows convention.</p>
-<p><strong>Layout by Code section added to DbDuo.md.</strong> A new
-major section walks through the LbC approach DbDuo uses for every
-dialog: the origin (Jamal Mazrui’s AutoIt LbC of 2006, ported through
-wxPython, JScript .NET, and now C#), the conceptual model (bands, layout
-cursor, dialog units), why LbC matters for a screen-reader audience (tab
-order = call order, focus tips routed to status bar,
-memo-vs-AcceptButton coordination), the anatomy of an LbC dialog with a
-usage example, the full add-control vocabulary (<code>addLabel</code>,
+<p><strong>Layout by Code section added to DbDo.md.</strong> A new major
+section walks through the LbC approach DbDo uses for every dialog: the
+origin (Jamal Mazrui’s AutoIt LbC of 2006, ported through wxPython,
+JScript .NET, and now C#), the conceptual model (bands, layout cursor,
+dialog units), why LbC matters for a screen-reader audience (tab order =
+call order, focus tips routed to status bar, memo-vs-AcceptButton
+coordination), the anatomy of an LbC dialog with a usage example, the
+full add-control vocabulary (<code>addLabel</code>,
 <code>addInputBox</code>, <code>addInlineInputBox</code>,
 <code>addMemoBox</code>, <code>addCheckBox</code>,
 <code>addListBox</code>, <code>addPickBox</code>,
@@ -3298,40 +3446,40 @@ Clipboard. Speaks the current Windows clipboard text via the
 screen-reader live region; double-press opens the read-only memo dialog
 for line-by-line review of long pasted content. Empty and non-text
 clipboards announce that fact rather than going silent. The “Say” prefix
-is retained per DbDuo’s Say-X family convention (the prefix marks the
+is retained per DbDo’s Say-X family convention (the prefix marks the
 command as speech-only, no visible side-effect; FileDir has no such
 family so its bare “Clipboard” label is unambiguous). Canonical verb
 <code>Say-Clipboard</code>. Pass-through configs
-<code>DbDuo_JAWS.zip</code> and <code>DbDuo.nvda-addon</code> extended
-with <code>Alt+Apostrophe=PassDbDuoKey</code> and <code>kb:alt+'</code>
+<code>DbDo_JAWS.zip</code> and <code>DbDo.nvda-addon</code> extended
+with <code>Alt+Apostrophe=PassDbDoKey</code> and <code>kb:alt+'</code>
 so JAWS’s default Alt+Apostrophe = “Say JAWS Version” gives way to
-DbDuo’s handler inside the data list.</p>
+DbDo’s handler inside the data list.</p>
 <p><strong>EdSharp/FileDir-aligned menu names in the Help menu.</strong>
 Five Help-menu items renamed to match the EdSharp and FileDir convention
 exactly, since the chord was already a match in each case: “Help
 Contents” → “Documentation” (F1); “Version History” → “History of
 Changes” (Shift+F1); “Toggle Key Describer Mode” → “Key Describer”
 (Control+F1); “Check for Update…” → “Elevate Version…” (F11); “About
-DbDuo” → “About” (Alt+F1). Also renamed: the Alternate Menu command’s
+DbDo” → “About” (Alt+F1). Also renamed: the Alternate Menu command’s
 label was previously “Command Picker (alternate menu)…” with a verbose
 parenthetical; it is now simply “Alternate Menu…” (the EdSharp/FileDir
 name, Alt+F10). The Misc-menu “Configuration Settings…” command is now
 “Configuration Options…” (Alt+Shift+C), again matching EdSharp/FileDir
 verbatim. The PowerShell verb-noun pairs (Get-Help, Show-History,
-Trace-Command, Elevate-Version, About-DbDuo, Alternate-Menu,
+Trace-Command, Elevate-Version, About-DbDo, Alternate-Menu,
 Edit-Configuration) remain available at the dot prompt and in logs but
-are not surfaced in the user-visible UI. The principle: when DbDuo has a
+are not surfaced in the user-visible UI. The principle: when DbDo has a
 command that does what EdSharp or FileDir does and the chord matches,
 the menu label IS the EdSharp/FileDir label; the PowerShell synonym is
 for power users.</p>
-<p>A few user-facing DbDuo commands deliberately keep their original
+<p>A few user-facing DbDo commands deliberately keep their original
 (non-EdSharp/FileDir) labels because of meaningful domain-specific
 reasons: “Say Clipboard” keeps the “Say” prefix per the Say-X family
 marker; “Say Status” keeps the “Say” prefix for the same reason; “Table
 Properties” keeps the disambiguating “Table” qualifier since the bare
 “Properties” would be ambiguous in a database context (properties of
 what? the cell, the table, the database?); “Close Database” keeps its
-name because DbDuo does not have multiple windows in EdSharp’s MDI
+name because DbDo does not have multiple windows in EdSharp’s MDI
 sense.</p>
 <h2 id="v1.0.60">v1.0.60</h2>
 <p><strong>Per-command summaries and descriptions.</strong> Every menu
@@ -3381,8 +3529,8 @@ documented set is now <code>&lt;table&gt;_id</code>, <code>added</code>,
 is rebuilt to match this set while preserving its existing rows.</p>
 <p>Two additional sample databases ship: <code>northwind.db</code> (the
 classic Microsoft Northwind sales sample) and <code>chinook.db</code>
-(the classic Chinook music-store sample), both adapted to DbDuo’s
-standard column conventions. They are useful for exercising DbDuo’s
+(the classic Chinook music-store sample), both adapted to DbDo’s
+standard column conventions. They are useful for exercising DbDo’s
 parent-child drill against deeper relationships than the small
 <code>sample.db</code> provides. The Help menu has new one-keystroke
 commands to open each: <strong>Open Northwind Sample</strong> and
@@ -3390,40 +3538,40 @@ commands to open each: <strong>Open Northwind Sample</strong> and
 <strong>Open Sample Database</strong> command. All three open via the
 same code path as File &gt; Open Database.</p>
 <p><code>CamelType_CSharp.md</code> ships with the distribution,
-documenting the coding conventions used inside <code>DbDuo.cs</code>.
-The conventions are updated to remove the <code>c_</code> prefix that
-was previously required for constants; constants now follow the same
-naming pattern as variables but are still declared on their own lines,
+documenting the coding conventions used inside <code>DbDo.cs</code>. The
+conventions are updated to remove the <code>c_</code> prefix that was
+previously required for constants; constants now follow the same naming
+pattern as variables but are still declared on their own lines,
 distinguished by <code>const</code> or <code>static readonly</code>
 instead of by capitalization. The <code>o</code> prefix is reserved for
 COM objects only; managed-type instances use a class-name prefix.</p>
-<p><code>DbDuo.cs</code> is updated to conform to the revised
-conventions (<code>c_</code> removed; <code>o</code>-prefix usage
-adjusted) with the addition of two new Help-menu items (Open Northwind
-Sample, Open Chinook Sample) and a shared helper method
-<code>openInstallSampleDb</code> that the existing Open Sample Database
-command now also routes through, eliminating duplicated code.</p>
+<p><code>DbDo.cs</code> is updated to conform to the revised conventions
+(<code>c_</code> removed; <code>o</code>-prefix usage adjusted) with the
+addition of two new Help-menu items (Open Northwind Sample, Open Chinook
+Sample) and a shared helper method <code>openInstallSampleDb</code> that
+the existing Open Sample Database command now also routes through,
+eliminating duplicated code.</p>
 <p>The JScript .NET support module is renamed: <code>dbDuoEval.js</code>
-becomes <code>DbDuo.js</code>, compiled to <code>DbDuo.dll</code>
+becomes <code>DbDo.js</code>, compiled to <code>DbDo.dll</code>
 (previously <code>dbDuoEval.dll</code>). The JScript package and class
 are renamed to match, so the reflection target is now
-<code>DbDuo.JS.runScript</code> (previously
-<code>DbDuoScripting.JS.Eval</code> then
-<code>DbDuoScripting.JS.runScript</code>). Because DbDuo.exe and
-DbDuo.dll now share the simple assembly name “DbDuo”, the C# code loads
-the DLL with <code>Assembly.LoadFrom</code> and the full path next to
-the executable instead of <code>Assembly.Load</code> with the simple
-name — the simple-name load would have resolved to DbDuo.exe rather than
-DbDuo.dll. The <code>/reference:</code> flag is dropped from the csc.exe
+<code>DbDo.JS.runScript</code> (previously
+<code>DbDoScripting.JS.Eval</code> then
+<code>DbDoScripting.JS.runScript</code>). Because DbDo.exe and DbDo.dll
+now share the simple assembly name “DbDo”, the C# code loads the DLL
+with <code>Assembly.LoadFrom</code> and the full path next to the
+executable instead of <code>Assembly.Load</code> with the simple name —
+the simple-name load would have resolved to DbDo.exe rather than
+DbDo.dll. The <code>/reference:</code> flag is dropped from the csc.exe
 command line for the same reason (the C# code never needed a
 compile-time reference; it always called the JS module through
 reflection). Existing user scripts are unaffected by the rename — they
 see the same <code>frm</code> and <code>db</code> globals and call the
-same DbDuo API.</p>
+same DbDo API.</p>
 <p>Three sample scripts ship in <code>{app}\SampleScripts\</code>:
 <code>DescribeTable.js</code>, <code>CopyRowToClipboard.js</code>, and
 <code>MarkRowsMatchingRegex.js</code>. On first access of the user’s
-script folder (<code>%APPDATA%\DbDuo\Scripts\</code>), DbDuo copies any
+script folder (<code>%APPDATA%\DbDo\Scripts\</code>), DbDo copies any
 samples that aren’t already there and writes a <code>.seeded</code>
 sentinel file so the seeding does not repeat on later launches. Deleting
 a sample does not cause it to reappear; deleting the
@@ -3475,7 +3623,7 @@ not just the table you land on first. F5 Refresh still resets to (row 1,
 first column) by design.</p>
 <p>The JAWS <code>.jkm</code> and NVDA add-on are updated to pass the
 new Shift+letter chords (Shift+A, Shift+C, Shift+N) and Alt+Shift+M
-through to DbDuo.</p>
+through to DbDo.</p>
 <p><strong>Descriptive statistics for the current virtual
 column.</strong> A new command, <strong>Describe Column</strong>
 (Control+Shift+D, <code>Measure-Column</code> at the dot prompt, in the
@@ -3514,9 +3662,9 @@ counts-by-month-of-year column chart for seasonal patterns. Boolean
 columns auto-pick a pie of true/false proportions (binary proportions
 are pie charts’ textbook use case). Text columns auto-pick a horizontal
 Pareto bar of the top 15 most frequent values, sorted by frequency
-descending. When only one chart shape fits the data type, DbDuo
-generates the file directly without an intermediate dialog. The .xlsx
-file is written next to the database file with a name like
+descending. When only one chart shape fits the data type, DbDo generates
+the file directly without an intermediate dialog. The .xlsx file is
+written next to the database file with a name like
 <code>customers-region-pareto.xlsx</code> and opened in Excel. Plot
 Column requires Excel; it reuses the same late-bound COM scaffolding as
 the existing Frequency Chart command. The choice of chart shapes follows
@@ -3533,7 +3681,7 @@ dialog with one labeled textbox for the current virtual cell — the cell
 under the Alt+Control+arrow cursor. F2 still opens the full-row editor;
 Shift+F2 is the fast path when you only need to change one value. Both
 editors share the per-field regex validation already enforced under
-<code>[Validation:&lt;table&gt;]</code> in DbDuo.ini, so a configured
+<code>[Validation:&lt;table&gt;]</code> in DbDo.ini, so a configured
 pattern (e.g., <code>^[^@\s]+@[^@\s]+\.[a-z]+$</code> for an email
 field) is respected from either entry point.</p>
 <p>The <strong>Configuration Settings</strong> command (Alt+Shift+C,
@@ -3543,7 +3691,7 @@ curated user-facing settings — UI mode, Command Echo — and adds a
 <strong>“Field Validation…”</strong> sub-dialog that lists the editable
 fields of the current table with one input per field for a regex
 pattern. The sub-dialog compiles each pattern as you save so it can warn
-on bad regex syntax. DbDuo deliberately uses .NET regex (the established
+on bad regex syntax. DbDo deliberately uses .NET regex (the established
 powerful pattern language already used by Find Regex) rather than
 inventing a separate dBASE-PICTURE-style or WinForms-MaskedTextBox-style
 mask vocabulary. Operational settings (<code>[Session]</code>,
@@ -3562,7 +3710,7 @@ Shift+T speech commands) are removed.</p>
 <p><strong>F8 / Shift+F8 / Alt+F8 / Alt+Shift+F8 range-mark
 family.</strong> Four new commands in the Edit menu parallel EdSharp’s
 Start/Complete Selection family and FileDir’s Start Tag or Untag /
-Complete Tag / Complete Untag, using DbDuo’s “Mark” terminology and two
+Complete Tag / Complete Untag, using DbDo’s “Mark” terminology and two
 independent anchors. <strong>Start Mark Anchor</strong> (F8) and
 <strong>Complete Mark to Anchor</strong> (Shift+F8) form one pair;
 <strong>Start Unmark Anchor</strong> (Alt+F8) and <strong>Complete
@@ -3581,8 +3729,8 @@ header and 1-based row number — for example, “Column: name, Row: 30.”
 Speech-only; does not move focus. Single-press speaks; double-press
 shows the same text in the dialog used by the other speech-only
 commands. Console verb: <code>say-position</code>. The pass-through
-configs for JAWS (DbDuo.jkm) and NVDA (DbDuo.nvda-addon) are extended to
-forward F8, Shift+F8, Alt+F8, Alt+Shift+F8, and Alt+Delete to DbDuo so
+configs for JAWS (DbDo.jkm) and NVDA (DbDo.nvda-addon) are extended to
+forward F8, Shift+F8, Alt+F8, Alt+Shift+F8, and Alt+Delete to DbDo so
 its handlers always win over any default screen-reader behavior.</p>
 <p><strong>Say Sort and Filter (Shift+8).</strong> A new speech-only
 command on the asterisk key (Numpad-asterisk works as a hidden alias).
@@ -3605,13 +3753,13 @@ The canonical-verb list lives in a single <code>s_aCanonicalVerbs</code>
 array near the dispatcher; new commands added in the future need a
 one-line entry there alongside their switch arm.</p>
 <p><strong>GUI vs CLI response analysis.</strong> A new “GUI versus CLI
-response patterns” section in DbDuo.md walks through the command
-families and documents how each behaves in each mode. The principle is
-“same data effect, mode-appropriate confirmation” — the GUI uses
-LbcDialogs, status-bar updates, and the LiveRegion; the CLI prints to
-stdout and reads from stdin. The few cases where a command does not
-reasonably apply in one mode (New-Plot in CLI, Switch-Focus and
-Enter-Console in CLI-only mode) are called out explicitly.</p>
+response patterns” section in DbDo.md walks through the command families
+and documents how each behaves in each mode. The principle is “same data
+effect, mode-appropriate confirmation” — the GUI uses LbcDialogs,
+status-bar updates, and the LiveRegion; the CLI prints to stdout and
+reads from stdin. The few cases where a command does not reasonably
+apply in one mode (New-Plot in CLI, Switch-Focus and Enter-Console in
+CLI-only mode) are called out explicitly.</p>
 <strong>Say Kin (Shift+K).</strong> A new speech-only command that
 announces the <code>look</code> field of every related record — both
 parents (reached by outbound foreign-key columns on the current row) and
@@ -3650,20 +3798,20 @@ for the very users most likely to mark. The <code>added</code>,
 <code>updated</code>, <code>look</code>, and <code>unq</code> columns
 are also excluded (they’re either system-managed or stored-generated).
 The check uses <code>IS NOT</code> rather than <code>&lt;&gt;</code> for
-null-safety. The “Bundled sample databases” section of DbDuo.md gets a
+null-safety. The “Bundled sample databases” section of DbDo.md gets a
 new sub-section with the recommended trigger SQL for users creating
 their own tables.</p>
 <p><strong>Initial listview selection hardened.</strong> The listview no
 longer leaves the first row unselected on table open. After
 <code>updateGrid</code> builds the rows, if the ADO recordset’s
-<code>absolutePosition</code> is at BOF (≤ 0) but rows exist, DbDuo now
+<code>absolutePosition</code> is at BOF (≤ 0) but rows exist, DbDo now
 moves both the ADO cursor and the listview selection to row 1.
 Previously, ADO providers that opened the recordset at BOF could leave
 the user with rows visible but no selection, which broke commands that
 operate on “the current row.” The invariant is now: if the table has at
 least one row, the listview always has exactly one selected, focused,
 visible row.</p>
-<p>The README, Announce, History, and DbDuo reference documentation are
+<p>The README, Announce, History, and DbDo reference documentation are
 revised to drop development-process narrative that does not affect users
 and to incorporate concept and language refinements from the project’s
 manual announcement.</p>
@@ -3683,12 +3831,12 @@ identifier system. v1.0.58 uses the correct numeric identifiers:
 <code>numpad5</code> (say-current-cell).</p>
 <p>Second problem: <code>gesture.send()</code> extended-key asymmetry.
 NVDA’s <code>KeyboardInputGesture.send()</code> fails to deliver
-synthesized extended-key chords (six-pack arrows) to DbDuo while
+synthesized extended-key chords (six-pack arrows) to DbDo while
 delivering non-extended chords (numpad arrows) reliably. v1.0.58
 replaces <code>gesture.send()</code> with a helper that constructs a
 fresh <code>KeyboardInputGesture</code> via
 <code>fromName(sCanonicalChord)</code> and sends that. The architectural
-benefit is that DbDuo always sees the same VK code regardless of which
+benefit is that DbDo always sees the same VK code regardless of which
 physical key the user pressed.</p>
 <p>Add-on internal version bumped to 1.0.7.</p>
 <h2 id="v1.0.57">v1.0.57</h2>
@@ -3703,7 +3851,7 @@ current cell.”</p>
 Without it, scripts only fire when the focused NVDAObject is the
 AppModule’s top-level object; with it, scripts fire when the AppModule
 appears anywhere in the focused object’s ancestor chain. This matters
-because the focused object in DbDuo is typically the data-grid ListView,
+because the focused object in DbDo is typically the data-grid ListView,
 a child of the form’s NVDAObject.</p>
 <p>Add-on internal version bumped to 1.0.5.</p>
 <h2 id="v1.0.55">v1.0.55</h2>
@@ -3717,7 +3865,7 @@ of regression before delivery.</p>
 <p>NVDA add-on rewritten using the modern decorator API and lowercase
 module name. The <code>.py</code> filename is now lowercase
 (<code>appModules/dbduo.py</code> instead of
-<code>appModules/DbDuo.py</code>), matching the convention every shipped
+<code>appModules/DbDo.py</code>), matching the convention every shipped
 NVDA app module follows. Gestures are now declared with the
 <code>@scriptHandler.script</code> decorator instead of a class-level
 <code>__gestures</code> dict, and scripts are grouped by intent (one
@@ -3725,7 +3873,7 @@ decorator per logical group of chords) rather than every chord pointing
 at one omnibus script.</p>
 <p>First-run default-database fallback added: on a fresh install with no
 saved session, if <code>{app}\sample.db</code> is present, it opens
-automatically. New users see DbDuo’s school-domain sample on first run
+automatically. New users see DbDo’s school-domain sample on first run
 rather than facing an empty form.</p>
 <h2 id="v1.0.53">v1.0.53</h2>
 <p>Installer description for the NVDA add-on checkbox refined to flag
@@ -3742,23 +3890,23 @@ now documented in both the installer’s Finish-page checkbox description
 and the README.</p>
 <h2 id="v1.0.51">v1.0.51</h2>
 <p>Inno Setup compile fix. A Pascal block comment whose second line read
-<code>[Run] entry invokes DbDuo.exe...</code> was misparsed because Inno
+<code>[Run] entry invokes DbDo.exe...</code> was misparsed because Inno
 Setup’s preprocessor scans for <code>[Section]</code> tags before
 Pascal-comment parsing.</p>
 <h2 id="v1.0.50">v1.0.50</h2>
 <p>NVDA add-on manifest format fix. String values containing spaces and
 special characters are now enclosed in quotes (required by the NVDA
 manifest format), and the zip no longer contains standalone directory
-entries. JAWS files now ship as a single <code>DbDuo_JAWS.zip</code>
+entries. JAWS files now ship as a single <code>DbDo_JAWS.zip</code>
 archive in the repo, extracted into place at install time by Inno
 Setup’s built-in <code>ExtractArchive</code> Pascal function.</p>
 <h2 id="v1.0.49">v1.0.49</h2>
 <p>NVDA add-on install dialog now actually appears at end of setup. The
 Finish-page checkbox’s <code>[Run]</code> entry now points
-<code>FileName</code> directly at <code>{app}\DbDuo.nvda-addon</code>
+<code>FileName</code> directly at <code>{app}\DbDo.nvda-addon</code>
 with the <code>shellexec</code> flag, which is the documented mechanism
 for opening non-executable files via their file association. The
-previous chain through DbDuo.exe was racing against installer wizard
+previous chain through DbDo.exe was racing against installer wizard
 completion.</p>
 <h2 id="v1.0.48">v1.0.48</h2>
 <p>JAWS settings installer migrated to Inno Setup <code>[Run]</code>
@@ -3766,7 +3914,7 @@ entries. The C# <code>JawsSettingsInstaller</code> class added in
 v1.0.40 is preserved for use from the Help menu’s “Re-install JAWS
 Settings” command.</p>
 <h2 id="v1.0.47">v1.0.47</h2>
-<p>Command-name cleanup: “object” removed from DbDuo’s command names.
+<p>Command-name cleanup: “object” removed from DbDo’s command names.
 Show-Object → Show Record; Set-Object → Edit Record; Get-Property →
 Table Properties; etc. The word was vague and intimidating; the new
 names describe what the commands actually operate on.</p>
@@ -3777,11 +3925,11 @@ updated.</p>
 <h2 id="v1.0.45">v1.0.45</h2>
 <p>JScript .NET script feature lands. Save, Invoke, and Edit Script
 commands accessible from the Misc menu. Scripts live in
-<code>%APPDATA%\DbDuo\Scripts\</code> and run inside the DbDuo process
+<code>%APPDATA%\DbDo\Scripts\</code> and run inside the DbDo process
 with full access to the running form (<code>frm</code>) and recordset
 manager (<code>db</code>). The tiny <code>dbDuoEval.dll</code> support
 assembly is compiled at build time by <code>jsc.exe</code> from
-<code>dbDuoEval.js</code>. See <code>DbDuo.md</code>’s “Scripting with
+<code>dbDuoEval.js</code>. See <code>DbDo.md</code>’s “Scripting with
 scripts” section.</p>
 <h2 id="v1.0.44">v1.0.44</h2>
 <p>Course-correction release. The Roslyn C# scripting feature from
@@ -3804,15 +3952,15 @@ filename.</p>
 NuGet to support a Roslyn-based C# scripting feature. (Both of these
 decisions are rolled back in v1.0.44.)</p>
 <h2 id="v1.0.41">v1.0.41</h2>
-<p>NVDA parity with JAWS. The <code>DbDuo.nvda-addon</code> package
-ships and the Finish-page checkbox “Install NVDA add-on for DbDuo” is
-checked by default. The add-on contains an app module that binds 49
-keyboard gestures — the same set the JAWS <code>DbDuo.jkm</code> covers
-— to a <code>script_passThrough</code> method whose body is one line,
+<p>NVDA parity with JAWS. The <code>DbDo.nvda-addon</code> package ships
+and the Finish-page checkbox “Install NVDA add-on for DbDo” is checked
+by default. The add-on contains an app module that binds 49 keyboard
+gestures — the same set the JAWS <code>DbDo.jkm</code> covers — to a
+<code>script_passThrough</code> method whose body is one line,
 <code>gesture.send()</code>. Without this add-on, NVDA intercepts
 Alt+Control+arrow for its own table-navigation commands.</p>
 <p>The <code>--install-nvda-addon</code> CLI flag is implemented: it
-locates <code>DbDuo.nvda-addon</code> next to DbDuo.exe and opens it via
+locates <code>DbDo.nvda-addon</code> next to DbDo.exe and opens it via
 Windows shell-execute, handing it to NVDA’s file association.</p>
 <h2 id="v1.0.40">v1.0.40</h2>
 <p>Broad polish release.</p>
@@ -3839,24 +3987,24 @@ via the same code path as File &gt; Open.</li>
 approach that turned out not to work: <code>TypeCurrentScriptKey</code>
 is a JAWS Function, not a Script, so it cannot be invoked from a JKM
 right-hand side. v1.0.39 adds a tiny script source file
-(<code>DbDuo.jss</code>) defining a one-line wrapper Script called
-<code>PassDbDuoKey</code>, and installer logic to compile it to
-<code>DbDuo.jsb</code> in each JAWS year-version’s settings folder.</p>
+(<code>DbDo.jss</code>) defining a one-line wrapper Script called
+<code>PassDbDoKey</code>, and installer logic to compile it to
+<code>DbDo.jsb</code> in each JAWS year-version’s settings folder.</p>
 <h2 id="v1.0.38">v1.0.38</h2>
-<p>JAWS settings integration. The <code>DbDuo.jkm</code> JAWS key map
+<p>JAWS settings integration. The <code>DbDo.jkm</code> JAWS key map
 ships and the installer places it in the right JAWS user-settings
-folders automatically. JAWS will pass DbDuo’s chords through rather than
+folders automatically. JAWS will pass DbDo’s chords through rather than
 intercepting them for its own table-navigation commands.</p>
 <h2 id="v1.0.37">v1.0.37</h2>
 <p>Build fixes.</p>
 <h2 id="v1.0.36">v1.0.36</h2>
-<p>Final program name selected as DbDuo.</p>
+<p>Final program name selected as DbDo.</p>
 <h2 id="v1.0.35">v1.0.35</h2>
 <p>Virtual cell navigation polish: column-aware commands default to the
 column currently under virtual focus.</p>
 <h2 id="v1.0.34">v1.0.34</h2>
 <p>Virtual cell cursor implementation. The data list is a virtual-mode
-ListView, but on top of it DbDuo overlays a <code>(row, column)</code>
+ListView, but on top of it DbDo overlays a <code>(row, column)</code>
 cursor you drive with Alt+Control + arrow / Home / End / PageDown /
 PageUp / Numpad5. Movement triggers a direction-aware announcement.</p>
 <h2 id="v1.0.33">v1.0.33</h2>
@@ -3868,7 +4016,7 @@ used.</p>
 <p>Recent Files dialog on Alt+R opens one of the last 10 database files
 with full state restoration (last-active table, filter, sort,
 position).</p>
-<p>Menu labels rewritten to natural-English DbDuo names. The PowerShell
+<p>Menu labels rewritten to natural-English DbDo names. The PowerShell
 canonical names (Show-Object, Set-Mark, Sort-Object, etc.) remain
 available at the dot prompt.</p>
 <h2 id="v1.0.32">v1.0.32</h2>
@@ -3906,7 +4054,7 @@ shortcuts.</p>
 <p>Initial release packaged with InnoSetup.</p>
 <h2 id="pre-v1.0.20">Pre-v1.0.20</h2>
 <p>Development history under earlier program-name candidates (DbDual,
-DbDo, DbDesk, etc.) before settling on DbDuo. Early work covered:
+DbDo, DbDesk, etc.) before settling on DbDo. Early work covered:
 WinForms architecture with FluentListView-derived virtualization,
 late-bound ADO via the SQLite ODBC driver, parent-child drill via
 foreign-key inference, the Show Record / Related Records pattern,

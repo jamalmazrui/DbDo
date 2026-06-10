@@ -1,5 +1,5 @@
 ﻿/*
-DbDuo.js -- JScript .NET support module for DbDuo scripting.
+DbDo.js -- JScript .NET support module for DbDo scripting.
 
 Modeled on Jamal Mazrui's Eval.js / jsSupport.js for EdSharp. The pattern
 is the same: a tiny class with a static function whose body uses JScript's
@@ -9,13 +9,13 @@ been imported. User snippets can then reference any of those types
 directly without writing import statements themselves.
 
 This file is compiled at build time by jsc.exe (the JScript .NET compiler,
-ships with .NET Framework v4.0.30319) into DbDuo.dll. DbDuo.exe references
-that DLL via /reference: and calls DbDuo.JS.runScript via reflection from
+ships with .NET Framework v4.0.30319) into DbDo.dll. DbDo.exe references
+that DLL via /reference: and calls DbDo.JS.runScript via reflection from
 C# to run user scripts.
 
 Globals exposed inside the eval scope, visible to user .js snippets:
-  frm -- the DbDuoForm instance (passed in from C# as frmArg).
-  db  -- shortcut for frm.db (the DbDuoManager).
+  frm -- the DbDoForm instance (passed in from C# as frmArg).
+  db  -- shortcut for frm.db (the DbDoManager).
 
 Naming follows Camel Type conventions: lower-camelCase for functions,
 methods, and variables; no "o" prefix on managed types; frm and db are
@@ -23,10 +23,10 @@ the conventional short forms for Form and database. The function is
 named runScript rather than the more obvious eval because eval is a
 JScript built-in -- we cannot shadow it inside our own body.
 
-Usage from C# (via reflection so DbDuo.cs takes no compile-time
+Usage from C# (via reflection so DbDo.cs takes no compile-time
 dependency on the JScript assembly):
-  var asm = Assembly.Load("DbDuo");
-  var jsType = asm.GetType("DbDuo.JS");
+  var asm = Assembly.Load("DbDo");
+  var jsType = asm.GetType("DbDo.JS");
   var mi = jsType.GetMethod("runScript",
     new Type[] { typeof(string), typeof(object), typeof(object) });
   string sResult = (string)mi.Invoke(null, new object[] { sCode, frm, db });
@@ -34,21 +34,21 @@ dependency on the JScript assembly):
 The returned string is whatever the script's last expression evaluated
 to, converted with .ToString(). On compile or runtime error, the
 returned string is "ERROR: " followed by the exception message; the
-script does NOT throw out to the host so DbDuo's UI stays responsive.
+script does NOT throw out to the host so DbDo's UI stays responsive.
 
 Notes for the build:
-  We deliberately do NOT use the DbDuo namespace inside DbDuo.exe's
-  C# code at compile time. The host DbDuo.exe is built AFTER DbDuo.dll,
-  so a compile-time C# `using DbDuo;` could be ambiguous with the C#
-  namespace DbDuo declared in DbDuo.cs. Snippets reach DbDuo types via
+  We deliberately do NOT use the DbDo namespace inside DbDo.exe's
+  C# code at compile time. The host DbDo.exe is built AFTER DbDo.dll,
+  so a compile-time C# `using DbDo;` could be ambiguous with the C#
+  namespace DbDo declared in DbDo.cs. Snippets reach DbDo types via
   the late-bound frm and db parameters which are typed as Object.
   JScript's late-bound dispatch resolves member access at runtime
   with no compile-time type information needed.
 
   Note also that JScript .NET's package keyword creates a CLR namespace.
-  Because DbDuo.cs's C# namespace is also DbDuo, the type lookup from
-  C# is done by string ("DbDuo.JS") via Assembly.GetType, which is
-  unambiguous because it queries DbDuo.dll specifically rather than
+  Because DbDo.cs's C# namespace is also DbDo, the type lookup from
+  C# is done by string ("DbDo.JS") via Assembly.GetType, which is
+  unambiguous because it queries DbDo.dll specifically rather than
   the global type table.
 */
 
@@ -61,7 +61,7 @@ import System.Text;
 import System.Text.RegularExpressions;
 import System.Windows.Forms;
 
-package DbDuo {
+package DbDo {
 
 public class JS {
 
@@ -88,4 +88,4 @@ public class JS {
 
 } // class JS
 
-} // package DbDuo
+} // package DbDo
