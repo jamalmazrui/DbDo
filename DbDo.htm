@@ -7,6 +7,9 @@
   <title>DbDo User Guide</title>
   <style>
     html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
       color: #1a1a1a;
       background-color: #fdfdfd;
     }
@@ -25,16 +28,13 @@
     @media (max-width: 600px) {
       body {
         font-size: 0.9em;
-        padding: 12px;
+        padding: 1em;
       }
       h1 {
         font-size: 1.8em;
       }
     }
     @media print {
-      html {
-        background-color: white;
-      }
       body {
         background-color: transparent;
         color: black;
@@ -84,10 +84,9 @@
       color: #606060;
     }
     code {
-      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
       font-size: 85%;
       margin: 0;
-      hyphens: manual;
     }
     pre {
       margin: 1em 0;
@@ -152,19 +151,14 @@
     div.columns{display: flex; gap: min(4vw, 1.5em);}
     div.column{flex: auto; overflow-x: auto;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    /* The extra [class] is a hack that increases specificity enough to
-       override a similar rule in reveal.js */
-    ul.task-list[class]{list-style: none;}
+    ul.task-list{list-style: none;}
     ul.task-list li input[type="checkbox"] {
-      font-size: inherit;
       width: 0.8em;
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
-    /* CSS for syntax highlighting */
     pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
     pre > code.sourceCode > span:empty { height: 1.2em; }
     .sourceCode { overflow: visible; }
     code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -226,12 +220,206 @@
     code span.va { color: #19177c; } /* Variable */
     code span.vs { color: #4070a0; } /* VerbatimString */
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
 </head>
 <body>
 <header id="title-block-header">
 <h1 class="title">DbDo User Guide</h1>
 </header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#dbdo-reference" id="toc-dbdo-reference">DbDo Reference</a>
+<ul>
+<li><a href="#how-dbdo-is-organized" id="toc-how-dbdo-is-organized">How
+DbDo is organized</a>
+<ul>
+<li><a href="#switching-between-modes"
+id="toc-switching-between-modes">Switching between modes</a></li>
+<li><a href="#starting-dbdo" id="toc-starting-dbdo">Starting
+DbDo</a></li>
+</ul></li>
+<li><a href="#terminology-row-column-record-field-cell"
+id="toc-terminology-row-column-record-field-cell">Terminology: row,
+column, record, field, cell</a>
+<ul>
+<li><a href="#a-note-on-url-lowercase-as-ordinary-english"
+id="toc-a-note-on-url-lowercase-as-ordinary-english">A note on “url” —
+lowercase as ordinary English</a></li>
+<li><a href="#database-used-broadly"
+id="toc-database-used-broadly">“Database” used broadly</a></li>
+<li><a href="#key-name-convention" id="toc-key-name-convention">Key-name
+convention</a></li>
+<li><a href="#camel-type-for-code" id="toc-camel-type-for-code">Camel
+Type for code</a></li>
+</ul></li>
+<li><a href="#the-db-cursor" id="toc-the-db-cursor">The db
+cursor</a></li>
+<li><a href="#keyboard-navigation-in-the-data-list"
+id="toc-keyboard-navigation-in-the-data-list">Keyboard navigation in the
+data list</a></li>
+<li><a href="#virtual-cell-navigation"
+id="toc-virtual-cell-navigation">Virtual cell navigation</a></li>
+<li><a href="#screen-reader-settings"
+id="toc-screen-reader-settings">Screen-reader settings</a>
+<ul>
+<li><a href="#jaws-settings-for-dbdo"
+id="toc-jaws-settings-for-dbdo">JAWS settings for DbDo</a></li>
+<li><a href="#nvda-add-on" id="toc-nvda-add-on">NVDA add-on</a></li>
+</ul></li>
+<li><a href="#file-menu" id="toc-file-menu">File menu</a></li>
+<li><a href="#edit-menu" id="toc-edit-menu">Edit menu</a></li>
+<li><a href="#navigate-menu" id="toc-navigate-menu">Navigate
+menu</a></li>
+<li><a href="#query-menu" id="toc-query-menu">Query menu</a></li>
+<li><a href="#misc-menu" id="toc-misc-menu">Misc menu</a></li>
+<li><a href="#sql-reference-what-invoke-sql-actually-runs"
+id="toc-sql-reference-what-invoke-sql-actually-runs">SQL reference: what
+Invoke-Sql actually runs</a>
+<ul>
+<li><a href="#a-portable-sql-baseline-that-works-everywhere"
+id="toc-a-portable-sql-baseline-that-works-everywhere">A portable SQL
+baseline that works everywhere</a></li>
+<li><a href="#sqlite-full-modern-sql"
+id="toc-sqlite-full-modern-sql">SQLite: full modern SQL</a></li>
+<li><a href="#access-.mdb-.accdb-jetace-sql"
+id="toc-access-.mdb-.accdb-jetace-sql">Access (.mdb / .accdb): Jet/ACE
+SQL</a></li>
+<li><a href="#excel-.xlsx-.xls-a-subset-of-jet-sql"
+id="toc-excel-.xlsx-.xls-a-subset-of-jet-sql">Excel (.xlsx / .xls): a
+subset of Jet SQL</a></li>
+<li><a href="#dbase-.dbf-minimal-sql"
+id="toc-dbase-.dbf-minimal-sql">dBASE (.dbf): minimal SQL</a></li>
+<li><a href="#csv-and-tsv-select-only-jet-text-driver"
+id="toc-csv-and-tsv-select-only-jet-text-driver">CSV and TSV:
+SELECT-only Jet text driver</a></li>
+<li><a href="#practical-recommendation"
+id="toc-practical-recommendation">Practical recommendation</a></li>
+</ul></li>
+<li><a href="#scripting" id="toc-scripting">Scripting</a>
+<ul>
+<li><a href="#where-scripts-live" id="toc-where-scripts-live">Where
+scripts live</a></li>
+<li><a href="#the-three-file-types" id="toc-the-three-file-types">The
+three file types</a></li>
+<li><a href="#the-chord-altv" id="toc-the-chord-altv">The chord —
+Alt+V</a></li>
+<li><a href="#editing-scripts" id="toc-editing-scripts">Editing
+scripts</a></li>
+<li><a href="#opening-the-scripts-folder"
+id="toc-opening-the-scripts-folder">Opening the Scripts folder</a></li>
+<li><a href="#bundled-sample-scripts"
+id="toc-bundled-sample-scripts">Bundled sample scripts</a></li>
+<li><a href="#errors" id="toc-errors">Errors</a></li>
+<li><a href="#writing-your-own" id="toc-writing-your-own">Writing your
+own</a></li>
+<li><a href="#power-and-responsibility"
+id="toc-power-and-responsibility">Power and responsibility</a></li>
+</ul></li>
+<li><a href="#text-field-conveniences"
+id="toc-text-field-conveniences">Text field conveniences</a></li>
+<li><a href="#sqlean-extensions" id="toc-sqlean-extensions">SQLean
+extensions</a></li>
+<li><a href="#help-menu" id="toc-help-menu">Help menu</a></li>
+<li><a href="#commands-available-only-at-the-dot-prompt"
+id="toc-commands-available-only-at-the-dot-prompt">Commands available
+only at the dot prompt</a></li>
+<li><a href="#mnemonic-hotkey-groups"
+id="toc-mnemonic-hotkey-groups">Mnemonic hotkey groups</a>
+<ul>
+<li><a href="#bare-shiftletter-family"
+id="toc-bare-shiftletter-family">Bare Shift+Letter family</a></li>
+<li><a href="#function-key-family"
+id="toc-function-key-family">Function-key family</a></li>
+<li><a href="#control-letter-family"
+id="toc-control-letter-family">Control-letter family</a></li>
+<li><a href="#alt-letter-family" id="toc-alt-letter-family">Alt-letter
+family</a></li>
+<li><a href="#altcontrol-extended-key-family-virtual-cell-navigation"
+id="toc-altcontrol-extended-key-family-virtual-cell-navigation">Alt+Control
+extended-key family (virtual cell navigation)</a></li>
+<li><a href="#altarrow-family-parent-child-drill"
+id="toc-altarrow-family-parent-child-drill">Alt+arrow family
+(parent-child drill)</a></li>
+<li><a href="#navigation-family" id="toc-navigation-family">Navigation
+family</a></li>
+<li><a href="#graveaccent-family"
+id="toc-graveaccent-family">GraveAccent family</a></li>
+</ul></li>
+<li><a href="#schema-documentation-in-comments"
+id="toc-schema-documentation-in-comments">Schema documentation in
+comments</a></li>
+<li><a href="#standard-fields" id="toc-standard-fields">Standard
+fields</a>
+<ul>
+<li><a href="#example-schema-using-the-standard-fields"
+id="toc-example-schema-using-the-standard-fields">Example schema using
+the standard fields</a></li>
+</ul></li>
+<li><a href="#bundled-sample-databases"
+id="toc-bundled-sample-databases">Bundled sample databases</a>
+<ul>
+<li><a href="#edited-timestamp-triggers"
+id="toc-edited-timestamp-triggers">Edited-timestamp triggers</a></li>
+</ul></li>
+<li><a href="#persistence" id="toc-persistence">Persistence</a></li>
+<li><a href="#logging" id="toc-logging">Logging</a></li>
+<li><a href="#bundled-documentation"
+id="toc-bundled-documentation">Bundled documentation</a></li>
+</ul></li>
+<li><a href="#development" id="toc-development">Development</a>
+<ul>
+<li><a href="#requirements" id="toc-requirements">Requirements</a></li>
+<li><a href="#build-steps" id="toc-build-steps">Build steps</a></li>
+<li><a href="#architecture-one-connection-two-interfaces"
+id="toc-architecture-one-connection-two-interfaces">Architecture: one
+connection, two interfaces</a></li>
+<li><a href="#coding-style" id="toc-coding-style">Coding style</a></li>
+<li><a href="#layout-by-code" id="toc-layout-by-code">Layout by Code</a>
+<ul>
+<li><a
+href="#the-conceptual-model-bands-the-layout-cursor-and-dialog-units"
+id="toc-the-conceptual-model-bands-the-layout-cursor-and-dialog-units">The
+conceptual model: bands, the layout cursor, and dialog units</a></li>
+<li><a href="#why-lbc-matters-for-a-screen-reader-audience"
+id="toc-why-lbc-matters-for-a-screen-reader-audience">Why LbC matters
+for a screen-reader audience</a></li>
+<li><a href="#anatomy-of-an-lbc-dialog"
+id="toc-anatomy-of-an-lbc-dialog">Anatomy of an LbC dialog</a></li>
+<li><a href="#the-add-control-vocabulary"
+id="toc-the-add-control-vocabulary">The add-control vocabulary</a></li>
+<li><a href="#run-methods" id="toc-run-methods">Run methods</a></li>
+<li><a href="#looking-up-controls-by-name"
+id="toc-looking-up-controls-by-name">Looking up controls by
+name</a></li>
+<li><a href="#focus-tips-and-the-status-bar"
+id="toc-focus-tips-and-the-status-bar">Focus tips and the status
+bar</a></li>
+<li><a href="#comparison-with-the-original-lbc-implementations"
+id="toc-comparison-with-the-original-lbc-implementations">Comparison
+with the original LbC implementations</a></li>
+<li><a href="#open-ended-extension"
+id="toc-open-ended-extension">Open-ended extension</a></li>
+<li><a href="#edsharp-style-text-edit-hotkeys"
+id="toc-edsharp-style-text-edit-hotkeys">EdSharp-style text-edit
+hotkeys</a></li>
+</ul></li>
+<li><a href="#gui-versus-cli-response-patterns"
+id="toc-gui-versus-cli-response-patterns">GUI versus CLI response
+patterns</a></li>
+<li><a
+href="#office-automation-always-createobject-never-getactiveobject"
+id="toc-office-automation-always-createobject-never-getactiveobject">Office
+automation: always CreateObject, never GetActiveObject</a></li>
+<li><a href="#the-inix-file-format" id="toc-the-inix-file-format">The
+Inix file format</a></li>
+<li><a href="#file-layout" id="toc-file-layout">File layout</a></li>
+</ul></li>
+</ul>
+</nav>
 <h1 id="dbdo-reference">DbDo Reference</h1>
 <p><strong>An accessible, keyboard-first database manager for
 Windows.</strong> DbDo opens SQLite, Microsoft Access, Excel, dBASE, and
@@ -308,13 +496,13 @@ PostgreSQL or Oracle documentation prefers. The goal is naturalness for
 the user reaching for the command, not theoretical purity.</p>
 <p><strong>Record.</strong> The primary noun for “a complete entity
 stored as a row in a table.” Used in command names for actions that act
-on a complete row of data: New Record, Edit Record, Delete Record, Copy
-Record, Append Record, New Copy, Mail Record, Mark Record, Unmark
-Record. Find (Ctrl+F) finds <em>a record</em>; Jump (Ctrl+J) jumps to
-<em>a record</em>. The Edit Record dialog’s title is the operation; the
-inputs inside are fields (see below). The same noun the user sees in
-Microsoft Access, FileMaker, dBASE — and the noun ADODB uses internally
-for <code>Recordset.AddNew</code>, <code>Recordset.Delete</code>, and
+on a complete row of data: New Record, Delete Record, Copy Record,
+Append Record, Mail Record, Mark Record, Unmark Record. Find (Ctrl+F)
+finds <em>a record</em>; Jump (Ctrl+J) jumps to <em>a record</em>. The
+Edit View dialog edits one record; the inputs inside are fields (see
+below). The same noun the user sees in Microsoft Access, FileMaker,
+dBASE — and the noun ADODB uses internally for
+<code>Recordset.AddNew</code>, <code>Recordset.Delete</code>, and
 similar entity-level operations.</p>
 <p><strong>Cell.</strong> The intersection of a record and a column — a
 single named value within one record, viewed in the listview’s grid
@@ -324,15 +512,14 @@ Cell (Alt+C), Open Cell (Ctrl+Enter), Say Cell (Shift+C). The virtual
 cursor moved by Alt+Control+arrow targets a cell.</p>
 <p><strong>Column.</strong> A vertical slice of the listview — one
 attribute considered across all records. Used in command names for
-actions that sweep vertically through one attribute: Sort Ascending by
-Column, Sort Descending by Column, Sort Records (by current column),
-Replace Column, Statistics from Column (Alt+G), Output Graphics (plot a
-column), Select Columns (Alt+S — which columns are visible), the eight
-Sort-by-X shortcuts (Alt+I/L/T/U for id/look/tags/url). The screen
-reader’s “row N column M” announcement uses “column” because that’s the
-geometric description it speaks.</p>
+actions that sweep vertically through one attribute: Order Records
+(Alt+O — sort by chosen columns), Reverse Order (Alt+Shift+O), Replace
+Column (Control+R), Statistics Column (Control+Shift+S), Graphics Column
+(Control+Shift+G — plots a column), and Select Columns (Alt+S — which
+columns are visible). The screen reader’s “row N column M” announcement
+uses “column” because that’s the geometric description it speaks.</p>
 <p><strong>Field.</strong> A named attribute on a single record, viewed
-as a labeled input in a vertical-stack dialog. The Edit Record and New
+as a labeled input in a vertical-stack dialog. The Edit View and New
 Record dialogs lay out one field per line; that layout is intrinsically
 not a “column” layout, so the word “field” reads naturally there. Also
 used for individual attributes referred to by name: the <code>url</code>
@@ -343,10 +530,10 @@ vertical-stack labeled inputs “fields” even though the underlying ADODB
 API uses the same word for column-typed metadata.</p>
 <p><strong>Row.</strong> The geometric unit of the listview — used
 mostly for screen-reader and navigation announcements. “Row N column M”
-is the live region’s spatial readout. “Go to Row” (Set-Position) jumps
-by absolute position. “Table has no rows” announces emptiness. The
-status bar reports “20 of 25 rows shown” when a filter is active. Avoid
-“row” in command names that target the data semantically; use “record”
+is the live region’s spatial readout. Set Position jumps to a row by
+absolute position. “Table has no rows” announces emptiness. The status
+bar reports “20 of 25 rows shown” when a filter is active. Avoid “row”
+in command names that target the data semantically; use “record”
 instead. The exception is geometric scope descriptions inside
 parentheticals where the natural English reading wins (“every record in
 filtered view” — record because the action treats the row as an entity;
@@ -361,7 +548,7 @@ the Choose View command exists separately.</p>
 layout the user sees when invoking the command.</strong> In the
 listview’s grid, the user sees rows, columns, and cells, so commands
 that act on those grid units use those words. When the user opens an
-Edit Record dialog, the layout rotates 90 degrees — fields stack
+Edit View dialog, the layout rotates 90 degrees — fields stack
 vertically — and “column” would force a mental translation back to the
 listview view, so we say “field” instead. When the user issues an action
 that treats the whole record as one thing, the entity-level word
@@ -413,7 +600,12 @@ listview experience preserved as the format supports. Standard columns
 <code>notes</code>, <code>marked</code>) cannot be assumed to exist on
 tables from .xlsx or .csv sources; commands that use them check first
 via <code>hasField</code> and announce a clear refusal when the column
-is absent rather than producing an error.</p>
+is absent rather than producing an error. Import Data and Export Data
+also handle JSON — a top-level array of objects (or a single object),
+with native numbers, booleans, and nulls — alongside Markdown tables and
+inix; JSON support uses the Json.NET (Newtonsoft.Json) library, which
+<code>buildDbDo.cmd</code> downloads automatically from nuget.org the
+first time you build.</p>
 <h3 id="key-name-convention">Key-name convention</h3>
 <p>Key combinations follow the Freedom Scientific / JAWS convention:
 <strong>Control</strong>, <strong>Alt</strong>, <strong>Shift</strong>,
@@ -444,6 +636,34 @@ dictionary. Constants use a <code>c_</code> prefix:
 productivity — prefixes let the listener identify a variable’s type from
 the first syllable rather than having to track type declarations
 elsewhere.</p>
+<h2 id="the-db-cursor">The db cursor</h2>
+<p>The db cursor is your position in the current recordset: a current
+row and a current column.</p>
+<p>The row is concrete: it is the data list’s single focused row.
+Whenever the recordset has at least one row, exactly one row carries
+both keyboard focus and list selection. That selection is only the
+cursor; choosing multiple records is the job of DbDo’s mark
+infrastructure (the standard boolean <code>marked</code> field, Set Mark
+Control+M, Toggle Marked Control+Space, the bulk-mark span chords, and
+the marked-navigation keys).</p>
+<p>The column is virtual: a standard list view has no cell focus, so the
+current column is tracked by DbDo and voiced rather than drawn.
+Column-aware commands (Say Cell, type-ahead search, sorting defaults,
+Show Related, Edit Cell) act on it, and the Alt+Control navigation
+family moves it cell by cell.</p>
+<p>Movement keys, in the data list:</p>
+<p>Home and End move the cursor to the first and last column of the
+current row. Control+Home and Control+End move it to the first column of
+the first row and the last column of the last row. PageUp and PageDown
+page the focused row a screenful at a time. The guiding principle is
+column preservation: the cursor column persists across every row
+movement (arrows, paging, jumps, refreshes, even table switches, which
+restore that table’s remembered column by name) and changes only when a
+command explicitly says otherwise.</p>
+<p>The marked-record jumps formerly on Control+Home and Control+End now
+live on Control+Shift+Home and Control+Shift+End (first and last marked
+record); Control+UpArrow and Control+DownArrow remain previous and next
+marked record.</p>
 <h2 id="keyboard-navigation-in-the-data-list">Keyboard navigation in the
 data list</h2>
 <p>Three navigation modes operate independently in the data list: row
@@ -511,11 +731,10 @@ single speech announcement. The dialog’s textbox supports normal
 text-navigation and Control+C copy. The two-second window is
 deliberately more forgiving than the JAWS and NVDA defaults (around 500
 milliseconds) so a thinking pause between presses still counts as one
-gesture. Commands that participate: Say Status (Alt+Z), Say Path
-(Alt+P), Say Yield (Alt+Y), Say Tables (Shift+F4), Say Marked
-(Alt+Shift+M), Say Edited (Shift+E), Say Notes (Shift+N), Say Tags
-(Shift+T), Say Column from Cursor (Shift+L), Say Marked Yield
-(Shift+Y).</p>
+gesture. Commands that participate include: Say Status (Shift+Z), Say
+Database (Shift+D), Say Yield (Shift+Y), Say Tables (Shift+F7), Say
+Marked (Alt+M), Say Edited (Shift+E), Say Notes (Shift+F9), Say Tags
+(Shift+T), and Say Column Rest (Alt+L).</p>
 <p>The virtual cursor synchronizes with the listview row selection in
 both directions: pressing plain Down/Up arrow updates the listview’s row
 selection, and the virtual row follows along with the column unchanged.
@@ -528,11 +747,13 @@ a different table (and later return), DbDo restores the row and column
 you were on. When you open a database file, every previously-visited
 table’s filter, sort, position, and virtual column are restored —
 switching to any one of them via Choose Table, Control+Tab, or the dot
-prompt picks up the saved state, not row 1. The F5 Refresh command still
-resets the virtual cursor to (row 1, first column) by design.</p>
+prompt picks up the saved state, not row 1. The F5 Refresh command
+re-reads the current rows’ values from the database via the ADO Resync
+method and preserves your cursor position (it does not pick up rows
+added or removed outside the recordset; reopen the table for that).</p>
 <p><strong>Column-aware commands default to the virtual column.</strong>
-When a command needs a column — Sort Ascending, Sort Descending, Open
-Cell Value, Next Initial Change, Jump to Match in One Column — its
+When a command needs a column — Replace Column, Statistics Column,
+Graphics Column, Open Cell Value, Jump to Match in One Column — its
 picker dialog defaults to the column currently under virtual focus. Just
 press Enter in the picker to accept that column, or arrow up/down to
 pick a different one.</p>
@@ -587,8 +808,8 @@ when DbDo next gains focus).</p>
 (Alt+Control + arrows, Home, End, PageUp, PageDown, NumPad5); the
 parent-child drill family (Alt+RightArrow, Alt+LeftArrow, Alt+Home); the
 three search families (Control+F, Control+J, Control+F3 plus their Shift
-variants and F3 / Shift+F3); marked-row navigation (Control+Home,
-Control+End, Control+UpArrow, Control+DownArrow); bulk-mark spans
+variants and F3 / Shift+F3); marked-row navigation (Control+Shift+Home,
+Control+Shift+End, Control+UpArrow, Control+DownArrow); bulk-mark spans
 (Shift+Home, Shift+End, plus Alt+Shift variants); and the Alt-letter
 command shortcuts (Alt+A, C, D, E, K, L, P, R, T, Y, Z plus relevant
 Alt+Shift variants).</p>
@@ -690,7 +911,7 @@ exports open a separate ADODB connection to a fresh file, issue
 <code>CREATE TABLE</code> with portable text-typed columns, and INSERT
 row by row — the user’s open recordset is not disturbed.</p>
 <p>The File menu also hosts the table-switching commands: <strong>Choose
-Table</strong> (F4) opens a listbox of base tables, <strong>Choose
+Table</strong> (F7) opens a listbox of base tables, <strong>Choose
 View</strong> opens the equivalent for views, <strong>Next Visited
 Table</strong> / <strong>Previous Visited Table</strong> (Control+Tab /
 Control+Shift+Tab) cycle among recently-opened tables in MRU order, and
@@ -712,11 +933,10 @@ noted.</p>
 shows an edit dialog with one line per distinct field; bookkeeping
 fields (<code>added</code>, <code>edited</code>, <code>marked</code>,
 the primary key, <code>look</code>, <code>unq</code>) get their default
-values automatically. Use the Edit Record command, F2 (the
-Windows-standard rename key), to edit the current row. Use the Delete
-Record command, Control+D (D for Delete), to remove the current row; the
-Delete key alone is a secondary binding so the Excel and Outlook
-convention works too.</p>
+values automatically. Use the Edit View command, Control+E, to edit the
+current record field-by-field (see Views below). Use the Delete Record
+command, the Delete key, to remove the current row; Control+Shift+D
+removes it without the confirmation prompt.</p>
 <p>Use the Duplicate Record command, Control+Shift+C (Shift turns the
 native clipboard’s Control+C into row-copy), to clone the current row as
 a new record.</p>
@@ -728,15 +948,14 @@ fire as for a SQL UPDATE.</p>
 <p>Use the Mark Record command, Control+M (M for Mark), to set the
 boolean <code>marked</code> column on the current row; when marked is
 true, the status bar reads “marked.” Use the Unmark Record command,
-Control+U (U for Unmark), to clear it. Marks are useful for accumulating
-an ad-hoc selection across navigation; combine with
-<code>filter marked</code> at the dot prompt to scope subsequent
-commands.</p>
-<p>Use the Save Bookmark command, Control+K (K for booKmark), to
-remember the current row by primary key. Use the Go to Bookmark command,
-Alt+K (Alt is the inverse of Save), to return to it later; use the Clear
-Bookmark command, Control+Shift+K, to forget it. DbDo holds one named
-bookmark per session.</p>
+Control+Shift+M, to clear it; Say Mark Status (Shift+M) reads whether
+the current row is marked. Marks are useful for accumulating an ad-hoc
+selection across navigation; combine with <code>filter marked</code> at
+the dot prompt to scope subsequent commands.</p>
+<p>Use the Save Bookmark command, Control+B (B for Bookmark), to
+remember the current row by primary key. Use the List Bookmarks command,
+Alt+B, to return to a saved one; use the Clear Bookmark command,
+Control+Shift+B, to forget it.</p>
 <p>Use the Open Cell Value command, Control+Enter (extends Enter into
 “open as url”), to treat a cell’s value as a url or a file path and open
 it in its default Windows application. DbDo prompts for the column
@@ -749,9 +968,10 @@ and parent-child drill.</p>
 <p><strong>Record stepping.</strong> Use the First Record / Last Record
 / Next Record / Previous Record commands to step through the current
 view. None have hotkeys by default because the listview’s arrow keys and
-Control+Home/End handle the same movements natively. Use the Go to Row
-command, Shift+G (G for Go-to), to jump to a row number; out-of-range
-values clamp to the first or last row.</p>
+Control+Home/End handle the same movements natively. Use the Set
+Position command, Control+G, to jump to a row number (absolute,
+percentage, or relative); Say Goto (Shift+G) speaks the current
+position. Out-of-range values clamp to the first or last row.</p>
 <p><strong>Search.</strong> Three independent search families plus a
 unified “repeat last search” pair. Each family has its own forward and
 reverse chord, and each family’s last-used term is remembered separately
@@ -802,15 +1022,14 @@ stack and return to the topmost ancestor in one keypress.</p>
 <p>The Query menu contains read-only commands that report on the data
 without modifying it. Most fall into three families: examine,
 speech-only, and shape (filter / sort).</p>
-<p><strong>Show commands.</strong> Use the Show Record command, plain
-Enter, to open a read-only dialog showing every visible field of the
-current row plus its related parent and child rows (via foreign-key
-relationships). Use the Table Properties command, Alt+Enter (the
-Windows-standard properties chord), to see metadata about the current
-table — row count, column count, primary key, inferred foreign keys,
-cached settings. Use the Related Records command (no hotkey by default;
-Alt+Shift+R as an alias) to navigate from the current row’s foreign-key
-column to the corresponding parent row in the related table. Use the
+<p><strong>Show commands.</strong> Use the Details View command,
+Control+D (or Enter), to open a read-only display of every visible field
+of the current record plus its related parent and child rows (via
+foreign-key relationships). Use the Table Properties command, Alt+Enter
+(the Windows-standard properties chord), to see metadata about the
+current table — row count, column count, primary key, inferred foreign
+keys, cached settings. Use the Say Related command, Shift+R, to speak
+the records related to the current row through foreign keys. Use the
 Show Schema command to print every CREATE TABLE and CREATE VIEW in the
 database; this is long output, usually called from the dot prompt as
 <code>schema</code>.</p>
@@ -820,12 +1039,12 @@ state without changing focus or position. All eight commands respect the
 chord twice within 1.5 seconds to hear the text spelled character by
 character.</p>
 <ul>
-<li>Say Status (Alt+Z) — table name, row position, filter, sort</li>
-<li>Say Path (Alt+P) — the open database file’s full path</li>
-<li>Say Yield (Alt+Y) — row count and active filter</li>
-<li>Say Tables (Shift+F4) — tables visited in this session</li>
-<li>Say Marked (Alt+Shift+M) — the <code>look</code> values of every
-marked row</li>
+<li>Say Status (Shift+Z) — table name, row position, filter, sort</li>
+<li>Say Database (Shift+D) — the open database’s name and path</li>
+<li>Say Yield (Shift+Y) — row count and active filter</li>
+<li>Say Tables (Shift+F7) — tables visited in this session</li>
+<li>Say Marked (Query menu; unbound by default) — the <code>look</code>
+values of every marked row</li>
 <li>Say Edited (Shift+E) — the <code>edited</code> value of the current
 row, in a human-friendly local-time form
 (<code>December 14, 1963 at 5:42 AM</code>); the underlying SQLite text
@@ -834,53 +1053,69 @@ is unchanged</li>
 row</li>
 <li>Say Tags (Shift+T) — the <code>tags</code> field of the current
 row</li>
-<li>Say Column from Cursor (Shift+L) — values of the current virtual
-column starting at the current row, semicolon-separated</li>
-<li>Say Marked Yield (Shift+Y) — count of marked rows</li>
+<li>Say Column Rest (Alt+L) — every value of the current column from the
+cursor row down (no length cap)</li>
+<li>Say Records Rest Marked (Alt+Shift+M) — every marked record in full,
+from the cursor down</li>
 </ul>
 <p><strong>Shape commands.</strong> Use the Filter Records command,
-Shift+F (F for Filter), to apply an ADO Filter expression like
-<code>name LIKE '%bridge%'</code>. Use the Clear Filter command, Shift+R
-(R for Reset), to clear it. Use the Custom Sort command, Shift+S (S for
-Sort), to type an arbitrary ADO Sort expression like
-<code>name ASC, year DESC</code>.</p>
-<p>Use the Sort Ascending by Column command, Alt+A (A for Ascending), to
-sort by a chosen column alphabetically; use Alt+Shift+A for Sort
-Descending. Each prompts for the column with a listbox that defaults to
-the column under virtual focus — just press Enter to accept.</p>
-<p>Use the Sort by Date Edited (oldest first) command, Alt+D (D for
-Date), to sort by the table’s <code>edited</code> column with the oldest
-at the top; use Alt+Shift+D for the most-recent-first variant. Use the
-Clear Sort command to drop the sort so the recordset returns to its
-natural order.</p>
+Alt+Shift+F (F for Filter), to filter through a field form like the edit
+dialog — one box per field. A bare value is a case-insensitive substring
+match (the default, the same as a leading <code>%</code>, so both
+<code>bridge</code> and <code>%bridge</code> become
+<code>name LIKE '%bridge%'</code>); a leading <code>=</code> forces an
+exact match; and <code>&lt;=</code>, <code>&gt;=</code>,
+<code>&lt;</code>, <code>&gt;</code>, <code>&lt;&gt;</code> (or
+<code>!=</code>) compare. Filled fields combine with AND. When a filter
+is already active, a chooser offers Clear (the default), And, Or, New,
+Edit, and Cancel — And and Or wrap the existing filter and the new one
+as <code>(old) AND (new)</code> or <code>(old) OR (new)</code>, New
+replaces from a blank form, and Edit replaces from a form pre-filled
+with your last values. Say Filter (Shift+F) speaks the current filter;
+to clear a filter, choose Clear in the chooser. The Filter by Regex
+command (Query menu, unbound by default) is a server-side complement to
+Filter Records: it restricts the current column to rows matching a
+regular expression using SQLean’s <code>REGEXP</code> operator — see the
+SQLean extensions section below. For sorting, use the Order Records
+command, Alt+O, to pick columns and a direction for each; Reverse Order
+(Alt+Shift+O) flips every direction; and Say Order (Shift+O) speaks the
+current sort.</p>
+<p>Sorting is done through the Order Records dialog (Alt+O): pick one or
+more columns and a direction (ascending or descending) for each. The
+dialog’s column list defaults to the column under virtual focus.</p>
+<p>To sort by date, add the <code>edited</code> column in Order Records.
+Removing every column from the sort returns the recordset to its natural
+order.</p>
 <h2 id="misc-menu">Misc menu</h2>
 <p>Use the Refresh View command, F5 (the browser-standard refresh key),
-to re-query the database from disk; useful when another tool has written
-to the file while DbDo had it open. F5 also resets the virtual cursor to
-(row 1, first column).</p>
-<p>Use the Toggle Read-Only Lock command, Control+F7 (F7 = lock
-convention), to switch the recordset between editable and read-only; the
-window title shows the change.</p>
-<p>Use the Table Statistics command (no hotkey) to print row counts and
-per-column statistics for the current table. Use the Frequency Chart
-command (no hotkey; Alt+C as an alias) to render a frequency-by-column
-chart in Excel for analysis.</p>
-<p>Use the Describe Column command, Control+Shift+D (D for Describe), to
-compute descriptive statistics for the column under the virtual cursor.
-DbDo walks the column, detects whether the values look numeric,
-date-like, boolean-like, or text, and reports the statistics that fit.
-Numeric columns get count, unique, minimum, maximum, range, mean,
-median, sample standard deviation, Q1, Q3, IQR, mode (if unambiguous),
-and a skew indicator. Date columns get earliest, latest, median, and
-span. Boolean-like columns (<code>0/1</code>, <code>Y/N</code>,
+to re-read the current rows’ values from the database via the ADO Resync
+method; useful when another tool has edited rows DbDo has open. F5
+preserves your cursor position (reopen the table to pick up rows added
+or removed externally).</p>
+<p>Use the Read Only Toggle command, Alt+Z, to switch the recordset
+between editable and read-only; the window title shows the change.
+(Views and query results are read-only by nature and the toggle cannot
+unlock them.)</p>
+<p>Use the Table Summary command, Alt+T, to print row counts and a
+columns overview for the current table. Use the Graphics Grid command,
+Alt+Shift+G, to render a frequency-by-column chart in Excel for
+analysis.</p>
+<p>Use the Statistics Column command, Control+Shift+S, to compute
+descriptive statistics for the column under the virtual cursor. DbDo
+walks the column, detects whether the values look numeric, date-like,
+boolean-like, or text, and reports the statistics that fit. Numeric
+columns get count, unique, minimum, maximum, range, mean, median, sample
+standard deviation, Q1, Q3, IQR, mode (if unambiguous), and a skew
+indicator. Date columns get earliest, latest, median, and span.
+Boolean-like columns (<code>0/1</code>, <code>Y/N</code>,
 <code>true/false</code>) get true and false counts with percentages.
 Text columns get unique count, shortest/longest/mean length, and a
 top-10 frequency table. The report opens in the same multi-line
 read-only dialog used by speech commands on double-press; press
 Control+C inside the textbox to copy the whole report.</p>
-<p>Use the Plot Column command, Control+Shift+P (P for Plot), to produce
-an Excel chart matched to the data type of the column under the virtual
-cursor. DbDo runs the same data-type detection Describe Column uses and
+<p>Use the Graphics Column command, Control+Shift+G, to produce an Excel
+chart matched to the data type of the column under the virtual cursor.
+DbDo runs the same data-type detection Statistics Column uses and
 chooses a chart shape from it. Numeric columns can plot as a histogram
 (Sturges-binned distribution) or as a box-and-whisker plot (Tukey’s
 five-number summary as a single compact shape); a small dialog prompts
@@ -894,34 +1129,29 @@ the data type, DbDo skips the picker and generates it directly. The
 .xlsx file is written next to the database file with a name like
 <code>customers-region-pareto.xlsx</code>, then opened in Excel; from
 there you can polish the chart, copy it to other documents, or change
-the chart type by hand. Plot Column requires Excel to be installed (same
-dependency as Frequency Chart). The existing Frequency &amp;Chart
-command (Alt+C) remains for when you want to pick any column from a list
-and produce a column chart of value counts, regardless of data type.</p>
-<p>Use the Choose Visible Columns command (no hotkey; Alt+L as an alias)
-to pick which columns appear in the data list for the current table.
-Hidden columns are still accessible through Show Record and Edit
-Record.</p>
-<p>Use the Extract Regex Matches to Clipboard command, Alt+E (E for
-Extract), to walk every visible row, run a .NET regex against every
-visible column, and copy every match to the clipboard one per line.
-Useful for pulling email addresses, urls, or IDs out of free-text
-columns.</p>
-<p>Use the Copy Cell to Clipboard command, Shift+C, to copy the current
-virtual cell (the cell under the Alt+Control+arrow cursor) to the
-Windows clipboard, replacing whatever was there. Use the Append Cell to
-Clipboard command, Shift+A, to append the current virtual cell to the
-clipboard separated by a blank line (two CRLF), so you can accumulate
-values from multiple cells across rows or columns. If the clipboard is
-empty, Append acts the same as Copy.</p>
+the chart type by hand. Graphics Column requires Excel to be installed.
+The Graphics Grid command (Alt+Shift+G) remains for when you want to
+pick any column from a list and produce a column chart of value counts,
+regardless of data type.</p>
+<p>Use the Select Columns command, Alt+S, to pick which columns appear
+in the data list for the current table. Hidden columns are still
+accessible through Details View and Edit View.</p>
+<p>Use the Extract Regex command, Control+Shift+X, to walk every visible
+row, run a .NET regex against every visible column, and copy every match
+to the clipboard one per line. Useful for pulling email addresses, urls,
+or IDs out of free-text columns.</p>
+<p>Use the Copy Cell command, Control+C, to copy the current virtual
+cell (the cell under the Alt+Control+arrow cursor) to the Windows
+clipboard, replacing whatever was there. Use the Append Cell command,
+Alt+C, to append the current virtual cell to the clipboard separated by
+a blank line (two CRLF), so you can accumulate values from multiple
+cells across rows or columns. If the clipboard is empty, Append acts the
+same as Copy.</p>
 <p>Use the Copy Row as TSV to Clipboard command (no hotkey, accessed
 through the Misc menu) to copy the current row’s visible columns as
 tab-separated values for pasting into Excel, Word tables, or chat
 clients. The label lacks a mnemonic letter because the only candidates
 fall mid-word — DbDo prefers no mnemonic to a mid-word one.</p>
-<p>Use the Next Initial Change command, Shift+I, to jump to the next row
-whose value in a chosen column starts with a different first letter. The
-column picker defaults to the column under virtual focus.</p>
 <p>Use the Run SQL command, Control+Q (Q for Query), to run any SQL
 statement. SELECTs display the result as a new recordset;
 INSERT/UPDATE/DELETE/DDL run via ADO Connection.Execute. The dot
@@ -998,8 +1228,8 @@ interactive jump to a specific related record, use the existing
 Show-Related command (Alt+Shift+R) instead.</p>
 <p>Field validation: each editable field can have a regex pattern stored
 in DbDo.inix under a <code>[Validation:&lt;table&gt;]</code> section.
-When the pattern is set, both the Edit Record dialog (F2) and the Edit
-Field dialog (Shift+F2) refuse non-matching input. DbDo uses .NET regex
+When the pattern is set, both the Edit View dialog (Control+E) and the
+Edit Cell dialog (F2) refuse non-matching input. DbDo uses .NET regex
 syntax (the established powerful pattern language, the same one Find
 Regex uses) — examples appear in the sub-dialog. Empty pattern means no
 constraint.</p>
@@ -1437,6 +1667,112 @@ There is no facade or sandbox. A script can call
 programs, modify the database. This is intentional for power-user
 automation; treat scripts the same way you would treat shell scripts or
 PowerShell scripts you run on your own machine.</p>
+<h2 id="text-field-conveniences">Text field conveniences</h2>
+<p>Every text box in DbDo’s dialogs — single-line inputs, the multi-line
+memo editor, and even the read-only Error and Help viewers — shares a
+family of keyboard conveniences aimed at screen-reader review and
+editing. They belong to the text control itself, so they behave the same
+everywhere a text field appears, with no per-dialog setup.</p>
+<ul>
+<li><strong>Control+A</strong> — Select all;
+<strong>Control+Shift+A</strong> — Unselect all. Both work even in
+read-only and multi-line boxes, where a plain select-all is often
+unreliable.</li>
+<li><strong>Control+C</strong> — Copy. With a selection, copies it; with
+no selection, copies the current line (without its line break), so you
+can grab a line without selecting it first.</li>
+<li><strong>Alt+C</strong> — Copy Append: add the selection (or current
+line) to what is already on the clipboard.</li>
+<li><strong>Control+X</strong> — Cut. With a selection, cuts it; with
+none, cuts the current line including its break (removing the row) and
+speaks the line the cursor lands on.</li>
+<li><strong>Alt+X</strong> — Cut Append: cut as above, but add to the
+clipboard instead of replacing it.</li>
+<li><strong>Control+D</strong> — Delete Line: remove the current line
+without touching the clipboard.</li>
+<li><strong>F8 / Shift+F8</strong> — Start Selection / Complete
+Selection: press F8 to drop an anchor, move the cursor, then Shift+F8 to
+select from the anchor to the cursor.</li>
+<li><strong>Control+F8</strong> — Copy All; <strong>Alt+F8</strong> —
+Read All (speak the entire field).</li>
+<li><strong>Alt+Y</strong> — Say Yield: speak the line and character
+counts.</li>
+<li><strong>Alt+Apostrophe</strong> — Say Clipboard: speak the current
+clipboard text.</li>
+<li><strong>Shift+F1</strong> — Focus Tip: speak the tip describing the
+field you are in.</li>
+</ul>
+<p>Cut, Cut Append, and Delete Line do nothing in a read-only viewer —
+they announce “Read-only” — while the copy, read, count, clipboard, and
+tip commands work there too.</p>
+<h2 id="sqlean-extensions">SQLean extensions</h2>
+<p>DbDo can use SQLean, a bundle of SQLite extensions, to add SQL
+functions that plain SQLite lacks. If a file named
+<code>sqlean.dll</code> sits in the same folder as
+<code>DbDo.exe</code>, DbDo loads it automatically when it opens a
+SQLite database — there is nothing to configure. The bundle is 64-bit,
+matching DbDo’s build. DbDo’s build script (<code>buildDbDo.cmd</code>)
+downloads it for you and places it beside the executable, but you can
+also drop it in by hand. You can read the full function reference at the
+SQLean project: <a href="https://github.com/nalgeon/sqlean"
+class="uri">https://github.com/nalgeon/sqlean</a>.</p>
+<p>With SQLean loaded, two DbDo features come alive:</p>
+<ul>
+<li><strong>Filter by Regex</strong> (Query menu, unbound by default)
+restricts the current column to rows matching a regular expression,
+using SQLean’s <code>REGEXP</code> operator. The match runs inside
+SQLite rather than row-by-row in DbDo, so it is fast on large tables,
+and because the result is still a single-table SELECT it stays editable.
+An empty pattern clears the filter. This complements the client-side
+regex Find (which searches the displayed view) and Filter Records (which
+uses the ADO filter and cannot do regular expressions).</li>
+<li><strong>Extended field statistics</strong> add <code>median</code>,
+<code>stddev</code>, <code>stddev_pop</code>, <code>variance</code>,
+<code>var_pop</code>, and <code>percentile_25</code> /
+<code>percentile_75</code> / <code>percentile_90</code> /
+<code>percentile_95</code> to the <code>Measure-Field</code> command at
+the dot prompt — for example, <code>Measure-Field amount median</code>.
+They are computed in SQL through SQLean’s stats functions, alongside the
+built-in <code>count</code>, <code>min</code>, <code>max</code>,
+<code>sum</code>, <code>avg</code>, <code>longest</code>, and
+<code>shortest</code>.</li>
+</ul>
+<p>SQLean’s functions are also available in any SQL you run through
+Invoke-Sql — for instance
+<code>SELECT name FROM contacts WHERE name REGEXP '^Dr\.'</code> or
+<code>SELECT median(amount) FROM events</code>.</p>
+<p><strong>The two SQLean files.</strong> There are two distinct
+downloads, easy to confuse. <code>sqlean.dll</code> is the loadable
+<em>extension bundle</em> described above, which DbDo auto-loads into
+its own database connection. <code>sqlean.exe</code> is a separate
+<em>shell</em> — the standard SQLite command-line shell with the same
+extensions built in — from the companion project at <a
+href="https://github.com/nalgeon/sqlite"
+class="uri">https://github.com/nalgeon/sqlite</a>. The build script
+fetches both and places them beside <code>DbDo.exe</code>. The shell
+powers the dot prompt’s <code>!</code> lane: typing <code>!</code>
+followed by a line runs it in <code>sqlean.exe</code> against the
+current database file (opened read-only) and shows the output, giving
+you the full sqlite3/SQLean shell — <code>.tables</code>,
+<code>.schema</code>, <code>.dump</code>, <code>.stats</code>, and every
+SQLean function — without DbDo reimplementing any of it. The
+<code>/</code> lane is the complement: <code>/</code> followed by SQL
+runs through DbDo’s own connection, where the result integrates with
+DbDo.</p>
+<p><strong>What the bundle provides.</strong> The SQLean main set spans,
+by module: crypto (hashing and encoding), define (user-defined functions
+and dynamic SQL), fileio (file and directory access), fuzzy (fuzzy
+matching and phonetics), ipaddr (IP-address functions), math
+(mathematical functions), regexp (regular expressions), stats (median,
+percentiles, and other statistics), text (Unicode-aware string
+functions), unicode (Unicode utilities), uuid (UUID generation), and vsv
+(reading delimited files as virtual tables). The regexp and stats
+modules are what power Filter by Regex and the extended field statistics
+above; the rest are available to any SQL you run.</p>
+<p>If <code>sqlean.dll</code> is absent, these specific features report
+that the bundle is needed and the rest of DbDo is unaffected. The Test
+Extension Load command (Misc menu) reports whether the bundle loaded and
+which version.</p>
 <h2 id="help-menu">Help menu</h2>
 <p>Use the Documentation command, F1 (the standard help key), for help.
 With no argument, F1 shows the command index; from the dot prompt,
@@ -1511,49 +1847,55 @@ send subsequent output to a file while also keeping it on screen. The
 lines beginning with <code>#</code> or <code>;</code> are treated as
 comments. Errors are reported per line but do not stop the script.</p>
 <pre><code>Out-File monthly_report.txt
-Invoke-Script monthly_report.dbduo
+Invoke-Script monthly_report.dbdo
 Out-File stdout</code></pre>
 <h2 id="mnemonic-hotkey-groups">Mnemonic hotkey groups</h2>
 <p>This section restates every hotkey in the program, grouped by the
 part of the keyboard it lives on.</p>
 <h3 id="bare-shiftletter-family">Bare Shift+Letter family</h3>
-<p>Five one-key shortcuts fire from the data list only (so capital
-letters typed in dialogs are not affected): Shift+F filters (Filter
-Records); Shift+G goes to a row (Go to Row); Shift+J as a synonym for
-Jump to Match in One Column; Shift+R resets the filter (Clear Filter);
-Shift+S sorts by an arbitrary expression (Custom Sort).</p>
+<p>Several capital-letter shortcuts fire from the data list (so capital
+letters typed in dialogs are not affected). These are the Say family:
+Shift+F (Say Filter), Shift+O (Say Order), Shift+G (Say Goto), Shift+R
+(Say Related), and the other Shift+letter say commands.</p>
 <h3 id="function-key-family">Function-key family</h3>
-<p>F1 is Documentation; Shift+F1 is History of Changes; Alt+F1 is About;
-Control+F1 is Key Describer. F2 edits the current row; Shift+F2 edits
-just the current field (virtual cell). F3 is search next; Shift+F3 is
-search previous. Control+F3 is Find Regex Across All Columns;
-Control+Shift+F3 is the reverse. F4 picks a table; Shift+F4 is Say
-Tables; Control+F4 closes the open file. F5 refreshes and resets the
-virtual cursor. Control+F6 cycles all objects; Control+Shift+F6 cycles
-backward. Control+F7 toggles the lock. F11 is Elevate Version. Alt+F4
-closes the program. Alt+F10 opens the Alternate Menu. F12 is a legacy
-alias for Configuration Options (now on Alt+Shift+C, the same chord
-EdSharp and FileDir use for their Configuration Options command).</p>
+<p>F1 is Get Help; Shift+F1 is Show History; Alt+F1 is About DbDo;
+Control+F1 is Key Help Toggle. F2 is Edit Cell; Control+F2 is Pick
+Value. F3 is Search Next; Shift+F3 is Search Previous; Control+F3 is
+Find Regex; Control+Shift+F3 is the reverse. F4 is Current Windows;
+Shift+F4 is Say Windows Open; Control+F4 closes the window. F5 is
+Refresh View. F6 cycles the views; Shift+F6 cycles back; Alt+F6 and
+Control+F6 switch table and object (Alt+Shift+F6 and Control+Shift+F6 go
+backward). F7 is Choose Table; Shift+F7 is Say Tables. F8 starts a mark;
+Shift+F8 completes it; Alt+F8 starts an unmark; Alt+Shift+F8 unmarks a
+range. Shift+F9 is Say Notes; Control+F9 is Edit Notes. Alt+F10 opens
+the Alternate Menu. F11 is Elevate Version. Alt+F4 closes the
+program.</p>
 <h3 id="control-letter-family">Control-letter family</h3>
-<p>Control+C is reserved for native clipboard. Control+D deletes the
-current row. Control+F is Find Across All Columns; Control+Shift+F is
-the reverse. Control+J is Jump to Match in One Column; Control+Shift+J
-is the reverse. Control+K saves a bookmark; Control+Shift+K clears it.
-Control+M marks the current row; Control+U unmarks it. Control+N adds a
-row; Control+Shift+N creates a new database. Control+O opens a file.
-Control+P prints. Control+Q runs SQL. Control+R is Find and Replace
-Across Rows. Control+S saves the database to a new path; Control+Shift+S
-takes a backup snapshot. Control+Shift+C duplicates the current row.
-Control+Shift+I imports a Markdown table; Control+Shift+X exports data.
-Control+Enter is Open Cell Value.</p>
+<p>Control+C copies the current cell. Control+L, Control+E, and
+Control+D are List View, Edit View, and Details View. Control+F is Find
+Across All Columns; Control+Shift+F is the reverse. Control+J is Jump to
+Match in One Column; Control+Shift+J is the reverse. Control+B saves a
+bookmark and Control+Shift+B clears it. Control+M marks the current row;
+Control+Shift+M unmarks it. Control+N adds a row; Control+Shift+N copies
+the record as a new one. Control+O opens a database; Control+Shift+O
+opens a table in a new window. Control+P prints. Control+Q runs SQL.
+Control+R is Find and Replace Across Rows; Control+Shift+R is its regex
+variant. Control+S saves the database to a new path; Control+Shift+S is
+Statistics Column. Control+T edits tags; Control+U edits the url.
+Control+Shift+D deletes without confirmation. Control+Shift+G is
+Graphics Column; Control+Shift+X extracts regex matches. Control+G is
+Set Position. Control+Enter is Open Cell Value.</p>
 <h3 id="alt-letter-family">Alt-letter family</h3>
-<p>Alt+A sorts ascending; Alt+Shift+A sorts descending. Alt+C is an
-alias for Frequency Chart. Alt+D sorts by date oldest first; Alt+Shift+D
-sorts most recent first. Alt+E is Extract Regex Matches to Clipboard.
-Alt+K is Go to Bookmark. Alt+L is an alias for Choose Table. Alt+P is
-Say Path. Alt+R is Recent Files; Alt+Shift+R is Related Records. Alt+T
-is an alias for Table Statistics. Alt+Y is Say Yield. Alt+Z is Say
-Status. Alt+Enter is Table Properties. Alt+Backslash is Open in
+<p>Alt+B lists bookmarks. Alt+C appends the current cell to the
+clipboard; Alt+Shift+C appends the record. Alt+D is Database Summary;
+Alt+T is Table Summary. Alt+I imports data; Alt+X exports data. Alt+G
+repeats Set Position. Alt+L is Say Column Rest; Alt+Shift+L is Say
+Records Rest; Alt+M is Say Marked; Alt+Shift+M is Say Records Rest
+Marked. Alt+O is Order Records; Alt+Shift+O is Reverse Order. Alt+R is
+Recent Files. Alt+S is Select Columns. Alt+V invokes a script;
+Alt+Shift+V edits one. Alt+Z is Read Only Toggle; Alt+Shift+Z is Extra
+Speech Toggle. Alt+Shift+F is Filter Records; Alt+Shift+G is Graphics
+Grid. Alt+Enter is Table Properties. Alt+Backslash is Open in
 Explorer.</p>
 <h3
 id="altcontrol-extended-key-family-virtual-cell-navigation">Alt+Control
@@ -1570,20 +1912,58 @@ on a second press.</p>
 the parent row. Alt+Home pops the entire drill stack.</p>
 <h3 id="navigation-family">Navigation family</h3>
 <p>Tab and Shift+Tab move an announcement-only column cursor across the
-current row. The arrow keys move the listview’s row selection. Enter
-opens Show Record on the current row. Control+Tab cycles among
-recently-visited tables; Control+Shift+Tab cycles backward. Control+Home
-and Control+End jump to the first or last marked row; Control+UpArrow
-and Control+DownArrow step among marked rows. Shift+Home and Shift+End
-bulk-mark every row from the first through the current, or the current
-through the last; Alt+Shift+Home and Alt+Shift+End unmark the same
-spans.</p>
+current row. The arrow keys move the listview’s row selection. Enter (or
+Control+D) opens Details View on the current row. Control+Tab cycles
+among recently-visited tables; Control+Shift+Tab cycles backward.
+Control+Shift+Home and Control+Shift+End jump to the first or last
+marked row; Control+UpArrow and Control+DownArrow step among marked
+rows. Shift+Home and Shift+End bulk-mark every row from the first
+through the current, or the current through the last; Alt+Shift+Home and
+Alt+Shift+End unmark the same spans.</p>
 <h3 id="graveaccent-family">GraveAccent family</h3>
 <p>Control+GraveAccent is the GUI menu hotkey for Open Dot Prompt.
 Alt+Control+GraveAccent is a global hotkey that always acts: it toggles
 between GUI and console, whichever is not currently in front. (The
 former Alt+GraveAccent console-to-GUI hotkey was dropped as redundant
 with the toggle, and to stop reserving a second system-wide chord.)</p>
+<h2 id="schema-documentation-in-comments">Schema documentation in
+comments</h2>
+<p>DbDo databases can carry their own documentation inside the schema
+itself, with no extra data-dictionary tables. SQLite stores the verbatim
+text of every CREATE statement – comments included – in sqlite_master,
+so comments written inside a CREATE TABLE body persist in the database
+file and travel with it.</p>
+<p>DbDo reads the sqlite-docs convention (compatible with
+github.com/asg017/sqlite-docs):</p>
+<p>A line beginning <code>--!</code> inside the CREATE TABLE body
+documents the table. When the text has the shape
+<code>key: value</code>, DbDo treats it as a YAML-style publishing field
+(name, author, version, description, abstract, relationships, or any key
+you choose); otherwise it is free prose. A line beginning
+<code>---</code> documents the column whose definition follows it.</p>
+<p>Example:</p>
+<pre><code>CREATE TABLE events (
+  --! description: One row per discrete agenda entry
+  --! author: Jamal Mazrui
+  --! relationships: presents (contacts), located_at (locations)
+  event_id INTEGER PRIMARY KEY,
+  --- Start time in SQLite timestamp form
+  starts TEXT,
+  ...
+);</code></pre>
+<p>By DbDo convention, database-level metadata is the <code>--!</code>
+block of the builtin lookups table, since every DbDo database has one
+and the database file itself has no CREATE statement to carry
+comments.</p>
+<p>Where it surfaces: Table Properties (Alt+Enter) shows a table’s
+documentation and column documentation first; Database Summary shows the
+database-level block beneath the table count.</p>
+<p>One caution, documented by SQLite users and the sqlite-docs project
+alike: ALTER TABLE ADD, RENAME, or DROP COLUMN rewrites the stored
+statement and can erase or mangle embedded comments. DbDo’s
+regenerate-the-table approach to schema changes composes its own CREATE
+statements, so doc comments survive DbDo’s edits; avoid raw ALTER TABLE
+on documented tables in outside tools.</p>
 <h2 id="standard-fields">Standard fields</h2>
 <p>DbDo follows a convention for table design that the bundled sample
 databases illustrate and that the user manual recommends for new
@@ -1614,8 +1994,8 @@ table is actually for.</li>
 command toggles.</li>
 <li><code>look</code> — computed text. A pipe-joined rendering of the
 most identifying distinct fields, designed for screen-reader
-readability. Appears in listboxes, quick-search displays, and Show
-Record’s Related Records section.</li>
+readability. Appears in listboxes, quick-search displays, and the
+Details View’s related-records section.</li>
 <li><code>unq</code> — computed text. Like <code>look</code> but
 optimized for uniqueness rather than readability. The intent is that the
 combination of column values in <code>unq</code> can confidently be
@@ -1623,18 +2003,19 @@ considered unique for a row, so that an upsert-style command can update
 an existing row if <code>unq</code> matches, or insert a new row
 otherwise.</li>
 </ol>
-<p>The TEXTLINE / TEXTMEMO type names on <code>url</code>,
-<code>tags</code>, and <code>notes</code> aren’t standard SQLite types —
-they’re convention labels DbDo reads from
-<code>PRAGMA table_info</code>. SQLite’s type affinity treats all three
-as TEXT for storage. The difference is that DbDo’s Edit Record dialog
-renders a single-line input box for TEXT/TEXTLINE columns and a
-multi-line memo widget for any type containing “memo”. Use TEXTMEMO for
-<code>tags</code> and <code>notes</code> so the editor handles their
-potentially-long content gracefully.</p>
-<p>The <code>look</code> column is what makes Show Record’s Related
-Records section informative. When DbDo lists “Related students:” or
-“Related classes:”, each line is one matching row’s <code>look</code>
+<p>The TEXTLINE / TEXTMEMO / TEXTMARKDOWN type names on
+<code>url</code>, <code>tags</code>, and <code>notes</code> aren’t
+standard SQLite types — they’re convention labels DbDo reads from
+<code>PRAGMA table_info</code>. SQLite’s type affinity treats them all
+as TEXT for storage. The difference is that the Edit View dialog renders
+a single-line input box for TEXT/TEXTLINE columns and a multi-line box
+for any type containing “memo” or “markdown”. <code>tags</code> uses
+TEXTMEMO and <code>notes</code> uses TEXTMARKDOWN (a multi-line field
+whose content is expected to be Markdown) so the editor handles their
+longer content gracefully.</p>
+<p>The <code>look</code> column is what makes the Details View’s
+related-records section informative. When DbDo lists “Related students:”
+or “Related classes:”, each line is one matching row’s <code>look</code>
 value, so a single short string identifies who or what each related
 record is. Tables without a <code>look</code> column still show up under
 the right header but with a <code>(N row(s) -- no look column)</code>
@@ -1644,42 +2025,42 @@ foreign keys), bare <code>id</code>, and the bookkeeping columns (added,
 edited, marked, look, unq) from the listview by default. As of v1.0.68,
 <code>url</code>, <code>tags</code>, and <code>notes</code> are also
 hidden by default — they’re “extended” data per row that the user
-reaches via the Say-X family (Say Url, Say Tags, Say Notes) or edits via
-Edit Record (F2 Edit Cell or Ctrl+E Edit Record, which both show the
-FULL field set). Use the Select Columns command (Alt+S) to override on a
-per-table basis; the override persists across sessions via
+reaches via the Say family (Say URL Shift+U, Say Tags Shift+T, Say Notes
+Shift+F9) or edits via Edit Cell (F2) or Edit View (Control+E), which
+shows the full field set. Use the Select Columns command (Alt+S) to
+override on a per-table basis; the override persists across sessions via
 DbDo.inix.</p>
 <h3 id="example-schema-using-the-standard-fields">Example schema using
 the standard fields</h3>
 <p>The <code>teachers</code> table from <code>sample.db</code>:</p>
-<div class="sourceCode" id="cb12"><pre
-class="sourceCode sql"><code class="sourceCode sql"><span id="cb12-1"><a href="#cb12-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> teachers (</span>
-<span id="cb12-2"><a href="#cb12-2" aria-hidden="true" tabindex="-1"></a>    teacher_id  <span class="dt">integer</span>  <span class="kw">primary</span> <span class="kw">key</span> autoincrement,</span>
-<span id="cb12-3"><a href="#cb12-3" aria-hidden="true" tabindex="-1"></a>    added       datetime <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> <span class="fu">current_timestamp</span>,</span>
-<span id="cb12-4"><a href="#cb12-4" aria-hidden="true" tabindex="-1"></a>    edited      datetime <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> <span class="fu">current_timestamp</span>,</span>
-<span id="cb12-5"><a href="#cb12-5" aria-hidden="true" tabindex="-1"></a>    name        text     <span class="kw">not</span> <span class="kw">null</span>,</span>
-<span id="cb12-6"><a href="#cb12-6" aria-hidden="true" tabindex="-1"></a>    department  text,</span>
-<span id="cb12-7"><a href="#cb12-7" aria-hidden="true" tabindex="-1"></a>    email       text,</span>
-<span id="cb12-8"><a href="#cb12-8" aria-hidden="true" tabindex="-1"></a>    office      text,</span>
-<span id="cb12-9"><a href="#cb12-9" aria-hidden="true" tabindex="-1"></a>    notes       text,</span>
-<span id="cb12-10"><a href="#cb12-10" aria-hidden="true" tabindex="-1"></a>    tags        text,</span>
-<span id="cb12-11"><a href="#cb12-11" aria-hidden="true" tabindex="-1"></a>    marked      <span class="dt">integer</span>  <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> <span class="dv">0</span>,</span>
-<span id="cb12-12"><a href="#cb12-12" aria-hidden="true" tabindex="-1"></a>    look text <span class="kw">generated</span> always <span class="kw">as</span> (</span>
-<span id="cb12-13"><a href="#cb12-13" aria-hidden="true" tabindex="-1"></a>        <span class="fu">rtrim</span>(</span>
-<span id="cb12-14"><a href="#cb12-14" aria-hidden="true" tabindex="-1"></a>            iif(<span class="fu">length</span>(name)<span class="op">&gt;</span><span class="dv">0</span>,       name       <span class="op">||</span> <span class="st">&#39; | &#39;</span>, <span class="st">&#39;&#39;</span>) <span class="op">||</span></span>
-<span id="cb12-15"><a href="#cb12-15" aria-hidden="true" tabindex="-1"></a>            iif(<span class="fu">length</span>(department)<span class="op">&gt;</span><span class="dv">0</span>, department <span class="op">||</span> <span class="st">&#39; | &#39;</span>, <span class="st">&#39;&#39;</span>) <span class="op">||</span></span>
-<span id="cb12-16"><a href="#cb12-16" aria-hidden="true" tabindex="-1"></a>            iif(<span class="fu">length</span>(office)<span class="op">&gt;</span><span class="dv">0</span>,     office     <span class="op">||</span> <span class="st">&#39; | &#39;</span>, <span class="st">&#39;&#39;</span>),</span>
-<span id="cb12-17"><a href="#cb12-17" aria-hidden="true" tabindex="-1"></a>            <span class="st">&#39; | &#39;</span></span>
-<span id="cb12-18"><a href="#cb12-18" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb12-19"><a href="#cb12-19" aria-hidden="true" tabindex="-1"></a>    ) stored,</span>
-<span id="cb12-20"><a href="#cb12-20" aria-hidden="true" tabindex="-1"></a>    unq text <span class="kw">generated</span> always <span class="kw">as</span> (</span>
-<span id="cb12-21"><a href="#cb12-21" aria-hidden="true" tabindex="-1"></a>        <span class="fu">rtrim</span>(</span>
-<span id="cb12-22"><a href="#cb12-22" aria-hidden="true" tabindex="-1"></a>            iif(<span class="fu">length</span>(name)<span class="op">&gt;</span><span class="dv">0</span>,  name  <span class="op">||</span> <span class="st">&#39; | &#39;</span>, <span class="st">&#39;&#39;</span>) <span class="op">||</span></span>
-<span id="cb12-23"><a href="#cb12-23" aria-hidden="true" tabindex="-1"></a>            iif(<span class="fu">length</span>(email)<span class="op">&gt;</span><span class="dv">0</span>, email,           <span class="st">&#39;&#39;</span>),</span>
-<span id="cb12-24"><a href="#cb12-24" aria-hidden="true" tabindex="-1"></a>            <span class="st">&#39; | &#39;</span></span>
-<span id="cb12-25"><a href="#cb12-25" aria-hidden="true" tabindex="-1"></a>        )</span>
-<span id="cb12-26"><a href="#cb12-26" aria-hidden="true" tabindex="-1"></a>    ) stored</span>
-<span id="cb12-27"><a href="#cb12-27" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
+<div class="sourceCode" id="cb13"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TABLE</span> teachers (</span>
+<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a>    teacher_id  <span class="dt">integer</span>  <span class="kw">primary</span> <span class="kw">key</span> autoincrement,</span>
+<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a>    added       datetime <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> <span class="fu">current_timestamp</span>,</span>
+<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a>    edited      datetime <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> <span class="fu">current_timestamp</span>,</span>
+<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a>    name        text     <span class="kw">not</span> <span class="kw">null</span>,</span>
+<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>    department  text,</span>
+<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>    email       text,</span>
+<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>    office      text,</span>
+<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a>    notes       text,</span>
+<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    tags        text,</span>
+<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    marked      <span class="dt">integer</span>  <span class="kw">not</span> <span class="kw">null</span> <span class="kw">default</span> <span class="dv">0</span>,</span>
+<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a>    look text <span class="kw">generated</span> always <span class="kw">as</span> (</span>
+<span id="cb13-13"><a href="#cb13-13" aria-hidden="true" tabindex="-1"></a>        <span class="fu">rtrim</span>(</span>
+<span id="cb13-14"><a href="#cb13-14" aria-hidden="true" tabindex="-1"></a>            iif(<span class="fu">length</span>(name)<span class="op">&gt;</span><span class="dv">0</span>,       name       <span class="op">||</span> <span class="st">&#39; | &#39;</span>, <span class="st">&#39;&#39;</span>) <span class="op">||</span></span>
+<span id="cb13-15"><a href="#cb13-15" aria-hidden="true" tabindex="-1"></a>            iif(<span class="fu">length</span>(department)<span class="op">&gt;</span><span class="dv">0</span>, department <span class="op">||</span> <span class="st">&#39; | &#39;</span>, <span class="st">&#39;&#39;</span>) <span class="op">||</span></span>
+<span id="cb13-16"><a href="#cb13-16" aria-hidden="true" tabindex="-1"></a>            iif(<span class="fu">length</span>(office)<span class="op">&gt;</span><span class="dv">0</span>,     office     <span class="op">||</span> <span class="st">&#39; | &#39;</span>, <span class="st">&#39;&#39;</span>),</span>
+<span id="cb13-17"><a href="#cb13-17" aria-hidden="true" tabindex="-1"></a>            <span class="st">&#39; | &#39;</span></span>
+<span id="cb13-18"><a href="#cb13-18" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb13-19"><a href="#cb13-19" aria-hidden="true" tabindex="-1"></a>    ) stored,</span>
+<span id="cb13-20"><a href="#cb13-20" aria-hidden="true" tabindex="-1"></a>    unq text <span class="kw">generated</span> always <span class="kw">as</span> (</span>
+<span id="cb13-21"><a href="#cb13-21" aria-hidden="true" tabindex="-1"></a>        <span class="fu">rtrim</span>(</span>
+<span id="cb13-22"><a href="#cb13-22" aria-hidden="true" tabindex="-1"></a>            iif(<span class="fu">length</span>(name)<span class="op">&gt;</span><span class="dv">0</span>,  name  <span class="op">||</span> <span class="st">&#39; | &#39;</span>, <span class="st">&#39;&#39;</span>) <span class="op">||</span></span>
+<span id="cb13-23"><a href="#cb13-23" aria-hidden="true" tabindex="-1"></a>            iif(<span class="fu">length</span>(email)<span class="op">&gt;</span><span class="dv">0</span>, email,           <span class="st">&#39;&#39;</span>),</span>
+<span id="cb13-24"><a href="#cb13-24" aria-hidden="true" tabindex="-1"></a>            <span class="st">&#39; | &#39;</span></span>
+<span id="cb13-25"><a href="#cb13-25" aria-hidden="true" tabindex="-1"></a>        )</span>
+<span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    ) stored</span>
+<span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
 <h2 id="bundled-sample-databases">Bundled sample databases</h2>
 <p>DbDo ships five SQLite sample databases, each adapted to the standard
 column conventions described above. The Help menu has one-keystroke
@@ -1716,10 +2097,10 @@ standard columns <code>added</code>, <code>edited</code>,
 <code>look</code>, <code>unq</code>, and (new in v1.0.68)
 <code>url</code> are appended to each table; <code>notes</code> and
 <code>tags</code> are declared as <code>TEXTMEMO</code> so DbDo’s Edit
-Record dialog renders a multi-line memo widget for them. The substantive
-columns (company, contact, city, country, phone for customers;
-first_name, last_name, title for employees; and so on) are preserved
-verbatim. Learn more about the canonical Microsoft Northwind:</p>
+View dialog renders a multi-line box for them. The substantive columns
+(company, contact, city, country, phone for customers; first_name,
+last_name, title for employees; and so on) are preserved verbatim. Learn
+more about the canonical Microsoft Northwind:</p>
 <ul>
 <li>Microsoft Learn — <a
 href="https://learn.microsoft.com/en-us/dotnet/framework/data/adonet/ef/loading-related-objects">Northwind
@@ -1810,26 +2191,26 @@ marking as a working-set tool.</p>
 <p>The check uses <code>OLD.col IS NOT NEW.col</code> for each
 substantive column, joined by <code>OR</code>, so the trigger correctly
 skips both the “ADO only writes one column” case (Mark Record updates
-only <code>marked</code>) and the “Edit Record writes every column with
-values unchanged” case (the F2 dialog hands every field back even if
+only <code>marked</code>) and the “Edit View writes every column with
+values unchanged” case (the edit dialog hands every field back even if
 untouched). NULLs are handled correctly because <code>IS NOT</code> is
 null-safe in SQLite, unlike the regular <code>&lt;&gt;</code>
 operator.</p>
 <p>For users creating their own tables, the same trigger pattern is
 recommended:</p>
-<div class="sourceCode" id="cb13"><pre
-class="sourceCode sql"><code class="sourceCode sql"><span id="cb13-1"><a href="#cb13-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TRIGGER</span> trg_<span class="op">&lt;</span><span class="kw">table</span><span class="op">&gt;</span>_edited</span>
-<span id="cb13-2"><a href="#cb13-2" aria-hidden="true" tabindex="-1"></a><span class="kw">AFTER</span> <span class="kw">UPDATE</span> <span class="kw">OF</span> <span class="ot">&quot;col1&quot;</span>, <span class="ot">&quot;col2&quot;</span> <span class="co">-- the data-bearing columns, including notes, tags, url</span></span>
-<span id="cb13-3"><a href="#cb13-3" aria-hidden="true" tabindex="-1"></a><span class="kw">ON</span> <span class="op">&lt;</span><span class="kw">table</span><span class="op">&gt;</span></span>
-<span id="cb13-4"><a href="#cb13-4" aria-hidden="true" tabindex="-1"></a><span class="cf">FOR</span> <span class="kw">EACH</span> <span class="kw">ROW</span></span>
-<span id="cb13-5"><a href="#cb13-5" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="kw">OLD</span>.<span class="ot">&quot;col1&quot;</span> <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NEW</span>.<span class="ot">&quot;col1&quot;</span></span>
-<span id="cb13-6"><a href="#cb13-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">OR</span> <span class="kw">OLD</span>.<span class="ot">&quot;col2&quot;</span> <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NEW</span>.<span class="ot">&quot;col2&quot;</span></span>
-<span id="cb13-7"><a href="#cb13-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">-- one OLD/NEW comparison per data-bearing column;</span></span>
-<span id="cb13-8"><a href="#cb13-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">-- omit &lt;singular&gt;_id, marked, added, edited, look, unq</span></span>
-<span id="cb13-9"><a href="#cb13-9" aria-hidden="true" tabindex="-1"></a><span class="cf">BEGIN</span></span>
-<span id="cb13-10"><a href="#cb13-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">UPDATE</span> <span class="op">&lt;</span><span class="kw">table</span><span class="op">&gt;</span> <span class="kw">SET</span> edited <span class="op">=</span> <span class="fu">CURRENT_TIMESTAMP</span></span>
-<span id="cb13-11"><a href="#cb13-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">WHERE</span> <span class="op">&lt;</span>singular<span class="op">&gt;</span>_id <span class="op">=</span> <span class="kw">NEW</span>.<span class="op">&lt;</span>singular<span class="op">&gt;</span>_id;</span>
-<span id="cb13-12"><a href="#cb13-12" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span>;</span></code></pre></div>
+<div class="sourceCode" id="cb14"><pre
+class="sourceCode sql"><code class="sourceCode sql"><span id="cb14-1"><a href="#cb14-1" aria-hidden="true" tabindex="-1"></a><span class="kw">CREATE</span> <span class="kw">TRIGGER</span> trg_<span class="op">&lt;</span><span class="kw">table</span><span class="op">&gt;</span>_edited</span>
+<span id="cb14-2"><a href="#cb14-2" aria-hidden="true" tabindex="-1"></a><span class="kw">AFTER</span> <span class="kw">UPDATE</span> <span class="kw">OF</span> <span class="ot">&quot;col1&quot;</span>, <span class="ot">&quot;col2&quot;</span> <span class="co">-- the data-bearing columns, including notes, tags, url</span></span>
+<span id="cb14-3"><a href="#cb14-3" aria-hidden="true" tabindex="-1"></a><span class="kw">ON</span> <span class="op">&lt;</span><span class="kw">table</span><span class="op">&gt;</span></span>
+<span id="cb14-4"><a href="#cb14-4" aria-hidden="true" tabindex="-1"></a><span class="cf">FOR</span> <span class="kw">EACH</span> <span class="kw">ROW</span></span>
+<span id="cb14-5"><a href="#cb14-5" aria-hidden="true" tabindex="-1"></a><span class="cf">WHEN</span> <span class="kw">OLD</span>.<span class="ot">&quot;col1&quot;</span> <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NEW</span>.<span class="ot">&quot;col1&quot;</span></span>
+<span id="cb14-6"><a href="#cb14-6" aria-hidden="true" tabindex="-1"></a>  <span class="kw">OR</span> <span class="kw">OLD</span>.<span class="ot">&quot;col2&quot;</span> <span class="kw">IS</span> <span class="kw">NOT</span> <span class="kw">NEW</span>.<span class="ot">&quot;col2&quot;</span></span>
+<span id="cb14-7"><a href="#cb14-7" aria-hidden="true" tabindex="-1"></a>  <span class="co">-- one OLD/NEW comparison per data-bearing column;</span></span>
+<span id="cb14-8"><a href="#cb14-8" aria-hidden="true" tabindex="-1"></a>  <span class="co">-- omit &lt;singular&gt;_id, marked, added, edited, look, unq</span></span>
+<span id="cb14-9"><a href="#cb14-9" aria-hidden="true" tabindex="-1"></a><span class="cf">BEGIN</span></span>
+<span id="cb14-10"><a href="#cb14-10" aria-hidden="true" tabindex="-1"></a>    <span class="kw">UPDATE</span> <span class="op">&lt;</span><span class="kw">table</span><span class="op">&gt;</span> <span class="kw">SET</span> edited <span class="op">=</span> <span class="fu">CURRENT_TIMESTAMP</span></span>
+<span id="cb14-11"><a href="#cb14-11" aria-hidden="true" tabindex="-1"></a>    <span class="kw">WHERE</span> <span class="op">&lt;</span>singular<span class="op">&gt;</span>_id <span class="op">=</span> <span class="kw">NEW</span>.<span class="op">&lt;</span>singular<span class="op">&gt;</span>_id;</span>
+<span id="cb14-12"><a href="#cb14-12" aria-hidden="true" tabindex="-1"></a><span class="cf">END</span>;</span></code></pre></div>
 <p>DbDo itself does not write to <code>edited</code>; the timestamp
 behavior comes entirely from these triggers. The same pattern works on
 Access (using <code>ON UPDATE</code> data macros) but DbDo does not ship
@@ -2052,20 +2433,20 @@ about it.</p>
 <h3 id="anatomy-of-an-lbc-dialog">Anatomy of an LbC dialog</h3>
 <p>The typical usage pattern in DbDo is one <code>using</code> block per
 dialog:</p>
-<div class="sourceCode" id="cb16"><pre
-class="sourceCode csharp"><code class="sourceCode cs"><span id="cb16-1"><a href="#cb16-1" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> <span class="op">(</span>LbcDialog dlg <span class="op">=</span> <span class="kw">new</span> <span class="fu">LbcDialog</span><span class="op">(</span><span class="st">&quot;Configuration&quot;</span><span class="op">,</span> <span class="kw">this</span><span class="op">))</span></span>
-<span id="cb16-2"><a href="#cb16-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
-<span id="cb16-3"><a href="#cb16-3" aria-hidden="true" tabindex="-1"></a>    TextBox  tbMode  <span class="op">=</span> dlg<span class="op">.</span><span class="fu">addInputBox</span><span class="op">(</span><span class="st">&quot;UI mode:&quot;</span><span class="op">,</span>       <span class="st">&quot;both&quot;</span><span class="op">,</span> <span class="st">&quot;How DbDo launches&quot;</span><span class="op">);</span></span>
-<span id="cb16-4"><a href="#cb16-4" aria-hidden="true" tabindex="-1"></a>    CheckBox cbBeep  <span class="op">=</span> dlg<span class="op">.</span><span class="fu">addCheckBox</span><span class="op">(</span><span class="st">&quot;&amp;Beep on errors&quot;</span><span class="op">,</span> <span class="kw">true</span><span class="op">,</span>  <span class="st">&quot;Audible cue on failure&quot;</span><span class="op">);</span></span>
-<span id="cb16-5"><a href="#cb16-5" aria-hidden="true" tabindex="-1"></a>    TextBox  tbNote  <span class="op">=</span> dlg<span class="op">.</span><span class="fu">addMemoBox</span><span class="op">(</span><span class="st">&quot;Startup note:&quot;</span><span class="op">,</span>   <span class="st">&quot;&quot;</span><span class="op">,</span>     <span class="st">&quot;Free-form text shown at launch&quot;</span><span class="op">);</span></span>
-<span id="cb16-6"><a href="#cb16-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="op">(</span>dlg<span class="op">.</span><span class="fu">runOkCancel</span><span class="op">())</span></span>
-<span id="cb16-7"><a href="#cb16-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
-<span id="cb16-8"><a href="#cb16-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">string</span> sMode <span class="op">=</span> tbMode<span class="op">.</span><span class="fu">Text</span><span class="op">;</span></span>
-<span id="cb16-9"><a href="#cb16-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">bool</span>   bBeep <span class="op">=</span> cbBeep<span class="op">.</span><span class="fu">Checked</span><span class="op">;</span></span>
-<span id="cb16-10"><a href="#cb16-10" aria-hidden="true" tabindex="-1"></a>        <span class="dt">string</span> sNote <span class="op">=</span> tbNote<span class="op">.</span><span class="fu">Text</span><span class="op">;</span></span>
-<span id="cb16-11"><a href="#cb16-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">// ... persist or apply</span></span>
-<span id="cb16-12"><a href="#cb16-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
-<span id="cb16-13"><a href="#cb16-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
+<div class="sourceCode" id="cb17"><pre
+class="sourceCode csharp"><code class="sourceCode cs"><span id="cb17-1"><a href="#cb17-1" aria-hidden="true" tabindex="-1"></a><span class="kw">using</span> <span class="op">(</span>LbcDialog dlg <span class="op">=</span> <span class="kw">new</span> <span class="fu">LbcDialog</span><span class="op">(</span><span class="st">&quot;Configuration&quot;</span><span class="op">,</span> <span class="kw">this</span><span class="op">))</span></span>
+<span id="cb17-2"><a href="#cb17-2" aria-hidden="true" tabindex="-1"></a><span class="op">{</span></span>
+<span id="cb17-3"><a href="#cb17-3" aria-hidden="true" tabindex="-1"></a>    TextBox  tbMode  <span class="op">=</span> dlg<span class="op">.</span><span class="fu">addInputBox</span><span class="op">(</span><span class="st">&quot;UI mode:&quot;</span><span class="op">,</span>       <span class="st">&quot;both&quot;</span><span class="op">,</span> <span class="st">&quot;How DbDo launches&quot;</span><span class="op">);</span></span>
+<span id="cb17-4"><a href="#cb17-4" aria-hidden="true" tabindex="-1"></a>    CheckBox cbBeep  <span class="op">=</span> dlg<span class="op">.</span><span class="fu">addCheckBox</span><span class="op">(</span><span class="st">&quot;&amp;Beep on errors&quot;</span><span class="op">,</span> <span class="kw">true</span><span class="op">,</span>  <span class="st">&quot;Audible cue on failure&quot;</span><span class="op">);</span></span>
+<span id="cb17-5"><a href="#cb17-5" aria-hidden="true" tabindex="-1"></a>    TextBox  tbNote  <span class="op">=</span> dlg<span class="op">.</span><span class="fu">addMemoBox</span><span class="op">(</span><span class="st">&quot;Startup note:&quot;</span><span class="op">,</span>   <span class="st">&quot;&quot;</span><span class="op">,</span>     <span class="st">&quot;Free-form text shown at launch&quot;</span><span class="op">);</span></span>
+<span id="cb17-6"><a href="#cb17-6" aria-hidden="true" tabindex="-1"></a>    <span class="kw">if</span> <span class="op">(</span>dlg<span class="op">.</span><span class="fu">runOkCancel</span><span class="op">())</span></span>
+<span id="cb17-7"><a href="#cb17-7" aria-hidden="true" tabindex="-1"></a>    <span class="op">{</span></span>
+<span id="cb17-8"><a href="#cb17-8" aria-hidden="true" tabindex="-1"></a>        <span class="dt">string</span> sMode <span class="op">=</span> tbMode<span class="op">.</span><span class="fu">Text</span><span class="op">;</span></span>
+<span id="cb17-9"><a href="#cb17-9" aria-hidden="true" tabindex="-1"></a>        <span class="dt">bool</span>   bBeep <span class="op">=</span> cbBeep<span class="op">.</span><span class="fu">Checked</span><span class="op">;</span></span>
+<span id="cb17-10"><a href="#cb17-10" aria-hidden="true" tabindex="-1"></a>        <span class="dt">string</span> sNote <span class="op">=</span> tbNote<span class="op">.</span><span class="fu">Text</span><span class="op">;</span></span>
+<span id="cb17-11"><a href="#cb17-11" aria-hidden="true" tabindex="-1"></a>        <span class="co">// ... persist or apply</span></span>
+<span id="cb17-12"><a href="#cb17-12" aria-hidden="true" tabindex="-1"></a>    <span class="op">}</span></span>
+<span id="cb17-13"><a href="#cb17-13" aria-hidden="true" tabindex="-1"></a><span class="op">}</span></span></code></pre></div>
 <p>Each line maps to one decision: what kind of control, what its label
 says, what the initial value is, what tip to surface when the user tabs
 into it. The framework handles everything else — label placement,
@@ -2109,7 +2490,7 @@ method for editing scalar values: names, paths, single integers, simple
 regex patterns.</p>
 <p><code>addInlineInputBox(string sLabel, string sValue, string sTip)</code>
 is the horizontal variant: label and textbox on a single row, sharing
-the same band. Used in the Edit Record dialog where vertical density
+the same band. Used in the Edit View dialog where vertical density
 matters and there are many short fields.</p>
 <p><code>addMemoBox(string sLabel, string sValue, string sTip)</code>
 adds a label and a multi-line <code>TextBox</code> (96 pixels tall by

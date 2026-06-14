@@ -7,6 +7,9 @@
   <title>DbDo README</title>
   <style>
     html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
       color: #1a1a1a;
       background-color: #fdfdfd;
     }
@@ -25,16 +28,13 @@
     @media (max-width: 600px) {
       body {
         font-size: 0.9em;
-        padding: 12px;
+        padding: 1em;
       }
       h1 {
         font-size: 1.8em;
       }
     }
     @media print {
-      html {
-        background-color: white;
-      }
       body {
         background-color: transparent;
         color: black;
@@ -84,10 +84,9 @@
       color: #606060;
     }
     code {
-      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
       font-size: 85%;
       margin: 0;
-      hyphens: manual;
     }
     pre {
       margin: 1em 0;
@@ -152,22 +151,47 @@
     div.columns{display: flex; gap: min(4vw, 1.5em);}
     div.column{flex: auto; overflow-x: auto;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    /* The extra [class] is a hack that increases specificity enough to
-       override a similar rule in reveal.js */
-    ul.task-list[class]{list-style: none;}
+    ul.task-list{list-style: none;}
     ul.task-list li input[type="checkbox"] {
-      font-size: inherit;
       width: 0.8em;
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
 </head>
 <body>
 <header id="title-block-header">
 <h1 class="title">DbDo README</h1>
 </header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#dbdo-the-keyboard-first-relational-database-manager"
+id="toc-dbdo-the-keyboard-first-relational-database-manager">DbDo – the
+keyboard-first relational database manager</a>
+<ul>
+<li><a href="#convention-over-configuration-five-nouns-and-one-junction"
+id="toc-convention-over-configuration-five-nouns-and-one-junction">Convention
+over configuration: five nouns and one junction</a></li>
+<li><a href="#valid-values-become-comboboxes-the-lookups-table"
+id="toc-valid-values-become-comboboxes-the-lookups-table">Valid values
+become comboboxes (the lookups table)</a></li>
+<li><a href="#a-guided-tour-by-keyboard"
+id="toc-a-guided-tour-by-keyboard">A guided tour by keyboard</a></li>
+<li><a href="#the-included-demo-scripts"
+id="toc-the-included-demo-scripts">The included demo scripts</a></li>
+<li><a href="#the-other-sample-databases-the-same-column-convention"
+id="toc-the-other-sample-databases-the-same-column-convention">The other
+sample databases – the same column convention</a></li>
+<li><a href="#building-this-archive"
+id="toc-building-this-archive">Building this archive</a></li>
+<li><a href="#license" id="toc-license">License</a></li>
+</ul></li>
+</ul>
+</nav>
 <h1 id="dbdo-the-keyboard-first-relational-database-manager">DbDo – the
 keyboard-first relational database manager</h1>
 <p><strong>DbDo opens a relational database and lets you read it,
@@ -188,46 +212,65 @@ over configuration: five nouns and one junction</h2>
 <p>Most of the relational worlds people actually keep – a convention, a
 club roster, a project tracker, a contact book – reduce to a handful of
 nouns and the relationships among them. DbDo leans into that.
-NFB2026Convention.db uses exactly five noun tables plus one junction,
-and every table shares the same standard columns (a primary key,
-<code>added</code>, <code>edited</code>, …, <code>notes</code>,
-<code>tags</code>, <code>look</code>, <code>unq</code>,
-<code>marked</code>). Note: this database still uses the older
-bare-<code>id</code> primary-key shape; it is awaiting a schema
-redesign, after which its keys will follow the
-<code>&lt;singular&gt;_id</code> convention described below:</p>
+NFB2026Convention.db uses exactly four noun tables plus DbDo’s two
+standard infrastructure tables, and every table – infrastructure
+included – carries the full standard column set
+(<code>&lt;singular&gt;_id</code> primary key, <code>added</code>,
+<code>edited</code>, …, <code>notes</code>, <code>tags</code>,
+<code>look</code>, <code>unq</code>, <code>marked</code>):</p>
 <ul>
-<li><strong>contacts</strong> – every <em>party</em>, person or
-organization. Persons fill
-<code>first_name</code>/<code>last_name</code>; organizations leave
-those empty and fill <code>org_name</code>. A self-reference
-<code>organization_id</code> points a person at their employer, which is
-just another contact row – so “who works where” needs no second
+<li><strong>contacts</strong> – people and organizations. The field
+roster (<code>first_name</code>, <code>middle_name</code>,
+<code>last_name</code>, <code>gender</code>, <code>date_of_birth</code>,
+three phone fields, two email fields,
+<code>address1</code>/<code>address2</code>/<code>city</code>/<code>state</code>/<code>zip</code>/<code>nation</code>,
+<code>enterprise</code>, <code>job</code>, <code>url</code>) is a
+general-purpose contact schema designed so the Record Edit dialog can
+give every field a distinct accelerator key.</li>
+<li><strong>events</strong> – one row per discrete agenda entry:
+<code>event_date</code>, <code>start_time</code>, <code>end_time</code>
+(24-hour, so chronological sort is plain text sort), <code>title</code>,
+and a <code>details</code> memo. No subevents, no tracks – every entry
+stands alone.</li>
+<li><strong>locations</strong> – the hotel’s rooms and spaces:
+<code>name</code>, <code>level</code>, <code>hotel</code>. Levels follow
+the agenda’s own rule (room numbers starting with N are on level N;
+lettered salons are the Lone Star Ballroom on 3; numbered salons are the
+JW Grand Ballroom on 4).</li>
+<li><strong>projects</strong> – products, services, and other ongoing
+endeavors: a work in progress that evolves over time justifies the term.
+Parsed from the agenda by named-program patterns (academies, awards,
+fairs, camps, scholarship programs) and a curated brand list
+(NFB-NEWSLINE, Aira, Monarch, Dot Pad), with shorter name variants
+merged into their fuller titles. Ownership and appearances are never
+columns here – an event <strong>features</strong> a project, and an
+organization <strong>offers</strong> one, both as maps rows.</li>
+<li><strong>maps</strong> – the heart of the model: a <em>generic typed
+association</em> between any two records in any tables. Each row holds
+<code>(tbl1, unq1, kind, tbl2, unq2)</code> – the subject, the
+relationship kind, and the object – identified by <code>unq</code>
+values rather than integer keys, so map rows are human-readable in the
+grid, survive export and re-import, and can be authored by script. The
+kinds here: <strong>presents</strong> (a contact presents at, chairs, or
+leads an event; the stated role and affiliation ride in the map row’s
+<code>notes</code>), <strong>located_at</strong> (an event happens at a
+location), <strong>sponsors</strong> (an organization sponsors an
+event), <strong>features</strong> (an event features, demonstrates, or
+discusses a project), and <strong>offers</strong> (an organization
+provides a project). Any table pair, any cardinality – one-to-many and
+many-to-many are the same row shape, and parent/child is just a matter
+of which side of a kind you read. The same one table could equally
+relate a contact to a location, an event to an event, or anything to
+anything – new relationship kinds need a lookups row, not a new junction
 table.</li>
-<li><strong>places</strong> – venues, rooms, cities. A self-reference
-<code>parent_id</code> gives room-inside-venue-inside-city (here: the JW
-Marriott Austin’s rooms inside the venue inside Austin).</li>
-<li><strong>events</strong> – the convention and its sessions. A
-self-reference <code>parent_id</code> makes the convention the root
-event and each session a child; <code>place_id</code> says where it is
-held.</li>
-<li><strong>projects</strong> – the cross-cutting combiners. The
-convention’s tracks are projects; a project gathers sessions and people
-from across the other tables.</li>
-<li><strong>associations</strong> – the universal junction, and the
-heart of the model. Each row carries a <code>role</code> plus nullable
-foreign keys to each noun: <code>contact_id</code>,
-<code>event_id</code>, <code>place_id</code>, <code>project_id</code>.
-One row can say “Mark Riccobono, as Presiding Officer, at the Opening
-General Session, in the Lone Star Grand Ballroom, under the Advocacy
-&amp; Policy project.” Because every link is a real declared foreign
-key, DbDo can drill each one in both directions.</li>
+<li><strong>lookups</strong> – the standard valid-values table, seeded
+with the <code>maps.kind</code> vocabulary and the hotel names.</li>
 </ul>
-<p>The point is that you learn these five nouns once and navigate them
-everywhere. Organizations are not a separate concept from people; a
-venue, a room, and a city are all just places; the convention and its
-talks are all just events; and a project is simply a named purpose that
-ties chosen entities together.</p>
+<p>The point of the maps model: “all events related to this contact” and
+“all events at this location” are the SAME query shape – filter maps by
+one side, read the other side – and because the answer comes back as a
+single-table SELECT through an IN-subquery, the resulting view stays
+editable in DbDo.</p>
 <h2 id="valid-values-become-comboboxes-the-lookups-table">Valid values
 become comboboxes (the lookups table)</h2>
 <p>A <strong>lookups</strong> table defines the allowed values for a
@@ -239,15 +282,12 @@ instead of a bare text box. Each lookups row binds a value to a
 authority and a <code>descrip</code>). DbDo offers the combobox whenever
 a field has values defined.</p>
 <p>NFB2026Convention.db carries lookups for its own fields –
-<code>contacts.kind</code> (person, org), <code>places.kind</code>
-(city, venue, room), <code>events.kind</code> (General Session,
-Division/Group Meeting, Seminar, …),
-<code>projects.kind</code>/<code>status</code>, and
-<code>associations.role</code> (Speaker, Moderator, Panelist, …). A
-separate, shared <strong>lookups.db</strong> ships alongside with global
-lists – <code>state</code> and <code>country</code> – bound to any table
-that has a field of that name, so they serve the other sample databases
-too (Northwind’s <code>country</code> field gets a combobox with no
+<code>maps.kind</code> (presents, located_at, sponsors) and
+<code>locations.hotel</code>. A separate, shared
+<strong>lookups.db</strong> ships alongside with global lists –
+<code>state</code> and <code>country</code> – bound to any table that
+has a field of that name, so they serve the other sample databases too
+(Northwind’s <code>country</code> field gets a combobox with no
 per-database setup).</p>
 <h2 id="a-guided-tour-by-keyboard">A guided tour by keyboard</h2>
 <p>Launch DbDo. On a first run it opens NFB2026Convention.db on the
@@ -258,31 +298,33 @@ the virtual cell cursor: Alt+Control+RightArrow / LeftArrow step across
 columns announcing “header: value,” and Alt+Control+Numpad5 says the
 current cell (twice to spell it).</p>
 <p><strong>Reorder and filter to the question you’re asking.</strong>
-Sort, Shift+S, with <code>day, start_time</code> for chronological order
-or <code>kind, start_time</code> to group by session type. Filter,
-Shift+F, with <code>day = '2026-07-05'</code> for one day,
-<code>kind = 'General Session'</code> for the plenaries, or
-<code>ticketed = 1</code> for what needs a ticket; Clear Filter is
+Sort, Shift+S, with <code>event_date, start_time</code> for
+chronological order. Filter, Shift+F, with
+<code>event_date = '2026-07-05'</code> for one day or
+<code>title LIKE '*Braille*'</code> for a topic; Clear Filter is
 Shift+R. Find Across All Columns is Control+F; Jump to Match in one
 column is Control+J.</p>
-<p><strong>See a record’s whole story.</strong> Press Enter on a session
-for Show Record: every field as <code>name = value</code>, then an
-automatic Related Records section. On a session you see its parent
-convention, its place, and the people associated with it; on a person
-you see their organization and the sessions they are part of.</p>
-<p><strong>Drill through the relationships.</strong> Enter Child Table,
-Alt+RightArrow, opens the children of the current row: from a
-<strong>project</strong> it opens that track’s associations (and onward
-to its sessions and people); from a <strong>place</strong> it opens the
-sessions held there; from a <strong>contact</strong> it opens that
-person’s associations; from the convention <strong>event</strong> it
-opens its sessions. Alt+LeftArrow walks back to the exact parent row;
-Alt+Home pops the whole stack.</p>
+<p><strong>See a record’s whole story.</strong> Press Enter on an event
+for Show Record: every field as <code>name = value</code>. Say Related,
+Shift+R, then lists the look line of each associated record – on an
+event, its location and its presenters; on a contact, every event they
+present; on a location, everything happening there.</p>
+<p><strong>Follow the associations.</strong> Enter Child Table,
+Alt+RightArrow, now drills through maps as well as foreign keys: on a
+contact it offers “events via presents”; on an event, “contacts via
+presents (incoming)” and “locations via located_at”; pick one and the
+related records open as a filtered view, with Alt+LeftArrow returning to
+the exact row you left and Alt+Home popping the whole drill stack. The
+<strong>maps</strong> table is also a first-class grid in its own right:
+open it to browse every relationship as a readable row, filter it by
+<code>kind</code>, or add a row to declare a new association – relating
+any record to any other is an ordinary record edit, not a schema
+change.</p>
 <p><strong>Pick from valid values.</strong> When you edit a field that
-has a lookups list – a session’s <code>kind</code>, an association’s
-<code>role</code>, a place’s <code>kind</code> – the editor is a
-combobox: arrow or type-ahead to a value, or type a new one. Country and
-state fields anywhere draw on the shared lookups.db.</p>
+has a lookups list – a map row’s <code>kind</code>, a location’s
+<code>hotel</code> – the editor is a combobox: arrow or type-ahead to a
+value, or type a new one. Country and state fields anywhere draw on the
+shared lookups.db.</p>
 <p><strong>Hand it to someone else in their format.</strong> Export
 Data, Control+Shift+X, writes the current filtered, sorted view to xlsx,
 docx, filtered HTML, Markdown, CSV, TSV, SQLite, Access, or dBASE. From
@@ -290,16 +332,17 @@ the dot prompt, <code>Export-Data xlsx docx md csv</code> writes all
 four at once.</p>
 <h2 id="the-included-demo-scripts">The included demo scripts</h2>
 <p>Three SQL scripts in <code>Scripts</code> show the relational queries
-behind the views above; because this database still uses
-bare-<code>id</code> keys, its joins qualify the key by table
-(<code>events.id</code>, <code>places.id</code>):</p>
+behind the views above, each demonstrating the maps join pattern (filter
+both <code>tbl</code> columns explicitly, join on <code>unq</code> with
+<code>=</code>):</p>
 <ul>
 <li><strong>ConventionSchedule.sql</strong> – the full schedule, each
-session with its place and the project it belongs to.</li>
-<li><strong>SpeakerSessions.sql</strong> – every session a given person
-is part of, with their role (change the surname on the WHERE line).</li>
-<li><strong>DayAtAGlance.sql</strong> – one day’s sessions ordered by
-time and place, with a people count.</li>
+event with its location and level.</li>
+<li><strong>SpeakerSessions.sql</strong> – every event a given person
+presents, with their stated role (change the surname on the WHERE
+line).</li>
+<li><strong>DayAtAGlance.sql</strong> – one day’s events ordered by
+start time, with locations.</li>
 </ul>
 <h2 id="the-other-sample-databases-the-same-column-convention">The other
 sample databases – the same column convention</h2>

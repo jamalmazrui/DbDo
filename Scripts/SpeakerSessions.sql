@@ -1,18 +1,14 @@
--- Description: Every session a given person is part of, with their role, walked
--- through the associations junction. Persons live in contacts (kind='person')
--- with first_name/last_name. Change the surname on the WHERE line. The joins are
--- qualified: associations.contact_id -> contacts.id, associations.event_id ->
--- events.id, associations.place_id -> places.id.
-SELECT
-    trim(c.first_name || ' ' || c.last_name) AS person,
-    a.role       AS role,
-    e.day        AS day,
-    e.start_time AS start,
-    e.title      AS session,
-    p.name       AS place
-FROM associations a
-JOIN contacts c ON a.contact_id = c.id
-JOIN events   e ON a.event_id   = e.id
-LEFT JOIN places p ON a.place_id = p.id
-WHERE c.last_name = 'Riccobono'   -- change to any contact
-ORDER BY e.day, e.start_time;
+-- SpeakerSessions.sql - every event a given person presents, chairs,
+-- or leads, with their stated role for each. Change the last_name
+-- literal to look up someone else.
+--
+-- This is the canonical "all events related to a contact" query: the
+-- IN-subquery through maps keeps the outer SELECT single-table, so
+-- the resulting recordset remains editable in DbDo.
+select e.event_date as Day, e.start_time as Start, e.title as Event,
+       m.notes as Role
+from events e
+join maps m on m.tbl2 = 'events' and m.unq2 = e.unq
+           and m.kind = 'presents' and m.tbl1 = 'contacts'
+where m.unq1 in (select c.unq from contacts c where c.last_name = 'Chan')
+order by e.event_date, e.start_time;

@@ -1,27 +1,30 @@
-# DbDuo .gitignore
+# DbDo .gitignore
 #
 # Files matching these patterns are NOT tracked in source control.
 # They are either transient build artifacts, dev-only convenience
 # scripts that are not distributed to users, or backup files from
 # editors.
 #
-# Note: DbDuo.exe and DbDuo_setup.exe are intentionally NOT excluded;
-# they ARE tracked in this repo. DbDuo_setup.exe is also published as
+# Note: DbDo.exe and DbDo_setup.exe are intentionally NOT excluded;
+# they ARE tracked in this repo. DbDo_setup.exe is also published as
 # a GitHub Release asset by tagRelease.ps1. End users can either
 # download the .exe from the source-tree view or get the latest from
 # the Releases page.
 
-# ---- JAWS source files (live inside DbDuo_JAWS.zip in the repo) ---
-# The repo ships DbDuo_JAWS.zip containing DbDuo.jkm and DbDuo.jss.
+# ---- JAWS source files (live inside DbDo_JAWS.zip in the repo) ---
+# The repo ships DbDo_JAWS.zip containing DbDo.jkm and DbDo.jss.
 # Developers who need to edit those files unzip them locally; the
-# loose copies should NOT be tracked. DbDuo_JAWS.zip is the single
+# loose copies should NOT be tracked. DbDo_JAWS.zip is the single
 # source of truth in version control.
-DbDuo.jkm
-DbDuo.jss
+DbDo.jkm
+DbDo.jss
 
 # ---- Build logs and scratch ---------------------------------------
-# buildDbDuo.cmd writes a fresh log on each run.
-buildDbDuo.log
+# buildDbDo.cmd writes a fresh log on each run.
+buildDbDo.log
+
+# DbDo writes a runtime debug log (DbDoLog) beside the executable.
+DbDo.log
 
 # tagRelease.ps1 / tagRelease.cmd write timestamped logs.
 tagRelease-*.log
@@ -38,7 +41,7 @@ tagRelease-*.log
 # ---- Development-only scripts (NOT distributed) -------------------
 # tagRelease.* are convenience scripts for the maintainer's release
 # workflow. They invoke `git tag`, `git push`, and `gh release` based
-# on the AppVersion in DbDuo_setup.iss. End users do not need them
+# on the AppVersion in DbDo_setup.iss. End users do not need them
 # and they are not part of any release zip. Keep them on the
 # developer's disk but do not track them in git so they cannot leak
 # into a release tag or be visible in the GitHub source browser.
@@ -59,7 +62,7 @@ packages/
 # csproj / App.config from the v1.0.42-v1.0.43 MSBuild era. Removed
 # in v1.0.44 but explicitly ignored so a stale dev checkout that
 # still has them won't accidentally re-commit them.
-DbDuo.csproj
+DbDo.csproj
 App.config
 
 # Backup files some editors leave behind.

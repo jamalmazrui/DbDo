@@ -55,17 +55,17 @@ echo Working directory: %CD% >> "!log!"
 echo. >> "!log!"
 
 rem ---- check source files ----
-if not exist "DbDo.cs"  goto :no_dbduo_cs
-if not exist "DbDo.js"  goto :no_dbduo_js
+if not exist "DbDo.cs"  goto :no_dbdo_cs
+if not exist "DbDo.js"  goto :no_dbdo_js
 goto :have_sources
 
-:no_dbduo_cs
+:no_dbdo_cs
 echo ERROR: DbDo.cs not found. >> "!log!"
 echo ERROR: DbDo.cs not found in script directory.
 popd
 exit /b 1
 
-:no_dbduo_js
+:no_dbdo_js
 echo ERROR: DbDo.js not found. >> "!log!"
 echo ERROR: DbDo.js not found in script directory.
 popd
@@ -204,7 +204,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "  if (Test-Path $p) { $dll = $p; break }" ^
   "}" ^
   "if ($null -eq $dll) {" ^
-  "  $dll = Get-ChildItem -Path $tmpDir -Recurse ^| Where-Object { $_.Name -in @('nvdaControllerClient.dll', 'nvdaControllerClient64.dll') } ^| Select-Object -First 1 -ExpandProperty FullName;" ^
+  "  $dll = Get-ChildItem -Path $tmpDir -Recurse | Where-Object { $_.Name -in @('nvdaControllerClient.dll', 'nvdaControllerClient64.dll') } | Select-Object -First 1 -ExpandProperty FullName;" ^
   "}" ^
   "if ($null -eq $dll) { throw 'nvdaControllerClient.dll (or nvdaControllerClient64.dll) not found in archive' };" ^
   "Copy-Item -Path $dll -Destination '%nvdaDll%' -Force;" ^
@@ -217,6 +217,138 @@ if errorlevel 1 (
     echo and place it next to DbDo.exe.
 )
 :have_nvda_dll
+
+rem ---- fetch Newtonsoft.Json.dll if missing (JSON / .ipynb support) ----
+rem DbDo references Newtonsoft.Json (Json.NET, MIT license) for JSON
+rem import/export, and for parsing Jupyter .ipynb notebooks. The DLL is
+rem pulled from nuget.org (the official NuGet flat-container URL); the
+rem net45 build, which runs on .NET 4.8, is extracted next to DbDo.exe.
+set "jsonDll=Newtonsoft.Json.dll"
+set "jsonVer=13.0.3"
+set "jsonUrl=https://api.nuget.org/v3-flatcontainer/newtonsoft.json/13.0.3/newtonsoft.json.13.0.3.nupkg"
+if exist "%jsonDll%" goto :have_json_dll
+echo Fetching %jsonDll% ...
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+  "$ErrorActionPreference='Stop';" ^
+  "$tmpZip = Join-Path $env:TEMP 'newtonsoft_json.zip';" ^
+  "$tmpDir = Join-Path $env:TEMP 'newtonsoft_json';" ^
+  "if (Test-Path $tmpZip) { Remove-Item -Force $tmpZip };" ^
+  "if (Test-Path $tmpDir) { Remove-Item -Recurse -Force $tmpDir };" ^
+  "Invoke-WebRequest -Uri '%jsonUrl%' -OutFile $tmpZip -UseBasicParsing;" ^
+  "Expand-Archive -Path $tmpZip -DestinationPath $tmpDir;" ^
+  "$dll = $null;" ^
+  "foreach ($tf in @('net45','net46','net48','netstandard2.0')) {" ^
+  "  $p = Join-Path $tmpDir ('lib\' + $tf + '\Newtonsoft.Json.dll');" ^
+  "  if (Test-Path $p) { $dll = $p; break }" ^
+  "}" ^
+  "if ($null -eq $dll) {" ^
+  "  $dll = Get-ChildItem -Path $tmpDir -Recurse -Filter 'Newtonsoft.Json.dll' | Select-Object -First 1 -ExpandProperty FullName;" ^
+  "}" ^
+  "if ($null -eq $dll) { throw 'Newtonsoft.Json.dll not found in package' };" ^
+  "Copy-Item -Path $dll -Destination '%jsonDll%' -Force;" ^
+  "Remove-Item -Force $tmpZip;" ^
+  "Remove-Item -Recurse -Force $tmpDir;" >> "!log!" 2>&1
+if errorlevel 1 (
+    echo WARNING: Newtonsoft.Json download failed; see %log%.
+    echo Manual fallback: download newtonsoft.json.%jsonVer%.nupkg from
+    echo   https://www.nuget.org/packages/Newtonsoft.Json/%jsonVer%
+    echo rename it to .zip, and copy lib\net45\Newtonsoft.Json.dll next to DbDo.exe.
+)
+:have_json_dll
+
+rem ---- fetch System.Data.SQLite (managed + native x64 interop) ----
+rem System.Data.SQLite (public domain) gives DbDo the SQLite online
+rem backup API and native in-memory databases, used for the Open / Save
+rem As in-memory model. The ODBC driver remains the on-disk writer; this
+rem library owns the in-memory database and the backup bridge only.
+rem NOTE: the "System.Data.SQLite.Core" package is, as of 1.0.119, an
+rem empty umbrella with no framework assets -- the actual managed
+rem System.Data.SQLite.dll (lib/net46) and native SQLite.Interop.dll
+rem (build/net46/x64) live in "Stub.System.Data.SQLite.Core.NetFramework",
+rem which is what we download here. The managed assembly probes for the
+rem interop both beside itself and in an x64\ subdirectory, so we place a
+rem copy in each to be safe. This build is x64.
+set "sqliteDll=System.Data.SQLite.dll"
+set "sqliteInterop=SQLite.Interop.dll"
+set "sqliteVer=1.0.119"
+set "sqliteUrl=https://api.nuget.org/v3-flatcontainer/stub.system.data.sqlite.core.netframework/1.0.119/stub.system.data.sqlite.core.netframework.1.0.119.nupkg"
+if exist "%sqliteDll%" if exist "%sqliteInterop%" goto :have_sqlite_dll
+echo Fetching %sqliteDll% ...
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+  "$ErrorActionPreference='Stop';" ^
+  "$tmpZip = Join-Path $env:TEMP 'sds_sqlite.zip';" ^
+  "$tmpDir = Join-Path $env:TEMP 'sds_sqlite';" ^
+  "if (Test-Path $tmpZip) { Remove-Item -Force $tmpZip };" ^
+  "if (Test-Path $tmpDir) { Remove-Item -Recurse -Force $tmpDir };" ^
+  "Invoke-WebRequest -Uri '%sqliteUrl%' -OutFile $tmpZip -UseBasicParsing;" ^
+  "Expand-Archive -Path $tmpZip -DestinationPath $tmpDir;" ^
+  "$mng = Get-ChildItem -Path $tmpDir -Recurse -Filter 'System.Data.SQLite.dll' | Where-Object { $_.FullName -match 'net4' } | Select-Object -First 1 -ExpandProperty FullName;" ^
+  "if ($null -eq $mng) { $mng = Get-ChildItem -Path $tmpDir -Recurse -Filter 'System.Data.SQLite.dll' | Select-Object -First 1 -ExpandProperty FullName };" ^
+  "if ($null -eq $mng) { throw 'System.Data.SQLite.dll not found in package' };" ^
+  "$nat = Get-ChildItem -Path $tmpDir -Recurse -Filter 'SQLite.Interop.dll' | Where-Object { $_.FullName -match 'x64' -and $_.FullName -match 'net4' } | Select-Object -First 1 -ExpandProperty FullName;" ^
+  "if ($null -eq $nat) { $nat = Get-ChildItem -Path $tmpDir -Recurse -Filter 'SQLite.Interop.dll' | Where-Object { $_.FullName -match 'x64' } | Select-Object -First 1 -ExpandProperty FullName };" ^
+  "if ($null -eq $nat) { throw 'x64 SQLite.Interop.dll not found in package' };" ^
+  "Copy-Item -Path $mng -Destination '%sqliteDll%' -Force;" ^
+  "Copy-Item -Path $nat -Destination '%sqliteInterop%' -Force;" ^
+  "if (-not (Test-Path 'x64')) { New-Item -ItemType Directory -Path 'x64' | Out-Null };" ^
+  "Copy-Item -Path $nat -Destination 'x64\SQLite.Interop.dll' -Force;" ^
+  "Remove-Item -Force $tmpZip;" ^
+  "Remove-Item -Recurse -Force $tmpDir;" >> "!log!" 2>&1
+if errorlevel 1 (
+    echo WARNING: System.Data.SQLite download failed; see %log%.
+    echo Manual fallback: download stub.system.data.sqlite.core.netframework.%sqliteVer%.nupkg from
+    echo   https://www.nuget.org/packages/Stub.System.Data.SQLite.Core.NetFramework/%sqliteVer%
+    echo rename to .zip, and copy lib\net46\System.Data.SQLite.dll plus
+    echo build\net46\x64\SQLite.Interop.dll next to DbDo.exe.
+)
+:have_sqlite_dll
+
+rem ---- fetch SQLean: the shell (sqlean.exe) and the extension
+rem bundle (sqlean.dll) ----
+rem These are TWO separate upstream projects, easy to confuse:
+rem   sqlean.exe  -- the SQLite command-line shell with the SQLean
+rem                  extensions built in, from nalgeon/sqlite. DbDo
+rem                  shells out to it for the dot-prompt pass-through
+rem                  lane, exposing the full sqlite3/SQLean shell.
+rem   sqlean.dll  -- the all-in-one loadable extension bundle, from
+rem                  nalgeon/sqlean (inside sqlean-win-x64.zip). DbDo
+rem                  auto-loads it at connect time so REGEXP, median,
+rem                  percentiles, and the rest are available to DbDo's
+rem                  own connection. The init symbol sqlite3_sqlean_init
+rem                  is derived from the filename, so it must stay named
+rem                  sqlean.dll beside the executable.
+rem Both are 64-bit, matching this x64 build. (nalgeon/sqlite is
+rem archived but its release assets still download via /releases/latest.)
+set "sqleanExe=sqlean.exe"
+set "sqleanDll=sqlean.dll"
+set "sqleanExeUrl=https://github.com/nalgeon/sqlite/releases/latest/download/sqlean.exe"
+set "sqleanZipUrl=https://github.com/nalgeon/sqlean/releases/latest/download/sqlean-win-x64.zip"
+if exist "%sqleanExe%" if exist "%sqleanDll%" goto :have_sqlean
+echo Fetching %sqleanExe% and %sqleanDll% ...
+powershell -NoProfile -ExecutionPolicy Bypass -Command ^
+  "$ErrorActionPreference='Stop';" ^
+  "if (-not (Test-Path '%sqleanExe%')) { Invoke-WebRequest -Uri '%sqleanExeUrl%' -OutFile '%sqleanExe%' -UseBasicParsing };" ^
+  "if (-not (Test-Path '%sqleanDll%')) {" ^
+  "  $tmpZip = Join-Path $env:TEMP 'sqlean_ext.zip';" ^
+  "  $tmpDir = Join-Path $env:TEMP 'sqlean_ext';" ^
+  "  if (Test-Path $tmpZip) { Remove-Item -Force $tmpZip };" ^
+  "  if (Test-Path $tmpDir) { Remove-Item -Recurse -Force $tmpDir };" ^
+  "  Invoke-WebRequest -Uri '%sqleanZipUrl%' -OutFile $tmpZip -UseBasicParsing;" ^
+  "  Expand-Archive -Path $tmpZip -DestinationPath $tmpDir;" ^
+  "  $dll = Get-ChildItem -Path $tmpDir -Recurse -Filter 'sqlean.dll' | Select-Object -First 1 -ExpandProperty FullName;" ^
+  "  if ($null -eq $dll) { throw 'sqlean.dll not found in bundle' };" ^
+  "  Copy-Item -Path $dll -Destination '%sqleanDll%' -Force;" ^
+  "  Remove-Item -Force $tmpZip;" ^
+  "  Remove-Item -Recurse -Force $tmpDir;" ^
+  "}" >> "!log!" 2>&1
+if errorlevel 1 (
+    echo WARNING: SQLean download failed; see %log%.
+    echo The dot-prompt shell pass-through needs sqlean.exe, and REGEXP /
+    echo median / percentiles need sqlean.dll, both beside DbDo.exe. Get them at:
+    echo   sqlean.exe : https://github.com/nalgeon/sqlite/releases/latest
+    echo   sqlean.dll : https://github.com/nalgeon/sqlean/releases/latest  ^(sqlean-win-x64.zip^)
+)
+:have_sqlean
 
 rem ---- compile DbDo.js -> DbDo.dll (JScript .NET) ----
 rem
@@ -259,10 +391,10 @@ rem (the misleading "Unsupported 16-Bit Application" dialog appears
 rem when the loader sees an empty or truncated MZ image).
 if exist DbDo.exe del /f /q DbDo.exe
 if exist DbDo.ico (
-    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32icon:DbDo.ico /win32manifest:DbDo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /out:DbDo.exe DbDo.cs >> "!log!" 2>&1
+    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32icon:DbDo.ico /win32manifest:DbDo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"System.Data.SQLite.dll" /out:DbDo.exe DbDo.cs >> "!log!" 2>&1
 ) else (
     echo NOTE: DbDo.ico not found; building without embedded icon. >> "!log!"
-    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32manifest:DbDo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /out:DbDo.exe DbDo.cs >> "!log!" 2>&1
+    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32manifest:DbDo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"System.Data.SQLite.dll" /out:DbDo.exe DbDo.cs >> "!log!" 2>&1
 )
 if errorlevel 1 goto :build_failed
 echo DbDo.exe built.
@@ -285,6 +417,10 @@ echo Build complete. Artifacts in this directory:
 echo   DbDo.exe       -- the application
 echo   DbDo.dll       -- JScript .NET scripting support
 echo   nvdaControllerClient.dll -- NVDA controller-client DLL
+echo   Newtonsoft.Json.dll -- JSON (Json.NET) support
+echo   System.Data.SQLite.dll + SQLite.Interop.dll -- in-memory/backup engine
+echo   sqlean.exe -- SQLite/SQLean shell for the dot-prompt pass-through lane
+echo   sqlean.dll -- SQLean extension bundle (REGEXP, median, percentiles, ...)
 popd
 endlocal
 exit /b 0

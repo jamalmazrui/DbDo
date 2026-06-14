@@ -36,19 +36,19 @@ The installer creates a single shortcut, DbDo, with hotkey Alt+Control+D (D for 
 
 DbDo uses a small set of nouns deliberately. The words are not interchangeable, and they shift with the context in which the user is operating. The choices here match the dominant conventions of end-user database products (Microsoft Access, FileMaker Pro, dBASE/FoxPro, the ADODB API) rather than the strictly SQL-canonical vocabulary that PostgreSQL or Oracle documentation prefers. The goal is naturalness for the user reaching for the command, not theoretical purity.
 
-**Record.** The primary noun for "a complete entity stored as a row in a table." Used in command names for actions that act on a complete row of data: New Record, Edit Record, Delete Record, Copy Record, Append Record, New Copy, Mail Record, Mark Record, Unmark Record. Find (Ctrl+F) finds *a record*; Jump (Ctrl+J) jumps to *a record*. The Edit Record dialog's title is the operation; the inputs inside are fields (see below). The same noun the user sees in Microsoft Access, FileMaker, dBASE — and the noun ADODB uses internally for `Recordset.AddNew`, `Recordset.Delete`, and similar entity-level operations.
+**Record.** The primary noun for "a complete entity stored as a row in a table." Used in command names for actions that act on a complete row of data: New Record, Delete Record, Copy Record, Append Record, Mail Record, Mark Record, Unmark Record. Find (Ctrl+F) finds *a record*; Jump (Ctrl+J) jumps to *a record*. The Edit View dialog edits one record; the inputs inside are fields (see below). The same noun the user sees in Microsoft Access, FileMaker, dBASE — and the noun ADODB uses internally for `Recordset.AddNew`, `Recordset.Delete`, and similar entity-level operations.
 
 **Cell.** The intersection of a record and a column — a single named value within one record, viewed in the listview's grid context. Used in command names for actions that act on one value at the row-and-column crosshair: Edit Cell (F2), Copy Cell (Ctrl+C), Append Cell (Alt+C), Open Cell (Ctrl+Enter), Say Cell (Shift+C). The virtual cursor moved by Alt+Control+arrow targets a cell.
 
-**Column.** A vertical slice of the listview — one attribute considered across all records. Used in command names for actions that sweep vertically through one attribute: Sort Ascending by Column, Sort Descending by Column, Sort Records (by current column), Replace Column, Statistics from Column (Alt+G), Output Graphics (plot a column), Select Columns (Alt+S — which columns are visible), the eight Sort-by-X shortcuts (Alt+I/L/T/U for id/look/tags/url). The screen reader's "row N column M" announcement uses "column" because that's the geometric description it speaks.
+**Column.** A vertical slice of the listview — one attribute considered across all records. Used in command names for actions that sweep vertically through one attribute: Order Records (Alt+O — sort by chosen columns), Reverse Order (Alt+Shift+O), Replace Column (Control+R), Statistics Column (Control+Shift+S), Graphics Column (Control+Shift+G — plots a column), and Select Columns (Alt+S — which columns are visible). The screen reader's "row N column M" announcement uses "column" because that's the geometric description it speaks.
 
-**Field.** A named attribute on a single record, viewed as a labeled input in a vertical-stack dialog. The Edit Record and New Record dialogs lay out one field per line; that layout is intrinsically not a "column" layout, so the word "field" reads naturally there. Also used for individual attributes referred to by name: the `url` field, the `notes` field, the `tags` field. Say Notes and Say Tags target named fields. The choice of "field" inside dialogs follows Microsoft Access and FileMaker, both of which call vertical-stack labeled inputs "fields" even though the underlying ADODB API uses the same word for column-typed metadata.
+**Field.** A named attribute on a single record, viewed as a labeled input in a vertical-stack dialog. The Edit View and New Record dialogs lay out one field per line; that layout is intrinsically not a "column" layout, so the word "field" reads naturally there. Also used for individual attributes referred to by name: the `url` field, the `notes` field, the `tags` field. Say Notes and Say Tags target named fields. The choice of "field" inside dialogs follows Microsoft Access and FileMaker, both of which call vertical-stack labeled inputs "fields" even though the underlying ADODB API uses the same word for column-typed metadata.
 
-**Row.** The geometric unit of the listview — used mostly for screen-reader and navigation announcements. "Row N column M" is the live region's spatial readout. "Go to Row" (Set-Position) jumps by absolute position. "Table has no rows" announces emptiness. The status bar reports "20 of 25 rows shown" when a filter is active. Avoid "row" in command names that target the data semantically; use "record" instead. The exception is geometric scope descriptions inside parentheticals where the natural English reading wins ("every record in filtered view" — record because the action treats the row as an entity; the parenthetical describes scope geometrically but uses the same vocabulary).
+**Row.** The geometric unit of the listview — used mostly for screen-reader and navigation announcements. "Row N column M" is the live region's spatial readout. Set Position jumps to a row by absolute position. "Table has no rows" announces emptiness. The status bar reports "20 of 25 rows shown" when a filter is active. Avoid "row" in command names that target the data semantically; use "record" instead. The exception is geometric scope descriptions inside parentheticals where the natural English reading wins ("every record in filtered view" — record because the action treats the row as an entity; the parenthetical describes scope geometrically but uses the same vocabulary).
 
 **Table.** A schema-level object holding a set of records of the same shape. The Choose Table command, Switch Table, Show Schema all use "table." Views (read-only result sets defined by a SELECT) are labeled distinctly as "views" in dialogs that distinguish; the Choose View command exists separately.
 
-The principle behind these choices: **the noun matches the layout the user sees when invoking the command.** In the listview's grid, the user sees rows, columns, and cells, so commands that act on those grid units use those words. When the user opens an Edit Record dialog, the layout rotates 90 degrees — fields stack vertically — and "column" would force a mental translation back to the listview view, so we say "field" instead. When the user issues an action that treats the whole record as one thing, the entity-level word "Record" reads naturally regardless of the layout being viewed.
+The principle behind these choices: **the noun matches the layout the user sees when invoking the command.** In the listview's grid, the user sees rows, columns, and cells, so commands that act on those grid units use those words. When the user opens an Edit View dialog, the layout rotates 90 degrees — fields stack vertically — and "column" would force a mental translation back to the listview view, so we say "field" instead. When the user issues an action that treats the whole record as one thing, the entity-level word "Record" reads naturally regardless of the layout being viewed.
 
 If you come from a SQL or PostgreSQL background and prefer "row/column" everywhere, every Record command has a dot-prompt alias using SQL vocabulary: `find`, `new`, `edit`, `delete`, `copy`, `mark`, `unmark` all work. Type `verbs` at the dot prompt for the full list.
 
@@ -62,7 +62,7 @@ The house style applies to developer documentation as well: code comments and hi
 
 ### "Database" used broadly
 
-In DbDo, "database" covers more than SQLite .db files. The Open Database command also accepts .xlsx (Excel workbook), .csv (comma-separated values), and other tabular file formats; each sheet or file is presented as a table the user can browse with the same navigation commands. SQLite .db is the default for full functionality (triggers, generated columns, foreign-key drill, the standard-column convention) and is what new databases created through DbDo use. Other formats are best thought of as data sources DbDo can read and write through the Import Data and Export Data commands, with as much of the listview experience preserved as the format supports. Standard columns (`look`, `unq`, `added`, `edited`, `url`, `tags`, `notes`, `marked`) cannot be assumed to exist on tables from .xlsx or .csv sources; commands that use them check first via `hasField` and announce a clear refusal when the column is absent rather than producing an error.
+In DbDo, "database" covers more than SQLite .db files. The Open Database command also accepts .xlsx (Excel workbook), .csv (comma-separated values), and other tabular file formats; each sheet or file is presented as a table the user can browse with the same navigation commands. SQLite .db is the default for full functionality (triggers, generated columns, foreign-key drill, the standard-column convention) and is what new databases created through DbDo use. Other formats are best thought of as data sources DbDo can read and write through the Import Data and Export Data commands, with as much of the listview experience preserved as the format supports. Standard columns (`look`, `unq`, `added`, `edited`, `url`, `tags`, `notes`, `marked`) cannot be assumed to exist on tables from .xlsx or .csv sources; commands that use them check first via `hasField` and announce a clear refusal when the column is absent rather than producing an error. Import Data and Export Data also handle JSON — a top-level array of objects (or a single object), with native numbers, booleans, and nulls — alongside Markdown tables and inix; JSON support uses the Json.NET (Newtonsoft.Json) library, which `buildDbDo.cmd` downloads automatically from nuget.org the first time you build.
 
 ### Key-name convention
 
@@ -71,6 +71,20 @@ Key combinations follow the Freedom Scientific / JAWS convention: **Control**, *
 ### Camel Type for code
 
 DbDo's source code follows the **Camel Type** coding style — Hungarian-prefixed lower camel case, alphabetized variable blocks, lowercase keywords where the language permits, no subprocedures (every routine is a function). The full specification is in the included `CamelType_CSharp.md` / `CamelType_CSharp.htm` file. Examples: `sName` for a string, `iCount` for an integer, `bFound` for a boolean, `aRows` for an array, `lFields` for a list, `dCache` for a dictionary. Constants use a `c_` prefix: `c_sFormat`. The style is optimized for screen-reader productivity — prefixes let the listener identify a variable's type from the first syllable rather than having to track type declarations elsewhere.
+
+## The db cursor
+
+The db cursor is your position in the current recordset: a current row and a current column.
+
+The row is concrete: it is the data list's single focused row. Whenever the recordset has at least one row, exactly one row carries both keyboard focus and list selection. That selection is only the cursor; choosing multiple records is the job of DbDo's mark infrastructure (the standard boolean `marked` field, Set Mark Control+M, Toggle Marked Control+Space, the bulk-mark span chords, and the marked-navigation keys).
+
+The column is virtual: a standard list view has no cell focus, so the current column is tracked by DbDo and voiced rather than drawn. Column-aware commands (Say Cell, type-ahead search, sorting defaults, Show Related, Edit Cell) act on it, and the Alt+Control navigation family moves it cell by cell.
+
+Movement keys, in the data list:
+
+Home and End move the cursor to the first and last column of the current row. Control+Home and Control+End move it to the first column of the first row and the last column of the last row. PageUp and PageDown page the focused row a screenful at a time. The guiding principle is column preservation: the cursor column persists across every row movement (arrows, paging, jumps, refreshes, even table switches, which restore that table's remembered column by name) and changes only when a command explicitly says otherwise.
+
+The marked-record jumps formerly on Control+Home and Control+End now live on Control+Shift+Home and Control+Shift+End (first and last marked record); Control+UpArrow and Control+DownArrow remain previous and next marked record.
 
 ## Keyboard navigation in the data list
 
@@ -100,13 +114,13 @@ DbDo overlays a screen-reader-style table cursor on the listview. The listview i
 
 Each movement triggers a speech announcement with **direction-aware framing**: a vertical move (row changed only) says "Row N: value"; a horizontal move (column changed only) says "Header: value"; a corner jump (both changed, from Home or End) says "Row N, Header: value". This matches the JAWS / NVDA table-reading convention.
 
-The **double-press dialog** convention applies to every speech-only command. Press the command once to hear the text through your screen reader without moving keyboard focus. Press the same chord again within two seconds to open an information dialog with a read-only multi-line textbox containing the text plus an OK button — useful for reviewing long status, paths, or values that don't fit comfortably in a single speech announcement. The dialog's textbox supports normal text-navigation and Control+C copy. The two-second window is deliberately more forgiving than the JAWS and NVDA defaults (around 500 milliseconds) so a thinking pause between presses still counts as one gesture. Commands that participate: Say Status (Alt+Z), Say Path (Alt+P), Say Yield (Alt+Y), Say Tables (Shift+F4), Say Marked (Alt+Shift+M), Say Edited (Shift+E), Say Notes (Shift+N), Say Tags (Shift+T), Say Column from Cursor (Shift+L), Say Marked Yield (Shift+Y).
+The **double-press dialog** convention applies to every speech-only command. Press the command once to hear the text through your screen reader without moving keyboard focus. Press the same chord again within two seconds to open an information dialog with a read-only multi-line textbox containing the text plus an OK button — useful for reviewing long status, paths, or values that don't fit comfortably in a single speech announcement. The dialog's textbox supports normal text-navigation and Control+C copy. The two-second window is deliberately more forgiving than the JAWS and NVDA defaults (around 500 milliseconds) so a thinking pause between presses still counts as one gesture. Commands that participate include: Say Status (Shift+Z), Say Database (Shift+D), Say Yield (Shift+Y), Say Tables (Shift+F7), Say Marked (Alt+M), Say Edited (Shift+E), Say Notes (Shift+F9), Say Tags (Shift+T), and Say Column Rest (Alt+L).
 
 The virtual cursor synchronizes with the listview row selection in both directions: pressing plain Down/Up arrow updates the listview's row selection, and the virtual row follows along with the column unchanged. Pressing Alt+Control+arrow moves the virtual cursor first, then moves the listview's row selection to match — so you can see the row you're virtually browsing.
 
-The virtual cursor's column and row are **remembered per table** within a session and across sessions. When you switch to a different table (and later return), DbDo restores the row and column you were on. When you open a database file, every previously-visited table's filter, sort, position, and virtual column are restored — switching to any one of them via Choose Table, Control+Tab, or the dot prompt picks up the saved state, not row 1. The F5 Refresh command still resets the virtual cursor to (row 1, first column) by design.
+The virtual cursor's column and row are **remembered per table** within a session and across sessions. When you switch to a different table (and later return), DbDo restores the row and column you were on. When you open a database file, every previously-visited table's filter, sort, position, and virtual column are restored — switching to any one of them via Choose Table, Control+Tab, or the dot prompt picks up the saved state, not row 1. The F5 Refresh command re-reads the current rows' values from the database via the ADO Resync method and preserves your cursor position (it does not pick up rows added or removed outside the recordset; reopen the table for that).
 
-**Column-aware commands default to the virtual column.** When a command needs a column — Sort Ascending, Sort Descending, Open Cell Value, Next Initial Change, Jump to Match in One Column — its picker dialog defaults to the column currently under virtual focus. Just press Enter in the picker to accept that column, or arrow up/down to pick a different one.
+**Column-aware commands default to the virtual column.** When a command needs a column — Replace Column, Statistics Column, Graphics Column, Open Cell Value, Jump to Match in One Column — its picker dialog defaults to the column currently under virtual focus. Just press Enter in the picker to accept that column, or arrow up/down to pick a different one.
 
 ## Screen-reader settings
 
@@ -139,7 +153,7 @@ cd "%APPDATA%\Freedom Scientific\JAWS\<year>\Settings\enu"
 
 where `<year>` is your JAWS year-version. The settings work from JAWS's next launch (or, if JAWS is already running, when DbDo next gains focus).
 
-The chords passed through to DbDo include: the virtual-cursor family (Alt+Control + arrows, Home, End, PageUp, PageDown, NumPad5); the parent-child drill family (Alt+RightArrow, Alt+LeftArrow, Alt+Home); the three search families (Control+F, Control+J, Control+F3 plus their Shift variants and F3 / Shift+F3); marked-row navigation (Control+Home, Control+End, Control+UpArrow, Control+DownArrow); bulk-mark spans (Shift+Home, Shift+End, plus Alt+Shift variants); and the Alt-letter command shortcuts (Alt+A, C, D, E, K, L, P, R, T, Y, Z plus relevant Alt+Shift variants).
+The chords passed through to DbDo include: the virtual-cursor family (Alt+Control + arrows, Home, End, PageUp, PageDown, NumPad5); the parent-child drill family (Alt+RightArrow, Alt+LeftArrow, Alt+Home); the three search families (Control+F, Control+J, Control+F3 plus their Shift variants and F3 / Shift+F3); marked-row navigation (Control+Shift+Home, Control+Shift+End, Control+UpArrow, Control+DownArrow); bulk-mark spans (Shift+Home, Shift+End, plus Alt+Shift variants); and the Alt-letter command shortcuts (Alt+A, C, D, E, K, L, P, R, T, Y, Z plus relevant Alt+Shift variants).
 
 If you customize the JKM in place and re-install DbDo, your changes will be overwritten. To preserve customizations across updates, copy your modified version to a different filename and load both via JAWS's chain mechanism, or keep a copy outside the Settings folder and merge by hand after each DbDo upgrade.
 
@@ -173,7 +187,7 @@ Use the Export-Data command, Control+Shift+X (X for eXport), to write the curren
 
 The xlsx and docx formats use Word and Excel through late-bound COM and therefore need Microsoft Office; csv, tsv, md, plain HTML, SQLite, Access, and dBASE all work without Office. SQLite, Access, and dBASE exports open a separate ADODB connection to a fresh file, issue `CREATE TABLE` with portable text-typed columns, and INSERT row by row — the user's open recordset is not disturbed.
 
-The File menu also hosts the table-switching commands: **Choose Table** (F4) opens a listbox of base tables, **Choose View** opens the equivalent for views, **Next Visited Table** / **Previous Visited Table** (Control+Tab / Control+Shift+Tab) cycle among recently-opened tables in MRU order, and **Next Object** / **Previous Object** (Control+F6 / Control+Shift+F6) cycle through every table and view without the MRU filter.
+The File menu also hosts the table-switching commands: **Choose Table** (F7) opens a listbox of base tables, **Choose View** opens the equivalent for views, **Next Visited Table** / **Previous Visited Table** (Control+Tab / Control+Shift+Tab) cycle among recently-opened tables in MRU order, and **Next Object** / **Previous Object** (Control+F6 / Control+Shift+F6) cycle through every table and view without the MRU filter.
 
 Use the Print command, Control+P (P for Print), to print the current view; this is reserved for a future release. For now, export to HTML or docx and print from the corresponding application.
 
@@ -183,15 +197,15 @@ Use the Exit DbDo command, Alt+F4 (the Windows-standard close-program key), to c
 
 Every Edit-menu command operates on the current row, except where noted.
 
-Use the New Record command, Control+N (N for New), to add a row. DbDo shows an edit dialog with one line per distinct field; bookkeeping fields (`added`, `edited`, `marked`, the primary key, `look`, `unq`) get their default values automatically. Use the Edit Record command, F2 (the Windows-standard rename key), to edit the current row. Use the Delete Record command, Control+D (D for Delete), to remove the current row; the Delete key alone is a secondary binding so the Excel and Outlook convention works too.
+Use the New Record command, Control+N (N for New), to add a row. DbDo shows an edit dialog with one line per distinct field; bookkeeping fields (`added`, `edited`, `marked`, the primary key, `look`, `unq`) get their default values automatically. Use the Edit View command, Control+E, to edit the current record field-by-field (see Views below). Use the Delete Record command, the Delete key, to remove the current row; Control+Shift+D removes it without the confirmation prompt.
 
 Use the Duplicate Record command, Control+Shift+C (Shift turns the native clipboard's Control+C into row-copy), to clone the current row as a new record.
 
 Use the Find and Replace Across Rows command, Control+R (R for Replace), to do a find-and-replace: pick a column, type the find string and the replace string, choose the scope (current row, filtered rows, or all rows), and DbDo updates every match through ADO so the same triggers fire as for a SQL UPDATE.
 
-Use the Mark Record command, Control+M (M for Mark), to set the boolean `marked` column on the current row; when marked is true, the status bar reads "marked." Use the Unmark Record command, Control+U (U for Unmark), to clear it. Marks are useful for accumulating an ad-hoc selection across navigation; combine with `filter marked` at the dot prompt to scope subsequent commands.
+Use the Mark Record command, Control+M (M for Mark), to set the boolean `marked` column on the current row; when marked is true, the status bar reads "marked." Use the Unmark Record command, Control+Shift+M, to clear it; Say Mark Status (Shift+M) reads whether the current row is marked. Marks are useful for accumulating an ad-hoc selection across navigation; combine with `filter marked` at the dot prompt to scope subsequent commands.
 
-Use the Save Bookmark command, Control+K (K for booKmark), to remember the current row by primary key. Use the Go to Bookmark command, Alt+K (Alt is the inverse of Save), to return to it later; use the Clear Bookmark command, Control+Shift+K, to forget it. DbDo holds one named bookmark per session.
+Use the Save Bookmark command, Control+B (B for Bookmark), to remember the current row by primary key. Use the List Bookmarks command, Alt+B, to return to a saved one; use the Clear Bookmark command, Control+Shift+B, to forget it.
 
 Use the Open Cell Value command, Control+Enter (extends Enter into "open as url"), to treat a cell's value as a url or a file path and open it in its default Windows application. DbDo prompts for the column (defaulting to the column under virtual focus, so just press Enter to accept); useful when a database column holds links to PDFs, screenshots, or web pages.
 
@@ -199,7 +213,7 @@ Use the Open Cell Value command, Control+Enter (extends Enter into "open as url"
 
 The Navigate menu contains three families: record stepping, search, and parent-child drill.
 
-**Record stepping.** Use the First Record / Last Record / Next Record / Previous Record commands to step through the current view. None have hotkeys by default because the listview's arrow keys and Control+Home/End handle the same movements natively. Use the Go to Row command, Shift+G (G for Go-to), to jump to a row number; out-of-range values clamp to the first or last row.
+**Record stepping.** Use the First Record / Last Record / Next Record / Previous Record commands to step through the current view. None have hotkeys by default because the listview's arrow keys and Control+Home/End handle the same movements natively. Use the Set Position command, Control+G, to jump to a row number (absolute, percentage, or relative); Say Goto (Shift+G) speaks the current position. Out-of-range values clamp to the first or last row.
 
 **Search.** Three independent search families plus a unified "repeat last search" pair. Each family has its own forward and reverse chord, and each family's last-used term is remembered separately so reopening a family's dialog brings up its own prior text.
 
@@ -223,48 +237,46 @@ Use the Exit to Root Table command, Alt+Home, to pop the entire drill stack and 
 
 The Query menu contains read-only commands that report on the data without modifying it. Most fall into three families: examine, speech-only, and shape (filter / sort).
 
-**Show commands.** Use the Show Record command, plain Enter, to open a read-only dialog showing every visible field of the current row plus its related parent and child rows (via foreign-key relationships). Use the Table Properties command, Alt+Enter (the Windows-standard properties chord), to see metadata about the current table — row count, column count, primary key, inferred foreign keys, cached settings. Use the Related Records command (no hotkey by default; Alt+Shift+R as an alias) to navigate from the current row's foreign-key column to the corresponding parent row in the related table. Use the Show Schema command to print every CREATE TABLE and CREATE VIEW in the database; this is long output, usually called from the dot prompt as `schema`.
+**Show commands.** Use the Details View command, Control+D (or Enter), to open a read-only display of every visible field of the current record plus its related parent and child rows (via foreign-key relationships). Use the Table Properties command, Alt+Enter (the Windows-standard properties chord), to see metadata about the current table — row count, column count, primary key, inferred foreign keys, cached settings. Use the Say Related command, Shift+R, to speak the records related to the current row through foreign keys. Use the Show Schema command to print every CREATE TABLE and CREATE VIEW in the database; this is long output, usually called from the dot prompt as `schema`.
 
 **Speech-only commands.** The Say-X family announces state without changing focus or position. All eight commands respect the **double-press-spells** convention: press the same speech chord twice within 1.5 seconds to hear the text spelled character by character.
 
-- Say Status (Alt+Z) — table name, row position, filter, sort
-- Say Path (Alt+P) — the open database file's full path
-- Say Yield (Alt+Y) — row count and active filter
-- Say Tables (Shift+F4) — tables visited in this session
-- Say Marked (Alt+Shift+M) — the `look` values of every marked row
+- Say Status (Shift+Z) — table name, row position, filter, sort
+- Say Database (Shift+D) — the open database's name and path
+- Say Yield (Shift+Y) — row count and active filter
+- Say Tables (Shift+F7) — tables visited in this session
+- Say Marked (Query menu; unbound by default) — the `look` values of every marked row
 - Say Edited (Shift+E) — the `edited` value of the current row, in a human-friendly local-time form (`December 14, 1963 at 5:42 AM`); the underlying SQLite text is unchanged
 - Say Notes (Shift+N) — the `notes` field of the current row
 - Say Tags (Shift+T) — the `tags` field of the current row
-- Say Column from Cursor (Shift+L) — values of the current virtual column starting at the current row, semicolon-separated
-- Say Marked Yield (Shift+Y) — count of marked rows
+- Say Column Rest (Alt+L) — every value of the current column from the cursor row down (no length cap)
+- Say Records Rest Marked (Alt+Shift+M) — every marked record in full, from the cursor down
 
-**Shape commands.** Use the Filter Records command, Shift+F (F for Filter), to apply an ADO Filter expression like `name LIKE '%bridge%'`. Use the Clear Filter command, Shift+R (R for Reset), to clear it. Use the Custom Sort command, Shift+S (S for Sort), to type an arbitrary ADO Sort expression like `name ASC, year DESC`.
+**Shape commands.** Use the Filter Records command, Alt+Shift+F (F for Filter), to filter through a field form like the edit dialog — one box per field. A bare value is a case-insensitive substring match (the default, the same as a leading `%`, so both `bridge` and `%bridge` become `name LIKE '%bridge%'`); a leading `=` forces an exact match; and `<=`, `>=`, `<`, `>`, `<>` (or `!=`) compare. Filled fields combine with AND. When a filter is already active, a chooser offers Clear (the default), And, Or, New, Edit, and Cancel — And and Or wrap the existing filter and the new one as `(old) AND (new)` or `(old) OR (new)`, New replaces from a blank form, and Edit replaces from a form pre-filled with your last values. Say Filter (Shift+F) speaks the current filter; to clear a filter, choose Clear in the chooser. The Filter by Regex command (Query menu, unbound by default) is a server-side complement to Filter Records: it restricts the current column to rows matching a regular expression using SQLean's `REGEXP` operator — see the SQLean extensions section below. For sorting, use the Order Records command, Alt+O, to pick columns and a direction for each; Reverse Order (Alt+Shift+O) flips every direction; and Say Order (Shift+O) speaks the current sort.
 
-Use the Sort Ascending by Column command, Alt+A (A for Ascending), to sort by a chosen column alphabetically; use Alt+Shift+A for Sort Descending. Each prompts for the column with a listbox that defaults to the column under virtual focus — just press Enter to accept.
+Sorting is done through the Order Records dialog (Alt+O): pick one or more columns and a direction (ascending or descending) for each. The dialog's column list defaults to the column under virtual focus.
 
-Use the Sort by Date Edited (oldest first) command, Alt+D (D for Date), to sort by the table's `edited` column with the oldest at the top; use Alt+Shift+D for the most-recent-first variant. Use the Clear Sort command to drop the sort so the recordset returns to its natural order.
+To sort by date, add the `edited` column in Order Records. Removing every column from the sort returns the recordset to its natural order.
 
 ## Misc menu
 
-Use the Refresh View command, F5 (the browser-standard refresh key), to re-query the database from disk; useful when another tool has written to the file while DbDo had it open. F5 also resets the virtual cursor to (row 1, first column).
+Use the Refresh View command, F5 (the browser-standard refresh key), to re-read the current rows' values from the database via the ADO Resync method; useful when another tool has edited rows DbDo has open. F5 preserves your cursor position (reopen the table to pick up rows added or removed externally).
 
-Use the Toggle Read-Only Lock command, Control+F7 (F7 = lock convention), to switch the recordset between editable and read-only; the window title shows the change.
+Use the Read Only Toggle command, Alt+Z, to switch the recordset between editable and read-only; the window title shows the change. (Views and query results are read-only by nature and the toggle cannot unlock them.)
 
-Use the Table Statistics command (no hotkey) to print row counts and per-column statistics for the current table. Use the Frequency Chart command (no hotkey; Alt+C as an alias) to render a frequency-by-column chart in Excel for analysis.
+Use the Table Summary command, Alt+T, to print row counts and a columns overview for the current table. Use the Graphics Grid command, Alt+Shift+G, to render a frequency-by-column chart in Excel for analysis.
 
-Use the Describe Column command, Control+Shift+D (D for Describe), to compute descriptive statistics for the column under the virtual cursor. DbDo walks the column, detects whether the values look numeric, date-like, boolean-like, or text, and reports the statistics that fit. Numeric columns get count, unique, minimum, maximum, range, mean, median, sample standard deviation, Q1, Q3, IQR, mode (if unambiguous), and a skew indicator. Date columns get earliest, latest, median, and span. Boolean-like columns (`0/1`, `Y/N`, `true/false`) get true and false counts with percentages. Text columns get unique count, shortest/longest/mean length, and a top-10 frequency table. The report opens in the same multi-line read-only dialog used by speech commands on double-press; press Control+C inside the textbox to copy the whole report.
+Use the Statistics Column command, Control+Shift+S, to compute descriptive statistics for the column under the virtual cursor. DbDo walks the column, detects whether the values look numeric, date-like, boolean-like, or text, and reports the statistics that fit. Numeric columns get count, unique, minimum, maximum, range, mean, median, sample standard deviation, Q1, Q3, IQR, mode (if unambiguous), and a skew indicator. Date columns get earliest, latest, median, and span. Boolean-like columns (`0/1`, `Y/N`, `true/false`) get true and false counts with percentages. Text columns get unique count, shortest/longest/mean length, and a top-10 frequency table. The report opens in the same multi-line read-only dialog used by speech commands on double-press; press Control+C inside the textbox to copy the whole report.
 
-Use the Plot Column command, Control+Shift+P (P for Plot), to produce an Excel chart matched to the data type of the column under the virtual cursor. DbDo runs the same data-type detection Describe Column uses and chooses a chart shape from it. Numeric columns can plot as a histogram (Sturges-binned distribution) or as a box-and-whisker plot (Tukey's five-number summary as a single compact shape); a small dialog prompts you to pick one. Date columns can plot as a timeline (count by month or by day for short spans, line chart), as counts-per-calendar-year (column chart), or as counts-by-month-of-year (column chart for seasonal patterns). Boolean columns auto-pick a pie chart of true / false proportions. Text columns auto-pick a horizontal Pareto bar of the top 15 most frequent values. When there is only one sensible chart shape for the data type, DbDo skips the picker and generates it directly. The .xlsx file is written next to the database file with a name like `customers-region-pareto.xlsx`, then opened in Excel; from there you can polish the chart, copy it to other documents, or change the chart type by hand. Plot Column requires Excel to be installed (same dependency as Frequency Chart). The existing Frequency &Chart command (Alt+C) remains for when you want to pick any column from a list and produce a column chart of value counts, regardless of data type.
+Use the Graphics Column command, Control+Shift+G, to produce an Excel chart matched to the data type of the column under the virtual cursor. DbDo runs the same data-type detection Statistics Column uses and chooses a chart shape from it. Numeric columns can plot as a histogram (Sturges-binned distribution) or as a box-and-whisker plot (Tukey's five-number summary as a single compact shape); a small dialog prompts you to pick one. Date columns can plot as a timeline (count by month or by day for short spans, line chart), as counts-per-calendar-year (column chart), or as counts-by-month-of-year (column chart for seasonal patterns). Boolean columns auto-pick a pie chart of true / false proportions. Text columns auto-pick a horizontal Pareto bar of the top 15 most frequent values. When there is only one sensible chart shape for the data type, DbDo skips the picker and generates it directly. The .xlsx file is written next to the database file with a name like `customers-region-pareto.xlsx`, then opened in Excel; from there you can polish the chart, copy it to other documents, or change the chart type by hand. Graphics Column requires Excel to be installed. The Graphics Grid command (Alt+Shift+G) remains for when you want to pick any column from a list and produce a column chart of value counts, regardless of data type.
 
-Use the Choose Visible Columns command (no hotkey; Alt+L as an alias) to pick which columns appear in the data list for the current table. Hidden columns are still accessible through Show Record and Edit Record.
+Use the Select Columns command, Alt+S, to pick which columns appear in the data list for the current table. Hidden columns are still accessible through Details View and Edit View.
 
-Use the Extract Regex Matches to Clipboard command, Alt+E (E for Extract), to walk every visible row, run a .NET regex against every visible column, and copy every match to the clipboard one per line. Useful for pulling email addresses, urls, or IDs out of free-text columns.
+Use the Extract Regex command, Control+Shift+X, to walk every visible row, run a .NET regex against every visible column, and copy every match to the clipboard one per line. Useful for pulling email addresses, urls, or IDs out of free-text columns.
 
-Use the Copy Cell to Clipboard command, Shift+C, to copy the current virtual cell (the cell under the Alt+Control+arrow cursor) to the Windows clipboard, replacing whatever was there. Use the Append Cell to Clipboard command, Shift+A, to append the current virtual cell to the clipboard separated by a blank line (two CRLF), so you can accumulate values from multiple cells across rows or columns. If the clipboard is empty, Append acts the same as Copy.
+Use the Copy Cell command, Control+C, to copy the current virtual cell (the cell under the Alt+Control+arrow cursor) to the Windows clipboard, replacing whatever was there. Use the Append Cell command, Alt+C, to append the current virtual cell to the clipboard separated by a blank line (two CRLF), so you can accumulate values from multiple cells across rows or columns. If the clipboard is empty, Append acts the same as Copy.
 
 Use the Copy Row as TSV to Clipboard command (no hotkey, accessed through the Misc menu) to copy the current row's visible columns as tab-separated values for pasting into Excel, Word tables, or chat clients. The label lacks a mnemonic letter because the only candidates fall mid-word — DbDo prefers no mnemonic to a mid-word one.
-
-Use the Next Initial Change command, Shift+I, to jump to the next row whose value in a chosen column starts with a different first letter. The column picker defaults to the column under virtual focus.
 
 Use the Run SQL command, Control+Q (Q for Query), to run any SQL statement. SELECTs display the result as a new recordset; INSERT/UPDATE/DELETE/DDL run via ADO Connection.Execute. The dot prompt's `;` and `*` aliases map to the same command.
 
@@ -286,7 +298,7 @@ Use the Say Sort and Filter command, Shift+8 (the asterisk key; Numpad-asterisk 
 
 Use the Say Kin command, Shift+K (K for Kin — relatives by foreign key), to hear the `look` field of every related record. The announcement covers both directions: every parent reached by an outbound foreign-key column on the current row, and every child that points back via an inbound foreign key. Parent entries are listed first as "Parents: <table>: <look>; <table>: <look>"; children follow as "Children: <table> (N): <look>, <look>, ...". Single-press speaks via the screen reader; double-press shows the same content in the multi-line dialog, useful when the parent row has many children. The Say Kin command is read-only and does not move the cursor or change the open table; for an interactive jump to a specific related record, use the existing Show-Related command (Alt+Shift+R) instead.
 
-Field validation: each editable field can have a regex pattern stored in DbDo.inix under a `[Validation:<table>]` section. When the pattern is set, both the Edit Record dialog (F2) and the Edit Field dialog (Shift+F2) refuse non-matching input. DbDo uses .NET regex syntax (the established powerful pattern language, the same one Find Regex uses) — examples appear in the sub-dialog. Empty pattern means no constraint.
+Field validation: each editable field can have a regex pattern stored in DbDo.inix under a `[Validation:<table>]` section. When the pattern is set, both the Edit View dialog (Control+E) and the Edit Cell dialog (F2) refuse non-matching input. DbDo uses .NET regex syntax (the established powerful pattern language, the same one Find Regex uses) — examples appear in the sub-dialog. Empty pattern means no constraint.
 
 ## SQL reference: what Invoke-Sql actually runs
 
@@ -551,6 +563,41 @@ frm.recBookmarkClicked(null, null);
 
 Scripts run in the DbDo process with all the privileges DbDo has. There is no facade or sandbox. A script can call `Environment.Exit`, read or write files, launch other programs, modify the database. This is intentional for power-user automation; treat scripts the same way you would treat shell scripts or PowerShell scripts you run on your own machine.
 
+## Text field conveniences
+
+Every text box in DbDo's dialogs — single-line inputs, the multi-line memo editor, and even the read-only Error and Help viewers — shares a family of keyboard conveniences aimed at screen-reader review and editing. They belong to the text control itself, so they behave the same everywhere a text field appears, with no per-dialog setup.
+
+- **Control+A** — Select all; **Control+Shift+A** — Unselect all. Both work even in read-only and multi-line boxes, where a plain select-all is often unreliable.
+- **Control+C** — Copy. With a selection, copies it; with no selection, copies the current line (without its line break), so you can grab a line without selecting it first.
+- **Alt+C** — Copy Append: add the selection (or current line) to what is already on the clipboard.
+- **Control+X** — Cut. With a selection, cuts it; with none, cuts the current line including its break (removing the row) and speaks the line the cursor lands on.
+- **Alt+X** — Cut Append: cut as above, but add to the clipboard instead of replacing it.
+- **Control+D** — Delete Line: remove the current line without touching the clipboard.
+- **F8 / Shift+F8** — Start Selection / Complete Selection: press F8 to drop an anchor, move the cursor, then Shift+F8 to select from the anchor to the cursor.
+- **Control+F8** — Copy All; **Alt+F8** — Read All (speak the entire field).
+- **Alt+Y** — Say Yield: speak the line and character counts.
+- **Alt+Apostrophe** — Say Clipboard: speak the current clipboard text.
+- **Shift+F1** — Focus Tip: speak the tip describing the field you are in.
+
+Cut, Cut Append, and Delete Line do nothing in a read-only viewer — they announce "Read-only" — while the copy, read, count, clipboard, and tip commands work there too.
+
+## SQLean extensions
+
+DbDo can use SQLean, a bundle of SQLite extensions, to add SQL functions that plain SQLite lacks. If a file named `sqlean.dll` sits in the same folder as `DbDo.exe`, DbDo loads it automatically when it opens a SQLite database — there is nothing to configure. The bundle is 64-bit, matching DbDo's build. DbDo's build script (`buildDbDo.cmd`) downloads it for you and places it beside the executable, but you can also drop it in by hand. You can read the full function reference at the SQLean project: <https://github.com/nalgeon/sqlean>.
+
+With SQLean loaded, two DbDo features come alive:
+
+- **Filter by Regex** (Query menu, unbound by default) restricts the current column to rows matching a regular expression, using SQLean's `REGEXP` operator. The match runs inside SQLite rather than row-by-row in DbDo, so it is fast on large tables, and because the result is still a single-table SELECT it stays editable. An empty pattern clears the filter. This complements the client-side regex Find (which searches the displayed view) and Filter Records (which uses the ADO filter and cannot do regular expressions).
+- **Extended field statistics** add `median`, `stddev`, `stddev_pop`, `variance`, `var_pop`, and `percentile_25` / `percentile_75` / `percentile_90` / `percentile_95` to the `Measure-Field` command at the dot prompt — for example, `Measure-Field amount median`. They are computed in SQL through SQLean's stats functions, alongside the built-in `count`, `min`, `max`, `sum`, `avg`, `longest`, and `shortest`.
+
+SQLean's functions are also available in any SQL you run through Invoke-Sql — for instance `SELECT name FROM contacts WHERE name REGEXP '^Dr\.'` or `SELECT median(amount) FROM events`.
+
+**The two SQLean files.** There are two distinct downloads, easy to confuse. `sqlean.dll` is the loadable *extension bundle* described above, which DbDo auto-loads into its own database connection. `sqlean.exe` is a separate *shell* — the standard SQLite command-line shell with the same extensions built in — from the companion project at <https://github.com/nalgeon/sqlite>. The build script fetches both and places them beside `DbDo.exe`. The shell powers the dot prompt's `!` lane: typing `!` followed by a line runs it in `sqlean.exe` against the current database file (opened read-only) and shows the output, giving you the full sqlite3/SQLean shell — `.tables`, `.schema`, `.dump`, `.stats`, and every SQLean function — without DbDo reimplementing any of it. The `/` lane is the complement: `/` followed by SQL runs through DbDo's own connection, where the result integrates with DbDo.
+
+**What the bundle provides.** The SQLean main set spans, by module: crypto (hashing and encoding), define (user-defined functions and dynamic SQL), fileio (file and directory access), fuzzy (fuzzy matching and phonetics), ipaddr (IP-address functions), math (mathematical functions), regexp (regular expressions), stats (median, percentiles, and other statistics), text (Unicode-aware string functions), unicode (Unicode utilities), uuid (UUID generation), and vsv (reading delimited files as virtual tables). The regexp and stats modules are what power Filter by Regex and the extended field statistics above; the rest are available to any SQL you run.
+
+If `sqlean.dll` is absent, these specific features report that the bundle is needed and the rest of DbDo is unaffected. The Test Extension Load command (Misc menu) reports whether the bundle loaded and which version.
+
 ## Help menu
 
 Use the Documentation command, F1 (the standard help key), for help. With no argument, F1 shows the command index; from the dot prompt, `help <topic>` shows details for one command. The menu label matches EdSharp and FileDir: "Documentation".
@@ -577,7 +624,7 @@ Use the Invoke-Script command, `Invoke-Script path.txt` (with aliases `read`, `s
 
 ```
 Out-File monthly_report.txt
-Invoke-Script monthly_report.dbduo
+Invoke-Script monthly_report.dbdo
 Out-File stdout
 ```
 
@@ -587,19 +634,19 @@ This section restates every hotkey in the program, grouped by the part of the ke
 
 ### Bare Shift+Letter family
 
-Five one-key shortcuts fire from the data list only (so capital letters typed in dialogs are not affected): Shift+F filters (Filter Records); Shift+G goes to a row (Go to Row); Shift+J as a synonym for Jump to Match in One Column; Shift+R resets the filter (Clear Filter); Shift+S sorts by an arbitrary expression (Custom Sort).
+Several capital-letter shortcuts fire from the data list (so capital letters typed in dialogs are not affected). These are the Say family: Shift+F (Say Filter), Shift+O (Say Order), Shift+G (Say Goto), Shift+R (Say Related), and the other Shift+letter say commands.
 
 ### Function-key family
 
-F1 is Documentation; Shift+F1 is History of Changes; Alt+F1 is About; Control+F1 is Key Describer. F2 edits the current row; Shift+F2 edits just the current field (virtual cell). F3 is search next; Shift+F3 is search previous. Control+F3 is Find Regex Across All Columns; Control+Shift+F3 is the reverse. F4 picks a table; Shift+F4 is Say Tables; Control+F4 closes the open file. F5 refreshes and resets the virtual cursor. Control+F6 cycles all objects; Control+Shift+F6 cycles backward. Control+F7 toggles the lock. F11 is Elevate Version. Alt+F4 closes the program. Alt+F10 opens the Alternate Menu. F12 is a legacy alias for Configuration Options (now on Alt+Shift+C, the same chord EdSharp and FileDir use for their Configuration Options command).
+F1 is Get Help; Shift+F1 is Show History; Alt+F1 is About DbDo; Control+F1 is Key Help Toggle. F2 is Edit Cell; Control+F2 is Pick Value. F3 is Search Next; Shift+F3 is Search Previous; Control+F3 is Find Regex; Control+Shift+F3 is the reverse. F4 is Current Windows; Shift+F4 is Say Windows Open; Control+F4 closes the window. F5 is Refresh View. F6 cycles the views; Shift+F6 cycles back; Alt+F6 and Control+F6 switch table and object (Alt+Shift+F6 and Control+Shift+F6 go backward). F7 is Choose Table; Shift+F7 is Say Tables. F8 starts a mark; Shift+F8 completes it; Alt+F8 starts an unmark; Alt+Shift+F8 unmarks a range. Shift+F9 is Say Notes; Control+F9 is Edit Notes. Alt+F10 opens the Alternate Menu. F11 is Elevate Version. Alt+F4 closes the program.
 
 ### Control-letter family
 
-Control+C is reserved for native clipboard. Control+D deletes the current row. Control+F is Find Across All Columns; Control+Shift+F is the reverse. Control+J is Jump to Match in One Column; Control+Shift+J is the reverse. Control+K saves a bookmark; Control+Shift+K clears it. Control+M marks the current row; Control+U unmarks it. Control+N adds a row; Control+Shift+N creates a new database. Control+O opens a file. Control+P prints. Control+Q runs SQL. Control+R is Find and Replace Across Rows. Control+S saves the database to a new path; Control+Shift+S takes a backup snapshot. Control+Shift+C duplicates the current row. Control+Shift+I imports a Markdown table; Control+Shift+X exports data. Control+Enter is Open Cell Value.
+Control+C copies the current cell. Control+L, Control+E, and Control+D are List View, Edit View, and Details View. Control+F is Find Across All Columns; Control+Shift+F is the reverse. Control+J is Jump to Match in One Column; Control+Shift+J is the reverse. Control+B saves a bookmark and Control+Shift+B clears it. Control+M marks the current row; Control+Shift+M unmarks it. Control+N adds a row; Control+Shift+N copies the record as a new one. Control+O opens a database; Control+Shift+O opens a table in a new window. Control+P prints. Control+Q runs SQL. Control+R is Find and Replace Across Rows; Control+Shift+R is its regex variant. Control+S saves the database to a new path; Control+Shift+S is Statistics Column. Control+T edits tags; Control+U edits the url. Control+Shift+D deletes without confirmation. Control+Shift+G is Graphics Column; Control+Shift+X extracts regex matches. Control+G is Set Position. Control+Enter is Open Cell Value.
 
 ### Alt-letter family
 
-Alt+A sorts ascending; Alt+Shift+A sorts descending. Alt+C is an alias for Frequency Chart. Alt+D sorts by date oldest first; Alt+Shift+D sorts most recent first. Alt+E is Extract Regex Matches to Clipboard. Alt+K is Go to Bookmark. Alt+L is an alias for Choose Table. Alt+P is Say Path. Alt+R is Recent Files; Alt+Shift+R is Related Records. Alt+T is an alias for Table Statistics. Alt+Y is Say Yield. Alt+Z is Say Status. Alt+Enter is Table Properties. Alt+Backslash is Open in Explorer.
+Alt+B lists bookmarks. Alt+C appends the current cell to the clipboard; Alt+Shift+C appends the record. Alt+D is Database Summary; Alt+T is Table Summary. Alt+I imports data; Alt+X exports data. Alt+G repeats Set Position. Alt+L is Say Column Rest; Alt+Shift+L is Say Records Rest; Alt+M is Say Marked; Alt+Shift+M is Say Records Rest Marked. Alt+O is Order Records; Alt+Shift+O is Reverse Order. Alt+R is Recent Files. Alt+S is Select Columns. Alt+V invokes a script; Alt+Shift+V edits one. Alt+Z is Read Only Toggle; Alt+Shift+Z is Extra Speech Toggle. Alt+Shift+F is Filter Records; Alt+Shift+G is Graphics Grid. Alt+Enter is Table Properties. Alt+Backslash is Open in Explorer.
 
 ### Alt+Control extended-key family (virtual cell navigation)
 
@@ -611,11 +658,37 @@ Alt+RightArrow drills into a child table. Alt+LeftArrow returns to the parent ro
 
 ### Navigation family
 
-Tab and Shift+Tab move an announcement-only column cursor across the current row. The arrow keys move the listview's row selection. Enter opens Show Record on the current row. Control+Tab cycles among recently-visited tables; Control+Shift+Tab cycles backward. Control+Home and Control+End jump to the first or last marked row; Control+UpArrow and Control+DownArrow step among marked rows. Shift+Home and Shift+End bulk-mark every row from the first through the current, or the current through the last; Alt+Shift+Home and Alt+Shift+End unmark the same spans.
+Tab and Shift+Tab move an announcement-only column cursor across the current row. The arrow keys move the listview's row selection. Enter (or Control+D) opens Details View on the current row. Control+Tab cycles among recently-visited tables; Control+Shift+Tab cycles backward. Control+Shift+Home and Control+Shift+End jump to the first or last marked row; Control+UpArrow and Control+DownArrow step among marked rows. Shift+Home and Shift+End bulk-mark every row from the first through the current, or the current through the last; Alt+Shift+Home and Alt+Shift+End unmark the same spans.
 
 ### GraveAccent family
 
 Control+GraveAccent is the GUI menu hotkey for Open Dot Prompt. Alt+Control+GraveAccent is a global hotkey that always acts: it toggles between GUI and console, whichever is not currently in front. (The former Alt+GraveAccent console-to-GUI hotkey was dropped as redundant with the toggle, and to stop reserving a second system-wide chord.)
+
+## Schema documentation in comments
+
+DbDo databases can carry their own documentation inside the schema itself, with no extra data-dictionary tables. SQLite stores the verbatim text of every CREATE statement -- comments included -- in sqlite_master, so comments written inside a CREATE TABLE body persist in the database file and travel with it.
+
+DbDo reads the sqlite-docs convention (compatible with github.com/asg017/sqlite-docs):
+
+A line beginning `--!` inside the CREATE TABLE body documents the table. When the text has the shape `key: value`, DbDo treats it as a YAML-style publishing field (name, author, version, description, abstract, relationships, or any key you choose); otherwise it is free prose. A line beginning `---` documents the column whose definition follows it.
+
+Example:
+
+    CREATE TABLE events (
+      --! description: One row per discrete agenda entry
+      --! author: Jamal Mazrui
+      --! relationships: presents (contacts), located_at (locations)
+      event_id INTEGER PRIMARY KEY,
+      --- Start time in SQLite timestamp form
+      starts TEXT,
+      ...
+    );
+
+By DbDo convention, database-level metadata is the `--!` block of the builtin lookups table, since every DbDo database has one and the database file itself has no CREATE statement to carry comments.
+
+Where it surfaces: Table Properties (Alt+Enter) shows a table's documentation and column documentation first; Database Summary shows the database-level block beneath the table count.
+
+One caution, documented by SQLite users and the sqlite-docs project alike: ALTER TABLE ADD, RENAME, or DROP COLUMN rewrites the stored statement and can erase or mangle embedded comments. DbDo's regenerate-the-table approach to schema changes composes its own CREATE statements, so doc comments survive DbDo's edits; avoid raw ALTER TABLE on documented tables in outside tools.
 
 ## Standard fields
 
@@ -630,14 +703,14 @@ DbDo follows a convention for table design that the bundled sample databases ill
 7. Foreign-key columns (`<parent>_id`, for child tables only).
 8. **Distinct fields** — the substantive columns this table is actually for.
 9. `marked` — boolean, default 0. The flag the Set-Mark command toggles.
-10. `look` — computed text. A pipe-joined rendering of the most identifying distinct fields, designed for screen-reader readability. Appears in listboxes, quick-search displays, and Show Record's Related Records section.
+10. `look` — computed text. A pipe-joined rendering of the most identifying distinct fields, designed for screen-reader readability. Appears in listboxes, quick-search displays, and the Details View's related-records section.
 11. `unq` — computed text. Like `look` but optimized for uniqueness rather than readability. The intent is that the combination of column values in `unq` can confidently be considered unique for a row, so that an upsert-style command can update an existing row if `unq` matches, or insert a new row otherwise.
 
-The TEXTLINE / TEXTMEMO type names on `url`, `tags`, and `notes` aren't standard SQLite types — they're convention labels DbDo reads from `PRAGMA table_info`. SQLite's type affinity treats all three as TEXT for storage. The difference is that DbDo's Edit Record dialog renders a single-line input box for TEXT/TEXTLINE columns and a multi-line memo widget for any type containing "memo". Use TEXTMEMO for `tags` and `notes` so the editor handles their potentially-long content gracefully.
+The TEXTLINE / TEXTMEMO / TEXTMARKDOWN type names on `url`, `tags`, and `notes` aren't standard SQLite types — they're convention labels DbDo reads from `PRAGMA table_info`. SQLite's type affinity treats them all as TEXT for storage. The difference is that the Edit View dialog renders a single-line input box for TEXT/TEXTLINE columns and a multi-line box for any type containing "memo" or "markdown". `tags` uses TEXTMEMO and `notes` uses TEXTMARKDOWN (a multi-line field whose content is expected to be Markdown) so the editor handles their longer content gracefully.
 
-The `look` column is what makes Show Record's Related Records section informative. When DbDo lists "Related students:" or "Related classes:", each line is one matching row's `look` value, so a single short string identifies who or what each related record is. Tables without a `look` column still show up under the right header but with a `(N row(s) -- no look column)` placeholder.
+The `look` column is what makes the Details View's related-records section informative. When DbDo lists "Related students:" or "Related classes:", each line is one matching row's `look` value, so a single short string identifies who or what each related record is. Tables without a `look` column still show up under the right header but with a `(N row(s) -- no look column)` placeholder.
 
-DbDo hides every column ending in `_id` (primary and foreign keys), bare `id`, and the bookkeeping columns (added, edited, marked, look, unq) from the listview by default. As of v1.0.68, `url`, `tags`, and `notes` are also hidden by default — they're "extended" data per row that the user reaches via the Say-X family (Say Url, Say Tags, Say Notes) or edits via Edit Record (F2 Edit Cell or Ctrl+E Edit Record, which both show the FULL field set). Use the Select Columns command (Alt+S) to override on a per-table basis; the override persists across sessions via DbDo.inix.
+DbDo hides every column ending in `_id` (primary and foreign keys), bare `id`, and the bookkeeping columns (added, edited, marked, look, unq) from the listview by default. As of v1.0.68, `url`, `tags`, and `notes` are also hidden by default — they're "extended" data per row that the user reaches via the Say family (Say URL Shift+U, Say Tags Shift+T, Say Notes Shift+F9) or edits via Edit Cell (F2) or Edit View (Control+E), which shows the full field set. Use the Select Columns command (Alt+S) to override on a per-table basis; the override persists across sessions via DbDo.inix.
 
 ### Example schema using the standard fields
 
@@ -679,7 +752,7 @@ DbDo ships five SQLite sample databases, each adapted to the standard column con
 
 **`sample.db`** — a small school domain. Four tables: `teachers`, `classes`, `students`, `enrollments`. Three rows each — twelve rows total — just enough to demonstrate parent-child relationships (a teacher teaches classes; students enroll in classes through the enrollments junction table). The minimum that exercises every standard column, the parent-child drill, and the related-records view. Opens automatically on first launch from a clean install.
 
-**`northwind.db`** — the classic Microsoft Northwind sales sample, adapted to DbDo's column conventions. Eight tables: `categories` (8 rows), `suppliers` (10), `products` (24), `customers` (12), `employees` (9), `orders` (14), `order_details` (21), `shippers` (3) — 101 rows total. Rich parent-child shape: a category has products, a supplier has products, a customer places orders, an employee handles orders, an order has order_details, a shipper ships orders. Useful for exercising DbDo's parent-child drill against multi-level relationships with realistic row counts. **DbDo's adaptations are minimal and trivial**: every table has `<table>_id` primary keys (the canonical Northwind uses `CategoryID`, `SupplierID`, etc. — same idea, snake_case naming); the standard columns `added`, `edited`, `marked`, `notes`, `tags`, `look`, `unq`, and (new in v1.0.68) `url` are appended to each table; `notes` and `tags` are declared as `TEXTMEMO` so DbDo's Edit Record dialog renders a multi-line memo widget for them. The substantive columns (company, contact, city, country, phone for customers; first_name, last_name, title for employees; and so on) are preserved verbatim. Learn more about the canonical Microsoft Northwind:
+**`northwind.db`** — the classic Microsoft Northwind sales sample, adapted to DbDo's column conventions. Eight tables: `categories` (8 rows), `suppliers` (10), `products` (24), `customers` (12), `employees` (9), `orders` (14), `order_details` (21), `shippers` (3) — 101 rows total. Rich parent-child shape: a category has products, a supplier has products, a customer places orders, an employee handles orders, an order has order_details, a shipper ships orders. Useful for exercising DbDo's parent-child drill against multi-level relationships with realistic row counts. **DbDo's adaptations are minimal and trivial**: every table has `<table>_id` primary keys (the canonical Northwind uses `CategoryID`, `SupplierID`, etc. — same idea, snake_case naming); the standard columns `added`, `edited`, `marked`, `notes`, `tags`, `look`, `unq`, and (new in v1.0.68) `url` are appended to each table; `notes` and `tags` are declared as `TEXTMEMO` so DbDo's Edit View dialog renders a multi-line box for them. The substantive columns (company, contact, city, country, phone for customers; first_name, last_name, title for employees; and so on) are preserved verbatim. Learn more about the canonical Microsoft Northwind:
 
 - Microsoft Learn — [Northwind sample database overview](https://learn.microsoft.com/en-us/dotnet/framework/data/adonet/ef/loading-related-objects)
 - GitHub — [microsoft/sql-server-samples / Northwind](https://github.com/microsoft/sql-server-samples/tree/master/samples/databases/northwind-pubs)
@@ -700,7 +773,7 @@ All five databases use the same column conventions, so navigation commands and c
 
 Each bundled database carries one SQLite trigger per table (named `trg_<table>_edited`) that maintains the `edited` column automatically. The trigger fires `AFTER UPDATE OF` the data-bearing columns and bumps `edited = CURRENT_TIMESTAMP` only when one of those columns actually changed in value. The `marked`, `added`, `edited`, `look`, and `unq` columns are deliberately excluded from the substantive set, so toggling the `marked` flag (Control+M / Control+U, or any of the range-mark commands) does NOT bump the timestamp — `marked` is a UI flag, not a content edit, and bumping the timestamp on every Mark Record would scramble "sort by recently edited" for users who use marking as a working-set tool.
 
-The check uses `OLD.col IS NOT NEW.col` for each substantive column, joined by `OR`, so the trigger correctly skips both the "ADO only writes one column" case (Mark Record updates only `marked`) and the "Edit Record writes every column with values unchanged" case (the F2 dialog hands every field back even if untouched). NULLs are handled correctly because `IS NOT` is null-safe in SQLite, unlike the regular `<>` operator.
+The check uses `OLD.col IS NOT NEW.col` for each substantive column, joined by `OR`, so the trigger correctly skips both the "ADO only writes one column" case (Mark Record updates only `marked`) and the "Edit View writes every column with values unchanged" case (the edit dialog hands every field back even if untouched). NULLs are handled correctly because `IS NOT` is null-safe in SQLite, unlike the regular `<>` operator.
 
 For users creating their own tables, the same trigger pattern is recommended:
 
@@ -839,7 +912,7 @@ DbDo's LbcDialog exposes the following methods for assembling a dialog. Two nami
 
 `addInputBox(string sLabel, string sValue, string sTip)` adds a label, a single-line `TextBox` below it, and registers the tip with the status bar. Returns the `TextBox`. The textbox's `AccessibleName` is set from the label so screen readers announce the field correctly on tab-in. This is the workhorse method for editing scalar values: names, paths, single integers, simple regex patterns.
 
-`addInlineInputBox(string sLabel, string sValue, string sTip)` is the horizontal variant: label and textbox on a single row, sharing the same band. Used in the Edit Record dialog where vertical density matters and there are many short fields.
+`addInlineInputBox(string sLabel, string sValue, string sTip)` is the horizontal variant: label and textbox on a single row, sharing the same band. Used in the Edit View dialog where vertical density matters and there are many short fields.
 
 `addMemoBox(string sLabel, string sValue, string sTip)` adds a label and a multi-line `TextBox` (96 pixels tall by default) suitable for longer text — notes, tags, descriptions. While focus is inside the memo, the dialog's `AcceptButton` is temporarily cleared so Enter inserts a newline rather than submitting; `LostFocus` restores it. Returns the `TextBox`.
 

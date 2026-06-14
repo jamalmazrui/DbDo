@@ -1,4 +1,4 @@
-; DbDo.inix - sample configuration
+﻿; DbDo.inix - sample configuration
 ;
 ; Two copies of this file are used:
 ;
@@ -33,18 +33,44 @@
 ; connection strings are long and contain '=' characters.
 
 [General]
+; historyCount sets how many entries each history keeps -- the
+; custom-query history (Alt+Shift+Q), the search/find/jump
+; histories, and the recent-files list. Default 10; range 1 to 100.
+historyCount = 10
 
 ; uiMode controls which surface(s) DbDo presents at startup.
 ;
-;   both = GUI window AND a separate console window with the dot prompt.
-;          Two distinct accessibility surfaces. Alt+Tab between them.
-;   gui  = GUI window only. Use Tools > Enter-Console to summon the
-;          console on demand.
+;   gui  = GUI window only (the default). The dot-prompt console is
+;          opt-in: summon it on demand with Control+GraveAccent or
+;          Tools > Enter-Console.
+;   both = GUI window AND a separate console window with the dot
+;          prompt at startup. Two distinct accessibility surfaces;
+;          Alt+Tab between them.
 ;   cli  = Console only, no GUI. When launched from cmd.exe, attaches
 ;          to the launching terminal.
 ;
 ; Command-line flags -cli, -gui, -both override this setting.
-uiMode = both
+uiMode = gui
+
+[Console]
+; followActiveWindow: Y (default) = the Dot Prompt's table/recordset
+; context follows the most recently active window; N = the prompt
+; stays pinned to the window that opened it until Enter-Console is
+; invoked again from another window.
+followActiveWindow=Y
+
+[Validation]
+; Type-default "picture" patterns (dBASE III+ PICTURE spirit).
+; Key = declared type; value = .NET regex a non-empty value must
+; match in the record edit dialog. Per-table-and-field patterns
+; elsewhere in this file override these; the entries below match
+; the compiled defaults and may be edited or removed freely.
+; Empty values always pass (nullable fields).
+BOOLEAN=^(0|1)$
+INTEGER=^[+-]?[0-9]+$
+REAL=^[+-]?([0-9]+(\.[0-9]*)?|\.[0-9]+)([eE][+-]?[0-9]+)?$
+NUMERIC=^[+-]?([0-9]+(\.[0-9]*)?|\.[0-9]+)$
+TEXTTIME=^[0-9]{4}-[0-9]{2}-[0-9]{2}([ T][0-9]{2}:[0-9]{2}(:[0-9]{2}(\.[0-9]+)?)?)?$
 
 [Hotkeys]
 
@@ -68,20 +94,22 @@ uiMode = both
 
 ; ===== File menu =====
 Open Database=Control+O, Open a database file on disk
-Open Recordset=Control+Shift+O, Open an ad-hoc SELECT as a recordset
+New Database=None, Create a new database file: define the first table's fields and types; standard columns plus the builtin maps and lookups tables are added automatically
+Add Table=None, Add another table in the standard shape to the open database
+Open Recordset=Control+Shift+T, Open an ad-hoc SELECT as a recordset
 Recent Files=Alt+R, Pick a recently opened database to reopen
 Save Database=Control+S, Save the open database to another file or format
-Close Database=Control+F4, Close the open database
+Close Database=Control+W, Close the open database
 Import Data=Alt+I, Import records from a delimited or structured file into the current table
 Export Data=Alt+X, Export the current grid (visible columns and filtered rows) to a file
 Exit Application=Alt+F4, Exit (quit) DbDo
 
 ; ===== Edit menu =====
 New Record=Control+N, Add a new record at the cursor row
-Copy Record as New=Control+Shift+N, Add a new record copied from the current one
-Edit Record=Control+E, Edit (modify) the current record field-by-field
+Copy Record as New=Control+Shift+N, Start a new record pre-filled with the current record's editable values; admin fields regenerate
+Edit View=Control+E, Edit the current record field-by-field (the edit view). Control+PageDown/Control+PageUp save and move to the next/previous record (same field focused); Control+Shift+D deletes the record without confirmation; Control+Shift+Backspace nulls the focused field; F6/Shift+F6 switch to the next/previous view
 Edit Cell=F2, Edit the current cell value in place
-Delete Record=Control+D, Delete (remove) the current record after confirming
+Delete Record=Control+D, Delete (remove) the current record after confirming; when records are marked, first choose Current (default) or Marked. The Delete key also works
 Delete Record Force=Control+Shift+D, Delete the current record without confirmation
 Copy Cell=Control+C, Copy the current cell value to the clipboard
 Append Cell=Alt+C, Append the current cell value to the clipboard
@@ -92,14 +120,30 @@ Open URL=Control+Shift+U, Open the current record's url in the default browser
 Pick Value=Control+F2, Pick a value from a list of distinct values in the current column
 Replace Column=Control+R, Replace (find and replace) text within the current virtual column
 Regex Replace=Control+Shift+R, Replace within the current column using regular expressions
-Send Mail=Control+Shift+M, Send mail using the current record (mailto link)
+Send Mail=None, Send mail using the current record (mailto link); on the Edit menu (no hotkey)
 
 ; ===== Mark menu =====
 Set Mark=Control+M, Mark the current record for batch operations
+Say Mark=Shift+M, Say the current record's mark status: Marked or Unmarked
 Toggle Marked=Control+Space, Toggle (flip) the mark on the current record
+Edit Notes=Control+F9, Edit just the notes field of the current record (a multiline Markdown editor; OK and Cancel only)
+Edit Tags=Control+T, Edit just the tags field of the current record (OK and Cancel only)
+Edit URL=Control+U, Edit just the url field of the current record (single-line; OK and Cancel only)
+Clear Mark=Control+Shift+M, Unmark (clear the mark on) the current record
+Cursor Row Start=Home, Move the db cursor to the first column of the current row
+Cursor Row End=End, Move the db cursor to the last column of the current row
+Cursor Grid Start=Control+Home, Move the db cursor to the first column of the first row
+Cursor Grid End=Control+End, Move the db cursor to the last column of the last row
+Cursor Column First=Control+PageUp, Move the db cursor to the first row of the current column
+Cursor Column Last=Control+PageDown, Move the db cursor to the last row of the current column
+Context Menu=Shift+F10, Open the context menu (also the Applications key): in the data list, record, mark, cell, and structure commands; in the Edit Record form, edit, field, record-navigation, and help commands. Every item mirrors an existing hotkey, shown beside it
+Repeat Set Position=Alt+G, Repeat the Go To command with the previously saved input (saved across sessions in DbDo.inix)
+Null Value=Control+Shift+Backspace, Set the current cell (data list) or the focused field (Edit Record form) to SQL NULL, distinct from the empty string; speech says null for NULL and blank for an empty string
+First Marked=Control+Shift+Home, Go to the first marked record
+Last Marked=Control+Shift+End, Go to the last marked record
 Set Mark All=Control+A, Mark every visible record in the filtered view
 Clear Mark All=Control+Shift+A, Unmark (clear marks on) every visible record
-Invert Marked=Control+I, Invert the marked state of every visible record
+Invert Marked=Control+Shift+I, Invert the marked state of every visible record
 Start Mark=F8, Start marking from the current record (set anchor)
 Complete Mark=Shift+F8, Complete marking from the anchor to the current record
 Start Unmark=Alt+F8, Start unmarking from the current record (set anchor)
@@ -109,67 +153,80 @@ List Bookmarks=Alt+B, List saved bookmarks and pick one to jump to that record
 Clear Bookmark=Control+Shift+B, Clear (remove) a saved bookmark or all of them
 
 ; ===== Navigate menu =====
-Show Object=Enter, Show (display) the current record field-by-field
-Set Position=Control+G, Go to the record at a chosen row number
+Inspect Record=Control+I, Show the current record field-by-field with its related records (the inspect view). Control+PageDown/Control+PageUp move to the next/previous record; F6/Shift+F6 switch to the next/previous view
+View Cycle=F6, Cycle to the next view of the current record: list to edit to inspect and back to list (Control+E and Control+I jump straight to the edit and inspect views)
+View Cycle Back=Shift+F6, Cycle to the previous presentation of the current record (list, show, form)
+Set Position=Control+G, Go to a position by intelligent input: a number is an absolute row; a percent (50%) scales to the row count with rounding; a leading + or - moves relatively, in rows or in percent (+10, -25%); input with letters moves the db cursor to the next column, cyclically from the current one, whose header (or failing that, current-row value) contains the text. Inputs persist in DbDo.inix; Alt+G repeats the last one
 Switch Object=Control+F6, Switch (cycle forward) to the next opened recordset
 Switch Previous Object=Control+Shift+F6, Switch (cycle backward) to the previous opened recordset
-Switch Table=Control+Tab, Switch to the next visited table
-Switch Previous Table=Control+Shift+Tab, Switch to the previously visited table
-Select Table=F4, Select a table to open from the database
-Enter Child=Alt+RightArrow, Enter (drill into) the child records related to the current record
-Exit Child=Alt+LeftArrow, Exit (back out of) the child relation to the parent record
+Switch Table=Alt+F6, Switch to the next visited table
+Switch Previous Table=Alt+Shift+F6, Switch to the previously visited table
+Select Table=F7, Select a table to open in the same window
+Open Table=Control+Shift+O, Open a chosen table of the current database in a new window
+Current Windows=F4, Pick window to activate from list of current ones
+Window Toggle=Shift+W, Toggle between most recently used windows
+Next Window=Control+Tab, Activate next open window
+Previous Window=Control+Shift+Tab, Activate previous open window
+Say Windows Open=Shift+F4, Say count and titles of open windows
+Close Window=Control+F4, Close current window
+Close All But Current Window=Control+Shift+F4, Close all windows except the current one
+Enter Child=Alt+RightArrow, Drill into related records: foreign-key children, or any table related through the maps table (Enter also drills in)
+Exit Child=Alt+LeftArrow, Exit (back out of) the child relation to the parent record (Backspace also steps out)
 Exit Child to Root=Alt+Home, Exit all child relations back to the root table
 Get Property=Alt+Enter, Get (show) properties of the current table
-Find=Control+F, Find (search) text across all columns
+Find=Control+F, Find a record by case-insensitive substring match across all fields
 Find Previous=Control+Shift+F, Find the previous match across all columns
 Find Regex=Control+F3, Find using a regular expression across all columns
 Find Previous Regex=Control+Shift+F3, Find the previous regex match across all columns
-Jump Record=Control+J, Jump to the next record matching text in the current column
+Jump Record=Control+J, Jump to a record by case-insensitive substring match in the db cursor's column
 Jump Previous Record=Control+Shift+J, Jump to the previous record matching text in the current column
 Search Next=F3, Search (repeat) the last find forward
 Search Previous=Shift+F3, Search the last find in reverse (backward)
 
 ; ===== Order and Filter =====
-Order Records=Alt+O, Order (sort) records ascending by a chosen column
-Reverse Order=Alt+Shift+O, Order records in reverse (descending sort)
-Filter Records=Alt+Shift+F, Filter records to those matching a where condition
+Order Records=Alt+O, Order the records with the Names/Picks dialog: Ascending (the default) or Descending moves the selected column to Picks with its direction (shown as: name asc); the Picks order is the sort precedence; Remove returns a pick to Names; OK applies, and empty Picks clears the sort
+Reverse Order=Alt+Shift+O, Reverse the current sort by flipping each column's direction (ASC becomes DESC and vice versa), so records run in the exact reverse order
+Filter Records=Alt+Shift+F, Filter with a field form like the edit dialog. With no filter active it opens straight to the first field; with one active a chooser offers Clear (default), And, Or, New, Edit, Cancel. Per field: a bare value is a case-insensitive substring (same as a leading %; field like %value%), a leading = forces an exact match, and =, <=, >=, <, >, <> (or !=) compare; filled fields AND together
 
 ; ===== Query/Say menu =====
 Say Added=Shift+A, Say when the current record was added
-Say Cell=Shift+C, Say the current cell value
+Say Cell=Shift+C, Say the current cell value (NumPad5 with NumLock off is equivalent)
 Say Database=Shift+D, Say the open database's file name and path
-Say Filter=Shift+F, Say the active filter expression
+Say Filter=Shift+F, Say the active filter expression, or that none is active
+Say Select=Shift+S, Say the columns currently shown (the selection made with Select Columns, Alt+S)
+Say Query=Shift+Q, Say the query behind the current recordset: the exact SELECT for a custom query (Control+Q), or SELECT * FROM the table for a directly-opened table or view
 Say Goto=Shift+G, Say the most recent Goto (jump) search target
 Say ID=Shift+I, Say the primary key of the current record
 Say Look=Shift+L, Say the look value distinguishing the current record
 Say Edited=Shift+E, Say when the current record was last edited
 Say Notes=Shift+N, Say the notes field of the current record
 Say Order=Shift+O, Say the active order (sort) expression
-Say Related=Shift+R, Say the look value of each parent and child record related to the current one
+Say Related=Shift+R, Say the look value of each record related to the current one: foreign-key parents and children, plus maps associations in both directions
 Say Tags=Shift+T, Say the tags field of the current record
 Say URL=Shift+U, Say the url field of the current record
 Say Yield=Shift+Y, Say the yield (record count) of the current filter
 Say Status=Shift+Z, Say status: table, row, filter, and order
-Say Marked=Alt+M, Say the marked records (their look values)
-Say Tables=Shift+F4, Say the list of tables visited this session
+Say Marked=, Say the marked records (their look values)
+Say Tables=Shift+F7, Say the list of tables visited this session
 Say Clipboard=Alt+Apostrophe, Say the current clipboard text
 Say Position=Alt+Delete, Say current position, record count, and percent through
 Say Sort Filter=Shift+8, Say the active sort and filter expressions
-Say Column Rest=Control+L, Say (list) the rest of the current column from the cursor down
+Say Column Rest=Control+L, Say every value of the current column from the cursor row down (no length cap; press Control to stop speech)
 Say Column Rest Marked=Control+Shift+L, Say the rest of the current column for marked records only
-Say Records Rest=Alt+L, Say (list) the rest of the records in full from the cursor down
-Say Records Rest Marked=Alt+Shift+L, Say the rest of the records in full for marked records only
+Say Records Rest=Alt+L, Say every record in full from the cursor down (no length cap)
+Say Records Rest Marked=Alt+Shift+M, Say every marked record in full from the cursor down (no length cap)
 
 ; ===== Misc menu =====
 Database Summary=Alt+D, Display a summary of the database: tables, record counts, and related tables
 Table Summary=Alt+T, Display a summary of the current table: columns, types, and key constraints
 Statistics Column=Control+Shift+S, Show descriptive statistics for the current virtual column
-Graphics Column=Alt+G, Graph (chart) the current virtual column in Excel
+Graphics Column=Control+Shift+G, Graph (chart) the current virtual column in Excel
 Graphics Grid=Alt+Shift+G, Graph the displayed grid (multi-column chart) in Excel
-Select Columns=Alt+S, Select (choose) which columns are visible in the grid
-Update View=F5, Update (refresh) the visible rows from the database
+Select Columns=Alt+S, Choose the displayed columns and their order with the Names/Picks dialog: Names lists every column in natural order with the db cursor's column preselected; Add (the default) moves the selected name to the bottom of Picks; Remove returns it to its natural place in Names with focus there; the Picks order is the column order shown
+Update View=F5, Refresh the current rows' values from the database via the ADO Resync method, preserving the cursor position
 Extract Regex=Control+Shift+X, Extract matches of a regular expression to the clipboard
-Invoke SQL=Control+Q, Invoke an SQL query against the current database
+Query=Control+Q, Enter a manual SQL statement: SELECT or WITH opens the result in a new window (editable when it draws on a single table, read-only by nature otherwise); any other statement executes and reports records affected
+Query History=Alt+Shift+Q, Pick a previously-run custom query (Control+Q) from the saved history and run it again; the list is newest first, up to 20
 Invoke Script=Alt+V, Invoke a script file against DbDo
 Edit Script=Alt+Shift+V, Edit a script file in the configured text editor
 Edit Settings=Alt+Shift+E, Edit DbDo settings stored in the configuration file
@@ -178,10 +235,10 @@ Out Printer=Control+P, Output (print) the current grid to the default printer
 Enter Console=Control+GraveAccent, Enter (summon) the DbDo console window
 
 ; ===== Toggles =====
-Toggle Read Only=Alt+Z, Toggle read-only mode to protect data from edits
-Toggle Command Echo=Control+Shift+Z, Toggle command echo (extra speech) on or off
-Toggle Extra Speech=Alt+Shift+Z, Toggle extra speech messages on or off
-Toggle Key Help=Control+F1, Toggle key describer mode: pressing a key says its command instead of running it
+Read Only Toggle=Alt+Z, Toggle read-only mode to protect data from edits Views and query results that cannot be updated are read-only by nature and the toggle cannot unlock them.
+Command Echo Toggle=Control+Shift+Z, Toggle command echo (extra speech) on or off
+Extra Speech Toggle=Alt+Shift+Z, Toggle extra speech messages on or off
+Key Help Toggle=Control+F1, Toggle key describer mode: pressing a key says its command instead of running it
 
 ; ===== Help menu =====
 Get Help=F1, Get (display) DbDo documentation
