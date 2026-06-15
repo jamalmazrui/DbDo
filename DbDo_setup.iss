@@ -150,7 +150,6 @@ Source: "lookups.db"; DestDir: "{app}"; Flags: ignoreversion
 Source: "sample.db";     DestDir: "{app}"; Flags: ignoreversion
 Source: "northwind.db";  DestDir: "{app}"; Flags: ignoreversion
 Source: "chinook.db";    DestDir: "{app}"; Flags: ignoreversion
-Source: "collection.db"; DestDir: "{app}"; Flags: ignoreversion
 Source: "cellar.db";     DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDo.inix";   DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist
 ;

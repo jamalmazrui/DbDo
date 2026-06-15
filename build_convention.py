@@ -829,14 +829,55 @@ def buildDatabase(sAgendaPath, sDbPath):
         "Ronza Othman": "https://www.linkedin.com/in/ronza-othman-4b44698/",
         "J.J. Meddaugh": "https://www.linkedin.com/in/jasonmeddaugh/",
         "Everette Bacon": "https://nfb.org/about-us/leadership/board-directors/everette-bacon",
+        # Named-employer individuals, each verified beyond reasonable doubt by
+        # matching the agenda's organization and role to the linked source.
+        # Where an authoritative employer bio exists it is the primary url and
+        # any LinkedIn goes to notes (see c_dContactLinkedIn); otherwise an
+        # unambiguous LinkedIn profile is the primary url.
+        "Kiran Kaja": "https://www.linkedin.com/in/kirankaja12/",
+        "Greg Stilson": "https://www.linkedin.com/in/greg-stilson/",
+        "Nimer Jaber": "https://www.linkedin.com/in/nimer-jaber-68b96ba5/",
+        "Danielle Lane": "https://www.linkedin.com/in/danielle-montour-a586b9238/",
+        "Josh Loebner": "https://www.vml.com/people/josh-loebner",
+        # Second batch. NFB national board members carry their official
+        # nfb.org board-director bios; others use an authoritative employer
+        # bio (LinkedIn then in notes) or an unambiguous LinkedIn.
+        "Donald Porterfield": "https://nfb.org/about-us/leadership/board-directors/donald-porterfield",
+        "Shawn Callaway": "https://nfb.org/about-us/leadership/board-directors/shawn-callaway",
+        "Krystle Allen": "https://eyeslikemine.org/team/",
+        "Jerred Mace": "https://www.onecourt.io/about",
+        "Tanner Gers": "https://accessabilityofficer.com/about",
+        "Nicky Shaw": "https://www.linkedin.com/in/nicky-s-52077425/",
+        "Max Schafer": "https://www.linkedin.com/in/max-schafer-4914988/",
+        # Third batch. All confirmed via exact employer + role; LinkedIn is
+        # the primary url (no authoritative employer bio page exists for
+        # these). "Andrew Flattres" keeps the agenda's misspelling so the key
+        # matches the stored contact; his profile confirms the correct
+        # spelling "Flatres".
+        "Matt Philipenko": "https://www.linkedin.com/in/mattphilipenko/",
+        "Kyungjun Lee": "https://www.linkedin.com/in/kyungjunlee/",
+        "Andrew Flattres": "https://www.linkedin.com/in/andrew-flatres-3a54b695/",
+    }
+    # Secondary URLs worth exposing when the contact already carries a primary
+    # url (above or from the agenda). Appended to notes as "LinkedIn: <url>"
+    # only when present and different from the primary url. Keyed by
+    # "First Last".
+    c_dContactLinkedIn = {
+        "Josh Loebner": "https://www.linkedin.com/in/joshloebner/",
+        "Krystle Allen": "https://www.linkedin.com/in/krystle-allen-21529a32/",
+        "Jerred Mace": "https://www.linkedin.com/in/jerred-mace/",
+        "Tanner Gers": "https://www.linkedin.com/in/tannergers/",
     }
     for sUnq, d in dContacts.items():
-        lAlso = [a for a in d.get("alsoRoles", [])
-                 if a != ", ".join(x for x in (d["job"], d["enterprise"]) if x)]
-        sNotes = "\n".join("Also: " + a for a in lAlso) or None
-        sTags = "\n".join(lContactTags(d, dContactKinds.get(sUnq, set()))) or None
         sFullName = " ".join(x for x in (d["first"], d["last"]) if x)
         sUrl = d.get("url") or c_dContactBioUrls.get(sFullName)
+        lAlso = [a for a in d.get("alsoRoles", [])
+                 if a != ", ".join(x for x in (d["job"], d["enterprise"]) if x)]
+        lNoteLines = ["Also: " + a for a in lAlso]
+        sLinked = c_dContactLinkedIn.get(sFullName)
+        if sLinked and sLinked != sUrl: lNoteLines.append("LinkedIn: " + sLinked)
+        sNotes = "\n".join(lNoteLines) or None
+        sTags = "\n".join(lContactTags(d, dContactKinds.get(sUnq, set()))) or None
         cur.execute("INSERT INTO contacts (first_name, middle_name, last_name, "
                     "enterprise, job, notes, url, tags) VALUES (?,?,?,?,?,?,?,?)",
                     (d["first"] or None, d["middle"] or None, d["last"] or None,
@@ -910,6 +951,9 @@ def buildDatabase(sAgendaPath, sDbPath):
     iCleaned = cleanContactEnterprises(cur)
     if iCleaned: print("Tightened %d contact enterprise value(s)." % iCleaned)
     enrichOrganizations(cur, lLines)
+    (iDrop, iFix, iProj, iMaps) = cleanArtifacts(cur)
+    print("Cleaned artifacts: dropped %d non-person contact(s), repaired %d, "
+          "resolved %d project(s), removed %d map(s)." % (iDrop, iFix, iProj, iMaps))
     conn.commit()
 
     # unq indexes: UNIQUE where the data allows.
@@ -1112,7 +1156,8 @@ def dParseSponsors(lLines):
     def flush():
         sCur, lBuf = lState
         if not sCur: return
-        sBody = " ".join(x.strip() for x in lBuf if x.strip())
+        sRaw = " ".join(x.strip() for x in lBuf if x.strip())
+        sBody = sRaw
         for sCut in ("Images include", "Image includes", "Image description", "Image include"):
             iCut = sBody.find(sCut)
             if iCut > 0: sBody = sBody[:iCut].strip()
@@ -1128,6 +1173,7 @@ def dParseSponsors(lLines):
         if not kHit:
             dOut[k] = dict(name=sCur, tier=None, descrip=None, url=None, email=None, phone=None)
             kHit = k
+        if sRaw: dOut[kHit]["ad"] = sRaw
         if sBody: dOut[kHit]["descrip"] = sBody
         for sF in ("url", "email", "phone"):
             if d.get(sF) and not dOut[kHit].get(sF): dOut[kHit][sF] = d[sF]
@@ -1141,6 +1187,48 @@ def dParseSponsors(lLines):
             lState[1].append(l)
     flush()
     return dOut
+
+def applySponsorAds(cur, dSpon):
+    """Append each sponsor's full ad text to that sponsor's contact record,
+    under a 'Sponsor Ad:' header on its own line. Existing notes are kept
+    (the ad is appended, never overwritten) and any ad already present is
+    not added again. In this schema an organization is a contact, so a
+    sponsor that so far exists only as a project gets an organization
+    contact created here to hold its ad."""
+    def sStrip(sKey):
+        return re.sub(r"(inc|llc|llp|ltd|co|corp|corporation|company)$",
+                      "", sNormKey(sKey or ""))
+    dOrg = {}   # stripped key -> (contact_id, notes); people excluded
+    for (iId, sEnt, sNotes) in cur.execute(
+            "SELECT contact_id, enterprise, notes FROM contacts "
+            "WHERE (last_name IS NULL OR last_name='') "
+            "AND enterprise IS NOT NULL AND enterprise<>''"):
+        dOrg.setdefault(sStrip(sEnt), (iId, sNotes))
+    iAdd = iUpd = 0
+    for k, dS in dSpon.items():
+        sAd = dS.get("ad")
+        sName = dS.get("name") or ""
+        if not sAd or not sName: continue
+        sBlock = "Sponsor Ad:\n" + sAd
+        sKey = sStrip(sName)
+        tHit = dOrg.get(sKey)
+        if tHit:
+            iId, sNotes = tHit
+            sNotes = sNotes or ""
+            if sBlock in sNotes: continue
+            sNew = (sNotes.rstrip() + "\n\n" + sBlock) if sNotes.strip() else sBlock
+            cur.execute("UPDATE contacts SET notes=? WHERE contact_id=?", (sNew, iId))
+            dOrg[sKey] = (iId, sNew)
+            iUpd += 1
+        else:
+            cur.execute("INSERT INTO contacts (enterprise, notes) VALUES (?,?)",
+                        (sName, sBlock))
+            dOrg[sKey] = (cur.lastrowid, sBlock)
+            iAdd += 1
+    if iAdd or iUpd:
+        print("Sponsor ads: %d appended to existing contacts, "
+              "%d new sponsor contacts created." % (iUpd, iAdd))
+
 
 def sClassifyOrg(sName):
     """Best-guess kind for a broad-sense organization project."""
@@ -1192,6 +1280,70 @@ def cleanContactEnterprises(cur):
         cur.execute("UPDATE contacts SET enterprise=?, job=? WHERE unq=?",
                     (sNewEnt, (sNewJob or None), sUnq))
     return len(lFix)
+
+def cleanArtifacts(cur):
+    """Remove parser artifacts and consolidate split records so the database
+    reads as clean, real-world data. Three jobs:
+
+      1. Delete non-person 'contacts' the presenter parser minted from agenda
+         phrases -- a product ('Seeing AI'), a program ('Achieving Access'),
+         a place ('New York'), a support desk ('Disability Answer Desk'), the
+         'Managing Partner' fragment from the law-firm name split -- along
+         with every maps row that referenced them.
+      2. Repair real people whose enterprise/job the parser garbled (most from
+         'Brown, Goldstein & Levy, LLP' being split with 'Brown' read as a
+         first name, and company tails truncated to bare 'Inc').
+      3. Merge the duplicate 'Goldstein & Levy' project into the full firm
+         name, and drop the spurious 'Accessibility Innovation' project (a
+         Meta session/team label, not an endeavor), repointing or removing
+         their maps and de-duplicating the result.
+
+    Returns (dropped, fixed, projects, mapsRemoved) for the build log."""
+    # 1. Non-person contacts, by unq (the presenter parser's mistaken names).
+    c_lDropUnqs = (
+        "Seeing||AI", "Achieving||Access", "Oklahoma||City", "Salt|Lake|City",
+        "Blindness|Narrative|Curator", "Disability|Answer|Desk", "Print||Disabled",
+        "TRE|Legal|Practice", "Impact||Producer", "Commercial||Support",
+        "New||York", "Managing||Partner",
+    )
+    # 2. Real people to repair: (unq, new_enterprise_or_None, new_job_or_None).
+    c_lFixContacts = (
+        ("Jessica||Weber", "Brown, Goldstein & Levy, LLP", None),
+        ("Xiaoran||Wang", None, "CEO"),
+        ("Fan||Zhang", None, "Principal Engineer"),
+    )
+    # 3. Projects: (old_unq, new_unq_or_None). None means drop outright;
+    #    otherwise repoint the old project's maps onto new_unq, then drop it.
+    c_lProjectMerges = (
+        ("Goldstein & Levy", "Brown, Goldstein & Levy, LLP"),
+        ("Accessibility Innovation", None),
+    )
+    iMaps = 0
+    for sUnq in c_lDropUnqs:
+        cur.execute("DELETE FROM maps WHERE (tbl1='contacts' AND unq1=?) "
+                    "OR (tbl2='contacts' AND unq2=?)", (sUnq, sUnq))
+        iMaps += cur.rowcount
+        cur.execute("DELETE FROM contacts WHERE unq=?", (sUnq,))
+    for (sUnq, sEnt, sJob) in c_lFixContacts:
+        cur.execute("UPDATE contacts SET enterprise=?, job=? WHERE unq=?",
+                    (sEnt, sJob, sUnq))
+    for (sOld, sNew) in c_lProjectMerges:
+        if sNew is None:
+            cur.execute("DELETE FROM maps WHERE (tbl1='projects' AND unq1=?) "
+                        "OR (tbl2='projects' AND unq2=?)", (sOld, sOld))
+            iMaps += cur.rowcount
+        else:
+            cur.execute("UPDATE maps SET unq1=? WHERE tbl1='projects' AND unq1=?",
+                        (sNew, sOld))
+            cur.execute("UPDATE maps SET unq2=? WHERE tbl2='projects' AND unq2=?",
+                        (sNew, sOld))
+        cur.execute("DELETE FROM projects WHERE unq=?", (sOld,))
+    # A repoint can create a twin map (same tbl1|unq1|kind|tbl2|unq2, which is
+    # exactly maps.unq); keep the earliest rowid of each.
+    cur.execute("DELETE FROM maps WHERE rowid NOT IN ("
+                "SELECT min(rowid) FROM maps GROUP BY tbl1, unq1, kind, tbl2, unq2)")
+    iMaps += cur.rowcount
+    return (len(c_lDropUnqs), len(c_lFixContacts), len(c_lProjectMerges), iMaps)
 
 def enrichOrganizations(cur, lLines):
     dSpon = dParseSponsors(lLines)
@@ -1348,10 +1500,53 @@ def enrichOrganizations(cur, lLines):
         "Tesla": "https://www.tesla.com",
         "Zoox": "https://zoox.com",
         "CVS Health": "https://www.cvshealth.com",
+        # Official pages verified against each maker's own site.
+        "BrailleNote Evolve": "https://www.humanware.com/braillenote-evolve/",
+        "VictorReader Stream":
+            "https://store.humanware.com/hus/victor-reader-stream-handheld-media-player.html",
+        "JAWS": "https://www.freedomscientific.com/products/software/jaws/",
+        "Saavi Services for the Blind": "https://saavi.us/",
+        "A. T. Guys": "https://atguys.com/",
+        "National Blindness Professional Certification Board": "https://nbpcb.org/",
+        "Storm Interface": "https://www.storm-interface.com/",
+        # Well-established official domains/product pages.
+        "ChatGPT": "https://chatgpt.com",
+        "Claude": "https://claude.ai",
+        "Gemini": "https://gemini.google.com",
+        "Seeing AI": "https://www.seeingai.com",
+        "Microsoft 365 Copilot": "https://www.microsoft.com/microsoft-365/copilot",
+        "Nemonic Dot Printer": "https://dotincorp.com/en",
+        "BrailleSense 7": "https://www.selvasblv.com",
+        "VitalSource": "https://www.vitalsource.com",
+        "Texas Comptroller of Public Accounts": "https://comptroller.texas.gov",
+        "Amazon Worldwide Stores Accessibility": "https://www.amazon.com/accessibility",
+        "Ray-Ban Meta": "https://www.meta.com/ai-glasses/",
+        # Mis-split of Brown, Goldstein & Levy, LLP (the parser took "Brown"
+        # as a first name); same firm, same official site.
+        "Goldstein & Levy": "https://browngold.com",
     }
     for sName, sUrl in dProjectUrls.items():
         cur.execute("UPDATE projects SET url=? WHERE name=? AND (url IS NULL OR url='')",
                     (sUrl, sName))
+
+    applySponsorAds(cur, dSpon)
+
+    # Official contact data for sponsor contacts, taken from each
+    # organization's own website. Keyed by the contact's enterprise; only
+    # blank fields are filled, so nothing already present is overwritten.
+    # Source: vandapharma.com/about/locations (corporate headquarters).
+    dSponsorContactData = {
+        "Vanda": dict(
+            office_phone="202-734-3400", url="https://www.vandapharma.com",
+            address1="2200 Pennsylvania Ave NW", address2="Suite 300E",
+            city="Washington", state="DC", zip="20037", nation="United States"),
+    }
+    for sEnt, dFields in dSponsorContactData.items():
+        for sCol, sVal in dFields.items():
+            cur.execute("UPDATE contacts SET %s=? WHERE enterprise=? "
+                        "AND (last_name IS NULL OR last_name='') "
+                        "AND (%s IS NULL OR %s='')" % (sCol, sCol, sCol),
+                        (sVal, sEnt))
 
 
 if __name__ == "__main__":

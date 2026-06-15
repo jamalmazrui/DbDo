@@ -4,7 +4,19 @@
 
 This build opens **NFB2026Convention.db** automatically on first launch (until you open something else, after which DbDo remembers your last file). It is built on the small, general schema DbDo favors, so the navigation habits you form here carry over to almost any data you keep.
 
-## Convention over configuration: five nouns and one junction
+## Quick start: five things to try
+
+Launch DbDo and it opens **NFB2026Convention.db** -- the full program of the National Federation of the Blind's 2026 National Convention: about 240 sessions across six days, with the rooms they happen in, the people presenting them, the organizations sponsoring them, and the products on the exhibit floor. It is here as a worked example -- a real, many-to-many dataset that shows what DbDo's small standard schema can hold and how a screen-reader user moves through it. Five things worth trying, each a habit that transfers to any other database:
+
+- **Build your own schedule.** Arrow through the events table (every row spoken), mark the sessions you want with the Mark command, then run the **Marked-Schedule.js** script to write a clean, per-day HTML agenda of just your picks -- a personal itinerary authored entirely from the keyboard and readable in any browser or screen reader.
+- **Narrow 240 sessions to the few you care about.** Filter (Shift+F) to one day with `event_date = '2026-07-05'`, or to a theme with `title LIKE '*Braille*'`; the **Daily-Schedule.dbdo** and **Topic-Track.dbdo** scripts do exactly that and then export the result to a Word document or HTML you can hand to someone.
+- **Follow a person, a room, or a sponsor through the data.** On a presenter, Enter Child Table (Alt+RightArrow) offers "events via presents" and lists their sessions; Say Related (Shift+R) on an event names its room and everyone presenting; the **maps** table itself opens as a grid where every relationship is a readable row. This answers "where is X, who is at Y, what is in room Z" with no SQL at all.
+- **Get a directory, or a ranking.** Run **Speaker-Directory.sql** for an alphabetical directory of presenters -- name, organization, role, session count, and a verified bio or profile link where one was found -- or **Convention-Stats.sql** to rank the busiest speakers, rooms, and days. Export either (Control+Shift+X) to a spreadsheet or document.
+- **See the exhibit-floor picture.** **Sponsor-Showcase.sql** lists who sponsors which events and which products and services each organization offers -- the same maps model read through its `sponsors` and `offers` relationships instead of `presents`.
+
+None of this is special-cased for conventions. Marking, filtering, drilling through relationships, and exporting are the same moves on a club roster, a research bibliography, or a project tracker -- which is the point of practicing them here. The sections below give the keyboard detail, the schema, and the scripts.
+
+## Convention over configuration: four nouns and one junction
 
 Most of the relational worlds people actually keep -- a convention, a club roster, a project tracker, a contact book -- reduce to a handful of nouns and the relationships among them. DbDo leans into that. NFB2026Convention.db uses exactly four noun tables plus DbDo's two standard infrastructure tables, and every table -- infrastructure included -- carries the full standard column set (`<singular>_id` primary key, `added`, `edited`, ..., `notes`, `tags`, `look`, `unq`, `marked`):
 
@@ -21,7 +33,7 @@ The point of the maps model: "all events related to this contact" and "all event
 
 A **lookups** table defines the allowed values for a field, so the Record Edit dialog can present that field as a ComboBox -- the Windows control that works best from the keyboard, with type-ahead and arrow navigation that every screen reader announces cleanly -- instead of a bare text box. Each lookups row binds a value to a `tbl` and `fld` (with an optional `src` authority and a `descrip`). DbDo offers the combobox whenever a field has values defined.
 
-NFB2026Convention.db carries lookups for its own fields -- `maps.kind` (presents, located_at, sponsors) and `locations.hotel`. A separate, shared **lookups.db** ships alongside with global lists -- `state` and `country` -- bound to any table that has a field of that name, so they serve the other sample databases too (Northwind's `country` field gets a combobox with no per-database setup).
+NFB2026Convention.db carries lookups for its own fields -- every `maps.kind` it uses (presents, located_at, sponsors, features, offers, affiliated_with, part_of), the `projects.kind` list (product, service, program, app, ...), and `locations.hotel`. A separate, shared **lookups.db** ships alongside with global lists -- `state` and `country` -- bound to any table that has a field of that name, so they serve the other sample databases too (Northwind's `country` field gets a combobox with no per-database setup).
 
 ## A guided tour by keyboard
 
@@ -41,11 +53,23 @@ Launch DbDo. On a first run it opens NFB2026Convention.db on the **events** tabl
 
 ## The included demo scripts
 
-Three SQL scripts in `Scripts` show the relational queries behind the views above, each demonstrating the maps join pattern (filter both `tbl` columns explicitly, join on `unq` with `=`):
+The `Scripts` folder bundles seven sample scripts for NFB2026Convention.db. Run any of them with **Invoke Script (Alt+V)**: a listbox names every script by filename and extension, and the result opens in a read-only dialog your screen reader can navigate line by line. The extension picks the engine -- `.sql` queries the database, `.dbdo` runs a sequence of dot-prompt commands, `.js` computes and builds output -- so the set exercises all three scripting surfaces. DbDo.md walks through each one and how to adapt it.
 
-- **ConventionSchedule.sql** -- the full schedule, each event with its location and level.
-- **SpeakerSessions.sql** -- every event a given person presents, with their stated role (change the surname on the WHERE line).
-- **DayAtAGlance.sql** -- one day's events ordered by start time, with locations.
+**Query the relationships (`.sql`).** Each joins the maps table with the same plain idiom, `c.unq = m.unq1`, and changes only the relationship kind on the WHERE line:
+
+- **Presenter-Events.sql** -- every session one presenter appears on, in time order (change the surname on the WHERE line).
+- **Speaker-Directory.sql** -- an alphabetical directory of all presenters with organization, role, session count, and bio link.
+- **Convention-Stats.sql** -- rankings: the busiest speakers, rooms, and days, by row counts in maps.
+- **Sponsor-Showcase.sql** -- who sponsors which events, and which products and services each organization offers (the `sponsors` and `offers` kinds, not `presents`).
+
+**Automate a workflow (`.dbdo`).** A list of dot-prompt commands run in order, exactly what you could type yourself:
+
+- **Daily-Schedule.dbdo** -- filter to one day, sort by start time, count, and export the schedule (change the date).
+- **Topic-Track.dbdo** -- filter to a topic keyword, sort, count, and export a themed "track" as a document (change the keyword).
+
+**Compute and build output (`.js`).** Full access to the open recordset:
+
+- **Marked-Schedule.js** -- read the current view and write a per-day HTML agenda, one navigable table per day -- a friendlier read than a flat export.
 
 ## The other sample databases -- the same column convention
 

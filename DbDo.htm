@@ -313,6 +313,9 @@ scripts</a></li>
 id="toc-opening-the-scripts-folder">Opening the Scripts folder</a></li>
 <li><a href="#bundled-sample-scripts"
 id="toc-bundled-sample-scripts">Bundled sample scripts</a></li>
+<li><a href="#the-convention-sample-scripts"
+id="toc-the-convention-sample-scripts">The convention sample
+scripts</a></li>
 <li><a href="#errors" id="toc-errors">Errors</a></li>
 <li><a href="#writing-your-own" id="toc-writing-your-own">Writing your
 own</a></li>
@@ -804,15 +807,20 @@ cd &quot;%APPDATA%\Freedom Scientific\JAWS\&lt;year&gt;\Settings\enu&quot;
 <p>where <code>&lt;year&gt;</code> is your JAWS year-version. The
 settings work from JAWS’s next launch (or, if JAWS is already running,
 when DbDo next gains focus).</p>
-<p>The chords passed through to DbDo include: the virtual-cursor family
+<p>The pass-through list is generated to mirror DbDo’s compiled key
+bindings exactly, so DbDo — not the screen reader — produces the speech
+for every one of its hotkeys. It covers the virtual-cursor family
 (Alt+Control + arrows, Home, End, PageUp, PageDown, NumPad5); the
-parent-child drill family (Alt+RightArrow, Alt+LeftArrow, Alt+Home); the
-three search families (Control+F, Control+J, Control+F3 plus their Shift
-variants and F3 / Shift+F3); marked-row navigation (Control+Shift+Home,
-Control+Shift+End, Control+UpArrow, Control+DownArrow); bulk-mark spans
-(Shift+Home, Shift+End, plus Alt+Shift variants); and the Alt-letter
-command shortcuts (Alt+A, C, D, E, K, L, P, R, T, Y, Z plus relevant
-Alt+Shift variants).</p>
+parent-child drill family (Alt+RightArrow, Alt+LeftArrow, Alt+Home,
+Alt+End); marked-row navigation and the column-preserving extremes
+(Control + Home, End, UpArrow, DownArrow, PageDown, PageUp); bulk-mark
+spans (Shift+Home, Shift+End, and the Alt+Shift unmark variants); the
+search families (Control+F, Control+J, Control+F3 with their Shift
+variants, plus F3 and Shift+F3); and every menu and direct command chord
+— the Alt-, Control-, and Shift-letter shortcuts, the function keys, and
+special keys such as Alt+Delete, Shift+8, Alt+Apostrophe, and
+Alt+Backslash. Because the list is regenerated from DbDo’s own bindings,
+it stays in step as commands are added, removed, or rebound.</p>
 <p>If you customize the JKM in place and re-install DbDo, your changes
 will be overwritten. To preserve customizations across updates, copy
 your modified version to a different filename and load both via JAWS’s
@@ -1620,6 +1628,90 @@ one-line row-count summary. Demonstrates: pure-read workflow, the
 speech-only command family, scriptable as a warm-up routine when sitting
 down to a workspace.</p></li>
 </ul>
+<h3 id="the-convention-sample-scripts">The convention sample
+scripts</h3>
+<p>NFB2026Convention.db ships with its own set of seven demonstration
+scripts, in the <code>Scripts</code> folder of the distribution. They
+are separate from the generic samples above: where those teach the
+mechanics of each engine on whatever database is open, these answer real
+questions about the convention and double as templates for the kinds of
+work the maps model makes easy. To run one, place it in your script
+folder (Open Script Folder opens that folder in Explorer; copy the files
+in), after which it appears in the Invoke Script picker like any
+other.</p>
+<p>All four <code>.sql</code> scripts share one idiom worth learning,
+because it is how every relational question against this schema is
+phrased. A record’s identity is its <code>unq</code> – for a person,
+<code>first|middle|last</code>; for an organization, its enterprise
+name; for an event, <code>date|time|title</code> – and the maps table
+stores exactly those <code>unq</code> strings in <code>unq1</code> and
+<code>unq2</code>. So the join is always
+<code>JOIN contacts c ON c.unq = m.unq1</code> (or
+<code>events e ON e.unq = m.unq2</code>, and so on), and to ask a
+<em>different</em> relational question you change only the
+<code>kind</code> on the <code>WHERE</code> line. “Who presents at
+events,” “who sponsors events,” and “who offers which products” are the
+same query with <code>presents</code>, <code>sponsors</code>, or
+<code>offers</code> swapped in – the payoff of one generic junction
+table instead of a separate join table per relationship.</p>
+<p><strong>Query the relationships (<code>.sql</code>).</strong></p>
+<ul>
+<li><strong>Presenter-Events.sql</strong> – every session one presenter
+appears on, in time order, joining contacts to events through the
+<code>presents</code> kind. Adapt it by changing the surname on the
+<code>WHERE c.last_name = '...'</code> line. The canonical “follow one
+record to its related records” query.</li>
+<li><strong>Speaker-Directory.sql</strong> – groups the
+<code>presents</code> rows by presenter into an alphabetical directory:
+name, organization, role, session count, and the <code>url</code> link
+where one was confirmed. Shows how a maps join and a plain contact
+column combine into reference output, and how <code>GROUP BY</code>
+collapses a person’s several sessions into one line. Commented variants
+reorder it by session count or restrict it to presenters with a
+confirmed link.</li>
+<li><strong>Convention-Stats.sql</strong> – three ranking queries
+(busiest speakers, rooms, and days) built with
+<code>GROUP BY ... COUNT(*)</code>, plus a footer noting the
+single-table questions you need no SQL for at all (<code>filter</code>,
+<code>yield</code>, <code>longest</code>, <code>reset-filter</code> at
+the dot prompt).</li>
+<li><strong>Sponsor-Showcase.sql</strong> – reads the
+<code>sponsors</code> (organization to event) and <code>offers</code>
+(organization to project) kinds, demonstrating that the join shape never
+changes when the relationship does.</li>
+</ul>
+<p><strong>Automate a workflow (<code>.dbdo</code>).</strong> Each line
+is a dot-prompt command run in order, so the file reads as the sequence
+of moves you would otherwise make by hand.</p>
+<ul>
+<li><strong>Daily-Schedule.dbdo</strong> – <code>filter</code> to one
+day, <code>order</code> by start time, <code>count</code>,
+<code>export</code> the schedule, then
+<code>reset-filter</code>/<code>reset-sort</code>. Change the date on
+the filter line; the convention runs 2026-07-03 through 2026-07-08.</li>
+<li><strong>Topic-Track.dbdo</strong> – the same shape applied to a
+topic instead of a day: <code>filter title LIKE '*Braille*'</code>,
+sort, count, and <code>export Braille-Track.docx</code>. Change the
+keyword to retopic it, or change the export extension
+(<code>.html</code>, <code>.md</code>, <code>.xlsx</code>,
+<code>.csv</code>) for the same view in another format.</li>
+</ul>
+<p><strong>Compute and build output (<code>.js</code>).</strong></p>
+<ul>
+<li><strong>Marked-Schedule.js</strong> – walks the current view with
+<code>db.moveFirst()</code>/<code>db.moveNext()</code> and
+<code>db.getFieldValue</code>, grouping events under a day heading and
+writing one navigable HTML table per day to
+<code>MySchedule.html</code>. Because it reads only the rows in the
+current view, the filter and sort you set beforehand decide exactly what
+it captures – run <code>filter marked = true</code> first to export only
+the sessions you marked. The template to copy when you want grouped or
+formatted output the plain Export command does not produce.</li>
+</ul>
+<p>Together the seven map onto the same “compute / query / do” split as
+the generic samples: <code>.sql</code> to ask, <code>.dbdo</code> to
+drive a workflow, <code>.js</code> to build something. Copy whichever is
+closest to your need and change the noun.</p>
 <h3 id="errors">Errors</h3>
 <p>Compile-time errors and runtime errors in <code>.js</code> scripts
 are caught and returned as a string starting with <code>ERROR:</code>.
@@ -2062,14 +2154,14 @@ class="sourceCode sql"><code class="sourceCode sql"><span id="cb13-1"><a href="#
 <span id="cb13-26"><a href="#cb13-26" aria-hidden="true" tabindex="-1"></a>    ) stored</span>
 <span id="cb13-27"><a href="#cb13-27" aria-hidden="true" tabindex="-1"></a>);</span></code></pre></div>
 <h2 id="bundled-sample-databases">Bundled sample databases</h2>
-<p>DbDo ships five SQLite sample databases, each adapted to the standard
-column conventions described above. The Help menu has one-keystroke
-commands to open each one (see “Help menu” above); all five open via the
-same code path File &gt; Open Database uses. The first three are
-“textbook” databases borrowed from the broader SQLite community; the
-latter two are “hobbyist” databases that DbDo author Jamal Mazrui
-assembled based on research into the most popular real-world personal
-database categories.</p>
+<p>DbDo ships four SQLite sample databases, each adapted to the standard
+column conventions described above. The first three are “textbook”
+databases borrowed from the broader SQLite community, each with a
+one-keystroke Help-menu command to open it (see “Help menu” above); the
+fourth is a “hobbyist” database that DbDo author Jamal Mazrui assembled
+based on research into the most popular real-world personal database
+categories. All open via the same code path File &gt; Open Database
+uses.</p>
 <p><strong><code>sample.db</code></strong> — a small school domain. Four
 tables: <code>teachers</code>, <code>classes</code>,
 <code>students</code>, <code>enrollments</code>. Three rows each —
@@ -2139,19 +2231,6 @@ Oracle, and SQLite variants live here)</li>
 href="https://www.sqlitetutorial.net/sqlite-sample-database/">Chinook
 sample database</a> (with a clear ER diagram description)</li>
 </ul>
-<p><strong><code>collection.db</code></strong> — a personal music
-collection. Three tables: <code>artists</code> (8 rows),
-<code>albums</code> (16), <code>tracks</code> (22). Models a domain that
-hobbyist software like CLZ Music, MyMusicCollection, and Musicnizer have
-refined for decades: per-album metadata (title, release year, format,
-label, catalog number, genre), per-artist metadata (sort name, country,
-active years), per-track metadata (track number, title, duration).
-Includes fields for personal ratings, physical location, and loan
-tracking. Useful as a template for building your own collection
-database; the schema generalizes naturally to books, DVDs, or any other
-catalogable hobby. The schema differs from <code>chinook.db</code> by
-emphasizing per-album collector fields (loan status, location, rating,
-catalog number) rather than per-track sales data.</p>
 <p><strong><code>cellar.db</code></strong> — a personal wine cellar.
 Three tables: <code>wines</code> (8 rows), <code>bottles</code> (10),
 <code>tastings</code> (4). Models the data model that CellarTracker,
@@ -2166,14 +2245,13 @@ the cellar, where does it sit in its drinkable range? — bundled as
 a relational schema serves a real workflow that no flat list or
 spreadsheet can: “find the wines closest to the end of their drink
 window” is one ORDER-BY clause away.</p>
-<p>All five databases use the same column conventions, so navigation
+<p>All four databases use the same column conventions, so navigation
 commands and column-hiding rules behave consistently across them. The
-five are complementary rather than alternatives: <code>sample.db</code>
+four are complementary rather than alternatives: <code>sample.db</code>
 is the gentle introduction; <code>northwind.db</code> is the relational
 textbook example; <code>chinook.db</code> is the deeper-hierarchy stress
-test; <code>collection.db</code> and <code>cellar.db</code> are starting
-points for hobbyist users who want to track their own real-world
-things.</p>
+test; <code>cellar.db</code> is a starting point for hobbyist users who
+want to track their own real-world things.</p>
 <h3 id="edited-timestamp-triggers">Edited-timestamp triggers</h3>
 <p>Each bundled database carries one SQLite trigger per table (named
 <code>trg_&lt;table&gt;_edited</code>) that maintains the
