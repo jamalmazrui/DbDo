@@ -41,7 +41,6 @@ using System.Windows.Automation.Provider;
 using Microsoft.CSharp.RuntimeBinder;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
-using System.Data.SQLite;
 
 namespace DbDo
 {
@@ -54,7 +53,7 @@ namespace DbDo
     // =====================================================================
     public static class BuildInfo
     {
-        public const string VersionString = "1.0.105";
+        public const string VersionString = "1.0.111";
     }
 
     // =====================================================================
@@ -3669,136 +3668,6 @@ namespace DbDo
             if (sValue.Length == 0) return "(empty)";
             if (sValue.Length > 40) return sValue.Substring(0, 40) + "...";
             return sValue;
-        }
-
-        // extensionLoadReport: end-to-end diagnostic for SQLean (or any
-        // SQLite loadable extension). It reports where DbDo looked for
-        // sqlean.dll, the exact connection string in use (so the LoadExt
-        // clause and its slash direction are visible), and then runs three
-        // probes against the live connection: whether the function is
-        // already present (connect-time LoadExt worked), an explicit
-        // forward-slash load_extension with the provider's error captured,
-        // and a re-test afterward. The closing key maps each likely error
-        // to its cause. Shown read-only via the Misc menu.
-        public string extensionLoadReport()
-        {
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            string sAppDir = "";
-            string sDll;
-            string sError;
-            string sResult;
-            try
-            {
-                sAppDir = Path.GetDirectoryName(
-                    System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
-            }
-            catch { }
-            sDll = Path.Combine(sAppDir, "sqlean.dll");
-            sb.AppendLine("Extension load diagnostic");
-            sb.AppendLine("=========================");
-            sb.AppendLine("Executable folder: " + sAppDir);
-            try
-            {
-                if (File.Exists(sDll))
-                    sb.AppendLine("sqlean.dll: FOUND, " + new FileInfo(sDll).Length + " bytes, at " + sDll);
-                else
-                    sb.AppendLine("sqlean.dll: NOT FOUND beside the executable");
-            }
-            catch (Exception ex) { sb.AppendLine("sqlean.dll: check failed -- " + ex.Message); }
-            sb.AppendLine();
-
-            if (oConn == null || ((int)oConn.State) == 0)
-            {
-                sb.AppendLine("No database is open, so the connection probes cannot run.");
-                sb.AppendLine("Open a database, then run this diagnostic again.");
-                return sb.ToString();
-            }
-
-            sb.AppendLine("Connection string in use:");
-            sb.AppendLine("  " + sConnectString);
-            sb.AppendLine("Engine: " + (connectionProperty("DBMS Name") + " " + connectionProperty("DBMS Version")).Trim());
-            sb.AppendLine("Driver: " + (connectionProperty("Driver Name") + " " + connectionProperty("Driver Version")).Trim());
-            sb.AppendLine();
-
-            sResult = probeScalar("SELECT sqlean_version()", out sError);
-            sb.AppendLine("Probe 1 -- SELECT sqlean_version() (tests the connect-time LoadExt):");
-            if (sError.Length == 0) sb.AppendLine("  OK: " + sResult);
-            else { sb.AppendLine("  FAILED: " + sError); sb.Append(adoDiagnostics()); }
-            sb.AppendLine();
-
-            string sForward = sDll.Replace('\\', '/');
-            string sLoad = "SELECT load_extension('" + sForward + "')";
-            sb.AppendLine("Probe 2 -- explicit load by forward-slash path:");
-            sb.AppendLine("  " + sLoad);
-            try
-            {
-                oConn.Execute(sLoad, Type.Missing, 1 /* adCmdText */);
-                sb.AppendLine("  OK: load_extension returned without error");
-            }
-            catch (Exception ex)
-            {
-                sb.AppendLine("  FAILED: " + ex.Message);
-                sb.Append(adoDiagnostics());
-            }
-            sb.AppendLine();
-
-            sResult = probeScalar("SELECT sqlean_version()", out sError);
-            sb.AppendLine("Probe 3 -- SELECT sqlean_version() after the explicit load:");
-            if (sError.Length == 0) sb.AppendLine("  OK: " + sResult);
-            else { sb.AppendLine("  FAILED: " + sError); sb.Append(adoDiagnostics()); }
-            sb.AppendLine();
-
-            sb.AppendLine("Interpreting the result:");
-            sb.AppendLine("  - Probe 1 OK: the extension loads at connect; nothing more to do.");
-            sb.AppendLine("  - Probe 1 fails but Probe 3 OK: the connect-time LoadExt was the only");
-            sb.AppendLine("    gap; the forward-slash connection-string fix resolves it.");
-            sb.AppendLine("  - 'not authorized' on Probe 2: this driver build disables");
-            sb.AppendLine("    load_extension; a newer SQLite ODBC driver is needed.");
-            sb.AppendLine("  - 'specified module could not be found' / 'cannot load': wrong path,");
-            sb.AppendLine("    a 32-vs-64-bit mismatch, or the DLL is blocked (right-click the");
-            sb.AppendLine("    file, Properties, Unblock).");
-            sb.AppendLine("  - 'no entry point' / init not found: filename-to-entrypoint mismatch.");
-            return sb.ToString();
-        }
-
-        // providerPropertiesReport: enumerate the dynamic ADO Properties
-        // collections for the live connection, the current recordset,
-        // and the first field, as "name = value" lines. This is a
-        // runtime probe: the SQLite ODBC driver (via MSDASQL) only fills
-        // a subset, and which entries come back populated, empty, or
-        // meaningless can be known only by running it against a real
-        // database. Used to decide what (if anything) is worth folding
-        // into the Database / Table summaries.
-        public string providerPropertiesReport()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("Connection properties");
-            sb.AppendLine("---------------------");
-            appendAdoProps(sb, (oConn != null) ? (object)oConn.Properties : null);
-            bool bRsOpen = false;
-            try { bRsOpen = (oRecordset != null) && ((int)oRecordset.State != 0); }
-            catch { bRsOpen = false; }
-            if (bRsOpen)
-            {
-                sb.AppendLine();
-                sb.AppendLine("Recordset properties");
-                sb.AppendLine("--------------------");
-                appendAdoProps(sb, (object)oRecordset.Properties);
-                try
-                {
-                    if ((int)oRecordset.Fields.Count > 0)
-                    {
-                        dynamic oField = oRecordset.Fields.Item(0);
-                        sb.AppendLine();
-                        sb.AppendLine("Field properties (sample: first column \""
-                            + (string)oField.Name + "\")");
-                        sb.AppendLine("--------------------");
-                        appendAdoProps(sb, (object)oField.Properties);
-                    }
-                }
-                catch (Exception ex) { sb.AppendLine("  (field properties unavailable: " + ex.Message + ")"); }
-            }
-            return sb.ToString();
         }
 
         // appendAdoProps: dump an ADO Properties collection. Reading a
@@ -7523,12 +7392,13 @@ namespace DbDo
             using (StreamWriter writer2 = new StreamWriter(sDestPath, false, new UTF8Encoding(true)))
             {
                 writer2.WriteLine("<!DOCTYPE html>");
-                writer2.WriteLine("<html><head><meta charset=\"utf-8\"><title>" + htmlEscape(sCurrentTable) + "</title></head>");
+                writer2.WriteLine("<html lang=\"en\"><head><meta charset=\"utf-8\"><title>" + htmlEscape(sCurrentTable) + "</title></head>");
                 writer2.WriteLine("<body>");
                 writer2.WriteLine("<h1>" + htmlEscape(sCurrentTable) + "</h1>");
                 writer2.WriteLine("<table border=\"1\">");
+                writer2.WriteLine("<caption>" + htmlEscape(sCurrentTable) + "</caption>");
                 writer2.Write("<thead><tr>");
-                foreach (string sN in lFields) writer2.Write("<th>" + htmlEscape(sN) + "</th>");
+                foreach (string sN in lFields) writer2.Write("<th scope=\"col\">" + htmlEscape(sN) + "</th>");
                 writer2.WriteLine("</tr></thead>");
                 writer2.WriteLine("<tbody>");
                 moveFirst();
@@ -7845,7 +7715,51 @@ namespace DbDo
             new Dictionary<string, string>();
         public static Dictionary<string, string> dCommandToDescription =
             new Dictionary<string, string>();
+        // dCommandToContext: the parent/child context in which a command's
+        // chord is live -- e.g. "Grid" (the main records window), "Cell
+        // Editor" (the in-place field editor), or a dialog name. A command
+        // with no entry is treated as "Global" (active wherever its menu
+        // is). This is the authoritative answer to "where does this chord
+        // apply", surfaced by the menu, Alt+F10, and Ctrl+F1 Key Help so a
+        // chord that does different things in different contexts can be
+        // documented once per context rather than guessed at.
+        public static Dictionary<string, string> dCommandToContext =
+            new Dictionary<string, string>();
         public static List<string> lConflicts = new List<string>();
+
+        // KeyBinding: one row of the authoritative key-binding table -- a
+        // command, the context its chord is live in ("Global" when
+        // unscoped), its short summary and long description, and the chord
+        // itself (Keys.None when the command is unbound). Each command sits
+        // in a single context; a command carrying two chords simply yields
+        // two rows. This typed list is the one structured surface the rest
+        // of DbDo reads from, and projects cleanly to the [Hotkeys] text,
+        // a TSV table, or a DbDo table for the user.
+        public class KeyBinding
+        {
+            public Keys   keyData;        // Keys.None == unbound
+            public string sCommand;
+            public string sContext;
+            public string sDescription;
+            public string sSummary;
+            public KeyBinding(string sContextIn, string sCommandIn, string sSummaryIn,
+                              string sDescriptionIn, Keys keyDataIn)
+            {
+                keyData = keyDataIn;
+                sCommand = sCommandIn;
+                sContext = string.IsNullOrEmpty(sContextIn) ? "Global" : sContextIn;
+                sDescription = sDescriptionIn ?? "";
+                sSummary = sSummaryIn ?? "";
+            }
+            public bool bUnbound { get { return keyData == Keys.None; } }
+        }
+
+        // lExtraBindings: bindings that do NOT come from a menu item --
+        // chords live only inside the listview grid, an LbcTextBox cell
+        // editor, or an LbcDialog. The menu-derived table can't see these,
+        // so they are registered here (via addBinding) and merged in by
+        // bindings(). Left empty until those contexts are catalogued.
+        public static List<KeyBinding> lExtraBindings = new List<KeyBinding>();
 
         // Key Help mode. When true, hotkeys are intercepted and
         // their (command, chord, description) triple is announced via
@@ -7957,6 +7871,99 @@ namespace DbDo
                     return kv.Value;
             }
             return "";
+        }
+
+        // contextFor: the parent/child context a command's chord is live
+        // in. Returns "Global" when no narrower context is registered, so
+        // callers never null-check and an unannotated command reads as
+        // "works everywhere its menu does". Mirrors summaryFor/descriptionFor
+        // including the normalized-key fallback for historical command forms.
+        public static string contextFor(string sCommand)
+        {
+            if (string.IsNullOrEmpty(sCommand)) return "Global";
+            if (dCommandToContext.ContainsKey(sCommand))
+            {
+                string s = dCommandToContext[sCommand];
+                if (!string.IsNullOrEmpty(s)) return s;
+            }
+            string sNormC = normalizeCommandKey(sCommand);
+            foreach (KeyValuePair<string, string> kv in dCommandToContext)
+            {
+                if (normalizeCommandKey(kv.Key) == sNormC && !string.IsNullOrEmpty(kv.Value))
+                    return kv.Value;
+            }
+            return "Global";
+        }
+
+        // addBinding: record a non-menu binding (grid, cell editor, or
+        // dialog chord) so it appears in the table alongside the menu
+        // commands. Also feeds the summary/description/context dictionaries
+        // so Key Help, the status line, and contextFor see it too. Pass
+        // Keys.None for a command documented but not yet bound.
+        public static void addBinding(string sContext, string sCommand, string sSummary,
+                                      string sDescription, Keys keyData)
+        {
+            if (string.IsNullOrEmpty(sCommand)) return;
+            if (!string.IsNullOrEmpty(sSummary)) dCommandToSummary[sCommand] = sSummary;
+            if (!string.IsNullOrEmpty(sDescription)) dCommandToDescription[sCommand] = sDescription;
+            if (!string.IsNullOrEmpty(sContext)) dCommandToContext[sCommand] = sContext;
+            lExtraBindings.Add(new KeyBinding(sContext, sCommand, sSummary, sDescription, keyData));
+        }
+
+        // bindings: build the authoritative table fresh each call -- one
+        // row per menu command (taken from the live dictionaries, so .ini
+        // overrides are always reflected) plus the registered non-menu
+        // rows. Building on demand keeps the table from going stale; it is
+        // small enough that the cost is irrelevant.
+        public static List<KeyBinding> bindings()
+        {
+            List<KeyBinding> l = new List<KeyBinding>();
+            SortedSet<string> setCommands = new SortedSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (string sCmd in dCommandToSummary.Keys) setCommands.Add(sCmd);
+            foreach (string sCmd in dCommandToKey.Keys) setCommands.Add(sCmd);
+            foreach (KeyValuePair<ToolStripMenuItem, string> kv in dMenuToCommand) setCommands.Add(kv.Value);
+            foreach (string sCmd in setCommands)
+            {
+                Keys key;
+                if (!dCommandToKey.TryGetValue(sCmd, out key)) key = Keys.None;
+                l.Add(new KeyBinding(contextFor(sCmd), sCmd, summaryFor(sCmd), descriptionFor(sCmd), key));
+            }
+            foreach (KeyBinding kb in lExtraBindings) l.Add(kb);
+            return l;
+        }
+
+        // bindingTable: the table as tab-separated rows with a header --
+        // Context, Command, Key, Summary, Description -- sorted by context
+        // then command. A user-facing projection: copy into a spreadsheet
+        // or open as a DbDo table. Tabs and newlines inside the text fields
+        // are flattened to spaces so the TSV stays one row per binding.
+        public static string bindingTable()
+        {
+            List<KeyBinding> l = bindings();
+            l.Sort(delegate (KeyBinding a, KeyBinding b)
+            {
+                int c = string.Compare(a.sContext, b.sContext, StringComparison.OrdinalIgnoreCase);
+                return c != 0 ? c : string.Compare(a.sCommand, b.sCommand, StringComparison.OrdinalIgnoreCase);
+            });
+            StringBuilder sb = new StringBuilder();
+            sb.AppendLine("Context\tCommand\tKey\tSummary\tDescription");
+            foreach (KeyBinding kb in l)
+            {
+                sb.Append(kb.sContext).Append('\t');
+                sb.Append(kb.sCommand).Append('\t');
+                sb.Append(kb.bUnbound ? "" : friendlyKey(kb.keyData)).Append('\t');
+                sb.Append(flattenCell(kb.sSummary)).Append('\t');
+                sb.AppendLine(flattenCell(kb.sDescription));
+            }
+            return sb.ToString();
+        }
+
+        // flattenCell: collapse tabs and newlines to single spaces so a
+        // text field cannot break the one-row-per-binding TSV layout.
+        private static string flattenCell(string s)
+        {
+            if (string.IsNullOrEmpty(s)) return "";
+            return s.Replace('\t', ' ').Replace('\r', ' ').Replace('\n', ' ').Trim();
         }
 
         // registerDisplayOnly: show a chord in the menu UI without
@@ -8100,7 +8107,9 @@ namespace DbDo
                 }
                 string sSummary = summaryFor(sCmd);
                 string sChord = friendlyKey(key);
-                LiveRegion.say(sCmd + ". " + sChord + ". " + sSummary + ".");
+                string sCtx = contextFor(sCmd);
+                string sCtxPart = (sCtx == "Global") ? "" : " Context: " + sCtx + ".";
+                LiveRegion.say(sCmd + ". " + sChord + ". " + sSummary + "." + sCtxPart);
             }
             else
             {
@@ -8307,6 +8316,15 @@ namespace DbDo
         // Tip: focus tip spoken by Shift+F1; set by the Lbc adders.
         public string Tip = "";
 
+        // lsLookupValues: opt-in F4 / Alt+DownArrow pick list. When an
+        // editor assigns the valid values for this control's table+field
+        // pair (from the builtin lookups table, e.g. maps.kind or
+        // projects.kind), F4 opens an alphabetical pick list and replaces
+        // the text with the chosen value -- the same pattern the multi-
+        // field edit dialog offers, now available in any single Lbc text
+        // line. Null or empty means no pick list for this control.
+        public List<string> lsLookupValues = null;
+
         // ----- Text-control extra keys (HomerLbc_40 heritage) -----
         // Every Lbc text field gets this family of screen-reader
         // conveniences by being an LbcTextBox -- nothing is wired per
@@ -8328,6 +8346,35 @@ namespace DbDo
         //   Alt+Y            Say Yield: line and character counts
         //   Alt+Apostrophe   Say Clipboard
         //   Shift+F1         Focus Tip
+        // showLookupPick: open an alphabetical pick list of lsLookupValues
+        // and, on OK, replace the text with the chosen value. Mirrors the
+        // edit dialog's pickLookupValue so the F4 behavior is identical,
+        // but is self-contained on the control so any single Lbc text line
+        // can offer it just by assigning lsLookupValues.
+        private void showLookupPick()
+        {
+            if (lsLookupValues == null || lsLookupValues.Count == 0) return;
+            try
+            {
+                List<string> lsAlpha = new List<string>(lsLookupValues);
+                lsAlpha.Sort(StringComparer.OrdinalIgnoreCase);   // pick list in alpha order
+                using (LbcDialog dlgPick = new LbcDialog("Pick value", FindForm()))
+                {
+                    ListBox lbPick = dlgPick.addListBox("Choose a value:", lsAlpha, Text);
+                    if (!string.Equals(dlgPick.runWithButtons(new string[] { "OK", "Cancel" }),
+                            "OK", StringComparison.OrdinalIgnoreCase)) return;
+                    if (lbPick.SelectedItem == null) return;
+                    if (ReadOnly) { LiveRegion.say("Read-only"); return; }
+                    Text = lbPick.SelectedItem.ToString();
+                    SelectionStart = TextLength;
+                    SelectionLength = 0;
+                    LiveRegion.say(Text);
+                }
+            }
+            catch (Exception exPick)
+            { try { DbDoLog.write("showLookupPick failed: " + exPick.Message); } catch { } }
+        }
+
         // Control+A / Control+Shift+A use ProcessCmdKey so they fire even
         // in multi-line and read-only boxes; the rest use OnKeyDown.
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
@@ -8348,7 +8395,14 @@ namespace DbDo
             string sLine;
             Keys key = evArgs.KeyData;
 
-            if (key == (Keys.Control | Keys.C))
+            if ((key == Keys.F4 || key == (Keys.Alt | Keys.Down))
+                && lsLookupValues != null && lsLookupValues.Count > 0)
+            {
+                evArgs.Handled = true;
+                evArgs.SuppressKeyPress = true;
+                showLookupPick();
+            }
+            else if (key == (Keys.Control | Keys.C))
             {
                 if (SelectionLength > 0) return;   // normal copy proceeds
                 sLine = currentLineText();
@@ -11653,6 +11707,8 @@ namespace DbDo
             if (KeyMap.dCommandToKey.ContainsKey(sCmd))
                 sb.Append("  [").Append(KeyMap.friendlyKey(KeyMap.dCommandToKey[sCmd])).Append("]");
             sb.AppendLine();
+            string sCtx = KeyMap.contextFor(sCmd);
+            if (sCtx != "Global") sb.Append("Context: ").AppendLine(sCtx);
             sb.Append("Summary: ").AppendLine(sSummary);
             if (!string.IsNullOrEmpty(sDescription))
             {
@@ -12544,7 +12600,7 @@ namespace DbDo
         // v1.0.67 wave-2 new commands:
         private ToolStripMenuItem miRecMarkAll;       // Ctrl+A: Mark every row in current filtered view
         private ToolStripMenuItem miRecUnmarkAll;     // Ctrl+Shift+A: Unmark every row in current filtered view
-        private ToolStripMenuItem miRecInvertMarked;  // Ctrl+I: Invert mark state on every row
+        private ToolStripMenuItem miRecInvertMarked;  // Alt+Shift+I: Invert mark state on every row
         private ToolStripMenuItem miRecRemoveForce;   // Ctrl+Shift+D: Delete without confirmation
         private ToolStripMenuItem miRecOpenUrl;       // Ctrl+Shift+U: Open the 'url' column value
         // miSortRecords retired in v1.0.99 (Sort Records became Order Records).
@@ -12604,10 +12660,7 @@ namespace DbDo
         // miToolsLock removed in v1.0.91 along with the Lock-Database
         // toggle.
         private ToolStripMenuItem miToolsTestDriver;
-        private ToolStripMenuItem miToolsShowProps;
-        private ToolStripMenuItem miToolsTestExt;
         private ToolStripMenuItem miMiscHotkeySummary; // Hotkey Summary: the (command, key, description) listing + consistency check
-        private ToolStripMenuItem miMiscTestMemory;    // Test In-Memory Open: System.Data.SQLite :memory: + backup spike
         private ToolStripMenuItem miMiscDescribeTable; // Describe Table: per-column data profile (%whos-style)
         private ToolStripMenuItem miMiscFacetColumn;   // Facet Column: distinct values + row counts for the cursor column; pick one to filter
         private ToolStripMenuItem miMiscOpenManagedCopy; // Open Managed Copy: edit a throwaway working copy; original untouched until Save Database
@@ -12623,6 +12676,7 @@ namespace DbDo
         private string sManagedTempPath;
         private ToolStripMenuItem miToolsOpenFolder;
         private ToolStripMenuItem miToolsConsole;
+        private ToolStripMenuItem miMiscSqleanConsole;
         private ToolStripMenuItem miToolsInvokeSql;
         private ToolStripMenuItem miToolsSqlHistory;
         private ToolStripMenuItem miToolsEditConfig;
@@ -13161,7 +13215,7 @@ namespace DbDo
                 { evArgs.Handled = true; evArgs.SuppressKeyPress = true; markAll(true);   return; }
                 if (key == (Keys.Control | Keys.Shift | Keys.A))
                 { evArgs.Handled = true; evArgs.SuppressKeyPress = true; markAll(false);  return; }
-                if (key == (Keys.Control | Keys.Shift | Keys.I))
+                if (key == (Keys.Alt | Keys.Shift | Keys.I))
                 { evArgs.Handled = true; evArgs.SuppressKeyPress = true; invertMarks();   return; }
             }
         }
@@ -13389,11 +13443,11 @@ namespace DbDo
             // 'marked' column for every row currently visible. The
             // chord pairs follow the standard primary/secondary
             // convention: Ctrl+letter is the primary action, Ctrl+
-            // Shift+letter is the variant. Ctrl+I (Invert) is on its
-            // own because it doesn't have a paired counterpart.
+            // Shift+letter is the variant. Invert Marked is on Alt+Shift+I,
+            // off on its own because it doesn't have a paired counterpart.
             miRecMarkAll     = addItem(miEdit, "Mark &All",   "Set Mark All",         Keys.Control | Keys.A,              recMarkAllClicked);
             miRecUnmarkAll   = addItem(miEdit, "U&nmark All", "Clear Mark All",       Keys.Control | Keys.Shift | Keys.A, recUnmarkAllClicked);
-            miRecInvertMarked= addItem(miEdit, "&Invert Marked",     "Invert Marked",         Keys.Control | Keys.Shift | Keys.I, recInvertMarkedClicked);
+            miRecInvertMarked= addItem(miEdit, "&Invert Marked",     "Invert Marked",         Keys.Alt | Keys.Shift | Keys.I, recInvertMarkedClicked);
             // F8 / Shift+F8 / Alt+F8 / Alt+Shift+F8 -- range mark
             // and range unmark families. Two INDEPENDENT anchors:
             // one for marking (F8 to set, Shift+F8 to complete) and
@@ -13688,14 +13742,9 @@ namespace DbDo
             miToolsSqlHistory= addItem(miMisc, "Query &History...",                      "Query History",     Keys.Alt | Keys.Shift | Keys.Q,     sqlHistoryClicked);
             miToolsTest      = addItem(miMisc, "&Test Integrity",                        "Test Database",     Keys.None,                          toolsTestClicked);
             miToolsTestDriver= addItem(miMisc, "Test &Drivers",        "Test Driver",       Keys.None,                          toolsTestDriverClicked);
-            miToolsShowProps = addItem(miMisc, "Show Provider Propert&ies", "Show Provider Properties", Keys.None,             toolsShowPropsClicked);
-            miToolsTestExt   = addItem(miMisc, "Test Extension &Load",   "Test Extension Load", Keys.None,                  toolsTestExtClicked);
             miMiscHotkeySummary = addItem(miMisc, "&Hotkey Summary",      "Hotkey Summary",      Keys.None,                  hotkeySummaryClicked,
                 "List every command with its key and description, then flag any inconsistencies",
                 "Joins the command, key, and description tables the menus and Key Help already use into one EdSharp-style listing, sorted by command name, then notes duplicate key assignments and commands missing a description. Unbound by default; assign a chord (EdSharp uses Alt+Shift+H) if you want it at hand.");
-            miMiscTestMemory = addItem(miMisc, "Test In-&Memory Open",   "Test In-Memory Open", Keys.None,              testInMemoryClicked,
-                "Spike: open a :memory: SQLite database via System.Data.SQLite and exercise the online backup API",
-                "Confirms the foundation for the in-memory Open / Save As model: opens an in-memory database through System.Data.SQLite (independent of the ODBC stack), round-trips a row, and copies the database to a temp file via the backup API. Surfaces a missing or misplaced native SQLite.Interop.dll clearly. Unbound by default.");
             miMiscOpenManagedCopy = addItem(miMisc, "Open as Managed &Copy...", "Open Managed Copy", Keys.None, openManagedCopyClicked,
                 "Open a SQLite database as a throwaway working copy: edits stay in the copy and the original is untouched until you Save Database",
                 "The document model: the chosen .db/.sqlite file is duplicated to a temp working file that becomes the live database, so every edit, add, and delete lands in the copy and the original on disk is left alone. Use Save Database (Control+S) to write the working copy back to the original path or anywhere else; closing the window without saving discards the changes, exactly like an editor's open/edit/save. First step of the in-memory Open / Save As model -- SQLite sources only for now; converting other formats into a managed copy comes next. Unbound by default.");
@@ -13708,6 +13757,7 @@ namespace DbDo
             addSep(miMisc);
             miToolsOpenFolder= addItem(miMisc, "Open in E&xplorer",                      "Open File Folder",   Keys.Alt | Keys.OemPipe,            toolsOpenFolderClicked);
             miToolsConsole   = addItem(miMisc, "Open D&ot Prompt",                       "Enter Console",     Keys.Control | Keys.Oemtilde,       toolsConsoleClicked);
+            miMiscSqleanConsole = addItem(miMisc, "Sqlean &Console",                       "Sqlean Console",    Keys.Control | Keys.Shift | Keys.Oemtilde, sqleanConsoleClicked);
             addSep(miMisc);
             // Script family. Adapted from EdSharp's Invoke / View
             // Script pattern. Scripts are plain files in
@@ -13921,6 +13971,18 @@ namespace DbDo
                         kv.Key.ToolTipText = sSum;
             };
 
+            // Context assignments: { canonical command, context }. Any
+            // command not listed defaults to "Global" -- live wherever its
+            // menu is. Add rows here as the parent/child context taxonomy is
+            // settled; the canonical name must match the add(...) call above.
+            // Example rows (commented until the taxonomy is confirmed):
+            //   new string[] { "Edit Cell",         "Grid" },
+            //   new string[] { "Pick Lookup Value", "Cell Editor" },
+            string[][] aContext = new string[][] {
+            };
+            foreach (string[] aPair in aContext)
+                if (aPair.Length == 2) KeyMap.dCommandToContext[aPair[0]] = aPair[1];
+
             // ===== File menu =====
             add("New Database",       "Create a new database file: define the first table's fields and types; the standard columns and the builtin maps and lookups tables are added automatically", "");
             add("Add Table",          "Add another table in the standard shape to the open database", "");
@@ -14066,6 +14128,8 @@ namespace DbDo
                 "Exposes UI Mode, Command Echo, and a Field Validation... sub-dialog for per-field regex patterns on the current table. 'Open file...' button edits DbDo.inix directly for advanced settings. Same name and chord (Alt+Shift+C) as in EdSharp and FileDir.");
             add("Switch-Focus",       "Switch focus between the GUI window and the console", "");
             add("Enter Console",      "Send focus to the dot prompt console", "");
+            add("Sqlean Console",     "Open the bundled sqlean.exe shell in its own console window on the current database",
+                "Control+Shift+GraveAccent. The full SQLite / SQLean command shell -- .tables, .schema, .dump, .import, REGEXP, median(), and the rest. Opens the current database read-only so it cannot contend with DbDo's writer; with no database open it starts on an in-memory database. The bundled sqlean.exe must sit beside DbDo.exe.");
             add("Exit-Console",       "Close the dot prompt and return to the GUI", "");
             add("Enter Child",        "Drill into related records: foreign-key child tables, plus any tables related to this record through the maps table (by kind)", "");
             add("Exit Child",         "Return from a child drill-down to the parent table", "");
@@ -19278,6 +19342,20 @@ namespace DbDo
                     lDdl.Add("INSERT INTO lookups (src, tbl, fld, val, ordinal) VALUES "
                         + "('DbDo', '*', 'type', '" + sType + "', " + iOrd + ")");
                 }
+                // Seed a generic maps.kind vocabulary so F4 offers sensible
+                // association kinds when the user adds a mapping in a new
+                // database. Domain databases (e.g. the NFB convention) seed
+                // their own richer set; the user can add to or replace these.
+                if (bMaps)
+                {
+                    int iKindOrd = 0;
+                    foreach (string sKind in new string[] { "related_to", "part_of", "located_at", "member_of", "affiliated_with" })
+                    {
+                        iKindOrd++;
+                        lDdl.Add("INSERT INTO lookups (src, tbl, fld, val, ordinal) VALUES "
+                            + "('DbDo', 'maps', 'kind', '" + sKind + "', " + iKindOrd + ")");
+                    }
+                }
             }
             return lDdl;
         }
@@ -20274,13 +20352,26 @@ namespace DbDo
                 // The Camel-Type rule prefers a single-line input
                 // unless the original spans multiple lines; in that
                 // case a memo is appropriate.
+                // Lookups-driven pick list: if the builtin lookups table
+                // offers values for this table+field (e.g. maps.kind,
+                // projects.kind), F4 / Alt+DownArrow opens an alphabetical
+                // pick list in the value editbox.
+                List<string> lsCellLookups = null;
+                try { lsCellLookups = db.getLookupValues(db.currentTable, sColumn, 500); }
+                catch (Exception exLk) { try { DbDoLog.write("Edit Cell lookups failed: " + exLk.Message); } catch { } }
+                bool bHasLookups = lsCellLookups != null && lsCellLookups.Count > 0;
+                string sBaseTip = "New value for the field. Tab to OK to commit; Cancel to discard.";
+                string sFullTip = bHasLookups
+                    ? sBaseTip + " F4 picks from " + lsCellLookups.Count
+                        + (lsCellLookups.Count == 1 ? " value." : " values.")
+                    : sBaseTip;
                 TextBox tb;
                 if (sOriginal.IndexOf('\n') >= 0 || sOriginal.Length > 100)
-                    tb = dlg.addMemoBox("&Value:", sOriginal,
-                        "New value for the field. Tab to OK to commit; Cancel to discard.");
+                    tb = dlg.addMemoBox("&Value:", sOriginal, sFullTip);
                 else
-                    tb = dlg.addInputBox("&Value:", sOriginal,
-                        "New value for the field. Tab to OK to commit; Cancel to discard.");
+                    tb = dlg.addInputBox("&Value:", sOriginal, sFullTip);
+                LbcTextBox tbLbc = tb as LbcTextBox;
+                if (tbLbc != null && bHasLookups) tbLbc.lsLookupValues = lsCellLookups;
                 if (!dlg.runOkCancel()) return;
                 sNewValue = tb.Text ?? "";
             }
@@ -24817,6 +24908,22 @@ namespace DbDo
                         if (lParts.Count > 0)
                             sLine += " (" + string.Join(", ", lParts.ToArray()) + ")";
                         sb.AppendLine(sLine);
+
+                        // If the field has lookup values registered in the
+                        // builtin lookups table, list them under the field
+                        // (count first, then up to 20 values). Guarded so a
+                        // database without a lookups table just shows none.
+                        List<string> lLook = null;
+                        try { lLook = db.getLookupValues(sTable, sc.name, 200); }
+                        catch (Exception exLk)
+                        { try { DbDoLog.write("Table Summary lookups for " + sc.name + ": " + exLk.Message); } catch { } }
+                        if (lLook != null && lLook.Count > 0)
+                        {
+                            int iShow = Math.Min(lLook.Count, 20);
+                            string sVals = string.Join(", ", lLook.GetRange(0, iShow).ToArray());
+                            if (lLook.Count > iShow) sVals += ", ...";
+                            sb.Append("      lookups (").Append(lLook.Count).Append("): ").AppendLine(sVals);
+                        }
                     }
                 }
             }
@@ -25098,39 +25205,11 @@ namespace DbDo
         // remains; users who want to open a database read-only can
         // launch with DbDo.exe -readonly path.
 
-        // toolsShowPropsClicked: a diagnostic probe of the live ADO
-        // Properties collections (see providerPropertiesReport). Use
-        // it to test, on a real database, which provider properties
-        // come back genuinely populated and not already covered by
-        // the Database (Alt+D) or Table (Alt+T) summaries.
-        private void toolsShowPropsClicked(object sender, EventArgs evArgs)
-        {
-            if (db == null || !db.isOpen())
-            { LiveRegion.say("No database open"); return; }
-            HelpDialog.show(this, "Provider Properties", db.providerPropertiesReport());
-        }
-
-        // toolsTestExtClicked: SQLean / loadable-extension diagnostic.
-        // Reports where sqlean.dll was sought, the live connection string
-        // (so the LoadExt clause and slash direction are visible), and
-        // three load probes with the provider's errors captured.
-        private void toolsTestExtClicked(object sender, EventArgs evArgs)
-        {
-            if (db == null || !db.isOpen())
-            { LiveRegion.say("No database open"); return; }
-            HelpDialog.show(this, "Test Extension Load", db.extensionLoadReport());
-        }
-
         // hotkeySummaryClicked: show the joined (command, key, description)
         // listing plus consistency notes in the read-only viewer.
         private void hotkeySummaryClicked(object sender, EventArgs evArgs)
         {
             HelpDialog.show(this, "Hotkey Summary", KeyMap.hotkeySummary());
-        }
-
-        private void testInMemoryClicked(object sender, EventArgs evArgs)
-        {
-            HelpDialog.show(this, "Test In-Memory Open", inMemoryReport());
         }
 
         private void describeTableClicked(object sender, EventArgs evArgs)
@@ -25240,75 +25319,6 @@ namespace DbDo
             }
         }
 
-        // inMemoryReport: spike for the System.Data.SQLite in-memory engine.
-        // Opens a :memory: database through the new library (independent of
-        // the ODBC stack), round-trips a row, and exercises the online
-        // backup API by copying the in-memory database to a temp file.
-        // Reports each step so a missing or misplaced native
-        // SQLite.Interop.dll surfaces clearly rather than silently.
-        private string inMemoryReport()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("System.Data.SQLite in-memory test");
-            sb.AppendLine();
-            string sTempDb = null;
-            try
-            {
-                using (SQLiteConnection cn = new SQLiteConnection("Data Source=:memory:;Version=3;"))
-                {
-                    cn.Open();
-                    sb.AppendLine("Opened :memory: connection: OK");
-                    using (SQLiteCommand cmd = cn.CreateCommand())
-                    {
-                        cmd.CommandText = "SELECT sqlite_version()";
-                        sb.AppendLine("SQLite engine version: " + Convert.ToString(cmd.ExecuteScalar()));
-                        cmd.CommandText = "CREATE TABLE t (id INTEGER PRIMARY KEY, name TEXTMARKDOWN)";
-                        cmd.ExecuteNonQuery();
-                        cmd.CommandText = "INSERT INTO t (name) VALUES ('alpha'), ('beta')";
-                        int iRows = cmd.ExecuteNonQuery();
-                        sb.AppendLine("Inserted rows: " + iRows);
-                        cmd.CommandText = "SELECT count(*) FROM t";
-                        sb.AppendLine("Row count read back: " + Convert.ToString(cmd.ExecuteScalar()));
-                    }
-
-                    try
-                    {
-                        sTempDb = Path.Combine(Path.GetTempPath(),
-                            "dbdo_membackup_" + Guid.NewGuid().ToString("N") + ".db");
-                        using (SQLiteConnection cnDest = new SQLiteConnection(
-                            "Data Source=\"" + sTempDb + "\";Version=3;"))
-                        {
-                            cnDest.Open();
-                            cn.BackupDatabase(cnDest, "main", "main", -1, null, 0);
-                        }
-                        long iLen = new FileInfo(sTempDb).Length;
-                        sb.AppendLine("Online backup to temp file: OK (" + iLen + " bytes)");
-                    }
-                    catch (Exception exBk)
-                    {
-                        sb.AppendLine("Online backup: FAILED -- " + exBk.Message);
-                    }
-                }
-                sb.AppendLine();
-                sb.AppendLine("Result: the in-memory engine and backup API are available.");
-                sb.AppendLine("This confirms the foundation for the in-memory Open / Save As model.");
-            }
-            catch (Exception ex)
-            {
-                sb.AppendLine();
-                sb.AppendLine("FAILED: " + ex.Message);
-                sb.AppendLine();
-                sb.AppendLine("Most likely the native SQLite.Interop.dll (x64) is not beside DbDo.exe.");
-                sb.AppendLine("buildDbDo.cmd fetches it next to the managed System.Data.SQLite.dll;");
-                sb.AppendLine("confirm both files are present in the program folder.");
-            }
-            finally
-            {
-                try { if (sTempDb != null && File.Exists(sTempDb)) File.Delete(sTempDb); } catch { }
-            }
-            return sb.ToString();
-        }
-
         private void toolsTestDriverClicked(object sender, EventArgs evArgs)
         {
             StringBuilder sb = new StringBuilder();
@@ -25391,6 +25401,65 @@ namespace DbDo
         private void toolsConsoleClicked(object sender, EventArgs evArgs)
         {
             DotPromptHost.enter(this);
+        }
+
+        private void sqleanConsoleClicked(object sender, EventArgs evArgs)
+        {
+            launchSqleanConsole();
+        }
+
+        // launchSqleanConsole: open the bundled sqlean.exe interactively
+        // in its own console window -- the full SQLite / SQLean shell
+        // (.tables, .schema, .dump, REGEXP, median(), and the rest). Opens
+        // the current database read-only so it cannot contend with DbDo's
+        // writer; with no database open it starts on an in-memory database.
+        // Bound to Control+Shift+GraveAccent. Mirrors the path lookup of
+        // the '!' dot-prompt pass-through (cmdSqleanShell) but launches
+        // interactively instead of round-tripping a single line.
+        private void launchSqleanConsole()
+        {
+            string sExeDir = Path.GetDirectoryName(System.Reflection.Assembly.GetExecutingAssembly().Location);
+            string sShell = Path.Combine(sExeDir ?? ".", "sqlean.exe");
+            if (!File.Exists(sShell))
+            {
+                ErrorDialog.show(this, "Sqlean Console",
+                    "sqlean.exe was not found beside DbDo.exe.\n\n"
+                    + "The sqlean.exe shell ships with DbDo; place it in the program "
+                    + "folder (or reinstall) to use the Sqlean Console.");
+                try { DbDoLog.write("Sqlean Console: sqlean.exe missing at " + sShell); } catch { }
+                return;
+            }
+            string sDbPath = (db != null) ? (db.filePath ?? "") : "";
+            try
+            {
+                // Host the shell inside a cmd.exe window (/k) rather than
+                // launching sqlean.exe directly. A GUI process spawning a
+                // console app can hand it a console where the shell's
+                // interactive .quit / .exit do not cleanly close the
+                // window; inside cmd the shell gets a normal interactive
+                // console, and when it does exit, cmd remains so the
+                // window is never orphaned -- type exit or close it. The
+                // banner states how to leave.
+                string sDbArg = (sDbPath.Length > 0) ? (" -readonly \"" + sDbPath + "\"") : "";
+                System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo();
+                psi.FileName = "cmd.exe";
+                psi.Arguments = "/k title Sqlean Console"
+                    + " & echo To leave the sqlean shell: type .quit or .exit"
+                    + " (then close this window or type exit)."
+                    + " & echo. & \"" + sShell + "\"" + sDbArg;
+                psi.UseShellExecute = true;
+                psi.WorkingDirectory = sExeDir ?? ".";
+                System.Diagnostics.Process.Start(psi);
+                LiveRegion.say(sDbPath.Length > 0
+                    ? "Sqlean console opened read only on the current database."
+                    : "Sqlean console opened.");
+                try { DbDoLog.write("Sqlean Console launched: " + sShell + " " + sDbArg); } catch { }
+            }
+            catch (Exception ex)
+            {
+                ErrorDialog.show(this, "Sqlean Console", "Could not start sqlean.exe.\n\n" + ex.Message);
+                try { DbDoLog.write("Sqlean Console error: " + ex.Message); } catch { }
+            }
         }
 
         // Edit-Settings: open a Settings dialog
@@ -27577,13 +27646,36 @@ namespace DbDo
         // command handlers that take one "rest of the line" argument
         // when the user might quote it to include spaces. For multi-
         // argument handlers, use splitArgsRespectingQuotes instead.
+        // unquote: return the trailing dot-prompt argument as the user
+        // typed it, honoring the Homer/Lbc/DbDo "type it verbatim" rule.
+        // The value is taken literally -- no escape characters are ever
+        // required. As a convenience, a value MAY be wrapped in a single
+        // matching pair of double or single quotes; exactly that one
+        // outer pair is removed and the inside is returned verbatim
+        // (nothing inside is un-escaped). Enclosing quotes are therefore
+        // optional: "John Smith", 'John Smith', and John Smith all yield
+        // John Smith. Two things follow naturally, with no escaping:
+        //   - To include a literal quote, type it bare. a b"c yields
+        //     a b"c, because the value does not both start and end with
+        //     the same quote character.
+        //   - To keep a value that itself begins and ends with the same
+        //     quote, or that has leading or trailing spaces, wrap it once:
+        //     ""x""  yields  "x" ;   " x "  yields  (space)x(space).
+        //     Wrapping again is the same rule applied, not an escape.
+        // Bare leading and trailing spaces are trimmed; wrap the value in
+        // quotes to preserve them. The few values that cannot be written
+        // under these rules (for example a field name that contains a
+        // command's own list separator) are rejected by that command with
+        // an explanation, rather than by adding escape syntax.
         private static string unquote(string sArg)
         {
             if (string.IsNullOrEmpty(sArg)) return sArg;
             string s = sArg.Trim();
-            if (s.Length >= 2 && s[0] == '"' && s[s.Length - 1] == '"')
+            if (s.Length >= 2)
             {
-                s = s.Substring(1, s.Length - 2).Replace("\"\"", "\"");
+                char cFirst = s[0];
+                if ((cFirst == '"' || cFirst == '\'') && s[s.Length - 1] == cFirst)
+                    return s.Substring(1, s.Length - 2);
             }
             return s;
         }
@@ -29468,9 +29560,11 @@ namespace DbDo
         }
 
         // cmdOrderRecords: dot-prompt equivalent of Alt+O. Takes a
-        // column name (case-insensitive); sorts ascending. With no
-        // argument, lists all field names and prompts the user to
-        // pick one (CLI equivalent of the GUI listbox).
+        // comma-separated precedence list of field names, each optionally
+        // followed by asc or desc (case-insensitive; quoting optional),
+        // e.g.  order-records city, last_name desc, first_name. With no
+        // argument, lists all field names and prompts the user to pick
+        // one (CLI equivalent of the GUI listbox).
         private static void cmdOrderRecords(string sArg)
         {
             cmdOrderCommon(sArg, false);
@@ -29486,39 +29580,61 @@ namespace DbDo
         private static void cmdOrderCommon(string sArg, bool bDescending)
         {
             if (!requireRecordset()) return;
-            string sCol = unquote((sArg ?? "").Trim());
-            if (sCol.Length == 0)
+            string sList = unquote((sArg ?? "").Trim());
+            if (sList.Length == 0)
             {
-                // Prompt with the alpha-sorted column list. The CLI
-                // analog of the GUI listbox: numbered choice using
-                // promptChoiceCli (added in v1.0.95).
+                // No argument: prompt with the alpha-sorted column list,
+                // the CLI analog of the GUI listbox (single column).
                 List<string> lAll = db.getFieldNames();
                 List<string> lSorted = new List<string>(lAll);
                 lSorted.Sort(StringComparer.OrdinalIgnoreCase);
-                int iDefault = 0;
                 int iChoice = promptChoiceCli(
                     bDescending ? "Reverse Order by column" : "Order Records by column",
-                    lSorted, iDefault);
+                    lSorted, 0);
                 if (iChoice < 0) { Console.WriteLine("Cancelled."); return; }
-                sCol = lSorted[iChoice];
+                sList = lSorted[iChoice];
             }
-            // Validate column name (case-insensitive match against fields).
-            string sActual = null;
-            foreach (string sF in db.getFieldNames())
+            // Parse a comma-separated precedence list: each term is a field
+            // name optionally followed by asc or desc. A term with no
+            // direction takes the command default (ascending for Order
+            // Records, descending for Reverse Order). Field names match
+            // case-insensitively; the assembled clause feeds db.sort, which
+            // accepts the same multi-column form as the GUI picker.
+            List<string> lTerms = new List<string>();
+            foreach (string sRawTerm in sList.Split(','))
             {
-                if (string.Equals(sF, sCol, StringComparison.OrdinalIgnoreCase))
-                { sActual = sF; break; }
+                string sTerm = unquote(sRawTerm.Trim());
+                if (sTerm.Length == 0) continue;
+                bool bTermDesc = bDescending;
+                int iSpace = sTerm.LastIndexOf(' ');
+                if (iSpace > 0)
+                {
+                    string sDir = sTerm.Substring(iSpace + 1).Trim().ToLowerInvariant();
+                    if (sDir == "asc" || sDir == "ascending")
+                    { bTermDesc = false; sTerm = sTerm.Substring(0, iSpace).Trim(); }
+                    else if (sDir == "desc" || sDir == "descending")
+                    { bTermDesc = true; sTerm = sTerm.Substring(0, iSpace).Trim(); }
+                }
+                string sActual = null;
+                foreach (string sF in db.getFieldNames())
+                {
+                    if (string.Equals(sF, sTerm, StringComparison.OrdinalIgnoreCase))
+                    { sActual = sF; break; }
+                }
+                if (sActual == null)
+                {
+                    Console.WriteLine("No such column: \"" + sTerm + "\".");
+                    return;
+                }
+                lTerms.Add(sActual + (bTermDesc ? " DESC" : " ASC"));
             }
-            if (sActual == null)
-            {
-                Console.WriteLine("No such column: \"" + sCol + "\".");
-                return;
-            }
+            if (lTerms.Count == 0) { Console.WriteLine("No columns to sort by."); return; }
+            string sClause = string.Join(", ", lTerms.ToArray());
             try
             {
-                db.sort = sActual + (bDescending ? " DESC" : " ASC");
+                db.sort = sClause;
                 refresh();
-                Console.WriteLine((bDescending ? "Reverse-ordered by " : "Ordered by ") + sActual + ".");
+                Console.WriteLine("Ordered by " + sClause + ".");
                 printRowSummary();
             }
             catch (Exception ex) { Console.WriteLine("Error: " + ex.Message); }

@@ -143,8 +143,8 @@ Source: "History.md";   DestDir: "{app}"; Flags: ignoreversion
 Source: "History.htm";  DestDir: "{app}"; Flags: ignoreversion
 Source: "License.md";   DestDir: "{app}"; Flags: ignoreversion
 Source: "License.htm";  DestDir: "{app}"; Flags: ignoreversion
-Source: "CamelType_CSharp.md"; DestDir: "{app}"; Flags: ignoreversion
-Source: "CamelType_CSharp.htm"; DestDir: "{app}"; Flags: ignoreversion
+; Source: "CamelType_CSharp.md"; DestDir: "{app}"; Flags: ignoreversion
+; Source: "CamelType_CSharp.htm"; DestDir: "{app}"; Flags: ignoreversion
 Source: "NFB2026Convention.db"; DestDir: "{app}"; Flags: ignoreversion
 Source: "lookups.db"; DestDir: "{app}"; Flags: ignoreversion
 Source: "sample.db";     DestDir: "{app}"; Flags: ignoreversion

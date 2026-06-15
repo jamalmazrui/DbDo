@@ -4,6 +4,8 @@ Manage database files in a dual interface of console and graphical modes, maximi
 
 After decades of personal interest in how to achieve nonvisual usability in database management, I have developed a general-purpose program in this area with AI assistance. DbDo is a free, open source program designed to boost productivity in the input, querying, and output of data.
 
+My hope is that DbDo can grow into the most accessible general-purpose database manager available to screen-reader users. I don't claim it is there yet — it is early, evolving software, shared in the spirit of continuous improvement, and it will get better with use and feedback. To be clear about scope up front: DbDo today serves Windows users running the JAWS, NVDA, or Narrator screen readers. That is the goal I am building toward, and any feedback that moves it closer is genuinely welcome.
+
 - [DbDo project page](https://github.com/JamalMazrui/DbDo)
 - [DbDo project archive](https://github.com/JamalMazrui/DbDo/archive/main.zip)
 - [DbDo executable installer](https://github.com/JamalMazrui/DbDo/releases/latest/download/DbDo_setup.exe)

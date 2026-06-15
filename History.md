@@ -4,7 +4,39 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.107 (current)
+## v1.0.111 (current)
+
+**Dot-prompt arguments are taken verbatim, with no escape characters.** The trailing argument of a command is read literally as typed. Enclosing quotes are now optional and may be either double or single: a single matching outer pair is stripped and the inside kept exactly, so `find "John Smith"`, `find 'John Smith'`, and `find John Smith` are equivalent. Nothing inside a quoted value is un-escaped -- a literal quote is just typed -- and the former doubled-quote convention is gone. To keep a value that itself begins and ends with a quote, or that has leading or trailing spaces, wrap it once more (`""x""` yields `"x"`); that is the same rule applied, not an escape. Values that cannot be expressed this way are refused by the command with an explanation rather than by adding escape syntax. This realizes the Homer/Lbc/DbDo principle that everything should be typeable as written.
+
+**A convention analytics script and tutorial sections.** `Scripts/Convention-Stats.sql` answers popularity-and-count questions -- speakers ranked by presentations, locations ranked by events held, days ranked by event count -- with verified `maps` joins. The Convention-Tutorials document gains a section on how arguments are typed and a "popularity and counts" walk-through showing the single-table path with `filter`, `yield`, and the statistics commands.
+
+## v1.0.110
+
+**Exported HTML is more navigable for screen readers.** The HTML export now writes `lang="en"` on the document, a `<caption>` naming the table, and `scope="col"` on every header cell, so a screen reader announces the table's name and ties each value to its column header during table navigation.
+
+**Bundled sample scripts for the convention database.** A Scripts folder ships three worked examples against `NFB2026Convention.db`, one of each script type: `Daily-Schedule.dbdo` (filter to a day, sort by time, count, export an HTML schedule), `Presenter-Events.sql` (a maps join listing every event a presenter appears on), and `Marked-Schedule.js` (turn the current view into a day-grouped, accessible HTML schedule). A companion Convention-Tutorials document walks through the common planning workflows -- a presenter's events, collecting picks and exporting them, a day at a glance -- using only existing features.
+
+## v1.0.109
+
+**Sqlean Console is hosted in a cmd window for a reliable exit.** Launching sqlean.exe directly from the GUI could hand it a console where the shell's interactive `.quit` / `.exit` did not cleanly close the window. The console now runs inside a `cmd.exe` window: the shell gets a normal interactive console where `.quit` / `.exit` work, and when it exits, cmd remains so the window is never orphaned -- type `exit` or close it. A banner states how to leave.
+
+**Order Records / Reverse Order take a multi-column precedence list at the dot prompt.** The argument is now a comma-separated list of field names, each optionally followed by `asc` or `desc` -- `order-records city, last_name desc, first_name` -- assembled into the sort clause (quoting optional, field names case-insensitive). A term with no direction takes the command default. With no argument, the single-column picker still appears. This is the template for the broader effort to give every dialog command an equivalent dot-prompt parameter form.
+
+## v1.0.108
+
+**A Sqlean Console on Control+Shift+GraveAccent.** A new Misc command opens the bundled `sqlean.exe` interactively in its own console window -- the full SQLite / SQLean shell (`.tables`, `.schema`, `.dump`, `.import`, `REGEXP`, `median()`, and the rest). It opens the current database read-only so it cannot contend with DbDo's writer; with no database open it starts on an in-memory database. It sits alongside the existing `!` dot-prompt pass-through (one-shot lines) and Open Dot Prompt on Control+GraveAccent.
+
+**Invert Marked moved to Alt+Shift+I.** Both binding sites -- the Edit-menu item and the grid's mark-handling key path -- now use Alt+Shift+I; the former Control+Shift+I no longer triggers it.
+
+**Table Summary (Alt+T) lists a field's lookup values.** Under each field that has values registered in the builtin `lookups` table, the summary now prints a `lookups (N): value1, value2, ...` line -- the count first, then up to twenty values in ordinal order. It is guarded, so a database without a lookups table simply shows no such lines.
+
+**An authoritative key-binding table.** `KeyMap` gained a context column and a typed `KeyBinding` table on top of it. Each row carries the command's context (the parent/child surface its chord is live in, "Global" when unscoped), the command name, its short summary and long description, and the chord (unbound rows allowed). The menu, status line, Alt+F10 Alternate Menu, and Ctrl+F1 Key Help all read from this single structure, and `bindingTable()` projects it to a tab-separated table for export or for opening as a DbDo table. The existing dictionaries remain as fast indexes, so dispatch is unchanged.
+
+**Pick-list lookups in the cell editor.** F4 (or Alt+DownArrow) in the in-place cell editor opens a sorted picker of the field's registered lookup values, so a constrained field can be filled without typing.
+
+**Leaner distribution.** The `System.Data.SQLite.dll` and native `SQLite.Interop.dll` assemblies are dropped -- they backed only an unbound in-memory diagnostic spike, never a shipping feature (the real SQLite path is ADODB over the SQLite ODBC driver, and SQLean rides that same ODBC path). Two development-only Misc commands are removed as well: Show Provider Properties (an ADO property dump) and Test Extension Load (a SQLean-load spike), along with their now-dead report methods. Less to ship, less menu noise.
+
+## v1.0.107
 
 **GUI-only startup is now truly the default.** Two compounding bugs made the dot-prompt console appear at every launch. First, every uiMode default still said `both` -- the shipped template, the Edit Settings dialog default, the generated per-user stub, and the startup parser's three fallback returns. All now say `gui`; the console is opt-in via Control+GraveAccent or `uiMode = both`. Second, and worse: startup read uiMode ONLY from the template next to the EXE, while Edit Settings writes to the per-user file -- so a user's saved choice never took effect. `readUiModeFromIni` now consults the per-user file first, the shipped template as fallback, and parses through `InixCodec`.
 
@@ -1028,7 +1060,7 @@ The relation analysis follows DbDo's column-naming convention (column `<other>_i
 
 - "Database" used broadly — covers .xlsx, .csv, and .db. SQLite .db is the default for full functionality (triggers, generated columns, foreign-key drill, the standard-column convention); other formats are bridged via the Import Data and Export Data commands with as much of the listview experience preserved as the format supports. Standard columns can't be assumed on .xlsx or .csv tables; commands that use them already check via `hasField` and announce a clear refusal when absent.
 - Key-name convention — DbDo follows the Freedom Scientific / JAWS names: Control, Alt, Shift, Enter, Escape, UpArrow, DownArrow, F1-F12, Apostrophe, Asterisk, and so on. Combinations written with `+` and no spaces. The convention matches what JAWS announces aloud when a key is pressed.
-- Camel Type for code — DbDo's source follows the Camel Type style; the full specification is in `CamelType_CSharp.md` (markdown source) and `CamelType_CSharp.htm` (Pandoc-rendered HTML, new in this build). The build pipeline now generates the HTML alongside `DbDo.htm` and `History.htm`; the installer bundles both.
+- Camel Type for code — DbDo's source follows the Camel Type style; the full specification is in `Camel_Type_C#.md` (markdown source) and `Camel_Type_C#.htm` (Pandoc-rendered HTML, new in this build). The build pipeline now generates the HTML alongside `DbDo.htm` and `History.htm`; the installer bundles both.
 
 **Standard-column accesses audit.** A fresh audit of `db.getFieldValue("look")`, `db.getFieldValue("notes")`, etc. confirmed all such accesses are systematically guarded: either by an explicit `db.hasField(...)` check in the preceding lines (the Say-X family, Mail Record, Open Url) or by a try/catch with graceful fallback (loops that walk rows for batch operations, where one missing field shouldn't abort the whole loop). No unguarded paths would error on .xlsx / .csv tables.
 
@@ -1252,7 +1284,7 @@ Documentation cleanup. The standard-field set is corrected: `observed` and `meth
 
 Two additional sample databases ship: `northwind.db` (the classic Microsoft Northwind sales sample) and `chinook.db` (the classic Chinook music-store sample), both adapted to DbDo's standard column conventions. They are useful for exercising DbDo's parent-child drill against deeper relationships than the small `sample.db` provides. The Help menu has new one-keystroke commands to open each: **Open Northwind Sample** and **Open Chinook Sample**, parallel to the existing **Open Sample Database** command. All three open via the same code path as File > Open Database.
 
-`CamelType_CSharp.md` ships with the distribution, documenting the coding conventions used inside `DbDo.cs`. The conventions are updated to remove the `c_` prefix that was previously required for constants; constants now follow the same naming pattern as variables but are still declared on their own lines, distinguished by `const` or `static readonly` instead of by capitalization. The `o` prefix is reserved for COM objects only; managed-type instances use a class-name prefix.
+`Camel_Type_C#.md` ships with the distribution, documenting the coding conventions used inside `DbDo.cs`. The conventions are updated to remove the `c_` prefix that was previously required for constants; constants now follow the same naming pattern as variables but are still declared on their own lines, distinguished by `const` or `static readonly` instead of by capitalization. The `o` prefix is reserved for COM objects only; managed-type instances use a class-name prefix.
 
 `DbDo.cs` is updated to conform to the revised conventions (`c_` removed; `o`-prefix usage adjusted) with the addition of two new Help-menu items (Open Northwind Sample, Open Chinook Sample) and a shared helper method `openInstallSampleDb` that the existing Open Sample Database command now also routes through, eliminating duplicated code.
 
