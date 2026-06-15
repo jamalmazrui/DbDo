@@ -4,6 +4,8 @@ Manage database files in a dual interface of console and graphical modes, maximi
 
 After decades of personal interest in how to achieve nonvisual usability in database management, I have developed a general-purpose program in this area with AI assistance. DbDo is a free, open source program designed to boost productivity in the input, querying, and output of data.
 
+This is not my first attempt at the problem. My work on nonvisual database access goes back to a Contact Tracking System I wrote for DOS; it continued with DbDialog, a friendly database manager I built in the AutoIt language and later packaged to run as a script within the Window-Eyes screen reader; and it now reaches DbDo, a Windows desktop program offering both a graphical (multiple-document) interface and a console dot prompt, supporting several file formats in a relational model designed from the ground up for screen-reader and keyboard efficiency. As far as I have been able to determine, with research assistance, DbDo is the only general-purpose relational database manager built specifically for screen-reader users -- mainstream desktop database tools are designed for sighted, mouse-driven use and are accessible only incidentally, if at all.
+
 My hope is that DbDo can grow into the most accessible general-purpose database manager available to screen-reader users. I don't claim it is there yet — it is early, evolving software, shared in the spirit of continuous improvement, and it will get better with use and feedback. To be clear about scope up front: DbDo today serves Windows users running the JAWS, NVDA, or Narrator screen readers. That is the goal I am building toward, and any feedback that moves it closer is genuinely welcome.
 
 - [DbDo project page](https://github.com/JamalMazrui/DbDo)
@@ -32,15 +34,14 @@ Every DbDo command can be accomplished efficiently from the keyboard. In additio
 
 ## Sample databases
 
-DbDo ships five SQLite sample databases adapted to its standard column conventions (`<singular>_id` primary keys, `added`/`edited` timestamps maintained by triggers, generated `look`/`unq` columns):
+DbDo ships four SQLite sample databases adapted to its standard column conventions (`<singular>_id` primary keys, `added`/`edited` timestamps maintained by triggers, generated `look`/`unq` columns):
 
+- `NFB2026Convention.db` — the flagship demo: the 2026 NFB national convention agenda as a four-table relational model (contacts, events, locations, projects) wired together by a generic `maps` association table.
 - `sample.db` — a small school domain (teachers, classes, students, enrollments) for first-launch exploration.
 - `northwind.db` — the classic Microsoft Northwind sales sample (categories, suppliers, products, customers, employees, orders, order details, shippers).
-- `chinook.db` — the classic Chinook music-store sample (artists, albums, tracks, genres, customers, invoices, invoice items).
-- `collection.db` — a personal music collection (artists, albums, tracks).
-- `cellar.db` — a personal wine cellar (wines, bottles, tastings).
+- `chinook.db` — the classic Chinook music-store sample (artists, albums, tracks, genres, customers, invoices, invoice items), with deep parent-child chains.
 
-The two larger samples are useful for exercising DbDo against real-shaped data with multiple parent-child relationships.
+The Northwind and Chinook samples are useful for exercising DbDo against real-shaped data with multiple parent-child relationships; the convention database shows the maps model on real-world associations.
 
 ## Accessibility design
 

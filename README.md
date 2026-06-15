@@ -49,7 +49,19 @@ Three SQL scripts in `Scripts` show the relational queries behind the views abov
 
 ## The other sample databases -- the same column convention
 
-The Help menu also opens five more databases, all migrated to the same standard columns (`<singular>_id` primary keys such as `teacher_id` and `wine_id`, with each foreign key carrying the same name as the parent primary key it references; `TEXTTIME` `added`/`edited` maintained by triggers; generated `look`/`unq`; `marked` last): the school `sample.db`, the classic `northwind.db` and `chinook.db`, a music `collection.db`, and a wine `cellar.db`. They keep their own domain tables -- the five-noun model is the favored shape for a *new* database, not a straitjacket for every domain -- but the keyboard moves are identical, which is the whole mission: whatever relational data you already know, DbDo gives a screen-reader and keyboard user full, efficient command of it.
+The Help menu also opens three more databases, all migrated to the same standard columns (`<singular>_id` primary keys such as `teacher_id`, with each foreign key carrying the same name as the parent primary key it references; `TEXTTIME` `added`/`edited` maintained by triggers; generated `look`/`unq`; `marked` last): the school `sample.db` and the classic `northwind.db` and `chinook.db`. They keep their own domain tables -- the convention model is the favored shape for a *new* database, not a straitjacket for every domain -- but the keyboard moves are identical, which is the whole mission: whatever relational data you already know, DbDo gives a screen-reader and keyboard user full, efficient command of it.
+
+## Background: four decades of nonvisual database tools
+
+DbDo is the latest in a line of accessible database managers I have built over nearly forty years. I worked as a database administrator at Harvard's Kennedy School of Government in the 1980s; when the field moved from the DOS command line to the Windows graphical interface and tools like Microsoft Access, the screen readers of the day could not make those tools usable -- a barrier that cost me a promotion and pushed me toward building accessible software myself.
+
+- **Contact Tracking System (DOS).** My first accessible database tool: a keyboard-and-speech contact and records manager for the DOS era, when a well-structured text screen was the most accessible interface available.
+- **DbDialog (AutoIt).** A friendly database manager for Windows, built in the AutoIt scripting language on top of my own label-based-controls library (LbC) so that every field was a standard, screen-reader-friendly Windows control. I later packaged DbDialog to run as a script package within the Window-Eyes screen reader as well.
+- **DbDo (this program).** A Windows desktop application with two interfaces over one live connection -- a multiple-document graphical interface and a dBASE-style console dot prompt -- supporting SQLite, Access, Excel, dBASE, and delimited files in a relational model designed from the ground up for screen-reader and keyboard efficiency.
+
+Across that span I also served as founding director of the Boston Computer Society's Visually Impaired and Blind User Group, as an analyst at the National Council on Disability, and as deputy director of the FCC's Accessibility and Innovation Initiative, and I maintain a large free-software repository for blind computer users. DbDo carries that history forward.
+
+To the best of my research, no other general-purpose relational database manager has been built specifically for screen-reader users; mainstream desktop database tools are designed for sighted, mouse-driven use and are accessible only incidentally, if at all. DbDo is built to close that gap.
 
 ## Building this archive
 

@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>DbDo</title>
+  <title>Introducing DbDo</title>
   <style>
     html {
       color: #1a1a1a;
@@ -166,7 +166,7 @@
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">DbDo</h1>
+<h1 class="title">Introducing DbDo</h1>
 </header>
 <h1 id="dbdo">DbDo</h1>
 <p>Manage database files in a dual interface of console and graphical
@@ -176,14 +176,27 @@ usability in database management, I have developed a general-purpose
 program in this area with AI assistance. DbDo is a free, open source
 program designed to boost productivity in the input, querying, and
 output of data.</p>
+<p>This is not my first attempt at the problem. My work on nonvisual
+database access goes back to a Contact Tracking System I wrote for DOS;
+it continued with DbDialog, a friendly database manager I built in the
+AutoIt language and later packaged to run as a script within the
+Window-Eyes screen reader; and it now reaches DbDo, a Windows desktop
+program offering both a graphical (multiple-document) interface and a
+console dot prompt, supporting several file formats in a relational
+model designed from the ground up for screen-reader and keyboard
+efficiency. As far as I have been able to determine, with research
+assistance, DbDo is the only general-purpose relational database manager
+built specifically for screen-reader users – mainstream desktop database
+tools are designed for sighted, mouse-driven use and are accessible only
+incidentally, if at all.</p>
 <p>My hope is that DbDo can grow into the most accessible
 general-purpose database manager available to screen-reader users. I
 don’t claim it is there yet — it is early, evolving software, shared in
-the spirit of continuous improvement, and it will get better
-with use and feedback. To be clear about scope up front: DbDo today
-serves Windows users running the JAWS, NVDA, or Narrator screen readers.
-That is the goal I am building toward, and any feedback that moves it
-closer is genuinely welcome.</p>
+the spirit of continuous improvement, and it will get better with use
+and feedback. To be clear about scope up front: DbDo today serves
+Windows users running the JAWS, NVDA, or Narrator screen readers. That
+is the goal I am building toward, and any feedback that moves it closer
+is genuinely welcome.</p>
 <ul>
 <li><a href="https://github.com/JamalMazrui/DbDo">DbDo project
 page</a></li>
@@ -238,26 +251,27 @@ keystroke (Alt+V). Scripts can automate bulk record edits, filter
 changes, custom reports — anything the database manager itself can
 do.</p>
 <h2 id="sample-databases">Sample databases</h2>
-<p>DbDo ships five SQLite sample databases adapted to its standard
+<p>DbDo ships four SQLite sample databases adapted to its standard
 column conventions (<code>&lt;singular&gt;_id</code> primary keys,
 <code>added</code>/<code>edited</code> timestamps maintained by
 triggers, generated <code>look</code>/<code>unq</code> columns):</p>
 <ul>
+<li><code>NFB2026Convention.db</code> — the flagship demo: the 2026 NFB
+national convention agenda as a four-table relational model (contacts,
+events, locations, projects) wired together by a generic
+<code>maps</code> association table.</li>
 <li><code>sample.db</code> — a small school domain (teachers, classes,
 students, enrollments) for first-launch exploration.</li>
 <li><code>northwind.db</code> — the classic Microsoft Northwind sales
 sample (categories, suppliers, products, customers, employees, orders,
 order details, shippers).</li>
 <li><code>chinook.db</code> — the classic Chinook music-store sample
-(artists, albums, tracks, genres, customers, invoices, invoice
-items).</li>
-<li><code>collection.db</code> — a personal music collection (artists,
-albums, tracks).</li>
-<li><code>cellar.db</code> — a personal wine cellar (wines, bottles,
-tastings).</li>
+(artists, albums, tracks, genres, customers, invoices, invoice items),
+with deep parent-child chains.</li>
 </ul>
-<p>The two larger samples are useful for exercising DbDo against
-real-shaped data with multiple parent-child relationships.</p>
+<p>The Northwind and Chinook samples are useful for exercising DbDo
+against real-shaped data with multiple parent-child relationships; the
+convention database shows the maps model on real-world associations.</p>
 <h2 id="accessibility-design">Accessibility design</h2>
 <p>Three speech paths in priority order: JAWS via direct COM, NVDA via
 the controller-client DLL, UIA live-region fallback for Narrator and
