@@ -19701,8 +19701,24 @@ namespace DbDo
             try
             {
                 oApp = ComAutomation.createApp("Excel.Application");
-                // Open(Filename, UpdateLinks, ReadOnly): read-only, no link prompts.
+                // Suppress every prompt BEFORE opening -- the export path
+                // does the same. A hidden, automated Excel cannot show a
+                // dialog, so if Open would raise one -- a file-in-use notice
+                // (the workbook already open elsewhere), a Protected View
+                // block (the file arrived as an email attachment, carrying
+                // the mark-of-the-web), or a link/data prompt -- the call
+                // leaves an invalid workbook reference whose next use throws
+                // COM 0x80010114, "the requested object does not exist."
+                oApp.Visible = false;
+                oApp.DisplayAlerts = false;
+                try { oApp.ScreenUpdating = false; } catch { }
+                try { oApp.AskToUpdateLinks = false; } catch { }
+                try { oApp.AutomationSecurity = 1 /* msoAutomationSecurityLow */; } catch { }
+                // Open(Filename, UpdateLinks, ReadOnly): read-only.
                 oBook = oApp.Workbooks.Open(sXlsxPath, 0, true);
+                if (oBook == null)
+                    throw new InvalidOperationException("Excel could not open " + Path.GetFileName(sXlsxPath)
+                        + ". If the workbook is open in Excel, please close it and try again.");
 
                 if (File.Exists(sDbPath)) File.Delete(sDbPath);
                 using (FileStream fs = File.Create(sDbPath)) { }
@@ -19725,6 +19741,31 @@ namespace DbDo
                         int iC0 = aCells.GetLowerBound(1), iC1 = aCells.GetUpperBound(1);
                         if (iR1 <= iR0 || iC1 < iC0) continue; // need a header row plus at least one data row
 
+                        // Find the header row. Some sheets begin with a
+                        // sparse title/metadata row (Richard's, for example,
+                        // opens with "Updated 2026/03/18" above the real
+                        // column names). The header is the first row whose
+                        // count of non-empty cells is at least 60% of the
+                        // widest row in the opening stretch of the sheet; any
+                        // rows above it are preamble and are skipped.
+                        int iScanEnd = Math.Min(iR1, iR0 + 14);
+                        int iWidest = 0;
+                        for (int r = iR0; r <= iScanEnd; r++)
+                        {
+                            int iFilled = 0;
+                            for (int c = iC0; c <= iC1; c++) if (sCellToString(aCells[r, c]).Length > 0) iFilled++;
+                            if (iFilled > iWidest) iWidest = iFilled;
+                        }
+                        int iThreshold = Math.Max(2, (iWidest * 6) / 10);
+                        int iHdr = iR0;
+                        for (int r = iR0; r <= iScanEnd; r++)
+                        {
+                            int iFilled = 0;
+                            for (int c = iC0; c <= iC1; c++) if (sCellToString(aCells[r, c]).Length > 0) iFilled++;
+                            if (iFilled >= iThreshold) { iHdr = r; break; }
+                        }
+                        if (iHdr >= iR1) continue; // a header but no data rows beneath it
+
                         // Table name from the sheet name, made a safe,
                         // unique snake_case identifier.
                         string sTable = sNormalizeIdentifier(sSheetName);
@@ -19745,7 +19786,7 @@ namespace DbDo
                         List<string> lUsedNames = new List<string>();
                         for (int iCol = iC0; iCol <= iC1; iCol++)
                         {
-                            string sHdr = sNormalizeIdentifier(sCellToString(aCells[iR0, iCol]));
+                            string sHdr = sNormalizeIdentifier(sCellToString(aCells[iHdr, iCol]));
                             if (sHdr.Length == 0) sHdr = "column_" + (iCol - iC0 + 1);
                             if (char.IsDigit(sHdr[0])) sHdr = "c_" + sHdr;
                             if (sHdr == "notes") { lColTarget.Add("notes"); continue; }
@@ -19764,7 +19805,7 @@ namespace DbDo
                         foreach (string sSql in lStandardTableDdl(sTable, lFieldDefs))
                             managerImport.invokeSql(sSql, null);
 
-                        for (int iRow = iR0 + 1; iRow <= iR1; iRow++)
+                        for (int iRow = iHdr + 1; iRow <= iR1; iRow++)
                         {
                             List<string> lCols = new List<string>();
                             List<string> lVals = new List<string>();
