@@ -53,7 +53,7 @@ namespace DbDo
     // =====================================================================
     public static class BuildInfo
     {
-        public const string VersionString = "1.0.111";
+        public const string VersionString = "1.0.113";
     }
 
     // =====================================================================
@@ -12570,6 +12570,7 @@ namespace DbDo
         private ToolStripMenuItem miFileBackup;
         private ToolStripMenuItem miFileCompare;
         private ToolStripMenuItem miFileImport;
+        private ToolStripMenuItem miFileMerge;
         private ToolStripMenuItem miFileExport;
         private ToolStripMenuItem miFilePrint;
         private ToolStripMenuItem miFileExit;
@@ -12688,15 +12689,13 @@ namespace DbDo
         private ToolStripMenuItem miHelpContents;
         private ToolStripMenuItem miHelpHistory;
         private ToolStripMenuItem miHelpReadme;
-        private ToolStripMenuItem miHelpVerbs;
         private ToolStripMenuItem miHelpShowCommand;
         private ToolStripMenuItem miHelpStatus;
         private ToolStripMenuItem miHelpTestReader;
         private ToolStripMenuItem miHelpSampleDb;
         private ToolStripMenuItem miHelpNorthwindDb;
         private ToolStripMenuItem miHelpChinookDb;
-        private ToolStripMenuItem miHelpCollectionDb;
-        private ToolStripMenuItem miHelpCellarDb;
+        private ToolStripMenuItem miHelpConventionDb;
         private ToolStripMenuItem miHelpExtraSpeech;
         private ToolStripMenuItem miHelpCommandEcho;
         private ToolStripMenuItem miEditNotes;
@@ -13364,13 +13363,14 @@ namespace DbDo
             miFileBackup  = addItem(miFile, "&Backup Database...",        "Backup Database",  Keys.None,                            fileBackupClicked);
             miFileCompare = addItem(miFile, "Co&mpare Database...",       "Compare Database", Keys.None,                            fileCompareClicked);
             addSep(miFile);
-            // Alt+I = Import Data, Alt+E = Export Data. The Alt+
-            // letter slots are clean one-handed productivity chords
-            // for the I/E mnemonic family. (Ctrl+I and Ctrl+E are
-            // already used for Invert Marked and Edit Record, which
-            // are high-frequency core operations that should keep
-            // their plain-Ctrl chords.)
-            miFileImport  = addItem(miFile, "&Import Data...",            "Import Data",      Keys.Alt | Keys.I,                    fileImportClicked);
+            // Alt+I = Import (build a new DbDo shell from another file),
+            // Alt+M = Merge (rows into the current table), Alt+E = Export
+            // Data. The Alt+letter slots are clean one-handed productivity
+            // chords. (Ctrl+I and Ctrl+E are already used for Invert Marked
+            // and Edit Record, which are high-frequency core operations that
+            // should keep their plain-Ctrl chords.)
+            miFileImport  = addItem(miFile, "&Import...",                 "Import",           Keys.Alt | Keys.I,                    importClicked);
+            miFileMerge   = addItem(miFile, "&Merge Data...",             "Merge",            Keys.Alt | Keys.M,                    mergeClicked);
             miFileExport  = addItem(miFile, "E&xport Data...",            "Export Data",      Keys.Alt | Keys.X,                    fileExportClicked);
             addSep(miFile);
             miFilePrint   = addItem(miFile, "&Print...",                  "Out Printer",      Keys.Control | Keys.P,                filePrintClicked);
@@ -13747,7 +13747,7 @@ namespace DbDo
                 "Joins the command, key, and description tables the menus and Key Help already use into one EdSharp-style listing, sorted by command name, then notes duplicate key assignments and commands missing a description. Unbound by default; assign a chord (EdSharp uses Alt+Shift+H) if you want it at hand.");
             miMiscOpenManagedCopy = addItem(miMisc, "Open as Managed &Copy...", "Open Managed Copy", Keys.None, openManagedCopyClicked,
                 "Open a SQLite database as a throwaway working copy: edits stay in the copy and the original is untouched until you Save Database",
-                "The document model: the chosen .db/.sqlite file is duplicated to a temp working file that becomes the live database, so every edit, add, and delete lands in the copy and the original on disk is left alone. Use Save Database (Control+S) to write the working copy back to the original path or anywhere else; closing the window without saving discards the changes, exactly like an editor's open/edit/save. First step of the in-memory Open / Save As model -- SQLite sources only for now; converting other formats into a managed copy comes next. Unbound by default.");
+                "The document model: the chosen SQLite database is copied to a temp working file that becomes the live database, so every edit, add, and delete lands in the copy and the original on disk is left alone. Use Save Database (Control+S) to write the working copy out to a .db file (a -copy name is suggested, so the source is never overwritten); closing without saving discards the changes. To bring an Excel, Access, dBASE, or CSV file into a new DbDo database instead, use Import. Unbound by default.");
             miMiscDescribeTable = addItem(miMisc, "&Describe Table", "Describe Table", Keys.None, describeTableClicked,
                 "Per-column data profile of the current table: declared type and key/null/FK flags, plus live null and distinct counts with min and max values",
                 "A profile of the current base table, one column per entry: its declared type and any primary-key, not-null, or foreign-key flags from the schema, then the number of nulls, the number of distinct values, and the minimum and maximum values, each computed in SQL over the whole table. Read-only. It scans once per column, so it can take a moment on very large tables. Unbound by default.");
@@ -13815,6 +13815,11 @@ namespace DbDo
             // Database uses, so all the normal post-open behaviors
             // (filter restore, status announcement, etc.) apply.
             miHelpSampleDb     = addItem(miHelp, "Open &Sample Database",                "Open Sample Database", Keys.None,                        helpSampleDbClicked);
+            // Open Convention Sample: the flagship app-plus-data demo --
+            // the NFB 2026 convention agenda as a four-table database with
+            // maps-based associations. Shipped alongside the executable
+            // and opened via the same code path as File > Open Database.
+            miHelpConventionDb = addItem(miHelp, "Open Con&vention Sample",              "Open Convention Database", Keys.None,                    helpConventionDbClicked);
             // Open Northwind Sample and Open Chinook Sample: parallel
             // commands for the two larger bundled databases. Both use
             // the same code path as Open Sample Database. Northwind is
@@ -13823,15 +13828,6 @@ namespace DbDo
             // rows, with three-deep parent-child chains).
             miHelpNorthwindDb  = addItem(miHelp, "Open &Northwind Sample",               "Open Northwind Database", Keys.None,                     helpNorthwindDbClicked);
             miHelpChinookDb    = addItem(miHelp, "Open Ch&inook Sample",                 "Open Chinook Database",   Keys.None,                     helpChinookDbClicked);
-            // Hobbyist sample databases new in v1.0.63.
-            //   collection.db -- music collection (artists, albums,
-            //     tracks, plus collector fields for rating, location,
-            //     loan tracking).
-            //   cellar.db -- wine cellar (wines, bottles, tastings,
-            //     with drink-window data and per-bottle inventory).
-            miHelpCollectionDb = addItem(miHelp, "Open &Music Collection",                "Open Collection Database",Keys.None,                     helpCollectionDbClicked);
-            miHelpCellarDb     = addItem(miHelp, "Open Wine &Cellar",                     "Open Cellar Database",    Keys.None,                     helpCellarDbClicked);
-            miHelpVerbs        = addItem(miHelp, "PowerShell &Verb Reference",           "Get Verb",          Keys.None,                          helpVerbsClicked);
             addSep(miHelp);
             miHelpShowCommand  = addItem(miHelp, "Alternate Menu...",                        "Alternate Menu",    Keys.Alt | Keys.F10,                helpShowCommandClicked);
             // Control+F1 = Key Help toggle. EdSharp and FileDir
@@ -14005,8 +14001,10 @@ namespace DbDo
                 "Control+Shift+F4, matching FileDir.");
             add("Save Database",    "Export the open database to another path (whole database, ignores filter)", "");
             add("Backup Database",    "Write a timestamped copy of the open database", "");
-            add("Import Data",        "Import rows from a CSV, TSV, or other database into a new table",
-                "Auto-detects the input file's delimiter and creates a destination table with all-text columns.");
+            add("Import",             "Build a new DbDo database from another file -- Excel (read through Excel itself, no Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and lookups",
+                "Open mounts a file with a live driver; Import transfers its data into DbDo's own structure. The source is only read; Save Database keeps the result as a .db.");
+            add("Merge",              "Merge rows from a Markdown table, JSON, or Inix file into the current table",
+                "Fields are matched by name; unmatched fields are dropped and one bad row does not sink the import.");
             add("Export Data",        "Export the current table or query to CSV, TSV, JSON, or another format",
                 "Choose the destination file extension to pick the format; row order and filter match what is visible.");
             add("Open File Folder",    "Open the folder containing the open database in Windows Explorer", "");
@@ -15567,7 +15565,7 @@ namespace DbDo
             miFileClose.Enabled = bOpen;
             miFileBackup.Enabled = bOpen;
             miFileCompare.Enabled = bOpen;
-            miFileImport.Enabled = bWritable;
+            miFileMerge.Enabled = bWritable;
             miFileExport.Enabled = bHasTable;
             miFilePrint.Enabled = bHasTable;
 
@@ -19508,9 +19506,10 @@ namespace DbDo
         // and a :memory: database would be private to whatever
         // connection created it. The temp file gives the same
         // open/edit/save semantics while every existing recordset and
-        // editing command keeps working unchanged. SQLite sources only
-        // for now; converting other formats into a managed copy is the
-        // next increment.
+        // editing command keeps working unchanged. SQLite sources only;
+        // foreign formats (Excel, Access, dBASE, CSV) are brought in by
+        // the separate Import command (see importToShell), which builds a
+        // fresh DbDo shell rather than mounting a live driver.
         private void openManagedCopyClicked(object sender, EventArgs evArgs)
         {
             using (OpenFileDialog dlgFile = new OpenFileDialog())
@@ -19527,7 +19526,7 @@ namespace DbDo
                 if (sExt != "db" && sExt != "sqlite" && sExt != "sqlite3")
                 {
                     ErrorDialog.show(this, "Open as Managed Copy",
-                        "Managed Copy currently supports SQLite databases (.db, .sqlite, .sqlite3). Converting other formats into a managed copy comes next.");
+                        "Managed Copy is for SQLite databases (.db, .sqlite, .sqlite3). To bring an Excel, Access, dBASE, or CSV file into a DbDo database, use Import instead.");
                     return;
                 }
                 string sTemp = Path.Combine(Path.GetTempPath(),
@@ -19665,6 +19664,311 @@ namespace DbDo
             LiveRegion.say("Converted " + lRecords.Count + " record"
                 + (lRecords.Count == 1 ? "" : "s") + " to " + Path.GetFileName(sDbPath));
             return sDbPath;
+        }
+
+        // importWorkbookFile: read an Excel workbook (.xlsx / .xls) via
+        // Excel.Application COM automation and build a temporary SQLite
+        // database in the standard DbDo shape -- one table per worksheet,
+        // each sheet's first row taken as the field names and the rows
+        // below as data, wrapped in the standard columns, plus the builtin
+        // maps and lookups tables. Returns the temp .db path for the
+        // normal SQLite open; the caller treats it as a managed copy whose
+        // origin is the workbook, so the workbook is only ever read.
+        //
+        // COM is used, NOT the ACE OLE DB provider, on purpose: Excel
+        // automation is out-of-process, so a 64-bit DbDo reads a workbook
+        // through whatever Excel is installed (even 32-bit) with no
+        // provider-bitness or Office-architecture conflict. The only
+        // requirement is that Excel itself is present.
+        //
+        // A sheet header that collides with a standard column is handled,
+        // not duplicated: "notes" and "tags" route their data into the
+        // standard notes/tags columns; the rest of the reserved set is
+        // renamed with an "_in" suffix.
+        internal string importWorkbookFile(string sXlsxPath)
+        {
+            if (string.IsNullOrEmpty(sXlsxPath)) throw new ArgumentException("importWorkbookFile requires a path.");
+            if (!File.Exists(sXlsxPath)) throw new FileNotFoundException("Workbook not found: " + sXlsxPath);
+
+            string[] aReservedRename = new string[] { "added", "edited", "look", "unq", "marked" };
+            string sDbPath = Path.Combine(Path.GetTempPath(),
+                "DbDo_managed_" + Guid.NewGuid().ToString("N") + ".db");
+
+            dynamic oApp = null;
+            dynamic oBook = null;
+            int iSheetsImported = 0;
+            int iRowsImported = 0;
+            try
+            {
+                oApp = ComAutomation.createApp("Excel.Application");
+                // Open(Filename, UpdateLinks, ReadOnly): read-only, no link prompts.
+                oBook = oApp.Workbooks.Open(sXlsxPath, 0, true);
+
+                if (File.Exists(sDbPath)) File.Delete(sDbPath);
+                using (FileStream fs = File.Create(sDbPath)) { }
+                using (DbDoManager managerImport = new DbDoManager())
+                {
+                    managerImport.openDatabase(sDbPath, null, false);
+                    List<string> lTableNames = new List<string>();
+                    int iSheetCount = (int)oBook.Worksheets.Count;
+                    for (int iSheet = 1; iSheet <= iSheetCount; iSheet++)
+                    {
+                        dynamic oSheet = oBook.Worksheets[iSheet];
+                        string sSheetName = (string)oSheet.Name;
+                        // One COM call pulls the whole used range as a
+                        // 1-based 2-D array; null when the sheet is empty
+                        // or holds a single blank cell.
+                        object oVals = oSheet.UsedRange.Value;
+                        object[,] aCells = oVals as object[,];
+                        if (aCells == null) continue;
+                        int iR0 = aCells.GetLowerBound(0), iR1 = aCells.GetUpperBound(0);
+                        int iC0 = aCells.GetLowerBound(1), iC1 = aCells.GetUpperBound(1);
+                        if (iR1 <= iR0 || iC1 < iC0) continue; // need a header row plus at least one data row
+
+                        // Table name from the sheet name, made a safe,
+                        // unique snake_case identifier.
+                        string sTable = sNormalizeIdentifier(sSheetName);
+                        if (sTable.Length == 0) sTable = "sheet_" + iSheet;
+                        if (char.IsDigit(sTable[0])) sTable = "t_" + sTable;
+                        string sBaseT = sTable; int iDupT = 1;
+                        while (lTableNames.Contains(sTable)) { iDupT++; sTable = sBaseT + "_" + iDupT; }
+                        lTableNames.Add(sTable);
+                        string sSingular = sTable.EndsWith("s") ? sTable.Substring(0, sTable.Length - 1) : sTable;
+                        string sPk = sSingular + "_id";
+
+                        // Plan the columns from the header row. lColTarget
+                        // holds, per source column, the SQL column it writes
+                        // (or null to skip); lFieldDefs are the distinct data
+                        // fields handed to lStandardTableDdl.
+                        List<string[]> lFieldDefs = new List<string[]>();
+                        List<string> lColTarget = new List<string>();
+                        List<string> lUsedNames = new List<string>();
+                        for (int iCol = iC0; iCol <= iC1; iCol++)
+                        {
+                            string sHdr = sNormalizeIdentifier(sCellToString(aCells[iR0, iCol]));
+                            if (sHdr.Length == 0) sHdr = "column_" + (iCol - iC0 + 1);
+                            if (char.IsDigit(sHdr[0])) sHdr = "c_" + sHdr;
+                            if (sHdr == "notes") { lColTarget.Add("notes"); continue; }
+                            if (sHdr == "tags") { lColTarget.Add("tags"); continue; }
+                            if (sHdr == sPk || Array.IndexOf(aReservedRename, sHdr) >= 0) sHdr = sHdr + "_in";
+                            string sBaseH = sHdr; int iDupH = 1;
+                            while (lUsedNames.Contains(sHdr)) { iDupH++; sHdr = sBaseH + "_" + iDupH; }
+                            lUsedNames.Add(sHdr);
+                            lFieldDefs.Add(new string[] { sHdr, "TEXTLINE" });
+                            lColTarget.Add(sHdr);
+                        }
+                        // Guarantee at least one distinct field so look/unq
+                        // are well-formed even for an all-notes/tags sheet.
+                        if (lFieldDefs.Count == 0) lFieldDefs.Add(new string[] { "value", "TEXTLINE" });
+
+                        foreach (string sSql in lStandardTableDdl(sTable, lFieldDefs))
+                            managerImport.invokeSql(sSql, null);
+
+                        for (int iRow = iR0 + 1; iRow <= iR1; iRow++)
+                        {
+                            List<string> lCols = new List<string>();
+                            List<string> lVals = new List<string>();
+                            bool bAny = false;
+                            int iColIdx = 0;
+                            for (int iCol = iC0; iCol <= iC1; iCol++, iColIdx++)
+                            {
+                                string sTarget = lColTarget[iColIdx];
+                                if (sTarget == null) continue;
+                                string sCell = sCellToString(aCells[iRow, iCol]);
+                                if (sCell.Length > 0) bAny = true;
+                                lCols.Add("\"" + sTarget + "\"");
+                                lVals.Add("'" + sCell.Replace("'", "''") + "'");
+                            }
+                            if (!bAny) continue; // skip a wholly-empty row
+                            string sInsert = "INSERT INTO \"" + sTable + "\" ("
+                                + string.Join(", ", lCols.ToArray()) + ") VALUES ("
+                                + string.Join(", ", lVals.ToArray()) + ")";
+                            try { managerImport.invokeSql(sInsert, null); iRowsImported++; }
+                            catch (Exception exRow)
+                            {
+                                // A duplicate unq (an identical data row) trips
+                                // the UNIQUE index; skip it, keep importing.
+                                try { DbDoLog.write("importWorkbookFile skipped a row in " + sTable + ": " + exRow.Message); } catch { }
+                            }
+                        }
+                        iSheetsImported++;
+                    }
+
+                    if (iSheetsImported == 0)
+                        throw new InvalidOperationException("No worksheets with a header row and data rows were found in " + Path.GetFileName(sXlsxPath) + ".");
+
+                    foreach (string sSql in lInfraDdl(true, true))
+                        managerImport.invokeSql(sSql, null);
+                }
+
+                try { DbDoLog.write("Imported workbook " + sXlsxPath + ": " + iSheetsImported
+                    + " sheet(s), " + iRowsImported + " row(s) -> " + sDbPath); } catch { }
+                return sDbPath;
+            }
+            catch
+            {
+                try { if (File.Exists(sDbPath)) File.Delete(sDbPath); } catch { }
+                throw;
+            }
+            finally
+            {
+                // Excel never attaches to a running instance (see
+                // ComAutomation); close the workbook without saving and
+                // quit the hidden process, then release the COM objects.
+                try { if (oBook != null) oBook.Close(false); } catch { }
+                try { if (oApp != null) oApp.Quit(); } catch { }
+                if (oBook != null) { try { Marshal.FinalReleaseComObject(oBook); } catch { } }
+                if (oApp != null) { try { Marshal.FinalReleaseComObject(oApp); } catch { } }
+            }
+        }
+
+        // sCellToString: render one Excel cell value (from a UsedRange
+        // .Value array) as a trimmed string. Empty cells arrive as null;
+        // numbers as double (whole numbers without a trailing ".0"); dates
+        // as DateTime (ISO, with a time only when present); else ToString.
+        private static string sCellToString(object oVal)
+        {
+            if (oVal == null) return "";
+            if (oVal is string) return ((string)oVal).Trim();
+            if (oVal is bool) return ((bool)oVal) ? "true" : "false";
+            if (oVal is DateTime)
+            {
+                DateTime dt = (DateTime)oVal;
+                return (dt.TimeOfDay == TimeSpan.Zero) ? dt.ToString("yyyy-MM-dd") : dt.ToString("yyyy-MM-dd HH:mm:ss");
+            }
+            if (oVal is double)
+            {
+                double d = (double)oVal;
+                if (!double.IsInfinity(d) && d == Math.Floor(d) && Math.Abs(d) < 1e15)
+                    return ((long)d).ToString(System.Globalization.CultureInfo.InvariantCulture);
+                return d.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            }
+            return oVal.ToString().Trim();
+        }
+
+        // importToShell: build a fresh DbDo database -- a temporary "shell"
+        // carrying the standard columns plus the maps and lookups tables --
+        // from another file, one standard-shape table per table found in
+        // the source. This is the "import" verb: unlike Open (which mounts
+        // a live ADO driver on the file as-is), Import transfers the data
+        // into DbDo's own structure. Excel workbooks are read through Excel
+        // COM (out-of-process, so 64-bit DbDo reads any Excel with no ACE
+        // and no Office-bitness conflict); every other supported format is
+        // read through a short-lived ADO connection. Returns the temp .db
+        // path; the caller opens it as a managed copy, so the source file
+        // is only ever read.
+        internal string importToShell(string sSourcePath)
+        {
+            if (string.IsNullOrEmpty(sSourcePath)) throw new ArgumentException("importToShell requires a path.");
+            string sExt = Path.GetExtension(sSourcePath).TrimStart('.').ToLowerInvariant();
+            if (sExt == "xlsx" || sExt == "xls") return importWorkbookFile(sSourcePath);
+            return importAdoToShell(sSourcePath);
+        }
+
+        // importAdoToShell: read every table of an ADO-accessible source
+        // (SQLite .db/.sqlite/.sqlite3, Access .mdb/.accdb, dBASE .dbf, or
+        // CSV/TSV/TXT) through a short-lived read-only manager and build a
+        // temp DbDo shell. The source's own maps/lookups tables are skipped
+        // -- the shell supplies fresh ones. The per-table shaping mirrors
+        // importWorkbookFile, so the result is identical whatever the source
+        // format: a column named notes or tags routes into the standard
+        // column, other standard-name collisions get an "_in" suffix, and a
+        // duplicate row that would trip the UNIQUE unq index is skipped.
+        internal string importAdoToShell(string sSourcePath)
+        {
+            if (string.IsNullOrEmpty(sSourcePath)) throw new ArgumentException("importAdoToShell requires a path.");
+            string[] aReservedRename = new string[] { "added", "edited", "look", "unq", "marked" };
+            string sDbPath = Path.Combine(Path.GetTempPath(),
+                "DbDo_managed_" + Guid.NewGuid().ToString("N") + ".db");
+            int iTablesImported = 0, iRowsImported = 0;
+            try
+            {
+                if (File.Exists(sDbPath)) File.Delete(sDbPath);
+                using (FileStream fs = File.Create(sDbPath)) { }
+                using (DbDoManager managerSrc = new DbDoManager())
+                using (DbDoManager managerDest = new DbDoManager())
+                {
+                    managerSrc.openDatabase(sSourcePath, null, true);   // read-only source
+                    managerDest.openDatabase(sDbPath, null, false);
+                    List<string> lTableNames = new List<string>();
+                    foreach (string sSrcTable in managerSrc.getTableNames())
+                    {
+                        string sNorm = sNormalizeIdentifier(sSrcTable);
+                        if (sNorm == "maps" || sNorm == "lookups") continue; // shell supplies its own
+                        managerSrc.selectTable(sSrcTable);
+                        List<string> lCols = managerSrc.getColumnsOfTable(sSrcTable);
+                        if (lCols.Count == 0) continue;
+
+                        string sTable = sNorm.Length == 0 ? "table_" + (iTablesImported + 1) : sNorm;
+                        if (char.IsDigit(sTable[0])) sTable = "t_" + sTable;
+                        string sBaseT = sTable; int iDupT = 1;
+                        while (lTableNames.Contains(sTable)) { iDupT++; sTable = sBaseT + "_" + iDupT; }
+                        lTableNames.Add(sTable);
+                        string sSingular = sTable.EndsWith("s") ? sTable.Substring(0, sTable.Length - 1) : sTable;
+                        string sPk = sSingular + "_id";
+
+                        List<string[]> lFieldDefs = new List<string[]>();
+                        List<string> lColTarget = new List<string>();
+                        List<string> lUsedNames = new List<string>();
+                        foreach (string sCol in lCols)
+                        {
+                            string sHdr = sNormalizeIdentifier(sCol);
+                            if (sHdr.Length == 0) sHdr = "column_" + (lColTarget.Count + 1);
+                            if (char.IsDigit(sHdr[0])) sHdr = "c_" + sHdr;
+                            if (sHdr == "notes") { lColTarget.Add("notes"); continue; }
+                            if (sHdr == "tags") { lColTarget.Add("tags"); continue; }
+                            if (sHdr == sPk || Array.IndexOf(aReservedRename, sHdr) >= 0) sHdr = sHdr + "_in";
+                            string sBaseH = sHdr; int iDupH = 1;
+                            while (lUsedNames.Contains(sHdr)) { iDupH++; sHdr = sBaseH + "_" + iDupH; }
+                            lUsedNames.Add(sHdr);
+                            lFieldDefs.Add(new string[] { sHdr, "TEXTLINE" });
+                            lColTarget.Add(sHdr);
+                        }
+                        if (lFieldDefs.Count == 0) lFieldDefs.Add(new string[] { "value", "TEXTLINE" });
+                        foreach (string sSql in lStandardTableDdl(sTable, lFieldDefs))
+                            managerDest.invokeSql(sSql, null);
+
+                        managerSrc.moveFirst();
+                        while (!managerSrc.eof)
+                        {
+                            List<string> lInsCols = new List<string>();
+                            List<string> lVals = new List<string>();
+                            bool bAny = false;
+                            for (int i = 0; i < lCols.Count; i++)
+                            {
+                                string sTarget = lColTarget[i];
+                                if (sTarget == null) continue;
+                                string sCell = managerSrc.getFieldValue(lCols[i]) ?? "";
+                                if (sCell.Length > 0) bAny = true;
+                                lInsCols.Add("\"" + sTarget + "\"");
+                                lVals.Add("'" + sCell.Replace("'", "''") + "'");
+                            }
+                            if (bAny)
+                            {
+                                string sInsert = "INSERT INTO \"" + sTable + "\" ("
+                                    + string.Join(", ", lInsCols.ToArray()) + ") VALUES ("
+                                    + string.Join(", ", lVals.ToArray()) + ")";
+                                try { managerDest.invokeSql(sInsert, null); iRowsImported++; }
+                                catch (Exception exRow) { try { DbDoLog.write("importAdoToShell skipped a row in " + sTable + ": " + exRow.Message); } catch { } }
+                            }
+                            managerSrc.moveNext();
+                        }
+                        iTablesImported++;
+                    }
+                    if (iTablesImported == 0)
+                        throw new InvalidOperationException("No importable tables were found in " + Path.GetFileName(sSourcePath) + ".");
+                    foreach (string sSql in lInfraDdl(true, true))
+                        managerDest.invokeSql(sSql, null);
+                }
+                try { DbDoLog.write("Imported " + sSourcePath + ": " + iTablesImported
+                    + " table(s), " + iRowsImported + " row(s) -> " + sDbPath); } catch { }
+                return sDbPath;
+            }
+            catch
+            {
+                try { if (File.Exists(sDbPath)) File.Delete(sDbPath); } catch { }
+                throw;
+            }
         }
 
         // Recent Files (Alt+R / File > Recent Files): show an LBC
@@ -19825,16 +20129,12 @@ namespace DbDo
             openInstallSampleDb("chinook.db", "Open Chinook Sample");
         }
 
-        // Hobbyist sample database openers (v1.0.63). Both use the
+        // Convention sample opener: the flagship demo database. Uses the
         // shared openInstallSampleDb helper, so missing-file handling,
         // post-open state restore, and error messaging are uniform.
-        private void helpCollectionDbClicked(object sender, EventArgs evArgs)
+        private void helpConventionDbClicked(object sender, EventArgs evArgs)
         {
-            openInstallSampleDb("collection.db", "Open Music Collection");
-        }
-        private void helpCellarDbClicked(object sender, EventArgs evArgs)
-        {
-            openInstallSampleDb("cellar.db", "Open Wine Cellar");
+            openInstallSampleDb("NFB2026Convention.db", "Open Convention Sample");
         }
 
         // openInstallSampleDb: shared open path for the bundled sample
@@ -19923,7 +20223,12 @@ namespace DbDo
                 // name, leaving the user one keystroke from a
                 // sensible "FooBackup.db" or similar by editing it.
                 dlgFile.InitialDirectory = IniFolders.bestDirectory("", db.filePath);
-                string sLeaf = Path.GetFileNameWithoutExtension(db.filePath);
+                // For a managed copy (e.g. an imported workbook) the live
+                // file is a temp GUID name; suggest the origin's name
+                // instead. The extension still follows db.filePath (.db),
+                // so a workbook-backed copy is never written over the xlsx.
+                string sNameSource = !string.IsNullOrEmpty(sManagedOriginPath) ? sManagedOriginPath : db.filePath;
+                string sLeaf = Path.GetFileNameWithoutExtension(sNameSource);
                 if (!string.IsNullOrEmpty(sLeaf))
                 {
                     // Suggest "<original>-copy" so we don't overwrite
@@ -19982,17 +20287,17 @@ namespace DbDo
                 "Compare Database", MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        private void fileImportClicked(object sender, EventArgs evArgs)
+        private void mergeClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset())
             {
                 MessageBox.Show(this, "Open a database and pick a target table first.",
-                    "Import Data", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Merge", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             using (OpenFileDialog dlgFile = new OpenFileDialog())
             {
-                dlgFile.Title = "Import Data into " + (db.currentTable ?? "current table");
+                dlgFile.Title = "Merge into " + (db.currentTable ?? "current table");
                 prepareFileDialog(dlgFile);
                 dlgFile.Filter = "Markdown table (*.md;*.markdown)|*.md;*.markdown"
                            + "|JSON (*.json)|*.json"
@@ -20014,16 +20319,69 @@ namespace DbDo
                         iCount = db.importJson(dlgFile.FileName);
                     else
                         iCount = db.importMarkdown(dlgFile.FileName);
-                    DbDoLog.write("Imported " + iCount + " row(s) from " + dlgFile.FileName);
+                    DbDoLog.write("Merged " + iCount + " row(s) from " + dlgFile.FileName);
                     invokeRefresh();
                     MessageBox.Show(this,
-                        "Imported " + iCount + " row(s) into " + db.currentTable + ".",
-                        "Import Data", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        "Merged " + iCount + " row(s) into " + db.currentTable + ".",
+                        "Merge", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
-                    ErrorDialog.show(this, "Import Data", ex.Message);
+                    ErrorDialog.show(this, "Merge", ex.Message);
                 }
+            }
+        }
+
+        // Import (Alt+I): build a brand-new DbDo database from another file
+        // -- one standard-shape table per source table, plus maps and
+        // lookups -- and open it. This is distinct from Open (which mounts a
+        // live ADO driver on the file as-is) and from Merge (which adds rows
+        // to the current table). The new database is a managed temp copy:
+        // the source file is only read, and Save Database keeps the result
+        // as a .db. No open database is required.
+        private void importClicked(object sender, EventArgs evArgs)
+        {
+            using (OpenFileDialog dlgFile = new OpenFileDialog())
+            {
+                dlgFile.Title = "Import into a new DbDo database";
+                prepareFileDialog(dlgFile);
+                dlgFile.Filter = "All supported (*.xlsx;*.xls;*.mdb;*.accdb;*.dbf;*.csv;*.tsv;*.txt;*.db;*.sqlite;*.sqlite3)|*.xlsx;*.xls;*.mdb;*.accdb;*.dbf;*.csv;*.tsv;*.txt;*.db;*.sqlite;*.sqlite3"
+                           + "|Excel workbook (*.xlsx;*.xls)|*.xlsx;*.xls"
+                           + "|Access (*.mdb;*.accdb)|*.mdb;*.accdb"
+                           + "|dBASE (*.dbf)|*.dbf"
+                           + "|CSV / text (*.csv;*.tsv;*.txt)|*.csv;*.tsv;*.txt"
+                           + "|SQLite (*.db;*.sqlite;*.sqlite3)|*.db;*.sqlite;*.sqlite3"
+                           + "|All Files (*.*)|*.*";
+                string sCurDb = (db != null) ? db.filePath : null;
+                dlgFile.InitialDirectory = IniFolders.bestDirectory(IniFolders.importFolder, sCurDb);
+                if (dlgFile.ShowDialog(this) != DialogResult.OK) return;
+                IniFolders.importFolder = Path.GetDirectoryName(dlgFile.FileName);
+                string sOrigin = dlgFile.FileName;
+                string sTemp;
+                try { sTemp = importToShell(sOrigin); }
+                catch (Exception ex)
+                {
+                    ErrorDialog.show(this, "Import", ex.Message);
+                    return;
+                }
+                // Open the shell as the live database, managed like a
+                // working copy: a previous managed temp (if any) is unlocked
+                // by the open and then deleted.
+                string sPrevTemp = sManagedTempPath;
+                try { openDatabaseAndApplyState(sTemp, null); }
+                catch (Exception ex)
+                {
+                    ErrorDialog.show(this, "Import", ex.Message);
+                    try { if (File.Exists(sTemp)) File.Delete(sTemp); } catch { }
+                    return;
+                }
+                if (!string.IsNullOrEmpty(sPrevTemp) && !string.Equals(sPrevTemp, sTemp, StringComparison.OrdinalIgnoreCase))
+                { try { if (File.Exists(sPrevTemp)) File.Delete(sPrevTemp); } catch { } }
+                sManagedOriginPath = sOrigin;
+                sManagedTempPath = sTemp;
+                invokeRefresh();
+                LiveRegion.say("Imported " + Path.GetFileName(sOrigin)
+                    + " into a new DbDo database. Save Database to keep it as a .db; the original file is unchanged.");
             }
         }
 
@@ -25995,25 +26353,6 @@ namespace DbDo
             }
         }
 
-        private void helpVerbsClicked(object sender, EventArgs evArgs)
-        {
-            HelpDialog.show(this, "Get Verb",
-                "PowerShell-canonical verbs used in DbDo:\n\n"
-                + "  COMMON      New, Get, Set, Remove, Show, Copy, Find, Select, Format,\n"
-                + "              Enter, Exit, Step, Open, Close, Lock, Add, Group, Reset\n"
-                + "  DATA        Backup, Restore, Import, Export, Update, Save, Compare,\n"
-                + "              ConvertTo, Initialize, Sync, Out\n"
-                + "  DIAGNOSTIC  Test, Measure, Resolve, Trace, Repair\n"
-                + "  LIFECYCLE   Invoke\n"
-                + "\n"
-                + "PowerShell discourages synonyms. DbDo never uses:\n"
-                + "  Delete (use Remove)        Create  (use New)         Read   (use Get)\n"
-                + "  Modify (use Set)           Cancel  (use Stop)        Search (use Find)\n"
-                + "\n"
-                + "Full canonical list:\n"
-                + "  https://learn.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands");
-        }
-
         private void helpShowCommandClicked(object sender, EventArgs evArgs)
         {
             using (CommandPickerDialog dlg = new CommandPickerDialog())
@@ -27526,6 +27865,8 @@ namespace DbDo
             "switch-focus", "toggle-keyhelp", "toggle-readonly", "sync-session",
             "test-database", "test-driver",
             "unmark-range", "replace-column", "update-view",
+            "select-window",
+            "set-location", "get-location", "invoke-item", "clear-host",
         };
 
         // expandUniquePrefix: find the canonical verb that uniquely
@@ -28171,6 +28512,11 @@ namespace DbDo
                 case "exit-console":     bShouldExit = true;       break;
                 case "exit-application": cmdExitApplication();      break;
                 case "switch-focus":     cmdSwitchFocus();          break;
+                case "select-window":    cmdSelectWindow(sRest);    break;
+                case "set-location":     cmdSetLocation(sRest);     break;
+                case "get-location":     cmdGetLocation();          break;
+                case "invoke-item":      cmdInvokeItem(sRest);      break;
+                case "clear-host":       cmdClearHost();            break;
                 case "about-dbdo":      cmdAboutDbDo();          break;
                 case "elevate-version":  cmdElevateVersion();      break;
                 case "show-readme":      cmdShowReadme();          break;
@@ -28184,6 +28530,7 @@ namespace DbDo
                     // used spaces instead of hyphens. Try expansion
                     // before giving up.
                     if (tryDispatchPrefix(sLine)) return;
+                    if (tryInvokeMenuCommand(sLine)) return;
                     Console.WriteLine("Unknown command: " + sVerb);
                     Console.WriteLine("Type 'help' for the command list.");
                     break;
@@ -28214,6 +28561,117 @@ namespace DbDo
             {
                 Console.WriteLine("Switch-Focus failed: " + ex.Message);
             }
+        }
+
+        // cmdSelectWindow: dot-prompt equivalent of F4 (Current Windows).
+        // With no argument it lists the open database windows and prompts
+        // for one; with an argument it matches a window by title -- typed
+        // verbatim, case-insensitive, exact match preferred then a
+        // contains match. The chosen window is activated AND the console
+        // is rebound to it (frm), so every later command acts on that
+        // window's database -- the context-setting the user asked for.
+        private static void cmdSelectWindow(string sArg)
+        {
+            if (frm == null || frm.IsDisposed)
+            {
+                Console.WriteLine("Select-Window: no GUI windows are available (CLI-only mode).");
+                return;
+            }
+            DbDoFrame frame = DbDoFrame.frame;
+            if (frame == null) { Console.WriteLine("No window frame available."); return; }
+            List<string> lTitles = frame.windowTitles();
+            if (lTitles.Count == 0) { Console.WriteLine("No windows open."); return; }
+            string sWanted = unquote(sArg ?? "");
+            string sChosen = null;
+            if (sWanted.Length > 0)
+            {
+                foreach (string sT in lTitles)
+                    if (string.Equals(sT, sWanted, StringComparison.OrdinalIgnoreCase)) { sChosen = sT; break; }
+                if (sChosen == null)
+                    foreach (string sT in lTitles)
+                        if (sT.IndexOf(sWanted, StringComparison.OrdinalIgnoreCase) >= 0) { sChosen = sT; break; }
+                if (sChosen == null)
+                {
+                    Console.WriteLine("No window matches: " + sWanted);
+                    Console.WriteLine("Open: " + string.Join(", ", lTitles.ToArray()));
+                    return;
+                }
+            }
+            else
+            {
+                int iChoice = promptChoiceCli("Current Windows", lTitles, 0);
+                if (iChoice < 0) { Console.WriteLine("Cancelled."); return; }
+                sChosen = lTitles[iChoice];
+            }
+            try
+            {
+                // Find the target child by its title up front so the
+                // rebind does not depend on the timing of window
+                // activation events.
+                DbDoForm frmTarget = null;
+                foreach (Form f in frame.MdiChildren)
+                {
+                    DbDoForm fd = f as DbDoForm;
+                    if (fd != null && fd.Text == sChosen) { frmTarget = fd; break; }
+                }
+                frame.activateByTitle(sChosen);
+                if (frmTarget != null && !frmTarget.IsDisposed) frm = frmTarget;
+                refresh();
+                Console.WriteLine("Current window: " + sChosen);
+                printRowSummary();
+            }
+            catch (Exception ex) { Console.WriteLine("Error: " + ex.Message); }
+        }
+
+        // cmdSetLocation: dot-prompt cd. Change the process working
+        // directory so later relative paths (export, save-as, open,
+        // invoke-item) resolve against it. PowerShell Set-Location;
+        // aliases cd, chdir, sl. With no argument, prints the current
+        // directory. No GUI peer.
+        private static void cmdSetLocation(string sArg)
+        {
+            string sPath = resolvePathArg(sArg ?? "");
+            if (sPath.Length == 0) { Console.WriteLine(System.IO.Directory.GetCurrentDirectory()); return; }
+            try
+            {
+                System.IO.Directory.SetCurrentDirectory(sPath);
+                Console.WriteLine(System.IO.Directory.GetCurrentDirectory());
+            }
+            catch (Exception ex) { Console.WriteLine("Error: " + ex.Message); }
+        }
+
+        // cmdGetLocation: dot-prompt pwd / cwd. Print the current working
+        // directory. PowerShell Get-Location; aliases pwd, cwd, gl.
+        private static void cmdGetLocation()
+        {
+            try { Console.WriteLine(System.IO.Directory.GetCurrentDirectory()); }
+            catch (Exception ex) { Console.WriteLine("Error: " + ex.Message); }
+        }
+
+        // cmdInvokeItem: open a verbatim file, folder, or URL in its
+        // default Windows program (the shell "open" verb), the way
+        // double-clicking it would. PowerShell Invoke-Item; aliases
+        // start, ii, open-file, launch. This lets a script create a file
+        // and then open it for viewing as its final step. The plain
+        // "open" verb stays bound to Open-Database, so a database loads
+        // into DbDo rather than launching in another program.
+        private static void cmdInvokeItem(string sArg)
+        {
+            string sTarget = unquote(sArg ?? "");
+            if (sTarget.Length == 0) { Console.WriteLine("Invoke-Item requires a file, folder, or URL."); return; }
+            try
+            {
+                ComAutomation.shellOpen(sTarget);
+                Console.WriteLine("Opened " + sTarget);
+            }
+            catch (Exception ex) { Console.WriteLine("Error: " + ex.Message); }
+        }
+
+        // cmdClearHost: clear the console screen. PowerShell Clear-Host;
+        // aliases cls, clear. No GUI peer.
+        private static void cmdClearHost()
+        {
+            try { Console.Clear(); } catch { }
         }
 
         // About-DbDo: print the version banner to the CLI. Mirrors
@@ -28540,10 +28998,74 @@ namespace DbDo
         // The result is a small, predictable set of aliases that
         // a dbDot user can already type and that don't ask the
         // newcomer to memorize cryptic shorthand.
+        // s_dSquishToMenu: squished command name -> the GUI menu item
+        // that runs it, built once on first use from KeyMap's registry.
+        private static Dictionary<string, ToolStripMenuItem> s_dSquishToMenu;
+
+        // menuItemForSquish: the menu item whose canonical command name
+        // squishes to sKey, or null. This is what lets the dot prompt
+        // reach any GUI menu command by name with separators and case
+        // ignored -- "Database Summary", "database-summary", and
+        // "databasesummary" all resolve to the same item.
+        private static ToolStripMenuItem menuItemForSquish(string sKey)
+        {
+            if (string.IsNullOrEmpty(sKey)) return null;
+            if (s_dSquishToMenu == null)
+            {
+                Dictionary<string, ToolStripMenuItem> d = new Dictionary<string, ToolStripMenuItem>();
+                foreach (KeyValuePair<ToolStripMenuItem, string> kv in KeyMap.dMenuToCommand)
+                {
+                    string sK = squishKey(kv.Value);
+                    if (sK.Length > 0 && !d.ContainsKey(sK)) d[sK] = kv.Key;
+                }
+                s_dSquishToMenu = d;
+            }
+            ToolStripMenuItem mi;
+            return s_dSquishToMenu.TryGetValue(sKey, out mi) ? mi : null;
+        }
+
+        // tryInvokeMenuCommand: last-resort resolution. Squish the leading
+        // words of the line and, if they name a GUI menu command, run it
+        // by clicking that menu item on the UI thread. This completes the
+        // "type any menu command at the dot prompt" philosophy: separators
+        // and case never matter before the parameter. PerformClick takes
+        // no argument, so a command that needs input opens its usual
+        // dialog and any trailing words are ignored. Console-backed
+        // commands never reach here -- the normal resolver matches them
+        // first, so their keyboard-friendly console forms still win.
+        private static bool tryInvokeMenuCommand(string sLine)
+        {
+            if (frm == null || frm.IsDisposed) return false;
+            string[] aTokens = sLine.Split(new char[] { ' ', '\t' },
+                StringSplitOptions.RemoveEmptyEntries);
+            if (aTokens.Length == 0) return false;
+            // Longest leading run first, so a multi-word menu name wins
+            // over a shorter prefix of it.
+            for (int iTake = aTokens.Length; iTake >= 1; iTake--)
+            {
+                string[] aLead = new string[iTake];
+                Array.Copy(aTokens, 0, aLead, 0, iTake);
+                ToolStripMenuItem mi = menuItemForSquish(squishKey(string.Join(" ", aLead)));
+                if (mi != null)
+                {
+                    try { frm.Invoke(new Action(delegate { if (mi.Enabled) mi.PerformClick(); })); }
+                    catch (Exception ex) { Console.WriteLine("Error: " + ex.Message); }
+                    return true;
+                }
+            }
+            return false;
+        }
+
         private static string resolveAlias(string sVerb)
         {
             switch (sVerb)
             {
+                // Filesystem and console utilities (CLI-only; no GUI peer)
+                case "cd": case "chdir": case "sl":   return "set-location";
+                case "pwd": case "cwd": case "gl":    return "get-location";
+                case "start": case "ii": case "open-file": case "launch":
+                                                     return "invoke-item";
+                case "cls": case "clear":             return "clear-host";
                 // Navigation
                 case "n": case "+": case "next":     return "step-record-next";
                 case "p": case "-": case "previous": return "step-record-prev";
@@ -28612,6 +29134,7 @@ namespace DbDo
                 case "desc": case "descending":      return "reverse-order";
                 // Tables
                 case "table":                        return "select-table";
+                case "open-table":                   return "select-table";
                 case "select-view":                  return "select-table";
                 case "tables":                       return "get-table";
                 case "properties":                   return "get-property";
@@ -28667,8 +29190,10 @@ namespace DbDo
                                                      return "invoke-script";
                 case "x": case "exit": case "bye":   return "exit-console";
                 case "q": case "quit":               return "exit-application";
-                case "gui": case "focus": case "window":
+                case "gui": case "focus":
                                                      return "switch-focus";
+                case "window": case "windows": case "pick-window":
+                                                     return "select-window";
                 // Additional aliases to give every command both a
                 // PowerShell name (the canonical Verb-Noun, always
                 // reachable by typing the hyphenated form) and a
@@ -29736,7 +30261,7 @@ namespace DbDo
         private static void cmdSelectTable(string sArg)
         {
             if (!requireOpen()) return;
-            string sName = sArg.Trim();
+            string sName = unquote(sArg ?? "");
             if (sName.Length == 0) { Console.WriteLine("Select-Table requires a table or view name."); return; }
             List<string> lT = db.getTableAndViewNames();
             if (!lT.Contains(sName))
@@ -30018,7 +30543,7 @@ namespace DbDo
         private static void cmdSaveAs(string sArg)
         {
             if (!requireOpen()) return;
-            string sPath = sArg.Trim();
+            string sPath = resolvePathArg(sArg ?? "");
             if (sPath.Length == 0) { Console.WriteLine("Save-DatabaseAs requires a destination path."); return; }
             try { db.saveAs(sPath); refresh(); Console.WriteLine("Saved to " + sPath); }
             catch (Exception ex) { Console.WriteLine("Error: " + ex.Message); }
