@@ -11920,8 +11920,15 @@ namespace DbDo
                         };
                     }
 
+                    Button btnEmailLog = new Button();
+                    btnEmailLog.Text = "&Email Log";
+                    btnEmailLog.SetBounds(156, 282, 100, 26);
+                    btnEmailLog.TabIndex = 4;
+                    btnEmailLog.Click += (sndr, evA) => { DbDoForm.emailLogFile(dlg); };
+
                     dlg.Controls.Add(lbl);
                     dlg.Controls.Add(tb);
+                    dlg.Controls.Add(btnEmailLog);
                     if (btnQuit != null) dlg.Controls.Add(btnQuit);
                     dlg.Controls.Add(btnCopy);
                     dlg.Controls.Add(btnClose);
@@ -12692,6 +12699,7 @@ namespace DbDo
         private ToolStripMenuItem miHelpShowCommand;
         private ToolStripMenuItem miHelpStatus;
         private ToolStripMenuItem miHelpTestReader;
+        private ToolStripMenuItem miHelpEmailLog;
         private ToolStripMenuItem miHelpSampleDb;
         private ToolStripMenuItem miHelpNorthwindDb;
         private ToolStripMenuItem miHelpChinookDb;
@@ -13838,6 +13846,7 @@ namespace DbDo
             miHelpTraceCommand = addItem(miHelp, "&Key Help Toggle",                "Key Help Toggle", Keys.Control | Keys.F1,             helpTraceCommandClicked);
             miHelpStatus       = addItem(miHelp, "&Where Am I",                            "Show Status",       Keys.None,                          helpStatusClicked);
             miHelpTestReader   = addItem(miHelp, "&Test Screen Reader Speech",           "Test Reader",       Keys.None,                          helpTestReaderClicked);
+            miHelpEmailLog     = addItem(miHelp, "&Email Log File...",                   "Email Log",         Keys.None,                          emailLogClicked);
             // Toggle-Extra-Speech: silence DbDo's direct speech
             // messages without affecting the screen reader's natural
             // focus and selection announcements. EdSharp/FileDir's
@@ -19887,6 +19896,426 @@ namespace DbDo
             return oVal.ToString().Trim();
         }
 
+        // ================= Native .xlsx reading (no Excel, no COM) =======
+        // An .xlsx is a ZIP of XML parts, so DbDo reads it directly: a tiny
+        // ZIP reader (central directory + DeflateStream, both already in
+        // System.dll) unpacks the parts and System.Xml parses them. This is
+        // why Import no longer needs Excel installed and is immune to the
+        // Office/DbDo bitness mismatch -- the COM failure (0x80010114, a
+        // 32-bit Excel automated by 64-bit DbDo) is gone because no second
+        // process is involved.
+
+        // XlsxZip: minimal read-only ZIP accessor over a file held in
+        // memory. Parses the central directory once; reads named entries on
+        // demand, inflating DEFLATE entries. No ZIP64 / no encryption (an
+        // Office package needs neither).
+        private class XlsxZip
+        {
+            private byte[] aData;
+            private Dictionary<string, int[]> dEntries = new Dictionary<string, int[]>(); // name -> {localOffset, method, compSize}
+
+            public XlsxZip(string sPath)
+            {
+                aData = File.ReadAllBytes(sPath);
+                int iEocd = -1;
+                for (int i = aData.Length - 22; i >= 0; i--) { if (u32(i) == 0x06054b50) { iEocd = i; break; } }
+                if (iEocd < 0) throw new InvalidOperationException("Not a valid .xlsx file (no ZIP end-of-directory record).");
+                int iCount = u16(iEocd + 10);
+                int p = (int)u32(iEocd + 16);
+                for (int n = 0; n < iCount && p + 46 <= aData.Length; n++)
+                {
+                    if (u32(p) != 0x02014b50) break;
+                    int iMethod = u16(p + 10);
+                    int iComp = (int)u32(p + 20);
+                    int iNameLen = u16(p + 28), iExtraLen = u16(p + 30), iCommentLen = u16(p + 32);
+                    int iLocalOff = (int)u32(p + 42);
+                    string sName = Encoding.UTF8.GetString(aData, p + 46, iNameLen);
+                    if (!dEntries.ContainsKey(sName)) dEntries.Add(sName, new int[] { iLocalOff, iMethod, iComp });
+                    p += 46 + iNameLen + iExtraLen + iCommentLen;
+                }
+            }
+
+            public bool has(string sName) { return dEntries.ContainsKey(sName); }
+
+            public string readText(string sName)
+            {
+                if (!dEntries.ContainsKey(sName)) return null;
+                int[] e = dEntries[sName];
+                int iOff = e[0], iMethod = e[1], iComp = e[2];
+                int iNameLen = u16(iOff + 26), iExtraLen = u16(iOff + 28);
+                int iStart = iOff + 30 + iNameLen + iExtraLen;
+                byte[] aRaw;
+                if (iMethod == 0)
+                {
+                    aRaw = new byte[iComp];
+                    Array.Copy(aData, iStart, aRaw, 0, iComp);
+                }
+                else
+                {
+                    using (MemoryStream msIn = new MemoryStream(aData, iStart, iComp))
+                    using (System.IO.Compression.DeflateStream ds = new System.IO.Compression.DeflateStream(msIn, System.IO.Compression.CompressionMode.Decompress))
+                    using (MemoryStream msOut = new MemoryStream())
+                    {
+                        ds.CopyTo(msOut);
+                        aRaw = msOut.ToArray();
+                    }
+                }
+                int iSkip = (aRaw.Length >= 3 && aRaw[0] == 0xEF && aRaw[1] == 0xBB && aRaw[2] == 0xBF) ? 3 : 0;
+                return Encoding.UTF8.GetString(aRaw, iSkip, aRaw.Length - iSkip);
+            }
+
+            private int u16(int i) { return aData[i] | (aData[i + 1] << 8); }
+            private long u32(int i) { return (uint)(aData[i] | (aData[i + 1] << 8) | (aData[i + 2] << 16) | (aData[i + 3] << 24)); }
+        }
+
+        // importXlsxNative: parse an .xlsx workbook with no Excel and build a
+        // temp DbDo shell -- one standard-shape table per worksheet, plus
+        // maps and lookups. Shared strings are resolved, dates (by cell
+        // style) are rendered ISO, and an empty sheet is skipped.
+        internal string importXlsxNative(string sXlsxPath)
+        {
+            if (string.IsNullOrEmpty(sXlsxPath)) throw new ArgumentException("importXlsxNative requires a path.");
+            if (!File.Exists(sXlsxPath)) throw new FileNotFoundException("Workbook not found: " + sXlsxPath);
+
+            XlsxZip zip = new XlsxZip(sXlsxPath);
+
+            // Shared strings: cells of type "s" hold an index into this list.
+            List<string> lShared = new List<string>();
+            if (zip.has("xl/sharedStrings.xml"))
+            {
+                System.Xml.XmlDocument docSs = new System.Xml.XmlDocument();
+                docSs.LoadXml(zip.readText("xl/sharedStrings.xml"));
+                foreach (System.Xml.XmlNode si in docSs.DocumentElement.ChildNodes)
+                {
+                    if (!localIs(si, "si")) continue;
+                    StringBuilder sb = new StringBuilder();
+                    appendXmlText(si, sb);
+                    lShared.Add(sb.ToString());
+                }
+            }
+
+            // Styles: which style indices are date/time formatted.
+            List<bool> lStyleIsDate = new List<bool>();
+            if (zip.has("xl/styles.xml"))
+            {
+                System.Xml.XmlDocument docSt = new System.Xml.XmlDocument();
+                docSt.LoadXml(zip.readText("xl/styles.xml"));
+                Dictionary<int, string> dNumFmt = new Dictionary<int, string>();
+                System.Xml.XmlNode oNumFmts = firstLocal(docSt.DocumentElement, "numFmts");
+                if (oNumFmts != null)
+                    foreach (System.Xml.XmlNode nf in oNumFmts.ChildNodes)
+                    {
+                        if (!localIs(nf, "numFmt")) continue;
+                        int iId; if (int.TryParse(xmlAttr(nf, "numFmtId"), out iId)) dNumFmt[iId] = xmlAttr(nf, "formatCode") ?? "";
+                    }
+                System.Xml.XmlNode oXfs = firstLocal(docSt.DocumentElement, "cellXfs");
+                if (oXfs != null)
+                    foreach (System.Xml.XmlNode xf in oXfs.ChildNodes)
+                    {
+                        if (!localIs(xf, "xf")) continue;
+                        int iFmt; int.TryParse(xmlAttr(xf, "numFmtId") ?? "0", out iFmt);
+                        lStyleIsDate.Add(bIsDateFormat(iFmt, dNumFmt));
+                    }
+            }
+
+            // Sheet order/names from workbook.xml; r:id -> part path from rels.
+            Dictionary<string, string> dRel = new Dictionary<string, string>();
+            if (zip.has("xl/_rels/workbook.xml.rels"))
+            {
+                System.Xml.XmlDocument docR = new System.Xml.XmlDocument();
+                docR.LoadXml(zip.readText("xl/_rels/workbook.xml.rels"));
+                foreach (System.Xml.XmlNode rel in docR.DocumentElement.ChildNodes)
+                    if (localIs(rel, "Relationship")) dRel[xmlAttr(rel, "Id") ?? ""] = xmlAttr(rel, "Target") ?? "";
+            }
+            List<string[]> lSheets = new List<string[]>(); // {name, partPath}
+            System.Xml.XmlDocument docW = new System.Xml.XmlDocument();
+            docW.LoadXml(zip.readText("xl/workbook.xml"));
+            System.Xml.XmlNode oSheets = firstLocal(docW.DocumentElement, "sheets");
+            if (oSheets != null)
+                foreach (System.Xml.XmlNode sh in oSheets.ChildNodes)
+                {
+                    if (!localIs(sh, "sheet")) continue;
+                    string sName = xmlAttr(sh, "name") ?? "sheet";
+                    string sRid = xmlAttrLocal(sh, "id"); // r:id
+                    string sTarget = (sRid != null && dRel.ContainsKey(sRid)) ? dRel[sRid] : null;
+                    if (string.IsNullOrEmpty(sTarget)) continue;
+                    sTarget = sTarget.StartsWith("/") ? sTarget.TrimStart('/') : "xl/" + sTarget.TrimStart('.', '/');
+                    lSheets.Add(new string[] { sName, sTarget });
+                }
+
+            string sDbPath = Path.Combine(Path.GetTempPath(), "DbDo_managed_" + Guid.NewGuid().ToString("N") + ".db");
+            int iSheetsImported = 0, iRowsImported = 0;
+            try
+            {
+                if (File.Exists(sDbPath)) File.Delete(sDbPath);
+                using (FileStream fs = File.Create(sDbPath)) { }
+                using (DbDoManager managerImport = new DbDoManager())
+                {
+                    managerImport.openDatabase(sDbPath, null, false);
+                    List<string> lTableNames = new List<string>();
+                    foreach (string[] aSheet in lSheets)
+                    {
+                        if (!zip.has(aSheet[1])) continue;
+                        List<string[]> aGrid = lGridFromSheet(zip.readText(aSheet[1]), lShared, lStyleIsDate);
+                        int iAdded = buildShellTableFromGrid(managerImport, aSheet[0], aGrid, lTableNames);
+                        if (iAdded >= 0) { iRowsImported += iAdded; iSheetsImported++; }
+                    }
+                    if (iSheetsImported == 0)
+                        throw new InvalidOperationException("No worksheets with a header row and data rows were found in " + Path.GetFileName(sXlsxPath) + ".");
+                    foreach (string sSql in lInfraDdl(true, true)) managerImport.invokeSql(sSql, null);
+                }
+                try { DbDoLog.write("Imported workbook (native) " + sXlsxPath + ": " + iSheetsImported
+                    + " sheet(s), " + iRowsImported + " row(s) -> " + sDbPath); } catch { }
+                return sDbPath;
+            }
+            catch
+            {
+                try { if (File.Exists(sDbPath)) File.Delete(sDbPath); } catch { }
+                throw;
+            }
+        }
+
+        // lGridFromSheet: turn one worksheet's XML into a rectangular grid of
+        // strings (row 0..n, each a string[] of column values), resolving
+        // shared strings and date styles via sCellXmlValue.
+        private static List<string[]> lGridFromSheet(string sSheetXml, List<string> lShared, List<bool> lStyleIsDate)
+        {
+            List<string[]> lResult = new List<string[]>();
+            if (string.IsNullOrEmpty(sSheetXml)) return lResult;
+            System.Xml.XmlDocument doc = new System.Xml.XmlDocument();
+            doc.LoadXml(sSheetXml);
+            System.Xml.XmlNode oData = firstLocal(doc.DocumentElement, "sheetData");
+            if (oData == null) return lResult;
+            List<Dictionary<int, string>> lRows = new List<Dictionary<int, string>>();
+            int iMaxCol = 0;
+            foreach (System.Xml.XmlNode oRow in oData.ChildNodes)
+            {
+                if (!localIs(oRow, "row")) continue;
+                Dictionary<int, string> dRow = new Dictionary<int, string>();
+                foreach (System.Xml.XmlNode oC in oRow.ChildNodes)
+                {
+                    if (!localIs(oC, "c")) continue;
+                    int iCol = iColFromRef(xmlAttr(oC, "r") ?? "");
+                    if (iCol <= 0) continue;
+                    string sVal = sCellXmlValue(oC, lShared, lStyleIsDate);
+                    if (sVal.Length > 0) { dRow[iCol] = sVal; if (iCol > iMaxCol) iMaxCol = iCol; }
+                }
+                lRows.Add(dRow);
+            }
+            foreach (Dictionary<int, string> dRow in lRows)
+            {
+                string[] aRow = new string[iMaxCol];
+                for (int c = 1; c <= iMaxCol; c++) aRow[c - 1] = dRow.ContainsKey(c) ? dRow[c] : "";
+                lResult.Add(aRow);
+            }
+            return lResult;
+        }
+
+        // sCellXmlValue: render one <c> cell as a trimmed string. Shared
+        // strings and inline strings are resolved; booleans become
+        // true/false; numbers whose cell style is a date format are rendered
+        // ISO (with time only when present); other numbers drop a trailing .0.
+        private static string sCellXmlValue(System.Xml.XmlNode oC, List<string> lShared, List<bool> lStyleIsDate)
+        {
+            string sT = xmlAttr(oC, "t");
+            if (sT == "inlineStr")
+            {
+                System.Xml.XmlNode oIs = firstLocal(oC, "is");
+                if (oIs == null) return "";
+                StringBuilder sb = new StringBuilder(); appendXmlText(oIs, sb); return sb.ToString().Trim();
+            }
+            System.Xml.XmlNode oV = firstLocal(oC, "v");
+            string sV = (oV != null) ? oV.InnerText : "";
+            if (sT == "s")
+            {
+                int iIdx;
+                if (int.TryParse(sV, out iIdx) && iIdx >= 0 && iIdx < lShared.Count) return lShared[iIdx].Trim();
+                return "";
+            }
+            if (sT == "str" || sT == "e") return (sV ?? "").Trim();
+            if (sT == "b") return (sV == "1") ? "true" : "false";
+            if (sV.Length == 0) return "";
+            bool bDate = false;
+            int iStyle;
+            string sS = xmlAttr(oC, "s");
+            if (sS != null && int.TryParse(sS, out iStyle) && iStyle >= 0 && iStyle < lStyleIsDate.Count) bDate = lStyleIsDate[iStyle];
+            double d;
+            if (double.TryParse(sV, System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out d))
+            {
+                if (bDate)
+                {
+                    try
+                    {
+                        DateTime dt = DateTime.FromOADate(d);
+                        return (dt.TimeOfDay == TimeSpan.Zero) ? dt.ToString("yyyy-MM-dd") : dt.ToString("yyyy-MM-dd HH:mm:ss");
+                    }
+                    catch { }
+                }
+                if (!double.IsInfinity(d) && d == Math.Floor(d) && Math.Abs(d) < 1e15)
+                    return ((long)d).ToString(System.Globalization.CultureInfo.InvariantCulture);
+                return d.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            }
+            return sV.Trim();
+        }
+
+        // buildShellTableFromGrid: create one standard-shape table from a
+        // parsed grid and insert its data rows. The header row is detected
+        // (a sparse title/metadata row above the column names is skipped); a
+        // notes/tags column routes into the standard column, other standard-
+        // name collisions get an "_in" suffix, and a duplicate row that would
+        // trip the UNIQUE unq index is skipped. Returns rows inserted, or -1
+        // if there was no usable header-plus-data and no table was made.
+        private static int buildShellTableFromGrid(DbDoManager managerImport, string sSheetName,
+            List<string[]> aGrid, List<string> lTableNames)
+        {
+            if (aGrid == null || aGrid.Count < 2) return -1;
+            string[] aReservedRename = new string[] { "added", "edited", "look", "unq", "marked" };
+
+            int iScan = Math.Min(aGrid.Count - 1, 14);
+            int iWidest = 0;
+            for (int r = 0; r <= iScan; r++) { int f = iFilledCells(aGrid[r]); if (f > iWidest) iWidest = f; }
+            int iThreshold = Math.Max(2, (iWidest * 6) / 10);
+            int iHdr = 0;
+            for (int r = 0; r <= iScan; r++) { if (iFilledCells(aGrid[r]) >= iThreshold) { iHdr = r; break; } }
+            if (iHdr >= aGrid.Count - 1) return -1;
+
+            string sTable = sNormalizeIdentifier(sSheetName);
+            if (sTable.Length == 0) sTable = "sheet";
+            if (char.IsDigit(sTable[0])) sTable = "t_" + sTable;
+            string sBaseT = sTable; int iDupT = 1;
+            while (lTableNames.Contains(sTable)) { iDupT++; sTable = sBaseT + "_" + iDupT; }
+            lTableNames.Add(sTable);
+            string sSingular = sTable.EndsWith("s") ? sTable.Substring(0, sTable.Length - 1) : sTable;
+            string sPk = sSingular + "_id";
+
+            string[] aHeader = aGrid[iHdr];
+            List<string[]> lFieldDefs = new List<string[]>();
+            List<string> lColTarget = new List<string>();
+            List<string> lUsedNames = new List<string>();
+            List<string> lUsedPass = new List<string>();
+            for (int c = 0; c < aHeader.Length; c++)
+            {
+                string sHdr = sNormalizeIdentifier(aHeader[c] ?? "");
+                if (sHdr.Length == 0) sHdr = "column_" + (c + 1);
+                if (char.IsDigit(sHdr[0])) sHdr = "c_" + sHdr;
+                if (sHdr == "notes" || sHdr == "tags")
+                {
+                    if (lUsedPass.Contains(sHdr)) { lColTarget.Add(null); continue; }
+                    lUsedPass.Add(sHdr); lColTarget.Add(sHdr); continue;
+                }
+                if (sHdr == sPk || Array.IndexOf(aReservedRename, sHdr) >= 0) sHdr = sHdr + "_in";
+                string sBaseH = sHdr; int iDupH = 1;
+                while (lUsedNames.Contains(sHdr)) { iDupH++; sHdr = sBaseH + "_" + iDupH; }
+                lUsedNames.Add(sHdr);
+                lFieldDefs.Add(new string[] { sHdr, "TEXTLINE" });
+                lColTarget.Add(sHdr);
+            }
+            if (lFieldDefs.Count == 0) lFieldDefs.Add(new string[] { "value", "TEXTLINE" });
+
+            foreach (string sSql in lStandardTableDdl(sTable, lFieldDefs)) managerImport.invokeSql(sSql, null);
+
+            int iRows = 0;
+            for (int r = iHdr + 1; r < aGrid.Count; r++)
+            {
+                string[] aRow = aGrid[r];
+                List<string> lCols = new List<string>();
+                List<string> lVals = new List<string>();
+                bool bAny = false;
+                for (int c = 0; c < lColTarget.Count; c++)
+                {
+                    string sTarget = lColTarget[c];
+                    if (sTarget == null) continue;
+                    string sCell = (c < aRow.Length && aRow[c] != null) ? aRow[c] : "";
+                    if (sCell.Length > 0) bAny = true;
+                    lCols.Add("\"" + sTarget + "\"");
+                    lVals.Add("'" + sCell.Replace("'", "''") + "'");
+                }
+                if (!bAny) continue;
+                string sInsert = "INSERT INTO \"" + sTable + "\" (" + string.Join(", ", lCols.ToArray())
+                    + ") VALUES (" + string.Join(", ", lVals.ToArray()) + ")";
+                try { managerImport.invokeSql(sInsert, null); iRows++; }
+                catch (Exception exRow) { try { DbDoLog.write("Import skipped a row in " + sTable + ": " + exRow.Message); } catch { } }
+            }
+            return iRows;
+        }
+
+        private static int iFilledCells(string[] aRow)
+        {
+            int n = 0;
+            if (aRow != null) foreach (string s in aRow) if (!string.IsNullOrEmpty(s)) n++;
+            return n;
+        }
+
+        // Small System.Xml helpers (match by local name so namespaces and
+        // prefixes do not matter).
+        private static bool localIs(System.Xml.XmlNode n, string sLocal)
+        { return n != null && n.NodeType == System.Xml.XmlNodeType.Element && n.LocalName == sLocal; }
+
+        private static System.Xml.XmlNode firstLocal(System.Xml.XmlNode parent, string sLocal)
+        {
+            if (parent == null) return null;
+            foreach (System.Xml.XmlNode ch in parent.ChildNodes) if (localIs(ch, sLocal)) return ch;
+            return null;
+        }
+
+        private static string xmlAttr(System.Xml.XmlNode n, string sName)
+        {
+            if (n == null || n.Attributes == null) return null;
+            System.Xml.XmlNode a = n.Attributes.GetNamedItem(sName);
+            return (a != null) ? a.Value : null;
+        }
+
+        private static string xmlAttrLocal(System.Xml.XmlNode n, string sLocal)
+        {
+            if (n == null || n.Attributes == null) return null;
+            foreach (System.Xml.XmlNode a in n.Attributes) if (a.LocalName == sLocal) return a.Value;
+            return null;
+        }
+
+        // iColFromRef: 1-based column number from a cell reference's letter
+        // prefix ("A"->1, "Z"->26, "AA"->27); ignores the row digits.
+        private static int iColFromRef(string sRef)
+        {
+            int n = 0;
+            foreach (char ch in sRef)
+            {
+                if (ch >= 'A' && ch <= 'Z') n = n * 26 + (ch - 'A' + 1);
+                else if (ch >= 'a' && ch <= 'z') n = n * 26 + (ch - 'a' + 1);
+                else break;
+            }
+            return n;
+        }
+
+        private static void appendXmlText(System.Xml.XmlNode n, StringBuilder sb)
+        {
+            foreach (System.Xml.XmlNode ch in n.ChildNodes)
+            {
+                if (localIs(ch, "t")) sb.Append(ch.InnerText);
+                else if (ch.HasChildNodes) appendXmlText(ch, sb);
+            }
+        }
+
+        private static bool bIsDateFormat(int iFmt, Dictionary<int, string> dNumFmt)
+        {
+            if ((iFmt >= 14 && iFmt <= 22) || (iFmt >= 45 && iFmt <= 47) || (iFmt >= 27 && iFmt <= 36) || (iFmt >= 50 && iFmt <= 58)) return true;
+            string sCode;
+            if (!dNumFmt.TryGetValue(iFmt, out sCode) || sCode == null) return false;
+            StringBuilder sb = new StringBuilder();
+            bool bInBracket = false, bInQuote = false;
+            for (int i = 0; i < sCode.Length; i++)
+            {
+                char c = sCode[i];
+                if (bInQuote) { if (c == '"') bInQuote = false; continue; }
+                if (bInBracket) { if (c == ']') bInBracket = false; continue; }
+                if (c == '"') { bInQuote = true; continue; }
+                if (c == '[') { bInBracket = true; continue; }
+                if (c == '\\') { i++; continue; }
+                sb.Append(char.ToLowerInvariant(c));
+            }
+            string s = sb.ToString();
+            return s.IndexOf('y') >= 0 || s.IndexOf('d') >= 0 || s.IndexOf('h') >= 0 || s.IndexOf('s') >= 0;
+        }
+
         // importToShell: build a fresh DbDo database -- a temporary "shell"
         // carrying the standard columns plus the maps and lookups tables --
         // from another file, one standard-shape table per table found in
@@ -19902,7 +20331,8 @@ namespace DbDo
         {
             if (string.IsNullOrEmpty(sSourcePath)) throw new ArgumentException("importToShell requires a path.");
             string sExt = Path.GetExtension(sSourcePath).TrimStart('.').ToLowerInvariant();
-            if (sExt == "xlsx" || sExt == "xls") return importWorkbookFile(sSourcePath);
+            if (sExt == "xlsx") return importXlsxNative(sSourcePath);
+            if (sExt == "xls") return importWorkbookFile(sSourcePath); // legacy binary; read via Excel COM
             return importAdoToShell(sSourcePath);
         }
 
@@ -20424,6 +20854,44 @@ namespace DbDo
                 LiveRegion.say("Imported " + Path.GetFileName(sOrigin)
                     + " into a new DbDo database. Save Database to keep it as a .db; the original file is unchanged.");
             }
+        }
+
+        // emailLogFile: make it easy to send DbDo.log for troubleshooting.
+        // The clipboard is sometimes unavailable (the error dialog's Copy
+        // button can report "could not access the clipboard"), so this does
+        // not rely on it: it opens the folder containing the log with the
+        // file selected, and starts a new email with the log's full path in
+        // the body, ready for the sender to attach. Shared by the Help menu
+        // and the error dialog's Email Log button.
+        internal static void emailLogFile(IWin32Window owner)
+        {
+            string sLog = DbDoLog.getLogPath();
+            if (string.IsNullOrEmpty(sLog) || !File.Exists(sLog))
+            {
+                MessageBox.Show(owner, "There is no DbDo.log file to send yet.", "Email Log File",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            // Reveal the log in the file manager, selected and ready to attach.
+            try { System.Diagnostics.Process.Start("explorer.exe", "/select,\"" + sLog + "\""); }
+            catch (Exception ex) { try { DbDoLog.write("emailLogFile reveal failed: " + ex.Message); } catch { } }
+            // Start a new email pointing at the log (mailto cannot attach a
+            // file, so the path goes in the body).
+            try
+            {
+                string sBody = "Please attach the DbDo log file, which is located here:\r\n"
+                    + sLog + "\r\n\r\nBriefly, what were you doing when the problem happened?\r\n";
+                System.Diagnostics.Process.Start("mailto:?subject=" + Uri.EscapeDataString("DbDo.log")
+                    + "&body=" + Uri.EscapeDataString(sBody));
+            }
+            catch (Exception ex) { try { DbDoLog.write("emailLogFile mailto failed: " + ex.Message); } catch { } }
+            try { LiveRegion.say("Opened your email program and the folder holding DbDo.log. Attach the file at "
+                + sLog + " to your message."); } catch { }
+        }
+
+        private void emailLogClicked(object sender, EventArgs evArgs)
+        {
+            emailLogFile(this);
         }
 
         private void fileExportClicked(object sender, EventArgs evArgs)

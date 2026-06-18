@@ -128,11 +128,59 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 ; the Installing step.
 WelcomeLabel2=This will install [name/ver] on your computer.%n%n[name] is an accessible, keyboard-first database manager for Windows. It opens SQLite, Microsoft Access, Excel, dBASE, and delimited-text files, with first-class support for JAWS, NVDA, and Narrator.%n%n[name] is licensed under the MIT License: free to use, copy, modify, and distribute; provided "as is" with no warranty. The full license text is installed as License.htm.%n%nSetup will silently install the SQLite ODBC driver and the Microsoft Access Database Engine if either is missing; existing drivers are left alone.%n%nIt is recommended that you close all other applications before continuing.
 
+[InstallDelete]
+; Cleanup on upgrade. Several files from earlier DbDo releases are
+; no longer referenced and should be removed so the install folder
+; reflects only files DbDo actually uses.
+;
+; v1.0.40-v1.0.42: NVDA controller-client DLL had a legacy 64-suffixed
+; name. v1.0.43+ uses the modern unsuffixed name.
+Type: files; Name: "{app}\nvdaControllerClient64.dll"
+;
+; v1.0.42-v1.0.43 bundled the Roslyn C# scripting assemblies; v1.0.44
+; rolled that back in favor of JScript .NET (no shipped runtime DLLs).
+; The 12 assemblies below plus the obsolete App.config binding-redirect
+; file are all dead weight from v1.0.44 onward and are removed here.
+; (DbDo.exe.config returns from a later build, but now it carries startup
+; tuning rather than binding redirects, so it is installed by [Files]
+; rather than deleted here.)
+Type: files; Name: "{app}\App.config"
+Type: files; Name: "{app}\Microsoft.CodeAnalysis.dll"
+Type: files; Name: "{app}\Microsoft.CodeAnalysis.CSharp.dll"
+Type: files; Name: "{app}\Microsoft.CodeAnalysis.Scripting.dll"
+Type: files; Name: "{app}\Microsoft.CodeAnalysis.CSharp.Scripting.dll"
+Type: files; Name: "{app}\System.Collections.Immutable.dll"
+Type: files; Name: "{app}\System.Reflection.Metadata.dll"
+Type: files; Name: "{app}\System.Memory.dll"
+Type: files; Name: "{app}\System.Buffers.dll"
+Type: files; Name: "{app}\System.Runtime.CompilerServices.Unsafe.dll"
+Type: files; Name: "{app}\System.Numerics.Vectors.dll"
+Type: files; Name: "{app}\System.Threading.Tasks.Extensions.dll"
+Type: files; Name: "{app}\System.Text.Encoding.CodePages.dll"
+Type: files; Name: "{app}\Microsoft.CSharp.dll"
+;
+; v1.0.58 and earlier shipped dbDuoEval.dll as the JScript .NET support
+; module. v1.0.59 renames it to DbDo.dll. Remove the old file on
+; upgrade so the install folder doesn't carry an unused DLL.
+Type: files; Name: "{app}\dbDuoEval.dll"
+
 [Files]
 Source: "DbDo.exe";    DestDir: "{app}"; Flags: ignoreversion
+; Runtime configuration for DbDo.exe -- startup tuning (disables Authenticode
+; publisher-evidence/CRL checks, enables concurrent GC). It must sit next to
+; DbDo.exe; ignoreversion keeps it refreshed in sync with the executable.
+Source: "DbDo.exe.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDo.dll"; DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDo.ico";    DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDo.manifest"; DestDir: "{app}"; Flags: ignoreversion
+; Source and build inputs, shipped so DbDo can be recompiled in place
+; (EdSharp-style). buildDbDo.cmd fetches its own NuGet/tool dependencies and
+; drives csc/jsc, so no Visual Studio install is required; run it first, then
+; recompile this installer with ISCC if desired.
+Source: "DbDo.cs";        DestDir: "{app}"; Flags: ignoreversion
+Source: "DbDo.js";        DestDir: "{app}"; Flags: ignoreversion
+Source: "buildDbDo.cmd";  DestDir: "{app}"; Flags: ignoreversion
+Source: "DbDo_setup.iss"; DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDo.md";     DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDo.htm";    DestDir: "{app}"; Flags: ignoreversion
 Source: "README.md";    DestDir: "{app}"; Flags: ignoreversion
@@ -143,13 +191,14 @@ Source: "History.md";   DestDir: "{app}"; Flags: ignoreversion
 Source: "History.htm";  DestDir: "{app}"; Flags: ignoreversion
 Source: "License.md";   DestDir: "{app}"; Flags: ignoreversion
 Source: "License.htm";  DestDir: "{app}"; Flags: ignoreversion
-; Source: "CamelType_CSharp.md"; DestDir: "{app}"; Flags: ignoreversion
-; Source: "CamelType_CSharp.htm"; DestDir: "{app}"; Flags: ignoreversion
+Source: "CamelType_CSharp.md"; DestDir: "{app}"; Flags: ignoreversion
+Source: "CamelType_CSharp.htm"; DestDir: "{app}"; Flags: ignoreversion
 Source: "NFB2026Convention.db"; DestDir: "{app}"; Flags: ignoreversion
 Source: "lookups.db"; DestDir: "{app}"; Flags: ignoreversion
 Source: "sample.db";     DestDir: "{app}"; Flags: ignoreversion
 Source: "northwind.db";  DestDir: "{app}"; Flags: ignoreversion
 Source: "chinook.db";    DestDir: "{app}"; Flags: ignoreversion
+
 Source: "cellar.db";     DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDo.inix";   DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist
 ;
@@ -174,22 +223,6 @@ Source: "Scripts\*.dbdo"; DestDir: "{app}\Scripts"; Flags: ignoreversion
 Source: "DbDo_JAWS.zip"; DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDo.nvda-addon"; DestDir: "{app}"; Flags: ignoreversion
 Source: "nvdaControllerClient.dll"; DestDir: "{app}"; Flags: ignoreversion
-
-; ---- Third-party runtime assemblies (fetched by buildDbDo.cmd) ----
-; All five are required at run time, not merely at build:
-;   Newtonsoft.Json.dll    -- JSON / .ipynb import-export (Json.NET, MIT)
-;   System.Data.SQLite.dll -- ADO.NET SQLite for the in-memory open and
-;                             backup feature (needs its native companion)
-;   SQLite.Interop.dll     -- native x64 interop for System.Data.SQLite
-;   sqlean.dll             -- SQLean extension bundle, loaded at run time
-;                             as a SQLite extension (sqliteLoadExtClause)
-;   sqlean.exe             -- SQLean command-line shell behind the '!'
-;                             shell pass-through (cmdSqleanShell)
-Source: "Newtonsoft.Json.dll";    DestDir: "{app}"; Flags: ignoreversion
-Source: "System.Data.SQLite.dll"; DestDir: "{app}"; Flags: ignoreversion
-Source: "SQLite.Interop.dll";     DestDir: "{app}"; Flags: ignoreversion
-Source: "sqlean.dll";             DestDir: "{app}"; Flags: ignoreversion
-Source: "sqlean.exe";             DestDir: "{app}"; Flags: ignoreversion
 
 ; (No [Tasks] section. The JAWS settings install is exposed as a
 ; checkbox on the Finish page via [Run] above, delegating the work
