@@ -20545,7 +20545,21 @@ namespace DbDo
                 if (lTables == null) lTables = new List<string>();
                 if (string.IsNullOrEmpty(sDesiredTable) || !lTables.Contains(sDesiredTable))
                 {
-                    sDesiredTable = lTables.Count > 0 ? lTables[0] : null;
+                    // Prefer a real data table over DbDo's infrastructure
+                    // tables. getTableNames() is alphabetical, so without this
+                    // an imported book list (table "sheet1") loses to "lookups"
+                    // and "maps" and the user lands on the 14-row lookups table
+                    // -- which looks exactly like an import that only read 14
+                    // records. Fall back to the first table only if every table
+                    // is infrastructure.
+                    sDesiredTable = null;
+                    foreach (string sT in lTables)
+                    {
+                        if (string.Equals(sT, "maps", StringComparison.OrdinalIgnoreCase)) continue;
+                        if (string.Equals(sT, "lookups", StringComparison.OrdinalIgnoreCase)) continue;
+                        sDesiredTable = sT; break;
+                    }
+                    if (sDesiredTable == null) sDesiredTable = lTables.Count > 0 ? lTables[0] : null;
                 }
                 if (!string.IsNullOrEmpty(sDesiredTable))
                 {
