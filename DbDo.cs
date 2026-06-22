@@ -42,14 +42,38 @@ using Microsoft.CSharp.RuntimeBinder;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 
+// =====================================================================
+// Assembly version resource. csc.exe stamps these three attributes
+// into the built EXE's Win32 version resource, so the Windows shell
+// (file Properties -> Details), Add/Remove Programs, and any tester
+// inspecting the binary all report the same number the About dialog
+// shows. All three read the single constant DbDo.BuildInfo.VersionString
+// below -- so the version is edited in exactly ONE place in the C#.
+// Without these attributes the file-properties version stays 0.0.0.0
+// on every build, which is what made the version look like it "never
+// changed" to a tester checking the EXE rather than the About box.
+// =====================================================================
+[assembly: AssemblyVersion(DbDo.BuildInfo.VersionString)]
+[assembly: AssemblyFileVersion(DbDo.BuildInfo.VersionString)]
+[assembly: AssemblyInformationalVersion(DbDo.BuildInfo.VersionString)]
+
 namespace DbDo
 {
     // =====================================================================
-    // BuildInfo: single source of truth for the application version
-    // string. Update VersionString here on each release; the value
-    // surfaces in the About dialog and (via VersionInfoVersion) in the
-    // built EXE's file properties. The Inno Setup script reads its own
-    // copy of the same value from DbDo_setup.iss; keep the two in sync.
+    // BuildInfo: THE single source of truth for the application
+    // version. Edit VersionString here on each release and nowhere
+    // else. It feeds three things automatically:
+    //   1. The About dialog, the --version console output, and the
+    //      GitHub update check (all read BuildInfo.VersionString).
+    //   2. The built EXE's file-properties version, via the
+    //      [assembly: AssemblyVersion/AssemblyFileVersion] attributes
+    //      above the namespace, which reference this same constant.
+    //   3. DbDo_setup.iss's #define AppVersion line, which buildDbDo.cmd
+    //      rewrites from this value on every build -- so the installer,
+    //      the uninstall entry, and the tagRelease git tag can no longer
+    //      drift behind the app. (Inno Setup cannot read a C# constant,
+    //      so the build copies the value across rather than duplicating
+    //      it by hand.)
     // =====================================================================
     public static class BuildInfo
     {
@@ -12301,6 +12325,26 @@ namespace DbDo
             return frmChild;
         }
 
+        // findDrillChild: locate an open MDI child already showing a
+        // related view for the same database file, target table, and
+        // WHERE clause -- so Enter-Child reactivates it instead of
+        // opening a duplicate window. The calling window is skipped.
+        public DbDoForm findDrillChild(string sFile, string sTable, string sWhere, DbDoForm frmCaller)
+        {
+            foreach (Form frm in this.MdiChildren)
+            {
+                DbDoForm frmChild = frm as DbDoForm;
+                if (frmChild == null || frmChild.IsDisposed || frmChild == frmCaller) continue;
+                if (!string.Equals(frmChild.sDrillTable ?? "", sTable ?? "", StringComparison.OrdinalIgnoreCase)) continue;
+                if (!string.Equals(frmChild.sDrillWhere ?? "", sWhere ?? "", StringComparison.Ordinal)) continue;
+                string sChildFile = "";
+                try { sChildFile = frmChild.Db.filePath ?? ""; } catch { }
+                if (!string.Equals(sChildFile, sFile ?? "", StringComparison.OrdinalIgnoreCase)) continue;
+                return frmChild;
+            }
+            return null;
+        }
+
         // toggleWindow: activate the child that was active before the
         // current one (FileDir's Window Toggle, Shift+W).
         public void toggleWindow()
@@ -12405,6 +12449,19 @@ namespace DbDo
         // memory tiny and load time near-zero even for 100K-row
         // tables.
         private LbcListView grid;
+
+        // --- MDI drill linkage (Enter Child / Exit Child) ---------------
+        // DbDo's drill is window-based, matching the app's "Open = new
+        // window" model: Enter-Child opens the related view in a NEW MDI
+        // child (or reactivates an existing one already showing the same
+        // table + WHERE). Each drilled child remembers the window and row
+        // it was opened FROM, so Exit-Child (Alt+Left / Backspace)
+        // reactivates that caller on its original row, and Exit-to-Root
+        // (Alt+Home) walks the chain back to the first window.
+        public DbDoForm frmDrillCaller;     // window drilled in FROM; null on a root window
+        public int      iDrillCallerRow;    // 1-based row to restore in the caller
+        public string   sDrillTable = "";   // this window's drill target table (reactivation match)
+        public string   sDrillWhere = "";   // this window's drill WHERE clause (reactivation match)
         // dLocalKeyToMenu: this window's own chord -> menu-item table.
         // Command dispatch (ProcessCmdKey) resolves chords here, against
         // THIS window's items, so a command acts on the focused window.
@@ -13285,7 +13342,7 @@ namespace DbDo
                 this.Invoke(new Action(() => recEnterChildClicked(this, EventArgs.Empty)));
             }
             catch { }
-            return drillStack.Count;
+            return drillDepth();
         }
 
         public int invokeExitChild()
@@ -13296,40 +13353,44 @@ namespace DbDo
                 this.Invoke(new Action(() => recExitChildClicked(this, EventArgs.Empty)));
             }
             catch { }
-            return drillStack.Count;
+            return drillDepth();
         }
 
-        // invokeExitChildToRoot: pop the entire drill stack and
-        // return the number of levels popped. Marshalled to the GUI
+        // invokeExitChildToRoot: return to the root window and report
+        // how many drill levels were unwound. Marshalled to the GUI
         // thread so the CLI's cmdExitChildToRoot can call it.
         public int invokeExitChildToRoot()
         {
             if (this.IsDisposed) return -1;
-            int iBefore = drillStack.Count;
+            int iBefore = drillDepth();
             try
             {
                 this.Invoke(new Action(() => recExitChildToRootClicked(this, EventArgs.Empty)));
             }
             catch { }
-            return iBefore - drillStack.Count;
+            return iBefore;
         }
 
-        // True if there is at least one parent on the drill stack
-        // (i.e., Exit-Child has something to pop). Used by the dot
-        // prompt's cmdExitChild to give a no-op message without
-        // marshaling to the GUI thread first.
+        // True if this window was opened by Enter-Child (i.e., it has a
+        // live caller window to return to). Used by the dot prompt's
+        // cmdExitChild to give a no-op message without marshaling to the
+        // GUI thread first.
         public bool hasDrillStack()
         {
-            return drillStack.Count > 0;
+            return frmDrillCaller != null && !frmDrillCaller.IsDisposed;
         }
 
-        // Drop any pending drill entries. Used when the database
-        // changes (open or close) from outside the form's normal
-        // click handlers -- the dot prompt's cmdOpenDatabase /
-        // cmdCloseDatabase paths in particular.
+        // Drop this window's drill linkage. Used when the database
+        // changes (open or close) from outside the form's normal click
+        // handlers -- the dot prompt's cmdOpenDatabase / cmdCloseDatabase
+        // paths in particular -- so a stale caller pointer can't survive
+        // into an unrelated database.
         public void clearDrillStack()
         {
-            drillStack.Clear();
+            frmDrillCaller = null;
+            iDrillCallerRow = 0;
+            sDrillTable = "";
+            sDrillWhere = "";
         }
 
         // =====================================================================
@@ -14539,9 +14600,19 @@ namespace DbDo
                     && grid.Columns.Count > 0 && lFields.Count != grid.Columns.Count)
                 {
                     bLoggedVirtualMismatch = true;
+                    // Capture the actual lists, not just the counts: a
+                    // trailing blank column or a notes/standard column
+                    // that renders empty almost always traces to a
+                    // display-fields vs grid-columns disagreement, and
+                    // the names pinpoint which column is the odd one out.
+                    string sFieldList = string.Join(", ", lFields.ToArray());
+                    List<string> lHdr = new List<string>();
+                    try { foreach (ColumnHeader oCh in grid.Columns) lHdr.Add(oCh.Text); } catch { }
                     DbDoLog.write("Virtual grid mismatch: " + lFields.Count
                         + " display fields vs " + grid.Columns.Count
-                        + " columns (table " + (db.currentTable ?? "?") + ")");
+                        + " columns (table " + (db.currentTable ?? "?") + ")"
+                        + "; fields=[" + sFieldList + "]"
+                        + "; columns=[" + string.Join(", ", lHdr.ToArray()) + "]");
                 }
                 string[] aRow = new string[lFields.Count];
                 for (int i = 0; i < lFields.Count; i++)
@@ -15612,10 +15683,10 @@ namespace DbDo
             if (miRecRegexReplace != null) miRecRegexReplace.Enabled = bWritable && bHasTable;
             miRecRelated.Enabled = bHasTable;
             miRecEnterChild.Enabled = bHasTable;
-            // Exit-Child is enabled only when there is something on
-            // the drill stack to pop back to.
-            miRecExitChild.Enabled = bHasTable && drillStack.Count > 0;
-            miRecExitChildToRoot.Enabled = bHasTable && drillStack.Count > 0;
+            // Exit-Child is enabled only on a window that Enter-Child
+            // opened -- i.e. one with a live caller window to return to.
+            miRecExitChild.Enabled = bHasTable && frmDrillCaller != null && !frmDrillCaller.IsDisposed;
+            miRecExitChildToRoot.Enabled = bHasTable && frmDrillCaller != null && !frmDrillCaller.IsDisposed;
             miRecGoTo.Enabled = bHasTable;
             miRecBookmark.Enabled = bHasTable;
             miRecGotoBookmark.Enabled = bHasTable && lBookmarks.Count > 0;
@@ -20501,7 +20572,7 @@ namespace DbDo
             try
             {
                 DbDoLog.write("Opening: " + sPath);
-                drillStack.Clear();
+                clearDrillStack();
                 // Reset the first-populate flag so the JAWS "Unselected"
                 // workaround fires once for this new database.
                 bGridFirstPopulate = true;
@@ -20751,10 +20822,10 @@ namespace DbDo
         {
             if (db == null) return;
             try { db.close(); } catch { }
-            // Reset the drill stack so navigation state doesn't leak
+            // Reset the drill linkage so navigation state doesn't leak
             // across databases. The TableSettings cache inside
             // DbDoManager is cleared by db.close() itself.
-            drillStack.Clear();
+            clearDrillStack();
             iMarkAnchor = -1;
             sMarkAnchorTable = null;
             iUnmarkAnchor = -1;
@@ -24458,38 +24529,26 @@ namespace DbDo
         }
 
         // =====================================================================
-        // Enter-Child / Exit-Child: parent-to-child drill-down with
-        // a navigation stack. Distinct from Show-Related (which goes
-        // child to parent via the row's foreign-key columns); these
-        // commands operate in the opposite direction.
+        // Enter-Child / Exit-Child: parent-to-child drill-down across
+        // MDI windows. Distinct from Show-Related (which goes child to
+        // parent via the row's foreign-key columns); these commands
+        // operate in the opposite direction.
         //
         // On Enter-Child, DbDo finds every other table that has a
         // column matching the current table's primary-key name (the
-        // dbDot convention <singular>_id). If exactly one such child
-        // table exists, it is opened directly; if several, the user
-        // picks from an alphabetized listbox.
+        // dbDot convention <singular>_id), plus any maps-based and
+        // two-hop relations. If exactly one target exists it opens
+        // directly; if several, the user picks from a listbox.
         //
-        // The child is then filtered to rows whose foreign-key value
-        // equals the parent's primary-key value. The child's last-
-        // used sort order is restored automatically by the existing
-        // per-table TableSettings cache.
-        //
-        // Exit-Child pops one level off the stack and returns the
-        // user to the same parent row they drilled from (located by
-        // primary-key value, not by absolute position, so the
-        // navigation is robust against intervening filter/sort
-        // changes in the parent).
-        //
-        // The stack is unbounded; nesting issues -> screens -> issues
-        // is fine. Closing the database clears the stack.
+        // The chosen related view opens in a NEW MDI child (or an
+        // existing child showing the same table + WHERE is reactivated)
+        // via openDrillChild, following the app's "Open = new window"
+        // model. Each drilled child stores its caller window and row
+        // (frmDrillCaller / iDrillCallerRow), so Exit-Child returns to
+        // that window on that row and Exit-to-Root walks the chain back
+        // to the first window. Closing a database clears a window's
+        // drill linkage (clearDrillStack).
         // =====================================================================
-        private class DrillEntry
-        {
-            public string sParentTable;    // table the user came from
-            public string sParentPkColumn; // PK column name on parent
-            public string sParentPkValue;  // PK value of the row at push time
-        }
-        private Stack<DrillEntry> drillStack = new Stack<DrillEntry>();
 
         // Given a table name, compute the actual primary-key column
         // name. Schema-truth FIRST (via db.actualPrimaryKey, which
@@ -24563,6 +24622,138 @@ namespace DbDo
                 return sColumn + " = " + sValue;
             // Quote as string, doubling embedded single quotes.
             return sColumn + " = '" + sValue.Replace("'", "''") + "'";
+        }
+
+        // drillDepth: how many caller windows lie between this window
+        // and the root (0 on a root window). Reported to the CLI lane.
+        private int drillDepth()
+        {
+            int iDepth = 0;
+            DbDoForm frm = this;
+            int iGuard = 0;
+            while (frm.frmDrillCaller != null && !frm.frmDrillCaller.IsDisposed && iGuard++ < 256)
+            { iDepth++; frm = frm.frmDrillCaller; }
+            return iDepth;
+        }
+
+        // focusOwnRow: put keyboard/screen-reader focus on this window's
+        // grid and ensure the ADO cursor's current row carries the
+        // selection, so the screen reader reads the right row on arrival
+        // or reactivation.
+        public void focusOwnRow()
+        {
+            try
+            {
+                if (grid == null) return;
+                grid.Focus();
+                if (db == null || !db.hasRecordset() || db.recordCount == 0) return;
+                int iPos = db.absolutePosition;
+                if (iPos < 1) iPos = 1;
+                int iIndex = iPos - 1;
+                if (iIndex < 0 || iIndex >= grid.VirtualListSize) return;
+                try
+                {
+                    grid.SelectedIndices.Clear();
+                    grid.SelectedIndices.Add(iIndex);
+                    grid.EnsureVisible(iIndex);
+                    grid.FocusedItem = grid.Items[iIndex];
+                    grid.selectAndFocusNative(iIndex);
+                }
+                catch { }
+            }
+            catch { }
+        }
+
+        // restoreRow: position this window on a specific 1-based row and
+        // refresh, so a returning Exit-Child lands the caller on the row
+        // the user drilled from rather than row 1.
+        public void restoreRow(int iRow)
+        {
+            try
+            {
+                if (db == null || !db.hasRecordset() || db.recordCount == 0) return;
+                if (iRow < 1) iRow = 1;
+                if (iRow > db.recordCount) iRow = db.recordCount;
+                try { db.absolutePosition = iRow; } catch { }
+                invokeRefresh();
+                focusOwnRow();
+            }
+            catch { }
+        }
+
+        // openDrillChild: open the chosen related view in a NEW MDI child
+        // on the same database file -- or, if a child is already showing
+        // that exact (table, WHERE), reactivate it instead of opening a
+        // duplicate. The new child records this window and row as its
+        // caller so Exit-Child can return here. An empty related view is
+        // not left on screen: the child is closed and focus stays put.
+        private void openDrillChild(string sTargetTable, string sWhereSql)
+        {
+            DbDoFrame frame = mdiFrame();
+            if (frame == null) return;
+            string sFile = "";
+            try { sFile = db.filePath ?? ""; } catch { }
+            string sWhere = sWhereSql ?? "";
+
+            // Capture the caller row so Exit-Child can restore it.
+            syncAdoCursorToSelection();
+            int iCallerRow = 0;
+            try { iCallerRow = db.absolutePosition; } catch { }
+
+            // Reactivate an existing child already showing this exact
+            // (file, table, WHERE), rather than stacking duplicates.
+            DbDoForm frmExisting = frame.findDrillChild(sFile, sTargetTable, sWhere, this);
+            if (frmExisting != null)
+            {
+                try { DbDoLog.write("Drill: reactivating existing window for '" + sTargetTable + "'."); } catch { }
+                frmExisting.frmDrillCaller = this;
+                frmExisting.iDrillCallerRow = iCallerRow;
+                try { frmExisting.Activate(); } catch { }
+                frmExisting.focusOwnRow();
+                LiveRegion.say(sTargetTable + ": already open");
+                return;
+            }
+
+            // Open a fresh child on the same file, then the filtered view
+            // (its own manager -- one manager per window, as Open Table).
+            DbDoForm frmChild = new DbDoForm(Program.UiMode.Gui);
+            frmChild.MdiParent = frame;
+            try
+            {
+                if (!string.IsNullOrEmpty(sFile)) frmChild.Db.openDatabase(sFile, null, false);
+                frmChild.Db.selectTableFiltered(sTargetTable, sWhere);
+            }
+            catch (Exception ex)
+            {
+                try { frmChild.Close(); } catch { }
+                try { DbDoLog.write("Drill: could not open related table '" + sTargetTable + "': " + ex.Message); } catch { }
+                ErrorDialog.show(this, "Enter Child", "Could not open related table: " + ex.Message);
+                return;
+            }
+            frmChild.frmDrillCaller = this;
+            frmChild.iDrillCallerRow = iCallerRow;
+            frmChild.sDrillTable = sTargetTable;
+            frmChild.sDrillWhere = sWhere;
+            frmChild.invokeRefresh();
+            frmChild.Show();
+            frmChild.Activate();
+
+            int iCount = 0;
+            try { iCount = frmChild.Db.recordCount; } catch { }
+            if (iCount == 0)
+            {
+                // Empty related view: don't strand the user in a blank
+                // window. Close the child and stay on this row.
+                try { DbDoLog.write("Drill: no related records in '" + sTargetTable + "'; closing child, staying."); } catch { }
+                try { frmChild.Close(); } catch { }
+                try { this.Activate(); } catch { }
+                focusOwnRow();
+                LiveRegion.say("No related records in " + sTargetTable + "; staying here");
+                return;
+            }
+            try { DbDoLog.write("Drill: opened window for '" + sTargetTable + "' (" + iCount + " rows)."); } catch { }
+            frmChild.focusOwnRow();
+            LiveRegion.say(sTargetTable + ": " + Str.plural("related record", iCount));
         }
 
         // finishDrillArrival: shared landing logic for every drill
@@ -24816,17 +25007,9 @@ namespace DbDo
                 if (string.IsNullOrEmpty(sChosen)) return;
             }
 
-            // Push a stack entry BEFORE switching tables, so we
-            // remember exactly where we came from. The TableSettings
-            // cache will save the parent's current filter/sort/
-            // position automatically as part of the table switch.
-            // Exit-Child restores by re-finding the parent row via its
-            // primary key, so the SAME stack serves both drill kinds.
-            DrillEntry entry = new DrillEntry();
-            entry.sParentTable = sParentTable;
-            entry.sParentPkColumn = sParentPk;
-            entry.sParentPkValue = sParentPkValue;
-            drillStack.Push(entry);
+            // No same-window stack push here: the drill opens an MDI
+            // child, and that child records this window + row as its
+            // caller (see openDrillChild) so Exit-Child can return.
 
             string[] aMapsSel;
             string[] aTwoHopSel;
@@ -24854,8 +25037,7 @@ namespace DbDo
                         + " AND e2.tt = " + DbDoManager.sQuoteSqlLiteral(sTarget)
                         + " AND NOT (e2.tt = " + DbDoManager.sQuoteSqlLiteral(sParentTable)
                         + " AND e2.tu = " + DbDoManager.sQuoteSqlLiteral(sUnqValue) + "))";
-                    db.selectTableFiltered(sTarget, sWhere);
-                    finishDrillArrival(sTarget);
+                    openDrillChild(sTarget, sWhere);
                 }
                 else if (aMapsSel != null)
                 {
@@ -24879,8 +25061,7 @@ namespace DbDo
                           + " AND unq2 = " + DbDoManager.sQuoteSqlLiteral(sUnqValue)
                           + " AND kind = " + DbDoManager.sQuoteSqlLiteral(sKind)
                           + " AND tbl1 = " + DbDoManager.sQuoteSqlLiteral(sOther) + ")";
-                    db.selectTableFiltered(sOther, sWhere);
-                    finishDrillArrival(sOther);
+                    openDrillChild(sOther, sWhere);
                 }
                 else
                 {
@@ -24889,128 +25070,61 @@ namespace DbDo
                     // (buildFkFilter emits valid SQL: numeric values
                     // bare, strings quoted with doubled apostrophes).
                     string sFkFilter = buildFkFilter(sParentPk, sParentPkValue);
-                    db.selectTableFiltered(sChosen, sFkFilter);
-                    finishDrillArrival(sChosen);
+                    openDrillChild(sChosen, sFkFilter);
                 }
             }
             catch (Exception ex)
             {
-                // Roll back the stack push since the table switch failed.
-                if (drillStack.Count > 0) drillStack.Pop();
                 ErrorDialog.show(this, "Enter Child", "Could not open related table: " + ex.Message);
             }
         }
 
         private void recExitChildClicked(object sender, EventArgs evArgs)
         {
-            if (db == null || !db.isOpen()) return;
-            if (drillStack.Count == 0)
+            // Window-based exit: return to the window this related view
+            // was drilled in from, on the row that was focused there.
+            DbDoForm frmCaller = (frmDrillCaller != null && !frmDrillCaller.IsDisposed) ? frmDrillCaller : null;
+            if (frmCaller == null)
             {
                 MessageBox.Show(this,
-                    "Nothing to exit -- the drill-down stack is empty.\n\n"
-                    + "Exit-Child returns from a child table opened via Enter-Child.",
+                    "Nothing to exit -- this window was not opened by Enter-Child.\n\n"
+                    + "Exit-Child returns to the window a related view was drilled in from.",
                     "Exit Child", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
-
-            DrillEntry entry = drillStack.Pop();
-            try
-            {
-                // Switch back to the parent. selectTable will restore
-                // the parent's cached TableSettings (sort, filter,
-                // and absolute-position-at-time-of-push).
-                db.selectTable(entry.sParentTable);
-
-                // Robustness: re-find the row by PK value rather than
-                // trusting the position cache. If the user added or
-                // removed rows on the parent while we were in the
-                // child, the absolute position could now point to the
-                // wrong row -- but the PK still uniquely identifies
-                // the original.
-                if (!string.IsNullOrEmpty(entry.sParentPkColumn)
-                    && !string.IsNullOrEmpty(entry.sParentPkValue))
-                {
-                    string sFindExpr = buildFkFilter(entry.sParentPkColumn, entry.sParentPkValue);
-                    // Try a Find on the current filtered view first;
-                    // if the row was filtered out, briefly reset
-                    // filter and try again.
-                    bool bFound = false;
-                    try
-                    {
-                        db.moveFirst();
-                        bFound = db.findRecord(sFindExpr, true, false);
-                    }
-                    catch { }
-                    if (!bFound)
-                    {
-                        // Row may be excluded by an active filter; try
-                        // again with the filter momentarily cleared.
-                        string sSavedFilter = db.filter;
-                        try
-                        {
-                            db.applyFilter("");
-                            db.moveFirst();
-                            bFound = db.findRecord(sFindExpr, true, false);
-                        }
-                        catch { }
-                        if (!bFound && !string.IsNullOrEmpty(sSavedFilter))
-                        {
-                            // Couldn't find it even without filter; the
-                            // row was deleted. Restore the original
-                            // filter so the parent table is back where
-                            // the user left it.
-                            try { db.applyFilter(sSavedFilter); } catch { }
-                        }
-                    }
-                }
-                invokeRefresh();
-            }
-            catch (Exception ex)
-            {
-                ErrorDialog.show(this, "Exit Child", "Could not return to parent table '" + entry.sParentTable + "': " + ex.Message);
-            }
+            int iRow = iDrillCallerRow;
+            try { DbDoLog.write("Exit Child: reactivating caller window at row " + iRow + "."); } catch { }
+            try { frmCaller.Activate(); } catch { }
+            frmCaller.restoreRow(iRow);
         }
 
-        // recExitChildToRootClicked (Alt+Home): pop the entire drill
-        // stack and return to the topmost parent table -- the one the
-        // user was on before the first Enter-Child of the chain.
-        // FileDir's Alt+Home pattern of "go all the way back to the
-        // root" generalizes here from folder hierarchy to table
-        // drill-down.
-        //
-        // Implementation: repeatedly invoke Exit-Child until the
-        // drill stack empties. Each pop re-finds the parent row by
-        // its primary-key value (the same robustness logic
-        // recExitChildClicked uses), so any structural changes the
-        // user made in child tables don't strand us on the wrong
-        // row. If a single Exit-Child step fails partway through,
-        // we stop there and let the user retry; we don't try to
-        // recover automatically.
+        // recExitChildToRootClicked (Alt+Home): walk the caller chain
+        // back to the first (root) window of the drill and activate it
+        // on the row the chain started from. FileDir's Alt+Home "go all
+        // the way back to the root" generalizes here from folder
+        // hierarchy to drill windows.
         private void recExitChildToRootClicked(object sender, EventArgs evArgs)
         {
-            if (db == null || !db.isOpen()) return;
-            if (drillStack.Count == 0)
+            if (frmDrillCaller == null || frmDrillCaller.IsDisposed)
             {
                 MessageBox.Show(this,
-                    "Already at the root -- the drill-down stack is empty.",
+                    "Already at the root -- this window was not opened by Enter-Child.",
                     "Exit Child to Root", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
-            int iLevels = drillStack.Count;
-            while (drillStack.Count > 0)
+            DbDoForm frmRoot = this;
+            int iRow = -1;
+            int iLevels = 0;
+            int iGuard = 0;
+            while (frmRoot.frmDrillCaller != null && !frmRoot.frmDrillCaller.IsDisposed && iGuard++ < 256)
             {
-                int iBefore = drillStack.Count;
-                recExitChildClicked(sender, evArgs);
-                if (drillStack.Count == iBefore)
-                {
-                    // Exit-Child didn't make progress; bail rather
-                    // than loop forever.
-                    break;
-                }
+                iRow = frmRoot.iDrillCallerRow;
+                frmRoot = frmRoot.frmDrillCaller;
+                iLevels++;
             }
-            // The per-step Exit-Child already announced its return
-            // via the live region; a final confirmation here helps
-            // the user know they popped multiple levels at once.
+            try { DbDoLog.write("Exit to Root: activating root window, " + iLevels + " level(s) up."); } catch { }
+            try { frmRoot.Activate(); } catch { }
+            if (iRow >= 1) frmRoot.restoreRow(iRow);
             LiveRegion.say("Returned to root (" + iLevels + " level" + (iLevels == 1 ? "" : "s") + ")");
         }
 
