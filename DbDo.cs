@@ -261,6 +261,13 @@ namespace DbDo
             // NVDA, this is the path that reaches it.
             sayViaUia(sNew);
             sLastPath = "UIA Notification + LiveRegionChanged (Narrator and others)";
+            // Optional SAPI backup (off by default; see bUseSapiAsBackup).
+            // Speaks only when no screen reader is detected, so it never
+            // doubles a live reader and gives audible output where a bare
+            // UIA Notification would be silent. Mirrors Say's (the shared
+            // toolkit's) UseSapiAsBackup behavior for cross-app consistency.
+            if (bUseSapiAsBackup && !isJawsRunning() && !isNvdaRunning() && !isAnyScreenReaderActive())
+                if (sapiSay(sNew)) sLastPath = "SAPI backup (no screen reader detected)";
         }
 
         // sayParts: speak each unit as its OWN direct-speech message
@@ -448,6 +455,35 @@ namespace DbDo
             if (!bNvdaDllPresent) return false;
             try { return nvdaController_speakText(sText) == 0; }
             catch { return false; }
+        }
+
+        // ---- Optional SAPI backup (shared-toolkit parity) ----
+        // Off by default. When enabled and no screen reader is detected,
+        // say() routes through the Windows SAPI voice so there is audible
+        // output where a bare UIA Notification would otherwise be silent.
+        public static bool bUseSapiAsBackup = false;
+        private static object oSapiVoice;
+        private static bool sapiSay(string sText)
+        {
+            if (string.IsNullOrEmpty(sText)) return false;
+            try
+            {
+                if (oSapiVoice == null)
+                {
+                    Type comType = Type.GetTypeFromProgID("SAPI.SPVoice");
+                    if (comType == null) return false;
+                    oSapiVoice = Activator.CreateInstance(comType);
+                    if (oSapiVoice == null) return false;
+                }
+                dynamic oVoice = oSapiVoice;
+                oVoice.Speak(sText, 1);
+                return true;
+            }
+            catch
+            {
+                oSapiVoice = null;
+                return false;
+            }
         }
 
         // ---- Narrator / generic UIA path ----
@@ -1269,6 +1305,18 @@ namespace DbDo
                     // marker that no execution happened.
                     return "(unsupported extension '" + sExt + "'; showing file contents)\n\n" + sBody;
             }
+        }
+
+        // evaluateExpression: run a single expression or snippet
+        // through the JScript .NET engine and return its result -- the
+        // inline counterpart to runScript, which reads a saved file.
+        // Used by the Evaluate Expression command (shared with EdSharp
+        // and FileDir), which hands the engine a one-off expression
+        // rather than a script file. The current window and table flow
+        // through to the engine exactly as for Invoke Script.
+        public static string evaluateExpression(string sBody, object frm, object db)
+        {
+            return runJScript(sBody ?? "", frm, db);
         }
 
         // runJScript: invoke DbDo.JS.runScript via reflection so we
@@ -2388,7 +2436,7 @@ namespace DbDo
             List<string> lLines = new List<string>();
             if (File.Exists(sPath))
             {
-                try { lLines.AddRange(File.ReadAllLines(sPath)); } catch { return false; }
+                try { lLines.AddRange(File.ReadAllLines(sPath, new UTF8Encoding(true))); } catch { return false; }
             }
 
             int iSectionEnd = -1, iSectionStart = -1;
@@ -2527,6 +2575,16 @@ namespace DbDo
         // custom query (Control+Q); null for a directly-opened
         // table or view. Read back by Say Query.
         private string sSourceSql;
+
+        // sActiveSort: the current sort, as the user-facing clause
+        // ("col ASC, col DESC, ..."). DbDo applies sorting through a SQL
+        // ORDER BY re-query rather than ADO's Recordset.Sort property:
+        // the client-cursor Sort silently returns NULL field values for
+        // some ODBC providers (the "every cell goes blank after I sort"
+        // report), whereas ORDER BY runs in the engine and is reliable.
+        // This field is the source of truth the sort getter returns,
+        // since the re-queried recordset's own Sort property stays "".
+        private string sActiveSort = "";
 
         // ------- Constructor / Dispose -------
         public DbDoManager()
@@ -3351,6 +3409,7 @@ namespace DbDo
             sCurrentTable = sTable;
             sSourceSql = null;
             bCurrentIsView = bIsView;
+            sActiveSort = "";   // fresh open starts unsorted; cached sort re-applied via applyTableSettings
             // A view is read-only by nature (SQLite/ADO cannot
             // update it); mark it innate so edits are blocked and
             // Alt+Z cannot unlock it. A real table clears the flag.
@@ -3429,6 +3488,7 @@ namespace DbDo
             sCurrentTable = sTable;
             sSourceSql = null;
             bCurrentIsView = bIsView;
+            sActiveSort = "";   // fresh open starts unsorted; cached sort re-applied via applyTableSettings
             // A view is read-only by nature (SQLite/ADO cannot
             // update it); mark it innate so edits are blocked and
             // Alt+Z cannot unlock it. A real table clears the flag.
@@ -3505,6 +3565,7 @@ namespace DbDo
             if (!isOpen()) throw new InvalidOperationException("No database open.");
             if (string.IsNullOrEmpty(sSql)) throw new ArgumentException("openSqlRecordset requires a non-empty SQL string.");
             sSourceSql = sSql;
+            sActiveSort = "";   // query windows sort via ADO fallback; start clean
 
             // Capture settings of whatever was open so a later
             // selectTable can return to that state.
@@ -4945,41 +5006,113 @@ namespace DbDo
 
         public string sort
         {
-            get
-            {
-                if (!hasRecordset()) return "";
-                try { return (string)(oRecordset.Sort ?? ""); }
-                catch { return ""; }
-            }
+            get { return sActiveSort ?? ""; }
             set
             {
                 if (!hasRecordset()) return;
-                // Setting Sort on the client (adUseClient) cursor throws
-                // "Row handle is invalid" when the current row handle is
-                // stale -- the cursor sits at EOF/BOF, a prior sort or
-                // filter left an invalid position, or an edit is pending.
-                // Capture the position, drop any pending edit, and park
-                // the cursor on a valid row first; the saved bookmark
-                // (which survives a client-cursor sort) restores the
-                // position afterward.
-                object bookmarkObj = bookmark;
+                sActiveSort = (value ?? "").Trim();
+                reopenWithCurrentSort();
+            }
+        }
+
+        // reopenWithCurrentSort: apply sActiveSort by re-querying the
+        // current table with a SQL ORDER BY clause, preserving the
+        // active filter and a valid cursor position. This deliberately
+        // avoids ADO's client-cursor Recordset.Sort, which returns NULL
+        // for every field with some ODBC providers (the "all cells go
+        // blank after sorting" bug). For a custom-SQL recordset (a query
+        // window), there is no single table to re-SELECT, so the ADO
+        // Sort property is used as a fallback there.
+        private void reopenWithCurrentSort()
+        {
+            if (oRecordset == null) return;
+            if (!string.IsNullOrEmpty(sSourceSql))
+            {
+                try { oRecordset.Sort = sActiveSort ?? ""; } catch { }
+                return;
+            }
+            string sTable = sCurrentTable;
+            if (string.IsNullOrEmpty(sTable)) return;
+
+            string sExt = "";
+            try { sExt = System.IO.Path.GetExtension(sFilePath ?? "").TrimStart('.').ToLowerInvariant(); }
+            catch { }
+
+            // Preserve the ADO filter (which DOES work) across the re-open.
+            string sSavedFilter = "";
+            try { sSavedFilter = (string)(oRecordset.Filter ?? ""); } catch { }
+
+            bool bIsView = bCurrentIsView;
+            int iLock = (bReadOnly || bIsView)
+                ? AdoConstants.adLockReadOnly : AdoConstants.adLockOptimistic;
+
+            string sOrderBy = buildOrderByClause(sActiveSort, sExt);
+            string sSql = "SELECT * FROM " + quoteOpenTable(sTable)
+                + (sOrderBy.Length > 0 ? " ORDER BY " + sOrderBy : "");
+
+            try
+            {
+                closeRecordset();
+                oRecordset = createComObject("ADODB.Recordset");
+                oRecordset.CursorLocation = AdoConstants.adUseClient;
+                oRecordset.Open(sSql, oConn, AdoConstants.adOpenStatic, iLock, AdoConstants.adCmdText);
+                try { DbDoLog.write("Sort via ORDER BY: " + (sOrderBy.Length > 0 ? sOrderBy : "(cleared)")
+                    + "; rows=" + (int)oRecordset.RecordCount); } catch { }
+            }
+            catch (COMException ex)
+            {
+                try { DbDoLog.write("Sort ORDER BY rejected: " + ex.Message + "; SQL: " + sSql); } catch { }
+                // Don't leave a dead recordset: re-open the table unsorted.
                 try
                 {
-                    int iEditMode = 0;
-                    try { iEditMode = (int)oRecordset.EditMode; } catch { iEditMode = 0; }
-                    if (iEditMode != 0 /* adEditNone */)
-                        try { oRecordset.CancelUpdate(); } catch { }
+                    oRecordset = createComObject("ADODB.Recordset");
+                    oRecordset.CursorLocation = AdoConstants.adUseClient;
+                    oRecordset.Open("SELECT * FROM " + quoteOpenTable(sTable), oConn,
+                        AdoConstants.adOpenStatic, iLock, AdoConstants.adCmdText);
+                    sActiveSort = "";
                 }
                 catch { }
-                try { if ((int)oRecordset.RecordCount > 0) oRecordset.MoveFirst(); } catch { }
-                try { oRecordset.Sort = value ?? ""; }
-                catch (COMException ex)
-                {
-                    try { DbDoLog.write("Sort rejected for '" + (value ?? "") + "': " + ex.Message); } catch { }
-                    throw new Exception("Sort rejected: " + ex.Message, ex);
-                }
-                if (bookmarkObj != null) { try { bookmark = bookmarkObj; } catch { } }
+                throw new Exception("Sort rejected: " + ex.Message, ex);
             }
+
+            // Re-apply the filter that was active before the re-open.
+            if (!string.IsNullOrEmpty(sSavedFilter))
+            { try { oRecordset.Filter = sSavedFilter; } catch { } }
+
+            try { if ((int)oRecordset.RecordCount > 0) oRecordset.MoveFirst(); } catch { }
+        }
+
+        // buildOrderByClause: turn the user-facing sort ("col asc,
+        // col2 desc") into a provider-quoted SQL ORDER BY body
+        // ("\"col\" ASC, \"col2\" DESC"). Each column is quoted with the
+        // same helper the rest of the SQL builders use, so reserved
+        // words and mixed case are safe. Unknown direction tokens
+        // default to ASC.
+        private string buildOrderByClause(string sSortClause, string sExt)
+        {
+            if (string.IsNullOrEmpty(sSortClause)) return "";
+            List<string> lParts = new List<string>();
+            foreach (string sRaw in sSortClause.Split(','))
+            {
+                string s = sRaw.Trim();
+                if (s.Length == 0) continue;
+                string sDir = "ASC";
+                string sCol = s;
+                int iSpace = s.LastIndexOf(' ');
+                if (iSpace > 0)
+                {
+                    string sTail = s.Substring(iSpace + 1).Trim();
+                    if (sTail.Equals("DESC", StringComparison.OrdinalIgnoreCase))
+                    { sDir = "DESC"; sCol = s.Substring(0, iSpace).Trim(); }
+                    else if (sTail.Equals("ASC", StringComparison.OrdinalIgnoreCase))
+                    { sDir = "ASC"; sCol = s.Substring(0, iSpace).Trim(); }
+                }
+                // Strip any quoting the caller may have included.
+                sCol = sCol.Trim('"', '[', ']', '`');
+                if (sCol.Length == 0) continue;
+                lParts.Add(quoteIdentifier(sCol, sExt) + " " + sDir);
+            }
+            return string.Join(", ", lParts.ToArray());
         }
 
         public void resetFilter() { filter = ""; }
@@ -6728,8 +6861,19 @@ namespace DbDo
             }
 
             object bookmarkObj = bookmark;
-            List<string> lFields = getDisplayFieldNames();
-            if (lFields.Count == 0) lFields = getFieldNames();
+            // Save-As to a database is a FAITHFUL COPY of the table, so
+            // the new file must get EVERY field -- matching this method's
+            // contract ("CREATE TABLE ... for every field"). It must NOT
+            // use getDisplayFieldNames(): the Alt+S display selection is a
+            // transient view preference, and letting it drive the persisted
+            // schema both drops columns the user has hidden (silent data
+            // loss) and bakes the current selection into the new file --
+            // e.g. exporting the standard 'notes' column as a visible field,
+            // which the reopened copy then hides again as a standard column,
+            // leaving its data reachable only via Say Notes. Copy all real
+            // fields; the display preference is reapplied when the copy opens.
+            List<string> lFields = getFieldNames();
+            if (lFields.Count == 0) lFields = getDisplayFieldNames();
 
             // Build the connection string. For dBASE the path
             // points at the parent folder (not the file), and the
@@ -7461,6 +7605,24 @@ namespace DbDo
         {
             if (!isOpen()) throw new InvalidOperationException("No database open.");
             if (string.IsNullOrEmpty(sDestPath)) throw new ArgumentException("saveAs requires a path.");
+
+            // Refuse to copy the open database over itself. The same-
+            // format path below closes the connection and copies the
+            // file onto its own path, then reopens -- but the SQLite
+            // ODBC handle (kept briefly by connection pooling even after
+            // Close) still holds the file, so the copy stalls on the
+            // lock rather than erroring cleanly. That is the reported
+            // "I hit Yes to replace and it stopped responding." Fail
+            // fast and clearly instead.
+            try
+            {
+                if (string.Equals(Path.GetFullPath(sDestPath), Path.GetFullPath(sFilePath),
+                                  StringComparison.OrdinalIgnoreCase))
+                    throw new IOException("The destination is the database that is already open. "
+                        + "Choose a different file name for the copy.");
+            }
+            catch (IOException) { throw; }
+            catch { /* path normalization failed; fall through to the normal save */ }
 
             string sSrcExt = Path.GetExtension(sFilePath).TrimStart('.').ToLowerInvariant();
             string sDstExt = Path.GetExtension(sDestPath).TrimStart('.').ToLowerInvariant();
@@ -12740,6 +12902,7 @@ namespace DbDo
         private string sManagedOriginPath;
         private string sManagedTempPath;
         private ToolStripMenuItem miToolsOpenFolder;
+        private ToolStripMenuItem miToolsCommandPrompt;
         private ToolStripMenuItem miToolsConsole;
         private ToolStripMenuItem miMiscSqleanConsole;
         private ToolStripMenuItem miToolsInvokeSql;
@@ -12748,6 +12911,7 @@ namespace DbDo
         private ToolStripMenuItem miMiscInvokeScript;
         private ToolStripMenuItem miMiscEditScript;
         private ToolStripMenuItem miMiscOpenScriptFolder;
+        private ToolStripMenuItem miMiscEvaluate;
 
         private ToolStripMenuItem miHelp;
         private ToolStripMenuItem miHelpContents;
@@ -13811,9 +13975,9 @@ namespace DbDo
             miToolsSqlHistory= addItem(miMisc, "Query &History...",                      "Query History",     Keys.Alt | Keys.Shift | Keys.Q,     sqlHistoryClicked);
             miToolsTest      = addItem(miMisc, "&Test Integrity",                        "Test Database",     Keys.None,                          toolsTestClicked);
             miToolsTestDriver= addItem(miMisc, "Test &Drivers",        "Test Driver",       Keys.None,                          toolsTestDriverClicked);
-            miMiscHotkeySummary = addItem(miMisc, "&Hotkey Summary",      "Hotkey Summary",      Keys.None,                  hotkeySummaryClicked,
+            miMiscHotkeySummary = addItem(miMisc, "&Hotkey Summary",      "Hotkey Summary",      Keys.Alt | Keys.Shift | Keys.H, hotkeySummaryClicked,
                 "List every command with its key and description, then flag any inconsistencies",
-                "Joins the command, key, and description tables the menus and Key Help already use into one EdSharp-style listing, sorted by command name, then notes duplicate key assignments and commands missing a description. Unbound by default; assign a chord (EdSharp uses Alt+Shift+H) if you want it at hand.");
+                "Joins the command, key, and description tables the menus and Key Help already use into one EdSharp-style listing, sorted by command name, then notes duplicate key assignments and commands missing a description. Bound to Alt+Shift+H to match EdSharp and FileDir, which carry the same command on that chord.");
             miMiscOpenManagedCopy = addItem(miMisc, "Open as Managed &Copy...", "Open Managed Copy", Keys.None, openManagedCopyClicked,
                 "Open a SQLite database as a throwaway working copy: edits stay in the copy and the original is untouched until you Save Database",
                 "The document model: the chosen SQLite database is copied to a temp working file that becomes the live database, so every edit, add, and delete lands in the copy and the original on disk is left alone. Use Save Database (Control+S) to write the working copy out to a .db file (a -copy name is suggested, so the source is never overwritten); closing without saving discards the changes. To bring an Excel, Access, dBASE, or CSV file into a new DbDo database instead, use Import. Unbound by default.");
@@ -13825,6 +13989,9 @@ namespace DbDo
                 "Datasette-style faceting: groups the current table by the cursor's column and lists each distinct value with how many rows have it, most common first; picking a value filters the grid to just those rows. An accessible way to hear what a column contains and how it's distributed, then drill in. The value list is capped (1000) so a high-cardinality column can't flood the picker; filtering replaces any current filter, and blank/null and date values aren't filterable yet. Read-only until you pick. Unbound by default.");
             addSep(miMisc);
             miToolsOpenFolder= addItem(miMisc, "Open in E&xplorer",                      "Open File Folder",   Keys.Alt | Keys.OemPipe,            toolsOpenFolderClicked);
+            miToolsCommandPrompt = addItem(miMisc, "Open Co&mmand Prompt",                 "Command Prompt",    Keys.Control | Keys.OemQuestion,    toolsCommandPromptClicked,
+                "Open a Windows command prompt in the folder of the currently-open database",
+                "Control+Slash. Shared with EdSharp and FileDir (both carry a Command Prompt command); the prompt opens with its working directory set to the open database's folder, or your user folder when nothing is open. Companion to Open in Explorer (Alt+Backslash), which opens that same folder in the file manager.");
             miToolsConsole   = addItem(miMisc, "Open D&ot Prompt",                       "Enter Console",     Keys.Control | Keys.Oemtilde,       toolsConsoleClicked);
             miMiscSqleanConsole = addItem(miMisc, "Sqlean &Console",                       "Sqlean Console",    Keys.Control | Keys.Shift | Keys.Oemtilde, sqleanConsoleClicked);
             addSep(miMisc);
@@ -13842,6 +14009,9 @@ namespace DbDo
             miMiscInvokeScript     = addItem(miMisc, "In&voke Script...",                     "Invoke Script",     Keys.Alt | Keys.V,                  miscInvokeScriptClicked);
             miMiscEditScript       = addItem(miMisc, "Edit Sni&ppet...",                       "Edit Script",       Keys.Alt | Keys.Shift | Keys.V,     miscEditScriptClicked);
             miMiscOpenScriptFolder = addItem(miMisc, "Open Script &Folder",                   "Open Script Folder", Keys.None,                          miscOpenScriptFolderClicked);
+            miMiscEvaluate         = addItem(miMisc, "&Evaluate Expression...",                "Evaluate Expression", Keys.Control | Keys.Oemplus,       miscEvaluateExpressionClicked,
+                "Evaluate a one-off expression and hear the result",
+                "Control+Equals. Shared with EdSharp and FileDir. Prompts for an expression, evaluates it through DbDo's JScript .NET engine (the same engine behind Invoke Script and the dot prompt -- so 2+2*10 or string operations work), then speaks and shows the result. The last expression is remembered for quick tweaking. The result is shown rather than copied to the clipboard, so it stays reachable even where clipboard access is restricted.");
             addSep(miMisc);
             // Edit-Settings dialog: Alt+Shift+C matches the EdSharp
             // and FileDir convention exactly -- same label, same
@@ -20796,6 +20966,29 @@ namespace DbDo
                     dlgFile.FileName = sSuggest;
                 }
                 if (dlgFile.ShowDialog(this) != DialogResult.OK) return;
+                // Guard the "save over the open database" case before we
+                // try anything. It is a copy-onto-itself that stalls on
+                // the live file lock (the "I hit Yes and it stopped
+                // responding" report), and it is not what the user needs:
+                // the Alt+S column order and other display choices are a
+                // per-table view preference already saved in DbDo.inix,
+                // not in the .db file, so no file save is required to
+                // keep them. Save Database is only for a separate copy.
+                try
+                {
+                    if (string.Equals(Path.GetFullPath(dlgFile.FileName), Path.GetFullPath(db.filePath),
+                                      StringComparison.OrdinalIgnoreCase))
+                    {
+                        MessageBox.Show(this,
+                            "That is the database that is already open, so there is nothing to copy over it.\n\n"
+                            + "Your column order and other display choices are saved automatically as you make them, "
+                            + "so you do not need to save the file to keep them. To make a separate copy, choose a "
+                            + "different file name.",
+                            sTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return;
+                    }
+                }
+                catch { /* path compare failed; fall through to the normal save */ }
                 // Word-style lossy-conversion heads-up: a same-format
                 // Save As is a clean file copy, but a different target
                 // format is a conversion (single-table, plus the format's
@@ -26870,6 +27063,38 @@ namespace DbDo
             }
         }
 
+        // toolsCommandPromptClicked: Control+Slash. Open a Windows
+        // command prompt whose working directory is the folder of the
+        // currently-open database (or the user's folder when nothing is
+        // open). Shared convention with EdSharp and FileDir, and the
+        // shell-side companion to Open in Explorer (Alt+Backslash),
+        // which reveals the same folder in the file manager.
+        private void toolsCommandPromptClicked(object sender, EventArgs evArgs)
+        {
+            try
+            {
+                string sPath = (db != null && db.isOpen()) ? db.filePath : null;
+                string sDir = (!string.IsNullOrEmpty(sPath) && File.Exists(sPath))
+                    ? Path.GetDirectoryName(sPath)
+                    : Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+
+                System.Diagnostics.ProcessStartInfo psi =
+                    new System.Diagnostics.ProcessStartInfo("cmd.exe");
+                psi.WorkingDirectory = sDir;
+                psi.UseShellExecute = true;   // open an interactive console window
+                System.Diagnostics.Process.Start(psi);
+
+                if (!string.IsNullOrEmpty(sPath) && File.Exists(sPath))
+                    LiveRegion.say("Command prompt at " + sDir);
+                else
+                    LiveRegion.say("No database open; command prompt at user folder");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(this, ex.Message, "Command Prompt", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+            }
+        }
+
         // =====================================================================
         // HELP menu handlers
         // =====================================================================
@@ -27414,6 +27639,39 @@ namespace DbDo
             {
                 ErrorDialog.show(this, "Open Script Folder", "Could not open the script folder:\n\n" + sDir + "\n\n" + ex.Message);
             }
+        }
+
+        // miscEvaluateExpressionClicked: Control+Equals. Evaluate a
+        // one-off expression through DbDo's JScript .NET engine -- the
+        // inline calculator/evaluator shared with EdSharp and FileDir.
+        // The engine returns the value of the last expression, so a bare
+        // "2+2*10" yields "22". The result is spoken and shown (not
+        // copied to the clipboard, which some testers cannot access),
+        // and the last expression is remembered for quick iteration.
+        private static string sLastEvaluateExpr = "";
+        private void miscEvaluateExpressionClicked(object sender, EventArgs evArgs)
+        {
+            string sExpr;
+            using (LbcDialog dlg = new LbcDialog("Evaluate Expression", this))
+            {
+                TextBox tb = dlg.addInputBox("&Expression:", sLastEvaluateExpr,
+                    "A JScript .NET expression to evaluate, for example 2+2*10 or "
+                    + "\"abc\".toUpperCase(). The current window (frm) and table (db) are "
+                    + "available to the engine, the same as Invoke Script.");
+                if (!dlg.runOkCancel()) return;
+                sExpr = (tb.Text ?? "").Trim();
+            }
+            if (sExpr.Length == 0) return;
+            sLastEvaluateExpr = sExpr;
+
+            string sResult;
+            try { sResult = ScriptHelper.evaluateExpression(sExpr, this, this.db); }
+            catch (Exception ex) { sResult = "ERROR: " + ex.Message; }
+            if (string.IsNullOrEmpty(sResult)) sResult = "(no result)";
+
+            LiveRegion.say(sResult);
+            MessageBox.Show(this, sExpr + " =\n\n" + sResult, "Evaluate Expression",
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
         // helpTraceCommandClicked: Ctrl+F1 toggles Key Help mode.
@@ -29104,6 +29362,7 @@ namespace DbDo
                 case "delete-record":    cmdRemoveRecord();        break;
                 case "copy-record":      cmdCopyRecord();          break;
                 case "select-table":     cmdSelectTable(sRest);    break;
+                case "table":            cmdTable(sRest);          break;
                 case "get-table":        cmdGetTable();            break;
                 case "get-property":     cmdGetProperty();         break;
                 case "set-mark":         cmdSetMark(true);         break;
@@ -29160,6 +29419,7 @@ namespace DbDo
                 case "show-log":         cmdShowLog();             break;
                 case "open-website":     cmdOpenWebsite();         break;
                 case "open-filefolder":  cmdOpenFileFolder();      break;
+                case "command-prompt":   cmdCommandPrompt();       break;
                 case "enter-console":    Console.WriteLine("(already at the dot prompt)"); break;
                 default:
                     // Prefix expansion: the user may have typed a
@@ -29369,6 +29629,27 @@ namespace DbDo
                 Console.WriteLine("Opened Explorer at " + db.filePath);
             }
             catch (Exception ex) { Console.WriteLine("Open-FileFolder failed: " + ex.Message); }
+        }
+
+        // cmdCommandPrompt: console form of the Command Prompt command.
+        // Opens cmd.exe with its working directory set to the open
+        // database's folder (or the user's folder when nothing is open).
+        private static void cmdCommandPrompt()
+        {
+            try
+            {
+                string sPath = (db != null && db.isOpen()) ? db.filePath : null;
+                string sDir = (!string.IsNullOrEmpty(sPath) && System.IO.File.Exists(sPath))
+                    ? System.IO.Path.GetDirectoryName(sPath)
+                    : Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
+                System.Diagnostics.ProcessStartInfo psi =
+                    new System.Diagnostics.ProcessStartInfo("cmd.exe");
+                psi.WorkingDirectory = sDir;
+                psi.UseShellExecute = true;
+                System.Diagnostics.Process.Start(psi);
+                Console.WriteLine("Opened command prompt at " + sDir);
+            }
+            catch (Exception ex) { Console.WriteLine("Command-Prompt failed: " + ex.Message); }
         }
 
         // Enter-Child / Exit-Child from the dot prompt. The actual
@@ -29770,7 +30051,10 @@ namespace DbDo
                 case "sort": case "order":           return "order-records";
                 case "desc": case "descending":      return "reverse-order";
                 // Tables
-                case "table":                        return "select-table";
+                // NB: "table" is NOT aliased here -- it is its own
+                // canonical command (cmdTable), the MDI-window-aware
+                // context switch. "open-table"/"select-view" remain
+                // in-place recordset swaps via select-table.
                 case "open-table":                   return "select-table";
                 case "select-view":                  return "select-table";
                 case "tables":                       return "get-table";
@@ -30917,6 +31201,95 @@ namespace DbDo
             catch (Exception ex) { Console.WriteLine("Error: " + ex.Message); }
         }
 
+        // cmdTable: dot-prompt "table <name>" -- make the GUI window
+        // showing the named table the console's current context
+        // (case-insensitive). MDI-aware, matching DbDo's "Open = a
+        // window" model: if a window is already showing that table on
+        // the current database, activate it and bind the console to it;
+        // otherwise open it in a new window exactly as the GUI's Open
+        // Table (Control+Shift+O) would, then bind to it. Distinct from
+        // select-table, which swaps the recordset in the current window
+        // in place. In CLI-only mode (no GUI frame) there are no
+        // windows, so this falls back to that in-place swap.
+        private static void cmdTable(string sArg)
+        {
+            if (!requireOpen()) return;
+            string sName = unquote(sArg ?? "");
+            if (sName.Length == 0) { Console.WriteLine("Table requires a table or view name."); return; }
+
+            // Resolve the name to its canonical form, case-insensitively.
+            List<string> lT = db.getTableAndViewNames();
+            string sCanonical = null;
+            foreach (string sT in lT)
+                if (string.Equals(sT, sName, StringComparison.OrdinalIgnoreCase)) { sCanonical = sT; break; }
+            if (sCanonical == null)
+            {
+                Console.WriteLine("No such table or view: " + sName);
+                Console.WriteLine("Available: " + string.Join(", ", lT.ToArray()));
+                return;
+            }
+
+            string sFile = "";
+            try { sFile = db.filePath ?? ""; } catch { }
+
+            DbDoFrame frame = DbDoFrame.frame;
+            if (frame == null)
+            {
+                // CLI-only: no windows to open or activate. Switch the
+                // recordset in place, like select-table.
+                try
+                {
+                    db.selectTable(sCanonical);
+                    refresh();
+                    Console.WriteLine("Switched to "
+                        + (db.isViewName(sCanonical) ? "view: " : "table: ") + sCanonical);
+                    printRowSummary();
+                }
+                catch (Exception ex) { Console.WriteLine("Error: " + ex.Message); }
+                return;
+            }
+
+            try
+            {
+                // Find an open window already showing this table on this file.
+                DbDoForm frmTarget = null;
+                foreach (Form f in frame.MdiChildren)
+                {
+                    DbDoForm fd = f as DbDoForm;
+                    if (fd == null || fd.IsDisposed) continue;
+                    string sChildFile = "";
+                    string sChildTable = "";
+                    try { sChildFile = fd.Db.filePath ?? ""; sChildTable = fd.Db.currentTable ?? ""; }
+                    catch { }
+                    if (string.Equals(sChildFile, sFile, StringComparison.OrdinalIgnoreCase)
+                        && string.Equals(sChildTable, sCanonical, StringComparison.OrdinalIgnoreCase))
+                    { frmTarget = fd; break; }
+                }
+
+                bool bOpened = false;
+                if (frmTarget == null)
+                {
+                    // None open: open it in a new window, as Open Table does.
+                    frmTarget = frame.openChildWindow(Program.UiMode.Gui, sFile, sCanonical);
+                    bOpened = true;
+                }
+                if (frmTarget == null || frmTarget.IsDisposed)
+                { Console.WriteLine("Could not open a window for table: " + sCanonical); return; }
+
+                // Activate the window (covers follow-active mode) and pin
+                // the console to it (covers the non-following mode), so
+                // the context lands on it regardless of the setting.
+                try { frmTarget.Activate(); } catch { }
+                frm = frmTarget;
+                refresh();
+                Console.WriteLine((bOpened ? "Opened and switched to " : "Switched to ")
+                    + (frmTarget.Db.isViewName(sCanonical) ? "view: " : "table: ") + sCanonical
+                    + " [" + frmTarget.Text + "]");
+                printRowSummary();
+            }
+            catch (Exception ex) { Console.WriteLine("Error: " + ex.Message); }
+        }
+
         private static void cmdGetTable()
         {
             if (!requireOpen()) return;
@@ -31720,6 +32093,18 @@ namespace DbDo
                 case "reset-sort":
                     return "Reset-Sort - clear any active Sort-Object so the table\n"
                          + "appears in its underlying storage order.";
+                case "table":
+                    return "Table - make the window showing a table the console's\n"
+                         + "current context (case-insensitive).\n\n"
+                         + "  Table customers\n\n"
+                         + "If a window is already showing that table of the current\n"
+                         + "database, it is activated and the console binds to it. If\n"
+                         + "none is, the table is opened in a new window, exactly as the\n"
+                         + "GUI's Open Table (Control+Shift+O) would. Contrast with\n"
+                         + "Select-Table, which swaps the recordset of the current\n"
+                         + "window in place rather than moving to another window.\n"
+                         + "When the dot prompt is first opened, its context is the GUI\n"
+                         + "window it was opened from.";
                 case "select-table":
                     return "Select-Table - switch to a different table or view.\n\n"
                          + "  Select-Table customers\n"
