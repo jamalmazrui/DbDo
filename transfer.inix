@@ -1,0 +1,29 @@
+; DbDo transfer map -- import legacy CTS dBASE contacts into a DbDo contact table.
+;
+; Run it with File > Transfer Import: open the destination database, select the
+; destination table, then pick this file, this section, and the source .dbf.
+;
+; Each mapping line:  destField = sourceField [ ; jscript-expression ]
+;   $v           the value of the source field named on the right
+;   $otherfield  the value of any other source field in the same row
+;   @table       the table to read inside the source file (default: file base name)
+;   empty source values are skipped; a repeated destField concatenates (see extra_info)
+
+[cts_contacts]
+@table       = cts
+created      = updated ; $v.substr(0,4) + "-" + $v.substr(4,2) + "-" + $v.substr(6,2)
+modified     = updated ; $v.substr(0,4) + "-" + $v.substr(4,2) + "-" + $v.substr(6,2)
+title        = title
+first_name   = firstname
+last_name    = lastname
+enterprise   = company
+address1     = address1
+address2     = address2
+city         = city
+state        = state
+zip          = zip
+nation       = country
+office_phone = workphone
+home_phone   = homephone
+extra_info   = notes ; $v + "\n"
+extra_info   = text

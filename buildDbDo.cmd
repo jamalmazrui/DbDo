@@ -97,6 +97,22 @@ exit /b 1
 :have_csc
 echo C# compiler: !csc! >> "!log!"
 
+rem ---- sync installer version from DbDo.cs (single source of truth) ----
+rem buildDbDo.cmd does not own the version. DbDo.cs's
+rem BuildInfo.VersionString is THE source; this step copies that value
+rem into DbDo_setup.iss's #define AppVersion so the installer, the
+rem uninstall entry, and the tagRelease git tag stay in lockstep with
+rem the app (they had drifted to 1.0.105 while the app was at 1.0.113).
+rem Non-fatal by design: if the helper or PowerShell is missing, the
+rem build proceeds and the .iss is simply left as-is.
+if exist syncIssVersion.ps1 (
+    echo Syncing DbDo_setup.iss version from DbDo.cs ... >> "!log!"
+    powershell -NoProfile -ExecutionPolicy Bypass -File syncIssVersion.ps1 >> "!log!" 2>&1
+    if errorlevel 1 echo NOTE: version sync did not run; DbDo_setup.iss left unchanged. >> "!log!"
+) else (
+    echo NOTE: syncIssVersion.ps1 not found; skipping installer version sync. >> "!log!"
+)
+
 rem ---- locate UIA reference assemblies ----
 rem v1.0.87 adds native UIA dispatch (NotificationHostControl /
 rem AnnouncerProvider / UiaNative), which requires:
@@ -344,10 +360,10 @@ rem (the misleading "Unsupported 16-Bit Application" dialog appears
 rem when the loader sees an empty or truncated MZ image).
 if exist DbDo.exe del /f /q DbDo.exe
 if exist DbDo.ico (
-    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32icon:DbDo.ico /win32manifest:DbDo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /out:DbDo.exe DbDo.cs >> "!log!" 2>&1
+    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32icon:DbDo.ico /win32manifest:DbDo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"Microsoft.JScript.dll" /out:DbDo.exe DbDo.cs >> "!log!" 2>&1
 ) else (
     echo NOTE: DbDo.ico not found; building without embedded icon. >> "!log!"
-    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32manifest:DbDo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /out:DbDo.exe DbDo.cs >> "!log!" 2>&1
+    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32manifest:DbDo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"Microsoft.JScript.dll" /out:DbDo.exe DbDo.cs >> "!log!" 2>&1
 )
 if errorlevel 1 goto :build_failed
 echo DbDo.exe built.

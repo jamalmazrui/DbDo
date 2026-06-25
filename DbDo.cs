@@ -77,7 +77,7 @@ namespace DbDo
     // =====================================================================
     public static class BuildInfo
     {
-        public const string VersionString = "1.0.113";
+        public const string VersionString = "1.0.120";
     }
 
     // =====================================================================
@@ -1113,6 +1113,100 @@ namespace DbDo
             return sDir;
         }
 
+        // getSampleDir: the per-user folder of sample databases,
+        // %APPDATA%\DbDo\Samples, seeded once from the install's
+        // {app}\Samples folder on first access -- the exact pattern
+        // getScriptDir uses for Scripts. The Sample Databases command
+        // lists the .db files here, and the user can drop their own
+        // databases into the folder to add them to that list.
+        public static string getSampleDir()
+        {
+            string sDir = System.IO.Path.Combine(
+                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
+                @"DbDo\Samples");
+            try { System.IO.Directory.CreateDirectory(sDir); }
+            catch { /* tolerate; the caller will surface the error */ }
+            seedSampleDatabasesIfNew(sDir);
+            return sDir;
+        }
+
+        // seedSampleDatabasesIfNew: one-time copy of the bundled sample
+        // databases ({app}\Samples\*.db) into the user's Samples folder.
+        // A .seeded sentinel records that seeding has run, so deleting a
+        // sample does not make it reappear on the next launch.
+        private static void seedSampleDatabasesIfNew(string sDir)
+        {
+            try
+            {
+                string sSentinel = System.IO.Path.Combine(sDir, ".seeded");
+                if (System.IO.File.Exists(sSentinel)) return;
+
+                string sAppFolder = System.IO.Path.GetDirectoryName(
+                    System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
+                string sSrcFolder = System.IO.Path.Combine(sAppFolder, "Samples");
+                if (System.IO.Directory.Exists(sSrcFolder))
+                {
+                    // Each sample database lives in its own subfolder
+                    // (Samples\<name>\<name>.db, plus that database's
+                    // own scripts beside it). Copy each subfolder's
+                    // files into the matching user subfolder.
+                    foreach (string sSubSrc in System.IO.Directory.GetDirectories(sSrcFolder))
+                    {
+                        string sSubDst = System.IO.Path.Combine(sDir, System.IO.Path.GetFileName(sSubSrc));
+                        try { System.IO.Directory.CreateDirectory(sSubDst); } catch { }
+                        foreach (string sSrcPath in System.IO.Directory.GetFiles(sSubSrc))
+                        {
+                            string sDstPath = System.IO.Path.Combine(sSubDst, System.IO.Path.GetFileName(sSrcPath));
+                            if (!System.IO.File.Exists(sDstPath))
+                            {
+                                try { System.IO.File.Copy(sSrcPath, sDstPath, false); }
+                                catch { /* keep going for the rest */ }
+                            }
+                        }
+                    }
+                    // Tolerate any loose .db left directly in the source
+                    // Samples folder (older flat layout).
+                    foreach (string sSrcPath in System.IO.Directory.GetFiles(sSrcFolder, "*.db"))
+                    {
+                        string sDstPath = System.IO.Path.Combine(sDir, System.IO.Path.GetFileName(sSrcPath));
+                        if (!System.IO.File.Exists(sDstPath))
+                        {
+                            try { System.IO.File.Copy(sSrcPath, sDstPath, false); }
+                            catch { /* keep going for the rest */ }
+                        }
+                    }
+                }
+                try { System.IO.File.WriteAllText(sSentinel, "seeded " + DateTime.Now.ToString("o")); }
+                catch { }
+            }
+            catch { /* never let seeding block the picker */ }
+        }
+
+        // listSampleDatabases: the full paths of the bundled sample
+        // databases. Each sample lives in its own subfolder of the
+        // user's Samples folder (Samples\<name>\<name>.db) so its
+        // database-specific scripts can sit beside it. Returns one
+        // .db per subfolder, sorted, for the Sample Databases pick list.
+        public static string[] listSampleDatabases()
+        {
+            List<string> l = new List<string>();
+            try
+            {
+                string sDir = getSampleDir();
+                // One .db per per-database subfolder (the standard
+                // layout: Samples\<name>\<name>.db).
+                foreach (string sSub in System.IO.Directory.GetDirectories(sDir))
+                    foreach (string sP in System.IO.Directory.GetFiles(sSub, "*.db"))
+                        l.Add(sP);
+                // Plus any loose .db directly in Samples (tolerated).
+                foreach (string sP in System.IO.Directory.GetFiles(sDir, "*.db"))
+                    l.Add(sP);
+                l.Sort(StringComparer.OrdinalIgnoreCase);
+            }
+            catch { }
+            return l.ToArray();
+        }
+
         // seedSampleScriptsIfNew: one-time copy of the bundled
         // sample scripts into the user's script folder. Copies
         // every .js, .sql, and .dbdo file from {app}\Scripts into
@@ -1210,9 +1304,21 @@ namespace DbDo
         // alphabetically case-insensitively.
         public static string[] listScripts()
         {
-            string sDir = getScriptDir();
-            if (!System.IO.Directory.Exists(sDir)) return new string[0];
-            System.IO.DirectoryInfo dirInfo = new System.IO.DirectoryInfo(sDir);
+            return listScriptsInFolder(getScriptDir());
+        }
+
+        // listScriptsInFolder: the script-file names (.js, .sql,
+        // .dbdo) directly in one folder, sorted case-insensitively,
+        // without paths. Any non-script file -- including a database
+        // sitting in the same folder, and the .seeded sentinel -- is
+        // ignored. This is the building block for both the generic
+        // script folder and a database's own folder, where its
+        // database-specific scripts live beside the .db file.
+        public static string[] listScriptsInFolder(string sFolder)
+        {
+            if (string.IsNullOrEmpty(sFolder) || !System.IO.Directory.Exists(sFolder))
+                return new string[0];
+            System.IO.DirectoryInfo dirInfo = new System.IO.DirectoryInfo(sFolder);
             List<string> lNames = new List<string>();
             foreach (System.IO.FileInfo fi in dirInfo.GetFiles())
             {
@@ -1776,7 +1882,7 @@ namespace DbDo
         //   <table>_id, added, edited, marked, look, unq
         //
         // 'look' and 'unq' are stored-generated (PRAGMA table_xinfo
-        // hidden=2); the calculated-column auto-hide rule would
+        // hidden=3); the calculated-column auto-hide rule would
         // catch them even without the by-name rule, but the by-name
         // rule is faster and works on providers that don't expose
         // generated-column metadata.
@@ -2551,6 +2657,163 @@ namespace DbDo
     // pattern dbDot.vbs uses and is the central reason we picked
     // ADODB over rolling our own cursor on top of System.Data.SQLite.
     // =====================================================================
+    // JScriptExpr: evaluate a JScript .NET expression at run time. Used
+    // by transfer-map imports so a mapping line can reshape a value as
+    // it is copied. Inside an expression, $v is the current source
+    // field's value and $<name> is any other source field in the same
+    // row. The referenced names are bound as JScript vars and the
+    // expression is wrapped in a self-invoking function, so it returns a
+    // single value. On any error the raw $v is returned, so a bad
+    // expression degrades to a plain copy instead of aborting the
+    // import. The VsaEngine is created once and reused. JScript .NET
+    // ships with every .NET Framework install (the same engine the
+    // build already uses via jsc.exe), so this adds no new dependency
+    // beyond a /reference:Microsoft.JScript.dll at compile time.
+    public static class JScriptExpr
+    {
+        private static Microsoft.JScript.Vsa.VsaEngine oEngine;
+        private static readonly object oLock = new object();
+
+        public static string eval(string sExpr, string sCurrent, Dictionary<string, string> dRow)
+        {
+            if (string.IsNullOrEmpty(sExpr)) return sCurrent ?? "";
+            try
+            {
+                StringBuilder sbVars = new StringBuilder();
+                HashSet<string> hSeen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                foreach (System.Text.RegularExpressions.Match m in
+                    System.Text.RegularExpressions.Regex.Matches(sExpr, "\\$([A-Za-z_][A-Za-z0-9_]*)"))
+                {
+                    string sName = m.Groups[1].Value;
+                    if (!hSeen.Add(sName)) continue;
+                    string sVal;
+                    if (string.Equals(sName, "v", StringComparison.OrdinalIgnoreCase)) sVal = sCurrent ?? "";
+                    else if (dRow == null || !dRow.TryGetValue(sName, out sVal) || sVal == null) sVal = "";
+                    sbVars.Append("var ").Append(sName).Append('=').Append(jsString(sVal)).Append(';');
+                }
+                string sBody = System.Text.RegularExpressions.Regex.Replace(
+                    sExpr, "\\$([A-Za-z_][A-Za-z0-9_]*)", "$1");
+                string sProgram = "(function(){" + sbVars + "return (" + sBody + ");})()";
+                object oResult = Microsoft.JScript.Eval.JScriptEvaluate(sProgram, engine());
+                return (oResult == null) ? "" : Convert.ToString(oResult,
+                    System.Globalization.CultureInfo.InvariantCulture);
+            }
+            catch { return sCurrent ?? ""; }
+        }
+
+        private static Microsoft.JScript.Vsa.VsaEngine engine()
+        {
+            lock (oLock)
+            {
+                if (oEngine == null) oEngine = Microsoft.JScript.Vsa.VsaEngine.CreateEngine();
+                return oEngine;
+            }
+        }
+
+        // Encode a string as a JScript double-quoted string literal.
+        private static string jsString(string s)
+        {
+            StringBuilder sb = new StringBuilder("\"");
+            foreach (char c in (s ?? ""))
+            {
+                switch (c)
+                {
+                    case '\\': sb.Append("\\\\"); break;
+                    case '"': sb.Append("\\\""); break;
+                    case '\n': sb.Append("\\n"); break;
+                    case '\r': sb.Append("\\r"); break;
+                    case '\t': sb.Append("\\t"); break;
+                    default:
+                        if (c < ' ') sb.Append("\\u").Append(((int)c).ToString("x4"));
+                        else sb.Append(c);
+                        break;
+                }
+            }
+            sb.Append('"');
+            return sb.ToString();
+        }
+    }
+
+    // ReportEngine: render a report template band against one record's
+    // fields. A band is multi-line text in which $field / ${field}
+    // expand to the record's values and {{ jscript-expression }} is
+    // evaluated by JScriptExpr (the same engine transfer maps use).
+    // {# ... #} is an inline comment. The rendering is line-oriented and
+    // mail-merge style: a line that carried a substitution token but came
+    // out blank is suppressed (so an absent field leaves no gap) and a
+    // surviving data line is trimmed with interior runs of spaces
+    // collapsed; a line with no token is emitted verbatim, preserving
+    // literal blank lines and Markdown structure.
+    public static class ReportEngine
+    {
+        private static readonly System.Text.RegularExpressions.Regex rxComment =
+            new System.Text.RegularExpressions.Regex("\\{#.*?#\\}");
+        private static readonly System.Text.RegularExpressions.Regex rxExpr =
+            new System.Text.RegularExpressions.Regex("\\{\\{(.*?)\\}\\}");
+        private static readonly System.Text.RegularExpressions.Regex rxField =
+            new System.Text.RegularExpressions.Regex("\\$\\{(\\w+)\\}|\\$(\\w+)");
+        private static readonly System.Text.RegularExpressions.Regex rxPlace =
+            new System.Text.RegularExpressions.Regex("\u0000(\\d+)\u0001");
+        private static readonly System.Text.RegularExpressions.Regex rxSpaces =
+            new System.Text.RegularExpressions.Regex(" {2,}");
+
+        // Render a whole band; returns its lines joined with CRLF (empty
+        // when the band is null/blank).
+        public static string renderBand(string sBand, Dictionary<string, string> dRow)
+        {
+            if (string.IsNullOrEmpty(sBand)) return "";
+            string[] aLines = sBand.Replace("\r\n", "\n").Replace("\r", "\n").Split('\n');
+            List<string> lOut = new List<string>();
+            foreach (string sLine in aLines)
+            {
+                string sR = renderLine(sLine, dRow);
+                if (sR != null) lOut.Add(sR);
+            }
+            return string.Join("\r\n", lOut.ToArray());
+        }
+
+        // Render one line. Returns null to mean "suppress this line".
+        public static string renderLine(string sLine, Dictionary<string, string> dRow)
+        {
+            bool bHad = false;
+            string s = rxComment.Replace(sLine ?? "", "");
+
+            // {{ expression }} -> evaluate, stash, leave a placeholder so
+            // the $field pass below doesn't touch the result text.
+            List<string> lResults = new List<string>();
+            s = rxExpr.Replace(s, delegate(System.Text.RegularExpressions.Match m)
+            {
+                bHad = true;
+                string r = JScriptExpr.eval(m.Groups[1].Value.Trim(), "", dRow);
+                lResults.Add(r ?? "");
+                return "\u0000" + (lResults.Count - 1).ToString() + "\u0001";
+            });
+
+            // $field / ${field}
+            s = rxField.Replace(s, delegate(System.Text.RegularExpressions.Match m)
+            {
+                bHad = true;
+                string sName = m.Groups[1].Success ? m.Groups[1].Value : m.Groups[2].Value;
+                string sVal;
+                return (dRow != null && dRow.TryGetValue(sName, out sVal) && sVal != null) ? sVal : "";
+            });
+
+            // Restore the {{ }} results.
+            s = rxPlace.Replace(s, delegate(System.Text.RegularExpressions.Match m)
+            {
+                int i = int.Parse(m.Groups[1].Value);
+                return (i >= 0 && i < lResults.Count) ? lResults[i] : "";
+            });
+
+            if (bHad)
+            {
+                string sNorm = rxSpaces.Replace(s, " ").Trim();
+                return (sNorm.Length == 0) ? null : sNorm;
+            }
+            return s;
+        }
+    }
+
     public class DbDoManager : IDisposable
     {
         // ------- Constants -------
@@ -3218,7 +3481,7 @@ namespace DbDo
         // Cache of (table, column) -> isCalculated. Populated by
         // selectTable when a new table is opened. SQLite reports
         // calculated columns through PRAGMA table_xinfo's 'hidden'
-        // column (values 2 = stored-generated, 3 = virtual-
+        // column (values 2 = virtual-generated, 3 = stored-
         // generated). Other providers (ACE/Jet) do not reliably
         // expose this through ADO, so for those tables the cache
         // contains only Metadata's standard 'look' entry.
@@ -3430,8 +3693,8 @@ namespace DbDo
             // Populate the calculated-columns cache for this table
             // by running PRAGMA table_xinfo. SQLite returns a row
             // per column with a 'hidden' integer:
-            //   0 = normal, 1 = hidden via constraint, 2 = stored
-            //   generated, 3 = virtual generated. Values 2 and 3
+            //   0 = normal, 1 = hidden via constraint, 2 = virtual
+            //   generated, 3 = stored generated. Values 2 and 3
             //   are calculated columns; we mark them hidden in the
             //   DbDo display.
             //
@@ -7553,6 +7816,363 @@ namespace DbDo
             return iInserted;
         }
 
+        // importWithTransferMap: import records from an external SOURCE
+        // file into the current table, renaming and transforming fields
+        // through a transfer map held in an .inix file. The chosen
+        // section holds one mapping per line:
+        //
+        //     destField = sourceField [ ; jscript-expression ]
+        //
+        // where $v is the source field's value and $<name> any other
+        // source field in the same row. A repeated destField
+        // concatenates (so two lines targeting extra_info join their
+        // results). A directive line "@table = <name>" names the table
+        // to read inside the source file; it defaults to the source
+        // file's base name (right for a single-table dBASE file like
+        // cts.dbf). An empty source value is skipped, leaving the
+        // destination column at its default -- matching the legacy
+        // DbDialog transfer semantics this revives. Modeled on
+        // importJson's per-row AddNew/Update, so one bad row never sinks
+        // the batch. Supported source formats: .dbf, .mdb/.accdb, and
+        // .db/.sqlite/.sqlite3. Returns the number of rows added.
+        public int importWithTransferMap(string sSourcePath, string sInixPath, string sSection)
+        {
+            if (!hasRecordset()) throw new InvalidOperationException("No recordset open. Use Open-Database first.");
+            if (readOnly) throw new InvalidOperationException("The database was opened read-only. Close it and reopen without the -readonly flag to enable editing.");
+            if (string.IsNullOrEmpty(sSourcePath) || !File.Exists(sSourcePath))
+                throw new FileNotFoundException("Source file not found.", sSourcePath);
+            if (string.IsNullOrEmpty(sInixPath) || !File.Exists(sInixPath))
+                throw new FileNotFoundException("Transfer map (.inix) not found.", sInixPath);
+
+            // Find the chosen mapping section.
+            InixCodec.Section sec = null;
+            foreach (InixCodec.Section s in InixCodec.read(sInixPath))
+                if (string.Equals(s.Name, sSection, StringComparison.OrdinalIgnoreCase)) { sec = s; break; }
+            if (sec == null) throw new Exception("The transfer map has no section named [" + sSection + "].");
+
+            // Build the ordered mapping; pick up the @table directive.
+            List<string[]> lMap = new List<string[]>();   // {destField, sourceField, expr}
+            string sSourceTable = null;
+            foreach (InixCodec.Pair p in sec.Pairs)
+            {
+                if (p.Key.StartsWith("@"))
+                {
+                    if (string.Equals(p.Key.Substring(1).Trim(), "table", StringComparison.OrdinalIgnoreCase))
+                        sSourceTable = (p.Value ?? "").Trim();
+                    continue;
+                }
+                string sSrc = p.Value ?? "";
+                string sExpr = "";
+                int iSemi = sSrc.IndexOf(';');
+                if (iSemi >= 0) { sExpr = sSrc.Substring(iSemi + 1).Trim(); sSrc = sSrc.Substring(0, iSemi); }
+                lMap.Add(new string[] { p.Key.Trim(), sSrc.Trim(), sExpr });
+            }
+            if (lMap.Count == 0) throw new Exception("Section [" + sSection + "] has no field mappings.");
+            if (string.IsNullOrEmpty(sSourceTable))
+                sSourceTable = Path.GetFileNameWithoutExtension(sSourcePath);
+
+            // Destination columns, matched case-insensitively.
+            HashSet<string> hDest = new HashSet<string>(getFieldNames(), StringComparer.OrdinalIgnoreCase);
+
+            string sExtSrc = Path.GetExtension(sSourcePath).TrimStart('.').ToLowerInvariant();
+            string sConnect = buildConnectStringForExport(sSourcePath, sExtSrc, sSourceTable);
+
+            dynamic oConnSrc = null;
+            dynamic oRsSrc = null;
+            int iInserted = 0;
+            try
+            {
+                oConnSrc = createComObject("ADODB.Connection");
+                oConnSrc.CursorLocation = AdoConstants.adUseClient;
+                oConnSrc.Open(sConnect);
+                oRsSrc = oConnSrc.Execute("SELECT * FROM " + sSourceTable);
+
+                List<string> lSrcFields = new List<string>();
+                int nF = (int)oRsSrc.Fields.Count;
+                for (int i = 0; i < nF; i++) lSrcFields.Add((string)oRsSrc.Fields[i].Name);
+
+                while (!(bool)oRsSrc.EOF)
+                {
+                    // Read the source row into a case-insensitive map.
+                    Dictionary<string, string> dSrc = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                    foreach (string sFn in lSrcFields)
+                    {
+                        object oVal = oRsSrc.Fields[sFn].Value;
+                        dSrc[sFn] = (oVal == null || oVal is DBNull)
+                            ? "" : Convert.ToString(oVal, System.Globalization.CultureInfo.InvariantCulture);
+                    }
+
+                    // Apply the mapping: skip empty sources, run any
+                    // expression, and accumulate repeated dest fields.
+                    Dictionary<string, string> dDest = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                    foreach (string[] aMap in lMap)
+                    {
+                        string sDestF = aMap[0], sSrcF = aMap[1], sExpr = aMap[2];
+                        if (!hDest.Contains(sDestF)) continue;
+                        string sVal;
+                        if (!dSrc.TryGetValue(sSrcF, out sVal)) sVal = "";
+                        if (string.IsNullOrEmpty(sVal)) continue;
+                        string sRes = string.IsNullOrEmpty(sExpr) ? sVal : JScriptExpr.eval(sExpr, sVal, dSrc);
+                        string sPrev;
+                        dDest[sDestF] = dDest.TryGetValue(sDestF, out sPrev) ? sPrev + sRes : sRes;
+                    }
+                    if (dDest.Count == 0) { oRsSrc.MoveNext(); continue; }
+
+                    // Insert via ADO AddNew so column defaults fire.
+                    try
+                    {
+                        oRecordset.AddNew();
+                        foreach (KeyValuePair<string, string> kvp in dDest)
+                        {
+                            try { oRecordset.Fields[kvp.Key].Value = kvp.Value; }
+                            catch { /* skip un-settable cells */ }
+                        }
+                        oRecordset.Update();
+                        iInserted++;
+                    }
+                    catch
+                    {
+                        try { oRecordset.CancelUpdate(); } catch { }
+                    }
+
+                    oRsSrc.MoveNext();
+                }
+            }
+            finally
+            {
+                try { if (oRsSrc != null) oRsSrc.Close(); } catch { }
+                try { if (oConnSrc != null) oConnSrc.Close(); } catch { }
+                releaseCom(oRsSrc);
+                releaseCom(oConnSrc);
+            }
+
+            DbDoLog.write("importWithTransferMap: added " + iInserted + " row(s) from "
+                + sSourcePath + " [" + sSection + "]");
+            return iInserted;
+        }
+
+        // generateReport: render a report template (.inix section) over
+        // the current filtered set, in the current sort order, and return
+        // the resulting Markdown. Bands are header (once), detail (per
+        // record), separator (between records), footer (once). The
+        // current cursor position is saved and restored, so producing a
+        // report never moves the user's place. See ReportEngine for the
+        // per-line substitution and suppress-if-blank rules.
+        public string generateReport(string sInixPath, string sSection)
+        {
+            if (!hasRecordset()) throw new InvalidOperationException("No recordset open. Open a table first.");
+            if (string.IsNullOrEmpty(sInixPath) || !File.Exists(sInixPath))
+                throw new FileNotFoundException("Report template (.inix) not found.", sInixPath);
+
+            InixCodec.Section sec = null;
+            foreach (InixCodec.Section s in InixCodec.read(sInixPath))
+                if (string.Equals(s.Name, sSection, StringComparison.OrdinalIgnoreCase)) { sec = s; break; }
+            if (sec == null) throw new Exception("The report file has no section named [" + sSection + "].");
+
+            string sWantTable = sec.get("@table");
+            if (!string.IsNullOrEmpty(sWantTable) && !string.IsNullOrEmpty(sCurrentTable)
+                && !string.Equals(sWantTable.Trim(), sCurrentTable, StringComparison.OrdinalIgnoreCase))
+                throw new Exception("This report is for table '" + sWantTable.Trim()
+                    + "'. Open that table first (the current table is '" + sCurrentTable + "').");
+
+            string sHeader = sec.get("header");
+            string sDetail = sec.get("detail");
+            string sFooter = sec.get("footer");
+            string sGroupHeader = sec.get("group_header");
+            string sGroupFooter = sec.get("group_footer");
+            string sSeparator = resolveSeparator(sec.get("separator"));
+
+            // Optional single-level grouping. When set, the report is
+            // sorted by the group field automatically (so it is never wrong
+            // because the user forgot to sort), and the group_header /
+            // group_footer bands fire as the key changes. With no @group a
+            // report is exactly the flat header/detail/footer it was before.
+            string sGroup = sec.get("@group");
+            sGroup = string.IsNullOrEmpty(sGroup) ? null : sGroup.Trim();
+
+            List<string> lFields = getFieldNames();
+            if (sGroup != null)
+            {
+                bool bFound = false;
+                foreach (string sFn in lFields)
+                    if (string.Equals(sFn, sGroup, StringComparison.OrdinalIgnoreCase)) { bFound = true; break; }
+                if (!bFound) throw new Exception("This report groups by '" + sGroup
+                    + "', which is not a column of '" + sCurrentTable + "'.");
+            }
+
+            // Read the current filtered set (in its current order) into
+            // memory, so grouping can re-order it and aggregates can be
+            // computed without re-reading or disturbing the live view.
+            List<Dictionary<string, string>> lRows = new List<Dictionary<string, string>>();
+            object bookmarkObj = bookmark;
+            try
+            {
+                moveFirst();
+                while (!eof)
+                {
+                    Dictionary<string, string> dRow = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                    foreach (string sFn in lFields) dRow[sFn] = getFieldValue(sFn) ?? "";
+                    lRows.Add(dRow);
+                    moveNext();
+                }
+            }
+            finally
+            {
+                if (bookmarkObj != null) try { bookmark = bookmarkObj; } catch { }
+            }
+
+            if (sGroup != null && lRows.Count > 1) stableSortByField(lRows, sGroup);
+
+            Dictionary<string, string> dEmpty = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, string> dGrand = computeAggregates(lRows, lFields);
+
+            List<string> lBlocks = new List<string>();
+            string sHd = ReportEngine.renderBand(sHeader, mergeDicts(dEmpty, dGrand));
+            if (!string.IsNullOrEmpty(sHd)) lBlocks.Add(sHd);
+
+            if (sGroup == null)
+            {
+                appendDetailBlocks(lBlocks, sDetail, lRows, sSeparator);
+            }
+            else
+            {
+                int i = 0;
+                while (i < lRows.Count)
+                {
+                    string sKey; lRows[i].TryGetValue(sGroup, out sKey); sKey = sKey ?? "";
+                    List<Dictionary<string, string>> lGroup = new List<Dictionary<string, string>>();
+                    while (i < lRows.Count)
+                    {
+                        string sK2; lRows[i].TryGetValue(sGroup, out sK2); sK2 = sK2 ?? "";
+                        if (!string.Equals(sK2, sKey, StringComparison.OrdinalIgnoreCase)) break;
+                        lGroup.Add(lRows[i]); i++;
+                    }
+                    // Group context: the group's first row (for fields like
+                    // the group key itself) overlaid with the group's totals.
+                    Dictionary<string, string> dGroupCtx = mergeDicts(lGroup[0], computeAggregates(lGroup, lFields));
+                    string sGh = ReportEngine.renderBand(sGroupHeader, dGroupCtx);
+                    if (!string.IsNullOrEmpty(sGh)) lBlocks.Add(sGh);
+                    appendDetailBlocks(lBlocks, sDetail, lGroup, sSeparator);
+                    string sGf = ReportEngine.renderBand(sGroupFooter, dGroupCtx);
+                    if (!string.IsNullOrEmpty(sGf)) lBlocks.Add(sGf);
+                }
+            }
+
+            string sFt = ReportEngine.renderBand(sFooter, mergeDicts(dEmpty, dGrand));
+            if (!string.IsNullOrEmpty(sFt)) lBlocks.Add(sFt);
+
+            DbDoLog.write("generateReport: [" + sSection + "] over " + lRows.Count + " record(s)"
+                + (sGroup == null ? "" : " grouped by " + sGroup));
+            return string.Join("\r\n\r\n", lBlocks.ToArray()) + "\r\n";
+        }
+
+        // Render each row's detail band into a block and append to lBlocks,
+        // inserting the separator between consecutive detail blocks.
+        private void appendDetailBlocks(List<string> lBlocks, string sDetail,
+            List<Dictionary<string, string>> lRows, string sSeparator)
+        {
+            List<string> lDetail = new List<string>();
+            foreach (Dictionary<string, string> dRow in lRows)
+            {
+                string sBlock = ReportEngine.renderBand(sDetail, dRow);
+                if (!string.IsNullOrEmpty(sBlock)) lDetail.Add(sBlock);
+            }
+            for (int i = 0; i < lDetail.Count; i++)
+            {
+                if (i > 0 && !string.IsNullOrEmpty(sSeparator)) lBlocks.Add(sSeparator);
+                lBlocks.Add(lDetail[i]);
+            }
+        }
+
+        // Overlay dExtra onto a copy of dBase (dExtra wins on conflict).
+        private static Dictionary<string, string> mergeDicts(
+            Dictionary<string, string> dBase, Dictionary<string, string> dExtra)
+        {
+            Dictionary<string, string> d = new Dictionary<string, string>(dBase, StringComparer.OrdinalIgnoreCase);
+            foreach (KeyValuePair<string, string> kvp in dExtra) d[kvp.Key] = kvp.Value;
+            return d;
+        }
+
+        // Stable in-place sort of rows by a field, case-insensitive, ties
+        // broken by original position (so within a group the current order
+        // is preserved).
+        private static void stableSortByField(List<Dictionary<string, string>> lRows, string sField)
+        {
+            List<KeyValuePair<int, Dictionary<string, string>>> lIdx =
+                new List<KeyValuePair<int, Dictionary<string, string>>>();
+            for (int i = 0; i < lRows.Count; i++)
+                lIdx.Add(new KeyValuePair<int, Dictionary<string, string>>(i, lRows[i]));
+            lIdx.Sort(delegate(KeyValuePair<int, Dictionary<string, string>> a,
+                               KeyValuePair<int, Dictionary<string, string>> b)
+            {
+                string ka; a.Value.TryGetValue(sField, out ka); ka = ka ?? "";
+                string kb; b.Value.TryGetValue(sField, out kb); kb = kb ?? "";
+                int c = string.Compare(ka, kb, StringComparison.OrdinalIgnoreCase);
+                return (c != 0) ? c : a.Key.CompareTo(b.Key);
+            });
+            lRows.Clear();
+            foreach (KeyValuePair<int, Dictionary<string, string>> kv in lIdx) lRows.Add(kv.Value);
+        }
+
+        // Compute aggregate pseudo-fields over a set of rows: $count, and
+        // for every field $sum_/$avg_/$min_/$max_ over the values that parse
+        // as numbers (blanks and non-numbers ignored). These become ordinary
+        // $-fields in the header/footer and group_header/group_footer bands.
+        private static Dictionary<string, string> computeAggregates(
+            List<Dictionary<string, string>> lRows, List<string> lFields)
+        {
+            Dictionary<string, string> d = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            d["count"] = lRows.Count.ToString(System.Globalization.CultureInfo.InvariantCulture);
+            foreach (string sField in lFields)
+            {
+                double dSum = 0, dMin = 0, dMax = 0;
+                int n = 0;
+                foreach (Dictionary<string, string> dRow in lRows)
+                {
+                    string sVal; double v;
+                    if (dRow.TryGetValue(sField, out sVal) && tryParseNumber(sVal, out v))
+                    {
+                        if (n == 0) { dMin = v; dMax = v; }
+                        else { if (v < dMin) dMin = v; if (v > dMax) dMax = v; }
+                        dSum += v; n++;
+                    }
+                }
+                d["sum_" + sField] = formatNumber(dSum);
+                d["avg_" + sField] = (n > 0) ? formatNumber(dSum / n) : "";
+                d["min_" + sField] = (n > 0) ? formatNumber(dMin) : "";
+                d["max_" + sField] = (n > 0) ? formatNumber(dMax) : "";
+            }
+            return d;
+        }
+
+        private static bool tryParseNumber(string s, out double v)
+        {
+            v = 0;
+            if (string.IsNullOrEmpty(s)) return false;
+            string t = s.Trim().Replace(",", "");
+            if (t.Length > 0 && (t[0] == '$' || t[0] == '\u00A3' || t[0] == '\u20AC')) t = t.Substring(1);
+            return double.TryParse(t, System.Globalization.NumberStyles.Number,
+                System.Globalization.CultureInfo.InvariantCulture, out v);
+        }
+
+        private static string formatNumber(double v)
+        {
+            return v.ToString("0.######", System.Globalization.CultureInfo.InvariantCulture);
+        }
+
+        // Resolve a separator value: a keyword maps to its Markdown/text,
+        // anything else is treated as literal separator text; null means
+        // no separator was specified.
+        private static string resolveSeparator(string sRaw)
+        {
+            if (sRaw == null) return null;
+            string sKey = sRaw.Trim().ToLowerInvariant();
+            if (sKey == "blank") return "";       // rely on the inter-block blank line
+            if (sKey == "rule") return "---";     // Markdown thematic break
+            if (sKey == "page") return "\f";      // form feed (plain-text page break)
+            return sRaw;                          // literal separator text
+        }
+
         private void exportHtml(string sDestPath)
         {
             object bookmarkObj = bookmark;
@@ -10622,6 +11242,28 @@ namespace DbDo
             // trailing zeros. Validation on OK re-parses the value
             // and refuses to close if a numeric field has non-
             // numeric content.
+            // Per-field documentation from the table's --- schema
+            // comments, so Shift+F1 on a field speaks the field's
+            // purpose -- the field-level help the Contact Tracking
+            // System pioneered, realized here through DbDo's own
+            // schema-doc convention. Fields whose column carries no
+            // doc comment are left exactly as before.
+            Dictionary<string, string> dColumnDoc =
+                new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (inputMgr != null)
+            {
+                try
+                {
+                    List<string[]> lsTblDoc;
+                    List<string[]> lsColDoc;
+                    if (inputMgr.getSchemaDoc(sTableName, out lsTblDoc, out lsColDoc))
+                        foreach (string[] aPair in lsColDoc)
+                            if (aPair.Length == 2 && !dColumnDoc.ContainsKey(aPair[0]))
+                                dColumnDoc[aPair[0]] = aPair[1];
+                }
+                catch { }
+            }
+
             for (int i = 0; i < lColumns.Count; i++)
             {
                 string sCol = lColumns[i];
@@ -10645,7 +11287,14 @@ namespace DbDo
                 // configured for <table>.<column>.
                 string sRegex = lookupFieldRegex(sCol);
                 StringBuilder sbTip = new StringBuilder();
-                if (!string.IsNullOrEmpty(sDeclared)) sbTip.Append("type ").Append(sDeclared);
+                string sColDoc;
+                if (dColumnDoc.TryGetValue(sCol, out sColDoc) && !string.IsNullOrEmpty(sColDoc))
+                    sbTip.Append(sColDoc);
+                if (!string.IsNullOrEmpty(sDeclared))
+                {
+                    if (sbTip.Length > 0) sbTip.Append(" -- ");
+                    sbTip.Append("type ").Append(sDeclared);
+                }
                 if (!bEditable)
                 {
                     if (sbTip.Length > 0) sbTip.Append(' ');
@@ -10764,6 +11413,16 @@ namespace DbDo
         //                            afterward revokes it)
         //   F6 / Shift+F6            save and switch to the next /
         //                            previous view (show / list)
+        //   Control+Semicolon        Insert Date: put today's date
+        //                            (yyyy-MM-dd) at the caret of the
+        //                            focused field
+        //   Control+Shift+Semicolon  Insert Time: put the current time
+        //                            (HH:mm:ss) at the caret
+        // The two insert chords mirror the long-standing Excel
+        // date/time shortcuts and realize a convenience both DbDo
+        // ancestors shipped (the Contact Tracking System's F8 date key
+        // and DbDialog's /Date and :Time form buttons), here scoped to
+        // DbDo's own edit form rather than the shared text control.
         // plus focused-field tracking so the caller's reopen loop
         // can restore position, and initial focus on the same
         // field.
@@ -10820,6 +11479,27 @@ namespace DbDo
                         evKey.Handled = true;
                         evKey.SuppressKeyPress = true;
                         dlg.pressButton("OK");
+                    }
+                    else if (evKey.KeyData == (Keys.Control | Keys.OemSemicolon)
+                        || evKey.KeyData == (Keys.Control | Keys.Shift | Keys.OemSemicolon))
+                    {
+                        // Insert Date / Insert Time at the caret of the
+                        // focused field, replacing any selection. The
+                        // chords match Excel's date/time shortcuts.
+                        TextBox tbHit = o as TextBox;
+                        evKey.Handled = true;
+                        evKey.SuppressKeyPress = true;
+                        if (tbHit == null || tbHit.ReadOnly) return;
+                        bool bTime = (evKey.KeyData == (Keys.Control | Keys.Shift | Keys.OemSemicolon));
+                        string sStamp = bTime
+                            ? DateTime.Now.ToString("HH:mm:ss")
+                            : DateTime.Now.ToString("yyyy-MM-dd");
+                        int iAt = tbHit.SelectionStart;
+                        tbHit.Text = tbHit.Text.Remove(iAt, tbHit.SelectionLength).Insert(iAt, sStamp);
+                        tbHit.SelectionStart = iAt + sStamp.Length;
+                        tbHit.SelectionLength = 0;
+                        lsNullFields.Remove(sName);
+                        LiveRegion.say(sStamp);
                     }
                 };
             }
@@ -13118,6 +13798,40 @@ namespace DbDo
         public string openTableName
         { get { return (db != null && db.isOpen()) ? (db.currentTable ?? "") : ""; } }
 
+        // currentDbFolder: the folder that holds the open database
+        // file, or null when no database is open. A database's own
+        // scripts live here, beside its .db file -- this is the heart
+        // of the "scripts belong to a database" layout.
+        private string currentDbFolder()
+        {
+            string sPath = openDatabasePath;
+            if (string.IsNullOrEmpty(sPath)) return null;
+            try { return System.IO.Path.GetDirectoryName(sPath); }
+            catch { return null; }
+        }
+
+        // gatherScripts: the scripts available right now, as a map
+        // from display name to full path. The open database's own
+        // scripts (in its folder) are merged with the generic scripts
+        // in %APPDATA%\DbDo\Scripts; on a same-named collision the
+        // database-specific script wins. Invoke Script and Edit Script
+        // both draw their pick list from this, so a database's scripts
+        // appear automatically whenever that database is open and stay
+        // out of the way when it is not.
+        private System.Collections.Generic.SortedDictionary<string, string> gatherScripts()
+        {
+            System.Collections.Generic.SortedDictionary<string, string> dMap =
+                new System.Collections.Generic.SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            string sDbFolder = currentDbFolder();
+            if (!string.IsNullOrEmpty(sDbFolder))
+                foreach (string sName in ScriptHelper.listScriptsInFolder(sDbFolder))
+                    dMap[sName] = System.IO.Path.Combine(sDbFolder, sName);
+            string sGeneric = ScriptHelper.getScriptDir();
+            foreach (string sName in ScriptHelper.listScriptsInFolder(sGeneric))
+                if (!dMap.ContainsKey(sName)) dMap[sName] = System.IO.Path.Combine(sGeneric, sName);
+            return dMap;
+        }
+
         // Lifecycle invariant (MDI): each child window owns exactly
         // one DbDoManager, so an open window means an open
         // connection/recordset and a closed window means both are
@@ -13604,6 +14318,8 @@ namespace DbDo
             // should keep their plain-Ctrl chords.)
             miFileImport  = addItem(miFile, "&Import...",                 "Import",           Keys.Alt | Keys.I,                    importClicked);
             miFileMerge   = addItem(miFile, "&Merge Data...",             "Merge",            Keys.Alt | Keys.M,                    mergeClicked);
+            addItem(miFile, "&Transfer Import...",       "Transfer Import",  Keys.None,                            importTransferClicked);
+            addItem(miFile, "Produce &Report...",        "Produce Report",   Keys.None,                            produceReportClicked);
             miFileExport  = addItem(miFile, "E&xport Data...",            "Export Data",      Keys.Alt | Keys.X,                    fileExportClicked);
             addSep(miFile);
             miFilePrint   = addItem(miFile, "&Print...",                  "Out Printer",      Keys.Control | Keys.P,                filePrintClicked);
@@ -14047,13 +14763,15 @@ namespace DbDo
             // both use this chord for the same purpose.
             miHelpHistory      = addItem(miHelp, "&History of Changes",                  "Show History",      Keys.Shift | Keys.F1,               helpHistoryClicked);
             miHelpReadme       = addItem(miHelp, "&Readme Guide",                        "Show Readme",       Keys.None,                          helpReadmeClicked);
-            // Open Sample Database: a one-keystroke tour entry point.
-            // The installer ships sample.db (teachers, classes,
-            // students, enrollments) alongside the executable; this
-            // command opens it via the same code path File > Open
-            // Database uses, so all the normal post-open behaviors
-            // (filter restore, status announcement, etc.) apply.
-            miHelpSampleDb     = addItem(miHelp, "Open &Sample Database",                "Open Sample Database", Keys.None,                        helpSampleDbClicked);
+            // Sample Databases: a tour entry point that lists every .db
+            // file in the user's Samples folder (%APPDATA%\DbDo\Samples,
+            // seeded once from {app}\Samples) and opens the chosen one
+            // via the same code path File > Open Database uses, so all
+            // the normal post-open behaviors (sort/filter/position
+            // restore, status announcement) apply. The list is built at
+            // runtime, so a user's own .db files in that folder appear
+            // alongside the bundled samples.
+            miHelpSampleDb     = addItem(miHelp, "Sample &Databases...",                "Sample Databases", Keys.None,                        helpSampleDbClicked);
             // Open Convention Sample: the flagship app-plus-data demo --
             // the NFB 2026 convention agenda as a four-table database with
             // maps-based associations. Shipped alongside the executable
@@ -14061,7 +14779,7 @@ namespace DbDo
             miHelpConventionDb = addItem(miHelp, "Open Con&vention Sample",              "Open Convention Database", Keys.None,                    helpConventionDbClicked);
             // Open Northwind Sample and Open Chinook Sample: parallel
             // commands for the two larger bundled databases. Both use
-            // the same code path as Open Sample Database. Northwind is
+            // the same code path as File > Open Database. Northwind is
             // the classic Microsoft sales sample (8 tables, 101 rows);
             // Chinook is the classic music-store sample (9 tables, 158
             // rows, with three-deep parent-child chains).
@@ -17070,24 +17788,17 @@ namespace DbDo
                         { dGroups[sKey] = new List<string[]>(); lOrder.Add(sKey); }
                         dGroups[sKey].Add(aRel);
                     }
-                    Dictionary<string, int> dTableSeen = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-                    foreach (string sKey in lOrder)
-                    {
-                        string sOtherT = sKey.Split('\x01')[1];
-                        dTableSeen[sOtherT] = dTableSeen.ContainsKey(sOtherT) ? dTableSeen[sOtherT] + 1 : 1;
-                    }
                     foreach (string sKey in lOrder)
                     {
                         string[] aParts = sKey.Split('\x01');
                         string sKind = aParts[0], sOther = aParts[1], sDir = aParts[2];
                         List<string[]> lGroup = dGroups[sKey];
-                        // Succinct header: "<table> (N):". The kind
-                        // ("presents") appears only when the same table
-                        // heads more than one group here, where it is
-                        // genuinely needed to tell the groups apart.
-                        bool bNeedKind = dTableSeen.ContainsKey(sOther) && dTableSeen[sOther] > 1;
-                        sb.AppendLine(sOther
-                            + (bNeedKind ? " via " + sKind + ((sDir == "object") ? " incoming" : "") : "")
+                        // Header names how the tables relate: "<table>
+                        // via <kind>", " incoming" when this record is
+                        // the object. Shown every time (not only to
+                        // disambiguate), matching the Enter drill picker.
+                        sb.AppendLine(sOther + " via " + sKind
+                            + ((sDir == "object") ? " incoming" : "")
                             + " (" + lGroup.Count + "):");
                         int iShown = 0;
                         foreach (string[] aRel in lGroup)
@@ -19246,7 +19957,7 @@ namespace DbDo
             // Update a single table's state inside a file. The file
             // entry is found by path; if absent it's created (and
             // promoted to the front via recordOpen).
-            public static void recordTableState(string sPath, string sTable, string sFilter, string sSort, int iPosition, string sVirtualColumn)
+            public static void recordTableState(string sPath, string sTable, string sFilter, string sSort, int iPosition, string sVirtualColumn, string sSelectList)
             {
                 if (string.IsNullOrEmpty(sPath) || string.IsNullOrEmpty(sTable)) return;
                 List<FileState> l = loadAll();
@@ -19268,6 +19979,7 @@ namespace DbDo
                 ts.sSort          = sSort   ?? "";
                 ts.iPosition      = iPosition;
                 ts.sVirtualColumn = sVirtualColumn ?? "";
+                ts.sSelectList    = sSelectList ?? "";
                 f.sLastTable = sTable;
                 saveAll(l);
             }
@@ -19740,7 +20452,14 @@ namespace DbDo
                     catch (Exception ex)
                     { ErrorDialog.show(this, "Open Database", "Could not convert the inix file: " + ex.Message); return; }
                 }
-                openDatabaseAndApplyState(sOpenPath, null);
+                // Reapply the per-table sort / filter / position this
+                // file was last left with. Without looking up the saved
+                // state here, a normal Open Database (as opposed to the
+                // Recent Files list) dropped the sort, so the user had
+                // to re-sort on every open. State is written on close in
+                // OnFormClosing; null is fine for a never-seen file.
+                RecentFiles.FileState stOpen = RecentFiles.findByPath(RecentFiles.loadAll(), sOpenPath);
+                openDatabaseAndApplyState(sOpenPath, stOpen);
             }
         }
 
@@ -20827,25 +21546,67 @@ namespace DbDo
         private void fileSaveAsClicked(object sender, EventArgs evArgs) { saveAsCommon("Save Database"); }
         private void fileBackupClicked(object sender, EventArgs evArgs) { saveAsCommon("Backup Database"); }
 
-        // helpSampleDbClicked, helpNorthwindDbClicked, helpChinookDbClicked:
-        // open one of the three bundled sample databases that ship in
-        // the DbDo install folder. All three commands share one
-        // helper (openInstallSampleDb) so the open path, the file-
-        // missing message, and the post-open behavior are identical
-        // for every sample. The bundled samples are:
-        //   - sample.db     : small school domain (teachers, classes,
-        //                     students, enrollments) for first-launch
-        //                     exploration. 4 tables, 3 rows each.
-        //   - northwind.db  : classic Microsoft Northwind sales sample
-        //                     adapted to DbDo standard columns.
-        //                     8 tables, 101 rows.
-        //   - chinook.db    : classic Chinook music-store sample
-        //                     adapted to DbDo standard columns.
-        //                     9 tables, 158 rows, three-deep chains.
+        // helpSampleDbClicked: the Sample Databases command. Lists every
+        // .db file in the user's Samples folder at runtime
+        // (%APPDATA%\DbDo\Samples, seeded once from {app}\Samples) and
+        // opens the chosen one through the normal state-restoring open
+        // path, so its remembered per-table sort, filter, and position
+        // come back exactly as they do for Open Database and Recent
+        // Files. The folder is discovered dynamically: the user can drop
+        // their own databases into it to add them to the list, and new
+        // bundled samples appear without any code change here.
         private void helpSampleDbClicked(object sender, EventArgs evArgs)
         {
-            openInstallSampleDb("sample.db", "Open Sample Database");
+            string[] aPaths = ScriptHelper.listSampleDatabases();
+            if (aPaths.Length == 0)
+            {
+                MessageBox.Show(this,
+                    "No sample databases found in:\n\n" + ScriptHelper.getSampleDir()
+                    + "\n\nEach sample lives in its own subfolder there (for example, "
+                    + "Samples\\music\\music.db). Drop a database into such a subfolder and try again.",
+                    "Sample Databases", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            // Show each database by its root name (its folder), mapping
+            // the label back to the full path. On the rare chance two
+            // roots collide, fall back to "<folder>\<file>".
+            System.Collections.Generic.SortedDictionary<string, string> dMap =
+                new System.Collections.Generic.SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (string sP in aPaths)
+            {
+                string sLabel = System.IO.Path.GetFileNameWithoutExtension(sP);
+                if (dMap.ContainsKey(sLabel))
+                    sLabel = System.IO.Path.GetFileName(System.IO.Path.GetDirectoryName(sP))
+                           + "\\" + System.IO.Path.GetFileName(sP);
+                dMap[sLabel] = sP;
+            }
+            List<string> lNames = new List<string>(dMap.Keys);
+            string sChosen = promptListChoice("Sample Databases",
+                "Choose a sample database to open:", lNames, lNames[0]);
+            if (string.IsNullOrEmpty(sChosen)) return;
+            string sPath = dMap[sChosen];
+            if (!System.IO.File.Exists(sPath))
+            {
+                ErrorDialog.show(this, "Sample Databases", "The chosen database no longer exists: " + sPath);
+                return;
+            }
+            try
+            {
+                RecentFiles.FileState stSample = RecentFiles.findByPath(RecentFiles.loadAll(), sPath);
+                openDatabaseAndApplyState(sPath, stSample);
+            }
+            catch (Exception ex)
+            {
+                ErrorDialog.show(this, "Sample Databases", ex.Message);
+            }
         }
+
+        // helpNorthwindDbClicked, helpChinookDbClicked: open one of the
+        // two classic reference databases that ship in the DbDo install
+        // folder root. Both share openInstallSampleDb so the open path,
+        // the file-missing message, and post-open behavior are identical.
+        // (The former single-file Open Sample Database command became the
+        // dynamic Sample Databases picker above.)
         private void helpNorthwindDbClicked(object sender, EventArgs evArgs)
         {
             openInstallSampleDb("northwind.db", "Open Northwind Sample");
@@ -20873,7 +21634,12 @@ namespace DbDo
         {
             string sAppDir = Path.GetDirectoryName(
                 System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
-            string sPath = Path.Combine(sAppDir, sFileName);
+            // New layout: {app}\Samples\<root>\<file>. Fall back to the
+            // older flat {app}\<file> when the per-database folder is
+            // absent, so the command works under either layout.
+            string sRoot = Path.GetFileNameWithoutExtension(sFileName);
+            string sPath = Path.Combine(sAppDir, "Samples", sRoot, sFileName);
+            if (!File.Exists(sPath)) sPath = Path.Combine(sAppDir, sFileName);
             if (!File.Exists(sPath))
             {
                 MessageBox.Show(this,
@@ -20882,7 +21648,11 @@ namespace DbDo
                     sTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
-            try { openDatabaseAndApplyState(sPath, null); }
+            try
+            {
+                RecentFiles.FileState st = RecentFiles.findByPath(RecentFiles.loadAll(), sPath);
+                openDatabaseAndApplyState(sPath, st);
+            }
             catch (Exception ex)
             {
                 ErrorDialog.show(this, sTitle, ex.Message);
@@ -21078,6 +21848,158 @@ namespace DbDo
                 {
                     ErrorDialog.show(this, "Merge", ex.Message);
                 }
+            }
+        }
+
+        // Transfer Import: bring records in from an external source file
+        // (.dbf, .mdb/.accdb, .db) into the current table through a
+        // transfer map (.inix), renaming and optionally transforming
+        // each field with a JScript expression. This is the modern heir
+        // of the legacy DbDialog transfer.ini -- useful, for instance,
+        // to import a DOS-era CTS dBASE file into a DbDo contact table,
+        // reformatting its packed YYYYMMDD dates along the way.
+        private void importTransferClicked(object sender, EventArgs evArgs)
+        {
+            if (db == null || !db.hasRecordset())
+            {
+                MessageBox.Show(this, "Open a database and pick a destination table first.",
+                    "Transfer Import", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            // 1. Choose the transfer map.
+            string sInix;
+            using (OpenFileDialog dlgMap = new OpenFileDialog())
+            {
+                dlgMap.Title = "Choose a transfer map";
+                prepareFileDialog(dlgMap);
+                dlgMap.Filter = "Transfer map (*.inix)|*.inix|All Files (*.*)|*.*";
+                dlgMap.DefaultExt = "inix";
+                dlgMap.InitialDirectory = IniFolders.bestDirectory(IniFolders.importFolder, db.filePath);
+                if (dlgMap.ShowDialog(this) != DialogResult.OK) return;
+                sInix = dlgMap.FileName;
+                IniFolders.importFolder = Path.GetDirectoryName(sInix);
+            }
+
+            // 2. Choose the mapping section within it.
+            List<string> lSections = new List<string>();
+            try
+            {
+                foreach (InixCodec.Section s in InixCodec.read(sInix))
+                    if (!string.Equals(s.Name, "Global", StringComparison.OrdinalIgnoreCase))
+                        lSections.Add(s.Name);
+            }
+            catch (Exception ex) { ErrorDialog.show(this, "Transfer Import", ex.Message); return; }
+            if (lSections.Count == 0)
+            {
+                MessageBox.Show(this, "That .inix has no mapping sections.",
+                    "Transfer Import", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            string sSection = (lSections.Count == 1)
+                ? lSections[0]
+                : promptListChoice("Transfer Import", "Choose the mapping to apply:", lSections, lSections[0]);
+            if (string.IsNullOrEmpty(sSection)) return;
+
+            // 3. Choose the source file.
+            string sSource;
+            using (OpenFileDialog dlgSrc = new OpenFileDialog())
+            {
+                dlgSrc.Title = "Choose the source file to import from";
+                prepareFileDialog(dlgSrc);
+                dlgSrc.Filter = "Source databases (*.dbf;*.mdb;*.accdb;*.db;*.sqlite;*.sqlite3)"
+                    + "|*.dbf;*.mdb;*.accdb;*.db;*.sqlite;*.sqlite3|All Files (*.*)|*.*";
+                dlgSrc.InitialDirectory = IniFolders.bestDirectory(IniFolders.importFolder, db.filePath);
+                if (dlgSrc.ShowDialog(this) != DialogResult.OK) return;
+                sSource = dlgSrc.FileName;
+            }
+
+            // 4. Run it.
+            try
+            {
+                int iCount = db.importWithTransferMap(sSource, sInix, sSection);
+                invokeRefresh();
+                MessageBox.Show(this,
+                    "Imported " + iCount + " row(s) into " + db.currentTable + " using [" + sSection + "].",
+                    "Transfer Import", MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                ErrorDialog.show(this, "Transfer Import", ex.Message);
+            }
+        }
+
+        // Produce Report: render a report template (.inix) over the
+        // current filtered set to a Markdown file and open it. The
+        // template language is documented in DbDo.md ("Report
+        // templates"); it reuses the same $field / {{ jscript }}
+        // substitution as transfer maps, and Markdown output converts
+        // cleanly to HTML, DOCX, or plain text with your own tools.
+        private void produceReportClicked(object sender, EventArgs evArgs)
+        {
+            if (db == null || !db.hasRecordset())
+            {
+                MessageBox.Show(this, "Open a database and pick a table first.",
+                    "Produce Report", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+
+            // 1. Choose the report template.
+            string sInix;
+            using (OpenFileDialog dlgMap = new OpenFileDialog())
+            {
+                dlgMap.Title = "Choose a report template";
+                prepareFileDialog(dlgMap);
+                dlgMap.Filter = "Report template (*.inix)|*.inix|All Files (*.*)|*.*";
+                dlgMap.DefaultExt = "inix";
+                dlgMap.InitialDirectory = IniFolders.bestDirectory(IniFolders.importFolder, db.filePath);
+                if (dlgMap.ShowDialog(this) != DialogResult.OK) return;
+                sInix = dlgMap.FileName;
+                IniFolders.importFolder = Path.GetDirectoryName(sInix);
+            }
+
+            // 2. Choose the report section.
+            List<string> lSections = new List<string>();
+            try
+            {
+                foreach (InixCodec.Section s in InixCodec.read(sInix))
+                    if (!string.Equals(s.Name, "Global", StringComparison.OrdinalIgnoreCase))
+                        lSections.Add(s.Name);
+            }
+            catch (Exception ex) { ErrorDialog.show(this, "Produce Report", ex.Message); return; }
+            if (lSections.Count == 0)
+            {
+                MessageBox.Show(this, "That .inix has no report sections.",
+                    "Produce Report", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            string sSection = (lSections.Count == 1)
+                ? lSections[0]
+                : promptListChoice("Produce Report", "Choose a report:", lSections, lSections[0]);
+            if (string.IsNullOrEmpty(sSection)) return;
+
+            // 3. Render to Markdown.
+            string sMarkdown;
+            try { sMarkdown = db.generateReport(sInix, sSection); }
+            catch (Exception ex) { ErrorDialog.show(this, "Produce Report", ex.Message); return; }
+
+            // 4. Save the Markdown and open it in the editor.
+            using (SaveFileDialog dlgOut = new SaveFileDialog())
+            {
+                dlgOut.Title = "Save report as Markdown";
+                dlgOut.Filter = "Markdown (*.md)|*.md|All Files (*.*)|*.*";
+                dlgOut.DefaultExt = "md";
+                dlgOut.FileName = sSection + ".md";
+                dlgOut.InitialDirectory = IniFolders.bestDirectory(IniFolders.exportFolder, db.filePath);
+                if (dlgOut.ShowDialog(this) != DialogResult.OK) return;
+                IniFolders.exportFolder = Path.GetDirectoryName(dlgOut.FileName);
+                try
+                {
+                    File.WriteAllText(dlgOut.FileName, sMarkdown, new UTF8Encoding(true));
+                    DbDoLog.write("Report written: " + dlgOut.FileName);
+                    ScriptHelper.openInEditor(dlgOut.FileName);
+                }
+                catch (Exception ex) { ErrorDialog.show(this, "Produce Report", ex.Message); }
             }
         }
 
@@ -23375,6 +24297,7 @@ namespace DbDo
                 {
                     db.filter = "";
                     invokeRefresh();
+                    persistCurrentTableState();
                     LiveRegion.sayForced("Filter cleared. " + db.recordCount + " records visible.");
                 }
                 catch (Exception ex)
@@ -23431,6 +24354,7 @@ namespace DbDo
                 {
                     db.filter = sFinalExpr;
                     invokeRefresh();
+                    persistCurrentTableState();
                     if (string.IsNullOrEmpty(sFinalExpr))
                         LiveRegion.sayForced("No filter applied. " + db.recordCount + " records visible.");
                     else
@@ -24071,6 +24995,31 @@ namespace DbDo
         // for the column. This command takes its column from the
         // current virtual cursor's position so it's a "sort this
         // column right now" gesture.
+        // persistCurrentTableState: write the current table's filter,
+        // sort, position, and virtual column straight to the RecentFiles
+        // ini block now, instead of waiting for form close. DbDo opens
+        // each database/table in its own MDI window with its own
+        // manager, so a close handler is fragile -- closing the database
+        // (not the window), or one window persisting over another, can
+        // drop the change. Writing here means the LAST sort (and filter)
+        // is saved the instant it is set and restored on the next open.
+        // Never allowed to throw: persistence must not break a command.
+        private void persistCurrentTableState()
+        {
+            try
+            {
+                if (db == null || !db.isOpen()
+                    || string.IsNullOrEmpty(db.filePath)
+                    || string.IsNullOrEmpty(db.currentTable)) return;
+                RecentFiles.recordTableState(db.filePath, db.currentTable,
+                    db.filter ?? "", db.sort ?? "", db.absolutePosition,
+                    virtCurrentColumnName() ?? "", db.getSelectList(db.currentTable) ?? "");
+                try { DbDoLog.write("Saved table state for '" + db.currentTable
+                    + "': sort=[" + (db.sort ?? "") + "]"); } catch { }
+            }
+            catch { /* never let persistence break the command */ }
+        }
+
         // reverseOrderClicked (Alt+Shift+O): reverse the current sort
         // by flipping each clause's direction -- ASC becomes DESC,
         // DESC becomes ASC, and a clause with no explicit direction
@@ -24100,6 +25049,7 @@ namespace DbDo
             {
                 db.sort = sNew;
                 invokeRefresh();
+                persistCurrentTableState();
                 LiveRegion.sayForced("Order reversed: " + sNew + ". " + db.recordCount + " records.");
             }
             catch (Exception ex) { ErrorDialog.show(this, "Reverse Order", ex, db); }
@@ -24160,6 +25110,11 @@ namespace DbDo
                 {
                     db.sort = sFinal;
                     invokeRefresh();
+                    // Persist the new sort for this table immediately,
+                    // rather than only on form close (see
+                    // persistCurrentTableState) -- the "I have to re-sort
+                    // every time I open it" report.
+                    persistCurrentTableState();
                     LiveRegion.sayForced(lClauses.Count == 0
                         ? "Sort cleared. " + db.recordCount + " records in original order."
                         : "Ordered by " + sFinal + ". " + db.recordCount + " records.");
@@ -25098,30 +26053,20 @@ namespace DbDo
                     if (!dCounts.ContainsKey(sKey)) { dCounts[sKey] = 0; lOrder.Add(sKey); }
                     dCounts[sKey]++;
                 }
-                // Succinct labels: just "<table> (N)". The kind word
-                // ("presents") is jargon to a user who simply wants the
-                // related events, so it is included -- as "via <kind>"
-                // -- ONLY when the same target table would otherwise
-                // appear twice in this picker and the qualifier is
-                // needed to tell the choices apart.
-                Dictionary<string, int> dTableSeen = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
-                foreach (string sKey in lOrder)
-                {
-                    string sOtherT = sKey.Split('\x01')[1];
-                    dTableSeen[sOtherT] = dTableSeen.ContainsKey(sOtherT) ? dTableSeen[sOtherT] + 1 : 1;
-                }
+                // Label every maps relation as "<table> via <kind>",
+                // with " incoming" added when this record is the OBJECT
+                // of the relation. The kind is useful orientation -- it
+                // names HOW the tables relate ("events via presents",
+                // "contacts via presents incoming") -- so it is always
+                // shown, not only when needed to disambiguate. The
+                // dMapsChoices guard still drops any exact duplicate.
                 foreach (string sKey in lOrder)
                 {
                     string[] aParts = sKey.Split('\x01');
                     string sKind = aParts[0], sOther = aParts[1], sDir = aParts[2];
-                    bool bNeedKind = dTableSeen.ContainsKey(sOther) && dTableSeen[sOther] > 1;
-                    string sLabel = sOther
-                        + (bNeedKind ? " via " + sKind : "")
+                    string sLabel = sOther + " via " + sKind
+                        + ((sDir == "object") ? " incoming" : "")
                         + " (" + dCounts[sKey] + ")";
-                    if (dMapsChoices.ContainsKey(sLabel))
-                        sLabel = sOther + " via " + sKind
-                            + ((sDir == "object") ? " incoming" : "")
-                            + " (" + dCounts[sKey] + ")";
                     if (!dMapsChoices.ContainsKey(sLabel))
                     {
                         dMapsChoices[sLabel] = new string[] { sKind, sOther, sDir };
@@ -25152,11 +26097,11 @@ namespace DbDo
                         if (string.Equals(aSel[1], sTarget, StringComparison.OrdinalIgnoreCase))
                         { bAlreadyDirect = true; break; }
                     if (bAlreadyDirect) continue;
-                    // Same succinctness rule: "<table> (N)", qualified
-                    // with the intermediate table only on collision.
-                    string sLabel = sTarget + " (" + dHopCounts[sKey] + ")";
-                    if (dTwoHopChoices.ContainsKey(sLabel))
-                        sLabel = sTarget + " via " + sVia + " (" + dHopCounts[sKey] + ")";
+                    // Always name the intermediate as "<table> via
+                    // <intermediate>", matching the maps relations above:
+                    // the path is the useful orientation, so it is shown
+                    // every time, not only to break a collision.
+                    string sLabel = sTarget + " via " + sVia + " (" + dHopCounts[sKey] + ")";
                     if (!dTwoHopChoices.ContainsKey(sLabel))
                     {
                         dTwoHopChoices[sLabel] = new string[] { sVia, sTarget };
@@ -25853,6 +26798,7 @@ namespace DbDo
             // setSelectList validates and stores. Empty string
             // clears the override.
             string sStored = db.setSelectList(sCurrentTable, sResult);
+            persistCurrentTableState();
 
             // Compute dropped names so we can tell the user.
             List<string> lRequested = DbDoManager.parseSelectList(sResult);
@@ -27420,18 +28366,23 @@ namespace DbDo
         // reader reads it through the standard dialog focus path.
         private void miscInvokeScriptClicked(object sender, EventArgs args)
         {
-            string[] aNames = ScriptHelper.listScripts();
-            if (aNames.Length == 0)
+            System.Collections.Generic.SortedDictionary<string, string> dScripts = gatherScripts();
+            if (dScripts.Count == 0)
             {
+                string sWhere = ScriptHelper.getScriptDir();
+                string sDbFolder = currentDbFolder();
+                if (!string.IsNullOrEmpty(sDbFolder)) sWhere = sDbFolder + "\n  or\n" + sWhere;
                 MessageBox.Show(this,
-                    "No scripts found in:\n\n" + ScriptHelper.getScriptDir()
+                    "No scripts found in:\n\n" + sWhere
                     + "\n\nUse Edit Script to create one, or Open Script Folder to manage files in Explorer.",
                     "Invoke Script", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
             // Standard LbcDialog pick; native ListBox under the hood,
-            // read line-by-line by every screen reader.
+            // read line-by-line by every screen reader. The list merges
+            // the open database's own scripts with the generic ones.
+            string[] aNames = new List<string>(dScripts.Keys).ToArray();
             using (LbcDialog dlg = new LbcDialog("Invoke Script", this))
             {
                 dlg.addLabel("&Script:");
@@ -27439,7 +28390,7 @@ namespace DbDo
                 if (!dlg.runOkCancel()) return;
                 if (lb.SelectedItem == null) return;
                 string sName = lb.SelectedItem.ToString();
-                string sPath = System.IO.Path.Combine(ScriptHelper.getScriptDir(), sName);
+                string sPath = dScripts[sName];
                 string sResult = ScriptHelper.runScript(sPath, this, this.db);
                 bool bIsError = sResult != null && sResult.StartsWith("ERROR:");
                 string sBody = string.IsNullOrEmpty(sResult) ? "(no output)" : sResult;
@@ -27474,26 +28425,27 @@ namespace DbDo
         // the chosen path is then opened in the user's editor.
         private void miscEditScriptClicked(object sender, EventArgs args)
         {
-            string[] aExisting = ScriptHelper.listScripts();
+            System.Collections.Generic.SortedDictionary<string, string> dExisting = gatherScripts();
             string sPath;
 
-            if (aExisting.Length == 0)
+            if (dExisting.Count == 0)
             {
                 // No scripts yet: skip the pick and go straight to
                 // the Save File dialog so the user can name the new
-                // file.
-                sPath = promptForNewScriptPath();
+                // file. A new script lands in the open database's
+                // folder when one is open, else the generic folder.
+                sPath = promptForNewScriptPath(currentDbFolder());
                 if (string.IsNullOrEmpty(sPath)) return;
             }
             else
             {
-                // Build a pick list with "[New script...]" at the
-                // top followed by existing names. Array.Sort on the
-                // existing names happens inside listScripts() so
-                // they are already alphabetical here.
-                string[] aChoices = new string[aExisting.Length + 1];
+                // Build a pick list with "[New script...]" at the top
+                // followed by the merged db-local and generic script
+                // names (already alphabetical from gatherScripts).
+                List<string> lExisting = new List<string>(dExisting.Keys);
+                string[] aChoices = new string[lExisting.Count + 1];
                 aChoices[0] = NewScriptSentinel;
-                Array.Copy(aExisting, 0, aChoices, 1, aExisting.Length);
+                lExisting.CopyTo(aChoices, 1);
 
                 string sPicked;
                 using (LbcDialog dlg = new LbcDialog("Edit Script", this))
@@ -27507,12 +28459,12 @@ namespace DbDo
 
                 if (sPicked == NewScriptSentinel)
                 {
-                    sPath = promptForNewScriptPath();
+                    sPath = promptForNewScriptPath(currentDbFolder());
                     if (string.IsNullOrEmpty(sPath)) return;
                 }
                 else
                 {
-                    sPath = System.IO.Path.Combine(ScriptHelper.getScriptDir(), sPicked);
+                    sPath = dExisting[sPicked];
                 }
             }
 
@@ -27540,14 +28492,14 @@ namespace DbDo
         // with one example construct, so the user opens a fresh
         // editor onto something that already runs successfully and
         // can be extended in place rather than a blank file.
-        private string promptForNewScriptPath()
+        private string promptForNewScriptPath(string sInitialDir)
         {
             string sPath;
             using (SaveFileDialog sfd = new SaveFileDialog())
             {
                 sfd.Title = "New Script";
                 prepareFileDialog(sfd);
-                sfd.InitialDirectory = ScriptHelper.getScriptDir();
+                sfd.InitialDirectory = string.IsNullOrEmpty(sInitialDir) ? ScriptHelper.getScriptDir() : sInitialDir;
                 sfd.Filter =
                       "JScript .NET (*.js)|*.js"
                     + "|SQL batch (*.sql)|*.sql"
@@ -27627,7 +28579,11 @@ namespace DbDo
         // reason.
         private void miscOpenScriptFolderClicked(object sender, EventArgs args)
         {
-            string sDir = ScriptHelper.getScriptDir();
+            // Open the open database's own folder when one is open --
+            // that is where its scripts live, beside the .db file --
+            // otherwise the generic script folder.
+            string sDbFolder = currentDbFolder();
+            string sDir = string.IsNullOrEmpty(sDbFolder) ? ScriptHelper.getScriptDir() : sDbFolder;
             try
             {
                 System.Diagnostics.ProcessStartInfo psi =

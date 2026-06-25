@@ -1,0 +1,41 @@
+; Sample report definitions for the NFB 2026 Convention database.
+; Run them with File > Produce Report: pick this file, pick a report, and DbDo
+; renders the current (filtered, sorted) view of the events table to Markdown,
+; then opens it in your editor.  Markdown converts cleanly to HTML, Word, or
+; plain text, so one definition serves every format.
+;
+; Each section is one report.  $field inserts a column value; {{ ... }} is a
+; JScript expression; a footer band can use $count and, for a numeric column,
+; $sum_<field> / $avg_<field> / $min_<field> / $max_<field>.  Adding @group
+; sorts by that field and turns on the group_header / group_footer bands.
+
+; The daily agenda, grouped by day with a session count per day.
+[daily_agenda]
+@table = events
+@group = event_date
+group_header = """
+## $event_date
+"""
+detail = """
+**$start_time–$end_time** $title
+"""
+group_footer = """
+*$count session(s) on $event_date.*
+"""
+footer = """
+**$count sessions across the convention.**
+"""
+
+; A flat session list.  Filter the events table first -- to one day, one room,
+; or your marked sessions -- and this reports exactly what you are looking at.
+[session_list]
+@table = events
+header = """
+# Convention Sessions
+"""
+detail = """
+**$event_date $start_time** $title
+"""
+footer = """
+**$count session(s) listed.**
+"""

@@ -1,4 +1,4 @@
-﻿; =====================================================================
+; =====================================================================
 ; DbDo installer script for Inno Setup 6.x
 ;
 ; Compile with Inno Setup IDE (ISCC.exe) to produce DbDo_setup.exe.
@@ -24,7 +24,11 @@
 ; =====================================================================
 
 #define AppName       "DbDo"
-#define AppVersion    "1.0.105"
+; AppVersion is rewritten automatically by buildDbDo.cmd from
+; DbDo.cs's BuildInfo.VersionString, so this literal is only the
+; fallback for compiling the .iss without a prior build. Do not
+; hand-edit it as the source of truth -- edit BuildInfo.VersionString.
+#define AppVersion    "1.0.120"
 #define AppPublisher  "Jamal Mazrui"
 #define AppUrl        "https://github.com/JamalMazrui/DbDo"
 #define AppExeName    "DbDo.exe"
@@ -193,26 +197,29 @@ Source: "License.md";   DestDir: "{app}"; Flags: ignoreversion
 Source: "License.htm";  DestDir: "{app}"; Flags: ignoreversion
 Source: "CamelType_CSharp.md"; DestDir: "{app}"; Flags: ignoreversion
 Source: "CamelType_CSharp.htm"; DestDir: "{app}"; Flags: ignoreversion
-Source: "NFB2026Convention.db"; DestDir: "{app}"; Flags: ignoreversion
+; Sample databases: each lives in its own subfolder under Samples
+; (Samples\<root>\<root>.db, plus that database's own scripts beside
+; it), and the whole tree is copied to {app}\Samples. On first access
+; DbDo seeds it into %APPDATA%\DbDo\Samples (see seedSampleDatabasesIfNew),
+; where the Sample Databases Help command lists it. lookups.db is
+; shared infrastructure, not a sample, so it stays in {app}.
 Source: "lookups.db"; DestDir: "{app}"; Flags: ignoreversion
-Source: "sample.db";     DestDir: "{app}"; Flags: ignoreversion
-Source: "northwind.db";  DestDir: "{app}"; Flags: ignoreversion
-Source: "chinook.db";    DestDir: "{app}"; Flags: ignoreversion
-
-Source: "cellar.db";     DestDir: "{app}"; Flags: ignoreversion
+Source: "Samples\*"; DestDir: "{app}\Samples"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
 Source: "DbDo.inix";   DestDir: "{app}"; Flags: ignoreversion onlyifdoesntexist
 ;
-; Scripts: example scripts of each of the three DbDo script types
-; that DbDo seeds into %APPDATA%\DbDo\Scripts on first access
-; (see ScriptHelper.seedSampleScriptsIfNew in DbDo.cs).
+; Scripts: the generic example scripts (each of the three DbDo
+; script types) that apply to any database. DbDo seeds these into
+; %APPDATA%\DbDo\Scripts on first access (see seedSampleScriptsIfNew).
+; Database-specific scripts are NOT here -- they ride along in each
+; database's own Samples\<root>\ folder above.
 ;   .js   -- JScript .NET, full computational power, host objects
 ;   .sql  -- SQL batch run through invokeSql
 ;   .dbdo -- DbDo command batch dispatched line-by-line as if at
 ;            the dot prompt
 ; Source flag recursesubdirs isn't needed -- it's a flat folder.
-Source: "Scripts\*.js";  DestDir: "{app}\Scripts"; Flags: ignoreversion
-Source: "Scripts\*.sql"; DestDir: "{app}\Scripts"; Flags: ignoreversion
-Source: "Scripts\*.dbdo"; DestDir: "{app}\Scripts"; Flags: ignoreversion
+Source: "Scripts\*.js";  DestDir: "{app}\Scripts"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "Scripts\*.sql"; DestDir: "{app}\Scripts"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "Scripts\*.dbdo"; DestDir: "{app}\Scripts"; Flags: ignoreversion skipifsourcedoesntexist
 ;
 ; DbDo_JAWS.zip contains DbDo.jkm and DbDo.jss at its root. We
 ; ship the zip rather than the two loose files so the GitHub repo

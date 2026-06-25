@@ -454,7 +454,7 @@ DbDo's scripting feature lets you save and re-run units of work — computations
 
 ### Where scripts live
 
-Scripts live under `%APPDATA%\DbDo\Scripts\`. The folder is created on first access; it lives under your roaming application data so it survives DbDo upgrades and uninstalls. On first launch DbDo seeds the folder with the bundled sample scripts (described at the end of this section). A `.seeded` sentinel file in the folder records that seeding has run, so deleting a sample does not cause it to reappear later. To re-seed (to recover a deleted sample or pick up a new one bundled with a future release), delete the `.seeded` file and any matching scripts, then invoke any script command.
+Scripts live in two places. Generic scripts — ones that work against any database — live under `%APPDATA%\DbDo\Scripts\`, created on first access under your roaming application data so they survive DbDo upgrades and uninstalls. A database's own scripts live in the same folder as its `.db` file, beside the database, so they travel with it and stay out of the way when a different database is open. Invoke Script and Edit Script show both sets merged, with the database's own scripts taking precedence on a name clash. On first launch DbDo seeds the generic folder with the bundled generic sample scripts, and seeds each bundled database's folder (under `%APPDATA%\DbDo\Samples\<name>\`) with that database's scripts. A `.seeded` sentinel file in each folder records that seeding has run, so deleting a sample does not cause it to reappear later. To re-seed (to recover a deleted sample or pick up a new one bundled with a future release), delete the `.seeded` file and any matching scripts, then invoke any script command.
 
 ### The three file types
 
@@ -472,7 +472,7 @@ The `.dbdo` extension is reserved for DbDo's command-batch format: it is simply 
 
 ### The chord — Alt+V
 
-Use the Invoke Script command, Alt+V, to pick and run a script. A standard `LbcDialog` listbox shows every `.js`, `.sql`, and `.dbdo` file in the folder, sorted alphabetically, each row showing the full filename including extension. Type into the filter box to narrow the list; press Enter or click OK to run the highlighted script. The result (script output for `.js`, query results for `.sql`, accumulated command output for `.dbdo`, or an `ERROR: ...` message on failure) appears in a read-only multi-line memo dialog that screen readers can navigate line by line, word by word, or character by character.
+Use the Invoke Script command, Alt+V, to pick and run a script. A standard `LbcDialog` listbox shows every `.js`, `.sql`, and `.dbdo` file in the open database's folder and the generic script folder, merged and sorted alphabetically, each row showing the full filename including extension. Type into the filter box to narrow the list; press Enter or click OK to run the highlighted script. The result (script output for `.js`, query results for `.sql`, accumulated command output for `.dbdo`, or an `ERROR: ...` message on failure) appears in a read-only multi-line memo dialog that screen readers can navigate line by line, word by word, or character by character.
 
 The chord is named "Invoke Script" rather than "Invoke File" or "Invoke Query" because "script" generalizes naturally to all three engines — a JScript script, a SQL script, and a DbDo command script are all *scripts* in the recipe-for-doing-something sense, even when the engines differ.
 
@@ -489,7 +489,7 @@ editor = C:\Program Files\Notepad++\notepad++.exe
 
 ### Opening the Scripts folder
 
-Use the Open Script Folder command (no hotkey by default) to launch Explorer at the script folder. Useful when you want to copy a script in from elsewhere, rename a batch of files, or check on the `.seeded` sentinel.
+Use the Open Script Folder command (no hotkey by default) to launch Explorer at the open database's folder — where its scripts live, beside the `.db` file — when a database is open, otherwise at the generic script folder. Useful when you want to copy a script in from elsewhere, rename a batch of files, or check on the `.seeded` sentinel.
 
 ### Bundled sample scripts
 
@@ -534,6 +534,8 @@ All four `.sql` scripts share one idiom worth learning, because it is how every 
 **Compute and build output (`.js`).**
 
 - **Marked-Schedule.js** -- walks the current view with `db.moveFirst()`/`db.moveNext()` and `db.getFieldValue`, grouping events under a day heading and writing one navigable HTML table per day to `MySchedule.html`. Because it reads only the rows in the current view, the filter and sort you set beforehand decide exactly what it captures -- run `filter marked = true` first to export only the sessions you marked. The template to copy when you want grouped or formatted output the plain Export command does not produce.
+
+**Produce a report (`report.inix`).** The convention sample also ships a report definition file, `report.inix`, beside the database -- the declarative counterpart to Marked-Schedule.js. Where the script walks the rows in code, the report file describes the output in bands and lets the Produce Report command do the walking. It defines two reports. **`daily_agenda`** groups the sessions by day (`@group = event_date`) and prints each as a Markdown heading with the day's sessions beneath it and a session count per day -- the no-code equivalent of the grouped schedule the `.js` builds. **`session_list`** is a flat list you run after filtering the events table to one day, one room, or your marked sessions, so the filter is your "which sessions" parameter. Pick either from File > Produce Report, which renders it to Markdown and opens it in your editor; the full template language is covered under "Report templates" below. Its sibling is the *import* definition file, a transfer map (`transfer.inix`) described under "Importing with a transfer map" -- the two `.inix` definition files are how you bring data in and send formatted data out without writing code.
 
 Together the seven map onto the same "compute / query / do" split as the generic samples: `.sql` to ask, `.dbdo` to drive a workflow, `.js` to build something. Copy whichever is closest to your need and change the noun.
 
@@ -634,7 +636,7 @@ Use the Where Am I command (no hotkey by default) to hear the current row, table
 
 Use the Key Describer command, Control+F1 (F1 for help, Control for "describe rather than fire"), to switch into a mode where every hotkey press announces the chord and its bound command instead of running it; press Control+F1 again to leave the mode. Use the Show Log Location command to print the path of `DbDo.log`, the per-session log file. Use the History of Changes command, Shift+F1, to read the chronological list of releases and what changed in each. Use the Readme Guide command to open `README.md` in your browser. Use the Open Website command to open the DbDo GitHub page. Use the Elevate Version command, F11, to ask GitHub for the latest release and offer to download and install it. Use the About command, Alt+F1, to read the version number and a brief credits block. The Help-menu commands carrying chords use the same name and chord as their EdSharp and FileDir counterparts (Documentation, History of Changes, Key Describer, Elevate Version, About, Alternate Menu).
 
-The Help menu also hosts one-keystroke commands to open each of the three bundled sample databases: **Open Sample Database** (sample.db, the small school domain), **Open Northwind Sample** (the classic Microsoft sales sample), and **Open Chinook Sample** (the classic music-store sample). All three open via the same code path File > Open Database uses, so the usual post-open behaviors apply. See "Bundled sample databases" below for what's in each.
+The Help menu hosts a **Sample Databases** command that lists every bundled database — and any database you have added — and opens the one you choose. The list is built at runtime by scanning the per-user Samples folder, where each database lives in its own subfolder, so a database you drop in there appears alongside the bundled ones with no further setup. Three larger references also keep their own one-keystroke openers: **Open Convention Sample**, **Open Northwind Sample**, and **Open Chinook Sample**. Every one opens via the same code path File > Open Database uses, so the usual post-open behaviors — sort, filter, and position restore — apply. See "Bundled sample databases" below for what's in each.
 
 ## Commands available only at the dot prompt
 
@@ -769,6 +771,22 @@ CREATE TABLE teachers (
     ) stored
 );
 ```
+
+## Designing accessible databases
+
+DbDo's standard-fields convention is not arbitrary house style; it applies, to relational tables, the same discipline that makes a spreadsheet accessible to a screen reader. The guidance Microsoft and the WCAG authors give for accessible spreadsheets and data tables comes down to a few principles, and each one has a direct relational counterpart that the convention bakes in. Following the convention is, in practice, the easiest way to get an accessible database; this section explains why, so the rules read as reasons rather than ritual.
+
+**One table, one kind of thing.** Accessible-table guidance asks for a single, simple, rectangular region per logical subject — no tables stacked inside one sheet, no merged cells, no sub-tables. The relational equivalent is one table per entity, with relationships expressed as their own rows rather than nested inside a record. DbDo follows this literally: each table describes one kind of thing, and every association between two things lives in the `maps` table as a row of its own, never as a repeating group or a packed column. A screen-reader user can then navigate any table as a plain grid of uniform rows, and reach related things by a deliberate step (Enter Child, Say Related) rather than by decoding structure hidden inside a cell.
+
+**A header row with clear, distinct names.** A spreadsheet is accessible only when each column has a header a screen reader can announce as it enters a cell, and when those headers are unambiguous. In a DbDo table the column names *are* that header row, and the convention keeps them descriptive and in `lower_snake_case` so each announces cleanly (`first_name`, `date_read`, not `f1` or `Column3`). Because the field names carry the meaning, the grid needs no second explanatory row — the very thing that most often breaks spreadsheet navigation.
+
+**No blank rows or columns as separators.** In a spreadsheet, a blank row or column inserted for visual spacing tells a screen reader the table has ended, and the data beyond it falls out of table navigation. The relational model forbids this by construction — a table has no decorative gaps — and DbDo never inserts blank separator rows. The fixed order of the standard fields adds a second kind of predictability: once a user learns that the identity, then the timestamps, then the substantive fields, then `marked`, `look`, and `unq` appear in the same order in every table, the navigation learned on one table transfers to the next without relearning.
+
+**A stable identity for every row.** Accessible data lets a reader name a location and return to it — the role Excel named ranges play. DbDo gives every row two identity columns for this: `look`, a short pipe-joined label built to be read aloud ("Ursula K. Le Guin | American"), and `unq`, a value intended to be unique so a row can be matched and updated rather than duplicated. `look` is what the related-records view and the pick lists speak, so a user always hears *which* row they are on, not merely a row number; `unq` is what the `maps` associations point at, so a relationship survives even as display text changes.
+
+**Descriptive names at every level.** The same guidance that asks for named ranges and named sheets asks that the names be meaningful. DbDo extends this past the column: table names are singular-entity nouns, the primary key echoes the table (`book_id` in `books`), and a database is one folder named for its root. The payoff is that every announcement — a table name, a column name, a row's `look`, a related table — is a real word a listener can hold onto.
+
+The shortest way to state the section: **a table a screen-reader user can work with efficiently is one whose structure lives entirely in its column names and its rows, with nothing meaningful hidden in layout.** The standard-fields convention is that idea written down. For the underlying general guidance, see Microsoft's "Make your Excel documents accessible to people with disabilities" and the WCAG techniques for data tables; DbDo's contribution is to carry those table-accessibility principles back into the schema itself, where a relational tool can actually enforce them.
 
 ## Bundled sample databases
 
@@ -1092,6 +1110,73 @@ Use cases for .inix:
 - **Hand-authored tabular data** — easier to write by hand than CSV when individual cells have multi-line content; easier to read in an editor than JSON.
 
 The .inix format was originally designed for the KeyLine toolkit; DbDo adopts it as another supported import and export format.
+
+### Importing with a transfer map
+
+Besides the list-of-records form above, an .inix file can act as a *transfer map* — a field-by-field recipe for pulling records out of a foreign database file and into the current table, renaming and reshaping each field on the way in. This is the modern heir of the transfer files DbDo's ancestors used, and it is reached through the **Transfer Import** command on the File menu (open the destination database and select the destination table first). Supported source formats are dBASE (`.dbf`), Access (`.mdb`/`.accdb`), and SQLite (`.db`/`.sqlite`/`.sqlite3`).
+
+Each section of the file is one named mapping; you pick which one to run. Within a section, every line is a mapping of the form:
+
+```
+destField = sourceField [ ; jscript-expression ]
+```
+
+The destination field on the left is filled from the named source field on the right. If a JScript expression follows a semicolon, the value is passed through it first. Inside the expression, `$v` is the source field's value and `$other_field` is the value of any other field in the same source row. A line beginning with `@table =` names the table to read inside the source file (it defaults to the source file's base name, which is what a single-table dBASE file like `cts.dbf` wants). Two rules give the map its flexibility: an **empty source value is skipped**, so the destination keeps its default rather than being blanked; and a **destination field named on more than one line accumulates**, so several source fields can be concatenated into one. A worked example, importing a DOS-era CTS dBASE contact file and reformatting its packed `YYYYMMDD` dates:
+
+```
+[cts_contacts]
+@table       = cts
+created      = updated ; $v.substr(0,4) + "-" + $v.substr(4,2) + "-" + $v.substr(6,2)
+title        = title
+first_name   = firstname
+last_name    = lastname
+enterprise   = company
+office_phone = workphone
+extra_info   = notes ; $v + "\n"
+extra_info   = text
+```
+
+Because the expression language is JScript .NET — the same engine the build already uses for snippets — anything it can compute is available: string slicing, conditionals (`$v == "Y" ? "Yes" : "No"`), arithmetic (`Number($v) * 100`), and so on. A bad expression falls back to copying the value unchanged rather than aborting the import, and as with the other importers a single bad row never sinks the batch.
+
+## Report templates
+
+The Produce Report command on the File menu renders a report over the current filtered set, in the current sort order, to a Markdown file that then opens in your editor. Markdown reads fine as plain text in a screen reader and converts cleanly to HTML, DOCX, or PDF with pandoc or Word, so one report definition serves every downstream format.
+
+A report is defined in an `.inix` file — the same family as a transfer map — with one section per report, chosen from a picker when you run the command. Within a section, four optional bands shape the output: `header` (emitted once at the top), `detail` (emitted once per record, usually a fenced multi-line block), `separator` (emitted between records), and `footer` (emitted once at the end). An optional `@table = <name>` records which table the report is for; open that table first.
+
+Inside any band, `$field` (or `${field}` when the name must abut other letters) expands to the current record's value, and `{{ jscript-expression }}` evaluates a JScript expression — the same `$field`/JScript model as a transfer map, so a "work-preferred" line is just `{{ $office_phone || $home_phone }}`. A `{# comment #}` is dropped. The rendering is mail-merge style: a line whose only content is a field or expression that comes out blank is dropped (so an absent middle name or second address leaves no gap), while a purely literal line — including a deliberately blank one and any Markdown structure — is kept verbatim. The `separator` value may be literal text or one of the keywords `blank` (a blank line), `rule` (a Markdown horizontal rule), or `page` (a form-feed page break).
+
+For example, a detail band of
+
+```
+## {{ ($first_name + " " + $last_name).replace(/\s+/g, " ").trim() }}
+$title $first_name $middle_name $last_name
+$job
+$enterprise
+$address1
+$address2
+$city, $state $zip
+$nation
+```
+
+prints each contact as a navigable Markdown heading followed by a clean address block, with the blank-field lines suppressed. A ready-to-use `report.inix` with this and a phone/email report ships alongside DbDo. Producing a report never moves your place in the data.
+
+A report can optionally group its records. Adding `@group = <field>` sorts the records by that field automatically — so a grouped report is never wrong because you forgot to sort first — and fires two more bands as the value changes: `group_header` at the start of each group and `group_footer` at its end. In a footer band (the report `footer` or a `group_footer`) you also get aggregate values as ordinary `$`-fields: `$count` is the number of records in scope, and for a numeric column `$sum_<field>`, `$avg_<field>`, `$min_<field>`, and `$max_<field>` summarise it (blank and non-numeric values are ignored). Grouping is entirely optional — a report with no `@group` is exactly the flat header/detail/footer report described above. For instance, grouping contacts by state:
+
+```
+@group = state
+group_header = """
+## $state
+"""
+detail = """
+- $first_name $last_name
+"""
+group_footer = """
+*$count contact(s) in $state.*
+"""
+```
+
+gives a heading and a running count for each state, with a single sort you never had to ask for. The bundled NFB convention sample ships a `report.inix` whose `daily_agenda` report uses exactly this pattern over its `events` table, grouping the sessions by `event_date`.
 
 ## File layout
 

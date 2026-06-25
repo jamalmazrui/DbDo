@@ -1,0 +1,57 @@
+; DbDo report templates.  Produce Report -> pick this file -> pick a section.
+; Output is Markdown over the current filtered set, in the current sort order.
+;   $field / ${field}        the current record's value
+;   {{ jscript-expression }} a computed value ($field works inside it too)
+;   {# comment #}            dropped from the output
+; A line whose only content is a field/expression is dropped when that comes
+; out blank, so absent fields leave no gap.  header/detail/separator/footer.
+
+[contact_addresses]
+@table = contact
+header = """
+# Contact Addresses
+"""
+detail = """
+## {{ ($first_name + " " + $last_name).replace(/\s+/g, " ").trim() }}
+$title $first_name $middle_name $last_name
+$job
+$enterprise
+$address1
+$address2
+$city, $state $zip
+$nation
+"""
+separator = rule
+
+[contact_phone_email]
+@table = contact
+header = """
+# Phone and Email
+(work preferred)
+"""
+detail = """
+**$first_name $last_name**
+{{ $office_phone || $home_phone }}
+{{ $business_email || $personal_email }}
+"""
+separator = blank
+
+; A grouped report.  @group sorts the rows by that field automatically and
+; fires group_header / group_footer as the value changes.  In a footer band
+; $count is the number of rows in scope, and for a numeric column you also get
+; $sum_<field>, $avg_<field>, $min_<field>, and $max_<field> (e.g. $sum_amount).
+[contacts_by_state]
+@table = contact
+@group = state
+group_header = """
+## $state
+"""
+detail = """
+- {{ ($first_name + " " + $last_name).replace(/\s+/g," ").trim() }}{{ $enterprise ? " — " + $enterprise : "" }}
+"""
+group_footer = """
+*$count contact(s) in $state.*
+"""
+footer = """
+**$count contacts total across all states.**
+"""

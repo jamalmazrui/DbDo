@@ -4,7 +4,31 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.111 (current)
+## v1.0.115 (current)
+
+**Scripts and databases are organized so a database's scripts live beside it.** A database's scripts now live in the same folder as its `.db` file, while truly generic scripts stay in `%APPDATA%\DbDo\Scripts`. Invoke Script and Edit Script show both sets merged -- the database's own scripts winning a name clash -- and a new script is created in the open database's folder when one is open. Each bundled sample occupies its own subfolder (`Samples\<root>\<root>.db`, plus that database's scripts), and the installer ships and seeds that tree; `lookups.db` stays at the install root as shared infrastructure, not a sample. Open Script Folder opens the open database's folder when one is open. The upshot: convention scripts no longer clutter the list while a music collection is open, and a database carries its scripts wherever its folder goes.
+
+## v1.0.114
+
+**A sort order now survives a normal Open.** Closing a database saved the per-table sort correctly, but a plain Open Database (Control+O) did not read it back -- only the Recent Files list did -- so a sort looked forgotten on every reopen. Open Database now resolves the file's saved state and reapplies its per-table sort, filter, and row position, the same way Recent Files already did. (Shift+O is Say Order, which only announces the current sort; it never saved anything, and now nothing needs to.)
+
+**A dynamic Sample Databases command.** The Help menu's Sample Databases command lists every database found at runtime under the user's Samples folder and opens the chosen one through the normal state-restoring path. Because the list is built by scanning the folder, a database the user drops in appears alongside the bundled samples with no code change.
+
+## v1.0.112 and v1.0.113
+
+**Native xlsx import with no Office dependency.** Importing an `.xlsx` workbook no longer drives Excel through COM automation (unreliable across the 64-bit/32-bit boundary). DbDo now reads the workbook directly as the ZIP-of-XML it is, using only `DeflateStream` and `System.Xml`, with no new dependencies, validated against a tester's real workbook.
+
+**Blank cells no longer sort to the wrong place.** Sorting is performed with a SQL `ORDER BY` reopen rather than the ADO client cursor's own sort property, which had mis-ordered rows containing blank values.
+
+**Six hobbyist sample databases.** A set of small, relatable collection databases -- reads (books, authors, series), recipes, music, media, contacts, and howtos -- each built on the standard column convention with the `maps` and `lookups` infrastructure and validated for referential integrity, so every association resolves to a real row.
+
+**Email Log File.** A Help-menu command and an error-dialog button reveal `DbDo.log` in the file manager and open a mail message with the log's path in the body, avoiding the clipboard entirely.
+
+**A smarter default table.** With no remembered table for a database, DbDo now opens the first non-infrastructure table rather than the first table alphabetically.
+
+**`DbDo.exe.config` is shipped** (modeled on EdSharp's), disabling Authenticode publisher-evidence generation at startup and enabling concurrent garbage collection.
+
+## v1.0.111
 
 **Dot-prompt arguments are taken verbatim, with no escape characters.** The trailing argument of a command is read literally as typed. Enclosing quotes are now optional and may be either double or single: a single matching outer pair is stripped and the inside kept exactly, so `find "John Smith"`, `find 'John Smith'`, and `find John Smith` are equivalent. Nothing inside a quoted value is un-escaped -- a literal quote is just typed -- and the former doubled-quote convention is gone. To keep a value that itself begins and ends with a quote, or that has leading or trailing spaces, wrap it once more (`""x""` yields `"x"`); that is the same rule applied, not an escape. Values that cannot be expressed this way are refused by the command with an explanation rather than by adding escape syntax. This realizes the Homer/Lbc/DbDo principle that everything should be typeable as written.
 
