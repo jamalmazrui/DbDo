@@ -77,7 +77,7 @@ namespace DbDo
     // =====================================================================
     public static class BuildInfo
     {
-        public const string VersionString = "1.0.120";
+        public const string VersionString = "1.0.121";
     }
 
     // =====================================================================
@@ -5933,6 +5933,100 @@ namespace DbDo
         {
             if (!hasRecordset()) return;
             try { oRecordset.CancelUpdate(); } catch { }
+        }
+
+        // isUnqViolation: true when an exception is a UNIQUE-constraint
+        // failure on this table's generated unq column -- the identity
+        // field DbDo builds from the record's content fields -- rather
+        // than a primary-key clash or some other unique index. The add
+        // paths use this to recognise an ordinary "this would duplicate an
+        // existing record" condition and offer the user a chance to change
+        // a content field, instead of surfacing a raw ADO error.
+        public bool isUnqViolation(Exception ex)
+        {
+            string s = "";
+            for (Exception e = ex; e != null; e = e.InnerException)
+                s += " " + (e.Message ?? "");
+            s = s.ToLowerInvariant();
+            return s.Contains("unique constraint") && s.Contains(".unq");
+        }
+
+        // getTableCreateSql: the CREATE TABLE text for a table from
+        // sqlite_master, or "" if unavailable. Used to read generated-
+        // column definitions; failures are swallowed.
+        private string getTableCreateSql(string sTable)
+        {
+            if (oConn == null || string.IsNullOrEmpty(sTable)) return "";
+            dynamic oRs = null;
+            try
+            {
+                string sSql = "SELECT sql FROM sqlite_master WHERE type='table' AND name='"
+                    + sTable.Replace("'", "''") + "' LIMIT 1";
+                oRs = oConn.Execute(sSql, Type.Missing, AdoConstants.adCmdText);
+                if (oRs != null && !(bool)oRs.EOF)
+                {
+                    object v = oRs.Fields[0].Value;
+                    return (v == null || v is DBNull) ? "" : v.ToString();
+                }
+                return "";
+            }
+            catch { return ""; }
+            finally
+            {
+                if (oRs != null)
+                {
+                    try { if (((int)oRs.State) != 0) oRs.Close(); } catch { }
+                    try { releaseCom(oRs); } catch { }
+                }
+            }
+        }
+
+        // getUnqComponentFields: the content fields the current table's
+        // generated unq column actually depends on, in order of first
+        // appearance. Read by pulling the unq expression out of the table's
+        // CREATE SQL and keeping the identifiers in it that are real columns
+        // of the table (which discards SQL functions and keywords). This is
+        // accurate whether unq is the simple positional concatenation Add
+        // Table builds or a hand-tuned expression like the sample databases'
+        // person-or-organization form. These are exactly the fields whose
+        // combination must be unique, so they are what a user changes to
+        // resolve a duplicate. Falls back to the full editable-field list if
+        // the expression cannot be read or parsed.
+        public List<string> getUnqComponentFields()
+        {
+            List<string> lEditable = getEditableFieldNames();
+            try
+            {
+                string sCreate = getTableCreateSql(sCurrentTable);
+                if (string.IsNullOrEmpty(sCreate)) return lEditable;
+                System.Text.RegularExpressions.Match m =
+                    System.Text.RegularExpressions.Regex.Match(sCreate,
+                        "\\bunq\\b\\s+\\w+\\s+GENERATED\\s+ALWAYS\\s+AS\\s*\\(",
+                        System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                if (!m.Success) return lEditable;
+                int iDepth = 1, i = m.Index + m.Length, iStart = i;
+                while (i < sCreate.Length && iDepth > 0)
+                {
+                    char c = sCreate[i];
+                    if (c == '(') iDepth++;
+                    else if (c == ')') { iDepth--; if (iDepth == 0) break; }
+                    i++;
+                }
+                string sExpr = sCreate.Substring(iStart, i - iStart);
+                Dictionary<string, string> dCols = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                foreach (string sF in getFieldNames()) dCols[sF] = sF;
+                List<string> lComp = new List<string>();
+                Dictionary<string, bool> dSeen = new Dictionary<string, bool>(StringComparer.OrdinalIgnoreCase);
+                foreach (System.Text.RegularExpressions.Match mm in
+                         System.Text.RegularExpressions.Regex.Matches(sExpr, "[A-Za-z_][A-Za-z0-9_]*"))
+                {
+                    string sTok = mm.Value;
+                    if (dCols.ContainsKey(sTok) && !dSeen.ContainsKey(sTok))
+                    { dSeen[sTok] = true; lComp.Add(dCols[sTok]); }
+                }
+                return lComp.Count > 0 ? lComp : lEditable;
+            }
+            catch { return lEditable; }
         }
 
         public void deleteCurrent()
@@ -22188,22 +22282,35 @@ namespace DbDo
                 dInitial[s] = "";
                 lEditable.Add(true);
             }
-            using (RecordEditDialog dlg = new RecordEditDialog("New Record", lFields, dInitial, lEditable, db))
+            // Loop so a duplicate-identity rejection can return the user to
+            // the editor with their entries intact -- to change a content
+            // field and try again -- instead of discarding the work behind a
+            // raw ADO error. Any other error still shows the diagnostic dialog.
+            Dictionary<string, string> dEntry = dInitial;
+            while (true)
             {
-                if (dlg.showDialog(this) != DialogResult.OK) return;
-                try
+                using (RecordEditDialog dlg = new RecordEditDialog("New Record", lFields, dEntry, lEditable, db))
                 {
-                    db.addNew();
-                    foreach (KeyValuePair<string, string> kv in dlg.dValues)
-                        if (!string.IsNullOrEmpty(kv.Value))
-                            db.setFieldValue(kv.Key, kv.Value);
-                    db.update();
-                    invokeRefresh();
-                }
-                catch (Exception ex)
-                {
-                    try { db.cancelUpdate(); } catch { }
-                    ErrorDialog.show(this, "New Record", ex, db);
+                    if (dlg.showDialog(this) != DialogResult.OK) return;
+                    dEntry = dlg.dValues;   // preserve entries for a possible retry
+                    try
+                    {
+                        db.addNew();
+                        foreach (KeyValuePair<string, string> kv in dlg.dValues)
+                            if (!string.IsNullOrEmpty(kv.Value))
+                                db.setFieldValue(kv.Key, kv.Value);
+                        db.update();
+                        invokeRefresh();
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        try { db.cancelUpdate(); } catch { }
+                        if (db.isUnqViolation(ex))
+                        { warnDuplicateIdentity("New Record", dlg.dValues); continue; }
+                        ErrorDialog.show(this, "New Record", ex, db);
+                        return;
+                    }
                 }
             }
         }
@@ -22212,6 +22319,40 @@ namespace DbDo
         // start the view cycle at the edit view.
         private void recSetClicked(object sender, EventArgs evArgs)
         { runRecordViews(1, true); }
+
+        // warnDuplicateIdentity: a New / New-Copy insert was rejected
+        // because the record's identity -- the generated unq field, built
+        // from a specific combination of content fields -- duplicates an
+        // existing record. That is an ordinary data condition, not a
+        // malfunction and not a sign that adding records is broken, so this
+        // explains it plainly: it names the exact fields the identity is
+        // built from (read from the table's unq definition, so it is right
+        // even when only some fields count) and shows the values entered for
+        // them, which is what is duplicated. The caller then reopens the
+        // editor with the entries intact so one field can be changed and the
+        // insert retried. No raw ADO text or stack trace.
+        private void warnDuplicateIdentity(string sTitle, Dictionary<string, string> dValues)
+        {
+            List<string> lComp = db.getUnqComponentFields();
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            sb.AppendLine("This record was not added because another record in this table "
+                + "already has the same identifying values, so it would be a duplicate.");
+            sb.AppendLine();
+            sb.AppendLine("Records here are kept distinct by the combination of these fields, "
+                + "and you entered:");
+            foreach (string sF in lComp)
+            {
+                string sV;
+                if (dValues == null || !dValues.TryGetValue(sF, out sV) || string.IsNullOrEmpty(sV))
+                    sV = "(blank)";
+                sb.AppendLine("    " + sF + " = " + sV);
+            }
+            sb.AppendLine();
+            sb.Append("Change one of those fields so the record is distinct, then choose OK to "
+                + "try again -- or choose Cancel in the editor to abandon it.");
+            MessageBox.Show(this, sb.ToString(), sTitle,
+                MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
 
         // runRecordViews: the three-view controller. iView is the
         // first non-list view to show (1 form, 2 show); the form and
@@ -23054,23 +23195,32 @@ namespace DbDo
                 dInitial[s] = sVal;
                 lEditable.Add(true);
             }
-            using (RecordEditDialog dlg = new RecordEditDialog("New Copy", lFields, dInitial, lEditable, db))
+            Dictionary<string, string> dEntry = dInitial;
+            while (true)
             {
-                if (dlg.showDialog(this) != DialogResult.OK) return;
-                try
+                using (RecordEditDialog dlg = new RecordEditDialog("New Copy", lFields, dEntry, lEditable, db))
                 {
-                    db.addNew();
-                    foreach (KeyValuePair<string, string> kv in dlg.dValues)
-                        if (!string.IsNullOrEmpty(kv.Value))
-                            db.setFieldValue(kv.Key, kv.Value);
-                    db.update();
-                    invokeRefresh();
-                    LiveRegion.say("New copy inserted");
-                }
-                catch (Exception ex)
-                {
-                    try { db.cancelUpdate(); } catch { }
-                    ErrorDialog.show(this, "New Copy", ex.Message);
+                    if (dlg.showDialog(this) != DialogResult.OK) return;
+                    dEntry = dlg.dValues;   // preserve entries for a possible retry
+                    try
+                    {
+                        db.addNew();
+                        foreach (KeyValuePair<string, string> kv in dlg.dValues)
+                            if (!string.IsNullOrEmpty(kv.Value))
+                                db.setFieldValue(kv.Key, kv.Value);
+                        db.update();
+                        invokeRefresh();
+                        LiveRegion.say("New copy inserted");
+                        return;
+                    }
+                    catch (Exception ex)
+                    {
+                        try { db.cancelUpdate(); } catch { }
+                        if (db.isUnqViolation(ex))
+                        { warnDuplicateIdentity("New Copy", dlg.dValues); continue; }
+                        ErrorDialog.show(this, "New Copy", ex, db);
+                        return;
+                    }
                 }
             }
         }
