@@ -1,0 +1,53 @@
+; Sample report definitions for the iOSTutorials database (parsed from
+; "Personal Power: Getting the Most From iOS as a Totally Blind User" by
+; Michael Feir). Run with File > Produce Report.
+
+; The app catalog, grouped by category -- the iOS apps the guide teaches.
+[app_catalog]
+@table = apps
+@group = category
+group_header = """
+## $category
+"""
+detail = """
+- **$name** -- $descrip
+"""
+group_footer = """
+*$count app(s) in this category.*
+"""
+footer = """
+**$count apps in total.**
+"""
+
+; Topics the guide explains, grouped by area (its thematic sections). Filter
+; the tasks table first if you want just one area.
+[tasks_by_area]
+@table = tasks
+@group = area
+group_header = """
+## $area
+"""
+detail = """
+- $name
+"""
+group_footer = """
+*$count topic(s).*
+"""
+footer = """
+**$count topics documented in the guide.**
+"""
+
+; A flat list of step-by-step methods. Filter the methods table (for example
+; to one app, via the maps table, or by a name search) before running, so
+; you get exactly the procedures you want. Every method is performed with
+; VoiceOver.
+[method_steps]
+@table = methods
+detail = """
+### $name
+
+$steps
+"""
+footer = """
+**$count method(s) listed.**
+"""

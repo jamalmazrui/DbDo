@@ -1,0 +1,52 @@
+; Sample report definitions for the Tutorials database (parsed from the
+; Windows Screenreader Primer). Run with File > Produce Report.
+
+; The app catalog, grouped by category, with each app's maker shown from
+; its notes is not stored here -- this lists the apps the book teaches.
+[app_catalog]
+@table = apps
+@group = category
+group_header = """
+## $category
+"""
+detail = """
+- **$name** -- $descrip
+"""
+group_footer = """
+*$count app(s) in this category.*
+"""
+footer = """
+**$count apps in total.**
+"""
+
+; Tasks the tutorial explains, grouped by area (chapter topic). Filter the
+; tasks table first if you want just one area.
+[tasks_by_area]
+@table = tasks
+@group = area
+group_header = """
+## $area
+"""
+detail = """
+- $name
+"""
+group_footer = """
+*$count task(s).*
+"""
+footer = """
+**$count tasks documented in the primer.**
+"""
+
+; A flat list of step-by-step methods. Filter the methods table (for
+; example to one app, via the maps table, or by a name search) before
+; running, so you get exactly the procedures you want.
+[method_steps]
+@table = methods
+detail = """
+### $name
+
+$steps
+"""
+footer = """
+**$count method(s) listed.**
+"""
