@@ -8,6 +8,10 @@
 ; out blank, so absent fields leave no gap.  header/detail/separator/footer.
 ; Optional @filter (SQL WHERE) and @sort (ORDER BY) scope and order a report.
 
+; FileTask marks this file's purpose so DbDo shows it only for the
+; matching command (here, Run Report / Alt+Shift+R).
+FileTask = report
+
 [contact_addresses]
 @table = contact
 header = """

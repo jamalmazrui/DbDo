@@ -3,6 +3,10 @@
 ; Michael Feir). Run with Run Report (Alt+Shift+R): reads the whole physical table, not the grid view.
 
 ; The app catalog, grouped by category -- the iOS apps the guide teaches.
+; FileTask marks this file's purpose so DbDo shows it only for the
+; matching command (here, Run Report / Alt+Shift+R).
+FileTask = report
+
 [app_catalog]
 @table = apps
 @group = category

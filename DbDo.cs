@@ -1322,17 +1322,37 @@ namespace DbDo
             List<string> lNames = new List<string>();
             foreach (System.IO.FileInfo fi in dirInfo.GetFiles())
             {
-                // DbDo.js is the build source compiled into DbDo.dll, not a
-                // user script; never offer it in the script picker even when
-                // a database happens to sit in the install folder beside it.
-                if (string.Equals(fi.Name, "DbDo.js", StringComparison.OrdinalIgnoreCase))
-                    continue;
                 string sExt = fi.Extension.ToLowerInvariant();
                 if (sExt == ".js" || sExt == ".sql" || sExt == ".dbdo")
                     lNames.Add(fi.Name);
             }
             lNames.Sort(StringComparer.OrdinalIgnoreCase);
             return lNames.ToArray();
+        }
+
+        // isDbDoInstallFolder: true when sFolder is DbDo's own program
+        // directory -- the folder that holds DbDo.exe. That directory
+        // holds DbDo's own files (DbDo.exe, DbDo.dll, and the DbDo.js
+        // build source that is compiled into DbDo.dll), none of which are
+        // user scripts. It is therefore never mined for a database's
+        // associated scripts, even when a database happens to sit
+        // directly in it. A database in any other folder -- including a
+        // subfolder such as Samples\media -- is scanned normally, so this
+        // is a location rule about DbDo's own directory, not a filter on
+        // any particular file name.
+        public static bool isDbDoInstallFolder(string sFolder)
+        {
+            if (string.IsNullOrEmpty(sFolder)) return false;
+            try
+            {
+                string sExeDir = System.IO.Path.GetDirectoryName(
+                    System.Windows.Forms.Application.ExecutablePath) ?? "";
+                if (string.IsNullOrEmpty(sExeDir)) return false;
+                string sA = System.IO.Path.GetFullPath(sFolder).TrimEnd('\\', '/');
+                string sB = System.IO.Path.GetFullPath(sExeDir).TrimEnd('\\', '/');
+                return string.Equals(sA, sB, StringComparison.OrdinalIgnoreCase);
+            }
+            catch { return false; }
         }
 
         // Open the user's editor on a script file path. The file is
@@ -2258,6 +2278,35 @@ namespace DbDo
             if (!File.Exists(sPath)) throw new FileNotFoundException(".inix file not found.", sPath);
             string[] aLines = File.ReadAllLines(sPath, new UTF8Encoding(true));
             return parseLines(aLines);
+        }
+
+        // fileTask: the declared purpose of an .inix file, read from the
+        // "FileTask" key of its implicit [Global] section -- e.g. "report"
+        // for a report definition or "transfer" for a Transfer-Import map.
+        // Returns "" when the file declares no FileTask, is unreadable, or
+        // is absent. The value is trimmed and lower-cased so callers can
+        // compare it directly. This is what lets a command that offers a
+        // pick-list of .inix files show only the files whose task matches
+        // the command (so a report picker never lists a transfer map or a
+        // settings file, and vice versa).
+        public static string fileTask(string sPath)
+        {
+            try { return fileTask(read(sPath)); }
+            catch { return ""; }
+        }
+
+        // fileTask overload for callers that have already parsed the file,
+        // so the FileTask can be read without a second pass over the disk.
+        public static string fileTask(List<Section> lSections)
+        {
+            if (lSections == null) return "";
+            foreach (Section s in lSections)
+                if (string.Equals(s.Name, "Global", StringComparison.OrdinalIgnoreCase))
+                {
+                    string sValue = s.get("FileTask");
+                    return string.IsNullOrEmpty(sValue) ? "" : sValue.Trim().ToLowerInvariant();
+                }
+            return "";
         }
 
         // parseLines: the actual state machine. Separated from read so
@@ -14820,6 +14869,8 @@ namespace DbDo
         private ToolStripMenuItem miSaySayTags;
         private ToolStripMenuItem miSaySayColumn;
         private ToolStripMenuItem miSaySayColumnMarked;
+        private ToolStripMenuItem miSaySayColumnAll;
+        private ToolStripMenuItem miSaySayColumnAllMarked;
         private ToolStripMenuItem miSaySayRows;
         private ToolStripMenuItem miSaySayRowsMarked;
         private ToolStripMenuItem miSaySayMarkedRows;
@@ -15183,7 +15234,11 @@ namespace DbDo
             System.Collections.Generic.SortedDictionary<string, string> dMap =
                 new System.Collections.Generic.SortedDictionary<string, string>(StringComparer.OrdinalIgnoreCase);
             string sDbFolder = currentDbFolder();
-            if (!string.IsNullOrEmpty(sDbFolder))
+            // A database sitting directly in DbDo's own program directory
+            // must not pull DbDo's files (e.g. the DbDo.js build source)
+            // into the script list; that directory is never a per-database
+            // script location. Databases anywhere else are scanned normally.
+            if (!string.IsNullOrEmpty(sDbFolder) && !ScriptHelper.isDbDoInstallFolder(sDbFolder))
                 foreach (string sName in ScriptHelper.listScriptsInFolder(sDbFolder))
                     dMap[sName] = System.IO.Path.Combine(sDbFolder, sName);
             string sGeneric = ScriptHelper.getScriptDir();
@@ -15899,9 +15954,16 @@ namespace DbDo
             // names the activity ("linear list down the column" or
             // "linear list across the rows") in the same way K
             // names the bookmark family.
-            miSaySayColumn       = addItem(miSay, "Say Column &Rest",   "Say Column Rest",         Keys.Control | Keys.L,             saySayColumn);
-            miSaySayColumnMarked = addItem(miSay, "Say Column Rest &Marked", "Say Column Rest Marked", Keys.Control | Keys.Shift | Keys.L,saySayColumnMarked);
-            miSaySayRows         = addItem(miSay, "Say Rec&ords Rest", "Say Records Rest",        Keys.Alt | Keys.L,                 saySayRows);
+            // Say Column family. Scope: Alt = All (from top), Control =
+            // from Current row. Filter: Shift = Marked rows only.
+            miSaySayColumnAll       = addItem(miSay, "Say Column &All",                "Say Column All",                Keys.Alt | Keys.L,                  saySayColumnAll);
+            miSaySayColumnAllMarked = addItem(miSay, "Say Column All &Marked",         "Say Column All Marked",         Keys.Alt | Keys.Shift | Keys.L,     saySayColumnAllMarked);
+            miSaySayColumn          = addItem(miSay, "Say Column from &Current",       "Say Column from Current",       Keys.Control | Keys.L,              saySayColumn);
+            miSaySayColumnMarked    = addItem(miSay, "Say Column from Current Mar&ked","Say Column from Current Marked",Keys.Control | Keys.Shift | Keys.L, saySayColumnMarked);
+            // Say Records Rest gave up Alt+L to the Say Column All command
+            // above; it remains on the menu (and the Alternate Menu) with
+            // no chord for now. Say Records Rest Marked keeps Alt+Shift+M.
+            miSaySayRows         = addItem(miSay, "Say Rec&ords Rest", "Say Records Rest",        Keys.None,                         saySayRows);
             miSaySayRowsMarked   = addItem(miSay, "Say Records Rest Marked", "Say Records Rest Marked", Keys.Alt | Keys.Shift | Keys.M,    saySayRowsMarked);
             miSaySayMarkedRows   = addItem(miSay, "Say &Marked Rows", "Say Marked Rows", Keys.Shift | Keys.Space, saySayMarkedRows);
             // Shift+K: Say Kin -- speak the 'look' values of every
@@ -16401,10 +16463,14 @@ namespace DbDo
             add("Say Tags",           "Speak the current row's 'tags' field", "");
             add("Say Goto",           "Speak the most recently used Jump search string",
                 "Shift+G. Companion to Say Where Filter (Shift+W) and Say Order (Shift+O) -- reveals the current state of the Ctrl+J Jump Record search. Reports 'No jump search active' when there's no remembered string.");
-            add("Say Column Rest",         "Speak every value of the current virtual column, from the cursor row down",
-                "Ctrl+L. Cap of 25 values in spoken form with 'plus N more' footer; double-press for the full list. Position and virtual cursor unchanged. Use Say Column Rest Marked (Ctrl+Shift+L) for the marked-rows-only version. CLI: 'say-column-rest all' overrides the from-cursor default to list every visible row.");
-            add("Say Column Rest Marked",  "Speak the current virtual column for marked rows only, from cursor down",
-                "Ctrl+Shift+L. Same format as Say Column Rest with a '(marked from cursor)' suffix. Reports 'No marked records from here' when nothing is marked at or after the cursor.");
+            add("Say Column All",          "Speak every value of the current virtual column, from the top",
+                "Alt+L. Sweeps the whole column top to bottom. Position and virtual cursor unchanged; double-press shows the full list. Alt = All. Shift adds the marked-only filter (Say Column All Marked, Alt+Shift+L).");
+            add("Say Column All Marked",   "Speak the current virtual column for marked rows only, from the top",
+                "Alt+Shift+L. Same as Say Column All but limited to marked rows. Reports 'No marked rows in this column' when nothing is marked.");
+            add("Say Column from Current", "Speak the current virtual column from the current row down",
+                "Control+L. Sweeps from the current row to the bottom. Control = from Current. Shift adds the marked-only filter (Say Column from Current Marked, Control+Shift+L).");
+            add("Say Column from Current Marked", "Speak the current virtual column for marked rows only, from the current row down",
+                "Control+Shift+L. Same as Say Column from Current but limited to marked rows. Reports 'No marked rows from here' when nothing is marked at or after the current row.");
             add("Say Records Rest",        "Speak every visible record in full, from the cursor row down (all displayed columns)",
                 "Alt+L. Each record formatted as 'Record N -- col1: val1; col2: val2; ...' with newlines between records. Cap 25 in spoken form; double-press for the full list.");
             add("Say Records Rest Marked", "Speak full marked records from the cursor row down",
@@ -16434,7 +16500,7 @@ namespace DbDo
                 "Alt+S. Opens a dialog with one checkbox per column in the current table; the user picks which columns to display. Three quick-action buttons: Select All (every column), Select None (revert to DbDo's default visible-columns rule), OK (apply selection). The choice persists with the table via the SelectList mechanism.");
             add("Generate from Grid",         "Alt+Shift+G. Ad-hoc analysis of the VIRTUAL grid (the current filtered, sorted view): profile the columns by type and pick an output -- summary statistics, frequency table, cross-tab, Markdown table, or an Excel chart (bar, pie, histogram, box-whisker, scatter, timeline). One-off and exploratory; acts on what you are looking at.", "");
             add("Run Report",              "Alt+Shift+R. Render a saved report definition to a Markdown document. A report reads the whole PHYSICAL table (not the grid view), so it is reproducible regardless of your current filter or sort.",
-                "Report definitions live in a report.inix file beside the database (each [section] is one report, with header/detail/footer/group bands, $field and {{ jscript }} substitution, and footer aggregates like $count and $sum_<field>). DbDo finds those files and offers a pick-list, then writes Markdown you can convert to HTML/DOCX/PDF. The contrast to remember: Generate from Grid = analyze what you SEE (virtual grid, ad-hoc); Run Report = produce a DEFINED document from the physical table (reproducible).");
+                "Report definitions live in an .inix file beside the database whose [Global] section declares FileTask = report (each [section] is one report, with header/detail/footer/group bands, $field and {{ jscript }} substitution, and footer aggregates like $count and $sum_<field>). DbDo lists only the FileTask = report files -- so a transfer map or settings file in the same folder is never offered -- then writes Markdown you can convert to HTML/DOCX/PDF. A legacy file with report bands but no FileTask still works. The contrast to remember: Generate from Grid = analyze what you SEE (virtual grid, ad-hoc); Run Report = produce a DEFINED document from the physical table (reproducible).");
             add("Graphics Column",           "Plot the column under the virtual cursor as an Excel chart",
                 "Type-aware: numeric -> histogram or box plot, date -> timeline or seasonal, boolean -> pie, text -> Pareto bar.");
             add("Copy Cell",          "Copy the value of the cell under the virtual cursor to the clipboard", "");
@@ -19368,31 +19434,37 @@ namespace DbDo
             speakOrShow("Prime", sField + ": " + sVal, 123);
         }
 
-        // saySayColumn: Ctrl+L. Speak every cell of the current
-        // virtual column, top to bottom of the visible filtered rows.
-        // The list is capped at 25 in the spoken form with a "plus N
-        // more" footer; the double-press dialog shows the full list.
-        // Position and virtual cursor are left unchanged.
-        //
-        // v1.0.98: changed to start at row 1 (was: start at current
-        // virtual row). The user's clarification was that this should
-        // speak "all cells in the current column" -- meaning the full
-        // column from the top of the view, not just from where the
-        // cursor happens to be.
+        // The Say-Column family sweeps the current virtual column and
+        // speaks each cell. Two axes: scope (Alt = All rows from the top;
+        // Control = from the Current row down) and filter (Shift = Marked
+        // rows only). Position and virtual cursor are left unchanged; the
+        // spoken list is paced one value per queued message. Double-press
+        // shows the full list in a dialog.
+        //   Alt+L            Say Column All
+        //   Alt+Shift+L      Say Column All Marked
+        //   Control+L        Say Column from Current
+        //   Control+Shift+L  Say Column from Current Marked
+        private void saySayColumnAll(object sender, EventArgs evArgs)
+        {
+            saySayColumnCommon(false, false);
+        }
+
+        private void saySayColumnAllMarked(object sender, EventArgs evArgs)
+        {
+            saySayColumnCommon(true, false);
+        }
+
         private void saySayColumn(object sender, EventArgs evArgs)
         {
-            saySayColumnCommon(false);
+            saySayColumnCommon(false, true);
         }
 
-        // saySayColumnMarked: Shift+G. Like saySayColumn but only
-        // speaks cells of rows whose marked field is truthy. If no
-        // rows are marked, says so.
         private void saySayColumnMarked(object sender, EventArgs evArgs)
         {
-            saySayColumnCommon(true);
+            saySayColumnCommon(true, true);
         }
 
-        private void saySayColumnCommon(bool bMarkedOnly)
+        private void saySayColumnCommon(bool bMarkedOnly, bool bFromCurrent)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
             { LiveRegion.say("No row selected"); return; }
@@ -19402,11 +19474,9 @@ namespace DbDo
             { LiveRegion.say("This table has no marked column"); return; }
 
             string sHeader = grid.Columns[iVirtualCol].Text;
-            // v1.0.99: start at the current virtual row (the "Rest" in
-            // the command name means "the rest of the column from here
-            // down"). For from-row-1 behavior, dot-prompt users can
-            // pass an "all" argument: say-column-rest all.
-            int iStart = (iVirtualRow >= 1) ? iVirtualRow : 1;
+            // Alt (All) starts at row 1; Control (Current) starts at the
+            // current virtual row and reads the rest of the column down.
+            int iStart = bFromCurrent ? ((iVirtualRow >= 1) ? iVirtualRow : 1) : 1;
             object oOriginal = null;
             try { oOriginal = db.bookmark; } catch { }
             // No cap: every value from the cursor down is spoken.
@@ -19435,17 +19505,21 @@ namespace DbDo
             }
             if (iTotal == 0)
             {
-                LiveRegion.say(bMarkedOnly ? "No marked rows from here." : "No rows visible from here.");
+                string sNone = bFromCurrent
+                    ? (bMarkedOnly ? "No marked rows from here." : "No rows visible from here.")
+                    : (bMarkedOnly ? "No marked rows in this column." : "No rows in this column.");
+                LiveRegion.say(sNone);
                 return;
             }
             // Header lead-in, then each value as its own queued message
             // so the column reads as a paced sequence rather than a
             // run-on string.
+            string sScope = (bFromCurrent ? "from current" : "all") + (bMarkedOnly ? " marked" : "");
+            string sCmd = "Say Column " + (bFromCurrent ? "from Current" : "All") + (bMarkedOnly ? " Marked" : "");
             List<string> lParts = new List<string>();
-            lParts.Add(sHeader + (bMarkedOnly ? " (marked from cursor)" : " (from cursor)"));
+            lParts.Add(sHeader + " (" + sScope + ")");
             lParts.AddRange(lValues);
-            speakOrShowParts(bMarkedOnly ? "Say Column Rest Marked" : "Say Column Rest",
-                lParts, bMarkedOnly ? 112 : 111);
+            speakOrShowParts(sCmd, lParts, bMarkedOnly ? 112 : 111);
         }
 
         // saySayRows: Shift+V. Speak every visible row in full -- each
@@ -23986,20 +24060,52 @@ namespace DbDo
             string sFolder = Path.GetDirectoryName(sDb);
             if (string.IsNullOrEmpty(sFolder) || !Directory.Exists(sFolder)) return lFound;
 
+            // Every .inix beside the database is a candidate. A file is a
+            // report file when its [Global] section declares FileTask =
+            // report -- that is the convention that lets one folder hold
+            // several .inix files for different tasks (reports, transfer
+            // maps, settings) and still show only the right ones here.
+            // Files that predate the FileTask convention are still accepted
+            // when they declare no task at all yet carry report bands, so
+            // existing report.inix definitions keep working; a file that
+            // declares some other task is never offered as a report.
             List<string> lFiles = new List<string>();
             try
             {
-                foreach (string sPat in new string[] { "report.inix", "*.report.inix", "*.reports.inix" })
-                    foreach (string sF in Directory.GetFiles(sFolder, sPat))
-                        if (!lFiles.Contains(sF)) lFiles.Add(sF);
+                foreach (string sF in Directory.GetFiles(sFolder, "*.inix"))
+                    if (!lFiles.Contains(sF)) lFiles.Add(sF);
             }
             catch { }
-            bool bMulti = lFiles.Count > 1;
+
+            // First pass: decide which files are reports and keep their
+            // parsed sections so the label pass does not re-read them.
+            List<string> lReportFiles = new List<string>();
+            Dictionary<string, List<InixCodec.Section>> dSecs =
+                new Dictionary<string, List<InixCodec.Section>>();
             foreach (string sFile in lFiles)
             {
                 List<InixCodec.Section> lSecs;
                 try { lSecs = InixCodec.read(sFile); } catch { continue; }
-                foreach (InixCodec.Section sec in lSecs)
+                string sTask = InixCodec.fileTask(lSecs);
+                bool bIsReport;
+                if (sTask.Length > 0)
+                    bIsReport = string.Equals(sTask, "report", StringComparison.OrdinalIgnoreCase);
+                else
+                {
+                    bIsReport = false;
+                    foreach (InixCodec.Section sec in lSecs)
+                        if (!string.Equals(sec.Name, "Global", StringComparison.OrdinalIgnoreCase)
+                            && sectionHasBand(sec)) { bIsReport = true; break; }
+                }
+                if (!bIsReport) continue;
+                lReportFiles.Add(sFile);
+                dSecs[sFile] = lSecs;
+            }
+
+            bool bMulti = lReportFiles.Count > 1;
+            foreach (string sFile in lReportFiles)
+            {
+                foreach (InixCodec.Section sec in dSecs[sFile])
                 {
                     if (string.Equals(sec.Name, "Global", StringComparison.OrdinalIgnoreCase)) continue;
                     if (!sectionHasBand(sec)) continue;
@@ -36540,15 +36646,10 @@ namespace DbDo
             string sLocal = BuildInfo.VersionString;
             string sLatest = sLatestTag.TrimStart('v', 'V').Trim();
             int iCmp = compareVersions(sLatest, sLocal);
-            if (iCmp == 0)
-            {
-                MessageBox.Show(miParent,
-                    "DbDo is up to date.\n\n"
-                    + "Installed version: " + sLocal + "\n"
-                    + "Latest release:    " + sLatest,
-                    "Elevate Version", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
-            }
+            // (iCmp == 0 -- already current -- no longer returns early;
+            // it falls through to the confirm below, which offers a
+            // reinstall of the latest version so the user can repair or
+            // re-run the installer even when nothing newer is available.)
             if (iCmp < 0)
             {
                 // Local version is NEWER than the public release --
@@ -36564,12 +36665,20 @@ namespace DbDo
                 return;
             }
 
-            // Step 3: confirm with the user before downloading.
+            // Step 3: confirm with the user before downloading. When
+            // already up to date (iCmp == 0), this offers a reinstall of
+            // the same latest version rather than an upgrade.
+            string sPrompt = (iCmp == 0)
+                ? "DbDo is already up to date.\n\n"
+                    + "Installed version: " + sLocal + "\n"
+                    + "Latest release:    " + sLatest + "\n\n"
+                    + "Reinstall the latest version anyway?"
+                : "A newer DbDo is available.\n\n"
+                    + "Installed: " + sLocal + "\n"
+                    + "Available: " + sLatest + "\n\n"
+                    + "Download and run the new installer now?";
             DialogResult answer = MessageBox.Show(miParent,
-                "A newer DbDo is available.\n\n"
-                + "Installed: " + sLocal + "\n"
-                + "Available: " + sLatest + "\n\n"
-                + "Download and run the new installer now?",
+                sPrompt,
                 "Elevate Version", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (answer != DialogResult.Yes) return;
 

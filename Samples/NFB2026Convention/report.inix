@@ -15,6 +15,10 @@
 ; let a report scope and order itself without touching the grid.
 
 ; The daily agenda, grouped by day with a session count per day.
+; FileTask marks this file's purpose so DbDo shows it only for the
+; matching command (here, Run Report / Alt+Shift+R).
+FileTask = report
+
 [daily_agenda]
 @table = events
 @group = event_date

@@ -3,6 +3,10 @@
 
 ; The app catalog, grouped by category, with each app's maker shown from
 ; its notes is not stored here -- this lists the apps the book teaches.
+; FileTask marks this file's purpose so DbDo shows it only for the
+; matching command (here, Run Report / Alt+Shift+R).
+FileTask = report
+
 [app_catalog]
 @table = apps
 @group = category

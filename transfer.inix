@@ -9,6 +9,10 @@
 ;   @table       the table to read inside the source file (default: file base name)
 ;   empty source values are skipped; a repeated destField concatenates (see extra_info)
 
+; FileTask marks this file's purpose so DbDo shows it only for the
+; matching command (here, Run Report / Alt+Shift+R).
+FileTask = transfer
+
 [cts_contacts]
 @table       = cts
 created      = updated ; $v.substr(0,4) + "-" + $v.substr(4,2) + "-" + $v.substr(6,2)
