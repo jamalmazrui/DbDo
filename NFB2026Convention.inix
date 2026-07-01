@@ -7,3 +7,5 @@ select sqlean_version
 JumpText = david, mosen
 FindText = Mosen
 InitialTable = contacts
+
+[Table:contacts]

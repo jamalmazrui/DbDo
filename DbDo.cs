@@ -9754,10 +9754,10 @@ namespace DbDo
             if (bKeyDescriber)
             {
                 // Key Help mode: announce (command, chord, summary) and
-                // swallow the keystroke -- except the Key Help toggle
+                // swallow the keystroke -- except the Key Describer toggle
                 // itself, which must run so the mode can be exited.
                 string sCmd = dMenuToCommand.ContainsKey(mi) ? dMenuToCommand[mi] : mi.Text.Replace("&", "");
-                if (sCmd == "Toggle Key Help")
+                if (sCmd == "Key Describer Toggle")
                 {
                     mi.PerformClick();
                     return true;
@@ -14113,7 +14113,10 @@ namespace DbDo
                 return;
             }
             frmTarget.Activate();
-            LiveRegion.say(frmTarget.Text);
+            // Not announced through the live region: activating a window
+            // makes it the active window, and JAWS speaks the new
+            // window's title on that change, so repeating it here would
+            // be double speech.
         }
 
         // stepWindow: activate the next (bNext true) or previous child
@@ -14129,20 +14132,28 @@ namespace DbDo
             if (iPosition >= aChildren.Length) iPosition = 0;
             if (iPosition < 0) iPosition = aChildren.Length - 1;
             aChildren[iPosition].Activate();
-            LiveRegion.say(aChildren[iPosition].Text);
+            // Not announced: JAWS speaks the newly active window's title
+            // on the active-window change (Next / Previous Window also
+            // still echo their command name when command echo is on).
         }
 
-        // closeAllButCurrent: Close All But Current Window.
-        // Announces the surviving window's title.
+        // closeAllButCurrent: Close All But Current Window. Confirms
+        // with a count of the windows closed.
         public void closeAllButCurrent()
         {
             Form frmKeep = this.ActiveMdiChild;
             if (frmKeep == null) return;
+            int iClosed = 0;
             foreach (Form frmChild in this.MdiChildren)
             {
-                if (frmChild != frmKeep) frmChild.Close();
+                if (frmChild != frmKeep) { frmChild.Close(); iClosed++; }
             }
-            LiveRegion.say(frmKeep.Text);
+            // The kept window was already active, so JAWS does not
+            // re-announce it. Confirm the action with a count instead of
+            // speaking the surviving window's title.
+            LiveRegion.sayForced(iClosed == 0
+                ? "No other windows to close."
+                : iClosed + " other window" + (iClosed == 1 ? "" : "s") + " closed.");
         }
 
         // windowTitles: the children's titles in MdiChildren order,
@@ -15025,7 +15036,12 @@ namespace DbDo
             // child registered the same key.
             bool bFirstChild = (this.MdiParent == null) || (this.MdiParent.MdiChildren.Length <= 1);
             if (bFirstChild) LiveRegion.say("DbDo ready");
-            else LiveRegion.say(this.Text);
+            // Later windows are NOT announced here. Opening a window makes
+            // it the active window, and JAWS speaks the new window's title
+            // on that change; saying it again through the live region would
+            // be double speech. (The first child keeps its one-time "DbDo
+            // ready" cue, which confirms the live-region pipeline rather
+            // than repeating a title.)
             if (bFirstChild) registerToggleHotKey();
         }
 
@@ -16280,7 +16296,7 @@ namespace DbDo
             // Control+F1 = Key Help toggle: announce on/off via the screen reader,
             // and when on, intercept hotkeys to announce them rather
             // than execute them.
-            miHelpTraceCommand = addItem(miHelp, "&Key Help Toggle",                "Key Help Toggle", Keys.Control | Keys.F1,             helpTraceCommandClicked);
+            miHelpTraceCommand = addItem(miHelp, "&Key Describer Toggle",           "Key Describer Toggle", Keys.Control | Keys.F1,             helpTraceCommandClicked);
             miHelpStatus       = addItem(miHelp, "&Where Am I",                            "Show Status",       Keys.None,                          helpStatusClicked);
             miHelpEmailLog     = addItem(miHelp, "&Email Log File...",                   "Email Log",         Keys.None,                          emailLogClicked);
             // Toggle-Extra-Speech: silence DbDo's direct speech
@@ -16552,7 +16568,7 @@ namespace DbDo
                 "Plain text only; non-text and empty clipboards announce that fact rather than going silent. Double-press opens the read-only memo dialog for line-by-line review of long pasted content.");
             add("Say Sort Filter",     "Speak the current sort and filter, or '(none)' for each",
                 "Single-press speaks; double-press opens the same text in the multi-line dialog. Useful when the filter or sort string is long.");
-            add("Where Filter",        "Filter to rows matching a SQL-style WHERE expression", "Control+W.");
+            add("Where Filter",        "Show only rows matching one or more field conditions", "Control+W. Opens a form with one box per editable field. Type a value to match; a leading symbol picks the kind of match, and with no symbol \"=\" (exact) is implicit. Symbols: > >= < <= for comparisons, != for not-equal, and % for a substring (the value appears anywhere in the field). Filling several boxes ANDs them. Matches are case-insensitive. When a filter is already active, a chooser offers Edit (revise it), And / Or (add a condition joined to the current filter, parenthesized), New (replace), or Clear.");
             add("Filter Regex",        "Filter to rows whose current column matches a regular expression (SQLean REGEXP)",
                 "Server-side, so it works on large tables and the result stays editable. Prompts for a pattern and applies it to the column under virtual focus; an empty pattern clears the filter. Needs sqlean.dll beside DbDo.exe. Unbound by default -- assign a chord if you use it often.");
             add("Clear Where",        "Clear the active filter (where expression)", "Control+Shift+W.");
@@ -16601,8 +16617,8 @@ namespace DbDo
             add("Show Readme",        "Open the bundled readme.htm", "");
             add("About DbDo",        "Show the version, author, and license",
                 "Menu label: About. Alt+F1.");
-            add("Toggle Key Help", "Toggle Key Help (Ctrl+F1)",
-                "When Key Help is on, pressing a hotkey announces the command, chord, and summary instead of running the command. Press Ctrl+F1 again to turn it off.");
+            add("Key Describer Toggle", "Describe each key instead of running it (Ctrl+F1)",
+                "When the Key Describer is on, pressing ANY key announces what it does -- its command, chord, and summary when one is bound, or just the key name otherwise -- instead of running it or moving the grid. Ctrl+F1 is the one key that still acts: press it again to turn the describer off (announced as \"No Key Describer\"). Because every other key is only described, this is also the safe way to explore the keyboard.");
             add("Alternate Menu",     "Pick a command from a flat, filterable list",
                 "Single alphabetized list of every command with its hotkey and one-line description. Type to filter, arrow to navigate, Enter to run.");
             add("Show Log",           "Open the DbDo session log", "");
@@ -16788,6 +16804,14 @@ namespace DbDo
         {
             if (!isCommandEchoOn()) return;
             if (string.IsNullOrEmpty(sCommand)) return;
+            // A command whose name ends in "Toggle" announces its NEW
+            // STATE itself -- the on/off modes say "<Feature> On" / "No
+            // <Feature>" via sayToggleState, and Window Toggle names the
+            // window it switched to -- so echoing the raw command name
+            // here would duplicate that and, worse, would not reflect the
+            // resulting state. Skip the raw echo and let that state
+            // announcement be the command echo.
+            if (sCommand.TrimEnd().EndsWith("Toggle", StringComparison.OrdinalIgnoreCase)) return;
             try { LiveRegion.say(sCommand); } catch { /* swallow */ }
         }
 
@@ -18180,6 +18204,31 @@ namespace DbDo
         // =====================================================================
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
+            // Key Describer mode intercepts EVERY key before any command
+            // or grid navigation runs. A key bound to a command is
+            // described (its command, chord, and summary) through
+            // dispatchMenuItem; any other key (Home, an arrow, a plain
+            // letter) is simply named so the user knows the describer is
+            // active and that key carries no DbDo command. Either way the
+            // key is swallowed, so nothing executes and the grid never
+            // moves. The sole exception is the Key Describer toggle chord
+            // itself: dispatchMenuItem runs it so the mode can be exited.
+            // Bare modifier presses are ignored so real chords still form.
+            if (KeyMap.bKeyDescriber)
+            {
+                Keys kCode = keyData & Keys.KeyCode;
+                if (kCode != Keys.ControlKey && kCode != Keys.ShiftKey
+                    && kCode != Keys.Menu && kCode != Keys.None)
+                {
+                    ToolStripMenuItem miDesc;
+                    if (dLocalKeyToMenu.TryGetValue(keyData, out miDesc))
+                        return KeyMap.dispatchMenuItem(miDesc, keyData);
+                    LiveRegion.say(KeyMap.friendlyKey(keyData)
+                        + ". No DbDo command is bound to this key.");
+                    return true;
+                }
+            }
+
             // VirtualCursor chords (Alt+Control + Home/End/arrows/
             // Numpad5/PageDown/PageUp). These are the screen-reader
             // table-navigation conventions: Alt+Control+Home jumps to
@@ -26532,7 +26581,7 @@ namespace DbDo
                     // pre-filled with the last values typed and
                     // replaces.
                     string sBtn = dlg.runWithButtons(new string[] {
-                        "&Clear", "&And", "&Or", "&New", "&Edit", "Cance&l"
+                        "&Edit", "&And", "&Or", "&New", "&Clear", "Cance&l"
                     }, false);
                     if (string.IsNullOrEmpty(sBtn)) return;
                     string sB = sBtn.Replace("&", "");
@@ -26628,47 +26677,69 @@ namespace DbDo
         private Dictionary<string, string> dLastFilterValues = new Dictionary<string, string>();
 
         // sBuildFieldPredicate: turn one field's filter entry into one
-        // ADO Filter predicate. An optional leading operator selects
-        // the comparison:
-        //   %value        case-insensitive substring -- field LIKE
-        //                 '*value*' (the user types the SQL-style %;
-        //                 DbDo emits ADO's * wildcard)
-        //   =value        exact equals
-        //   <> or != val  not equal (both spellings accepted; ADO
-        //                 only understands <>, so != is translated)
-        //   <= >= < > val numeric / ordinal comparison
-        //   value         no prefix: same as %, a case-insensitive
-        //                 substring match (use =value to force an
-        //                 exact match)
-        // Operators are matched longest-first so <= beats <. Numeric
-        // operands are emitted bare; everything else is quoted.
+        // ADO Filter predicate. An optional leading SYMBOL selects the
+        // kind of match; when no symbol is given, "=" (exact match) is
+        // implicit:
+        //   value      no symbol -> field = 'value'   (exact, implicit =)
+        //   =value     field = 'value'                (explicit exact)
+        //   !=value    field <> 'value'   (ADO spells not-equal as <>)
+        //   >value     field > value
+        //   >=value    field >= value
+        //   <value     field < value
+        //   <=value    field <= value
+        //   %value     field LIKE '*value*'  (value is a SUBSTRING)
+        // Symbols are matched longest-first so ">=" beats ">" and "<="
+        // beats "<". Numeric operands are emitted bare so the compare is
+        // numeric; text operands are quoted (embedded single quotes are
+        // doubled). ADO's client-side cursor compares strings case-
+        // insensitively, so matches are case-insensitive where the
+        // provider allows. Note the wildcard: ADO Filter's LIKE uses '*'
+        // (not SQL's '%'), so the user-facing '%' prefix is translated to
+        // a pair of '*' wildcards around the value.
         private static string sBuildFieldPredicate(string sField, string sValue)
         {
-            if (sValue.StartsWith("%"))
+            string sV = (sValue ?? "").Trim();
+            if (sV.Length == 0) return "";
+
+            // '%' prefix: case-insensitive substring match.
+            if (sV.StartsWith("%"))
             {
-                string sRest = sValue.Substring(1);
-                if (sRest.Length == 0) return "";
-                return sField + " LIKE '*" + sRest.Replace("'", "''") + "*'";
+                string sSub = sV.Substring(1).Trim();
+                if (sSub.Length == 0) return "";
+                return sField + " LIKE '*" + sSub.Replace("'", "''") + "*'";
             }
-            // Longest operators first; != is a synonym for <>.
-            string[] aOps = new string[] { "<=", ">=", "<>", "!=", "=", "<", ">" };
-            foreach (string sOp in aOps)
+
+            // Explicit comparison symbols, longest first so two-character
+            // operators win over their single-character prefixes.
+            string sOp = null;
+            string sRest = null;
+            foreach (string sCand in new string[] { ">=", "<=", "!=", "=", ">", "<" })
             {
-                if (!sValue.StartsWith(sOp)) continue;
-                string sRest = sValue.Substring(sOp.Length).Trim();
-                if (sRest.Length == 0) return "";
-                string sEmit = (sOp == "!=") ? "<>" : sOp;
-                double dN;
-                bool bNumeric = double.TryParse(sRest,
-                    System.Globalization.NumberStyles.Any,
-                    System.Globalization.CultureInfo.InvariantCulture, out dN);
-                return sField + " " + sEmit + " "
-                    + (bNumeric ? sRest : "'" + sRest.Replace("'", "''") + "'");
+                if (sV.StartsWith(sCand))
+                { sOp = sCand; sRest = sV.Substring(sCand.Length).Trim(); break; }
             }
-            // No prefix: case-insensitive substring -- the same as a
-            // leading %, so a bare value finds rows containing it.
-            // (Use a leading = to force an exact match instead.)
-            return sField + " LIKE '*" + sValue.Replace("'", "''") + "*'";
+
+            string sEmitOp;
+            string sOperand;
+            if (sOp == null)
+            {
+                // No symbol: exact equals is implicit.
+                sEmitOp = "=";
+                sOperand = sV;
+            }
+            else
+            {
+                sEmitOp = (sOp == "!=") ? "<>" : sOp;
+                sOperand = sRest;
+            }
+            if (sOperand.Length == 0) return "";
+
+            double dN;
+            bool bNumeric = double.TryParse(sOperand,
+                System.Globalization.NumberStyles.Any,
+                System.Globalization.CultureInfo.InvariantCulture, out dN);
+            return sField + " " + sEmitOp + " "
+                + (bNumeric ? sOperand : "'" + sOperand.Replace("'", "''") + "'");
         }
 
         // Translate the dialog's three controls into an ADO Filter expression.
@@ -31685,7 +31756,7 @@ namespace DbDo
         {
             KeyMap.bKeyDescriber = !KeyMap.bKeyDescriber;
             miHelpTraceCommand.Checked = KeyMap.bKeyDescriber;
-            sayToggleState("Key Help Toggle", KeyMap.bKeyDescriber);
+            sayToggleState("Key Describer Toggle", KeyMap.bKeyDescriber);
         }
 
         private void helpLogClicked(object sender, EventArgs evArgs)
