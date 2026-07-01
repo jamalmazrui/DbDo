@@ -1139,7 +1139,7 @@ namespace DbDo
             try
             {
                 string sSentinel = System.IO.Path.Combine(sDir, ".seeded");
-                if (System.IO.File.Exists(sSentinel)) return;
+                bool bFirstSeed = !System.IO.File.Exists(sSentinel);
 
                 string sAppFolder = System.IO.Path.GetDirectoryName(
                     System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
@@ -1147,9 +1147,15 @@ namespace DbDo
                 if (System.IO.Directory.Exists(sSrcFolder))
                 {
                     // Each sample database lives in its own subfolder
-                    // (Samples\<name>\<name>.db, plus that database's
-                    // own scripts beside it). Copy each subfolder's
-                    // files into the matching user subfolder.
+                    // (Samples\<name>\<name>.db, plus that database's own
+                    // scripts and report/transfer .inix files beside it).
+                    // On the FIRST seed every bundled file is copied. On
+                    // later launches a file is refreshed only when it still
+                    // exists here AND the installed copy is newer -- so a
+                    // new install's updated samples replace the older ones
+                    // by the same name, while a sample the user deleted is
+                    // not resurrected and an edit the user made after the
+                    // install (newer timestamp) is preserved.
                     foreach (string sSubSrc in System.IO.Directory.GetDirectories(sSrcFolder))
                     {
                         string sSubDst = System.IO.Path.Combine(sDir, System.IO.Path.GetFileName(sSubSrc));
@@ -1157,11 +1163,7 @@ namespace DbDo
                         foreach (string sSrcPath in System.IO.Directory.GetFiles(sSubSrc))
                         {
                             string sDstPath = System.IO.Path.Combine(sSubDst, System.IO.Path.GetFileName(sSrcPath));
-                            if (!System.IO.File.Exists(sDstPath))
-                            {
-                                try { System.IO.File.Copy(sSrcPath, sDstPath, false); }
-                                catch { /* keep going for the rest */ }
-                            }
+                            copyBundledSample(sSrcPath, sDstPath, bFirstSeed);
                         }
                     }
                     // Tolerate any loose .db left directly in the source
@@ -1169,17 +1171,59 @@ namespace DbDo
                     foreach (string sSrcPath in System.IO.Directory.GetFiles(sSrcFolder, "*.db"))
                     {
                         string sDstPath = System.IO.Path.Combine(sDir, System.IO.Path.GetFileName(sSrcPath));
-                        if (!System.IO.File.Exists(sDstPath))
-                        {
-                            try { System.IO.File.Copy(sSrcPath, sDstPath, false); }
-                            catch { /* keep going for the rest */ }
-                        }
+                        copyBundledSample(sSrcPath, sDstPath, bFirstSeed);
                     }
                 }
-                try { System.IO.File.WriteAllText(sSentinel, "seeded " + DateTime.Now.ToString("o")); }
-                catch { }
+                if (bFirstSeed)
+                {
+                    try { System.IO.File.WriteAllText(sSentinel, "seeded " + DateTime.Now.ToString("o")); }
+                    catch { }
+                }
             }
             catch { /* never let seeding block the picker */ }
+        }
+
+        // copyBundledSample: seed or refresh one bundled sample file.
+        //   - missing destination: copied only on the first seed, so a
+        //     sample the user has deliberately deleted stays gone;
+        //   - existing destination: overwritten only when the installed
+        //     source is newer, so a fresh install's updated files replace
+        //     the older same-named ones while a later user edit is kept.
+        private static void copyBundledSample(string sSrcPath, string sDstPath, bool bFirstSeed)
+        {
+            try
+            {
+                bool bExists = System.IO.File.Exists(sDstPath);
+                if (!bExists)
+                {
+                    if (!bFirstSeed) return;                 // don't resurrect deleted samples
+                    System.IO.File.Copy(sSrcPath, sDstPath, false);
+                    clearReadOnly(sDstPath);                 // keep the seeded copy editable
+                    return;
+                }
+                if (System.IO.File.GetLastWriteTimeUtc(sSrcPath)
+                    > System.IO.File.GetLastWriteTimeUtc(sDstPath))
+                {
+                    clearReadOnly(sDstPath);                 // so the overwrite can proceed
+                    System.IO.File.Copy(sSrcPath, sDstPath, true);   // replace older same-named file
+                    clearReadOnly(sDstPath);                 // and stay editable afterward
+                }
+            }
+            catch { /* keep going for the rest */ }
+        }
+
+        // clearReadOnly: drop the read-only attribute a File.Copy may have
+        // carried over from a read-only installed source, so the seeded
+        // sample can be refreshed on a later upgrade and edited by the user.
+        private static void clearReadOnly(string sPath)
+        {
+            try
+            {
+                System.IO.FileAttributes attr = System.IO.File.GetAttributes(sPath);
+                if ((attr & System.IO.FileAttributes.ReadOnly) != 0)
+                    System.IO.File.SetAttributes(sPath, attr & ~System.IO.FileAttributes.ReadOnly);
+            }
+            catch { }
         }
 
         // listSampleDatabases: the full paths of the bundled sample
@@ -4380,7 +4424,32 @@ namespace DbDo
             return lResult;
         }
 
-        // countRowsOfTable: return the number of rows in a named table
+        // primeColumnFor: the prime/unique-key column name of a named
+        // table -- "prm" on databases this DbDo builds, and the legacy
+        // "unq" on databases that predate the rename. Resolved by reading
+        // the table's actual columns (SELECT * exposes the STORED
+        // generated key column), so it is correct per table rather than
+        // assuming a database-wide convention. Defaults to "prm" when
+        // neither column is detectable, which is the right choice for
+        // every database this DbDo creates. Used wherever SQL must name a
+        // table's key column -- e.g. the related-table drill's
+        // "<prime> IN (SELECT unqN FROM maps ...)" filter.
+        public string primeColumnFor(string sTable)
+        {
+            try
+            {
+                List<string> lCols = getColumnsOfTable(sTable);
+                foreach (string sCol in lCols)
+                    if (string.Equals(sCol, Metadata.PrimeColumn, StringComparison.OrdinalIgnoreCase))
+                        return Metadata.PrimeColumn;
+                foreach (string sCol in lCols)
+                    if (string.Equals(sCol, Metadata.UnqColumn, StringComparison.OrdinalIgnoreCase))
+                        return Metadata.UnqColumn;
+            }
+            catch { }
+            return Metadata.PrimeColumn;
+        }
+
         // by running SELECT COUNT(*) FROM <table>. Returns -1 on any
         // error (table absent, provider quirk). Read-only; doesn't
         // disturb the current recordset's position, filter, or sort.
@@ -24902,11 +24971,12 @@ namespace DbDo
                 syncAdoCursorToSelection();
                 if (db.eof || db.bof) return 0;
 
-                // Inspect Record shows EVERY field of the row (admin,
-                // distinct, and editable), regardless of which columns
-                // the listview currently shows. The grid's visible set
-                // is the "select" view; Inspect is the full view.
-                List<string> lFields = db.getFieldNames();
+                // Inspect Record shows the EDITABLE fields of the row --
+                // the substantive columns a user maintains -- skipping any
+                // that are null or blank, so the reader hears only the
+                // fields that actually carry information. Admin columns
+                // (the key, added/edited, look/prm, marked) are omitted.
+                List<string> lFields = db.getEditableFieldNames();
                 if (lFields.Count == 0)
                 {
                     lFields = db.getDisplayFieldNames();
@@ -24914,10 +24984,20 @@ namespace DbDo
                 StringBuilder sb = new StringBuilder();
                 foreach (string sCol in lFields)
                 {
-                    string sValue = formatFieldValueForDisplay(db.getFieldValue(sCol), sCol);
+                    string sRaw = db.getFieldValue(sCol);
+                    if (string.IsNullOrWhiteSpace(sRaw)) continue;   // skip null/blank
+                    string sValue = formatFieldValueForDisplay(sRaw, sCol);
                     sb.Append(sCol); sb.Append(" = "); sb.AppendLine(sValue);
                 }
-                appendRelatedRecords(sb);
+                // A blank line divides the fields from the related records,
+                // which are presented exactly as Say Related (Shift+R) shows
+                // them: one line per related record, each by its look value.
+                string sRelated = buildRelatedSummary();
+                if (!string.IsNullOrEmpty(sRelated))
+                {
+                    sb.AppendLine();
+                    sb.Append(sRelated);
+                }
 
                 int v = HelpDialog.showRecordView(this,
                     "Inspect Record (row " + db.absolutePosition + " of " + db.recordCount + ")",
@@ -28351,7 +28431,7 @@ namespace DbDo
                     string sVia = aTwoHopSel[0], sTarget = aTwoHopSel[1];
                     string sEdges = "(SELECT tbl1 ft, unq1 fu, tbl2 tt, unq2 tu FROM maps"
                         + " UNION ALL SELECT tbl2, unq2, tbl1, unq1 FROM maps)";
-                    string sWhere = "unq IN (SELECT e2.tu FROM " + sEdges + " e1"
+                    string sWhere = db.primeColumnFor(sTarget) + " IN (SELECT e2.tu FROM " + sEdges + " e1"
                         + " JOIN " + sEdges + " e2 ON e2.ft = e1.tt AND e2.fu = e1.tu"
                         + " WHERE e1.ft = " + DbDoManager.sQuoteSqlLiteral(sParentTable)
                         + " AND e1.fu = " + DbDoManager.sQuoteSqlLiteral(sUnqValue)
@@ -28372,13 +28452,14 @@ namespace DbDo
                     // approach (ADO client-side Filter as an OR
                     // chain) is gone, along with its row cap.
                     string sKind = aMapsSel[0], sOther = aMapsSel[1], sDir = aMapsSel[2];
+                    string sPrimeCol = db.primeColumnFor(sOther);
                     string sWhere = (sDir == "subject")
-                        ? "unq IN (SELECT unq2 FROM maps WHERE tbl1 = "
+                        ? sPrimeCol + " IN (SELECT unq2 FROM maps WHERE tbl1 = "
                           + DbDoManager.sQuoteSqlLiteral(sParentTable)
                           + " AND unq1 = " + DbDoManager.sQuoteSqlLiteral(sUnqValue)
                           + " AND kind = " + DbDoManager.sQuoteSqlLiteral(sKind)
                           + " AND tbl2 = " + DbDoManager.sQuoteSqlLiteral(sOther) + ")"
-                        : "unq IN (SELECT unq1 FROM maps WHERE tbl2 = "
+                        : sPrimeCol + " IN (SELECT unq1 FROM maps WHERE tbl2 = "
                           + DbDoManager.sQuoteSqlLiteral(sParentTable)
                           + " AND unq2 = " + DbDoManager.sQuoteSqlLiteral(sUnqValue)
                           + " AND kind = " + DbDoManager.sQuoteSqlLiteral(sKind)
@@ -37551,9 +37632,20 @@ namespace DbDo
                     {
                         try
                         {
-                            string sAppFolder = System.IO.Path.GetDirectoryName(
-                                System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
-                            string sDefaultSample = System.IO.Path.Combine(sAppFolder, "NFB2026Convention.db");
+                            // The showcase database is seeded into the
+                            // user's writable Samples folder as
+                            // %APPDATA%\DbDo\Samples\NFB2026Convention\
+                            // NFB2026Convention.db; getSampleDir() performs
+                            // that seed on first access and returns the
+                            // folder. Opening the seeded copy -- rather than
+                            // the read-only one two levels deep under the
+                            // install folder -- lets the user edit and save
+                            // it. (The previous code looked for the file in
+                            // the install root, where it never exists, so
+                            // the showcase database never opened.)
+                            string sSampleDir = ScriptHelper.getSampleDir();
+                            string sDefaultSample = System.IO.Path.Combine(
+                                sSampleDir, "NFB2026Convention", "NFB2026Convention.db");
                             if (System.IO.File.Exists(sDefaultSample))
                             {
                                 DbDoLog.write("First-run default: opening " + sDefaultSample);
