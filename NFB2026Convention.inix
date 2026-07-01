@@ -6,6 +6,7 @@ select sqlean_version
 `
 JumpText = david, mosen
 FindText = Mosen
-InitialTable = contacts
+InitialTable = events
 
 [Table:contacts]
+SelectFields = look, unq

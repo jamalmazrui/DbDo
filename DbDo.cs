@@ -4405,8 +4405,25 @@ namespace DbDo
                 // Fall through to the empty-recordset path.
             }
 
-            // Fallback: open a no-row recordset to read field metadata.
-            // Quoting matches the rest of DbDo's SQL emission.
+            // Fallback: read field metadata as the QUERY ENGINE sees it,
+            // which includes STORED GENERATED columns (look, prm/unq) that
+            // ADOX omits.
+            List<string> lViaSelect = getColumnsViaSelect(sTable);
+            if (lViaSelect.Count > 0) lResult.AddRange(lViaSelect);
+            return lResult;
+        }
+
+        // getColumnsViaSelect: column names as the query engine reports
+        // them for SELECT * -- crucially INCLUDING the STORED GENERATED
+        // columns (look and the prime-key column prm/unq). The ODBC
+        // schema catalog used by ADOX does NOT list generated columns, so
+        // this SELECT-based reader is the reliable source whenever the
+        // generated key column must be detected (see primeColumnFor).
+        // Opens a no-row recordset (WHERE 1=0) purely for its Fields.
+        public List<string> getColumnsViaSelect(string sTable)
+        {
+            List<string> lResult = new List<string>();
+            if (!isOpen() || string.IsNullOrEmpty(sTable)) return lResult;
             try
             {
                 string sQuoted = "[" + sTable.Replace("]", "]]") + "]";
@@ -4438,7 +4455,17 @@ namespace DbDo
         {
             try
             {
-                List<string> lCols = getColumnsOfTable(sTable);
+                // Read the columns as the QUERY ENGINE exposes them:
+                // SELECT * includes the STORED GENERATED key column
+                // (prm/unq), whereas the ODBC schema catalog (ADOX,
+                // preferred by getColumnsOfTable) omits generated columns
+                // and would leave the key undetected -- which previously
+                // forced the "prm" default even on tables whose key is
+                // still "unq", producing "no such column: prm". Fall back
+                // to getColumnsOfTable only if the SELECT reader returns
+                // nothing.
+                List<string> lCols = getColumnsViaSelect(sTable);
+                if (lCols.Count == 0) lCols = getColumnsOfTable(sTable);
                 foreach (string sCol in lCols)
                     if (string.Equals(sCol, Metadata.PrimeColumn, StringComparison.OrdinalIgnoreCase))
                         return Metadata.PrimeColumn;
