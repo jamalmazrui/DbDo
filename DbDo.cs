@@ -1322,6 +1322,11 @@ namespace DbDo
             List<string> lNames = new List<string>();
             foreach (System.IO.FileInfo fi in dirInfo.GetFiles())
             {
+                // DbDo.js is the build source compiled into DbDo.dll, not a
+                // user script; never offer it in the script picker even when
+                // a database happens to sit in the install folder beside it.
+                if (string.Equals(fi.Name, "DbDo.js", StringComparison.OrdinalIgnoreCase))
+                    continue;
                 string sExt = fi.Extension.ToLowerInvariant();
                 if (sExt == ".js" || sExt == ".sql" || sExt == ".dbdo")
                     lNames.Add(fi.Name);
@@ -5749,13 +5754,20 @@ namespace DbDo
                 // valid; the user expects to see something.
             }
 
-            // (B) Default selection: the "distinct" summary columns
-            // (look + prm). Opening a table with no saved SelectFields
-            // shows this compact summary-plus-key view.
-            List<string> lDistinct = new List<string>();
+            // (B) Default selection: the component fields that compose
+            // the look/prime expression -- the substantive columns that
+            // form the record's human-readable identity -- rather than
+            // the derived look/prm columns themselves. Only applies to
+            // tables that carry the standard summary columns; xlsx/csv
+            // sources fall through to the rule-based selection in (C).
+            bool bHasSummary = false;
             foreach (string sName in getFieldNames())
-                if (Metadata.isDistinctColumn(sName)) lDistinct.Add(sName);
-            if (lDistinct.Count > 0) return lDistinct;
+                if (Metadata.isDistinctColumn(sName)) { bHasSummary = true; break; }
+            if (bHasSummary)
+            {
+                List<string> lComp = getUnqComponentFields();
+                if (lComp.Count > 0) return lComp;
+            }
 
             // (C) Fallback for tables without the standard summary
             // columns (e.g. .xlsx / .csv sources): the rule-based
@@ -6131,7 +6143,7 @@ namespace DbDo
                 if (string.IsNullOrEmpty(sCreate)) return lEditable;
                 System.Text.RegularExpressions.Match m =
                     System.Text.RegularExpressions.Regex.Match(sCreate,
-                        "\\bunq\\b\\s+\\w+\\s+GENERATED\\s+ALWAYS\\s+AS\\s*\\(",
+                        "\\b(?:prm|unq)\\b\\s+\\w+\\s+GENERATED\\s+ALWAYS\\s+AS\\s*\\(",
                         System.Text.RegularExpressions.RegexOptions.IgnoreCase);
                 if (!m.Success) return lEditable;
                 int iDepth = 1, i = m.Index + m.Length, iStart = i;
@@ -11073,7 +11085,13 @@ namespace DbDo
             // Add buttons right-to-left so the visual order reads
             // left-to-right as given. RightToLeft FlowDirection
             // puts the first-added at the right; we want first-
-            // given at the left, so iterate in reverse.
+            // given at the left, so iterate in reverse. TabIndex is
+            // assigned by LABEL position (not add order) so keyboard
+            // tab order and initial focus follow the visual left-to-
+            // right order: the first-given button (the AcceptButton,
+            // e.g. Custom) is focused first, and the rightmost Help
+            // button is last -- never the initial focus.
+            int iBtnBase = iTabIndex;
             for (int i = aButtonLabels.Length - 1; i >= 0; i--)
             {
                 string sLabel = aButtonLabels[i] ?? "";
@@ -11081,7 +11099,7 @@ namespace DbDo
                 btn.Text = "&" + sLabel.Replace("&", "");
                 btn.AccessibleName = sLabel.Replace("&", "");
                 btn.Size = new Size(DefaultButtonWidth, DefaultButtonHeight);
-                btn.TabIndex = iTabIndex++;
+                btn.TabIndex = iBtnBase + i;
                 btn.Margin = new Padding(DefaultRowGap, 0, 0, 0);
                 btn.UseVisualStyleBackColor = true;
 
@@ -14695,7 +14713,6 @@ namespace DbDo
         private ToolStripMenuItem miToolsChart;
         // miToolsLock removed in v1.0.91 along with the Lock-Database
         // toggle.
-        private ToolStripMenuItem miToolsTestDriver;
         private ToolStripMenuItem miMiscHotkeySummary; // Hotkey Summary: the (command, key, description) listing + consistency check
         private ToolStripMenuItem miMiscDescribeTable; // Describe Table: per-column data profile (%whos-style)
         private ToolStripMenuItem miMiscFacetColumn;   // Facet Column: distinct values + row counts for the cursor column; pick one to filter
@@ -14736,7 +14753,6 @@ namespace DbDo
         private ToolStripMenuItem miHelpReadme;
         private ToolStripMenuItem miHelpShowCommand;
         private ToolStripMenuItem miHelpStatus;
-        private ToolStripMenuItem miHelpTestReader;
         private ToolStripMenuItem miHelpEmailLog;
         private ToolStripMenuItem miHelpSampleDb;
         private ToolStripMenuItem miHelpExtraSpeech;
@@ -16040,7 +16056,6 @@ namespace DbDo
             miToolsInvokeSql = addItem(miQuery, "&Query...",                              "Query",             Keys.Control | Keys.Q,              toolsInvokeSqlClicked);
             miToolsSqlHistory= addItem(miQuery, "Query &History...",                      "Query History",     Keys.Alt | Keys.Shift | Keys.Q,     sqlHistoryClicked);
             miToolsTest      = addItem(miMisc, "&Test Integrity",                        "Test Database",     Keys.None,                          toolsTestClicked);
-            miToolsTestDriver= addItem(miMisc, "Test &Drivers",        "Test Driver",       Keys.None,                          toolsTestDriverClicked);
             miMiscHotkeySummary = addItem(miMisc, "&Hotkey Summary",      "Hotkey Summary",      Keys.Alt | Keys.Shift | Keys.H, hotkeySummaryClicked,
                 "List every command with its key and description, then flag any inconsistencies",
                 "Joins the command, key, and description tables the menus and Key Help already use into one listing, sorted by command name, then notes duplicate key assignments and commands missing a description. Bound to Alt+Shift+H.");
@@ -16136,7 +16151,6 @@ namespace DbDo
             // than execute them.
             miHelpTraceCommand = addItem(miHelp, "&Key Help Toggle",                "Key Help Toggle", Keys.Control | Keys.F1,             helpTraceCommandClicked);
             miHelpStatus       = addItem(miHelp, "&Where Am I",                            "Show Status",       Keys.None,                          helpStatusClicked);
-            miHelpTestReader   = addItem(miHelp, "&Test Screen Reader Speech",           "Test Reader",       Keys.None,                          helpTestReaderClicked);
             miHelpEmailLog     = addItem(miHelp, "&Email Log File...",                   "Email Log",         Keys.None,                          emailLogClicked);
             // Toggle-Extra-Speech: silence DbDo's direct speech
             // messages without affecting the screen reader's natural
@@ -17982,7 +17996,7 @@ namespace DbDo
             if (miPlotColumn != null) miPlotColumn.Enabled = bHasTable;
             miToolsInvokeSql.Enabled = bOpen;
             if (miToolsSqlHistory != null) miToolsSqlHistory.Enabled = bOpen;
-            // miToolsTestDriver, miToolsOpenFolder, and miToolsConsole are always enabled.
+            // miToolsOpenFolder and miToolsConsole are always enabled.
         }
 
         // =====================================================================
@@ -19202,7 +19216,7 @@ namespace DbDo
                             }
                             int iLookFound;
                             List<string> lLookVals = db.queryColumnValues(
-                                sOther, "look", "unq", aRel[2], 1, out iLookFound);
+                                sOther, "look", Metadata.PrimeColumn, aRel[2], 1, out iLookFound);
                             string sLine = (lLookVals.Count > 0
                                 && !string.IsNullOrEmpty(lLookVals[0]))
                                 ? lLookVals[0] : aRel[2];
@@ -19253,7 +19267,7 @@ namespace DbDo
                             }
                             int iLookFound;
                             List<string> lLookVals = db.queryColumnValues(
-                                sTarget, "look", "unq", sTu, 1, out iLookFound);
+                                sTarget, "look", Metadata.PrimeColumn, sTu, 1, out iLookFound);
                             sb.AppendLine("  " + ((lLookVals.Count > 0
                                 && !string.IsNullOrEmpty(lLookVals[0])) ? lLookVals[0] : sTu));
                             iShown++;
@@ -19279,26 +19293,42 @@ namespace DbDo
             if (db == null || !db.hasRecordset() || db.recordCount == 0) return "";
             try
             {
-                if (db.hasField(Metadata.UnqColumn))
+                // Recordset field: prefer the prm column, fall back to
+                // a legacy unq column when a database predates the rename.
+                foreach (string sCol in new string[] { Metadata.PrimeColumn, Metadata.UnqColumn })
                 {
-                    string sFromRecordset = db.getFieldValue(Metadata.UnqColumn) ?? "";
-                    if (!string.IsNullOrEmpty(sFromRecordset)) return sFromRecordset;
+                    if (db.hasField(sCol))
+                    {
+                        string sFromRecordset = db.getFieldValue(sCol) ?? "";
+                        if (!string.IsNullOrEmpty(sFromRecordset)) return sFromRecordset;
+                    }
                 }
-                // Fallback: SELECT unq FROM <table> WHERE <pk> = <value>.
+                // Fallback: SELECT prm (or unq) FROM <table> WHERE <pk> = <value>.
+                // Covers recordsets opened with a column subset and providers
+                // that omit generated columns from the field collection.
                 string sTable = db.currentTable;
                 if (string.IsNullOrEmpty(sTable)) return "";
                 string sPk = computePrimaryKeyColumn(sTable, db.getFieldNames());
                 if (string.IsNullOrEmpty(sPk)) return "";
                 string sPkValue = db.getFieldValue(sPk) ?? "";
                 if (string.IsNullOrEmpty(sPkValue)) return "";
-                int iFound;
-                List<string> lUnq = db.queryColumnValues(
-                    sTable, Metadata.UnqColumn, sPk, sPkValue, 1, out iFound);
-                string sResult = (lUnq.Count > 0) ? (lUnq[0] ?? "") : "";
-                DbDoLog.write("sCurrentUnqValue: recordset lacked unq; SQL fallback for "
-                    + sTable + "." + sPk + "=" + sPkValue + " -> "
-                    + (string.IsNullOrEmpty(sResult) ? "(none)" : "found"));
-                return sResult;
+                foreach (string sCol in new string[] { Metadata.PrimeColumn, Metadata.UnqColumn })
+                {
+                    try
+                    {
+                        int iFound;
+                        List<string> lVals = db.queryColumnValues(
+                            sTable, sCol, sPk, sPkValue, 1, out iFound);
+                        if (lVals.Count > 0 && !string.IsNullOrEmpty(lVals[0]))
+                        {
+                            DbDoLog.write("sCurrentUnqValue: SQL fallback via " + sCol
+                                + " for " + sTable + "." + sPk + "=" + sPkValue);
+                            return lVals[0];
+                        }
+                    }
+                    catch { /* column absent on this table; try the next */ }
+                }
+                return "";
             }
             catch (Exception ex)
             {
@@ -19884,7 +19914,7 @@ namespace DbDo
                 dlg.addLabel("Custom = pick an exact sequence. Distinct = look + prm.");
                 dlg.addLabel("Edit = the editable fields. All = every field.");
                 sBtn = dlg.runWithButtons(new string[]
-                    { "&Custom...", "&Distinct", "&Edit", "&All", "Cancel" });
+                    { "&Custom...", "&Edit", "&Distinct", "&All", "Cancel" });
             }
             if (string.IsNullOrEmpty(sBtn)
                 || string.Equals(sBtn, "Cancel", StringComparison.OrdinalIgnoreCase))
@@ -21723,7 +21753,7 @@ namespace DbDo
                 sbCreate.Append("\"" + aF[0] + "\" " + aF[1] + ", ");
             sbCreate.Append("notes TEXTMARKDOWN, tags TEXTMEMO, ");
             sbCreate.Append("look TEXT GENERATED ALWAYS AS (" + sbLook + ") STORED, ");
-            sbCreate.Append("unq TEXT GENERATED ALWAYS AS (" + sbUnq + ") STORED, ");
+            sbCreate.Append("prm TEXT GENERATED ALWAYS AS (" + sbUnq + ") STORED, ");
             sbCreate.Append("marked INTEGER NOT NULL DEFAULT 0)");
 
             List<string> lTrigCols = new List<string>(lCols);
@@ -21744,7 +21774,7 @@ namespace DbDo
             List<string> lDdl = new List<string>();
             lDdl.Add(sbCreate.ToString());
             lDdl.Add(sTrigger);
-            lDdl.Add("CREATE UNIQUE INDEX \"idx_" + sTable + "_unq\" ON \"" + sTable + "\" (unq)");
+            lDdl.Add("CREATE UNIQUE INDEX \"idx_" + sTable + "_prm\" ON \"" + sTable + "\" (prm)");
             return lDdl;
         }
 
@@ -22325,13 +22355,17 @@ namespace DbDo
                     managerImport.invokeSql(sSql, null);
                 for (int i = 0; i < lRecords.Count; i++)
                 {
-                    System.Text.StringBuilder sbCols = new System.Text.StringBuilder(c_sQuote + "unq" + c_sQuote);
-                    System.Text.StringBuilder sbVals = new System.Text.StringBuilder("'" + lsUnqs[i].Replace("'", "''") + "'");
+                    System.Text.StringBuilder sbCols = new System.Text.StringBuilder();
+                    System.Text.StringBuilder sbVals = new System.Text.StringBuilder();
+                    bool bFirstCol = true;
                     foreach (KeyValuePair<string, string> pair in lRecords[i])
                     {
-                        sbCols.Append(", " + c_sQuote + pair.Key + c_sQuote);
-                        sbVals.Append(", '" + pair.Value.Replace("'", "''") + "'");
+                        if (!bFirstCol) { sbCols.Append(", "); sbVals.Append(", "); }
+                        sbCols.Append(c_sQuote + pair.Key + c_sQuote);
+                        sbVals.Append("'" + pair.Value.Replace("'", "''") + "'");
+                        bFirstCol = false;
                     }
+                    if (sbCols.Length == 0) continue;
                     managerImport.invokeSql("INSERT INTO " + c_sQuote + sTable + c_sQuote
                         + " (" + sbCols + ") VALUES (" + sbVals + ")", null);
                 }
@@ -22365,7 +22399,7 @@ namespace DbDo
             if (string.IsNullOrEmpty(sXlsxPath)) throw new ArgumentException("importWorkbookFile requires a path.");
             if (!File.Exists(sXlsxPath)) throw new FileNotFoundException("Workbook not found: " + sXlsxPath);
 
-            string[] aReservedRename = new string[] { "added", "edited", "look", "unq", "marked" };
+            string[] aReservedRename = new string[] { "added", "edited", "look", "prm", "unq", "marked" };
             string sDbPath = Path.Combine(Path.GetTempPath(),
                 "DbDo_managed_" + Guid.NewGuid().ToString("N") + ".db");
 
@@ -22835,7 +22869,7 @@ namespace DbDo
             List<string[]> aGrid, List<string> lTableNames)
         {
             if (aGrid == null || aGrid.Count < 2) return -1;
-            string[] aReservedRename = new string[] { "added", "edited", "look", "unq", "marked" };
+            string[] aReservedRename = new string[] { "added", "edited", "look", "prm", "unq", "marked" };
 
             int iScan = Math.Min(aGrid.Count - 1, 14);
             int iWidest = 0;
@@ -23030,7 +23064,7 @@ namespace DbDo
             }
             if (lCols == null) throw new InvalidOperationException("No header row was found in " + Path.GetFileName(sSourcePath) + ".");
 
-            string[] aReservedRename = new string[] { "added", "edited", "look", "unq", "marked" };
+            string[] aReservedRename = new string[] { "added", "edited", "look", "prm", "unq", "marked" };
             string sDbPath = Path.Combine(Path.GetTempPath(),
                 "DbDo_managed_" + Guid.NewGuid().ToString("N") + ".db");
             try
@@ -23114,7 +23148,7 @@ namespace DbDo
         {
             if (string.IsNullOrEmpty(sDbfPath)) throw new ArgumentException("importDbfToShell requires a path.");
             DbfReader.Result res = DbfReader.read(sDbfPath);
-            string[] aReservedRename = new string[] { "added", "edited", "look", "unq", "marked" };
+            string[] aReservedRename = new string[] { "added", "edited", "look", "prm", "unq", "marked" };
             string sDbPath = Path.Combine(Path.GetTempPath(),
                 "DbDo_managed_" + Guid.NewGuid().ToString("N") + ".db");
             try
@@ -23201,7 +23235,7 @@ namespace DbDo
         internal string importAdoToShell(string sSourcePath)
         {
             if (string.IsNullOrEmpty(sSourcePath)) throw new ArgumentException("importAdoToShell requires a path.");
-            string[] aReservedRename = new string[] { "added", "edited", "look", "unq", "marked" };
+            string[] aReservedRename = new string[] { "added", "edited", "look", "prm", "unq", "marked" };
             string sDbPath = Path.Combine(Path.GetTempPath(),
                 "DbDo_managed_" + Guid.NewGuid().ToString("N") + ".db");
             int iTablesImported = 0, iRowsImported = 0;
@@ -36535,8 +36569,7 @@ namespace DbDo
                 "A newer DbDo is available.\n\n"
                 + "Installed: " + sLocal + "\n"
                 + "Available: " + sLatest + "\n\n"
-                + "Download and run the new installer now?\n\n"
-                + "The installer will offer to close this DbDo before it proceeds.",
+                + "Download and run the new installer now?",
                 "Elevate Version", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
             if (answer != DialogResult.Yes) return;
 

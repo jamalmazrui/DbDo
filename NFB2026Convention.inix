@@ -1,0 +1,9 @@
+[Database]
+QueryText=`
+select sqlean_version()
+select sqlean_version();
+select sqlean_version
+`
+JumpText = david, mosen
+FindText = Mosen
+InitialTable = contacts
