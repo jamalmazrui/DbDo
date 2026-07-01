@@ -17,10 +17,10 @@
 #               Ballroom on 3; numbered salons are the JW Grand
 #               Ballroom on 4).
 #   maps      - generic typed associations between any two records,
-#               identified by (table, unq) pairs. Kinds used here:
+#               identified by (table, prm) pairs. Kinds used here:
 #               presents (contact -> event) and located_at
 #               (event -> location). Full standard column set,
-#               including look AND unq.
+#               including look AND prm.
 #   lookups   - the standard lookups table, seeded with the valid
 #               maps.kind values and the hotel names.
 #
@@ -53,7 +53,7 @@ def sLookExpr(lCols):
 def sUnqExpr(lCols):
     return "||'|'||".join("coalesce(CAST(%s AS TEXT),'')" % c for c in lCols)
 
-# Contacts use the conditional-unq pattern: a PERSON's identity is the
+# Contacts use the conditional-prm pattern: a PERSON's identity is the
 # name; an ORGANIZATION (no last_name) is identified by its enterprise.
 c_sContactUnqExpr = ("iif(last_name IS NOT NULL AND length(last_name)>0, "
                      "coalesce(first_name,'')||'|'||coalesce(middle_name,'')"
@@ -73,33 +73,33 @@ dSchema = {
               "state TEXTLINE", "zip TEXTLINE", "nation TEXTLINE",
               "url TEXTLINE"],
         look=["first_name", "last_name", "enterprise"],
-        unq=c_sContactUnqExpr),
+        prm=c_sContactUnqExpr),
     "events": dict(
         data=["event_date TEXTLINE", "start_time TEXTLINE", "end_time TEXTLINE",
               "title TEXTLINE", "details TEXTMARKDOWN", "url TEXTLINE"],
         look=["event_date", "start_time", "title"],
-        unq=["event_date", "start_time", "title"]),
+        prm=["event_date", "start_time", "title"]),
     "locations": dict(
         data=["name TEXTLINE", "level TEXTLINE", "hotel TEXTLINE"],
         look=["name", "level"],
-        unq=["name", "hotel"]),
+        prm=["name", "hotel"]),
     "projects": dict(
         # A project is a product, service, or other ongoing endeavor
         # -- a work in progress that evolves over time. Ownership and
         # appearances are maps associations, never columns here.
         data=["name TEXTLINE", "kind TEXTLINE", "descrip TEXTMARKDOWN", "url TEXTLINE"],
         look=["name", "kind"],
-        unq=["name"]),
+        prm=["name"]),
     "maps": dict(
-        data=["tbl1 TEXTLINE", "unq1 TEXTLINE", "kind TEXTLINE",
-              "tbl2 TEXTLINE", "unq2 TEXTLINE"],
-        look=["tbl1", "unq1", "kind", "tbl2", "unq2"],
-        unq=["tbl1", "unq1", "kind", "tbl2", "unq2"]),
+        data=["tbl1 TEXTLINE", "prm1 TEXTLINE", "kind TEXTLINE",
+              "tbl2 TEXTLINE", "prm2 TEXTLINE"],
+        look=["tbl1", "prm1", "kind", "tbl2", "prm2"],
+        prm=["tbl1", "prm1", "kind", "tbl2", "prm2"]),
     "lookups": dict(
         data=["src TEXTLINE", "tbl TEXTLINE", "fld TEXTLINE", "val TEXTLINE",
               "ordinal INTEGER", "descrip TEXTMARKDOWN", "url TEXTLINE"],
         look=["src", "tbl", "fld", "val"],
-        unq=["src", "tbl", "fld", "val"]),
+        prm=["src", "tbl", "fld", "val"]),
 }
 
 
@@ -113,10 +113,10 @@ def createSchema(conn):
                   "  added TEXTTIME NOT NULL DEFAULT CURRENT_TIMESTAMP",
                   "  edited TEXTTIME NOT NULL DEFAULT CURRENT_TIMESTAMP"]
         lLines += ["  " + sCol for sCol in d["data"]]
-        sUnq = d["unq"] if isinstance(d["unq"], str) else sUnqExpr(d["unq"])
+        sUnq = d["prm"] if isinstance(d["prm"], str) else sUnqExpr(d["prm"])
         lLines += ["  notes TEXTMARKDOWN", "  tags TEXTMEMO",
                    "  look TEXT GENERATED ALWAYS AS (%s) STORED" % sLookExpr(d["look"]),
-                   "  unq TEXT GENERATED ALWAYS AS (%s) STORED" % sUnq,
+                   "  prm TEXT GENERATED ALWAYS AS (%s) STORED" % sUnq,
                    "  marked INTEGER NOT NULL DEFAULT 0"]
         cur.execute('CREATE TABLE "%s" (\n%s\n)' % (sTable, ",\n".join(lLines)))
         # Edited trigger: fires only when a data-bearing column is in
@@ -128,10 +128,10 @@ def createSchema(conn):
                     'FOR EACH ROW WHEN %s BEGIN UPDATE "%s" SET edited = '
                     'CURRENT_TIMESTAMP WHERE %s = NEW.%s; END'
                     % (sTable, sOf, sTable, sWhen, sTable, sPk, sPk))
-    # Join-path indexes for maps, created up front; unq indexes are
+    # Join-path indexes for maps, created up front; prm indexes are
     # added after load so duplicates can be detected first.
-    cur.execute('CREATE INDEX idx_maps_side1 ON maps (tbl1, unq1)')
-    cur.execute('CREATE INDEX idx_maps_side2 ON maps (tbl2, unq2)')
+    cur.execute('CREATE INDEX idx_maps_side1 ON maps (tbl1, prm1)')
+    cur.execute('CREATE INDEX idx_maps_side2 ON maps (tbl2, prm2)')
     conn.commit()
 
 
@@ -472,13 +472,13 @@ def buildDatabase(sAgendaPath, sDbPath):
     createSchema(conn)
     cur = conn.cursor()
 
-    dContacts = {}   # unq -> contact dict
-    dLocations = {}  # unq -> (name, level)
-    dEvents = {}     # unq -> event dict
-    dProjects = {}   # unq (name) -> dict(name, kind)
-    lMaps = []       # (tbl1, unq1, kind, tbl2, unq2, notes)
+    dContacts = {}   # prm -> contact dict
+    dLocations = {}  # prm -> (name, level)
+    dEvents = {}     # prm -> event dict
+    dProjects = {}   # prm (name) -> dict(name, kind)
+    lMaps = []       # (tbl1, prm1, kind, tbl2, prm2, notes)
 
-    lProjectHits = []  # (name, kind, owner, event unq)
+    lProjectHits = []  # (name, kind, owner, event prm)
 
     def harvestProjects(dEv, sEvUnq):
         """Collect candidate project mentions from an event's title and
@@ -520,7 +520,7 @@ def buildDatabase(sAgendaPath, sDbPath):
                 sOUnq = addOrgContact(sOwner)
                 lMaps.append(("contacts", sOUnq, "offers", "projects", sFull, ""))
 
-    # A contact's identity mirrors the table's conditional unq
+    # A contact's identity mirrors the table's conditional prm
     # expression exactly (the maps rows store these strings, so the
     # Python computation and the SQL generated column MUST agree):
     # a person's identity is the name; an organization's (no last
@@ -585,8 +585,8 @@ def buildDatabase(sAgendaPath, sDbPath):
     reAnyUrl = re.compile(r"(https?://[^\s)\]]+)", re.I)
 
     def addOrgContact(sOrgName):
-        """An organization is a contact with enterprise only; its unq
-        is the enterprise name (the conditional-unq pattern)."""
+        """An organization is a contact with enterprise only; its prm
+        is the enterprise name (the conditional-prm pattern)."""
         sOrgName = sOrgName.strip().rstrip(",")
         dOrg = dict(first="", middle="", last="", job="", enterprise=sOrgName)
         return addContact(dOrg)
@@ -956,15 +956,15 @@ def buildDatabase(sAgendaPath, sDbPath):
           "resolved %d project(s), removed %d map(s)." % (iDrop, iFix, iProj, iMaps))
     conn.commit()
 
-    # unq indexes: UNIQUE where the data allows.
+    # prm indexes: UNIQUE where the data allows.
     for sTable in dSchema:
         iDupes = cur.execute(
-            'SELECT count(*) FROM (SELECT unq FROM "%s" GROUP BY unq '
+            'SELECT count(*) FROM (SELECT prm FROM "%s" GROUP BY prm '
             'HAVING count(*) > 1)' % sTable).fetchone()[0]
         sKind = "UNIQUE INDEX" if iDupes == 0 else "INDEX"
-        cur.execute('CREATE %s "idx_%s_unq" ON "%s" (unq)' % (sKind, sTable, sTable))
+        cur.execute('CREATE %s "idx_%s_prm" ON "%s" (prm)' % (sKind, sTable, sTable))
         if iDupes:
-            print("NOTE: %s has %d duplicate unq values; plain index" % (sTable, iDupes))
+            print("NOTE: %s has %d duplicate prm values; plain index" % (sTable, iDupes))
     conn.commit()
     conn.execute("VACUUM")
 
@@ -1104,7 +1104,7 @@ def addMap(cur, sTbl1, sUnq1, sKind, sTbl2, sUnq2, sNotes=None):
         print("NOTE: maps row reordered to alpha table order: "
               "(%s,%s) %s (%s,%s)" % (sTbl1, sUnq1, sKind, sTbl2, sUnq2))
         sTbl1, sUnq1, sTbl2, sUnq2 = sTbl2, sUnq2, sTbl1, sUnq1
-    cur.execute("INSERT INTO maps (tbl1, unq1, kind, tbl2, unq2, notes) "
+    cur.execute("INSERT INTO maps (tbl1, prm1, kind, tbl2, prm2, notes) "
                 "VALUES (?,?,?,?,?,?)", (sTbl1, sUnq1, sKind, sTbl2, sUnq2, sNotes))
 
 def dExtractInfo(sBody):
@@ -1266,7 +1266,7 @@ def cleanContactEnterprises(cur):
         "Specialist", "Consultant", "Administrator", "Analyst"))
     lFix = []
     for (sUnq, sEnt, sJob) in cur.execute(
-            "SELECT unq, enterprise, coalesce(job,'') FROM contacts "
+            "SELECT prm, enterprise, coalesce(job,'') FROM contacts "
             "WHERE coalesce(last_name,'')<>'' AND coalesce(enterprise,'')<>''").fetchall():
         sE = (sEnt or "").strip(); sJ = (sJob or "").strip(); k = sNormKey(sE)
         m = re.match(r"^(.{2,40}?),\s*(.+)$", sE)
@@ -1277,7 +1277,7 @@ def cleanContactEnterprises(cur):
         if k in setJobTitle:
             lFix.append((sUnq, None, sJ or sE)); continue
     for (sUnq, sNewEnt, sNewJob) in lFix:
-        cur.execute("UPDATE contacts SET enterprise=?, job=? WHERE unq=?",
+        cur.execute("UPDATE contacts SET enterprise=?, job=? WHERE prm=?",
                     (sNewEnt, (sNewJob or None), sUnq))
     return len(lFix)
 
@@ -1299,14 +1299,14 @@ def cleanArtifacts(cur):
          their maps and de-duplicating the result.
 
     Returns (dropped, fixed, projects, mapsRemoved) for the build log."""
-    # 1. Non-person contacts, by unq (the presenter parser's mistaken names).
+    # 1. Non-person contacts, by prm (the presenter parser's mistaken names).
     c_lDropUnqs = (
         "Seeing||AI", "Achieving||Access", "Oklahoma||City", "Salt|Lake|City",
         "Blindness|Narrative|Curator", "Disability|Answer|Desk", "Print||Disabled",
         "TRE|Legal|Practice", "Impact||Producer", "Commercial||Support",
         "New||York", "Managing||Partner",
     )
-    # 2. Real people to repair: (unq, new_enterprise_or_None, new_job_or_None).
+    # 2. Real people to repair: (prm, new_enterprise_or_None, new_job_or_None).
     c_lFixContacts = (
         ("Jessica||Weber", "Brown, Goldstein & Levy, LLP", None),
         ("Xiaoran||Wang", None, "CEO"),
@@ -1320,28 +1320,28 @@ def cleanArtifacts(cur):
     )
     iMaps = 0
     for sUnq in c_lDropUnqs:
-        cur.execute("DELETE FROM maps WHERE (tbl1='contacts' AND unq1=?) "
-                    "OR (tbl2='contacts' AND unq2=?)", (sUnq, sUnq))
+        cur.execute("DELETE FROM maps WHERE (tbl1='contacts' AND prm1=?) "
+                    "OR (tbl2='contacts' AND prm2=?)", (sUnq, sUnq))
         iMaps += cur.rowcount
-        cur.execute("DELETE FROM contacts WHERE unq=?", (sUnq,))
+        cur.execute("DELETE FROM contacts WHERE prm=?", (sUnq,))
     for (sUnq, sEnt, sJob) in c_lFixContacts:
-        cur.execute("UPDATE contacts SET enterprise=?, job=? WHERE unq=?",
+        cur.execute("UPDATE contacts SET enterprise=?, job=? WHERE prm=?",
                     (sEnt, sJob, sUnq))
     for (sOld, sNew) in c_lProjectMerges:
         if sNew is None:
-            cur.execute("DELETE FROM maps WHERE (tbl1='projects' AND unq1=?) "
-                        "OR (tbl2='projects' AND unq2=?)", (sOld, sOld))
+            cur.execute("DELETE FROM maps WHERE (tbl1='projects' AND prm1=?) "
+                        "OR (tbl2='projects' AND prm2=?)", (sOld, sOld))
             iMaps += cur.rowcount
         else:
-            cur.execute("UPDATE maps SET unq1=? WHERE tbl1='projects' AND unq1=?",
+            cur.execute("UPDATE maps SET prm1=? WHERE tbl1='projects' AND prm1=?",
                         (sNew, sOld))
-            cur.execute("UPDATE maps SET unq2=? WHERE tbl2='projects' AND unq2=?",
+            cur.execute("UPDATE maps SET prm2=? WHERE tbl2='projects' AND prm2=?",
                         (sNew, sOld))
-        cur.execute("DELETE FROM projects WHERE unq=?", (sOld,))
-    # A repoint can create a twin map (same tbl1|unq1|kind|tbl2|unq2, which is
-    # exactly maps.unq); keep the earliest rowid of each.
+        cur.execute("DELETE FROM projects WHERE prm=?", (sOld,))
+    # A repoint can create a twin map (same tbl1|prm1|kind|tbl2|prm2, which is
+    # exactly maps.prm); keep the earliest rowid of each.
     cur.execute("DELETE FROM maps WHERE rowid NOT IN ("
-                "SELECT min(rowid) FROM maps GROUP BY tbl1, unq1, kind, tbl2, unq2)")
+                "SELECT min(rowid) FROM maps GROUP BY tbl1, prm1, kind, tbl2, prm2)")
     iMaps += cur.rowcount
     return (len(c_lDropUnqs), len(c_lFixContacts), len(c_lProjectMerges), iMaps)
 
@@ -1352,9 +1352,9 @@ def enrichOrganizations(cur, lLines):
         dExisting[sNormKey(sName)] = sName
     dAffil = {}        # normKey(enterprise) -> set(person 'First Last')
     dEntDisplay = {}   # normKey -> a display enterprise name
-    lPersonMap = []    # (contact unq, enterprise, normKey)
+    lPersonMap = []    # (contact prm, enterprise, normKey)
     for (sUnq, sFirst, sLast, sEnt) in cur.execute(
-            "SELECT unq, first_name, last_name, enterprise FROM contacts "
+            "SELECT prm, first_name, last_name, enterprise FROM contacts "
             "WHERE coalesce(enterprise,'')<>''").fetchall():
         k = sNormKey(sEnt)
         dEntDisplay.setdefault(k, sEnt)

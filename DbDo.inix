@@ -29,16 +29,37 @@
 ;     first line
 ;     second line
 ;
+; Inix also lets a key hold an ARRAY of values. When there are only a
+; few items and none contains a space or comma, they may be written
+; inline, separated by commas:
+;
+;     SelectFields = last_name, first_name, enterprise
+;
+; Otherwise -- more items, or items that contain spaces or commas --
+; each item goes on its own line under the "key =" line, using the
+; fenced form (default the ` fence; a triple-quote fence is used
+; automatically when an item itself contains a ` ). The most recent
+; item comes first:
+;
+;     FindText = `
+;     smith
+;     jones, robert
+;     annual report 2026
+;     `
+;
+; Either form reads back as the same ordered list, so you can edit a
+; setting in whichever shape is more convenient.
+;
 ; The ConnectStrings section below uses the fenced form, because
 ; connection strings are long and contain '=' characters.
 
 [General]
-; historyCount sets how many entries each history keeps -- the
+; HistoryCount sets how many entries each history keeps -- the
 ; custom-query history (Alt+Shift+Q), the search/find/jump
 ; histories, and the recent-files list. Default 10; range 1 to 100.
-historyCount = 10
+HistoryCount = 10
 
-; uiMode controls which surface(s) DbDo presents at startup.
+; UiMode controls which surface(s) DbDo presents at startup.
 ;
 ;   gui  = GUI window only (the default). The dot-prompt console is
 ;          opt-in: summon it on demand with Control+GraveAccent or
@@ -50,14 +71,14 @@ historyCount = 10
 ;          to the launching terminal.
 ;
 ; Command-line flags -cli, -gui, -both override this setting.
-uiMode = gui
+UiMode = gui
 
 [Console]
-; followActiveWindow: Y (default) = the Dot Prompt's table/recordset
+; FollowActiveWindow: Y (default) = the Dot Prompt's table/recordset
 ; context follows the most recently active window; N = the prompt
 ; stays pinned to the window that opened it until Enter-Console is
 ; invoked again from another window.
-followActiveWindow=Y
+FollowActiveWindow=Y
 
 [Validation]
 ; Type-default "picture" patterns (dBASE III+ PICTURE spirit).
@@ -283,17 +304,17 @@ Elevate Version=F11, Elevate (download and install) the latest DbDo version
 ; You can clear these by deleting the file, or override them with the
 ; -open <path> command-line flag.
 ;
-; lastDatabase = C:\Users\you\Documents\budget.db
-; lastTable    = transactions
+; LastDatabase = C:\Users\you\Documents\budget.db
+; LastTable    = transactions
 
 [Options]
 
-; commandEcho controls whether DbDo announces each command's name
+; CommandEcho controls whether DbDo announces each command's name
 ; through the screen reader (GUI) or prints a [Command-Name] marker
-; (CLI) just before the command runs. EdSharp's 'ExtraSpeech=Y'
-; is the model. Default Y. Set to N if you find the confirmation
+; (CLI) just before the command runs. Default Y. Set to N if you
+; find the confirmation
 ; noisy.
-commandEcho = N
+CommandEcho = N
 
 [ConnectStrings]
 
@@ -366,3 +387,57 @@ Provider=Microsoft.ACE.OLEDB.12.0;Data Source={folder};Extended Properties="text
 tsv=`
 Provider=Microsoft.ACE.OLEDB.12.0;Data Source={folder};Extended Properties="text;HDR=Yes;FMT=TabDelimited";
 `
+
+; =====================================================================
+; PER-DATABASE SETTINGS  (documented here; stored elsewhere)
+; =====================================================================
+;
+; The settings above live in this file, DbDo.inix. A second, separate
+; file holds settings that belong to ONE database and travel with it:
+; <DbName>.inix, kept beside the database file (for example
+; Budget.inix next to Budget.db). It uses the same Inix format and the
+; same UpperCamelCase, two-word key convention. DbDo writes it
+; automatically; you may also edit it by hand to pin a database's
+; starting view. It has two kinds of section.
+;
+; [Database] -- settings for the database as a whole:
+;
+;   InitialTable   The table opened in the first window when the
+;                  database is opened, so there is always a starting
+;                  window. Additional tables open in their own windows
+;                  via Open Table (Control+Shift+O). A single table
+;                  name; if you pin one here it wins over the
+;                  last-used table.
+;
+;   The recent-input lists, each an ARRAY of up to ten items, most
+;   recent first, offered in the matching command's combo box:
+;
+;   FindText       recent Find Record text
+;   JumpText       recent Jump to Record text
+;   ReplaceText    recent Replace Column text
+;   ReplaceRegex   recent Regex Replace patterns
+;   QueryText      recent SQL statements run via Query
+;
+; [Table:<name>] -- the saved view for one table, recalled when that
+; table is next opened:
+;
+;   SelectFields   the columns to display, in order (an array)
+;   OrderFields    the sort order (an array)
+;   WhereFilter    the filter condition (a single expression)
+;
+; Example <DbName>.inix:
+;
+;   [Database]
+;   InitialTable = books
+;   FindText = `
+;   hemingway
+;   annual report 2026
+;   `
+;   QueryText = `
+;   select title, author from books where year > 2000 order by author
+;   `
+;
+;   [Table:books]
+;   SelectFields = title, author, year, rating
+;   OrderFields = author, title
+;   WhereFilter = rating >= 4

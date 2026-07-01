@@ -243,6 +243,7 @@ set "jsonDll=Newtonsoft.Json.dll"
 set "jsonVer=13.0.3"
 set "jsonUrl=https://api.nuget.org/v3-flatcontainer/newtonsoft.json/13.0.3/newtonsoft.json.13.0.3.nupkg"
 if exist "%jsonDll%" goto :have_json_dll
+
 echo Fetching %jsonDll% ...
 powershell -NoProfile -ExecutionPolicy Bypass -Command ^
   "$ErrorActionPreference='Stop';" ^
@@ -271,6 +272,42 @@ if errorlevel 1 (
     echo rename it to .zip, and copy lib\net45\Newtonsoft.Json.dll next to DbDo.exe.
 )
 :have_json_dll
+
+rem ---- fetch NPOI + SharpZipLib + BouncyCastle (native .xlsx open/edit/save) ----
+rem DbDo edits .xlsx via NPOI (Apache-2.0) + SharpZipLib (MIT) + BouncyCastle
+rem (MIT). getDbDoDeps.ps1 downloads these managed DLLs (TLS 1.2, exact pinned
+rem versions) into this folder and is idempotent. It runs AFTER the Newtonsoft
+rem block on purpose: when Newtonsoft.Json.dll already exists, that blocks
+rem guard does goto :have_json_dll, so anything placed before the label would be
+rem skipped. The hard guard below stops the build with a clear message instead
+rem of letting csc emit six CS0006 "Metadata file not found" errors.
+if exist "NPOI.dll" if exist "NPOI.OOXML.dll" if exist "NPOI.OpenXml4Net.dll" if exist "NPOI.OpenXmlFormats.dll" if exist "ICSharpCode.SharpZipLib.dll" if exist "BouncyCastle.Crypto.dll" goto :have_npoi
+echo Fetching NPOI 2.5.6, SharpZipLib 1.3.3, BouncyCastle 1.8.9 ...
+powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0getDbDoDeps.ps1" >> "!log!" 2>&1
+:have_npoi
+set "xlsxMissing="
+for %%D in (NPOI.dll NPOI.OOXML.dll NPOI.OpenXml4Net.dll NPOI.OpenXmlFormats.dll ICSharpCode.SharpZipLib.dll BouncyCastle.Crypto.dll) do if not exist "%%D" set "xlsxMissing=1"
+if defined xlsxMissing (
+    echo.
+    echo ERROR: the NPOI .xlsx engine DLLs are missing and could not be downloaded.
+    echo   getDbDoDeps.ps1 could not fetch them -- see %log% for the reason
+    echo   ^(commonly no internet at build time, a proxy, or TLS/SSL blocking^).
+    echo.
+    echo   To fix by hand, on any PC with internet download these 3 packages,
+    echo   rename each .nupkg to .zip, open it, and copy the listed DLLs into
+    echo   "%CD%":
+    echo     NPOI 2.5.6             lib\net45  -^> NPOI.dll, NPOI.OOXML.dll,
+    echo                                         NPOI.OpenXml4Net.dll, NPOI.OpenXmlFormats.dll
+    echo       https://www.nuget.org/api/v2/package/NPOI/2.5.6
+    echo     SharpZipLib 1.3.3      lib\net45  -^> ICSharpCode.SharpZipLib.dll
+    echo       https://www.nuget.org/api/v2/package/SharpZipLib/1.3.3
+    echo     Portable.BouncyCastle  lib\net40  -^> BouncyCastle.Crypto.dll
+    echo       https://www.nuget.org/api/v2/package/Portable.BouncyCastle/1.8.9
+    echo   Then re-run buildDbDo.cmd.
+    echo ERROR: NPOI .xlsx engine DLLs missing; aborted before compile. >> "!log!"
+    exit /b 1
+)
+
 
 rem ---- fetch SQLean: the shell (sqlean.exe) and the extension
 rem bundle (sqlean.dll) ----
@@ -360,14 +397,42 @@ rem (the misleading "Unsupported 16-Bit Application" dialog appears
 rem when the loader sees an empty or truncated MZ image).
 if exist DbDo.exe del /f /q DbDo.exe
 if exist DbDo.ico (
-    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32icon:DbDo.ico /win32manifest:DbDo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"Microsoft.JScript.dll" /out:DbDo.exe DbDo.cs >> "!log!" 2>&1
+    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32icon:DbDo.ico /win32manifest:DbDo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"Microsoft.JScript.dll" /reference:"NPOI.dll" /reference:"NPOI.OOXML.dll" /reference:"NPOI.OpenXml4Net.dll" /reference:"NPOI.OpenXmlFormats.dll" /reference:"ICSharpCode.SharpZipLib.dll" /reference:"BouncyCastle.Crypto.dll" /out:DbDo.exe DbDo.cs >> "!log!" 2>&1
 ) else (
     echo NOTE: DbDo.ico not found; building without embedded icon. >> "!log!"
-    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32manifest:DbDo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"Microsoft.JScript.dll" /out:DbDo.exe DbDo.cs >> "!log!" 2>&1
+    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32manifest:DbDo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"Microsoft.JScript.dll" /reference:"NPOI.dll" /reference:"NPOI.OOXML.dll" /reference:"NPOI.OpenXml4Net.dll" /reference:"NPOI.OpenXmlFormats.dll" /reference:"ICSharpCode.SharpZipLib.dll" /reference:"BouncyCastle.Crypto.dll" /out:DbDo.exe DbDo.cs >> "!log!" 2>&1
 )
 if errorlevel 1 goto :build_failed
 echo DbDo.exe built.
 dir DbDo.exe | findstr DbDo.exe
+
+rem ---- build the 2db importer in BOTH bitnesses ----
+rem 2db.cs is a standalone console converter (a source data file -> a
+rem standard DbDo .db shell). It is built x86 AND x64 so DbDo can bridge
+rem the 32/64-bit Office ACE boundary out-of-process: DbDo runs whichever
+rem build matches the installed Office (and falls back to the other on a
+rem provider-unavailable exit code). /target:exe (console) so the importer
+rem can prompt and report on stdout/stderr. Microsoft.CSharp (for the
+rem dynamic COM calls) auto-resolves from csc.rsp, as it does for DbDo.cs.
+if not exist 2db.cs goto :skip_2db
+echo. >> "!log!"
+echo Compiling 2db.cs -^> 2db32.exe and 2db64.exe ... >> "!log!"
+echo Compiling 2db.cs -^> 2db32.exe and 2db64.exe ...
+if exist 2db32.exe del /f /q 2db32.exe
+if exist 2db64.exe del /f /q 2db64.exe
+"!csc!" /target:exe /platform:x86 /optimize+ /nologo /out:2db32.exe 2db.cs >> "!log!" 2>&1
+if errorlevel 1 goto :build_failed
+"!csc!" /target:exe /platform:x64 /optimize+ /nologo /out:2db64.exe 2db.cs >> "!log!" 2>&1
+if errorlevel 1 goto :build_failed
+echo 2db32.exe and 2db64.exe built.
+dir 2db32.exe | findstr 2db32.exe
+dir 2db64.exe | findstr 2db64.exe
+goto :have_2db
+:skip_2db
+echo NOTE: 2db.cs not found; skipping the 2db importer build. >> "!log!"
+echo NOTE: 2db.cs not found; skipping the 2db importer build.
+:have_2db
+
 
 rem ---- generate HTML documentation ----
 echo. >> "!log!"
@@ -389,6 +454,7 @@ echo   nvdaControllerClient.dll -- NVDA controller-client DLL
 echo   Newtonsoft.Json.dll -- JSON (Json.NET) support
 echo   sqlean.exe -- SQLite/SQLean shell for the dot-prompt pass-through lane
 echo   sqlean.dll -- SQLean extension bundle (REGEXP, median, percentiles, ...)
+echo   2db32.exe / 2db64.exe -- standalone importer (32- and 64-bit) for the Import command
 popd
 endlocal
 exit /b 0

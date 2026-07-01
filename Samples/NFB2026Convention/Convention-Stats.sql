@@ -14,9 +14,9 @@ SELECT
   COUNT(*)                           AS presentations
 FROM maps m
 JOIN contacts c
-  ON c.first_name || '|' || IFNULL(c.middle_name, '') || '|' || c.last_name = m.unq1
+  ON c.first_name || '|' || IFNULL(c.middle_name, '') || '|' || c.last_name = m.prm1
 WHERE m.tbl1 = 'contacts' AND m.kind = 'presents' AND m.tbl2 = 'events'
-GROUP BY m.unq1
+GROUP BY m.prm1
 ORDER BY presentations DESC, speaker
 LIMIT 10;
 
@@ -27,9 +27,9 @@ SELECT
   COUNT(*) AS events
 FROM maps m
 JOIN locations l
-  ON l.name || '|' || IFNULL(l.hotel, '') = m.unq2
+  ON l.name || '|' || IFNULL(l.hotel, '') = m.prm2
 WHERE m.tbl1 = 'events' AND m.kind = 'located_at' AND m.tbl2 = 'locations'
-GROUP BY m.unq2
+GROUP BY m.prm2
 ORDER BY events DESC, room
 LIMIT 10;
 

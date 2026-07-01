@@ -22,8 +22,8 @@ JOIN maps m
   ON  m.tbl1 = 'contacts'
   AND m.kind = 'presents'
   AND m.tbl2 = 'events'
-  AND m.unq1 = c.first_name || '|' || IFNULL(c.middle_name, '') || '|' || c.last_name
+  AND m.prm1 = c.first_name || '|' || IFNULL(c.middle_name, '') || '|' || c.last_name
 JOIN events e
-  ON  e.event_date || '|' || e.start_time || '|' || e.title = m.unq2
+  ON  e.event_date || '|' || e.start_time || '|' || e.title = m.prm2
 WHERE c.last_name = 'Mallett'
 ORDER BY e.event_date, e.start_time;

@@ -28,7 +28,7 @@
 ; DbDo.cs's BuildInfo.VersionString, so this literal is only the
 ; fallback for compiling the .iss without a prior build. Do not
 ; hand-edit it as the source of truth -- edit BuildInfo.VersionString.
-#define AppVersion    "1.0.121"
+#define AppVersion    "1.0.122"
 #define AppPublisher  "Jamal Mazrui"
 #define AppUrl        "https://github.com/JamalMazrui/DbDo"
 #define AppExeName    "DbDo.exe"
@@ -175,6 +175,23 @@ Source: "DbDo.exe";    DestDir: "{app}"; Flags: ignoreversion
 ; DbDo.exe; ignoreversion keeps it refreshed in sync with the executable.
 Source: "DbDo.exe.config"; DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDo.dll"; DestDir: "{app}"; Flags: ignoreversion
+; NPOI (Apache-2.0) + SharpZipLib (MIT) + BouncyCastle (MIT-style) -- the
+; managed .xlsx engine that lets DbDo open, edit, and save Excel workbooks
+; with no Office installed and no bitness dependency. All three licenses
+; permit redistribution in binary form, so they are bundled directly here
+; (THIRD-PARTY-NOTICES.txt below carries the required license texts). The
+; exact versions match what DbDo references, so they load without binding
+; redirects: NPOI 2.5.6, SharpZipLib 1.3.3, Portable.BouncyCastle 1.8.9.
+; buildDbDo.cmd fetches them next to DbDo.exe; it must run before ISCC so
+; these files exist to bundle. (System.Drawing and System.Configuration are
+; .NET Framework 4.8 assemblies, so they are not bundled.)
+Source: "NPOI.dll";                  DestDir: "{app}"; Flags: ignoreversion
+Source: "NPOI.OOXML.dll";            DestDir: "{app}"; Flags: ignoreversion
+Source: "NPOI.OpenXml4Net.dll";      DestDir: "{app}"; Flags: ignoreversion
+Source: "NPOI.OpenXmlFormats.dll";   DestDir: "{app}"; Flags: ignoreversion
+Source: "ICSharpCode.SharpZipLib.dll"; DestDir: "{app}"; Flags: ignoreversion
+Source: "BouncyCastle.Crypto.dll";   DestDir: "{app}"; Flags: ignoreversion
+Source: "THIRD-PARTY-NOTICES.txt";   DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDo.ico";    DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDo.manifest"; DestDir: "{app}"; Flags: ignoreversion
 ; Source and build inputs, shipped so DbDo can be recompiled in place
@@ -184,6 +201,7 @@ Source: "DbDo.manifest"; DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDo.cs";        DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDo.js";        DestDir: "{app}"; Flags: ignoreversion
 Source: "buildDbDo.cmd";  DestDir: "{app}"; Flags: ignoreversion
+Source: "getDbDoDeps.ps1"; DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDo_setup.iss"; DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDo.md";     DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDo.htm";    DestDir: "{app}"; Flags: ignoreversion

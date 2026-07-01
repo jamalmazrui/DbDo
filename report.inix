@@ -1,10 +1,12 @@
-; DbDo report templates.  Produce Report -> pick this file -> pick a section.
-; Output is Markdown over the current filtered set, in the current sort order.
+; DbDo report definitions.  Run Report (Alt+Shift+R) -> pick a report -> save.
+; Output is Markdown over the whole physical table (not the current grid view),
+; so a report is reproducible regardless of how the grid is filtered or sorted.
 ;   $field / ${field}        the current record's value
 ;   {{ jscript-expression }} a computed value ($field works inside it too)
 ;   {# comment #}            dropped from the output
 ; A line whose only content is a field/expression is dropped when that comes
 ; out blank, so absent fields leave no gap.  header/detail/separator/footer.
+; Optional @filter (SQL WHERE) and @sort (ORDER BY) scope and order a report.
 
 [contact_addresses]
 @table = contact

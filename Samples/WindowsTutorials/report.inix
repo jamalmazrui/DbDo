@@ -1,5 +1,5 @@
 ; Sample report definitions for the Tutorials database (parsed from the
-; Windows Screenreader Primer). Run with File > Produce Report.
+; Windows Screenreader Primer). Run with Run Report (Alt+Shift+R): reads the whole physical table, not the grid view.
 
 ; The app catalog, grouped by category, with each app's maker shown from
 ; its notes is not stored here -- this lists the apps the book teaches.

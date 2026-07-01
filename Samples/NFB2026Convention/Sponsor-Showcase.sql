@@ -6,9 +6,9 @@
 -- and run this with Invoke Script; each query's results appear in turn.
 --
 -- How it works: organizations live in the contacts table as rows with an
--- enterprise but no last name, so an organization's identity -- its unq --
+-- enterprise but no last name, so an organization's identity -- its prm --
 -- is simply the enterprise name, which is exactly the value the maps rows
--- point at. That makes every join the same plain shape, c.unq = m.unq1;
+-- point at. That makes every join the same plain shape, c.prm = m.prm1;
 -- only the kind on the WHERE line and the far table change. Swap 'sponsors'
 -- for 'presents' and you have the speaker query; the model does not care.
 
@@ -18,8 +18,8 @@ SELECT
   e.event_date AS date,
   e.title      AS event
 FROM maps m
-JOIN contacts c ON c.unq = m.unq1
-JOIN events   e ON e.unq = m.unq2
+JOIN contacts c ON c.prm = m.prm1
+JOIN events   e ON e.prm = m.prm2
 WHERE m.tbl1 = 'contacts' AND m.kind = 'sponsors' AND m.tbl2 = 'events'
 ORDER BY c.enterprise, e.event_date, e.start_time;
 
@@ -30,8 +30,8 @@ SELECT
   p.name       AS offering,
   p.kind       AS kind
 FROM maps m
-JOIN contacts c ON c.unq = m.unq1
-JOIN projects p ON p.unq = m.unq2
+JOIN contacts c ON c.prm = m.prm1
+JOIN projects p ON p.prm = m.prm2
 WHERE m.tbl1 = 'contacts' AND m.kind = 'offers' AND m.tbl2 = 'projects'
 ORDER BY c.enterprise, p.name;
 

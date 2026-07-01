@@ -1,6 +1,6 @@
 ; Sample report definitions for the iOSTutorials database (parsed from
 ; "Personal Power: Getting the Most From iOS as a Totally Blind User" by
-; Michael Feir). Run with File > Produce Report.
+; Michael Feir). Run with Run Report (Alt+Shift+R): reads the whole physical table, not the grid view.
 
 ; The app catalog, grouped by category -- the iOS apps the guide teaches.
 [app_catalog]
