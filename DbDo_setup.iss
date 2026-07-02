@@ -28,7 +28,7 @@
 ; DbDo.cs's BuildInfo.VersionString, so this literal is only the
 ; fallback for compiling the .iss without a prior build. Do not
 ; hand-edit it as the source of truth -- edit BuildInfo.VersionString.
-#define AppVersion    "1.0.125"
+#define AppVersion    "1.0.126"
 #define AppPublisher  "Jamal Mazrui"
 #define AppUrl        "https://github.com/JamalMazrui/DbDo"
 #define AppExeName    "DbDo.exe"

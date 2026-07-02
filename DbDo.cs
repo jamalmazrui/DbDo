@@ -77,7 +77,7 @@ namespace DbDo
     // =====================================================================
     public static class BuildInfo
     {
-        public const string VersionString = "1.0.125";
+        public const string VersionString = "1.0.126";
     }
 
     // =====================================================================
@@ -31429,10 +31429,15 @@ namespace DbDo
         {
             LiveRegion.bExtraSpeechEnabled = !LiveRegion.bExtraSpeechEnabled;
             miHelpExtraSpeech.Checked = LiveRegion.bExtraSpeechEnabled;
-            string sUserIni = Path.Combine(Path.GetDirectoryName(
-                System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "", "DbDo.inix");
-            try { writeIniValue(sUserIni, "General", "ExtraSpeech", LiveRegion.bExtraSpeechEnabled ? "Y" : "N"); }
-            catch { /* best-effort persist; the runtime state is the source of truth */ }
+            // Persist to the per-user file startup reads (configIniPath),
+            // not the exe-dir DbDo.inix, so the choice survives a restart.
+            string sUserIni = configIniPath();
+            if (!string.IsNullOrEmpty(sUserIni))
+            {
+                ensureConfigIniExists(sUserIni);
+                try { writeIniValue(sUserIni, "General", "ExtraSpeech", LiveRegion.bExtraSpeechEnabled ? "Y" : "N"); }
+                catch { /* best-effort persist; the runtime state is the source of truth */ }
+            }
             // Force-speak the new state so the user hears confirmation
             // even when they just turned speech off.
             sayToggleState("Extra Speech Toggle", LiveRegion.bExtraSpeechEnabled);
@@ -31450,11 +31455,19 @@ namespace DbDo
         // echoed back at them.
         private void helpCommandEchoClicked(object sender, EventArgs evArgs)
         {
-            string sUserIni = Path.Combine(Path.GetDirectoryName(
-                System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "", "DbDo.inix");
+            // Persist to the SAME per-user file isCommandEchoOn reads
+            // (%LOCALAPPDATA%\DbDo\DbDo.inix via configIniPath / IniSession).
+            // This used to write the exe-dir DbDo.inix, which the reader
+            // never consults -- so isCommandEchoOn never saw the new value
+            // and the toggle re-announced the same state on every press.
+            string sUserIni = configIniPath();
             bool bNew = !isCommandEchoOn();
-            try { writeIniValue(sUserIni, "Options", "CommandEcho", bNew ? "Y" : "N"); }
-            catch { /* best-effort persist */ }
+            if (!string.IsNullOrEmpty(sUserIni))
+            {
+                ensureConfigIniExists(sUserIni);
+                try { writeIniValue(sUserIni, "Options", "CommandEcho", bNew ? "Y" : "N"); }
+                catch { /* best-effort persist */ }
+            }
             invalidateCommandEchoCache();
             miHelpCommandEcho.Checked = bNew;
             sayToggleState("Command Echo Toggle", bNew);
