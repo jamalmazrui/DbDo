@@ -1947,9 +1947,9 @@ namespace DbDo
         // fillFieldArrays (line 318): the column names suppressed
         // from the default data-list view are exactly:
         //
-        //   <table>_id, added, edited, marked, look, unq
+        //   <table>_id, added, edited, marked, look, prm
         //
-        // 'look' and 'unq' are stored-generated (PRAGMA table_xinfo
+        // 'look' and 'prm' are stored-generated (PRAGMA table_xinfo
         // hidden=3); the calculated-column auto-hide rule would
         // catch them even without the by-name rule, but the by-name
         // rule is faster and works on providers that don't expose
@@ -1976,7 +1976,7 @@ namespace DbDo
         // hidden columns.
         //
         // 'tags', 'notes', and 'url' joined the hidden set in v1.0.68
-        // for the same reason 'look' and 'unq' are hidden: they're
+        // for the same reason 'look' and 'prm' are hidden: they're
         // "extended" data per row that bloats the listview if shown
         // unconditionally. The user can override via the Select
         // Columns command (Alt+S) and the override persists per
@@ -1987,7 +1987,7 @@ namespace DbDo
             "edited",
             "marked",
             "look",
-            "unq",
+            "prm",
             "prm",
             "url",
             "tags",
@@ -2018,7 +2018,7 @@ namespace DbDo
             "marked",
             "method",
             "observed",
-            "unq",
+            "prm",
             "prm"
         };
 
@@ -2033,11 +2033,10 @@ namespace DbDo
         public const string MarkedColumn   = "marked";
         public const string NotesColumn    = "notes";
         public const string TagsColumn     = "tags";
-        public const string UnqColumn      = "unq";
-        // PrimeColumn: the abbreviated name for the unique/primary-key
-        // expression column (the convention database uses 'prm'; other
-        // databases may still use the legacy 'unq'). Code that resolves
-        // "the prime field" should prefer prm and fall back to unq.
+        // PrimeColumn: the abbreviated name for the primary-key
+        // expression column. Every database uses 'prm' -- a STORED
+        // generated concatenation of a record's prime fields. There is
+        // no legacy alternative; the older 'unq' name has been retired.
         public const string PrimeColumn    = "prm";
         public const string UrlColumn      = "url";
 
@@ -2096,7 +2095,7 @@ namespace DbDo
 
         // isAdminColumn: true for the program-maintained fields that
         // the record dialogs never present -- the primary key, added,
-        // edited, look, unq, marked (plus the legacy observed and
+        // edited, look, prm, marked (plus the legacy observed and
         // method). Everything else, including notes/tags/url, is an
         // editable field.
         public static bool isAdminColumn(string sColumn, string sTable)
@@ -2121,7 +2120,7 @@ namespace DbDo
         // isDistinctColumn: the "distinct" summary columns that
         // distinctly identify a row -- the human-readable 'look'
         // summary and the 'prm' unique-key expression (plus the legacy
-        // 'unq'). These are the default listview ("select") set: opening
+        // 'prm'). These are the default listview ("select") set: opening
         // a table shows look + prm unless the user has saved a different
         // SelectFields list. They are computed columns, so they are not
         // editable and not admin; they form their own category between
@@ -2130,7 +2129,7 @@ namespace DbDo
         {
             if (string.IsNullOrEmpty(sColumn)) return false;
             string sLower = sColumn.ToLowerInvariant();
-            return sLower == LookColumn || sLower == PrimeColumn || sLower == UnqColumn;
+            return sLower == LookColumn || sLower == PrimeColumn;
         }
 
 
@@ -4406,7 +4405,7 @@ namespace DbDo
             }
 
             // Fallback: read field metadata as the QUERY ENGINE sees it,
-            // which includes STORED GENERATED columns (look, prm/unq) that
+            // which includes STORED GENERATED columns (look, prm/prm) that
             // ADOX omits.
             List<string> lViaSelect = getColumnsViaSelect(sTable);
             if (lViaSelect.Count > 0) lResult.AddRange(lViaSelect);
@@ -4415,7 +4414,7 @@ namespace DbDo
 
         // getColumnsViaSelect: column names as the query engine reports
         // them for SELECT * -- crucially INCLUDING the STORED GENERATED
-        // columns (look and the prime-key column prm/unq). The ODBC
+        // columns (look and the prime-key column prm/prm). The ODBC
         // schema catalog used by ADOX does NOT list generated columns, so
         // this SELECT-based reader is the reliable source whenever the
         // generated key column must be detected (see primeColumnFor).
@@ -4443,35 +4442,29 @@ namespace DbDo
 
         // primeColumnFor: the prime/unique-key column name of a named
         // table -- "prm" on databases this DbDo builds, and the legacy
-        // "unq" on databases that predate the rename. Resolved by reading
+        // "prm" on databases that predate the rename. Resolved by reading
         // the table's actual columns (SELECT * exposes the STORED
         // generated key column), so it is correct per table rather than
         // assuming a database-wide convention. Defaults to "prm" when
         // neither column is detectable, which is the right choice for
         // every database this DbDo creates. Used wherever SQL must name a
         // table's key column -- e.g. the related-table drill's
-        // "<prime> IN (SELECT unqN FROM maps ...)" filter.
+        // "<prime> IN (SELECT prmN FROM maps ...)" filter.
         public string primeColumnFor(string sTable)
         {
             try
             {
                 // Read the columns as the QUERY ENGINE exposes them:
                 // SELECT * includes the STORED GENERATED key column
-                // (prm/unq), whereas the ODBC schema catalog (ADOX,
-                // preferred by getColumnsOfTable) omits generated columns
-                // and would leave the key undetected -- which previously
-                // forced the "prm" default even on tables whose key is
-                // still "unq", producing "no such column: prm". Fall back
-                // to getColumnsOfTable only if the SELECT reader returns
-                // nothing.
+                // (prm), which the ODBC schema catalog (ADOX, preferred
+                // by getColumnsOfTable) omits -- leaving the key
+                // undetected. Fall back to getColumnsOfTable only if the
+                // SELECT reader returns nothing.
                 List<string> lCols = getColumnsViaSelect(sTable);
                 if (lCols.Count == 0) lCols = getColumnsOfTable(sTable);
                 foreach (string sCol in lCols)
                     if (string.Equals(sCol, Metadata.PrimeColumn, StringComparison.OrdinalIgnoreCase))
                         return Metadata.PrimeColumn;
-                foreach (string sCol in lCols)
-                    if (string.Equals(sCol, Metadata.UnqColumn, StringComparison.OrdinalIgnoreCase))
-                        return Metadata.UnqColumn;
             }
             catch { }
             return Metadata.PrimeColumn;
@@ -5318,27 +5311,27 @@ namespace DbDo
         }
 
         // lMapsRelations: every maps row touching the given record,
-        // identified by its (table, unq) pair, in BOTH directions.
-        // Each result row is: kind, other table, other unq, direction
-        // ("subject" when the given record is tbl1/unq1, "object"
-        // when it is tbl2/unq2), and the map row's notes.
-        public List<string[]> lMapsRelations(string sTable, string sUnqValue, int iMaxRows)
+        // identified by its (table, prm) pair, in BOTH directions.
+        // Each result row is: kind, other table, other prm, direction
+        // ("subject" when the given record is tbl1/prm1, "object"
+        // when it is tbl2/prm2), and the map row's notes.
+        public List<string[]> lMapsRelations(string sTable, string sPrmValue, int iMaxRows)
         {
             List<string[]> lAll = new List<string[]>();
-            if (string.IsNullOrEmpty(sTable) || string.IsNullOrEmpty(sUnqValue)) return lAll;
+            if (string.IsNullOrEmpty(sTable) || string.IsNullOrEmpty(sPrmValue)) return lAll;
             if (!hasMapsTable()) return lAll;
             string sT = sQuoteSqlLiteral(sTable);
-            string sU = sQuoteSqlLiteral(sUnqValue);
+            string sU = sQuoteSqlLiteral(sPrmValue);
             int iFound;
             // The record as subject: related records are on side 2.
             foreach (string[] aRow in queryRowsSql(
-                "SELECT kind, tbl2, unq2, 'subject', notes FROM maps WHERE tbl1 = "
-                + sT + " AND unq1 = " + sU, iMaxRows, out iFound))
+                "SELECT kind, tbl2, prm2, 'subject', notes FROM maps WHERE tbl1 = "
+                + sT + " AND prm1 = " + sU, iMaxRows, out iFound))
                 lAll.Add(aRow);
             // The record as object: related records are on side 1.
             foreach (string[] aRow in queryRowsSql(
-                "SELECT kind, tbl1, unq1, 'object', notes FROM maps WHERE tbl2 = "
-                + sT + " AND unq2 = " + sU, iMaxRows, out iFound))
+                "SELECT kind, tbl1, prm1, 'object', notes FROM maps WHERE tbl2 = "
+                + sT + " AND prm2 = " + sU, iMaxRows, out iFound))
                 lAll.Add(aRow);
             return lAll;
         }
@@ -5349,24 +5342,24 @@ namespace DbDo
         // case-split on which side a record sits.
         private const string sMapsEdgesCte =
             "WITH edges(ft, fu, tt, tu) AS ("
-            + "SELECT tbl1, unq1, tbl2, unq2 FROM maps "
-            + "UNION ALL SELECT tbl2, unq2, tbl1, unq1 FROM maps) ";
+            + "SELECT tbl1, prm1, tbl2, prm2 FROM maps "
+            + "UNION ALL SELECT tbl2, prm2, tbl1, prm1 FROM maps) ";
 
         // lMapsTwoHop: records related to the given record THROUGH an
         // intermediate record -- contact -> events -> locations being
         // the canonical case ("where does this person's work happen").
-        // Each result row is: via table, target table, target unq.
+        // Each result row is: via table, target table, target prm.
         // The starting record itself is excluded from the targets.
         // Requires a provider that accepts CTEs (SQLite does); on
         // failure the query helper returns an empty list, so callers
         // degrade gracefully to direct relations only.
-        public List<string[]> lMapsTwoHop(string sTable, string sUnqValue, int iMaxRows)
+        public List<string[]> lMapsTwoHop(string sTable, string sPrmValue, int iMaxRows)
         {
             List<string[]> lAll = new List<string[]>();
-            if (string.IsNullOrEmpty(sTable) || string.IsNullOrEmpty(sUnqValue)) return lAll;
+            if (string.IsNullOrEmpty(sTable) || string.IsNullOrEmpty(sPrmValue)) return lAll;
             if (!hasMapsTable()) return lAll;
             string sT = sQuoteSqlLiteral(sTable);
-            string sU = sQuoteSqlLiteral(sUnqValue);
+            string sU = sQuoteSqlLiteral(sPrmValue);
             int iFound;
             string sSql = sMapsEdgesCte
                 + "SELECT DISTINCT e1.tt, e2.tt, e2.tu FROM edges e1 "
@@ -5378,10 +5371,10 @@ namespace DbDo
             return lAll;
         }
 
-        // lMapsTwoHopTargets: the distinct target unq values for one
+        // lMapsTwoHopTargets: the distinct target prm values for one
         // chosen (via table, target table) pair -- the filter set for
         // a two-hop drill.
-        public List<string> lMapsTwoHopTargets(string sTable, string sUnqValue,
+        public List<string> lMapsTwoHopTargets(string sTable, string sPrmValue,
             string sViaTable, string sTargetTable, int iMaxRows, out int iCountFound)
         {
             List<string> lTargets = new List<string>();
@@ -5389,11 +5382,11 @@ namespace DbDo
                 + "SELECT DISTINCT e2.tu FROM edges e1 "
                 + "JOIN edges e2 ON e2.ft = e1.tt AND e2.fu = e1.tu "
                 + "WHERE e1.ft = " + sQuoteSqlLiteral(sTable)
-                + " AND e1.fu = " + sQuoteSqlLiteral(sUnqValue)
+                + " AND e1.fu = " + sQuoteSqlLiteral(sPrmValue)
                 + " AND e1.tt = " + sQuoteSqlLiteral(sViaTable)
                 + " AND e2.tt = " + sQuoteSqlLiteral(sTargetTable)
                 + " AND NOT (e2.tt = " + sQuoteSqlLiteral(sTable)
-                + " AND e2.tu = " + sQuoteSqlLiteral(sUnqValue) + ")";
+                + " AND e2.tu = " + sQuoteSqlLiteral(sPrmValue) + ")";
             foreach (string[] aRow in queryRowsSql(sSql, iMaxRows, out iCountFound))
                 lTargets.Add(aRow[0]);
             return lTargets;
@@ -5862,7 +5855,7 @@ namespace DbDo
         //   (B) Otherwise apply the default rules:
         //       1. Standard-visible columns (none currently) -- always shown.
         //       2. Standard-hidden columns (added, edited, marked,
-        //          look, unq) -- always hidden.
+        //          look, prm) -- always hidden.
         //       3. Any column ending in '_id' or named 'id' --
         //          always hidden (primary and foreign keys).
         //       4. Calculated columns from the schema (PRAGMA
@@ -5910,7 +5903,7 @@ namespace DbDo
                 if (Metadata.isDistinctColumn(sName)) { bHasSummary = true; break; }
             if (bHasSummary)
             {
-                List<string> lComp = getUnqComponentFields();
+                List<string> lComp = getPrmComponentFields();
                 if (lComp.Count > 0) return lComp;
             }
 
@@ -6222,20 +6215,20 @@ namespace DbDo
             try { oRecordset.CancelUpdate(); } catch { }
         }
 
-        // isUnqViolation: true when an exception is a UNIQUE-constraint
-        // failure on this table's generated unq column -- the identity
+        // isPrmViolation: true when an exception is a UNIQUE-constraint
+        // failure on this table's generated prm column -- the identity
         // field DbDo builds from the record's content fields -- rather
         // than a primary-key clash or some other unique index. The add
         // paths use this to recognise an ordinary "this would duplicate an
         // existing record" condition and offer the user a chance to change
         // a content field, instead of surfacing a raw ADO error.
-        public bool isUnqViolation(Exception ex)
+        public bool isPrmViolation(Exception ex)
         {
             string s = "";
             for (Exception e = ex; e != null; e = e.InnerException)
                 s += " " + (e.Message ?? "");
             s = s.ToLowerInvariant();
-            return s.Contains("unique constraint") && s.Contains(".unq");
+            return s.Contains("unique constraint") && s.Contains(".prm");
         }
 
         // getTableCreateSql: the CREATE TABLE text for a table from
@@ -6268,18 +6261,18 @@ namespace DbDo
             }
         }
 
-        // getUnqComponentFields: the content fields the current table's
-        // generated unq column actually depends on, in order of first
-        // appearance. Read by pulling the unq expression out of the table's
+        // getPrmComponentFields: the content fields the current table's
+        // generated prm column actually depends on, in order of first
+        // appearance. Read by pulling the prm expression out of the table's
         // CREATE SQL and keeping the identifiers in it that are real columns
         // of the table (which discards SQL functions and keywords). This is
-        // accurate whether unq is the simple positional concatenation Add
+        // accurate whether prm is the simple positional concatenation Add
         // Table builds or a hand-tuned expression like the sample databases'
         // person-or-organization form. These are exactly the fields whose
         // combination must be unique, so they are what a user changes to
         // resolve a duplicate. Falls back to the full editable-field list if
         // the expression cannot be read or parsed.
-        public List<string> getUnqComponentFields()
+        public List<string> getPrmComponentFields()
         {
             List<string> lEditable = getEditableFieldNames();
             try
@@ -6288,7 +6281,7 @@ namespace DbDo
                 if (string.IsNullOrEmpty(sCreate)) return lEditable;
                 System.Text.RegularExpressions.Match m =
                     System.Text.RegularExpressions.Regex.Match(sCreate,
-                        "\\b(?:prm|unq)\\b\\s+\\w+\\s+GENERATED\\s+ALWAYS\\s+AS\\s*\\(",
+                        "\\bprm\\b\\s+\\w+\\s+GENERATED\\s+ALWAYS\\s+AS\\s*\\(",
                         System.Text.RegularExpressions.RegexOptions.IgnoreCase);
                 if (!m.Success) return lEditable;
                 int iDepth = 1, i = m.Index + m.Length, iStart = i;
@@ -6350,7 +6343,7 @@ namespace DbDo
         // query. Unlike Requery it preserves the cursor position and
         // does not pick up rows added or removed outside this
         // recordset -- it re-reads existing rows (and recomputes
-        // STORED generated columns like look and unq), the
+        // STORED generated columns like look and prm), the
         // lightweight "refresh what I'm looking at" F5 wants.
         public void resync()
         {
@@ -6471,7 +6464,7 @@ namespace DbDo
 
         // sPrmExprFromFields: the unique-key expression -- the positional
         // pipe-join of the component fields, each coalesced to '' so NULLs
-        // do not poison the key. Mirrors lStandardTableDdl's unq shape.
+        // do not poison the key. Mirrors lStandardTableDdl's prm shape.
         internal static string sPrmExprFromFields(List<string> lFields)
         {
             if (lFields == null || lFields.Count == 0) return "''";
@@ -13645,7 +13638,7 @@ namespace DbDo
         {
             string sLow = (sRaw ?? "").ToLowerInvariant();
             if (sLow.Contains("unique constraint"))
-                return "A value that must be unique (such as unq or a key) already exists in another record. Change the value and try again.";
+                return "A value that must be unique (such as prm or a key) already exists in another record. Change the value and try again.";
             if (sLow.Contains("foreign key constraint"))
                 return "Another table still references this record, so the database refused the change. Remove or repoint the related records first.";
             if (sLow.Contains("not null constraint"))
@@ -15886,7 +15879,7 @@ namespace DbDo
             // New Copy: duplicate the current row. Pre-fills the New
             // Record dialog with all visible field values from the
             // current row; the user reviews, edits as needed, and
-            // OK inserts as a new row. Primary key and 'unq' are
+            // OK inserts as a new row. Primary key and 'prm' are
             // cleared automatically since both must be unique.
             miRecNewCopy     = addItem(miEdit, "Ne&w Copy...", "Copy Record as New",    Keys.Control | Keys.Shift | Keys.N, recNewCopyClicked);
             // Mail Record: build a mailto: URI from the current row.
@@ -16560,7 +16553,7 @@ namespace DbDo
             add("Say URL",            "Speak the current record's url field",
                 "Shift+U. Reports '(empty)' when the field is blank.");
             add("Say Prime",          "Speak the current record's prm (unique-key) field",
-                "Shift+P. The prm field is the unique/primary-key expression (formerly named 'unq'). Falls back to a legacy 'unq' column. Reports 'blank' when empty.");
+                "Shift+P. The prm field is the unique/primary-key expression (formerly named 'prm'). Falls back to a legacy 'prm' column. Reports 'blank' when empty.");
             add("Say Find",           "Speak the current Find search string",
                 "Shift+F. Reports the most recent Find substring (or regex). Says 'No find string' when nothing has been searched yet. Companion to Say Where Filter (Shift+W).");
             add("Say Yield",          "Speak the current row count (after filter)", "");
@@ -16617,11 +16610,11 @@ namespace DbDo
                 "Type-aware: numeric -> histogram or box plot, date -> timeline or seasonal, boolean -> pie, text -> Pareto bar.");
             add("Copy Cell",          "Copy the value of the cell under the virtual cursor to the clipboard", "");
             add("Append Cell",        "Append the value of the cell under the virtual cursor to the clipboard", "");
-            add("Copy Visible Cells",  "Copy the current record's visible cells to the clipboard as tab-separated values. Hidden columns (added, edited, look, unq, url, tags, notes, marked) are skipped; use Copy Record for the full set.", "");
+            add("Copy Visible Cells",  "Copy the current record's visible cells to the clipboard as tab-separated values. Hidden columns (added, edited, look, prm, url, tags, notes, marked) are skipped; use Copy Record for the full set.", "");
             add("Copy Column",        "Copy every value in the column under the virtual cursor to the clipboard, one value per line with the column name as a header line",
                 "Walks all rows and restores the cursor when done. Paste into a spreadsheet to drop the column into a single column of cells. Tabs and line breaks inside a value are flattened so the column stays aligned.");
             add("Copy Grid",          "Copy the whole visible grid to the clipboard as tab-separated values with a header row",
-                "Header row of visible column names, then every row, tab-separated. Hidden columns (added, edited, look, unq, url, tags, notes, marked) are skipped, matching Copy Visible Cells. Paste straight into a spreadsheet; for a file on disk use Export Data instead.");
+                "Header row of visible column names, then every row, tab-separated. Hidden columns (added, edited, look, prm, url, tags, notes, marked) are skipped, matching Copy Visible Cells. Paste straight into a spreadsheet; for a file on disk use Export Data instead.");
             add("Edit Settings", "Open the Settings dialog",
                 "Exposes UI Mode, Command Echo, and a Field Validation... sub-dialog for per-field regex patterns on the current table. 'Open file...' button edits DbDo.inix directly for advanced settings.");
             add("Switch-Focus",       "Switch focus between the GUI window and the console", "");
@@ -19383,16 +19376,16 @@ namespace DbDo
                 }
 
                 // Maps associations: generic typed relations stored in
-                // the standard maps table, identified by (table, unq)
+                // the standard maps table, identified by (table, prm)
                 // pairs. Both directions are reported; 'to' marks
                 // relations where this record is the subject, 'from'
                 // where it is the object. One look line per related
                 // record, the same convention as the FK sections.
-                string sUnqValue = sCurrentUnqValue();
-                if (!string.IsNullOrEmpty(sUnqValue) && db.hasMapsTable())
+                string sPrmValue = sCurrentPrmValue();
+                if (!string.IsNullOrEmpty(sPrmValue) && db.hasMapsTable())
                 {
                     List<string[]> lRelations = db.lMapsRelations(
-                        db.currentTable, sUnqValue, 200);
+                        db.currentTable, sPrmValue, 200);
                     // Group by (kind, other table, direction).
                     Dictionary<string, List<string[]>> dGroups =
                         new Dictionary<string, List<string[]>>();
@@ -19444,13 +19437,13 @@ namespace DbDo
                 // present). Grouped as "<target> via <viaTable>";
                 // direct relations above stay the closer view, so a
                 // target table already reported directly is skipped.
-                if (!string.IsNullOrEmpty(sUnqValue) && db.hasMapsTable())
+                if (!string.IsNullOrEmpty(sPrmValue) && db.hasMapsTable())
                 {
-                    List<string[]> lTwoHop = db.lMapsTwoHop(db.currentTable, sUnqValue, 200);
+                    List<string[]> lTwoHop = db.lMapsTwoHop(db.currentTable, sPrmValue, 200);
                     Dictionary<string, List<string>> dHop = new Dictionary<string, List<string>>();
                     List<string> lHopOrder = new List<string>();
                     HashSet<string> hsDirectTables = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
-                    foreach (string[] aRel in db.lMapsRelations(db.currentTable, sUnqValue, 200))
+                    foreach (string[] aRel in db.lMapsRelations(db.currentTable, sPrmValue, 200))
                         hsDirectTables.Add(aRel[1]);
                     foreach (string[] aHop in lTwoHop)
                     {
@@ -19463,17 +19456,17 @@ namespace DbDo
                     {
                         string[] aParts = sKey.Split('\x01');
                         string sTarget = aParts[0], sVia = aParts[1];
-                        List<string> lUnqs = dHop[sKey];
+                        List<string> lPrms = dHop[sKey];
                         // Two-hop groups never share a table name with a
                         // direct group (those are skipped above), so the
                         // bare table name is unambiguous here.
-                        sb.AppendLine(sTarget + " (" + lUnqs.Count + "):");
+                        sb.AppendLine(sTarget + " (" + lPrms.Count + "):");
                         int iShown = 0;
-                        foreach (string sTu in lUnqs)
+                        foreach (string sTu in lPrms)
                         {
                             if (iShown >= c_iChildCap)
                             {
-                                sb.AppendLine("  ... and " + (lUnqs.Count - iShown) + " more");
+                                sb.AppendLine("  ... and " + (lPrms.Count - iShown) + " more");
                                 break;
                             }
                             int iLookFound;
@@ -19490,31 +19483,27 @@ namespace DbDo
             return sb.ToString().Trim();
         }
 
-        // sCurrentUnqValue: the unq value of the current row, or ""
-        // when the table has no unq column or no current row. The
-        // (table, unq) pair is a record's identity in the maps model.
+        // sCurrentPrmValue: the prm value of the current row, or ""
+        // when the table has no prm column or no current row. The
+        // (table, prm) pair is a record's identity in the maps model.
         //
         // Two-tier read: the recordset field when present, else a
         // direct SQL lookup keyed on the row's primary key. The SQL
         // fallback covers recordsets opened with a column subset
         // (per-table select lists) and any provider that omits
         // generated columns from the field collection.
-        private string sCurrentUnqValue()
+        private string sCurrentPrmValue()
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0) return "";
             try
             {
-                // Recordset field: prefer the prm column, fall back to
-                // a legacy unq column when a database predates the rename.
-                foreach (string sCol in new string[] { Metadata.PrimeColumn, Metadata.UnqColumn })
+                // Read the prm column straight from the open recordset.
+                if (db.hasField(Metadata.PrimeColumn))
                 {
-                    if (db.hasField(sCol))
-                    {
-                        string sFromRecordset = db.getFieldValue(sCol) ?? "";
-                        if (!string.IsNullOrEmpty(sFromRecordset)) return sFromRecordset;
-                    }
+                    string sFromRecordset = db.getFieldValue(Metadata.PrimeColumn) ?? "";
+                    if (!string.IsNullOrEmpty(sFromRecordset)) return sFromRecordset;
                 }
-                // Fallback: SELECT prm (or unq) FROM <table> WHERE <pk> = <value>.
+                // Fallback: SELECT prm FROM <table> WHERE <pk> = <value>.
                 // Covers recordsets opened with a column subset and providers
                 // that omit generated columns from the field collection.
                 string sTable = db.currentTable;
@@ -19523,27 +19512,24 @@ namespace DbDo
                 if (string.IsNullOrEmpty(sPk)) return "";
                 string sPkValue = db.getFieldValue(sPk) ?? "";
                 if (string.IsNullOrEmpty(sPkValue)) return "";
-                foreach (string sCol in new string[] { Metadata.PrimeColumn, Metadata.UnqColumn })
+                try
                 {
-                    try
+                    int iFound;
+                    List<string> lVals = db.queryColumnValues(
+                        sTable, Metadata.PrimeColumn, sPk, sPkValue, 1, out iFound);
+                    if (lVals.Count > 0 && !string.IsNullOrEmpty(lVals[0]))
                     {
-                        int iFound;
-                        List<string> lVals = db.queryColumnValues(
-                            sTable, sCol, sPk, sPkValue, 1, out iFound);
-                        if (lVals.Count > 0 && !string.IsNullOrEmpty(lVals[0]))
-                        {
-                            DbDoLog.write("sCurrentUnqValue: SQL fallback via " + sCol
-                                + " for " + sTable + "." + sPk + "=" + sPkValue);
-                            return lVals[0];
-                        }
+                        DbDoLog.write("sCurrentPrmValue: SQL fallback via prm"
+                            + " for " + sTable + "." + sPk + "=" + sPkValue);
+                        return lVals[0];
                     }
-                    catch { /* column absent on this table; try the next */ }
                 }
+                catch { /* prm column absent on this table */ }
                 return "";
             }
             catch (Exception ex)
             {
-                try { DbDoLog.write("sCurrentUnqValue failed: " + ex.Message); } catch { }
+                try { DbDoLog.write("sCurrentPrmValue failed: " + ex.Message); } catch { }
                 return "";
             }
         }
@@ -19564,14 +19550,14 @@ namespace DbDo
 
         // saySayPrime: speak the 'prm' field -- the unique/primary-key
         // expression -- of the current record. Shift+P. Falls back to the
-        // legacy 'unq' column for databases not yet migrated to 'prm';
+        // legacy 'prm' column for databases not yet migrated to 'prm';
         // tables with neither report so.
         private void saySayPrime(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
             { LiveRegion.say("No record selected"); return; }
             string sField = db.hasField(Metadata.PrimeColumn) ? Metadata.PrimeColumn
-                          : (db.hasField(Metadata.UnqColumn) ? Metadata.UnqColumn : null);
+                          : (db.hasField(Metadata.PrimeColumn) ? Metadata.PrimeColumn : null);
             if (sField == null)
             { LiveRegion.say("This table has no prime column"); return; }
             string sVal = db.getFieldValue(sField);
@@ -21940,10 +21926,10 @@ namespace DbDo
         // lStandardTableDdl: the CREATE statements for one table in
         // the standard shape -- the user's distinct fields surrounded
         // by the standard columns: <singular>_id, added, edited
-        // BEFORE them; notes, tags, look, unq, marked AFTER. look is
-        // a skip-empty concatenation of every distinct field; unq is
+        // BEFORE them; notes, tags, look, prm, marked AFTER. look is
+        // a skip-empty concatenation of every distinct field; prm is
         // the positional concatenation; the edited trigger bumps only
-        // on a real data change; the unq index is UNIQUE.
+        // on a real data change; the prm index is UNIQUE.
         private static List<string> lStandardTableDdl(string sTable, List<string[]> lFieldDefs)
         {
             string sSingular = sTable.EndsWith("s") ? sTable.Substring(0, sTable.Length - 1) : sTable;
@@ -21952,14 +21938,14 @@ namespace DbDo
             foreach (string[] aF in lFieldDefs) lCols.Add(aF[0]);
 
             StringBuilder sbLook = new StringBuilder("rtrim(");
-            StringBuilder sbUnq = new StringBuilder();
+            StringBuilder sbPrm = new StringBuilder();
             for (int i = 0; i < lCols.Count; i++)
             {
                 string sC = "\"" + lCols[i] + "\"";
-                if (i > 0) { sbLook.Append(" || "); sbUnq.Append("||'|'||"); }
+                if (i > 0) { sbLook.Append(" || "); sbPrm.Append("||'|'||"); }
                 sbLook.Append("iif(" + sC + " IS NOT NULL AND length(CAST(" + sC
                     + " AS TEXT))>0, CAST(" + sC + " AS TEXT) || ' | ', '')");
-                sbUnq.Append("coalesce(CAST(" + sC + " AS TEXT),'')");
+                sbPrm.Append("coalesce(CAST(" + sC + " AS TEXT),'')");
             }
             sbLook.Append(", ' | ')");
 
@@ -21972,7 +21958,7 @@ namespace DbDo
                 sbCreate.Append("\"" + aF[0] + "\" " + aF[1] + ", ");
             sbCreate.Append("notes TEXTMARKDOWN, tags TEXTMEMO, ");
             sbCreate.Append("look TEXT GENERATED ALWAYS AS (" + sbLook + ") STORED, ");
-            sbCreate.Append("prm TEXT GENERATED ALWAYS AS (" + sbUnq + ") STORED, ");
+            sbCreate.Append("prm TEXT GENERATED ALWAYS AS (" + sbPrm + ") STORED, ");
             sbCreate.Append("marked INTEGER NOT NULL DEFAULT 0)");
 
             List<string> lTrigCols = new List<string>(lCols);
@@ -22007,11 +21993,11 @@ namespace DbDo
             if (bMaps)
             {
                 List<string[]> lMapFields = new List<string[]>();
-                foreach (string sC in new string[] { "tbl1", "unq1", "kind", "tbl2", "unq2" })
+                foreach (string sC in new string[] { "tbl1", "prm1", "kind", "tbl2", "prm2" })
                     lMapFields.Add(new string[] { sC, "TEXTLINE" });
                 lDdl.AddRange(lStandardTableDdl("maps", lMapFields));
-                lDdl.Add("CREATE INDEX idx_maps_side1 ON maps (tbl1, unq1)");
-                lDdl.Add("CREATE INDEX idx_maps_side2 ON maps (tbl2, unq2)");
+                lDdl.Add("CREATE INDEX idx_maps_side1 ON maps (tbl1, prm1)");
+                lDdl.Add("CREATE INDEX idx_maps_side2 ON maps (tbl2, prm2)");
             }
             if (bLookups)
             {
@@ -22504,9 +22490,9 @@ namespace DbDo
         // the normal SQLite open. The table is named after the
         // file's base name; its columns are the union of keys in
         // first-encountered order, all TEXTLINE, wrapped in the
-        // standard-table scaffolding (id, unq, marked, edited
+        // standard-table scaffolding (id, prm, marked, edited
         // trigger) plus the builtin maps and lookups tables, so the
-        // import is a first-class DbDo database. Each record's unq
+        // import is a first-class DbDo database. Each record's prm
         // is its section heading, suffixed when repeated. The
         // conversion uses its own short-lived manager so this
         // window's open database is untouched until the converted
@@ -22527,7 +22513,7 @@ namespace DbDo
             if (sTable.Length == 0 || char.IsDigit(sTable[0])) sTable = "t_" + sTable;
 
             List<string> lsKeys = new List<string>();
-            List<string> lsUnqs = new List<string>();
+            List<string> lsPrms = new List<string>();
             List<Dictionary<string, string>> lRecords = new List<Dictionary<string, string>>();
             Dictionary<string, string> dCurrent = null;
             foreach (string sRaw in File.ReadAllLines(sInixPath))
@@ -22539,10 +22525,10 @@ namespace DbDo
                     dCurrent = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                     lRecords.Add(dCurrent);
                     iSeq++;
-                    string sUnq = sLine.Substring(1, sLine.Length - 2).Trim();
-                    if (sUnq.Length == 0) sUnq = "record " + iSeq;
-                    while (lsUnqs.Contains(sUnq)) sUnq += " +";
-                    lsUnqs.Add(sUnq);
+                    string sPrm = sLine.Substring(1, sLine.Length - 2).Trim();
+                    if (sPrm.Length == 0) sPrm = "record " + iSeq;
+                    while (lsPrms.Contains(sPrm)) sPrm += " +";
+                    lsPrms.Add(sPrm);
                     continue;
                 }
                 int iEq = sLine.IndexOf('=');
@@ -22618,7 +22604,7 @@ namespace DbDo
             if (string.IsNullOrEmpty(sXlsxPath)) throw new ArgumentException("importWorkbookFile requires a path.");
             if (!File.Exists(sXlsxPath)) throw new FileNotFoundException("Workbook not found: " + sXlsxPath);
 
-            string[] aReservedRename = new string[] { "added", "edited", "look", "prm", "unq", "marked" };
+            string[] aReservedRename = new string[] { "added", "edited", "look", "prm", "prm", "marked" };
             string sDbPath = Path.Combine(Path.GetTempPath(),
                 "DbDo_managed_" + Guid.NewGuid().ToString("N") + ".db");
 
@@ -22726,7 +22712,7 @@ namespace DbDo
                             lFieldDefs.Add(new string[] { sHdr, "TEXTLINE" });
                             lColTarget.Add(sHdr);
                         }
-                        // Guarantee at least one distinct field so look/unq
+                        // Guarantee at least one distinct field so look/prm
                         // are well-formed even for an all-notes/tags sheet.
                         if (lFieldDefs.Count == 0) lFieldDefs.Add(new string[] { "value", "TEXTLINE" });
 
@@ -22755,7 +22741,7 @@ namespace DbDo
                             try { managerImport.invokeSql(sInsert, null); iRowsImported++; }
                             catch (Exception exRow)
                             {
-                                // A duplicate unq (an identical data row) trips
+                                // A duplicate prm (an identical data row) trips
                                 // the UNIQUE index; skip it, keep importing.
                                 try { DbDoLog.write("importWorkbookFile skipped a row in " + sTable + ": " + exRow.Message); } catch { }
                             }
@@ -23082,13 +23068,13 @@ namespace DbDo
         // (a sparse title/metadata row above the column names is skipped); a
         // notes/tags column routes into the standard column, other standard-
         // name collisions get an "_in" suffix, and a duplicate row that would
-        // trip the UNIQUE unq index is skipped. Returns rows inserted, or -1
+        // trip the UNIQUE prm index is skipped. Returns rows inserted, or -1
         // if there was no usable header-plus-data and no table was made.
         private static int buildShellTableFromGrid(DbDoManager managerImport, string sSheetName,
             List<string[]> aGrid, List<string> lTableNames)
         {
             if (aGrid == null || aGrid.Count < 2) return -1;
-            string[] aReservedRename = new string[] { "added", "edited", "look", "prm", "unq", "marked" };
+            string[] aReservedRename = new string[] { "added", "edited", "look", "prm", "prm", "marked" };
 
             int iScan = Math.Min(aGrid.Count - 1, 14);
             int iWidest = 0;
@@ -23283,7 +23269,7 @@ namespace DbDo
             }
             if (lCols == null) throw new InvalidOperationException("No header row was found in " + Path.GetFileName(sSourcePath) + ".");
 
-            string[] aReservedRename = new string[] { "added", "edited", "look", "prm", "unq", "marked" };
+            string[] aReservedRename = new string[] { "added", "edited", "look", "prm", "prm", "marked" };
             string sDbPath = Path.Combine(Path.GetTempPath(),
                 "DbDo_managed_" + Guid.NewGuid().ToString("N") + ".db");
             try
@@ -23367,7 +23353,7 @@ namespace DbDo
         {
             if (string.IsNullOrEmpty(sDbfPath)) throw new ArgumentException("importDbfToShell requires a path.");
             DbfReader.Result res = DbfReader.read(sDbfPath);
-            string[] aReservedRename = new string[] { "added", "edited", "look", "prm", "unq", "marked" };
+            string[] aReservedRename = new string[] { "added", "edited", "look", "prm", "prm", "marked" };
             string sDbPath = Path.Combine(Path.GetTempPath(),
                 "DbDo_managed_" + Guid.NewGuid().ToString("N") + ".db");
             try
@@ -23450,11 +23436,11 @@ namespace DbDo
         // importWorkbookFile, so the result is identical whatever the source
         // format: a column named notes or tags routes into the standard
         // column, other standard-name collisions get an "_in" suffix, and a
-        // duplicate row that would trip the UNIQUE unq index is skipped.
+        // duplicate row that would trip the UNIQUE prm index is skipped.
         internal string importAdoToShell(string sSourcePath)
         {
             if (string.IsNullOrEmpty(sSourcePath)) throw new ArgumentException("importAdoToShell requires a path.");
-            string[] aReservedRename = new string[] { "added", "edited", "look", "prm", "unq", "marked" };
+            string[] aReservedRename = new string[] { "added", "edited", "look", "prm", "prm", "marked" };
             string sDbPath = Path.Combine(Path.GetTempPath(),
                 "DbDo_managed_" + Guid.NewGuid().ToString("N") + ".db");
             int iTablesImported = 0, iRowsImported = 0;
@@ -24444,10 +24430,10 @@ namespace DbDo
                 return;
             }
             // New Record presents only the editable fields. The admin
-            // fields (the primary key, added, edited, look, unq,
+            // fields (the primary key, added, edited, look, prm,
             // marked) are filled by the database itself: the key
             // auto-increments, added/edited default to
-            // current_timestamp, look/unq are generated expressions,
+            // current_timestamp, look/prm are generated expressions,
             // and marked defaults to 0.
             List<string> lFields = db.getEditableFieldNames();
             Dictionary<string, string> dInitial = new Dictionary<string, string>();
@@ -24481,7 +24467,7 @@ namespace DbDo
                     catch (Exception ex)
                     {
                         try { db.cancelUpdate(); } catch { }
-                        if (db.isUnqViolation(ex))
+                        if (db.isPrmViolation(ex))
                         { warnDuplicateIdentity("New Record", dlg.dValues); continue; }
                         ErrorDialog.show(this, "New Record", ex, db);
                         return;
@@ -24496,19 +24482,19 @@ namespace DbDo
         { runRecordViews(1, true); }
 
         // warnDuplicateIdentity: a New / New-Copy insert was rejected
-        // because the record's identity -- the generated unq field, built
+        // because the record's identity -- the generated prm field, built
         // from a specific combination of content fields -- duplicates an
         // existing record. That is an ordinary data condition, not a
         // malfunction and not a sign that adding records is broken, so this
         // explains it plainly: it names the exact fields the identity is
-        // built from (read from the table's unq definition, so it is right
+        // built from (read from the table's prm definition, so it is right
         // even when only some fields count) and shows the values entered for
         // them, which is what is duplicated. The caller then reopens the
         // editor with the entries intact so one field can be changed and the
         // insert retried. No raw ADO text or stack trace.
         private void warnDuplicateIdentity(string sTitle, Dictionary<string, string> dValues)
         {
-            List<string> lComp = db.getUnqComponentFields();
+            List<string> lComp = db.getPrmComponentFields();
             System.Text.StringBuilder sb = new System.Text.StringBuilder();
             sb.AppendLine("This record was not added because another record in this table "
                 + "already has the same identifying values, so it would be a duplicate.");
@@ -25346,7 +25332,7 @@ namespace DbDo
         // New Copy (Ctrl+Shift+N): duplicate the current row. Opens
         // the New Record dialog pre-filled with the current row's
         // distinct (substantive) field values. The primary key,
-        // 'unq', 'look' generated columns, and timestamps are NOT
+        // 'prm', 'look' generated columns, and timestamps are NOT
         // pre-filled -- they regenerate from the column defaults
         // and the trigger system. The user can edit any field
         // before pressing OK to insert.
@@ -25368,7 +25354,7 @@ namespace DbDo
             // current row's value -- the multiple-employees-at-one-
             // company case: most values carry over, the user edits
             // the few that differ. Admin fields (the key, added,
-            // edited, look, unq, marked) are never in this list and
+            // edited, look, prm, marked) are never in this list and
             // regenerate from defaults, triggers, and expressions.
             foreach (string s in lFields)
             {
@@ -25398,7 +25384,7 @@ namespace DbDo
                     catch (Exception ex)
                     {
                         try { db.cancelUpdate(); } catch { }
-                        if (db.isUnqViolation(ex))
+                        if (db.isPrmViolation(ex))
                         { warnDuplicateIdentity("New Copy", dlg.dValues); continue; }
                         ErrorDialog.show(this, "New Copy", ex, db);
                         return;
@@ -28386,7 +28372,7 @@ namespace DbDo
             lChildren.Sort(StringComparer.OrdinalIgnoreCase);
 
             // Maps targets: when the database has a maps table and the
-            // current row has a unq identity, every distinct (kind,
+            // current row has a prm identity, every distinct (kind,
             // other-table, direction) group becomes a drill choice,
             // labeled "<table> via <kind>" -- with "(incoming)" marking
             // relations where this record is the OBJECT. So on a
@@ -28398,14 +28384,14 @@ namespace DbDo
             List<string> lChoices = new List<string>(lChildren);
             Dictionary<string, string[]> dMapsChoices = new Dictionary<string, string[]>();
             Dictionary<string, string[]> dTwoHopChoices = new Dictionary<string, string[]>();
-            string sUnqValue = sCurrentUnqValue();
+            string sPrmValue = sCurrentPrmValue();
             DbDoLog.write("Enter Child: table=" + sParentTable + " pk=" + sParentPk
                 + "=" + sParentPkValue + " fkChildren=" + lChildren.Count
-                + " unq=" + (string.IsNullOrEmpty(sUnqValue) ? "(none)" : "present")
+                + " prm=" + (string.IsNullOrEmpty(sPrmValue) ? "(none)" : "present")
                 + " maps=" + (db.hasMapsTable() ? "yes" : "no"));
-            if (!string.IsNullOrEmpty(sUnqValue) && db.hasMapsTable())
+            if (!string.IsNullOrEmpty(sPrmValue) && db.hasMapsTable())
             {
-                List<string[]> lRelations = db.lMapsRelations(sParentTable, sUnqValue, c_iMapsDrillCap);
+                List<string[]> lRelations = db.lMapsRelations(sParentTable, sPrmValue, c_iMapsDrillCap);
                 DbDoLog.write("Enter Child: " + lRelations.Count + " maps relations found");
                 Dictionary<string, int> dCounts = new Dictionary<string, int>();
                 List<string> lOrder = new List<string>();
@@ -28441,7 +28427,7 @@ namespace DbDo
                 // they present, a location's contacts via the events
                 // held there. Skip a target table already offered as a
                 // direct relation; the direct view is the closer one.
-                List<string[]> lTwoHop = db.lMapsTwoHop(sParentTable, sUnqValue, 500);
+                List<string[]> lTwoHop = db.lMapsTwoHop(sParentTable, sPrmValue, 500);
                 Dictionary<string, int> dHopCounts = new Dictionary<string, int>();
                 List<string> lHopOrder = new List<string>();
                 foreach (string[] aHop in lTwoHop)
@@ -28488,7 +28474,7 @@ namespace DbDo
                     + "Table: " + sParentTable + "; primary key " + sParentPk + " = " + sParentPkValue + "\r\n"
                     + "Tables referencing " + sParentPk + ": none\r\n"
                     + "maps table present: " + (db.hasMapsTable() ? "yes" : "NO") + "\r\n"
-                    + "This row's unq value: " + (string.IsNullOrEmpty(sUnqValue) ? "MISSING" : sUnqValue) + "\r\n"
+                    + "This row's prm value: " + (string.IsNullOrEmpty(sPrmValue) ? "MISSING" : sPrmValue) + "\r\n"
                     + "maps rows touching this record: 0\r\n\r\n"
                     + "If the database file above is not the one you expect, open the\r\n"
                     + "intended file; DbDo reopens the last file used.");
@@ -28523,20 +28509,20 @@ namespace DbDo
                     // selectTableFiltered with an IN-subquery WHERE --
                     // maps joined to maps through inline derived
                     // edge tables (both directions of every map row),
-                    // landing on the target unq set. Single-base-table
+                    // landing on the target prm set. Single-base-table
                     // SELECT, so the view stays updatable; no row cap
                     // and no client-side Filter involved.
                     string sVia = aTwoHopSel[0], sTarget = aTwoHopSel[1];
-                    string sEdges = "(SELECT tbl1 ft, unq1 fu, tbl2 tt, unq2 tu FROM maps"
-                        + " UNION ALL SELECT tbl2, unq2, tbl1, unq1 FROM maps)";
+                    string sEdges = "(SELECT tbl1 ft, prm1 fu, tbl2 tt, prm2 tu FROM maps"
+                        + " UNION ALL SELECT tbl2, prm2, tbl1, prm1 FROM maps)";
                     string sWhere = db.primeColumnFor(sTarget) + " IN (SELECT e2.tu FROM " + sEdges + " e1"
                         + " JOIN " + sEdges + " e2 ON e2.ft = e1.tt AND e2.fu = e1.tu"
                         + " WHERE e1.ft = " + DbDoManager.sQuoteSqlLiteral(sParentTable)
-                        + " AND e1.fu = " + DbDoManager.sQuoteSqlLiteral(sUnqValue)
+                        + " AND e1.fu = " + DbDoManager.sQuoteSqlLiteral(sPrmValue)
                         + " AND e1.tt = " + DbDoManager.sQuoteSqlLiteral(sVia)
                         + " AND e2.tt = " + DbDoManager.sQuoteSqlLiteral(sTarget)
                         + " AND NOT (e2.tt = " + DbDoManager.sQuoteSqlLiteral(sParentTable)
-                        + " AND e2.tu = " + DbDoManager.sQuoteSqlLiteral(sUnqValue) + "))";
+                        + " AND e2.tu = " + DbDoManager.sQuoteSqlLiteral(sPrmValue) + "))";
                     openDrillChild(sTarget, sWhere);
                 }
                 else if (aMapsSel != null)
@@ -28544,7 +28530,7 @@ namespace DbDo
                     // Maps drill: the target table opens through
                     // selectTableFiltered with the IN-subquery this
                     // architecture was designed around -- the WHERE
-                    // selects the unq values on the other side of the
+                    // selects the prm values on the other side of the
                     // matching map rows. Single-base-table SELECT, so
                     // the related view stays UPDATABLE; the previous
                     // approach (ADO client-side Filter as an OR
@@ -28552,14 +28538,14 @@ namespace DbDo
                     string sKind = aMapsSel[0], sOther = aMapsSel[1], sDir = aMapsSel[2];
                     string sPrimeCol = db.primeColumnFor(sOther);
                     string sWhere = (sDir == "subject")
-                        ? sPrimeCol + " IN (SELECT unq2 FROM maps WHERE tbl1 = "
+                        ? sPrimeCol + " IN (SELECT prm2 FROM maps WHERE tbl1 = "
                           + DbDoManager.sQuoteSqlLiteral(sParentTable)
-                          + " AND unq1 = " + DbDoManager.sQuoteSqlLiteral(sUnqValue)
+                          + " AND prm1 = " + DbDoManager.sQuoteSqlLiteral(sPrmValue)
                           + " AND kind = " + DbDoManager.sQuoteSqlLiteral(sKind)
                           + " AND tbl2 = " + DbDoManager.sQuoteSqlLiteral(sOther) + ")"
-                        : sPrimeCol + " IN (SELECT unq1 FROM maps WHERE tbl2 = "
+                        : sPrimeCol + " IN (SELECT prm1 FROM maps WHERE tbl2 = "
                           + DbDoManager.sQuoteSqlLiteral(sParentTable)
-                          + " AND unq2 = " + DbDoManager.sQuoteSqlLiteral(sUnqValue)
+                          + " AND prm2 = " + DbDoManager.sQuoteSqlLiteral(sPrmValue)
                           + " AND kind = " + DbDoManager.sQuoteSqlLiteral(sKind)
                           + " AND tbl1 = " + DbDoManager.sQuoteSqlLiteral(sOther) + ")";
                     openDrillChild(sOther, sWhere);
@@ -28910,7 +28896,7 @@ namespace DbDo
         // record in a focused dialog. The widget matches the
         // column's declared type -- a Markdown/memo column gets a
         // multi-line box, anything else a single line. Saves only
-        // that field; the edited trigger and look/unq regenerate as
+        // that field; the edited trigger and look/prm regenerate as
         // usual on update.
         private void editStandardField(string sColumn, string sTitle)
         {
@@ -32216,12 +32202,12 @@ namespace DbDo
 
         // cmdSayPrime: console form of Shift+P Say Prime. Prints the
         // prm (unique-key) field of the current record, falling back
-        // to the legacy 'unq' column, or reports its absence.
+        // to the legacy 'prm' column, or reports its absence.
         private static void cmdSayPrime()
         {
             if (!requireRecordset()) return;
             string sField = db.hasField(Metadata.PrimeColumn) ? Metadata.PrimeColumn
-                          : (db.hasField(Metadata.UnqColumn) ? Metadata.UnqColumn : null);
+                          : (db.hasField(Metadata.PrimeColumn) ? Metadata.PrimeColumn : null);
             if (sField == null)
             { Console.WriteLine("(no prime column)"); return; }
             string sVal = db.getFieldValue(sField) ?? "";

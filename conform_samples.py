@@ -1,4 +1,4 @@
-import sqlite3, shutil, os
+import sqlite3, shutil, os, re
 
 CANON = "Samples/media/media.db"          # source of canonical infra DDL
 FIELD_TYPES = ["BLOB","BOOLEAN","INTEGER","REAL","TEXT","TEXTLINE","TEXTMARKDOWN","TEXTMEMO","TEXTTIME"]
@@ -8,7 +8,12 @@ def canon_ddl():
     c=sqlite3.connect(CANON);cur=c.cursor();d={}
     for t in ("lookups","maps","sqlean_define"):
         cur.execute("select sql from sqlite_master where type='table' and name=?",(t,))
-        d[t]=cur.fetchone()[0]
+        sql=cur.fetchone()[0]
+        # Normalize any legacy unq naming to prm so infra copied into
+        # other databases is always prm-based (never unq).
+        sql=sql.replace("unq1","prm1").replace("unq2","prm2")
+        sql=re.sub(r"\bunq\b","prm",sql)
+        d[t]=sql
     c.close();return d
 
 def has(cur,name):
@@ -31,19 +36,19 @@ def add_sqlean(path, ddl):
     if not has(cur,"sqlean_define"): cur.execute(ddl["sqlean_define"]); made.append("sqlean_define")
     c.commit();c.close();return made
 
-def migrate_maps_prm_to_unq(path, ddl):
-    """NFB2026Convention: rebuild maps from prm1/prm2/prm -> unq1/unq2/unq."""
+def migrate_maps_unq_to_prm(path):
+    """Rename any legacy maps endpoint columns unq1/unq2 -> prm1/prm2.
+    SQLite's RENAME COLUMN rewrites the dependent look/prm generated
+    expressions automatically. Idempotent (prm already => no-op)."""
     c=sqlite3.connect(path);cur=c.cursor()
     cols=[r[1] for r in cur.execute("pragma table_xinfo('maps')").fetchall()]
-    if "unq1" in cols: c.close(); return "already unq1/unq2"
-    if "prm1" not in cols: c.close(); return "no prm1 (skip)"
-    cur.execute("ALTER TABLE maps RENAME TO maps_old")
-    cur.execute(ddl["maps"])
-    cur.execute("""INSERT INTO maps(map_id,added,edited,tbl1,unq1,kind,tbl2,unq2,notes,tags,marked)
-                   SELECT map_id,added,edited,tbl1,prm1,kind,tbl2,prm2,notes,tags,marked FROM maps_old""")
-    n=cur.execute("select count(*) from maps").fetchone()[0]
-    cur.execute("DROP TABLE maps_old")
-    c.commit();c.close();return f"migrated {n} rows prm->unq"
+    done=[]
+    if "unq1" in cols and "prm1" not in cols:
+        cur.execute("ALTER TABLE maps RENAME COLUMN unq1 TO prm1");done.append("unq1->prm1")
+    if "unq2" in cols and "prm2" not in cols:
+        cur.execute("ALTER TABLE maps RENAME COLUMN unq2 TO prm2");done.append("unq2->prm2")
+    c.commit();c.close()
+    return ", ".join(done) if done else "already prm1/prm2"
 
 ddl=canon_ddl()
 FULL=["Samples/cellar/cellar.db","Samples/chinook/chinook.db","Samples/northwind/northwind.db"]
@@ -55,4 +60,5 @@ for p in FULL+SQLEAN+[CONV]:
 
 for p in FULL:    print(f"{os.path.basename(p):22} infra added: {add_infra(p,ddl)}")
 for p in SQLEAN:  print(f"{os.path.basename(p):22} added: {add_sqlean(p,ddl)}")
-print(f"{os.path.basename(CONV):22} maps: {migrate_maps_prm_to_unq(CONV,ddl)}")
+for p in FULL+SQLEAN+[CONV]:
+    print(f"{os.path.basename(p):22} maps: {migrate_maps_unq_to_prm(p)}")

@@ -97,6 +97,66 @@ exit /b 1
 :have_csc
 echo C# compiler: !csc! >> "!log!"
 
+rem ---- optional, deliberate version bump (release builds only) ----
+rem Versioning best practice: the version is NOT auto-incremented on
+rem every build -- that is a deliberate act. You bump explicitly when
+rem cutting a release. The bump edits ONLY DbDo.cs
+rem (BuildInfo.VersionString, the single source of truth); the sync
+rem step just below derives DbDo_setup.iss from it, so the .exe, the
+rem installer, and the tagRelease git tag can never drift apart.
+rem
+rem   buildDbDo.cmd              test build; no version change
+rem   buildDbDo.cmd patch        1.0.122 -> 1.0.123
+rem   buildDbDo.cmd minor        1.0.122 -> 1.1.0
+rem   buildDbDo.cmd major        1.0.122 -> 2.0.0
+rem   buildDbDo.cmd set 1.2.0    explicit version
+set "bumpArg=%~1"
+if not defined bumpArg goto :after_bump
+if /I "%bumpArg%"=="patch" goto :do_bump
+if /I "%bumpArg%"=="minor" goto :do_bump
+if /I "%bumpArg%"=="major" goto :do_bump
+if /I "%bumpArg%"=="set"   goto :do_bump_set
+echo ERROR: unknown argument "%bumpArg%". Use: buildDbDo.cmd [patch^|minor^|major^|set X.Y.Z] >> "!log!"
+echo ERROR: unknown argument "%bumpArg%". Use: buildDbDo.cmd [patch ^| minor ^| major ^| set X.Y.Z]
+popd
+exit /b 1
+
+:do_bump_set
+if not exist bumpVersion.ps1 goto :bump_missing
+if "%~2"=="" (
+    echo ERROR: set needs a version, e.g. buildDbDo.cmd set 1.2.0 >> "!log!"
+    echo ERROR: set needs a version, e.g. buildDbDo.cmd set 1.2.0
+    popd
+    exit /b 1
+)
+echo Bumping version ^(set %~2^) ... >> "!log!"
+echo Bumping version ^(set %~2^) ...
+powershell -NoProfile -ExecutionPolicy Bypass -File bumpVersion.ps1 -Set "%~2" >> "!log!" 2>&1
+if errorlevel 1 goto :bump_failed
+goto :after_bump
+
+:do_bump
+if not exist bumpVersion.ps1 goto :bump_missing
+echo Bumping version ^(%bumpArg%^) ... >> "!log!"
+echo Bumping version ^(%bumpArg%^) ...
+powershell -NoProfile -ExecutionPolicy Bypass -File bumpVersion.ps1 -Part %bumpArg% >> "!log!" 2>&1
+if errorlevel 1 goto :bump_failed
+goto :after_bump
+
+:bump_missing
+echo ERROR: bumpVersion.ps1 not found next to buildDbDo.cmd; cannot bump. >> "!log!"
+echo ERROR: bumpVersion.ps1 not found next to buildDbDo.cmd; cannot bump.
+popd
+exit /b 1
+
+:bump_failed
+echo ERROR: version bump failed (see log). DbDo.cs unchanged; build aborted. >> "!log!"
+echo ERROR: version bump failed (see log). DbDo.cs unchanged; build aborted.
+popd
+exit /b 1
+
+:after_bump
+
 rem ---- sync installer version from DbDo.cs (single source of truth) ----
 rem buildDbDo.cmd does not own the version. DbDo.cs's
 rem BuildInfo.VersionString is THE source; this step copies that value
@@ -429,8 +489,11 @@ dir 2db32.exe | findstr 2db32.exe
 dir 2db64.exe | findstr 2db64.exe
 goto :have_2db
 :skip_2db
-echo NOTE: 2db.cs not found; skipping the 2db importer build. >> "!log!"
-echo NOTE: 2db.cs not found; skipping the 2db importer build.
+rem 2db.cs is optional, forward-looking infrastructure (a planned
+rem out-of-process importer that would bridge the 32/64-bit Office ACE
+rem boundary). It is not part of the current build: DbDo uses its
+rem native readers and does not invoke 2db32/64.exe. When 2db.cs is
+rem absent we skip it silently; drop a 2db.cs in this folder to build it.
 :have_2db
 
 
@@ -454,7 +517,7 @@ echo   nvdaControllerClient.dll -- NVDA controller-client DLL
 echo   Newtonsoft.Json.dll -- JSON (Json.NET) support
 echo   sqlean.exe -- SQLite/SQLean shell for the dot-prompt pass-through lane
 echo   sqlean.dll -- SQLean extension bundle (REGEXP, median, percentiles, ...)
-echo   2db32.exe / 2db64.exe -- standalone importer (32- and 64-bit) for the Import command
+if exist 2db64.exe echo   2db32.exe / 2db64.exe -- standalone importer (32- and 64-bit) for the Import command
 popd
 endlocal
 exit /b 0
