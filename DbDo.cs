@@ -77,7 +77,7 @@ namespace DbDo
     // =====================================================================
     public static class BuildInfo
     {
-        public const string VersionString = "1.0.123";
+        public const string VersionString = "1.0.124";
     }
 
     // =====================================================================
@@ -16649,7 +16649,7 @@ namespace DbDo
                 "When ON, DbDo speaks status messages, command names, and cell readouts through the screen reader. When OFF, the screen reader still announces focus and selection changes naturally but DbDo's additional commentary is suppressed. Default ON. Persisted in DbDo.inix [General] extraSpeech. Alt+Shift+Z to toggle; the 'zzz' mnemonic reads as a hush.");
             add("Toggle Command Echo",
                 "Toggle whether each menu/hotkey command's name is spoken before it runs",
-                "When ON, every command activated through the menu or a hotkey announces its canonical name through the screen reader just before executing. When OFF, commands run silently and you hear only their direct effects. Default ON. Persisted in DbDo.inix [Options] commandEcho. Ctrl+Shift+Z to toggle; the keyboard companion to Alt+Shift+Z (Extra Speech). Note: this toggle has no effect in CLI / dot-prompt mode, where the user has explicitly typed the command and shouldn't need it echoed back.");
+                "When ON, every command activated through the menu or a hotkey announces its canonical name through the screen reader just before executing. When OFF, commands run silently and you hear only their direct effects plus the screen reader's own natural announcements (dialog titles, focus changes). Default OFF, so DbDo does not echo command names over what the screen reader already says. Persisted in DbDo.inix [Options] commandEcho. Ctrl+Shift+Z to toggle; the keyboard companion to Alt+Shift+Z (Extra Speech). Note: this toggle has no effect in CLI / dot-prompt mode, where the user has explicitly typed the command and shouldn't need it echoed back.");
             add("Toggle Read Only",
                 "Flip the database between read-write and read-only at runtime",
                 "When ON, the database is opened read-only and edit commands fail with a clear error message. Use this to browse data without risk of accidental edits. Alt+Z to toggle in the GUI; at the dot prompt type 'toggle-readonly', 'read-only', or 'readonly' (with optional 'on'/'off' argument). Also exposed as a checkbox in the Settings dialog and as the -readonly command-line flag at launch.");
@@ -16809,7 +16809,7 @@ namespace DbDo
                                       && !sV.Equals("0", StringComparison.Ordinal)
                                       && !sV.Equals("False", StringComparison.OrdinalIgnoreCase);
                 }
-                catch { bCommandEchoCached = true; }
+                catch { bCommandEchoCached = false; }
                 bCommandEchoLoaded = true;
             }
             return bCommandEchoCached;
@@ -16818,7 +16818,14 @@ namespace DbDo
         private static string readEchoSetting()
         {
             string sV = IniSession.read("Options", "CommandEcho");
-            return string.IsNullOrEmpty(sV) ? "Y" : sV;
+            // Default OFF. Echoing every command's name duplicates what the
+            // screen reader already announces on its own -- a dialog's title,
+            // a focus or selection change -- which is chatty (e.g. "Select
+            // Columns" spoken by the echo and again as the dialog title).
+            // Direct speech is reserved for the deliberate context a command
+            // adds itself. Users who want the pre-echo can turn it on with
+            // Ctrl+Shift+Z.
+            return string.IsNullOrEmpty(sV) ? "N" : sV;
         }
         private void commandEcho(string sCommand)
         {
@@ -23608,6 +23615,14 @@ namespace DbDo
                 // Session-lifetime bookmarks: clear on database open.
                 lBookmarks.Clear();
                 db.openDatabase(sPath, null, false);
+                // Set the per-database settings path NOW, before the initial
+                // selectTable below. selectTable -> applyTableSettings reads
+                // the saved view (SelectFields / OrderFields / WhereFilter)
+                // via readPerDbValue, which consults sActiveDbInixPath. When
+                // this assignment lived after the table pick, the opening
+                // table's saved columns and sort silently failed to restore
+                // (only later table switches, by which time it was set, did).
+                sActiveDbInixPath = dbScopedInixPath();
                 // Heads-up for formats whose in-place writes are best-
                 // effort: the user can edit, but ACE may coerce or drop
                 // values. The detail goes to the log; a short spoken note
@@ -23687,6 +23702,10 @@ namespace DbDo
                 }
                 invokeRefresh();
                 DbDoLog.write("Open succeeded. Table: " + (db.currentTable ?? "(none)"));
+                // sActiveDbInixPath was set right after open (above), before
+                // the initial selectTable, so the opening table's saved view
+                // restores. Re-assert it here too (harmless) in case a table
+                // pick path changed the open file.
                 sActiveDbInixPath = dbScopedInixPath();
                 seedDbSettings();
                 IniSession.lastDatabase = sPath;
@@ -30753,7 +30772,7 @@ namespace DbDo
             // Read current values from the ini, with sensible defaults
             // if the keys are missing.
             string sCurrentUiMode = readIniValue(sUserIni, "General", "UiMode", "gui");
-            string sCurrentEcho   = readIniValue(sUserIni, "Options", "CommandEcho", "Y");
+            string sCurrentEcho   = readIniValue(sUserIni, "Options", "CommandEcho", "N");
             string sCurrentExtra  = readIniValue(sUserIni, "General", "ExtraSpeech", "Y");
             bool bCurrentEcho = !(sCurrentEcho.Equals("N", StringComparison.OrdinalIgnoreCase)
                               || sCurrentEcho.Equals("No", StringComparison.OrdinalIgnoreCase)
