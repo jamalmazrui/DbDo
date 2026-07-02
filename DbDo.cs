@@ -77,7 +77,7 @@ namespace DbDo
     // =====================================================================
     public static class BuildInfo
     {
-        public const string VersionString = "1.0.124";
+        public const string VersionString = "1.0.125";
     }
 
     // =====================================================================
@@ -3732,6 +3732,24 @@ namespace DbDo
             dTableCache[sCurrentTable] = snap;
         }
 
+        // perDbInixPath: this database's own <DbName>.inix, computed
+        // directly from the open file path -- independent of the form's
+        // static sActiveDbInixPath, which is set by only some open paths
+        // and only after the first selectTable. Reading our own file lets
+        // per-table view restore work on every open path (including the
+        // Alt+Ctrl+D startup session restore) with no ordering dependency.
+        private string perDbInixPath()
+        {
+            if (string.IsNullOrEmpty(filePath)) return null;
+            try
+            {
+                string sFolder = Path.GetDirectoryName(filePath);
+                if (string.IsNullOrEmpty(sFolder)) return null;
+                return Path.Combine(sFolder, Path.GetFileNameWithoutExtension(filePath) + ".inix");
+            }
+            catch { return null; }
+        }
+
         // Apply a previously-captured snapshot to the just-opened
         // recordset. Called by selectTable after Open() succeeds.
         // Filter and sort are best-effort: if the cached expression no
@@ -3761,18 +3779,29 @@ namespace DbDo
 
             // (2) Per-database [Table:<name>] config -- the saved view
             // that travels with the database (SelectFields, OrderFields,
-            // WhereFilter). Applied after the session cache so the saved
-            // config wins; position stays session-only. Each is skipped
-            // when absent so a table with no saved view falls back to the
-            // default (look + prm) selection and no sort/filter.
+            // WhereFilter). Read straight from THIS database's own
+            // <DbName>.inix (via perDbInixPath, computed from filePath),
+            // NOT via the form's static sActiveDbInixPath: that static is
+            // set by only some open paths and only after the initial
+            // selectTable, so on the Alt+Ctrl+D startup session restore it
+            // was still null here and the saved columns/sort silently did
+            // not restore. Reading our own file works on every open path.
+            // Applied after the session cache so the saved config wins;
+            // position stays session-only. Each key is skipped when absent
+            // so a table with no saved view falls back to the default
+            // (look + prm) selection and no sort/filter.
             try
             {
-                string sSel = DbDoForm.readPerDbValue("Table:" + sTable, "SelectFields");
-                if (!string.IsNullOrEmpty(sSel)) setSelectList(sTable, sSel);
-                string sOrd = DbDoForm.readPerDbValue("Table:" + sTable, "OrderFields");
-                if (!string.IsNullOrEmpty(sOrd)) { try { sort = sOrd; } catch { } }
-                string sWhr = DbDoForm.readPerDbValue("Table:" + sTable, "WhereFilter");
-                if (!string.IsNullOrEmpty(sWhr)) { try { filter = sWhr; } catch { } }
+                string sInix = perDbInixPath();
+                if (!string.IsNullOrEmpty(sInix) && File.Exists(sInix))
+                {
+                    string sSel = readIniFromFile(sInix, "Table:" + sTable, "SelectFields");
+                    if (!string.IsNullOrEmpty(sSel)) setSelectList(sTable, sSel);
+                    string sOrd = readIniFromFile(sInix, "Table:" + sTable, "OrderFields");
+                    if (!string.IsNullOrEmpty(sOrd)) { try { sort = sOrd; } catch { } }
+                    string sWhr = readIniFromFile(sInix, "Table:" + sTable, "WhereFilter");
+                    if (!string.IsNullOrEmpty(sWhr)) { try { filter = sWhr; } catch { } }
+                }
             }
             catch { }
         }
