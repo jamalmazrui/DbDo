@@ -97,65 +97,21 @@ exit /b 1
 :have_csc
 echo C# compiler: !csc! >> "!log!"
 
-rem ---- optional, deliberate version bump (release builds only) ----
-rem Versioning best practice: the version is NOT auto-incremented on
-rem every build -- that is a deliberate act. You bump explicitly when
-rem cutting a release. The bump edits ONLY DbDo.cs
-rem (BuildInfo.VersionString, the single source of truth); the sync
-rem step just below derives DbDo_setup.iss from it, so the .exe, the
-rem installer, and the tagRelease git tag can never drift apart.
-rem
-rem   buildDbDo.cmd              test build; no version change
-rem   buildDbDo.cmd patch        1.0.122 -> 1.0.123
-rem   buildDbDo.cmd minor        1.0.122 -> 1.1.0
-rem   buildDbDo.cmd major        1.0.122 -> 2.0.0
-rem   buildDbDo.cmd set 1.2.0    explicit version
-set "bumpArg=%~1"
-if not defined bumpArg goto :after_bump
-if /I "%bumpArg%"=="patch" goto :do_bump
-if /I "%bumpArg%"=="minor" goto :do_bump
-if /I "%bumpArg%"=="major" goto :do_bump
-if /I "%bumpArg%"=="set"   goto :do_bump_set
-echo ERROR: unknown argument "%bumpArg%". Use: buildDbDo.cmd [patch^|minor^|major^|set X.Y.Z] >> "!log!"
-echo ERROR: unknown argument "%bumpArg%". Use: buildDbDo.cmd [patch ^| minor ^| major ^| set X.Y.Z]
-popd
-exit /b 1
-
-:do_bump_set
-if not exist bumpVersion.ps1 goto :bump_missing
-if "%~2"=="" (
-    echo ERROR: set needs a version, e.g. buildDbDo.cmd set 1.2.0 >> "!log!"
-    echo ERROR: set needs a version, e.g. buildDbDo.cmd set 1.2.0
-    popd
-    exit /b 1
+rem ---- auto-bump the version, then sync the installer ----
+rem Every build advances the version so each GitHub release is newer
+rem than the installed copy -- which is what F11 compares. The next
+rem number is derived from the latest git release tag (last release
+rem + 1 patch); a manually higher BuildInfo.VersionString in DbDo.cs
+rem wins, for a deliberate minor/major bump. bumpVersion.ps1 stamps
+rem DbDo.cs; syncIssVersion.ps1 (below) copies it into DbDo_setup.iss.
+rem Nothing to remember beyond running this script.
+if exist bumpVersion.ps1 (
+    echo Bumping version from latest release tag ... >> "!log!"
+    powershell -NoProfile -ExecutionPolicy Bypass -File bumpVersion.ps1 >> "!log!" 2>&1
+    if errorlevel 1 echo NOTE: version bump did not run; DbDo.cs left unchanged. >> "!log!"
+) else (
+    echo NOTE: bumpVersion.ps1 not found; skipping version bump. >> "!log!"
 )
-echo Bumping version ^(set %~2^) ... >> "!log!"
-echo Bumping version ^(set %~2^) ...
-powershell -NoProfile -ExecutionPolicy Bypass -File bumpVersion.ps1 -Set "%~2" >> "!log!" 2>&1
-if errorlevel 1 goto :bump_failed
-goto :after_bump
-
-:do_bump
-if not exist bumpVersion.ps1 goto :bump_missing
-echo Bumping version ^(%bumpArg%^) ... >> "!log!"
-echo Bumping version ^(%bumpArg%^) ...
-powershell -NoProfile -ExecutionPolicy Bypass -File bumpVersion.ps1 -Part %bumpArg% >> "!log!" 2>&1
-if errorlevel 1 goto :bump_failed
-goto :after_bump
-
-:bump_missing
-echo ERROR: bumpVersion.ps1 not found next to buildDbDo.cmd; cannot bump. >> "!log!"
-echo ERROR: bumpVersion.ps1 not found next to buildDbDo.cmd; cannot bump.
-popd
-exit /b 1
-
-:bump_failed
-echo ERROR: version bump failed (see log). DbDo.cs unchanged; build aborted. >> "!log!"
-echo ERROR: version bump failed (see log). DbDo.cs unchanged; build aborted.
-popd
-exit /b 1
-
-:after_bump
 
 rem ---- sync installer version from DbDo.cs (single source of truth) ----
 rem buildDbDo.cmd does not own the version. DbDo.cs's

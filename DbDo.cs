@@ -77,7 +77,7 @@ namespace DbDo
     // =====================================================================
     public static class BuildInfo
     {
-        public const string VersionString = "1.0.122";
+        public const string VersionString = "1.0.123";
     }
 
     // =====================================================================
