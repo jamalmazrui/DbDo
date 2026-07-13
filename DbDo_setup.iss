@@ -1,4 +1,4 @@
-; =====================================================================
+﻿; =====================================================================
 ; DbDo installer script for Inno Setup 6.x
 ;
 ; Compile with Inno Setup IDE (ISCC.exe) to produce DbDo_setup.exe.
@@ -281,65 +281,43 @@ Name: "{autodesktop}\{#AppName}"; \
   Comment: "Dual-mode database manager ({#HotKeyDisplay})"
 
 [Run]
-; The four entries below appear as checkboxes on the installer's
-; Finish page in this exact order. Entry 1 delegates to
-; DbDo.exe's --install-jaws-settings mode; the C# implementation
-; lives in DbDo.cs (class JawsSettingsInstaller) so the same
-; logic can be re-run later from the Help menu. Entry 2 hands
-; DbDo.nvda-addon to its Windows file association via Inno
-; Setup's shellexec flag so NVDA shows its native add-on install
-; dialog directly (see the comment block on entry 2 for why this
-; replaced the v1.0.45-v1.0.48 approach of going through
-; DbDo.exe --install-nvda-addon).
+; The four Finish-page checkboxes, in this order.  All are checked by default
+; except the user guide.  The order here IS the order shown.
 ;
-; 1. Install JAWS settings (checked by default).
-FileName: "{app}\{#AppExeName}"; \
+; 1. JAWS scripts.  "DbDo.exe --install-jaws-settings" copies the script family into
+;    every installed version of JAWS and compiles it there.  The implementation is the
+;    shared Homer.JawsSettingsInstaller (Jaws.cs), so EdSharp, FileDir, and DbDo all
+;    install scripts by the same code, and the command can be re-run later.
+FileName: "{app}\DbDo.exe"; \
   Parameters: "--install-jaws-settings"; \
   WorkingDir: "{app}"; \
-  Description: "Install JAWS settings for {#AppName} (recommended if you use JAWS)"; \
+  Description: "Install scripts for improving use with the JAWS screen reader"; \
   Flags: postinstall waituntilterminated runhidden skipifsilent
 
-; 2. Install NVDA add-on (checked by default).
-;
-; This entry uses Inno Setup's shellexec flag to hand the
-; .nvda-addon file directly to its Windows file association,
-; rather than going through DbDo.exe --install-nvda-addon as
-; v1.0.45-v1.0.48 did. The CLI flag in DbDo.exe is still
-; supported (it's how the Help menu's Re-install NVDA Add-on
-; command works), but routing through it at install time was
-; subtly broken: DbDo.exe called Process.Start with
-; UseShellExecute=true and then exited immediately with code 0,
-; satisfying Inno Setup's "waituntilterminated" wait before the
-; shell-execute resolution had completed. NVDA's add-on install
-; dialog therefore never appeared even when NVDA was running and
-; correctly registered as the .nvda-addon handler.
-;
-; Using shellexec directly here lets Inno Setup do the shell-
-; execute itself, which is what shellexec is designed for: it
-; uses ShellExecuteEx with proper handle tracking. NVDA opens its
-; standard "Install this add-on?" dialog, the user confirms or
-; cancels, NVDA finishes, and only then does Inno Setup move on.
-;
-; If NVDA is not installed (no .nvda-addon file association),
-; Windows shows its "How do you want to open this file?" picker.
-; That is acceptable: the user can dismiss it (NVDA is not in
-; use anyway) or pick an app. The Description below mentions
-; the "recommended if you use NVDA" condition.
+; 2. NVDA add-on.  Shell-executing the .nvda-addon hands it to NVDA's own file
+;    association, so NVDA shows its native add-on install dialog.  skipifdoesntexist
+;    means the checkbox simply does not appear if the app ships no add-on yet.
 FileName: "{app}\DbDo.nvda-addon"; \
   WorkingDir: "{app}"; \
-  Description: "Install NVDA add-on (NVDA must be running; restart NVDA after install for it to take effect)"; \
-  Flags: postinstall shellexec waituntilterminated skipifsilent
+  Description: "Install add-on for improving use with the NVDA screen reader"; \
+  Flags: postinstall shellexec waituntilterminated skipifsilent skipifdoesntexist
 
-; 3. Launch DbDo (checked by default).
-FileName: "{app}\{#AppExeName}"; \
+; 3. Launch the app.
+FileName: "{app}\DbDo.exe"; \
   WorkingDir: "{app}"; \
-  Description: "Launch {#AppName} now (or use the desktop hotkey {#HotKeyDisplay} anytime)"; \
+  Description: "Launch DbDo (Alt+Control+D)"; \
   Flags: nowait postinstall skipifsilent
 
-; 4. Open README (checked by default).
-FileName: "{app}\README.htm"; \
-  Description: "Read the {#AppName} README"; \
-  Flags: postinstall shellexec skipifsilent
+; 4. User guide -- the ONLY box not checked by default.
+FileName: "{app}\DbDo.htm"; \
+  Description: "Open user guide for DbDo"; \
+  Flags: postinstall shellexec skipifsilent skipifdoesntexist unchecked
+
+; Native image generation.  Not checkboxes: these run automatically and elevated, so
+; the installed copy starts from a cached native image instead of JIT-compiling.
+; Identical in all three apps.  HasNgen skips them if ngen.exe is absent.
+FileName: "{code:NgenExe}"; Parameters: "uninstall DbDo /nologo /silent"; Flags: runhidden; Check: HasNgen
+FileName: "{code:NgenExe}"; Parameters: "install ""{app}\DbDo.exe"" /AppBase:""{app}"" /nologo /silent"; Flags: runhidden; Check: HasNgen
 
 [UninstallRun]
 ; Symmetric to the JAWS-install [Run] entry above. Removes only
@@ -353,6 +331,24 @@ FileName: "{app}\{#AppExeName}"; \
   Flags: runhidden waituntilterminated skipifdoesntexist
 
 [Code]
+
+(* --------------------------------------------------------------------
+   Native image generation (ngen), identical to EdSharp and FileDir.
+
+   ngen ships with the 64-bit .NET Framework runtime; on an ARM64 system
+   the Framework64 path is the ARM64 framework.  HasNgen guards against a
+   missing file, so the [Run] ngen entries are simply skipped when ngen is
+   not present rather than failing the install.
+   -------------------------------------------------------------------- *)
+function NgenExe(sParam: string): string;
+begin
+  result := ExpandConstant('{win}\Microsoft.NET\Framework64\v4.0.30319\ngen.exe');
+end;
+
+function HasNgen(): boolean;
+begin
+  result := FileExists(ExpandConstant('{code:NgenExe}'));
+end;
 (* --------------------------------------------------------------------
    Pascal Script: silent driver install during the Installing step.
 

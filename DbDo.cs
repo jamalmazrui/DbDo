@@ -41,6 +41,7 @@ using System.Windows.Automation.Provider;
 using Microsoft.CSharp.RuntimeBinder;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
+using Homer;
 
 // =====================================================================
 // Assembly version resource. csc.exe stamps these three attributes
@@ -80,993 +81,6 @@ namespace DbDo
         // Version is single-sourced from AppVersion in DbDo_setup.iss; buildDbDo.cmd
         // generates Version.cs (BuildVersion.Version) from it at build time.
         public const string VersionString = BuildVersion.Version;
-    }
-
-    // =====================================================================
-    // LiveRegion: hidden announcement surface for screen-reader output.
-    //
-    // Purpose: a single global "speak this string" sink that works with
-    // any active screen reader (JAWS, NVDA, Narrator, Windows Magnifier
-    // speech) without DbDo having to know which one is in memory. The
-    // screen reader uses its own active voice; DbDo's job is to raise
-    // the standard accessibility events that screen readers listen for.
-    //
-    // Mechanism (the right one for .NET Framework 4.8):
-    //
-    //   1. A real Label control is added to the form, sized 1x1 and
-    //      tucked under the menu strip at (0, 0) but
-    //      Visible = true (screen readers ignore Visible=false elements).
-    //      The Label's LiveSetting property is set to Polite. This is
-    //      a built-in WinForms feature added in .NET Framework 4.7.1
-    //      and surfaced as a property in 4.8: any text change on a
-    //      Label whose LiveSetting is Polite or Assertive automatically
-    //      raises a UIA LiveRegionChanged event, which JAWS, NVDA, and
-    //      Narrator all listen for.
-    //
-    //   2. As a belt-and-suspenders fallback, after updating the
-    //      Label.Text we also try to fire the UIA Notification event
-    //      via reflection. RaiseAutomationNotification, added in the
-    //      Windows 10 Fall Creators Update, makes the screen reader
-    //      announce arbitrary text without requiring a control to be
-    //      shown. The reflection guard means this is silently skipped
-    //      on older Windows versions.
-    //
-    // Why the previous custom-NotifyWinEvent approach didn't work:
-    // EVENT_OBJECT_LIVEREGIONCHANGED on its own does not make a
-    // control a live region. The screen reader, on receiving the
-    // event, queries the source's UIA LiveSetting property; if that
-    // property is Off (the WinForms default), the event is ignored.
-    // The fix is to set LiveSetting to Polite or Assertive; once set,
-    // text changes auto-raise the right event with the right metadata.
-    //
-    // Caveats:
-    //   - Whether a particular screen reader actually announces depends
-    //     on its verbosity settings.
-    //   - The Label MUST be added to a form's Controls collection
-    //     before say() will reach a screen reader. DbDoForm wires
-    //     this up in its constructor.
-    //   - Polite (not Assertive) is the right choice: assertive
-    //     interrupts whatever the screen reader is currently saying,
-    //     which would make DbDo announcements rude. Polite queues
-    //     them after current speech.
-    // =====================================================================
-    public static class LiveRegion
-    {
-        private static Label lbl;
-        // Form reference saved at attach time so the pure-UIA path can
-        // raise notifications from the form's AccessibleObject rather
-        // than the 1x1 Label's. Narrator is particular about
-        // notification source: it tends to honor notifications from
-        // a top-level window's AccessibleObject and ignore them from
-        // marginal hidden controls. JAWS and NVDA are more permissive
-        // and pick up either source.
-        private static Form frmOwner;
-
-        // Reflection cache for AccessibleObject.RaiseAutomationNotification
-        // was removed in v1.0.87 when the UIA path switched to native
-        // P/Invoke against UIAutomationCore.dll. See dispatchNativeUia
-        // Notification and the NotificationHostControl / AnnouncerProvider
-        // classes below.
-
-        // Attach the live region to a form. Called once during form
-        // construction. The Label is a real on-screen control with
-        // LiveSetting=Polite; WinForms automatically raises the UIA
-        // LiveRegionChanged event when the Label's Text changes,
-        // which JAWS, NVDA, and Narrator all listen for.
-        //
-        // Placement: 1x1 at the form origin (0, 0). The Label sits
-        // tucked under the MenuStrip so it is visually unnoticeable
-        // to sighted users, but stays inside the form's client area,
-        // which guarantees it participates in the UIA tree. (A
-        // far-off-screen Location can sometimes be pruned from the
-        // tree by WinForms.)
-        public static void attach(Form frm)
-        {
-            if (lbl != null) return;
-            frmOwner = frm;
-            lbl = new Label();
-            lbl.AutoSize = false;
-            lbl.Size = new Size(1, 1);
-            lbl.Location = new Point(0, 0);
-            lbl.TabStop = false;
-            lbl.Visible = true;
-            lbl.Text = "";
-            lbl.AccessibleName = "";
-            lbl.AccessibleRole = AccessibleRole.StaticText;
-            // OFF: the announcement is made solely by the UIA Notification event.
-            // Assertive meant any change to the label's Text ALSO raised
-            // LiveRegionChanged, so one message produced two UIA events and a
-            // UIA-listening reader spoke it twice.
-            lbl.LiveSetting = AutomationLiveSetting.Off;
-            frm.Controls.Add(lbl);
-            // Force the handle to be created so the AccessibleObject
-            // is wired up before the first say() call. Without this,
-            // the very first announcement can race ahead of UIA tree
-            // initialization and be missed.
-            IntPtr hForce = lbl.Handle;
-        }
-
-        // Push a string to the live region. The Label's Text change
-        // auto-raises the UIA LiveRegionChanged event (because
-        // LiveSetting was set to Polite at attach time), and we also
-        // fire the UIA Notification event by reflection as a belt-
-        // and-suspenders fallback. If the live region was never
-        // attached (e.g., CLI-only mode), the call is silently
-        // ignored.
-        //
-        // The say() pipeline. Determines which screen reader is
-        // currently running and speaks through that reader's own
-        // API so the speech uses the user's configured voice and
-        // verbosity. No SAPI fallback -- if no screen reader is
-        // running, no speech happens. Per-reader paths:
-        //
-        //   1. JAWS:     FreedomSci.JawsApi COM object's SayString.
-        //                Detection: FindWindow("JFWUI2"), which is
-        //                JAWS's top-level UI window class. Avoids the
-        //                cost of creating the COM object just to test.
-        //
-        //   2. NVDA:     nvdaControllerClient.dll P/Invoke. The DLL
-        //                must be shipped alongside DbDo.exe. NVDA
-        //                does NOT expose a COM API; the controller
-        //                client is the documented IPC channel.
-        //                Detection: nvdaController_testIfRunning()
-        //                returns 0 when NVDA is running.
-        //
-        //   3. Narrator: UIA Notification event via
-        //                AccessibleObject.RaiseAutomationNotification.
-        //                Narrator does not have a per-app API; it
-        //                listens to UIA events. RaiseAutomationNotification
-        //                is the documented "announce this text now"
-        //                event. Also reaches NVDA and JAWS in their
-        //                UIA-enabled modes, but we already covered
-        //                those by direct API, so this is effectively
-        //                the Narrator path.
-        //                Detection: SystemParametersInfo SPI_GETSCREENREADER
-        //                returns true when any screen reader is
-        //                running. We use this only as a "does anything
-        //                care?" hint -- the Notification event is
-        //                cheap to fire whether or not Narrator is on.
-        //
-        // The Label-based live-region path that previous versions
-        // used (Label.LiveSetting=Assertive) is preserved as part of
-        // the Narrator path because some configurations of NVDA and
-        // JAWS in UIA-only mode listen for LiveRegionChanged in
-        // addition to / instead of their direct APIs.
-        //
-        // Priority order: if JAWS is detected, JAWS speaks and we
-        // stop (we don't want JAWS to also receive a UIA Notification
-        // and speak twice). Same for NVDA. Otherwise UIA Notification
-        // fires for Narrator (and any other UIA-listening reader).
-        public static void say(string sText)
-        {
-            // Extra-Speech gate: when off, DbDo's direct speech is
-            // suppressed but the screen reader's natural focus and
-            // selection announcements still occur. The flag is toggled
-            // by Toggle-Extra-Speech (Alt+Shift+S) and persisted to
-            // [General] extraSpeech in DbDo.inix. The toggle command
-            // itself uses sayForced so the user always hears their
-            // own action confirmed regardless of the flag's state.
-            if (!bExtraSpeechEnabled) return;
-            sayForced(sText);
-        }
-
-        // sayForced: bypass the Extra-Speech gate. Used for two
-        // narrow purposes: the Toggle-Extra-Speech command's own
-        // confirmation (so the user hears "extra speech off" when
-        // turning it off), and the Test-Reader command (which must
-        // produce speech to be diagnostic).
-        public static void sayForced(string sText)
-        {
-            string sNew = sText ?? "";
-            if (isJawsRunning() && jawsSay(sNew)) { sLastPath = "JAWS COM"; return; }
-            if (isNvdaRunning() && nvdaSay(sNew)) { sLastPath = "NVDA controller client"; return; }
-            // Fall through to the UIA path for Narrator and any
-            // unrecognized UIA-aware reader. Also useful as a debug
-            // signal: if you have a screen reader running that's
-            // detectable via SPI_GETSCREENREADER but not JAWS or
-            // NVDA, this is the path that reaches it.
-            sayViaUia(sNew);
-            sLastPath = "UIA Notification + LiveRegionChanged (Narrator and others)";
-            // Optional SAPI backup (off by default; see bUseSapiAsBackup).
-            // Speaks only when no screen reader is detected, so it never
-            // doubles a live reader and gives audible output where a bare
-            // UIA Notification would be silent. Mirrors Say's (the shared
-            // toolkit's) UseSapiAsBackup behavior for cross-app consistency.
-            if (bUseSapiAsBackup && !isJawsRunning() && !isNvdaRunning() && !isAnyScreenReaderActive())
-                if (sapiSay(sNew)) sLastPath = "SAPI backup (no screen reader detected)";
-        }
-
-        // sayParts: speak each unit as its OWN direct-speech message
-        // rather than concatenating into one run-on string. Both JAWS
-        // (SayString flush=false) and the NVDA controller client queue
-        // successive messages, so the units come out in order with a
-        // natural pause between them, which is markedly more
-        // intelligible. Each unit passes through the same Extra-Speech
-        // gate as say(); empty units are skipped so a missing piece
-        // doesn't leave a dead pause. This is the preferred way to
-        // voice any announcement built of logical units -- a cell's
-        // header / row / value, a list of columns, a column's values.
-        public static void sayParts(IEnumerable<string> parts)
-        {
-            if (parts == null) return;
-            foreach (string sPart in parts)
-                if (!string.IsNullOrEmpty(sPart)) say(sPart);
-        }
-
-        public static void sayParts(params string[] aParts)
-        {
-            sayParts((IEnumerable<string>)aParts);
-        }
-
-        // Extra-Speech enabled flag. Public mutable so the toggle
-        // command can flip it. Loaded from DbDo.inix at startup;
-        // default true. Persisted on change.
-        public static bool bExtraSpeechEnabled = true;
-
-        // Records which path the most recent say() call used. The
-        // Test-Reader command displays this so the user can confirm
-        // whether they are hearing speech through the direct JAWS
-        // COM call, the direct NVDA controller client, or the
-        // generic UIA Notification fallback.
-        private static string sLastPath = "(none yet)";
-        public static string lastSpeechPath()
-        {
-            return sLastPath;
-        }
-
-        // Diagnostic snapshot of the speech pipeline. Returns a
-        // multi-line string covering which readers are detected,
-        // which DLL is loadable, and which path the most recent
-        // say() used. Test-Reader presents this in a MessageBox.
-        public static string speechDiagnostic()
-        {
-            StringBuilder sb = new StringBuilder();
-            sb.AppendLine("Speech pipeline diagnostic");
-            sb.AppendLine();
-            sb.AppendLine("JAWS running (window class JFWUI2 found): " + (isJawsRunning() ? "yes" : "no"));
-            sb.AppendLine("JAWS COM ProgID FreedomSci.JawsApi reachable: "
-                + ((oJawsApi != null) ? "yes (cached)" : "(not yet probed or unavailable)"));
-            sb.AppendLine();
-            bool bNvdaDll = false;
-            try { nvdaController_testIfRunning(); bNvdaDll = true; }
-            catch (DllNotFoundException) { bNvdaDll = false; }
-            catch { bNvdaDll = true; }
-            sb.AppendLine("nvdaControllerClient.dll loadable: " + (bNvdaDll ? "yes" : "no (drop the DLL next to DbDo.exe to enable NVDA support)"));
-            sb.AppendLine("NVDA running (controller client says so): " + (isNvdaRunning() ? "yes" : "no"));
-            sb.AppendLine();
-            // SystemParametersInfo SPI_GETSCREENREADER: a generic
-            // "some screen reader is on" probe. Independent of JAWS
-            // or NVDA detection.
-            sb.AppendLine("Windows reports any screen reader active: " + (isAnyScreenReaderActive() ? "yes" : "no"));
-            sb.AppendLine();
-            sb.AppendLine("Most recent say() used path: " + sLastPath);
-            return sb.ToString();
-        }
-
-        // SystemParametersInfo SPI_GETSCREENREADER (action 70).
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        private static extern bool SystemParametersInfo(int iAction, int iParam, ref bool bResult, int iUpdate);
-        private const int SPI_GETSCREENREADER = 70;
-        private static bool isAnyScreenReaderActive()
-        {
-            try
-            {
-                bool bActive = false;
-                if (SystemParametersInfo(SPI_GETSCREENREADER, 0, ref bActive, 0))
-                    return bActive;
-            }
-            catch { }
-            return false;
-        }
-
-        // ---- JAWS: detection + speak ----
-        // JAWS exposes a top-level UI window of class "JFWUI2". This
-        // is the cheap detection path -- FindWindow does not require
-        // COM startup. (Creating FreedomSci.JawsApi when JAWS is not
-        // running is slow and produces a misleading "succeeded but
-        // nobody listening" object.)
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        private static extern IntPtr FindWindow(string sClass, string sTitle);
-        private static bool isJawsRunning()
-        {
-            try { return FindWindow("JFWUI2", null) != IntPtr.Zero; }
-            catch { return false; }
-        }
-
-        // Speak through JAWS. The COM object is cached after first
-        // successful creation. If COM creation succeeds, we re-use
-        // the object across calls; if SayString throws (JAWS
-        // crashed or was closed mid-session), reset and let the
-        // next call try again.
-        private static object oJawsApi;
-        private static bool jawsSay(string sText)
-        {
-            if (string.IsNullOrEmpty(sText)) return false;
-            try
-            {
-                if (oJawsApi == null)
-                {
-                    Type comType = Type.GetTypeFromProgID("FreedomSci.JawsApi");
-                    if (comType == null) return false;
-                    oJawsApi = Activator.CreateInstance(comType);
-                    if (oJawsApi == null) return false;
-                }
-                dynamic oJaws = oJawsApi;
-                // SayString(text, flush). flush=false queues politely
-                // rather than interrupting whatever JAWS is reading.
-                object result = oJaws.SayString(sText, false);
-                return result != null && (bool)result;
-            }
-            catch
-            {
-                oJawsApi = null;
-                return false;
-            }
-        }
-
-        // ---- NVDA: detection + speak ----
-        // NVDA ships a Controller Client DLL with C-style exports.
-        // Starting in NVDA 2026.1 the DLL is named simply
-        // nvdaControllerClient.dll (no architecture suffix); earlier
-        // releases shipped it as nvdaControllerClient64.dll for x64
-        // hosts and nvdaControllerClient32.dll for x86. NVDA's own
-        // current C# example uses the unsuffixed name and that is
-        // what the DbDo build script downloads and bundles. Place
-        // the DLL next to DbDo.exe and the DllImport finds it via
-        // the standard Windows DLL search order. If the DLL is
-        // missing, DllNotFoundException is caught silently and the
-        // NVDA path is unavailable.
-        //
-        // testIfRunning returns 0 when NVDA is running, non-zero
-        // otherwise (it's a Windows error code). speakText takes
-        // a wide-char string and returns 0 on success.
-        [DllImport("nvdaControllerClient.dll", CharSet = CharSet.Unicode, EntryPoint = "nvdaController_testIfRunning")]
-        private static extern int nvdaController_testIfRunning();
-        [DllImport("nvdaControllerClient.dll", CharSet = CharSet.Unicode, EntryPoint = "nvdaController_speakText")]
-        private static extern int nvdaController_speakText([MarshalAs(UnmanagedType.LPWStr)] string sText);
-        [DllImport("nvdaControllerClient.dll", CharSet = CharSet.Unicode, EntryPoint = "nvdaController_cancelSpeech")]
-        private static extern int nvdaController_cancelSpeech();
-
-        private static bool bNvdaProbed;
-        private static bool bNvdaDllPresent;
-        private static bool isNvdaRunning()
-        {
-            // First call: probe whether the DLL is loadable at all.
-            // Subsequent calls skip the probe and just call
-            // testIfRunning, which is cheap and reliable.
-            if (!bNvdaProbed)
-            {
-                bNvdaProbed = true;
-                try
-                {
-                    int iResult = nvdaController_testIfRunning();
-                    bNvdaDllPresent = true;
-                    return iResult == 0;
-                }
-                catch (DllNotFoundException)
-                {
-                    bNvdaDllPresent = false;
-                    return false;
-                }
-                catch { bNvdaDllPresent = false; return false; }
-            }
-            if (!bNvdaDllPresent) return false;
-            try { return nvdaController_testIfRunning() == 0; }
-            catch { return false; }
-        }
-
-        private static bool nvdaSay(string sText)
-        {
-            if (string.IsNullOrEmpty(sText)) return false;
-            if (!bNvdaDllPresent) return false;
-            try { return nvdaController_speakText(sText) == 0; }
-            catch { return false; }
-        }
-
-        // ---- Optional SAPI backup (shared-toolkit parity) ----
-        // Off by default. When enabled and no screen reader is detected,
-        // say() routes through the Windows SAPI voice so there is audible
-        // output where a bare UIA Notification would otherwise be silent.
-        public static bool bUseSapiAsBackup = false;
-        private static object oSapiVoice;
-        private static bool sapiSay(string sText)
-        {
-            if (string.IsNullOrEmpty(sText)) return false;
-            try
-            {
-                if (oSapiVoice == null)
-                {
-                    Type comType = Type.GetTypeFromProgID("SAPI.SPVoice");
-                    if (comType == null) return false;
-                    oSapiVoice = Activator.CreateInstance(comType);
-                    if (oSapiVoice == null) return false;
-                }
-                dynamic oVoice = oSapiVoice;
-                oVoice.Speak(sText, 1);
-                return true;
-            }
-            catch
-            {
-                oSapiVoice = null;
-                return false;
-            }
-        }
-
-        // ---- Narrator / generic UIA path ----
-        // Update the hidden Label's Text (auto-raises
-        // LiveRegionChanged because LiveSetting=Assertive) and also
-        // fire the UIA Notification event by reflection. Narrator
-        // listens to both event families; the Label path is the
-        // documented "live region" approach, the Notification path
-        // is the explicit "announce this now" approach.
-        private static void sayViaUia(string sText)
-        {
-            if (lbl == null) return;
-            if (lbl.IsDisposed) return;
-            try
-            {
-                if (lbl.InvokeRequired)
-                {
-                    lbl.Invoke(new Action<string>(sayViaUia), new object[] { sText });
-                    return;
-                }
-                // Raise the UIA Notification and nothing else.  Writing the label's
-                // Text used to be the announcement mechanism, but the label is a live
-                // region, so that write raised LiveRegionChanged too -- two events for
-                // one message, spoken twice.
-                raiseUiaNotification(sText);
-            }
-            catch { }
-        }
-
-        // raiseUiaNotification: legacy entry point used by sayViaUia
-        // (which is invoked from say() as a Narrator-only fallback when
-        // neither JAWS COM nor NVDA controller-client is reachable).
-        // The historical reflection-on-Label path was a documented
-        // dead end on .NET Framework 4.8: only Label / LinkLabel /
-        // GroupBox / ProgressBar honor AccessibleObject.RaiseAutomation
-        // Notification on that runtime, and even then the dispatch did
-        // not reach Narrator reliably on Windows 11.
-        //
-        // v1.0.87 replaces the body with a native-P/Invoke call to
-        // UiaRaiseNotificationEvent against a fresh per-call custom
-        // IRawElementProviderSimple. That technique reaches all three
-        // readers (verified by ChatGPT's reference sample, which the
-        // user confirmed worked end to end). The reflection path is
-        // gone; the method signature stays so sayViaUia's call site
-        // doesn't have to change.
-        private static void raiseUiaNotification(string sText)
-        {
-            dispatchNativeUiaNotification(sText, /*All*/ 2);
-        }
-
-        // sayUiaString: pure-UIA speech path. Fires the UIA
-        // RaiseAutomationNotification event directly, without going
-        // through JAWS COM, NVDA controller client, or the Label/
-        // LiveRegionChanged intermediary. Use for testing the UIA
-        // path in isolation or when the caller wants a single,
-        // simple announcement that doesn't depend on JAWS or NVDA
-        // being detected.
-        //
-        // Reaches JAWS, NVDA, and Narrator in their UIA-listening
-        // modes (which is their default). Does NOT go through
-        // JAWS's FreedomSci.JawsApi.SayString or NVDA's
-        // nvdaControllerClient.dll, so this path is independent of
-        // any per-screen-reader API.
-        //
-        // Inspired by the WPF approach in Kelly Ford's UIANotifications
-        // demo (https://github.com/kellylford/TheWorkBench/tree/main/UiaNotifyDemo).
-        // The WinForms equivalent uses AccessibleObject's
-        // RaiseAutomationNotification instead of WPF's
-        // UIElementAutomationPeer.RaiseNotificationEvent, but the
-        // underlying UIA event is the same.
-        //
-        // Source element: the form's own AccessibleObject (not the
-        // hidden 1x1 Label that the legacy say() path uses). Narrator
-        // honors notifications from top-level windows but tends to
-        // ignore them from marginal hidden controls. JAWS and NVDA
-        // accept either. Processing mode is "All" (value 2), matching
-        // the behavior of the legacy sayViaUia path that DbDo's
-        // Narrator fallback was already using successfully -- "All"
-        // means deliver to every listener without queue restrictions.
-        // sayUiaString: pure-UIA speech path. Fires the UIA
-        // notification event directly via native UIAutomationCore.dll,
-        // bypassing JAWS COM, NVDA controller client, and the legacy
-        // reflection-on-AccessibleObject technique that previous
-        // versions (v1.0.76 - v1.0.86) used. The new path is adapted
-        // from ChatGPT's verified reference sample which reaches
-        // JAWS, NVDA, and Narrator on the same machine.
-        //
-        // Why it works where the managed RaiseAutomationNotification
-        // failed: on .NET Framework 4.8, AccessibleObject.RaiseAutomation
-        // Notification is honored only by Label / LinkLabel / GroupBox /
-        // ProgressBar, and even those reach Narrator inconsistently.
-        // The native UiaRaiseNotificationEvent (in UIAutomationCore.dll)
-        // has no such restriction; given a fully-implemented
-        // IRawElementProviderSimple anchored to a real window through
-        // WM_GETOBJECT, the screen reader's UIA listener picks the
-        // event up directly.
-        //
-        // Reaches JAWS, NVDA, and Narrator in their UIA-listening
-        // modes. Does NOT go through JAWS's FreedomSci.JawsApi.SayString
-        // or NVDA's nvdaControllerClient.dll.
-        public static void sayUiaString(string sText)
-        {
-            dispatchNativeUiaNotification(sText, /*All*/ 2);
-        }
-
-        // sayUiaStringForced: like sayUiaString but uses the
-        // ImportantMostRecent processing mode, which screen readers
-        // treat as "interrupt current speech and say this now." Use
-        // for time-critical announcements (errors, completion of a
-        // long operation the user is waiting on).
-        public static void sayUiaStringForced(string sText)
-        {
-            dispatchNativeUiaNotification(sText, /*ImportantMostRecent*/ 1);
-        }
-
-        // dispatchNativeUiaNotification: the actual native UIA path.
-        // Adapted from ChatGPT-generated reference sample (which the
-        // user confirmed works for JAWS, NVDA, and Narrator on Windows
-        // 11 with .NET Framework 4.8). Bypasses the managed
-        // AccessibleObject.RaiseAutomationNotification API entirely.
-        //
-        //   1. Create a fresh hidden NotificationHostControl (custom
-        //      Control subclass that overrides WndProc to respond to
-        //      WM_GETOBJECT by returning a custom IRawElementProvider
-        //      Simple). The control is added to the form's Controls
-        //      so it has a real window handle; UIA's source-validity
-        //      check passes because WM_GETOBJECT returns a provider
-        //      genuinely associated with the hwnd.
-        //   2. Call UiaRaiseNotificationEvent (P/Invoke into
-        //      UIAutomationCore.dll) with the provider as the source.
-        //   3. Retain the host on a small ring so it survives long
-        //      enough for the screen reader's async UIA listener to
-        //      finish reading the Name property. We keep the last 5
-        //      hosts before disposing the oldest. The unique sequence
-        //      number on each host also prevents UIA from deduping
-        //      "same source + same text" pairs.
-        //
-        // Threading: must run on the UI thread (creating Controls and
-        // adding to frmOwner.Controls is a UI-thread operation). If
-        // called from a worker thread, marshal via frmOwner.BeginInvoke.
-        //
-        // Why a fresh host per call (and not a reused pool): ChatGPT's
-        // empirical investigation (uia_notify_winforms_repeat_fix
-        // sample, "Most Important Behavioral Finding" in its findings
-        // doc) determined that reusing a provider for multiple
-        // announcements causes screen readers / UIA to silently drop
-        // later events, even when the text differs. The dedupe
-        // heuristic appears to operate per-source-HWND, so any reuse
-        // -- whether a single host or a small pool cycled
-        // round-robin -- will eventually drop announcements when two
-        // consecutive calls land on the same host. A fresh control
-        // per call is the only pattern proven to work for JAWS, NVDA,
-        // and Narrator simultaneously.
-        //
-        // The cost is small in absolute terms: creating a 1x1 Control
-        // with an HWND is on the order of tenths of a millisecond and
-        // a few KB of managed memory. The retention ring caps the live
-        // host count at 5; older hosts are disposed and their HWNDs
-        // released. For a database manager where announcements fire
-        // on user actions (cell moves, refreshes, edits), this is
-        // invisible in normal usage. Do not "optimize" this to a
-        // shared host -- it has been tried and it breaks Narrator and
-        // NVDA after the first announcement.
-        private static System.Collections.Generic.List<NotificationHostControl> lOldHosts
-            = new System.Collections.Generic.List<NotificationHostControl>();
-        private static int iNotificationSequence;
-
-        private static void dispatchNativeUiaNotification(string sText, int iProcessing)
-        {
-            if (string.IsNullOrEmpty(sText)) return;
-            if (frmOwner == null || frmOwner.IsDisposed) return;
-            if (frmOwner.InvokeRequired)
-            {
-                try
-                {
-                    frmOwner.BeginInvoke(new Action(delegate()
-                    {
-                        dispatchNativeUiaNotification(sText, iProcessing);
-                    }));
-                }
-                catch { /* form may be tearing down; non-fatal */ }
-                return;
-            }
-            try
-            {
-                iNotificationSequence++;
-                NotificationHostControl host = new NotificationHostControl(
-                    iNotificationSequence, sText);
-                host.Left = 0;
-                host.Top = 0;
-                frmOwner.Controls.Add(host);
-                host.CreateControl();  // force hwnd allocation
-                lOldHosts.Add(host);
-
-                // Retain the last 5 hosts. Disposing immediately can
-                // cause UIA / the screen reader to lose the source
-                // before reading the Name property asynchronously.
-                while (lOldHosts.Count > 5)
-                {
-                    NotificationHostControl old = lOldHosts[0];
-                    lOldHosts.RemoveAt(0);
-                    try
-                    {
-                        if (frmOwner != null && !frmOwner.IsDisposed)
-                            frmOwner.Controls.Remove(old);
-                    }
-                    catch { }
-                    try { old.Dispose(); } catch { }
-                }
-
-                // Fully qualify the enum types: both
-                // System.Windows.Forms.Automation and
-                // System.Windows.Automation define same-named enums
-                // (AutomationNotificationKind, AutomationNotification
-                // Processing). The UIAutomationCore.dll P/Invoke
-                // expects the System.Windows.Automation versions.
-                System.Windows.Automation.AutomationNotificationProcessing proc =
-                    (iProcessing == 1)
-                        ? System.Windows.Automation.AutomationNotificationProcessing.ImportantMostRecent
-                        : System.Windows.Automation.AutomationNotificationProcessing.All;
-                string sActivityId = "DbDo." + iNotificationSequence.ToString() + "." + Guid.NewGuid().ToString("N");
-                UiaNative.UiaRaiseNotificationEvent(
-                    host.ProviderAnnouncer,
-                    System.Windows.Automation.AutomationNotificationKind.Other,
-                    proc,
-                    sText,
-                    sActivityId);
-            }
-            catch { /* native UIA dispatch failures are non-fatal */ }
-        }
-    }
-
-    // =====================================================================
-    // Native UIA dispatch helpers (v1.0.87). Adapted from ChatGPT's
-    // reference sample that the user confirmed reaches JAWS, NVDA, and
-    // Narrator simultaneously on Windows 11 with .NET Framework 4.8.
-    //
-    // NotificationHostControl is a 1x1 invisible Control that owns a
-    // genuine HWND. By overriding WndProc to respond to WM_GETOBJECT,
-    // it returns a custom IRawElementProviderSimple (AnnouncerProvider)
-    // when UIA queries the window. UIA / the screen reader sees a
-    // legitimate UIA element in the tree, so when we call
-    // UiaRaiseNotificationEvent against that provider, the event
-    // reaches all three readers.
-    //
-    // AnnouncerProvider is the IRawElementProviderSimple implementation.
-    // It exposes a minimal but complete set of UIA properties: Name
-    // (the message text), AutomationId, ControlType=Text, FrameworkId,
-    // IsControlElement=true, IsContentElement=true. HostRawElementProvider
-    // anchors the provider to the host window via
-    // AutomationInteropProvider.HostProviderFromHandle.
-    //
-    // UiaNative.UiaRaiseNotificationEvent is a P/Invoke binding to the
-    // native function in UIAutomationCore.dll. The managed wrapper
-    // AccessibleObject.RaiseAutomationNotification on .NET Framework
-    // 4.8 only works for four specific control types (Label, LinkLabel,
-    // GroupBox, ProgressBar) and even then doesn't reach Narrator
-    // reliably; the native function has no such restriction.
-    // =====================================================================
-    public class NotificationHostControl : Control
-    {
-        private const int c_iWmGetObject = 0x003D;
-        private AnnouncerProvider providerAnnouncer;
-        public int iSequence;
-        public string sMessageText;
-
-        public NotificationHostControl(int iSeq, string sMsg)
-        {
-            this.TabStop = false;
-            this.Width = 1;
-            this.Height = 1;
-            this.Text = "DbDo notification host " + iSeq.ToString();
-            this.AccessibleName = sMsg;
-            this.iSequence = iSeq;
-            this.sMessageText = sMsg;
-            this.providerAnnouncer = null;
-        }
-
-        public AnnouncerProvider ProviderAnnouncer
-        {
-            get
-            {
-                ensureProvider();
-                return providerAnnouncer;
-            }
-        }
-
-        protected override void OnHandleCreated(EventArgs e)
-        {
-            base.OnHandleCreated(e);
-            ensureProvider();
-        }
-
-        protected override void WndProc(ref Message m)
-        {
-            if (m.Msg == c_iWmGetObject)
-            {
-                ensureProvider();
-                m.Result = AutomationInteropProvider.ReturnRawElementProvider(
-                    this.Handle, m.WParam, m.LParam, providerAnnouncer);
-                return;
-            }
-            base.WndProc(ref m);
-        }
-
-        private void ensureProvider()
-        {
-            if (providerAnnouncer == null && this.IsHandleCreated)
-            {
-                providerAnnouncer = new AnnouncerProvider(this.Handle, iSequence, sMessageText);
-            }
-        }
-    }
-
-    public class AnnouncerProvider : IRawElementProviderSimple
-    {
-        private const int c_iAutomationIdProperty   = 30011;
-        private const int c_iControlTypeProperty    = 30003;
-        private const int c_iFrameworkIdProperty    = 30024;
-        private const int c_iIsContentElementProperty = 30017;
-        private const int c_iIsControlElementProperty = 30016;
-        private const int c_iNameProperty           = 30005;
-        private const int c_iTextControlType        = 50020;
-
-        private IntPtr hWindow;
-        private int iSequence;
-        private string sName;
-
-        public AnnouncerProvider(IntPtr hWnd, int iSeq, string sNameIn)
-        {
-            this.hWindow = hWnd;
-            this.iSequence = iSeq;
-            this.sName = sNameIn;
-        }
-
-        public ProviderOptions ProviderOptions
-        {
-            get { return ProviderOptions.ServerSideProvider; }
-        }
-
-        public IRawElementProviderSimple HostRawElementProvider
-        {
-            get { return AutomationInteropProvider.HostProviderFromHandle(hWindow); }
-        }
-
-        public object GetPatternProvider(int iPatternId)
-        {
-            return null;
-        }
-
-        public object GetPropertyValue(int iPropertyId)
-        {
-            if (iPropertyId == c_iNameProperty)              return sName;
-            if (iPropertyId == c_iAutomationIdProperty)      return "DbDoNotification" + iSequence.ToString();
-            if (iPropertyId == c_iControlTypeProperty)       return c_iTextControlType;
-            if (iPropertyId == c_iFrameworkIdProperty)       return "WinForms";
-            if (iPropertyId == c_iIsControlElementProperty)  return true;
-            if (iPropertyId == c_iIsContentElementProperty)  return true;
-            return null;
-        }
-    }
-
-    public static class UiaNative
-    {
-        [DllImport("UIAutomationCore.dll", PreserveSig = true)]
-        public static extern int UiaRaiseNotificationEvent(
-            IRawElementProviderSimple provider,
-            System.Windows.Automation.AutomationNotificationKind notificationKind,
-            System.Windows.Automation.AutomationNotificationProcessing notificationProcessing,
-            [MarshalAs(UnmanagedType.BStr)] string displayString,
-            [MarshalAs(UnmanagedType.BStr)] string activityId);
-    }
-
-    // =====================================================================
-    // JawsSettingsInstaller: copy DbDo.jkm and DbDo.jss into every
-    // installed JAWS user-settings folder and run scompile.exe to
-    // produce DbDo.jsb there. The Pascal-Script equivalent that
-    // shipped with v1.0.39 worked but lived inside DbDo_setup.iss;
-    // moving it to C# lets the user re-trigger it later without
-    // re-running the full installer, and consolidates the JAWS-
-    // version-discovery logic in one place.
-    //
-    // Invoked two ways:
-    //   - From the installer's [Run] section as
-    //     `DbDo.exe --install-jaws-settings`, which runs the install
-    //     and exits without launching the GUI.
-    //   - From the Help menu's "Install JAWS settings" command, which
-    //     re-runs the install (for users who upgraded JAWS to a new
-    //     year-version after installing DbDo).
-    //
-    // Returns a multi-line report of what was done. Caller chooses
-    // whether to show it (the menu version pops a dialog; the CLI
-    // version prints it).
-    // =====================================================================
-    public static class JawsSettingsInstaller
-    {
-        // Find scompile.exe for a given JAWS year-version. Tries the
-        // registry value HKLM\Software\Freedom Scientific\JAWS\<ver>\
-        // Target first, then falls back to {pf}\Freedom Scientific\
-        // JAWS\<ver>\scompile.exe.
-        private static string findScompilePath(string sVersion)
-        {
-            try
-            {
-                using (Microsoft.Win32.RegistryKey key = Microsoft.Win32.Registry.LocalMachine
-                    .OpenSubKey(@"Software\Freedom Scientific\JAWS\" + sVersion))
-                {
-                    if (key != null)
-                    {
-                        string sTarget = key.GetValue("Target") as string;
-                        if (!string.IsNullOrEmpty(sTarget))
-                        {
-                            string sCompile = System.IO.Path.Combine(sTarget, "scompile.exe");
-                            if (System.IO.File.Exists(sCompile)) return sCompile;
-                        }
-                    }
-                }
-            }
-            catch { /* registry access can fail under low privilege; fall through */ }
-
-            string sPf = Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles);
-            string sFallback = System.IO.Path.Combine(sPf,
-                @"Freedom Scientific\JAWS\" + sVersion + @"\scompile.exe");
-            if (System.IO.File.Exists(sFallback)) return sFallback;
-            return null;
-        }
-
-        // Run the install. Returns a human-readable report and, via
-        // the iCopied / iCompiled out-parameters, totals the caller
-        // can use for status text. Records every path placed in a
-        // log under %APPDATA%\DbDo\jawsSettings.log so the matching
-        // uninstall path can remove exactly those files.
-        public static string install(string sAppFolder, out int iCopied, out int iCompiled)
-        {
-            iCopied = 0;
-            iCompiled = 0;
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            System.Collections.Generic.List<string> lLog = new System.Collections.Generic.List<string>();
-
-            string sJawsRoot = System.IO.Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                @"Freedom Scientific\JAWS");
-            if (!System.IO.Directory.Exists(sJawsRoot))
-            {
-                sb.AppendLine("JAWS does not appear to be installed for the current user.");
-                sb.AppendLine("(No folder at " + sJawsRoot + ")");
-                return sb.ToString();
-            }
-
-            string sJkmSource = System.IO.Path.Combine(sAppFolder, "DbDo.jkm");
-            string sJssSource = System.IO.Path.Combine(sAppFolder, "DbDo.jss");
-            if (!System.IO.File.Exists(sJkmSource))
-            {
-                sb.AppendLine("DbDo.jkm not found in " + sAppFolder + ".");
-                return sb.ToString();
-            }
-            if (!System.IO.File.Exists(sJssSource))
-            {
-                sb.AppendLine("DbDo.jss not found in " + sAppFolder + ".");
-                return sb.ToString();
-            }
-
-            foreach (string sVersionPath in System.IO.Directory.GetDirectories(sJawsRoot))
-            {
-                string sVersion = System.IO.Path.GetFileName(sVersionPath);
-                string sSettingsPath = System.IO.Path.Combine(sVersionPath, "Settings");
-                if (!System.IO.Directory.Exists(sSettingsPath)) continue;
-                string sScompile = findScompilePath(sVersion);
-
-                foreach (string sLangPath in System.IO.Directory.GetDirectories(sSettingsPath))
-                {
-                    string sLang = System.IO.Path.GetFileName(sLangPath);
-                    string sJkmTarget = System.IO.Path.Combine(sLangPath, "DbDo.jkm");
-                    string sJssTarget = System.IO.Path.Combine(sLangPath, "DbDo.jss");
-                    string sJsbTarget = System.IO.Path.Combine(sLangPath, "DbDo.jsb");
-
-                    bool bJkmOk = false, bJssOk = false, bJsbOk = false;
-                    try { System.IO.File.Copy(sJkmSource, sJkmTarget, true); bJkmOk = true; iCopied++; lLog.Add(sJkmTarget); }
-                    catch (Exception ex) { sb.AppendLine("FAIL: copy jkm to " + sJkmTarget + ": " + ex.Message); }
-                    try { System.IO.File.Copy(sJssSource, sJssTarget, true); bJssOk = true; iCopied++; lLog.Add(sJssTarget); }
-                    catch (Exception ex) { sb.AppendLine("FAIL: copy jss to " + sJssTarget + ": " + ex.Message); }
-
-                    if (bJssOk && !string.IsNullOrEmpty(sScompile))
-                    {
-                        try
-                        {
-                            System.Diagnostics.ProcessStartInfo psi =
-                                new System.Diagnostics.ProcessStartInfo(sScompile, "DbDo.jss");
-                            psi.WorkingDirectory = sLangPath;
-                            psi.UseShellExecute = false;
-                            psi.CreateNoWindow = true;
-                            psi.RedirectStandardOutput = true;
-                            psi.RedirectStandardError = true;
-                            using (System.Diagnostics.Process proc = System.Diagnostics.Process.Start(psi))
-                            {
-                                proc.WaitForExit(10000);
-                                if (proc.HasExited && proc.ExitCode == 0 && System.IO.File.Exists(sJsbTarget))
-                                { bJsbOk = true; iCompiled++; lLog.Add(sJsbTarget); }
-                                else
-                                {
-                                    string sErr = proc.HasExited ? proc.StandardError.ReadToEnd() : "(timed out)";
-                                    sb.AppendLine("FAIL: compile " + sJsbTarget + " - " + sErr.Trim());
-                                }
-                            }
-                        }
-                        catch (Exception ex) { sb.AppendLine("FAIL: compile " + sJsbTarget + ": " + ex.Message); }
-                    }
-                    else if (bJssOk && string.IsNullOrEmpty(sScompile))
-                    {
-                        sb.AppendLine("WARN: scompile.exe not found for JAWS " + sVersion
-                            + "; placed jss but did not compile (run scompile manually).");
-                    }
-
-                    sb.AppendLine("JAWS " + sVersion + " / " + sLang + ": "
-                        + (bJkmOk ? "jkm " : "no-jkm ")
-                        + (bJssOk ? "jss " : "no-jss ")
-                        + (bJsbOk ? "jsb" : "no-jsb"));
-                }
-            }
-
-            // Persist the log so the matching uninstall step can
-            // remove exactly the files we placed.
-            try
-            {
-                string sLogPath = getLogPath();
-                System.IO.Directory.CreateDirectory(System.IO.Path.GetDirectoryName(sLogPath));
-                System.IO.File.WriteAllLines(sLogPath, lLog);
-            }
-            catch (Exception ex) { sb.AppendLine("WARN: could not write log: " + ex.Message); }
-
-            return sb.ToString();
-        }
-
-        // Uninstall: read the log, delete each path listed, then
-        // delete the log itself. Mirrors what the Pascal Script
-        // CurUninstallStepChanged did in v1.0.39.
-        public static string uninstall(out int iDeleted)
-        {
-            iDeleted = 0;
-            System.Text.StringBuilder sb = new System.Text.StringBuilder();
-            string sLogPath = getLogPath();
-            if (!System.IO.File.Exists(sLogPath))
-            {
-                sb.AppendLine("No jawsSettings.log found; nothing to remove.");
-                return sb.ToString();
-            }
-            try
-            {
-                string[] aPaths = System.IO.File.ReadAllLines(sLogPath);
-                foreach (string sPath in aPaths)
-                {
-                    if (string.IsNullOrWhiteSpace(sPath)) continue;
-                    try
-                    {
-                        if (System.IO.File.Exists(sPath))
-                        {
-                            System.IO.File.Delete(sPath);
-                            iDeleted++;
-                            sb.AppendLine("removed " + sPath);
-                        }
-                    }
-                    catch (Exception ex) { sb.AppendLine("FAIL: " + sPath + ": " + ex.Message); }
-                }
-                try { System.IO.File.Delete(sLogPath); } catch { /* tolerate */ }
-                try { System.IO.Directory.Delete(System.IO.Path.GetDirectoryName(sLogPath), false); }
-                catch { /* only succeeds if empty; ok either way */ }
-            }
-            catch (Exception ex) { sb.AppendLine("FAIL: read log: " + ex.Message); }
-            return sb.ToString();
-        }
-
-        private static string getLogPath()
-        {
-            return System.IO.Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                @"DbDo\jawsSettings.log");
-        }
     }
 
     // =====================================================================
@@ -2181,655 +1195,6 @@ namespace DbDo
                 }
             }
             return sbOut.ToString();
-        }
-    }
-
-    // =====================================================================
-    // InixCodec: read and write .inix files. Inix is DbDo's extended .ini
-    // format -- a friendlier serialization than JSON or TOML for both
-    // configuration data and tabular data, designed to be readable and
-    // editable in any plain-text editor.
-    //
-    // SYNTAX
-    //
-    // Sections: [SectionName] on a line. Sections in order; the file is
-    // a list of dictionaries. If the first line of the file is a key=value
-    // pair without a section header, an implicit "[Global]" section is
-    // assumed.
-    //
-    // Keys and values: key=value on a line. Whitespace around key and
-    // value is trimmed. Empty value (key=) starts a multi-line value
-    // that runs until the next key, the next section header, or EOF.
-    //
-    // Multi-line values, plain form:  key=  followed by lines verbatim
-    // until a line that contains '=' (a new key) or '[' (a new section)
-    // or end-of-file. Cannot contain lines whose first non-whitespace
-    // character is '=' or '['.
-    //
-    // Multi-line values, fenced form:  key=`  on a line by itself, then
-    // value lines verbatim, then a single `  on a line by itself to
-    // close. Python-style key="""  ...  """ is equivalent. The fenced
-    // form is the reliable way to embed '=' or '[' characters in a value.
-    //
-    // Comments: lines whose first non-whitespace character is ';' are
-    // ignored at the top level. A section can be commented out with
-    // [;SectionName] -- the whole section's body is skipped.
-    //
-    // Anonymous sections: [] (or just [Record], with optional NNN suffix)
-    // implies a list-of-records table. Each anonymous or [RecordNNN]
-    // section is one row. The keys of the first such section are the
-    // column headers; subsequent sections may include any subset.
-    //
-    // Encoding: UTF-8 with BOM. Line terminators: CRLF. Verbatim
-    // multi-line content preserves whatever line endings the source has.
-    //
-    // EXAMPLES
-    //
-    // Configuration form (dictionary of dictionaries):
-    //
-    //   ; Top-level "global" keys are an implicit [Global] section.
-    //   IgnoreCase = True
-    //
-    //   [Replace dog with cat]
-    //   find = dog
-    //   replace = Cat
-    //
-    //   [Replace sheep with goat]
-    //   find = Sheep
-    //   replace = goat
-    //
-    // Table form (list of records):
-    //
-    //   [Record01]
-    //   name = Alice
-    //   notes =
-    //   Alice's notes
-    //   over two lines.
-    //
-    //   [Record02]
-    //   name = Bob
-    //   notes = single-line note
-    //
-    // The leading-zero width on [RecordNNN] section names matches the
-    // record count: 5 records -> [Record1..5], 99 records -> [Record01..99],
-    // 999 records -> [Record001..999]. ASCII sort of section names then
-    // matches numeric order.
-    // =====================================================================
-    public static class InixCodec
-    {
-        // A single key/value pair, preserving order within a section.
-        public class Pair
-        {
-            public string Key;
-            public string Value;
-            public Pair(string sK, string sV) { Key = sK; Value = sV; }
-        }
-
-        // A single section: name plus ordered list of pairs. Order of
-        // pairs is preserved on round-trip.
-        public class Section
-        {
-            public string Name;
-            public List<Pair> Pairs = new List<Pair>();
-            public Section(string sName) { Name = sName; }
-
-            // Lookup is case-insensitive on the key (matches the .ini
-            // convention). Returns null if the key is absent.
-            public string get(string sKey)
-            {
-                foreach (Pair p in Pairs)
-                    if (string.Equals(p.Key, sKey, StringComparison.OrdinalIgnoreCase))
-                        return p.Value;
-                return null;
-            }
-
-            // getArray: the value read as an array of items -- the read
-            // side of the .inix array convention. A value that spans
-            // multiple lines yields one item per line; a single-line value
-            // containing commas is split on commas; any other non-blank
-            // value is a one-item array. Surrounding whitespace and blank
-            // items are dropped. Returns an empty list when the key is
-            // absent or blank.
-            public List<string> getArray(string sKey)
-            {
-                List<string> l = new List<string>();
-                string sRaw = get(sKey);
-                if (string.IsNullOrEmpty(sRaw)) return l;
-                string sNorm = sRaw.Replace("\r\n", "\n").Replace("\r", "\n");
-                string[] aParts;
-                if (sNorm.IndexOf('\n') >= 0)     aParts = sNorm.Split('\n');
-                else if (sNorm.IndexOf(',') >= 0) aParts = sNorm.Split(',');
-                else                              aParts = new string[] { sNorm };
-                foreach (string s in aParts)
-                {
-                    string sT = (s ?? "").Trim();
-                    if (sT.Length > 0) l.Add(sT);
-                }
-                return l;
-            }
-
-            // Returns the full ordered list of keys.
-            public List<string> keys()
-            {
-                List<string> l = new List<string>();
-                foreach (Pair p in Pairs) l.Add(p.Key);
-                return l;
-            }
-        }
-
-        // Parse an .inix file. The returned list of sections preserves
-        // file order. Implicit "[Global]" is created if the file starts
-        // with key=value pairs before any explicit section header. The
-        // returned list is empty if the file has no sections and no
-        // top-level keys.
-        public static List<Section> read(string sPath)
-        {
-            if (string.IsNullOrEmpty(sPath)) throw new ArgumentException("InixCodec.read requires a path.");
-            if (!File.Exists(sPath)) throw new FileNotFoundException(".inix file not found.", sPath);
-            string[] aLines = File.ReadAllLines(sPath, new UTF8Encoding(true));
-            return parseLines(aLines);
-        }
-
-        // fileTask: the declared purpose of an .inix file, read from the
-        // "FileTask" key of its implicit [Global] section -- e.g. "report"
-        // for a report definition or "transfer" for a Transfer-Import map.
-        // Returns "" when the file declares no FileTask, is unreadable, or
-        // is absent. The value is trimmed and lower-cased so callers can
-        // compare it directly. This is what lets a command that offers a
-        // pick-list of .inix files show only the files whose task matches
-        // the command (so a report picker never lists a transfer map or a
-        // settings file, and vice versa).
-        public static string fileTask(string sPath)
-        {
-            try { return fileTask(read(sPath)); }
-            catch { return ""; }
-        }
-
-        // fileTask overload for callers that have already parsed the file,
-        // so the FileTask can be read without a second pass over the disk.
-        public static string fileTask(List<Section> lSections)
-        {
-            if (lSections == null) return "";
-            foreach (Section s in lSections)
-                if (string.Equals(s.Name, "Global", StringComparison.OrdinalIgnoreCase))
-                {
-                    string sValue = s.get("FileTask");
-                    return string.IsNullOrEmpty(sValue) ? "" : sValue.Trim().ToLowerInvariant();
-                }
-            return "";
-        }
-
-        // parseLines: the actual state machine. Separated from read so
-        // unit tests can drive it without disk I/O.
-        public static List<Section> parseLines(string[] aLines)
-        {
-            List<Section> lSections = new List<Section>();
-            Section secCurrent = null;       // null means "no section yet"
-            string sPendingKey = null;       // multi-line value accumulator state
-            StringBuilder sbValue = null;
-            string sFenceToken = null;       // "`" or "\"\"\"" when inside a fenced value
-            bool bSkipSection = false;       // section commented out via [;Name]
-
-            // Helper to commit a pending multi-line value to the
-            // current section. Strips the LAST trailing newline so that
-            // the value doesn't carry an extra CRLF from the closing
-            // line break.
-            Action commitPending = delegate()
-            {
-                if (sPendingKey == null) return;
-                string sFinal = (sbValue != null) ? sbValue.ToString() : "";
-                // Drop one trailing newline if present.
-                if (sFinal.EndsWith("\r\n")) sFinal = sFinal.Substring(0, sFinal.Length - 2);
-                else if (sFinal.EndsWith("\n")) sFinal = sFinal.Substring(0, sFinal.Length - 1);
-                if (secCurrent != null && !bSkipSection)
-                    secCurrent.Pairs.Add(new Pair(sPendingKey, sFinal));
-                sPendingKey = null;
-                sbValue = null;
-                sFenceToken = null;
-            };
-
-            for (int i = 0; i < aLines.Length; i++)
-            {
-                string sRaw = aLines[i] ?? "";
-
-                // Fenced multi-line value: accept the line VERBATIM
-                // until a closing fence appears on a line by itself.
-                if (sFenceToken != null)
-                {
-                    if (sRaw.Trim() == sFenceToken)
-                    {
-                        // Closing fence: commit and exit fenced mode.
-                        commitPending();
-                        continue;
-                    }
-                    if (sbValue.Length > 0) sbValue.Append("\r\n");
-                    sbValue.Append(sRaw);
-                    continue;
-                }
-
-                string sTrim = sRaw.Trim();
-
-                // Plain multi-line value: accumulate lines until we see
-                // a line that looks like a section header or a key=
-                // line. The plain form requires that continuation lines
-                // do NOT start with '[' or contain '=' as a meaningful
-                // separator. Comment lines (starting with ';') in plain-
-                // multi-line mode are treated as ordinary value content.
-                if (sPendingKey != null)
-                {
-                    bool bLooksLikeSection = sTrim.StartsWith("[") && sTrim.EndsWith("]");
-                    bool bLooksLikeKey = !sTrim.StartsWith(";")
-                                         && sTrim.IndexOf('=') > 0
-                                         && !looksLikePartOfValue(sTrim);
-                    if (bLooksLikeSection || bLooksLikeKey)
-                    {
-                        commitPending();
-                        // Fall through to process this line as the new
-                        // section or key.
-                    }
-                    else
-                    {
-                        if (sbValue.Length > 0) sbValue.Append("\r\n");
-                        sbValue.Append(sRaw);
-                        continue;
-                    }
-                }
-
-                // Section header.
-                if (sTrim.StartsWith("[") && sTrim.EndsWith("]") && sTrim.Length >= 2)
-                {
-                    string sInner = sTrim.Substring(1, sTrim.Length - 2);
-                    bSkipSection = sInner.StartsWith(";");
-                    if (bSkipSection)
-                    {
-                        // We still create a section with an empty name
-                        // and no pairs, but mark it skipped so we don't
-                        // store anything? Simpler: just don't create a
-                        // section at all -- the comment-out is total.
-                        secCurrent = null;
-                        continue;
-                    }
-                    if (sInner.Length == 0)
-                    {
-                        // Anonymous section in a list -- assign a
-                        // Record<N> name based on position. The N is
-                        // (count of unnamed/recordNNN sections + 1)
-                        // counting only data-bearing sections.
-                        int iN = countAnonymousOrRecord(lSections) + 1;
-                        sInner = "Record" + iN;
-                    }
-                    secCurrent = new Section(sInner);
-                    lSections.Add(secCurrent);
-                    continue;
-                }
-
-                // Skip comment and blank lines outside a value.
-                if (sTrim.Length == 0) continue;
-                if (sTrim.StartsWith(";") || sTrim.StartsWith("#")) continue;
-                if (bSkipSection) continue;
-
-                // Key=Value line.
-                int iEq = sRaw.IndexOf('=');
-                if (iEq <= 0) continue;  // not a valid key=value
-                string sKey = sRaw.Substring(0, iEq).Trim();
-                string sVal = sRaw.Substring(iEq + 1);
-
-                // If no section opened yet, create an implicit
-                // [Global] section.
-                if (secCurrent == null)
-                {
-                    secCurrent = new Section("Global");
-                    lSections.Add(secCurrent);
-                }
-
-                string sValTrim = sVal.Trim();
-                // Fenced multi-line starts with key=` or key=""" on a
-                // line by itself (the equals is part of the line; the
-                // fence token is the entire remainder).
-                if (sValTrim == "`" || sValTrim == "\"\"\"")
-                {
-                    sPendingKey = sKey;
-                    sbValue = new StringBuilder();
-                    sFenceToken = sValTrim;
-                    continue;
-                }
-                // Plain multi-line starts with key= (empty value on
-                // this line). The accumulator gathers subsequent lines
-                // until the next key= or section header.
-                if (sValTrim.Length == 0)
-                {
-                    sPendingKey = sKey;
-                    sbValue = new StringBuilder();
-                    continue;
-                }
-                // Single-line value.  Optional quoting, as in traditional .ini (of
-                // which .inix is a superset): if the value begins AND ends with a
-                // double quote, those quotes are delimiters, not content.  Only the
-                // outermost pair is removed and everything between is kept exactly,
-                // including spaces.  So Key="" is an empty string, " dog" keeps its
-                // leading space, and ""dog"" is the literal text "dog".  This runs
-                // AFTER the multi-line tests, so Key="" is an empty single-line value
-                // and does not begin an accumulation.  Unquoted values are unchanged.
-                if (sValTrim.Length >= 2 && sValTrim.StartsWith("\"") && sValTrim.EndsWith("\""))
-                    sValTrim = sValTrim.Substring(1, sValTrim.Length - 2);
-                secCurrent.Pairs.Add(new Pair(sKey, sValTrim));
-            }
-
-            // EOF: commit any open multi-line value.
-            commitPending();
-            return lSections;
-        }
-
-        // looksLikePartOfValue: a heuristic to keep the plain-multi-line
-        // parser from prematurely closing a value when a continuation
-        // line happens to contain an '=' character. We only treat
-        // 'x=y' as a key if the part before '=' is a plausible
-        // identifier (letters, digits, underscores). For values that
-        // contain natural-language text with arbitrary '=', users
-        // should use the fenced form.
-        private static bool looksLikePartOfValue(string sLine)
-        {
-            int iEq = sLine.IndexOf('=');
-            if (iEq <= 0) return true;
-            string sBefore = sLine.Substring(0, iEq).Trim();
-            if (sBefore.Length == 0) return true;
-            foreach (char c in sBefore)
-            {
-                if (!char.IsLetterOrDigit(c) && c != '_' && c != ' ' && c != '-')
-                    return true;
-            }
-            return false;
-        }
-
-        private static int countAnonymousOrRecord(List<Section> l)
-        {
-            int n = 0;
-            foreach (Section s in l)
-                if (s.Name != null && s.Name.StartsWith("Record",
-                    StringComparison.OrdinalIgnoreCase)) n++;
-            return n;
-        }
-
-        // ----------------------------------------------------------------
-        // Write helpers. Output is UTF-8 with BOM and CRLF line endings,
-        // matching the rest of DbDo's text-file conventions.
-        // ----------------------------------------------------------------
-
-        // Choose the right fence for a value: prefer plain multi-line
-        // (no fence) when the value has no '=' or '[' that would
-        // confuse the plain parser; prefer ` when '"""' is in the
-        // value; prefer """ when "`" is in the value; fall back to
-        // ` as a default for fenced values.
-        private static string chooseFence(string sValue)
-        {
-            if (sValue == null) return null;
-            bool bHasEq     = sValue.IndexOf('=') >= 0;
-            bool bHasBkt    = sValue.IndexOf('[') >= 0;
-            bool bMultiline = sValue.IndexOf('\n') >= 0 || sValue.IndexOf('\r') >= 0;
-            if (!bMultiline && !bHasEq && !bHasBkt) return null;  // single-line literal OK
-            if (!bMultiline) return "`";  // single-line but with = or [ -> fence it for safety
-            // Multi-line. Choose a fence not present as a sole line.
-            bool bBacktickFree = !containsSoleLine(sValue, "`");
-            bool bTriquoteFree = !containsSoleLine(sValue, "\"\"\"");
-            if (bBacktickFree) return "`";
-            if (bTriquoteFree) return "\"\"\"";
-            // Both candidate fences collide. Backtick is rare in
-            // real-world text; prefer it and hope.
-            return "`";
-        }
-
-        private static bool containsSoleLine(string sValue, string sToken)
-        {
-            // Split on \n; a "sole line" is one whose trim equals the token.
-            int i = 0;
-            while (i < sValue.Length)
-            {
-                int j = sValue.IndexOf('\n', i);
-                int end = (j < 0) ? sValue.Length : j;
-                string sLine = sValue.Substring(i, end - i).TrimEnd('\r').Trim();
-                if (sLine == sToken) return true;
-                i = (j < 0) ? sValue.Length : j + 1;
-            }
-            return false;
-        }
-
-        // writeAsConfig: serialize a list of named sections as an
-        // .inix configuration file. Sections are written in the order
-        // given; pairs within each section in the order given.
-        public static void writeAsConfig(string sPath, List<Section> lSections)
-        {
-            if (string.IsNullOrEmpty(sPath)) throw new ArgumentException("writeAsConfig requires a path.");
-            if (lSections == null) throw new ArgumentNullException("lSections");
-            using (StreamWriter w = new StreamWriter(sPath, false, new UTF8Encoding(true)))
-            {
-                w.NewLine = "\r\n";
-                bool bFirst = true;
-                foreach (Section sec in lSections)
-                {
-                    if (sec == null) continue;
-                    if (!bFirst) w.WriteLine();
-                    bFirst = false;
-                    if (!string.IsNullOrEmpty(sec.Name)
-                        && !string.Equals(sec.Name, "Global", StringComparison.OrdinalIgnoreCase))
-                        w.WriteLine("[" + sec.Name + "]");
-                    writePairs(w, sec.Pairs);
-                }
-            }
-        }
-
-        // writeAsTable: serialize a sequence of records as an .inix
-        // list-of-records file. The leading-zero width on the section
-        // name [RecordNNN] is chosen so ASCII sort matches numeric
-        // order. Pairs within each record are written in the order
-        // they appear in lFields; values missing from a record are
-        // simply omitted (no "key=" with empty value).
-        public static void writeAsTable(string sPath, List<string> lFields,
-                                        List<Dictionary<string, string>> lRows)
-        {
-            if (string.IsNullOrEmpty(sPath)) throw new ArgumentException("writeAsTable requires a path.");
-            if (lFields == null || lRows == null) throw new ArgumentNullException();
-            int n = lRows.Count;
-            int iWidth = (n == 0) ? 1 : (int)Math.Floor(Math.Log10(n)) + 1;
-            string sFmt = "D" + iWidth;
-            using (StreamWriter w = new StreamWriter(sPath, false, new UTF8Encoding(true)))
-            {
-                w.NewLine = "\r\n";
-                for (int i = 0; i < n; i++)
-                {
-                    if (i > 0) w.WriteLine();
-                    w.WriteLine("[Record" + (i + 1).ToString(sFmt) + "]");
-                    Dictionary<string, string> dRow = lRows[i];
-                    if (dRow == null) continue;
-                    List<Pair> lPairs = new List<Pair>();
-                    foreach (string sF in lFields)
-                    {
-                        string sV;
-                        if (!dRow.TryGetValue(sF, out sV)) continue;
-                        if (sV == null) continue;
-                        lPairs.Add(new Pair(sF, sV));
-                    }
-                    writePairs(w, lPairs);
-                }
-            }
-        }
-
-        private static void writePairs(StreamWriter w, List<Pair> lPairs)
-        {
-            foreach (Pair p in lPairs)
-            {
-                string sKey = p.Key ?? "";
-                string sVal = p.Value ?? "";
-                string sFence = chooseFence(sVal);
-                if (sFence == null)
-                {
-                    // Quote when writing bare would not read back exactly: an empty
-                    // value (bare "Key =" re-reads as the START of a multi-line value),
-                    // a value with a leading/trailing space (lost to trimming), or a
-                    // value that itself begins and ends with a quote.  The reader strips
-                    // exactly one outer pair, so the original text survives.
-                    bool bNeedsQuote = (sVal.Length == 0)
-                        || (sVal != sVal.Trim())
-                        || (sVal.Length >= 2 && sVal.StartsWith("\"") && sVal.EndsWith("\""));
-                    if (bNeedsQuote) w.WriteLine(sKey + " = \"" + sVal + "\"");
-                    else w.WriteLine(sKey + " = " + sVal);
-                }
-                else
-                {
-                    // Fenced form, even if value happens to be single
-                    // line -- chooseFence returns non-null when the
-                    // single line contains '=' or '['.
-                    w.WriteLine(sKey + "=" + sFence);
-                    // Write value lines verbatim. Normalize line
-                    // endings to CRLF so the output is a Windows file.
-                    string sNormalized = sVal.Replace("\r\n", "\n").Replace("\r", "\n");
-                    foreach (string sLn in sNormalized.Split('\n'))
-                        w.WriteLine(sLn);
-                    w.WriteLine(sFence);
-                }
-            }
-        }
-
-        // writeValue: surgically set, replace, or remove ONE key in an
-        // .inix file, preserving every comment and every other line --
-        // unlike writeAsConfig, which rewrites the whole file and
-        // would drop comments. Used for the per-user settings file,
-        // where the shipped template's documentation comments must
-        // survive machine writes.
-        //
-        // Inix-aware in both directions: a value containing a newline
-        // is written in the fenced form (key=` ... `), an existing
-        // fenced value is replaced or removed as a whole block, and
-        // the scan skips over fenced blocks so a key= line INSIDE a
-        // fenced value is never mistaken for a real key. Pass an
-        // empty value to remove the key. Returns false on I/O failure
-        // so callers can log it (this class stays log-independent).
-        public static bool writeValue(string sPath, string sSection, string sKey, string sValue)
-        {
-            string sHeader = "[" + sSection + "]";
-            List<string> lLines = new List<string>();
-            if (File.Exists(sPath))
-            {
-                try { lLines.AddRange(File.ReadAllLines(sPath, new UTF8Encoding(true))); } catch { return false; }
-            }
-
-            int iSectionEnd = -1, iSectionStart = -1;
-            for (int i = 0; i < lLines.Count; i++)
-            {
-                string sTrim = lLines[i].Trim();
-                if (sTrim.Equals(sHeader, StringComparison.OrdinalIgnoreCase))
-                {
-                    iSectionStart = i;
-                    iSectionEnd = lLines.Count;
-                    for (int j = i + 1; j < lLines.Count; j++)
-                    {
-                        string sJ = lLines[j].Trim();
-                        if (sJ.StartsWith("[")) { iSectionEnd = j; break; }
-                    }
-                    break;
-                }
-            }
-
-            // Render the new value as one or more lines: fenced when
-            // it spans lines or itself contains '=' or '[' (the cases
-            // where the plain form is unreliable), plain otherwise.
-            List<string> lNewLines = new List<string>();
-            if (!string.IsNullOrEmpty(sValue))
-            {
-                bool bFenced = sValue.IndexOf('\n') >= 0
-                            || sValue.IndexOf('=') >= 0
-                            || sValue.TrimStart().StartsWith("[");
-                if (bFenced)
-                {
-                    // Default to the ` fence; fall back to the triple-quote
-                    // fence when the content itself contains a ` (which would
-                    // otherwise be mistaken for the closing fence).
-                    string sFence = (sValue.IndexOf('`') >= 0) ? "\"\"\"" : "`";
-                    lNewLines.Add(sKey + "=" + sFence);
-                    string sNormalized = sValue.Replace("\r\n", "\n").Replace("\r", "\n");
-                    foreach (string sLn in sNormalized.Split('\n')) lNewLines.Add(sLn);
-                    lNewLines.Add(sFence);
-                }
-                else lNewLines.Add(sKey + " = " + sValue);
-            }
-
-            if (iSectionStart < 0)
-            {
-                if (lLines.Count > 0 && lLines[lLines.Count - 1].Trim().Length > 0) lLines.Add("");
-                lLines.Add(sHeader);
-                lLines.AddRange(lNewLines);
-            }
-            else
-            {
-                int iFound = -1, iFoundEnd = -1;  // inclusive line range of the existing entry
-                for (int i = iSectionStart + 1; i < iSectionEnd; i++)
-                {
-                    string sT = lLines[i].Trim();
-                    if (sT.Length == 0) continue;
-                    if (sT.StartsWith(";") || sT.StartsWith("#")) continue;
-                    int iEq = sT.IndexOf('=');
-                    if (iEq <= 0) continue;
-                    string sName = sT.Substring(0, iEq).Trim();
-                    string sRest = sT.Substring(iEq + 1).Trim();
-                    bool bFenceOpen = (sRest == "`" || sRest == "\"\"\"");
-                    int iEntryEnd = i;
-                    if (bFenceOpen)
-                    {
-                        iEntryEnd = iSectionEnd - 1;  // unterminated fence: rest of section
-                        for (int j = i + 1; j < iSectionEnd; j++)
-                            if (lLines[j].Trim() == sRest) { iEntryEnd = j; break; }
-                    }
-                    if (string.Equals(sName, sKey, StringComparison.OrdinalIgnoreCase))
-                    { iFound = i; iFoundEnd = iEntryEnd; break; }
-                    i = iEntryEnd;  // skip past a fenced block belonging to another key
-                }
-                if (iFound >= 0)
-                {
-                    lLines.RemoveRange(iFound, iFoundEnd - iFound + 1);
-                    if (lNewLines.Count > 0) lLines.InsertRange(iFound, lNewLines);
-                }
-                else if (lNewLines.Count > 0)
-                {
-                    lLines.InsertRange(iSectionStart + 1, lNewLines);
-                }
-            }
-
-            try { File.WriteAllLines(sPath, lLines.ToArray()); return true; }
-            catch { return false; }
-        }
-
-        // writeArrayValue: the write side of the .inix array convention.
-        // Stores the items under sKey, choosing the presentation
-        // automatically: inline and comma-separated when the items are few
-        // (up to six) and short and none contains a space or comma, else
-        // one item per line in a fenced block. Reuses writeValue, which
-        // selects the ` fence by default and the triple-quote fence when an
-        // item contains a `. Blank items are dropped; an empty list clears
-        // the key.
-        public static bool writeArrayValue(string sPath, string sSection, string sKey, List<string> items)
-        {
-            List<string> clean = new List<string>();
-            if (items != null)
-                foreach (string it in items)
-                {
-                    string s = (it ?? "").Replace("\r\n", " ").Replace("\r", " ").Replace("\n", " ").Trim();
-                    if (s.Length > 0) clean.Add(s);
-                }
-            if (clean.Count == 0) return writeValue(sPath, sSection, sKey, "");
-
-            bool bInline = clean.Count <= 6;
-            if (bInline)
-            {
-                int iLen = 0;
-                foreach (string s in clean)
-                {
-                    if (s.IndexOf(' ') >= 0 || s.IndexOf(',') >= 0 || s.IndexOf('`') >= 0) { bInline = false; break; }
-                    iLen += s.Length + 2;
-                }
-                if (iLen > 80) bInline = false;
-            }
-            string sValue = bInline ? string.Join(", ", clean.ToArray())
-                                    : string.Join("\n", clean.ToArray());
-            return writeValue(sPath, sSection, sKey, sValue);
         }
     }
 
@@ -9821,7 +8186,7 @@ namespace DbDo
                 // table selected). Announce why the key did nothing,
                 // and consume it so the grid never sees it.
                 string sCmd2 = dMenuToCommand.ContainsKey(mi) ? dMenuToCommand[mi] : mi.Text.Replace("&", "");
-                LiveRegion.say(sCmd2 + " is unavailable right now (open a database file or select a table first)");
+                Say.say(sCmd2 + " is unavailable right now (open a database file or select a table first)");
                 return true;
             }
             if (bKeyDescriber)
@@ -9839,7 +8204,7 @@ namespace DbDo
                 string sChord = friendlyKey(key);
                 string sCtx = contextFor(sCmd);
                 string sCtxPart = (sCtx == "Global") ? "" : " Context: " + sCtx + ".";
-                LiveRegion.say(sCmd + ". " + sChord + ". " + sSummary + "." + sCtxPart);
+                Say.say(sCmd + ". " + sChord + ". " + sSummary + "." + sCtxPart);
             }
             else
             {
@@ -10020,2116 +8385,6 @@ namespace DbDo
             }
             lOut.Sort((a, b) => string.Compare(a[0], b[0], StringComparison.OrdinalIgnoreCase));
             return lOut;
-        }
-    }
-
-    // =====================================================================
-    // HelpDialog: reusable read-only multiline TextBox dialog. Used
-    // for showing schema text, help contents, integrity check output,
-    // and other long read-only content.
-    // =====================================================================
-    // LbcTextBox: the TextBox subclass used by every LbC text field and
-    // by the read-only detail/help viewers. Its purpose is to be the one
-    // place screen-reader conveniences live, so a convenience added here
-    // propagates to every text field in the app at once rather than being
-    // wired control-by-control (which is how some fields previously ended
-    // up missing one). It adds only shortcuts WinForms does not provide as
-    // built-ins:
-    //   Control+A         select all text
-    //   Control+Shift+A   clear the selection (unselect all)
-    // ProcessCmdKey is overridden rather than OnKeyDown so the chord is
-    // intercepted before the control's default processing, which is what
-    // makes Control+A work even in multi-line and read-only boxes (where
-    // the stock TextBox otherwise ignores it).
-    public class LbcTextBox : TextBox
-    {
-        // Tip: focus tip spoken by Shift+F1; set by the Lbc adders.
-        public string Tip = "";
-
-        // lsLookupValues: opt-in F4 / Alt+DownArrow pick list. When an
-        // editor assigns the valid values for this control's table+field
-        // pair (from the builtin lookups table, e.g. maps.kind or
-        // projects.kind), F4 opens an alphabetical pick list and replaces
-        // the text with the chosen value -- the same pattern the multi-
-        // field edit dialog offers, now available in any single Lbc text
-        // line. Null or empty means no pick list for this control.
-        public List<string> lsLookupValues = null;
-
-        // ----- Text-control extra keys (HomerLbc_40 heritage) -----
-        // Every Lbc text field gets this family of screen-reader
-        // conveniences by being an LbcTextBox -- nothing is wired per
-        // control, so a convenience added here reaches them all at once
-        // (the modern replacement for HomerLbc's shared-handler + flag).
-        // Copy takes the line WITHOUT its break (text payload); Cut and
-        // Delete Line take the line WITH its break (removing the row),
-        // then speak the line the caret lands on.
-        //   Control+A        Select All          (ProcessCmdKey)
-        //   Control+Shift+A  Unselect All        (ProcessCmdKey)
-        //   Control+C        Copy: selection, else current line
-        //   Alt+C            Copy Append: clipboard + selection-or-line
-        //   Control+X        Cut: selection, else current line
-        //   Alt+X            Cut Append: clipboard + what Cut removed
-        //   Control+D        Delete Line (no clipboard)
-        //   F8 / Shift+F8    Start / Complete Selection
-        //   Control+F8       Copy All
-        //   Alt+F8           Read All
-        //   Alt+Y            Say Yield: line and character counts
-        //   Alt+Apostrophe   Say Clipboard
-        //   Shift+F1         Focus Tip
-        // showLookupPick: open an alphabetical pick list of lsLookupValues
-        // and, on OK, replace the text with the chosen value. Mirrors the
-        // edit dialog's pickLookupValue so the F4 behavior is identical,
-        // but is self-contained on the control so any single Lbc text line
-        // can offer it just by assigning lsLookupValues.
-        private void showLookupPick()
-        {
-            if (lsLookupValues == null || lsLookupValues.Count == 0) return;
-            try
-            {
-                List<string> lsAlpha = new List<string>(lsLookupValues);
-                lsAlpha.Sort(StringComparer.OrdinalIgnoreCase);   // pick list in alpha order
-                using (LbcDialog dlgPick = new LbcDialog("Pick value", FindForm()))
-                {
-                    ListBox lbPick = dlgPick.addListBox("Choose a value:", lsAlpha, Text);
-                    if (!string.Equals(dlgPick.runWithButtons(new string[] { "OK", "Cancel" }),
-                            "OK", StringComparison.OrdinalIgnoreCase)) return;
-                    if (lbPick.SelectedItem == null) return;
-                    if (ReadOnly) { LiveRegion.say("Read-only"); return; }
-                    Text = lbPick.SelectedItem.ToString();
-                    SelectionStart = TextLength;
-                    SelectionLength = 0;
-                    LiveRegion.say(Text);
-                }
-            }
-            catch (Exception exPick)
-            { try { DbDoLog.write("showLookupPick failed: " + exPick.Message); } catch { } }
-        }
-
-        // Control+A / Control+Shift+A use ProcessCmdKey so they fire even
-        // in multi-line and read-only boxes; the rest use OnKeyDown.
-        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
-        {
-            if (keyData == (Keys.Control | Keys.A))
-            { SelectAll(); LiveRegion.say("Selected all"); return true; }
-            if (keyData == (Keys.Control | Keys.Shift | Keys.A))
-            { SelectionLength = 0; LiveRegion.say("Selection cleared"); return true; }
-            return base.ProcessCmdKey(ref msg, keyData);
-        }
-
-        protected override void OnKeyDown(KeyEventArgs evArgs)
-        {
-            base.OnKeyDown(evArgs);
-            if (evArgs.Handled) return;
-            int iLength;
-            int iStart;
-            string sLine;
-            Keys key = evArgs.KeyData;
-
-            if ((key == Keys.F4 || key == (Keys.Alt | Keys.Down))
-                && lsLookupValues != null && lsLookupValues.Count > 0)
-            {
-                evArgs.Handled = true;
-                evArgs.SuppressKeyPress = true;
-                showLookupPick();
-            }
-            else if (key == (Keys.Control | Keys.C))
-            {
-                if (SelectionLength > 0) return;   // normal copy proceeds
-                sLine = currentLineText();
-                setClipboard(sLine);
-                LiveRegion.say(sLine.Length == 0 ? "Copied blank line" : "Copied line");
-            }
-            else if (key == (Keys.Alt | Keys.C))
-            {
-                sLine = (SelectionLength > 0) ? SelectedText : currentLineText();
-                setClipboard(clipboardJoin(sLine));
-                LiveRegion.say("Appended to clipboard");
-            }
-            else if (key == (Keys.Control | Keys.X))
-            {
-                if (ReadOnly) { LiveRegion.say("Read-only"); return; }
-                if (SelectionLength > 0) return;   // normal cut proceeds
-                lineBounds(true, out iStart, out iLength);
-                Select(iStart, iLength);
-                Cut();
-                SelectionStart = iStart;
-                SelectionLength = 0;
-                sayLanding();
-            }
-            else if (key == (Keys.Alt | Keys.X))
-            {
-                if (ReadOnly) { LiveRegion.say("Read-only"); return; }
-                string sPrior = clipboardJoin("");
-                if (SelectionLength == 0)
-                {
-                    lineBounds(true, out iStart, out iLength);
-                    Select(iStart, iLength);
-                }
-                else iStart = SelectionStart;
-                Cut();
-                string sCut = "";
-                try { sCut = Clipboard.GetText(); } catch { }
-                setClipboard(sPrior + sCut);
-                SelectionStart = iStart;
-                SelectionLength = 0;
-                sayLanding();
-            }
-            else if (key == (Keys.Control | Keys.D))
-            {
-                if (ReadOnly) { LiveRegion.say("Read-only"); return; }
-                lineBounds(true, out iStart, out iLength);
-                Text = Text.Remove(iStart, iLength);
-                SelectionStart = Math.Min(iStart, TextLength);
-                SelectionLength = 0;
-                sayLanding();
-            }
-            else if (key == Keys.F8)
-            {
-                int iAnchor = SelectionStart + SelectionLength;
-                Tag = iAnchor;
-                LiveRegion.say("Start selection" + (iAnchor < TextLength ? " at " + Text[iAnchor] : ""));
-            }
-            else if (key == (Keys.Shift | Keys.F8))
-            {
-                if (!(Tag is int)) { LiveRegion.say("No selection start; press F8 first"); return; }
-                int iAnchor2 = (int)Tag;
-                int iCaret = SelectionStart + SelectionLength;
-                Select(Math.Min(iAnchor2, iCaret), Math.Abs(iCaret - iAnchor2));
-                LiveRegion.say(SelectionLength + (SelectionLength == 1 ? " character" : " characters"));
-            }
-            else if (key == (Keys.Control | Keys.F8))
-            {
-                setClipboard(Text);
-                LiveRegion.say("Copied all");
-            }
-            else if (key == (Keys.Alt | Keys.F8))
-            {
-                LiveRegion.say(TextLength == 0 ? "Blank" : Text);
-            }
-            else if (key == (Keys.Alt | Keys.Y))
-            {
-                int iLines = Multiline ? Lines.Length : 1;
-                LiveRegion.say(iLines + (iLines == 1 ? " line, " : " lines, ")
-                    + TextLength + (TextLength == 1 ? " character" : " characters"));
-            }
-            else if (key == (Keys.Alt | Keys.OemQuotes))
-            {
-                string sClip = "";
-                try { sClip = Clipboard.GetText(); } catch { }
-                LiveRegion.say(sClip.Length == 0 ? "Clipboard empty" : sClip);
-            }
-            else if (key == (Keys.Shift | Keys.F1))
-            {
-                LiveRegion.say(string.IsNullOrEmpty(Tip) ? "No tip for this field" : Tip);
-            }
-            // Homer structured-text line operations, active only in
-            // multiline fields (notes, tags). Each acts on the selected
-            // lines, or all lines when there is no selection. Keys are
-            // the original Homer editor bindings. These mutate text, so
-            // they no-op (with a spoken note) on read-only fields.
-            else if (Multiline && key == (Keys.Alt | Keys.Shift | Keys.O))   applyLineOp(sortLines,    "Sorted");
-            else if (Multiline && key == (Keys.Alt | Keys.Shift | Keys.Z))   applyLineOp(reverseLines, "Reversed");
-            else if (Multiline && key == (Keys.Alt | Keys.Shift | Keys.K))   applyLineOp(uniqueLines,  "Kept unique,");
-            else if (Multiline && key == (Keys.Alt | Keys.Shift | Keys.N))   applyLineOp(numberLines,  "Numbered");
-            else if (Multiline && key == (Keys.Control | Keys.Shift | Keys.Enter)) applyLineOp(trimBlanks, "Trimmed");
-            else return;
-
-            evArgs.Handled = true;
-            evArgs.SuppressKeyPress = true;
-        }
-
-        // applyLineOp: run a line transform over the selected lines, or
-        // all lines when nothing is selected, replacing the text in
-        // place (undoable) and speaking the resulting line count.
-        private void applyLineOp(Func<string, string> op, string sVerb)
-        {
-            if (ReadOnly) { LiveRegion.say("Read-only"); return; }
-            if (SelectionLength == 0) SelectAll();
-            string sOut = op(SelectedText);
-            SelectedText = sOut;
-            int iLines = (sOut.Length == 0) ? 0 : sOut.Split('\n').Length;
-            LiveRegion.say(sVerb + " " + iLines + (iLines == 1 ? " line" : " lines"));
-        }
-
-        // Line-transform helpers (pure). splitTextLines normalizes any
-        // line-break flavor to a list; joinTextLines re-emits CRLF.
-        private static List<string> splitTextLines(string sText)
-        {
-            List<string> lLines = new List<string>();
-            foreach (string sLine in sText.Replace("\r\n", "\n").Replace("\r", "\n").Split('\n'))
-                lLines.Add(sLine);
-            return lLines;
-        }
-        private static string joinTextLines(List<string> lLines)
-        {
-            return string.Join("\r\n", lLines.ToArray());
-        }
-        private static string sortLines(string sText)
-        {
-            List<string> lLines = splitTextLines(sText);
-            lLines.Sort(StringComparer.OrdinalIgnoreCase);
-            return joinTextLines(lLines);
-        }
-        private static string reverseLines(string sText)
-        {
-            List<string> lLines = splitTextLines(sText);
-            lLines.Reverse();
-            return joinTextLines(lLines);
-        }
-        private static string uniqueLines(string sText)
-        {
-            List<string> lOut = new List<string>();
-            HashSet<string> hSeen = new HashSet<string>();
-            foreach (string sLine in splitTextLines(sText))
-                if (hSeen.Add(sLine)) lOut.Add(sLine);
-            return joinTextLines(lOut);
-        }
-        private static string trimBlanks(string sText)
-        {
-            List<string> lOut = new List<string>();
-            int iBlankRun = 0;
-            foreach (string sLine in splitTextLines(sText))
-            {
-                string sTrim = sLine.Trim();
-                if (sTrim.Length == 0)
-                {
-                    iBlankRun++;
-                    if (iBlankRun <= 2) lOut.Add("");
-                }
-                else { iBlankRun = 0; lOut.Add(sTrim); }
-            }
-            return joinTextLines(lOut);
-        }
-        private static string numberLines(string sText)
-        {
-            List<string> lOut = new List<string>();
-            int iNum = 0;
-            foreach (string sLine in splitTextLines(sText))
-            {
-                iNum++;
-                lOut.Add(iNum + ". " + sLine);
-            }
-            return joinTextLines(lOut);
-        }
-
-        // lineBounds: start index and length of the caret's line.
-        // bIncludeBreak picks the Cut/Delete flavor (line plus its
-        // terminator) versus the Copy flavor (text only).
-        private bool lineBounds(bool bIncludeBreak, out int iStart, out int iLength)
-        {
-            int iEnd;
-            int iIndex = SelectionStart + SelectionLength;
-            int iRow = GetLineFromCharIndex(iIndex);
-            iStart = GetFirstCharIndexFromLine(iRow);
-            iEnd = GetFirstCharIndexFromLine(iRow + 1);
-            if (iEnd <= 0) iEnd = TextLength;
-            else if (!bIncludeBreak) iEnd--;
-            if (iStart < 0) iStart = 0;
-            iLength = iEnd - iStart;
-            if (iLength < 0) iLength = 0;
-            return true;
-        }
-
-        private string currentLineText()
-        {
-            int iLength;
-            int iStart;
-            lineBounds(false, out iStart, out iLength);
-            return Text.Substring(iStart, iLength).TrimEnd('\r', '\n');
-        }
-
-        private void sayLanding()
-        {
-            string sLine = currentLineText();
-            LiveRegion.say(sLine.Length == 0 ? "Blank" : sLine);
-        }
-
-        // clipboardJoin / setClipboard: shared by the text conveniences
-        // here and by the Lbc list-box copy keys; static so both call
-        // them without duplicating the bodies.
-        internal static string clipboardJoin(string sAddition)
-        {
-            string sText = "";
-            try { sText = Clipboard.GetText(); } catch { }
-            if (sText.Length > 0 && !sText.EndsWith("\n")) sText += "\r\n";
-            return sText + sAddition;
-        }
-
-        internal static bool setClipboard(string sText)
-        {
-            try { Clipboard.SetText(sText.Length == 0 ? " " : sText); return true; }
-            catch { return false; }
-        }
-    }
-
-    // =====================================================================
-    // LbcForm: shared base for every Lbc dialog. Adds Control+Enter as
-    // a universal "press OK" accelerator so the user can accept a dialog
-    // from anywhere in it without tabbing to the OK button -- notably in
-    // the sort-order dialog, where Enter on the Fields list does Add (not
-    // OK). The OK button is located by its DialogResult (preferred) or an
-    // "OK" label, deliberately NOT via the form's AcceptButton: some Lbc
-    // dialogs point AcceptButton at a different default (e.g. Add) while
-    // focus sits on a listbox, so AcceptButton is not a reliable handle
-    // for "OK". If no OK button is found, Control+Enter falls through
-    // untouched.
-    public class LbcForm : Form
-    {
-        protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
-        {
-            if (keyData == (Keys.Control | Keys.Enter))
-            {
-                Button btnOk = findButton(this, true);   // by DialogResult.OK
-                if (btnOk == null) btnOk = findButton(this, false); // by "OK" label
-                if (btnOk != null) { btnOk.PerformClick(); return true; }
-            }
-            return base.ProcessCmdKey(ref msg, keyData);
-        }
-
-        private static Button findButton(Control parent, bool bByDialogResult)
-        {
-            foreach (Control c in parent.Controls)
-            {
-                Button btn = c as Button;
-                if (btn != null)
-                {
-                    if (bByDialogResult)
-                    {
-                        if (btn.DialogResult == DialogResult.OK) return btn;
-                    }
-                    else if (btn.Text != null
-                        && btn.Text.Replace("&", "").Trim().Equals("OK", StringComparison.OrdinalIgnoreCase))
-                        return btn;
-                }
-                Button nested = findButton(c, bByDialogResult);
-                if (nested != null) return nested;
-            }
-            return null;
-        }
-    }
-
-    // =====================================================================
-    public static class HelpDialog
-    {
-        public static void show(IWin32Window owner, string sTitle, string sText)
-        {
-            using (Form dlg = new LbcForm())
-            {
-                dlg.Text = sTitle;
-                dlg.StartPosition = FormStartPosition.CenterParent;
-                dlg.ClientSize = new Size(720, 540);
-                dlg.MinimumSize = new Size(400, 300);
-                dlg.FormBorderStyle = FormBorderStyle.Sizable;
-                dlg.MaximizeBox = true;
-                dlg.MinimizeBox = false;
-                dlg.ShowInTaskbar = false;
-                dlg.KeyPreview = true;
-
-                LbcTextBox tb = new LbcTextBox();
-                tb.Multiline = true;
-                tb.ReadOnly = true;
-                tb.ScrollBars = ScrollBars.Vertical;
-                tb.WordWrap = true;
-                tb.Font = new Font(FontFamily.GenericMonospace, 10f);
-                tb.Text = sText;
-                tb.AccessibleName = "Help text";
-                tb.TabIndex = 0;
-                tb.SelectionStart = 0;
-                tb.SelectionLength = 0;
-                tb.Size = new Size(dlg.ClientSize.Width - 20, dlg.ClientSize.Height - 50);
-                tb.Location = new Point(10, 10);
-                tb.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
-
-                Button btnClose = new Button();
-                btnClose.Text = "&OK";
-                btnClose.AccessibleName = "OK";
-                btnClose.DialogResult = DialogResult.OK;
-                btnClose.Size = new Size(90, 28);
-                btnClose.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-                btnClose.Location = new Point(dlg.ClientSize.Width - 100, dlg.ClientSize.Height - 38);
-                btnClose.UseVisualStyleBackColor = true;
-                btnClose.TabIndex = 1;
-
-                dlg.Controls.Add(tb);
-                dlg.Controls.Add(btnClose);
-                dlg.AcceptButton = btnClose;
-                dlg.CancelButton = btnClose;
-                dlg.ActiveControl = tb;
-
-                dlg.ShowDialog(owner);
-            }
-        }
-
-        // showRecordView: the Show view's read-only record display
-        // with view-cycle and record-navigation keys. Returns a
-        // verdict the caller's loop acts on:
-        //   0  closed (Escape / OK)            -> list
-        //   1  F6 (forward in the cycle)       -> list (show is last)
-        //   2  Shift+F6 (back in the cycle)    -> form
-        //   3  Control+PageDown                -> next record
-        //   4  Control+PageUp                  -> previous record
-        // Separate from show() so help text and query results keep
-        // their plain read-only dialog without these keys.
-        public static int showRecordView(IWin32Window owner, string sTitle, string sText)
-        {
-            int iVerdict = 0;
-            using (Form dlg = new LbcForm())
-            {
-                dlg.Text = sTitle;
-                dlg.StartPosition = FormStartPosition.CenterParent;
-                dlg.ClientSize = new Size(720, 540);
-                dlg.MinimumSize = new Size(400, 300);
-                dlg.FormBorderStyle = FormBorderStyle.Sizable;
-                dlg.MaximizeBox = true; dlg.MinimizeBox = false;
-                dlg.ShowInTaskbar = false; dlg.KeyPreview = true;
-
-                TextBox tb = new TextBox();
-                tb.Multiline = true; tb.ReadOnly = true;
-                tb.ScrollBars = ScrollBars.Vertical; tb.WordWrap = true;
-                tb.Font = new Font(FontFamily.GenericMonospace, 10f);
-                tb.Text = sText; tb.AccessibleName = "Record";
-                tb.TabIndex = 0; tb.SelectionStart = 0; tb.SelectionLength = 0;
-                tb.Size = new Size(dlg.ClientSize.Width - 20, dlg.ClientSize.Height - 50);
-                tb.Location = new Point(10, 10);
-                tb.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
-
-                Button btnClose = new Button();
-                btnClose.Text = "&OK"; btnClose.AccessibleName = "OK";
-                btnClose.DialogResult = DialogResult.OK;
-                btnClose.Size = new Size(90, 28);
-                btnClose.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-                btnClose.Location = new Point(dlg.ClientSize.Width - 100, dlg.ClientSize.Height - 38);
-                btnClose.UseVisualStyleBackColor = true; btnClose.TabIndex = 1;
-
-                dlg.KeyDown += delegate(object o, KeyEventArgs ev)
-                {
-                    int v = 0;
-                    if (ev.KeyData == Keys.F6) v = 1;
-                    else if (ev.KeyData == (Keys.Shift | Keys.F6)) v = 2;
-                    else if (ev.KeyData == (Keys.Control | Keys.PageDown)) v = 3;
-                    else if (ev.KeyData == (Keys.Control | Keys.PageUp)) v = 4;
-                    else return;
-                    iVerdict = v;
-                    ev.Handled = true; ev.SuppressKeyPress = true;
-                    dlg.DialogResult = DialogResult.OK;
-                    dlg.Close();
-                };
-
-                dlg.Controls.Add(tb);
-                dlg.Controls.Add(btnClose);
-                dlg.AcceptButton = btnClose;
-                dlg.CancelButton = btnClose;
-                dlg.ActiveControl = tb;
-                dlg.ShowDialog(owner);
-            }
-            return iVerdict;
-        }
-    }
-
-    // =====================================================================
-    // LbcDialog: "Layout by Code" dialog builder.
-    //
-    // A reusable WinForms dialog that callers build by adding one
-    // control at a time. Each add* method appends a labeled row
-    // to a vertical stack, returns the inner editing control, and
-    // wires its accessible name from the label so screen readers
-    // announce the field correctly when the user tabs into it.
-    //
-    // After adding all controls, the caller invokes runOkCancel()
-    // which appends an OK/Cancel button band, shows the dialog
-    // modally, and returns true on OK. The caller then reads the
-    // final values directly from the control references it kept.
-    //
-    // Borrowed pattern from Jamal Mazrui's Layout by Code system
-    // (LbC), which exists in C#, Python, AutoIt, and JScript .NET
-    // versions and codifies the practice of laying out screen-
-    // reader-friendly dialogs by composing simple "add this
-    // control" calls in sequence rather than using a designer file.
-    //
-    // Features carried over from HomerLbc (the mature JScript .NET
-    // implementation):
-    //   - Focus tips: each add* method takes an optional tip string;
-    //     when the user tabs into the control, the tip appears in
-    //     a status bar at the bottom of the dialog. Screen readers
-    //     announce status-bar changes, so the tip is read aloud
-    //     without forcing a popup. Tips replace tooltip popups,
-    //     which JAWS often suppresses.
-    //   - Name-based widget lookup: every control is registered in
-    //     a Widgets dictionary keyed by an auto-generated name
-    //     (<Kind>_<CleanedLabel>) so callers can retrieve controls
-    //     by string name as well as by reference. Useful for
-    //     handlers that get the sender but not the original ref,
-    //     and for generic walkers (import/export, validation).
-    //   - Memo-vs-AcceptButton coordination: while focus is on a
-    //     multi-line TextBox (added via addTextMemo / addMemoBox),
-    //     the form's AcceptButton is temporarily cleared so Enter
-    //     inserts a newline instead of submitting; on LostFocus
-    //     the AcceptButton is restored. This is the Homer LbC
-    //     convention -- it lets memo editing feel natural while
-    //     still letting Enter submit from single-line fields.
-    //
-    // Conventions:
-    //   - Each labeled control gets a Label above it (not beside).
-    //     Uniform vertical rhythm, label-then-control reading order.
-    //   - The label text passes through unchanged (caller may
-    //     include '&' for mnemonic letters); the control's
-    //     AccessibleName strips '&' and trailing ':'.
-    //   - TabIndex is assigned in add order. WinForms Labels are
-    //     non-focusable and naturally skipped during tab traversal.
-    //   - The dialog auto-sizes its height to its contents up to
-    //     a cap; AutoScroll engages above the cap.
-    //   - Two naming patterns coexist: bare-control adders (addLabel,
-    //     addTextBox, addCheckBox) and labeled-control adders that
-    //     mirror Homer LbC (addInputBox, addMemoBox, addPickBox,
-    //     addComboPickBox). The labeled variants are aliases that
-    //     emit a Label first and then call the bare adder.
-    //
-    // Typical usage:
-    //
-    //   LbcDialog dlg = new LbcDialog("Configuration", this);
-    //   TextBox   tbMode = dlg.addInputBox("UI mode", "both", "How DbDo launches");
-    //   CheckBox  cbBeep = dlg.addCheckBox("Beep on errors", true, "Audible cue on failure");
-    //   TextBox   tbNote = dlg.addMemoBox("Startup note", "", "Free-form text shown at launch");
-    //   if (dlg.runOkCancel())
-    //   {
-    //       string sMode = tbMode.Text;
-    //       bool   bBeep = cbBeep.Checked;
-    //       string sNote = tbNote.Text;
-    //       // ... persist or apply
-    //   }
-    //
-    //   // Or look up by name later:
-    //   TextBox tbAgain = dlg.getTextBox("TextBox_UI_mode");
-    // =====================================================================
-    public class LbcDialog : IDisposable
-    {
-        // Layout constants, all alphabetical. Sized for screen-reader
-        // users who often run at 125-150% display scaling -- generous
-        // padding makes the dialog readable without crowding labels.
-        private const int DefaultButtonHeight = 28;
-        private const int DefaultButtonWidth  = 90;
-        private const int DefaultDialogWidth  = 520;
-        private const int DefaultLabelHeight  = 18;
-        private const int DefaultLineHeight   = 24;
-        private const int DefaultListHeight   = 100;
-        private const int DefaultMaxHeight    = 600;
-        private const int DefaultMemoHeight   = 96;
-        private const int DefaultNumericWidth = 100;
-        private const int DefaultPadding      = 12;
-        private const int DefaultRowGap       = 6;
-        private const int DefaultStatusHeight = 22;
-
-        // Layout state. Built up by add* calls, consumed by runX.
-        // Alphabetical declarations.
-        private Dictionary<Control, string> dFocusTips;
-        private Dictionary<string, int>     dNameCounts;
-        private Dictionary<string, Control> dWidgets;
-        private Control                     ctlFirstFocusable;
-        private Form                        frm;
-        private IWin32Window                owner;
-        private Button                      btnSavedAccept;
-        private FlowLayoutPanel             pnlStack;
-        private Label                       lblStatusBar;
-        private int                         iTabIndex;
-        // Most-recent case-insensitive substring searched via Ctrl+J
-        // inside a pick-list. F3 / Shift+F3 advance / retreat through
-        // matches. Shared across all list boxes in this dialog so the
-        // user can chain searches across multiple lists.
-        private string                      sListSearchTerm = "";
-
-        public LbcDialog(string sTitle, IWin32Window ownerWindow)
-        {
-            owner = ownerWindow;
-            frm = new LbcForm();
-            frm.Text = sTitle ?? "";
-            frm.StartPosition = FormStartPosition.CenterParent;
-            frm.FormBorderStyle = FormBorderStyle.Sizable;
-            frm.MaximizeBox = false;
-            frm.MinimizeBox = false;
-            frm.ShowInTaskbar = false;
-            frm.KeyPreview = true;
-            // Text-edit convenience hotkeys: route every keystroke
-            // through onFormKeyDown so we can intercept Ctrl+C/X,
-            // Alt+C/X/F8, F8/Shift+F8, Ctrl+F8, and Ctrl+D when the
-            // focused control is a TextBox or memo. The handler is
-            // a no-op for other controls and for keystrokes that
-            // don't match the convenience set. Master enable flag
-            // [Lbc] extraKeys in DbDo.inix, defaults Y.
-            frm.KeyDown += new KeyEventHandler(onFormKeyDown);
-            frm.MinimumSize = new Size(360, 200);
-            frm.ClientSize = new Size(DefaultDialogWidth, 200);
-
-            // Status bar at the bottom of the form. Updates as the
-            // user tabs through controls -- each control's focus
-            // tip (set via the optional sTip argument on add*
-            // methods) appears here when the control receives focus.
-            // JAWS, NVDA, and Narrator pick up status-bar text via
-            // UIA live-region semantics; we set AccessibleRole to
-            // StatusBar so the announcement is appropriately routed.
-            //
-            // Added BEFORE the stack so its Dock=Bottom claims the
-            // bottom area. The button row (added later in run*) is
-            // also Dock=Bottom and pushes the status bar up by its
-            // own height.
-            lblStatusBar = new Label();
-            lblStatusBar.Text = "";
-            lblStatusBar.AccessibleRole = AccessibleRole.StatusBar;
-            lblStatusBar.AccessibleName = "Status";
-            lblStatusBar.Dock = DockStyle.Bottom;
-            lblStatusBar.Height = DefaultStatusHeight;
-            lblStatusBar.TextAlign = ContentAlignment.MiddleLeft;
-            lblStatusBar.Padding = new Padding(DefaultPadding, 2, DefaultPadding, 2);
-            lblStatusBar.BorderStyle = BorderStyle.Fixed3D;
-            frm.Controls.Add(lblStatusBar);
-
-            // Vertical FlowLayoutPanel as the form's main container.
-            // AutoScroll on so dialogs with many fields scroll instead
-            // of overflowing the screen.
-            pnlStack = new FlowLayoutPanel();
-            pnlStack.FlowDirection = FlowDirection.TopDown;
-            pnlStack.WrapContents = false;
-            pnlStack.AutoScroll = true;
-            pnlStack.Dock = DockStyle.Fill;
-            pnlStack.Padding = new Padding(DefaultPadding);
-            frm.Controls.Add(pnlStack);
-
-            dFocusTips = new Dictionary<Control, string>();
-            dNameCounts = new Dictionary<string, int>();
-            dWidgets = new Dictionary<string, Control>(StringComparer.OrdinalIgnoreCase);
-            iTabIndex = 0;
-            ctlFirstFocusable = null;
-            btnSavedAccept = null;
-        }
-
-        // ------- Add helpers -------
-        //
-        // Each adds one control (with optional label and tip) to the
-        // vertical stack and returns the control so the caller can
-        // stash a reference, attach event handlers, or query the
-        // final value after dismissal.
-        //
-        // Naming pattern (mirrors Homer LbC):
-        //   addX        -- bare control, no separate label above it
-        //                  (X carries its own label, like CheckBox,
-        //                  or no label is wanted)
-        //   addXBox     -- labeled control: a Label is added first,
-        //                  then the bare X (the convention from
-        //                  Homer Lbc where "Box" suffix means
-        //                  "with a label above")
-        //
-        // The Tip parameter, when given, is shown in the status bar
-        // when the control receives focus.
-
-        // addLabel: standalone explanatory text. Not focusable, so
-        // tip is not applicable.
-        public Label addLabel(string sText)
-        {
-            Label lbl = new Label();
-            lbl.Text = sText ?? "";
-            lbl.AutoSize = false;
-            lbl.Size = new Size(innerWidth(), DefaultLabelHeight);
-            lbl.Margin = new Padding(0, 0, 0, DefaultRowGap);
-            lbl.TextAlign = ContentAlignment.MiddleLeft;
-            registerWidget(lbl, "Label", sText);
-            pnlStack.Controls.Add(lbl);
-            return lbl;
-        }
-
-        // addTextBox: bare single-line text input (no separate
-        // Label above). Returns the TextBox.
-
-        public TextBox addTextBox(string sValue, string sTip)
-        {
-            LbcTextBox tb = new LbcTextBox();
-            tb.Text = sValue ?? "";
-            tb.Size = new Size(innerWidth(), DefaultLineHeight);
-            tb.TabIndex = iTabIndex++;
-            tb.Margin = new Padding(0, 0, 0, DefaultRowGap);
-            // Inherit the AccessibleName from the most recent Label,
-            // if one was just added. Mirrors Homer LbC.
-            Label lblLast = currentLabelOrNull();
-            if (lblLast != null) tb.AccessibleName = lblLast.AccessibleName;
-            tb.GotFocus += handleGotFocus;
-            registerWidget(tb, "TextBox", tb.AccessibleName);
-            if (!string.IsNullOrEmpty(sTip)) { dFocusTips[tb] = sTip; tb.Tip = sTip; }
-            pnlStack.Controls.Add(tb);
-            if (ctlFirstFocusable == null) ctlFirstFocusable = tb;
-            return tb;
-        }
-
-        // addInlineInputBox: labeled single-line text input where
-        // the label and the text box share one row. Layout:
-        //
-        //   [Label:        ] [____textbox____________________]
-        //
-        // Used by the record edit dialog (New-Record / Set-Record)
-        // for single-line fields, per the user-guide layout rule:
-        // single-line fields put "Label: " inline with the textbox,
-        // while multi-line fields put the label on the row above
-        // the (taller) memo box. Inline placement gives the screen
-        // reader a tight, scannable layout: Tab moves to the field
-        // and JAWS announces "Label: <value>" without the user
-        // hearing the bare label as a separate Tab stop.
-        //
-        // Implementation: a TableLayoutPanel with one row, two
-        // columns. The label column is auto-sized to fit its text;
-        // the textbox column fills the remaining width. The whole
-        // panel is added as a single row to the outer FlowLayoutPanel.
-        public TextBox addInlineInputBox(string sLabel, string sValue, string sTip)
-        {
-            TableLayoutPanel pnlRow = new TableLayoutPanel();
-            pnlRow.ColumnCount = 2;
-            pnlRow.RowCount = 1;
-            pnlRow.AutoSize = true;
-            pnlRow.AutoSizeMode = AutoSizeMode.GrowAndShrink;
-            pnlRow.Margin = new Padding(0, 0, 0, DefaultRowGap);
-            pnlRow.ColumnStyles.Clear();
-            pnlRow.ColumnStyles.Add(new ColumnStyle(SizeType.AutoSize));
-            pnlRow.ColumnStyles.Add(new ColumnStyle(SizeType.Percent, 100f));
-            pnlRow.Width = innerWidth();
-
-            Label lbl = new Label();
-            lbl.Text = (sLabel ?? "").TrimEnd();
-            if (!lbl.Text.EndsWith(":")) lbl.Text = lbl.Text + ":";
-            lbl.AccessibleName = cleanLabel(sLabel);
-            lbl.AutoSize = true;
-            lbl.TextAlign = ContentAlignment.MiddleLeft;
-            lbl.Margin = new Padding(0, 4, DefaultPadding, 0);
-            pnlRow.Controls.Add(lbl, 0, 0);
-
-            LbcTextBox tb = new LbcTextBox();
-            tb.Text = sValue ?? "";
-            tb.Dock = DockStyle.Fill;
-            tb.TabIndex = iTabIndex++;
-            tb.Margin = new Padding(0, 0, 0, 0);
-            tb.AccessibleName = cleanLabel(sLabel);
-            tb.GotFocus += handleGotFocus;
-            registerWidget(tb, "TextBox", tb.AccessibleName);
-            if (!string.IsNullOrEmpty(sTip)) { dFocusTips[tb] = sTip; tb.Tip = sTip; }
-            pnlRow.Controls.Add(tb, 1, 0);
-
-            pnlStack.Controls.Add(pnlRow);
-            if (ctlFirstFocusable == null) ctlFirstFocusable = tb;
-            return tb;
-        }
-
-        // addInputBox: labeled single-line text input. Adds a Label
-        // first, then a TextBox whose AccessibleName comes from the
-        // Label. Equivalent to AddInputBox in Homer LbC.
-        //
-        // Note: for the record edit dialog, callers should prefer
-        // addInlineInputBox (label and textbox on one row). This
-        // older addInputBox method (label above textbox) is still
-        // used by some dialogs where vertical rhythm matters.
-        public TextBox addInputBox(string sLabel, string sValue, string sTip)
-        {
-            addFieldLabel(sLabel);
-            TextBox tb = addTextBox(sValue, sTip);
-            // The label inheritance happened in addTextBox via
-            // currentLabelOrNull. Set AccessibleName explicitly
-            // here too as belt-and-suspenders.
-            tb.AccessibleName = cleanLabel(sLabel);
-            return tb;
-        }
-
-        // 2-arg overload (no tip). Convenient for dialogs where the
-        // label is self-explanatory and no extra tooltip is needed.
-        public TextBox addInputBox(string sLabel, string sValue)
-        {
-            return addInputBox(sLabel, sValue, null);
-        }
-
-        // addTextLine: alias for addInputBox without a tip. Kept
-        // for backward compatibility with the earlier API.
-        public TextBox addTextLine(string sLabel, string sValue)
-        {
-            return addInputBox(sLabel, sValue, null);
-        }
-
-        // addMemo: bare multi-line text input. Coordinates with
-        // AcceptButton so Enter inside the memo inserts a newline
-        // instead of submitting the dialog.
-        public TextBox addMemo(string sValue, string sTip)
-        {
-            LbcTextBox tb = new LbcTextBox();
-            tb.Text = sValue ?? "";
-            tb.Multiline = true;
-            tb.AcceptsReturn = true;
-            tb.AcceptsTab = false;
-            tb.ScrollBars = ScrollBars.Vertical;
-            tb.WordWrap = true;
-            tb.Size = new Size(innerWidth(), DefaultMemoHeight);
-            tb.TabIndex = iTabIndex++;
-            tb.Margin = new Padding(0, 0, 0, DefaultRowGap);
-            Label lblLast = currentLabelOrNull();
-            if (lblLast != null) tb.AccessibleName = lblLast.AccessibleName;
-            tb.GotFocus += handleMemoGotFocus;
-            tb.LostFocus += handleMemoLostFocus;
-            registerWidget(tb, "Memo", tb.AccessibleName);
-            if (!string.IsNullOrEmpty(sTip)) { dFocusTips[tb] = sTip; tb.Tip = sTip; }
-            pnlStack.Controls.Add(tb);
-            if (ctlFirstFocusable == null) ctlFirstFocusable = tb;
-            return tb;
-        }
-
-        // addMemoBox: labeled multi-line text input. Equivalent to
-        // AddMemoBox in Homer LbC.
-        public TextBox addMemoBox(string sLabel, string sValue, string sTip)
-        {
-            addFieldLabel(sLabel);
-            TextBox tb = addMemo(sValue, sTip);
-            tb.AccessibleName = cleanLabel(sLabel);
-            return tb;
-        }
-
-        // addTextMemo: alias for addMemoBox without a tip. Kept for
-        // backward compatibility.
-        public TextBox addTextMemo(string sLabel, string sValue)
-        {
-            return addMemoBox(sLabel, sValue, null);
-        }
-
-        // addCheckBox: boolean toggle. The label is part of the
-        // checkbox itself (WinForms convention).
-        public CheckBox addCheckBox(string sLabel, bool bValue, string sTip)
-        {
-            CheckBox cb = new CheckBox();
-            cb.Text = sLabel ?? "";
-            cb.AccessibleName = cleanLabel(sLabel);
-            cb.Checked = bValue;
-            cb.AutoSize = false;
-            cb.Size = new Size(innerWidth(), DefaultLineHeight);
-            cb.TabIndex = iTabIndex++;
-            cb.Margin = new Padding(0, 0, 0, DefaultRowGap);
-            cb.GotFocus += handleGotFocus;
-            registerWidget(cb, "CheckBox", sLabel);
-            if (!string.IsNullOrEmpty(sTip)) dFocusTips[cb] = sTip;
-            pnlStack.Controls.Add(cb);
-            if (ctlFirstFocusable == null) ctlFirstFocusable = cb;
-            return cb;
-        }
-
-        // addCheckBox without tip: backward compat.
-        public CheckBox addCheckBox(string sLabel, bool bValue)
-        {
-            return addCheckBox(sLabel, bValue, null);
-        }
-
-        // addListBox: bare pick-one list (no Label).
-        public ListBox addListBox(IList<string> lNames, string sSelected, string sTip)
-        {
-            ListBox lb = new ListBox();
-            lb.Size = new Size(innerWidth(), DefaultListHeight);
-            lb.TabIndex = iTabIndex++;
-            lb.Margin = new Padding(0, 0, 0, DefaultRowGap);
-            populateListBox(lb, lNames, sSelected);
-            Label lblLast = currentLabelOrNull();
-            if (lblLast != null) lb.AccessibleName = lblLast.AccessibleName;
-            lb.GotFocus += handleGotFocus;
-            // Find-in-list keys. Ctrl+J prompts for a case-insensitive
-            // substring; F3 advances to the next match; Shift+F3 the
-            // previous. Mirrors the data list's Jump-to and Find-Next
-            // chords. Useful when picking from long lists (Alternate
-            // Menu, Choose Table on a large schema).
-            lb.KeyDown += new KeyEventHandler(handleListBoxFindKeys);
-            lb.KeyDown += new KeyEventHandler(handleListBoxCopyKeys);
-            registerWidget(lb, "ListBox", lb.AccessibleName);
-            if (!string.IsNullOrEmpty(sTip)) dFocusTips[lb] = sTip;
-            pnlStack.Controls.Add(lb);
-            if (ctlFirstFocusable == null) ctlFirstFocusable = lb;
-            return lb;
-        }
-
-        // handleListBoxFindKeys: KeyDown handler attached to every
-        // ListBox added via addListBox / addPickBox. Intercepts the
-        // three find-in-list chords; defers everything else to the
-        // ListBox's normal handling.
-        // handleListBoxCopyKeys: Control+C copies the current list
-        // item's text to the clipboard; Alt+C appends it (clipboard,
-        // CRLF, item), mirroring the text-control family so every
-        // Lbc control answers the same chords.
-        private void handleListBoxCopyKeys(object sender, KeyEventArgs evArgs)
-        {
-            ListBox lb = sender as ListBox;
-            if (lb == null) return;
-            if (evArgs.KeyData != (Keys.Control | Keys.C)
-                && evArgs.KeyData != (Keys.Alt | Keys.C)) return;
-            string sItem = (lb.SelectedItem != null) ? lb.SelectedItem.ToString() : "";
-            if (sItem.Length == 0) { LiveRegion.say("No item"); }
-            else if (evArgs.KeyData == (Keys.Control | Keys.C))
-            { LbcTextBox.setClipboard(sItem); LiveRegion.say("Copied item"); }
-            else
-            { LbcTextBox.setClipboard(LbcTextBox.clipboardJoin(sItem)); LiveRegion.say("Appended to clipboard"); }
-            evArgs.Handled = true;
-            evArgs.SuppressKeyPress = true;
-        }
-
-        private void handleListBoxFindKeys(object sender, KeyEventArgs evArgs)
-        {
-            ListBox lb = sender as ListBox;
-            if (lb == null) return;
-            Keys k = evArgs.KeyData;
-            if (k == (Keys.Control | Keys.J))
-            { promptAndFindInListBox(lb); evArgs.Handled = true; evArgs.SuppressKeyPress = true; }
-            else if (k == Keys.F3)
-            { findNextInListBox(lb, true); evArgs.Handled = true; evArgs.SuppressKeyPress = true; }
-            else if (k == (Keys.Shift | Keys.F3))
-            { findNextInListBox(lb, false); evArgs.Handled = true; evArgs.SuppressKeyPress = true; }
-        }
-
-        // Ctrl+J: prompt for a case-insensitive substring, then jump
-        // to the first item containing it. The substring is stored
-        // in sListSearchTerm so subsequent F3 / Shift+F3 can advance.
-        private void promptAndFindInListBox(ListBox lb)
-        {
-            string sPrompt = "Find substring (case-insensitive):";
-            string sInitial = sListSearchTerm ?? "";
-            // Simple inline input: a tiny modal dialog with one input
-            // box. We don't recurse into LbcDialog because nesting
-            // would complicate event routing; a vanilla Form is fine.
-            using (Form prompt = new LbcForm())
-            {
-                prompt.Text = "Find in list";
-                prompt.AccessibleName = "Find in list";
-                prompt.FormBorderStyle = FormBorderStyle.FixedDialog;
-                prompt.StartPosition = FormStartPosition.CenterParent;
-                prompt.MinimizeBox = false;
-                prompt.MaximizeBox = false;
-                prompt.ClientSize = new Size(400, 110);
-                prompt.KeyPreview = true;
-                Label lbl = new Label();
-                lbl.Text = sPrompt;
-                lbl.AutoSize = true;
-                lbl.Location = new Point(12, 12);
-                TextBox tb = new TextBox();
-                tb.Text = sInitial;
-                tb.SelectAll();
-                tb.Location = new Point(12, 36);
-                tb.Size = new Size(376, 20);
-                tb.AccessibleName = "Find substring";
-                Button btnOk = new Button();
-                btnOk.Text = "&OK";
-                btnOk.DialogResult = DialogResult.OK;
-                btnOk.Location = new Point(232, 70);
-                Button btnCancel = new Button();
-                btnCancel.Text = "&Cancel";
-                btnCancel.DialogResult = DialogResult.Cancel;
-                btnCancel.Location = new Point(313, 70);
-                prompt.Controls.Add(lbl);
-                prompt.Controls.Add(tb);
-                prompt.Controls.Add(btnOk);
-                prompt.Controls.Add(btnCancel);
-                prompt.AcceptButton = btnOk;
-                prompt.CancelButton = btnCancel;
-                if (prompt.ShowDialog(frm) != DialogResult.OK) return;
-                sListSearchTerm = tb.Text ?? "";
-            }
-            if (string.IsNullOrEmpty(sListSearchTerm)) return;
-            // Start search from item 0 (Ctrl+J is "find first match
-            // from the top," not "find next from current position").
-            int iFound = findInListBoxFrom(lb, 0, true, sListSearchTerm);
-            if (iFound < 0)
-                LiveRegion.say("No match for \"" + sListSearchTerm + "\"");
-            else
-            { lb.SelectedIndex = iFound; lb.Focus(); }
-        }
-
-        // F3 / Shift+F3: advance / retreat through matches of the
-        // stored search term. If no search term is set, silently say
-        // so (don't pop up a dialog -- F3 is a navigation key, not a
-        // configuration key).
-        private void findNextInListBox(ListBox lb, bool bForward)
-        {
-            if (string.IsNullOrEmpty(sListSearchTerm))
-            { LiveRegion.say("No find substring set; press Control+J first"); return; }
-            int iFrom = lb.SelectedIndex + (bForward ? 1 : -1);
-            if (iFrom < 0) iFrom = lb.Items.Count - 1;
-            if (iFrom >= lb.Items.Count) iFrom = 0;
-            int iFound = findInListBoxFrom(lb, iFrom, bForward, sListSearchTerm);
-            if (iFound < 0)
-                LiveRegion.say("No more matches for \"" + sListSearchTerm + "\"");
-            else
-                lb.SelectedIndex = iFound;
-        }
-
-        // findInListBoxFrom: case-insensitive substring search through
-        // the ListBox starting at iFrom, wrapping at the boundary.
-        // Returns the index of the match or -1 if none.
-        private static int findInListBoxFrom(ListBox lb, int iFrom, bool bForward, string sNeedle)
-        {
-            int n = lb.Items.Count;
-            if (n == 0 || string.IsNullOrEmpty(sNeedle)) return -1;
-            if (iFrom < 0) iFrom = 0;
-            if (iFrom >= n) iFrom = n - 1;
-            string sLowerNeedle = sNeedle.ToLowerInvariant();
-            for (int i = 0; i < n; i++)
-            {
-                int j = bForward
-                    ? (iFrom + i) % n
-                    : ((iFrom - i) % n + n) % n;
-                string sItem = (lb.Items[j] ?? "").ToString().ToLowerInvariant();
-                if (sItem.Contains(sLowerNeedle)) return j;
-            }
-            return -1;
-        }
-
-        // addPickBox: labeled pick-one list. Equivalent to AddPickBox
-        // in Homer LbC.
-        public ListBox addPickBox(string sLabel, IList<string> lNames, string sSelected, string sTip)
-        {
-            addFieldLabel(sLabel);
-            ListBox lb = addListBox(lNames, sSelected, sTip);
-            lb.AccessibleName = cleanLabel(sLabel);
-            return lb;
-        }
-
-        // addListBox(label, items, selected): backward-compat
-        // 3-arg form that maps to addPickBox without a tip.
-        public ListBox addListBox(string sLabel, IList<string> lNames, string sSelected)
-        {
-            return addPickBox(sLabel, lNames, sSelected, null);
-        }
-
-        // addComboBox: bare drop-down pick-one. DropDownList style
-        // so the user can only pick from the list.
-        public ComboBox addComboBox(IList<string> lNames, string sSelected, string sTip)
-        {
-            ComboBox cb = new ComboBox();
-            cb.DropDownStyle = ComboBoxStyle.DropDownList;
-            cb.Size = new Size(innerWidth(), DefaultLineHeight);
-            cb.TabIndex = iTabIndex++;
-            cb.Margin = new Padding(0, 0, 0, DefaultRowGap);
-            populateComboBox(cb, lNames, sSelected);
-            Label lblLast = currentLabelOrNull();
-            if (lblLast != null) cb.AccessibleName = lblLast.AccessibleName;
-            cb.GotFocus += handleGotFocus;
-            registerWidget(cb, "ComboBox", cb.AccessibleName);
-            if (!string.IsNullOrEmpty(sTip)) dFocusTips[cb] = sTip;
-            pnlStack.Controls.Add(cb);
-            if (ctlFirstFocusable == null) ctlFirstFocusable = cb;
-            return cb;
-        }
-
-        // addComboPickBox: labeled drop-down pick-one. Equivalent
-        // to AddComboPickBox in Homer LbC.
-        public ComboBox addComboPickBox(string sLabel, IList<string> lNames, string sSelected, string sTip)
-        {
-            addFieldLabel(sLabel);
-            ComboBox cb = addComboBox(lNames, sSelected, sTip);
-            cb.AccessibleName = cleanLabel(sLabel);
-            return cb;
-        }
-
-        // addComboBox(label, items, selected): backward-compat
-        // 3-arg form that maps to addComboPickBox without a tip.
-        public ComboBox addComboBox(string sLabel, IList<string> lNames, string sSelected)
-        {
-            return addComboPickBox(sLabel, lNames, sSelected, null);
-        }
-
-        // addRadioButton: one option in a radio-button group. The
-        // first call after a non-RadioButton control starts a new
-        // group automatically (WinForms convention).
-        public RadioButton addRadioButton(string sLabel, bool bChecked, string sTip)
-        {
-            RadioButton rb = new RadioButton();
-            rb.Text = sLabel ?? "";
-            rb.AccessibleName = cleanLabel(sLabel);
-            rb.Checked = bChecked;
-            rb.AutoSize = false;
-            rb.Size = new Size(innerWidth(), DefaultLineHeight);
-            rb.TabIndex = iTabIndex++;
-            rb.Margin = new Padding(0, 0, 0, DefaultRowGap);
-            rb.GotFocus += handleGotFocus;
-            registerWidget(rb, "RadioButton", sLabel);
-            if (!string.IsNullOrEmpty(sTip)) dFocusTips[rb] = sTip;
-            pnlStack.Controls.Add(rb);
-            if (ctlFirstFocusable == null) ctlFirstFocusable = rb;
-            return rb;
-        }
-
-        // addRadioButton without tip: backward compat.
-        public RadioButton addRadioButton(string sLabel, bool bChecked)
-        {
-            return addRadioButton(sLabel, bChecked, null);
-        }
-
-        // addNumericUpDown: typed integer input with min/max bounds
-        // and spinner. Equivalent to AddNumericUpDown in Homer LbC.
-        public NumericUpDown addNumericUpDown(string sLabel, int iValue,
-                                              int iMin, int iMax, string sTip)
-        {
-            if (!string.IsNullOrEmpty(sLabel)) addFieldLabel(sLabel);
-            NumericUpDown nud = new NumericUpDown();
-            nud.Minimum = iMin;
-            nud.Maximum = iMax;
-            nud.Value = Math.Max(iMin, Math.Min(iMax, iValue));
-            nud.Size = new Size(DefaultNumericWidth, DefaultLineHeight);
-            nud.TabIndex = iTabIndex++;
-            nud.Margin = new Padding(0, 0, 0, DefaultRowGap);
-            nud.AccessibleName = cleanLabel(sLabel);
-            nud.GotFocus += handleGotFocus;
-            registerWidget(nud, "NumericUpDown", sLabel);
-            if (!string.IsNullOrEmpty(sTip)) dFocusTips[nud] = sTip;
-            pnlStack.Controls.Add(nud);
-            if (ctlFirstFocusable == null) ctlFirstFocusable = nud;
-            return nud;
-        }
-
-        // addSeparator: a thin horizontal divider, for visually
-        // grouping related fields. Not focusable.
-        public void addSeparator()
-        {
-            Label sep = new Label();
-            sep.Size = new Size(innerWidth(), 2);
-            sep.BorderStyle = BorderStyle.Fixed3D;
-            sep.Margin = new Padding(0, DefaultRowGap, 0, DefaultRowGap);
-            pnlStack.Controls.Add(sep);
-        }
-
-        // ------- Widget lookup helpers -------
-        //
-        // Every widget added via add* methods is registered in
-        // dWidgets under an auto-generated name of the form
-        // <Kind>_<CleanedLabel>. These helpers let callers fetch
-        // widgets by name without having to keep references.
-        //
-        // The name generator strips non-alphanumeric chars from
-        // the label, replaces spaces with underscore, and appends
-        // a 2/3/... suffix on collisions.
-
-        public Control findControl(string sName)
-        {
-            if (string.IsNullOrEmpty(sName)) return null;
-            Control ctl;
-            if (dWidgets.TryGetValue(sName, out ctl)) return ctl;
-            return null;
-        }
-
-        public TextBox       getTextBox(string sName)       { return findControl(sName) as TextBox; }
-        public CheckBox      getCheckBox(string sName)      { return findControl(sName) as CheckBox; }
-        public ComboBox      getComboBox(string sName)      { return findControl(sName) as ComboBox; }
-        public ListBox       getListBox(string sName)       { return findControl(sName) as ListBox; }
-        public RadioButton   getRadioButton(string sName)   { return findControl(sName) as RadioButton; }
-        public NumericUpDown getNumericUpDown(string sName) { return findControl(sName) as NumericUpDown; }
-        public Label         getLabel(string sName)         { return findControl(sName) as Label; }
-
-        // Snapshot of every widget added so far, keyed by name.
-        // Useful for callers that want to walk the whole dialog.
-        public IDictionary<string, Control> widgets
-        { get { return new Dictionary<string, Control>(dWidgets); } }
-
-        // ------- Finish and show -------
-
-        // runOkCancel: convenience wrapper. Returns true on OK.
-        public bool runOkCancel()
-        {
-            return string.Equals(runWithButtons(new string[] { "OK", "Cancel" }),
-                                 "OK", StringComparison.OrdinalIgnoreCase);
-        }
-
-        // runWithButtons: add a button band at the bottom, show
-        // modally, return the label of the button the user pressed
-        // (or "" on Escape/close-box). The first label is the
-        // AcceptButton (Enter); any "Cancel" or "Close" label is
-        // the CancelButton (Escape).
-        // Initial-focus override: when set, this control receives
-        // focus once the dialog is shown (Focus() before Shown is a
-        // no-op). Form-view record navigation uses it to land on
-        // the same field across reopen cycles.
-        private Control ctlInitialFocus;
-        public void setInitialFocus(Control ctl) { ctlInitialFocus = ctl; }
-
-        public string runWithButtons(string[] aButtonLabels)
-        {
-            return runWithButtons(aButtonLabels, true);
-        }
-
-        // Every Lbc dialog carries a Help button, placed rightmost in
-        // the button row per Windows layout convention (and reachable
-        // as Alt+H or F1). It describes the dialog's fields with
-        // their tips plus the universal dialog keys. bAddHelp lets
-        // the help dialog itself opt out, preventing recursion.
-        public string runWithButtons(string[] aButtonLabels, bool bAddHelp)
-        {
-            string[] aGivenLabels = aButtonLabels;
-            if (bAddHelp && Array.IndexOf(aButtonLabels, "Help") < 0)
-            {
-                List<string> lsAll = new List<string>(aButtonLabels);
-                lsAll.Add("Help");
-                aButtonLabels = lsAll.ToArray();
-            }
-            FlowLayoutPanel pnlButtonRow = new FlowLayoutPanel();
-            pnlButtonRow.FlowDirection = FlowDirection.RightToLeft;
-            pnlButtonRow.AutoSize = false;
-            pnlButtonRow.Dock = DockStyle.Bottom;
-            pnlButtonRow.Height = DefaultButtonHeight + DefaultPadding * 2;
-            pnlButtonRow.Padding = new Padding(DefaultPadding);
-
-            string sResult = "";
-            Button btnAccept = null;
-            Button btnCancel = null;
-
-            // Add buttons right-to-left so the visual order reads
-            // left-to-right as given. RightToLeft FlowDirection
-            // puts the first-added at the right; we want first-
-            // given at the left, so iterate in reverse. TabIndex is
-            // assigned by LABEL position (not add order) so keyboard
-            // tab order and initial focus follow the visual left-to-
-            // right order: the first-given button (the AcceptButton,
-            // e.g. Custom) is focused first, and the rightmost Help
-            // button is last -- never the initial focus.
-            int iBtnBase = iTabIndex;
-            for (int i = aButtonLabels.Length - 1; i >= 0; i--)
-            {
-                string sLabel = aButtonLabels[i] ?? "";
-                Button btn = new Button();
-                btn.Text = "&" + sLabel.Replace("&", "");
-                btn.AccessibleName = sLabel.Replace("&", "");
-                btn.Size = new Size(DefaultButtonWidth, DefaultButtonHeight);
-                btn.TabIndex = iBtnBase + i;
-                btn.Margin = new Padding(DefaultRowGap, 0, 0, 0);
-                btn.UseVisualStyleBackColor = true;
-
-                string sCaptured = sLabel.Replace("&", "");
-                if (bAddHelp && string.Equals(sCaptured, "Help", StringComparison.OrdinalIgnoreCase))
-                {
-                    btn.Click += delegate(object o, EventArgs e) { showHelp(); };
-                }
-                else
-                {
-                    btn.Click += delegate(object o, EventArgs e) {
-                        sResult = sCaptured;
-                        frm.DialogResult = DialogResult.OK;
-                        frm.Close();
-                    };
-                }
-                registerWidget(btn, "Button", sCaptured);
-                pnlButtonRow.Controls.Add(btn);
-                if (i == 0) btnAccept = btn;
-                if (string.Equals(sCaptured, "Cancel", StringComparison.OrdinalIgnoreCase)
-                    || string.Equals(sCaptured, "Close", StringComparison.OrdinalIgnoreCase))
-                    btnCancel = btn;
-            }
-            frm.Controls.Add(pnlButtonRow);
-            if (btnAccept != null) frm.AcceptButton = btnAccept;
-            if (btnCancel != null) frm.CancelButton = btnCancel;
-            // Control+Enter presses the accept button regardless of
-            // keyboard focus -- including inside a multi-line memo,
-            // where plain Enter inserts a newline (AcceptsReturn) and
-            // never reaches the AcceptButton. This is the classic
-            // windowing-guidelines rule (Enter and Control+Return both
-            // invoke the default action, Control+Return covering the
-            // multiline case), and it gives every Lbc dialog one
-            // universal "submit from anywhere" chord.
-            // Universal dialog keys, handled at form level:
-            //   Control+Enter  press the accept button from anywhere
-            //                  (covers memos, where plain Enter
-            //                  inserts a newline)
-            //   F1             show the dialog's Help
-            //   Control+Home   focus the FIRST field (excluding the
-            //   Control+End    button row) / the LAST field -- except
-            //                  inside a multi-line memo, where these
-            //                  chords keep their caret meaning
-            //                  (start / end of text), which a text
-            //                  editor's muscle memory expects.
-            //   F7             list every focusable control in
-            //                  navigation order; OK moves focus to
-            //                  the chosen one.
-            {
-                Button btnDefault = btnAccept;
-                bool bHelpHere = bAddHelp;
-                frm.KeyPreview = true;
-                frm.KeyDown += delegate(object sender, KeyEventArgs evArgs)
-                {
-                    TextBox tbActive = frm.ActiveControl as TextBox;
-                    bool bInMemo = (tbActive != null) && tbActive.Multiline;
-                    if (evArgs.KeyData == (Keys.Control | Keys.Enter) && btnDefault != null)
-                    {
-                        evArgs.Handled = true;
-                        evArgs.SuppressKeyPress = true;
-                        btnDefault.PerformClick();
-                    }
-                    else if (evArgs.KeyData == Keys.F1 && bHelpHere)
-                    {
-                        evArgs.Handled = true;
-                        evArgs.SuppressKeyPress = true;
-                        showHelp();
-                    }
-                    else if (evArgs.KeyData == (Keys.Control | Keys.Home) && !bInMemo)
-                    {
-                        evArgs.Handled = true;
-                        evArgs.SuppressKeyPress = true;
-                        focusFieldEdge(true);
-                    }
-                    else if (evArgs.KeyData == (Keys.Control | Keys.End) && !bInMemo)
-                    {
-                        evArgs.Handled = true;
-                        evArgs.SuppressKeyPress = true;
-                        focusFieldEdge(false);
-                    }
-                    else if (evArgs.KeyData == Keys.F7)
-                    {
-                        evArgs.Handled = true;
-                        evArgs.SuppressKeyPress = true;
-                        pickFocusControl();
-                    }
-                };
-            }
-            // Single-button confirmation dialogs (e.g., the read-only
-            // memo dialog used by Invoke-Script and the speech-only
-            // double-press) typically only carry an "OK" button. With
-            // no explicit Cancel button, the user would otherwise
-            // have to Tab to OK and press Enter or Space to dismiss
-            // -- Escape would do nothing. Wire that one button as
-            // BOTH AcceptButton and CancelButton so Escape, Enter,
-            // and the click all close the dialog with the same
-            // result. This matches the LbcDialog principle "minimum
-            // keystrokes to dismiss" and the user expectation that
-            // Escape always works.
-            if (btnCancel == null && btnAccept != null
-                && aGivenLabels.Length == 1)
-                frm.CancelButton = btnAccept;
-
-            int iContentHeight = computeStackHeight();
-            int iTotalHeight = iContentHeight + pnlButtonRow.Height
-                             + lblStatusBar.Height + 8;
-            if (iTotalHeight > DefaultMaxHeight) iTotalHeight = DefaultMaxHeight;
-            if (iTotalHeight < 200) iTotalHeight = 200;
-            frm.ClientSize = new Size(DefaultDialogWidth, iTotalHeight);
-
-            if (ctlFirstFocusable != null) frm.ActiveControl = ctlFirstFocusable;
-            if (ctlInitialFocus != null)
-            {
-                Control ctlFocusLater = ctlInitialFocus;
-                frm.Shown += delegate(object o, EventArgs e)
-                { try { ctlFocusLater.Focus(); } catch { } };
-            }
-            frm.ShowDialog(owner);
-            return sResult;
-        }
-
-        // form: outer access for callers who need to tweak something
-        // the high-level API doesn't expose (e.g., add an Icon).
-        public Form form { get { return frm; } }
-
-        public void Dispose()
-        {
-            if (frm != null) { frm.Dispose(); frm = null; }
-        }
-
-        // ------- Internal helpers (kept private) -------
-
-        // currentLabelOrNull: the most-recently-added Label, if the
-        // last control added was a Label. Returns null if the last
-        // control was something else (or the stack is empty). Used
-        // by bare-control adders to inherit the accessible name
-        // from an immediately-preceding Label, mirroring the Homer
-        // LbC convention where AddTextBox after AddLabel automatically
-        // gets the label's AccessibleName.
-        private Label currentLabelOrNull()
-        {
-            int iCount = pnlStack.Controls.Count;
-            if (iCount == 0) return null;
-            return pnlStack.Controls[iCount - 1] as Label;
-        }
-
-        // handleGotFocus: status-bar tip update on focus.
-        // showHelp: the Help button / F1 target. Lists the dialog's
-        // fields in layout order with their focus tips, then the
-        // universal dialog keys. Shown in a read-only memo so the
-        // user can arrow through it line by line; the help dialog
-        // suppresses its own Help button (bAddHelp false) to avoid
-        // recursion.
-        public void showHelp()
-        {
-            string sTip;
-            StringBuilder sbHelp = new StringBuilder();
-            sbHelp.AppendLine("Fields in this dialog:");
-            foreach (Control ctl in pnlStack.Controls)
-            {
-                if (ctl is Label) continue;
-                string sName = string.IsNullOrEmpty(ctl.AccessibleName)
-                    ? ctl.GetType().Name : ctl.AccessibleName;
-                sbHelp.Append("  ").Append(sName);
-                if (dFocusTips.TryGetValue(ctl, out sTip) && !string.IsNullOrEmpty(sTip))
-                    sbHelp.Append(" -- ").Append(sTip);
-                sbHelp.AppendLine();
-            }
-            sbHelp.AppendLine();
-            sbHelp.AppendLine("Dialog keys:");
-            sbHelp.AppendLine("  Control+Enter presses the accept button from anywhere.");
-            sbHelp.AppendLine("  Control+Home and Control+End move to the first and last field (outside multi-line text, where they move the caret).");
-            sbHelp.AppendLine("  Escape cancels. F1 shows this help.");
-            sbHelp.AppendLine("  F7 lists the dialog's controls in navigation order; choose one and press OK to focus it (type a letter to jump in the list).");
-            sbHelp.AppendLine("  In text fields: Control+C copies the current line when nothing is selected, Alt+C appends, Control+X cuts the line, Control+D deletes it, F8 and Shift+F8 start and complete a selection, Control+F8 copies all, Alt+F8 reads all, Alt+Y says counts, Shift+F1 speaks the field tip.");
-            sbHelp.AppendLine("  In lists: Control+C copies the current item, Alt+C appends it; Control+J then F3 search the list.");
-            using (LbcDialog dlgHelp = new LbcDialog("Help: " + frm.Text, frm))
-            {
-                TextBox tbHelp = dlgHelp.addMemo(sbHelp.ToString(), null);
-                tbHelp.ReadOnly = true;
-                tbHelp.AccessibleName = "Help text";
-                dlgHelp.runWithButtons(new string[] { "OK" }, false);
-            }
-        }
-
-        // pickFocusControl: the F7 control list. Presents every
-        // focusable control in the dialog -- content fields first in
-        // navigation (tab) order, then the button row in visual
-        // left-to-right order -- in a list box. The ListBox's native
-        // type-a-letter behavior gives navigation by initial letter;
-        // invoking OK moves focus to the chosen control. The idiom
-        // mirrors a screen reader's elements list (JAWS Insert+F7),
-        // scoped to the dialog. The chooser suppresses its own Help
-        // button to stay lightweight; F7 inside it simply lists the
-        // chooser's controls, which is harmless.
-        private void pickFocusControl()
-        {
-            Dictionary<string, Control> dByName = new Dictionary<string, Control>();
-            List<string> lsNames = new List<string>();
-            string sCurrent = null;
-            foreach (Control ctl in pnlStack.Controls)
-                addFocusEntry(ctl, lsNames, dByName);
-            // The button row is a sibling FlowLayoutPanel whose
-            // Controls collection is stored right-to-left (see
-            // runWithButtons); reverse it for navigation order.
-            foreach (Control ctlTop in frm.Controls)
-            {
-                FlowLayoutPanel pnlRow = ctlTop as FlowLayoutPanel;
-                if (pnlRow == null || pnlRow == pnlStack) continue;
-                List<Control> lsRow = new List<Control>();
-                foreach (Control ctl in pnlRow.Controls) lsRow.Add(ctl);
-                lsRow.Reverse();
-                foreach (Control ctl in lsRow) addFocusEntry(ctl, lsNames, dByName);
-            }
-            if (lsNames.Count == 0) { LiveRegion.say("No focusable controls"); return; }
-            Control ctlActive = frm.ActiveControl;
-            foreach (KeyValuePair<string, Control> pair in dByName)
-            {
-                if (pair.Value == ctlActive) { sCurrent = pair.Key; break; }
-            }
-            using (LbcDialog dlgPick = new LbcDialog("Controls: " + frm.Text, frm))
-            {
-                ListBox lb = dlgPick.addListBox("Choose a control to focus:",
-                    lsNames, sCurrent != null ? sCurrent : lsNames[0]);
-                if (!string.Equals(dlgPick.runWithButtons(new string[] { "OK", "Cancel" }, false),
-                        "OK", StringComparison.OrdinalIgnoreCase)) return;
-                string sChosen = (lb.SelectedItem != null) ? lb.SelectedItem.ToString() : null;
-                Control ctlTarget;
-                if (sChosen != null && dByName.TryGetValue(sChosen, out ctlTarget))
-                    ctlTarget.Focus();
-            }
-        }
-
-        // pressButton: programmatically invoke a button-row button
-        // by its label (mnemonics ignored) -- the hook form-view
-        // keys use to close-with-save (OK) or close-discarding
-        // (Cancel) from inside a field handler, reusing the
-        // button's own wiring.
-        public bool pressButton(string sLabel)
-        {
-            foreach (Control ctlTop in frm.Controls)
-            {
-                FlowLayoutPanel pnlRow = ctlTop as FlowLayoutPanel;
-                if (pnlRow == null || pnlRow == pnlStack) continue;
-                foreach (Control ctl in pnlRow.Controls)
-                {
-                    Button btn = ctl as Button;
-                    if (btn != null && string.Equals(btn.Text.Replace("&", ""), sLabel,
-                            StringComparison.OrdinalIgnoreCase))
-                    { btn.PerformClick(); return true; }
-                }
-            }
-            return false;
-        }
-
-        // addFocusEntry: register one focusable control under a
-        // unique display name (AccessibleName, else button text, else
-        // type name; duplicates get a numeric suffix).
-        private void addFocusEntry(Control ctl, List<string> lsNames, Dictionary<string, Control> dByName)
-        {
-            if (ctl is Label || !ctl.CanSelect || !ctl.Visible) return;
-            string sBase = !string.IsNullOrEmpty(ctl.AccessibleName) ? ctl.AccessibleName
-                : (!string.IsNullOrEmpty(ctl.Text) ? ctl.Text.Replace("&", "") : ctl.GetType().Name);
-            string sName = sBase;
-            int iSuffix = 2;
-            while (dByName.ContainsKey(sName)) { sName = sBase + " " + iSuffix; iSuffix++; }
-            lsNames.Add(sName);
-            dByName[sName] = ctl;
-        }
-
-        // focusFieldEdge: Control+Home/End target -- the first or
-        // last selectable field in the content stack. The button row
-        // lives outside pnlStack, so OK, Cancel, and Help are
-        // excluded by construction.
-        private void focusFieldEdge(bool bFirst)
-        {
-            Control ctlTarget = null;
-            foreach (Control ctl in pnlStack.Controls)
-            {
-                if (ctl is Label || !ctl.CanSelect) continue;
-                ctlTarget = ctl;
-                if (bFirst) break;
-            }
-            if (ctlTarget != null) ctlTarget.Focus();
-        }
-
-        // setStatusText: put a message on the dialog's status line --
-        // the same line that shows focus tips, so the user already
-        // knows where to look (and JAWS users can reread it with the
-        // say-status-bar hotkey).
-        public void setStatusText(string sText)
-        {
-            if (lblStatusBar != null) lblStatusBar.Text = sText ?? "";
-        }
-
-        private void handleGotFocus(object sender, EventArgs evArgs)
-        {
-            Control ctl = sender as Control;
-            if (ctl == null) { lblStatusBar.Text = ""; return; }
-            string sTip;
-            lblStatusBar.Text = dFocusTips.TryGetValue(ctl, out sTip) ? sTip : "";
-        }
-
-        // handleMemoGotFocus: while a memo has focus, Enter must
-        // insert a newline instead of submitting. Clear the form's
-        // AcceptButton (remembering it for restore on LostFocus).
-        // Also update the status bar.
-        private void handleMemoGotFocus(object sender, EventArgs evArgs)
-        {
-            if (frm.AcceptButton != null)
-                btnSavedAccept = frm.AcceptButton as Button;
-            frm.AcceptButton = null;
-            handleGotFocus(sender, evArgs);
-        }
-
-        // handleMemoLostFocus: restore the AcceptButton when the
-        // memo loses focus, so Enter from a subsequent single-line
-        // field submits as expected.
-        private void handleMemoLostFocus(object sender, EventArgs evArgs)
-        {
-            if (btnSavedAccept != null && frm.AcceptButton == null)
-                frm.AcceptButton = btnSavedAccept;
-        }
-
-        // ------- Text-edit convenience hotkeys -------
-        //
-        // When the focused control inside the LbcDialog is a single-
-        // line TextBox (Name starts with "TextBox_") or a multi-line
-        // memo (Name starts with "Memo_"), the following hotkeys are
-        // recognized in addition to standard text-edit behavior:
-        //
-        //   Ctrl+C    Copy. If text is selected, copy selection
-        //             (default behavior). If no selection, copy the
-        //             current line to the clipboard.
-        //   Alt+C     Append to clipboard. If selected, append the
-        //             selection; if no selection, append the current
-        //             line. Preserves the existing clipboard content;
-        //             the new piece is added on a fresh line.
-        //   Ctrl+X    Cut. If selected, cut the selection (default).
-        //             If no selection, cut the current line and
-        //             speak the next line as feedback.
-        //   Alt+X     Cut + append. Like Alt+C but removes the cut
-        //             text from the buffer after appending.
-        //   F8        Mark the start of a selection at the current
-        //             caret position. The position is stashed in
-        //             tb.Tag. The character at the start is spoken
-        //             as a confirmation.
-        //   Shift+F8  Complete the selection from the saved start to
-        //             the current caret. Highlights the range; the
-        //             length is announced.
-        //   Ctrl+F8   Copy ALL text in the field to the clipboard.
-        //             Status bar reports "Copy All".
-        //   Alt+F8    Speak ALL text in the field via the live
-        //             region. Status bar reports "Read All".
-        //   Ctrl+D    Delete the current line. The next line is
-        //             spoken as feedback so the user knows where the
-        //             caret ended up.
-        //   Shift+F5  Run at Cursor. Take the selection (or current
-        //             line) as a URL, file path, or address, and open
-        //             it with the OS after a confirmation prompt.
-        //
-        // None of the above conflicts with standard control behavior:
-        // F8, Shift+F8, Ctrl+F8, Alt+F8 are unbound in standard
-        // WinForms TextBoxes; Ctrl+D is unbound; the Ctrl+C / Ctrl+X
-        // overrides only act when there is no selection (the standard
-        // Copy and Cut don't do anything without a selection); the
-        // Alt+ variants are unbound. Pattern adapted from HomerLbc's
-        // convenience hotkeys for text fields.
-        //
-        // Master enable flag: [Lbc] extraKeys in DbDo.inix, default Y.
-        // When N, all of the above hotkeys are passed through to
-        // standard control handling.
-
-        private static bool? bExtraKeysCached = null;
-        private static bool isExtraKeysOn()
-        {
-            if (bExtraKeysCached.HasValue) return bExtraKeysCached.Value;
-            bool bDefault = true;
-            try
-            {
-                string sIniPath = Path.Combine(
-                    Path.GetDirectoryName(Application.ExecutablePath) ?? ".",
-                    "DbDo.inix");
-                if (!File.Exists(sIniPath)) { bExtraKeysCached = bDefault; return bDefault; }
-                bool bInLbcSection = false;
-                foreach (string sLine in File.ReadAllLines(sIniPath))
-                {
-                    string sTrim = sLine.Trim();
-                    if (sTrim.Length == 0 || sTrim.StartsWith(";") || sTrim.StartsWith("#")) continue;
-                    if (sTrim.StartsWith("["))
-                    {
-                        bInLbcSection = sTrim.Equals("[Lbc]", StringComparison.OrdinalIgnoreCase);
-                        continue;
-                    }
-                    if (!bInLbcSection) continue;
-                    int iEq = sTrim.IndexOf('=');
-                    if (iEq <= 0) continue;
-                    string sName = sTrim.Substring(0, iEq).Trim();
-                    if (!sName.Equals("ExtraKeys", StringComparison.OrdinalIgnoreCase)) continue;
-                    string sVal = sTrim.Substring(iEq + 1).Trim();
-                    if (sVal.Length == 0) { bExtraKeysCached = bDefault; return bDefault; }
-                    char c = sVal[0];
-                    bExtraKeysCached = !(c == 'N' || c == 'n' || c == '0' || c == 'F' || c == 'f');
-                    return bExtraKeysCached.Value;
-                }
-            }
-            catch { /* tolerate; fall through to default */ }
-            bExtraKeysCached = bDefault;
-            return bDefault;
-        }
-
-        // textEditEligible: is the focused control a single-line text
-        // box or a multi-line memo that DbDo registered via the
-        // standard add* methods? Pattern matches the Name prefix that
-        // registerWidget assigns (TextBox_ or Memo_).
-        private static TextBox textEditEligible(Control ctl)
-        {
-            TextBox tb = ctl as TextBox;
-            if (tb == null) return null;
-            string sName = tb.Name ?? "";
-            if (!sName.StartsWith("TextBox_") && !sName.StartsWith("Memo_")) return null;
-            if (tb.ReadOnly) return null;
-            return tb;
-        }
-
-        // onFormKeyDown: form-level KeyDown handler for the LbcDialog.
-        // Frm.KeyPreview is on, so this fires before the focused
-        // control sees the key. We intercept the
-        // chords listed in the section header and pass everything
-        // else through.
-        private void onFormKeyDown(object sender, KeyEventArgs evArgs)
-        {
-            if (!isExtraKeysOn()) return;
-            // GetFocus via active control on the form.
-            Control ctl = getActiveControl();
-            TextBox tb = textEditEligible(ctl);
-            if (tb == null) return;
-
-            Keys k = evArgs.KeyData;
-            bool bHandled = true;
-
-            if      (k == Keys.F8)                          textEditStartSelection(tb);
-            else if (k == (Keys.Shift   | Keys.F8))         textEditCompleteSelection(tb);
-            else if (k == (Keys.Control | Keys.F8))         textEditCopyAll(tb);
-            else if (k == (Keys.Alt     | Keys.F8))         textEditReadAll(tb);
-            else if (k == (Keys.Control | Keys.C))          { if (tb.SelectionLength > 0) bHandled = false; else textEditCopyLine(tb); }
-            else if (k == (Keys.Alt     | Keys.C))          textEditAppendLineToClipboard(tb);
-            else if (k == (Keys.Control | Keys.X))          { if (tb.SelectionLength > 0) bHandled = false; else textEditCutLine(tb); }
-            else if (k == (Keys.Alt     | Keys.X))          textEditCutAppend(tb);
-            else if (k == (Keys.Control | Keys.D))          textEditDeleteLine(tb);
-            else if (k == (Keys.Shift   | Keys.F5))         textEditRunAtCursor(tb);
-            else                                            bHandled = false;
-
-            if (bHandled)
-            {
-                evArgs.Handled = true;
-                evArgs.SuppressKeyPress = true;
-            }
-        }
-
-        // getActiveControl: walk the active-control chain to find the
-        // deepest focused control. Form.ActiveControl can return a
-        // container; we descend through ContainerControls to the leaf.
-        private Control getActiveControl()
-        {
-            Control ctl = frm.ActiveControl;
-            while (ctl is ContainerControl)
-            {
-                Control child = ((ContainerControl)ctl).ActiveControl;
-                if (child == null || child == ctl) break;
-                ctl = child;
-            }
-            return ctl;
-        }
-
-        // Compute the (start, length) of the line containing the
-        // current caret in tb. Used by every line-oriented hotkey.
-        // The line END is computed as the start of the NEXT line
-        // minus 1 (to exclude the trailing newline), or the end of
-        // the text when on the last line.
-        private static void textEditCurrentLineRange(TextBox tb, out int iStart, out int iLength)
-        {
-            int iCaret = tb.SelectionStart + tb.SelectionLength;
-            int iRow = tb.GetLineFromCharIndex(iCaret);
-            iStart = tb.GetFirstCharIndexFromLine(iRow);
-            int iEnd = tb.GetFirstCharIndexFromLine(iRow + 1);
-            if (iEnd <= 0) iEnd = tb.TextLength;
-            else iEnd--;
-            iLength = iEnd - iStart;
-            if (iLength < 0) iLength = 0;
-        }
-
-        // F8 -- mark the start of a selection at the current caret.
-        // The position is stored in tb.Tag as a boxed int. The char
-        // at the start is spoken as a confirmation.
-        private void textEditStartSelection(TextBox tb)
-        {
-            int iCaret = tb.SelectionStart + tb.SelectionLength;
-            tb.Tag = iCaret;
-            lblStatusBar.Text = "Start Selection";
-            string sCh = iCaret < tb.TextLength ? tb.Text.Substring(iCaret, 1) : "end";
-            LiveRegion.say("Start selection " + sCh);
-        }
-
-        // Shift+F8 -- complete a selection from the saved start to
-        // the current caret. If no start was saved, fall back to
-        // marking start at the current caret (so the user can press
-        // F8 then Shift+F8 after another navigation step in either
-        // order). Length is announced.
-        private void textEditCompleteSelection(TextBox tb)
-        {
-            if (tb.Tag == null)
-            {
-                textEditStartSelection(tb);
-                return;
-            }
-            int iStart;
-            try { iStart = (int)tb.Tag; }
-            catch { textEditStartSelection(tb); return; }
-            int iEnd = tb.SelectionStart + tb.SelectionLength;
-            if (iEnd < iStart) { int t = iStart; iStart = iEnd; iEnd = t; }
-            int iLength = iEnd - iStart;
-            tb.Select(iStart, iLength);
-            lblStatusBar.Text = "Complete Selection, " + iLength + " character" + (iLength == 1 ? "" : "s");
-            LiveRegion.say("Selected " + iLength + " character" + (iLength == 1 ? "" : "s"));
-        }
-
-        // Ctrl+F8 -- copy ALL text in the field to the clipboard.
-        private void textEditCopyAll(TextBox tb)
-        {
-            try
-            {
-                Clipboard.SetText(tb.Text.Length == 0 ? " " : tb.Text);
-                lblStatusBar.Text = "Copy All";
-                LiveRegion.say("Copied all, " + tb.TextLength + " character" + (tb.TextLength == 1 ? "" : "s"));
-            }
-            catch { LiveRegion.say("Could not copy"); }
-        }
-
-        // Alt+F8 -- speak ALL text in the field via the live region.
-        private void textEditReadAll(TextBox tb)
-        {
-            lblStatusBar.Text = "Read All";
-            LiveRegion.say(tb.Text);
-        }
-
-        // Ctrl+C with no selection -- copy the current line.
-        private void textEditCopyLine(TextBox tb)
-        {
-            int iStart, iLength;
-            textEditCurrentLineRange(tb, out iStart, out iLength);
-            string sLine = tb.Text.Substring(iStart, iLength);
-            try { Clipboard.SetText(sLine.Length == 0 ? " " : sLine); }
-            catch { LiveRegion.say("Could not copy"); return; }
-            lblStatusBar.Text = "Copy Line";
-            LiveRegion.say("Copied line");
-        }
-
-        // Alt+C -- append the current line (or selection) to the
-        // existing clipboard contents, separated by a newline.
-        private void textEditAppendLineToClipboard(TextBox tb)
-        {
-            string sExisting;
-            try { sExisting = Clipboard.GetText() ?? ""; }
-            catch { sExisting = ""; }
-            if (sExisting.Length > 0 && !sExisting.EndsWith("\n")) sExisting += "\r\n";
-            string sAdd;
-            if (tb.SelectionLength > 0)
-            {
-                sAdd = tb.SelectedText;
-            }
-            else
-            {
-                int iStart, iLength;
-                textEditCurrentLineRange(tb, out iStart, out iLength);
-                sAdd = tb.Text.Substring(iStart, iLength);
-            }
-            try { Clipboard.SetText(sExisting + sAdd); }
-            catch { LiveRegion.say("Could not append"); return; }
-            lblStatusBar.Text = "Append to Clipboard";
-            LiveRegion.say("Appended");
-        }
-
-        // Ctrl+X with no selection -- cut the current line.
-        private void textEditCutLine(TextBox tb)
-        {
-            int iStart, iLength;
-            textEditCurrentLineRange(tb, out iStart, out iLength);
-            // Include the trailing newline if there is a next line
-            // so the cut doesn't leave a blank line behind.
-            int iCutLen = iLength;
-            if (iStart + iLength < tb.TextLength)
-                iCutLen = iLength + 1; // include "\n" or "\r"
-            // Account for possible "\r\n" sequence -- TextBox uses
-            // "\r\n" line endings on Windows; the row index treats
-            // a single "\r\n" as one line break, so iEnd-1 already
-            // excludes the "\n"; we also strip the "\r" by extending
-            // by 1.
-            if (iCutLen > 0 && iStart + iCutLen < tb.TextLength
-                && tb.Text[iStart + iCutLen] == '\n')
-                iCutLen++;
-            string sLine = tb.Text.Substring(iStart, iCutLen);
-            try { Clipboard.SetText(sLine.Length == 0 ? " " : sLine); }
-            catch { LiveRegion.say("Could not cut"); return; }
-            tb.Text = tb.Text.Remove(iStart, iCutLen);
-            tb.SelectionStart = Math.Min(iStart, tb.TextLength);
-            tb.SelectionLength = 0;
-            lblStatusBar.Text = "Cut Line";
-            // Speak the next line as feedback (the line that's now
-            // at the caret).
-            int iNextStart, iNextLen;
-            textEditCurrentLineRange(tb, out iNextStart, out iNextLen);
-            string sNext = tb.Text.Substring(iNextStart, iNextLen);
-            LiveRegion.say(sNext.Length > 0 ? "Cut, now: " + sNext : "Cut, end of text");
-        }
-
-        // Alt+X -- cut current line / selection AND append to
-        // clipboard. After the cut, the clipboard holds existing
-        // contents plus the cut text (separator is a newline).
-        private void textEditCutAppend(TextBox tb)
-        {
-            string sExisting;
-            try { sExisting = Clipboard.GetText() ?? ""; }
-            catch { sExisting = ""; }
-            if (sExisting.Length > 0 && !sExisting.EndsWith("\n")) sExisting += "\r\n";
-
-            string sAdd;
-            int iStart, iLength;
-            if (tb.SelectionLength > 0)
-            {
-                iStart = tb.SelectionStart;
-                iLength = tb.SelectionLength;
-                sAdd = tb.SelectedText;
-            }
-            else
-            {
-                textEditCurrentLineRange(tb, out iStart, out iLength);
-                sAdd = tb.Text.Substring(iStart, iLength);
-                // Include trailing "\n" so cut doesn't leave blank line
-                if (iStart + iLength < tb.TextLength) iLength++;
-                if (iLength > 0 && iStart + iLength < tb.TextLength
-                    && tb.Text[iStart + iLength] == '\n') iLength++;
-            }
-            try { Clipboard.SetText(sExisting + sAdd); }
-            catch { LiveRegion.say("Could not append"); return; }
-            tb.Text = tb.Text.Remove(iStart, iLength);
-            tb.SelectionStart = Math.Min(iStart, tb.TextLength);
-            tb.SelectionLength = 0;
-            lblStatusBar.Text = "Cut and Append";
-            LiveRegion.say("Cut, appended");
-        }
-
-        // Ctrl+D -- delete the current line; speak the next line as
-        // feedback. Does not touch the clipboard.
-        private void textEditDeleteLine(TextBox tb)
-        {
-            int iStart, iLength;
-            textEditCurrentLineRange(tb, out iStart, out iLength);
-            int iCutLen = iLength;
-            if (iStart + iLength < tb.TextLength) iCutLen++;
-            if (iCutLen > 0 && iStart + iCutLen < tb.TextLength
-                && tb.Text[iStart + iCutLen] == '\n') iCutLen++;
-            tb.Text = tb.Text.Remove(iStart, iCutLen);
-            tb.SelectionStart = Math.Min(iStart, tb.TextLength);
-            tb.SelectionLength = 0;
-            lblStatusBar.Text = "Delete Line";
-            int iNextStart, iNextLen;
-            textEditCurrentLineRange(tb, out iNextStart, out iNextLen);
-            string sNext = tb.Text.Substring(iNextStart, iNextLen);
-            LiveRegion.say(sNext.Length > 0 ? "Deleted, now: " + sNext : "Deleted, end of text");
-        }
-
-        // Shift+F5 -- Run at Cursor. Take the selected text, or the current
-        // line when nothing is selected, clean it, apply light URL/email
-        // heuristics, and (after a confirmation prompt) launch it with the
-        // OS: a URL opens in the browser, a file path opens the file, an
-        // address opens the mail app. Open-at-cursor behavior;
-        // the confirmation step lets the user verify or edit the target
-        // before anything is launched, which matters more here since the
-        // text comes straight from a data field.
-        private void textEditRunAtCursor(TextBox tb)
-        {
-            string sText;
-            if (tb.SelectionLength > 0) sText = tb.SelectedText;
-            else
-            {
-                int iStart, iLength;
-                textEditCurrentLineRange(tb, out iStart, out iLength);
-                sText = tb.Text.Substring(iStart, iLength);
-            }
-            // Clean: collapse embedded newlines to a space, then strip a
-            // leading "<" or spaces and a trailing ">", spaces, or sentence
-            // dots so an address pasted mid-sentence works.
-            sText = System.Text.RegularExpressions.Regex.Replace(sText ?? "", "[\r\n]+", " ");
-            sText = System.Text.RegularExpressions.Regex.Replace(sText, "^[<\\s]+", "");
-            sText = System.Text.RegularExpressions.Regex.Replace(sText, "[>\\s.]+$", "");
-            sText = sText.Trim();
-            if (sText.Length == 0) { LiveRegion.say("Nothing at the cursor to run."); return; }
-
-            string sLower = sText.ToLowerInvariant();
-            if (sText.Contains("://")) { /* already a full URL */ }
-            else if (sLower.StartsWith("www.")) sText = "http://" + sText;
-            else if (sText.Contains("@") && !sLower.StartsWith("mailto:")) sText = "mailto:" + sText;
-
-            string sTarget;
-            using (LbcDialog dlg = new LbcDialog("Run at Cursor", frm))
-            {
-                dlg.addLabel("Open this with your system (a URL opens in your browser,");
-                dlg.addLabel("a file path opens the file, an address opens your mail app):");
-                TextBox tbT = dlg.addInputBox("&Target:", sText);
-                if (!string.Equals(dlg.runWithButtons(new string[] { "Open", "Cancel" }),
-                        "Open", StringComparison.OrdinalIgnoreCase))
-                    return;
-                sTarget = (tbT.Text ?? "").Trim();
-            }
-            if (sTarget.Length == 0) return;
-            try
-            {
-                System.Diagnostics.Process.Start(sTarget);
-                LiveRegion.say("Opening " + sTarget);
-            }
-            catch (Exception ex)
-            {
-                ErrorDialog.show(frm, "Run at Cursor", "Could not open:\r\n\r\n" + sTarget + "\r\n\r\n" + ex.Message);
-            }
-        }
-
-        // registerWidget: store the control under an auto-generated
-        // name <Kind>_<CleanedLabel> in dWidgets. On collisions a
-        // numeric suffix is appended (TextBox_Name, TextBox_Name_2).
-        private void registerWidget(Control ctl, string sKind, string sLabel)
-        {
-            string sClean = makeIdentifier(sLabel);
-            string sBase = sKind + "_" + sClean;
-            string sName = sBase;
-            int iCount;
-            if (dNameCounts.TryGetValue(sBase, out iCount) && iCount > 0)
-                sName = sBase + "_" + (iCount + 1);
-            dNameCounts[sBase] = (dNameCounts.ContainsKey(sBase) ? dNameCounts[sBase] : 0) + 1;
-            ctl.Name = sName;
-            dWidgets[sName] = ctl;
-        }
-
-        // makeIdentifier: turn a label into a programmer-friendly
-        // identifier suffix. Strips '&' and ':', maps any run of
-        // non-alphanumeric to a single underscore, trims leading
-        // and trailing underscores, falls back to "field" on empty.
-        private static string makeIdentifier(string sLabel)
-        {
-            if (string.IsNullOrEmpty(sLabel)) return "field";
-            StringBuilder sb = new StringBuilder();
-            bool bLastWasUnderscore = true; // suppress leading
-            foreach (char c in sLabel)
-            {
-                if (char.IsLetterOrDigit(c)) { sb.Append(c); bLastWasUnderscore = false; }
-                else if (!bLastWasUnderscore) { sb.Append('_'); bLastWasUnderscore = true; }
-            }
-            string s = sb.ToString();
-            if (s.EndsWith("_")) s = s.Substring(0, s.Length - 1);
-            return s.Length > 0 ? s : "field";
-        }
-
-        // The horizontal space inside the stack panel for a control,
-        // accounting for padding and a scrollbar reservation.
-        private int innerWidth()
-        {
-            return DefaultDialogWidth - DefaultPadding * 2 - 24;
-        }
-
-        // cleanLabel: strip '&' mnemonic markers and trailing ':'
-        // before using a label as an AccessibleName.
-        private string cleanLabel(string sLabel)
-        {
-            if (string.IsNullOrEmpty(sLabel)) return "";
-            string s = sLabel.Replace("&", "");
-            if (s.EndsWith(":")) s = s.Substring(0, s.Length - 1);
-            return s.Trim();
-        }
-
-        // addFieldLabel: emit a Label above a field control. Reused
-        // by every labeled-control adder (addInputBox, addMemoBox,
-        // addPickBox, addComboPickBox, addNumericUpDown).
-        private void addFieldLabel(string sText)
-        {
-            if (string.IsNullOrEmpty(sText)) return;
-            Label lbl = new Label();
-            lbl.Text = sText;
-            lbl.AccessibleName = cleanLabel(sText);
-            lbl.AutoSize = false;
-            lbl.Size = new Size(innerWidth(), DefaultLabelHeight);
-            lbl.Margin = new Padding(0, 0, 0, 0);
-            lbl.TextAlign = ContentAlignment.MiddleLeft;
-            pnlStack.Controls.Add(lbl);
-        }
-
-        // populateListBox: shared logic for filling a ListBox with
-        // strings and pre-selecting one.
-        private void populateListBox(ListBox lb, IList<string> lNames, string sSelected)
-        {
-            if (lNames == null) return;
-            foreach (string sN in lNames) lb.Items.Add(sN);
-            int iSel = -1;
-            if (!string.IsNullOrEmpty(sSelected))
-            {
-                for (int i = 0; i < lb.Items.Count; i++)
-                {
-                    if (string.Equals(lb.Items[i].ToString(), sSelected,
-                            StringComparison.OrdinalIgnoreCase))
-                    { iSel = i; break; }
-                }
-            }
-            if (iSel < 0 && lb.Items.Count > 0) iSel = 0;
-            if (iSel >= 0) lb.SelectedIndex = iSel;
-        }
-
-        // populateComboBox: shared logic for filling a ComboBox.
-        private void populateComboBox(ComboBox cb, IList<string> lNames, string sSelected)
-        {
-            if (lNames == null) return;
-            foreach (string sN in lNames) cb.Items.Add(sN);
-            int iSel = -1;
-            if (!string.IsNullOrEmpty(sSelected))
-            {
-                for (int i = 0; i < cb.Items.Count; i++)
-                {
-                    if (string.Equals(cb.Items[i].ToString(), sSelected,
-                            StringComparison.OrdinalIgnoreCase))
-                    { iSel = i; break; }
-                }
-            }
-            if (iSel < 0 && cb.Items.Count > 0) iSel = 0;
-            if (iSel >= 0) cb.SelectedIndex = iSel;
-        }
-
-        // computeStackHeight: sum heights of stack children plus
-        // margins. Used to choose an initial dialog height.
-        private int computeStackHeight()
-        {
-            int iTotal = pnlStack.Padding.Vertical;
-            foreach (Control c in pnlStack.Controls)
-                iTotal += c.Height + c.Margin.Vertical;
-            return iTotal + 8;
         }
     }
 
@@ -12344,7 +8599,7 @@ namespace DbDo
                         if (sChosen == null) return;
                         tbTarget.Text = sChosen;
                         tbTarget.SelectionStart = tbTarget.TextLength;
-                        LiveRegion.say(sChosen);
+                        Say.say(sChosen);
                     };
                 }
                 lTextBoxes.Add(tb);
@@ -12455,7 +8710,7 @@ namespace DbDo
                         if (tbHit == null) return;
                         tbHit.Clear();
                         if (!lsNullFields.Contains(sName)) lsNullFields.Add(sName);
-                        LiveRegion.sayForced("null");
+                        Say.sayForced("null");
                     }
                     else if (evKey.KeyData == Keys.F6 || evKey.KeyData == (Keys.Shift | Keys.F6))
                     {
@@ -12485,7 +8740,7 @@ namespace DbDo
                         tbHit.SelectionStart = iAt + sStamp.Length;
                         tbHit.SelectionLength = 0;
                         lsNullFields.Remove(sName);
-                        LiveRegion.say(sStamp);
+                        Say.say(sStamp);
                     }
                 };
             }
@@ -12522,7 +8777,7 @@ namespace DbDo
             {
                 tb.Clear();
                 if (!lsNullFields.Contains(sField)) lsNullFields.Add(sField);
-                LiveRegion.sayForced("null");
+                Say.sayForced("null");
             };
             cms.Items.Add(item);
             if (lsLookups != null)
@@ -12535,7 +8790,7 @@ namespace DbDo
                     if (sChosen == null) return;
                     tb.Text = sChosen;
                     tb.SelectionStart = tb.TextLength;
-                    LiveRegion.say(sChosen);
+                    Say.say(sChosen);
                 };
                 cms.Items.Add(item);
             }
@@ -12594,7 +8849,7 @@ namespace DbDo
                 // once, forced so it cuts through. The user is never
                 // more than typing-a-correct-value away from retrying
                 // OK; Escape still cancels unconditionally.
-                LiveRegion.sayForced(sErr);
+                Say.sayForced(sErr);
                 try { dlg.setStatusText(sErr); } catch { }
                 if (iOffending >= 0 && iOffending < lTextBoxes.Count)
                 {
@@ -13119,7 +9374,7 @@ namespace DbDo
                 foreach (string sN in lsNatural) lbNames.Items.Add(sN);
                 if (lbNames.Items.Count > 0) lbNames.SelectedIndex = 0;
                 lbNames.Focus();
-                LiveRegion.say(iCleared + (iCleared == 1 ? " pick cleared" : " picks cleared"));
+                Say.say(iCleared + (iCleared == 1 ? " pick cleared" : " picks cleared"));
             };
             Controls.Add(btnClear);
 
@@ -13202,7 +9457,7 @@ namespace DbDo
         private void addClicked(string sSuffix)
         {
             if (lbNames.SelectedIndex < 0)
-            { LiveRegion.say("No name selected"); return; }
+            { Say.say("No name selected"); return; }
             int iIdx = lbNames.SelectedIndex;
             string sName = lbNames.Items[iIdx].ToString();
             lbNames.Items.RemoveAt(iIdx);
@@ -13211,13 +9466,13 @@ namespace DbDo
             lbPicks.SelectedIndex = lbPicks.Items.Count - 1;
             if (lbNames.Items.Count > 0)
                 lbNames.SelectedIndex = Math.Min(iIdx, lbNames.Items.Count - 1);
-            LiveRegion.say(sPick + " picked, " + lbPicks.Items.Count + " picks");
+            Say.say(sPick + " picked, " + lbPicks.Items.Count + " picks");
         }
 
         private void removeClicked(object sender, EventArgs evArgs)
         {
             if (lbPicks.SelectedIndex < 0)
-            { LiveRegion.say("No pick selected"); return; }
+            { Say.say("No pick selected"); return; }
             int iIdx = lbPicks.SelectedIndex;
             string sName = bareName(lbPicks.Items[iIdx].ToString());
             lbPicks.Items.RemoveAt(iIdx);
@@ -13235,7 +9490,7 @@ namespace DbDo
             if (lbPicks.Items.Count > 0)
                 lbPicks.SelectedIndex = Math.Min(iIdx, lbPicks.Items.Count - 1);
             lbNames.Focus();
-            LiveRegion.say(sName + " removed, " + lbPicks.Items.Count + " picks");
+            Say.say(sName + " removed, " + lbPicks.Items.Count + " picks");
         }
 
         // helpText: generated for the Help button / dialog mode.
@@ -13858,148 +10113,6 @@ namespace DbDo
         }
     }
 
-    // =====================================================================
-    // LbcListView: the Lbc-enhanced ListView that embodies DbDo's
-    // "db cursor" concept.
-    //
-    // The db cursor is the user's position in the current recordset:
-    // a current ROW and a current COLUMN.
-    //
-    //   Row    -- always the ListView's single focused row. Whenever
-    //             the recordset has at least one row, exactly one row
-    //             carries both keyboard focus and ListView selection
-    //             (ensureCursorRow enforces the invariant). ListView
-    //             selection is purely the cursor; multi-row selection
-    //             semantics belong to DbDo's mark infrastructure (the
-    //             standard boolean 'marked' column, Set Mark
-    //             Control+M, Clear Mark, Toggle Marked Control+Space,
-    //             and the marked-navigation family).
-    //   Column -- a virtual construct: the standard ListView has no
-    //             cell focus, so the current column lives here as
-    //             cursorColumn (0-based display-column index) and is
-    //             voiced rather than drawn. The owning form keeps the
-    //             ADO absolutePosition (1-based) as the row's source
-    //             of truth and mirrors it to the focused row.
-    //
-    // Column-preservation principle: the cursor column persists
-    // across row movement (arrows, PageUp/PageDown, jumps, refresh)
-    // and changes only when a command explicitly or implicitly says
-    // otherwise (Home/End, Alt+Control+LeftArrow/RightArrow, the
-    // corner moves, type-ahead column targeting, or a table switch
-    // restoring that table's remembered column by name).
-    // =====================================================================
-    public class LbcListView : ListView
-    {
-        // Fields
-        private int iCursorColumn = 0;
-
-        // cursorColumn: 0-based index of the db cursor's current
-        // column among the displayed columns. Clamped on set.
-        public int cursorColumn
-        {
-            get { return iCursorColumn; }
-            set
-            {
-                int iMax = (Columns.Count > 0) ? Columns.Count - 1 : 0;
-                if (value < 0) value = 0;
-                if (value > iMax) value = iMax;
-                iCursorColumn = value;
-            }
-        }
-
-        // cursorRowIndex: 0-based index of the db cursor's row (the
-        // focused row), or -1 when the list is empty.
-        public int cursorRowIndex
-        {
-            get
-            {
-                if (FocusedItem != null) return FocusedItem.Index;
-                if (SelectedIndices.Count > 0) return SelectedIndices[0];
-                return -1;
-            }
-        }
-
-        // ensureCursorRow: enforce the invariant that a non-empty
-        // list always has exactly one row carrying both focus and
-        // selection. Returns true when a row holds the cursor on
-        // exit. Safe in VirtualMode (SelectedIndices.Add and Items[i]
-        // both work against virtual items).
-        public bool ensureCursorRow()
-        {
-            int iRow;
-            if (VirtualListSize <= 0 && !VirtualMode && Items.Count == 0) return false;
-            if (VirtualMode && VirtualListSize <= 0) return false;
-            iRow = cursorRowIndex;
-            if (iRow < 0) iRow = 0;
-            try
-            {
-                if (SelectedIndices.Count == 0) SelectedIndices.Add(iRow);
-                if (FocusedItem == null) Items[iRow].Focused = true;
-                // Force the native selected + focused state so screen
-                // readers see a real selection, not the focused-but-
-                // unselected state that managed selection leaves in
-                // VirtualMode (which JAWS announced as "Unselected").
-                selectAndFocusNative(iRow);
-            }
-            catch { return false; }
-            return true;
-        }
-
-        // ---- Native selection state (VirtualMode) ----
-        // WinForms' SelectedIndices.Add sets the managed selection, but
-        // in VirtualMode the native list-item state that MSAA / UIA
-        // (and therefore JAWS) read for "selected" is not reliably set
-        // until the control is focused and the user acts (pressing
-        // Space). That left the current row announced as "Unselected"
-        // on first open. Sending LVM_SETITEMSTATE with LVIS_SELECTED |
-        // LVIS_FOCUSED reproduces exactly what Space does, so the row
-        // reads as selected immediately and on every programmatic move.
-        private const int c_iLvmFirst = 0x1000;
-        private const int c_iLvmSetItemState = c_iLvmFirst + 43;
-        private const int c_iLvisFocused = 0x0001;
-        private const int c_iLvisSelected = 0x0002;
-
-        [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
-        private struct LVITEM
-        {
-            public int mask;
-            public int iItem;
-            public int iSubItem;
-            public int state;
-            public int stateMask;
-            public IntPtr pszText;
-            public int cchTextMax;
-            public int iImage;
-            public IntPtr lParam;
-            public int iIndent;
-            public int iGroupId;
-            public int cColumns;
-            public IntPtr puColumns;
-            public IntPtr piColFmt;
-            public int iGroup;
-        }
-
-        [DllImport("user32.dll", CharSet = CharSet.Auto)]
-        private static extern IntPtr SendMessage(IntPtr hWnd, int iMsg, IntPtr wParam, ref LVITEM lvi);
-
-        // selectAndFocusNative: force native LVIS_SELECTED | LVIS_FOCUSED
-        // on the given 0-based row. Only state and stateMask are used by
-        // LVM_SETITEMSTATE. Best-effort; never throws.
-        public void selectAndFocusNative(int iIndex)
-        {
-            if (iIndex < 0 || !IsHandleCreated) return;
-            if (VirtualMode && iIndex >= VirtualListSize) return;
-            try
-            {
-                LVITEM lvi = new LVITEM();
-                lvi.stateMask = c_iLvisSelected | c_iLvisFocused;
-                lvi.state = c_iLvisSelected | c_iLvisFocused;
-                SendMessage(this.Handle, c_iLvmSetItemState, (IntPtr)iIndex, ref lvi);
-            }
-            catch { }
-        }
-    }
-
     // DbDoFrame: the MDI container window. DbDo uses a multiple-window model: each open recordset (typically a
     // table) lives in its own MDI child window (a DbDoForm), and the
     // window-management commands carry these command names and
@@ -14174,7 +10287,7 @@ namespace DbDo
         // current one (Window Toggle, Shift+W).
         public void toggleWindow()
         {
-            if (this.MdiChildren.Length < 2) { LiveRegion.say("Only this window!"); return; }
+            if (this.MdiChildren.Length < 2) { Say.say("Only this window!"); return; }
             Form frmTarget = frmPriorActive;
             if (frmTarget == null || frmTarget.IsDisposed || frmTarget == this.ActiveMdiChild)
             {
@@ -14196,8 +10309,8 @@ namespace DbDo
         {
             Form[] aChildren = this.MdiChildren;
             int iPosition;
-            if (aChildren.Length == 0) { LiveRegion.say("No windows!"); return; }
-            if (aChildren.Length == 1) { LiveRegion.say("Only this window!"); return; }
+            if (aChildren.Length == 0) { Say.say("No windows!"); return; }
+            if (aChildren.Length == 1) { Say.say("Only this window!"); return; }
             iPosition = Array.IndexOf(aChildren, this.ActiveMdiChild) + (bNext ? 1 : -1);
             if (iPosition >= aChildren.Length) iPosition = 0;
             if (iPosition < 0) iPosition = aChildren.Length - 1;
@@ -14221,7 +10334,7 @@ namespace DbDo
             // The kept window was already active, so JAWS does not
             // re-announce it. Confirm the action with a count instead of
             // speaking the surviving window's title.
-            LiveRegion.sayForced(iClosed == 0
+            Say.sayForced(iClosed == 0
                 ? "No other windows to close."
                 : iClosed + " other window" + (iClosed == 1 ? "" : "s") + " closed.");
         }
@@ -14671,7 +10784,7 @@ namespace DbDo
         // bGridFirstPopulate: true at startup until updateGrid sees a
         // nonzero record count. When the transition from zero to
         // nonzero happens, we explicitly announce row 1's content
-        // via LiveRegion so the screen reader hears actual data
+        // via Say so the screen reader hears actual data
         // instead of the empty-list "Unselected" state JAWS reads on
         // the freshly-built listview before any row is selected.
         private bool bGridFirstPopulate = true;
@@ -15003,7 +11116,7 @@ namespace DbDo
         private ToolStripMenuItem miNavPrev;
 
         // Speech-only commands (Query menu's "Say..." family). Each
-        // pushes a state summary through LiveRegion without changing
+        // pushes a state summary through Say without changing
         // focus, selection, or recordset position.
         private ToolStripMenuItem miSaySayStatus;
         // miSaySayPath retired v1.0.99 (replaced by Say Database on Shift+D).
@@ -15070,16 +11183,16 @@ namespace DbDo
             buildMenus();
             buildGrid();
             buildStatusBar();
-            LiveRegion.attach(this);
+            Say.attach(this);
             // Load Extra-Speech setting from DbDo.inix [General].
             // Default ON (Y) on first launch. Off explicitly via "N".
             string sExtra = IniSession.read("General", "ExtraSpeech");
-            LiveRegion.bExtraSpeechEnabled = string.IsNullOrEmpty(sExtra)
+            Say.bExtraSpeechEnabled = string.IsNullOrEmpty(sExtra)
                 || !sExtra.Equals("N", StringComparison.OrdinalIgnoreCase);
             applyIniOverrides();
             updateMenuEnabled();
             updateStatusBar();
-            if (miHelpExtraSpeech != null) miHelpExtraSpeech.Checked = LiveRegion.bExtraSpeechEnabled;
+            if (miHelpExtraSpeech != null) miHelpExtraSpeech.Checked = Say.bExtraSpeechEnabled;
             if (miHelpCommandEcho != null) miHelpCommandEcho.Checked = isCommandEchoOn();
             if (miToggleReadOnly != null && db != null) miToggleReadOnly.Checked = db.readOnly;
         }
@@ -15105,7 +11218,7 @@ namespace DbDo
             // RegisterHotKey would fail (or double-fire) if every
             // child registered the same key.
             bool bFirstChild = (this.MdiParent == null) || (this.MdiParent.MdiChildren.Length <= 1);
-            if (bFirstChild) LiveRegion.say("DbDo ready");
+            if (bFirstChild) Say.say("DbDo ready");
             // Later windows are NOT announced here. Opening a window makes
             // it the active window, and JAWS speaks the new window's title
             // on that change; saying it again through the live region would
@@ -16889,7 +13002,7 @@ namespace DbDo
             // resulting state. Skip the raw echo and let that state
             // announcement be the command echo.
             if (sCommand.TrimEnd().EndsWith("Toggle", StringComparison.OrdinalIgnoreCase)) return;
-            try { LiveRegion.say(sCommand); } catch { /* swallow */ }
+            try { Say.say(sCommand); } catch { /* swallow */ }
         }
 
         private void addSep(ToolStripMenuItem miParent)
@@ -17368,14 +13481,14 @@ namespace DbDo
                 int iNewRow = iVirtualRow;
                 if (iNewCol < 0)
                 {
-                    if (!bCrossRows) { LiveRegion.say("First column"); iNewRow = -1; }
-                    else if (iVirtualRow <= 1) { LiveRegion.say("First cell"); iNewRow = -1; }
+                    if (!bCrossRows) { Say.say("First column"); iNewRow = -1; }
+                    else if (iVirtualRow <= 1) { Say.say("First cell"); iNewRow = -1; }
                     else { iNewRow = iVirtualRow - 1; iNewCol = iColCount - 1; }
                 }
                 else if (iNewCol >= iColCount)
                 {
-                    if (!bCrossRows) { LiveRegion.say("Last column"); iNewRow = -1; }
-                    else if (iVirtualRow >= iRowCount) { LiveRegion.say("Last cell"); iNewRow = -1; }
+                    if (!bCrossRows) { Say.say("Last column"); iNewRow = -1; }
+                    else if (iVirtualRow >= iRowCount) { Say.say("Last cell"); iNewRow = -1; }
                     else { iNewRow = iVirtualRow + 1; iNewCol = 0; }
                 }
                 if (iNewRow > 0) virtMoveTo(iNewRow, iNewCol);
@@ -17425,7 +13538,7 @@ namespace DbDo
                     {
                         string sCmd = target.Text.Replace("&", "");
                         if (sCmd.EndsWith("...")) sCmd = sCmd.Substring(0, sCmd.Length - 3).TrimEnd();
-                        LiveRegion.say(sCmd + " is unavailable right now (open a database file or select a table first)");
+                        Say.say(sCmd + " is unavailable right now (open a database file or select a table first)");
                     }
                     else if (KeyMap.bKeyDescriber)
                     {
@@ -17439,7 +13552,7 @@ namespace DbDo
                             : target.Text.Replace("&", "");
                         string sSummary = KeyMap.summaryFor(sCmd);
                         string sChord = "Shift+" + evArgs.KeyCode.ToString();
-                        LiveRegion.say(sCmd + ". " + sChord + ". " + sSummary + ".");
+                        Say.say(sCmd + ". " + sChord + ". " + sSummary + ".");
                     }
                     else
                     {
@@ -17604,12 +13717,12 @@ namespace DbDo
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
             {
-                LiveRegion.say("No rows");
+                Say.say("No rows");
                 return;
             }
             if (grid == null || grid.Columns.Count == 0)
             {
-                LiveRegion.say("No columns");
+                Say.say("No columns");
                 return;
             }
             // Clamp to valid range.
@@ -17673,7 +13786,7 @@ namespace DbDo
                 // when the user hits the same arrow at the edge.
                 sSpoken = sHeader + ": " + sValue;
             }
-            LiveRegion.say(sSpoken);
+            Say.say(sSpoken);
         }
 
         // virtSayCurrent: announce the current virtual cell. On a
@@ -17709,7 +13822,7 @@ namespace DbDo
                     else if (ch == ' ') sb.Append("space");
                     else sb.Append(ch);
                 }
-                LiveRegion.say(sb.ToString());
+                Say.say(sb.ToString());
             }
             else
             {
@@ -17717,7 +13830,7 @@ namespace DbDo
                 // "row" with the row number, then the value -- the
                 // header leads so a column-oriented ear hears the
                 // most distinguishing token first.
-                LiveRegion.say(sHeader + " row " + iVirtualRow + ": " + sValue);
+                Say.say(sHeader + " row " + iVirtualRow + ": " + sValue);
             }
         }
 
@@ -17749,7 +13862,7 @@ namespace DbDo
             }
             else
             {
-                LiveRegion.say(sText);
+                Say.say(sText);
             }
         }
 
@@ -17775,7 +13888,7 @@ namespace DbDo
             if (bDouble)
                 showInfoDialog(sTitle ?? "Information", string.Join("\r\n", lClean.ToArray()));
             else
-                LiveRegion.sayParts(lClean);
+                Say.sayParts(lClean);
         }
 
         // showInfoDialog: open an LbcDialog with a single multi-line
@@ -17802,7 +13915,7 @@ namespace DbDo
                 // If the dialog fails for any reason, fall back to
                 // speaking the text again so the user still gets some
                 // confirmation.
-                LiveRegion.say(sBody ?? "");
+                Say.say(sBody ?? "");
             }
         }
 
@@ -17912,7 +14025,7 @@ namespace DbDo
                 if (iCount == 0 && !bAnnouncedEmpty)
                 {
                     bAnnouncedEmpty = true;
-                    LiveRegion.say("Table has no rows");
+                    Say.say("Table has no rows");
                 }
                 else if (iCount > 0)
                 {
@@ -17966,7 +14079,7 @@ namespace DbDo
                     // listview's prior empty state as "Unselected" and
                     // not re-announce when the selection lands. We
                     // explicitly announce the first row's content via
-                    // LiveRegion so the user hears actual data rather
+                    // Say so the user hears actual data rather
                     // than silence following "Unselected."
                     if (bGridFirstPopulate && iCount > 0)
                     {
@@ -17987,7 +14100,7 @@ namespace DbDo
                             string sAnnounce = "Row 1 of " + iCount;
                             if (!string.IsNullOrEmpty(sFirstColValue))
                                 sAnnounce = sFirstColValue + ", " + sAnnounce;
-                            LiveRegion.say(sAnnounce);
+                            Say.say(sAnnounce);
                         }
                         catch { }
                     }
@@ -18300,7 +14413,7 @@ namespace DbDo
                     ToolStripMenuItem miDesc;
                     if (dLocalKeyToMenu.TryGetValue(keyData, out miDesc))
                         return KeyMap.dispatchMenuItem(miDesc, keyData);
-                    LiveRegion.say(KeyMap.friendlyKey(keyData)
+                    Say.say(KeyMap.friendlyKey(keyData)
                         + ". No DbDo command is bound to this key.");
                     return true;
                 }
@@ -18451,20 +14564,20 @@ namespace DbDo
             if (db == null || !db.hasRecordset()) return;
             if (!db.hasField(Metadata.MarkedColumn))
             {
-                LiveRegion.say("This table has no marked column");
+                Say.say("This table has no marked column");
                 return;
             }
             int iTarget = findMarkedRowPosition(jumpDir);
             if (iTarget <= 0)
             {
-                LiveRegion.say("No marked rows");
+                Say.say("No marked rows");
                 return;
             }
             try
             {
                 db.absolutePosition = iTarget;
                 invokeRefresh();
-                LiveRegion.say("Marked row " + iTarget);
+                Say.say("Marked row " + iTarget);
             }
             catch (Exception ex)
             {
@@ -18589,12 +14702,12 @@ namespace DbDo
             if (db == null || !db.hasRecordset()) return;
             if (!db.hasField(Metadata.MarkedColumn))
             {
-                LiveRegion.say("This table has no marked column");
+                Say.say("This table has no marked column");
                 return;
             }
             if (db.readOnly)
             {
-                LiveRegion.say("Database is read-only");
+                Say.say("Database is read-only");
                 return;
             }
 
@@ -18656,7 +14769,7 @@ namespace DbDo
             string sMsg = sVerb + " " + iChanged + " row"
                         + (iChanged == 1 ? "" : "s")
                         + (iSkipped > 0 ? "; " + iSkipped + " already in that state" : "");
-            LiveRegion.say(sMsg);
+            Say.say(sMsg);
             DbDoLog.write("BulkMark " + jumpDir + ": " + sMsg);
         }
 
@@ -18687,12 +14800,12 @@ namespace DbDo
             if (db.recordCount <= 0) return;
             if (!db.hasField(Metadata.MarkedColumn))
             {
-                LiveRegion.say("This table has no marked column");
+                Say.say("This table has no marked column");
                 return;
             }
             if (db.readOnly)
             {
-                LiveRegion.say("Database is read-only");
+                Say.say("Database is read-only");
                 return;
             }
             try
@@ -18707,7 +14820,7 @@ namespace DbDo
             }
             catch (Exception ex)
             {
-                LiveRegion.say("Mark error: " + ex.Message);
+                Say.say("Mark error: " + ex.Message);
                 return;
             }
             // Move cursor one row in the requested direction; stay
@@ -18730,12 +14843,12 @@ namespace DbDo
             if (db == null || !db.hasRecordset()) return;
             if (!db.hasField(Metadata.MarkedColumn))
             {
-                LiveRegion.say("This table has no marked column");
+                Say.say("This table has no marked column");
                 return;
             }
             if (db.readOnly)
             {
-                LiveRegion.say("Database is read-only");
+                Say.say("Database is read-only");
                 return;
             }
             int iCount = db.recordCount;
@@ -18769,7 +14882,7 @@ namespace DbDo
             string sVerb = bMark ? "Marked" : "Unmarked";
             string sMsg = sVerb + " " + iChanged + " row" + (iChanged == 1 ? "" : "s")
                         + (iSkipped > 0 ? "; " + iSkipped + " already in that state" : "");
-            LiveRegion.say(sMsg);
+            Say.say(sMsg);
             DbDoLog.write("MarkAll " + bMark + ": " + sMsg);
         }
 
@@ -18782,12 +14895,12 @@ namespace DbDo
             if (db == null || !db.hasRecordset()) return;
             if (!db.hasField(Metadata.MarkedColumn))
             {
-                LiveRegion.say("This table has no marked column");
+                Say.say("This table has no marked column");
                 return;
             }
             if (db.readOnly)
             {
-                LiveRegion.say("Database is read-only");
+                Say.say("Database is read-only");
                 return;
             }
             int iCount = db.recordCount;
@@ -18818,7 +14931,7 @@ namespace DbDo
             invokeRefresh();
             string sMsg = "Inverted marks on " + iFlipped + " row"
                         + (iFlipped == 1 ? "" : "s");
-            LiveRegion.say(sMsg);
+            Say.say(sMsg);
             DbDoLog.write("InvertMarks: " + sMsg);
         }
 
@@ -18832,7 +14945,7 @@ namespace DbDo
         // three separate gestures and the result is announced in
         // the screen reader's own voice and order. A single chord
         // that DbDo composes itself gives the user a consistent
-        // summary in DbDo's own LiveRegion path -- title, then
+        // summary in DbDo's own Say path -- title, then
         // status, then per-column values for the current row,
         // separated by " | " so JAWS' pause-on-punctuation pacing
         // is natural.
@@ -18882,12 +14995,12 @@ namespace DbDo
 
             string sMsg = sb.ToString();
             if (sMsg.Length == 0) sMsg = "DbDo, no database open";
-            LiveRegion.say(sMsg);
+            Say.say(sMsg);
         }
 
         // =======================================================================
         // Speech-only commands. Each builds a string from current state
-        // and pushes it through LiveRegion.say() without changing focus,
+        // and pushes it through Say.say() without changing focus,
         // selection, recordset position, or any other state. Modeled on
         // The "Say X" status family (Say-Date, Say-Path, Say-Size, etc.)
         // and an Alt+Letter status-query family (Address, Block,
@@ -18909,7 +15022,7 @@ namespace DbDo
         private void saySayStatus(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
-            { LiveRegion.say("No database open"); return; }
+            { Say.say("No database open"); return; }
             if (!db.hasRecordset())
             { speakOrShow("Status", db.filePath ?? "Database open, no table selected", 101); return; }
             StringBuilder sb = new StringBuilder();
@@ -18939,7 +15052,7 @@ namespace DbDo
         private void saySayDatabase(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
-            { LiveRegion.say("No database open"); return; }
+            { Say.say("No database open"); return; }
             string sPath = db.filePath ?? "(unknown)";
             string sName = Path.GetFileName(sPath);
             // Single-press: name only. Double-press: full path
@@ -18952,12 +15065,12 @@ namespace DbDo
         private void saySayOrder(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
-            { LiveRegion.say("No database open"); return; }
+            { Say.say("No database open"); return; }
             if (!db.hasRecordset())
-            { LiveRegion.say("No table selected"); return; }
+            { Say.say("No table selected"); return; }
             string s = db.sort ?? "";
             if (s.Length == 0)
-            { LiveRegion.say("No order applied"); return; }
+            { Say.say("No order applied"); return; }
             speakOrShow("Order", "order: " + s, 125);
         }
 
@@ -18970,7 +15083,7 @@ namespace DbDo
         private void saySayGoto(object sender, EventArgs evArgs)
         {
             if (string.IsNullOrEmpty(sLastJumpSubstring))
-            { LiveRegion.say("No jump search active"); return; }
+            { Say.say("No jump search active"); return; }
             string sCol = string.IsNullOrEmpty(sLastJumpColumn) ? "(any column)" : sLastJumpColumn;
             speakOrShow("Goto", sCol + ": \"" + sLastJumpSubstring + "\"", 127);
         }
@@ -18991,7 +15104,7 @@ namespace DbDo
         private void saySayYield(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset())
-            { LiveRegion.say("No table selected"); return; }
+            { Say.say("No table selected"); return; }
             StringBuilder sb = new StringBuilder();
             sb.Append(db.recordCount).Append(" row").Append(db.recordCount == 1 ? "" : "s");
             if (db.filter.Length > 0) sb.Append(" (filter: ").Append(db.filter).Append(")");
@@ -19007,10 +15120,10 @@ namespace DbDo
         private void saySayTables(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
-            { LiveRegion.say("No database open"); return; }
+            { Say.say("No database open"); return; }
             List<string> lTables = db.visitedTableNames();
             if (lTables == null || lTables.Count == 0)
-            { LiveRegion.say("No tables visited yet in this session"); return; }
+            { Say.say("No tables visited yet in this session"); return; }
             StringBuilder sb = new StringBuilder();
             sb.Append(lTables.Count).Append(" table").Append(lTables.Count == 1 ? "" : "s").Append(": ");
             for (int i = 0; i < lTables.Count; i++)
@@ -19027,13 +15140,13 @@ namespace DbDo
         private void saySayMark(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             if (!db.hasField(Metadata.MarkedColumn))
-            { LiveRegion.say("This table has no marked column"); return; }
+            { Say.say("This table has no marked column"); return; }
             bool bMarked;
             try { bMarked = isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn) ?? ""); }
             catch { bMarked = false; }
-            LiveRegion.sayForced(bMarked ? "Marked" : "Unmarked");
+            Say.sayForced(bMarked ? "Marked" : "Unmarked");
         }
 
         // saySayMarked: Shift+L. Speak the look-column values of every
@@ -19044,9 +15157,9 @@ namespace DbDo
         private void saySayMarked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset())
-            { LiveRegion.say("No table selected"); return; }
+            { Say.say("No table selected"); return; }
             if (!db.hasField(Metadata.MarkedColumn))
-            { LiveRegion.say("This table has no marked column"); return; }
+            { Say.say("This table has no marked column"); return; }
 
             object original = null;
             try { original = db.bookmark; } catch { }
@@ -19075,7 +15188,7 @@ namespace DbDo
                 if (original != null) try { db.bookmark = original; } catch { }
             }
             if (iTotal == 0)
-            { LiveRegion.say("No marked rows"); return; }
+            { Say.say("No marked rows"); return; }
             StringBuilder sb = new StringBuilder();
             sb.Append(iTotal).Append(" marked row").Append(iTotal == 1 ? "" : "s").Append(": ");
             for (int i = 0; i < lLooks.Count; i++)
@@ -19104,10 +15217,10 @@ namespace DbDo
         private void saySayEdited(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             string sCol = db.hasField("edited") ? "edited" : (db.hasField("added") ? "added" : null);
             if (sCol == null)
-            { LiveRegion.say("No date column in this table"); return; }
+            { Say.say("No date column in this table"); return; }
             string sVal = db.getFieldValue(sCol);
             string sSpoken = formatDateHumanFriendly(sVal);
             if (string.IsNullOrEmpty(sSpoken)) sSpoken = "blank";
@@ -19154,9 +15267,9 @@ namespace DbDo
         private void saySayYieldMarked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset())
-            { LiveRegion.say("No table selected"); return; }
+            { Say.say("No table selected"); return; }
             if (!db.hasField(Metadata.MarkedColumn))
-            { LiveRegion.say("This table has no marked column"); return; }
+            { Say.say("This table has no marked column"); return; }
             object original = null;
             try { original = db.bookmark; } catch { }
             int iCount = 0;
@@ -19187,9 +15300,9 @@ namespace DbDo
         private void saySayNotes(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             if (!db.hasField("notes"))
-            { LiveRegion.say("This table has no notes column"); return; }
+            { Say.say("This table has no notes column"); return; }
             string sVal = db.getFieldValue("notes");
             if (string.IsNullOrEmpty(sVal)) sVal = "blank";
             speakOrShow("Notes", "notes: " + sVal, 109);
@@ -19200,9 +15313,9 @@ namespace DbDo
         private void saySayTags(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             if (!db.hasField("tags"))
-            { LiveRegion.say("This table has no tags column"); return; }
+            { Say.say("This table has no tags column"); return; }
             string sVal = db.getFieldValue("tags");
             if (string.IsNullOrEmpty(sVal)) sVal = "blank";
             speakOrShow("Tags", "tags: " + sVal, 110);
@@ -19217,9 +15330,9 @@ namespace DbDo
         private void saySayAdded(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             if (!db.hasField("added"))
-            { LiveRegion.say("This table has no added column"); return; }
+            { Say.say("This table has no added column"); return; }
             string sVal = db.getFieldValue("added");
             string sSpoken = formatDateHumanFriendly(sVal);
             if (string.IsNullOrEmpty(sSpoken)) sSpoken = "blank";
@@ -19234,9 +15347,9 @@ namespace DbDo
         private void saySayCell(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             string sCol = virtCurrentColumnName();
-            if (string.IsNullOrEmpty(sCol)) { LiveRegion.say("No virtual column at cursor"); return; }
+            if (string.IsNullOrEmpty(sCol)) { Say.say("No virtual column at cursor"); return; }
             string sVal = virtCellValue(iVirtualRow, iVirtualCol);
             if (string.IsNullOrEmpty(sVal)) sVal = "blank";
             // Cell speech pattern: the column header, the word "row"
@@ -19262,9 +15375,9 @@ namespace DbDo
         private void saySayQuery(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
-            { LiveRegion.say("No database open"); return; }
+            { Say.say("No database open"); return; }
             if (!db.hasRecordset())
-            { LiveRegion.say("No table selected"); return; }
+            { Say.say("No table selected"); return; }
             string sQuery;
             if (!string.IsNullOrEmpty(db.sourceSql))
                 sQuery = db.sourceSql;
@@ -19276,14 +15389,14 @@ namespace DbDo
         private void saySaySelect(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
-            { LiveRegion.say("No database open"); return; }
+            { Say.say("No database open"); return; }
             if (!db.hasRecordset())
-            { LiveRegion.say("No table selected"); return; }
+            { Say.say("No table selected"); return; }
             List<string> lsCols = new List<string>();
             if (grid != null)
                 foreach (ColumnHeader oCol in grid.Columns) lsCols.Add(oCol.Text);
             if (lsCols.Count == 0)
-            { LiveRegion.say("No columns shown"); return; }
+            { Say.say("No columns shown"); return; }
             // One queued message per column, for a natural pause
             // between column names rather than a run-on list.
             speakOrShowParts("Columns", lsCols, 123);
@@ -19292,10 +15405,10 @@ namespace DbDo
         private void saySayFilter(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset())
-            { LiveRegion.say("No recordset open"); return; }
+            { Say.say("No recordset open"); return; }
             string sFilter = db.filter ?? "";
             if (string.IsNullOrEmpty(sFilter))
-            { LiveRegion.say("No filter active"); return; }
+            { Say.say("No filter active"); return; }
             speakOrShow("Filter", "filter: " + sFilter, 118);
         }
 
@@ -19313,7 +15426,7 @@ namespace DbDo
                 try { sFind = SearchHistory.lastText(SearchHistory.SectionFind) ?? ""; } catch { }
             }
             if (string.IsNullOrEmpty(sFind))
-            { LiveRegion.say("No find string"); return; }
+            { Say.say("No find string"); return; }
             speakOrShow("Find", "find: " + sFind, 126);
         }
 
@@ -19323,7 +15436,7 @@ namespace DbDo
         private void saySayId(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             string sPk = "";
             try
             {
@@ -19331,7 +15444,7 @@ namespace DbDo
             }
             catch { }
             if (string.IsNullOrEmpty(sPk))
-            { LiveRegion.say("This table has no detected primary key"); return; }
+            { Say.say("This table has no detected primary key"); return; }
             string sVal = "";
             try { sVal = db.getFieldValue(sPk) ?? ""; } catch { }
             if (string.IsNullOrEmpty(sVal)) sVal = "blank";
@@ -19343,9 +15456,9 @@ namespace DbDo
         private void saySayLook(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             if (!db.hasField("look"))
-            { LiveRegion.say("This table has no look column"); return; }
+            { Say.say("This table has no look column"); return; }
             string sVal = db.getFieldValue("look");
             if (string.IsNullOrEmpty(sVal)) sVal = "blank";
             speakOrShow("Look", "look: " + sVal, 120);
@@ -19359,7 +15472,7 @@ namespace DbDo
         private void saySayRelated(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             // Reuse the Show-Related machinery to get a textual
             // summary. For the brief form, just count the FK
             // neighbors; for the detailed form, show their look
@@ -19597,9 +15710,9 @@ namespace DbDo
         private void saySayUrl(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             if (!db.hasField(Metadata.UrlColumn))
-            { LiveRegion.say("This table has no url column"); return; }
+            { Say.say("This table has no url column"); return; }
             string sVal = db.getFieldValue(Metadata.UrlColumn);
             if (string.IsNullOrEmpty(sVal)) sVal = "blank";
             speakOrShow("URL", Metadata.UrlColumn + ": " + sVal, 122);
@@ -19612,11 +15725,11 @@ namespace DbDo
         private void saySayPrime(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             string sField = db.hasField(Metadata.PrimeColumn) ? Metadata.PrimeColumn
                           : (db.hasField(Metadata.PrimeColumn) ? Metadata.PrimeColumn : null);
             if (sField == null)
-            { LiveRegion.say("This table has no prime column"); return; }
+            { Say.say("This table has no prime column"); return; }
             string sVal = db.getFieldValue(sField);
             if (string.IsNullOrEmpty(sVal)) sVal = "blank";
             speakOrShow("Prime", sField + ": " + sVal, 123);
@@ -19655,11 +15768,11 @@ namespace DbDo
         private void saySayColumnCommon(bool bMarkedOnly, bool bFromCurrent)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No row selected"); return; }
+            { Say.say("No row selected"); return; }
             if (grid == null || iVirtualCol < 0 || iVirtualCol >= grid.Columns.Count)
-            { LiveRegion.say("No column under virtual cursor"); return; }
+            { Say.say("No column under virtual cursor"); return; }
             if (bMarkedOnly && !db.hasField(Metadata.MarkedColumn))
-            { LiveRegion.say("This table has no marked column"); return; }
+            { Say.say("This table has no marked column"); return; }
 
             string sHeader = grid.Columns[iVirtualCol].Text;
             // Alt (All) starts at row 1; Control (Current) starts at the
@@ -19696,7 +15809,7 @@ namespace DbDo
                 string sNone = bFromCurrent
                     ? (bMarkedOnly ? "No marked rows from here." : "No rows visible from here.")
                     : (bMarkedOnly ? "No marked rows in this column." : "No rows in this column.");
-                LiveRegion.say(sNone);
+                Say.say(sNone);
                 return;
             }
             // Header lead-in, then each value as its own queued message
@@ -19739,12 +15852,12 @@ namespace DbDo
         private void saySayMarkedRows(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No row selected"); return; }
+            { Say.say("No row selected"); return; }
             if (!db.hasField(Metadata.MarkedColumn))
-            { LiveRegion.say("This table has no marked column"); return; }
+            { Say.say("This table has no marked column"); return; }
             List<string> lDispCols = db.getDisplayFieldNames();
             if (lDispCols.Count == 0)
-            { LiveRegion.say("No columns visible"); return; }
+            { Say.say("No columns visible"); return; }
             object oOriginal = null;
             try { oOriginal = db.bookmark; } catch { }
             List<string> lParts = new List<string>();
@@ -19773,7 +15886,7 @@ namespace DbDo
                 if (oOriginal != null) try { db.bookmark = oOriginal; } catch { }
             }
             if (lParts.Count == 0)
-            { LiveRegion.say("No marked rows."); return; }
+            { Say.say("No marked rows."); return; }
             speakOrShowParts("Say Marked Rows", lParts, 128);
         }
 
@@ -19791,13 +15904,13 @@ namespace DbDo
         private void saySayRowsCommon(bool bMarkedOnly)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No row selected"); return; }
+            { Say.say("No row selected"); return; }
             if (bMarkedOnly && !db.hasField(Metadata.MarkedColumn))
-            { LiveRegion.say("This table has no marked column"); return; }
+            { Say.say("This table has no marked column"); return; }
 
             List<string> lDispCols = db.getDisplayFieldNames();
             if (lDispCols.Count == 0)
-            { LiveRegion.say("No columns visible"); return; }
+            { Say.say("No columns visible"); return; }
             // v1.0.99: start at the current row (the "Rest" in the
             // command name). Renamed from Say Rows to Say Records Rest
             // for consistency with the rest of DbDo's entity vocabulary.
@@ -19836,7 +15949,7 @@ namespace DbDo
             }
             if (iTotal == 0)
             {
-                LiveRegion.say(bMarkedOnly ? "No marked rows from here." : "No rows visible from here.");
+                Say.say(bMarkedOnly ? "No marked rows from here." : "No rows visible from here.");
                 return;
             }
             // One queued message per row so the rows are spoken as a
@@ -19859,9 +15972,9 @@ namespace DbDo
         private void saySayPosition(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             if (grid == null || iVirtualCol < 0 || iVirtualCol >= grid.Columns.Count)
-            { LiveRegion.say("No column under virtual cursor"); return; }
+            { Say.say("No column under virtual cursor"); return; }
             string sHeader = grid.Columns[iVirtualCol].Text;
             if (string.IsNullOrEmpty(sHeader)) sHeader = "(unnamed)";
             int iRow = iVirtualRow >= 1 ? iVirtualRow : db.absolutePosition;
@@ -19918,7 +16031,7 @@ namespace DbDo
         private void saySaySortFilter(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset())
-            { LiveRegion.say("No table open"); return; }
+            { Say.say("No table open"); return; }
             string sSort = db.sort ?? "";
             string sFilter = db.filter ?? "";
             StringBuilder sb = new StringBuilder();
@@ -19942,13 +16055,13 @@ namespace DbDo
         private void saySayKin(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             if (db.eof || db.bof)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
 
             string sCurrentTable = db.currentTable;
             if (string.IsNullOrEmpty(sCurrentTable))
-            { LiveRegion.say("No table open"); return; }
+            { Say.say("No table open"); return; }
 
             // Use static helpers so logic is shared with the existing
             // Show-Object code; we replicate the parent/child walks
@@ -20072,8 +16185,8 @@ namespace DbDo
             string sNew = string.IsNullOrEmpty(sExisting)
                         ? sCell
                         : sExisting + "\r\n\r\n" + sCell;
-            try { Clipboard.SetText(sNew); LiveRegion.say("Appended cell"); }
-            catch (Exception ex) { LiveRegion.say("Clipboard error: " + ex.Message); }
+            try { Clipboard.SetText(sNew); Say.say("Appended cell"); }
+            catch (Exception ex) { Say.say("Clipboard error: " + ex.Message); }
         }
 
         // cellCopyClicked: Shift+C. Copy the current virtual cell's
@@ -20082,8 +16195,8 @@ namespace DbDo
         {
             string sCell = virtCellValue(iVirtualRow, iVirtualCol);
             if (sCell == null) sCell = "";
-            try { Clipboard.SetText(sCell); LiveRegion.say("Copied cell"); }
-            catch (Exception ex) { LiveRegion.say("Clipboard error: " + ex.Message); }
+            try { Clipboard.SetText(sCell); Say.say("Copied cell"); }
+            catch (Exception ex) { Say.say("Clipboard error: " + ex.Message); }
         }
 
         // =======================================================================
@@ -20142,13 +16255,13 @@ namespace DbDo
         {
             if (db == null || !db.hasRecordset())
             {
-                LiveRegion.say("No database open.");
+                Say.say("No database open.");
                 return;
             }
             string sTable = db.currentTable;
             if (string.IsNullOrEmpty(sTable))
             {
-                LiveRegion.say("No table selected.");
+                Say.say("No table selected.");
                 return;
             }
             List<string> lAllColumns = db.getFieldNames();
@@ -20191,7 +16304,7 @@ namespace DbDo
                 string sStored = db.setSelectList(sTable, string.Join(", ", lPick.ToArray()));
                 invokeRefresh();
                 persistCurrentTableState();
-                LiveRegion.sayForced(sBtn + ": "
+                Say.sayForced(sBtn + ": "
                     + (string.IsNullOrEmpty(sStored) ? "(no matching columns)" : sStored));
                 return;
             }
@@ -20216,13 +16329,13 @@ namespace DbDo
                     db.setSelectList(sTable, "");
                     invokeRefresh();
                     persistCurrentTableState();
-                    LiveRegion.sayForced("Reset to default visible columns.");
+                    Say.sayForced("Reset to default visible columns.");
                     return;
                 }
                 db.setSelectList(sTable, dlg.sChosenCsv);
                 invokeRefresh();
                 persistCurrentTableState();
-                LiveRegion.sayForced("Showing " + dlg.lChosenColumns.Count
+                Say.sayForced("Showing " + dlg.lChosenColumns.Count
                     + " column" + (dlg.lChosenColumns.Count == 1 ? "" : "s")
                     + ": " + dlg.sChosenCsv);
             }
@@ -20231,12 +16344,12 @@ namespace DbDo
         private void describeColumnClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             if (grid == null || iVirtualCol < 0 || iVirtualCol >= grid.Columns.Count)
-            { LiveRegion.say("No column under virtual cursor"); return; }
+            { Say.say("No column under virtual cursor"); return; }
             string sColumn = grid.Columns[iVirtualCol].Text;
             if (string.IsNullOrEmpty(sColumn))
-            { LiveRegion.say("Column has no name"); return; }
+            { Say.say("Column has no name"); return; }
 
             // Walk the column once. Use a bookmark sentinel like the
             // other column-sweep commands so the user's row position
@@ -20292,12 +16405,12 @@ namespace DbDo
         private void plotColumnClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             if (grid == null || iVirtualCol < 0 || iVirtualCol >= grid.Columns.Count)
-            { LiveRegion.say("No column under virtual cursor"); return; }
+            { Say.say("No column under virtual cursor"); return; }
             string sColumn = grid.Columns[iVirtualCol].Text;
             if (string.IsNullOrEmpty(sColumn))
-            { LiveRegion.say("Column has no name"); return; }
+            { Say.say("Column has no name"); return; }
 
             // Walk the column once. Reuse the same bookmark-save
             // pattern Describe Column uses so the user's row
@@ -20384,7 +16497,7 @@ namespace DbDo
                         "No usable data to plot for column \"" + sColumn + "\".");
                     return;
                 }
-                LiveRegion.say("Plot saved (" + sKind + ", " + iPlotted + " points); opening in Excel");
+                Say.say("Plot saved (" + sKind + ", " + iPlotted + " points); opening in Excel");
                 try { System.Diagnostics.Process.Start(sDest); } catch { }
             }
             catch (Exception ex)
@@ -20871,7 +16984,7 @@ namespace DbDo
         private void copyRowClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             try
             {
                 List<string> lFields = db.getDisplayFieldNames();
@@ -20886,9 +16999,9 @@ namespace DbDo
                     sb.Append(sV);
                 }
                 Clipboard.SetText(sb.ToString());
-                LiveRegion.say("Row copied to clipboard");
+                Say.say("Row copied to clipboard");
             }
-            catch (Exception ex) { LiveRegion.say("Copy Row: " + ex.Message); }
+            catch (Exception ex) { Say.say("Copy Row: " + ex.Message); }
         }
 
         // copyColumnClicked: copy every value in the column under the
@@ -20900,11 +17013,11 @@ namespace DbDo
         private void copyColumnClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             try
             {
                 List<string> lFields = db.getDisplayFieldNames();
-                if (lFields == null || lFields.Count == 0) { LiveRegion.say("No columns"); return; }
+                if (lFields == null || lFields.Count == 0) { Say.say("No columns"); return; }
                 string sField = virtCurrentColumnName();
                 if (string.IsNullOrEmpty(sField) || !lFields.Contains(sField)) sField = lFields[0];
                 int iSavedPos = db.absolutePosition;
@@ -20929,9 +17042,9 @@ namespace DbDo
                     bSuppressCellChanged = false;
                 }
                 Clipboard.SetText(sb.ToString());
-                LiveRegion.say("Column " + sField + " copied, " + iTotal + (iTotal == 1 ? " value" : " values"));
+                Say.say("Column " + sField + " copied, " + iTotal + (iTotal == 1 ? " value" : " values"));
             }
-            catch (Exception ex) { LiveRegion.say("Copy Column: " + ex.Message); }
+            catch (Exception ex) { Say.say("Copy Column: " + ex.Message); }
         }
 
         // copyGridClicked: copy the whole visible grid to the clipboard
@@ -20943,11 +17056,11 @@ namespace DbDo
         private void copyGridClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             try
             {
                 List<string> lFields = db.getDisplayFieldNames();
-                if (lFields == null || lFields.Count == 0) { LiveRegion.say("No columns"); return; }
+                if (lFields == null || lFields.Count == 0) { Say.say("No columns"); return; }
                 int iCols = lFields.Count;
                 int iSavedPos = db.absolutePosition;
                 int iTotal = db.recordCount;
@@ -20980,9 +17093,9 @@ namespace DbDo
                     bSuppressCellChanged = false;
                 }
                 Clipboard.SetText(sb.ToString());
-                LiveRegion.say("Grid copied, " + iTotal + (iTotal == 1 ? " row, " : " rows, ") + iCols + (iCols == 1 ? " column" : " columns"));
+                Say.say("Grid copied, " + iTotal + (iTotal == 1 ? " row, " : " rows, ") + iCols + (iCols == 1 ? " column" : " columns"));
             }
-            catch (Exception ex) { LiveRegion.say("Copy Grid: " + ex.Message); }
+            catch (Exception ex) { Say.say("Copy Grid: " + ex.Message); }
         }
 
         // jumpNextInitial: jump to the next row whose value in a
@@ -20999,10 +17112,10 @@ namespace DbDo
         private void jumpNextInitialClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             List<string> lFields = db.getDisplayFieldNames();
             if (lFields == null || lFields.Count == 0)
-            { LiveRegion.say("No columns"); return; }
+            { Say.say("No columns"); return; }
             LbcDialog dlg = new LbcDialog("Next Initial Change", this);
             string sColName;
             try
@@ -21033,15 +17146,15 @@ namespace DbDo
                     if (ch != chCurrent)
                     {
                         invokeRefresh();
-                        LiveRegion.say("Initial: " + (sV.Length > 0 ? sV.Substring(0, Math.Min(40, sV.Length)) : "blank"));
+                        Say.say("Initial: " + (sV.Length > 0 ? sV.Substring(0, Math.Min(40, sV.Length)) : "blank"));
                         return;
                     }
                 }
                 // No change found; put cursor back.
                 db.absolutePosition = iStart;
-                LiveRegion.say("No further initial change in " + sColName);
+                Say.say("No further initial change in " + sColName);
             }
-            catch (Exception ex) { LiveRegion.say("Next Initial Change: " + ex.Message); }
+            catch (Exception ex) { Say.say("Next Initial Change: " + ex.Message); }
         }
 
         // extractRegex: Control+Shift+E. Prompt for a .NET regex,
@@ -21054,7 +17167,7 @@ namespace DbDo
         private void extractRegexClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No table selected"); return; }
+            { Say.say("No table selected"); return; }
             string sPattern;
             using (LbcDialog dlg = new LbcDialog("Extract Regex", this))
             {
@@ -21118,13 +17231,13 @@ namespace DbDo
             }
             invokeRefresh();
             if (iMatches == 0)
-            { LiveRegion.say("No matches found"); return; }
+            { Say.say("No matches found"); return; }
             try
             {
                 Clipboard.SetText(sbOut.ToString());
-                LiveRegion.say(iMatches + " match" + (iMatches == 1 ? "" : "es") + " copied to clipboard");
+                Say.say(iMatches + " match" + (iMatches == 1 ? "" : "es") + " copied to clipboard");
             }
-            catch (Exception ex) { LiveRegion.say("Extract Regex clipboard error: " + ex.Message); }
+            catch (Exception ex) { Say.say("Extract Regex clipboard error: " + ex.Message); }
         }
 
         // Cycle through the list of tables visited in this session.
@@ -21135,11 +17248,11 @@ namespace DbDo
         {
             if (db == null || !db.isOpen())
             {
-                LiveRegion.say("No database file open; press Control+O to open one");
+                Say.say("No database file open; press Control+O to open one");
                 return;
             }
             List<string> lVisited = db.visitedTableNames();
-            if (lVisited.Count < 2) { LiveRegion.say("Only one table visited; press F4 to pick another table"); return; }
+            if (lVisited.Count < 2) { Say.say("Only one table visited; press F4 to pick another table"); return; }
             string sCurrent = db.currentTable;
             int iCurrent = -1;
             for (int i = 0; i < lVisited.Count; i++)
@@ -21164,7 +17277,7 @@ namespace DbDo
                 int iCount = db.recordCount;
                 string sPosOf = "position " + (iNext + 1) + " of " + lVisited.Count;
                 string sRows = ", " + iCount + (iCount == 1 ? " row" : " rows");
-                LiveRegion.say(sNext + ", " + sPosOf + sRows);
+                Say.say(sNext + ", " + sPosOf + sRows);
             }
             catch (Exception ex)
             {
@@ -21188,7 +17301,7 @@ namespace DbDo
             int iCount = db.recordCount;
             string sTable = db.currentTable;
             string sMsg = sTable + ", " + iCount + (iCount == 1 ? " row" : " rows");
-            LiveRegion.say(sMsg);
+            Say.say(sMsg);
         }
 
         // =====================================================================
@@ -21960,9 +18073,9 @@ namespace DbDo
                 }
             }
             if (string.IsNullOrEmpty(sTableName))
-            { LiveRegion.say("No table name entered"); return false; }
+            { Say.say("No table name entered"); return false; }
             if (lFieldDefs.Count == 0)
-            { LiveRegion.say("No fields entered"); return false; }
+            { Say.say("No fields entered"); return false; }
             return true;
         }
 
@@ -22124,7 +18237,7 @@ namespace DbDo
                     db.refreshTableList();
                     db.selectTable(sTableName);
                     invokeRefresh();
-                    LiveRegion.say("Database created with tables " + sTableName + ", maps, and lookups");
+                    Say.say("Database created with tables " + sTableName + ", maps, and lookups");
                 }
                 catch (Exception ex)
                 {
@@ -22140,9 +18253,9 @@ namespace DbDo
         private void fileAddTableClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
-            { LiveRegion.say("No database open"); return; }
+            { Say.say("No database open"); return; }
             if (db.readOnly)
-            { LiveRegion.say("Database is read-only"); return; }
+            { Say.say("Database is read-only"); return; }
             string sTableName;
             List<string[]> lFieldDefs;
             if (!bPromptTableDefinition("Add Table", out sTableName, out lFieldDefs)) return;
@@ -22166,7 +18279,7 @@ namespace DbDo
                 db.refreshTableList();
                 db.selectTable(sTableName);
                 invokeRefresh();
-                LiveRegion.say("Table " + sTableName + " created");
+                Say.say("Table " + sTableName + " created");
             }
             catch (Exception ex)
             {
@@ -22254,7 +18367,7 @@ namespace DbDo
                     sWorkbookSheetName = wo.Sheet;
                     sWorkbookTable = wo.Table;
                     lWorkbookColumns = wo.Columns;
-                    LiveRegion.say("Opened workbook " + Path.GetFileName(sOpenPath)
+                    Say.say("Opened workbook " + Path.GetFileName(sOpenPath)
                         + " for editing. Edit data cells; formulas are preserved. Press Control+S to save your changes back to the file.");
                     return;
                 }
@@ -22328,7 +18441,7 @@ namespace DbDo
                 { try { if (File.Exists(sPrevTemp)) File.Delete(sPrevTemp); } catch { } }
                 sManagedOriginPath = sOrigin;
                 sManagedTempPath = sTemp;
-                LiveRegion.say("Opened managed copy of " + Path.GetFileName(sManagedOriginPath)
+                Say.say("Opened managed copy of " + Path.GetFileName(sManagedOriginPath)
                     + ". Edits stay in the working copy; the original is untouched until you Save As.");
             }
         }
@@ -22467,7 +18580,7 @@ namespace DbDo
                 fileSaveAsClicked(sender, evArgs);
                 return;
             }
-            LiveRegion.say("All changes are already saved. Use Save As to make a copy under a new name or format.");
+            Say.say("All changes are already saved. Use Save As to make a copy under a new name or format.");
         }
 
         // saveWorkbookToDisk: write the working copy's data back to the
@@ -22510,7 +18623,7 @@ namespace DbDo
                 db.bDataModified = false;   // working copy now matches the .xlsx on disk
                 updateStatusBar();          // flip the indicator to "saved"
                 try { DbDoLog.write("Save: wrote " + iWritten + " data cell(s) to " + sWorkbookOriginPath + " (formulas preserved)."); } catch { }
-                LiveRegion.say("Saved your changes to " + Path.GetFileName(sWorkbookOriginPath)
+                Say.say("Saved your changes to " + Path.GetFileName(sWorkbookOriginPath)
                     + ". Formulas and other sheets were preserved.");
             }
             catch (Exception ex)
@@ -22632,7 +18745,7 @@ namespace DbDo
                         + " (" + sbCols + ") VALUES (" + sbVals + ")", null);
                 }
             }
-            LiveRegion.say("Converted " + lRecords.Count + " record"
+            Say.say("Converted " + lRecords.Count + " record"
                 + (lRecords.Count == 1 ? "" : "s") + " to " + Path.GetFileName(sDbPath));
             return sDbPath;
         }
@@ -23682,7 +19795,7 @@ namespace DbDo
                 if (sOpenLimit.Length > 0)
                 {
                     DbDoLog.write("Opened editable ." + sOpenExt + " (in-place edits best-effort): " + sOpenLimit);
-                    LiveRegion.say("Note: edits to this " + sOpenExt + " file are best effort and may not all save back exactly.");
+                    Say.say("Note: edits to this " + sOpenExt + " file are best effort and may not all save back exactly.");
                 }
 
                 // Pre-seed the manager's in-session per-table cache
@@ -24374,7 +20487,7 @@ namespace DbDo
                 sManagedOriginPath = sOrigin;
                 sManagedTempPath = sTemp;
                 invokeRefresh();
-                LiveRegion.say("Imported " + Path.GetFileName(sOrigin)
+                Say.say("Imported " + Path.GetFileName(sOrigin)
                     + " into a new DbDo database. Save As to keep it as a .db; the original file is unchanged.");
             }
         }
@@ -24408,7 +20521,7 @@ namespace DbDo
                     + "&body=" + Uri.EscapeDataString(sBody));
             }
             catch (Exception ex) { try { DbDoLog.write("emailLogFile mailto failed: " + ex.Message); } catch { } }
-            try { LiveRegion.say("Opened your email program and the folder holding DbDo.log. Attach the file at "
+            try { Say.say("Opened your email program and the folder holding DbDo.log. Attach the file at "
                 + sLog + " to your message."); } catch { }
         }
 
@@ -24677,13 +20790,13 @@ namespace DbDo
                 if (iNav == 1)
                 {
                     if (db.absolutePosition >= db.recordCount)
-                    { LiveRegion.sayForced("Last record"); return 0; }
+                    { Say.sayForced("Last record"); return 0; }
                     db.absolutePosition = db.absolutePosition + 1;
                 }
                 else if (iNav == -1)
                 {
                     if (db.absolutePosition <= 1)
-                    { LiveRegion.sayForced("First record"); return 0; }
+                    { Say.sayForced("First record"); return 0; }
                     db.absolutePosition = db.absolutePosition - 1;
                 }
                 else if (iNav == 2)
@@ -24693,8 +20806,8 @@ namespace DbDo
                     { ErrorDialog.show(this, "Delete Record", ex, db); return 0; }
                     invokeRefresh();
                     if (db.recordCount == 0 || db.eof)
-                    { LiveRegion.sayForced("Record deleted; no records remain"); return 0; }
-                    LiveRegion.sayForced("Record deleted");
+                    { Say.sayForced("Record deleted; no records remain"); return 0; }
+                    Say.sayForced("Record deleted");
                 }
                 else return 0;
                 virtSyncListSelection(db.absolutePosition);
@@ -24726,12 +20839,12 @@ namespace DbDo
             }
             if (db.eof || db.bof) return;
             if (grid == null || iVirtualCol < 0 || iVirtualCol >= grid.Columns.Count)
-            { LiveRegion.say("No column under virtual cursor"); return; }
+            { Say.say("No column under virtual cursor"); return; }
             string sColumn = grid.Columns[iVirtualCol].Text;
             if (string.IsNullOrEmpty(sColumn))
-            { LiveRegion.say("Column has no name"); return; }
+            { Say.say("Column has no name"); return; }
             if (!db.hasField(sColumn))
-            { LiveRegion.say("Field not in current table: " + sColumn); return; }
+            { Say.say("Field not in current table: " + sColumn); return; }
 
             // Refuse on metadata fields (system-managed) and route
             // 'marked' to the proper toggle commands.
@@ -24816,7 +20929,7 @@ namespace DbDo
 
             if (string.Equals(sNewValue, sOriginal, StringComparison.Ordinal))
             {
-                LiveRegion.say("No change");
+                Say.say("No change");
                 return;
             }
 
@@ -24859,7 +20972,7 @@ namespace DbDo
                 db.setFieldValue(sColumn, sNewValue);
                 db.update();
                 invokeRefresh();
-                LiveRegion.say("Field updated");
+                Say.say("Field updated");
             }
             catch (Exception ex)
             {
@@ -25046,7 +21159,7 @@ namespace DbDo
                     catch { }
                 }
                 invokeRefresh();
-                LiveRegion.sayForced("Deleted " + iDeleted + " marked record" + (iDeleted == 1 ? "" : "s") + ".");
+                Say.sayForced("Deleted " + iDeleted + " marked record" + (iDeleted == 1 ? "" : "s") + ".");
             }
             catch (Exception ex)
             {
@@ -25137,14 +21250,14 @@ namespace DbDo
                 {
                     if (db.absolutePosition < db.recordCount)
                     { db.absolutePosition = db.absolutePosition + 1; virtSyncListSelection(db.absolutePosition); }
-                    else LiveRegion.sayForced("Last record");
+                    else Say.sayForced("Last record");
                     continue;
                 }
                 if (v == 4)
                 {
                     if (db.absolutePosition > 1)
                     { db.absolutePosition = db.absolutePosition - 1; virtSyncListSelection(db.absolutePosition); }
-                    else LiveRegion.sayForced("First record");
+                    else Say.sayForced("First record");
                     continue;
                 }
                 if (v == 2) return 1;  // Shift+F6 -> form
@@ -25371,7 +21484,7 @@ namespace DbDo
         private void recAppendClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset()) return;
-            if (db.eof || db.bof) { LiveRegion.say("No record selected"); return; }
+            if (db.eof || db.bof) { Say.say("No record selected"); return; }
             string sExisting;
             try { sExisting = Clipboard.GetText() ?? ""; }
             catch { sExisting = ""; }
@@ -25390,11 +21503,11 @@ namespace DbDo
             try
             {
                 Clipboard.SetText(sb.ToString());
-                LiveRegion.say("Appended record to clipboard");
+                Say.say("Appended record to clipboard");
             }
             catch
             {
-                LiveRegion.say("Could not append to clipboard");
+                Say.say("Could not append to clipboard");
             }
         }
 
@@ -25415,7 +21528,7 @@ namespace DbDo
                     "New Copy", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
-            if (db.eof || db.bof) { LiveRegion.say("No record to copy"); return; }
+            if (db.eof || db.bof) { Say.say("No record to copy"); return; }
             List<string> lFields = db.getEditableFieldNames();
             Dictionary<string, string> dInitial = new Dictionary<string, string>();
             List<bool> lEditable = new List<bool>();
@@ -25447,7 +21560,7 @@ namespace DbDo
                                 db.setFieldValue(kv.Key, kv.Value);
                         db.update();
                         invokeRefresh();
-                        LiveRegion.say("New copy inserted");
+                        Say.say("New copy inserted");
                         return;
                     }
                     catch (Exception ex)
@@ -25471,8 +21584,8 @@ namespace DbDo
         private void recMailClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
-            if (db.eof || db.bof) { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
+            if (db.eof || db.bof) { Say.say("No record selected"); return; }
             string sEmailCol = null;
             foreach (string sCol in db.getFieldNames())
             {
@@ -25488,7 +21601,7 @@ namespace DbDo
                 return;
             }
             string sTo = (db.getFieldValue(sEmailCol) ?? "").Trim();
-            if (sTo.Length == 0) { LiveRegion.say("Email field is empty"); return; }
+            if (sTo.Length == 0) { Say.say("Email field is empty"); return; }
             string sSubject = "";
             if (db.hasField("look")) sSubject = db.getFieldValue("look") ?? "";
             string sBody = "";
@@ -25508,7 +21621,7 @@ namespace DbDo
             try
             {
                 System.Diagnostics.Process.Start(sb.ToString());
-                LiveRegion.say("Opening mail to " + sTo);
+                Say.say("Opening mail to " + sTo);
             }
             catch (Exception ex)
             {
@@ -25531,7 +21644,7 @@ namespace DbDo
             if (db == null || !db.hasRecordset()) return;
             List<string> lFields = db.getDisplayFieldNames();
             if (lFields == null || lFields.Count == 0)
-            { LiveRegion.say("No columns"); return; }
+            { Say.say("No columns"); return; }
             // Prompt for the column whose cell value to open. The
             // default is the column under virtual focus -- pressing
             // Enter accepts it. Listview has no per-column focus,
@@ -25557,7 +21670,7 @@ namespace DbDo
             catch { }
             if (sValue.Length == 0)
             {
-                LiveRegion.say("Cell is empty");
+                Say.say("Cell is empty");
                 return;
             }
             try
@@ -25569,11 +21682,11 @@ namespace DbDo
                 if (bIsUrl || File.Exists(sValue) || Directory.Exists(sValue))
                 {
                     System.Diagnostics.Process.Start(sValue);
-                    LiveRegion.say("Opened: " + sValue);
+                    Say.say("Opened: " + sValue);
                 }
                 else
                 {
-                    LiveRegion.say("Not a url, file, or folder: " + sValue);
+                    Say.say("Not a url, file, or folder: " + sValue);
                 }
             }
             catch (Exception ex)
@@ -25645,7 +21758,7 @@ namespace DbDo
                 string sCursorCol = virtCurrentColumnName();
                 if (string.IsNullOrEmpty(sCursorCol))
                 {
-                    LiveRegion.sayForced("No column at the db cursor.");
+                    Say.sayForced("No column at the db cursor.");
                     return;
                 }
                 // Remember the last input across sessions: when this
@@ -25682,7 +21795,7 @@ namespace DbDo
                 else
                 {
                     invokeRefresh();
-                    LiveRegion.sayForced("Not found");
+                    Say.sayForced("Not found");
                 }
             }
             catch (Exception ex)
@@ -25822,7 +21935,7 @@ namespace DbDo
                 else
                 {
                     invokeRefresh();
-                    LiveRegion.sayForced("Not found");
+                    Say.sayForced("Not found");
                 }
             }
             catch (Exception ex)
@@ -25945,7 +22058,7 @@ namespace DbDo
                 else
                 {
                     invokeRefresh();
-                    LiveRegion.sayForced("Not found");
+                    Say.sayForced("Not found");
                 }
             }
             catch (Exception ex)
@@ -26208,7 +22321,7 @@ namespace DbDo
                     doFindRegex(bForward, true);
                     break;
                 default:
-                    LiveRegion.sayForced("No previous search. Use Find, Jump, or Find Regex first.");
+                    Say.sayForced("No previous search. Use Find, Jump, or Find Regex first.");
                     break;
             }
         }
@@ -26220,7 +22333,7 @@ namespace DbDo
         {
             if (db == null || !db.hasRecordset()) return;
             int iCount = db.recordCount;
-            if (iCount <= 0) { LiveRegion.say("No rows."); return; }
+            if (iCount <= 0) { Say.say("No rows."); return; }
             string sInput = promptText("Set Position",
                 "Row number (1 to " + iCount + "), percent (50%), relative (+10, -25%), or column text:",
                 (db.absolutePosition).ToString());
@@ -26237,7 +22350,7 @@ namespace DbDo
             if (db == null || !db.hasRecordset()) return;
             string sLast = SearchHistory.lastText(SearchHistory.SectionGoTo);
             if (string.IsNullOrEmpty(sLast))
-            { LiveRegion.sayForced("No previous Go To input."); return; }
+            { Say.sayForced("No previous Go To input."); return; }
             applyGoTo(sLast, false);
         }
 
@@ -26287,7 +22400,7 @@ namespace DbDo
                         { virtMoveTo(iVirtualRow, iCol); return; }
                     }
                 }
-                LiveRegion.sayForced("No column matching " + sInput);
+                Say.sayForced("No column matching " + sInput);
                 return;
             }
 
@@ -26297,7 +22410,7 @@ namespace DbDo
             string sDigits = sInput.TrimStart('+', '-').TrimEnd('%').Trim();
             double nNumber;
             if (!double.TryParse(sDigits, out nNumber) || nNumber < 0)
-            { LiveRegion.sayForced("Enter a row number, percent, relative offset, or column text."); return; }
+            { Say.sayForced("Enter a row number, percent, relative offset, or column text."); return; }
 
             int iAmount = bPercent
                 ? (int)Math.Round(iCount * nNumber / 100.0, MidpointRounding.AwayFromZero)
@@ -26337,14 +22450,14 @@ namespace DbDo
         {
             if (db == null || !db.hasRecordset()) return;
             try { db.moveFirst(); invokeRefresh(); }
-            catch (Exception ex) { LiveRegion.say("Step Record First: " + ex.Message); }
+            catch (Exception ex) { Say.say("Step Record First: " + ex.Message); }
         }
 
         private void navLastClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset()) return;
             try { db.moveLast(); invokeRefresh(); }
-            catch (Exception ex) { LiveRegion.say("Step Record Last: " + ex.Message); }
+            catch (Exception ex) { Say.say("Step Record Last: " + ex.Message); }
         }
 
         private void navNextClicked(object sender, EventArgs evArgs)
@@ -26355,7 +22468,7 @@ namespace DbDo
                 if (db.absolutePosition < db.recordCount) db.absolutePosition = db.absolutePosition + 1;
                 invokeRefresh();
             }
-            catch (Exception ex) { LiveRegion.say("Step Record Next: " + ex.Message); }
+            catch (Exception ex) { Say.say("Step Record Next: " + ex.Message); }
         }
 
         private void navPrevClicked(object sender, EventArgs evArgs)
@@ -26366,7 +22479,7 @@ namespace DbDo
                 if (db.absolutePosition > 1) db.absolutePosition = db.absolutePosition - 1;
                 invokeRefresh();
             }
-            catch (Exception ex) { LiveRegion.say("Step Record Previous: " + ex.Message); }
+            catch (Exception ex) { Say.say("Step Record Previous: " + ex.Message); }
         }
 
         // Save-Bookmark (Ctrl+B): add the current record to the
@@ -26392,7 +22505,7 @@ namespace DbDo
                     : be.sLook;
                 string sMsg = "Bookmark saved: " + sLabel + " (" + lBookmarks.Count + " total)";
                 lblStatus.Text = sMsg;
-                LiveRegion.say(sMsg);
+                Say.say(sMsg);
             }
             catch (Exception ex) { ErrorDialog.show(this, "Save Bookmark", ex.Message); }
         }
@@ -26443,7 +22556,7 @@ namespace DbDo
             {
                 db.bookmark = chosen.oBookmark;
                 invokeRefresh();
-                LiveRegion.say("Returned to row " + db.absolutePosition + " in " + chosen.sTable);
+                Say.say("Returned to row " + db.absolutePosition + " in " + chosen.sTable);
             }
             catch (Exception ex)
             {
@@ -26458,14 +22571,14 @@ namespace DbDo
         {
             if (lBookmarks.Count == 0)
             {
-                LiveRegion.say("No bookmarks to clear");
+                Say.say("No bookmarks to clear");
                 return;
             }
             if (lBookmarks.Count == 1)
             {
                 lBookmarks.Clear();
                 lblStatus.Text = "Bookmark cleared.";
-                LiveRegion.say("Bookmark cleared");
+                Say.say("Bookmark cleared");
                 return;
             }
             // Multiple: chooser
@@ -26494,7 +22607,7 @@ namespace DbDo
                     int n = lBookmarks.Count;
                     lBookmarks.Clear();
                     lblStatus.Text = "Bookmarks cleared (" + n + ").";
-                    LiveRegion.say("Cleared " + n + " bookmarks");
+                    Say.say("Cleared " + n + " bookmarks");
                     return;
                 }
                 iChosen = lb.SelectedIndex;
@@ -26506,7 +22619,7 @@ namespace DbDo
                 ? ("row " + removed.iRowAtSave) : removed.sLook;
             string sMsg = "Bookmark cleared: " + sLook + " (" + lBookmarks.Count + " remaining)";
             lblStatus.Text = sMsg;
-            LiveRegion.say(sMsg);
+            Say.say(sMsg);
         }
 
         // Helper: prompt for a single line of text. Returns null if the
@@ -26606,9 +22719,9 @@ namespace DbDo
         {
             if (db == null || !db.hasRecordset()) return;
             if (db.currentIsCustomQuery)
-            { LiveRegion.sayForced("Filter Regex applies to a table, not a query window."); return; }
+            { Say.sayForced("Filter Regex applies to a table, not a query window."); return; }
             string sCol = virtCurrentColumnName();
-            if (string.IsNullOrEmpty(sCol)) { LiveRegion.sayForced("No current column."); return; }
+            if (string.IsNullOrEmpty(sCol)) { Say.sayForced("No current column."); return; }
 
             string sPattern;
             using (LbcDialog dlg = new LbcDialog("Filter Regex", this))
@@ -26626,14 +22739,14 @@ namespace DbDo
                 {
                     db.selectTable(db.currentTable);
                     invokeRefresh();
-                    LiveRegion.sayForced("Regex filter cleared. " + db.recordCount + " records.");
+                    Say.sayForced("Regex filter cleared. " + db.recordCount + " records.");
                     return;
                 }
                 string sWhere = "\"" + sCol.Replace("\"", "\"\"") + "\" REGEXP '"
                     + sPattern.Replace("'", "''") + "'";
                 db.selectTableFiltered(db.currentTable, sWhere);
                 invokeRefresh();
-                LiveRegion.sayForced("Regex filter applied. " + db.recordCount + " matching records.");
+                Say.sayForced("Regex filter applied. " + db.recordCount + " matching records.");
             }
             catch (Exception ex) { ErrorDialog.show(this, "Filter Regex", ex.Message); }
         }
@@ -26684,7 +22797,7 @@ namespace DbDo
                     db.filter = "";
                     invokeRefresh();
                     persistCurrentTableState();
-                    LiveRegion.sayForced("Filter cleared. " + db.recordCount + " records visible.");
+                    Say.sayForced("Filter cleared. " + db.recordCount + " records visible.");
                 }
                 catch (Exception ex)
                 {
@@ -26742,9 +22855,9 @@ namespace DbDo
                     invokeRefresh();
                     persistCurrentTableState();
                     if (string.IsNullOrEmpty(sFinalExpr))
-                        LiveRegion.sayForced("No filter applied. " + db.recordCount + " records visible.");
+                        Say.sayForced("No filter applied. " + db.recordCount + " records visible.");
                     else
-                        LiveRegion.sayForced("Filter applied. " + db.recordCount + " records match.");
+                        Say.sayForced("Filter applied. " + db.recordCount + " records match.");
                 }
                 catch (Exception ex)
                 {
@@ -26885,7 +22998,7 @@ namespace DbDo
                 db.resync();
                 invokeRefresh();
                 virtMoveTo(iSavedRow, iSavedCol);
-                LiveRegion.sayForced("Refreshed");
+                Say.sayForced("Refreshed");
             }
             catch (Exception ex)
             {
@@ -26908,7 +23021,7 @@ namespace DbDo
         private DbDoFrame mdiFrame()
         {
             DbDoFrame frame = this.MdiParent as DbDoFrame;
-            if (frame == null) LiveRegion.say("No window frame!");
+            if (frame == null) Say.say("No window frame!");
             return frame;
         }
 
@@ -26922,9 +23035,9 @@ namespace DbDo
             List<string> lsNames;
             string sChosen;
             if (frame == null) return;
-            if (db == null || !db.isOpen()) { LiveRegion.say("No database open!"); return; }
+            if (db == null || !db.isOpen()) { Say.say("No database open!"); return; }
             lsNames = db.getTableAndViewNames();
-            if (lsNames == null || lsNames.Count == 0) { LiveRegion.say("No tables found in this database file."); return; }
+            if (lsNames == null || lsNames.Count == 0) { Say.say("No tables found in this database file."); return; }
             // maps and lookups are DbDo's internal metadata tables, not
             // user data, so keep them out of the Open Table picker. They
             // stay reachable via SQL, and the features that read them
@@ -26938,7 +23051,7 @@ namespace DbDo
                 return string.Equals(s, "maps", StringComparison.OrdinalIgnoreCase)
                     || string.Equals(s, "lookups", StringComparison.OrdinalIgnoreCase);
             });
-            if (lsNames.Count == 0) { LiveRegion.say("No user tables to open."); return; }
+            if (lsNames.Count == 0) { Say.say("No user tables to open."); return; }
             // Offer only tables NOT already open in a window on this
             // database; opening a table that is already on screen is
             // Window-menu territory (F4 / Control+Tab), not Open
@@ -26956,7 +23069,7 @@ namespace DbDo
             foreach (string sName in lsNames)
                 if (!containsIgnoreCase(lsOpen, sName)) lsClosed.Add(sName);
             if (lsClosed.Count == 0)
-            { LiveRegion.say("All tables of this database are already open in windows."); return; }
+            { Say.say("All tables of this database are already open in windows."); return; }
             lsNames = lsClosed;
             sChosen = promptListChoice("Open Table", "Choose a table to open in a new window:", lsNames, lsNames[0]);
             if (string.IsNullOrEmpty(sChosen)) return;
@@ -26972,7 +23085,7 @@ namespace DbDo
             string sChosen;
             if (frame == null) return;
             lsTitles = frame.windowTitles();
-            if (lsTitles.Count == 0) { LiveRegion.say("No windows!"); return; }
+            if (lsTitles.Count == 0) { Say.say("No windows!"); return; }
             sChosen = promptListChoice("Current Windows", "Choose a window:", lsTitles, this.Text);
             if (string.IsNullOrEmpty(sChosen)) return;
             frame.activateByTitle(sChosen);
@@ -27006,7 +23119,7 @@ namespace DbDo
             StringBuilder sbOut;
             if (frame == null) return;
             lsTitles = frame.windowTitles();
-            if (lsTitles.Count == 0) { LiveRegion.say("No windows!"); return; }
+            if (lsTitles.Count == 0) { Say.say("No windows!"); return; }
             sbOut = new StringBuilder();
             sbOut.Append(lsTitles.Count).Append(lsTitles.Count == 1 ? " window: " : " windows: ");
             foreach (string sTitle in lsTitles)
@@ -27015,12 +23128,12 @@ namespace DbDo
                 if (sTitle == this.Text) sbOut.Append(" (current)");
                 sbOut.Append("; ");
             }
-            LiveRegion.say(sbOut.ToString().TrimEnd(' ', ';'));
+            Say.say(sbOut.ToString().TrimEnd(' ', ';'));
         }
 
         private void windowCloseClicked(object sender, EventArgs evArgs)
         {
-            LiveRegion.say("Close window");
+            Say.say("Close window");
             this.Close();
         }
 
@@ -27028,7 +23141,7 @@ namespace DbDo
         {
             DbDoFrame frame = mdiFrame();
             if (frame == null) return;
-            LiveRegion.say("Close all but current");
+            Say.say("Close all but current");
             frame.closeAllButCurrent();
         }
 
@@ -27055,7 +23168,7 @@ namespace DbDo
                     sMsg += " (Views are tables whose names start with 'view_'.)";
                 MessageBox.Show(this, sMsg, sCommand,
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
-                LiveRegion.say(sMsg);
+                Say.say(sMsg);
                 return;
             }
             string sChosen = promptListChoice(sCommand,
@@ -27118,18 +23231,18 @@ namespace DbDo
         {
             if (db == null || !db.isOpen())
             {
-                LiveRegion.say("No database file open; press Control+O to open one");
+                Say.say("No database file open; press Control+O to open one");
                 return;
             }
             List<string> lAll = db.getTableAndViewNames();
             if (lAll.Count == 0)
             {
-                LiveRegion.say("No tables or views in this database");
+                Say.say("No tables or views in this database");
                 return;
             }
             if (lAll.Count < 2)
             {
-                LiveRegion.say("Only one table or view in this database");
+                Say.say("Only one table or view in this database");
                 return;
             }
             string sCurrent = db.currentTable;
@@ -27152,7 +23265,7 @@ namespace DbDo
                 string sKind = db.isViewName(sNext) ? "view" : "table";
                 string sPosOf = "position " + (iNext + 1) + " of " + lAll.Count;
                 string sRows = ", " + iCount + (iCount == 1 ? " row" : " rows");
-                LiveRegion.say(sNext + " (" + sKind + "), " + sPosOf + sRows);
+                Say.say(sNext + " (" + sKind + "), " + sPosOf + sRows);
                 IniSession.lastTable = sNext;
             }
             catch (Exception ex)
@@ -27257,7 +23370,7 @@ namespace DbDo
                 db.setFieldValue(Metadata.MarkedColumn, bValue ? "1" : "0");
                 db.update();
                 invokeRefresh();
-                LiveRegion.say(bValue ? "Marked" : "Unmarked");
+                Say.say(bValue ? "Marked" : "Unmarked");
             }
             catch (Exception ex)
             {
@@ -27285,7 +23398,7 @@ namespace DbDo
         private void applyBulkMark(string sTitle, string sNewValue, bool bInvert)
         {
             if (db == null || !db.hasRecordset() || db.readOnly)
-            { LiveRegion.say(sTitle + ": no writable recordset"); return; }
+            { Say.say(sTitle + ": no writable recordset"); return; }
             if (db.currentIsView)
             {
                 MessageBox.Show(this, "Cannot mark rows of a view (read-only).", sTitle,
@@ -27312,7 +23425,7 @@ namespace DbDo
                 System.IO.StringWriter sw = new System.IO.StringWriter();
                 int iAffected = db.invokeSql(sSql, sw);
                 invokeRefresh();
-                LiveRegion.say(sTitle + ": " + iAffected + " row" + (iAffected == 1 ? "" : "s"));
+                Say.say(sTitle + ": " + iAffected + " row" + (iAffected == 1 ? "" : "s"));
             }
             catch (Exception ex)
             {
@@ -27330,14 +23443,14 @@ namespace DbDo
         private void recRemoveForceClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.readOnly)
-            { LiveRegion.say("Delete: no writable recordset"); return; }
+            { Say.say("Delete: no writable recordset"); return; }
             if (db.currentIsView)
             {
                 MessageBox.Show(this, "Cannot delete rows of a view (read-only).", "Delete Without Confirmation",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
-            if (db.eof || db.bof) { LiveRegion.say("Delete: no current row"); return; }
+            if (db.eof || db.bof) { Say.say("Delete: no current row"); return; }
             // Speak the row's look value (or primary key) BEFORE delete
             // so the user has confirmation feedback even after the
             // recordset moves to the next row.
@@ -27354,7 +23467,7 @@ namespace DbDo
             {
                 db.deleteCurrent();
                 invokeRefresh();
-                LiveRegion.say("Deleted: " + sLabel);
+                Say.say("Deleted: " + sLabel);
             }
             catch (Exception ex)
             {
@@ -27371,15 +23484,15 @@ namespace DbDo
         private void recOpenUrlClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             if (!db.hasField("url"))
-            { LiveRegion.say("This table has no url column"); return; }
+            { Say.say("This table has no url column"); return; }
             string sUrl = db.getFieldValue("url") ?? "";
-            if (sUrl.Length == 0) { LiveRegion.say("Url is empty"); return; }
+            if (sUrl.Length == 0) { Say.say("Url is empty"); return; }
             try
             {
                 System.Diagnostics.Process.Start(sUrl);
-                LiveRegion.say("Opening " + sUrl);
+                Say.say("Opening " + sUrl);
             }
             catch (Exception ex)
             {
@@ -27394,7 +23507,7 @@ namespace DbDo
         // than retyping. For now, announce deferral.
         private void recPickValueStub(object sender, EventArgs evArgs)
         {
-            LiveRegion.say("Pick Value is deferred; not yet implemented");
+            Say.say("Pick Value is deferred; not yet implemented");
         }
 
         // --- Sort Records (Alt+Shift+S) ---
@@ -27447,7 +23560,7 @@ namespace DbDo
             if (db == null || !db.hasRecordset()) return;
             string sCurrent = (db.sort ?? "").Trim();
             if (sCurrent.Length == 0)
-            { LiveRegion.sayForced("No order to reverse."); return; }
+            { Say.sayForced("No order to reverse."); return; }
             List<string> lFlipped = new List<string>();
             foreach (string sPart in sCurrent.Split(','))
             {
@@ -27466,7 +23579,7 @@ namespace DbDo
                 db.sort = sNew;
                 invokeRefresh();
                 persistCurrentTableState();
-                LiveRegion.sayForced("Order reversed: " + sNew + ". " + db.recordCount + " records.");
+                Say.sayForced("Order reversed: " + sNew + ". " + db.recordCount + " records.");
             }
             catch (Exception ex) { ErrorDialog.show(this, "Reverse Order", ex, db); }
         }
@@ -27493,7 +23606,7 @@ namespace DbDo
             if (db == null || !db.hasRecordset()) return;
             List<string> lAllFields = db.getFieldNames();
             if (lAllFields == null || lAllFields.Count == 0)
-            { LiveRegion.say("No columns to sort by"); return; }
+            { Say.say("No columns to sort by"); return; }
 
             List<string> lInitial = new List<string>();
             foreach (string sPart in (db.sort ?? "").Split(','))
@@ -27531,7 +23644,7 @@ namespace DbDo
                     // persistCurrentTableState) -- the "I have to re-sort
                     // every time I open it" report.
                     persistCurrentTableState();
-                    LiveRegion.sayForced(lClauses.Count == 0
+                    Say.sayForced(lClauses.Count == 0
                         ? "Sort cleared. " + db.recordCount + " records in original order."
                         : "Ordered by " + sFinal + ". " + db.recordCount + " records.");
                 }
@@ -27571,10 +23684,10 @@ namespace DbDo
         private void miscDatabaseSummaryClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
-            { LiveRegion.say("No database open"); return; }
+            { Say.say("No database open"); return; }
             List<string> lAllTables = db.getTableAndViewNames();
             if (lAllTables == null || lAllTables.Count == 0)
-            { LiveRegion.say("Database has no tables"); return; }
+            { Say.say("Database has no tables"); return; }
 
             // Order: current table first, then the rest alphabetically.
             string sCurrent = db.currentTable ?? "";
@@ -27791,7 +23904,7 @@ namespace DbDo
         }
         private void miscWindowSummaryStub(object sender, EventArgs evArgs)
         {
-            LiveRegion.say("Window Summary is deferred; not yet implemented");
+            Say.say("Window Summary is deferred; not yet implemented");
         }
 
         // The per-column sort handlers (sortByFixedColumn,
@@ -27817,7 +23930,7 @@ namespace DbDo
         private void fileOpenSelectClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
-            { LiveRegion.say("No database open"); return; }
+            { Say.say("No database open"); return; }
             string sSql;
             using (LbcDialog dlg = new LbcDialog("Open New Recordset", this))
             {
@@ -27848,7 +23961,7 @@ namespace DbDo
             {
                 db.openSqlRecordset(sSql);
                 invokeRefresh();
-                LiveRegion.say("Recordset opened. " + db.recordCount + " row"
+                Say.say("Recordset opened. " + db.recordCount + " row"
                     + (db.recordCount == 1 ? "" : "s") + ". Read-only.");
             }
             catch (Exception ex)
@@ -27881,19 +23994,19 @@ namespace DbDo
         private void recMarkAnchorClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             iMarkAnchor = db.absolutePosition;
             sMarkAnchorTable = db.currentTable;
-            LiveRegion.say("Mark anchor at row " + iMarkAnchor);
+            Say.say("Mark anchor at row " + iMarkAnchor);
         }
 
         private void recUnmarkAnchorClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             iUnmarkAnchor = db.absolutePosition;
             sUnmarkAnchorTable = db.currentTable;
-            LiveRegion.say("Unmark anchor at row " + iUnmarkAnchor);
+            Say.say("Unmark anchor at row " + iUnmarkAnchor);
         }
 
         private void recMarkToAnchorClicked(object sender, EventArgs evArgs)
@@ -27920,7 +24033,7 @@ namespace DbDo
             string sKindWord = bMark ? "mark" : "unmark";
 
             if (db == null || !db.hasRecordset() || db.readOnly)
-            { LiveRegion.say("No table open or read-only"); return; }
+            { Say.say("No table open or read-only"); return; }
             if (db.currentIsView)
             {
                 MessageBox.Show(this, "Cannot mark rows of a view (read-only).",
@@ -27936,14 +24049,14 @@ namespace DbDo
             }
             if (iAnchor < 1)
             {
-                LiveRegion.say("No " + sKindWord + " anchor set; press "
+                Say.say("No " + sKindWord + " anchor set; press "
                     + (bMark ? "F8" : "Alt+F8") + " first");
                 return;
             }
             if (!string.Equals(sAnchorTable, db.currentTable,
                 StringComparison.OrdinalIgnoreCase))
             {
-                LiveRegion.say("Anchor was set on a different table; press "
+                Say.say("Anchor was set on a different table; press "
                     + (bMark ? "F8" : "Alt+F8") + " to set a new one");
                 if (bMark) { iMarkAnchor = -1; sMarkAnchorTable = null; }
                 else       { iUnmarkAnchor = -1; sUnmarkAnchorTable = null; }
@@ -27989,7 +24102,7 @@ namespace DbDo
             invokeRefresh();
             int iRange = iTo - iFrom + 1;
             string sAction = bMark ? "Marked" : "Unmarked";
-            LiveRegion.say(sAction + " " + iChanged
+            Say.say(sAction + " " + iChanged
                 + " of " + iRange + " row" + (iRange == 1 ? "" : "s")
                 + " (rows " + iFrom + " to " + iTo + ")");
         }
@@ -28274,7 +24387,7 @@ namespace DbDo
                 frmExisting.iDrillCallerRow = iCallerRow;
                 try { frmExisting.Activate(); } catch { }
                 frmExisting.focusOwnRow();
-                LiveRegion.say(sTargetTable + ": already open");
+                Say.say(sTargetTable + ": already open");
                 return;
             }
 
@@ -28312,12 +24425,12 @@ namespace DbDo
                 try { frmChild.Close(); } catch { }
                 try { this.Activate(); } catch { }
                 focusOwnRow();
-                LiveRegion.say("No related records in " + sTargetTable + "; staying here");
+                Say.say("No related records in " + sTargetTable + "; staying here");
                 return;
             }
             try { DbDoLog.write("Drill: opened window for '" + sTargetTable + "' (" + iCount + " rows)."); } catch { }
             frmChild.focusOwnRow();
-            LiveRegion.say(sTargetTable + ": " + Str.plural("related record", iCount));
+            Say.say(sTargetTable + ": " + Str.plural("related record", iCount));
         }
 
         // finishDrillArrival: shared landing logic for every drill
@@ -28339,12 +24452,12 @@ namespace DbDo
             try { iCount = db.recordCount; } catch { }
             if (iCount == 0)
             {
-                LiveRegion.say("No related records in " + sTargetTable + "; returning");
+                Say.say("No related records in " + sTargetTable + "; returning");
                 recExitChildClicked(null, null);
                 return;
             }
             try { if (grid != null) grid.Focus(); } catch { }
-            LiveRegion.say(sTargetTable + ": " + Str.plural("related record", iCount));
+            Say.say(sTargetTable + ": " + Str.plural("related record", iCount));
         }
 
         // syncAdoCursorToSelection: belt-and-braces companion to the
@@ -28680,7 +24793,7 @@ namespace DbDo
             try { DbDoLog.write("Exit to Root: activating root window, " + iLevels + " level(s) up."); } catch { }
             try { frmRoot.Activate(); } catch { }
             if (iRow >= 1) frmRoot.restoreRow(iRow);
-            LiveRegion.say("Returned to root (" + iLevels + " level" + (iLevels == 1 ? "" : "s") + ")");
+            Say.say("Returned to root (" + iLevels + " level" + (iLevels == 1 ? "" : "s") + ")");
         }
 
         // =====================================================================
@@ -28728,12 +24841,12 @@ namespace DbDo
         {
             if (db == null || !db.hasRecordset())
             {
-                LiveRegion.sayForced("No database open.");
+                Say.sayForced("No database open.");
                 return;
             }
             if (db.readOnly)
             {
-                LiveRegion.sayForced("Database is read-only. Press Alt+Z to toggle read-only off, then try again.");
+                Say.sayForced("Database is read-only. Press Alt+Z to toggle read-only off, then try again.");
                 return;
             }
             if (db.currentIsView)
@@ -28746,7 +24859,7 @@ namespace DbDo
             string sColumn = currentVirtualColumnName();
             if (string.IsNullOrEmpty(sColumn))
             {
-                LiveRegion.sayForced("No virtual column selected.");
+                Say.sayForced("No virtual column selected.");
                 return;
             }
 
@@ -28784,7 +24897,7 @@ namespace DbDo
                 string sRepl = tbRepl.Text ?? "";
                 if (sFind.Length == 0)
                 {
-                    LiveRegion.sayForced("Find text empty. Nothing to do.");
+                    Say.sayForced("Find text empty. Nothing to do.");
                     return;
                 }
                 bool bCase = (cbCase != null) && cbCase.Checked;
@@ -28865,7 +24978,7 @@ namespace DbDo
                         + iChanged + " of " + iScanned + " cells "
                         + (bDry ? "would be" : "were")
                         + " changed.";
-                    LiveRegion.sayForced(sResult);
+                    Say.sayForced(sResult);
                     MessageBox.Show(this, sResult, sTitle,
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
@@ -28971,7 +25084,7 @@ namespace DbDo
             if (db == null || !db.hasRecordset() || db.eof || db.bof) return;
             if (blockIfReadOnly(sTitle)) return;
             if (!db.hasField(sColumn))
-            { LiveRegion.sayForced("This table has no " + sColumn + " column."); return; }
+            { Say.sayForced("This table has no " + sColumn + " column."); return; }
             string sTable = db.currentTable;
             bool bMarkdown = db.isMarkdownColumn(sTable, sColumn);
             bool bMultiline = db.isMultilineColumn(sTable, sColumn);
@@ -28991,7 +25104,7 @@ namespace DbDo
                     db.setFieldValue(sColumn, tb.Text);
                     db.update();
                     invokeRefresh();
-                    LiveRegion.sayForced(sColumn + " saved.");
+                    Say.sayForced(sColumn + " saved.");
                 }
                 catch (Exception ex)
                 {
@@ -29014,7 +25127,7 @@ namespace DbDo
             string sFeature = (sCommandName ?? "").Trim();
             if (sFeature.EndsWith("Toggle", StringComparison.OrdinalIgnoreCase))
                 sFeature = sFeature.Substring(0, sFeature.Length - 6).Trim();
-            LiveRegion.sayForced(bOn ? sFeature + " On" : "No " + sFeature);
+            Say.sayForced(bOn ? sFeature + " On" : "No " + sFeature);
         }
 
         // blockIfReadOnly: the friendly gate every data-changing
@@ -29027,12 +25140,12 @@ namespace DbDo
         {
             if (db == null || db.readOnly == false) return false;
             if (db.readOnlyInnate || db.currentIsView)
-                LiveRegion.sayForced(sCommandName + " is unavailable: this "
+                Say.sayForced(sCommandName + " is unavailable: this "
                     + (db.currentIsView ? "view" : "query result")
                     + " is read-only by nature, and that cannot be changed. "
                     + "Open the underlying table to make changes.");
             else
-                LiveRegion.sayForced(sCommandName + " is unavailable: the read-only "
+                Say.sayForced(sCommandName + " is unavailable: the read-only "
                     + "safeguard is on. Press Alt+Z to turn it off, then try again.");
             return true;
         }
@@ -29064,18 +25177,18 @@ namespace DbDo
         private void nullCurrentCell()
         {
             if (db == null || !db.hasRecordset() || db.eof || db.bof) return;
-            if (db.readOnly) { LiveRegion.sayForced("Database is read-only."); return; }
-            if (db.currentIsView) { LiveRegion.sayForced("Cannot update a view."); return; }
+            if (db.readOnly) { Say.sayForced("Database is read-only."); return; }
+            if (db.currentIsView) { Say.sayForced("Cannot update a view."); return; }
             string sColumn = currentVirtualColumnName();
             if (string.IsNullOrEmpty(sColumn)) return;
             if (!containsIgnoreCase(db.getEditableFieldNames(), sColumn))
-            { LiveRegion.sayForced(sColumn + " is program-maintained."); return; }
+            { Say.sayForced(sColumn + " is program-maintained."); return; }
             try
             {
                 db.setFieldNull(sColumn);
                 db.update();
                 invokeRefresh();
-                LiveRegion.sayForced(sColumn + ": null");
+                Say.sayForced(sColumn + ": null");
             }
             catch (Exception ex)
             {
@@ -29231,13 +25344,13 @@ namespace DbDo
             {
                 string sMsg = "Dropped (not column names of this table): "
                     + string.Join(", ", lDropped.ToArray());
-                LiveRegion.say(sMsg);
+                Say.say(sMsg);
                 MessageBox.Show(this, sMsg, "Select Column",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
-                LiveRegion.say("Visible columns updated");
+                Say.say("Visible columns updated");
             }
         }
 
@@ -29839,7 +25952,7 @@ namespace DbDo
                 {
                     File.WriteAllText(dlg.FileName, sb.ToString(), new UTF8Encoding(false));
                     try { DbDoLog.write("Generate from Grid: wrote Markdown table " + dlg.FileName + " (" + iMax + " rows)."); } catch { }
-                    LiveRegion.say("Saved Markdown table with " + iMax + " rows; opening in your editor.");
+                    Say.say("Saved Markdown table with " + iMax + " rows; opening in your editor.");
                     try { System.Diagnostics.Process.Start(dlg.FileName); } catch { }
                 }
                 catch (Exception ex)
@@ -29867,7 +25980,7 @@ namespace DbDo
                     ? db.exportFrequencyChart(sColumn, sDest)
                     : db.exportColumnChart(sColumn, sKind, sDest);
                 if (iN == 0) { showInfoDialog("Generate from Grid", "No usable data to chart in column \"" + sColumn + "\"."); return; }
-                LiveRegion.say("Chart saved (" + sKind + ", " + iN + "); opening in Excel.");
+                Say.say("Chart saved (" + sKind + ", " + iN + "); opening in Excel.");
                 try { System.Diagnostics.Process.Start(sDest); } catch { }
             }
             catch (Exception ex) { showExcelFailure("chart", ex); }
@@ -29888,7 +26001,7 @@ namespace DbDo
             {
                 int iN = db.exportScatterChart(sColX, sColY, sDest);
                 if (iN == 0) { showInfoDialog("Generate from Grid", "No rows where both \"" + sColX + "\" and \"" + sColY + "\" are numeric."); return; }
-                LiveRegion.say("Scatter saved (" + iN + " points); opening in Excel.");
+                Say.say("Scatter saved (" + iN + " points); opening in Excel.");
                 try { System.Diagnostics.Process.Start(sDest); } catch { }
             }
             catch (Exception ex) { showExcelFailure("scatter chart", ex); }
@@ -29962,7 +26075,7 @@ namespace DbDo
             try
             {
                 int iDistinct = db.exportFrequencyChart(sColumn, sDest);
-                LiveRegion.say("Chart saved with " + iDistinct + " distinct values; opening in Excel");
+                Say.say("Chart saved with " + iDistinct + " distinct values; opening in Excel");
                 try { System.Diagnostics.Process.Start(sDest); } catch { }
             }
             catch (Exception ex)
@@ -30043,7 +26156,7 @@ namespace DbDo
                 if (frmQuery != null && frmQuery.Db != null)
                 {
                     bool bRO = frmQuery.Db.readOnlyInnate;
-                    LiveRegion.sayForced("Query opened: " + frmQuery.Db.recordCount
+                    Say.sayForced("Query opened: " + frmQuery.Db.recordCount
                         + " row" + (frmQuery.Db.recordCount == 1 ? "" : "s")
                         + (bRO ? ". Read-only by nature."
                                : ". Editable (single-table result)."));
@@ -30060,7 +26173,7 @@ namespace DbDo
                     // Action statement (INSERT / UPDATE / DELETE / DDL):
                     // no rows returned, just a count. Speak it and
                     // refresh so any change to the current table shows.
-                    LiveRegion.sayForced(iAffected + " record"
+                    Say.sayForced(iAffected + " record"
                         + (iAffected == 1 ? "" : "s") + " affected.");
                     invokeRefresh();
                 }
@@ -30185,12 +26298,12 @@ namespace DbDo
         {
             const int c_iFacetMax = 1000;
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { LiveRegion.say("No record selected"); return; }
+            { Say.say("No record selected"); return; }
             string sTable = db.currentTable;
             if (string.IsNullOrEmpty(sTable))
-            { LiveRegion.say("Facet Column works on a table, not a custom query"); return; }
+            { Say.say("Facet Column works on a table, not a custom query"); return; }
             List<string> lFields = db.getFieldNames();
-            if (lFields == null || lFields.Count == 0) { LiveRegion.say("No columns"); return; }
+            if (lFields == null || lFields.Count == 0) { Say.say("No columns"); return; }
             string sField = virtCurrentColumnName();
             if (string.IsNullOrEmpty(sField) || !lFields.Contains(sField)) sField = lFields[0];
 
@@ -30209,7 +26322,7 @@ namespace DbDo
                 ErrorDialog.show(this, "Facet Column", "Could not read column values: " + ex.Message);
                 return;
             }
-            if (lRows.Count == 0) { LiveRegion.say("No values in " + sField); return; }
+            if (lRows.Count == 0) { Say.say("No values in " + sField); return; }
 
             // Build the picker: "value (count)" lines, with a map back
             // to the raw value. GROUP BY keys are distinct, so the
@@ -30239,7 +26352,7 @@ namespace DbDo
 
             if (sPicked.Length == 0)
             {
-                LiveRegion.say("Filtering to blank or null values is not supported yet");
+                Say.say("Filtering to blank or null values is not supported yet");
                 try { DbDoLog.write("Facet Column: blank/null bucket chosen for " + sField + "; filter not applied."); } catch { }
                 return;
             }
@@ -30260,7 +26373,7 @@ namespace DbDo
             {
                 db.applyFilter(sExpr);
                 invokeRefresh();
-                LiveRegion.say("Filtered " + sField + " to " + sPicked
+                Say.say("Filtered " + sField + " to " + sPicked
                     + ", " + db.recordCount + (db.recordCount == 1 ? " row" : " rows"));
                 try { DbDoLog.write("Facet applied: " + sExpr + " -> " + db.recordCount + " rows."); } catch { }
             }
@@ -30403,7 +26516,7 @@ namespace DbDo
                 psi.UseShellExecute = true;
                 psi.WorkingDirectory = sExeDir ?? ".";
                 System.Diagnostics.Process.Start(psi);
-                LiveRegion.say(sDbPath.Length > 0
+                Say.say(sDbPath.Length > 0
                     ? "Sqlean console opened read only on the current database."
                     : "Sqlean console opened.");
                 try { DbDoLog.write("Sqlean Console launched: " + sShell + " " + sDbArg); } catch { }
@@ -30560,7 +26673,7 @@ namespace DbDo
                         if (sNew != sOld) { writeIniValue(sTarget, "Validation", sType, sNew); iSaved++; }
                     }
                     try { IniValidation.reset(); } catch { }
-                    LiveRegion.say("Regex settings saved");
+                    Say.say("Regex settings saved");
                     DbDoLog.write("Edit-Settings regex: " + iSaved + " saved to " + sTarget);
                     MessageBox.Show(this, iSaved + " pattern(s) saved to:\n" + sTarget,
                         "Field Regex by Type", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -30607,7 +26720,7 @@ namespace DbDo
                         string sOld = readIniValue(sTarget, "ConnectStrings", sExt, "");
                         if (sNew != sOld) { writeIniValue(sTarget, "ConnectStrings", sExt, sNew); iSaved++; }
                     }
-                    LiveRegion.say("Connection settings saved");
+                    Say.say("Connection settings saved");
                     DbDoLog.write("Edit-Settings connstrings: " + iSaved + " saved to " + sTarget);
                     MessageBox.Show(this, iSaved + " template(s) saved to:\n" + sTarget
                         + "\n\nChanges take effect the next time a file of that type is opened.",
@@ -30687,7 +26800,7 @@ namespace DbDo
                     writeIniValue(sDbInix, "Table:" + sTable, "SelectFields", sSelect);
                     writeIniValue(sDbInix, "Table:" + sTable, "OrderFields", sSort);
                     writeIniValue(sDbInix, "Table:" + sTable, "WhereFilter", sFilter);
-                    LiveRegion.say("View settings saved");
+                    Say.say("View settings saved");
                     DbDoLog.write("Edit-Settings view: [Table:" + sTable + "] saved to " + sDbInix);
                     MessageBox.Show(this, "View saved to:\n" + sDbInix,
                         "This Table's View", MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -30759,7 +26872,7 @@ namespace DbDo
                     string.Join(", ", splitFieldList(sCurPrm).ToArray()), StringComparison.OrdinalIgnoreCase);
                 if (bLookSame && bPrmSame)
                 {
-                    LiveRegion.say("No change to look or prm fields.");
+                    Say.say("No change to look or prm fields.");
                     return;
                 }
 
@@ -30789,7 +26902,7 @@ namespace DbDo
                 DbDoLog.write("Look/Prm rebuilt for [Table:" + sTable + "]; maps re-pointed=" + iMaps);
                 string sDone = "Rebuilt '" + sTable + "'.";
                 if (iMaps > 0) sDone += " " + iMaps + " map reference" + (iMaps == 1 ? "" : "s") + " updated.";
-                LiveRegion.sayForced(sDone);
+                Say.sayForced(sDone);
                 MessageBox.Show(this, sDone, "Rebuild Table", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             finally { dlg.Dispose(); }
@@ -30904,8 +27017,8 @@ namespace DbDo
                     writeIniValue(sUserIni, "Options", "CommandEcho", sNewEcho);
                     writeIniValue(sUserIni, "General", "ExtraSpeech", sNewExtra);
                     invalidateCommandEchoCache();
-                    LiveRegion.bExtraSpeechEnabled = cbExtra.Checked;
-                    if (miHelpExtraSpeech != null) miHelpExtraSpeech.Checked = LiveRegion.bExtraSpeechEnabled;
+                    Say.bExtraSpeechEnabled = cbExtra.Checked;
+                    if (miHelpExtraSpeech != null) miHelpExtraSpeech.Checked = Say.bExtraSpeechEnabled;
                     if (miHelpCommandEcho != null) miHelpCommandEcho.Checked = isCommandEchoOn();
                     // Read-Only delta: if the dialog setting differs
                     // from the current connection state, reopen the
@@ -30914,7 +27027,7 @@ namespace DbDo
                     {
                         toggleReadOnlyClicked(null, EventArgs.Empty);
                     }
-                    LiveRegion.say("Configuration saved");
+                    Say.say("Configuration saved");
                     DbDoLog.write("Edit-Settings saved: uiMode=" + sNewUiMode
                         + "; commandEcho=" + sNewEcho
                         + "; extraSpeech=" + sNewExtra
@@ -31045,7 +27158,7 @@ namespace DbDo
                 // Invalidate the cache so subsequent Edit Record /
                 // Edit Cell dialogs pick up the new regexes.
                 try { IniValidation.reset(); } catch { }
-                LiveRegion.say("Field validation saved");
+                Say.say("Field validation saved");
                 if (lWarnings.Count > 0)
                 {
                     StringBuilder sbWarn = new StringBuilder();
@@ -31124,7 +27237,7 @@ namespace DbDo
             try
             {
                 System.Diagnostics.Process.Start(sUserIni);
-                LiveRegion.say("Opened DbDo.inix for editing");
+                Say.say("Opened DbDo.inix for editing");
                 DbDoLog.write("Edit-Settings opened: " + sUserIni);
             }
             catch
@@ -31187,13 +27300,13 @@ namespace DbDo
                 {
                     // explorer.exe /select,"path" highlights the file
                     System.Diagnostics.Process.Start("explorer.exe", "/select,\"" + sPath + "\"");
-                    LiveRegion.say("Opened folder: " + Path.GetDirectoryName(sPath));
+                    Say.say("Opened folder: " + Path.GetDirectoryName(sPath));
                 }
                 else
                 {
                     string sHome = Environment.GetFolderPath(Environment.SpecialFolder.UserProfile);
                     System.Diagnostics.Process.Start("explorer.exe", sHome);
-                    LiveRegion.say("No database open; opened user folder");
+                    Say.say("No database open; opened user folder");
                 }
             }
             catch (Exception ex)
@@ -31224,9 +27337,9 @@ namespace DbDo
                 System.Diagnostics.Process.Start(psi);
 
                 if (!string.IsNullOrEmpty(sPath) && File.Exists(sPath))
-                    LiveRegion.say("Command prompt at " + sDir);
+                    Say.say("Command prompt at " + sDir);
                 else
-                    LiveRegion.say("No database open; command prompt at user folder");
+                    Say.say("No database open; command prompt at user folder");
             }
             catch (Exception ex)
             {
@@ -31377,7 +27490,7 @@ namespace DbDo
         private void helpStatusClicked(object sender, EventArgs evArgs)
         {
             string sMsg = buildStatusMessage();
-            LiveRegion.say(sMsg);
+            Say.say(sMsg);
             // Also dump to the StatusStrip label so the user can
             // tab-navigate to it (or use the screen reader's "say
             // status bar" hotkey -- JAWS Insert+PageDown) and have
@@ -31431,8 +27544,8 @@ namespace DbDo
         {
             // Use sayForced: Test-Reader's whole purpose is to verify
             // speech, so it must speak even when Extra-Speech is off.
-            LiveRegion.sayForced("Speech path test. If you hear this, the speech pipeline is working.");
-            string sDiag = LiveRegion.speechDiagnostic();
+            Say.sayForced("Speech path test. If you hear this, the speech pipeline is working.");
+            string sDiag = Say.speechDiagnostic();
             MessageBox.Show(this, sDiag, "Test Reader",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -31446,20 +27559,20 @@ namespace DbDo
         // persisted in DbDo.inix [General] extraSpeech.
         private void helpExtraSpeechClicked(object sender, EventArgs evArgs)
         {
-            LiveRegion.bExtraSpeechEnabled = !LiveRegion.bExtraSpeechEnabled;
-            miHelpExtraSpeech.Checked = LiveRegion.bExtraSpeechEnabled;
+            Say.bExtraSpeechEnabled = !Say.bExtraSpeechEnabled;
+            miHelpExtraSpeech.Checked = Say.bExtraSpeechEnabled;
             // Persist to the per-user file startup reads (configIniPath),
             // not the exe-dir DbDo.inix, so the choice survives a restart.
             string sUserIni = configIniPath();
             if (!string.IsNullOrEmpty(sUserIni))
             {
                 ensureConfigIniExists(sUserIni);
-                try { writeIniValue(sUserIni, "General", "ExtraSpeech", LiveRegion.bExtraSpeechEnabled ? "Y" : "N"); }
+                try { writeIniValue(sUserIni, "General", "ExtraSpeech", Say.bExtraSpeechEnabled ? "Y" : "N"); }
                 catch { /* best-effort persist; the runtime state is the source of truth */ }
             }
             // Force-speak the new state so the user hears confirmation
             // even when they just turned speech off.
-            sayToggleState("Extra Speech Toggle", LiveRegion.bExtraSpeechEnabled);
+            sayToggleState("Extra Speech Toggle", Say.bExtraSpeechEnabled);
         }
 
         // helpCommandEchoClicked: toggle whether DbDo speaks the
@@ -31509,12 +27622,12 @@ namespace DbDo
         {
             if (db == null || !db.isOpen())
             {
-                LiveRegion.sayForced("No database open. Use Open Database first.");
+                Say.sayForced("No database open. Use Open Database first.");
                 return;
             }
             if (db.readOnlyInnate)
             {
-                LiveRegion.sayForced("This recordset is read-only by nature "
+                Say.sayForced("This recordset is read-only by nature "
                     + "(a view or a query result that cannot be updated); "
                     + "the read-only setting cannot be changed here. "
                     + "Open the underlying table to make changes.");
@@ -31830,7 +27943,7 @@ namespace DbDo
             catch (Exception ex) { sResult = "ERROR: " + ex.Message; }
             if (string.IsNullOrEmpty(sResult)) sResult = "(no result)";
 
-            LiveRegion.say(sResult);
+            Say.say(sResult);
             MessageBox.Show(this, sExpr + " =\n\n" + sResult, "Evaluate Expression",
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
@@ -31891,7 +28004,7 @@ namespace DbDo
             try
             {
                 System.Diagnostics.Process.Start(sUrl);
-                LiveRegion.say("Opened DbDo on GitHub");
+                Say.say("Opened DbDo on GitHub");
                 DbDoLog.write("Open-WebSite: " + sUrl);
             }
             catch (Exception ex)
@@ -31907,7 +28020,7 @@ namespace DbDo
             try
             {
                 System.Diagnostics.Process.Start(sUrl);
-                LiveRegion.say("Opened the DbDo issue form on GitHub. If it does not recognize you, sign in to GitHub to post.");
+                Say.say("Opened the DbDo issue form on GitHub. If it does not recognize you, sign in to GitHub to post.");
                 DbDoLog.write("File-GitHub-Issue: " + sUrl);
             }
             catch (Exception ex)
@@ -32194,7 +28307,7 @@ namespace DbDo
 
         // =======================================================================
         // CLI implementations of the speech-only and new action commands.
-        // The GUI variants live on DbDoForm and push through LiveRegion;
+        // The GUI variants live on DbDoForm and push through Say;
         // these CLI variants print the same content to the console.
         // =======================================================================
 
@@ -33504,7 +29617,7 @@ namespace DbDo
                 case "show-schema":      cmdShowSchema(sRest);     break;
                 case "show-status":      printRowSummary();        break;
                 // Speech-only commands. Their GUI handlers push
-                // through LiveRegion; the CLI equivalents print to
+                // through Say; the CLI equivalents print to
                 // Console since there's no live region in a console.
                 case "say-status":       cmdSayStatus();           break;
                 case "say-path":         cmdSayPath();             break;
@@ -36857,12 +32970,8 @@ namespace DbDo
             string sLatestTag;
             try
             {
-                // .NET 4.8 defaults to a mix of SSL3/TLS1.0 on some
-                // older boxes; GitHub requires TLS 1.2 or newer. Set
-                // explicitly, including TLS 1.3 in case it's available.
-                System.Net.ServicePointManager.SecurityProtocol |=
-                    (System.Net.SecurityProtocolType)3072   // Tls12
-                    | (System.Net.SecurityProtocolType)12288; // Tls13 (if present)
+                // TLS is configured by Homer.Web (it enables TLS 1.2/1.3 once), so the
+                // hand-rolled ServicePointManager setup that used to sit here is gone.
                 sLatestTag = fetchLatestTag();
             }
             catch (Exception ex)
@@ -37012,23 +33121,15 @@ namespace DbDo
         // no credentials, returns JSON.
         private static string fetchLatestTagViaApi()
         {
+            // Homer.Web supplies the modern TLS handshake and the User-Agent that the
+            // GitHub API requires, and follows redirects -- the work this method used to
+            // do by hand with WebClient and ServicePointManager.
             const string sApiUrl = "https://api.github.com/repos/JamalMazrui/DbDo/releases/latest";
-            string sBody;
-            using (System.Net.WebClient wc = new System.Net.WebClient())
-            {
-                wc.Headers.Add("User-Agent", "DbDo-ElevateVersion/" + BuildInfo.VersionString);
-                wc.Headers.Add("Accept", "application/vnd.github+json");
-                sBody = wc.DownloadString(sApiUrl);
-            }
-            // The JSON payload has many fields. The tag is the first
-            // "tag_name":"..." occurrence. A bounded regex is safe
-            // here because the field name is unique in this response
-            // shape and the value contains no escape sequences worth
-            // worrying about (version tags are ASCII).
-            System.Text.RegularExpressions.Match match = System.Text.RegularExpressions.Regex.Match(
-                sBody ?? "",
-                "\"tag_name\"\\s*:\\s*\"([^\"]+)\"");
-            return match.Success ? match.Groups[1].Value : "";
+            string sFinalUrl;
+            string sBody = Homer.Web.getPage(sApiUrl, out sFinalUrl);
+            if (string.IsNullOrEmpty(sBody)) return "";
+            System.Text.RegularExpressions.Match match = System.Text.RegularExpressions.Regex.Match(sBody, "\"tag_name\"\\s*:\\s*\"([^\"]+)\"");
+            return match.Success ? match.Groups[1].Value.Trim() : "";
         }
 
         // fetchLatestTagViaScrape: the HTML-scrape fallback. The url
@@ -37048,78 +33149,16 @@ namespace DbDo
         // response URI (WebClient or HttpWebResponse.ResponseUri).
         private static string fetchLatestTagViaScrape()
         {
+            // The releases/latest page redirects to the tagged release, so the tag is in
+            // the FINAL url.  Homer.Web.getPage reports that final url, which is exactly
+            // what the hand-rolled HttpWebRequest redirect dance was for.
             const string sUrl = "https://github.com/JamalMazrui/DbDo/releases/latest";
             string sFinalUrl = "";
-            try
-            {
-                System.Net.HttpWebRequest req = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(sUrl);
-                req.UserAgent = "DbDo-ElevateVersion/" + BuildInfo.VersionString;
-                req.AllowAutoRedirect = false;
-                req.Method = "GET";
-                req.Timeout = 15000;
-                System.Net.HttpWebResponse resp = null;
-                try
-                {
-                    resp = (System.Net.HttpWebResponse)req.GetResponse();
-                }
-                catch (System.Net.WebException webEx)
-                {
-                    // Some HttpWebRequest implementations throw on 3xx
-                    // when AllowAutoRedirect is false; the response is
-                    // still on the exception.
-                    resp = webEx.Response as System.Net.HttpWebResponse;
-                    if (resp == null) throw;
-                }
-                using (resp)
-                {
-                    int iStatus = (int)resp.StatusCode;
-                    if (iStatus >= 300 && iStatus < 400)
-                    {
-                        sFinalUrl = resp.Headers["Location"] ?? "";
-                    }
-                    else
-                    {
-                        // No redirect; the request may have been
-                        // followed transparently, in which case
-                        // ResponseUri is the resolved url.
-                        sFinalUrl = resp.ResponseUri != null ? resp.ResponseUri.AbsoluteUri : "";
-                    }
-                }
-            }
-            catch
-            {
-                // Last resort: ask WebClient to do the GET with
-                // auto-redirect on and read its ResponseUri.
-                try
-                {
-                    using (System.Net.WebClient wc = new System.Net.WebClient())
-                    {
-                        wc.Headers.Add("User-Agent", "DbDo-ElevateVersion/" + BuildInfo.VersionString);
-                        wc.DownloadString(sUrl);
-                        // WebClient doesn't expose ResponseUri directly,
-                        // but for our use we accept the scrape failed
-                        // silently if the HttpWebRequest path didn't work.
-                    }
-                }
-                catch { /* both paths failed */ }
-            }
+            Homer.Web.getPage(sUrl, out sFinalUrl);
             if (string.IsNullOrEmpty(sFinalUrl)) return "";
-            // Extract the last path segment from a url like
-            // https://github.com/JamalMazrui/DbDo/releases/tag/v1.0.29
-            try
-            {
-                Uri uri = new Uri(sFinalUrl);
-                string sPath = uri.AbsolutePath;
-                int iSlash = sPath.LastIndexOf('/');
-                if (iSlash < 0 || iSlash == sPath.Length - 1) return "";
-                string sTag = sPath.Substring(iSlash + 1);
-                // Sanity check: must not still be "latest" (would mean
-                // GitHub didn't redirect, perhaps because no release
-                // exists yet for this repo).
-                if (sTag.Equals("latest", StringComparison.OrdinalIgnoreCase)) return "";
-                return sTag;
-            }
-            catch { return ""; }
+            int iSlash = sFinalUrl.LastIndexOf('/');
+            if (iSlash < 0 || iSlash == sFinalUrl.Length - 1) return "";
+            return sFinalUrl.Substring(iSlash + 1).Trim();
         }
 
 
@@ -37129,11 +33168,12 @@ namespace DbDo
         // resolves to the most recent release's asset of that name.
         private static void downloadInstaller(string sLocalPath)
         {
+            // Homer.Web.downloadTo writes to the exact path given, over HTTPS with modern
+            // TLS.  Asset names on GitHub are case-sensitive and must match the installer's
+            // OutputBaseFilename.
             const string sDownloadUrl = "https://github.com/JamalMazrui/DbDo/releases/latest/download/DbDo_setup.exe";
-            using (System.Net.WebClient wc = new System.Net.WebClient())
-            {
-                wc.Headers.Add("User-Agent", "DbDo-ElevateVersion/" + BuildInfo.VersionString);
-                wc.DownloadFile(sDownloadUrl, sLocalPath);
+            if (!Homer.Web.downloadTo(sDownloadUrl, sLocalPath, "", "")) {
+                throw new IOException("Could not download the installer from " + sDownloadUrl);
             }
         }
 
