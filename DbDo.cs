@@ -11622,14 +11622,9 @@ namespace DbDo
 
         protected override void WndProc(ref Message msg)
         {
-            // Message IDs from RegisterWindowMessage are in the
-            // 0xC000-0xFFFF range, which fits in int with no sign issues,
-            // but compare as uint to keep the types matched.
-            if ((uint)msg.Msg == SingleInstance.WakeUpMessage)
-            {
-                bringForward();
-                return;
-            }
+            // (The old single-instance wake-up message is gone: WindowsFormsApplicationBase
+            // now handles the handoff, and DbDoApplication.OnStartupNextInstance brings the
+            // window forward.)
             if (msg.Msg == WmHotKey)
             {
                 int iId = (int)msg.WParam;
@@ -33259,115 +33254,229 @@ namespace DbDo
             catch { /* logging never throws to callers */ }
         }
     }
+    // (SingleInstance -- the hand-rolled mutex plus broadcast window message -- has been
+    // retired.  DbDo now uses WindowsFormsApplicationBase, the built-in WinForms
+    // single-instance mechanism, exactly as EdSharp and FileDir do.  See DbDoApplication.)
 
     // =====================================================================
-    // SingleInstance: detect-or-launch helper, used by the desktop-shortcut
-    // hotkey path (DbDo.exe -activate).
+    // DbDoApplication: single-instance support, the built-in WinForms way.
     //
-    // Mechanism:
-    //   1. A named, session-scoped Mutex serves as the "is anyone already
-    //      running?" sentinel. The first instance acquires it and holds it
-    //      for the life of the process; later launches see it taken.
-    //   2. A registered window message ("DbDo.WakeUp") is broadcast by the
-    //      second instance. The first instance's main form has a WndProc
-    //      override that listens for the message and brings itself to the
-    //      foreground when received.
-    //   3. The second instance signals, then exits without creating a form
-    //      or opening a database.
+    // WindowsFormsApplicationBase (Microsoft.VisualBasic.ApplicationServices, part of
+    // the .NET Framework and fully supported for 64-bit apps) is the same mechanism
+    // EdSharp and FileDir use, so all three behave identically:
     //
-    // Why a Mutex plus a broadcast message instead of FindWindow:
-    //   - FindWindow looks up windows by title, which is fragile (the title
-    //     can be hidden, minimized to tray, or differ across configurations).
-    //     A registered window-message ID is system-wide unique to the
-    //     registering string, robust against title changes, and survives
-    //     window-state transitions.
-    //   - The Mutex makes the "am I the first?" decision deterministic
-    //     before we even need to enumerate windows. Without it, there is
-    //     a race window where two near-simultaneous launches would both
-    //     decide to activate-or-launch and both might end up as the
-    //     "first."
+    //   * IsSingleInstance = true makes a SECOND launch hand its command line to the
+    //     FIRST process and exit.  Nothing heavy happens in the second process --
+    //     OnCreateMainForm is called only for the first instance, which is why the
+    //     database opening and the console spawn live there and not in Main.
+    //   * The first process receives OnStartupNextInstance and brings itself forward.
+    //     That is what makes the desktop hotkey (Alt+Control+D) ACTIVATE a running DbDo
+    //     rather than start another one.
     //
-    // Scope:
-    //   The Mutex name is "Local\\DbDo.SingleInstance" (no Global\\
-    //   prefix), which scopes it to the current Windows user session.
-    //   Multiple users on the same machine each get their own first
-    //   instance. Multiple Remote Desktop sessions of the same user
-    //   each get their own first instance.
+    // This replaces the hand-rolled mutex + broadcast-window-message code, which did the
+    // same job with more machinery and only when -activate was passed.
     // =====================================================================
-    public static class SingleInstance
+    public class DbDoApplication : Microsoft.VisualBasic.ApplicationServices.WindowsFormsApplicationBase
     {
-        private const string MutexName = "Local\\DbDo.SingleInstance";
-        public const string WakeUpMessageName = "DbDo.WakeUp";
+        private readonly Program.UiMode startMode;
+        private readonly string sStartFile;
+        private readonly string sStartTable;
+        private readonly bool bStartReadOnly;
+        private DbDoFrame frameMain;
+        private DbDoForm frmFirstChild;
 
-        // The cached message ID, looked up once via RegisterWindowMessage.
-        // Both the broadcaster (second instance) and the listener (first
-        // instance, in DbDoForm.WndProc) call RegisterWindowMessage with
-        // the same string and get back the same numeric ID. Windows
-        // guarantees this; the ID is unique per logon session.
-        public static uint WakeUpMessage { get { return registerOnce(); } }
-        private static uint iCachedMessage;
-        private static uint registerOnce()
+        public DbDoApplication(Program.UiMode inputModeIn, string sFileIn, string sTableIn, bool bReadOnlyIn)
         {
-            if (iCachedMessage == 0) iCachedMessage = RegisterWindowMessageW(WakeUpMessageName);
-            return iCachedMessage;
+            startMode = inputModeIn;
+            sStartFile = sFileIn;
+            sStartTable = sTableIn;
+            bStartReadOnly = bReadOnlyIn;
+            this.IsSingleInstance = true;
+            // Main has already called Application.EnableVisualStyles().
+            this.EnableVisualStyles = false;
+            this.ShutdownStyle = Microsoft.VisualBasic.ApplicationServices.ShutdownMode.AfterMainFormCloses;
         }
 
-        // Keep the mutex alive for the process lifetime by storing it in a
-        // static field. Without this reference, the GC may collect it
-        // before the program exits, which would release the mutex early.
-        private static System.Threading.Mutex mutex;
-
-        [DllImport("user32.dll", CharSet = CharSet.Unicode, SetLastError = true)]
-        private static extern uint RegisterWindowMessageW(string sName);
-
-        [DllImport("user32.dll", SetLastError = true)]
-        private static extern bool PostMessage(IntPtr hWnd, uint iMsg, IntPtr wParam, IntPtr lParam);
-
-        // HWND_BROADCAST = (HWND)0xFFFF, sends to every top-level window.
-        // This is how the second instance reaches the first without
-        // knowing the first's window handle.
-        private static readonly IntPtr HWND_BROADCAST = new IntPtr(0xFFFF);
-
-        // Try to acquire the single-instance mutex. Returns true if this
-        // process is the first instance (and now owns the mutex). The
-        // mutex stays owned for the rest of the process lifetime; no
-        // matching release call is needed.
-        public static bool tryAcquire()
+        // Called ONLY in the first instance.  Everything that used to sit in Main between
+        // "new DbDoFrame()" and "Application.Run(frame)" happens here, unchanged.
+        protected override void OnCreateMainForm()
         {
+            Program.UiMode inputMode = startMode;
+            string sFile = sStartFile;
+            string sTable = sStartTable;
+            bool bReadOnly = bStartReadOnly;
+
+                    DbDoFrame frame = new DbDoFrame();
+                    DbDoForm frm = new DbDoForm(inputMode);
+                    frm.MdiParent = frame;
+                    DbDoLog.write("Frame and first child window created (uiMode=" + inputMode + ").");
+
+                    if (!string.IsNullOrEmpty(sFile))
+                    {
+                        try
+                        {
+                            // A .inix record file is not an ADO provider type;
+                            // convert it to a SQLite database alongside the
+                            // source (<name>.inix.db) and open that, so a
+                            // command-line or double-click launch of a .inix
+                            // works like File > Open does.
+                            if (string.Equals(Path.GetExtension(sFile), ".inix", StringComparison.OrdinalIgnoreCase))
+                            {
+                                DbDoLog.write("Converting inix record file: " + sFile);
+                                sFile = frm.importInixRecordFile(sFile);
+                                sTable = null;
+                            }
+                            DbDoLog.write("Opening database: " + sFile + (sTable != null ? " (table: " + sTable + ")" : "") + (bReadOnly ? " [read-only]" : ""));
+                            frm.Db.openDatabase(sFile, sTable, bReadOnly);
+                            if (!frm.Db.hasRecordset())
+                            {
+                                // Prefer base tables; fall back to views.
+                                List<string> lT = frm.Db.getTableNames();
+                                if (lT.Count == 0) lT = frm.Db.getViewNames();
+                                if (lT.Count > 0)
+                                {
+                                    frm.Db.selectTable(lT[0]);
+                                    DbDoLog.write("Auto-selected: " + lT[0]);
+                                }
+                            }
+                            frm.invokeRefresh();
+                            DbDoLog.write("Database opened successfully. Connect string: " + frm.Db.connectString);
+                        }
+                        catch (Exception ex)
+                        {
+                            DbDoLog.write("Open failed: " + ex.Message);
+                            ErrorDialog.show(frm, "Open Database",
+                                "Could not open " + sFile + ":\n\n" + ex.Message);
+                        }
+                    }
+                    else
+                    {
+                        // No command-line file specified: try to restore the
+                        // last database and table from DbDo.inix's [Session]
+                        // section. Saved on Open-Database, Select-Table, and
+                        // Close-Database. If the saved path no longer exists
+                        // (file moved or deleted), the restore is skipped
+                        // silently; the user starts with no database open.
+                        string sSavedDb = DbDoForm.IniSession.lastDatabase;
+                        string sSavedTbl = DbDoForm.IniSession.lastTable;
+                        bool bRestoredSomething = false;
+                        if (!string.IsNullOrEmpty(sSavedDb) && System.IO.File.Exists(sSavedDb))
+                        {
+                            try
+                            {
+                                DbDoLog.write("Restoring last session: " + sSavedDb
+                                    + (string.IsNullOrEmpty(sSavedTbl) ? "" : " (table: " + sSavedTbl + ")"));
+                                frm.Db.openDatabase(sSavedDb,
+                                    string.IsNullOrEmpty(sSavedTbl) ? null : sSavedTbl,
+                                    bReadOnly);
+                                if (!frm.Db.hasRecordset())
+                                {
+                                    List<string> lT = frm.Db.getTableNames();
+                                    if (lT.Count == 0) lT = frm.Db.getViewNames();
+                                    if (lT.Count > 0) frm.Db.selectTable(lT[0]);
+                                }
+                                frm.invokeRefresh();
+                                DbDoLog.write("Session restored.");
+                                bRestoredSomething = true;
+                            }
+                            catch (Exception ex)
+                            {
+                                DbDoLog.write("Session restore failed: " + ex.Message);
+                                // Don't show a dialog -- the user didn't ask
+                                // to open this file; we did. Just log and
+                                // start empty.
+                            }
+                        }
+
+                        // First-run fallback: if the ini has no [Session]
+                        // lastDatabase entry (the file has never been written
+                        // to disk, or a fresh install replaced the install
+                        // folder), open {app}\NFB2026Convention.db so the user
+                        // has the showcase convention database to explore on
+                        // first launch. Silent failure: if the file is missing
+                        // or unreadable, start with an empty form just as before.
+                        if (!bRestoredSomething && string.IsNullOrEmpty(sSavedDb))
+                        {
+                            try
+                            {
+                                // The showcase database is seeded into the
+                                // user's writable Samples folder as
+                                // %APPDATA%\DbDo\Samples\NFB2026Convention\
+                                // NFB2026Convention.db; getSampleDir() performs
+                                // that seed on first access and returns the
+                                // folder. Opening the seeded copy -- rather than
+                                // the read-only one two levels deep under the
+                                // install folder -- lets the user edit and save
+                                // it. (The previous code looked for the file in
+                                // the install root, where it never exists, so
+                                // the showcase database never opened.)
+                                string sSampleDir = ScriptHelper.getSampleDir();
+                                string sDefaultSample = System.IO.Path.Combine(
+                                    sSampleDir, "NFB2026Convention", "NFB2026Convention.db");
+                                if (System.IO.File.Exists(sDefaultSample))
+                                {
+                                    DbDoLog.write("First-run default: opening " + sDefaultSample);
+                                    frm.Db.openDatabase(sDefaultSample, "events", bReadOnly);
+                                    if (!frm.Db.hasRecordset())
+                                    {
+                                        List<string> lT = frm.Db.getTableNames();
+                                        if (lT.Count == 0) lT = frm.Db.getViewNames();
+                                        if (lT.Count > 0) frm.Db.selectTable(lT[0]);
+                                    }
+                                    frm.invokeRefresh();
+                                    DbDoLog.write("First-run default database opened.");
+                                }
+                            }
+                            catch (Exception ex)
+                            {
+                                DbDoLog.write("First-run default-open failed: " + ex.Message);
+                            }
+                        }
+                    }
+
+                    DbDoLog.write("Entering Application.Run message loop.");
+                    // uiMode=both: spawn the dot-prompt console window in
+                    // addition to the GUI form. The console runs on a worker
+                    // thread that owns its AllocConsole-allocated console;
+                    // the GUI runs on the main message loop. Both share
+                    // frm.Db (the single DbDoManager). User can Alt+Tab
+                    // between the two windows.
+                    if (inputMode == Program.UiMode.Both)
+                    {
+                        DbDoLog.write("uiMode=both: spawning dot-prompt console window.");
+                        DotPromptHost.enter(frm);
+                    }
+                    frame.Load += delegate(object sender, EventArgs evX) { frm.Show(); };
+
+            frameMain = frame;
+            frmFirstChild = frm;
+            this.MainForm = frame;
+        }
+
+        // A second launch (for example the desktop hotkey while DbDo is already running)
+        // arrives here in the FIRST process.  Bring the window forward, and open whatever
+        // was on the second command line, so "DbDo somefile.db" on a running instance opens
+        // that file rather than starting a rival process.
+        protected override void OnStartupNextInstance(
+            Microsoft.VisualBasic.ApplicationServices.StartupNextInstanceEventArgs e)
+        {
+            base.OnStartupNextInstance(e);
+            e.BringToForeground = true;
             try
             {
-                bool bCreatedNew;
-                mutex = new System.Threading.Mutex(true, MutexName, out bCreatedNew);
-                if (!bCreatedNew)
+                if (frameMain != null)
                 {
-                    // Another instance owns the mutex. Drop our reference
-                    // so it doesn't linger on the GC's heap.
-                    try { mutex.Close(); } catch { }
-                    mutex = null;
-                    return false;
+                    if (frameMain.WindowState == FormWindowState.Minimized)
+                        frameMain.WindowState = FormWindowState.Normal;
+                    frameMain.Activate();
+                    frameMain.BringToFront();
                 }
-                return true;
+                DbDoLog.write("Second launch handed off; existing instance brought forward.");
             }
-            catch
+            catch (Exception ex)
             {
-                // If anything goes wrong with the mutex (e.g., the named
-                // kernel object is in a weird state), fall back to
-                // "behave as first instance." Worst case: two instances
-                // open. Better than refusing to launch at all.
-                return true;
+                try { DbDoLog.write("Bring-forward on next instance failed: " + ex.Message); } catch { }
             }
-        }
-
-        // Send the wake-up message to all top-level windows. The first
-        // instance's main form will recognize it and bring itself forward;
-        // every other window ignores it. Returns true on success.
-        public static bool wakeUpFirstInstance()
-        {
-            try
-            {
-                return PostMessage(HWND_BROADCAST, WakeUpMessage, IntPtr.Zero, IntPtr.Zero);
-            }
-            catch { return false; }
         }
     }
 
@@ -33710,31 +33819,11 @@ namespace DbDo
                 resolveFileAndTable(lPositional, ref sFile, ref sTable);
                 DbDoLog.write("uiMode: " + inputMode + (bModeFromCli ? " (from command line)" : " (from DbDo.inix)"));
 
-                // ----- Single-instance handoff: -activate flag.
-                //
-                // The desktop-shortcut hotkey passes -activate. Behavior:
-                //   - If another DbDo instance is already running, send it
-                //     a wake-up message and exit. The first instance brings
-                //     itself to the foreground (handled in DbDoForm.WndProc).
-                //   - If no other instance is running, fall through to a
-                //     normal launch. The first instance acquires the
-                //     single-instance mutex and holds it for its lifetime.
-                //
-                // Without -activate, every launch is independent: starts a
-                // fresh process, doesn't touch the mutex, doesn't interact
-                // with any running instance. This preserves the ability to
-                // open multiple databases in separate processes from the
-                // command line.
-                if (bActivate)
-                {
-                    if (!SingleInstance.tryAcquire())
-                    {
-                        DbDoLog.write("-activate: another instance is running; sending wake-up.");
-                        SingleInstance.wakeUpFirstInstance();
-                        return 0;
-                    }
-                    DbDoLog.write("-activate: no existing instance; launching as first instance.");
-                }
+                // The -activate flag is no longer needed for single-instance handling:
+                // WindowsFormsApplicationBase does the handoff for every launch (see below).
+                // The flag is still accepted so existing shortcuts keep working; it simply
+                // has nothing left to do.  Logged so the value is used and the intent is clear.
+                if (bActivate) DbDoLog.write("-activate passed; single-instance handoff is automatic now.");
 
                 // ----- CLI-only mode: no GUI form, attach parent console
                 if (inputMode == UiMode.Cli)
@@ -33743,148 +33832,19 @@ namespace DbDo
                 }
 
                 // ----- GUI mode: MDI frame plus the first child window
-                DbDoFrame frame = new DbDoFrame();
-                DbDoForm frm = new DbDoForm(inputMode);
-                frm.MdiParent = frame;
-                DbDoLog.write("Frame and first child window created (uiMode=" + inputMode + ").");
-
-                if (!string.IsNullOrEmpty(sFile))
-                {
-                    try
-                    {
-                        // A .inix record file is not an ADO provider type;
-                        // convert it to a SQLite database alongside the
-                        // source (<name>.inix.db) and open that, so a
-                        // command-line or double-click launch of a .inix
-                        // works like File > Open does.
-                        if (string.Equals(Path.GetExtension(sFile), ".inix", StringComparison.OrdinalIgnoreCase))
-                        {
-                            DbDoLog.write("Converting inix record file: " + sFile);
-                            sFile = frm.importInixRecordFile(sFile);
-                            sTable = null;
-                        }
-                        DbDoLog.write("Opening database: " + sFile + (sTable != null ? " (table: " + sTable + ")" : "") + (bReadOnly ? " [read-only]" : ""));
-                        frm.Db.openDatabase(sFile, sTable, bReadOnly);
-                        if (!frm.Db.hasRecordset())
-                        {
-                            // Prefer base tables; fall back to views.
-                            List<string> lT = frm.Db.getTableNames();
-                            if (lT.Count == 0) lT = frm.Db.getViewNames();
-                            if (lT.Count > 0)
-                            {
-                                frm.Db.selectTable(lT[0]);
-                                DbDoLog.write("Auto-selected: " + lT[0]);
-                            }
-                        }
-                        frm.invokeRefresh();
-                        DbDoLog.write("Database opened successfully. Connect string: " + frm.Db.connectString);
-                    }
-                    catch (Exception ex)
-                    {
-                        DbDoLog.write("Open failed: " + ex.Message);
-                        ErrorDialog.show(frm, "Open Database",
-                            "Could not open " + sFile + ":\n\n" + ex.Message);
-                    }
-                }
-                else
-                {
-                    // No command-line file specified: try to restore the
-                    // last database and table from DbDo.inix's [Session]
-                    // section. Saved on Open-Database, Select-Table, and
-                    // Close-Database. If the saved path no longer exists
-                    // (file moved or deleted), the restore is skipped
-                    // silently; the user starts with no database open.
-                    string sSavedDb = DbDoForm.IniSession.lastDatabase;
-                    string sSavedTbl = DbDoForm.IniSession.lastTable;
-                    bool bRestoredSomething = false;
-                    if (!string.IsNullOrEmpty(sSavedDb) && System.IO.File.Exists(sSavedDb))
-                    {
-                        try
-                        {
-                            DbDoLog.write("Restoring last session: " + sSavedDb
-                                + (string.IsNullOrEmpty(sSavedTbl) ? "" : " (table: " + sSavedTbl + ")"));
-                            frm.Db.openDatabase(sSavedDb,
-                                string.IsNullOrEmpty(sSavedTbl) ? null : sSavedTbl,
-                                bReadOnly);
-                            if (!frm.Db.hasRecordset())
-                            {
-                                List<string> lT = frm.Db.getTableNames();
-                                if (lT.Count == 0) lT = frm.Db.getViewNames();
-                                if (lT.Count > 0) frm.Db.selectTable(lT[0]);
-                            }
-                            frm.invokeRefresh();
-                            DbDoLog.write("Session restored.");
-                            bRestoredSomething = true;
-                        }
-                        catch (Exception ex)
-                        {
-                            DbDoLog.write("Session restore failed: " + ex.Message);
-                            // Don't show a dialog -- the user didn't ask
-                            // to open this file; we did. Just log and
-                            // start empty.
-                        }
-                    }
-
-                    // First-run fallback: if the ini has no [Session]
-                    // lastDatabase entry (the file has never been written
-                    // to disk, or a fresh install replaced the install
-                    // folder), open {app}\NFB2026Convention.db so the user
-                    // has the showcase convention database to explore on
-                    // first launch. Silent failure: if the file is missing
-                    // or unreadable, start with an empty form just as before.
-                    if (!bRestoredSomething && string.IsNullOrEmpty(sSavedDb))
-                    {
-                        try
-                        {
-                            // The showcase database is seeded into the
-                            // user's writable Samples folder as
-                            // %APPDATA%\DbDo\Samples\NFB2026Convention\
-                            // NFB2026Convention.db; getSampleDir() performs
-                            // that seed on first access and returns the
-                            // folder. Opening the seeded copy -- rather than
-                            // the read-only one two levels deep under the
-                            // install folder -- lets the user edit and save
-                            // it. (The previous code looked for the file in
-                            // the install root, where it never exists, so
-                            // the showcase database never opened.)
-                            string sSampleDir = ScriptHelper.getSampleDir();
-                            string sDefaultSample = System.IO.Path.Combine(
-                                sSampleDir, "NFB2026Convention", "NFB2026Convention.db");
-                            if (System.IO.File.Exists(sDefaultSample))
-                            {
-                                DbDoLog.write("First-run default: opening " + sDefaultSample);
-                                frm.Db.openDatabase(sDefaultSample, "events", bReadOnly);
-                                if (!frm.Db.hasRecordset())
-                                {
-                                    List<string> lT = frm.Db.getTableNames();
-                                    if (lT.Count == 0) lT = frm.Db.getViewNames();
-                                    if (lT.Count > 0) frm.Db.selectTable(lT[0]);
-                                }
-                                frm.invokeRefresh();
-                                DbDoLog.write("First-run default database opened.");
-                            }
-                        }
-                        catch (Exception ex)
-                        {
-                            DbDoLog.write("First-run default-open failed: " + ex.Message);
-                        }
-                    }
-                }
-
-                DbDoLog.write("Entering Application.Run message loop.");
-                // uiMode=both: spawn the dot-prompt console window in
-                // addition to the GUI form. The console runs on a worker
-                // thread that owns its AllocConsole-allocated console;
-                // the GUI runs on the main message loop. Both share
-                // frm.Db (the single DbDoManager). User can Alt+Tab
-                // between the two windows.
-                if (inputMode == UiMode.Both)
-                {
-                    DbDoLog.write("uiMode=both: spawning dot-prompt console window.");
-                    DotPromptHost.enter(frm);
-                }
-                frame.Load += delegate(object sender, EventArgs evX) { frm.Show(); };
-                Application.Run(frame);
+                // Single instance, the built-in WinForms way -- the same mechanism EdSharp
+                // and FileDir use.  WindowsFormsApplicationBase with IsSingleInstance = true
+                // makes Windows hand a second launch off to the first process: the second
+                // one exits immediately, and the first gets OnStartupNextInstance, where it
+                // brings itself forward.  That is what makes Alt+Control+D activate a running
+                // DbDo instead of starting another one.
+                //
+                // The form construction lives in OnCreateMainForm (below), NOT here.  That is
+                // deliberate: a second instance must not open the database or spawn a console
+                // before discovering it is a duplicate.  Run() calls OnCreateMainForm only for
+                // the FIRST instance.
+                DbDoApplication application = new DbDoApplication(inputMode, sFile, sTable, bReadOnly);
+                application.Run(aArgs);
                 DbDoLog.write("Application.Run returned. Exiting normally.");
                 return 0;
             }
