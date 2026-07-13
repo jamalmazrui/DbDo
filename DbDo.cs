@@ -77,7 +77,9 @@ namespace DbDo
     // =====================================================================
     public static class BuildInfo
     {
-        public const string VersionString = "1.0.126";
+        // Version is single-sourced from AppVersion in DbDo_setup.iss; buildDbDo.cmd
+        // generates Version.cs (BuildVersion.Version) from it at build time.
+        public const string VersionString = BuildVersion.Version;
     }
 
     // =====================================================================
@@ -171,7 +173,11 @@ namespace DbDo
             lbl.Text = "";
             lbl.AccessibleName = "";
             lbl.AccessibleRole = AccessibleRole.StaticText;
-            lbl.LiveSetting = AutomationLiveSetting.Assertive;
+            // OFF: the announcement is made solely by the UIA Notification event.
+            // Assertive meant any change to the label's Text ALSO raised
+            // LiveRegionChanged, so one message produced two UIA events and a
+            // UIA-listening reader spoke it twice.
+            lbl.LiveSetting = AutomationLiveSetting.Off;
             frm.Controls.Add(lbl);
             // Force the handle to be created so the AccessibleObject
             // is wired up before the first say() call. Without this,
@@ -504,9 +510,10 @@ namespace DbDo
                     lbl.Invoke(new Action<string>(sayViaUia), new object[] { sText });
                     return;
                 }
-                if (lbl.Text == sText) lbl.Text = "";
-                lbl.Text = sText;
-                lbl.AccessibleName = sText;
+                // Raise the UIA Notification and nothing else.  Writing the label's
+                // Text used to be the announcement mechanism, but the label is a live
+                // region, so that write raised LiveRegionChanged too -- two events for
+                // one message, spoken twice.
                 raiseUiaNotification(sText);
             }
             catch { }
@@ -2495,7 +2502,16 @@ namespace DbDo
                     sbValue = new StringBuilder();
                     continue;
                 }
-                // Single-line value.
+                // Single-line value.  Optional quoting, as in traditional .ini (of
+                // which .inix is a superset): if the value begins AND ends with a
+                // double quote, those quotes are delimiters, not content.  Only the
+                // outermost pair is removed and everything between is kept exactly,
+                // including spaces.  So Key="" is an empty string, " dog" keeps its
+                // leading space, and ""dog"" is the literal text "dog".  This runs
+                // AFTER the multi-line tests, so Key="" is an empty single-line value
+                // and does not begin an accumulation.  Unquoted values are unchanged.
+                if (sValTrim.Length >= 2 && sValTrim.StartsWith("\"") && sValTrim.EndsWith("\""))
+                    sValTrim = sValTrim.Substring(1, sValTrim.Length - 2);
                 secCurrent.Pairs.Add(new Pair(sKey, sValTrim));
             }
 
@@ -2646,8 +2662,16 @@ namespace DbDo
                 string sFence = chooseFence(sVal);
                 if (sFence == null)
                 {
-                    // Single-line value, safe to write inline.
-                    w.WriteLine(sKey + " = " + sVal);
+                    // Quote when writing bare would not read back exactly: an empty
+                    // value (bare "Key =" re-reads as the START of a multi-line value),
+                    // a value with a leading/trailing space (lost to trimming), or a
+                    // value that itself begins and ends with a quote.  The reader strips
+                    // exactly one outer pair, so the original text survives.
+                    bool bNeedsQuote = (sVal.Length == 0)
+                        || (sVal != sVal.Trim())
+                        || (sVal.Length >= 2 && sVal.StartsWith("\"") && sVal.EndsWith("\""));
+                    if (bNeedsQuote) w.WriteLine(sKey + " = \"" + sVal + "\"");
+                    else w.WriteLine(sKey + " = " + sVal);
                 }
                 else
                 {
@@ -10392,7 +10416,6 @@ namespace DbDo
             using (Form dlg = new LbcForm())
             {
                 dlg.Text = sTitle;
-                dlg.AccessibleName = sTitle;
                 dlg.StartPosition = FormStartPosition.CenterParent;
                 dlg.ClientSize = new Size(720, 540);
                 dlg.MinimumSize = new Size(400, 300);
@@ -10453,7 +10476,6 @@ namespace DbDo
             using (Form dlg = new LbcForm())
             {
                 dlg.Text = sTitle;
-                dlg.AccessibleName = sTitle;
                 dlg.StartPosition = FormStartPosition.CenterParent;
                 dlg.ClientSize = new Size(720, 540);
                 dlg.MinimumSize = new Size(400, 300);
@@ -10620,7 +10642,6 @@ namespace DbDo
             owner = ownerWindow;
             frm = new LbcForm();
             frm.Text = sTitle ?? "";
-            frm.AccessibleName = sTitle ?? "";
             frm.StartPosition = FormStartPosition.CenterParent;
             frm.FormBorderStyle = FormBorderStyle.Sizable;
             frm.MaximizeBox = false;
@@ -26496,7 +26517,6 @@ namespace DbDo
             using (Form dlg = new LbcForm())
             {
                 dlg.Text = sTitle;
-                dlg.AccessibleName = sTitle;
                 dlg.StartPosition = FormStartPosition.CenterParent;
                 dlg.ClientSize = new Size(420, 140);
                 dlg.FormBorderStyle = FormBorderStyle.FixedDialog;
@@ -29285,7 +29305,6 @@ namespace DbDo
             using (Form dlg = new LbcForm())
             {
                 dlg.Text = sTitle;
-                dlg.AccessibleName = sTitle;
                 dlg.StartPosition = FormStartPosition.CenterParent;
                 dlg.ClientSize = new Size(420, 360);
                 dlg.FormBorderStyle = FormBorderStyle.Sizable;
