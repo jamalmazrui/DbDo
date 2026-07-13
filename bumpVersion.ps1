@@ -1,135 +1,123 @@
 # bumpVersion.ps1
-# Advance the application version so every release is newer than the
-# one before it -- which is what the F11 "Elevate Version" check
-# compares (installed version vs. the latest GitHub release tag).
 #
-# Called automatically by buildDbDo.cmd on every build. You never run
-# it by hand and never pass arguments; just build.
+# Assign the next version number to this project, at BUILD time.
 #
-# Where the number comes from (and why it is reliable):
-#   The next version is derived from your GIT RELEASE TAGS, not from a
-#   file. buildDbDo unarchives may overwrite DbDo.cs (and its version
-#   literal) from a delivered zip, but nothing overwrites your tags, so
-#   the release history is the trustworthy source. Rule:
-#     * latest release tag exists  -> next = that tag with patch + 1
-#     * you set BuildInfo.VersionString HIGHER than the latest tag
-#       (a deliberate minor/major bump) -> next = that literal
-#     * no tags yet (first release) -> next = the literal as-is
-#   Rebuilding within the same release cycle is idempotent: until you
-#   actually tag the release, the number stays put, so builds do not
-#   inflate the version.
+# Why this exists
+# ---------------
+# The version has to be settled BEFORE the program and the installer are compiled,
+# because both of them bake it in: Build<App>.cmd generates Version.cs from it, and
+# Inno Setup stamps it into the installer's version resource. If the number were
+# instead chosen later (at release time), every build of an already-released version
+# would have to be bumped and then rebuilt -- an endless loop.
 #
-# It then stamps the result into DbDo.cs's BuildInfo.VersionString;
-# syncIssVersion.ps1 (run next by buildDbDo) copies it into the .iss,
-# and tagRelease reads the .iss. One source, no drift.
+# So: the build assigns the version, and tagRelease only publishes what the build
+# produced. tagRelease never changes a version number.
 #
-# Reusable across projects (DbDo, EdSharp, FileDir): with no -sCsPath
-# it uses DbDo.cs if present, else the first *.cs here that declares
-# BuildInfo.VersionString.
+# What it does
+# ------------
+#   * Finds <App>_setup.iss, where <App> is the name of the current directory.
+#   * Reads AppVersion (both Inno styles are supported):
+#         #define AppVersion "1.0.126"      (DbDo)
+#         AppVersion=5.0.2                  (EdSharp, FileDir)
+#   * Increments the last dotted-numeric part: 5.0.2 -> 5.0.3, 1.0.126 -> 1.0.127.
+#     A two-part version gains a third part (5.0 -> 5.0.1), because 5.0 and 5.0.0
+#     compare EQUAL and an existing install would not see it as newer.
+#   * Writes the new number back into every version-bearing line of the .iss that
+#     holds a literal (AppVersion, and AppVerName / VersionInfoVersion when they do
+#     not use the {#AppVersion} token).
+#   * Prints the new version.
+#
+# Build<App>.cmd calls this, then reads AppVersion back from the .iss and generates
+# Version.cs from it -- so the .iss remains the single source of truth.
+#
+# Usage (normally only from the build script):
+#     powershell -NoProfile -ExecutionPolicy Bypass -File bumpVersion.ps1
+#     powershell -NoProfile -ExecutionPolicy Bypass -File bumpVersion.ps1 -Version 6.0
+#
+# Exit code 0 on success, 1 on failure (the build script aborts on failure).
 
 [CmdletBinding()]
 param(
-    [string] $sCsPath = ''
+    [string] $Version
 )
 
 $ErrorActionPreference = 'Stop'
 
-function toParts([string] $v)
-{
-    $p = @($v -split '\.')
-    while ($p.Count -lt 3) { $p += '0' }
-    return ,$p
-}
+try {
+    $sRepoPath = $PWD.Path
+    $sApp = Split-Path -Leaf $sRepoPath
 
-function cmpVer([string] $a, [string] $b)
-{
-    $pa = toParts $a; $pb = toParts $b
-    for ($i = 0; $i -lt 3; $i++)
-    {
-        $x = [int]$pa[$i]; $y = [int]$pb[$i]
-        if ($x -ne $y) { return ($x - $y) }
+    # ---- Find <App>_setup.iss ----
+    $aFound = @(Get-ChildItem -LiteralPath $sRepoPath -Filter "$($sApp)_setup.iss" -File -ErrorAction SilentlyContinue)
+    if ($aFound.Count -ne 1) {
+        throw "Expected exactly one $($sApp)_setup.iss in $sRepoPath (found $($aFound.Count))."
     }
-    return 0
-}
+    $sIssPath = $aFound[0].FullName
+    $aLines = [System.IO.File]::ReadAllText($sIssPath) -split "`r?`n"
 
-try
-{
-    # Resolve the source file.
-    if (-not $sCsPath)
-    {
-        if (Test-Path -LiteralPath 'DbDo.cs' -PathType Leaf)
-        {
-            $sCsPath = 'DbDo.cs'
-        }
-        else
-        {
-            $oFound = Get-ChildItem -File -Filter *.cs -ErrorAction SilentlyContinue |
-                Where-Object { (Get-Content -LiteralPath $_.FullName -Raw) -match 'VersionString\s*=\s*"' } |
-                Select-Object -First 1
-            if ($oFound) { $sCsPath = $oFound.Name }
+    # ---- Read the current AppVersion ----
+    $sOld = ''
+    foreach ($sLine in $aLines) {
+        if ($sLine -match '^\s*#define\s+AppVersion\s+"([^"]+)"') { $sOld = $Matches[1]; break }
+    }
+    if (-not $sOld) {
+        foreach ($sLine in $aLines) {
+            if ($sLine -match '^\s*AppVersion\s*=\s*([^\s{]+)\s*$') { $sOld = $Matches[1]; break }
         }
     }
-    if (-not $sCsPath -or -not (Test-Path -LiteralPath $sCsPath -PathType Leaf))
-    {
-        throw "No source file with BuildInfo.VersionString found. Pass -sCsPath <App>.cs."
+    if (-not $sOld) { throw "Could not find AppVersion in $(Split-Path -Leaf $sIssPath)." }
+
+    # ---- Decide the new version ----
+    if ($Version) {
+        $sNew = $Version.Trim()
     }
-
-    $aBytes  = [System.IO.File]::ReadAllBytes([System.IO.Path]::GetFullPath($sCsPath))
-    $bHasBom = ($aBytes.Length -ge 3 -and $aBytes[0] -eq 0xEF -and $aBytes[1] -eq 0xBB -and $aBytes[2] -eq 0xBF)
-
-    $sCs = Get-Content -LiteralPath $sCsPath -Raw -Encoding UTF8
-    $oMatch = [regex]::Match($sCs, 'VersionString\s*=\s*"([^"]+)"')
-    if (-not $oMatch.Success) { throw "BuildInfo.VersionString not found in $sCsPath." }
-    $sLit = $oMatch.Groups[1].Value.Trim()
-
-    # Highest release tag (v1.2.3 / 1.2.3), if any.
-    $sTag = $null
-    try
-    {
-        $aRaw = & git tag --list 2>$null
-        foreach ($t in $aRaw)
-        {
-            $s = ([string]$t).Trim()
-            if ($s -match '^[vV]?(\d+\.\d+(?:\.\d+)?)$')
-            {
-                $cand = $Matches[1]
-                if ($null -eq $sTag -or (cmpVer $cand $sTag) -gt 0) { $sTag = $cand }
+    else {
+        $aParts = $sOld.Trim().Split('.')
+        foreach ($sPart in $aParts) {
+            if ($sPart -notmatch '^\d+$') {
+                throw "Version '$sOld' is not dotted-numeric, so it cannot be bumped automatically. Pass -Version X.Y.Z."
             }
         }
-    }
-    catch { $sTag = $null }
-
-    if ($null -eq $sTag)
-    {
-        $sNext = $sLit                                   # first release: use the literal
-    }
-    elseif ((cmpVer $sLit $sTag) -gt 0)
-    {
-        $sNext = $sLit                                   # deliberate manual bump above last release
-    }
-    else
-    {
-        $p = toParts $sTag; $p[2] = [string]([int]$p[2] + 1); $sNext = ($p -join '.')   # auto patch
+        if ($aParts.Count -lt 3) { $aParts = @($aParts) + '1' }
+        else { $aParts[$aParts.Count - 1] = [string]([int]$aParts[$aParts.Count - 1] + 1) }
+        $sNew = ($aParts -join '.')
     }
 
-    if ($sNext -eq $sLit)
-    {
-        Write-Host "bumpVersion: version stays $sLit (latest tag: $(if ($sTag) { $sTag } else { 'none' }))."
-        exit 0
+    # ---- Write it back into every literal version line ----
+    $bChanged = $false
+    $aOut = @()
+    foreach ($sLine in $aLines) {
+        $sEdit = $sLine
+        if ($sLine -match '^\s*#define\s+AppVersion\s+"[^"]+"') {
+            $sEdit = $sLine -replace '"(?:[^"]+)"', "`"$sNew`""
+        }
+        elseif ($sLine -match '^\s*AppVersion\s*=\s*[^\s{]+\s*$') {
+            $sEdit = "AppVersion=$sNew"
+        }
+        elseif ($sLine -match '^\s*VersionInfoVersion\s*=\s*[\d\.]+\s*$') {
+            $sEdit = "VersionInfoVersion=$sNew"
+        }
+        elseif ($sLine -match '^\s*AppVerName\s*=\s*(.+)$') {
+            # Replace only a literal dotted-numeric version, keeping any words around it
+            # (e.g. "EdSharp 5.0.2 beta" -> "EdSharp 5.0.3 beta").
+            $sRest = $Matches[1]
+            if ($sRest -match '\d+(\.\d+)+') {
+                $sEdit = "AppVerName=" + ($sRest -replace '\d+(\.\d+)+', $sNew)
+            }
+        }
+        if ($sEdit -ne $sLine) { $bChanged = $true }
+        $aOut += $sEdit
     }
 
-    $sCsUpdated = [regex]::Replace($sCs, '(VersionString\s*=\s*")[^"]+(")', ('${1}' + $sNext + '${2}'), 1)
+    if ($bChanged) {
+        $sText = ($aOut -join "`r`n")
+        [System.IO.File]::WriteAllText($sIssPath, $sText, (New-Object System.Text.UTF8Encoding($false)))
+    }
 
-    $sTmp = $sCsPath + '.tmp'
-    $oEnc = New-Object System.Text.UTF8Encoding($bHasBom)
-    [System.IO.File]::WriteAllText([System.IO.Path]::GetFullPath($sTmp), $sCsUpdated, $oEnc)
-    Move-Item -LiteralPath $sTmp -Destination $sCsPath -Force
-
-    Write-Host "bumpVersion: $sLit -> $sNext (latest tag: $(if ($sTag) { $sTag } else { 'none' }); in $sCsPath)."
+    Write-Host "Version: $sOld -> $sNew"
     exit 0
 }
-catch
-{
-    Write-Host "bumpVersion: ERROR -- $($_.Exception.Message). Source left unchanged."
+catch {
+    Write-Host "bumpVersion failed: $($_.Exception.Message)"
     exit 1
 }

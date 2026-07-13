@@ -28,7 +28,17 @@
 ; DbDo.cs's BuildInfo.VersionString, so this literal is only the
 ; fallback for compiling the .iss without a prior build. Do not
 ; hand-edit it as the source of truth -- edit BuildInfo.VersionString.
-#define AppVersion    "1.0.127"
+; ---- Version -----------------------------------------------------------------
+; The version number is NOT stored in this script.  It lives in version.txt, one
+; line, which Build<App>.cmd increments on every build.  Inno reads it here, and
+; Build<App>.cmd also generates Version.cs from it, so the program, the installer,
+; and the release tag always report the same number -- which is what Elevate
+; Version (F11) compares.  Because no version literal appears in this file, a
+; stale copy of it can never rewind the version.
+#define VerFile FileOpen(AddBackslash(SourcePath) + "version.txt")
+#define AppVersion Trim(FileRead(VerFile))
+#expr FileClose(VerFile)
+#undef VerFile
 #define AppPublisher  "Jamal Mazrui"
 #define AppUrl        "https://github.com/JamalMazrui/DbDo"
 #define AppExeName    "DbDo.exe"
@@ -699,4 +709,3 @@ begin
      may have other DbDo state in there. *)
   RemoveDir(ExtractFileDir(sLogPath));
 end;
-
