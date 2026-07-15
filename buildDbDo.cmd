@@ -73,6 +73,7 @@ exit /b 1
 
 :have_sources
 echo Found: DbDo.cs, DbDo.js >> "!log!"
+if not exist "DbDo.manifest" echo ERROR: DbDo.manifest not found.& popd & exit /b 1
 
 rem ---- version: version.txt is the SINGLE source of truth ----
 rem The version lives in version.txt: one line, nothing else.  It is incremented
