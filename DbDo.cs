@@ -33708,7 +33708,7 @@ namespace DbDo
                         string sAppFolder = System.IO.Path.GetDirectoryName(
                             System.Reflection.Assembly.GetExecutingAssembly().Location);
                         int iCopied, iCompiled;
-                        string sReport = JawsSettingsInstaller.install(sAppFolder, out iCopied, out iCompiled);
+                        string sReport = JawsSettingsInstaller.install("DbDo", sAppFolder, out iCopied, out iCompiled);
                         Console.WriteLine(sReport);
                         Console.WriteLine("Copied " + iCopied + " files, compiled " + iCompiled + " jsb.");
                         return 0;
@@ -33771,7 +33771,7 @@ namespace DbDo
                      || sArg.Equals("/uninstall-jaws-settings", StringComparison.OrdinalIgnoreCase))
                     {
                         int iDeleted;
-                        string sReport = JawsSettingsInstaller.uninstall(out iDeleted);
+                        string sReport = JawsSettingsInstaller.uninstall("DbDo", out iDeleted);
                         Console.WriteLine(sReport);
                         Console.WriteLine("Removed " + iDeleted + " files.");
                         return 0;
