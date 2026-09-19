@@ -1,4 +1,4 @@
-# DbDo User Guide
+﻿# DbDo User Guide
 
 DbDo is a relational database manager built from the ground up for people who work by keyboard and screen reader. It opens SQLite, Access, Excel, dBASE, and delimited-text files, presents their tables as ordinary Windows lists you can navigate cell by cell, and lets you query, edit, relate, analyze, and report on the data without ever needing a mouse or a glance at the screen.
 
@@ -122,10 +122,10 @@ DbDo recognizes certain field **names** and maintains or exposes them for you. A
 - **tags** (TEXTMEMO) — free-form tags or keywords. Edit with Edit Tags (Alt+Shift+T); speak with Say Tags (Shift+T).
 - **url** (TEXTLINE) — an associated link. Edit with Edit URL (Alt+Shift+U); open it with Open URL (Ctrl+Shift+U); speak with Say URL (Shift+U).
 - **look** — a derived "display label" for the record: a short human-readable summary DbDo can compute so a record can be referred to by something friendlier than its key. Speak it with Say Look (Shift+L).
-- **prm** (the *prime* field) — a record's primary human-facing identity value. Speak it with Say Prime (Shift+P).
+- **prime** (the *prime* field) — a record's primary human-facing identity value. Speak it with Say Prime (Shift+P).
 - **unq** — a uniqueness/identity helper used internally for stable record identity.
 
-The distinction to hold onto: **added** and **edited** are *automatic* (DbDo writes them for you); **marked** is *state* you toggle; **notes**, **tags**, and **url** are *content* you edit through their own focused dialogs; **look**, **prm**, and **unq** are *derived identity* fields DbDo computes so records can be named and matched reliably.
+The distinction to hold onto: **added** and **edited** are *automatic* (DbDo writes them for you); **marked** is *state* you toggle; **notes**, **tags**, and **url** are *content* you edit through their own focused dialogs; **look**, **prime**, and **unq** are *derived identity* fields DbDo computes so records can be named and matched reliably.
 
 ### Lookups and maps
 
@@ -244,7 +244,7 @@ Acts on **one column** — the column under the virtual cursor. It computes type
 
 ## Graphics Column (Ctrl+Shift+G)
 
-Also acts on **one column** — the column under the virtual cursor — but produces a **chart** of that column (via Excel, out of process) rather than a table of numbers. Use it when you want a quick visual of one field's distribution.
+Also acts on **one column** — the column under the virtual cursor — but produces a **chart** of that column (via Excel, out of process -- the one export that still needs Office) rather than a table of numbers. Use it when you want a quick visual of one field's distribution.
 
 ## Generate from Grid (Alt+Shift+G)
 
@@ -527,7 +527,7 @@ The Query menu holds record inspection and the Say-X status family.
 | tags | TEXTMEMO | keywords | Shift+T |
 | url | TEXTLINE | associated link | Shift+U |
 | look | derived | display label for the record | Shift+L |
-| prm | derived | prime human-facing identity | Shift+P |
+| prime | derived | prime human-facing identity | Shift+P |
 | unq | derived | internal uniqueness helper | — |
 
 ## Field types (summary)
@@ -628,3 +628,60 @@ DbDo builds its dialogs and menus **in code** rather than with a visual designer
 ## File layout
 
 The source is a single large `DbDo.cs`. Alongside it live the build script, the installer script, the dependency fetcher, the `.inix` configuration, this guide (`DbDo.md`), the README, the coding-style file, and the sample databases with their scripts and `report.inix` definitions.
+
+
+## How a Say command answers
+
+Every Say command answers in one shape:
+
+    <name>: <value>
+
+The name is the word in the Say menu and in the hotkey list, so the answer says
+which question was asked. That matters when you are walking the alphabet and
+lose your place: "Unmarked" does not say which key produced it, and
+"mark: unmarked" does.
+
+An empty answer keeps its label and says none -- "find: none", not "No find
+string" -- and every count matches its noun.
+
+Two commands use the column name instead of the menu word, because there the
+column is the more useful label and it is what the grid already calls that
+field:
+
+- Say Cell answers `employer: Example Widgets Company`
+- Say Id answers `job_id: 3`
+
+One press speaks. A second press within a moment shows the same text in a
+read-only window you can read line by line and copy from.
+
+### The Say keys
+
+- Shift+A -- added
+- Shift+C -- cell, as column and value
+- Shift+D -- database, as file and folder
+- Shift+E -- edited
+- Shift+F -- find
+- Shift+G -- goto, the jump search
+- Shift+I -- id
+- Shift+L -- look
+- Shift+M -- mark
+- Shift+N -- notes
+- Shift+O -- order
+- Shift+P -- prime
+- Shift+Q -- query
+- Shift+R -- related
+- Shift+S -- select, the columns shown
+- Shift+T -- tags
+- Shift+U -- url
+- Shift+W -- where, the filter
+- Shift+Y -- yield, how many rows
+- Shift+Z -- status, the table, the row and the sort
+
+Shift plus a letter answers a question. A letter on its own moves: type the
+first letters of a value and the list view goes there, in lower case and
+without regard to case. The two layers do not collide, which is why the Say
+commands live on Shift.
+
+Six letters are unused -- B, H, J, K, V and X -- and are kept that way on
+purpose, so a new question can be added later without moving an answer somebody
+has learned.

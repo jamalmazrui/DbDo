@@ -1,0 +1,37 @@
+﻿# RepoFiles.txt -- what the DbDo repository carries.
+#
+# One name per line. A trailing slash names a whole folder. Blank lines and
+# lines beginning with # or ; are ignored.
+#
+# THIS IS THE WHITELIST. homerTidy --gitignore turns it into a .gitignore that
+# ignores everything else, so a file dropped into this folder is invisible to
+# git until it is named here. The Homer classes are NOT listed: DbDo compiles
+# them from C:\HomerDev and no longer carries copies.
+
+2db.cs
+DbDo.cs
+DbDo.js
+DbDo.ico
+DbDo.inix
+DbDo.manifest
+DbDo.exe.config
+DbDo_hotkeys.inix
+DbDo_setup.iss
+DbDo_JAWS.zip
+DbDo.nvda-addon
+buildDbDo.cmd
+summarizeSetup.cmd
+summarizeSetup.ps1
+installModels.cmd
+installOllama.cmd
+accept.inix
+uiTest.inix
+help/
+templates/
+ReadMe.md
+ReadMe.htm
+License.md
+License.htm
+version.txt
+RepoFiles.txt
+.gitignore

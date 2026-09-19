@@ -309,6 +309,11 @@ connection, two interfaces</a></li>
 <li><a href="#layout-by-code" id="toc-layout-by-code">Layout by
 Code</a></li>
 <li><a href="#file-layout" id="toc-file-layout">File layout</a></li>
+<li><a href="#how-a-say-command-answers"
+id="toc-how-a-say-command-answers">How a Say command answers</a>
+<ul>
+<li><a href="#the-say-keys" id="toc-the-say-keys">The Say keys</a></li>
+</ul></li>
 </ul></li>
 </ul>
 </nav>
@@ -550,8 +555,9 @@ URL (Shift+U).</li>
 short human-readable summary DbDo can compute so a record can be
 referred to by something friendlier than its key. Speak it with Say Look
 (Shift+L).</li>
-<li><strong>prm</strong> (the <em>prime</em> field) — a record’s primary
-human-facing identity value. Speak it with Say Prime (Shift+P).</li>
+<li><strong>prime</strong> (the <em>prime</em> field) — a record’s
+primary human-facing identity value. Speak it with Say Prime
+(Shift+P).</li>
 <li><strong>unq</strong> — a uniqueness/identity helper used internally
 for stable record identity.</li>
 </ul>
@@ -560,7 +566,7 @@ for stable record identity.</li>
 you); <strong>marked</strong> is <em>state</em> you toggle;
 <strong>notes</strong>, <strong>tags</strong>, and <strong>url</strong>
 are <em>content</em> you edit through their own focused dialogs;
-<strong>look</strong>, <strong>prm</strong>, and <strong>unq</strong>
+<strong>look</strong>, <strong>prime</strong>, and <strong>unq</strong>
 are <em>derived identity</em> fields DbDo computes so records can be
 named and matched reliably.</p>
 <h3 id="lookups-and-maps">Lookups and maps</h3>
@@ -785,8 +791,9 @@ column</em>.</p>
 <h2 id="graphics-column-ctrlshiftg">Graphics Column (Ctrl+Shift+G)</h2>
 <p>Also acts on <strong>one column</strong> — the column under the
 virtual cursor — but produces a <strong>chart</strong> of that column
-(via Excel, out of process) rather than a table of numbers. Use it when
-you want a quick visual of one field’s distribution.</p>
+(via Excel, out of process – the one export that still needs Office)
+rather than a table of numbers. Use it when you want a quick visual of
+one field’s distribution.</p>
 <h2 id="generate-from-grid-altshiftg">Generate from Grid
 (Alt+Shift+G)</h2>
 <p>Acts on the <strong>virtual grid</strong> — the current filtered,
@@ -1718,7 +1725,7 @@ family.</p>
 <td>Shift+L</td>
 </tr>
 <tr class="even">
-<td>prm</td>
+<td>prime</td>
 <td>derived</td>
 <td>prime human-facing identity</td>
 <td>Shift+P</td>
@@ -1950,5 +1957,53 @@ the build script, the installer script, the dependency fetcher, the
 <code>.inix</code> configuration, this guide (<code>DbDo.md</code>), the
 README, the coding-style file, and the sample databases with their
 scripts and <code>report.inix</code> definitions.</p>
+<h2 id="how-a-say-command-answers">How a Say command answers</h2>
+<p>Every Say command answers in one shape:</p>
+<pre><code>&lt;name&gt;: &lt;value&gt;</code></pre>
+<p>The name is the word in the Say menu and in the hotkey list, so the
+answer says which question was asked. That matters when you are walking
+the alphabet and lose your place: “Unmarked” does not say which key
+produced it, and “mark: unmarked” does.</p>
+<p>An empty answer keeps its label and says none – “find: none”, not “No
+find string” – and every count matches its noun.</p>
+<p>Two commands use the column name instead of the menu word, because
+there the column is the more useful label and it is what the grid
+already calls that field:</p>
+<ul>
+<li>Say Cell answers <code>employer: Example Widgets Company</code></li>
+<li>Say Id answers <code>job_id: 3</code></li>
+</ul>
+<p>One press speaks. A second press within a moment shows the same text
+in a read-only window you can read line by line and copy from.</p>
+<h3 id="the-say-keys">The Say keys</h3>
+<ul>
+<li>Shift+A – added</li>
+<li>Shift+C – cell, as column and value</li>
+<li>Shift+D – database, as file and folder</li>
+<li>Shift+E – edited</li>
+<li>Shift+F – find</li>
+<li>Shift+G – goto, the jump search</li>
+<li>Shift+I – id</li>
+<li>Shift+L – look</li>
+<li>Shift+M – mark</li>
+<li>Shift+N – notes</li>
+<li>Shift+O – order</li>
+<li>Shift+P – prime</li>
+<li>Shift+Q – query</li>
+<li>Shift+R – related</li>
+<li>Shift+S – select, the columns shown</li>
+<li>Shift+T – tags</li>
+<li>Shift+U – url</li>
+<li>Shift+W – where, the filter</li>
+<li>Shift+Y – yield, how many rows</li>
+<li>Shift+Z – status, the table, the row and the sort</li>
+</ul>
+<p>Shift plus a letter answers a question. A letter on its own moves:
+type the first letters of a value and the list view goes there, in lower
+case and without regard to case. The two layers do not collide, which is
+why the Say commands live on Shift.</p>
+<p>Six letters are unused – B, H, J, K, V and X – and are kept that way
+on purpose, so a new question can be added later without moving an
+answer somebody has learned.</p>
 </body>
 </html>

@@ -1,0 +1,47 @@
+﻿; accept.inix -- what "done" means for DbDo, written down so a script settles it.
+;
+; checkHomerApp runs every check here and records the command, the exit code and
+; the verdict in its evidence report. A criterion that cannot be written this way
+; belongs in help\self.md under what a person has to check by hand.
+
+FileTask = accept
+
+[check]
+Name = the summary and local AI scripts ship with the app
+Run = cmd /c if exist summarizeSetup.cmd if exist summarizeSetup.ps1 if exist installOllama.cmd if exist installModels.cmd (exit 0) else (exit 1)
+Expect = 0
+
+[check]
+Name = the shipped samples are in templates, not a samples folder
+Run = cmd /c if exist templates\JobTrail\JobTrail.db (exit 0) else (exit 1)
+Expect = 0
+
+[check]
+Name = no samples folder remains
+Run = cmd /c if exist Samples (exit 1) else (exit 0)
+Expect = 0
+
+[check]
+Name = the build runs clean against the kit
+Run = buildDbDo.cmd nobump
+Expect = 0
+
+[check]
+Name = the program was produced
+Run = cmd /c if exist DbDo.exe (exit 0) else (exit 1)
+Expect = 0
+
+[check]
+Name = the snippet module was produced
+Run = cmd /c if exist DbDo.dll (exit 0) else (exit 1)
+Expect = 0
+
+[check]
+Name = the local copies of the Homer classes are gone
+Run = cmd /c if exist Lbc.cs (exit 1) else (exit 0)
+Expect = 0
+
+[check]
+Name = a session log lands where the Homer layout says
+Run = cmd /c if exist "%LOCALAPPDATA%\DbDo\logs" (exit 0) else (exit 1)
+Expect = 0

@@ -142,9 +142,19 @@ namespace DbDo
         // databases into the folder to add them to that list.
         public static string getSampleDir()
         {
-            string sDir = System.IO.Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                @"DbDo\Samples");
+            // THE HOMER FOLDER LAYOUT.
+            //
+            // The user's editable copies are databases, so they live in the data
+            // folder of the per-user tree that Paths owns:
+            //     %LOCALAPPDATA%\DbDo\data
+            // The shipped read-only originals live in templates beside the
+            // program, because a template that shows what is possible is a
+            // sample with a purpose, and the layout has one folder for both.
+            //
+            // The old location was %APPDATA%\DbDo\Samples. A copy still there
+            // is left alone rather than deleted: it is the user's data, and
+            // nothing in this program is entitled to remove it.
+            string sDir = Homer.Paths.data();
             try { System.IO.Directory.CreateDirectory(sDir); }
             catch { /* tolerate; the caller will surface the error */ }
             seedSampleDatabasesIfNew(sDir);
@@ -152,7 +162,7 @@ namespace DbDo
         }
 
         // seedSampleDatabasesIfNew: one-time copy of the bundled sample
-        // databases ({app}\Samples\*.db) into the user's Samples folder.
+        // databases ({app}\templates\*.db) into the user's data folder.
         // A .seeded sentinel records that seeding has run, so deleting a
         // sample does not make it reappear on the next launch.
         private static void seedSampleDatabasesIfNew(string sDir)
@@ -162,13 +172,15 @@ namespace DbDo
                 string sSentinel = System.IO.Path.Combine(sDir, ".seeded");
                 bool bFirstSeed = !System.IO.File.Exists(sSentinel);
 
-                string sAppFolder = System.IO.Path.GetDirectoryName(
-                    System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
-                string sSrcFolder = System.IO.Path.Combine(sAppFolder, "Samples");
+                // Paths.installedFolder answers the folder the program was
+                // installed into, climbing out of exec when it runs from there,
+                // so the shipped folders are found whether DbDo was installed or
+                // unzipped beside its own source.
+                string sSrcFolder = Homer.Paths.shippedTemplates();
                 if (System.IO.Directory.Exists(sSrcFolder))
                 {
                     // Each sample database lives in its own subfolder
-                    // (Samples\<name>\<name>.db, plus that database's own
+                    // (templates\<name>\<name>.db, plus that database's own
                     // scripts and report/transfer .inix files beside it).
                     // On the FIRST seed every bundled file is copied. On
                     // later launches a file is refreshed only when it still
@@ -294,13 +306,13 @@ namespace DbDo
 
                 string sAppFolder = System.IO.Path.GetDirectoryName(
                     System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
-                string sSrcFolder = System.IO.Path.Combine(sAppFolder, "Scripts");
+                string sSrcFolder = Homer.Paths.shippedScripts();
                 // Backward compatibility: if the new "Scripts" folder
                 // doesn't exist next to the EXE but the older
                 // "SampleScripts" folder does, use that instead.
                 if (!System.IO.Directory.Exists(sSrcFolder))
                 {
-                    string sLegacy = System.IO.Path.Combine(sAppFolder, "SampleScripts");
+                    string sLegacy = System.IO.Path.Combine(Homer.Paths.installedFolder, "SampleScripts");
                     if (System.IO.Directory.Exists(sLegacy)) sSrcFolder = sLegacy;
                 }
                 if (System.IO.Directory.Exists(sSrcFolder))
@@ -968,9 +980,9 @@ namespace DbDo
         // fillFieldArrays (line 318): the column names suppressed
         // from the default data-list view are exactly:
         //
-        //   <table>_id, added, edited, marked, look, prm
+        //   <table>_id, added, edited, marked, look, prime
         //
-        // 'look' and 'prm' are stored-generated (PRAGMA table_xinfo
+        // 'look' and 'prime' are stored-generated (PRAGMA table_xinfo
         // hidden=3); the calculated-column auto-hide rule would
         // catch them even without the by-name rule, but the by-name
         // rule is faster and works on providers that don't expose
@@ -997,7 +1009,7 @@ namespace DbDo
         // hidden columns.
         //
         // 'tags', 'notes', and 'url' joined the hidden set in v1.0.68
-        // for the same reason 'look' and 'prm' are hidden: they're
+        // for the same reason 'look' and 'prime' are hidden: they're
         // "extended" data per row that bloats the listview if shown
         // unconditionally. The user can override via the Select
         // Columns command (Alt+S) and the override persists per
@@ -1008,8 +1020,8 @@ namespace DbDo
             "edited",
             "marked",
             "look",
-            "prm",
-            "prm",
+            "prime",
+            "prime",
             "url",
             "tags",
             "notes"
@@ -1039,8 +1051,8 @@ namespace DbDo
             "marked",
             "method",
             "observed",
-            "prm",
-            "prm"
+            "prime",
+            "prime"
         };
 
         public const string PrimaryKeySuffix = "_id";
@@ -1055,10 +1067,10 @@ namespace DbDo
         public const string NotesColumn    = "notes";
         public const string TagsColumn     = "tags";
         // PrimeColumn: the abbreviated name for the primary-key
-        // expression column. Every database uses 'prm' -- a STORED
+        // expression column. Every database uses 'prime' -- a STORED
         // generated concatenation of a record's prime fields. There is
         // no legacy alternative; the older 'unq' name has been retired.
-        public const string PrimeColumn    = "prm";
+        public const string PrimeColumn    = "prime";
         public const string UrlColumn      = "url";
 
         // Standard date-sort column resolution. dbDot's standard for
@@ -1116,7 +1128,7 @@ namespace DbDo
 
         // isAdminColumn: true for the program-maintained fields that
         // the record dialogs never present -- the primary key, added,
-        // edited, look, prm, marked (plus the legacy observed and
+        // edited, look, prime, marked (plus the legacy observed and
         // method). Everything else, including notes/tags/url, is an
         // editable field.
         public static bool isAdminColumn(string sColumn, string sTable)
@@ -1140,9 +1152,9 @@ namespace DbDo
 
         // isDistinctColumn: the "distinct" summary columns that
         // distinctly identify a row -- the human-readable 'look'
-        // summary and the 'prm' unique-key expression (plus the legacy
-        // 'prm'). These are the default listview ("select") set: opening
-        // a table shows look + prm unless the user has saved a different
+        // summary and the 'prime' unique-key expression (plus the legacy
+        // 'prime'). These are the default listview ("select") set: opening
+        // a table shows look + prime unless the user has saved a different
         // SelectFields list. They are computed columns, so they are not
         // editable and not admin; they form their own category between
         // the leading admin keys and the editable data fields.
@@ -2178,7 +2190,7 @@ namespace DbDo
             // Applied after the session cache so the saved config wins;
             // position stays session-only. Each key is skipped when absent
             // so a table with no saved view falls back to the default
-            // (look + prm) selection and no sort/filter.
+            // (look + prime) selection and no sort/filter.
             try
             {
                 string sInix = perDbInixPath();
@@ -2823,7 +2835,7 @@ namespace DbDo
             }
 
             // Fallback: read field metadata as the QUERY ENGINE sees it,
-            // which includes STORED GENERATED columns (look, prm/prm) that
+            // which includes STORED GENERATED columns (look, prime/prime) that
             // ADOX omits.
             List<string> lViaSelect = getColumnsViaSelect(sTable);
             if (lViaSelect.Count > 0) lResult.AddRange(lViaSelect);
@@ -2832,7 +2844,7 @@ namespace DbDo
 
         // getColumnsViaSelect: column names as the query engine reports
         // them for SELECT * -- crucially INCLUDING the STORED GENERATED
-        // columns (look and the prime-key column prm/prm). The ODBC
+        // columns (look and the prime-key column prime/prime). The ODBC
         // schema catalog used by ADOX does NOT list generated columns, so
         // this SELECT-based reader is the reliable source whenever the
         // generated key column must be detected (see primeColumnFor).
@@ -2859,22 +2871,22 @@ namespace DbDo
         }
 
         // primeColumnFor: the prime/unique-key column name of a named
-        // table -- "prm" on databases this DbDo builds, and the legacy
-        // "prm" on databases that predate the rename. Resolved by reading
+        // table -- "prime" on databases this DbDo builds, and the legacy
+        // "prime" on databases that predate the rename. Resolved by reading
         // the table's actual columns (SELECT * exposes the STORED
         // generated key column), so it is correct per table rather than
-        // assuming a database-wide convention. Defaults to "prm" when
+        // assuming a database-wide convention. Defaults to "prime" when
         // neither column is detectable, which is the right choice for
         // every database this DbDo creates. Used wherever SQL must name a
         // table's key column -- e.g. the related-table drill's
-        // "<prime> IN (SELECT prmN FROM maps ...)" filter.
+        // "<prime> IN (SELECT primeN FROM maps ...)" filter.
         public string primeColumnFor(string sTable)
         {
             try
             {
                 // Read the columns as the QUERY ENGINE exposes them:
                 // SELECT * includes the STORED GENERATED key column
-                // (prm), which the ODBC schema catalog (ADOX, preferred
+                // (prime), which the ODBC schema catalog (ADOX, preferred
                 // by getColumnsOfTable) omits -- leaving the key
                 // undetected. Fall back to getColumnsOfTable only if the
                 // SELECT reader returns nothing.
@@ -3729,10 +3741,10 @@ namespace DbDo
         }
 
         // lMapsRelations: every maps row touching the given record,
-        // identified by its (table, prm) pair, in BOTH directions.
-        // Each result row is: kind, other table, other prm, direction
-        // ("subject" when the given record is tbl1/prm1, "object"
-        // when it is tbl2/prm2), and the map row's notes.
+        // identified by its (table, prime) pair, in BOTH directions.
+        // Each result row is: kind, other table, other prime, direction
+        // ("subject" when the given record is tbl1/prime1, "object"
+        // when it is tbl2/prime2), and the map row's notes.
         public List<string[]> lMapsRelations(string sTable, string sPrmValue, int iMaxRows)
         {
             List<string[]> lAll = new List<string[]>();
@@ -3743,13 +3755,13 @@ namespace DbDo
             int iFound;
             // The record as subject: related records are on side 2.
             foreach (string[] aRow in queryRowsSql(
-                "SELECT kind, tbl2, prm2, 'subject', notes FROM maps WHERE tbl1 = "
-                + sT + " AND prm1 = " + sU, iMaxRows, out iFound))
+                "SELECT kind, tbl2, prime2, 'subject', notes FROM maps WHERE tbl1 = "
+                + sT + " AND prime1 = " + sU, iMaxRows, out iFound))
                 lAll.Add(aRow);
             // The record as object: related records are on side 1.
             foreach (string[] aRow in queryRowsSql(
-                "SELECT kind, tbl1, prm1, 'object', notes FROM maps WHERE tbl2 = "
-                + sT + " AND prm2 = " + sU, iMaxRows, out iFound))
+                "SELECT kind, tbl1, prime1, 'object', notes FROM maps WHERE tbl2 = "
+                + sT + " AND prime2 = " + sU, iMaxRows, out iFound))
                 lAll.Add(aRow);
             return lAll;
         }
@@ -3760,13 +3772,13 @@ namespace DbDo
         // case-split on which side a record sits.
         private const string sMapsEdgesCte =
             "WITH edges(ft, fu, tt, tu) AS ("
-            + "SELECT tbl1, prm1, tbl2, prm2 FROM maps "
-            + "UNION ALL SELECT tbl2, prm2, tbl1, prm1 FROM maps) ";
+            + "SELECT tbl1, prime1, tbl2, prime2 FROM maps "
+            + "UNION ALL SELECT tbl2, prime2, tbl1, prime1 FROM maps) ";
 
         // lMapsTwoHop: records related to the given record THROUGH an
         // intermediate record -- contact -> events -> locations being
         // the canonical case ("where does this person's work happen").
-        // Each result row is: via table, target table, target prm.
+        // Each result row is: via table, target table, target prime.
         // The starting record itself is excluded from the targets.
         // Requires a provider that accepts CTEs (SQLite does); on
         // failure the query helper returns an empty list, so callers
@@ -3789,7 +3801,7 @@ namespace DbDo
             return lAll;
         }
 
-        // lMapsTwoHopTargets: the distinct target prm values for one
+        // lMapsTwoHopTargets: the distinct target prime values for one
         // chosen (via table, target table) pair -- the filter set for
         // a two-hop drill.
         public List<string> lMapsTwoHopTargets(string sTable, string sPrmValue,
@@ -4273,7 +4285,7 @@ namespace DbDo
         //   (B) Otherwise apply the default rules:
         //       1. Standard-visible columns (none currently) -- always shown.
         //       2. Standard-hidden columns (added, edited, marked,
-        //          look, prm) -- always hidden.
+        //          look, prime) -- always hidden.
         //       3. Any column ending in '_id' or named 'id' --
         //          always hidden (primary and foreign keys).
         //       4. Calculated columns from the schema (PRAGMA
@@ -4313,7 +4325,7 @@ namespace DbDo
             // (B) Default selection: the component fields that compose
             // the look/prime expression -- the substantive columns that
             // form the record's human-readable identity -- rather than
-            // the derived look/prm columns themselves. Only applies to
+            // the derived look/prime columns themselves. Only applies to
             // tables that carry the standard summary columns; xlsx/csv
             // sources fall through to the rule-based selection in (C).
             bool bHasSummary = false;
@@ -4634,7 +4646,7 @@ namespace DbDo
         }
 
         // isPrmViolation: true when an exception is a UNIQUE-constraint
-        // failure on this table's generated prm column -- the identity
+        // failure on this table's generated prime column -- the identity
         // field DbDo builds from the record's content fields -- rather
         // than a primary-key clash or some other unique index. The add
         // paths use this to recognise an ordinary "this would duplicate an
@@ -4646,7 +4658,7 @@ namespace DbDo
             for (Exception e = ex; e != null; e = e.InnerException)
                 s += " " + (e.Message ?? "");
             s = s.ToLowerInvariant();
-            return s.Contains("unique constraint") && s.Contains(".prm");
+            return s.Contains("unique constraint") && s.Contains(".prime");
         }
 
         // getTableCreateSql: the CREATE TABLE text for a table from
@@ -4680,11 +4692,11 @@ namespace DbDo
         }
 
         // getPrmComponentFields: the content fields the current table's
-        // generated prm column actually depends on, in order of first
-        // appearance. Read by pulling the prm expression out of the table's
+        // generated prime column actually depends on, in order of first
+        // appearance. Read by pulling the prime expression out of the table's
         // CREATE SQL and keeping the identifiers in it that are real columns
         // of the table (which discards SQL functions and keywords). This is
-        // accurate whether prm is the simple positional concatenation Add
+        // accurate whether prime is the simple positional concatenation Add
         // Table builds or a hand-tuned expression like the sample databases'
         // person-or-organization form. These are exactly the fields whose
         // combination must be unique, so they are what a user changes to
@@ -4699,7 +4711,7 @@ namespace DbDo
                 if (string.IsNullOrEmpty(sCreate)) return lEditable;
                 System.Text.RegularExpressions.Match m =
                     System.Text.RegularExpressions.Regex.Match(sCreate,
-                        "\\bprm\\b\\s+\\w+\\s+GENERATED\\s+ALWAYS\\s+AS\\s*\\(",
+                        "\\bprime\\b\\s+\\w+\\s+GENERATED\\s+ALWAYS\\s+AS\\s*\\(",
                         System.Text.RegularExpressions.RegexOptions.IgnoreCase);
                 if (!m.Success) return lEditable;
                 int iDepth = 1, i = m.Index + m.Length, iStart = i;
@@ -4761,7 +4773,7 @@ namespace DbDo
         // query. Unlike Requery it preserves the cursor position and
         // does not pick up rows added or removed outside this
         // recordset -- it re-reads existing rows (and recomputes
-        // STORED generated columns like look and prm), the
+        // STORED generated columns like look and prime), the
         // lightweight "refresh what I'm looking at" F5 wants.
         public void resync()
         {
@@ -4849,16 +4861,16 @@ namespace DbDo
         // =====================================================================
         // Look / Prm reconfiguration (pass two).
         //
-        // 'look' and 'prm' are STORED generated columns, so their defining
+        // 'look' and 'prime' are STORED generated columns, so their defining
         // expressions cannot be altered in place. Changing which component
         // fields build them means rebuilding the table with the SQLite-
         // recommended safe sequence: build a replacement under a NEW name
         // first, copy the data in, drop the old table, then rename the new
         // one into place (the reverse ordering can corrupt references in
-        // triggers, views, and foreign keys). Because prm values change
-        // when prm's components change, any maps rows that referenced the
-        // table by its old prm are re-pointed to the new prm in the same
-        // transaction. The whole thing refuses up front if the chosen prm
+        // triggers, views, and foreign keys). Because prime values change
+        // when prime's components change, any maps rows that referenced the
+        // table by its old prime are re-pointed to the new prime in the same
+        // transaction. The whole thing refuses up front if the chosen prime
         // fields would not uniquely identify every record.
         // =====================================================================
 
@@ -4882,7 +4894,7 @@ namespace DbDo
 
         // sPrmExprFromFields: the unique-key expression -- the positional
         // pipe-join of the component fields, each coalesced to '' so NULLs
-        // do not poison the key. Mirrors lStandardTableDdl's prm shape.
+        // do not poison the key. Mirrors lStandardTableDdl's prime shape.
         internal static string sPrmExprFromFields(List<string> lFields)
         {
             if (lFields == null || lFields.Count == 0) return "''";
@@ -4973,7 +4985,7 @@ namespace DbDo
             return lResult;
         }
 
-        // rebuildGeneratedColumns: reconfigure 'look' and 'prm' for a table
+        // rebuildGeneratedColumns: reconfigure 'look' and 'prime' for a table
         // by rebuilding it with new generated-column expressions built from
         // the given component-field lists, re-pointing maps as needed.
         // Returns true on success; on any failure leaves the database
@@ -4989,7 +5001,7 @@ namespace DbDo
             { sError = "At least one Prm field is required."; return false; }
 
             // Resolve the primary key, the non-generated columns, and confirm
-            // the table actually has look + prm to reconfigure.
+            // the table actually has look + prime to reconfigure.
             string sPk = null;
             List<string> lNonGen = new List<string>();
             bool bHasLook = false, bHasPrm = false;
@@ -4999,12 +5011,12 @@ namespace DbDo
                 if (aRow.Length < 7) continue;
                 string sName = aRow[1];
                 if (string.Equals(sName, "look", StringComparison.OrdinalIgnoreCase)) bHasLook = true;
-                if (string.Equals(sName, "prm", StringComparison.OrdinalIgnoreCase)) bHasPrm = true;
+                if (string.Equals(sName, "prime", StringComparison.OrdinalIgnoreCase)) bHasPrm = true;
                 if (aRow[6] == "0") lNonGen.Add(sName);          // hidden==0 -> stored, copyable
                 if (aRow[5] == "1" && string.IsNullOrEmpty(sPk)) sPk = sName; // pk flag
             }
             if (!bHasLook || !bHasPrm)
-            { sError = "Table '" + sTable + "' has no look/prm columns to reconfigure."; return false; }
+            { sError = "Table '" + sTable + "' has no look/prime columns to reconfigure."; return false; }
             if (string.IsNullOrEmpty(sPk))
             { sError = "Table '" + sTable + "' has no single-column primary key."; return false; }
 
@@ -5016,7 +5028,7 @@ namespace DbDo
             string sLookExpr = sLookExprFromFields(lLookFields);
             string sPrmExpr  = sPrmExprFromFields(lPrmFields);
 
-            // Refuse up front if the new prm would not be unique.
+            // Refuse up front if the new prime would not be unique.
             int iDup = 0;
             foreach (string[] aRow in queryRowsSql("SELECT count(*) FROM (SELECT 1 FROM \"" + sTable
                 + "\" GROUP BY " + sPrmExpr + " HAVING count(*)>1)", 1, out iN))
@@ -5038,12 +5050,12 @@ namespace DbDo
             { sError = "Could not read the schema for '" + sTable + "'."; return false; }
 
             string sNewTable = "new_" + sTable;
-            const string sHelper = "dbdo_oldprm";
+            const string sHelper = "dbdo_oldprime";
             string sNewCreate;
             try
             {
                 sNewCreate = replaceGeneratedExpr(sOldCreate, "look", sLookExpr);
-                sNewCreate = replaceGeneratedExpr(sNewCreate, "prm", sPrmExpr);
+                sNewCreate = replaceGeneratedExpr(sNewCreate, "prime", sPrmExpr);
                 sNewCreate = new System.Text.RegularExpressions.Regex(
                     "CREATE TABLE\\s+\"?" + System.Text.RegularExpressions.Regex.Escape(sTable) + "\"?",
                     System.Text.RegularExpressions.RegexOptions.IgnoreCase)
@@ -5081,7 +5093,7 @@ namespace DbDo
             try
             {
                 oConn.BeginTrans(); bInTrans = true;
-                invokeSql("CREATE TABLE " + sHelper + " AS SELECT " + sQPk + " AS k, prm AS p FROM \"" + sTable + "\"", null);
+                invokeSql("CREATE TABLE " + sHelper + " AS SELECT " + sQPk + " AS k, prime AS p FROM \"" + sTable + "\"", null);
                 invokeSql(sNewCreate, null);
                 invokeSql("INSERT INTO \"" + sNewTable + "\" (" + sColList + ") SELECT " + sColList + " FROM \"" + sTable + "\"", null);
                 invokeSql("DROP TABLE \"" + sTable + "\"", null);
@@ -5089,14 +5101,14 @@ namespace DbDo
                 foreach (string sSql in lAux) invokeSql(sSql, null);
                 if (bHasMaps)
                 {
-                    iMapsUpdated += invokeSql("UPDATE maps SET prm1=(SELECT n.prm FROM \"" + sTable
-                        + "\" n JOIN " + sHelper + " o ON n." + sQPk + "=o.k WHERE o.p=maps.prm1 AND n.prm<>o.p) "
-                        + "WHERE tbl1='" + sTableEsc + "' AND prm1 IN (SELECT o2.p FROM " + sHelper
-                        + " o2 JOIN \"" + sTable + "\" n2 ON n2." + sQPk + "=o2.k WHERE n2.prm<>o2.p)", null);
-                    iMapsUpdated += invokeSql("UPDATE maps SET prm2=(SELECT n.prm FROM \"" + sTable
-                        + "\" n JOIN " + sHelper + " o ON n." + sQPk + "=o.k WHERE o.p=maps.prm2 AND n.prm<>o.p) "
-                        + "WHERE tbl2='" + sTableEsc + "' AND prm2 IN (SELECT o2.p FROM " + sHelper
-                        + " o2 JOIN \"" + sTable + "\" n2 ON n2." + sQPk + "=o2.k WHERE n2.prm<>o2.p)", null);
+                    iMapsUpdated += invokeSql("UPDATE maps SET prime1=(SELECT n.prime FROM \"" + sTable
+                        + "\" n JOIN " + sHelper + " o ON n." + sQPk + "=o.k WHERE o.p=maps.prime1 AND n.prime<>o.p) "
+                        + "WHERE tbl1='" + sTableEsc + "' AND prime1 IN (SELECT o2.p FROM " + sHelper
+                        + " o2 JOIN \"" + sTable + "\" n2 ON n2." + sQPk + "=o2.k WHERE n2.prime<>o2.p)", null);
+                    iMapsUpdated += invokeSql("UPDATE maps SET prime2=(SELECT n.prime FROM \"" + sTable
+                        + "\" n JOIN " + sHelper + " o ON n." + sQPk + "=o.k WHERE o.p=maps.prime2 AND n.prime<>o.p) "
+                        + "WHERE tbl2='" + sTableEsc + "' AND prime2 IN (SELECT o2.p FROM " + sHelper
+                        + " o2 JOIN \"" + sTable + "\" n2 ON n2." + sQPk + "=o2.k WHERE n2.prime<>o2.p)", null);
                 }
                 invokeSql("DROP TABLE " + sHelper, null);
                 oConn.CommitTrans(); bInTrans = false;
@@ -5112,7 +5124,7 @@ namespace DbDo
                 return false;
             }
             try { invokeSql("PRAGMA foreign_keys=ON", null); } catch { }
-            try { DbDoLog.write("Rebuilt look/prm for '" + sTable + "'. maps re-pointed=" + iMapsUpdated); } catch { }
+            try { DbDoLog.write("Rebuilt look/prime for '" + sTable + "'. maps re-pointed=" + iMapsUpdated); } catch { }
             return true;
         }
 
@@ -5199,7 +5211,7 @@ namespace DbDo
                 default:
                     throw new Exception("exportData: unsupported format ." + sExt
                         + ". Supported: csv, tsv, md, json, inix, html, xlsx, docx, db, sqlite, mdb, accdb, dbf. "
-                        + "xlsx and docx require Microsoft Office.");
+                        + "xlsx is written with NPOI and docx with pandoc; neither needs Microsoft Office.");
             }
         }
 
@@ -5211,10 +5223,10 @@ namespace DbDo
         // file by that name already exists. Returns the list of paths
         // actually written.
         //
-        // xlsx and docx require Microsoft Office. The same Word
-        // and Excel Application objects drive html and csv when
-        // requested alongside; this matches dbDot.vbs / HomerLib.vbs
-        // behavior verbatim.
+        // xlsx is written by NPOI and docx by pandoc, so neither needs
+        // Microsoft Office. html and csv are written by DbDo itself. Office is
+        // tried only when those cannot, which keeps the dbDot behaviour without
+        // the dbDot requirement.
         //
         // If sFolder is null/empty, the database file's folder is
         // used. If sBaseName is null/empty, the current table name
@@ -5380,6 +5392,241 @@ namespace DbDo
             return Path.Combine(sFolder, sBase + "_" + DateTime.Now.ToString("yyyyMMddHHmmss") + "." + sExt);
         }
 
+        // ------- FILE CONVERSION: WHAT IS TRIED, AND IN WHAT ORDER -------
+        //
+        // DbDo writes tabular data. The tools that do that without Microsoft
+        // Office are already here, and they are tried first:
+        //
+        //   .xlsx and .xls   NPOI, then Excel through COM
+        //   .docx and .doc   pandoc from Markdown, then Word through COM
+        //   .html            DbDo's own writer, which needs nothing
+        //
+        // The order is HomerView's rule: a tool that drives Office through COM
+        // comes last for everything it is not alone in handling, because it
+        // needs Office installed and of the same bitness, while the others need
+        // nothing but themselves. Office is not removed -- it is the last link,
+        // for the one job it still does better, which is the frequency chart.
+        //
+        // What is NOT attempted: reproducing a document's layout. DbDo exports
+        // rows and columns, so a table in a worksheet and a table in a document
+        // is the whole of the job. The database drivers are untouched by any of
+        // this: ADO and ACE are how DbDo CONNECTS, and connecting to Access,
+        // ODBC and dBase sources is the capability nothing else here has.
+
+        // findPandoc: pandoc on the PATH, or where winget puts it. Empty when
+        // it is not installed, so a caller can say so rather than fail oddly.
+        public static string findPandoc()
+        {
+            try
+            {
+                foreach (string sDir in (Environment.GetEnvironmentVariable("PATH") ?? "").Split(';'))
+                {
+                    if (sDir.Trim().Length == 0) continue;
+                    string sTry = System.IO.Path.Combine(sDir.Trim(), "pandoc.exe");
+                    if (System.IO.File.Exists(sTry)) return sTry;
+                }
+            }
+            catch (Exception) { }
+            foreach (string sFolder in new string[] {
+                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
+                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) })
+            {
+                try
+                {
+                    string sTry = System.IO.Path.Combine(sFolder, @"Pandoc\pandoc.exe");
+                    if (System.IO.File.Exists(sTry)) return sTry;
+                    sTry = System.IO.Path.Combine(sFolder, @"Microsoft\WinGet\Links\pandoc.exe");
+                    if (System.IO.File.Exists(sTry)) return sTry;
+                }
+                catch (Exception) { }
+            }
+            return "";
+        }
+
+        // hasExcelCom: is Excel actually registered? Asking first turns a COM
+        // exception into a sentence somebody can act on.
+        public static bool hasExcelCom()
+        {
+            try { return Type.GetTypeFromProgID("Excel.Application") != null; }
+            catch (Exception) { return false; }
+        }
+
+        // exportSpreadsheet: the current recordset as a worksheet, written by
+        // NPOI -- managed, AnyCPU, no Office, no bitness trap. The same library
+        // DbDo already uses to read and patch workbooks now writes them too.
+        //
+        // The sheet keeps what a reader needs: a header row, frozen so it stays
+        // announced while you scroll; wrapped cells so long values are readable;
+        // columns sized to their content. Excel through COM remains available
+        // as exportSpreadsheetViaExcel and is used only when NPOI cannot.
+        public void exportSpreadsheet(string sDestPath, string sExt)
+        {
+            if (!hasRecordset()) throw new InvalidOperationException("No recordset open.");
+            object bookmarkObj = bookmark;
+
+            List<string> lFields = getDisplayFieldNames();
+            if (lFields.Count == 0) lFields = getFieldNames();
+
+            bool bOld = (sExt ?? "").ToLowerInvariant() == "xls";
+            NPOI.SS.UserModel.IWorkbook wb = bOld
+                ? (NPOI.SS.UserModel.IWorkbook) new NPOI.HSSF.UserModel.HSSFWorkbook()
+                : (NPOI.SS.UserModel.IWorkbook) new NPOI.XSSF.UserModel.XSSFWorkbook();
+            try
+            {
+                string sSheetName = string.IsNullOrEmpty(currentTable) ? "Data" : currentTable;
+                foreach (char c in new char[] { '\\', '/', '?', '*', '[', ']', ':' })
+                    sSheetName = sSheetName.Replace(c, '_');
+                if (sSheetName.Length > 31) sSheetName = sSheetName.Substring(0, 31);
+                NPOI.SS.UserModel.ISheet sheet = wb.CreateSheet(sSheetName);
+
+                NPOI.SS.UserModel.ICellStyle styleHead = wb.CreateCellStyle();
+                NPOI.SS.UserModel.IFont fontHead = wb.CreateFont();
+                fontHead.IsBold = true;
+                styleHead.SetFont(fontHead);
+                styleHead.WrapText = true;
+                styleHead.VerticalAlignment = NPOI.SS.UserModel.VerticalAlignment.Top;
+
+                NPOI.SS.UserModel.ICellStyle styleBody = wb.CreateCellStyle();
+                styleBody.WrapText = true;
+                styleBody.VerticalAlignment = NPOI.SS.UserModel.VerticalAlignment.Top;
+
+                NPOI.SS.UserModel.IRow rowHead = sheet.CreateRow(0);
+                for (int i = 0; i < lFields.Count; i++)
+                {
+                    NPOI.SS.UserModel.ICell cell = rowHead.CreateCell(i);
+                    cell.SetCellValue(lFields[i]);
+                    cell.CellStyle = styleHead;
+                }
+
+                int iRow = 1;
+                moveFirst();
+                while (!eof)
+                {
+                    NPOI.SS.UserModel.IRow row = sheet.CreateRow(iRow++);
+                    for (int i = 0; i < lFields.Count; i++)
+                    {
+                        NPOI.SS.UserModel.ICell cell = row.CreateCell(i);
+                        string sValue = getFieldValue(lFields[i]);
+                        cell.SetCellValue(sValue ?? "");
+                        cell.CellStyle = styleBody;
+                    }
+                    moveNext();
+                }
+
+                // The header stays on screen, and stays announced, while the
+                // rows scroll under it.
+                sheet.CreateFreezePane(0, 1);
+                for (int i = 0; i < lFields.Count; i++)
+                {
+                    try { sheet.AutoSizeColumn(i); } catch (Exception) { }
+                    try
+                    {
+                        // AutoSizeColumn can produce a column wider than Excel
+                        // allows; clamp it rather than write a file Excel warns
+                        // about.
+                        if (sheet.GetColumnWidth(i) > 60 * 256) sheet.SetColumnWidth(i, 60 * 256);
+                    }
+                    catch (Exception) { }
+                }
+
+                using (System.IO.FileStream fs = new System.IO.FileStream(
+                    sDestPath, System.IO.FileMode.Create, System.IO.FileAccess.Write))
+                {
+                    wb.Write(fs);
+                }
+                DbDoLog.write("exportSpreadsheet: wrote " + sDestPath + " with NPOI, "
+                    + (iRow - 1) + " rows, " + lFields.Count + " columns.");
+            }
+            catch (Exception ex)
+            {
+                DbDoLog.write("exportSpreadsheet: NPOI failed (" + ex.Message + "); trying Excel.");
+                if (hasExcelCom())
+                {
+                    exportSpreadsheetViaExcel(sDestPath, sExt);
+                }
+                else
+                {
+                    throw new InvalidOperationException(
+                        "The spreadsheet could not be written: " + ex.Message
+                        + " Excel is not installed either, so there is no second way to try.");
+                }
+            }
+            finally
+            {
+                try { wb.Close(); } catch (Exception) { }
+                try { bookmark = bookmarkObj; } catch (Exception) { }
+            }
+        }
+
+        // exportWord: the current recordset as a document, written by pandoc
+        // from Markdown -- the same pandoc that builds DbDo's own guide.
+        //
+        // A table of rows and columns is what DbDo has and what Markdown says
+        // plainly, so Markdown is the intermediate rather than HTML: it is
+        // readable on its own if pandoc is missing, and pandoc renders it as a
+        // real Word table. Filtered HTML is written by DbDo's own HTML writer,
+        // which needs nothing at all. Word through COM remains available as
+        // exportWordViaWord and is used only when pandoc is absent.
+        public void exportWord(string sDestPath, string sExt, bool bFilteredHtml)
+        {
+            if (!hasRecordset()) throw new InvalidOperationException("No recordset open.");
+
+            if (bFilteredHtml)
+            {
+                // DbDo's own writer produces clean HTML with no Office markup
+                // in it, which is what filtered HTML meant in the first place.
+                exportHtml(sDestPath);
+                DbDoLog.write("exportWord: wrote " + sDestPath + " with DbDo's HTML writer.");
+                return;
+            }
+
+            string sPandoc = findPandoc();
+            if (sPandoc.Length == 0)
+            {
+                DbDoLog.write("exportWord: pandoc not found; trying Word.");
+                if (hasWordCom()) { exportWordViaWord(sDestPath, sExt, bFilteredHtml); return; }
+                throw new InvalidOperationException(
+                    "Writing a Word document needs pandoc, which is free, or Microsoft Word. "
+                    + "Neither was found. Install pandoc with: winget install JohnMacFarlane.Pandoc");
+            }
+
+            string sMarkdown = System.IO.Path.Combine(
+                Homer.Paths.temp(), "export-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".md");
+            try
+            {
+                exportMarkdown(sMarkdown);
+                System.Diagnostics.ProcessStartInfo oStart =
+                    new System.Diagnostics.ProcessStartInfo(sPandoc,
+                        "-f markdown -t docx -o \"" + sDestPath + "\" \"" + sMarkdown + "\"");
+                oStart.UseShellExecute = false;
+                oStart.CreateNoWindow = true;
+                oStart.RedirectStandardError = true;
+                System.Diagnostics.Process oProcess = System.Diagnostics.Process.Start(oStart);
+                string sError = oProcess.StandardError.ReadToEnd();
+                oProcess.WaitForExit();
+                DbDoLog.write("exportWord: pandoc exit " + oProcess.ExitCode
+                    + (sError.Length > 0 ? "; " + sError.Trim() : ""));
+                if (oProcess.ExitCode != 0 || !System.IO.File.Exists(sDestPath))
+                {
+                    if (hasWordCom()) { exportWordViaWord(sDestPath, sExt, bFilteredHtml); return; }
+                    throw new InvalidOperationException(
+                        "pandoc could not write the document: " + sError.Trim());
+                }
+            }
+            finally
+            {
+                try { if (System.IO.File.Exists(sMarkdown)) System.IO.File.Delete(sMarkdown); }
+                catch (Exception) { }
+            }
+        }
+
+        // hasWordCom: is Word actually registered?
+        public static bool hasWordCom()
+        {
+            try { return Type.GetTypeFromProgID("Word.Application") != null; }
+            catch (Exception) { return false; }
+        }
+
         // exportSpreadsheet: write the current recordset to an .xlsx
         // file via Excel.Application late-bound COM. Requires Excel
         // to be installed. Throws InvalidOperationException with a
@@ -5392,7 +5639,7 @@ namespace DbDo
         //
         // For .xls (legacy), the same workflow runs and SaveAs uses
         // xlExcel8 (56) instead of xlWorkbookDefault (51).
-        public void exportSpreadsheet(string sDestPath, string sExt)
+        public void exportSpreadsheetViaExcel(string sDestPath, string sExt)
         {
             if (!hasRecordset()) throw new InvalidOperationException("No recordset open.");
             object bookmarkObj = bookmark;
@@ -6167,7 +6414,7 @@ namespace DbDo
         // bFilteredHtml = true uses wdFormatFilteredHtml (10), which
         // produces clean HTML without MSO-specific markup. Filtered
         // HTML is the user's preferred format for screen readers.
-        public void exportWord(string sDestPath, string sExt, bool bFilteredHtml)
+        public void exportWordViaWord(string sDestPath, string sExt, bool bFilteredHtml)
         {
             if (!hasRecordset()) throw new InvalidOperationException("No recordset open.");
             object bookmarkObj = bookmark;
@@ -9188,7 +9435,7 @@ namespace DbDo
                     // unusual case where the user profile path is
                     // unset (portable installs, sandboxes, etc.)
                     string sExeDir = System.IO.Path.GetDirectoryName(Application.ExecutablePath) ?? ".";
-                    sIni = System.IO.Path.Combine(sExeDir, "DbDo.inix");
+                    sIni = Homer.Paths.configFile("DbDo.inix");
                 }
                 else
                 {
@@ -9943,7 +10190,7 @@ namespace DbDo
         {
             string sLow = (sRaw ?? "").ToLowerInvariant();
             if (sLow.Contains("unique constraint"))
-                return "A value that must be unique (such as prm or a key) already exists in another record. Change the value and try again.";
+                return "A value that must be unique (such as prime or a key) already exists in another record. Change the value and try again.";
             if (sLow.Contains("foreign key constraint"))
                 return "Another table still references this record, so the database refused the change. Remove or repoint the related records first.";
             if (sLow.Contains("not null constraint"))
@@ -12037,7 +12284,7 @@ namespace DbDo
             // New Copy: duplicate the current row. Pre-fills the New
             // Record dialog with all visible field values from the
             // current row; the user reviews, edits as needed, and
-            // OK inserts as a new row. Primary key and 'prm' are
+            // OK inserts as a new row. Primary key and 'prime' are
             // cleared automatically since both must be unique.
             miRecNewCopy     = addItem(miEdit, "Ne&w Copy...", "Copy Record as New",    Keys.Control | Keys.Shift | Keys.N, recNewCopyClicked);
             // Mail Record: build a mailto: URI from the current row.
@@ -12710,8 +12957,8 @@ namespace DbDo
                 "Shift+O. Counterpart to Say Where Filter (Shift+W). Reports 'No order applied' when nothing is sorted.");
             add("Say URL",            "Speak the current record's url field",
                 "Shift+U. Reports '(empty)' when the field is blank.");
-            add("Say Prime",          "Speak the current record's prm (unique-key) field",
-                "Shift+P. The prm field is the unique/primary-key expression (formerly named 'prm'). Falls back to a legacy 'prm' column. Reports 'blank' when empty.");
+            add("Say Prime",          "Speak the current record's prime (unique-key) field",
+                "Shift+P. The prime field is the unique/primary-key expression (formerly named 'prime'). Falls back to a legacy 'prime' column. Reports 'blank' when empty.");
             add("Say Find",           "Speak the current Find search string",
                 "Shift+F. Reports the most recent Find substring (or regex). Says 'No find string' when nothing has been searched yet. Companion to Say Where Filter (Shift+W).");
             add("Say Yield",          "Speak the current row count (after filter)", "");
@@ -12768,11 +13015,11 @@ namespace DbDo
                 "Type-aware: numeric -> histogram or box plot, date -> timeline or seasonal, boolean -> pie, text -> Pareto bar.");
             add("Copy Cell",          "Copy the value of the cell under the virtual cursor to the clipboard", "");
             add("Append Cell",        "Append the value of the cell under the virtual cursor to the clipboard", "");
-            add("Copy Visible Cells",  "Copy the current record's visible cells to the clipboard as tab-separated values. Hidden columns (added, edited, look, prm, url, tags, notes, marked) are skipped; use Copy Record for the full set.", "");
+            add("Copy Visible Cells",  "Copy the current record's visible cells to the clipboard as tab-separated values. Hidden columns (added, edited, look, prime, url, tags, notes, marked) are skipped; use Copy Record for the full set.", "");
             add("Copy Column",        "Copy every value in the column under the virtual cursor to the clipboard, one value per line with the column name as a header line",
                 "Walks all rows and restores the cursor when done. Paste into a spreadsheet to drop the column into a single column of cells. Tabs and line breaks inside a value are flattened so the column stays aligned.");
             add("Copy Grid",          "Copy the whole visible grid to the clipboard as tab-separated values with a header row",
-                "Header row of visible column names, then every row, tab-separated. Hidden columns (added, edited, look, prm, url, tags, notes, marked) are skipped, matching Copy Visible Cells. Paste straight into a spreadsheet; for a file on disk use Export Data instead.");
+                "Header row of visible column names, then every row, tab-separated. Hidden columns (added, edited, look, prime, url, tags, notes, marked) are skipped, matching Copy Visible Cells. Paste straight into a spreadsheet; for a file on disk use Export Data instead.");
             add("Edit Settings", "Open the Settings dialog",
                 "Exposes UI Mode, Command Echo, and a Field Validation... sub-dialog for per-field regex patterns on the current table. 'Open file...' button edits DbDo.inix directly for advanced settings.");
             add("Switch-Focus",       "Switch focus between the GUI window and the console", "");
@@ -15019,7 +15266,7 @@ namespace DbDo
             if (db == null || !db.isOpen())
             { Say.say("No database open"); return; }
             if (!db.hasRecordset())
-            { speakOrShow("Status", db.filePath ?? "Database open, no table selected", 101); return; }
+            { speakOrShow("Status", "status: " + (db.filePath ?? "database open, no table selected"), 101); return; }
             StringBuilder sb = new StringBuilder();
             // Marked state at the front so the user hears it first.
             // Only announce when true (matching the status bar
@@ -15037,7 +15284,7 @@ namespace DbDo
             sb.Append(" row ").Append(db.absolutePosition).Append(" of ").Append(db.recordCount);
             if (db.filter.Length > 0) sb.Append("; filter: ").Append(db.filter);
             if (db.sort.Length > 0) sb.Append("; sort: ").Append(db.sort);
-            speakOrShow("Status", sb.ToString(), 101);
+            speakOrShow("Status", "status: " + sb.ToString(), 101);
         }
 
         // saySayDatabase: Shift+D. Speak the database name (single-
@@ -15052,7 +15299,9 @@ namespace DbDo
             string sName = Path.GetFileName(sPath);
             // Single-press: name only. Double-press: full path
             // (speakOrShow's standard memo dialog handles this).
-            speakOrShow("Database", sName + " -- full path: " + sPath, 124);
+            // "database: <file> in <folder>" rather than a path with a dash in it,
+            // which a synthesizer reads as two dashes.
+            speakOrShow("Database", "database: " + sName + " in " + sPath, 124);
         }
 
         // saySayOrder: Shift+O. Speak the active sort/order
@@ -15078,9 +15327,9 @@ namespace DbDo
         private void saySayGoto(object sender, EventArgs evArgs)
         {
             if (string.IsNullOrEmpty(sLastJumpSubstring))
-            { Say.say("No jump search active"); return; }
+            { Say.say("goto: none"); return; }
             string sCol = string.IsNullOrEmpty(sLastJumpColumn) ? "(any column)" : sLastJumpColumn;
-            speakOrShow("Goto", sCol + ": \"" + sLastJumpSubstring + "\"", 127);
+            speakOrShow("Goto", "goto: " + sLastJumpSubstring + " in " + sCol, 127);
         }
 
         // saySayPath: Shift+P retired in v1.0.99 (replaced by Say
@@ -15103,7 +15352,7 @@ namespace DbDo
             StringBuilder sb = new StringBuilder();
             sb.Append(db.recordCount).Append(" row").Append(db.recordCount == 1 ? "" : "s");
             if (db.filter.Length > 0) sb.Append(" (filter: ").Append(db.filter).Append(")");
-            speakOrShow("Yield", sb.ToString(), 103);
+            speakOrShow("Yield", "yield: " + sb.ToString(), 103);
         }
 
         // saySayTables: Shift+F4. Speak the names of tables that
@@ -15137,11 +15386,11 @@ namespace DbDo
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
             { Say.say("No record selected"); return; }
             if (!db.hasField(Metadata.MarkedColumn))
-            { Say.say("This table has no marked column"); return; }
+            { Say.say("mark: this table has no marked column"); return; }
             bool bMarked;
             try { bMarked = isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn) ?? ""); }
             catch { bMarked = false; }
-            Say.sayForced(bMarked ? "Marked" : "Unmarked");
+            Say.sayForced(bMarked ? "mark: marked" : "mark: unmarked");
         }
 
         // saySayMarked: Shift+L. Speak the look-column values of every
@@ -15327,7 +15576,7 @@ namespace DbDo
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
             { Say.say("No record selected"); return; }
             if (!db.hasField("added"))
-            { Say.say("This table has no added column"); return; }
+            { Say.say("added: this table has no added column"); return; }
             string sVal = db.getFieldValue("added");
             string sSpoken = formatDateHumanFriendly(sVal);
             if (string.IsNullOrEmpty(sSpoken)) sSpoken = "blank";
@@ -15339,20 +15588,38 @@ namespace DbDo
         // and the Alt+Control chords announce, read through the same
         // virtCellValue path. This is the synchronization guarantee:
         // Shift+C always repeats the cell the user last heard.
+        // ------- THE SAY COMMANDS ALL ANSWER IN ONE SHAPE -------
+        //
+        //     <name>: <value>
+        //
+        // where <name> is the word in the Say menu and in the hotkey document,
+        // so the answer says which question was asked. That matters more than
+        // it looks: somebody walking Shift+A to Shift+Z loses their place, and
+        // an answer of "Unmarked" or "4 rows" does not say which key produced
+        // it. "mark: unmarked" and "yield: 4 rows" do.
+        //
+        // An empty answer keeps the label and says none: "find: none", not "No
+        // find string". A count matches its noun. Two commands use the COLUMN
+        // NAME as the label instead of the menu word -- Say Cell and Say Id --
+        // because there the column is the more useful word, and it is what the
+        // grid already calls that field.
+        //
+        // One press speaks; a second press within the double-press window shows
+        // the same text in a read-only dialog to copy from. That is
+        // speakOrShow, and it is why every answer is built as text first.
+
         private void saySayCell(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
             { Say.say("No record selected"); return; }
             string sCol = virtCurrentColumnName();
-            if (string.IsNullOrEmpty(sCol)) { Say.say("No virtual column at cursor"); return; }
+            if (string.IsNullOrEmpty(sCol)) { Say.say("cell: no column at the cursor"); return; }
             string sVal = virtCellValue(iVirtualRow, iVirtualCol);
             if (string.IsNullOrEmpty(sVal)) sVal = "blank";
-            // Cell speech pattern: the column header, the word "row"
-            // with the row number, then the value -- each its own
-            // queued message so they are heard with a natural pause
-            // between them rather than as one run-on string.
-            speakOrShowParts("Cell",
-                new List<string> { sCol, "row " + iVirtualRow, sVal }, 117);
+            // The column name IS the label, and the row number is left out:
+            // the list view announced the position when the row was reached,
+            // and Say Status repeats it on demand. One line, two facts.
+            speakOrShow("Cell", sCol + ": " + sVal, 117);
         }
 
         // saySayFilter: speak the active ADO filter expression. Empty
@@ -15391,10 +15658,13 @@ namespace DbDo
             if (grid != null)
                 foreach (ColumnHeader oCol in grid.Columns) lsCols.Add(oCol.Text);
             if (lsCols.Count == 0)
-            { Say.say("No columns shown"); return; }
+            { Say.say("select: none"); return; }
             // One queued message per column, for a natural pause
             // between column names rather than a run-on list.
-            speakOrShowParts("Columns", lsCols, 123);
+            // One line rather than one part per column: the answer is a list,
+            // and a list read as separate utterances cannot be taken in at a
+            // glance by ear.
+            speakOrShow("Columns", "select: " + string.Join(", ", lsCols.ToArray()), 123);
         }
 
         private void saySayFilter(object sender, EventArgs evArgs)
@@ -15403,8 +15673,8 @@ namespace DbDo
             { Say.say("No recordset open"); return; }
             string sFilter = db.filter ?? "";
             if (string.IsNullOrEmpty(sFilter))
-            { Say.say("No filter active"); return; }
-            speakOrShow("Filter", "filter: " + sFilter, 118);
+            { Say.say("where: none"); return; }
+            speakOrShow("Filter", "where: " + sFilter, 118);
         }
 
         // saySayFind: speak the current Find search string. Shift+F.
@@ -15421,7 +15691,7 @@ namespace DbDo
                 try { sFind = SearchHistory.lastText(SearchHistory.SectionFind) ?? ""; } catch { }
             }
             if (string.IsNullOrEmpty(sFind))
-            { Say.say("No find string"); return; }
+            { Say.say("find: none"); return; }
             speakOrShow("Find", "find: " + sFind, 126);
         }
 
@@ -15439,7 +15709,7 @@ namespace DbDo
             }
             catch { }
             if (string.IsNullOrEmpty(sPk))
-            { Say.say("This table has no detected primary key"); return; }
+            { Say.say("id: this table has no primary key"); return; }
             string sVal = "";
             try { sVal = db.getFieldValue(sPk) ?? ""; } catch { }
             if (string.IsNullOrEmpty(sVal)) sVal = "blank";
@@ -15475,7 +15745,7 @@ namespace DbDo
             // related). The text we display is the brief Kin form.
             string sSummary = buildRelatedSummary();
             if (string.IsNullOrEmpty(sSummary)) sSummary = "(no related records found)";
-            speakOrShow("Related", sSummary, 121);
+            speakOrShow("Related", "related: " + sSummary, 121);
         }
 
         // Related-summary builder. Lists parents (via outbound *_id
@@ -15541,7 +15811,7 @@ namespace DbDo
                 }
 
                 // Maps associations: generic typed relations stored in
-                // the standard maps table, identified by (table, prm)
+                // the standard maps table, identified by (table, prime)
                 // pairs. Both directions are reported; 'to' marks
                 // relations where this record is the subject, 'from'
                 // where it is the object. One look line per related
@@ -15648,9 +15918,9 @@ namespace DbDo
             return sb.ToString().Trim();
         }
 
-        // sCurrentPrmValue: the prm value of the current row, or ""
-        // when the table has no prm column or no current row. The
-        // (table, prm) pair is a record's identity in the maps model.
+        // sCurrentPrmValue: the prime value of the current row, or ""
+        // when the table has no prime column or no current row. The
+        // (table, prime) pair is a record's identity in the maps model.
         //
         // Two-tier read: the recordset field when present, else a
         // direct SQL lookup keyed on the row's primary key. The SQL
@@ -15662,13 +15932,13 @@ namespace DbDo
             if (db == null || !db.hasRecordset() || db.recordCount == 0) return "";
             try
             {
-                // Read the prm column straight from the open recordset.
+                // Read the prime column straight from the open recordset.
                 if (db.hasField(Metadata.PrimeColumn))
                 {
                     string sFromRecordset = db.getFieldValue(Metadata.PrimeColumn) ?? "";
                     if (!string.IsNullOrEmpty(sFromRecordset)) return sFromRecordset;
                 }
-                // Fallback: SELECT prm FROM <table> WHERE <pk> = <value>.
+                // Fallback: SELECT prime FROM <table> WHERE <pk> = <value>.
                 // Covers recordsets opened with a column subset and providers
                 // that omit generated columns from the field collection.
                 string sTable = db.currentTable;
@@ -15684,12 +15954,12 @@ namespace DbDo
                         sTable, Metadata.PrimeColumn, sPk, sPkValue, 1, out iFound);
                     if (lVals.Count > 0 && !string.IsNullOrEmpty(lVals[0]))
                     {
-                        DbDoLog.write("sCurrentPrmValue: SQL fallback via prm"
+                        DbDoLog.write("sCurrentPrmValue: SQL fallback via prime"
                             + " for " + sTable + "." + sPk + "=" + sPkValue);
                         return lVals[0];
                     }
                 }
-                catch { /* prm column absent on this table */ }
+                catch { /* prime column absent on this table */ }
                 return "";
             }
             catch (Exception ex)
@@ -15713,9 +15983,9 @@ namespace DbDo
             speakOrShow("URL", Metadata.UrlColumn + ": " + sVal, 122);
         }
 
-        // saySayPrime: speak the 'prm' field -- the unique/primary-key
+        // saySayPrime: speak the 'prime' field -- the unique/primary-key
         // expression -- of the current record. Shift+P. Falls back to the
-        // legacy 'prm' column for databases not yet migrated to 'prm';
+        // legacy 'prime' column for databases not yet migrated to 'prime';
         // tables with neither report so.
         private void saySayPrime(object sender, EventArgs evArgs)
         {
@@ -16262,7 +16532,7 @@ namespace DbDo
             List<string> lAllColumns = db.getFieldNames();
 
             // Build the named field sets:
-            //   Distinct = the summary/key columns (look + prm)
+            //   Distinct = the summary/key columns (look + prime)
             //   Edit     = the editable fields (everything that isn't an
             //              admin or computed column -- the nonstandard
             //              columns plus notes/tags/url)
@@ -16281,7 +16551,7 @@ namespace DbDo
             using (LbcDialog dlg = new LbcDialog("Select Columns", this))
             {
                 dlg.addLabel("Which columns should the listview show for " + sTable + "?");
-                dlg.addLabel("Custom = pick an exact sequence. Distinct = look + prm.");
+                dlg.addLabel("Custom = pick an exact sequence. Distinct = look + prime.");
                 dlg.addLabel("Edit = the editable fields. All = every field.");
                 sBtn = dlg.runWithButtons(new string[]
                     { "&Custom...", "&Edit", "&Distinct", "&All", "Cancel" });
@@ -18091,10 +18361,10 @@ namespace DbDo
         // lStandardTableDdl: the CREATE statements for one table in
         // the standard shape -- the user's distinct fields surrounded
         // by the standard columns: <singular>_id, added, edited
-        // BEFORE them; notes, tags, look, prm, marked AFTER. look is
-        // a skip-empty concatenation of every distinct field; prm is
+        // BEFORE them; notes, tags, look, prime, marked AFTER. look is
+        // a skip-empty concatenation of every distinct field; prime is
         // the positional concatenation; the edited trigger bumps only
-        // on a real data change; the prm index is UNIQUE.
+        // on a real data change; the prime index is UNIQUE.
         private static List<string> lStandardTableDdl(string sTable, List<string[]> lFieldDefs)
         {
             string sSingular = sTable.EndsWith("s") ? sTable.Substring(0, sTable.Length - 1) : sTable;
@@ -18123,7 +18393,7 @@ namespace DbDo
                 sbCreate.Append("\"" + aF[0] + "\" " + aF[1] + ", ");
             sbCreate.Append("notes TEXTMARKDOWN, tags TEXTMEMO, ");
             sbCreate.Append("look TEXT GENERATED ALWAYS AS (" + sbLook + ") STORED, ");
-            sbCreate.Append("prm TEXT GENERATED ALWAYS AS (" + sbPrm + ") STORED, ");
+            sbCreate.Append("prime TEXT GENERATED ALWAYS AS (" + sbPrm + ") STORED, ");
             sbCreate.Append("marked INTEGER NOT NULL DEFAULT 0)");
 
             List<string> lTrigCols = new List<string>(lCols);
@@ -18144,7 +18414,7 @@ namespace DbDo
             List<string> lDdl = new List<string>();
             lDdl.Add(sbCreate.ToString());
             lDdl.Add(sTrigger);
-            lDdl.Add("CREATE UNIQUE INDEX \"idx_" + sTable + "_prm\" ON \"" + sTable + "\" (prm)");
+            lDdl.Add("CREATE UNIQUE INDEX \"idx_" + sTable + "_prime\" ON \"" + sTable + "\" (prime)");
             return lDdl;
         }
 
@@ -18158,11 +18428,11 @@ namespace DbDo
             if (bMaps)
             {
                 List<string[]> lMapFields = new List<string[]>();
-                foreach (string sC in new string[] { "tbl1", "prm1", "kind", "tbl2", "prm2" })
+                foreach (string sC in new string[] { "tbl1", "prime1", "kind", "tbl2", "prime2" })
                     lMapFields.Add(new string[] { sC, "TEXTLINE" });
                 lDdl.AddRange(lStandardTableDdl("maps", lMapFields));
-                lDdl.Add("CREATE INDEX idx_maps_side1 ON maps (tbl1, prm1)");
-                lDdl.Add("CREATE INDEX idx_maps_side2 ON maps (tbl2, prm2)");
+                lDdl.Add("CREATE INDEX idx_maps_side1 ON maps (tbl1, prime1)");
+                lDdl.Add("CREATE INDEX idx_maps_side2 ON maps (tbl2, prime2)");
             }
             if (bLookups)
             {
@@ -18655,9 +18925,9 @@ namespace DbDo
         // the normal SQLite open. The table is named after the
         // file's base name; its columns are the union of keys in
         // first-encountered order, all TEXTLINE, wrapped in the
-        // standard-table scaffolding (id, prm, marked, edited
+        // standard-table scaffolding (id, prime, marked, edited
         // trigger) plus the builtin maps and lookups tables, so the
-        // import is a first-class DbDo database. Each record's prm
+        // import is a first-class DbDo database. Each record's prime
         // is its section heading, suffixed when repeated. The
         // conversion uses its own short-lived manager so this
         // window's open database is untouched until the converted
@@ -18769,7 +19039,7 @@ namespace DbDo
             if (string.IsNullOrEmpty(sXlsxPath)) throw new ArgumentException("importWorkbookFile requires a path.");
             if (!File.Exists(sXlsxPath)) throw new FileNotFoundException("Workbook not found: " + sXlsxPath);
 
-            string[] aReservedRename = new string[] { "added", "edited", "look", "prm", "prm", "marked" };
+            string[] aReservedRename = new string[] { "added", "edited", "look", "prime", "prime", "marked" };
             string sDbPath = Path.Combine(Path.GetTempPath(),
                 "DbDo_managed_" + Guid.NewGuid().ToString("N") + ".db");
 
@@ -18877,7 +19147,7 @@ namespace DbDo
                             lFieldDefs.Add(new string[] { sHdr, "TEXTLINE" });
                             lColTarget.Add(sHdr);
                         }
-                        // Guarantee at least one distinct field so look/prm
+                        // Guarantee at least one distinct field so look/prime
                         // are well-formed even for an all-notes/tags sheet.
                         if (lFieldDefs.Count == 0) lFieldDefs.Add(new string[] { "value", "TEXTLINE" });
 
@@ -18906,7 +19176,7 @@ namespace DbDo
                             try { managerImport.invokeSql(sInsert, null); iRowsImported++; }
                             catch (Exception exRow)
                             {
-                                // A duplicate prm (an identical data row) trips
+                                // A duplicate prime (an identical data row) trips
                                 // the UNIQUE index; skip it, keep importing.
                                 try { DbDoLog.write("importWorkbookFile skipped a row in " + sTable + ": " + exRow.Message); } catch { }
                             }
@@ -19233,13 +19503,13 @@ namespace DbDo
         // (a sparse title/metadata row above the column names is skipped); a
         // notes/tags column routes into the standard column, other standard-
         // name collisions get an "_in" suffix, and a duplicate row that would
-        // trip the UNIQUE prm index is skipped. Returns rows inserted, or -1
+        // trip the UNIQUE prime index is skipped. Returns rows inserted, or -1
         // if there was no usable header-plus-data and no table was made.
         private static int buildShellTableFromGrid(DbDoManager managerImport, string sSheetName,
             List<string[]> aGrid, List<string> lTableNames)
         {
             if (aGrid == null || aGrid.Count < 2) return -1;
-            string[] aReservedRename = new string[] { "added", "edited", "look", "prm", "prm", "marked" };
+            string[] aReservedRename = new string[] { "added", "edited", "look", "prime", "prime", "marked" };
 
             int iScan = Math.Min(aGrid.Count - 1, 14);
             int iWidest = 0;
@@ -19434,7 +19704,7 @@ namespace DbDo
             }
             if (lCols == null) throw new InvalidOperationException("No header row was found in " + Path.GetFileName(sSourcePath) + ".");
 
-            string[] aReservedRename = new string[] { "added", "edited", "look", "prm", "prm", "marked" };
+            string[] aReservedRename = new string[] { "added", "edited", "look", "prime", "prime", "marked" };
             string sDbPath = Path.Combine(Path.GetTempPath(),
                 "DbDo_managed_" + Guid.NewGuid().ToString("N") + ".db");
             try
@@ -19518,7 +19788,7 @@ namespace DbDo
         {
             if (string.IsNullOrEmpty(sDbfPath)) throw new ArgumentException("importDbfToShell requires a path.");
             DbfReader.Result res = DbfReader.read(sDbfPath);
-            string[] aReservedRename = new string[] { "added", "edited", "look", "prm", "prm", "marked" };
+            string[] aReservedRename = new string[] { "added", "edited", "look", "prime", "prime", "marked" };
             string sDbPath = Path.Combine(Path.GetTempPath(),
                 "DbDo_managed_" + Guid.NewGuid().ToString("N") + ".db");
             try
@@ -19601,11 +19871,11 @@ namespace DbDo
         // importWorkbookFile, so the result is identical whatever the source
         // format: a column named notes or tags routes into the standard
         // column, other standard-name collisions get an "_in" suffix, and a
-        // duplicate row that would trip the UNIQUE prm index is skipped.
+        // duplicate row that would trip the UNIQUE prime index is skipped.
         internal string importAdoToShell(string sSourcePath)
         {
             if (string.IsNullOrEmpty(sSourcePath)) throw new ArgumentException("importAdoToShell requires a path.");
-            string[] aReservedRename = new string[] { "added", "edited", "look", "prm", "prm", "marked" };
+            string[] aReservedRename = new string[] { "added", "edited", "look", "prime", "prime", "marked" };
             string sDbPath = Path.Combine(Path.GetTempPath(),
                 "DbDo_managed_" + Guid.NewGuid().ToString("N") + ".db");
             int iTablesImported = 0, iRowsImported = 0;
@@ -19899,7 +20169,7 @@ namespace DbDo
                 MessageBox.Show(this,
                     "No sample databases found in:\n\n" + ScriptHelper.getSampleDir()
                     + "\n\nEach sample lives in its own subfolder there (for example, "
-                    + "Samples\\music\\music.db). Drop a database into such a subfolder and try again.",
+                    + "templates\\music\\music.db). Drop a database into such a subfolder and try again.",
                     "Sample Databases", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -20607,10 +20877,10 @@ namespace DbDo
                 return;
             }
             // New Record presents only the editable fields. The admin
-            // fields (the primary key, added, edited, look, prm,
+            // fields (the primary key, added, edited, look, prime,
             // marked) are filled by the database itself: the key
             // auto-increments, added/edited default to
-            // current_timestamp, look/prm are generated expressions,
+            // current_timestamp, look/prime are generated expressions,
             // and marked defaults to 0.
             List<string> lFields = db.getEditableFieldNames();
             Dictionary<string, string> dInitial = new Dictionary<string, string>();
@@ -20659,12 +20929,12 @@ namespace DbDo
         { runRecordViews(1, true); }
 
         // warnDuplicateIdentity: a New / New-Copy insert was rejected
-        // because the record's identity -- the generated prm field, built
+        // because the record's identity -- the generated prime field, built
         // from a specific combination of content fields -- duplicates an
         // existing record. That is an ordinary data condition, not a
         // malfunction and not a sign that adding records is broken, so this
         // explains it plainly: it names the exact fields the identity is
-        // built from (read from the table's prm definition, so it is right
+        // built from (read from the table's prime definition, so it is right
         // even when only some fields count) and shows the values entered for
         // them, which is what is duplicated. The caller then reopens the
         // editor with the entries intact so one field can be changed and the
@@ -21214,7 +21484,7 @@ namespace DbDo
                 // the substantive columns a user maintains -- skipping any
                 // that are null or blank, so the reader hears only the
                 // fields that actually carry information. Admin columns
-                // (the key, added/edited, look/prm, marked) are omitted.
+                // (the key, added/edited, look/prime, marked) are omitted.
                 List<string> lFields = db.getEditableFieldNames();
                 if (lFields.Count == 0)
                 {
@@ -21509,7 +21779,7 @@ namespace DbDo
         // New Copy (Ctrl+Shift+N): duplicate the current row. Opens
         // the New Record dialog pre-filled with the current row's
         // distinct (substantive) field values. The primary key,
-        // 'prm', 'look' generated columns, and timestamps are NOT
+        // 'prime', 'look' generated columns, and timestamps are NOT
         // pre-filled -- they regenerate from the column defaults
         // and the trigger system. The user can edit any field
         // before pressing OK to insert.
@@ -21531,7 +21801,7 @@ namespace DbDo
             // current row's value -- the multiple-employees-at-one-
             // company case: most values carry over, the user edits
             // the few that differ. Admin fields (the key, added,
-            // edited, look, prm, marked) are never in this list and
+            // edited, look, prime, marked) are never in this list and
             // regenerate from defaults, triggers, and expressions.
             foreach (string s in lFields)
             {
@@ -24548,7 +24818,7 @@ namespace DbDo
             lChildren.Sort(StringComparer.OrdinalIgnoreCase);
 
             // Maps targets: when the database has a maps table and the
-            // current row has a prm identity, every distinct (kind,
+            // current row has a prime identity, every distinct (kind,
             // other-table, direction) group becomes a drill choice,
             // labeled "<table> via <kind>" -- with "(incoming)" marking
             // relations where this record is the OBJECT. So on a
@@ -24563,7 +24833,7 @@ namespace DbDo
             string sPrmValue = sCurrentPrmValue();
             DbDoLog.write("Enter Child: table=" + sParentTable + " pk=" + sParentPk
                 + "=" + sParentPkValue + " fkChildren=" + lChildren.Count
-                + " prm=" + (string.IsNullOrEmpty(sPrmValue) ? "(none)" : "present")
+                + " prime=" + (string.IsNullOrEmpty(sPrmValue) ? "(none)" : "present")
                 + " maps=" + (db.hasMapsTable() ? "yes" : "no"));
             if (!string.IsNullOrEmpty(sPrmValue) && db.hasMapsTable())
             {
@@ -24650,7 +24920,7 @@ namespace DbDo
                     + "Table: " + sParentTable + "; primary key " + sParentPk + " = " + sParentPkValue + "\r\n"
                     + "Tables referencing " + sParentPk + ": none\r\n"
                     + "maps table present: " + (db.hasMapsTable() ? "yes" : "NO") + "\r\n"
-                    + "This row's prm value: " + (string.IsNullOrEmpty(sPrmValue) ? "MISSING" : sPrmValue) + "\r\n"
+                    + "This row's prime value: " + (string.IsNullOrEmpty(sPrmValue) ? "MISSING" : sPrmValue) + "\r\n"
                     + "maps rows touching this record: 0\r\n\r\n"
                     + "If the database file above is not the one you expect, open the\r\n"
                     + "intended file; DbDo reopens the last file used.");
@@ -24685,12 +24955,12 @@ namespace DbDo
                     // selectTableFiltered with an IN-subquery WHERE --
                     // maps joined to maps through inline derived
                     // edge tables (both directions of every map row),
-                    // landing on the target prm set. Single-base-table
+                    // landing on the target prime set. Single-base-table
                     // SELECT, so the view stays updatable; no row cap
                     // and no client-side Filter involved.
                     string sVia = aTwoHopSel[0], sTarget = aTwoHopSel[1];
-                    string sEdges = "(SELECT tbl1 ft, prm1 fu, tbl2 tt, prm2 tu FROM maps"
-                        + " UNION ALL SELECT tbl2, prm2, tbl1, prm1 FROM maps)";
+                    string sEdges = "(SELECT tbl1 ft, prime1 fu, tbl2 tt, prime2 tu FROM maps"
+                        + " UNION ALL SELECT tbl2, prime2, tbl1, prime1 FROM maps)";
                     string sWhere = db.primeColumnFor(sTarget) + " IN (SELECT e2.tu FROM " + sEdges + " e1"
                         + " JOIN " + sEdges + " e2 ON e2.ft = e1.tt AND e2.fu = e1.tu"
                         + " WHERE e1.ft = " + DbDoManager.sQuoteSqlLiteral(sParentTable)
@@ -24706,7 +24976,7 @@ namespace DbDo
                     // Maps drill: the target table opens through
                     // selectTableFiltered with the IN-subquery this
                     // architecture was designed around -- the WHERE
-                    // selects the prm values on the other side of the
+                    // selects the prime values on the other side of the
                     // matching map rows. Single-base-table SELECT, so
                     // the related view stays UPDATABLE; the previous
                     // approach (ADO client-side Filter as an OR
@@ -24714,14 +24984,14 @@ namespace DbDo
                     string sKind = aMapsSel[0], sOther = aMapsSel[1], sDir = aMapsSel[2];
                     string sPrimeCol = db.primeColumnFor(sOther);
                     string sWhere = (sDir == "subject")
-                        ? sPrimeCol + " IN (SELECT prm2 FROM maps WHERE tbl1 = "
+                        ? sPrimeCol + " IN (SELECT prime2 FROM maps WHERE tbl1 = "
                           + DbDoManager.sQuoteSqlLiteral(sParentTable)
-                          + " AND prm1 = " + DbDoManager.sQuoteSqlLiteral(sPrmValue)
+                          + " AND prime1 = " + DbDoManager.sQuoteSqlLiteral(sPrmValue)
                           + " AND kind = " + DbDoManager.sQuoteSqlLiteral(sKind)
                           + " AND tbl2 = " + DbDoManager.sQuoteSqlLiteral(sOther) + ")"
-                        : sPrimeCol + " IN (SELECT prm1 FROM maps WHERE tbl2 = "
+                        : sPrimeCol + " IN (SELECT prime1 FROM maps WHERE tbl2 = "
                           + DbDoManager.sQuoteSqlLiteral(sParentTable)
-                          + " AND prm2 = " + DbDoManager.sQuoteSqlLiteral(sPrmValue)
+                          + " AND prime2 = " + DbDoManager.sQuoteSqlLiteral(sPrmValue)
                           + " AND kind = " + DbDoManager.sQuoteSqlLiteral(sKind)
                           + " AND tbl1 = " + DbDoManager.sQuoteSqlLiteral(sOther) + ")";
                     openDrillChild(sOther, sWhere);
@@ -25072,7 +25342,7 @@ namespace DbDo
         // record in a focused dialog. The widget matches the
         // column's declared type -- a Markdown/memo column gets a
         // multi-line box, anything else a single line. Saves only
-        // that field; the edited trigger and look/prm regenerate as
+        // that field; the edited trigger and look/prime regenerate as
         // usual on update.
         private void editStandardField(string sColumn, string sTitle)
         {
@@ -26805,10 +27075,10 @@ namespace DbDo
         }
 
         // editLookPrmFields: reconfigure which component fields build the
-        // current table's 'look' summary and 'prm' unique key. Because both
+        // current table's 'look' summary and 'prime' unique key. Because both
         // are STORED generated columns, a change rebuilds the table (the
         // safe create-new / copy / drop / rename sequence) and re-points any
-        // maps references whose prm changed. The chosen lists are saved to
+        // maps references whose prime changed. The chosen lists are saved to
         // [Table:<name>] LookFields / PrmFields in the per-database file.
         private void editLookPrmFields()
         {
@@ -26816,7 +27086,7 @@ namespace DbDo
                 || string.IsNullOrEmpty(db.currentTable))
             {
                 MessageBox.Show(this,
-                    "Open a base table first; look and prm are per-table.",
+                    "Open a base table first; look and prime are per-table.",
                     "Look/Prm Fields", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -26837,13 +27107,13 @@ namespace DbDo
             if (string.IsNullOrEmpty(sCurLook))
                 sCurLook = string.Join(", ", db.lParseGeneratedFields(sTable, "look").ToArray());
             if (string.IsNullOrEmpty(sCurPrm))
-                sCurPrm = string.Join(", ", db.lParseGeneratedFields(sTable, "prm").ToArray());
+                sCurPrm = string.Join(", ", db.lParseGeneratedFields(sTable, "prime").ToArray());
 
             LbcDialog dlg = new LbcDialog("Look/Prm Fields: " + sTable, this);
             try
             {
-                dlg.addLabel("Choose the fields that build this table's look and prm.");
-                dlg.addLabel("look is the readable summary; prm is the unique key.");
+                dlg.addLabel("Choose the fields that build this table's look and prime.");
+                dlg.addLabel("look is the readable summary; prime is the unique key.");
                 dlg.addLabel("Saving a change REBUILDS the table to recompute them.");
                 dlg.addSeparator();
                 TextBox tbLook = dlg.addTextLine("Look fields (comma-separated, in order):", sCurLook);
@@ -26867,15 +27137,15 @@ namespace DbDo
                     string.Join(", ", splitFieldList(sCurPrm).ToArray()), StringComparison.OrdinalIgnoreCase);
                 if (bLookSame && bPrmSame)
                 {
-                    Say.say("No change to look or prm fields.");
+                    Say.say("No change to look or prime fields.");
                     return;
                 }
 
-                // Confirm the rebuild; warn about maps re-pointing when prm changes.
-                string sMsg = "This rebuilds table '" + sTable + "' to recompute look and prm.";
+                // Confirm the rebuild; warn about maps re-pointing when prime changes.
+                string sMsg = "This rebuilds table '" + sTable + "' to recompute look and prime.";
                 if (!bPrmSame)
-                    sMsg += "\n\nBecause the prm key changes, existing relationship references in "
-                          + "maps will be updated to match the new prm.";
+                    sMsg += "\n\nBecause the prime key changes, existing relationship references in "
+                          + "maps will be updated to match the new prime.";
                 sMsg += "\n\nContinue?";
                 if (MessageBox.Show(this, sMsg, "Rebuild Table",
                         MessageBoxButtons.OKCancel, MessageBoxIcon.Warning) != DialogResult.OK)
@@ -28389,8 +28659,8 @@ namespace DbDo
         }
 
         // cmdSayPrime: console form of Shift+P Say Prime. Prints the
-        // prm (unique-key) field of the current record, falling back
-        // to the legacy 'prm' column, or reports its absence.
+        // prime (unique-key) field of the current record, falling back
+        // to the legacy 'prime' column, or reports its absence.
         private static void cmdSayPrime()
         {
             if (!requireRecordset()) return;
@@ -33212,7 +33482,7 @@ namespace DbDo
         public static void init()
         {
             string sExeDir = Path.GetDirectoryName(Application.ExecutablePath) ?? ".";
-            string sCandidate = Path.Combine(sExeDir, "DbDo.log");
+            string sCandidate = Path.Combine(Homer.Paths.logs(), "DbDo.log");
             try
             {
                 using (FileStream fs = File.Create(sCandidate)) { }
@@ -33391,9 +33661,14 @@ namespace DbDo
                         // First-run fallback: if the ini has no [Session]
                         // lastDatabase entry (the file has never been written
                         // to disk, or a fresh install replaced the install
-                        // folder), open {app}\NFB2026Convention.db so the user
-                        // has the showcase convention database to explore on
-                        // first launch. Silent failure: if the file is missing
+                        // folder), open the JobTrail sample so the user
+                        // has a showcase database to explore on first launch.
+                        // JobTrail replaced the convention database because it
+                        // shows more of DbDo in one file: seven related tables,
+                        // lookups that fill combo boxes, maps that link records
+                        // across tables, saved views, SQL scripts and a report
+                        // definition that produces a document somebody else
+                        // reads. Its records are illustrative rather than real. Silent failure: if the file is missing
                         // or unreadable, start with an empty form just as before.
                         if (!bRestoredSomething && string.IsNullOrEmpty(sSavedDb))
                         {
@@ -33401,8 +33676,8 @@ namespace DbDo
                             {
                                 // The showcase database is seeded into the
                                 // user's writable Samples folder as
-                                // %APPDATA%\DbDo\Samples\NFB2026Convention\
-                                // NFB2026Convention.db; getSampleDir() performs
+                                // %APPDATA%\DbDo\Samples\JobTrail\
+                                // JobTrail.db; getSampleDir() performs
                                 // that seed on first access and returns the
                                 // folder. Opening the seeded copy -- rather than
                                 // the read-only one two levels deep under the
@@ -33412,11 +33687,11 @@ namespace DbDo
                                 // the showcase database never opened.)
                                 string sSampleDir = ScriptHelper.getSampleDir();
                                 string sDefaultSample = System.IO.Path.Combine(
-                                    sSampleDir, "NFB2026Convention", "NFB2026Convention.db");
+                                    sSampleDir, "JobTrail", "JobTrail.db");
                                 if (System.IO.File.Exists(sDefaultSample))
                                 {
                                     DbDoLog.write("First-run default: opening " + sDefaultSample);
-                                    frm.Db.openDatabase(sDefaultSample, "events", bReadOnly);
+                                    frm.Db.openDatabase(sDefaultSample, "jobs", bReadOnly);
                                     if (!frm.Db.hasRecordset())
                                     {
                                         List<string> lT = frm.Db.getTableNames();
@@ -33628,6 +33903,26 @@ namespace DbDo
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
 
+                // THE HOMER SESSION LOG AND FOLDER LAYOUT.
+                //
+                // Paths decides where settings, data, jobs, logs, results and
+                // temporary files go, so DbDo puts them where every Homer app
+                // puts them: %LOCALAPPDATA%\DbDo\<folder>, each folder starting
+                // with a different letter so one keystroke reaches it.
+                //
+                // Log opens one file per run, named for the moment it began,
+                // holding the version, the command line, the environment and
+                // every error with its stack. It is opened FIRST, so a failure
+                // in anything after this line is explainable.
+                //
+                // DbDoLog continues to work as it always has; this is the
+                // standard log beside it, and the two will be merged once the
+                // rest of DbDo has moved onto the kit.
+                Homer.Paths.start("DbDo");
+                Homer.Log.start("DbDo");
+                Homer.Log.keyValue("Command line", string.Join(" ", aArgs));
+                Homer.Log.info("Cleared " + Homer.Paths.clearTemp() + " leftover temporary items");
+
                 // Global runtime-error handling: any unhandled
                 // exception on the UI thread (or elsewhere) is logged
                 // and presented in the ErrorDialog, whose Copy button
@@ -33705,8 +34000,10 @@ namespace DbDo
                      || sArg.Equals("-install-jaws-settings", StringComparison.OrdinalIgnoreCase)
                      || sArg.Equals("/install-jaws-settings", StringComparison.OrdinalIgnoreCase))
                     {
-                        string sAppFolder = System.IO.Path.GetDirectoryName(
-                            System.Reflection.Assembly.GetExecutingAssembly().Location);
+                        // The .jkm and .jss files are unpacked into the scripts
+                        // folder, which is where the Homer layout keeps anything
+                        // a screen reader runs.
+                        string sAppFolder = Homer.Paths.shippedScripts();
                         int iCopied, iCompiled;
                         string sReport = JawsSettingsInstaller.install("DbDo", sAppFolder, out iCopied, out iCompiled);
                         Console.WriteLine(sReport);
@@ -33740,7 +34037,7 @@ namespace DbDo
                         //     exit non-zero.
                         string sAppFolder = System.IO.Path.GetDirectoryName(
                             System.Reflection.Assembly.GetExecutingAssembly().Location);
-                        string sAddonPath = System.IO.Path.Combine(sAppFolder, "DbDo.nvda-addon");
+                        string sAddonPath = System.IO.Path.Combine(Homer.Paths.shippedScripts(), "DbDo.nvda-addon");
                         if (!System.IO.File.Exists(sAddonPath))
                         {
                             Console.Error.WriteLine("DbDo.nvda-addon not found at " + sAddonPath);

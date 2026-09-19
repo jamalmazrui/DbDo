@@ -1,6 +1,12 @@
 @echo off
 rem ====================================================================
-rem buildDbDo.cmd - build script for DbDo.exe (v1.0.44 and later).
+rem buildDbDo.cmd - build script for DbDo.exe, built on the Homer Development Kit.
+rem
+rem DbDo compiles against the kit's shared classes in C:\HomerDev\CSharp rather
+rem than its own copies of them. What that buys: a fix to Lbc or Say reaches
+rem DbDo, EdSharp and FileDir together; the version DbDo was built against is
+rem recorded in this log; and the kit's own checks prove those classes still
+rem compile before DbDo ever sees them.
 rem
 rem Compiles two assemblies with the stock .NET Framework compilers:
 rem
@@ -74,6 +80,72 @@ exit /b 1
 :have_sources
 echo Found: DbDo.cs, DbDo.js >> "!log!"
 if not exist "DbDo.manifest" echo ERROR: DbDo.manifest not found.& popd & exit /b 1
+
+
+rem ---- find the Homer Development Kit ----
+rem DbDo no longer carries its own copies of the Homer classes. They live in
+rem one place, so a fix reaches every app that uses them, and so the version
+rem DbDo compiles against is a fact rather than a guess. Looked for in order:
+rem the HomerDev environment variable, C:\HomerDev, then this folder.
+set "homerDev="
+if defined HomerDev if exist "%HomerDev%\CSharp\Lbc.cs" set "homerDev=%HomerDev%"
+if not defined homerDev if exist "C:\HomerDev\CSharp\Lbc.cs" set "homerDev=C:\HomerDev"
+if not defined homerDev if exist "%CD%\CSharp\Lbc.cs" set "homerDev=%CD%"
+if not defined homerDev (
+  echo ERROR: The Homer Development Kit was not found.
+  echo Unzip it into C:\HomerDev, or set the HomerDev environment variable.
+  echo ERROR: kit not found >> "!log!"
+  popd
+  exit /b 1
+)
+set "homerVer=unknown"
+if exist "!homerDev!\version.txt" set /p homerVer=<"!homerDev!\version.txt"
+echo Kit: !homerDev! version !homerVer! >> "!log!"
+echo Kit: !homerDev! version !homerVer!
+
+rem A MODULE MAY NEED ANOTHER MODULE, and only two do: Mdi.cs uses KeyMap, so
+rem the pair is switched on together. DbDo has its own MDI frame for now, so
+rem neither is compiled here; KeyMap is, because DbDo's hotkey document and its
+rem alternate menu read from it.
+set "homerSources="
+set "homerSources=!homerSources! "!homerDev!\CSharp\Inix.cs""
+set "homerSources=!homerSources! "!homerDev!\CSharp\KeyMap.cs""
+set "homerSources=!homerSources! "!homerDev!\CSharp\KeyName.cs""
+set "homerSources=!homerSources! "!homerDev!\CSharp\Lbc.cs""
+set "homerSources=!homerSources! "!homerDev!\CSharp\Log.cs""
+set "homerSources=!homerSources! "!homerDev!\CSharp\Paths.cs""
+set "homerSources=!homerSources! "!homerDev!\CSharp\Say.cs""
+set "homerSources=!homerSources! "!homerDev!\CSharp\Util.cs""
+set "homerSources=!homerSources! "!homerDev!\CSharp\Web.cs""
+echo Homer modules: !homerSources! >> "!log!"
+
+
+rem ---- the assemblies the Homer modules need ----
+rem A shared module can need an assembly reference as well as another module.
+rem Inix.cs reads and writes .xlsx files, which are zip archives, so it uses
+rem System.IO.Compression. csc does not resolve that from csc.rsp, and the
+rem failure reads as though the type were missing rather than the reference:
+rem
+rem   error CS0246: The type or namespace name 'ZipArchive' could not be found
+rem
+rem The kit's own build template passes these, and now so does this one. Each
+rem module states what it needs in an ASSEMBLIES line at the top of its file.
+set "homerRefs=/reference:System.IO.Compression.dll /reference:System.IO.Compression.FileSystem.dll"
+set "homerRefs=!homerRefs! /reference:System.Core.dll /reference:System.Net.Http.dll"
+set "homerRefs=!homerRefs! /reference:System.Web.Extensions.dll"
+echo Homer references: !homerRefs! >> "!log!"
+
+rem ---- remove the local copies the kit has replaced ----
+rem An archive unpacked over this folder adds and replaces; it never deletes.
+rem So the old Inix.cs, Lbc.cs, Say.cs and Web.cs would sit here looking
+rem authoritative while nothing compiled them. Each goes only when the kit has
+rem its replacement, so nothing is deleted without a copy already in place.
+for %%f in (Inix.cs Lbc.cs Say.cs Web.cs) do (
+  if exist "%%f" if exist "!homerDev!\CSharp\%%f" (
+    del /f /q "%%f"
+    echo REPLACED BY THE KIT: %%f >> "!log!"
+  )
+)
 
 rem ---- version: version.txt is the SINGLE source of truth ----
 rem The version lives in version.txt: one line, nothing else.  It is incremented
@@ -433,10 +505,10 @@ rem (the misleading "Unsupported 16-Bit Application" dialog appears
 rem when the loader sees an empty or truncated MZ image).
 if exist DbDo.exe del /f /q DbDo.exe
 if exist DbDo.ico (
-    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32icon:DbDo.ico /win32manifest:DbDo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"Microsoft.VisualBasic.dll" /reference:"Microsoft.JScript.dll" /reference:"NPOI.dll" /reference:"NPOI.OOXML.dll" /reference:"NPOI.OpenXml4Net.dll" /reference:"NPOI.OpenXmlFormats.dll" /reference:"ICSharpCode.SharpZipLib.dll" /reference:"BouncyCastle.Crypto.dll" /out:DbDo.exe Version.cs DbDo.cs Lbc.cs Say.cs Inix.cs Web.cs >> "!log!" 2>&1
+    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32icon:DbDo.ico /win32manifest:DbDo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"Microsoft.VisualBasic.dll" /reference:"Microsoft.JScript.dll" /reference:"NPOI.dll" /reference:"NPOI.OOXML.dll" /reference:"NPOI.OpenXml4Net.dll" /reference:"NPOI.OpenXmlFormats.dll" /reference:"ICSharpCode.SharpZipLib.dll" /reference:"BouncyCastle.Crypto.dll" !homerRefs! /out:DbDo.exe Version.cs DbDo.cs !homerSources! >> "!log!" 2>&1
 ) else (
     echo NOTE: DbDo.ico not found; building without embedded icon. >> "!log!"
-    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32manifest:DbDo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"Microsoft.VisualBasic.dll" /reference:"Microsoft.JScript.dll" /reference:"NPOI.dll" /reference:"NPOI.OOXML.dll" /reference:"NPOI.OpenXml4Net.dll" /reference:"NPOI.OpenXmlFormats.dll" /reference:"ICSharpCode.SharpZipLib.dll" /reference:"BouncyCastle.Crypto.dll" /out:DbDo.exe Version.cs DbDo.cs Lbc.cs Say.cs Inix.cs Web.cs >> "!log!" 2>&1
+    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32manifest:DbDo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"Microsoft.VisualBasic.dll" /reference:"Microsoft.JScript.dll" /reference:"NPOI.dll" /reference:"NPOI.OOXML.dll" /reference:"NPOI.OpenXml4Net.dll" /reference:"NPOI.OpenXmlFormats.dll" /reference:"ICSharpCode.SharpZipLib.dll" /reference:"BouncyCastle.Crypto.dll" !homerRefs! /out:DbDo.exe Version.cs DbDo.cs !homerSources! >> "!log!" 2>&1
 )
 if errorlevel 1 goto :build_failed
 echo DbDo.exe built.
@@ -474,19 +546,74 @@ rem absent we skip it silently; drop a 2db.cs in this folder to build it.
 
 
 rem ---- generate HTML documentation ----
+rem Every .md ships with a matching .htm, and pandoc is FETCHED when this machine
+rem has none. A Homer build script asks the web for what it needs rather than
+rem asking the person.
 echo. >> "!log!"
 echo Generating HTML documentation ... >> "!log!"
+where pandoc >nul 2>&1
+if errorlevel 1 (
+  echo Installing pandoc, which writes the .htm copies of the documents...
+  echo Pandoc not found; installing with winget ... >> "!log!"
+  winget install --id JohnMacFarlane.Pandoc --silent --accept-source-agreements --accept-package-agreements >> "!log!" 2>&1
+)
 where pandoc >nul 2>&1
 if errorlevel 1 goto :no_pandoc
 pandoc --standalone --toc --toc-depth=3 --metadata=title:"DbDo User Guide" -o DbDo.htm DbDo.md >> "!log!" 2>&1
 pandoc --standalone --toc --toc-depth=3 --metadata=title:"DbDo README" -o README.htm README.md >> "!log!" 2>&1
+for %%m in (Announce.md History.md License.md) do (
+  if exist "%%m" pandoc --standalone --metadata=title:"%%~nm" -o "%%~nm.htm" "%%m" >> "!log!" 2>&1
+)
+echo Documentation converted with pandoc. >> "!log!"
 goto :doc_done
 :no_pandoc
-echo WARNING: pandoc not found on PATH. Install with: winget install JohnMacFarlane.Pandoc
+echo NOTE: pandoc could not be installed, so the .htm files were not rebuilt.
+echo Pandoc unavailable; .htm files left as they are. >> "!log!"
 
 :doc_done
+
+rem ---- build the installer ----
+rem DbDo_setup.exe is part of the build, not a separate errand: one command
+rem produces everything a release needs. Inno Setup is fetched with winget when
+rem it is missing, for the same reason pandoc is.
+echo. >> "!log!"
+set "progFiles86=%ProgramFiles(x86)%"
+set "progFiles=%ProgramFiles%"
+set "iscc="
+if exist "!progFiles86!\Inno Setup 6\ISCC.exe" set "iscc=!progFiles86!\Inno Setup 6\ISCC.exe"
+if not defined iscc if exist "!progFiles!\Inno Setup 6\ISCC.exe" set "iscc=!progFiles!\Inno Setup 6\ISCC.exe"
+if not defined iscc (
+  echo Installing Inno Setup, which builds DbDo_setup.exe...
+  echo Inno Setup not found; installing with winget ... >> "!log!"
+  winget install --id JRSoftware.InnoSetup --silent --accept-source-agreements --accept-package-agreements >> "!log!" 2>&1
+  if exist "!progFiles86!\Inno Setup 6\ISCC.exe" set "iscc=!progFiles86!\Inno Setup 6\ISCC.exe"
+  if not defined iscc if exist "!progFiles!\Inno Setup 6\ISCC.exe" set "iscc=!progFiles!\Inno Setup 6\ISCC.exe"
+)
+if not defined iscc (
+  echo ERROR: Inno Setup could not be installed, so DbDo_setup.exe was not built.
+  echo ERROR: Inno Setup unavailable. >> "!log!"
+  goto :build_failed
+)
+echo Inno Setup: !iscc! >> "!log!"
+echo Compiling DbDo_setup.iss -^> DbDo_setup.exe ...
+if exist DbDo_setup.exe del /f /q DbDo_setup.exe
+"!iscc!" "DbDo_setup.iss" >> "!log!" 2>&1
+if errorlevel 1 (
+  echo ERROR: the installer build failed. See !log!.
+  echo ERROR: the installer build failed. >> "!log!"
+  goto :build_failed
+)
+if not exist DbDo_setup.exe (
+  echo ERROR: Inno Setup returned 0 but wrote no DbDo_setup.exe.
+  echo ERROR: no DbDo_setup.exe after a successful ISCC run. >> "!log!"
+  goto :build_failed
+)
+echo Built DbDo_setup.exe version !ver!
+echo Built DbDo_setup.exe version !ver! >> "!log!"
+
 echo.
 echo Build complete. Artifacts in this directory:
+echo   DbDo_setup.exe -- the installer, version !ver!
 echo   DbDo.exe       -- the application
 echo   DbDo.dll       -- JScript .NET scripting support
 echo   nvdaControllerClient.dll -- NVDA controller-client DLL
@@ -494,6 +621,9 @@ echo   Newtonsoft.Json.dll -- JSON (Json.NET) support
 echo   sqlean.exe -- SQLite/SQLean shell for the dot-prompt pass-through lane
 echo   sqlean.dll -- SQLean extension bundle (REGEXP, median, percentiles, ...)
 if exist 2db64.exe echo   2db32.exe / 2db64.exe -- standalone importer (32- and 64-bit) for the Import command
+echo.
+echo To publish: gitPush "What changed." then gitRelease.
+echo Build succeeded %DATE% %TIME% >> "!log!"
 popd
 endlocal
 exit /b 0

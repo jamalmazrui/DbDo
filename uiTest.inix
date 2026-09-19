@@ -1,0 +1,36 @@
+﻿; uiTest.inix -- what DbDo must actually do when it is run.
+;
+; uiCheck starts the program, sends these keys, and reads back the Windows UI
+; Automation tree -- the same tree a screen reader reads. A control with no
+; accessible name is invisible to both, so a step that finds nothing has found
+; something worth knowing.
+;
+; Keys are pywinauto syntax: {ENTER} {ESC} {F4} {TAB}, %x for Alt+x, ^x for
+; Control+x, +x for Shift+x.
+;
+; These are deliberately few and safe: they open the program, ask it about
+; itself, and close it. Tests that touch a database belong here too, once a
+; sample database ships with a known table to open.
+
+FileTask = uiTest
+
+[test]
+Name = DbDo opens and names its own window
+Run = DbDo.exe
+
+[step]
+Keys = {ESC}
+Wants = DbDo
+Note = the frame is titled with the app name, which is what Alt+Tab announces
+
+[step]
+Keys = %{F1}
+Wait = 1.0
+Escape = yes
+Note = Alt+F1 opens About, which reports the version and where the log went
+
+[step]
+Keys = %{F10}
+Wait = 1.0
+Escape = yes
+Note = Alt+F10 offers every command in one list

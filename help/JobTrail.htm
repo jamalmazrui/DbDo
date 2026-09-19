@@ -1,0 +1,636 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Jamal Mazrui" />
+  <title>JobTrail</title>
+  <style>
+    html {
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        background-color: white;
+      }
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">JobTrail</h1>
+<p class="subtitle">Plan for a job lead and application database built
+on DbDo</p>
+<p class="author">Jamal Mazrui</p>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#jobtrail" id="toc-jobtrail">JobTrail</a>
+<ul>
+<li><a href="#what-this-plan-covers" id="toc-what-this-plan-covers">What
+this plan covers</a></li>
+</ul></li>
+<li><a href="#the-conventions-this-follows"
+id="toc-the-conventions-this-follows">The conventions this
+follows</a></li>
+<li><a href="#the-tables" id="toc-the-tables">The tables</a>
+<ul>
+<li><a href="#jobs" id="toc-jobs">jobs</a></li>
+<li><a href="#contacts" id="toc-contacts">contacts</a></li>
+<li><a href="#actions" id="toc-actions">actions</a></li>
+<li><a href="#docs" id="toc-docs">docs</a></li>
+<li><a href="#stories" id="toc-stories">stories</a></li>
+<li><a href="#lookups-and-maps" id="toc-lookups-and-maps">lookups and
+maps</a></li>
+</ul></li>
+<li><a href="#what-the-agency-requires"
+id="toc-what-the-agency-requires">What the agency requires</a>
+<ul>
+<li><a href="#every-entry-needs-three-things"
+id="toc-every-entry-needs-three-things">Every entry needs three
+things</a></li>
+<li><a href="#what-else-depends-on-how-you-made-contact"
+id="toc-what-else-depends-on-how-you-made-contact">What else depends on
+how you made contact</a></li>
+<li><a href="#not-everything-counts" id="toc-not-everything-counts">Not
+everything counts</a></li>
+<li><a href="#keep-the-log" id="toc-keep-the-log">Keep the log</a></li>
+</ul></li>
+<li><a href="#the-lookup-values" id="toc-the-lookup-values">The lookup
+values</a></li>
+<li><a href="#how-records-connect" id="toc-how-records-connect">How
+records connect</a></li>
+<li><a href="#the-scripts" id="toc-the-scripts">The scripts</a></li>
+<li><a href="#the-reports" id="toc-the-reports">The reports</a>
+<ul>
+<li><a href="#work-search-record" id="toc-work-search-record">Work
+Search Record</a></li>
+<li><a href="#pipeline-summary" id="toc-pipeline-summary">Pipeline
+Summary</a></li>
+<li><a href="#follow-up-schedule" id="toc-follow-up-schedule">Follow-Up
+Schedule</a></li>
+<li><a href="#contact-directory" id="toc-contact-directory">Contact
+Directory</a></li>
+<li><a href="#interview-preparation"
+id="toc-interview-preparation">Interview Preparation</a></li>
+<li><a href="#application-history"
+id="toc-application-history">Application History</a></li>
+</ul></li>
+<li><a href="#what-happens-first" id="toc-what-happens-first">What
+happens first</a></li>
+</ul>
+</nav>
+<h1 id="jobtrail">JobTrail</h1>
+<p>A record of every job lead you follow, every person you talk to, and
+every document you send, kept in one file you own. It produces the Work
+Search Record that an unemployment officer or a vocational
+rehabilitation counselor asks for.</p>
+<p>JobTrail is a DbDo database, not a new program.
+<code>JobTrail.db</code> holds the tables; the scripts and reports
+beside it do the work. That means it inherits everything DbDo already
+does well by keyboard and screen reader, and it means the first version
+can be finished and used rather than merely started.</p>
+<h2 id="what-this-plan-covers">What this plan covers</h2>
+<ul>
+<li>the naming conventions it follows, taken from the shipped DbDo
+databases</li>
+<li>the seven tables and every field in them</li>
+<li>the lookup values that fill the combo boxes</li>
+<li>how records connect to each other</li>
+<li>the scripts, and what each one saves you</li>
+<li>the reports, and who reads them</li>
+</ul>
+<h1 id="the-conventions-this-follows">The conventions this follows</h1>
+<p>Read from <code>contacts.db</code>, <code>reads.db</code> and
+<code>lookups.db</code> as DbDo ships them, so JobTrail looks like a
+DbDo database to anybody who has used one.</p>
+<p>Every table has, in this order:</p>
+<ol type="1">
+<li><code>&lt;singular&gt;_id INTEGER PRIMARY KEY AUTOINCREMENT</code> –
+the row’s own number.</li>
+<li><code>added TEXTTIME NOT NULL DEFAULT CURRENT_TIMESTAMP</code> and
+<code>edited</code> likewise, both maintained by DbDo.</li>
+<li>The data fields, in the order a person would fill them in.</li>
+<li><code>url TEXTLINE</code> where a record can point at something on
+the web.</li>
+<li><code>notes TEXTMARKDOWN</code> – the long free text.</li>
+<li><code>tags TEXTMEMO</code> – short labels for filtering.</li>
+<li><code>look TEXT GENERATED ALWAYS AS (...) STORED</code> – what the
+record is called when it appears in a list, the parts joined with
+<code>|</code>.</li>
+<li><code>prime TEXT GENERATED ALWAYS AS (...) STORED</code> – the
+identifying fields joined with <code>|</code>, which is what
+<code>maps</code> points at and what a unique index guards.</li>
+<li><code>marked INTEGER NOT NULL DEFAULT 0</code> – always last.</li>
+</ol>
+<p>Field types are DbDo’s: <code>TEXTLINE</code> for one line,
+<code>TEXTMARKDOWN</code> for prose, <code>TEXTMEMO</code> for several
+short lines, <code>TEXTTIME</code> for a timestamp, <code>INTEGER</code>
+for a number or a yes/no.</p>
+<p>Names are lower case with underscores, singular for the id, plural
+for the table. Nothing is abbreviated past recognition:
+<code>employer</code>, not <code>emp</code>.</p>
+<p><strong>First letters matter.</strong> The table list is reached by
+typing a letter, so the seven tables begin with seven different letters:
+<code>actions</code>, <code>contacts</code>, <code>docs</code>,
+<code>jobs</code>, <code>lookups</code>, <code>maps</code>,
+<code>stories</code>.</p>
+<h1 id="the-tables">The tables</h1>
+<h2 id="jobs">jobs</h2>
+<p>One row per opening you are pursuing. The heart of the database.</p>
+<ul>
+<li><code>job_id</code> INTEGER PRIMARY KEY AUTOINCREMENT</li>
+<li><code>added</code>, <code>edited</code> TEXTTIME</li>
+<li><code>employer</code> TEXTLINE – the organization, as they write
+it</li>
+<li><code>employer_contact</code> TEXTLINE – the address, phone or web
+address of the employer. <strong>Required on a work search log</strong>,
+and the field people most often wish they had captured when the posting
+has gone</li>
+<li><code>title</code> TEXTLINE – the role as advertised</li>
+<li><code>reference</code> TEXTLINE – the job reference or requisition
+number. <strong>An agency accepts this in place of the position
+title</strong>, and an ATS confirmation usually quotes it</li>
+<li><code>status</code> TEXTLINE – from lookups; starts at
+<code>lead</code></li>
+<li><code>source</code> TEXTLINE – from lookups; where you found it</li>
+<li><code>location</code> TEXTLINE – city and state, or
+<code>remote</code></li>
+<li><code>pay</code> TEXTLINE – free text, because postings say “DOE” as
+often as a number</li>
+<li><code>applied_date</code> TEXTLINE – ISO date, empty until you
+apply</li>
+<li><code>ats</code> TEXTLINE – from lookups; whose application system
+it uses</li>
+<li><code>closing_date</code> TEXTLINE – ISO date, when the posting says
+one</li>
+<li><code>url</code> TEXTLINE – the posting</li>
+<li><code>posting</code> TEXTMARKDOWN – the text of the posting,
+captured at the time</li>
+<li><code>notes</code> TEXTMARKDOWN</li>
+<li><code>tags</code> TEXTMEMO</li>
+<li><code>look</code> = employer, title, status</li>
+<li><code>prime</code> = employer, title</li>
+<li><code>marked</code></li>
+</ul>
+<p>A unique index on <code>prime</code> stops you applying to the same
+role twice without noticing, which is the most common wasted hour in a
+job search.</p>
+<h2 id="contacts">contacts</h2>
+<p>The standard DbDo contacts table, unchanged. Keeping it identical
+means the lookups, the accelerator keys and anything built for contacts
+elsewhere work here without adjustment.</p>
+<p><code>contact_id</code>, <code>added</code>, <code>edited</code>,
+<code>first_name</code>, <code>middle_name</code>,
+<code>last_name</code>, <code>enterprise</code>, <code>job</code>,
+<code>wireless_phone</code>, <code>home_phone</code>,
+<code>personal_email</code>, <code>business_email</code>,
+<code>address1</code>, <code>city</code>, <code>state</code>,
+<code>zip</code>, <code>nation</code>, <code>url</code>,
+<code>notes</code>, <code>tags</code>, <code>look</code>,
+<code>prime</code>, <code>marked</code>.</p>
+<h2 id="actions">actions</h2>
+<p>Every contact made and every thing still to do, in one table. This is
+what the Work Search Record is built from, so its fields are the ones
+agencies ask for.</p>
+<ul>
+<li><code>action_id</code> INTEGER PRIMARY KEY AUTOINCREMENT</li>
+<li><code>added</code>, <code>edited</code> TEXTTIME</li>
+<li><code>action_date</code> TEXTLINE – ISO date; for a future action
+this is when it is due</li>
+<li><code>kind</code> TEXTLINE – from lookups: application, inquiry,
+interview, follow_up, preparation, workshop… The agency calls this the
+type of contact and requires it</li>
+<li><code>method</code> TEXTLINE – from lookups, and the list is the
+agency’s own: email, fax, in person, internet, kiosk, mail, phone,
+video. <strong>Required, because what else you must record depends on
+it.</strong></li>
+<li><code>person</code> TEXTLINE – the name or title of the person dealt
+with. Required for a fax, in person, mail, inquiry or interview
+contact</li>
+<li><code>place</code> TEXTLINE – where an interview happened, or which
+WorkSource office or American Job Center an activity was at. Required
+for those two</li>
+<li><code>detail</code> TEXTLINE – the phone number, email address,
+website or video service used. Which of those it holds depends on the
+method, and one field covers them all because only one is ever
+required</li>
+<li><code>summary</code> TEXTLINE – one line, which is what appears in
+the report</li>
+<li><code>outcome</code> TEXTLINE – from lookups: awaiting reply,
+interview scheduled, no response, not hiring, offer, rejected,
+withdrawn. <strong>The agency calls this the result of contact and
+requires it on every entry</strong></li>
+<li><code>evidence</code> TEXTLINE – what proof you kept and where:
+“confirmation email saved”, “screenshot in results folder”. Reviews are
+random, and this is the column people wish they had filled</li>
+<li><code>counts</code> INTEGER NOT NULL DEFAULT 1 – 1 when this is an
+employer contact the agency counts, 0 when it is preparation. See
+below</li>
+<li><code>done</code> INTEGER NOT NULL DEFAULT 0 – 0 is still to do, 1
+is finished</li>
+<li><code>job_id</code> INTEGER – the job this was about, when it was
+about one</li>
+<li><code>contact_id</code> INTEGER – the person, when they are in
+contacts</li>
+<li><code>details</code> TEXTMARKDOWN – what was said</li>
+<li><code>notes</code> TEXTMARKDOWN</li>
+<li><code>tags</code> TEXTMEMO</li>
+<li><code>look</code> = action_date, kind, summary</li>
+<li><code>prime</code> = action_date, kind, summary</li>
+<li><code>marked</code></li>
+</ul>
+<p>Both foreign keys may be empty. A networking coffee is an action with
+a contact and no job; a speculative application is an action with a job
+and no contact.</p>
+<h2 id="docs">docs</h2>
+<p>The resumes, cover letters and answer sets you send, so you know
+which version went where.</p>
+<ul>
+<li><code>doc_id</code> INTEGER PRIMARY KEY AUTOINCREMENT</li>
+<li><code>added</code>, <code>edited</code> TEXTTIME</li>
+<li><code>name</code> TEXTLINE – what you call it</li>
+<li><code>kind</code> TEXTLINE – from lookups: resume, cover_letter,
+answers, portfolio, reference_list, offer</li>
+<li><code>version</code> TEXTLINE – your own marker, so “resume, plain
+text, March” is one row and “resume, chronological, March” is
+another</li>
+<li><code>url</code> TEXTLINE – the path or link to the file, so Open
+URL opens it</li>
+<li><code>notes</code> TEXTMARKDOWN</li>
+<li><code>tags</code> TEXTMEMO</li>
+<li><code>look</code> = name, kind, version</li>
+<li><code>prime</code> = name, version</li>
+<li><code>marked</code></li>
+</ul>
+<h2 id="stories">stories</h2>
+<p>For interview preparation, and the one table here that is not about
+record keeping.</p>
+<p>One row per accomplishment, told as Challenge, Action, Result and
+Takeaway. A behavioral interview question – “tell me about a time a team
+failed”, “when you convinced somebody to change their mind”, “when you
+led a group of peers” – is answered by picking the story that fits, and
+<code>tags</code> says which questions each story answers.</p>
+<ul>
+<li><code>story_id</code> INTEGER PRIMARY KEY AUTOINCREMENT</li>
+<li><code>added</code>, <code>edited</code> TEXTTIME</li>
+<li><code>name</code> TEXTLINE – what you call the story, so you can
+find it under pressure</li>
+<li><code>challenge</code> TEXTMARKDOWN – the situation and what made it
+hard</li>
+<li><code>action</code> TEXTMARKDOWN – what you did, in the first
+person</li>
+<li><code>result</code> TEXTMARKDOWN – what happened, with a number in
+it where there is one</li>
+<li><code>takeaway</code> TEXTMARKDOWN – what it says about you, which
+is what the interviewer is actually asking</li>
+<li><code>notes</code> TEXTMARKDOWN</li>
+<li><code>tags</code> TEXTMEMO – the question themes this story
+answers</li>
+<li><code>look</code> = name</li>
+<li><code>prime</code> = name</li>
+<li><code>marked</code></li>
+</ul>
+<p>Prepared once, used for years. Its first letter, s, is free among the
+other tables.</p>
+<h2 id="lookups-and-maps">lookups and maps</h2>
+<p>The two standard DbDo tables, exactly as DbDo makes them.
+<code>lookups</code> fills the combo boxes; <code>maps</code> records
+the many-to-many links.</p>
+<h1 id="what-the-agency-requires">What the agency requires</h1>
+<p>Read from the Washington Employment Security Department’s Unemployed
+Worker Handbook, which is the document behind the report. Other states
+differ in detail; the shape is the same everywhere, and the fields below
+cover it.</p>
+<h2 id="every-entry-needs-three-things">Every entry needs three
+things</h2>
+<p>The date of contact, the type of contact, and the result of contact.
+Those are <code>action_date</code>, <code>kind</code> and
+<code>outcome</code>, and none of them may be empty on an entry that
+counts.</p>
+<h2 id="what-else-depends-on-how-you-made-contact">What else depends on
+how you made contact</h2>
+<ul>
+<li><strong>An application</strong> needs the position applied for
+<strong>or the job reference number</strong>, the employer’s name
+<strong>and address</strong>, and then one more thing depending on the
+method: a phone number, the name or title of a person, a fax number, or
+the website, email address or newspaper used.</li>
+<li><strong>An inquiry</strong> needs the employer’s name and address,
+the name or title of the person contacted, how you reached them, the
+position asked about, and the result.</li>
+<li><strong>An interview</strong> needs the position, the employer’s
+name and address, <strong>where the interview took place</strong>, the
+names and titles of the people conducting it, a phone number or email
+address, and <strong>which video service</strong> if it was remote.</li>
+<li><strong>A WorkSource or American Job Center activity</strong> needs
+the office’s location, the activity completed, and the instructor’s
+name.</li>
+</ul>
+<p>That is why <code>person</code>, <code>place</code> and
+<code>detail</code> exist as separate fields. Between them they hold
+everything the four cases above ask for, and the report prints only the
+ones that apply.</p>
+<h2 id="not-everything-counts">Not everything counts</h2>
+<p>The handbook is explicit that some activities are
+<strong>not</strong> employer contacts: contacting an employer you
+already know is not hiring, browsing job listings, posting a resume
+without applying, having a recruiter look on your behalf, working to set
+up your own business, calling a job line, and checking in with a
+recruiting service you have already registered with.</p>
+<p>They still belong in the log – they are what you did that week, and a
+counselor wants to see them – but they must not be counted toward a
+weekly minimum. That is what the <code>counts</code> field is for. The
+Work Search Record lists countable contacts first, with their total, and
+everything else after under a heading that says what it is.</p>
+<p>Getting this wrong is expensive: an incomplete log, or one that does
+not show a genuine search, can mean benefits denied and already-paid
+benefits repaid.</p>
+<h2 id="keep-the-log">Keep the log</h2>
+<p>The handbook requires keeping it for at least thirty days after the
+end of the benefit year, or thirty days after benefits stop, whichever
+is later, and reviews are random. <strong>JobTrail never deletes an
+action</strong>, and the guide will say so plainly.</p>
+<h1 id="the-lookup-values">The lookup values</h1>
+<p>Seeded into <code>lookups</code> so that the fields with fixed
+vocabularies offer them from the start. Each set is alphabetical, since
+that is the order a combo box is searched by first letter.</p>
+<ul>
+<li><code>jobs.status</code>: applied, closed, interviewing, lead,
+offer, rejected, withdrawn</li>
+<li><code>jobs.source</code>: agency, board, employer site, event,
+network, other, recruiter, referral</li>
+<li><code>jobs.ats</code>: Ashby, BrassRing, email, employer form,
+Greenhouse, iCIMS, Lever, other, Taleo, USAJOBS, Workday</li>
+<li><code>actions.kind</code>: application, follow_up, inquiry,
+interview, meeting, note, offer, preparation, rejection, research,
+thank_you, workshop</li>
+<li><code>actions.method</code>: email, fax, in person, internet, kiosk,
+mail, phone, video – <strong>the agency’s own list</strong>, so an entry
+can be transcribed to their form without translation</li>
+<li><code>actions.outcome</code>: awaiting reply, hired, interview
+scheduled, no response, not hiring, offer, rejected, withdrawn</li>
+<li><code>docs.kind</code>: answers, cover_letter, offer, portfolio,
+reference_list, resume</li>
+<li><code>maps.kind</code>: contact_for, sent_for, works_at</li>
+</ul>
+<h1 id="how-records-connect">How records connect</h1>
+<p>Two mechanisms, each for a different frequency of use.</p>
+<p><strong>Foreign keys, for what happens daily.</strong>
+<code>actions.job_id</code> and <code>actions.contact_id</code> are
+filled in as you work, usually by a script that already knows which job
+you are on.</p>
+<p><strong>Maps, for what happens occasionally.</strong> Three
+kinds:</p>
+<ul>
+<li><code>contact_for</code> – this person is a contact for that
+job</li>
+<li><code>works_at</code> – this person works at that employer, linking
+contact to contact</li>
+<li><code>sent_for</code> – this document was sent for that job, with
+the date in the note</li>
+</ul>
+<h1 id="the-scripts">The scripts</h1>
+<p>In <code>Scripts\</code>, which is where DbDo looks and what the
+Homer layout calls the folder. Each one exists because it removes
+keystrokes from something you do many times a week.</p>
+<ul>
+<li><strong>Capture-Posting.js</strong> – takes the job posting from the
+clipboard, makes a <code>jobs</code> row with status <code>lead</code>
+and today’s date, and puts the text in <code>posting</code>. One paste
+instead of six fields.</li>
+<li><strong>Log-Application.js</strong> – the single most useful script.
+On a <code>jobs</code> row it sets <code>status</code> to
+<code>applied</code> and <code>applied_date</code> to today, writes an
+<code>actions</code> row of kind <code>applied</code> with the method
+you choose, and creates a second, undone <code>actions</code> row of
+kind <code>follow_up</code> dated a week out. One keystroke for what is
+otherwise three records.</li>
+<li><strong>Log-Contact.js</strong> – on a <code>contacts</code> row,
+writes an <code>actions</code> row for a call, an email or a meeting,
+links it to the job you were last on, and offers to schedule the
+follow-up.</li>
+<li><strong>Next-Follow-Up.js</strong> – moves an undone
+<code>follow_up</code> forward by a week, for the employer who has not
+replied yet.</li>
+<li><strong>Mark-Closed.js</strong> – sets a job’s status, writes the
+matching action, and marks any outstanding follow-ups done, so a
+rejection does not leave a task list haunted by dead applications.</li>
+<li><strong>Today.dbdo</strong> – the saved view the database opens on:
+actions where <code>done</code> is 0 and <code>action_date</code> is
+today or earlier, oldest first.</li>
+<li><strong>Stale-Applications.dbdo</strong> – jobs with status
+<code>applied</code> whose most recent action is more than fourteen days
+old.</li>
+<li><strong>Active-Pipeline.sql</strong> – a count of jobs by status,
+which is the answer to “how is it going” in one line.</li>
+<li><strong>Neglected-Contacts.sql</strong> – people in
+<code>contacts</code> with no action in ninety days.</li>
+<li><strong>Ats-Experience.sql</strong> – your own record of which
+application systems worked: jobs grouped by <code>ats</code>, with how
+many applications reached an interview.</li>
+</ul>
+<h1 id="the-reports">The reports</h1>
+<p>Defined in <code>report.inix</code> beside the database, in DbDo’s
+report format. Each is Markdown first, so pandoc turns it into HTML to
+email or a Word file to hand across a desk.</p>
+<h2 id="work-search-record">Work Search Record</h2>
+<p><strong>The report that matters most, because somebody else reads
+it.</strong></p>
+<p>Every action between two dates, in date order, printed the way the
+agency asks for it: the date, the type of contact, the method, the
+employer with its address, the position or its reference number, the
+person, the place, the phone or email or website or video service, the
+result, and what evidence was kept. Each entry prints only the fields
+its method requires, because a field that is empty earns no line.</p>
+<p>Two sections. <strong>Countable employer contacts</strong> first,
+with their total and a count for each week in the period, so you can see
+at a glance whether a weekly minimum was met. <strong>Other job search
+activity</strong> after it, for the preparation, the workshops and the
+self-employment work that belong in the record but do not count as
+employer contacts.</p>
+<p>The period is stated at the top, every count matches its noun, and
+the heading carries your name and the date the report was printed.</p>
+<p>The period comes from <code>Settings.LastReportDate</code> in
+<code>JobTrail.inix</code>, so “since the last reporting period” is a
+fact rather than arithmetic. Producing the report updates that date, and
+a <code>--from</code> and <code>--to</code> let you produce any period
+again.</p>
+<h2 id="pipeline-summary">Pipeline Summary</h2>
+<p>For you. Jobs by status, with the count of each, then the open ones
+listed newest first. One page that answers what is live, what is waiting
+and what is closed.</p>
+<h2 id="follow-up-schedule">Follow-Up Schedule</h2>
+<p>Every undone action, in date order, with what it is about. This is
+what you read on a Monday morning.</p>
+<h2 id="contact-directory">Contact Directory</h2>
+<p>Everybody in <code>contacts</code>, with their employer, their phone
+and email, and the jobs they are a contact for. Alphabetical by last
+name.</p>
+<h2 id="interview-preparation">Interview Preparation</h2>
+<p>For a specific job: the posting, every action taken on it, the people
+involved, and the stories from <code>stories</code> whose tags match the
+kind of role. Printed the night before.</p>
+<h2 id="application-history">Application History</h2>
+<p>One job per section, with its posting details and every action taken
+on it in order. This is the report you read before an interview, and the
+one you keep after the search ends.</p>
+<h1 id="what-happens-first">What happens first</h1>
+<p>Phase one is the database, the scripts and the reports, with no new
+program: <code>JobTrail.db</code>, <code>JobTrail.inix</code>,
+<code>report.inix</code>, the <code>Scripts\</code> folder, and the
+document set. It can be used the day it is finished.</p>
+<p>Phase two is a dedicated program, and only when a tester asks for
+something that cannot be a script, a report, a lookup or a saved view.
+That test has not been met yet, and might not be.</p>
+</body>
+</html>
