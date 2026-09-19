@@ -12774,14 +12774,21 @@ namespace DbDo
             // (Statistics, Graphics Column, Generate from Grid) thus lives
             // on the Alt+Shift+letter family.
 
-            // Jump-Record: secondary alias on Shift+J for muscle
-            // Shift+J: data-list alias for Jump-Record (single-column
-            // substring). Preserves the bare-Shift+Letter family
-            // muscle memory from earlier DbDo versions, and parallels
-            // the canonical Control+J binding. Note this binds to
-            // miRecJump (the new column-listbox Jump-Record), NOT to
-            // miRecFind (which is now the across-all-columns Find).
-            registerLocalAlias(Keys.Shift | Keys.J, miRecJump);
+            // SHIFT+J WAS AN ALIAS FOR JUMP-RECORD AND IS GONE.
+            //
+            // Shift plus a letter is the say layer: it answers a question about
+            // the current record or table and changes nothing. Shift+J opened a
+            // modal dialog, which is the opposite -- and somebody walking the
+            // alphabet to hear what each key reports hit a dialog instead of an
+            // answer. One key breaking a layer costs more than the muscle
+            // memory it preserved.
+            //
+            // Jump-Record keeps its own key, Control+J, which is where the rest
+            // of the suite looks for it. Shift+G still SAYS the current jump
+            // search, which is the say-layer question Shift+J looked like it
+            // would answer.
+            //
+            // J now joins B, H, K, V and X as free letters on the say layer.
 
             // Alt+Letter bindings that don't collide with main-menu
             // accelerators. ProcessCmdKey dispatches form-level chords
@@ -15390,7 +15397,14 @@ namespace DbDo
             bool bMarked;
             try { bMarked = isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn) ?? ""); }
             catch { bMarked = false; }
-            Say.sayForced(bMarked ? "mark: marked" : "mark: unmarked");
+            // THE ONE EXCEPTION TO THE LABEL RULE, and it is the rule about
+            // toggles rather than a lapse. A two-state answer whose value
+            // already names the setting says the state alone: "Marked",
+            // "Unmarked". Prefixing it -- "mark: marked" -- says the same word
+            // twice, and the second word is the only one carrying information.
+            // The same shape a toggle uses elsewhere: "<setting> on" and
+            // "no <setting>", never "<setting>: on".
+            Say.sayForced(bMarked ? "Marked" : "Unmarked");
         }
 
         // saySayMarked: Shift+L. Speak the look-column values of every

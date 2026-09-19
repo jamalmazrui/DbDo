@@ -644,6 +644,12 @@ lose your place: "Unmarked" does not say which key produced it, and
 An empty answer keeps its label and says none -- "find: none", not "No find
 string" -- and every count matches its noun.
 
+**One exception, and it is a rule of its own.** A two-state answer whose value
+already names the setting says the state alone: Say Mark answers "Marked" or
+"Unmarked", not "mark: marked". Prefixing it would say the same word twice, and
+only the second word carries information. It is the shape a toggle uses
+everywhere else: "<setting> on" and "no <setting>", never "<setting>: on".
+
 Two commands use the column name instead of the menu word, because there the
 column is the more useful label and it is what the grid already calls that
 field:
@@ -685,3 +691,9 @@ commands live on Shift.
 Six letters are unused -- B, H, J, K, V and X -- and are kept that way on
 purpose, so a new question can be added later without moving an answer somebody
 has learned.
+
+Shift+J used to be a second key for Jump to Record. It has been removed: a modal
+dialog on the say layer is the one thing that layer must not do, and somebody
+walking the alphabet to hear what each key reports met a dialog instead of an
+answer. Jump to Record keeps Control+J, and Shift+G still says the current jump
+search.
