@@ -2711,6 +2711,39 @@ namespace DbDo
             return getCatalogObjectNames(false, true);
         }
 
+        // THE HIDDEN TABLES: the ones DbDo keeps for itself.
+        //
+        // lookups fills the pick lists; maps records the links between records.
+        // Both are DbDo's own bookkeeping rather than anybody's data, and a
+        // person browsing a database should no more meet them than they meet
+        // sqlite_sequence. They stay reachable through SQL and the dot prompt,
+        // and the features that read them query them directly.
+        //
+        // The rule is a LIST, not a pattern: a table whose name is not on it is
+        // the user's, and is offered. Anything added here has to earn it.
+        //
+        // sqlite_ and sqlean_ tables are filtered earlier, in
+        // getCatalogObjectNames, because they are not DbDo's either.
+        public static readonly string[] c_lsHiddenTables = new string[] { "lookups", "maps" };
+
+        public static bool isHiddenTable(string sName)
+        {
+            if (string.IsNullOrEmpty(sName)) return false;
+            foreach (string sHidden in c_lsHiddenTables)
+                if (string.Equals(sName, sHidden, StringComparison.OrdinalIgnoreCase)) return true;
+            return false;
+        }
+
+        // getUserTableNames: what to OFFER. getTableAndViewNames still answers
+        // with everything, because the features that read the hidden tables
+        // need to find them.
+        public List<string> getUserTableNames()
+        {
+            List<string> lsAll = getTableAndViewNames();
+            lsAll.RemoveAll(delegate(string s) { return isHiddenTable(s); });
+            return lsAll;
+        }
+
         public List<string> getTableAndViewNames()
         {
             return getCatalogObjectNames(true, true);
@@ -4531,6 +4564,31 @@ namespace DbDo
             return false;
         }
 
+        // emptyWord: the word for a value that is not there.
+        //
+        // "null" when the field holds SQL NULL, "blank" when it holds an empty
+        // string. Both words are borrowed rather than invented, and from the
+        // two places they are already settled:
+        //
+        //   NULL  -- every database tool prints the literal word for it and
+        //            says so explicitly. phpLiteAdmin shows NULL in italics to
+        //            tell it from the string "NULL"; DB Browser and SQL Server
+        //            Management Studio do the same; the sqlite3 shell has
+        //            .nullvalue for choosing the word; CockroachDB's client
+        //            documents that it prints NULL "to distinguish them from a
+        //            character field that contains an empty string".
+        //   blank -- what JAWS and NVDA say when they reach an empty cell, in
+        //            Excel and in any grid. A person using this program has
+        //            heard that word for years and it already means this.
+        //
+        // So a listener gets the database's word for the database's idea and
+        // the screen reader's word for an empty cell, and neither has to be
+        // learned. isFieldNull does the asking; this only chooses the word.
+        public string emptyWord(string sName)
+        {
+            return isFieldNull(sName) ? "null" : "blank";
+        }
+
         public string getFieldValue(string sName)
         {
             if (!hasRecordset()) return "";
@@ -4609,13 +4667,38 @@ namespace DbDo
             catch { return -1; }
         }
 
+        // ONE REPRESENTATION OF "NOTHING WAS ENTERED", AND IT IS NULL.
+        //
+        // The settled practice across SQL databases is that an optional column
+        // uses NULL for "not known" and nothing else: allowing NULL and '' in
+        // the same column gives two values one meaning, so every query needs
+        // "IS NULL OR = ''" and every one that forgets is quietly wrong. Oracle
+        // went as far as making them the same thing; MySQL and SQL Server
+        // guidance is a CHECK constraint forbidding ''; SQLite keeps them
+        // distinct and leaves the choice to the application. This is that
+        // choice, made once, at the only place a value reaches a field.
+        //
+        // An empty box therefore stores NULL. A user who wants a stored empty
+        // string can still have one -- typing a space is a value -- but nothing
+        // DbDo writes creates the ambiguity by accident.
+        //
+        // bEmptyIsNull is true by default and settable from DbDo.inix, because
+        // a database somebody else built may depend on '' being kept as ''.
+        public static bool bEmptyIsNull = true;
+
+        // bShowEmptyWords: whether an empty cell shows "null" or "blank" in the
+        // grid rather than nothing. On by default, and settable from DbDo.inix
+        // for anybody who wants the older, silent grid back.
+        public static bool bShowEmptyWords = true;
+
         public void setFieldValue(string sName, string sValue)
         {
             if (!hasRecordset()) throw new InvalidOperationException("No recordset open.");
             if (bReadOnly) throw new InvalidOperationException("Database is read-only.");
             try
             {
-                oRecordset.Fields[sName].Value = (sValue == null) ? (object)DBNull.Value : (object)sValue;
+                bool bNull = (sValue == null) || (bEmptyIsNull && sValue.Length == 0);
+                oRecordset.Fields[sName].Value = bNull ? (object)DBNull.Value : (object)sValue;
             }
             catch (COMException ex)
             {
@@ -11296,6 +11379,8 @@ namespace DbDo
         private List<string> lWorkbookColumns; // mirror columns, in worksheet column order
         private ToolStripMenuItem miToolsOpenFolder;
         private ToolStripMenuItem miToolsCommandPrompt;
+        private ToolStripMenuItem miToolsChatWithAi;     // F12
+        private ToolStripMenuItem miToolsChatAboutTable; // Shift+F12
         private ToolStripMenuItem miToolsConsole;
         private ToolStripMenuItem miMiscSqleanConsole;
         private ToolStripMenuItem miToolsInvokeSql;
@@ -11384,6 +11469,10 @@ namespace DbDo
         private ToolStripMenuItem miSaySayRows;
         private ToolStripMenuItem miSaySayRowsMarked;
         private ToolStripMenuItem miSaySayMarkedRows;
+        private ToolStripMenuItem miSaySayJump;
+        private ToolStripMenuItem miSaySayBookmark;
+        private ToolStripMenuItem miSaySayReplace;
+        private ToolStripMenuItem miSaySayRegex;      // Shift+X
         // miSaySayKin retired v1.0.101.
         private ToolStripMenuItem miSaySaySortFilter;
         private ToolStripMenuItem miSaySayPosition;
@@ -12476,6 +12565,21 @@ namespace DbDo
             miSaySayRows         = addItem(miSay, "Say Rec&ords Rest", "Say Records Rest",        Keys.None,                         saySayRows);
             miSaySayRowsMarked   = addItem(miSay, "Say Records Rest Marked", "Say Records Rest Marked", Keys.Alt | Keys.Shift | Keys.M,    saySayRowsMarked);
             miSaySayMarkedRows   = addItem(miSay, "Say &Marked Rows", "Say Marked Rows", Keys.Shift | Keys.Space, saySayMarkedRows);
+
+            // THE SAY LAYER ANSWERS FOR EVERY DIALOG THAT REMEMBERS AN ANSWER.
+            //
+            // A command that opens a dialog with a value already in it has a
+            // value worth hearing before the dialog opens. Shift plus the
+            // dialog's own letter says it: Shift+J what Jump would offer,
+            // Shift+B where the bookmarks are. Then a person can decide whether
+            // to open the dialog at all, which is the point of the layer.
+            //
+            // null answers "none"; an empty string answers "blank". They are
+            // different facts -- nothing was ever set, against something was set
+            // to nothing -- and a listener cannot tell them apart otherwise.
+            miSaySayJump         = addItem(miSay, "Say &Jump", "Say Jump", Keys.Shift | Keys.J, saySayJump);
+            miSaySayBookmark     = addItem(miSay, "Say &Bookmark", "Say Bookmark", Keys.Shift | Keys.B, saySayBookmark);
+            miSaySayReplace      = addItem(miSay, "Say Rep&lace", "Say Replace", Keys.Shift | Keys.V, saySayReplace);
             // Shift+K: Say Kin -- speak the 'look' values of every
             // related record (both directions: parents reached by
             // outbound FK columns, and children that point back to
@@ -12527,6 +12631,14 @@ namespace DbDo
             miSaySayLook         = addItem(miSay, "Say &Look",           "Say Look",    Keys.Shift | Keys.L,                saySayLook);
             miSaySayRelated      = addItem(miSay, "Say &Related", "Say Related", Keys.Shift | Keys.R,           saySayRelated);
             miSaySayUrl          = addItem(miSay, "Say &URL",          "Say URL",      Keys.Shift | Keys.U,                saySayUrl);
+            // EVERY REMEMBERED INPUT HAS A KEY THAT SAYS IT.
+            //
+            // A dialog that offers a value next time you open it is a dialog
+            // whose value you should be able to hear now, without opening it.
+            // Find, Jump, Query, Replace and Bookmark already had one. Regex
+            // Replace kept its own history and had no key, so Shift+X says it --
+            // x being the letter spelling has always given regex.
+            miSaySayRegex        = addItem(miSay, "Say Rege&x Replace", "Say Regex Replace", Keys.Shift | Keys.X, saySayRegex);
             miSaySayPrime        = addItem(miSay, "Say &Prime",        "Say Prime",    Keys.Shift | Keys.P,                saySayPrime);
             addSep(miQuery);
             // Filter / Sort -- data-shaping commands. As of v1.0.86
@@ -12648,6 +12760,13 @@ namespace DbDo
             miToolsCommandPrompt = addItem(miTools, "Open Co&mmand Prompt",                 "Command Prompt",    Keys.Control | Keys.OemQuestion,    toolsCommandPromptClicked,
                 "Open a Windows command prompt in the folder of the currently-open database",
                 "Control+Slash. The prompt opens with its working directory set to the open database's folder, or your user folder when nothing is open. Companion to Open in Explorer (Alt+Backslash), which opens that same folder in the file manager.");
+            // ASK THE MODEL ON THIS COMPUTER. The keys are EdSharp's and
+            // FileDir's, unchanged: F12 asks a plain question, Shift+F12 sends
+            // the thing you are looking at with it. Keeping them apart matters
+            // -- how to phrase an SQL clause has nothing to do with whichever
+            // record the cursor happens to be on.
+            miToolsChatWithAi = addItem(miTools, "Chat with &AI",                        "Chat with AI",      Keys.F12,                           toolsChatWithAiClicked);
+            miToolsChatAboutTable = addItem(miTools, "Chat about Ta&ble",                "Chat about Table",  Keys.Shift | Keys.F12,              toolsChatAboutTableClicked);
             miToolsConsole   = addItem(miTools, "Open D&ot Prompt",                       "Enter Console",     Keys.Control | Keys.Oemtilde,       toolsConsoleClicked);
             miMiscSqleanConsole = addItem(miTools, "Sqlean &Console",                       "Sqlean Console",    Keys.Control | Keys.Shift | Keys.Oemtilde, sqleanConsoleClicked);
             addSep(miTools);
@@ -12756,7 +12875,9 @@ namespace DbDo
             // Alt+Shift+C). Hidden in the menu (Alt+Shift+C is shown there) but
             // continues to work for users with the chord in muscle
             // memory.
-            registerLocalAlias(Keys.F12, miToolsEditConfig);
+            // F12 WENT TO CHAT WITH AI, which is where EdSharp and FileDir put
+            // it. Edit Config keeps its menu item and its own key; a second key
+            // for it is not worth the one key the whole suite agrees on.
 
             // Numpad asterisk: alias for Say Sort and Filter, for
             // users with a numpad. The primary chord is Shift+8 on
@@ -13483,6 +13604,20 @@ namespace DbDo
                         else
                         {
                             aRow[i] = formatCellValue(db.getFieldValue(sCol));
+                            // AN EMPTY CELL SAYS WHICH KIND OF EMPTY IT IS.
+                            //
+                            // Silence is the one answer a cell must not give: it
+                            // cannot be told from a key that did not register or
+                            // a column that is not there. JAWS says "blank" at an
+                            // empty cell, but NVDA says nothing at all and moves
+                            // on, and Narrator is its own case -- so the word goes
+                            // in the cell, where all three read it the same.
+                            //
+                            // "null" and "blank" are each ONE SYLLABLE, so the
+                            // precise answer costs no more time than a vague one,
+                            // and "blank" is the word JAWS would have said anyway.
+                            if (aRow[i].Length == 0 && DbDoManager.bShowEmptyWords)
+                                aRow[i] = db.emptyWord(sCol);
                         }
                     }
                     catch { aRow[i] = ""; }
@@ -13583,6 +13718,13 @@ namespace DbDo
         // The recordset's getFieldValue currently returns a string
         // already, so date detection is best-effort: try to parse
         // as DateTime; if successful, reformat.
+        // formatCellValue: the DATA form of a cell. It feeds the clipboard,
+        // exports and reports as well as the grid, so it never puts a word in
+        // place of an absent value -- a copied cell must be what the cell holds,
+        // and "blank" pasted into a spreadsheet would be a lie.
+        //
+        // The word an empty cell SHOWS is decided in the grid fill, and the word
+        // it SAYS when asked is decided by speakableCellText.
         private string formatCellValue(string sValue)
         {
             if (sValue == null) return "";
@@ -13755,62 +13897,29 @@ namespace DbDo
             // announces it; the dispatch happens here, not through
             // the form-level KeyMap.
             //
-            // Shift+E and Shift+X are deliberately NOT bound -- the
-            // Alt+RightArrow / Alt+LeftArrow chords for Enter-Child
-            // and Exit-Child obviate the need for any Letter binding
-            // on those commands, freeing the E and X slots for
-            // future commands. Same reasoning for Shift+M / Shift+U:
-            // Set-Mark / Clear-Mark live on Control+M / Control+U
-            // for symmetric chord pairing, and the bare Letter slots
-            // are reserved.
+            // Enter-Child and Exit-Child live on Alt+RightArrow and
+            // Alt+LeftArrow, and Set-Mark and Clear-Mark on Control+M and
+            // Control+U, so none of them needs a bare Shift letter. Every bare
+            // Shift letter belongs to the say layer instead: E says the edited
+            // time, M says the mark, U says the url, X says the regex
+            // replacement. The free letters are H and K, and auditPatterns
+            // prints the current map rather than trusting a comment like this
+            // one, which was out of date before it was noticed.
             if (evArgs.Shift && !evArgs.Control && !evArgs.Alt)
             {
-                ToolStripMenuItem target = null;
-                switch (evArgs.KeyCode)
-                {
-                    // Legacy dbDot Shift+Letter dispatch. As of v1.0.65
-                    // most Shift+Letter chords are now bound directly to
-                    // menu items as their ShortcutKeys (Say-X family),
-                    // so the WinForms dispatch fires them and this
-                    // parallel handler is no longer needed for those
-                    // letters. We keep Shift+J (Jump-Record) for
-                    // backward compatibility -- it has a parallel
-                    // Control-chord binding (Ctrl+J) so the Shift+Letter
-                    // form is the secondary chord. Shift+S → Sort-Object
-                    // was dropped in v1.0.86 along with Sort-Object
-                    // itself (universal Sort-Records replaced it).
-                    case Keys.J: target = miRecJump;          break;
-                }
-                if (target != null)
-                {
-                    if (!target.Enabled)
-                    {
-                        string sCmd = target.Text.Replace("&", "");
-                        if (sCmd.EndsWith("...")) sCmd = sCmd.Substring(0, sCmd.Length - 3).TrimEnd();
-                        Say.say(sCmd + " is unavailable right now (open a database file or select a table first)");
-                    }
-                    else if (KeyMap.bKeyDescriber)
-                    {
-                        // Key Help mode: announce the (command,
-                        // chord, summary) triple via the live region
-                        // and SWALLOW the keystroke. Mirrors the
-                        // KeyMap.tryDispatch behavior so the Shift+
-                        // Letter family is describable too.
-                        string sCmd = KeyMap.dMenuToCommand.ContainsKey(target)
-                            ? KeyMap.dMenuToCommand[target]
-                            : target.Text.Replace("&", "");
-                        string sSummary = KeyMap.summaryFor(sCmd);
-                        string sChord = "Shift+" + evArgs.KeyCode.ToString();
-                        Say.say(sCmd + ". " + sChord + ". " + sSummary + ".");
-                    }
-                    else
-                    {
-                        target.PerformClick();
-                    }
-                    evArgs.Handled = true;
-                    evArgs.SuppressKeyPress = true;
-                    return;
-                }
+                // NOTHING IS DISPATCHED HERE ANY MORE.
+                //
+                // This handler used to map bare Shift+Letter chords to menu
+                // items, and it ran BEFORE the menu shortcuts, so whatever it
+                // named won. Its last entry was Shift+J for Jump-Record, which
+                // is why Shift+J opened a dialog long after the menu alias for
+                // it had gone: Say Jump has held that key as its own
+                // ShortcutKeys all along and never got the chance.
+                //
+                // The block is kept, empty, with this note, because the next
+                // person wanting a bare Shift chord needs to know that adding
+                // one here takes the key away from the say layer silently.
+                // Bind it as a menu item's ShortcutKeys instead.
             }
         }
 
@@ -14668,6 +14777,31 @@ namespace DbDo
                 }
             }
 
+            // THE SAY LAYER ALWAYS ANSWERS.
+            //
+            // Shift plus a letter is a question, and a question that produces
+            // silence cannot be told from a key that did not register, a
+            // mishearing, or a program that has stopped. The bound letters
+            // answer with their value; the free ones say so. Six letters have no
+            // question yet -- and a person walking the alphabet to learn the
+            // layer now hears that, rather than wondering.
+            if ((keyData & (Keys.Control | Keys.Alt)) == 0
+                && (keyData & Keys.Shift) == Keys.Shift)
+            {
+                Keys kLetter = keyData & Keys.KeyCode;
+                // DbDo's own KeyMap, not the kit's: this file has a class of
+                // that name in the global namespace, and the kit's is
+                // Homer.KeyMap. An unqualified KeyMap here is always the local
+                // one, which keeps its bindings in dKeyToMenu.
+                if (kLetter >= Keys.A && kLetter <= Keys.Z
+                    && !dLocalKeyToMenu.ContainsKey(keyData)
+                    && !KeyMap.dKeyToMenu.ContainsKey(keyData))
+                {
+                    Say.say("Shift+" + kLetter.ToString() + ": no question on this key");
+                    return true;
+                }
+            }
+
             // VirtualCursor chords (Alt+Control + Home/End/arrows/
             // Numpad5/PageDown/PageUp). These are the screen-reader
             // table-navigation conventions: Alt+Control+Home jumps to
@@ -15271,7 +15405,7 @@ namespace DbDo
         private void saySayStatus(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
-            { Say.say("No database open"); return; }
+            { Say.say("status: no database open"); return; }
             if (!db.hasRecordset())
             { speakOrShow("Status", "status: " + (db.filePath ?? "database open, no table selected"), 101); return; }
             StringBuilder sb = new StringBuilder();
@@ -15301,7 +15435,7 @@ namespace DbDo
         private void saySayDatabase(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
-            { Say.say("No database open"); return; }
+            { Say.say("database: no database open"); return; }
             string sPath = db.filePath ?? "(unknown)";
             string sName = Path.GetFileName(sPath);
             // Single-press: name only. Double-press: full path
@@ -15316,12 +15450,12 @@ namespace DbDo
         private void saySayOrder(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
-            { Say.say("No database open"); return; }
+            { Say.say("order: no database open"); return; }
             if (!db.hasRecordset())
-            { Say.say("No table selected"); return; }
+            { Say.say("order: no table selected"); return; }
             string s = db.sort ?? "";
             if (s.Length == 0)
-            { Say.say("No order applied"); return; }
+            { Say.say("order: no order applied"); return; }
             speakOrShow("Order", "order: " + s, 125);
         }
 
@@ -15355,7 +15489,7 @@ namespace DbDo
         private void saySayYield(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset())
-            { Say.say("No table selected"); return; }
+            { Say.say("yield: no table selected"); return; }
             StringBuilder sb = new StringBuilder();
             sb.Append(db.recordCount).Append(" row").Append(db.recordCount == 1 ? "" : "s");
             if (db.filter.Length > 0) sb.Append(" (filter: ").Append(db.filter).Append(")");
@@ -15371,10 +15505,10 @@ namespace DbDo
         private void saySayTables(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
-            { Say.say("No database open"); return; }
+            { Say.say("tables: no database open"); return; }
             List<string> lTables = db.visitedTableNames();
             if (lTables == null || lTables.Count == 0)
-            { Say.say("No tables visited yet in this session"); return; }
+            { Say.say("tables: no tables visited yet in this session"); return; }
             StringBuilder sb = new StringBuilder();
             sb.Append(lTables.Count).Append(" table").Append(lTables.Count == 1 ? "" : "s").Append(": ");
             for (int i = 0; i < lTables.Count; i++)
@@ -15388,6 +15522,58 @@ namespace DbDo
         // saySayMark (Shift+M): speak the current record's mark
         // status, "Marked" or "Unmarked" -- the say half of the M
         // mark family (Control+M marks, Control+Shift+M unmarks).
+        // saySayJump: what the Jump dialog would offer next time.
+        //
+        // Shift+G says the jump that is ACTIVE. This says the text that would be
+        // waiting in the box, which is the same thing until you jump somewhere
+        // else and then is not. Both are worth having and they answer different
+        // questions.
+        private void saySayJump(object sender, EventArgs evArgs)
+        {
+            string sText = SearchHistory.lastText(SearchHistory.SectionJump);
+            speakOrShow("Jump", "jump: " + sayableValue(sText), 128);
+        }
+
+        // saySayBookmark: the bookmarks saved this session, newest first.
+        private void saySayBookmark(object sender, EventArgs evArgs)
+        {
+            if (lBookmarks == null || lBookmarks.Count == 0)
+            {
+                Say.say("bookmark: none");
+                return;
+            }
+            System.Text.StringBuilder sbMarks = new System.Text.StringBuilder();
+            sbMarks.Append("bookmark: ").Append(Str.plural("bookmark", lBookmarks.Count)).Append(", newest ");
+            BookmarkEntry beLast = lBookmarks[lBookmarks.Count - 1];
+            sbMarks.Append(string.IsNullOrEmpty(beLast.sLook)
+                ? ("row " + beLast.iRowAtSave) : beLast.sLook);
+            sbMarks.Append(" in ").Append(beLast.sTable);
+            speakOrShow("Bookmark", sbMarks.ToString(), 129);
+        }
+
+        // saySayReplace: what the Replace dialog would offer next time -- the
+        // text to find and the text to put in its place.
+        private void saySayReplace(object sender, EventArgs evArgs)
+        {
+            string sFrom = SearchHistory.lastText(SearchHistory.SectionReplace);
+            string sTo = SearchHistory.lastText(SearchHistory.SectionReplaceWith);
+            speakOrShow("Replace", "replace: " + sayableValue(sFrom)
+                + " with " + sayableValue(sTo), 130);
+        }
+
+        // sayableValue: the convention for an answer that has no answer.
+        //
+        // "none" means there is no value -- nothing was ever set. "blank" means
+        // there is a value and it is empty -- something was set to nothing.
+        // A listener cannot tell those apart from silence, and they are
+        // different facts about the database.
+        private static string sayableValue(string sValue)
+        {
+            if (sValue == null) return "none";
+            if (sValue.Length == 0) return "blank";
+            return sValue;
+        }
+
         private void saySayMark(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
@@ -15415,9 +15601,9 @@ namespace DbDo
         private void saySayMarked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset())
-            { Say.say("No table selected"); return; }
+            { Say.say("marked: no table selected"); return; }
             if (!db.hasField(Metadata.MarkedColumn))
-            { Say.say("This table has no marked column"); return; }
+            { Say.say("marked: this table has no marked column"); return; }
 
             object original = null;
             try { original = db.bookmark; } catch { }
@@ -15446,7 +15632,7 @@ namespace DbDo
                 if (original != null) try { db.bookmark = original; } catch { }
             }
             if (iTotal == 0)
-            { Say.say("No marked rows"); return; }
+            { Say.say("marked: no marked rows"); return; }
             StringBuilder sb = new StringBuilder();
             sb.Append(iTotal).Append(" marked row").Append(iTotal == 1 ? "" : "s").Append(": ");
             for (int i = 0; i < lLooks.Count; i++)
@@ -15475,10 +15661,10 @@ namespace DbDo
         private void saySayEdited(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("No record selected"); return; }
+            { Say.say("edited: no record selected"); return; }
             string sCol = db.hasField("edited") ? "edited" : (db.hasField("added") ? "added" : null);
             if (sCol == null)
-            { Say.say("No date column in this table"); return; }
+            { Say.say("edited: no date column in this table"); return; }
             string sVal = db.getFieldValue(sCol);
             string sSpoken = formatDateHumanFriendly(sVal);
             if (string.IsNullOrEmpty(sSpoken)) sSpoken = "blank";
@@ -15525,9 +15711,9 @@ namespace DbDo
         private void saySayYieldMarked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset())
-            { Say.say("No table selected"); return; }
+            { Say.say("yield marked: no table selected"); return; }
             if (!db.hasField(Metadata.MarkedColumn))
-            { Say.say("This table has no marked column"); return; }
+            { Say.say("yield marked: this table has no marked column"); return; }
             object original = null;
             try { original = db.bookmark; } catch { }
             int iCount = 0;
@@ -15558,9 +15744,9 @@ namespace DbDo
         private void saySayNotes(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("No record selected"); return; }
+            { Say.say("notes: no record selected"); return; }
             if (!db.hasField("notes"))
-            { Say.say("This table has no notes column"); return; }
+            { Say.say("notes: this table has no notes column"); return; }
             string sVal = db.getFieldValue("notes");
             if (string.IsNullOrEmpty(sVal)) sVal = "blank";
             speakOrShow("Notes", "notes: " + sVal, 109);
@@ -15571,9 +15757,9 @@ namespace DbDo
         private void saySayTags(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("No record selected"); return; }
+            { Say.say("tags: no record selected"); return; }
             if (!db.hasField("tags"))
-            { Say.say("This table has no tags column"); return; }
+            { Say.say("tags: this table has no tags column"); return; }
             string sVal = db.getFieldValue("tags");
             if (string.IsNullOrEmpty(sVal)) sVal = "blank";
             speakOrShow("Tags", "tags: " + sVal, 110);
@@ -15588,7 +15774,7 @@ namespace DbDo
         private void saySayAdded(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("No record selected"); return; }
+            { Say.say("added: no record selected"); return; }
             if (!db.hasField("added"))
             { Say.say("added: this table has no added column"); return; }
             string sVal = db.getFieldValue("added");
@@ -15629,7 +15815,9 @@ namespace DbDo
             string sCol = virtCurrentColumnName();
             if (string.IsNullOrEmpty(sCol)) { Say.say("cell: no column at the cursor"); return; }
             string sVal = virtCellValue(iVirtualRow, iVirtualCol);
-            if (string.IsNullOrEmpty(sVal)) sVal = "blank";
+            // "none" when the column holds NULL, "blank" when it holds an empty
+            // string. Same distinction everywhere, so the word is the answer.
+            if (string.IsNullOrEmpty(sVal)) sVal = db.emptyWord(sCol);
             // The column name IS the label, and the row number is left out:
             // the list view announced the position when the row was reached,
             // and Say Status repeats it on demand. One line, two facts.
@@ -15651,9 +15839,9 @@ namespace DbDo
         private void saySayQuery(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
-            { Say.say("No database open"); return; }
+            { Say.say("query: no database open"); return; }
             if (!db.hasRecordset())
-            { Say.say("No table selected"); return; }
+            { Say.say("query: no table selected"); return; }
             string sQuery;
             if (!string.IsNullOrEmpty(db.sourceSql))
                 sQuery = db.sourceSql;
@@ -15665,9 +15853,9 @@ namespace DbDo
         private void saySaySelect(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
-            { Say.say("No database open"); return; }
+            { Say.say("select: no database open"); return; }
             if (!db.hasRecordset())
-            { Say.say("No table selected"); return; }
+            { Say.say("select: no table selected"); return; }
             List<string> lsCols = new List<string>();
             if (grid != null)
                 foreach (ColumnHeader oCol in grid.Columns) lsCols.Add(oCol.Text);
@@ -15684,7 +15872,7 @@ namespace DbDo
         private void saySayFilter(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset())
-            { Say.say("No recordset open"); return; }
+            { Say.say("filter: no recordset open"); return; }
             string sFilter = db.filter ?? "";
             if (string.IsNullOrEmpty(sFilter))
             { Say.say("where: none"); return; }
@@ -15735,9 +15923,9 @@ namespace DbDo
         private void saySayLook(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("No record selected"); return; }
+            { Say.say("look: no record selected"); return; }
             if (!db.hasField("look"))
-            { Say.say("This table has no look column"); return; }
+            { Say.say("look: this table has no look column"); return; }
             string sVal = db.getFieldValue("look");
             if (string.IsNullOrEmpty(sVal)) sVal = "blank";
             speakOrShow("Look", "look: " + sVal, 120);
@@ -15751,7 +15939,7 @@ namespace DbDo
         private void saySayRelated(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("No record selected"); return; }
+            { Say.say("related: no record selected"); return; }
             // Reuse the Show-Related machinery to get a textual
             // summary. For the brief form, just count the FK
             // neighbors; for the detailed form, show their look
@@ -15989,9 +16177,9 @@ namespace DbDo
         private void saySayUrl(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("No record selected"); return; }
+            { Say.say("url: no record selected"); return; }
             if (!db.hasField(Metadata.UrlColumn))
-            { Say.say("This table has no url column"); return; }
+            { Say.say("url: this table has no url column"); return; }
             string sVal = db.getFieldValue(Metadata.UrlColumn);
             if (string.IsNullOrEmpty(sVal)) sVal = "blank";
             speakOrShow("URL", Metadata.UrlColumn + ": " + sVal, 122);
@@ -16001,14 +16189,25 @@ namespace DbDo
         // expression -- of the current record. Shift+P. Falls back to the
         // legacy 'prime' column for databases not yet migrated to 'prime';
         // tables with neither report so.
+        // saySayRegex: what Regex Replace would offer next time. X for regex,
+        // the letter that spelling has always used for it.
+        private void saySayRegex(object sender, EventArgs evArgs)
+        {
+            List<SearchHistory.Entry> lEntries = SearchHistory.load(SearchHistory.SectionRegex);
+            string sText = (lEntries != null && lEntries.Count > 0 && lEntries[0] != null)
+                ? (lEntries[0].sTerm ?? "") : "";
+            if (sText.Length == 0) { Say.say("regex: none"); return; }
+            speakOrShow("Regex", "regex: " + sText, 129);
+        }
+
         private void saySayPrime(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("No record selected"); return; }
+            { Say.say("prime: no record selected"); return; }
             string sField = db.hasField(Metadata.PrimeColumn) ? Metadata.PrimeColumn
                           : (db.hasField(Metadata.PrimeColumn) ? Metadata.PrimeColumn : null);
             if (sField == null)
-            { Say.say("This table has no prime column"); return; }
+            { Say.say("prime: this table has no prime column"); return; }
             string sVal = db.getFieldValue(sField);
             if (string.IsNullOrEmpty(sVal)) sVal = "blank";
             speakOrShow("Prime", sField + ": " + sVal, 123);
@@ -16131,12 +16330,12 @@ namespace DbDo
         private void saySayMarkedRows(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("No row selected"); return; }
+            { Say.say("marked rows: no row selected"); return; }
             if (!db.hasField(Metadata.MarkedColumn))
-            { Say.say("This table has no marked column"); return; }
+            { Say.say("marked rows: this table has no marked column"); return; }
             List<string> lDispCols = db.getDisplayFieldNames();
             if (lDispCols.Count == 0)
-            { Say.say("No columns visible"); return; }
+            { Say.say("marked rows: no columns visible"); return; }
             object oOriginal = null;
             try { oOriginal = db.bookmark; } catch { }
             List<string> lParts = new List<string>();
@@ -16165,7 +16364,7 @@ namespace DbDo
                 if (oOriginal != null) try { db.bookmark = oOriginal; } catch { }
             }
             if (lParts.Count == 0)
-            { Say.say("No marked rows."); return; }
+            { Say.say("marked rows: no marked rows."); return; }
             speakOrShowParts("Say Marked Rows", lParts, 128);
         }
 
@@ -16251,9 +16450,9 @@ namespace DbDo
         private void saySayPosition(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("No record selected"); return; }
+            { Say.say("position: no record selected"); return; }
             if (grid == null || iVirtualCol < 0 || iVirtualCol >= grid.Columns.Count)
-            { Say.say("No column under virtual cursor"); return; }
+            { Say.say("position: no column under virtual cursor"); return; }
             string sHeader = grid.Columns[iVirtualCol].Text;
             if (string.IsNullOrEmpty(sHeader)) sHeader = "(unnamed)";
             int iRow = iVirtualRow >= 1 ? iVirtualRow : db.absolutePosition;
@@ -16310,7 +16509,7 @@ namespace DbDo
         private void saySaySortFilter(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset())
-            { Say.say("No table open"); return; }
+            { Say.say("sort filter: no table open"); return; }
             string sSort = db.sort ?? "";
             string sFilter = db.filter ?? "";
             StringBuilder sb = new StringBuilder();
@@ -16334,13 +16533,13 @@ namespace DbDo
         private void saySayKin(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("No record selected"); return; }
+            { Say.say("kin: no record selected"); return; }
             if (db.eof || db.bof)
-            { Say.say("No record selected"); return; }
+            { Say.say("kin: no record selected"); return; }
 
             string sCurrentTable = db.currentTable;
             if (string.IsNullOrEmpty(sCurrentTable))
-            { Say.say("No table open"); return; }
+            { Say.say("kin: no table open"); return; }
 
             // Use static helpers so logic is shared with the existing
             // Show-Object code; we replicate the parent/child walks
@@ -16422,7 +16621,7 @@ namespace DbDo
 
             if (lParentLines.Count == 0 && lChildLines.Count == 0)
             {
-                speakOrShow("Kin", "No related records", 114);
+                speakOrShow("Kin", "kin: no related records", 114);
                 return;
             }
 
@@ -23290,7 +23489,9 @@ namespace DbDo
         // =====================================================================
         private void schemaSelectTableClicked(object sender, EventArgs evArgs)
         {
-            selectFromList(db == null ? null : db.getTableNames(), "Select Table", "table");
+            // The user's tables, not DbDo's own. lookups and maps are on the
+            // hidden list; the dot prompt still reaches them by name.
+            selectFromList(db == null ? null : db.getUserTableNames(), "Select Table", "table");
         }
 
         // ===== Window commands (MDI window management) =====
@@ -23315,21 +23516,11 @@ namespace DbDo
             string sChosen;
             if (frame == null) return;
             if (db == null || !db.isOpen()) { Say.say("No database open!"); return; }
-            lsNames = db.getTableAndViewNames();
+            // The hidden tables are DbDo's own; getUserTableNames leaves them
+            // out. This was two names written into this one method, which is
+            // why the table ring and the chooser still offered them.
+            lsNames = db.getUserTableNames();
             if (lsNames == null || lsNames.Count == 0) { Say.say("No tables found in this database file."); return; }
-            // maps and lookups are DbDo's internal metadata tables, not
-            // user data, so keep them out of the Open Table picker. They
-            // stay reachable via SQL, and the features that read them
-            // (relationship navigation, database documentation) query
-            // them directly, so hiding them here is display-only. Other
-            // internals (sqlite_, sqlean_) are filtered upstream in
-            // getCatalogObjectNames; these two can't be, because
-            // hasMapsTable() relies on that same enumeration.
-            lsNames.RemoveAll(delegate(string s)
-            {
-                return string.Equals(s, "maps", StringComparison.OrdinalIgnoreCase)
-                    || string.Equals(s, "lookups", StringComparison.OrdinalIgnoreCase);
-            });
             if (lsNames.Count == 0) { Say.say("No user tables to open."); return; }
             // Offer only tables NOT already open in a window on this
             // database; opening a table that is already on screen is
@@ -23513,7 +23704,10 @@ namespace DbDo
                 Say.say("No database file open; press Control+O to open one");
                 return;
             }
-            List<string> lAll = db.getTableAndViewNames();
+            // The ring holds the user's tables. lookups and maps are DbDo's
+            // own, and arriving on one by pressing Control+Page Down is how
+            // somebody meets a table they did not know existed and cannot use.
+            List<string> lAll = db.getUserTableNames();
             if (lAll.Count == 0)
             {
                 Say.say("No tables or views in this database");
@@ -26741,6 +26935,70 @@ namespace DbDo
                 return comType != null;
             }
             catch { return false; }
+        }
+
+        // askOllama: the part both commands share -- check the server, check
+        // there is a model, ask, and show the answer. Nothing is spoken before
+        // a window opens, because the screen reader reads a window title when it
+        // arrives and saying it first only makes it say it twice.
+        private void askOllama(string sTitle, string sQuestion)
+        {
+            if (!Homer.Ollama.isRunning())
+            {
+                showInfoDialog(sTitle, "Ollama is not running on this computer, so there is nothing to ask."
+                    + "\r\n\r\nTo add it, run installOllama.cmd in the DbDo folder, or install DbDo again and tick the Ollama box."
+                    + "\r\n\r\nOllama is shared with EdSharp and FileDir, so if you have it for one of those it is already here.");
+                return;
+            }
+            string sModel = Homer.Ollama.bestTranslateModel();
+            if (sModel.Length == 0)
+            {
+                showInfoDialog(sTitle, "Ollama is running, but no model is installed."
+                    + "\r\n\r\nRun installOllama.cmd in the DbDo folder to fetch llama3.2.");
+                return;
+            }
+            Say.say("Asking " + sModel + ". This can take a while.");
+            string sError;
+            string sAnswer = Homer.Ollama.generate(sModel, sQuestion, 600000, out sError);
+            if (sError.Length > 0) { showInfoDialog(sTitle, "The question could not be answered.\r\n\r\n" + sError); return; }
+            if (sAnswer.Trim().Length == 0) { showInfoDialog(sTitle, "The model returned nothing. Try asking in fewer words."); return; }
+            // The same read-only window every long answer in DbDo uses, so the
+            // keys for reading and copying it are the ones already learned.
+            showInfoDialog(sTitle, sAnswer.Trim());
+        }
+
+        // Chat with AI (F12): a question with nothing attached.
+        private void toolsChatWithAiClicked(object sender, EventArgs evArgs)
+        {
+            string sTitle = "Chat with AI";
+            string sQuestion = (promptText(sTitle, "&Question", "") ?? "").Trim();
+            if (sQuestion.Length == 0) return;
+            askOllama(sTitle, sQuestion);
+        }
+
+        // Chat about Table (Shift+F12): the same question with the table sent
+        // alongside it -- its name, its columns, how many rows, and the record
+        // you are on. Enough for "what does this column hold" or "write me the
+        // filter that finds the ones still open", and small enough that the
+        // model is not reading ten thousand rows to answer.
+        private void toolsChatAboutTableClicked(object sender, EventArgs evArgs)
+        {
+            string sTitle = "Chat about Table";
+            if (db == null || !db.isOpen() || string.IsNullOrEmpty(db.currentTable))
+            { showInfoDialog(sTitle, "Open a table first. This command asks about the table you are on."); return; }
+            string sQuestion = (promptText(sTitle, "&Question", "") ?? "").Trim();
+            if (sQuestion.Length == 0) return;
+            StringBuilder sbContext = new StringBuilder();
+            sbContext.Append("Table: ").Append(db.currentTable).Append("\n");
+            sbContext.Append("Columns: ").Append(string.Join(", ", db.getFieldNames().ToArray())).Append("\n");
+            sbContext.Append("Rows: ").Append(db.recordCount).Append("\n");
+            try
+            {
+                if (!db.eof && !db.bof)
+                    sbContext.Append("The record in view: ").Append(db.getFieldValue("look")).Append("\n");
+            }
+            catch (Exception) { }
+            askOllama(sTitle, sbContext.ToString() + "\nQuestion: " + sQuestion);
         }
 
         private void toolsConsoleClicked(object sender, EventArgs evArgs)

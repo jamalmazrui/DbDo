@@ -358,6 +358,7 @@ FileName: "{app}\exec\DbDo.exe"; \
   Parameters: "--install-jaws-settings"; \
   WorkingDir: "{app}\exec"; \
   Description: "Install scripts for improving use with the JAWS screen reader"; \
+  Check: haveJaws; \
   Flags: postinstall waituntilterminated runhidden skipifsilent
 
 ; 2. NVDA add-on.  Shell-executing the .nvda-addon hands it to NVDA's own file
@@ -366,6 +367,7 @@ FileName: "{app}\exec\DbDo.exe"; \
 FileName: "{app}\scripts\DbDo.nvda-addon"; \
   WorkingDir: "{app}\scripts"; \
   Description: "Install add-on for improving use with the NVDA screen reader"; \
+  Check: haveNvda; \
   Flags: postinstall shellexec waituntilterminated skipifsilent skipifdoesntexist
 
 ; ---- The optional components, each appearing three times ----
@@ -511,12 +513,16 @@ begin
   sLogDir := ExpandConstant('{localappdata}\{#AppName}\logs');
   ForceDirectories(sLogDir);
   sCapture := sLogDir + '\{#AppName}_probe.tmp';
-  (* THE WHOLE COMMAND IS WRAPPED IN ONE MORE PAIR OF QUOTES.
-     cmd /c strips the first and last quote of what follows it, so a command
-     that BEGINS with a quoted path -- "C:\...\ollama.exe" --version -- loses
-     its opening quote and fails silently. The outer pair is what cmd eats.
-     That is why the Ollama probe found nothing on a machine that had Ollama. *)
-  Result := Exec(ExpandConstant('{cmd}'), '/c ""' + sCommand + ' > "' + sCapture + '" 2>&1"',
+  (* /s /c, WHICH IS THE ONLY FORM THAT BEHAVES THE SAME EVERY TIME.
+     Without /s, cmd decides for itself whether to strip the outer quotes, and
+     the decision depends on how many quotes the rest of the line holds. The
+     first attempt used no wrapper and broke a quoted path; the second wrapped
+     everything and broke the plain commands instead -- "where ollama" came back
+     exit 1 with no capture file at all, which is what a line cmd could not
+     parse looks like.
+     With /s the rule is fixed: strip the first and last quote, run the rest
+     verbatim. One form, both cases. *)
+  Result := Exec(ExpandConstant('{cmd}'), '/s /c "' + sCommand + ' > "' + sCapture + '" 2>&1"',
                  '', SW_HIDE, ewWaitUntilTerminated, iResult);
   if Result then Result := LoadStringsFromFile(sCapture, lsLines);
   (* EVERY PROBE IS LOGGED. A detection that goes wrong on somebody else's
@@ -583,6 +589,22 @@ begin
       exit;
     end;
   end;
+end;
+
+function lastWord(sText: String): String;
+(* Ollama answers "ollama version is 0.34.1", so the version is the last word.
+   Returning the whole sentence produced "Reinstall Ollama the installed version
+   (installed version)" on Jamal's machine -- a label that says nothing twice. *)
+var
+  i: Integer;
+begin
+  Result := Trim(sText);
+  for i := Length(Result) downto 1 do
+    if Result[i] = ' ' then
+    begin
+      Result := Copy(Result, i + 1, Length(Result));
+      exit;
+    end;
 end;
 
 function exeVersion(sExe: String): String;
@@ -713,10 +735,12 @@ begin
   end;
   if Result = '' then
   begin
-    sVersion := exeVersion('"' + ollamaExe() + '"');
-    if (sVersion = '') and ollamaIsOnDisk() then sVersion := 'the installed version';
+    sVersion := lastWord(exeVersion('"' + ollamaExe() + '"'));
+    if sVersion = '' then sVersion := lastWord(exeVersion('ollama'));
     if sVersion <> '' then
-      Result := 'Reinstall Ollama ' + sVersion + ' (installed version)'
+      Result := 'Reinstall Ollama ' + sVersion + ' (current version)'
+    else if ollamaIsOnDisk() then
+      Result := 'Reinstall Ollama (already installed)'
     else
     begin
       sVersion := wingetLatest('Ollama.Ollama');
@@ -727,6 +751,22 @@ begin
     end;
   end;
   gOllamaDesc := Result;
+end;
+
+function haveJaws(): Boolean;
+(* A checkbox must know what is already installed -- and that applies to the
+   screen readers too, not only to the AI. EdSharp gates its JAWS entry this
+   way; DbDo offered both to everybody. *)
+begin
+  Result := RegKeyExists(HKEY_LOCAL_MACHINE, 'SOFTWARE\Freedom Scientific\JAWS')
+         or RegKeyExists(HKEY_LOCAL_MACHINE, 'SOFTWARE\WOW6432Node\Freedom Scientific\JAWS');
+end;
+
+function haveNvda(): Boolean;
+begin
+  Result := FileExists(ExpandConstant('{commonpf32}\NVDA\nvda.exe'))
+         or FileExists(ExpandConstant('{commonpf}\NVDA\nvda.exe'))
+         or RegKeyExists(HKEY_LOCAL_MACHINE, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\NVDA');
 end;
 
 function descModel(sParam: String): String;
@@ -742,15 +782,17 @@ begin
     Result := gModelDesc;
     exit;
   end;
-  Result := 'Install the AI model DbDo uses (about 2 GB)';
+  Result := 'Install the llama3.2 model, which DbDo asks questions of (about 2 GB)';
   if ollamaState() > 0 then
   begin
-    Result := 'Install the AI model DbDo uses (about 2 GB)';
-    if probeLines('"' + ollamaExe() + '" list', lsLines) then
-      for i := 1 to GetArrayLength(lsLines) - 1 do
-        if Trim(lsLines[i]) <> '' then
+    (* Ask the way installOllama.cmd asks -- through the PATH -- and look for
+       THIS model rather than for any model. Five other models installed does
+       not mean the one DbDo uses is there. *)
+    if probeLines('ollama list', lsLines) then
+      for i := 0 to GetArrayLength(lsLines) - 1 do
+        if Pos('llama3.2', Lowercase(lsLines[i])) > 0 then
         begin
-          Result := 'Reinstall the AI model DbDo uses (a model is already installed)';
+          Result := 'Reinstall the llama3.2 model (already installed)';
           break;
         end;
   end;
@@ -1227,7 +1269,7 @@ var
   iResult: Integer;
 begin
   try
-    Exec(ExpandConstant('{cmd}'), '/c ""' + ExpandConstant('{app}\exec\summarizeSetup.cmd') + '""',
+    Exec(ExpandConstant('{cmd}'), '/s /c "' + ExpandConstant('{app}\exec\summarizeSetup.cmd') + '"',
          ExpandConstant('{app}\exec'), SW_HIDE, ewNoWait, iResult);
   except
   end;

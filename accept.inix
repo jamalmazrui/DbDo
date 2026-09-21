@@ -6,6 +6,12 @@
 
 FileTask = accept
 
+
+[check]
+Name = the patterns hold
+Run = scripts\auditPatterns.cmd
+Expect = 0
+
 [check]
 Name = the summary and local AI scripts ship with the app
 Run = cmd /c if exist summarizeSetup.cmd if exist summarizeSetup.ps1 if exist installOllama.cmd if exist installModels.cmd (exit 0) else (exit 1)
@@ -13,7 +19,7 @@ Expect = 0
 
 [check]
 Name = the shipped samples are in templates, not a samples folder
-Run = cmd /c if exist templates\JobTrail\JobTrail.db (exit 0) else (exit 1)
+Run = cmd /c if exist templates\JobTrail\JobTrail.db if exist templates\contacts\contacts.db if exist templates\NFB2026Convention\NFB2026Convention.db (exit 0) else (exit 1)
 Expect = 0
 
 [check]

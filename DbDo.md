@@ -630,6 +630,191 @@ DbDo builds its dialogs and menus **in code** rather than with a visual designer
 The source is a single large `DbDo.cs`. Alongside it live the build script, the installer script, the dependency fetcher, the `.inix` configuration, this guide (`DbDo.md`), the README, the coding-style file, and the sample databases with their scripts and `report.inix` definitions.
 
 
+
+
+## Nothing, and the two kinds of it
+
+A field can be empty in two ways, and databases have always kept them apart.
+
+- **null** means nobody has said. The value is unknown, or does not apply.
+- **blank** means somebody said nothing: a real value, a string of no length.
+
+### What DbDo stores
+
+**An empty box stores null.** When you leave a field alone, or clear it, DbDo
+writes null rather than an empty string.
+
+This is the settled practice, not a preference. Allowing both in one column
+gives two values one meaning, so every search has to ask for both and every
+search that forgets is quietly wrong. Oracle went as far as treating an empty
+string AS null; MySQL and SQL Server guidance is to forbid the empty string with
+a rule on the column. SQLite keeps the two apart and leaves the choice to the
+program, so DbDo makes it once, where values are written, rather than leaving it
+to each dialog.
+
+You can still store an empty string on purpose -- a space is a value -- and a
+database built elsewhere keeps whatever it already holds. DbDo changes nothing
+it did not write.
+
+### What DbDo says
+
+**A null field says "null". An empty one says "blank".**
+
+Both words are borrowed rather than invented. Database tools print the literal
+word NULL for a null and have done for decades: phpLiteAdmin shows it in italics
+so it cannot be mistaken for the text "NULL", DB Browser and SQL Server
+Management Studio do the same, and the sqlite3 shell has a setting for choosing
+the word. "Blank" is what JAWS and NVDA say when they reach an empty cell, in
+Excel and in any grid, so it is a word you have heard for years that already
+means exactly this.
+
+### What the screen readers do, and what DbDo does about it
+
+The three readers disagree about an empty cell, and DbDo settles it rather than
+leaving it to them:
+
+- **JAWS says "blank."**
+- **NVDA says nothing** and moves to the next cell, though it still reads the
+  column header.
+- **Narrator** is its own case again.
+
+Silence is the one answer a cell must not give, because it cannot be told from a
+key that did not register or a column that is not there. So **DbDo puts the word
+in the cell**: an empty cell reads "null" or "blank", and all three readers say
+the same thing because all three are reading the same text.
+
+Each word is **one syllable**, so the precise answer costs no more time than a
+vague one -- and "blank" is the word JAWS would have said anyway, so nothing
+contradicts what you already hear elsewhere in Windows.
+
+Accessibility guidance for data tables says the same thing from the other side:
+never leave a cell visually empty, and do not use a dash, which NVDA does not
+read either.
+
+**The word is shown, never stored or copied.** Copy a cell and you get what the
+cell holds, not the word; the same is true of exports and reports. Set
+**ShowEmptyWords** to No in DbDo.inix for the older, silent grid.
+
+### What Microsoft Access does, for comparison
+
+Access reaches the same place from the other end. Its text boxes trim what you
+type and save an empty box as null; a zero-length string cannot be typed into a
+datasheet at all, and takes an update query to create. Its **Allow Zero Length**
+property exists to forbid them outright, and long-standing Access guidance is to
+set it to No, because -- in the words of the reference most Access developers
+learned from -- there is no visible difference between a zero-length string and
+a null, and the distinction should not be forced on the end user.
+
+DbDo does the same thing at the point of writing and then, unlike Access, can
+tell you which one you are on when you ask.
+
+### Why it is worth the distinction
+
+- A job with no applied date has not been applied to. A job whose applied date
+  was cleared has been un-applied. The first is a lead; the second is a mistake
+  to look at.
+- Searching for null finds what nobody has filled in. Searching for blank finds
+  what somebody emptied.
+- **Uniqueness does not see nulls.** SQLite, like every other SQL database,
+  treats each null as different from every other, so a unique column accepts as
+  many nulls as you like. DbDo's `prime` column is built with coalesce for that
+  reason: it turns nulls into empty text before joining, so two records missing
+  the same field still collide as duplicates rather than slipping past.
+- **Sorting puts nulls first.** In SQLite a null sorts before every value, so
+  the rows nobody has filled in arrive at the top of an ascending sort. That is
+  usually what you want and always worth knowing.
+
+## Asking the model on your computer
+
+**F12, Chat with AI**, asks a plain question. **Shift+F12, Chat about Table**,
+asks the same kind of question with the table sent alongside it: its name, its
+columns, how many rows it holds, and the record you are on. So "how do I write a
+filter for the last thirty days" suits F12, and "which of these columns would
+tell me whether I have applied" suits Shift+F12.
+
+The keys are EdSharp's and FileDir's, unchanged, so one habit works across all
+three. Nothing leaves your computer: Ollama runs locally and the model sits in
+your own profile. If Ollama is not installed, either command says so and tells
+you how to add it -- and it is shared with EdSharp and FileDir, so installing it
+once covers all three.
+
+## Tables DbDo keeps for itself
+
+Two tables in every DbDo database belong to DbDo rather than to you:
+
+- **lookups** fills the pick lists. F4 in a field offers what this table holds
+  for that table and field.
+- **maps** records links between records, which is what Say Related reads.
+
+Neither is offered when you choose a table, open a table in a new window, or
+step through tables with Control+Page Down. They are on a hidden list, and
+anything NOT on that list is yours and is offered.
+
+They are not locked away. At the dot prompt, `select-table lookups` opens either
+one by name, and any SQL statement can read or change them. The rule is about
+what a person meets while browsing, not about permission.
+
+SQLite's own tables -- anything beginning with `sqlite_`, and the `sqlean_`
+tables the extensions create -- are filtered out earlier and are never offered
+at all.
+
+## look and prime: the two computed columns
+
+Every table DbDo makes carries two columns that nobody types into. They are
+computed from the fields beside them and kept up to date by the database itself.
+
+### look: a glimpse of a record from somewhere else
+
+`look` is what a record looks like when it is mentioned somewhere other than its
+own table.
+
+The idea is older than DbDo. In Clipper, under DOS, a form with a foreign key in
+it showed a number, and a number is not a record. So the practice was to put a
+glimpse of the referenced record in parentheses after the id: enough to know
+which one it is, and no more. Tab through a form of fields, reach the field that
+points at another table, and hear something meaningful rather than "4".
+
+That is what `look` holds. It joins the fields that identify a record to a
+person, separated by a space, a vertical bar and a space:
+
+    Example Widgets Company (sample employer) | Accessibility Analyst | interviewing
+
+The separator is chosen for the ear: a screen reader pauses at punctuation, so
+the parts arrive as parts rather than as one run-on line.
+
+A glimpse is deliberately not the whole record. When you need the rest, it is
+one keystroke away: Enter opens the record, and Shift plus R lists what this
+record is related to, showing each related record by its own `look`.
+
+### prime: the primary key, computed
+
+`prime` is short for primary key, and it is a primary key in the sense that
+matters rather than the sense SQL means.
+
+The table does have a formal key -- `<table>_id`, a number the database hands
+out -- but that number says nothing about the record. What decides whether two
+rows are the same job is the employer and the title. So `prime` is computed from
+exactly the fields that make a record unique, joined with a vertical bar and
+nothing else:
+
+    Example Widgets Company (sample employer)|Accessibility Analyst
+
+Two things follow, and both are the reason it is done this way.
+
+**The rule can be changed.** Deciding that a job is unique by employer, title
+and location as well is a change to one expression, not a migration of a key.
+
+**Matching becomes one comparison.** When a script asks whether to add a record
+or update the one already there, it compares one value instead of three, in SQL
+or in any language: `WHERE prime = ?`. The maps table works the same way -- it
+records a link as `prime1`, a kind, and `prime2` -- so a relationship needs no
+knowledge of how either table numbers its rows.
+
+### The difference in one line
+
+`look` is for a person, joined with spaces so it reads aloud. `prime` is for a
+program, joined without them so it matches exactly.
+
 ## How a Say command answers
 
 Every Say command answers in one shape:
@@ -663,12 +848,16 @@ read-only window you can read line by line and copy from.
 ### The Say keys
 
 - Shift+A -- added
+- Shift+B -- bookmark, how many are saved and the newest
 - Shift+C -- cell, as column and value
 - Shift+D -- database, as file and folder
 - Shift+E -- edited
 - Shift+F -- find
 - Shift+G -- goto, the jump search
+- Shift+B -- bookmark
 - Shift+I -- id
+- Shift+J -- jump, the text Jump to Record would offer next
+- Shift+J -- jump, the text the Jump dialog would offer next
 - Shift+L -- look
 - Shift+M -- mark
 - Shift+N -- notes
@@ -679,7 +868,10 @@ read-only window you can read line by line and copy from.
 - Shift+S -- select, the columns shown
 - Shift+T -- tags
 - Shift+U -- url
+- Shift+V -- replace, the text Replace would offer next
+- Shift+V -- replace, the text Replace would offer and what it would put there
 - Shift+W -- where, the filter
+- Shift+X -- regex replace, the pattern Regex Replace would offer next
 - Shift+Y -- yield, how many rows
 - Shift+Z -- status, the table, the row and the sort
 
@@ -688,12 +880,42 @@ first letters of a value and the list view goes there, in lower case and
 without regard to case. The two layers do not collide, which is why the Say
 commands live on Shift.
 
-Six letters are unused -- B, H, J, K, V and X -- and are kept that way on
-purpose, so a new question can be added later without moving an answer somebody
-has learned.
+Three letters are still unused -- H, K and X -- and are kept that way on purpose,
+so a new question can be added later without moving an answer somebody has
+learned. Pressing one of them says so rather than staying silent: the say layer
+always answers, because silence cannot be told from a key that did not register.
 
-Shift+J used to be a second key for Jump to Record. It has been removed: a modal
-dialog on the say layer is the one thing that layer must not do, and somebody
-walking the alphabet to hear what each key reports met a dialog instead of an
-answer. Jump to Record keeps Control+J, and Shift+G still says the current jump
-search.
+**A command that opens a dialog with a value already in it has a value worth
+hearing first.** That is what Shift+B, Shift+J and Shift+V are: the bookmark
+list, the text Jump would offer, and the pair Replace would offer. Hearing the
+answer is often enough, and the dialog never has to open.
+
+**none and blank are different answers.** "none" means there is no value --
+nothing was ever set. "blank" means there is a value and it is empty. A listener
+cannot tell those apart from silence, and they are different facts.
+
+Shift+J used to open the Jump dialog. It now says the jump text instead, which
+is what Say Jump on that key was always meant to do. Jump to Record keeps
+Control+J.
+
+## Credits for the tutorial voices
+
+The spoken tutorials in `Tutorials.mkv` were produced with
+[piper](https://github.com/rhasspy/piper), which is MIT licensed, using two
+voices trained by Bryce Beattie and published in the
+[piper-voices](https://huggingface.co/rhasspy/piper-voices) collection:
+
+- **kristin (medium)** -- the narrator. A US English female voice trained from
+  scratch on the [LJ Speech dataset](https://keithito.com/LJ-Speech-Dataset/),
+  which is in the public domain.
+- **john (medium)** -- the screen reader. A US English male voice built from
+  [LibriVox](https://librivox.org) recordings, which are in the public domain.
+
+Both were chosen because their training data carries no restriction on reuse.
+Several better-known piper voices do: the lessac voice comes from the Blizzard
+2013 corpus, which permits research use only, and the ryan and hfc voices are
+licensed CC BY-NC-SA, which bars commercial use and requires share-alike terms
+that would conflict with the MIT licence on this repository.
+
+No acknowledgement is legally required for public domain material. These credits
+are here because the people who recorded and trained these voices deserve them.

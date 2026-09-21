@@ -1,0 +1,1188 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Tutorials</title>
+  <style>
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Tutorials</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#dbdo-tutorials" id="toc-dbdo-tutorials">DbDo –
+Tutorials</a>
+<ul>
+<li><a href="#how-to-listen" id="toc-how-to-listen">How to
+listen</a></li>
+<li><a href="#contents" id="toc-contents">Contents</a></li>
+<li><a href="#overview-and-table-of-contents"
+id="toc-overview-and-table-of-contents">00 - Overview and Table of
+Contents</a>
+<ul>
+<li><a href="#step-1" id="toc-step-1">Step 1</a></li>
+<li><a href="#step-2" id="toc-step-2">Step 2</a></li>
+<li><a href="#step-3" id="toc-step-3">Step 3</a></li>
+<li><a href="#step-4" id="toc-step-4">Step 4</a></li>
+<li><a href="#step-5" id="toc-step-5">Step 5</a></li>
+</ul></li>
+<li><a href="#installing-dbdo" id="toc-installing-dbdo">01 - Installing
+DbDo</a>
+<ul>
+<li><a href="#step-1-enter" id="toc-step-1-enter">Step 1: Enter</a></li>
+<li><a href="#step-2-1" id="toc-step-2-1">Step 2</a></li>
+<li><a href="#step-3-enter" id="toc-step-3-enter">Step 3: Enter</a></li>
+<li><a href="#step-4-tab" id="toc-step-4-tab">Step 4: Tab</a></li>
+<li><a href="#step-5-tab" id="toc-step-5-tab">Step 5: Tab</a></li>
+<li><a href="#step-6-enter" id="toc-step-6-enter">Step 6: Enter</a></li>
+<li><a href="#step-7" id="toc-step-7">Step 7</a></li>
+<li><a href="#step-8-enter" id="toc-step-8-enter">Step 8: Enter</a></li>
+</ul></li>
+<li><a href="#opening-dbdo-for-the-first-time"
+id="toc-opening-dbdo-for-the-first-time">02 - Opening DbDo for the First
+Time</a>
+<ul>
+<li><a href="#step-1-altcontrold" id="toc-step-1-altcontrold">Step 1:
+Alt+Control+D</a></li>
+<li><a href="#step-2-2" id="toc-step-2-2">Step 2</a></li>
+<li><a href="#step-3-1" id="toc-step-3-1">Step 3</a></li>
+<li><a href="#step-4-downarrow" id="toc-step-4-downarrow">Step 4:
+DownArrow</a></li>
+<li><a href="#step-5-rightarrow" id="toc-step-5-rightarrow">Step 5:
+RightArrow</a></li>
+<li><a href="#step-6-shiftc" id="toc-step-6-shiftc">Step 6:
+Shift+C</a></li>
+<li><a href="#step-7-downarrow" id="toc-step-7-downarrow">Step 7:
+DownArrow</a></li>
+<li><a href="#step-8-i" id="toc-step-8-i">Step 8: i</a></li>
+<li><a href="#step-9-shiftz" id="toc-step-9-shiftz">Step 9:
+Shift+Z</a></li>
+<li><a href="#step-10-shiftc" id="toc-step-10-shiftc">Step 10:
+Shift+C</a></li>
+<li><a href="#step-11-controlpagedown"
+id="toc-step-11-controlpagedown">Step 11: Control+PageDown</a></li>
+<li><a href="#step-12" id="toc-step-12">Step 12</a></li>
+</ul></li>
+<li><a href="#adding-a-new-record" id="toc-adding-a-new-record">03 -
+Adding a New Record</a>
+<ul>
+<li><a href="#step-1-controln" id="toc-step-1-controln">Step 1:
+Control+N</a></li>
+<li><a href="#step-2-tab" id="toc-step-2-tab">Step 2: Tab</a></li>
+<li><a href="#step-3-tab" id="toc-step-3-tab">Step 3: Tab</a></li>
+<li><a href="#step-4-f4" id="toc-step-4-f4">Step 4: F4</a></li>
+<li><a href="#step-5-l" id="toc-step-5-l">Step 5: l</a></li>
+<li><a href="#step-6-enter-1" id="toc-step-6-enter-1">Step 6:
+Enter</a></li>
+<li><a href="#step-7-controlenter" id="toc-step-7-controlenter">Step 7:
+Control+Enter</a></li>
+</ul></li>
+<li><a href="#editing-a-record" id="toc-editing-a-record">04 - Editing a
+Record</a>
+<ul>
+<li><a href="#step-1-enter-1" id="toc-step-1-enter-1">Step 1:
+Enter</a></li>
+<li><a href="#step-2-f4" id="toc-step-2-f4">Step 2: F4</a></li>
+<li><a href="#step-3-controlenter" id="toc-step-3-controlenter">Step 3:
+Control+Enter</a></li>
+<li><a href="#step-4-f2" id="toc-step-4-f2">Step 4: F2</a></li>
+<li><a href="#step-5-f4" id="toc-step-5-f4">Step 5: F4</a></li>
+<li><a href="#step-6-enter-2" id="toc-step-6-enter-2">Step 6:
+Enter</a></li>
+<li><a href="#step-7-altshiftn" id="toc-step-7-altshiftn">Step 7:
+Alt+Shift+N</a></li>
+</ul></li>
+<li><a href="#find-and-jump" id="toc-find-and-jump">05 - Find and
+Jump</a>
+<ul>
+<li><a href="#step-1-exa" id="toc-step-1-exa">Step 1: exa</a></li>
+<li><a href="#step-2-controlj" id="toc-step-2-controlj">Step 2:
+Control+J</a></li>
+<li><a href="#step-3-enter-1" id="toc-step-3-enter-1">Step 3:
+Enter</a></li>
+<li><a href="#step-4-shiftg" id="toc-step-4-shiftg">Step 4:
+Shift+G</a></li>
+<li><a href="#step-5-controlf" id="toc-step-5-controlf">Step 5:
+Control+F</a></li>
+<li><a href="#step-6-enter-3" id="toc-step-6-enter-3">Step 6:
+Enter</a></li>
+<li><a href="#step-7-shiftf" id="toc-step-7-shiftf">Step 7:
+Shift+F</a></li>
+</ul></li>
+<li><a href="#order-and-where-filter" id="toc-order-and-where-filter">06
+- Order and Where Filter</a>
+<ul>
+<li><a href="#step-1-controlo" id="toc-step-1-controlo">Step 1:
+Control+O</a></li>
+<li><a href="#step-2-enter" id="toc-step-2-enter">Step 2: Enter</a></li>
+<li><a href="#step-3-shifto" id="toc-step-3-shifto">Step 3:
+Shift+O</a></li>
+<li><a href="#step-4-controlw" id="toc-step-4-controlw">Step 4:
+Control+W</a></li>
+<li><a href="#step-5-enter" id="toc-step-5-enter">Step 5: Enter</a></li>
+<li><a href="#step-6-shiftw" id="toc-step-6-shiftw">Step 6:
+Shift+W</a></li>
+<li><a href="#step-7-controlshiftw" id="toc-step-7-controlshiftw">Step
+7: Control+Shift+W</a></li>
+</ul></li>
+<li><a href="#select-the-columns-you-hear"
+id="toc-select-the-columns-you-hear">07 - Select the Columns You
+Hear</a>
+<ul>
+<li><a href="#step-1-shifts" id="toc-step-1-shifts">Step 1:
+Shift+S</a></li>
+<li><a href="#step-2-controls" id="toc-step-2-controls">Step 2:
+Control+S</a></li>
+<li><a href="#step-3-downarrow" id="toc-step-3-downarrow">Step 3:
+DownArrow</a></li>
+<li><a href="#step-4-space" id="toc-step-4-space">Step 4: Space</a></li>
+<li><a href="#step-5-controlenter" id="toc-step-5-controlenter">Step 5:
+Control+Enter</a></li>
+<li><a href="#step-6-enter-4" id="toc-step-6-enter-4">Step 6:
+Enter</a></li>
+<li><a href="#step-7-escape" id="toc-step-7-escape">Step 7:
+Escape</a></li>
+</ul></li>
+<li><a href="#report-save-and-copy" id="toc-report-save-and-copy">08 -
+Report, Save and Copy</a>
+<ul>
+<li><a href="#step-1-controlc" id="toc-step-1-controlc">Step 1:
+Control+C</a></li>
+<li><a href="#step-2-altshiftr" id="toc-step-2-altshiftr">Step 2:
+Alt+Shift+R</a></li>
+<li><a href="#step-3-w" id="toc-step-3-w">Step 3: w</a></li>
+<li><a href="#step-4-enter" id="toc-step-4-enter">Step 4: Enter</a></li>
+<li><a href="#step-5-controlshifts" id="toc-step-5-controlshifts">Step
+5: Control+Shift+S</a></li>
+<li><a href="#step-6-enter-5" id="toc-step-6-enter-5">Step 6:
+Enter</a></li>
+<li><a href="#step-7-shifty" id="toc-step-7-shifty">Step 7:
+Shift+Y</a></li>
+</ul></li>
+<li><a href="#look-and-prime" id="toc-look-and-prime">09 - Look and
+Prime</a>
+<ul>
+<li><a href="#step-1-shiftl" id="toc-step-1-shiftl">Step 1:
+Shift+L</a></li>
+<li><a href="#step-2-3" id="toc-step-2-3">Step 2</a></li>
+<li><a href="#step-3-shiftr" id="toc-step-3-shiftr">Step 3:
+Shift+R</a></li>
+<li><a href="#step-4-shiftp" id="toc-step-4-shiftp">Step 4:
+Shift+P</a></li>
+<li><a href="#step-5-shifti" id="toc-step-5-shifti">Step 5:
+Shift+I</a></li>
+<li><a href="#step-6" id="toc-step-6">Step 6</a></li>
+<li><a href="#step-7-1" id="toc-step-7-1">Step 7</a></li>
+<li><a href="#step-8" id="toc-step-8">Step 8</a></li>
+</ul></li>
+<li><a href="#where-to-go-next" id="toc-where-to-go-next">1. Where to Go
+Next</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="dbdo-tutorials">DbDo – Tutorials</h1>
+<p><strong>Version 1.0</strong><br />
+September 2026<br />
+Copyright 2026 by Jamal Mazrui<br />
+MIT License</p>
+<p>Nine short walkthroughs, each about three minutes, each a real job
+done from start to finish. Work through the first one and the rest will
+make sense; after that, take whichever matches what you need today.
+Every one uses JobTrail, the job search database that comes with DbDo,
+so you can follow along without having anything of your own to lose.</p>
+<p><strong>Simulations, made with AI.</strong> One synthetic voice works
+through a task; a second answers as a screen reader would. The voices
+are piper’s kristin and john, trained on public domain recordings;
+DbDo.md credits them. You always know which is talking without being
+told.</p>
+<p>The screen reader answers are written for the middle setting every
+reader has: <strong>JAWS at intermediate verbosity</strong>, or
+<strong>Narrator at its default level 3</strong>. You hear the name, the
+kind of control, its value and its state – and, in a dialog, the Alt key
+that jumps straight to it, because that letter is rarely the one you
+would guess. You do not hear the beginner’s help after each control,
+since anybody who knows what a check box is knows that Space toggles
+it.</p>
+<p>Where a tutorial says to read the current line, use your own say line
+key – JAWS or NVDA with Up Arrow – rather than anything of DbDo’s. It is
+the habit you already have, and in this grid a line is a record.</p>
+<p>Every key is named in full the first time it appears. If you forget
+one, press Control+F1 for the key describer and press the key: it says
+the command’s name and what it does instead of running it.</p>
+<h2 id="how-to-listen">How to listen</h2>
+<p><strong><code>Tutorials.mkv</code></strong> holds all nine as one
+recording with a chapter at the start of each. In FileDir, put the
+cursor on it and press Control+Shift+H for the Homer Player: it opens as
+one track, and <strong>Control+Page Down and Control+Page Up move
+between tutorials</strong>, announcing “Chapter 3 of 9” as they go.
+Control+Shift+Page Down and Control+Shift+Page Up jump to the last and
+first.</p>
+<p><strong>If you have the nine .mp3 files</strong>, open
+<code>Tutorials.m3u</code> in the Homer Player instead. A playlist opens
+as nine separate tracks, each named for its tutorial, and moving between
+tracks is then an arrow key in a list. The .mp3 files are not in the
+repository – they are rebuilt by
+<code>scripts\buildTutorials</code>.</p>
+<h2 id="contents">Contents</h2>
+<ul>
+<li><a href="#00-overview-and-table-of-contents">00 - Overview and Table
+of Contents</a></li>
+<li><a href="#01-installing-dbdo">01 - Installing DbDo</a></li>
+<li><a href="#02-opening-dbdo-for-the-first-time">02 - Opening DbDo for
+the First Time</a></li>
+<li><a href="#03-adding-a-new-record">03 - Adding a New Record</a></li>
+<li><a href="#04-editing-a-record">04 - Editing a Record</a></li>
+<li><a href="#05-find-and-jump">05 - Find and Jump</a></li>
+<li><a href="#06-order-and-where-filter">06 - Order and Where
+Filter</a></li>
+<li><a href="#07-select-the-columns-you-hear">07 - Select the Columns
+You Hear</a></li>
+<li><a href="#08-report-save-and-copy">08 - Report, Save and
+Copy</a></li>
+<li><a href="#09-look-and-prime">09 - Look and Prime</a></li>
+<li><a href="#1-where-to-go-next">1. Where to Go Next</a></li>
+</ul>
+<!-- walkthrough: written by makeTutorial.py, do not edit between the markers -->
+<h2 id="overview-and-table-of-contents">00 - Overview and Table of
+Contents</h2>
+<p>A simulated walk through DbDo, made with AI: a person working, and a
+screen reader answering.</p>
+<p><strong>Before you start:</strong> Nothing yet.</p>
+<h3 id="step-1">Step 1</h3>
+<p>DbDo is a database manager for people who work by keyboard and ear.
+SQLite, Access, spreadsheets, plain data – every table is a list you
+arrow through.</p>
+<p>Ten walkthroughs, three minutes each, all using JobTrail, the sample
+that ships with DbDo.</p>
+<h3 id="step-2">Step 2</h3>
+<p>One installs it. Two opens it, and explains the grid and the Shift
+keys.</p>
+<h3 id="step-3">Step 3</h3>
+<p>Three adds a New record, four edits one. Five is Find and Jump. Six
+is Order and Where filter.</p>
+<h3 id="step-4">Step 4</h3>
+<p>Seven Selects the columns you hear. Eight is Report, Save and Copy.
+Nine is Look and Prime, the two computed columns.</p>
+<p>Seven changes how every other row sounds.</p>
+<h3 id="step-5">Step 5</h3>
+<p>Every key is named with the word it comes from, so key and command
+stay together.</p>
+<p>If you forget one, Control plus F1 is the key describer: press it,
+then press the key, and it says what that key does instead of doing
+it.</p>
+<p><strong>Something to try:</strong> Pick the one that matches today’s
+job.</p>
+<h2 id="installing-dbdo">01 - Installing DbDo</h2>
+<p>A simulated walk through DbDo, made with AI: a person working, and a
+screen reader answering.</p>
+<p><strong>Before you start:</strong> You have downloaded DbDo
+underscore setup dot e x e, running a Windows screen reader.</p>
+<h3 id="step-1-enter">Step 1: Enter</h3>
+<p>Run the installer. It needs administrator rights, so Windows asks
+first. Answer yes.</p>
+<p>Screen reader:</p>
+<ul>
+<li>User Account Control dialog</li>
+<li>Do you want to allow this app to make changes to your device?</li>
+<li>Yes button</li>
+</ul>
+<p>DbDo installs for everybody on the computer, which is why it
+asks.</p>
+<h3 id="step-2-1">Step 2</h3>
+<p>The first page says whether this is a new install, an update from an
+earlier version, or a reinstall of the same one.</p>
+<p>Screen reader:</p>
+<ul>
+<li>This will install DbDo 1.0.150.</li>
+</ul>
+<p>If DbDo is already here, the page that asks for a folder is skipped
+and the update goes where the last one went.</p>
+<h3 id="step-3-enter">Step 3: Enter</h3>
+<p>Press Enter to install. The Install button already has focus, so
+Enter is all it takes.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Setup dialog, Installing, Please wait while Setup installs DbDo on
+your computer, progress bar</li>
+</ul>
+<p>Nothing is asked during the copying.</p>
+<h3 id="step-4-tab">Step 4: Tab</h3>
+<p>The last page offers checkboxes for the optional parts. Each one says
+what it would do, with version numbers where there are any.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Install scripts for improving use with the JAWS screen reader check
+box checked</li>
+</ul>
+<p>A box appears only for a screen reader you actually have
+installed.</p>
+<h3 id="step-5-tab">Step 5: Tab</h3>
+<p>Tab again for the local AI. If Ollama is already on the computer the
+box says reinstall, with the version you have, and is not ticked.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Reinstall Ollama 0.34.1 (current version) check box not checked</li>
+</ul>
+<p>A checkbox that offers to install something you already have is a
+checkbox that did not look.</p>
+<h3 id="step-6-enter">Step 6: Enter</h3>
+<p>The last two are the ones you will want. Leave Launch DbDo ticked and
+press Enter to finish.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Launch DbDo (Alt+Control+D starts it any time) check box
+checked</li>
+</ul>
+<p>The guide box is not ticked, because most people want the program
+first.</p>
+<h3 id="step-7">Step 7</h3>
+<p>A results box appears before DbDo does. It says what was installed,
+what the optional parts look like now, and where the log is.</p>
+<p>Screen reader:</p>
+<ul>
+<li>DbDo Setup Results dialog</li>
+<li>DbDo 1.0.156 is installed. Program files, C colon backslash Program
+Files backslash DbDo</li>
+<li>OK button</li>
+</ul>
+<p>The box always appears. It is part of installing rather than a
+choice.</p>
+<h3 id="step-8-enter">Step 8: Enter</h3>
+<p>Press Enter to close it, and DbDo starts.</p>
+<p>Screen reader:</p>
+<ul>
+<li>DbDo</li>
+<li>JobTrail dot d b, actions</li>
+<li>Records list view</li>
+<li>2026-09-24 Follow up on the Accessibility Analyst interview awaiting
+reply, 1 of 7</li>
+</ul>
+<p>DbDo starts only after the box is closed, so its window never lands
+on top of something you were reading.</p>
+<p><strong>Something to try:</strong> Open the log the results box
+named, and read the line that says where DbDo was installed.</p>
+<h2 id="opening-dbdo-for-the-first-time">02 - Opening DbDo for the First
+Time</h2>
+<p>A simulated walk through DbDo, made with AI: a person working, and a
+screen reader answering.</p>
+<p><strong>Before you start:</strong> DbDo is installed and not yet
+opened, so it starts on the JobTrail sample.</p>
+<h3 id="step-1-altcontrold">Step 1: Alt+Control+D</h3>
+<p>Alt plus Control plus D starts DbDo from anywhere in Windows – D for
+DbDo. First run opens the sample database, JobTrail.</p>
+<p>Screen reader:</p>
+<ul>
+<li>DbDo</li>
+<li>JobTrail dot d b, jobs</li>
+<li>Records list view</li>
+<li>Demo Data Cooperative (made up) Data Quality Specialist rejected, 1
+of 4</li>
+</ul>
+<p>After the first time, DbDo opens whatever you had open last.</p>
+<h3 id="step-2-2">Step 2</h3>
+<p>A window opened, so the title was read. Focus landed, so the control
+was read, then its value. Name, role, value, state – that order never
+changes.</p>
+<p>Screen reader people call it nervish – name, role, value, state,
+hint. Learn the order once and every announcement makes sense.</p>
+<h3 id="step-3-1">Step 3</h3>
+<p>A table is just a list you arrow through. Each row is one job, and
+you hear three things: the employer, the role, and where it stands.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Demo Data Cooperative (made up) Data Quality Specialist rejected, 1
+of 4</li>
+</ul>
+<p>Three fields, chosen so you can decide whether to keep going before
+the row finishes.</p>
+<h3 id="step-4-downarrow">Step 4: DownArrow</h3>
+<p>Arrow down.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Example Widgets Company (sample employer) Accessibility Analyst
+interviewing, 2 of 4</li>
+</ul>
+<p>DownArrow interrupts speech, so you can move on as soon as you have
+heard enough.</p>
+<h3 id="step-5-rightarrow">Step 5: RightArrow</h3>
+<p>It is a grid. Down and Up move between rows – one record each. Left
+and Right move between columns – one field each.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Accessibility Analyst</li>
+</ul>
+<p>Only the columns you chose are in the grid. The record holds more,
+and Enter opens all of it.</p>
+<h3 id="step-6-shiftc">Step 6: Shift+C</h3>
+<p>Shift plus C is Say Cell: the column you are on, and its value
+here.</p>
+<p>Screen reader:</p>
+<ul>
+<li>title, Accessibility Analyst</li>
+</ul>
+<p>C for Cell. It never says the table or the sort, which is what Say
+Status on Shift plus Z is for.</p>
+<h3 id="step-7-downarrow">Step 7: DownArrow</h3>
+<p>Down keeps the column, so you can compare one field down a list.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Digital Services Assistant</li>
+</ul>
+<p>Control plus Home and Control plus End go to the first and last
+record, and keep the column too.</p>
+<h3 id="step-8-i">Step 8: i</h3>
+<p>Type a letter, and the list goes to the next row starting with it,
+the way any Windows list does. Type two or three letters for a closer
+landing.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Illustration City Library (fictional) Digital Services Assistant
+lead, 3 of 4</li>
+</ul>
+<p>Lower case is fine, and case does not matter.</p>
+<h3 id="step-9-shiftz">Step 9: Shift+Z</h3>
+<p>Your screen reader’s say line key reads the row again. Shift plus Z
+is Say Status: table, row of how many, and order.</p>
+<p>Screen reader:</p>
+<ul>
+<li>status: jobs row 3 of 4, sort employer</li>
+</ul>
+<p>A letter on its own moves. Shift plus a letter answers. The two
+layers never collide.</p>
+<h3 id="step-10-shiftc">Step 10: Shift+C</h3>
+<p>Shift plus N is Say Notes, which reads the note on this record, and
+Shift plus L is Say Look, the one-line summary of it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>notes, Illustrative record. Heard about it at a sample networking
+event; not applied yet.</li>
+</ul>
+<p>Every answer starts with the name of what you asked for, so you know
+which key you pressed.</p>
+<h3 id="step-11-controlpagedown">Step 11: Control+PageDown</h3>
+<p>Control plus Page Down moves to the next table, the way Page Down
+moves through tabs everywhere else. JobTrail gives you five: actions,
+contacts, docs, jobs and stories.</p>
+<p>Screen reader:</p>
+<ul>
+<li>JobTrail dot d b, contacts</li>
+<li>Records list view</li>
+<li>Alvarez Robin Sample Employment Network (illustration), 1 of 4</li>
+</ul>
+<p>F7 lists them to pick from instead. Two more tables exist that DbDo
+keeps for itself, holding the pick lists and the links between records;
+you are not offered those.</p>
+<h3 id="step-12">Step 12</h3>
+<p>That is the whole idea, and it is a small one: a table is a list, a
+letter moves, Shift plus a letter answers, and everything else is a menu
+away.</p>
+<p>Alt plus F10 lists every command in one window you can filter by
+typing.</p>
+<p><strong>Something to try:</strong> Arrow through all four jobs,
+reading each row with your say line key, and notice which of the three
+fields you actually need before moving on.</p>
+<h2 id="adding-a-new-record">03 - Adding a New Record</h2>
+<p>A simulated walk through DbDo, made with AI: a person working, and a
+screen reader answering.</p>
+<p><strong>Before you start:</strong> JobTrail is open on the jobs
+table.</p>
+<h3 id="step-1-controln">Step 1: Control+N</h3>
+<p>Press Control plus N for a New record – N for New, as in most Windows
+programs. DbDo opens a dialog with one box per field, in the order you
+would fill them in.</p>
+<p>Screen reader:</p>
+<ul>
+<li>New Record dialog</li>
+<li>Employer edit</li>
+</ul>
+<p>The first box is the employer, because that is what you know first
+about a job.</p>
+<h3 id="step-2-tab">Step 2: Tab</h3>
+<p>Type the employer and press Tab.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Title edit</li>
+</ul>
+<p>Tab moves forward, Shift plus Tab moves back. The order is the order
+of the fields in the table.</p>
+<h3 id="step-3-tab">Step 3: Tab</h3>
+<p>Type the role, Tab again, and you reach status. Listen to the end of
+this one.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Status edit</li>
+<li>F4 picks from 7 values</li>
+</ul>
+<p>A field with a pick list says so. The tip is spoken when you arrive
+and shown in the status line.</p>
+<h3 id="step-4-f4">Step 4: F4</h3>
+<p>Press F4 to open the list, arrow to the value you want, and press
+Enter.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Status list box, applied, 1 of 7</li>
+</ul>
+<p>Alt plus DownArrow does the same thing, which is the Windows way of
+opening a combo.</p>
+<h3 id="step-5-l">Step 5: l</h3>
+<p>Type the first letter to jump instead of arrowing. L takes you to
+lead, which is where a job starts.</p>
+<p>Screen reader:</p>
+<ul>
+<li>lead, 4 of 7</li>
+</ul>
+<p>The values are alphabetical so that first letters land where you
+expect.</p>
+<h3 id="step-6-enter-1">Step 6: Enter</h3>
+<p>Press Enter to take it. The value goes into the field and you are
+back in the dialog.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Status edit, lead</li>
+</ul>
+<p>Twenty three fields in JobTrail have pick lists, including the states
+and countries in contacts.</p>
+<h3 id="step-7-controlenter">Step 7: Control+Enter</h3>
+<p>Fill in what you know and leave the rest. Press Control plus Enter
+from anywhere in the dialog to save.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Record added</li>
+<li>Records list view</li>
+<li>Widget Works (your own entry) Support Analyst lead, 5 of 5</li>
+</ul>
+<p>Control plus Enter saves from any field, so you never have to find
+the OK button.</p>
+<p><strong>Something to try:</strong> Add a second job at the same
+employer and notice that DbDo refuses a duplicate of the same employer
+and title.</p>
+<h2 id="editing-a-record">04 - Editing a Record</h2>
+<p>A simulated walk through DbDo, made with AI: a person working, and a
+screen reader answering.</p>
+<p><strong>Before you start:</strong> JobTrail is open on the jobs
+table, on a job you have applied to.</p>
+<h3 id="step-1-enter-1">Step 1: Enter</h3>
+<p>Press Enter on a row to open it for editing. The same dialog you used
+to add a record, with the values in it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Edit Record dialog</li>
+<li>Employer edit, Example Widgets Company (sample employer)</li>
+</ul>
+<p>The caret starts at the beginning of the box, not at the end of the
+text.</p>
+<h3 id="step-2-f4">Step 2: F4</h3>
+<p>Tab to the field you want. Status has a pick list, so F4 offers the
+values rather than making you spell one.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Status list box, interviewing, 3 of 7</li>
+</ul>
+<p>Picking rather than typing is how a vocabulary stays consistent
+across a hundred records.</p>
+<h3 id="step-3-controlenter">Step 3: Control+Enter</h3>
+<p>Enter takes the value; Control plus Enter saves the record.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Record saved</li>
+<li>Records list view</li>
+</ul>
+<p>Escape leaves without saving, and DbDo asks first if you changed
+anything.</p>
+<h3 id="step-4-f2">Step 4: F2</h3>
+<p>For one field there is a shorter way. Move to the column you want
+with Right Arrow, then press F2 to edit just that cell.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Cell edit, interviewing</li>
+</ul>
+<p>F2 is the Windows key for editing in place, and it works the same
+here.</p>
+<h3 id="step-5-f4">Step 5: F4</h3>
+<p>The cell editor has the same pick list. F4, a letter, Enter.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Cell list box, offer, 5 of 7</li>
+</ul>
+<p>Anything a dialog can do to a field, the cell editor can do to the
+same field.</p>
+<h3 id="step-6-enter-2">Step 6: Enter</h3>
+<p>Enter saves the cell.</p>
+<p>Screen reader:</p>
+<ul>
+<li>offer</li>
+</ul>
+<p>Shift plus E is Say Edited, and it says when the record was last
+changed, if you want to be sure it took.</p>
+<h3 id="step-7-altshiftn">Step 7: Alt+Shift+N</h3>
+<p>Some fields are longer than a line. Alt plus Shift plus N edits the
+Notes – N for Notes – in a window of their own, and Control plus Enter
+saves it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Notes dialog</li>
+<li>Notes edit, multiline, Illustrative record. Interview booked for the
+24th.</li>
+</ul>
+<p>Alt plus Shift plus T does the same for tags, and Alt plus Shift plus
+U for the web address.</p>
+<p><strong>Something to try:</strong> Change a status with F2, then
+press Shift plus E and notice that the edited time has moved.</p>
+<h2 id="find-and-jump">05 - Find and Jump</h2>
+<p>A simulated walk through DbDo, made with AI: a person working, and a
+screen reader answering.</p>
+<p><strong>Before you start:</strong> JobTrail is open on the jobs
+table, sorted by employer.</p>
+<h3 id="step-1-exa">Step 1: exa</h3>
+<p>The quickest way needs no command at all. Type the first letters of
+what you want, and the list goes there.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Example Widgets Company (sample employer) Accessibility Analyst
+interviewing, 2 of 4</li>
+</ul>
+<p>Typing searches the first column, which is why the first column is
+the one you would look a record up by.</p>
+<h3 id="step-2-controlj">Step 2: Control+J</h3>
+<p>Control plus J is Jump to Record – J for Jump – and it searches one
+column. DbDo asks for the text and says which column it will search.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Jump to Match (column, employer) dialog</li>
+<li>Text to search for combo box, blank, ALT+T</li>
+</ul>
+<p>The box remembers your last ten answers, so a search you repeat is
+one arrow away.</p>
+<h3 id="step-3-enter-1">Step 3: Enter</h3>
+<p>Type part of the value and press Enter. DbDo moves to the first row
+that contains it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Illustration City Library (fictional) Digital Services Assistant
+lead, 3 of 4</li>
+</ul>
+<p>Control plus Shift plus J goes backwards to the previous match.</p>
+<h3 id="step-4-shiftg">Step 4: Shift+G</h3>
+<p>Shift plus G is Say Goto – G for Goto, the jump search – and it says
+what you looked for last, for when you have lost your place.</p>
+<p>Screen reader:</p>
+<ul>
+<li>goto: library in employer</li>
+</ul>
+<p>It says none when no jump is active, rather than saying nothing.</p>
+<h3 id="step-5-controlf">Step 5: Control+F</h3>
+<p>Control plus F is Find – F for Find, as everywhere in Windows – and
+it searches every column, including the notes and the posting text.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Find dialog</li>
+<li>Text combo box, blank</li>
+</ul>
+<p>Jump is one column and fast. Find is all of them and thorough.</p>
+<h3 id="step-6-enter-3">Step 6: Enter</h3>
+<p>Type what you want and press Enter.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Sample Health Network (illustration only) Records Coordinator
+applied, 4 of 4</li>
+</ul>
+<p>F3 repeats the find forwards, and Control plus Shift plus F goes
+back.</p>
+<h3 id="step-7-shiftf">Step 7: Shift+F</h3>
+<p>Shift plus F is Say Find, the same way Shift plus G is Say Goto: F
+for Find, G for Goto.</p>
+<p>Screen reader:</p>
+<ul>
+<li>find: schedule a</li>
+</ul>
+<p>Every Shift plus letter answer begins with the name of what you asked
+for.</p>
+<p><strong>Something to try:</strong> Find a word you know is in a note
+rather than in a title, and notice which of the three ways gets you
+there.</p>
+<h2 id="order-and-where-filter">06 - Order and Where Filter</h2>
+<p>A simulated walk through DbDo, made with AI: a person working, and a
+screen reader answering.</p>
+<p><strong>Before you start:</strong> JobTrail is open on the jobs
+table.</p>
+<h3 id="step-1-controlo">Step 1: Control+O</h3>
+<p>Control plus O sets the Order – O for Order. Sorting is what it does;
+Order is what it is called, and O is the key. DbDo offers the columns as
+a list rather than asking you to type one.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Order Records dialog</li>
+<li>Column to sort by list box, employer, 4 of 16, ALT+C</li>
+</ul>
+<p>The list starts on the column the table is sorted by now.</p>
+<h3 id="step-2-enter">Step 2: Enter</h3>
+<p>Arrow to the column you want and press Enter. The list is read again
+in the new order.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Sorted by status</li>
+<li>Records list view</li>
+<li>Sample Health Network (illustration only) Records Coordinator
+applied, 1 of 4</li>
+</ul>
+<p>Sorting alphabetically keeps a row in the same place every time you
+open the table, which is what makes first letters worth typing.</p>
+<h3 id="step-3-shifto">Step 3: Shift+O</h3>
+<p>Shift plus O is Say Order, which says the current order at any time.
+Same O, asked rather than set.</p>
+<p>Screen reader:</p>
+<ul>
+<li>order: status</li>
+</ul>
+<p>Shift plus Z, Say Status, gives the order along with the table and
+the row.</p>
+<h3 id="step-4-controlw">Step 4: Control+W</h3>
+<p>Control plus W sets the Where filter – W for Where, as in the SQL
+word – a condition deciding which rows you hear at all.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Where Filter dialog</li>
+<li>Filter combo box, blank, ALT+F</li>
+</ul>
+<p>The condition is SQL, and the box remembers the last ten you
+used.</p>
+<h3 id="step-5-enter">Step 5: Enter</h3>
+<p>Type the condition and press Enter.</p>
+<p>Screen reader:</p>
+<ul>
+<li>2 rows</li>
+<li>Records list view</li>
+<li>Example Widgets Company (sample employer) Accessibility Analyst
+interviewing, 1 of 2</li>
+</ul>
+<p>A count of zero is an answer too, and DbDo says it plainly rather
+than treating it as a fault.</p>
+<h3 id="step-6-shiftw">Step 6: Shift+W</h3>
+<p>Shift plus W is Say Where filter – W for Where – and Shift plus Y is
+Say Yield, how many rows it leaves.</p>
+<p>Screen reader:</p>
+<ul>
+<li>where: status = ‘applied’</li>
+</ul>
+<p>Both say none and zero when there is nothing to report.</p>
+<h3 id="step-7-controlshiftw">Step 7: Control+Shift+W</h3>
+<p>Control plus Shift plus W clears the Where filter, and the whole
+table comes back. Shift reverses a command all through DbDo.</p>
+<p>Screen reader:</p>
+<ul>
+<li>where: none</li>
+<li>4 rows</li>
+</ul>
+<p>DbDo remembers the sort and the filter for each table, so they are
+still there the next time you open it.</p>
+<p><strong>Something to try:</strong> Set a Where filter for the jobs
+you have applied to, Order them by the date you applied, then clear both
+and hear the count come back.</p>
+<h2 id="select-the-columns-you-hear">07 - Select the Columns You
+Hear</h2>
+<p>A simulated walk through DbDo, made with AI: a person working, and a
+screen reader answering.</p>
+<p><strong>Before you start:</strong> JobTrail is open on the jobs
+table, which shows the employer, the role and the status.</p>
+<h3 id="step-1-shifts">Step 1: Shift+S</h3>
+<p>A row is heard rather than seen, so the columns it carries are worth
+a thought. Shift plus S is Say Select – S for Select – and names the
+ones you have.</p>
+<p>Screen reader:</p>
+<ul>
+<li>select: employer, title, status</li>
+</ul>
+<p>Three is the usual number. Four is the most that stays
+comfortable.</p>
+<h3 id="step-2-controls">Step 2: Control+S</h3>
+<p>Control plus S opens Select Columns – S for Select. The columns you
+hear are the ones selected here. Every column in the table is there,
+ticked or not.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Select Columns dialog</li>
+<li>Columns check list box, employer check box checked, 1 of 16,
+ALT+C</li>
+</ul>
+<p>The order in the dialog is the order in the table, which is the order
+somebody would fill the fields in.</p>
+<h3 id="step-3-downarrow">Step 3: DownArrow</h3>
+<p>Arrow down the list and press Space to tick or untick a column.</p>
+<p>Screen reader:</p>
+<ul>
+<li>title check box checked, 2 of 16</li>
+</ul>
+<p>The ticked ones are read in the order they appear here, so the first
+one is the one you hear first.</p>
+<h3 id="step-4-space">Step 4: Space</h3>
+<p>Tick the applied date as a fourth column.</p>
+<p>Screen reader:</p>
+<ul>
+<li>applied underscore date check box checked, 11 of 16</li>
+</ul>
+<p>A date is a good fourth column because it is short. A note is a bad
+one because it is long.</p>
+<h3 id="step-5-controlenter">Step 5: Control+Enter</h3>
+<p>Press Control plus Enter to take the change. The list is read again
+with the new columns.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Records list view</li>
+<li>Example Widgets Company (sample employer) Accessibility Analyst
+interviewing 2026-09-02, 2 of 4</li>
+</ul>
+<p>Everything you did not choose is still there. It is one keystroke
+away in the record.</p>
+<h3 id="step-6-enter-4">Step 6: Enter</h3>
+<p>Press Enter on a row to hear every field, whether it is a column or
+not.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Edit Record dialog</li>
+<li>Employer edit, Example Widgets Company (sample employer)</li>
+</ul>
+<p>Choosing columns decides what you hear while moving, not what the
+record holds.</p>
+<h3 id="step-7-escape">Step 7: Escape</h3>
+<p>Escape closes it. DbDo remembers your columns for this table, so the
+choice is made once.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Records list view</li>
+</ul>
+<p>The choice is kept in a settings file beside the database, along with
+the sort and the filter.</p>
+<p><strong>Something to try:</strong> Add a fourth column, listen to ten
+rows, then take it away again and decide which you preferred.</p>
+<h2 id="report-save-and-copy">08 - Report, Save and Copy</h2>
+<p>A simulated walk through DbDo, made with AI: a person working, and a
+screen reader answering.</p>
+<p><strong>Before you start:</strong> JobTrail is open on the actions
+table, which is the log of everything you have done.</p>
+<h3 id="step-1-controlc">Step 1: Control+C</h3>
+<p>Start with the simplest output there is: one record. Control plus C
+copies the record you are on – C for Copy, as everywhere – to the
+clipboard, as labelled lines.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Record copied</li>
+</ul>
+<p>Alt plus Shift plus C adds a record to what is already on the
+clipboard, so you can gather several.</p>
+<h3 id="step-2-altshiftr">Step 2: Alt+Shift+R</h3>
+<p>Alt plus Shift plus R runs a Report – R for Report, and Shift because
+Alt plus R belongs to the menu bar. JobTrail comes with six, and DbDo
+offers them as a list.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Run Report dialog</li>
+<li>Output list box, application underscore history, 1 of 6, ALT+O</li>
+</ul>
+<p>A report reads the whole table rather than the rows on screen, so the
+filter does not change what it produces.</p>
+<h3 id="step-3-w">Step 3: w</h3>
+<p>The one that matters most is the work search record: every countable
+employer contact, in the shape an agency asks for.</p>
+<p>Screen reader:</p>
+<ul>
+<li>work underscore search underscore record, 6 of 6</li>
+</ul>
+<p>The values are alphabetical, so the first letter lands you near what
+you want.</p>
+<h3 id="step-4-enter">Step 4: Enter</h3>
+<p>Press Enter.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Report written</li>
+<li>EdSharp, work underscore search underscore record dot m d</li>
+</ul>
+<p>It is Markdown, so pandoc turns it into a web page to send or a Word
+file to hand across a desk.</p>
+<h3 id="step-5-controlshifts">Step 5: Control+Shift+S</h3>
+<p>For a whole table rather than a report, Control plus Shift plus S is
+Save As – S for Save – and writes the table to a file. DbDo asks for the
+name and decides the format from what you type.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Save As dialog</li>
+<li>File name edit</li>
+</ul>
+<p>Type a name ending in x l s x for a spreadsheet, c s v for plain
+data, or d o c x for a document.</p>
+<h3 id="step-6-enter-5">Step 6: Enter</h3>
+<p>Type the name and press Enter. No Excel needed.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Saved actions dot x l s x</li>
+</ul>
+<p>The header row is frozen and the columns are sized, so the file is
+usable by somebody else as it is.</p>
+<h3 id="step-7-shifty">Step 7: Shift+Y</h3>
+<p>Shift plus Y is Say Yield – Y for Yield, what the table yielded – so
+it says how many rows went into the file.</p>
+<p>Screen reader:</p>
+<ul>
+<li>yield: 7 rows</li>
+</ul>
+<p>Every count in DbDo matches its noun, so one row is one row rather
+than one rows.</p>
+<p><strong>Something to try:</strong> Produce the work search record for
+the last four weeks and read it in your editor before sending it to
+anybody.</p>
+<h2 id="look-and-prime">09 - Look and Prime</h2>
+<p>A simulated walk through DbDo, made with AI: a person working, and a
+screen reader answering.</p>
+<p><strong>Before you start:</strong> JobTrail is open on the jobs
+table, on the Example Widgets job.</p>
+<h3 id="step-1-shiftl">Step 1: Shift+L</h3>
+<p>Every table DbDo makes has two columns nobody types into. They are
+computed from the fields beside them, and each one has a job. Shift plus
+L is Say Look – L for Look – and it says the first.</p>
+<p>Screen reader:</p>
+<ul>
+<li>look: Example Widgets Company (sample employer) | Accessibility
+Analyst | interviewing</li>
+</ul>
+<p>Look is what this record looks like when it is mentioned somewhere
+else.</p>
+<h3 id="step-2-3">Step 2</h3>
+<p>The idea is older than DbDo. In a form of fields, a field pointing at
+another table shows a number, and a number is not a record. Look is the
+glimpse that goes with it.</p>
+<p>The parts are separated by a space, a bar and a space, because a
+screen reader pauses at punctuation and the parts then arrive as
+parts.</p>
+<h3 id="step-3-shiftr">Step 3: Shift+R</h3>
+<p>Shift plus R is Say Related – R for Related – and it shows the look
+working. Every record this one is related to is listed by its look, so
+you know which is which without opening any of them.</p>
+<p>Screen reader:</p>
+<ul>
+<li>related, actions (1 record)</li>
+<li>2026-09-08 bar First interview for Accessibility Analyst bar
+interview scheduled</li>
+</ul>
+<p>A glimpse is deliberately not the whole record. Enter opens the
+record when you want the rest.</p>
+<h3 id="step-4-shiftp">Step 4: Shift+P</h3>
+<p>The second column is prime, which is short for primary key. Shift
+plus P is Say Prime – P for Prime – and it says it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>prime: Example Widgets Company (sample employer)|Accessibility
+Analyst</li>
+</ul>
+<p>Bare bars, no spaces. This one is for a program rather than for
+you.</p>
+<h3 id="step-5-shifti">Step 5: Shift+I</h3>
+<p>The table does have a formal key, a number the database hands out.
+Shift plus I is Say Id – I for Id – and it says that number. Notice how
+little it tells you.</p>
+<p>Screen reader:</p>
+<ul>
+<li>job_id: 1</li>
+</ul>
+<p>A number says nothing about the record. What decides whether two rows
+are the same job is the employer and the title.</p>
+<h3 id="step-6">Step 6</h3>
+<p>So prime is computed from exactly the fields that make a record
+unique. That buys two things.</p>
+<p>The rule can be changed by editing one expression, rather than by
+migrating a key.</p>
+<h3 id="step-7-1">Step 7</h3>
+<p>And matching becomes one comparison. A script deciding whether to add
+a job or update the one already there compares prime, not three
+fields.</p>
+<p>The maps table works the same way: a link is one prime, a kind, and
+another prime, so it needs no knowledge of how either table numbers its
+rows.</p>
+<h3 id="step-8">Step 8</h3>
+<p>One line to remember. Look is for a person, joined with spaces so it
+reads aloud. Prime is for a program, joined without them so it matches
+exactly.</p>
+<p>Neither is ever typed, and neither can be edited: the database keeps
+both current as the fields beside them change.</p>
+<p><strong>Something to try:</strong> Open a contact and press Shift
+plus R, then work out which job each line came from without opening
+anything.</p>
+<!-- walkthrough ends -->
+<h2 id="where-to-go-next">1. Where to Go Next</h2>
+<p>The tutorials above cover the day-to-day. When you want more:</p>
+<ul>
+<li><strong>The guide.</strong> F1 inside DbDo opens
+<code>DbDo.md</code>, which documents every command, the Say keys, and
+the two computed columns.</li>
+<li><strong>The hotkey list.</strong> Alt+Shift+H shows every command
+with its key and a line saying what it does. Control+F1 does the same
+one key at a time.</li>
+<li><strong>The alternate menu.</strong> Alt+F10 lists every command in
+one window you can filter by typing, which is the fastest way to find
+something whose name you half remember.</li>
+<li><strong>The sample databases.</strong> JobTrail is one of fourteen
+that ship with DbDo. The others hold recipes, music, books, contacts and
+more, and each is a different shape of database to practise on.</li>
+<li><strong>The audio.</strong> <code>Tutorials.mkv</code> holds all of
+these as one file with a chapter each, for listening through rather than
+reading.</li>
+</ul>
+</body>
+</html>

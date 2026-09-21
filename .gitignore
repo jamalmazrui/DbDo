@@ -51,3 +51,15 @@ tagRelease.ps1
 Version.cs
 __pycache__/
 version.py
+
+# FETCHED, NOT AUTHORED. buildTutorials downloads about 86 MB of voice engine
+# and voice model into scripts/voices, and speaks the tutorials into help as
+# .mp3 and .mkv. None of it is source: it is rebuilt by one command, it is far
+# larger than everything else here put together, and a zip of the folder with it
+# in is 80 MB of the wrong thing.
+scripts/voices/
+scripts/ffmpeg.exe
+help/Tutorial_*.inix
+help/*.mp3
+help/*.wav
+help/Tutorials.m3u

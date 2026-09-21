@@ -113,6 +113,7 @@ set "homerSources=!homerSources! "!homerDev!\CSharp\KeyMap.cs""
 set "homerSources=!homerSources! "!homerDev!\CSharp\KeyName.cs""
 set "homerSources=!homerSources! "!homerDev!\CSharp\Lbc.cs""
 set "homerSources=!homerSources! "!homerDev!\CSharp\Log.cs""
+set "homerSources=!homerSources! "!homerDev!\CSharp\Ollama.cs""
 set "homerSources=!homerSources! "!homerDev!\CSharp\Paths.cs""
 set "homerSources=!homerSources! "!homerDev!\CSharp\Say.cs""
 set "homerSources=!homerSources! "!homerDev!\CSharp\Util.cs""
@@ -545,6 +546,32 @@ rem absent we skip it silently; drop a 2db.cs in this folder to build it.
 :have_2db
 
 
+rem ---- files that were renamed ----
+rem
+rem FILES THAT WERE RENAMED LEAVE THE OLD COPY BEHIND, because unarchiving adds
+rem and replaces but never deletes. The last run found 17 tutorials where there
+rem are 9: the old names and the new ones, each built into the document twice
+rem over. So the build removes what it knows has moved.
+echo. >> "!log!"
+for %%f in (
+  "help\Tutorial_1_Installing.inix" "help\Tutorial_2_Opening.inix" "help\Tutorial_3_Adding.inix"
+  "help\Tutorial_4_Editing.inix" "help\Tutorial_5_Finding.inix" "help\Tutorial_6_Sorting.inix"
+  "help\Tutorial_7_Columns.inix" "help\Tutorial_8_Output.inix" "help\Tutorial_9_LookAndPrime.inix"
+  "help\Tutorial.inix" "help\Tutorial_2_Adding.inix" "help\Tutorial_3_Editing.inix"
+  "help\Tutorial_4_Finding.inix" "help\Tutorial_5_Sorting.inix" "help\Tutorial_6_Columns.inix"
+  "help\Tutorial_7_Output.inix" "help\Tutorial_8_LookAndPrime.inix"
+  "help\Tutorial_1_Installing.inix.bak"
+  "help\Tutorial_Adding.inix" "help\Tutorial_Columns.inix" "help\Tutorial_Editing.inix"
+  "help\Tutorial_Finding.inix" "help\Tutorial_Installing.inix" "help\Tutorial_LookAndPrime.inix"
+  "help\Tutorial_Output.inix" "help\Tutorial_Sorting.inix"
+  "scripts\buildTutorial.cmd" "scripts\buildTutorial.ps1"
+) do (
+  if exist %%f (
+    del /f /q %%f
+    echo Removed the old %%f >> "!log!"
+  )
+)
+
 rem ---- generate HTML documentation ----
 rem Every .md ships with a matching .htm, and pandoc is FETCHED when this machine
 rem has none. A Homer build script asks the web for what it needs rather than
@@ -564,6 +591,11 @@ pandoc --standalone --toc --toc-depth=3 --metadata=title:"DbDo README" -o README
 for %%m in (Announce.md History.md License.md) do (
   if exist "%%m" pandoc --standalone --metadata=title:"%%~nm" -o "%%~nm.htm" "%%m" >> "!log!" 2>&1
 )
+rem The help folder too: Tutorials.md is written by makeTutorial and the podcast
+rem feed links to Tutorials.htm, so the pair has to stay together.
+if exist "help\*.md" for %%m in (help\*.md) do (
+  pandoc --standalone --toc --metadata=title:"%%~nm" -o "help\%%~nm.htm" "%%m" >> "!log!" 2>&1
+)
 echo Documentation converted with pandoc. >> "!log!"
 goto :doc_done
 :no_pandoc
@@ -571,6 +603,28 @@ echo NOTE: pandoc could not be installed, so the .htm files were not rebuilt.
 echo Pandoc unavailable; .htm files left as they are. >> "!log!"
 
 :doc_done
+
+rem ---- the spoken tutorials, only when they are not already here ----
+rem
+rem A release carries help\Tutorials.mkv and help\Tutorials.md. Building them
+rem takes minutes and fetches voices the first time, so it happens only when one
+rem of them is MISSING -- which is exactly the state a fresh clone is in, and
+rem never the state a working folder is in. To rebuild after editing a script,
+rem run scripts\buildTutorials yourself.
+if not exist "help\Tutorials.mkv" goto :makeTutorials
+if not exist "help\Tutorials.md" goto :makeTutorials
+echo Tutorials already built. >> "!log!"
+goto :tutorialsDone
+:makeTutorials
+if exist "help\Tutorial_*.inix" (
+  echo Building the spoken tutorials. The first run fetches two voices...
+  echo Tutorials missing; running buildTutorials >> "!log!"
+  call "scripts\buildTutorials.cmd" >> "!log!" 2>&1
+  if errorlevel 1 echo WARN: buildTutorials reported a problem; see scripts\buildTutorials.log >> "!log!"
+) else (
+  echo No tutorial scripts here. >> "!log!"
+)
+:tutorialsDone
 
 rem ---- build the installer ----
 rem DbDo_setup.exe is part of the build, not a separate errand: one command

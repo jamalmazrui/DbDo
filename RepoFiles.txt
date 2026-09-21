@@ -27,6 +27,9 @@ installOllama.cmd
 accept.inix
 uiTest.inix
 help/
+help/Tutorials.md
+help/Tutorials.mkv
+scripts/
 templates/
 ReadMe.md
 ReadMe.htm

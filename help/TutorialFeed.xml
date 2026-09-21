@@ -1,0 +1,104 @@
+﻿<?xml version="1.0" encoding="UTF-8"?>
+<rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
+  <channel>
+    <title>DbDo Walkthroughs</title>
+    <link>Tutorials.htm</link>
+    <description>Short simulated walks through DbDo, using the JobTrail job search database that ships with it. Each one is about three minutes, with something to try at the end.</description>
+    <language>en-us</language>
+    <lastBuildDate>Sun, 20 Sep 2026 21:37:21 +0000</lastBuildDate>
+    <itunes:author>Jamal Mazrui</itunes:author>
+    <itunes:explicit>false</itunes:explicit>
+    <itunes:category text="Technology"/>
+    <itunes:owner><itunes:name>Jamal Mazrui</itunes:name><itunes:email>empowermentzone@gmail.com</itunes:email></itunes:owner>
+    <item>
+      <title>00 - Overview and Table of Contents</title>
+      <description>Nothing yet. Full transcript: Tutorials.htm#0-00-overview-and-table-of-contents</description>
+      <link>Tutorials.htm#0-00-overview-and-table-of-contents</link>
+      <guid isPermaLink="false">homer-tutorial_00_overview</guid>
+      <enclosure url="Tutorial_00_Overview.mp3" length="316134" type="audio/mpeg"/>
+      <itunes:duration>00:00:53</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>01 - Installing DbDo</title>
+      <description>You have downloaded DbDo underscore setup dot e x e, running a Windows screen reader. Full transcript: Tutorials.htm#0a-01-installing-dbdo</description>
+      <link>Tutorials.htm#0a-01-installing-dbdo</link>
+      <guid isPermaLink="false">homer-tutorial_01_installing</guid>
+      <enclosure url="Tutorial_01_Installing.mp3" length="818585" type="audio/mpeg"/>
+      <itunes:duration>00:02:08</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>02 - Opening DbDo for the First Time</title>
+      <description>DbDo is installed and not yet opened, so it starts on the JobTrail sample. Full transcript: Tutorials.htm#0b-02-opening-dbdo-for-the-first-time</description>
+      <link>Tutorials.htm#0b-02-opening-dbdo-for-the-first-time</link>
+      <guid isPermaLink="false">homer-tutorial_02_opening</guid>
+      <enclosure url="Tutorial_02_Opening.mp3" length="1103955" type="audio/mpeg"/>
+      <itunes:duration>00:02:54</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>03 - Adding a New Record</title>
+      <description>JobTrail is open on the jobs table. Full transcript: Tutorials.htm#0c-03-adding-a-new-record</description>
+      <link>Tutorials.htm#0c-03-adding-a-new-record</link>
+      <guid isPermaLink="false">homer-tutorial_03_adding</guid>
+      <enclosure url="Tutorial_03_Adding.mp3" length="540053" type="audio/mpeg"/>
+      <itunes:duration>00:01:32</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>04 - Editing a Record</title>
+      <description>JobTrail is open on the jobs table, on a job you have applied to. Full transcript: Tutorials.htm#0d-04-editing-a-record</description>
+      <link>Tutorials.htm#0d-04-editing-a-record</link>
+      <guid isPermaLink="false">homer-tutorial_04_editing</guid>
+      <enclosure url="Tutorial_04_Editing.mp3" length="584107" type="audio/mpeg"/>
+      <itunes:duration>00:01:38</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>05 - Find and Jump</title>
+      <description>JobTrail is open on the jobs table, sorted by employer. Full transcript: Tutorials.htm#0e-05-find-and-jump</description>
+      <link>Tutorials.htm#0e-05-find-and-jump</link>
+      <guid isPermaLink="false">homer-tutorial_05_finding</guid>
+      <enclosure url="Tutorial_05_Finding.mp3" length="638542" type="audio/mpeg"/>
+      <itunes:duration>00:01:45</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>06 - Order and Where Filter</title>
+      <description>JobTrail is open on the jobs table. Full transcript: Tutorials.htm#0f-06-order-and-where-filter</description>
+      <link>Tutorials.htm#0f-06-order-and-where-filter</link>
+      <guid isPermaLink="false">homer-tutorial_06_sorting</guid>
+      <enclosure url="Tutorial_06_Sorting.mp3" length="681739" type="audio/mpeg"/>
+      <itunes:duration>00:01:50</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>07 - Select the Columns You Hear</title>
+      <description>JobTrail is open on the jobs table, which shows the employer, the role and the status. Full transcript: Tutorials.htm#0g-07-select-the-columns-you-hear</description>
+      <link>Tutorials.htm#0g-07-select-the-columns-you-hear</link>
+      <guid isPermaLink="false">homer-tutorial_07_columns</guid>
+      <enclosure url="Tutorial_07_Columns.mp3" length="659927" type="audio/mpeg"/>
+      <itunes:duration>00:01:47</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>08 - Report, Save and Copy</title>
+      <description>JobTrail is open on the actions table, which is the log of everything you have done. Full transcript: Tutorials.htm#0h-08-report-save-and-copy</description>
+      <link>Tutorials.htm#0h-08-report-save-and-copy</link>
+      <guid isPermaLink="false">homer-tutorial_08_output</guid>
+      <enclosure url="Tutorial_08_Output.mp3" length="689445" type="audio/mpeg"/>
+      <itunes:duration>00:01:49</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>09 - Look and Prime</title>
+      <description>JobTrail is open on the jobs table, on the Example Widgets job. Full transcript: Tutorials.htm#0i-09-look-and-prime</description>
+      <link>Tutorials.htm#0i-09-look-and-prime</link>
+      <guid isPermaLink="false">homer-tutorial_09_lookandprime</guid>
+      <enclosure url="Tutorial_09_LookAndPrime.mp3" length="761274" type="audio/mpeg"/>
+      <itunes:duration>00:02:01</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+  </channel>
+</rss>
