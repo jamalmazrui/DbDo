@@ -45,6 +45,10 @@ in the repository -- they are rebuilt by `scripts\buildTutorials`.
 
 ## Contents
 
+- [10 - Related Records](#10-related-records)
+- [11 - Mark and Unmark](#11-mark-and-unmark)
+- [12 - Inspecting a Record](#12-inspecting-a-record)
+- [13 - Work Search Record for a Claim or Counselor](#13-work-search-record-for-a-claim-or-counselor)
 - [00 - Overview and Table of Contents](#00-overview-and-table-of-contents)
 - [01 - Installing DbDo](#01-installing-dbdo)
 - [02 - Opening DbDo for the First Time](#02-opening-dbdo-for-the-first-time)
@@ -105,81 +109,107 @@ A simulated walk through DbDo, made with AI: a person working, and a screen read
 
 ### Step 1: Enter
 
-Run the installer. It needs administrator rights, so Windows asks first. Answer yes.
+Run the installer from wherever it downloaded. Windows asks first, because the file came from the internet.
 
 Screen reader:
 
-- User Account Control dialog
-- Do you want to allow this app to make changes to your device?
-- Yes button
+- Open File - Security Warning dialog
+- The publisher could not be verified. Are you sure you want to run this software?
+- Run Button, alt+R
 
-DbDo installs for everybody on the computer, which is why it asks.
+DbDo is not code signed, so this appears every time. Alt plus R runs it.
 
-### Step 2
+### Step 2: Alt+Y
 
-The first page says whether this is a new install, an update from an earlier version, or a reinstall of the same one.
+Then Windows asks for administrator rights, because DbDo installs for everybody on the computer.
 
 Screen reader:
 
-- This will install DbDo 1.0.150.
+- User Account Control
 
-If DbDo is already here, the page that asks for a folder is skipped and the update goes where the last one went.
+The prompt can open behind other windows without taking focus. If nothing happens, press Alt plus Tab and look for it.
 
 ### Step 3: Enter
 
-Press Enter to install. The Install button already has focus, so Enter is all it takes.
+The first page says what this install is: a new one, an update from an earlier version, or the same version again.
 
 Screen reader:
 
-- Setup dialog, Installing, Please wait while Setup installs DbDo on your computer, progress bar
+- Setup - DbDo dialog
+- This will install DbDo 1.0.167.
+- Next Button
+
+Enter takes the default button on every page, so you rarely need anything else.
+
+### Step 4: Enter
+
+Next comes the folder. The default is Program Files, and most people press Enter.
+
+Screen reader:
+
+- Select Destination Location
+- Setup will install DbDo into the following folder. To continue, click Next.
+- Folder edit, C colon backslash Program Files backslash DbDo
+
+Install DbDo a second time and this page does not appear at all: the update goes where the last one went.
+
+### Step 5: Enter
+
+Then Install, and it takes a few seconds.
+
+Screen reader:
+
+- Ready to Install
+- Install Button, Alt+i
 
 Nothing is asked during the copying.
 
-### Step 4: Tab
+### Step 6: Tab
 
-The last page offers checkboxes for the optional parts. Each one says what it would do, with version numbers where there are any.
-
-Screen reader:
-
-- Install scripts for improving use with the JAWS screen reader check box checked
-
-A box appears only for a screen reader you actually have installed.
-
-### Step 5: Tab
-
-Tab again for the local AI. If Ollama is already on the computer the box says reinstall, with the version you have, and is not ticked.
+The last page carries the optional parts, as a list you arrow through rather than separate boxes.
 
 Screen reader:
 
-- Reinstall Ollama 0.34.1 (current version) check box not checked
+- Setup has finished installing DbDo on your computer.
+- Tree view, Install scripts for improving use with the JAWS screen reader, checked, 1 of 6
 
-A checkbox that offers to install something you already have is a checkbox that did not look.
+Space toggles the one you are on. There are six, and a screen reader box appears only for a reader you actually have.
 
-### Step 6: Enter
+### Step 7: DownArrow
 
-The last two are the ones you will want. Leave Launch DbDo ticked and press Enter to finish.
+Arrow down for the local AI. If Ollama is already here, the line says reinstall, with the version you have, and is not ticked.
 
 Screen reader:
 
-- Launch DbDo (Alt+Control+D starts it any time) check box checked
+- Reinstall Ollama 0.34.1 (current version), not checked, 3 of 6
 
-The guide box is not ticked, because most people want the program first.
+A checkbox offering to install what you already have is a checkbox that did not look.
 
-### Step 7
+### Step 8: Enter
 
-A results box appears before DbDo does. It says what was installed, what the optional parts look like now, and where the log is.
+The last two are the guide and the launch. Leave the launch ticked and press Enter to finish.
+
+Screen reader:
+
+- Launch DbDo (Alt+Control+D starts it any time), checked, 6 of 6
+
+Alt plus Control plus D starts DbDo from anywhere in Windows afterwards -- D for DbDo.
+
+### Step 9
+
+A results box comes first, before DbDo opens.
 
 Screen reader:
 
 - DbDo Setup Results dialog
-- DbDo 1.0.156 is installed. Program files, C colon backslash Program Files backslash DbDo
-- OK button
+- DbDo 1.0.167 is installed. Program files, C colon backslash Program Files backslash DbDo
+- OK Button
 
-The box always appears. It is part of installing rather than a choice.
+It always appears. It is part of installing rather than something to tick.
 
-### Step 8: Enter
+### Step 10: Enter
 
-Press Enter to close it, and DbDo starts.
+Enter closes it, and DbDo starts.
 
 Screen reader:
 
@@ -188,9 +218,9 @@ Screen reader:
 - Records list view
 - 2026-09-24 Follow up on the Accessibility Analyst interview awaiting reply, 1 of 7
 
-DbDo starts only after the box is closed, so its window never lands on top of something you were reading.
+DbDo opens only after the box is closed, so its window never lands on top of something you were reading.
 
-**Something to try:** Open the log the results box named, and read the line that says where DbDo was installed.
+**Something to try:** After it finishes, open the log the results box named and find the line saying where DbDo was installed.
 
 ## 02 - Opening DbDo for the First Time
 
