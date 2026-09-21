@@ -1,0 +1,1549 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Hotkeys</title>
+  <style>
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Hotkeys</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#dbdo-hotkeys" id="toc-dbdo-hotkeys">DbDo Hotkeys</a>
+<ul>
+<li><a href="#how-the-keys-are-chosen"
+id="toc-how-the-keys-are-chosen">How the keys are chosen</a></li>
+<li><a href="#by-menu" id="toc-by-menu">By menu</a>
+<ul>
+<li><a href="#edit" id="toc-edit">Edit</a></li>
+<li><a href="#edit-bulk-marking" id="toc-edit-bulk-marking">Edit, Bulk
+Marking</a></li>
+<li><a href="#file" id="toc-file">File</a></li>
+<li><a href="#help" id="toc-help">Help</a></li>
+<li><a href="#misc" id="toc-misc">Misc</a></li>
+<li><a href="#misc-tools" id="toc-misc-tools">Misc, Tools</a></li>
+<li><a href="#navigate" id="toc-navigate">Navigate</a></li>
+<li><a href="#query" id="toc-query">Query</a></li>
+<li><a href="#query-say" id="toc-query-say">Query, Say</a></li>
+<li><a href="#window" id="toc-window">Window</a></li>
+</ul></li>
+<li><a href="#by-key" id="toc-by-key">By key</a>
+<ul>
+<li><a href="#alt" id="toc-alt">Alt</a></li>
+<li><a href="#altshift" id="toc-altshift">Alt+Shift</a></li>
+<li><a href="#control" id="toc-control">Control</a></li>
+<li><a href="#controlshift" id="toc-controlshift">Control+Shift</a></li>
+<li><a href="#function-keys" id="toc-function-keys">Function
+keys</a></li>
+<li><a href="#shift" id="toc-shift">Shift</a></li>
+</ul></li>
+<li><a href="#by-command" id="toc-by-command">By command</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="dbdo-hotkeys">DbDo Hotkeys</h1>
+<p>Every key DbDo binds, three ways: by menu, by key, and by command.
+The menu section says why each key is the one it is.</p>
+<h2 id="how-the-keys-are-chosen">How the keys are chosen</h2>
+<ul>
+<li><strong>A letter is the first letter of a word in the
+command.</strong> Shift+C is Say Cell; Alt+O is Order.</li>
+<li><strong>Shift and a letter asks.</strong> Every Say command is Shift
+and a letter, and none changes anything.</li>
+<li><strong>Adding Shift reverses.</strong> Control+M marks and
+Control+Shift+M unmarks; Control+W sets the Where filter and
+Control+Shift+W clears it.</li>
+<li><strong>Z is for sleep.</strong> Every Z key is a toggle: it wakes a
+behavior or puts it to sleep. Control+Z undoes in Windows, and restoring
+a behavior is the same idea.</li>
+<li><strong>X is for the sound of “ex”</strong>, as in Export.</li>
+<li><strong>Alt takes the letter when Control already means something in
+Windows.</strong> Control+O opens and Control+S saves everywhere, so
+Order is Alt+O and Select Columns is Alt+S.</li>
+<li><strong>Each function key is a family,</strong> from Windows and
+Office habits, extended: F1 help, F2 editing, F3 searching, F4 picking,
+saying or closing open windows, F5 refreshing, F6 moving among parts of
+the window, F7 review, F8 selection, F9 a more readable view, F10 menus,
+F11 the version (elevate sounds like eleven), F12 files and AI.</li>
+<li><strong>Control+Tab moves among DbDo windows,</strong> as it moves
+among tabs everywhere else.</li>
+</ul>
+<h2 id="by-menu">By menu</h2>
+<h3 id="edit">Edit</h3>
+<ul>
+<li>Append Record to Clipboard<br />
+Alt+Shift+C</li>
+<li>Clear Bookmark<br />
+Forget the saved bookmark. B for Bookmark. Shift reverses Save
+Bookmark.<br />
+Control+Shift+B</li>
+<li>Copy Record<br />
+Duplicate the current row as a new row. C for Copy.<br />
+Control+Shift+C</li>
+<li>Delete Record<br />
+Delete the current record (or marked records, when marks exist). D for
+Delete.<br />
+Control+D</li>
+<li>Delete Without Confirmation<br />
+D for Delete.<br />
+Control+Shift+D</li>
+<li>Edit Cell<br />
+Edit just the field under the virtual cursor. F2 is editing, as it
+renames a file in Windows.<br />
+F2</li>
+<li>Edit Notes<br />
+N for Notes.<br />
+Alt+Shift+N</li>
+<li>Edit Tags<br />
+T for Tags.<br />
+Alt+Shift+T</li>
+<li>Edit URL<br />
+U for URL.<br />
+Alt+Shift+U</li>
+<li>Edit View<br />
+E for Edit.<br />
+Control+E</li>
+<li>List Bookmarks<br />
+Show saved bookmarks in a listbox; navigate to the selected one. B for
+Bookmarks.<br />
+Alt+B</li>
+<li>Mark Record<br />
+Set the ‘marked’ flag on the current row. M for Mark.<br />
+Control+M</li>
+<li>New Copy<br />
+N for New.<br />
+Control+Shift+N</li>
+<li>New Record<br />
+Add a new row to the current table. N for New.<br />
+Control+N</li>
+<li>Open Cell Value<br />
+Control+Enter acts from anywhere in a Homer dialog; here it opens the
+cell’s value.<br />
+Control+Enter</li>
+<li>Open Url<br />
+U for URL.<br />
+Control+Shift+U</li>
+<li>Pick Value<br />
+F2 is editing; Control+F2 edits by picking a value.<br />
+Control+F2</li>
+<li>Regex Replace<br />
+Regex find-and-replace within the current virtual column, over visible
+rows. R for Regex.<br />
+Control+Shift+R</li>
+<li>Replace Column<br />
+Substring find-and-replace within the current virtual column, over
+visible rows. R for Replace.<br />
+Control+R</li>
+<li>Save Bookmark<br />
+Save the current row position as a session bookmark. B for
+Bookmark.<br />
+Control+B</li>
+<li>Toggle Marked<br />
+Control+Space toggles a selection in any Windows list.<br />
+Control+Space</li>
+<li>Unmark Record<br />
+Clear the ‘marked’ flag on the current row. M for Mark. Shift reverses
+Mark Record.<br />
+Control+Shift+M</li>
+</ul>
+<h3 id="edit-bulk-marking">Edit, Bulk Marking</h3>
+<p>F8 starts a run and Shift completes it; Alt makes the run an unmark
+instead of a mark.</p>
+<ul>
+<li>Complete Mark<br />
+Mark every row from the F8 anchor to the current row. F8 is selection;
+Shift completes the run F8 started.<br />
+Shift+F8</li>
+<li>Complete Unmark to Anchor<br />
+Unmark every row from the Alt+F8 anchor to the current row. F8 is
+selection; Shift completes the run Alt+F8 started.<br />
+Alt+Shift+F8</li>
+<li>Invert Marked<br />
+I for Invert.<br />
+Alt+Shift+I</li>
+<li>Mark All<br />
+A for All.<br />
+Control+A</li>
+<li>Start Mark<br />
+Drop a mark anchor at the current row. F8 is selection: F8 starts a run
+of marks.<br />
+F8</li>
+<li>Start Unmark<br />
+Drop an unmark anchor at the current row. F8 is selection; Alt turns the
+run into an unmark.<br />
+Alt+F8</li>
+<li>Unmark All<br />
+A for All. Shift reverses Mark All.<br />
+Control+Shift+A</li>
+</ul>
+<h3 id="file">File</h3>
+<ul>
+<li>Choose Table<br />
+T for Table.<br />
+Control+T</li>
+<li>Exit DbDo<br />
+Close DbDo. Alt+F4 closes the program, as in every Windows
+program.<br />
+Alt+F4</li>
+<li>Export Data<br />
+Export the current table or query to CSV, TSV, JSON, or another format.
+X for the sound of “ex”.<br />
+Alt+X</li>
+<li>Import<br />
+Build a new DbDo database from another file – Excel (read through Excel
+itself, no Access driver needed), Access, dBASE, CSV, or SQLite – with
+one standard-shape table per source table, plus maps and lookups. I for
+Import.<br />
+Alt+I</li>
+<li>Merge Data<br />
+Merge rows from a Markdown table, JSON, or Inix file into the current
+table. M for Merge.<br />
+Alt+M</li>
+<li>Next Table or View<br />
+F6 moves among parts of the window; Control+F6 moves to the next
+table.<br />
+Control+F6</li>
+<li>Next Visited Table<br />
+F6 moves among parts; Alt+F6 returns to tables you have visited.<br />
+Alt+F6</li>
+<li>Open Database<br />
+Open a database file. O for Open.<br />
+Control+O</li>
+<li>Open Table in New Window<br />
+Control+Shift+T</li>
+<li>Previous Table or View<br />
+F6 moves among parts; Shift reverses Control+F6.<br />
+Control+Shift+F6</li>
+<li>Previous Visited Table<br />
+F6 moves among parts; Shift reverses Alt+F6.<br />
+Alt+Shift+F6</li>
+<li>Print<br />
+P for Printer.<br />
+Control+P</li>
+<li>Recent Files<br />
+R for Recent.<br />
+Alt+R</li>
+<li>Run Report<br />
+Alt+Shift+R. Render a saved report definition to a Markdown document. A
+report reads the whole PHYSICAL table (not the grid view), so it is
+reproducible regardless of your current filter or sort. R for Run.<br />
+Alt+Shift+R</li>
+<li>Save<br />
+Save changes to disk (writes an open workbook back to its .xlsx; a .db
+is already saved as you go). S for Save.<br />
+Control+S</li>
+<li>Save As<br />
+Save a copy to another path or file format. S for Save.<br />
+Control+Shift+S</li>
+</ul>
+<h3 id="help">Help</h3>
+<ul>
+<li>About<br />
+Show the version, author, and license. F1 is help; Alt+F1 is
+About.<br />
+Alt+F1</li>
+<li>Alternate Menu<br />
+Pick a command from a flat, filterable list. F10 is menus: F10 the menu
+bar, Shift+F10 the context menu, Alt+F10 the alternate menu.<br />
+Alt+F10</li>
+<li>Command Echo Toggle<br />
+Z is for sleep: it wakes this behavior or puts it to sleep.<br />
+Control+Shift+Z</li>
+<li>Documentation<br />
+Open the documentation in the default browser. F1 is help: this
+guide.<br />
+F1</li>
+<li>Elevate Version<br />
+Check for a newer version on GitHub and offer to install it. F11 is the
+version: elevate sounds like eleven.<br />
+F11</li>
+<li>Extra Speech Toggle<br />
+Z is for sleep: it wakes this behavior or puts it to sleep.<br />
+Alt+Shift+Z</li>
+<li>History of Changes<br />
+Open the history of changes in the default browser. F1 is help; Shift+F1
+is the history of changes.<br />
+Shift+F1</li>
+<li>Hotkeys<br />
+F1 is help; Control+F1 describes one key, and adding Shift describes
+them all.<br />
+Control+Shift+F1</li>
+<li>Key Describer Toggle<br />
+Describe each key instead of running it (Ctrl+F1). F1 is help;
+Control+F1 describes whatever key you press next.<br />
+Control+F1</li>
+<li>ReadMe<br />
+F1 is help; Alt+Shift+F1 is the ReadMe, the short start.<br />
+Alt+Shift+F1</li>
+</ul>
+<h3 id="misc">Misc</h3>
+<ul>
+<li>Append Cell to Clipboard<br />
+Append the value of the cell under the virtual cursor to the clipboard.
+C for Cell.<br />
+Alt+C</li>
+<li>Copy Cell to Clipboard<br />
+Copy the value of the cell under the virtual cursor to the clipboard. C
+for Copy.<br />
+Control+C</li>
+<li>Database Summary<br />
+D for Database.<br />
+Alt+D</li>
+<li>Edit Settings<br />
+Open the Settings dialog. E for Edit.<br />
+Alt+Shift+E</li>
+<li>Extract with Regex<br />
+Extract all regex matches in the current virtual column to the
+clipboard. X for the sound of “ex”.<br />
+Control+Shift+X</li>
+<li>Generate from Grid<br />
+Alt+Shift+G. Ad-hoc analysis of the VIRTUAL grid (the current filtered,
+sorted view): profile the columns by type and pick an output – summary
+statistics, frequency table, cross-tab, Markdown table, or an Excel
+chart (bar, pie, histogram, box-whisker, scatter, timeline). One-off and
+exploratory; acts on what you are looking at. G for Generate.<br />
+Alt+Shift+G</li>
+<li>Graphics Column<br />
+Plot the column under the virtual cursor as an Excel chart. G for
+Graphics.<br />
+Control+Shift+G</li>
+<li>Hotkey Summary<br />
+H for Hotkey.<br />
+Alt+Shift+H</li>
+<li>Refresh View<br />
+Refresh the visible row set from the database. F5 is refreshing.<br />
+F5</li>
+<li>Select Columns to Display<br />
+Choose which columns the grid shows AND their order, via the
+Available/Chosen sequence picker. S for Select.<br />
+Alt+S</li>
+<li>Statistics from Column<br />
+Print descriptive statistics for the column under the virtual cursor. S
+for Statistics.<br />
+Alt+Shift+S</li>
+<li>Table Summary<br />
+Print row count, column count, and storage statistics for the open
+database. T for Table.<br />
+Alt+T</li>
+<li>Toggle Read Only<br />
+Flip the database between read-write and read-only at runtime. Z is for
+sleep: it wakes this behavior or puts it to sleep.<br />
+Alt+Z</li>
+</ul>
+<h3 id="misc-tools">Misc, Tools</h3>
+<ul>
+<li>Chat about Table<br />
+F12 is AI; Shift sends the table along with the question.<br />
+Shift+F12</li>
+<li>Chat with AI<br />
+F12 is files and AI: F12 talks to the model on this computer.<br />
+F12</li>
+<li>Edit Snippet<br />
+E for Edit.<br />
+Control+Shift+E</li>
+<li>Evaluate Expression<br />
+Control+Equals</li>
+<li>Invoke Script<br />
+Run a script from the Scripts folder (.js, .sql, or .dbdo). I for
+Invoke.<br />
+Control+Shift+I</li>
+<li>Open Command Prompt<br />
+Control+Slash</li>
+<li>Open Dot Prompt<br />
+Send focus to the dot prompt console. Control+Grave opens a console, as
+it opens the terminal in Visual Studio Code.<br />
+Control+Grave</li>
+<li>Open in Explorer<br />
+Open the folder containing the open database in Windows Explorer.<br />
+Alt+Backslash</li>
+<li>Sqlean Console<br />
+Open the bundled sqlean.exe shell in its own console window on the
+current database.<br />
+Control+Shift+Grave</li>
+</ul>
+<h3 id="navigate">Navigate</h3>
+<ul>
+<li>Enter Child Table<br />
+Drill into related records: foreign-key child tables, plus any tables
+related to this record through the maps table (by kind). Alt+Right Arrow
+goes forward, and deeper, as in a browser.<br />
+Alt+RightArrow</li>
+<li>Exit Child Table<br />
+Return from a child drill-down to the parent table. Alt+Left Arrow goes
+back, as in a browser.<br />
+Alt+LeftArrow</li>
+<li>Exit to Root Table<br />
+Return from any drill-down depth to the original table. Home goes to the
+top; Alt+Home goes to the top table.<br />
+Alt+Home</li>
+<li>Find Record<br />
+Search across all columns for a substring. F for Find.<br />
+Control+F</li>
+<li>Find Regex<br />
+Search across all columns with a .NET regex pattern. F3 searches;
+Control makes the search a pattern.<br />
+Control+F3</li>
+<li>Go to Record<br />
+Jump to a specific row by number. G for Go, as Control+G goes to a line
+in Windows editors.<br />
+Control+G</li>
+<li>Jump to Record<br />
+Search within one chosen column for a substring. J for Jump.<br />
+Control+J</li>
+<li>Repeat Go To<br />
+Alt+G</li>
+<li>Reverse Find<br />
+Find Previous (backward search across all columns). F for Find. Shift
+reverses Find Record.<br />
+Control+Shift+F</li>
+<li>Reverse Jump<br />
+Jump Record backward. J for Jump. Shift reverses Jump to Record.<br />
+Control+Shift+J</li>
+<li>Reverse Regex Find<br />
+Find Regex backward. F3 searches; Control makes it a pattern and Shift
+reverses it.<br />
+Control+Shift+F3</li>
+<li>Search Next<br />
+Repeat the last Find forward. F3 is searching and searching again.<br />
+F3</li>
+<li>Search Previous<br />
+Repeat the last Find backward. F3 searches; Shift reverses the
+direction.<br />
+Shift+F3</li>
+</ul>
+<h3 id="query">Query</h3>
+<ul>
+<li>Clear Where<br />
+Clear the active filter (where expression). W for Where. Shift reverses
+Where Filter.<br />
+Control+Shift+W</li>
+<li>Inspect Record<br />
+I for Inspect.<br />
+Control+I</li>
+<li>Order Records<br />
+Sort the current table by a chosen column, ascending. O for Order.<br />
+Alt+O</li>
+<li>Query<br />
+Q for Query.<br />
+Control+Q</li>
+<li>Query History<br />
+Q for Query.<br />
+Alt+Shift+Q</li>
+<li>Reverse Order<br />
+O for Order. Shift reverses Order Records.<br />
+Alt+Shift+O</li>
+<li>Table Properties<br />
+Alt+Enter</li>
+<li>Where Filter<br />
+Show only rows matching one or more field conditions. W for Where.<br />
+Control+W</li>
+</ul>
+<h3 id="query-say">Query, Say</h3>
+<p>Shift and a letter asks. Nothing here changes anything; each answers
+a question about where you are, in one short line.</p>
+<ul>
+<li>Say Added<br />
+A for Added.<br />
+Shift+A</li>
+<li>Say Bookmark<br />
+B for Bookmark.<br />
+Shift+B</li>
+<li>Say Cell<br />
+C for Cell.<br />
+Shift+C</li>
+<li>Say Clipboard<br />
+Speak the current Windows clipboard text. The apostrophe is a quotation
+mark, and the clipboard is what you last quoted.<br />
+Alt+Apostrophe</li>
+<li>Say Column as List<br />
+Speak every value of the current virtual column, from the top. L for
+List.<br />
+Alt+L</li>
+<li>Say Column as List from Current<br />
+Speak the current virtual column from the current row down. L for
+List.<br />
+Control+L</li>
+<li>Say Column as List from Current Marked<br />
+Speak the current virtual column for marked rows only, from the current
+row down. L for List.<br />
+Control+Shift+L</li>
+<li>Say Column as List of Marked<br />
+Speak the current virtual column for marked rows only, from the top. L
+for List.<br />
+Alt+Shift+L</li>
+<li>Say Database<br />
+Speak the open database’s name (single-press) or full path
+(double-press). D for Database.<br />
+Shift+D</li>
+<li>Say Edited<br />
+Speak the current row’s ‘edited’ value in human-friendly local time. E
+for Edited.<br />
+Shift+E</li>
+<li>Say Find<br />
+Speak the current Find search string. F for Find.<br />
+Shift+F</li>
+<li>Say Goto<br />
+Speak the most recently used Jump search string. G for Goto.<br />
+Shift+G</li>
+<li>Say Here<br />
+H for Here.<br />
+Shift+H</li>
+<li>Say Id<br />
+I for ID.<br />
+Shift+I</li>
+<li>Say Jump<br />
+J for Jump.<br />
+Shift+J</li>
+<li>Say Look<br />
+L for Look.<br />
+Shift+L</li>
+<li>Say Mark Status<br />
+M for Mark.<br />
+Shift+M</li>
+<li>Say Marked Rows<br />
+Speak every marked row in full, scanning from the first row down (all
+displayed columns). Space marks in a list; Shift and Space asks how many
+are marked.<br />
+Shift+Space</li>
+<li>Say Notes<br />
+Speak the current row’s ‘notes’ field. N for Notes.<br />
+Shift+N</li>
+<li>Say Order<br />
+Speak the active sort/order expression. O for Order.<br />
+Shift+O</li>
+<li>Say Position<br />
+Speak the column header and 1-based row number of the virtual cell.
+Delete echoes JAWS, where Insert+Delete says where the cursor is.<br />
+Alt+Delete</li>
+<li>Say Prime<br />
+Speak the current record’s prime (unique-key) field. P for Prime.<br />
+Shift+P</li>
+<li>Say Query<br />
+Q for Query.<br />
+Shift+Q</li>
+<li>Say Records Rest Marked<br />
+Speak full marked records from the cursor row down. M for Marked.<br />
+Alt+Shift+M</li>
+<li>Say Regex Replace<br />
+X for the sound of “ex”.<br />
+Shift+X</li>
+<li>Say Related<br />
+R for Related.<br />
+Shift+R</li>
+<li>Say Replacement Value<br />
+V for Value.<br />
+Shift+V</li>
+<li>Say Select Columns<br />
+S for Say.<br />
+Shift+S</li>
+<li>Say Sort and Filter<br />
+Speak the current sort and filter, or ‘(none)’ for each. Shift+8 is the
+asterisk, the SQL sign for everything: sort and filter together.<br />
+Shift+8</li>
+<li>Say Tags<br />
+Speak the current row’s ‘tags’ field. T for Tags.<br />
+Shift+T</li>
+<li>Say URL<br />
+Speak the current record’s url field. U for URL.<br />
+Shift+U</li>
+<li>Say Where Filter<br />
+W for Where.<br />
+Shift+W</li>
+<li>Say Yield<br />
+Speak the current row count (after filter). Y for Yield.<br />
+Shift+Y</li>
+</ul>
+<h3 id="window">Window</h3>
+<ul>
+<li>Close All But Current Window<br />
+Close every window except the current one. F4 is open windows;
+Control+Shift+F4 closes all but this one.<br />
+Control+Shift+F4</li>
+<li>Close Window<br />
+Close the current recordset window. F4 is open windows; Control+F4
+closes this one, as in Windows.<br />
+Control+F4</li>
+<li>Current Windows<br />
+Pick from the list of open recordset windows and activate the chosen
+one. F4 picks, says or closes open windows: F4 picks one.<br />
+F4</li>
+<li>Next Window<br />
+Activate the next open window. Control+Tab moves among DbDo
+windows.<br />
+Control+Tab</li>
+<li>Open Table<br />
+Open a chosen table of the current database in a new window. O for
+Open.<br />
+Control+Shift+O</li>
+<li>Previous Window<br />
+Activate the previous open window. Shift reverses Control+Tab.<br />
+Control+Shift+Tab</li>
+<li>Say Windows Open<br />
+Speak the count and titles of open recordset windows, marking the
+current one. F4 is open windows; Shift+F4 says which are open.<br />
+Shift+F4</li>
+</ul>
+<h2 id="by-key">By key</h2>
+<h3 id="alt">Alt</h3>
+<ul>
+<li>Alt+Apostrophe<br />
+Speak the current Windows clipboard text.<br />
+Say Clipboard</li>
+<li>Alt+B<br />
+Show saved bookmarks in a listbox; navigate to the selected one.<br />
+List Bookmarks</li>
+<li>Alt+Backslash<br />
+Open the folder containing the open database in Windows Explorer.<br />
+Open in Explorer</li>
+<li>Alt+C<br />
+Append the value of the cell under the virtual cursor to the
+clipboard.<br />
+Append Cell to Clipboard</li>
+<li>Alt+D<br />
+Database Summary</li>
+<li>Alt+Delete<br />
+Speak the column header and 1-based row number of the virtual
+cell.<br />
+Say Position</li>
+<li>Alt+Enter<br />
+Table Properties</li>
+<li>Alt+G<br />
+Repeat Go To</li>
+<li>Alt+Home<br />
+Return from any drill-down depth to the original table.<br />
+Exit to Root Table</li>
+<li>Alt+I<br />
+Build a new DbDo database from another file – Excel (read through Excel
+itself, no Access driver needed), Access, dBASE, CSV, or SQLite – with
+one standard-shape table per source table, plus maps and lookups.<br />
+Import</li>
+<li>Alt+L<br />
+Speak every value of the current virtual column, from the top.<br />
+Say Column as List</li>
+<li>Alt+LeftArrow<br />
+Return from a child drill-down to the parent table.<br />
+Exit Child Table</li>
+<li>Alt+M<br />
+Merge rows from a Markdown table, JSON, or Inix file into the current
+table.<br />
+Merge Data</li>
+<li>Alt+O<br />
+Sort the current table by a chosen column, ascending.<br />
+Order Records</li>
+<li>Alt+R<br />
+Recent Files</li>
+<li>Alt+RightArrow<br />
+Drill into related records: foreign-key child tables, plus any tables
+related to this record through the maps table (by kind).<br />
+Enter Child Table</li>
+<li>Alt+S<br />
+Choose which columns the grid shows AND their order, via the
+Available/Chosen sequence picker.<br />
+Select Columns to Display</li>
+<li>Alt+T<br />
+Print row count, column count, and storage statistics for the open
+database.<br />
+Table Summary</li>
+<li>Alt+X<br />
+Export the current table or query to CSV, TSV, JSON, or another
+format.<br />
+Export Data</li>
+<li>Alt+Z<br />
+Flip the database between read-write and read-only at runtime.<br />
+Toggle Read Only</li>
+</ul>
+<h3 id="altshift">Alt+Shift</h3>
+<ul>
+<li>Alt+Shift+C<br />
+Append Record to Clipboard</li>
+<li>Alt+Shift+E<br />
+Open the Settings dialog.<br />
+Edit Settings</li>
+<li>Alt+Shift+G<br />
+Alt+Shift+G. Ad-hoc analysis of the VIRTUAL grid (the current filtered,
+sorted view): profile the columns by type and pick an output – summary
+statistics, frequency table, cross-tab, Markdown table, or an Excel
+chart (bar, pie, histogram, box-whisker, scatter, timeline). One-off and
+exploratory; acts on what you are looking at.<br />
+Generate from Grid</li>
+<li>Alt+Shift+H<br />
+Hotkey Summary</li>
+<li>Alt+Shift+I<br />
+Invert Marked</li>
+<li>Alt+Shift+L<br />
+Speak the current virtual column for marked rows only, from the
+top.<br />
+Say Column as List of Marked</li>
+<li>Alt+Shift+M<br />
+Speak full marked records from the cursor row down.<br />
+Say Records Rest Marked</li>
+<li>Alt+Shift+N<br />
+Edit Notes</li>
+<li>Alt+Shift+O<br />
+Reverse Order</li>
+<li>Alt+Shift+Q<br />
+Query History</li>
+<li>Alt+Shift+R<br />
+Alt+Shift+R. Render a saved report definition to a Markdown document. A
+report reads the whole PHYSICAL table (not the grid view), so it is
+reproducible regardless of your current filter or sort.<br />
+Run Report</li>
+<li>Alt+Shift+S<br />
+Print descriptive statistics for the column under the virtual
+cursor.<br />
+Statistics from Column</li>
+<li>Alt+Shift+T<br />
+Edit Tags</li>
+<li>Alt+Shift+U<br />
+Edit URL</li>
+<li>Alt+Shift+Z<br />
+Extra Speech Toggle</li>
+</ul>
+<h3 id="control">Control</h3>
+<ul>
+<li>Control+A<br />
+Mark All</li>
+<li>Control+B<br />
+Save the current row position as a session bookmark.<br />
+Save Bookmark</li>
+<li>Control+C<br />
+Copy the value of the cell under the virtual cursor to the
+clipboard.<br />
+Copy Cell to Clipboard</li>
+<li>Control+D<br />
+Delete the current record (or marked records, when marks exist).<br />
+Delete Record</li>
+<li>Control+E<br />
+Edit View</li>
+<li>Control+Enter<br />
+Open Cell Value</li>
+<li>Control+Equals<br />
+Evaluate Expression</li>
+<li>Control+F<br />
+Search across all columns for a substring.<br />
+Find Record</li>
+<li>Control+G<br />
+Jump to a specific row by number.<br />
+Go to Record</li>
+<li>Control+Grave<br />
+Send focus to the dot prompt console.<br />
+Open Dot Prompt</li>
+<li>Control+I<br />
+Inspect Record</li>
+<li>Control+J<br />
+Search within one chosen column for a substring.<br />
+Jump to Record</li>
+<li>Control+L<br />
+Speak the current virtual column from the current row down.<br />
+Say Column as List from Current</li>
+<li>Control+M<br />
+Set the ‘marked’ flag on the current row.<br />
+Mark Record</li>
+<li>Control+N<br />
+Add a new row to the current table.<br />
+New Record</li>
+<li>Control+O<br />
+Open a database file.<br />
+Open Database</li>
+<li>Control+P<br />
+Print</li>
+<li>Control+Q<br />
+Query</li>
+<li>Control+R<br />
+Substring find-and-replace within the current virtual column, over
+visible rows.<br />
+Replace Column</li>
+<li>Control+S<br />
+Save changes to disk (writes an open workbook back to its .xlsx; a .db
+is already saved as you go).<br />
+Save</li>
+<li>Control+Slash<br />
+Open Command Prompt</li>
+<li>Control+Space<br />
+Toggle Marked</li>
+<li>Control+T<br />
+Choose Table</li>
+<li>Control+Tab<br />
+Activate the next open window.<br />
+Next Window</li>
+<li>Control+W<br />
+Show only rows matching one or more field conditions.<br />
+Where Filter</li>
+</ul>
+<h3 id="controlshift">Control+Shift</h3>
+<ul>
+<li>Control+Shift+A<br />
+Unmark All</li>
+<li>Control+Shift+B<br />
+Forget the saved bookmark.<br />
+Clear Bookmark</li>
+<li>Control+Shift+C<br />
+Duplicate the current row as a new row.<br />
+Copy Record</li>
+<li>Control+Shift+D<br />
+Delete Without Confirmation</li>
+<li>Control+Shift+E<br />
+Edit Snippet</li>
+<li>Control+Shift+F<br />
+Find Previous (backward search across all columns).<br />
+Reverse Find</li>
+<li>Control+Shift+G<br />
+Plot the column under the virtual cursor as an Excel chart.<br />
+Graphics Column</li>
+<li>Control+Shift+Grave<br />
+Open the bundled sqlean.exe shell in its own console window on the
+current database.<br />
+Sqlean Console</li>
+<li>Control+Shift+I<br />
+Run a script from the Scripts folder (.js, .sql, or .dbdo).<br />
+Invoke Script</li>
+<li>Control+Shift+J<br />
+Jump Record backward.<br />
+Reverse Jump</li>
+<li>Control+Shift+L<br />
+Speak the current virtual column for marked rows only, from the current
+row down.<br />
+Say Column as List from Current Marked</li>
+<li>Control+Shift+M<br />
+Clear the ‘marked’ flag on the current row.<br />
+Unmark Record</li>
+<li>Control+Shift+N<br />
+New Copy</li>
+<li>Control+Shift+O<br />
+Open a chosen table of the current database in a new window.<br />
+Open Table</li>
+<li>Control+Shift+R<br />
+Regex find-and-replace within the current virtual column, over visible
+rows.<br />
+Regex Replace</li>
+<li>Control+Shift+S<br />
+Save a copy to another path or file format.<br />
+Save As</li>
+<li>Control+Shift+T<br />
+Open Table in New Window</li>
+<li>Control+Shift+Tab<br />
+Activate the previous open window.<br />
+Previous Window</li>
+<li>Control+Shift+U<br />
+Open Url</li>
+<li>Control+Shift+W<br />
+Clear the active filter (where expression).<br />
+Clear Where</li>
+<li>Control+Shift+X<br />
+Extract all regex matches in the current virtual column to the
+clipboard.<br />
+Extract with Regex</li>
+<li>Control+Shift+Z<br />
+Command Echo Toggle</li>
+</ul>
+<h3 id="function-keys">Function keys</h3>
+<ul>
+<li>Alt+F1<br />
+Show the version, author, and license.<br />
+About</li>
+<li>Alt+F10<br />
+Pick a command from a flat, filterable list.<br />
+Alternate Menu</li>
+<li>Alt+F4<br />
+Close DbDo.<br />
+Exit DbDo</li>
+<li>Alt+F6<br />
+Next Visited Table</li>
+<li>Alt+F8<br />
+Drop an unmark anchor at the current row.<br />
+Start Unmark</li>
+<li>Alt+Shift+F1<br />
+ReadMe</li>
+<li>Alt+Shift+F6<br />
+Previous Visited Table</li>
+<li>Alt+Shift+F8<br />
+Unmark every row from the Alt+F8 anchor to the current row.<br />
+Complete Unmark to Anchor</li>
+<li>Control+F1<br />
+Describe each key instead of running it (Ctrl+F1).<br />
+Key Describer Toggle</li>
+<li>Control+F2<br />
+Pick Value</li>
+<li>Control+F3<br />
+Search across all columns with a .NET regex pattern.<br />
+Find Regex</li>
+<li>Control+F4<br />
+Close the current recordset window.<br />
+Close Window</li>
+<li>Control+F6<br />
+Next Table or View</li>
+<li>Control+Shift+F1<br />
+Hotkeys</li>
+<li>Control+Shift+F3<br />
+Find Regex backward.<br />
+Reverse Regex Find</li>
+<li>Control+Shift+F4<br />
+Close every window except the current one.<br />
+Close All But Current Window</li>
+<li>Control+Shift+F6<br />
+Previous Table or View</li>
+<li>F1<br />
+Open the documentation in the default browser.<br />
+Documentation</li>
+<li>F11<br />
+Check for a newer version on GitHub and offer to install it.<br />
+Elevate Version</li>
+<li>F12<br />
+Chat with AI</li>
+<li>F2<br />
+Edit just the field under the virtual cursor.<br />
+Edit Cell</li>
+<li>F3<br />
+Repeat the last Find forward.<br />
+Search Next</li>
+<li>F4<br />
+Pick from the list of open recordset windows and activate the chosen
+one.<br />
+Current Windows</li>
+<li>F5<br />
+Refresh the visible row set from the database.<br />
+Refresh View</li>
+<li>F8<br />
+Drop a mark anchor at the current row.<br />
+Start Mark</li>
+<li>Shift+F1<br />
+Open the history of changes in the default browser.<br />
+History of Changes</li>
+<li>Shift+F12<br />
+Chat about Table</li>
+<li>Shift+F3<br />
+Repeat the last Find backward.<br />
+Search Previous</li>
+<li>Shift+F4<br />
+Speak the count and titles of open recordset windows, marking the
+current one.<br />
+Say Windows Open</li>
+<li>Shift+F8<br />
+Mark every row from the F8 anchor to the current row.<br />
+Complete Mark</li>
+</ul>
+<h3 id="shift">Shift</h3>
+<ul>
+<li>Shift+8<br />
+Speak the current sort and filter, or ‘(none)’ for each.<br />
+Say Sort and Filter</li>
+<li>Shift+A<br />
+Say Added</li>
+<li>Shift+B<br />
+Say Bookmark</li>
+<li>Shift+C<br />
+Say Cell</li>
+<li>Shift+D<br />
+Speak the open database’s name (single-press) or full path
+(double-press).<br />
+Say Database</li>
+<li>Shift+E<br />
+Speak the current row’s ‘edited’ value in human-friendly local
+time.<br />
+Say Edited</li>
+<li>Shift+F<br />
+Speak the current Find search string.<br />
+Say Find</li>
+<li>Shift+G<br />
+Speak the most recently used Jump search string.<br />
+Say Goto</li>
+<li>Shift+H<br />
+Say Here</li>
+<li>Shift+I<br />
+Say Id</li>
+<li>Shift+J<br />
+Say Jump</li>
+<li>Shift+L<br />
+Say Look</li>
+<li>Shift+M<br />
+Say Mark Status</li>
+<li>Shift+N<br />
+Speak the current row’s ‘notes’ field.<br />
+Say Notes</li>
+<li>Shift+O<br />
+Speak the active sort/order expression.<br />
+Say Order</li>
+<li>Shift+P<br />
+Speak the current record’s prime (unique-key) field.<br />
+Say Prime</li>
+<li>Shift+Q<br />
+Say Query</li>
+<li>Shift+R<br />
+Say Related</li>
+<li>Shift+S<br />
+Say Select Columns</li>
+<li>Shift+Space<br />
+Speak every marked row in full, scanning from the first row down (all
+displayed columns).<br />
+Say Marked Rows</li>
+<li>Shift+T<br />
+Speak the current row’s ‘tags’ field.<br />
+Say Tags</li>
+<li>Shift+U<br />
+Speak the current record’s url field.<br />
+Say URL</li>
+<li>Shift+V<br />
+Say Replacement Value</li>
+<li>Shift+W<br />
+Say Where Filter</li>
+<li>Shift+X<br />
+Say Regex Replace</li>
+<li>Shift+Y<br />
+Speak the current row count (after filter).<br />
+Say Yield</li>
+</ul>
+<h2 id="by-command">By command</h2>
+<ul>
+<li>About<br />
+Show the version, author, and license.<br />
+Alt+F1</li>
+<li>Alternate Menu<br />
+Pick a command from a flat, filterable list.<br />
+Alt+F10</li>
+<li>Append Cell to Clipboard<br />
+Append the value of the cell under the virtual cursor to the
+clipboard.<br />
+Alt+C</li>
+<li>Append Record to Clipboard<br />
+Alt+Shift+C</li>
+<li>Chat about Table<br />
+Shift+F12</li>
+<li>Chat with AI<br />
+F12</li>
+<li>Choose Table<br />
+Control+T</li>
+<li>Clear Bookmark<br />
+Forget the saved bookmark.<br />
+Control+Shift+B</li>
+<li>Clear Where<br />
+Clear the active filter (where expression).<br />
+Control+Shift+W</li>
+<li>Close All But Current Window<br />
+Close every window except the current one.<br />
+Control+Shift+F4</li>
+<li>Close Window<br />
+Close the current recordset window.<br />
+Control+F4</li>
+<li>Command Echo Toggle<br />
+Control+Shift+Z</li>
+<li>Complete Mark<br />
+Mark every row from the F8 anchor to the current row.<br />
+Shift+F8</li>
+<li>Complete Unmark to Anchor<br />
+Unmark every row from the Alt+F8 anchor to the current row.<br />
+Alt+Shift+F8</li>
+<li>Copy Cell to Clipboard<br />
+Copy the value of the cell under the virtual cursor to the
+clipboard.<br />
+Control+C</li>
+<li>Copy Record<br />
+Duplicate the current row as a new row.<br />
+Control+Shift+C</li>
+<li>Current Windows<br />
+Pick from the list of open recordset windows and activate the chosen
+one.<br />
+F4</li>
+<li>Database Summary<br />
+Alt+D</li>
+<li>Delete Record<br />
+Delete the current record (or marked records, when marks exist).<br />
+Control+D</li>
+<li>Delete Without Confirmation<br />
+Control+Shift+D</li>
+<li>Documentation<br />
+Open the documentation in the default browser.<br />
+F1</li>
+<li>Edit Cell<br />
+Edit just the field under the virtual cursor.<br />
+F2</li>
+<li>Edit Notes<br />
+Alt+Shift+N</li>
+<li>Edit Settings<br />
+Open the Settings dialog.<br />
+Alt+Shift+E</li>
+<li>Edit Snippet<br />
+Control+Shift+E</li>
+<li>Edit Tags<br />
+Alt+Shift+T</li>
+<li>Edit URL<br />
+Alt+Shift+U</li>
+<li>Edit View<br />
+Control+E</li>
+<li>Elevate Version<br />
+Check for a newer version on GitHub and offer to install it.<br />
+F11</li>
+<li>Enter Child Table<br />
+Drill into related records: foreign-key child tables, plus any tables
+related to this record through the maps table (by kind).<br />
+Alt+RightArrow</li>
+<li>Evaluate Expression<br />
+Control+Equals</li>
+<li>Exit Child Table<br />
+Return from a child drill-down to the parent table.<br />
+Alt+LeftArrow</li>
+<li>Exit DbDo<br />
+Close DbDo.<br />
+Alt+F4</li>
+<li>Exit to Root Table<br />
+Return from any drill-down depth to the original table.<br />
+Alt+Home</li>
+<li>Export Data<br />
+Export the current table or query to CSV, TSV, JSON, or another
+format.<br />
+Alt+X</li>
+<li>Extra Speech Toggle<br />
+Alt+Shift+Z</li>
+<li>Extract with Regex<br />
+Extract all regex matches in the current virtual column to the
+clipboard.<br />
+Control+Shift+X</li>
+<li>Find Record<br />
+Search across all columns for a substring.<br />
+Control+F</li>
+<li>Find Regex<br />
+Search across all columns with a .NET regex pattern.<br />
+Control+F3</li>
+<li>Generate from Grid<br />
+Alt+Shift+G. Ad-hoc analysis of the VIRTUAL grid (the current filtered,
+sorted view): profile the columns by type and pick an output – summary
+statistics, frequency table, cross-tab, Markdown table, or an Excel
+chart (bar, pie, histogram, box-whisker, scatter, timeline). One-off and
+exploratory; acts on what you are looking at.<br />
+Alt+Shift+G</li>
+<li>Go to Record<br />
+Jump to a specific row by number.<br />
+Control+G</li>
+<li>Graphics Column<br />
+Plot the column under the virtual cursor as an Excel chart.<br />
+Control+Shift+G</li>
+<li>History of Changes<br />
+Open the history of changes in the default browser.<br />
+Shift+F1</li>
+<li>Hotkey Summary<br />
+Alt+Shift+H</li>
+<li>Hotkeys<br />
+Control+Shift+F1</li>
+<li>Import<br />
+Build a new DbDo database from another file – Excel (read through Excel
+itself, no Access driver needed), Access, dBASE, CSV, or SQLite – with
+one standard-shape table per source table, plus maps and lookups.<br />
+Alt+I</li>
+<li>Inspect Record<br />
+Control+I</li>
+<li>Invert Marked<br />
+Alt+Shift+I</li>
+<li>Invoke Script<br />
+Run a script from the Scripts folder (.js, .sql, or .dbdo).<br />
+Control+Shift+I</li>
+<li>Jump to Record<br />
+Search within one chosen column for a substring.<br />
+Control+J</li>
+<li>Key Describer Toggle<br />
+Describe each key instead of running it (Ctrl+F1).<br />
+Control+F1</li>
+<li>List Bookmarks<br />
+Show saved bookmarks in a listbox; navigate to the selected one.<br />
+Alt+B</li>
+<li>Mark All<br />
+Control+A</li>
+<li>Mark Record<br />
+Set the ‘marked’ flag on the current row.<br />
+Control+M</li>
+<li>Merge Data<br />
+Merge rows from a Markdown table, JSON, or Inix file into the current
+table.<br />
+Alt+M</li>
+<li>New Copy<br />
+Control+Shift+N</li>
+<li>New Record<br />
+Add a new row to the current table.<br />
+Control+N</li>
+<li>Next Table or View<br />
+Control+F6</li>
+<li>Next Visited Table<br />
+Alt+F6</li>
+<li>Next Window<br />
+Activate the next open window.<br />
+Control+Tab</li>
+<li>Open Cell Value<br />
+Control+Enter</li>
+<li>Open Command Prompt<br />
+Control+Slash</li>
+<li>Open Database<br />
+Open a database file.<br />
+Control+O</li>
+<li>Open Dot Prompt<br />
+Send focus to the dot prompt console.<br />
+Control+Grave</li>
+<li>Open in Explorer<br />
+Open the folder containing the open database in Windows Explorer.<br />
+Alt+Backslash</li>
+<li>Open Table<br />
+Open a chosen table of the current database in a new window.<br />
+Control+Shift+O</li>
+<li>Open Table in New Window<br />
+Control+Shift+T</li>
+<li>Open Url<br />
+Control+Shift+U</li>
+<li>Order Records<br />
+Sort the current table by a chosen column, ascending.<br />
+Alt+O</li>
+<li>Pick Value<br />
+Control+F2</li>
+<li>Previous Table or View<br />
+Control+Shift+F6</li>
+<li>Previous Visited Table<br />
+Alt+Shift+F6</li>
+<li>Previous Window<br />
+Activate the previous open window.<br />
+Control+Shift+Tab</li>
+<li>Print<br />
+Control+P</li>
+<li>Query<br />
+Control+Q</li>
+<li>Query History<br />
+Alt+Shift+Q</li>
+<li>ReadMe<br />
+Alt+Shift+F1</li>
+<li>Recent Files<br />
+Alt+R</li>
+<li>Refresh View<br />
+Refresh the visible row set from the database.<br />
+F5</li>
+<li>Regex Replace<br />
+Regex find-and-replace within the current virtual column, over visible
+rows.<br />
+Control+Shift+R</li>
+<li>Repeat Go To<br />
+Alt+G</li>
+<li>Replace Column<br />
+Substring find-and-replace within the current virtual column, over
+visible rows.<br />
+Control+R</li>
+<li>Reverse Find<br />
+Find Previous (backward search across all columns).<br />
+Control+Shift+F</li>
+<li>Reverse Jump<br />
+Jump Record backward.<br />
+Control+Shift+J</li>
+<li>Reverse Order<br />
+Alt+Shift+O</li>
+<li>Reverse Regex Find<br />
+Find Regex backward.<br />
+Control+Shift+F3</li>
+<li>Run Report<br />
+Alt+Shift+R. Render a saved report definition to a Markdown document. A
+report reads the whole PHYSICAL table (not the grid view), so it is
+reproducible regardless of your current filter or sort.<br />
+Alt+Shift+R</li>
+<li>Save<br />
+Save changes to disk (writes an open workbook back to its .xlsx; a .db
+is already saved as you go).<br />
+Control+S</li>
+<li>Save As<br />
+Save a copy to another path or file format.<br />
+Control+Shift+S</li>
+<li>Save Bookmark<br />
+Save the current row position as a session bookmark.<br />
+Control+B</li>
+<li>Say Added<br />
+Shift+A</li>
+<li>Say Bookmark<br />
+Shift+B</li>
+<li>Say Cell<br />
+Shift+C</li>
+<li>Say Clipboard<br />
+Speak the current Windows clipboard text.<br />
+Alt+Apostrophe</li>
+<li>Say Column as List<br />
+Speak every value of the current virtual column, from the top.<br />
+Alt+L</li>
+<li>Say Column as List from Current<br />
+Speak the current virtual column from the current row down.<br />
+Control+L</li>
+<li>Say Column as List from Current Marked<br />
+Speak the current virtual column for marked rows only, from the current
+row down.<br />
+Control+Shift+L</li>
+<li>Say Column as List of Marked<br />
+Speak the current virtual column for marked rows only, from the
+top.<br />
+Alt+Shift+L</li>
+<li>Say Database<br />
+Speak the open database’s name (single-press) or full path
+(double-press).<br />
+Shift+D</li>
+<li>Say Edited<br />
+Speak the current row’s ‘edited’ value in human-friendly local
+time.<br />
+Shift+E</li>
+<li>Say Find<br />
+Speak the current Find search string.<br />
+Shift+F</li>
+<li>Say Goto<br />
+Speak the most recently used Jump search string.<br />
+Shift+G</li>
+<li>Say Here<br />
+Shift+H</li>
+<li>Say Id<br />
+Shift+I</li>
+<li>Say Jump<br />
+Shift+J</li>
+<li>Say Look<br />
+Shift+L</li>
+<li>Say Mark Status<br />
+Shift+M</li>
+<li>Say Marked Rows<br />
+Speak every marked row in full, scanning from the first row down (all
+displayed columns).<br />
+Shift+Space</li>
+<li>Say Notes<br />
+Speak the current row’s ‘notes’ field.<br />
+Shift+N</li>
+<li>Say Order<br />
+Speak the active sort/order expression.<br />
+Shift+O</li>
+<li>Say Position<br />
+Speak the column header and 1-based row number of the virtual
+cell.<br />
+Alt+Delete</li>
+<li>Say Prime<br />
+Speak the current record’s prime (unique-key) field.<br />
+Shift+P</li>
+<li>Say Query<br />
+Shift+Q</li>
+<li>Say Records Rest Marked<br />
+Speak full marked records from the cursor row down.<br />
+Alt+Shift+M</li>
+<li>Say Regex Replace<br />
+Shift+X</li>
+<li>Say Related<br />
+Shift+R</li>
+<li>Say Replacement Value<br />
+Shift+V</li>
+<li>Say Select Columns<br />
+Shift+S</li>
+<li>Say Sort and Filter<br />
+Speak the current sort and filter, or ‘(none)’ for each.<br />
+Shift+8</li>
+<li>Say Tags<br />
+Speak the current row’s ‘tags’ field.<br />
+Shift+T</li>
+<li>Say URL<br />
+Speak the current record’s url field.<br />
+Shift+U</li>
+<li>Say Where Filter<br />
+Shift+W</li>
+<li>Say Windows Open<br />
+Speak the count and titles of open recordset windows, marking the
+current one.<br />
+Shift+F4</li>
+<li>Say Yield<br />
+Speak the current row count (after filter).<br />
+Shift+Y</li>
+<li>Search Next<br />
+Repeat the last Find forward.<br />
+F3</li>
+<li>Search Previous<br />
+Repeat the last Find backward.<br />
+Shift+F3</li>
+<li>Select Columns to Display<br />
+Choose which columns the grid shows AND their order, via the
+Available/Chosen sequence picker.<br />
+Alt+S</li>
+<li>Sqlean Console<br />
+Open the bundled sqlean.exe shell in its own console window on the
+current database.<br />
+Control+Shift+Grave</li>
+<li>Start Mark<br />
+Drop a mark anchor at the current row.<br />
+F8</li>
+<li>Start Unmark<br />
+Drop an unmark anchor at the current row.<br />
+Alt+F8</li>
+<li>Statistics from Column<br />
+Print descriptive statistics for the column under the virtual
+cursor.<br />
+Alt+Shift+S</li>
+<li>Table Properties<br />
+Alt+Enter</li>
+<li>Table Summary<br />
+Print row count, column count, and storage statistics for the open
+database.<br />
+Alt+T</li>
+<li>Toggle Marked<br />
+Control+Space</li>
+<li>Toggle Read Only<br />
+Flip the database between read-write and read-only at runtime.<br />
+Alt+Z</li>
+<li>Unmark All<br />
+Control+Shift+A</li>
+<li>Unmark Record<br />
+Clear the ‘marked’ flag on the current row.<br />
+Control+Shift+M</li>
+<li>Where Filter<br />
+Show only rows matching one or more field conditions.<br />
+Control+W</li>
+</ul>
+</body>
+</html>

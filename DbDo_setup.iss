@@ -251,12 +251,12 @@ Name: "{app}\scripts"
 Name: "{app}\templates"
 
 [Files]
-Source: "DbDo.exe";    DestDir: "{app}\exec"; Flags: ignoreversion
+Source: "exec\DbDo.exe";    DestDir: "{app}\exec"; Flags: ignoreversion
 ; Runtime configuration for DbDo.exe -- startup tuning (disables Authenticode
 ; publisher-evidence/CRL checks, enables concurrent GC). It must sit next to
 ; DbDo.exe; ignoreversion keeps it refreshed in sync with the executable.
 Source: "DbDo.exe.config"; DestDir: "{app}\exec"; Flags: ignoreversion
-Source: "DbDo.dll"; DestDir: "{app}\exec"; Flags: ignoreversion
+Source: "exec\DbDo.dll"; DestDir: "{app}\exec"; Flags: ignoreversion
 ; NPOI (Apache-2.0) + SharpZipLib (MIT) + BouncyCastle (MIT-style) -- the
 ; managed .xlsx engine that lets DbDo open, edit, and save Excel workbooks
 ; with no Office installed and no bitness dependency. All three licenses
@@ -267,12 +267,12 @@ Source: "DbDo.dll"; DestDir: "{app}\exec"; Flags: ignoreversion
 ; buildDbDo.cmd fetches them next to DbDo.exe; it must run before ISCC so
 ; these files exist to bundle. (System.Drawing and System.Configuration are
 ; .NET Framework 4.8 assemblies, so they are not bundled.)
-Source: "NPOI.dll";                  DestDir: "{app}\exec"; Flags: ignoreversion
-Source: "NPOI.OOXML.dll";            DestDir: "{app}\exec"; Flags: ignoreversion
-Source: "NPOI.OpenXml4Net.dll";      DestDir: "{app}\exec"; Flags: ignoreversion
-Source: "NPOI.OpenXmlFormats.dll";   DestDir: "{app}\exec"; Flags: ignoreversion
-Source: "ICSharpCode.SharpZipLib.dll"; DestDir: "{app}\exec"; Flags: ignoreversion
-Source: "BouncyCastle.Crypto.dll";   DestDir: "{app}\exec"; Flags: ignoreversion
+Source: "exec\NPOI.dll";                  DestDir: "{app}\exec"; Flags: ignoreversion
+Source: "exec\NPOI.OOXML.dll";            DestDir: "{app}\exec"; Flags: ignoreversion
+Source: "exec\NPOI.OpenXml4Net.dll";      DestDir: "{app}\exec"; Flags: ignoreversion
+Source: "exec\NPOI.OpenXmlFormats.dll";   DestDir: "{app}\exec"; Flags: ignoreversion
+Source: "exec\ICSharpCode.SharpZipLib.dll"; DestDir: "{app}\exec"; Flags: ignoreversion
+Source: "exec\BouncyCastle.Crypto.dll";   DestDir: "{app}\exec"; Flags: ignoreversion
 Source: "THIRD-PARTY-NOTICES.txt";   DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDo.ico";    DestDir: "{app}\exec"; Flags: ignoreversion
 Source: "DbDo.manifest"; DestDir: "{app}\exec"; Flags: ignoreversion
@@ -299,18 +299,22 @@ Source: "DbDo_setup.iss"; DestDir: "{app}\exec"; Flags: ignoreversion
 Source: "help\Tutorials.mkv"; DestDir: "{app}\help"; Flags: ignoreversion
 Source: "help\Tutorials.md";  DestDir: "{app}\help"; Flags: ignoreversion
 Source: "help\Tutorials.htm"; DestDir: "{app}\help"; Flags: ignoreversion
-Source: "DbDo.md";     DestDir: "{app}\help"; Flags: ignoreversion
-Source: "DbDo.htm";    DestDir: "{app}\help"; Flags: ignoreversion
-Source: "README.md";    DestDir: "{app}"; Flags: ignoreversion
-Source: "README.htm";   DestDir: "{app}"; Flags: ignoreversion
-Source: "Announce.md";  DestDir: "{app}\help"; Flags: ignoreversion
-Source: "Announce.htm"; DestDir: "{app}\help"; Flags: ignoreversion
-Source: "History.md";   DestDir: "{app}\help"; Flags: ignoreversion
-Source: "History.htm";  DestDir: "{app}\help"; Flags: ignoreversion
+Source: "help\Hotkeys.md";  DestDir: "{app}\help"; Flags: ignoreversion
+Source: "help\Hotkeys.htm"; DestDir: "{app}\help"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "help\DbDo.md";     DestDir: "{app}\help"; Flags: ignoreversion
+Source: "help\DbDo.htm";    DestDir: "{app}\help"; Flags: ignoreversion
+Source: "ReadMe.md";    DestDir: "{app}"; Flags: ignoreversion
+Source: "ReadMe.htm";   DestDir: "{app}"; Flags: ignoreversion
+Source: "help\Announce.md";  DestDir: "{app}\help"; Flags: ignoreversion
+Source: "help\Announce.htm"; DestDir: "{app}\help"; Flags: ignoreversion
+Source: "help\Developer.md";  DestDir: "{app}\help"; Flags: ignoreversion
+Source: "help\Developer.htm"; DestDir: "{app}\help"; Flags: ignoreversion
+Source: "help\FAQ.md";        DestDir: "{app}\help"; Flags: ignoreversion
+Source: "help\FAQ.htm";       DestDir: "{app}\help"; Flags: ignoreversion
+Source: "help\History.md";   DestDir: "{app}\help"; Flags: ignoreversion
+Source: "help\History.htm";  DestDir: "{app}\help"; Flags: ignoreversion
 Source: "License.md";   DestDir: "{app}"; Flags: ignoreversion
 Source: "License.htm";  DestDir: "{app}"; Flags: ignoreversion
-Source: "CamelType_CSharp.md"; DestDir: "{app}\help"; Flags: ignoreversion
-Source: "CamelType_CSharp.htm"; DestDir: "{app}\help"; Flags: ignoreversion
 ; Sample databases: each lives in its own subfolder under templates
 ; (templates\<root>\<root>.db, plus that database's own scripts beside
 ; it), and the whole tree is copied to {app}\templates. THE HOMER LAYOUT HAS NO
@@ -345,7 +349,7 @@ Source: "scripts\*.dbdo"; DestDir: "{app}\scripts"; Flags: ignoreversion skipifs
 ; JAWS settings installer runs.
 Source: "DbDo_JAWS.zip"; DestDir: "{app}\scripts"; Flags: ignoreversion
 Source: "DbDo.nvda-addon"; DestDir: "{app}\scripts"; Flags: ignoreversion
-Source: "nvdaControllerClient.dll"; DestDir: "{app}\exec"; Flags: ignoreversion
+Source: "exec\nvdaControllerClient.dll"; DestDir: "{app}\exec"; Flags: ignoreversion
 
 ; LOCAL AI. DbDo's Ask commands send a question and the shape of the current
 ; table to a model running on this machine, and nothing leaves it. Ollama is the

@@ -34,7 +34,7 @@ Expect = 0
 
 [check]
 Name = the program was produced
-Run = cmd /c if exist DbDo.exe (exit 0) else (exit 1)
+Run = cmd /c if exist exec\DbDo.exe (exit 0) else (exit 1)
 Expect = 0
 
 [check]

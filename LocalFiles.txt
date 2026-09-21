@@ -1,0 +1,11 @@
+﻿# LocalFiles.txt -- what belongs to DbDo on this disk, but never in the repository.
+#
+# homerTidy keeps these where they are and writes each line into .gitignore as
+# never pushed. The recording (help/Tutorials.mkv) and the transcript are in
+# RepoFiles.txt; the working material that makes them is here.
+help/Tutorial_*.inix
+help/*.mp3
+help/Tutorials.m3u
+scripts/ffmpeg.exe
+scripts/ffprobe.exe
+scripts/voices/

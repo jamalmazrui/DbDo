@@ -53,7 +53,16 @@ setlocal enableextensions enabledelayedexpansion
 
 pushd "%~dp0"
 
-set "log=buildDbDo.log"
+rem THE LOG IS NAMED BY FULL PATH. It was relative, so once the build moved into
+rem exec\ to compile, every line from the compile went to exec\buildDbDo.log
+rem instead -- and the log beside this script jumped from the compiler check to
+rem "Back to", saying nothing about whether DbDo.exe was built at all.
+rem EVERY SESSION ITS OWN LOG, IN logs\, named as the program names its own:
+rem <App>-<task>-yyyyMMdd-HHmmss.log. An alphabetical sort is then a
+rem chronological one, and zipping logs\ gathers everything.
+for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd-HHmmss"') do set "sStamp=%%i"
+if not exist "%~dp0logs" mkdir "%~dp0logs"
+set "log=%~dp0logs\DbDo-build-%sStamp%.log"
 echo DbDo build log > "!log!"
 echo Started at %DATE% %TIME% (Pacific time, Seattle) >> "!log!"
 echo Script directory: %~dp0 >> "!log!"
@@ -309,6 +318,17 @@ echo   C#:      !csc!
 echo   JScript: !jsc!
 echo. >> "!log!"
 
+rem ---- EVERYTHING BINARY IS MADE IN exec\ ----
+rem
+rem The development folder mirrors the installed one: sources and build files at
+rem the top, and each thing the program runs from in the folder it is installed
+rem to. So the libraries are fetched into exec\, and DbDo.exe, DbDo.dll and the
+rem importers are compiled into it. The sources are named by full path from
+rem here, so nothing about them moves. To try a build, run exec\DbDo.exe.
+if not exist "%~dp0exec" mkdir "%~dp0exec"
+pushd "%~dp0exec"
+echo Binaries go to: %CD% >> "!log!"
+
 rem ---- fetch nvdaControllerClient.dll if missing (same as v1.0.43) ----
 set "nvdaDll=nvdaControllerClient.dll"
 set "nvdaUrl=https://download.nvaccess.org/releases/stable/nvda_2026.1_controllerClient.zip"
@@ -393,6 +413,8 @@ rem of letting csc emit six CS0006 "Metadata file not found" errors.
 if exist "NPOI.dll" if exist "NPOI.OOXML.dll" if exist "NPOI.OpenXml4Net.dll" if exist "NPOI.OpenXmlFormats.dll" if exist "ICSharpCode.SharpZipLib.dll" if exist "BouncyCastle.Crypto.dll" goto :have_npoi
 echo Fetching NPOI 2.5.6, SharpZipLib 1.3.3, BouncyCastle 1.8.9 ...
 powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0getDbDoDeps.ps1" >> "!log!" 2>&1
+rem Wherever the fetch put them, they belong here.
+for %%D in (NPOI.dll NPOI.OOXML.dll NPOI.OpenXml4Net.dll NPOI.OpenXmlFormats.dll ICSharpCode.SharpZipLib.dll BouncyCastle.Crypto.dll) do if exist "%~dp0%%D" if not exist "%%D" move /y "%~dp0%%D" . >nul
 :have_npoi
 set "xlsxMissing="
 for %%D in (NPOI.dll NPOI.OOXML.dll NPOI.OpenXml4Net.dll NPOI.OpenXmlFormats.dll ICSharpCode.SharpZipLib.dll BouncyCastle.Crypto.dll) do if not exist "%%D" set "xlsxMissing=1"
@@ -481,7 +503,7 @@ rem create an assembly-name collision with DbDo.exe at load time.
 echo. >> "!log!"
 echo Compiling DbDo.js -> DbDo.dll ... >> "!log!"
 echo Compiling DbDo.js -> DbDo.dll ...
-"!jsc!" /target:library /platform:anycpu /nologo /out:DbDo.dll DbDo.js >> "!log!" 2>&1
+"!jsc!" /target:library /platform:anycpu /nologo /out:DbDo.dll "%~dp0DbDo.js" >> "!log!" 2>&1
 if errorlevel 1 goto :build_failed
 echo DbDo.dll built.
 
@@ -505,11 +527,14 @@ rem written executable that Windows might mistake for a 16-bit binary
 rem (the misleading "Unsupported 16-Bit Application" dialog appears
 rem when the loader sees an empty or truncated MZ image).
 if exist DbDo.exe del /f /q DbDo.exe
-if exist DbDo.ico (
-    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32icon:DbDo.ico /win32manifest:DbDo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"Microsoft.VisualBasic.dll" /reference:"Microsoft.JScript.dll" /reference:"NPOI.dll" /reference:"NPOI.OOXML.dll" /reference:"NPOI.OpenXml4Net.dll" /reference:"NPOI.OpenXmlFormats.dll" /reference:"ICSharpCode.SharpZipLib.dll" /reference:"BouncyCastle.Crypto.dll" !homerRefs! /out:DbDo.exe Version.cs DbDo.cs !homerSources! >> "!log!" 2>&1
+rem The icon is looked for where the sources are. After the build moved into
+rem exec\ this check still said "if exist DbDo.ico", found nothing there, and
+rem 1.0.173 was compiled without its icon.
+if exist "%~dp0DbDo.ico" (
+    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32icon:"%~dp0DbDo.ico" /win32manifest:"%~dp0DbDo.manifest" /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"Microsoft.VisualBasic.dll" /reference:"Microsoft.JScript.dll" /reference:"NPOI.dll" /reference:"NPOI.OOXML.dll" /reference:"NPOI.OpenXml4Net.dll" /reference:"NPOI.OpenXmlFormats.dll" /reference:"ICSharpCode.SharpZipLib.dll" /reference:"BouncyCastle.Crypto.dll" !homerRefs! /out:DbDo.exe "%~dp0Version.cs" "%~dp0DbDo.cs" !homerSources! >> "!log!" 2>&1
 ) else (
     echo NOTE: DbDo.ico not found; building without embedded icon. >> "!log!"
-    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32manifest:DbDo.manifest /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"Microsoft.VisualBasic.dll" /reference:"Microsoft.JScript.dll" /reference:"NPOI.dll" /reference:"NPOI.OOXML.dll" /reference:"NPOI.OpenXml4Net.dll" /reference:"NPOI.OpenXmlFormats.dll" /reference:"ICSharpCode.SharpZipLib.dll" /reference:"BouncyCastle.Crypto.dll" !homerRefs! /out:DbDo.exe Version.cs DbDo.cs !homerSources! >> "!log!" 2>&1
+    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32manifest:"%~dp0DbDo.manifest" /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"Microsoft.VisualBasic.dll" /reference:"Microsoft.JScript.dll" /reference:"NPOI.dll" /reference:"NPOI.OOXML.dll" /reference:"NPOI.OpenXml4Net.dll" /reference:"NPOI.OpenXmlFormats.dll" /reference:"ICSharpCode.SharpZipLib.dll" /reference:"BouncyCastle.Crypto.dll" !homerRefs! /out:DbDo.exe "%~dp0Version.cs" "%~dp0DbDo.cs" !homerSources! >> "!log!" 2>&1
 )
 if errorlevel 1 goto :build_failed
 echo DbDo.exe built.
@@ -523,15 +548,15 @@ rem build matches the installed Office (and falls back to the other on a
 rem provider-unavailable exit code). /target:exe (console) so the importer
 rem can prompt and report on stdout/stderr. Microsoft.CSharp (for the
 rem dynamic COM calls) auto-resolves from csc.rsp, as it does for DbDo.cs.
-if not exist 2db.cs goto :skip_2db
+if not exist "%~dp02db.cs" goto :skip_2db
 echo. >> "!log!"
 echo Compiling 2db.cs -^> 2db32.exe and 2db64.exe ... >> "!log!"
 echo Compiling 2db.cs -^> 2db32.exe and 2db64.exe ...
 if exist 2db32.exe del /f /q 2db32.exe
 if exist 2db64.exe del /f /q 2db64.exe
-"!csc!" /target:exe /platform:x86 /optimize+ /nologo /out:2db32.exe 2db.cs >> "!log!" 2>&1
+"!csc!" /target:exe /platform:x86 /optimize+ /nologo /out:2db32.exe "%~dp02db.cs" >> "!log!" 2>&1
 if errorlevel 1 goto :build_failed
-"!csc!" /target:exe /platform:x64 /optimize+ /nologo /out:2db64.exe 2db.cs >> "!log!" 2>&1
+"!csc!" /target:exe /platform:x64 /optimize+ /nologo /out:2db64.exe "%~dp02db.cs" >> "!log!" 2>&1
 if errorlevel 1 goto :build_failed
 echo 2db32.exe and 2db64.exe built.
 dir 2db32.exe | findstr 2db32.exe
@@ -544,6 +569,8 @@ rem boundary). It is not part of the current build: DbDo uses its
 rem native readers and does not invoke 2db32/64.exe. When 2db.cs is
 rem absent we skip it silently; drop a 2db.cs in this folder to build it.
 :have_2db
+popd
+echo Back to: %CD% >> "!log!"
 
 
 rem ---- files that were renamed ----
@@ -554,6 +581,10 @@ rem are 9: the old names and the new ones, each built into the document twice
 rem over. So the build removes what it knows has moved.
 echo. >> "!log!"
 for %%f in (
+  "help\Tutorial_03_Adding.inix" "help\Tutorial_04_Editing.inix" "help\Tutorial_05_Finding.inix"
+  "help\Tutorial_06_Sorting.inix" "help\Tutorial_07_Columns.inix" "help\Tutorial_08_Output.inix"
+  "help\Tutorial_09_LookAndPrime.inix" "help\Tutorial_12_Inspect.inix" "help\Tutorial_13_WorkSearch.inix"
+  "help\Tutorial_14_Menus.inix"
   "help\Tutorial_1_Installing.inix" "help\Tutorial_2_Opening.inix" "help\Tutorial_3_Adding.inix"
   "help\Tutorial_4_Editing.inix" "help\Tutorial_5_Finding.inix" "help\Tutorial_6_Sorting.inix"
   "help\Tutorial_7_Columns.inix" "help\Tutorial_8_Output.inix" "help\Tutorial_9_LookAndPrime.inix"
@@ -564,13 +595,21 @@ for %%f in (
   "help\Tutorial_Adding.inix" "help\Tutorial_Columns.inix" "help\Tutorial_Editing.inix"
   "help\Tutorial_Finding.inix" "help\Tutorial_Installing.inix" "help\Tutorial_LookAndPrime.inix"
   "help\Tutorial_Output.inix" "help\Tutorial_Sorting.inix"
-  "scripts\buildTutorial.cmd" "scripts\buildTutorial.ps1"
+  "scripts\buildTutorial.cmd" "scripts\buildTutorial.ps1" "cleanDir.cmd"
 ) do (
   if exist %%f (
     del /f /q %%f
     echo Removed the old %%f >> "!log!"
   )
 )
+
+rem ---- Hotkeys.md, from the menus themselves ----
+rem Every key lives in one addItem call, so the hotkey document is generated
+rem rather than kept by hand: a list kept by hand drifts the first time a key
+rem changes, and this one would have drifted four times in a week.
+echo. >> "!log!"
+python "%~dp0scripts\makeHotkeys.py" >> "!log!" 2>&1
+if errorlevel 1 echo WARN: makeHotkeys reported a problem; see logs\DbDo-hotkeys-*.log >> "!log!"
 
 rem ---- generate HTML documentation ----
 rem Every .md ships with a matching .htm, and pandoc is FETCHED when this machine
@@ -586,9 +625,9 @@ if errorlevel 1 (
 )
 where pandoc >nul 2>&1
 if errorlevel 1 goto :no_pandoc
-pandoc --standalone --toc --toc-depth=3 --metadata=title:"DbDo User Guide" -o DbDo.htm DbDo.md >> "!log!" 2>&1
-pandoc --standalone --toc --toc-depth=3 --metadata=title:"DbDo README" -o README.htm README.md >> "!log!" 2>&1
-for %%m in (Announce.md History.md License.md) do (
+pandoc --standalone --toc --toc-depth=3 --metadata=title:"DbDo User Guide" -o help\DbDo.htm help\DbDo.md >> "!log!" 2>&1
+pandoc --standalone --toc --toc-depth=3 --metadata=title:"DbDo ReadMe" -o ReadMe.htm ReadMe.md >> "!log!" 2>&1
+for %%m in (License.md) do (
   if exist "%%m" pandoc --standalone --metadata=title:"%%~nm" -o "%%~nm.htm" "%%m" >> "!log!" 2>&1
 )
 rem The help folder too: Tutorials.md is written by makeTutorial and the podcast
@@ -611,16 +650,24 @@ rem takes minutes and fetches voices the first time, so it happens only when one
 rem of them is MISSING -- which is exactly the state a fresh clone is in, and
 rem never the state a working folder is in. To rebuild after editing a script,
 rem run scripts\buildTutorials yourself.
+rem Missing is one reason to build; OUT OF DATE is the other. A script edited
+rem since the recording was made means the recording no longer demonstrates
+rem the program, which is as bad as having none.
 if not exist "help\Tutorials.mkv" goto :makeTutorials
 if not exist "help\Tutorials.md" goto :makeTutorials
-echo Tutorials already built. >> "!log!"
+powershell -NoProfile -Command "$m=(Get-Item 'help\Tutorials.mkv').LastWriteTime; if (Get-ChildItem 'help\Tutorial_*.inix' | Where-Object { $_.LastWriteTime -gt $m }) { exit 1 } else { exit 0 }"
+if errorlevel 1 (
+  echo A tutorial script is newer than the recording. >> "!log!"
+  goto :makeTutorials
+)
+echo Tutorials already built and current. >> "!log!"
 goto :tutorialsDone
 :makeTutorials
 if exist "help\Tutorial_*.inix" (
   echo Building the spoken tutorials. The first run fetches two voices...
   echo Tutorials missing; running buildTutorials >> "!log!"
   call "%~dp0scripts\buildTutorials.cmd" >> "!log!" 2>&1
-  if errorlevel 1 echo WARN: buildTutorials reported a problem; see scripts\buildTutorials.log >> "!log!"
+  if errorlevel 1 echo WARN: buildTutorials reported a problem; see logs\DbDo-tutorials-*.log >> "!log!"
 ) else (
   echo No tutorial scripts here. >> "!log!"
 )

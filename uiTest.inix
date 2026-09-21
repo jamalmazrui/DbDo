@@ -16,7 +16,7 @@ FileTask = uiTest
 
 [test]
 Name = DbDo opens and names its own window
-Run = DbDo.exe
+Run = exec\DbDo.exe
 
 [step]
 Keys = {ESC}

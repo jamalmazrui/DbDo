@@ -1,0 +1,147 @@
+﻿; Report definitions for the JobTrail sample database.
+;
+; Run them with Run Report (Alt+Shift+R). DbDo finds this file beside the
+; database, offers the reports below in a list, renders the chosen one over the
+; whole table, and opens it in your editor. A report reads the table, not the
+; grid, so it produces the same document however the grid is filtered.
+;
+; $field inserts a column value; {{ ... }} is a JScript expression; @group turns
+; on the group bands; @filter and @sort scope and order the report.
+
+FileTask = report
+
+; ---- The one somebody else reads. ----
+; Every countable employer contact in date order, with the fields an agency
+; asks for. Empty fields print nothing, because a field earns its line.
+[work_search_record]
+@table = actions
+@filter = counts = 1
+@sort = action_date
+header = """
+# Work Search Record
+
+Prepared {{ new Date().toISOString().substring(0,10) }} from JobTrail.
+
+Countable employer contacts, oldest first.
+"""
+detail = """
+## $action_date -- $summary
+
+- Type of contact: $kind
+- How: $method
+- Result: $outcome
+{{ $person ? "- Person: " + $person : "" }}
+{{ $place ? "- Place: " + $place : "" }}
+{{ $detail ? "- Phone, email, website or service: " + $detail : "" }}
+{{ $accommodation ? "- Accommodation: " + $accommodation : "" }}
+{{ $evidence ? "- Evidence kept: " + $evidence : "" }}
+"""
+footer = """
+**$count countable employer {{ $count == 1 ? "contact" : "contacts" }} in this record.**
+"""
+
+; Everything else that happened: preparation, workshops, inquiries that did not
+; become applications. It belongs in the record and does not count.
+[other_activity]
+@table = actions
+@filter = counts = 0
+@sort = action_date
+header = """
+# Other Job Search Activity
+
+These are not employer contacts under the rules, and are recorded so the week
+reads honestly.
+"""
+detail = """
+- **$action_date** $summary ($kind, $method){{ $place ? " at " + $place : "" }}
+"""
+footer = """
+$count {{ $count == 1 ? "activity" : "activities" }}.
+"""
+
+; ---- The ones you read. ----
+[pipeline_summary]
+@table = jobs
+@group = status
+@sort = status
+header = """
+# Pipeline Summary
+"""
+group_header = """
+## $status
+"""
+detail = """
+- $employer -- $title{{ $applied_date ? " (applied $applied_date)" : "" }}
+"""
+group_footer = """
+$count in this status.
+"""
+
+[follow_up_schedule]
+@table = actions
+@filter = done = 0
+@sort = action_date
+header = """
+# Follow-Up Schedule
+
+What is still to do, soonest first.
+"""
+detail = """
+- **$action_date** $summary{{ $person ? " -- " + $person : "" }}
+"""
+footer = """
+$count {{ $count == 1 ? "item" : "items" }} outstanding.
+"""
+
+[contact_directory]
+@table = contacts
+@sort = last_name
+header = """
+# Contact Directory
+"""
+detail = """
+## $first_name $last_name
+
+- $job, $enterprise
+{{ $role ? "- Role in this search: " + $role : "" }}
+{{ $wireless_phone ? "- Phone: " + $wireless_phone : "" }}
+{{ $business_email ? "- Email: " + $business_email : "" }}
+{{ $personal_email ? "- Email: " + $personal_email : "" }}
+"""
+
+[application_history]
+@table = jobs
+@sort = employer
+header = """
+# Application History
+"""
+detail = """
+## $employer -- $title
+
+- Status: $status
+{{ $reference ? "- Reference: " + $reference : "" }}
+{{ $applied_date ? "- Applied: " + $applied_date : "" }}
+{{ $hiring_path ? "- Hiring path: " + $hiring_path : "" }}
+{{ $ats ? "- Application system: " + $ats : "" }}
+{{ $employer_contact ? "- Employer contact: " + $employer_contact : "" }}
+{{ $location ? "- Location: " + $location : "" }}
+{{ $pay ? "- Pay: " + $pay : "" }}
+"""
+
+[interview_preparation]
+@table = stories
+@sort = name
+header = """
+# Interview Preparation
+
+One story per question theme. Read the night before.
+"""
+detail = """
+## $name
+
+- Challenge: $challenge
+- Action: $action
+- Result: $result
+- Takeaway: $takeaway
+{{ $tags ? "- Answers questions about: " + $tags : "" }}
+"""

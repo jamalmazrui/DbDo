@@ -1,20 +1,61 @@
-﻿# DbDo -- the keyboard-first relational database manager
+﻿# DbDo -- the keyboard-first database manager
 
-**DbDo opens a relational database and lets you read it, reorder it, filter it, follow its relationships, and hand it to other people in whatever format they need -- entirely from the keyboard, with a screen reader doing the talking.** JAWS, NVDA, and Narrator are all first-class. Every command has a hotkey, every row and cell move is spoken, and a dot-prompt console rides alongside the GUI for one-off SQL.
+DbDo opens a database and lets you read it, add to it, sort it, filter it, follow
+its links, and hand it to other people -- all from the keyboard, with your screen
+reader doing the talking. It works with JAWS, NVDA and Narrator.
 
-This build opens **NFB2026Convention.db** automatically on first launch (until you open something else, after which DbDo remembers your last file). It is built on the small, general schema DbDo favors, so the navigation habits you form here carry over to almost any data you keep.
+Every table is a list you arrow through. Every command has a key, and every key
+is named for a word in its command, so it can be remembered rather than looked
+up.
 
-## Quick start: five things to try
+## Installing
 
-Launch DbDo and it opens **NFB2026Convention.db** -- the full program of the National Federation of the Blind's 2026 National Convention: about 240 sessions across six days, with the rooms they happen in, the people presenting them, the organizations sponsoring them, and the products on the exhibit floor. It is here as a worked example -- a real, many-to-many dataset that shows what DbDo's small standard schema can hold and how a screen-reader user moves through it. Five things worth trying, each a habit that transfers to any other database:
+Download [the DbDo installer](https://github.com/JamalMazrui/DbDo/releases/latest/download/DbDo_setup.exe)
+and run it. Windows asks for permission first, because DbDo installs for
+everyone on the computer; the prompt can open behind other windows, so press
+Alt+Tab if nothing seems to happen.
 
-- **Build your own schedule.** Arrow through the events table (every row spoken), mark the sessions you want with the Mark command, then run the **Marked-Schedule.js** script to write a clean, per-day HTML agenda of just your picks -- a personal itinerary authored entirely from the keyboard and readable in any browser or screen reader.
-- **Narrow 240 sessions to the few you care about.** Filter (Shift+F) to one day with `event_date = '2026-07-05'`, or to a theme with `title LIKE '*Braille*'`; the **Daily-Schedule.dbdo** and **Topic-Track.dbdo** scripts do exactly that and then export the result to a Word document or HTML you can hand to someone.
-- **Follow a person, a room, or a sponsor through the data.** On a presenter, Enter Child Table (Alt+RightArrow) offers "events via presents" and lists their sessions; Say Related (Shift+R) on an event names its room and everyone presenting; the **maps** table itself opens as a grid where every relationship is a readable row. This answers "where is X, who is at Y, what is in room Z" with no SQL at all.
-- **Get a directory, or a ranking.** Run **Speaker-Directory.sql** for an alphabetical directory of presenters -- name, organization, role, session count, and a verified bio or profile link where one was found -- or **Convention-Stats.sql** to rank the busiest speakers, rooms, and days. Export either (Control+Shift+X) to a spreadsheet or document.
-- **See the exhibit-floor picture.** **Sponsor-Showcase.sql** lists who sponsors which events and which products and services each organization offers -- the same maps model read through its `sponsors` and `offers` relationships instead of `presents`.
+On the last page you can add scripts for JAWS and NVDA, and Ollama, which lets
+DbDo answer questions with AI that runs on your own computer. Leave **Launch
+DbDo** ticked and press Enter. After that, **Alt+Control+D** starts DbDo from
+anywhere in Windows -- D for DbDo.
 
-None of this is special-cased for conventions. Marking, filtering, drilling through relationships, and exporting are the same moves on a club roster, a research bibliography, or a project tracker -- which is the point of practicing them here. The sections below give the keyboard detail, the schema, and the scripts.
+To update later, press **F11** inside DbDo: Elevate Version. It checks for a
+newer release and offers to install it.
+
+## Quick start
+
+The first time it runs, DbDo opens **JobTrail**, a job search database that
+comes with it. JobTrail keeps the jobs you are after, the people you meet, the
+documents you send, the stories you tell in interviews, and a log of every step
+you take -- the log an unemployment office or a rehabilitation counselor asks
+for.
+
+Five things to try:
+
+- **Arrow through a table.** Each row is one record. Down and Up move between
+  records; Left and Right move between fields. Shift+C, Say Cell, tells you
+  which field you are on and what it holds.
+- **Add a record.** Control+N, New. Tab through the fields and press
+  Control+Enter to save.
+- **Find something.** Type the first letters of what you want and the list goes
+  there. Control+F, Find, searches every field.
+- **Choose what you hear.** Alt+S, Select Columns, picks the fields each row
+  speaks.
+- **Get something out.** Alt+Shift+R runs a Report, such as the Work Search
+  Record for a claim.
+
+## Learning more
+
+- **Play Tutorials,** on the Help menu, plays fifteen short spoken walkthroughs
+  that follow one job seeker through JobTrail. Take them in order: each one
+  builds on the last.
+- **[DbDo.md](help/DbDo.md)** (F1) is the full guide.
+- **[Hotkeys.md](help/Hotkeys.md)** (Control+Shift+F1) lists every key, by menu, by key and by
+  command, with the reason for each.
+- **[FAQ.md](help/FAQ.md)** answers common questions.
+- **[History.md](help/History.md)** (Shift+F1) says what changed in each version.
+- **[Developer.md](help/Developer.md)** explains how to build DbDo from its source.
 
 ## Convention over configuration: four nouns and one junction
 
@@ -35,46 +76,6 @@ A **lookups** table defines the allowed values for a field, so the Record Edit d
 
 NFB2026Convention.db carries lookups for its own fields -- every `maps.kind` it uses (presents, located_at, sponsors, features, offers, affiliated_with, part_of), the `projects.kind` list (product, service, program, app, ...), and `locations.hotel`. A separate, shared **lookups.db** ships alongside with global lists -- `state` and `country` -- bound to any table that has a field of that name, so they serve the other sample databases too (Northwind's `country` field gets a combobox with no per-database setup).
 
-## A guided tour by keyboard
-
-Launch DbDo. On a first run it opens NFB2026Convention.db on the **events** table and announces the row count.
-
-**Read the schedule.** Arrow up and down to move between sessions; DbDo speaks each row. To hear one session field by field, use the virtual cell cursor: Alt+Control+RightArrow / LeftArrow step across columns announcing "header: value," and Alt+Control+Numpad5 says the current cell (twice to spell it).
-
-**Reorder and filter to the question you're asking.** Sort, Shift+S, with `event_date, start_time` for chronological order. Filter, Shift+F, with `event_date = '2026-07-05'` for one day or `title LIKE '*Braille*'` for a topic; Clear Filter is Shift+R. Find Across All Columns is Control+F; Jump to Match in one column is Control+J.
-
-**See a record's whole story.** Press Enter on an event for Show Record: every field as `name = value`. Say Related, Shift+R, then lists the look line of each associated record -- on an event, its location and its presenters; on a contact, every event they present; on a location, everything happening there.
-
-**Follow the associations.** Enter Child Table, Alt+RightArrow, now drills through maps as well as foreign keys: on a contact it offers "events via presents"; on an event, "contacts via presents (incoming)" and "locations via located_at"; pick one and the related records open as a filtered view, with Alt+LeftArrow returning to the exact row you left and Alt+Home popping the whole drill stack. The **maps** table is also a first-class grid in its own right: open it to browse every relationship as a readable row, filter it by `kind`, or add a row to declare a new association -- relating any record to any other is an ordinary record edit, not a schema change.
-
-**Pick from valid values.** When you edit a field that has a lookups list -- a map row's `kind`, a location's `hotel` -- the editor is a combobox: arrow or type-ahead to a value, or type a new one. Country and state fields anywhere draw on the shared lookups.db.
-
-**Hand it to someone else in their format.** Export Data, Control+Shift+X, writes the current filtered, sorted view to xlsx, docx, filtered HTML, Markdown, CSV, TSV, SQLite, Access, or dBASE. From the dot prompt, `Export-Data xlsx docx md csv` writes all four at once.
-
-## The included demo scripts
-
-The `Scripts` folder bundles seven sample scripts for NFB2026Convention.db. Run any of them with **Invoke Script (Alt+V)**: a listbox names every script by filename and extension, and the result opens in a read-only dialog your screen reader can navigate line by line. The extension picks the engine -- `.sql` queries the database, `.dbdo` runs a sequence of dot-prompt commands, `.js` computes and builds output -- so the set exercises all three scripting surfaces. DbDo.md walks through each one and how to adapt it.
-
-**Query the relationships (`.sql`).** Each joins the maps table with the same plain idiom, `c.unq = m.unq1`, and changes only the relationship kind on the WHERE line:
-
-- **Presenter-Events.sql** -- every session one presenter appears on, in time order (change the surname on the WHERE line).
-- **Speaker-Directory.sql** -- an alphabetical directory of all presenters with organization, role, session count, and bio link.
-- **Convention-Stats.sql** -- rankings: the busiest speakers, rooms, and days, by row counts in maps.
-- **Sponsor-Showcase.sql** -- who sponsors which events, and which products and services each organization offers (the `sponsors` and `offers` kinds, not `presents`).
-
-**Automate a workflow (`.dbdo`).** A list of dot-prompt commands run in order, exactly what you could type yourself:
-
-- **Daily-Schedule.dbdo** -- filter to one day, sort by start time, count, and export the schedule (change the date).
-- **Topic-Track.dbdo** -- filter to a topic keyword, sort, count, and export a themed "track" as a document (change the keyword).
-
-**Compute and build output (`.js`).** Full access to the open recordset:
-
-- **Marked-Schedule.js** -- read the current view and write a per-day HTML agenda, one navigable table per day -- a friendlier read than a flat export.
-
-## The other sample databases -- the same column convention
-
-The Help menu also opens three more databases, all migrated to the same standard columns (`<singular>_id` primary keys such as `teacher_id`, with each foreign key carrying the same name as the parent primary key it references; `TEXTTIME` `added`/`edited` maintained by triggers; generated `look`/`unq`; `marked` last): the school `sample.db` and the classic `northwind.db` and `chinook.db`. They keep their own domain tables -- the convention model is the favored shape for a *new* database, not a straitjacket for every domain -- but the keyboard moves are identical, which is the whole mission: whatever relational data you already know, DbDo gives a screen-reader and keyboard user full, efficient command of it.
-
 ## Background: four decades of nonvisual database tools
 
 DbDo is the latest in a line of accessible database managers I have built over nearly forty years. I worked as a database administrator at Harvard's Kennedy School of Government in the 1980s; when the field moved from the DOS command line to the Windows graphical interface and tools like Microsoft Access, the screen readers of the day could not make those tools usable -- a barrier that cost me a promotion and pushed me toward building accessible software myself.
@@ -89,10 +90,6 @@ Across that span I also served as founding director of the Boston Computer Socie
 
 To the best of my research, no other general-purpose relational database manager has been built specifically for screen-reader users; mainstream desktop database tools are designed for sighted, mouse-driven use and are accessible only incidentally, if at all. DbDo is built to close that gap.
 
-## Building this archive
-
-This is a **source distribution**: compile once with `buildDbDo.cmd` to produce `DbDo.exe`. Three Camel Type modules are included to wire in during that build -- `FkResolution.cs` (schema-truth relationship navigation), `Lookups.cs` (field comboboxes), and `ImportNormalization.cs` (convention-conforming import). See `DbDo_BuildNotes.md` for the integration steps.
-
 ## License
 
-MIT. See `License.md`.
+DbDo is free and open source under the MIT License. See [License.md](License.md).

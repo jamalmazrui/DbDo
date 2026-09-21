@@ -1,0 +1,280 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>Developer</title>
+  <style>
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Developer</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#dbdo-developer-guide" id="toc-dbdo-developer-guide">DbDo –
+Developer Guide</a>
+<ul>
+<li><a href="#what-you-need" id="toc-what-you-need">What you
+need</a></li>
+<li><a href="#building" id="toc-building">Building</a></li>
+<li><a href="#the-layout" id="toc-the-layout">The layout</a></li>
+<li><a href="#checks" id="toc-checks">Checks</a></li>
+<li><a href="#keys" id="toc-keys">Keys</a></li>
+<li><a href="#tutorials" id="toc-tutorials">Tutorials</a></li>
+<li><a href="#releasing" id="toc-releasing">Releasing</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="dbdo-developer-guide">DbDo – Developer Guide</h1>
+<p>How to build DbDo from its source and change it. This file is written
+for programmers.</p>
+<h2 id="what-you-need">What you need</h2>
+<p>Nothing by hand. <code>buildDbDo.cmd</code> finds or fetches
+everything it uses:</p>
+<ul>
+<li>the .NET Framework 4.8 C# compiler (<code>csc.exe</code>), from
+Visual Studio Build Tools;</li>
+<li>the Homer Development Kit in <code>C:\HomerDev</code>, whose shared
+C# classes DbDo compiles in – Inix, KeyMap, KeyName, Lbc, Log, Ollama,
+Paths, Say, Util, Web;</li>
+<li>pandoc, for the .htm versions of the documents;</li>
+<li>Inno Setup, for the installer;</li>
+<li>Python, for the tutorial and hotkey documents;</li>
+<li>ffmpeg and two piper voices, for the spoken tutorials, the first
+time only.</li>
+</ul>
+<p>Missing tools are fetched with winget. Everything the build does is
+written to <code>logs\\DbDo-build-&lt;date&gt;-&lt;time&gt;.log</code>,
+a new file for every build.</p>
+<h2 id="building">Building</h2>
+<p>From <code>C:\DbDo</code>:</p>
+<pre><code>buildDbDo</code></pre>
+<p>It compiles <code>DbDo.cs</code> into <code>exec\DbDo.exe</code>,
+writes <code>Hotkeys.md</code> from the menus, converts every document
+to .htm, builds the spoken tutorials if they are missing, and compiles
+<code>DbDo_setup.exe</code>. The installer will not compile without the
+tutorials: a release without them is refused at build time rather than
+shipped.</p>
+<h2 id="the-layout">The layout</h2>
+<p>The development folder and the installed folder have the same shape.
+Sources and build files stay at the top, with ReadMe and License;
+everything else sits in the folder it is installed to. To try a build,
+run <code>exec\\DbDo.exe</code>.</p>
+<p><code>homerTidy</code>, from the Homer Development Kit, puts the
+folder back into this shape: it moves programs into <code>exec</code>,
+documents into <code>help</code> and logs into <code>logs</code>, and
+moves anything the project does not name into <code>notes</code>. Run
+<code>homerTidy</code> to see the plan,
+<code>homerTidy --do-it --folder-only</code> to tidy the folder alone.
+<code>LocalFiles.txt</code> tells it what belongs on this disk but not
+in the repository: the tutorial scripts, the generated audio and the
+fetched voices.</p>
+<ul>
+<li><code>configs</code> – settings shipped with the program</li>
+<li><code>data</code> – the shared lookups database</li>
+<li><code>exec</code> – the program and its libraries</li>
+<li><code>help</code> – the documents, the tutorials and their
+recording</li>
+<li><code>logs</code> – in the development folder, one file per build,
+clean, tutorial or audit run, named
+<code>DbDo-&lt;task&gt;-&lt;date&gt;-&lt;time&gt;.log</code>. Sort by
+name and they are in order; zip the folder and you have them all.</li>
+<li><code>scripts</code> – screen reader scripts and tooling</li>
+<li><code>templates</code> – the sample databases, copied to your own
+folder on first run</li>
+</ul>
+<p>Your own copies live under <code>%LOCALAPPDATA%\DbDo</code>.</p>
+<h2 id="checks">Checks</h2>
+<p><code>scripts\auditPatterns.py</code> checks the rules that are easy
+to break and hard to notice, including:</p>
+<ul>
+<li>every Say command answers in the form <code>name: value</code>;</li>
+<li>every Shift+letter is a Say command;</li>
+<li>no menu letter falls in the middle of a word, and a menu letter
+matches its hotkey’s letter;</li>
+<li>every key a tutorial teaches is bound in the program;</li>
+<li>tutorial scripts are complete.</li>
+</ul>
+<p>Run it before a release. It writes
+<code>logs\\DbDo-audit-&lt;date&gt;-&lt;time&gt;.log</code>.</p>
+<h2 id="keys">Keys</h2>
+<p>Every key follows the Homer rules, written out in
+<code>C:\HomerDev\help\HomerDev.md</code>: a letter is the first letter
+of a word in the command; Shift and a letter asks; adding Shift
+reverses; each function key is a family. <code>Hotkeys.md</code> is
+generated from the <code>addItem</code> calls, so a key changed in the
+code is changed in the document at the next build.</p>
+<h2 id="tutorials">Tutorials</h2>
+<p>Each tutorial is a demo script,
+<code>help\Tutorial_NN_Topic.inix</code>: a <code>[global]</code>
+section for the voices and timing, then one <code>[step]</code> per
+exchange – <code>Say=</code> for the narrator, <code>Key=</code> for the
+keystroke, <code>Hear=</code> for the screen reader, <code>Note=</code>
+for the written transcript only. <code>scripts\buildTutorials</code>
+speaks them into <code>help\Tutorials.mkv</code>;
+<code>scripts\makeTutorial</code> writes <code>help\Tutorials.md</code>.
+The scripts are not published; the recording and the transcript are.</p>
+<h2 id="releasing">Releasing</h2>
+<p>After a build, <code>tagRelease</code> tags the version stamped in
+<code>DbDo_setup.exe</code>, creates the GitHub release, and checks that
+the public download link answers.</p>
+</body>
+</html>

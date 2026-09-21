@@ -1,0 +1,9 @@
+﻿; Today.dbdo -- what needs doing now.
+;
+; Open with Run Script (Alt+Shift+S) or set it as the view JobTrail opens on.
+; Undone actions dated today or earlier, oldest first, so the oldest neglected
+; thing is the first thing you hear.
+
+table = actions
+where = done = 0 AND action_date <= date('now')
+order = action_date

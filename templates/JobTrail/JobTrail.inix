@@ -1,0 +1,112 @@
+﻿; JobTrail.inix -- how this database opens, and how each table is heard.
+;
+; DbDo reads this file beside the database. [Database] decides which table the
+; window starts on; each [Table:<name>] decides which columns the grid shows,
+; in which order, and how the rows are sorted. DbDo WRITES these same keys back
+; whenever you change the columns, the sort or the filter -- SelectFields,
+; OrderFields, WhereFilter -- so anything you adjust is remembered and this file
+; stays the single place the answers live.
+;
+; WHY THESE CHOICES
+;
+; A row is heard, not seen. DownArrow interrupts speech and reads the next row,
+; so a listener who has heard enough moves on -- which means the deciding
+; information must come FIRST and the row must be short. Three fields is the
+; target; four is the ceiling. Everything else is one keystroke away in the
+; record view.
+;
+; The first column is also what first-letter navigation searches, so it is the
+; field you would look something up by: the employer, the surname, the date.
+;
+; PICK LISTS
+;
+; Where the lookups table holds values for a table and field, the edit dialog
+; says so in the field's tip -- "F4 picks from 8 values" -- and F4 or
+; Alt+DownArrow opens the list. The same keys work in the grid's cell editor.
+; DbDo matches on the table and field name exactly and orders by ordinal, so a
+; set is alphabetical and its ordinals follow the alphabet: a listener types the
+; first letter and lands on the value.
+;
+; 23 fields here have pick lists, including the 51 USPS states and the ISO
+; country list from DbDo's own lookups.db, copied in under contacts because the
+; match is on the table name and a blank one matches nothing.
+
+[Database]
+
+; THE WINDOW OPENS ON actions.
+;
+; jobs is the bigger table and the obvious choice, and it is the wrong one. The
+; first question of a working day is not "what am I applying to" -- it is "what
+; do I owe somebody". actions answers that, sorted newest first, and jobs is one
+; keystroke away on Control+PageDown.
+InitialTable = actions
+
+[Table:actions]
+
+; date, then what happened, then how it turned out.
+;
+; The date leads because this is a log and position in time is how a person
+; navigates it. summary carries the meaning and is the field somebody decides
+; on. outcome closes the sentence: "2026-09-02, applied for Accessibility
+; Analyst, awaiting reply."
+;
+; kind and method are NOT here. They repeat what summary already says, and an
+; agency reads them from the report rather than the grid.
+SelectFields = action_date, summary, outcome
+OrderFields = action_date DESC
+WhereFilter =
+
+[Table:jobs]
+
+; employer, then role, then where it stands.
+;
+; employer leads because it is what you look a job up by, and first-letter
+; navigation searches the first column: press E and you are at Example Widgets.
+; title distinguishes two roles at one employer. status is the decision.
+;
+; Sorted by employer rather than by date, so the same job is always in the same
+; place and the alphabet is the index.
+SelectFields = employer, title, status
+OrderFields = employer
+WhereFilter =
+
+[Table:contacts]
+
+; Surname first, because that is how a person is looked up and how the list is
+; sorted. The employer follows, since "which Pat" is usually answered by where
+; they work.
+SelectFields = last_name, first_name, enterprise
+OrderFields = last_name, first_name
+WhereFilter =
+
+[Table:docs]
+
+; The name is the whole identity; version separates two copies of one thing.
+SelectFields = name, kind, version
+OrderFields = name
+WhereFilter =
+
+[Table:stories]
+
+; The name is what you search for under pressure. tags say which questions the
+; story answers, which is the reason you are in this table at all.
+SelectFields = name, tags
+OrderFields = name
+WhereFilter =
+
+[Table:lookups]
+
+; Table, then field, then value: the order somebody thinks in when they want to
+; add a status or a method. Sorted the same way, with ordinal keeping each set
+; in its own order.
+SelectFields = tbl, fld, val
+OrderFields = tbl, fld, ordinal
+WhereFilter =
+
+[Table:maps]
+
+; The kind of link first, because that is what distinguishes one row from
+; another, then the two things being linked.
+SelectFields = kind, prime1, prime2
+OrderFields = kind, prime1
+WhereFilter =

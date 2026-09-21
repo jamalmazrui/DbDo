@@ -8225,10 +8225,16 @@ namespace DbDo
         // its screen-reader accessible name to include the chord.
         private static void applyChordDisplay(ToolStripMenuItem mi, Keys key)
         {
+            // THE ACCESSIBLE NAME IS LEFT ALONE.
+            //
+            // This used to set AccessibleName to the caption with its ampersand
+            // stripped, plus the chord. Replacing the name hides the MNEMONIC
+            // from the screen reader, which then falls back to announcing the
+            // first letter of the item: "Add Table, A" for an item whose access
+            // letter is T, so pressing the letter it was told did nothing. The
+            // chord needs no help -- the reader takes it from
+            // ShortcutKeyDisplayString, which is what this sets.
             mi.ShortcutKeyDisplayString = friendlyKey(key);
-            string sBase = mi.Text.Replace("&", "");
-            if (sBase.EndsWith("...")) sBase = sBase.Substring(0, sBase.Length - 3).TrimEnd();
-            mi.AccessibleName = sBase + "   " + friendlyKey(key);
         }
 
         // summaryFor: lookup the one-line summary for a canonical
@@ -8414,10 +8420,10 @@ namespace DbDo
             // the chord-summary table can find this binding, but
             // DON'T add to dKeyToMenu (form-level dispatch table).
             dCommandToKey[sCommand] = key;
+            // The name is left alone so the screen reader keeps the item's own
+            // access letter; see applyChordDisplay. The chord shows through
+            // ShortcutKeyDisplayString.
             mi.ShortcutKeyDisplayString = friendlyKey(key);
-            string sBase = mi.Text.Replace("&", "");
-            if (sBase.EndsWith("...")) sBase = sBase.Substring(0, sBase.Length - 3).TrimEnd();
-            mi.AccessibleName = sBase + "   " + friendlyKey(key);
         }
 
         // registerAlias: bind a SECONDARY key to a command that already
@@ -8487,10 +8493,10 @@ namespace DbDo
             }
             dKeyToMenu[key] = mi;
             dCommandToKey[sCommand] = key;
+            // The name is left alone so the screen reader keeps the item's own
+            // access letter; see applyChordDisplay. The chord shows through
+            // ShortcutKeyDisplayString.
             mi.ShortcutKeyDisplayString = friendlyKey(key);
-            string sBase = mi.Text.Replace("&", "");
-            if (sBase.EndsWith("...")) sBase = sBase.Substring(0, sBase.Length - 3).TrimEnd();
-            mi.AccessibleName = sBase + "   " + friendlyKey(key);
             return true;
         }
 
@@ -11395,6 +11401,8 @@ namespace DbDo
         private ToolStripMenuItem miHelpContents;
         private ToolStripMenuItem miHelpHistory;
         private ToolStripMenuItem miHelpReadme;
+        private ToolStripMenuItem miHelpHotkeysDoc;
+        private ToolStripMenuItem miHelpFaq;
         private ToolStripMenuItem miHelpShowCommand;
         private ToolStripMenuItem miHelpStatus;
         private ToolStripMenuItem miHelpEmailLog;
@@ -12303,7 +12311,7 @@ namespace DbDo
             // ===== File menu: database files + cross-file movement =====
             miFile = addMenu("&File");
             miFileNew     = addItem(miFile, "&New Database...",           "New Database",     Keys.None,                            fileNewClicked);
-            miFileAddTable = addItem(miFile, "Add &Table...",              "Add Table",        Keys.None,                            fileAddTableClicked);
+            miFileAddTable = addItem(miFile, "&Add Table...",              "Add Table",        Keys.None,                            fileAddTableClicked);
             miFileOpen    = addItem(miFile, "&Open Database...",          "Open Database",    Keys.Control | Keys.O,                fileOpenClicked);
             // Open New Recordset: prompt for a SQL SELECT and present
             // its result as the current recordset. The recordset is
@@ -12311,18 +12319,18 @@ namespace DbDo
             // work) but Find / Filter / Sort / Say-X all do. Useful
             // for "give me a join of these tables I want to browse"
             // workflows that don't justify creating a permanent view.
-            miFileOpenSelect = addItem(miFile, "Open New &Recordset...", "Open Recordset", Keys.Control | Keys.Shift | Keys.T, fileOpenSelectClicked);
+            miFileOpenSelect = addItem(miFile, "Open &Table in New Window...", "Open Recordset", Keys.Control | Keys.Shift | Keys.T, fileOpenSelectClicked);
             miFileRecent  = addItem(miFile, "&Recent Files...",           "Recent Files",     Keys.Alt | Keys.R,                    fileRecentClicked);
             // Export Database: primary chord Alt+Shift+E (parallel to
             // Alt+E = Export Data productivity pair). Ctrl+Shift+S was
             // the earlier primary, but the user moved it to Statistics
             // Column for that command's S-letter family.
             miFileSave    = addItem(miFile, "&Save",                     "Save",             Keys.Control | Keys.S,                fileSaveClicked);
-            miFileSaveAs  = addItem(miFile, "Save &As...",              "Save As",          Keys.Control | Keys.Shift | Keys.S,   fileSaveAsClicked);
+            miFileSaveAs  = addItem(miFile, "&Save As...",              "Save As",          Keys.Control | Keys.Shift | Keys.S,   fileSaveAsClicked);
             miFileClose   = addItem(miFile, "&Close Database",            "Close Database",   Keys.None,                            fileCloseClicked);
             addSep(miFile);
             miFileBackup  = addItem(miFile, "&Backup Database...",        "Backup Database",  Keys.None,                            fileBackupClicked);
-            miFileCompare = addItem(miFile, "Co&mpare Database...",       "Compare Database", Keys.None,                            fileCompareClicked);
+            miFileCompare = addItem(miFile, "Compare &Database...",       "Compare Database", Keys.None,                            fileCompareClicked);
             addSep(miFile);
             // Alt+I = Import (build a new DbDo shell from another file),
             // Alt+M = Merge (rows into the current table), Alt+E = Export
@@ -12332,7 +12340,7 @@ namespace DbDo
             // should keep their plain-Ctrl chords.)
             miFileImport  = addItem(miFile, "&Import...",                 "Import",           Keys.Alt | Keys.I,                    importClicked);
             miFileMerge   = addItem(miFile, "&Merge Data...",             "Merge",            Keys.Alt | Keys.M,                    mergeClicked);
-            addItem(miFile, "&Transfer Import...",       "Transfer Import",  Keys.None,                            importTransferClicked);
+            addItem(miFile, "Transfer Import...",       "Transfer Import",  Keys.None,                            importTransferClicked);
             addItem(miFile, "&Run Report...",           "Run Report",       Keys.Alt | Keys.Shift | Keys.R,       produceReportClicked);
             miFileExport  = addItem(miFile, "E&xport Data...",            "Export Data",      Keys.Alt | Keys.X,                    fileExportClicked);
             addSep(miFile);
@@ -12342,14 +12350,14 @@ namespace DbDo
             // which file/table is on screen is a file-level operation,
             // and the File menu carries Current Windows (F4)
             // by the same logic.
-            miSchemaSelectTable = addItem(miFile, "Choose &Table...",           "Select Table",         Keys.F7,                            schemaSelectTableClicked);
+            miSchemaSelectTable = addItem(miFile, "Choose &Table...",          "Select Table",         Keys.Control | Keys.T,                            schemaSelectTableClicked);
             miSchemaSelectView  = addItem(miFile, "Choose &View...",            "Select View",          Keys.None,                          schemaSelectViewClicked);
             miSchemaSwitch      = addItem(miFile, "Next Visited Table",         "Switch Table",         Keys.Alt | Keys.F6,                 schemaSwitchClicked);
             miSchemaSwitchPrev  = addItem(miFile, "Previous Visited Table",     "Switch Previous Table", Keys.Alt | Keys.Shift | Keys.F6,   schemaSwitchPrevClicked);
             miSchemaSwitchAll     = addItem(miFile, "Next Table or View",     "Switch Object",         Keys.Control | Keys.F6,            schemaSwitchAllClicked);
             miSchemaSwitchAllPrev = addItem(miFile, "Previous Table or View", "Switch Previous Object", Keys.Control | Keys.Shift | Keys.F6, schemaSwitchAllPrevClicked);
             addSep(miFile);
-            miFileExit    = addItem(miFile, "E&xit DbDo",                "Exit Application", Keys.Alt | Keys.F4,                   fileExitClicked);
+            miFileExit    = addItem(miFile, "&Exit DbDo",                "Exit Application", Keys.Alt | Keys.F4,                   fileExitClicked);
 
             // ===== Edit menu: modify the data =====
             miEdit = addMenu("&Edit");
@@ -12361,45 +12369,45 @@ namespace DbDo
             // sections of DbDo.inix) but only one field is shown.
             // Mnemonic "F" for field; Shift+F2 since F2 is Edit
             // Record.
-            miRecSetCell     = addItem(miEdit, "Edit &Cell...",    "Edit Cell",            Keys.F2,                            recSetCellClicked);
+            miRecSetCell     = addItem(miEdit, "Edit Cell...",    "Edit Cell",            Keys.F2,                            recSetCellClicked);
             miRecRemove      = addItem(miEdit, "&Delete Record",      "Delete Record",       Keys.Control | Keys.D,              recRemoveClicked);
-            miRecRemoveForce = addItem(miEdit, "Delete Without Confir&mation",            "Delete Record Force",  Keys.Control | Keys.Shift | Keys.D, recRemoveForceClicked);
-            miRecCopy        = addItem(miEdit, "Copy &Record", "Copy Record",         Keys.Control | Keys.Shift | Keys.C, recCopyClicked);
+            miRecRemoveForce = addItem(miEdit, "&Delete Without Confirmation",            "Delete Record Force",  Keys.Control | Keys.Shift | Keys.D, recRemoveForceClicked);
+            miRecCopy        = addItem(miEdit, "&Copy Record", "Copy Record",         Keys.Control | Keys.Shift | Keys.C, recCopyClicked);
             // Append Record: like Copy Record but adds to the
             // existing clipboard contents rather than replacing.
             // Useful for collecting several rows from across the
             // database into one clipboard payload. Each appended
             // record is separated by a blank line.
-            miRecAppend      = addItem(miEdit, "Append Recor&d to Clipboard",             "Append Record",       Keys.Alt | Keys.Shift | Keys.C,     recAppendClicked);
+            miRecAppend      = addItem(miEdit, "Append Record to &Clipboard",             "Append Record",       Keys.Alt | Keys.Shift | Keys.C,     recAppendClicked);
             // New Copy: duplicate the current row. Pre-fills the New
             // Record dialog with all visible field values from the
             // current row; the user reviews, edits as needed, and
             // OK inserts as a new row. Primary key and 'prime' are
             // cleared automatically since both must be unique.
-            miRecNewCopy     = addItem(miEdit, "Ne&w Copy...", "Copy Record as New",    Keys.Control | Keys.Shift | Keys.N, recNewCopyClicked);
+            miRecNewCopy     = addItem(miEdit, "&New Copy...", "Copy Record as New",    Keys.Control | Keys.Shift | Keys.N, recNewCopyClicked);
             // Mail Record: build a mailto: URI from the current row.
             // Uses the first email-like column found (looking for
             // 'email', 'e_mail', 'mail') for the address; uses the
             // 'look' column for the subject; uses the 'notes' column
             // for the body. Falls back gracefully if any are missing.
-            miRecMail        = addItem(miEdit, "&Mail Record", "Send Mail",  Keys.None, recMailClicked);
+            miRecMail        = addItem(miEdit, "Mail Record", "Send Mail",  Keys.None, recMailClicked);
             miRecUpdateColumn = addItem(miEdit, "&Replace Column...", "Replace Column", Keys.Control | Keys.R, recUpdateColumnClicked);
             // Regex Replace: same as Update Column but interprets the
             // search text as a .NET regex pattern and supports $1, $2
             // back-references in the replacement. Ctrl+Shift+R as the
             // "power version" companion to Ctrl+R = Update Column.
-            miRecRegexReplace = addItem(miEdit, "Re&gex Replace...", "Regex Replace", Keys.Control | Keys.Shift | Keys.R, recRegexReplaceClicked);
+            miRecRegexReplace = addItem(miEdit, "&Regex Replace...", "Regex Replace", Keys.Control | Keys.Shift | Keys.R, recRegexReplaceClicked);
             addSep(miEdit);
             // Marks: per-row boolean flags. Control+M / Control+U is
             // the canonical chord pair, chosen for symmetry (mark and
             // unmark differ only by the letter, not by an added
             // modifier).
             miRecMark        = addItem(miEdit, "&Mark Record",                            "Set Mark",            Keys.Control | Keys.M,              recMarkClicked);
-            miRecToggleMark  = addItem(miEdit, "&Toggle Marked",          "Toggle Marked",       Keys.Control | Keys.Space,          recToggleMarkClicked);
+            miRecToggleMark  = addItem(miEdit, "Toggle Marked",          "Toggle Marked",       Keys.Control | Keys.Space,          recToggleMarkClicked);
             miEditNotes      = addItem(miEdit, "Edit &Notes...",          "Edit Notes",          Keys.Alt | Keys.Shift | Keys.N,     editNotesClicked);
-            miEditTags       = addItem(miEdit, "Edit Ta&gs...",           "Edit Tags",           Keys.Alt | Keys.Shift | Keys.T,     editTagsClicked);
+            miEditTags       = addItem(miEdit, "Edit &Tags...",           "Edit Tags",           Keys.Alt | Keys.Shift | Keys.T,     editTagsClicked);
             miEditUrl        = addItem(miEdit, "Edit &URL...",            "Edit URL",            Keys.Alt | Keys.Shift | Keys.U,     editUrlClicked);
-            miRecUnmark      = addItem(miEdit, "&Unmark Record",                          "Clear Mark",          Keys.Control | Keys.Shift | Keys.M, recUnmarkClicked);
+            miRecUnmark      = addItem(miEdit, "Un&mark Record",                          "Clear Mark",          Keys.Control | Keys.Shift | Keys.M, recUnmarkClicked);
             // Bulk mark operations (v1.0.67). All operate on the
             // current filtered view -- they set, clear, or invert the
             // 'marked' column for every row currently visible. The
@@ -12407,11 +12415,11 @@ namespace DbDo
             // convention: Ctrl+letter is the primary action, Ctrl+
             // Shift+letter is the variant. Invert Marked is on Alt+Shift+I,
             // off on its own because it doesn't have a paired counterpart.
-            ToolStripMenuItem miBulkMark = new ToolStripMenuItem("&Bulk Marking...");
+            ToolStripMenuItem miBulkMark = new ToolStripMenuItem("&Bulk Marking");
             miBulkMark.AccessibleName = "Bulk Marking";
             miEdit.DropDownItems.Add(miBulkMark);
             miRecMarkAll     = addItem(miBulkMark, "Mark &All",   "Set Mark All",         Keys.Control | Keys.A,              recMarkAllClicked);
-            miRecUnmarkAll   = addItem(miBulkMark, "U&nmark All", "Clear Mark All",       Keys.Control | Keys.Shift | Keys.A, recUnmarkAllClicked);
+            miRecUnmarkAll   = addItem(miBulkMark, "Unmark &All", "Clear Mark All",       Keys.Control | Keys.Shift | Keys.A, recUnmarkAllClicked);
             miRecInvertMarked= addItem(miBulkMark, "&Invert Marked",     "Invert Marked",         Keys.Alt | Keys.Shift | Keys.I, recInvertMarkedClicked);
             // F8 / Shift+F8 / Alt+F8 / Alt+Shift+F8 -- range mark
             // and range unmark families. Two INDEPENDENT anchors:
@@ -12425,9 +12433,9 @@ namespace DbDo
             // build a mark range and an unmark range without one
             // gesture clobbering the other.
             miRecMarkAnchor      = addItem(miBulkMark, "&Start Mark",                  "Start Mark",      Keys.F8,                            recMarkAnchorClicked);
-            miRecMarkToAnchor    = addItem(miBulkMark, "Complete &Mark",             "Complete Mark",          Keys.Shift | Keys.F8,               recMarkToAnchorClicked);
+            miRecMarkToAnchor    = addItem(miBulkMark, "&Complete Mark",             "Complete Mark",          Keys.Shift | Keys.F8,               recMarkToAnchorClicked);
             miRecUnmarkAnchor    = addItem(miBulkMark, "Start &Unmark",                 "Start Unmark",    Keys.Alt | Keys.F8,                 recUnmarkAnchorClicked);
-            miRecUnmarkToAnchor  = addItem(miBulkMark, "Complete Unmark to Anchor",           "Unmark Range",        Keys.Alt | Keys.Shift | Keys.F8,    recUnmarkToAnchorClicked);
+            miRecUnmarkToAnchor  = addItem(miBulkMark, "Complete Unmark &to Anchor",           "Unmark Range",        Keys.Alt | Keys.Shift | Keys.F8,    recUnmarkToAnchorClicked);
             addSep(miEdit);
             // Bookmarks: the Set/Clear/Go-to Bookmark trio
             // on Control+K / Control+Shift+K / Alt+K. Identical
@@ -12438,9 +12446,9 @@ namespace DbDo
             // from earlier app conventions). Migrating to B frees
             // the K-family for future use and follows the strict
             // mnemonic rule throughout.
-            miRecBookmark    = addItem(miEdit, "&Save Bookmark",                          "Save Bookmark",       Keys.Control | Keys.B,              recBookmarkClicked);
-            miRecGotoBookmark= addItem(miEdit, "&List Bookmarks...",                       "List Bookmarks",      Keys.Alt | Keys.B,                  recGotoBookmarkClicked);
-            miRecClearBookmark=addItem(miEdit, "&Clear Bookmark",                         "Clear Bookmark",      Keys.Control | Keys.Shift | Keys.B, recClearBookmarkClicked);
+            miRecBookmark    = addItem(miEdit, "Save &Bookmark",                          "Save Bookmark",       Keys.Control | Keys.B,              recBookmarkClicked);
+            miRecGotoBookmark= addItem(miEdit, "List &Bookmarks...",                       "List Bookmarks",      Keys.Alt | Keys.B,                  recGotoBookmarkClicked);
+            miRecClearBookmark=addItem(miEdit, "Clear &Bookmark",                         "Clear Bookmark",      Keys.Control | Keys.Shift | Keys.B, recClearBookmarkClicked);
             addSep(miEdit);
             // Open Cell Value: open the url, file path, or folder
             // path stored in a cell of the current row.
@@ -12454,7 +12462,7 @@ namespace DbDo
             // Pick Value: v1.0.67 deferred stub. The chord (Ctrl+F2)
             // is reserved so the menu doesn't drift and the user can
             // discover the planned command.
-            miRecPickValue   = addItem(miEdit, "Pick &Value", "Pick Value", Keys.Control | Keys.F2,            recPickValueStub);
+            miRecPickValue   = addItem(miEdit, "&Pick Value", "Pick Value", Keys.Control | Keys.F2,            recPickValueStub);
 
             // ===== Navigate menu: move around the data =====
             miNavigate = addMenu("&Navigate");
@@ -12462,12 +12470,12 @@ namespace DbDo
             // Names follow the standard convention; chords are
             // unset (the listview's arrow keys handle next/previous
             // and Control+Home/End handle first/last natively).
-            miNavFirst       = addItem(miNavigate, "&First Record",                          "Step Record First",    Keys.None,                          navFirstClicked);
+            miNavFirst       = addItem(miNavigate, "First &Record",                          "Step Record First",    Keys.None,                          navFirstClicked);
             miNavLast        = addItem(miNavigate, "&Last Record",                           "Step Record Last",     Keys.None,                          navLastClicked);
             miNavNext        = addItem(miNavigate, "&Next Record",                        "Step Record Next",     Keys.None,                          navNextClicked);
             miNavPrev        = addItem(miNavigate, "&Previous Record",                    "Step Record Previous", Keys.None,                          navPrevClicked);
             miRecGoTo        = addItem(miNavigate, "&Go to Record...",                    "Set Position",         Keys.Control | Keys.G,              recGoToClicked);
-            miRecGoToRepeat  = addItem(miNavigate, "Repeat Go &To",                       "Repeat Set Position",  Keys.Alt | Keys.G,                  repeatGoToClicked);
+            miRecGoToRepeat  = addItem(miNavigate, "Repeat &Go To",                       "Repeat Set Position",  Keys.Alt | Keys.G,                  repeatGoToClicked);
             addSep(miNavigate);
             // Search families. Three distinct families with their
             // own chord pairs, plus a unified F3 / Shift+F3 "repeat
@@ -12488,13 +12496,13 @@ namespace DbDo
             // F3 / Shift+F3 repeat whichever family was most recently
             // invoked; sLastSearchKind routes the dispatch.
             miRecFind         = addItem(miNavigate, "&Find Record...",        "Find",                Keys.Control | Keys.F,              recFindAllClicked);
-            miRecFindPrev     = addItem(miNavigate, "&Reverse Find", "Find Previous",      Keys.Control | Keys.Shift | Keys.F, recFindAllPrevClicked);
+            miRecFindPrev     = addItem(miNavigate, "Reverse &Find", "Find Previous",      Keys.Control | Keys.Shift | Keys.F, recFindAllPrevClicked);
             miRecJump         = addItem(miNavigate, "&Jump to Record...", "Jump Record",        Keys.Control | Keys.J,              recJumpClicked);
-            miRecJumpPrev     = addItem(miNavigate, "Re&verse Jump", "Jump Previous Record", Keys.Control | Keys.Shift | Keys.J, recJumpPrevClicked);
-            miRecFindRegex    = addItem(miNavigate, "Find Re&gex...", "Find Regex",       Keys.Control | Keys.F3,             recFindRegexClicked);
-            miRecFindRegexPrev = addItem(miNavigate, "Reverse Re&gex Find", "Find Previous Regex", Keys.Control | Keys.Shift | Keys.F3, recFindRegexPrevClicked);
-            miRecSearchAgain  = addItem(miNavigate, "Search &Next",   "Search Next",         Keys.F3,                            recSearchNextClicked);
-            miRecSearchPrev   = addItem(miNavigate, "&Search Previous", "Search Previous",   Keys.Shift | Keys.F3,               recSearchPrevClicked);
+            miRecJumpPrev     = addItem(miNavigate, "Reverse &Jump", "Jump Previous Record", Keys.Control | Keys.Shift | Keys.J, recJumpPrevClicked);
+            miRecFindRegex    = addItem(miNavigate, "Find Regex...", "Find Regex",       Keys.Control | Keys.F3,             recFindRegexClicked);
+            miRecFindRegexPrev = addItem(miNavigate, "Reverse Regex Find", "Find Previous Regex", Keys.Control | Keys.Shift | Keys.F3, recFindRegexPrevClicked);
+            miRecSearchAgain  = addItem(miNavigate, "&Search Next",   "Search Next",         Keys.F3,                            recSearchNextClicked);
+            miRecSearchPrev   = addItem(miNavigate, "Search Previous", "Search Previous",   Keys.Shift | Keys.F3,               recSearchPrevClicked);
             addSep(miNavigate);
             // Parent-child drill family. Alt+RightArrow enters a
             // child table from the current row's foreign-key target;
@@ -12502,24 +12510,24 @@ namespace DbDo
             // in. Alt+Home pops all the way back to the topmost
             // ancestor.
             miRecEnterChild      = addItem(miNavigate, "&Enter Child Table...", "Enter Child",      Keys.Alt | Keys.Right, recEnterChildClicked);
-            miRecExitChild       = addItem(miNavigate, "E&xit Child Table",        "Exit Child",       Keys.Alt | Keys.Left,  recExitChildClicked);
-            miRecExitChildToRoot = addItem(miNavigate, "Exit to &Root Table",    "Exit Child to Root", Keys.Alt | Keys.Home,  recExitChildToRootClicked);
+            miRecExitChild       = addItem(miNavigate, "Exit &Child Table",        "Exit Child",       Keys.Alt | Keys.Left,  recExitChildClicked);
+            miRecExitChildToRoot = addItem(miNavigate, "Exit &to Root Table",    "Exit Child to Root", Keys.Alt | Keys.Home,  recExitChildToRootClicked);
 
             // ===== Query menu: read aspects of the data =====
             miQuery = addMenu("&Query");
             // Read-only inspection of current record / table / schema.
             miRecShow        = addItem(miQuery, "&Inspect Record",  "Inspect Record",   Keys.Control | Keys.I,            recShowClicked);
-            miSchemaProperties  = addItem(miQuery, "Table &Properties",              "Get Property",  Keys.Alt | Keys.Enter,            schemaPropertiesClicked);
+            miSchemaProperties  = addItem(miQuery, "&Table Properties",              "Get Property",  Keys.Alt | Keys.Enter,            schemaPropertiesClicked);
             miRecRelated     = addItem(miQuery, "&Related Records...",   "Show Related",  Keys.None,                        recRelatedClicked);
             miSchemaShow     = addItem(miQuery, "&Show Schema",         "Show Schema",   Keys.None,                        schemaShowClicked);
             addSep(miQuery);
             // Say-X family: speaks state without changing focus or
             // recordset position (the Say-X status family).
-            ToolStripMenuItem miSay = new ToolStripMenuItem("&Say...");
+            ToolStripMenuItem miSay = new ToolStripMenuItem("&Say");
             miSay.AccessibleName = "Say announcements";
             miQuery.DropDownItems.Add(miSay);
-            miSaySayMark         = addItem(miSay, "&Say Mark Status", "Say Mark", Keys.Shift | Keys.M, saySayMark);
-            miSaySayStatus       = addItem(miSay, "Say Status",   "Say Status",       Keys.Shift | Keys.Z,               saySayStatus);
+            miSaySayMark         = addItem(miSay, "Say &Mark Status", "Say Mark", Keys.Shift | Keys.M, saySayMark);
+            miSaySayStatus       = addItem(miSay, "Say &Here",   "Say Here",       Keys.Shift | Keys.H,               saySayStatus);
             miSaySayDatabase     = addItem(miSay, "Say &Database",        "Say Database",     Keys.Shift | Keys.D,               saySayDatabase);
             miSaySayOrder        = addItem(miSay, "Say &Order",      "Say Order",        Keys.Shift | Keys.O,               saySayOrder);
             miSaySayGoto         = addItem(miSay, "Say &Goto",      "Say Goto",         Keys.Shift | Keys.G,               saySayGoto);
@@ -12530,10 +12538,10 @@ namespace DbDo
             // Say Path retired in v1.0.99 (covered by Say Database on
             // Shift+D, single-press = name, double-press = full path).
             miSaySayYield        = addItem(miSay, "Say &Yield",       "Say Yield",        Keys.Shift | Keys.Y,               saySayYield);
-            miSaySayTables       = addItem(miSay, "Say Tables",      "Say Tables",        Keys.Shift | Keys.F7,              saySayTables);
+            miSaySayTables       = addItem(miSay, "Say Tables",      "Say Tables",        Keys.None,              saySayTables);
             // Say Marked moved off Shift+L (which is now Say Column from
             // Cursor) to Alt+Shift+M. Mark Record itself uses Control+M.
-            miSaySayMarked       = addItem(miSay, "Say &Marked", "Say Marked",      Keys.None,                         saySayMarked);
+            miSaySayMarked       = addItem(miSay, "Say Marked", "Say Marked",      Keys.None,                         saySayMarked);
             // Shift+E: Say Edited -- the 'edited' value, rendered in
             // a human-friendly local-time form, parallel to Shift+A
             // for the 'added' value.
@@ -12556,16 +12564,16 @@ namespace DbDo
             // names the bookmark family.
             // Say Column family. Scope: Alt = All (from top), Control =
             // from Current row. Filter: Shift = Marked rows only.
-            miSaySayColumnAll       = addItem(miSay, "Say Column &All",                "Say Column All",                Keys.Alt | Keys.L,                  saySayColumnAll);
-            miSaySayColumnAllMarked = addItem(miSay, "Say Column All &Marked",         "Say Column All Marked",         Keys.Alt | Keys.Shift | Keys.L,     saySayColumnAllMarked);
-            miSaySayColumn          = addItem(miSay, "Say Column from &Current",       "Say Column from Current",       Keys.Control | Keys.L,              saySayColumn);
-            miSaySayColumnMarked    = addItem(miSay, "Say Column from Current Mar&ked","Say Column from Current Marked",Keys.Control | Keys.Shift | Keys.L, saySayColumnMarked);
+            miSaySayColumnAll       = addItem(miSay, "Say Column as &List",                "Say Column as List",                Keys.Alt | Keys.L,                  saySayColumnAll);
+            miSaySayColumnAllMarked = addItem(miSay, "Say Column as &List of Marked",         "Say Column as List of Marked",         Keys.Alt | Keys.Shift | Keys.L,     saySayColumnAllMarked);
+            miSaySayColumn          = addItem(miSay, "Say Column as &List from Current",       "Say Column as List from Current",       Keys.Control | Keys.L,              saySayColumn);
+            miSaySayColumnMarked    = addItem(miSay, "Say Column as &List from Current Marked","Say Column as List from Current Marked",Keys.Control | Keys.Shift | Keys.L, saySayColumnMarked);
             // Say Records Rest gave up Alt+L to the Say Column All command
             // above; it remains on the menu (and the Alternate Menu) with
             // no chord for now. Say Records Rest Marked keeps Alt+Shift+M.
-            miSaySayRows         = addItem(miSay, "Say Rec&ords Rest", "Say Records Rest",        Keys.None,                         saySayRows);
-            miSaySayRowsMarked   = addItem(miSay, "Say Records Rest Marked", "Say Records Rest Marked", Keys.Alt | Keys.Shift | Keys.M,    saySayRowsMarked);
-            miSaySayMarkedRows   = addItem(miSay, "Say &Marked Rows", "Say Marked Rows", Keys.Shift | Keys.Space, saySayMarkedRows);
+            miSaySayRows         = addItem(miSay, "Say Records Rest", "Say Records Rest",        Keys.None,                         saySayRows);
+            miSaySayRowsMarked   = addItem(miSay, "Say Records Rest &Marked", "Say Records Rest Marked", Keys.Alt | Keys.Shift | Keys.M,    saySayRowsMarked);
+            miSaySayMarkedRows   = addItem(miSay, "Say Marked Rows", "Say Marked Rows", Keys.Shift | Keys.Space, saySayMarkedRows);
 
             // THE SAY LAYER ANSWERS FOR EVERY DIALOG THAT REMEMBERS AN ANSWER.
             //
@@ -12580,7 +12588,7 @@ namespace DbDo
             // to nothing -- and a listener cannot tell them apart otherwise.
             miSaySayJump         = addItem(miSay, "Say &Jump", "Say Jump", Keys.Shift | Keys.J, saySayJump);
             miSaySayBookmark     = addItem(miSay, "Say &Bookmark", "Say Bookmark", Keys.Shift | Keys.B, saySayBookmark);
-            miSaySayReplace      = addItem(miSay, "Say Rep&lace", "Say Replace", Keys.Shift | Keys.V, saySayReplace);
+            miSaySayReplace      = addItem(miSay, "Say Replacement &Value", "Say Replacement Value", Keys.Shift | Keys.V, saySayReplace);
             // Shift+K: Say Kin -- speak the 'look' values of every
             // related record (both directions: parents reached by
             // outbound FK columns, and children that point back to
@@ -12599,7 +12607,7 @@ namespace DbDo
             // about how the data is being shaped" which is what this
             // command reports. Numpad-asterisk (Keys.Multiply) is a
             // hidden alias for users with a numeric keypad.
-            miSaySaySortFilter   = addItem(miSay, "Say &Sort and Filter", "Say Sort Filter", Keys.Shift | Keys.D8,         saySaySortFilter);
+            miSaySaySortFilter   = addItem(miSay, "Say Sort and Filter", "Say Sort Filter", Keys.Shift | Keys.D8,         saySaySortFilter);
             // Alt+Delete: JAWS-style "say cursor position." Speaks the
             // current virtual column's header followed by the current
             // (1-based) row number. The single most useful "where am
@@ -12613,7 +12621,7 @@ namespace DbDo
             // or other shell data, the speech says "(non-text
             // clipboard)" rather than nothing. Double-press opens
             // the read-only memo dialog for line-by-line review.
-            miSaySayClipboard    = addItem(miSay, "Say &Clipboard", "Say Clipboard", Keys.Alt | Keys.OemQuotes,    saySayClipboard);
+            miSaySayClipboard    = addItem(miSay, "Say Clipboard", "Say Clipboard", Keys.Alt | Keys.OemQuotes,    saySayClipboard);
             miSaySayYieldMarked  = addItem(miSay, "Say Marked Yield", "Say Yield Marked",  Keys.None,                          saySayYieldMarked);
             // v1.0.67 Say-X family completions. Each speaks one piece
             // of state without changing recordset position. The chord
@@ -12622,11 +12630,11 @@ namespace DbDo
             // Related, Url. Long values can be reviewed with a second
             // press (LbcDialog with a multi-line TextBox) via the
             // shared speakOrShow helper.
-            miSaySayAdded        = addItem(miSay, "Say A&dded",     "Say Added",   Keys.Shift | Keys.A,                saySayAdded);
-            miSaySayCell         = addItem(miSay, "Say Ce&ll",       "Say Cell",    Keys.Shift | Keys.C,                saySayCell);
+            miSaySayAdded        = addItem(miSay, "Say &Added",     "Say Added",   Keys.Shift | Keys.A,                saySayAdded);
+            miSaySayCell         = addItem(miSay, "Say &Cell",       "Say Cell",    Keys.Shift | Keys.C,                saySayCell);
             miSaySayFilter       = addItem(miSay, "Say &Where Filter",  "Say Where Filter", Keys.Shift | Keys.W,            saySayFilter);
-            miSaySayFind         = addItem(miSay, "Say Fi&nd",          "Say Find",    Keys.Shift | Keys.F,                saySayFind);
-            miSaySaySelect       = addItem(miSay, "Say &Select Columns", "Say Select",  Keys.Shift | Keys.S,                saySaySelect);
+            miSaySayFind         = addItem(miSay, "Say &Find",          "Say Find",    Keys.Shift | Keys.F,                saySayFind);
+            miSaySaySelect       = addItem(miSay, "&Say Select Columns", "Say Select",  Keys.Shift | Keys.S,                saySaySelect);
             miSaySayQuery        = addItem(miSay, "Say &Query",          "Say Query",   Keys.Shift | Keys.Q,                saySayQuery);
             miSaySayId           = addItem(miSay, "Say &Id",      "Say ID",      Keys.Shift | Keys.I,                saySayId);
             miSaySayLook         = addItem(miSay, "Say &Look",           "Say Look",    Keys.Shift | Keys.L,                saySayLook);
@@ -12650,9 +12658,9 @@ namespace DbDo
             // offering an opt-in Descending checkbox.
             miViewSelect     = addItem(miQuery, "&Where Filter...",                                 "Where Filter",       Keys.Control | Keys.W,             viewSelectClicked);
             miViewResetFilter= addItem(miQuery, "Clear &Where",                                     "Clear Where",       Keys.Control | Keys.Shift | Keys.W, viewResetFilterClicked);
-            miViewFilterRegex= addItem(miQuery, "Filter by Re&gex...",                                 "Filter Regex",      Keys.None,                          filterRegexClicked);
+            miViewFilterRegex= addItem(miQuery, "&Filter by Regex...",                                 "Filter Regex",      Keys.None,                          filterRegexClicked);
             addSep(miQuery);
-            miViewResetSort  = addItem(miQuery, "Clear Sor&t",                                      "Reset Sort",        Keys.None,                          viewResetSortClicked);
+            miViewResetSort  = addItem(miQuery, "&Clear Sort",                                      "Reset Sort",        Keys.None,                          viewResetSortClicked);
             // Sort Records: the universal sort. Defaults to the
             // current virtual column with an opt-in Descending
             // checkbox. Replaces the entire family of per-column
@@ -12665,7 +12673,7 @@ namespace DbDo
             // descending half lives in the dialog's Descending
             // button, per-column.
             miOrderRecords   = addItem(miQuery, "&Order Records...",  "Order Records",   Keys.Alt | Keys.O,                  orderRecordsClicked);
-            miReverseOrder   = addItem(miQuery, "&Reverse Order",   "Reverse Order",  Keys.Alt | Keys.Shift | Keys.O,     reverseOrderClicked);
+            miReverseOrder   = addItem(miQuery, "Reverse &Order",   "Reverse Order",  Keys.Alt | Keys.Shift | Keys.O,     reverseOrderClicked);
 
             // ===== Misc menu: utilities, tools, settings =====
             miMisc = addMenu("&Misc");
@@ -12677,7 +12685,7 @@ namespace DbDo
             // Ctrl+Shift+R slot is better used for the more-common
             // regex-replace operation. Alt+Z is also one-handed which
             // is appropriate for a setting you flip once and forget.
-            miToggleReadOnly = addItem(miMisc, "Read &Only Toggle",                       "Read Only Toggle",  Keys.Alt | Keys.Z,                  toggleReadOnlyClicked);
+            miToggleReadOnly = addItem(miMisc, "Toggle Read Only",                       "Toggle Read Only",  Keys.Alt | Keys.Z,                  toggleReadOnlyClicked);
             // v1.0.67 deferred stubs. The chords are reserved so the
             // menu stays stable and the user can discover the planned
             // commands. The handlers display "Not yet implemented."
@@ -12698,7 +12706,7 @@ namespace DbDo
             // commands use on double-press: multi-line read-only
             // TextBox plus an OK button, focus-stealing, Control+C
             // copies the whole report.
-            miDescribeColumn = addItem(miMisc, "S&tatistics from Column",     "Statistics from Column", Keys.Alt | Keys.Shift | Keys.S, describeColumnClicked);
+            miDescribeColumn = addItem(miMisc, "&Statistics from Column",     "Statistics from Column", Keys.Alt | Keys.Shift | Keys.S, describeColumnClicked);
             // Select Columns: per-table visibility picker. Alt+S as
             // the S-letter productivity primary; the dialog has one
             // checkbox per column, plus Select All / Select None /
@@ -12717,7 +12725,7 @@ namespace DbDo
             // Extract Matches: walk every visible row, find every
             // regex match across every visible column, copy matches
             // to the clipboard. Alt+E ("E for Extract").
-            miExtractRegex   = addItem(miMisc, "&Extract with Regex...", "Extract Regex", Keys.Control | Keys.Shift | Keys.X, extractRegexClicked);
+            miExtractRegex   = addItem(miMisc, "E&xtract with Regex...", "Extract Regex", Keys.Control | Keys.Shift | Keys.X, extractRegexClicked);
             addSep(miMisc);
             // Cell clipboard family. Operate on the virtual cell (the
             // cell under the Alt+Control+arrow cursor). Shift+A appends,
@@ -12727,7 +12735,7 @@ namespace DbDo
             // legitimate Camel-Type mnemonic.
             miCellAppend     = addItem(miMisc, "Append &Cell to Clipboard",                "Append Cell",    Keys.Alt | Keys.C,                  cellAppendClicked);
             miCellCopy       = addItem(miMisc, "&Copy Cell to Clipboard",                  "Copy Cell",      Keys.Control | Keys.C,              cellCopyClicked);
-            miCopyRow        = addItem(miMisc, "Copy &Visible Cells as TSV to Clipboard",   "Copy Visible Cells", Keys.None,                          copyRowClicked);
+            miCopyRow        = addItem(miMisc, "Copy Visible Cells &as TSV to Clipboard",   "Copy Visible Cells", Keys.None,                          copyRowClicked);
             // Column / whole-grid clipboard. Both walk every row with
             // the cursor suppressed and restore position when done (the
             // gridSearchForVirtualItem full-scan pattern). Unbound --
@@ -12735,30 +12743,30 @@ namespace DbDo
             // the user assigns chords from the Hotkey editor.
             miCopyColumn     = addItem(miMisc, "Copy Column to Clipboard",                  "Copy Column",        Keys.None,                          copyColumnClicked);
             miCopyGrid       = addItem(miMisc, "Copy Grid as TSV to Clipboard",             "Copy Grid",          Keys.None,                          copyGridClicked);
-            miJumpNextInitial = addItem(miMisc, "Jump to Next &Initial...", "Jump Next Initial", Keys.None,                         jumpNextInitialClicked);
+            miJumpNextInitial = addItem(miMisc, "&Jump to Next Initial...", "Jump Next Initial", Keys.None,                         jumpNextInitialClicked);
             addSep(miMisc);
             addSep(miQuery);
             miToolsInvokeSql = addItem(miQuery, "&Query...",                              "Query",             Keys.Control | Keys.Q,              toolsInvokeSqlClicked);
-            miToolsSqlHistory= addItem(miQuery, "Query &History...",                      "Query History",     Keys.Alt | Keys.Shift | Keys.Q,     sqlHistoryClicked);
-            miToolsTest      = addItem(miMisc, "&Test Integrity",                        "Test Database",     Keys.None,                          toolsTestClicked);
+            miToolsSqlHistory= addItem(miQuery, "&Query History...",                      "Query History",     Keys.Alt | Keys.Shift | Keys.Q,     sqlHistoryClicked);
+            miToolsTest      = addItem(miMisc, "Test &Integrity",                        "Test Database",     Keys.None,                          toolsTestClicked);
             miMiscHotkeySummary = addItem(miMisc, "&Hotkey Summary",      "Hotkey Summary",      Keys.Alt | Keys.Shift | Keys.H, hotkeySummaryClicked,
                 "List every command with its key and description, then flag any inconsistencies",
                 "Joins the command, key, and description tables the menus and Key Help already use into one listing, sorted by command name, then notes duplicate key assignments and commands missing a description. Bound to Alt+Shift+H.");
-            miMiscOpenManagedCopy = addItem(miMisc, "Open as Managed &Copy...", "Open Managed Copy", Keys.None, openManagedCopyClicked,
+            miMiscOpenManagedCopy = addItem(miMisc, "&Open as Managed Copy...", "Open Managed Copy", Keys.None, openManagedCopyClicked,
                 "Open a SQLite database as a throwaway working copy: edits stay in the copy and the original is untouched until you Save As",
                 "The document model: the chosen SQLite database is copied to a temp working file that becomes the live database, so every edit, add, and delete lands in the copy and the original on disk is left alone. Use Save (Control+S), which writes the working copy out to a .db file (a -copy name is suggested, so the source is never overwritten); closing without saving discards the changes. To bring an Excel, Access, dBASE, or CSV file into a new DbDo database instead, use Import. Unbound by default.");
             miMiscDescribeTable = addItem(miQuery, "&Describe Table", "Describe Table", Keys.None, describeTableClicked,
                 "Per-column data profile of the current table: declared type and key/null/FK flags, plus live null and distinct counts with min and max values",
                 "A profile of the current base table, one column per entry: its declared type and any primary-key, not-null, or foreign-key flags from the schema, then the number of nulls, the number of distinct values, and the minimum and maximum values, each computed in SQL over the whole table. Read-only. It scans once per column, so it can take a moment on very large tables. Unbound by default.");
-            miMiscFacetColumn = addItem(miQuery, "&Facet Column...", "Facet Column", Keys.None, facetColumnClicked,
+            miMiscFacetColumn = addItem(miQuery, "Facet Column...", "Facet Column", Keys.None, facetColumnClicked,
                 "List the distinct values in the column under the cursor with their row counts, then filter the grid to a chosen value",
                 "Datasette-style faceting: groups the current table by the cursor's column and lists each distinct value with how many rows have it, most common first; picking a value filters the grid to just those rows. An accessible way to hear what a column contains and how it's distributed, then drill in. The value list is capped (1000) so a high-cardinality column can't flood the picker; filtering replaces any current filter, and blank/null and date values aren't filterable yet. Read-only until you pick. Unbound by default.");
             addSep(miMisc);
-            ToolStripMenuItem miTools = new ToolStripMenuItem("&Tools...");
+            ToolStripMenuItem miTools = new ToolStripMenuItem("&Tools");
             miTools.AccessibleName = "Tools";
             miMisc.DropDownItems.Add(miTools);
-            miToolsOpenFolder= addItem(miTools, "Open in E&xplorer",                      "Open File Folder",   Keys.Alt | Keys.OemPipe,            toolsOpenFolderClicked);
-            miToolsCommandPrompt = addItem(miTools, "Open Co&mmand Prompt",                 "Command Prompt",    Keys.Control | Keys.OemQuestion,    toolsCommandPromptClicked,
+            miToolsOpenFolder= addItem(miTools, "&Open in Explorer",                      "Open File Folder",   Keys.Alt | Keys.OemPipe,            toolsOpenFolderClicked);
+            miToolsCommandPrompt = addItem(miTools, "Open &Command Prompt",                 "Command Prompt",    Keys.Control | Keys.OemQuestion,    toolsCommandPromptClicked,
                 "Open a Windows command prompt in the folder of the currently-open database",
                 "Control+Slash. The prompt opens with its working directory set to the open database's folder, or your user folder when nothing is open. Companion to Open in Explorer (Alt+Backslash), which opens that same folder in the file manager.");
             // ASK THE MODEL ON THIS COMPUTER. The keys are EdSharp's and
@@ -12766,10 +12774,10 @@ namespace DbDo
             // the thing you are looking at with it. Keeping them apart matters
             // -- how to phrase an SQL clause has nothing to do with whichever
             // record the cursor happens to be on.
-            miToolsChatWithAi = addItem(miTools, "Chat with &AI",                        "Chat with AI",      Keys.F12,                           toolsChatWithAiClicked);
-            miToolsChatAboutTable = addItem(miTools, "Chat about Ta&ble",                "Chat about Table",  Keys.Shift | Keys.F12,              toolsChatAboutTableClicked);
-            miToolsConsole   = addItem(miTools, "Open D&ot Prompt",                       "Enter Console",     Keys.Control | Keys.Oemtilde,       toolsConsoleClicked);
-            miMiscSqleanConsole = addItem(miTools, "Sqlean &Console",                       "Sqlean Console",    Keys.Control | Keys.Shift | Keys.Oemtilde, sqleanConsoleClicked);
+            miToolsChatWithAi = addItem(miTools, "Chat &with AI",                        "Chat with AI",      Keys.F12,                           toolsChatWithAiClicked);
+            miToolsChatAboutTable = addItem(miTools, "Chat &about Table",                "Chat about Table",  Keys.Shift | Keys.F12,              toolsChatAboutTableClicked);
+            miToolsConsole   = addItem(miTools, "Open &Dot Prompt",                       "Enter Console",     Keys.Control | Keys.Oemtilde,       toolsConsoleClicked);
+            miMiscSqleanConsole = addItem(miTools, "&Sqlean Console",                       "Sqlean Console",    Keys.Control | Keys.Shift | Keys.Oemtilde, sqleanConsoleClicked);
             addSep(miTools);
             // Script family: Invoke / View
             // Script pattern. Scripts are plain files in
@@ -12782,8 +12790,8 @@ namespace DbDo
             // handles both modifying an existing script and creating
             // a new one (via a "[New script...]" entry at the top of
             // the pick list).
-            miMiscInvokeScript     = addItem(miTools, "In&voke Script...",                     "Invoke Script",     Keys.Alt | Keys.V,                  miscInvokeScriptClicked);
-            miMiscEditScript       = addItem(miTools, "Edit Sni&ppet...",                       "Edit Script",       Keys.Alt | Keys.Shift | Keys.V,     miscEditScriptClicked);
+            miMiscInvokeScript     = addItem(miTools, "&Invoke Script...",                     "Invoke Script",     Keys.Control | Keys.Shift | Keys.I,                  miscInvokeScriptClicked);
+            miMiscEditScript       = addItem(miTools, "&Edit Snippet...",                       "Edit Snippet",       Keys.Control | Keys.Shift | Keys.E,     miscEditScriptClicked);
             miMiscOpenScriptFolder = addItem(miTools, "Open Script &Folder",                   "Open Script Folder", Keys.None,                          miscOpenScriptFolderClicked);
             miMiscEvaluate         = addItem(miTools, "&Evaluate Expression...",                "Evaluate Expression", Keys.Control | Keys.Oemplus,       miscEvaluateExpressionClicked,
                 "Evaluate a one-off expression and hear the result",
@@ -12808,19 +12816,36 @@ namespace DbDo
             miWindow = addMenu("&Window");
             miWindowOpenTable     = addItem(miWindow, "&Open Table...",                 "Open Table",            Keys.Control | Keys.Shift | Keys.O,   windowOpenTableClicked);
             miWindowCurrent       = addItem(miWindow, "&Current Windows...",            "Current Windows",       Keys.F4,                              windowCurrentClicked);
-            miWindowToggle        = addItem(miWindow, "Window &Toggle",                 "Window Toggle",         Keys.None,                            windowToggleClicked);
+            miWindowToggle        = addItem(miWindow, "&Window Toggle",                 "Window Toggle",         Keys.None,                            windowToggleClicked);
             miWindowNext          = addItem(miWindow, "&Next Window",                   "Next Window",           Keys.Control | Keys.Tab,              windowNextClicked);
             miWindowPrevious      = addItem(miWindow, "&Previous Window",               "Previous Window",       Keys.Control | Keys.Shift | Keys.Tab, windowPreviousClicked);
             miWindowSayOpen       = addItem(miWindow, "&Say Windows Open",              "Say Windows Open",      Keys.Shift | Keys.F4,                 windowSayOpenClicked);
-            miWindowClose         = addItem(miWindow, "C&lose Window",                  "Close Window",          Keys.Control | Keys.F4,               windowCloseClicked);
+            miWindowClose         = addItem(miWindow, "Close Window",                  "Close Window",          Keys.Control | Keys.F4,               windowCloseClicked);
             miWindowCloseAllBut   = addItem(miWindow, "Close &All But Current Window",  "Close All But Current Window", Keys.Control | Keys.Shift | Keys.F4, windowCloseAllButClicked);
 
             // ===== Help menu =====
             miHelp = addMenu("&Help");
-            miHelpContents     = addItem(miHelp, "&Documentation",                       "Get Help",          Keys.F1,                            helpContentsClicked);
+            miHelpContents     = addItem(miHelp, "&Documentation",                       "Get Help",          Keys.F1,                            (s, e) => openHelpDocument("DbDo", "Documentation"));
             // Shift+F1 -- Version History.
-            miHelpHistory      = addItem(miHelp, "&History of Changes",                  "Show History",      Keys.Shift | Keys.F1,               helpHistoryClicked);
-            miHelpReadme       = addItem(miHelp, "&Readme Guide",                        "Show Readme",       Keys.None,                          helpReadmeClicked);
+            miHelpHistory      = addItem(miHelp, "&History of Changes",                  "Show History",      Keys.Shift | Keys.F1,               (s, e) => openHelpDocument("History", "History of Changes"));
+            // THE F1 FAMILY IS HELP. F1 is the guide, Shift+F1 the history, Alt+F1
+            // About and Control+F1 the key describer, as in EdSharp and FileDir.
+            // The two left over go to the two documents people reach for most:
+            // Alt+Shift+F1 the ReadMe, the short start, and Control+Shift+F1 the
+            // Hotkeys document -- Control+F1 describes one key, and adding Shift
+            // describes them all.
+            miHelpReadme       = addItem(miHelp, "&ReadMe",                              "Show ReadMe",       Keys.Alt | Keys.Shift | Keys.F1,    (s, e) => openHelpDocument("README", "ReadMe"));
+            miHelpHotkeysDoc   = addItem(miHelp, "&Hotkeys",                             "Show Hotkeys",      Keys.Control | Keys.Shift | Keys.F1, (s, e) => openHelpDocument("Hotkeys", "Hotkeys"));
+            miHelpFaq          = addItem(miHelp, "&Frequently Asked Questions",          "Show FAQ",          Keys.None,                          (s, e) => openHelpDocument("FAQ", "Frequently Asked Questions"));
+            // The documents almost nobody opens twice go one level down, which is
+            // the case for a submenu: four items that would otherwise be arrowed
+            // past every time, and a fresh set of letters for them.
+            ToolStripMenuItem miHelpMore = new ToolStripMenuItem("&More Documents");
+            miHelp.DropDownItems.Add(miHelpMore);
+            addItem(miHelpMore, "&Announcement",          "Show Announcement",     Keys.None, (s, e) => openHelpDocument("Announce", "Announcement"));
+            addItem(miHelpMore, "&Developer Guide",       "Show Developer Guide",  Keys.None, (s, e) => openHelpDocument("Developer", "Developer Guide"));
+            addItem(miHelpMore, "&License",               "Show License",          Keys.None, (s, e) => openHelpDocument("License", "License"));
+            addItem(miHelpMore, "&Tutorials Transcript",  "Show Tutorials Transcript", Keys.None, (s, e) => openHelpDocument("Tutorials", "Tutorials Transcript"));
             // Sample Databases: a tour entry point that lists every .db
             // file in the user's Samples folder (%APPDATA%\DbDo\Samples,
             // seeded once from {app}\Samples) and opens the chosen one
@@ -12832,8 +12857,8 @@ namespace DbDo
             // PLAY THE WALKTHROUGHS. T for Tutorials, no shortcut key: this is
             // something somebody does once or twice, not a command they reach
             // for, and the free keys are worth keeping for commands that are.
-            miHelpTutorials    = addItem(miHelp, "Play &Tutorials",                      "Play Tutorials",    Keys.None,                          helpTutorialsClicked);
-            miHelpSampleDb     = addItem(miHelp, "Sample &Databases...",                "Sample Databases", Keys.None,                        helpSampleDbClicked);
+            miHelpTutorials    = addItem(miHelp, "&Play Tutorials",                      "Play Tutorials",    Keys.None,                          helpTutorialsClicked);
+            miHelpSampleDb     = addItem(miHelp, "&Sample Databases...",                "Sample Databases", Keys.None,                        helpSampleDbClicked);
             // The former per-sample items (Open Convention / Northwind /
             // Chinook) were removed: the Sample Databases picker above
             // discovers every .db under the Samples tree at runtime, so
@@ -12841,7 +12866,7 @@ namespace DbDo
             // entries. (Samples that ship outside the Samples folder must
             // be placed under it to remain on the list.)
             addSep(miHelp);
-            miHelpShowCommand  = addItem(miHelp, "Alternate Menu...",                        "Alternate Menu",    Keys.Alt | Keys.F10,                helpShowCommandClicked);
+            miHelpShowCommand  = addItem(miHelp, "&Alternate Menu...",                        "Alternate Menu",    Keys.Alt | Keys.F10,                helpShowCommandClicked);
             // Control+F1 = Key Help toggle: announce on/off via the screen reader,
             // and when on, intercept hotkeys to announce them rather
             // than execute them.
@@ -12852,21 +12877,21 @@ namespace DbDo
             // messages without affecting the screen reader's natural
             // focus and selection announcements. The "zzz" mnemonic on Alt+Shift+Z reads as a
             // hush -- speech going to sleep. Default ON.
-            miHelpExtraSpeech   = addItem(miHelp, "E&xtra Speech Toggle",                "Extra Speech Toggle", Keys.Alt | Keys.Shift | Keys.Z,    helpExtraSpeechClicked);
+            miHelpExtraSpeech   = addItem(miHelp, "Extra Speech Toggle",                "Extra Speech Toggle", Keys.Alt | Keys.Shift | Keys.Z,    helpExtraSpeechClicked);
             // Toggle-Command-Echo: silence the spoken canonical command
             // name that fires from menu/hotkey activations just before
             // the command body runs. Mirrors the Extra Speech toggle's
             // mnemonic (Ctrl+Shift+Z is the keyboard companion to
             // Alt+Shift+Z, both "z for hushed speech"). Default ON.
-            miHelpCommandEcho   = addItem(miHelp, "&Command Echo Toggle",                "Command Echo Toggle", Keys.Control | Keys.Shift | Keys.Z, helpCommandEchoClicked);
+            miHelpCommandEcho   = addItem(miHelp, "Command Echo Toggle",                "Command Echo Toggle", Keys.Control | Keys.Shift | Keys.Z, helpCommandEchoClicked);
             addSep(miHelp);
             miHelpLog          = addItem(miHelp, "Show &Log Location",                   "Show Log",          Keys.None,                          helpLogClicked);
-            addItem(miHelp, "File GitHub &Issue...", "File GitHub Issue", Keys.None, helpFileIssueClicked);
-            miHelpWebSite      = addItem(miHelp, "Open We&bsite",      "Open Website",      Keys.None,                          helpWebSiteClicked);
+            addItem(miHelp, "&File GitHub Issue...", "File GitHub Issue", Keys.None, helpFileIssueClicked);
+            miHelpWebSite      = addItem(miHelp, "&Open Website",      "Open Website",      Keys.None,                          helpWebSiteClicked);
             // Elevate-Version: check GitHub for a newer DbDo_setup.exe
             // and offer to download / install.
-            miHelpElevate      = addItem(miHelp, "&Elevate Version...",                  "Elevate Version",   Keys.F11,                           helpElevateClicked);
-            miHelpAbout        = addItem(miHelp, "&About",                                  "About DbDo",       Keys.Alt | Keys.F1,                 helpAboutClicked);
+            miHelpElevate      = addItem(miHelp, "Elevate &Version...",                  "Elevate Version",   Keys.F11,                           helpElevateClicked);
+            miHelpAbout        = addItem(miHelp, "About",                                  "About DbDo",       Keys.Alt | Keys.F1,                 helpAboutClicked);
 
             // Delete key as a secondary binding for Remove-Record.
             // The primary menu shortcut is Control+D (shown next to
@@ -13106,13 +13131,13 @@ namespace DbDo
             add("Say Tags",           "Speak the current row's 'tags' field", "");
             add("Say Goto",           "Speak the most recently used Jump search string",
                 "Shift+G. Companion to Say Where Filter (Shift+W) and Say Order (Shift+O) -- reveals the current state of the Ctrl+J Jump Record search. Reports 'No jump search active' when there's no remembered string.");
-            add("Say Column All",          "Speak every value of the current virtual column, from the top",
+            add("Say Column as List",          "Speak every value of the current virtual column, from the top",
                 "Alt+L. Sweeps the whole column top to bottom. Position and virtual cursor unchanged; double-press shows the full list. Alt = All. Shift adds the marked-only filter (Say Column All Marked, Alt+Shift+L).");
-            add("Say Column All Marked",   "Speak the current virtual column for marked rows only, from the top",
+            add("Say Column as List of Marked",   "Speak the current virtual column for marked rows only, from the top",
                 "Alt+Shift+L. Same as Say Column All but limited to marked rows. Reports 'No marked rows in this column' when nothing is marked.");
-            add("Say Column from Current", "Speak the current virtual column from the current row down",
+            add("Say Column as List from Current", "Speak the current virtual column from the current row down",
                 "Control+L. Sweeps from the current row to the bottom. Control = from Current. Shift adds the marked-only filter (Say Column from Current Marked, Control+Shift+L).");
-            add("Say Column from Current Marked", "Speak the current virtual column for marked rows only, from the current row down",
+            add("Say Column as List from Current Marked", "Speak the current virtual column for marked rows only, from the current row down",
                 "Control+Shift+L. Same as Say Column from Current but limited to marked rows. Reports 'No marked rows from here' when nothing is marked at or after the current row.");
             add("Say Records Rest",        "Speak every visible record in full, from the cursor row down (all displayed columns)",
                 "Alt+L. Each record formatted as 'Record N -- col1: val1; col2: val2; ...' with newlines between records. Cap 25 in spoken form; double-press for the full list.");
@@ -13207,8 +13232,9 @@ namespace DbDo
 
         private ToolStripMenuItem addMenu(string sText)
         {
+            // No AccessibleName: it was the caption without its ampersand, which
+            // is the caption -- read twice by some readers, and the mnemonic lost.
             ToolStripMenuItem mi = new ToolStripMenuItem(sText);
-            mi.AccessibleName = sText.Replace("&", "");
             menuMain.Items.Add(mi);
             return mi;
         }
@@ -15412,7 +15438,7 @@ namespace DbDo
             if (db == null || !db.isOpen())
             { Say.say("status: no database open"); return; }
             if (!db.hasRecordset())
-            { speakOrShow("Status", "status: " + (db.filePath ?? "database open, no table selected"), 101); return; }
+            { speakOrShow("Here", "here: " + (db.filePath ?? "database open, no table selected"), 101); return; }
             StringBuilder sb = new StringBuilder();
             // Marked state at the front so the user hears it first.
             // Only announce when true (matching the status bar
@@ -15430,7 +15456,7 @@ namespace DbDo
             sb.Append(" row ").Append(db.absolutePosition).Append(" of ").Append(db.recordCount);
             if (db.filter.Length > 0) sb.Append("; filter: ").Append(db.filter);
             if (db.sort.Length > 0) sb.Append("; sort: ").Append(db.sort);
-            speakOrShow("Status", "status: " + sb.ToString(), 101);
+            speakOrShow("Here", "here: " + sb.ToString(), 101);
         }
 
         // saySayDatabase: Shift+D. Speak the database name (single-
@@ -24445,7 +24471,7 @@ namespace DbDo
             if (db == null || !db.isOpen())
             { Say.say("No database open"); return; }
             string sSql;
-            using (LbcDialog dlg = new LbcDialog("Open New Recordset", this))
+            using (LbcDialog dlg = new LbcDialog("Open Table in New Window", this))
             {
                 dlg.addLabel("Enter a SQL SELECT statement. The result will open as a");
                 dlg.addLabel("read-only recordset that you can browse with all the");
@@ -24467,7 +24493,7 @@ namespace DbDo
                 MessageBox.Show(this,
                     "Open New Recordset only accepts SELECT or WITH statements. "
                     + "Use File > Run SQL for other statement types.",
-                    "Open New Recordset", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Open Table in New Window", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             try
@@ -24479,7 +24505,7 @@ namespace DbDo
             }
             catch (Exception ex)
             {
-                ErrorDialog.show(this, "Open New Recordset", "Could not open recordset: " + ex.Message);
+                ErrorDialog.show(this, "Open Table in New Window", "Could not open recordset: " + ex.Message);
             }
         }
 
@@ -27975,6 +28001,39 @@ namespace DbDo
         // (F1) but points at README.htm instead of DbDo.htm.
         // README is shorter and more introductory; DbDo.htm is
         // the full reference.
+        // openHelpDocument: the .htm of a shipped document, in the default
+        // browser. It looks where an installation keeps it, then where an
+        // unzipped copy does, and says plainly when it is not there -- a missing
+        // document is a fact to state, not a failure to hide.
+        private void openHelpDocument(string sBase, string sTitle)
+        {
+            List<string> lsTry = new List<string>();
+            foreach (string sDir in new string[] { Homer.Paths.shippedHelp(), Application.StartupPath,
+                                                   System.IO.Path.Combine(Application.StartupPath, "help"),
+                                                   System.IO.Path.GetDirectoryName(Application.StartupPath) ?? "",
+                                                   System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Application.StartupPath) ?? "", "help") })
+            {
+                if (string.IsNullOrEmpty(sDir)) continue;
+                lsTry.Add(System.IO.Path.Combine(sDir, sBase + ".htm"));
+                lsTry.Add(System.IO.Path.Combine(sDir, sBase + ".md"));
+            }
+            foreach (string sPath in lsTry)
+            {
+                if (!System.IO.File.Exists(sPath)) continue;
+                try
+                {
+                    System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo(sPath);
+                    psi.UseShellExecute = true;
+                    System.Diagnostics.Process.Start(psi);
+                    DbDoLog.write("Open-Help-Document: " + sPath);
+                }
+                catch (Exception ex) { showInfoDialog(sTitle, "Windows could not open " + sPath + ".\r\n\r\n" + ex.Message); }
+                return;
+            }
+            DbDoLog.write("Open-Help-Document: not found: " + sBase);
+            showInfoDialog(sTitle, sTitle + " is not here. It ships in the help folder of an installed DbDo, as " + sBase + ".htm.");
+        }
+
         private void helpReadmeClicked(object sender, EventArgs evArgs)
         {
             string sPath = System.IO.Path.Combine(

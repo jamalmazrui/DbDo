@@ -1,0 +1,2312 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>DbDo</title>
+  <style>
+    html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
+      color: #1a1a1a;
+      background-color: #fdfdfd;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 1em;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      body {
+        background-color: transparent;
+        color: black;
+        font-size: 12pt;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a {
+      color: #1a1a1a;
+    }
+    a:visited {
+      color: #1a1a1a;
+    }
+    img {
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid #e6e6e6;
+      color: #606060;
+    }
+    code {
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-size: 85%;
+      margin: 0;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      background-color: #1a1a1a;
+      border: none;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid #1a1a1a;
+      border-bottom: 1px solid #1a1a1a;
+    }
+    th {
+      border-top: 1px solid #1a1a1a;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    code{white-space: pre-wrap;}
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: min(4vw, 1.5em);}
+    div.column{flex: auto; overflow-x: auto;}
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    ul.task-list{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+  </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">DbDo</h1>
+</header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#dbdo-user-guide" id="toc-dbdo-user-guide">DbDo User
+Guide</a></li>
+<li><a href="#part-1-key-concepts" id="toc-part-1-key-concepts">Part 1 —
+Key concepts</a>
+<ul>
+<li><a href="#what-dbdo-is" id="toc-what-dbdo-is">What DbDo is</a></li>
+<li><a href="#windows-the-multiple-document-model"
+id="toc-windows-the-multiple-document-model">Windows: the
+multiple-document model</a></li>
+<li><a href="#the-data-list" id="toc-the-data-list">The data list</a>
+<ul>
+<li><a href="#virtual-cell-navigation"
+id="toc-virtual-cell-navigation">Virtual cell navigation</a></li>
+</ul></li>
+<li><a href="#two-vocabularies-schema-versus-interface"
+id="toc-two-vocabularies-schema-versus-interface">Two vocabularies:
+schema versus interface</a></li>
+<li><a href="#the-grid-versus-the-physical-database"
+id="toc-the-grid-versus-the-physical-database">The grid versus the
+physical database</a></li>
+<li><a href="#the-database-cursor" id="toc-the-database-cursor">The
+database cursor</a></li>
+<li><a href="#how-fields-are-categorized"
+id="toc-how-fields-are-categorized">How fields are categorized</a>
+<ul>
+<li><a href="#field-types" id="toc-field-types">Field types</a></li>
+<li><a href="#standard-fields" id="toc-standard-fields">Standard
+fields</a></li>
+<li><a href="#lookups-and-maps" id="toc-lookups-and-maps">Lookups and
+maps</a></li>
+</ul></li>
+<li><a href="#keyboard-patterns" id="toc-keyboard-patterns">Keyboard
+patterns</a>
+<ul>
+<li><a href="#command-chords" id="toc-command-chords">1. Command
+chords</a></li>
+<li><a href="#convenience-keys-in-text-fields"
+id="toc-convenience-keys-in-text-fields">2. Convenience keys in text
+fields</a></li>
+<li><a href="#the-dot-prompt-and-status-queries"
+id="toc-the-dot-prompt-and-status-queries">3. The dot prompt and status
+queries</a></li>
+<li><a href="#key-help" id="toc-key-help">Key Help</a></li>
+</ul></li>
+</ul></li>
+<li><a href="#part-2-working-with-data"
+id="toc-part-2-working-with-data">Part 2 — Working with data</a>
+<ul>
+<li><a href="#opening-databases-and-recordsets"
+id="toc-opening-databases-and-recordsets">Opening databases and
+recordsets</a></li>
+<li><a href="#navigating-records" id="toc-navigating-records">Navigating
+records</a></li>
+<li><a href="#editing-records" id="toc-editing-records">Editing
+records</a></li>
+<li><a href="#marking-records" id="toc-marking-records">Marking
+records</a></li>
+<li><a href="#filtering-and-sorting"
+id="toc-filtering-and-sorting">Filtering and sorting</a></li>
+<li><a href="#choosing-displayed-columns"
+id="toc-choosing-displayed-columns">Choosing displayed columns</a></li>
+<li><a href="#relationships-between-tables"
+id="toc-relationships-between-tables">Relationships between
+tables</a></li>
+</ul></li>
+<li><a href="#part-3-producing-output"
+id="toc-part-3-producing-output">Part 3 — Producing output</a>
+<ul>
+<li><a href="#statistics-from-column-altshifts"
+id="toc-statistics-from-column-altshifts">Statistics from Column
+(Alt+Shift+S)</a></li>
+<li><a href="#graphics-column-controlshiftg"
+id="toc-graphics-column-controlshiftg">Graphics Column
+(Control+Shift+G)</a></li>
+<li><a href="#generate-from-grid-altshiftg"
+id="toc-generate-from-grid-altshiftg">Generate from Grid
+(Alt+Shift+G)</a></li>
+<li><a href="#run-report-altshiftr" id="toc-run-report-altshiftr">Run
+Report (Alt+Shift+R)</a></li>
+<li><a href="#snippets-and-scripts"
+id="toc-snippets-and-scripts">Snippets and scripts</a></li>
+<li><a href="#which-one-do-i-want" id="toc-which-one-do-i-want">Which
+one do I want?</a></li>
+</ul></li>
+<li><a href="#part-4-importing-exporting-opening-saving"
+id="toc-part-4-importing-exporting-opening-saving">Part 4 — Importing,
+exporting, opening, saving</a></li>
+<li><a href="#part-5-sql-and-scripting"
+id="toc-part-5-sql-and-scripting">Part 5 — SQL and scripting</a>
+<ul>
+<li><a href="#running-sql" id="toc-running-sql">Running SQL</a></li>
+<li><a href="#the-scripting-engine" id="toc-the-scripting-engine">The
+scripting engine</a></li>
+</ul></li>
+<li><a href="#part-6-reference" id="toc-part-6-reference">Part 6 —
+Reference</a>
+<ul>
+<li><a href="#command-reference-by-menu"
+id="toc-command-reference-by-menu">Command reference by menu</a>
+<ul>
+<li><a href="#file-menu" id="toc-file-menu">File menu</a></li>
+<li><a href="#edit-menu" id="toc-edit-menu">Edit menu</a></li>
+<li><a href="#navigate-menu" id="toc-navigate-menu">Navigate
+menu</a></li>
+<li><a href="#query-menu" id="toc-query-menu">Query menu</a></li>
+<li><a href="#misc-menu" id="toc-misc-menu">Misc menu</a></li>
+<li><a href="#window-menu" id="toc-window-menu">Window menu</a></li>
+<li><a href="#help-menu" id="toc-help-menu">Help menu</a></li>
+</ul></li>
+<li><a href="#standard-fields-summary"
+id="toc-standard-fields-summary">Standard fields (summary)</a></li>
+<li><a href="#field-types-summary" id="toc-field-types-summary">Field
+types (summary)</a></li>
+<li><a href="#the-report-template-language"
+id="toc-the-report-template-language">The report-template
+language</a></li>
+<li><a href="#the-.inix-configuration-format"
+id="toc-the-.inix-configuration-format">The .inix configuration
+format</a></li>
+<li><a href="#sqlean-extensions" id="toc-sqlean-extensions">SQLean
+extensions</a></li>
+<li><a href="#sample-databases" id="toc-sample-databases">Sample
+databases</a></li>
+<li><a href="#screen-reader-settings"
+id="toc-screen-reader-settings">Screen-reader settings</a></li>
+<li><a href="#persistence-and-logging"
+id="toc-persistence-and-logging">Persistence and logging</a></li>
+</ul></li>
+<li><a href="#part-7-development" id="toc-part-7-development">Part 7 —
+Development</a>
+<ul>
+<li><a href="#requirements" id="toc-requirements">Requirements</a></li>
+<li><a href="#build" id="toc-build">Build</a></li>
+<li><a href="#architecture-one-connection-two-interfaces"
+id="toc-architecture-one-connection-two-interfaces">Architecture: one
+connection, two interfaces</a></li>
+<li><a href="#coding-style" id="toc-coding-style">Coding style</a></li>
+<li><a href="#layout-by-code" id="toc-layout-by-code">Layout by
+Code</a></li>
+<li><a href="#file-layout" id="toc-file-layout">File layout</a></li>
+<li><a href="#nothing-and-the-two-kinds-of-it"
+id="toc-nothing-and-the-two-kinds-of-it">Nothing, and the two kinds of
+it</a>
+<ul>
+<li><a href="#what-dbdo-stores" id="toc-what-dbdo-stores">What DbDo
+stores</a></li>
+<li><a href="#what-dbdo-says" id="toc-what-dbdo-says">What DbDo
+says</a></li>
+<li><a href="#what-the-screen-readers-do-and-what-dbdo-does-about-it"
+id="toc-what-the-screen-readers-do-and-what-dbdo-does-about-it">What the
+screen readers do, and what DbDo does about it</a></li>
+<li><a href="#what-microsoft-access-does-for-comparison"
+id="toc-what-microsoft-access-does-for-comparison">What Microsoft Access
+does, for comparison</a></li>
+<li><a href="#why-it-is-worth-the-distinction"
+id="toc-why-it-is-worth-the-distinction">Why it is worth the
+distinction</a></li>
+</ul></li>
+<li><a href="#the-help-menu" id="toc-the-help-menu">The Help
+menu</a></li>
+<li><a href="#the-spoken-walkthroughs"
+id="toc-the-spoken-walkthroughs">The spoken walkthroughs</a></li>
+<li><a href="#asking-the-model-on-your-computer"
+id="toc-asking-the-model-on-your-computer">Asking the model on your
+computer</a></li>
+<li><a href="#tables-dbdo-keeps-for-itself"
+id="toc-tables-dbdo-keeps-for-itself">Tables DbDo keeps for
+itself</a></li>
+<li><a href="#look-and-prime-the-two-computed-columns"
+id="toc-look-and-prime-the-two-computed-columns">look and prime: the two
+computed columns</a>
+<ul>
+<li><a href="#look-a-glimpse-of-a-record-from-somewhere-else"
+id="toc-look-a-glimpse-of-a-record-from-somewhere-else">look: a glimpse
+of a record from somewhere else</a></li>
+<li><a href="#prime-the-primary-key-computed"
+id="toc-prime-the-primary-key-computed">prime: the primary key,
+computed</a></li>
+<li><a href="#the-difference-in-one-line"
+id="toc-the-difference-in-one-line">The difference in one line</a></li>
+</ul></li>
+<li><a href="#how-a-say-command-answers"
+id="toc-how-a-say-command-answers">How a Say command answers</a>
+<ul>
+<li><a href="#the-say-keys" id="toc-the-say-keys">The Say keys</a></li>
+</ul></li>
+<li><a href="#credits-for-the-tutorial-voices"
+id="toc-credits-for-the-tutorial-voices">Credits for the tutorial
+voices</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="dbdo-user-guide">DbDo User Guide</h1>
+<p>DbDo is a relational database manager built from the ground up for
+people who work by keyboard and screen reader. It opens SQLite, Access,
+Excel, dBASE, and delimited-text files, presents their tables as
+ordinary Windows lists you can navigate cell by cell, and lets you
+query, edit, relate, analyze, and report on the data without ever
+needing a mouse or a glance at the screen.</p>
+<p>This guide is organized concepts first. The opening part explains the
+handful of ideas that everything else rests on: how windows are
+arranged, what the data list is, the difference between the grid you
+navigate and the physical table underneath it, how fields are
+categorized, and the keyboard patterns that recur throughout the
+program. Once those are clear, the later parts cover working with data,
+producing output, importing and exporting, SQL and scripting, and a full
+command reference. If you are new to DbDo, read Part 1 in order. If you
+are returning for a specific answer, jump to the reference tables near
+the end.</p>
+<hr />
+<h1 id="part-1-key-concepts">Part 1 — Key concepts</h1>
+<h2 id="what-dbdo-is">What DbDo is</h2>
+<p>DbDo is a single desktop application that presents <strong>two
+interfaces over one live connection</strong> to whatever database you
+open:</p>
+<ul>
+<li>A <strong>graphical interface</strong> of standard Windows menus and
+lists, driven entirely from the keyboard, where each open table appears
+in its own window.</li>
+<li>A <strong>dot prompt</strong>, a dBASE-style console where you type
+commands and short SQL directly, for people who prefer a command line or
+want to script.</li>
+</ul>
+<p>Both interfaces talk to the same open database at the same time, so a
+change made in one is immediately visible in the other. You can spend
+all your time in the menus, all your time at the prompt, or move freely
+between them.</p>
+<p>DbDo does not invent its own storage format. It reads and writes real
+files in their native formats — a SQLite <code>.db</code>, an Access
+<code>.mdb</code>/<code>.accdb</code>, an Excel workbook, a dBASE
+<code>.dbf</code>, a <code>.csv</code> — through the appropriate
+database driver. Its value is the <em>interface</em>, not the
+container.</p>
+<h2 id="windows-the-multiple-document-model">Windows: the
+multiple-document model</h2>
+<p>DbDo uses a <strong>multiple-document interface (MDI)</strong>. There
+is one application frame, and inside it each open recordset — normally a
+table, sometimes a view or a query result — lives in <strong>its own
+child window</strong>. Opening a second table does not replace the
+first; it opens alongside it, and you move between them with window
+commands.</p>
+<p>This matters for a screen-reader user because it keeps each table’s
+state — its position, its filter, its sort, its selected columns —
+self-contained and announced per window. When you switch windows you
+switch whole working contexts.</p>
+<p>The window commands live in the <strong>Window menu</strong>:</p>
+<ul>
+<li><strong>Current Windows</strong> (F4) lists every open window; pick
+one to jump to it.</li>
+<li><strong>Window Toggle</strong> flips between the current window and
+the one you were in before it.</li>
+<li><strong>Next Window</strong> (Control+Tab) and <strong>Previous
+Window</strong> (Control+Shift+Tab) cycle through them.</li>
+<li><strong>Say Windows Open</strong> (Shift+F4) speaks how many windows
+are open and their titles.</li>
+<li><strong>Close Window</strong> (Control+F4) closes the current one;
+<strong>Close All But Current Window</strong> (Control+Shift+F4) leaves
+only the active one. Closing the last window exits DbDo, because the
+menu bar lives in the window.</li>
+</ul>
+<p>There is a deliberate distinction between <strong>opening</strong> a
+table and <strong>going to</strong> one. <strong>Open Table in New
+Window</strong> (Control+Shift+T) makes a <em>new window</em> for a
+table; <strong>Choose Table</strong> (Control+T) changes the table shown
+in the <em>current</em> window. Open when you want both tables visible
+at once; choose when you simply want to switch what this window is
+looking at.</p>
+<h2 id="the-data-list">The data list</h2>
+<p>Inside each window the records are shown in a <strong>data
+list</strong> — a standard Windows list control with a row per record
+and a column per field. This is the surface you spend most of your time
+on. Your screen reader reads it the way it reads any Windows list: arrow
+down to the next row, and the row’s contents are announced.</p>
+<p>The list is <strong>single-select</strong>: exactly one row is
+current at a time, and that row is the database cursor’s current record
+(see below). DbDo deliberately does not use multi-select highlighting;
+instead it has an explicit <strong>marking</strong> system (covered in
+Part 2) so that “which records are selected for an operation” is a
+property you set and query on purpose, not a fragile visual
+highlight.</p>
+<h3 id="virtual-cell-navigation">Virtual cell navigation</h3>
+<p>Beyond moving row to row, DbDo lets you move <strong>cell by cell
+within a row</strong> without leaving the list. A <em>virtual
+cursor</em> tracks which column you are on. Move it left and right
+across the columns and DbDo speaks the value in the current cell
+together with its field name, so you always know both <em>what</em> the
+value is and <em>which field</em> it belongs to. This is how you inspect
+a wide record one field at a time by keyboard, and it is what several
+commands mean when they act on “the current column” or “the cell under
+the cursor.”</p>
+<h2 id="two-vocabularies-schema-versus-interface">Two vocabularies:
+schema versus interface</h2>
+<p>DbDo is careful about words, and the guide follows the same
+discipline, because the two halves of the program describe the same data
+with two different vocabularies:</p>
+<ul>
+<li><strong>Schema vocabulary — Field, Record, Table.</strong> These
+describe the <em>data model</em>: a table is made of records, each
+record has fields. Use these words when talking about structure, types,
+and design.</li>
+<li><strong>Interface vocabulary — Column, Row, Cell, Grid.</strong>
+These describe <em>what you navigate</em>: the grid has rows and
+columns, and each intersection is a cell. Use these words when talking
+about moving around and reading.</li>
+</ul>
+<p>A field and a column are the same underlying thing seen from two
+angles; likewise a record and a row, and a cell is one field of one
+record. One more term: an absent value is <strong>blank</strong>, never
+“empty” or “null” in the interface.</p>
+<h2 id="the-grid-versus-the-physical-database">The grid versus the
+physical database</h2>
+<p>This is the single most important distinction in DbDo.</p>
+<p>The <strong>physical database</strong> is the table as stored on
+disk: every record, every field, in whatever order the file holds
+them.</p>
+<p>The <strong>grid</strong> is a <strong>virtual view</strong> onto
+that table — specifically, the view produced by three things you
+control:</p>
+<ol type="1">
+<li>the <strong>filter</strong> currently in effect (a Where clause
+limiting which records appear),</li>
+<li>the <strong>sort</strong> currently in effect (the order the records
+appear in), and</li>
+<li>the <strong>displayed columns</strong> you have chosen to show.</li>
+</ol>
+<p>The grid is what you see and navigate. It can be a small, reordered
+slice of a large table. The physical table is the whole thing
+underneath.</p>
+<p>Editing writes <strong>through</strong> the grid to the physical
+table: when you change a cell, the underlying record is updated on disk.
+But <em>reading</em> commands split into two families, and knowing which
+is which prevents surprises:</p>
+<ul>
+<li>Commands that act on <strong>the grid</strong> operate on <em>what
+you are looking at</em> — the current filtered, sorted, column-selected
+view. <strong>Generate from Grid</strong> is the clearest example: it
+analyzes the virtual grid.</li>
+<li>Commands that act on <strong>the physical table</strong> operate on
+<em>all the records</em>, regardless of the current filter or sort.
+<strong>Run Report</strong> is the clearest example: it reads the whole
+physical table so a report is reproducible no matter what you were
+viewing.</li>
+</ul>
+<p>Whenever a command’s behavior could depend on the current view, this
+guide says explicitly whether it acts on the grid or the physical
+table.</p>
+<h2 id="the-database-cursor">The database cursor</h2>
+<p>Underneath the grid is a <strong>cursor</strong>: a pointer to the
+<strong>current record</strong>. Exactly one record is current at any
+moment. Almost everything is expressed relative to the cursor:</p>
+<ul>
+<li><strong>Navigation</strong> moves the cursor — to the next or
+previous record, the first or last, a record number, or the next record
+matching a search.</li>
+<li><strong>Editing</strong> acts on the current record.</li>
+<li><strong>Filtering and sorting</strong> rebuild the grid and leave
+the cursor on a sensible record within the new view.</li>
+</ul>
+<p>DbDo uses a <strong>client-side cursor</strong>, meaning the working
+set is held in memory on your side of the connection; this is what makes
+instant sorting, filtering, and backward navigation possible even on
+file-based databases.</p>
+<p>Edits <strong>auto-commit</strong>. When you finish adding or
+changing a record, DbDo writes it immediately. There is no separate
+“save the record” step. (The Save command, described later, is a
+different thing — it makes a copy of the whole database.)</p>
+<h2 id="how-fields-are-categorized">How fields are categorized</h2>
+<p>Every field has a <strong>type</strong> (also called its affinity),
+and DbDo uses that type to decide how the field is edited, displayed,
+and validated. On top of the type system sits a small set of
+<strong>standard fields</strong> that DbDo recognizes by name and treats
+specially. Understanding both is the key to designing a database that
+behaves well with a screen reader.</p>
+<h3 id="field-types">Field types</h3>
+<p>DbDo recognizes these declared types. The first group is text
+refinements — all stored as text, but each tells DbDo how to present and
+edit the field:</p>
+<ul>
+<li><strong>TEXT</strong> — general text of any length.</li>
+<li><strong>TEXTLINE</strong> — a single line of text. The editor is a
+one-line box; newlines are not expected.</li>
+<li><strong>TEXTMEMO</strong> — multi-line plain text. The editor is a
+multi-line box.</li>
+<li><strong>TEXTMARKDOWN</strong> — multi-line text written in Markdown.
+Edited in a multi-line box and understood as Markdown when rendered into
+reports.</li>
+<li><strong>TEXTTIME</strong> — a timestamp stored as text in a sortable
+form. Used by the automatic <code>added</code> and <code>edited</code>
+fields.</li>
+</ul>
+<p>The remaining types are the ordinary storage classes:</p>
+<ul>
+<li><strong>INTEGER</strong> — whole numbers.</li>
+<li><strong>REAL</strong> — floating-point numbers.</li>
+<li><strong>NUMERIC</strong> — numbers generally (integer or real).</li>
+<li><strong>BOOLEAN</strong> — true/false, presented and toggled as
+such.</li>
+<li><strong>BLOB</strong> — binary data.</li>
+</ul>
+<p>Because the type controls the editing widget, choosing TEXTLINE
+versus TEXTMEMO versus TEXTMARKDOWN for a field is not cosmetic: it
+determines whether a screen-reader user gets a single-line box, a
+multi-line box, or a Markdown-aware box when they edit that field.</p>
+<h3 id="standard-fields">Standard fields</h3>
+<p>DbDo recognizes certain field <strong>names</strong> and maintains or
+exposes them for you. A table need not have all of them; DbDo simply
+uses the ones present. They are, by convention, kept out of the way —
+typically hidden from the default column display and reached through
+dedicated commands — so the grid stays focused on the data you care
+about while the housekeeping fields remain one keystroke away.</p>
+<ul>
+<li><strong>added</strong> (TEXTTIME) — when the record was created.
+Maintained automatically. Speak it with Say Added (Shift+A).</li>
+<li><strong>edited</strong> (TEXTTIME) — when the record was last
+changed. Maintained automatically on every update. Speak it with Say
+Edited (Shift+E).</li>
+<li><strong>marked</strong> (BOOLEAN) — whether the record is currently
+marked for a batch operation. This is what the marking commands set and
+clear.</li>
+<li><strong>notes</strong> (TEXTMARKDOWN) — a free-form Markdown note
+attached to the record. Edit it with Edit Notes (Alt+Shift+N); speak it
+with Say Notes (Shift+N).</li>
+<li><strong>tags</strong> (TEXTMEMO) — free-form tags or keywords. Edit
+with Edit Tags (Alt+Shift+T); speak with Say Tags (Shift+T).</li>
+<li><strong>url</strong> (TEXTLINE) — an associated link. Edit with Edit
+URL (Alt+Shift+U); open it with Open URL (Control+Shift+U); speak with
+Say URL (Shift+U).</li>
+<li><strong>look</strong> — a derived “display label” for the record: a
+short human-readable summary DbDo can compute so a record can be
+referred to by something friendlier than its key. Speak it with Say Look
+(Shift+L).</li>
+<li><strong>prime</strong> (the <em>prime</em> field) — a record’s
+primary human-facing identity value. Speak it with Say Prime
+(Shift+P).</li>
+<li><strong>unq</strong> — a uniqueness/identity helper used internally
+for stable record identity.</li>
+</ul>
+<p>The distinction to hold onto: <strong>added</strong> and
+<strong>edited</strong> are <em>automatic</em> (DbDo writes them for
+you); <strong>marked</strong> is <em>state</em> you toggle;
+<strong>notes</strong>, <strong>tags</strong>, and <strong>url</strong>
+are <em>content</em> you edit through their own focused dialogs;
+<strong>look</strong>, <strong>prime</strong>, and <strong>unq</strong>
+are <em>derived identity</em> fields DbDo computes so records can be
+named and matched reliably.</p>
+<h3 id="lookups-and-maps">Lookups and maps</h3>
+<p>Two optional companion tables let a database describe its own
+vocabulary:</p>
+<ul>
+<li>A <strong>lookups</strong> table lists the valid values for a field.
+When a field has lookups defined, its editor becomes a combo box of
+those values instead of a free-text box — so a screen-reader user arrows
+through the legal choices rather than typing and risking a typo. Pick
+Value (Control+F2) surfaces the same choices on demand.</li>
+<li>A <strong>maps</strong> table is a junction that records
+relationships between records (many-to-many links), which the
+relationship-navigation commands can follow.</li>
+</ul>
+<p>These are conventions, not requirements; a database without them
+simply offers free-text editing and no mapped relationships.</p>
+<h2 id="keyboard-patterns">Keyboard patterns</h2>
+<p>DbDo has three distinct keyboard channels, and recognizing which one
+you are using clears up most confusion about “why did that key do
+that.”</p>
+<h3 id="command-chords">1. Command chords</h3>
+<p>Every menu command has a name and, usually, a <strong>chord</strong>
+— a keyboard shortcut shown next to it in the menu. Chords follow a
+consistent <strong>mnemonic rule</strong>: the letter in the chord is
+the first letter of a word in the command’s name. <em>Statistics from
+Column</em> is Alt+Shift+S; <em>Generate from Grid</em> is Alt+Shift+G;
+<em>Where Filter</em> is Control+W. Once you know a command’s name you
+can usually guess its chord, and vice versa. Chords are grouped by
+modifier so related commands share a shape — the Say-something status
+commands are mostly Shift+letter, for instance.</p>
+<h3 id="convenience-keys-in-text-fields">2. Convenience keys in text
+fields</h3>
+<p>When you are <em>inside a text box</em> — editing a cell, a note, a
+filter — a set of <strong>convenience keys</strong> is available in
+addition to normal typing. These operate on the text under your cursor
+and are meant to save a screen-reader user from hunting around:</p>
+<ul>
+<li><strong>Copy / cut the current line</strong> without selecting it
+first (Control+C / Control+X with no selection), and
+<strong>append</strong> to the clipboard rather than replacing it (Alt+C
+/ Alt+X).</li>
+<li><strong>Mark a selection</strong> by setting a start (F8) and
+completing it (Shift+F8) as two separate keystrokes, rather than holding
+Shift while arrowing.</li>
+<li><strong>Copy all</strong> (Control+F8) or <strong>read all</strong>
+(Alt+F8) of the field’s text.</li>
+<li><strong>Delete the current line</strong> (Control+D), with the next
+line spoken so you know where you landed.</li>
+<li><strong>Run at Cursor</strong> (Shift+F5) — take the selection, or
+the current line if nothing is selected, treat it as a URL, file path,
+or email address, and open it with your system after a confirmation
+prompt. Put the cursor on a link in a note and press Shift+F5 to open it
+in your browser.</li>
+</ul>
+<p>These are on by default and can be turned off with the
+<code>extraKeys</code> setting.</p>
+<h3 id="the-dot-prompt-and-status-queries">3. The dot prompt and status
+queries</h3>
+<p>The <strong>dot prompt</strong> (Enter Console, Control+GraveAccent)
+is the command-line channel: type dBASE-style commands or short SQL and
+press Enter. It is covered in Part 5.</p>
+<p>Woven through the menus is a large <strong>Say-X status
+family</strong> in the Query menu: quick commands that <em>speak a fact
+about your current situation</em> without changing anything — Say Here,
+Say Database, Say Order, Say Yield (record count), Say Where Filter, Say
+Position, Say Cell, and many more. These are how you interrogate the
+screen on demand instead of hunting for information, and they are listed
+in full in the command reference.</p>
+<h3 id="key-help">Key Help</h3>
+<p><strong>Key Help Toggle</strong> (Control+F1) turns on a learning
+mode: while it is on, pressing a command chord
+<strong>announces</strong> what that command is and does <strong>instead
+of running it</strong>. Press Control+F1 again to turn it off. This lets
+you explore the keyboard safely. The <strong>Hotkey Summary</strong>
+(Alt+Shift+H) and <strong>Alternate Menu</strong> (Alt+F10) give you,
+respectively, an auditable listing of every command with its key, and a
+single filterable list of all commands you can search and run.</p>
+<hr />
+<h1 id="part-2-working-with-data">Part 2 — Working with data</h1>
+<h2 id="opening-databases-and-recordsets">Opening databases and
+recordsets</h2>
+<ul>
+<li><strong>Open Database</strong> (Control+O) opens a database file,
+choosing the right driver from the extension. <strong>New
+Database</strong> creates a fresh SQLite database; <strong>Add
+Table</strong> adds a table to it.</li>
+<li><strong>Open Table in New Window</strong> (Control+Shift+T) opens a
+table (or arbitrary query) in a new window.</li>
+<li><strong>Recent Files</strong> (Alt+R) reopens something you used
+lately.</li>
+<li><strong>Close Database</strong> closes the current database;
+<strong>Backup Database</strong> writes a copy; <strong>Compare
+Database</strong> compares two.</li>
+</ul>
+<p>When a database has several tables, <strong>Choose Table</strong>
+(Control+T) switches the current window to another table, and the
+<em>Next/Previous Visited Table</em> commands walk the tables you have
+already looked at. <strong>Choose View</strong> (and the object-switch
+commands) do the same for saved views.</p>
+<h2 id="navigating-records">Navigating records</h2>
+<p>The cursor moves with ordinary list navigation (arrow keys, Home,
+End) and with explicit commands:</p>
+<ul>
+<li><strong>Go to Record</strong> (Control+G) jumps to a record number;
+<strong>Repeat Go To</strong> (Alt+G) repeats it.</li>
+<li><strong>Find Record</strong> (Control+F) searches for text;
+<strong>Reverse Find</strong> (Control+Shift+F) searches backward;
+<strong>Search Next</strong> (F3) and <strong>Search Previous</strong>
+(Shift+F3) repeat the last search. <strong>Find Regex</strong>
+(Control+F3) searches by regular expression.</li>
+<li><strong>Jump to Record</strong> (Control+J) and <strong>Reverse
+Jump</strong> move by a jump increment for quickly covering distance in
+a long table.</li>
+<li><strong>Jump to Next Initial</strong> steps to the next record whose
+current column starts with a new letter — type-ahead through a sorted
+column.</li>
+</ul>
+<h2 id="editing-records">Editing records</h2>
+<ul>
+<li><strong>New Record</strong> (Control+N) adds a record; <strong>New
+Copy</strong> (Control+Shift+N) starts a new record pre-filled from the
+current one; <strong>Copy Record</strong> (Control+Shift+C) copies it to
+the clipboard.</li>
+<li><strong>Edit View</strong> (Control+E) opens the whole record in a
+field-by-field dialog. <strong>Edit Cell</strong> (F2) edits just the
+current cell. <strong>Open Cell Value</strong> (Control+Enter) opens a
+large value in its own box for comfortable reading and editing.</li>
+<li><strong>Pick Value</strong> (Control+F2) offers the legal values for
+a field that has lookups defined.</li>
+<li><strong>Edit Notes</strong> (Alt+Shift+N), <strong>Edit
+Tags</strong> (Alt+Shift+T), and <strong>Edit URL</strong> (Alt+Shift+U)
+each open one standard field in a focused single-field dialog with OK
+and Cancel — the quick way to touch a note, tags, or a link without
+opening the whole record.</li>
+<li><strong>Replace Column</strong> (Control+R) replaces text across a
+column; <strong>Regex Replace</strong> (Control+Shift+R) does the same
+by pattern; <strong>Extract with Regex</strong> (Control+Shift+X) pulls
+matches out of a column.</li>
+<li><strong>Delete Record</strong> (Control+D) deletes the current
+record with confirmation; <strong>Delete Without Confirmation</strong>
+(Control+Shift+D) skips the prompt.</li>
+</ul>
+<p>All edits auto-commit. If a table is read-only, <strong>Read Only
+Toggle</strong> (Alt+Z) reports and controls that.</p>
+<h2 id="marking-records">Marking records</h2>
+<p>Marking is DbDo’s explicit, queryable alternative to visual
+multi-select. The <code>marked</code> field carries the state.</p>
+<ul>
+<li><strong>Mark Record</strong> (Control+M) marks the current record;
+<strong>Unmark Record</strong> (Control+Shift+M) clears it;
+<strong>Toggle Marked</strong> (Control+Space) flips it; <strong>Say
+Mark Status</strong> (Shift+M) speaks it.</li>
+<li><strong>Mark All</strong> (Control+A), <strong>Unmark All</strong>
+(Control+Shift+A), and <strong>Invert Marked</strong> (Alt+Shift+I) act
+across the current view.</li>
+<li>To mark a <strong>range</strong>, set an anchor with <strong>Start
+Mark</strong> (F8) and extend to the cursor with <strong>Complete
+Mark</strong> (Shift+F8). <strong>Start Unmark</strong> (Alt+F8) and
+<strong>Complete Unmark to Anchor</strong> (Alt+Shift+F8) do the same
+for clearing, with a separate anchor so building a mark range and an
+unmark range never clobber each other.</li>
+</ul>
+<p>Marked records can then be reported, filtered, or exported as a set,
+and several Say commands report only the marked ones.</p>
+<h2 id="filtering-and-sorting">Filtering and sorting</h2>
+<p>Filtering and sorting reshape the grid without touching the physical
+table.</p>
+<ul>
+<li><strong>Where Filter</strong> (Control+W) limits the grid to records
+matching a condition; <strong>Clear Where</strong> (Control+Shift+W)
+removes it; <strong>Filter by Regex</strong> filters by pattern;
+<strong>Say Where Filter</strong> (Shift+W) speaks the current
+filter.</li>
+<li><strong>Order Records</strong> (Alt+O) sorts the grid by a field;
+<strong>Reverse Order</strong> (Alt+Shift+O) reverses it; <strong>Clear
+Sort</strong> returns to natural order; <strong>Say Order</strong>
+(Shift+O) speaks the current sort.</li>
+</ul>
+<p>Because these only change the view, you can slice a large table down
+to what you need, work on it, and clear the filter to see everything
+again — the records were never removed.</p>
+<h2 id="choosing-displayed-columns">Choosing displayed columns</h2>
+<p><strong>Select Columns to Display</strong> (Alt+S) chooses which
+fields appear in the grid, and in what order. Hiding the standard
+housekeeping fields and showing only the columns you are working with
+keeps cell-by-cell navigation short. The choice is part of the grid, so
+it travels with the window and is remembered.</p>
+<h2 id="relationships-between-tables">Relationships between tables</h2>
+<p>DbDo can follow relationships defined by foreign keys (and by the
+maps junction):</p>
+<ul>
+<li><strong>Enter Child Table</strong> (Alt+Right) follows a
+relationship from the current record into the related records in another
+table, opening them filtered to that parent.</li>
+<li><strong>Exit Child Table</strong> (Alt+Left) returns to the parent
+you came from; <strong>Exit to Root Table</strong> (Alt+Home) returns
+all the way up a chain.</li>
+<li><strong>Related Records</strong> (Query menu) shows the records
+related to the current one.</li>
+</ul>
+<p>This is how you walk a normalized database — from an order to its
+line items, from a person to their contacts — entirely by keyboard, with
+each step announced.</p>
+<hr />
+<h1 id="part-3-producing-output">Part 3 — Producing output</h1>
+<p>DbDo offers several ways to turn data into something you can read,
+share, or file. They differ in <strong>what they act on</strong> and
+<strong>what they produce</strong>, and it is worth learning the
+distinction so you reach for the right one. There are two single-column
+tools, one grid tool, one physical-table tool, and the scripting
+facility.</p>
+<h2 id="statistics-from-column-altshifts">Statistics from Column
+(Alt+Shift+S)</h2>
+<p>Acts on <strong>one column</strong> — the column under the virtual
+cursor. It computes type-aware descriptive statistics: for a numeric
+column, things like count, populated percentage, minimum, maximum, mean,
+median, standard deviation, quartiles and interquartile range, outlier
+fences, and mode; for dates, a temporal summary; for text, the most
+frequent values. It speaks and shows the result. Use it to understand a
+single field at a glance. Its name emphasizes that it works <em>from a
+column</em>.</p>
+<h2 id="graphics-column-controlshiftg">Graphics Column
+(Control+Shift+G)</h2>
+<p>Also acts on <strong>one column</strong> — the column under the
+virtual cursor — but produces a <strong>chart</strong> of that column
+(via Excel, out of process – the one export that still needs Office)
+rather than a table of numbers. Use it when you want a quick visual of
+one field’s distribution.</p>
+<h2 id="generate-from-grid-altshiftg">Generate from Grid
+(Alt+Shift+G)</h2>
+<p>Acts on the <strong>virtual grid</strong> — the current filtered,
+sorted, column-selected view — and is the ad-hoc, exploratory tool. It
+profiles the grid’s columns by type and offers a menu of outputs:</p>
+<ul>
+<li>a <strong>summary</strong> across all columns,</li>
+<li>a <strong>frequency table</strong> of one column,</li>
+<li>a <strong>cross-tab</strong> of two columns,</li>
+<li>a <strong>Markdown table</strong> saved to a file, and</li>
+<li><strong>Excel charts</strong> — bar, pareto, pie, histogram,
+box-and-whisker, scatter (two numeric columns), or timeline — generated
+out of process so they work regardless of your Office bitness.</li>
+</ul>
+<p>The point of the name is that it operates <strong>on the grid, not
+the physical database</strong>: it analyzes <em>what you are looking
+at</em>. Filter and sort first to shape the grid, then Generate from
+Grid to analyze that exact view. It is one-off and exploratory; nothing
+is saved except the specific output file you ask for.</p>
+<h2 id="run-report-altshiftr">Run Report (Alt+Shift+R)</h2>
+<p>Acts on the <strong>physical table</strong> and produces a
+<strong>defined, reproducible document</strong>. Where Generate from
+Grid analyzes whatever you happen to be viewing, Run Report renders a
+<strong>report definition</strong> — a saved template — against
+<em>all</em> the records in the table (optionally with its own filter
+and sort baked into the definition), so the same report comes out the
+same way every time no matter what your grid was showing.</p>
+<p>Report definitions live in a <strong>report.inix</strong> file beside
+the database. Each definition is one <code>[section]</code> in that
+file, describing which table to read, how to group and order it, and a
+set of <strong>bands</strong> — header, detail, separators, footers, and
+group headers/footers — that lay out the text. Within a band,
+<code>$field</code> (or <code>${field}</code>) inserts a field’s value,
+<code>{{ ... }}</code> evaluates a JScript expression,
+<code>{# ... #}</code> is a comment, and footer bands can compute
+aggregates like <code>$count</code>, <code>$sum_&lt;field&gt;</code>,
+<code>$avg_&lt;field&gt;</code>, <code>$min_&lt;field&gt;</code>, and
+<code>$max_&lt;field&gt;</code>. DbDo discovers the report files beside
+the open database, offers a pick-list of the definitions it finds, and
+writes the result as Markdown you can convert onward to HTML, DOCX, or
+PDF. The report-template language is detailed in Part 6.</p>
+<h2 id="snippets-and-scripts">Snippets and scripts</h2>
+<p>The scripting facility is for <strong>reusable automation</strong>
+rather than one-off output. A snippet is a small script file kept in the
+Scripts folder (and, for a database’s own automation, beside the
+<code>.db</code> file). DbDo recognizes three snippet types by
+extension:</p>
+<ul>
+<li><strong><code>.js</code></strong> — <strong>JScript .NET</strong>.
+The general automation language: it can read and write fields, walk
+records, build strings, and call into DbDo. This is the same engine
+behind Evaluate Expression and the <code>{{ ... }}</code> substitutions
+in reports.</li>
+<li><strong><code>.sql</code></strong> — a <strong>SQL batch</strong>.
+One or more SQL statements run against the open database.</li>
+<li><strong><code>.dbdo</code></strong> — a <strong>DbDo command
+batch</strong>: a sequence of the same commands you would type at the
+dot prompt.</li>
+</ul>
+<p>Run a snippet with <strong>Invoke Script</strong> (Alt+V); create or
+edit one with <strong>Edit Snippet</strong> (Alt+Shift+V), which offers
+the existing files plus a “new snippet” entry; open the folder with
+<strong>Open Script Folder</strong>. Use snippets when you find yourself
+doing the same multi-step task repeatedly.</p>
+<h2 id="which-one-do-i-want">Which one do I want?</h2>
+<table>
+<colgroup>
+<col style="width: 16%" />
+<col style="width: 25%" />
+<col style="width: 27%" />
+<col style="width: 30%" />
+</colgroup>
+<thead>
+<tr class="header">
+<th>Tool</th>
+<th>Acts on</th>
+<th>Produces</th>
+<th>Reusable?</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Statistics from Column</td>
+<td>one column</td>
+<td>descriptive statistics (spoken/shown)</td>
+<td>one-off</td>
+</tr>
+<tr class="even">
+<td>Graphics Column</td>
+<td>one column</td>
+<td>a chart</td>
+<td>one-off</td>
+</tr>
+<tr class="odd">
+<td>Generate from Grid</td>
+<td>the virtual grid (current view)</td>
+<td>summary, frequency, cross-tab, Markdown, or chart</td>
+<td>one-off</td>
+</tr>
+<tr class="even">
+<td>Run Report</td>
+<td>the physical table</td>
+<td>a formatted document from a saved definition</td>
+<td>reproducible</td>
+</tr>
+<tr class="odd">
+<td>Snippet / script</td>
+<td>whatever the script does</td>
+<td>anything (automation)</td>
+<td>reusable</td>
+</tr>
+</tbody>
+</table>
+<p>The mental shortcut: <strong>Column</strong> tools look at one field;
+<strong>Generate from Grid</strong> analyzes what you <em>see</em>;
+<strong>Run Report</strong> produces a defined document from what is
+<em>there</em>; <strong>snippets</strong> automate what you
+<em>do</em>.</p>
+<hr />
+<h1 id="part-4-importing-exporting-opening-saving">Part 4 — Importing,
+exporting, opening, saving</h1>
+<p>DbDo distinguishes four file operations that are easy to confuse. The
+distinction is about whether the data keeps its original shape or is
+reshaped into DbDo’s conventions.</p>
+<ul>
+<li><strong>Open</strong> (Control+O) opens a file <em>faithfully</em> —
+a round trip. An Excel workbook opens as its sheets, a CSV as its rows,
+and saving writes back to that same file in that same format. Use Open
+when you want to work with a file as it is.</li>
+<li><strong>Import</strong> (Alt+I) reads an outside file and reshapes
+it <em>into a DbDo database</em> — normalizing columns, applying
+conventions, and producing a <code>.db</code> you then work with. Use
+Import when you want to bring foreign data into a proper DbDo database.
+<strong>Transfer Import</strong> and <strong>Merge Data</strong> (Alt+M)
+bring data in alongside existing data.</li>
+<li><strong>Export Data</strong> (Alt+X) writes the
+<strong>grid</strong> — the current view — out to a new file in a chosen
+format. Use Export to hand off what you are looking at.</li>
+<li><strong>Save</strong> (Control+S) and <strong>Save As</strong>
+(Control+Shift+S) concern the <em>whole database</em>. For a workbook
+opened faithfully, Save writes your edits back to the
+<code>.xlsx</code>. For a native database your edits were already
+committed, so Save reports that; Save As writes a fresh copy.
+<strong>Open as Managed Copy</strong> opens a file as a working copy so
+the original is untouched until you decide.</li>
+</ul>
+<p>Supported formats include SQLite (<code>.db</code>,
+<code>.sqlite</code>, <code>.sqlite3</code>), Access (<code>.mdb</code>,
+<code>.accdb</code>), Excel (<code>.xlsx</code>, <code>.xls</code>),
+dBASE (<code>.dbf</code>), and delimited text (<code>.csv</code>,
+<code>.tsv</code>, <code>.tab</code>, <code>.txt</code>). The right
+driver is chosen from the extension.</p>
+<hr />
+<h1 id="part-5-sql-and-scripting">Part 5 — SQL and scripting</h1>
+<h2 id="running-sql">Running SQL</h2>
+<ul>
+<li><strong>Query</strong> (Control+Q) opens a box where you type SQL
+and run it; the results open as a recordset you can navigate like any
+table. <strong>Query History</strong> (Alt+Shift+Q) recalls previous
+queries.</li>
+<li>The <strong>dot prompt</strong> (Enter Console, Control+GraveAccent)
+accepts both dBASE-style dot commands and short SQL inline. It is the
+fastest path for people who think in commands.</li>
+<li><strong>Sqlean Console</strong> (Control+Shift+GraveAccent) opens a
+console with the SQLean extension functions available (see Part 6).</li>
+</ul>
+<p>DbDo runs your SQL against the live connection, so queries see
+uncommitted context the way the rest of the program does. Because the
+cursor is client-side, result sets are fully navigable — forward,
+backward, and by position.</p>
+<h2 id="the-scripting-engine">The scripting engine</h2>
+<p>DbDo’s scripting language is <strong>JScript .NET</strong>. The same
+engine powers three things, so learning it once pays off in all of them:
+<strong>Invoke Script</strong> for <code>.js</code> snippets,
+<strong>Evaluate Expression</strong> (Control+Equals) for one-off
+calculations, and the <code>{{ ... }}</code> expressions inside report
+templates.</p>
+<ul>
+<li><strong>Evaluate Expression</strong> (Control+Equals) prompts for an
+expression, evaluates it, and speaks and shows the result —
+<code>2+2*10</code>, string manipulation, date math. The result is shown
+rather than only copied, so it stays reachable even where clipboard
+access is restricted. The last expression is remembered for quick
+tweaking.</li>
+<li>In scripts and report expressions, field values are available for
+substitution and computation, so an expression can combine, format, or
+conditionally choose field values.</li>
+</ul>
+<p>Snippet types and how to run them are covered in Part 3.</p>
+<hr />
+<h1 id="part-6-reference">Part 6 — Reference</h1>
+<h2 id="command-reference-by-menu">Command reference by menu</h2>
+<p>Chords use screen-reader-canonical key names. A command with no chord
+is reachable through its menu or through Alternate Menu (Alt+F10).</p>
+<h3 id="file-menu">File menu</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Command</th>
+<th>Chord</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>New Database</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Add Table</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>Open Database</td>
+<td>Control+O</td>
+</tr>
+<tr class="even">
+<td>Open Table in New Window</td>
+<td>Control+Shift+T</td>
+</tr>
+<tr class="odd">
+<td>Recent Files</td>
+<td>Alt+R</td>
+</tr>
+<tr class="even">
+<td>Save</td>
+<td>Control+S</td>
+</tr>
+<tr class="odd">
+<td>Save As</td>
+<td>Control+Shift+S</td>
+</tr>
+<tr class="even">
+<td>Close Database</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>Backup Database</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Compare Database</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>Import</td>
+<td>Alt+I</td>
+</tr>
+<tr class="even">
+<td>Merge Data</td>
+<td>Alt+M</td>
+</tr>
+<tr class="odd">
+<td>Transfer Import</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Run Report</td>
+<td>Alt+Shift+R</td>
+</tr>
+<tr class="odd">
+<td>Export Data</td>
+<td>Alt+X</td>
+</tr>
+<tr class="even">
+<td>Print</td>
+<td>Control+P</td>
+</tr>
+<tr class="odd">
+<td>Choose Table</td>
+<td>Control+T</td>
+</tr>
+<tr class="even">
+<td>Choose View</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>Next / Previous Visited Table</td>
+<td>Alt+F6 / Alt+Shift+F6</td>
+</tr>
+<tr class="even">
+<td>Next / Previous Table or View</td>
+<td>Control+F6 / Control+Shift+F6</td>
+</tr>
+<tr class="odd">
+<td>Exit DbDo</td>
+<td>Alt+F4</td>
+</tr>
+</tbody>
+</table>
+<h3 id="edit-menu">Edit menu</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Command</th>
+<th>Chord</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>New Record</td>
+<td>Control+N</td>
+</tr>
+<tr class="even">
+<td>Edit View</td>
+<td>Control+E</td>
+</tr>
+<tr class="odd">
+<td>Edit Cell</td>
+<td>F2</td>
+</tr>
+<tr class="even">
+<td>Delete Record</td>
+<td>Control+D</td>
+</tr>
+<tr class="odd">
+<td>Delete Without Confirmation</td>
+<td>Control+Shift+D</td>
+</tr>
+<tr class="even">
+<td>Copy Record</td>
+<td>Control+Shift+C</td>
+</tr>
+<tr class="odd">
+<td>Append Record to Clipboard</td>
+<td>Alt+Shift+C</td>
+</tr>
+<tr class="even">
+<td>New Copy</td>
+<td>Control+Shift+N</td>
+</tr>
+<tr class="odd">
+<td>Mail Record</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Replace Column</td>
+<td>Control+R</td>
+</tr>
+<tr class="odd">
+<td>Regex Replace</td>
+<td>Control+Shift+R</td>
+</tr>
+<tr class="even">
+<td>Mark Record</td>
+<td>Control+M</td>
+</tr>
+<tr class="odd">
+<td>Say Mark Status</td>
+<td>Shift+M</td>
+</tr>
+<tr class="even">
+<td>Toggle Marked</td>
+<td>Control+Space</td>
+</tr>
+<tr class="odd">
+<td>Edit Notes</td>
+<td>Alt+Shift+N</td>
+</tr>
+<tr class="even">
+<td>Edit Tags</td>
+<td>Alt+Shift+T</td>
+</tr>
+<tr class="odd">
+<td>Edit URL</td>
+<td>Alt+Shift+U</td>
+</tr>
+<tr class="even">
+<td>Unmark Record</td>
+<td>Control+Shift+M</td>
+</tr>
+<tr class="odd">
+<td>Mark All</td>
+<td>Control+A</td>
+</tr>
+<tr class="even">
+<td>Unmark All</td>
+<td>Control+Shift+A</td>
+</tr>
+<tr class="odd">
+<td>Invert Marked</td>
+<td>Alt+Shift+I</td>
+</tr>
+<tr class="even">
+<td>Start Mark / Complete Mark</td>
+<td>F8 / Shift+F8</td>
+</tr>
+<tr class="odd">
+<td>Start Unmark / Complete Unmark to Anchor</td>
+<td>Alt+F8 / Alt+Shift+F8</td>
+</tr>
+<tr class="even">
+<td>Save Bookmark</td>
+<td>Control+B</td>
+</tr>
+<tr class="odd">
+<td>List Bookmarks</td>
+<td>Alt+B</td>
+</tr>
+<tr class="even">
+<td>Clear Bookmark</td>
+<td>Control+Shift+B</td>
+</tr>
+<tr class="odd">
+<td>Open Cell Value</td>
+<td>Control+Enter</td>
+</tr>
+<tr class="even">
+<td>Open URL</td>
+<td>Control+Shift+U</td>
+</tr>
+<tr class="odd">
+<td>Pick Value</td>
+<td>Control+F2</td>
+</tr>
+</tbody>
+</table>
+<h3 id="navigate-menu">Navigate menu</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Command</th>
+<th>Chord</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>First / Last Record</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Next / Previous Record</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>Go to Record</td>
+<td>Control+G</td>
+</tr>
+<tr class="even">
+<td>Repeat Go To</td>
+<td>Alt+G</td>
+</tr>
+<tr class="odd">
+<td>Find Record</td>
+<td>Control+F</td>
+</tr>
+<tr class="even">
+<td>Reverse Find</td>
+<td>Control+Shift+F</td>
+</tr>
+<tr class="odd">
+<td>Jump to Record</td>
+<td>Control+J</td>
+</tr>
+<tr class="even">
+<td>Reverse Jump</td>
+<td>Control+Shift+J</td>
+</tr>
+<tr class="odd">
+<td>Find Regex</td>
+<td>Control+F3</td>
+</tr>
+<tr class="even">
+<td>Reverse Regex Find</td>
+<td>Control+Shift+F3</td>
+</tr>
+<tr class="odd">
+<td>Search Next / Previous</td>
+<td>F3 / Shift+F3</td>
+</tr>
+<tr class="even">
+<td>Enter Child Table</td>
+<td>Alt+Right</td>
+</tr>
+<tr class="odd">
+<td>Exit Child Table</td>
+<td>Alt+Left</td>
+</tr>
+<tr class="even">
+<td>Exit to Root Table</td>
+<td>Alt+Home</td>
+</tr>
+</tbody>
+</table>
+<h3 id="query-menu">Query menu</h3>
+<p>The Query menu holds record inspection and the Say-X status
+family.</p>
+<table>
+<thead>
+<tr class="header">
+<th>Command</th>
+<th>Chord</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Inspect Record</td>
+<td>Control+I</td>
+</tr>
+<tr class="even">
+<td>Table Properties</td>
+<td>Alt+Enter</td>
+</tr>
+<tr class="odd">
+<td>Related Records</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Show Schema</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>Say Here</td>
+<td>Shift+H</td>
+</tr>
+<tr class="even">
+<td>Say Database</td>
+<td>Shift+D</td>
+</tr>
+<tr class="odd">
+<td>Say Order</td>
+<td>Shift+O</td>
+</tr>
+<tr class="even">
+<td>Say Goto</td>
+<td>Shift+G</td>
+</tr>
+<tr class="odd">
+<td>Say Yield</td>
+<td>Shift+Y</td>
+</tr>
+<tr class="even">
+<td>Say Marked</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>Say Edited</td>
+<td>Shift+E</td>
+</tr>
+<tr class="even">
+<td>Say Notes</td>
+<td>Shift+N</td>
+</tr>
+<tr class="odd">
+<td>Say Tags</td>
+<td>Shift+T</td>
+</tr>
+<tr class="even">
+<td>Say Column Rest</td>
+<td>Control+L</td>
+</tr>
+<tr class="odd">
+<td>Say Column Rest Marked</td>
+<td>Control+Shift+L</td>
+</tr>
+<tr class="even">
+<td>Say Records Rest</td>
+<td>Alt+L</td>
+</tr>
+<tr class="odd">
+<td>Say Marked Rows</td>
+<td>Shift+Space</td>
+</tr>
+<tr class="even">
+<td>Say Sort and Filter</td>
+<td>Shift+8</td>
+</tr>
+<tr class="odd">
+<td>Say Position</td>
+<td>Alt+Delete</td>
+</tr>
+<tr class="even">
+<td>Say Clipboard</td>
+<td>Alt+Apostrophe</td>
+</tr>
+<tr class="odd">
+<td>Say Added</td>
+<td>Shift+A</td>
+</tr>
+<tr class="even">
+<td>Say Cell</td>
+<td>Shift+C</td>
+</tr>
+<tr class="odd">
+<td>Say Where Filter</td>
+<td>Shift+W</td>
+</tr>
+<tr class="even">
+<td>Say Find</td>
+<td>Shift+F</td>
+</tr>
+<tr class="odd">
+<td>Say Select Columns</td>
+<td>Shift+S</td>
+</tr>
+<tr class="even">
+<td>Say Query</td>
+<td>Shift+Q</td>
+</tr>
+<tr class="odd">
+<td>Say Id</td>
+<td>Shift+I</td>
+</tr>
+<tr class="even">
+<td>Say Look</td>
+<td>Shift+L</td>
+</tr>
+<tr class="odd">
+<td>Say Related</td>
+<td>Shift+R</td>
+</tr>
+<tr class="even">
+<td>Say URL</td>
+<td>Shift+U</td>
+</tr>
+<tr class="odd">
+<td>Say Prime</td>
+<td>Shift+P</td>
+</tr>
+<tr class="even">
+<td>Where Filter</td>
+<td>Control+W</td>
+</tr>
+<tr class="odd">
+<td>Clear Where</td>
+<td>Control+Shift+W</td>
+</tr>
+<tr class="even">
+<td>Filter by Regex</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>Clear Sort</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Order Records</td>
+<td>Alt+O</td>
+</tr>
+<tr class="odd">
+<td>Reverse Order</td>
+<td>Alt+Shift+O</td>
+</tr>
+</tbody>
+</table>
+<h3 id="misc-menu">Misc menu</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Command</th>
+<th>Chord</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Refresh View</td>
+<td>F5</td>
+</tr>
+<tr class="even">
+<td>Read Only Toggle</td>
+<td>Alt+Z</td>
+</tr>
+<tr class="odd">
+<td>Database Summary</td>
+<td>Alt+D</td>
+</tr>
+<tr class="even">
+<td>Table Summary</td>
+<td>Alt+T</td>
+</tr>
+<tr class="odd">
+<td>Statistics from Column</td>
+<td>Alt+Shift+S</td>
+</tr>
+<tr class="even">
+<td>Select Columns to Display</td>
+<td>Alt+S</td>
+</tr>
+<tr class="odd">
+<td>Graphics Column</td>
+<td>Control+Shift+G</td>
+</tr>
+<tr class="even">
+<td>Generate from Grid</td>
+<td>Alt+Shift+G</td>
+</tr>
+<tr class="odd">
+<td>Extract with Regex</td>
+<td>Control+Shift+X</td>
+</tr>
+<tr class="even">
+<td>Append Cell to Clipboard</td>
+<td>Alt+C</td>
+</tr>
+<tr class="odd">
+<td>Copy Cell to Clipboard</td>
+<td>Control+C</td>
+</tr>
+<tr class="even">
+<td>Copy Visible Cells as TSV</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>Copy Column / Copy Grid</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Jump to Next Initial</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>Query</td>
+<td>Control+Q</td>
+</tr>
+<tr class="even">
+<td>Query History</td>
+<td>Alt+Shift+Q</td>
+</tr>
+<tr class="odd">
+<td>Test Integrity</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Test Drivers</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>Hotkey Summary</td>
+<td>Alt+Shift+H</td>
+</tr>
+<tr class="even">
+<td>Open as Managed Copy</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>Describe Table</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Facet Column</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>Open in Explorer</td>
+<td>Alt+Pipe</td>
+</tr>
+<tr class="even">
+<td>Open Command Prompt</td>
+<td>Control+Slash</td>
+</tr>
+<tr class="odd">
+<td>Open Dot Prompt</td>
+<td>Control+GraveAccent</td>
+</tr>
+<tr class="even">
+<td>Sqlean Console</td>
+<td>Control+Shift+GraveAccent</td>
+</tr>
+<tr class="odd">
+<td>Invoke Script</td>
+<td>Alt+V</td>
+</tr>
+<tr class="even">
+<td>Edit Snippet</td>
+<td>Alt+Shift+V</td>
+</tr>
+<tr class="odd">
+<td>Open Script Folder</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Evaluate Expression</td>
+<td>Control+Equals</td>
+</tr>
+<tr class="odd">
+<td>Edit Settings</td>
+<td>Alt+Shift+C</td>
+</tr>
+</tbody>
+</table>
+<h3 id="window-menu">Window menu</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Command</th>
+<th>Chord</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Open Table</td>
+<td>Control+Shift+T</td>
+</tr>
+<tr class="even">
+<td>Current Windows</td>
+<td>F4</td>
+</tr>
+<tr class="odd">
+<td>Window Toggle</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Next Window</td>
+<td>Control+Tab</td>
+</tr>
+<tr class="odd">
+<td>Previous Window</td>
+<td>Control+Shift+Tab</td>
+</tr>
+<tr class="even">
+<td>Say Windows Open</td>
+<td>Shift+F4</td>
+</tr>
+<tr class="odd">
+<td>Close Window</td>
+<td>Control+F4</td>
+</tr>
+<tr class="even">
+<td>Close All But Current Window</td>
+<td>Control+Shift+F4</td>
+</tr>
+</tbody>
+</table>
+<h3 id="help-menu">Help menu</h3>
+<table>
+<thead>
+<tr class="header">
+<th>Command</th>
+<th>Chord</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>Documentation</td>
+<td>F1</td>
+</tr>
+<tr class="even">
+<td>History of Changes</td>
+<td>Shift+F1</td>
+</tr>
+<tr class="odd">
+<td>Readme Guide</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Sample Databases</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>Alternate Menu</td>
+<td>Alt+F10</td>
+</tr>
+<tr class="even">
+<td>Key Help Toggle</td>
+<td>Control+F1</td>
+</tr>
+<tr class="odd">
+<td>Where Am I</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Test Screen Reader Speech</td>
+<td>—</td>
+</tr>
+<tr class="odd">
+<td>Email Log File</td>
+<td>—</td>
+</tr>
+<tr class="even">
+<td>Elevate Version</td>
+<td>F11</td>
+</tr>
+</tbody>
+</table>
+<h2 id="standard-fields-summary">Standard fields (summary)</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Field</th>
+<th>Type</th>
+<th>Role</th>
+<th>Speak with</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>added</td>
+<td>TEXTTIME</td>
+<td>creation time, automatic</td>
+<td>Shift+A</td>
+</tr>
+<tr class="even">
+<td>edited</td>
+<td>TEXTTIME</td>
+<td>last-change time, automatic</td>
+<td>Shift+E</td>
+</tr>
+<tr class="odd">
+<td>marked</td>
+<td>BOOLEAN</td>
+<td>batch-operation state you toggle</td>
+<td>Shift+M</td>
+</tr>
+<tr class="even">
+<td>notes</td>
+<td>TEXTMARKDOWN</td>
+<td>free-form Markdown note</td>
+<td>Shift+N</td>
+</tr>
+<tr class="odd">
+<td>tags</td>
+<td>TEXTMEMO</td>
+<td>keywords</td>
+<td>Shift+T</td>
+</tr>
+<tr class="even">
+<td>url</td>
+<td>TEXTLINE</td>
+<td>associated link</td>
+<td>Shift+U</td>
+</tr>
+<tr class="odd">
+<td>look</td>
+<td>derived</td>
+<td>display label for the record</td>
+<td>Shift+L</td>
+</tr>
+<tr class="even">
+<td>prime</td>
+<td>derived</td>
+<td>prime human-facing identity</td>
+<td>Shift+P</td>
+</tr>
+<tr class="odd">
+<td>unq</td>
+<td>derived</td>
+<td>internal uniqueness helper</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h2 id="field-types-summary">Field types (summary)</h2>
+<table>
+<thead>
+<tr class="header">
+<th>Type</th>
+<th>Stored as</th>
+<th>Editor</th>
+</tr>
+</thead>
+<tbody>
+<tr class="odd">
+<td>TEXT</td>
+<td>text</td>
+<td>text box</td>
+</tr>
+<tr class="even">
+<td>TEXTLINE</td>
+<td>text</td>
+<td>single-line box</td>
+</tr>
+<tr class="odd">
+<td>TEXTMEMO</td>
+<td>text</td>
+<td>multi-line box</td>
+</tr>
+<tr class="even">
+<td>TEXTMARKDOWN</td>
+<td>text</td>
+<td>multi-line, Markdown-aware</td>
+</tr>
+<tr class="odd">
+<td>TEXTTIME</td>
+<td>text</td>
+<td>sortable timestamp</td>
+</tr>
+<tr class="even">
+<td>INTEGER</td>
+<td>integer</td>
+<td>number</td>
+</tr>
+<tr class="odd">
+<td>REAL</td>
+<td>real</td>
+<td>number</td>
+</tr>
+<tr class="even">
+<td>NUMERIC</td>
+<td>number</td>
+<td>number</td>
+</tr>
+<tr class="odd">
+<td>BOOLEAN</td>
+<td>true/false</td>
+<td>toggle</td>
+</tr>
+<tr class="even">
+<td>BLOB</td>
+<td>binary</td>
+<td>—</td>
+</tr>
+</tbody>
+</table>
+<h2 id="the-report-template-language">The report-template language</h2>
+<p>A report definition is a <code>[section]</code> in a
+<strong>report.inix</strong> file beside the database. Directives
+configure the source; bands lay out the text.</p>
+<p><strong>Directives</strong> (at the top of the section):</p>
+<ul>
+<li><code>@table</code> — the table to read.</li>
+<li><code>@group</code> — a field to group by (implies sorting by that
+field).</li>
+<li><code>@filter</code> — an optional Where condition.</li>
+<li><code>@sort</code> — an optional sort order.</li>
+</ul>
+<p><strong>Bands</strong> (each is a block of literal text with
+substitutions):</p>
+<ul>
+<li><code>header</code> / <code>footer</code> — once at the top and
+bottom of the report.</li>
+<li><code>detail</code> — repeated once per record.</li>
+<li><code>separator</code> — between detail records.</li>
+<li><code>group_header</code> / <code>group_footer</code> — at the start
+and end of each group.</li>
+</ul>
+<p><strong>Inside a band:</strong></p>
+<ul>
+<li><code>$field</code> or <code>${field}</code> — insert the value of a
+field.</li>
+<li><code>{{ expression }}</code> — evaluate a JScript expression (field
+values are in scope).</li>
+<li><code>{# comment #}</code> — a comment, omitted from output.</li>
+<li>Footer bands can use aggregates: <code>$count</code>,
+<code>$sum_&lt;field&gt;</code>, <code>$avg_&lt;field&gt;</code>,
+<code>$min_&lt;field&gt;</code>, <code>$max_&lt;field&gt;</code>.</li>
+<li>A line that resolves to blank can be suppressed, and runs of
+whitespace normalized, so grouped output stays tidy.</li>
+</ul>
+<p>Reports render to Markdown, which you can convert to HTML, DOCX, or
+PDF.</p>
+<h2 id="the-.inix-configuration-format">The .inix configuration
+format</h2>
+<p>DbDo’s own settings and several data files use
+<strong>.inix</strong>, an INI-style format: <code>[Section]</code>
+headers followed by <code>name = value</code> lines, with <code>;</code>
+or <code>#</code> beginning a comment and case-insensitive key names
+written in UpperCamelCase (usually two words). Global defaults live in
+<strong>DbDo.inix</strong> beside the program; a database may carry its
+own <strong><code>&lt;DbName&gt;.inix</code></strong> beside the
+database file for per-database overrides. Notable sections include
+<code>[General]</code> and <code>[Options]</code> for behavior toggles
+(such as <code>ExtraSpeech</code>, <code>CommandEcho</code>, and the
+<code>ExtraKeys</code> convenience-key switch),
+<code>[Validation]</code> for per-field regex patterns,
+<code>[ConnectStrings]</code> for per-extension connection-string
+overrides, and <code>[Hotkeys]</code> which documents and can
+re-describe command chords. <strong>Edit Settings</strong> (Alt+Shift+C)
+exposes the common options in a dialog and can open the file directly
+for advanced editing.</p>
+<p>Values are usually a single line, but a key may hold a
+<strong>multi-line value</strong> — a fenced block opened and closed by
+a line containing only <code>`</code> (or a triple-quote fence, used
+when the content itself contains a <code>`</code>), taken verbatim. A
+key may also hold an <strong>array of values</strong>. A few short items
+with no spaces or commas can sit inline, comma-separated
+(<code>SelectFields = last_name, first_name, enterprise</code>);
+otherwise each item goes on its own line inside a fence, most recent
+first. Either shape reads back as the same ordered list.</p>
+<p>A <code>&lt;DbName&gt;.inix</code> holds the settings that belong to
+one database. Its <code>[Database]</code> section carries
+<strong>InitialTable</strong> (the table opened in the first window when
+the database opens, so there is always a starting window — other tables
+open via Open Table, Control+Shift+O) and the recent-input arrays
+<strong>FindText</strong>, <strong>JumpText</strong>,
+<strong>ReplaceText</strong>, <strong>ReplaceRegex</strong>, and
+<strong>QueryText</strong>, each up to ten items, most recent first,
+which populate the matching command’s combo box. A
+<code>[Table:&lt;name&gt;]</code> section carries that table’s saved
+view — <strong>SelectFields</strong>, <strong>OrderFields</strong>, and
+<strong>WhereFilter</strong> — recalled when the table is next
+opened.</p>
+<h2 id="sqlean-extensions">SQLean extensions</h2>
+<p>When the SQLean extension functions are available, they add a large
+library of SQL functions — string and text helpers, math, statistics,
+fuzzy matching, regular expressions, and more — usable in queries and
+reachable through the <strong>Sqlean Console</strong>
+(Control+Shift+GraveAccent). They extend what your <code>Query</code>
+and report expressions can compute without leaving SQL.</p>
+<h2 id="sample-databases">Sample databases</h2>
+<p>DbDo ships with sample databases that follow the same column
+conventions as your own data, reachable from <strong>Sample
+Databases</strong> in the Help menu. They are the fastest way to see the
+standard fields, lookups, relationships, and reports working together on
+real records.</p>
+<h2 id="screen-reader-settings">Screen-reader settings</h2>
+<p>DbDo speaks directly to supplement your screen reader’s own
+announcements. <strong>Extra Speech</strong> (toggled from the Help
+menu) controls DbDo’s additional commentary without affecting your
+screen reader’s natural focus and selection announcements; turning it
+off leaves only the screen reader’s own speech. <strong>Command
+Echo</strong> controls whether commands announce a confirmation as they
+run. <strong>Test Screen Reader Speech</strong> verifies that DbDo can
+reach your screen reader.</p>
+<h2 id="persistence-and-logging">Persistence and logging</h2>
+<p>DbDo remembers per-database state in the database’s own
+<code>&lt;DbName&gt;.inix</code> — the last table, sort, filter, and
+displayed columns, plus a pinned <strong>InitialTable</strong> and the
+recent Find, Jump, Replace, Regex, and Query inputs — so reopening a
+database returns you to where you were. Activity is written to
+<strong>DbDo.log</strong>; <strong>Email Log File</strong> in the Help
+menu reveals the log and starts an email with its path, for reporting
+issues.</p>
+<hr />
+<h1 id="part-7-development">Part 7 — Development</h1>
+<p>This part is for people building DbDo from source.</p>
+<h2 id="requirements">Requirements</h2>
+<ul>
+<li>.NET Framework 4.8, 64-bit.</li>
+<li>The build tools invoked by <code>buildDbDo.cmd</code> (the .NET
+Framework C# compiler and Inno Setup for packaging).</li>
+<li>The SQLite ODBC driver and the bundled dependency DLLs the build
+fetches.</li>
+</ul>
+<h2 id="build">Build</h2>
+<p>Compile with <strong><code>buildDbDo.cmd</code></strong>, which
+builds <code>DbDo.exe</code>, converts this guide and the README to HTML
+with pandoc, and packages the installer with Inno Setup
+(<code>DbDo_setup.iss</code>). The dependency DLLs are gathered by
+<code>getDbDoDeps.ps1</code>. To replicate the development layout, keep
+the program and its subfolders under <code>C:\DbDo</code>.</p>
+<h2 id="architecture-one-connection-two-interfaces">Architecture: one
+connection, two interfaces</h2>
+<p>DbDo maintains a single live database connection and presents it
+through both the graphical interface and the dot prompt, as described in
+Part 1. Each MDI child window owns its own manager and cursor, so tables
+are independent, while the connection and drivers are shared. The cursor
+is client-side, which is what makes instant sort, filter, and backward
+navigation possible on file-based databases.</p>
+<h2 id="coding-style">Coding style</h2>
+<p>DbDo is written in the “Camel Type” style. The full, authoritative
+description is a separate distributed file,
+<strong><code>Camel_Type_CSharp.md</code></strong>; consult it for
+specifics rather than duplicating them here. In brief, it uses
+Hungarian-style prefixes, lower-camel method names, alphabetized
+declarations, double-quoted strings, and for-each iteration; database
+identifiers use lower_snake_case.</p>
+<h2 id="layout-by-code">Layout by Code</h2>
+<p>DbDo builds its dialogs and menus <strong>in code</strong> rather
+than with a visual designer, so that every control is a standard,
+screen-reader-friendly Windows control created and labeled explicitly.
+The label-based-controls helpers assemble a dialog from labels, input
+boxes, memo boxes, list boxes, and pick boxes with OK/Cancel or custom
+buttons, keeping tab order and accessible names correct by
+construction.</p>
+<h2 id="file-layout">File layout</h2>
+<p>The source is a single large <code>DbDo.cs</code>. Alongside it live
+the build script, the installer script, the dependency fetcher, the
+<code>.inix</code> configuration, this guide (<code>DbDo.md</code>), the
+README, the coding-style file, and the sample databases with their
+scripts and <code>report.inix</code> definitions.</p>
+<h2 id="nothing-and-the-two-kinds-of-it">Nothing, and the two kinds of
+it</h2>
+<p>A field can be empty in two ways, and databases have always kept them
+apart.</p>
+<ul>
+<li><strong>null</strong> means nobody has said. The value is unknown,
+or does not apply.</li>
+<li><strong>blank</strong> means somebody said nothing: a real value, a
+string of no length.</li>
+</ul>
+<h3 id="what-dbdo-stores">What DbDo stores</h3>
+<p><strong>An empty box stores null.</strong> When you leave a field
+alone, or clear it, DbDo writes null rather than an empty string.</p>
+<p>This is the settled practice, not a preference. Allowing both in one
+column gives two values one meaning, so every search has to ask for both
+and every search that forgets is quietly wrong. Oracle went as far as
+treating an empty string AS null; MySQL and SQL Server guidance is to
+forbid the empty string with a rule on the column. SQLite keeps the two
+apart and leaves the choice to the program, so DbDo makes it once, where
+values are written, rather than leaving it to each dialog.</p>
+<p>You can still store an empty string on purpose – a space is a value –
+and a database built elsewhere keeps whatever it already holds. DbDo
+changes nothing it did not write.</p>
+<h3 id="what-dbdo-says">What DbDo says</h3>
+<p><strong>A null field says “null”. An empty one says
+“blank”.</strong></p>
+<p>Both words are borrowed rather than invented. Database tools print
+the literal word NULL for a null and have done for decades: phpLiteAdmin
+shows it in italics so it cannot be mistaken for the text “NULL”, DB
+Browser and SQL Server Management Studio do the same, and the sqlite3
+shell has a setting for choosing the word. “Blank” is what JAWS and NVDA
+say when they reach an empty cell, in Excel and in any grid, so it is a
+word you have heard for years that already means exactly this.</p>
+<h3 id="what-the-screen-readers-do-and-what-dbdo-does-about-it">What the
+screen readers do, and what DbDo does about it</h3>
+<p>The three readers disagree about an empty cell, and DbDo settles it
+rather than leaving it to them:</p>
+<ul>
+<li><strong>JAWS says “blank.”</strong></li>
+<li><strong>NVDA says nothing</strong> and moves to the next cell,
+though it still reads the column header.</li>
+<li><strong>Narrator</strong> is its own case again.</li>
+</ul>
+<p>Silence is the one answer a cell must not give, because it cannot be
+told from a key that did not register or a column that is not there. So
+<strong>DbDo puts the word in the cell</strong>: an empty cell reads
+“null” or “blank”, and all three readers say the same thing because all
+three are reading the same text.</p>
+<p>Each word is <strong>one syllable</strong>, so the precise answer
+costs no more time than a vague one – and “blank” is the word JAWS would
+have said anyway, so nothing contradicts what you already hear elsewhere
+in Windows.</p>
+<p>Accessibility guidance for data tables says the same thing from the
+other side: never leave a cell visually empty, and do not use a dash,
+which NVDA does not read either.</p>
+<p><strong>The word is shown, never stored or copied.</strong> Copy a
+cell and you get what the cell holds, not the word; the same is true of
+exports and reports. Set <strong>ShowEmptyWords</strong> to No in
+DbDo.inix for the older, silent grid.</p>
+<h3 id="what-microsoft-access-does-for-comparison">What Microsoft Access
+does, for comparison</h3>
+<p>Access reaches the same place from the other end. Its text boxes trim
+what you type and save an empty box as null; a zero-length string cannot
+be typed into a datasheet at all, and takes an update query to create.
+Its <strong>Allow Zero Length</strong> property exists to forbid them
+outright, and long-standing Access guidance is to set it to No, because
+– in the words of the reference most Access developers learned from –
+there is no visible difference between a zero-length string and a null,
+and the distinction should not be forced on the end user.</p>
+<p>DbDo does the same thing at the point of writing and then, unlike
+Access, can tell you which one you are on when you ask.</p>
+<h3 id="why-it-is-worth-the-distinction">Why it is worth the
+distinction</h3>
+<ul>
+<li>A job with no applied date has not been applied to. A job whose
+applied date was cleared has been un-applied. The first is a lead; the
+second is a mistake to look at.</li>
+<li>Searching for null finds what nobody has filled in. Searching for
+blank finds what somebody emptied.</li>
+<li><strong>Uniqueness does not see nulls.</strong> SQLite, like every
+other SQL database, treats each null as different from every other, so a
+unique column accepts as many nulls as you like. DbDo’s
+<code>prime</code> column is built with coalesce for that reason: it
+turns nulls into empty text before joining, so two records missing the
+same field still collide as duplicates rather than slipping past.</li>
+<li><strong>Sorting puts nulls first.</strong> In SQLite a null sorts
+before every value, so the rows nobody has filled in arrive at the top
+of an ascending sort. That is usually what you want and always worth
+knowing.</li>
+</ul>
+<h2 id="the-help-menu">The Help menu</h2>
+<p>Every document that comes with DbDo opens from Help, in your web
+browser. The F1 keys open the ones you will want most. F1 is help in
+every Windows program, and each extra key picks a different kind of
+help.</p>
+<ul>
+<li><strong>Documentation, F1.</strong> This guide.</li>
+<li><strong>History of Changes, Shift+F1.</strong> What changed in each
+version.</li>
+<li><strong>About, Alt+F1.</strong> The version and the license.</li>
+<li><strong>Key Describer, Control+F1.</strong> Press it, then any key,
+to hear what that key does.</li>
+<li><strong>ReadMe, Alt+Shift+F1.</strong> The short start: installing
+and a first walk.</li>
+<li><strong>Hotkeys, Control+Shift+F1.</strong> Every key, by menu, by
+key and by command. Control+F1 describes one key; adding Shift describes
+them all.</li>
+<li><strong>Frequently Asked Questions.</strong></li>
+<li><strong>Play Tutorials.</strong> The spoken walkthroughs.</li>
+<li><strong>More Documents.</strong> The Announcement, the Developer
+Guide, the License, and the Tutorials Transcript. These are used rarely,
+so they sit one level down.</li>
+</ul>
+<h2 id="the-spoken-walkthroughs">The spoken walkthroughs</h2>
+<p><strong>Help, Play Tutorials</strong> opens
+<code>Tutorials.mkv</code> – fourteen walkthroughs, about three minutes
+each, as one recording with a chapter at the start of every one. DbDo
+hands the file to Windows, so whatever plays that kind of file plays it.
+In a player that reads chapters, Control+Page Down and Control+Page Up
+move from one walkthrough to the next.</p>
+<p>The same walkthroughs are written out in <code>Tutorials.md</code>,
+in the help folder, for reading rather than listening.</p>
+<h2 id="asking-the-model-on-your-computer">Asking the model on your
+computer</h2>
+<p><strong>F12, Chat with AI</strong>, asks a plain question.
+<strong>Shift+F12, Chat about Table</strong>, asks the same kind of
+question with the table sent alongside it: its name, its columns, how
+many rows it holds, and the record you are on. So “how do I write a
+filter for the last thirty days” suits F12, and “which of these columns
+would tell me whether I have applied” suits Shift+F12.</p>
+<p>The keys are EdSharp’s and FileDir’s, unchanged, so one habit works
+across all three. Nothing leaves your computer: Ollama runs locally and
+the model sits in your own profile. If Ollama is not installed, either
+command says so and tells you how to add it – and it is shared with
+EdSharp and FileDir, so installing it once covers all three.</p>
+<h2 id="tables-dbdo-keeps-for-itself">Tables DbDo keeps for itself</h2>
+<p>Two tables in every DbDo database belong to DbDo rather than to
+you:</p>
+<ul>
+<li><strong>lookups</strong> fills the pick lists. F4 in a field offers
+what this table holds for that table and field.</li>
+<li><strong>maps</strong> records links between records, which is what
+Say Related reads.</li>
+</ul>
+<p>Neither is offered when you choose a table, open a table in a new
+window, or step through tables with Control+Page Down. They are on a
+hidden list, and anything NOT on that list is yours and is offered.</p>
+<p>They are not locked away. At the dot prompt,
+<code>select-table lookups</code> opens either one by name, and any SQL
+statement can read or change them. The rule is about what a person meets
+while browsing, not about permission.</p>
+<p>SQLite’s own tables – anything beginning with <code>sqlite_</code>,
+and the <code>sqlean_</code> tables the extensions create – are filtered
+out earlier and are never offered at all.</p>
+<h2 id="look-and-prime-the-two-computed-columns">look and prime: the two
+computed columns</h2>
+<p>Every table DbDo makes carries two columns that nobody types into.
+They are computed from the fields beside them and kept up to date by the
+database itself.</p>
+<h3 id="look-a-glimpse-of-a-record-from-somewhere-else">look: a glimpse
+of a record from somewhere else</h3>
+<p><code>look</code> is what a record looks like when it is mentioned
+somewhere other than its own table.</p>
+<p>The idea is older than DbDo. In Clipper, under DOS, a form with a
+foreign key in it showed a number, and a number is not a record. So the
+practice was to put a glimpse of the referenced record in parentheses
+after the id: enough to know which one it is, and no more. Tab through a
+form of fields, reach the field that points at another table, and hear
+something meaningful rather than “4”.</p>
+<p>That is what <code>look</code> holds. It joins the fields that
+identify a record to a person, separated by a space, a vertical bar and
+a space:</p>
+<pre><code>Example Widgets Company (sample employer) | Accessibility Analyst | interviewing</code></pre>
+<p>The separator is chosen for the ear: a screen reader pauses at
+punctuation, so the parts arrive as parts rather than as one run-on
+line.</p>
+<p>A glimpse is deliberately not the whole record. When you need the
+rest, it is one keystroke away: Enter opens the record, and Shift plus R
+lists what this record is related to, showing each related record by its
+own <code>look</code>.</p>
+<h3 id="prime-the-primary-key-computed">prime: the primary key,
+computed</h3>
+<p><code>prime</code> is short for primary key, and it is a primary key
+in the sense that matters rather than the sense SQL means.</p>
+<p>The table does have a formal key – <code>&lt;table&gt;_id</code>, a
+number the database hands out – but that number says nothing about the
+record. What decides whether two rows are the same job is the employer
+and the title. So <code>prime</code> is computed from exactly the fields
+that make a record unique, joined with a vertical bar and nothing
+else:</p>
+<pre><code>Example Widgets Company (sample employer)|Accessibility Analyst</code></pre>
+<p>Two things follow, and both are the reason it is done this way.</p>
+<p><strong>The rule can be changed.</strong> Deciding that a job is
+unique by employer, title and location as well is a change to one
+expression, not a migration of a key.</p>
+<p><strong>Matching becomes one comparison.</strong> When a script asks
+whether to add a record or update the one already there, it compares one
+value instead of three, in SQL or in any language:
+<code>WHERE prime = ?</code>. The maps table works the same way – it
+records a link as <code>prime1</code>, a kind, and <code>prime2</code> –
+so a relationship needs no knowledge of how either table numbers its
+rows.</p>
+<h3 id="the-difference-in-one-line">The difference in one line</h3>
+<p><code>look</code> is for a person, joined with spaces so it reads
+aloud. <code>prime</code> is for a program, joined without them so it
+matches exactly.</p>
+<h2 id="how-a-say-command-answers">How a Say command answers</h2>
+<p>Every Say command answers in one shape:</p>
+<pre><code>&lt;name&gt;: &lt;value&gt;</code></pre>
+<p>The name is the word in the Say menu and in the hotkey list, so the
+answer says which question was asked. That matters when you are walking
+the alphabet and lose your place: “Unmarked” does not say which key
+produced it, and “mark: unmarked” does.</p>
+<p>An empty answer keeps its label and says none – “find: none”, not “No
+find string” – and every count matches its noun.</p>
+<p><strong>One exception, and it is a rule of its own.</strong> A
+two-state answer whose value already names the setting says the state
+alone: Say Mark answers “Marked” or “Unmarked”, not “mark: marked”.
+Prefixing it would say the same word twice, and only the second word
+carries information. It is the shape a toggle uses everywhere else:
+“<setting> on” and “no <setting>”, never “<setting>: on”.</p>
+<p>Two commands use the column name instead of the menu word, because
+there the column is the more useful label and it is what the grid
+already calls that field:</p>
+<ul>
+<li>Say Cell answers <code>employer: Example Widgets Company</code></li>
+<li>Say Id answers <code>job_id: 3</code></li>
+</ul>
+<p>One press speaks. A second press within a moment shows the same text
+in a read-only window you can read line by line and copy from.</p>
+<h3 id="the-say-keys">The Say keys</h3>
+<ul>
+<li>Shift+A – added</li>
+<li>Shift+B – bookmark, how many are saved and the newest</li>
+<li>Shift+C – cell, as column and value</li>
+<li>Shift+D – database, as file and folder</li>
+<li>Shift+E – edited</li>
+<li>Shift+F – find</li>
+<li>Shift+G – goto, the jump search</li>
+<li>Shift+B – bookmark</li>
+<li>Shift+I – id</li>
+<li>Shift+J – jump, the text Jump to Record would offer next</li>
+<li>Shift+J – jump, the text the Jump dialog would offer next</li>
+<li>Shift+L – look</li>
+<li>Shift+M – mark</li>
+<li>Shift+N – notes</li>
+<li>Shift+O – order</li>
+<li>Shift+P – prime</li>
+<li>Shift+Q – query</li>
+<li>Shift+R – related</li>
+<li>Shift+S – select, the columns shown</li>
+<li>Shift+T – tags</li>
+<li>Shift+U – url</li>
+<li>Shift+V – replacement value, the text Replace would offer next</li>
+<li>Shift+V – replace, the text Replace would offer and what it would
+put there</li>
+<li>Shift+W – where, the filter</li>
+<li>Shift+X – regex replace, the pattern Regex Replace would offer
+next</li>
+<li>Shift+Y – yield, how many rows</li>
+<li>Shift+H – here: the table, the row and the order</li>
+</ul>
+<p>Shift plus a letter answers a question. A letter on its own moves:
+type the first letters of a value and the list view goes there, in lower
+case and without regard to case. The two layers do not collide, which is
+why the Say commands live on Shift.</p>
+<p>Three letters are still unused – H, K and X – and are kept that way
+on purpose, so a new question can be added later without moving an
+answer somebody has learned. Pressing one of them says so rather than
+staying silent: the say layer always answers, because silence cannot be
+told from a key that did not register.</p>
+<p><strong>A command that opens a dialog with a value already in it has
+a value worth hearing first.</strong> That is what Shift+B, Shift+J and
+Shift+V are: the bookmark list, the text Jump would offer, and the pair
+Replace would offer. Hearing the answer is often enough, and the dialog
+never has to open.</p>
+<p><strong>none and blank are different answers.</strong> “none” means
+there is no value – nothing was ever set. “blank” means there is a value
+and it is empty. A listener cannot tell those apart from silence, and
+they are different facts.</p>
+<p>Shift+J used to open the Jump dialog. It now says the jump text
+instead, which is what Say Jump on that key was always meant to do. Jump
+to Record keeps Control+J.</p>
+<h2 id="credits-for-the-tutorial-voices">Credits for the tutorial
+voices</h2>
+<p>The spoken tutorials in <code>Tutorials.mkv</code> were produced with
+<a href="https://github.com/rhasspy/piper">piper</a>, which is MIT
+licensed, using two voices trained by Bryce Beattie and published in the
+<a href="https://huggingface.co/rhasspy/piper-voices">piper-voices</a>
+collection:</p>
+<ul>
+<li><strong>kristin (medium)</strong> – the narrator. A US English
+female voice trained from scratch on the <a
+href="https://keithito.com/LJ-Speech-Dataset/">LJ Speech dataset</a>,
+which is in the public domain.</li>
+<li><strong>john (medium)</strong> – the screen reader. A US English
+male voice built from <a href="https://librivox.org">LibriVox</a>
+recordings, which are in the public domain.</li>
+</ul>
+<p>Both were chosen because their training data carries no restriction
+on reuse. Several better-known piper voices do: the lessac voice comes
+from the Blizzard 2013 corpus, which permits research use only, and the
+ryan and hfc voices are licensed CC BY-NC-SA, which bars commercial use
+and requires share-alike terms that would conflict with the MIT licence
+on this repository.</p>
+<p>No acknowledgement is legally required for public domain material.
+These credits are here because the people who recorded and trained these
+voices deserve them.</p>
+</body>
+</html>

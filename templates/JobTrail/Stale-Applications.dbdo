@@ -1,0 +1,8 @@
+﻿; Stale-Applications.dbdo -- applications that have gone quiet.
+;
+; Jobs marked applied whose newest action is more than fourteen days old. These
+; are the ones worth a follow-up, and the ones people forget.
+
+table = jobs
+where = status = 'applied' AND job_id NOT IN (SELECT job_id FROM actions WHERE job_id IS NOT NULL AND action_date > date('now','-14 days'))
+order = applied_date

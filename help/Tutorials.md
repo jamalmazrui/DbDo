@@ -69,27 +69,44 @@ in the repository -- they are rebuilt by `scripts\buildTutorials`.
 - [11 - Mark and Unmark](#11-mark-and-unmark)
 - [12 - Inspecting a Record](#12-inspecting-a-record)
 - [13 - Work Search Record for a Claim or Counselor](#13-work-search-record-for-a-claim-or-counselor)
-- [00 - Overview and Table of Contents](#00-overview-and-table-of-contents)
-- [01 - Installing DbDo](#01-installing-dbdo)
-- [02 - Opening DbDo for the First Time](#02-opening-dbdo-for-the-first-time)
-- [03 - Adding a New Record](#03-adding-a-new-record)
-- [04 - Editing a Record](#04-editing-a-record)
-- [05 - Find and Jump](#05-find-and-jump)
-- [06 - Order and Where Filter](#06-order-and-where-filter)
-- [07 - Select the Columns You Hear](#07-select-the-columns-you-hear)
-- [08 - Report, Save and Copy](#08-report-save-and-copy)
-- [09 - Look and Prime](#09-look-and-prime)
+- [14 - Menus, Windows and Help](#14-menus-windows-and-help)
 - [10 - Related Records](#10-related-records)
 - [11 - Mark and Unmark](#11-mark-and-unmark)
 - [12 - Inspecting a Record](#12-inspecting-a-record)
 - [13 - Work Search Record for a Claim or Counselor](#13-work-search-record-for-a-claim-or-counselor)
+- [14 - Menus, Windows and Help](#14-menus-windows-and-help)
+- [10 - Related Records](#10-related-records)
+- [11 - Mark and Unmark](#11-mark-and-unmark)
+- [12 - Look and Prime](#12-look-and-prime)
+- [13 - Report, Save and Copy](#13-report-save-and-copy)
+- [14 - Work Search Record for a Claim or Counselor](#14-work-search-record-for-a-claim-or-counselor)
+- [10 - Related Records](#10-related-records)
+- [11 - Mark and Unmark](#11-mark-and-unmark)
+- [12 - Look and Prime](#12-look-and-prime)
+- [13 - Report, Save and Copy](#13-report-save-and-copy)
+- [14 - Work Search Record for a Claim or Counselor](#14-work-search-record-for-a-claim-or-counselor)
+- [00 - Overview and Table of Contents](#00-overview-and-table-of-contents)
+- [01 - Installing DbDo](#01-installing-dbdo)
+- [02 - Opening JobTrail](#02-opening-jobtrail)
+- [03 - Menus, Windows and Help](#03-menus-windows-and-help)
+- [04 - Adding a New Record](#04-adding-a-new-record)
+- [05 - Inspecting a Record](#05-inspecting-a-record)
+- [06 - Editing a Record](#06-editing-a-record)
+- [07 - Find and Jump](#07-find-and-jump)
+- [08 - Order and Where Filter](#08-order-and-where-filter)
+- [09 - Select the Columns You Hear](#09-select-the-columns-you-hear)
+- [10 - Related Records](#10-related-records)
+- [11 - Mark and Unmark](#11-mark-and-unmark)
+- [12 - Look and Prime](#12-look-and-prime)
+- [13 - Report, Save and Copy](#13-report-save-and-copy)
+- [14 - Work Search Record for a Claim or Counselor](#14-work-search-record-for-a-claim-or-counselor)
 - [1. Where to Go Next](#1-where-to-go-next)
 
 <!-- walkthrough: written by makeTutorial.py, do not edit between the markers -->
 
 ## 00 - Overview and Table of Contents
 
-Simulated walkthroughs of DbDo, made with AI: two synthetic voices, one working and one answering as a screen reader.
+A simulated walk through DbDo, made with AI: a person working, and a screen reader answering.
 
 ### Step 1
 
@@ -99,42 +116,42 @@ Screen reader:
 
 - I am John, the screen reader.
 
-Both voices are synthetic, made with piper from public domain recordings. They are introduced once, here.
+Both voices are synthetic, made with piper from public domain recordings. They introduce themselves once, here.
 
 ### Step 2: Alt+Control+D
 
-DbDo is a database manager for people who work by keyboard and ear. Every table is a list you arrow through.
+I am on the trail of an accessibility analyst job. I keep every lead, contact, and step in JobTrail, a job search database built on DbDo.
 
 Screen reader:
 
 - DbDo
 - Records list view
 
-SQLite, Access, spreadsheets and plain data all open the same way.
+DbDo opens databases of any kind. JobTrail is the one that comes with it.
 
-### Step 3
+### Step 3: Shift+H
 
-One installs it. Two opens it, and explains the grid and the Shift keys. Three and four add a New record and edit one.
+These walkthroughs follow me in order. One installs DbDo, two opens JobTrail, three learns the menus. Four to six add, inspect and edit a job.
+
+Screen reader:
+
+- here, jobs row 1 of 4, sort employer
 
 ### Step 4
 
-Five is Find and Jump. Six is Order and Where filter. Seven Selects the columns you hear. Eight is Report, Save and Copy.
+Then finding, ordering and filtering, choosing what I hear, following links, marking, the two computed columns, getting things out, and last, the work search record my counselor asks for.
 
-### Step 5
+Each one assumes the ones before it, so later ones say less.
 
-Nine is Look and Prime. Ten is Related records, eleven is Mark and Unmark, twelve inspects a record, and thirteen produces the Work Search Record for a claim or a counselor.
-
-Every key is named with the word it comes from, so key and command stay together.
-
-**Something to try:** Pick the one that matches today's job.
+**Something to try:** Take the next one: installing.
 
 ## 01 - Installing DbDo
 
-**Before you start:** You have downloaded DbDo underscore setup dot e x e, running a Windows screen reader.
+**Before you start:** The installer is downloaded, and a Windows screen reader is running.
 
 ### Step 1: Enter
 
-Run the installer. Windows asks first, because the file came from the internet.
+I run the installer. Windows asks first, because it came from the internet.
 
 Screen reader:
 
@@ -142,51 +159,47 @@ Screen reader:
 - The publisher could not be verified. Are you sure you want to run this software?
 - Run Button, alt+R
 
-DbDo is not code signed, so this appears for every download. Alt plus R runs it.
+DbDo is not code signed, so this appears for every download.
 
-### Step 2: Alt+Y
+### Step 2: Alt+R
 
-Then administrator rights, because DbDo installs for everybody on the computer.
+Alt plus R, Run. Then Windows asks for administrator rights, because DbDo installs for everyone.
 
 Screen reader:
 
 - User Account Control
 
-The prompt can open behind other windows. If nothing happens, press Alt plus Tab and look for it.
+The prompt can open behind other windows. If nothing happens, Alt plus Tab finds it.
 
-### Step 3: Enter
+### Step 3: Alt+Y
 
-First the folder. Program Files is the default, and Enter presses Next, the page's default button.
+Alt plus Y, Yes. The first page is the folder. Enter presses Next, the page's default button.
 
 Screen reader:
 
-- Setup - DbDo 1.0.168 dialog
+- Setup - DbDo dialog
 - To continue, click Next. If you would like to select a different folder, click Browse.
 - Edit, C colon backslash Program Files backslash DbDo
 
-Install DbDo again later and this page is skipped: the update goes where the last one went.
+A later update skips this page and goes where the last one went.
 
 ### Step 4: Enter
-
-Enter presses Install, the default button here.
 
 Screen reader:
 
 - Click Install to continue with the installation, or click Back if you want to review or change any settings.
 - Install Button, Alt+i
 
-A few seconds of copying, and nothing is asked.
+### Step 5: Enter
 
-### Step 5: Tab
-
-The last page lists the optional parts. Arrow through them; Space ticks or unticks the one you are on.
+Enter again presses Install. The last page lists the extras. I arrow through them; Space ticks one.
 
 Screen reader:
 
 - Setup has finished installing DbDo on your computer.
 - Tree view, Install scripts for improving use with the JAWS screen reader, checked, 1 of 6
 
-A screen reader line appears only for a reader you actually have installed.
+A screen reader line appears only for a reader you actually have.
 
 ### Step 6: DownArrow
 
@@ -196,64 +209,31 @@ Screen reader:
 
 ### Step 7: DownArrow
 
-The local AI comes next, in two parts, both unticked: Ollama, which runs models on this computer, then the model itself.
+Ollama runs AI on my own computer. I want it, so I tick it.
 
 Screen reader:
 
 - Install Ollama 0.34.2, not checked, 3 of 6
 
-If Ollama is already here the line says Update or Reinstall instead, with the versions you have and would get.
-
-### Step 8: DownArrow
+### Step 8: Space
 
 Screen reader:
 
-- Install the llama3.2 model, which DbDo asks questions of (about 2 GB), not checked, 4 of 6
+- checked
 
-Ollama is installed first and the model second, so ticking both works in one pass.
+The model comes next, about 2 gigabytes, and installs after Ollama.
 
-### Step 9: DownArrow
+### Step 9: Enter
 
-Then the launch, ticked, and the guide, not.
-
-Screen reader:
-
-- Launch DbDo (Alt+Control+D starts it any time), checked, 5 of 6
-
-Alt plus Control plus D starts DbDo from anywhere in Windows -- D for DbDo.
-
-### Step 10: Enter
-
-Enter presses Finish.
+Launch is ticked already. Enter presses Finish, and a results box says what was done.
 
 Screen reader:
 
 - DbDo Setup Results dialog
-- DbDo 1.0.168 is installed. Program files, C colon backslash Program Files backslash DbDo
+- DbDo 1.0.172 is installed. Program files, C colon backslash Program Files backslash DbDo
 - OK Button
 
-The results box always appears, and DbDo waits for it.
-
-### Step 11: Enter
-
-Enter again, and DbDo starts.
-
-Screen reader:
-
-- DbDo
-- JobTrail dot d b, actions
-- Records list view
-- 2026-09-24 Follow up on the Accessibility Analyst interview awaiting reply, 1 of 7
-
-**Something to try:** After it finishes, open the log the results box named and find the line saying where DbDo was installed.
-
-## 02 - Opening DbDo for the First Time
-
-**Before you start:** DbDo is installed and not yet opened, so it starts on the JobTrail sample.
-
-### Step 1: Alt+Control+D
-
-Alt plus Control plus D starts DbDo from anywhere in Windows -- D for DbDo. First run opens the sample database, JobTrail.
+### Step 10: Enter
 
 Screen reader:
 
@@ -261,692 +241,494 @@ Screen reader:
 - JobTrail dot d b, jobs
 - Records list view
 - Demo Data Cooperative (made up) Data Quality Specialist rejected, 1 of 4
+- DbDo ready
 
-After the first time, DbDo opens whatever you had open last.
+Alt plus Control plus D starts DbDo from anywhere afterwards. D for DbDo.
 
-### Step 2
+**Something to try:** Open the log the results box names, and find where DbDo was installed.
 
-A window opened, so the title was read. Focus landed, so the control was read, then its value. Name, role, value, state -- that order never changes.
+## 02 - Opening JobTrail
 
-Screen reader people call it nervish -- name, role, value, state, hint. Learn the order once and every announcement makes sense.
+**Before you start:** DbDo has just opened JobTrail on the jobs table.
 
-### Step 3
+### Step 1: DownArrow
 
-A table is just a list you arrow through. Each row is one job, and you hear three things: the employer, the role, and where it stands.
-
-Screen reader:
-
-- Demo Data Cooperative (made up) Data Quality Specialist rejected, 1 of 4
-
-Three fields, chosen so you can decide whether to keep going before the row finishes.
-
-### Step 4: DownArrow
-
-Arrow down.
+Each row is one job I am after: employer, title, and where it stands.
 
 Screen reader:
 
 - Example Widgets Company (sample employer) Accessibility Analyst interviewing, 2 of 4
 
-DownArrow interrupts speech, so you can move on as soon as you have heard enough.
+That one is the job I want most.
 
-### Step 5: RightArrow
+### Step 2: RightArrow
 
-It is a grid. Down and Up move between rows -- one record each. Left and Right move between columns -- one field each.
+It is a grid. Down and Up move between records; Left and Right between fields.
 
 Screen reader:
 
 - Accessibility Analyst
 
-Only the columns you chose are in the grid. The record holds more, and Enter opens all of it.
+### Step 3: Shift+C
 
-### Step 6: Shift+C
-
-Shift plus C is Say Cell: the column you are on, and its value here.
+Shift plus C, Say Cell -- C for Cell. The field I am on, and its value.
 
 Screen reader:
 
 - title, Accessibility Analyst
 
-C for Cell. It never says the table or the sort, which is what Say Status on Shift plus Z is for.
+Every Shift and letter asks a question, and none changes anything.
 
-### Step 7: DownArrow
+### Step 4: DownArrow
 
-Down keeps the column, so you can compare one field down a list.
+Down keeps the field, so I can compare one field down the list.
 
 Screen reader:
 
 - Digital Services Assistant
 
-Control plus Home and Control plus End go to the first and last record, and keep the column too.
+### Step 5: Shift+H
 
-### Step 8: i
-
-Type a letter, and the list goes to the next row starting with it, the way any Windows list does. Type two or three letters for a closer landing.
+My screen reader's say line key reads the whole row again. Shift plus H, Say Here, gives the summary. H for Here.
 
 Screen reader:
 
-- Illustration City Library (fictional) Digital Services Assistant lead, 3 of 4
+- here, jobs row 3 of 4, sort employer
 
-Lower case is fine, and case does not matter.
+### Step 6: Control+PageDown
 
-### Step 9: Shift+Z
-
-Your screen reader's say line key reads the row again. Shift plus Z is Say Status: table, row of how many, and order.
+Control plus Page Down moves to the next table. JobTrail gives me five: actions, contacts, docs, jobs and stories.
 
 Screen reader:
 
-- status: jobs row 3 of 4, sort employer
-
-A letter on its own moves. Shift plus a letter answers. The two layers never collide.
-
-### Step 10: Shift+C
-
-Shift plus N is Say Notes, which reads the note on this record, and Shift plus L is Say Look, the one-line summary of it.
-
-Screen reader:
-
-- notes, Illustrative record. Heard about it at a sample networking event; not applied yet.
-
-Every answer starts with the name of what you asked for, so you know which key you pressed.
-
-### Step 11: Control+PageDown
-
-Control plus Page Down moves to the next table, the way Page Down moves through tabs everywhere else. JobTrail gives you five: actions, contacts, docs, jobs and stories.
-
-Screen reader:
-
-- JobTrail dot d b, contacts
+- JobTrail dot d b, stories
 - Records list view
-- Alvarez Robin Sample Employment Network (illustration), 1 of 4
 
-F7 lists them to pick from instead. Two more tables exist that DbDo keeps for itself, holding the pick lists and the links between records; you are not offered those.
+Two more tables hold DbDo's own pick lists and links. It keeps those out of the way.
 
-### Step 12
+**Something to try:** Arrow through the four jobs, then Left and Right through one of them, checking each cell with Shift plus C.
 
-That is the whole idea, and it is a small one: a table is a list, a letter moves, Shift plus a letter answers, and everything else is a menu away.
-
-Alt plus F10 lists every command in one window you can filter by typing.
-
-**Something to try:** Arrow through all four jobs, reading each row with your say line key, and notice which of the three fields you actually need before moving on.
-
-## 03 - Adding a New Record
+## 03 - Menus, Windows and Help
 
 **Before you start:** JobTrail is open on the jobs table.
 
+### Step 1: Alt
+
+Alt opens the menu bar. Each menu's first letter opens it directly.
+
+Screen reader:
+
+- Menu bar
+- File, F
+
+File, Edit, Navigate, Query, Misc, Window, Help. Every letter differs.
+
+### Step 2: DownArrow
+
+Down Arrow opens File. Each item gives its key, then its letter.
+
+Screen reader:
+
+- New Database..., N
+
+### Step 3: DownArrow
+
+Screen reader:
+
+- Add Table..., A
+
+### Step 4: DownArrow
+
+Screen reader:
+
+- Open Database..., Control+O, O
+
+The key works from anywhere. The letter works while the menu is open. They match whenever the key has a letter.
+
+### Step 5: Escape
+
+A few menus hold a submenu for a large or rarely used group. Edit, B for Bulk Marking, is one. Right Arrow goes in; Left Arrow comes back.
+
+Screen reader:
+
+- Leaving menus
+
+The others: Query, S for Say, Misc, T for Tools, and Help, M for More Documents. None goes deeper than one level.
+
+### Step 6: Control+Tab
+
+DbDo can keep several tables open, each in its own window -- the multiple document interface. Control plus Tab moves among DbDo windows.
+
+Screen reader:
+
+- JobTrail dot d b, actions
+- Records list view
+
+Control plus Shift plus T opens a table in a new window. Control plus F4 closes one.
+
+### Step 7: Control+F1
+
+F1 is help: the guide. Shift plus F1 is the history, Control plus F1 describes the next key I press.
+
+Screen reader:
+
+- Key describer on
+
+Help also holds the ReadMe, Hotkeys, the FAQ, and Play Tutorials.
+
+### Step 8: F11
+
+F11 is Elevate Version -- elevate sounds like eleven. It checks for a newer DbDo.
+
+Screen reader:
+
+- Elevate Version dialog
+
+Nothing downloads without asking.
+
+**Something to try:** Open Help and find the document you would read second.
+
+## 04 - Adding a New Record
+
+**Before you start:** JobTrail is open on the jobs table. This morning I found a support analyst opening at Widget Works.
+
 ### Step 1: Control+N
 
-Press Control plus N for a New record -- N for New, as in most Windows programs. DbDo opens a dialog with one box per field, in the order you would fill them in.
+Control plus N, New record -- N for New.
 
 Screen reader:
 
 - New Record dialog
 - Employer edit
 
-The first box is the employer, because that is what you know first about a job.
+One box per field, in the order I would fill them in.
 
 ### Step 2: Tab
 
-Type the employer and press Tab.
+The employer, then Tab to the title.
 
 Screen reader:
 
 - Title edit
 
-Tab moves forward, Shift plus Tab moves back. The order is the order of the fields in the table.
-
 ### Step 3: Tab
 
-Type the role, Tab again, and you reach status. Listen to the end of this one.
+The title, then Tab to status.
 
 Screen reader:
 
 - Status edit
 - F4 picks from 7 values
 
-A field with a pick list says so. The tip is spoken when you arrive and shown in the status line.
-
 ### Step 4: F4
 
-Press F4 to open the list, arrow to the value you want, and press Enter.
+F4 opens the pick list. F4 picks, all through Homer programs.
 
 Screen reader:
 
 - Status list box, applied, 1 of 7
 
-Alt plus DownArrow does the same thing, which is the Windows way of opening a combo.
-
 ### Step 5: l
-
-Type the first letter to jump instead of arrowing. L takes you to lead, which is where a job starts.
 
 Screen reader:
 
 - lead, 4 of 7
 
-The values are alphabetical so that first letters land where you expect.
+### Step 6: Control+Enter
 
-### Step 6: Enter
-
-Press Enter to take it. The value goes into the field and you are back in the dialog.
-
-Screen reader:
-
-- Status edit, lead
-
-Twenty three fields in JobTrail have pick lists, including the states and countries in contacts.
-
-### Step 7: Control+Enter
-
-Fill in what you know and leave the rest. Press Control plus Enter from anywhere in the dialog to save.
+Enter takes it. Control plus Enter saves the record from anywhere in the dialog.
 
 Screen reader:
 
 - Record added
-- Records list view
 - Widget Works (your own entry) Support Analyst lead, 5 of 5
 
-Control plus Enter saves from any field, so you never have to find the OK button.
+**Something to try:** Add a job you are actually after, with its status.
 
-**Something to try:** Add a second job at the same employer and notice that DbDo refuses a duplicate of the same employer and title.
+## 05 - Inspecting a Record
 
-## 04 - Editing a Record
+**Before you start:** JobTrail is open on the jobs table, on Example Widgets.
 
-**Before you start:** JobTrail is open on the jobs table, on a job you have applied to.
+### Step 1: Control+I
 
-### Step 1: Enter
-
-Press Enter on a row to open it for editing. The same dialog you used to add a record, with the values in it.
+A row speaks three fields. Control plus I, Inspect Record, reads them all.
 
 Screen reader:
 
-- Edit Record dialog
-- Employer edit, Example Widgets Company (sample employer)
+- Inspect Record dialog
+- employer: Example Widgets Company (sample employer)
 
-The caret starts at the beginning of the box, not at the end of the text.
+I for Inspect. A read-only window; Escape closes it.
 
-### Step 2: F4
+### Step 2: Escape
 
-Tab to the field you want. Status has a pick list, so F4 offers the values rather than making you spell one.
-
-Screen reader:
-
-- Status list box, interviewing, 3 of 7
-
-Picking rather than typing is how a vocabulary stays consistent across a hundred records.
-
-### Step 3: Control+Enter
-
-Enter takes the highlighted value from the list; Control plus Enter saves the record.
+For one fact, I ask instead. Shift plus N, Say Notes.
 
 Screen reader:
 
-- Record saved
 - Records list view
 
-Escape leaves without saving, and DbDo asks first if you changed anything.
-
-### Step 4: F2
-
-For one field there is a shorter way. Move to the column you want with Right Arrow, then press F2 to edit just that cell.
+### Step 3: Shift+N
 
 Screen reader:
 
-- Cell edit, interviewing
+- notes, Illustrative record. Interview booked for the 24th; ask about screen reader testing tools.
 
-F2 is the Windows key for editing in place, and it works the same here.
+Shift plus T, Say Tags, and Shift plus U, Say URL, work the same way.
 
-### Step 5: F4
+### Step 4: Shift+E
 
-The cell editor has the same pick list. F4, a letter, Enter.
-
-Screen reader:
-
-- Cell list box, offer, 5 of 7
-
-Anything a dialog can do to a field, the cell editor can do to the same field.
-
-### Step 6: Enter
-
-Enter saves the cell.
+Shift plus E, Say Edited: when I last changed it.
 
 Screen reader:
 
-- offer
+- edited, September 19, 2026 at 10:01 PM
 
-Shift plus E is Say Edited, and it says when the record was last changed, if you want to be sure it took.
+Shift plus A, Say Added, says when it arrived.
 
-### Step 7: Alt+Shift+N
+### Step 5: Alt+Shift+N
 
-Some fields are longer than a line. Alt plus Shift plus N edits the Notes -- N for Notes -- in a window of their own, and Control plus Enter saves it.
+Alt plus Shift plus N edits the notes in their own window, for a long one.
 
 Screen reader:
 
 - Notes dialog
 - Notes edit, multiline, Illustrative record. Interview booked for the 24th.
 
-Alt plus Shift plus T does the same for tags, and Alt plus Shift plus U for the web address.
+Control plus Enter saves; Escape leaves.
 
-**Something to try:** Change a status with F2, then press Shift plus E and notice that the edited time has moved.
+**Something to try:** Walk the Shift keys on one record and notice which three you want while arrowing.
 
-## 05 - Find and Jump
+## 06 - Editing a Record
 
-**Before you start:** JobTrail is open on the jobs table, sorted by employer.
+**Before you start:** JobTrail is open on the jobs table. The interview at Example Widgets went well, and they made an offer.
 
-### Step 1: exa
+### Step 1: Enter
 
-The quickest way needs no command at all. Type the first letters of what you want, and the list goes there.
-
-Screen reader:
-
-- Example Widgets Company (sample employer) Accessibility Analyst interviewing, 2 of 4
-
-Typing searches the first column, which is why the first column is the one you would look a record up by.
-
-### Step 2: Control+J
-
-Control plus J is Jump to Record -- J for Jump -- and it searches one column. DbDo asks for the text and says which column it will search.
-
-Screen reader:
-
-- Jump to Match (column, employer) dialog
-- Text to search for combo box, blank, ALT+T
-
-The box remembers your last ten answers, so a search you repeat is one arrow away.
-
-### Step 3: Enter
-
-Type part of the value and press Enter. DbDo moves to the first row that contains it.
-
-Screen reader:
-
-- Illustration City Library (fictional) Digital Services Assistant lead, 3 of 4
-
-Control plus Shift plus J goes backwards to the previous match.
-
-### Step 4: Shift+G
-
-Shift plus G is Say Goto -- G for Goto, the jump search -- and it says what you looked for last, for when you have lost your place.
-
-Screen reader:
-
-- goto: library in employer
-
-It says none when no jump is active, rather than saying nothing.
-
-### Step 5: Control+F
-
-Control plus F is Find -- F for Find, as everywhere in Windows -- and it searches every column, including the notes and the posting text.
-
-Screen reader:
-
-- Find dialog
-- Text combo box, blank
-
-Jump is one column and fast. Find is all of them and thorough.
-
-### Step 6: Enter
-
-Type what you want and press Enter.
-
-Screen reader:
-
-- Sample Health Network (illustration only) Records Coordinator applied, 4 of 4
-
-F3 repeats the find forwards, and Control plus Shift plus F goes back.
-
-### Step 7: Shift+F
-
-Shift plus F is Say Find, the same way Shift plus G is Say Goto: F for Find, G for Goto.
-
-Screen reader:
-
-- find: schedule a
-
-Every Shift plus letter answer begins with the name of what you asked for.
-
-**Something to try:** Find a word you know is in a note rather than in a title, and notice which of the three ways gets you there.
-
-## 06 - Order and Where Filter
-
-**Before you start:** JobTrail is open on the jobs table.
-
-### Step 1: Control+O
-
-Control plus O sets the Order -- O for Order. Sorting is what it does; Order is what it is called, and O is the key. DbDo offers the columns as a list rather than asking you to type one.
-
-Screen reader:
-
-- Order Records dialog
-- Column to sort by list box, employer, 4 of 16, ALT+C
-
-The list starts on the column the table is sorted by now.
-
-### Step 2: Enter
-
-Arrow to the column you want and press Enter. The list is read again in the new order.
-
-Screen reader:
-
-- Sorted by status
-- Records list view
-- Sample Health Network (illustration only) Records Coordinator applied, 1 of 4
-
-Sorting alphabetically keeps a row in the same place every time you open the table, which is what makes first letters worth typing.
-
-### Step 3: Shift+O
-
-Shift plus O is Say Order, which says the current order at any time. Same O, asked rather than set.
-
-Screen reader:
-
-- order: status
-
-Shift plus Z, Say Status, gives the order along with the table and the row.
-
-### Step 4: Control+W
-
-Control plus W sets the Where filter -- W for Where, as in the SQL word -- a condition deciding which rows you hear at all.
-
-Screen reader:
-
-- Where Filter dialog
-- Filter combo box, blank, ALT+F
-
-The condition is SQL, and the box remembers the last ten you used.
-
-### Step 5: Enter
-
-Type the condition and press Enter.
-
-Screen reader:
-
-- 2 rows
-- Records list view
-- Example Widgets Company (sample employer) Accessibility Analyst interviewing, 1 of 2
-
-A count of zero is an answer too, and DbDo says it plainly rather than treating it as a fault.
-
-### Step 6: Shift+W
-
-Shift plus W is Say Where filter -- W for Where -- and Shift plus Y is Say Yield, how many rows it leaves.
-
-Screen reader:
-
-- where: status = 'applied'
-
-Both say none and zero when there is nothing to report.
-
-### Step 7: Control+Shift+W
-
-Control plus Shift plus W clears the Where filter, and the whole table comes back. Shift reverses a command all through DbDo.
-
-Screen reader:
-
-- where: none
-- 4 rows
-
-DbDo remembers the sort and the filter for each table, so they are still there the next time you open it.
-
-**Something to try:** Set a Where filter for the jobs you have applied to, Order them by the date you applied, then clear both and hear the count come back.
-
-## 07 - Select the Columns You Hear
-
-**Before you start:** JobTrail is open on the jobs table, which shows the employer, the role and the status.
-
-### Step 1: Shift+S
-
-A row is heard rather than seen, so the columns it carries are worth a thought. Shift plus S is Say Select -- S for Select -- and names the ones you have.
-
-Screen reader:
-
-- select: employer, title, status
-
-Three is the usual number. Four is the most that stays comfortable.
-
-### Step 2: Control+S
-
-Control plus S opens Select Columns -- S for Select. The columns you hear are the ones selected here. Every column in the table is there, ticked or not.
-
-Screen reader:
-
-- Select Columns dialog
-- Columns check list box, employer check box checked, 1 of 16, ALT+C
-
-The order in the dialog is the order in the table, which is the order somebody would fill the fields in.
-
-### Step 3: DownArrow
-
-Arrow down the list and press Space to tick or untick a column.
-
-Screen reader:
-
-- title check box checked, 2 of 16
-
-The ticked ones are read in the order they appear here, so the first one is the one you hear first.
-
-### Step 4: Space
-
-Tick the applied date as a fourth column.
-
-Screen reader:
-
-- applied underscore date check box checked, 11 of 16
-
-A date is a good fourth column because it is short. A note is a bad one because it is long.
-
-### Step 5: Control+Enter
-
-Press Control plus Enter to take the change. The list is read again with the new columns.
-
-Screen reader:
-
-- Records list view
-- Example Widgets Company (sample employer) Accessibility Analyst interviewing 2026-09-02, 2 of 4
-
-Everything you did not choose is still there. It is one keystroke away in the record.
-
-### Step 6: Enter
-
-Press Enter on a row to hear every field, whether it is a column or not.
+Enter opens the record in the same dialog I used to add one.
 
 Screen reader:
 
 - Edit Record dialog
 - Employer edit, Example Widgets Company (sample employer)
 
-Choosing columns decides what you hear while moving, not what the record holds.
+### Step 2: o
 
-### Step 7: Escape
+Tab to status, F4 for the list, O for offer.
 
-Escape closes it. DbDo remembers your columns for this table, so the choice is made once.
+Screen reader:
+
+- offer, 5 of 7
+
+### Step 3: Control+Enter
+
+Screen reader:
+
+- Record saved
+- Records list view
+
+### Step 4: F2
+
+For one field, F2 edits the cell in place -- the same F2 that renames a file in Windows.
+
+Screen reader:
+
+- Cell edit, offer
+
+Enter saves the cell and keeps my place.
+
+### Step 5: Escape
+
+Shift plus C checks it.
 
 Screen reader:
 
 - Records list view
 
-The choice is kept in a settings file beside the database, along with the sort and the filter.
-
-**Something to try:** Add a fourth column, listen to ten rows, then take it away again and decide which you preferred.
-
-## 08 - Report, Save and Copy
-
-**Before you start:** JobTrail is open on the actions table, which is the log of everything you have done.
-
-### Step 1: Control+C
-
-Start with the simplest output there is: one record. Control plus C copies the record you are on -- C for Copy, as everywhere -- to the clipboard, as labelled lines.
+### Step 6: Shift+C
 
 Screen reader:
 
-- Record copied
+- status, offer
 
-Alt plus Shift plus C adds a record to what is already on the clipboard, so you can gather several.
+**Something to try:** Change the status of one of your own jobs both ways, and check it with Shift plus C.
 
-### Step 2: Alt+Shift+R
+## 07 - Find and Jump
 
-Alt plus Shift plus R runs a Report -- R for Report, and Shift because Alt plus R belongs to the menu bar. JobTrail comes with six, and DbDo offers them as a list.
+**Before you start:** JobTrail is open on the jobs table.
 
-Screen reader:
+### Step 1: exa
 
-- Run Report dialog
-- Output list box, application underscore history, 1 of 6, ALT+O
-
-A report reads the whole table rather than the rows on screen, so the filter does not change what it produces.
-
-### Step 3: w
-
-The one that matters most is the work search record: every countable employer contact, in the shape an agency asks for.
+The quickest way is typing. The first letters of an employer go there.
 
 Screen reader:
 
-- work underscore search underscore record, 6 of 6
+- Example Widgets Company (sample employer) Accessibility Analyst interviewing, 2 of 4
 
-The values are alphabetical, so the first letter lands you near what you want.
+### Step 2: Control+J
+
+Control plus J, Jump to Record -- J for Jump. It searches the field I am on.
+
+Screen reader:
+
+- Jump to Match (column, employer) dialog
+- Text combo box, blank, ALT+T
+
+### Step 3: Enter
+
+Screen reader:
+
+- Illustration City Library (fictional) Digital Services Assistant lead, 3 of 4
+
+### Step 4: Control+F
+
+Control plus F, Find -- it searches every field, notes included.
+
+Screen reader:
+
+- Find dialog
+- Text combo box, blank, ALT+T
+
+### Step 5: Enter
+
+Screen reader:
+
+- Sample Health Network (illustration only) Records Coordinator applied, 4 of 4
+
+F3 searches again. Shift reverses: Shift plus F3 searches back, Control plus Shift plus F finds backwards.
+
+### Step 6: Shift+F
+
+Shift plus F, Say Find, reminds me what I looked for.
+
+Screen reader:
+
+- find, screen reader
+
+**Something to try:** Find a job by a word in its notes, then jump back to it by employer.
+
+## 08 - Order and Where Filter
+
+**Before you start:** JobTrail is open on the jobs table.
+
+### Step 1: Alt+O
+
+Alt plus O, Order -- O for Order. Control plus O is Open everywhere, so Order takes Alt.
+
+Screen reader:
+
+- Order Records dialog
+- Column to sort by list box, employer, 4 of 16, ALT+C
+
+### Step 2: s
+
+Screen reader:
+
+- status, 13 of 16
+
+### Step 3: Enter
+
+Screen reader:
+
+- Sorted by status
+- Sample Health Network (illustration only) Records Coordinator applied, 1 of 4
+
+Shift plus O, Say Order, says it later.
+
+### Step 4: Control+W
+
+Control plus W, Where filter -- W for Where, the word SQL uses. It decides which rows I hear.
+
+Screen reader:
+
+- Where Filter dialog
+- Filter combo box, blank, ALT+F
+
+### Step 5: Enter
+
+I want what is still moving: status not rejected.
+
+Screen reader:
+
+- 3 rows
+
+Shift plus W, Say Where, and Shift plus Y, Say Yield -- how many rows it left.
+
+### Step 6: Control+Shift+W
+
+Control plus Shift plus W clears it. Adding Shift reverses.
+
+Screen reader:
+
+- 4 rows
+
+**Something to try:** Filter to the jobs you applied to, order them by date applied, then clear the filter.
+
+## 09 - Select the Columns You Hear
+
+**Before you start:** JobTrail is open on the jobs table.
+
+### Step 1: Shift+S
+
+Shift plus S, Say Select, names the fields each row speaks.
+
+Screen reader:
+
+- select, employer, title, status
+
+### Step 2: Alt+S
+
+Alt plus S, Select Columns -- Control plus S saves, so Select takes Alt.
+
+Screen reader:
+
+- Select Columns dialog
+- Columns check list box, employer check box checked, 1 of 16, ALT+C
+
+### Step 3: Space
+
+I add the date I applied. Space ticks it.
+
+Screen reader:
+
+- applied underscore date check box checked, 11 of 16
 
 ### Step 4: Enter
 
-Press Enter.
-
 Screen reader:
 
-- Report written
-- EdSharp, work underscore search underscore record dot m d
+- Records list view
+- Example Widgets Company (sample employer) Accessibility Analyst interviewing 2026-09-02, 2 of 4
 
-It is Markdown, so pandoc turns it into a web page to send or a Word file to hand across a desk.
+Three or four fields is the useful range. Every row is heard, so every field costs time.
 
-### Step 5: Control+Shift+S
-
-For a whole table rather than a report, Control plus Shift plus S is Save As -- S for Save -- and writes the table to a file. DbDo asks for the name and decides the format from what you type.
-
-Screen reader:
-
-- Save As dialog
-- File name edit
-
-Type a name ending in x l s x for a spreadsheet, c s v for plain data, or d o c x for a document.
-
-### Step 6: Enter
-
-Type the name and press Enter. No Excel needed.
-
-Screen reader:
-
-- Saved actions dot x l s x
-
-The header row is frozen and the columns are sized, so the file is usable by somebody else as it is.
-
-### Step 7: Shift+Y
-
-Shift plus Y is Say Yield -- Y for Yield, what the table yielded -- so it says how many rows went into the file.
-
-Screen reader:
-
-- yield: 7 rows
-
-Every count in DbDo matches its noun, so one row is one row rather than one rows.
-
-**Something to try:** Produce the work search record for the last four weeks and read it in your editor before sending it to anybody.
-
-## 09 - Look and Prime
-
-**Before you start:** JobTrail is open on the jobs table, on the Example Widgets job.
-
-### Step 1: Shift+L
-
-Every table DbDo makes has two columns nobody types into. They are computed from the fields beside them, and each one has a job. Shift plus L is Say Look -- L for Look -- and it says the first.
-
-Screen reader:
-
-- look: Example Widgets Company (sample employer) | Accessibility Analyst | interviewing
-
-Look is what this record looks like when it is mentioned somewhere else.
-
-### Step 2
-
-The idea is older than DbDo. In a form of fields, a field pointing at another table shows a number, and a number is not a record. Look is the glimpse that goes with it.
-
-The parts are separated by a space, a bar and a space, because a screen reader pauses at punctuation and the parts then arrive as parts.
-
-### Step 3: Shift+R
-
-Shift plus R is Say Related -- R for Related -- and it shows the look working. Every record this one is related to is listed by its look, so you know which is which without opening any of them.
-
-Screen reader:
-
-- related, actions (1 record)
-- 2026-09-08 bar First interview for Accessibility Analyst bar interview scheduled
-
-A glimpse is deliberately not the whole record. Enter opens the record when you want the rest.
-
-### Step 4: Shift+P
-
-The second column is prime, which is short for primary key. Shift plus P is Say Prime -- P for Prime -- and it says it.
-
-Screen reader:
-
-- prime: Example Widgets Company (sample employer)|Accessibility Analyst
-
-Bare bars, no spaces. This one is for a program rather than for you.
-
-### Step 5: Shift+I
-
-The table does have a formal key, a number the database hands out. Shift plus I is Say Id -- I for Id -- and it says that number. Notice how little it tells you.
-
-Screen reader:
-
-- job_id: 1
-
-A number says nothing about the record. What decides whether two rows are the same job is the employer and the title.
-
-### Step 6: Shift+P
-
-So prime is built from exactly the fields that make a record unique. Changing the rule means editing one expression, and matching becomes one comparison.
-
-Screen reader:
-
-- prime, Example Widgets Company (sample employer)|Accessibility Analyst
-
-The maps table depends on it: a link is one prime, a kind, and another prime.
-
-### Step 7
-
-One line to remember. Look is for a person, joined with spaces so it reads aloud. Prime is for a program, joined without them so it matches exactly.
-
-Neither is ever typed, and neither can be edited: the database keeps both current as the fields beside them change.
-
-**Something to try:** Open a contact and press Shift plus R, then work out which job each line came from without opening anything.
+**Something to try:** Choose three fields for the actions table that tell you what to do next.
 
 ## 10 - Related Records
 
-**Before you start:** JobTrail is open on the jobs table, on the Example Widgets job.
+**Before you start:** JobTrail is open on the jobs table, on Example Widgets.
 
 ### Step 1: Shift+R
 
-Shift plus R is Say Related -- R for Related. It names every record connected to this one, each by its look, so you know which is which without opening any.
+Shift plus R, Say Related: every record linked to this job.
 
 Screen reader:
 
 - related, actions (1 record)
 - 2026-09-08 bar First interview for Accessibility Analyst bar interview scheduled
 
-Connections come from two places: a field holding another record's id, and the maps table DbDo keeps for links across tables.
-
 ### Step 2: Alt+RightArrow
 
-Alt plus Right Arrow enters the related records, the way Right Arrow goes deeper in a tree.
+Alt plus Right Arrow goes in, the way it goes forward in a browser.
 
 Screen reader:
 
 - JobTrail dot d b, actions
-- Records list view
 - 2026-09-08 First interview for Accessibility Analyst interview scheduled, 1 of 1
-
-The filter is set for you: only the actions belonging to that job.
 
 ### Step 3: Backspace
 
-Backspace goes back up, as it does everywhere in Windows.
+Backspace comes back, as it goes up a level everywhere.
 
 Screen reader:
 
@@ -955,221 +737,182 @@ Screen reader:
 
 Alt plus Left Arrow does the same.
 
-### Step 4: Shift+R
-
-The link a record does not hold itself lives in maps: this document was sent for that job, this person is a contact for it.
-
-Screen reader:
-
-- related, docs via sent_for (2 records)
-
-DbDo writes those rows; you are not offered the maps table when choosing one.
-
-### Step 5
-
-Say Related is a list, not a trip. Use it to decide, then Alt plus Right Arrow when you mean to go.
-
-Control plus F1, the key describer, names any key you have forgotten.
-
-**Something to try:** From a contact, reach the job they are a contact for, then come back with Backspace.
+**Something to try:** From a contact, reach the job they belong to, and come back.
 
 ## 11 - Mark and Unmark
 
-**Before you start:** JobTrail is open on the jobs table.
+**Before you start:** JobTrail is open on the jobs table. I want to follow up on two of them this week.
 
 ### Step 1: Control+M
 
-Control plus M Marks the record you are on -- M for Mark.
+Control plus M, Mark -- M for Mark.
 
 Screen reader:
 
 - Marked
 
-One word, because the state is the whole answer.
+### Step 2: Control+Shift+M
 
-### Step 2: Control+U
-
-Control plus U Unmarks it -- U for Unmark. The pair sits together on the keyboard and in the menu.
+Control plus Shift plus M unmarks. Adding Shift reverses.
 
 Screen reader:
 
 - Unmarked
 
-A toggle says the state it reached, never the key that got there.
+Shift plus M, Say Mark, asks without changing anything.
 
-### Step 3: Shift+M
+### Step 3: Control+DownArrow
 
-Shift plus M is Say Mark, which tells you where you stand without changing anything.
-
-Screen reader:
-
-- Unmarked
-
-Every Shift key asks; no Shift key changes.
-
-### Step 4: Control+DownArrow
-
-Control plus Down Arrow steps to the next marked record, Control plus Up Arrow to the previous, so a scattered set reads as a list.
+Control plus Down Arrow steps to the next marked record.
 
 Screen reader:
 
 - Sample Health Network (illustration only) Records Coordinator applied, 4 of 4
 
-Marks live for the session and are remembered per table.
+### Step 4: Shift+Space
 
-### Step 5: Shift+End
-
-Shift plus Home marks everything from here to the top; Shift plus End, to the bottom. Alt plus Shift plus Home and End undo those.
+Shift plus Space counts them.
 
 Screen reader:
 
-- 3 marked
+- marked rows, 2 of 4
 
-The same keys that select to top and bottom everywhere else in Windows.
+### Step 5: Control+A
 
-### Step 6: Shift+Space
-
-Marks are how you act on some records rather than all: copy them together, or delete them in one go.
+For runs of rows: Edit, B for Bulk Marking, then A for Mark All.
 
 Screen reader:
 
-- marked rows, 3 of 4
+- 4 marked
 
-Shift plus Space is Say Marked Rows, which counts them.
+Control plus A is the key for Mark All; Control plus Shift plus A unmarks all.
 
-**Something to try:** Mark the two jobs you have applied to, then produce a report and notice it covers the table rather than your marks.
+**Something to try:** Mark the jobs you will follow up on, then step through them.
 
-## 12 - Inspecting a Record
+## 12 - Look and Prime
 
-**Before you start:** JobTrail is open on the jobs table, on the Example Widgets job.
+**Before you start:** JobTrail is open on the jobs table, on Example Widgets.
 
-### Step 1: Enter
+### Step 1: Shift+L
 
-A row gives you three fields. The record holds all of them, and Enter opens it.
-
-Screen reader:
-
-- Edit Record dialog
-- Employer edit, Example Widgets Company (sample employer), ALT+E
-
-Tab moves through the fields in the order you would fill them in.
-
-### Step 2: Escape
-
-Escape closes it without changing anything. For a quick answer, you do not have to open the record at all.
+Every table has two columns nobody types into. Shift plus L, Say Look.
 
 Screen reader:
 
-- Records list view
+- look, Example Widgets Company (sample employer) | Accessibility Analyst | interviewing
 
-The Shift keys answer questions about the record under the cursor.
+Look is the record at a glance. It is what Say Related shows for a linked record.
 
-### Step 3: Shift+N
+### Step 2: Shift+P
 
-Shift plus N is Say Notes, Shift plus T is Say Tags, Shift plus U is Say URL. Each says the field its letter starts.
-
-Screen reader:
-
-- notes, Illustrative record. Interview booked for the 24th; ask about screen reader testing tools.
-
-An empty field says null or blank, so silence never means a key failed.
-
-### Step 4: Shift+E
-
-Shift plus A is Say Added and Shift plus E is Say Edited: when the record arrived, and when it last changed.
+Shift plus P, Say Prime: the fields that make the record unique.
 
 Screen reader:
 
-- edited, September 19, 2026 at 10:01 PM
+- prime, Example Widgets Company (sample employer)|Accessibility Analyst
 
-Useful after a save, to be sure it took.
+Employer and title. Two jobs with both the same would be one job.
 
-### Step 5: Alt+Shift+N
+### Step 3: Shift+I
 
-Alt plus Shift plus N opens the Notes in a window of their own, for reading a long one line by line.
-
-Screen reader:
-
-- Notes dialog
-- Notes edit, multiline, Illustrative record. Interview booked for the 24th., ALT+N
-
-Control plus Enter saves it; Escape leaves it.
-
-### Step 6: Shift+Z
-
-Shift plus Z is Say Status: which table, which row of how many, and the order. The one to press when you have lost your place.
+Shift plus I, Say ID, gives the row number, which tells a person almost nothing.
 
 Screen reader:
 
-- status, jobs row 2 of 4, sort employer
+- id, 2
 
-Your screen reader's say line key reads the row itself.
+Look is for people; prime is for matching.
 
-**Something to try:** Walk Shift plus A to Shift plus Z on one record and notice which three answers you would want while arrowing.
+**Something to try:** Say the look and prime of three records and notice which tells you more.
 
-## 13 - Work Search Record for a Claim or Counselor
+## 13 - Report, Save and Copy
 
-**Before you start:** JobTrail is open on the actions table, the log of everything you have done.
+**Before you start:** JobTrail is open on the jobs table, on Example Widgets.
 
-### Step 1: Shift+Z
+### Step 1: Control+Shift+C
 
-Unemployment offices and counselors ask for what you did, when, with whom, and what came of it. The actions table holds exactly that.
-
-Screen reader:
-
-- status, actions row 1 of 7, sort action date descending
-
-Every contact is one row: date, kind, method, summary, outcome.
-
-### Step 2: Shift+C
-
-Three fields matter to the agency and to nobody else. Method is how you made contact. Evidence is what you kept. Counts says whether it is an employer contact at all.
+To tell a friend about a job: Control plus Shift plus C copies the record. C for Copy; Control plus C alone copies the cell.
 
 Screen reader:
 
-- method, internet
+- Record copied
 
-Preparation and workshops belong in the log and do not count toward a weekly minimum. Counts is how the report tells them apart.
+Labelled lines, ready to paste.
 
-### Step 3: Alt+Shift+R
+### Step 2: Alt+Shift+R
 
-Alt plus Shift plus R runs a Report -- R for Report.
+For a prepared document: File, R for Run Report. Its key is Alt plus Shift plus R.
 
 Screen reader:
 
 - Run Report dialog
 - Output list box, application underscore history, 1 of 6, ALT+O
 
-A report reads the whole table, so a filter on screen does not change what it produces.
+### Step 3: Enter
+
+Screen reader:
+
+- Report written
+- EdSharp, application underscore history dot m d
+
+### Step 4: Control+Shift+S
+
+For the whole table as a file: Control plus Shift plus S, Save As.
+
+Screen reader:
+
+- Save As dialog
+- File name edit, ALT+N
+
+The extension decides the format: dot x l s x, dot c s v, dot h t m.
+
+**Something to try:** Copy one record into an email to yourself.
+
+## 14 - Work Search Record for a Claim or Counselor
+
+**Before you start:** JobTrail is open on the actions table, the log of everything I have done.
+
+### Step 1: Shift+H
+
+My counselor asks what I did, when, with whom, and what came of it. The actions table holds exactly that.
+
+Screen reader:
+
+- here, actions row 1 of 7, sort action date descending
+
+### Step 2: Shift+C
+
+Three fields matter to the agency: method, evidence, and counts -- whether it was an employer contact.
+
+Screen reader:
+
+- method, internet
+
+### Step 3: Alt+Shift+R
+
+File, R for Run Report.
+
+Screen reader:
+
+- Run Report dialog
+- Output list box, application underscore history, 1 of 6, ALT+O
 
 ### Step 4: w
-
-Type W for the work search record.
 
 Screen reader:
 
 - work underscore search underscore record, 6 of 6
 
-The values are alphabetical, so the first letter lands near what you want.
-
 ### Step 5: Enter
-
-Press Enter.
 
 Screen reader:
 
 - Report written
 - EdSharp, work underscore search underscore record dot m d
 
-Countable employer contacts first, with a total and a count for each week; everything else after, under its own heading.
+Countable contacts first, with weekly totals; everything else after.
 
-### Step 6
-
-It is Markdown, so pandoc turns it into a web page to email or a Word file to hand across a desk.
-
-Keep the log. Agencies can ask for it up to thirty days after a benefit year ends, and DbDo never deletes an action.
-
-**Something to try:** Produce the record for the last four weeks and read it before sending it to anybody.
+**Something to try:** Produce the record for the last four weeks and read it before sending.
 
 <!-- walkthrough ends -->
 

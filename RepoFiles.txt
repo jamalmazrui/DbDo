@@ -20,6 +20,9 @@ DbDo_setup.iss
 DbDo_JAWS.zip
 DbDo.nvda-addon
 buildDbDo.cmd
+getDbDoDeps.ps1
+THIRD-PARTY-NOTICES.txt
+lookups.db
 summarizeSetup.cmd
 summarizeSetup.ps1
 installModels.cmd
@@ -37,4 +40,5 @@ License.md
 License.htm
 version.txt
 RepoFiles.txt
+LocalFiles.txt
 .gitignore
