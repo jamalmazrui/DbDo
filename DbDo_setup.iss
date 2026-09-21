@@ -63,6 +63,24 @@
 #define AceUrl         "https://download.microsoft.com/download/3/5/C/35C84C36-661A-44E6-9324-8786B8DBE231/accessdatabaseengine_X64.exe"
 #define AceHash        "04e96c9f1a1f7d251a88aececf1dc10ff65950392787427c00814a43308003de"
 
+; ---- THE TUTORIALS MUST EXIST BEFORE THIS INSTALLER CAN BE BUILT ----
+;
+; ISPP evaluates this while reading the script, so a missing walkthrough stops
+; the compile with a sentence saying what to run, rather than producing an
+; installer whose Help menu opens nothing.
+;
+; Run scripts\buildTutorials once; buildDbDo does it for you when the output is
+; not already there.
+#if !FileExists(AddBackslash(SourcePath) + "help\Tutorials.mkv")
+  #error help\Tutorials.mkv is missing. Run scripts\buildTutorials (or buildDbDo) before building the installer.
+#endif
+#if !FileExists(AddBackslash(SourcePath) + "help\Tutorials.md")
+  #error help\Tutorials.md is missing. Run scripts\makeTutorials (or buildDbDo) before building the installer.
+#endif
+#if !FileExists(AddBackslash(SourcePath) + "help\Tutorials.htm")
+  #error help\Tutorials.htm is missing. buildDbDo converts it with pandoc; run buildDbDo before building the installer.
+#endif
+
 [Setup]
 ; THE INSTALLER KEEPS A LOG, always, and puts it where DbDo's own logs go.
 ; SetupLogging makes Inno write a detailed record of every file, registry key
@@ -267,6 +285,20 @@ Source: "DbDo.js";        DestDir: "{app}\exec"; Flags: ignoreversion
 Source: "buildDbDo.cmd";  DestDir: "{app}\exec"; Flags: ignoreversion
 Source: "getDbDoDeps.ps1"; DestDir: "{app}\exec"; Flags: ignoreversion
 Source: "DbDo_setup.iss"; DestDir: "{app}\exec"; Flags: ignoreversion
+; THE SPOKEN WALKTHROUGHS, AND THEY ARE NOT OPTIONAL.
+;
+; No skipifsourcedoesntexist here, and the check above refuses to compile
+; without them. Every other optional part of DbDo can be sorted out at run time
+; -- a screen reader that is not installed, a model that has not been fetched --
+; because the person can add it later and the program says how. A release
+; missing its tutorials is different: nobody knows they are absent, the Help
+; item leads nowhere, and the only fix is another release.
+;
+; So the failure belongs at compile time, on the machine where the fix takes one
+; command, rather than at run time on somebody else's.
+Source: "help\Tutorials.mkv"; DestDir: "{app}\help"; Flags: ignoreversion
+Source: "help\Tutorials.md";  DestDir: "{app}\help"; Flags: ignoreversion
+Source: "help\Tutorials.htm"; DestDir: "{app}\help"; Flags: ignoreversion
 Source: "DbDo.md";     DestDir: "{app}\help"; Flags: ignoreversion
 Source: "DbDo.htm";    DestDir: "{app}\help"; Flags: ignoreversion
 Source: "README.md";    DestDir: "{app}"; Flags: ignoreversion

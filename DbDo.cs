@@ -11398,6 +11398,7 @@ namespace DbDo
         private ToolStripMenuItem miHelpShowCommand;
         private ToolStripMenuItem miHelpStatus;
         private ToolStripMenuItem miHelpEmailLog;
+        private ToolStripMenuItem miHelpTutorials;
         private ToolStripMenuItem miHelpSampleDb;
         private ToolStripMenuItem miHelpExtraSpeech;
         private ToolStripMenuItem miHelpCommandEcho;
@@ -12828,6 +12829,10 @@ namespace DbDo
             // restore, status announcement) apply. The list is built at
             // runtime, so a user's own .db files in that folder appear
             // alongside the bundled samples.
+            // PLAY THE WALKTHROUGHS. T for Tutorials, no shortcut key: this is
+            // something somebody does once or twice, not a command they reach
+            // for, and the free keys are worth keeping for commands that are.
+            miHelpTutorials    = addItem(miHelp, "Play &Tutorials",                      "Play Tutorials",    Keys.None,                          helpTutorialsClicked);
             miHelpSampleDb     = addItem(miHelp, "Sample &Databases...",                "Sample Databases", Keys.None,                        helpSampleDbClicked);
             // The former per-sample items (Open Convention / Northwind /
             // Chinook) were removed: the Sample Databases picker above
@@ -20374,6 +20379,41 @@ namespace DbDo
         // Files. The folder is discovered dynamically: the user can drop
         // their own databases into it to add them to the list, and new
         // bundled samples appear without any code change here.
+        // helpTutorialsClicked: hand Tutorials.mkv to Windows and let whatever
+        // plays that kind of file play it -- the Homer Player in FileDir, or
+        // whatever else is registered. DbDo does not choose a player.
+        //
+        // The file is one recording with a chapter per walkthrough, so a player
+        // that reads chapters moves between them; one that does not plays it
+        // through from the start.
+        private void helpTutorialsClicked(object sender, EventArgs evArgs)
+        {
+            string sPath = System.IO.Path.Combine(Homer.Paths.shippedHelp(), "Tutorials.mkv");
+            if (!System.IO.File.Exists(sPath))
+                sPath = System.IO.Path.Combine(Application.StartupPath, "Tutorials.mkv");
+            if (!System.IO.File.Exists(sPath))
+            {
+                showInfoDialog("Play Tutorials",
+                    "Tutorials.mkv is not here.\r\n\r\nIt ships with DbDo and lives in the help folder of the installation. "
+                    + "If you are running from the source folder, build it by running scripts\\buildTutorials from a command prompt "
+                    + "-- the first run fetches two voices and takes a few minutes.");
+                return;
+            }
+            try
+            {
+                System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo(sPath);
+                psi.UseShellExecute = true;
+                System.Diagnostics.Process.Start(psi);
+                DbDoLog.write("Play-Tutorials: " + sPath);
+            }
+            catch (Exception ex)
+            {
+                showInfoDialog("Play Tutorials",
+                    "Windows could not open the tutorials.\r\n\r\n" + ex.Message
+                    + "\r\n\r\nThe file is at:\r\n" + sPath);
+            }
+        }
+
         private void helpSampleDbClicked(object sender, EventArgs evArgs)
         {
             string[] aPaths = ScriptHelper.listSampleDatabases();

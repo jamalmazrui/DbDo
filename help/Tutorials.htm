@@ -334,6 +334,65 @@ Shift+I</a></li>
 <li><a href="#step-7-1" id="toc-step-7-1">Step 7</a></li>
 <li><a href="#step-8" id="toc-step-8">Step 8</a></li>
 </ul></li>
+<li><a href="#related-records" id="toc-related-records">10 - Related
+Records</a>
+<ul>
+<li><a href="#step-1-shiftr" id="toc-step-1-shiftr">Step 1:
+Shift+R</a></li>
+<li><a href="#step-2-altrightarrow" id="toc-step-2-altrightarrow">Step
+2: Alt+RightArrow</a></li>
+<li><a href="#step-3-backspace" id="toc-step-3-backspace">Step 3:
+Backspace</a></li>
+<li><a href="#step-4-shiftr" id="toc-step-4-shiftr">Step 4:
+Shift+R</a></li>
+<li><a href="#step-5-1" id="toc-step-5-1">Step 5</a></li>
+</ul></li>
+<li><a href="#mark-and-unmark" id="toc-mark-and-unmark">11 - Mark and
+Unmark</a>
+<ul>
+<li><a href="#step-1-controlm" id="toc-step-1-controlm">Step 1:
+Control+M</a></li>
+<li><a href="#step-2-controlu" id="toc-step-2-controlu">Step 2:
+Control+U</a></li>
+<li><a href="#step-3-shiftm" id="toc-step-3-shiftm">Step 3:
+Shift+M</a></li>
+<li><a href="#step-4-controldownarrow"
+id="toc-step-4-controldownarrow">Step 4: Control+DownArrow</a></li>
+<li><a href="#step-5-shiftend" id="toc-step-5-shiftend">Step 5:
+Shift+End</a></li>
+<li><a href="#step-6-shiftspace" id="toc-step-6-shiftspace">Step 6:
+Shift+Space</a></li>
+</ul></li>
+<li><a href="#inspecting-a-record" id="toc-inspecting-a-record">12 -
+Inspecting a Record</a>
+<ul>
+<li><a href="#step-1-enter-2" id="toc-step-1-enter-2">Step 1:
+Enter</a></li>
+<li><a href="#step-2-escape" id="toc-step-2-escape">Step 2:
+Escape</a></li>
+<li><a href="#step-3-shiftn" id="toc-step-3-shiftn">Step 3:
+Shift+N</a></li>
+<li><a href="#step-4-shifte" id="toc-step-4-shifte">Step 4:
+Shift+E</a></li>
+<li><a href="#step-5-altshiftn" id="toc-step-5-altshiftn">Step 5:
+Alt+Shift+N</a></li>
+<li><a href="#step-6-shiftz" id="toc-step-6-shiftz">Step 6:
+Shift+Z</a></li>
+</ul></li>
+<li><a href="#work-search-record-for-a-claim-or-counselor"
+id="toc-work-search-record-for-a-claim-or-counselor">13 - Work Search
+Record for a Claim or Counselor</a>
+<ul>
+<li><a href="#step-1-1" id="toc-step-1-1">Step 1</a></li>
+<li><a href="#step-2-shiftc" id="toc-step-2-shiftc">Step 2:
+Shift+C</a></li>
+<li><a href="#step-3-altshiftr" id="toc-step-3-altshiftr">Step 3:
+Alt+Shift+R</a></li>
+<li><a href="#step-4-w" id="toc-step-4-w">Step 4: w</a></li>
+<li><a href="#step-5-enter-1" id="toc-step-5-enter-1">Step 5:
+Enter</a></li>
+<li><a href="#step-6-1" id="toc-step-6-1">Step 6</a></li>
+</ul></li>
 <li><a href="#where-to-go-next" id="toc-where-to-go-next">1. Where to Go
 Next</a></li>
 </ul></li>
@@ -399,6 +458,11 @@ You Hear</a></li>
 <li><a href="#08-report-save-and-copy">08 - Report, Save and
 Copy</a></li>
 <li><a href="#09-look-and-prime">09 - Look and Prime</a></li>
+<li><a href="#10-related-records">10 - Related Records</a></li>
+<li><a href="#11-mark-and-unmark">11 - Mark and Unmark</a></li>
+<li><a href="#12-inspecting-a-record">12 - Inspecting a Record</a></li>
+<li><a href="#13-work-search-record-for-a-claim-or-counselor">13 - Work
+Search Record for a Claim or Counselor</a></li>
 <li><a href="#1-where-to-go-next">1. Where to Go Next</a></li>
 </ul>
 <!-- walkthrough: written by makeTutorial.py, do not edit between the markers -->
@@ -1164,6 +1228,233 @@ both current as the fields beside them change.</p>
 <p><strong>Something to try:</strong> Open a contact and press Shift
 plus R, then work out which job each line came from without opening
 anything.</p>
+<h2 id="related-records">10 - Related Records</h2>
+<p>A simulated walk through DbDo, made with AI: a person working, and a
+screen reader answering.</p>
+<p><strong>Before you start:</strong> JobTrail is open on the jobs
+table, on the Example Widgets job.</p>
+<h3 id="step-1-shiftr">Step 1: Shift+R</h3>
+<p>Shift plus R is Say Related – R for Related. It names every record
+connected to this one, each by its look, so you know which is which
+without opening any.</p>
+<p>Screen reader:</p>
+<ul>
+<li>related, actions (1 record)</li>
+<li>2026-09-08 bar First interview for Accessibility Analyst bar
+interview scheduled</li>
+</ul>
+<p>Connections come from two places: a field holding another record’s
+id, and the maps table DbDo keeps for links across tables.</p>
+<h3 id="step-2-altrightarrow">Step 2: Alt+RightArrow</h3>
+<p>Alt plus Right Arrow enters the related records, the way Right Arrow
+goes deeper in a tree.</p>
+<p>Screen reader:</p>
+<ul>
+<li>JobTrail dot d b, actions</li>
+<li>Records list view</li>
+<li>2026-09-08 First interview for Accessibility Analyst interview
+scheduled, 1 of 1</li>
+</ul>
+<p>The filter is set for you: only the actions belonging to that
+job.</p>
+<h3 id="step-3-backspace">Step 3: Backspace</h3>
+<p>Backspace goes back up, as it does everywhere in Windows.</p>
+<p>Screen reader:</p>
+<ul>
+<li>JobTrail dot d b, jobs</li>
+<li>Example Widgets Company (sample employer) Accessibility Analyst
+interviewing, 2 of 4</li>
+</ul>
+<p>Alt plus Left Arrow does the same.</p>
+<h3 id="step-4-shiftr">Step 4: Shift+R</h3>
+<p>The link a record does not hold itself lives in maps: this document
+was sent for that job, this person is a contact for it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>related, docs via sent_for (2 records)</li>
+</ul>
+<p>DbDo writes those rows; you are not offered the maps table when
+choosing one.</p>
+<h3 id="step-5-1">Step 5</h3>
+<p>Say Related is a list, not a trip. Use it to decide, then Alt plus
+Right Arrow when you mean to go.</p>
+<p>Control plus F1, the key describer, names any key you have
+forgotten.</p>
+<p><strong>Something to try:</strong> From a contact, reach the job they
+are a contact for, then come back with Backspace.</p>
+<h2 id="mark-and-unmark">11 - Mark and Unmark</h2>
+<p>A simulated walk through DbDo, made with AI: a person working, and a
+screen reader answering.</p>
+<p><strong>Before you start:</strong> JobTrail is open on the jobs
+table.</p>
+<h3 id="step-1-controlm">Step 1: Control+M</h3>
+<p>Control plus M Marks the record you are on – M for Mark.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Marked</li>
+</ul>
+<p>One word, because the state is the whole answer.</p>
+<h3 id="step-2-controlu">Step 2: Control+U</h3>
+<p>Control plus U Unmarks it – U for Unmark. The pair sits together on
+the keyboard and in the menu.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Unmarked</li>
+</ul>
+<p>A toggle says the state it reached, never the key that got there.</p>
+<h3 id="step-3-shiftm">Step 3: Shift+M</h3>
+<p>Shift plus M is Say Mark, which tells you where you stand without
+changing anything.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Unmarked</li>
+</ul>
+<p>Every Shift key asks; no Shift key changes.</p>
+<h3 id="step-4-controldownarrow">Step 4: Control+DownArrow</h3>
+<p>Control plus Down Arrow steps to the next marked record, Control plus
+Up Arrow to the previous, so a scattered set reads as a list.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Sample Health Network (illustration only) Records Coordinator
+applied, 4 of 4</li>
+</ul>
+<p>Marks live for the session and are remembered per table.</p>
+<h3 id="step-5-shiftend">Step 5: Shift+End</h3>
+<p>Shift plus Home marks everything from here to the top; Shift plus
+End, to the bottom. Alt plus Shift plus Home and End undo those.</p>
+<p>Screen reader:</p>
+<ul>
+<li>3 marked</li>
+</ul>
+<p>The same keys that select to top and bottom everywhere else in
+Windows.</p>
+<h3 id="step-6-shiftspace">Step 6: Shift+Space</h3>
+<p>Marks are how you act on some records rather than all: copy them
+together, or delete them in one go.</p>
+<p>Screen reader:</p>
+<ul>
+<li>marked rows, 3 of 4</li>
+</ul>
+<p>Shift plus Space is Say Marked Rows, which counts them.</p>
+<p><strong>Something to try:</strong> Mark the two jobs you have applied
+to, then produce a report and notice it covers the table rather than
+your marks.</p>
+<h2 id="inspecting-a-record">12 - Inspecting a Record</h2>
+<p>A simulated walk through DbDo, made with AI: a person working, and a
+screen reader answering.</p>
+<p><strong>Before you start:</strong> JobTrail is open on the jobs
+table, on the Example Widgets job.</p>
+<h3 id="step-1-enter-2">Step 1: Enter</h3>
+<p>A row gives you three fields. The record holds all of them, and Enter
+opens it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Edit Record dialog</li>
+<li>Employer edit, Example Widgets Company (sample employer), ALT+E</li>
+</ul>
+<p>Tab moves through the fields in the order you would fill them in.</p>
+<h3 id="step-2-escape">Step 2: Escape</h3>
+<p>Escape closes it without changing anything. For a quick answer, you
+do not have to open the record at all.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Records list view</li>
+</ul>
+<p>The Shift keys answer questions about the record under the
+cursor.</p>
+<h3 id="step-3-shiftn">Step 3: Shift+N</h3>
+<p>Shift plus N is Say Notes, Shift plus T is Say Tags, Shift plus U is
+Say URL. Each says the field its letter starts.</p>
+<p>Screen reader:</p>
+<ul>
+<li>notes, Illustrative record. Interview booked for the 24th; ask about
+screen reader testing tools.</li>
+</ul>
+<p>An empty field says null or blank, so silence never means a key
+failed.</p>
+<h3 id="step-4-shifte">Step 4: Shift+E</h3>
+<p>Shift plus A is Say Added and Shift plus E is Say Edited: when the
+record arrived, and when it last changed.</p>
+<p>Screen reader:</p>
+<ul>
+<li>edited, September 19, 2026 at 10:01 PM</li>
+</ul>
+<p>Useful after a save, to be sure it took.</p>
+<h3 id="step-5-altshiftn">Step 5: Alt+Shift+N</h3>
+<p>Alt plus Shift plus N opens the Notes in a window of their own, for
+reading a long one line by line.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Notes dialog</li>
+<li>Notes edit, multiline, Illustrative record. Interview booked for the
+24th., ALT+N</li>
+</ul>
+<p>Control plus Enter saves it; Escape leaves it.</p>
+<h3 id="step-6-shiftz">Step 6: Shift+Z</h3>
+<p>Shift plus Z is Say Status: which table, which row of how many, and
+the order. The one to press when you have lost your place.</p>
+<p>Screen reader:</p>
+<ul>
+<li>status, jobs row 2 of 4, sort employer</li>
+</ul>
+<p>Your screen reader’s say line key reads the row itself.</p>
+<p><strong>Something to try:</strong> Walk Shift plus A to Shift plus Z
+on one record and notice which three answers you would want while
+arrowing.</p>
+<h2 id="work-search-record-for-a-claim-or-counselor">13 - Work Search
+Record for a Claim or Counselor</h2>
+<p>A simulated walk through DbDo, made with AI: a person working, and a
+screen reader answering.</p>
+<p><strong>Before you start:</strong> JobTrail is open on the actions
+table, the log of everything you have done.</p>
+<h3 id="step-1-1">Step 1</h3>
+<p>Unemployment offices and vocational rehabilitation counselors ask for
+the same thing: what you did, when, with whom, and what came of it. The
+actions table holds exactly that.</p>
+<p>Every contact is one row: date, kind, method, summary, outcome.</p>
+<h3 id="step-2-shiftc">Step 2: Shift+C</h3>
+<p>Three fields matter to the agency and to nobody else. Method is how
+you made contact. Evidence is what you kept. Counts says whether it is
+an employer contact at all.</p>
+<p>Screen reader:</p>
+<ul>
+<li>method, internet</li>
+</ul>
+<p>Preparation and workshops belong in the log and do not count toward a
+weekly minimum. Counts is how the report tells them apart.</p>
+<h3 id="step-3-altshiftr">Step 3: Alt+Shift+R</h3>
+<p>Alt plus Shift plus R runs a Report – R for Report.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Run Report dialog</li>
+<li>Output list box, application underscore history, 1 of 6, ALT+O</li>
+</ul>
+<p>A report reads the whole table, so a filter on screen does not change
+what it produces.</p>
+<h3 id="step-4-w">Step 4: w</h3>
+<p>Type W for the work search record.</p>
+<p>Screen reader:</p>
+<ul>
+<li>work underscore search underscore record, 6 of 6</li>
+</ul>
+<p>The values are alphabetical, so the first letter lands near what you
+want.</p>
+<h3 id="step-5-enter-1">Step 5: Enter</h3>
+<p>Press Enter.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Report written</li>
+<li>EdSharp, work underscore search underscore record dot m d</li>
+</ul>
+<p>Countable employer contacts first, with a total and a count for each
+week; everything else after, under its own heading.</p>
+<h3 id="step-6-1">Step 6</h3>
+<p>It is Markdown, so pandoc turns it into a web page to email or a Word
+file to hand across a desk.</p>
+<p>Keep the log. Agencies can ask for it up to thirty days after a
+benefit year ends, and DbDo never deletes an action.</p>
+<p><strong>Something to try:</strong> Produce the record for the last
+four weeks and read it before sending it to anybody.</p>
 <!-- walkthrough ends -->
 <h2 id="where-to-go-next">1. Where to Go Next</h2>
 <p>The tutorials above cover the day-to-day. When you want more:</p>

@@ -724,6 +724,17 @@ tell you which one you are on when you ask.
   the rows nobody has filled in arrive at the top of an ascending sort. That is
   usually what you want and always worth knowing.
 
+## The spoken walkthroughs
+
+**Help, Play Tutorials** opens `Tutorials.mkv` -- fourteen walkthroughs, about
+three minutes each, as one recording with a chapter at the start of every one.
+DbDo hands the file to Windows, so whatever plays that kind of file plays it. In
+a player that reads chapters, Control+Page Down and Control+Page Up move from
+one walkthrough to the next.
+
+The same walkthroughs are written out in `Tutorials.md`, in the help folder, for
+reading rather than listening.
+
 ## Asking the model on your computer
 
 **F12, Chat with AI**, asks a plain question. **Shift+F12, Chat about Table**,
