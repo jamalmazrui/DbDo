@@ -49,6 +49,26 @@ in the repository -- they are rebuilt by `scripts\buildTutorials`.
 - [11 - Mark and Unmark](#11-mark-and-unmark)
 - [12 - Inspecting a Record](#12-inspecting-a-record)
 - [13 - Work Search Record for a Claim or Counselor](#13-work-search-record-for-a-claim-or-counselor)
+- [10 - Related Records](#10-related-records)
+- [11 - Mark and Unmark](#11-mark-and-unmark)
+- [12 - Inspecting a Record](#12-inspecting-a-record)
+- [13 - Work Search Record for a Claim or Counselor](#13-work-search-record-for-a-claim-or-counselor)
+- [10 - Related Records](#10-related-records)
+- [11 - Mark and Unmark](#11-mark-and-unmark)
+- [12 - Inspecting a Record](#12-inspecting-a-record)
+- [13 - Work Search Record for a Claim or Counselor](#13-work-search-record-for-a-claim-or-counselor)
+- [10 - Related Records](#10-related-records)
+- [11 - Mark and Unmark](#11-mark-and-unmark)
+- [12 - Inspecting a Record](#12-inspecting-a-record)
+- [13 - Work Search Record for a Claim or Counselor](#13-work-search-record-for-a-claim-or-counselor)
+- [10 - Related Records](#10-related-records)
+- [11 - Mark and Unmark](#11-mark-and-unmark)
+- [12 - Inspecting a Record](#12-inspecting-a-record)
+- [13 - Work Search Record for a Claim or Counselor](#13-work-search-record-for-a-claim-or-counselor)
+- [10 - Related Records](#10-related-records)
+- [11 - Mark and Unmark](#11-mark-and-unmark)
+- [12 - Inspecting a Record](#12-inspecting-a-record)
+- [13 - Work Search Record for a Claim or Counselor](#13-work-search-record-for-a-claim-or-counselor)
 - [00 - Overview and Table of Contents](#00-overview-and-table-of-contents)
 - [01 - Installing DbDo](#01-installing-dbdo)
 - [02 - Opening DbDo for the First Time](#02-opening-dbdo-for-the-first-time)
@@ -69,47 +89,52 @@ in the repository -- they are rebuilt by `scripts\buildTutorials`.
 
 ## 00 - Overview and Table of Contents
 
-A simulated walk through DbDo, made with AI: a person working, and a screen reader answering.
-
-**Before you start:** Nothing yet.
+Simulated walkthroughs of DbDo, made with AI: two synthetic voices, one working and one answering as a screen reader.
 
 ### Step 1
 
-DbDo is a database manager for people who work by keyboard and ear. SQLite, Access, spreadsheets, plain data -- every table is a list you arrow through.
+I am Kristin, the user.
 
-Ten walkthroughs, three minutes each, all using JobTrail, the sample that ships with DbDo.
+Screen reader:
 
-### Step 2
+- I am John, the screen reader.
 
-One installs it. Two opens it, and explains the grid and the Shift keys.
+Both voices are synthetic, made with piper from public domain recordings. They are introduced once, here.
+
+### Step 2: Alt+Control+D
+
+DbDo is a database manager for people who work by keyboard and ear. Every table is a list you arrow through.
+
+Screen reader:
+
+- DbDo
+- Records list view
+
+SQLite, Access, spreadsheets and plain data all open the same way.
 
 ### Step 3
 
-Three adds a New record, four edits one. Five is Find and Jump. Six is Order and Where filter.
+One installs it. Two opens it, and explains the grid and the Shift keys. Three and four add a New record and edit one.
 
 ### Step 4
 
-Seven Selects the columns you hear. Eight is Report, Save and Copy. Nine is Look and Prime, the two computed columns.
-
-Seven changes how every other row sounds.
+Five is Find and Jump. Six is Order and Where filter. Seven Selects the columns you hear. Eight is Report, Save and Copy.
 
 ### Step 5
 
-Every key is named with the word it comes from, so key and command stay together.
+Nine is Look and Prime. Ten is Related records, eleven is Mark and Unmark, twelve inspects a record, and thirteen produces the Work Search Record for a claim or a counselor.
 
-If you forget one, Control plus F1 is the key describer: press it, then press the key, and it says what that key does instead of doing it.
+Every key is named with the word it comes from, so key and command stay together.
 
 **Something to try:** Pick the one that matches today's job.
 
 ## 01 - Installing DbDo
 
-A simulated walk through DbDo, made with AI: a person working, and a screen reader answering.
-
 **Before you start:** You have downloaded DbDo underscore setup dot e x e, running a Windows screen reader.
 
 ### Step 1: Enter
 
-Run the installer from wherever it downloaded. Windows asks first, because the file came from the internet.
+Run the installer. Windows asks first, because the file came from the internet.
 
 Screen reader:
 
@@ -117,99 +142,101 @@ Screen reader:
 - The publisher could not be verified. Are you sure you want to run this software?
 - Run Button, alt+R
 
-DbDo is not code signed, so this appears every time. Alt plus R runs it.
+DbDo is not code signed, so this appears for every download. Alt plus R runs it.
 
 ### Step 2: Alt+Y
 
-Then Windows asks for administrator rights, because DbDo installs for everybody on the computer.
+Then administrator rights, because DbDo installs for everybody on the computer.
 
 Screen reader:
 
 - User Account Control
 
-The prompt can open behind other windows without taking focus. If nothing happens, press Alt plus Tab and look for it.
+The prompt can open behind other windows. If nothing happens, press Alt plus Tab and look for it.
 
 ### Step 3: Enter
 
-The first page says what this install is: a new one, an update from an earlier version, or the same version again.
+First the folder. Program Files is the default, and Enter presses Next, the page's default button.
 
 Screen reader:
 
-- Setup - DbDo dialog
-- This will install DbDo 1.0.167.
-- Next Button
+- Setup - DbDo 1.0.168 dialog
+- To continue, click Next. If you would like to select a different folder, click Browse.
+- Edit, C colon backslash Program Files backslash DbDo
 
-Enter takes the default button on every page, so you rarely need anything else.
+Install DbDo again later and this page is skipped: the update goes where the last one went.
 
 ### Step 4: Enter
 
-Next comes the folder. The default is Program Files, and most people press Enter.
+Enter presses Install, the default button here.
 
 Screen reader:
 
-- Select Destination Location
-- Setup will install DbDo into the following folder. To continue, click Next.
-- Folder edit, C colon backslash Program Files backslash DbDo
-
-Install DbDo a second time and this page does not appear at all: the update goes where the last one went.
-
-### Step 5: Enter
-
-Then Install, and it takes a few seconds.
-
-Screen reader:
-
-- Ready to Install
+- Click Install to continue with the installation, or click Back if you want to review or change any settings.
 - Install Button, Alt+i
 
-Nothing is asked during the copying.
+A few seconds of copying, and nothing is asked.
 
-### Step 6: Tab
+### Step 5: Tab
 
-The last page carries the optional parts, as a list you arrow through rather than separate boxes.
+The last page lists the optional parts. Arrow through them; Space ticks or unticks the one you are on.
 
 Screen reader:
 
 - Setup has finished installing DbDo on your computer.
 - Tree view, Install scripts for improving use with the JAWS screen reader, checked, 1 of 6
 
-Space toggles the one you are on. There are six, and a screen reader box appears only for a reader you actually have.
+A screen reader line appears only for a reader you actually have installed.
+
+### Step 6: DownArrow
+
+Screen reader:
+
+- Install add-on for improving use with the NVDA screen reader, checked, 2 of 6
 
 ### Step 7: DownArrow
 
-Arrow down for the local AI. If Ollama is already here, the line says reinstall, with the version you have, and is not ticked.
+The local AI comes next, in two parts, both unticked: Ollama, which runs models on this computer, then the model itself.
 
 Screen reader:
 
-- Reinstall Ollama 0.34.1 (current version), not checked, 3 of 6
+- Install Ollama 0.34.2, not checked, 3 of 6
 
-A checkbox offering to install what you already have is a checkbox that did not look.
+If Ollama is already here the line says Update or Reinstall instead, with the versions you have and would get.
 
-### Step 8: Enter
-
-The last two are the guide and the launch. Leave the launch ticked and press Enter to finish.
+### Step 8: DownArrow
 
 Screen reader:
 
-- Launch DbDo (Alt+Control+D starts it any time), checked, 6 of 6
+- Install the llama3.2 model, which DbDo asks questions of (about 2 GB), not checked, 4 of 6
 
-Alt plus Control plus D starts DbDo from anywhere in Windows afterwards -- D for DbDo.
+Ollama is installed first and the model second, so ticking both works in one pass.
 
-### Step 9
+### Step 9: DownArrow
 
-A results box comes first, before DbDo opens.
+Then the launch, ticked, and the guide, not.
+
+Screen reader:
+
+- Launch DbDo (Alt+Control+D starts it any time), checked, 5 of 6
+
+Alt plus Control plus D starts DbDo from anywhere in Windows -- D for DbDo.
+
+### Step 10: Enter
+
+Enter presses Finish.
 
 Screen reader:
 
 - DbDo Setup Results dialog
-- DbDo 1.0.167 is installed. Program files, C colon backslash Program Files backslash DbDo
+- DbDo 1.0.168 is installed. Program files, C colon backslash Program Files backslash DbDo
 - OK Button
 
-It always appears. It is part of installing rather than something to tick.
+The results box always appears, and DbDo waits for it.
 
-### Step 10: Enter
+### Step 11: Enter
 
-Enter closes it, and DbDo starts.
+Enter again, and DbDo starts.
 
 Screen reader:
 
@@ -218,13 +245,9 @@ Screen reader:
 - Records list view
 - 2026-09-24 Follow up on the Accessibility Analyst interview awaiting reply, 1 of 7
 
-DbDo opens only after the box is closed, so its window never lands on top of something you were reading.
-
 **Something to try:** After it finishes, open the log the results box named and find the line saying where DbDo was installed.
 
 ## 02 - Opening DbDo for the First Time
-
-A simulated walk through DbDo, made with AI: a person working, and a screen reader answering.
 
 **Before you start:** DbDo is installed and not yet opened, so it starts on the JobTrail sample.
 
@@ -349,8 +372,6 @@ Alt plus F10 lists every command in one window you can filter by typing.
 
 ## 03 - Adding a New Record
 
-A simulated walk through DbDo, made with AI: a person working, and a screen reader answering.
-
 **Before you start:** JobTrail is open on the jobs table.
 
 ### Step 1: Control+N
@@ -431,8 +452,6 @@ Control plus Enter saves from any field, so you never have to find the OK button
 
 ## 04 - Editing a Record
 
-A simulated walk through DbDo, made with AI: a person working, and a screen reader answering.
-
 **Before you start:** JobTrail is open on the jobs table, on a job you have applied to.
 
 ### Step 1: Enter
@@ -458,7 +477,7 @@ Picking rather than typing is how a vocabulary stays consistent across a hundred
 
 ### Step 3: Control+Enter
 
-Enter takes the value; Control plus Enter saves the record.
+Enter takes the highlighted value from the list; Control plus Enter saves the record.
 
 Screen reader:
 
@@ -511,8 +530,6 @@ Alt plus Shift plus T does the same for tags, and Alt plus Shift plus U for the 
 **Something to try:** Change a status with F2, then press Shift plus E and notice that the edited time has moved.
 
 ## 05 - Find and Jump
-
-A simulated walk through DbDo, made with AI: a person working, and a screen reader answering.
 
 **Before you start:** JobTrail is open on the jobs table, sorted by employer.
 
@@ -591,8 +608,6 @@ Every Shift plus letter answer begins with the name of what you asked for.
 **Something to try:** Find a word you know is in a note rather than in a title, and notice which of the three ways gets you there.
 
 ## 06 - Order and Where Filter
-
-A simulated walk through DbDo, made with AI: a person working, and a screen reader answering.
 
 **Before you start:** JobTrail is open on the jobs table.
 
@@ -677,8 +692,6 @@ DbDo remembers the sort and the filter for each table, so they are still there t
 
 ## 07 - Select the Columns You Hear
 
-A simulated walk through DbDo, made with AI: a person working, and a screen reader answering.
-
 **Before you start:** JobTrail is open on the jobs table, which shows the employer, the role and the status.
 
 ### Step 1: Shift+S
@@ -757,8 +770,6 @@ The choice is kept in a settings file beside the database, along with the sort a
 **Something to try:** Add a fourth column, listen to ten rows, then take it away again and decide which you preferred.
 
 ## 08 - Report, Save and Copy
-
-A simulated walk through DbDo, made with AI: a person working, and a screen reader answering.
 
 **Before you start:** JobTrail is open on the actions table, which is the log of everything you have done.
 
@@ -839,8 +850,6 @@ Every count in DbDo matches its noun, so one row is one row rather than one rows
 
 ## 09 - Look and Prime
 
-A simulated walk through DbDo, made with AI: a person working, and a screen reader answering.
-
 **Before you start:** JobTrail is open on the jobs table, on the Example Widgets job.
 
 ### Step 1: Shift+L
@@ -890,19 +899,17 @@ Screen reader:
 
 A number says nothing about the record. What decides whether two rows are the same job is the employer and the title.
 
-### Step 6
+### Step 6: Shift+P
 
-So prime is computed from exactly the fields that make a record unique. That buys two things.
+So prime is built from exactly the fields that make a record unique. Changing the rule means editing one expression, and matching becomes one comparison.
 
-The rule can be changed by editing one expression, rather than by migrating a key.
+Screen reader:
+
+- prime, Example Widgets Company (sample employer)|Accessibility Analyst
+
+The maps table depends on it: a link is one prime, a kind, and another prime.
 
 ### Step 7
-
-And matching becomes one comparison. A script deciding whether to add a job or update the one already there compares prime, not three fields.
-
-The maps table works the same way: a link is one prime, a kind, and another prime, so it needs no knowledge of how either table numbers its rows.
-
-### Step 8
 
 One line to remember. Look is for a person, joined with spaces so it reads aloud. Prime is for a program, joined without them so it matches exactly.
 
@@ -911,8 +918,6 @@ Neither is ever typed, and neither can be edited: the database keeps both curren
 **Something to try:** Open a contact and press Shift plus R, then work out which job each line came from without opening anything.
 
 ## 10 - Related Records
-
-A simulated walk through DbDo, made with AI: a person working, and a screen reader answering.
 
 **Before you start:** JobTrail is open on the jobs table, on the Example Widgets job.
 
@@ -969,8 +974,6 @@ Control plus F1, the key describer, names any key you have forgotten.
 **Something to try:** From a contact, reach the job they are a contact for, then come back with Backspace.
 
 ## 11 - Mark and Unmark
-
-A simulated walk through DbDo, made with AI: a person working, and a screen reader answering.
 
 **Before you start:** JobTrail is open on the jobs table.
 
@@ -1037,8 +1040,6 @@ Shift plus Space is Say Marked Rows, which counts them.
 **Something to try:** Mark the two jobs you have applied to, then produce a report and notice it covers the table rather than your marks.
 
 ## 12 - Inspecting a Record
-
-A simulated walk through DbDo, made with AI: a person working, and a screen reader answering.
 
 **Before you start:** JobTrail is open on the jobs table, on the Example Widgets job.
 
@@ -1108,13 +1109,15 @@ Your screen reader's say line key reads the row itself.
 
 ## 13 - Work Search Record for a Claim or Counselor
 
-A simulated walk through DbDo, made with AI: a person working, and a screen reader answering.
-
 **Before you start:** JobTrail is open on the actions table, the log of everything you have done.
 
-### Step 1
+### Step 1: Shift+Z
 
-Unemployment offices and vocational rehabilitation counselors ask for the same thing: what you did, when, with whom, and what came of it. The actions table holds exactly that.
+Unemployment offices and counselors ask for what you did, when, with whom, and what came of it. The actions table holds exactly that.
+
+Screen reader:
+
+- status, actions row 1 of 7, sort action date descending
 
 Every contact is one row: date, kind, method, summary, outcome.
 

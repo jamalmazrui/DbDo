@@ -619,7 +619,7 @@ goto :tutorialsDone
 if exist "help\Tutorial_*.inix" (
   echo Building the spoken tutorials. The first run fetches two voices...
   echo Tutorials missing; running buildTutorials >> "!log!"
-  call "scripts\buildTutorials.cmd" >> "!log!" 2>&1
+  call "%~dp0scripts\buildTutorials.cmd" >> "!log!" 2>&1
   if errorlevel 1 echo WARN: buildTutorials reported a problem; see scripts\buildTutorials.log >> "!log!"
 ) else (
   echo No tutorial scripts here. >> "!log!"

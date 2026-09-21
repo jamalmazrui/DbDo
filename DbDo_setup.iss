@@ -420,6 +420,10 @@ FileName: "{app}\scripts\DbDo.nvda-addon"; \
 ; part that needs it, and two gigabytes should never arrive because somebody did
 ; not notice a checkbox.
 
+; Ollama BEFORE the model. [Run] entries run in the order written, and an
+; update to Ollama should land before anything is pulled through it. The
+; update entry passes the word update, so installOllama upgrades rather than
+; finding Ollama present and leaving the version alone.
 FileName: "{cmd}"; \
   Parameters: "/c """"{app}\exec\installOllama.cmd"""""; \
   WorkingDir: "{app}\exec"; \
@@ -427,13 +431,7 @@ FileName: "{cmd}"; \
   Flags: postinstall skipifsilent runascurrentuser unchecked; Check: ollamaNeedsInstall
 
 FileName: "{cmd}"; \
-  Parameters: "/c """"{app}\exec\installModels.cmd"""""; \
-  WorkingDir: "{app}\exec"; \
-  Description: "{code:descModel}"; \
-  Flags: postinstall skipifsilent runascurrentuser unchecked
-
-FileName: "{cmd}"; \
-  Parameters: "/c """"{app}\exec\installOllama.cmd"""""; \
+  Parameters: "/c """"{app}\exec\installOllama.cmd"""" update"; \
   WorkingDir: "{app}\exec"; \
   Description: "{code:descOllama}"; \
   Flags: postinstall skipifsilent runascurrentuser unchecked; Check: ollamaNeedsUpdate
@@ -443,6 +441,12 @@ FileName: "{cmd}"; \
   WorkingDir: "{app}\exec"; \
   Description: "{code:descOllama}"; \
   Flags: postinstall skipifsilent runascurrentuser unchecked; Check: ollamaIsCurrent
+
+FileName: "{cmd}"; \
+  Parameters: "/c """"{app}\exec\installModels.cmd"""""; \
+  WorkingDir: "{app}\exec"; \
+  Description: "{code:descModel}"; \
+  Flags: postinstall skipifsilent runascurrentuser unchecked
 
 ; ---- After the components: what to do now ----
 ;
@@ -855,14 +859,20 @@ begin
   Result := (sPriorVersion = '');
 end;
 
+(* describeThisInstall writes on the READY page, not the Welcome page.
+   Inno Setup 6 hides the Welcome page by default, and the speech history of a
+   clean install shows it never appears -- so the sentence saying install,
+   update or reinstall was being written to a page nobody reaches. The Ready
+   page is read aloud in full ("Click Install to continue..."), so the sentence
+   goes at the front of that instead. *)
 procedure describeThisInstall();
 begin
   if sPriorVersion = '' then
-    WizardForm.WelcomeLabel2.Caption := 'This will install {#AppName} {#AppVersion}.' + #13#10#13#10 + WizardForm.WelcomeLabel2.Caption
+    WizardForm.ReadyLabel.Caption := 'This will install {#AppName} {#AppVersion}.' + #13#10#13#10 + WizardForm.ReadyLabel.Caption
   else if sPriorVersion = '{#AppVersion}' then
-    WizardForm.WelcomeLabel2.Caption := 'This will reinstall {#AppName} {#AppVersion}, which is already here.' + #13#10#13#10 + WizardForm.WelcomeLabel2.Caption
+    WizardForm.ReadyLabel.Caption := 'This will reinstall {#AppName} {#AppVersion}, which is already here.' + #13#10#13#10 + WizardForm.ReadyLabel.Caption
   else
-    WizardForm.WelcomeLabel2.Caption := 'This will update {#AppName} from ' + sPriorVersion + ' to {#AppVersion}.' + #13#10#13#10 + WizardForm.WelcomeLabel2.Caption;
+    WizardForm.ReadyLabel.Caption := 'This will update {#AppName} from ' + sPriorVersion + ' to {#AppVersion}.' + #13#10#13#10 + WizardForm.ReadyLabel.Caption;
 end;
 
 (* --------------------------------------------------------------------
@@ -1301,7 +1311,12 @@ var
   iResult: Integer;
 begin
   try
-    Exec(ExpandConstant('{cmd}'), '/s /c "' + ExpandConstant('{app}\exec\summarizeSetup.cmd') + '"',
+    (* TWO pairs of quotes, not one. cmd /s strips the outermost pair and runs
+       what is left verbatim -- so with one pair, C:\Program Files\... arrived
+       unquoted, cmd tried to run "C:\Program", and the summary never started.
+       That is why 1.0.168 showed no Results box. The probes survived the /s
+       change because their commands carry their own quotes; this line did not. *)
+    Exec(ExpandConstant('{cmd}'), '/s /c ""' + ExpandConstant('{app}\exec\summarizeSetup.cmd') + '""',
          ExpandConstant('{app}\exec'), SW_HIDE, ewNoWait, iResult);
   except
   end;
