@@ -441,7 +441,7 @@ FileName: "{cmd}"; \
   Flags: postinstall skipifsilent runascurrentuser unchecked; Check: ollamaNeedsUpdate
 
 FileName: "{cmd}"; \
-  Parameters: "/c """"{app}\exec\installOllama.cmd"""""; \
+  Parameters: "/c """"{app}\exec\installOllama.cmd"""" reinstall"; \
   WorkingDir: "{app}\exec"; \
   Description: "{code:descOllama}"; \
   Flags: postinstall skipifsilent runascurrentuser unchecked; Check: ollamaIsCurrent

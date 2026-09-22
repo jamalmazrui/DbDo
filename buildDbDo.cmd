@@ -112,6 +112,20 @@ if exist "!homerDev!\version.txt" set /p homerVer=<"!homerDev!\version.txt"
 echo Kit: !homerDev! version !homerVer! >> "!log!"
 echo Kit: !homerDev! version !homerVer!
 
+rem THE KIT MUST BE NEW ENOUGH FOR THE SOURCE. DbDo.cs uses what the kit gives
+rem it -- Say.onSpoken, LbcMenuItem -- and a kit older than the source fails deep
+rem in the compiler with "Say does not contain a definition for onSpoken", which
+rem names the symptom and not the cause. So the build says the cause, first.
+set "kitNeeded=1.25.0"
+powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
+if errorlevel 1 (
+  echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
+  echo.
+  echo DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!.
+  echo Unzip HomerDev.zip into C:\HomerDev, then build again.
+  exit /b 1
+)
+
 rem A MODULE MAY NEED ANOTHER MODULE, and only two do: Mdi.cs uses KeyMap, so
 rem the pair is switched on together. DbDo has its own MDI frame for now, so
 rem neither is compiled here; KeyMap is, because DbDo's hotkey document and its

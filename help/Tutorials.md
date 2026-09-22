@@ -32,6 +32,10 @@ and what it does instead of running it.
 
 ## How to listen
 
+Help, Play Tutorials opens `Tutorials.mkv` in whatever program plays video and
+audio files on your computer. If none is set, Windows asks which app to use;
+pick a media player such as VLC and choose Always, and it will not ask again.
+
 **`Tutorials.mkv`** holds all nine as one recording with a chapter at the start
 of each. In FileDir, put the cursor on it and press Control+Shift+H for the
 Homer Player: it opens as one track, and **Control+Page Down and Control+Page Up
@@ -75,6 +79,11 @@ in the repository -- they are rebuilt by `scripts\buildTutorials`.
 - [12 - Inspecting a Record](#12-inspecting-a-record)
 - [13 - Work Search Record for a Claim or Counselor](#13-work-search-record-for-a-claim-or-counselor)
 - [14 - Menus, Windows and Help](#14-menus-windows-and-help)
+- [10 - Related Records](#10-related-records)
+- [11 - Mark and Unmark](#11-mark-and-unmark)
+- [12 - Look and Prime](#12-look-and-prime)
+- [13 - Report, Save and Copy](#13-report-save-and-copy)
+- [14 - Work Search Record for a Claim or Counselor](#14-work-search-record-for-a-claim-or-counselor)
 - [10 - Related Records](#10-related-records)
 - [11 - Mark and Unmark](#11-mark-and-unmark)
 - [12 - Look and Prime](#12-look-and-prime)

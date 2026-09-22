@@ -51,6 +51,11 @@ rem had, left the version where it was, and then reported "Installed Ollama and
 rem the llama3.2 model" -- true of nothing it had done. Asked to update, it now
 rem upgrades through winget and does only that.
 if /i "%~1"=="update" goto :updateOllama
+rem REINSTALL MEANS REINSTALL. The finish page said "Reinstall Ollama 0.34.2
+rem (current version)"; this script found Ollama present, fetched the model, and
+rem reported "Installed Ollama and the llama3.2 model". Asked to reinstall, it
+rem now reinstalls Ollama over itself and says so.
+if /i "%~1"=="reinstall" goto :reinstallOllama
 
 call :logLine "Ollama not on the PATH; installing with winget."
 where winget >nul 2>&1
@@ -115,4 +120,17 @@ set "sNow="
 for /f "tokens=*" %%v in ('ollama --version 2^>nul') do set "sNow=%%v"
 call :addAction "Updated Ollama. %sNow%"
 echo Ollama is up to date.
+goto :done
+
+:reinstallOllama
+call :logLine "Reinstall requested."
+echo Reinstalling Ollama.
+echo Windows may ask for permission in a window behind this one.
+echo If nothing happens, press Alt+Tab and look for User Account Control.
+winget install --id Ollama.Ollama --force --accept-source-agreements --accept-package-agreements --silent >> "%sLog%" 2>&1
+call :logLine "winget install --force exit code: %ERRORLEVEL%"
+set "sNow="
+for /f "tokens=*" %%v in ('ollama --version 2^>nul') do set "sNow=%%v"
+call :addAction "Reinstalled Ollama. %sNow%"
+echo Ollama is reinstalled.
 goto :done

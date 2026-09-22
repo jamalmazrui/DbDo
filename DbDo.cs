@@ -11532,6 +11532,9 @@ namespace DbDo
             // Load Extra-Speech setting from DbDo.inix [General].
             // Default ON (Y) on first launch. Off explicitly via "N".
             string sExtra = IniSession.read("General", "ExtraSpeech");
+            // What DbDo says goes into the runtime log beside what the user
+            // pressed, so a log can be read as the conversation it was.
+            Say.onSpoken = delegate(string sLine) { DbDoLog.write(sLine); };
             Say.bExtraSpeechEnabled = string.IsNullOrEmpty(sExtra)
                 || !sExtra.Equals("N", StringComparison.OrdinalIgnoreCase);
             applyIniOverrides();
@@ -13254,8 +13257,10 @@ namespace DbDo
         private ToolStripMenuItem addItem(ToolStripMenuItem miParent, string sText, string sCommand, Keys key, EventHandler evHandler,
             string sSummary, string sDescription)
         {
-            ToolStripMenuItem mi = new ToolStripMenuItem(sText);
-            mi.Click += (senderA, evA) => { commandEcho(sCommand); evHandler(senderA, evA); };
+            // LbcMenuItem reports both the shortcut and the access letter to the
+            // screen reader; see Lbc.cs. The stock item reports only one of them.
+            ToolStripMenuItem mi = new LbcMenuItem(sText);
+            mi.Click += (senderA, evA) => { DbDoLog.write("command: " + sCommand); commandEcho(sCommand); evHandler(senderA, evA); };
             miParent.DropDownItems.Add(mi);
             KeyMap.register(key, mi, sCommand);
             if (key != Keys.None) dLocalKeyToMenu[key] = mi;
@@ -13279,7 +13284,9 @@ namespace DbDo
         private ToolStripMenuItem addItemLocal(ToolStripMenuItem miParent, string sText, string sCommand, Keys key, EventHandler evHandler,
             string sSummary, string sDescription)
         {
-            ToolStripMenuItem mi = new ToolStripMenuItem(sText);
+            // LbcMenuItem reports both the shortcut and the access letter to the
+            // screen reader; see Lbc.cs. The stock item reports only one of them.
+            ToolStripMenuItem mi = new LbcMenuItem(sText);
             mi.Click += (senderA, evA) => { commandEcho(sCommand); evHandler(senderA, evA); };
             miParent.DropDownItems.Add(mi);
             KeyMap.registerDisplayOnly(key, mi, sCommand);
@@ -14783,6 +14790,18 @@ namespace DbDo
         // =====================================================================
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
+            // EVERY KEY THE PROGRAM SEES IS LOGGED, by its Homer name. With the
+            // commands and the speech also logged, the runtime log reads as the
+            // session did: key, command, what was said. That is what makes a log
+            // useful to hand to an AI, or to read beside a screen reader's speech
+            // history. A bare Shift or Control is not a keystroke and is skipped.
+            Keys kOnly = keyData & Keys.KeyCode;
+            if (kOnly != Keys.ShiftKey && kOnly != Keys.ControlKey && kOnly != Keys.Menu
+                && kOnly != Keys.LShiftKey && kOnly != Keys.RShiftKey && kOnly != Keys.LControlKey
+                && kOnly != Keys.RControlKey && kOnly != Keys.LMenu && kOnly != Keys.RMenu)
+            {
+                try { DbDoLog.write("key: " + KeyMap.friendlyKey(keyData)); } catch { }
+            }
             // Key Describer mode intercepts EVERY key before any command
             // or grid navigation runs. A key bound to a command is
             // described (its command, chord, and summary) through

@@ -452,7 +452,27 @@ if ($bLive) {
 # Faster than natural, both of them, because an experienced screen reader user
 # listens above the rate a narrator would choose and a tutorial that dawdles is
 # one nobody finishes.
-$dNarratorScale = 0.72
+# THE NARRATOR, TUNED FOR LISTENERS OF EVERY AGE.
+#
+# Hearing changes with age, and blind listeners are no exception. A beta tester
+# found the narrator hard to follow at 0.72. Two things are known to matter:
+#
+#   Rate. Older listeners' hearing recovers more slowly between sounds, so
+#   speech that is fast for a young ear runs sounds together for an older one.
+#   0.80 is one step back from 0.72 -- still brisker than natural (1.0), since
+#   slow speech tries the patience of the many listeners who hear well.
+#
+#   Pitch. Age-related hearing loss takes the high frequencies first, and a
+#   woman's voice sits about an octave above a man's -- roughly 224 Hz against
+#   132. So the narrator is lowered two semitones, to about 200 Hz: easier on an
+#   older ear, still clearly a woman's voice, and still well apart from the
+#   screen reader's. Keeping the two voices apart in pitch is itself an aid:
+#   a difference in pitch is how any listener tells two voices apart.
+#
+# Both are [global] settings, NarratorScale and NarratorPitch, in semitones;
+# 0 leaves the pitch alone.
+$dNarratorScale = 0.80
+$dNarratorPitch = -2
 $dReaderScale = 0.56
 $dReaderNoise = 0.333
 # Silence before the first word of a script, and after each passage. The lead-in
@@ -516,7 +536,7 @@ function resolveVoice([string] $sName) {
 
 function applyGlobal($dGlobal) {
   if ($null -eq $dGlobal) { return }
-  foreach ($sKey in @("NarratorVoice", "ReaderVoice", "NarratorScale", "ReaderScale",
+  foreach ($sKey in @("NarratorVoice", "ReaderVoice", "NarratorPitch", "NarratorScale", "ReaderScale",
                       "ReaderFlatness", "LeadIn", "Gap", "VoiceFolder", "PiperPath", "FfmpegPath")) {
     if (-not $dGlobal.ContainsKey($sKey)) { continue }
     $sValue = ([string] $dGlobal[$sKey][0]).Trim()
@@ -525,6 +545,7 @@ function applyGlobal($dGlobal) {
       "NarratorVoice"  { $sFound = resolveVoice $sValue; if ($sFound -ne "") { $script:sPiperVoice = $sFound } }
       "ReaderVoice"    { $sFound = resolveVoice $sValue; if ($sFound -ne "") { $script:sReaderVoice = $sFound } }
       "NarratorScale"  { $script:dNarratorScale = [double] $sValue }
+      "NarratorPitch"  { $script:dNarratorPitch = [double] $sValue }
       "ReaderScale"    { $script:dReaderScale = [double] $sValue }
       "ReaderFlatness" { $script:dReaderNoise = [double] $sValue }
       "LeadIn"         { $script:dLeadIn = [double] $sValue }
@@ -568,6 +589,20 @@ function buildOne([string] $sScript) {
       # sentences so a point lands before the next one starts.
       runVoice $sPiper @("-m", $sPiperVoice, "--length_scale", "$dNarratorScale",
                          "--sentence_silence", "0.5", "-f", $sFile) $sText "piper" | Out-Null
+      # Lower the pitch without changing the length: play it slower by the pitch
+      # ratio, then speed the tempo back up by the same ratio. The voice models
+      # speak at 22050 Hz.
+      if ($dNarratorPitch -ne 0 -and (Test-Path -LiteralPath $sFile)) {
+        $dRatio = [Math]::Pow(2.0, $dNarratorPitch / 12.0)
+        $sInv = [System.Globalization.CultureInfo]::InvariantCulture
+        $sRate = [string]::Format($sInv, "{0:0}", 22050 * $dRatio)
+        $sTempo = [string]::Format($sInv, "{0:0.0000}", 1.0 / $dRatio)
+        $sLowered = $sFile + ".low.wav"
+        runVoice $sFfmpeg @("-y", "-loglevel", "error", "-i", $sFile,
+                            "-af", ("asetrate=" + $sRate + ",aresample=22050,atempo=" + $sTempo),
+                            $sLowered) $null "ffmpeg-pitch" | Out-Null
+        if (Test-Path -LiteralPath $sLowered) { Move-Item -LiteralPath $sLowered -Destination $sFile -Force }
+      }
     }
     else {
       $oSpeaker.SelectVoice($sSapiNarrator)

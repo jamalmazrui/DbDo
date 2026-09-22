@@ -743,7 +743,7 @@ and each extra key picks a different kind of help.
 
 **Help, Play Tutorials** opens `Tutorials.mkv` -- fourteen walkthroughs, about
 three minutes each, as one recording with a chapter at the start of every one.
-DbDo hands the file to Windows, so whatever plays that kind of file plays it. In
+DbDo hands the file to Windows, so whatever plays that kind of file plays it. If Windows asks which app to use, pick a media player such as VLC, and choose Always so it does not ask again. In
 a player that reads chapters, Control+Page Down and Control+Page Up move from
 one walkthrough to the next.
 
