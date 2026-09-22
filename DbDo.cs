@@ -4098,7 +4098,41 @@ namespace DbDo
                 // Strip any quoting the caller may have included.
                 sCol = sCol.Trim('"', '[', ']', '`');
                 if (sCol.Length == 0) continue;
-                lParts.Add(quoteIdentifier(sCol, sExt) + " " + sDir);
+                string sQ = quoteIdentifier(sCol, sExt);
+                if (sExt == "db" || sExt == "sqlite" || sExt == "sqlite3")
+                {
+                    // ORDER THE WAY A PERSON READS, NOT THE WAY SQLITE STORES.
+                    //
+                    // A reported bug: sorted by author, series and volume, book
+                    // 09 came after 06.5 and before 07. SQLite puts every NUMBER
+                    // before every piece of TEXT, whatever the digits say. A
+                    // column that holds some values stored as numbers (9, 6.5)
+                    // and some as text ('07', '08') -- which happens when records
+                    // arrive by different routes, an import and a hand entry --
+                    // sorts as 6.5, 9, '07', '08'. Deleting the record and typing
+                    // it again stored it the same way, so the fault came back.
+                    //
+                    // So a SQLite sort key is three keys:
+                    //   1. numbers first -- values stored as numbers, and text
+                    //      that is only digits with an optional point or minus;
+                    //   2. those in numeric order, however they are stored;
+                    //   3. everything else as text, without regard to case, so
+                    //      "spencer-Fleming" sorts among the S's rather than
+                    //      after every capitalised name.
+                    // A plain text column sorts as before, apart from case.
+                    string sT = "trim(" + sQ + ")";
+                    string sNumeric = "(typeof(" + sQ + ") IN ('integer','real') OR ("
+                        + sT + " <> '' AND " + sT + " GLOB '*[0-9]*' AND ("
+                        + sT + " NOT GLOB '*[^0-9.]*' OR (substr(" + sT + ",1,1) = '-' AND substr("
+                        + sT + ",2) NOT GLOB '*[^0-9.]*'))))";
+                    lParts.Add("(CASE WHEN " + sNumeric + " THEN 0 ELSE 1 END) " + sDir);
+                    lParts.Add("(CASE WHEN " + sNumeric + " THEN CAST(" + sQ + " AS REAL) END) " + sDir);
+                    lParts.Add(sQ + " COLLATE NOCASE " + sDir);
+                }
+                else
+                {
+                    lParts.Add(sQ + " " + sDir);
+                }
             }
             return string.Join(", ", lParts.ToArray());
         }

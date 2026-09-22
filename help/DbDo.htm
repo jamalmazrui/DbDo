@@ -791,6 +791,9 @@ filter.</li>
 Sort</strong> returns to natural order; <strong>Say Order</strong>
 (Shift+O) speaks the current sort.</li>
 </ul>
+<p>Sorting reads numbers as numbers: volume 9 comes after 7 and 6.5 even
+if some values were stored as text and others as numbers. It also
+ignores capital letters, so “spencer” sorts with “Spencer”.</p>
 <p>Because these only change the view, you can slice a large table down
 to what you need, work on it, and clear the filter to see everything
 again — the records were never removed.</p>

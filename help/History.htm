@@ -235,8 +235,9 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
-<li><a href="#v1.0.172-current" id="toc-v1.0.172-current">v1.0.172
+<li><a href="#v1.0.177-current" id="toc-v1.0.177-current">v1.0.177
 (current)</a></li>
+<li><a href="#v1.0.172" id="toc-v1.0.172">v1.0.172</a></li>
 <li><a href="#v1.0.115" id="toc-v1.0.115">v1.0.115</a></li>
 <li><a href="#v1.0.114" id="toc-v1.0.114">v1.0.114</a></li>
 <li><a href="#v1.0.112-and-v1.0.113"
@@ -343,7 +344,20 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
-<h2 id="v1.0.172-current">v1.0.172 (current)</h2>
+<h2 id="v1.0.177-current">v1.0.177 (current)</h2>
+<p><strong>Sorting puts numbers in numeric order, however they were
+stored.</strong> A tester sorted his books by author, series and volume
+and found volume 09 between 06.5 and 07. SQLite sorts every value stored
+as a number ahead of every value stored as text, so a column holding
+some of each – which happens when records arrive by different routes,
+such as an import and a hand entry – came out as 6.5, 9, 07, 08.
+Deleting the record and typing it again stored it the same way. Now
+numbers, and text that is only a number, sort together in numeric order;
+everything else follows as text.</p>
+<p><strong>Sorting ignores capital letters.</strong> A name typed as
+“spencer-Fleming” now sorts among the S’s instead of after every
+capitalised name.</p>
+<h2 id="v1.0.172">v1.0.172</h2>
 <p>This release gathers the work since 1.0.115 into one entry. The short
 version: DbDo now opens on a job search database, teaches itself through
 spoken walkthroughs, and every key is named for a word in its

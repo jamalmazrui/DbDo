@@ -216,6 +216,10 @@ Filtering and sorting reshape the grid without touching the physical table.
 - **Where Filter** (Control+W) limits the grid to records matching a condition; **Clear Where** (Control+Shift+W) removes it; **Filter by Regex** filters by pattern; **Say Where Filter** (Shift+W) speaks the current filter.
 - **Order Records** (Alt+O) sorts the grid by a field; **Reverse Order** (Alt+Shift+O) reverses it; **Clear Sort** returns to natural order; **Say Order** (Shift+O) speaks the current sort.
 
+Sorting reads numbers as numbers: volume 9 comes after 7 and 6.5 even if some
+values were stored as text and others as numbers. It also ignores capital
+letters, so "spencer" sorts with "Spencer".
+
 Because these only change the view, you can slice a large table down to what you need, work on it, and clear the filter to see everything again — the records were never removed.
 
 ## Choosing displayed columns

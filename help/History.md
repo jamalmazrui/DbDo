@@ -4,7 +4,21 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.172 (current)
+## v1.0.177 (current)
+
+**Sorting puts numbers in numeric order, however they were stored.** A tester
+sorted his books by author, series and volume and found volume 09 between 06.5
+and 07. SQLite sorts every value stored as a number ahead of every value stored
+as text, so a column holding some of each -- which happens when records arrive by
+different routes, such as an import and a hand entry -- came out as 6.5, 9, 07,
+08. Deleting the record and typing it again stored it the same way. Now numbers,
+and text that is only a number, sort together in numeric order; everything else
+follows as text.
+
+**Sorting ignores capital letters.** A name typed as "spencer-Fleming" now sorts
+among the S's instead of after every capitalised name.
+
+## v1.0.172
 
 This release gathers the work since 1.0.115 into one entry. The short version:
 DbDo now opens on a job search database, teaches itself through spoken
