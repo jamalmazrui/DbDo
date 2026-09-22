@@ -94,6 +94,16 @@ in the repository -- they are rebuilt by `scripts\buildTutorials`.
 - [12 - Look and Prime](#12-look-and-prime)
 - [13 - Report, Save and Copy](#13-report-save-and-copy)
 - [14 - Work Search Record for a Claim or Counselor](#14-work-search-record-for-a-claim-or-counselor)
+- [10 - Related Records](#10-related-records)
+- [11 - Mark and Unmark](#11-mark-and-unmark)
+- [12 - Look and Prime](#12-look-and-prime)
+- [13 - Report, Save and Copy](#13-report-save-and-copy)
+- [14 - Work Search Record for a Claim or Counselor](#14-work-search-record-for-a-claim-or-counselor)
+- [10 - Related Records](#10-related-records)
+- [11 - Mark and Unmark](#11-mark-and-unmark)
+- [12 - Look and Prime](#12-look-and-prime)
+- [13 - Report, Save and Copy](#13-report-save-and-copy)
+- [14 - Work Search Record for a Claim or Counselor](#14-work-search-record-for-a-claim-or-counselor)
 - [00 - Overview and Table of Contents](#00-overview-and-table-of-contents)
 - [01 - Installing DbDo](#01-installing-dbdo)
 - [02 - Opening JobTrail](#02-opening-jobtrail)
@@ -138,13 +148,13 @@ Screen reader:
 
 DbDo opens databases of any kind. JobTrail is the one that comes with it.
 
-### Step 3: Shift+H
+### Step 3: Shift+Z
 
 These walkthroughs follow me in order. One installs DbDo, two opens JobTrail, three learns the menus. Four to six add, inspect and edit a job.
 
 Screen reader:
 
-- here, jobs row 1 of 4, sort employer
+- status, jobs row 1 of 4, sort employer
 
 ### Step 4
 
@@ -296,13 +306,13 @@ Screen reader:
 
 - Digital Services Assistant
 
-### Step 5: Shift+H
+### Step 5: Shift+Z
 
-My screen reader's say line key reads the whole row again. Shift plus H, Say Here, gives the summary. H for Here.
+My screen reader's say line key reads the whole row again. Shift plus Z, Say Status, gives the summary. H for Here.
 
 Screen reader:
 
-- here, jobs row 3 of 4, sort employer
+- status, jobs row 3 of 4, sort employer
 
 ### Step 6: Control+PageDown
 
@@ -381,7 +391,7 @@ F1 is help: the guide. Shift plus F1 is the history, Control plus F1 describes t
 
 Screen reader:
 
-- Key describer on
+- Key Describer On
 
 Help also holds the ReadMe, Hotkeys, the FAQ, and Play Tutorials.
 
@@ -449,7 +459,7 @@ Enter takes it. Control plus Enter saves the record from anywhere in the dialog.
 
 Screen reader:
 
-- Record added
+- Records list view
 - Widget Works (your own entry) Support Analyst lead, 5 of 5
 
 **Something to try:** Add a job you are actually after, with its status.
@@ -533,8 +543,8 @@ Screen reader:
 
 Screen reader:
 
-- Record saved
 - Records list view
+- Example Widgets Company (sample employer) Accessibility Analyst offer, 2 of 4
 
 ### Step 4: F2
 
@@ -558,7 +568,9 @@ Screen reader:
 
 Screen reader:
 
-- status, offer
+- status
+- row 2 of 4
+- offer
 
 **Something to try:** Change the status of one of your own jobs both ways, and check it with Shift plus C.
 
@@ -639,7 +651,7 @@ Screen reader:
 
 Screen reader:
 
-- Sorted by status
+- Records list view
 - Sample Health Network (illustration only) Records Coordinator applied, 1 of 4
 
 Shift plus O, Say Order, says it later.
@@ -659,7 +671,8 @@ I want what is still moving: status not rejected.
 
 Screen reader:
 
-- 3 rows
+- Records list view
+- Example Widgets Company (sample employer) Accessibility Analyst interviewing, 1 of 3
 
 Shift plus W, Say Where, and Shift plus Y, Say Yield -- how many rows it left.
 
@@ -669,7 +682,8 @@ Control plus Shift plus W clears it. Adding Shift reverses.
 
 Screen reader:
 
-- 4 rows
+- Records list view
+- Demo Data Cooperative (made up) Data Quality Specialist rejected, 1 of 4
 
 **Something to try:** Filter to the jobs you applied to, order them by date applied, then clear the filter.
 
@@ -758,7 +772,7 @@ Control plus M, Mark -- M for Mark.
 
 Screen reader:
 
-- Marked
+- Marked row 2
 
 ### Step 2: Control+Shift+M
 
@@ -766,7 +780,7 @@ Control plus Shift plus M unmarks. Adding Shift reverses.
 
 Screen reader:
 
-- Unmarked
+- Unmarked row 2
 
 Shift plus M, Say Mark, asks without changing anything.
 
@@ -784,7 +798,7 @@ Shift plus Space counts them.
 
 Screen reader:
 
-- marked rows, 2 of 4
+- 2 marked rows: Example Widgets Company (sample employer), Sample Health Network (illustration only)
 
 ### Step 5: Control+A
 
@@ -792,7 +806,7 @@ For runs of rows: Edit, B for Bulk Marking, then A for Mark All.
 
 Screen reader:
 
-- 4 marked
+- Marked 4 rows
 
 Control plus A is the key for Mark All; Control plus Shift plus A unmarks all.
 
@@ -844,7 +858,7 @@ To tell a friend about a job: Control plus Shift plus C copies the record. C for
 
 Screen reader:
 
-- Record copied
+- Row copied to clipboard
 
 Labelled lines, ready to paste.
 
@@ -861,7 +875,6 @@ Screen reader:
 
 Screen reader:
 
-- Report written
 - EdSharp, application underscore history dot m d
 
 ### Step 4: Control+Shift+S
@@ -881,13 +894,13 @@ The extension decides the format: dot x l s x, dot c s v, dot h t m.
 
 **Before you start:** JobTrail is open on the actions table, the log of everything I have done.
 
-### Step 1: Shift+H
+### Step 1: Shift+Z
 
 My counselor asks what I did, when, with whom, and what came of it. The actions table holds exactly that.
 
 Screen reader:
 
-- here, actions row 1 of 7, sort action date descending
+- status, actions row 1 of 7, sort action date descending
 
 ### Step 2: Shift+C
 
@@ -895,7 +908,9 @@ Three fields matter to the agency: method, evidence, and counts -- whether it wa
 
 Screen reader:
 
-- method, internet
+- method
+- row 1 of 7
+- internet
 
 ### Step 3: Alt+Shift+R
 
@@ -916,7 +931,6 @@ Screen reader:
 
 Screen reader:
 
-- Report written
 - EdSharp, work underscore search underscore record dot m d
 
 Countable contacts first, with weekly totals; everything else after.

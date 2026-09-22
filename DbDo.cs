@@ -125,9 +125,10 @@ namespace DbDo
         // all just leave the script folder empty.
         public static string getScriptDir()
         {
-            string sDir = System.IO.Path.Combine(
-                Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData),
-                @"DbDo\Scripts");
+            // The Homer per-user tree: %LOCALAPPDATA%\DbDo\scripts. The old
+            // place was %APPDATA%\DbDo\Scripts; a copy still there is left
+            // alone, being the user's own work.
+            string sDir = Homer.Paths.scripts();
             try { System.IO.Directory.CreateDirectory(sDir); }
             catch { /* tolerate; the caller will surface the error */ }
             seedSampleScriptsIfNew(sDir);
@@ -169,8 +170,26 @@ namespace DbDo
         {
             try
             {
+                // THE SENTINEL IS A LIST, NOT A FLAG.
+                //
+                // It used to say only "seeded". So a file added to a sample
+                // folder in a later version -- JobTrail.inix, which is what tells
+                // the database which table to open on -- was never copied to a
+                // user who had run DbDo once. The database opened on the wrong
+                // table and nothing said why.
+                //
+                // Now the sentinel lists every bundled file that has ever been
+                // seeded. A file missing from the user's folder but present in
+                // the list was deleted by the user and stays deleted; one that
+                // is not in the list is new in this version and is copied.
                 string sSentinel = System.IO.Path.Combine(sDir, ".seeded");
                 bool bFirstSeed = !System.IO.File.Exists(sSentinel);
+                List<string> lsSeeded = new List<string>();
+                if (!bFirstSeed)
+                {
+                    try { lsSeeded.AddRange(System.IO.File.ReadAllLines(sSentinel)); } catch { }
+                }
+                List<string> lsNew = new List<string>();
 
                 // Paths.installedFolder answers the folder the program was
                 // installed into, climbing out of exec when it runs from there,
@@ -196,7 +215,10 @@ namespace DbDo
                         foreach (string sSrcPath in System.IO.Directory.GetFiles(sSubSrc))
                         {
                             string sDstPath = System.IO.Path.Combine(sSubDst, System.IO.Path.GetFileName(sSrcPath));
-                            copyBundledSample(sSrcPath, sDstPath, bFirstSeed);
+                            string sKey = System.IO.Path.GetFileName(sSubSrc) + "/" + System.IO.Path.GetFileName(sSrcPath);
+                            bool bNeverSeeded = !bFirstSeed && !lsSeeded.Contains(sKey);
+                            copyBundledSample(sSrcPath, sDstPath, bFirstSeed || bNeverSeeded);
+                            if (!lsSeeded.Contains(sKey)) lsNew.Add(sKey);
                         }
                     }
                     // Tolerate any loose .db left directly in the source
@@ -207,9 +229,13 @@ namespace DbDo
                         copyBundledSample(sSrcPath, sDstPath, bFirstSeed);
                     }
                 }
+                if (lsNew.Count > 0 && !bFirstSeed)
+                {
+                    try { System.IO.File.AppendAllLines(sSentinel, lsNew); } catch { }
+                }
                 if (bFirstSeed)
                 {
-                    try { System.IO.File.WriteAllText(sSentinel, "seeded " + DateTime.Now.ToString("o")); }
+                    try { System.IO.File.WriteAllLines(sSentinel, lsNew.ToArray()); }
                     catch { }
                 }
             }
@@ -1598,6 +1624,9 @@ namespace DbDo
             // so a bad sweep can't break the open.
             if (!bReadOnlyFlag && (sExt == "db" || sExt == "sqlite" || sExt == "sqlite3"))
             {
+                try { renamePrmToPrime(); }
+                catch (Exception exRen)
+                { try { DbDoLog.write("renamePrmToPrime failed: " + exRen.Message); } catch { } }
                 try { ensureRecommendedIndexes(); }
                 catch (Exception exIdx)
                 { try { DbDoLog.write("ensureRecommendedIndexes failed: " + exIdx.Message); } catch { } }
@@ -1605,6 +1634,56 @@ namespace DbDo
 
             if (!string.IsNullOrEmpty(sTable))
                 selectTable(sTable);
+        }
+
+        // renamePrmToPrime: bring a database made before the rename up to date.
+        //
+        // The computed key column was called prm, and the maps table's two ends
+        // prm1 and prm2. DbDo now reads only prime, prime1 and prime2, so an
+        // older database -- a tester's own, or a sample shipped before the
+        // rename -- lost Say Prime and every link that goes through maps, with
+        // no error to say why. Thirteen of the fourteen samples were in that
+        // state until they were migrated.
+        //
+        // ALTER TABLE ... RENAME COLUMN keeps the data and rewrites every
+        // generated column, index and view that names the old column. Only a
+        // column still called prm is touched, and only when prime is absent,
+        // so running it on a current database does nothing. Each rename is
+        // logged.
+        private void renamePrmToPrime()
+        {
+            if (oConn == null) return;
+            List<string[]> lRenames = new List<string[]>();
+            dynamic oRs = null;
+            try
+            {
+                oRs = oConn.Execute("SELECT m.name, p.name FROM sqlite_master m, pragma_table_xinfo(m.name) p "
+                    + "WHERE m.type = 'table' AND m.name NOT LIKE 'sqlite_%' AND p.name IN ('prm', 'prm1', 'prm2')",
+                    Type.Missing, AdoConstants.adCmdText);
+                while (oRs != null && !(bool)oRs.EOF)
+                {
+                    lRenames.Add(new string[] { Convert.ToString(oRs.Fields[0].Value), Convert.ToString(oRs.Fields[1].Value) });
+                    oRs.MoveNext();
+                }
+            }
+            finally { try { if (oRs != null) oRs.Close(); } catch { } }
+            foreach (string[] a in lRenames)
+            {
+                string sNew = a[1].Replace("prm", "prime");
+                bool bHasNew = false;
+                dynamic oChk = null;
+                try
+                {
+                    oChk = oConn.Execute("SELECT count(*) FROM pragma_table_xinfo('" + a[0].Replace("'", "''")
+                        + "') WHERE name = '" + sNew + "'", Type.Missing, AdoConstants.adCmdText);
+                    bHasNew = oChk != null && !(bool)oChk.EOF && Convert.ToInt32(oChk.Fields[0].Value) > 0;
+                }
+                finally { try { if (oChk != null) oChk.Close(); } catch { } }
+                if (bHasNew) continue;
+                oConn.Execute("ALTER TABLE \"" + a[0].Replace("\"", "\"\"") + "\" RENAME COLUMN \"" + a[1] + "\" TO \"" + sNew + "\"",
+                    Type.Missing, AdoConstants.adCmdText);
+                try { DbDoLog.write("renamed " + a[0] + "." + a[1] + " to " + sNew); } catch { }
+            }
         }
 
         // ensureRecommendedIndexes: for every base table in the
@@ -12564,7 +12643,11 @@ namespace DbDo
             miSay.AccessibleName = "Say announcements";
             miQuery.DropDownItems.Add(miSay);
             miSaySayMark         = addItem(miSay, "Say &Mark Status", "Say Mark", Keys.Shift | Keys.M, saySayMark);
-            miSaySayStatus       = addItem(miSay, "Say &Here",   "Say Here",       Keys.Shift | Keys.H,               saySayStatus);
+            miSaySayStatus       = addItem(miSay, "Say Status",  "Say Status",     Keys.Shift | Keys.Z,               saySayStatus);
+            // Z FOR STATUS: Z is the bottom of the alphabet, and the status bar
+            // is the bottom of the window. The caption carries no access letter,
+            // since no word in it begins with Z and a letter from the middle of
+            // a word is worse than none.
             miSaySayDatabase     = addItem(miSay, "Say &Database",        "Say Database",     Keys.Shift | Keys.D,               saySayDatabase);
             miSaySayOrder        = addItem(miSay, "Say &Order",      "Say Order",        Keys.Shift | Keys.O,               saySayOrder);
             miSaySayGoto         = addItem(miSay, "Say &Goto",      "Say Goto",         Keys.Shift | Keys.G,               saySayGoto);
@@ -15491,7 +15574,7 @@ namespace DbDo
             if (db == null || !db.isOpen())
             { Say.say("status: no database open"); return; }
             if (!db.hasRecordset())
-            { speakOrShow("Here", "here: " + (db.filePath ?? "database open, no table selected"), 101); return; }
+            { speakOrShow("Status", "status: " + (db.filePath ?? "database open, no table selected"), 101); return; }
             StringBuilder sb = new StringBuilder();
             // Marked state at the front so the user hears it first.
             // Only announce when true (matching the status bar
@@ -15509,7 +15592,7 @@ namespace DbDo
             sb.Append(" row ").Append(db.absolutePosition).Append(" of ").Append(db.recordCount);
             if (db.filter.Length > 0) sb.Append("; filter: ").Append(db.filter);
             if (db.sort.Length > 0) sb.Append("; sort: ").Append(db.sort);
-            speakOrShow("Here", "here: " + sb.ToString(), 101);
+            speakOrShow("Status", "status: " + sb.ToString(), 101);
         }
 
         // saySayDatabase: Shift+D. Speak the database name (single-
@@ -15902,10 +15985,21 @@ namespace DbDo
             // "none" when the column holds NULL, "blank" when it holds an empty
             // string. Same distinction everywhere, so the word is the answer.
             if (string.IsNullOrEmpty(sVal)) sVal = db.emptyWord(sCol);
-            // The column name IS the label, and the row number is left out:
-            // the list view announced the position when the row was reached,
-            // and Say Status repeats it on demand. One line, two facts.
-            speakOrShow("Cell", sCol + ": " + sVal, 117);
+            // THREE UTTERANCES, NOT ONE SENTENCE: the column, then where the row
+            // is, then the value. Sent separately, a screen reader gives each its
+            // own phrase, and the three facts are heard as three answers rather
+            // than as one long line to unpick. Nothing is added between them, so
+            // it costs no time.
+            //
+            // Double-pressing still shows the whole thing in a window, which is
+            // why the joined form is built as well.
+            string sWhere = "row " + iVirtualRow + " of " + db.recordCount;
+            long iNowCell = DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond;
+            bool bDoubleCell = (117 == iLastSpeechChord) && (iNowCell - iLastSpeechTicks < DoublePressMillis);
+            iLastSpeechChord = 117;
+            iLastSpeechTicks = iNowCell;
+            if (bDoubleCell) showInfoDialog("Cell", sCol + ", " + sWhere + ": " + sVal);
+            else Say.sayParts(new string[] { sCol, sWhere, sVal });
         }
 
         // saySayFilter: speak the active ADO filter expression. Empty

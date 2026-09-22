@@ -1,0 +1,44 @@
+﻿; BookTrail.inix -- how the BookTrail database opens, and how each table is heard.
+;
+; BookTrail keeps the books you have read, are reading, and mean to read. It is
+; built for a reader who follows authors and series, and who reads by ear or by
+; finger as often as by eye: a narrator field, formats such as BARD audio and
+; Bookshare text, and a catalog number for finding a book again.
+;
+; ONE TABLE, ON PURPOSE. Author and series are fields of the book, not tables of
+; their own. That is what lets the list be ordered by author, then series, then
+; volume -- the order a series reader wants -- and it is what a spreadsheet of
+; books already looks like, so importing one needs no reshaping. Consistency,
+; which separate tables would enforce, comes from pick lists instead: F4 on
+; series, format, genre or status offers the values already in use, so a series
+; is chosen rather than retyped. A series spelled two ways is the commonest cause
+; of a book sorting in the wrong place.
+;
+; VOLUME IS TEXT, as typed. A novella between books 6 and 7 is 6.5, and some
+; readers write 06. DbDo sorts text that holds only a number as a number, so
+; 6.5 falls between 6 and 7 and 10 comes after 9.
+
+[Database]
+
+InitialTable = books
+
+[Table:books]
+
+; The row says who wrote it first, because a reader of series looks books up by
+; author, and first-letter navigation searches the first column. Then the title,
+; then where it sits in its series. Four fields, the ceiling.
+SelectFields = author, title, series, volume
+OrderFields = author, series, volume, title
+WhereFilter =
+
+[Table:lookups]
+
+SelectFields = fld, val
+OrderFields = fld, ordinal
+WhereFilter =
+
+[Table:maps]
+
+SelectFields = kind, prime1, prime2
+OrderFields = kind, prime1
+WhereFilter =

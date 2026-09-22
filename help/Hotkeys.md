@@ -370,9 +370,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Goto\
   Speak the most recently used Jump search string. G for Goto.\
   Shift+G
-- Say Here\
-  H for Here.\
-  Shift+H
 - Say Id\
   I for ID.\
   Shift+I
@@ -421,6 +418,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Sort and Filter\
   Speak the current sort and filter, or '(none)' for each. Shift+8 is the asterisk, the SQL sign for everything: sort and filter together.\
   Shift+8
+- Say Status\
+  Speak the table, row count, filter, and sort. Z is for sleep: it wakes this behavior or puts it to sleep.\
+  Shift+Z
 - Say Tags\
   Speak the current row's 'tags' field. T for Tags.\
   Shift+T
@@ -795,8 +795,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Shift+G\
   Speak the most recently used Jump search string.\
   Say Goto
-- Shift+H\
-  Say Here
 - Shift+I\
   Say Id
 - Shift+J\
@@ -838,6 +836,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Shift+Y\
   Speak the current row count (after filter).\
   Say Yield
+- Shift+Z\
+  Speak the table, row count, filter, and sort.\
+  Say Status
 
 ## By command
 
@@ -1108,8 +1109,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Goto\
   Speak the most recently used Jump search string.\
   Shift+G
-- Say Here\
-  Shift+H
 - Say Id\
   Shift+I
 - Say Jump\
@@ -1149,6 +1148,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Sort and Filter\
   Speak the current sort and filter, or '(none)' for each.\
   Shift+8
+- Say Status\
+  Speak the table, row count, filter, and sort.\
+  Shift+Z
 - Say Tags\
   Speak the current row's 'tags' field.\
   Shift+T

@@ -160,7 +160,7 @@ These are on by default and can be turned off with the `extraKeys` setting.
 
 The **dot prompt** (Enter Console, Control+GraveAccent) is the command-line channel: type dBASE-style commands or short SQL and press Enter. It is covered in Part 5.
 
-Woven through the menus is a large **Say-X status family** in the Query menu: quick commands that *speak a fact about your current situation* without changing anything — Say Here, Say Database, Say Order, Say Yield (record count), Say Where Filter, Say Position, Say Cell, and many more. These are how you interrogate the screen on demand instead of hunting for information, and they are listed in full in the command reference.
+Woven through the menus is a large **Say-X status family** in the Query menu: quick commands that *speak a fact about your current situation* without changing anything — Say Status, Say Database, Say Order, Say Yield (record count), Say Where Filter, Say Position, Say Cell, and many more. These are how you interrogate the screen on demand instead of hunting for information, and they are listed in full in the command reference.
 
 ### Key Help
 
@@ -421,7 +421,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Table Properties | Alt+Enter |
 | Related Records | — |
 | Show Schema | — |
-| Say Here | Shift+H |
+| Say Status | Shift+Z |
 | Say Database | Shift+D |
 | Say Order | Shift+O |
 | Say Goto | Shift+G |
@@ -743,6 +743,63 @@ and each extra key picks a different kind of help.
 - **Play Tutorials.** The spoken walkthroughs.
 - **More Documents.** The Announcement, the Developer Guide, the License, and the Tutorials Transcript. These are used rarely, so they sit one level down.
 
+## Bringing in a spreadsheet
+
+There are two ways, and one of them is almost always the right one.
+
+**Import, Alt+I** -- I for Import. DbDo reads the workbook itself, with no Excel
+and nothing else installed, and makes a new DbDo database from it. Each sheet
+with a header row becomes a table named after the sheet, each column becomes a
+field, and an empty sheet is skipped. The result opens as an unsaved copy; press
+Control+Shift+S, Save As, to keep it. Your workbook is only read.
+
+**Open, Control+O**, opens the workbook as it is, through Microsoft's Access
+Database Engine, so it works only where that engine is installed, and changes go
+back into the workbook.
+
+For a list of books, import it and then copy the rows into a BookTrail database,
+which already has the fields, the pick lists and the sort a reading list needs.
+
+## Where a database's files live
+
+Everything that belongs to one database sits in one folder, named after the
+database:
+
+    BookTrail\BookTrail.db      the database
+    BookTrail\BookTrail.inix    which table it opens on, and what each row says
+    BookTrail\report.inix       its reports, if it has any
+    BookTrail\*.dbdo, *.sql     its own scripts
+
+DbDo finds them by the folder, so two databases never read each other's
+settings even when the files inside have the same names. A script written for
+one database appears in Invoke Script only while that database is open.
+
+**Scripts that are not about one database** -- something you would run against
+any of them -- go in your own scripts folder instead, which DbDo makes at
+`%LOCALAPPDATA%\DbDo\scripts` and seeds with examples. Both lists are offered
+together, and where a name appears in both, the database's own script wins.
+
+The samples that come with DbDo follow the same rule: each is a folder under
+`templates`, and DbDo copies them into `%LOCALAPPDATA%\DbDo\data` the first
+time you run it, so your copies are yours to change.
+
+## BookTrail, for books
+
+BookTrail is a sample database for the books you have read, are reading, and
+mean to read. One table, books, holds the author, title, subtitle, narrator,
+series and volume, status, format, source, catalog number, genre, rating, the
+dates added and read, why you chose it, a summary and your notes.
+
+- **The list reads author, title, series, volume,** and is ordered by author,
+  then series, then volume, so a series comes out in reading order.
+- **Pick lists** on status, format, source and genre -- F4 in the field. A
+  series spelled two ways is the commonest reason a book sorts out of place, so
+  choose it from the list rather than typing it again.
+- **Volume is kept as you type it.** 6.5 for a novella between 6 and 7 sorts
+  between them, and 10 comes after 9.
+- **Formats a blind reader uses**: BARD audio, commercial audio, braille,
+  Bookshare text, large print, eBook and print.
+
 ## The spoken walkthroughs
 
 **Help, Play Tutorials** opens `Tutorials.mkv` -- fourteen walkthroughs, about
@@ -767,6 +824,17 @@ three. Nothing leaves your computer: Ollama runs locally and the model sits in
 your own profile. If Ollama is not installed, either command says so and tells
 you how to add it -- and it is shared with EdSharp and FileDir, so installing it
 once covers all three.
+
+## Two keys worth knowing early
+
+**Shift+C, Say Cell**, answers in three short utterances: the column, then where
+the row is, then the value -- "title", "row 2 of 4", "Accessibility Analyst".
+Three answers are easier to take in than one long line, and nothing is added
+between them.
+
+**Shift+Z, Say Status**, gives the summary: which table, which row of how many,
+and the order. Z is the bottom of the alphabet, and the status bar is the bottom
+of the window.
 
 ## Tables DbDo keeps for itself
 
@@ -903,7 +971,7 @@ read-only window you can read line by line and copy from.
 - Shift+W -- where, the filter
 - Shift+X -- regex replace, the pattern Regex Replace would offer next
 - Shift+Y -- yield, how many rows
-- Shift+H -- here: the table, the row and the order
+- Shift+Z -- status: the table, the row and the order
 
 Shift plus a letter answers a question. A letter on its own moves: type the
 first letters of a value and the list view goes there, in lower case and

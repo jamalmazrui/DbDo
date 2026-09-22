@@ -329,11 +329,21 @@ distinction</a></li>
 </ul></li>
 <li><a href="#the-help-menu" id="toc-the-help-menu">The Help
 menu</a></li>
+<li><a href="#bringing-in-a-spreadsheet"
+id="toc-bringing-in-a-spreadsheet">Bringing in a spreadsheet</a></li>
+<li><a href="#where-a-databases-files-live"
+id="toc-where-a-databases-files-live">Where a database’s files
+live</a></li>
+<li><a href="#booktrail-for-books"
+id="toc-booktrail-for-books">BookTrail, for books</a></li>
 <li><a href="#the-spoken-walkthroughs"
 id="toc-the-spoken-walkthroughs">The spoken walkthroughs</a></li>
 <li><a href="#asking-the-model-on-your-computer"
 id="toc-asking-the-model-on-your-computer">Asking the model on your
 computer</a></li>
+<li><a href="#two-keys-worth-knowing-early"
+id="toc-two-keys-worth-knowing-early">Two keys worth knowing
+early</a></li>
 <li><a href="#tables-dbdo-keeps-for-itself"
 id="toc-tables-dbdo-keeps-for-itself">Tables DbDo keeps for
 itself</a></li>
@@ -676,11 +686,11 @@ is the command-line channel: type dBASE-style commands or short SQL and
 press Enter. It is covered in Part 5.</p>
 <p>Woven through the menus is a large <strong>Say-X status
 family</strong> in the Query menu: quick commands that <em>speak a fact
-about your current situation</em> without changing anything — Say Here,
-Say Database, Say Order, Say Yield (record count), Say Where Filter, Say
-Position, Say Cell, and many more. These are how you interrogate the
-screen on demand instead of hunting for information, and they are listed
-in full in the command reference.</p>
+about your current situation</em> without changing anything — Say
+Status, Say Database, Say Order, Say Yield (record count), Say Where
+Filter, Say Position, Say Cell, and many more. These are how you
+interrogate the screen on demand instead of hunting for information, and
+they are listed in full in the command reference.</p>
 <h3 id="key-help">Key Help</h3>
 <p><strong>Key Help Toggle</strong> (Control+F1) turns on a learning
 mode: while it is on, pressing a command chord
@@ -1355,8 +1365,8 @@ family.</p>
 <td>—</td>
 </tr>
 <tr class="odd">
-<td>Say Here</td>
-<td>Shift+H</td>
+<td>Say Status</td>
+<td>Shift+Z</td>
 </tr>
 <tr class="even">
 <td>Say Database</td>
@@ -2116,6 +2126,60 @@ them all.</li>
 Guide, the License, and the Tutorials Transcript. These are used rarely,
 so they sit one level down.</li>
 </ul>
+<h2 id="bringing-in-a-spreadsheet">Bringing in a spreadsheet</h2>
+<p>There are two ways, and one of them is almost always the right
+one.</p>
+<p><strong>Import, Alt+I</strong> – I for Import. DbDo reads the
+workbook itself, with no Excel and nothing else installed, and makes a
+new DbDo database from it. Each sheet with a header row becomes a table
+named after the sheet, each column becomes a field, and an empty sheet
+is skipped. The result opens as an unsaved copy; press Control+Shift+S,
+Save As, to keep it. Your workbook is only read.</p>
+<p><strong>Open, Control+O</strong>, opens the workbook as it is,
+through Microsoft’s Access Database Engine, so it works only where that
+engine is installed, and changes go back into the workbook.</p>
+<p>For a list of books, import it and then copy the rows into a
+BookTrail database, which already has the fields, the pick lists and the
+sort a reading list needs.</p>
+<h2 id="where-a-databases-files-live">Where a database’s files live</h2>
+<p>Everything that belongs to one database sits in one folder, named
+after the database:</p>
+<pre><code>BookTrail\BookTrail.db      the database
+BookTrail\BookTrail.inix    which table it opens on, and what each row says
+BookTrail\report.inix       its reports, if it has any
+BookTrail\*.dbdo, *.sql     its own scripts</code></pre>
+<p>DbDo finds them by the folder, so two databases never read each
+other’s settings even when the files inside have the same names. A
+script written for one database appears in Invoke Script only while that
+database is open.</p>
+<p><strong>Scripts that are not about one database</strong> – something
+you would run against any of them – go in your own scripts folder
+instead, which DbDo makes at <code>%LOCALAPPDATA%\DbDo\scripts</code>
+and seeds with examples. Both lists are offered together, and where a
+name appears in both, the database’s own script wins.</p>
+<p>The samples that come with DbDo follow the same rule: each is a
+folder under <code>templates</code>, and DbDo copies them into
+<code>%LOCALAPPDATA%\DbDo\data</code> the first time you run it, so your
+copies are yours to change.</p>
+<h2 id="booktrail-for-books">BookTrail, for books</h2>
+<p>BookTrail is a sample database for the books you have read, are
+reading, and mean to read. One table, books, holds the author, title,
+subtitle, narrator, series and volume, status, format, source, catalog
+number, genre, rating, the dates added and read, why you chose it, a
+summary and your notes.</p>
+<ul>
+<li><strong>The list reads author, title, series, volume,</strong> and
+is ordered by author, then series, then volume, so a series comes out in
+reading order.</li>
+<li><strong>Pick lists</strong> on status, format, source and genre – F4
+in the field. A series spelled two ways is the commonest reason a book
+sorts out of place, so choose it from the list rather than typing it
+again.</li>
+<li><strong>Volume is kept as you type it.</strong> 6.5 for a novella
+between 6 and 7 sorts between them, and 10 comes after 9.</li>
+<li><strong>Formats a blind reader uses</strong>: BARD audio, commercial
+audio, braille, Bookshare text, large print, eBook and print.</li>
+</ul>
 <h2 id="the-spoken-walkthroughs">The spoken walkthroughs</h2>
 <p><strong>Help, Play Tutorials</strong> opens
 <code>Tutorials.mkv</code> – fourteen walkthroughs, about three minutes
@@ -2140,6 +2204,14 @@ across all three. Nothing leaves your computer: Ollama runs locally and
 the model sits in your own profile. If Ollama is not installed, either
 command says so and tells you how to add it – and it is shared with
 EdSharp and FileDir, so installing it once covers all three.</p>
+<h2 id="two-keys-worth-knowing-early">Two keys worth knowing early</h2>
+<p><strong>Shift+C, Say Cell</strong>, answers in three short
+utterances: the column, then where the row is, then the value – “title”,
+“row 2 of 4”, “Accessibility Analyst”. Three answers are easier to take
+in than one long line, and nothing is added between them.</p>
+<p><strong>Shift+Z, Say Status</strong>, gives the summary: which table,
+which row of how many, and the order. Z is the bottom of the alphabet,
+and the status bar is the bottom of the window.</p>
 <h2 id="tables-dbdo-keeps-for-itself">Tables DbDo keeps for itself</h2>
 <p>Two tables in every DbDo database belong to DbDo rather than to
 you:</p>
@@ -2265,7 +2337,7 @@ put there</li>
 <li>Shift+X – regex replace, the pattern Regex Replace would offer
 next</li>
 <li>Shift+Y – yield, how many rows</li>
-<li>Shift+H – here: the table, the row and the order</li>
+<li>Shift+Z – status: the table, the row and the order</li>
 </ul>
 <p>Shift plus a letter answers a question. A letter on its own moves:
 type the first letters of a value and the list view goes there, in lower

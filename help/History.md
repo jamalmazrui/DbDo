@@ -4,7 +4,56 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.177 (current)
+## v1.0.180 (current)
+
+**Say Cell answers in three parts.** Shift+C now says the column, then where the
+row is, then the value -- "title", "row 2 of 4", "Accessibility Analyst" -- as
+three separate utterances with nothing added between them, which is easier to
+take in than one long line. Press it twice quickly to see all three in a window.
+
+**Say Status is back on Shift+Z.** Z is the bottom of the alphabet, and the
+status bar is the bottom of the window. It had been renamed and moved in the
+last version; that was a mistake.
+
+## v1.0.179
+
+**Every sample now opens on the right table, and says how each row reads.** Each
+sample database has its own settings file beside it -- which table the window
+starts on, which fields a row speaks, and the sort. BookTrail opens on books,
+CellarTrail on wines, ContactTrail on contacts, FilmTrail on films, HowToTrail on
+articles, JobTrail on actions, MusicTrail on albums, RecipeTrail on recipes, the
+convention sample on events, the tutorial samples on tasks, chinook on tracks,
+northwind on products.
+
+**A fix that made those settings reach you.** DbDo copies the samples to your own
+folder the first time it runs, and afterwards refreshed only files that were
+already there. A file added to a sample in a later version -- including the
+settings file above -- never arrived. DbDo now keeps a list of what it has
+seeded: anything new is copied, and anything you deleted stays deleted.
+
+**Samples renamed for the Trail family**: cellar, contacts, howtos, media, music
+and recipes are now CellarTrail, ContactTrail, HowToTrail, FilmTrail, MusicTrail
+and RecipeTrail, joining BookTrail and JobTrail. The standard teaching databases
+keep their usual names: chinook, northwind and sample.
+
+**Your scripts folder moved** to `%LOCALAPPDATA%\DbDo\scripts`, with the rest of
+your DbDo files. Anything in the old place is left where it is.
+
+## v1.0.178
+
+**BookTrail, a sample for books.** Replaces the old reads sample. One books table
+with author, series and volume as fields, so the list sorts in series order;
+pick lists for status, format, source and genre; a narrator field; and formats
+such as BARD audio, braille and Bookshare text. Volume keeps what you type, so a
+6.5 sorts between 6 and 7.
+
+**Older databases are updated when opened.** The column that identifies a record
+was renamed from prm to prime, and every sample except JobTrail still used the
+old name, which quietly broke Say Prime and following links between records.
+The samples are fixed, and DbDo now renames the column itself in any database it
+opens that still has the old name.
+
+## v1.0.177
 
 **Sorting puts numbers in numeric order, however they were stored.** A tester
 sorted his books by author, series and volume and found volume 09 between 06.5

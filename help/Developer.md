@@ -26,7 +26,7 @@ From `C:\DbDo`:
 
 It compiles `DbDo.cs` into `exec\DbDo.exe`, writes `Hotkeys.md` from the menus,
 converts every document to .htm, builds the spoken tutorials if they are
-missing, and compiles `DbDo_setup.exe`. The installer will not compile without
+missing (delete help\\Tutorials.mkv and the Tutorial*.mp3 files to re-record), and compiles `DbDo_setup.exe`. The installer will not compile without
 the tutorials: a release without them is refused at build time rather than
 shipped.
 

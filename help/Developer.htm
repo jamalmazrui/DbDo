@@ -209,10 +209,11 @@ a new file for every build.</p>
 <pre><code>buildDbDo</code></pre>
 <p>It compiles <code>DbDo.cs</code> into <code>exec\DbDo.exe</code>,
 writes <code>Hotkeys.md</code> from the menus, converts every document
-to .htm, builds the spoken tutorials if they are missing, and compiles
-<code>DbDo_setup.exe</code>. The installer will not compile without the
-tutorials: a release without them is refused at build time rather than
-shipped.</p>
+to .htm, builds the spoken tutorials if they are missing (delete
+help\Tutorials.mkv and the Tutorial*.mp3 files to re-record), and
+compiles <code>DbDo_setup.exe</code>. The installer will not compile
+without the tutorials: a release without them is refused at build time
+rather than shipped.</p>
 <h2 id="the-layout">The layout</h2>
 <p>The development folder and the installed folder have the same shape.
 Sources and build files stay at the top, with ReadMe and License;

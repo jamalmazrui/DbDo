@@ -391,7 +391,11 @@ def checkAccessLetters():
         bSoundX = sHot == "X" and re.search(r"[Ee]x", sPlain)
         bUnShift = sHot and "Shift" in sExpr and re.search(r"\bUn" + sHot.lower(), sPlain, re.I)
         # Z is for sleep: a toggle that puts a behaviour to sleep or wakes it.
-        bSleepZ = sHot == "Z" and re.search(r"\btoggle\b", sPlain, re.I)
+        # Z has two documented associations. A toggle: Z is sleep, catching some
+        # Z's, so a Z key wakes a behavior or puts it to sleep. And Status: Z is
+        # the bottom of the alphabet, and the status bar is the bottom of the
+        # window.
+        bSleepZ = sHot == "Z" and re.search(r"\b(toggle|status)\b", sPlain, re.I)
         bSoundX = bSoundX or bSleepZ
         if oAmp:
             iAt = sCaption.index("&")

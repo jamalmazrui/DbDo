@@ -609,7 +609,9 @@ for %%f in (
   "help\Tutorial_Adding.inix" "help\Tutorial_Columns.inix" "help\Tutorial_Editing.inix"
   "help\Tutorial_Finding.inix" "help\Tutorial_Installing.inix" "help\Tutorial_LookAndPrime.inix"
   "help\Tutorial_Output.inix" "help\Tutorial_Sorting.inix"
-  "scripts\buildTutorial.cmd" "scripts\buildTutorial.ps1" "cleanDir.cmd"
+  "scripts\buildTutorial.cmd" "scripts\buildTutorial.ps1" "cleanDir.cmd" "templates\reads\reads.db"
+  "templates\cellar\cellar.db" "templates\contacts\contacts.db" "templates\howtos\howtos.db"
+  "templates\media\media.db" "templates\music\music.db" "templates\recipes\recipes.db"
 ) do (
   if exist %%f (
     del /f /q %%f
@@ -664,22 +666,19 @@ rem takes minutes and fetches voices the first time, so it happens only when one
 rem of them is MISSING -- which is exactly the state a fresh clone is in, and
 rem never the state a working folder is in. To rebuild after editing a script,
 rem run scripts\buildTutorials yourself.
-rem Missing is one reason to build; OUT OF DATE is the other. A script edited
-rem since the recording was made means the recording no longer demonstrates
-rem the program, which is as bad as having none.
+rem ONLY WHAT IS MISSING IS BUILT. Speaking the tutorials takes minutes, and a
+rem file's date is no guide to whether its content changed: unzipping a delivery
+rem stamps every script as new. So the build makes the recording only when it is
+rem not on disk. To re-record, delete help\Tutorials.mkv and the help\Tutorial*.mp3
+rem files you want spoken again; each missing .mp3 is spoken, the rest are reused.
 if not exist "help\Tutorials.mkv" goto :makeTutorials
 if not exist "help\Tutorials.md" goto :makeTutorials
-powershell -NoProfile -Command "$m=(Get-Item 'help\Tutorials.mkv').LastWriteTime; if (Get-ChildItem 'help\Tutorial_*.inix' | Where-Object { $_.LastWriteTime -gt $m }) { exit 1 } else { exit 0 }"
-if errorlevel 1 (
-  echo A tutorial script is newer than the recording. >> "!log!"
-  goto :makeTutorials
-)
-echo Tutorials already built and current. >> "!log!"
+echo Tutorials already built; delete help\Tutorials.mkv to rebuild. >> "!log!"
 goto :tutorialsDone
 :makeTutorials
 if exist "help\Tutorial_*.inix" (
   echo Building the spoken tutorials. The first run fetches two voices...
-  echo Tutorials missing; running buildTutorials >> "!log!"
+  echo Tutorials.mkv missing; running buildTutorials >> "!log!"
   call "%~dp0scripts\buildTutorials.cmd" >> "!log!" 2>&1
   if errorlevel 1 echo WARN: buildTutorials reported a problem; see logs\DbDo-tutorials-*.log >> "!log!"
 ) else (
