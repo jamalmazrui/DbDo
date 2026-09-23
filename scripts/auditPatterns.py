@@ -414,6 +414,35 @@ def checkAccessLetters():
                    "no hidden letters; repeated letters by menu: " + (", ".join(lsReport) if lsReport else "none"))
 
 
+def checkAccessibleNames():
+    """An accessible name must not repeat words the control already carries.
+
+    This is the mechanism behind years of doubled speech in these programs: a
+    list box labelled "&Fields:" whose AccessibleName is also "Fields" is named
+    twice, and every reader says it twice. FileDir found forty-eight of them in
+    one file; DbDo had nineteen.
+
+    So: every AccessibleName literal is compared, letters and digits only,
+    against every caption and label literal in the same file. A match fails.
+    A name that matches nothing is the good case -- a control with no words of
+    its own, such as the records grid.
+    """
+    sSource = readText(os.path.join(sRoot, "DbDo.cs"))
+    def flat(s): return "".join(c.lower() for c in s if c.isalnum())
+    lsCaptions = set(flat(m.group(1)) for m in re.finditer(r'\.Text\s*=\s*"([^"]{2,60})"', sSource))
+    lsBad = []
+    iChecked = 0
+    for oMatch in re.finditer(r'(\w+)\.AccessibleName\s*=\s*"([^"]{2,60})"', sSource):
+        iChecked += 1
+        if flat(oMatch.group(2)) in lsCaptions:
+            lsBad.append("%s is named %r, which is already a caption or label"
+                         % (oMatch.group(1), oMatch.group(2)))
+    for s in lsBad: logLine("NAME: " + s)
+    if lsBad:
+        return finding("accessible names", "fail", "%s; each is in the log" % countNoun(len(lsBad), "duplicate"))
+    return finding("accessible names", "pass", "%s, none repeating a caption" % countNoun(iChecked, "accessible name"))
+
+
 def checkSections():
     lsBad = []
     iChecked = 0
@@ -479,7 +508,25 @@ def checkTutorials():
                    countNoun(iChecked, "tutorial"))
 
 
+def usage(bBad):
+    """What this script does, and what it accepts: nothing.
+
+    An audit invoked with an argument it ignores is an audit somebody thinks
+    they configured. It takes no options, so it says so and stops.
+    """
+    print("auditPatterns.py -- check DbDo's source, tutorials and keys against")
+    print("the rules that are easy to break and hard to notice.")
+    print("")
+    print("It takes no options. Run it from anywhere:  scripts\\auditPatterns")
+    print("It writes logs\\DbDo-audit-<date>-<time>.log beside the project.")
+    return 2 if bBad else 0
+
+
 def main():
+    if len(sys.argv) > 1:
+        bHelp = sys.argv[1].lower() in ("-h", "--help", "/?", "help")
+        if not bHelp: print("auditPatterns takes no options, and %r is not one." % sys.argv[1])
+        return usage(not bHelp)
     global oLog
     oLog = open(sLogPath, "w", encoding="utf-8")
     logLine("auditPatterns started %s" % datetime.datetime.now().isoformat(" ", "seconds"))
@@ -496,6 +543,7 @@ def main():
     checkTutorials()
     checkTutorialKeys()
     checkAccessLetters()
+    checkAccessibleNames()
 
     iFailed = len([t for t in lsFindings if t[1] == "fail"])
     iPassed = len([t for t in lsFindings if t[1] == "pass"])

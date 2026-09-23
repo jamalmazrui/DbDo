@@ -1654,6 +1654,7 @@ namespace DbDo
         {
             if (oConn == null) return;
             List<string[]> lRenames = new List<string[]>();
+            bool bBackedUp = false;
             dynamic oRs = null;
             try
             {
@@ -1680,6 +1681,29 @@ namespace DbDo
                 }
                 finally { try { if (oChk != null) oChk.Close(); } catch { } }
                 if (bHasNew) continue;
+                // A COPY FIRST, ONCE, BEFORE THE FIRST RENAME. This runs without
+                // being asked, on somebody's own data, so there is a way back.
+                if (!bBackedUp)
+                {
+                    bBackedUp = true;
+                    try
+                    {
+                        string sCopy = System.IO.Path.Combine(
+                            System.IO.Path.GetDirectoryName(sFilePath) ?? "",
+                            System.IO.Path.GetFileNameWithoutExtension(sFilePath) + "-before-prime"
+                            + System.IO.Path.GetExtension(sFilePath));
+                        if (!System.IO.File.Exists(sCopy)) System.IO.File.Copy(sFilePath, sCopy);
+                        DbDoLog.write("copied " + sFilePath + " to " + sCopy + " before renaming prm to prime");
+                        Say.say("Updating this database to the current column names. A copy of the original is beside it, named "
+                            + System.IO.Path.GetFileName(sCopy) + ".");
+                    }
+                    catch (Exception exCopy)
+                    {
+                        DbDoLog.write("backup before prm rename failed: " + exCopy.Message);
+                        Say.say("This database uses older column names and could not be copied first, so it was left alone.");
+                        return;
+                    }
+                }
                 oConn.Execute("ALTER TABLE \"" + a[0].Replace("\"", "\"\"") + "\" RENAME COLUMN \"" + a[1] + "\" TO \"" + sNew + "\"",
                     Type.Missing, AdoConstants.adCmdText);
                 try { DbDoLog.write("renamed " + a[0] + "." + a[1] + " to " + sNew); } catch { }
@@ -5282,7 +5306,21 @@ namespace DbDo
             // Defensive cleanup of leftovers from any prior failed attempt.
             try { invokeSql("DROP TABLE IF EXISTS \"" + sNewTable + "\"", null); } catch { }
             try { invokeSql("DROP TABLE IF EXISTS " + sHelper, null); } catch { }
-            // foreign_keys is a no-op inside a transaction, so set it first.
+            // foreign_keys is a no-op inside a transaction, so set it first --
+            // and REMEMBER what it was. Turning it on afterwards regardless
+            // turns it on for a database whose owner had it off, and hides a
+            // failure to set it at all. Read, set, restore.
+            string sFkWas = "OFF";
+            try
+            {
+                int iFkFound;
+                foreach (string[] aFk in queryRowsSql("PRAGMA foreign_keys", 1, out iFkFound))
+                {
+                    if (aFk != null && aFk.Length > 0) sFkWas = (aFk[0] == "1") ? "ON" : "OFF";
+                    break;
+                }
+            }
+            catch (Exception) { }
             try { invokeSql("PRAGMA foreign_keys=OFF", null); } catch { }
 
             bool bInTrans = false;
@@ -5315,11 +5353,11 @@ namespace DbDo
                 if (bInTrans) { try { oConn.RollbackTrans(); } catch { } }
                 try { invokeSql("DROP TABLE IF EXISTS \"" + sNewTable + "\"", null); } catch { }
                 try { invokeSql("DROP TABLE IF EXISTS " + sHelper, null); } catch { }
-                try { invokeSql("PRAGMA foreign_keys=ON", null); } catch { }
+                try { invokeSql("PRAGMA foreign_keys=" + sFkWas, null); } catch { }
                 try { DbDoLog.write("rebuildGeneratedColumns failed for '" + sTable + "': " + ex.Message); } catch { }
                 return false;
             }
-            try { invokeSql("PRAGMA foreign_keys=ON", null); } catch { }
+            try { invokeSql("PRAGMA foreign_keys=" + sFkWas, null); } catch { }
             try { DbDoLog.write("Rebuilt look/prime for '" + sTable + "'. maps re-pointed=" + iMapsUpdated); } catch { }
             return true;
         }
@@ -9750,7 +9788,6 @@ namespace DbDo
             lbNames = new ListBox();
             lbNames.SetBounds(12, 30, 250, 226);
             lbNames.TabIndex = 1;
-            lbNames.AccessibleName = "Fields";
             lbNames.KeyDown += (sndr, evK) =>
             {
                 if (evK.KeyCode == Keys.Return)
@@ -9766,7 +9803,6 @@ namespace DbDo
             lbPicks = new ListBox();
             lbPicks.SetBounds(286, 30, 250, 226);
             lbPicks.TabIndex = bSortStyle ? 6 : 5;
-            lbPicks.AccessibleName = "Picks";
             lbPicks.KeyDown += (sndr, evK) =>
             {
                 if (evK.KeyCode == Keys.Return || evK.KeyCode == Keys.Delete)
@@ -9977,7 +10013,6 @@ namespace DbDo
         public FilterDialog(List<string> lColumns, string sCurrentText, string sCurrentColumn, string sCurrentMode)
         {
             this.Text = "Where Filter";
-            this.AccessibleName = "Where filter";
             this.AccessibleDescription = "";
             this.StartPosition = FormStartPosition.CenterParent;
             this.ClientSize = new Size(440, 200);
@@ -9994,7 +10029,6 @@ namespace DbDo
             this.Controls.Add(lbl1);
 
             TextBox tbFilter = new TextBox();
-            tbFilter.AccessibleName = "Filter text";
             tbFilter.Location = new Point(130, 13);
             tbFilter.Size = new Size(290, 23);
             tbFilter.TabIndex = 0;
@@ -10008,7 +10042,6 @@ namespace DbDo
             this.Controls.Add(lbl2);
 
             ComboBox cbCol = new ComboBox();
-            cbCol.AccessibleName = "Column";
             cbCol.Location = new Point(130, 45);
             cbCol.Size = new Size(290, 23);
             cbCol.TabIndex = 1;
@@ -10025,7 +10058,6 @@ namespace DbDo
             this.Controls.Add(lbl3);
 
             ComboBox cbMode = new ComboBox();
-            cbMode.AccessibleName = "Match mode";
             cbMode.Location = new Point(130, 77);
             cbMode.Size = new Size(290, 23);
             cbMode.TabIndex = 2;
@@ -10109,7 +10141,6 @@ namespace DbDo
         public CommandPickerDialog()
         {
             this.Text = "Alternate Menu";
-            this.AccessibleName = "Alternate Menu";
             this.AccessibleDescription = "";
             this.StartPosition = FormStartPosition.CenterParent;
             this.ClientSize = new Size(640, 520);
@@ -10127,7 +10158,6 @@ namespace DbDo
             this.Controls.Add(lblF);
 
             tbFilter = new TextBox();
-            tbFilter.AccessibleName = "Filter";
             tbFilter.Location = new Point(80, 11);
             tbFilter.Size = new Size(540, 23);
             tbFilter.TabIndex = 0;
@@ -10143,7 +10173,6 @@ namespace DbDo
             this.Controls.Add(lblL);
 
             lbCommands = new ListBox();
-            lbCommands.AccessibleName = "Commands";
             lbCommands.Location = new Point(12, 64);
             // Shrink the list height so the description detail box
             // fits below it. The list still uses the form's full
@@ -10170,7 +10199,6 @@ namespace DbDo
             this.Controls.Add(lblD);
 
             tbDetail = new TextBox();
-            tbDetail.AccessibleName = "Detail";
             tbDetail.Location = new Point(12, 312);
             tbDetail.Size = new Size(608, 64);
             tbDetail.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
@@ -10612,7 +10640,6 @@ namespace DbDo
             // the Homer-app pattern: no GetActiveChild() indirection,
             // and per-window state stays encapsulated.
             menuFrame = new MenuStrip();
-            menuFrame.AccessibleName = "Main menu";
             menuFrame.AllowMerge = true;
             menuFrame.Dock = DockStyle.Top;
             this.MainMenuStrip = menuFrame;
@@ -12151,7 +12178,6 @@ namespace DbDo
         private void initializeForm()
         {
             this.Text = "(no database)";
-            this.AccessibleName = "(no database)";
             // No AccessibleDescription. Screen readers read the title
             // and the focused control on form open; an extra description
             // becomes a "banner" that wastes time before the user can
@@ -12416,7 +12442,6 @@ namespace DbDo
         private void buildMenus()
         {
             menuMain = new MenuStrip();
-            menuMain.AccessibleName = "Main menu";
 
             // Top-level menu layout: File / Edit /
             // Navigate / Query / Misc / Help. Each leaf item keeps
@@ -12532,7 +12557,6 @@ namespace DbDo
             // Shift+letter is the variant. Invert Marked is on Alt+Shift+I,
             // off on its own because it doesn't have a paired counterpart.
             ToolStripMenuItem miBulkMark = new ToolStripMenuItem("&Bulk Marking");
-            miBulkMark.AccessibleName = "Bulk Marking";
             miEdit.DropDownItems.Add(miBulkMark);
             miRecMarkAll     = addItem(miBulkMark, "Mark &All",   "Set Mark All",         Keys.Control | Keys.A,              recMarkAllClicked);
             miRecUnmarkAll   = addItem(miBulkMark, "Unmark &All", "Clear Mark All",       Keys.Control | Keys.Shift | Keys.A, recUnmarkAllClicked);
@@ -12640,7 +12664,6 @@ namespace DbDo
             // Say-X family: speaks state without changing focus or
             // recordset position (the Say-X status family).
             ToolStripMenuItem miSay = new ToolStripMenuItem("&Say");
-            miSay.AccessibleName = "Say announcements";
             miQuery.DropDownItems.Add(miSay);
             miSaySayMark         = addItem(miSay, "Say &Mark Status", "Say Mark", Keys.Shift | Keys.M, saySayMark);
             miSaySayStatus       = addItem(miSay, "Say Status",  "Say Status",     Keys.Shift | Keys.Z,               saySayStatus);
@@ -12883,7 +12906,6 @@ namespace DbDo
                 "Datasette-style faceting: groups the current table by the cursor's column and lists each distinct value with how many rows have it, most common first; picking a value filters the grid to just those rows. An accessible way to hear what a column contains and how it's distributed, then drill in. The value list is capped (1000) so a high-cardinality column can't flood the picker; filtering replaces any current filter, and blank/null and date values aren't filterable yet. Read-only until you pick. Unbound by default.");
             addSep(miMisc);
             ToolStripMenuItem miTools = new ToolStripMenuItem("&Tools");
-            miTools.AccessibleName = "Tools";
             miMisc.DropDownItems.Add(miTools);
             miToolsOpenFolder= addItem(miTools, "&Open in Explorer",                      "Open File Folder",   Keys.Alt | Keys.OemPipe,            toolsOpenFolderClicked);
             miToolsCommandPrompt = addItem(miTools, "Open &Command Prompt",                 "Command Prompt",    Keys.Control | Keys.OemQuestion,    toolsCommandPromptClicked,
@@ -13543,6 +13565,11 @@ namespace DbDo
         private void buildGrid()
         {
             grid = new LbcListView();
+            // THE ONE ACCESSIBLE NAME THAT IS RIGHT. The grid has no caption and
+            // no label beside it, so without this a reader announces only "list
+            // view". Every other control in DbDo carries its own words, or the
+            // label before it, and naming those again is what made the program
+            // say everything twice.
             grid.AccessibleName = "Records";
             grid.AccessibleRole = AccessibleRole.List;
             grid.Dock = DockStyle.Fill;
@@ -14439,7 +14466,6 @@ namespace DbDo
             // The filename and current-table name are now in the
             // window title, not the status bar.
             lblTable = new ToolStripStatusLabel("");
-            lblTable.AccessibleName = "View state";
             lblTable.Spring = true;
             lblTable.TextAlign = ContentAlignment.MiddleLeft;
 
@@ -14448,7 +14474,6 @@ namespace DbDo
             // (JAWS Insert+PageDown, NVDA NVDA+End), or by Tab-
             // navigating to the status strip.
             lblStatus = new ToolStripStatusLabel("");
-            lblStatus.AccessibleName = "Row position";
             lblStatus.Spring = true;
             lblStatus.TextAlign = ContentAlignment.MiddleRight;
 
@@ -14647,7 +14672,6 @@ namespace DbDo
             if (db == null || !db.isOpen())
             {
                 this.Text = "(no database)";
-                this.AccessibleName = this.Text;
                 lblTable.Text = "";
                 lblStatus.Text = "";
                 return;
@@ -14689,7 +14713,7 @@ namespace DbDo
             // database and table. AccessibleName tracks the caption so
             // the two never diverge.
             this.Text = sBaseName + sToggleReadOnly + " - " + sTable + sForcedReadOnly;
-            this.AccessibleName = this.Text;
+
 
             if (!db.hasRecordset())
             {
@@ -19027,6 +19051,51 @@ namespace DbDo
                         + " for editing. Edit data cells; formulas are preserved. Press Control+S to save your changes back to the file.");
                     return;
                 }
+                // A DELIMITED FILE OPENS THE WAY A WORKBOOK DOES.
+                //
+                // The question this answers: when somebody opens a .csv, a
+                // .tsv or a spreadsheet in DbDo -- because the other software
+                // for them is unusable by ear -- edits it and saves, where do
+                // the changes go?
+                //
+                // One rule for every file that is not itself a database: THE
+                // SOURCE FILE REMAINS THE FILE OF RECORD. DbDo reads it into a
+                // working copy, all the editing happens there with the full
+                // program available, and Control+S writes the data back to the
+                // file it came from. Control+Shift+S, Save As, keeps the
+                // working copy as a database instead, for anybody who would
+                // rather leave the spreadsheet behind.
+                //
+                // Access and SQLite files are databases already, so they open
+                // as themselves and are edited in place. Nothing is copied into
+                // the user's own data folder: a file somebody opened from their
+                // documents belongs in their documents.
+                string sDelimExt = Path.GetExtension(sOpenPath).TrimStart('.').ToLowerInvariant();
+                if (sDelimExt == "csv" || sDelimExt == "tsv" || sDelimExt == "tab" || sDelimExt == "txt")
+                {
+                    char cDelim = (sDelimExt == "tsv" || sDelimExt == "tab") ? '\t' : ',';
+                    string sShell;
+                    try { sShell = importDelimitedToShell(sOpenPath, cDelim); }
+                    catch (Exception ex)
+                    { ErrorDialog.show(this, "Open Database", "Could not read the file: " + ex.Message); return; }
+                    string sPrevTempDelim = sManagedTempPath;
+                    try { openDatabaseAndApplyState(sShell, null); }
+                    catch (Exception ex)
+                    {
+                        ErrorDialog.show(this, "Open Database", ex.Message);
+                        try { if (File.Exists(sShell)) File.Delete(sShell); } catch { }
+                        return;
+                    }
+                    if (!string.IsNullOrEmpty(sPrevTempDelim) && !string.Equals(sPrevTempDelim, sShell, StringComparison.OrdinalIgnoreCase))
+                    { try { if (File.Exists(sPrevTempDelim)) File.Delete(sPrevTempDelim); } catch { } }
+                    sManagedOriginPath = sOpenPath;
+                    sManagedTempPath = sShell;
+                    sDelimitedOriginPath = sOpenPath;
+                    cDelimitedOrigin = cDelim;
+                    Say.say("Opened " + Path.GetFileName(sOpenPath)
+                        + " for editing. Control+S writes your changes back to the file; Control+Shift+S keeps them as a database instead.");
+                    return;
+                }
                 // Reapply the per-table sort / filter / position this
                 // file was last left with. Without looking up the saved
                 // state here, a normal Open Database (as opposed to the
@@ -19227,6 +19296,11 @@ namespace DbDo
                 saveWorkbookToDisk();
                 return;
             }
+            if (!string.IsNullOrEmpty(sDelimitedOriginPath))
+            {
+                saveDelimitedToSource();
+                return;
+            }
             if (!string.IsNullOrEmpty(sManagedTempPath))
             {
                 // A managed working copy (Open Managed Copy) lives only in a
@@ -19237,6 +19311,42 @@ namespace DbDo
                 return;
             }
             Say.say("All changes are already saved. Use Save As to make a copy under a new name or format.");
+        }
+
+        // The delimited file this working copy came from, and what separates
+        // its columns. Set when a .csv, .tsv, .tab or .txt is opened; cleared
+        // by every other open, as the workbook fields are.
+        private string sDelimitedOriginPath = null;
+        private char cDelimitedOrigin = ',';
+
+        // saveDelimitedToSource: write the table back over the file it was read
+        // from, keeping one copy of the original the first time.
+        //
+        // A delimited file has no formulas and no formatting to preserve, so
+        // the whole table is written out. It also has no second chance, which
+        // is why the first save leaves <name>-before-dbdo<ext> beside it.
+        private void saveDelimitedToSource()
+        {
+            if (string.IsNullOrEmpty(sDelimitedOriginPath)) return;
+            try
+            {
+                string sKeep = Path.Combine(Path.GetDirectoryName(sDelimitedOriginPath) ?? "",
+                    Path.GetFileNameWithoutExtension(sDelimitedOriginPath) + "-before-dbdo"
+                    + Path.GetExtension(sDelimitedOriginPath));
+                if (!File.Exists(sKeep)) File.Copy(sDelimitedOriginPath, sKeep);
+                // exportData picks the writer from the extension, which is the
+                // extension this file already had.
+                db.exportData(sDelimitedOriginPath);
+                db.bDataModified = false;   // the file on disk now matches the working copy
+                updateStatusBar();
+                DbDoLog.write("Saved back to " + sDelimitedOriginPath);
+                Say.say("Saved back to " + Path.GetFileName(sDelimitedOriginPath)
+                    + ". The file as it was before is beside it, named " + Path.GetFileName(sKeep) + ".");
+            }
+            catch (Exception ex)
+            {
+                ErrorDialog.show(this, "Save", "Could not write " + sDelimitedOriginPath + ".\n\n" + ex.Message);
+            }
         }
 
         // saveWorkbookToDisk: write the working copy's data back to the
@@ -20425,6 +20535,7 @@ namespace DbDo
                 // returns; every other open (a .db, Recent Files, etc.)
                 // leaves them cleared so Save Workbook stays inert.
                 sWorkbookOriginPath = null;
+                sDelimitedOriginPath = null;
                 sWorkbookSheetName = null;
                 sWorkbookTable = null;
                 lWorkbookColumns = null;
@@ -22883,7 +22994,6 @@ namespace DbDo
                     string sDefaultCol = (!string.IsNullOrEmpty(sInitialCol) && lCols.Contains(sInitialCol))
                         ? sInitialCol : lCols[0];
                     cbCol.SelectedItem = sDefaultCol;
-                    cbCol.AccessibleName = "Column to search";
                     dlg.Controls.Add(cbCol);
                     iY += iLineHeight + 8;
                 }
@@ -22927,7 +23037,6 @@ namespace DbDo
                 cbCase.Checked = bAllowCase && bInitialCase;
                 cbCase.Location = new Point(12, iY);
                 cbCase.Size = new Size(iControlWidth, iLineHeight);
-                cbCase.AccessibleName = "Case sensitive";
                 if (bAllowCase)
                 {
                     dlg.Controls.Add(cbCase);
@@ -23336,7 +23445,6 @@ namespace DbDo
                 dlg.Controls.Add(lbl);
 
                 TextBox tb = new TextBox();
-                tb.AccessibleName = sPrompt;
                 tb.Location = new Point(12, 56);
                 tb.Size = new Size(396, 23);
                 tb.Text = sInitial ?? "";
@@ -26049,7 +26157,6 @@ namespace DbDo
             using (Form dlg = new LbcForm())
             {
                 dlg.Text = "Select-Column (visible columns)";
-                dlg.AccessibleName = "Select Column";
                 dlg.StartPosition = FormStartPosition.CenterParent;
                 dlg.ClientSize = new Size(560, 160);
                 dlg.FormBorderStyle = FormBorderStyle.Sizable;
@@ -26119,7 +26226,6 @@ namespace DbDo
                 dlg.Controls.Add(lbl);
 
                 ListBox lb = new ListBox();
-                lb.AccessibleName = sPrompt;
                 lb.Location = new Point(12, 36);
                 lb.Size = new Size(396, 270);
                 lb.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
@@ -26885,7 +26991,6 @@ namespace DbDo
             using (Form dlg = new LbcForm())
             {
                 dlg.Text = "Invoke SQL";
-                dlg.AccessibleName = "Invoke SQL";
                 dlg.StartPosition = FormStartPosition.CenterParent;
                 dlg.ClientSize = new Size(640, 320);
                 dlg.FormBorderStyle = FormBorderStyle.Sizable;
@@ -33837,6 +33942,48 @@ namespace DbDo
                     + "https://github.com/JamalMazrui/DbDo/releases/latest");
                 return;
             }
+
+            // Step 4b: CHECK WHAT CAME DOWN BEFORE RUNNING IT.
+            //
+            // This file is about to be run with a request for administrator
+            // rights. Two cheap checks are worth making first: that it is a
+            // real program of plausible size, and that the version stamped in
+            // it is the version this update is for. A partial download, a proxy
+            // error page saved as .exe, or an asset that does not match the tag
+            // all fail one of them, and the user is told rather than elevated.
+            //
+            // This is not a signature check. DbDo is not code signed, so the
+            // strongest available check is the version resource Inno Setup
+            // writes from the same version.txt the tag comes from. Said plainly
+            // in the message, so nobody mistakes it for more than it is.
+            try
+            {
+                System.IO.FileInfo oInfo = new System.IO.FileInfo(sTempPath);
+                if (!oInfo.Exists || oInfo.Length < 1000000)
+                {
+                    ErrorDialog.show(miParent, "Elevate Version",
+                        "The download is too small to be the installer, so it was not run."
+                        + "\n\nThe file is at:\n" + sTempPath
+                        + "\n\nTry again, or download directly from\n"
+                        + "https://github.com/JamalMazrui/DbDo/releases/latest");
+                    return;
+                }
+                string sStamped = System.Diagnostics.FileVersionInfo.GetVersionInfo(sTempPath).FileVersion ?? "";
+                if (sStamped.Length > 0 && compareVersions(sStamped, sLatest) != 0)
+                {
+                    ErrorDialog.show(miParent, "Elevate Version",
+                        "The installer that came down says it is version " + sStamped
+                        + ", but this update is for version " + sLatest + ", so it was not run."
+                        + "\n\nThe file is at:\n" + sTempPath
+                        + "\n\nTry again, or download directly from\n"
+                        + "https://github.com/JamalMazrui/DbDo/releases/latest");
+                    DbDoLog.write("Elevate: stamped " + sStamped + " does not match " + sLatest);
+                    return;
+                }
+                DbDoLog.write("Elevate: downloaded " + oInfo.Length + " bytes, stamped " + sStamped);
+            }
+            catch (Exception exCheck)
+            { DbDoLog.write("Elevate: could not check the download: " + exCheck.Message); }
 
             // Step 5: run the installer and let Inno Setup take over.
             try

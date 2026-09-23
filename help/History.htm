@@ -235,8 +235,11 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
-<li><a href="#v1.0.180-current" id="toc-v1.0.180-current">v1.0.180
+<li><a href="#v1.0.183-current" id="toc-v1.0.183-current">v1.0.183
 (current)</a></li>
+<li><a href="#v1.0.182" id="toc-v1.0.182">v1.0.182</a></li>
+<li><a href="#v1.0.181" id="toc-v1.0.181">v1.0.181</a></li>
+<li><a href="#v1.0.180" id="toc-v1.0.180">v1.0.180</a></li>
 <li><a href="#v1.0.179" id="toc-v1.0.179">v1.0.179</a></li>
 <li><a href="#v1.0.178" id="toc-v1.0.178">v1.0.178</a></li>
 <li><a href="#v1.0.177" id="toc-v1.0.177">v1.0.177</a></li>
@@ -347,7 +350,50 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
-<h2 id="v1.0.180-current">v1.0.180 (current)</h2>
+<h2 id="v1.0.183-current">v1.0.183 (current)</h2>
+<p><strong>One rule for files that are not databases.</strong> Opening a
+.csv, .tsv or .txt file now works the way opening a spreadsheet already
+did: DbDo reads it into a working copy, you edit with the whole program
+available, and Control+S writes your changes back to the file you
+opened. The first save leaves the file as it was beside it, named
+<name>-before-dbdo.csv. Control+Shift+S keeps the working copy as a
+database instead. Access and SQLite files are databases already and are
+edited directly.</p>
+<p>Before this, a text file opened through a Microsoft driver that had
+to be installed, and there was no clear answer to where your changes
+went.</p>
+<h2 id="v1.0.182">v1.0.182</h2>
+<p><strong>DbDo no longer says things twice.</strong> Twenty-two
+controls carried an accessible name that repeated the label or caption
+beside them – a list box labelled “Fields:” was also named “Fields”, so
+every screen reader said it twice. All are gone. Five accessible names
+remain, each on a control with no words of its own, such as the records
+grid.</p>
+<p>DbDo also inherits a guard from the shared Homer code: a spoken line
+that repeats the one before it, or that matches the window title or the
+control with focus, is dropped, since the screen reader says those
+itself. Toggle answers such as “Marked” are never dropped.</p>
+<h2 id="v1.0.181">v1.0.181</h2>
+<p><strong>An update is checked before it is run.</strong> F11 downloads
+the installer and asks Windows to run it as administrator. It now first
+makes sure the file is a plausible size and that the version stamped
+inside it is the version being installed, and refuses to run it if
+either fails, naming the file so you can look at it. DbDo is not code
+signed, so this is not a signature check.</p>
+<p><strong>A copy is made before an old database is updated.</strong>
+When DbDo renames the older prm columns on opening a database, it now
+copies the file first, beside the original as <name>-before-prime.db,
+and says where the copy is.</p>
+<p><strong>A failed build no longer burns a version number.</strong>
+buildDbDo used to write the new number to version.txt before it had even
+found the compiler, so a failure left the number ahead of the last thing
+that actually built. The number is written after the installer is
+made.</p>
+<p><strong>Smaller:</strong> rebuilding a table now restores the
+foreign-keys setting to what it was, instead of turning it on
+regardless; the audit script explains itself with –help and refuses
+options it does not know.</p>
+<h2 id="v1.0.180">v1.0.180</h2>
 <p><strong>Say Cell answers in three parts.</strong> Shift+C now says
 the column, then where the row is, then the value – “title”, “row 2 of
 4”, “Accessibility Analyst” – as three separate utterances with nothing

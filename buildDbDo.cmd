@@ -725,6 +725,12 @@ if not exist DbDo_setup.exe (
 echo Built DbDo_setup.exe version !ver!
 echo Built DbDo_setup.exe version !ver! >> "!log!"
 
+rem The build worked, so the number it used is now the current one.
+if defined verPending (
+  > version.txt echo !ver!
+  echo version.txt is now !ver! >> "!log!"
+)
+
 echo.
 echo Build complete. Artifacts in this directory:
 echo   DbDo_setup.exe -- the installer, version !ver!
@@ -784,8 +790,13 @@ if not defined new (
   echo ERROR: could not work out the next version from "!ver!". >> "!log!"
   goto :eof
 )
-> version.txt echo !new!
-echo Version: !ver! -^> !new!
-echo Version: !ver! -^> !new! >> "!log!"
+rem THE NUMBER IS TAKEN ONLY WHEN THE BUILD SUCCEEDS. version.txt used to be
+rem written here, before the compiler had even been found, so every failed build
+rem burned a release number and left version.txt ahead of the last thing that
+rem actually built. The new number is used for this build; it is written to
+rem version.txt at the end, after the installer is made.
+echo Version: !ver! -^> !new! (not yet written to version.txt)
+echo Version: !ver! -^> !new! (pending a successful build) >> "!log!"
 set "ver=!new!"
+set "verPending=1"
 goto :eof

@@ -4,7 +4,54 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.180 (current)
+## v1.0.183 (current)
+
+**One rule for files that are not databases.** Opening a .csv, .tsv or .txt file
+now works the way opening a spreadsheet already did: DbDo reads it into a working
+copy, you edit with the whole program available, and Control+S writes your
+changes back to the file you opened. The first save leaves the file as it was
+beside it, named <name>-before-dbdo.csv. Control+Shift+S keeps the working copy
+as a database instead. Access and SQLite files are databases already and are
+edited directly.
+
+Before this, a text file opened through a Microsoft driver that had to be
+installed, and there was no clear answer to where your changes went.
+
+## v1.0.182
+
+**DbDo no longer says things twice.** Twenty-two controls carried an accessible
+name that repeated the label or caption beside them -- a list box labelled
+"Fields:" was also named "Fields", so every screen reader said it twice. All are
+gone. Five accessible names remain, each on a control with no words of its own,
+such as the records grid.
+
+DbDo also inherits a guard from the shared Homer code: a spoken line that
+repeats the one before it, or that matches the window title or the control with
+focus, is dropped, since the screen reader says those itself. Toggle answers
+such as "Marked" are never dropped.
+
+## v1.0.181
+
+**An update is checked before it is run.** F11 downloads the installer and asks
+Windows to run it as administrator. It now first makes sure the file is a
+plausible size and that the version stamped inside it is the version being
+installed, and refuses to run it if either fails, naming the file so you can look
+at it. DbDo is not code signed, so this is not a signature check.
+
+**A copy is made before an old database is updated.** When DbDo renames the
+older prm columns on opening a database, it now copies the file first, beside
+the original as <name>-before-prime.db, and says where the copy is.
+
+**A failed build no longer burns a version number.** buildDbDo used to write the
+new number to version.txt before it had even found the compiler, so a failure
+left the number ahead of the last thing that actually built. The number is
+written after the installer is made.
+
+**Smaller:** rebuilding a table now restores the foreign-keys setting to what it
+was, instead of turning it on regardless; the audit script explains itself with
+--help and refuses options it does not know.
+
+## v1.0.180
 
 **Say Cell answers in three parts.** Shift+C now says the column, then where the
 row is, then the value -- "title", "row 2 of 4", "Accessibility Analyst" -- as

@@ -743,6 +743,28 @@ and each extra key picks a different kind of help.
 - **Play Tutorials.** The spoken walkthroughs.
 - **More Documents.** The Announcement, the Developer Guide, the License, and the Tutorials Transcript. These are used rarely, so they sit one level down.
 
+## Files that are not databases
+
+Spreadsheets and text files are not databases, so DbDo treats them all the same
+way, and the rule is one sentence: **the file you opened stays the file of
+record.**
+
+When you open a .xlsx, .csv, .tsv or .txt file, DbDo reads it into a working copy
+and opens that. You get the whole program -- sorting, filtering, the Say keys,
+reports -- and your file is only read.
+
+- **Control+S writes your changes back** to the file you opened. A spreadsheet
+  keeps its formulas, its formatting and its other sheets. A text file is
+  written out afresh, and the first time you save, DbDo leaves the file as it
+  was beside it, named `<name>-before-dbdo.csv`.
+- **Control+Shift+S, Save As, keeps the working copy as a database** instead, if
+  you would rather leave the spreadsheet behind and work in DbDo from now on.
+- **Nothing is copied into a hidden folder.** A file you opened from your
+  documents stays in your documents.
+
+Access and SQLite files are databases already, so DbDo opens them as they are
+and your edits go straight into them.
+
 ## Bringing in a spreadsheet
 
 There are two ways, and one of them is almost always the right one.
@@ -757,8 +779,9 @@ Control+Shift+S, Save As, to keep it. Your workbook is only read.
 Database Engine, so it works only where that engine is installed, and changes go
 back into the workbook.
 
-For a list of books, import it and then copy the rows into a BookTrail database,
-which already has the fields, the pick lists and the sort a reading list needs.
+Opening a spreadsheet does the same reading, and adds a way back: Control+S
+writes your changes into the file you opened. Import is for when you want a new
+database and no further connection to the workbook.
 
 ## Where a database's files live
 
