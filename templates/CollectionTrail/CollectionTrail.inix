@@ -1,0 +1,45 @@
+﻿; CollectionTrail.inix -- how this database opens, and how each table is heard.
+;
+; ONE DATABASE FOR WHATEVER YOU COLLECT. Stamps, coins, records, tools, anything
+; else -- they all answer the same questions, so they share one table, items, and
+; the collection field says which collection a thing belongs to. Keep them all in
+; one file and sort by collection, or make a copy for each; the shape is the same
+; either way.
+;
+; The fields are the ones a collector of anything needs: what it is, who made it,
+; when and where it is from, an identifier the hobby uses (a catalogue number, a
+; mint mark, a pressing), condition, how many, when and where you got it, what
+; you paid, what it is worth, where it is now, and whether it is stored, on show,
+; lent out, sold, or still wanted.
+;
+; F4 in collection, condition, source or status picks from the values in use, so
+; a collection is chosen rather than typed again. Add your own to the lookups
+; table.
+;
+; WHEN A COLLECTION NEEDS MORE, make it its own database. CellarTrail is the
+; worked example: wine wants a vintage, a drinking window and a bottle count that
+; falls as you drink, which no general shape gives you.
+
+[Database]
+
+InitialTable = items
+
+[Table:items]
+
+; The collection first, so one press of its letter reaches it, then the thing
+; itself and who made it.
+SelectFields = collection, item, maker, year
+OrderFields = collection, item
+WhereFilter =
+
+[Table:lookups]
+
+SelectFields = fld, val
+OrderFields = fld, ordinal
+WhereFilter =
+
+[Table:maps]
+
+SelectFields = kind, prime1, prime2
+OrderFields = kind, prime1
+WhereFilter =

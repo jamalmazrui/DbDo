@@ -806,6 +806,45 @@ The samples that come with DbDo follow the same rule: each is a folder under
 `templates`, and DbDo copies them into `%LOCALAPPDATA%\DbDo\data` the first
 time you run it, so your copies are yours to change.
 
+## The sample databases
+
+Each sample is a folder under `templates`, copied into your own folder the first
+time you run DbDo. The ones written for DbDo share the Trail name:
+
+- **BookTrail** -- books read, reading, and meant to be read
+- **CellarTrail** -- wine: the bottles, and what you thought of them
+- **CollectionTrail** -- anything you collect: stamps, coins, records, tools
+- **ContactTrail** -- people, and the groups you sort them into
+- **ConventionTrail** -- a convention: what is on, where, and who is speaking
+- **FilmTrail** -- films and the people who made them
+- **HowToTrail** -- how to do things on Windows and on iOS, in one database
+- **JobTrail** -- a job search: applications, contacts, and what you did
+- **MusicTrail** -- albums and artists
+- **RecipeTrail** -- recipes and their ingredients
+- **SchoolTrail** -- a small teaching database: students, teachers, classes
+
+**chinook** and **northwind** keep their usual names. They are the two databases
+most database tutorials use, so the names are how people recognise them.
+
+### HowToTrail holds both systems
+
+The Windows and iOS how-to databases were the same shape, and answering "how do
+I do this on my phone?" meant opening a different file. They are one database
+now, and the system is a field: **platform**, holding Windows, iOS, or any for
+something true on both. Press F4 in the field to pick. To work in one system
+only, put `platform = "Windows"` in the Where filter, Control+W, and it stays
+until you clear it.
+
+### CollectionTrail holds whatever you collect
+
+Stamps, coins, records and tools answer the same questions, so they share one
+table and a **collection** field says which collection a thing belongs to. Keep
+everything in one file, or make a copy for each collection.
+
+When a collection needs fields of its own, make it its own database. CellarTrail
+is the example: wine wants a vintage, a drinking window and a bottle count that
+falls as you drink it.
+
 ## BookTrail, for books
 
 BookTrail is a sample database for the books you have read, are reading, and

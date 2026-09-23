@@ -1,4 +1,4 @@
-﻿; WindowsTutorials.inix -- how this database opens, and how each table is heard.
+﻿; ConventionTrail.inix -- how this database opens, and how each table is heard.
 ;
 ; [Database] decides which table the window starts on. Each [Table:<name>]
 ; decides which fields the row speaks, in what order, and how the rows are
@@ -9,28 +9,28 @@
 ; comes first, and three fields is the target. The first field is also what
 ; first-letter navigation searches.
 ;
-; The window opens on tasks -- what you are trying to do. methods say how, and
-; apps say where.
+; The window opens on events, because the first question at a convention is
+; what is on and when. locations, projects and contacts answer the rest.
 
 [Database]
 
-InitialTable = tasks
+InitialTable = events
 
-[Table:tasks]
+[Table:events]
 
-SelectFields = name, area
-OrderFields = area, name
+SelectFields = event_date, start_time, title
+OrderFields = event_date, start_time
 WhereFilter =
 
-[Table:methods]
+[Table:locations]
 
-SelectFields = name, summary
+SelectFields = name, level, hotel
 OrderFields = name
 WhereFilter =
 
-[Table:apps]
+[Table:projects]
 
-SelectFields = name, category
+SelectFields = name, kind
 OrderFields = name
 WhereFilter =
 

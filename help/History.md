@@ -4,7 +4,31 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.183 (current)
+## v1.0.185 (current)
+
+**Say Select answers field by field.** Shift+S says "select", then each column,
+each as its own utterance, the way Say Cell does. Pressing either twice quickly
+shows the same answers on separate lines.
+
+**The samples are in order.** The Windows and iOS how-to databases are now one,
+**HowToTrail**, with a platform field holding Windows, iOS or any -- 890 tasks,
+446 methods and 87 apps, with every link between them preserved. **CollectionTrail**
+is new, for stamps, coins, records, tools or anything else, with a collection
+field so one database holds them all. The convention and teaching samples take
+Trail names: **ConventionTrail** and **SchoolTrail**. chinook and northwind keep
+the names everybody knows them by.
+
+## v1.0.184
+
+**Dialogs are announced once, not twice.** A shared fault in the dialog code set
+the keyboard focus twice as a window opened, so screen readers read the whole
+dialog again. It is fixed for every Homer program.
+
+**A command that opens a dialog is no longer announced twice.** DbDo used to say
+the command's name and then the dialog said the same name as it opened. Any menu
+item whose name ends in "..." now leaves the announcing to the dialog.
+
+## v1.0.183
 
 **One rule for files that are not databases.** Opening a .csv, .tsv or .txt file
 now works the way opening a spreadsheet already did: DbDo reads it into a working

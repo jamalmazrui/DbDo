@@ -1,4 +1,4 @@
-﻿; sample.inix -- how this database opens, and how each table is heard.
+﻿; SchoolTrail.inix -- how this database opens, and how each table is heard.
 ;
 ; [Database] decides which table the window starts on. Each [Table:<name>]
 ; decides which fields the row speaks, in what order, and how the rows are

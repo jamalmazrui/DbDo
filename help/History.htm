@@ -235,8 +235,10 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
-<li><a href="#v1.0.183-current" id="toc-v1.0.183-current">v1.0.183
+<li><a href="#v1.0.185-current" id="toc-v1.0.185-current">v1.0.185
 (current)</a></li>
+<li><a href="#v1.0.184" id="toc-v1.0.184">v1.0.184</a></li>
+<li><a href="#v1.0.183" id="toc-v1.0.183">v1.0.183</a></li>
 <li><a href="#v1.0.182" id="toc-v1.0.182">v1.0.182</a></li>
 <li><a href="#v1.0.181" id="toc-v1.0.181">v1.0.181</a></li>
 <li><a href="#v1.0.180" id="toc-v1.0.180">v1.0.180</a></li>
@@ -350,7 +352,30 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
-<h2 id="v1.0.183-current">v1.0.183 (current)</h2>
+<h2 id="v1.0.185-current">v1.0.185 (current)</h2>
+<p><strong>Say Select answers field by field.</strong> Shift+S says
+“select”, then each column, each as its own utterance, the way Say Cell
+does. Pressing either twice quickly shows the same answers on separate
+lines.</p>
+<p><strong>The samples are in order.</strong> The Windows and iOS how-to
+databases are now one, <strong>HowToTrail</strong>, with a platform
+field holding Windows, iOS or any – 890 tasks, 446 methods and 87 apps,
+with every link between them preserved. <strong>CollectionTrail</strong>
+is new, for stamps, coins, records, tools or anything else, with a
+collection field so one database holds them all. The convention and
+teaching samples take Trail names: <strong>ConventionTrail</strong> and
+<strong>SchoolTrail</strong>. chinook and northwind keep the names
+everybody knows them by.</p>
+<h2 id="v1.0.184">v1.0.184</h2>
+<p><strong>Dialogs are announced once, not twice.</strong> A shared
+fault in the dialog code set the keyboard focus twice as a window
+opened, so screen readers read the whole dialog again. It is fixed for
+every Homer program.</p>
+<p><strong>A command that opens a dialog is no longer announced
+twice.</strong> DbDo used to say the command’s name and then the dialog
+said the same name as it opened. Any menu item whose name ends in “…”
+now leaves the announcing to the dialog.</p>
+<h2 id="v1.0.183">v1.0.183</h2>
 <p><strong>One rule for files that are not databases.</strong> Opening a
 .csv, .tsv or .txt file now works the way opening a spreadsheet already
 did: DbDo reads it into a working copy, you edit with the whole program

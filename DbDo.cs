@@ -13399,7 +13399,18 @@ namespace DbDo
             // LbcMenuItem reports both the shortcut and the access letter to the
             // screen reader; see Lbc.cs. The stock item reports only one of them.
             ToolStripMenuItem mi = new LbcMenuItem(sText);
-            mi.Click += (senderA, evA) => { DbDoLog.write("command: " + sCommand); commandEcho(sCommand); evHandler(senderA, evA); };
+            // A CAPTION ENDING IN "..." OPENS A DIALOG, and the dialog says its
+            // own name as it opens. Echoing the command first says it twice --
+            // "Order Records", then "Order Records dialog". Windows has used the
+            // ellipsis for exactly this promise since 1985, so it is the signal
+            // the echo listens to.
+            bool bOpensDialog = sText.TrimEnd().EndsWith("...");
+            mi.Click += (senderA, evA) =>
+            {
+                DbDoLog.write("command: " + sCommand);
+                if (!bOpensDialog) commandEcho(sCommand);
+                evHandler(senderA, evA);
+            };
             miParent.DropDownItems.Add(mi);
             KeyMap.register(key, mi, sCommand);
             if (key != Keys.None) dLocalKeyToMenu[key] = mi;
@@ -16022,7 +16033,7 @@ namespace DbDo
             bool bDoubleCell = (117 == iLastSpeechChord) && (iNowCell - iLastSpeechTicks < DoublePressMillis);
             iLastSpeechChord = 117;
             iLastSpeechTicks = iNowCell;
-            if (bDoubleCell) showInfoDialog("Cell", sCol + ", " + sWhere + ": " + sVal);
+            if (bDoubleCell) showInfoDialog("Cell", sCol + "\r\n" + sWhere + "\r\n" + sVal);
             else Say.sayParts(new string[] { sCol, sWhere, sVal });
         }
 
@@ -16068,7 +16079,25 @@ namespace DbDo
             // One line rather than one part per column: the answer is a list,
             // and a list read as separate utterances cannot be taken in at a
             // glance by ear.
-            speakOrShow("Columns", "select: " + string.Join(", ", lsCols.ToArray()), 123);
+            // SEPARATE UTTERANCES, as Say Cell does: "select", then each column.
+            // A reader gives each its own phrase, so four field names are four
+            // answers rather than one run-on line. Double-pressing shows them on
+            // separate lines, in the same order.
+            long iNowSel = DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond;
+            bool bDoubleSel = (123 == iLastSpeechChord) && (iNowSel - iLastSpeechTicks < DoublePressMillis);
+            iLastSpeechChord = 123;
+            iLastSpeechTicks = iNowSel;
+            if (bDoubleSel)
+            {
+                showInfoDialog("Columns", "select\r\n" + string.Join("\r\n", lsCols.ToArray()));
+            }
+            else
+            {
+                List<string> lsParts = new List<string>();
+                lsParts.Add("select");
+                lsParts.AddRange(lsCols);
+                Say.sayParts(lsParts);
+            }
         }
 
         private void saySayFilter(object sender, EventArgs evArgs)

@@ -1,19 +1,40 @@
 ﻿; HowToTrail.inix -- how this database opens, and how each table is heard.
 ;
-; [Database] decides which table the window starts on. Each [Table:<name>]
-; decides which fields the row speaks, in what order, and how the rows are
-; sorted. DbDo writes these keys back whenever you change the columns, the sort
-; or the filter, so what you adjust is remembered here.
+; ONE DATABASE FOR EVERY SYSTEM. The Windows and iOS tutorial databases had the
+; same shape -- tasks, methods, apps, contacts -- and answering "how do I do this
+; on my phone?" meant opening a different file. They are one database now, and
+; the system is a field: platform, on tasks, methods and apps, holding Windows,
+; iOS, or any for something that is true on both. F4 in the field picks from
+; that list. To work in one system only, put platform = "Windows" in the Where
+; filter, Control+W, and it stays until you clear it.
 ;
-; A row is heard, not seen, so the field that decides whether to keep listening
-; comes first, and three fields is the target. The first field is also what
-; first-letter navigation searches.
-;
-; The window opens on articles, the how-to itself; categories group them.
+; The accessibility articles that were the old how-to database are here too, in
+; articles and categories. They are about the web rather than about a system, so
+; they carry no platform.
 
 [Database]
 
-InitialTable = articles
+InitialTable = tasks
+
+[Table:tasks]
+
+; What you are trying to do, and where. The name comes first, because that is
+; what you look up; the system and the area narrow it.
+SelectFields = name, platform, area
+OrderFields = platform, area, name
+WhereFilter =
+
+[Table:methods]
+
+SelectFields = name, platform, summary
+OrderFields = platform, name
+WhereFilter =
+
+[Table:apps]
+
+SelectFields = name, platform, category
+OrderFields = platform, name
+WhereFilter =
 
 [Table:articles]
 
@@ -25,6 +46,12 @@ WhereFilter =
 
 SelectFields = name, summary
 OrderFields = name
+WhereFilter =
+
+[Table:contacts]
+
+SelectFields = last_name, first_name, enterprise
+OrderFields = last_name, first_name
 WhereFilter =
 
 [Table:lookups]

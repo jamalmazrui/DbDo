@@ -587,6 +587,24 @@ popd
 echo Back to: %CD% >> "!log!"
 
 
+rem ---- SAMPLES THAT WERE RENAMED OR FOLDED INTO ANOTHER ----
+rem
+rem A renamed sample leaves its old folder behind, because unarchiving adds and
+rem replaces but never deletes. These folders hold a database, its settings and
+rem its scripts, so the whole folder goes rather than a list of files. Each was
+rem either renamed (media to FilmTrail, reads to BookTrail, sample to
+rem SchoolTrail, NFB2026Convention to ConventionTrail) or folded into another
+rem (WindowsTutorials and iOSTutorials into HowToTrail).
+rem
+rem Only here, in the development folder. A copy in the user's own data folder
+rem is theirs, and nothing in this build removes it.
+for %%f in (cellar contacts howtos iOSTutorials media music NFB2026Convention reads recipes sample WindowsTutorials) do (
+  if exist "templates\%%f" (
+    rd /s /q "templates\%%f"
+    echo Removed the retired sample "templates\%%f" >> "!log!"
+  )
+)
+
 rem ---- files that were renamed ----
 rem
 rem FILES THAT WERE RENAMED LEAVE THE OLD COPY BEHIND, because unarchiving adds
@@ -610,8 +628,6 @@ for %%f in (
   "help\Tutorial_Finding.inix" "help\Tutorial_Installing.inix" "help\Tutorial_LookAndPrime.inix"
   "help\Tutorial_Output.inix" "help\Tutorial_Sorting.inix"
   "scripts\buildTutorial.cmd" "scripts\buildTutorial.ps1" "cleanDir.cmd" "templates\reads\reads.db"
-  "templates\cellar\cellar.db" "templates\contacts\contacts.db" "templates\howtos\howtos.db"
-  "templates\media\media.db" "templates\music\music.db" "templates\recipes\recipes.db"
 ) do (
   if exist %%f (
     del /f /q %%f

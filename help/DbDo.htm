@@ -337,6 +337,16 @@ id="toc-bringing-in-a-spreadsheet">Bringing in a spreadsheet</a></li>
 <li><a href="#where-a-databases-files-live"
 id="toc-where-a-databases-files-live">Where a database’s files
 live</a></li>
+<li><a href="#the-sample-databases" id="toc-the-sample-databases">The
+sample databases</a>
+<ul>
+<li><a href="#howtotrail-holds-both-systems"
+id="toc-howtotrail-holds-both-systems">HowToTrail holds both
+systems</a></li>
+<li><a href="#collectiontrail-holds-whatever-you-collect"
+id="toc-collectiontrail-holds-whatever-you-collect">CollectionTrail
+holds whatever you collect</a></li>
+</ul></li>
 <li><a href="#booktrail-for-books"
 id="toc-booktrail-for-books">BookTrail, for books</a></li>
 <li><a href="#the-spoken-walkthroughs"
@@ -2186,6 +2196,52 @@ name appears in both, the database’s own script wins.</p>
 folder under <code>templates</code>, and DbDo copies them into
 <code>%LOCALAPPDATA%\DbDo\data</code> the first time you run it, so your
 copies are yours to change.</p>
+<h2 id="the-sample-databases">The sample databases</h2>
+<p>Each sample is a folder under <code>templates</code>, copied into
+your own folder the first time you run DbDo. The ones written for DbDo
+share the Trail name:</p>
+<ul>
+<li><strong>BookTrail</strong> – books read, reading, and meant to be
+read</li>
+<li><strong>CellarTrail</strong> – wine: the bottles, and what you
+thought of them</li>
+<li><strong>CollectionTrail</strong> – anything you collect: stamps,
+coins, records, tools</li>
+<li><strong>ContactTrail</strong> – people, and the groups you sort them
+into</li>
+<li><strong>ConventionTrail</strong> – a convention: what is on, where,
+and who is speaking</li>
+<li><strong>FilmTrail</strong> – films and the people who made them</li>
+<li><strong>HowToTrail</strong> – how to do things on Windows and on
+iOS, in one database</li>
+<li><strong>JobTrail</strong> – a job search: applications, contacts,
+and what you did</li>
+<li><strong>MusicTrail</strong> – albums and artists</li>
+<li><strong>RecipeTrail</strong> – recipes and their ingredients</li>
+<li><strong>SchoolTrail</strong> – a small teaching database: students,
+teachers, classes</li>
+</ul>
+<p><strong>chinook</strong> and <strong>northwind</strong> keep their
+usual names. They are the two databases most database tutorials use, so
+the names are how people recognise them.</p>
+<h3 id="howtotrail-holds-both-systems">HowToTrail holds both
+systems</h3>
+<p>The Windows and iOS how-to databases were the same shape, and
+answering “how do I do this on my phone?” meant opening a different
+file. They are one database now, and the system is a field:
+<strong>platform</strong>, holding Windows, iOS, or any for something
+true on both. Press F4 in the field to pick. To work in one system only,
+put <code>platform = "Windows"</code> in the Where filter, Control+W,
+and it stays until you clear it.</p>
+<h3 id="collectiontrail-holds-whatever-you-collect">CollectionTrail
+holds whatever you collect</h3>
+<p>Stamps, coins, records and tools answer the same questions, so they
+share one table and a <strong>collection</strong> field says which
+collection a thing belongs to. Keep everything in one file, or make a
+copy for each collection.</p>
+<p>When a collection needs fields of its own, make it its own database.
+CellarTrail is the example: wine wants a vintage, a drinking window and
+a bottle count that falls as you drink it.</p>
 <h2 id="booktrail-for-books">BookTrail, for books</h2>
 <p>BookTrail is a sample database for the books you have read, are
 reading, and mean to read. One table, books, holds the author, title,
