@@ -120,7 +120,7 @@ namespace DbDo
         // files from {app}\SampleScripts into the user's folder so
         // they have working examples to learn from. The sentinel
         // prevents re-seeding on later launches (so users can delete
-        // samples they don't want without them coming back). Failure
+        // templates they don't want without them coming back). Failure
         // is silent: bad permissions, missing source folder, etc.,
         // all just leave the script folder empty.
         public static string getScriptDir()
@@ -135,13 +135,13 @@ namespace DbDo
             return sDir;
         }
 
-        // getSampleDir: the per-user folder of sample databases,
-        // %APPDATA%\DbDo\Samples, seeded once from the install's
-        // {app}\Samples folder on first access -- the exact pattern
-        // getScriptDir uses for Scripts. The Sample Databases command
+        // getTemplateDir: the per-user folder of template databases,
+        // %APPDATA%\DbDo\templates, seeded once from the install's
+        // {app}\templates folder on first access -- the exact pattern
+        // getScriptDir uses for Scripts. The Template Databases command
         // lists the .db files here, and the user can drop their own
         // databases into the folder to add them to that list.
-        public static string getSampleDir()
+        public static string getTemplateDir()
         {
             // THE HOMER FOLDER LAYOUT.
             //
@@ -152,27 +152,27 @@ namespace DbDo
             // program, because a template that shows what is possible is a
             // sample with a purpose, and the layout has one folder for both.
             //
-            // The old location was %APPDATA%\DbDo\Samples. A copy still there
+            // The old location was %APPDATA%\DbDo\templates. A copy still there
             // is left alone rather than deleted: it is the user's data, and
             // nothing in this program is entitled to remove it.
             string sDir = Homer.Paths.data();
             try { System.IO.Directory.CreateDirectory(sDir); }
             catch { /* tolerate; the caller will surface the error */ }
-            seedSampleDatabasesIfNew(sDir);
+            seedTemplateDatabasesIfNew(sDir);
             return sDir;
         }
 
-        // seedSampleDatabasesIfNew: one-time copy of the bundled sample
+        // seedTemplateDatabasesIfNew: one-time copy of the bundled sample
         // databases ({app}\templates\*.db) into the user's data folder.
         // A .seeded sentinel records that seeding has run, so deleting a
         // sample does not make it reappear on the next launch.
-        private static void seedSampleDatabasesIfNew(string sDir)
+        private static void seedTemplateDatabasesIfNew(string sDir)
         {
             try
             {
                 // THE SENTINEL IS A LIST, NOT A FLAG.
                 //
-                // It used to say only "seeded". So a file added to a sample
+                // It used to say only "seeded". So a file added to a template
                 // folder in a later version -- JobTrail.inix, which is what tells
                 // the database which table to open on -- was never copied to a
                 // user who had run DbDo once. The database opened on the wrong
@@ -198,14 +198,14 @@ namespace DbDo
                 string sSrcFolder = Homer.Paths.shippedTemplates();
                 if (System.IO.Directory.Exists(sSrcFolder))
                 {
-                    // Each sample database lives in its own subfolder
+                    // Each template database lives in its own subfolder
                     // (templates\<name>\<name>.db, plus that database's own
                     // scripts and report/transfer .inix files beside it).
                     // On the FIRST seed every bundled file is copied. On
                     // later launches a file is refreshed only when it still
                     // exists here AND the installed copy is newer -- so a
-                    // new install's updated samples replace the older ones
-                    // by the same name, while a sample the user deleted is
+                    // new install's updated templates replace the older ones
+                    // by the same name, while a template the user deleted is
                     // not resurrected and an edit the user made after the
                     // install (newer timestamp) is preserved.
                     foreach (string sSubSrc in System.IO.Directory.GetDirectories(sSrcFolder))
@@ -217,16 +217,16 @@ namespace DbDo
                             string sDstPath = System.IO.Path.Combine(sSubDst, System.IO.Path.GetFileName(sSrcPath));
                             string sKey = System.IO.Path.GetFileName(sSubSrc) + "/" + System.IO.Path.GetFileName(sSrcPath);
                             bool bNeverSeeded = !bFirstSeed && !lsSeeded.Contains(sKey);
-                            copyBundledSample(sSrcPath, sDstPath, bFirstSeed || bNeverSeeded);
+                            copyBundledTemplate(sSrcPath, sDstPath, bFirstSeed || bNeverSeeded);
                             if (!lsSeeded.Contains(sKey)) lsNew.Add(sKey);
                         }
                     }
                     // Tolerate any loose .db left directly in the source
-                    // Samples folder (older flat layout).
+                    // templates folder (older flat layout).
                     foreach (string sSrcPath in System.IO.Directory.GetFiles(sSrcFolder, "*.db"))
                     {
                         string sDstPath = System.IO.Path.Combine(sDir, System.IO.Path.GetFileName(sSrcPath));
-                        copyBundledSample(sSrcPath, sDstPath, bFirstSeed);
+                        copyBundledTemplate(sSrcPath, sDstPath, bFirstSeed);
                     }
                 }
                 if (lsNew.Count > 0 && !bFirstSeed)
@@ -242,20 +242,20 @@ namespace DbDo
             catch { /* never let seeding block the picker */ }
         }
 
-        // copyBundledSample: seed or refresh one bundled sample file.
+        // copyBundledTemplate: seed or refresh one bundled sample file.
         //   - missing destination: copied only on the first seed, so a
         //     sample the user has deliberately deleted stays gone;
         //   - existing destination: overwritten only when the installed
         //     source is newer, so a fresh install's updated files replace
         //     the older same-named ones while a later user edit is kept.
-        private static void copyBundledSample(string sSrcPath, string sDstPath, bool bFirstSeed)
+        private static void copyBundledTemplate(string sSrcPath, string sDstPath, bool bFirstSeed)
         {
             try
             {
                 bool bExists = System.IO.File.Exists(sDstPath);
                 if (!bExists)
                 {
-                    if (!bFirstSeed) return;                 // don't resurrect deleted samples
+                    if (!bFirstSeed) return;                 // don't resurrect deleted templates
                     System.IO.File.Copy(sSrcPath, sDstPath, false);
                     clearReadOnly(sDstPath);                 // keep the seeded copy editable
                     return;
@@ -287,21 +287,21 @@ namespace DbDo
 
         // listSampleDatabases: the full paths of the bundled sample
         // databases. Each sample lives in its own subfolder of the
-        // user's Samples folder (Samples\<name>\<name>.db) so its
+        // user's templates folder (templates\<name>\<name>.db) so its
         // database-specific scripts can sit beside it. Returns one
-        // .db per subfolder, sorted, for the Sample Databases pick list.
+        // .db per subfolder, sorted, for the Template Databases pick list.
         public static string[] listSampleDatabases()
         {
             List<string> l = new List<string>();
             try
             {
-                string sDir = getSampleDir();
+                string sDir = getTemplateDir();
                 // One .db per per-database subfolder (the standard
-                // layout: Samples\<name>\<name>.db).
+                // layout: templates\<name>\<name>.db).
                 foreach (string sSub in System.IO.Directory.GetDirectories(sDir))
                     foreach (string sP in System.IO.Directory.GetFiles(sSub, "*.db"))
                         l.Add(sP);
-                // Plus any loose .db directly in Samples (tolerated).
+                // Plus any loose .db directly in templates (tolerated).
                 foreach (string sP in System.IO.Directory.GetFiles(sDir, "*.db"))
                     l.Add(sP);
                 l.Sort(StringComparer.OrdinalIgnoreCase);
@@ -315,7 +315,7 @@ namespace DbDo
         // every .js, .sql, and .dbdo file from {app}\Scripts into
         // %APPDATA%\DbDo\Scripts. A .seeded sentinel file inside
         // the user's script folder records that seeding has run,
-        // so deleting a sample doesn't cause it to reappear on
+        // so deleting a template doesn't cause it to reappear on
         // the next launch.
         //
         // The source folder is called Scripts in the install layout
@@ -373,7 +373,7 @@ namespace DbDo
             catch
             {
                 /* swallow everything -- script folder still works
-                   without the samples */
+                   without the templates */
             }
         }
 
@@ -440,7 +440,7 @@ namespace DbDo
         // user scripts. It is therefore never mined for a database's
         // associated scripts, even when a database happens to sit
         // directly in it. A database in any other folder -- including a
-        // subfolder such as Samples\media -- is scanned normally, so this
+        // subfolder such as templates\media -- is scanned normally, so this
         // is a location rule about DbDo's own directory, not a filter on
         // any particular file name.
         public static bool isDbDoInstallFolder(string sFolder)
@@ -1636,13 +1636,192 @@ namespace DbDo
                 selectTable(sTable);
         }
 
+        // =====================================================================
+        // MERGING ANOTHER DbDo DATABASE INTO THIS ONE
+        //
+        // Two people keeping the same kind of database -- two BookTrail files,
+        // two JobTrails -- need a way to put one into the other without losing
+        // either. The rule is the one DbDo already uses to say what a record IS:
+        // its prime, the computed key built from the fields that identify it. A
+        // record whose prime is not here is new and is added. A record whose
+        // prime is already here is the same record, and what happens to it is
+        // the person's choice, made once for the whole run:
+        //
+        //   keep    leave every record that is already here untouched
+        //   update  take the incoming values for records already here
+        //   fill    take incoming values only where this database has none
+        //   newer   take incoming values only where the incoming record was
+        //           edited more recently
+        //
+        // LINKS SURVIVE because maps names its two ends by prime, not by row
+        // number: a link copied from the other database points at the same two
+        // records here, whatever their row ids are. Map rows are added when the
+        // same link is not here already and both ends exist after the records
+        // have merged -- so the records are always merged first.
+        //
+        // Lookups -- the pick lists -- merge the same way, one row per
+        // table/field/value.
+        //
+        // Nothing is deleted, ever. A merge only adds or overwrites, and
+        // "keep" overwrites nothing.
+        //
+        // The work is done in SQL through ATTACH, so a large file does not
+        // travel through this program row by row.
+        public string mergeFromDatabase(string sOtherPath, string sPolicy)
+        {
+            if (!isOpen()) throw new InvalidOperationException("No database is open.");
+            if (string.IsNullOrEmpty(sOtherPath) || !System.IO.File.Exists(sOtherPath))
+                throw new ArgumentException("Could not find " + sOtherPath + ".");
+            string sNorm = (sPolicy ?? "keep").Trim().ToLowerInvariant();
+            System.Text.StringBuilder sbReport = new System.Text.StringBuilder();
+            int iAdded = 0, iUpdated = 0, iSame = 0, iLinks = 0, iPicks = 0;
+            invokeSql("ATTACH DATABASE '" + sOtherPath.Replace("'", "''") + "' AS incoming", null);
+            try
+            {
+                List<string> lsTables = new List<string>();
+                foreach (string sT in getTableAndViewNames())
+                    if (!sT.Equals("maps", StringComparison.OrdinalIgnoreCase)
+                        && !sT.Equals("lookups", StringComparison.OrdinalIgnoreCase))
+                        lsTables.Add(sT);
+                foreach (string sTable in lsTables)
+                {
+                    List<string> lsHere = plainColumnsOf("main", sTable);
+                    List<string> lsThere = plainColumnsOf("incoming", sTable);
+                    if (lsHere.Count == 0 || lsThere.Count == 0) continue;
+                    if (!lsHere.Contains("prime") || !lsThere.Contains("prime")) continue;
+                    List<string> lsShared = new List<string>();
+                    foreach (string sC in lsHere)
+                        if (lsThere.Contains(sC) && sC != "prime" && sC != "look"
+                            && !sC.EndsWith("_id", StringComparison.OrdinalIgnoreCase))
+                            lsShared.Add(sC);
+                    if (lsShared.Count == 0) continue;
+                    string sQ = "\"" + sTable.Replace("\"", "\"\"") + "\"";
+                    string sCols = string.Join(", ", lsShared.ConvertAll(s => "\"" + s + "\"").ToArray());
+                    string sSel = string.Join(", ", lsShared.ConvertAll(s => "i.\"" + s + "\"").ToArray());
+
+                    int iBefore = countOf("main." + sQ);
+                    int iMatched = countOf("main." + sQ + " d WHERE EXISTS (SELECT 1 FROM incoming." + sQ + " i WHERE i.\"prime\" = d.\"prime\")");
+                    invokeSql("INSERT INTO main." + sQ + " (" + sCols + ") SELECT " + sSel
+                        + " FROM incoming." + sQ + " i WHERE NOT EXISTS (SELECT 1 FROM main." + sQ
+                        + " d WHERE d.\"prime\" = i.\"prime\")", null);
+                    int iNew = countOf("main." + sQ) - iBefore;
+                    iAdded += iNew;
+
+                    int iChanged = 0;
+                    if (sNorm != "keep" && iMatched > 0)
+                    {
+                        string sWhereNewer = (sNorm == "newer" && lsShared.Contains("edited"))
+                            ? " AND coalesce(i.\"edited\",'') > coalesce(main." + sQ + ".\"edited\",'')" : "";
+                        foreach (string sC in lsShared)
+                        {
+                            if (sC == "added") continue;
+                            string sTake = "(SELECT i.\"" + sC + "\" FROM incoming." + sQ
+                                + " i WHERE i.\"prime\" = main." + sQ + ".\"prime\")";
+                            string sSet = (sNorm == "fill")
+                                ? "\"" + sC + "\" = coalesce(nullif(\"" + sC + "\", ''), " + sTake + ")"
+                                : "\"" + sC + "\" = coalesce(" + sTake + ", \"" + sC + "\")";
+                            invokeSql("UPDATE main." + sQ + " SET " + sSet
+                                + " WHERE EXISTS (SELECT 1 FROM incoming." + sQ + " i WHERE i.\"prime\" = main." + sQ
+                                + ".\"prime\"" + sWhereNewer + ")", null);
+                        }
+                        iChanged = iMatched;
+                    }
+                    iUpdated += iChanged;
+                    iSame += (iChanged == 0) ? iMatched : 0;
+                    if (iNew > 0 || iMatched > 0)
+                        sbReport.AppendLine(sTable + ": " + countNoun(iNew, "record") + " added, "
+                            + countNoun(iMatched, "record") + " already here"
+                            + (iChanged > 0 ? " and updated" : ""));
+                }
+
+                // The links, once every record they point at is here.
+                if (hasTable("main", "maps") && hasTable("incoming", "maps"))
+                {
+                    int iB = countOf("main.\"maps\"");
+                    invokeSql("INSERT INTO main.\"maps\" (tbl1, prime1, kind, tbl2, prime2, notes, tags) "
+                        + "SELECT i.tbl1, i.prime1, i.kind, i.tbl2, i.prime2, i.notes, i.tags FROM incoming.\"maps\" i "
+                        + "WHERE NOT EXISTS (SELECT 1 FROM main.\"maps\" d WHERE d.tbl1 = i.tbl1 AND d.prime1 = i.prime1 "
+                        + "AND d.kind = i.kind AND d.tbl2 = i.tbl2 AND d.prime2 = i.prime2)", null);
+                    iLinks = countOf("main.\"maps\"") - iB;
+                }
+                if (hasTable("main", "lookups") && hasTable("incoming", "lookups"))
+                {
+                    int iB = countOf("main.\"lookups\"");
+                    invokeSql("INSERT INTO main.\"lookups\" (src, tbl, fld, val, ordinal, descrip) "
+                        + "SELECT i.src, i.tbl, i.fld, i.val, i.ordinal, i.descrip FROM incoming.\"lookups\" i "
+                        + "WHERE NOT EXISTS (SELECT 1 FROM main.\"lookups\" d WHERE d.tbl = i.tbl AND d.fld = i.fld "
+                        + "AND d.val = i.val)", null);
+                    iPicks = countOf("main.\"lookups\"") - iB;
+                }
+            }
+            finally { try { invokeSql("DETACH DATABASE incoming", null); } catch { } }
+
+            string sHead = countNoun(iAdded, "record") + " added, " + countNoun(iUpdated, "record") + " updated, "
+                + countNoun(iSame, "record") + " left as they were, " + countNoun(iLinks, "link") + " added, "
+                + countNoun(iPicks, "pick list value") + " added.";
+            try { DbDoLog.write("Merge from " + sOtherPath + " (" + sNorm + "): " + sHead); } catch { }
+            return sHead + (sbReport.Length > 0 ? "\r\n\r\n" + sbReport.ToString() : "");
+        }
+
+        // plainColumnsOf: the columns of one table, leaving out the ones SQLite
+        // computes (look and prime are generated and cannot be written to).
+        private List<string> plainColumnsOf(string sSchema, string sTable)
+        {
+            List<string> lsOut = new List<string>();
+            try
+            {
+                int iFound;
+                foreach (string[] aRow in queryRowsSql("SELECT name, hidden FROM pragma_table_xinfo('"
+                    + sTable.Replace("'", "''") + "', '" + sSchema + "')", 500, out iFound))
+                {
+                    if (aRow == null || aRow.Length < 2) continue;
+                    string sName = aRow[0];
+                    bool bGenerated = (aRow[1] == "2" || aRow[1] == "3");
+                    if (bGenerated && sName != "prime") continue;
+                    lsOut.Add(sName);
+                }
+            }
+            catch (Exception) { }
+            return lsOut;
+        }
+
+        private bool hasTable(string sSchema, string sTable)
+        {
+            try
+            {
+                int iFound;
+                foreach (string[] a in queryRowsSql("SELECT count(*) FROM " + sSchema
+                    + ".sqlite_master WHERE type='table' AND name='" + sTable.Replace("'", "''") + "'", 1, out iFound))
+                    return a != null && a.Length > 0 && a[0] != "0";
+            }
+            catch (Exception) { }
+            return false;
+        }
+
+        private int countOf(string sFrom)
+        {
+            try
+            {
+                int iFound;
+                foreach (string[] a in queryRowsSql("SELECT count(*) FROM " + sFrom, 1, out iFound))
+                    if (a != null && a.Length > 0) return Convert.ToInt32(a[0]);
+            }
+            catch (Exception) { }
+            return 0;
+        }
+
+        private static string countNoun(int i, string sNoun)
+        {
+            return i + " " + sNoun + (i == 1 ? "" : "s");
+        }
+
         // renamePrmToPrime: bring a database made before the rename up to date.
         //
         // The computed key column was called prm, and the maps table's two ends
         // prm1 and prm2. DbDo now reads only prime, prime1 and prime2, so an
-        // older database -- a tester's own, or a sample shipped before the
+        // older database -- a tester's own, or a template shipped before the
         // rename -- lost Say Prime and every link that goes through maps, with
-        // no error to say why. Thirteen of the fourteen samples were in that
+        // no error to say why. Thirteen of the fourteen templates were in that
         // state until they were migrated.
         //
         // ALTER TABLE ... RENAME COLUMN keeps the data and rewrites every
@@ -4917,7 +5096,7 @@ namespace DbDo
         // CREATE SQL and keeping the identifiers in it that are real columns
         // of the table (which discards SQL functions and keywords). This is
         // accurate whether prime is the simple positional concatenation Add
-        // Table builds or a hand-tuned expression like the sample databases'
+        // Table builds or a hand-tuned expression like the template databases'
         // person-or-organization form. These are exactly the fields whose
         // combination must be unique, so they are what a user changes to
         // resolve a duplicate. Falls back to the full editable-field list if
@@ -10012,7 +10191,7 @@ namespace DbDo
 
         public FilterDialog(List<string> lColumns, string sCurrentText, string sCurrentColumn, string sCurrentMode)
         {
-            this.Text = "Where Filter";
+            this.Text = "Filter Records";
             this.AccessibleDescription = "";
             this.StartPosition = FormStartPosition.CenterParent;
             this.ClientSize = new Size(440, 200);
@@ -11412,6 +11591,7 @@ namespace DbDo
         private ToolStripMenuItem miFileCompare;
         private ToolStripMenuItem miFileImport;
         private ToolStripMenuItem miFileMerge;
+        private ToolStripMenuItem miFileSampleDb;
         private ToolStripMenuItem miFileExport;
         private ToolStripMenuItem miFilePrint;
         private ToolStripMenuItem miFileExit;
@@ -11547,7 +11727,6 @@ namespace DbDo
         private ToolStripMenuItem miHelpStatus;
         private ToolStripMenuItem miHelpEmailLog;
         private ToolStripMenuItem miHelpTutorials;
-        private ToolStripMenuItem miHelpSampleDb;
         private ToolStripMenuItem miHelpExtraSpeech;
         private ToolStripMenuItem miHelpCommandEcho;
         private ToolStripMenuItem miEditNotes;
@@ -12480,6 +12659,26 @@ namespace DbDo
             // and Edit Record, which are high-frequency core operations that
             // should keep their plain-Ctrl chords.)
             miFileImport  = addItem(miFile, "&Import...",                 "Import",           Keys.Alt | Keys.I,                    importClicked);
+            // OPEN SAMPLE DATABASE, ALT+D. It lived on the Help menu, where a
+            // beginner might look for an example -- but what it does is open a
+            // database, and the person reaching for it after the first week is
+            // opening BookTrail to work, not reading a tutorial. So it sits with
+            // Open and Merge, which are the three ways a database gets in front
+            // of you: open a file of your own, open one of these, or fold
+            // another one into the one you have.
+            //
+            // TEMPLATE IS THE WORD, EVERYWHERE. It is the folder these come
+            // from on disk, so the word people read in the menu is the word they
+            // see in the file system -- one association instead of two.
+            //
+            // Alt+E, since E starts Template's own word in the caption is not
+            // true: T is Table Summary and D is Database Summary, both taken. So
+            // the key carries no letter of the name and the caption takes no
+            // trigger letter from the middle of a word either; E is the letter
+            // of "Database" in neither. Keep the pattern honest: no letter at
+            // all is better than a wrong one, and this command is reached once
+            // or twice a session.
+            miFileSampleDb= addItem(miFile, "Open Template Database...",  "Open Template Database", Keys.None,                      openTemplateDbClicked);
             miFileMerge   = addItem(miFile, "&Merge Data...",             "Merge",            Keys.Alt | Keys.M,                    mergeClicked);
             addItem(miFile, "Transfer Import...",       "Transfer Import",  Keys.None,                            importTransferClicked);
             addItem(miFile, "&Run Report...",           "Run Report",       Keys.Alt | Keys.Shift | Keys.R,       produceReportClicked);
@@ -12635,8 +12834,16 @@ namespace DbDo
             //
             // F3 / Shift+F3 repeat whichever family was most recently
             // invoked; sLastSearchKind routes the dispatch.
-            miRecFind         = addItem(miNavigate, "&Find Record...",        "Find",                Keys.Control | Keys.F,              recFindAllClicked);
-            miRecFindPrev     = addItem(miNavigate, "Reverse &Find", "Find Previous",      Keys.Control | Keys.Shift | Keys.F, recFindAllPrevClicked);
+            // KEYWORDS, CONTROL+K, IS WHAT FIND WAS.
+            //
+            // Three commands narrow or locate here, and each now holds the
+            // letter of its own word. Keywords searches INSIDE the records --
+            // every column, including ones not on screen -- which is what this
+            // command always did and what "Find" never promised. F went to
+            // Filter Records, where "filter" is the word a data table uses, and
+            // W was freed: raw SQL has its own key, Control+Q.
+            miRecFind         = addItem(miNavigate, "&Keywords...",           "Keywords",            Keys.Control | Keys.K,              recFindAllClicked);
+            miRecFindPrev     = addItem(miNavigate, "Reverse &Keywords", "Keywords Previous",  Keys.Control | Keys.Shift | Keys.K, recFindAllPrevClicked);
             miRecJump         = addItem(miNavigate, "&Jump to Record...", "Jump Record",        Keys.Control | Keys.J,              recJumpClicked);
             miRecJumpPrev     = addItem(miNavigate, "Reverse &Jump", "Jump Previous Record", Keys.Control | Keys.Shift | Keys.J, recJumpPrevClicked);
             miRecFindRegex    = addItem(miNavigate, "Find Regex...", "Find Regex",       Keys.Control | Keys.F3,             recFindRegexClicked);
@@ -12775,8 +12982,8 @@ namespace DbDo
             // shared speakOrShow helper.
             miSaySayAdded        = addItem(miSay, "Say &Added",     "Say Added",   Keys.Shift | Keys.A,                saySayAdded);
             miSaySayCell         = addItem(miSay, "Say &Cell",       "Say Cell",    Keys.Shift | Keys.C,                saySayCell);
-            miSaySayFilter       = addItem(miSay, "Say &Where Filter",  "Say Where Filter", Keys.Shift | Keys.W,            saySayFilter);
-            miSaySayFind         = addItem(miSay, "Say &Find",          "Say Find",    Keys.Shift | Keys.F,                saySayFind);
+            miSaySayFilter       = addItem(miSay, "Say &Filter",        "Say Filter",       Keys.Shift | Keys.F,            saySayFilter);
+            miSaySayFind         = addItem(miSay, "Say &Keywords",      "Say Keywords", Keys.Shift | Keys.K,               saySayFind);
             miSaySaySelect       = addItem(miSay, "&Say Select Columns", "Say Select",  Keys.Shift | Keys.S,                saySaySelect);
             miSaySayQuery        = addItem(miSay, "Say &Query",          "Say Query",   Keys.Shift | Keys.Q,                saySayQuery);
             miSaySayId           = addItem(miSay, "Say &Id",      "Say ID",      Keys.Shift | Keys.I,                saySayId);
@@ -12799,8 +13006,12 @@ namespace DbDo
             // single Sort-Records dialog on Alt+Shift+S handles every
             // sorting case by defaulting to the virtual column and
             // offering an opt-in Descending checkbox.
-            miViewSelect     = addItem(miQuery, "&Where Filter...",                                 "Where Filter",       Keys.Control | Keys.W,             viewSelectClicked);
-            miViewResetFilter= addItem(miQuery, "Clear &Where",                                     "Clear Where",       Keys.Control | Keys.Shift | Keys.W, viewResetFilterClicked);
+            // FILTER RECORDS BUILDS THE CONDITION FOR YOU. The old name, Where
+            // Filter, promised SQL to a person who types no SQL: the dialog is
+            // a form with one box per field, and DbDo writes the condition. Raw
+            // SQL is Control+Q, Query, and always was.
+            miViewSelect     = addItem(miQuery, "&Filter Records...",                               "Filter Records",     Keys.Control | Keys.F,             viewSelectClicked);
+            miViewResetFilter= addItem(miQuery, "Clear &Filter",                                    "Clear Filter",      Keys.Control | Keys.Shift | Keys.F, viewResetFilterClicked);
             miViewFilterRegex= addItem(miQuery, "&Filter by Regex...",                                 "Filter Regex",      Keys.None,                          filterRegexClicked);
             addSep(miQuery);
             miViewResetSort  = addItem(miQuery, "&Clear Sort",                                      "Reset Sort",        Keys.None,                          viewResetSortClicked);
@@ -12988,24 +13199,24 @@ namespace DbDo
             addItem(miHelpMore, "&Developer Guide",       "Show Developer Guide",  Keys.None, (s, e) => openHelpDocument("Developer", "Developer Guide"));
             addItem(miHelpMore, "&License",               "Show License",          Keys.None, (s, e) => openHelpDocument("License", "License"));
             addItem(miHelpMore, "&Tutorials Transcript",  "Show Tutorials Transcript", Keys.None, (s, e) => openHelpDocument("Tutorials", "Tutorials Transcript"));
-            // Sample Databases: a tour entry point that lists every .db
-            // file in the user's Samples folder (%APPDATA%\DbDo\Samples,
-            // seeded once from {app}\Samples) and opens the chosen one
+            // Template Databases: a tour entry point that lists every .db
+            // file in the user's templates folder (%APPDATA%\DbDo\templates,
+            // seeded once from {app}\templates) and opens the chosen one
             // via the same code path File > Open Database uses, so all
             // the normal post-open behaviors (sort/filter/position
             // restore, status announcement) apply. The list is built at
             // runtime, so a user's own .db files in that folder appear
-            // alongside the bundled samples.
+            // alongside the bundled templates.
             // PLAY THE WALKTHROUGHS. T for Tutorials, no shortcut key: this is
             // something somebody does once or twice, not a command they reach
             // for, and the free keys are worth keeping for commands that are.
             miHelpTutorials    = addItem(miHelp, "&Play Tutorials",                      "Play Tutorials",    Keys.None,                          helpTutorialsClicked);
-            miHelpSampleDb     = addItem(miHelp, "&Sample Databases...",                "Sample Databases", Keys.None,                        helpSampleDbClicked);
+
             // The former per-sample items (Open Convention / Northwind /
-            // Chinook) were removed: the Sample Databases picker above
-            // discovers every .db under the Samples tree at runtime, so
-            // the bundled samples appear there without dedicated menu
-            // entries. (Samples that ship outside the Samples folder must
+            // Chinook) were removed: the Template Databases picker above
+            // discovers every .db under the templates tree at runtime, so
+            // the bundled templates appear there without dedicated menu
+            // entries. (templates that ship outside the templates folder must
             // be placed under it to remain on the list.)
             addSep(miHelp);
             miHelpShowCommand  = addItem(miHelp, "&Alternate Menu...",                        "Alternate Menu",    Keys.Alt | Keys.F10,                helpShowCommandClicked);
@@ -13231,9 +13442,9 @@ namespace DbDo
             add("Set Position",       "Jump to a specific row by number", "");
             add("Jump Next Initial", "Move to the next row where the first display field's initial letter changes",
                 "Useful in alphabetically sorted lists for moving by letter group.");
-            add("Find",               "Search across all columns for a substring",
+            add("Keywords",           "Search across all columns for a substring",
                 "Case-insensitive substring match against every visible column. Find Previous goes backward.");
-            add("Find Previous",      "Find Previous (backward search across all columns)", "");
+            add("Keywords Previous",  "Keywords backward: the previous match across all columns", "");
             add("Find Regex",         "Search across all columns with a .NET regex pattern", "");
             add("Find Previous Regex", "Find Regex backward", "");
             add("Find Regex Again",    "Repeat the last Find Regex forward", "");
@@ -13259,7 +13470,7 @@ namespace DbDo
                 "Shift+U. Reports '(empty)' when the field is blank.");
             add("Say Prime",          "Speak the current record's prime (unique-key) field",
                 "Shift+P. The prime field is the unique/primary-key expression (formerly named 'prime'). Falls back to a legacy 'prime' column. Reports 'blank' when empty.");
-            add("Say Find",           "Speak the current Find search string",
+            add("Say Keywords",       "Speak the current Keywords search string",
                 "Shift+F. Reports the most recent Find substring (or regex). Says 'No find string' when nothing has been searched yet. Companion to Say Where Filter (Shift+W).");
             add("Say Yield",          "Speak the current row count (after filter)", "");
             add("Say Tables",         "Speak the visited-tables list", "");
@@ -13293,10 +13504,10 @@ namespace DbDo
                 "Plain text only; non-text and empty clipboards announce that fact rather than going silent. Double-press opens the read-only memo dialog for line-by-line review of long pasted content.");
             add("Say Sort Filter",     "Speak the current sort and filter, or '(none)' for each",
                 "Single-press speaks; double-press opens the same text in the multi-line dialog. Useful when the filter or sort string is long.");
-            add("Where Filter",        "Show only rows matching one or more field conditions", "Control+W. Opens a form with one box per editable field. Type a value to match; a leading symbol picks the kind of match, and with no symbol \"=\" (exact) is implicit. Symbols: > >= < <= for comparisons, != for not-equal, and % for a substring (the value appears anywhere in the field). Filling several boxes ANDs them. Matches are case-insensitive. When a filter is already active, a chooser offers Edit (revise it), And / Or (add a condition joined to the current filter, parenthesized), New (replace), or Clear.");
+            add("Filter Records",      "Show only rows matching one or more field conditions", "Control+F. Opens a form with one box per editable field. Type a value to match; a leading symbol picks the kind of match, and with no symbol \"=\" (exact) is implicit. Symbols: > >= < <= for comparisons, != for not-equal, and % for a substring (the value appears anywhere in the field). Filling several boxes ANDs them. Matches are case-insensitive. When a filter is already active, a chooser offers Edit (revise it), And / Or (add a condition joined to the current filter, parenthesized), New (replace), or Clear.");
             add("Filter Regex",        "Filter to rows whose current column matches a regular expression (SQLean REGEXP)",
                 "Server-side, so it works on large tables and the result stays editable. Prompts for a pattern and applies it to the column under virtual focus; an empty pattern clears the filter. Needs sqlean.dll beside DbDo.exe. Unbound by default -- assign a chord if you use it often.");
-            add("Clear Where",        "Clear the active filter (where expression)", "Control+Shift+W.");
+            add("Clear Filter",       "Clear the active filter", "Control+Shift+F.");
             add("Order Records",       "Sort the current table by a chosen column, ascending",
                 "Alt+O. Shows a list box of all field names (alpha-sorted, including hidden columns), with the current virtual column as the default. Press Enter to sort by the default, or arrow + Enter to pick another. Sorting by hidden columns is the main feature -- no need to display, sort, then re-hide.");
             add("Reset Sort",         "Clear the active sort", "");
@@ -16125,7 +16336,7 @@ namespace DbDo
             }
             if (string.IsNullOrEmpty(sFind))
             { Say.say("find: none"); return; }
-            speakOrShow("Find", "find: " + sFind, 126);
+            speakOrShow("Keywords", "keywords: " + sFind, 126);
         }
 
         // saySayId: speak the primary-key value of the current row.
@@ -20683,15 +20894,15 @@ namespace DbDo
         private void fileSaveAsClicked(object sender, EventArgs evArgs) { saveAsCommon("Save As"); }
         private void fileBackupClicked(object sender, EventArgs evArgs) { saveAsCommon("Backup Database"); }
 
-        // helpSampleDbClicked: the Sample Databases command. Lists every
-        // .db file in the user's Samples folder at runtime
-        // (%APPDATA%\DbDo\Samples, seeded once from {app}\Samples) and
+        // helpSampleDbClicked: the Template Databases command. Lists every
+        // .db file in the user's templates folder at runtime
+        // (%APPDATA%\DbDo\templates, seeded once from {app}\templates) and
         // opens the chosen one through the normal state-restoring open
         // path, so its remembered per-table sort, filter, and position
         // come back exactly as they do for Open Database and Recent
         // Files. The folder is discovered dynamically: the user can drop
         // their own databases into it to add them to the list, and new
-        // bundled samples appear without any code change here.
+        // bundled templates appear without any code change here.
         // helpTutorialsClicked: hand Tutorials.mkv to Windows and let whatever
         // plays that kind of file play it -- the Homer Player in FileDir, or
         // whatever else is registered. DbDo does not choose a player.
@@ -20727,16 +20938,16 @@ namespace DbDo
             }
         }
 
-        private void helpSampleDbClicked(object sender, EventArgs evArgs)
+        private void openTemplateDbClicked(object sender, EventArgs evArgs)
         {
             string[] aPaths = ScriptHelper.listSampleDatabases();
             if (aPaths.Length == 0)
             {
                 MessageBox.Show(this,
-                    "No sample databases found in:\n\n" + ScriptHelper.getSampleDir()
+                    "No template databases found in:\n\n" + ScriptHelper.getTemplateDir()
                     + "\n\nEach sample lives in its own subfolder there (for example, "
                     + "templates\\music\\music.db). Drop a database into such a subfolder and try again.",
-                    "Sample Databases", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Template Databases", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             // Show each database by its root name (its folder), mapping
@@ -20753,30 +20964,30 @@ namespace DbDo
                 dMap[sLabel] = sP;
             }
             List<string> lNames = new List<string>(dMap.Keys);
-            string sChosen = promptListChoice("Sample Databases",
-                "Choose a sample database to open:", lNames, lNames[0]);
+            string sChosen = promptListChoice("Template Databases",
+                "Choose a template database to open:", lNames, lNames[0]);
             if (string.IsNullOrEmpty(sChosen)) return;
             string sPath = dMap[sChosen];
             if (!System.IO.File.Exists(sPath))
             {
-                ErrorDialog.show(this, "Sample Databases", "The chosen database no longer exists: " + sPath);
+                ErrorDialog.show(this, "Template Databases", "The chosen database no longer exists: " + sPath);
                 return;
             }
             try
             {
-                RecentFiles.FileState stSample = RecentFiles.findByPath(RecentFiles.loadAll(), sPath);
-                openDatabaseAndApplyState(sPath, stSample);
+                RecentFiles.FileState stTemplate = RecentFiles.findByPath(RecentFiles.loadAll(), sPath);
+                openDatabaseAndApplyState(sPath, stTemplate);
             }
             catch (Exception ex)
             {
-                ErrorDialog.show(this, "Sample Databases", ex.Message);
+                ErrorDialog.show(this, "Template Databases", ex.Message);
             }
         }
 
         // The per-sample openers (Northwind / Chinook / Convention) were
-        // removed with their menu items; the Sample Databases picker
+        // removed with their menu items; the Template Databases picker
         // (helpSampleDbClicked) discovers and opens every bundled .db
-        // under the Samples tree at runtime. openInstallSampleDb is kept
+        // under the templates tree at runtime. openInstallSampleDb is kept
         // below for any caller that opens a known bundled file by name.
 
         // openInstallSampleDb: shared open path for the bundled sample
@@ -20789,17 +21000,17 @@ namespace DbDo
         {
             string sAppDir = Path.GetDirectoryName(
                 System.Reflection.Assembly.GetExecutingAssembly().Location) ?? "";
-            // New layout: {app}\Samples\<root>\<file>. Fall back to the
+            // New layout: {app}\templates\<root>\<file>. Fall back to the
             // older flat {app}\<file> when the per-database folder is
             // absent, so the command works under either layout.
             string sRoot = Path.GetFileNameWithoutExtension(sFileName);
-            string sPath = Path.Combine(sAppDir, "Samples", sRoot, sFileName);
+            string sPath = Path.Combine(sAppDir, "templates", sRoot, sFileName);
             if (!File.Exists(sPath)) sPath = Path.Combine(sAppDir, sFileName);
             if (!File.Exists(sPath))
             {
                 MessageBox.Show(this,
                     sFileName + " not found in the DbDo install folder:\n\n" + sPath
-                    + "\n\nIf you installed DbDo via the regular installer the sample is normally placed here automatically.",
+                    + "\n\nIf you installed DbDo via the regular installer the template is normally placed here automatically.",
                     sTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -20975,7 +21186,8 @@ namespace DbDo
             {
                 dlgFile.Title = "Merge into " + (db.currentTable ?? "current table");
                 prepareFileDialog(dlgFile);
-                dlgFile.Filter = "Markdown table (*.md;*.markdown)|*.md;*.markdown"
+                dlgFile.Filter = "DbDo database (*.db;*.sqlite;*.sqlite3)|*.db;*.sqlite;*.sqlite3"
+                           + "|Markdown table (*.md;*.markdown)|*.md;*.markdown"
                            + "|CSV (*.csv)|*.csv"
                            + "|TSV (*.tsv;*.tab)|*.tsv;*.tab"
                            + "|JSON (*.json)|*.json"
@@ -20987,6 +21199,12 @@ namespace DbDo
                 dlgFile.InitialDirectory = IniFolders.bestDirectory(IniFolders.importFolder, db.filePath);
                 if (dlgFile.ShowDialog(this) != DialogResult.OK) return;
                 IniFolders.importFolder = Path.GetDirectoryName(dlgFile.FileName);
+                // A WHOLE DbDo DATABASE takes the other road: records matched by
+                // prime across every table, with their links, rather than rows
+                // appended to the table in front of you.
+                string sMergeExt = Path.GetExtension(dlgFile.FileName).TrimStart('.').ToLowerInvariant();
+                if (sMergeExt == "db" || sMergeExt == "sqlite" || sMergeExt == "sqlite3")
+                { mergeWholeDatabase(dlgFile.FileName); return; }
                 try
                 {
                     string sExt = Path.GetExtension(dlgFile.FileName).TrimStart('.').ToLowerInvariant();
@@ -23506,7 +23724,77 @@ namespace DbDo
         // =====================================================================
         // VIEW menu handlers
         // =====================================================================
-        // viewSelectClicked (Alt+Shift+F): Filter Records via the
+        // mergeDatabaseClicked: Alt+M. Take another DbDo database of the same
+        // kind and fold its records into this one.
+        //
+        // WHAT MAKES TWO RECORDS THE SAME is the prime, the computed key each
+        // table already carries. So the question DbDo asks is not "which rows
+        // are these" but "what should happen to the records that are already
+        // here" -- and it asks once, before anything is written:
+        //
+        //   Add new only   nothing already here is touched (the safe default)
+        //   Update         records already here take the incoming values
+        //   Fill blanks    incoming values fill empty fields only
+        //   Newer wins     incoming values win where they were edited later
+        //
+        // The shape of the question is FileDir's when it copies over files that
+        // exist, adapted: there, the units are files and the test is the date;
+        // here they are records and the test is the prime.
+        private void mergeWholeDatabase(string sOther)
+        {
+            {
+                if (db.readOnly) { Say.sayForced("This database is open read only."); return; }
+                if (string.Equals(sOther, db.filePath, StringComparison.OrdinalIgnoreCase))
+                { ErrorDialog.show(this, "Merge Database", "That is the database already open."); return; }
+
+                string sChoice;
+                using (LbcDialog dlgAsk = new LbcDialog("Merge Database", this))
+                {
+                    dlgAsk.addLabel("Merging " + Path.GetFileName(sOther) + " into " + Path.GetFileName(db.filePath)
+                        + ". Records it holds that are not here are added. For records that are already here:");
+                    sChoice = dlgAsk.runWithButtons(new string[] { "Add new only", "Update", "Fill blanks", "Newer wins", "Cancel" });
+                }
+                if (string.IsNullOrEmpty(sChoice) || sChoice.StartsWith("Cancel", StringComparison.OrdinalIgnoreCase)) return;
+                string sPolicy = "keep";
+                if (sChoice.StartsWith("Update", StringComparison.OrdinalIgnoreCase)) sPolicy = "update";
+                else if (sChoice.StartsWith("Fill", StringComparison.OrdinalIgnoreCase)) sPolicy = "fill";
+                else if (sChoice.StartsWith("Newer", StringComparison.OrdinalIgnoreCase)) sPolicy = "newer";
+
+                // A copy first, always. This writes into somebody's data on the
+                // strength of one dialog, so there is a way back.
+                string sBackup = "";
+                try
+                {
+                    sBackup = Path.Combine(Path.GetDirectoryName(db.filePath) ?? "",
+                        Path.GetFileNameWithoutExtension(db.filePath) + "-before-merge" + Path.GetExtension(db.filePath));
+                    System.IO.File.Copy(db.filePath, sBackup, true);
+                }
+                catch (Exception exCopy)
+                {
+                    ErrorDialog.show(this, "Merge Database", "Could not copy this database before merging, so nothing was changed.\n\n" + exCopy.Message);
+                    return;
+                }
+
+                string sReport;
+                try { sReport = db.mergeFromDatabase(sOther, sPolicy); }
+                catch (Exception ex) { ErrorDialog.show(this, "Merge Database", ex.Message); return; }
+                // A merge adds rows behind the open recordset, so the table is
+                // re-selected rather than resynced: Resync re-reads the rows
+                // already loaded and would not show what was just added.
+                try
+                {
+                    string sTableNow = db.currentTable;
+                    if (!string.IsNullOrEmpty(sTableNow)) db.selectTable(sTableNow);
+                    invokeRefresh();
+                    virtMoveTo(0, 0);
+                }
+                catch (Exception exBack) { DbDoLog.write("Merge: could not reload the table: " + exBack.Message); }
+                showInfoDialog("Merge Database", sReport + "\r\n\r\nThis database as it was before the merge is beside it, named "
+                    + Path.GetFileName(sBackup) + ".");
+            }
+        }
+
+        // viewSelectClicked (Control+F): Filter Records via the
         // same field form as Edit Record. One textbox per editable
         // field; a bare value is an exact match, a leading % is a
         // case-insensitive substring (LIKE), and a leading operator
@@ -23518,7 +23806,7 @@ namespace DbDo
         // and whether the result replaces or combines with the
         // current filter.
 
-        // viewSelectClicked: Alt+Shift+F. Two-phase design:
+        // viewSelectClicked: Control+F. Two-phase design:
         //   Phase 1: when a filter is already active, show a chooser
         //     dialog with action buttons (Clear / And / Or / Edit /
         //     Reset / Cancel). Clear is the default (Enter).
@@ -23590,7 +23878,7 @@ namespace DbDo
 
             if (bFilterActive)
             {
-                using (LbcDialog dlg = new LbcDialog("Where Filter", this))
+                using (LbcDialog dlg = new LbcDialog("Filter Records", this))
                 {
                     dlg.addLabel("A filter is active:");
                     dlg.addLabel(sExistingFilter);
@@ -23629,7 +23917,7 @@ namespace DbDo
                 }
                 catch (Exception ex)
                 {
-                    ErrorDialog.show(this, "Where Filter", ex.Message);
+                    ErrorDialog.show(this, "Filter Records", ex.Message);
                 }
                 return;
             }
@@ -23650,7 +23938,7 @@ namespace DbDo
                     ? sPrev : "";
                 lEditable.Add(true);
             }
-            using (RecordEditDialog dlg = new RecordEditDialog("Where Filter", lFields, dInitial, lEditable, db))
+            using (RecordEditDialog dlg = new RecordEditDialog("Filter Records", lFields, dInitial, lEditable, db))
             {
                 if (dlg.showDialog(this) != DialogResult.OK) return;
                 dLastFilterValues = new Dictionary<string, string>(dlg.dValues);
@@ -23689,7 +23977,7 @@ namespace DbDo
                 }
                 catch (Exception ex)
                 {
-                    ErrorDialog.show(this, "Where Filter", ex.Message);
+                    ErrorDialog.show(this, "Filter Records", ex.Message);
                 }
             }
         }
@@ -34369,9 +34657,9 @@ namespace DbDo
                             try
                             {
                                 // The showcase database is seeded into the
-                                // user's writable Samples folder as
-                                // %APPDATA%\DbDo\Samples\JobTrail\
-                                // JobTrail.db; getSampleDir() performs
+                                // user's writable templates folder as
+                                // %APPDATA%\DbDo\templates\JobTrail\
+                                // JobTrail.db; getTemplateDir() performs
                                 // that seed on first access and returns the
                                 // folder. Opening the seeded copy -- rather than
                                 // the read-only one two levels deep under the
@@ -34379,9 +34667,9 @@ namespace DbDo
                                 // it. (The previous code looked for the file in
                                 // the install root, where it never exists, so
                                 // the showcase database never opened.)
-                                string sSampleDir = ScriptHelper.getSampleDir();
+                                string sTemplateDir = ScriptHelper.getTemplateDir();
                                 string sDefaultSample = System.IO.Path.Combine(
-                                    sSampleDir, "JobTrail", "JobTrail.db");
+                                    sTemplateDir, "JobTrail", "JobTrail.db");
                                 if (System.IO.File.Exists(sDefaultSample))
                                 {
                                     DbDoLog.write("First-run default: opening " + sDefaultSample);

@@ -235,8 +235,11 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
-<li><a href="#v1.0.185-current" id="toc-v1.0.185-current">v1.0.185
+<li><a href="#v1.0.188-current" id="toc-v1.0.188-current">v1.0.188
 (current)</a></li>
+<li><a href="#v1.0.187" id="toc-v1.0.187">v1.0.187</a></li>
+<li><a href="#v1.0.186" id="toc-v1.0.186">v1.0.186</a></li>
+<li><a href="#v1.0.185" id="toc-v1.0.185">v1.0.185</a></li>
 <li><a href="#v1.0.184" id="toc-v1.0.184">v1.0.184</a></li>
 <li><a href="#v1.0.183" id="toc-v1.0.183">v1.0.183</a></li>
 <li><a href="#v1.0.182" id="toc-v1.0.182">v1.0.182</a></li>
@@ -352,7 +355,54 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
-<h2 id="v1.0.185-current">v1.0.185 (current)</h2>
+<h2 id="v1.0.188-current">v1.0.188 (current)</h2>
+<p><strong>“Template” is the word now, everywhere.</strong> The
+databases DbDo ships were called samples in the menus and templates on
+disk. They are templates: BookTrail and the rest are meant to be kept
+and filled with your own records. The folder they come from is named
+templates, and now so is everything that talks about them.</p>
+<p><strong>Open Template Database moved to the File menu.</strong> It
+was on Help, where a beginner might look for an example, but what it
+does is open a database, and it belongs with Open and Merge Data – the
+three ways a database gets in front of you.</p>
+<p><strong>So sharing a database needs no copying into DbDo’s
+folders.</strong> Someone sends you a .db file; you save it wherever you
+like and open it with Control+O. Or you start your own from a template
+with Open Template Database, then use Merge Data, Alt+M, and pick the
+file they sent, from wherever it is.</p>
+<h2 id="v1.0.187">v1.0.187</h2>
+<p><strong>Two people can now share a database.</strong> Merge Data,
+Alt+M, accepts another DbDo database as well as a text file. Records are
+matched by their prime – the computed key that says which record a
+record is – so a record you do not have is added, and for one you do
+have you choose once: add new only, update, fill blanks, or newer wins.
+Links between records survive the move, since a link names its ends by
+prime and not by row number, and pick lists merge as well. Nothing is
+deleted, and your database is copied first as
+<name>-before-merge.db.</p>
+<h2 id="v1.0.186">v1.0.186</h2>
+<p><strong>Filter, Keywords and Jump each take the letter of their own
+word.</strong></p>
+<ul>
+<li><strong>Filter Records is now Control+F</strong>, and
+<strong>Control+Shift+F</strong> clears it. It was Control+W, under the
+name “Where Filter” – a name that promised SQL to people who write none.
+The dialog is unchanged: one box per field, a symbol in front of a value
+to compare instead of match, several boxes all having to match, and a
+chooser to edit, And, Or, replace or clear when a filter is already in
+force.</li>
+<li><strong>Keywords is now Control+K</strong>, and was Find on
+Control+F. The command searches every column, including ones not on
+screen, which is what “keywords” means and what “find” did not promise.
+<strong>Control+Shift+K</strong> searches backward,
+<strong>Shift+K</strong> says the terms.</li>
+<li><strong>Say Filter is Shift+F</strong>, matching its command.</li>
+<li><strong>Jump (Control+J), the F3 searches and Query (Control+Q) are
+unchanged.</strong></li>
+</ul>
+<p>Nothing lost a feature; three commands got the letters that match
+their names.</p>
+<h2 id="v1.0.185">v1.0.185</h2>
 <p><strong>Say Select answers field by field.</strong> Shift+S says
 “select”, then each column, each as its own utterance, the way Say Cell
 does. Pressing either twice quickly shows the same answers on separate

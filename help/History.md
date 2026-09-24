@@ -4,7 +4,52 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.185 (current)
+## v1.0.188 (current)
+
+**"Template" is the word now, everywhere.** The databases DbDo ships were called
+samples in the menus and templates on disk. They are templates: BookTrail and the
+rest are meant to be kept and filled with your own records. The folder they come
+from is named templates, and now so is everything that talks about them.
+
+**Open Template Database moved to the File menu.** It was on Help, where a
+beginner might look for an example, but what it does is open a database, and it
+belongs with Open and Merge Data -- the three ways a database gets in front of
+you.
+
+**So sharing a database needs no copying into DbDo's folders.** Someone sends you
+a .db file; you save it wherever you like and open it with Control+O. Or you
+start your own from a template with Open Template Database, then use Merge Data,
+Alt+M, and pick the file they sent, from wherever it is.
+
+## v1.0.187
+
+**Two people can now share a database.** Merge Data, Alt+M, accepts another DbDo
+database as well as a text file. Records are matched by their prime -- the
+computed key that says which record a record is -- so a record you do not have is
+added, and for one you do have you choose once: add new only, update, fill blanks,
+or newer wins. Links between records survive the move, since a link names its ends
+by prime and not by row number, and pick lists merge as well. Nothing is deleted,
+and your database is copied first as <name>-before-merge.db.
+
+## v1.0.186
+
+**Filter, Keywords and Jump each take the letter of their own word.**
+
+- **Filter Records is now Control+F**, and **Control+Shift+F** clears it. It was
+  Control+W, under the name "Where Filter" -- a name that promised SQL to people
+  who write none. The dialog is unchanged: one box per field, a symbol in front
+  of a value to compare instead of match, several boxes all having to match, and
+  a chooser to edit, And, Or, replace or clear when a filter is already in force.
+- **Keywords is now Control+K**, and was Find on Control+F. The command searches
+  every column, including ones not on screen, which is what "keywords" means and
+  what "find" did not promise. **Control+Shift+K** searches backward, **Shift+K**
+  says the terms.
+- **Say Filter is Shift+F**, matching its command.
+- **Jump (Control+J), the F3 searches and Query (Control+Q) are unchanged.**
+
+Nothing lost a feature; three commands got the letters that match their names.
+
+## v1.0.185
 
 **Say Select answers field by field.** Shift+S says "select", then each column,
 each as its own utterance, the way Say Cell does. Pressing either twice quickly

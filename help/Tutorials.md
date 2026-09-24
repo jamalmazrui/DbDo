@@ -94,6 +94,11 @@ in the repository -- they are rebuilt by `scripts\buildTutorials`.
 - [12 - Look and Prime](#12-look-and-prime)
 - [13 - Report, Save and Copy](#13-report-save-and-copy)
 - [14 - Work Search Record for a Claim or Counselor](#14-work-search-record-for-a-claim-or-counselor)
+- [10 - Related Records](#10-related-records)
+- [11 - Mark and Unmark](#11-mark-and-unmark)
+- [12 - Look and Prime](#12-look-and-prime)
+- [13 - Report, Save and Copy](#13-report-save-and-copy)
+- [14 - Work Search Record for a Claim or Counselor](#14-work-search-record-for-a-claim-or-counselor)
 - [00 - Overview and Table of Contents](#00-overview-and-table-of-contents)
 - [01 - Installing DbDo](#01-installing-dbdo)
 - [02 - Opening JobTrail](#02-opening-jobtrail)
@@ -101,8 +106,8 @@ in the repository -- they are rebuilt by `scripts\buildTutorials`.
 - [04 - Adding a New Record](#04-adding-a-new-record)
 - [05 - Inspecting a Record](#05-inspecting-a-record)
 - [06 - Editing a Record](#06-editing-a-record)
-- [07 - Find and Jump](#07-find-and-jump)
-- [08 - Order and Where Filter](#08-order-and-where-filter)
+- [07 - Keywords and Jump](#07-keywords-and-jump)
+- [08 - Order and Filter Records](#08-order-and-filter-records)
 - [09 - Select the Columns You Hear](#09-select-the-columns-you-hear)
 - [10 - Related Records](#10-related-records)
 - [11 - Mark and Unmark](#11-mark-and-unmark)
@@ -564,7 +569,7 @@ Screen reader:
 
 **Something to try:** Change the status of one of your own jobs both ways, and check it with Shift plus C.
 
-## 07 - Find and Jump
+## 07 - Keywords and Jump
 
 **Before you start:** JobTrail is open on the jobs table.
 
@@ -591,13 +596,13 @@ Screen reader:
 
 - Illustration City Library (fictional) Digital Services Assistant lead, 3 of 4
 
-### Step 4: Control+F
+### Step 4: Control+K
 
-Control plus F, Find -- it searches every field, notes included.
+Control plus K, Keywords -- K for Keywords. It searches every field, notes included, which is why it is not called Find.
 
 Screen reader:
 
-- Find dialog
+- Keywords dialog
 - Text combo box, blank, ALT+T
 
 ### Step 5: Enter
@@ -610,15 +615,15 @@ F3 searches again. Shift reverses: Shift plus F3 searches back, Control plus Shi
 
 ### Step 6: Shift+F
 
-Shift plus F, Say Find, reminds me what I looked for.
+Shift plus K, Say Keywords, reminds me what I looked for.
 
 Screen reader:
 
 - find, screen reader
 
-**Something to try:** Find a job by a word in its notes, then jump back to it by employer.
+**Something to try:** Find a job by a word in its notes with Keywords, then jump back to it by employer.
 
-## 08 - Order and Where Filter
+## 08 - Order and Filter Records
 
 **Before you start:** JobTrail is open on the jobs table.
 
@@ -646,13 +651,13 @@ Screen reader:
 
 Shift plus O, Say Order, says it later.
 
-### Step 4: Control+W
+### Step 4: Control+F
 
-Control plus W, Where filter -- W for Where, the word SQL uses. It decides which rows I hear.
+Control plus F, Filter Records -- F for Filter. It decides which rows I hear, and it writes the condition for me: one box per field, and a symbol in front of a value to compare instead of match.
 
 Screen reader:
 
-- Where Filter dialog
+- Filter Records dialog
 - Filter combo box, blank, ALT+F
 
 ### Step 5: Enter
@@ -664,11 +669,11 @@ Screen reader:
 - Records list view
 - Example Widgets Company (sample employer) Accessibility Analyst interviewing, 1 of 3
 
-Shift plus W, Say Where, and Shift plus Y, Say Yield -- how many rows it left.
+Shift plus F, Say Filter, and Shift plus Y, Say Yield -- how many rows it left.
 
-### Step 6: Control+Shift+W
+### Step 6: Control+Shift+F
 
-Control plus Shift plus W clears it. Adding Shift reverses.
+Control plus Shift plus F clears it. Adding Shift reverses.
 
 Screen reader:
 

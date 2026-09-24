@@ -536,9 +536,6 @@ Alt+LeftArrow</li>
 Return from any drill-down depth to the original table. Home goes to the
 top; Alt+Home goes to the top table.<br />
 Alt+Home</li>
-<li>Find Record<br />
-Search across all columns for a substring. F for Find.<br />
-Control+F</li>
 <li>Find Regex<br />
 Search across all columns with a .NET regex pattern. F3 searches;
 Control makes the search a pattern.<br />
@@ -550,15 +547,18 @@ Control+G</li>
 <li>Jump to Record<br />
 Search within one chosen column for a substring. J for Jump.<br />
 Control+J</li>
+<li>Keywords<br />
+Search across all columns for a substring. K for Keywords.<br />
+Control+K</li>
 <li>Repeat Go To<br />
 Alt+G</li>
-<li>Reverse Find<br />
-Find Previous (backward search across all columns). F for Find. Shift
-reverses Find Record.<br />
-Control+Shift+F</li>
 <li>Reverse Jump<br />
 Jump Record backward. J for Jump. Shift reverses Jump to Record.<br />
 Control+Shift+J</li>
+<li>Reverse Keywords<br />
+Keywords backward: the previous match across all columns. K for
+Keywords. Shift reverses Keywords.<br />
+Control+Shift+K</li>
 <li>Reverse Regex Find<br />
 Find Regex backward. F3 searches; Control makes it a pattern and Shift
 reverses it.<br />
@@ -573,10 +573,14 @@ Shift+F3</li>
 </ul>
 <h3 id="query">Query</h3>
 <ul>
-<li>Clear Where<br />
-Clear the active filter (where expression). W for Where. Shift reverses
-Where Filter.<br />
-Control+Shift+W</li>
+<li>Clear Filter<br />
+Clear the active filter. F for Filter. Shift reverses Filter
+Records.<br />
+Control+Shift+F</li>
+<li>Filter Records<br />
+Show only rows matching one or more field conditions. F for
+Filter.<br />
+Control+F</li>
 <li>Inspect Record<br />
 I for Inspect.<br />
 Control+I</li>
@@ -594,9 +598,6 @@ O for Order. Shift reverses Order Records.<br />
 Alt+Shift+O</li>
 <li>Table Properties<br />
 Alt+Enter</li>
-<li>Where Filter<br />
-Show only rows matching one or more field conditions. W for Where.<br />
-Control+W</li>
 </ul>
 <h3 id="query-say">Query, Say</h3>
 <p>Shift and a letter asks. Nothing here changes anything; each answers
@@ -639,8 +640,8 @@ Shift+D</li>
 Speak the current row’s ‘edited’ value in human-friendly local time. E
 for Edited.<br />
 Shift+E</li>
-<li>Say Find<br />
-Speak the current Find search string. F for Find.<br />
+<li>Say Filter<br />
+F for Filter.<br />
 Shift+F</li>
 <li>Say Goto<br />
 Speak the most recently used Jump search string. G for Goto.<br />
@@ -651,6 +652,9 @@ Shift+I</li>
 <li>Say Jump<br />
 J for Jump.<br />
 Shift+J</li>
+<li>Say Keywords<br />
+Speak the current Keywords search string. K for Keywords.<br />
+Shift+K</li>
 <li>Say Look<br />
 L for Look.<br />
 Shift+L</li>
@@ -707,9 +711,6 @@ Shift+T</li>
 <li>Say URL<br />
 Speak the current record’s url field. U for URL.<br />
 Shift+U</li>
-<li>Say Where Filter<br />
-W for Where.<br />
-Shift+W</li>
 <li>Say Yield<br />
 Speak the current row count (after filter). Y for Yield.<br />
 Shift+Y</li>
@@ -881,8 +882,8 @@ Open Cell Value</li>
 <li>Control+Equals<br />
 Evaluate Expression</li>
 <li>Control+F<br />
-Search across all columns for a substring.<br />
-Find Record</li>
+Show only rows matching one or more field conditions.<br />
+Filter Records</li>
 <li>Control+G<br />
 Jump to a specific row by number.<br />
 Go to Record</li>
@@ -894,6 +895,9 @@ Inspect Record</li>
 <li>Control+J<br />
 Search within one chosen column for a substring.<br />
 Jump to Record</li>
+<li>Control+K<br />
+Search across all columns for a substring.<br />
+Keywords</li>
 <li>Control+L<br />
 Speak the current virtual column from the current row down.<br />
 Say Column as List from Current</li>
@@ -927,9 +931,6 @@ Choose Table</li>
 <li>Control+Tab<br />
 Activate the next open window.<br />
 Next Window</li>
-<li>Control+W<br />
-Show only rows matching one or more field conditions.<br />
-Where Filter</li>
 </ul>
 <h3 id="controlshift">Control+Shift</h3>
 <ul>
@@ -946,8 +947,8 @@ Delete Without Confirmation</li>
 <li>Control+Shift+E<br />
 Edit Snippet</li>
 <li>Control+Shift+F<br />
-Find Previous (backward search across all columns).<br />
-Reverse Find</li>
+Clear the active filter.<br />
+Clear Filter</li>
 <li>Control+Shift+G<br />
 Plot the column under the virtual cursor as an Excel chart.<br />
 Graphics Column</li>
@@ -961,6 +962,9 @@ Invoke Script</li>
 <li>Control+Shift+J<br />
 Jump Record backward.<br />
 Reverse Jump</li>
+<li>Control+Shift+K<br />
+Keywords backward: the previous match across all columns.<br />
+Reverse Keywords</li>
 <li>Control+Shift+L<br />
 Speak the current virtual column for marked rows only, from the current
 row down.<br />
@@ -987,9 +991,6 @@ Activate the previous open window.<br />
 Previous Window</li>
 <li>Control+Shift+U<br />
 Open Url</li>
-<li>Control+Shift+W<br />
-Clear the active filter (where expression).<br />
-Clear Where</li>
 <li>Control+Shift+X<br />
 Extract all regex matches in the current virtual column to the
 clipboard.<br />
@@ -1103,8 +1104,7 @@ Speak the current row’s ‘edited’ value in human-friendly local
 time.<br />
 Say Edited</li>
 <li>Shift+F<br />
-Speak the current Find search string.<br />
-Say Find</li>
+Say Filter</li>
 <li>Shift+G<br />
 Speak the most recently used Jump search string.<br />
 Say Goto</li>
@@ -1112,6 +1112,9 @@ Say Goto</li>
 Say Id</li>
 <li>Shift+J<br />
 Say Jump</li>
+<li>Shift+K<br />
+Speak the current Keywords search string.<br />
+Say Keywords</li>
 <li>Shift+L<br />
 Say Look</li>
 <li>Shift+M<br />
@@ -1143,8 +1146,6 @@ Speak the current record’s url field.<br />
 Say URL</li>
 <li>Shift+V<br />
 Say Replacement Value</li>
-<li>Shift+W<br />
-Say Where Filter</li>
 <li>Shift+X<br />
 Say Regex Replace</li>
 <li>Shift+Y<br />
@@ -1177,9 +1178,9 @@ Control+T</li>
 <li>Clear Bookmark<br />
 Forget the saved bookmark.<br />
 Control+Shift+B</li>
-<li>Clear Where<br />
-Clear the active filter (where expression).<br />
-Control+Shift+W</li>
+<li>Clear Filter<br />
+Clear the active filter.<br />
+Control+Shift+F</li>
 <li>Close All But Current Window<br />
 Close every window except the current one.<br />
 Control+Shift+F4</li>
@@ -1259,8 +1260,8 @@ Alt+Shift+Z</li>
 Extract all regex matches in the current virtual column to the
 clipboard.<br />
 Control+Shift+X</li>
-<li>Find Record<br />
-Search across all columns for a substring.<br />
+<li>Filter Records<br />
+Show only rows matching one or more field conditions.<br />
 Control+F</li>
 <li>Find Regex<br />
 Search across all columns with a .NET regex pattern.<br />
@@ -1303,6 +1304,9 @@ Control+J</li>
 <li>Key Describer Toggle<br />
 Describe each key instead of running it (Ctrl+F1).<br />
 Control+F1</li>
+<li>Keywords<br />
+Search across all columns for a substring.<br />
+Control+K</li>
 <li>List Bookmarks<br />
 Show saved bookmarks in a listbox; navigate to the selected one.<br />
 Alt+B</li>
@@ -1382,12 +1386,12 @@ Alt+G</li>
 Substring find-and-replace within the current virtual column, over
 visible rows.<br />
 Control+R</li>
-<li>Reverse Find<br />
-Find Previous (backward search across all columns).<br />
-Control+Shift+F</li>
 <li>Reverse Jump<br />
 Jump Record backward.<br />
 Control+Shift+J</li>
+<li>Reverse Keywords<br />
+Keywords backward: the previous match across all columns.<br />
+Control+Shift+K</li>
 <li>Reverse Order<br />
 Alt+Shift+O</li>
 <li>Reverse Regex Find<br />
@@ -1439,8 +1443,7 @@ Shift+D</li>
 Speak the current row’s ‘edited’ value in human-friendly local
 time.<br />
 Shift+E</li>
-<li>Say Find<br />
-Speak the current Find search string.<br />
+<li>Say Filter<br />
 Shift+F</li>
 <li>Say Goto<br />
 Speak the most recently used Jump search string.<br />
@@ -1449,6 +1452,9 @@ Shift+G</li>
 Shift+I</li>
 <li>Say Jump<br />
 Shift+J</li>
+<li>Say Keywords<br />
+Speak the current Keywords search string.<br />
+Shift+K</li>
 <li>Say Look<br />
 Shift+L</li>
 <li>Say Mark Status<br />
@@ -1495,8 +1501,6 @@ Shift+T</li>
 <li>Say URL<br />
 Speak the current record’s url field.<br />
 Shift+U</li>
-<li>Say Where Filter<br />
-Shift+W</li>
 <li>Say Windows Open<br />
 Speak the count and titles of open recordset windows, marking the
 current one.<br />
@@ -1544,9 +1548,6 @@ Control+Shift+A</li>
 <li>Unmark Record<br />
 Clear the ‘marked’ flag on the current row.<br />
 Control+Shift+M</li>
-<li>Where Filter<br />
-Show only rows matching one or more field conditions.<br />
-Control+W</li>
 </ul>
 </body>
 </html>

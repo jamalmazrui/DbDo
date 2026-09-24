@@ -51,7 +51,7 @@ repository: the tutorial scripts, the generated audio and the fetched voices.
   audit run, named `DbDo-<task>-<date>-<time>.log`. Sort by name and they are in
   order; zip the folder and you have them all.
 - `scripts` -- screen reader scripts and tooling
-- `templates` -- the sample databases, copied to your own folder on first run
+- `templates` -- the template databases, copied to your own folder on first run
 
 Your own copies live under `%LOCALAPPDATA%\DbDo`.
 

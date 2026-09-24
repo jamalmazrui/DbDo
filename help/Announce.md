@@ -22,7 +22,7 @@ Every DbDo command can be accomplished efficiently from the keyboard. In additio
 
 **Double-press to spell.** Any speech-only command spells its text character by character when pressed twice within 1.5 seconds — the convention familiar from EdSharp and FileDir.
 
-**Three search families with persistent history.** Find (Control+F) for substring across all columns, Jump to Match (Control+J) for substring within one column, Find Regex (Control+F3) for .NET regex. Each family remembers its last 10 terms along with their case-sensitive flags. F3 / Shift+F3 repeats whichever family was most recent.
+**Three search families with persistent history.** Find (Control+K) for substring across all columns, Jump to Match (Control+J) for substring within one column, Find Regex (Control+F3) for .NET regex. Each family remembers its last 10 terms along with their case-sensitive flags. F3 / Shift+F3 repeats whichever family was most recent.
 
 **Parent-child drill.** Alt+RightArrow drills from a parent row into a filtered child table (a teacher's classes, a class's enrollments). Alt+LeftArrow returns to the exact parent row; Alt+Home pops the whole drill stack at once.
 
@@ -34,14 +34,14 @@ Every DbDo command can be accomplished efficiently from the keyboard. In additio
 
 ## Sample databases
 
-DbDo ships four SQLite sample databases adapted to its standard column conventions (`<singular>_id` primary keys, `added`/`edited` timestamps maintained by triggers, generated `look`/`unq` columns):
+DbDo ships four SQLite template databases adapted to its standard column conventions (`<singular>_id` primary keys, `added`/`edited` timestamps maintained by triggers, generated `look`/`unq` columns):
 
 - `NFB2026Convention.db` — the flagship demo: the 2026 NFB national convention agenda as a four-table relational model (contacts, events, locations, projects) wired together by a generic `maps` association table.
-- `sample.db` — a small school domain (teachers, classes, students, enrollments) for first-launch exploration.
-- `northwind.db` — the classic Microsoft Northwind sales sample (categories, suppliers, products, customers, employees, orders, order details, shippers).
-- `chinook.db` — the classic Chinook music-store sample (artists, albums, tracks, genres, customers, invoices, invoice items), with deep parent-child chains.
+- `template.db` — a small school domain (teachers, classes, students, enrollments) for first-launch exploration.
+- `northwind.db` — the classic Microsoft Northwind sales template (categories, suppliers, products, customers, employees, orders, order details, shippers).
+- `chinook.db` — the classic Chinook music-store template (artists, albums, tracks, genres, customers, invoices, invoice items), with deep parent-child chains.
 
-The Northwind and Chinook samples are useful for exercising DbDo against real-shaped data with multiple parent-child relationships; the convention database shows the maps model on real-world associations.
+The Northwind and Chinook templates are useful for exercising DbDo against real-shaped data with multiple parent-child relationships; the convention database shows the maps model on real-world associations.
 
 ## Accessibility design
 

@@ -142,7 +142,7 @@ DbDo has three distinct keyboard channels, and recognizing which one you are usi
 
 ### 1. Command chords
 
-Every menu command has a name and, usually, a **chord** — a keyboard shortcut shown next to it in the menu. Chords follow a consistent **mnemonic rule**: the letter in the chord is the first letter of a word in the command's name. *Statistics from Column* is Alt+Shift+S; *Generate from Grid* is Alt+Shift+G; *Where Filter* is Control+W. Once you know a command's name you can usually guess its chord, and vice versa. Chords are grouped by modifier so related commands share a shape — the Say-something status commands are mostly Shift+letter, for instance.
+Every menu command has a name and, usually, a **chord** — a keyboard shortcut shown next to it in the menu. Chords follow a consistent **mnemonic rule**: the letter in the chord is the first letter of a word in the command's name. *Statistics from Column* is Alt+Shift+S; *Generate from Grid* is Alt+Shift+G; *Filter Records* is Control+F. Once you know a command's name you can usually guess its chord, and vice versa. Chords are grouped by modifier so related commands share a shape — the Say-something status commands are mostly Shift+letter, for instance.
 
 ### 2. Convenience keys in text fields
 
@@ -160,7 +160,7 @@ These are on by default and can be turned off with the `extraKeys` setting.
 
 The **dot prompt** (Enter Console, Control+GraveAccent) is the command-line channel: type dBASE-style commands or short SQL and press Enter. It is covered in Part 5.
 
-Woven through the menus is a large **Say-X status family** in the Query menu: quick commands that *speak a fact about your current situation* without changing anything — Say Status, Say Database, Say Order, Say Yield (record count), Say Where Filter, Say Position, Say Cell, and many more. These are how you interrogate the screen on demand instead of hunting for information, and they are listed in full in the command reference.
+Woven through the menus is a large **Say-X status family** in the Query menu: quick commands that *speak a fact about your current situation* without changing anything — Say Status, Say Database, Say Order, Say Yield (record count), Say Filter, Say Position, Say Cell, and many more. These are how you interrogate the screen on demand instead of hunting for information, and they are listed in full in the command reference.
 
 ### Key Help
 
@@ -172,6 +172,7 @@ Woven through the menus is a large **Say-X status family** in the Query menu: qu
 
 ## Opening databases and recordsets
 
+- **Open Template Database** starts from one of the databases DbDo ships -- BookTrail, JobTrail and the rest -- opening your own copy of it.
 - **Open Database** (Control+O) opens a database file, choosing the right driver from the extension. **New Database** creates a fresh SQLite database; **Add Table** adds a table to it.
 - **Open Table in New Window** (Control+Shift+T) opens a table (or arbitrary query) in a new window.
 - **Recent Files** (Alt+R) reopens something you used lately.
@@ -184,7 +185,7 @@ When a database has several tables, **Choose Table** (Control+T) switches the cu
 The cursor moves with ordinary list navigation (arrow keys, Home, End) and with explicit commands:
 
 - **Go to Record** (Control+G) jumps to a record number; **Repeat Go To** (Alt+G) repeats it.
-- **Find Record** (Control+F) searches for text; **Reverse Find** (Control+Shift+F) searches backward; **Search Next** (F3) and **Search Previous** (Shift+F3) repeat the last search. **Find Regex** (Control+F3) searches by regular expression.
+- **Keywords** (Control+K) searches for text; **Reverse Keywords** (Control+Shift+K) searches backward; **Search Next** (F3) and **Search Previous** (Shift+F3) repeat the last search. **Find Regex** (Control+F3) searches by regular expression.
 - **Jump to Record** (Control+J) and **Reverse Jump** move by a jump increment for quickly covering distance in a long table.
 - **Jump to Next Initial** steps to the next record whose current column starts with a new letter — type-ahead through a sorted column.
 
@@ -213,7 +214,7 @@ Marked records can then be reported, filtered, or exported as a set, and several
 
 Filtering and sorting reshape the grid without touching the physical table.
 
-- **Where Filter** (Control+W) limits the grid to records matching a condition; **Clear Where** (Control+Shift+W) removes it; **Filter by Regex** filters by pattern; **Say Where Filter** (Shift+W) speaks the current filter.
+- **Filter Records** (Control+F) limits the grid to records matching a condition; **Clear Filter** (Control+Shift+F) removes it; **Filter by Regex** filters by pattern; **Say Filter** (Shift+F) speaks the current filter.
 - **Order Records** (Alt+O) sorts the grid by a field; **Reverse Order** (Alt+Shift+O) reverses it; **Clear Sort** returns to natural order; **Say Order** (Shift+O) speaks the current sort.
 
 Sorting reads numbers as numbers: volume 9 comes after 7 and 6.5 even if some
@@ -400,8 +401,8 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Next / Previous Record | — |
 | Go to Record | Control+G |
 | Repeat Go To | Alt+G |
-| Find Record | Control+F |
-| Reverse Find | Control+Shift+F |
+| Keywords | Control+K |
+| Reverse Keywords | Control+Shift+K |
 | Jump to Record | Control+J |
 | Reverse Jump | Control+Shift+J |
 | Find Regex | Control+F3 |
@@ -439,8 +440,8 @@ The Query menu holds record inspection and the Say-X status family.
 | Say Clipboard | Alt+Apostrophe |
 | Say Added | Shift+A |
 | Say Cell | Shift+C |
-| Say Where Filter | Shift+W |
-| Say Find | Shift+F |
+| Say Filter | Shift+F |
+| Say Keywords | Shift+K |
 | Say Select Columns | Shift+S |
 | Say Query | Shift+Q |
 | Say Id | Shift+I |
@@ -448,8 +449,8 @@ The Query menu holds record inspection and the Say-X status family.
 | Say Related | Shift+R |
 | Say URL | Shift+U |
 | Say Prime | Shift+P |
-| Where Filter | Control+W |
-| Clear Where | Control+Shift+W |
+| Filter Records | Control+F |
+| Clear Filter | Control+Shift+F |
 | Filter by Regex | — |
 | Clear Sort | — |
 | Order Records | Alt+O |
@@ -511,7 +512,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Documentation | F1 |
 | History of Changes | Shift+F1 |
 | Readme Guide | — |
-| Sample Databases | — |
+| Template Databases | — |
 | Alternate Menu | Alt+F10 |
 | Key Help Toggle | Control+F1 |
 | Where Am I | — |
@@ -588,9 +589,9 @@ A `<DbName>.inix` holds the settings that belong to one database. Its `[Database
 
 When the SQLean extension functions are available, they add a large library of SQL functions — string and text helpers, math, statistics, fuzzy matching, regular expressions, and more — usable in queries and reachable through the **Sqlean Console** (Control+Shift+GraveAccent). They extend what your `Query` and report expressions can compute without leaving SQL.
 
-## Sample databases
+## Template databases
 
-DbDo ships with sample databases that follow the same column conventions as your own data, reachable from **Sample Databases** in the Help menu. They are the fastest way to see the standard fields, lookups, relationships, and reports working together on real records.
+DbDo ships with template databases that follow the same column conventions as your own data, reachable from **Template Databases** in the Help menu. They are the fastest way to see the standard fields, lookups, relationships, and reports working together on real records.
 
 ## Screen-reader settings
 
@@ -630,7 +631,7 @@ DbDo builds its dialogs and menus **in code** rather than with a visual designer
 
 ## File layout
 
-The source is a single large `DbDo.cs`. Alongside it live the build script, the installer script, the dependency fetcher, the `.inix` configuration, this guide (`DbDo.md`), the README, the coding-style file, and the sample databases with their scripts and `report.inix` definitions.
+The source is a single large `DbDo.cs`. Alongside it live the build script, the installer script, the dependency fetcher, the `.inix` configuration, this guide (`DbDo.md`), the README, the coding-style file, and the template databases with their scripts and `report.inix` definitions.
 
 
 
@@ -743,6 +744,63 @@ and each extra key picks a different kind of help.
 - **Play Tutorials.** The spoken walkthroughs.
 - **More Documents.** The Announcement, the Developer Guide, the License, and the Tutorials Transcript. These are used rarely, so they sit one level down.
 
+## Four ways to reach a record
+
+Each has its own letter, and the letter is the first letter of its own word.
+
+- **Jump, Control+J** -- type part of what you hear on the line and arrive there.
+  No syntax, no dialog to fill in: three letters is usually enough.
+- **Keywords, Control+K** -- search inside the records, every column, including
+  ones not on screen. The cursor moves to the match; F3 finds the next one and
+  Shift+F3 the one before. Shift+K says what you searched for.
+- **Filter Records, Control+F** -- shorten the list to the records you want. DbDo
+  writes the condition for you: a form with one box per field, where a value on
+  its own means equals, a symbol in front compares (`>`, `>=`, `<`, `<=`, `!=`),
+  and `%` in front matches anywhere in the field. Fill in several boxes and they
+  all have to match. With a filter already in force, DbDo first asks whether to
+  edit it, add a condition with And or Or, start again, or clear it.
+  **Control+Shift+F** clears; **Shift+F** says what is in force.
+- **Query, Control+Q** -- write SQL yourself, when you want to.
+
+The first three need no SQL at all. The old name for Filter Records was "Where
+Filter", which promised SQL to people who never write any; the dialog has not
+changed.
+
+## Sharing a database with somebody else
+
+A DbDo database is one file, so sharing it is sending that file. What the person
+receiving it does depends on whether they already keep one of their own.
+
+**If they do not**, they save the file wherever they like -- their documents,
+their desktop, anywhere -- and open it with Control+O. Nothing has to be copied
+into a folder belonging to DbDo.
+
+**If they want it in a database of their own**, they start one from a template:
+File, **Open Template Database**, and pick BookTrail, which opens their own copy
+under their own account. Then **Merge Data, Alt+M**, and choose the file they
+were sent, wherever they saved it. DbDo folds the records in.
+
+### How a merge decides
+
+Every record carries a **prime**, the computed key built from the fields that say
+which record it is -- for books, the author and the title. That is what DbDo
+compares.
+
+- A record whose prime is **not** in your database is **new**, and is added.
+- A record whose prime **is** there is the **same record**, and you decide what
+  happens to it. DbDo asks once, before anything is written:
+  - **Add new only** -- nothing you already have is touched. The safe choice.
+  - **Update** -- records you already have take the incoming values.
+  - **Fill blanks** -- incoming values fill your empty fields and nothing else.
+  - **Newer wins** -- incoming values win only where they were edited later.
+
+**Links between records survive**, because a link names its two ends by prime
+rather than by row number: a link from the other database points at the same two
+records in yours. Pick lists merge too, one entry per table, field and value.
+
+**Nothing is ever deleted by a merge**, and DbDo copies your database first,
+leaving it beside the original as `<name>-before-merge.db`.
+
 ## Files that are not databases
 
 Spreadsheets and text files are not databases, so DbDo treats them all the same
@@ -802,13 +860,13 @@ any of them -- go in your own scripts folder instead, which DbDo makes at
 `%LOCALAPPDATA%\DbDo\scripts` and seeds with examples. Both lists are offered
 together, and where a name appears in both, the database's own script wins.
 
-The samples that come with DbDo follow the same rule: each is a folder under
+The templates that come with DbDo follow the same rule: each is a folder under
 `templates`, and DbDo copies them into `%LOCALAPPDATA%\DbDo\data` the first
 time you run it, so your copies are yours to change.
 
-## The sample databases
+## The template databases
 
-Each sample is a folder under `templates`, copied into your own folder the first
+Each template is a folder under `templates`, copied into your own folder the first
 time you run DbDo. The ones written for DbDo share the Trail name:
 
 - **BookTrail** -- books read, reading, and meant to be read
@@ -832,7 +890,7 @@ The Windows and iOS how-to databases were the same shape, and answering "how do
 I do this on my phone?" meant opening a different file. They are one database
 now, and the system is a field: **platform**, holding Windows, iOS, or any for
 something true on both. Press F4 in the field to pick. To work in one system
-only, put `platform = "Windows"` in the Where filter, Control+W, and it stays
+only, put `platform = "Windows"` in the Filter Records, Control+F, and it stays
 until you clear it.
 
 ### CollectionTrail holds whatever you collect
@@ -847,7 +905,7 @@ falls as you drink it.
 
 ## BookTrail, for books
 
-BookTrail is a sample database for the books you have read, are reading, and
+BookTrail is a template database for the books you have read, are reading, and
 mean to read. One table, books, holds the author, title, subtitle, narrator,
 series and volume, status, format, source, catalog number, genre, rating, the
 dates added and read, why you chose it, a summary and your notes.
@@ -937,7 +995,7 @@ points at another table, and hear something meaningful rather than "4".
 That is what `look` holds. It joins the fields that identify a record to a
 person, separated by a space, a vertical bar and a space:
 
-    Example Widgets Company (sample employer) | Accessibility Analyst | interviewing
+    Example Widgets Company (template employer) | Accessibility Analyst | interviewing
 
 The separator is chosen for the ear: a screen reader pauses at punctuation, so
 the parts arrive as parts rather than as one run-on line.
@@ -957,7 +1015,7 @@ rows are the same job is the employer and the title. So `prime` is computed from
 exactly the fields that make a record unique, joined with a vertical bar and
 nothing else:
 
-    Example Widgets Company (sample employer)|Accessibility Analyst
+    Example Widgets Company (template employer)|Accessibility Analyst
 
 Two things follow, and both are the reason it is done this way.
 
@@ -1030,7 +1088,7 @@ read-only window you can read line by line and copy from.
 - Shift+U -- url
 - Shift+V -- replacement value, the text Replace would offer next
 - Shift+V -- replace, the text Replace would offer and what it would put there
-- Shift+W -- where, the filter
+- Shift+F -- filter, the condition in force
 - Shift+X -- regex replace, the pattern Regex Replace would offer next
 - Shift+Y -- yield, how many rows
 - Shift+Z -- status: the table, the row and the order

@@ -244,7 +244,7 @@ muscle memory transfers.</p>
 spells its text character by character when pressed twice within 1.5
 seconds — the convention familiar from EdSharp and FileDir.</p>
 <p><strong>Three search families with persistent history.</strong> Find
-(Control+F) for substring across all columns, Jump to Match (Control+J)
+(Control+K) for substring across all columns, Jump to Match (Control+J)
 for substring within one column, Find Regex (Control+F3) for .NET regex.
 Each family remembers its last 10 terms along with their case-sensitive
 flags. F3 / Shift+F3 repeats whichever family was most recent.</p>
@@ -264,7 +264,7 @@ keystroke (Control+Shift+I, I for Invoke). Scripts can automate bulk
 record edits, filter changes, custom reports — anything the database
 manager itself can do.</p>
 <h2 id="sample-databases">Sample databases</h2>
-<p>DbDo ships four SQLite sample databases adapted to its standard
+<p>DbDo ships four SQLite template databases adapted to its standard
 column conventions (<code>&lt;singular&gt;_id</code> primary keys,
 <code>added</code>/<code>edited</code> timestamps maintained by
 triggers, generated <code>look</code>/<code>unq</code> columns):</p>
@@ -273,16 +273,16 @@ triggers, generated <code>look</code>/<code>unq</code> columns):</p>
 national convention agenda as a four-table relational model (contacts,
 events, locations, projects) wired together by a generic
 <code>maps</code> association table.</li>
-<li><code>sample.db</code> — a small school domain (teachers, classes,
+<li><code>template.db</code> — a small school domain (teachers, classes,
 students, enrollments) for first-launch exploration.</li>
 <li><code>northwind.db</code> — the classic Microsoft Northwind sales
-sample (categories, suppliers, products, customers, employees, orders,
+template (categories, suppliers, products, customers, employees, orders,
 order details, shippers).</li>
-<li><code>chinook.db</code> — the classic Chinook music-store sample
+<li><code>chinook.db</code> — the classic Chinook music-store template
 (artists, albums, tracks, genres, customers, invoices, invoice items),
 with deep parent-child chains.</li>
 </ul>
-<p>The Northwind and Chinook samples are useful for exercising DbDo
+<p>The Northwind and Chinook templates are useful for exercising DbDo
 against real-shaped data with multiple parent-child relationships; the
 convention database shows the maps model on real-world associations.</p>
 <h2 id="accessibility-design">Accessibility design</h2>

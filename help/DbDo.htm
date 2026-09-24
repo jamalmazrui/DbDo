@@ -290,7 +290,7 @@ id="toc-the-.inix-configuration-format">The .inix configuration
 format</a></li>
 <li><a href="#sqlean-extensions" id="toc-sqlean-extensions">SQLean
 extensions</a></li>
-<li><a href="#sample-databases" id="toc-sample-databases">Sample
+<li><a href="#template-databases" id="toc-template-databases">Template
 databases</a></li>
 <li><a href="#screen-reader-settings"
 id="toc-screen-reader-settings">Screen-reader settings</a></li>
@@ -329,6 +329,16 @@ distinction</a></li>
 </ul></li>
 <li><a href="#the-help-menu" id="toc-the-help-menu">The Help
 menu</a></li>
+<li><a href="#four-ways-to-reach-a-record"
+id="toc-four-ways-to-reach-a-record">Four ways to reach a
+record</a></li>
+<li><a href="#sharing-a-database-with-somebody-else"
+id="toc-sharing-a-database-with-somebody-else">Sharing a database with
+somebody else</a>
+<ul>
+<li><a href="#how-a-merge-decides" id="toc-how-a-merge-decides">How a
+merge decides</a></li>
+</ul></li>
 <li><a href="#files-that-are-not-databases"
 id="toc-files-that-are-not-databases">Files that are not
 databases</a></li>
@@ -337,8 +347,8 @@ id="toc-bringing-in-a-spreadsheet">Bringing in a spreadsheet</a></li>
 <li><a href="#where-a-databases-files-live"
 id="toc-where-a-databases-files-live">Where a database’s files
 live</a></li>
-<li><a href="#the-sample-databases" id="toc-the-sample-databases">The
-sample databases</a>
+<li><a href="#the-template-databases"
+id="toc-the-template-databases">The template databases</a>
 <ul>
 <li><a href="#howtotrail-holds-both-systems"
 id="toc-howtotrail-holds-both-systems">HowToTrail holds both
@@ -662,7 +672,7 @@ that.”</p>
 consistent <strong>mnemonic rule</strong>: the letter in the chord is
 the first letter of a word in the command’s name. <em>Statistics from
 Column</em> is Alt+Shift+S; <em>Generate from Grid</em> is Alt+Shift+G;
-<em>Where Filter</em> is Control+W. Once you know a command’s name you
+<em>Filter Records</em> is Control+F. Once you know a command’s name you
 can usually guess its chord, and vice versa. Chords are grouped by
 modifier so related commands share a shape — the Say-something status
 commands are mostly Shift+letter, for instance.</p>
@@ -700,10 +710,10 @@ press Enter. It is covered in Part 5.</p>
 <p>Woven through the menus is a large <strong>Say-X status
 family</strong> in the Query menu: quick commands that <em>speak a fact
 about your current situation</em> without changing anything — Say
-Status, Say Database, Say Order, Say Yield (record count), Say Where
-Filter, Say Position, Say Cell, and many more. These are how you
-interrogate the screen on demand instead of hunting for information, and
-they are listed in full in the command reference.</p>
+Status, Say Database, Say Order, Say Yield (record count), Say Filter,
+Say Position, Say Cell, and many more. These are how you interrogate the
+screen on demand instead of hunting for information, and they are listed
+in full in the command reference.</p>
 <h3 id="key-help">Key Help</h3>
 <p><strong>Key Help Toggle</strong> (Control+F1) turns on a learning
 mode: while it is on, pressing a command chord
@@ -718,6 +728,9 @@ single filterable list of all commands you can search and run.</p>
 <h2 id="opening-databases-and-recordsets">Opening databases and
 recordsets</h2>
 <ul>
+<li><strong>Open Template Database</strong> starts from one of the
+databases DbDo ships – BookTrail, JobTrail and the rest – opening your
+own copy of it.</li>
 <li><strong>Open Database</strong> (Control+O) opens a database file,
 choosing the right driver from the extension. <strong>New
 Database</strong> creates a fresh SQLite database; <strong>Add
@@ -741,8 +754,8 @@ End) and with explicit commands:</p>
 <ul>
 <li><strong>Go to Record</strong> (Control+G) jumps to a record number;
 <strong>Repeat Go To</strong> (Alt+G) repeats it.</li>
-<li><strong>Find Record</strong> (Control+F) searches for text;
-<strong>Reverse Find</strong> (Control+Shift+F) searches backward;
+<li><strong>Keywords</strong> (Control+K) searches for text;
+<strong>Reverse Keywords</strong> (Control+Shift+K) searches backward;
 <strong>Search Next</strong> (F3) and <strong>Search Previous</strong>
 (Shift+F3) repeat the last search. <strong>Find Regex</strong>
 (Control+F3) searches by regular expression.</li>
@@ -804,10 +817,10 @@ and several Say commands report only the marked ones.</p>
 <p>Filtering and sorting reshape the grid without touching the physical
 table.</p>
 <ul>
-<li><strong>Where Filter</strong> (Control+W) limits the grid to records
-matching a condition; <strong>Clear Where</strong> (Control+Shift+W)
-removes it; <strong>Filter by Regex</strong> filters by pattern;
-<strong>Say Where Filter</strong> (Shift+W) speaks the current
+<li><strong>Filter Records</strong> (Control+F) limits the grid to
+records matching a condition; <strong>Clear Filter</strong>
+(Control+Shift+F) removes it; <strong>Filter by Regex</strong> filters
+by pattern; <strong>Say Filter</strong> (Shift+F) speaks the current
 filter.</li>
 <li><strong>Order Records</strong> (Alt+O) sorts the grid by a field;
 <strong>Reverse Order</strong> (Alt+Shift+O) reverses it; <strong>Clear
@@ -1309,12 +1322,12 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <td>Alt+G</td>
 </tr>
 <tr class="odd">
-<td>Find Record</td>
-<td>Control+F</td>
+<td>Keywords</td>
+<td>Control+K</td>
 </tr>
 <tr class="even">
-<td>Reverse Find</td>
-<td>Control+Shift+F</td>
+<td>Reverse Keywords</td>
+<td>Control+Shift+K</td>
 </tr>
 <tr class="odd">
 <td>Jump to Record</td>
@@ -1450,12 +1463,12 @@ family.</p>
 <td>Shift+C</td>
 </tr>
 <tr class="odd">
-<td>Say Where Filter</td>
-<td>Shift+W</td>
+<td>Say Filter</td>
+<td>Shift+F</td>
 </tr>
 <tr class="even">
-<td>Say Find</td>
-<td>Shift+F</td>
+<td>Say Keywords</td>
+<td>Shift+K</td>
 </tr>
 <tr class="odd">
 <td>Say Select Columns</td>
@@ -1486,12 +1499,12 @@ family.</p>
 <td>Shift+P</td>
 </tr>
 <tr class="even">
-<td>Where Filter</td>
-<td>Control+W</td>
+<td>Filter Records</td>
+<td>Control+F</td>
 </tr>
 <tr class="odd">
-<td>Clear Where</td>
-<td>Control+Shift+W</td>
+<td>Clear Filter</td>
+<td>Control+Shift+F</td>
 </tr>
 <tr class="even">
 <td>Filter by Regex</td>
@@ -1711,7 +1724,7 @@ family.</p>
 <td>—</td>
 </tr>
 <tr class="even">
-<td>Sample Databases</td>
+<td>Template Databases</td>
 <td>—</td>
 </tr>
 <tr class="odd">
@@ -1954,9 +1967,9 @@ fuzzy matching, regular expressions, and more — usable in queries and
 reachable through the <strong>Sqlean Console</strong>
 (Control+Shift+GraveAccent). They extend what your <code>Query</code>
 and report expressions can compute without leaving SQL.</p>
-<h2 id="sample-databases">Sample databases</h2>
-<p>DbDo ships with sample databases that follow the same column
-conventions as your own data, reachable from <strong>Sample
+<h2 id="template-databases">Template databases</h2>
+<p>DbDo ships with template databases that follow the same column
+conventions as your own data, reachable from <strong>Template
 Databases</strong> in the Help menu. They are the fastest way to see the
 standard fields, lookups, relationships, and reports working together on
 real records.</p>
@@ -2024,7 +2037,7 @@ construction.</p>
 <p>The source is a single large <code>DbDo.cs</code>. Alongside it live
 the build script, the installer script, the dependency fetcher, the
 <code>.inix</code> configuration, this guide (<code>DbDo.md</code>), the
-README, the coding-style file, and the sample databases with their
+README, the coding-style file, and the template databases with their
 scripts and <code>report.inix</code> definitions.</p>
 <h2 id="nothing-and-the-two-kinds-of-it">Nothing, and the two kinds of
 it</h2>
@@ -2139,6 +2152,75 @@ them all.</li>
 Guide, the License, and the Tutorials Transcript. These are used rarely,
 so they sit one level down.</li>
 </ul>
+<h2 id="four-ways-to-reach-a-record">Four ways to reach a record</h2>
+<p>Each has its own letter, and the letter is the first letter of its
+own word.</p>
+<ul>
+<li><strong>Jump, Control+J</strong> – type part of what you hear on the
+line and arrive there. No syntax, no dialog to fill in: three letters is
+usually enough.</li>
+<li><strong>Keywords, Control+K</strong> – search inside the records,
+every column, including ones not on screen. The cursor moves to the
+match; F3 finds the next one and Shift+F3 the one before. Shift+K says
+what you searched for.</li>
+<li><strong>Filter Records, Control+F</strong> – shorten the list to the
+records you want. DbDo writes the condition for you: a form with one box
+per field, where a value on its own means equals, a symbol in front
+compares (<code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>,
+<code>&lt;=</code>, <code>!=</code>), and <code>%</code> in front
+matches anywhere in the field. Fill in several boxes and they all have
+to match. With a filter already in force, DbDo first asks whether to
+edit it, add a condition with And or Or, start again, or clear it.
+<strong>Control+Shift+F</strong> clears; <strong>Shift+F</strong> says
+what is in force.</li>
+<li><strong>Query, Control+Q</strong> – write SQL yourself, when you
+want to.</li>
+</ul>
+<p>The first three need no SQL at all. The old name for Filter Records
+was “Where Filter”, which promised SQL to people who never write any;
+the dialog has not changed.</p>
+<h2 id="sharing-a-database-with-somebody-else">Sharing a database with
+somebody else</h2>
+<p>A DbDo database is one file, so sharing it is sending that file. What
+the person receiving it does depends on whether they already keep one of
+their own.</p>
+<p><strong>If they do not</strong>, they save the file wherever they
+like – their documents, their desktop, anywhere – and open it with
+Control+O. Nothing has to be copied into a folder belonging to DbDo.</p>
+<p><strong>If they want it in a database of their own</strong>, they
+start one from a template: File, <strong>Open Template
+Database</strong>, and pick BookTrail, which opens their own copy under
+their own account. Then <strong>Merge Data, Alt+M</strong>, and choose
+the file they were sent, wherever they saved it. DbDo folds the records
+in.</p>
+<h3 id="how-a-merge-decides">How a merge decides</h3>
+<p>Every record carries a <strong>prime</strong>, the computed key built
+from the fields that say which record it is – for books, the author and
+the title. That is what DbDo compares.</p>
+<ul>
+<li>A record whose prime is <strong>not</strong> in your database is
+<strong>new</strong>, and is added.</li>
+<li>A record whose prime <strong>is</strong> there is the <strong>same
+record</strong>, and you decide what happens to it. DbDo asks once,
+before anything is written:
+<ul>
+<li><strong>Add new only</strong> – nothing you already have is touched.
+The safe choice.</li>
+<li><strong>Update</strong> – records you already have take the incoming
+values.</li>
+<li><strong>Fill blanks</strong> – incoming values fill your empty
+fields and nothing else.</li>
+<li><strong>Newer wins</strong> – incoming values win only where they
+were edited later.</li>
+</ul></li>
+</ul>
+<p><strong>Links between records survive</strong>, because a link names
+its two ends by prime rather than by row number: a link from the other
+database points at the same two records in yours. Pick lists merge too,
+one entry per table, field and value.</p>
+<p><strong>Nothing is ever deleted by a merge</strong>, and DbDo copies
+your database first, leaving it beside the original as
+<code>&lt;name&gt;-before-merge.db</code>.</p>
 <h2 id="files-that-are-not-databases">Files that are not databases</h2>
 <p>Spreadsheets and text files are not databases, so DbDo treats them
 all the same way, and the rule is one sentence: <strong>the file you
@@ -2192,12 +2274,12 @@ you would run against any of them – go in your own scripts folder
 instead, which DbDo makes at <code>%LOCALAPPDATA%\DbDo\scripts</code>
 and seeds with examples. Both lists are offered together, and where a
 name appears in both, the database’s own script wins.</p>
-<p>The samples that come with DbDo follow the same rule: each is a
+<p>The templates that come with DbDo follow the same rule: each is a
 folder under <code>templates</code>, and DbDo copies them into
 <code>%LOCALAPPDATA%\DbDo\data</code> the first time you run it, so your
 copies are yours to change.</p>
-<h2 id="the-sample-databases">The sample databases</h2>
-<p>Each sample is a folder under <code>templates</code>, copied into
+<h2 id="the-template-databases">The template databases</h2>
+<p>Each template is a folder under <code>templates</code>, copied into
 your own folder the first time you run DbDo. The ones written for DbDo
 share the Trail name:</p>
 <ul>
@@ -2231,7 +2313,7 @@ answering “how do I do this on my phone?” meant opening a different
 file. They are one database now, and the system is a field:
 <strong>platform</strong>, holding Windows, iOS, or any for something
 true on both. Press F4 in the field to pick. To work in one system only,
-put <code>platform = "Windows"</code> in the Where filter, Control+W,
+put <code>platform = "Windows"</code> in the Filter Records, Control+F,
 and it stays until you clear it.</p>
 <h3 id="collectiontrail-holds-whatever-you-collect">CollectionTrail
 holds whatever you collect</h3>
@@ -2243,7 +2325,7 @@ copy for each collection.</p>
 CellarTrail is the example: wine wants a vintage, a drinking window and
 a bottle count that falls as you drink it.</p>
 <h2 id="booktrail-for-books">BookTrail, for books</h2>
-<p>BookTrail is a sample database for the books you have read, are
+<p>BookTrail is a template database for the books you have read, are
 reading, and mean to read. One table, books, holds the author, title,
 subtitle, narrator, series and volume, status, format, source, catalog
 number, genre, rating, the dates added and read, why you chose it, a
@@ -2330,7 +2412,7 @@ something meaningful rather than “4”.</p>
 <p>That is what <code>look</code> holds. It joins the fields that
 identify a record to a person, separated by a space, a vertical bar and
 a space:</p>
-<pre><code>Example Widgets Company (sample employer) | Accessibility Analyst | interviewing</code></pre>
+<pre><code>Example Widgets Company (template employer) | Accessibility Analyst | interviewing</code></pre>
 <p>The separator is chosen for the ear: a screen reader pauses at
 punctuation, so the parts arrive as parts rather than as one run-on
 line.</p>
@@ -2348,7 +2430,7 @@ record. What decides whether two rows are the same job is the employer
 and the title. So <code>prime</code> is computed from exactly the fields
 that make a record unique, joined with a vertical bar and nothing
 else:</p>
-<pre><code>Example Widgets Company (sample employer)|Accessibility Analyst</code></pre>
+<pre><code>Example Widgets Company (template employer)|Accessibility Analyst</code></pre>
 <p>Two things follow, and both are the reason it is done this way.</p>
 <p><strong>The rule can be changed.</strong> Deciding that a job is
 unique by employer, title and location as well is a change to one
@@ -2414,7 +2496,7 @@ in a read-only window you can read line by line and copy from.</p>
 <li>Shift+V – replacement value, the text Replace would offer next</li>
 <li>Shift+V – replace, the text Replace would offer and what it would
 put there</li>
-<li>Shift+W – where, the filter</li>
+<li>Shift+F – filter, the condition in force</li>
 <li>Shift+X – regex replace, the pattern Regex Replace would offer
 next</li>
 <li>Shift+Y – yield, how many rows</li>

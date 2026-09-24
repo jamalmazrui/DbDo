@@ -274,9 +274,6 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Exit to Root Table\
   Return from any drill-down depth to the original table. Home goes to the top; Alt+Home goes to the top table.\
   Alt+Home
-- Find Record\
-  Search across all columns for a substring. F for Find.\
-  Control+F
 - Find Regex\
   Search across all columns with a .NET regex pattern. F3 searches; Control makes the search a pattern.\
   Control+F3
@@ -286,14 +283,17 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Jump to Record\
   Search within one chosen column for a substring. J for Jump.\
   Control+J
+- Keywords\
+  Search across all columns for a substring. K for Keywords.\
+  Control+K
 - Repeat Go To\
   Alt+G
-- Reverse Find\
-  Find Previous (backward search across all columns). F for Find. Shift reverses Find Record.\
-  Control+Shift+F
 - Reverse Jump\
   Jump Record backward. J for Jump. Shift reverses Jump to Record.\
   Control+Shift+J
+- Reverse Keywords\
+  Keywords backward: the previous match across all columns. K for Keywords. Shift reverses Keywords.\
+  Control+Shift+K
 - Reverse Regex Find\
   Find Regex backward. F3 searches; Control makes it a pattern and Shift reverses it.\
   Control+Shift+F3
@@ -306,9 +306,12 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 
 ### Query
 
-- Clear Where\
-  Clear the active filter (where expression). W for Where. Shift reverses Where Filter.\
-  Control+Shift+W
+- Clear Filter\
+  Clear the active filter. F for Filter. Shift reverses Filter Records.\
+  Control+Shift+F
+- Filter Records\
+  Show only rows matching one or more field conditions. F for Filter.\
+  Control+F
 - Inspect Record\
   I for Inspect.\
   Control+I
@@ -326,9 +329,6 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Alt+Shift+O
 - Table Properties\
   Alt+Enter
-- Where Filter\
-  Show only rows matching one or more field conditions. W for Where.\
-  Control+W
 
 ### Query, Say
 
@@ -364,8 +364,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Edited\
   Speak the current row's 'edited' value in human-friendly local time. E for Edited.\
   Shift+E
-- Say Find\
-  Speak the current Find search string. F for Find.\
+- Say Filter\
+  F for Filter.\
   Shift+F
 - Say Goto\
   Speak the most recently used Jump search string. G for Goto.\
@@ -376,6 +376,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Jump\
   J for Jump.\
   Shift+J
+- Say Keywords\
+  Speak the current Keywords search string. K for Keywords.\
+  Shift+K
 - Say Look\
   L for Look.\
   Shift+L
@@ -427,9 +430,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say URL\
   Speak the current record's url field. U for URL.\
   Shift+U
-- Say Where Filter\
-  W for Where.\
-  Shift+W
 - Say Yield\
   Speak the current row count (after filter). Y for Yield.\
   Shift+Y
@@ -578,8 +578,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Equals\
   Evaluate Expression
 - Control+F\
-  Search across all columns for a substring.\
-  Find Record
+  Show only rows matching one or more field conditions.\
+  Filter Records
 - Control+G\
   Jump to a specific row by number.\
   Go to Record
@@ -591,6 +591,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+J\
   Search within one chosen column for a substring.\
   Jump to Record
+- Control+K\
+  Search across all columns for a substring.\
+  Keywords
 - Control+L\
   Speak the current virtual column from the current row down.\
   Say Column as List from Current
@@ -622,9 +625,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Tab\
   Activate the next open window.\
   Next Window
-- Control+W\
-  Show only rows matching one or more field conditions.\
-  Where Filter
 
 ### Control+Shift
 
@@ -641,8 +641,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Shift+E\
   Edit Snippet
 - Control+Shift+F\
-  Find Previous (backward search across all columns).\
-  Reverse Find
+  Clear the active filter.\
+  Clear Filter
 - Control+Shift+G\
   Plot the column under the virtual cursor as an Excel chart.\
   Graphics Column
@@ -655,6 +655,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Shift+J\
   Jump Record backward.\
   Reverse Jump
+- Control+Shift+K\
+  Keywords backward: the previous match across all columns.\
+  Reverse Keywords
 - Control+Shift+L\
   Speak the current virtual column for marked rows only, from the current row down.\
   Say Column as List from Current Marked
@@ -679,9 +682,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Previous Window
 - Control+Shift+U\
   Open Url
-- Control+Shift+W\
-  Clear the active filter (where expression).\
-  Clear Where
 - Control+Shift+X\
   Extract all regex matches in the current virtual column to the clipboard.\
   Extract with Regex
@@ -790,8 +790,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Speak the current row's 'edited' value in human-friendly local time.\
   Say Edited
 - Shift+F\
-  Speak the current Find search string.\
-  Say Find
+  Say Filter
 - Shift+G\
   Speak the most recently used Jump search string.\
   Say Goto
@@ -799,6 +798,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Say Id
 - Shift+J\
   Say Jump
+- Shift+K\
+  Speak the current Keywords search string.\
+  Say Keywords
 - Shift+L\
   Say Look
 - Shift+M\
@@ -829,8 +831,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Say URL
 - Shift+V\
   Say Replacement Value
-- Shift+W\
-  Say Where Filter
 - Shift+X\
   Say Regex Replace
 - Shift+Y\
@@ -862,9 +862,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Clear Bookmark\
   Forget the saved bookmark.\
   Control+Shift+B
-- Clear Where\
-  Clear the active filter (where expression).\
-  Control+Shift+W
+- Clear Filter\
+  Clear the active filter.\
+  Control+Shift+F
 - Close All But Current Window\
   Close every window except the current one.\
   Control+Shift+F4
@@ -939,8 +939,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Extract with Regex\
   Extract all regex matches in the current virtual column to the clipboard.\
   Control+Shift+X
-- Find Record\
-  Search across all columns for a substring.\
+- Filter Records\
+  Show only rows matching one or more field conditions.\
   Control+F
 - Find Regex\
   Search across all columns with a .NET regex pattern.\
@@ -977,6 +977,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Key Describer Toggle\
   Describe each key instead of running it (Ctrl+F1).\
   Control+F1
+- Keywords\
+  Search across all columns for a substring.\
+  Control+K
 - List Bookmarks\
   Show saved bookmarks in a listbox; navigate to the selected one.\
   Alt+B
@@ -1053,12 +1056,12 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Replace Column\
   Substring find-and-replace within the current virtual column, over visible rows.\
   Control+R
-- Reverse Find\
-  Find Previous (backward search across all columns).\
-  Control+Shift+F
 - Reverse Jump\
   Jump Record backward.\
   Control+Shift+J
+- Reverse Keywords\
+  Keywords backward: the previous match across all columns.\
+  Control+Shift+K
 - Reverse Order\
   Alt+Shift+O
 - Reverse Regex Find\
@@ -1103,8 +1106,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Edited\
   Speak the current row's 'edited' value in human-friendly local time.\
   Shift+E
-- Say Find\
-  Speak the current Find search string.\
+- Say Filter\
   Shift+F
 - Say Goto\
   Speak the most recently used Jump search string.\
@@ -1113,6 +1115,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Shift+I
 - Say Jump\
   Shift+J
+- Say Keywords\
+  Speak the current Keywords search string.\
+  Shift+K
 - Say Look\
   Shift+L
 - Say Mark Status\
@@ -1157,8 +1162,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say URL\
   Speak the current record's url field.\
   Shift+U
-- Say Where Filter\
-  Shift+W
 - Say Windows Open\
   Speak the count and titles of open recordset windows, marking the current one.\
   Shift+F4
@@ -1201,6 +1204,3 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Unmark Record\
   Clear the 'marked' flag on the current row.\
   Control+Shift+M
-- Where Filter\
-  Show only rows matching one or more field conditions.\
-  Control+W

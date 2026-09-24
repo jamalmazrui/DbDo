@@ -39,7 +39,7 @@ Five things to try:
 - **Add a record.** Control+N, New. Tab through the fields and press
   Control+Enter to save.
 - **Find something.** Type the first letters of what you want and the list goes
-  there. Control+F, Find, searches every field.
+  there. Control+K, Find, searches every field.
 - **Choose what you hear.** Alt+S, Select Columns, picks the fields each row
   speaks.
 - **Get something out.** Alt+Shift+R runs a Report, such as the Work Search
@@ -74,7 +74,7 @@ The point of the maps model: "all events related to this contact" and "all event
 
 A **lookups** table defines the allowed values for a field, so the Record Edit dialog can present that field as a ComboBox -- the Windows control that works best from the keyboard, with type-ahead and arrow navigation that every screen reader announces cleanly -- instead of a bare text box. Each lookups row binds a value to a `tbl` and `fld` (with an optional `src` authority and a `descrip`). DbDo offers the combobox whenever a field has values defined.
 
-NFB2026Convention.db carries lookups for its own fields -- every `maps.kind` it uses (presents, located_at, sponsors, features, offers, affiliated_with, part_of), the `projects.kind` list (product, service, program, app, ...), and `locations.hotel`. A separate, shared **lookups.db** ships alongside with global lists -- `state` and `country` -- bound to any table that has a field of that name, so they serve the other sample databases too (Northwind's `country` field gets a combobox with no per-database setup).
+NFB2026Convention.db carries lookups for its own fields -- every `maps.kind` it uses (presents, located_at, sponsors, features, offers, affiliated_with, part_of), the `projects.kind` list (product, service, program, app, ...), and `locations.hotel`. A separate, shared **lookups.db** ships alongside with global lists -- `state` and `country` -- bound to any table that has a field of that name, so they serve the other template databases too (Northwind's `country` field gets a combobox with no per-database setup).
 
 ## Background: four decades of nonvisual database tools
 
