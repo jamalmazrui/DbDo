@@ -4,7 +4,17 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.188 (current)
+## v1.0.189 (current)
+
+**A database now carries its own view.** Which fields a row speaks, the order and
+the filter were kept only in the settings file beside the database. Email
+somebody a database and those settings stayed behind, so they saw a bare pair of
+columns instead of the fields you had chosen. Each table's view is now stored in
+the database as well, and used when no settings file is present. The settings
+file still wins on your own computer, so your column choices do not follow a file
+you share. Every template database carries its view already.
+
+## v1.0.188
 
 **"Template" is the word now, everywhere.** The databases DbDo ships were called
 samples in the menus and templates on disk. They are templates: BookTrail and the

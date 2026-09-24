@@ -801,6 +801,14 @@ records in yours. Pick lists merge too, one entry per table, field and value.
 **Nothing is ever deleted by a merge**, and DbDo copies your database first,
 leaving it beside the original as `<name>-before-merge.db`.
 
+### A shared database knows how to present itself
+
+The fields a row speaks, the order and the filter are kept inside the database as
+well as in the settings file beside it. So a database you send somebody arrives
+looking the way you left it. Your own settings file still wins on your own
+computer, which means your column choices do not follow the file to everybody
+else.
+
 ## Files that are not databases
 
 Spreadsheets and text files are not databases, so DbDo treats them all the same

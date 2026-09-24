@@ -338,6 +338,9 @@ somebody else</a>
 <ul>
 <li><a href="#how-a-merge-decides" id="toc-how-a-merge-decides">How a
 merge decides</a></li>
+<li><a href="#a-shared-database-knows-how-to-present-itself"
+id="toc-a-shared-database-knows-how-to-present-itself">A shared database
+knows how to present itself</a></li>
 </ul></li>
 <li><a href="#files-that-are-not-databases"
 id="toc-files-that-are-not-databases">Files that are not
@@ -2221,6 +2224,13 @@ one entry per table, field and value.</p>
 <p><strong>Nothing is ever deleted by a merge</strong>, and DbDo copies
 your database first, leaving it beside the original as
 <code>&lt;name&gt;-before-merge.db</code>.</p>
+<h3 id="a-shared-database-knows-how-to-present-itself">A shared database
+knows how to present itself</h3>
+<p>The fields a row speaks, the order and the filter are kept inside the
+database as well as in the settings file beside it. So a database you
+send somebody arrives looking the way you left it. Your own settings
+file still wins on your own computer, which means your column choices do
+not follow the file to everybody else.</p>
 <h2 id="files-that-are-not-databases">Files that are not databases</h2>
 <p>Spreadsheets and text files are not databases, so DbDo treats them
 all the same way, and the rule is one sentence: <strong>the file you

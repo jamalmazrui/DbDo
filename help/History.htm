@@ -235,8 +235,9 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
-<li><a href="#v1.0.188-current" id="toc-v1.0.188-current">v1.0.188
+<li><a href="#v1.0.189-current" id="toc-v1.0.189-current">v1.0.189
 (current)</a></li>
+<li><a href="#v1.0.188" id="toc-v1.0.188">v1.0.188</a></li>
 <li><a href="#v1.0.187" id="toc-v1.0.187">v1.0.187</a></li>
 <li><a href="#v1.0.186" id="toc-v1.0.186">v1.0.186</a></li>
 <li><a href="#v1.0.185" id="toc-v1.0.185">v1.0.185</a></li>
@@ -355,7 +356,16 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
-<h2 id="v1.0.188-current">v1.0.188 (current)</h2>
+<h2 id="v1.0.189-current">v1.0.189 (current)</h2>
+<p><strong>A database now carries its own view.</strong> Which fields a
+row speaks, the order and the filter were kept only in the settings file
+beside the database. Email somebody a database and those settings stayed
+behind, so they saw a bare pair of columns instead of the fields you had
+chosen. Each table’s view is now stored in the database as well, and
+used when no settings file is present. The settings file still wins on
+your own computer, so your column choices do not follow a file you
+share. Every template database carries its view already.</p>
+<h2 id="v1.0.188">v1.0.188</h2>
 <p><strong>“Template” is the word now, everywhere.</strong> The
 databases DbDo ships were called samples in the menus and templates on
 disk. They are templates: BookTrail and the rest are meant to be kept

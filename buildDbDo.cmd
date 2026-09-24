@@ -698,7 +698,25 @@ if exist "help\Tutorial_*.inix" (
   call "%~dp0scripts\buildTutorials.cmd" >> "!log!" 2>&1
   if errorlevel 1 echo WARN: buildTutorials reported a problem; see logs\DbDo-tutorials-*.log >> "!log!"
 ) else (
-  echo No tutorial scripts here. >> "!log!"
+  rem THE RECORDING IS MISSING AND SO ARE THE SCRIPTS THAT MAKE IT. The installer
+  rem requires help\Tutorials.mkv, so this is the end of the build -- and saying so
+  rem here, by name, beats the installer's error twenty lines later.
+  rem
+  rem How it happens: deleting "the tutorials" takes the Tutorial_*.inix scripts
+  rem along with the .mkv and the .mp3 files. The scripts are the source; they are
+  rem in the delivery zip and in nobody's repository, since they are listed in
+  rem LocalFiles.txt.
+  echo. >> "!log!"
+  echo ERROR: help\Tutorials.mkv is missing, and so are the help\Tutorial_*.inix >> "!log!"
+  echo scripts that would rebuild it. Unzip the delivery again to restore them. >> "!log!"
+  echo.
+  echo The tutorials cannot be built: help\Tutorials.mkv is missing, and so are
+  echo the help\Tutorial_*.inix scripts that make it.
+  echo.
+  echo Unzip DbDo.zip into this folder again to restore the scripts, then build.
+  echo To keep a recording you already have, put Tutorials.mkv back in help\.
+  popd
+  exit /b 1
 )
 :tutorialsDone
 

@@ -2487,6 +2487,68 @@ namespace DbDo
                 }
             }
             catch { }
+
+            // (3) THE VIEW STORED IN THE DATABASE ITSELF.
+            //
+            // A .inix sits beside the file and does not survive being emailed.
+            // A tester was sent a database of his own books and saw two columns,
+            // because the settings that say which fields a row speaks stayed
+            // behind in the template's .inix. A database somebody shares should
+            // arrive knowing how to present itself.
+            //
+            // So the same three keys are kept in a "views" table inside the
+            // file, and read when the .inix has not already answered. The .inix
+            // still wins: it is this computer's opinion about a file that may be
+            // shared, and one person's column choice should not follow the file
+            // to everybody else.
+            try
+            {
+                if (getSelectList(sTable) == null || getSelectList(sTable).Length == 0)
+                {
+                    string sSelIn = readViewFromDatabase(sTable, "SelectFields");
+                    if (!string.IsNullOrEmpty(sSelIn)) setSelectList(sTable, sSelIn);
+                    string sOrdIn = readViewFromDatabase(sTable, "OrderFields");
+                    if (!string.IsNullOrEmpty(sOrdIn)) { try { sort = sOrdIn; } catch { } }
+                    string sWhrIn = readViewFromDatabase(sTable, "WhereFilter");
+                    if (!string.IsNullOrEmpty(sWhrIn)) { try { filter = sWhrIn; } catch { } }
+                }
+            }
+            catch { }
+        }
+
+        // readViewFromDatabase: one saved view key, from the views table, or ""
+        // when the table or the row is not there. Older databases have no views
+        // table and answer "" for everything, which is the right answer.
+        public string readViewFromDatabase(string sTable, string sKey)
+        {
+            try
+            {
+                int iFound;
+                foreach (string[] a in queryRowsSql("SELECT val FROM views WHERE tbl = '"
+                    + (sTable ?? "").Replace("'", "''") + "' AND fld = '" + sKey.Replace("'", "''") + "'", 1, out iFound))
+                    if (a != null && a.Length > 0) return a[0] ?? "";
+            }
+            catch (Exception) { }
+            return "";
+        }
+
+        // writeViewToDatabase: keep the view with the file, so it survives being
+        // sent to somebody. Silent when the database is read only or the write
+        // fails: this is a convenience, and never the reason an action fails.
+        public void writeViewToDatabase(string sTable, string sSelect, string sOrder, string sWhere)
+        {
+            if (!isOpen() || readOnly) return;
+            try
+            {
+                invokeSql("CREATE TABLE IF NOT EXISTS views (tbl TEXTLINE NOT NULL, fld TEXTLINE NOT NULL, "
+                    + "val TEXTLINE, PRIMARY KEY (tbl, fld))", null);
+                string sQt = (sTable ?? "").Replace("'", "''");
+                string[,] aPairs = { { "SelectFields", sSelect ?? "" }, { "OrderFields", sOrder ?? "" }, { "WhereFilter", sWhere ?? "" } };
+                for (int i = 0; i < 3; i++)
+                    invokeSql("INSERT OR REPLACE INTO views (tbl, fld, val) VALUES ('" + sQt + "', '"
+                        + aPairs[i, 0] + "', '" + (aPairs[i, 1] ?? "").Replace("'", "''") + "')", null);
+            }
+            catch (Exception ex) { try { DbDoLog.write("writeViewToDatabase: " + ex.Message); } catch { } }
         }
 
         // Public list of tables visited in this session, in insertion
@@ -3006,7 +3068,7 @@ namespace DbDo
         //
         // sqlite_ and sqlean_ tables are filtered earlier, in
         // getCatalogObjectNames, because they are not DbDo's either.
-        public static readonly string[] c_lsHiddenTables = new string[] { "lookups", "maps" };
+        public static readonly string[] c_lsHiddenTables = new string[] { "lookups", "maps", "views" };
 
         public static bool isHiddenTable(string sName)
         {
@@ -12049,6 +12111,8 @@ namespace DbDo
                 writeIniValue(sInix, "Table:" + sTable, "SelectFields", sSelect);
                 writeIniValue(sInix, "Table:" + sTable, "OrderFields",  sOrder);
                 writeIniValue(sInix, "Table:" + sTable, "WhereFilter",  sWhere);
+                // And inside the file, so it travels with a shared database.
+                try { db.writeViewToDatabase(sTable, sSelect, sOrder, sWhere); } catch { }
             }
             catch { }
         }
@@ -27972,6 +28036,7 @@ namespace DbDo
                     writeIniValue(sDbInix, "Table:" + sTable, "SelectFields", sSelect);
                     writeIniValue(sDbInix, "Table:" + sTable, "OrderFields", sSort);
                     writeIniValue(sDbInix, "Table:" + sTable, "WhereFilter", sFilter);
+                    try { db.writeViewToDatabase(sTable, sSelect, sSort, sFilter); } catch { }
                     Say.say("View settings saved");
                     DbDoLog.write("Edit-Settings view: [Table:" + sTable + "] saved to " + sDbInix);
                     MessageBox.Show(this, "View saved to:\n" + sDbInix,
