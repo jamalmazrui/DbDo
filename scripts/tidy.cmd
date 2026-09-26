@@ -28,6 +28,6 @@ if errorlevel 1 (
     endlocal
     exit /b 1
 )
-python "%~dp0homerTidy.py" %*
+python "%~dp0tidy.py" %*
 set exitCode=%errorlevel%
 endlocal & exit /b %exitCode%

@@ -175,28 +175,68 @@ function getIssDirective {
     return $sValue
 }
 
+function runNative {
+    # Run a program with its standard output and error captured, never shown
+    # to PowerShell as a stream, and return @{ Code = exit code; Out = the
+    # output }. System.Diagnostics.Process rather than & or cmd /c: Windows
+    # PowerShell 5.1 turns each stderr line of a native program into a
+    # NativeCommandError, even with 2>$null, and routing through cmd /c needs
+    # quoting that 5.1 mangles -- the first release of this edition died on
+    # "The syntax of the command is incorrect" before it could say more.
+    param(
+        [Parameter(Mandatory)] [string]   $sExe,
+        [AllowEmptyCollection()] [string[]] $aArgs = @()
+    )
+    $oCommand = Get-Command $sExe -ErrorAction SilentlyContinue | Select-Object -First 1
+    $sPath = if ($oCommand -and $oCommand.Source) { $oCommand.Source } else { $sExe }
+    $oInfo = New-Object System.Diagnostics.ProcessStartInfo
+    $sArgs = ($aArgs | ForEach-Object { if ($_ -match '[\s"]') { '"' + ($_ -replace '"', '\"') + '"' } else { $_ } }) -join ' '
+    # A .cmd or .bat (gh can be gh.cmd) runs through cmd, quoted whole so a
+    # path with a space survives: cmd /s strips exactly the outer pair.
+    if ($sPath -match '\.(cmd|bat)$') {
+        $oInfo.FileName = $env:ComSpec
+        $oInfo.Arguments = '/d /s /c ""' + $sPath + '" ' + $sArgs + '"'
+    } else {
+        $oInfo.FileName = $sPath
+        $oInfo.Arguments = $sArgs
+    }
+    $oInfo.UseShellExecute = $false
+    $oInfo.RedirectStandardOutput = $true
+    $oInfo.RedirectStandardError = $true
+    $oInfo.CreateNoWindow = $true
+    $oInfo.WorkingDirectory = (Get-Location).Path
+    try {
+        $oProcess = [System.Diagnostics.Process]::Start($oInfo)
+    } catch {
+        return @{ Code = 9009; Out = "Could not start ${sExe}: $($_.Exception.Message)" }
+    }
+    # Both streams are read at once, so a program filling one cannot stall on
+    # the other.
+    $oErrTask = $oProcess.StandardError.ReadToEndAsync()
+    $sOut = $oProcess.StandardOutput.ReadToEnd()
+    $oProcess.WaitForExit()
+    $sErr = $oErrTask.Result
+    return @{ Code = $oProcess.ExitCode; Out = (($sOut + $sErr) -replace "`r", '').TrimEnd() }
+}
+
 function invokeQuiet {
-    # Run a native program through cmd with every output discarded, and return
-    # its exit code. For questions whose "no" is normal: PowerShell 5.1 would
-    # otherwise record each stderr line as a NativeCommandError.
+    # A yes-or-no question to git or gh: the exit code, nothing shown.
     param(
         [Parameter(Mandatory)] [string]   $sExe,
         [Parameter(Mandatory)] [string[]] $aArgs
     )
-    $sLine = ($sExe + ' ' + (($aArgs | ForEach-Object { '"' + $_ + '"' }) -join ' ')) + ' >nul 2>&1'
-    & cmd.exe /d /c $sLine
-    return $LASTEXITCODE
+    return (runNative -sExe $sExe -aArgs $aArgs).Code
 }
 
 function readQuiet {
-    # Run a native program through cmd and return its standard output, with
-    # stderr discarded before PowerShell sees it.
+    # A program's output as text, with nothing shown and no error records.
     param(
         [Parameter(Mandatory)] [string]   $sExe,
         [Parameter(Mandatory)] [string[]] $aArgs
     )
-    $sLine = ($sExe + ' ' + (($aArgs | ForEach-Object { '"' + $_ + '"' }) -join ' ')) + ' 2>nul'
-    return ((& cmd.exe /d /c $sLine) | Out-String).Trim()
+    $oResult = runNative -sExe $sExe -aArgs $aArgs
+    if ($oResult.Code -ne 0) { return '' }
+    return $oResult.Out.Trim()
 }
 
 function getOwnerRepo {
@@ -406,10 +446,9 @@ try {
         Write-Host ""
         Write-Host "--- Check ---"
         Write-Host "  > scripts\check" -ForegroundColor DarkGray
-        # Two pairs of quotes: cmd /c strips the outer pair when the line holds
-        # a redirection, and the inner pair must survive a path with a space.
-        & cmd.exe /d /c ('""' + $sCheck + '" 2>&1"')
-        if ($LASTEXITCODE -ne 0) {
+        $oCheck = runNative -sExe $sCheck
+        if ($oCheck.Out) { Write-Host $oCheck.Out }
+        if ($oCheck.Code -ne 0) {
             throw "scripts\check found a problem, so nothing was published. Its report in logs names it. (release -NoCheck skips the check.)"
         }
         Write-Host "The check passed."

@@ -72,8 +72,8 @@ if not exist "%CD%\RepoFiles.txt" (
 
 rem The whitelist is rewritten on every push, so RepoFiles.txt and .gitignore
 rem cannot drift apart, and a line just added to the list counts now.
-if exist "%~dp0homerTidy.cmd" (
-  call "%~dp0homerTidy.cmd" --gitignore >> "%log%" 2>&1
+if exist "%~dp0tidy.cmd" (
+  call "%~dp0tidy.cmd" --gitignore >> "%log%" 2>&1
   if errorlevel 1 echo WARN: the whitelist .gitignore could not be rewritten; see the log.
 )
 
