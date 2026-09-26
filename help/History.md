@@ -4,7 +4,21 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.190 (current)
+## v1.0.191 (current)
+
+**One letter per menu.** When two items in the same menu began with the same
+letter, pressing it made the reader cycle between them. Now the first item keeps
+the letter and the later one has none, so a letter always does one thing.
+Thirty-nine captions changed; their keys did not.
+
+**The system-wide Alt+Control+GraveAccent chord is gone.** Alt+Control
+combinations belong to desktop shortcuts, and DbDo's own is Alt+Control+D, set
+on the desktop icon by the installer. DbDo runs as one instance, so that key
+opens it or brings it forward. Control+GraveAccent, which opens the dot prompt
+from inside DbDo, is unchanged, and so are the Alt+Control arrow keys that move
+the cell cursor.
+
+## v1.0.190
 
 **DbDo builds against the current Homer kit.** The build now needs HomerDev
 1.38.3, compiles Elevate with the shared classes, and refreshes the kit's tools

@@ -120,7 +120,14 @@ if not defined homerDev (
   exit /b 1
 )
 set "homerVer=unknown"
-if exist "!homerDev!\version.txt" set /p homerVer=<"!homerDev!\version.txt"
+rem READ THE VERSION WITHOUT ITS BYTE ORDER MARK. version.txt is not supposed
+rem to carry one, but something wrote one into the kit's on 25 September, and
+rem "set /p" reads it as part of the number: [version]'<BOM>1.40.1' cannot be
+rem parsed, so a kit that was newer than required was refused as "older". A
+rem check on a version number must not depend on an invisible character.
+if exist "!homerDev!\version.txt" (
+  for /f "usebackq delims=" %%v in (`powershell -NoProfile -Command "(Get-Content -Raw -LiteralPath '!homerDev!\version.txt').Trim([char]0xFEFF, ' ', [char]13, [char]10)"`) do set "homerVer=%%v"
+)
 echo Kit: !homerDev! version !homerVer! >> "!log!"
 echo Kit: !homerDev! version !homerVer!
 
