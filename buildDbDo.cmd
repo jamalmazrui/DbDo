@@ -650,6 +650,12 @@ for %%f in (cellar contacts howtos iOSTutorials media music NFB2026Convention re
 
 rem ---- files that were renamed ----
 rem
+rem DbDo_hotkeys.inix is on this list because nothing reads it: not DbDo.cs, not
+rem KeyMap, not the installer, not the build. It described keys from an earlier
+rem age -- "Jump Record=Control+J, or Shift+J", "Window Toggle=Shift+W" -- and
+rem the audit rightly refused to release a document naming keys nobody can
+rem press. Hotkeys.md, generated from the menus every build, is the document.
+rem
 rem FILES THAT WERE RENAMED LEAVE THE OLD COPY BEHIND, because unarchiving adds
 rem and replaces but never deletes. The last run found 17 tutorials where there
 rem are 9: the old names and the new ones, each built into the document twice
@@ -670,7 +676,8 @@ for %%f in (
   "help\Tutorial_Adding.inix" "help\Tutorial_Columns.inix" "help\Tutorial_Editing.inix"
   "help\Tutorial_Finding.inix" "help\Tutorial_Installing.inix" "help\Tutorial_LookAndPrime.inix"
   "help\Tutorial_Output.inix" "help\Tutorial_Sorting.inix"
-  "scripts\buildTutorial.cmd" "scripts\buildTutorial.ps1" "cleanDir.cmd" "templates\reads\reads.db"
+  "scripts\buildTutorial.cmd" "scripts\buildTutorial.ps1" "cleanDir.cmd"
+  "DbDo_hotkeys.inix" "templates\reads\reads.db"
 ) do (
   if exist %%f (
     del /f /q %%f

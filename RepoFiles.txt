@@ -15,7 +15,6 @@ DbDo.ico
 DbDo.inix
 DbDo.manifest
 DbDo.exe.config
-DbDo_hotkeys.inix
 DbDo_setup.iss
 buildDbDo.cmd
 scripts/acceptCheck.cmd
