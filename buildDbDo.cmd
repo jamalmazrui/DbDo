@@ -818,7 +818,17 @@ if exist "!sHere!scripts\fixEncoding.cmd" (
   echo Putting the files into the Homer encoding.
   echo Running fixEncoding >> "!log!"
   call "!sHere!scripts\fixEncoding.cmd" -build >> "!log!" 2>&1
-  if errorlevel 1 echo WARN: fixEncoding reported a problem >> "!log!"
+  rem ITS EXIT CODE IS A COUNT, NOT A COMPLAINT: 1 means it found files in the
+  rem wrong encoding and put them right, which happens on every build, because
+  rem the kit's refreshed scripts arrive with bare line feeds. That is the tool
+  rem doing its job, and it is logged as such. Only 2 or more is a failure.
+  if errorlevel 2 (
+    echo WARN: fixEncoding could not finish; see logs\DbDo-encoding-*.log >> "!log!"
+  ) else if errorlevel 1 (
+    echo fixEncoding put some files into the Homer encoding; the encoding log names them. >> "!log!"
+  ) else (
+    echo Every file was already in the Homer encoding. >> "!log!"
+  )
 ) else (
   echo WARN: scripts\fixEncoding.cmd is not here, so the encodings were not checked >> "!log!"
 )
