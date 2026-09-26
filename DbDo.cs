@@ -13459,7 +13459,7 @@ namespace DbDo
             add("Current Windows",    "Pick from the list of open recordset windows and activate the chosen one",
                 "F4. Each open recordset (typically a table) is an MDI child window.");
             add("Window Toggle",      "Switch between the two most recently used windows",
-                "Shift+W.");
+                "No key: Shift+W is on the Say layer. Use the Window menu.");
             add("Next Window",        "Activate the next open window", "Control+Tab.");
             add("Previous Window",    "Activate the previous open window", "Control+Shift+Tab.");
             add("Say Windows Open",   "Speak the count and titles of open recordset windows, marking the current one",

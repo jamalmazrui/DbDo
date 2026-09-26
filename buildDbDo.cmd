@@ -577,16 +577,6 @@ rem UIAutomationProvider.dll and UIAutomationTypes.dll (located above
 rem and stored in !uiaProv! and !uiaTypes!). Other framework
 rem references continue to auto-resolve from csc.rsp.
 echo. >> "!log!"
-rem ---- the Homer encoding, before the compiler sees anything ----
-rem Pandoc writes neither the byte order mark nor CRLF, so every build puts the
-rem project's own files back into the Homer encoding first. The kit's tool reads
-rem RepoFiles.txt to know which files are the project's.
-if exist "scripts\fixEncoding.cmd" (
-  echo Checking the file encodings.
-  call "!sHere!scripts\fixEncoding.cmd" -build
-  if errorlevel 1 echo WARN: fixEncoding reported a problem >> "!log!"
-)
-
 echo Compiling DbDo.cs -> DbDo.exe ... >> "!log!"
 echo Compiling DbDo.cs -> DbDo.exe ...
 rem Delete any stale .exe first so a failed compile leaves no half-
@@ -798,6 +788,26 @@ if exist "help\Tutorial_*.inix" (
   exit /b 1
 )
 :tutorialsDone
+
+rem ---- the Homer encoding, after every file has been written ----
+rem
+rem THIS RUNS LATE, AND FROM THE PROJECT FOLDER, ON PURPOSE. It used to run
+rem before the compile, guarded by "if exist scripts\fixEncoding.cmd" -- a
+rem relative path tested while the working folder was exec, so the guard was
+rem false and the tool never ran, silently. And pandoc, makeHotkeys and the
+rem kit's refreshed scripts all write files after that point: pandoc with no
+rem byte order mark, the kit's scripts with bare line feeds. Fixing encodings
+rem before the files exist fixes nothing. So it runs here, at the top of the
+rem project, when everything the installer will ship has been written, and it
+rem is logged so its absence would be visible.
+if exist "!sHere!scripts\fixEncoding.cmd" (
+  echo Putting the files into the Homer encoding.
+  echo Running fixEncoding >> "!log!"
+  call "!sHere!scripts\fixEncoding.cmd" -build >> "!log!" 2>&1
+  if errorlevel 1 echo WARN: fixEncoding reported a problem >> "!log!"
+) else (
+  echo WARN: scripts\fixEncoding.cmd is not here, so the encodings were not checked >> "!log!"
+)
 
 rem ---- build the installer ----
 rem DbDo_setup.exe is part of the build, not a separate errand: one command

@@ -1,4 +1,4 @@
-DbDo -- Third-Party Notices
+﻿DbDo -- Third-Party Notices
 ===========================
 
 DbDo bundles the following third-party components to read, edit, and save

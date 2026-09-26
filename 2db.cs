@@ -1,4 +1,4 @@
-// =====================================================================
+﻿// =====================================================================
 // 2db.cs -- standalone "to DbDo" importer.
 //
 // Reads the tables of a source data file (Access .mdb/.accdb, Excel
