@@ -1,4 +1,4 @@
--- Tasks-By-Area.sql
+﻿-- Tasks-By-Area.sql
 -- A statistics overview: how many topics the guide covers in each thematic
 -- area (its major sections), from most to least. Because this guide is
 -- organized by subject rather than by app, this is the clearest map of where

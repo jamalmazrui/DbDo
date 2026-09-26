@@ -1,4 +1,4 @@
--- Speaker-Directory.sql
+﻿-- Speaker-Directory.sql
 -- A directory of everyone presenting at the convention: name, the
 -- organization and role they are billed under, how many sessions they
 -- appear on, and -- where it could be verified -- a link to their official

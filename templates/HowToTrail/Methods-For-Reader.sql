@@ -1,4 +1,4 @@
--- Methods-For-Reader.sql
+﻿-- Methods-For-Reader.sql
 -- Every step-by-step method that involves one screen reader, with the task it
 -- accomplishes and the app it runs in. This is the canonical "go to all the
 -- records of a screen reader" query: it follows BOTH the with_app link (the

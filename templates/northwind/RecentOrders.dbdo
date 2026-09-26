@@ -1,4 +1,4 @@
-# Description: Open the orders table, filter to the most recent calendar
+﻿# Description: Open the orders table, filter to the most recent calendar
 # year, sort by order_date most-recent-first, and report the result
 # count via speech. Useful as a quick "what landed in the last year?"
 # probe -- the script leaves you at the first row of the filtered set

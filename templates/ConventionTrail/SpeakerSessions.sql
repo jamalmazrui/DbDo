@@ -1,4 +1,4 @@
--- SpeakerSessions.sql - every event a given person presents, chairs,
+﻿-- SpeakerSessions.sql - every event a given person presents, chairs,
 -- or leads, with their stated role for each. Change the last_name
 -- literal to look up someone else.
 --

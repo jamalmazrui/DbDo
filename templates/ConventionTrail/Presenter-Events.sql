@@ -1,4 +1,4 @@
--- Presenter-Events.sql
+﻿-- Presenter-Events.sql
 -- List every event a chosen presenter appears on, in time order, showing
 -- the date, start time, and title.
 --

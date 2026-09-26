@@ -1,4 +1,4 @@
--- App-Coverage.sql
+﻿-- App-Coverage.sql
 -- How thoroughly the guide covers each app: the number of step-by-step
 -- methods and the number of distinct tasks recorded for it. A quick
 -- statistics view of where the book's hands-on detail lies. (Much of this

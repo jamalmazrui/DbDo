@@ -1,4 +1,4 @@
--- Description: Print the row count of every base table in the open database.
+﻿-- Description: Print the row count of every base table in the open database.
 -- Uses the sqlite_master catalog to discover table names, then issues one
 -- SELECT COUNT(*) per table. Result format: one row per table, two columns
 -- (table name, row count).

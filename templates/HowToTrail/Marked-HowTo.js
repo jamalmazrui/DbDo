@@ -1,4 +1,4 @@
-// Marked-HowTo.js
+﻿// Marked-HowTo.js
 // Build a personal how-to guide from the CURRENT view of the methods table
 // and save it as MyHowTo.md, ready to read, print, or convert to another
 // format. With the methods table open, mark the procedures you want to study

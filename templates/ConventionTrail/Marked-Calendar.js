@@ -1,4 +1,4 @@
-// Marked-Calendar.js
+﻿// Marked-Calendar.js
 // Build an iCalendar (.ics) file from the CURRENT view of the events table
 // and save it as MySchedule.ics, ready to import into Google Calendar,
 // Outlook, Apple Calendar, or any app that reads calendar files. This is the

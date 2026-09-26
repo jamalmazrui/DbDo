@@ -1,4 +1,4 @@
--- Reader-Coverage.sql
+﻿-- Reader-Coverage.sql
 -- A statistics summary for the three screen readers: for each, how many
 -- methods involve it (configuring it, or written for it in another app), and
 -- how many distinct apps and tasks those methods span. A compact measure of

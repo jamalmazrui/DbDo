@@ -1,4 +1,4 @@
--- DayAtAGlance.sql - one convention day, ordered by start time.
+﻿-- DayAtAGlance.sql - one convention day, ordered by start time.
 -- Change the date literal to the day you want: 2026-07-03 (Friday)
 -- through 2026-07-08 (Wednesday).
 select e.start_time as Start, e.end_time as Finish, e.title as Event,

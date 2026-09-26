@@ -1,4 +1,4 @@
--- Description: Wine cellar -- what's in the drink window right now?
+﻿-- Description: Wine cellar -- what's in the drink window right now?
 -- For every wine in the cellar where bottles remain (status = 'held'),
 -- report producer, vintage, varietal, and where in its drink window it
 -- currently sits. Rows are sorted by "urgency": wines closest to the

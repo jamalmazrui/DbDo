@@ -1,4 +1,4 @@
--- ConventionSchedule.sql - the full NFB 2026 convention schedule with
+﻿-- ConventionSchedule.sql - the full NFB 2026 convention schedule with
 -- each event's location, resolved through the maps table.
 --
 -- The maps join pattern: a map row relates two records by (table,

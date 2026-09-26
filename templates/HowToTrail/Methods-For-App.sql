@@ -1,4 +1,4 @@
--- Methods-For-App.sql
+﻿-- Methods-For-App.sql
 -- Every step-by-step method recorded for one app, with the task it
 -- accomplishes. Change 'iOS' on the WHERE line to any app name -- for
 -- example 'Apple Books' or 'Overcast'. Because VoiceOver is the only screen

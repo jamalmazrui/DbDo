@@ -1,4 +1,4 @@
-// Marked-Schedule.js
+﻿// Marked-Schedule.js
 // Build a clean, accessible HTML schedule from the CURRENT view of the
 // events table and save it as MySchedule.html.
 //

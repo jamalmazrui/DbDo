@@ -1,4 +1,4 @@
--- Convention-Stats.sql
+﻿-- Convention-Stats.sql
 -- A few "who and what is most popular" questions about the NFB 2026
 -- convention, answered by counting rows in the maps table. Open
 -- NFB2026Convention.db and run this with Invoke Script; each query's

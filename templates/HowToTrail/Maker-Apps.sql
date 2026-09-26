@@ -1,4 +1,4 @@
--- Maker-Apps.sql
+﻿-- Maker-Apps.sql
 -- Each maker (a company in the contacts table) and the apps it makes, via
 -- the 'makes' relationship. Apple makes most of the built-in apps; the rest
 -- come from a wide range of third parties. The canonical "follow one record

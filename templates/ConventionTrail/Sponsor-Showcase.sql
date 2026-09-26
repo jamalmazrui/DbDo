@@ -1,4 +1,4 @@
--- Sponsor-Showcase.sql
+﻿-- Sponsor-Showcase.sql
 -- Who is backing the convention, and with what? Two questions answered
 -- from the maps table using relationship kinds OTHER than 'presents':
 -- 'sponsors' (an organization backs an event) and 'offers' (an

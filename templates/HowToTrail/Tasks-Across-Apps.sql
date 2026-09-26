@@ -1,4 +1,4 @@
--- Tasks-Across-Apps.sql
+﻿-- Tasks-Across-Apps.sql
 -- Tasks the book shows how to do in more than one app -- the payoff of
 -- keeping tasks app-agnostic and tying each app-specific procedure to the
 -- shared task through the maps table. Each row is a task and the apps that

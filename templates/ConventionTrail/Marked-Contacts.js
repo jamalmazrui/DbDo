@@ -1,4 +1,4 @@
-// Marked-Contacts.js
+﻿// Marked-Contacts.js
 // Build a vCard (.vcf) file from the CURRENT view of the contacts table and
 // save it as MyContacts.vcf, ready to import into your phone, Outlook,
 // Google Contacts, or Apple Contacts. It is the contact-card sibling of
