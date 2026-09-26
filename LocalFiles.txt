@@ -5,7 +5,14 @@
 # RepoFiles.txt; the working material that makes them is here.
 help/Tutorial_*.inix
 help/*.mp3
+help/tutorials/
 help/Tutorials.m3u
 scripts/ffmpeg.exe
 scripts/ffprobe.exe
 scripts/voices/
+exec/
+logs/
+notes/
+work/
+DbDo_JAWS.zip
+DbDo.nvda-addon

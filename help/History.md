@@ -4,7 +4,27 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.189 (current)
+## v1.0.190 (current)
+
+**DbDo builds against the current Homer kit.** The build now needs HomerDev
+1.38.3, compiles Elevate with the shared classes, and refreshes the kit's tools
+into `scripts` every time, so checkHomerApp, checkTutorial, fixEncoding, gitPush,
+gitUnpushed, homerInstall, homerTidy, installOllama, installScreenReaderSupport
+and tagRelease are always the kit's current ones. Retired near-duplicates are
+deleted rather than left to be run by mistake.
+
+**The installer is built into `exec`**, with the program and its libraries, so no
+build product sits among the sources. The install scripts moved to `scripts` and
+are installed to the program's own `scripts` folder.
+
+**F11 now comes from the kit.** DbDo tells Elevate its version and where its
+releases are, so the Help box carries a version section and offers the update.
+
+**Smaller:** the build passes an explicit argument to the tutorial tool and lets
+its progress reach the screen, and it puts every file into the Homer encoding
+before compiling.
+
+## v1.0.189
 
 **A database now carries its own view.** Which fields a row speaks, the order and
 the filter were kept only in the settings file beside the database. Email

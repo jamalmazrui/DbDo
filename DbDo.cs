@@ -11916,6 +11916,13 @@ namespace DbDo
             // What DbDo says goes into the runtime log beside what the user
             // pressed, so a log can be read as the conversation it was.
             Say.onSpoken = delegate(string sLine) { DbDoLog.write(sLine); };
+
+            // ELEVATE, SO F11 AND THE HELP BOX KNOW WHERE THE RELEASES ARE.
+            // The kit's Elevate compares this version with the latest release
+            // on GitHub and offers to fetch the installer. Lbc's Help box
+            // carries the version section that comes from it.
+            try { Elevate.configure("JamalMazrui", "DbDo", BuildInfo.VersionString); }
+            catch (Exception exElev) { try { DbDoLog.write("Elevate.configure: " + exElev.Message); } catch { } }
             Say.bExtraSpeechEnabled = string.IsNullOrEmpty(sExtra)
                 || !sExtra.Equals("N", StringComparison.OrdinalIgnoreCase);
             applyIniOverrides();
@@ -20976,13 +20983,27 @@ namespace DbDo
         // through from the start.
         private void helpTutorialsClicked(object sender, EventArgs evArgs)
         {
+            // EITHER FORM PLAYS. One recording with a chapter per walk was the
+            // old shape; the kit's tool writes one mp3 per walk into a tutorials
+            // folder, with a playlist. Take whichever is installed.
             string sPath = System.IO.Path.Combine(Homer.Paths.shippedHelp(), "Tutorials.mkv");
+            if (!System.IO.File.Exists(sPath))
+            {
+                string sFolder = System.IO.Path.Combine(Homer.Paths.shippedHelp(), "tutorials");
+                if (System.IO.Directory.Exists(sFolder))
+                {
+                    string[] aPlay = System.IO.Directory.GetFiles(sFolder, "*.m3u");
+                    if (aPlay.Length == 0) aPlay = System.IO.Directory.GetFiles(sFolder, "*.mp3");
+                    Array.Sort(aPlay);
+                    if (aPlay.Length > 0) sPath = aPlay[0];
+                }
+            }
             if (!System.IO.File.Exists(sPath))
                 sPath = System.IO.Path.Combine(Application.StartupPath, "Tutorials.mkv");
             if (!System.IO.File.Exists(sPath))
             {
                 showInfoDialog("Play Tutorials",
-                    "Tutorials.mkv is not here.\r\n\r\nIt ships with DbDo and lives in the help folder of the installation. "
+                    "The tutorials are not here.\r\n\r\nThey ship with DbDo and live in the help folder of the installation. "
                     + "If you are running from the source folder, build it by running scripts\\buildTutorials from a command prompt "
                     + "-- the first run fetches two voices and takes a few minutes.");
                 return;

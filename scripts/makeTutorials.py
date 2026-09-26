@@ -1,4 +1,4 @@
-﻿"""makeTutorial.py -- write the walkthrough section of Tutorials.md.
+﻿"""makeTutorials.py -- write the walkthrough section of Tutorials.md.
 
 WHAT IT DOES
 
@@ -41,7 +41,7 @@ if not os.path.isdir(c_sHere):
 import datetime as _dt
 c_sLogDir = os.path.join(os.path.dirname(c_sTool), "logs")
 os.makedirs(c_sLogDir, exist_ok=True)
-c_sLog = os.path.join(c_sLogDir, "DbDo-tutorials-text-%s.log" % _dt.datetime.now().strftime("%Y%m%d-%H%M%S"))
+c_sLog = os.path.join(c_sLogDir, os.path.basename(os.path.dirname(c_sTool)) + "-tutorials-text-%s.log" % _dt.datetime.now().strftime("%Y%m%d-%H%M%S"))
 import glob
 
 # EVERY SCRIPT IN THE FOLDER, in name order. Tutorial.inix is the first walk;
@@ -65,7 +65,7 @@ c_sSkeleton = """# Tutorials
 Press F1 for the guide, Alt+Shift+H for the hotkey list, and Alt+F10 for every
 command in one window.
 """
-c_sStartMark = "<!-- walkthrough: written by makeTutorial.py, do not edit between the markers -->"
+c_sStartMark = "<!-- walkthrough: written by makeTutorials.py, do not edit between the markers -->"
 c_sEndMark = "<!-- walkthrough ends -->"
 
 
@@ -155,7 +155,7 @@ def buildMarkdown(lsSections, sNumber):
             lsSteps.append(dSection)
 
     lsOut = []
-    sTitle = firstOf(dAbout, "Title") or "A Walk Through DbDo"
+    sTitle = firstOf(dAbout, "Title") or "A Walk Through This Program"
     # A TITLE THAT ALREADY CARRIES ITS NUMBER KEEPS IT ALONE. The generated
     # counter -- 0, 0a, 0b -- existed because titles had no numbers of their own;
     # with "01 - Installing DbDo" it produced "0a. 01 - Installing DbDo", which
@@ -418,18 +418,19 @@ def main():
                     if sKey != "_name":
                         dFeed[sKey] = dSection[sKey][0]
         sStem = os.path.splitext(os.path.basename(sSource))[0]
-        sAudio = os.path.join(c_sHere, sStem + ".mp3")
+        # The audio lives in help\tutorials, one .mp3 per script (25 Sep 2026).
+        sAudio = os.path.join(c_sHere, "tutorials", sStem + ".mp3")
         if os.path.isfile(sAudio):
             lsEpisodes.append({
                 "stem": sStem,
                 "number": sNumber,
                 "title": firstOf(dAbout, "Title") or sStem,
                 "intro": firstOf(dAbout, "Setup") or firstOf(dAbout, "Intro"),
-                "audio": sStem + ".mp3",
+                "audio": "tutorials/" + sStem + ".mp3",
                 "bytes": os.path.getsize(sAudio),
                 "seconds": secondsOf(sAudio)})
         else:
-            note("no audio yet for " + sStem + "; it will join the feed once sayTutorial has run")
+            note("no audio yet for " + sStem + "; it will join the feed once buildTutorials has run")
 
     try:
         sSection = c_sStartMark + "\n\n" + "\n\n".join(lsBlocks) + "\n\n" + c_sEndMark

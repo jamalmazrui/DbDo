@@ -175,6 +175,9 @@ Developer Guide</a>
 <li><a href="#what-you-need" id="toc-what-you-need">What you
 need</a></li>
 <li><a href="#building" id="toc-building">Building</a></li>
+<li><a href="#the-four-scripts-and-the-order-they-run-in"
+id="toc-the-four-scripts-and-the-order-they-run-in">The four scripts,
+and the order they run in</a></li>
 <li><a href="#the-layout" id="toc-the-layout">The layout</a></li>
 <li><a href="#checks" id="toc-checks">Checks</a></li>
 <li><a href="#keys" id="toc-keys">Keys</a></li>
@@ -214,6 +217,32 @@ help\Tutorials.mkv and the Tutorial*.mp3 files to re-record), and
 compiles <code>DbDo_setup.exe</code>. The installer will not compile
 without the tutorials: a release without them is refused at build time
 rather than shipped.</p>
+<h2 id="the-four-scripts-and-the-order-they-run-in">The four scripts,
+and the order they run in</h2>
+<ol type="1">
+<li><strong><code>buildDbDo</code></strong> – steps
+<code>version.txt</code>, writes <code>Version.cs</code>, refreshes the
+kit’s tools into <code>scripts</code>, puts the project’s files into the
+Homer encoding, compiles into <code>exec</code>, speaks any tutorial
+with no audio, and builds <code>exec\DbDo_setup.exe</code>.</li>
+<li><strong><code>scripts\gitPush "message"</code></strong> – rewrites
+the whitelist from <code>RepoFiles.txt</code>, adds what it names,
+commits, pushes.</li>
+<li><strong><code>scripts\homerTidy --do-it</code></strong> – the
+periodic clean: strays into <code>notes</code>, fetched things deleted,
+zero-byte files deleted, whitelist rewritten.</li>
+<li><strong><code>scripts\tagRelease</code></strong> – runs
+<code>checkHomerApp --build</code>, tags the pushed commit with the
+version stamped in <code>exec\DbDo_setup.exe</code>, publishes the
+installer as a GitHub release.</li>
+</ol>
+<p><code>scripts\gitUnpushed</code> undoes a local commit that should
+not go up. Every tool takes the project to be the folder it is run in,
+or its parent when that folder is <code>scripts</code> or
+<code>exec</code>.</p>
+<p><strong>The kit is a development-time dependency only.</strong> DbDo
+needs HomerDev 1.38.3 or later to build; the installed program runs with
+no kit on the machine.</p>
 <h2 id="the-layout">The layout</h2>
 <p>The development folder and the installed folder have the same shape.
 Sources and build files stay at the top, with ReadMe and License;

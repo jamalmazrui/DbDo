@@ -4,16 +4,24 @@
 #   buildTutorials Tutorial_Tagging   just that one
 #   buildTutorials -docs              documents and feed only, no speaking
 #   buildTutorials -sapi              use Windows voices; fetch nothing
-#   buildTutorials -live              perform it now through JAWS, write no file
+#   buildTutorials -live              perform it now through the screen reader, write no file
+#   buildTutorials -fetch             allowed to download engines and voices: buildHomerDev
+#                                     passes this; an app's build does not
+#   buildTutorials -build             called from a build script; means nothing else
 #
 # WHAT IT DOES, IN ORDER
 #
 #   1. Makes sure there are two voices worth listening to (see below).
-#   2. Runs makeTutorial.py: the sections of Tutorials.md and the feed.
-#   3. Speaks each script into its own .mp3.
-#   3a. Joins them into Tutorials.mkv, one chapter per tutorial, and writes
-#       Tutorials.m3u beside it.
-#   4. Runs makeTutorial.py again, so the feed picks up the audio just made.
+#   2. Runs makeTutorials.py: the sections of Tutorials.md and the feed.
+#   3. Speaks each script into its own .mp3 in help\tutorials, and writes
+#      Tutorials.m3u beside them.
+#   4. Runs makeTutorials.py again, so the feed picks up the audio just made.
+#
+# ONE .mp3 PER TUTORIAL, IN help\tutorials, AND NO Tutorials.mkv (25 Sep 2026).
+# A folder of audio files is found by anybody who looks in help, each file is
+# recognised as audio by its extension, and a person plays the one they want.
+# The single chaptered recording it used to make was one file that most
+# players treated as one track.
 #
 # THE TWO VOICES, AND WHY THESE
 #
@@ -65,10 +73,48 @@ $sTool = Split-Path -Parent $MyInvocation.MyCommand.Path
 # the voices and the log stay in scripts.
 $sHere = Join-Path (Split-Path -Parent $sTool) "help"
 if (-not (Test-Path -LiteralPath $sHere)) { $sHere = $sTool }
+$sAudioDir = Join-Path $sHere "tutorials"
+if (-not (Test-Path -LiteralPath $sAudioDir)) { New-Item -ItemType Directory -Path $sAudioDir | Out-Null }
 $sLogDir = Join-Path (Split-Path -Parent $sTool) "logs"
 if (-not (Test-Path -LiteralPath $sLogDir)) { New-Item -ItemType Directory -Path $sLogDir | Out-Null }
-$sLog = Join-Path $sLogDir ("DbDo-tutorials-" + (Get-Date -Format "yyyyMMdd-HHmmss") + ".log")
-$sTools = Join-Path $sTool "voices"
+$sLog = Join-Path $sLogDir ((Split-Path -Leaf (Split-Path -Parent $sTool)) + "-tutorials-" + (Get-Date -Format "yyyyMMdd-HHmmss") + ".log")
+# WHERE THE VOICES LIVE: ONE COPY, IN THE KIT'S exec FOLDER (25 Sep 2026).
+#
+# The rule for a shared component is one copy that every Homer app finds --
+# never a copy inside an app's own tree, fetched again for the next app. For
+# Whisper or Pandoc that copy is where their installer puts it; piper and
+# sherpa-onnx have no installer, so there is no default location to look in.
+# Every Homer app already relies on C:\HomerDev for its shared classes, so
+# the voices live there too, in exec: the Homer folder for binaries that are
+# not in git, which is what a fetched engine and the model files it needs
+# are -- the same shape as exiftool.exe with its runtime folder beside it.
+# C:\HomerDev\exec, fetched once, found by every app's build; LocalFiles.txt
+# names it as never pushed, and the kit's own build skips it.
+#
+# The order, first found wins: HOMER_VOICES, for a machine that keeps them
+# elsewhere; a Piper or sherpa-onnx folder somebody put under Program Files by
+# hand; the kit's exec folder; and, only when no kit can be found, the old
+# place beside this script. A script's [global] VoiceFolder still overrides
+# all of it for that series.
+function findKit() {
+  if ($env:HomerDev -and (Test-Path -LiteralPath (Join-Path $env:HomerDev "CSharp\Lbc.cs"))) { return $env:HomerDev }
+  if (Test-Path -LiteralPath "C:\HomerDev\CSharp\Lbc.cs") { return "C:\HomerDev" }
+  $sUp = Split-Path -Parent $sTool
+  if (Test-Path -LiteralPath (Join-Path $sUp "CSharp\Lbc.cs")) { return $sUp }
+  return ""
+}
+$sTools = ""
+if ($env:HOMER_VOICES -and (Test-Path -LiteralPath $env:HOMER_VOICES)) { $sTools = $env:HOMER_VOICES }
+if ($sTools -eq "") {
+  foreach ($sTry in @((Join-Path $env:ProgramFiles "Piper"), (Join-Path $env:ProgramFiles "sherpa-onnx"))) {
+    if (Test-Path -LiteralPath $sTry) { $sTools = $sTry; break }
+  }
+}
+if ($sTools -eq "") {
+  $sKit = findKit
+  if ($sKit -ne "") { $sTools = Join-Path $sKit "exec" }
+}
+if ($sTools -eq "") { $sTools = Join-Path $sTool "voices" }
 
 trap {
   $sWhere = ""
@@ -97,12 +143,18 @@ note ("PowerShell: " + $PSVersionTable.PSVersion.ToString())
 note ("platform: " + [Environment]::OSVersion.VersionString)
 note ("working directory: " + (Get-Location).Path)
 note ("command line: " + [Environment]::CommandLine)
+note ("voices folder: " + $sTools)
 
 # ---- what was asked for ----
 
 $bDocsOnly = $false
 $bSapi = $false
 $bLive = $false
+# ONLY THE KIT'S BUILD FETCHES (25 Sep 2026). The voices are shared by every
+# app and live in the kit's exec folder, so the kit's build is the one thing
+# that downloads them: buildHomerDev passes -fetch. An app's build finds them
+# there; when they are missing it says to run buildHomerDev, and speaks nothing.
+$bFetch = $false
 $sOnly = ""
 foreach ($sArg in $args) {
   $sTrimmed = ("" + $sArg).Trim()
@@ -110,17 +162,29 @@ foreach ($sArg in $args) {
   if ($sTrimmed -eq "-docs") { $bDocsOnly = $true; continue }
   if ($sTrimmed -eq "-sapi") { $bSapi = $true; continue }
   if ($sTrimmed -eq "-live") { $bLive = $true; continue }
+  if ($sTrimmed -eq "-fetch") { $bFetch = $true; continue }
+  # -build says "called from a build script" and means nothing else. It exists
+  # because cmd's %* is NOT reset by a bare "call": buildHomerScribe was run
+  # as "buildHomerScribe nobump", called this tool with no arguments, and
+  # "nobump" arrived here as a script name. A build always passes -build, so
+  # %* is its own again. Any other dash-argument is noted and ignored.
+  if ($sTrimmed -eq "-build") { continue }
+  if ($sTrimmed.StartsWith("-")) { Write-Host ("Ignoring an argument this tool does not know: " + $sTrimmed); continue }
   if ($sTrimmed.StartsWith("-")) { note ("ignoring unknown switch " + $sTrimmed); continue }
   $sOnly = [System.IO.Path]::GetFileNameWithoutExtension($sTrimmed)
 }
-note ("docs only: " + $bDocsOnly + ", Windows voices: " + $bSapi + ", live: " + $bLive + ", only: " + $sOnly)
+note ("docs only: " + $bDocsOnly + ", Windows voices: " + $bSapi + ", live: " + $bLive + ", fetch: " + $bFetch + ", only: " + $sOnly)
 
 # ---- the scripts to build ----
 
 $lsScripts = @()
 if ($sOnly -ne "") {
   $sOne = Join-Path $sHere ($sOnly + ".inix")
-  if (-not (Test-Path -LiteralPath $sOne)) { say ($sOnly + ".inix is not here."); exit 1 }
+  if (-not (Test-Path -LiteralPath $sOne)) {
+    $lsHave = @(Get-ChildItem -LiteralPath $sHere -Filter "Tutorial*.inix" -ErrorAction SilentlyContinue | ForEach-Object { $_.BaseName })
+    say ($sOnly + ".inix is not here. The scripts in " + $sHere + " are: " + $(if ($lsHave.Count -gt 0) { $lsHave -join ", " } else { "none" }))
+    exit 1
+  }
   $lsScripts = @($sOne)
 }
 else {
@@ -180,8 +244,23 @@ function runVoice([string] $sExe, [string[]] $lsArgs, [object] $oInput, [string]
     note (("  " + $sLabel + " threw: " + $_.Exception.Message))
   }
   finally { $ErrorActionPreference = $sPrevious }
+  # sherpa-onnx writes its whole configuration, a progress line per chunk and
+  # its timings to standard error; PowerShell wraps the first such line as a
+  # "NativeCommandError". None of it is an error. Of a Kokoro run only the
+  # timing lines and anything that looks wrong are kept in the log.
+  # PowerShell wraps the first line a native program writes to standard error
+  # in a NativeCommandError record: five lines of "At C:\...", "+ ...",
+  # "CategoryInfo" and "FullyQualifiedErrorId" per piece, none of them from
+  # the program. piper's "[info]" lines are its progress. A seven-walk run
+  # logged 186 KB of this on 25 Sep 2026. Dropped; a real message survives.
+  $bKokoroRun = $sLabel.StartsWith("kokoro")
   foreach ($sLine in ($sOut -split "`r?`n")) {
-    if ($sLine.Trim() -ne "") { note ("  " + $sLabel + " | " + $sLine.Trim()) }
+    $sTrim = $sLine.Trim()
+    if ($sTrim -eq "") { continue }
+    if ($sTrim -match "^(At line:|At [A-Z]:\\|\+ |CategoryInfo|FullyQualifiedErrorId|~+$)") { continue }
+    if ($sTrim -match "\[info\]") { continue }
+    if ($bKokoroRun -and -not ($sTrim -match "Elapsed seconds|RTF|error|fail|not found|cannot|unable")) { continue }
+    note ("  " + $sLabel + " | " + $sTrim)
   }
   return $LASTEXITCODE
 }
@@ -199,8 +278,8 @@ function runMake() {
   # Take the code runVoice RETURNS. $LASTEXITCODE is whatever the last native
   # command in this session set, which after a skipped or wrapped call is
   # nothing at all -- the log showed "exit code: " with a blank after it.
-  $iExit = runVoice $sPython @((Join-Path $sTool "makeTutorial.py")) $null "makeTutorial"
-  note ("makeTutorial.py exit code: " + $iExit)
+  $iExit = runVoice $sPython @((Join-Path $sTool "makeTutorials.py")) $null "makeTutorial"
+  note ("makeTutorials.py exit code: " + $iExit)
   return ($iExit -eq 0)
 }
 
@@ -250,7 +329,7 @@ if (-not $bSapi -and -not $bLive) {
 
   # PIPER: the narrator. A release zip and one voice, both fetched once.
   $sPiper = Join-Path $sTools "piper\piper.exe"
-  if (-not (Test-Path -LiteralPath $sPiper)) {
+  if (-not (Test-Path -LiteralPath $sPiper) -and $bFetch) {
     say "Fetching the narrator voice. This happens once."
     $sZip = Join-Path $sTools "piper.zip"
     if (fetchTo "https://github.com/rhasspy/piper/releases/latest/download/piper_windows_amd64.zip" $sZip) {
@@ -271,16 +350,102 @@ if (-not $bSapi -and -not $bLive) {
   }
   note ("piper: " + $sPiper + ", present: " + (Test-Path -LiteralPath $sPiper))
 
+  # KOKORO, THROUGH SHERPA-ONNX: the better voice, when it can be fetched.
+  #
+  # Re-investigated 25 September 2026. Kokoro-82M is an open-weight neural
+  # voice model under Apache 2.0, trained on public-domain audio, audio under
+  # permissive licences, and synthetic audio -- no share-alike clause and no
+  # non-commercial clause anywhere in it, so audio made with it can be
+  # published under MIT beside the program. It is markedly more natural than
+  # piper's medium voices. sherpa-onnx (also Apache 2.0) runs it on Windows
+  # as one executable, sherpa-onnx-offline-tts.exe, with the espeak data it
+  # needs inside the model bundle: no Python, nothing to install.
+  #
+  # Both are fetched once into the voices folder: the newest sherpa-onnx
+  # Windows x64 build (found through the GitHub API, preferring the static
+  # one), and the int8 English Kokoro bundle. If either cannot be fetched,
+  # piper does the job as before -- the log says which.
+  $sSherpa = ""
+  $sKokoroDir = Join-Path $sTools "kokoro-int8-en-v0_19"
+  $oFound = Get-ChildItem -LiteralPath $sTools -Filter "sherpa-onnx-offline-tts.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+  if ($oFound) { $sSherpa = $oFound.FullName }
+  # A WRONG PACKAGE, FETCHED ON 25 SEP 2026 AND CLEARED HERE: the "static-MD-
+  # Debug-lib" package is libraries for linking, hundreds of megabytes and no
+  # executable. The package with bin\sherpa-onnx-offline-tts.exe is the SHARED
+  # one -- win-x64-shared.tar.bz2 -- so that is the only one taken now, and a
+  # folder left by the wrong one is removed.
+  foreach ($oOld in (Get-ChildItem -LiteralPath $sTools -Directory -Filter "sherpa-onnx-*" -ErrorAction SilentlyContinue)) {
+    if ($oOld.Name -match "lib|Debug|static" -and -not (Get-ChildItem -LiteralPath $oOld.FullName -Filter "sherpa-onnx-offline-tts.exe" -Recurse -ErrorAction SilentlyContinue)) {
+      try { Remove-Item -LiteralPath $oOld.FullName -Recurse -Force; note ("removed a sherpa-onnx package with no executable: " + $oOld.FullName) } catch { }
+    }
+  }
+  if ($sSherpa -eq "" -and $bFetch) {
+    say "Fetching the Kokoro voice engine. This happens once."
+    $sUrl = ""
+    try {
+      $oRel = Invoke-RestMethod -Uri "https://api.github.com/repos/k2-fsa/sherpa-onnx/releases/latest" -Headers @{ "User-Agent" = "HomerDev-buildTutorials" } -UseBasicParsing
+      $lsWin = @($oRel.assets | Where-Object { $_.name -match "win-x64" -and $_.name -match "\.tar\.bz2$" -and $_.name -notmatch "cuda|directml|arm|lib|Debug|no-tts" })
+      $oPick = $lsWin | Where-Object { $_.name -match "win-x64-shared\.tar\.bz2$" } | Select-Object -First 1
+      if (-not $oPick) { $oPick = $lsWin | Where-Object { $_.name -match "shared" } | Select-Object -First 1 }
+      if ($oPick) { $sUrl = $oPick.browser_download_url; note ("sherpa-onnx asset: " + $oPick.name) }
+      else { note ("no sherpa-onnx package with executables among: " + (($oRel.assets | ForEach-Object { $_.name }) -join ", ")) }
+    }
+    catch { note ("GitHub API could not be read for sherpa-onnx: " + $_.Exception.Message) }
+    if ($sUrl -ne "") {
+      $sTar = Join-Path $sTools "sherpa-onnx.tar.bz2"
+      if (fetchTo $sUrl $sTar) {
+        # Windows carries tar (libarchive) since 2018, and it reads bzip2.
+        $iExit = runVoice "tar.exe" @("-xf", $sTar, "-C", $sTools) $null "tar-sherpa"
+        note ("tar exit code: " + $iExit)
+        try { Remove-Item -LiteralPath $sTar -Force } catch { }
+        $oFound = Get-ChildItem -LiteralPath $sTools -Filter "sherpa-onnx-offline-tts.exe" -Recurse -ErrorAction SilentlyContinue | Select-Object -First 1
+        if ($oFound) { $sSherpa = $oFound.FullName }
+      }
+    }
+  }
+  # The int8 bundle names its model model.int8.onnx; the fp32 one, model.onnx.
+  # On 25 Sep 2026 the bundle was fetched and unpacked and then not recognised,
+  # because only the second name was looked for.
+  function kokoroModel() {
+    foreach ($sName in @("model.int8.onnx", "model.onnx")) {
+      $sTry = Join-Path $sKokoroDir $sName
+      if (Test-Path -LiteralPath $sTry) { return $sTry }
+    }
+    return ""
+  }
+  if ($sSherpa -ne "" -and $bFetch -and (kokoroModel) -eq "") {
+    say "Fetching the Kokoro voices. This happens once."
+    $sTar = Join-Path $sTools "kokoro.tar.bz2"
+    if (fetchTo "https://github.com/k2-fsa/sherpa-onnx/releases/download/tts-models/kokoro-int8-en-v0_19.tar.bz2" $sTar) {
+      $iExit = runVoice "tar.exe" @("-xf", $sTar, "-C", $sTools) $null "tar-kokoro"
+      note ("tar exit code: " + $iExit)
+      try { Remove-Item -LiteralPath $sTar -Force } catch { }
+    }
+  }
+  $sKokoroModel = kokoroModel
+  $bKokoro = ($sSherpa -ne "") -and ($sKokoroModel -ne "")
+  note ("kokoro: " + $bKokoro + ", engine " + $sSherpa + ", model folder " + $sKokoroDir)
+  if (-not $bKokoro -and $bFetch) { say "Kokoro is not available, so piper speaks these." }
+  # ONE LINE SAYING WHICH VOICES, AND FROM WHERE. On 25 Sep 2026 a build was
+  # stopped by hand because its screen said nothing for three minutes and the
+  # person took the silence for a second download of the voices.
+  if ($bKokoro) { say ("Voices: Kokoro for the narrator, piper for the reader, from " + $sTools + ". Nothing is downloaded.") }
+  elseif ($sPiper -ne "" -and $sPiperVoice -ne "") { say ("Voices: piper, from " + $sTools + ". Nothing is downloaded.") }
+
   # TWO NEURAL VOICES, ONE ENGINE.
   #
   # fetchVoice takes a piper voice name -- speaker and quality -- and brings back
   # the model and its settings file, once.
   function fetchVoice([string] $sSpeaker, [string] $sQuality) {
     $sName = "en_US-" + $sSpeaker + "-" + $sQuality
-    $sModel = Join-Path $sTools ($sName + ".onnx")
+    # Beside piper.exe, so exec holds one folder per engine.
+    $sPiperDir = Join-Path $sTools "piper"
+    if (-not (Test-Path -LiteralPath $sPiperDir)) { New-Item -ItemType Directory -Path $sPiperDir -Force | Out-Null }
+    $sModel = Join-Path $sPiperDir ($sName + ".onnx")
     $sJson = $sModel + ".json"
     $sBase = "https://huggingface.co/rhasspy/piper-voices/resolve/main/en/en_US/" + $sSpeaker + "/" + $sQuality + "/"
     if (-not (Test-Path -LiteralPath $sModel)) {
+      if (-not $bFetch) { return "" }
       if (-not (fetchTo ($sBase + $sName + ".onnx") $sModel)) { return "" }
     }
     if (-not (Test-Path -LiteralPath $sJson)) {
@@ -473,8 +638,26 @@ if ($bLive) {
 # 0 leaves the pitch alone.
 $dNarratorScale = 0.80
 $dNarratorPitch = -2
-$dReaderScale = 0.56
+# READER SLOWER THAN IT WAS (25 Sep 2026). A beta tester asked for "a bit
+# slower"; 0.56 was brisk even for a practised listener. 0.64 keeps the reader
+# faster than the narrator, which is what tells them apart, and can be set per
+# series with ReaderScale in [global].
+$dReaderScale = 0.64
 $dReaderNoise = 0.333
+# KOKORO SPEAKERS, by index in the English v0.19 voice pack: 0 af, 1 af_bella,
+# 2 af_nicole, 3 af_sarah, 4 af_sky, 5 am_adam, 6 am_michael, 7 bf_emma,
+# 8 bf_isabella, 9 bm_george, 10 bm_lewis. The narrator is af_sarah, a clear
+# American woman; the reader am_michael, an even American man -- the same
+# pairing as piper's kristin and john, so the two are told apart the same way.
+# KokoroNarrator and KokoroReader in [global] change them.
+$iKokoroNarrator = 3
+$iKokoroReader = 6
+$bKokoroForReader = $false
+$dReaderGain = 1.0
+if ($null -eq $bKokoro) { $bKokoro = $false }
+if ($null -eq $sSherpa) { $sSherpa = "" }
+if ($null -eq $sKokoroDir) { $sKokoroDir = "" }
+if ($null -eq $sKokoroModel) { $sKokoroModel = "" }
 # Silence before the first word of a script, and after each passage. The lead-in
 # exists because the screen reader is usually still announcing that a program
 # opened when the audio starts.
@@ -537,7 +720,8 @@ function resolveVoice([string] $sName) {
 function applyGlobal($dGlobal) {
   if ($null -eq $dGlobal) { return }
   foreach ($sKey in @("NarratorVoice", "ReaderVoice", "NarratorPitch", "NarratorScale", "ReaderScale",
-                      "ReaderFlatness", "LeadIn", "Gap", "VoiceFolder", "PiperPath", "FfmpegPath")) {
+                      "ReaderFlatness", "LeadIn", "Gap", "VoiceFolder", "PiperPath", "FfmpegPath",
+                      "KokoroNarrator", "KokoroReader", "Engine", "ReaderGain", "ReaderOnKokoro")) {
     if (-not $dGlobal.ContainsKey($sKey)) { continue }
     $sValue = ([string] $dGlobal[$sKey][0]).Trim()
     if ($sValue -eq "") { continue }
@@ -553,6 +737,11 @@ function applyGlobal($dGlobal) {
       "VoiceFolder"    { if (Test-Path -LiteralPath $sValue) { $script:sTools = $sValue } }
       "PiperPath"      { if (Test-Path -LiteralPath $sValue) { $script:sPiper = $sValue } }
       "FfmpegPath"     { if (Test-Path -LiteralPath $sValue) { $script:sFfmpeg = $sValue } }
+      "KokoroNarrator" { $script:iKokoroNarrator = [int] $sValue }
+      "KokoroReader"   { $script:iKokoroReader = [int] $sValue }
+      "Engine"         { if ($sValue -eq "piper") { $script:bKokoro = $false } }
+      "ReaderGain"     { $script:dReaderGain = [double] $sValue }
+      "ReaderOnKokoro" { $script:bKokoroForReader = ($sValue -eq "1" -or $sValue.ToLower() -eq "yes") }
     }
     note ("[global] " + $sKey + " = " + $sValue)
   }
@@ -560,16 +749,92 @@ function applyGlobal($dGlobal) {
 
 function buildOne([string] $sScript) {
   $sStem = [System.IO.Path]::GetFileNameWithoutExtension($sScript)
-  $sOut = Join-Path $sHere ($sStem + ".mp3")
+  $sOut = Join-Path $sAudioDir ($sStem + ".mp3")
   $sWork = Join-Path $env:TEMP ("buildTutorial_" + [Guid]::NewGuid().ToString("N"))
   $script:iPiece = 0
   $script:lsPieces = New-Object System.Collections.Generic.List[string]
   if (-not $bLive) { New-Item -ItemType Directory -Path $sWork -Force | Out-Null }
   note ("building " + $sStem + ", work folder " + $sWork)
+  $dtStarted = Get-Date
 
   function pieceFile() {
     $script:iPiece = $script:iPiece + 1
     return (Join-Path $sWork ("piece_{0:D4}.wav" -f $script:iPiece))
+  }
+
+  function kokoroChunks([string] $sText) {
+    # LONG UNBROKEN TEXT IS WHAT MAKES KOKORO SLOW. On 25 Sep 2026 a web
+    # address spelled out as words -- eighty characters with no full stop --
+    # took 71 seconds for 8 seconds of speech, nine times real time, while an
+    # ordinary sentence ran at two. The model's cost climbs with the length of
+    # what it is handed at once. So the text is cut at sentence ends and, when
+    # a sentence is still long, at commas, into pieces of about 120 characters,
+    # spoken one after another and joined.
+    $lsOut = New-Object System.Collections.Generic.List[string]
+    $lsSentences = [regex]::Split($sText, "(?<=[.!?])\s+")
+    foreach ($sSentence in $lsSentences) {
+      $sSentence = $sSentence.Trim()
+      if ($sSentence -eq "") { continue }
+      if ($sSentence.Length -le 120) { $lsOut.Add($sSentence); continue }
+      $sPending = ""
+      foreach ($sPart in [regex]::Split($sSentence, "(?<=,)\s+")) {
+        if ($sPending -ne "" -and ($sPending.Length + $sPart.Length) -gt 120) { $lsOut.Add($sPending.Trim()); $sPending = "" }
+        $sPending = ($sPending + " " + $sPart).Trim()
+      }
+      if ($sPending -ne "") { $lsOut.Add($sPending) }
+    }
+    return $lsOut
+  }
+
+  function speakKokoro([string] $sText, [int] $iSpeaker, [double] $dScale, [string] $sFile, [string] $sLabel) {
+    # sherpa-onnx writes a 24 kHz wave; every other piece is 22050 Hz mono, and
+    # the join expects one format, so the piece is resampled in place. Each
+    # chunk is spoken on its own and the chunks are joined into $sFile.
+    #
+    # THREADS: two. Measured on 25 Sep 2026: two threads gave 1.6 times real
+    # time, every core gave 3 -- the model does not parallelise, and the extra
+    # threads only fight each other.
+    $sInv = [System.Globalization.CultureInfo]::InvariantCulture
+    $lsParts = New-Object System.Collections.Generic.List[string]
+    $iChunk = 0
+    foreach ($sChunk in (kokoroChunks $sText)) {
+      $iChunk = $iChunk + 1
+      $sRaw = $sFile + ".k" + $iChunk + ".wav"
+      runVoice $sSherpa @(("--kokoro-model=" + $sKokoroModel),
+                          ("--kokoro-voices=" + (Join-Path $sKokoroDir "voices.bin")),
+                          ("--kokoro-tokens=" + (Join-Path $sKokoroDir "tokens.txt")),
+                          ("--kokoro-data-dir=" + (Join-Path $sKokoroDir "espeak-ng-data")),
+                          ("--kokoro-length-scale=" + [string]::Format($sInv, "{0:0.00}", $dScale)),
+                          "--num-threads=2", ("--sid=" + $iSpeaker), ("--output-filename=" + $sRaw), $sChunk) $null $sLabel | Out-Null
+      if (Test-Path -LiteralPath $sRaw) { $lsParts.Add($sRaw) }
+    }
+    if ($lsParts.Count -eq 0) { return }
+    if ($lsParts.Count -eq 1) {
+      runVoice $sFfmpeg @("-y", "-loglevel", "error", "-i", $lsParts[0], "-ar", "22050", "-ac", "1", $sFile) $null "ffmpeg-resample" | Out-Null
+    }
+    else {
+      $sList = $sFile + ".chunks.txt"
+      Set-Content -LiteralPath $sList -Value ($lsParts | ForEach-Object { "file '" + $_.Replace("'", "'\''") + "'" }) -Encoding ASCII
+      runVoice $sFfmpeg @("-y", "-loglevel", "error", "-f", "concat", "-safe", "0", "-i", $sList, "-ar", "22050", "-ac", "1", $sFile) $null "ffmpeg-chunks" | Out-Null
+      try { Remove-Item -LiteralPath $sList -Force } catch { }
+    }
+    foreach ($sPart in $lsParts) { try { Remove-Item -LiteralPath $sPart -Force } catch { } }
+  }
+
+  function evenOut([string] $sFile, [double] $dGain) {
+    # EVERY PIECE AT THE SAME LOUDNESS. Two engines, two speakers, two
+    # settings: the narrator came out noticeably louder than the reader. Each
+    # piece is brought to the same measured loudness before the join, and the
+    # reader's pieces are then scaled by ReaderGain, 1.0 unless a series sets
+    # it in [global].
+    if (-not (Test-Path -LiteralPath $sFile)) { return }
+    $sInv = [System.Globalization.CultureInfo]::InvariantCulture
+    $sEven = $sFile + ".even.wav"
+    $sFilter = "loudnorm=I=-16:TP=-1.5:LRA=11"
+    if ($dGain -ne 1.0) { $sFilter = $sFilter + ",volume=" + [string]::Format($sInv, "{0:0.00}", $dGain) }
+    $iEven = runVoice $sFfmpeg @("-y", "-loglevel", "error", "-i", $sFile, "-af", $sFilter, "-ar", "22050", "-ac", "1", $sEven) $null "ffmpeg-loudness"
+    if ($iEven -ne 0 -or -not (Test-Path -LiteralPath $sEven)) { note ("  loudness NOT evened for " + [System.IO.Path]::GetFileName($sFile) + ", exit " + $iEven + "; the piece is used as spoken"); return }
+    Move-Item -LiteralPath $sEven -Destination $sFile -Force
   }
 
   function speakNarrator([string] $sText) {
@@ -582,7 +847,10 @@ function buildOne([string] $sScript) {
       return
     }
     $sFile = pieceFile
-    if (-not $bWindowsVoices) {
+    if ($bKokoro -and -not $bWindowsVoices) {
+      speakKokoro $sText $iKokoroNarrator $dNarratorScale $sFile "kokoro"
+    }
+    elseif (-not $bWindowsVoices) {
       # Piper reads its text from standard input and writes one wave file.
       # The narrator keeps piper's own variation, which is what makes a voice
       # sound like somebody rather than something, and a half-second between
@@ -611,6 +879,7 @@ function buildOne([string] $sScript) {
       $oSpeaker.Speak($sText)
       $oSpeaker.SetOutputToNull()
     }
+    evenOut $sFile 1.0
     if (Test-Path -LiteralPath $sFile) { $script:lsPieces.Add($sFile) }
     else { note ("no audio made for: " + $sText) }
     note ("narrator: " + $sText)
@@ -624,7 +893,15 @@ function buildOne([string] $sScript) {
       return
     }
     $sFile = pieceFile
-    if (-not $bWindowsVoices) {
+    # THE READER SPEAKS THROUGH PIPER EVEN WHEN KOKORO IS HERE (25 Sep 2026).
+    # Half the lines in a walk are the reader's, and piper speaks a line in a
+    # second where Kokoro takes twenty; piper's john, flattened, is also what a
+    # screen reader sounds like. Kokoro's naturalness goes where it is heard,
+    # the narrator. KokoroReader=1 in [global] puts the reader on Kokoro too.
+    if ($bKokoro -and $bKokoroForReader -and -not $bWindowsVoices) {
+      speakKokoro $sText $iKokoroReader $dReaderScale $sFile "kokoro-sr"
+    }
+    elseif (-not $bWindowsVoices) {
       # SR SPEAKS THROUGH THE SAME NEURAL ENGINE, faster and in another voice.
       #
       # eSpeak was the wrong choice and the research says why: NVDA's default on
@@ -661,6 +938,7 @@ function buildOne([string] $sScript) {
       $oSpeaker.Speak($sText)
       $oSpeaker.SetOutputToNull()
     }
+    evenOut $sFile $dReaderGain
     if (Test-Path -LiteralPath $sFile) { $script:lsPieces.Add($sFile) }
     else { note ("no audio made for: " + $sText) }
     note ("reader: " + $sText)
@@ -681,6 +959,8 @@ function buildOne([string] $sScript) {
   $lsSteps = @($lsSections | Where-Object { $_["_name"] -eq "step" })
   if ($lsSteps.Count -eq 0) { say ($sStem + " holds 0 steps."); return $false }
   note ($sStem + ": steps " + $lsSteps.Count)
+  say ("Creating " + $sStem + ".mp3, " + $lsSteps.Count + " steps. A few minutes.")
+  note ("loudness: every piece to loudnorm I=-16 TP=-1.5 LRA=11; reader gain " + $dReaderGain.ToString([System.Globalization.CultureInfo]::InvariantCulture))
 
   # A BEAT BEFORE ANYTHING IS SAID.
   #
@@ -700,7 +980,10 @@ function buildOne([string] $sScript) {
   # reader said anything. The listener hears the reader within one sentence now,
   # and the starting state is in the transcript for anybody who wants it.
 
+  $iStepAt = 0
   foreach ($dStep in $lsSteps) {
+    $iStepAt = $iStepAt + 1
+    if ($iStepAt -gt 1 -and (($iStepAt - 1) % 4) -eq 0) { say ("  step " + $iStepAt + " of " + $lsSteps.Count) }
     # Pause= is the one piece of timing a script can set for itself: seconds of
     # silence before the step is spoken. SSML calls this <break time="2s"/>; our
     # key is the same idea with the angle brackets left off. Everything else --
@@ -735,8 +1018,43 @@ function buildOne([string] $sScript) {
   note ("ffmpeg exit code: " + $iExit)
   try { Remove-Item -LiteralPath $sWork -Recurse -Force } catch { note ("could not clear " + $sWork) }
   if ($iExit -ne 0 -or -not (Test-Path -LiteralPath $sOut)) { say ($sStem + " could not be joined."); return $false }
-  say ("Wrote " + [System.IO.Path]::GetFileName($sOut))
+  $dTook = ((Get-Date) - $dtStarted).TotalSeconds
+  $sTook = $(if ($dTook -lt 90) { ([int]$dTook).ToString() + " seconds" } else { ([int][Math]::Round($dTook / 60.0)).ToString() + " minutes" })
+  say ("Created " + [System.IO.Path]::GetFileName($sOut) + " in " + $sTook + ".")
   return $true
+}
+
+# THE SCRIPTS ARE CHECKED BEFORE ANYTHING IS SPOKEN (25 Sep 2026). checkTutorial
+# reads every script against the format and the reader's grammar -- a key with
+# no reader line and no named silence, "Alt+T" where the reader says the words,
+# a screen reader named, a file name written rather than said. Speaking a
+# script with a problem in it wastes the minutes and publishes the mistake, so
+# nothing is spoken while it reports one. -docs and -live skip this.
+if (-not $bDocsOnly -and -not $bLive) {
+  $sCheck = Join-Path $sTool "checkTutorial.py"
+  $sPyForCheck = ""
+  foreach ($sTry in @("python.exe", "py.exe")) {
+    $oFound = Get-Command $sTry -ErrorAction SilentlyContinue
+    if ($oFound -and $sPyForCheck -eq "") { $sPyForCheck = $oFound.Source }
+  }
+  if ((Test-Path -LiteralPath $sCheck) -and $sPyForCheck -ne "") {
+    $iCheck = runVoice $sPyForCheck @($sCheck) $null "checkTutorial"
+    note ("checkTutorial exit code: " + $iCheck)
+    if ($iCheck -ne 0) {
+      say "The tutorial scripts have problems; see above and the tutorials-check log. Nothing was spoken."
+      exit 1
+    }
+  }
+}
+
+# NO VOICES AND NOT ALLOWED TO FETCH THEM: say where they come from, and stop.
+if (-not $bSapi -and -not $bLive -and -not $bDocsOnly) {
+  $bHaveVoice = ($bKokoro) -or ($sPiper -ne "" -and $sPiperVoice -ne "")
+  if (-not $bHaveVoice) {
+    say "No voices in $sTools. Run buildHomerDev: the kit's build fetches them, once, for every app."
+    note "stopping: no voices and -fetch not given"
+    exit 1
+  }
 }
 
 # ---- step 3 of 4: speak them ----
@@ -748,7 +1066,7 @@ function buildOne([string] $sScript) {
 $iDone = 0
 $iKept = 0
 foreach ($sScript in $lsScripts) {
-  $sHave = Join-Path $sHere ([System.IO.Path]::GetFileNameWithoutExtension($sScript) + ".mp3")
+  $sHave = Join-Path $sAudioDir ([System.IO.Path]::GetFileNameWithoutExtension($sScript) + ".mp3")
   if (-not $bLive -and $sOnly -eq "" -and (Test-Path -LiteralPath $sHave)) {
     note ("kept " + $sHave + ", already spoken")
     $iKept = $iKept + 1
@@ -760,110 +1078,36 @@ foreach ($sScript in $lsScripts) {
 if ($iKept -gt 0) { say ("Kept " + $iKept + " tutorial" + $(if ($iKept -eq 1) { "" } else { "s" }) + " already spoken.") }
 $oSpeaker.Dispose()
 
-# ---- step 4 of 5: one file with a chapter for each tutorial ----
+# ---- step 4 of 5: the playlist ----
 #
-# The separate .mp3 files are what a feed wants. One file with a chapter per
-# tutorial is what a person wants who is going to sit and listen through them,
-# and what the Homer Player in FileDir opens as a set of tracks. Matroska holds
-# both the audio and the chapter names, so the tracks are called what the
-# tutorials are called rather than "track 3".
-#
-# Tutorials.m3u is written beside it: a plain playlist of the same files, in the
-# same order, for any player that reads a list rather than a container.
+# Tutorials.m3u, beside the .mp3 files in help\tutorials: a plain playlist in
+# tutorial order, for any player that reads one -- the Homer Player in FileDir
+# opens it as one track per tutorial, named for the tutorial. No Tutorials.mkv
+# any more: see the note at the top.
 
-function buildOneFile() {
-  # ONE TRACK PER TUTORIAL.
-  #
-  # Chapters gave the Player "1 track", which is literally what a chaptered file
-  # is: one continuous recording with marks in it. A track list needs tracks, so
-  # Tutorials.mkv carries nine audio streams, each titled with its tutorial's
-  # name, and the Player lists nine.
-  #
-  # The trade-off, stated because it is real: a container's audio streams are
-  # ALTERNATIVES by convention -- the way a film holds English and French -- so a
-  # player that follows the convention plays one and waits rather than running
-  # on to the next. Moving between tracks is a keystroke; automatic advance is
-  # what Tutorials.m3u is for, since a playlist of nine files advances by itself
-  # in any player that reads one.
-  #
-  # Both are written every run. Whichever the Player prefers is there.
-  $lsParts = @()
-  $lsTitles = @()
+function writePlaylist() {
+  $lsM3u = @("#EXTM3U")
+  $iListed = 0
   foreach ($sScript in $lsScripts) {
     $sStem = [System.IO.Path]::GetFileNameWithoutExtension($sScript)
-    $sMp3 = Join-Path $sHere ($sStem + ".mp3")
+    $sMp3 = Join-Path $sAudioDir ($sStem + ".mp3")
     if (-not (Test-Path -LiteralPath $sMp3)) { continue }
-    $lsParts += $sMp3
     $sTitle = $sStem
     foreach ($sLine in (Get-Content -LiteralPath $sScript)) {
       if ($sLine -match "^\s*Title\s*=\s*(.+?)\s*$") { $sTitle = $matches[1]; break }
     }
-    $lsTitles += $sTitle
+    $lsM3u += ("#EXTINF:-1," + $sTitle)
+    $lsM3u += ($sStem + ".mp3")
+    $iListed = $iListed + 1
   }
-  if ($lsParts.Count -eq 0) { say "No audio to join."; return $false }
-
-  $sM3u = Join-Path $sHere "Tutorials.m3u"
-  $lsM3u = @("#EXTM3U")
-  for ($i = 0; $i -lt $lsParts.Count; $i++) {
-    $lsM3u += ("#EXTINF:-1," + $lsTitles[$i])
-    $lsM3u += [System.IO.Path]::GetFileName($lsParts[$i])
-  }
+  if ($iListed -eq 0) { say "No audio to list."; return $false }
+  $sM3u = Join-Path $sAudioDir "Tutorials.m3u"
   [System.IO.File]::WriteAllLines($sM3u, $lsM3u, (New-Object System.Text.UTF8Encoding($false)))
-  note ("wrote " + $sM3u)
-
-  # ONE RECORDING, MARKED OFF INTO TUTORIALS.
-  #
-  # FileDir's Control+Shift+L is a play list BUILDER: it writes an .m3u naming
-  # the items you have tagged. One .mkv is one item, so it reports one track,
-  # and no arrangement of audio streams inside the file changes that -- a
-  # container's streams are alternatives, not a sequence, which is also why only
-  # the first played when it held nine.
-  #
-  # So the file distributed in the repository is one continuous recording with a
-  # CHAPTER at the start of each tutorial: it plays through by itself, and a
-  # player that reads chapters lists them by name. The .m3u beside it names the
-  # nine .mp3 files for anybody who keeps them.
-  $sList = Join-Path $env:TEMP ("tutorials_" + [guid]::NewGuid().ToString("N") + ".txt")
-  $sMeta = Join-Path $env:TEMP ("chapters_" + [guid]::NewGuid().ToString("N") + ".txt")
-  $lsList = @()
-  $lsMeta = @(";FFMETADATA1", "title=DbDo Walkthroughs", "artist=Jamal Mazrui",
-              "album=DbDo Walkthroughs", "genre=Speech", "comment=Simulated walkthroughs of DbDo using the JobTrail sample database. Speech synthesised with piper, voices kristin and john, both trained on public domain recordings.")
-  $dStart = 0.0
-  for ($i = 0; $i -lt $lsParts.Count; $i++) {
-    $sPart = $lsParts[$i]
-    $lsList += ("file '" + $sPart.Replace("'", "'\''") + "'")
-    $sPrevious = $ErrorActionPreference
-    $ErrorActionPreference = "Continue"
-    $sProbe = (& $sFfmpeg -i $sPart 2>&1 | Out-String) | Select-String -Pattern "Duration: (\d+):(\d+):([\d.]+)"
-    $ErrorActionPreference = $sPrevious
-    $dSeconds = 0.0
-    if ($sProbe) {
-      $oM = $sProbe.Matches[0]
-      $dSeconds = ([double]$oM.Groups[1].Value) * 3600 + ([double]$oM.Groups[2].Value) * 60 + [double]$oM.Groups[3].Value
-    }
-    $dEnd = $dStart + $dSeconds
-    $sTitle = $lsTitles[$i]
-    foreach ($sCh in @("\", "=", ";", "#")) { $sTitle = $sTitle.Replace($sCh, "\" + $sCh) }
-    $lsMeta += @("[CHAPTER]", "TIMEBASE=1/1000", ("START=" + [int]($dStart * 1000)),
-                 ("END=" + [int]($dEnd * 1000)), ("title=" + $sTitle))
-    $dStart = $dEnd
-  }
-  [System.IO.File]::WriteAllLines($sList, $lsList, (New-Object System.Text.ASCIIEncoding))
-  # No byte order mark: ffmetadata must begin with ";FFMETADATA1".
-  [System.IO.File]::WriteAllLines($sMeta, $lsMeta, (New-Object System.Text.UTF8Encoding($false)))
-  $sOut = Join-Path $sHere "Tutorials.mkv"
-  $iExit = runVoice $sFfmpeg @("-y", "-loglevel", "error", "-f", "concat", "-safe", "0",
-                               "-i", $sList, "-f", "ffmetadata", "-i", $sMeta, "-map_metadata", "1",
-                               "-map", "0:a", "-c:a", "libmp3lame", "-q:a", "4",
-                               "-ar", "22050", "-ac", "1", $sOut) $null "ffmpeg"
-  note ("ffmpeg exit code (one file): " + $iExit)
-  try { Remove-Item -LiteralPath $sList, $sMeta -Force } catch { }
-  if ($iExit -ne 0 -or -not (Test-Path -LiteralPath $sOut)) { say "Tutorials.mkv could not be written."; return $false }
-  say ("Wrote Tutorials.mkv: one recording, " + $lsParts.Count + " chapters, with title and credits. Tutorials.m3u names the same " + $lsParts.Count + " files.")
+  say ("Wrote Tutorials.m3u naming " + $iListed + " tutorial" + $(if ($iListed -eq 1) { "" } else { "s" }) + ".")
   return $true
 }
 
-if (-not $bLive -and $iDone -gt 0) { buildOneFile | Out-Null }
+if (-not $bLive -and $iDone -gt 0) { writePlaylist | Out-Null }
 
 # ---- step 5 of 5: the feed, now that the audio exists ----
 

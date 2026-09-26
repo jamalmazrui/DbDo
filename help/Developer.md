@@ -30,6 +30,27 @@ missing (delete help\\Tutorials.mkv and the Tutorial*.mp3 files to re-record), a
 the tutorials: a release without them is refused at build time rather than
 shipped.
 
+## The four scripts, and the order they run in
+
+1. **`buildDbDo`** -- steps `version.txt`, writes `Version.cs`, refreshes the
+   kit's tools into `scripts`, puts the project's files into the Homer
+   encoding, compiles into `exec`, speaks any tutorial with no audio, and
+   builds `exec\DbDo_setup.exe`.
+2. **`scripts\gitPush "message"`** -- rewrites the whitelist from
+   `RepoFiles.txt`, adds what it names, commits, pushes.
+3. **`scripts\homerTidy --do-it`** -- the periodic clean: strays into `notes`,
+   fetched things deleted, zero-byte files deleted, whitelist rewritten.
+4. **`scripts\tagRelease`** -- runs `checkHomerApp --build`, tags the pushed
+   commit with the version stamped in `exec\DbDo_setup.exe`, publishes the
+   installer as a GitHub release.
+
+`scripts\gitUnpushed` undoes a local commit that should not go up. Every tool
+takes the project to be the folder it is run in, or its parent when that folder
+is `scripts` or `exec`.
+
+**The kit is a development-time dependency only.** DbDo needs HomerDev 1.38.3 or
+later to build; the installed program runs with no kit on the machine.
+
 ## The layout
 
 The development folder and the installed folder have the same shape. Sources and

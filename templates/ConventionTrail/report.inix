@@ -1,4 +1,4 @@
-; Sample report definitions for the NFB 2026 Convention database.
+﻿; Sample report definitions for the NFB 2026 Convention database.
 ; Run them with Run Report (Alt+Shift+R): DbDo finds this file beside the
 ; database, offers a pick-list of the reports below, renders the chosen one
 ; over the WHOLE events table to Markdown, and opens it in your editor.  A

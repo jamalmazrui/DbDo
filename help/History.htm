@@ -235,8 +235,9 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
-<li><a href="#v1.0.189-current" id="toc-v1.0.189-current">v1.0.189
+<li><a href="#v1.0.190-current" id="toc-v1.0.190-current">v1.0.190
 (current)</a></li>
+<li><a href="#v1.0.189" id="toc-v1.0.189">v1.0.189</a></li>
 <li><a href="#v1.0.188" id="toc-v1.0.188">v1.0.188</a></li>
 <li><a href="#v1.0.187" id="toc-v1.0.187">v1.0.187</a></li>
 <li><a href="#v1.0.186" id="toc-v1.0.186">v1.0.186</a></li>
@@ -356,7 +357,25 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
-<h2 id="v1.0.189-current">v1.0.189 (current)</h2>
+<h2 id="v1.0.190-current">v1.0.190 (current)</h2>
+<p><strong>DbDo builds against the current Homer kit.</strong> The build
+now needs HomerDev 1.38.3, compiles Elevate with the shared classes, and
+refreshes the kit’s tools into <code>scripts</code> every time, so
+checkHomerApp, checkTutorial, fixEncoding, gitPush, gitUnpushed,
+homerInstall, homerTidy, installOllama, installScreenReaderSupport and
+tagRelease are always the kit’s current ones. Retired near-duplicates
+are deleted rather than left to be run by mistake.</p>
+<p><strong>The installer is built into <code>exec</code></strong>, with
+the program and its libraries, so no build product sits among the
+sources. The install scripts moved to <code>scripts</code> and are
+installed to the program’s own <code>scripts</code> folder.</p>
+<p><strong>F11 now comes from the kit.</strong> DbDo tells Elevate its
+version and where its releases are, so the Help box carries a version
+section and offers the update.</p>
+<p><strong>Smaller:</strong> the build passes an explicit argument to
+the tutorial tool and lets its progress reach the screen, and it puts
+every file into the Homer encoding before compiling.</p>
+<h2 id="v1.0.189">v1.0.189</h2>
 <p><strong>A database now carries its own view.</strong> Which fields a
 row speaks, the order and the filter were kept only in the settings file
 beside the database. Email somebody a database and those settings stayed

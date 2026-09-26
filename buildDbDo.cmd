@@ -113,10 +113,11 @@ echo Kit: !homerDev! version !homerVer! >> "!log!"
 echo Kit: !homerDev! version !homerVer!
 
 rem THE KIT MUST BE NEW ENOUGH FOR THE SOURCE. DbDo.cs uses what the kit gives
-rem it -- Say.onSpoken, LbcMenuItem -- and a kit older than the source fails deep
-rem in the compiler with "Say does not contain a definition for onSpoken", which
-rem names the symptom and not the cause. So the build says the cause, first.
-set "kitNeeded=1.25.0"
+rem it -- Say.onSpoken, LbcMenuItem, Elevate -- and a kit older than the source
+rem fails deep in the compiler with "Say does not contain a definition for
+rem onSpoken", which names the symptom and not the cause. So the build says the
+rem cause, first. Raise this whenever DbDo starts using something new.
+set "kitNeeded=1.38.3"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -131,6 +132,9 @@ rem the pair is switched on together. DbDo has its own MDI frame for now, so
 rem neither is compiled here; KeyMap is, because DbDo's hotkey document and its
 rem alternate menu read from it.
 set "homerSources="
+rem ELEVATE GOES WHEREVER LBC GOES (kit 1.31 and later): Lbc's Help box carries
+rem the version section and the F11 update offer, which are Elevate's.
+set "homerSources=!homerSources! "!homerDev!\CSharp\Elevate.cs""
 set "homerSources=!homerSources! "!homerDev!\CSharp\Inix.cs""
 set "homerSources=!homerSources! "!homerDev!\CSharp\KeyMap.cs""
 set "homerSources=!homerSources! "!homerDev!\CSharp\KeyName.cs""
@@ -143,6 +147,25 @@ set "homerSources=!homerSources! "!homerDev!\CSharp\Util.cs""
 set "homerSources=!homerSources! "!homerDev!\CSharp\Web.cs""
 echo Homer modules: !homerSources! >> "!log!"
 
+
+rem ---- refresh the kit's tools into scripts\ ----
+rem
+rem ONE SOURCE OF TRUTH. These tools belong to the kit; DbDo keeps a working
+rem copy so they are there beside the project, and every build takes the kit's
+rem version again. Nothing here is edited in place: a fix made in the kit
+rem reaches DbDo on its next build, and a change made here would be overwritten,
+rem which is the point.
+if not exist "scripts" mkdir "scripts"
+for %%F in (buildTutorials.cmd buildTutorials.ps1 checkHomerApp.cmd checkHomerApp.py checkTutorial.cmd checkTutorial.py fixEncoding.cmd fixEncoding.py gitPush.cmd gitUnpushed.cmd gitUnpushed.py homerFinish.cmd homerInstall.cmd homerTidy.cmd homerTidy.py installOllama.cmd installScreenReaderSupport.cmd makeTutorials.cmd makeTutorials.py tagRelease.cmd tagRelease.ps1 uiCheck.cmd uiCheck.py) do (
+  if exist "!homerDev!\scripts\%%F" copy /y "!homerDev!\scripts\%%F" scripts\ >nul
+)
+rem Tools the kit has retired, and DbDo's own near-duplicates of them. Similar
+rem names are how the wrong tool gets run: makeTutorial beside makeTutorials,
+rem cleanDir beside homerTidy, sayTutorial beside buildTutorials.
+for %%F in (cleanDir.cmd cleanDir.py gitRelease.cmd homerPolicy.py installTools.cmd makeTutorial.cmd makeTutorial.py sayTutorial.cmd sayTutorial.py tidyRepo.cmd tidyRepo.py) do (
+  if exist "scripts\%%F" del /q "scripts\%%F"
+)
+echo Refreshed the kit's tools into scripts. >> "!log!"
 
 rem ---- the assemblies the Homer modules need ----
 rem A shared module can need an assembly reference as well as another module.
@@ -534,6 +557,16 @@ rem UIAutomationProvider.dll and UIAutomationTypes.dll (located above
 rem and stored in !uiaProv! and !uiaTypes!). Other framework
 rem references continue to auto-resolve from csc.rsp.
 echo. >> "!log!"
+rem ---- the Homer encoding, before the compiler sees anything ----
+rem Pandoc writes neither the byte order mark nor CRLF, so every build puts the
+rem project's own files back into the Homer encoding first. The kit's tool reads
+rem RepoFiles.txt to know which files are the project's.
+if exist "scripts\fixEncoding.cmd" (
+  echo Checking the file encodings.
+  call "%~dp0scripts\fixEncoding.cmd" -build
+  if errorlevel 1 echo WARN: fixEncoding reported a problem >> "!log!"
+)
+
 echo Compiling DbDo.cs -> DbDo.exe ... >> "!log!"
 echo Compiling DbDo.cs -> DbDo.exe ...
 rem Delete any stale .exe first so a failed compile leaves no half-
@@ -662,7 +695,7 @@ pandoc --standalone --toc --toc-depth=3 --metadata=title:"DbDo ReadMe" -o ReadMe
 for %%m in (License.md) do (
   if exist "%%m" pandoc --standalone --metadata=title:"%%~nm" -o "%%~nm.htm" "%%m" >> "!log!" 2>&1
 )
-rem The help folder too: Tutorials.md is written by makeTutorial and the podcast
+rem The help folder too: Tutorials.md is written by makeTutorials and the podcast
 rem feed links to Tutorials.htm, so the pair has to stay together.
 if exist "help\*.md" for %%m in (help\*.md) do (
   pandoc --standalone --toc --metadata=title:"%%~nm" -o "help\%%~nm.htm" "%%m" >> "!log!" 2>&1
@@ -687,16 +720,42 @@ rem file's date is no guide to whether its content changed: unzipping a delivery
 rem stamps every script as new. So the build makes the recording only when it is
 rem not on disk. To re-record, delete help\Tutorials.mkv and the help\Tutorial*.mp3
 rem files you want spoken again; each missing .mp3 is spoken, the rest are reused.
-if not exist "help\Tutorials.mkv" goto :makeTutorials
+rem WHAT COUNTS AS BUILT: the transcript, and some audio in either form -- the
+rem one recording with chapters, or one mp3 per walk in help\tutorials.
 if not exist "help\Tutorials.md" goto :makeTutorials
-echo Tutorials already built; delete help\Tutorials.mkv to rebuild. >> "!log!"
+if exist "help\Tutorials.mkv" goto :haveAudio
+if exist "help\tutorials\*.mp3" goto :haveAudio
+goto :makeTutorials
+:haveAudio
+echo Tutorials already built; delete the audio in help to rebuild. >> "!log!"
 goto :tutorialsDone
 :makeTutorials
 if exist "help\Tutorial_*.inix" (
   echo Building the spoken tutorials. The first run fetches two voices...
-  echo Tutorials.mkv missing; running buildTutorials >> "!log!"
-  call "%~dp0scripts\buildTutorials.cmd" >> "!log!" 2>&1
-  if errorlevel 1 echo WARN: buildTutorials reported a problem; see logs\DbDo-tutorials-*.log >> "!log!"
+  echo Tutorials.mkv missing; running buildTutorials -build >> "!log!"
+  rem TWO THINGS THIS LINE GETS RIGHT, both learned the hard way.
+  rem
+  rem An EXPLICIT ARGUMENT: a bare call does not reset %*, so a build run as
+  rem "buildDbDo nobump" hands "nobump" to the tutorial tool as though it were a
+  rem script name. -build says what this call is.
+  rem
+  rem NO REDIRECTION: the tool names each walk as it speaks it, and speaking
+  rem takes minutes. Sent to the log, the screen says nothing for twenty minutes
+  rem and the build looks hung. Its own log still records the detail.
+  call "%~dp0scripts\buildTutorials.cmd" -build
+  if errorlevel 1 (
+    rem THE BUILD STOPS HERE, because the installer needs what this makes and
+    rem its own error names a missing file rather than the reason. The tutorial
+    rem tool checks every walk before speaking any of them and says what is
+    rem wrong; that is the message worth reading.
+    echo ERROR: the tutorials were not built; see logs\DbDo-tutorials-check-*.log >> "!log!"
+    echo.
+    echo The tutorials were not built, so the installer cannot be made.
+    echo The tutorial checker listed what is wrong with the walks:
+    echo   logs\DbDo-tutorials-check-*.log
+    popd
+    exit /b 1
+  )
 ) else (
   rem THE RECORDING IS MISSING AND SO ARE THE SCRIPTS THAT MAKE IT. The installer
   rem requires help\Tutorials.mkv, so this is the end of the build -- and saying so
@@ -744,6 +803,8 @@ if not defined iscc (
 )
 echo Inno Setup: !iscc! >> "!log!"
 echo Compiling DbDo_setup.iss -^> DbDo_setup.exe ...
+if not exist exec mkdir exec
+if exist exec\DbDo_setup.exe del /f /q exec\DbDo_setup.exe
 if exist DbDo_setup.exe del /f /q DbDo_setup.exe
 "!iscc!" "DbDo_setup.iss" >> "!log!" 2>&1
 if errorlevel 1 (
@@ -751,8 +812,8 @@ if errorlevel 1 (
   echo ERROR: the installer build failed. >> "!log!"
   goto :build_failed
 )
-if not exist DbDo_setup.exe (
-  echo ERROR: Inno Setup returned 0 but wrote no DbDo_setup.exe.
+if not exist exec\DbDo_setup.exe (
+  echo ERROR: Inno Setup returned 0 but wrote no exec\DbDo_setup.exe.
   echo ERROR: no DbDo_setup.exe after a successful ISCC run. >> "!log!"
   goto :build_failed
 )
@@ -767,7 +828,7 @@ if defined verPending (
 
 echo.
 echo Build complete. Artifacts in this directory:
-echo   DbDo_setup.exe -- the installer, version !ver!
+echo   exec\DbDo_setup.exe -- the installer, version !ver!
 echo   DbDo.exe       -- the application
 echo   DbDo.dll       -- JScript .NET scripting support
 echo   nvdaControllerClient.dll -- NVDA controller-client DLL

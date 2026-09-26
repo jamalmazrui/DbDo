@@ -308,7 +308,8 @@ def checkTutorialKeys():
 
     Keys any Windows program has -- Enter, Tab, arrows, Escape, Alt on its own,
     and the dialog-wide Control+Enter -- are not DbDo's to bind and are skipped,
-    along with Alt+Control+D, which the desktop shortcut owns.
+    along with Alt+Control+D, which the desktop shortcut owns, and the reader's
+    own keys, which begin with Insert.
     """
     sSource = readText(os.path.join(sRoot, "DbDo.cs"))
     lsBound = set()
@@ -319,8 +320,12 @@ def checkTutorialKeys():
               "pagedown": "pagedown", "pageup": "pageup", "downarrow": "down", "uparrow": "up",
               "rightarrow": "right", "leftarrow": "left", "space": "space", "backspace": "back",
               "escape": "escape", "tab": "tab", "home": "home", "end": "end", "delete": "delete"}
+    # The reader's own keys are not DbDo's to bind either. Insert plus Up Arrow
+    # repeats the last line, and the first walk teaches it because every walk
+    # after assumes it.
     lsFree = {"enter", "tab", "escape", "alt", "down", "up", "left", "right", "space", "back",
-              "control+enter", "alt+tab", "alt+y", "alt+control+d", "alt+r", "alt+h"}
+              "control+enter", "alt+tab", "alt+y", "alt+control+d", "alt+r", "alt+h",
+              "insert+up", "insert+down", "insert+t", "insert+f12", "insert+space"}
     lsBad = []
     iChecked = 0
     sHelp = os.path.join(sRoot, "help")

@@ -7,9 +7,11 @@ rem   buildTutorials -docs              documents and feed only, no speaking
 rem   buildTutorials -sapi              use Windows voices; fetch nothing
 rem   buildTutorials -live              perform it now through the screen reader, write no file
 rem
-rem The narrator is piper with a neural voice, and so is the screen reader:
-rem piper too -- kristin and john, both public domain. Fetched once if missing.
-rem The log is logs\DbDo-tutorials-<date>-<time>.log.
+rem The voices are Kokoro, through sherpa-onnx, when they can be fetched --
+rem Apache 2.0, fine to publish under MIT -- and piper's kristin and john,
+rem public domain, when they cannot. Both fetched once into scripts\voices.
+rem The audio goes to help\tutorials, one .mp3 per script, with Tutorials.m3u.
+rem The log is logs\<App>-tutorials-yyyyMMdd-HHmmss.log.
 setlocal
 rem %~dp0 IS CAPTURED BEFORE pushd. When this file is CALLed by a relative
 rem path -- call "scripts\buildTutorials.cmd" -- cmd works %~dp0 out again

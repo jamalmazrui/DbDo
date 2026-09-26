@@ -71,11 +71,15 @@
 ;
 ; Run scripts\buildTutorials once; buildDbDo does it for you when the output is
 ; not already there.
-#if !FileExists(AddBackslash(SourcePath) + "help\Tutorials.mkv")
-  #error help\Tutorials.mkv is missing. Run scripts\buildTutorials (or buildDbDo) before building the installer.
+; THE TRANSCRIPT IS WHAT MUST BE HERE. The kit's tutorial tool writes
+; help\Tutorials.md and one mp3 per walk in help\tutorials; an older recording
+; may also leave help\Tutorials.mkv. Any of those forms ships, so the check is
+; on the transcript, which every form produces.
+#if !FileExists(AddBackslash(SourcePath) + "help\Tutorials.md")
+  #error help\Tutorials.md is missing. Run scripts\buildTutorials (or buildDbDo) before building the installer.
 #endif
 #if !FileExists(AddBackslash(SourcePath) + "help\Tutorials.md")
-  #error help\Tutorials.md is missing. Run scripts\makeTutorials (or buildDbDo) before building the installer.
+  #error help\Tutorials.md is missing. Run scripts\buildTutorials (or buildDbDo) before building the installer.
 #endif
 #if !FileExists(AddBackslash(SourcePath) + "help\Tutorials.htm")
   #error help\Tutorials.htm is missing. buildDbDo converts it with pandoc; run buildDbDo before building the installer.
@@ -116,7 +120,10 @@ UsePreviousAppDir=yes
 ; and goes where the last one went. A first install still chooses the folder.
 DisableDirPage=auto
 
-OutputDir=.
+; BUILD PRODUCTS GO IN exec, AND ONLY THERE. An installer written to the top
+; of the project is a binary among the sources, and every tidy carries it off
+; again. tagRelease looks in exec first.
+OutputDir=exec
 OutputBaseFilename={#AppName}_setup
 Compression=lzma2
 SolidCompression=yes
@@ -296,7 +303,10 @@ Source: "DbDo_setup.iss"; DestDir: "{app}\exec"; Flags: ignoreversion
 ;
 ; So the failure belongs at compile time, on the machine where the fix takes one
 ; command, rather than at run time on somebody else's.
-Source: "help\Tutorials.mkv"; DestDir: "{app}\help"; Flags: ignoreversion
+Source: "help\Tutorials.mkv"; DestDir: "{app}\help"; Flags: ignoreversion skipifsourcedoesntexist
+; One mp3 per walk, the form the kit's tool writes.
+Source: "help\tutorials\*.mp3"; DestDir: "{app}\help\tutorials"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "help\TutorialFeed.xml"; DestDir: "{app}\help"; Flags: ignoreversion skipifsourcedoesntexist
 Source: "help\Tutorials.md";  DestDir: "{app}\help"; Flags: ignoreversion
 Source: "help\Tutorials.htm"; DestDir: "{app}\help"; Flags: ignoreversion
 Source: "help\Hotkeys.md";  DestDir: "{app}\help"; Flags: ignoreversion
@@ -356,10 +366,10 @@ Source: "exec\nvdaControllerClient.dll"; DestDir: "{app}\exec"; Flags: ignorever
 ; runner and the model is a separate download, so both are offered on the finish
 ; page rather than bundled: an installer that quietly pulls two gigabytes is an
 ; installer people learn to cancel.
-Source: "summarizeSetup.cmd"; DestDir: "{app}\exec"; Flags: ignoreversion
-Source: "summarizeSetup.ps1"; DestDir: "{app}\exec"; Flags: ignoreversion
-Source: "installOllama.cmd"; DestDir: "{app}\exec"; Flags: ignoreversion skipifsourcedoesntexist
-Source: "installModels.cmd"; DestDir: "{app}\exec"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "scripts\summarizeSetup.cmd"; DestDir: "{app}\scripts"; Flags: ignoreversion
+Source: "scripts\summarizeSetup.ps1"; DestDir: "{app}\scripts"; Flags: ignoreversion
+Source: "scripts\installOllama.cmd"; DestDir: "{app}\scripts"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "scripts\installModels.cmd"; DestDir: "{app}\scripts"; Flags: ignoreversion skipifsourcedoesntexist
 
 ; (No [Tasks] section. The JAWS settings install is exposed as a
 ; checkbox on the Finish page via [Run] above, delegating the work
@@ -429,25 +439,25 @@ FileName: "{app}\scripts\DbDo.nvda-addon"; \
 ; update entry passes the word update, so installOllama upgrades rather than
 ; finding Ollama present and leaving the version alone.
 FileName: "{cmd}"; \
-  Parameters: "/c """"{app}\exec\installOllama.cmd"""""; \
+  Parameters: "/c """"{app}\scripts\installOllama.cmd"""""; \
   WorkingDir: "{app}\exec"; \
   Description: "{code:descOllama}"; \
   Flags: postinstall skipifsilent runascurrentuser unchecked; Check: ollamaNeedsInstall
 
 FileName: "{cmd}"; \
-  Parameters: "/c """"{app}\exec\installOllama.cmd"""" update"; \
+  Parameters: "/c """"{app}\scripts\installOllama.cmd"""" update"; \
   WorkingDir: "{app}\exec"; \
   Description: "{code:descOllama}"; \
   Flags: postinstall skipifsilent runascurrentuser unchecked; Check: ollamaNeedsUpdate
 
 FileName: "{cmd}"; \
-  Parameters: "/c """"{app}\exec\installOllama.cmd"""" reinstall"; \
+  Parameters: "/c """"{app}\scripts\installOllama.cmd"""" reinstall"; \
   WorkingDir: "{app}\exec"; \
   Description: "{code:descOllama}"; \
   Flags: postinstall skipifsilent runascurrentuser unchecked; Check: ollamaIsCurrent
 
 FileName: "{cmd}"; \
-  Parameters: "/c """"{app}\exec\installModels.cmd"""""; \
+  Parameters: "/c """"{app}\scripts\installModels.cmd"""""; \
   WorkingDir: "{app}\exec"; \
   Description: "{code:descModel}"; \
   Flags: postinstall skipifsilent runascurrentuser unchecked
@@ -1320,7 +1330,7 @@ begin
        unquoted, cmd tried to run "C:\Program", and the summary never started.
        That is why 1.0.168 showed no Results box. The probes survived the /s
        change because their commands carry their own quotes; this line did not. *)
-    Exec(ExpandConstant('{cmd}'), '/s /c ""' + ExpandConstant('{app}\exec\summarizeSetup.cmd') + '""',
+    Exec(ExpandConstant('{cmd}'), '/s /c ""' + ExpandConstant('{app}\scripts\summarizeSetup.cmd') + '""',
          ExpandConstant('{app}\exec'), SW_HIDE, ewNoWait, iResult);
   except
   end;
