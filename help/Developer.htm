@@ -229,9 +229,9 @@ project.</li>
 <li><strong><code>scripts\push "message"</code></strong> – rewrites the
 whitelist from <code>RepoFiles.txt</code>, adds what it names, commits,
 pushes.</li>
-<li><strong><code>scripts\tidy --do-it</code></strong> – the periodic
-clean: strays into <code>notes</code>, fetched things deleted, zero-byte
-files deleted, whitelist rewritten.</li>
+<li><strong><code>scripts\tidy</code></strong> – the periodic clean:
+strays into <code>notes</code>, fetched things deleted, zero-byte files
+deleted, whitelist rewritten.</li>
 <li><strong><code>scripts\release</code></strong> – runs
 <code>scripts\check --build</code>, tags the pushed commit with the
 version stamped in <code>DbDo_setup.exe</code>, publishes the installer
@@ -253,8 +253,8 @@ run <code>exec\\DbDo.exe</code>.</p>
 folder back into this shape: it moves programs into <code>exec</code>,
 documents into <code>help</code> and logs into <code>logs</code>, and
 moves anything the project does not name into <code>notes</code>. Run
-<code>tidy</code> to see the plan,
-<code>tidy --do-it --folder-only</code> to tidy the folder alone.
+<code>tidy</code> to tidy the folder and the repository,
+<code>tidy --folder-only</code> to tidy the folder alone.
 <code>LocalFiles.txt</code> tells it what belongs on this disk but not
 in the repository: the tutorial scripts, the generated audio and the
 fetched voices.</p>

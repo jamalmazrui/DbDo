@@ -65,7 +65,7 @@ if errorlevel 1 (
 if not exist "%CD%\RepoFiles.txt" (
   echo No RepoFiles.txt here, so nothing was staged: without it, "git add -A" would
   echo take everything in the folder. RepoFiles.txt names what the repository
-  echo carries; add it and run push again. tidy --do-it makes the first commit.
+  echo carries; add it and run push again. tidy makes the first commit.
   echo NO RepoFiles.txt: stopped before staging>> "%log%"
   endlocal & exit /b 1
 )

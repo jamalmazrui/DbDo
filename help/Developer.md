@@ -38,7 +38,7 @@ shipped.
    builds `DbDo_setup.exe` at the top of the project.
 2. **`scripts\push "message"`** -- rewrites the whitelist from
    `RepoFiles.txt`, adds what it names, commits, pushes.
-3. **`scripts\tidy --do-it`** -- the periodic clean: strays into `notes`,
+3. **`scripts\tidy`** -- the periodic clean: strays into `notes`,
    fetched things deleted, zero-byte files deleted, whitelist rewritten.
 4. **`scripts\release`** -- runs `scripts\check --build`, tags the pushed
    commit with the version stamped in `DbDo_setup.exe`, publishes the
@@ -60,7 +60,7 @@ folder it is installed to. To try a build, run `exec\\DbDo.exe`.
 `scripts\tidy`, from the Homer Development Kit, puts the folder back into this
 shape: it moves programs into `exec`, documents into `help` and logs into
 `logs`, and moves anything the project does not name into `notes`. Run
-`tidy` to see the plan, `tidy --do-it --folder-only` to tidy the
+`tidy` to tidy the folder and the repository, `tidy --folder-only` to tidy the
 folder alone. `LocalFiles.txt` tells it what belongs on this disk but not in the
 repository: the tutorial scripts, the generated audio and the fetched voices.
 
