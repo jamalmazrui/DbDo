@@ -4,7 +4,12 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.200 (current)
+## v1.0.204 (current)
+
+- **The installer carries the version it was built with.** buildDbDo writes version.txt only after a build succeeds, and the installer script read version.txt, so every installer was stamped with the previous number: 1.0.202 inside a build of 1.0.203. `scripts\release`, which now refuses an installer older than version.txt, stopped on it. The build hands its number to Inno Setup directly.
+- `scripts\tidy` untracked the files RepoFiles.txt leaves out -- version.txt, Version.cs, the release scripts, the screen reader packages and the old template generators; they remain on this disk.
+
+## v1.0.200
 
 Brought in line with the Homer Development Kit as it stands at 1.43.6.
 

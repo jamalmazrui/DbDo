@@ -235,8 +235,9 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
-<li><a href="#v1.0.200-current" id="toc-v1.0.200-current">v1.0.200
+<li><a href="#v1.0.204-current" id="toc-v1.0.204-current">v1.0.204
 (current)</a></li>
+<li><a href="#v1.0.200" id="toc-v1.0.200">v1.0.200</a></li>
 <li><a href="#v1.0.191" id="toc-v1.0.191">v1.0.191</a></li>
 <li><a href="#v1.0.190" id="toc-v1.0.190">v1.0.190</a></li>
 <li><a href="#v1.0.189" id="toc-v1.0.189">v1.0.189</a></li>
@@ -359,7 +360,20 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
-<h2 id="v1.0.200-current">v1.0.200 (current)</h2>
+<h2 id="v1.0.204-current">v1.0.204 (current)</h2>
+<ul>
+<li><strong>The installer carries the version it was built
+with.</strong> buildDbDo writes version.txt only after a build succeeds,
+and the installer script read version.txt, so every installer was
+stamped with the previous number: 1.0.202 inside a build of 1.0.203.
+<code>scripts\release</code>, which now refuses an installer older than
+version.txt, stopped on it. The build hands its number to Inno Setup
+directly.</li>
+<li><code>scripts\tidy</code> untracked the files RepoFiles.txt leaves
+out – version.txt, Version.cs, the release scripts, the screen reader
+packages and the old template generators; they remain on this disk.</li>
+</ul>
+<h2 id="v1.0.200">v1.0.200</h2>
 <p>Brought in line with the Homer Development Kit as it stands at
 1.43.6.</p>
 <ul>

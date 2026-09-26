@@ -24,21 +24,24 @@
 ; =====================================================================
 
 #define AppName       "DbDo"
-; AppVersion is rewritten automatically by buildDbDo.cmd from
-; DbDo.cs's BuildInfo.VersionString, so this literal is only the
-; fallback for compiling the .iss without a prior build. Do not
-; hand-edit it as the source of truth -- edit BuildInfo.VersionString.
 ; ---- Version -----------------------------------------------------------------
-; The version number is NOT stored in this script.  It lives in version.txt, one
-; line, which Build<App>.cmd increments on every build.  Inno reads it here, and
-; Build<App>.cmd also generates Version.cs from it, so the program, the installer,
-; and the release tag always report the same number -- which is what Elevate
-; Version (F11) compares.  Because no version literal appears in this file, a
-; stale copy of it can never rewind the version.
-#define VerFile FileOpen(AddBackslash(SourcePath) + "version.txt")
-#define AppVersion Trim(FileRead(VerFile))
-#expr FileClose(VerFile)
-#undef VerFile
+; The version number is NOT stored in this script. buildDbDo passes the number
+; it is building with /DBuildVersion=, and that is the one stamped into the
+; installer. buildDbDo writes version.txt only AFTER the build succeeds, so the
+; number it is building with is not in version.txt yet while Inno runs: reading
+; the file here stamped every installer with the PREVIOUS number, and on
+; 26 September 2026 release refused DbDo_setup.exe for carrying 1.0.202 while
+; the program and version.txt said 1.0.203. Compiled by hand, without a build,
+; the .iss still reads version.txt. Because no version literal appears in this
+; file, a stale copy of it can never rewind the version.
+#ifdef BuildVersion
+  #define AppVersion BuildVersion
+#else
+  #define VerFile FileOpen(AddBackslash(SourcePath) + "version.txt")
+  #define AppVersion Trim(FileRead(VerFile))
+  #expr FileClose(VerFile)
+  #undef VerFile
+#endif
 #define AppPublisher  "Jamal Mazrui"
 #define AppUrl        "https://github.com/JamalMazrui/DbDo"
 #define AppExeName    "DbDo.exe"

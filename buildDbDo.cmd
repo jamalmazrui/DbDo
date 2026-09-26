@@ -908,7 +908,9 @@ rem 2026 DbDo wrote it into exec, and the release that day stopped with
 rem "DbDo_setup.exe not found". The copy an older build left in exec goes.
 if exist exec\DbDo_setup.exe del /f /q exec\DbDo_setup.exe && echo Removed the old exec\DbDo_setup.exe >> "!log!"
 if exist DbDo_setup.exe del /f /q DbDo_setup.exe
-"!iscc!" "DbDo_setup.iss" >> "!log!" 2>&1
+rem The number this build is using goes to Inno directly: version.txt is written
+rem only after the build succeeds, so it still holds the previous number here.
+"!iscc!" /DBuildVersion=!ver! "DbDo_setup.iss" >> "!log!" 2>&1
 if errorlevel 1 (
   echo ERROR: the installer build failed. See !log!.
   echo ERROR: the installer build failed. >> "!log!"
