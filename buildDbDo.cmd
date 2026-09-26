@@ -540,6 +540,14 @@ rem create an assembly-name collision with DbDo.exe at load time.
 echo. >> "!log!"
 echo Compiling DbDo.js -> DbDo.dll ... >> "!log!"
 echo Compiling DbDo.js -> DbDo.dll ...
+rem THE SOURCE IS NAMED BY FULL PATH, because this runs with exec as the
+rem working folder. A bare DbDo.js here looks for exec\DbDo.js and fails with
+rem "Could not find file", which names the file and not the reason.
+if not exist "%~dp0DbDo.js" (
+  echo ERROR: DbDo.js is not in %~dp0 -- the snippet module cannot be built. >> "!log!"
+  echo DbDo.js is missing from the project folder. Unzip the delivery again.
+  popd & popd & exit /b 1
+)
 "!jsc!" /target:library /platform:anycpu /nologo /out:DbDo.dll "%~dp0DbDo.js" >> "!log!" 2>&1
 if errorlevel 1 goto :build_failed
 echo DbDo.dll built.
