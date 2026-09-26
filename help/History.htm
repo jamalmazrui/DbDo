@@ -235,8 +235,9 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
-<li><a href="#v1.0.191-current" id="toc-v1.0.191-current">v1.0.191
+<li><a href="#v1.0.200-current" id="toc-v1.0.200-current">v1.0.200
 (current)</a></li>
+<li><a href="#v1.0.191" id="toc-v1.0.191">v1.0.191</a></li>
 <li><a href="#v1.0.190" id="toc-v1.0.190">v1.0.190</a></li>
 <li><a href="#v1.0.189" id="toc-v1.0.189">v1.0.189</a></li>
 <li><a href="#v1.0.188" id="toc-v1.0.188">v1.0.188</a></li>
@@ -354,11 +355,42 @@ id="toc-v1.0.112-and-v1.0.113">v1.0.112 and v1.0.113</a></li>
 <h1 id="dbdo-history-of-changes">DbDo History of Changes</h1>
 <p>This file is the chronological record of DbDo releases. The most
 recent release is at the top. For the overview of what DbDo is, see
-<code>Announce.md</code> or <code>README.md</code>. For the full
+<code>Announce.md</code> or <code>ReadMe.md</code>. For the full
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
-<h2 id="v1.0.191-current">v1.0.191 (current)</h2>
+<h2 id="v1.0.200-current">v1.0.200 (current)</h2>
+<p>Brought in line with the Homer Development Kit as it stands at
+1.43.6.</p>
+<ul>
+<li><strong>The kit’s scripts under their plain names.</strong> The
+build refreshes check, push, release, tidy, unpushed, finish and
+installCommon into <code>scripts</code>, and deletes the old copies of
+checkHomerApp, gitPush, gitUnpushed, homerFinish, homerInstall,
+homerTidy and tagRelease, so an old name typed from habit no longer runs
+a stale tool.</li>
+<li><strong>The installer is written to the top of the project</strong>,
+where <code>scripts\release</code> looks for it. On 26 September the
+release stopped with “DbDo_setup.exe not found” because it was in
+<code>exec</code>.</li>
+<li><strong>Installing Ollama from the finish page works.</strong>
+installOllama.cmd needs the kit’s shared install half, now
+installCommon.cmd, beside it; the installer never shipped it, so the
+installed script could only stop with a message. It ships now.</li>
+<li><strong>The project mirrors the installed tree:</strong>
+<code>DbDo.inix</code> is in <code>configs</code> and
+<code>lookups.db</code> in <code>data</code>, moved by the build through
+git, so a copy run from the project’s <code>exec</code> finds them where
+an installed copy does. README takes its standard capitals, ReadMe.</li>
+<li><strong>What git carries:</strong> version.txt and Version.cs stay
+on this machine; the scripts are named one by one, so the kit’s release
+scripts never go up; <code>.gitattributes</code> stops git turning the
+Homer CRLF line endings into LF. <code>getDbDoDeps.ps1</code> has a
+<code>.cmd</code> beside it for running it by hand.</li>
+<li>The installer’s uninstall step has a RunOnceId, and its log copy
+uses CopyFile, clearing two Inno Setup warnings.</li>
+</ul>
+<h2 id="v1.0.191">v1.0.191</h2>
 <p><strong>One letter per menu.</strong> When two items in the same menu
 began with the same letter, pressing it made the reader cycle between
 them. Now the first item keeps the letter and the later one has none, so

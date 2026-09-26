@@ -1,6 +1,6 @@
 ﻿; accept.inix -- what "done" means for DbDo, written down so a script settles it.
 ;
-; checkHomerApp runs every check here and records the command, the exit code and
+; scripts\check runs every check here and records the command, the exit code and
 ; the verdict in its evidence report. A criterion that cannot be written this way
 ; belongs in help\self.md under what a person has to check by hand.
 

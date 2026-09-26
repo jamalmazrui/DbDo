@@ -35,20 +35,20 @@ shipped.
 1. **`buildDbDo`** -- steps `version.txt`, writes `Version.cs`, refreshes the
    kit's tools into `scripts`, puts the project's files into the Homer
    encoding, compiles into `exec`, speaks any tutorial with no audio, and
-   builds `exec\DbDo_setup.exe`.
-2. **`scripts\gitPush "message"`** -- rewrites the whitelist from
+   builds `DbDo_setup.exe` at the top of the project.
+2. **`scripts\push "message"`** -- rewrites the whitelist from
    `RepoFiles.txt`, adds what it names, commits, pushes.
-3. **`scripts\homerTidy --do-it`** -- the periodic clean: strays into `notes`,
+3. **`scripts\tidy --do-it`** -- the periodic clean: strays into `notes`,
    fetched things deleted, zero-byte files deleted, whitelist rewritten.
-4. **`scripts\tagRelease`** -- runs `checkHomerApp --build`, tags the pushed
-   commit with the version stamped in `exec\DbDo_setup.exe`, publishes the
+4. **`scripts\release`** -- runs `scripts\check --build`, tags the pushed
+   commit with the version stamped in `DbDo_setup.exe`, publishes the
    installer as a GitHub release.
 
-`scripts\gitUnpushed` undoes a local commit that should not go up. Every tool
+`scripts\unpushed` undoes a local commit that should not go up. Every tool
 takes the project to be the folder it is run in, or its parent when that folder
 is `scripts` or `exec`.
 
-**The kit is a development-time dependency only.** DbDo needs HomerDev 1.38.3 or
+**The kit is a development-time dependency only.** DbDo needs HomerDev 1.43.6 or
 later to build; the installed program runs with no kit on the machine.
 
 ## The layout
@@ -57,15 +57,15 @@ The development folder and the installed folder have the same shape. Sources and
 build files stay at the top, with ReadMe and License; everything else sits in the
 folder it is installed to. To try a build, run `exec\\DbDo.exe`.
 
-`homerTidy`, from the Homer Development Kit, puts the folder back into this
+`scripts\tidy`, from the Homer Development Kit, puts the folder back into this
 shape: it moves programs into `exec`, documents into `help` and logs into
 `logs`, and moves anything the project does not name into `notes`. Run
-`homerTidy` to see the plan, `homerTidy --do-it --folder-only` to tidy the
+`tidy` to see the plan, `tidy --do-it --folder-only` to tidy the
 folder alone. `LocalFiles.txt` tells it what belongs on this disk but not in the
 repository: the tutorial scripts, the generated audio and the fetched voices.
 
-- `configs` -- settings shipped with the program
-- `data` -- the shared lookups database
+- `configs` -- settings shipped with the program: `DbDo.inix`
+- `data` -- the shared lookups database, `lookups.db`
 - `exec` -- the program and its libraries
 - `help` -- the documents, the tutorials and their recording
 - `logs` -- in the development folder, one file per build, clean, tutorial or
@@ -109,5 +109,5 @@ The scripts are not published; the recording and the transcript are.
 
 ## Releasing
 
-After a build, `tagRelease` tags the version stamped in `DbDo_setup.exe`,
+After a build, `scripts\release` tags the version stamped in `DbDo_setup.exe`,
 creates the GitHub release, and checks that the public download link answers.

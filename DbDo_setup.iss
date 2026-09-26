@@ -120,10 +120,11 @@ UsePreviousAppDir=yes
 ; and goes where the last one went. A first install still chooses the folder.
 DisableDirPage=auto
 
-; BUILD PRODUCTS GO IN exec, AND ONLY THERE. An installer written to the top
-; of the project is a binary among the sources, and every tidy carries it off
-; again. tagRelease looks in exec first.
-OutputDir=exec
+; THE INSTALLER IS WRITTEN TO THE TOP OF THE PROJECT, as in every Homer app:
+; scripts\release looks for it there, and LocalFiles.txt names it, so tidy
+; leaves it in place and git never takes it. Written into exec until
+; 26 September 2026, when the release stopped with "DbDo_setup.exe not found".
+OutputDir=.
 OutputBaseFilename={#AppName}_setup
 Compression=lzma2
 SolidCompression=yes
@@ -291,6 +292,7 @@ Source: "DbDo.cs";        DestDir: "{app}\exec"; Flags: ignoreversion
 Source: "DbDo.js";        DestDir: "{app}\exec"; Flags: ignoreversion
 Source: "buildDbDo.cmd";  DestDir: "{app}\exec"; Flags: ignoreversion
 Source: "getDbDoDeps.ps1"; DestDir: "{app}\exec"; Flags: ignoreversion
+Source: "getDbDoDeps.cmd"; DestDir: "{app}\exec"; Flags: ignoreversion
 Source: "DbDo_setup.iss"; DestDir: "{app}\exec"; Flags: ignoreversion
 ; THE SPOKEN WALKTHROUGHS, AND THEY ARE NOT OPTIONAL.
 ;
@@ -333,9 +335,9 @@ Source: "License.htm";  DestDir: "{app}"; Flags: ignoreversion
 ; %LOCALAPPDATA%\DbDo\data (see seedSampleDatabasesIfNew),
 ; where the Sample Databases Help command lists it. lookups.db is
 ; shared infrastructure, not a sample, so it stays in {app}.
-Source: "lookups.db"; DestDir: "{app}\data"; Flags: ignoreversion
+Source: "data\lookups.db"; DestDir: "{app}\data"; Flags: ignoreversion
 Source: "templates\*"; DestDir: "{app}\templates"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
-Source: "DbDo.inix";   DestDir: "{app}\configs"; Flags: ignoreversion onlyifdoesntexist
+Source: "configs\DbDo.inix";   DestDir: "{app}\configs"; Flags: ignoreversion onlyifdoesntexist
 ;
 ; Scripts: the generic example scripts (each of the three DbDo
 ; script types) that apply to any database. DbDo seeds these into
@@ -369,6 +371,11 @@ Source: "exec\nvdaControllerClient.dll"; DestDir: "{app}\exec"; Flags: ignorever
 Source: "scripts\summarizeSetup.cmd"; DestDir: "{app}\scripts"; Flags: ignoreversion
 Source: "scripts\summarizeSetup.ps1"; DestDir: "{app}\scripts"; Flags: ignoreversion
 Source: "scripts\installOllama.cmd"; DestDir: "{app}\scripts"; Flags: ignoreversion skipifsourcedoesntexist
+; THE SHARED HALF OF EVERY INSTALL SCRIPT. installOllama.cmd calls it for its
+; log folder, log name and environment header, and stops with a message when it
+; is absent -- which, until kit 1.42 renamed it from homerInstall.cmd, the
+; installed copy always was, because nothing shipped it.
+Source: "scripts\installCommon.cmd"; DestDir: "{app}\scripts"; Flags: ignoreversion
 Source: "scripts\installModels.cmd"; DestDir: "{app}\scripts"; Flags: ignoreversion skipifsourcedoesntexist
 
 ; (No [Tasks] section. The JAWS settings install is exposed as a
@@ -503,7 +510,8 @@ FileName: "{code:NgenExe}"; Parameters: "install ""{app}\exec\DbDo.exe"" /AppBas
 FileName: "{app}\exec\{#AppExeName}"; \
   Parameters: "--uninstall-jaws-settings"; \
   WorkingDir: "{app}\exec"; \
-  Flags: runhidden waituntilterminated skipifdoesntexist
+  Flags: runhidden waituntilterminated skipifdoesntexist; \
+  RunOnceId: "UninstallJawsSettings"
 
 [Code]
 
@@ -1196,7 +1204,7 @@ begin
   if not DirExists(sFolder) then
     if not ForceDirectories(sFolder) then exit;
   sTarget := sFolder + '\{#AppName}-setup-' + GetDateTimeString('yyyymmdd-hhnnss', #0, #0) + '.log';
-  FileCopy(ExpandConstant('{log}'), sTarget, False);
+  CopyFile(ExpandConstant('{log}'), sTarget, False);
 end;
 
 procedure CurStepChanged(CurStep: TSetupStep);

@@ -1,10 +1,21 @@
 ﻿# DbDo History of Changes
 
-This file is the chronological record of DbDo releases. The most recent release is at the top. For the overview of what DbDo is, see `Announce.md` or `README.md`. For the full reference, see `DbDo.md`.
+This file is the chronological record of DbDo releases. The most recent release is at the top. For the overview of what DbDo is, see `Announce.md` or `ReadMe.md`. For the full reference, see `DbDo.md`.
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.191 (current)
+## v1.0.200 (current)
+
+Brought in line with the Homer Development Kit as it stands at 1.43.6.
+
+- **The kit's scripts under their plain names.** The build refreshes check, push, release, tidy, unpushed, finish and installCommon into `scripts`, and deletes the old copies of checkHomerApp, gitPush, gitUnpushed, homerFinish, homerInstall, homerTidy and tagRelease, so an old name typed from habit no longer runs a stale tool.
+- **The installer is written to the top of the project**, where `scripts\release` looks for it. On 26 September the release stopped with "DbDo_setup.exe not found" because it was in `exec`.
+- **Installing Ollama from the finish page works.** installOllama.cmd needs the kit's shared install half, now installCommon.cmd, beside it; the installer never shipped it, so the installed script could only stop with a message. It ships now.
+- **The project mirrors the installed tree:** `DbDo.inix` is in `configs` and `lookups.db` in `data`, moved by the build through git, so a copy run from the project's `exec` finds them where an installed copy does. README takes its standard capitals, ReadMe.
+- **What git carries:** version.txt and Version.cs stay on this machine; the scripts are named one by one, so the kit's release scripts never go up; `.gitattributes` stops git turning the Homer CRLF line endings into LF. `getDbDoDeps.ps1` has a `.cmd` beside it for running it by hand.
+- The installer's uninstall step has a RunOnceId, and its log copy uses CopyFile, clearing two Inno Setup warnings.
+
+## v1.0.191
 
 **One letter per menu.** When two items in the same menu began with the same
 letter, pressing it made the reader cycle between them. Now the first item keeps

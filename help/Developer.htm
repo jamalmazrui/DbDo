@@ -224,42 +224,45 @@ and the order they run in</h2>
 <code>version.txt</code>, writes <code>Version.cs</code>, refreshes the
 kit’s tools into <code>scripts</code>, puts the project’s files into the
 Homer encoding, compiles into <code>exec</code>, speaks any tutorial
-with no audio, and builds <code>exec\DbDo_setup.exe</code>.</li>
-<li><strong><code>scripts\gitPush "message"</code></strong> – rewrites
-the whitelist from <code>RepoFiles.txt</code>, adds what it names,
-commits, pushes.</li>
-<li><strong><code>scripts\homerTidy --do-it</code></strong> – the
-periodic clean: strays into <code>notes</code>, fetched things deleted,
-zero-byte files deleted, whitelist rewritten.</li>
-<li><strong><code>scripts\tagRelease</code></strong> – runs
-<code>checkHomerApp --build</code>, tags the pushed commit with the
-version stamped in <code>exec\DbDo_setup.exe</code>, publishes the
-installer as a GitHub release.</li>
+with no audio, and builds <code>DbDo_setup.exe</code> at the top of the
+project.</li>
+<li><strong><code>scripts\push "message"</code></strong> – rewrites the
+whitelist from <code>RepoFiles.txt</code>, adds what it names, commits,
+pushes.</li>
+<li><strong><code>scripts\tidy --do-it</code></strong> – the periodic
+clean: strays into <code>notes</code>, fetched things deleted, zero-byte
+files deleted, whitelist rewritten.</li>
+<li><strong><code>scripts\release</code></strong> – runs
+<code>scripts\check --build</code>, tags the pushed commit with the
+version stamped in <code>DbDo_setup.exe</code>, publishes the installer
+as a GitHub release.</li>
 </ol>
-<p><code>scripts\gitUnpushed</code> undoes a local commit that should
-not go up. Every tool takes the project to be the folder it is run in,
-or its parent when that folder is <code>scripts</code> or
+<p><code>scripts\unpushed</code> undoes a local commit that should not
+go up. Every tool takes the project to be the folder it is run in, or
+its parent when that folder is <code>scripts</code> or
 <code>exec</code>.</p>
 <p><strong>The kit is a development-time dependency only.</strong> DbDo
-needs HomerDev 1.38.3 or later to build; the installed program runs with
+needs HomerDev 1.43.6 or later to build; the installed program runs with
 no kit on the machine.</p>
 <h2 id="the-layout">The layout</h2>
 <p>The development folder and the installed folder have the same shape.
 Sources and build files stay at the top, with ReadMe and License;
 everything else sits in the folder it is installed to. To try a build,
 run <code>exec\\DbDo.exe</code>.</p>
-<p><code>homerTidy</code>, from the Homer Development Kit, puts the
+<p><code>scripts\tidy</code>, from the Homer Development Kit, puts the
 folder back into this shape: it moves programs into <code>exec</code>,
 documents into <code>help</code> and logs into <code>logs</code>, and
 moves anything the project does not name into <code>notes</code>. Run
-<code>homerTidy</code> to see the plan,
-<code>homerTidy --do-it --folder-only</code> to tidy the folder alone.
+<code>tidy</code> to see the plan,
+<code>tidy --do-it --folder-only</code> to tidy the folder alone.
 <code>LocalFiles.txt</code> tells it what belongs on this disk but not
 in the repository: the tutorial scripts, the generated audio and the
 fetched voices.</p>
 <ul>
-<li><code>configs</code> – settings shipped with the program</li>
-<li><code>data</code> – the shared lookups database</li>
+<li><code>configs</code> – settings shipped with the program:
+<code>DbDo.inix</code></li>
+<li><code>data</code> – the shared lookups database,
+<code>lookups.db</code></li>
 <li><code>exec</code> – the program and its libraries</li>
 <li><code>help</code> – the documents, the tutorials and their
 recording</li>
@@ -303,8 +306,8 @@ speaks them into <code>help\Tutorials.mkv</code>;
 <code>scripts\makeTutorial</code> writes <code>help\Tutorials.md</code>.
 The scripts are not published; the recording and the transcript are.</p>
 <h2 id="releasing">Releasing</h2>
-<p>After a build, <code>tagRelease</code> tags the version stamped in
-<code>DbDo_setup.exe</code>, creates the GitHub release, and checks that
-the public download link answers.</p>
+<p>After a build, <code>scripts\release</code> tags the version stamped
+in <code>DbDo_setup.exe</code>, creates the GitHub release, and checks
+that the public download link answers.</p>
 </body>
 </html>

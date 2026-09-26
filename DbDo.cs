@@ -71,7 +71,7 @@ namespace DbDo
     //      above the namespace, which reference this same constant.
     //   3. DbDo_setup.iss's #define AppVersion line, which buildDbDo.cmd
     //      rewrites from this value on every build -- so the installer,
-    //      the uninstall entry, and the tagRelease git tag can no longer
+    //      the uninstall entry, and the release git tag can no longer
     //      drift behind the app. (Inno Setup cannot read a C# constant,
     //      so the build copies the value across rather than duplicating
     //      it by hand.)

@@ -54,7 +54,7 @@ setlocal enableextensions enabledelayedexpansion
 rem THE SCRIPT'S OWN FOLDER, CAPTURED ONCE, BEFORE ANYTHING CHANGES DIRECTORY.
 rem
 rem %~dp0 is not a constant. When a script is started by its bare name --
-rem "buildDbDo.cmd", which is how checkHomerApp runs it -- %0 carries no path,
+rem "buildDbDo.cmd", which is how scripts\check runs it -- %0 carries no path,
 rem and %~dp0 is resolved against the CURRENT directory every time it is used.
 rem After the pushd into exec it became C:\DbDo\exec\, so the JScript compile
 rem looked for exec\DbDo.js, and fixEncoding was looked for there too and
@@ -136,7 +136,7 @@ rem it -- Say.onSpoken, LbcMenuItem, Elevate -- and a kit older than the source
 rem fails deep in the compiler with "Say does not contain a definition for
 rem onSpoken", which names the symptom and not the cause. So the build says the
 rem cause, first. Raise this whenever DbDo starts using something new.
-set "kitNeeded=1.38.3"
+set "kitNeeded=1.43.6"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -175,13 +175,18 @@ rem version again. Nothing here is edited in place: a fix made in the kit
 rem reaches DbDo on its next build, and a change made here would be overwritten,
 rem which is the point.
 if not exist "scripts" mkdir "scripts"
-for %%F in (buildTutorials.cmd buildTutorials.ps1 checkHomerApp.cmd checkHomerApp.py checkTutorial.cmd checkTutorial.py fixEncoding.cmd fixEncoding.py gitPush.cmd gitUnpushed.cmd gitUnpushed.py homerFinish.cmd homerInstall.cmd homerTidy.cmd homerTidy.py installOllama.cmd installScreenReaderSupport.cmd makeTutorials.cmd makeTutorials.py tagRelease.cmd tagRelease.ps1 uiCheck.cmd uiCheck.py) do (
+for %%F in (buildTutorials.cmd buildTutorials.ps1 check.cmd check.py checkTutorial.cmd checkTutorial.py finish.cmd fixEncoding.cmd fixEncoding.py installCommon.cmd installOllama.cmd installScreenReaderSupport.cmd makeTutorials.cmd makeTutorials.py push.cmd release.cmd release.ps1 tidy.cmd tidy.py uiCheck.cmd uiCheck.py unpushed.cmd unpushed.py) do (
   if exist "!homerDev!\scripts\%%F" copy /y "!homerDev!\scripts\%%F" scripts\ >nul
 )
-rem Tools the kit has retired, and DbDo's own near-duplicates of them. Similar
-rem names are how the wrong tool gets run: makeTutorial beside makeTutorials,
-rem cleanDir beside homerTidy, sayTutorial beside buildTutorials.
-for %%F in (cleanDir.cmd cleanDir.py gitRelease.cmd homerPolicy.py installTools.cmd makeTutorial.cmd makeTutorial.py sayTutorial.cmd sayTutorial.py tidyRepo.cmd tidyRepo.py) do (
+rem Tools the kit has retired or renamed, and DbDo's own near-duplicates of
+rem them. Similar names are how the wrong tool gets run: makeTutorial beside
+rem makeTutorials, cleanDir beside tidy, sayTutorial beside buildTutorials.
+rem Since kit 1.42 the kit's scripts have plain names (checkHomerApp is check,
+rem gitPush is push, gitUnpushed is unpushed, homerFinish is finish,
+rem homerInstall is installCommon, homerTidy is tidy, tagRelease is release);
+rem the old copies go, so an old name typed from habit fails at once rather
+rem than running a stale tool.
+for %%F in (checkHomerApp.cmd checkHomerApp.py cleanDir.cmd cleanDir.py gitPush.cmd gitRelease.cmd gitUnpushed.cmd gitUnpushed.py homerFinish.cmd homerInstall.cmd homerPolicy.py homerTidy.cmd homerTidy.py installTools.cmd makeTutorial.cmd makeTutorial.py sayTutorial.cmd sayTutorial.py tagRelease.cmd tagRelease.ps1 tidyRepo.cmd tidyRepo.py) do (
   if exist "scripts\%%F" del /q "scripts\%%F"
 )
 echo Refreshed the kit's tools into scripts. >> "!log!"
@@ -220,7 +225,7 @@ rem bake the number in:
 rem   * this script generates Version.cs from it, so the running program reports it
 rem   * DbDo_setup.iss reads version.txt directly (see its #define AppVersion), so the
 rem     installer is stamped with it
-rem   * tagRelease tags the release with it
+rem   * scripts\release tags the release with it
 rem All three therefore always agree, which is what Elevate Version (F11) needs.
 rem The .iss contains NO version number, so an old copy of it cannot rewind one.
 rem
@@ -833,6 +838,45 @@ if exist "!sHere!scripts\fixEncoding.cmd" (
   echo WARN: scripts\fixEncoding.cmd is not here, so the encodings were not checked >> "!log!"
 )
 
+rem ---- carried over to the Homer layout (September 2026) ----
+rem README.md and README.htm take the standard capitals, ReadMe, through git mv
+rem when git tracks the old spelling, since Windows' git treats the two as one
+rem file and would otherwise keep the old name forever. The copies of
+rem installOllama.cmd and installModels.cmd at the top are older than the ones
+rem in scripts, which are what the installer ships; they go once scripts has
+rem its own.
+powershell -NoProfile -Command ^
+  "$lTracked = @(git ls-files 2>$null);" ^
+  "foreach ($sPair in @('README.md>ReadMe.md', 'README.htm>ReadMe.htm')) {" ^
+  "  $sOld, $sNew = $sPair.Split('>');" ^
+  "  if ($lTracked -ccontains $sOld) { git mv -f $sOld $sNew 2>&1 | Out-Null; 'git mv ' + $sOld + ' ' + $sNew + ', exit code ' + $LASTEXITCODE; continue }" ^
+  "  $f = Get-ChildItem -LiteralPath '.' -File | Where-Object { $_.Name -ceq $sOld };" ^
+  "  if (-not $f) { continue }" ^
+  "  Rename-Item -LiteralPath $sOld -NewName ($sNew + '.tmp'); Rename-Item -LiteralPath ($sNew + '.tmp') -NewName $sNew;" ^
+  "  'Renamed ' + $sOld + ' to ' + $sNew" ^
+  "}" ^
+  "'Capitals checked: ReadMe'" >> "!log!" 2>&1
+rem THE PROJECT MIRRORS THE INSTALLED TREE. DbDo.inix is installed to configs
+rem and lookups.db to data, so that is where they live here too -- and where
+rem Homer.Paths finds them when exec\DbDo.exe runs from the project, since the
+rem project folder is the installed folder of that copy. git mv when git
+rem tracks them, so the history follows the file.
+powershell -NoProfile -Command ^
+  "$lTracked = @(git ls-files 2>$null);" ^
+  "foreach ($sPair in @('DbDo.inix>configs', 'lookups.db>data')) {" ^
+  "  $sOld, $sDir = $sPair.Split('>'); $sNew = $sDir + '/' + $sOld;" ^
+  "  if (-not (Test-Path -LiteralPath $sOld) -or (Test-Path -LiteralPath $sNew)) { continue }" ^
+  "  New-Item -ItemType Directory -Force -Path $sDir | Out-Null;" ^
+  "  if ($lTracked -contains $sOld) { git mv -f $sOld $sNew 2>&1 | Out-Null; 'git mv ' + $sOld + ' ' + $sNew + ', exit code ' + $LASTEXITCODE }" ^
+  "  else { Move-Item -LiteralPath $sOld -Destination $sNew; 'Moved ' + $sOld + ' to ' + $sNew }" ^
+  "}" >> "!log!" 2>&1
+for %%F in (installOllama.cmd installModels.cmd) do (
+  if exist "%%F" if exist "scripts\%%F" (
+    del /f /q "%%F"
+    echo Removed the old top-level %%F; scripts\%%F is the one the installer ships >> "!log!"
+  )
+)
+
 rem ---- build the installer ----
 rem DbDo_setup.exe is part of the build, not a separate errand: one command
 rem produces everything a release needs. Inno Setup is fetched with winget when
@@ -857,8 +901,12 @@ if not defined iscc (
 )
 echo Inno Setup: !iscc! >> "!log!"
 echo Compiling DbDo_setup.iss -^> DbDo_setup.exe ...
-if not exist exec mkdir exec
-if exist exec\DbDo_setup.exe del /f /q exec\DbDo_setup.exe
+rem THE INSTALLER IS WRITTEN TO THE TOP OF THE PROJECT (OutputDir=.), where
+rem scripts\release looks for it, as in every Homer app; LocalFiles.txt names it,
+rem so tidy leaves it where it is and git never takes it. Until 26 September
+rem 2026 DbDo wrote it into exec, and the release that day stopped with
+rem "DbDo_setup.exe not found". The copy an older build left in exec goes.
+if exist exec\DbDo_setup.exe del /f /q exec\DbDo_setup.exe && echo Removed the old exec\DbDo_setup.exe >> "!log!"
 if exist DbDo_setup.exe del /f /q DbDo_setup.exe
 "!iscc!" "DbDo_setup.iss" >> "!log!" 2>&1
 if errorlevel 1 (
@@ -866,8 +914,8 @@ if errorlevel 1 (
   echo ERROR: the installer build failed. >> "!log!"
   goto :build_failed
 )
-if not exist exec\DbDo_setup.exe (
-  echo ERROR: Inno Setup returned 0 but wrote no exec\DbDo_setup.exe.
+if not exist DbDo_setup.exe (
+  echo ERROR: Inno Setup returned 0 but wrote no DbDo_setup.exe.
   echo ERROR: no DbDo_setup.exe after a successful ISCC run. >> "!log!"
   goto :build_failed
 )
@@ -882,7 +930,7 @@ if defined verPending (
 
 echo.
 echo Build complete. Artifacts in this directory:
-echo   exec\DbDo_setup.exe -- the installer, version !ver!
+echo   DbDo_setup.exe -- the installer, version !ver!
 echo   DbDo.exe       -- the application
 echo   DbDo.dll       -- JScript .NET scripting support
 echo   nvdaControllerClient.dll -- NVDA controller-client DLL
@@ -891,7 +939,7 @@ echo   sqlean.exe -- SQLite/SQLean shell for the dot-prompt pass-through lane
 echo   sqlean.dll -- SQLean extension bundle (REGEXP, median, percentiles, ...)
 if exist 2db64.exe echo   2db32.exe / 2db64.exe -- standalone importer (32- and 64-bit) for the Import command
 echo.
-echo To publish: gitPush "What changed." then gitRelease.
+echo To publish: scripts\push "What changed." then scripts\release.
 echo Build succeeded %DATE% %TIME% >> "!log!"
 popd
 endlocal
@@ -912,7 +960,7 @@ rem
 rem This makes NO network call.  An earlier version asked GitHub whether the number
 rem was already taken -- but gh has no timeout, so a slow or unreachable network hung
 rem the build with no message and no way to interrupt it.  A build script must never
-rem wait on the network.  tagRelease does the "already released" check instead: that
+rem wait on the network.  scripts\release does the "already released" check instead: that
 rem is where a network call belongs, and where a stall is visible and interruptible.
 rem
 rem This runs as a subroutine rather than inside a parenthesised ( ) block, so each

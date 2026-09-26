@@ -9,7 +9,7 @@ else: a checkbox label with a placeholder in it, a [Dirs] block inserted into
 the say layer. Each was found by a person running the program and reading the
 speech history. That is the most expensive way to find any of them.
 
-So the rules are written as checks. checkHomerApp runs this through accept.inix,
+So the rules are written as checks. scripts\check runs this through accept.inix,
 and a broken pattern fails a build rather than a user's afternoon.
 
 WHAT IT CHECKS
