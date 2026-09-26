@@ -9,36 +9,37 @@ FileTask = accept
 
 [check]
 
-; A CHECK IS ONE CONDITION. cmd's nested "if exist A if exist B (...) else (...)"
-; does not mean what it reads as -- the else binds to the last if -- and three
-; checks here were failing on that rather than on anything about DbDo.
+; A CHECK IS ONE CONDITION, AND THE TEST LIVES IN A FILE. A line here is run
+; through a shell that already wraps it in cmd /c, so parentheses and an else
+; written here are parsed twice and answer 1 whatever is true. scripts\acceptCheck
+; does the looking, and takes two words: exists or missing, and a path.
 Name = the patterns hold
 Run = scripts\auditPatterns.cmd
 
 [check]
 
 Name = the local AI scripts ship in scripts
-Run = cmd /c if exist scripts\installOllama.cmd (exit 0) else (exit 1)
+Run = scripts\acceptCheck.cmd exists scripts\installOllama.cmd
 
 [check]
 
 Name = the model script ships in scripts
-Run = cmd /c if exist scripts\installModels.cmd (exit 0) else (exit 1)
+Run = scripts\acceptCheck.cmd exists scripts\installModels.cmd
 
 [check]
 
 Name = the starter databases are in templates
-Run = cmd /c if exist templates\JobTrail\JobTrail.db (exit 0) else (exit 1)
+Run = scripts\acceptCheck.cmd exists templates\JobTrail\JobTrail.db
 
 [check]
 
 Name = the book template is in templates
-Run = cmd /c if exist templates\BookTrail\BookTrail.db (exit 0) else (exit 1)
+Run = scripts\acceptCheck.cmd exists templates\BookTrail\BookTrail.db
 
 [check]
 
 Name = no samples folder remains
-Run = cmd /c if exist Samples (exit 1) else (exit 0)
+Run = scripts\acceptCheck.cmd missing Samples
 
 [check]
 
@@ -48,17 +49,17 @@ Run = buildDbDo.cmd nobump
 [check]
 
 Name = the program was produced
-Run = cmd /c if exist exec\DbDo.exe (exit 0) else (exit 1)
+Run = scripts\acceptCheck.cmd exists exec\DbDo.exe
 
 [check]
 
 Name = the snippet module was produced
-Run = cmd /c if exist exec\DbDo.dll (exit 0) else (exit 1)
+Run = scripts\acceptCheck.cmd exists exec\DbDo.dll
 
 [check]
 
 Name = the local copies of the Homer classes are gone
-Run = cmd /c if exist Lbc.cs (exit 1) else (exit 0)
+Run = scripts\acceptCheck.cmd missing Lbc.cs
 
 [check]
 
@@ -68,4 +69,4 @@ Run = scripts\checkTutorial.cmd
 [check]
 
 Name = a session log lands where the Homer layout says
-Run = cmd /c if exist "%LOCALAPPDATA%\DbDo\logs" (exit 0) else (exit 1)
+Run = scripts\acceptCheck.cmd exists "%LOCALAPPDATA%\DbDo\logs"

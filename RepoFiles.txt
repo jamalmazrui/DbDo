@@ -18,6 +18,7 @@ DbDo.exe.config
 DbDo_hotkeys.inix
 DbDo_setup.iss
 buildDbDo.cmd
+scripts/acceptCheck.cmd
 getDbDoDeps.ps1
 THIRD-PARTY-NOTICES.txt
 lookups.db

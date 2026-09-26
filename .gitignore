@@ -36,6 +36,7 @@
 !/ReadMe.md
 !/RepoFiles.txt
 !/scripts/
+!/scripts/acceptCheck.cmd
 !/scripts/installModels.cmd
 !/scripts/installOllama.cmd
 !/scripts/summarizeSetup.cmd

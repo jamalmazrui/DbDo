@@ -51,7 +51,19 @@ rem ====================================================================
 
 setlocal enableextensions enabledelayedexpansion
 
+rem THE SCRIPT'S OWN FOLDER, CAPTURED ONCE, BEFORE ANYTHING CHANGES DIRECTORY.
+rem
+rem %~dp0 is not a constant. When a script is started by its bare name --
+rem "buildDbDo.cmd", which is how checkHomerApp runs it -- %0 carries no path,
+rem and %~dp0 is resolved against the CURRENT directory every time it is used.
+rem After the pushd into exec it became C:\DbDo\exec\, so the JScript compile
+rem looked for exec\DbDo.js, and fixEncoding was looked for there too and
+rem silently never ran. Two failures, one cause.
+rem
+rem sHere is taken here and every later use names it instead.
 pushd "%~dp0"
+set "sHere=%CD%\"
+
 
 rem THE LOG IS NAMED BY FULL PATH. It was relative, so once the build moved into
 rem exec\ to compile, every line from the compile went to exec\buildDbDo.log
@@ -61,11 +73,11 @@ rem EVERY SESSION ITS OWN LOG, IN logs\, named as the program names its own:
 rem <App>-<task>-yyyyMMdd-HHmmss.log. An alphabetical sort is then a
 rem chronological one, and zipping logs\ gathers everything.
 for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd-HHmmss"') do set "sStamp=%%i"
-if not exist "%~dp0logs" mkdir "%~dp0logs"
-set "log=%~dp0logs\DbDo-build-%sStamp%.log"
+if not exist "!sHere!logs" mkdir "!sHere!logs"
+set "log=!sHere!logs\DbDo-build-%sStamp%.log"
 echo DbDo build log > "!log!"
 echo Started at %DATE% %TIME% (Pacific time, Seattle) >> "!log!"
-echo Script directory: %~dp0 >> "!log!"
+echo Script directory: !sHere! >> "!log!"
 echo Working directory: %CD% >> "!log!"
 echo. >> "!log!"
 
@@ -362,8 +374,8 @@ rem the top, and each thing the program runs from in the folder it is installed
 rem to. So the libraries are fetched into exec\, and DbDo.exe, DbDo.dll and the
 rem importers are compiled into it. The sources are named by full path from
 rem here, so nothing about them moves. To try a build, run exec\DbDo.exe.
-if not exist "%~dp0exec" mkdir "%~dp0exec"
-pushd "%~dp0exec"
+if not exist "!sHere!exec" mkdir "!sHere!exec"
+pushd "!sHere!exec"
 echo Binaries go to: %CD% >> "!log!"
 
 rem ---- fetch nvdaControllerClient.dll if missing (same as v1.0.43) ----
@@ -449,9 +461,9 @@ rem skipped. The hard guard below stops the build with a clear message instead
 rem of letting csc emit six CS0006 "Metadata file not found" errors.
 if exist "NPOI.dll" if exist "NPOI.OOXML.dll" if exist "NPOI.OpenXml4Net.dll" if exist "NPOI.OpenXmlFormats.dll" if exist "ICSharpCode.SharpZipLib.dll" if exist "BouncyCastle.Crypto.dll" goto :have_npoi
 echo Fetching NPOI 2.5.6, SharpZipLib 1.3.3, BouncyCastle 1.8.9 ...
-powershell -NoProfile -ExecutionPolicy Bypass -File "%~dp0getDbDoDeps.ps1" >> "!log!" 2>&1
+powershell -NoProfile -ExecutionPolicy Bypass -File "!sHere!getDbDoDeps.ps1" >> "!log!" 2>&1
 rem Wherever the fetch put them, they belong here.
-for %%D in (NPOI.dll NPOI.OOXML.dll NPOI.OpenXml4Net.dll NPOI.OpenXmlFormats.dll ICSharpCode.SharpZipLib.dll BouncyCastle.Crypto.dll) do if exist "%~dp0%%D" if not exist "%%D" move /y "%~dp0%%D" . >nul
+for %%D in (NPOI.dll NPOI.OOXML.dll NPOI.OpenXml4Net.dll NPOI.OpenXmlFormats.dll ICSharpCode.SharpZipLib.dll BouncyCastle.Crypto.dll) do if exist "!sHere!%%D" if not exist "%%D" move /y "!sHere!%%D" . >nul
 :have_npoi
 set "xlsxMissing="
 for %%D in (NPOI.dll NPOI.OOXML.dll NPOI.OpenXml4Net.dll NPOI.OpenXmlFormats.dll ICSharpCode.SharpZipLib.dll BouncyCastle.Crypto.dll) do if not exist "%%D" set "xlsxMissing=1"
@@ -543,12 +555,12 @@ echo Compiling DbDo.js -> DbDo.dll ...
 rem THE SOURCE IS NAMED BY FULL PATH, because this runs with exec as the
 rem working folder. A bare DbDo.js here looks for exec\DbDo.js and fails with
 rem "Could not find file", which names the file and not the reason.
-if not exist "%~dp0DbDo.js" (
-  echo ERROR: DbDo.js is not in %~dp0 -- the snippet module cannot be built. >> "!log!"
+if not exist "!sHere!DbDo.js" (
+  echo ERROR: DbDo.js is not in !sHere! -- the snippet module cannot be built. >> "!log!"
   echo DbDo.js is missing from the project folder. Unzip the delivery again.
   popd & popd & exit /b 1
 )
-"!jsc!" /target:library /platform:anycpu /nologo /out:DbDo.dll "%~dp0DbDo.js" >> "!log!" 2>&1
+"!jsc!" /target:library /platform:anycpu /nologo /out:DbDo.dll "!sHere!DbDo.js" >> "!log!" 2>&1
 if errorlevel 1 goto :build_failed
 echo DbDo.dll built.
 
@@ -571,7 +583,7 @@ rem project's own files back into the Homer encoding first. The kit's tool reads
 rem RepoFiles.txt to know which files are the project's.
 if exist "scripts\fixEncoding.cmd" (
   echo Checking the file encodings.
-  call "%~dp0scripts\fixEncoding.cmd" -build
+  call "!sHere!scripts\fixEncoding.cmd" -build
   if errorlevel 1 echo WARN: fixEncoding reported a problem >> "!log!"
 )
 
@@ -585,11 +597,11 @@ if exist DbDo.exe del /f /q DbDo.exe
 rem The icon is looked for where the sources are. After the build moved into
 rem exec\ this check still said "if exist DbDo.ico", found nothing there, and
 rem 1.0.173 was compiled without its icon.
-if exist "%~dp0DbDo.ico" (
-    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32icon:"%~dp0DbDo.ico" /win32manifest:"%~dp0DbDo.manifest" /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"Microsoft.VisualBasic.dll" /reference:"Microsoft.JScript.dll" /reference:"NPOI.dll" /reference:"NPOI.OOXML.dll" /reference:"NPOI.OpenXml4Net.dll" /reference:"NPOI.OpenXmlFormats.dll" /reference:"ICSharpCode.SharpZipLib.dll" /reference:"BouncyCastle.Crypto.dll" !homerRefs! /out:DbDo.exe "%~dp0Version.cs" "%~dp0DbDo.cs" !homerSources! >> "!log!" 2>&1
+if exist "!sHere!DbDo.ico" (
+    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32icon:"!sHere!DbDo.ico" /win32manifest:"!sHere!DbDo.manifest" /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"Microsoft.VisualBasic.dll" /reference:"Microsoft.JScript.dll" /reference:"NPOI.dll" /reference:"NPOI.OOXML.dll" /reference:"NPOI.OpenXml4Net.dll" /reference:"NPOI.OpenXmlFormats.dll" /reference:"ICSharpCode.SharpZipLib.dll" /reference:"BouncyCastle.Crypto.dll" !homerRefs! /out:DbDo.exe "!sHere!Version.cs" "!sHere!DbDo.cs" !homerSources! >> "!log!" 2>&1
 ) else (
     echo NOTE: DbDo.ico not found; building without embedded icon. >> "!log!"
-    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32manifest:"%~dp0DbDo.manifest" /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"Microsoft.VisualBasic.dll" /reference:"Microsoft.JScript.dll" /reference:"NPOI.dll" /reference:"NPOI.OOXML.dll" /reference:"NPOI.OpenXml4Net.dll" /reference:"NPOI.OpenXmlFormats.dll" /reference:"ICSharpCode.SharpZipLib.dll" /reference:"BouncyCastle.Crypto.dll" !homerRefs! /out:DbDo.exe "%~dp0Version.cs" "%~dp0DbDo.cs" !homerSources! >> "!log!" 2>&1
+    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32manifest:"!sHere!DbDo.manifest" /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"Microsoft.VisualBasic.dll" /reference:"Microsoft.JScript.dll" /reference:"NPOI.dll" /reference:"NPOI.OOXML.dll" /reference:"NPOI.OpenXml4Net.dll" /reference:"NPOI.OpenXmlFormats.dll" /reference:"ICSharpCode.SharpZipLib.dll" /reference:"BouncyCastle.Crypto.dll" !homerRefs! /out:DbDo.exe "!sHere!Version.cs" "!sHere!DbDo.cs" !homerSources! >> "!log!" 2>&1
 )
 if errorlevel 1 goto :build_failed
 echo DbDo.exe built.
@@ -603,15 +615,15 @@ rem build matches the installed Office (and falls back to the other on a
 rem provider-unavailable exit code). /target:exe (console) so the importer
 rem can prompt and report on stdout/stderr. Microsoft.CSharp (for the
 rem dynamic COM calls) auto-resolves from csc.rsp, as it does for DbDo.cs.
-if not exist "%~dp02db.cs" goto :skip_2db
+if not exist "!sHere!2db.cs" goto :skip_2db
 echo. >> "!log!"
 echo Compiling 2db.cs -^> 2db32.exe and 2db64.exe ... >> "!log!"
 echo Compiling 2db.cs -^> 2db32.exe and 2db64.exe ...
 if exist 2db32.exe del /f /q 2db32.exe
 if exist 2db64.exe del /f /q 2db64.exe
-"!csc!" /target:exe /platform:x86 /optimize+ /nologo /out:2db32.exe "%~dp02db.cs" >> "!log!" 2>&1
+"!csc!" /target:exe /platform:x86 /optimize+ /nologo /out:2db32.exe "!sHere!2db.cs" >> "!log!" 2>&1
 if errorlevel 1 goto :build_failed
-"!csc!" /target:exe /platform:x64 /optimize+ /nologo /out:2db64.exe "%~dp02db.cs" >> "!log!" 2>&1
+"!csc!" /target:exe /platform:x64 /optimize+ /nologo /out:2db64.exe "!sHere!2db.cs" >> "!log!" 2>&1
 if errorlevel 1 goto :build_failed
 echo 2db32.exe and 2db64.exe built.
 dir 2db32.exe | findstr 2db32.exe
@@ -681,7 +693,7 @@ rem Every key lives in one addItem call, so the hotkey document is generated
 rem rather than kept by hand: a list kept by hand drifts the first time a key
 rem changes, and this one would have drifted four times in a week.
 echo. >> "!log!"
-python "%~dp0scripts\makeHotkeys.py" >> "!log!" 2>&1
+python "!sHere!scripts\makeHotkeys.py" >> "!log!" 2>&1
 if errorlevel 1 echo WARN: makeHotkeys reported a problem; see logs\DbDo-hotkeys-*.log >> "!log!"
 
 rem ---- generate HTML documentation ----
@@ -750,7 +762,7 @@ if exist "help\Tutorial_*.inix" (
   rem NO REDIRECTION: the tool names each walk as it speaks it, and speaking
   rem takes minutes. Sent to the log, the screen says nothing for twenty minutes
   rem and the build looks hung. Its own log still records the detail.
-  call "%~dp0scripts\buildTutorials.cmd" -build
+  call "!sHere!scripts\buildTutorials.cmd" -build
   if errorlevel 1 (
     rem THE BUILD STOPS HERE, because the installer needs what this makes and
     rem its own error names a missing file rather than the reason. The tutorial
