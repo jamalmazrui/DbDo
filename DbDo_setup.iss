@@ -413,7 +413,7 @@ Name: "{autodesktop}\{#AppName}"; \
 FileName: "{app}\exec\DbDo.exe"; \
   Parameters: "--install-jaws-settings"; \
   WorkingDir: "{app}\exec"; \
-  Description: "Install scripts for improving use with the JAWS screen reader"; \
+  Description: "Install JAWS scripts"; \
   Check: haveJaws; \
   Flags: postinstall waituntilterminated runhidden skipifsilent
 
@@ -422,7 +422,7 @@ FileName: "{app}\exec\DbDo.exe"; \
 ;    means the checkbox simply does not appear if the app ships no add-on yet.
 FileName: "{app}\scripts\DbDo.nvda-addon"; \
   WorkingDir: "{app}\scripts"; \
-  Description: "Install add-on for improving use with the NVDA screen reader"; \
+  Description: "Install NVDA add-on"; \
   Check: haveNvda; \
   Flags: postinstall shellexec waituntilterminated skipifsilent skipifdoesntexist
 
@@ -487,11 +487,11 @@ FileName: "{cmd}"; \
 FileName: "{cmd}"; \
   Parameters: "/c echo launch > ""{localappdata}\{#AppName}\logs\{#AppName}_launch.flag"""; \
   WorkingDir: "{app}\exec"; \
-  Description: "Launch DbDo (Alt+Control+D starts it any time)"; \
+  Description: "Launch DbDo (desktop hotkey Alt+Control+D)"; \
   Flags: postinstall skipifsilent runhidden runasoriginaluser
 
 FileName: "{app}\help\DbDo.htm"; \
-  Description: "Open the user guide (F1 opens it inside DbDo)"; \
+  Description: "Open the user guide (F1 in DbDo)"; \
   Flags: postinstall skipifsilent shellexec nowait runasoriginaluser unchecked
 
 ; The results summary is NOT listed here. It is not an option -- it always runs,
@@ -792,23 +792,23 @@ begin
     if sAvailable <> '' then
       Result := 'Update Ollama from ' + sInstalled + ' to ' + sAvailable
     else if sInstalled <> '' then
-      Result := 'Reinstall Ollama ' + sInstalled + ' (current version)';
+      Result := 'Reinstall Ollama ' + sInstalled;
   end;
   if Result = '' then
   begin
     sVersion := lastWord(exeVersion('"' + ollamaExe() + '"'));
     if sVersion = '' then sVersion := lastWord(exeVersion('ollama'));
     if sVersion <> '' then
-      Result := 'Reinstall Ollama ' + sVersion + ' (current version)'
+      Result := 'Reinstall Ollama ' + sVersion
     else if ollamaIsOnDisk() then
-      Result := 'Reinstall Ollama (already installed)'
+      Result := 'Reinstall Ollama'
     else
     begin
       sVersion := wingetLatest('Ollama.Ollama');
       if sVersion <> '' then
         Result := 'Install Ollama ' + sVersion
       else
-        Result := 'Install Ollama, which runs the AI model locally (about 600 MB)';
+        Result := 'Install Ollama (runs AI models, about 600 MB)';
     end;
   end;
   gOllamaDesc := Result;
@@ -843,7 +843,7 @@ begin
     Result := gModelDesc;
     exit;
   end;
-  Result := 'Install the llama3.2 model, which DbDo asks questions of (about 2 GB)';
+  Result := 'Install llama3.2 (answers questions, about 2 GB)';
   if ollamaState() > 0 then
   begin
     (* Ask the way installOllama.cmd asks -- through the PATH -- and look for
@@ -853,7 +853,7 @@ begin
       for i := 0 to GetArrayLength(lsLines) - 1 do
         if Pos('llama3.2', Lowercase(lsLines[i])) > 0 then
         begin
-          Result := 'Reinstall the llama3.2 model (already installed)';
+          Result := 'Reinstall llama3.2 (answers questions)';
           break;
         end;
   end;

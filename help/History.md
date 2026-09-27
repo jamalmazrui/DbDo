@@ -4,7 +4,11 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.205 (current)
+## v1.0.206 (current)
+
+- **Setup.** The Results box at the end of setup is titled "DbDo Setup Results", and the finish page uses the Homer wording: the verb first, no "recommended", and "Launch DbDo (desktop hotkey ...)". The JAWS and NVDA boxes read "Install JAWS scripts" and "Install NVDA add-on"; the Ollama and llama3.2 boxes lost their "(current version)" and "(already installed)" tails.
+
+## v1.0.205
 
 - **Built with HomerDev 1.43.19.** The build refreshes the kit's tools with the day's fixes: `scripts\tidy` keeps a file where the project says it lives and untracks only what RepoFiles.txt leaves out, `scripts\check` reads keys and access letters without false alarms and never waits for a key, and `scripts\release` publishes a draft and confirms the release is GitHub's latest.
 
