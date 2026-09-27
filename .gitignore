@@ -76,6 +76,8 @@
 !/THIRD-PARTY-NOTICES.txt
 !/uiTest.inix
 !/.gitignore
+!/.gitattributes
+!/KeepEncoding.txt
 
 # On this disk only, from LocalFiles.txt.
 DbDo.nvda-addon
@@ -117,4 +119,4 @@ self.htm
 self.md
 release.cmd
 release.ps1
-version.py
+/version.py
