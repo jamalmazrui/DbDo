@@ -2,7 +2,7 @@
 rem ====================================================================
 rem buildDbDo.cmd - build script for DbDo.exe, built on the Homer Development Kit.
 rem
-rem DbDo compiles against the kit's shared classes in C:\HomerDev\CSharp rather
+rem DbDo compiles against the kit's shared classes in C:\HomerDev\exec\CSharp rather
 rem than its own copies of them. What that buys: a fix to Lbc or Say reaches
 rem DbDo, EdSharp and FileDir together; the version DbDo was built against is
 rem recorded in this log; and the kit's own checks prove those classes still
@@ -75,8 +75,12 @@ rem chronological one, and zipping logs\ gathers everything.
 for /f %%i in ('powershell -NoProfile -Command "Get-Date -Format yyyyMMdd-HHmmss"') do set "sStamp=%%i"
 if not exist "!sHere!logs" mkdir "!sHere!logs"
 set "log=!sHere!logs\DbDo-build-%sStamp%.log"
-echo DbDo build log > "!log!"
-echo Started at %DATE% %TIME% (Pacific time, Seattle) >> "!log!"
+rem THE START AND END LINES CARRY AN ISO 8601 TIME (HomerDev 1.43.21), with
+rem the UTC offset, from PowerShell rather than %DATE% %TIME%, whose form
+rem follows the regional settings; and they name the event and its result as
+rem every Homer log does.
+for /f "usebackq delims=" %%i in (`powershell -NoProfile -Command "Get-Date -Format 'yyyy-MM-ddTHH:mm:ss.fffzzz'"`) do set "sIso=%%i"
+> "!log!" echo !sIso! INFO  build start app=DbDo
 echo Script directory: !sHere! >> "!log!"
 echo Working directory: %CD% >> "!log!"
 echo. >> "!log!"
@@ -109,9 +113,9 @@ rem one place, so a fix reaches every app that uses them, and so the version
 rem DbDo compiles against is a fact rather than a guess. Looked for in order:
 rem the HomerDev environment variable, C:\HomerDev, then this folder.
 set "homerDev="
-if defined HomerDev if exist "%HomerDev%\CSharp\Lbc.cs" set "homerDev=%HomerDev%"
-if not defined homerDev if exist "C:\HomerDev\CSharp\Lbc.cs" set "homerDev=C:\HomerDev"
-if not defined homerDev if exist "%CD%\CSharp\Lbc.cs" set "homerDev=%CD%"
+if defined HomerDev if exist "%HomerDev%\exec\CSharp\Lbc.cs" set "homerDev=%HomerDev%"
+if not defined homerDev if exist "C:\HomerDev\exec\CSharp\Lbc.cs" set "homerDev=C:\HomerDev"
+if not defined homerDev if exist "%CD%\exec\CSharp\Lbc.cs" set "homerDev=%CD%"
 if not defined homerDev (
   echo ERROR: The Homer Development Kit was not found.
   echo Unzip it into C:\HomerDev, or set the HomerDev environment variable.
@@ -136,7 +140,7 @@ rem it -- Say.onSpoken, LbcMenuItem, Elevate -- and a kit older than the source
 rem fails deep in the compiler with "Say does not contain a definition for
 rem onSpoken", which names the symptom and not the cause. So the build says the
 rem cause, first. Raise this whenever DbDo starts using something new.
-set "kitNeeded=1.43.20"
+set "kitNeeded=1.43.22"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -153,17 +157,17 @@ rem alternate menu read from it.
 set "homerSources="
 rem ELEVATE GOES WHEREVER LBC GOES (kit 1.31 and later): Lbc's Help box carries
 rem the version section and the F11 update offer, which are Elevate's.
-set "homerSources=!homerSources! "!homerDev!\CSharp\Elevate.cs""
-set "homerSources=!homerSources! "!homerDev!\CSharp\Inix.cs""
-set "homerSources=!homerSources! "!homerDev!\CSharp\KeyMap.cs""
-set "homerSources=!homerSources! "!homerDev!\CSharp\KeyName.cs""
-set "homerSources=!homerSources! "!homerDev!\CSharp\Lbc.cs""
-set "homerSources=!homerSources! "!homerDev!\CSharp\Log.cs""
-set "homerSources=!homerSources! "!homerDev!\CSharp\Ollama.cs""
-set "homerSources=!homerSources! "!homerDev!\CSharp\Paths.cs""
-set "homerSources=!homerSources! "!homerDev!\CSharp\Say.cs""
-set "homerSources=!homerSources! "!homerDev!\CSharp\Util.cs""
-set "homerSources=!homerSources! "!homerDev!\CSharp\Web.cs""
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Elevate.cs""
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Inix.cs""
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\KeyMap.cs""
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\KeyName.cs""
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Lbc.cs""
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Log.cs""
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Ollama.cs""
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Paths.cs""
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Say.cs""
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Util.cs""
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Web.cs""
 echo Homer modules: !homerSources! >> "!log!"
 
 
@@ -212,7 +216,7 @@ rem So the old Inix.cs, Lbc.cs, Say.cs and Web.cs would sit here looking
 rem authoritative while nothing compiled them. Each goes only when the kit has
 rem its replacement, so nothing is deleted without a copy already in place.
 for %%f in (Inix.cs Lbc.cs Say.cs Web.cs) do (
-  if exist "%%f" if exist "!homerDev!\CSharp\%%f" (
+  if exist "%%f" if exist "!homerDev!\exec\CSharp\%%f" (
     del /f /q "%%f"
     echo REPLACED BY THE KIT: %%f >> "!log!"
   )
@@ -942,13 +946,15 @@ echo   sqlean.dll -- SQLean extension bundle (REGEXP, median, percentiles, ...)
 if exist 2db64.exe echo   2db32.exe / 2db64.exe -- standalone importer (32- and 64-bit) for the Import command
 echo.
 echo To publish: scripts\push "What changed." then scripts\release.
-echo Build succeeded %DATE% %TIME% >> "!log!"
+for /f "usebackq delims=" %%i in (`powershell -NoProfile -Command "Get-Date -Format 'yyyy-MM-ddTHH:mm:ss.fffzzz'"`) do set "sIso=%%i"
+>> "!log!" echo !sIso! INFO  build end result=succeeded
 popd
 endlocal
 exit /b 0
 
 :build_failed
-echo. >> "!log!"
+for /f "usebackq delims=" %%i in (`powershell -NoProfile -Command "Get-Date -Format 'yyyy-MM-ddTHH:mm:ss.fffzzz'"`) do set "sIso=%%i"
+>> "!log!" echo !sIso! ERROR build end result=failed
 echo BUILD FAILED. See %log% for details.
 type "!log!" | findstr /C:"error" /C:"Error" /C:"FAILED"
 popd
