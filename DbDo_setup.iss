@@ -1138,8 +1138,8 @@ end;
    uses the same algorithm (registry-first scompile lookup with
    Program Files fallback, enumerate %APPDATA%\Freedom Scientific\
    JAWS\*\Settings\*, copy + scompile, log the paths placed) and
-   the same uninstall log location ({userappdata}\DbDo\
-   jawsSettings.log) so the upgrade from v1.0.39 to v1.0.40 is
+   the same uninstall log location, now %LOCALAPPDATA%\DbDo\
+   jawsSettings.log (HomerDev 1.43.49 moved it from the Roaming tree), so the upgrade from v1.0.39 to v1.0.40 is
    transparent. The advantage of the move: the user can re-run the
    install later from Help > Install JAWS Settings without re-
    running the full installer. *)
@@ -1281,7 +1281,9 @@ var
   i: Integer;
 begin
   if CurUninstallStep <> usUninstall then exit;
-  sLogPath := ExpandConstant('{userappdata}\DbDo\jawsSettings.log');
+  // The Local tree only (HomerDev 1.43.49); DbDo moves an older record
+  // there from the Roaming tree the next time it runs.
+  sLogPath := ExpandConstant('{localappdata}\DbDo\jawsSettings.log');
   if not FileExists(sLogPath) then exit;
   if not LoadStringsFromFile(sLogPath, oLog) then exit;
   for i := 0 to GetArrayLength(oLog) - 1 do
@@ -1290,7 +1292,7 @@ begin
       DeleteFile(oLog[i]);
   end;
   DeleteFile(sLogPath);
-  (* Try to remove the {userappdata}\DbDo folder if it's now empty.
+  (* Try to remove the per-user DbDo folder if it's now empty.
      RemoveDir returns False if non-empty, which is fine -- the user
      may have other DbDo state in there. *)
   RemoveDir(ExtractFileDir(sLogPath));

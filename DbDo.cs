@@ -110,9 +110,9 @@ namespace DbDo
     // =====================================================================
     public static class ScriptHelper
     {
-        // Script folder under %APPDATA%\DbDo\Scripts. Created on
+        // Script folder under %LOCALAPPDATA%\DbDo\scripts. Created on
         // first access. Path is stable across DbDo upgrades because
-        // it lives under the user's roaming application data, not
+        // it lives under the user's local application data, not
         // the install folder.
         //
         // First-creation seeding: if we are creating the folder for
@@ -13515,7 +13515,7 @@ namespace DbDo
             add("Exit Child to Root",   "Return from any drill-down depth to the original table", "");
             add("Invoke SQL",         "Run an ad-hoc SQL statement against the open database", "");
             add("Invoke Script",      "Run a script from the Scripts folder (.js, .sql, or .dbdo)",
-                "The picker shows every .js (JScript .NET), .sql (SQL batch), and .dbdo (DbDo command batch) file in %APPDATA%\\DbDo\\Scripts. Type to filter the list; press Enter to run. The file extension determines the engine: .js gets full computational power and host objects (db, frm); .sql runs a semicolon-separated batch of statements; .dbdo dispatches each line through the dot-prompt as if you had typed it.");
+                "The picker shows every .js (JScript .NET), .sql (SQL batch), and .dbdo (DbDo command batch) file in %LOCALAPPDATA%\\DbDo\\scripts. Type to filter the list; press Enter to run. The file extension determines the engine: .js gets full computational power and host objects (db, frm); .sql runs a semicolon-separated batch of statements; .dbdo dispatches each line through the dot-prompt as if you had typed it.");
 
             // ===== Help menu =====
             add("Get Help",           "Open the documentation in the default browser",
@@ -34890,6 +34890,11 @@ namespace DbDo
                 Homer.Paths.start("DbDo");
                 Homer.Log.start("DbDo");
                 Homer.Log.keyValue("Command line", string.Join(" ", aArgs));
+                // ONLY THE LOCAL TREE (HomerDev 1.43.49): anything an earlier
+                // DbDo left under %APPDATA%\DbDo -- scripts, templates, the JAWS
+                // settings record -- is moved to %LOCALAPPDATA%\DbDo, each file
+                // to the same place, and every move is logged.
+                foreach (string sMoved in Homer.Paths.moveFromRoaming()) Homer.Log.info(sMoved);
                 Homer.Log.info("Cleared " + Homer.Paths.clearTemp() + " leftover temporary items");
 
                 // Global runtime-error handling: any unhandled
