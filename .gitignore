@@ -22,7 +22,7 @@
 !/.gitignore
 !/2db.cs
 !/accept.inix
-!/buildDbDo.cmd
+!/build.cmd
 !/configs/DbDo.inix
 !/data/lookups.db
 !/DbDo.cmd

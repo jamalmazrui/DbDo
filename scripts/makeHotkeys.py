@@ -3,7 +3,7 @@ r"""makeHotkeys.py -- write Hotkeys.md from the menus in DbDo.cs.
 
 WHY GENERATED. Every key lives in one addItem call. A hand-kept list drifts the
 first time a key changes, and this project has changed several in a week. So the
-document is built from the source, and buildDbDo builds it each time.
+document is built from the source, and build builds it each time.
 
 THE FORMAT. One list item per key, and inside it one fact per line, the lines
 joined with a backslash hard break -- which CommonMark, GitHub and pandoc all

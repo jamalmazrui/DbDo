@@ -25,9 +25,9 @@
 
 #define AppName       "DbDo"
 ; ---- Version -----------------------------------------------------------------
-; The version number is NOT stored in this script. buildDbDo passes the number
+; The version number is NOT stored in this script. build passes the number
 ; it is building with /DBuildVersion=, and that is the one stamped into the
-; installer. buildDbDo writes version.txt only AFTER the build succeeds, so the
+; installer. build writes version.txt only AFTER the build succeeds, so the
 ; number it is building with is not in version.txt yet while Inno runs: reading
 ; the file here stamped every installer with the PREVIOUS number, and on
 ; 26 September 2026 release refused DbDo_setup.exe for carrying 1.0.202 while
@@ -72,20 +72,20 @@
 ; the compile with a sentence saying what to run, rather than producing an
 ; installer whose Help menu opens nothing.
 ;
-; Run scripts\buildTutorials once; buildDbDo does it for you when the output is
+; Run scripts\buildTutorials once; build does it for you when the output is
 ; not already there.
 ; THE TRANSCRIPT IS WHAT MUST BE HERE. The kit's tutorial tool writes
 ; help\Tutorials.md and one mp3 per walk in help\tutorials; an older recording
 ; may also leave help\Tutorials.mkv. Any of those forms ships, so the check is
 ; on the transcript, which every form produces.
 #if !FileExists(AddBackslash(SourcePath) + "help\Tutorials.md")
-  #error help\Tutorials.md is missing. Run scripts\buildTutorials (or buildDbDo) before building the installer.
+  #error help\Tutorials.md is missing. Run scripts\buildTutorials (or build) before building the installer.
 #endif
 #if !FileExists(AddBackslash(SourcePath) + "help\Tutorials.md")
-  #error help\Tutorials.md is missing. Run scripts\buildTutorials (or buildDbDo) before building the installer.
+  #error help\Tutorials.md is missing. Run scripts\buildTutorials (or build) before building the installer.
 #endif
 #if !FileExists(AddBackslash(SourcePath) + "help\Tutorials.htm")
-  #error help\Tutorials.htm is missing. buildDbDo converts it with pandoc; run buildDbDo before building the installer.
+  #error help\Tutorials.htm is missing. build converts it with pandoc; run build before building the installer.
 #endif
 
 [Setup]
@@ -275,7 +275,7 @@ Source: "exec\DbDo.dll"; DestDir: "{app}\exec"; Flags: ignoreversion
 ; (THIRD-PARTY-NOTICES.txt below carries the required license texts). The
 ; exact versions match what DbDo references, so they load without binding
 ; redirects: NPOI 2.5.6, SharpZipLib 1.3.3, Portable.BouncyCastle 1.8.9.
-; buildDbDo.cmd fetches them next to DbDo.exe; it must run before ISCC so
+; build.cmd fetches them next to DbDo.exe; it must run before ISCC so
 ; these files exist to bundle. (System.Drawing and System.Configuration are
 ; .NET Framework 4.8 assemblies, so they are not bundled.)
 Source: "exec\NPOI.dll";                  DestDir: "{app}\exec"; Flags: ignoreversion
@@ -288,12 +288,12 @@ Source: "THIRD-PARTY-NOTICES.txt";   DestDir: "{app}"; Flags: ignoreversion
 Source: "DbDo.ico";    DestDir: "{app}\exec"; Flags: ignoreversion
 Source: "DbDo.manifest"; DestDir: "{app}\exec"; Flags: ignoreversion
 ; Source and build inputs, shipped so DbDo can be recompiled in place
-; (EdSharp-style). buildDbDo.cmd fetches its own NuGet/tool dependencies and
+; (EdSharp-style). build.cmd fetches its own NuGet/tool dependencies and
 ; drives csc/jsc, so no Visual Studio install is required; run it first, then
 ; recompile this installer with ISCC if desired.
 Source: "DbDo.cs";        DestDir: "{app}\exec"; Flags: ignoreversion
 Source: "DbDo.js";        DestDir: "{app}\exec"; Flags: ignoreversion
-Source: "buildDbDo.cmd";  DestDir: "{app}\exec"; Flags: ignoreversion
+Source: "build.cmd";  DestDir: "{app}\exec"; Flags: ignoreversion
 Source: "getDbDoDeps.ps1"; DestDir: "{app}\exec"; Flags: ignoreversion
 Source: "getDbDoDeps.cmd"; DestDir: "{app}\exec"; Flags: ignoreversion
 Source: "DbDo_setup.iss"; DestDir: "{app}\exec"; Flags: ignoreversion

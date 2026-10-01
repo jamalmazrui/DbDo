@@ -610,12 +610,12 @@ This part is for people building DbDo from source.
 ## Requirements
 
 - .NET Framework 4.8, 64-bit.
-- The build tools invoked by `buildDbDo.cmd` (the .NET Framework C# compiler and Inno Setup for packaging).
+- The build tools invoked by `build.cmd` (the .NET Framework C# compiler and Inno Setup for packaging).
 - The SQLite ODBC driver and the bundled dependency DLLs the build fetches.
 
 ## Build
 
-Compile with **`buildDbDo.cmd`**, which builds `DbDo.exe`, converts this guide and the README to HTML with pandoc, and packages the installer with Inno Setup (`DbDo_setup.iss`). The dependency DLLs are gathered by `getDbDoDeps.ps1`. To replicate the development layout, keep the program and its subfolders under `C:\DbDo`.
+Compile with **`build.cmd`**, which builds `DbDo.exe`, converts this guide and the README to HTML with pandoc, and packages the installer with Inno Setup (`DbDo_setup.iss`). The dependency DLLs are gathered by `getDbDoDeps.ps1`. To replicate the development layout, keep the program and its subfolders under `C:\DbDo`.
 
 ## Architecture: one connection, two interfaces
 

@@ -2000,15 +2000,15 @@ issues.</p>
 <h2 id="requirements">Requirements</h2>
 <ul>
 <li>.NET Framework 4.8, 64-bit.</li>
-<li>The build tools invoked by <code>buildDbDo.cmd</code> (the .NET
+<li>The build tools invoked by <code>build.cmd</code> (the .NET
 Framework C# compiler and Inno Setup for packaging).</li>
 <li>The SQLite ODBC driver and the bundled dependency DLLs the build
 fetches.</li>
 </ul>
 <h2 id="build">Build</h2>
-<p>Compile with <strong><code>buildDbDo.cmd</code></strong>, which
-builds <code>DbDo.exe</code>, converts this guide and the README to HTML
-with pandoc, and packages the installer with Inno Setup
+<p>Compile with <strong><code>build.cmd</code></strong>, which builds
+<code>DbDo.exe</code>, converts this guide and the README to HTML with
+pandoc, and packages the installer with Inno Setup
 (<code>DbDo_setup.iss</code>). The dependency DLLs are gathered by
 <code>getDbDoDeps.ps1</code>. To replicate the development layout, keep
 the program and its subfolders under <code>C:\DbDo</code>.</p>

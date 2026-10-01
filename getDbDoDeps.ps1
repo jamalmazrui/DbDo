@@ -1,7 +1,7 @@
 ﻿# getDbDoDeps.ps1 -- fetch the managed DLLs DbDo's .xlsx engine needs
 # (NPOI 2.5.6, SharpZipLib 1.3.3, Portable.BouncyCastle 1.8.9) into this
 # script's own folder. Idempotent: any DLL already present is left alone.
-# Exits 0 on success, 1 (with guidance) on failure. buildDbDo.cmd calls it
+# Exits 0 on success, 1 (with guidance) on failure. build.cmd calls it
 # before compiling; it can also be run by hand:  powershell -ExecutionPolicy
 # Bypass -File getDbDoDeps.ps1
 #

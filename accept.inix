@@ -44,7 +44,7 @@ Run = scripts\acceptCheck.cmd missing Samples
 [check]
 
 Name = the build runs clean against the kit
-Run = buildDbDo.cmd nobump
+Run = build.cmd nobump
 
 [check]
 

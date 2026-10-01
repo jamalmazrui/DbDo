@@ -5,7 +5,7 @@ programmers.
 
 ## What you need
 
-Nothing by hand. `buildDbDo.cmd` finds or fetches everything it uses:
+Nothing by hand. `build.cmd` finds or fetches everything it uses:
 
 - the .NET Framework 4.8 C# compiler (`csc.exe`), from Visual Studio Build Tools;
 - the Homer Development Kit in `C:\HomerDev`, whose shared C# classes DbDo
@@ -22,7 +22,7 @@ Missing tools are fetched with winget. Everything the build does is written to
 
 From `C:\DbDo`:
 
-    buildDbDo
+    build
 
 It compiles `DbDo.cs` into `exec\DbDo.exe`, writes `Hotkeys.md` from the menus,
 converts every document to .htm, builds the spoken tutorials if they are
@@ -32,7 +32,7 @@ shipped.
 
 ## The four scripts, and the order they run in
 
-1. **`buildDbDo`** -- steps `version.txt`, writes `Version.cs`, refreshes the
+1. **`build`** -- steps `version.txt`, writes `Version.cs`, refreshes the
    kit's tools into `scripts`, puts the project's files into the Homer
    encoding, compiles into `exec`, speaks any tutorial with no audio, and
    builds `DbDo_setup.exe` at the top of the project.

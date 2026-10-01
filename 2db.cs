@@ -38,7 +38,7 @@
 //                (DbDo passes this after showing its own GUI prompt)
 //     /quiet     suppress progress lines on stdout (errors still print)
 //
-// Build (see buildDbDo.cmd): csc /platform:x86 -> 2db32.exe,
+// Build (see build.cmd): csc /platform:x86 -> 2db32.exe,
 //                            csc /platform:x64 -> 2db64.exe.
 // Requires a reference to Microsoft.CSharp.dll for the dynamic COM calls.
 // =====================================================================

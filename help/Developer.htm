@@ -190,8 +190,8 @@ and the order they run in</a></li>
 <p>How to build DbDo from its source and change it. This file is written
 for programmers.</p>
 <h2 id="what-you-need">What you need</h2>
-<p>Nothing by hand. <code>buildDbDo.cmd</code> finds or fetches
-everything it uses:</p>
+<p>Nothing by hand. <code>build.cmd</code> finds or fetches everything
+it uses:</p>
 <ul>
 <li>the .NET Framework 4.8 C# compiler (<code>csc.exe</code>), from
 Visual Studio Build Tools;</li>
@@ -209,7 +209,7 @@ written to <code>logs\\DbDo-build-&lt;date&gt;-&lt;time&gt;.log</code>,
 a new file for every build.</p>
 <h2 id="building">Building</h2>
 <p>From <code>C:\DbDo</code>:</p>
-<pre><code>buildDbDo</code></pre>
+<pre><code>build</code></pre>
 <p>It compiles <code>DbDo.cs</code> into <code>exec\DbDo.exe</code>,
 writes <code>Hotkeys.md</code> from the menus, converts every document
 to .htm, builds the spoken tutorials if they are missing (delete
@@ -220,7 +220,7 @@ rather than shipped.</p>
 <h2 id="the-four-scripts-and-the-order-they-run-in">The four scripts,
 and the order they run in</h2>
 <ol type="1">
-<li><strong><code>buildDbDo</code></strong> – steps
+<li><strong><code>build</code></strong> – steps
 <code>version.txt</code>, writes <code>Version.cs</code>, refreshes the
 kit’s tools into <code>scripts</code>, puts the project’s files into the
 Homer encoding, compiles into <code>exec</code>, speaks any tutorial
