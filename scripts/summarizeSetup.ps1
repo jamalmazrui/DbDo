@@ -62,42 +62,69 @@ if (Test-Path -LiteralPath $sResultsFile) {
 }
 
 # ---- what the finish-page entries did, one line each ----
-$lActions = @()
-if (Test-Path -LiteralPath $sActionsFile) {
-  $lActions = @(Get-Content -LiteralPath $sActionsFile -ErrorAction SilentlyContinue | Where-Object { $_.Trim() -ne "" })
+# ONLY WHAT WAS TICKED (30 September 2026). The installer wrote the ticked
+# captions to DbDo_ticked.txt when Finish was pressed; each component is
+# reported only when its box was among them, and each line says whether what
+# the box asked for happened. Then where the logs are, and nothing else.
+$sTickedFile = Join-Path $sLogDir "$sApp`_ticked.txt"
+$lsTicked = @()
+if (Test-Path -LiteralPath $sTickedFile) {
+  $lsTicked = @(Get-Content -LiteralPath $sTickedFile -ErrorAction SilentlyContinue | Where-Object { $_.Trim() -ne "" })
+  try { Remove-Item -LiteralPath $sTickedFile -Force } catch { }
 }
-say ""
-if ($lActions.Count -eq 0) {
-  say "No optional component needed installing."
-} else {
-  say "Results"
-  foreach ($sLine in $lActions) { say "  $sLine" }
-}
+function tickedLine($sWord) { return @($lsTicked | Where-Object { $_ -match [regex]::Escape($sWord) })[0] }
+$lsOutcomes = @()
 
-# ---- the state of the AI components, since those are the ones people ask about ----
-$sOllama = ollamaExe
-if ($sOllama -ne "") {
-  $sVersion = (probe $sOllama "--version").Trim()
-  if ($sVersion -eq "") { $sVersion = "installed" }
-  say ""
-  say "Local AI"
-  say "  Ollama: $sVersion"
-  $sModels = probe $sOllama "list"
-  $lModels = @($sModels -split "`n" | Select-Object -Skip 1 | Where-Object { $_.Trim() -ne "" })
-  if ($lModels.Count -eq 0) {
-    say "  Models: 0 installed. DbDo's Ask commands need one."
-  } elseif ($lModels.Count -eq 1) {
-    say "  Models: 1 installed."
+$sCaption = tickedLine "JAWS"
+if ($sCaption) {
+  $sRecord = Join-Path $env:LOCALAPPDATA "$sApp\jawsSettings.log"
+  $sStamp = Join-Path $env:LOCALAPPDATA "$sApp\jawsSettings.version"
+  if ((Test-Path -LiteralPath $sRecord) -and (Test-Path -LiteralPath $sStamp) -and
+      ((Get-Item -LiteralPath $sStamp).LastWriteTime -gt (Get-Date).AddMinutes(-30))) {
+    $lsOutcomes += "JAWS scripts: installed."
   } else {
-    say ("  Models: " + $lModels.Count + " installed.")
+    $lsOutcomes += "JAWS scripts: NOT installed. The log says why."
   }
 }
 
-say ""
-say "Log"
-say "  $sLogFile"
+if (tickedLine "NVDA") {
+  # The kit's screen reader script wrote its own line, installed or not.
+  $sReaders = Join-Path $sLogDir "$sApp`_screenReaders.txt"
+  $lsReader = @()
+  if (Test-Path -LiteralPath $sReaders) { $lsReader = @(Get-Content -LiteralPath $sReaders | Where-Object { $_ -match "NVDA" }) }
+  if ($lsReader.Count -gt 0) { $lsOutcomes += ($lsReader | ForEach-Object { $_.Trim().TrimEnd(".") + "." }) }
+  else { $lsOutcomes += "NVDA add-on: the step left no record. The log says why." }
+}
 
-# ---- one box, at the end, and only then the program ----
+$sOllama = ollamaExe
+$sHave = ""
+if ($sOllama -ne "") { $sHave = (((probe $sOllama "--version") -split "\s+") | Where-Object { $_ -match "^\d+(\.\d+)+$" } | Select-Object -Last 1) }
+$sCaption = tickedLine "Ollama"
+if ($sCaption) {
+  if ($sCaption -match "^Update Ollama from ([\d.]+) to ([\d.]+)") {
+    if ($sHave -eq $Matches[2]) { $lsOutcomes += "Ollama: updated to $sHave." }
+    else { $lsOutcomes += "Ollama: NOT updated -- still $sHave, though $($Matches[2]) was offered. The log has winget's answer." }
+  } elseif ($sCaption -match "^Reinstall") {
+    if ($sHave) { $lsOutcomes += "Ollama $sHave`: reinstalled." } else { $lsOutcomes += "Ollama: NOT reinstalled. The log says why." }
+  } else {
+    if ($sHave) { $lsOutcomes += "Ollama $sHave`: installed." } else { $lsOutcomes += "Ollama: NOT installed. The log says why." }
+  }
+}
+
+$sCaption = tickedLine "llama3.2"
+if ($sCaption) {
+  $bModel = $false
+  if ($sOllama -ne "") { $bModel = ((probe $sOllama "list") -match "llama3\.2") }
+  $sVerb = if ($sCaption -match "^Reinstall") { "reinstalled" } else { "installed" }
+  if ($bModel) { $lsOutcomes += "llama3.2: $sVerb." } else { $lsOutcomes += "llama3.2: NOT $sVerb. The log says why." }
+}
+
+if ($lsOutcomes.Count -gt 0) {
+  say ""
+  foreach ($sLine in $lsOutcomes) { say "  $sLine" }
+}
+say ""
+say "Logs are kept in $sLogDir."
 try { Remove-Item -LiteralPath $sActionsFile -ErrorAction SilentlyContinue } catch { }
 if (-not $bQuiet) {
   Add-Type -AssemblyName System.Windows.Forms | Out-Null
@@ -108,10 +135,5 @@ if (-not $bQuiet) {
 # The launch checkbox left a marker rather than starting the program, so that
 # the program's own window cannot arrive on top of a box nobody has read yet.
 # Now the box is closed, so the program can start.
-$sFlag = Join-Path $sLogDir "$sApp`_launch.flag"
-if (Test-Path -LiteralPath $sFlag) {
-  try { Remove-Item -LiteralPath $sFlag -ErrorAction SilentlyContinue } catch { }
-  $sExe = Join-Path (Split-Path -Parent $PSScriptRoot) "exec\$sApp.exe"
-  if (-not (Test-Path -LiteralPath $sExe)) { $sExe = Join-Path $PSScriptRoot "$sApp.exe" }
-  try { Start-Process -FilePath $sExe -WorkingDirectory (Split-Path -Parent $sExe) } catch { }
-}
+# DbDo itself is started by the installer once this box is closed, as the
+# person rather than with the installer's elevated rights (30 September 2026).

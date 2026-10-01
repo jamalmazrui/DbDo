@@ -403,76 +403,81 @@ Name: "{autodesktop}\{#AppName}"; \
   Comment: "Dual-mode database manager ({#HotKeyDisplay})"
 
 [Run]
-; The four Finish-page checkboxes, in this order.  All are checked by default
-; except the user guide.  The order here IS the order shown.
-;
-; 1. JAWS scripts.  "DbDo.exe --install-jaws-settings" copies the script family into
-;    every installed version of JAWS and compiles it there.  The implementation is the
-;    shared Homer.JawsSettingsInstaller (in Say.cs), so EdSharp, FileDir, and DbDo all
-;    install scripts by the same code, and the command can be re-run later.
-FileName: "{app}\exec\DbDo.exe"; \
-  Parameters: "--install-jaws-settings"; \
+; THE FINISH PAGE (30 September 2026; HomerDev FinishPage.md). Three groups:
+; Install and Update ticked, Reinstall never ticked; within each, alphabetical
+; by the component's name, ignoring case -- JAWS scripts, llama3.2, NVDA
+; add-on, Ollama. Every box is worded from what is on the computer. Then
+; Launch, ticked, and the guide, unticked. The NVDA add-on is installed by the
+; kit's script straight into NVDA's add-ons folder, without starting NVDA.
+
+; ---- 1. Install, ticked --------------------------------------------------------
+FileName: "{cmd}"; \
+  Parameters: "/s /c """"{app}\exec\DbDo.exe"" --install-jaws-settings && echo {#AppVersion}> ""{localappdata}\DbDo\jawsSettings.version"""""; \
   WorkingDir: "{app}\exec"; \
-  Description: "Install JAWS scripts"; \
-  Check: haveJaws; \
-  Flags: postinstall waituntilterminated runhidden skipifsilent
-
-; 2. NVDA add-on.  Shell-executing the .nvda-addon hands it to NVDA's own file
-;    association, so NVDA shows its native add-on install dialog.  skipifdoesntexist
-;    means the checkbox simply does not appear if the app ships no add-on yet.
-FileName: "{app}\scripts\DbDo.nvda-addon"; \
+  Description: "{code:labelJaws}"; \
+  Check: isInstallJaws; \
+  Flags: postinstall waituntilterminated runhidden skipifsilent runasoriginaluser
+FileName: "{cmd}"; \
+  Parameters: "/c """"{app}\scripts\installModels.cmd"""""; \
+  WorkingDir: "{app}\exec"; \
+  Description: "{code:descModel}"; \
+  Flags: postinstall skipifsilent runascurrentuser; Check: modelNeedsInstall
+FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
+  Parameters: "noPause nvda"; \
   WorkingDir: "{app}\scripts"; \
-  Description: "Install NVDA add-on"; \
-  Check: haveNvda; \
-  Flags: postinstall shellexec waituntilterminated skipifsilent skipifdoesntexist
-
-; ---- The optional components, each appearing three times ----
-;
-; One entry per state, grouped so the ones that do something come first:
-; everything to be installed, then everything to be updated, then anything
-; already current, offered last and never ticked because there is nothing to
-; gain. Only ONE entry per tool is ever shown; the other two are skipped by
-; their Check function.
-;
-; Every label carries the versions in play -- install what, update from what to
-; what, reinstall which -- so the checkbox says what it would actually do.
-;
-; runascurrentuser matters: winget and ollama install per user, into the profile
-; of whoever is signed in, while this installer runs elevated.
-;
-; Unticked by default. DbDo works without local AI; the Ask commands are the
-; part that needs it, and two gigabytes should never arrive because somebody did
-; not notice a checkbox.
-
-; Ollama BEFORE the model. [Run] entries run in the order written, and an
-; update to Ollama should land before anything is pulled through it. The
-; update entry passes the word update, so installOllama upgrades rather than
-; finding Ollama present and leaving the version alone.
+  Description: "{code:labelNvda}"; \
+  Check: isInstallNvda; \
+  Flags: postinstall waituntilterminated runhidden skipifsilent runasoriginaluser
 FileName: "{cmd}"; \
   Parameters: "/c """"{app}\scripts\installOllama.cmd"""""; \
   WorkingDir: "{app}\exec"; \
   Description: "{code:descOllama}"; \
-  Flags: postinstall skipifsilent runascurrentuser unchecked; Check: ollamaNeedsInstall
+  Flags: postinstall skipifsilent runascurrentuser; Check: ollamaNeedsInstall
 
+; ---- 2. Update, ticked ---------------------------------------------------------
+FileName: "{cmd}"; \
+  Parameters: "/s /c """"{app}\exec\DbDo.exe"" --install-jaws-settings && echo {#AppVersion}> ""{localappdata}\DbDo\jawsSettings.version"""""; \
+  WorkingDir: "{app}\exec"; \
+  Description: "{code:labelJaws}"; \
+  Check: isUpdateJaws; \
+  Flags: postinstall waituntilterminated runhidden skipifsilent runasoriginaluser
+FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
+  Parameters: "noPause nvda"; \
+  WorkingDir: "{app}\scripts"; \
+  Description: "{code:labelNvda}"; \
+  Check: isUpdateNvda; \
+  Flags: postinstall waituntilterminated runhidden skipifsilent runasoriginaluser
 FileName: "{cmd}"; \
   Parameters: "/c """"{app}\scripts\installOllama.cmd"""" update"; \
   WorkingDir: "{app}\exec"; \
   Description: "{code:descOllama}"; \
-  Flags: postinstall skipifsilent runascurrentuser unchecked; Check: ollamaNeedsUpdate
+  Flags: postinstall skipifsilent runascurrentuser; Check: ollamaNeedsUpdate
 
+; ---- 3. Reinstall, never ticked ------------------------------------------------
+FileName: "{cmd}"; \
+  Parameters: "/s /c """"{app}\exec\DbDo.exe"" --install-jaws-settings && echo {#AppVersion}> ""{localappdata}\DbDo\jawsSettings.version"""""; \
+  WorkingDir: "{app}\exec"; \
+  Description: "{code:labelJaws}"; \
+  Check: isReinstallJaws; \
+  Flags: postinstall waituntilterminated runhidden skipifsilent runasoriginaluser unchecked
+FileName: "{cmd}"; \
+  Parameters: "/c """"{app}\scripts\installModels.cmd"""""; \
+  WorkingDir: "{app}\exec"; \
+  Description: "{code:descModel}"; \
+  Flags: postinstall skipifsilent runascurrentuser unchecked; Check: modelIsCurrent
+FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
+  Parameters: "noPause nvda"; \
+  WorkingDir: "{app}\scripts"; \
+  Description: "{code:labelNvda}"; \
+  Check: isReinstallNvda; \
+  Flags: postinstall waituntilterminated runhidden skipifsilent runasoriginaluser unchecked
 FileName: "{cmd}"; \
   Parameters: "/c """"{app}\scripts\installOllama.cmd"""" reinstall"; \
   WorkingDir: "{app}\exec"; \
   Description: "{code:descOllama}"; \
   Flags: postinstall skipifsilent runascurrentuser unchecked; Check: ollamaIsCurrent
 
-FileName: "{cmd}"; \
-  Parameters: "/c """"{app}\scripts\installModels.cmd"""""; \
-  WorkingDir: "{app}\exec"; \
-  Description: "{code:descModel}"; \
-  Flags: postinstall skipifsilent runascurrentuser unchecked
-
-; ---- After the components: what to do now ----
+; ---- 4. Launch, ticked; 5. the guide, unticked ---------------------------------
 ;
 ; Two ordinary things somebody may want the moment setup ends, offered last
 ; because they are not installations. runasoriginaluser matters -- setup is
@@ -830,6 +835,80 @@ begin
          or RegKeyExists(HKEY_LOCAL_MACHINE, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\NVDA');
 end;
 
+{ ---- The screen readers, judged like any component (30 September 2026) ----
+  JAWS: DbDo.exe --install-jaws-settings records each file it places in
+  %LOCALAPPDATA%\DbDo\jawsSettings.log; the box also writes the DbDo version it
+  installed for into jawsSettings.version. No record: Install. A record for
+  this version: Reinstall. Otherwise: Update.
+  NVDA: the kit's installScreenReaderSupport.cmd state nvda compares the
+  add-on's manifest version with the installed add-on's. Each answer is
+  logged. -1 hides that reader's boxes. }
+var
+  giJawsState, giNvdaState: Integer;
+  gbJawsRead, gbNvdaRead: Boolean;
+  gsTicked: String;
+
+function readerState(sReader: String): Integer;
+var
+  sFile, sRecord, sVersionFile: String;
+  sAnswer: AnsiString;
+  iCode: Integer;
+begin
+  if (sReader = 'jaws') and gbJawsRead then begin Result := giJawsState; exit; end;
+  if (sReader = 'nvda') and gbNvdaRead then begin Result := giNvdaState; exit; end;
+  Result := -1;
+  sAnswer := '';
+  if sReader = 'jaws' then
+  begin
+    if haveJaws() then
+    begin
+      sRecord := ExpandConstant('{localappdata}\DbDo\jawsSettings.log');
+      sVersionFile := ExpandConstant('{localappdata}\DbDo\jawsSettings.version');
+      if not FileExists(sRecord) then Result := 0
+      else if LoadStringFromFile(sVersionFile, sAnswer) and (Trim(sAnswer) = '{#AppVersion}') then Result := 2
+      else Result := 1;
+      Log('Component jaws: record ' + sRecord + ' present=' + IntToStr(Ord(FileExists(sRecord))) + '; installed for version "' + Trim(sAnswer) + '"; this version {#AppVersion}');
+    end;
+    giJawsState := Result; gbJawsRead := True;
+  end
+  else
+  begin
+    sFile := ExpandConstant('{tmp}\dbdoReader_nvda.txt');
+    if haveNvda() then
+      if Exec(ExpandConstant('{cmd}'), '/c ""' + ExpandConstant('{app}\scripts\installScreenReaderSupport.cmd') + '" state nvda "' + sFile + '""',
+              ExpandConstant('{app}\scripts'), SW_HIDE, ewWaitUntilTerminated, iCode) then
+        if LoadStringFromFile(sFile, sAnswer) then
+        begin
+          sAnswer := Trim(sAnswer);
+          if sAnswer = 'install' then Result := 0
+          else if sAnswer = 'update' then Result := 1
+          else if sAnswer = 'reinstall' then Result := 2;
+        end;
+    giNvdaState := Result; gbNvdaRead := True;
+  end;
+  Log('Component ' + sReader + ': state ' + IntToStr(Result) + ' (-1 not offered, 0 Install, 1 Update, 2 Reinstall)');
+end;
+
+function readerLabel(sReader: String): String;
+begin
+  case readerState(sReader) of
+    1: Result := 'Update';
+    2: Result := 'Reinstall';
+  else Result := 'Install';
+  end;
+  if sReader = 'jaws' then Result := Result + ' JAWS scripts'
+  else Result := Result + ' NVDA add-on';
+end;
+
+function labelJaws(sParam: String): String;  begin Result := readerLabel('jaws'); end;
+function isInstallJaws(): Boolean;           begin Result := readerState('jaws') = 0; end;
+function isUpdateJaws(): Boolean;            begin Result := readerState('jaws') = 1; end;
+function isReinstallJaws(): Boolean;         begin Result := readerState('jaws') = 2; end;
+function labelNvda(sParam: String): String;  begin Result := readerLabel('nvda'); end;
+function isInstallNvda(): Boolean;           begin Result := readerState('nvda') = 0; end;
+function isUpdateNvda(): Boolean;            begin Result := readerState('nvda') = 1; end;
+function isReinstallNvda(): Boolean;         begin Result := readerState('nvda') = 2; end;
+
 function descModel(sParam: String): String;
 (* The model is not a winget package, so there is no version pair to report --
    it is there or it is not. The label says which, and how big the download is,
@@ -858,6 +937,41 @@ begin
         end;
   end;
   gModelDesc := Result;
+end;
+
+{ The model's two boxes: Install, ticked, when Ollama lacks it; Reinstall,
+  never ticked, when it has it. }
+function modelNeedsInstall(): Boolean;
+begin
+  Result := Pos('Install', descModel('')) = 1;
+end;
+
+function modelIsCurrent(): Boolean;
+begin
+  Result := Pos('Reinstall', descModel('')) = 1;
+end;
+
+{ THE RESULTS BOX REPORTS WHAT WAS TICKED: the captions are written down when
+  Finish is pressed, before any step runs, for summarizeSetup. }
+function NextButtonClick(iCurPageID: Integer): Boolean;
+var
+  i: Integer;
+  lsLines: TArrayOfString;
+begin
+  Result := True;
+  if iCurPageID <> wpFinished then exit;
+  gsTicked := '';
+  SetArrayLength(lsLines, 0);
+  for i := 0 to WizardForm.RunList.Items.Count - 1 do
+    if WizardForm.RunList.Checked[i] then
+    begin
+      gsTicked := gsTicked + WizardForm.RunList.ItemCaption[i] + #10;
+      SetArrayLength(lsLines, GetArrayLength(lsLines) + 1);
+      lsLines[GetArrayLength(lsLines) - 1] := WizardForm.RunList.ItemCaption[i];
+    end;
+  ForceDirectories(ExpandConstant('{localappdata}\DbDo\logs'));
+  SaveStringsToFile(ExpandConstant('{localappdata}\DbDo\logs\DbDo_ticked.txt'), lsLines, False);
+  DeleteFile(ExpandConstant('{localappdata}\DbDo\logs\DbDo_screenReaders.txt'));
 end;
 
 (* ---- WHAT THIS INSTALL IS: a fresh install, an update, or a reinstall ----
@@ -1343,8 +1457,18 @@ begin
        unquoted, cmd tried to run "C:\Program", and the summary never started.
        That is why 1.0.168 showed no Results box. The probes survived the /s
        change because their commands carry their own quotes; this line did not. *)
-    Exec(ExpandConstant('{cmd}'), '/s /c ""' + ExpandConstant('{app}\scripts\summarizeSetup.cmd') + '""',
-         ExpandConstant('{app}\exec'), SW_HIDE, ewNoWait, iResult);
+    (* With the Launch box ticked, setup waits for the box to be closed and then
+       starts DbDo as the person, not with the installer's elevated rights. *)
+    if FileExists(ExpandConstant('{localappdata}\{#AppName}\logs\{#AppName}_launch.flag')) then
+    begin
+      Exec(ExpandConstant('{cmd}'), '/s /c ""' + ExpandConstant('{app}\scripts\summarizeSetup.cmd') + '""',
+           ExpandConstant('{app}\exec'), SW_HIDE, ewWaitUntilTerminated, iResult);
+      DeleteFile(ExpandConstant('{localappdata}\{#AppName}\logs\{#AppName}_launch.flag'));
+      ExecAsOriginalUser(ExpandConstant('{app}\exec\{#AppExeName}'), '', ExpandConstant('{app}\exec'), SW_SHOW, ewNoWait, iResult);
+    end
+    else
+      Exec(ExpandConstant('{cmd}'), '/s /c ""' + ExpandConstant('{app}\scripts\summarizeSetup.cmd') + '""',
+           ExpandConstant('{app}\exec'), SW_HIDE, ewNoWait, iResult);
   except
   end;
 end;
@@ -1363,9 +1487,7 @@ begin
   sLogDir := ExpandConstant('{localappdata}\{#AppName}\logs');
   ForceDirectories(sLogDir);
 
-  sMessage := '{#AppName} {#AppVersion} is installed.' + sBreak + sBreak
-    + 'Program files:' + sBreak + '  ' + ExpandConstant('{app}') + sBreak
-    + 'Sample databases:' + sBreak + '  ' + ExpandConstant('{app}\templates');
+  sMessage := '{#AppName} {#AppVersion} is installed in ' + ExpandConstant('{app}') + '.';
 
   saveResultsForSummary(sLogDir, sMessage);
   showResultsSummary();
