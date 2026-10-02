@@ -235,8 +235,9 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
-<li><a href="#v1.0.206-current" id="toc-v1.0.206-current">v1.0.206
+<li><a href="#v1.0.207-current" id="toc-v1.0.207-current">v1.0.207
 (current)</a></li>
+<li><a href="#v1.0.206" id="toc-v1.0.206">v1.0.206</a></li>
 <li><a href="#v1.0.205" id="toc-v1.0.205">v1.0.205</a></li>
 <li><a href="#v1.0.204" id="toc-v1.0.204">v1.0.204</a></li>
 <li><a href="#v1.0.200" id="toc-v1.0.200">v1.0.200</a></li>
@@ -362,7 +363,41 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
-<h2 id="v1.0.206-current">v1.0.206 (current)</h2>
+<h2 id="v1.0.207-current">v1.0.207 (current)</h2>
+<ul>
+<li><strong>Relationships recorded either way, or both.</strong> DbDo
+follows foreign keys named for a table, as <code>job_id</code> is for
+<code>jobs</code> and as Northwind and Chinook name theirs, and the maps
+table, which links any record to any other with a kind from the lookups
+table. Say Related, Related Records and Enter Child follow both alike;
+the guide’s “Relationships between tables” says how.</li>
+<li><strong>Links stay whole.</strong> A map names a record by its
+prime, and prime changes when one of its fields is edited. Every table
+DbDo makes, and every table in the templates, now carries two triggers:
+one moves a record’s links to its new prime, the other removes its links
+when the record is deleted. Before, correcting a name left the record’s
+links pointing at nothing.</li>
+<li><strong>The right id names.</strong> The id of a new table is named
+for the English singular of its name: <code>story_id</code> for
+<code>stories</code>, <code>box_id</code> for <code>boxes</code>. DbDo
+used to drop one trailing s, which made <code>storie_id</code>, and
+looked for foreign keys the same way, so it missed <code>story_id</code>
+in the templates. The same rule is used everywhere a singular is
+needed.</li>
+<li><strong>Your table named maps stays yours.</strong> DbDo knows its
+own lookups, maps and views tables by their columns as well as their
+names, so a table of your own that only shares a name is offered like
+any other and never read as links.</li>
+<li><strong>The templates checked and brought into line.</strong> Every
+table has its trigger that keeps edited current and a unique index on
+prime, checked with HomerDev’s checkDb. HowToTrail’s contacts table
+holds eight primes that repeat, so it keeps its plain index until those
+duplicates are resolved.</li>
+<li><strong>The Say keys list in the guide matches the program</strong>:
+one entry per key, Shift+F for filter, Shift+K for keywords, Shift+X for
+regex replace, and H and W as the letters still free.</li>
+</ul>
+<h2 id="v1.0.206">v1.0.206</h2>
 <ul>
 <li><strong>Setup.</strong> The Results box at the end of setup is
 titled “DbDo Setup Results”, and the finish page uses the Homer wording:

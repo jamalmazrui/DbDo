@@ -3084,7 +3084,7 @@ namespace DbDo
         public List<string> getUserTableNames()
         {
             List<string> lsAll = getTableAndViewNames();
-            lsAll.RemoveAll(delegate(string s) { return isHiddenTable(s); });
+            lsAll.RemoveAll(delegate(string s) { return isHiddenTable(s) && hasOwnTableShape(s); });
             return lsAll;
         }
 
@@ -4104,10 +4104,37 @@ namespace DbDo
             {
                 foreach (string sT in getTableNames())
                     if (string.Equals(sT, "maps", StringComparison.OrdinalIgnoreCase))
-                        return true;
+                        return hasOwnTableShape(sT);
             }
             catch { }
             return false;
+        }
+
+        // hasOwnTableShape: true when a table named like one of DbDo's own has
+        // that table's columns -- maps has tbl1, prime1, kind, tbl2 and prime2;
+        // lookups and views have tbl, fld and val (2 October 2026). A user's
+        // own table that only shares the name, a geographic maps table say, is
+        // not DbDo's: it stays on every list and is never read as links.
+        public bool hasOwnTableShape(string sTable)
+        {
+            string[] aWanted;
+            if (string.Equals(sTable, "maps", StringComparison.OrdinalIgnoreCase))
+                aWanted = new string[] { "tbl1", "prime1", "kind", "tbl2", "prime2" };
+            else if (string.Equals(sTable, "lookups", StringComparison.OrdinalIgnoreCase)
+                || string.Equals(sTable, "views", StringComparison.OrdinalIgnoreCase))
+                aWanted = new string[] { "tbl", "fld", "val" };
+            else return false;
+            try
+            {
+                int iFound;
+                List<string> lsColumns = new List<string>();
+                foreach (string[] aRow in queryRowsSql("SELECT name FROM pragma_table_info(" + sQuoteSqlLiteral(sTable) + ")", 500, out iFound))
+                    if (aRow != null && aRow.Length > 0 && aRow[0] != null) lsColumns.Add(aRow[0].ToLowerInvariant());
+                foreach (string sWanted in aWanted)
+                    if (!lsColumns.Contains(sWanted)) return false;
+                return true;
+            }
+            catch { return false; }
         }
 
         // sQuoteSqlLiteral: single-quote a string literal for SQL,
@@ -18992,9 +19019,46 @@ namespace DbDo
         // a skip-empty concatenation of every distinct field; prime is
         // the positional concatenation; the edited trigger bumps only
         // on a real data change; the prime index is UNIQUE.
+        // sSingularOf: the English singular of a plural table name, which is
+        // what its id field is named for -- jobs gives job_id, stories gives
+        // story_id, boxes gives box_id. Dropping one trailing s, as DbDo did
+        // before, made storie_id, which no template uses (2 October 2026).
+        public static string sSingularOf(string sTable)
+        {
+            if (string.IsNullOrEmpty(sTable)) return sTable;
+            string sLower = sTable.ToLowerInvariant();
+            if (sLower.Length > 3 && sLower.EndsWith("ies")) return sTable.Substring(0, sTable.Length - 3) + "y";
+            if (sLower.EndsWith("sses") || sLower.EndsWith("xes") || sLower.EndsWith("ches") || sLower.EndsWith("shes")) return sTable.Substring(0, sTable.Length - 2);
+            if (sLower.EndsWith("s") && !sLower.EndsWith("ss")) return sTable.Substring(0, sTable.Length - 1);
+            return sTable;
+        }
+
+        // lMapsTriggerDdl: the two triggers that keep a table's maps links
+        // whole (2 October 2026). A map names a record by its table and its
+        // prime, so the link survives a merge or an export; but prime changes
+        // when one of its fields is edited, and a deleted record leaves its
+        // links behind. The first trigger moves the record's links to its new
+        // prime; the second removes them when the record goes. Added for every
+        // standard table in a database whose maps table is DbDo's own.
+        public static List<string> lMapsTriggerDdl(string sTable)
+        {
+            string sQ = "\"" + sTable.Replace("\"", "\"\"") + "\"";
+            string sLit = "'" + sTable.Replace("'", "''") + "'";
+            string sName = sTable.Replace("\"", "");
+            List<string> lDdl = new List<string>();
+            lDdl.Add("CREATE TRIGGER IF NOT EXISTS \"trg_" + sName + "_maps\" AFTER UPDATE ON " + sQ
+                + " FOR EACH ROW WHEN OLD.prime IS NOT NEW.prime BEGIN"
+                + " UPDATE maps SET prime1 = NEW.prime WHERE tbl1 = " + sLit + " AND prime1 = OLD.prime;"
+                + " UPDATE maps SET prime2 = NEW.prime WHERE tbl2 = " + sLit + " AND prime2 = OLD.prime; END");
+            lDdl.Add("CREATE TRIGGER IF NOT EXISTS \"trg_" + sName + "_maps_delete\" AFTER DELETE ON " + sQ
+                + " FOR EACH ROW BEGIN DELETE FROM maps WHERE (tbl1 = " + sLit + " AND prime1 = OLD.prime)"
+                + " OR (tbl2 = " + sLit + " AND prime2 = OLD.prime); END");
+            return lDdl;
+        }
+
         private static List<string> lStandardTableDdl(string sTable, List<string[]> lFieldDefs)
         {
-            string sSingular = sTable.EndsWith("s") ? sTable.Substring(0, sTable.Length - 1) : sTable;
+            string sSingular = sSingularOf(sTable);
             string sPk = sSingular + "_id";
             List<string> lCols = new List<string>();
             foreach (string[] aF in lFieldDefs) lCols.Add(aF[0]);
@@ -19126,6 +19190,10 @@ namespace DbDo
                         db.invokeSql(sSql, null);
                     foreach (string sSql in lInfraDdl(true, true))
                         db.invokeSql(sSql, null);
+                    foreach (string sSql in lMapsTriggerDdl(sTableName))
+                        db.invokeSql(sSql, null);
+                    foreach (string sSql in lMapsTriggerDdl("lookups"))
+                        db.invokeSql(sSql, null);
                     db.refreshTableList();
                     db.selectTable(sTableName);
                     invokeRefresh();
@@ -19168,6 +19236,12 @@ namespace DbDo
                     db.invokeSql(sSql, null);
                 foreach (string sSql in lInfraDdl(!bHasMaps, !bHasLookups))
                     db.invokeSql(sSql, null);
+                // The link-keeping triggers only where maps is DbDo's own: a
+                // user's table that happens to be called maps has no prime1.
+                db.refreshTableList();
+                if (db.hasMapsTable())
+                    foreach (string sSql in lMapsTriggerDdl(sTableName))
+                        db.invokeSql(sSql, null);
                 db.refreshTableList();
                 db.selectTable(sTableName);
                 invokeRefresh();
@@ -19706,6 +19780,8 @@ namespace DbDo
                     managerImport.invokeSql(sSql, null);
                 foreach (string sSql in lInfraDdl(true, true))
                     managerImport.invokeSql(sSql, null);
+                foreach (string sSql in lMapsTriggerDdl(sTable))
+                    managerImport.invokeSql(sSql, null);
                 for (int i = 0; i < lRecords.Count; i++)
                 {
                     System.Text.StringBuilder sbCols = new System.Text.StringBuilder();
@@ -19836,7 +19912,7 @@ namespace DbDo
                         string sBaseT = sTable; int iDupT = 1;
                         while (lTableNames.Contains(sTable)) { iDupT++; sTable = sBaseT + "_" + iDupT; }
                         lTableNames.Add(sTable);
-                        string sSingular = sTable.EndsWith("s") ? sTable.Substring(0, sTable.Length - 1) : sTable;
+                        string sSingular = sSingularOf(sTable);
                         string sPk = sSingular + "_id";
 
                         // Plan the columns from the header row. lColTarget
@@ -20238,7 +20314,7 @@ namespace DbDo
             string sBaseT = sTable; int iDupT = 1;
             while (lTableNames.Contains(sTable)) { iDupT++; sTable = sBaseT + "_" + iDupT; }
             lTableNames.Add(sTable);
-            string sSingular = sTable.EndsWith("s") ? sTable.Substring(0, sTable.Length - 1) : sTable;
+            string sSingular = sSingularOf(sTable);
             string sPk = sSingular + "_id";
 
             string[] aHeader = aGrid[iHdr];
@@ -20430,7 +20506,7 @@ namespace DbDo
                     string sTable = sNormalizeIdentifier(Path.GetFileNameWithoutExtension(sSourcePath));
                     if (sTable.Length == 0) sTable = "table_1";
                     if (char.IsDigit(sTable[0])) sTable = "t_" + sTable;
-                    string sSingular = sTable.EndsWith("s") ? sTable.Substring(0, sTable.Length - 1) : sTable;
+                    string sSingular = sSingularOf(sTable);
                     string sPk = sSingular + "_id";
 
                     List<string[]> lFieldDefs = new List<string[]>();
@@ -20515,7 +20591,7 @@ namespace DbDo
                     string sTable = sNormalizeIdentifier(Path.GetFileNameWithoutExtension(sDbfPath));
                     if (sTable.Length == 0) sTable = "table_1";
                     if (char.IsDigit(sTable[0])) sTable = "t_" + sTable;
-                    string sSingular = sTable.EndsWith("s") ? sTable.Substring(0, sTable.Length - 1) : sTable;
+                    string sSingular = sSingularOf(sTable);
                     string sPk = sSingular + "_id";
 
                     List<string[]> lFieldDefs = new List<string[]>();
@@ -20615,7 +20691,7 @@ namespace DbDo
                         string sBaseT = sTable; int iDupT = 1;
                         while (lTableNames.Contains(sTable)) { iDupT++; sTable = sBaseT + "_" + iDupT; }
                         lTableNames.Add(sTable);
-                        string sSingular = sTable.EndsWith("s") ? sTable.Substring(0, sTable.Length - 1) : sTable;
+                        string sSingular = sSingularOf(sTable);
                         string sPk = sSingular + "_id";
 
                         List<string[]> lFieldDefs = new List<string[]>();

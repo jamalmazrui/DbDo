@@ -4,7 +4,16 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.206 (current)
+## v1.0.207 (current)
+
+- **Relationships recorded either way, or both.** DbDo follows foreign keys named for a table, as `job_id` is for `jobs` and as Northwind and Chinook name theirs, and the maps table, which links any record to any other with a kind from the lookups table. Say Related, Related Records and Enter Child follow both alike; the guide's "Relationships between tables" says how.
+- **Links stay whole.** A map names a record by its prime, and prime changes when one of its fields is edited. Every table DbDo makes, and every table in the templates, now carries two triggers: one moves a record's links to its new prime, the other removes its links when the record is deleted. Before, correcting a name left the record's links pointing at nothing.
+- **The right id names.** The id of a new table is named for the English singular of its name: `story_id` for `stories`, `box_id` for `boxes`. DbDo used to drop one trailing s, which made `storie_id`, and looked for foreign keys the same way, so it missed `story_id` in the templates. The same rule is used everywhere a singular is needed.
+- **Your table named maps stays yours.** DbDo knows its own lookups, maps and views tables by their columns as well as their names, so a table of your own that only shares a name is offered like any other and never read as links.
+- **The templates checked and brought into line.** Every table has its trigger that keeps edited current and a unique index on prime, checked with HomerDev's checkDb. HowToTrail's contacts table holds eight primes that repeat, so it keeps its plain index until those duplicates are resolved.
+- **The Say keys list in the guide matches the program**: one entry per key, Shift+F for filter, Shift+K for keywords, Shift+X for regex replace, and H and W as the letters still free.
+
+## v1.0.206
 
 - **Setup.** The Results box at the end of setup is titled "DbDo Setup Results", and the finish page uses the Homer wording: the verb first, no "recommended", and "Launch DbDo (desktop hotkey ...)". The JAWS and NVDA boxes read "Install JAWS scripts" and "Install NVDA add-on"; the Ollama and llama3.2 boxes lost their "(current version)" and "(already installed)" tails.
 

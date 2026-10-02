@@ -132,9 +132,9 @@ The distinction to hold onto: **added** and **edited** are *automatic* (DbDo wri
 Two optional companion tables let a database describe its own vocabulary:
 
 - A **lookups** table lists the valid values for a field. When a field has lookups defined, its editor becomes a combo box of those values instead of a free-text box — so a screen-reader user arrows through the legal choices rather than typing and risking a typo. Pick Value (Control+F2) surfaces the same choices on demand.
-- A **maps** table is a junction that records relationships between records (many-to-many links), which the relationship-navigation commands can follow.
+- A **maps** table links any record in the database to any other record, with a **kind** saying how they are related -- "contact for", "sent for", "part of" -- and the kinds kept in the lookups table, so F4 offers them. One maps table serves every pair of tables, so an occasional or many-to-many relationship needs no table of its own.
 
-These are conventions, not requirements; a database without them simply offers free-text editing and no mapped relationships.
+These are conventions, not requirements; a database without them simply offers free-text editing, and its relationships are its foreign keys.
 
 ## Keyboard patterns
 
@@ -229,13 +229,21 @@ Because these only change the view, you can slice a large table down to what you
 
 ## Relationships between tables
 
-DbDo can follow relationships defined by foreign keys (and by the maps junction):
+DbDo recognizes relationships recorded in either of two ways, or both in the same database, and treats them alike:
 
-- **Enter Child Table** (Alt+Right) follows a relationship from the current record into the related records in another table, opening them filtered to that parent.
-- **Exit Child Table** (Alt+Left) returns to the parent you came from; **Exit to Root Table** (Alt+Home) returns all the way up a chain.
-- **Related Records** (Query menu) shows the records related to the current one.
+- **Foreign keys, the traditional way.** A field holds the id of a record in another table: an order's customer, a track's album. DbDo follows a field named for a table in the singular, such as `job_id` for the `jobs` table, as the Northwind and Chinook templates name theirs. Keys declared in the database itself appear in Table Summary (Alt+T); following a declared key whose field is named differently is planned.
+- **The maps table, the DbDo way.** A map links one record to another, names how they are related, and needs no table built for that one purpose.
 
-This is how you walk a normalized database — from an order to its line items, from a person to their contacts — entirely by keyboard, with each step announced.
+The same commands follow both:
+
+- **Say Related** (Shift+R) lists what the current record is related to, by foreign key and by map, each related record by its look.
+- **Related Records** (Query menu) shows the same list in a window.
+- **Enter Child Table** (Alt+Right) follows a relationship into the related records in another table, opening them filtered to the record you came from.
+- **Exit Child Table** (Alt+Left) returns to the record you came from; **Exit to Root Table** (Alt+Home) returns all the way up a chain.
+
+A map names each record by its table and its prime, not its number, so a link still holds after a merge or an export, when the numbers change. Two small triggers on each table keep links whole as you work: when you edit a field that is part of a record's prime, its links follow the new prime, and when you delete a record, its links go with it. DbDo adds these triggers to every table it makes, and every template carries them.
+
+This is how you walk a database -- from an order to its line items, from a person to the jobs they are a contact for -- entirely by keyboard, with each step announced.
 
 ---
 
@@ -976,6 +984,12 @@ Neither is offered when you choose a table, open a table in a new window, or
 step through tables with Control+Page Down. They are on a hidden list, and
 anything NOT on that list is yours and is offered.
 
+DbDo knows them by their columns as well as their names: its maps table has
+`tbl1`, `prime1`, `kind`, `tbl2` and `prime2`, and lookups and views have `tbl`,
+`fld` and `val`. A table of your own that only shares the name -- a table of
+geographic maps, say -- is yours, is offered like any other, and is never read
+as links.
+
 They are not locked away. At the dot prompt, `select-table lookups` opens either
 one by name, and any SQL statement can read or change them. The rule is about
 what a person meets while browsing, not about permission.
@@ -1078,25 +1092,22 @@ read-only window you can read line by line and copy from.
 - Shift+C -- cell, as column and value
 - Shift+D -- database, as file and folder
 - Shift+E -- edited
-- Shift+F -- find
+- Shift+F -- filter, the condition in force
 - Shift+G -- goto, the jump search
-- Shift+B -- bookmark
 - Shift+I -- id
-- Shift+J -- jump, the text Jump to Record would offer next
 - Shift+J -- jump, the text the Jump dialog would offer next
+- Shift+K -- keywords, the text Keywords would search for
 - Shift+L -- look
 - Shift+M -- mark
 - Shift+N -- notes
 - Shift+O -- order
 - Shift+P -- prime
 - Shift+Q -- query
-- Shift+R -- related
+- Shift+R -- related, by foreign key and by map
 - Shift+S -- select, the columns shown
 - Shift+T -- tags
 - Shift+U -- url
-- Shift+V -- replacement value, the text Replace would offer next
-- Shift+V -- replace, the text Replace would offer and what it would put there
-- Shift+F -- filter, the condition in force
+- Shift+V -- replacement value, the text Replace would offer and what it would put there
 - Shift+X -- regex replace, the pattern Regex Replace would offer next
 - Shift+Y -- yield, how many rows
 - Shift+Z -- status: the table, the row and the order
@@ -1106,7 +1117,7 @@ first letters of a value and the list view goes there, in lower case and
 without regard to case. The two layers do not collide, which is why the Say
 commands live on Shift.
 
-Three letters are still unused -- H, K and X -- and are kept that way on purpose,
+Two letters are still unused -- H and W -- and are kept that way on purpose,
 so a new question can be added later without moving an answer somebody has
 learned. Pressing one of them says so rather than staying silent: the say layer
 always answers, because silence cannot be told from a key that did not register.
