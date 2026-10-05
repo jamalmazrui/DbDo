@@ -4,7 +4,16 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.207 (current)
+## v1.0.208 (current)
+
+**RadioTrail, a template for Internet radio.** One stations table -- name,
+stream address, country, state, language, genre, codec, bitrate, votes, source
+-- with status, rating, notes and tags for the listener. `fetchRadioBrowser`
+in its folder fills it from the Radio Browser public catalog, all of it or one
+country, keyed by the catalog's own station id and never touching what you
+wrote. Control+Enter on a stream address plays it.
+
+## v1.0.207
 
 - **Relationships recorded either way, or both.** DbDo follows foreign keys named for a table, as `job_id` is for `jobs` and as Northwind and Chinook name theirs, and the maps table, which links any record to any other with a kind from the lookups table. Say Related, Related Records and Enter Child follow both alike; the guide's "Relationships between tables" says how.
 - **Links stay whole.** A map names a record by its prime, and prime changes when one of its fields is edited. Every table DbDo makes, and every table in the templates, now carries two triggers: one moves a record's links to its new prime, the other removes its links when the record is deleted. Before, correcting a name left the record's links pointing at nothing.

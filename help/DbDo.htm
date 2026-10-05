@@ -356,6 +356,9 @@ id="toc-the-template-databases">The template databases</a>
 <li><a href="#howtotrail-holds-both-systems"
 id="toc-howtotrail-holds-both-systems">HowToTrail holds both
 systems</a></li>
+<li><a href="#radiotrail-plays-internet-radio"
+id="toc-radiotrail-plays-internet-radio">RadioTrail plays Internet
+radio</a></li>
 <li><a href="#collectiontrail-holds-whatever-you-collect"
 id="toc-collectiontrail-holds-whatever-you-collect">CollectionTrail
 holds whatever you collect</a></li>
@@ -2336,6 +2339,8 @@ iOS, in one database</li>
 <li><strong>JobTrail</strong> – a job search: applications, contacts,
 and what you did</li>
 <li><strong>MusicTrail</strong> – albums and artists</li>
+<li><strong>RadioTrail</strong> – Internet radio stations, with a script
+that brings in the whole Radio Browser catalog</li>
 <li><strong>RecipeTrail</strong> – recipes and their ingredients</li>
 <li><strong>SchoolTrail</strong> – a small teaching database: students,
 teachers, classes</li>
@@ -2352,6 +2357,22 @@ file. They are one database now, and the system is a field:
 true on both. Press F4 in the field to pick. To work in one system only,
 put <code>platform = "Windows"</code> in the Filter Records, Control+F,
 and it stays until you clear it.</p>
+<h3 id="radiotrail-plays-internet-radio">RadioTrail plays Internet
+radio</h3>
+<p>Three stations are in the template to start. To bring in the whole
+catalog – some sixty thousand working stations from Radio Browser, a
+volunteer-kept public directory – run <code>fetchRadioBrowser</code> in
+the template’s folder. It takes about a minute, and it can take one
+country instead:
+<code>fetchRadioBrowser --country "United States"</code>.</p>
+<p>To listen, move to a station’s <strong>stream_url</strong> cell and
+press <strong>Control+Enter</strong>, Open Cell Value. Windows hands the
+address to whatever plays streams on your computer. Filter Records by
+genre, country or language is the way through sixty thousand rows;
+Keywords searches every field.</p>
+<p>Your <strong>status</strong>, <strong>rating</strong>,
+<strong>notes</strong> and <strong>tags</strong> are yours: a refresh
+from the catalog never writes them.</p>
 <h3 id="collectiontrail-holds-whatever-you-collect">CollectionTrail
 holds whatever you collect</h3>
 <p>Stamps, coins, records and tools answer the same questions, so they

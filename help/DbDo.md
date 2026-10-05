@@ -894,6 +894,7 @@ time you run DbDo. The ones written for DbDo share the Trail name:
 - **HowToTrail** -- how to do things on Windows and on iOS, in one database
 - **JobTrail** -- a job search: applications, contacts, and what you did
 - **MusicTrail** -- albums and artists
+- **RadioTrail** -- Internet radio stations, with a script that brings in the whole Radio Browser catalog
 - **RecipeTrail** -- recipes and their ingredients
 - **SchoolTrail** -- a small teaching database: students, teachers, classes
 
@@ -908,6 +909,22 @@ now, and the system is a field: **platform**, holding Windows, iOS, or any for
 something true on both. Press F4 in the field to pick. To work in one system
 only, put `platform = "Windows"` in the Filter Records, Control+F, and it stays
 until you clear it.
+
+### RadioTrail plays Internet radio
+
+Three stations are in the template to start. To bring in the whole catalog --
+some sixty thousand working stations from Radio Browser, a volunteer-kept public
+directory -- run `fetchRadioBrowser` in the template's folder. It takes about a
+minute, and it can take one country instead: `fetchRadioBrowser --country
+"United States"`.
+
+To listen, move to a station's **stream_url** cell and press **Control+Enter**,
+Open Cell Value. Windows hands the address to whatever plays streams on your
+computer. Filter Records by genre, country or language is the way through sixty
+thousand rows; Keywords searches every field.
+
+Your **status**, **rating**, **notes** and **tags** are yours: a refresh from the
+catalog never writes them.
 
 ### CollectionTrail holds whatever you collect
 

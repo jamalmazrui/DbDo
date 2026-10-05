@@ -1,0 +1,42 @@
+﻿; RadioTrail.inix -- how this database opens, and how each table is heard.
+;
+; INTERNET RADIO, AS A LIST YOU CAN SEARCH AND SORT. One table, stations, holds
+; a station's name, its stream address, where it is from, its language, its
+; genres, its codec and bitrate, and how listeners rate it. Three stations are
+; here to start. Run fetchRadioBrowser, in this folder, to bring in the whole
+; Radio Browser catalog -- some sixty thousand working stations -- or one
+; country of it.
+;
+; LISTENING IS ONE KEY. On a station's row, move to the stream_url column and
+; press Control+Enter, Open Cell Value: Windows hands the address to whatever
+; plays streams on your computer, as VLC does. Shift+C says the cell.
+;
+; WHAT IS YOURS STAYS YOURS. status (favorite, tried, dead, want to try),
+; rating, notes and tags are the listener's fields; a refresh from the catalog
+; never writes them, and the merge is keyed by the catalog's own id for each
+; station, never by the stream address, which real stations share.
+
+[Database]
+
+InitialTable = stations
+
+[Table:stations]
+
+; Name first, so a letter reaches the station; then where it is from, what it
+; plays, and how it sounds. Filter Records on genre, country or language is
+; the way through sixty thousand rows; Keywords searches every field.
+SelectFields = name, country, genre, codec
+OrderFields = name
+WhereFilter =
+
+[Table:lookups]
+
+SelectFields = fld, val
+OrderFields = fld, ordinal
+WhereFilter =
+
+[Table:maps]
+
+SelectFields = kind, prime1, prime2
+OrderFields = kind, prime1
+WhereFilter =
