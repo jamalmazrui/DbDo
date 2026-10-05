@@ -112,6 +112,10 @@ def enrich(sDb, sCountry, iLimit, bAgain, logLine, say):
     the listener's fields."""
     c = sqlite3.connect(sDb)
     c.execute("PRAGMA journal_mode=WAL")
+    lsCols = set(r[1] for r in c.execute("pragma table_info(stations)"))
+    if "slogan" not in lsCols or "probed" not in lsCols:
+        say("This copy of RadioTrail is older than the template and has nowhere to put what a station says. Run rebuildRadioTrail, or fetchStations --fresh, first.")
+        c.close(); return 1
     sWhere = "stream_url <> ''"
     lsArgs = []
     if not bAgain: sWhere += " and (probed is null or probed = '')"
@@ -382,9 +386,22 @@ def mergeRows(sDb, lsRows, logLine, say, sLog):
     sNow = datetime.datetime.now().strftime("%Y-%m-%d")
     c = sqlite3.connect(sDb)
     c.execute("PRAGMA journal_mode=WAL")
+    # THE COPY MAY BE OLDER THAN THE TEMPLATE. A copy made before a field was
+    # added has no column for it, and an update naming it stops the whole run
+    # ("no such column: playlist_url", 5 October 2026, after sixty thousand
+    # stations had been fetched). So the columns the copy has are read first;
+    # what it lacks is dropped from every row, and said once, with the way to
+    # get the new fields.
+    lsCols = set(r[1] for r in c.execute("pragma table_info(stations)"))
+    lsMissing = sorted(k for k in lsRows[0] if k not in lsCols) if lsRows else []
+    if lsMissing:
+        say("This copy of RadioTrail is older than the template and lacks " + ", ".join(lsMissing)
+            + ". Those were left out. For the new fields run rebuildRadioTrail, or fetchStations --fresh.")
+        logLine("missing columns: " + ", ".join(lsMissing))
     dHave = {r[0]: r[1] for r in c.execute("select source_id, station_id from stations where source_id is not null and source_id <> ''")}
     iAdded = iUpdated = 0
     for dRow in lsRows:
+        for k in lsMissing: dRow.pop(k, None)
         sKey = dRow.get("source_id", "")
         if not sKey: continue
         dRow["last_seen"] = sNow

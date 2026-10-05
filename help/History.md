@@ -23,7 +23,7 @@ the Homer Player, the same player FileDir has, now shared through the kit. mpv
 does the playing. The installer's finish page offers mpv as a box of its own --
 Install, Update or Reinstall, ticked when it is missing or out of date --
 through the kit's shared component table; and if it is still missing when you
-press Alt+Shift+P, DbDo offers to fetch it. Needs HomerDev 1.51.2.
+press Alt+Shift+P, DbDo offers to fetch it. Needs HomerDev 1.51.3.
 
 ## v1.0.223
 
