@@ -4,14 +4,31 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.208 (current)
+## v1.0.222 (current)
+
+**The walks learn from the JAWS trainers.** Every lone letter is spelled with
+its alphabet word before it is pressed; the first walk teaches Insert plus Tab
+beside Insert plus Up Arrow and shows one tutor message before saying they are
+off from here; every walk ends with the two or three keys it taught. The
+tutorial audio should be rebuilt: delete help\tutorials and run build.
+
+## v1.0.221
+
+**RadioTrail's fetch logs where DbDo logs**, under `%LOCALAPPDATA%\DbDo\logs`
+rather than inside the data folder, and the build and installer remove the
+script's former name, fetchRadioBrowser, so only fetchStations remains.
+
+## v1.0.208
 
 **RadioTrail, a template for Internet radio.** One stations table -- name,
 stream address, country, state, language, genre, codec, bitrate, votes, source
--- with status, rating, notes and tags for the listener. `fetchRadioBrowser`
-in its folder fills it from the Radio Browser public catalog, all of it or one
-country, keyed by the catalog's own station id and never touching what you
-wrote. Control+Enter on a stream address plays it.
+-- with status, rating, notes and tags for the listener. It starts with the ten
+ACB Media streams, the NFB Radio Network, Radio Paradise and two SomaFM
+channels. `fetchStations` in its folder fills it from the Radio Browser public
+catalog and SomaFM's channel list, all of it or one country, keyed by each
+source's own station id and never touching what you wrote. If you have not
+opened the template yet, the script makes your copy. Control+Enter on a stream
+address plays it.
 
 ## v1.0.207
 

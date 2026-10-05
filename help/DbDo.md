@@ -894,7 +894,7 @@ time you run DbDo. The ones written for DbDo share the Trail name:
 - **HowToTrail** -- how to do things on Windows and on iOS, in one database
 - **JobTrail** -- a job search: applications, contacts, and what you did
 - **MusicTrail** -- albums and artists
-- **RadioTrail** -- Internet radio stations, with a script that brings in the whole Radio Browser catalog
+- **RadioTrail** -- Internet radio stations, with a script that brings in the Radio Browser catalog and SomaFM
 - **RecipeTrail** -- recipes and their ingredients
 - **SchoolTrail** -- a small teaching database: students, teachers, classes
 
@@ -912,11 +912,14 @@ until you clear it.
 
 ### RadioTrail plays Internet radio
 
-Three stations are in the template to start. To bring in the whole catalog --
-some sixty thousand working stations from Radio Browser, a volunteer-kept public
-directory -- run `fetchRadioBrowser` in the template's folder. It takes about a
-minute, and it can take one country instead: `fetchRadioBrowser --country
-"United States"`.
+Fourteen stations are in the template to start: the ten ACB Media streams, the
+NFB Radio Network, Radio Paradise and two SomaFM channels. To bring in the whole
+catalog -- some sixty thousand working stations from Radio Browser, a
+volunteer-kept public directory, and all forty-six SomaFM channels -- run
+`fetchStations` in the template's folder. It takes about a minute, and it can
+take one country instead: `fetchStations --country "United States"`. If you
+have not opened the template in DbDo yet, the script makes your copy itself. Its
+log is with DbDo's own, under `%LOCALAPPDATA%\DbDo\logs`.
 
 To listen, move to a station's **stream_url** cell and press **Control+Enter**,
 Open Cell Value. Windows hands the address to whatever plays streams on your

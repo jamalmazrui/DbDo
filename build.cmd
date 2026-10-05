@@ -663,6 +663,16 @@ for %%f in (cellar contacts howtos iOSTutorials media music NFB2026Convention re
     echo Removed the retired sample "templates\%%f" >> "!log!"
   )
 )
+rem A RENAMED SCRIPT LEAVES ITS OLD NAME BEHIND when a zip is unpacked over the
+rem folder, and two scripts with similar names that do nearly the same thing
+rem is exactly how the wrong one gets run: fetchRadioBrowser became
+rem fetchStations on 5 October 2026, and both were run, one after the other.
+for %%f in (templates\RadioTrail\fetchRadioBrowser.cmd templates\RadioTrail\fetchRadioBrowser.py) do (
+  if exist "%%f" (
+    del /q "%%f"
+    echo Removed the renamed script "%%f" >> "!log!"
+  )
+)
 
 rem ---- files that were renamed ----
 rem

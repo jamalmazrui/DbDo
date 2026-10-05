@@ -325,7 +325,8 @@ def checkTutorialKeys():
     # after assumes it.
     lsFree = {"enter", "tab", "escape", "alt", "down", "up", "left", "right", "space", "back",
               "control+enter", "alt+tab", "alt+y", "alt+control+d", "alt+r", "alt+h",
-              "insert+up", "insert+down", "insert+t", "insert+f12", "insert+space"}
+              "insert+up", "insert+down", "insert+t", "insert+f12", "insert+space",
+              "insert+tab"}
     lsBad = []
     iChecked = 0
     sHelp = os.path.join(sRoot, "help")

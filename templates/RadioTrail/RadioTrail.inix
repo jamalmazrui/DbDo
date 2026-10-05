@@ -2,10 +2,11 @@
 ;
 ; INTERNET RADIO, AS A LIST YOU CAN SEARCH AND SORT. One table, stations, holds
 ; a station's name, its stream address, where it is from, its language, its
-; genres, its codec and bitrate, and how listeners rate it. Three stations are
-; here to start. Run fetchRadioBrowser, in this folder, to bring in the whole
-; Radio Browser catalog -- some sixty thousand working stations -- or one
-; country of it.
+; genres, its codec and bitrate, and how listeners rate it. Fourteen stations
+; are here to start: the ten ACB Media streams, the NFB Radio Network, Radio
+; Paradise and two SomaFM channels. Run fetchStations, in this folder, to bring
+; in the whole Radio Browser catalog -- some sixty thousand working stations --
+; and all forty-six SomaFM channels, or one country of Radio Browser.
 ;
 ; LISTENING IS ONE KEY. On a station's row, move to the stream_url column and
 ; press Control+Enter, Open Cell Value: Windows hands the address to whatever

@@ -235,8 +235,10 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
-<li><a href="#v1.0.208-current" id="toc-v1.0.208-current">v1.0.208
+<li><a href="#v1.0.222-current" id="toc-v1.0.222-current">v1.0.222
 (current)</a></li>
+<li><a href="#v1.0.221" id="toc-v1.0.221">v1.0.221</a></li>
+<li><a href="#v1.0.208" id="toc-v1.0.208">v1.0.208</a></li>
 <li><a href="#v1.0.207" id="toc-v1.0.207">v1.0.207</a></li>
 <li><a href="#v1.0.206" id="toc-v1.0.206">v1.0.206</a></li>
 <li><a href="#v1.0.205" id="toc-v1.0.205">v1.0.205</a></li>
@@ -364,13 +366,28 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
-<h2 id="v1.0.208-current">v1.0.208 (current)</h2>
+<h2 id="v1.0.222-current">v1.0.222 (current)</h2>
+<p><strong>The walks learn from the JAWS trainers.</strong> Every lone
+letter is spelled with its alphabet word before it is pressed; the first
+walk teaches Insert plus Tab beside Insert plus Up Arrow and shows one
+tutor message before saying they are off from here; every walk ends with
+the two or three keys it taught. The tutorial audio should be rebuilt:
+delete helpand run build.</p>
+<h2 id="v1.0.221">v1.0.221</h2>
+<p><strong>RadioTrail’s fetch logs where DbDo logs</strong>, under
+<code>%LOCALAPPDATA%\DbDo\logs</code> rather than inside the data
+folder, and the build and installer remove the script’s former name,
+fetchRadioBrowser, so only fetchStations remains.</p>
+<h2 id="v1.0.208">v1.0.208</h2>
 <p><strong>RadioTrail, a template for Internet radio.</strong> One
 stations table – name, stream address, country, state, language, genre,
 codec, bitrate, votes, source – with status, rating, notes and tags for
-the listener. <code>fetchRadioBrowser</code> in its folder fills it from
-the Radio Browser public catalog, all of it or one country, keyed by the
-catalog’s own station id and never touching what you wrote.
+the listener. It starts with the ten ACB Media streams, the NFB Radio
+Network, Radio Paradise and two SomaFM channels.
+<code>fetchStations</code> in its folder fills it from the Radio Browser
+public catalog and SomaFM’s channel list, all of it or one country,
+keyed by each source’s own station id and never touching what you wrote.
+If you have not opened the template yet, the script makes your copy.
 Control+Enter on a stream address plays it.</p>
 <h2 id="v1.0.207">v1.0.207</h2>
 <ul>

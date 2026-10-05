@@ -2340,7 +2340,7 @@ iOS, in one database</li>
 and what you did</li>
 <li><strong>MusicTrail</strong> – albums and artists</li>
 <li><strong>RadioTrail</strong> – Internet radio stations, with a script
-that brings in the whole Radio Browser catalog</li>
+that brings in the Radio Browser catalog and SomaFM</li>
 <li><strong>RecipeTrail</strong> – recipes and their ingredients</li>
 <li><strong>SchoolTrail</strong> – a small teaching database: students,
 teachers, classes</li>
@@ -2359,12 +2359,15 @@ put <code>platform = "Windows"</code> in the Filter Records, Control+F,
 and it stays until you clear it.</p>
 <h3 id="radiotrail-plays-internet-radio">RadioTrail plays Internet
 radio</h3>
-<p>Three stations are in the template to start. To bring in the whole
-catalog – some sixty thousand working stations from Radio Browser, a
-volunteer-kept public directory – run <code>fetchRadioBrowser</code> in
-the template’s folder. It takes about a minute, and it can take one
-country instead:
-<code>fetchRadioBrowser --country "United States"</code>.</p>
+<p>Fourteen stations are in the template to start: the ten ACB Media
+streams, the NFB Radio Network, Radio Paradise and two SomaFM channels.
+To bring in the whole catalog – some sixty thousand working stations
+from Radio Browser, a volunteer-kept public directory, and all forty-six
+SomaFM channels – run <code>fetchStations</code> in the template’s
+folder. It takes about a minute, and it can take one country instead:
+<code>fetchStations --country "United States"</code>. If you have not
+opened the template in DbDo yet, the script makes your copy itself. Its
+log is with DbDo’s own, under <code>%LOCALAPPDATA%\DbDo\logs</code>.</p>
 <p>To listen, move to a station’s <strong>stream_url</strong> cell and
 press <strong>Control+Enter</strong>, Open Cell Value. Windows hands the
 address to whatever plays streams on your computer. Filter Records by
