@@ -235,8 +235,9 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
-<li><a href="#v1.0.225-current" id="toc-v1.0.225-current">v1.0.225
+<li><a href="#v1.0.226-current" id="toc-v1.0.226-current">v1.0.226
 (current)</a></li>
+<li><a href="#v1.0.225" id="toc-v1.0.225">v1.0.225</a></li>
 <li><a href="#v1.0.224" id="toc-v1.0.224">v1.0.224</a></li>
 <li><a href="#v1.0.223" id="toc-v1.0.223">v1.0.223</a></li>
 <li><a href="#v1.0.222" id="toc-v1.0.222">v1.0.222</a></li>
@@ -369,7 +370,15 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
-<h2 id="v1.0.225-current">v1.0.225 (current)</h2>
+<h2 id="v1.0.226-current">v1.0.226 (current)</h2>
+<p><strong>One command builds RadioTrail.</strong>
+<code>fetchStations</code> with no arguments makes a clean copy, fetches
+the catalog and SomaFM, then asks every station what it says about
+itself, forty at a time, writing as it goes so a stop loses nothing and
+the next run carries on. A copy nobody has marked up is replaced; one
+with a status, rating, note or tag is kept. rebuildRadioTrail is gone,
+since the one script is the whole job.</p>
+<h2 id="v1.0.225">v1.0.225</h2>
 <p><strong>RadioTrail knows more, and can ask a station about
 itself.</strong> New fields: slogan, playlist_url (the address as
 submitted when it differs from the stream), countrycode, hls, trend,
@@ -397,10 +406,10 @@ sixty thousand stations went back to fourteen rows. A database that
 exists is left alone from now on; only the settings and report files
 beside it are refreshed. If this happened to you, run
 <code>fetchStations</code> again – it takes a minute.</p>
-<p><strong>The installer says Update when it should.</strong> A record
-of the JAWS scripts left in the Roaming tree by an earlier version now
-counts, so the finish page no longer offers Install for scripts that are
-already there.</p>
+<p><strong>The installer says Update when it should.</strong> The one
+install after the JAWS record moved to the Local tree said Install for
+scripts already there; that install wrote the record in its new place,
+so the finish page is right from here on.</p>
 <h2 id="v1.0.222">v1.0.222</h2>
 <p><strong>The walks learn from the JAWS trainers.</strong> Every lone
 letter is spelled with its alphabet word before it is pressed; the first

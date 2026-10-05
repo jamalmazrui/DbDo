@@ -4,7 +4,16 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.225 (current)
+## v1.0.226 (current)
+
+**One command builds RadioTrail.** `fetchStations` with no arguments makes a
+clean copy, fetches the catalog and SomaFM, then asks every station what it
+says about itself, forty at a time, writing as it goes so a stop loses
+nothing and the next run carries on. A copy nobody has marked up is replaced;
+one with a status, rating, note or tag is kept. rebuildRadioTrail is gone,
+since the one script is the whole job.
+
+## v1.0.225
 
 **RadioTrail knows more, and can ask a station about itself.** New fields:
 slogan, playlist_url (the address as submitted when it differs from the
@@ -34,9 +43,10 @@ fourteen rows. A database that exists is left alone from now on; only the
 settings and report files beside it are refreshed. If this happened to you,
 run `fetchStations` again -- it takes a minute.
 
-**The installer says Update when it should.** A record of the JAWS scripts
-left in the Roaming tree by an earlier version now counts, so the finish page
-no longer offers Install for scripts that are already there.
+**The installer says Update when it should.** The one install after the JAWS
+record moved to the Local tree said Install for scripts already there; that
+install wrote the record in its new place, so the finish page is right from
+here on.
 
 ## v1.0.222
 

@@ -912,42 +912,35 @@ until you clear it.
 
 ### RadioTrail plays Internet radio
 
-Fourteen stations are in the template to start: the ten ACB Media streams, the
-NFB Radio Network, Radio Paradise and two SomaFM channels. To bring in the whole
-catalog -- some sixty thousand working stations from Radio Browser, a
-volunteer-kept public directory, and all forty-six SomaFM channels -- run
-`fetchStations` in the template's folder. It takes about a minute, and it can
-take one country instead: `fetchStations --country "United States"`. If you
-have not opened the template in DbDo yet, the script makes your copy itself. Its
-log is with DbDo's own, under `%LOCALAPPDATA%\DbDo\logs`.
+Fourteen stations are in the template to start. To build the real thing, run
+**`fetchStations`** in the template's folder, `templates\RadioTrail`. One
+command does three things: a clean copy from the template; the whole catalog --
+some sixty thousand working stations from Radio Browser, a volunteer-kept public
+directory, plus SomaFM's channels, a minute; and then each station asked what it
+says about itself, which takes an hour or two and can be stopped at any time,
+the next run carrying on where it left off.
 
-To listen, press **Alt+Shift+P**, Play Stream, on any station's row. The Homer
-Player opens -- the same player FileDir has -- with the station playing: Scroll
-Lock pauses and resumes, the Volume and Rate sliders are ordinary controls, and
-Escape closes it. The first time, if mpv is not on your computer, DbDo offers
-to fetch it; it takes about a minute. Filter Records by genre, country or
-language is the way through sixty thousand rows; Keywords searches every
-field.
-
-The catalog knows a station's name, tags and place, and no more. What a station
-says about itself -- "Official home of the Seattle Seahawks" -- is in its
-stream's headers and on its home page. `fetchStations --enrich` asks each
-station once and files the answer: the slogan in **slogan**, the rest in
-**descrip**, new genre words in **genre**. Then Keywords, Control+K, finds
-"Seahawks". Sixty thousand stations take hours; one country takes less:
-`fetchStations --enrich --country "United States"`.
+That third step is what makes searching work. The catalog knows a station's
+name, tags and place, and no more. "Official home of the Seattle Seahawks" is in
+the station's own stream headers and on its home page, and that is where
+fetchStations reads it: the slogan into **slogan**, the rest into **descrip**,
+new genre words into **genre**. Then Keywords, Control+K, finds "Seahawks".
 
 A row reads name, genre, state and country. Every other field -- slogan,
 descrip, homepage, codec, bitrate, votes, the playlist address when there is
 one -- is there for Keywords and Filter Records, and Inspect shows them all.
 
-Your **status**, **rating**, **notes** and **tags** are yours: a refresh from the
-catalog never writes them, and neither does an enrichment.
+To listen, press **Alt+Shift+P**, Play Stream, on any station's row. The Homer
+Player opens -- the same player FileDir has -- with the station playing: Scroll
+Lock pauses and resumes, the Volume and Rate sliders are ordinary controls, and
+Escape closes it. The first time, if mpv is not on your computer, DbDo offers
+to fetch it.
 
-To start over with a fresh copy -- after a new version adds fields, say -- run
-`rebuildRadioTrail` in the template's folder: it sets the old copy aside as
-RadioTrail-old.db, fills a new one from the catalog, and asks the United States
-stations about themselves, all in one go.
+A copy you have not marked up is replaced by a clean one on each run, so new
+fields arrive. Once you have set a **status**, a **rating**, a **note** or a
+**tag**, the copy is yours: it is refreshed in place and those fields are never
+written by the script. `fetchStations --country "United States"` keeps a run to
+one country; `--catalog-only` skips the asking; `--enrich-only` does only that.
 
 ### CollectionTrail holds whatever you collect
 

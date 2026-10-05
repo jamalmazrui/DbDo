@@ -21,19 +21,27 @@
 # listener's, and a refresh leaves them exactly as they were. Everything the
 # catalog knows is rewritten; everything the person wrote is kept.
 #
-#   fetchStations                       fills the RadioTrail copy under
-#                                       %LOCALAPPDATA%\DbDo\data\RadioTrail
-#   fetchStations path\to\other.db      fills that database instead
-#   fetchStations --country "United States"   only one country from Radio Browser
+# ONE COMMAND DOES THE WHOLE JOB. fetchStations with no arguments:
+#
+#   1. A clean copy from the template -- when the copy there holds nothing of
+#      yours yet (no status set, no rating, no notes, no tags); a copy you have
+#      marked up is kept and refreshed instead, and --fresh forces a clean one.
+#   2. The catalog: every working Radio Browser station, and SomaFM's channels.
+#   3. What each station says about itself: its stream's headers and its home
+#      page, forty stations at a time. Every station, which takes an hour or
+#      two for sixty thousand; stop it at any time, and the next run carries
+#      on where it stopped, because each station is marked when it has been
+#      asked.
+#
+#   fetchStations                       all three steps, every station
+#   fetchStations --country "United States"   the catalog for one country only
 #   fetchStations --limit 2000          the 2,000 most voted, for a taste
-#   fetchStations --source somafm       only the SomaFM channels (46 of them)
-#   fetchStations --source radiobrowser only Radio Browser; the default is both
-#   fetchStations --fresh               throw the copy away and start from the
-#                                       template, so new fields arrive; your
-#                                       status, rating, notes and tags go too
-#   fetchStations --enrich              ask each unprobed station what it says
-#                                       about itself; add --country or --limit
-#                                       to take a part of the list first
+#   fetchStations --catalog-only        steps 1 and 2, no asking
+#   fetchStations --enrich-only         step 3 only, on what is there
+#   fetchStations --again               ask again the stations already asked
+#   fetchStations --fresh               a clean copy even if yours holds notes
+#   fetchStations path\to\other.db      another database instead of the copy
+#   fetchStations --source somafm       only SomaFM in step 2
 #
 # WHAT A STATION SAYS ABOUT ITSELF. The catalog knows a station's name, its
 # tags and where it is, and that is all: "Official home of the Seattle
@@ -72,7 +80,7 @@ c_sAllHosts = "all.api.radio-browser.info"
 c_sSomaChannels = "https://somafm.com/channels.json"
 c_lsSomaFormats = ["mp3", "aac", "aacp"]
 c_lsSomaQuality = ["highest", "high", "low"]
-c_iProbeThreads = 20
+c_iProbeThreads = 40
 c_iProbeSeconds = 4
 
 def probeStation(sUrl, sHomepage):
@@ -127,6 +135,31 @@ def enrich(sDb, sCountry, iLimit, bAgain, logLine, say):
         say("Nothing to probe: every station here has been asked already. Add --again to ask them again."); c.close(); return 0
     say("Asking %d stations what they say about themselves, %d at a time. About %d minutes." % (len(lsRows), c_iProbeThreads, max(1, len(lsRows) * c_iProbeSeconds // c_iProbeThreads // 60)))
     oLock = threading.Lock(); lsOut = []; lsQueue = list(lsRows)
+    sNow = datetime.datetime.now().strftime("%Y-%m-%d")
+    iFilled = [0]; iWritten = [0]
+    def flush():
+        """Write what has come back so far. Called every few seconds, so a
+        stop at any moment keeps everything asked up to then."""
+        with oLock:
+            lsBatch = list(lsOut); del lsOut[:]
+        for r, d in lsBatch:
+            iId, sGenre, sSlogan, sDescrip = r[0], r[3] or "", r[4] or "", r[5] or ""
+            lsParts = []
+            for k in ("icy_description", "page_title", "page_description"):
+                v = d.get(k, "")
+                if v and v.lower() not in sDescrip.lower() and v not in lsParts: lsParts.append(v)
+            sSloganNew = sSlogan or d.get("icy_description", "")[:200]
+            sDescripNew = sDescrip
+            if lsParts: sDescripNew = (sDescrip + "\n\n" if sDescrip else "") + "\n".join(lsParts)
+            sGenreNew = sGenre
+            for sWord in re.split(r"[,/;|]", d.get("icy_genre", "")):
+                sWord = sWord.strip().lower()
+                if sWord and sWord not in sGenreNew.lower(): sGenreNew = (sGenreNew + ", " if sGenreNew else "") + sWord
+            if d: iFilled[0] += 1
+            logLine("probe %d: %s" % (iId, "; ".join("%s=%s" % (k, v[:80]) for k, v in d.items()) or "nothing"))
+            c.execute("update stations set slogan=?, descrip=?, genre=?, probed=?, edited=CURRENT_TIMESTAMP where station_id=?", (sSloganNew, sDescripNew, sGenreNew, sNow, iId))
+            iWritten[0] += 1
+        if lsBatch: c.commit()
     def worker():
         while True:
             with oLock:
@@ -136,32 +169,20 @@ def enrich(sDb, sCountry, iLimit, bAgain, logLine, say):
             with oLock: lsOut.append((r, d))
     lsThreads = [threading.Thread(target=worker, daemon=True) for _ in range(c_iProbeThreads)]
     for o in lsThreads: o.start()
-    iDone = 0
-    while any(o.is_alive() for o in lsThreads):
-        time.sleep(5)
-        with oLock: iNow = len(lsOut)
-        if iNow - iDone >= 200: say("  %d of %d" % (iNow, len(lsRows))); iDone = iNow
-    for o in lsThreads: o.join()
-    sNow = datetime.datetime.now().strftime("%Y-%m-%d")
-    iFilled = 0
-    for r, d in lsOut:
-        iId, sGenre, sSlogan, sDescrip = r[0], r[3] or "", r[4] or "", r[5] or ""
-        lsParts = []
-        for k in ("icy_description", "page_title", "page_description"):
-            v = d.get(k, "")
-            if v and v.lower() not in sDescrip.lower() and v not in lsParts: lsParts.append(v)
-        sSloganNew = sSlogan or d.get("icy_description", "")[:200]
-        sDescripNew = sDescrip
-        if lsParts: sDescripNew = (sDescrip + "\n\n" if sDescrip else "") + "\n".join(lsParts)
-        sGenreNew = sGenre
-        for sWord in re.split(r"[,/;|]", d.get("icy_genre", "")):
-            sWord = sWord.strip().lower()
-            if sWord and sWord not in sGenreNew.lower(): sGenreNew = (sGenreNew + ", " if sGenreNew else "") + sWord
-        if d: iFilled += 1
-        logLine("probe %d: %s" % (iId, "; ".join("%s=%s" % (k, v[:80]) for k, v in d.items()) or "nothing"))
-        c.execute("update stations set slogan=?, descrip=?, genre=?, probed=?, edited=CURRENT_TIMESTAMP where station_id=?", (sSloganNew, sDescripNew, sGenreNew, sNow, iId))
-    c.commit(); c.close()
-    say("%d stations answered with something; %d said nothing. Keywords now finds what they said." % (iFilled, len(lsOut) - iFilled))
+    iSaid = 0
+    try:
+        while any(o.is_alive() for o in lsThreads):
+            time.sleep(5)
+            flush()
+            if iWritten[0] - iSaid >= 500: say("  %d of %d" % (iWritten[0], len(lsRows))); iSaid = iWritten[0]
+        flush()
+    except KeyboardInterrupt:
+        with oLock: del lsQueue[:]
+        flush(); c.close()
+        say("Stopped after %d stations; what they said is kept. Run fetchStations again to carry on with the rest." % iWritten[0])
+        return 0
+    c.close()
+    say("%d stations answered with something; %d said nothing. Keywords now finds what they said." % (iFilled[0], iWritten[0] - iFilled[0]))
     return 0
 
 def resolveMirrors(logLine):
@@ -239,7 +260,8 @@ def main():
     sCountry = ""
     sSource = "all"
     iLimit = 0
-    bEnrich = False
+    bCatalogOnly = False
+    bEnrichOnly = False
     bAgain = False
     bFresh = False
     i = 0
@@ -248,13 +270,26 @@ def main():
         if sArg == "--country" and i + 1 < len(lsArgs): sCountry = lsArgs[i + 1]; i += 2; continue
         if sArg == "--limit" and i + 1 < len(lsArgs): iLimit = int(lsArgs[i + 1]); i += 2; continue
         if sArg == "--source" and i + 1 < len(lsArgs): sSource = lsArgs[i + 1].lower(); i += 2; continue
-        if sArg == "--enrich": bEnrich = True; i += 1; continue
+        if sArg in ("--catalog-only", "--no-enrich"): bCatalogOnly = True; i += 1; continue
+        if sArg in ("--enrich-only", "--enrich"): bEnrichOnly = True; i += 1; continue
         if sArg == "--fresh": bFresh = True; i += 1; continue
         if sArg == "--again": bAgain = True; i += 1; continue
         if sArg.startswith("-"): i += 1; continue
         sDb = sArg; i += 1
     if not sDb:
         sDb = os.path.join(os.environ.get("LOCALAPPDATA", ""), "DbDo", "data", "RadioTrail", "RadioTrail.db")
+    # A COPY NOBODY HAS MARKED UP IS REPLACED, not merged: a clean start gives
+    # every field the template has. One with a status, a rating, a note or a
+    # tag in it is yours, and is refreshed in place.
+    if not bFresh and not bEnrichOnly and os.path.isfile(sDb):
+        try:
+            cPeek = sqlite3.connect(sDb)
+            iMine = cPeek.execute("select count(*) from stations where (status is not null and status not in ('', 'untried')) or coalesce(rating,'') <> '' or coalesce(notes,'') <> '' or coalesce(tags,'') <> ''").fetchone()[0]
+            cPeek.close()
+            if iMine == 0: bFresh = True
+            else: print("Your copy has %d stations you have marked up, so it is kept and refreshed; --fresh would replace it." % iMine)
+        except Exception:
+            bFresh = True
     if bFresh and os.path.isfile(sDb):
         # A FRESH START, asked for by name. The old copy is kept beside the new
         # one as RadioTrail-old.db until the next fresh start, so a status or a
@@ -299,9 +334,11 @@ def main():
     logLine("Script: " + os.path.abspath(__file__) + " | Python " + sys.version.split()[0] + " | " + sys.platform)
     logLine("Database: " + sDb + " | source: " + sSource + " | country: " + (sCountry or "(all)") + " | limit: " + str(iLimit or "(none)"))
 
-    if bEnrich:
+    if bEnrichOnly:
         iCode = enrich(sDb, sCountry, iLimit, bAgain, logLine, say)
         say("The log is " + sLog); logLine("finished " + datetime.datetime.now().isoformat()); return iCode
+    say("Step 1 of 3: the copy is " + ("fresh from the template." if bFresh else "in place."))
+    say("Step 2 of 3: the catalog.")
 
     # ---- fetch ----
     lsStations = []
@@ -312,7 +349,9 @@ def main():
         except Exception as oError:
             say("SomaFM did not answer: %s" % oError); logLine("ERROR somafm " + str(oError))
     if sSource == "somafm":
-        return mergeRows(sDb, lsRows, logLine, say, sLog)
+        iCode = mergeRows(sDb, lsRows, logLine, say, sLog)
+        if iCode != 0 or bCatalogOnly: return iCode
+        return enrich(sDb, sCountry, 0, bAgain, logLine, say)
     sServer = ""
     for sTry in resolveMirrors(logLine):
         try:
@@ -378,7 +417,10 @@ def main():
             "source": "Radio Browser",
             "source_id": sUuid,
         })
-    return mergeRows(sDb, lsRows, logLine, say, sLog)
+    iCode = mergeRows(sDb, lsRows, logLine, say, sLog)
+    if iCode != 0 or bCatalogOnly: return iCode
+    say("Step 3 of 3: asking each station what it says about itself. Stop at any time; the next run carries on.")
+    return enrich(sDb, sCountry, 0, bAgain, logLine, say)
 
 def mergeRows(sDb, lsRows, logLine, say, sLog):
     """Keyed by the source's own id, rewriting every catalog field and never
@@ -393,7 +435,12 @@ def mergeRows(sDb, lsRows, logLine, say, sLog):
     # what it lacks is dropped from every row, and said once, with the way to
     # get the new fields.
     lsCols = set(r[1] for r in c.execute("pragma table_info(stations)"))
-    lsMissing = sorted(k for k in lsRows[0] if k not in lsCols) if lsRows else []
+    # Across EVERY row, not the first: the SomaFM rows come first and carry
+    # fewer fields than the catalog's, so the first row said nothing was
+    # missing while sixty thousand rows behind it named playlist_url.
+    lsAll = set()
+    for dRow in lsRows: lsAll.update(dRow.keys())
+    lsMissing = sorted(k for k in lsAll if k not in lsCols)
     if lsMissing:
         say("This copy of RadioTrail is older than the template and lacks " + ", ".join(lsMissing)
             + ". Those were left out. For the new fields run rebuildRadioTrail, or fetchStations --fresh.")
@@ -401,7 +448,8 @@ def mergeRows(sDb, lsRows, logLine, say, sLog):
     dHave = {r[0]: r[1] for r in c.execute("select source_id, station_id from stations where source_id is not null and source_id <> ''")}
     iAdded = iUpdated = 0
     for dRow in lsRows:
-        for k in lsMissing: dRow.pop(k, None)
+        for k in list(dRow.keys()):
+            if k not in lsCols: dRow.pop(k, None)
         sKey = dRow.get("source_id", "")
         if not sKey: continue
         dRow["last_seen"] = sNow

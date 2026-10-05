@@ -1,5 +1,7 @@
 @echo off
-rem fetchStations.cmd -- fill a RadioTrail database from Radio Browser and SomaFM.
-rem Runs the Python beside it and passes every argument through: a database
-rem path, --country "Name", --limit N, or --source somafm.
+rem fetchStations.cmd -- build the RadioTrail database: a clean copy, the whole
+rem catalog, and what every station says about itself. One command; an hour or
+rem two, most of it the asking, which can be stopped and picked up again.
+rem Passes every argument through: --country "Name", --limit N, --catalog-only,
+rem --enrich-only, --again, --fresh, or a database path.
 python "%~dp0fetchStations.py" %*

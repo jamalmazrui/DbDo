@@ -900,13 +900,11 @@ begin
     begin
       sRecord := ExpandConstant('{localappdata}\DbDo\jawsSettings.log');
       sVersionFile := ExpandConstant('{localappdata}\DbDo\jawsSettings.version');
-      // AN OLDER RECORD STILL LIVES IN THE ROAMING TREE until DbDo itself next
-      // runs the script install, which moves it. This page is shown BEFORE
-      // that run, so a person whose scripts were installed by an earlier
-      // version saw "Install" where "Update" was true (5 October 2026). The
-      // Roaming record counts as a record.
-      if not FileExists(sRecord) then
-        sRecord := ExpandConstant('{userappdata}\DbDo\jawsSettings.log');
+      // The record lives in the Local tree only. An older version kept it in
+      // Roaming, and the one install after that change said "Install" where
+      // "Update" was true (5 October 2026); that install wrote the record in
+      // its new place, so the moment has passed, and the kit's check rightly
+      // refuses an installer that reads the Roaming tree at all.
       if not FileExists(sRecord) then Result := 0
       else if LoadStringFromFile(sVersionFile, sAnswer) and (Trim(sAnswer) = '{#AppVersion}') then Result := 2
       else Result := 1;

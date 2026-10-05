@@ -16,8 +16,8 @@
 ; the Seattle Seahawks" lives in the stream's own headers and on the station's
 ; home page. fetchStations --enrich asks each station once and files the
 ; answer -- the slogan in slogan, the rest in descrip, new genre words in
-; genre -- so Keywords finds Seahawks. Ask one country first: --enrich
-; --country "United States".
+; genre -- so Keywords finds Seahawks. fetchStations does this as its third
+; step; --country "United States" keeps the whole run to one country.
 ;
 ; WHAT IS YOURS STAYS YOURS. status (favorite, tried, dead, want to try),
 ; rating, notes and tags are the listener's fields; a refresh from the catalog
@@ -35,6 +35,10 @@ InitialTable = stations
 ; tells stations apart. Filter Records on genre, country, state or language is
 ; the way through sixty thousand rows; Keywords searches every field, on
 ; screen or off -- slogan, descrip, homepage, codec, all of them.
+;
+; FILLING IT IS ONE COMMAND: fetchStations, in this folder. A clean copy, the
+; whole catalog, then every station asked what it says about itself -- an
+; hour or two, which can be stopped and picked up again.
 SelectFields = name, genre, state, country
 OrderFields = name
 WhereFilter =

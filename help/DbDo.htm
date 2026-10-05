@@ -2359,43 +2359,38 @@ put <code>platform = "Windows"</code> in the Filter Records, Control+F,
 and it stays until you clear it.</p>
 <h3 id="radiotrail-plays-internet-radio">RadioTrail plays Internet
 radio</h3>
-<p>Fourteen stations are in the template to start: the ten ACB Media
-streams, the NFB Radio Network, Radio Paradise and two SomaFM channels.
-To bring in the whole catalog – some sixty thousand working stations
-from Radio Browser, a volunteer-kept public directory, and all forty-six
-SomaFM channels – run <code>fetchStations</code> in the template’s
-folder. It takes about a minute, and it can take one country instead:
-<code>fetchStations --country "United States"</code>. If you have not
-opened the template in DbDo yet, the script makes your copy itself. Its
-log is with DbDo’s own, under <code>%LOCALAPPDATA%\DbDo\logs</code>.</p>
-<p>To listen, press <strong>Alt+Shift+P</strong>, Play Stream, on any
-station’s row. The Homer Player opens – the same player FileDir has –
-with the station playing: Scroll Lock pauses and resumes, the Volume and
-Rate sliders are ordinary controls, and Escape closes it. The first
-time, if mpv is not on your computer, DbDo offers to fetch it; it takes
-about a minute. Filter Records by genre, country or language is the way
-through sixty thousand rows; Keywords searches every field.</p>
-<p>The catalog knows a station’s name, tags and place, and no more. What
-a station says about itself – “Official home of the Seattle Seahawks” –
-is in its stream’s headers and on its home page.
-<code>fetchStations --enrich</code> asks each station once and files the
-answer: the slogan in <strong>slogan</strong>, the rest in
-<strong>descrip</strong>, new genre words in <strong>genre</strong>.
-Then Keywords, Control+K, finds “Seahawks”. Sixty thousand stations take
-hours; one country takes less:
-<code>fetchStations --enrich --country "United States"</code>.</p>
+<p>Fourteen stations are in the template to start. To build the real
+thing, run <strong><code>fetchStations</code></strong> in the template’s
+folder, <code>templates\RadioTrail</code>. One command does three
+things: a clean copy from the template; the whole catalog – some sixty
+thousand working stations from Radio Browser, a volunteer-kept public
+directory, plus SomaFM’s channels, a minute; and then each station asked
+what it says about itself, which takes an hour or two and can be stopped
+at any time, the next run carrying on where it left off.</p>
+<p>That third step is what makes searching work. The catalog knows a
+station’s name, tags and place, and no more. “Official home of the
+Seattle Seahawks” is in the station’s own stream headers and on its home
+page, and that is where fetchStations reads it: the slogan into
+<strong>slogan</strong>, the rest into <strong>descrip</strong>, new
+genre words into <strong>genre</strong>. Then Keywords, Control+K, finds
+“Seahawks”.</p>
 <p>A row reads name, genre, state and country. Every other field –
 slogan, descrip, homepage, codec, bitrate, votes, the playlist address
 when there is one – is there for Keywords and Filter Records, and
 Inspect shows them all.</p>
-<p>Your <strong>status</strong>, <strong>rating</strong>,
-<strong>notes</strong> and <strong>tags</strong> are yours: a refresh
-from the catalog never writes them, and neither does an enrichment.</p>
-<p>To start over with a fresh copy – after a new version adds fields,
-say – run <code>rebuildRadioTrail</code> in the template’s folder: it
-sets the old copy aside as RadioTrail-old.db, fills a new one from the
-catalog, and asks the United States stations about themselves, all in
-one go.</p>
+<p>To listen, press <strong>Alt+Shift+P</strong>, Play Stream, on any
+station’s row. The Homer Player opens – the same player FileDir has –
+with the station playing: Scroll Lock pauses and resumes, the Volume and
+Rate sliders are ordinary controls, and Escape closes it. The first
+time, if mpv is not on your computer, DbDo offers to fetch it.</p>
+<p>A copy you have not marked up is replaced by a clean one on each run,
+so new fields arrive. Once you have set a <strong>status</strong>, a
+<strong>rating</strong>, a <strong>note</strong> or a
+<strong>tag</strong>, the copy is yours: it is refreshed in place and
+those fields are never written by the script.
+<code>fetchStations --country "United States"</code> keeps a run to one
+country; <code>--catalog-only</code> skips the asking;
+<code>--enrich-only</code> does only that.</p>
 <h3 id="collectiontrail-holds-whatever-you-collect">CollectionTrail
 holds whatever you collect</h3>
 <p>Stamps, coins, records and tools answer the same questions, so they
