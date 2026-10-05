@@ -7,9 +7,6 @@
   <title>DbDo</title>
   <style>
     html {
-      line-height: 1.5;
-      font-family: Georgia, serif;
-      font-size: 20px;
       color: #1a1a1a;
       background-color: #fdfdfd;
     }
@@ -28,13 +25,16 @@
     @media (max-width: 600px) {
       body {
         font-size: 0.9em;
-        padding: 1em;
+        padding: 12px;
       }
       h1 {
         font-size: 1.8em;
       }
     }
     @media print {
+      html {
+        background-color: white;
+      }
       body {
         background-color: transparent;
         color: black;
@@ -84,9 +84,10 @@
       color: #606060;
     }
     code {
-      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
       font-size: 85%;
       margin: 0;
+      hyphens: manual;
     }
     pre {
       margin: 1em 0;
@@ -151,17 +152,17 @@
     div.columns{display: flex; gap: min(4vw, 1.5em);}
     div.column{flex: auto; overflow-x: auto;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
     ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
       width: 0.8em;
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
 </head>
 <body>
 <header id="title-block-header">
@@ -2361,12 +2362,22 @@ and it stays until you clear it.</p>
 radio</h3>
 <p>Fourteen stations are in the template to start. To build the real
 thing, run <strong><code>fetchStations</code></strong> in the template’s
-folder, <code>templates\RadioTrail</code>. One command does three
-things: a clean copy from the template; the whole catalog – some sixty
-thousand working stations from Radio Browser, a volunteer-kept public
-directory, plus SomaFM’s channels, a minute; and then each station asked
-what it says about itself, which takes an hour or two and can be stopped
-at any time, the next run carrying on where it left off.</p>
+folder, <code>templates\RadioTrail</code>. It begins by measuring what
+is there – how many stations, how recent the catalog, how many are
+playable, asked, looked up – and says so; then it fetches only what is
+missing, and leaves a complete copy alone.
+<code>fetchStations --check</code> gives the report by itself. Its log
+is named first thing, in the project’s <code>logs</code> folder. From
+nothing, one command does four things: a clean copy from the template;
+the whole catalog – some sixty thousand working stations from Radio
+Browser, a volunteer-kept public directory, plus SomaFM’s channels, a
+minute; each station asked what it says about itself, an hour or two
+that can be stopped and picked up again; and, for a station with a
+broadcast call sign in its name, its official record from Wikipedia –
+<strong>call_sign</strong>, <strong>frequency</strong>,
+<strong>city</strong> of licence, <strong>owner</strong>,
+<strong>format</strong>, and the article’s opening paragraph – taken
+only when the article’s own call sign is in the station’s name.</p>
 <p>That third step is what makes searching work. The catalog knows a
 station’s name, tags and place, and no more. “Official home of the
 Seattle Seahawks” is in the station’s own stream headers and on its home
@@ -2374,23 +2385,103 @@ page, and that is where fetchStations reads it: the slogan into
 <strong>slogan</strong>, the rest into <strong>descrip</strong>, new
 genre words into <strong>genre</strong>. Then Keywords, Control+K, finds
 “Seahawks”.</p>
-<p>A row reads name, genre, state and country. Every other field –
-slogan, descrip, homepage, codec, bitrate, votes, the playlist address
-when there is one – is there for Keywords and Filter Records, and
-Inspect shows them all.</p>
+<p>A row reads name, genre and country. State is left off the row
+because it is empty for most of the world and an empty cell is spoken as
+“blank” on every row; once you have filtered to one country, Select
+Columns adds it. Every other field is there for Keywords and Filter
+Records, and Inspect shows them all. Words that vary – the catalog’s
+tags, a stream’s genre words, a page’s keywords, the article’s format –
+are in <strong>tags</strong>, one per line. Prose – what the station
+says of itself and the article’s opening paragraph – is in
+<strong>notes</strong>. Both only grow: a line you add to either stays
+through every refresh.</p>
 <p>To listen, press <strong>Alt+Shift+P</strong>, Play Stream, on any
-station’s row. The Homer Player opens – the same player FileDir has –
-with the station playing: Scroll Lock pauses and resumes, the Volume and
-Rate sliders are ordinary controls, and Escape closes it. The first
-time, if mpv is not on your computer, DbDo offers to fetch it.</p>
+station’s row. The Homer Player opens – the same player FileDir has,
+built from the same code in the kit – with the station playing: Scroll
+Lock pauses and resumes, the Volume and Rate sliders are ordinary
+controls, and Escape closes it. Mark several stations first, Control+M,
+and Play Stream queues all of them, as tagged files are queued in
+FileDir, with the current one first. The first time, if mpv is not on
+your computer, DbDo offers to fetch it.</p>
 <p>A copy you have not marked up is replaced by a clean one on each run,
-so new fields arrive. Once you have set a <strong>status</strong>, a
-<strong>rating</strong>, a <strong>note</strong> or a
-<strong>tag</strong>, the copy is yours: it is refreshed in place and
-those fields are never written by the script.
-<code>fetchStations --country "United States"</code> keeps a run to one
-country; <code>--catalog-only</code> skips the asking;
-<code>--enrich-only</code> does only that.</p>
+so new fields arrive. Once you have set a <strong>status</strong> or a
+<strong>rating</strong>, or written in <strong>notes</strong> or
+<strong>tags</strong>, the copy is yours: it is refreshed in place,
+status and rating are never written by the script, and notes and tags
+are only added to. <code>fetchStations --country "United States"</code>
+keeps a run to one country; <code>--catalog-only</code> skips the
+asking; <code>--enrich-only</code> does only that.</p>
+<h4 id="four-spoken-walks">Four spoken walks</h4>
+<p>Walks 15 to 18 of the tutorials – Help menu, Play Tutorials – are
+RadioTrail’s: opening it and reading a row; finding a station with
+Keywords and Filter Records; playing one, and several, in the Homer
+Player; and marking favorites, rating, writing notes, and what a refresh
+leaves alone. The walks that belong to a database live beside the
+program’s walks in <code>help</code>, numbered after them, with the
+database’s name in the title; the database’s own files – its settings,
+its scripts – live in its template folder.</p>
+<h4 id="reports-playlists-and-what-you-listened-to">Reports, playlists
+and what you listened to</h4>
+<p>Run Report, Alt+Shift+R, offers three reports for RadioTrail.
+<strong>Favorites playlist</strong> writes your favorites as an M3U:
+save it from the editor with the .m3u extension and hand it to any
+player or a phone. <strong>Most played</strong> lists the stations you
+have played, most often first, with the date you last played each – Play
+Stream keeps the count and the date in the <strong>plays</strong> and
+<strong>last_played</strong> fields, so Order Records on last_played is
+your recent list. <strong>My stations</strong> is one page per favorite
+with everything known about it.</p>
+<p>To bring in a playlist of your own,
+<code>fetchStations --import list.m3u</code> adds its stations as yours,
+source “mine”; .m3u8 and .pls work too. After each full fetch, a station
+the catalog no longer lists is marked <strong>dead</strong> unless you
+had set its status yourself; it stays in the table, so a favorite that
+went quiet is still there to try.</p>
+<p>When you play a station from the catalog, DbDo tells Radio Browser
+so, in the background, which is how that directory learns what people
+listen to.</p>
+<h4 id="what-radiotrail-took-from-quill-radio-and-what-it-left">What
+RadioTrail took from Quill Radio, and what it left</h4>
+<p>Quill Radio’s features were read one by one and sorted three ways:
+useful, clever, or for a small circle of radio enthusiasts; and each
+useful one asked whether it fits a database program under the Homer
+rules.</p>
+<p>Taken, because a database does them well: a favorites list and the
+filter that shows it; a playlist in and out; the stations you played,
+counted and dated; dead stations marked and kept; the catalog’s health
+reported before anything is fetched; a search across every field; the
+station’s own words and its licence record in the table; the click
+registered with the directory.</p>
+<p>Left to the player, because that is where they belong: pause, rewind
+of live radio, volume boost, a sleep timer. The Homer Player is shared
+with FileDir, and these are its to gain, once, for every app.
+<strong>Recording</strong> it has gained: a Record button and a Stop
+recording button beside Stop playback, each available only when it
+applies, and Alt+Shift+R, which does whichever applies from anywhere in
+the player, the way Scroll Lock does for playing. The stream is written
+as it arrives to Music, Homer Player, named for the station and the
+time; a copy, nothing more – enough to keep a programme for later. Audio
+meant for others is made in a studio program, not here.</p>
+<p>Left aside, as clever or for the enthusiast: a wake-up timer, quiet
+hours, reminders for programmes, listening statistics beyond a count,
+YouTube and Spotify, video and captions, a system tray, global hotkeys,
+a command palette, sound enhancements. Each would be a window and a key
+for a thing a database is not for.</p>
+<p>Worth a second look later: the ACB Media programme schedule and NOAA
+weather radio by place – both small, both of real use to the people
+RadioTrail is for.</p>
+<h4 id="where-radiotrails-data-and-design-come-from">Where RadioTrail’s
+data and design come from</h4>
+<p>The stations are from <strong>Radio Browser</strong>, a public
+directory kept by volunteers, and from <strong>SomaFM</strong>’s own
+channel list; the official records are from <strong>Wikipedia</strong>.
+The ACB Media and NFB Radio Network addresses, and much of the design –
+keying stations by the catalog’s own id rather than by a stream address
+that many stations share, paging the catalog, never refreshing what a
+listener has written – follow <strong>Quill Radio</strong>, the
+successor to the ACB Radio Tuner, whose published requirements and
+source were studied while RadioTrail was built. RadioTrail owes it a
+debt, and its listeners the ten ACB Media streams.</p>
 <h3 id="collectiontrail-holds-whatever-you-collect">CollectionTrail
 holds whatever you collect</h3>
 <p>Stamps, coins, records and tools answer the same questions, so they

@@ -19,6 +19,11 @@
 ; genre -- so Keywords finds Seahawks. fetchStations does this as its third
 ; step; --country "United States" keeps the whole run to one country.
 ;
+; WHERE IT COMES FROM. The stations: Radio Browser, a volunteer directory, and
+; SomaFM's channel list; the official records: Wikipedia. The design, and the
+; ACB Media and NFB Radio addresses, follow Quill Radio, the successor to the
+; ACB Radio Tuner, whose published requirements and source were studied here.
+;
 ; WHAT IS YOURS STAYS YOURS. status (favorite, tried, dead, want to try),
 ; rating, notes and tags are the listener's fields; a refresh from the catalog
 ; never writes them, and the merge is keyed by the catalog's own id for each
@@ -31,15 +36,24 @@ InitialTable = stations
 [Table:stations]
 
 ; Name first, so a letter reaches the station; then what it plays and where it
-; is, state before country because within one country the state is what
-; tells stations apart. Filter Records on genre, country, state or language is
-; the way through sixty thousand rows; Keywords searches every field, on
-; screen or off -- slogan, descrip, homepage, codec, all of them.
+; is. State is not on the row: it is empty for most of the world, and an empty
+; cell is a "blank" spoken on every row. Within one country, Select Columns
+; adds it. Filter Records on genre, country, state or language is the way
+; through sixty thousand rows; Keywords searches every field, on screen or
+; off -- slogan, descrip, homepage, codec, all of them.
 ;
 ; FILLING IT IS ONE COMMAND: fetchStations, in this folder. A clean copy, the
 ; whole catalog, then every station asked what it says about itself -- an
-; hour or two, which can be stopped and picked up again.
-SelectFields = name, genre, state, country
+; hour or two, which can be stopped and picked up again -- and then, for a
+; station with a broadcast call sign in its name, its official record from
+; Wikipedia: call sign, frequency, city of licence, owner and format.
+;
+; WHERE EACH THING GOES. A fact most stations have is a column. Words that
+; vary -- the catalog's tags, a stream's genre words, a page's keywords, the
+; article's format -- are in tags, one per line. Prose is in notes: what the
+; station says of itself, and the article's opening paragraph. Both only ever
+; grow; a line you add stays. status and rating are yours alone.
+SelectFields = name, genre, country
 OrderFields = name
 WhereFilter =
 

@@ -326,7 +326,7 @@ def checkTutorialKeys():
     lsFree = {"enter", "tab", "escape", "alt", "down", "up", "left", "right", "space", "back",
               "control+enter", "alt+tab", "alt+y", "alt+control+d", "alt+r", "alt+h",
               "insert+up", "insert+down", "insert+t", "insert+f12", "insert+space",
-              "insert+tab"}
+              "insert+tab", "alt+f", "alt+e", "alt+v", "alt+h", "scrolllock"}
     lsBad = []
     iChecked = 0
     sHelp = os.path.join(sRoot, "help")
@@ -338,6 +338,11 @@ def checkTutorialKeys():
             if not sLine.startswith("Key="): continue
             sKey = sLine[4:].strip()
             if not sKey or "+" not in sKey and len(sKey) <= 3: continue
+            # Typed text is not a key: a word, a search term, a filter pattern.
+            # A key has a modifier, or is one of the named keys; anything
+            # else of more than three characters that has no plus sign and is
+            # not a key name is something the walk types.
+            if "+" not in sKey and sKey.lower() not in ("scrolllock", "escape", "enter", "space", "backspace", "delete", "insert", "home", "end", "pageup", "pagedown", "uparrow", "downarrow", "leftarrow", "rightarrow") and not re.fullmatch(r"F\d{1,2}", sKey): continue
             lsParts = [dAlias.get(s.strip().lower(), s.strip().lower()) for s in sKey.split("+")]
             if "+".join(lsParts) in lsFree or (len(lsParts) == 1 and lsParts[0] in lsFree): continue
             iChecked += 1

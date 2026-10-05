@@ -13393,8 +13393,8 @@ namespace DbDo
             add("New Database",       "Create a new database file: define the first table's fields and types; the standard columns and the builtin maps and lookups tables are added automatically", "");
             add("Add Table",          "Add another table in the standard shape to the open database", "");
             add("Open Database",      "Open a database file", "");
-            add("Play Stream",        "Play the current record's stream address in the Homer Player",
-                "Alt+Shift+P. Takes the first of stream_url, url, stream, link or address that begins with http, or the current cell. The player is mpv; if it is not installed, DbDo offers to fetch it.");
+            add("Play Stream",        "Play the current record's stream address in the Homer Player; with records marked, play all of them",
+                "Alt+Shift+P. Takes the first of stream_url, url, stream, link or address that begins with http, or the current cell. Marked records make a play list, current one first. The player is mpv; if it is not installed, DbDo offers to fetch it.");
             add("Close Database",     "Close the currently open database", "");
             // ===== Window menu =====
             add("Open Table",         "Open a chosen table of the current database in a new window",
@@ -22810,10 +22810,74 @@ namespace DbDo
                 }
                 return;
             }
+            // MARKED RECORDS MAKE A PLAY LIST, the way tagged files do in FileDir:
+            // when any records are marked, every marked station with an address
+            // goes to the player, the current one first if it is among them.
+            // With nothing marked, the current station plays alone.
             System.Collections.Generic.List<Homer.MediaTrack> lsTracks = new System.Collections.Generic.List<Homer.MediaTrack>();
-            lsTracks.Add(new Homer.MediaTrack(sName, sUrl));
-            DbDoLog.write("Play Stream: " + sName + " -> " + sUrl);
-            Homer.MediaPlayer.run(this, "Playing " + sName, db.currentTable, lsTracks);
+            try
+            {
+                if (db.countMarked() > 0)
+                {
+                    int iFound;
+                    string sTbl = db.currentTable;
+                    string sUrlField = "";
+                    foreach (string sField in new string[] { "stream_url", "url", "stream", "link", "address" })
+                        if (db.hasField(sField)) { sUrlField = sField; break; }
+                    string sNameField = db.hasField("name") ? "name" : (db.hasField("title") ? "title" : "look");
+                    if (sUrlField.Length > 0)
+                        foreach (string[] a in db.queryRowsSql("SELECT \"" + sNameField + "\", \"" + sUrlField + "\" FROM \"" + sTbl
+                            + "\" WHERE marked = 1 AND \"" + sUrlField + "\" LIKE 'http%' ORDER BY \"" + sNameField + "\"", 10000, out iFound))
+                            if (a != null && a.Length > 1 && !string.IsNullOrEmpty(a[1]))
+                            {
+                                if (a[1] == sUrl) lsTracks.Insert(0, new Homer.MediaTrack(a[0] ?? a[1], a[1]));
+                                else lsTracks.Add(new Homer.MediaTrack(a[0] ?? a[1], a[1]));
+                            }
+                }
+            }
+            catch (Exception ex) { DbDoLog.write("Play Stream, marked list: " + ex.Message); lsTracks.Clear(); }
+            if (lsTracks.Count == 0) lsTracks.Add(new Homer.MediaTrack(sName, sUrl));
+            DbDoLog.write("Play Stream: " + lsTracks.Count + " track(s), first " + lsTracks[0].display() + " -> " + sUrl);
+            // LISTENING LEAVES A TRACE, IN THE RECORD. When the table has plays and
+            // last_played fields, as RadioTrail does, playing counts one and dates
+            // it, so Most Played and Order by last_played mean something. And a
+            // station from Radio Browser gets its click registered there, in the
+            // background, which is how that directory learns what people listen
+            // to; the request's failure is nobody's problem.
+            try
+            {
+                if (db.hasField("plays") && db.hasField("last_played") && db.hasField("prime"))
+                {
+                    string sPrime = (db.getFieldValue("prime") ?? "").Replace("'", "''");
+                    if (sPrime.Length > 0)
+                        db.invokeSql("UPDATE \"" + db.currentTable.Replace("\"", "\"\"") + "\" SET plays = CAST(COALESCE(NULLIF(plays, ''), '0') AS INTEGER) + 1, "
+                            + "last_played = date('now', 'localtime') WHERE prime = '" + sPrime + "'", null);
+                }
+                string sSource = db.hasField("source") ? (db.getFieldValue("source") ?? "") : "";
+                string sSourceId = db.hasField("source_id") ? (db.getFieldValue("source_id") ?? "") : "";
+                if (sSource == "Radio Browser" && sSourceId.Length > 0)
+                {
+                    string sClick = "https://de1.api.radio-browser.info/json/url/" + Uri.EscapeDataString(sSourceId);
+                    System.Threading.ThreadPool.QueueUserWorkItem(delegate
+                    {
+                        try
+                        {
+                            System.Net.HttpWebRequest req = (System.Net.HttpWebRequest)System.Net.WebRequest.Create(sClick);
+                            req.UserAgent = "DbDo RadioTrail/1.0 (https://github.com/JamalMazrui/DbDo)";
+                            req.Timeout = 8000;
+                            using (System.Net.WebResponse resp = req.GetResponse()) { }
+                        }
+                        catch (Exception) { }
+                    });
+                }
+            }
+            catch (Exception exTrace) { DbDoLog.write("Play Stream, trace: " + exTrace.Message); }
+            // The title is the database's name, as FileDir gives the folder's; the
+            // player itself names the window after the track once it is playing.
+            string sDbName = "";
+            try { sDbName = System.IO.Path.GetFileNameWithoutExtension(db.filePath); } catch { }
+            if (sDbName.Length == 0) sDbName = db.currentTable;
+            Homer.MediaPlayer.run(this, sDbName, db.currentTable, lsTracks);
         }
 
         private void recOpenCellClicked(object sender, EventArgs evArgs)

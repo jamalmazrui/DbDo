@@ -4,7 +4,78 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.226 (current)
+## v1.0.235 (current)
+
+**Record a station**: Alt+Shift+R in the Homer Player starts and stops a copy
+of the stream, kept in Music, Homer Player. Needs HomerDev 1.51.5.
+
+## v1.0.234
+
+**RadioTrail learns from Quill Radio's feature list** -- what a database does
+well, taken; what a player does well, left to the Homer Player; the rest left
+aside. Three reports: a favorites playlist as M3U, most played, and a page per
+favorite. Play Stream counts plays and dates them in two new fields, and tells
+Radio Browser about the click. `fetchStations --import` brings a playlist's
+stations in as yours; after a full fetch, stations the catalog has dropped are
+marked dead and kept. The guide says what was taken and what was left.
+
+## v1.0.233
+
+**Four spoken walks for RadioTrail**, 15 to 18: opening and the row, finding a
+station, playing one and several, and keeping it yours. The build notices a walk
+with no audio, or audio older than the walk, and speaks just that one. Needs
+HomerDev 1.51.4.
+
+## v1.0.232
+
+**Credit where it is due.** The guide's RadioTrail section now names its
+sources -- Radio Browser, SomaFM, Wikipedia -- and Quill Radio, whose published
+requirements and source shaped the design and supplied the ACB Media and NFB
+Radio addresses.
+
+## v1.0.231
+
+**The Wikipedia step asks one question a second**, as Wikipedia asks of a
+script, and tells a refusal from a miss: a refused station is left for the next
+run instead of being marked as unmatched. Only United States and Canadian
+stations are looked up, and only an article whose own infobox carries the
+station's call sign counts -- "WAVE" no longer finds the article on radio waves.
+The first run matched 183 of 6,860 because Wikipedia stopped answering after the
+first thousand and the rest were taken for misses; those will be looked up
+again.
+
+## v1.0.230
+
+**`fetchStations` checks before it fetches.** It measures the copy against what
+it is for -- the whole catalog within a week, every row playable, no litter,
+every station asked, every call sign looked up -- says the report, and fetches
+only what is missing; a complete copy is left alone, and `--check` gives the
+report alone. Its log is in the project's `logs` folder and its path is said
+at the start, after a two-hour run whose log was elsewhere.
+
+## v1.0.229
+
+**RadioTrail takes the official record.** For a station with a broadcast call
+sign in its name, `fetchStations` now reads the Wikipedia infobox, which is
+kept from the licence: call_sign, frequency, city, owner, format and the
+article's link, and its opening paragraph into notes -- taken only when the
+article's own call sign is in the station's name. The catalog's tags, a
+stream's genre words and a page's keywords go to tags, one per line; prose
+goes to notes; both only ever grow.
+
+## v1.0.228
+
+**Play Stream queues marked stations**, the way FileDir queues tagged files,
+with the current one first; and the player's window is titled the way FileDir
+titles it, by the source and then by the track.
+
+## v1.0.227
+
+**RadioTrail rows read name, genre and country.** State came off the row: it
+is empty for most stations and was a "blank" spoken on every one. Tags that
+are addresses or bare numbers no longer reach the genre field.
+
+## v1.0.226
 
 **One command builds RadioTrail.** `fetchStations` with no arguments makes a
 clean copy, fetches the catalog and SomaFM, then asks every station what it

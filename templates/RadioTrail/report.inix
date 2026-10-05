@@ -1,0 +1,81 @@
+﻿; Report definitions for RadioTrail.
+;
+; Run them with Run Report (Alt+Shift+R). DbDo finds this file beside the
+; database, offers the reports below in a list, renders the chosen one over the
+; whole table, and opens it in your editor. A report reads the table, not the
+; grid, so it produces the same document however the grid is filtered.
+;
+; $field inserts a column value; {{ ... }} is a JScript expression; @filter and
+; @sort scope and order the report.
+
+FileTask = report
+
+; ---- A playlist any player opens. ----
+; Every favorite, as an M3U: save it from the editor with the .m3u extension
+; and hand it to VLC, mpv, foobar2000 or a phone. The EXTINF line carries the
+; station's name, so the player shows names and not addresses.
+[favorites_playlist]
+@filter = status = 'favorite'
+@sort = name
+header = """
+#EXTM3U
+"""
+detail = """
+#EXTINF:-1,$name
+$stream_url
+"""
+footer = """
+"""
+
+; ---- The stations you actually listen to. ----
+; Most played first, with when you last played each. Play Stream keeps the
+; count and the date; nothing else writes them.
+[most_played]
+@filter = plays <> ''
+@sort = cast(plays as integer) desc, last_played desc
+header = """
+# Most Played
+
+What RadioTrail has played, most often first. Prepared {{ new Date().toISOString().substring(0,10) }}.
+
+"""
+detail = """
+- **$name** -- $plays {{ $plays == 1 ? "play" : "plays" }}, last $last_played{{ $slogan ? ". " + $slogan : "" }}
+"""
+footer = """
+
+$count {{ $count == 1 ? "station" : "stations" }} played so far.
+"""
+
+; ---- One page per favorite, with everything known. ----
+; For reading, or for handing to someone: the slogan, where it broadcasts
+; from, what it says of itself, and its addresses. A field earns its line.
+[favorites_guide]
+@filter = status = 'favorite'
+@sort = name
+header = """
+# My Stations
+
+Prepared {{ new Date().toISOString().substring(0,10) }} from RadioTrail.
+
+"""
+detail = """
+## $name
+
+{{ $slogan ? $slogan + "\n" : "" }}
+{{ $genre ? "- Genre: " + $genre : "" }}
+{{ $city ? "- City: " + $city : ($state ? "- State: " + $state : "") }}
+{{ $country ? "- Country: " + $country : "" }}
+{{ $frequency ? "- Frequency: " + $frequency : "" }}
+{{ $owner ? "- Owner: " + $owner : "" }}
+{{ $codec ? "- Sound: " + $codec + ($bitrate ? " at " + $bitrate + " kbps" : "") : "" }}
+{{ $rating ? "- My rating: " + $rating : "" }}
+- Stream: $stream_url
+{{ $homepage ? "- Home page: " + $homepage : "" }}
+{{ $wikipedia ? "- Wikipedia: " + $wikipedia : "" }}
+{{ $notes ? "\n" + $notes : "" }}
+"""
+footer = """
+
+$count {{ $count == 1 ? "station" : "stations" }}.
+"""

@@ -140,7 +140,7 @@ rem it -- Say.onSpoken, LbcMenuItem, Elevate -- and a kit older than the source
 rem fails deep in the compiler with "Say does not contain a definition for
 rem onSpoken", which names the symptom and not the cause. So the build says the
 rem cause, first. Raise this whenever DbDo starts using something new.
-set "kitNeeded=1.51.3"
+set "kitNeeded=1.51.5"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -772,10 +772,19 @@ rem WHAT COUNTS AS BUILT: the transcript, and some audio in either form -- the
 rem one recording with chapters, or one mp3 per walk in help\tutorials.
 if not exist "help\Tutorials.md" goto :makeTutorials
 if exist "help\Tutorials.mkv" goto :haveAudio
-if exist "help\tutorials\*.mp3" goto :haveAudio
-goto :makeTutorials
+if not exist "help\tutorials\*.mp3" goto :makeTutorials
+rem EVERY WALK MUST HAVE ITS AUDIO, AND THE AUDIO MUST BE AS NEW AS THE WALK.
+rem A walk added or changed since its mp3 was spoken sends the build back to
+rem the tutorial tool by itself -- four RadioTrail walks arrived on 5 October
+rem 2026, and nobody should have to delete a folder by hand to hear them. The
+rem tool speaks only what is missing or stale, so this costs nothing when all
+rem is current.
+for %%F in (help\Tutorial_*.inix) do (
+  if not exist "help\tutorials\%%~nF.mp3" goto :makeTutorials
+  for /f %%N in ('powershell -NoProfile -Command "if ((Get-Item -LiteralPath '%%F').LastWriteTimeUtc -gt (Get-Item -LiteralPath 'help\tutorials\%%~nF.mp3').LastWriteTimeUtc) { 1 } else { 0 }"') do if "%%N"=="1" goto :makeTutorials
+)
 :haveAudio
-echo Tutorials already built; delete the audio in help to rebuild. >> "!log!"
+echo Tutorials already built and current. >> "!log!"
 goto :tutorialsDone
 :makeTutorials
 if exist "help\Tutorial_*.inix" (

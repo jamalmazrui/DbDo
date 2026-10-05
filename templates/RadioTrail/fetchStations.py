@@ -32,12 +32,47 @@
 #      two for sixty thousand; stop it at any time, and the next run carries
 #      on where it stopped, because each station is marked when it has been
 #      asked.
+#   4. What the record says: for a station with a broadcast call sign in its
+#      name -- KIRO, WNYC, CBC -- the Wikipedia article's infobox, which is
+#      kept from the licence: call sign, frequency, city of licence, owner,
+#      format, first air date, and the article's opening paragraph. Only
+#      taken when the article's own call sign appears in the station's name,
+#      so a near miss is left empty rather than filled wrong.
+#
+# WHERE EACH THING GOES. A fact most stations have is a column: call sign,
+# frequency, city, owner, format, wikipedia. Words that vary a lot -- the
+# catalog's tags, a stream's genre words, a page's keywords, the article's
+# format -- go to tags, one per line, so Filter Records and Keywords find any
+# of them. Prose -- what the station or its article says in sentences -- goes
+# to notes. Neither tags nor notes is ever emptied: lines are added, and a
+# line you wrote stays. status and rating are yours alone.
 #
 #   fetchStations                       all three steps, every station
 #   fetchStations --country "United States"   the catalog for one country only
 #   fetchStations --limit 2000          the 2,000 most voted, for a taste
 #   fetchStations --catalog-only        steps 1 and 2, no asking
 #   fetchStations --enrich-only         step 3 only, on what is there
+#   fetchStations --official-only       step 4 only, on what is there
+#   fetchStations --no-official         skip step 4
+#   fetchStations --check               the quality report alone, nothing fetched
+#   fetchStations --force               every step, whatever the check says
+#   fetchStations --import list.m3u     add the stations in a playlist -- .m3u,
+#                                       .m3u8 or .pls -- as your own, source
+#                                       "mine", keyed by name and address;
+#                                       a station already there is left alone
+#
+# STATIONS THE CATALOG HAS DROPPED. After a full catalog fetch, a Radio Browser
+# station that was not in it any more -- its stream failed the directory's
+# checks, or it was removed -- is marked dead, unless you had already set its
+# status yourself. It stays in the table, so a favorite that went quiet is
+# still yours to see and to try; Filter Records on status shows the dead ones.
+#
+# THE CHECK COMES FIRST. Before anything is fetched, the copy is measured
+# against what it is for -- comprehensive: the whole catalog, fetched within a
+# week; consistent: every row playable, no litter in genre, no duplicates
+# hiding; coherent: the parts of a record agreeing; and how many stations have
+# been asked and looked up -- and the report is said. Then only what is
+# missing is fetched. A complete copy is left alone.
 #   fetchStations --again               ask again the stations already asked
 #   fetchStations --fresh               a clean copy even if yours holds notes
 #   fetchStations path\to\other.db      another database instead of the copy
@@ -71,7 +106,7 @@
 #
 # The log is %LOCALAPPDATA%\DbDo\logs\RadioTrail-fetch-<date>-<time>.log, where
 # DbDo's own logs go: everything it did, every request, every count.
-import datetime, html, json, os, random, re, socket, sqlite3, sys, threading, time, urllib.parse, urllib.request
+import datetime, html, json, os, random, re, socket, sqlite3, sys, threading, time, urllib.error, urllib.parse, urllib.request
 
 c_sAgent = "RadioTrail/1.0 (DbDo; https://github.com/JamalMazrui/DbDo)"
 c_lsServers = ["https://de1.api.radio-browser.info", "https://fi1.api.radio-browser.info",
@@ -82,6 +117,283 @@ c_lsSomaFormats = ["mp3", "aac", "aacp"]
 c_lsSomaQuality = ["highest", "high", "low"]
 c_iProbeThreads = 40
 c_iProbeSeconds = 4
+c_sWikiApi = "https://en.wikipedia.org/w/api.php"
+# ONE REQUEST A SECOND, ONE THREAD. Wikipedia asks exactly that of a script,
+# and refuses one that does more: on 5 October 2026 six threads were answered
+# for the first thousand stations and silently refused for the next six
+# thousand, which read as "no safe match" when it was "go away". A refusal is
+# now told apart from a miss, waited out, and the station left for next time.
+c_iWikiThreads = 1
+c_dWikiPause = 1.0
+c_lsCallSignCountries = ("US", "CA")
+c_reCallSign = re.compile(r"\b([KWC][A-Z]{2,3})(?:[- ]?(AM|FM))?\b")
+
+def addLines(sHave, lsNew):
+    """Add lines to a one-per-line field, keeping every line already there."""
+    lsOut = [s for s in (sHave or "").split("\n") if s.strip()]
+    lsLow = set(s.strip().lower() for s in lsOut)
+    for s in lsNew:
+        s = (s or "").strip()
+        if s and s.lower() not in lsLow: lsOut.append(s); lsLow.add(s.lower())
+    return "\n".join(lsOut)
+
+def wikiGet(dParams):
+    dParams = dict(dParams); dParams["format"] = "json"
+    oReq = urllib.request.Request(c_sWikiApi + "?" + urllib.parse.urlencode(dParams), headers={"User-Agent": c_sAgent})
+    with urllib.request.urlopen(oReq, timeout=20) as oResp:
+        return json.loads(oResp.read().decode("utf-8"))
+
+def infoboxFields(sWikitext):
+    """The fields of a Template:Infobox radio station, lightly cleaned."""
+    m = re.search(r"\{\{\s*Infobox radio station(.*)", sWikitext, re.I | re.S)
+    if not m: return {}
+    sBody = m.group(1)
+    d = {}
+    for mm in re.finditer(r"^\s*\|\s*([a-z_ ]+?)\s*=\s*(.*?)(?=^\s*\||\Z)", sBody, re.M | re.S):
+        k = mm.group(1).strip().lower().replace(" ", "_"); v = mm.group(2)
+        v = re.sub(r"<ref[^>]*/>|<ref.*?</ref>", "", v, flags=re.S)
+        v = re.sub(r"\{\{(?:nowrap|nobr)\|([^}]*)\}\}", r"\1", v, flags=re.I)
+        v = re.sub(r"\{\{\s*Frequency\s*\|\s*([^|}]+)\s*\|\s*([^|}]+)\s*\}\}", r"\1 \2", v, flags=re.I)
+        v = re.sub(r"\{\{\s*Start date(?: and age)?\s*\|\s*(\d{4})(?:\s*\|\s*(\d{1,2}))?(?:\s*\|\s*(\d{1,2}))?[^}]*\}\}",
+                   lambda mm: mm.group(1) + ("-" + mm.group(2).zfill(2) if mm.group(2) else "") + ("-" + mm.group(3).zfill(2) if mm.group(3) else ""), v, flags=re.I)
+        v = re.sub(r"\{\{[^}]*\}\}", "", v)
+        v = re.sub(r"\[\[(?:[^|\]]*\|)?([^\]]*)\]\]", r"\1", v)
+        v = re.sub(r"<[^>]+>", " ", v)
+        v = re.sub(r"\s+", " ", v).strip(" \n}")
+        if v: d[k] = v[:200]
+    return d
+
+class WikiRefused(Exception):
+    pass
+
+def officialStation(sName):
+    """Wikipedia's infobox and opening paragraph for a station whose name
+    carries a call sign, in one request. Returns a dict; empty when no
+    article's own call sign matches. Raises WikiRefused when Wikipedia
+    answers with a refusal rather than a page, so the caller can wait."""
+    m = c_reCallSign.search(sName.upper())
+    if not m: return {}
+    sCall = m.group(1); sBand = m.group(2) or ""
+    try:
+        dPage = wikiGet({"action": "query", "generator": "search", "gsrlimit": "5",
+                         "gsrsearch": sCall + (" " + sBand if sBand else "") + " radio station",
+                         "prop": "revisions|extracts", "rvprop": "content", "rvslots": "main", "exintro": "1", "explaintext": "1"})
+    except urllib.error.HTTPError as oError:
+        if oError.code in (403, 429, 503): raise WikiRefused(str(oError.code))
+        return {}
+    except Exception:
+        return {}
+    for oPage in dPage.get("query", {}).get("pages", {}).values():
+        sTitle = oPage.get("title", "")
+        sText = ""
+        try: sText = oPage["revisions"][0]["slots"]["main"]["*"]
+        except Exception: pass
+        dBox = infoboxFields(sText)
+        if not dBox: continue
+        sBoxCall = (dBox.get("call_sign") or dBox.get("callsign") or "").upper()
+        # THE INFOBOX'S OWN CALL SIGN MUST CARRY OURS. A title alone is not
+        # enough: "WAVE" found the article on radio waves.
+        if not re.search(r"\b" + re.escape(sCall) + r"\b", sBoxCall): continue
+        d = {"wikipedia": "https://en.wikipedia.org/wiki/" + urllib.parse.quote(sTitle.replace(" ", "_")),
+             "call_sign": dBox.get("call_sign") or dBox.get("callsign") or sCall,
+             "frequency": dBox.get("frequency", ""), "city": dBox.get("city", "") or dBox.get("area", ""),
+             "owner": dBox.get("owner", ""), "format": dBox.get("format", ""),
+             "extract": (oPage.get("extract") or "").strip()[:1500], "airdate": dBox.get("airdate", "")}
+        return {k: v for k, v in d.items() if v}
+    return {}
+
+def importPlaylist(sDb, sPath, logLine, say):
+    """The stations in an .m3u, .m3u8 or .pls file, added as the listener's
+    own. A station whose name and address are already there is left alone."""
+    if not os.path.isfile(sPath):
+        say("No playlist at " + sPath); return 1
+    sText = open(sPath, "rb").read().decode("utf-8-sig", "replace").replace("\r\n", "\n")
+    lsRows = []
+    if sPath.lower().endswith(".pls"):
+        dFiles = {}; dTitles = {}
+        for m in re.finditer(r"^\s*File(\d+)\s*=\s*(\S+)", sText, re.M | re.I): dFiles[m.group(1)] = m.group(2).strip()
+        for m in re.finditer(r"^\s*Title(\d+)\s*=\s*(.+)$", sText, re.M | re.I): dTitles[m.group(1)] = m.group(2).strip()
+        for k in sorted(dFiles, key=int): lsRows.append((dTitles.get(k, dFiles[k]), dFiles[k]))
+    else:
+        sTitle = ""
+        for sLine in sText.split("\n"):
+            sLine = sLine.strip()
+            if not sLine: continue
+            if sLine.upper().startswith("#EXTINF"):
+                sTitle = sLine.split(",", 1)[1].strip() if "," in sLine else ""
+            elif sLine.startswith("#"):
+                continue
+            else:
+                lsRows.append((sTitle or sLine, sLine)); sTitle = ""
+    lsRows = [(n, u) for n, u in lsRows if u.lower().startswith("http")]
+    if not lsRows:
+        say("No stream addresses in " + os.path.basename(sPath)); return 1
+    c = sqlite3.connect(sDb)
+    iAdded = iHad = 0
+    for sName, sUrl in lsRows:
+        if c.execute("select 1 from stations where stream_url = ? or (name = ? and source = 'mine')", (sUrl, sName)).fetchone():
+            iHad += 1; continue
+        c.execute("insert into stations (name, stream_url, source, source_id, status, last_seen) values (?,?,?,?,?,?)",
+                  (sName, sUrl, "mine", "", "untried", datetime.date.today().isoformat()))
+        iAdded += 1
+        logLine("imported: %s -> %s" % (sName, sUrl))
+    c.commit(); c.close()
+    say("%d stations added from %s; %d were already here." % (iAdded, os.path.basename(sPath), iHad))
+    return 0
+
+def markDropped(sDb, sNow, logLine, say):
+    """After a full catalog fetch: a Radio Browser station not seen today is
+    dead -- unless the listener had set its status."""
+    c = sqlite3.connect(sDb)
+    iDead = c.execute("select count(*) from stations where source = 'Radio Browser' and last_seen < ? and coalesce(status,'') in ('', 'untried')", (sNow,)).fetchone()[0]
+    c.execute("update stations set status = 'dead', edited = CURRENT_TIMESTAMP where source = 'Radio Browser' and last_seen < ? and coalesce(status,'') in ('', 'untried')", (sNow,))
+    c.commit(); c.close()
+    if iDead: say("%d stations the catalog no longer lists are marked dead; they stay in the table." % iDead)
+    logLine("dropped marked dead: %d" % iDead)
+
+def assess(sDb, logLine, say):
+    """How the database measures against what it is for: comprehensive --
+    the whole catalog, recently; consistent -- every row playable, no litter;
+    coherent -- the parts agree. Says a short report and returns what is
+    still needed: catalog, enrich, official, each True or False."""
+    c = sqlite3.connect(sDb)
+    lsCols = set(r[1] for r in c.execute("pragma table_info(stations)"))
+    def q(sSql):
+        try: return c.execute(sSql).fetchone()[0] or 0
+        except Exception: return 0
+    iAll = q("select count(*) from stations")
+    iPlayable = q("select count(*) from stations where stream_url like 'http%'")
+    iDupUrl = q("select count(*) from (select stream_url from stations where stream_url <> '' group by stream_url having count(*) > 1)")
+    sLastSeen = str(q("select max(last_seen) from stations where source = 'Radio Browser'") or "")
+    iDaysOld = 999
+    try: iDaysOld = (datetime.date.today() - datetime.date.fromisoformat(sLastSeen[:10])).days
+    except Exception: pass
+    iProbed = q("select count(*) from stations where coalesce(probed,'') <> ''") if "probed" in lsCols else 0
+    iAnswered = q("select count(*) from stations where coalesce(slogan,'') <> '' or coalesce(descrip,'') <> ''") if "slogan" in lsCols else 0
+    iTags = q("select count(*) from stations where coalesce(tags,'') <> ''")
+    iNotes = q("select count(*) from stations where coalesce(notes,'') <> ''")
+    iLitterGenre = q("select count(*) from stations where genre like '%://%'")
+    iNumericName = q("select count(*) from stations where name glob '[0-9]*' and name not glob '*[a-zA-Z]*'")
+    # A STATE WITHOUT A COUNTRY IS REPAIRED FROM THE CODE. The catalog gives a
+    # country code for nearly every station, and the catalog itself says what
+    # each code's country is called: the name most of that code's stations
+    # carry. A record with a code and no name gets the name, and the check's
+    # own number for this goes down instead of being reported every time.
+    try:
+        dCode = {}
+        for sCode, sName, iCount in c.execute("select countrycode, country, count(*) from stations where coalesce(countrycode,'') <> '' and coalesce(country,'') <> '' group by countrycode, country order by count(*)"):
+            dCode[sCode] = sName  # the last row for a code is its most common name
+        iRepaired = 0
+        for iId, sCode in c.execute("select station_id, countrycode from stations where coalesce(country,'') = '' and coalesce(countrycode,'') <> ''").fetchall():
+            if sCode in dCode:
+                c.execute("update stations set country = ? where station_id = ?", (dCode[sCode], iId)); iRepaired += 1
+        if iRepaired: c.commit(); say("  %d stations had a country code and no country name; the name is filled in from the code." % iRepaired)
+    except Exception as oError:
+        logLine("country repair skipped: " + str(oError))
+    iStateNoCountry = q("select count(*) from stations where coalesce(state,'') <> '' and coalesce(country,'') = ''")
+    lsCall = []; iOfficial = 0; iCallNames = 0; iDash = 0
+    if "call_sign" in lsCols:
+        for r in c.execute("select name, coalesce(wikipedia,'') from stations where stream_url <> '' and countrycode in ('US','CA')"):
+            if c_reCallSign.search((r[0] or "").upper()):
+                iCallNames += 1
+                if r[1] == "": lsCall.append(r[0])
+                elif r[1] == "-": iDash += 1
+                else: iOfficial += 1
+        # MARKS FROM A REFUSED RUN ARE NOT MISSES. The run of 5 October 2026
+        # was refused by Wikipedia after its first thousand questions and
+        # marked the rest as unmatched. When nearly every looked-up station is
+        # marked unmatched, that is a refusal's signature, not the record's:
+        # the marks are cleared and those stations asked about again.
+        if iDash > 0 and iOfficial * 10 < iDash:
+            c.execute("update stations set wikipedia = '' where wikipedia = '-' and countrycode in ('US','CA')")
+            c.commit()
+            say("  %d stations marked unmatched by a run Wikipedia refused; they will be looked up again." % iDash)
+            lsCall.extend([None] * iDash); iDash = 0
+    c.close()
+    def pct(a, b): return "%d%%" % (100 * a // b) if b else "0%"
+    say("Quality check of " + os.path.basename(sDb) + ":")
+    say("  Comprehensive: %d stations, catalog last fetched %s (%s)." % (iAll, sLastSeen[:10] or "never", ("%d days ago" % iDaysOld) if iDaysOld < 999 else "unknown"))
+    say("  Consistent: %s playable (%d); %d stream addresses shared by more than one station; %d genres with litter; %d names that are only numbers." % (pct(iPlayable, iAll), iPlayable, iDupUrl, iLitterGenre, iNumericName))
+    say("  Coherent: %d stations with a state but no country." % iStateNoCountry)
+    say("  What the stations say: %s asked (%d), %s answered (%d); %s with tags, %s with notes." % (pct(iProbed, iAll), iProbed, pct(iAnswered, iAll), iAnswered, pct(iTags, iAll), pct(iNotes, iAll)))
+    say("  Official record: %d US and Canadian names carry a call sign; %d have their record; %d found no article; %d not yet looked up." % (iCallNames, iOfficial, iDash, len(lsCall)))
+    bCatalog = iAll < 1000 or iDaysOld > 7
+    bEnrich = (iAll - iProbed) > 0
+    bOfficial = len(lsCall) > 0
+    lsNeed = [s for s, b in (("the catalog", bCatalog), ("asking %d stations" % (iAll - iProbed), bEnrich), ("%d official records" % len(lsCall), bOfficial)) if b]
+    say("  Needed: " + (", ".join(lsNeed) if lsNeed else "nothing. The database is as complete as its sources allow."))
+    return {"catalog": bCatalog, "enrich": bEnrich, "official": bOfficial, "count": iAll}
+
+def official(sDb, sCountry, iLimit, bAgain, logLine, say):
+    """Step 4: the record behind the name, from Wikipedia's infobox."""
+    c = sqlite3.connect(sDb)
+    c.execute("PRAGMA journal_mode=WAL")
+    lsCols = set(r[1] for r in c.execute("pragma table_info(stations)"))
+    if "call_sign" not in lsCols:
+        say("This copy has no columns for the official record. Run fetchStations --fresh first."); c.close(); return 1
+    sWhere = "stream_url <> ''"
+    lsArgs = []
+    if not bAgain: sWhere += " and (wikipedia is null or wikipedia = '')"
+    if sCountry: sWhere += " and country = ?"; lsArgs.append(sCountry)
+    # Call signs are a North American habit in station names; a "KISS FM" in
+    # Hamburg is not a licence. Only United States and Canadian stations are
+    # looked up.
+    sWhere += " and countrycode in ('US', 'CA')"
+    lsRows = [r for r in c.execute("select station_id, name, notes, tags from stations where " + sWhere + " order by cast(votes as integer) desc", lsArgs)
+              if c_reCallSign.search((r[1] or "").upper())]
+    if iLimit: lsRows = lsRows[:iLimit]
+    if not lsRows:
+        say("No station here with a call sign in its name is still unlooked-up."); c.close(); return 0
+    say("Looking up %d stations with a call sign in their name on Wikipedia, one a second as it asks. About %d minutes; stop any time and the next run carries on." % (len(lsRows), max(1, len(lsRows) * 11 // 10 // 60)))
+    oLock = threading.Lock(); lsOut = []; lsQueue = list(lsRows); iWritten = [0]; iFilled = [0]; bRefused = [False]
+    def flush():
+        with oLock:
+            lsBatch = list(lsOut); del lsOut[:]
+        for r, d in lsBatch:
+            iId, sNotes, sTags = r[0], r[2] or "", r[3] or ""
+            if d:
+                iFilled[0] += 1
+                lsTagNew = [s.strip() for s in re.split(r"[,/;]", d.get("format", "")) if s.strip()]
+                sNotesNew = sNotes
+                if d.get("extract") and d["extract"][:60].lower() not in sNotes.lower():
+                    sNotesNew = (sNotes + "\n\n" if sNotes else "") + d["extract"]
+                c.execute("update stations set call_sign=?, frequency=?, city=?, owner=?, format=?, wikipedia=?, tags=?, notes=?, edited=CURRENT_TIMESTAMP where station_id=?",
+                          (d.get("call_sign",""), d.get("frequency",""), d.get("city",""), d.get("owner",""), d.get("format",""), d.get("wikipedia",""),
+                           addLines(sTags, lsTagNew), sNotesNew, iId))
+            elif d is not None:
+                c.execute("update stations set wikipedia='-' where station_id=?", (iId,))
+            logLine("official %d %s: %s" % (iId, (r[1] or "")[:40], "; ".join("%s=%s" % (k, str(v)[:60]) for k, v in d.items()) if d else ("refused, left for next time" if d is None else "no safe match")))
+            iWritten[0] += 1
+        if lsBatch: c.commit()
+    def worker():
+        while True:
+            with oLock:
+                if not lsQueue: return
+                r = lsQueue.pop()
+            try:
+                d = officialStation(r[1] or "")
+            except WikiRefused:
+                d = None
+                time.sleep(60)
+                with oLock: bRefused[0] = True
+            with oLock: lsOut.append((r, d))
+            time.sleep(c_dWikiPause)
+    lsThreads = [threading.Thread(target=worker, daemon=True) for _ in range(c_iWikiThreads)]
+    for o in lsThreads: o.start()
+    iSaid = 0
+    try:
+        while any(o.is_alive() for o in lsThreads):
+            time.sleep(5); flush()
+            if iWritten[0] - iSaid >= 200: say("  %d of %d" % (iWritten[0], len(lsRows))); iSaid = iWritten[0]
+        flush()
+    except KeyboardInterrupt:
+        with oLock: del lsQueue[:]
+        flush(); c.close()
+        say("Stopped after %d stations; what was found is kept. Run fetchStations again to carry on." % iWritten[0]); return 0
+    c.close()
+    say("%d stations have their record from Wikipedia; %d had no safe match and were left as they were." % (iFilled[0], iWritten[0] - iFilled[0]))
+    if bRefused[0]: say("Wikipedia refused some requests; those stations were left for the next run.")
+    return 0
 
 def probeStation(sUrl, sHomepage):
     """What one station says about itself: ICY headers off its stream, and the
@@ -111,6 +423,8 @@ def probeStation(sUrl, sHomepage):
             m = re.search(r'<meta[^>]+(?:name|property)=["\'](?:description|og:description)["\'][^>]+content=["\']([^"\']{3,500})', sHtml, re.I)
             if not m: m = re.search(r'<meta[^>]+content=["\']([^"\']{3,500})["\'][^>]+(?:name|property)=["\'](?:description|og:description)', sHtml, re.I)
             if m: d["page_description"] = html.unescape(re.sub(r"\s+", " ", m.group(1))).strip()
+            m = re.search(r'<meta[^>]+name=["\']keywords["\'][^>]+content=["\']([^"\']{3,500})', sHtml, re.I)
+            if m: d["page_keywords"] = html.unescape(m.group(1)).strip()
         except Exception:
             pass
     return d
@@ -128,7 +442,7 @@ def enrich(sDb, sCountry, iLimit, bAgain, logLine, say):
     lsArgs = []
     if not bAgain: sWhere += " and (probed is null or probed = '')"
     if sCountry: sWhere += " and country = ?"; lsArgs.append(sCountry)
-    sSql = "select station_id, stream_url, homepage, genre, slogan, descrip from stations where " + sWhere + " order by cast(votes as integer) desc"
+    sSql = "select station_id, stream_url, homepage, genre, slogan, descrip, tags, notes from stations where " + sWhere + " order by cast(votes as integer) desc"
     if iLimit: sSql += " limit %d" % iLimit
     lsRows = c.execute(sSql, lsArgs).fetchall()
     if not lsRows:
@@ -143,7 +457,7 @@ def enrich(sDb, sCountry, iLimit, bAgain, logLine, say):
         with oLock:
             lsBatch = list(lsOut); del lsOut[:]
         for r, d in lsBatch:
-            iId, sGenre, sSlogan, sDescrip = r[0], r[3] or "", r[4] or "", r[5] or ""
+            iId, sGenre, sSlogan, sDescrip, sTags, sNotes = r[0], r[3] or "", r[4] or "", r[5] or "", r[6] or "", r[7] or ""
             lsParts = []
             for k in ("icy_description", "page_title", "page_description"):
                 v = d.get(k, "")
@@ -157,7 +471,13 @@ def enrich(sDb, sCountry, iLimit, bAgain, logLine, say):
                 if sWord and sWord not in sGenreNew.lower(): sGenreNew = (sGenreNew + ", " if sGenreNew else "") + sWord
             if d: iFilled[0] += 1
             logLine("probe %d: %s" % (iId, "; ".join("%s=%s" % (k, v[:80]) for k, v in d.items()) or "nothing"))
-            c.execute("update stations set slogan=?, descrip=?, genre=?, probed=?, edited=CURRENT_TIMESTAMP where station_id=?", (sSloganNew, sDescripNew, sGenreNew, sNow, iId))
+            lsTagNew = [w.strip().lower() for w in re.split(r"[,/;|]", d.get("icy_genre", "")) if w.strip()]
+            lsTagNew += [w.strip() for w in re.split(r"[,;]", d.get("page_keywords", "")) if w.strip() and len(w.strip()) <= 40][:20]
+            sNotesNew = sNotes
+            sProse = d.get("page_description", "")
+            if sProse and sProse[:60].lower() not in sNotes.lower(): sNotesNew = (sNotes + "\n\n" if sNotes else "") + sProse
+            c.execute("update stations set slogan=?, descrip=?, genre=?, tags=?, notes=?, probed=?, edited=CURRENT_TIMESTAMP where station_id=?",
+                      (sSloganNew, sDescripNew, sGenreNew, addLines(sTags, lsTagNew), sNotesNew, sNow, iId))
             iWritten[0] += 1
         if lsBatch: c.commit()
     def worker():
@@ -262,6 +582,11 @@ def main():
     iLimit = 0
     bCatalogOnly = False
     bEnrichOnly = False
+    bOfficialOnly = False
+    bNoOfficial = False
+    bReportOnly = False
+    bForce = False
+    sImport = ""
     bAgain = False
     bFresh = False
     i = 0
@@ -272,16 +597,91 @@ def main():
         if sArg == "--source" and i + 1 < len(lsArgs): sSource = lsArgs[i + 1].lower(); i += 2; continue
         if sArg in ("--catalog-only", "--no-enrich"): bCatalogOnly = True; i += 1; continue
         if sArg in ("--enrich-only", "--enrich"): bEnrichOnly = True; i += 1; continue
+        if sArg == "--official-only": bOfficialOnly = True; i += 1; continue
+        if sArg == "--no-official": bNoOfficial = True; i += 1; continue
+        if sArg in ("--report-only", "--check"): bReportOnly = True; i += 1; continue
+        if sArg == "--force": bForce = True; i += 1; continue
+        if sArg == "--import" and i + 1 < len(lsArgs): sImport = lsArgs[i + 1]; i += 2; continue
         if sArg == "--fresh": bFresh = True; i += 1; continue
         if sArg == "--again": bAgain = True; i += 1; continue
         if sArg.startswith("-"): i += 1; continue
         sDb = sArg; i += 1
     if not sDb:
         sDb = os.path.join(os.environ.get("LOCALAPPDATA", ""), "DbDo", "data", "RadioTrail", "RadioTrail.db")
+    if not os.path.isfile(sDb):
+        # NO COPY YET? MAKE ONE. DbDo copies the templates into its data
+        # folder the first time Template Databases is opened, and a person who
+        # builds and runs this script first has not opened it yet. The
+        # template is beside this script, so the script makes the copy itself
+        # rather than sending the person away to do a step and come back.
+        sTemplate = os.path.join(os.path.dirname(os.path.abspath(__file__)), "RadioTrail.db")
+        if os.path.isfile(sTemplate):
+            os.makedirs(os.path.dirname(sDb), exist_ok=True)
+            import shutil
+            shutil.copy2(sTemplate, sDb)
+            for sSide in ("RadioTrail.inix",):
+                sSrc = os.path.join(os.path.dirname(sTemplate), sSide)
+                if os.path.isfile(sSrc): shutil.copy2(sSrc, os.path.join(os.path.dirname(sDb), sSide))
+            print("Made your copy of RadioTrail at " + sDb)
+        else:
+            print("No database at " + sDb + ", and no RadioTrail.db beside this script to copy. Name a database.")
+            return 1
+    # THE LOG GOES IN THE PROJECT'S logs FOLDER when the script runs from a
+    # project -- C:\DbDo\logs, two levels above templates\RadioTrail -- because
+    # that is where every other Homer log of the project is gathered from. When
+    # the script runs from an installed copy, whose folder is not writable, the
+    # log goes with the program's own under %LOCALAPPDATA%\DbDo\logs. Either way
+    # the path is said FIRST, so nobody finishes a two-hour run and then looks
+    # for a file that was somewhere else all along (5 October 2026).
+    sProject = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
+    sLogDir = os.path.join(sProject, "logs")
+    try:
+        os.makedirs(sLogDir, exist_ok=True)
+        sProbe = os.path.join(sLogDir, ".write-test"); open(sProbe, "w").close(); os.remove(sProbe)
+    except Exception:
+        sLogDir = os.path.join(os.environ.get("LOCALAPPDATA", ""), "DbDo", "logs")
+    os.makedirs(sLogDir, exist_ok=True)
+    sLog = os.path.join(sLogDir, "RadioTrail-fetch-" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".log")
+    oLog = open(sLog, "w", encoding="utf-8")
+    def logLine(s): oLog.write(s + "\n"); oLog.flush()
+    def say(s): print(s); logLine("CONSOLE: " + s)
+    print("Log: " + sLog)
+    logLine("fetchStations started " + datetime.datetime.now().isoformat())
+    logLine("Script: " + os.path.abspath(__file__) + " | Python " + sys.version.split()[0] + " | " + sys.platform)
+    logLine("Database: " + sDb + " | source: " + sSource + " | country: " + (sCountry or "(all)") + " | limit: " + str(iLimit or "(none)"))
+
+    if sImport:
+        iCode = importPlaylist(sDb, sImport, logLine, say)
+        say("The log is " + sLog); logLine("finished " + datetime.datetime.now().isoformat()); return iCode
+    if bOfficialOnly:
+        iCode = official(sDb, sCountry, iLimit, bAgain, logLine, say)
+        say("The log is " + sLog); logLine("finished " + datetime.datetime.now().isoformat()); return iCode
+    if bEnrichOnly:
+        iCode = enrich(sDb, sCountry, iLimit, bAgain, logLine, say)
+        say("The log is " + sLog); logLine("finished " + datetime.datetime.now().isoformat()); return iCode
+    # THE CHECK COMES FIRST, AND FETCHING FOLLOWS ONLY WHERE IT SAYS. A copy
+    # that already holds the whole catalog, recently fetched, every station
+    # asked and every call sign looked up, needs nothing; one that is partly
+    # done gets the parts it lacks; --force runs everything regardless.
+    dNeed = assess(sDb, logLine, say)
+    if bReportOnly:
+        if dNeed["catalog"] or dNeed["enrich"] or dNeed["official"]:
+            say("This was the report only. To fetch what is needed, run fetchStations with no arguments.")
+        say("The log is " + sLog); logLine("finished " + datetime.datetime.now().isoformat()); return 0
+    if not bForce and not dNeed["catalog"]:
+        say("The catalog is current; skipping to what is still needed.")
+        iCode = 0
+        if dNeed["enrich"]:
+            say("Asking the stations not yet asked.")
+            iCode = enrich(sDb, sCountry, 0, bAgain, logLine, say)
+        if iCode == 0 and dNeed["official"] and not bNoOfficial:
+            say("Looking up the call signs not yet looked up.")
+            iCode = official(sDb, sCountry, 0, bAgain, logLine, say)
+        say("The log is " + sLog); logLine("finished " + datetime.datetime.now().isoformat()); return iCode
     # A COPY NOBODY HAS MARKED UP IS REPLACED, not merged: a clean start gives
     # every field the template has. One with a status, a rating, a note or a
     # tag in it is yours, and is refreshed in place.
-    if not bFresh and not bEnrichOnly and os.path.isfile(sDb):
+    if not bFresh and os.path.isfile(sDb):
         try:
             cPeek = sqlite3.connect(sDb)
             iMine = cPeek.execute("select count(*) from stations where (status is not null and status not in ('', 'untried')) or coalesce(rating,'') <> '' or coalesce(notes,'') <> '' or coalesce(tags,'') <> ''").fetchone()[0]
@@ -303,42 +703,8 @@ def main():
             print("The old copy is now " + sOld)
         except Exception as oError:
             print("Could not set the old copy aside: " + str(oError)); return 1
-    if not os.path.isfile(sDb):
-        # NO COPY YET? MAKE ONE. DbDo copies the templates into its data
-        # folder the first time Template Databases is opened, and a person who
-        # builds and runs this script first has not opened it yet. The
-        # template is beside this script, so the script makes the copy itself
-        # rather than sending the person away to do a step and come back.
-        sTemplate = os.path.join(os.path.dirname(os.path.abspath(__file__)), "RadioTrail.db")
-        if os.path.isfile(sTemplate):
-            os.makedirs(os.path.dirname(sDb), exist_ok=True)
-            import shutil
-            shutil.copy2(sTemplate, sDb)
-            for sSide in ("RadioTrail.inix",):
-                sSrc = os.path.join(os.path.dirname(sTemplate), sSide)
-                if os.path.isfile(sSrc): shutil.copy2(sSrc, os.path.join(os.path.dirname(sDb), sSide))
-            print("Made your copy of RadioTrail at " + sDb)
-        else:
-            print("No database at " + sDb + ", and no RadioTrail.db beside this script to copy. Name a database.")
-            return 1
-    # THE LOG GOES WHERE THE PROGRAM'S LOGS GO: %LOCALAPPDATA%\DbDo\logs, beside
-    # the data folder, not inside it. The first version wrote into data\logs,
-    # which is where nobody looks.
-    sLogDir = os.path.join(os.environ.get("LOCALAPPDATA", ""), "DbDo", "logs")
-    os.makedirs(sLogDir, exist_ok=True)
-    sLog = os.path.join(sLogDir, "RadioTrail-fetch-" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".log")
-    oLog = open(sLog, "w", encoding="utf-8")
-    def logLine(s): oLog.write(s + "\n"); oLog.flush()
-    def say(s): print(s); logLine("CONSOLE: " + s)
-    logLine("fetchStations started " + datetime.datetime.now().isoformat())
-    logLine("Script: " + os.path.abspath(__file__) + " | Python " + sys.version.split()[0] + " | " + sys.platform)
-    logLine("Database: " + sDb + " | source: " + sSource + " | country: " + (sCountry or "(all)") + " | limit: " + str(iLimit or "(none)"))
-
-    if bEnrichOnly:
-        iCode = enrich(sDb, sCountry, iLimit, bAgain, logLine, say)
-        say("The log is " + sLog); logLine("finished " + datetime.datetime.now().isoformat()); return iCode
-    say("Step 1 of 3: the copy is " + ("fresh from the template." if bFresh else "in place."))
-    say("Step 2 of 3: the catalog.")
+    say("Step 1 of 4: the copy is " + ("fresh from the template." if bFresh else "in place."))
+    say("Step 2 of 4: the catalog.")
 
     # ---- fetch ----
     lsStations = []
@@ -351,7 +717,9 @@ def main():
     if sSource == "somafm":
         iCode = mergeRows(sDb, lsRows, logLine, say, sLog)
         if iCode != 0 or bCatalogOnly: return iCode
-        return enrich(sDb, sCountry, 0, bAgain, logLine, say)
+        iCode = enrich(sDb, sCountry, 0, bAgain, logLine, say)
+        if iCode != 0 or bNoOfficial: return iCode
+        return official(sDb, sCountry, 0, bAgain, logLine, say)
     sServer = ""
     for sTry in resolveMirrors(logLine):
         try:
@@ -405,7 +773,10 @@ def main():
             "country": (d.get("country") or "").strip(),
             "state": (d.get("state") or "").strip(),
             "language": (d.get("language") or "").strip(),
-            "genre": ", ".join(s.strip() for s in (d.get("tags") or "").split(",") if s.strip()),
+            # A tag that is an address, a number alone, or longer than a phrase
+            # is catalog litter, not a genre; it stays out of the row.
+            "genre": ", ".join(s.strip() for s in (d.get("tags") or "").split(",")
+                               if s.strip() and "://" not in s and not s.strip().replace(".", "").isdigit() and len(s.strip()) <= 40),
             "codec": (d.get("codec") or "").strip(),
             "bitrate": str(d.get("bitrate") or ""),
             "votes": str(d.get("votes") or ""),
@@ -416,11 +787,17 @@ def main():
             "last_check": (d.get("lastchecktime_iso8601") or d.get("lastchecktime") or "")[:10],
             "source": "Radio Browser",
             "source_id": sUuid,
+            "tags": "\n".join(s.strip() for s in (d.get("tags") or "").split(",") if s.strip() and "://" not in s and len(s.strip()) <= 40),
         })
     iCode = mergeRows(sDb, lsRows, logLine, say, sLog)
+    if iCode == 0 and not sCountry and not iLimit and sSource in ("all", "radiobrowser"):
+        markDropped(sDb, datetime.date.today().strftime("%Y-%m-%d"), logLine, say)
     if iCode != 0 or bCatalogOnly: return iCode
-    say("Step 3 of 3: asking each station what it says about itself. Stop at any time; the next run carries on.")
-    return enrich(sDb, sCountry, 0, bAgain, logLine, say)
+    say("Step 3 of 4: asking each station what it says about itself. Stop at any time; the next run carries on.")
+    iCode = enrich(sDb, sCountry, 0, bAgain, logLine, say)
+    if iCode != 0 or bNoOfficial: return iCode
+    say("Step 4 of 4: the official record, from Wikipedia, for stations with a call sign in their name.")
+    return official(sDb, sCountry, 0, bAgain, logLine, say)
 
 def mergeRows(sDb, lsRows, logLine, say, sLog):
     """Keyed by the source's own id, rewriting every catalog field and never
@@ -455,8 +832,15 @@ def mergeRows(sDb, lsRows, logLine, say, sLog):
         dRow["last_seen"] = sNow
         # The listener's fields are never in an update, whatever a source
         # handed over: the rule is enforced here, not trusted upstream.
-        lsTheirs = ("status", "rating", "notes", "tags")
+        lsTheirs = ("status", "rating", "notes")
         for sTheirs in lsTheirs: dRow.pop(sTheirs, None)
+        if "tags" in dRow:
+            sTagsNew = dRow.pop("tags")
+            if sKey in dHave:
+                sHave = (c.execute("select tags from stations where station_id = ?", (dHave[sKey],)).fetchone() or [""])[0]
+                c.execute("update stations set tags = ? where station_id = ?", (addLines(sHave, sTagsNew.split("\n")), dHave[sKey]))
+            else:
+                dRow["tags"] = sTagsNew
         # What --enrich learned is kept across a catalog refresh too: the
         # catalog never had a slogan or a description to overwrite them with,
         # and its genre is merged into what the probe added rather than
