@@ -4,7 +4,22 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.235 (current)
+## v1.0.236 (current)
+
+**The walks take the Homer pattern of eleven.** 00 Overview and Table of
+Contents, 01 Install and Launch, 02 User Interface Concepts, 03 Key Patterns,
+then five tasks -- 04 Open and Move Through a Database, 05 Add, Inspect and Edit
+Records, 06 Find, Order and Select, 07 Related, Marked, Reports and a Work
+Search Record, 08 RadioTrail -- then 09 Glossary, 10 Conclusion and 11 More
+Information. The nineteen earlier walks were regrouped into these, nothing
+dropped; three were written new: the interface, the key rules, and a glossary
+of twenty-three terms in which the host says the term and the reader says what
+it means. Every walk's closing recap is two voices the same way: the host says
+the key, the reader says the command. The audio is named like a
+chapter, 04_Open_and_Move_Through_a_Database.mp3. The build retires the old
+scripts and audio and speaks the new set. Needs HomerDev 1.52.0.
+
+## v1.0.235
 
 **Record a station**: Alt+Shift+R in the Homer Player starts and stops a copy
 of the stream, kept in Music, Homer Player. Needs HomerDev 1.51.5.

@@ -54,7 +54,7 @@
 #   fetchStations --enrich-only         step 3 only, on what is there
 #   fetchStations --official-only       step 4 only, on what is there
 #   fetchStations --no-official         skip step 4
-#   fetchStations --check               the quality report alone, nothing fetched
+#   fetchStations --report              the quality report alone, nothing fetched
 #   fetchStations --force               every step, whatever the check says
 #   fetchStations --import list.m3u     add the stations in a playlist -- .m3u,
 #                                       .m3u8 or .pls -- as your own, source
@@ -599,7 +599,7 @@ def main():
         if sArg in ("--enrich-only", "--enrich"): bEnrichOnly = True; i += 1; continue
         if sArg == "--official-only": bOfficialOnly = True; i += 1; continue
         if sArg == "--no-official": bNoOfficial = True; i += 1; continue
-        if sArg in ("--report-only", "--check"): bReportOnly = True; i += 1; continue
+        if sArg in ("--report", "--report-only"): bReportOnly = True; i += 1; continue
         if sArg == "--force": bForce = True; i += 1; continue
         if sArg == "--import" and i + 1 < len(lsArgs): sImport = lsArgs[i + 1]; i += 2; continue
         if sArg == "--fresh": bFresh = True; i += 1; continue
@@ -677,6 +677,9 @@ def main():
         if iCode == 0 and dNeed["official"] and not bNoOfficial:
             say("Looking up the call signs not yet looked up.")
             iCode = official(sDb, sCountry, 0, bAgain, logLine, say)
+        if iCode == 0 and (dNeed["enrich"] or dNeed["official"]):
+            say("Done. The report afterwards:")
+            assess(sDb, logLine, say)
         say("The log is " + sLog); logLine("finished " + datetime.datetime.now().isoformat()); return iCode
     # A COPY NOBODY HAS MARKED UP IS REPLACED, not merged: a clean start gives
     # every field the template has. One with a status, a rating, a note or a
@@ -797,7 +800,11 @@ def main():
     iCode = enrich(sDb, sCountry, 0, bAgain, logLine, say)
     if iCode != 0 or bNoOfficial: return iCode
     say("Step 4 of 4: the official record, from Wikipedia, for stations with a call sign in their name.")
-    return official(sDb, sCountry, 0, bAgain, logLine, say)
+    iCode = official(sDb, sCountry, 0, bAgain, logLine, say)
+    if iCode == 0:
+        say("Done. The report afterwards:")
+        assess(sDb, logLine, say)
+    return iCode
 
 def mergeRows(sDb, lsRows, logLine, say, sLog):
     """Keyed by the source's own id, rewriting every catalog field and never

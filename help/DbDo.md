@@ -916,8 +916,8 @@ Fourteen stations are in the template to start. To build the real thing, run
 **`fetchStations`** in the template's folder, `templates\RadioTrail`. It begins
 by measuring what is there -- how many stations, how recent the catalog, how
 many are playable, asked, looked up -- and says so; then it fetches only what
-is missing, and leaves a complete copy alone. `fetchStations --check` gives the
-report by itself. Its log is named first thing, in the project's `logs`
+is missing, and leaves a complete copy alone. `fetchStations --report` gives the
+report by itself, and fetches nothing. Its log is named first thing, in the project's `logs`
 folder. From nothing, one command does four things: a clean copy from the template; the whole catalog --
 some sixty thousand working stations from Radio Browser, a volunteer-kept public
 directory, plus SomaFM's channels, a minute; each station asked what it says
@@ -957,65 +957,19 @@ fields arrive. Once you have set a **status** or a **rating**, or written in
 rating are never written by the script, and notes and tags are only added to. `fetchStations --country "United States"` keeps a run to
 one country; `--catalog-only` skips the asking; `--enrich-only` does only that.
 
-#### Four spoken walks
+#### The spoken walks
 
-Walks 15 to 18 of the tutorials -- Help menu, Play Tutorials -- are RadioTrail's:
-opening it and reading a row; finding a station with Keywords and Filter
-Records; playing one, and several, in the Homer Player; and marking favorites,
-rating, writing notes, and what a refresh leaves alone. The walks that belong
-to a database live beside the program's walks in `help`, numbered after them,
-with the database's name in the title; the database's own files -- its
-settings, its scripts -- live in its template folder.
-
-#### Reports, playlists and what you listened to
-
-Run Report, Alt+Shift+R, offers three reports for RadioTrail. **Favorites
-playlist** writes your favorites as an M3U: save it from the editor with the
-.m3u extension and hand it to any player or a phone. **Most played** lists the
-stations you have played, most often first, with the date you last played each
--- Play Stream keeps the count and the date in the **plays** and
-**last_played** fields, so Order Records on last_played is your recent list.
-**My stations** is one page per favorite with everything known about it.
-
-To bring in a playlist of your own, `fetchStations --import list.m3u` adds
-its stations as yours, source "mine"; .m3u8 and .pls work too. After each
-full fetch, a station the catalog no longer lists is marked **dead** unless you
-had set its status yourself; it stays in the table, so a favorite that went
-quiet is still there to try.
-
-When you play a station from the catalog, DbDo tells Radio Browser so, in the
-background, which is how that directory learns what people listen to.
-
-#### What RadioTrail took from Quill Radio, and what it left
-
-Quill Radio's features were read one by one and sorted three ways: useful,
-clever, or for a small circle of radio enthusiasts; and each useful one asked
-whether it fits a database program under the Homer rules.
-
-Taken, because a database does them well: a favorites list and the filter that
-shows it; a playlist in and out; the stations you played, counted and dated;
-dead stations marked and kept; the catalog's health reported before anything is
-fetched; a search across every field; the station's own words and its licence
-record in the table; the click registered with the directory.
-
-Left to the player, because that is where they belong: pause, rewind of live
-radio, volume boost, a sleep timer. The Homer Player is shared with FileDir,
-and these are its to gain, once, for every app. **Recording** it has gained:
-a Record button and a Stop recording button beside Stop playback, each
-available only when it applies, and Alt+Shift+R, which does whichever applies
-from anywhere in the player, the way Scroll Lock does for playing. The stream
-is written as it arrives to Music, Homer Player, named for the station and the
-time; a copy, nothing more -- enough to keep a programme for later. Audio meant
-for others is made in a studio program, not here.
-
-Left aside, as clever or for the enthusiast: a wake-up timer, quiet hours,
-reminders for programmes, listening statistics beyond a count, YouTube and
-Spotify, video and captions, a system tray, global hotkeys, a command palette,
-sound enhancements. Each would be a window and a key for a thing a database
-is not for.
-
-Worth a second look later: the ACB Media programme schedule and NOAA weather
-radio by place -- both small, both of real use to the people RadioTrail is for.
+Every Homer program has twelve spoken walks, Help menu, Play Tutorials, in the
+same order: 00 overview and table of contents; 01 install and launch; 02 what
+the screen is made of; 03 the rules every key follows; 04 to 08 up to five
+tasks; 09 a glossary, where one voice says the term and the other says what it
+means; 10 a conclusion; 11 where the rest is. DbDo's five tasks are opening and moving
+through a database; adding, inspecting and editing records; finding, ordering
+and choosing columns; related and marked records, reports and a work search
+record; and RadioTrail, walk 08 -- opening it and reading a row, finding a
+station by what it says of itself, playing one and several, recording, and
+keeping favorites. The walks' scripts live in `help`; a database's own files --
+its settings, its scripts -- live in its template folder.
 
 #### Where RadioTrail's data and design come from
 

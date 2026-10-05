@@ -7,6 +7,9 @@
   <title>History</title>
   <style>
     html {
+      line-height: 1.5;
+      font-family: Georgia, serif;
+      font-size: 20px;
       color: #1a1a1a;
       background-color: #fdfdfd;
     }
@@ -25,16 +28,13 @@
     @media (max-width: 600px) {
       body {
         font-size: 0.9em;
-        padding: 12px;
+        padding: 1em;
       }
       h1 {
         font-size: 1.8em;
       }
     }
     @media print {
-      html {
-        background-color: white;
-      }
       body {
         background-color: transparent;
         color: black;
@@ -84,10 +84,9 @@
       color: #606060;
     }
     code {
-      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
       font-size: 85%;
       margin: 0;
-      hyphens: manual;
     }
     pre {
       margin: 1em 0;
@@ -152,19 +151,14 @@
     div.columns{display: flex; gap: min(4vw, 1.5em);}
     div.column{flex: auto; overflow-x: auto;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    /* The extra [class] is a hack that increases specificity enough to
-       override a similar rule in reveal.js */
-    ul.task-list[class]{list-style: none;}
+    ul.task-list{list-style: none;}
     ul.task-list li input[type="checkbox"] {
-      font-size: inherit;
       width: 0.8em;
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
-    /* CSS for syntax highlighting */
     pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { line-height: 1.25; }
+    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
     pre > code.sourceCode > span:empty { height: 1.2em; }
     .sourceCode { overflow: visible; }
     code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -226,7 +220,11 @@
     code span.va { color: #19177c; } /* Variable */
     code span.vs { color: #4070a0; } /* VerbatimString */
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
+  <!--[if lt IE 9]>
+    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
+  <![endif]-->
 </head>
 <body>
 <header id="title-block-header">
@@ -237,8 +235,9 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
-<li><a href="#v1.0.235-current" id="toc-v1.0.235-current">v1.0.235
+<li><a href="#v1.0.236-current" id="toc-v1.0.236-current">v1.0.236
 (current)</a></li>
+<li><a href="#v1.0.235" id="toc-v1.0.235">v1.0.235</a></li>
 <li><a href="#v1.0.234" id="toc-v1.0.234">v1.0.234</a></li>
 <li><a href="#v1.0.233" id="toc-v1.0.233">v1.0.233</a></li>
 <li><a href="#v1.0.232" id="toc-v1.0.232">v1.0.232</a></li>
@@ -381,7 +380,22 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
-<h2 id="v1.0.235-current">v1.0.235 (current)</h2>
+<h2 id="v1.0.236-current">v1.0.236 (current)</h2>
+<p><strong>The walks take the Homer pattern of eleven.</strong> 00
+Overview and Table of Contents, 01 Install and Launch, 02 User Interface
+Concepts, 03 Key Patterns, then five tasks – 04 Open and Move Through a
+Database, 05 Add, Inspect and Edit Records, 06 Find, Order and Select,
+07 Related, Marked, Reports and a Work Search Record, 08 RadioTrail –
+then 09 Glossary, 10 Conclusion and 11 More Information. The nineteen
+earlier walks were regrouped into these, nothing dropped; three were
+written new: the interface, the key rules, and a glossary of
+twenty-three terms in which the host says the term and the reader says
+what it means. Every walk’s closing recap is two voices the same way:
+the host says the key, the reader says the command. The audio is named
+like a chapter, 04_Open_and_Move_Through_a_Database.mp3. The build
+retires the old scripts and audio and speaks the new set. Needs HomerDev
+1.52.0.</p>
+<h2 id="v1.0.235">v1.0.235</h2>
 <p><strong>Record a station</strong>: Alt+Shift+R in the Homer Player
 starts and stops a copy of the stream, kept in Music, Homer Player.
 Needs HomerDev 1.51.5.</p>

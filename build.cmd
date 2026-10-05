@@ -140,7 +140,7 @@ rem it -- Say.onSpoken, LbcMenuItem, Elevate -- and a kit older than the source
 rem fails deep in the compiler with "Say does not contain a definition for
 rem onSpoken", which names the symptom and not the cause. So the build says the
 rem cause, first. Raise this whenever DbDo starts using something new.
-set "kitNeeded=1.51.5"
+set "kitNeeded=1.52.1"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -672,6 +672,18 @@ rem A RENAMED SCRIPT LEAVES ITS OLD NAME BEHIND when a zip is unpacked over the
 rem folder, and two scripts with similar names that do nearly the same thing
 rem is exactly how the wrong one gets run: fetchRadioBrowser became
 rem fetchStations on 5 October 2026, and both were run, one after the other.
+rem The walks took the eleven-part pattern on 5 October 2026; the nineteen old
+rem scripts and their audio are retired, and the build speaks the new set.
+for %%f in (help\Tutorial_00_Overview.inix help\Tutorial_01_Installing.inix help\Tutorial_02_Opening.inix help\Tutorial_03_Menus.inix help\Tutorial_04_Adding.inix help\Tutorial_05_Inspecting.inix help\Tutorial_06_Editing.inix help\Tutorial_07_Finding.inix help\Tutorial_08_Ordering.inix help\Tutorial_09_Columns.inix help\Tutorial_10_Related.inix help\Tutorial_11_Marking.inix help\Tutorial_12_LookAndPrime.inix help\Tutorial_13_Output.inix help\Tutorial_14_WorkSearch.inix help\Tutorial_15_RadioTrail_Opening.inix help\Tutorial_16_RadioTrail_Finding.inix help\Tutorial_17_RadioTrail_Playing.inix help\Tutorial_18_RadioTrail_Keeping.inix help\Tutorial_09_Conclusion.inix help\Tutorial_10_More_Information.inix) do (
+  if exist "%%f" (
+    del /q "%%f"
+    echo Removed the retired walk "%%f" >> "!log!"
+  )
+)
+if exist "help\tutorials\Tutorial_*.mp3" (
+  del /q "help\tutorials\Tutorial_*.mp3"
+  echo Removed the audio of the retired walks >> "!log!"
+)
 for %%f in (templates\RadioTrail\fetchRadioBrowser.cmd templates\RadioTrail\fetchRadioBrowser.py) do (
   if exist "%%f" (
     del /q "%%f"
