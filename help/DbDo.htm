@@ -7,9 +7,6 @@
   <title>DbDo</title>
   <style>
     html {
-      line-height: 1.5;
-      font-family: Georgia, serif;
-      font-size: 20px;
       color: #1a1a1a;
       background-color: #fdfdfd;
     }
@@ -28,13 +25,16 @@
     @media (max-width: 600px) {
       body {
         font-size: 0.9em;
-        padding: 1em;
+        padding: 12px;
       }
       h1 {
         font-size: 1.8em;
       }
     }
     @media print {
+      html {
+        background-color: white;
+      }
       body {
         background-color: transparent;
         color: black;
@@ -84,9 +84,10 @@
       color: #606060;
     }
     code {
-      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
       font-size: 85%;
       margin: 0;
+      hyphens: manual;
     }
     pre {
       margin: 1em 0;
@@ -151,17 +152,17 @@
     div.columns{display: flex; gap: min(4vw, 1.5em);}
     div.column{flex: auto; overflow-x: auto;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
     ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
       width: 0.8em;
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
     .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
 </head>
 <body>
 <header id="title-block-header">
@@ -2368,14 +2369,34 @@ folder. It takes about a minute, and it can take one country instead:
 <code>fetchStations --country "United States"</code>. If you have not
 opened the template in DbDo yet, the script makes your copy itself. Its
 log is with DbDo’s own, under <code>%LOCALAPPDATA%\DbDo\logs</code>.</p>
-<p>To listen, move to a station’s <strong>stream_url</strong> cell and
-press <strong>Control+Enter</strong>, Open Cell Value. Windows hands the
-address to whatever plays streams on your computer. Filter Records by
-genre, country or language is the way through sixty thousand rows;
-Keywords searches every field.</p>
+<p>To listen, press <strong>Alt+Shift+P</strong>, Play Stream, on any
+station’s row. The Homer Player opens – the same player FileDir has –
+with the station playing: Scroll Lock pauses and resumes, the Volume and
+Rate sliders are ordinary controls, and Escape closes it. The first
+time, if mpv is not on your computer, DbDo offers to fetch it; it takes
+about a minute. Filter Records by genre, country or language is the way
+through sixty thousand rows; Keywords searches every field.</p>
+<p>The catalog knows a station’s name, tags and place, and no more. What
+a station says about itself – “Official home of the Seattle Seahawks” –
+is in its stream’s headers and on its home page.
+<code>fetchStations --enrich</code> asks each station once and files the
+answer: the slogan in <strong>slogan</strong>, the rest in
+<strong>descrip</strong>, new genre words in <strong>genre</strong>.
+Then Keywords, Control+K, finds “Seahawks”. Sixty thousand stations take
+hours; one country takes less:
+<code>fetchStations --enrich --country "United States"</code>.</p>
+<p>A row reads name, genre, state and country. Every other field –
+slogan, descrip, homepage, codec, bitrate, votes, the playlist address
+when there is one – is there for Keywords and Filter Records, and
+Inspect shows them all.</p>
 <p>Your <strong>status</strong>, <strong>rating</strong>,
 <strong>notes</strong> and <strong>tags</strong> are yours: a refresh
-from the catalog never writes them.</p>
+from the catalog never writes them, and neither does an enrichment.</p>
+<p>To start over with a fresh copy – after a new version adds fields,
+say – run <code>rebuildRadioTrail</code> in the template’s folder: it
+sets the old copy aside as RadioTrail-old.db, fills a new one from the
+catalog, and asks the United States stations about themselves, all in
+one go.</p>
 <h3 id="collectiontrail-holds-whatever-you-collect">CollectionTrail
 holds whatever you collect</h3>
 <p>Stamps, coins, records and tools answer the same questions, so they

@@ -377,6 +377,8 @@ Source: "exec\nvdaControllerClient.dll"; DestDir: "{app}\exec"; Flags: ignorever
 Source: "scripts\summarizeSetup.cmd"; DestDir: "{app}\scripts"; Flags: ignoreversion
 Source: "scripts\summarizeSetup.ps1"; DestDir: "{app}\scripts"; Flags: ignoreversion
 Source: "scripts\installOllama.cmd"; DestDir: "{app}\scripts"; Flags: ignoreversion skipifsourcedoesntexist
+; mpv plays streams for Play Stream; installMpv fetches it with winget, from the Play Stream command when it is missing.
+Source: "scripts\installMpv.cmd"; DestDir: "{app}\scripts"; Flags: ignoreversion skipifsourcedoesntexist
 ; THE SHARED HALF OF EVERY INSTALL SCRIPT. installOllama.cmd calls it for its
 ; log folder, log name and environment header, and stops with a message when it
 ; is absent -- which, until kit 1.42 renamed it from homerInstall.cmd, the
@@ -431,6 +433,12 @@ FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
   Description: "{code:labelNvda}"; \
   Check: isInstallNvda; \
   Flags: postinstall waituntilterminated runhidden skipifsilent runasoriginaluser
+FileName: "{app}\scripts\installMpv.cmd"; \
+  Parameters: "noPause"; \
+  WorkingDir: "{app}\scripts"; \
+  Description: "{code:labelmpv}"; \
+  Check: isInstallmpv; \
+  Flags: postinstall skipifsilent runascurrentuser waituntilterminated skipifdoesntexist
 FileName: "{cmd}"; \
   Parameters: "/c """"{app}\scripts\installOllama.cmd"""""; \
   WorkingDir: "{app}\exec"; \
@@ -450,6 +458,12 @@ FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
   Description: "{code:labelNvda}"; \
   Check: isUpdateNvda; \
   Flags: postinstall waituntilterminated runhidden skipifsilent runasoriginaluser
+FileName: "{app}\scripts\installMpv.cmd"; \
+  Parameters: "noPause update"; \
+  WorkingDir: "{app}\scripts"; \
+  Description: "{code:labelmpv}"; \
+  Check: isUpdatempv; \
+  Flags: postinstall skipifsilent runascurrentuser waituntilterminated skipifdoesntexist
 FileName: "{cmd}"; \
   Parameters: "/c """"{app}\scripts\installOllama.cmd"""" update"; \
   WorkingDir: "{app}\exec"; \
@@ -474,6 +488,12 @@ FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
   Description: "{code:labelNvda}"; \
   Check: isReinstallNvda; \
   Flags: postinstall waituntilterminated runhidden skipifsilent runasoriginaluser unchecked
+FileName: "{app}\scripts\installMpv.cmd"; \
+  Parameters: "noPause reinstall"; \
+  WorkingDir: "{app}\scripts"; \
+  Description: "{code:labelmpv}"; \
+  Check: isReinstallmpv; \
+  Flags: postinstall skipifsilent runascurrentuser waituntilterminated skipifdoesntexist unchecked
 FileName: "{cmd}"; \
   Parameters: "/c """"{app}\scripts\installOllama.cmd"""" reinstall"; \
   WorkingDir: "{app}\exec"; \
@@ -525,6 +545,19 @@ FileName: "{app}\exec\{#AppExeName}"; \
   RunOnceId: "UninstallJawsSettings"
 
 [Code]
+
+// THE SHARED COMPONENT TABLE from the kit: one line registers a component, and
+// the three states -- absent, outdated, current -- decide the finish page's
+// verb and tick. mpv, which Play Stream needs, is the first DbDo component on
+// it; Ollama keeps DbDo's own older code below until it too is moved over.
+// The include goes INSIDE [Code]; HomerComponents.iss carries no [Code] line.
+#ifndef HomerDev
+  #define HomerDev "C:\HomerDev"
+#endif
+#include HomerDev + "\Templates\HomerComponents.iss"
+
+var
+  iMpv: Integer;
 
 (* ---- WHAT IS ALREADY ON THIS COMPUTER, AND AT WHICH VERSION ----
 
@@ -867,6 +900,13 @@ begin
     begin
       sRecord := ExpandConstant('{localappdata}\DbDo\jawsSettings.log');
       sVersionFile := ExpandConstant('{localappdata}\DbDo\jawsSettings.version');
+      // AN OLDER RECORD STILL LIVES IN THE ROAMING TREE until DbDo itself next
+      // runs the script install, which moves it. This page is shown BEFORE
+      // that run, so a person whose scripts were installed by an earlier
+      // version saw "Install" where "Update" was true (5 October 2026). The
+      // Roaming record counts as a record.
+      if not FileExists(sRecord) then
+        sRecord := ExpandConstant('{userappdata}\DbDo\jawsSettings.log');
       if not FileExists(sRecord) then Result := 0
       else if LoadStringFromFile(sVersionFile, sAnswer) and (Trim(sAnswer) = '{#AppVersion}') then Result := 2
       else Result := 1;
@@ -963,6 +1003,7 @@ var
 begin
   Result := True;
   if iCurPageID <> wpFinished then exit;
+  homerNoteTicked();   // the shared table's record of which boxes were ticked
   gsTicked := '';
   SetArrayLength(lsLines, 0);
   for i := 0 to WizardForm.RunList.Items.Count - 1 do
@@ -1417,9 +1458,19 @@ end;
 
 function InitializeSetup(): Boolean;
 begin
+  //  mpv is MACHINE WIDE, in its own default folder under Program Files, never
+  //  under {app}: an upgrade of DbDo replaces that tree and would take the
+  //  player with it. The shared Mpv.cs looks there first.
+  iMpv := homerAdd('mpv', 'shinchiro.mpv', 'mpv',
+    '{pf}\MPV Player\mpv.exe', 'plays a station for Play Stream', 'mpv');
   sPriorVersion := priorVersion();
   Result := True;
 end;
+
+function labelmpv(sParam: String): String;  begin Result := homerLabel(iMpv); end;
+function isInstallmpv(): Boolean;           begin Result := homerIs(iMpv, 0); end;
+function isUpdatempv(): Boolean;            begin Result := homerIs(iMpv, 1); end;
+function isReinstallmpv(): Boolean;         begin Result := homerIs(iMpv, 2); end;
 
 (* ---- The Results summary: always, and always last ---- *)
 
@@ -1492,6 +1543,9 @@ begin
 
   sMessage := '{#AppName} {#AppVersion} is installed in ' + ExpandConstant('{app}') + '.';
 
+  //  One past-tense line for mpv when its box was ticked, from a probe made
+  //  after the script ran -- what happened, not what was hoped.
+  if homerOutcomeLine(iMpv) <> '' then addAction(sLogDir, homerOutcomeLine(iMpv));
   saveResultsForSummary(sLogDir, sMessage);
   showResultsSummary();
 end;

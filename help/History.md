@@ -4,7 +4,41 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.222 (current)
+## v1.0.225 (current)
+
+**RadioTrail knows more, and can ask a station about itself.** New fields:
+slogan, playlist_url (the address as submitted when it differs from the
+stream), countrycode, hls, trend, last_check and probed. A row reads name,
+genre, state and country. `fetchStations --enrich` reads a station's stream
+headers and home page and files its slogan, description and genre words, so
+Keywords finds a station by what it says of itself -- "Seahawks" finds the team's
+flagship. Enrichment survives a catalog refresh. `rebuildRadioTrail` in the template's
+folder makes a fresh copy, fills it, and enriches one country, in one go.
+
+## v1.0.224
+
+**Play Stream, Alt+Shift+P.** The current record's stream address -- its
+stream_url, url, stream, link or address field, or the current cell -- opens in
+the Homer Player, the same player FileDir has, now shared through the kit. mpv
+does the playing. The installer's finish page offers mpv as a box of its own --
+Install, Update or Reinstall, ticked when it is missing or out of date --
+through the kit's shared component table; and if it is still missing when you
+press Alt+Shift+P, DbDo offers to fetch it. Needs HomerDev 1.51.2.
+
+## v1.0.223
+
+**Your databases are never replaced by a new install.** The copy of a template
+in your data folder is yours: an install whose template file was newer used to
+replace it, and a RadioTrail filled with sixty thousand stations went back to
+fourteen rows. A database that exists is left alone from now on; only the
+settings and report files beside it are refreshed. If this happened to you,
+run `fetchStations` again -- it takes a minute.
+
+**The installer says Update when it should.** A record of the JAWS scripts
+left in the Roaming tree by an earlier version now counts, so the finish page
+no longer offers Install for scripts that are already there.
+
+## v1.0.222
 
 **The walks learn from the JAWS trainers.** Every lone letter is spelled with
 its alphabet word before it is pressed; the first walk teaches Insert plus Tab

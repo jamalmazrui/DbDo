@@ -140,7 +140,7 @@ rem it -- Say.onSpoken, LbcMenuItem, Elevate -- and a kit older than the source
 rem fails deep in the compiler with "Say does not contain a definition for
 rem onSpoken", which names the symptom and not the cause. So the build says the
 rem cause, first. Raise this whenever DbDo starts using something new.
-set "kitNeeded=1.43.22"
+set "kitNeeded=1.51.2"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -163,6 +163,11 @@ set "homerSources=!homerSources! "!homerDev!\exec\CSharp\KeyMap.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\KeyName.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Lbc.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Log.cs""
+rem THE HOMER PLAYER, shared with FileDir since kit 1.51.1: Play Stream hands a
+rem record's stream address to it, and mpv does the playing.
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Media.cs""
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\MediaPlayer.cs""
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Mpv.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Ollama.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Paths.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Say.cs""
@@ -924,7 +929,9 @@ if exist exec\DbDo_setup.exe del /f /q exec\DbDo_setup.exe && echo Removed the o
 if exist DbDo_setup.exe del /f /q DbDo_setup.exe
 rem The number this build is using goes to Inno directly: version.txt is written
 rem only after the build succeeds, so it still holds the previous number here.
-"!iscc!" /DBuildVersion=!ver! "DbDo_setup.iss" >> "!log!" 2>&1
+rem The kit's folder goes in as /DHomerDev, so the installer's #include finds
+rem HomerComponents.iss on any drive at any depth, not only C:\HomerDev.
+"!iscc!" /DBuildVersion=!ver! "/DHomerDev=!homerDev!" "DbDo_setup.iss" >> "!log!" 2>&1
 if errorlevel 1 (
   echo ERROR: the installer build failed. See !log!.
   echo ERROR: the installer build failed. >> "!log!"

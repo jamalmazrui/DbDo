@@ -921,13 +921,33 @@ take one country instead: `fetchStations --country "United States"`. If you
 have not opened the template in DbDo yet, the script makes your copy itself. Its
 log is with DbDo's own, under `%LOCALAPPDATA%\DbDo\logs`.
 
-To listen, move to a station's **stream_url** cell and press **Control+Enter**,
-Open Cell Value. Windows hands the address to whatever plays streams on your
-computer. Filter Records by genre, country or language is the way through sixty
-thousand rows; Keywords searches every field.
+To listen, press **Alt+Shift+P**, Play Stream, on any station's row. The Homer
+Player opens -- the same player FileDir has -- with the station playing: Scroll
+Lock pauses and resumes, the Volume and Rate sliders are ordinary controls, and
+Escape closes it. The first time, if mpv is not on your computer, DbDo offers
+to fetch it; it takes about a minute. Filter Records by genre, country or
+language is the way through sixty thousand rows; Keywords searches every
+field.
+
+The catalog knows a station's name, tags and place, and no more. What a station
+says about itself -- "Official home of the Seattle Seahawks" -- is in its
+stream's headers and on its home page. `fetchStations --enrich` asks each
+station once and files the answer: the slogan in **slogan**, the rest in
+**descrip**, new genre words in **genre**. Then Keywords, Control+K, finds
+"Seahawks". Sixty thousand stations take hours; one country takes less:
+`fetchStations --enrich --country "United States"`.
+
+A row reads name, genre, state and country. Every other field -- slogan,
+descrip, homepage, codec, bitrate, votes, the playlist address when there is
+one -- is there for Keywords and Filter Records, and Inspect shows them all.
 
 Your **status**, **rating**, **notes** and **tags** are yours: a refresh from the
-catalog never writes them.
+catalog never writes them, and neither does an enrichment.
+
+To start over with a fresh copy -- after a new version adds fields, say -- run
+`rebuildRadioTrail` in the template's folder: it sets the old copy aside as
+RadioTrail-old.db, fills a new one from the catalog, and asks the United States
+stations about themselves, all in one go.
 
 ### CollectionTrail holds whatever you collect
 

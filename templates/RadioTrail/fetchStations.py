@@ -28,6 +28,24 @@
 #   fetchStations --limit 2000          the 2,000 most voted, for a taste
 #   fetchStations --source somafm       only the SomaFM channels (46 of them)
 #   fetchStations --source radiobrowser only Radio Browser; the default is both
+#   fetchStations --fresh               throw the copy away and start from the
+#                                       template, so new fields arrive; your
+#                                       status, rating, notes and tags go too
+#   fetchStations --enrich              ask each unprobed station what it says
+#                                       about itself; add --country or --limit
+#                                       to take a part of the list first
+#
+# WHAT A STATION SAYS ABOUT ITSELF. The catalog knows a station's name, its
+# tags and where it is, and that is all: "Official home of the Seattle
+# Seahawks" is in no catalog field. It is in two places the station itself
+# publishes. A stream's first reply carries ICY headers -- icy-name,
+# icy-description, icy-genre, icy-url -- and that description is usually the
+# station's slogan. And the station's home page has a title and a meta
+# description. --enrich reads both, twenty stations at a time, three seconds
+# each, and files what it finds: the slogan into slogan, the rest into
+# descrip, any new genre words into genre. Then Keywords finds "Seahawks".
+# Each station is probed once; probed holds the date, and --enrich --again
+# repeats the ones already done.
 #
 # WHERE THE SERVERS COME FROM. Radio Browser publishes its mirrors through DNS:
 # all.api.radio-browser.info resolves to every mirror's address, and each
@@ -45,7 +63,7 @@
 #
 # The log is %LOCALAPPDATA%\DbDo\logs\RadioTrail-fetch-<date>-<time>.log, where
 # DbDo's own logs go: everything it did, every request, every count.
-import datetime, json, os, random, re, socket, sqlite3, sys, time, urllib.parse, urllib.request
+import datetime, html, json, os, random, re, socket, sqlite3, sys, threading, time, urllib.parse, urllib.request
 
 c_sAgent = "RadioTrail/1.0 (DbDo; https://github.com/JamalMazrui/DbDo)"
 c_lsServers = ["https://de1.api.radio-browser.info", "https://fi1.api.radio-browser.info",
@@ -54,6 +72,93 @@ c_sAllHosts = "all.api.radio-browser.info"
 c_sSomaChannels = "https://somafm.com/channels.json"
 c_lsSomaFormats = ["mp3", "aac", "aacp"]
 c_lsSomaQuality = ["highest", "high", "low"]
+c_iProbeThreads = 20
+c_iProbeSeconds = 4
+
+def probeStation(sUrl, sHomepage):
+    """What one station says about itself: ICY headers off its stream, and the
+    title and description off its home page. Returns a dict; keys absent when
+    nothing was found."""
+    d = {}
+    if sUrl:
+        try:
+            oReq = urllib.request.Request(sUrl, headers={"User-Agent": c_sAgent, "Icy-MetaData": "1"})
+            with urllib.request.urlopen(oReq, timeout=c_iProbeSeconds) as oResp:
+                h = oResp.headers
+                for sKey, sField in (("icy-name", "icy_name"), ("icy-description", "icy_description"), ("icy-genre", "icy_genre"), ("icy-url", "icy_url")):
+                    sVal = (h.get(sKey) or "").strip()
+                    if sVal: d[sField] = sVal
+                sType = (h.get("Content-Type") or "").strip()
+                if sType: d["content_type"] = sType
+        except Exception:
+            pass
+    sPage = sHomepage or d.get("icy_url", "")
+    if sPage and sPage.lower().startswith("http"):
+        try:
+            oReq = urllib.request.Request(sPage, headers={"User-Agent": c_sAgent})
+            with urllib.request.urlopen(oReq, timeout=c_iProbeSeconds) as oResp:
+                sHtml = oResp.read(65536).decode("utf-8", "replace")
+            m = re.search(r"<title[^>]*>(.*?)</title>", sHtml, re.I | re.S)
+            if m: d["page_title"] = html.unescape(re.sub(r"\s+", " ", m.group(1))).strip()[:200]
+            m = re.search(r'<meta[^>]+(?:name|property)=["\'](?:description|og:description)["\'][^>]+content=["\']([^"\']{3,500})', sHtml, re.I)
+            if not m: m = re.search(r'<meta[^>]+content=["\']([^"\']{3,500})["\'][^>]+(?:name|property)=["\'](?:description|og:description)', sHtml, re.I)
+            if m: d["page_description"] = html.unescape(re.sub(r"\s+", " ", m.group(1))).strip()
+        except Exception:
+            pass
+    return d
+
+def enrich(sDb, sCountry, iLimit, bAgain, logLine, say):
+    """Probe stations and file what they say about themselves, never touching
+    the listener's fields."""
+    c = sqlite3.connect(sDb)
+    c.execute("PRAGMA journal_mode=WAL")
+    sWhere = "stream_url <> ''"
+    lsArgs = []
+    if not bAgain: sWhere += " and (probed is null or probed = '')"
+    if sCountry: sWhere += " and country = ?"; lsArgs.append(sCountry)
+    sSql = "select station_id, stream_url, homepage, genre, slogan, descrip from stations where " + sWhere + " order by cast(votes as integer) desc"
+    if iLimit: sSql += " limit %d" % iLimit
+    lsRows = c.execute(sSql, lsArgs).fetchall()
+    if not lsRows:
+        say("Nothing to probe: every station here has been asked already. Add --again to ask them again."); c.close(); return 0
+    say("Asking %d stations what they say about themselves, %d at a time. About %d minutes." % (len(lsRows), c_iProbeThreads, max(1, len(lsRows) * c_iProbeSeconds // c_iProbeThreads // 60)))
+    oLock = threading.Lock(); lsOut = []; lsQueue = list(lsRows)
+    def worker():
+        while True:
+            with oLock:
+                if not lsQueue: return
+                r = lsQueue.pop()
+            d = probeStation(r[1], r[2])
+            with oLock: lsOut.append((r, d))
+    lsThreads = [threading.Thread(target=worker, daemon=True) for _ in range(c_iProbeThreads)]
+    for o in lsThreads: o.start()
+    iDone = 0
+    while any(o.is_alive() for o in lsThreads):
+        time.sleep(5)
+        with oLock: iNow = len(lsOut)
+        if iNow - iDone >= 200: say("  %d of %d" % (iNow, len(lsRows))); iDone = iNow
+    for o in lsThreads: o.join()
+    sNow = datetime.datetime.now().strftime("%Y-%m-%d")
+    iFilled = 0
+    for r, d in lsOut:
+        iId, sGenre, sSlogan, sDescrip = r[0], r[3] or "", r[4] or "", r[5] or ""
+        lsParts = []
+        for k in ("icy_description", "page_title", "page_description"):
+            v = d.get(k, "")
+            if v and v.lower() not in sDescrip.lower() and v not in lsParts: lsParts.append(v)
+        sSloganNew = sSlogan or d.get("icy_description", "")[:200]
+        sDescripNew = sDescrip
+        if lsParts: sDescripNew = (sDescrip + "\n\n" if sDescrip else "") + "\n".join(lsParts)
+        sGenreNew = sGenre
+        for sWord in re.split(r"[,/;|]", d.get("icy_genre", "")):
+            sWord = sWord.strip().lower()
+            if sWord and sWord not in sGenreNew.lower(): sGenreNew = (sGenreNew + ", " if sGenreNew else "") + sWord
+        if d: iFilled += 1
+        logLine("probe %d: %s" % (iId, "; ".join("%s=%s" % (k, v[:80]) for k, v in d.items()) or "nothing"))
+        c.execute("update stations set slogan=?, descrip=?, genre=?, probed=?, edited=CURRENT_TIMESTAMP where station_id=?", (sSloganNew, sDescripNew, sGenreNew, sNow, iId))
+    c.commit(); c.close()
+    say("%d stations answered with something; %d said nothing. Keywords now finds what they said." % (iFilled, len(lsOut) - iFilled))
+    return 0
 
 def resolveMirrors(logLine):
     """Every current Radio Browser mirror, from DNS, shuffled; the known list
@@ -130,16 +235,35 @@ def main():
     sCountry = ""
     sSource = "all"
     iLimit = 0
+    bEnrich = False
+    bAgain = False
+    bFresh = False
     i = 0
     while i < len(lsArgs):
         sArg = lsArgs[i]
         if sArg == "--country" and i + 1 < len(lsArgs): sCountry = lsArgs[i + 1]; i += 2; continue
         if sArg == "--limit" and i + 1 < len(lsArgs): iLimit = int(lsArgs[i + 1]); i += 2; continue
         if sArg == "--source" and i + 1 < len(lsArgs): sSource = lsArgs[i + 1].lower(); i += 2; continue
+        if sArg == "--enrich": bEnrich = True; i += 1; continue
+        if sArg == "--fresh": bFresh = True; i += 1; continue
+        if sArg == "--again": bAgain = True; i += 1; continue
         if sArg.startswith("-"): i += 1; continue
         sDb = sArg; i += 1
     if not sDb:
         sDb = os.path.join(os.environ.get("LOCALAPPDATA", ""), "DbDo", "data", "RadioTrail", "RadioTrail.db")
+    if bFresh and os.path.isfile(sDb):
+        # A FRESH START, asked for by name. The old copy is kept beside the new
+        # one as RadioTrail-old.db until the next fresh start, so a status or a
+        # note that mattered can still be read out of it.
+        sOld = os.path.join(os.path.dirname(sDb), "RadioTrail-old.db")
+        try:
+            if os.path.isfile(sOld): os.remove(sOld)
+            for sSide in ("", "-wal", "-shm"):
+                if os.path.isfile(sDb + sSide) and sSide: os.remove(sDb + sSide)
+            os.rename(sDb, sOld)
+            print("The old copy is now " + sOld)
+        except Exception as oError:
+            print("Could not set the old copy aside: " + str(oError)); return 1
     if not os.path.isfile(sDb):
         # NO COPY YET? MAKE ONE. DbDo copies the templates into its data
         # folder the first time Template Databases is opened, and a person who
@@ -170,6 +294,10 @@ def main():
     logLine("fetchStations started " + datetime.datetime.now().isoformat())
     logLine("Script: " + os.path.abspath(__file__) + " | Python " + sys.version.split()[0] + " | " + sys.platform)
     logLine("Database: " + sDb + " | source: " + sSource + " | country: " + (sCountry or "(all)") + " | limit: " + str(iLimit or "(none)"))
+
+    if bEnrich:
+        iCode = enrich(sDb, sCountry, iLimit, bAgain, logLine, say)
+        say("The log is " + sLog); logLine("finished " + datetime.datetime.now().isoformat()); return iCode
 
     # ---- fetch ----
     lsStations = []
@@ -227,6 +355,9 @@ def main():
         lsRows.append({
             "name": (d.get("name") or "").strip(),
             "stream_url": (d.get("url_resolved") or d.get("url") or "").strip(),
+            # the address as submitted, when it differs from the stream it
+            # resolved to: a playlist that still works after a stream moves
+            "playlist_url": (d.get("url") or "").strip() if (d.get("url") or "").strip() != (d.get("url_resolved") or "").strip() else "",
             "homepage": (d.get("homepage") or "").strip(),
             "country": (d.get("country") or "").strip(),
             "state": (d.get("state") or "").strip(),
@@ -236,6 +367,10 @@ def main():
             "bitrate": str(d.get("bitrate") or ""),
             "votes": str(d.get("votes") or ""),
             "clicks": str(d.get("clickcount") or ""),
+            "trend": str(d.get("clicktrend") or ""),
+            "hls": "yes" if str(d.get("hls") or "0") not in ("0", "", "False", "false") else "",
+            "countrycode": (d.get("countrycode") or "").strip(),
+            "last_check": (d.get("lastchecktime_iso8601") or d.get("lastchecktime") or "")[:10],
             "source": "Radio Browser",
             "source_id": sUuid,
         })
@@ -257,6 +392,18 @@ def mergeRows(sDb, lsRows, logLine, say, sLog):
         # handed over: the rule is enforced here, not trusted upstream.
         lsTheirs = ("status", "rating", "notes", "tags")
         for sTheirs in lsTheirs: dRow.pop(sTheirs, None)
+        # What --enrich learned is kept across a catalog refresh too: the
+        # catalog never had a slogan or a description to overwrite them with,
+        # and its genre is merged into what the probe added rather than
+        # replacing it.
+        if sKey in dHave:
+            dRow.pop("slogan", None); dRow.pop("descrip", None); dRow.pop("probed", None)
+            try:
+                sOld = (c.execute("select genre from stations where station_id = ?", (dHave[sKey],)).fetchone() or [""])[0] or ""
+                for sWord in [w.strip() for w in sOld.split(",") if w.strip()]:
+                    if sWord.lower() not in dRow.get("genre", "").lower():
+                        dRow["genre"] = (dRow.get("genre", "") + ", " if dRow.get("genre") else "") + sWord
+            except Exception: pass
         if sKey in dHave:
             sSet = ", ".join('"%s" = ?' % k for k in dRow if k != "source_id")
             c.execute('update stations set %s, edited = CURRENT_TIMESTAMP where station_id = ?' % sSet,

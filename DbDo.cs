@@ -260,6 +260,14 @@ namespace DbDo
                     clearReadOnly(sDstPath);                 // keep the seeded copy editable
                     return;
                 }
+                // A DATABASE THAT EXISTS IS THE PERSON'S, NEVER THE TEMPLATE'S.
+                // The copy in the data folder is their working copy: RadioTrail
+                // had been filled with sixty thousand stations when a new
+                // install, whose template file carried a newer timestamp,
+                // replaced it with the fourteen-row template (5 October 2026).
+                // "Newer replaces older" is right for a report or a settings
+                // file beside the database; it is never right for the database.
+                if (sDstPath.EndsWith(".db", StringComparison.OrdinalIgnoreCase)) return;
                 if (System.IO.File.GetLastWriteTimeUtc(sSrcPath)
                     > System.IO.File.GetLastWriteTimeUtc(sDstPath))
                 {
@@ -11747,6 +11755,7 @@ namespace DbDo
         private ToolStripMenuItem miRecGotoBookmark;
         private ToolStripMenuItem miRecClearBookmark;
         private ToolStripMenuItem miRecOpenCell;
+        private ToolStripMenuItem miRecPlayStream;
 
         private ToolStripMenuItem miViewSelect;
         private ToolStripMenuItem miViewFilterRegex; // Filter Regex: server-side REGEXP on the current column (SQLean)
@@ -12791,6 +12800,10 @@ namespace DbDo
             // Open Cell Value: open the url, file path, or folder
             // path stored in a cell of the current row.
             miRecOpenCell    = addItem(miEdit, "&Open Cell Value...",       "Open Cell",           Keys.Control | Keys.Enter,          recOpenCellClicked);
+            // PLAY STREAM: the current record's stream address, in the Homer
+            // Player. P for Play; Alt+Shift because the command has no control
+            // of its own. No trigger letter, because Pick Value took P first.
+            miRecPlayStream  = addItem(miEdit, "Play Stream",               "Play Stream",         Keys.Alt | Keys.Shift | Keys.P,     recPlayStreamClicked);
             // Open Url: open the row's 'url' column with the system
             // default handler (browser, mail client, file opener).
             // Convenience chord for the most common Open-Cell case --
@@ -13380,6 +13393,8 @@ namespace DbDo
             add("New Database",       "Create a new database file: define the first table's fields and types; the standard columns and the builtin maps and lookups tables are added automatically", "");
             add("Add Table",          "Add another table in the standard shape to the open database", "");
             add("Open Database",      "Open a database file", "");
+            add("Play Stream",        "Play the current record's stream address in the Homer Player",
+                "Alt+Shift+P. Takes the first of stream_url, url, stream, link or address that begins with http, or the current cell. The player is mpv; if it is not installed, DbDo offers to fetch it.");
             add("Close Database",     "Close the currently open database", "");
             // ===== Window menu =====
             add("Open Table",         "Open a chosen table of the current database in a new window",
@@ -22750,6 +22765,57 @@ namespace DbDo
         //   - Anything else: show a brief message in the live region
         //     and do nothing.
         // Bound to Control+Enter.
+        // recPlayStreamClicked: play the current record's stream in the Homer
+        // Player. The address is the first of these the record has and that
+        // starts with http: a field named stream_url, url, stream, link or
+        // address, then the current cell. The track is named from the record's
+        // name field, or its look. If mpv is not on this computer the program
+        // offers to fetch it with scripts\installMpv, the same winget install
+        // the installer's finish page offers.
+        private void recPlayStreamClicked(object sender, EventArgs evArgs)
+        {
+            if (db == null || !db.isOpen()) { Say.say("No database is open."); return; }
+            string sUrl = "";
+            foreach (string sField in new string[] { "stream_url", "url", "stream", "link", "address" })
+            {
+                string sTry = "";
+                try { sTry = (db.getFieldValue(sField) ?? "").Trim(); } catch { sTry = ""; }
+                if (sTry.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || sTry.StartsWith("https://", StringComparison.OrdinalIgnoreCase)) { sUrl = sTry; break; }
+            }
+            if (sUrl.Length == 0)
+            {
+                string sCell = "";
+                try { sCell = (db.getFieldValue(virtCurrentColumnName()) ?? "").Trim(); } catch { }
+                if (sCell.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || sCell.StartsWith("https://", StringComparison.OrdinalIgnoreCase)) sUrl = sCell;
+            }
+            if (sUrl.Length == 0) { Say.say("This record has no stream address."); return; }
+            string sName = "";
+            foreach (string sField in new string[] { "name", "title", "station", "look" })
+            {
+                try { sName = (db.getFieldValue(sField) ?? "").Trim(); } catch { sName = ""; }
+                if (sName.Length > 0) break;
+            }
+            if (sName.Length == 0) sName = sUrl;
+            if (Homer.Media.mpvProgram().Length == 0)
+            {
+                string sScript = System.IO.Path.Combine(Homer.Paths.shippedScripts(), "installMpv.cmd");
+                DialogResult dr = MessageBox.Show(this,
+                    "mpv, the program that plays streams, is not on this computer.\r\n\r\n"
+                    + "Install it now? It is fetched with winget and takes about a minute.",
+                    "Play Stream", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                if (dr == DialogResult.Yes && System.IO.File.Exists(sScript))
+                {
+                    try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("cmd.exe", "/c \"" + sScript + "\"") { UseShellExecute = true }); }
+                    catch (Exception ex) { MessageBox.Show(this, "Could not start the install: " + ex.Message, "Play Stream"); }
+                }
+                return;
+            }
+            System.Collections.Generic.List<Homer.MediaTrack> lsTracks = new System.Collections.Generic.List<Homer.MediaTrack>();
+            lsTracks.Add(new Homer.MediaTrack(sName, sUrl));
+            DbDoLog.write("Play Stream: " + sName + " -> " + sUrl);
+            Homer.MediaPlayer.run(this, "Playing " + sName, db.currentTable, lsTracks);
+        }
+
         private void recOpenCellClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset()) return;
@@ -35058,6 +35124,11 @@ namespace DbDo
                         string sReport = JawsSettingsInstaller.install("DbDo", sAppFolder, out iCopied, out iCompiled);
                         Console.WriteLine(sReport);
                         Console.WriteLine("Copied " + iCopied + " files, compiled " + iCompiled + " jsb.");
+                        // The console is nobody's when the installer runs this, so
+                        // the report goes into the session log too, where an
+                        // "Install" that should have been "Update" can be traced.
+                        try { DbDoLog.write("install-jaws-settings: " + sReport.Replace("\r\n", " | ").Replace("\n", " | ")
+                            + " copied=" + iCopied + " compiled=" + iCompiled); } catch { }
                         return 0;
                     }
                     if (sArg.Equals("--install-nvda-addon", StringComparison.OrdinalIgnoreCase)

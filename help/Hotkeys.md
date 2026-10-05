@@ -68,6 +68,9 @@ section says why each key is the one it is.
 - Pick Value\
   F2 is editing; Control+F2 edits by picking a value.\
   Control+F2
+- Play Stream\
+  Play the current record's stream address in the Homer Player. P for Play.\
+  Alt+Shift+P
 - Regex Replace\
   Regex find-and-replace within the current virtual column, over visible rows. R for Regex.\
   Control+Shift+R
@@ -543,6 +546,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Edit Notes
 - Alt+Shift+O\
   Reverse Order
+- Alt+Shift+P\
+  Play the current record's stream address in the Homer Player.\
+  Play Stream
 - Alt+Shift+Q\
   Query History
 - Alt+Shift+R\
@@ -1028,6 +1034,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Alt+O
 - Pick Value\
   Control+F2
+- Play Stream\
+  Play the current record's stream address in the Homer Player.\
+  Alt+Shift+P
 - Previous Table or View\
   Control+Shift+F6
 - Previous Visited Table\

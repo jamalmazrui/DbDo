@@ -12,6 +12,13 @@
 ; press Control+Enter, Open Cell Value: Windows hands the address to whatever
 ; plays streams on your computer, as VLC does. Shift+C says the cell.
 ;
+; WHAT A STATION SAYS ABOUT ITSELF is not in the catalog: "Official home of
+; the Seattle Seahawks" lives in the stream's own headers and on the station's
+; home page. fetchStations --enrich asks each station once and files the
+; answer -- the slogan in slogan, the rest in descrip, new genre words in
+; genre -- so Keywords finds Seahawks. Ask one country first: --enrich
+; --country "United States".
+;
 ; WHAT IS YOURS STAYS YOURS. status (favorite, tried, dead, want to try),
 ; rating, notes and tags are the listener's fields; a refresh from the catalog
 ; never writes them, and the merge is keyed by the catalog's own id for each
@@ -23,10 +30,12 @@ InitialTable = stations
 
 [Table:stations]
 
-; Name first, so a letter reaches the station; then where it is from, what it
-; plays, and how it sounds. Filter Records on genre, country or language is
-; the way through sixty thousand rows; Keywords searches every field.
-SelectFields = name, country, genre, codec
+; Name first, so a letter reaches the station; then what it plays and where it
+; is, state before country because within one country the state is what
+; tells stations apart. Filter Records on genre, country, state or language is
+; the way through sixty thousand rows; Keywords searches every field, on
+; screen or off -- slogan, descrip, homepage, codec, all of them.
+SelectFields = name, genre, state, country
 OrderFields = name
 WhereFilter =
 
