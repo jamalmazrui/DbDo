@@ -1,62 +1,62 @@
-﻿# DbDo
+﻿---
+title: "Announcing the Homer Development Kit"
+subtitle: "Foundations for Windows programs that work by keyboard and speech"
+author: "Jamal Mazrui"
+---
 
-Manage database files in a dual interface of console and graphical modes, maximizing productivity for screen reader and keyboard users.
+# Announcing the Homer Development Kit
 
-After decades of personal interest in how to achieve nonvisual usability in database management, I have developed a general-purpose program in this area with AI assistance. DbDo is a free, open source program designed to boost productivity in the input, querying, and output of data.
+## Foundations for Windows programs that work by keyboard and speech
 
-This is not my first attempt at the problem. My work on nonvisual database access goes back to a Contact Tracking System I wrote for DOS; it continued with DbDialog, a friendly database manager I built in the AutoIt language and later packaged to run as a script within the Window-Eyes screen reader; and it now reaches DbDo, a Windows desktop program offering both a graphical (multiple-document) interface and a console dot prompt, supporting several file formats in a relational model designed from the ground up for screen-reader and keyboard efficiency. As far as I have been able to determine, with research assistance, DbDo is the only general-purpose relational database manager built specifically for screen-reader users -- mainstream desktop database tools are designed for sighted, mouse-driven use and are accessible only incidentally, if at all.
+September 2026
+Copyright 2026 by Jamal Mazrui
+MIT License
 
-My hope is that DbDo can grow into the most accessible general-purpose database manager available to screen-reader users. I don't claim it is there yet — it is early, evolving software, shared in the spirit of continuous improvement, and it will get better with use and feedback. To be clear about scope up front: DbDo today serves Windows users running the JAWS, NVDA, or Narrator screen readers. That is the goal I am building toward, and any feedback that moves it closer is genuinely welcome.
+Building a small Windows tool of your own should not require first discovering,
+by trial and error, what makes a program work well with a screen reader. The
+Homer Development Kit is free and open source, and it exists so that you can
+skip that part.
 
-- [DbDo project page](https://github.com/JamalMazrui/DbDo)
-- [DbDo project archive](https://github.com/JamalMazrui/DbDo/archive/main.zip)
-- [DbDo executable installer](https://github.com/JamalMazrui/DbDo/releases/latest/download/DbDo_setup.exe)
+It consolidates decades of screen reader oriented development I have done under
+Windows -- tools and techniques that I hope will help others get started and
+succeed, based on lessons I have learned and tried to write down. The knowledge
+is not new; gathering it into one place is, and AI is what made that practical.
 
-DbDo defaults to an SQLite database file (`.db` extension), which supports management of related tables via either a command-line interface (like the memorable dBASE dot prompt) or a graphical user interface with a menu system and standard controls. You can easily switch between the two interface windows, depending on what technique is more convenient for the task at hand. Other database-like file formats are also supported, for import or export, including `.dbf`, `.mdb`, `.accdb`, `.xlsx`, `.csv`, and `.tsv`.
+Start a new program and it already does the things that usually take years to
+learn. The tab order is right. The keys do not fight Windows, JAWS or NVDA.
+Nothing is announced twice, and nothing important goes unannounced. When
+something goes wrong there is a log that says what happened, in a place you can
+find. When it works, one command builds an installer and publishes a release.
 
-Every DbDo command can be accomplished efficiently from the keyboard. In addition, extensions for the JAWS and NVDA screen readers are bundled with the DbDo installer to further optimize productivity. Advanced features include statistics, charts, and scripts.
+What makes that possible is that the decisions are in classes you call rather
+than rules you remember. The project holds equivalent versions in C#, for .NET
+Framework 4.8, which builds on any modern Windows, and in Python, for any recent
+version. They support layout by code, standard dialogs, and several components
+that help a screen reader user work either with AI assistance or by hand. The
+order you add a control is the order you tab through it. An ampersand in a label
+is the whole of an access key. Speech is used only for what a screen reader
+cannot work out for itself. Settings and logs land in the same folders in every
+program.
 
-## Highlights
+You can also find out what your program does without looking at it. One command
+checks the things that can be checked -- an accessible name that repeats a
+caption, two controls claiming one access key, the build, a smoke run, and the
+criteria you wrote before you began -- then starts the program, presses the keys,
+and reads back the same accessibility tree a screen reader reads. The report says
+what was verified, what was not checked, and what remains uncertain. Knowing
+which is which is the difference between a program you hope works and one you can
+vouch for.
 
-**A virtual table cursor for the data list.** Alt+Control plus arrow / Home / End / PageDown / PageUp / Numpad5 moves a `(row, column)` cursor through the data, with direction-aware announcements: a horizontal move says "Header: value"; a vertical move says "Row N: value"; a corner jump says both. The convention matches how JAWS and NVDA read HTML and Word tables, so the muscle memory transfers.
+The sample programs include fruit basket dialogs in C# and in Python, built with
+the shared classes, as a single dialog and as a multiple-document application.
+The pairs read side by side, so you can see one design in two languages and pick
+the one you want to work in. Template files help with the rest: a build script
+for an app that uses Homer components, and an installer built with Inno Setup.
 
-**Double-press to spell.** Any speech-only command spells its text character by character when pressed twice within 1.5 seconds — the convention familiar from EdSharp and FileDir.
+MIT licensed, for Windows 10 or later, with JAWS, NVDA or Narrator.
 
-**Three search families with persistent history.** Find (Control+K) for substring across all columns, Jump to Match (Control+J) for substring within one column, Find Regex (Control+F3) for .NET regex. Each family remembers its last 10 terms along with their case-sensitive flags. F3 / Shift+F3 repeats whichever family was most recent.
+- [The HomerDev project page on GitHub](https://github.com/JamalMazrui/HomerDev)
 
-**Parent-child drill.** Alt+RightArrow drills from a parent row into a filtered child table (a teacher's classes, a class's enrollments). Alt+LeftArrow returns to the exact parent row; Alt+Home pops the whole drill stack at once.
-
-**Recent files with per-table state.** Alt+R reopens any of the last 10 databases, restoring not just the file but the last-active table, filter, sort, and row position.
-
-**One connection, two interfaces.** The GUI window and the dot-prompt console drive the same live ADO recordset. Edits made in the prompt show up immediately in the data list, and vice versa.
-
-**Snippet scripting.** Save small JavaScript or text snippets in your own editor, then invoke them inside DbDo with a single keystroke (Control+Shift+I, I for Invoke). Scripts can automate bulk record edits, filter changes, custom reports — anything the database manager itself can do.
-
-## Sample databases
-
-DbDo ships four SQLite template databases adapted to its standard column conventions (`<singular>_id` primary keys, `added`/`edited` timestamps maintained by triggers, generated `look`/`unq` columns):
-
-- `NFB2026Convention.db` — the flagship demo: the 2026 NFB national convention agenda as a four-table relational model (contacts, events, locations, projects) wired together by a generic `maps` association table.
-- `template.db` — a small school domain (teachers, classes, students, enrollments) for first-launch exploration.
-- `northwind.db` — the classic Microsoft Northwind sales template (categories, suppliers, products, customers, employees, orders, order details, shippers).
-- `chinook.db` — the classic Chinook music-store template (artists, albums, tracks, genres, customers, invoices, invoice items), with deep parent-child chains.
-
-The Northwind and Chinook templates are useful for exercising DbDo against real-shaped data with multiple parent-child relationships; the convention database shows the maps model on real-world associations.
-
-## Accessibility design
-
-Three speech paths in priority order: JAWS via direct COM, NVDA via the controller-client DLL, UIA live-region fallback for Narrator and anything else. The data list is a virtual-mode `ListView` in Details view, which all three readers handle as a familiar Details list. JAWS settings (a JKM key map plus a compiled script) and an NVDA add-on ship with the installer so that both screen readers pass DbDo's chords through rather than intercepting them for their own table-navigation or browse-mode commands.
-
-JAWS-canonical key names appear throughout the menus, help text, and status messages — UpArrow, DownArrow, NumPad0 through NumPad9, GraveAccent, Minus rather than Dash, modifiers always in alphabetical order (Alt+Control+Shift).
-
-## Project home and downloads
-
-- **Source, issues, discussion:** <https://github.com/JamalMazrui/DbDo>
-- **Latest installer (always points to the current release):** <https://github.com/JamalMazrui/DbDo/releases/latest/download/DbDo_setup.exe>
-- **Full project as a zip:** <https://github.com/JamalMazrui/DbDo/archive/main.zip>
-
-For per-release notes, see `History.md`. Released under the MIT License.
-
-Feedback from blind and low-vision developers is especially welcome — keyboard ergonomics, screen-reader announcements, command-name choices, anything that helps the tool fit how people actually work.
-
-Jamal
+If you use a screen reader and have wanted to build something of your own, start
+with the ReadMe and tell me where it loses you. If you already build Windows
+software, I would value your eyes on what is there.

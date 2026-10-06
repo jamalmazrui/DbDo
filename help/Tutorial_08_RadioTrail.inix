@@ -1,0 +1,172 @@
+﻿[about]
+Title=08 - RadioTrail: Find the Seahawks on the Air
+Intro=The Internet radio directory that comes with DbDo, worked through three wants: the station carrying the Seattle Seahawks, found by a word it says of itself and played, recorded and kept; jazz from anywhere, by filtering on genre; and jazz near home, by adding the state. This walk assumes walks four to seven.
+Setup=DbDo is open, fetchStations has been run once, and no database is open yet.
+Homework=Find a station for your team or your town, play it, and mark it a favorite.
+
+[step]
+
+Say=You opened a template in walk four. The same way: Alt plus F, then T, Tango.
+Key=Alt+F
+Hear=File menu
+
+[step]
+
+Say=T, Tango.
+Key=T
+Hear=Template Databases dialog, Choose a template database, list box, BookTrail, 1 of 14
+
+[step]
+
+Say=R, Romeo, jumps to the first template starting with R.
+Key=R
+Hear=RadioTrail, 11 of 14
+
+[step]
+
+Say=Enter opens it. The first time, DbDo makes your own copy in your data folder; that copy is the one that fills with stations.
+Key=Enter
+Hear=RadioTrail stations, 1, https://stream.0nlineradio.com/schlager?ref=crysta, various, The Russian Federation, 1 of 60313
+Say=One of sixty thousand three hundred and thirteen. The list is sorted by name, and the catalog's first names are numbers, so the first rows are odd ones. The row reads the station's name, its genre, and its country.
+
+[step]
+
+Say=Now the want itself: the Seahawks game is on, and I do not know which station carries it. Control plus K, Keywords -- K for Keywords -- searches every field, on the row or off it: the name, the slogan, what the station says of itself, the notes from its record.
+Key=Control+K
+Hear=Keywords dialog, Keywords: edit
+
+[step]
+
+Say=I type seahawks, S E A H A W K S. No station is named that; it is in what one station says of itself.
+Key=seahawks
+Hear=seahawks
+
+[step]
+
+Say=Enter.
+Key=Enter
+Hear=RadioTrail stations, KIRO 710 ESPN Seattle, sports, news, The United States Of America, 22607 of 60313
+Say=KIRO 710 ESPN Seattle, the flagship of the Seahawks Radio Network, found by a word from the station's own description, not from its name. F3 would find the next station that mentions the team; a network has several.
+
+[step]
+
+Say=Alt plus Shift plus P, Play Stream -- P for Play. The station's stream address goes to the Homer Player, the same player FileDir has. Mark several stations first, Control plus M, and they all queue.
+Key=Alt+Shift+P
+Hear=1 track from stations
+
+[step]
+
+Say=The player opens on its track list, and the station begins. Scroll Lock pauses and resumes; its F1 lists the rest.
+Key=
+Hear=RadioTrail, Track list: list box, KIRO 710 ESPN Seattle, 1 of 1
+Say=The window is named for the database, then for the track once it plays. The sound you hear now is the station.
+
+[step]
+
+Say=Alt plus Shift plus R, Record -- R for Record -- keeps a copy of the stream as it arrives, in your Music folder under Homer Player; the same key, or the Stop recording button, stops it.
+Key=Alt+Shift+R
+Hear=Recording KIRO 710 ESPN Seattle. Alt Shift R stops.
+
+[step]
+
+Say=Escape closes the player and stops the sound, recording included. I am back on the row I left.
+Key=Escape
+Hear=RadioTrail stations, KIRO 710 ESPN Seattle, sports, news, The United States Of America, 22607 of 60313
+
+[step]
+
+Say=Keeping it: Right Arrow to the status field is slow with this many columns, so F4 on the row opens the pick list for the cell I am on; I am on status.
+Key=F4
+Hear=status: list box, untried, 4 of 5
+
+[step]
+
+Say=F, Foxtrot, for favorite.
+Key=F
+Hear=favorite, 2 of 5
+
+[step]
+
+Say=Enter sets it, saved at once. Rating, F2 on the rating cell, and notes, Shift plus N, work as in walk five; a refresh of the catalog never touches any of them.
+Key=Enter
+Hear=favorite
+
+[step]
+
+Say=A second want: jazz, from anywhere. Keywords would jump to one station; Filter Records, which you know from walk six, narrows the list to all of them. Control plus F.
+Key=Control+F
+Hear=Filter Records dialog, name: edit
+
+[step]
+
+Say=Tab to genre, and the word, with percent signs around it: contains jazz.
+Key=Tab
+Hear=genre: edit
+
+[step]
+
+Say=Percent jazz percent.
+Key=%jazz%
+Hear=%jazz%
+
+[step]
+
+Say=Control plus Enter is OK, as in every dialog.
+Key=Control+Enter
+Hear=RadioTrail stations, filtered, 1 of 1200
+Say=Twelve hundred jazz stations, the whole world over. Up and Down Arrows now move only among them; a letter still jumps by name.
+
+[step]
+
+Say=A third want: that jazz, but near home. Control plus F again -- the filter keeps what it has, and I add a field.
+Key=Control+F
+Hear=Filter Records dialog, name: edit
+
+[step]
+
+Say=Tab past genre and country to state -- three Tabs; the boxes are in field order.
+Key=Tab
+Hear=state: edit
+
+[step]
+
+Say=Washington.
+Key=Washington
+Hear=Washington
+
+[step]
+
+Say=Control plus Enter.
+Key=Control+Enter
+Hear=RadioTrail stations, filtered, 1 of 9
+Say=Nine jazz stations in Washington, from twelve hundred, from sixty thousand. Two boxes are joined with and; each one narrows.
+
+[step]
+
+Say=Shift plus F, Say Filter, as in walk six, reads the rule back: genre like jazz and state Washington. A city goes the same way, in the city box, or by Keywords when you are not sure which field holds it. Control plus Shift plus F would clear the filter.
+Key=Shift+F
+Hear=genre like %jazz% and state = Washington
+
+[step]
+
+Say=What this walk taught. I say the key; the reader says what it does.
+Key=
+Hear=
+
+[step]
+
+Say=Control plus K.
+Key=
+Hear=Keywords
+
+[step]
+
+Say=Alt plus Shift plus P.
+Key=
+Hear=Play Stream
+
+[step]
+
+Say=Control plus F.
+Key=
+Hear=Filter Records

@@ -812,9 +812,39 @@ function applyGlobal($dGlobal) {
   }
 }
 
+# THE AUDIO IS NAMED LIKE A CHAPTER, NOT LIKE A SCRIPT (5 October 2026):
+# Tutorial_04_Open_and_Move.inix speaks to 04_Open_and_Move.mp3. The number
+# and the title are what a listener reads in a folder or a player; the word
+# Tutorial is the script's, and the folder is already called tutorials.
+# AUDIO UNDER THE OLD NAMES -- Tutorial_04_X.mp3 -- is retired by the tool
+# itself, so no app's build script has to know the naming changed.
+function retireOldAudio() {
+  if (-not (Test-Path -LiteralPath $sAudioDir)) { return }
+  foreach ($f in @(Get-ChildItem -LiteralPath $sAudioDir -Filter "Tutorial_*.mp3" -ErrorAction SilentlyContinue)) {
+    try { Remove-Item -LiteralPath $f.FullName -Force; note ("  retired " + $f.Name + ", an old-style name") } catch { }
+  }
+}
+
+function audioName([string] $sScript) {
+  $sStem = [System.IO.Path]::GetFileNameWithoutExtension($sScript)
+  if ($sStem -match '^Tutorial_(.+)$') { $sStem = $matches[1] }
+  return ($sStem + ".mp3")
+}
+
 function buildOne([string] $sScript) {
   $sStem = [System.IO.Path]::GetFileNameWithoutExtension($sScript)
-  $sOut = Join-Path $sAudioDir ($sStem + ".mp3")
+  $sOut = Join-Path $sAudioDir (audioName $sScript)
+  # SPEAK ONLY WHAT IS MISSING OR STALE. A walk whose mp3 is newer than the
+  # walk itself is already spoken; re-speaking nineteen walks because four new
+  # ones arrived would cost twenty minutes for nothing (5 October 2026). -live
+  # performs regardless, since nothing is written.
+  if (-not $bLive -and (Test-Path -LiteralPath $sOut)) {
+    if ((Get-Item -LiteralPath $sOut).LastWriteTimeUtc -gt (Get-Item -LiteralPath $sScript).LastWriteTimeUtc) {
+      note ("  " + $sStem + " is already spoken and current; skipped")
+      say ("  " + $sStem + ": already spoken")
+      return
+    }
+  }
   $sWork = Join-Path $env:TEMP ("buildTutorial_" + [Guid]::NewGuid().ToString("N"))
   $script:iPiece = 0
   $script:lsPieces = New-Object System.Collections.Generic.List[string]
@@ -1069,7 +1099,7 @@ function buildOne([string] $sScript) {
   $lsSteps = @($lsSections | Where-Object { $_["_name"] -eq "step" })
   if ($lsSteps.Count -eq 0) { say ($sStem + " holds 0 steps."); return $false }
   note ($sStem + ": steps " + $lsSteps.Count)
-  say ("Creating " + $sStem + ".mp3, " + $lsSteps.Count + " steps. A few minutes.")
+  say ("Creating " + (audioName $sScript) + ", " + $lsSteps.Count + " steps. A few minutes.")
   note ("loudness: every piece to loudnorm I=-16 TP=-1.5 LRA=11; reader gain " + $dReaderGain.ToString([System.Globalization.CultureInfo]::InvariantCulture))
 
   # A BEAT BEFORE ANYTHING IS SAID.
@@ -1175,10 +1205,15 @@ if (-not $bSapi -and -not $bLive -and -not $bDocsOnly) {
 # script named on the command line always speak.
 $iDone = 0
 $iKept = 0
+retireOldAudio
 foreach ($sScript in $lsScripts) {
-  $sHave = Join-Path $sAudioDir ([System.IO.Path]::GetFileNameWithoutExtension($sScript) + ".mp3")
-  if (-not $bLive -and $sOnly -eq "" -and (Test-Path -LiteralPath $sHave)) {
-    note ("kept " + $sHave + ", already spoken")
+  $sHave = Join-Path $sAudioDir (audioName $sScript)
+  # KEPT ONLY WHEN CURRENT: audio older than its walk is spoken again. The
+  # earlier test kept any file that existed, so a changed walk kept its old
+  # voice until someone deleted the folder (5 October 2026).
+  if (-not $bLive -and $sOnly -eq "" -and (Test-Path -LiteralPath $sHave) -and
+      ((Get-Item -LiteralPath $sHave).LastWriteTimeUtc -gt (Get-Item -LiteralPath $sScript).LastWriteTimeUtc)) {
+    note ("kept " + $sHave + ", already spoken and current")
     $iKept = $iKept + 1
     $iDone = $iDone + 1
     continue
@@ -1195,25 +1230,56 @@ $oSpeaker.Dispose()
 # opens it as one track per tutorial, named for the tutorial. No Tutorials.mkv
 # any more: see the note at the top.
 
+# HOW LONG EACH WALK RUNS is read from the file with ffprobe, which comes with
+# ffmpeg. The playlist carries it, the log names it, and a walk over the five
+# minutes the guideline allows is said aloud, so the author hears which walk
+# to cut before anyone else does (6 October 2026).
+function audioSeconds([string] $sMp3) {
+  try {
+    $sProbe = Join-Path (Split-Path -Parent $sFfmpeg) "ffprobe.exe"
+    if (-not (Test-Path -LiteralPath $sProbe)) { $oFound = Get-Command ffprobe.exe -ErrorAction SilentlyContinue; if ($oFound) { $sProbe = $oFound.Source } else { return -1 } }
+    $sOut = & $sProbe -v error -show_entries format=duration -of default=noprint_wrappers=1:nokey=1 $sMp3 2>$null
+    $d = 0.0
+    if ([double]::TryParse(("" + $sOut).Trim(), [System.Globalization.NumberStyles]::Float, [System.Globalization.CultureInfo]::InvariantCulture, [ref] $d)) { return [int][Math]::Round($d) }
+  } catch { }
+  return -1
+}
+
+function minutesText([int] $iSeconds) {
+  if ($iSeconds -lt 0) { return "length unknown" }
+  return ("" + [int][Math]::Floor($iSeconds / 60) + ":" + ("" + ($iSeconds % 60)).PadLeft(2, "0"))
+}
+
 function writePlaylist() {
   $lsM3u = @("#EXTM3U")
   $iListed = 0
+  $iTotal = 0
+  $lsLong = @()
+  $lsShort = @()
   foreach ($sScript in $lsScripts) {
     $sStem = [System.IO.Path]::GetFileNameWithoutExtension($sScript)
-    $sMp3 = Join-Path $sAudioDir ($sStem + ".mp3")
+    $sMp3 = Join-Path $sAudioDir (audioName $sScript)
     if (-not (Test-Path -LiteralPath $sMp3)) { continue }
     $sTitle = $sStem
     foreach ($sLine in (Get-Content -LiteralPath $sScript)) {
       if ($sLine -match "^\s*Title\s*=\s*(.+?)\s*$") { $sTitle = $matches[1]; break }
     }
-    $lsM3u += ("#EXTINF:-1," + $sTitle)
-    $lsM3u += ($sStem + ".mp3")
+    $iSeconds = audioSeconds $sMp3
+    if ($iSeconds -ge 0) { $iTotal = $iTotal + $iSeconds }
+    note ("  " + (audioName $sScript) + " runs " + (minutesText $iSeconds))
+    if ($iSeconds -gt 300) { $lsLong += ((audioName $sScript) + " at " + (minutesText $iSeconds)) }
+    # PARTS 01 TO 10 WANT THREE TO FIVE MINUTES; 00 and 11 may be short.
+    if ($iSeconds -ge 0 -and $iSeconds -lt 180 -and $sStem -match "^Tutorial_(0[1-9]|10)_") { $lsShort += ((audioName $sScript) + " at " + (minutesText $iSeconds)) }
+    $lsM3u += ("#EXTINF:" + $(if ($iSeconds -ge 0) { $iSeconds } else { -1 }) + "," + $sTitle)
+    $lsM3u += (audioName $sScript)
     $iListed = $iListed + 1
   }
   if ($iListed -eq 0) { say "No audio to list."; return $false }
   $sM3u = Join-Path $sAudioDir "Tutorials.m3u"
   [System.IO.File]::WriteAllLines($sM3u, $lsM3u, (New-Object System.Text.UTF8Encoding($false)))
-  say ("Wrote Tutorials.m3u naming " + $iListed + " tutorial" + $(if ($iListed -eq 1) { "" } else { "s" }) + ".")
+  say ("Wrote Tutorials.m3u naming " + $iListed + " tutorial" + $(if ($iListed -eq 1) { "" } else { "s" }) + ", " + (minutesText $iTotal) + " in all.")
+  foreach ($s in $lsLong) { say ("  Over five minutes: " + $s + ". The guideline says cut what an earlier walk taught, or split it.") }
+  foreach ($s in $lsShort) { say ("  Under three minutes: " + $s + ". The guideline wants three to five for parts 01 to 10; give it more substance, not padding.") }
   return $true
 }
 

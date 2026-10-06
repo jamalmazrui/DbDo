@@ -1,113 +1,209 @@
-﻿# DbDo -- Developer Guide
+﻿---
+title: "HomerDev Developer Guide"
+author: "Jamal Mazrui"
+---
 
-How to build DbDo from its source and change it. This file is written for
-programmers.
+# Developer Guide
 
-## What you need
+This is for changing the kit itself. For building an app with it, read
+HomerDev.md.
 
-Nothing by hand. `build.cmd` finds or fetches everything it uses:
+## Contents
 
-- the .NET Framework 4.8 C# compiler (`csc.exe`), from Visual Studio Build Tools;
-- the Homer Development Kit in `C:\HomerDev`, whose shared C# classes DbDo
-  compiles in -- Inix, KeyMap, KeyName, Lbc, Log, Ollama, Paths, Say, Util, Web;
-- pandoc, for the .htm versions of the documents;
-- Inno Setup, for the installer;
-- Python, for the tutorial and hotkey documents;
-- ffmpeg and two piper voices, for the spoken tutorials, the first time only.
+- [Layout](#layout)
+- [Releasing the kit](#releasing-the-kit)
+- [Building the kit](#building-the-kit)
+- [How a change reaches the apps](#how-a-change-reaches-the-apps)
+- [The four scripts, and the order they run in](#the-four-scripts-and-the-order-they-run-in)
+- [Adding a module](#adding-a-module)
+- [Encodings](#encodings)
+- [Templates](#templates)
+- [Versioning and release](#versioning-and-release)
+- [Publishing the kit](#publishing-the-kit)
+- [Conventions worth not rediscovering](#conventions-worth-not-rediscovering)
 
-Missing tools are fetched with winget. Everything the build does is written to
-`logs\\DbDo-build-<date>-<time>.log`, a new file for every build.
+## Layout
 
-## Building
+    C:\HomerDev\
+      .claude\skills\   the Claude skills, one folder each
+      exec\CSharp\    the Homer namespace: Inix, KeyMap, KeyName, Lbc, Log, Mdi,
+                     Paths, PdfRead, Say, Util, Web, inixVert
+      exec\Python\    the same toolbox for Python and NVDA add-ons, a module
+                     each: inix, lbc, log, paths, say, util, web
+      help\          every document, the style guides, the tutorial scripts
+      Templates\samples\       the four fruit basket programs and their build scripts
+      Templates\     the files a new app is written from, carrying _APP_
+      scripts\         check, push, release, tidy,
+                     buildTutorials, release
+      build.cmd / .py     convert the documents, audit the kit
+      checkHomerDev.cmd / .py     build all three samples and report
+      newHomerApp.cmd / .py       write a new app folder
+      ReadMe, License, RepoFiles.txt, version.txt, .gitignore
 
-From `C:\DbDo`:
+## Releasing the kit
 
-    build
+    releaseHomerDev "What changed."   all four steps below, stopping at the first failure
 
-It compiles `DbDo.cs` into `exec\DbDo.exe`, writes `Hotkeys.md` from the menus,
-converts every document to .htm, builds the spoken tutorials if they are
-missing (delete help\\Tutorials.mkv and the Tutorial*.mp3 files to re-record), and compiles `DbDo_setup.exe`. The installer will not compile without
-the tutorials: a release without them is refused at build time rather than
-shipped.
+or one step at a time:
+
+    build                   documents, all four samples, the audit
+    checkHomerDev                   environment, clean build of everything, the
+                                    tools on your PATH, and every program driven
+                                    through its keys by uiCheck
+    scripts\installTools              put the current tools on the PATH
+    push "What changed."
+    release
+
+`installTools` matters more than it looks. `release`, `tidy`,
+`check`, `push` and `release` all act on the current directory, so
+one copy on the PATH serves every project -- and an OLD copy on the PATH also
+serves every project. A `release` from before source-only releases were
+supported refuses to release a project that has no installer script, and the
+error names a file that was never meant to exist:
+
+    Could not find HomerDev_setup.iss in C:\HomerDev
+
+That is the old copy talking. Run `installTools` after updating the kit and it
+goes away.
+
+## Building the kit
+
+    build          convert the documents, build every sample, check the kit
+    build check    check only
+    checkHomerDev          build all three samples from clean and report
+
+There is no compiler step, because the kit is source. The check is what stands
+in for one:
+
+- every expected component is present and not empty
+- every text file is UTF-8 with a BOM and CRLF, except `.cmd` and `.bat`, which
+  are CRLF with no BOM
+- every template still carries its `_APP_` placeholder
+- no zero-byte file anywhere
+- nothing left behind by an earlier layout: a file the kit has moved is removed
+  once its replacement is in place
+
+`build` reads files; it does not compile. `checkHomerDev` does, and it
+is the one to run before a release: it audits, checks that every module's
+`REQUIRES` line is satisfied, deletes what previous builds wrote, and builds all
+three samples. Three releases shipped a compile failure that only this would
+have caught.
+
+Any failure exits non-zero and names the file. The detail is in
+`build.log` beside the script.
+
+The kit's modules are not compiled here, so a C# mistake in one of them
+surfaces the first time an app builds. That is deliberate and matches the house
+preference: a build error you can see beats a component quietly left out.
+
+## How a change reaches the apps
+
+An app's build script compiles the Homer modules straight out of
+`%HomerDev%\exec\CSharp`, or the HomerDev folder found above or beside the app on any drive (see "Where the kit and your projects live" in HomerDev.md). There is no copy in the app
+folder. So:
+
+1. Change the module here.
+2. Run `build` to check the kit still passes.
+3. Rebuild each app that uses it.
+
+The third step is the real test. A change to `Lbc.cs` that DbDo compiles and
+HomerScribe does not is a change that is not finished.
+
+Before removing or renaming a public member, grep the apps for it. The merge
+that produced this kit exists because two apps had diverged on exactly that.
 
 ## The four scripts, and the order they run in
 
-1. **`build`** -- steps `version.txt`, writes `Version.cs`, refreshes the
-   kit's tools into `scripts`, puts the project's files into the Homer
-   encoding, compiles into `exec`, speaks any tutorial with no audio, and
-   builds `DbDo_setup.exe` at the top of the project.
-2. **`scripts\push "message"`** -- rewrites the whitelist from
-   `RepoFiles.txt`, adds what it names, commits, pushes.
-3. **`scripts\tidy`** -- the periodic clean: strays into `notes`,
-   fetched things deleted, zero-byte files deleted, whitelist rewritten.
-4. **`scripts\release`** -- runs `scripts\check --build`, tags the pushed
-   commit with the version stamped in `DbDo_setup.exe`, publishes the
-   installer as a GitHub release.
+Every app carries these in `scripts`, refreshed from the kit by its build,
+and runs them from its project folder. They share one fact: `.gitignore` is
+a whitelist written from `RepoFiles.txt`, so "add everything" means "add
+everything the project has named".
 
-`scripts\unpushed` undoes a local commit that should not go up. Every tool
-takes the project to be the folder it is run in, or its parent when that folder
-is `scripts` or `exec`.
+1. `build` -- steps `version.txt`, builds the program and the installer,
+   speaks any tutorial without audio, puts the project's own files into the
+   Homer encoding (`scripts\fixEncoding`), refreshes these scripts from the kit.
+2. `scripts\push "message"` -- rewrites the whitelist from `RepoFiles.txt`,
+   adds what it names, refuses anything over 10 MB, commits, pushes, shows
+   the status. Without `RepoFiles.txt` it stages nothing and says so.
+3. `scripts\tidy` -- the periodic clean: strays into place,
+   fetched things deleted, the whitelist rewritten, strays untracked, commit.
+   Same whitelist as push; it too stages nothing without `RepoFiles.txt`.
+4. `scripts\release` -- tags the pushed commit with the version stamped in
+   `<App>_setup.exe` and publishes the installer. `scripts	agRelease` runs
+   the checks first, then this.
+And `scripts\unpushed` -- when something was committed that should not
+   have been and the push has not happened: undoes the local commits,
+   keeps every file, and the next push or tidy makes the commit properly.
 
-**The kit is a development-time dependency only.** DbDo needs HomerDev 1.43.6 or
-later to build; the installed program runs with no kit on the machine.
+`RepoFiles.txt` names what the repository carries; `LocalFiles.txt` names
+what stays on this disk and is never pushed -- fetched voices, built output,
+logs, generated audio. A file that does not go up needs one line in the
+first; a large file that must not go up needs one line in the second.
 
-## The layout
+## Adding a module
 
-The development folder and the installed folder have the same shape. Sources and
-build files stay at the top, with ReadMe and License; everything else sits in the
-folder it is installed to. To try a build, run `exec\\DbDo.exe`.
+1. Write it in Camel Type, in `namespace Homer`, with a header comment saying
+   what it is for and what it depends on.
+2. Depend on as little as possible. The existing modules depend on the .NET
+   base class library, WinForms, and each other, and nothing else. `PdfRead.cs`
+   is the one exception, which is why it sits apart and why an app's build
+   script fetches its package rather than the kit carrying it.
+3. Add it to `c_lsExpected` in `build.py`.
+4. Add a commented line for it in `Templates\build_APP_.cmd`, so a new app can
+   switch it on by uncommenting.
+5. Describe it in HomerDev.md.
 
-`scripts\tidy`, from the Homer Development Kit, puts the folder back into this
-shape: it moves programs into `exec`, documents into `help` and logs into
-`logs`, and moves anything the project does not name into `notes`. Run
-`tidy` to tidy the folder and the repository, `tidy --folder-only` to tidy the
-folder alone. `LocalFiles.txt` tells it what belongs on this disk but not in the
-repository: the tutorial scripts, the generated audio and the fetched voices.
+## Encodings
 
-- `configs` -- settings shipped with the program: `DbDo.inix`
-- `data` -- the shared lookups database, `lookups.db`
-- `exec` -- the program and its libraries
-- `help` -- the documents, the tutorials and their recording
-- `logs` -- in the development folder, one file per build, clean, tutorial or
-  audit run, named `DbDo-<task>-<date>-<time>.log`. Sort by name and they are in
-  order; zip the folder and you have them all.
-- `scripts` -- screen reader scripts and tooling
-- `templates` -- the template databases, copied to your own folder on first run
+UTF-8 with a byte order mark and CRLF line endings, everywhere except `.cmd`
+and `.bat`, which take CRLF and no BOM. The check enforces this, and
+`newHomerApp` writes files this way. A file that reads text should detect its
+encoding rather than assume, using the Ude package an app's build script
+fetches.
 
-Your own copies live under `%LOCALAPPDATA%\DbDo`.
+## Templates
 
-## Checks
+A template is an ordinary working file with `_APP_` wherever the app name
+belongs, in the content and in the file name. `newHomerApp.py` replaces the
+token and renames. Two rules:
 
-`scripts\auditPatterns.py` checks the rules that are easy to break and hard to
-notice, including:
+- A template must still carry the token. The check fails if one has lost it,
+  because a template that has been edited into a concrete app silently produces
+  broken copies.
+- Anything a person must change by hand after instantiation is marked
+  `CHANGE ME` with a comment saying what to put there. Today that is the AppId
+  and the hotkey in the installer.
 
-- every Say command answers in the form `name: value`;
-- every Shift+letter is a Say command;
-- no menu letter falls in the middle of a word, and a menu letter matches its
-  hotkey's letter;
-- every key a tutorial teaches is bound in the program;
-- tutorial scripts are complete.
+## Versioning and release
 
-Run it before a release. It writes `logs\\DbDo-audit-<date>-<time>.log`.
+`version.txt` holds one line and is the only place the kit's version is
+written. `release` reads a version from the installer's version resource,
+which the kit does not have, so the kit is tagged by hand:
 
-## Keys
+    git tag v1.0.0
+    git push origin v1.0.0
 
-Every key follows the Homer rules, written out in `C:\HomerDev\help\HomerDev.md`:
-a letter is the first letter of a word in the command; Shift and a letter asks;
-adding Shift reverses; each function key is a family. `Hotkeys.md` is generated
-from the `addItem` calls, so a key changed in the code is changed in the
-document at the next build.
+An app is different: its `build.cmd` increments `version.txt`, generates
+`Version.cs` from it, and the `.iss` reads the same file, so the program, the
+installer and the tag cannot disagree. `release` then does the rest.
 
-## Tutorials
+## Publishing the kit
 
-Each tutorial is a demo script, `help\Tutorial_NN_Topic.inix`: a `[global]`
-section for the voices and timing, then one `[step]` per exchange --
-`Say=` for the narrator, `Key=` for the keystroke, `Hear=` for the screen reader,
-`Note=` for the written transcript only. `scripts\buildTutorials` speaks them
-into `help\Tutorials.mkv`; `scripts\makeTutorial` writes `help\Tutorials.md`.
-The scripts are not published; the recording and the transcript are.
+    createHomerDevRepo            create the repository and push
+    createHomerDevRepo -DryRun    report what would happen, change nothing
 
-## Releasing
+It needs git and an authenticated `gh`. It is a maintainer script and is named
+in `.gitignore`, so it does not appear in the public source browser.
 
-After a build, `scripts\release` tags the version stamped in `DbDo_setup.exe`,
-creates the GitHub release, and checks that the public download link answers.
+## Conventions worth not rediscovering
+
+- **Add order is focus order** in Lbc. Fix the order of the calls, or fix Lbc.
+  Never sprinkle `TabIndex` assignments through an app.
+- **A `.ps1` never ships without a `.cmd`** that calls it and forwards its
+  arguments.
+- **A script's log goes beside the script**, except for an installed program
+  under Program Files, which writes beside its output or under
+  `%LOCALAPPDATA%\<App>`.
+- **The console is for a person; the log is for debugging.**
+- **Settings are written the moment they are answered**, not at exit.
+- **Speak only what the screen reader cannot know.**

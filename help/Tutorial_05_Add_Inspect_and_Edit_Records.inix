@@ -1,0 +1,170 @@
+﻿[about]
+Title=05 - Add, Inspect and Edit Records
+Intro=Adding a record with its pick lists, looking at one record whole, and changing a value and checking what was saved.
+Setup=JobTrail is open on the jobs table. This morning I found a support analyst opening at Widget Works.
+Homework=Add a job of your own, inspect it, then change one field.
+
+[step]
+
+Say=Control plus N, New record -- N for New.
+Key=Control+N
+Hear=New Record dialog
+Hear=Employer edit
+Note=One box per field, in the order I would fill them in.
+
+[step]
+
+Say=The employer, then Tab to the title.
+Key=Tab
+Hear=Title edit
+
+[step]
+
+Say=The title, then Tab to status.
+Key=Tab
+Hear=Status edit
+Hear=F4 picks from 7 values
+
+[step]
+
+Say=F4 opens the pick list. F4 picks, all through Homer programs.
+Key=F4
+Hear=Status list box, applied, 1 of 7
+
+[step]
+
+Say=Typing a letter jumps to the first value starting with it, so L reaches lead. That is L, Lima.
+Key=l
+Hear=lead, 4 of 7
+
+[step]
+
+Say=Enter takes it. Control plus Enter saves the record from anywhere in the dialog.
+Key=Control+Enter
+Hear=Records list view
+Hear=Widget Works (your own entry) Support Analyst lead, 5 of 5
+
+[step]
+
+Say=A row speaks three fields. Control plus I, Inspect Record, reads them all.
+Key=Control+I
+Hear=Inspect Record dialog
+Hear=employer: Example Widgets Company (sample employer)
+Note=I for Inspect. A read-only window; Escape closes it.
+
+[step]
+
+Say=For one fact, I ask instead. Shift plus N, Say Notes.
+Key=Escape
+Hear=Records list view
+
+[step]
+
+Say=Shift plus N is Say Notes -- N for Notes -- and reads the whole note.
+Key=Shift+N
+Hear=notes, Illustrative record. Interview booked for the 24th; ask about screen reader testing tools.
+Note=Shift plus T, Say Tags, and Shift plus U, Say URL, work the same way.
+
+[step]
+
+Say=Shift plus E, Say Edited: when I last changed it.
+Key=Shift+E
+Hear=edited, September 19, 2026 at 10:01 PM
+Note=Shift plus A, Say Added, says when it arrived.
+
+[step]
+
+Say=Alt plus Shift plus N edits the notes in their own window, for a long one.
+Key=Alt+Shift+N
+Hear=Notes dialog
+Hear=Notes edit, multiline, Illustrative record. Interview booked for the 24th.
+Note=Control plus Enter saves; Escape leaves.
+
+[step]
+
+Say=Enter opens the record in the same dialog I used to add one.
+Key=Enter
+Hear=Edit Record dialog
+Hear=Employer edit, Example Widgets Company (sample employer)
+
+[step]
+
+Say=Tab to status, F4 for the list, O for offer. That is O, Oscar.
+Key=o
+Hear=offer, 5 of 7
+
+[step]
+
+Say=Control plus Enter saves, the way it presses OK in any DbDo dialog.
+Key=Control+Enter
+Hear=Records list view
+Hear=Example Widgets Company (sample employer) Accessibility Analyst offer, 2 of 4
+
+[step]
+
+Say=For one field, F2 edits the cell in place -- the same F2 that renames a file in Windows.
+Key=F2
+Hear=Cell edit, offer
+Note=Enter saves the cell and keeps my place.
+
+[step]
+
+Say=Shift plus C checks it.
+Key=Escape
+Hear=Records list view
+
+[step]
+
+Say=Shift plus C is Say Cell: the column, where the row is, and the value.
+Key=Shift+C
+Hear=status
+Hear=row 2 of 4
+Hear=offer
+
+[step]
+
+Say=Control plus Shift plus C, Copy Record, duplicates the current row as a new one, for a job much like the last; then edit the few fields that differ.
+Key=Control+Shift+C
+Hear=Record copied
+
+[step]
+
+Say=Control plus D, Delete Record, removes the current record -- or every marked record when marks exist -- after asking once.
+Key=Control+D
+Hear=Delete this record? Yes button
+
+[step]
+
+Say=Escape keeps it. The question is the only confirmation DbDo asks; everything else is saved as you go.
+Key=Escape
+Hear=JobTrail jobs
+
+[step]
+
+Say=What this walk taught. I say the key; the reader says what it does.
+Key=
+Hear=
+
+[step]
+
+Say=Control plus N.
+Key=
+Hear=New Record
+
+[step]
+
+Say=F4.
+Key=
+Hear=Current Windows
+
+[step]
+
+Say=Control plus Enter.
+Key=
+Hear=Open Cell Value
+
+[step]
+
+Say=Control plus I.
+Key=
+Hear=Inspect Record

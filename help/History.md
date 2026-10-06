@@ -1,2035 +1,3415 @@
-﻿# DbDo History of Changes
+﻿---
+title: "HomerDev History"
+author: "Jamal Mazrui"
+---
 
-This file is the chronological record of DbDo releases. The most recent release is at the top. For the overview of what DbDo is, see `Announce.md` or `ReadMe.md`. For the full reference, see `DbDo.md`.
+# History
 
-Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
+## Contents
 
-## v1.0.240 (current)
+- [1.50.2 -- 2 October 2026](#october-2026)
+- [1.50.1 -- 2 October 2026](#october-2026-1)
+- [1.50.0 -- 2 October 2026](#october-2026-2)
+- [1.49.1 -- 2 October 2026](#october-2026-3)
+- [1.49.0 -- 2 October 2026](#october-2026-4)
+- [1.48.0 -- 2 October 2026](#october-2026-5)
+- [1.47.0 -- 2 October 2026](#october-2026-6)
+- [1.46.0 -- 2 October 2026](#october-2026-7)
+- [1.45.0 -- 2 October 2026](#october-2026-8)
+- [1.44.0 -- 2 October 2026](#october-2026-9)
+- [1.43.59 -- 1 October 2026](#october-2026-10)
+- [1.43.58 -- 1 October 2026](#october-2026-11)
+- [1.43.57 -- 1 October 2026](#october-2026-12)
+- [1.43.56 -- 1 October 2026](#october-2026-13)
+- [1.43.55 -- 1 October 2026](#october-2026-14)
+- [1.43.54 -- 1 October 2026](#october-2026-15)
+- [1.43.53 -- 1 October 2026](#october-2026-16)
+- [1.43.52 -- 1 October 2026](#october-2026-17)
+- [1.43.51 -- 30 September 2026](#september-2026)
+- [1.43.50 -- 30 September 2026](#september-2026-1)
+- [1.43.49 -- 30 September 2026](#september-2026-2)
+- [1.43.48 -- 30 September 2026](#september-2026-3)
+- [1.43.47 -- 30 September 2026](#september-2026-4)
+- [1.43.46 -- 29 September 2026](#september-2026-5)
+- [1.43.45 -- 29 September 2026](#september-2026-6)
+- [1.43.44 -- 29 September 2026](#september-2026-7)
+- [1.43.43 -- 29 September 2026](#september-2026-8)
+- [1.43.42 -- 29 September 2026](#september-2026-9)
+- [1.43.41 -- 29 September 2026](#september-2026-10)
+- [1.43.40 -- 29 September 2026](#september-2026-11)
+- [1.43.39 -- 29 September 2026](#september-2026-12)
+- [1.43.38 -- 29 September 2026](#september-2026-13)
+- [1.43.37 -- 29 September 2026](#september-2026-14)
+- [1.43.36 -- 28 September 2026](#september-2026-15)
+- [1.43.35 -- 28 September 2026](#september-2026-16)
+- [1.43.34 -- 28 September 2026](#september-2026-17)
+- [1.43.33 -- 28 September 2026](#september-2026-18)
+- [1.43.32 -- 28 September 2026](#september-2026-19)
+- [1.43.31 -- 28 September 2026](#september-2026-20)
+- [1.43.30 -- 28 September 2026](#september-2026-21)
+- [1.43.29 -- 28 September 2026](#september-2026-22)
+- [1.43.28 -- 28 September 2026](#september-2026-23)
+- [1.43.27 -- 28 September 2026](#september-2026-24)
+- [1.43.26 -- 28 September 2026](#september-2026-25)
+- [1.43.25 -- 28 September 2026](#september-2026-26)
+- [1.43.24 -- 28 September 2026](#september-2026-27)
+- [1.43.23 -- 28 September 2026](#september-2026-28)
+- [1.43.22 -- 27 September 2026](#september-2026-29)
+- [1.43.21 -- 27 September 2026](#september-2026-30)
+- [1.43.20 -- 27 September 2026](#september-2026-31)
+- [1.43.19 -- 26 September 2026](#september-2026-32)
+- [1.43.18 -- 26 September 2026](#september-2026-33)
+- [1.43.17 -- 26 September 2026](#september-2026-34)
+- [1.43.16 -- 26 September 2026](#september-2026-35)
+- [1.43.15 -- 26 September 2026](#september-2026-36)
+- [1.43.14 -- 26 September 2026](#september-2026-37)
+- [1.43.13 -- 26 September 2026](#september-2026-38)
+- [1.43.12 -- 26 September 2026](#september-2026-39)
+- [1.43.11 -- 26 September 2026](#september-2026-40)
+- [1.43.10 -- 26 September 2026](#september-2026-41)
+- [1.43.9 -- 26 September 2026](#september-2026-42)
+- [1.43.8 -- 26 September 2026](#september-2026-43)
+- [1.43.7 -- 26 September 2026](#september-2026-44)
+- [1.43.6 -- 26 September 2026](#september-2026-45)
+- [1.43.5 -- 26 September 2026](#september-2026-46)
+- [1.43.4 -- 26 September 2026](#september-2026-47)
+- [1.43.3 -- 26 September 2026](#september-2026-48)
+- [1.43.2 -- 26 September 2026](#september-2026-49)
+- [1.43.1 -- 26 September 2026](#september-2026-50)
+- [1.43.0 -- 26 September 2026](#september-2026-51)
+- [1.42.1 -- 26 September 2026](#september-2026-52)
+- [1.42.0 -- 26 September 2026](#september-2026-53)
+- [1.41.3 -- 26 September 2026](#september-2026-54)
+- [1.41.2 -- 26 September 2026](#september-2026-55)
+- [1.41.1 -- 26 September 2026](#september-2026-56)
+- [1.39.1 -- 25 September 2026](#september-2026-57)
+- [1.38.3 -- 25 September 2026](#september-2026-58)
+- [1.38.2 -- 25 September 2026](#september-2026-59)
+- [1.38.1 -- 25 September 2026](#september-2026-60)
+- [1.38.0 -- 25 September 2026](#september-2026-61)
+- [1.37.0 -- 25 September 2026](#september-2026-62)
+- [1.36.2 -- 25 September 2026](#september-2026-63)
+- [1.36.1 -- 25 September 2026](#september-2026-64)
+- [1.36.0 -- 25 September 2026](#september-2026-65)
+- [1.35.1 -- 25 September 2026](#september-2026-66)
+- [1.35.0 -- 25 September 2026](#september-2026-67)
+- [1.34.0 -- 25 September 2026](#september-2026-68)
+- [1.33.0 -- 25 September 2026](#september-2026-69)
+- [1.32.0 -- 25 September 2026](#september-2026-70)
+- [1.31.1 -- 25 September 2026](#september-2026-71)
+- [1.31.0 -- 25 September 2026](#september-2026-72)
+- [1.30.0 -- 25 September 2026](#september-2026-73)
+- [1.29.0 -- 25 September 2026](#september-2026-74)
+- [1.28.0 -- 24 September 2026](#september-2026-75)
+- [1.27.0 -- 23 September 2026](#september-2026-76)
+- [1.26.0 -- 22 September 2026](#september-2026-77)
+- [1.25.0 -- 21 September 2026](#september-2026-78)
+- [1.24.0 -- 21 September 2026](#september-2026-79)
+- [1.23.0 -- 21 September 2026](#september-2026-80)
+- [1.22.1 -- 21 September 2026](#september-2026-81)
+- [1.22.0 -- 21 September 2026](#september-2026-82)
+- [1.21.0 -- 21 September 2026](#september-2026-83)
+- [1.20.0 -- 20 September 2026](#september-2026-84)
+- [1.19.0 -- 20 September 2026](#september-2026-85)
+- [1.18.0 -- 19 September 2026](#september-2026-86)
+- [1.17.0 -- 19 September 2026](#september-2026-87)
+- [1.16.0 -- 19 September 2026](#september-2026-88)
+- [1.15.0 -- 19 September 2026](#september-2026-89)
+- [1.14.1 -- 19 September 2026](#september-2026-90)
+- [1.14.0 -- 19 September 2026](#september-2026-91)
+- [1.13.5 -- 19 September 2026](#september-2026-92)
+- [1.13.4 -- 19 September 2026](#september-2026-93)
+- [1.13.3 -- 19 September 2026](#september-2026-94)
+- [1.13.2 -- 19 September 2026](#september-2026-95)
+- [1.13.1 -- 19 September 2026](#september-2026-96)
+- [1.13.0 -- 19 September 2026](#september-2026-97)
+- [1.12.1 -- 19 September 2026](#september-2026-98)
+- [1.12.0 -- 19 September 2026](#september-2026-99)
+- [1.11.0 -- 19 September 2026](#september-2026-100)
+- [1.10.1 -- 19 September 2026](#september-2026-101)
+- [1.10.0 -- 19 September 2026](#september-2026-102)
+- [1.9.0 -- 19 September 2026](#september-2026-103)
+- [1.8.1 -- 19 September 2026](#september-2026-104)
+- [1.8.0 -- 19 September 2026](#september-2026-105)
+- [1.7.0 -- 19 September 2026](#september-2026-106)
+- [1.6.1 -- 19 September 2026](#september-2026-107)
+- [1.6.0 -- 19 September 2026](#september-2026-108)
+- [1.5.0 -- 18 September 2026](#september-2026-109)
+- [1.4.0 -- 18 September 2026](#september-2026-110)
+- [1.3.0 -- 18 September 2026](#september-2026-111)
+- [1.2.0 -- 18 September 2026](#september-2026-112)
+- [1.1.0 -- 18 September 2026](#september-2026-113)
+- [1.0.0 -- 18 September 2026](#september-2026-114)
 
-**The official record is asked for by title.** The run of 5 October looked up
-3,878 call-sign stations and found 263 -- not for want of articles, since KALW,
-WCRB and WETA all have one, but because a search was asked where a title would
-do. `fetchStations` now asks Wikipedia for the article by its likely titles
--- KALW, KALW-FM, KALW (FM) -- with redirects followed, and searches only when
-none answers; an infobox under the station's own title counts even without a
-call_sign line. Every miss is logged with its reason, an error inside a 200 is
-treated as the refusal it is, and the check that mistook an honest run for a
-refused one is gone. `--official-only --again` asks about the unmatched ones.
-Needs HomerDev 1.52.5.
+## 1.53.1 -- 6 October 2026
 
-## v1.0.239
+**A high step count is a notice.** The tool's measurement of the audio is the
+fact; a walk of many short two-voice exchanges is brisk, not long, and is no
+longer refused for its count.
 
-**fetchStations starts clean and stays simple.** A fresh start sets the old
-copy aside and makes the new one in the same breath -- it had set aside and
-not copied, leaving an empty database for the catalog to miss. A copy that is
-not the template's shape is replaced, not patched; there is no migration of an
-older copy, since the structure going forward is the template's.
+## 1.53.0 -- 6 October 2026
 
-## v1.0.238
+**The kit has its own twelve walks**, in the pattern it prescribes: overview,
+install and launch -- the kit's build and the fruit basket --, the interface
+and the key rules heard in DbDo, EdSharp and FileDir, then five tasks --
+starting an app from the kit, build and check and release, the installer's
+finish page, spoken tutorials, shared code and the Homer Player heard in two
+programs -- then a glossary of twenty-six terms, a conclusion and more
+information. Where the kit has no screen of its own, an app built on it shows
+what the kit's code makes a person hear. The one earlier walk is retired, and
+checkTutorial holds the kit to the pattern like any app.
 
-**A tidied logs folder no longer fails the release.** The acceptance check that
-looked for the program's logs folder now looks for its user folder, which is
-there once DbDo has run; gathering the logs with zip -m had taken the folder
-with the files.
+## 1.52.8 -- 6 October 2026
 
-## v1.0.237
+**HomerComponents.iss supplies the screen reader wrappers** -- isInstallJaws,
+isUpdateJaws, isReinstallJaws, labelJaws, and the same four for NVDA -- that an
+app's [Components] lines call. An app that defines its own writes
+`#define HomerReaderWrappersInApp` before the include. FileDir's installer
+failed on 6 October because a kit without these had been laid over one that
+had them.
 
-**The walks fit five minutes each.** Walk 08 is cut to its three wants, with
-playing, recording and keeping between them and nothing an earlier walk already
-taught. Walk 04 is rebuilt from the right pieces -- opening JobTrail and the
-menus -- after a mix-up had given it the key rules twice. Walk 00 is prose, the
-two reader keys, then the table of contents as a clean list in two voices.
-Walks 02 and 03 say where help is. Twelve walks, about an hour. Needs HomerDev
-1.52.3.
+## 1.52.7 -- 6 October 2026
 
-## v1.0.236
+**Three to five minutes a walk.** Parts 01 to 10 are to run between three and
+five minutes -- under three is too thin, over five too long; 00 and 11 may be
+short. buildTutorials names any walk under three as well as over five;
+checkTutorial notices a thin walk and exempts the glossary from the step
+ceiling, since its steps are two short lines. Tutorials.md and the skill have
+the rule.
 
-**The walks take the Homer pattern of eleven.** 00 Overview and Table of
-Contents, 01 Install and Launch, 02 User Interface Concepts, 03 Key Patterns,
-then five tasks -- 04 Open and Move Through a Database, 05 Add, Inspect and Edit
-Records, 06 Find, Order and Select, 07 Related, Marked, Reports and a Work
-Search Record, 08 RadioTrail -- then 09 Glossary, 10 Conclusion and 11 More
-Information. The nineteen earlier walks were regrouped into these, nothing
-dropped; three were written new: the interface, the key rules, and a glossary
-of twenty-three terms in which the host says the term and the reader says what
-it means. Every walk's closing recap is two voices the same way: the host says
-the key, the reader says the command. The audio is named like a
-chapter, 04_Open_and_Move_Through_a_Database.mp3. The build retires the old
-scripts and audio and speaks the new set. Needs HomerDev 1.52.0.
+## 1.52.6 -- 6 October 2026
 
-## v1.0.235
+**An incomplete set is a notice, not a silence.** checkTutorial reports the
+twelve-walk pattern's gaps, and a first walk without the orientation key, as
+notices: the clean walks are spoken and the program releases, and every build
+says what the set still lacks. A problem is something wrong inside a walk; work
+not yet done is not a reason to leave a program with no audio, which is what
+EdSharp and FileDir had on 6 October.
 
-**Record a station**: Alt+Shift+R in the Homer Player starts and stops a copy
-of the stream, kept in Music, Homer Player. Needs HomerDev 1.51.5.
+## 1.52.5 -- 6 October 2026
 
-## v1.0.234
+**buildTutorials measures, retires and re-speaks on its own.** Each walk's
+length is read with ffprobe, written into Tutorials.m3u, named in the log and
+summed aloud; a walk over five minutes is called out. Audio under the old names
+is retired by the tool, so no app's build has to know the naming changed. And a
+walk whose audio is older than the walk is spoken again -- the tool had kept any
+file that existed, so a changed walk kept its old voice until the folder was
+deleted by hand.
 
-**RadioTrail learns from Quill Radio's feature list** -- what a database does
-well, taken; what a player does well, left to the Homer Player; the rest left
-aside. Three reports: a favorites playlist as M3U, most played, and a page per
-favorite. Play Stream counts plays and dates them in two new fields, and tells
-Radio Browser about the click. `fetchStations --import` brings a playlist's
-stations in as yours; after a full fetch, stations the catalog has dropped are
-marked dead and kept. The guide says what was taken and what was left.
+## 1.52.4 -- 5 October 2026
 
-## v1.0.233
+**The build template speaks walks by chapter name.** Its tutorial gate looks
+for 04_X.mp3 beside Tutorial_04_X.inix, retires audio under the old names, and
+calls the tool when a walk's audio is missing or older than the walk; the tool
+speaks only those. Every app's build takes this through updateAppBuilds.
 
-**Four spoken walks for RadioTrail**, 15 to 18: opening and the row, finding a
-station, playing one and several, and keeping it yours. The build notices a walk
-with no audio, or audio older than the walk, and speaks just that one. Needs
-HomerDev 1.51.4.
+## 1.52.3 -- 5 October 2026
 
-## v1.0.232
+**Five minutes a walk, and walk 00 has a shape.** A walk is under five
+minutes -- about twenty-five steps -- and checkTutorial sends back one plainly
+over; twelve such walks are "about an hour". Walk 00 is prose, then the two
+reader keys, then the table of contents as a clean two-voice list. Walks 02
+and 03 say where help is and name the keys that explain the keys. All of it
+is in Tutorials.md and in the homer-tutorial skill.
 
-**Credit where it is due.** The guide's RadioTrail section now names its
-sources -- Radio Browser, SomaFM, Wikipedia -- and Quill Radio, whose published
-requirements and source shaped the design and supplied the ACB Media and NFB
-Radio addresses.
+## 1.52.2 -- 5 October 2026
 
-## v1.0.231
+**Tasks are wants, and later walks lean on earlier ones**: a task walk
+states a plain want first and shows the features as the way to it; each walk
+assumes those before it and names rather than reteaches what they taught.
+Tutorials.md has the rule.
 
-**The Wikipedia step asks one question a second**, as Wikipedia asks of a
-script, and tells a refusal from a miss: a refused station is left for the next
-run instead of being marked as unmatched. Only United States and Canadian
-stations are looked up, and only an article whose own infobox carries the
-station's call sign counts -- "WAVE" no longer finds the article on radio waves.
-The first run matched 183 of 6,860 because Wikipedia stopped answering after the
-first thousand and the rest were taken for misses; those will be looked up
+## 1.52.1 -- 5 October 2026
+
+**Twelve walks, with a glossary.** 09 Glossary joins the pattern, after the
+tasks and before 10 Conclusion and 11 More Information, which is always last.
+Tasks are 04 to 08, at least one and at most five, numbered without a gap. The
+glossary is two voices -- the host says the term, the reader says the meaning
+-- and so is every recap: the host says the key, the reader says the command.
+Tutorials.md has the pattern and the rule for the two voices: an exchange that
+teaches, never a chat.
+
+## 1.52.0 -- 5 October 2026
+
+**Eleven walks for every program**, by name: 00 Overview and Table of Contents,
+01 Install and Launch, 02 User Interface Concepts, 03 Key Patterns, 04 to 08
+five tasks, 09 Conclusion, 10 More Information. The templates carry a skeleton
+of each; checkTutorial requires the fixed six by name and the five task numbers;
+and the audio is named like a chapter -- 04_Open_and_Move.mp3 from
+Tutorial_04_Open_and_Move.inix -- so a folder or a player shows the number and
+the title. Tutorials.md has the pattern.
+
+## 1.51.5 -- 5 October 2026
+
+**The Homer Player records: two buttons and one key.** Record and Stop
+recording are buttons beside Stop playback, each available only when it
+applies, so the reader says which state you are in; Alt+Shift+R does whichever
+applies from anywhere in the dialog, as Scroll Lock does for playing. Where am
+I, Alt+Shift+W, says "recording for N minutes" while one runs, and closing the
+player finishes a recording rather than cutting it. The buttons carry no
+trigger letter: R is the Rate slider's and S is Stop playback's.
+
+**The player records** Alt+Shift+R writes the stream as it
+arrives to Music\Homer Player, named for the track and the time, and says the
+file; Alt+Shift+R again stops and says how long it ran. A copy of the stream,
+no re-encoding, no settings: enough to keep a programme to hear later, which
+is all a player should offer. Anyone making audio to publish has a studio
+program for that.
+
+## 1.51.4 -- 5 October 2026
+
+**buildTutorials speaks only what is missing or stale.** A walk whose audio is
+newer than the walk is skipped, so adding four walks to a set of fifteen costs
+four walks' speaking, not nineteen.
+
+## 1.51.3 -- 5 October 2026
+
+**MediaPlayer.cs stands on its own.** Two dialogs it had borrowed from
+FileDir's own Lbc class -- a message box and a Save As -- are private helpers
+now, so the player compiles in any app that takes it from the kit.
+
+## 1.51.2 -- 5 October 2026
+
+**Mpv.cs looks for mpv machine-wide only**: under Program Files, where a Homer
+installer puts it, and on the PATH; never in a user's own profile.
+
+## 1.51.1 -- 5 October 2026
+
+**The Homer Player is a shared class.** Media.cs, Mpv.cs and MediaPlayer.cs
+move into the kit from FileDir, where they were written, with three lines
+changed: the namespace, the data folder, and the one voice. Any Homer app can
+hand the player a queue of tracks -- `Homer.MediaPlayer.run(owner, title,
+source, tracks)` -- and mpv plays them. DbDo's Play Stream is the first second
+user.
+
+## 1.51.0 -- 5 October 2026
+
+**What the JAWS trainers do, applied to the walks.** From 98 transcripts of
+Freedom Scientific training, `help\TutorialLearnings.md` records eleven habits
+and their evidence. Tutorials.md now asks for five of them: Insert Tab to
+verify inside a dialog (Insert T for the window), a lone letter spelled with
+its alphabet word, the tutor message shown once and then off, one planned
+misstep with its Escape, and a closing step naming the keys taught. The
+overview template teaches the repeat key and the orientation key in its first
+steps and ends with a recap; checkTutorial requires the first script to teach
+both keys.
+
+## 1.50.2 -- 2 October 2026
+
+**Every Homer app is MIT, and the kit keeps it so.** HomerView was the one
+app under the GPL, version 2, on the understanding that an NVDA add-on should
+share NVDA's license. NV Access's own submission guide checks no license, the
+store's form only records one, and MIT is compatible with the GPL, so
+HomerView is MIT like the rest.
+
+- **scripts\relicense** makes an app MIT throughout: License.md becomes the
+  kit's MIT text (a LICENSE.md is renamed to License.md through git mv, with
+  RepoFiles.txt, LocalFiles.txt and the installer script following), and the
+  app's own claims to another license become "MIT License" -- a line naming
+  Jamal Mazrui with a GNU license, a bare license line just after his
+  copyright line, and "<App> is free software under the GNU ...". Lines about
+  other people's software are left alone, as are History.md and History.htm.
+  Each change is logged in logs\<App>-relicense-<stamp>.log. "relicense all"
+  covers every app beside the kit.
+- **tidy runs it before each push**, with --if-needed, so it does nothing and
+  writes no log when an app is already MIT throughout.
+- **check's "license" now also fails a remaining claim,** naming each line in
+  the log: on the apps' current copies it found EdSharp's source header and
+  About box (still "GNU Lesser General Public License"), the ";Modified GPL
+  License" header of the homer.jss JAWS scripts in EdSharp and FileDir, and
+  HomerView's installer page and license file.
+- HomerDev.md's licenses section says why an app with an NVDA add-on is MIT.
+
+## 1.50.1 -- 2 October 2026
+
+**The skills take the settled lessons from the accessibility skills.** These
+were written as 1.43.60, which never reached GitHub; they are the parts of
+HomerSkills.md that agree with the HomerDev guidelines as they stand:
+
+- homer-build-release: a fix is shown to work by the check or symptom that
+  failed now passing, not by a successful build.
+- homer-code: fix a fault in the shared class it comes from, not the app; a
+  change to what is heard or which keys act is tried with JAWS and NVDA.
+- homer-docs: link text says where it goes and reads well out of context; an
+  image or diagram says what it shows. checkDocs now reports vague link text
+  ("click here", "read more") and images with no text alternative.
+- homer-screen-reader: declare an NVDA script with every field a person meets
+  (description, gesture, category, speakOnDemand for scripts that only
+  report); ui.message only for what NVDA cannot know; prove a script by
+  pressing its key in the reader.
+- homer-ui: the words on screen are the spoken words, for voice control as
+  for screen readers; a one-key command acts only where it belongs (WCAG
+  2.1.4); and a new reference, uia.md, says what each Lbc control exposes
+  through UI Automation and how to look at the tree.
+
+**summarizeLogs reports the kit's own check as what it is.** In C:\HomerDev,
+check recognizes the kit and hands over to checkHomerDev, with no totals; the
+summary had called that "FAILED: no totals".
+
+## 1.50.0 -- 2 October 2026
+
+**Stages: from a build to a release version.** HomerDev.md sets out the
+sequence every Homer resource follows, since nothing built is finished for
+good: a build on the builder's computer; a development release, public and
+labelled as such, for the testers who asked for new work; and, from time to
+time, a release version for everybody, after a higher bar -- no known serious
+problem, testers' real use, a full JAWS and NVDA test pass, current documents
+with the license named, an installer tried on a fresh computer, and for the
+kit checkHomerDev and evalSkills. A serious problem in a release version is
+fixed through a development release first. The homer-build-release skill
+starts from the stages.
+
+**homer-db says exactly how DbDo follows foreign keys.** DbDo follows fields
+named <singular>_id; declared REFERENCES are shown by Table Summary and read by
+checkDb, and following a differently named declared key is planned in DbDo.
+
+## 1.49.1 -- 2 October 2026
+
+**homer-db: two ways to relate records, both first-class.** The skill now sets
+out that DbDo supports traditional foreign keys, named <singular>_id as in the
+Northwind and Chinook templates and best also declared with REFERENCES, and the
+maps table, which links any record to any other with a kind from lookups, in the
+same database or apart. It adds two triggers per table that keep maps links
+whole: when a record's prime changes its links follow it, and when it is
+deleted its links go too. checkDb now reads declared foreign keys and warns
+when a table in a database with maps lacks those triggers. The reference notes
+two gaps in DbDo itself: links are re-pointed only when a prime definition is
+rebuilt, not when a record is edited, and DbDo's own tables are recognized by
+name alone.
+
+## 1.49.0 -- 2 October 2026
+
+**homer-db, a skill for SQLite databases the DbDo way.** It sets out the
+conventions DbDo's generator and its Trail templates follow: plural lower-case
+tables with a singular id, the standard fields added, edited, url, notes, tags,
+look, prime and marked in their order, DbDo's field types, the edited trigger
+and unique prime index, the lookups, maps and views tables, pick lists in
+alphabetical order, rows short enough to be heard, a first letter for each
+table, and a database's own folder with its .inix settings, reports and
+scripts. Its checkDb script reads a .db file, or every .db under a folder, and
+reports each departure as a failure or a warning, with a log beside the
+database. Run over DbDo's templates, it found most tables without the edited
+trigger, lookups and maps without a unique prime index, and DbDo's generator
+deriving an id by dropping a trailing s (storie_id), all recorded in the
+skill's reference.
+
+**Homer creates .inix, never .ini.** HomerDev.md and the homer-code skill now
+say so: .ini is deprecated in Homer and used only where another program requires
+it, such as an NVDA add-on's manifest.ini, or to read an old Homer .ini once.
+
+## 1.48.0 -- 2 October 2026
+
+**Every resource names its license, briefly, with a link.** An app and the kit
+are MIT, in License.md; a page is Creative Commons Attribution-ShareAlike 4.0,
+the license Wikipedia's text uses; a collection is CC BY-SA 4.0 for its own
+selection, arrangement and wording, while what it gathers from others keeps
+its owners' terms and the document says so in one sentence. kind.py holds the
+table (licenseFor). check gains a license finding for every kind. post adds the
+kind's license to a page's front matter when the source lacks it and logs a
+reminder; the kit's page layout shows the license in its footer. newHomerApp's
+ReadMe names the MIT License. The podcast-directory, app-help-guide and
+blind-creators builders write the license lines and the one-sentence notice
+themselves. HomerDev.md has a new section, "Licenses for each kind".
+
+## 1.47.0 -- 2 October 2026
+
+**evalSkills: measuring whether the skills help.** scripts\evalSkills.cmd and
+evalSkills.py ask Claude Code, headless, for the same small program several
+times without the Homer skills and several times with them and the three
+sentences, build each with the kit's sample build script, and score them with
+check and uiCheck. The runs happen in a fresh folder outside the kit, so the
+plain runs cannot see the kit by accident; uiCheck tests only what the task
+asked for, and check's findings that partly measure Homer conventions are
+reported apart. The report and log go to the kit's logs folder. --dry-run
+prepares everything without asking the AI. HomerDev.md explains it under
+"Measuring the difference the skills make".
+
+**The gathered accessibility skills are linked, not copied.** help\A11ySkills.md
+and its .htm leave the kit; the kit's build removes them when it finds them.
+They live in their own repository, which states each skill's license: 142 are
+MIT and 33 are under the GNU Affero General Public License, whose full texts
+inside an MIT-licensed kit could be mistaken for MIT. HomerSkills.md,
+HomerDev.md and the skills index link to that repository.
+
+**Fewer proposed skills, measurement first.** HomerSkills.md now folds the
+proposed homer-ui-check into an extension of uiCheck, which already reads the
+UI Automation tree; joins homer-test-pass to homer-audit as its last step;
+requires homer-listen to label every report as a prediction and name what
+still needs a real screen reader; and puts evalSkills first in the suggested
+order, rerun after every change.
+
+**Comments match 1.46.0.** The build templates' and sample builds' opening
+notes no longer say the kit is looked for in C:\HomerDev.
+
+## 1.46.0 -- 2 October 2026
+
+**Any drive, any depth.** Only Windows and folder names are now assumed: the
+kit is a folder named HomerDev, a project is a folder named for itself, and
+either may be on any drive and at any level -- C:\HomerDev beside C:\EdSharp
+and D:\Work\HomerDev beside D:\Work\EdSharp work alike. Nothing in a script
+names drive C any more.
+
+Every script and build finds the kit the same way: the HomerDev environment
+variable; then the current folder and every folder above it, and the script's
+own folder and every folder above it, each either the kit or holding a
+HomerDev folder; then a HomerDev folder at the top of any fixed drive. This
+replaces "C:\HomerDev" in the app build templates, the four sample builds,
+push, post, buildTutorials, tidy and the kind loader in every Python script.
+kind.py gains findKit, and "kind --kit" prints the kit it finds.
+
+newHomerApp puts a new app beside the kit rather than at the top of drive C.
+The installer template, compiled by hand, takes the HomerDev folder beside the
+app instead of C:\HomerDev. The sample builds find the compiler under
+%ProgramFiles% and %ProgramFiles(x86)%, wherever Windows put them.
+HomerDev.md has a new section, "Where the kit and your projects live", and the
+ReadMe and Developer.md say the same.
+
+## 1.45.0 -- 2 October 2026
+
+**Four kinds of Homer resource, and every script knows which it is in.** The
+kit now serves apps, collections, the kit itself and pages, and they need
+different things: a page has no build, a collection has no installer, the kit
+checks itself. scripts\kind.py decides which a folder holds from one fact
+each, checked in order -- the kit's own files, then an installer script or a
+program source named for the folder (an app), then a document named for the
+folder (a page), then many documents at the top (a collection) -- and kind.cmd
+says it aloud with the reason.
+
+Every kit script now asks first and acts accordingly. check runs every check
+on an app, only the document checks on a page or a collection (with a new
+check that a page has its title and .htm, and a collection its ReadMe and an
+.htm for every .md), and sends the kit to checkHomerDev. post publishes an
+app's, the kit's or a collection's page to gh-pages and a page to main.
+push, tidy and unpushed tell a page that is not a repository that post
+publishes it. uiCheck and the three tutorial scripts leave a page or a
+collection alone. fixEncoding covers a page's documents, scripts and site files
+without a RepoFiles.txt. renameBuild leaves a page or collection alone.
+newHomerApp will not start an app on top of another kind. updateAppBuilds
+touches apps only, finds the build under its current name, build.cmd, and adds
+kind.cmd and kind.py to each app's kitTools, as the build templates now do.
+
+A script declines only on positive evidence. Where kind.py is missing or
+cannot place a folder, a script does what it did before, so nothing that
+worked stops working. HomerDev.md has a new chapter, "Four kinds of Homer
+resource", listing what each script does for each kind; homer-build-release
+and homer-page start from it.
+
+**Not yet changed: release.** scripts\release.cmd and release.ps1 are kept on
+this disk only, so they were not part of this update. They should release an
+app and the kit, and decline a page (post releases it) and a collection.
+
+## 1.44.0 -- 2 October 2026
+
+**Publish a page with post, and a skill to go with it.** scripts\post.cmd and
+post.ps1 publish a project's document as a GitHub Page that meets WCAG 2.2 AA
+and the Homer conventions. An app (a folder that is a git repository) has its
+guide, help\<App>.md, published to a gh-pages branch, so push and release keep
+main and the tags to themselves, and no release is made. A page project (a
+folder that is not a repository) is the repository: post creates it, publishes
+to main, keeps its description equal to the title and subtitle, and releases
+the document's version. -DryRun stages everything and stops. The log is
+logs\<App>-post-yyyyMMdd-HHmmss.log. An app opts in by naming post.cmd and
+post.ps1 in kitTools.
+
+post prepares the page the way the first ones taught: the byte order mark is
+removed from everything Jekyll reads, every heading gets Pandoc's id so one
+contents list works in the .htm and on the web, a body h1 that repeats the
+title is dropped so the page has one h1, Liquid-looking text is wrapped in raw,
+kramdown's hard wraps are turned off, the .htm files beside the document go up
+with it, self.md never does, and staged text is CRLF under "* -text" with
+images marked binary.
+
+The new homer-page skill gives the steps, the front matter fields (title,
+subtitle, description, version, lang, and logo, image and image_alt for
+pictures), and two references: what makes a page meet WCAG and the Homer rules,
+and what Jekyll and git need. Its templates folder holds the kit's page layout
+and stylesheet, which post uses when a project has none: one h1, a skip link,
+landmarks, underlined links, colors measured against WCAG with each ratio
+noted, a visible focus outline, Atkinson Hyperlegible, and support for reduced
+motion and Windows high contrast. GitHub's Cayman theme alone fails several of
+these.
+
+**Where to read more.** HomerDev.md and the ReadMe now point to Blind Vibe
+Coding, a directory of resources on building apps nonvisually with AI, which
+lists HomerDev and was itself published with post.
+
+## 1.43.59 -- 1 October 2026
+
+**Two documents about skills, in help.** A11ySkills.md gathers 175 published
+accessibility skills from eight collections, each with its facts, license and
+full text, as a reference for anyone writing a Homer skill. HomerSkills.md
+reads them for what they teach the kit: learnings that fit the HomerDev
+guidelines, questions that need a decision before any guideline changes, and
+proposed new skills (homer-listen, homer-ui-check, homer-audit,
+homer-bug-report, homer-test-pass) and improvements to existing ones.
+HomerDev.md's chapter on Claude skills and the skills index point to both.
+
+**Dollar signs stay text in every document.** The kit's build converts
+Markdown with Pandoc's dollar-sign mathematics turned off, so a workflow's
+${{ secrets }} or a price in a document is shown as written.
+
+## 1.43.58 -- 1 October 2026
+
+**The kit's build command is "build" too.** In C:\HomerDev, as in every app
+folder, the command is now `build`: buildHomerDev.cmd and buildHomerDev.py
+are build.cmd and build.py, and the documents, skills, templates and scripts
+say "build". The kit's own build removes the old pair when it finds them
+beside the new one, so unzipping the kit over an older copy leaves nothing
+behind, and the push records it. check's "buildname" now holds the kit to
+the same rule as the apps; tidy and renameBuild still leave the kit to its
+own build. renameBuild, when it renames an app, also changes the app's
+messages that said "run buildHomerDev" to "run build".
+
+## 1.43.57 -- 1 October 2026
+
+**The kit keeps buildHomerDev, and its own release goes through.** 1.43.55
+said the kit's build script keeps its name, but check's new "buildname" did
+not know the kit from an app, and failed the kit's own release; 1.43.56's
+tidy would even have renamed it. check, tidy and renameBuild now recognize
+the kit by its buildHomerDev.py and leave it alone.
+
+## 1.43.56 -- 1 October 2026
+
+**tidy gives the build script its short name by itself.** After 1.43.55,
+every app's release stopped at check's "buildname", because no app had been
+renamed yet. Tidy runs before every push and is refreshed from the kit at
+every build, so it now runs the kit's renameBuild whenever build<App>.cmd or
+build<App>.ps1 is still there -- git mv, every reference updated, its own
+log -- and the push that follows records it. The usual build, tidy, push,
+release sequence needs no extra step.
+
+## 1.43.55 -- 1 October 2026
+
+**An app's build script is build.cmd.** The folder already names the app, so
+build<App>.cmd said it twice. newHomerApp now writes build.cmd (and build.ps1
+where a build has a PowerShell half); the templates, release's messages, push,
+the documents and the skills say "build". check gains "buildname", which fails
+an app whose script still has the old name, and names the fix: the new
+scripts\renameBuild, which renames build<App>.cmd and .ps1 through git mv,
+changes every reference in the app's own files -- .htm pages and .gitignore
+included -- except History.md and History.htm, and logs
+each change to logs\<App>-renameBuild-<time>.log. renameBuild all does every
+app beside the kit. check's build step and the kit's scan for stale app
+builds accept either name. The kit's own buildHomerDev, and the samples, which
+share one folder, keep their names.
+
+## 1.43.54 -- 1 October 2026
+
+**A build steps over every released number, as it always meant to.** Each
+build takes the next version and skips any number already tagged on GitHub,
+by searching git's list of tags with findstr /e. git writes that list with LF
+line ends, and findstr /e matches only before CR LF, so nothing ever matched.
+For most apps it did not matter; EdSharp has releases from long ago above its
+current number, so its builds chose v5.0.32, then 33, 34, 35 and 36, each
+already on GitHub, and each release rightly refused. The tag list is now
+rewritten with CR LF before the search, and the build log says how many tags
+it read. The build templates and the four samples carry the fix; release 1.43.53's
+evidence lines showed it ("GitHub has a published release tagged v5.0.36",
+among 43). homer-build-release's failures reference gains the case.
+
+## 1.43.53 -- 1 October 2026
+
+**release shows GitHub's answer when it decides a version is already out.**
+EdSharp's releases said "already on GitHub" for 5.0.32 through 5.0.35, each
+straight after a build that had chosen a new number, and the log showed
+nothing of what GitHub had said. Now release prints how many releases GitHub
+lists, the newest tags, and whether the one asked for is among them. The list
+is read as one block of text, however gh splits its output into lines. When
+the list cannot be read, GitHub's own record of that tag is fetched and read
+-- a published release names the tag and is not a draft -- instead of trusting
+the exit code of gh release view, which through gh.cmd has said "found" for
+releases that did not exist.
+
+## 1.43.52 -- 1 October 2026
+
+**No Ollama window left open after an install.** Ollama's own installer
+starts its desktop app when it finishes, and the app opens a chat window,
+which confuses someone who never asked for it: Homer apps call Ollama behind
+the scenes and never use its window. installOllama now closes that window
+after installing, updating or reinstalling -- politely, as Alt+F4 would, so
+the app and the Ollama service keep running -- waiting up to 20 seconds for it
+to appear, and logs whether it closed one. Apps whose builds copy the kit's
+installOllama (DbDo, FileDir, HomerScribe) take it at their next build.
+
+## 1.43.51 -- 30 September 2026
+
+**check enforces the finish page.** EdSharp's installer, called migrated, still
+left its Git, Node.js, Ollama and model boxes unticked, Install and Update
+alike, and DbDo's left Ollama unticked, offered its model with no verb, and
+opened its NVDA add-on, which starts NVDA. The new "finish" check reads the
+installer the build compiles and fails: an Install or Update box not ticked, a
+Reinstall box ticked, an unticked Launch box, a component box without Install,
+Update or Reinstall, a box that starts NVDA, and a label saying NVDA must be
+running. Run on the apps, it finds those two and passes the rest.
+
+**The box decides, the script does.** installOllama announced "Checking for a
+newer version" when the finish page had already compared versions and said
+Update or Reinstall. It now takes `update` or `reinstall` from its box, says
+"Updating Ollama to the newest version" or "Reinstalling Ollama", reinstalls
+with winget install --force when asked, and reports what happened. The
+template's Update and Reinstall boxes pass the word; FinishPage.md says so.
+
+**check's "local" exemptions.** A JAWS settings path split over two lines,
+and the one-time code that moves an earlier version's files out of Roaming,
+no longer count as using the Roaming tree.
+
+## 1.43.50 -- 30 September 2026
+
+**Nothing of Homer's own in Roaming, JAWS's folders included.** The fingerprint
+that tells Install, Update and Reinstall apart for the JAWS scripts was a file
+written into each JAWS version's settings folder, under %APPDATA%. It is now a
+line per JAWS version in %LOCALAPPDATA%\\<App>\\jawsScripts.inix, and an old
+marker file is removed from the JAWS folder at the next install. The only files
+a Homer installer puts under Roaming are the JAWS scripts and the NVDA add-on
+themselves, where those readers read them. The same change is made in EdSharp's
+and HomerView's own JAWS installers. HomerDev.md, homer-code and
+homer-screen-reader say so.
+
+## 1.43.49 -- 30 September 2026
+
+**Only the local tree, never Roaming.** Every Homer app keeps everything of its
+own under %LOCALAPPDATA%\\<App> and nothing under %APPDATA%\\<App>.
+
+- Paths.moveFromRoaming (Python: paths.moveFromRoaming) moves what an earlier
+  version left under the Roaming tree to the same place under the local one,
+  keeps a Roaming file where a local one of that name already exists, removes
+  the Roaming folder once it is empty, and returns a line per action for the
+  log. An app calls it once, after the log starts.
+- The JAWS settings record, jawsSettings.log, which Say's installer kept under
+  %APPDATA%\\<App>, is now under %LOCALAPPDATA%\\<App>; an older record is moved
+  there the first time it is looked for, so an uninstall still finds it.
+- check gains "local": any use of the Roaming tree in a project's code,
+  installer or scripts fails, except where it names JAWS's or NVDA's own
+  folders, which live there. Run on the apps, it finds DbDo (now fixed),
+  EdSharp, FileDir and HomerView.
+- HomerDev.md, homer-code and homer-migrate say so.
+
+## 1.43.48 -- 30 September 2026
+
+**A running program's log cannot be deleted again.** 1.43.40 opened each
+session log with delete sharing as well as read-write sharing, so that zipping
+a logs folder would not stop on the log of a program still running. It also
+let "Zip then delete" or the recycle bin remove that log while the program
+went on writing to it -- into a file no one could see -- so a whole session's
+record could vanish, as FileDir's did on 30 September. Read-write sharing
+stays, so the live log can still be copied or zipped; deleting it is refused,
+as it was before.
+
+**Nowhere to write is not a reason to write nothing.** If a program's logs
+folder cannot be made, its session is logged in the temporary folder, and the
+log's first line says why.
+
+## 1.43.47 -- 30 September 2026
+
+**The skills learn from EdSharp's and HomerView's installers.** FinishPage.md
+(which homer-installer carries) now says what the Results box holds -- the
+install location first, the logs folder last, one line per ticked box, an
+Update that says whether it happened, one blank line at most -- and how Launch
+works: ticked, a marker, the app started as the person once the box is closed.
+homer-installer's components reference gains "Failures that looked like
+success": the winget update limited to machine scope that never updated, the
+support folder that only grew until stale scripts reached every JAWS
+settings folder, the check that passed on an old installer in exec, and NVDA
+started over JAWS. homer-migrate's checklist gains the screen reader,
+Results-box and cleared-folder items; homer-build-release's failures, the
+release run twice.
+
+## 1.43.46 -- 29 September 2026
+
+**NVDA add-ons are installed without starting NVDA.** Starting nvda.exe
+--install-add-on brought a second screen reader up talking over JAWS, and for
+EdSharp on 29 September stopped on an invalid command line parameter with
+nothing installed -- NVDA's own log recorded no add-on activity at all.
+installScreenReaderSupport now does what NVDA's installAddonBundle does, to
+the end NVDA's next start would reach: the add-on is unpacked, any installed
+copy moved aside to <name>.delete (a suffix NVDA skips) and the new one moved
+into %APPDATA%\\nvda\\addons\\<name>, with the old one put back if the move
+fails. NVDA loads it at its next start. The log names the add-on, its version
+and NVDA-version range, whether NVDA was running, every step, and an
+installTasks.py whose install step this way does not run. homer-screen-
+reader's notes say how.
+
+## 1.43.45 -- 29 September 2026
+
+**The screen reader state check shows its evidence.** For NVDA,
+installScreenReaderSupport's state mode now logs the add-on's name, the
+shipped version and the installed one (or "none"), and the lines about
+add-ons from NVDA's own logs -- %TEMP%\\nvda.log and nvda-old.log for an
+installed NVDA, read with sharing because NVDA holds them open -- so one setup
+log shows what the installer offered and what NVDA did with the add-on.
+homer-screen-reader's reference gains the rules learned with EdSharp: the
+add-on carries the app's version, nvda.exe is started through the shell
+(CreateProcess refuses it with code 740), an accepted add-on waits as
+<name>.pendingInstall, and where NVDA keeps its log.
+
+## 1.43.44 -- 29 September 2026
+
+**An NVDA add-on waiting for NVDA's restart counts as installed.** NVDA keeps
+an add-on it has just accepted as <name>.pendingInstall until it restarts, so
+an install right after accepting it would still have offered "Install NVDA
+add-on". The state check reads the pending copy's manifest too.
+
+## 1.43.43 -- 29 September 2026
+
+**The JAWS scripts and the NVDA add-on are components like any other.** Their
+boxes say Install, Update or Reinstall by what is on the computer, ticked for
+Install and Update and unticked for Reinstall, and they are no longer placed
+first: each group -- Install, Update, Reinstall -- is in alphabetical order by
+component name, ignoring case, with Launch and the user guide still last.
+
+- installScreenReaderSupport gains a state mode, "state jaws <file>" and
+  "state nvda <file>", which answers none, install, update or reinstall. For
+  JAWS it compares a fingerprint of the script sources in <App>_JAWS.zip --
+  their names and contents, since the zip's own bytes change with every build
+  -- with the one it now writes into each JAWS version's settings folder when
+  the scripts compile there (and removes with them on failure). A JAWS version
+  installed since, or scripts from before fingerprints, read as Update. For
+  NVDA it compares the add-on's manifest version with the installed one's.
+- HomerComponents gains homerReaderState, homerReaderIs and homerReaderLabel,
+  which ask once per reader, log the answer, and word the box.
+- The template's finish page is rebuilt in the new order; FinishPage.md and
+  homer-installer's components reference say how.
+
+## 1.43.42 -- 29 September 2026
+
+**The program the finish page launches runs as the person.** The template's
+startIfAsked started it with Exec through cmd, which still runs it with the
+installer's elevated rights; it now uses ExecAsOriginalUser, so the program
+runs as it will every other time. Each app's installer gets the change when
+it is next migrated; homer-migrate's checklist gains the item, with EdSharp's
+case: its Launch box was unticked, so pressing Enter on its finish page
+installed EdSharp and never opened it.
+
+## 1.43.41 -- 29 September 2026
+
+**A compiled script can still reach an installer through a wildcard.** FileDir
+5.0.122's JAWS zip carried sources only, but its installer's `scripts\jaws\*`
+line still packed filedir.jsb and homer.jsb. The failures reference gains the
+case: add Excludes: "*.jsb", and have the build delete any .jsb left in
+scripts\jaws.
+
+## 1.43.40 -- 29 September 2026
+
+**A program's live log can be read, copied or deleted while it is written.**
+Log.cs opened the session log with a plain StreamWriter, which lets another
+program read it only if that program does not also ask to write, and never
+delete it. On 29 September FileDir's Zip then delete, run on its own logs
+folder, met "File In Use" on the log of the FileDir that was running. The log
+is now opened with read, write and delete sharing, so a zipper, an editor or
+the recycle bin can work with it; the running program keeps writing.
+
+## 1.43.39 -- 29 September 2026
+
+**JAWS scripts are compiled on the user's machine or not installed at all.**
+No compiled .jsb is shipped any more: one built by another JAWS version may
+not suit the user's.
+
+- The kit's installScreenReaderSupport, for each JAWS version, unpacks the
+  sources, compiles each with that version's own scompile.exe, and checks for
+  the .jsb. If a version has no compiler, or any source fails, every file the
+  run put in that settings folder is removed and any file it replaced is put
+  back; the compiler's words go to the setup log. It reports each version, and
+  NVDA, in <App>_screenReaders.txt beside the setup log.
+- HomerComponents gains homerScreenReaderOutcome, which the Results box reads
+  for those lines -- "JAWS 2026 scripts: installed and compiled", or "NOT
+  installed -- they did not compile (FileDir.jss); nothing was left behind" --
+  and clears the file when Finish is pressed. The template's Results box and
+  FileDir's call it.
+- HomerView's installer no longer ships a prebuilt HomerView.jsb or falls back
+  to one; when any version does not compile, its own removal takes out
+  everything the run placed, and its Results box says the scripts are not
+  installed and why. EdSharp's does the same, and treats a missing compiler as
+  a failure rather than leaving uncompiled scripts. Both installers exclude
+  any .jsb from what they carry.
+
+**Every kit document has one H1, its title, and a contents list.** HomerDev.md,
+History.md, Developer.md, HomerDev_update.md, License.md and Hotkeys.md used H1
+for their chapters, versions or parts; each chapter is now an H2 and every
+heading below it one level down, with a linked contents list after the title.
+ReadMe.md gains a contents list and Announce.md's first section its proper
+level. A heading in HomerDev.md that followed a list with no blank line was
+not a heading at all to Pandoc; every heading now has a blank line before it.
+homer-ui's reference is taken from HomerDev.md's H2 chapters accordingly.
+The kit's documents check reports 0 findings.
+
+## 1.43.38 -- 29 September 2026
+
+**Compiled JAWS scripts are never shipped or pushed.** A .jsb runs on the JAWS
+version that built it and on later ones, so one built on the developer's
+machine may not suit the user's. The installer compiles each .jss with every
+installed version's own scompile.exe (1.43.37); now nothing else supplies a
+.jsb. tidy's never-pushed list gains *.jsb, and FileDir's build, which packed
+filedir.jsb and homer.jsb into FileDir_JAWS.zip, packs the sources only.
+
+**homer-screen-reader carries the publishers' own guides.** Freedom
+Scientific's JAWS scripting documentation and NV Access's and the add-on
+team's NVDA guides, as gathered on 30 and 31 August, go into the skill's
+references, to be searched for a function or API rather than read whole. What
+they taught is in jaws-and-nvda.md: how JAWS resolves a call and what
+"unknown function call" means, scripts against functions, overriding with
+Default:: and why a user default.jss must Use default.jsb, AutoStartEvent and
+AutoFinishEvent, the standard includes, scompile, the byte order mark as
+JAWS's sign of UTF-8, JAWS 2026's new syntax that older versions cannot
+compile; and for NVDA, which script wins a key (a global plugin over every app
+module), never blocking NVDA, relative imports against sys.path, ui.message,
+and testing.
+
+## 1.43.37 -- 29 September 2026
+
+**A skill for screen reader scripting: homer-screen-reader.** When a script is
+needed at all (most speech goes through Say from the app), the rules on both
+readers -- one set of commands, measured for parity; the keys of homer-ui;
+keys scoped to their program, never default.jkm or MyExtensions; speech -- and
+where JAWS scripts and NVDA add-ons live, ship and install. Its reference,
+jaws-and-nvda.md, holds what HomerView's and EdSharp's scripts taught: which
+files JAWS loads, layering over the factory scripts, key-map sections,
+compiling for each JAWS version and why the compilers disagree, an add-on's
+structure and gestures, carrying the kit's modules inside an add-on, and how
+to diagnose a script that does not load or answers "Unknown script call". It
+carries the JAWS script style guide from help.
+
+**installScreenReaderSupport compiles the JAWS scripts it unpacks.** It
+unpacked <App>_JAWS.zip into each JAWS version's settings folder and stopped
+there, so a .jss shipped without its .jsb was never run. Each .jss in the zip
+is now compiled in place by that version's own scompile.exe, as EdSharp's and
+HomerView's installers do, with each exit code in the setup log.
+
+## 1.43.36 -- 28 September 2026
+
+From the builds and releases of 28 September at 21:40, when nine apps were
+built on the kit's new layout and eight released:
+
+- **HomerView's installer could not find the kit.** Its build took the kit's
+  folder to be two levels above a C# source, true until the sources moved into
+  exec\\CSharp; it told Inno Setup the kit was C:\\HomerDev\\exec, and the
+  include of HomerComponents.iss failed. It now climbs to the nearest folder
+  holding Templates\\HomerComponents.iss. The release that followed stopped, as
+  it should, on the failed build. The failures reference gains the case.
+- **HomerView's build log is in the Homer line format**, as EdSharp's became in
+  1.43.22.
+- **summarizeLogs reads more version lines**: "Version: 1.0.261 -> 1.0.262"
+  and EdSharp's "Version: 5.0.18 (from version.txt ...)".
+
+## 1.43.35 -- 28 September 2026
+
+**homer-new-app asks first whether it should be a program at all.** When the
+need is keeping and reporting on records, a DbDo database is usually the better
+answer, and JobTrail -- JobTrail.db with its .inix, reports and scripts under
+DbDo's templates -- is the example the skill now describes, with DbDo's other
+Trails. Taken from DbDo as it is on GitHub, 28 September.
+
+**Only a project under git counts as an app.** The kit build's stale-script
+warning named C:\\Jobrise, and it was then treated as an app. There is no such
+app: Jobrise was a name considered and rejected for what became JobTrail, a
+DbDo database rather than a program, and the folder is left from that. The
+warning, and updateAppBuilds when no app is named, now pass over a folder with
+no .git: the kit's build notes it as a possible leftover, and updateAppBuilds
+changes it only when it is named.
+
+## 1.43.34 -- 28 September 2026
+
+**summarizeLogs shows a build's warnings.** The kit's build of 21:26 succeeded
+and warned that Jobrise's build script still looks for the kit's old layout,
+but the summary said only "result=succeeded". A build's WARN lines now follow
+its result, even when it succeeded.
+
+## 1.43.33 -- 28 September 2026
+
+From the logs of 28 September at 21:03, when the kit's new warning named nine
+apps and every app build but urlCheck's stopped with "no kit found":
+
+- **updateAppBuilds, a kit tool that brings app build scripts to the kit's
+  layout.** Run from C:\\HomerDev, it finds each app beside the kit whose build
+  script still names the old CSharp or homer paths and changes only those:
+  \\CSharp\\ to \\exec\\CSharp\\, homer\\log.py to exec\\Python\\log.py, PyInstaller's
+  --paths to exec\\Python and its hidden imports to plain names, and in a Python
+  app's own source "from homer import" to "import". Each changed file is copied
+  first into the app's notes folder. It serves an app with no current zip --
+  Jobrise, which the warning named -- and anyone who would rather not unzip
+  ten.
+- **The warning finds HomerView too.** It looked for CSharp\\Lbc.cs, and
+  HomerView's build asks for CSharp\\Inix.cs; any kit path not under exec now
+  counts. Its message names updateAppBuilds.
+- **A leading level word is the level.** "WARN: ..." was written as
+  "WARN  WARN: ..."; the word now sets the level and is not repeated.
+
+## 1.43.32 -- 28 September 2026
+
+**The last planned skill: homer-migrate.** Bringing an existing app onto the
+kit, or auditing one that has drifted: read the current files before changing
+anything, work through a checklist by area -- the build script's kit contract,
+layout, lists, installer, checks, version, Elevate, documents and logging --
+each item with what it looked like when it was wrong in the migrations of 25
+to 28 September, then deliver only the files that change and prove the result
+through a build, a check and a confirmed release.
+
+**buildHomerDev names apps whose build script is stale.** On 28 September
+urlFido's build stopped twice with "no kit found": its build script was still
+the copy that looked for the kit's old layout, since its newest urlFido.zip
+had not been unzipped. The kit's build now looks at each app folder beside
+it and warns, by name, of any build script that still names the old CSharp or
+homer paths.
+
+## 1.43.31 -- 28 September 2026
+
+**A skill for starting an app: homer-new-app.** Choosing the shape (a single
+tool, a multiple-document app, an NVDA add-on) and the language, the fruit
+basket to start from, newHomerApp, the starters to fill in -- source,
+installer, build settings, acceptance checks, lists and documents -- and the
+first build, repository and release, with a checklist.
+
+**newHomerApp brought up to the kit.** Writing the skill showed it was behind:
+
+- On a kit cloned from GitHub it stopped at once with "Template missing:
+  self.md" -- git never carries a file named self.md -- and after that it
+  would have wanted installOllama.cmd, installScreenReaderSupport.cmd and
+  finish.cmd from Templates, where they no longer are. It no longer copies
+  them: the first build puts the kit's scripts in scripts, where the Homer
+  layout keeps them.
+- It now writes RepoFiles.txt, LocalFiles.txt, .gitattributes, ReadMe.md,
+  License.md (the MIT license) and starters in help for the guide, Announce,
+  Developer and History, with the notebook self.md written from its own text.
+- Its log goes to the kit's logs folder as
+  HomerDev-newHomerApp-<stamp>.log, not beside the script.
+
+**The template's acceptance checks run exec\\<App>.exe.** They ran a bare
+<App>.exe, which is not found from the project folder, where the program
+is built into exec.
+
+**The kit check no longer asks for Templates\\self.md**, which git never
+carries, so a fresh clone of the kit checks clean.
+
+## 1.43.30 -- 28 September 2026
+
+From the kit build of 28 September at 20:17:
+
+- **buildHomerDev no longer rewrites old names inside a skill.** Its rename
+  pass, which turns checkHomerApp into check and gitPush into push across the
+  kit, rewrote homer-build-release's failures.md, whose point was to list the
+  old names an old build script calls. It now passes over .claude.
+- **No .htm beside a skill's files.** The document conversion made an .htm
+  for every SKILL.md and reference -- 30 of them -- which then sat in git and
+  in every packed skill. It now converts only the skills index,
+  .claude\\skills\\ReadMe.md; the build deletes the ones earlier builds wrote,
+  and the packer leaves any .htm out.
+- **One line per command in the scripts' logs.** "RUN: ..." and then
+  "EXIT: 0" on a separate line become `run start cmd="..."` and
+  `run exit=0 ms=304 cmd="..."`, so a single line says what ran, how it ended
+  and how long it took; a command that cannot start is an ERROR line naming
+  both. In check, tidy, unpushed and buildHomerDev.
+
+## 1.43.29 -- 28 September 2026
+
+From the logs of 28 September, when HomerScribe's and urlFido's builds failed
+and urlFido was released anyway:
+
+- **release stops after a failed build.** urlFido's build stopped at once --
+  its build script was still the copy that looked for the kit's old layout --
+  and the release that followed republished the day-before installer as if new,
+  since version.txt still matched it. release now reads the newest build log
+  and goes on only when it says the build succeeded; -Force overrides.
+- **release could not tell a published version from a new one** in Windows
+  PowerShell 5.1, whose ConvertFrom-Json writes a JSON array as a single
+  object: the check asked -not of the whole array, which is false, so every
+  tag read as unreleased. The list is now assigned and then enumerated.
+- **A failed build takes no number.** The templates' builds step version.txt
+  when they begin; now, when one fails, the number goes back. HomerScribe's
+  failed build had left 1.0.260 in version.txt beside a 1.0.259 installer, and
+  its release refused. All eight app build scripts made from the templates
+  carry the same, and require this kit.
+- **HomerScribe's build ends its log on every failure.** Its "kit not found"
+  and "kit too old" paths left with exit /b and wrote no build end line; they
+  go through :failed. And its yt-dlp update ran twice; it runs once.
+- **homer-build-release's failures reference** gains all four.
+
+## 1.43.28 -- 28 September 2026
+
+**A skill for documents: homer-docs.** The document set every app ships and
+what each holds (document-set.md), the ninth-grade reading level, saying the
+word a key comes from, key names, counts, lists rather than tables, verified
+links with readable text, page breaks, the heading structure of a guide, and
+how a History entry is written. Its script, checkDocs, reports documents
+missing from the set, a .md without its .htm or with an older one, a document
+without exactly one H1, a skipped heading level, bare URLs, a long document
+with no contents list, and each document's reading grade, flagging one a user
+reads that is above grade 9.
+
+Run on the kit itself, it found two bare URLs, now links, in Announce.md and
+Tutorials.md. It also finds that the kit's longest documents -- HomerDev.md,
+History.md, Developer.md and the migration briefing -- use H1 for their
+chapters and have no contents list, which the Homer heading rule asks of a
+guide.
+
+## 1.43.27 -- 28 September 2026
+
+**A skill for the interface: homer-ui.** Lbc dialogs and their focus order,
+labels and accessible names, access and trigger letters, flat menus, hotkeys
+and their exceptions, the Alt+Control rule, the selection and navigation keys,
+the function-key families, the grave accent, key names, the command table,
+speech, and the three shapes of app -- the rules a screen reader user relies
+on, in one place.
+
+**A skill can carry chapters of a kit document.** homer-ui's reference,
+ui-guide.md, is made at each build from four chapters of HomerDev.md -- Lbc,
+keys and key names, direct speech, and the three kinds of app -- with a
+contents list, so the skill never holds a second copy that drifts.
+
+**HomerDev.md: two sections back where they belong.** "Claude skills" and
+"Finish page wording" had been added inside the chapter on keys; the first is
+now a chapter of its own, and the second sits with the installer's log.
+
+## 1.43.26 -- 28 September 2026
+
+**A skill for converting files: homer-convert.** It picks the tool by what is
+converted: Pandoc for a Homer document's Markdown to .htm, with a title, a
+contents list for a long document, and the pagebreak filter; 2htm for Word,
+Excel, PowerPoint, PDF, CSV, JSON, HTML, Markdown and text to accessible .htm
+or .txt, with its options; inixVert for tables among .inix, .csv, .tsv,
+Markdown and .xlsx; and Pandoc for the rest. Its reference, conversions.md,
+lists the 120 format pairs in EdSharp's Import and Export tables with the
+command for each, noting that EdSharp reads GitHub's Markdown where a Homer
+document uses Pandoc's. Its script, toHomerEncoding, puts converted files into
+the Homer encoding -- UTF-8 with a byte order mark and CRLF, none for .cmd,
+.bat and SKILL.md -- since Pandoc and most converters write neither.
+
+## 1.43.25 -- 28 September 2026
+
+**Two more skills, and the tutorial skill carries the kit's guide.**
+
+- **homer-elevate**: the Elevate Version feature. F11 checks GitHub for a newer
+  release and offers to fetch and run its installer: an item on a multiple-
+  document app's Help menu, or the version section and Yes/No buttons of a
+  single-dialog app's Help box, through the kit's Elevate class in C# or
+  Python.
+- **homer-installer**: the Inno Setup installer -- machine-wide installs, the
+  folders things go to, which optional components to offer, install scripts,
+  and the finish page. Its references are FinishPage.md, copied from help, and
+  components.md, the kit's calls for declaring a component, its three [Run]
+  entries, labels, outcomes, Ollama models and detection.
+- **homer-tutorial** now carries the kit's Tutorials.md, copied from help at
+  each build: the conventions for spoken walks refined over many tutorials.
+
+**FinishPage.md is the one account of the finish page.** It now holds the
+wording rules that were in HomerDev.md -- the verb first, a short use in
+parentheses, a box each for JAWS and NVDA, JAWS first, no word the tick
+already says -- with two more: offer only the app's own components, and
+install shared ones machine-wide. HomerDev.md points to it. It also names the
+Results box's title and the logged verdicts.
+
+**One order for the boxes: Install, Update, Reinstall.** FinishPage.md said so
+in one section and "Install, Reinstall, Update" in another, and homerGroup
+followed the second. The ticked boxes now come first everywhere, then the
+unticked ones, so homerOrder, which the Results box lists by, matches the page.
+
+## 1.43.24 -- 28 September 2026
+
+**A skill for writing Homer code: homer-code.** The second development skill.
+Its SKILL.md holds the Camel Type rules that matter most -- Hungarian
+prefixes, c_ constants, lower camel case, functions rather than subroutines,
+one-line ifs, for-each loops, sorted declarations and imports, a detailed log
+from every script -- with the encoding rule and the instruction to build on
+the kit's classes. Its references are kit-libraries.md, what each C# class
+and Python module offers and how an app compiles or imports it, and the kit's
+own style guides.
+
+**A skill carries the kit's documents, copied at each build.** A skill
+uploaded to claude.ai cannot read C:\\HomerDev, so homer-code carries the style
+guides for C#, Python and JAWS script and the logging convention. buildHomerDev
+copies them from help into the skill's references before packing, so they are
+always the kit's current rules; LocalFiles.txt keeps the copies out of git,
+which carries the originals. Anthropic's guidance asks a reference longer than
+100 lines to open with a contents list, so the three long style guides now
+have one.
+
+## 1.43.23 -- 28 September 2026
+
+**A skill for the build and release cycle: homer-build-release.** The first of
+the Homer development skills. It teaches Claude the cycle -- buildHomerDev,
+build, a quick test, tidy, push, release -- and how to read what the steps
+leave. Its three references hold what is not obvious from the logs: the
+lists and git rules (RepoFiles.txt, LocalFiles.txt, KeepEncoding.txt, what
+stays tracked, the whitelist, the folder layout), the Homer log line, and the
+failures that have each cost a run, with symptom, cause and fix. Its script,
+summarizeLogs, turns a folder or zip of uploaded logs into one report: per app,
+the newest build's result and version, the check's counts and failures, the
+release's outcome with its version and whether GitHub confirmed it as latest,
+tidy's changes and push's outcome. It reads the kit's own build as well as an
+app's, and skips files that are not Homer logs. Tested on the uploads of 26 to
+28 September, where it found each failure this chat found by hand.
+
+## 1.43.22 -- 27 September 2026
+
+From the first run of all ten apps on 1.43.21, whose program and script logs
+came out in the new format:
+
+- **An abbreviation is a word in a key.** Log.cs made "CLR" into cLR; it and
+  log.py now write clr, as they write nvdaClient for "NVDA client".
+- **The scripts name Windows as the programs do**: "Windows 11 25H2
+  (10.0.26200.9550)" in tidy's, check's and every kit script's log, where they
+  wrote Python's "Windows-11-10.0.26200-SP0".
+- **The build templates' ISO start and end lines reach the apps.** An app's
+  build script is its own copy of the template, made when the app was, so
+  1.43.21's change to the template reached no existing app: 2htm's log still
+  began "2htm build started Sun 09/27/2026 17:06:47.56". All ten apps' build
+  scripts now start and end with `build start app=...` and `build end
+  result=...`, EdSharp's build engine stamps every line in the Homer format,
+  and DbDo's no longer writes "(Pacific time, Seattle)" after a time with no
+  offset.
+
+**An empty log no longer stops a release.** The kit's release on 28 September
+was refused over three zero-byte files in logs. check now passes over logs --
+a run's record is not part of the project -- and tidy deletes a zero-byte log
+as it does any other empty file.
+
+**The libraries live in exec, each named for its platform.** exec holds the
+code an app's core work runs on, in any form -- native, .NET, or source for an
+interpreter -- and scripts the tools that maintain the code base or extend an
+app beyond its core. So the kit's C# classes are now exec\\CSharp and its Python
+modules exec\\Python, beside exec\\Homer.dll. C# and Python are equal platforms,
+so neither goes by the name Homer on the Python side: each module is imported
+by its own name -- `import log`, `import inix, paths` -- as each C# class is a
+class of its own, and the homer package and its __init__.py are gone. This also
+ends homer sharing its first letter with help at the top of the kit. Every
+build template, sample and app build script finds the kit by
+exec\\CSharp\\Lbc.cs or exec\\Python\\log.py; a Python app's build puts
+exec\\Python on PyInstaller's path and names each module plainly with
+--hidden-import. buildHomerDev removes the old copies from CSharp, homer and
+exec\\homer once the new ones are in place, and the old folders once empty.
+exec stays off every repository, but tidy now honours a RepoFiles.txt line
+inside a folder kept off it: the kit's .gitignore ignores exec's contents
+("/exec/*") and puts exec/CSharp and exec/Python back after, since git never
+looks inside a folder it ignores whole. fixEncoding no longer passes over exec,
+touching there, as everywhere, only what RepoFiles.txt names.
+
+**The skills have a home: .claude\\skills.** Claude Code finds a project's
+skills there and nowhere else -- `.claude\skills\<name>\SKILL.md`, one folder
+deep -- and the leading dot gives the folder a first letter of its own beside
+scripts. homer-tutorial moves there from Templates\\skills, since a skill is not
+something an app is made from, and three join it: app-help-guide,
+blind-creators and podcast-directory, their descriptions put in the third
+person as Anthropic's guidance asks. An index, ReadMe.md, sits beside them.
+buildHomerDev packs each into exec\\skills\\<name>.zip for claude.ai. A new
+KeepEncoding.txt keeps SKILL.md free of a byte order mark, which would hide its
+front matter, and HomerDev.md gains "Claude skills", the rules for writing one.
+
+## 1.43.21 -- 27 September 2026
+
+**One log line format, for machines and for people.** From the session logs
+of 2htm, EdSharp, FileDir, urlCheck and urlFido, run on 27 September:
+
+- **Every line is stamped** with an ISO 8601 time, milliseconds and UTC offset.
+  Before, the header said "Started 2026-09-27 16:16:40" and each line after it
+  only "16:16:40", with no date and no offset, and blank lines, headings and
+  settings carried no stamp at all.
+- **Facts are key=value.** "    Log file                 = C:\..." is now
+  `env logFile=C:\...`; "Ran: pandoc   exit code 1" is `run exit=1 cmd=pandoc`,
+  with `ms=` when timed; "Session ended ... after 0 seconds" is
+  `session end seconds=0.214`.
+- **Windows is reported truly.** 2htm and urlFido logged "Microsoft Windows NT
+  6.2.9200.0" -- Windows 8 -- on Windows 11: Environment.OSVersion answers that
+  to any program whose manifest does not name Windows 10. The version now comes
+  from the registry: "Windows 11 25H2 (10.0.26200.7462)".
+- **The screen reader facts are facts.** The header's "Screen reader = Speech
+  pipeline diagnostic" line, followed by the diagnostic's lines unindented and
+  unstamped, is four facts: jawsRunning, nvdaClient, nvdaRunning,
+  screenReaderFlag. Say.speechDiagnostic, the text shown to a person, no longer
+  tells 2htm's and urlFido's users to put a DLL beside EdSharp.exe.
+- **Python programs log what C# programs do**: the same keys, the true Windows
+  version, and the screen reader facts, where urlCheck's header had none.
+- **A fact is written once**: FileDir's header repeated Version and Program,
+  and DbDo's the command line.
+- **The kit's Python scripts** -- check, tidy, fixEncoding, unpushed,
+  checkTutorial, uiCheck, buildHomerDev, checkHomerDev and newHomerApp --
+  stamp every line the same way, with ERROR on a line that says ERROR, FAIL or
+  FAILED, and WARN on one that says WARN.
+
+And from the build, tidy, push, check and release logs of the same day:
+
+- **Each kit script opens and closes the same way.** "tidy started 2026-09-27
+  16:20:06", "Script: ...", "Python: 3.14.3 (tags/v3.14.3:323c59a, Feb ...)",
+  "Platform: ...", "Command line: ..." and "Finished ..." are now
+  `tidy start pid=...`, `env script=...`, `env python=3.14.3`,
+  `env windows=...`, `env project=...`, `env arguments=...`, `settings ...`
+  and `tidy end`, in every script. tidy no longer logs do-it, which it has not
+  had since 1.43.9.
+- **The build templates, push and the release launcher** start and end with
+  an ISO 8601 line -- `build start app=2htm`, `build end result=succeeded` or
+  `result=failed`, `release launch end exit=0` -- instead of "%DATE% %TIME%",
+  which Windows writes as "Sun 09/27/2026 16:18:38.77" and whose form changes
+  with the regional settings. The lines between still carry no stamp: a
+  command's own output, from csc or Inno Setup, is appended as it comes.
+
+The format is set out in HomerDev.md, "How a log line is written".
+
+## 1.43.20 -- 27 September 2026
+
+From reinstalling all ten apps:
+
+- **installScreenReaderSupport named the app "scripts".** Installers put it in
+  scripts, and it climbed out of exec only, so FileDir's finish page looked for
+  scripts_JAWS.zip, logged to %LOCALAPPDATA%\scripts\logs, and installed no
+  JAWS scripts. It now climbs out of scripts too. It also takes "jaws" or
+  "nvda" to install one reader's support, so each has its own box.
+- **JAWS and NVDA have a box each, JAWS first**, in the template: "Install JAWS
+  scripts" and "Install NVDA add-on", and the same with Update.
+- **The Results box is titled "<App> Setup Results".** Inno's MsgBox has no
+  caption of its own, so the box was announced as the wizard's. homerResultsBox
+  shows the same OK box through Windows' MessageBox, with the title.
+- **Every component verdict is logged**: what was found and whether its box
+  offers Install, Update or Reinstall. Before, only EdSharp and DbDo, with
+  their own probes, recorded why a box was ticked.
+- **Finish page wording** is written down in HomerDev.md, and the template's
+  Launch and guide boxes follow it.
+
+## 1.43.19 -- 26 September 2026
+
+**The grave accent family is a kit convention.** HomerDev.md's "Choosing a
+key" now sets out EdSharp's arrangement: Alt+Grave and Alt+Shift+Grave for
+volume, Control+Grave and Control+Shift+Grave for rate, and the screen reader
+key plus Grave for toggling punctuation, so punctuation never shares a key with
+the other four. HomerView had given Toggle Punctuation Control+Shift+Grave,
+Voice Slower's key.
+
+**The templates need this kit.** build_APP_.cmd and build_APP_Py.cmd name
+1.43.19 as kitNeeded, so a new app starts with every tidy, check and release
+fix of the day.
+
+## 1.43.18 -- 26 September 2026
+
+**check reads a key combination whole, and in Python reads the gestures.** It
+matched "Alt+Control" plus one more word, so Alt+Control+Shift+H was read as
+Alt+Control+Shift, with Shift taken for the key. It also counted every mention
+of a key in a Python file -- HomerView tells its user "Press
+Alt+Control+Shift+H" in eight places, and one docstring still named a key the
+add-on no longer binds -- 15 "reserved" findings, none of them a binding.
+Now a combination is read with its Shift and its key; in a .py file only the
+gestures NVDA binds ("kb:alt+control+shift+h") are keys; and the app's own
+desktop shortcut is compared whole, modifiers and all, with the HotKey its
+installer gives the desktop icon. Proved: HomerView and FileDir pass, and a
+C# Alt+Control+S and a Python kb:alt+control+t are still caught.
+
+## 1.43.17 -- 26 September 2026
+
+**check never waits for a key.** Each acceptance command now runs with empty
+input, so a "pause" or a prompt in it returns at once. HomerView's quality
+check ended with "Press any key to close this window"; check captured its
+output, so nothing was shown, and the release sat silent until it was stopped
+by hand. The console now also names each acceptance command as it starts, so
+a long one -- HomerView's accept list rebuilds the whole program -- is seen to
+be running.
+
+## 1.43.16 -- 26 September 2026
+
+**version.py is kept out of git at the top of a project only.** tidy never
+pushes the version.py a Python app's build generates beside its source, but a
+bare name matched anywhere: HomerView's NVDA add-on carries its own
+homer\version.py, which the add-on imports, and tidy would have untracked it.
+The name is now /version.py, and a leading / anchors any name in tidy's lists
+to the top of the project, as it does in .gitignore. Proved on HomerView's
+repository: the add-on's version.py stays tracked.
+
+## 1.43.15 -- 26 September 2026
+
+**release publishes a draft and proves the release is the latest.** EdSharp's
+v5.0.15 already existed on GitHub as a draft, left by an earlier run: invisible
+to the public, so the list of releases rightly said it was not released, while
+"gh release view" found it. release uploaded the installer to the draft and
+reported success, because the download link answers for any earlier release
+with an installer of the same name. Now an existing release is edited with
+--draft=false --latest, and a failure is shown; and before calling a release
+published, release asks GitHub which release it calls latest and stops unless
+it is this one.
+
+**check reads only the .inix files the project names**, as it does its
+sources. FileDir's pre-kit Hotkeys.inix at the top, superseded by
+configs\Hotkeys.inix, still named keys the program no longer has.
+
+## 1.43.14 -- 26 September 2026
+
+**check's key test no longer cries wolf on an app with a menu bar.** Run on
+FileDir it reported 47 key problems, 40 of them false, from three blind spots:
+
+- A method declared with no modifier -- FileDir's "void menuEditRename_Click(
+  object sender, EventArgs e) {" at the left margin -- did not start a new
+  owner, so every caption after it was counted as one earlier method's.
+- A caption tested again in code -- ButtonDialog(..., {"&No", "&Yes"}) and then
+  case "&No" -- counted as a second claim on its letter. Only two DIFFERENT
+  captions with one letter compete now.
+- A whole menu bar built in one constructor was one owner. A caption assigned
+  to menuEdit... or miEdit... now belongs to the Edit menu, and one assigned to
+  menuEdit itself to the menu bar.
+
+The app's own desktop shortcut letter, read from its installer's HotKey, is no
+longer reported as a reserved Alt+Control key: FileDir's Hotkeys.inix lists
+Alt+Control+F because that is how FileDir is opened. What remains for FileDir
+are its three real Alt+Control timer keys.
+
+**buildHomerDev stops trying the 1.42.1 patch to release.ps1**, which release
+no longer needs; every kit build logged that it could not apply it.
+
+## 1.43.13 -- 26 September 2026
+
+**release reads GitHub's list of releases rather than trusting an exit code.**
+Even asking GitHub alone (1.43.12), it said EdSharp 5.0.15 was already
+released minutes after the build, which steps over every tagged number, had
+chosen 5.0.15. On that machine gh is gh.cmd, and the exit code of a batch file
+passed back through cmd is not a reliable yes or no. release now asks gh for
+the tag names of the repository's releases as JSON and looks for the tag among
+them, ignoring drafts; only if that list cannot be read does it fall back to
+"gh release view".
+
+## 1.43.12 -- 26 September 2026
+
+**release asks GitHub whether a version is released, and no one else.** It
+also counted a tag on this machine as a release, so a tag left by an earlier run
+that stopped before publishing made EdSharp 5.0.14 "already released" when
+nothing was on GitHub -- its build, which steps over every number tagged on
+origin, had just used 5.0.14. Now a release exists only when gh finds it; a tag
+on this machine alone is pushed and published by the tag step. Without gh, a
+local tag is still the answer, as there is nothing else to ask.
+
+## 1.43.11 -- 26 September 2026
+
+**tidy leaves a file where the project says it lives.** EdSharp keeps the two
+libraries its repository carries, and the ones its build fetches, at the top of
+the project, and its installer ships them from exec, where the build copies
+them. Seeing the installer's exec\ names, tidy "put them in place", found exec
+already held a copy, and moved every one into notes -- and git recorded
+Tektosyne.dll and nvdaControllerClient.dll as deleted. A file RepoFiles.txt or
+LocalFiles.txt names where it is now stays. Proved: with the installer naming
+exec\Tektosyne.dll, tidy moved neither Tektosyne.dll nor Markdig.dll.
+
+**KeepEncoding.txt: other people's files keep their encoding.** A project may
+carry third-party tools, dictionaries, or files that show another encoding; a
+byte order mark on a Lua filter or a tool's config is read as part of its first
+line. KeepEncoding.txt, beside RepoFiles.txt and in the same form, names what
+fixEncoding and check leave exactly as they are. tidy treats it as a project
+file, and the whitelist always keeps it. Proved: a .lua file under a kept
+folder stayed without a mark while the project's own .inix was fixed.
+
+**check looks only at the project's own sources**, the files RepoFiles.txt
+names, as its encoding test already did. EdSharp's release was refused over a
+fruitBasket.cs in its pre-kit Samples folder, still on disk but no longer part
+of the project.
+
+## 1.43.10 -- 26 September 2026
+
+**A name in RepoFiles.txt outranks a pattern in LocalFiles.txt**, in tidy's
+choice of what stays tracked and in the whitelist .gitignore. EdSharp carries
+Tektosyne.dll, which cannot be fetched, while its LocalFiles.txt says *.dll for
+the libraries the build fetches; 1.43.9 would have untracked it. A file named
+exactly in RepoFiles.txt now stays tracked and is put back after the
+LocalFiles.txt patterns. Anything the kit never pushes -- the release scripts,
+Version.cs, any .exe -- is untracked wherever it is. Proved on an
+EdSharp-shaped repository: Tektosyne.dll and nvdaControllerClient.dll stayed;
+Markdig.dll, the release script, Version.cs, version.txt and a stale Lbc.cs
+were untracked; a new .dll stayed ignored.
+
+**The whitelist puts back .gitattributes** as it does .gitignore, so the file
+that keeps the Homer CRLF line endings is never left out of a repository.
+
+## 1.43.9 -- 26 September 2026
+
+**tidy just does it.** It no longer prints a plan and waits for --do-it: one
+run carries the plan out. Nothing is lost -- a stray goes into notes, which is
+on this disk and never in git, and the log names every move; the only
+deletions are zero-byte files and things the build fetches again. --do-it is
+still accepted and changes nothing, so an old habit does no harm.
+
+**tidy untracks what RepoFiles.txt leaves out.** Its repository survey used
+the folder's test of belonging, which also accepts what LocalFiles.txt, the
+installer and the standing names allow -- version.txt and any .cs among them.
+So on DbDo it reported "0 files tracked that the project does not name" while
+version.txt, Version.cs, release.cmd and release.ps1 were all tracked. A
+tracked file now stays only when RepoFiles.txt names it and LocalFiles.txt does
+not; the files themselves stay on disk. Proved on a DbDo-shaped repository:
+those four and a stray temp.txt were untracked, the rest kept.
+
+**release parses again.** 1.43.8's message "version.txt says $sFileVersion: the
+last build" is a drive-qualified variable to PowerShell, and the whole script
+failed to parse; the launcher log caught it. Written ${sFileVersion} now, and
+no other string has the pattern.
+
+## 1.43.8 -- 26 September 2026
+
+**The renamed scripts called their neighbours by the old names.** After 1.42
+renamed homerTidy to tidy and the rest, tidy.cmd still ran "%~dp0homerTidy.py",
+check.cmd "%~dp0checkHomerApp.py", unpushed.cmd "%~dp0gitUnpushed.py",
+installOllama.cmd "%~dp0homerInstall.cmd", and push.cmd asked whether
+"%~dp0homerTidy.cmd" existed before rewriting the whitelist. The build's rename
+step was meant to fix such lines, but its pattern would not match a name with a
+digit before it, and every one of these follows the 0 of %~dp0. So in every
+app that refreshed them, tidy and check stopped at once, and push skipped the
+whitelist without a word -- DbDo's push that day committed version.txt,
+Version.cs and the release scripts, which its RepoFiles.txt leaves out.
+
+- The five scripts call tidy.py, check.py, unpushed.py and installCommon.cmd.
+- The rename pattern allows a digit before a name.
+- buildHomerDev reports any script in scripts that calls a neighbour which is
+  not there, unless the same line first asks whether it exists. Proved by
+  putting homerTidy.py back into a copy of tidy.cmd: the check named it.
+
+**release asks git and gh through System.Diagnostics.Process**, with both
+streams captured, instead of through cmd /c. The 1.43.7 edition built cmd
+lines that Windows PowerShell 5.1 quotes its own way, and the first release
+with it stopped on "The syntax of the command is incorrect".
+
+**release.cmd keeps a launcher log**, logs\<App>-release-launch-<stamp>.log,
+with the command line, PowerShell's error stream and the exit code, so a
+failure before release.ps1's own transcript starts still leaves a record.
+
+## 1.43.7 -- 26 September 2026
+
+**release, the script that used to be tagRelease, fixed from the day's logs.**
+It is not in the kit's repository -- by standing rule the release scripts never
+are -- but it lives in C:\HomerDev\scripts and every app's build refreshes it
+from there, so this zip carries it. Of six releases on 26 September, three
+stopped and the three that published looked as if they had failed:
+
+- **Where the installer is.** DbDo, EdSharp and FileDir stopped with "<App>_setup.exe
+  not found". It looks at the top of the project, where every Homer build
+  writes it, and now also in exec, where DbDo wrote it before 1.0.200, saying
+  so. The message names both places and the build to run.
+- **An older installer is not published.** HomerView was published as 1.48.53
+  while its version.txt said 1.48.63: its builds had stepped the number without
+  finishing a new installer, and the release tagged the old one with only a
+  note. It now stops and says to build; -Force publishes the older one anyway.
+- **No false alarms.** Every "is this tag here yet?" question printed red
+  NativeCommandError blocks, because Windows PowerShell 5.1 records each line a
+  native program writes to stderr as an error, even with 2>$null. Those
+  questions now go through cmd, which discards stderr first.
+- **The check runs first.** The documents said release runs scripts\check before
+  publishing; only HomerScribe's own copy did. Now every copy does, and stops
+  when the check fails. -NoCheck skips it.
+
+## 1.43.6 -- 26 September 2026
+
+**Python apps build their WinForms dialogs with the C# LbcDialog.** A Python
+app with a WinForms interface had to write its dialogs by hand, since the
+kit's homer\lbc.py is Lbc for wxPython, which NVDA code needs. Rather than a
+second Lbc written in Python and kept in step by hand, the C# one is now
+reachable from Python:
+
+- **buildHomerDev compiles exec\Homer.dll** from CSharp\Elevate, Inix, Lbc,
+  Log, Paths, Say, Util and Web, after the samples (whose C# build installs
+  the Build Tools where needed). A failure is reported with the samples'.
+- **homer\lbcnet.py** loads it through pythonnet from the program's bundle,
+  beside the program, or the kit's exec folder; sets the thread to a
+  single-threaded apartment; and returns the Homer namespace. strings() and
+  keyHandler() give runWithButtons its string[] and commandKey its
+  Func<Keys, bool>.
+- **build_APP_Py.cmd** has a homerDll setting: 1 bundles
+  C:\HomerDev\exec\Homer.dll into the program, and the build stops with a
+  plain message when buildHomerDev has not made it yet.
+
+The focus order, keys, Help box and version check are therefore the same in
+both languages by construction. urlCheck 1.12.3 is the first user.
+
+## 1.43.5 -- 26 September 2026
+
+**seedVersion is a floor in both build templates.** It was only a starting
+point, used when version.txt was missing, although its comment said "nothing
+lower than this". 2htm showed the gap: its machine already had a version.txt
+holding 1.18.4, so its first kit build stepped to 1.18.5 while its documents
+named 1.19.0. Now a version.txt below seedVersion is raised to it, logged,
+and taken as it is for that build, the same as a newly made one. A number
+already at or above the floor is stepped as before.
+
+## 1.43.4 -- 26 September 2026
+
+**check no longer starts a windowed program.** Its smoke test ran the program
+with --help, which a console program answers and exits; a windowed one --
+bookFido, and every MDI app -- opens its window and waits for a person, so the
+check sat for its whole fifteen-minute timeout and then called that a failure.
+The PE header now says which kind a program is, and a windowed one is reported
+as started by hand. Proved on the real executables: bookFido.exe reads as
+windowed, urlFido.exe as console.
+
+## 1.43.3 -- 26 September 2026
+
+**Templates\build_APP_.cmd lost half a Python template.** 1.43.2's C# template
+was assembled from the Python one, and the piece meant to be its version
+subroutines was cut from the first ":seedVersion" in the file -- the one in
+"call :seedVersion" -- so 278 lines of the Python template followed the C#
+subroutines: a second :seedVersion, a second :failed, and the Python build
+steps. cmd takes the first label it meets, so "call :seedVersion" landed in the
+pasted copy, found no version.txt, and the build stopped with "Build FAILED"
+written twice and nothing else. urlFido's first build did exactly that. The
+pasted copy is gone.
+
+**buildHomerDev checks every .cmd in Templates, Templates\samples and scripts
+for a label defined twice, and for a goto or call to a label that does not
+exist.** Neither is ever an error to cmd; both are now problems the kit build
+reports. Proved by adding a second :failed and a jump to a missing label to a
+copy of the template: the check named both.
+
+## 1.43.2 -- 26 September 2026
+
+**Templates\build_APP_.cmd keeps the same contract as the Python template,
+clause for clause.** It had fallen behind: the program went to the top of the
+project, no kit version was checked, a missing version.txt became 1.0.0, kit
+tools were refreshed only if present and without a word when not, and any
+running copy of the program -- the installed one included -- stopped the
+build. Now: kitNeeded with a trimmed comparison; version.txt seeded from the
+app's number or one past its newest release tag, written into Version.cs;
+Roslyn found with vswhere or installed with winget as the Build Tools, never
+the Framework's C# 5 csc; the kit classes named in homerModules compiled from
+the kit, and an app's stale copies of them deleted; NuGet packages and NVDA's
+controller client fetched (the client from NV Access's published
+controllerClient.zip, 2025.3, beside the program or embedded); the program
+built into exec\; only a copy running from the project's own exec reported,
+never closed; the kit tools refreshed by name and retired ones deleted; every
+.md given its .htm; fixEncoding; every help\ file checked against the
+installer; /DHomerDev= to ISCC; one log per run in logs\. urlFido's
+buildUrlFido.cmd is the worked example.
+
+buildHomerDev no longer notes a missing retired loop in the C# template: the
+list is a retiredTools= variable now, as in the Python template, and the
+renaming leaves that line alone.
+
+## 1.43.1 -- 26 September 2026
+
+**buildHomerDev no longer rewrites the Python template's retired list.** Its
+first 1.43.0 run did: "REWROTE old script names in Templates\build_APP_Py.cmd"
+turned checkHomerApp, gitPush, homerTidy and tagRelease into check, push, tidy
+and release, so an app made from the template would have deleted, on every
+build, the tools it had just refreshed. The renaming skipped only the C#
+template's retired loop; it now skips the retiredTools= line too, and this kit
+ships the template whole again.
+
+**The installer template takes the program from exec when it is there**, and
+ships every document in help\. A build in the Homer layout -- the Python
+template's, HomerScribe's, HomerView's -- leaves the program in exec\, and the
+template named it only at the top of the project. An older build that leaves
+it at the top still works. A new define, AppLaunchParams, is what the program
+is started with after the Results box, as its desktop shortcut starts it.
+
+**urlCheck's installer follows the template's pattern whole**: the component
+table included from the kit the build names, the ticked boxes noted when Finish
+is pressed, the Results box, then the launch -- with no components registered,
+since urlCheck needs none.
+
+## 1.43.0 -- 26 September 2026
+
+**The Python side brought level with the C# side**, from moving urlCheck, the
+first Python app, to the kit.
+
+**homer\elevate.py**, the Python Elevate: configure, check, isNewer, describe,
+update and offer, with the same outcome numbers as Elevate.cs. Its boxes are
+Windows message boxes through ctypes, so it serves a wx program, a WinForms
+program through pythonnet, or one with no window. It takes over the version
+comparison of **homer\version.py, which is retired**: every build writes a
+version.py of its own, so .gitignore and the checks treat the name as
+generated, the module was never pushed, and the kit's check reported it
+missing on every build.
+
+**homer\say.py speaks outside NVDA.** Inside NVDA it still uses ui.message;
+outside, it tries JAWS by COM (pywin32 or pythonnet, whichever is there), then
+the NVDA controller client DLL through ctypes. say("Column 3", "Row 12",
+"Paid") sends three utterances with nothing between them, as Say.cs does; a
+trailing True is still the interrupt flag.
+
+**Templates\build_APP_Py.cmd keeps the whole contract**: kitNeeded with a
+trimmed comparison; version.txt seeded from the app's own number or one past
+its newest release tag, never from 1.0.0 over a released app; version.py
+written every build; Python found or installed by winget and a .venv rebuilt
+when its Python differs; the program built into exec\ with PyInstaller's
+scratch in work\ and the kit's modules named by --hidden-import; a copy running
+from the project's own exec reported, never closed; the kit tools the app
+names refreshed and retired ones deleted; every .md given its .htm when newer;
+fixEncoding; every file in help\ and every scripts\install*.cmd checked
+against the installer's Source: lines; /DHomerDev= passed to ISCC; one log per
+run in logs\.
+
+**scripts\check.py**: the smoke test looks in exec\ first -- before, it looked
+only at the top of the project and found nothing for any app moved to the
+layout; the key check reads a Python function as a window's builder, and does
+not count an HTML entity such as &amp; as a trigger letter.
+
+**Templates\_APP__setup.iss**: the previous install is read once, in
+InitializeSetup. Read lazily, a fresh install cached nothing and the finish
+page's Check: functions then found the install that had just been made,
+offering "Update the JAWS scripts" where "Install" belonged. The component
+table is included from the kit named by /DHomerDev.
+
+**scripts\tidy.py puts back files named one by one in a subfolder.** The
+whitelist began "/*", which ignores the folder help itself, and git never
+looks inside an ignored folder, so "!/help/Announce.md" put back nothing:
+every file named individually in help\ or scripts\ -- as the rules for
+RepoFiles.txt ask -- was silently left out of the repository. The folder is
+now put back and its contents ignored again ("!/help/" then "/help/*") before
+the named files. Proved with git on urlCheck's list: before the fix 15 files
+were staged and 19 left out; after it, all 34. **Run scripts\tidy --gitignore
+in every app whose RepoFiles.txt names files inside a folder** (HomerView's
+scripts, for one) and push: those files may never have gone up.
+
+**help\CamelType_Python.md** joins the C# and JAWS script documents, moved
+from urlCheck and updated for the c_ constant prefix and the kit's imports.
+buildHomerDev now empties the old Python\ and Samples\ folders, whose last
+files no move pair reached. HomerDev.md and paths.py no longer say to put
+C:\HomerDev\Python on the path, or that a development folder stays flat.
+
+## 1.42.1 -- 26 September 2026
+
+release no longer shows two red error blocks on a release that
+succeeded: asking git whether a tag exists, and gh whether a release
+exists, normally gets the answer no, and that answer is no longer
+recorded as an error. push now notices when GitHub says a repository
+has moved, and points origin at the new address once, so the notice
+stops. Both are patched into the scripts in place by buildHomerDev,
+keeping everything else in them.
+
+## 1.42.0 -- 26 September 2026
+
+The scripts have shorter names: tidy (was homerTidy), push (gitPush),
+unpushed (gitUnpushed), release (tagRelease), check (checkHomerApp),
+finish (homerFinish) and installCommon (homerInstall). buildHomerDev
+renames them in place, keeping their content, rewrites the old names
+in the kit's files, and adds them to the template's retired list so each
+app's build removes its old copies. Each app's own build script names
+the new ones and needs kit 1.42.0. The renaming and retiring now run
+whether or not pandoc is present. help\HomerDev_update.md now holds
+everything HomerView's migration taught, as rules.
+
+## 1.41.3 -- 26 September 2026
+
+Three fixes to the installer template, all found by building FileDir's
+installer from it -- the first app to do so on this machine.
+
+**isOlderInstalled no longer uses PackVersionString**, which this Inno Setup 6
+does not have: the compile stopped at the Code section with "Unknown identifier".
+The comparison is written out in plain Pascal -- each dotted part read as a
+number and compared in turn -- so an installer's version check does not depend
+on the compiler's version.
+
+**CopyFile in place of FileCopy**, which Inno has renamed and reports as a hint
+on every build. The line keeps the setup log with the program's own logs.
+
+**UsedUserAreasWarning=no.** The template writes the setup log and the launch
+marker to the profile of whoever answered the elevation prompt, on purpose and
+with a comment saying so. A warning read past on every build teaches people to
+read past warnings.
+
+## 1.41.2 -- 26 September 2026
+
+`commandKey` is settable on the dialog, not only on its form. 1.41.1 put the
+hook on LbcForm, where ProcessCmdKey runs, and forgot the property on
+LbcDialog that hands it through -- so an app holding a dialog had no way to
+reach it. The dialog wraps its form; the app sets `dlg.commandKey` and never has
+to know which class holds the override.
+
+## 1.41.1 -- 26 September 2026
+
+**Lbc.cs takes in FileDir's work on it**, so that FileDir can stop carrying a
+copy and every app gets what FileDir paid for. The two files had drifted 40 per
+cent apart in both directions -- FileDir had thirty-eight methods the kit lacked
+and the kit had forty-nine FileDir lacked -- so this is a merge rather than a
+replacement, and nothing the kit already did was given up. The same merge
+shipped as 1.40.0 and 1.40.1, was compiled clean by the kit's own samples, and
+was then overwritten by the 1.41.0 update; it is recorded here so it is not lost
 again.
 
-## v1.0.230
-
-**`fetchStations` checks before it fetches.** It measures the copy against what
-it is for -- the whole catalog within a week, every row playable, no litter,
-every station asked, every call sign looked up -- says the report, and fetches
-only what is missing; a complete copy is left alone, and `--check` gives the
-report alone. Its log is in the project's `logs` folder and its path is said
-at the start, after a two-hour run whose log was elsewhere.
-
-## v1.0.229
-
-**RadioTrail takes the official record.** For a station with a broadcast call
-sign in its name, `fetchStations` now reads the Wikipedia infobox, which is
-kept from the licence: call_sign, frequency, city, owner, format and the
-article's link, and its opening paragraph into notes -- taken only when the
-article's own call sign is in the station's name. The catalog's tags, a
-stream's genre words and a page's keywords go to tags, one per line; prose
-goes to notes; both only ever grow.
-
-## v1.0.228
+**No control names itself after its own caption or its label.** Thirty-two
+AccessibleName assignments are gone: a screen reader reads the caption or the
+Label before the control AND the accessible name, so a name repeating either is
+heard twice. Four remain, all empty, and for the opposite reason: a layout panel
+with no name is reported under the WINDOW's name, so focus arriving through two
+nested panels made a screen reader say the dialog's title three times. Help and
+the F7 control list now work a control's name out from its Label through
+fieldName and nameFromLabel.
+
+**Finding in a list, rebuilt.** Control+J jumps by the line the list shows;
+Control+K searches everything known about each item with the keyword syntax --
+`red & blue` for both, `red | blue` for either, `chap*` for anything starting
+that way; Control+F filters by the same syntax and Control+Shift+F clears it;
+F3 and Shift+F3 repeat whichever search was last. Each prompt keeps its own last
+ten answers through the historyRead and historyWrite hooks. setListItems,
+listSourceIndex and listIsFiltered let an app rebuild a list and still know
+which item a visible row is.
+
+**Control+Home and Control+End belong to the control that has them** -- first
+and last item in a list, top and bottom in a multiline box -- and move between
+fields only where the control has no use for them. **A multiline box starts at
+its beginning**, and a read-only one keeps Enter for the default button.
+
+**The status line carries status.** setStatusExtra puts a standing note there,
+read with the screen reader's own key and never announced; where a dialog has a
+note the note is the whole line. appendStatus keeps a transcript of what a
+command said.
+
+**New to the toolkit:** LbcTrackBar and addSlider, a slider that reports its
+value in words; commandKey and dialogKey on LbcForm, claimed in ProcessCmdKey
+before any control and before the screen reader; focusedControl; runPlain and
+close, for a dialog whose buttons are commands; stackFields, which flattens
+bands; and an addButton overload with no tip.
+
+**System.Convert is written in full.** Two lines said `Convert.ToString`, which
+inside the Homer namespace binds to any app's own `Homer.Convert` class before
+it reaches the framework's -- and FileDir has one. A shared class cannot assume
+what an app does not define.
+
+Util.cs gains looksLikeText and readSample: whether a file is text at all, and
+the sample of bytes that decides it.
+
+## 1.39.1 -- 25 September 2026
+
+help\HomerDev_update.md: the briefing for bringing another Homer app up to
+the current kit -- what the kit is, the contract between an app and it
+(finding the kit, kitNeeded, compiling against its sources, refreshing its
+scripts, the folder layout and why the first letters differ, the two lists,
+the four scripts, versions, machine-wide components, the fetching build,
+logs and encoding, the finish page, F11, the walks, the check), the lessons
+paid for with their dates, the migration in ten steps, and what DbDo and
+EdSharp each still need -- and, from 1.39.1, FileDir: its two-branch
+repository, copied classes with a per-project namespace, binaries in git,
+and earlier editions of the tools. The first release of HomerScribe through the whole
+chain -- build, check, push, tag, installer asset -- went through today.
+
+## 1.38.3 -- 25 September 2026
+
+HomerScribe's first release through tagRelease's built-in check was refused
+on three counts, two of them the check's own fault and one half mine. The
+check demanded FAQ.md, which the default document set never included;
+Announce and FAQ are welcome now, never required, and Tutorials is required
+only where tutorial scripts exist. It accepted only the kit's Log.start as
+evidence of logging; a program that opens its own file under a logs folder
+counts. And it judged the encoding of every text file in the folder, strays
+included; it judges the files RepoFiles.txt names, the project's own. The
+half mine: eighteen delivered .htm files had never been put into the Homer
+encoding. scripts\fixEncoding, new, puts every file RepoFiles.txt names into
+UTF-8 with a mark and CRLF (.cmd and .bat without the mark), logs to
+logs\<App>-encoding-<stamp>.log, and every app's build runs it before the
+compile, so the check that follows has nothing to find. tagRelease's probe
+for an existing release no longer logs "release not found" as an error.
+
+## 1.38.2 -- 25 September 2026
+
+The tutorial log is readable again: PowerShell's five-line wrapper around a
+native program's first standard-error line, and piper's "[info]" progress,
+are dropped -- a seven-walk run had logged 186 KB of them, and the "Error"
+in "FullyQualifiedErrorId" had slipped through the earlier filter. The
+loudness pass logs its setting once per walk and only a failure per piece.
+The build log records the tutorial tool's exit code and the time beside its
+outcome line.
+
+## 1.38.1 -- 25 September 2026
+
+One rule for where a tool is run: the project is the current folder, or its
+parent when the current folder is the project's scripts or exec folder.
+homerTidy and checkTutorial already worked that way; gitPush, tagRelease,
+checkHomerApp and gitUnpushed now do too -- a push run from scripts had
+logged to scripts\logs and looked for RepoFiles.txt there, and a release run
+from scripts handed the checks the scripts folder to judge. checkHomerApp
+runs build<App>.cmd, the script named after the folder, never another
+build*.cmd: it had run buildTutorials.cmd with "nobump" as a script name,
+which is where every stray "nobump.inix is not here" came from. Its log and
+its evidence report go in logs, named like the rest. And the kit's build
+removes the copies of kit tools it finds in C:\bin -- only files bearing a
+kit tool's name, each removal logged -- since a push and a release ran from
+those stale copies today.
+
+## 1.38.0 -- 25 September 2026
+
+One tool per job, and the names that sounded alike are gone. cleanDir and
+tidyRepo, with homerPolicy that only tidyRepo read, are homerTidy; gitRelease
+is tagRelease, which now runs the app's checks itself before touching a tag
+(-SkipCheck when a caller has just run them, as releaseHomerDev does);
+sayTutorial is buildTutorials; installTools, which copied tools into C:\bin
+where they went stale, is gone, since every app refreshes its scripts from
+the kit on each build. The build deletes a retired file when it finds one and
+says so; checkHomerDev reports any kit tool found on the PATH outside the kit
+as a copy to delete; buildHomerDev warns once when C:\bin holds one.
+
+A move-pair bug: Windows does not tell Scripts from scripts, so the pair
+that had once moved Scripts\homerInstall.cmd into Templates saw the newly
+delivered scripts\homerInstall.cmd as the old copy and deleted it. The pair
+is gone and the move list skips any pair whose two sides are the same file.
+LocalFiles.txt names the sample programs' build products.
+
+## 1.37.0 -- 25 September 2026
+
+Two folders that broke the first-letter rule, and the kit's copies of shared
+scripts. Samples shared its letter with scripts: the four fruit-basket
+programs and their build scripts are under Templates\samples, and the
+build's move list carries them over and removes the old folder. The shared
+install scripts -- homerInstall, installOllama, installScreenReaderSupport,
+homerFinish -- were starters in Templates that every app carried under
+scripts and let drift; they are kit scripts now, refreshed into each app's
+scripts folder by its build, and the newer installOllama from HomerScribe
+(which updates through winget rather than saying "already installed") is
+the kit's. installModels.cmd stays a template: it names an app's own
+models. The template installer ships and runs them from scripts, as
+HomerScribe does.
+
+The tutorial tool: the reader speaks through piper even when Kokoro is
+here, which halves the minutes; long text is cut at sentences and commas
+before Kokoro sees it (a spelled-out web address took 71 seconds whole);
+Kokoro runs on two threads, measured faster than all of them; every piece
+is brought to one loudness, and ReaderGain scales the reader's; and a
+"step N of M" line every four steps says the minutes are speaking.
+
+## 1.36.2 -- 25 September 2026
+
+A build was stopped by hand because its screen said one sentence and then
+nothing for three minutes, and the silence read as a second download of
+the voices. It was Kokoro speaking walk 01. Now the tutorial tool says once
+which voices it has and where from ("Voices: Kokoro, from C:\HomerDev\exec.
+Nothing is downloaded."), says "Creating <name>.mp3, N steps" as each walk
+starts and "Created <name>.mp3 in N minutes" as it finishes, and both the
+kit's build and an app's let those lines reach the screen instead of
+capturing them into the build log. Kokoro runs on every processor core
+rather than two, and its configuration and progress chatter -- which
+PowerShell had been logging as a "NativeCommandError" -- is kept out of
+the log except for its timings.
+
+## 1.36.1 -- 25 September 2026
+
+Three faults from the first full run of 1.35 and 1.36, and two more lines
+of reader grammar. Kokoro was fetched and unpacked and then not recognised:
+the int8 bundle names its model model.int8.onnx, and only model.onnx was
+looked for; both are now. "nobump" arrived in the tutorial tool as a script
+name, because cmd's %* is not reset by a bare "call": a build now passes
+-build, an argument of its own, and the tool ignores any dash-argument it
+does not know and names the scripts present when one is asked for by a
+wrong name. cleanDir, which judged the folder it was run in and logged
+beside itself, forwards to homerTidy with the same arguments. Tutorials.md
+and the skill gain the reader's phrasing of a slider with a value, a numeric
+edit, a tabbed dialog, a list view item, and a program's loading message.
+
+## 1.36.0 -- 25 September 2026
+
+The screen reader's speech in a tutorial is now checked by code and written
+by a skill. scripts\checkTutorial reads every Tutorial_*.inix against the
+format and the reader's grammar and names the script and step for each
+problem; buildTutorials runs it first and speaks nothing while a problem
+stands. It found twelve in HomerScribe's seven walks on its first run and
+seven in the kit's own. Templates\skills\homer-tutorial\SKILL.md is a
+skill for an AI writing these: the four beats, the grammar of every control
+and of an edit box, where a Hear line's truth comes from, and the commands.
+
+## 1.35.1 -- 25 September 2026
+
+gitPush, in the form Jamal has used by hand -- clear the screen, add
+everything, commit "Fix." or the message given, push, show the status --
+with the guard the day taught: it stops when there is no RepoFiles.txt,
+rewrites the whitelist .gitignore from RepoFiles.txt before staging, and
+refuses a commit that stages anything over 10 MB, naming the file. Developer.md
+gains "The five scripts, and the order they run in": build, gitPush,
+homerTidy, tagRelease, gitUnpushed, and what RepoFiles.txt and
+LocalFiles.txt each decide.
+
+## 1.35.0 -- 25 September 2026
+
+Four things learnt from one afternoon's logs.
+
+ONLY THE KIT FETCHES THE VOICES. buildHomerDev runs scripts\buildTutorials
+with -fetch, which is the one way the tool downloads engines and models; an
+app's build finds them in C:\HomerDev\exec or says "Run buildHomerDev" and
+speaks nothing. The sherpa-onnx package taken is the shared one, which
+carries the executable; the static "lib" package it took before -- hundreds
+of megabytes of link libraries and no executable -- is removed when found.
+
+FETCHED THINGS ARE DELETED, NEVER ARCHIVED. A tidy found the old per-app
+voices, called all 486 files strays, moved them into notes\other, and
+committed them. homerTidy now recognises what a build fetches -- engines,
+models, packages -- and deletes it, including anything an earlier tidy put
+into notes.
+
+NOTHING IS STAGED WITHOUT A WHITELIST. With no RepoFiles.txt, homerTidy's
+"git add -A" swept those 480 files into a commit. Without RepoFiles.txt the
+repository is now left exactly as it was, and the console says why.
+
+scripts\gitUnpushed undoes the commits not yet pushed and keeps every file,
+so a commit like that one is put right by one command and the next tidy.
+gitRelease and gitPush log to logs\ like everything else. Every app's build
+refreshes the whole tool set from the kit into its scripts folder --
+buildTutorials, makeTutorials, homerTidy, checkHomerApp, tagRelease,
+gitRelease, gitPush, gitUnpushed -- so scripts\tagRelease is the release
+command in every Homer app, and the copy in C:\bin is retired.
+
+help\Tutorials.md gains the reader's grammar inside an edit box, from a
+class on reading and editing text: typing echo, Backspace, Blank, Top and
+Bottom of file, the three ways of selecting and their words.
+
+## 1.34.0 -- 25 September 2026
+
+The kit follows the layout it asks of every app. Tools is now scripts:
+every build script, every document and RepoFiles.txt say scripts, the
+build's move list carries each of the 22 files over and removes the empty
+Tools folder, and homerTidy is at C:\HomerDev\scripts\homerTidy.cmd. The
+standard folders -- configs, data, exec, help, logs, results, scripts,
+templates -- were chosen with distinct first letters so a list of them can
+be walked by initial letter, and "tools" collided with "templates".
+
+The tutorial voices live in C:\HomerDev\exec, not a new voices folder: exec
+is the Homer folder for binaries that are not in git, and a fetched engine
+with the model files beside it is exactly that. Piper's models sit in
+exec\piper beside piper.exe, so exec holds one folder per engine.
+LocalFiles.txt names exec as never pushed. (1.33.0's voices folder was
+never released.)
+
+## 1.33.0 -- 25 September 2026
+
+The tutorial voices live in one place, C:\HomerDev\voices, fetched once and
+found by every app's build; they are no longer fetched into each app's
+scripts\voices. Neither piper nor sherpa-onnx has an installer, so the kit
+names the place, as the one folder every Homer app already relies on.
+HOMER_VOICES overrides it. The kit gains LocalFiles.txt, naming voices\ and
+logs\ as local and never pushed, and its build skips the voices folder.
+
+## 1.32.0 -- 25 September 2026
+
+The spoken tutorials change shape, and the tools that make them move with
+them. Tools\buildTutorials.ps1 writes one .mp3 per walk into help\tutorials
+with Tutorials.m3u beside them, and no Tutorials.mkv; makeTutorials.py looks
+for the audio there. The reader is a bit slower (ReaderScale 0.64, was 0.56),
+at a beta tester's request. Kokoro-82M, run through sherpa-onnx, is the voice
+when it can be fetched -- Apache 2.0 throughout, so the audio can be published
+under MIT -- with piper's kristin and john as before when it cannot; the
+licence findings are in help\Tutorials.md. Templates\build_APP_.cmd and
+Templates\_APP__setup.iss carry the new step and ship the audio: the tools
+are refreshed from the kit into the app's scripts\ on every build, because
+the kit's copy run in place takes the kit for the project.
+
+help\Tutorials.md gains "How a reader phrases a control", the grammar of a
+screen reader's speech for every control, taken from two training classes and
+naming no reader; and the tutorial scripts are to name none either.
+
+## 1.31.1 -- 25 September 2026
+
+Two build failures from 1.31.0, both fixed. homerNoteTicked was declared a
+function with no return type, which Pascal refuses ("colon expected"); it is
+a procedure. The two C# sample builds and Templates\build_APP_.cmd compiled
+Lbc.cs without the Elevate.cs it now depends on; each lists it.
+
+help\Tutorials.md gains "How a screen reader trainer narrates": nine beats
+taken from a professional JAWS training recording -- key, press, hear, then
+translate; letters with their phonetic word; the reader quoted word for word
+and then paraphrased; silence named; focus verified after every change; the
+repeat key taught first; counts used as orientation; controls named as the
+reader names them; a breath before each key. Templates\Tutorial_00_Overview.inix
+carries the short form.
+
+## 1.31.0 -- 25 September 2026
+
+Two patterns every Homer app is to follow, asked for on this date.
+
+THE ORDER OF THE FINISH-PAGE BOXES: Install (screen reader scripts first,
+then components alphabetically), ticked; Update, ticked, alphabetical;
+Reinstall, unticked, alphabetical; Launch, ticked; Open the user guide,
+unticked. Done with three [Run] entries per component, one per verb, using
+the new homerIs(i, state) and homerModelIs(model, present) checks; Inno's
+script order and Check: do the grouping. FinishPage.md states the rule.
+Templates\_APP__setup.iss is rewritten to it -- it includes
+HomerComponents.iss, registers Ollama with homerAdd, keeps the screen reader
+script entries, reports the Results box from homerOutcomeLine, starts the
+program after that box through the launch marker, and its [UninstallDelete]
+names only logs and settings, never the whole app-data folder. homerFinish.cmd
+is no longer shipped by the template.
+
+THE HELP BOX CHECKS THE WEB FOR A NEWER VERSION. New shared class
+CSharp\Elevate.cs: an app calls Elevate.configure(owner, repo, version) once
+at startup; the Lbc Help box then ends with "This is version X. Version Y is
+on the web." and its buttons become Yes and No -- Yes the default when a newer
+version exists, No when this is the newest, OK alone when the web could not be
+checked (eight-second timeout, so an offline machine never hangs the box).
+Yes fetches <repo>_setup.exe from the latest GitHub release and starts it.
+Elevate.offer(owner) does the same conversation in a message box for an F11
+handler. LBC NOW REQUIRES ELEVATE.CS: add CSharp\Elevate.cs to every build
+that compiles Lbc.cs.
+
+Util.spokenLength(seconds) says a LENGTH in words -- "19 minutes", "1 hour
+and 6 minutes", "45 seconds" -- because a screen reader reads "19:00" as
+nineteen hundred hours and "1:06:06" as a time of day. HomerScribe reported a
+nineteen-minute run as "Took 19:00". A clock reading is only for a POSITION:
+where in a film or recording something is.
+
+Lbc.runWithButtons gains a third argument naming the default button, so a
+Yes/No box can keep Yes-then-No order with No as the default. The first
+label is the default when the argument is absent -- so list OK first: with
+Help first, Enter in HomerScribe's source paths field opened Help.
+
+## 1.30.0 -- 25 September 2026
+
+The Results box after an install reports only the boxes that were ticked,
+from a probe made after the scripts ran: homerNoteTicked records the ticked
+captions when Finish is pressed (from NextButtonClick at wpFinished);
+homerOutcomeLine and homerModelOutcomeLine each return a past-tense line for
+a ticked box and nothing for one that was not. Until now the box recited
+every component from the probe made when the wizard opened -- so a minute
+after Whisper was installed and Ollama updated, it said neither had
+happened, and it listed three components nobody had asked about.
+
+FinishPage.md gains the Results-box rule and the "Downloading" rule for
+install-script console messages.
+
+## 1.29.0 -- 25 September 2026
+
+Four files delivered the day before had landed in folders the kit never had:
+Docs, Inno and Scripts. They now sit where RepoFiles.txt says kit files go --
+FinishPage.md and Logging.md in help; HomerComponents.iss and homerInstall.cmd
+in Templates, beside _APP__setup.iss and installOllama.cmd. The build's move
+list removes the old copies once the new ones are in place, and the emptied
+folders after them, so nobody deletes anything by hand.
+
+The build's log moves to logs\HomerDev-build-yyyyMMdd-HHmmss.log, one file
+per run, and each sample build's log to logs\<App>-build-yyyyMMdd-HHmmss.log
+beside its script -- the convention every Homer build follows. The fixed
+buildHomerDev.log and build<App>.log at the old places go the same way.
+
+version.txt carries no byte order mark. cmd's set /p, which the app build
+scripts use to read it, cannot strip one, and a build refused a kit of
+exactly the version it asked for when one was present. normalizeHomer
+already knew this; the file had been saved wrongly.
+
+## 1.28.0 -- 24 September 2026
+
+HomerComponents.iss gained a sixth homerAdd argument, the registry Uninstall
+key name, checked under HKLM, HKCU and WOW6432Node. An installer runs
+elevated, where winget is often unreachable and a per-user tool is not on
+the PATH, so Ollama read as absent on a machine that runs it daily. It also
+gained Ollama model detection (homerModelPresent, homerModelWanted,
+homerModelLabel) from one ollama list call, and Install-Reinstall-Update
+grouping with case-insensitive alpha sorting within each group.
+
+homerInstall.cmd resolves the app name with ~f first, so a path ending in
+".." cannot yield ".." as the name, and takes a noPause argument in place of
+an environment variable. It and the build scripts stamp their logs with
+PowerShell's Get-Date; WMIC is gone from Windows 11 and every log had been
+named with zeros.
+
+homerTidy.py writes logs\<App>-tidy-yyyyMMdd-HHmmss.log in the project the
+script belongs to, worked out by climbing out of scripts, tools or exec,
+rather than surveying whatever the current directory was.
+
+Two documents: FinishPage.md, the rule for what a finish-page checkbox says
+and whether it starts ticked; Logging.md, where logs go and what they open
+with.
+
+## 1.27.0 -- 23 September 2026
+
+**Repeated speech is handled in the kit, not app by app.** `Say.say` drops a
+line that repeats the last one within a second and a half, or that matches the
+title of the window in front or the name of the control with focus -- the three
+shapes of duplicate announcement that have been reported for years. `sayForced`
+is never guarded, so a toggle can answer twice. Anything dropped is logged with
+the reason.
+
+The other mechanism, an accessible name repeating a caption, cannot be fixed at
+run time and is now audited instead: every accessible name is compared against
+every caption in the same source, and a match fails the check. A new section in
+the guide, **Not twice: speech that repeats**, says which is which.
+
+## 1.26.0 -- 22 September 2026
+
+**The published repository was missing most of itself.** The whitelist in
+.gitignore still named the documents at the top level, where they were before
+they moved into `help`, and named neither `help`, `Tools`, `version.txt` nor the
+check and release scripts. So a clone or a downloaded zip had no guide, no
+history, no tools and no checker -- which is what an outside audit of the
+published archive found. The whitelist is generated from RepoFiles.txt again,
+and createHomerDevRepo is in RepoFiles.
+
+**The lesson worth keeping:** the checker runs on the working folder, so it
+passed while the thing people actually download was missing sixteen paths. Check
+the archive, not the folder it came from.
+
+## 1.25.0 -- 21 September 2026
+
+Runtime logs record the conversation. **Say.onSpoken** sends every utterance to
+the app's log, including those withheld because extra speech was off, so a
+runtime log holds what the program said beside what the user pressed. A new
+**Evidence for the AI** section in the guide sets out the four records of a
+session -- build, release, runtime and the screen reader's speech history -- and
+how to gather each.
+
+**_APP_.cmd**, a template: with programs built into exec, typing the program's
+name at the top of the project would find nothing. This wrapper runs the fresh
+build from there.
+
+## 1.24.0 -- 21 September 2026
+
+**LbcMenuItem**, in Lbc.cs: a menu item that tells the screen reader both its
+shortcut and its access letter. A stock item's name leaves out the shortcut;
+replacing the name to put it in hides the letter, and the reader falls back to
+announcing a first letter that may not work. LbcMenuItem answers both itself.
+Use it for every item that runs a command; submenus keep the stock item.
+
+**The tutorial narrator** gains a NarratorPitch setting, in semitones, applied
+with ffmpeg after piper speaks so the length does not change. The default is -2
+with NarratorScale 0.80: a beta tester with the high-frequency loss that comes
+with age found the narrator hard to follow at 0.72 and full pitch.
+
+## 1.23.0 -- 21 September 2026
+
+homerTidy learns the Homer layout, and apps stop writing their own clean-up
+scripts. It moves a file the installer takes from exec or help into that folder,
+sends stray logs to logs, and never surveys exec or logs. A project's
+**LocalFiles.txt** names what belongs on this disk but not in the repository --
+the per-app customization that a separate cleanDir used to carry -- and every
+line of it is written into .gitignore as never pushed.
+
+Also fixed: two identical files the project names, such as the same script in
+two sample folders, are no longer treated as duplicates to remove.
+
+## 1.22.1 -- 21 September 2026
+
+tagRelease joins the logs folder: each run writes
+`logs\<App>-release-<date>-<time>.log` instead of overwriting `tagRelease.log` at
+the top of the project. Install it with `Tools\installTools`, which copies the
+kit's tools to C:\bin.
+
+## 1.22.0 -- 21 September 2026
+
+Development logs join the tree. Every build, clean, tidy, tutorial and audit run
+writes its own file in the project's `logs` folder, named as the program names
+its runtime logs: `<App>-<task>-yyyyMMdd-HHmmss.log`. One session per file, an
+alphabetical sort is a chronological one, and one zip gathers them all. The build
+template, homerTidy, buildTutorials, makeTutorials and makeHotkeys all follow it.
+
+## 1.21.0 -- 21 September 2026
+
+The development folder takes the installed shape. Sources and build files stay at
+the top with ReadMe and License; programs are built into `exec`, documents live
+in `help`, tooling in `scripts`. A clean-up script that predates the layout moved
+DbDo's `scripts` folder as obsolete, since Windows treats Scripts and scripts as
+one name -- the guide now says so.
+
+Also recorded: why Homer menus are long and flat, when a submenu earns its place,
+the function-key families, the two rules for letters with the X, Un- and Z
+exceptions, and the Hotkeys.md format.
+
+## 1.20.0 -- 20 September 2026
+
+A demo script declares its own terms.
+
+The tutorial .inix gains a `[global]` first section: the voices, their speeds,
+the screen reader's flatness, the silence before the first word and between
+passages, and where the engines are when they are somewhere unusual. Script 00
+sets the series defaults and any later script can override them for itself.
+
+That also gives the file kind a name. An .inix whose sections are speech
+passages is a **demo script**, and it says so: `FileTask = demo`, the way report
+and accept files declare themselves.
+
+## 1.19.0 -- 20 September 2026
+
+Spoken tutorials become a kit capability.
+
+DbDo grew a set of simulated walkthroughs -- a narrator and a screen reader,
+built from text files -- and the tooling was app-specific by accident rather
+than by design. It is in the kit now: `buildTutorials` and `makeTutorials` in
+Tools, a starter script in Templates, and a section in the guide covering the
+format, the tools, the voices and what may be published.
+
+Two things in that section are worth stating on their own.
+
+**The voices are chosen by licence first.** Most of piper's best-known English
+voices cannot be redistributed -- lessac is Blizzard 2013, research only; ryan
+and the hfc pair are CC BY-NC-SA; libritts_r is fine-tuned from lessac. The kit
+installs kristin and john, both trained on public domain recordings, so the
+audio an app publishes is free of restrictions.
+
+**Say the word the key comes from.** Now a universal guideline rather than a
+tutorial habit: wherever a key is introduced, name the word its letter comes
+from. A key whose mnemonic goes unsaid is one somebody has to memorise rather
+than understand, and the association is why that key was chosen.
+
+The same rule governs HEADINGS, which is where it is easiest to miss. A section
+called "Sorting" teaches the wrong letter, because the command is Order and the
+key is O. The test is simple: if the heading were the only thing somebody
+remembered, which key would they press?
+
+sayTutorial, which spoke a single script in two SAPI voices, is replaced by
+buildTutorials, which does that and everything after it.
+
+
+## 1.18.0 -- 19 September 2026
+
+A script that shells out to an installer says where the window went.
+
+`buildTutorials` in DbDo appeared to hang while fetching a voice. It was not
+hung: a User Account Control prompt had opened behind everything, without taking
+focus, and was waiting for an answer nobody knew it had asked for. A sighted
+user gets a taskbar flash; a screen reader user gets silence.
+
+So the kit's installer scripts now say, before they start, that Windows may ask
+for permission in a window behind this one, and that Alt+Tab finds it. Where the
+wait can be watched -- `consent.exe` is the prompt itself -- a script can say
+"Windows is asking for permission now" the moment it appears, and give the wait
+a time limit so an answer that never comes ends in a sentence rather than a
+hang. The guide says all three.
+
+
+## 1.17.0 -- 19 September 2026
+
+Everything DbDo's installer taught this week, folded back in.
+
+### The destination page
+
+`DisableDirPage=auto` with `UsePreviousAppDir=yes`. A reinstall or an update now
+asks nothing and goes where the last one went; a first install still chooses.
+HomerScribe already did this and the template did not.
+
+### Probe quoting, which cost three releases
+
+`cmd /c` strips the first and last quote of what follows it, so a probe
+beginning with a quoted path -- `"C:\...\ollama.exe" --version` -- lost its
+opening quote and ran nothing. Empty output read as "not installed", and an
+installer kept offering to install a tool that was already there. The whole
+command is now wrapped in one more pair of quotes.
+
+### Detect by looking, not by running
+
+The file and the uninstall registry key are checked first: no process, no
+quoting, no PATH, and an elevated installer still sees them. The tool is run
+only to learn its version, never to learn whether it exists. Ollama installs per
+user, into a profile an elevated installer's PATH cannot reach, which is what
+made this the failure it was.
+
+### Three entries per component, with versions in the label
+
+One entry per state -- install, update, already current -- grouped so the ones
+that do something come first, only one ever shown. The label carries the
+versions and nothing else:
+
+    Install Ollama 0.34.1
+    Update Ollama from 0.33.0 to 0.34.1
+    Reinstall Ollama 0.34.1 (current version)
+
+A purpose clause belongs only in the fallback, where no version is known. The
+launch and guide entries keep the words the other apps use, name and key
+substituted and nothing more.
+
+### The Results box is not a checkbox
+
+It always runs and it must run last, so it is started from code in
+`DeinitializeSetup` rather than listed on the finish page. A launch checkbox
+leaves a marker instead of starting the program, and the summary starts it once
+the box has been closed.
+
+### Every probe is logged
+
+Command, exit code, output. Three rounds went into finding a fault that one
+logged probe would have shown at once.
+
+
+## 1.16.0 -- 19 September 2026
+
+Finish-page checkboxes that look before they offer.
+
+DbDo's installer offered to install Ollama on a machine that already had it.
+The guideline said what the finish page should contain and not that a checkbox
+must first ask the machine, so the template did not either.
+
+Both now do. `ollamaState` asks winget, then looks for the per-user copy at
+`%LOCALAPPDATA%\Programs\Ollama\ollama.exe`, and caches the answer: 0 not
+installed, 1 out of date, 2 current. `ollamaNeedsInstall` and `ollamaIsPresent`
+gate the entries, and `descOllama` writes the label -- install, update, or
+reinstall -- so the checkbox says what it would actually do. The pattern is
+EdSharp's `devToolState`, at the scale a smaller app needs.
+
+The guide also now states what was previously only in the template: the last
+checkbox runs `homerFinish.cmd` rather than the program, because Inno runs the
+entries in order and a program started last puts its window over whatever the
+other entries were still saying. And it says what the Results box should hold:
+the program and where it is, one line per ticked checkbox, and the log's
+location. Nothing about a step that did not run.
+
+
+## 1.15.0 -- 19 September 2026
+
+`jobs` became `scripts`, and `samples` folded into `templates`.
+
+The folder layout is now, in the installed tree: `configs`, `data`, `exec`,
+`help`, `scripts`, `templates`. In the per-user tree: `configs`, `data`, `logs`,
+`results`, `scripts`, `temp`. Every initial is still distinct in each listing,
+and `temp` and `templates` still never appear together.
+
+**`jobs` became `scripts`** because the word arrived from mainframe batch
+processing and everybody now says scripts. Same letter, better word. `Paths.jobs`
+is `Paths.scripts`, `shippedJobs` is `shippedScripts`, and the MDI frame's
+command is **Run a Script on Alt+Shift+S**, where it used to be Run a Job on
+Alt+Shift+J.
+
+**`samples` folded into `templates`.** A template that shows what is possible is
+a sample with a purpose. The alternatives collided: `examples` wants e, which is
+`exec`, and `demos` wants d, which is `data`. The installer template ships one
+folder now, with a comment saying why.
+
+DbDo needs no change for this: it already keeps its scripts in `Scripts\`.
+
+
+## 1.14.1 -- 19 September 2026
+
+The build template fetches what it needs.
+
+Reviewing DbDo's build against the kit's own showed that the kit was not
+following its own rule in two places. A build script asks the web for what it
+needs rather than asking the person, and the template said "Inno Setup was not
+found. To produce the installer, open the .iss and click Compile" -- which is a
+manual step -- and left pandoc to the same fate.
+
+Both are now installed with winget when they are missing. A missing Inno Setup
+after that attempt fails the build rather than quietly skipping the installer,
+because the installer is part of a release. And an ISCC that returns 0 without
+writing the .exe now fails too.
+
+
+## 1.14.0 -- 19 September 2026
+
+A module can need an assembly, and now it says so.
+
+DbDo's first build against the kit failed with four copies of
+
+    error CS0246: The type or namespace name 'ZipArchive' could not be found
+
+in `Inix.cs`. Nothing was wrong with `Inix.cs`: reading and writing .xlsx means
+reading and writing a zip archive, csc does not resolve `System.IO.Compression`
+from csc.rsp, and DbDo's build script did not pass it. The kit's own template
+always had, which is why the samples never showed it.
+
+That is the same class of fault as `Mdi.cs` needing `KeyMap.cs`, one level
+lower, and nastier: a missing module reports a missing NAME and points at the
+build script, while a missing assembly reports a missing TYPE and points at the
+module.
+
+So a module now declares both:
+
+    // REQUIRES: KeyMap.cs, Lbc.cs, Log.cs, Paths.cs, Say.cs, Util.cs.
+    // ASSEMBLIES: System.IO.Compression.dll, System.IO.Compression.FileSystem.dll.
+
+`Inix.cs`, `Say.cs` and `Web.cs` carry ASSEMBLIES lines, and `checkHomerDev`
+reads every build script -- the samples', the templates', and any other it is
+pointed at -- for one that compiles a module without the references it names.
+
+
+## 1.13.5 -- 19 September 2026
+
+`Announce.md` carries the facts a reader asks for first.
+
+Jamal's own explanation of the project, written after the first posting, added
+what the draft had left out: that the project consolidates decades of screen
+reader oriented development under Windows; that the classes come in equivalent
+C# and Python versions, the C# for .NET Framework 4.8 which builds on any modern
+Windows and the Python for any recent version; that the functionality covers
+layout by code, standard dialogs, and components that help a screen reader user
+work with AI assistance or by hand; and that template files help with a build
+script and an Inno Setup installer.
 
-**Play Stream queues marked stations**, the way FileDir queues tagged files,
-with the current one first; and the player's window is titled the way FileDir
-titles it, by the source and then by the track.
+All of that is now in the announcement, in the places where a reader would look
+for it, and the piece is still one posting at about 2,800 characters.
 
-## v1.0.227
 
-**RadioTrail rows read name, genre and country.** State came off the row: it
-is empty for most stations and was a "blank" spoken on every one. Tags that
-are addresses or bare numbers no longer reach the genre field.
+## 1.13.4 -- 19 September 2026
 
-## v1.0.226
+`Announce.md` leads with what somebody gets.
 
-**One command builds RadioTrail.** `fetchStations` with no arguments makes a
-clean copy, fetches the catalog and SomaFM, then asks every station what it
-says about itself, forty at a time, writing as it goes so a stop loses
-nothing and the next run carries on. A copy nobody has marked up is replaced;
-one with a status, rating, note or tag is kept. rebuildRadioTrail is gone,
-since the one script is the whole job.
+The previous version listed what the kit contains and left the reader to work out
+why that mattered. It now opens with the benefit -- building a small Windows tool
+of your own should not require first discovering, by trial and error, what makes
+a program work well with a screen reader -- and the features appear underneath as
+what makes that possible.
 
-## v1.0.225
+It also follows the form of the other Homer announcements: a title and subtitle,
+the date, the licence, the link, and plain paragraphs. One piece of content, 2,581
+characters, which fits a LinkedIn post, a Facebook post, or an email as it
+stands.
 
-**RadioTrail knows more, and can ask a station about itself.** New fields:
-slogan, playlist_url (the address as submitted when it differs from the
-stream), countrycode, hls, trend, last_check and probed. A row reads name,
-genre, state and country. `fetchStations --enrich` reads a station's stream
-headers and home page and files its slogan, description and genre words, so
-Keywords finds a station by what it says of itself -- "Seahawks" finds the team's
-flagship. Enrichment survives a catalog refresh. `rebuildRadioTrail` in the template's
-folder makes a fresh copy, fills it, and enriches one country, in one go.
 
-## v1.0.224
+## 1.13.3 -- 19 September 2026
 
-**Play Stream, Alt+Shift+P.** The current record's stream address -- its
-stream_url, url, stream, link or address field, or the current cell -- opens in
-the Homer Player, the same player FileDir has, now shared through the kit. mpv
-does the playing. The installer's finish page offers mpv as a box of its own --
-Install, Update or Reinstall, ticked when it is missing or out of date --
-through the kit's shared component table; and if it is still missing when you
-press Alt+Shift+P, DbDo offers to fetch it. Needs HomerDev 1.51.3.
-
-## v1.0.223
-
-**Your databases are never replaced by a new install.** The copy of a template
-in your data folder is yours: an install whose template file was newer used to
-replace it, and a RadioTrail filled with sixty thousand stations went back to
-fourteen rows. A database that exists is left alone from now on; only the
-settings and report files beside it are refreshed. If this happened to you,
-run `fetchStations` again -- it takes a minute.
-
-**The installer says Update when it should.** The one install after the JAWS
-record moved to the Local tree said Install for scripts already there; that
-install wrote the record in its new place, so the finish page is right from
-here on.
-
-## v1.0.222
-
-**The walks learn from the JAWS trainers.** Every lone letter is spelled with
-its alphabet word before it is pressed; the first walk teaches Insert plus Tab
-beside Insert plus Up Arrow and shows one tutor message before saying they are
-off from here; every walk ends with the two or three keys it taught. The
-tutorial audio should be rebuilt: delete help\tutorials and run build.
-
-## v1.0.221
-
-**RadioTrail's fetch logs where DbDo logs**, under `%LOCALAPPDATA%\DbDo\logs`
-rather than inside the data folder, and the build and installer remove the
-script's former name, fetchRadioBrowser, so only fetchStations remains.
-
-## v1.0.208
-
-**RadioTrail, a template for Internet radio.** One stations table -- name,
-stream address, country, state, language, genre, codec, bitrate, votes, source
--- with status, rating, notes and tags for the listener. It starts with the ten
-ACB Media streams, the NFB Radio Network, Radio Paradise and two SomaFM
-channels. `fetchStations` in its folder fills it from the Radio Browser public
-catalog and SomaFM's channel list, all of it or one country, keyed by each
-source's own station id and never touching what you wrote. If you have not
-opened the template yet, the script makes your copy. Control+Enter on a stream
-address plays it.
-
-## v1.0.207
+`Announce.md` is one announcement.
 
-- **Relationships recorded either way, or both.** DbDo follows foreign keys named for a table, as `job_id` is for `jobs` and as Northwind and Chinook name theirs, and the maps table, which links any record to any other with a kind from the lookups table. Say Related, Related Records and Enter Child follow both alike; the guide's "Relationships between tables" says how.
-- **Links stay whole.** A map names a record by its prime, and prime changes when one of its fields is edited. Every table DbDo makes, and every table in the templates, now carries two triggers: one moves a record's links to its new prime, the other removes its links when the record is deleted. Before, correcting a name left the record's links pointing at nothing.
-- **The right id names.** The id of a new table is named for the English singular of its name: `story_id` for `stories`, `box_id` for `boxes`. DbDo used to drop one trailing s, which made `storie_id`, and looked for foreign keys the same way, so it missed `story_id` in the templates. The same rule is used everywhere a singular is needed.
-- **Your table named maps stays yours.** DbDo knows its own lookups, maps and views tables by their columns as well as their names, so a table of your own that only shares a name is offered like any other and never read as links.
-- **The templates checked and brought into line.** Every table has its trigger that keeps edited current and a unique index on prime, checked with HomerDev's checkDb. HowToTrail's contacts table holds eight primes that repeat, so it keeps its plain index until those duplicates are resolved.
-- **The Say keys list in the guide matches the program**: one entry per key, Shift+F for filter, Shift+K for keywords, Shift+X for regex replace, and H and W as the letters still free.
+It held three versions and a page of notes about character limits and editorial
+intent. None of that belongs in a document whose job is to be posted. The file is
+now a single piece of content, 2,241 characters of body, which fits LinkedIn's
+3,000-character cap, fits Facebook, and reads as an email.
 
-## v1.0.206
+It opens with what the kit is, then says what it is built on, then the features,
+then the checks, then the samples, the licence and the link. No headings about
+where to paste it and no commentary about itself.
 
-- **Setup.** The Results box at the end of setup is titled "DbDo Setup Results", and the finish page uses the Homer wording: the verb first, no "recommended", and "Launch DbDo (desktop hotkey ...)". The JAWS and NVDA boxes read "Install JAWS scripts" and "Install NVDA add-on"; the Ollama and llama3.2 boxes lost their "(current version)" and "(already installed)" tails.
 
-## v1.0.205
+## 1.13.2 -- 19 September 2026
 
-- **Built with HomerDev 1.43.19.** The build refreshes the kit's tools with the day's fixes: `scripts\tidy` keeps a file where the project says it lives and untracks only what RepoFiles.txt leaves out, `scripts\check` reads keys and access letters without false alarms and never waits for a key, and `scripts\release` publishes a draft and confirms the release is GitHub's latest.
+The announcements say what this actually is.
 
-## v1.0.204
+### All four programs built at 1.13.1
 
-- **The installer carries the version it was built with.** buildDbDo writes version.txt only after a build succeeds, and the installer script read version.txt, so every installer was stamped with the previous number: 1.0.202 inside a build of 1.0.203. `scripts\release`, which now refuses an installer older than version.txt, stopped on it. The build hands its number to Inno Setup directly.
-- `scripts\tidy` untracked the files RepoFiles.txt leaves out -- version.txt, Version.cs, the release scripts, the screen reader packages and the old template generators; they remain on this disk.
+FruitBasketCs, FruitBasketMdiCs, FruitBasketMdiPy and FruitBasketPy each
+produced their executable, and the kit audit found 0 problems.
 
-## v1.0.200
+### Announce.md, rewritten around the honest claim
 
-Brought in line with the Homer Development Kit as it stands at 1.43.6.
+The three posts now say the true thing rather than the impressive one: this is
+about twenty years of learning consolidated into one place, with AI making the
+consolidation practical, so that somebody else can start from foundations that
+work rather than from a blank file.
 
-- **The kit's scripts under their plain names.** The build refreshes check, push, release, tidy, unpushed, finish and installCommon into `scripts`, and deletes the old copies of checkHomerApp, gitPush, gitUnpushed, homerFinish, homerInstall, homerTidy and tagRelease, so an old name typed from habit no longer runs a stale tool.
-- **The installer is written to the top of the project**, where `scripts\release` looks for it. On 26 September the release stopped with "DbDo_setup.exe not found" because it was in `exec`.
-- **Installing Ollama from the finish page works.** installOllama.cmd needs the kit's shared install half, now installCommon.cmd, beside it; the installer never shipped it, so the installed script could only stop with a message. It ships now.
-- **The project mirrors the installed tree:** `DbDo.inix` is in `configs` and `lookups.db` in `data`, moved by the build through git, so a copy run from the project's `exec` finds them where an installed copy does. README takes its standard capitals, ReadMe.
-- **What git carries:** version.txt and Version.cs stay on this machine; the scripts are named one by one, so the kit's release scripts never go up; `.gitattributes` stops git turning the Homer CRLF line endings into LF. `getDbDoDeps.ps1` has a `.cmd` beside it for running it by hand.
-- The installer's uninstall step has a RunOnceId, and its log copy uses CopyFile, clearing two Inno Setup warnings.
+Both halves of that are stated plainly. The knowledge is not new and the posts
+do not pretend it is. The consolidation is what is new -- gathering decisions
+scattered across a dozen programs, writing down why each is what it is, and
+checking that they still hold is work that was always worth doing and never
+quite got done -- and it is honest to say that AI is what made it affordable.
 
-## v1.0.191
+The posts also say that the kit covers both shapes these tools take: a graphical
+window, or a command line with the same settings and the same log.
 
-**One letter per menu.** When two items in the same menu began with the same
-letter, pressing it made the reader cycle between them. Now the first item keeps
-the letter and the later one has none, so a letter always does one thing.
-Thirty-nine captions changed; their keys did not.
+The file now opens with what the announcements deliberately avoid: no claim to be
+first, no promise about what somebody will build, no number that cannot be
+checked.
 
-**The system-wide Alt+Control+GraveAccent chord is gone.** Alt+Control
-combinations belong to desktop shortcuts, and DbDo's own is Alt+Control+D, set
-on the desktop icon by the installer. DbDo runs as one instance, so that key
-opens it or brings it forward. Control+GraveAccent, which opens the dot prompt
-from inside DbDo, is unchanged, and so are the Alt+Control arrow keys that move
-the cell cursor.
+Lengths are measured rather than estimated: the short post is about 1,600
+characters, the standard post about 2,500, and the email version longer because
+email has no limit.
 
-## v1.0.190
 
-**DbDo builds against the current Homer kit.** The build now needs HomerDev
-1.38.3, compiles Elevate with the shared classes, and refreshes the kit's tools
-into `scripts` every time, so checkHomerApp, checkTutorial, fixEncoding, gitPush,
-gitUnpushed, homerInstall, homerTidy, installOllama, installScreenReaderSupport
-and tagRelease are always the kit's current ones. Retired near-duplicates are
-deleted rather than left to be run by mistake.
+## 1.13.1 -- 19 September 2026
 
-**The installer is built into `exec`**, with the program and its libraries, so no
-build product sits among the sources. The install scripts moved to `scripts` and
-are installed to the program's own `scripts` folder.
+One command for the whole release.
 
-**F11 now comes from the kit.** DbDo tells Elevate its version and where its
-releases are, so the Help box carries a version section and offers the update.
+### All four samples built at 1.13.0
 
-**Smaller:** the build passes an explicit argument to the tutorial tool and lets
-its progress reach the screen, and it puts every file into the Homer encoding
-before compiling.
+`buildHomerDev` converted the documents, built FruitBasketCs, FruitBasketMdiCs,
+FruitBasketMdiPy and FruitBasketPy, and found 0 problems.
 
-## v1.0.189
+### releaseHomerDev
 
-**A database now carries its own view.** Which fields a row speaks, the order and
-the filter were kept only in the settings file beside the database. Email
-somebody a database and those settings stayed behind, so they saw a bare pair of
-columns instead of the fields you had chosen. Each table's view is now stored in
-the database as well, and used when no settings file is present. The settings
-file still wins on your own computer, so your column choices do not follow a file
-you share. Every template database carries its view already.
+    releaseHomerDev "What changed."
 
-## v1.0.188
+Four steps, stopping at the first failure: `installTools` puts the kit's current
+tools on the PATH so an old `tagRelease` cannot refuse the release;
+`checkHomerDev` records the environment, builds everything from clean, checks the
+dependency rule and the tools on the PATH, and drives every program through its
+keys with uiCheck; `gitPush` commits and pushes what the whitelist allows; and
+`gitRelease` tags and publishes.
 
-**"Template" is the word now, everywhere.** The databases DbDo ships were called
-samples in the menus and templates on disk. They are templates: BookTrail and the
-rest are meant to be kept and filled with your own records. The folder they come
-from is named templates, and now so is everything that talks about them.
+Nothing in it is a test somebody has to remember. What it cannot do is read the
+third list of its own evidence report -- what remains uncertain -- and that is
+the one thing to do before announcing.
 
-**Open Template Database moved to the File menu.** It was on Help, where a
-beginner might look for an example, but what it does is open a database, and it
-belongs with Open and Merge Data -- the three ways a database gets in front of
-you.
-
-**So sharing a database needs no copying into DbDo's folders.** Someone sends you
-a .db file; you save it wherever you like and open it with Control+O. Or you
-start your own from a template with Open Template Database, then use Merge Data,
-Alt+M, and pick the file they sent, from wherever it is.
+`gitRelease` now prefers `checkHomerDev` when the folder has one, so releasing
+the kit runs the kit's own check rather than the per-app one.
 
-## v1.0.187
 
-**Two people can now share a database.** Merge Data, Alt+M, accepts another DbDo
-database as well as a text file. Records are matched by their prime -- the
-computed key that says which record a record is -- so a record you do not have is
-added, and for one you do have you choose once: add new only, update, fill blanks,
-or newer wins. Links between records survive the move, since a link names its ends
-by prime and not by row number, and pick lists merge as well. Nothing is deleted,
-and your database is copied first as <name>-before-merge.db.
+## 1.13.0 -- 19 September 2026
 
-## v1.0.186
+The keys are now pressed by a script.
 
-**Filter, Keywords and Jump each take the letter of their own word.**
+### uiCheck
 
-- **Filter Records is now Control+F**, and **Control+Shift+F** clears it. It was
-  Control+W, under the name "Where Filter" -- a name that promised SQL to people
-  who write none. The dialog is unchanged: one box per field, a symbol in front
-  of a value to compare instead of match, several boxes all having to match, and
-  a chooser to edit, And, Or, replace or clear when a filter is already in force.
-- **Keywords is now Control+K**, and was Find on Control+F. The command searches
-  every column, including ones not on screen, which is what "keywords" means and
-  what "find" did not promise. **Control+Shift+K** searches backward, **Shift+K**
-  says the terms.
-- **Say Filter is Shift+F**, matching its command.
-- **Jump (Control+J), the F3 searches and Query (Control+Q) are unchanged.**
-
-Nothing lost a feature; three commands got the letters that match their names.
-
-## v1.0.185
-
-**Say Select answers field by field.** Shift+S says "select", then each column,
-each as its own utterance, the way Say Cell does. Pressing either twice quickly
-shows the same answers on separate lines.
-
-**The samples are in order.** The Windows and iOS how-to databases are now one,
-**HowToTrail**, with a platform field holding Windows, iOS or any -- 890 tasks,
-446 methods and 87 apps, with every link between them preserved. **CollectionTrail**
-is new, for stamps, coins, records, tools or anything else, with a collection
-field so one database holds them all. The convention and teaching samples take
-Trail names: **ConventionTrail** and **SchoolTrail**. chinook and northwind keep
-the names everybody knows them by.
-
-## v1.0.184
-
-**Dialogs are announced once, not twice.** A shared fault in the dialog code set
-the keyboard focus twice as a window opened, so screen readers read the whole
-dialog again. It is fixed for every Homer program.
-
-**A command that opens a dialog is no longer announced twice.** DbDo used to say
-the command's name and then the dialog said the same name as it opened. Any menu
-item whose name ends in "..." now leaves the announcing to the dialog.
-
-## v1.0.183
-
-**One rule for files that are not databases.** Opening a .csv, .tsv or .txt file
-now works the way opening a spreadsheet already did: DbDo reads it into a working
-copy, you edit with the whole program available, and Control+S writes your
-changes back to the file you opened. The first save leaves the file as it was
-beside it, named <name>-before-dbdo.csv. Control+Shift+S keeps the working copy
-as a database instead. Access and SQLite files are databases already and are
-edited directly.
-
-Before this, a text file opened through a Microsoft driver that had to be
-installed, and there was no clear answer to where your changes went.
-
-## v1.0.182
-
-**DbDo no longer says things twice.** Twenty-two controls carried an accessible
-name that repeated the label or caption beside them -- a list box labelled
-"Fields:" was also named "Fields", so every screen reader said it twice. All are
-gone. Five accessible names remain, each on a control with no words of its own,
-such as the records grid.
-
-DbDo also inherits a guard from the shared Homer code: a spoken line that
-repeats the one before it, or that matches the window title or the control with
-focus, is dropped, since the screen reader says those itself. Toggle answers
-such as "Marked" are never dropped.
-
-## v1.0.181
-
-**An update is checked before it is run.** F11 downloads the installer and asks
-Windows to run it as administrator. It now first makes sure the file is a
-plausible size and that the version stamped inside it is the version being
-installed, and refuses to run it if either fails, naming the file so you can look
-at it. DbDo is not code signed, so this is not a signature check.
-
-**A copy is made before an old database is updated.** When DbDo renames the
-older prm columns on opening a database, it now copies the file first, beside
-the original as <name>-before-prime.db, and says where the copy is.
-
-**A failed build no longer burns a version number.** buildDbDo used to write the
-new number to version.txt before it had even found the compiler, so a failure
-left the number ahead of the last thing that actually built. The number is
-written after the installer is made.
-
-**Smaller:** rebuilding a table now restores the foreign-keys setting to what it
-was, instead of turning it on regardless; the audit script explains itself with
---help and refuses options it does not know.
-
-## v1.0.180
-
-**Say Cell answers in three parts.** Shift+C now says the column, then where the
-row is, then the value -- "title", "row 2 of 4", "Accessibility Analyst" -- as
-three separate utterances with nothing added between them, which is easier to
-take in than one long line. Press it twice quickly to see all three in a window.
-
-**Say Status is back on Shift+Z.** Z is the bottom of the alphabet, and the
-status bar is the bottom of the window. It had been renamed and moved in the
-last version; that was a mistake.
-
-## v1.0.179
-
-**Every sample now opens on the right table, and says how each row reads.** Each
-sample database has its own settings file beside it -- which table the window
-starts on, which fields a row speaks, and the sort. BookTrail opens on books,
-CellarTrail on wines, ContactTrail on contacts, FilmTrail on films, HowToTrail on
-articles, JobTrail on actions, MusicTrail on albums, RecipeTrail on recipes, the
-convention sample on events, the tutorial samples on tasks, chinook on tracks,
-northwind on products.
-
-**A fix that made those settings reach you.** DbDo copies the samples to your own
-folder the first time it runs, and afterwards refreshed only files that were
-already there. A file added to a sample in a later version -- including the
-settings file above -- never arrived. DbDo now keeps a list of what it has
-seeded: anything new is copied, and anything you deleted stays deleted.
-
-**Samples renamed for the Trail family**: cellar, contacts, howtos, media, music
-and recipes are now CellarTrail, ContactTrail, HowToTrail, FilmTrail, MusicTrail
-and RecipeTrail, joining BookTrail and JobTrail. The standard teaching databases
-keep their usual names: chinook, northwind and sample.
-
-**Your scripts folder moved** to `%LOCALAPPDATA%\DbDo\scripts`, with the rest of
-your DbDo files. Anything in the old place is left where it is.
+    uiCheck                    every uiTest.inix beside the script
+    uiCheck --path C:\JobDo    an app's own tests
 
-## v1.0.178
+It starts a real program, sends keystrokes, and reads back the Windows UI
+Automation tree -- the same interface a screen reader uses to find out what is
+on the screen. A control with no accessible name is invisible to both, so a
+check that finds nothing has found something real.
 
-**BookTrail, a sample for books.** Replaces the old reads sample. One books table
-with author, series and volume as fields, so the list sorts in series order;
-pick lists for status, format, source and genre; a narrator field; and formats
-such as BARD audio, braille and Bookshare text. Volume keeps what you type, so a
-6.5 sorts between 6 and 7.
+Tests live beside the program in `uiTest.inix`: `Run` names the program, then
+each `[step]` has `Keys` to send, `Wants` for a string that must appear in the
+tree, `Title` for a window that must exist, and `Escape` to close what the step
+opened. pywinauto does the driving and installs itself on first run.
 
-**Older databases are updated when opened.** The column that identifies a record
-was renamed from prm to prime, and every sample except JobTrail still used the
-old name, which quietly broke Say Prime and following links between records.
-The samples are fixed, and DbDo now renames the column itself in any database it
-opens that still has the old name.
+`Samples\uiTest.inix` drives all four samples, including every key an MDI app
+gets free: Control+N for a second window, F4 for the window list, Alt+Shift+J
+for the job list, Alt+Shift+C for the settings list, Alt+F1 for about.
 
-## v1.0.177
+This replaces the last instruction in this project that said "open it and press
+the keys". A check a person has to remember is a check that stops happening in
+the week it matters.
 
-**Sorting puts numbers in numeric order, however they were stored.** A tester
-sorted his books by author, series and volume and found volume 09 between 06.5
-and 07. SQLite sorts every value stored as a number ahead of every value stored
-as text, so a column holding some of each -- which happens when records arrive by
-different routes, such as an import and a hand entry -- came out as 6.5, 9, 07,
-08. Deleting the record and typing it again stored it the same way. Now numbers,
-and text that is only a number, sort together in numeric order; everything else
-follows as text.
+### checkHomerDev checks the machine too
 
-**Sorting ignores capital letters.** A name typed as "spencer-Fleming" now sorts
-among the S's instead of after every capitalised name.
+Two additions, both from faults that actually happened:
 
-## v1.0.172
+- **The environment is recorded** -- which Python and which pandoc the run
+  actually used -- so a report says what it was produced with.
+- **Every tool on your PATH is compared with the kit's copy.** A release failed
+  on a `tagRelease` from before source-only releases were supported, and nothing
+  could see it, because the kit only inspected itself. When the check reports a
+  stale tool, `Tools\installTools` fixes it.
 
-This release gathers the work since 1.0.115 into one entry. The short version:
-DbDo now opens on a job search database, teaches itself through spoken
-walkthroughs, and every key is named for a word in its command.
+`checkHomerDev` now runs uiCheck as its last step, so one command builds
+everything from clean and then drives it.
 
-**JobTrail, and fifteen spoken walkthroughs.** The first time it runs, DbDo opens
-JobTrail, a job search database with jobs, contacts, documents, interview stories
-and a log of every step -- including the fields an unemployment office or a
-rehabilitation counselor asks for. Help, Play Tutorials plays fifteen short
-walkthroughs that follow one job seeker through it, from installing to producing
-a Work Search Record. Both voices are synthetic, trained on public domain
-recordings.
+### What is still not automated
 
-**Keys you can remember.** Every menu letter is now the first letter of a word in
-the command, and matches the command's hotkey when it has one. Several keys
-moved so their letters mean something:
+Speech. UI Automation reports that a control exists and what it is called, not
+what JAWS said. NVDA can log what it speaks at debug level, so a future check
+could run a scripted session and read that log back. It is written down as the
+next step rather than claimed as done, and every report says so.
 
-- Order Records is Alt+O and Select Columns is Alt+S, since Control+O opens and
-  Control+S saves everywhere in Windows.
-- Choose Table is Control+T, T for Table. F7 is now kept for review.
-- Say Status is now Say Here, on Shift+H.
-- Invoke Script is Control+Shift+I and Edit Snippet is Control+Shift+E.
-- Open New Recordset is now called Open Table in New Window.
-- Z keys are toggles -- Z for sleep: Alt+Z Toggle Read Only, Alt+Shift+Z Extra
-  Speech, Control+Shift+Z Command Echo.
 
-Your screen reader also now announces each menu item's real letter. Before, it
-announced each item's first letter, which often did not work.
+## 1.12.1 -- 19 September 2026
 
-**Every document from Help.** F1 the guide, Shift+F1 this history, Alt+F1 About,
-Control+F1 the key describer, Alt+Shift+F1 the ReadMe, Control+Shift+F1 the
-Hotkeys list, plus the FAQ, the tutorials, and a More Documents submenu with the
-Announcement, the Developer Guide, the License and the tutorials transcript.
+Everything builds; the release itself needed one more script.
 
-**Chat with AI.** F12 asks a question of the AI model on your own computer;
-Shift+F12, Chat about Table, sends the table you are on with it. The keys match
-EdSharp and FileDir.
+### All four samples built, and the kit audited clean
 
-**Empty fields say which kind of empty.** A field with no value says "null"; one
-holding empty text says "blank". An empty box is saved as null, so the two are
-not mixed in one column.
+`buildHomerDev` converted the documents, built FruitBasketCs, FruitBasketMdiCs,
+FruitBasketMdiPy and FruitBasketPy, and found 0 problems. That is the first run
+where the whole kit -- three shapes, two languages, one command -- came through
+in one pass.
 
-**Tables DbDo keeps for itself are out of the way.** The lookups and maps tables
-are not offered when you choose or step through tables. They are still reachable
-at the dot prompt.
+### tagRelease failed, and it was not tagRelease
 
-**A cleaner installer.** A new layout on disk (configs, data, exec, help,
-scripts, templates); an update skips the folder page; the finish page says what
-each option will do and offers Ollama as install, update or reinstall with
-version numbers; and a results box says what was done before DbDo opens.
+    Could not find HomerDev_setup.iss in C:\HomerDev
 
-**Spreadsheets and Word documents without Office.** Export writes .xlsx and .docx
-directly.
+That is a `tagRelease` from before source-only releases were supported. The kit
+has carried the fixed one since 1.1, in `Tools`, but the copy that runs is the
+one on the PATH, and nothing had ever updated it.
 
-## v1.0.115
+`Tools\installTools.cmd` does that now. It copies checkHomerApp, gitPush,
+gitRelease, homerTidy, sayTutorial and tagRelease to a folder on the PATH --
+`C:\bin` unless another is named -- and says plainly if that folder is not on
+the PATH. Run it after updating the kit.
 
-**Scripts and databases are organized so a database's scripts live beside it.** A database's scripts now live in the same folder as its `.db` file, while truly generic scripts stay in `%APPDATA%\DbDo\Scripts`. Invoke Script and Edit Script show both sets merged -- the database's own scripts winning a name clash -- and a new script is created in the open database's folder when one is open. Each bundled sample occupies its own subfolder (`Samples\<root>\<root>.db`, plus that database's scripts), and the installer ships and seeds that tree; `lookups.db` stays at the install root as shared infrastructure, not a sample. Open Script Folder opens the open database's folder when one is open. The upshot: convention scripts no longer clutter the list while a music collection is open, and a database carries its scripts wherever its folder goes.
+The lesson generalizes: a tool that acts on the current directory is meant to
+have one copy, and one copy means one copy that can go stale. `Developer.md` now
+opens with the release sequence, `installTools` included.
 
-## v1.0.114
+### Smaller things
 
-**A sort order now survives a normal Open.** Closing a database saved the per-table sort correctly, but a plain Open Database (Control+O) did not read it back -- only the Recent Files list did -- so a sort looked forgotten on every reopen. Open Database now resolves the file's saved state and reapplies its per-table sort, filter, and row position, the same way Recent Files already did. (Shift+O is Say Order, which only announces the current sort; it never saved anything, and now nothing needs to.)
+- The migration list covers the MDI sample's rename, so the old
+  `FruitBasketMdi.exe` and its log go on the next build.
+- The tutorial playlist no longer implies the two planned episodes are written.
+  They are not.
 
-**A dynamic Sample Databases command.** The Help menu's Sample Databases command lists every database found at runtime under the user's Samples folder and opens the chosen one through the normal state-restoring path. Because the list is built by scanning the folder, a database the user drops in appears alongside the bundled samples with no code change.
 
-## v1.0.112 and v1.0.113
+## 1.12.0 -- 19 September 2026
 
-**Native xlsx import with no Office dependency.** Importing an `.xlsx` workbook no longer drives Excel through COM automation (unreliable across the 64-bit/32-bit boundary). DbDo now reads the workbook directly as the ZIP-of-XML it is, using only `DeflateStream` and `System.Xml`, with no new dependencies, validated against a tester's real workbook.
+The MDI shape in both languages, two lists that matter, and an FAQ.
 
-**Blank cells no longer sort to the wrong place.** Sorting is performed with a SQL `ORDER BY` reopen rather than the ADO client cursor's own sort property, which had mis-ordered rows containing blank values.
+### FruitBasketMdiCs and FruitBasketMdiPy
 
-**Six hobbyist sample databases.** A set of small, relatable collection databases -- reads (books, authors, series), recipes, music, media, contacts, and howtos -- each built on the standard column convention with the `maps` and `lookups` infrastructure and validated for referential integrity, so every association resolves to a real row.
+The MDI sample is now a pair, like the single-dialog one. `homer\mdi.py` is the
+Python side of `Mdi.cs`: same command names, same keys, same title rule, same
+menus. So the claim the kit makes -- one behaviour, either language -- now holds
+for all three shapes rather than two.
 
-**Email Log File.** A Help-menu command and an error-dialog button reveal `DbDo.log` in the file manager and open a mail message with the log's path in the body, avoiding the clipboard entirely.
+One honest note, which is in the file as well: `lbc.Dialog` builds a dialog, and
+a wx dialog cannot be an MDI child, so the band layout in `mdi.py` is written
+again rather than reused. Everything that makes a control accessible IS reused.
+Lifting lbc's building methods into a mixin that a dialog and a panel can share
+is the next refactor, and it has not been done.
 
-**A smarter default table.** With no remembered table for a database, DbDo now opens the first non-infrastructure table rather than the first table alphabetically.
+### One command builds everything
 
-**`DbDo.exe.config` is shipped** (modeled on EdSharp's), disabling Authenticode publisher-evidence generation at startup and enabling concurrent garbage collection.
+`buildHomerDev` now converts the documents, **builds all four samples**, and
+audits the kit. Somebody who changes a shared class should not have to remember
+four build scripts; a problem anywhere surfaces from the one thing they already
+run. Each sample still writes its own log beside itself, and a failure is named
+on screen with the log that holds the compiler output.
 
-## v1.0.111
+`checkHomerDev` is unchanged in purpose and now covers all four: it cleans
+first, checks the module dependency rule, and writes the evidence report.
 
-**Dot-prompt arguments are taken verbatim, with no escape characters.** The trailing argument of a command is read literally as typed. Enclosing quotes are now optional and may be either double or single: a single matching outer pair is stripped and the inside kept exactly, so `find "John Smith"`, `find 'John Smith'`, and `find John Smith` are equivalent. Nothing inside a quoted value is un-escaped -- a literal quote is just typed -- and the former doubled-quote convention is gone. To keep a value that itself begins and ends with a quote, or that has leading or trailing spaces, wrap it once more (`""x""` yields `"x"`); that is the same rule applied, not an escape. Values that cannot be expressed this way are refused by the command with an explanation rather than by adding escape syntax. This realizes the Homer/Lbc/DbDo principle that everything should be typeable as written.
+### Run a Job, and Change a Setting
 
-**A convention analytics script and tutorial sections.** `Scripts/Convention-Stats.sql` answers popularity-and-count questions -- speakers ranked by presentations, locations ranked by events held, days ranked by event count -- with verified `maps` joins. The Convention-Tutorials document gains a section on how arguments are typed and a "popularity and counts" walk-through showing the single-table path with `filter`, `yield`, and the statistics commands.
+Every MDI app now gets two more commands free:
 
-## v1.0.110
+    Alt+Shift+J    run a job: a list of the scripts in the jobs folder
+    Alt+Shift+C    change a setting: a list of what this program lets you change
 
-**Exported HTML is more navigable for screen readers.** The HTML export now writes `lang="en"` on the document, a `<caption>` naming the table, and `scope="col"` on every header cell, so a screen reader announces the table's name and ties each value to its column header during table navigation.
+Both are lists, and `HomerDev.md` says at length why. Briefly: without sight, a
+folder is a sequence to be heard and a typed path is a spelling test, while a
+list is reached by one key and narrowed by first letter. The job list is read
+fresh every time, so dropping a script into the folder makes it available with
+nothing to register. The user's own jobs live in the per-user tree, where an
+update cannot overwrite them, and appear above the shipped ones.
 
-**Bundled sample scripts for the convention database.** A Scripts folder ships three worked examples against `NFB2026Convention.db`, one of each script type: `Daily-Schedule.dbdo` (filter to a day, sort by time, count, export an HTML schedule), `Presenter-Events.sql` (a maps join listing every event a presenter appears on), and `Marked-Schedule.js` (turn the current view into a day-grouped, accessible HTML schedule). A companion Convention-Tutorials document walks through the common planning workflows -- a presenter's events, collecting picks and exporting them, a day at a glance -- using only existing features.
+Settings are declared by the app with `addSetting`, changed through one field,
+saved the moment they are answered, and handed back to the app through
+`onSettingChanged` so they take effect at once. No file to edit by hand, no
+twenty-control preferences dialog, no restart.
 
-## v1.0.109
+### FAQ.md
 
-**Sqlean Console is hosted in a cmd window for a reliable exit.** Launching sqlean.exe directly from the GUI could hand it a console where the shell's interactive `.quit` / `.exit` did not cleanly close the window. The console now runs inside a `cmd.exe` window: the shell gets a normal interactive console where `.quit` / `.exit` work, and when it exits, cmd remains so the window is never orphaned -- type `exit` or close it. A banner states how to leave.
+A new standard document, in `help` with the others. It answers the question that
+comes first from outside the Windows world -- why not Mac -- plainly: this kit
+is built on decades of Windows screen reader experience and exists to make that
+experience as good as it can be; that depth is missing for other platforms, and
+writing conventions I had not lived with would produce confident guidance that
+turned out to be wrong. The code is MIT licensed and developers on those
+platforms are welcome to it.
 
-**Order Records / Reverse Order take a multi-column precedence list at the dot prompt.** The argument is now a comma-separated list of field names, each optionally followed by `asc` or `desc` -- `order-records city, last_name desc, first_name` -- assembled into the sort clause (quoting optional, field names case-insensitive). A term with no direction takes the command default. With no argument, the single-column picker still appears. This is the template for the broader effort to give every dialog command an equivalent dot-prompt parameter form.
+The full document set is now `ReadMe.md` and `License.md` at the top, and in
+`help`: `<App>.md`, `Announce.md`, `Developer.md`, `FAQ.md`, `History.md`,
+`Hotkeys.md` and `Tutorials.md`.
 
-## v1.0.108
 
-**A Sqlean Console on Control+Shift+GraveAccent.** A new Misc command opens the bundled `sqlean.exe` interactively in its own console window -- the full SQLite / SQLean shell (`.tables`, `.schema`, `.dump`, `.import`, `REGEXP`, `median()`, and the rest). It opens the current database read-only so it cannot contend with DbDo's writer; with no database open it starts on an in-memory database. It sits alongside the existing `!` dot-prompt pass-through (one-shot lines) and Open Dot Prompt on Control+GraveAccent.
+## 1.11.0 -- 19 September 2026
 
-**Invert Marked moved to Alt+Shift+I.** Both binding sites -- the Edit-menu item and the grid's mark-handling key path -- now use Alt+Shift+I; the former Control+Shift+I no longer triggers it.
+Ready for a first public release.
 
-**Table Summary (Alt+T) lists a field's lookup values.** Under each field that has values registered in the builtin `lookups` table, the summary now prints a `lookups (N): value1, value2, ...` line -- the count first, then up to twenty values in ordinal order. It is guarded, so a database without a lookups table simply shows no such lines.
+### The documents now say what the kit does
 
-**An authoritative key-binding table.** `KeyMap` gained a context column and a typed `KeyBinding` table on top of it. Each row carries the command's context (the parent/child surface its chord is live in, "Global" when unscoped), the command name, its short summary and long description, and the chord (unbound rows allowed). The menu, status line, Alt+F10 Alternate Menu, and Control+F1 Key Help all read from this single structure, and `bindingTable()` projects it to a tab-separated table for export or for opening as a DbDo table. The existing dictionaries remain as fast indexes, so dispatch is unchanged.
+A full pass over every document against the actual contents of the folder. What
+had drifted:
 
-**Pick-list lookups in the cell editor.** F4 (or Alt+DownArrow) in the in-place cell editor opens a sorted picker of the field's registered lookup values, so a constrained field can be filled without typing.
+- The kit has **twelve** C# modules, not nine. Inix, KeyMap, KeyName, Lbc, Log,
+  Mdi, Paths, PdfRead, Say, Util, Web and inixVert.
+- The Python side has **seven** modules -- inix, lbc, log, paths, say, util and
+  web -- plus the package file and the version file the build writes.
+- There are **three** samples, not two.
+- `Style\` no longer exists; its files are in `help`. Three documents still
+  pointed at the old path.
+- `Developer.md` carried the folder tree from three layouts ago.
+- `Hotkeys.md` had no section for the MDI frame's keys, which every
+  multiple-document app gets for free.
 
-**Leaner distribution.** The `System.Data.SQLite.dll` and native `SQLite.Interop.dll` assemblies are dropped -- they backed only an unbound in-memory diagnostic spike, never a shipping feature (the real SQLite path is ADODB over the SQLite ODBC driver, and SQLean rides that same ODBC path). Two development-only Misc commands are removed as well: Show Provider Properties (an ADO property dump) and Test Extension Load (a SQLean-load spike), along with their now-dead report methods. Less to ship, less menu noise.
+### Announce.md is now three announcements, each already the right length
 
-## v1.0.107
+The Word document made from `Announce.md` was always far too long to paste into
+a post, which is the wrong way round: the document should hold posts that are
+ready to use.
 
-**GUI-only startup is now truly the default.** Two compounding bugs made the dot-prompt console appear at every launch. First, every uiMode default still said `both` -- the shipped template, the Edit Settings dialog default, the generated per-user stub, and the startup parser's three fallback returns. All now say `gui`; the console is opt-in via Control+GraveAccent or `uiMode = both`. Second, and worse: startup read uiMode ONLY from the template next to the EXE, while Edit Settings writes to the per-user file -- so a user's saved choice never took effect. `readUiModeFromIni` now consults the per-user file first, the shipped template as fallback, and parses through `InixCodec`.
+It now holds three, with their character counts measured rather than estimated:
 
-**Virtual cursor desynchronization fixed at the root.** Say Cell (Shift+C), type-ahead search, the custom-sort default, and the Show-Related default all still read the vestigial `iCurrentColumnIndex` -- a field that nothing ever set (and that arrow movement actively reset to 0), so Shift+C could speak a different cell than the one Tab just announced. Every reader now uses `iVirtualCol`, the single column-cursor state that Tab, Shift+Tab, and the Alt+Control chords drive through `virtMoveTo`; Say Cell additionally reads the value through the same `virtCellValue` path the movement announcements use, so Shift+C now repeats, verbatim, the cell the user last heard. The dead field, the dead `announceCurrentColumn` helper, and the dead resetting handler are deleted -- closing the long-standing vestigial-field cleanup item.
+- **the short post, about 1,700 characters** -- fits anywhere, including a
+  mailing list digest or a forum with a tight limit
+- **the standard post, about 2,200 characters** -- for LinkedIn and Facebook
+- **the email version** -- longer, plain text, with a subject line
 
-**NFB2026Convention.db rebuilt on the simplified maps model.** Three noun tables -- contacts, events, locations -- plus the standard maps and lookups infrastructure tables, every one carrying the full standard column set including both `look` and `unq`. No subevents, no tracks: each of the 242 agenda entries is a discrete event (general-session program items inherit the session's time window as their own). Associations are generic typed map rows: 104 presenter relationships of kind `presents` (with the stated role and per-event affiliation in the map row's notes) and located_at rows binding events to 38 locations, whose levels follow the agenda's own room-numbering rule. The contacts field roster is adopted from the DbDialog.mdb Contact schema -- a general-purpose design (three phones, two emails, full postal fields, `enterprise`, `job`) whose ancestors of `look`/`added`/`edited`/`marked` (CONTACT_LOOK, CREATED, MODIFIED, TAGGED) confirm the lineage of today's standard columns. A contact's identity (`unq`) is the name alone; affiliations vary per event and live on the map rows. `build_convention.py` is the repeatable parser/builder, included in the archive.
+LinkedIn caps a post at 3,000 characters including spaces, which its own help
+page states, and that is the only limit that rejects a post outright. Facebook's
+is far larger. The limit that decides whether anybody reads it is smaller than
+either: roughly the first 140 to 210 characters are shown before a "see more"
+link, so both posts are written to carry their point in the first two sentences.
 
-**Related-record navigation is now maps-aware.** Say Related (Shift+R) reports, after the foreign-key parents and children, every maps association touching the current record in BOTH directions -- grouped by kind and table ("presents to events (12 records):" when the record is the subject, "presents from contacts" when it is the object), one look line per related record with the map row's notes (role, affiliation) in parentheses. Enter Child Table (Alt+RightArrow) offers the same relations as drill targets alongside FK children, labeled "<table> via <kind>" with "(incoming)" marking object-side relations; choosing one opens the related table filtered to exactly the associated records (the related unq set rendered as the OR-equality chain the ADO client cursor accepts, capped at 200 with a spoken truncation notice). The drill rides the existing stack, so Exit Child (Alt+LeftArrow) returns to the precise row you left and Exit to Root (Alt+Home) pops everything -- one navigation model for both relationship mechanisms. New manager plumbing: `queryRowsSql` (general transient-recordset SELECT), `hasMapsTable`, `lMapsRelations`, and the shared `sQuoteSqlLiteral`.
+The file also says what the announcements deliberately avoid: no claim to be the
+first anything, no promise about what somebody will be able to build, and no
+number that cannot be checked.
 
-**Parser round two: professional data preferred, nothing lost.** Sponsors are parsed from "Sponsored by ..." prose into organization contacts (enterprise-only rows) related through maps rows of kind `sponsors`; the contacts unq is now the conditional Pax-style expression -- a person is identified by name, an organization by enterprise -- mirrored exactly between the SQL generated column and the builder's Python so every maps reference joins (verified: zero orphaned references). The presenter classifier now handles comma-separated name lists with a shared trailing organization ("Mariah Moon, Praveena Parsiboina, and Nimer Jaber, Google" yields three contacts at Google), stacked role parts ("Senior Financial Advisor, AVP, Wells Fargo"), plural roles distributed to every name ("A and B, Co-Chairs"), semicolon-separated credits, honorific suffixes (Esq., PhD) dropped, and city/state tails and organization-vocabulary lines rejected. Data preservation per the convention-over-configuration rule: a contact's dedicated columns hold the richest job and enterprise seen, with conflicting additional roles kept as "Also:" lines in notes; event Zoom/1CapApp logistics move from details into notes with the Zoom link filling the standard url column; and way-finding bullets from the agenda's Navigate the Hotel section attach to the matching location's notes (with street-name false matches excluded). Duplicate map tuples merge their notes so the maps unq index is UNIQUE.
 
-**ColumnSequenceDialog: the reusable ordered-column picker.** A new Lbc-family dialog with two side-by-side listboxes, Available (alphabetical, opening on the virtual cursor's column) and Chosen. Add (Alt+A, or Enter or double-click in Available) moves a column to the END of the chosen list -- so the order of adding IS the sequence; Remove (Alt+R, or Enter or Delete in Chosen) sends it back, re-inserted alphabetically; each move is spoken ("city added, 3 chosen"); OK yields the names and their comma-separated form. Enter deliberately belongs to the listboxes rather than an AcceptButton, so the single-column case is three keystrokes. Two commands now run on it: **Select Columns (Alt+S)** opens with every column in Available (alphabetical, the virtual cursor's column selected) and Chosen empty, and now controls column ORDER as well as visibility -- the Chosen sequence is the grid's column sequence; and **Order Records / Reverse Order** accept a multi-column precedence in one pass, every column in the sequence carrying the direction (a, b ASC or DESC), with the existing Replace/Add-to-existing-sort behavior unchanged. The dialog is ready for any future command needing an ordered column list.
+## 1.10.1 -- 19 September 2026
 
-**Row synchronization fixed at its architectural root.** Pressing Enter on a contact could show a DIFFERENT record, and Alt+RightArrow on a row could drill from the wrong one. The cause: the virtual grid's paint handler seeks the ADO cursor to every row it renders -- so after any repaint the cursor rests at the last-PAINTED row, while the selection handler had synced it only once, at selection time. The fix installs an invariant in the paint handler itself: seek, read the row, then RESTORE the cursor to the selected row (an in-memory operation on the client cursor) -- so painting can never move the user's record, and every command that reads "the current record" is repaired at once. Belt-and-braces, a syncAdoCursorToSelection helper runs first in the two row-identity-critical commands, Show Record and Enter Child.
+The build now clears up after a move.
 
-**The convention database is rebuilt on four nouns: contacts, events, locations, and projects.** A project is a product, service, or other ongoing endeavor -- a work in progress that evolves over time. The parser finds them two ways: named-program patterns (any capitalized phrase ending in Program, Academy, Award, Scholarship, Camp, Fair, Contest, or Initiative, ampersands included) and a curated brand list with kinds and -- when the agenda makes ownership unambiguous -- the offering organization (Aira the service from Aira the company; Dot Pad from Dot Inc). A second pass canonicalizes name variants: a strict word-suffix of a longer seen name merges into the fuller title, so "Parent Leadership Program" joins "NOPBC Parent Leadership Program" rather than duplicating it. Ten projects ship: two products, two services, six programs, related through two new maps kinds -- **features** (event -> project, 12 rows) and **offers** (organization -> project) -- with the lookups vocabulary extended to match (maps.kind now five values; projects.kind four). Every association between noun tables lives in maps; the noun tables carry no relationship columns at all. The navigation logic needed NO changes for the fourth noun -- verified by simulation: Enter Child on the Monarch project offers its event directly and reaches its presenters and its room at two hops, because the maps machinery is generic over tables. All references verified, zero orphans.
+### All three samples built at 1.10.0
 
-**The runtime-error dialog can never trap the user again.** Two protections: the global handlers now pass a Quit button (Alt+Q, Environment.Exit) into ErrorDialog, so a repeating error always leaves a one-keystroke way out instead of requiring Task Manager; and a repeat suppressor logs -- but does not re-show -- the SAME error recurring within five seconds, which is exactly the paint-loop pattern that previously reopened the dialog the instant it closed.
+FruitBasketCs, FruitBasketMdi and FruitBasketPy each produced their program
+again, so moving the documents disturbed nothing that compiles.
 
-**Related-record wording is succinct.** The Enter Child picker and the related sections of Show Record and Say Related now say just "<table> (N)" -- "events (2)" -- instead of "events via presents (2 records)". The relationship kind is jargon to a user who simply wants the related events, so "via <kind>" appears ONLY when the same target table would otherwise be listed twice and the qualifier is genuinely needed to tell the choices apart; per-record role notes still ride in parentheses on each look line.
+### Twenty documents, when there are twelve
 
-**Filter Records (Alt+Shift+F) is now a field form.** The same shape as Edit Record: one textbox per editable field, blank by default. A plain value is a CONTAINS match on that field; a value starting with =, <=, >=, <, <>, or > uses that comparison (numerics bare, strings quoted); several filled fields AND together. The Clear / And / Or / Edit / Reset chooser still appears first when a filter is active, with Edit pre-filling the last values typed.
+The 1.10.0 run converted 20 documents instead of 12. Unarchiving over an
+existing folder adds and replaces; it never deletes. So every document that
+moved into `help` was still sitting at the old path as well, and `Style` was
+still there beside it. Two files with the same name and different contents is
+worse than either alone.
 
-**New Database actually builds a database.** The File menu command previously created an empty file; it now prompts for the first table -- a name plus up to ten field slots, each with a type pick-combo (BLOB, BOOLEAN, INTEGER, REAL, TEXT, TEXTLINE, TEXTMEMO, TEXTTIME) -- and creates the table in the standard shape: the distinct fields surrounded by <singular>_id, added, edited before and notes, tags, look, unq, marked after, with the skip-empty look expression, the positional unq expression, the edited trigger, and a UNIQUE unq index, all generated from the definition. The builtin maps and lookups tables are created alongside, lookups seeded with the field-type vocabulary (src 'DbDo', fld 'type') so future picklists draw types from lookups. A new **Add Table** command on the File menu defines additional tables in the same shape inside the open database, creating the maps/lookups infrastructure when a database predates it.
+The previous release answered that with a sentence telling the user to delete
+the old copies. That was the wrong kind of answer, and it broke a standing rule
+of this kit: ship a script that makes the change, not a step for somebody to
+carry out.
 
-**New Copy confirmed and clarified.** Control+Shift+N already starts a new record pre-filled with every editable (non-admin) value of the current row -- the multiple-employees-at-one-company case; the admin fields regenerate from defaults, triggers, and expressions. The stale in-code unq guard (now impossible by construction) was removed and the hotkey description rewritten to match.
+`buildHomerDev` now does it. It carries a list of pairs -- where a file used to
+be, and where it is now -- and removes the old copy when, and only when, the new
+one is already in place. The same list clears the folders an earlier layout
+left empty: `Style`, `Python\homer`, and the three per-sample folders from
+before the samples were flattened. It is logged file by file and summarized in
+one line on screen.
 
-**Virtual-grid crash fixed at the root (the first copyable error report earns its keep).** The pasted runtime error -- InvalidOperationException, "When in VirtualMode the ListView RetrieveVirtualItem event needs a list view SubItem for each ListView column" -- had a structural cause: the retrieve handler's fallback item was a SINGLE-subitem ListViewItem, so ANY transient exception while building a row (a cursor seek during a table transition, one unreadable field) handed WinForms an item with fewer subitems than columns, which is itself the crash. Every exit from the handler now goes through miPaddedItem, which pads or truncates the row to exactly the grid's current column count -- making the exception structurally impossible -- and each field read is individually isolated, so one bad field blanks one cell rather than the row. A one-shot diagnostic logs any display-fields/columns count mismatch per session, and drill transitions quiesce the virtual list (size 0) before repositioning so the ListView cannot request items against the old column set mid-switch.
+Every move the kit has made is in that list, back to `Keys.cs` becoming
+`KeyName.cs`, so a machine carrying any earlier version tidies itself on the
+next build.
 
-**Maps drilling now lands in a real, populated, announced view.** Choosing a related table from the Enter Child picker previously applied the related unq set as an ADO client-side Filter OR-chain -- which could silently match nothing, leaving an empty grid with stale speech, exactly the confusion reported. All three drill kinds (foreign-key, one-hop maps, two-hop maps) now open through a new manager method, selectTableFiltered: a single-base-table `SELECT * FROM <table> WHERE ...` over the client cursor with optimistic locking, so every related-record view is UPDATABLE -- the IN-subquery-through-maps design the architecture was built around, now literally the code path. One-hop drills use `unq IN (SELECT ... FROM maps WHERE ...)`; two-hop drills join maps to maps through inline derived edge tables; both WHERE clauses validated against the shipped database (Mosen: 2 events; Salons G and H via his events). The 200-row drill cap is gone (a WHERE clause needs no cap). Arrival is explicit: focus moves to the grid and the count is spoken ("events: 2 related records"); an EMPTY result announces itself and returns to the parent row automatically instead of stranding focus in a blank grid. Drill views deliberately skip cached per-table settings, since a remembered filter reapplied on top would silently change the result set.
 
-**Empty values speak as "blank".** All 18 speech and display sites that said "(empty)" -- Say Cell, Say Notes, Say Tags, Say URL, Say Added, Say Edited, the related summaries, the console forms -- now say "blank": shorter to hear, same meaning.
+## 1.10.0 -- 19 September 2026
 
-**Admin fields versus editable fields.** The record dialogs now present ONLY editable fields: the admin fields -- the primary key, added, edited, look, unq, and marked -- never appear in New Record or Edit Record, because the program and the database maintain them (auto-increment, current_timestamp defaults, the edited trigger, generated look/unq expressions, the mark commands). Edit Record previously appended them read-only at the bottom; that section is gone, and their values remain viewable through Show Record, Say Added, and Say Edited. Critically, the old bookkeeping list wrongly included notes and tags, which therefore could NOT be edited in the dialogs -- under the new split, notes, tags, and url are ordinary editable fields and appear like any substantive column. Shift+F2 Set Cell refuses every admin field with its system-managed explanation (marked still routes to the mark commands). Vocabulary follows the model: Metadata.AdminColumns/isAdminColumn, and the manager's getEditableFieldNames/getAdminFieldNames (formerly getDistinctFieldNames/getMetadataFieldNames); the schema-properties displays group admin fields separately as before.
+A place for the documents, and two scripts for releasing.
 
-**Database Summary (Alt+D) is now maps-aware.** Its related-tables report walked only the foreign-key naming convention, so under the maps architecture every table read "(no related tables)" -- technically true and completely misleading. The summary now also aggregates maps once per invocation (GROUP BY subject table, kind, object table) and prints both directions per table: contacts shows "maps: presents to events (149)" and "maps: sponsors to events (5)"; events shows those incoming plus "maps: located_at to locations (197)". Because this uses the same queryRowsSql machinery as the Enter Child picker, the summary doubles as a health check: maps lines appearing in Alt+D proves the maps query path works end to end on that machine. The Enter Child empty-result diagnostics now present through ErrorDialog, so they are copyable with Alt+C.
+### help, the tenth folder
 
-**Runtime errors are now copyable.** A new ErrorDialog replaces every error MessageBox (56 sites converted) and backs two NEW global handlers (Application.ThreadException and AppDomain.UnhandledException -- previously absent, so an unhandled exception fell through to the raw .NET crash dialog). The details live in a read-only multiline TextBox that takes focus on open, so the screen reader begins reading immediately and the text can be reviewed line by line or selected; the Copy button (Alt+C) puts the title and full details -- exception type, message, every inner exception, and the stack trace for unhandled errors -- on the clipboard for pasting into a chat or an issue, with a spoken confirmation. Escape or Enter closes. Every error shown is also written to the log. The dialog's own last-resort fallback remains a plain MessageBox (which supports Control+C) to avoid recursing on a failure inside the dialog itself.
+`help` joins the layout, at the same level as configs, data, exec, jobs, logs,
+results, samples, temp and templates. Its letter, h, was free, and it holds every
+document -- the guide, `Tutorials.md`, `History.md`, `Hotkeys.md`, `Announce.md`,
+`Developer.md`, the style guides and the tutorial scripts -- in both `.md` and
+`.htm`.
 
-**Two-hop relations: the listbox now offers what a person expects.** On a contact, Enter Child (Alt+RightArrow) previously offered only the DIRECT maps relations -- "events via presents" -- but a contact's locations are reachable only through their events, so the locations table never appeared. The manager now also traverses maps two hops through an intermediate record, via a normalized undirected edge CTE (each map row contributes an edge in both directions, so the SQL never case-splits on which side a record sits): on Jonathan Mosen the picker now offers "events via presents (2 records)", "contacts via events (co-presenters)", and "locations via events (1 record)"; on a location, the events held there plus every contact presenting at them; on an event, its location, its presenters, and the sibling events sharing either. A target table already offered as a direct relation is not duplicated at two hops. The drill uses the subquery shape throughout -- maps joined to maps through the edges CTE producing the distinct target unq set, rendered as the same OR-equality ADO filter as the direct drill. Say Related (Shift+R) reports the same two-hop groups after the direct ones, headed "<target> via <viaTable>". Simulated end-to-end against the shipped database for a contact, an event, and a location.
+`ReadMe` and `License` stay at the top of the project. That is not sentiment: it
+is what GitHub recognizes, and it is where a person opening the folder for the
+first time looks.
 
-**The empty-result dialog is now self-diagnosing.** When Enter Child finds nothing, the message reports the open database FILE PATH, the table and primary-key value, whether a maps table is present, and whether the row has a unq value -- so a stale last-opened file or a schema mismatch is visible in the dialog itself rather than requiring a log dive. (The step-by-step simulation of the Mosen case shows the code and shipped data producing the expected choices, which points to the running program opening a different database file; the dialog now settles that question directly.)
+**Why not `docs`, which is the GitHub convention?** Because `d` is `data` here,
+and the letters are the point of the layout. What that costs is one feature:
+GitHub Pages published from a `/docs` folder. Homer apps are listed from the
+separate HomerTools site instead, so nothing is actually given up. README
+recognition is unaffected, since the ReadMe stays at the root. Community health
+files, if a project ever wants them, go in `.github`, which GitHub also
+recognizes and which leaves the letters alone.
 
-**Parser: plural role credits.** Role-token matching is plural-aware, so "Accessibility Excellence Advocates" is a role, not a person -- eliminating a false contact -- and a plural role anywhere in a credit line now applies to every job-less presenter named before its bearer ("Charles Hiser and Ron Miller, Accessibility Excellence Advocates, and Jonathan Mosen, Executive Director..." gives Hiser and Miller the shared role and Mosen his own).
+### Tutorials.md and Announce.md join the standard set
 
-**Say Added (Shift+A) now speaks the human-friendly form.** It previously spoke the raw SQLite text ("2026-05-16 14:39:06"); it now renders through the same formatDateHumanFriendly helper as Say Edited (Shift+E), yielding "May 16, 2026 at 2:39 PM" -- the two timestamp commands are exact parallels.
+The full documentation set is now: `ReadMe.md` and `License.md` at the top, and
+in `help`: `<App>.md`, `Announce.md`, `Developer.md`, `History.md`,
+`Hotkeys.md` and `Tutorials.md`. Every one has a matching `.htm`, and
+`checkHomerApp` checks for all of them in their right place.
 
-**Contacts field order made intuitive.** The reading/dialog order is now identity, professional, contact methods, postal address, url: first_name, middle_name, last_name, enterprise, job, gender, date_of_birth, wireless_phone, home_phone, office_phone, personal_email, business_email, address1, address2, city, state, zip, nation, url -- enterprise directly after the name, ahead of the street address.
+`Tutorials.md` holds nine worked scenarios -- starting an app, adding a field,
+finding out what a key does, turning one window into many, reading a log,
+writing acceptance criteria, changing a shared class, releasing, and asking an
+AI for a Homer app -- plus the audio tutorial playlist and how to record more.
 
-**Enter Child hardened.** Two belt-and-braces protections for the maps drill path: if the ADO cursor sits at EOF/BOF while the grid shows a focused row, the cursor resyncs from the virtual row before bailing; and the current row's unq is read two-tier -- the recordset field when present, else a direct SQL lookup keyed on the primary key, covering recordsets opened with a column subset or providers that omit generated columns. Diagnostic log lines at each decision point (PK resolution, FK child count, unq presence, maps relation count) make any remaining failure leg identifiable from DbDo's log.
+### gitPush and gitRelease
 
-**Convention scripts rewritten for the maps pattern.** ConventionSchedule.sql, DayAtAGlance.sql, and SpeakerSessions.sql all demonstrate the canonical maps join -- both `tbl` columns filtered explicitly, `unq` joined with `=` (never LIKE), and the contact query shaped as an IN-subquery so the events view stays editable. README's convention sections rewritten to match the new model.
+Both from the versions in daily use, with three changes. `gitPush` takes the
+commit message as an argument instead of always saying "Fix.", refuses to run
+outside a git repository rather than creating one by accident, and writes a log.
+`gitRelease` runs `checkHomerApp --build` first and stops if anything failed,
+because a release is the one moment where a fault costs somebody else time
+rather than you. `--skip-check` is there for when you already know.
 
-## v1.0.106
+Both stage only what the whitelist allows, so `git add -A` means "everything the
+project has named" rather than "everything in the folder".
 
-**Primary keys follow the `<singular>_id` convention.** Every sample database's primary key is renamed from the bare `id` to the singular table name plus `_id` (`teacher_id`, `wine_id`, `order_detail_id`), so a foreign key now carries the SAME name as the parent primary key it references (`teacher_id` in `classes` references `teachers(teacher_id)`). The same key name on both ends of every relationship makes schemas, generated SQL, grep results, and -- most importantly for this program -- spoken column names self-identifying. Code already preferred `<singular>_id` discovery with a bare-`id` fallback; the fallback is retained for legacy databases. `NFB2026Convention.db` is deliberately NOT migrated -- it awaits a separate schema redesign.
+### Every file, listed
 
-**`edited` replaces `modified` as the standard last-change column.** Consistent with Control+E (Edit Record) and Alt+E (Edit menu). The `Metadata.ModifiedColumn` constant is renamed `EditedColumn`; the standard-hidden list, bookkeeping list, date-sort list, index-recommendation pass, status bar ("edited YYYY-MM-DD"), Edit Cell refusal message, and New Record skip list all follow.
+`HomerDev.md` gained a manifest: every file in the kit with one line saying why
+it is there, grouped by folder. A file you have not seen before can now be
+looked up rather than guessed at.
 
-**Say Edited on Shift+E.** The command formerly called Say Modified (Shift+M) is renamed Say Edited and rebound to Shift+E, the mnemonic parallel of Shift+A for Say Added. It speaks the `edited` timestamp in the same human-friendly local-time form ("April 15, 2026 at 5:42 PM"), falling back to `added` when the table has no `edited` column. Shift+M is now unbound.
 
-**Standard hidden columns confirmed as: `added`, `edited`, `notes`, `tags`, `url`, `look`, `unq`, `marked`** -- plus the every-`_id`-and-bare-`id` key rule. (Same set as before, with `edited` in place of `modified`.)
+## 1.9.0 -- 19 September 2026
 
-**Edited-timestamp triggers rewritten so marking never bumps the timestamp.** Each sample-table trigger is now `AFTER UPDATE OF <data columns> ... WHEN OLD.col IS NOT NEW.col OR ...`: the OF list excludes `marked` (and the bookkeeping columns), so Mark Record (Control+M), Unmark Record (Control+U), Toggle Marked (Control+Space), and the range-mark commands leave `edited` untouched; the null-safe WHEN clause additionally skips no-op saves where the Edit Record dialog hands every field back unchanged. Verified by test: marking does not bump, a real edit does, a no-op save does not.
+The kit can now check itself with a compiler.
 
-**`look` and `unq` redesigned per table across the sample databases.** Previously most tables defined `look` and `unq` as the SAME expression, defeating their distinct purposes. Now `look` concatenates the few human-identifying columns (' | ' separated, empties skipped) while `unq` concatenates the uniqueness-defining columns ('|' separated, positionally stable via coalesce, so a NULL keeps its slot and two rows can't collide by omission). Example: chinook customers -- look is first_name | last_name | company; unq is first_name|last_name|email. A `unq` index is created per table -- UNIQUE where the data allows (every table except none; all passed), supporting upsert-style scripts that match on `unq`.
+### All three samples built at 1.8.1
 
-**Say Related (Shift+R) now lists children too.** One look line per related record: parents as before ("teachers: Anita Carver | acarver@school.edu"), then each child table as a header with up to five look lines and an "and N more" footer. Previously only parent rows were listed.
+FruitBasketCs, FruitBasketMdi and FruitBasketPy each produced their program.
+The MDI one is the news: it is the first real exercise of the adopting
+constructor added to `LbcDialog`, so an MDI child laid out by the same builder
+as a dialog now has a compiler's word for it.
 
-**Companion design files updated to the new convention.** `FkResolution.cs`, `ImportNormalization.cs`, and `Lookups.cs` (unwired design drops -- only `DbDo.cs` is compiled) had headers written for the bare-`id` era; their comments now describe the `<singular>_id` convention. `rebuildSamples.py` is included as the regeneration script for the five migrated sample databases.
+### checkHomerDev
 
-**Documentation synchronized**: `DbDo.md` (standard-fields section, trigger section with the new SQL pattern, Say Edited, sample-database descriptions), `README.md` (convention description; explicit note that the convention database still uses bare `id` pending redesign), `Announce.md` (now lists all five samples), and `DbDo.ini` (Say Edited entry; Say Related description).
+    checkHomerDev
+    checkHomerDev --deep
+    checkHomerDev --no-clean
 
-**Script extension renamed `.duo` -> `.dbdo`.** The command-batch extension is now simply the program's own name -- unmistakable association, clean namespace. `Scripts/RecentOrders.dbdo` and `Scripts/StatusSnapshot.dbdo` renamed; the Invoke Script picker, file-dialog filter, dispatcher, installer entries, and documentation all follow. No aliases for the old extension.
+It runs the kit audit, checks the module dependency rule, deletes what previous
+builds wrote, builds all three samples with their own scripts, and writes
+`evidence-kit-<yyyymmdd-hhmmss>.md` beside itself. Exit code 1 when anything
+failed, so a release script can act on it.
 
-**Global Alt+GraveAccent hotkey dropped.** DbDo is a single-instance application, so the Alt+Control+GraveAccent toggle already covers both directions of GUI/console switching; the one-way console-to-GUI chord was redundant and reserved a second system-wide chord other applications may want. The pair is now Control+GraveAccent (GUI menu, GUI -> console) and Alt+Control+GraveAccent (global toggle).
+The cleaning is the part that makes the answer mean something. A build that is
+not run still leaves yesterday's executable in the folder, and an existence
+check would call that a pass.
 
-**Settings file renamed `DbDo.ini` -> `DbDo.inix`, now read as Inix.** The per-user and shipped settings files use DbDo's own extended-ini format. The settings readers (`readIniValue`, `readIniFromFile`, `IniSession.readFrom`) route through `InixCodec`, so any setting may hold a multi-line value in the fenced or plain Inix form. A new `InixCodec.writeValue` surgically sets, replaces, or removes one key while preserving all comments and other lines -- fence-aware in both directions (a value containing a newline, `=`, or a leading `[` is written fenced; an existing fenced value is replaced or removed as a whole block; the key scan skips fenced blocks so a `key=` line inside a fenced value is never misread). Both writers (`writeIniValue` and `IniSession.write`) delegate to it. The shipped template demonstrates the payoff: every `[ConnectStrings]` entry is now fenced, the reliable form for values dense with `=` characters. On launch, a per-user `DbDo.ini` is renamed to `DbDo.inix` automatically (every classic ini file is already valid Inix, so no conversion is needed).
+**The dependency check is new and general.** Every module may declare what it
+needs in a `// REQUIRES:` line, and the check reads every build script -- the
+samples' and the templates' -- for a script that includes a module without one
+of its requirements, ignoring commented lines, since a commented module is one
+deliberately left out. Today `Mdi.cs` is the only module with a REQUIRES line.
+The check exists because that was not true a release ago.
 
-**Design principle recorded: every table gets the full standard column set.** Convention over configuration applies to DbDo's own infrastructure tables too -- the planned `maps` association table (and any future standard table) carries the complete roster including both `look` and `unq`, the same as every domain table.
+**Why it exists, in three failures.** 1.5.0 shipped a class-name collision that
+stopped `Lbc.cs` compiling. 1.6.0 shipped a build script that treated a missing
+`version.txt` as fatal after the samples' were removed. 1.8.0 shipped `Mdi.cs`
+without `KeyMap.cs` beside it. Every check in the kit read files; none compiled
+anything; a user found all three. A compiler is the only instrument that answers
+"does this still work."
 
-**Validated**: trigger behavior tests pass on the rebuilt databases; foreign-key checks clean; the shipped DbDo.inix template round-trips through the Inix parser with all eleven fenced ConnectStrings values intact; brace and paren balance verified.
+**What it does not do**, and says so in every report: it does not run the
+programs. All three samples are windowed, and a check that needs a person to
+close a window is not a check. What a screen reader says is still for a person
+to hear, and the report's uncertain list names that first.
 
-## v1.0.105
 
+## 1.8.1 -- 19 September 2026
 
-**Chord bindings are compiled-in only; .ini file is documentation for the chord field.** v1.0.104 wired the .ini to drive both chords and descriptions; that imposed startup parsing overhead on a feature that is not user-configurable in practice (no one was going to edit chord bindings; EdSharp's history confirms this). v1.0.105 reverses the chord-override half. Descriptions remain editable in `DbDo.ini` and load at startup -- editing wording and restarting still works.
+Three faults from the first run of 1.8.0, and one of them is a new kind.
 
-The `Hotkeys` section header explains: the chord field documents the binding, the description field is loaded. Removed `friendlyToKeysName`, `normalizeKeyText`, and the KeysConverter-based parsing -- dead code since the runtime never parses chord strings now.
+### The MDI sample would not compile
 
-**JAWS-canonical key names in display.** `friendlyKey()` (the function that renders a Keys value as text for the status bar, menu, and key describer) was already using JAWS conventions for most keys. Added the NumPad arithmetic family: `NumPadPlus` (Add), `NumPadMinus` (Subtract), `NumPadStar` (Multiply), `NumPadSlash` (Divide), `NumPadDot` (Decimal). And `Oemtilde` displays as `GraveAccent` (the standard English name). The point: when DbDo announces a chord, the user hears the same name JAWS uses for that key in their daily browsing.
+    Mdi.cs(137,13): error CS0103: The name 'KeyMap' does not exist in the current context
 
-**`DbDo.ini` Hotkeys section comment updated** to explain the documentation-only role of the chord field.
+Nine times over. `Mdi.cs` registers every command with `KeyMap` as it is added,
+and `KeyMap.cs` was commented out in the build script, as it has been in every
+Homer build script since the switches were written.
 
-**Validated**: brace and paren balance at 26188 lines; chord-conflict audit clean.
+This is a kind of fault the kit had not had before: **a shared module that needs
+another shared module**. The module list was written as though every file were
+independent, and until MDI arrived every file was. Three changes:
 
-## v1.0.104
+- `Mdi.cs` now states what it requires at the top, where a reader looks.
+- The build template pairs KeyMap and Mdi under one comment, since turning on one
+  without the other cannot work.
+- The MDI sample's build script switches both on.
 
-**`DbDo.ini` now drives hotkey bindings and command descriptions.** New `[Hotkeys]` section in FileDir style. Each line is `Command Name=Modifiers+Key, Imperative description.` Modifiers are always Alt, Control, Shift, in alphabetical order, in full-word spelling. Descriptions are single imperative sentences that weave common synonyms and -- where natural -- reinforce the chord-letter mnemonic. All 106 chord-bound commands are now in the file.
+`Mdi.cs` and `KeyMap.cs` are the only pair in the kit. Everything else is
+independent, and the comment in the template says so, so nobody hunts for
+dependencies that are not there.
 
-The loader is an **override layer** on top of compiled-in defaults: if `DbDo.ini` is missing, DbDo still runs with the v1.0.103 defaults; if it's present, file entries win. Each entry overrides the chord AND sets the status-bar / key-describer description (`KeyMap.dCommandToSummary`). You can edit `DbDo.ini` in any text editor, restart DbDo, hear the change.
+### The C# and Python samples both built and ran
 
-**Friendly key names supported.** The loader translates user-friendly key tokens to the .NET `Keys` enum names before parsing: `Apostrophe` -> `OemQuotes`, `Backslash` -> `OemPipe`, `Backspace` -> `Back`, `UpArrow` -> `Up`, `Ctrl` -> `Control`, `Esc` -> `Escape`, plus the other Oem-prefixed punctuation. You don't need to memorize the C# enum names; the human-readable names from FileDir's `Hotkeys.ini` work as written.
+FruitBasketCs and FruitBasketPy each produced their program on the first try at
+1.8.0, which means the adopting-constructor change to `LbcDialog` did not disturb
+ordinary dialogs. The MDI sample is still the real test of that seam.
 
-**Alternate-chord syntax supported.** A description line may include `, or X` to declare additional chord(s) for the same command (e.g., `Beginning Tagged=Shift+B, or Control+Home, Go to beginning tagged item`). The parser locates the first comma whose tail is NOT `or ...` as the chord/description boundary. The DbDo `[Hotkeys]` ships without alternate chords today; the parser tolerates them for future use.
+### The kit check audited files the build had written
 
-**Backward-compatible parsing.** `[Hotkeys]` is the modern section name; the historical `[Keys]` (chord-only, no description) is still accepted.
+`Version.cs` and `version.py` are generated on every build and are already in the
+never-pushed list, so their encoding says nothing about the kit. Both the kit
+check and `checkHomerApp` now skip them.
 
-**Distribution adjustment.** `DbDo.exe` and `DbDo_setup.exe` are no longer included in the shipped zip. You rebuild them locally.
 
-**Validated**: brace and paren balance at 26275 lines; chord-conflict audit clean; all 106 `[Hotkeys]` entries match registered commands.
+## 1.8.0 -- 19 September 2026
 
-## v1.0.103
+MDI, and the three shapes named.
 
-Bug fixes from user testing of v1.0.102.
+### Mdi.cs
 
-**Alt+Shift+F (Filter Records) didn't work.** Root cause: the menu item was registered via `addItemLocal` instead of `addItem`. The "local" variant uses `KeyMap.registerDisplayOnly` which shows the chord in the menu but never adds it to the form-level dispatch table. Pressing the chord did nothing. Fixed by changing Filter Records, Clear Filter, and Go to Record to use the regular `addItem` registration.
+`MdiFrame` and `MdiChild` carry the frame of a multiple-document app, so
+EdSharp, FileDir and DbDo can share one implementation instead of three that
+drift. Free with the frame: the window picker on F4, the spoken window list on
+Shift+F4, next and previous, close and close-others, the alternate menu on
+Alt+F10, the key describer on Control+F1, about on Alt+F1 and the guide on F1.
+Commands are named sentences rather than control ids, registered with KeyMap as
+they are added, so the menu, the alternate menu, the key describer and the
+hotkey document cannot disagree.
 
-**Alt+D (Database Summary) showed an unresolved or stale file path.** The summary printed `db.filePath` literally -- whatever was passed to openDatabase, which could be relative or no longer exist. Fixed by resolving the path with `Path.GetFullPath` and adding a "(file not found at this path)" line when the resolved path doesn't exist. This catches the case where the manager's stored path is no longer reachable on disk.
+The design is the Homer.NET MDI fruit basket of 2010 -- LbcMdiApp, LbcMdiFrame,
+LbcMdiChild, a menu declared by name and key, focus tips, a window picker, an
+alternate menu, a key describer. That program was right about the shape; this is
+the same shape with today's classes under it.
 
-**Alt+O / Alt+Shift+O (Order Records / Reverse Order) not behaving correctly.** Possible cause: menu items weren't being explicitly enabled, so chord dispatch may have fallen through to other handlers. Fixed by adding explicit `Enabled = bHasTable` for `miOrderRecords` and `miReverseOrder`, and `Enabled = bOpen` for `miFileOpenSelect` (Open Recordset, Control+Shift+O). The bindings themselves were correct; this hardens the enable state.
+The title rule is enforced rather than documented: the frame carries the app
+name, a child carries its subject, and `setTitle` is the only way to set one.
 
-**Menu labels no longer carry descriptive parentheticals.** Per the menu-name guideline (a menu label should be only the command name in title case, 2-4 words), 137 menu items had their parenthetical descriptions stripped. The descriptions remain available via the status bar (which pulls from `KeyMap.summaryFor`) and the key describer mode -- they just don't clutter the menu label itself anymore.
+### LbcDialog can adopt a form
 
-**JAWS "Not Selected" announcement on listview load.** Root cause: in virtual mode, `grid.Items[iIndex].Selected = true` operates on a placeholder object that doesn't persist. Removed the no-op line; `SelectedIndices.Add` is the API that actually sets the selection in virtual mode. Also: `bGridFirstPopulate` is now reset when the displayed table changes (tracked via `sLastGridTable`), so the workaround that announces "Row 1 of N -- first column value" via LiveRegion fires once per table switch, not just on database open.
+A dialog and an MDI child differ in how they are shown, not in how they are laid
+out. `LbcDialog` now takes an optional existing form and builds into it, so a
+child gets add-order focus, the status line, the list search, the line chords
+and the access keys from the same code a dialog uses. An adopted form is
+finished with `layoutIntoForm`, which sizes it and sets the opening focus
+without showing anything, because the frame shows the child.
 
-**Validated**: brace and paren balance at 26153 lines; chord-conflict audit clean.
+### FruitBasketMdi.cs
 
-## v1.0.102
+The third sample. It does not repeat the nine decisions -- FruitBasketCs still
+carries those -- and marks only what changes when a program holds several things
+at once: the title rule, commands as sentences, what the frame gives free, state
+per window, and closing the last window closing the program.
 
-Build fixes. v1.0.101 didn't compile cleanly; this version makes the source actually build.
+### The guide names the three shapes
 
-**Errors fixed:**
+A single tool with a command line and a dialog; a desktop-only program whose
+dependencies decided that; and a multiple-document program. The consistent flags
+for the first are written down -- `--help`, `--gui`, `--version`, `--log`, and an
+unknown switch refused rather than ignored -- and so is the list of everything
+all three share, which is nearly all of it.
 
-1. Variable shadowing in recClearBookmarkClicked — renamed an inner `sLook` to `sLookText` to avoid the conflict with the outer `sLook` declared in the same method.
 
-2. `LbcDialog.addInputBox` missing 2-arg overload — added an overload taking just `(sLabel, sValue)` (the 3-arg form with `sTip` was the only one defined; the Replace handler called the 2-arg form).
+## 1.7.0 -- 19 September 2026
 
-3. `db.getField` / `db.setField` — the DbDoManager API exposes `getFieldValue` and `setFieldValue`. The Replace Column / Regex Replace handler had been calling non-existent methods. Fixed to use the correct names.
+The kit learnt to produce evidence.
 
-4. `RegexParseException` — that type was added in .NET 7; DbDo targets .NET Framework 4.8 where regex parse errors throw `System.ArgumentException`. Fixed the catch clause.
+### checkHomerApp
 
-5. Orphaned `miSortRecords` field declaration removed (the warning becomes silent).
+    checkHomerApp
+    checkHomerApp --build
+    checkHomerApp --path C:\JobDo
 
-**Validated**: brace and paren balance at 26110 lines. The compilation errors from v1.0.101 are resolved.
+Eleven checks, each recorded with the command that ran it and the exit code it
+returned: the document set and its HTML, encodings, zero-byte files, the
+version's single source of truth, the publishing whitelist, whether the program
+opens a log, accessible names that repeat a caption, reserved key combinations
+and access keys claimed twice, the build, a smoke run of `--help`, and the app's
+own acceptance criteria. It writes `evidence-<yyyymmdd-hhmmss>.md` and exits 1
+when something failed, so a script can act on it.
 
-## v1.0.101
+The report says three things, and the third is the point: what was verified,
+what was not checked, and what remains uncertain. A skip is never counted as a
+pass. The uncertain list is printed every time, because a report claiming
+everything is fine is worth nothing.
 
-Big design pass driven by user analysis of mnemonic-rule compliance, terminology consistency, and screen-reader UX.
+Two rules are built in, both learned on its first run. It ignores the kit's own
+modules, since a shared class sets accessible names and names key combinations
+on purpose, and it ignores comment lines, since a comment explaining that
+Alt+Control is reserved is the rule rather than a breach of it. A checker that
+cries wolf teaches people to ignore it.
 
-**Listview "Unselected" fix.** A real screen-reader bug. When DbDo opened with a previously-opened database, the listview was first presented with VirtualListSize=0 and got focus before updateGrid populated rows. JAWS announced "Unselected" for the listview's initial empty state and didn't re-announce when the selection landed. Fix: a first-populate workaround that explicitly announces "Row 1 of N" (with the first column's value) via LiveRegion when the listview transitions from empty to non-empty, so the user hears actual data instead of silence following the stale "Unselected" announcement.
+On that first run it found a real fault: both fruit basket samples had given the
+access key S to two controls at once. Fixed -- the speaking check is now
+"Spea&k each change".
 
-**Drop holdover aliases.** Pre-publicized-alpha means there's no installed user base; old command names are simply obsolete, not aliases. Removed: `sort-records` (alias for order-records), `remove` (alias for delete-record), `restore` (alias for restore-bookmark which itself is retired).
+### accept.inix
 
-**Column rename: `updated` -> `modified`.** Aligns with the Windows / SharePoint / Office convention (File Explorer's "Date modified," SharePoint's Modified column) over the SQL Rails/Django `updated_at` convention. The DbDo audience is Windows screen-reader users, for whom "modified" is the vocabulary heard daily. Centralized standard-column names into Metadata constants (`ModifiedColumn`, `LookColumn`, `UrlColumn`, `AddedColumn`, etc.) so future renames need only update the constant.
+What "done" means, written before the code is:
 
-**Drop Say Kin, Say Record, Say Web entirely.** Say Kin's "kin" terminology was idiosyncratic; foreign-key relationships are read by Say Related (Shift+R) instead. Say Record (Shift+Space) was redundant with the screen reader's built-in row read-line command. Say Web is replaced by Say URL (Shift+U) -- the column rename `url -> web` was reverted (user prefers "url").
+    [check]
+    Name   = the help text names every switch
+    Run    = JobDo.exe --help
+    Expect = 0
+    Wants  = --source
 
-**New: Say Goto on Shift+G.** Speaks the most recent Jump Record search string (column + substring). Completes the "current state" Shift+letter family alongside Say Filter (Shift+F) and Say Order (Shift+O).
+Four fields and no more, because the point is that criteria get written.
+`Templates\accept.inix` starts a new app off; `Samples\accept.inix` checks that
+both fruit baskets build and produce their programs.
 
-**New: Toggle Marked on Control+Space.** The Windows ListView convention is Control+Space to toggle the focused item's selection state. Since DbDo uses the marked column as its multi-select equivalent, the chord maps directly. Solves the workflow gap where there was no single-keystroke way to flip the current record's mark.
+### The guide gained two parts
 
-**Say-X chord moves**:
+"Evidence, and checking without sight" explains the instrument and the three
+lists. The AI-assisted coding part gained "the method, in four moves" --
+specify, build in small recoverable steps, verify, package and defend -- with
+what in the kit carries each.
 
-| Chord | Command | Was |
-|---|---|---|
-| Shift+M | Say Modified | Say Marked (moved) |
-| Alt+M | Say Marked | (new chord for existing command) |
-| Shift+U | Say URL | Say Updated (renamed) |
-| Control+Shift+U | Open URL | Control+U |
-| Shift+G | Say Goto | (new) |
-| Control+Space | Toggle Marked | (new) |
 
-**Mark anchor command renames**: "Set Mark Anchor" -> "Start Mark", "Mark Range" -> "Complete Mark", "Set Unmark Anchor" -> "Start Unmark". Aligns with EdSharp / FileDir terminology.
+## 1.6.1 -- 19 September 2026
 
-**Graphics Table -> Graphics Grid.** User's terminology rule: "Table" is schema-level, "Grid" is the displayed columns x rows (after filter and sort). The chart command operates on the displayed grid, not the schema-level table.
+Two faults from the first run of 1.6.0, both mine.
 
-**Save/Export/Edit Settings shuffle** (full reshuffle motivated by mnemonic-rule + dropping past-convention concerns):
+### A missing version.txt stopped the build
 
-- `Export Database` -> **`Save Database`** -- the operation IS Save-As semantically; Save is the rule-compliant S verb.
-- Save Database chord: was Alt+Shift+E, now **Control+S** (cross-app Save convention, rule-compliant S).
-- Export Data chord: was Alt+E, now **Alt+X** (eXport letter family, rule-compliant).
-- Edit Settings chord: was Alt+Shift+S, now **Alt+Shift+E** (rule-compliant E for Edit, the verb-letter).
+Flattening the samples in 1.5.0 removed their `version.txt` files, on the
+grounds that a sample is never released and so has no number to step. The build
+script still treated a missing one as fatal, and both samples failed at the
+first line that mattered:
 
-**Multi-bookmark feature.** Replaces the single-bookmark system with a per-session list. Each bookmark stores the table name, the ADO bookmark, the row position at save time, and the **look-value** at save time (one of the use cases the user pointed out for the look concept). The list dialog shows entries as "table -- look-value (row N)". Session-lifetime only: closing the database or app clears all bookmarks (ADO bookmarks are tied to the recordset that produced them, so cross-session persistence requires saving primary-key values instead -- deferred).
+    ERROR: version.txt not found.
 
-New chord assignments:
+A build needs a number whatever else is true -- the program reports it, the
+installer carries it, the release tag is it. So a missing `version.txt` is now
+created holding 1.0.0 and the build carries on, in both templates and both
+samples. Stopping there left a manual step, which no Homer build does.
 
-- **Control+B = Save Bookmark** -- append current record to bookmark list
-- **Alt+B = List Bookmarks** -- listbox dialog showing all saved; Enter navigates (switches table if needed)
-- **Control+Shift+B = Clear Bookmark** -- chooser when multiple ("Clear All" default, or "Clear Selected"); direct clear when only one
+### The kit check walked into a virtual environment
 
-The old "Restore Bookmark" command is retired -- it was a single-bookmark thing. The new List Bookmarks (Alt+B) is more general.
+`buildHomerDev` audits every text file in the kit. The Python sample's build had
+left a `.venv` beside it holding the whole of PyInstaller, so the check dutifully
+audited several thousand files that belong to somebody else and wrote 611 KB of
+complaints about their line endings.
 
-**Table Summary (Alt+T) reimplemented as columns-overview.** Previously this slot held a misnamed field-and-statistic picker. New behavior: lists every column in the current table in **natural (schema-defined) order**, one line per column packing maximum info -- name plus declared type plus key/null/foreign-key/default constraints. Implementation: new `DbDoManager.SchemaColumn` class and `getSchemaColumns(table)` method that queries SQLite's `PRAGMA table_info` plus `PRAGMA foreign_key_list`, with fallback to ADO Fields-collection (name + type only) for non-SQLite backends.
+Two changes. The check and `homerTidy` now skip the folders a build makes --
+`.git`, `.venv`, `__pycache__`, `build`, `dist`, `notes`, `venv` -- and those
+folders join the never-pushed list. And the console now shows the first twenty
+problems and says how many more there are, with every one of them in the log. A
+console that scrolls for a minute tells a screen reader user nothing at all.
 
-**Free chord slots** (after all the moves above):
-- Alt+E, Alt+Shift+S
-- Shift+W, Shift+K, Shift+Space, Shift+E
-- Control+U
+### Also
 
-These are reserved for future commands.
+The Homer module list in the C# build template is now in lowercase alphabetical
+order, which it had drifted out of when KeyName was renamed.
 
-**Documented standard-column constants** in `Metadata`: `AddedColumn` ("added"), `MarkedColumn` ("marked"), `ModifiedColumn` ("modified"), `NotesColumn` ("notes"), `LookColumn` ("look"), `TagsColumn` ("tags"), `UrlColumn` ("url"), `UnqColumn` ("unq"). Any code that references these standard columns should use the constants, not string literals -- this is the flexibility hook the user asked for to make further fine-tuning straightforward.
 
-**Validated**: brace and paren balance at 26087 lines; chord-conflict audit clean.
+## 1.6.0 -- 19 September 2026
 
-## v1.0.100
+A folder layout whose initials are all different.
 
-**Sort chooser symmetric to Filter chooser.** When pressing Alt+O or Alt+Shift+O and a sort is already active, a chooser dialog appears with four buttons (Clear is the default):
+### The nine folders
 
-- **Clear** (Alt+C, default) -- empty db.sort and close
-- **Reset** (Alt+R) -- discard current sort, open the listbox to pick fresh
-- **Add** (Alt+A) -- append the chosen column to the existing sort expression (multi-column sort)
-- **Cancel** (Alt+N) -- close without changes
+`configs`, `data`, `exec`, `jobs`, `logs`, `results`, `samples`, `temp`,
+`templates`. Nine folders, nine different first letters, because a screen reader
+user reaches a folder by typing its initial and duplicated initials turn one
+keystroke into several.
 
-When no sort is active, the chooser doesn't appear -- the chord goes directly to the listbox (Reset behavior). Same two-keystroke clearing pattern as Filter: Alt+O, Enter.
+`temp` and `templates` both begin with t and never appear together: `temp`
+exists only in the per-user tree, `templates` only in the installed tree. That
+is where each belongs anyway -- a temp folder under Program Files cannot be
+written to, and templates are shipped and read-only -- so no folder needed an
+unobvious name, and the rule that makes it hold is simply that temp always lives
+in the per-user tree, portable copies included.
 
-The Add button enables multi-column sort. Choose Order Records (Alt+O), pick "title", get sorted by title. Choose Order Records again, pick Add, pick "year": now sorted by `title ASC, year ASC`. Mix ascending and descending by which chord (Alt+O vs Alt+Shift+O) you press at the Add step. Status announces "Added order on X" / "Added reverse order on X" to confirm the direction at each step.
+### Paths.cs and homer/paths.py
 
-This makes Shift+F (Say Filter) and Shift+O (Say Order) more useful: they reveal the current state, and the chooser dialogs offer the obvious next-step actions on that state without forcing the user to manually edit ADO sort/filter strings.
+New, and parallel: the two trees, the nine folders, and three things every app
+was writing for itself.
 
-**Validated**: brace and paren balance at 25655 lines; chord-conflict audit clean.
+- `configFile` hands back the user's copy of a settings file, making it from the
+  shipped one the first time it is asked, so an update never overwrites a
+  change somebody made.
+- `clearTemp` empties the temp folder at startup. Whatever it finds is what a
+  previous run could not clean up after itself.
+- `tempFile` names a scratch file nothing else is using.
 
-## v1.0.99
+`Log` now asks `Paths` for its folder, so one class decides the layout.
 
-**Edit Settings moves to Alt+Shift+S.** Control+, was a Mac convention that violated the strict mnemonic rule on Windows. New chord is rule-compliant (S = first letter of Settings) and Windows-native (no funny punctuation chord). Menu label updated to "&Edit Settings..." for the natural verb-noun verb-noun pattern that matches Edit Record / Edit Cell / Edit Script.
+### The installer lays the tree down
 
-**Sort Records → Order Records, with listbox-of-columns dialog.** The new behavior:
+`[Dirs]` creates the six shipped folders, and the files go where they belong:
+the executable and the DLLs in `exec`, the shipped `.inix` in `configs`, seed
+data in `data`, scripts and the screen reader packages in `jobs`, and `samples`
+and `templates` as shipped. The documents stay at the root of the installed
+tree, where somebody looking for the ReadMe expects them.
 
-- **Alt+O = Order Records** -- sort ascending. Opens a listbox of all field names (alpha-sorted, including hidden columns), with the current virtual column as the default focus. Press Enter to sort by the focused column, or arrow to a different one and Enter.
-- **Alt+Shift+O = Reverse Order** -- same listbox UX, sorts descending.
+One consequence to plan for: `{app}\<App>.exe` became `{app}\exec\<App>.exe`.
+Shortcuts, the uninstall icon and the finish helper were all updated, but an app
+adopting this layout should be reinstalled rather than updated in place the
+first time.
 
-The key feature: **sorting by hidden columns works directly**. Today (before this change) you had to display a column, sort, then optionally hide it. Now the listbox shows every field regardless of visibility.
 
-The natural-English aliases `sort` and `sort-records` still resolve to `order-records` at the dot prompt for users who think Sort first.
+## 1.5.0 -- 18 September 2026
 
-**Switch Mark → Invert Marked.** The menu label was already "Invert Marked"; canonical name and dot-prompt token now match (I-letter rule-compliant on Control+I).
+A failed build, a flatter tree, and a tutorial.
 
-**L-family Say commands rewritten as Rest commands** (from cursor, not from row 1):
+### The C# build failed, and the cause was a name
 
-- Control+L = **Say Column Rest** (current column, from cursor down)
-- Control+Shift+L = **Say Column Rest Marked**
-- Alt+L = **Say Records Rest** (renamed from Say Rows -- entity vocabulary alignment)
-- Alt+Shift+L = **Say Records Rest Marked** (renamed from Say Rows Marked)
+The first real build of FruitBasketCs against the kit stopped with
 
-The "Rest" in the name means "from this point onward." This is genuinely more useful than start-from-row-1 in most workflows -- a user is usually focused on a row of interest and wants to hear what comes after. CLI users can override with an `all` argument when row-1 start is needed.
+    Lbc.cs(368,60): error CS0721: 'Keys': static types cannot be used as parameters
+    Lbc.cs(368,29): error CS0115: 'LbcForm.ProcessCmdKey(ref Message, Keys)':
+                    no suitable method found to override
 
-**New Say-X commands for standard columns:**
+Homer's key-name class was called `Keys`, and so is the WinForms enum that
+`ProcessCmdKey` takes. In one namespace the static class wins the lookup, the
+override no longer matches, and an app writing `Keys.Delete` gets an ambiguity
+error as well. The class is now **KeyName**, in `CSharp\KeyName.cs`, and the
+file says at the top what the old name cost. Nothing else calls it yet, so
+nothing else breaks.
 
-- **Shift+D = Say Database** (replaces Shift+P = Say Path). Single-press announces the filename for fast 'where am I'; double-press opens a dialog with the full path.
-- **Shift+O = Say Order**. The sort-expression counterpart to Say Filter (Shift+F).
-- **Shift+Space = Say Record**. The gap-filler: speaks the current row's full content (all displayed columns) in one utterance. Slots between Say Cell (one cell) and Say Records Rest (many records).
-- **Shift+U = Say Updated** (moved from Shift+D; rule-compliant U).
-- **Shift+W = Say Web** (renamed from Say URL; reclaims the retired Window Summary stub slot; rule-compliant W).
+The Python build succeeded on the first try and produced FruitBasketPy.exe.
 
-The Say Web handler accepts both `web` and `url` column names for transitional compatibility -- the canonical column rename `url -> web` is being held pending user decision.
+### A flatter tree
 
-**Say Status (Shift+Z) leads with Marked state.** When the current record is marked, the announcement now begins with "Marked." before the table / row / filter / sort details. This implements the user's design where Shift+Z is the bottom-of-the-UI status read with the marked indicator prominent.
+Two folder levels went, because navigating them by screen reader is slower than
+reading a longer list:
 
-**Filter Records redesigned with action chooser.** When pressing Alt+Shift+F and a filter is ALREADY active, a chooser dialog appears first with six buttons (Clear is the default):
+- `Python\homer\` became `homer\`. A Python app now puts the kit itself on the
+  path rather than a subfolder of it.
+- `Samples\FruitBasketCs\` and `Samples\FruitBasketPy\` became a flat
+  `Samples\` holding four files. The samples' `version.txt` files went with
+  them: a sample is never released, so it never had a version to step.
 
-- **Clear** (Alt+C, default) -- set filter to empty; close
-- **And** (Alt+A) -- open blank form; result wraps "(old) AND (new)"
-- **Or** (Alt+O within dialog) -- open blank form; result wraps "(old) OR (new)"
-- **Edit** (Alt+E) -- open form pre-populated with current values; replace
-- **Reset** (Alt+R) -- open blank form; replace
-- **Cancel** (Alt+N) -- close without changes
+Nothing is deeper than two levels now. Every build script, document and check
+was repointed.
 
-When no filter is active, the chooser doesn't appear -- Alt+Shift+F goes directly to a blank field form. This implements the user's request for at-most-two-keystroke filter clearing (Alt+Shift+F, then Enter to accept the Clear default) and adds incremental filter composition via And / Or.
+### The tutorial
 
-**Window Summary stub retired.** Was a deferred-not-implemented stub on Shift+W. Replaced by Say Web.
+`Tutorial_HomerDev.inix` is a spoken walkthrough in the step format the existing
+makeTutorial.py already reads: `Say` for the narration, `Key` for the keystroke,
+`Hear` for what the screen reader answers, `Note` for the written version. It
+covers what the kit is, unarchiving it into `C:\HomerDev`, running
+`buildHomerDev`, building and running both fruit baskets, and the point the
+whole thing exists to make -- that the two behave the same because the behaviour
+lives in the components rather than in either program.
 
-**Validated**: brace and paren balance at 25590 lines; chord-conflict audit clean.
+`Tools\sayTutorial.cmd` and `.py` render it to audio in **two voices**: the
+narration in one, the screen reader's answers in another, because a listener who
+cannot see the screen has no other way to tell the teacher from the machine.
+Windows' own voices do the speaking through System.Speech, so nothing is
+installed and nothing is uploaded. One .wav per line, kept, and one .mp3 when
+ffmpeg is present.
 
-## v1.0.98
 
-**Strict mnemonic rule audit and cleanup.** The user re-stated the chord-letter rule: the letter must be the first letter of one of the words in the canonical command name, with rare conventional exceptions documented in source. A full audit of all 135 chord bindings found 16 violations (down to 3 after this cleanup).
+## 1.4.0 -- 18 September 2026
 
-**Renames to make first letters rule-compliant.** Two clear-cut cases where the canonical name was wrong relative to what the menu said and what the user understands:
+Logging, publishing, and a notebook.
 
-- `Select Record` -> **`Filter Records`** (the menu label was already "Filter Records..."; canonical and dot-prompt token were the misnamed "Select Record" / "select-record" -- a PowerShell `Select-` verb holdover that didn't match the actual semantics)
-- `Update Column` -> **`Replace Column`** (the menu label was already "Replace Column"; matches Control+R chord)
+### Every program and every installer keeps a log
 
-These bring the canonical names into sync with the menus and chord-letters at the same time.
+`CSharp\Log.cs` and `homer\log.py` are the same class in two languages:
+same file name, same folder, same header block, same method names -- start,
+close, line, info, warn, error, section, keyValue, command, exception, prune,
+show. Both were taken from the two implementations that already worked and had
+converged separately, HomerScribe's C# session log and HomerView's Python
+logger.
 
-**New L-family convention for multi-cell speech commands.** The four new Say commands from v1.0.97 had no rule-compliant first letter (Say Column / Say Column Marked / Say Rows / Say Rows Marked share only S, M, and consonants like C and R that were taken). Following the K-for-Bookmark precedent of a "conventional exception letter," L is now the documented exception for **multi-cell linear sweeps** (List / Look / Linear-read):
+    %LOCALAPPDATA%\<App>\logs\<App>-<yyyymmdd-hhmmss>.log        one per run
+    %LOCALAPPDATA%\<App>\logs\<App>-setup-<yyyymmdd-hhmmss>.log  one per install
 
-- **Control+L** = Say Column
-- **Control+Shift+L** = Say Column Marked
-- **Alt+L** = Say Rows
-- **Alt+Shift+L** = Say Rows Marked
+One file per session, named for when the session began, with the most recent
+thirty kept. The header block records the version, the program, the working
+directory, the command line, the Windows build, the user, the machine and, in
+C#, which screen reader Say can reach.
 
-This groups the four into a clean L-family. Shift+L stays Say Look (the existing "L for Look" command speaking the current row's summary), so the L convention is now consistently "list / look / linear sweep" across the speech family.
+The installer template now sets `SetupLogging=yes` and copies Inno's own log
+into the same folder at ssDone, after the final-page checkboxes have run. The
+one caveat -- an elevated installer writes to the elevating account's profile --
+is documented where it happens rather than left to be discovered.
 
-The earlier v1.0.97 bindings (Shift+E / G / V / X) were rule-violations and have been removed.
+Logging is deliberately not optional. When it becomes so, the switch goes inside
+the class rather than into every caller.
 
-**Bookmark chords migrated K to B.** The user's observation: B is the rule-compliant first-letter of "Bookmark", and the K-for-booKmark convention was inherited from older app conventions. Moving to B follows the strict rule and frees the K-family. Shift+K stays Say Kin (K is K's first letter, rule-compliant).
+### .gitignore became a whitelist
 
-- Save Bookmark: **Control+B** (was Control+K)
-- Restore Bookmark: **Alt+B** (was Alt+K)
-- Clear Bookmark: **Control+Shift+B** (was Control+Shift+K)
+`RepoFiles.txt` names what the repository carries, and `homerTidy --gitignore`
+turns it into a `.gitignore` that ignores everything and puts back exactly what
+was named. A file dropped into the folder is invisible to git until somebody
+names it.
 
-K-family is now wide open. Three free chords saved for future commands whose names start with K.
+This replaces a habit rather than codifying one, so it is worth saying why: a
+list of exclusions is only ever as complete as the last time somebody remembered
+to add a line, and the tidy scripts existed because things got pushed that should
+not have. A blacklist cannot fix that class of problem.
 
-**Documented conventional exceptions** (in source comments at the binding sites):
+A never-pushed list overrides the whitelist for private and generated files:
+self.md, self.htm, tagRelease, create<App>Repo, every .log, notes\, Version.cs,
+version.py, __pycache__\ and the build products.
 
-- **B = Bookmark** (now strictly rule-compliant since the rename; "K for booKmark" is retired)
-- **L = List / Look / Linear-sweep** for multi-cell speech commands (Say Column family)
-- **V = inVoke** (V-sound exception for Invoke Script / Edit Script paired commands)
-- **C = Configuration** for Edit Settings (EdSharp / FileDir convention)
-- **K = Kin** in Say Kin (rule-compliant on its own, just shares the letter family the bookmarks left)
-- **Z = ZZZ / hush / sleep / silent-mode** for speech-toggles and read-only mode (Say Status, Toggle Read Only, Toggle Extra Speech, Toggle Command Echo)
-- **X = eXtract** for Extract Regex
-- **Q = Query** for Invoke SQL
-- **G = Goto** for Set Position (cross-app convention)
+### self.md
 
-**Three remaining rule-violations** flagged for user decision (not auto-renamed in this version):
+A new Homer convention: a dated, headed notebook in every project, never
+published. It holds decisions with their rejected alternatives, findings, and
+honest open items -- the things History.md cannot hold because History.md is
+public and is about releases.
 
-1. **Append Record (Alt+Shift+C)** -- letter C, name letters A or R. C from "Clipboard" (it appends to the clipboard buffer) is a stretch; options are to rename to a C-starting name like "Concatenate Record" (awkward), remap to a different chord, or accept C as a clipboard-family convention.
-2. **Switch Mark (Control+I)** -- letter I, name letters S or M. The menu label is "Invert Marked (toggle every record)"; renaming canonical to "Invert Marked" would make I rule-compliant.
-3. **Say Updated (Shift+D)** -- letter D, name letters S or U. The column is called "updated" but contains a date; renaming canonical to "Say Date" would make D rule-compliant.
+The kit's own `self.md` opens with a report on what a full reading of DbDo,
+EdSharp, FileDir, HomerScribe, HomerView, 2htm, extCheck and urlCheck found:
+what the apps had already converged on, what they disagreed about, what they got
+wrong, and a review of every one of the kit's inclusion decisions against that
+evidence. `newHomerApp` writes a starter into each new app.
 
-These three need user judgment before I touch them.
+### Smaller things
 
-**Statistics / Graphics chord adjustments** from earlier in v1.0.97 retained:
+- Both samples now open a log first and record what they do, and their headers
+  list the keys that arrive free with an Lbc text box and list box: Control+C
+  with nothing selected, Control+J to search a list, F3 to repeat, Alt+F8 to
+  read all, F8 and Shift+F8 to mark, Control+Enter to accept from anywhere.
+- Hotkeys.md gained a list box section; the list-search keys had been missing.
+- ReadMe.md's quick start now walks the whole path: install the kit, build and
+  run both fruit baskets, try the free keys, read the two side by side, look at
+  the log, start an app, publish it.
 
-| Chord | Command |
-|---|---|
-| Alt+S | Select Columns (new) |
-| Alt+Shift+S | Sort Records |
-| Alt+T | Table Summary (renamed from Statistics Table) |
-| Alt+D | Database Summary |
-| Alt+G | Graphics Column (primary) |
-| Alt+Shift+G | Graphics Table |
-| Alt+Shift+F | Filter Records |
-| Alt+Shift+E | Export Database (primary chord; Control+Shift+S binding dropped) |
-| Control+R | Replace Column (renamed from Update Column) |
-| Control+Shift+R | Regex Replace |
-| Control+Shift+S | Statistics Column (replaces Save-As convention; see push-back below) |
-| Control+Shift+G | Graphics Column (secondary; Alt+G is primary) |
-| Control+Shift+X | Extract Regex |
 
-**Push-back on Control+Shift+S.** This chord is the universal cross-application Save-As convention (Word, Excel, every browser save-page-as, every IDE save-file-as). Repurposing it to Statistics Column will surprise new users who reflexively press Control+Shift+S expecting Save-As. The user's argument that DbDo auto-saves so Save-As isn't critical is fair, and Export Database remains on Alt+Shift+E. Filed here so it's visible to anyone reviewing the design.
+## 1.3.0 -- 18 September 2026
 
-**Renames affecting dot-prompt tokens** (token = lowercase-with-hyphens form):
+The two samples were rewritten to be read side by side.
 
-- `remove-record` -> `delete-record`
-- `remove-record-force` -> `delete-record-force`
-- `statistics-table` -> `table-summary`
-- `update-column` -> `replace-column`
-- `select-record` -> `filter-records`
-- `save-databaseas` -> `export-database` (v1.0.97)
-- `measure-column` -> `statistics-column` (v1.0.97)
-- `measure-table` -> `table-summary` (v1.0.97 and again this version)
-- `new-plot` -> `graphics-column` (v1.0.97)
-- `new-chart` -> `graphics-table` (v1.0.97)
+### Twelve blocks, the same in both
 
-**Select Columns** new feature (carried over from in-progress v1.0.97): per-table column visibility picker. Alt+S. Dialog with one checkbox per column plus four buttons: OK, Select All, Select None (revert to default), Cancel. Persists per-table via the existing `db.setSelectList()` infrastructure.
+Each sample now carries twelve markers of the form `---- BLOCK n: <title> ----`,
+with the same numbers and the same titles in each file, and the same function
+names throughout: addFruit, basketState, handleButton, saveBasket, settingsPath,
+showReport, showState, sortBasket. Somebody with both files open can move
+between them by block rather than by searching.
 
-**Four new speech commands** (carried over): Say Column, Say Column Marked, Say Rows, Say Rows Marked. Now on L-family chords. saySayColumn behavior changed from "sweep starting at current row" to "sweep starting at row 1" per the user's clarification that "all cells in the current column" means the whole column.
+They deliberately do not track line for line. C# needs a class where Python
+needs none, and pretending otherwise would teach padding rather than design. The
+rule kept instead: nothing appears in one file without a counterpart in the
+other, and the counterpart carries the same name.
 
-**Validated**: brace and paren balance at 25278 lines; chord-conflict audit clean.
+Three places where the two genuinely differ are commented where they happen: how
+each library keeps a dialog open while a button does work, the different shapes
+of stringPlural, and the status line that C# has and wx does not.
 
-## v1.0.97
+### More of Lbc, on purpose
 
-**Three big design themes**: (1) analytical command name family aligned around Statistics and Graphics with Column / Table scope, (2) the marks-aware scope-prompt design rule established and applied to Remove Record as the first example, (3) Save Database As renamed Export Database with secondary Alt+Shift+E chord.
+The samples now use a combo pick box for the sort order, a check box to turn the
+speaking off, a read-only report window, a status line in C# and the window
+title in Python, tips on every control, and the list search and line-editing
+chords that come free with a list box and a field. More than a fruit basket
+needs, which is the point of a sample; the guide now says so plainly, so nobody
+reads the sample as a minimum.
 
-**Statistics / Graphics command renames.** The user's "statistics on the virtual column/displayed table" and "graphics on the same" framing pointed at the right name structure. The Measure-* / New-Plot / New-Chart family was renamed:
+### A wart found by making them parallel
 
-- `Measure Column` -> **`Statistics Column`** (Alt+S; current virtual column, all visible/filtered rows)
-- `Measure Table` -> **`Statistics Table`** (Alt+Shift+S NEW; all visible columns x all visible rows)
-- `New Plot` -> **`Graphics Column`** (Alt+G)
-- `New Chart` -> **`Graphics Table`** (Alt+Shift+G NEW)
-- `Measure Longest` / `Maximum` / `Minimum` / `Shortest` / `Field` -> `Statistics Longest` / `Maximum` / `Minimum` / `Shortest` / `Field`
+`Util.stringPlural` in C# returns the count and the noun together, "3 fruits";
+`util.stringPlural` in Python returns only the noun, "fruits". Two functions,
+one name, two shapes. Neither was changed here, because the Python one has
+callers in HomerView, but both samples now say so where they use it, and the
+Python one should take the C# shape the next time that add-on is touched.
 
-The pattern: **`<Verb> Column` for one-column scope, `<Verb> Table` for full-view scope**. The naming maps cleanly to a single mnemonic letter family: S for Statistics (Alt+S / Alt+Shift+S), G for Graphics (Alt+G / Alt+Shift+G). The "Table" in the name means "the currently filtered + sorted view of the table" -- not the whole underlying table; clearing the filter changes what counts.
 
-Dot-prompt canonical tokens followed: `measure-column` -> `statistics-column`, `new-plot` -> `graphics-column`, etc. The dispatch switch labels and the alias mappings (`longest` -> `statistics-longest`, `max` -> `statistics-maximum`, `chart` -> `graphics-table`, etc.) all updated together.
+## 1.2.0 -- 18 September 2026
 
-**Sort Records moved from Alt+Shift+S to Alt+Shift+O.** Alt+Shift+S was needed for Statistics Table to keep the S-family symmetric. O is for ORDER (the SQL ORDER BY mnemonic) -- standard convention for sort. Alt+Shift+O is one-handed and free.
+The kit became a teaching kit.
 
-**Save Database As -> Export Database.** A user filtered to 50 of 1000 rows wants Export Data to write 50 rows; Save Database As writes all 1000 -- so Save-As is conceptually "Export the whole database, ignoring filter." Renamed to make the relationship to Export Data clear:
+### The fruit basket came back
 
-- `Save Database As` -> **`Export Database`** (Control+Shift+S kept as the cross-app Save-As convention; Alt+Shift+E added as the new productivity chord parallel to Alt+E = Export Data)
-- The dot-prompt canonical token `save-databaseas` -> `export-database`
-- The `save` and `save-as` natural-English aliases now resolve to `export-database`
+`Samples\FruitBasketCs.cs` and `Samples\FruitBasketPy.py` hold the same program twice:
+once on the C# classes, once on the Python package, with `buildFruitBasketCs.cmd`
+and `buildFruitBasketPy.cmd` producing `FruitBasketCs.exe` and
+`FruitBasketPy.exe`. The Python one is a single file with Python and every
+dependency inside it, built with PyInstaller in a virtual environment beside the
+script, so it installs on the same terms as a C# program.
 
-The Control+Shift+S binding stays because Save-As is one of the most universal cross-application Windows conventions; new users approaching DbDo expect it to work out of the box.
+The specification is the one from 2005, and the legacy collection of thirty-six
+implementations is what it comes from. That collection answered "what does this
+language look like". These two answer "what does a program look like when it is
+built out of components that already know the conventions", which is the
+question a builder working with an AI actually has.
 
-**Marks-aware scope-prompt system established.** This is the design rule the user requested for commands that can act on either the current record or a marked set:
+Nine numbered comments in each sample mark the nine decisions a working program
+has to get right and an AI will not make unless it is asked: which library, add
+order as focus order, bands, access keys, what the screen reader already says,
+where the focus goes, counts that match their nouns, saving as the answer is
+given, and the escape hatch. The two files number them identically so they can
+be read side by side.
 
-> A scope-flexible command operates on the current record by default with no prompt. When marks exist in the current filtered view, the command prompts the user to choose: act on current record (the default, safer choice for destructive ops), or on the N marked records, or cancel.
+### AI-assisted coding, written down
 
-Implementation:
+A new part of HomerDev.md explains why the kit prefers that name to vibe coding,
+gives the three sentences that carry most of the kit into an AI session, and
+sets out a five-step teaching sequence around the samples: ask for the program
+cold, read the sample, ask again with the conventions, read the other language,
+then change one thing and watch which decisions it touches.
 
-- New `countMarkedInFilter()` helper counts records whose 'marked' value is truthy within the currently filtered set. Iterates through the recordset (which already respects the active filter) and restores position via bookmark on exit.
+### The build scripts look in three places
 
-- New `ScopeChoice` enum (Current / Marked / Cancel) and `promptScope(string sCommandName)` helper. The GUI version uses an LbcDialog with three buttons: "&Current record (default)", "&Marked records (N records)" (count interpolated), "Ca&ncel". Returns the user's choice. If no records are marked, returns Current immediately without prompting -- the default-and-fast path.
+Both build templates now find the kit in this order, first hit wins: the
+`HomerDev` environment variable, then `C:\HomerDev`, then the current directory.
+The third is what lets a sample, a demonstration, or a machine with no kit
+installed still build, by carrying its own copy of the folder.
 
-- **Remove Record (Control+D)** was retrofitted as the first marks-aware command, matching the user's named example. When no marks exist: standard "Remove the current record?" confirmation (unchanged). When marks exist: scope prompt first, then either single-record confirm or a count-aware bulk-delete confirm ("Remove 7 marked records? This cannot be undone."). Bulk deletes iterate marked positions in reverse so deletions don't shift indices of records not yet processed.
+### The templates became opinionated
 
-**Category catalog for the marks-aware retrofit.** The audit identified four categories of commands by their relationship to record scope:
+Every component any Homer app has ever needed is now listed in both build
+templates as a switch. The ones used by more than one app are switched on --
+configuration file, documentation through pandoc, icon, installer, manifest,
+NuGet fetching, screen reader scripts, version stepping -- because that is the
+evidence the next app will want them too. The ones used by a single app are
+commented out with the app named, so turning one on is one character: exiftool,
+ffmpeg, Markdig, NPOI, PdfPig, SQLite, Tesseract, Ude and Whisper on the C# side;
+beautifulsoup4, pillow, playwright, pythonnet and requests on the Python side.
 
-- **Category A (single-record always)**: Edit Record, Edit Cell, Copy Record, Copy Record as New, Open Cell, Show Record, Say-X commands, Set Mark, Clear Mark. These operate on the current record by their nature; no scope prompt makes sense.
+A single `:getNuGet` subroutine now does every package fetch, so Markdig, NPOI,
+PdfPig, SQLite and Ude are one line each rather than five variations on the same
+PowerShell.
 
-- **Category B (scope-flexible)**: Remove Record (this version), Append Record, Send Mail, Copy Record / Copy Record as New (multi-record forms), Update Column with marked-rows scope, Regex Replace with marked-rows scope. v1.0.97 retrofits only Remove Record; the rest follow in v1.0.98+.
+### Smaller things
 
-- **Category C (set operations)**: Sort Records, Filter Records, Export Data, Statistics Table, Graphics Table. These operate on the whole visible set; the user changes scope by changing the filter, not by picking a different command.
+- `newHomerApp <App> --python` writes a Python app: the Python build script in
+  place of the C# one, with the rest of the set unchanged.
+- Alphabetical order is now a stated convention for every list in Homer code and
+  documentation, unless another order is clearly more logical. The module lists,
+  the component switches and the option catalogues in this release all follow it.
 
-- **Category D (cell scope)**: Copy Visible Cells, Update Column, Regex Replace. These are column-scoped within visible rows; the marks-aware retrofit (Category B) for Update Column / Regex Replace will add an optional "marked rows only" scope on top.
 
-**Validated**: brace and paren balance at 25032 lines; chord-conflict audit clean.
+## 1.1.0 -- 18 September 2026
 
-## v1.0.96
+Everything in this release came from running 1.0.0 for a day and from the logs
+of apps the kit had not yet been tried on.
 
-**Chord reassignments for productivity and mnemonic strength.**
+### tagRelease could not release a source-only project
 
-- **Control+Shift+R** is now **Regex Replace**, a new command (was Toggle Read Only). Mnemonic: R for Regex; the Shift modifier marks it as the "power version" companion to Control+R = Update Column (substring replace). Regex Replace interprets the find text as a .NET regex pattern and supports `$1`, `$2` back-references in the replacement.
+The log said it plainly: "Could not find HomerDev_setup.iss in C:\HomerDev".
+The kit ships source and has no installer, and the script treated a missing
+setup script as a fatal error rather than as an answer. It now recognizes two
+kinds of project. One with an installer is released exactly as before, from the
+version stamped into <App>_setup.exe with that installer attached. One without
+is released from version.txt, with no asset and no URL check. Nothing on the
+installer path changed, so EdSharp, FileDir, DbDo, HomerView and HomerScribe
+behave as they always have.
 
-- **Alt+Z** is now **Toggle Read Only** (was Say Status). The user re-assessed: read-only is a rare-use toggle and the more-valuable Control+Shift+R slot belongs to regex-replace. Alt+Z is a one-handed chord appropriate for a "set once and forget" feature.
+Two smaller changes came with it. A -Path argument aims the script at a repo
+without a cd first, and the header now says outright that the script acts on the
+current directory, so one copy at C:\bin serves everything. The edition line in
+the banner names the kit, so a log says which copy ran.
 
-- **Shift+Z** is now **Say Status** (was Alt+Z). Joins the Say-X family (Shift+A through Shift+Y, all Say commands), which has the consistent "Shift+letter = speech-only, never moves focus" pattern. Z for Status is intuitive ("zoom out, see status").
+The version of tagRelease that the kit shipped in 1.0.0 was the older copy from
+the EdSharp folder. The base is now the newer one, the copy actually in daily
+use.
 
-**Import / Export promoted to bare Alt chords for one-handed productivity.**
+### cleanDir and tidyRepo became homerTidy
 
-- **Alt+I** = Import Data (was Control+Shift+I)
-- **Alt+E** = Export Data (was Control+Shift+X)
+They asked the same question -- does this file belong to the project? -- of two
+places, the folder and the repository, which meant two surveys, two plans, and
+two chances to disagree. homerTidy asks it once and fixes both in one pass:
+empty files deleted, duplicates and unnamed files moved into notes\ under
+subfolders named for what they are, tracked files that do not belong untracked
+and added to .gitignore under a dated comment, and anything large in the history
+reported with the command that would remove it. History is never rewritten
+automatically.
 
-Control+I and Control+E stay where they were -- Switch Mark and Edit Record, both high-frequency core operations that earn their bare-Ctrl status.
+What belongs is still decided by the project's own <App>_setup.iss and
+RepoFiles.txt, so the script needs no editing. homerPolicy.py is gone: it is
+inside homerTidy now.
 
-**Extract Regex moved to Control+Shift+X.** Was Control+Shift+E. The new chord X = eXtract is a stronger mnemonic. Control+Shift+E is now free.
+### The installer template learnt what is already installed
 
-**Update Column actually implemented.** Was a placeholder stub since the rename in v1.0.95. Now provides a working find-and-replace dialog: search text, replacement text, case-sensitive checkbox, dry-run checkbox. Operates over the current virtual column for all currently-filtered rows (clear the filter to apply across the whole table). Reports the number of cells changed. Control+R.
+The [Code] section reads the version of any previous install from the app's own
+uninstall key. The welcome page says "Install", "Update from X to Y" or
+"Reinstall" accordingly, and each component checkbox is now a pair of [Run]
+lines gated by a Check: function, so the wording matches the situation instead
+of always saying "Install".
 
-**Regex Replace** (new) is the regex companion to Update Column. Same dialog plus the search text is interpreted as a .NET regex pattern. Supports back-references (`$1`, `$2`) in the replacement. Same scope rules. Control+Shift+R.
+Three conventions were settled at the same time:
 
-**Filter Records dialog redesigned for one-step clearing.** The user's principle: "at most a two-step keyboard way of clearing an existing filter and restoring access to all records." Implementation:
+- A checkbox that installs SCREEN READER scripts or add-ons is CHECKED by
+  default. A blind user installing a Homer tool wants them, and a cleared box
+  they have to notice is the friction the whole suite exists to remove.
+- The last two checkboxes are always documentation, unchecked, then launch,
+  checked.
+- The launch does not start the program. It runs homerFinish.cmd, which reads
+  the setup log, shows one Results box describing what this install actually
+  did, and starts the program only once that box is dismissed. Being last, it
+  runs after every other checkbox, so the box can report all of them.
 
-- The dialog pre-populates with the user's last filter values (text, column, mode). Re-opening Alt+Shift+F when a filter is active lets the user edit the existing filter rather than re-typing it from scratch.
-- A new **Clear** button (Alt+C) clears the filter and closes the dialog in one keystroke. Total to clear: **Alt+Shift+F, Alt+C** -- exactly two keystrokes as specified.
-- The original OK and Cancel buttons retain their roles (OK applies the dialog's values; Cancel discards and closes).
-- Status announcements report the outcome: "Filter cleared", "No filter applied", or "Filter applied. N records match."
+installScreenReaderSupport.cmd is new and generic: it unpacks <App>_JAWS.zip
+into every JAWS settings folder it finds and hands <App>.nvda-addon to NVDA,
+skipping without complaint whichever is absent.
 
-**Statistics scope clarification** in the history (documenting the decision rather than changing code). Two natural scopes exist for column statistics:
+### Smaller things
 
-1. **The virtual column the user is focused on, applied to currently-filtered rows.** This is the productive default for "tell me about what I'm looking at." Measure Column (Alt+S) and Describe Column (also Alt+S, currently aliased) do this.
+- version.txt is written without a byte order mark. A batch file's "set /p" and
+  Inno's FileRead both take a mark as part of the number, which would have made
+  every version wrong by one invisible character.
+- The kit carries its own RepoFiles.txt, so homerTidy can tidy the kit.
+- homerTidy leaves a project's own script logs where the scripts that write them
+  expect to find them, rather than filing them into notes\logs.
 
-2. **The entire table, all rows.** Measure Table is for this database-summary use case (menu only).
 
-The user can change scope deliberately by clearing the filter (Alt+Shift+F, Alt+C) before invoking the statistic. Statistical announcements report scope ("Median X over N visible rows; Y total when filter cleared") so the user always knows what they're hearing about.
+## 1.0.0 -- 18 September 2026
 
-**Shift+letter family expanded.** Z is no longer unused -- Shift+Z = Say Status puts it in the Say-X consistent pattern. All Say-X commands follow the rule "Shift+letter is speech-only, never moves focus, returns the user to wherever they were."
+First release. The kit was assembled by comparing every duplicated shared file
+across DbDo, EdSharp, FileDir, HomerScribe and HomerView, and taking the better
+version of each. What that comparison found is recorded here, because the
+differences explain why the kit exists.
 
-**Validated**: brace and paren balance at 24866 lines; chord-conflict audit clean.
+### Which version won, and why
 
-## v1.0.95
+- **Say.cs** -- byte for byte identical in DbDo, EdSharp and HomerScribe once
+  line endings are normalized. The CRLF copy was taken.
+- **Web.cs** -- identical in all four apps that carry it. The CRLF copy was
+  taken.
+- **Inix.cs** -- three generations were in circulation. DbDo and HomerScribe
+  carried the original 29 KB codec. EdSharp carried the version that added
+  `InixTable`, the converter between .inix, .csv, .tsv, Markdown and .xlsx.
+  HomerView carried that plus `InixCodec.readValue`, the single-setting reader
+  whose absence had every caller reading the whole file and walking the
+  sections itself. HomerView's is a strict superset and was taken, which also
+  means DbDo and HomerScribe had been two generations behind.
+- **Lbc.cs** -- neither of the two newest copies was a superset of the other, so
+  they were merged. EdSharp's is the base: it holds `LbcBandLayout`,
+  `LbcBandDialog` and `LbcInixForm`, better access-key handling in the button
+  row, the rule that Enter presses the button meaning accept wherever it sits,
+  and `sortedIgnoringCase`. HomerScribe's contributed the horizontal band API --
+  `addBand`, `endBand`, `bandTarget` and `addButton` -- with all thirteen `add`
+  methods rerouted through `bandTarget()` and `addSeparator` closing an open
+  band. Without that merge, HomerScribe would not compile against the kit and
+  EdSharp would lose its form work.
+- **KeyMap.cs, Keys.cs, Util.cs, inixVert.cs, PdfRead.cs** -- one copy each, no
+  contest. Keys.cs came from HomerView, the rest from EdSharp and HomerScribe.
+- **The Python homer package** -- only HomerView carries it, and it was already
+  written to know nothing about HomerView.
+- **tagRelease, cleanDir, tidyRepo, homerPolicy** -- these four say in their own
+  headers that they are app-independent, and they are: tagRelease takes the app
+  name from the directory, and cleanDir and tidyRepo decide what belongs by
+  reading the project's own `<App>_setup.iss` and `RepoFiles.txt`. tidyRepo
+  still named one app in five strings, and those were replaced with a name taken
+  from the folder.
+- **The install scripts for Pandoc, the GitHub CLI, Python, Node and Ollama** --
+  these read as generic but each writes to its own app's folder and its own
+  app's log, so they are not portable files. The pattern is documented in
+  HomerDev.md instead, and the kit ships fresh generic `installOllama.cmd` and
+  `installModels.cmd` for the local AI case.
+- **The build script and the installer script** -- HomerScribe's are the newest
+  and most refined of each, and became the templates.
 
-**Pre-publicized-release cleanup pass.** The user clarified: DbDo's GitHub repo is currently alpha and only a handful of blind developers have seen it. There is no installed user base to preserve compatibility with. Focus is the cleanest possible design at first publicized announcement (Facebook, LinkedIn, etc.). This version drops a half-dozen back-compat aliases that existed only to preserve muscle memory across renames in v1.0.86 / v1.0.91 / v1.0.94, since muscle memory is no longer a constraint.
+### One behavior deliberately changed in the merge
 
-**Aliases removed**:
+HomerScribe's Lbc selects the text of the field that opens with the focus, and
+extends that to the first focusable control rather than only an explicitly set
+one. That was taken, with one change: a **multi-line** box now gets the caret at
+position 0 instead of a full selection, because its value is a document rather
+than a field and the Homer rule is that the caret opens on the first line. This
+is the only place in the kit where the merged file is not simply the union of
+what already existed.
 
-- `set-record` → was rename alias for `edit-record` (v1.0.86)
-- `set-cell` → was rename alias for `edit-cell` (v1.0.86)
-- `switch-keydescriber` → was rename alias for `toggle-keyhelp` (v1.0.91)
-- `edit-configuration` → was rename alias for `edit-settings` (v1.0.91)
-- `step-initialchange` → was rename alias for `jump-nextinitial` (v1.0.91)
-- `update-field` → was rename alias for `update-column` (this version)
-- The "Pre-v1.0.86 name; still accepted" line in `edit-record` help text
+### What is new rather than merged
 
-The "natural English" aliases that aren't backward-compat (e.g., `update` / `replace` → update-column, `delete` → remove-record, `add` / `append` → new-record, `describer` / `keydescriber` → toggle-keyhelp) are kept; those reflect natural user intent rather than legacy command names.
-
-**Update Field → Update Column.** The command was named "Update Field" but its actual semantics is column-scoped find-and-replace within one column; the menu label already said "Replace Column". Renamed to make the canonical name match what the operation does:
-
-- Canonical: "Update Field" → **"Update Column"**
-- Dot-prompt token: `update-field` → `update-column`
-- C# identifiers: `recUpdateFieldClicked` → `recUpdateColumnClicked`, `miRecUpdateField` → `miRecUpdateColumn`
-- The `update` / `replace` natural-English aliases continue to point at the canonical token (now `update-column`).
-
-**Toggle Read Only restored** as a runtime feature. v1.0.91 removed the GUI Lock-Database toggle while keeping the `-readonly` command-line flag, which was asymmetric. The user re-affirmed the feature's value: anyone running DbDo can edit data they have write access to; the read-only toggle is for the user's own protection against accidental edits while browsing.
-
-Implementation:
-- **Control+Shift+R** to toggle (mnemonic: "R for read-only")
-- Menu item on Misc menu: "Toggle Read &Only"
-- Click handler `toggleReadOnlyClicked` reopens the database with the flipped flag, clears the drill stack (its row identities are invalid in the new connection)
-- Settings dialog gets a "Read Only" checkbox alongside Command Echo and Extra Speech. Toggling it in Settings applies immediately via the same code path.
-- CLI command: `toggle-readonly`, `read-only`, `readonly` (with optional `on` / `off` / `1` / `0` / `yes` / `no` argument; bare invocation toggles)
-- Help-table entry documents all surfaces (menu, chord, settings checkbox, CLI command, command-line flag)
-- The `-readonly` command-line flag is preserved, so CLI startup and runtime are at parity
-
-**Optional quotes for file paths**. The user's principle: "enclosing quotes for a string should be optional if the command line can be parsed without ambiguity." Added `resolvePathArg(sArg)` helper: tests `File.Exists(sUnquoted)` and `Directory.Exists(sUnquoted)` first, returning the unquoted path if it identifies an existing filesystem entry; falls back to the v1.0.94 quote-aware tokenizer when no existing file matches. Applied to:
-
-- `cmdOpenDatabase` -- `open database C:\My Stuff\foo.db` works without quotes
-- `cmdImportData` -- same for the Markdown-import file path
-
-Export-Data wasn't retrofitted because export paths don't exist yet at command time (they're being created), so File.Exists can't disambiguate. The v1.0.94 `unquote` approach there is correct.
-
-**Dot-prompt CLI prompt helpers** added as infrastructure for future LBC-dialog-equivalents work. Three new static helpers:
-
-- `promptChoiceCli(prompt, options, default)` -- numbered choice list. Prints each option as `  N. label`, marks the default with `(default)`, prompts with `Number or text [N]: `, accepts the number or a substring of the label (case-insensitive), or "cancel"/"quit"/"q" to abort. Returns the 0-based index.
-- `promptYesNoCli(prompt, default)` -- yes/no with `[Y/n]` or `[y/N]` default display; returns true/false/null.
-- `promptTextCli(prompt, default)` -- single text input with `[default]` shown in brackets.
-
-These are infrastructure. The existing GUI-dialog commands (Find, Jump, Sort Records, Settings, Open Recordset, Recent Files, etc.) will be retrofitted incrementally to use these helpers when invoked from the dot prompt with no arguments. The first round of retrofits will land in v1.0.96+.
-
-**Terminology audit completed**. The Record/Field/Column/Cell/Table/Row nouns are now internally consistent across all canonical names:
-
-- **Cell** = single value at a row+column intersection. Cell-scoped commands: Open Cell, Edit Cell, Append Cell, Copy Cell, Copy Visible Cells, Say Cell.
-- **Column** = vertical slice of values across rows. Column-scoped commands: Measure Column, Say Column, Select Column, Update Column (formerly misnamed Update Field).
-- **Record** = whole logical entity (one row's worth of fields). Record-scoped commands: New Record, Edit Record, Append Record, Copy Record, Copy Record as New, Remove Record, Remove Record Force, Select Record, Jump Record, Jump Previous Record, Step Record First/Last/Next/Previous, Sort Records.
-- **Table** = named collection of records. Table-scoped: Measure Table, Say Tables, Select Table, Switch Table, Switch Previous Table.
-- **Field** is reserved for schema-level concepts (a column's definition, not its data). Currently only used in code (Get Field, Set Field) and in the Update Field validators dialog.
-
-The user's "noun matches layout user sees" rule led to the question of whether navigation commands should say Record or Row. The current Record-named navigation (Step Record First/Last/Next/Previous, Jump Record, Jump Previous Record) is kept because the navigation semantically targets a whole record's worth of data even though the visual unit is a row. The audit found this internally consistent; no further renames were warranted.
-
-**Validated**: brace and paren balance at 24626 lines; chord-conflict audit clean.
-
-## v1.0.94
-
-**Dot-prompt case-insensitivity confirmed and documented.** The user clarified that the CLI should be case-insensitive for command names and parameter keywords (matching `cmd.exe` convention), while quoted strings preserve their content verbatim. An audit confirmed that case-insensitivity for command verbs was already correctly implemented in v1.0.93:
-
-- `dispatch()` calls `aTokens[0].ToLowerInvariant()` before alias resolution
-- `expandUniquePrefix()` calls `sTyped.ToLowerInvariant()` before matching against the canonical-verb table
-- `resolveAlias()` switches on the lowercased input
-
-So all of these resolve to the same internal canonical token: `edit settings`, `Edit Settings`, `EDIT SETTINGS`, `Edit-Settings`, `EDIT-SETTINGS`, `JUMP record`, `Say SORT filter`. This was already working; v1.0.94 documents it explicitly in the dot-prompt help index (bare `help` now prints a CONVENTIONS section as its first item) so users know they can type however they prefer.
-
-**Quote-aware tokenization** added to the dot-prompt parser. The previous whitespace-split tokenizer treated quote characters literally, so `find regex "Hello World"` shattered the quoted phrase into pieces and the embedded space was lost on rejoin. v1.0.94 introduces three new helpers:
-
-- `splitArgsRespectingQuotes(string sLine)` returns a `string[]` of tokens honoring double-quoted regions. Whitespace inside quotes stays inside the token. Surrounding quotes are stripped on the way out. Doubled quotes inside a quoted region (`""`) unescape to a single literal quote. Single quotes are NOT treated as token boundaries, since users commonly type single quotes inside SQL fragments.
-
-- `joinArgsRespectingQuotes(string[] aTokens, int iStart)` is the inverse: rebuild a remainder string from a tokenized array, re-quoting any token that contains whitespace or quote characters so the result round-trips through `splitArgsRespectingQuotes` losslessly. Used by `tryDispatchPrefix` when it peels off the verb tokens and needs to pass the rest along to the next dispatch level.
-
-- `unquote(string sArg)` strips surrounding double quotes from a single argument and unescapes doubled inner quotes. For command handlers that take a "rest of the line" string argument that might be quoted (file paths most commonly), this is the simplest opt-in.
-
-**Handlers updated to be quote-aware**:
-
-- `cmdOpenDatabase`: file path can now be `open database "C:\My Stuff\foo.db"`. Previously the literal quotes were passed to `db.openDatabase()` and the open would fail.
-- `cmdImportData`: same fix for the Markdown-import file path.
-- `cmdExportData`: the legacy-single-path form correctly detects path extensions on the unquoted form, and the export call uses the unquoted path.
-- `cmdFindRegex`: the `<column> <pattern>` parse uses `splitArgsRespectingQuotes`, so `find regex Notes "stays \"in\" quotes"` works (note: in the user's typed string, two double quotes in a row inside the outer quotes become a literal double quote in the pattern).
-- `tryDispatchPrefix`: the prefix matcher uses the quote-aware tokenizer when peeling off the verb tokens, so the trailing arguments survive the rejoin intact.
-
-**The Find / Jump / Search / Say-X handlers that take a single string argument** were not retrofitted. Their typical usage is a single unquoted token; adding `unquote()` to all of them is mechanical and the user can request a sweep when they actually hit a case that bites. The case-insensitivity guarantee for command verbs is independent of these handler details and works regardless.
-
-**Dot-prompt CLI help index** (`help` with no argument) now begins with a CONVENTIONS section explaining case-insensitivity and quoting rules with concrete examples. Users no longer have to discover these by trial and error.
-
-**Validated**: brace and paren balance at 24370 lines; chord-conflict audit clean.
-
-## v1.0.93
-
-**Proper AP-style Title Case applied to canonical names.** The user clarified that "Title Case" in the user-facing UI should follow standard publishing convention -- principal words capitalized, short articles/prepositions/conjunctions lowercased when not first or last. Two names from v1.0.92 needed adjusting:
-
-- `Copy Record As New` → `Copy Record as New` ("as" is a mid-title 2-letter conjunction)
-- `Exit Child To Root` → `Exit Child to Root` ("to" is a mid-title 2-letter preposition)
-
-`Save Database As` stays as-is because "As" is the last word, and AP convention always capitalizes the last word.
-
-A focused audit of all 129 multi-word canonical names confirmed zero remaining short-word issues. The rule applied: lowercase articles (a, an, the), short coordinating conjunctions (and, but, or, nor, for, yet, so), and short prepositions (≤3 letters: in, on, at, to, by, of, as, up) when they appear mid-title; capitalize everything else including all 4+-letter prepositions.
-
-**Dot prompt now prefers multi-word interpretation over single-token aliases.** When the user types `edit settings export.csv`, the previous dispatcher would resolve "edit" as the bare alias for "edit-record" and try to dispatch as `edit-record settings export.csv` -- wrong. The new dispatcher runs `tryDispatchPrefix` before single-token alias resolution when the input line has 2+ space-separated tokens. If a multi-token prefix matches a canonical command, that wins; only when no multi-token interpretation applies does the bare-alias path run (so single-word input like `edit` still resolves to `edit-record` as before).
-
-This means **lowercase-with-spaces** is now the easy-to-type default at the dot prompt: `edit settings`, `jump record`, `say sort filter`, `find regex`, `save bookmark`. The hyphenated PowerShell-style form (`edit-settings`, `jump-record`, etc.) continues to work for users who prefer it. Both forms route to the same internal canonical token. (Some run-together canonical tokens like `exit-childtoroot` and `save-databaseas` still expect their hyphens between bare-words only; teaching the prefix matcher to also split run-together tokens is deferred to a future version.)
-
-**README updated** with explicit audience positioning. Windows screen reader and keyboard users are named as the top-priority audience. The "developer-culture conventions as alternatives" position is now documented: both the lowercase-with-spaces dot-prompt input form AND the PowerShell-flavored hyphenated form are first-class. The C# implementation continues to follow Camel Type. Three independent layers (user-facing names, dot-prompt input, internal code identifiers), each with its own convention chosen for its audience. The GitHub project URL (https://github.com/JamalMazrui/DbDo) is now in both the README and the CLI About output.
-
-The outdated Alt+Shift+S reference for Toggle Extra Speech (the chord since v1.0.91 is Alt+Shift+Z) was also corrected in the README.
-
-**NuGet case-conversion library research.** Investigated candidate libraries CaseConverter (markcastle, v2.0.1, ~4M downloads via the CaseExtensions sibling package; both maintained), Minerals.StringCases (SzymonHalucha), Simple.CaseConverter, CaseON, and CaseDotNet. All convert between programmer-identifier conventions (camelCase, snake_case, kebab-case, PascalCase, Train-Case) with zero dependencies and broad .NET Framework / .NET Standard compatibility. **None of them implement proper AP-style Title Case** -- all "ToTitleCase" methods are naive "capitalize first letter of every word" wrappers around `TextInfo.ToTitleCase`. That's a different problem (mechanical case-conversion of identifiers) from natural-language Title Case (which requires knowing which words are articles/prepositions/conjunctions). Conclusion: not worth a NuGet dependency. The Title Case rules live in the source as documented logic future maintainers can adjust. The case-conversion problem for DbDo is small enough that a global dictionary isn't needed either; the dot-prompt prefix matcher plus the helpful 60-entry alias table already cover both lowercase-with-spaces and hyphenated input.
-
-**Validated**: brace and paren balance at 24210 lines; chord-conflict audit clean.
-
-## v1.0.92
-
-**Canonical command names rewritten as Title Case With Spaces.** The user clarified that "title case" meant book-title convention (space-separated words with each word capitalized) for the user-facing form, while underlying C# code stays in Camel Type. Previous versions used Pascal-Case-With-Hyphens (`Edit-Settings`, `Toggle-KeyHelp`, `Jump-NextInitial`) as both the canonical display form and the dot-prompt input form; v1.0.92 separates these.
-
-**New canonical display form** (what command echo speaks, what Key Help announces, what the Alternate Menu lists, what MessageBox titles show): `Edit Settings`, `Toggle Key Help`, `Jump Next Initial`, `Save Database As`, `Switch Previous Table`, etc.
-
-**Dot-prompt input form is unchanged**: `edit-settings`, `toggle-keyhelp`, `jump-nextinitial`. The dot prompt is command-line syntax, not user-facing prose; whitespace would break the tokenizer. Users at the dot prompt continue to type hyphenated lowercase tokens.
-
-**289 canonical-name replacements** applied across all `addItem(...)` and `add(...)` help-table calls. Awkward Pascal-second-half words got natural word ordering at the same time:
-
-- `Save-DatabaseAs` → **Save Database As**
-- `Copy-RecordAsNew` → **Copy Record As New**
-- `Switch-TablePrevious` → **Switch Previous Table**
-- `Switch-ObjectPrevious` → **Switch Previous Object**
-- `Jump-RecordPrevious` → **Jump Previous Record**
-- `Jump-RecordAgain` → **Jump Record Again**
-- `Find-RegexPrevious` → **Find Previous Regex**
-- `Find-RegexAgain` → **Find Regex Again**
-- `Exit-ChildToRoot` → **Exit Child To Root**
-- `Copy-VisibleCells` → **Copy Visible Cells**
-- `Open-WebSite` → **Open Website** (single-word; modern convention)
-- `Open-CellarDatabase` / `Chinook` / `Collection` / `Northwind` / `Sample` → **Open Cellar/Chinook/Collection/Northwind/Sample Database**
-- `Open-FileFolder` → **Open File Folder**
-- `Open-ScriptFolder` → **Open Script Folder**
-- `About-DbDo` → **About DbDo**
-- `Invoke-Sql` → **Invoke SQL** (uppercased acronym)
-- `Open-Url`, `Say-Url` → **Open URL**, **Say URL**
-- `Say-Id` → **Say ID**
-
-**Acronym handling**: SQL, URL, and ID are uppercased to match common usage; everything else is initial-cap each word.
-
-**Backward-compatibility normalization** added to `KeyMap.summaryFor` and `KeyMap.descriptionFor`. Both lookups now compare a normalized key (hyphens collapsed to spaces, lowercased) so that older documentation, scripts, or muscle memory using the hyphenated form continue to find help: `Get-Help "Edit-Settings"` still works at the dot prompt and returns the same description that `Get-Help "Edit Settings"` does.
-
-**Dot-prompt error messages updated** where they referenced canonical names (e.g. `"Step-Record: count must be an integer."` is now `"Step Record: count must be an integer."`). The dot-prompt input verbs themselves (typed by the user) stay hyphenated.
-
-**Three special cases worth knowing about** for future maintenance:
-
-1. The `Step-Record` dot-prompt verb (an internal-only command with `next`/`previous`/`first`/`last` sub-arguments) keeps its hyphenated input form because it's never bound to a GUI menu item. Only its user-facing error/help text uses the Title-Case display form.
-
-2. The `Find-Previous`, `Jump-Record`, `Find-Regex`, etc. references that appeared **inside description prose** ("Find-Previous goes backward") were updated to match the new canonical form ("Find Previous goes backward"). This catches the descriptions that explain one command in terms of another.
-
-3. The `Measure-Field`, `Measure-Longest`, `Measure-Maximum`, `Measure-Minimum`, `Measure-Shortest` MessageBox titles were renamed to Title Case even though those names aren't bound to menu items. They appear in the `toolsMeasureClicked` flow as dialog titles, so they're user-facing and follow the same convention.
-
-**No chord changes this version.** No new commands; no removed commands. The visible difference is in spoken / displayed command names. Anyone whose muscle memory is "Control+, opens Settings" continues to be served unchanged.
-
-**Validated**: brace and paren balance at 24194 lines; chord-conflict audit clean.
-
-## v1.0.91
-
-**Rollback marker:** v1.0.90 is the last version that maximized EdSharp/FileDir command-name and chord conventions. If anything in v1.0.91 or later feels wrong, rolling back to v1.0.90 restores the EdSharp/FileDir-maximized baseline (Edit-Configuration, Switch-KeyDescriber, Step-InitialChange, Save-Path on Shift+P, Lock-Database on Control+F7, Toggle-Extra-Speech on Alt+Shift+X).
-
-The user's clarification ("relax the constraint to maximize EdSharp/FileDir conventions; optimize for DbDo coherence first") guided this version. The renames below reflect that shift.
-
-**Toggle-Extra-Speech rebound to Alt+Shift+Z.** From Alt+Shift+X. The "zzz / hush" mnemonic was the user's suggestion; the new chord matches the introduced sibling Toggle-Command-Echo.
-
-**Toggle-Command-Echo added on Control+Shift+Z.** New Help-menu item with click handler that mirrors helpExtraSpeechClicked: toggles `[Options] commandEcho` in DbDo.ini, invalidates the runtime cache, force-speaks "Command echo on" / "off" through the live region, and updates its menu Checked state. Default ON, so new users hear command names by default; advanced users who find it noisy turn it off in one chord. Startup-time check-state initialization makes the menu reflect the persisted setting.
-
-**Command-echo has no effect in CLI/dot-prompt mode** — confirmed and documented in the help-table entry and a code comment. The `commandEcho` function is only called from the `addItem` / `addItemLocal` menu wrappers, not from the dot-prompt dispatcher. CLI users typed the command name themselves and shouldn't need it echoed back.
-
-**Settings dialog now has both speech toggles.** The Settings dialog (renamed from "Configuration Options" -- see below) exposes Command Echo and Extra Speech as checkboxes. OK saves both to DbDo.ini, applies the runtime state immediately, and refreshes the corresponding menu Checked states.
-
-**Lock-Database removed entirely.** The user reframed the design assumption: anyone running DbDo has full read-write authority over the data they opened. View-only commands (Say-Cell, Say-Position, etc.) let cautious users browse without risk; the explicit read-write/read-only toggle is overhead. Removed: menu item, field declaration, click handler, Enabled update, command-table entry, dot-prompt `lock` alias. The two `InvalidOperationException` messages that referenced Lock-Database now say "The database was opened read-only. Close it and reopen without the -readonly flag to enable editing." The `-readonly` command-line flag is preserved -- users who want to launch DbDo with a database opened read-only from disk can still do `DbDo.exe -readonly path`.
-
-**Renames** (with backward-compat aliases in the dot prompt so existing scripts and muscle memory keep working):
-
-- **Edit-Configuration → Edit-Settings** (menu label "Configuration Options..." → "&Settings..."). "Settings" is the defacto modern convention across Windows itself, macOS Ventura+, VS Code, Slack, Discord, and every Electron-generation app. One syllable shorter than "Configuration" and "Preferences"; scans faster for screen readers; matches new-user expectations regardless of background. Bound to **Control+, (comma)** -- modern Windows convention -- with the menu entry still accessible without a chord.
-- **Switch-KeyDescriber → Toggle-KeyHelp** (menu label "&Key Describer" → "&Key Help"). "Key Describer" was an EdSharp-ism that newcomers can't guess; "Key Help" is self-documenting. The verb change from `Switch-` to `Toggle-` aligns with the Toggle-Extra-Speech / Toggle-Command-Echo pattern established this version.
-- **Step-InitialChange → Jump-NextInitial** (menu label "Next Initial Change (column-aware)..." → "Jump to Next Initial (where first letter changes)..."). Step-InitialChange was opaque jargon; Jump-NextInitial joins the established Jump-Record / Jump-RecordPrevious family of content-navigation commands.
-
-**On the audience analysis behind these choices** (recorded so future renaming has a reference): DbDo's realistic user base splits into three tiers. Tier 1 is blind/visually-impaired technical users who already use EdSharp/FileDir daily and have PowerShell exposure -- they benefit from verb-noun naming and accept EdSharp conventions. Tier 2 is blind/visually-impaired non-technical users who manage personal data and know Microsoft Office conventions if anything -- they benefit from Office-aligned chords (Control+S, Control+P, Control+F, F1 help) and clear menu labels over clever mnemonics. Tier 3 is sighted developers building accessible software who use DbDo as a tool and reference -- they benefit from predictable command vocabulary.
-
-Where EdSharp conventions (Tier 1) and modern Windows conventions (Tier 2/3) overlap, both serve all tiers. Where they diverge, the modern conventions usually win because Tier 1 users adapt easily, the modern names expand the user base, and documentation is easier when names are self-evident. This version applies that principle: rename the jargon (Configuration, KeyDescriber, InitialChange), keep the pattern (PowerShell verb-noun), add the modern chord (Control+, for Settings) without removing the menu access.
-
-**Brace and paren balance verified.** 24164 lines. No chord conflicts.
-
-## v1.0.90
-
-**Documentation pass following the v1.0.89 Narrator confirmation.** The user reports that v1.0.89 successfully speaks through JAWS, NVDA, and Narrator on Windows 11, closing the eight-round investigation that began in v1.0.76. This version consolidates what was learned and protects against future regressions.
-
-**No functional code changes.** The `dispatchNativeUiaNotification` per-call host-creation pattern from v1.0.87 is preserved as-is. ChatGPT's findings document (`Direct_Screen_Reader_Speech_Findings.md`, generated during the same investigation that produced the reference WinForms sample) is included under `chatgpt_reference/` for future maintainers. Its "Most Important Behavioral Finding" section is the empirical evidence that **reusing a provider for multiple announcements causes screen readers to silently drop later events**, even with unique activity IDs and even when the text differs. ChatGPT specifically tested provider reuse and confirmed it breaks Narrator and NVDA after the first announcement; only fresh-per-call works.
-
-This means a pool of N reused hosts (a tempting optimization to avoid HWND churn) is not safe: the dedupe heuristic appears to be per-source-HWND, so any reuse pattern will eventually drop announcements when two consecutive calls land on the same host. The cost of fresh-per-call is small in absolute terms -- creating a 1x1 Control with an HWND is on the order of tenths of a millisecond and a few KB of managed memory, and the retention ring caps live hosts at 5. For a database manager where announcements fire on user actions rather than in tight loops, the cost is invisible.
-
-**Updated comment block** on `dispatchNativeUiaNotification` now explicitly warns against "optimizing" the path to a reused host, citing ChatGPT's empirical finding. A future maintainer looking at the per-call allocation and thinking "this is wasteful" will see the warning before they break Narrator.
-
-**JAWS COM and NVDA controller-client paths preserved exactly as before.** Per the user's request following the v1.0.89 success: the direct-API paths remain primary in `sayForced`. `isJawsRunning() && jawsSay(...)` is tried first; if JAWS isn't running, `isNvdaRunning() && nvdaSay(...)` is tried next; only if neither reader is detected does the native UIA dispatch fire as the third-tier fallback (which is also the only path that reaches Narrator). All four functions (`jawsSay`, `nvdaSay`, `isJawsRunning`, `isNvdaRunning`) are unchanged. If future problems with the UIA path arise -- a Windows update changes the dedupe heuristic, NVDA's controller-client adds a new failure mode, anything -- the direct-API paths are still there to fall back on cleanly.
-
-**Pool-design investigation summary** (recorded in case it ever needs revisiting): briefly explored replacing per-call creation with a pool of 3 hosts cycled round-robin. The thought was that three different source HWNDs would defeat the dedupe heuristic for any reasonable sequence of repeated announcements. The risk: if dedupe is per-source-HWND rather than over the most-recent-N sources, the pool would work fine until two consecutive announcements happened to land on the same host (a sequence of 4 same-text announcements with a pool of 3 means the 4th repeats the 1st host's text -- silent drop). That's an intermittent failure mode that would be hard to debug later. ChatGPT's empirical finding explicitly tested provider reuse and found it breaks, so the pool was reverted before shipping. Future revisiting only makes sense if a Windows update changes the dedupe behavior in a documented way.
-
-**chatgpt_reference/ folder** in the install tree now contains: the seven C# / manifest files (`AnnouncerProvider.cs`, `NotificationHostControl.cs`, `MainForm.cs`, `Program.cs`, `UiaNativeMethods.cs`, `DiagnosticLogger.cs`, `app.manifest`) plus the findings markdown. The whole bundle is preserved as the canonical record of how the native UIA path was discovered.
-
-## v1.0.89
-
-**Namespace clash fix for v1.0.87's UIA code.** The build error on v1.0.88:
-
-```
-DbDo.cs(740,13): error CS0104: 'AutomationNotificationKind' is an ambiguous
-  reference between 'System.Windows.Forms.Automation.AutomationNotificationKind'
-  and 'System.Windows.Automation.AutomationNotificationKind'
-DbDo.cs(741,13): error CS0104: 'AutomationNotificationProcessing' is an
-  ambiguous reference...
-```
-
-Two `using` directives in DbDo.cs both pull in enum types of the same name:
-
-- `using System.Windows.Forms.Automation;` -- added much earlier for `AutomationLiveSetting` (used by the hidden Label that DbDo's legacy `say()` path mutates).
-- `using System.Windows.Automation;` -- added in v1.0.87 for the `IRawElementProviderSimple` / `AutomationNotificationKind` / `AutomationNotificationProcessing` infrastructure the native dispatch path needs.
-
-Both namespaces define `AutomationNotificationKind` and `AutomationNotificationProcessing` independently (they're distinct types in distinct assemblies that happen to share names). The compiler can't pick one without a fully-qualified reference.
-
-**Fix:** every use of these two enum names in the native-dispatch code is now fully qualified as `System.Windows.Automation.AutomationNotificationKind` / `System.Windows.Automation.AutomationNotificationProcessing`. Five sites total: the `UiaNative.UiaRaiseNotificationEvent` P/Invoke signature (two parameters) and the `dispatchNativeUiaNotification` method (three uses: declaring the local, the ternary that selects between `ImportantMostRecent` and `All`, and the argument to the P/Invoke). The other UIA types (`IRawElementProviderSimple`, `ProviderOptions`, `AutomationInteropProvider`) live only in `System.Windows.Automation.Provider`, so no qualification is needed for them.
-
-No behavioral change. v1.0.87's native UIA dispatch (NotificationHostControl / AnnouncerProvider / UiaNative) is the same; only the type-resolution at compile time is fixed.
-
-## v1.0.88
-
-**Build-script fix for v1.0.87's UIA references.** v1.0.87 added two new `/reference:` entries to `buildDbDo.cmd` for `UIAutomationProvider.dll` and `UIAutomationTypes.dll`, passing the bare DLL names and assuming csc.exe would resolve them through `csc.rsp`. It doesn't -- csc.exe's response file lists a fixed set of common framework assemblies, and these two are not in it. The build failed with:
-
-```
-error CS0006: Metadata file 'UIAutomationProvider.dll' could not be found
-error CS0006: Metadata file 'UIAutomationTypes.dll' could not be found
-```
-
-A stale or empty `DbDo.exe` from a previous successful build was left on disk, and running it triggered Windows's misleading "Unsupported 16-Bit Application" dialog -- which appears when the loader sees a truncated or zero-byte MZ image, not because the file is actually 16-bit.
-
-**The fix:** `buildDbDo.cmd` now resolves both DLLs by probing the standard reference-assemblies folder hierarchy and the runtime GAC, then passes full paths to csc:
-
-1. **Primary location**: `C:\Program Files (x86)\Reference Assemblies\Microsoft\Framework\.NETFramework\v4.8\` -- present whenever the .NET Framework 4.8 Developer Pack is installed.
-2. **Earlier-version fallback**: same folder under v4.7.2 / v4.7.1 / v4.7 / v4.6.2 / v4.6.1 / v4.6 / v4.5.2 / v4.5.1 / v4.5. The API surface of these two assemblies has been stable since 4.5.
-3. **Runtime GAC fallback**: `%SystemRoot%\Microsoft.NET\assembly\GAC_MSIL\UIAutomationProvider\v4.0_4.0.0.0__31bf3856ad364e35\UIAutomationProvider.dll` and the matching path for `UIAutomationTypes`. Always present on Windows 10+, since UIA itself depends on these assemblies being installed.
-
-If neither source is reachable, the build aborts with a clear message pointing to the .NET Framework 4.8 Developer Pack download. Both resolved paths are written to `buildDbDo.log` so future build failures are diagnosable.
-
-**Defensive cleanup:** `buildDbDo.cmd` now deletes any existing `DbDo.exe` before compile, so a failed build leaves no half-written executable behind. This prevents the "Unsupported 16-Bit Application" dialog from surfacing when the user runs DbDo after a build failure they may not have noticed.
-
-No code changes in `DbDo.cs` this version -- the v1.0.87 native UIA dispatch (NotificationHostControl / AnnouncerProvider / UiaNative) is unchanged. Once this build succeeds, Narrator should hear DbDo announcements as JAWS and NVDA already do.
-
-## v1.0.87
-
-**UIA Notification breakthrough -- Narrator now works.** The user obtained a working reference WinForms .NET Framework 4.8 sample from ChatGPT that reaches JAWS, NVDA, and Narrator simultaneously on Windows 11. This version adopts ChatGPT's technique into DbDo's `LiveRegion` speech path.
-
-**The fundamental shift:** previous versions called `AccessibleObject.RaiseAutomationNotification` via reflection (the managed wrapper). That API on .NET Framework 4.8 only works for four control types (Label / LinkLabel / GroupBox / ProgressBar) per Microsoft documentation, and even those don't reach Narrator reliably. v1.0.87 replaces the managed path entirely with **native P/Invoke against `UIAutomationCore.dll`'s `UiaRaiseNotificationEvent`**, supplying a custom `IRawElementProviderSimple` anchored to a real window via `WM_GETOBJECT`. The native function has none of the managed wrapper's restrictions; the screen reader's UIA listener picks up the event directly.
-
-**Implementation:**
-
-- New top-level class `NotificationHostControl : Control` -- 1x1 invisible Control that overrides `WndProc` to return its `AnnouncerProvider` when UIA queries the window via `WM_GETOBJECT` (0x003D). Each notification gets a fresh host (anti-dedupe sequence number, retained on a 5-deep ring so UIA's async source-lookup completes successfully).
-- New top-level class `AnnouncerProvider : IRawElementProviderSimple` -- implements the minimal-but-complete property set UIA expects (Name, AutomationId, ControlType=Text, FrameworkId, IsControlElement, IsContentElement). `HostRawElementProvider` anchors via `AutomationInteropProvider.HostProviderFromHandle`.
-- New top-level class `UiaNative` -- P/Invoke binding for `UiaRaiseNotificationEvent` in `UIAutomationCore.dll`.
-- `LiveRegion.dispatchNativeUiaNotification` is the new private worker. It marshals to the UI thread if needed, creates a fresh host, calls the native function, and retains the last 5 hosts before disposing.
-- `LiveRegion.sayUiaString`, `sayUiaStringForced`, and `raiseUiaNotification` (the legacy entry point used by `sayViaUia` inside the dual `say()` pipeline) all route through `dispatchNativeUiaNotification`. The reflection-cached `MethodInfo` and probe flag are gone.
-
-**Build change:** `buildDbDo.cmd` now adds `/reference:UIAutomationProvider.dll /reference:UIAutomationTypes.dll` so csc.exe resolves the `IRawElementProviderSimple` interface and `AutomationNotificationKind` / `AutomationNotificationProcessing` enums. These assemblies are part of .NET Framework 4.8 and ship on every modern Windows machine.
-
-**Reference files** preserved under `chatgpt_reference/` in the build folder for documentation: `AnnouncerProvider.cs`, `NotificationHostControl.cs`, `MainForm.cs`, `Program.cs`, `UiaNativeMethods.cs`, `DiagnosticLogger.cs`, `app.manifest`. Adapted from ChatGPT's `uia_notify_winforms_repeat_fix` sample.
-
-**README updated** to reflect that all three screen readers now work via the corrected UIA path. JAWS and NVDA continue to be served first by their direct-API paths (FreedomSci.JawsApi.SayString and nvdaControllerClient.dll) for lowest latency; the UIA path is the universal fallback that reaches Narrator and any other UIA-listening reader.
-
-**Test UIA Speech command** stays removed from the Help menu (v1.0.86 dropped it). The native dispatch path is exercised on every `LiveRegion.say` / `sayForced` / `sayUiaString` call now, so any DbDo operation that announces also serves as a Narrator test.
-
-**Earlier eight rounds of speech-path debugging** (v1.0.76 - v1.0.86) were guided by the assumption that the managed `RaiseAutomationNotification` was the right API. Microsoft's documentation says so, the reference samples on the dotnet/winforms repo say so, and Kelly Ford's WPF demo demonstrates the equivalent path working on .NET 8. But on .NET Framework 4.8 the managed dispatch is unreliable for Narrator; only native P/Invoke through `UIAutomationCore.dll` reaches all three readers consistently. Lesson: when a working reference sample exists, read its actual source rather than the API docs that lead to a different implementation.
-
-**The wxPython equivalent** (also generated by ChatGPT, attempted by the user) reaches JAWS but not NVDA or Narrator. Inspection shows the wxPython version doesn't intercept `WM_GETOBJECT` on its host window; comtypes' `COMObject` provider is created but UIA can't verify it's associated with a real window in the tree. JAWS apparently doesn't verify; NVDA and Narrator do. Making wxPython work would require subclassing the panel's window procedure, which is a different complexity tier and not relevant to DbDo. The native-P/Invoke technique remains a WinForms specialty.
-
-## v1.0.86
-
-**Major chord-and-command reorganization** per the user's spec in temp.txt. The pattern of dedicated Alt+letter ascending / Alt+Shift+letter descending sort chords for each standard column is retired; one universal Sort-Records dialog on Alt+Shift+S handles every sorting need by defaulting to the virtual column with an opt-in Descending checkbox.
-
-**Commands dropped entirely** (menu items, field declarations, click handlers, dot-prompt help entries, and the `SortDialog` Custom-Sort class): `Sort-Object`, `Sort-Ascending`, `Sort-Descending`, `Sort-ById`, `Sort-ByIdReverse`, `Sort-ByLook`, `Sort-ByLookReverse`, `Sort-ByTags`, `Sort-ByTagsReverse`, `Sort-ByUrl`, `Sort-ByUrlReverse`, `Sort-OldestFirst`, `Sort-RecentFirst`. The single `Sort-Records` command on Alt+Shift+S replaces all thirteen.
-
-**Sort-Records dialog flipped** to match the spec: checkbox is "Descending order" (default OFF, meaning ascending), so the natural default is ascending and the user opts in to descending.
-
-**Verb rename — Set-* → Edit-***. Internal verbs renamed: `Set-Cell` → `Edit-Cell`, `Set-Record` → `Edit-Record`. Menu labels were already "Edit Cell" and "Edit Record"; this aligns the verb spoken by the command-echo feature with the visible label. Dot-prompt commands `set-cell` and `set-record` retained as backward-compat aliases that redirect to `edit-cell` / `edit-record`. Detail help for `Set-Record` updated to show the new canonical name with a note about the alias.
-
-**F2 row-sync bug fix** (carried from v1.0.85): `recSetCellClicked` explicitly resyncs `db.absolutePosition = iVirtualRow` both before reading the cell value and again before committing the update, so F2 always edits the row the user hears after Alt+Control+arrow navigation regardless of background sync drift.
-
-**Test UIA Speech menu item removed entirely** (carried from v1.0.85): the diagnostic produced no audible result on tested configurations; the underlying `LiveRegion.sayUiaString` machinery stays in place as silent future-compatibility code.
-
-**Chord rebinds:**
-
-- `Open-Url` rebound from Control+Shift+U to **Control+U** (per spec). `Clear-Mark` (Unmark Record) lost its Control+U chord to make room; reachable via the menu or via `Switch-Mark` (Control+I) which toggles.
-- `Save-DatabaseAs` rebound from Control+S to **Control+Shift+S** (per spec). `Backup-Database` lost its Control+Shift+S chord and is now menu-only.
-- `Append-Record` bound to **Alt+Shift+C** (previously unbound). `Edit-Configuration` (Configuration Options) lost its Alt+Shift+C chord; reachable through the Misc menu.
-- `Say-Updated` bound to **Shift+D** (previously unbound).
-- `Say-Added` (Shift+A) re-added — v1.0.85 had dropped this assuming the Added column was being abandoned, but the spec retains it.
-
-**Chords explicitly left as-is** (per user clarification): `Say-Path` stays on **Shift+P**, not Alt+P. Double-pressing Say-Path opens the existing `speakOrShow` memo dialog from which the path can be copied via Control+C (Windows's "copy current line if no selection" convention). Alt+P and Alt+Shift+P are unassigned.
-
-**Deferred per spec's bracketed editorial comments** — items the user marked with square-bracket annotations indicating either ambiguous intent or new functionality requiring more than chord-rebinding:
-
-- All G-family commands (`Say Go to`, `Go to Record` with rich target syntax including "+3" / "-10" / "20%" / "+5%" / "-5%", `Repeat Go`, `Graphics Output`)
-- `Shift+J = Say Jump` with target-substring semantics
-- `Alt+K = List Bookmarks` (picker dialog)
-- `Control+L = List Column` (all values starting from first)
-- `Alt+Shift+N = New Database` (interactive schema builder merging with standard columns)
-- `Alt+Shift+Q = Query History` (10 most recent picker)
-- `Control+Shift+E = Extract Column` (semantics unclear vs existing `Extract-Regex` on the same chord)
-- `Control+Shift+R = Regex Replace` (in current column)
-
-These remain on the queue for future versions. Brace and paren balance verified at `brace=0, paren=0, lines=23971`. Chord-conflict audit passes cleanly.
-
-## v1.0.85
-
-**Naming fixes, F2 functional fix, plus partial chord reorganization.** The chord reshuffle the user requested has several ambiguous pieces that need clarification before completion; this version ships the unambiguous fixes and flags the remaining questions.
-
-**Done in this version:**
-
-- **Test UIA Speech menu item removed entirely** (field declaration, menu binding, click handler all gone). The UIA-path machinery in `LiveRegion` stays in place as a best-effort future-compatibility layer, but the user-facing diagnostic is gone since it produces no audible result on current configurations.
-- **Internal verb renamed: `Set-Cell` → `Edit-Cell`, `Set-Record` → `Edit-Record`.** Nine `Set-Cell` occurrences and four `Set-Record` occurrences updated across click handlers, dialog titles, and the command-name help table. Menu labels were already "Edit Cell" and "Edit Record"; this brings the verb that the command-echo feature speaks into alignment with the visible label.
-- **F2 row-sync bug fixed.** `recSetCellClicked` now explicitly synchronizes `db.absolutePosition` to `iVirtualRow` both before reading the field's value into the dialog and again before committing the update. The previous code relied on the existing sync paths (via `virtSyncListSelection` and `virtSyncFromListSelection`) but those don't fire on every code path; under filters, sorts, or background refreshes the cursor could drift. Defense in depth: F2 now always edits the row the user can actually hear via Alt+Control+arrow navigation.
-- **Say-Added (Shift+A) dropped entirely** — menu item, field declaration, and handler removed. Shift+A is now unassigned.
-- **Say-Updated bound to Shift+D** (was `Keys.None` since v1.0.67's wave-2 work).
-
-**Still pending — need user clarification:**
-
-1. **Where does Database Summary move?** Currently Alt+D. The user wants Alt+D for Sort-ByUpdated. The user suggested Alt+S, but Alt+S is already taken by `Measure-Column` (Statistics from Column). Options: (a) move Measure-Column elsewhere and give Database Summary Alt+S, (b) move Database Summary to a different chord entirely (e.g. Control+Alt+D), or (c) leave Database Summary on Alt+D and pick a different chord for Sort-ByUpdated.
-2. **Url commands' chord home.** Currently the url-family lives on U: `Say-Url` (Shift+U), `Sort-ByUrl` (Alt+U), `Sort-ByUrlReverse` (Alt+Shift+U), `Open-Url` (Control+Shift+U). The user suggested moving them to A-family chords now that Say-Added is gone. Question: keep url commands on U-family chords, or move them to A-family chords (Shift+A, Alt+A, Alt+Shift+A) where Say-Added used to be? If the latter, the new url chords would coexist with the existing `Sort-Ascending` (Alt+A) and `Sort-Descending` (Alt+Shift+A) which prompt for a column.
-3. **Generic sort placement.** Two "generic sort" commands exist: `Sort-Object` (currently Shift+S, full multi-column Custom Sort dialog) and `Sort-Ascending` / `Sort-Descending` (Alt+A / Alt+Shift+A, single-column prompt with direction). User wants "the generic sort" on Alt+Shift+S. Which of the two should land there?
-4. **Sort-ByUpdated chord.** Pending the answers above. Provisional plan if Database Summary moves successfully: Sort-ByUpdated on Alt+D, Sort-ByUpdatedReverse on Alt+Shift+D.
-
-The four pending items interact; I'd rather answer all of them in one round than ship a partial reshuffle that needs another correction pass. Tell me your preference on each and I'll do them together.
-
-## v1.0.84
-
-**Mystery resolved.** The reason Alt+W appeared to produce JAWS speech in DbDo while the standalone UIA_WinForms_test app was silent: the speech the user heard from DbDo's Alt+W was the **command echo** feature, which announces every GUI command's name through the JAWS direct-API path. JAWS was saying "Test UIA Speech" — the menu item's label as echoed by DbDo's command-announcement system, not the UIA Notification's announcement payload. The Notification event itself was silent for JAWS in DbDo too, just as it was in the test app.
-
-This means **the entire UIA Notification code path has been dead code** on .NET Framework 4.8 WinForms for the user's Windows 11 configuration. JAWS and NVDA support has been functioning correctly through their direct-API paths (`FreedomSci.JawsApi.SayString` and `nvdaControllerClient.dll`) the entire time. The `sayUiaString` family, the legacy `sayViaUia` fallback inside `say()`, and the Test UIA Speech menu item have all been firing the Notification event without anyone hearing it.
-
-**v1.0.84 keeps the UIA code in place** as a best-effort path that may benefit from future Windows or Narrator improvements, but adjusts user-facing surfaces to reflect reality:
-
-- **Alt+W chord removed from Test UIA Speech.** The chord was prime hotkey real estate that should be available for a feature that actually works. The Test UIA Speech menu item remains under Help, reachable through the menu, renamed to "Test UIA Speech (diagnostic)" so its purpose is clear.
-- **History entry is honest about the eight-round investigation.** No claim that the UIA path works for any reader on the tested configuration. If a future Windows update changes that, users can verify via the diagnostic menu item.
-
-The accessibility story DbDo offers is: **JAWS and NVDA fully supported via direct APIs. Narrator support is best-effort via the documented UIA pattern; on current .NET Framework 4.8 WinForms / Windows 11 builds, the path does not reach Narrator in our testing.** README already reflects this from v1.0.83.
-
-**Investigation lessons documented for future reference:**
-
-1. When a feature appears to work, verify what the screen reader is actually saying — not just that "something" was spoken. Asking the user to read back the exact phrase would have resolved this in round one rather than round nine.
-2. Microsoft's documentation contains the definitive answer for .NET Framework 4.8 UIA behavior (Label, LinkLabel, GroupBox, ProgressBar are the only controls whose AccessibleObjects support the UIA Notification event). Web research at the start would have saved several rounds of source-priority experimentation.
-3. Command-echo features that announce menu item names are easy to mistake for the announcements those menu items make.
-
-Returning to actual database features next.
-
-## v1.0.83
-
-**Narrator status: best-effort.** After v1.0.82's source-priority fix (Label first, matching Microsoft's documented pattern) and eight rounds of attempted variations across v1.0.76 through v1.0.82, user testing on Windows 11 confirms Narrator still does not hear DbDo's UIA Notification announcements. JAWS and NVDA work reliably via both their direct-API paths and (in v1.0.82+) the corrected UIA Notification path. Narrator does not.
-
-The investigation is concluded with this honest assessment: **DbDo's UIA path is implemented per Microsoft's documented pattern**, but Narrator on Windows 11's current builds does not reliably honor `RaiseAutomationNotification` events from .NET Framework 4.8 WinForms apps the same way it does from .NET 6+ WPF apps. Kelly Ford's reference WPF demo built against .NET 8 reaches all three readers on the same machine where DbDo's .NET Framework 4.8 build reaches only JAWS and NVDA. The runtime appears to be the discriminator; moving DbDo to .NET 8 would bundle a 70-100 MB runtime, which is not acceptable per project policy.
-
-**Changes in this version:**
-
-- **README updated** to honestly state JAWS and NVDA are fully supported; Narrator is best-effort through the UIA path.
-- **Tested-with line updated** to reflect actual test results rather than aspirational support.
-- The `Test UIA Speech` command (Alt+W) is retained as a diagnostic. Users who want to know whether their particular Windows / Narrator configuration hears DbDo can press it to find out. If a future Windows or Narrator update improves UIA Notification dispatch, DbDo should benefit automatically without any further code changes -- the path is wired correctly per the documentation.
-
-**Looking forward:** the Narrator question is now off the active investigation list. DbDo development can return to actual database features. Wave-3 commands, additional standard-column features, schema-introspection improvements, and the broader data-management roadmap are the next priorities.
-
-## v1.0.82
-
-**Root cause found.** Web research surfaced Microsoft's own documentation (https://learn.microsoft.com/en-us/dotnet/framework/whats-new/whats-new-in-accessibility) and the dotnet/winforms issue tracker (issue #4494). The documented constraint:
-
-> On .NET Framework 4.8, `AccessibleObject.RaiseAutomationNotification` is only honored by the AccessibleObject implementations of four controls: **Label, LinkLabel, GroupBox, and ProgressBar**. Calling it on any other control's `AccessibleObject` -- including a `Form`'s, a `Button`'s, a `TextBox`'s, or a `ListView`'s -- silently no-ops. The method returns success but no UIA event is dispatched.
-
-This is the root cause of seven rounds of debugging that started in v1.0.76. DbDo's pure-UIA path (`sayUiaString` and friends) was raising the notification from the form's `AccessibleObject` from v1.0.78 onward, which silently no-ops. JAWS still spoke for Alt+W in user testing because DbDo's legacy `say()` path mutates the hidden Label's `Text` from various places around the same time, which JAWS picks up as a separate `LiveRegionChanged` event. The Notification event from `sayUiaString` itself was never dispatched.
-
-The Microsoft-documented working pattern, copied verbatim from the .NET Framework "what's new in accessibility" page:
-
-```csharp
-raiseMethod.Invoke(progressBar1.AccessibilityObject,
-    new object[3] { /*Other*/ 4, /*All*/ 2, "The progress is 50%." });
-```
-
-A `ProgressBar`'s `AccessibilityObject`. Not a Form's, not a Button's.
-
-**Fix in `LiveRegion.raiseUiaNotificationNow`:** source priority reversed. The hidden Label is now the primary source. The form's AccessibilityObject remains as a last-resort fallback only because some path could in principle exist where the Label is unavailable (e.g., CLI-only launch), though such fallback firing is expected to silently no-op on .NET Framework 4.8.
-
-This is the same Label that `LiveRegion.attach` has been creating since v1.0.59 -- 1x1, tucked under the MenuStrip, `LiveSetting=Assertive`. It's a Label, so its `AccessibleObject` has the UIA Notification provider implementation. The previous "improvement" of using the form as source was a regression I shipped through five versions without realizing.
-
-**What this means for Narrator:** if Narrator was the problem all along because the WinForms UIA bridge on .NET Framework 4.8 has limited notification dispatch, Narrator should now hear the notification when sayUiaString fires from the Label. Whether Narrator does or doesn't pick this up is now testable cleanly.
-
-**Companion test app `UIA_WinForms_test.cs`** updated with the same fix: fires from the hidden Label, not the form. If the test app speaks for JAWS/NVDA/Narrator after this fix, the documentation-confirmed pattern is verified end to end. If only JAWS and NVDA speak and Narrator stays silent, then Narrator has an additional quirk specific to it -- but at minimum the JAWS and NVDA path will be working correctly via UIA Notification, not just incidentally through the LiveRegionChanged event from other code paths.
-
-## v1.0.81
-
-**Manifest added — declaring Windows 10/11 support.** The v1.0.80 test apps revealed an unexpected result: with the parameter count corrected to three, `AccessibleObject.RaiseAutomationNotification` returned `False` on every WinForms call (no exception, but the underlying UIA infrastructure rejected the call). The WPF test returned `SUCCESS` on every call but still produced no speech. Both apps logged `Environment.OSVersion = Microsoft Windows NT 6.2.9200.0` — that's Windows 8's version string, returned for any process that lacks an application manifest declaring newer-Windows support.
-
-This is the documented behavior of Windows's "version lying" feature: starting with Windows 8.1, unmanifested processes get Windows 8's reported version regardless of the actual OS. UIA 1.1 features added in Windows 10 1709 (Notification events specifically) check this manifested version and refuse to dispatch when the caller claims to be Windows 8 or older — silently, with `RaiseAutomationNotification` returning `False`.
-
-This explains:
-
-- Why the test .exes returned `False` / no-speech in v1.0.80.
-- Why JAWS and NVDA in the v1.0.76 testing of DbDo's Alt+W appeared to "hear" the test message — they were actually responding to other accessibility events fired by the focus change into the menu and back, not the UIA Notification itself.
-- Why Narrator has been silent through all five rounds of attempted fixes — Narrator depends exclusively on the UIA Notification dispatch, which was being rejected at the manifest-version check.
-
-**Fix:** `DbDo.manifest` ships now and is embedded via `csc /win32manifest:DbDo.manifest` in `buildDbDo.cmd`. The manifest declares Windows 10 (Id `{8e0f7a12-...}`) and earlier supportedOS GUIDs, requested execution level `asInvoker`, and per-monitor DPI awareness. The installer (`DbDo_setup.iss`) ships `DbDo.manifest` alongside `DbDo.exe` and `DbDo.ico` so it's visible in the install folder for diagnostic purposes, though Windows reads it from the .exe's embedded resource at runtime, not the disk file.
-
-**No other code changes.** The `LiveRegion` class still has the three-argument call from v1.0.80; that's correct and stays. The hypothesis is that v1.0.80's three-argument call was correct and the silent rejection was happening one layer above the parameter count. v1.0.81 tests that.
-
-If v1.0.81's Alt+W reaches Narrator (and JAWS and NVDA continue to hear it), the manifest hypothesis is confirmed and we can simplify DbDo's speech architecture confidently. If Narrator is still silent, we need to look at the next layer — possibly Narrator's notification-source filter, or per-app verbosity policy.
-
-The companion `uia_test_apps.zip` is updated with `UIA_test.manifest` and modified build scripts that embed it. The WinForms test now also calls `GetLastWin32Error()` after every `Invoke` and logs the error code, so if `RaiseAutomationNotification` still returns `False`, the log will tell us the specific failure reason. The wxPython build script cleans `dist\` and `build\` before running PyInstaller to avoid the `PermissionError: Access is denied` that locked the previous .exe.
-
-## v1.0.80
-
-**Real fix for Narrator silence: three-argument call, not four.** Investigation triggered by the user's WinForms UIA test build, which JAWS reported "Parameter count mismatch" on every button. Microsoft's documentation and the dotnet/winforms GitHub repository both confirm: `AccessibleObject.RaiseAutomationNotification` takes three parameters (`AutomationNotificationKind`, `AutomationNotificationProcessing`, `string notificationText`), not four. The WPF equivalent `UIElementAutomationPeer.RaiseNotificationEvent` does take four; the activityId fourth parameter is set to `string.Empty` internally by WinForms.
-
-DbDo's reflection invocations in `raiseUiaNotification` (used by the legacy `sayViaUia` Narrator-fallback path) and `raiseUiaNotificationNow` (used by v1.0.76's `sayUiaString`) had been passing four args from day one. Both call sites had `try/catch { /* swallow */ }` wrappers that hid the `TargetParameterCountException` thrown on every invocation. **JAWS and NVDA never noticed** because their direct-API paths (`FreedomSci.JawsApi.SayString` and `nvdaControllerClient.dll`) run first in `sayForced` and succeed; the broken UIA fallback never executes when those readers are running. **Narrator was the only path that depended on the UIA call**, and every invocation hit the exception silently.
-
-Both call sites in `DbDo.cs` now pass exactly three arguments. The `sActivityId` parameter is removed from the helper chain `sayUiaString` → `raiseUiaNotificationWithMode` → `raiseUiaNotificationNow` since it no longer maps to any actual API parameter. Comments explain the WinForms vs WPF signature difference so this mistake doesn't recur.
-
-**An open question remains about v1.0.76 testing.** The user reported that v1.0.76's Alt+W (`sayUiaString`) made JAWS and NVDA speak "Test UIA speech" — but if every reflection invocation was throwing, neither reader should have heard anything via that code path. The only way speech could have reached them is if `MethodInfo.Invoke` was leniently accepting four args against a three-arg method (unlikely but not impossible) or if a parallel code path was firing in the same window of time. v1.0.80 will test cleanly: if Alt+W now reaches Narrator too, the three-arg fix is the answer; if Narrator still stays silent, we have a different problem to solve and JAWS/NVDA's previous success must have come from a path we haven't accounted for.
-
-**Test apps updated:**
-
-- **UIA_WinForms_test.cs** rewritten with the correct three-argument signature plus runtime logging. Every notification attempt writes a timestamped line to `uia_winforms_test.log` next to the .exe — button label, processing-mode value, reflection-lookup result, Invoke return value or exception type and message. Whatever happens, the log makes it visible.
-- **build_UIA_WPF_test.cmd** rewritten to reference WPF assemblies from the **runtime** location `%WINDIR%\Microsoft.NET\Framework64\v4.0.30319\WPF\` instead of the Developer-Pack reference-assemblies folder. The runtime location is always present on Windows 10 1903+ and Windows 11 without needing any developer-pack install. Both build scripts now log full compiler output to `<scriptname>.log` so build failures are visible offline.
-
-The WinForms test should now produce speech on every button when run with JAWS, NVDA, or Narrator active. The WPF test should now build on a stock Windows 11 machine.
-
-## v1.0.79
-
-**Two more strategies attempted to make Narrator hear `sayUiaString`,** since v1.0.78's two changes (form-as-source, processing-mode=All) didn't reach Narrator on the user's Windows 11 setup:
-
-- **Deferred firing via `BeginInvoke`.** Narrator on Windows 11 can drop UIA notifications fired during the exact moment of menu-strip dismissal because it's busy processing the menu-close events. The notification now posts through the form's message queue rather than firing inline; it runs one message-loop turn later, after the menu-close events have drained. JAWS and NVDA are unaffected (they'd have heard the notification synchronously too). Synchronous path preserved as a fallback if `BeginInvoke` throws or if the form is unavailable.
-- **Source priority: `ActiveControl` > form > Label.** v1.0.78 used the form's `AccessibilityObject` as the notification source. v1.0.79 prefers `frmOwner.ActiveControl` first — whatever control has real focus when the notification fires (the listview, an input box, a dialog control). Narrator targets notifications by proximity to the focused element, so firing from the focused element itself is the most reliable way to reach Narrator. Falls back to the form's AccessibleObject (v1.0.78's source), then to the Label, in that order.
-
-This is still hypothesis-driven — Narrator's UIA event handling is under-documented and varies across Windows 11 builds. If Narrator still doesn't hear Alt+W after this build, the next candidates are:
-
-- Change `AutomationNotificationKind` from `Other` (4) to `ActionCompleted` (2). Some screen readers treat the two values differently; Narrator may prefer the more specific kind.
-- Change the processing mode to `ImportantAll` (0). Both `MostRecent` (3) and `All` (2) have been tried; `ImportantAll` is the one remaining mainstream option.
-- Add a UIA notification listener to the test command's own handler to confirm the notification is actually being raised on the wire (currently we have no visibility into whether the notification reaches the UIA event bus at all — Narrator's silence could mean it never received the event, OR it received it and chose not to speak).
-
-Diagnostic confirmation that may inform the next attempt: the user's Test-Reader diagnostic dialog reported `Windows reports any screen reader active: no` even with Narrator running. `SystemParametersInfo SPI_GETSCREENREADER` doesn't reliably detect Narrator (Microsoft hasn't documented why); this means DbDo's existing detection logic mostly falls through to the UIA path for Narrator. The UIA path itself is the question.
-
-## v1.0.78
-
-**Narrator now hears `sayUiaString`.** Investigation of why the user's JAWS and NVDA picked up Alt+W's UIA notification but Narrator stayed silent yielded two probable causes; both are addressed in this build:
-
-- **Notification source changed from the 1x1 Label to the form itself.** Narrator is particular about which UIA element raises a notification: it honors notifications from top-level windows reliably, but tends to ignore them from marginal hidden controls. The Label (`lbl`, 1x1, tucked under the MenuStrip) had worked for JAWS and NVDA because both readers are permissive about source. The new `frmOwner` field on `LiveRegion` captures the form at `attach` time and `raiseUiaNotificationWithMode` uses the form's `AccessibilityObject` as the notification source. Falls back to the Label only if the form reference is unavailable.
-- **Processing mode changed from `MostRecent` (3) to `All` (2).** The legacy `sayViaUia` path (DbDo's existing Narrator fallback inside `sayForced`) was already using `All` and getting through to Narrator; the new `sayUiaString` was using `MostRecent` for "polite queuing." Narrator may filter `MostRecent` differently from `All`. Switched the polite variant to `All` to match the path that's known to work for Narrator. `sayUiaStringForced` continues to use `ImportantMostRecent` (1) since interrupt behavior is the point of that variant.
-
-These changes are honest hypotheses, not guarantees — Narrator's notification handling is under-documented, and the only way to be sure is to test on a machine with Narrator running. If Narrator still stays silent, the next candidate is `ImportantAll` (0) or a different `AutomationNotificationKind` value than `Other` (4).
-
-**EdSharp / FileDir chord conventions enforced.** Per the user's reminder, EdSharp and FileDir both use Alt+Shift+C for "Configuration Options" and Alt+C for cell-level "Append to Clipboard." DbDo's bindings now match:
-
-- **Alt+C** = Append Cell to Clipboard (unchanged, already in this configuration)
-- **Alt+Shift+C** = Configuration Options... (restored — v1.0.77 had moved this to no-chord to resolve a conflict with Append Record)
-- **Append Record** moves off Alt+Shift+C to no-chord, reachable via the Edit menu
-
-Verified against `EdSharp.cs` and `FileDir.cs`: both have `menuMiscConfigurationOptions` bound to "Alt+Shift+C" with the label "Configuration Options" or "Configuration Options ...". DbDo's label "Configuration Options..." matches exactly.
-
-The Append Record chord change is a minor regression for users who used it. It's a rare command (collecting multiple records onto the clipboard with a separator); the menu access remains and the dot-prompt verb `append-record` still works. EdSharp/FileDir don't have an analogous record-level command, so dropping the chord respects the convention rather than inventing a new chord that DbDo would need to defend long-term.
-
-A full audit of `addItem` chord assignments after this build confirms no duplicate chord registrations remain.
-
-## v1.0.77
-
-**Two fixes from in-use testing of v1.0.76:**
-
-**Alt+Shift+C chord conflict resolved.** v1.0.69 wave-2 introduced `Append Record` on Alt+Shift+C, but an older `Edit-Configuration` command (Configuration Options dialog, on the Misc menu) had been holding the same chord. WinForms' shortcut registration prints a warning at startup when the same chord is registered twice via a menu strip; the user saw that message on first load of v1.0.76. Resolution: `Edit-Configuration` lost the chord (set to `Keys.None`) — it's an infrequent setup command and remains reachable via the Misc menu and the dot prompt. `Append Record` keeps Alt+Shift+C as originally specified.
-
-A full audit of `addItem` chord assignments confirms no other duplicates remain after this fix.
-
-**Test UIA Speech command revised.** Two changes per user feedback:
-
-- **Chord changed from no-chord to Alt+W**, since JAWS auto-reads dialog text and the user reported difficulty distinguishing the direct-speech announcement from any dialog content that followed. Alt+W keeps the listview focused so the user hears only the UIA announcement.
-- **Follow-up explanatory dialog removed.** The handler now just fires `LiveRegion.sayUiaString` and returns. No MessageBox, no focus change. The shortened announcement text is "Pure UIA speech test. RaiseAutomationNotification only, no JAWS or NVDA specific API." If the user hears it, the path works.
-
-The original `Test Screen Reader Speech` (Test-Reader) command is unchanged — it continues to show its diagnostic MessageBox after speaking, because that path's whole purpose is to report which reader was detected and which API path was used. The two test commands now have complementary roles: Test-Reader for diagnostic detail, Test UIA Speech for fast pass/fail of the pure-UIA path.
-
-## v1.0.76
-
-**Pure-UIA speech path exposed as `sayUiaString` and `sayUiaStringForced`** on `LiveRegion`. Both methods fire `AccessibleObject.RaiseAutomationNotification` directly, bypassing JAWS's FreedomSci COM API, NVDA's controller-client DLL, and the Label/LiveRegionChanged intermediary. JAWS, NVDA, and Narrator all listen to the UIA Notification event in their default modes, so this path reaches all three without DbDo needing to detect which reader is running.
-
-- `sayUiaString(sText)` uses the **MostRecent** processing mode (3) — polite, queues behind current speech.
-- `sayUiaStringForced(sText)` uses **ImportantMostRecent** (1) — interrupts current speech.
-
-These are separate from the existing `say()` and `sayForced()` methods, which continue to prefer per-reader APIs when JAWS or NVDA is detected. Nothing was removed; the new methods are an additional path the caller chooses explicitly. The activity-id string passed to the UIA event is `"DbDo-Uia"` for the polite variant and `"DbDo-Uia-Important"` for the interrupting variant, distinct from the existing `"DbDo"` activity id so screen readers can distinguish the two pipelines if their announcement-history is being inspected.
-
-**Approach traces to** the WPF technique described by Kelly Ford in his UIANotifications demo (https://github.com/kellylford/TheWorkBench/tree/main/UiaNotifyDemo). The WinForms equivalent uses `AccessibleObject.RaiseAutomationNotification` instead of WPF's `UIElementAutomationPeer.RaiseNotificationEvent`, but the underlying UIA event is the same. DbDo had a UIA path internally already (used in its Narrator fallback inside `sayViaUia`), but it was not exposed for direct caller invocation and it hardcoded the `All` processing mode (2); the new methods give callers explicit control over the polite-vs-interrupting choice.
-
-**New menu command Test-UIA Speech** under Help, no chord. Invokes `LiveRegion.sayUiaString` with a known test message and then displays an explanatory dialog so the user can compare its behavior to Test-Reader (which prefers JAWS COM and NVDA controller-client paths). Useful for diagnosing which speech path reaches a particular reader configuration.
-
-## v1.0.75
-
-**Inix format added as a supported import and export option.** The Inix format (extended .ini) is plain text with three powerful additions beyond classic .ini: multi-line string values (plain form starting after `key=` on its own line, or fenced form with `` ` `` or `"""` delimiters); sections that can be either a dictionary of dictionaries (named sections like `[Replace dog with cat]`) or a list of records (anonymous `[]` or numbered `[RecordNNN]`); and an implicit `[Global]` section for top-level keys before the first explicit section. No escape characters, no doubled quotes, no backslash sequences — values are stored verbatim. The format is the work of Jamal Mazrui in the KeyLine toolkit; DbDo adopts it as another import and export format.
-
-DbDo's Export Data now writes .inix as a list-of-records file, choosing the leading-zero width on the `[RecordNNN]` section name so that ASCII sort of section names matches numeric order: 5 records use `[Record1..5]`, 99 records use `[Record01..99]`, 999 records use `[Record001..999]`. NULL values are omitted from a record (no `key=` line at all), rather than written as an empty value. The output uses UTF-8 with BOM and CRLF line endings, the same as DbDo's other text-file outputs.
-
-Import Data now accepts .inix files and inserts each section's pairs as a row in the current table. Keys that don't match a column on the target table are silently skipped (matching how the Markdown import handles unknown columns). The implicit `[Global]` section is treated as document metadata and skipped when the file has more than one section, which is the typical case for table-shaped .inix files.
-
-**One new static class on `DbDo.cs`: `InixCodec`.** Public API:
-
-- `static List<Section> read(string sPath)` — parses an .inix file.
-- `static void writeAsConfig(string sPath, List<Section> lSections)` — writes named-section .inix.
-- `static void writeAsTable(string sPath, List<string> lFields, List<Dictionary<string,string>> lRows)` — writes list-of-records .inix.
-
-The codec is independent of `DbDoManager`, so other tools or scripts in the DbDo ecosystem can use it as a standalone format library.
-
-**New section "The Inix file format" in DbDo.md** documents the format with examples covering all three forms (plain multi-line, fenced multi-line, list-of-records), the comment syntax including `[;Section]` for commenting out a whole section, the implicit `[Global]` section, and the use cases.
-
-**README updated** to state DbDo's positioning goal explicitly: to be the most screen-reader-accessible and keyboard-accessible general-purpose relational-database manager available. The accessibility consideration is the design, not a layer applied on top.
-
-## v1.0.74
-
-**Two FileDir-style mark-and-move chords retired** to eliminate conflict with the data list's type-to-search. The chord `>` (Shift+Period) had been "Mark and next"; the chord `<` (Shift+Comma) had been "Unmark and next." Each had an alternate binding that's free of typeahead-search conflict, so retiring them costs nothing functionally. The surviving mark-and-move chords:
-
-- **Shift+DownArrow** — Mark and next
-- **Shift+UpArrow** — Mark and previous
-- **Alt+Shift+DownArrow** — Unmark and next
-- **Alt+Shift+UpArrow** — Unmark and previous
-
-Each of these is safe in the data list because Shift+arrow has no native meaning on a single-select ListView, so the chord can't conflict with typeahead-search (which only consumes printable characters).
-
-**Audit of remaining typeahead-search conflicts:** fifteen Shift+letter commands are still bound, none with an alternate chord. They are: Say-Path (Shift+P), Say-Yield (Shift+Y), Say-Marked (Shift+M), Say-Notes (Shift+N), Say-Tags (Shift+T), Say-Kin (Shift+K), Say-Added (Shift+A), Say-Cell (Shift+C), Say-Filter (Shift+F), Say-Id (Shift+I), Say-Look (Shift+L), Say-Related (Shift+R), Say-Url (Shift+U), Window-Summary (Shift+W, still a deferred stub), and Sort-Object (Shift+S, the multi-column Custom Sort). Each is the only binding for its command. Resolving the conflict requires either accepting that Shift+letter typeahead is unavailable in the data list (the current state) or moving the Say-X family to a different modifier set, which would break the mnemonic that the user deliberately chose for Shift+letter assignments. **The user's question — "are there any printable characters being used as hotkeys which do not have another hotkey that does the same thing?" — has the answer: yes, all fifteen Shift+letter hotkeys listed above.** Resolution deferred for user decision since the trade-off is a matter of design preference, not a technical bug.
-
-**Indexes auto-created on sortable standard columns.** `ensureRecommendedIndexes` already created `CREATE INDEX IF NOT EXISTS` on foreign-key columns and the `marked` column. v1.0.74 extends the criteria to cover the standard columns that are reachable via Alt+letter Sort-by hotkeys plus the timestamp columns commonly used as sort targets: `look` (Alt+L), `tags` (Alt+T), `url` (Alt+U), `added`, `updated`. The id column already has SQLite's implicit rowid-alias index, so it's excluded. Index names follow the existing convention `idx_<table>_<column>`. The IF-NOT-EXISTS guard keeps the operation idempotent across opens; databases opened before v1.0.74 will get the new indexes added the next time they're opened in v1.0.74 or later.
-
-## v1.0.73
-
-**Database Summary (Alt+D)** replaces the stub from v1.0.67. A read-only memo dialog opens with one line per table, each followed by an indented list of related tables — parents (where this table's rows point to another table) and children (where another table's rows point back). Every name carries a record count in parentheses. The currently-open table is listed first so the user opens the dialog already on the table they're thinking about; the rest follow alphabetically. Format example:
-
-```
-classes (3 records)
-  parent: teachers (3)
-  child:  enrollments (3)
-
-enrollments (3 records)
-  parent: classes (3)
-  parent: students (3)
-
-students (3 records)
-  child:  enrollments (3)
-
-teachers (3 records)
-  child:  classes (3)
-```
-
-The relation analysis follows DbDo's column-naming convention (column `<other>_id` references table `<other>s`) rather than walking `PRAGMA foreign_key_list`, so the same algorithm works for .db, .xlsx, .csv, and any other tabular source where the convention has been adopted. Plain text throughout — no "schema," "primary key," "FK," or other database-internals language. The chord moved from the v1.0.67 stub's `Shift+D` to `Alt+D` per the user's spec; `Shift+D` is now free.
-
-**Find-in-pick-list: Control+J, F3, Shift+F3.** Pick-list dialogs (Choose Table, Choose Database, Alternate Menu, Pick Field) now have the same find-and-advance chords as the data list. Control+J prompts for a case-insensitive substring; F3 advances to the next match wrapping at the end; Shift+F3 retreats wrapping at the start. The substring persists across F3 presses for as long as the dialog is open. Implementation: a KeyDown handler attached to every ListBox added via `addListBox` / `addPickBox`, plus a single `sListSearchTerm` field on the `LbcDialog` that holds the most-recent substring. The dialog used by Control+J is a tiny vanilla Form (one Label, one TextBox, one OK button, one Cancel button) rather than a nested LbcDialog — avoids event-routing complications when an LbcDialog hosts a ListBox that itself spawns a search dialog. The chord mapping mirrors the data list's: Control+J = Jump-to (find first match from top), F3 / Shift+F3 = Find-Next / Find-Previous.
-
-**One new helper on `DbDoManager`:** `countRowsOfTable(string sTable)` returns the row count via `SELECT COUNT(*) FROM <table>`, or -1 on any error. Read-only; doesn't disturb the current recordset's position, filter, or sort. Used by Database Summary; available to other consumers that want a cheap row count without opening a recordset.
-
-## v1.0.72
-
-**House style applies to developer documentation too.** The lowercase-url convention from v1.0.71 now reaches code comments and the History.md entries. Thirteen code comments in DbDo.cs had "URL" lowercased to "url"; History.md had two cases corrected (Wikipedia URLs → urls, URL-encoding → url-encoding). Variable names continue to use Camel Type casing — `sUrl`, `lUrls` — since variable naming follows a separate convention.
-
-**Three additions to the Terminology section in DbDo.md:**
-
-- "Database" used broadly — covers .xlsx, .csv, and .db. SQLite .db is the default for full functionality (triggers, generated columns, foreign-key drill, the standard-column convention); other formats are bridged via the Import Data and Export Data commands with as much of the listview experience preserved as the format supports. Standard columns can't be assumed on .xlsx or .csv tables; commands that use them already check via `hasField` and announce a clear refusal when absent.
-- Key-name convention — DbDo follows the Freedom Scientific / JAWS names: Control, Alt, Shift, Enter, Escape, UpArrow, DownArrow, F1-F12, Apostrophe, Asterisk, and so on. Combinations written with `+` and no spaces. The convention matches what JAWS announces aloud when a key is pressed.
-- Camel Type for code — DbDo's source follows the Camel Type style; the full specification is in `Camel_Type_C#.md` (markdown source) and `Camel_Type_C#.htm` (Pandoc-rendered HTML, new in this build). The build pipeline now generates the HTML alongside `DbDo.htm` and `History.htm`; the installer bundles both.
-
-**Standard-column accesses audit.** A fresh audit of `db.getFieldValue("look")`, `db.getFieldValue("notes")`, etc. confirmed all such accesses are systematically guarded: either by an explicit `db.hasField(...)` check in the preceding lines (the Say-X family, Mail Record, Open Url) or by a try/catch with graceful fallback (loops that walk rows for batch operations, where one missing field shouldn't abort the whole loop). No unguarded paths would error on .xlsx / .csv tables.
-
-## v1.0.71
-
-**"url" lowercase as ordinary English.** Per the user's house style: write **url** in lowercase as a regular English noun in prose (sentences, dialog labels, tooltips, status-bar messages, live-region announcements that aren't sentence-initial), and **Url** in title case where title-casing applies (command names like Open Url and Say Url, menu labels like "Sort by Url"). The convention follows the same path natural English took with *laser*, *radar*, *scuba*, and *sonar* — words that began as acronyms but settled into lowercase ordinary nouns once the original expansion stopped being foreground knowledge for most users. Most people who type a url into their browser have never thought about what the letters stand for; calling the thing a "url" rather than a "URL" matches lived experience. Also matters for screen readers: "URL" gets spelled out as three letters (U-R-L), while "url" reads as one syllable (earl), which is faster and less interrupting in the audio stream for frequently-issued commands like Open Url and Say Url.
-
-**User-visible strings normalized:** six places in `DbDo.cs` had uppercase URL in user-facing text. All six lowercased:
-
-- Open Cell Value menu label: "(URL or path)" → "(url or path)"
-- Open Cell Value column-picker tooltip: "opens the URL, file path, or folder path" → "opens the url, file path, or folder path" (the same string also had "current row" → "current record" applied per the v1.0.70 terminology rule)
-- Open-Cell "not a match" announcement: "Not a URL, file, or folder" → "Not a url, file, or folder"
-- Extract Regex dialog label: "pulling emails, URLs, or IDs" → "pulling emails, urls, or IDs"
-- Open Url failure MessageBox title text: "Could not open URL" → "Could not open url"
-- Self-update notification body: "The URL is:" → "The url is:"
-
-Two more in `DbDo.md` prose normalized:
-
-- "open as URL" / "URL or a file path" in the Open Cell Value section → "open as url" / "url or a file path"
-- "URLs" in the Extract Regex description → "urls"
-
-Code comments containing "URL" were left alone — those are developer-facing and the lowercase-url convention is a user-facing style rule.
-
-**A new subsection in DbDo.md's Terminology section** articulates the convention with two paragraphs: one explaining the laser/radar/scuba lineage and one explaining the screen-reader speech consideration. The convention is now documented so future contributions (and future Claudes) know the house style.
-
-**Command names unchanged:** Open Url, Say Url, Sort by Url, Sort-ByUrl / Sort-ByUrlReverse canonical names — all keep their title-case "Url" because title-casing applies to those layers (menu labels, canonical PowerShell-style verb names).
-
-## v1.0.70
-
-**Terminology rule formalized and applied.** After researching how end-user database products handle the "row vs record / column vs field / cell" naming question (Microsoft Access, FileMaker Pro, dBASE / FoxPro, the ADODB API all favor record / field for end-user-facing commands; PostgreSQL / SQL Server / Oracle documentation favors row / column; DBeaver uses both depending on the view mode — "Table view" vs "Record view"), DbDo now articulates and enforces a deliberate context-driven mixture:
-
-- **Record** for actions that treat a row as a complete entity (New, Edit, Delete, Copy, Append, Mail, Mark, Unmark, Find, Jump). End-user-friendly, matches every dominant end-user database product, and matches ADODB's own internal vocabulary.
-- **Cell** for actions on a single value at the row-column intersection (Edit Cell, Copy Cell, Append Cell, Open Cell, Say Cell). Used when the user is operating at the listview's grid crosshair.
-- **Column** for actions that sweep vertically through one attribute (Sort by Column, Replace Column, Statistics from Column, Output Graphics, Select Columns, Sort-by-X shortcuts). Used when the user is operating on one attribute considered across all records.
-- **Field** for named attributes in a vertical-stack dialog (the Edit Record / New Record dialogs lay out one field per line; "column" would force mental translation back to the listview view, so "field" reads naturally there). Also used for individual attributes referred to by name: the `url` field, the `notes` field.
-- **Row** restricted to geometric / spatial references and screen-reader navigation announcements ("Row N column M," "Table has no rows," "Go to Row," "20 of 25 rows shown"). Avoid in command names; use "Record" instead.
-- **Table** for the schema-level object as a unit of navigation.
-
-The principle behind these choices: *the noun matches the layout the user sees when invoking the command*. In the listview's grid, the user sees rows, columns, cells. When the user opens an Edit Record dialog, the layout rotates 90 degrees — fields stack vertically — and "column" would force a mental translation, so we say "field" instead. When the action treats the whole record as one thing, "Record" reads naturally regardless of layout.
-
-**Specific user-facing changes:**
-
-- `Copy-Row` command renamed to `Copy-VisibleCells` ("Copy Visible Cells as TSV to Clipboard"). This differentiates it from `Copy-Record` (which copies ALL fields including hidden ones); the new name communicates the actual difference — Copy Record gets the full record, Copy Visible Cells gets only what's in the listview. `copy-row` remains as a backward-compatible dot-prompt alias.
-- `Invert Marked` parenthetical: "(toggle every row)" → "(toggle every record)"
-- `Mark All` and `Unmark All` parentheticals: "(every row in filtered view)" → "(every record in filtered view)"
-- `Copy Record` parenthetical: "(current row to clipboard)" → "(current record to clipboard)"
-- `Mail Record` parenthetical: "(from current row)" → "(from current record)"
-- `Open Url` parenthetical: "(current row's url column)" → "(current record's url field)" — also fixes the inner noun: the `url` attribute is named, so "field" not "column."
-- Seven Say-X menu labels normalized: Say-Notes / Say-Tags / Say-Added / Say-Id / Say-Look / Say-Related / Say-Url all changed from "current row's X" patterns to "current record's X" patterns, with the redundant trailing "field" word removed.
-
-**New "Terminology" section in DbDo.md** (immediately after "How DbDo is organized") documents the rule with examples and acknowledges that users who prefer SQL-canonical vocabulary can use the dot-prompt aliases (`find`, `new`, `edit`, `delete`, `copy`, `mark`, `unmark`) which use SQL-style verb naming. The acknowledgment matters: forty-plus years of database work spans both vocabulary traditions, and a single user may shift between them depending on whether they're writing SQL or operating the listview by keyboard.
-
-## v1.0.69
-
-**The wave-2 commands from the v1.0.65 spec are complete.** Thirteen new commands wired up in this build, finishing the last pending block:
-
-- **Append Record (Alt+Shift+C)** — like Copy Record but appends to the existing clipboard contents (separator: blank line). Each record renders as "field: value" lines so the clipboard accumulates several rows in human-readable form.
-- **New Copy (Control+Shift+N)** — duplicates the current row. Opens the New Record dialog pre-filled with the current row's distinct field values; the user reviews, edits, and OK inserts as a new row. The `unq` column is cleared in the pre-fill since stored generated columns must be unique.
-- **Mail Record (Control+Shift+M)** — scans the current row for an email-like column (containing 'email', 'e_mail', or 'mail' in the column name), then launches the system mail client via `mailto:` with the subject populated from `look` and body from `notes`. Uses `Uri.EscapeDataString` for proper url-encoding of subject and body per RFC 6068.
-- **Open New Recordset (Control+Shift+O)** — prompts for a SQL SELECT or WITH statement and opens the result as a read-only recordset. Find, Filter, Sort, Say-X all work; Mark, Edit, Delete refuse because the result has no table identity. Useful for ad-hoc views that don't justify creating a permanent SQLite VIEW. New method `openSqlRecordset` on `DbDoManager` does the work; calls `oRecordset.Open(sql, conn, adOpenStatic, adLockReadOnly, adCmdText)` against ADODB, sets a synthetic current-table name `(ad-hoc SELECT)` so dialogs and status bars have something to display.
-- **Eight Sort-by-standard-column shortcuts.** Each pair Alt+letter / Alt+Shift+letter sorts by a fixed standard column ascending or descending: Alt+I / Alt+Shift+I = Sort by Id (the table's actual primary key, resolved via `actualPrimaryKey`), Alt+L / Alt+Shift+L = Sort by Look, Alt+T / Alt+Shift+T = Sort by Tags, Alt+U / Alt+Shift+U = Sort by Url. Convenience aliases over Sort-Object so the user doesn't have to pick the column through a dialog for the standards that always exist on DbDo-convention tables. All eight thread through a single helper `sortByFixedColumn` that sets `db.sort` and refreshes.
-
-**Chord conflict cleanup, three resolutions:**
-
-- Three `Alt+letter` aliases were removed: `Alt+T → Measure-Table`, `Alt+C → New-Chart`, `Alt+L → Select-Table`. Each of those chords is now the primary chord for one of the new Sort-by-X commands (or Append Cell in the Alt+C case). Measure-Table, New-Chart, and Select-Table retain their menu entries with their canonical chords (F4 for Select-Table; no chord for the other two — reachable via the menu).
-- **Append Cell moved from Shift+A to Alt+C** to resolve a silent chord collision with Say-Added (Shift+A, added in v1.0.67). WinForms registers only the last menu item assigned to a chord, so the prior assignment quietly clobbered Say-Added; the move puts Append Cell on the chord the user actually intended.
-- **Copy Cell moved from Shift+C to Control+C** to resolve a similar silent collision with Say-Cell (Shift+C, added in v1.0.67). The user's spec was `Control+C = Copy Cell` and `Shift+C = Say Cell`; both are now in effect.
-
-**Still pending:** the deferred trio (Database Summary on Shift+D, Window Summary on Shift+W, Pick Value on Control+F2) still have their "deferred; not yet implemented" stubs. Each chord is reserved for the eventual real implementation.
-
-## v1.0.68
-
-**Northwind and Chinook adopt the v1.0.66 standard-column extensions.** Both bundled "canonical" sample databases were upgraded in place to match DbDo's full standard-column convention. Discovery: both already had `<table>_id` primary keys, `added` / `updated` timestamps, `notes`, `tags`, `marked` columns, and (most usefully) `look` and `unq` were already present as `STORED GENERATED` columns computed from the substantive fields. The `look` column in `northwind.db::categories` for example is `rtrim(iif(length(name)>0, name || ' | ', '') || iif(length(description)>0, description || ' | ', ''), ' | ')` — exactly the right pipe-joined display nickname pattern. The only work for v1.0.68 was to **add `url` (TEXTLINE)** and **upgrade `notes`/`tags` from `TEXT` to `TEXTMEMO`** so DbDo's Edit Record dialog renders the multi-line memo widget. The substantive columns (company, contact, city, country, phone for Northwind customers; name, title, artist_id for Chinook artists; etc.) are preserved verbatim.
-
-Per the user's clarification this turn, *"additional columns in the canonical databases do not have to be displayed."* Three columns moved from "visible by default" to "hidden by default" so the listview matches the canonical schemas and isn't cluttered: `url`, `tags`, `notes` now join `added`, `updated`, `marked`, `look`, `unq` in DbDo's `StandardHiddenColumns` set. Users who want any of those visible in their own databases can use the Select Columns command (Alt+S, v1.0.66) to override per-table; the override persists to DbDo.ini via the `t<n>_selectlist` mechanism added in v1.0.66.
-
-**Online documentation links for canonical samples.** The "Bundled sample databases" section of DbDo.md now includes external links so users can learn more about the canonical Northwind and Chinook schemas and their broader uses:
-
-- Northwind: Microsoft Learn, the official `microsoft/sql-server-samples` GitHub repo, and Wikipedia.
-- Chinook: Luis Rocha's `lerocha/chinook-database` reference repo, plus the SQLite Tutorial walkthrough.
-
-Both descriptions now explicitly enumerate DbDo's adaptations to make clear they're minimal: same substantive columns, snake_case naming on the integer primary keys, standard columns appended, TEXTMEMO declared on notes/tags. The Foxbase-and-Clipper-era principle survives: real databases used for real work need certain things (timestamps, look-labels, free-text notes); DbDo's standard columns formalize those needs without forcing users to redesign canonical sample schemas.
-
-**Mechanics of the upgrade.** Each table got `ALTER TABLE … ADD COLUMN url TEXTLINE`. SQLite doesn't natively support changing a column's declared type, so the notes/tags upgrade used the standard "rebuild dance": copy the original CREATE TABLE SQL, regex-substitute `notes text` → `notes TEXTMEMO` (and same for tags), CREATE the new table under a temporary name, INSERT-SELECT the data, DROP the original, RENAME the new. Generated columns (`look`, `unq`) carried over correctly since their definitions live in the CREATE TABLE statement itself. PRAGMA `table_xinfo` was the key to discovering that the standards were already present as generated columns — `table_info` hides them.
-
-**Pending for a later build:** Append Record (Alt+Shift+C), New Copy (Control+Shift+N), Mail Record (Control+Shift+M), Open New Recordset (Control+Shift+O), the Alt+letter "X Order" variants for id/look/tags/url. These are the remaining wave-2 commands from the v1.0.65 spec.
-
-## v1.0.67
-
-**Sort Records (Alt+Shift+S).** New command: sorts the current view by the column under the virtual cursor. A single-checkbox LbcDialog asks "Ascending order (otherwise descending)" with the checkbox OFF by default — the user's spec for this command. The resulting expression (`<column> ASC` or `<column> DESC`) is assigned to `db.sort`, which routes through to the underlying ADODB.Recordset's `Sort` property. Complements the existing Custom Sort (Shift+S, multi-column dialog) and Sort Ascending/Descending by Column (Alt+A/Alt+Shift+A, prompts for column): Sort Records uses the current virtual column without prompting, making it the fastest sort gesture when the user is already navigating in the column they want to sort by.
-
-**Bulk mark operations.** Three new commands all of which act on the current filtered view:
-
-- **Mark All (Control+A)** — UPDATE the `marked` column to 1 for every row in the filtered view. WHERE clause is the active ADO filter; if no filter is active, every row in the table is updated.
-- **Unmark All (Control+Shift+A)** — same, marking to 0.
-- **Invert Marked (Control+I)** — toggle via `CASE WHEN marked IS NULL OR marked = 0 THEN 1 ELSE 0 END`.
-
-All three refuse with a clear message if the current table is a view (read-only) or lacks the `marked` column. Each speaks the affected row count via the live region.
-
-**Delete Without Confirmation (Control+Shift+D).** New command paired with Delete Record (Control+D, which uses the LbcDialog confirmation). The destructive variant speaks the row's `look` value (or primary-key position if look is empty) BEFORE deleting, so the screen-reader user gets explicit confirmation of what just happened even without a preceding dialog.
-
-**Open Url (Control+Shift+U).** New command: opens the current row's `url` column with the system default handler (browser, mail client, file opener) via Process.Start. Convenience chord that saves the user from having to navigate the virtual cursor onto the url cell first and then issue Open Cell Value.
-
-**Seven new Say-X family commands.** Each speaks one piece of state without changing recordset position; long values get the LbcDialog memo-box on double-press: Say Added (Shift+A), Say Cell (Shift+C), Say Filter (Shift+F), Say Id (Shift+I), Say Look (Shift+L), Say Related (Shift+R), Say Url (Shift+U).
-
-**Deferred stubs reserved on their chords.** Database Summary (Shift+D), Window Summary (Shift+W), and Pick Value (Control+F2) each open as menu entries with handlers that announce "deferred; not yet implemented" via the live region. Reserving the chords keeps the menu structure stable so the user can discover the planned commands and the mnemonics don't drift when implementation lands.
-
-**One shortcut collision fix.** Say-YieldMarked (line 9035 in the menu builder) had previously been assigned `Shift+Y`, which is also Say-Yield's chord; WinForms shortcut registration only keeps the last one. Removed the duplicate chord — Say-YieldMarked is now reachable via the menu only.
-
-**Still pending for a later build:** Append Record (Alt+Shift+C), New Copy (Control+Shift+N), Mail Record (Control+Shift+M), Open New Recordset (Control+Shift+O), the Alt+letter "X Order" variants for id/look/tags/url; whether `northwind.db` and `chinook.db` should also adopt the new standard-column schema.
-
-## v1.0.66
-
-**Chord layout adjustments to the v1.0.65 wave.** Three commands moved chord positions per the user's revised spec, plus one new command slot reserved for v1.0.67.
-
-- **Alt+S = Select Columns** (formerly "Choose Visible Columns" at no chord). Choose which columns appear in the listview. The same per-table select-list mechanism that existed before — now reachable via a chord that suits the user's mental model: S for Select.
-- **Alt+G = Generate Statistics** (formerly Alt+S "Statistics from Column"). Statistical summary of the current virtual column.
-- **Alt+O = Output Graphics** (formerly Alt+G "Graphics Output"). Plot the current virtual column.
-- **Alt+Shift+S** reserved for the v1.0.67 new "Sort Records" command (sort by current virtual column, with an Ascending checkbox defaulting to off).
-
-**Find searches all columns, not just displayed.** Per the v1.0.65 spec the user reiterated this turn: Find, Reverse Find, Extract with Regex, Regex Find, and Reverse Regex Find now walk the FULL field set when searching, so hidden columns like `notes`, `tags`, `url`, and the bookkeeping timestamps are reachable. The Replace and Jump families still operate on the current virtual column only. Touched `findAcrossColumns`, `findRegexAcrossColumns`, and `extractRegexClicked`; each previously called `getDisplayFieldNames()` and now calls `getFieldNames()`.
-
-**Standard-column schema refresh for three bundled databases.** `sample.db`, `collection.db`, and `cellar.db` rebuilt with the v1.0.66 standard-column sequence: `<table>_id, added, updated, url, tags, notes, look, unq`. The new `url` column carries SQLite declared type `TEXTLINE` so DbDo renders a single-line input box in Edit Record; `tags` and `notes` carry `TEXTMEMO` so they get the multi-line memo widget. Each row's data was rewritten to populate the new look/url/tags/notes fields with real content — sort names and Wikipedia urls for the music collection, producer websites for the wine cellar, school emails for the students/teachers. The two textbook databases (`northwind.db`, `chinook.db`) were left untouched to preserve their canonical adapt-of-canonical-SQL-sample identity; ask if you want those regenerated too.
-
-**Select-list persistence to DbDo.ini.** The per-table column selection set via Alt+S now survives across sessions. `RecentFiles.TableState` gained an `sSelectList` field; `loadSection` reads `t<n>_selectlist` from the section; `saveAll` writes the same key; `recordAllTableStates` pulls from the manager's `TableSettings.sSelectList` cache; `seedTableSettings` accepts the new parameter and restores the manager's cache when the database is reopened.
-
-**ADODB API confirmation for Filter and Sort.** The user asked that Find, Sort, and Filter use the ADODB API as much as possible, translating user input into ADODB syntax. The good news: this is already how Filter and Sort work. `viewSelectClicked` calls `buildFilterExpression` which translates the user's `(text, column, matchMode)` triple from the Filter Records dialog into ADODB-syntax predicates (`col LIKE '%text%'`, `col = 'text'`, OR-chained across columns when "All columns" is the column choice). `viewFormatClicked` translates `(column, ascending)` from the Custom Sort dialog into `col ASC` or `col DESC`. The translated expressions are then assigned to `db.filter` and `db.sort`, which are properties that route through to the underlying ADODB.Recordset's `Filter` and `Sort` (the dynamic recordset object's `.Filter = value` and `.Sort = value` setters). Find is the one outlier: multi-column substring search cannot be expressed as a single ADODB predicate efficiently (ADO's `Find` method only supports one column), so Find walks rows in user-space via `absolutePosition` increment and field-by-field inspection. The new "search all columns" behavior preserves this user-space walk pattern but iterates `getFieldNames()` instead of `getDisplayFieldNames()`.
-
-**Planned for v1.0.67:** the new Sort Records command (Alt+Shift+S) with an Ascending checkbox defaulting to off; the remaining v1.0.66 wave-2 new commands (Mark All, Unmark All, Invert Marked, Mail Record, New Copy, Open Url, Open New Recordset, Append Record, Delete Without Confirmation, Say-X family completions); decision on whether to regenerate `northwind.db` and `chinook.db` with the new standard-column schema.
-
-## v1.0.65
-
-**Hotkey rebinding — first wave (chord moves on existing commands).** Twenty-nine chord and label changes applied to existing commands, implementing the chord layout the user requested for v1.0.65. Highlights:
-
-- **F2 is now Edit Cell** (single-field editor for the current virtual cell). Edit Record moves to Control+E. Shift+F2 is freed.
-- **Control+G = Go to Record** (by absolute position). Was Shift+G.
-- **Alt+S = Statistics from Column** (formerly Describe Column / Measure-Column). Was Control+Shift+D. The Control+Shift+D slot is now reserved for Delete Without Confirmation, coming in v1.0.66.
-- **Control+Shift+E = Extract with Regex.** Was Alt+E.
-- **Alt+Shift+F = Filter Records.** Was Shift+F. Shift+F reserved for Say Filter, coming in v1.0.66.
-- **Shift+P = Say Path.** Was Alt+P.
-- **Shift+Y = Say Yield.** Was Alt+Y.
-- **Shift+M = Say Marked.** Was Alt+Shift+M.
-- **Alt+G = Graphics Output** (formerly Plot Column / New-Plot). Was Control+Shift+P.
-- **Alt+Shift+X = Toggle Extra Speech.** Was Alt+Shift+S.
-- Several Sort commands relabeled: Sort-Ascending is now "Ascending Order by Column" (Alt+A); Sort-Descending is "Descending Order by Column" (Alt+Shift+A); Sort-RecentFirst and Sort-OldestFirst lose their chords (Alt+D and Alt+Shift+D freed; user can sort by date column via Alt+A on the date column directly).
-- Several command labels normalized to match the new vocabulary: "Delete Record (with confirmation)", "Find Record (search all columns)", "Reverse Find", "Jump to Record (match in current column)", "Reverse Jump", "Find Regex (search all columns by pattern)", "Reverse Regex Find", "Replace Column (find and replace in current virtual column)", "Copy Record (current row to clipboard)".
-- New-Database and Step-InitialChange lose their chords (Control+Shift+N and Shift+I freed for new commands in v1.0.66).
-- Several Say-X commands lose their old chords (Shift+L, Shift+D, Say-Updated specifically): the slots are reserved for the new Say-Look / Database-Summary commands coming in v1.0.66.
-
-The legacy dbDot Shift+Letter dispatch at the form level was pruned: Shift+F, Shift+G, Shift+R no longer have parallel handlers (their underlying menu items moved or were freed). Shift+J (Jump-Record) and Shift+S (Custom Sort) remain in the parallel dispatch for backward compatibility.
-
-**Planned for v1.0.66 (new commands and stubs):** roughly sixteen new menu entries for Mark All (Control+A), Unmark All (Control+Shift+A), Invert Marked (Control+I), Mail Record (Control+Shift+M), New Copy (Control+Shift+N), Open Url (Control+Shift+U), Open New Recordset (Control+Shift+O), Append Record (Alt+Shift+C), Delete Without Confirmation (Control+Shift+D), Say Added (Shift+A), Say Cell (Shift+C), Say Url (Shift+U), Say id (Shift+I), Say Look (Shift+L), Say Filter (Shift+F), Say Related (Shift+R), plus the Alt+letter "X Order" variants for id/look/tags/url, plus the deferred trio (Database Summary, Window Summary, Pick Value) as "not yet implemented" stubs.
-
-**Planned for v1.0.67 (schema and search behavior):** the new `url` standard column (textline type) with the reordered standard-column layout `<table>_id, added, updated, url, tags, notes, look, unq`; the `tags`/`notes` upgrade to textmemo; the Find / Reverse Find / Extract / Regex Find / Reverse Regex Find search-all-columns behavior; the Replace and Jump current-column-only restriction; the Search Next / Search Previous unified family.
-
-## v1.0.64
-
-**Critical fix: Key Describer mode could not be exited.** When Key Describer was on, Control+F1 (the toggle chord) was intercepted by the describe-mode handler — DbDo announced the chord and its summary instead of running the toggle. Result: the user could enter Key Describer but never leave, blocking application exit short of killing the process. The fix adds the same escape EdSharp and FileDir use (EdSharp.cs line 1640, FileDir.cs line 7533): when in Key Describer mode, the toggle command itself ALWAYS executes regardless of mode state. Every other chord still gets described. The wording on toggle ("Key Describer On" / "No Key Describer", with "No" leading when the mode turns off so the screen reader announces the state change instantly) was already correct in v1.0.63 and is unchanged.
-
-**Planned for v1.0.65** (pending the next build cycle, per the spec received during v1.0.64 development): a roughly 40-chord rebinding to clean up the menu mnemonics around a verb-noun-pair pattern (Shift+Letter = Say-X, Alt+Letter = X-Order, Alt+Shift+Letter = Reverse-X-Order, Control+Letter = primary action on X, Control+Shift+Letter = secondary action on X); a new `url` standard column of type textline, with the standard-column order becoming `<table>_id, added, updated, url, tags, notes, look, unq` and `tags`/`notes` upgraded to textmemo type; Find / Reverse Find / Extract / Regex Find / Reverse Regex Find searching all columns (not just displayed); Replace / Regex Replace / Jump operating on the current virtual column only; Search Next / Search Previous supporting all three families (Find, Regex Find, Jump). Several commands deferred (Control+F2 Pick Value, Shift+D Database Summary, Shift+W Window Summary).
-
-## v1.0.63
-
-**EdSharp-style text-edit hotkeys in LbcDialog.** Inside every LbcDialog, single-line text inputs and multi-line memos now recognize a set of EdSharp-style hotkeys in addition to the standard Windows text-editing chords. The pattern is adapted from Jamal Mazrui's HomerLbc framework (`HomerLbc_40.js` lines 995–1162), which itself derives from EdSharp's text-editor conventions. Nine new chords: Control+C copies the current line when nothing is selected; Alt+C appends the current line (or selection) to the existing clipboard contents on a fresh line; Control+X cuts the current line when nothing is selected and speaks the next line as feedback; Alt+X cuts and appends; F8 marks the start of a selection at the caret; Shift+F8 completes the selection from that mark to the current caret; Control+F8 copies all text in the field; Alt+F8 speaks all text via the live region; Control+D deletes the current line and speaks the next line as feedback. None conflicts with standard control behavior — the Control+C / Control+X overrides only act when there is no selection (the standard Copy and Cut don't do anything without a selection); the F8 family, Control+F8, Alt+F8, and Control+D are unbound in standard WinForms TextBoxes; the Alt+ variants are unbound. Implementation lives on LbcDialog (not via TextBox subclassing): a form-level KeyDown handler with KeyPreview=true dispatches to twelve helper methods, gated by the focused control's Name prefix (`TextBox_` or `Memo_`) and a master enable flag `[Lbc] extraKeys` in DbDo.ini (default Y, cached on first read).
-
-**Two new hobbyist sample databases.** `collection.db` is a personal music collection — three tables (`artists`, `albums`, `tracks`) modeled on the data conventions refined by CLZ Music, MyMusicCollection, and Musicnizer over the past decade. Includes collector fields (rating, location, loan tracking) that distinguish a personal collection from the broader Chinook music-store data. Seeded with 8 artists / 16 albums / 22 tracks spanning rock, jazz, soul, classical, and electronic. `cellar.db` is a personal wine cellar — three tables (`wines`, `bottles`, `tastings`) modeled on CellarTracker, eSommelier, and VinCellar. The schema split separates wine identity (producer + vintage + varietal + region) from physical bottles (each with bin location, purchase price, source, status) from tasting notes (multiple over time). Seeded with 8 wines / 10 bottle lots / 4 tasting notes. New canonical Help-menu commands `Open-CollectionDatabase` (Open Music Collection) and `Open-CellarDatabase` (Open Wine Cellar) parallel the existing sample-database openers. Documented in DbDo.md's "Bundled sample databases" section.
-
-**Wine drink-window analytical query bundled as a script.** `Scripts/WineDrinkWindow.sql` is the standout analytical workflow from the wine-cellar research: for every wine in the cellar with bottles still held, compute years remaining in its drink window, sort by urgency (closest to end of window first), and classify each as too-young / in-window / past-peak. The kind of query that no flat list or spreadsheet can answer naturally — one ORDER BY clause and a JOIN against the bottles inventory. Demonstrates DbDo's value for hobbyist data: ad-hoc SQL serves real workflows.
-
-**Camel Type compliance for bundled `.js` script samples.** `CopyRowToClipboard.js` and `MarkRowsMatchingRegex.js` now follow Camel Type conventions verbatim: Hungarian-style type prefixes (`aFieldNames` for array, `sb` for StringBuilder, `iMarked` for integer, `regex` for Regex, `bMatch` for boolean), all variable declarations at the top of the script grouped alphabetically by type with type-lines themselves in alphabetical order (a < b < i < regex < s < sb), the constant `c_sPattern` with the required `c_` prefix, and `for each (sName in aFieldNames)` for-each iteration instead of integer-indexed loops. The DbDo.js support module was already Camel Type compliant and is unchanged.
-
-**Native dot-prompt syntax for bundled `.duo` script samples.** The `.duo` files previously used PowerShell-style canonical verbs (`switch-table`, `select-record`, `reset-filter`, `sort-object`, `say-path`, `say-status`, `say-tables`, `say-sortfilter`). They now use the natural single-word dot-prompt aliases (`table`, `filter`, `clear-filter`, `sort`, `path`, `status`, `tables-list`, `sort-filter`) — matching what users type interactively at the dot prompt. Either form still works because the dispatcher resolves aliases, but the natural form is shorter, more readable, and consistent with the rest of DbDo's dot-prompt vocabulary. The `.duo` starter template was also updated. `RecentOrders.duo` additionally replaces the invented `sort-recentfirst` (which didn't exist) with the standard SQL-style `sort order_date desc`. The Scripting section of DbDo.md was updated to make this convention explicit, with a recommended list of short forms.
-
-## v1.0.62
-
-**Key Describer now matches EdSharp and FileDir verbatim.** The Key Describer mode at Control+F1 had three behaviors that diverged from its EdSharp/FileDir model and made the feature unusable in practice: (1) toggling the mode opened a MessageBox confirmation dialog instead of announcing the new state to the screen reader; (2) when the mode was on and the user pressed a chord to be described, DbDo opened another MessageBox showing the chord/command pair instead of speaking the information; (3) the canonical verb was named `Trace-Command` (mirrored in user-visible status strings as "trace mode" and "Trace-Command mode"), which both leaked an implementation term into the UI and collided with the real PowerShell `Trace-Command` cmdlet.
-
-Studied EdSharp's `menuItem_Click` (line 1640) and FileDir's `ClickOrDescribe` method (line 7533) — both follow the same pattern: a static `KeyDescriber` boolean, a Control+F1 menu handler that just announces "Key Describer On" / "No Key Describer" via the live region (no dialog), and a gate at the top of menu-click dispatch that, when the flag is on and the click isn't the Key Describer menu item itself, speaks three pieces of information — command name, chord, summary — and *swallows* the click without firing the command. No MessageBox anywhere. No tracing terminology.
-
-DbDo now follows the same pattern. The `helpTraceCommandClicked` menu handler (Control+F1) toggles `KeyMap.bKeyDescriber` and announces the new state via `LiveRegion.say`. The `KeyMap.tryDispatch` path and the Shift+Letter handler both check `bKeyDescriber` and, when on, call `LiveRegion.say(command + ". " + chord + ". " + summary + ".")` — three pieces joined with sentence-ending punctuation for natural screen-reader pauses, in one utterance — and swallow the keystroke. The command does not run.
-
-The canonical verb is now `Switch-KeyDescriber`, matching DbDo's PowerShell-style verb-noun discipline (Switch- is an approved PowerShell verb for toggles, and KeyDescriber is the noun). The menu item's user-visible label is still "Key Describer" verbatim per the EdSharp/FileDir alignment principle. Dot-prompt aliases `trace`, `trace-command`, `key-describer`, `keydescriber`, `describe-key`, and `describer` all resolve to `switch-keydescriber` for backward compatibility. The dot-prompt cmd `cmdTraceCommand` is renamed to `cmdSwitchKeyDescriber`; the console echo also says "Key Describer On" / "No Key Describer" to match the live region. The field `KeyMap.bTraceMode` is renamed to `KeyMap.bKeyDescriber`.
-
-## v1.0.61
-
-**Primary-key heuristic now schema-first.** Opening Northwind and pressing Enter-Child on a `categories` row reported "Cannot determine the primary-key column for 'categories'." The fault was in the Enter-Child helper `computePrimaryKeyColumn`, which used naive `-s`-stripping to singularize a table name: `categories` became `categorie`, which has no matching column. The corrected helper now calls the existing schema-driven `actualPrimaryKey(sTable)` FIRST (which reads `PRAGMA table_info` on SQLite or the ADOX `Keys` collection on Access), falling back to the naming heuristic only when the schema lookup is unavailable. The heuristic itself was also fixed to handle the `-ies` → `-y`, `-ses`/`-xes`/`-ches`/`-shes` → drop `-es`, and plain `-s` → drop `-s` plural patterns. Either path now finds `category_id` from `categories`.
-
-**"Snippet" renamed to "Script" throughout.** The `Invoke-Snippet` command is now `Invoke-Script` (Alt+V still); `Save-Snippet` and `View-Snippet` (where they exist as dot-prompt or method names) become `Save-Script` and `View-Script`. The bundled sample folder `SampleSnippets` is now `SampleScripts`. The user-facing motivation: "script" describes what these files do (executable code in JScript .NET that drives DbDo via host objects), whereas "snippet" connotes a passive text fragment. EdSharp and FileDir use "Snippet" for their own paste-tag idiom which is different from DbDo's; the rename also disambiguates DbDo from the editors. Variable names like `miMiscInvokeSnippet` are renamed to `miMiscInvokeScript`. 135 occurrences replaced across the C# source, 44 in DbDo.md, 12 in History.md, 7 in the installer script.
-
-**Invoke-Script output now uses the LbcDialog memo box.** The script-output dialog was a `MessageBox` previously, which is unsuitable for line-by-line, word-by-word, or character-by-character exploration with a screen reader. Multi-line results (or any result containing an "ERROR:" marker) now display in the same `showInfoDialog` LbcDialog used by the speech-only commands' double-press: a read-only multi-line TextBox with an OK button. Short single-line results still use MessageBox since brevity matches that idiom. The `Test-Database`, `Measure-Field`, and `Invoke-Sql` commands have used the equivalent `HelpDialog.show` for multi-line output since earlier versions; Invoke-Script now matches the pattern.
-
-**Escape now activates OK in single-button LbcDialogs.** When `runWithButtons` is called with only one button (typically "OK", as in the confirmation-only memo dialog used by Invoke-Script's output and the speech-only commands' double-press), that one button is now wired as BOTH `AcceptButton` (Enter) AND `CancelButton` (Escape). Previously the user had to Tab to OK and press Enter or Space; Escape did nothing because no Cancel button was present. The fix matches user expectation that Escape always dismisses a modal dialog.
-
-**Help menu mnemonic is now Alt+H (was Alt+P).** The top-level Help menu was labeled `Hel&p`, which made Alt+P open it — a non-standard convention. The label is now `&Help`, matching every modern Windows app. Top-level menu mnemonics are now: Alt+F (File), Alt+E (Edit), Alt+N (Navigate), Alt+Q (Query), Alt+M (Misc), Alt+H (Help). Each is unique and matches the Windows convention.
-
-**Layout by Code section added to DbDo.md.** A new major section walks through the LbC approach DbDo uses for every dialog: the origin (Jamal Mazrui's AutoIt LbC of 2006, ported through wxPython, JScript .NET, and now C#), the conceptual model (bands, layout cursor, dialog units), why LbC matters for a screen-reader audience (tab order = call order, focus tips routed to status bar, memo-vs-AcceptButton coordination), the anatomy of an LbC dialog with a usage example, the full add-control vocabulary (`addLabel`, `addInputBox`, `addInlineInputBox`, `addMemoBox`, `addCheckBox`, `addListBox`, `addPickBox`, `addComboBox`, `addComboPickBox`, `addRadioButton`, `addNumericUpDown`, `addSeparator`), the two run methods (`runOkCancel` and `runWithButtons`), and the lookup-by-name pattern using `findControl` and the typed accessors. The section closes with a comparison against the original AutoIt LbC, noting which features were deliberately simplified in the C# port and which were preserved verbatim.
-
-**Tab and Shift+Tab now move the virtual cursor.** Earlier versions had a vestigial `iCurrentColumnIndex` state that Tab/Shift+Tab advanced, separate from the canonical `iVirtualCol` used by Set-Cell, Say-Column, Say-Position, and the Alt+Control+arrow chords. The Tab handler also did nothing in practice because WinForms ListView does not surface Tab as a KeyDown event by default. The fix wires `grid.PreviewKeyDown` to flag Tab (without Control) as an input key so the KeyDown handler actually fires, and the handler now calls `virtMoveTo(iVirtualRow, iNewCol)` — the same path the Alt+Control+arrow chords use. Single state, single announcement, single behavior. Control+Tab remains reserved for Switch-Table.
-
-**Say Clipboard command added (Alt+Apostrophe).** New speech-only command in the Query menu, mirrors FileDir's Alt+Apostrophe Clipboard. Speaks the current Windows clipboard text via the screen-reader live region; double-press opens the read-only memo dialog for line-by-line review of long pasted content. Empty and non-text clipboards announce that fact rather than going silent. The "Say" prefix is retained per DbDo's Say-X family convention (the prefix marks the command as speech-only, no visible side-effect; FileDir has no such family so its bare "Clipboard" label is unambiguous). Canonical verb `Say-Clipboard`. Pass-through configs `DbDo_JAWS.zip` and `DbDo.nvda-addon` extended with `Alt+Apostrophe=PassDbDoKey` and `kb:alt+'` so JAWS's default Alt+Apostrophe = "Say JAWS Version" gives way to DbDo's handler inside the data list.
-
-**EdSharp/FileDir-aligned menu names in the Help menu.** Five Help-menu items renamed to match the EdSharp and FileDir convention exactly, since the chord was already a match in each case: "Help Contents" → "Documentation" (F1); "Version History" → "History of Changes" (Shift+F1); "Toggle Key Describer Mode" → "Key Describer" (Control+F1); "Check for Update..." → "Elevate Version..." (F11); "About DbDo" → "About" (Alt+F1). Also renamed: the Alternate Menu command's label was previously "Command Picker (alternate menu)..." with a verbose parenthetical; it is now simply "Alternate Menu..." (the EdSharp/FileDir name, Alt+F10). The Misc-menu "Configuration Settings..." command is now "Configuration Options..." (Alt+Shift+C), again matching EdSharp/FileDir verbatim. The PowerShell verb-noun pairs (Get-Help, Show-History, Trace-Command, Elevate-Version, About-DbDo, Alternate-Menu, Edit-Configuration) remain available at the dot prompt and in logs but are not surfaced in the user-visible UI. The principle: when DbDo has a command that does what EdSharp or FileDir does and the chord matches, the menu label IS the EdSharp/FileDir label; the PowerShell synonym is for power users.
-
-A few user-facing DbDo commands deliberately keep their original (non-EdSharp/FileDir) labels because of meaningful domain-specific reasons: "Say Clipboard" keeps the "Say" prefix per the Say-X family marker; "Say Status" keeps the "Say" prefix for the same reason; "Table Properties" keeps the disambiguating "Table" qualifier since the bare "Properties" would be ambiguous in a database context (properties of what? the cell, the table, the database?); "Close Database" keeps its name because DbDo does not have multiple windows in EdSharp's MDI sense.
-
-## v1.0.60
-
-**Per-command summaries and descriptions.** Every menu item, dot-prompt verb, and dispatcher arm now carries a one-line summary and an optional multi-line description as metadata. The summary appears on the menu status bar when the item has focus, in the Alternate Menu (Alt+F10) inline after the verb, and in the Key Describer trace dialog (Control+F1) on its own line. The description, when present, appears in the Alternate Menu's detail pane and in the Key Describer trace. This mirrors the EdSharp and FileDir convention for command-self-documentation, exposing the metadata through three different surfaces (status bar, picker, trace) so users can discover what a command does without reading separate documentation.
-
-The summary follows a consistent voice: verb-first, plain text, one line, suggesting the chord where one exists. Examples: "Open a database file" (Open-Database), "Mark every row from the F8 anchor to the current row" (Mark-Range), "Speak the current sort and filter, or '(none)'" (Say-SortFilter). Commands without an explicit summary fall back to the menu label minus the ampersand mnemonic markers, so every command is at least minimally self-describing even when the metadata table has a gap.
-
-The implementation: `addItem` and `addItemLocal` gain two optional trailing parameters `sSummary` and `sDescription` (both default to `""`); the values flow into new `KeyMap.dCommandToSummary` and `dCommandToDescription` dictionaries keyed by canonical verb; menu items get their `ToolTipText` populated with the summary so screen readers announce it on accelerator-key landings; a `mi.MouseEnter` + `mi.Select` handler copies the summary into `lblStatus` on the form's status bar.
-
-**Version-string bump from v1.0.58.** The `BuildInfo.VersionString` constant was last set to `1.0.58` and stayed there through the v1.0.59 development cycle by oversight. The constant now reads `1.0.60` to match the headline, the installer's `AppVersion` is bumped the same way, and the History.md headline marks v1.0.60 as current.
-
-## v1.0.59
-
-Compaction summary of work staged through v1.0.59 (entered the public history retroactively when v1.0.60 was tagged):
-
-Documentation cleanup. The standard-field set is corrected: `observed` and `method` are removed; the documented set is now `<table>_id`, `added`, `updated`, foreign keys, distinct fields, `notes`, `tags`, `marked`, `look`, `unq`. The `sample.db` bundled with the installer is rebuilt to match this set while preserving its existing rows.
-
-Two additional sample databases ship: `northwind.db` (the classic Microsoft Northwind sales sample) and `chinook.db` (the classic Chinook music-store sample), both adapted to DbDo's standard column conventions. They are useful for exercising DbDo's parent-child drill against deeper relationships than the small `sample.db` provides. The Help menu has new one-keystroke commands to open each: **Open Northwind Sample** and **Open Chinook Sample**, parallel to the existing **Open Sample Database** command. All three open via the same code path as File > Open Database.
-
-`Camel_Type_C#.md` ships with the distribution, documenting the coding conventions used inside `DbDo.cs`. The conventions are updated to remove the `c_` prefix that was previously required for constants; constants now follow the same naming pattern as variables but are still declared on their own lines, distinguished by `const` or `static readonly` instead of by capitalization. The `o` prefix is reserved for COM objects only; managed-type instances use a class-name prefix.
-
-`DbDo.cs` is updated to conform to the revised conventions (`c_` removed; `o`-prefix usage adjusted) with the addition of two new Help-menu items (Open Northwind Sample, Open Chinook Sample) and a shared helper method `openInstallSampleDb` that the existing Open Sample Database command now also routes through, eliminating duplicated code.
-
-Three sample scripts ship in `{app}\SampleScripts\`: `DescribeTable.js`, `CopyRowToClipboard.js`, and `MarkRowsMatchingRegex.js`. On first access of the user's script folder (`%APPDATA%\DbDo\Scripts\`), DbDo copies any samples that aren't already there and writes a `.seeded` sentinel file so the seeding does not repeat on later launches. Deleting a sample does not cause it to reappear; deleting the `.seeded` file allows re-seeding (e.g. to recover a deleted sample, or to pick up new samples bundled in a future release). The samples are short, single-purpose, and modeled on the EdSharp script style: a read-only introspection demo, a current-row clipboard helper, and a regex-match-and-mark utility.
-
-**Speech-only commands and Shift+letter bindings reshuffled.** Seven Shift+letter chords now do focused per-cell, per-row work suited to screen-reader review: **Shift+A** appends the current virtual cell to the clipboard (two-CRLF separator, or just sets if the clipboard was empty); **Shift+C** copies the current virtual cell to the clipboard; **Shift+D** speaks the `updated` value in human-friendly local time (`December 14, 1963 at 5:42 AM`) — the underlying SQLite text is unchanged; **Shift+L** sweeps the current virtual column from the cursor downward; **Shift+N** speaks the current row's `notes` field; **Shift+T** speaks the current row's `tags` field. Shift+I remains Next Initial Change (the id is reachable via Show Record, Open Cell Value, or virtual cursor to the `_id` column). Say Marked moves from Shift+L to **Alt+Shift+M** (`M` for Marked). The prior Say Type (Shift+T) is dropped — Say Status already conveys the same context. Copy Row as TSV loses its Shift+A hotkey and now lives in the Misc menu without a mnemonic letter, per the Camel-Type rule that prefers no trigger letter to a mid-word one.
-
-**Double-press behavior changed.** Every speech-only command now follows a single rule, regardless of chord: one press speaks the text through the screen reader without moving keyboard focus; a second press of the same chord within two seconds opens an information dialog with a read-only multi-line textbox and an OK button, useful for reviewing long content. The previous "double-press spells character-by-character" convention is removed. The two-second window is deliberately wider than the JAWS and NVDA defaults (~500 ms) so a thinking pause between presses still counts as one gesture.
-
-**Per-table virtual-cell column is now remembered.** The cell under the Alt+Control+arrow cursor remembers its column (by name) and row, per table, both across table switches in a session and across sessions. Opening a database now seeds the in-session per-table cache from every previously-visited table's ini state, so switching to any one of them later restores its filter, sort, position, and virtual column — not just the table you land on first. F5 Refresh still resets to (row 1, first column) by design.
-
-The JAWS `.jkm` and NVDA add-on are updated to pass the new Shift+letter chords (Shift+A, Shift+C, Shift+N) and Alt+Shift+M through to DbDo.
-
-**Descriptive statistics for the current virtual column.** A new command, **Describe Column** (Control+Shift+D, `Measure-Column` at the dot prompt, in the Misc menu), walks the column under the virtual cursor and reports the statistics best suited to the data it finds. Numeric columns get Tukey's five-number summary (min, Q1, median, Q3, max) plus mean, sample standard deviation, range, IQR, mode (only when unambiguous), and a skew indicator derived from mean-vs-median against a fraction of the standard deviation. Date columns get earliest, latest, median, and span (rendered as days, then months and days, then years and months for long spans). Boolean-like columns (`0/1`, `Y/N`, `true/false`) get true and false counts with percentages. Text columns get unique count, shortest/longest/mean length, and a top-ten frequency table with counts and percentages. The report opens in the same read-only multi-line dialog used by the speech-on-double-press commands; Control+C inside the textbox copies the whole report. The choice of statistics follows the consensus in statistics teaching (Tukey's five-number summary plus mean and SD, the R `summary()` and SAS `PROC UNIVARIATE` defaults, pandas `describe()` for categorical) and the cognitive-accessibility finding that screen-reader users benefit more from linearized summary statistics than from raw data — Lundgard and Satyanarayan's MIT study on chart accessibility makes this point directly.
-
-**Graphical statistics for the current virtual column.** A second new command, **Plot Column** (Control+Shift+P, `New-Plot` at the dot prompt, in the Misc menu), is the graphical sibling of Describe Column. It runs the same data-type detection and produces an Excel chart matched to the dominant type. Numeric columns prompt for either a histogram (Sturges-binned column chart of the distribution shape) or an Excel 2016 box-and-whisker chart (which renders Tukey's five-number summary as a single compact shape). Date columns prompt for a timeline (line chart of counts by month, or by day for short spans), a counts-per-year column chart, or a counts-by-month-of-year column chart for seasonal patterns. Boolean columns auto-pick a pie of true/false proportions (binary proportions are pie charts' textbook use case). Text columns auto-pick a horizontal Pareto bar of the top 15 most frequent values, sorted by frequency descending. When only one chart shape fits the data type, DbDo generates the file directly without an intermediate dialog. The .xlsx file is written next to the database file with a name like `customers-region-pareto.xlsx` and opened in Excel. Plot Column requires Excel; it reuses the same late-bound COM scaffolding as the existing Frequency Chart command. The choice of chart shapes follows the standard recommendations from Tukey (box plot), Tufte's visualization principles (Pareto), the data-viz consensus that line charts are the default "change over time" shape, and Excel's native chart-type enumeration (`xlColumnClustered`, `xlLine`, `xlPie`, `xlBarClustered`, `xlBoxwhisker`).
-
-**Single-cell editor and Configuration Settings dialog.** A new command, **Edit Field** (Shift+F2, `Set-Cell` at the dot prompt, in the Edit menu) opens a small dialog with one labeled textbox for the current virtual cell — the cell under the Alt+Control+arrow cursor. F2 still opens the full-row editor; Shift+F2 is the fast path when you only need to change one value. Both editors share the per-field regex validation already enforced under `[Validation:<table>]` in DbDo.ini, so a configured pattern (e.g., `^[^@\s]+@[^@\s]+\.[a-z]+$` for an email field) is respected from either entry point.
-
-The **Configuration Settings** command (Alt+Shift+C, matching the EdSharp and FileDir convention; F12 kept as a legacy alias) is the renamed and extended Edit-Configuration dialog. It exposes the curated user-facing settings — UI mode, Command Echo — and adds a **"Field Validation..."** sub-dialog that lists the editable fields of the current table with one input per field for a regex pattern. The sub-dialog compiles each pattern as you save so it can warn on bad regex syntax. DbDo deliberately uses .NET regex (the established powerful pattern language already used by Find Regex) rather than inventing a separate dBASE-PICTURE-style or WinForms-MaskedTextBox-style mask vocabulary. Operational settings (`[Session]`, `[Folders]`, `[Keys]` overrides, etc.) are still in the same .ini file but not shown in the dialog; the "Open file..." button is the escape hatch for raw editing.
-
-The dot prompt picked up matching verbs for the new commands: `set-cell <column> = <value>`, `say-updated`, `say-notes`, `say-tags`, `say-column`, `append-cell`, `copy-cell`, `measure-column`, `new-plot`, `edit-configuration` (or `configuration`). The old `say-date` and `say-type` verbs (which corresponded to the dropped Shift+D / Shift+T speech commands) are removed.
-
-**F8 / Shift+F8 / Alt+F8 / Alt+Shift+F8 range-mark family.** Four new commands in the Edit menu parallel EdSharp's Start/Complete Selection family and FileDir's Start Tag or Untag / Complete Tag / Complete Untag, using DbDo's "Mark" terminology and two independent anchors. **Start Mark Anchor** (F8) and **Complete Mark to Anchor** (Shift+F8) form one pair; **Start Unmark Anchor** (Alt+F8) and **Complete Unmark to Anchor** (Alt+Shift+F8) form the other. Each pair operates on its own anchor, so the user can stage a mark range and an unmark range without one gesture clobbering the other. Both "Complete" commands are direction-agnostic — the range from anchor to current row is the same whether the anchor was set above or below. The anchors are transient form-local state: they reset on database close so a stale anchor never bleeds across files. Console verbs: `set-markanchor`, `set-unmarkanchor`, `mark-range`, `unmark-range`.
-
-**Say Position (Alt+Delete).** A new JAWS-style "say cursor position" command. Speaks the current virtual cell's column header and 1-based row number — for example, "Column: name, Row: 30." Speech-only; does not move focus. Single-press speaks; double-press shows the same text in the dialog used by the other speech-only commands. Console verb: `say-position`. The pass-through configs for JAWS (DbDo.jkm) and NVDA (DbDo.nvda-addon) are extended to forward F8, Shift+F8, Alt+F8, Alt+Shift+F8, and Alt+Delete to DbDo so its handlers always win over any default screen-reader behavior.
-
-**Say Sort and Filter (Shift+8).** A new speech-only command on the asterisk key (Numpad-asterisk works as a hidden alias). Speaks the active sort order and filter criteria for the current table, with explicit "(none)" markers when either is empty, so the user gets confirmation rather than silence. Console verb: `say-sortfilter`.
-
-**Dot prompt accepts any unique prefix.** The dispatcher now resolves typed verbs that are short unique prefixes of a canonical name, with hyphens and spaces interchangeable. So `first` resolves to `step-record-first`, `meas col` to `measure-column`, `step rec n` to `step-record-next`, and `config` to `configuration`. Where a prefix is ambiguous, the prompt prints the candidate list so the user can disambiguate by typing more characters. The expansion runs only after the existing alias table (resolveAlias) has had a chance, so the short single-character aliases like `n` (next) and `+` continue to work directly. The canonical-verb list lives in a single `s_aCanonicalVerbs` array near the dispatcher; new commands added in the future need a one-line entry there alongside their switch arm.
-
-**GUI vs CLI response analysis.** A new "GUI versus CLI response patterns" section in DbDo.md walks through the command families and documents how each behaves in each mode. The principle is "same data effect, mode-appropriate confirmation" — the GUI uses LbcDialogs, status-bar updates, and the LiveRegion; the CLI prints to stdout and reads from stdin. The few cases where a command does not reasonably apply in one mode (New-Plot in CLI, Switch-Focus and Enter-Console in CLI-only mode) are called out explicitly.
-
-**Say Kin (Shift+K).** A new speech-only command that announces the `look` field of every related record — both parents (reached by outbound foreign-key columns on the current row) and children (records in other tables whose FK points back to this row's primary key). Output is laid out as "Parents: <table>: <look>; <table>: <look>. Children: <table> (N): <look>, <look>, ..." for speech; double-press shows the same in the multi-line dialog, useful when a parent row has many children. Read-only and does not navigate — for an interactive jump to one related record, use Show-Related (Alt+Shift+R) as before. Console verb: `say-kin`; aliases `kin` and `say-related`. The mnemonic letter K stands for "kin" (relatives) since R (Related) is already taken by Clear Filter; the menu label leads with "Kin" to reinforce the chord.
-
-**Updated-timestamp triggers in the sample databases.** The bundled sample databases (`sample.db`, `northwind.db`, `chinook.db`) now carry one SQLite trigger per table that maintains the `updated` column automatically. Previously, the `updated` column defaulted to `current_timestamp` at INSERT time but was never bumped on UPDATE — the comment in the C# source claiming "SQLite triggers update 'updated' automatically" was aspirational rather than accurate. The new triggers fire `AFTER UPDATE FOR EACH ROW WHEN OLD.col1 IS NOT NEW.col1 OR OLD.col2 IS NOT NEW.col2 ...` for every substantive column. The `marked` column is deliberately excluded from the substantive set, so toggling a row's marked flag (Control+M / Control+U, or any of the F8-family range-mark commands) does NOT bump the timestamp — marking is a UI gesture for building a working set, not a content edit, and bumping the timestamp every time a user marks rows would scramble "sort by recently edited" for the very users most likely to mark. The `added`, `updated`, `look`, and `unq` columns are also excluded (they're either system-managed or stored-generated). The check uses `IS NOT` rather than `<>` for null-safety. The "Bundled sample databases" section of DbDo.md gets a new sub-section with the recommended trigger SQL for users creating their own tables.
-
-**Initial listview selection hardened.** The listview no longer leaves the first row unselected on table open. After `updateGrid` builds the rows, if the ADO recordset's `absolutePosition` is at BOF (≤ 0) but rows exist, DbDo now moves both the ADO cursor and the listview selection to row 1. Previously, ADO providers that opened the recordset at BOF could leave the user with rows visible but no selection, which broke commands that operate on "the current row." The invariant is now: if the table has at least one row, the listview always has exactly one selected, focused, visible row.
-
-The README, Announce, History, and DbDo reference documentation are revised to drop development-process narrative that does not affect users and to incorporate concept and language refinements from the project's manual announcement.
-
-## v1.0.58
-
-NVDA add-on rewritten to fix the v1.0.57 six-pack-silence symptom.
-
-First problem: bogus numpad identifier names. NVDA distinguishes numpad keys from six-pack keys at the gesture-identifier level. The v1.0.57 add-on bound names like `kb:alt+control+numpadRightArrow` and `kb:alt+control+numpadHome`, which do not exist in NVDA's identifier system. v1.0.58 uses the correct numeric identifiers: `numpad7` (Home), `numpad1` (End), `numpad9` (PageUp), `numpad3` (PageDown), `numpad8` (Up), `numpad2` (Down), `numpad4` (Left), `numpad6` (Right), `numpad5` (say-current-cell).
-
-Second problem: `gesture.send()` extended-key asymmetry. NVDA's `KeyboardInputGesture.send()` fails to deliver synthesized extended-key chords (six-pack arrows) to DbDo while delivering non-extended chords (numpad arrows) reliably. v1.0.58 replaces `gesture.send()` with a helper that constructs a fresh `KeyboardInputGesture` via `fromName(sCanonicalChord)` and sends that. The architectural benefit is that DbDo always sees the same VK code regardless of which physical key the user pressed.
-
-Add-on internal version bumped to 1.0.7.
-
-## v1.0.57
-
-NVDA add-on now binds both six-pack and numpad variants of navigation chords. Documented convention is six-pack arrows for the `Control+Alt+arrow` table-navigation family; the numpad-specific exception is `Control+Alt+Numpad5` for "say current cell."
-
-## v1.0.56
-
-Added `canPropagate=True` to all `@scriptHandler.script` decorators in the NVDA add-on. Without it, scripts only fire when the focused NVDAObject is the AppModule's top-level object; with it, scripts fire when the AppModule appears anywhere in the focused object's ancestor chain. This matters because the focused object in DbDo is typically the data-grid ListView, a child of the form's NVDAObject.
-
-Add-on internal version bumped to 1.0.5.
-
-## v1.0.55
-
-Build fix. v1.0.54's revert of a scaffolding block accidentally removed the `public static class JawsSettingsInstaller` declaration line, leaving the opening `{` unattached. The brace-counter check passed (matched totals) but a state-walking check now reports any spot where depth goes negative — catching this category of regression before delivery.
-
-## v1.0.54
-
-NVDA add-on rewritten using the modern decorator API and lowercase module name. The `.py` filename is now lowercase, matching the convention every shipped NVDA app module follows. Gestures are now declared with the `@scriptHandler.script` decorator instead of a class-level `__gestures` dict, and scripts are grouped by intent (one decorator per logical group of chords) rather than every chord pointing at one omnibus script.
-
-First-run default-database fallback added: on a fresh install with no saved session, if `{app}\sample.db` is present, it opens automatically. New users see DbDo's school-domain sample on first run rather than facing an empty form.
-
-## v1.0.53
-
-Installer description for the NVDA add-on checkbox refined to flag the post-install restart requirement: "Install NVDA add-on (NVDA must be running; restart NVDA after install for it to take effect)".
-
-## v1.0.52
-
-Diagnostic logging added to the NVDA add-on's Python app module at four points: module import, AppModule.__init__, bindGesture loop completion, and script invocation. The pattern of presence/absence of these log lines pinpoints exactly which stage of the binding chain is failing for diagnostic purposes. NVDA must be running for the `.nvda-addon` file association to install correctly; this is now documented in both the installer's Finish-page checkbox description and the README.
-
-## v1.0.51
-
-Inno Setup compile fix. A Pascal block comment whose second line read `[Run] entry invokes DbDo.exe...` was misparsed because Inno Setup's preprocessor scans for `[Section]` tags before Pascal-comment parsing.
-
-## v1.0.50
-
-NVDA add-on manifest format fix. String values containing spaces and special characters are now enclosed in quotes (required by the NVDA manifest format), and the zip no longer contains standalone directory entries. JAWS files now ship as a single `DbDo_JAWS.zip` archive in the repo, extracted into place at install time by Inno Setup's built-in `ExtractArchive` Pascal function.
-
-## v1.0.49
-
-NVDA add-on install dialog now actually appears at end of setup. The Finish-page checkbox's `[Run]` entry now points `FileName` directly at `{app}\DbDo.nvda-addon` with the `shellexec` flag, which is the documented mechanism for opening non-executable files via their file association. The previous chain through DbDo.exe was racing against installer wizard completion.
-
-## v1.0.48
-
-JAWS settings installer migrated to Inno Setup `[Run]` entries. The C# `JawsSettingsInstaller` class added in v1.0.40 is preserved for use from the Help menu's "Re-install JAWS Settings" command.
-
-## v1.0.47
-
-Command-name cleanup: "object" removed from DbDo's command names. Show-Object → Show Record; Set-Object → Edit Record; Get-Property → Table Properties; etc. The word was vague and intimidating; the new names describe what the commands actually operate on.
-
-## v1.0.46
-
-Times in version-history entries adjusted for Pacific time zone (Seattle). Documentation references to time-sensitive operations updated.
-
-## v1.0.45
-
-JScript .NET script feature lands. Save, Invoke, and Edit Script commands accessible from the Misc menu. Scripts live in `%APPDATA%\DbDo\Scripts\` and run inside the DbDo process with full access to the running form (`frm`) and recordset manager (`db`). The tiny `DbDo.dll` support assembly is compiled at build time by `jsc.exe` from `DbDo.js`. See `DbDo.md`'s "Scripting with scripts" section.
-
-## v1.0.44
-
-Course-correction release. The Roslyn C# scripting feature from v1.0.42-v1.0.43 is rolled back; in its place is the EdSharp-style Save / Invoke / Edit Script pattern using JScript .NET. The Roslyn approach shipped 12 NuGet runtime DLLs totaling ~25-30 MB and required an MSBuild + NuGet build-system migration. The new approach matches the EdSharp precedent: standard controls, no shipped runtime DLLs beyond the tiny `DbDo.dll`, no custom UI; the user writes scripts in their own editor.
-
-## v1.0.43
-
-NVDA controller DLL renamed: `nvdaControllerClient64.dll` → `nvdaControllerClient.dll`. NVDA 2026.1 ships the 64-bit DLL inside `x64/` with the unsuffixed name. The build script's DLL-extraction logic now looks in the archive's `x64/` folder and accepts either the modern or legacy filename.
-
-## v1.0.42
-
-Build system switches from bare `csc.exe` to MSBuild + NuGet to support a Roslyn-based C# scripting feature. (Both of these decisions are rolled back in v1.0.44.)
-
-## v1.0.41
-
-NVDA parity with JAWS. The `DbDo.nvda-addon` package ships and the Finish-page checkbox "Install NVDA add-on for DbDo" is checked by default. The add-on contains an app module that binds 49 keyboard gestures — the same set the JAWS `DbDo.jkm` covers — to a `script_passThrough` method whose body is one line, `gesture.send()`. Without this add-on, NVDA intercepts Alt+Control+arrow for its own table-navigation commands.
-
-The `--install-nvda-addon` CLI flag is implemented: it locates `DbDo.nvda-addon` next to DbDo.exe and opens it via Windows shell-execute, handing it to NVDA's file association.
-
-## v1.0.40
-
-Broad polish release.
-
-- Post-install task list reordered (JAWS install first, NVDA install second, launch third, README fourth).
-- JAWS install logic migrated from Pascal Script to a C# `JawsSettingsInstaller` class, accessible from the Help menu without re-running the installer.
-- NVDA controller-client DLL (`nvdaControllerClient64.dll`) bundled at build time via PowerShell `Invoke-WebRequest` from the official NVDA source distribution.
-- Command-name consistency cleanup: eleven dialog titles and MessageBox captions previously displayed the PowerShell verb-noun canonical name while their menu labels used natural English; all eleven captions now match.
-- Extra Speech toggle added (Alt+Shift+S) following the EdSharp / FileDir model.
-- Help > Open Sample Database opens `{app}\sample.db` via the same code path as File > Open.
-
-## v1.0.39
-
-JAWS settings install correctness fix. v1.0.38 shipped a JKM-only approach that turned out not to work: `TypeCurrentScriptKey` is a JAWS Function, not a Script, so it cannot be invoked from a JKM right-hand side. v1.0.39 adds a tiny script source file (`DbDo.jss`) defining a one-line wrapper Script called `PassDbDoKey`, and installer logic to compile it to `DbDo.jsb` in each JAWS year-version's settings folder.
-
-## v1.0.38
-
-JAWS settings integration. The `DbDo.jkm` JAWS key map ships and the installer places it in the right JAWS user-settings folders automatically. JAWS will pass DbDo's chords through rather than intercepting them for its own table-navigation commands.
-
-## v1.0.37
-
-Build fixes.
-
-## v1.0.36
-
-Final program name selected as DbDo.
-
-## v1.0.35
-
-Virtual cell navigation polish: column-aware commands default to the column currently under virtual focus.
-
-## v1.0.34
-
-Virtual cell cursor implementation. The data list is a virtual-mode ListView, but on top of it DbDo overlays a `(row, column)` cursor you drive with Alt+Control + arrow / Home / End / PageDown / PageUp / Numpad5. Movement triggers a direction-aware announcement.
-
-## v1.0.33
-
-Search dialogs now have a Text input, a Recent list, and a Case-sensitive checkbox. Each of the three search families uses the same dialog layout; selecting a Recent entry copies its text into the Text input AND sets the Case-sensitive checkbox to how that term was last used.
-
-Recent Files dialog on Alt+R opens one of the last 10 database files with full state restoration (last-active table, filter, sort, position).
-
-Menu labels rewritten to natural-English DbDo names. The PowerShell canonical names (Show-Object, Set-Mark, Sort-Object, etc.) remain available at the dot prompt.
-
-## v1.0.32
-
-Three distinct search families: Find Across All Columns (Control+F), Jump to Match in One Column (Control+J), Find Regex Across All Columns (Control+F3). Each family has its own forward / reverse chord pair, plus the unified F3 / Shift+F3 dispatcher.
-
-## v1.0.31
-
-Alt+RightArrow / Alt+LeftArrow obviate the need for separate keys for entering or exiting child tables.
-
-## v1.0.30
-
-Public GitHub API used for update checks; no credentials required.
-
-## v1.0.29
-
-Persistent search history across the three search families.
-
-## v1.0.28
-
-`PRAGMA table_info` and window-function output rendered correctly in the result grid for Run SQL.
-
-## v1.0.27
-
-EdSharp/FileDir equivalence prioritized for command names; conflicting commands renamed or rebound. Hotkey assignments evaluated in priority order for common operations.
-
-## v1.0.26
-
-Initial command-and-hotkey table assembled.
-
-## v1.0.25
-
-Build script and release-tagging stabilized.
-
-## v1.0.24
-
-Single Alt+Control+D shortcut only — no other start-menu or desktop shortcuts.
-
-## v1.0.23
-
-Build-error cleanups.
-
-## v1.0.22
-
-InnoSetup installer modeled on the 2htm pattern.
-
-## v1.0.21
-
-Initial release packaged with InnoSetup.
-
-## Pre-v1.0.20
-
-Development history under earlier program-name candidates (DbDual, DbDo, DbDesk, etc.) before settling on DbDo. Early work covered: WinForms architecture with FluentListView-derived virtualization, late-bound ADO via the SQLite ODBC driver, parent-child drill via foreign-key inference, the Show Record / Related Records pattern, three-mode keyboard model (rows / column-announcements / virtual cells), and the dual-interface (GUI + dot prompt) design.
+- `buildHomerDev.cmd` and `.py` -- convert the documents and audit the kit:
+  components present, encodings right, templates still holding their
+  placeholder, no empty files.
+- `newHomerApp.cmd` and `.py` -- write a new app folder from the templates.
+- `Templates\_APP_.cs` -- a working launchpad app with the standard controls,
+  the two message boxes, the matching command line, and settings saved as they
+  are answered.
+- `Templates\installOllama.cmd` and `installModels.cmd` -- local AI as an
+  installer checkbox, now that more than one Homer app uses a model.
+- The documentation set.

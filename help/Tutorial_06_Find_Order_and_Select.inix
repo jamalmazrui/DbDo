@@ -1,0 +1,144 @@
+﻿[about]
+Title=06 - Find, Order and Select
+Intro=Reaching a record by typing and by Keywords; ordering the list and narrowing it with Filter Records; choosing which fields a row speaks.
+Setup=JobTrail is open on the jobs table.
+Homework=Find a record three ways, then change the sort and the columns and listen to the difference.
+
+[step]
+
+Say=The quickest way is typing. The first letters of an employer go there.
+Key=exa
+Hear=Example Widgets Company (sample employer) Accessibility Analyst interviewing, 2 of 4
+
+[step]
+
+Say=Control plus J, Jump to Record -- J for Jump. It searches the field I am on.
+Key=Control+J
+Hear=Jump to Match (column, employer) dialog
+Hear=Text combo box, blank, ALT+T
+
+[step]
+
+Say=Enter takes me to the record it found.
+Key=Enter
+Hear=Illustration City Library (fictional) Digital Services Assistant lead, 3 of 4
+
+[step]
+
+Say=Control plus K, Keywords -- K for Keywords. It searches every field, notes included, which is why it is not called Find.
+Key=Control+K
+Hear=Keywords dialog
+Hear=Text combo box, blank, ALT+T
+
+[step]
+
+Say=Enter again, and this is the second match.
+Key=Enter
+Hear=Sample Health Network (illustration only) Records Coordinator applied, 4 of 4
+Note=F3 searches again. Shift reverses: Shift plus F3 searches back, Control plus Shift plus F finds backwards.
+
+[step]
+
+Say=Shift plus K, Say Keywords, reminds me what I looked for.
+Key=Shift+F
+Hear=find, screen reader
+
+[step]
+
+Say=Alt plus O, Order -- O for Order. Control plus O is Open everywhere, so Order takes Alt.
+Key=Alt+O
+Hear=Order Records dialog
+Hear=Column to sort by list box, employer, 4 of 16, ALT+C
+
+[step]
+
+Say=Typing S jumps to the first field starting with it. That is S, Sierra.
+Key=s
+Hear=status, 13 of 16
+
+[step]
+
+Say=Enter sorts the list, and the reader reads the row I land on.
+Key=Enter
+Hear=Records list view
+Hear=Sample Health Network (illustration only) Records Coordinator applied, 1 of 4
+Note=Shift plus O, Say Order, says it later.
+
+[step]
+
+Say=Control plus F, Filter Records -- F for Filter. It decides which rows I hear, and it writes the condition for me: one box per field, and a symbol in front of a value to compare instead of match.
+Key=Control+F
+Hear=Filter Records dialog
+Hear=Filter combo box, blank, ALT+F
+
+[step]
+
+Say=I want what is still moving: status not rejected.
+Key=Enter
+Hear=Records list view
+Hear=Example Widgets Company (sample employer) Accessibility Analyst interviewing, 1 of 3
+Note=Shift plus F, Say Filter, and Shift plus Y, Say Yield -- how many rows it left.
+
+[step]
+
+Say=Control plus Shift plus F clears it. Adding Shift reverses.
+Key=Control+Shift+F
+Hear=Records list view
+Hear=Demo Data Cooperative (made up) Data Quality Specialist rejected, 1 of 4
+
+[step]
+
+Say=Shift plus S, Say Select, names the fields each row speaks.
+Key=Shift+S
+Hear=select, employer, title, status
+
+[step]
+
+Say=Alt plus S, Select Columns -- Control plus S saves, so Select takes Alt.
+Key=Alt+S
+Hear=Select Columns dialog
+Hear=Columns check list box, employer check box checked, 1 of 16, ALT+C
+
+[step]
+
+Say=I add the date I applied. Space ticks it.
+Key=Space
+Hear=applied underscore date check box checked, 11 of 16
+
+[step]
+
+Say=Enter applies the choice, and the row is shorter from here on.
+Key=Enter
+Hear=Records list view
+Hear=Example Widgets Company (sample employer) Accessibility Analyst interviewing 2026-09-02, 2 of 4
+Note=Three or four fields is the useful range. Every row is heard, so every field costs time.
+
+[step]
+
+Say=What this walk taught. I say the key; the reader says what it does.
+Key=
+Hear=
+
+[step]
+
+Say=Control plus J.
+Key=
+Hear=Jump to Record
+
+[step]
+
+Say=Control plus K.
+Key=
+Hear=Keywords
+
+[step]
+
+Say=Shift plus F.
+Key=
+Hear=Say Filter
+
+[step]
+
+Say=Alt plus O.
+Key=
+Hear=Order Records
