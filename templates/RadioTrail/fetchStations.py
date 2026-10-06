@@ -168,41 +168,78 @@ def infoboxFields(sWikitext):
 class WikiRefused(Exception):
     pass
 
-def officialStation(sName):
-    """Wikipedia's infobox and opening paragraph for a station whose name
-    carries a call sign, in one request. Returns a dict; empty when no
-    article's own call sign matches. Raises WikiRefused when Wikipedia
-    answers with a refusal rather than a page, so the caller can wait."""
-    m = c_reCallSign.search(sName.upper())
-    if not m: return {}
-    sCall = m.group(1); sBand = m.group(2) or ""
+def wikiPages(dParams):
+    """One query; the pages it returns, or a WikiRefused when the answer is a
+    refusal -- which Wikipedia gives as an HTTP code or, as often, as an
+    error object inside a 200."""
     try:
-        dPage = wikiGet({"action": "query", "generator": "search", "gsrlimit": "5",
-                         "gsrsearch": sCall + (" " + sBand if sBand else "") + " radio station",
-                         "prop": "revisions|extracts", "rvprop": "content", "rvslots": "main", "exintro": "1", "explaintext": "1"})
+        d = wikiGet(dParams)
     except urllib.error.HTTPError as oError:
         if oError.code in (403, 429, 503): raise WikiRefused(str(oError.code))
-        return {}
-    except Exception:
-        return {}
-    for oPage in dPage.get("query", {}).get("pages", {}).values():
-        sTitle = oPage.get("title", "")
-        sText = ""
-        try: sText = oPage["revisions"][0]["slots"]["main"]["*"]
+        return [], "http " + str(oError.code)
+    except Exception as oError:
+        return [], "network: " + str(oError)[:80]
+    if "error" in d:
+        sCode = str(d["error"].get("code", ""))
+        if sCode in ("ratelimited", "maxlag", "readonly"): raise WikiRefused(sCode)
+        return [], "api error " + sCode
+    return list(d.get("query", {}).get("pages", {}).values()), ""
+
+def pageRecord(oPage, sCall):
+    """The record from one page, when its infobox is a station's and its
+    call sign is ours; otherwise None, with the reason."""
+    sTitle = oPage.get("title", "")
+    if "missing" in oPage: return None, "no page " + sTitle
+    sText = ""
+    try: sText = oPage["revisions"][0]["slots"]["main"]["*"]
+    except Exception: pass
+    if not sText:
+        try: sText = oPage["revisions"][0].get("content", "") or oPage["revisions"][0].get("*", "")
         except Exception: pass
-        dBox = infoboxFields(sText)
-        if not dBox: continue
-        sBoxCall = (dBox.get("call_sign") or dBox.get("callsign") or "").upper()
-        # THE INFOBOX'S OWN CALL SIGN MUST CARRY OURS. A title alone is not
-        # enough: "WAVE" found the article on radio waves.
-        if not re.search(r"\b" + re.escape(sCall) + r"\b", sBoxCall): continue
-        d = {"wikipedia": "https://en.wikipedia.org/wiki/" + urllib.parse.quote(sTitle.replace(" ", "_")),
-             "call_sign": dBox.get("call_sign") or dBox.get("callsign") or sCall,
-             "frequency": dBox.get("frequency", ""), "city": dBox.get("city", "") or dBox.get("area", ""),
-             "owner": dBox.get("owner", ""), "format": dBox.get("format", ""),
-             "extract": (oPage.get("extract") or "").strip()[:1500], "airdate": dBox.get("airdate", "")}
-        return {k: v for k, v in d.items() if v}
-    return {}
+    dBox = infoboxFields(sText)
+    if not dBox: return None, "no infobox in " + sTitle
+    sBoxCall = (dBox.get("call_sign") or dBox.get("callsign") or dBox.get("name") or "").upper()
+    # THE CALL SIGN MUST BE THE ARTICLE'S: in its infobox, or as the whole of
+    # its title before a band or a bracket -- KALW, WCRB (FM), KQED-FM.
+    bOurs = bool(re.search(r"\b" + re.escape(sCall) + r"\b", sBoxCall)) or bool(re.match(r"^" + re.escape(sCall) + r"(-(AM|FM|LP|HD\d?))?( \(.*\))?$", sTitle.upper()))
+    if not bOurs: return None, "other call sign in " + sTitle
+    d = {"wikipedia": "https://en.wikipedia.org/wiki/" + urllib.parse.quote(sTitle.replace(" ", "_")),
+         "call_sign": dBox.get("call_sign") or dBox.get("callsign") or sCall,
+         "frequency": dBox.get("frequency", ""), "city": dBox.get("city", "") or dBox.get("area", ""),
+         "owner": dBox.get("owner", ""), "format": dBox.get("format", ""),
+         "extract": (oPage.get("extract") or "").strip()[:1500], "airdate": dBox.get("airdate", "")}
+    return {k: v for k, v in d.items() if v}, ""
+
+def officialStation(sName):
+    """Wikipedia's infobox and opening paragraph for a station whose name
+    carries a call sign. The article is asked for BY TITLE first -- KALW,
+    KALW-FM, KALW (FM) and so on, redirects followed -- which is how a
+    licensed station's article is named; a search is the fallback. Returns
+    (record, reason): the record empty when nothing safe was found, the
+    reason saying why, for the log."""
+    m = c_reCallSign.search(sName.upper())
+    if not m: return {}, "no call sign in name"
+    sCall = m.group(1); sBand = m.group(2) or ""
+    lsTitles = [sCall, sCall + "-FM", sCall + "-AM", sCall + " (FM)", sCall + " (AM)", sCall + "-LP"]
+    if sBand: lsTitles.insert(0, sCall + "-" + sBand); lsTitles.insert(1, sCall + " (" + sBand + ")")
+    dCommon = {"action": "query", "prop": "revisions|extracts", "rvprop": "content", "rvslots": "main", "exintro": "1", "explaintext": "1", "redirects": "1"}
+    lsReasons = []
+    dParams = dict(dCommon); dParams["titles"] = "|".join(dict.fromkeys(lsTitles))
+    lsPages, sWhy = wikiPages(dParams)
+    if sWhy: lsReasons.append(sWhy)
+    for oPage in lsPages:
+        d, sReason = pageRecord(oPage, sCall)
+        if d: return d, "by title " + oPage.get("title", "")
+        if sReason and not sReason.startswith("no page"): lsReasons.append(sReason)
+    time.sleep(c_dWikiPause)
+    dParams = dict(dCommon); dParams.update({"generator": "search", "gsrlimit": "5", "gsrsearch": sCall + (" " + sBand if sBand else "") + " radio station"})
+    lsPages, sWhy = wikiPages(dParams)
+    if sWhy: lsReasons.append(sWhy)
+    for oPage in lsPages:
+        d, sReason = pageRecord(oPage, sCall)
+        if d: return d, "by search " + oPage.get("title", "")
+        if sReason: lsReasons.append(sReason)
+    return {}, "; ".join(lsReasons[:4]) or "search found nothing"
 
 def importPlaylist(sDb, sPath, logLine, say):
     """The stations in an .m3u, .m3u8 or .pls file, added as the listener's
@@ -301,16 +338,6 @@ def assess(sDb, logLine, say):
                 if r[1] == "": lsCall.append(r[0])
                 elif r[1] == "-": iDash += 1
                 else: iOfficial += 1
-        # MARKS FROM A REFUSED RUN ARE NOT MISSES. The run of 5 October 2026
-        # was refused by Wikipedia after its first thousand questions and
-        # marked the rest as unmatched. When nearly every looked-up station is
-        # marked unmatched, that is a refusal's signature, not the record's:
-        # the marks are cleared and those stations asked about again.
-        if iDash > 0 and iOfficial * 10 < iDash:
-            c.execute("update stations set wikipedia = '' where wikipedia = '-' and countrycode in ('US','CA')")
-            c.commit()
-            say("  %d stations marked unmatched by a run Wikipedia refused; they will be looked up again." % iDash)
-            lsCall.extend([None] * iDash); iDash = 0
     c.close()
     def pct(a, b): return "%d%%" % (100 * a // b) if b else "0%"
     say("Quality check of " + os.path.basename(sDb) + ":")
@@ -318,7 +345,7 @@ def assess(sDb, logLine, say):
     say("  Consistent: %s playable (%d); %d stream addresses shared by more than one station; %d genres with litter; %d names that are only numbers." % (pct(iPlayable, iAll), iPlayable, iDupUrl, iLitterGenre, iNumericName))
     say("  Coherent: %d stations with a state but no country." % iStateNoCountry)
     say("  What the stations say: %s asked (%d), %s answered (%d); %s with tags, %s with notes." % (pct(iProbed, iAll), iProbed, pct(iAnswered, iAll), iAnswered, pct(iTags, iAll), pct(iNotes, iAll)))
-    say("  Official record: %d US and Canadian names carry a call sign; %d have their record; %d found no article; %d not yet looked up." % (iCallNames, iOfficial, iDash, len(lsCall)))
+    say("  Official record: %d US and Canadian names carry a call sign; %d have their record; %d found no safe article; %d not yet looked up. (--official-only --again asks about the unmatched ones again.)" % (iCallNames, iOfficial, iDash, len(lsCall)))
     bCatalog = iAll < 1000 or iDaysOld > 7
     bEnrich = (iAll - iProbed) > 0
     bOfficial = len(lsCall) > 0
@@ -351,7 +378,7 @@ def official(sDb, sCountry, iLimit, bAgain, logLine, say):
     def flush():
         with oLock:
             lsBatch = list(lsOut); del lsOut[:]
-        for r, d in lsBatch:
+        for r, d, sWhy in lsBatch:
             iId, sNotes, sTags = r[0], r[2] or "", r[3] or ""
             if d:
                 iFilled[0] += 1
@@ -364,7 +391,7 @@ def official(sDb, sCountry, iLimit, bAgain, logLine, say):
                            addLines(sTags, lsTagNew), sNotesNew, iId))
             elif d is not None:
                 c.execute("update stations set wikipedia='-' where station_id=?", (iId,))
-            logLine("official %d %s: %s" % (iId, (r[1] or "")[:40], "; ".join("%s=%s" % (k, str(v)[:60]) for k, v in d.items()) if d else ("refused, left for next time" if d is None else "no safe match")))
+            logLine("official %d %s: %s" % (iId, (r[1] or "")[:40], ("; ".join("%s=%s" % (k, str(v)[:60]) for k, v in d.items()) + " [" + sWhy + "]") if d else ("refused, left for next time" if d is None else "no safe match [" + sWhy + "]")))
             iWritten[0] += 1
         if lsBatch: c.commit()
     def worker():
@@ -372,13 +399,14 @@ def official(sDb, sCountry, iLimit, bAgain, logLine, say):
             with oLock:
                 if not lsQueue: return
                 r = lsQueue.pop()
+            sWhy = ""
             try:
-                d = officialStation(r[1] or "")
-            except WikiRefused:
-                d = None
+                d, sWhy = officialStation(r[1] or "")
+            except WikiRefused as oRefused:
+                d = None; sWhy = "refused: " + str(oRefused)
                 time.sleep(60)
                 with oLock: bRefused[0] = True
-            with oLock: lsOut.append((r, d))
+            with oLock: lsOut.append((r, d, sWhy))
             time.sleep(c_dWikiPause)
     lsThreads = [threading.Thread(target=worker, daemon=True) for _ in range(c_iWikiThreads)]
     for o in lsThreads: o.start()

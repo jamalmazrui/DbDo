@@ -5,117 +5,144 @@
     <link>Tutorials.htm</link>
     <description>Short simulated walks through DbDo, using the JobTrail job search database that ships with it. Each one is about three minutes, with something to try at the end.</description>
     <language>en-us</language>
-    <lastBuildDate>Tue, 06 Oct 2026 04:03:32 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 26 Sep 2026 01:49:28 +0000</lastBuildDate>
     <itunes:author>Jamal Mazrui</itunes:author>
     <itunes:explicit>false</itunes:explicit>
     <itunes:category text="Technology"/>
     <itunes:owner><itunes:name>Jamal Mazrui</itunes:name><itunes:email>empowermentzone@gmail.com</itunes:email></itunes:owner>
     <item>
       <title>00 - Overview and Table of Contents</title>
-      <description>Nothing is needed; this walk is listened to. Full transcript: Tutorials.htm#0-00-overview-and-table-of-contents</description>
+      <description>DbDo is installed and your reader is running. Nothing else is needed. Full transcript: Tutorials.htm#0-00-overview-and-table-of-contents</description>
       <link>Tutorials.htm#0-00-overview-and-table-of-contents</link>
-      <guid isPermaLink="false">homer-tutorial_00_overview_and_table_of_contents</guid>
-      <enclosure url="tutorials/00_Overview_and_Table_of_Contents.mp3" length="947361" type="audio/mpeg"/>
-      <itunes:duration>00:02:16</itunes:duration>
+      <guid isPermaLink="false">homer-tutorial_00_overview</guid>
+      <enclosure url="tutorials/Tutorial_00_Overview.mp3" length="437805" type="audio/mpeg"/>
+      <itunes:duration>00:01:02</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>01 - Install and Launch</title>
-      <description>The installer is downloaded, and your reader is running. Full transcript: Tutorials.htm#0a-01-install-and-launch</description>
-      <link>Tutorials.htm#0a-01-install-and-launch</link>
-      <guid isPermaLink="false">homer-tutorial_01_install_and_launch</guid>
-      <enclosure url="tutorials/01_Install_and_Launch.mp3" length="879562" type="audio/mpeg"/>
-      <itunes:duration>00:02:09</itunes:duration>
+      <title>01 - Installing DbDo</title>
+      <description>The installer is downloaded, and your reader is running. Full transcript: Tutorials.htm#0a-01-installing-dbdo</description>
+      <link>Tutorials.htm#0a-01-installing-dbdo</link>
+      <guid isPermaLink="false">homer-tutorial_01_installing</guid>
+      <enclosure url="tutorials/Tutorial_01_Installing.mp3" length="869808" type="audio/mpeg"/>
+      <itunes:duration>00:02:03</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>02 - User Interface Concepts</title>
-      <description>DbDo is open with any database. Nothing needs pressing in this walk; it is listened to. Full transcript: Tutorials.htm#0b-02-user-interface-concepts</description>
-      <link>Tutorials.htm#0b-02-user-interface-concepts</link>
-      <guid isPermaLink="false">homer-tutorial_02_user_interface_concepts</guid>
-      <enclosure url="tutorials/02_User_Interface_Concepts.mp3" length="702464" type="audio/mpeg"/>
-      <itunes:duration>00:01:33</itunes:duration>
+      <title>02 - Opening JobTrail</title>
+      <description>DbDo has just opened JobTrail on the jobs table. Full transcript: Tutorials.htm#0b-02-opening-jobtrail</description>
+      <link>Tutorials.htm#0b-02-opening-jobtrail</link>
+      <guid isPermaLink="false">homer-tutorial_02_opening</guid>
+      <enclosure url="tutorials/Tutorial_02_Opening.mp3" length="454379" type="audio/mpeg"/>
+      <itunes:duration>00:01:08</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>03 - Key Patterns</title>
-      <description>DbDo is open with any database. Full transcript: Tutorials.htm#0c-03-key-patterns</description>
-      <link>Tutorials.htm#0c-03-key-patterns</link>
-      <guid isPermaLink="false">homer-tutorial_03_key_patterns</guid>
-      <enclosure url="tutorials/03_Key_Patterns.mp3" length="714282" type="audio/mpeg"/>
-      <itunes:duration>00:01:39</itunes:duration>
+      <title>03 - Menus, Windows and Help</title>
+      <description>JobTrail is open on the jobs table. Full transcript: Tutorials.htm#0c-03-menus-windows-and-help</description>
+      <link>Tutorials.htm#0c-03-menus-windows-and-help</link>
+      <guid isPermaLink="false">homer-tutorial_03_menus</guid>
+      <enclosure url="tutorials/Tutorial_03_Menus.mp3" length="544704" type="audio/mpeg"/>
+      <itunes:duration>00:01:20</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>04 - Open and Move Through a Database</title>
-      <description>DbDo is open and no database is open yet. Full transcript: Tutorials.htm#0d-04-open-and-move-through-a-database</description>
-      <link>Tutorials.htm#0d-04-open-and-move-through-a-database</link>
-      <guid isPermaLink="false">homer-tutorial_04_open_and_move_through_a_database</guid>
-      <enclosure url="tutorials/04_Open_and_Move_Through_a_Database.mp3" length="1002069" type="audio/mpeg"/>
-      <itunes:duration>00:02:34</itunes:duration>
+      <title>04 - Adding a New Record</title>
+      <description>JobTrail is open on the jobs table. This morning I found a support analyst opening at Widget Works. Full transcript: Tutorials.htm#0d-04-adding-a-new-record</description>
+      <link>Tutorials.htm#0d-04-adding-a-new-record</link>
+      <guid isPermaLink="false">homer-tutorial_04_adding</guid>
+      <enclosure url="tutorials/Tutorial_04_Adding.mp3" length="344955" type="audio/mpeg"/>
+      <itunes:duration>00:00:54</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>05 - Add, Inspect and Edit Records</title>
-      <description>JobTrail is open on the jobs table. This morning I found a support analyst opening at Widget Works. Full transcript: Tutorials.htm#0e-05-add-inspect-and-edit-records</description>
-      <link>Tutorials.htm#0e-05-add-inspect-and-edit-records</link>
-      <guid isPermaLink="false">homer-tutorial_05_add_inspect_and_edit_records</guid>
-      <enclosure url="tutorials/05_Add_Inspect_and_Edit_Records.mp3" length="1077135" type="audio/mpeg"/>
-      <itunes:duration>00:02:47</itunes:duration>
+      <title>05 - Inspecting a Record</title>
+      <description>JobTrail is open on the jobs table, on Example Widgets. Full transcript: Tutorials.htm#0e-05-inspecting-a-record</description>
+      <link>Tutorials.htm#0e-05-inspecting-a-record</link>
+      <guid isPermaLink="false">homer-tutorial_05_inspecting</guid>
+      <enclosure url="tutorials/Tutorial_05_Inspecting.mp3" length="403627" type="audio/mpeg"/>
+      <itunes:duration>00:00:59</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>06 - Find, Order and Select</title>
-      <description>JobTrail is open on the jobs table. Full transcript: Tutorials.htm#0f-06-find-order-and-select</description>
-      <link>Tutorials.htm#0f-06-find-order-and-select</link>
-      <guid isPermaLink="false">homer-tutorial_06_find_order_and_select</guid>
-      <enclosure url="tutorials/06_Find_Order_and_Select.mp3" length="1216807" type="audio/mpeg"/>
-      <itunes:duration>00:03:04</itunes:duration>
+      <title>06 - Editing a Record</title>
+      <description>JobTrail is open on the jobs table. The interview at Example Widgets went well, and they made an offer. Full transcript: Tutorials.htm#0f-06-editing-a-record</description>
+      <link>Tutorials.htm#0f-06-editing-a-record</link>
+      <guid isPermaLink="false">homer-tutorial_06_editing</guid>
+      <enclosure url="tutorials/Tutorial_06_Editing.mp3" length="375417" type="audio/mpeg"/>
+      <itunes:duration>00:00:57</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>07 - Related, Marked, Reports and a Work Search Record</title>
-      <description>JobTrail is open on the jobs table. Full transcript: Tutorials.htm#0g-07-related-marked-reports-and-a-work-search-record</description>
-      <link>Tutorials.htm#0g-07-related-marked-reports-and-a-work-search-record</link>
-      <guid isPermaLink="false">homer-tutorial_07_related_marked_reports_and_a_work_search_record</guid>
-      <enclosure url="tutorials/07_Related_Marked_Reports_and_a_Work_Search_Record.mp3" length="1325288" type="audio/mpeg"/>
-      <itunes:duration>00:03:19</itunes:duration>
+      <title>07 - Keywords and Jump</title>
+      <description>JobTrail is open on the jobs table. Full transcript: Tutorials.htm#0g-07-keywords-and-jump</description>
+      <link>Tutorials.htm#0g-07-keywords-and-jump</link>
+      <guid isPermaLink="false">homer-tutorial_07_finding</guid>
+      <enclosure url="tutorials/Tutorial_07_Finding.mp3" length="437766" type="audio/mpeg"/>
+      <itunes:duration>00:01:05</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>08 - RadioTrail: Find the Seahawks on the Air</title>
-      <description>DbDo is open, fetchStations has been run once, and no database is open yet. Full transcript: Tutorials.htm#0h-08-radiotrail-find-the-seahawks-on-the-air</description>
-      <link>Tutorials.htm#0h-08-radiotrail-find-the-seahawks-on-the-air</link>
-      <guid isPermaLink="false">homer-tutorial_08_radiotrail</guid>
-      <enclosure url="tutorials/08_RadioTrail.mp3" length="1757175" type="audio/mpeg"/>
-      <itunes:duration>00:04:19</itunes:duration>
+      <title>08 - Order and Filter Records</title>
+      <description>JobTrail is open on the jobs table. Full transcript: Tutorials.htm#0h-08-order-and-filter-records</description>
+      <link>Tutorials.htm#0h-08-order-and-filter-records</link>
+      <guid isPermaLink="false">homer-tutorial_08_ordering</guid>
+      <enclosure url="tutorials/Tutorial_08_Ordering.mp3" length="517362" type="audio/mpeg"/>
+      <itunes:duration>00:01:14</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>09 - Glossary</title>
-      <description>Nothing is needed. Full transcript: Tutorials.htm#0i-09-glossary</description>
-      <link>Tutorials.htm#0i-09-glossary</link>
-      <guid isPermaLink="false">homer-tutorial_09_glossary</guid>
-      <enclosure url="tutorials/09_Glossary.mp3" length="959132" type="audio/mpeg"/>
-      <itunes:duration>00:02:25</itunes:duration>
+      <title>09 - Select the Columns You Hear</title>
+      <description>JobTrail is open on the jobs table. Full transcript: Tutorials.htm#0i-09-select-the-columns-you-hear</description>
+      <link>Tutorials.htm#0i-09-select-the-columns-you-hear</link>
+      <guid isPermaLink="false">homer-tutorial_09_columns</guid>
+      <enclosure url="tutorials/Tutorial_09_Columns.mp3" length="327702" type="audio/mpeg"/>
+      <itunes:duration>00:00:49</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>10 - Conclusion</title>
-      <description>Nothing is needed. Full transcript: Tutorials.htm#0j-10-conclusion</description>
-      <link>Tutorials.htm#0j-10-conclusion</link>
-      <guid isPermaLink="false">homer-tutorial_10_conclusion</guid>
-      <enclosure url="tutorials/10_Conclusion.mp3" length="225506" type="audio/mpeg"/>
-      <itunes:duration>00:00:32</itunes:duration>
+      <title>10 - Related Records</title>
+      <description>JobTrail is open on the jobs table, on Example Widgets. Full transcript: Tutorials.htm#0j-10-related-records</description>
+      <link>Tutorials.htm#0j-10-related-records</link>
+      <guid isPermaLink="false">homer-tutorial_10_related</guid>
+      <enclosure url="tutorials/Tutorial_10_Related.mp3" length="317559" type="audio/mpeg"/>
+      <itunes:duration>00:00:46</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>11 - More Information</title>
-      <description>Nothing is needed. Full transcript: Tutorials.htm#0k-11-more-information</description>
-      <link>Tutorials.htm#0k-11-more-information</link>
-      <guid isPermaLink="false">homer-tutorial_11_more_information</guid>
-      <enclosure url="tutorials/11_More_Information.mp3" length="362739" type="audio/mpeg"/>
-      <itunes:duration>00:00:50</itunes:duration>
+      <title>11 - Mark and Unmark</title>
+      <description>JobTrail is open on the jobs table. I want to follow up on two of them this week. Full transcript: Tutorials.htm#0k-11-mark-and-unmark</description>
+      <link>Tutorials.htm#0k-11-mark-and-unmark</link>
+      <guid isPermaLink="false">homer-tutorial_11_marking</guid>
+      <enclosure url="tutorials/Tutorial_11_Marking.mp3" length="309488" type="audio/mpeg"/>
+      <itunes:duration>00:00:47</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>12 - Look and Prime</title>
+      <description>JobTrail is open on the jobs table, on Example Widgets. Full transcript: Tutorials.htm#0l-12-look-and-prime</description>
+      <link>Tutorials.htm#0l-12-look-and-prime</link>
+      <guid isPermaLink="false">homer-tutorial_12_lookandprime</guid>
+      <enclosure url="tutorials/Tutorial_12_LookAndPrime.mp3" length="245848" type="audio/mpeg"/>
+      <itunes:duration>00:00:37</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>13 - Report, Save and Copy</title>
+      <description>JobTrail is open on the jobs table, on Example Widgets. Full transcript: Tutorials.htm#0m-13-report-save-and-copy</description>
+      <link>Tutorials.htm#0m-13-report-save-and-copy</link>
+      <guid isPermaLink="false">homer-tutorial_13_output</guid>
+      <enclosure url="tutorials/Tutorial_13_Output.mp3" length="334344" type="audio/mpeg"/>
+      <itunes:duration>00:00:49</itunes:duration>
+      <itunes:explicit>false</itunes:explicit>
+    </item>
+    <item>
+      <title>14 - Work Search Record for a Claim or Counselor</title>
+      <description>JobTrail is open on the actions table, the log of everything I have done. Full transcript: Tutorials.htm#0n-14-work-search-record-for-a-claim-or-counselor</description>
+      <link>Tutorials.htm#0n-14-work-search-record-for-a-claim-or-counselor</link>
+      <guid isPermaLink="false">homer-tutorial_14_worksearch</guid>
+      <enclosure url="tutorials/Tutorial_14_WorkSearch.mp3" length="379262" type="audio/mpeg"/>
+      <itunes:duration>00:00:55</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
   </channel>

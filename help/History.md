@@ -4,7 +4,20 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.239 (current)
+## v1.0.240 (current)
+
+**The official record is asked for by title.** The run of 5 October looked up
+3,878 call-sign stations and found 263 -- not for want of articles, since KALW,
+WCRB and WETA all have one, but because a search was asked where a title would
+do. `fetchStations` now asks Wikipedia for the article by its likely titles
+-- KALW, KALW-FM, KALW (FM) -- with redirects followed, and searches only when
+none answers; an infobox under the station's own title counts even without a
+call_sign line. Every miss is logged with its reason, an error inside a 200 is
+treated as the refusal it is, and the check that mistook an honest run for a
+refused one is gone. `--official-only --again` asks about the unmatched ones.
+Needs HomerDev 1.52.5.
+
+## v1.0.239
 
 **fetchStations starts clean and stays simple.** A fresh start sets the old
 copy aside and makes the new one in the same breath -- it had set aside and
