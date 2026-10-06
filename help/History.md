@@ -4,7 +4,32 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.236 (current)
+## v1.0.239 (current)
+
+**fetchStations starts clean and stays simple.** A fresh start sets the old
+copy aside and makes the new one in the same breath -- it had set aside and
+not copied, leaving an empty database for the catalog to miss. A copy that is
+not the template's shape is replaced, not patched; there is no migration of an
+older copy, since the structure going forward is the template's.
+
+## v1.0.238
+
+**A tidied logs folder no longer fails the release.** The acceptance check that
+looked for the program's logs folder now looks for its user folder, which is
+there once DbDo has run; gathering the logs with zip -m had taken the folder
+with the files.
+
+## v1.0.237
+
+**The walks fit five minutes each.** Walk 08 is cut to its three wants, with
+playing, recording and keeping between them and nothing an earlier walk already
+taught. Walk 04 is rebuilt from the right pieces -- opening JobTrail and the
+menus -- after a mix-up had given it the key rules twice. Walk 00 is prose, the
+two reader keys, then the table of contents as a clean list in two voices.
+Walks 02 and 03 say where help is. Twelve walks, about an hour. Needs HomerDev
+1.52.3.
+
+## v1.0.236
 
 **The walks take the Homer pattern of eleven.** 00 Overview and Table of
 Contents, 01 Install and Launch, 02 User Interface Concepts, 03 Key Patterns,

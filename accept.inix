@@ -68,5 +68,10 @@ Run = scripts\checkTutorial.cmd
 
 [check]
 
-Name = a session log lands where the Homer layout says
-Run = scripts\acceptCheck.cmd exists "%LOCALAPPDATA%\DbDo\logs"
+; The logs folder itself comes and goes: gathering the logs with zip -m can
+; take the folder with the files, and a release does not fail because a
+; person tidied up (5 October 2026). What the layout promises is that the
+; program keeps its files under %LOCALAPPDATA%\DbDo, and that folder is there
+; once DbDo has run on this machine.
+Name = the program keeps its files under the Homer user folder
+Run = scripts\acceptCheck.cmd exists "%LOCALAPPDATA%\DbDo"

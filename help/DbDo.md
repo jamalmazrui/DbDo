@@ -951,8 +951,8 @@ first, Control+M, and Play Stream queues all of them, as tagged files are queued
 in FileDir, with the current one first. The first time, if mpv is not on your
 computer, DbDo offers to fetch it.
 
-A copy you have not marked up is replaced by a clean one on each run, so new
-fields arrive. Once you have set a **status** or a **rating**, or written in
+A copy you have not marked up, or one not in the template's current shape, is
+replaced by a clean one, so the structure is always the template's. Once you have set a **status** or a **rating**, or written in
 **notes** or **tags**, the copy is yours: it is refreshed in place, status and
 rating are never written by the script, and notes and tags are only added to. `fetchStations --country "United States"` keeps a run to
 one country; `--catalog-only` skips the asking; `--enrich-only` does only that.
@@ -966,9 +966,10 @@ tasks; 09 a glossary, where one voice says the term and the other says what it
 means; 10 a conclusion; 11 where the rest is. DbDo's five tasks are opening and moving
 through a database; adding, inspecting and editing records; finding, ordering
 and choosing columns; related and marked records, reports and a work search
-record; and RadioTrail, walk 08 -- opening it and reading a row, finding a
-station by what it says of itself, playing one and several, recording, and
-keeping favorites. The walks' scripts live in `help`; a database's own files --
+record; and RadioTrail, walk 08, worked through three wants -- the station
+carrying the Seattle Seahawks, found by a word it says of itself; jazz from
+anywhere, by filtering on genre; jazz near home, by adding the state -- then
+playing what was found, recording it, and keeping it as a favorite. The walks' scripts live in `help`; a database's own files --
 its settings, its scripts -- live in its template folder.
 
 #### Where RadioTrail's data and design come from

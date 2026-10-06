@@ -235,8 +235,11 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
-<li><a href="#v1.0.236-current" id="toc-v1.0.236-current">v1.0.236
+<li><a href="#v1.0.239-current" id="toc-v1.0.239-current">v1.0.239
 (current)</a></li>
+<li><a href="#v1.0.238" id="toc-v1.0.238">v1.0.238</a></li>
+<li><a href="#v1.0.237" id="toc-v1.0.237">v1.0.237</a></li>
+<li><a href="#v1.0.236" id="toc-v1.0.236">v1.0.236</a></li>
 <li><a href="#v1.0.235" id="toc-v1.0.235">v1.0.235</a></li>
 <li><a href="#v1.0.234" id="toc-v1.0.234">v1.0.234</a></li>
 <li><a href="#v1.0.233" id="toc-v1.0.233">v1.0.233</a></li>
@@ -380,7 +383,27 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
-<h2 id="v1.0.236-current">v1.0.236 (current)</h2>
+<h2 id="v1.0.239-current">v1.0.239 (current)</h2>
+<p><strong>fetchStations starts clean and stays simple.</strong> A fresh
+start sets the old copy aside and makes the new one in the same breath –
+it had set aside and not copied, leaving an empty database for the
+catalog to miss. A copy that is not the template’s shape is replaced,
+not patched; there is no migration of an older copy, since the structure
+going forward is the template’s.</p>
+<h2 id="v1.0.238">v1.0.238</h2>
+<p><strong>A tidied logs folder no longer fails the release.</strong>
+The acceptance check that looked for the program’s logs folder now looks
+for its user folder, which is there once DbDo has run; gathering the
+logs with zip -m had taken the folder with the files.</p>
+<h2 id="v1.0.237">v1.0.237</h2>
+<p><strong>The walks fit five minutes each.</strong> Walk 08 is cut to
+its three wants, with playing, recording and keeping between them and
+nothing an earlier walk already taught. Walk 04 is rebuilt from the
+right pieces – opening JobTrail and the menus – after a mix-up had given
+it the key rules twice. Walk 00 is prose, the two reader keys, then the
+table of contents as a clean list in two voices. Walks 02 and 03 say
+where help is. Twelve walks, about an hour. Needs HomerDev 1.52.3.</p>
+<h2 id="v1.0.236">v1.0.236</h2>
 <p><strong>The walks take the Homer pattern of eleven.</strong> 00
 Overview and Table of Contents, 01 Install and Launch, 02 User Interface
 Concepts, 03 Key Patterns, then five tasks – 04 Open and Move Through a

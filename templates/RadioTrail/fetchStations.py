@@ -23,9 +23,11 @@
 #
 # ONE COMMAND DOES THE WHOLE JOB. fetchStations with no arguments:
 #
-#   1. A clean copy from the template -- when the copy there holds nothing of
-#      yours yet (no status set, no rating, no notes, no tags); a copy you have
-#      marked up is kept and refreshed instead, and --fresh forces a clean one.
+#   1. A clean copy from the template -- when there is none, when the copy is
+#      not this template's shape, or when it holds nothing of yours yet (no
+#      status set, no rating, no notes, no tags). A copy you have marked up is
+#      kept and refreshed; --fresh forces a clean one. There is no migration of
+#      an older copy: the structure going forward is the template's.
 #   2. The catalog: every working Radio Browser station, and SomaFM's channels.
 #   3. What each station says about itself: its stream's headers and its home
 #      page, forty stations at a time. Every station, which takes an hour or
@@ -574,6 +576,45 @@ def fetchSomaFm(logLine, say):
 c_iPage = 10000
 c_dPause = 0.5
 
+def templatePath():
+    return os.path.join(os.path.dirname(os.path.abspath(__file__)), "RadioTrail.db")
+
+def copyTemplate(sDb):
+    """A new copy of the template at sDb, with its settings file beside it."""
+    import shutil
+    sTemplate = templatePath()
+    if not os.path.isfile(sTemplate):
+        print("No RadioTrail.db beside this script to copy from."); return False
+    os.makedirs(os.path.dirname(sDb), exist_ok=True)
+    shutil.copy2(sTemplate, sDb)
+    sInix = os.path.join(os.path.dirname(sTemplate), "RadioTrail.inix")
+    if os.path.isfile(sInix): shutil.copy2(sInix, os.path.join(os.path.dirname(sDb), "RadioTrail.inix"))
+    print("Made your copy of RadioTrail at " + sDb)
+    return True
+
+def setAside(sDb):
+    """The copy at sDb becomes RadioTrail-old.db beside it; a previous old
+    copy goes. The journal files go with it."""
+    sOld = os.path.join(os.path.dirname(sDb), "RadioTrail-old.db")
+    try:
+        if os.path.isfile(sOld): os.remove(sOld)
+        for sSide in ("-wal", "-shm"):
+            if os.path.isfile(sDb + sSide): os.remove(sDb + sSide)
+        os.rename(sDb, sOld)
+        print("The old copy is now " + sOld)
+    except Exception as oError:
+        print("Could not set the old copy aside: " + str(oError))
+
+def sameShape(sDb):
+    """True when the copy's stations table has every column the template's
+    has. An empty file or an older copy answers False."""
+    try:
+        cT = sqlite3.connect(templatePath()); lsWant = set(r[1] for r in cT.execute("pragma table_info(stations)")); cT.close()
+        cD = sqlite3.connect(sDb); lsHave = set(r[1] for r in cD.execute("pragma table_info(stations)")); cD.close()
+        return bool(lsHave) and lsWant <= lsHave
+    except Exception:
+        return False
+
 def main():
     lsArgs = sys.argv[1:]
     sDb = ""
@@ -609,23 +650,16 @@ def main():
     if not sDb:
         sDb = os.path.join(os.environ.get("LOCALAPPDATA", ""), "DbDo", "data", "RadioTrail", "RadioTrail.db")
     if not os.path.isfile(sDb):
-        # NO COPY YET? MAKE ONE. DbDo copies the templates into its data
-        # folder the first time Template Databases is opened, and a person who
-        # builds and runs this script first has not opened it yet. The
-        # template is beside this script, so the script makes the copy itself
-        # rather than sending the person away to do a step and come back.
-        sTemplate = os.path.join(os.path.dirname(os.path.abspath(__file__)), "RadioTrail.db")
-        if os.path.isfile(sTemplate):
-            os.makedirs(os.path.dirname(sDb), exist_ok=True)
-            import shutil
-            shutil.copy2(sTemplate, sDb)
-            for sSide in ("RadioTrail.inix",):
-                sSrc = os.path.join(os.path.dirname(sTemplate), sSide)
-                if os.path.isfile(sSrc): shutil.copy2(sSrc, os.path.join(os.path.dirname(sDb), sSide))
-            print("Made your copy of RadioTrail at " + sDb)
-        else:
-            print("No database at " + sDb + ", and no RadioTrail.db beside this script to copy. Name a database.")
-            return 1
+        # NO COPY YET? MAKE ONE from the template beside this script, rather
+        # than sending the person away to open it in DbDo and come back.
+        if not copyTemplate(sDb): return 1
+    elif not sameShape(sDb):
+        # THE COPY IS NOT THIS TEMPLATE'S SHAPE -- an older RadioTrail, or an
+        # empty file left by a failed start. Nobody's work is in it that the
+        # template does not supply, so it is set aside and a clean one made.
+        # No migration: the structure going forward is the template's.
+        setAside(sDb)
+        if not copyTemplate(sDb): return 1
     # THE LOG GOES IN THE PROJECT'S logs FOLDER when the script runs from a
     # project -- C:\DbDo\logs, two levels above templates\RadioTrail -- because
     # that is where every other Homer log of the project is gathered from. When
@@ -694,18 +728,12 @@ def main():
         except Exception:
             bFresh = True
     if bFresh and os.path.isfile(sDb):
-        # A FRESH START, asked for by name. The old copy is kept beside the new
-        # one as RadioTrail-old.db until the next fresh start, so a status or a
-        # note that mattered can still be read out of it.
-        sOld = os.path.join(os.path.dirname(sDb), "RadioTrail-old.db")
-        try:
-            if os.path.isfile(sOld): os.remove(sOld)
-            for sSide in ("", "-wal", "-shm"):
-                if os.path.isfile(sDb + sSide) and sSide: os.remove(sDb + sSide)
-            os.rename(sDb, sOld)
-            print("The old copy is now " + sOld)
-        except Exception as oError:
-            print("Could not set the old copy aside: " + str(oError)); return 1
+        # A FRESH START: the old copy set aside as RadioTrail-old.db, and a new
+        # copy made from the template at once. (Setting aside without copying
+        # left an empty database on 5 October 2026, and the catalog then had
+        # no table to land in.)
+        setAside(sDb)
+        if not copyTemplate(sDb): return 1
     say("Step 1 of 4: the copy is " + ("fresh from the template." if bFresh else "in place."))
     say("Step 2 of 4: the catalog.")
 
@@ -819,21 +847,16 @@ def mergeRows(sDb, lsRows, logLine, say, sLog):
     # what it lacks is dropped from every row, and said once, with the way to
     # get the new fields.
     lsCols = set(r[1] for r in c.execute("pragma table_info(stations)"))
-    # Across EVERY row, not the first: the SomaFM rows come first and carry
-    # fewer fields than the catalog's, so the first row said nothing was
-    # missing while sixty thousand rows behind it named playlist_url.
     lsAll = set()
     for dRow in lsRows: lsAll.update(dRow.keys())
     lsMissing = sorted(k for k in lsAll if k not in lsCols)
     if lsMissing:
-        say("This copy of RadioTrail is older than the template and lacks " + ", ".join(lsMissing)
-            + ". Those were left out. For the new fields run rebuildRadioTrail, or fetchStations --fresh.")
-        logLine("missing columns: " + ", ".join(lsMissing))
+        # Cannot happen after the shape check at the start; said plainly if it does.
+        say("The copy lacks columns the catalog needs: " + ", ".join(lsMissing) + ". Run fetchStations --fresh.")
+        logLine("missing columns: " + ", ".join(lsMissing)); c.close(); return 1
     dHave = {r[0]: r[1] for r in c.execute("select source_id, station_id from stations where source_id is not null and source_id <> ''")}
     iAdded = iUpdated = 0
     for dRow in lsRows:
-        for k in list(dRow.keys()):
-            if k not in lsCols: dRow.pop(k, None)
         sKey = dRow.get("source_id", "")
         if not sKey: continue
         dRow["last_seen"] = sNow
