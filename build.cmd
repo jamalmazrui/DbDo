@@ -140,7 +140,7 @@ rem it -- Say.onSpoken, LbcMenuItem, Elevate -- and a kit older than the source
 rem fails deep in the compiler with "Say does not contain a definition for
 rem onSpoken", which names the symptom and not the cause. So the build says the
 rem cause, first. Raise this whenever DbDo starts using something new.
-set "kitNeeded=1.53.2"
+set "kitNeeded=1.54.0"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -254,6 +254,25 @@ if "!ver!"=="" (
   echo ERROR: version.txt is empty. >> "!log!"
   popd
   exit /b 1
+)
+
+rem THE VERSION MUST BE THIS APP'S. A kit unarchived into the app's folder put
+rem the kit's version.txt in place of the app's (6 October 2026: 1.53.2 where
+rem 1.0.228 belonged), and the next build would have bumped the wrong series.
+rem The last published tag is the app's own number: when version.txt's first two
+rem parts differ from the tag's, the tag wins, and the log says so.
+set "tagVer="
+for /f "usebackq delims=" %%t in (`git describe --tags --abbrev^=0 2^>nul`) do set "tagVer=%%t"
+set "tagVer=!tagVer:v=!"
+if not "!tagVer!"=="" (
+  for /f "tokens=1,2 delims=." %%a in ("!ver!") do set "verSeries=%%a.%%b"
+  for /f "tokens=1,2 delims=." %%a in ("!tagVer!") do set "tagSeries=%%a.%%b"
+  if not "!verSeries!"=="!tagSeries!" (
+    echo version.txt held !ver!, not this app's series; the last published tag is !tagVer!, so that is the version now.
+    echo version.txt held !ver!, not this app's series; set to the last published tag !tagVer! >> "!log!"
+    > version.txt echo !tagVer!
+    set "ver=!tagVer!"
+  )
 )
 
 if /i "%~1"=="nobump" (

@@ -5,7 +5,7 @@
     <link>Tutorials.htm</link>
     <description>Short simulated walks through DbDo, using the JobTrail job search database that ships with it. Each one is about three minutes, with something to try at the end.</description>
     <language>en-us</language>
-    <lastBuildDate>Wed, 07 Oct 2026 01:28:54 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 07 Oct 2026 04:24:14 +0000</lastBuildDate>
     <itunes:author>Jamal Mazrui</itunes:author>
     <itunes:explicit>false</itunes:explicit>
     <itunes:category text="Technology"/>
@@ -24,8 +24,8 @@
       <description>The installer is downloaded, and your reader is running. Full transcript: Tutorials.htm#0a-01-install-and-launch</description>
       <link>Tutorials.htm#0a-01-install-and-launch</link>
       <guid isPermaLink="false">homer-tutorial_01_install_and_launch</guid>
-      <enclosure url="tutorials/01_Install_and_Launch.mp3" length="1381458" type="audio/mpeg"/>
-      <itunes:duration>00:03:14</itunes:duration>
+      <enclosure url="tutorials/01_Install_and_Launch.mp3" length="1504582" type="audio/mpeg"/>
+      <itunes:duration>00:03:33</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
@@ -33,8 +33,8 @@
       <description>DbDo is open with any database. Nothing needs pressing in this walk; it is listened to. Full transcript: Tutorials.htm#0b-02-user-interface-concepts</description>
       <link>Tutorials.htm#0b-02-user-interface-concepts</link>
       <guid isPermaLink="false">homer-tutorial_02_user_interface_concepts</guid>
-      <enclosure url="tutorials/02_User_Interface_Concepts.mp3" length="1369028" type="audio/mpeg"/>
-      <itunes:duration>00:03:07</itunes:duration>
+      <enclosure url="tutorials/02_User_Interface_Concepts.mp3" length="1553935" type="audio/mpeg"/>
+      <itunes:duration>00:03:26</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
@@ -42,8 +42,8 @@
       <description>DbDo is open with any database. Full transcript: Tutorials.htm#0c-03-key-patterns</description>
       <link>Tutorials.htm#0c-03-key-patterns</link>
       <guid isPermaLink="false">homer-tutorial_03_key_patterns</guid>
-      <enclosure url="tutorials/03_Key_Patterns.mp3" length="1139471" type="audio/mpeg"/>
-      <itunes:duration>00:02:39</itunes:duration>
+      <enclosure url="tutorials/03_Key_Patterns.mp3" length="1021259" type="audio/mpeg"/>
+      <itunes:duration>00:02:25</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
@@ -51,7 +51,7 @@
       <description>DbDo is open and no database is open yet. Full transcript: Tutorials.htm#0d-04-open-and-move-through-a-database</description>
       <link>Tutorials.htm#0d-04-open-and-move-through-a-database</link>
       <guid isPermaLink="false">homer-tutorial_04_open_and_move_through_a_database</guid>
-      <enclosure url="tutorials/04_Open_and_Move_Through_a_Database.mp3" length="1272536" type="audio/mpeg"/>
+      <enclosure url="tutorials/04_Open_and_Move_Through_a_Database.mp3" length="1276669" type="audio/mpeg"/>
       <itunes:duration>00:03:10</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
@@ -60,7 +60,7 @@
       <description>The kit is at C colon backslash HomerDev, and a command prompt is open there. Full transcript: Tutorials.htm#0e-04-start-an-app-from-the-kit</description>
       <link>Tutorials.htm#0e-04-start-an-app-from-the-kit</link>
       <guid isPermaLink="false">homer-tutorial_04_start_an_app_from_the_kit</guid>
-      <enclosure url="tutorials/04_Start_an_App_from_the_Kit.mp3" length="1261277" type="audio/mpeg"/>
+      <enclosure url="tutorials/04_Start_an_App_from_the_Kit.mp3" length="1263212" type="audio/mpeg"/>
       <itunes:duration>00:02:55</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
@@ -69,7 +69,7 @@
       <description>JobTrail is open on the jobs table. This morning I found a support analyst opening at Widget Works. Full transcript: Tutorials.htm#0f-05-add-inspect-and-edit-records</description>
       <link>Tutorials.htm#0f-05-add-inspect-and-edit-records</link>
       <guid isPermaLink="false">homer-tutorial_05_add_inspect_and_edit_records</guid>
-      <enclosure url="tutorials/05_Add_Inspect_and_Edit_Records.mp3" length="1326725" type="audio/mpeg"/>
+      <enclosure url="tutorials/05_Add_Inspect_and_Edit_Records.mp3" length="1326433" type="audio/mpeg"/>
       <itunes:duration>00:03:22</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
@@ -78,7 +78,7 @@
       <description>An app built on the kit is open in a command prompt, with a change made and GitHub signed in. Full transcript: Tutorials.htm#0g-05-build-check-and-release</description>
       <link>Tutorials.htm#0g-05-build-check-and-release</link>
       <guid isPermaLink="false">homer-tutorial_05_build_check_and_release</guid>
-      <enclosure url="tutorials/05_Build_Check_and_Release.mp3" length="1326646" type="audio/mpeg"/>
+      <enclosure url="tutorials/05_Build_Check_and_Release.mp3" length="1326001" type="audio/mpeg"/>
       <itunes:duration>00:03:03</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
@@ -96,7 +96,7 @@
       <description>A Homer program's installer is downloaded, and your reader is running. Full transcript: Tutorials.htm#0i-06-the-installer-and-its-finish-page</description>
       <link>Tutorials.htm#0i-06-the-installer-and-its-finish-page</link>
       <guid isPermaLink="false">homer-tutorial_06_the_installer_and_its_finish_page</guid>
-      <enclosure url="tutorials/06_The_Installer_and_Its_Finish_Page.mp3" length="1208790" type="audio/mpeg"/>
+      <enclosure url="tutorials/06_The_Installer_and_Its_Finish_Page.mp3" length="1202662" type="audio/mpeg"/>
       <itunes:duration>00:02:47</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
@@ -114,7 +114,7 @@
       <description>An app built on the kit, with its help folder open. Full transcript: Tutorials.htm#0k-07-spoken-tutorials</description>
       <link>Tutorials.htm#0k-07-spoken-tutorials</link>
       <guid isPermaLink="false">homer-tutorial_07_spoken_tutorials</guid>
-      <enclosure url="tutorials/07_Spoken_Tutorials.mp3" length="1611376" type="audio/mpeg"/>
+      <enclosure url="tutorials/07_Spoken_Tutorials.mp3" length="1611091" type="audio/mpeg"/>
       <itunes:duration>00:03:38</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
@@ -132,7 +132,7 @@
       <description>FileDir and DbDo are installed, with mpv. Full transcript: Tutorials.htm#0m-08-shared-code-and-the-homer-player</description>
       <link>Tutorials.htm#0m-08-shared-code-and-the-homer-player</link>
       <guid isPermaLink="false">homer-tutorial_08_shared_code_and_the_homer_player</guid>
-      <enclosure url="tutorials/08_Shared_Code_and_the_Homer_Player.mp3" length="1255329" type="audio/mpeg"/>
+      <enclosure url="tutorials/08_Shared_Code_and_the_Homer_Player.mp3" length="1254832" type="audio/mpeg"/>
       <itunes:duration>00:02:52</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
@@ -141,8 +141,8 @@
       <description>Nothing is needed. Full transcript: Tutorials.htm#0n-09-glossary</description>
       <link>Tutorials.htm#0n-09-glossary</link>
       <guid isPermaLink="false">homer-tutorial_09_glossary</guid>
-      <enclosure url="tutorials/09_Glossary.mp3" length="1323381" type="audio/mpeg"/>
-      <itunes:duration>00:03:14</itunes:duration>
+      <enclosure url="tutorials/09_Glossary.mp3" length="1492385" type="audio/mpeg"/>
+      <itunes:duration>00:03:44</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
@@ -150,8 +150,8 @@
       <description>Nothing is needed. Full transcript: Tutorials.htm#0o-10-conclusion</description>
       <link>Tutorials.htm#0o-10-conclusion</link>
       <guid isPermaLink="false">homer-tutorial_10_conclusion</guid>
-      <enclosure url="tutorials/10_Conclusion.mp3" length="896638" type="audio/mpeg"/>
-      <itunes:duration>00:02:03</itunes:duration>
+      <enclosure url="tutorials/10_Conclusion.mp3" length="1107009" type="audio/mpeg"/>
+      <itunes:duration>00:02:31</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>

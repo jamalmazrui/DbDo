@@ -4,7 +4,15 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.242 (current)
+## v1.0.243 (current)
+
+**The build puts the folder right by itself.** Through the kit's tidy it removes
+any of the kit's files unarchived here by mistake, and the one-off repair
+scripts of 5 and 6 October; and when version.txt holds another series' number
+it returns to the last published tag. No separate script to run: unzip, build,
+release. Needs HomerDev 1.54.0.
+
+## v1.0.242
 
 **The installer keeps its own reader wrappers** and tells the kit so, now that
 HomerComponents.iss supplies them to apps that have none. Needs HomerDev
