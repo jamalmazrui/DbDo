@@ -1,11 +1,10 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="author" content="Jamal Mazrui" />
-  <title>ReadMe</title>
+  <title>DbDo ReadMe</title>
   <style>
     html {
       line-height: 1.5;
@@ -166,261 +165,227 @@
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">ReadMe</h1>
-<p class="author">Jamal Mazrui</p>
+<h1 class="title">DbDo ReadMe</h1>
 </header>
-<h1 id="homerdev">HomerDev</h1>
-<p>HomerDev is the Homer Development Kit: the shared C# classes, Python
-modules, build scripts and project templates that every Homer Tools
-program is built on. One copy, in one place, so a fix reaches every
-app.</p>
-<p>It is aimed at two readers. A developer who wants to build or change
-a Homer app, and an AI asked to write one, which can be told: “use the
-Homer namespace in <code>C:\HomerDev\exec\CSharp</code> and follow
-HomerDev.md.”</p>
-<h2 id="contents">Contents</h2>
+<nav id="TOC" role="doc-toc">
 <ul>
-<li><a href="#install">Install</a></li>
-<li><a href="#quick-start">Quick start</a></li>
-<li><a href="#what-is-in-the-kit">What is in the kit</a></li>
-<li><a href="#where-the-documents-are">Where the documents are</a></li>
-<li><a href="#the-other-documents">The other documents</a></li>
-</ul>
-<h2 id="install">Install</h2>
-<p>Unzip <code>HomerDev.zip</code> into a folder named
-<code>HomerDev</code>, on any drive and at any depth – beside your
-projects is simplest. That is the install.</p>
-<p>You also need, and the kit will tell you if one is missing:</p>
+<li><a href="#dbdo-the-keyboard-first-database-manager"
+id="toc-dbdo-the-keyboard-first-database-manager">DbDo – the
+keyboard-first database manager</a>
 <ul>
-<li>Windows 10 or later, 64-bit</li>
-<li>the .NET Framework 4.8 Developer Pack</li>
-<li>the Visual Studio Build Tools, free, for the C# compiler</li>
-<li>Python 3, for the kit’s own scripts</li>
-<li>Inno Setup 6, to build an installer</li>
-<li>git and the GitHub CLI, to publish</li>
+<li><a href="#installing" id="toc-installing">Installing</a></li>
+<li><a href="#quick-start" id="toc-quick-start">Quick start</a></li>
+<li><a href="#learning-more" id="toc-learning-more">Learning
+more</a></li>
+<li><a href="#convention-over-configuration-four-nouns-and-one-junction"
+id="toc-convention-over-configuration-four-nouns-and-one-junction">Convention
+over configuration: four nouns and one junction</a></li>
+<li><a href="#valid-values-become-comboboxes-the-lookups-table"
+id="toc-valid-values-become-comboboxes-the-lookups-table">Valid values
+become comboboxes (the lookups table)</a></li>
+<li><a href="#background-four-decades-of-nonvisual-database-tools"
+id="toc-background-four-decades-of-nonvisual-database-tools">Background:
+four decades of nonvisual database tools</a></li>
+<li><a href="#license" id="toc-license">License</a></li>
+</ul></li>
 </ul>
-<p>The kit is found by its folder name: the <code>HomerDev</code>
-environment variable, then any folder above the one you are working in
-that is the kit or holds a HomerDev folder, then a HomerDev folder at
-the top of any drive. So a kit beside your projects needs no setting,
-wherever they are.</p>
+</nav>
+<h1 id="dbdo-the-keyboard-first-database-manager">DbDo – the
+keyboard-first database manager</h1>
+<p>DbDo opens a database and lets you read it, add to it, sort it,
+filter it, follow its links, and hand it to other people – all from the
+keyboard, with your screen reader doing the talking. It works with JAWS,
+NVDA and Narrator.</p>
+<p>Every table is a list you arrow through. Every command has a key, and
+every key is named for a word in its command, so it can be remembered
+rather than looked up.</p>
+<h2 id="installing">Installing</h2>
+<p>Download <a
+href="https://github.com/JamalMazrui/DbDo/releases/latest/download/DbDo_setup.exe">the
+DbDo installer</a> and run it. Windows asks for permission first,
+because DbDo installs for everyone on the computer; the prompt can open
+behind other windows, so press Alt+Tab if nothing seems to happen.</p>
+<p>On the last page you can add scripts for JAWS and NVDA, and Ollama,
+which lets DbDo answer questions with AI that runs on your own computer.
+Leave <strong>Launch DbDo</strong> ticked and press Enter. After that,
+<strong>Alt+Control+D</strong> starts DbDo from anywhere in Windows – D
+for DbDo.</p>
+<p>To update later, press <strong>F11</strong> inside DbDo: Elevate
+Version. It checks for a newer release and offers to install it.</p>
 <h2 id="quick-start">Quick start</h2>
-<h3 id="install-the-kit">1. Install the kit</h3>
-<p>Unzip <code>HomerDev.zip</code> into a folder named
-<code>HomerDev</code>, such as <code>C:\HomerDev</code> or
-<code>D:\Work\HomerDev</code>. That is the install. Then, in that
-folder:</p>
-<pre><code>build</code></pre>
-<p>It converts every document to HTML with pandoc, fetching pandoc with
-winget if this machine does not have it, then checks the kit over and
-reports anything wrong. The detail goes to <code>build.log</code> beside
-the script.</p>
-<p>Every build script looks for the kit in the <code>HomerDev</code>
-environment variable first, then in the folder it is run from and every
-folder above it, then in a HomerDev folder at the top of any drive.</p>
-<h3 id="build-and-run-the-fruit-basket-in-c">2. Build and run the fruit
-basket in C</h3>
-<pre><code>cd Templates\samples
-buildFruitBasketCs
-FruitBasketCs</code></pre>
-<p>A window opens with a fruit field, an Add button, a basket list and a
-Delete button. Type a fruit and press Enter. Arrow through the basket.
-Press Delete on one. Press Report to see the whole basket in a window
-you can read line by line. Close it and run it again: the basket is
-still there.</p>
-<p>Then try what nothing in that program had to write:</p>
+<p>The first time it runs, DbDo opens <strong>JobTrail</strong>, a job
+search database that comes with it. JobTrail keeps the jobs you are
+after, the people you meet, the documents you send, the stories you tell
+in interviews, and a log of every step you take – the log an
+unemployment office or a rehabilitation counselor asks for.</p>
+<p>Five things to try:</p>
 <ul>
-<li><strong>Alt+F</strong> reaches the fruit field,
-<strong>Alt+A</strong> adds, <strong>Alt+D</strong> deletes,
-<strong>Alt+R</strong> reports. One ampersand in a label is the whole
-mechanism.</li>
-<li><strong>Control+J</strong> in the basket searches inside the list;
-<strong>F3</strong> repeats it.</li>
-<li><strong>Control+C</strong> in the fruit field copies the whole line
-with nothing selected; <strong>Alt+F8</strong> reads the field aloud;
-<strong>F8</strong> then <strong>Shift+F8</strong> marks a selection in
-two keystrokes instead of holding Shift.</li>
-<li><strong>F1</strong> opens a Help window listing every field with its
-explanation.</li>
-<li><strong>Control+Enter</strong> accepts from anywhere.</li>
+<li><strong>Arrow through a table.</strong> Each row is one record. Down
+and Up move between records; Left and Right move between fields.
+Shift+C, Say Cell, tells you which field you are on and what it
+holds.</li>
+<li><strong>Add a record.</strong> Control+N, New. Tab through the
+fields and press Control+Enter to save.</li>
+<li><strong>Find something.</strong> Type the first letters of what you
+want and the list goes there. Control+K, Find, searches every
+field.</li>
+<li><strong>Choose what you hear.</strong> Alt+S, Select Columns, picks
+the fields each row speaks.</li>
+<li><strong>Get something out.</strong> Alt+Shift+R runs a Report, such
+as the Work Search Record for a claim.</li>
 </ul>
-<p>All of that comes from Lbc, and the program is about 250 lines
-including its comments.</p>
-<h3 id="build-and-run-the-same-program-in-python">3. Build and run the
-same program in Python</h3>
-<pre><code>    buildFruitBasketPy
-FruitBasketPy</code></pre>
-<p>The first build makes a virtual environment beside the script and
-installs PyInstaller and wxPython into it, which takes a few minutes
-once. What comes out is one file: <code>FruitBasketPy.exe</code>, with
-Python and every dependency inside it, so whoever you give it to needs
-no Python of their own.</p>
-<h3 id="read-the-two-side-by-side">4. Read the two side by side</h3>
-<p>This is the part worth the time. Both files carry the same twelve
-markers:</p>
-<pre><code>---- BLOCK n: &lt;title&gt; ----</code></pre>
-<p>Same numbers, same titles, same function names. Nine decisions are
-marked DECISION 1 to DECISION 9 where they occur in each. They are the
-decisions a working program has to get right and an AI will not make for
-you unless you ask for them. The AI-assisted coding part of
-<code>HomerDev.md</code> is written around them.</p>
-<h3 id="look-at-where-it-put-things">5. Look at where it put things</h3>
-<pre><code>%LOCALAPPDATA%\FruitBasketCs</code></pre>
-<p>Six folders, and every one of them starts with a different letter, so
-you reach any of them by typing that letter: <code>configs</code> holds
-the settings, <code>data</code> a database, <code>scripts</code> your
-own scripts, <code>logs</code> one file per session,
-<code>results</code> what the program produced, <code>temp</code> what a
-crash left behind. An installed program adds <code>exec</code>,
-<code>samples</code> and <code>templates</code> in its own folder under
-Program Files.</p>
-<h3 id="look-at-the-log">6. Look at the log</h3>
-<pre><code>%LOCALAPPDATA%\FruitBasketCs\logs</code></pre>
-<p>One file per session, named for when it started, holding the
-environment, every setting and every error with its stack. Every Homer
-program writes one, from the same <code>Log</code> class, in the same
-place. So does every installer.</p>
-<h3 id="build-the-third-shape-in-both-languages">7. Build the third
-shape, in both languages</h3>
-<pre><code>buildFruitBasketMdiCs
-FruitBasketMdiCs
-buildFruitBasketMdiPy
-FruitBasketMdiPy</code></pre>
-<p>The same fruit basket as a multiple-document program. Press Control+N
-for another basket, F4 to pick between them, Shift+F4 to hear how many
-are open, Alt+F10 for every command in one list, and Control+F1 to turn
-on the key describer and explore the keys without running anything.</p>
-<p>Press Alt+Shift+S for the script list and Alt+Shift+C to change a
-setting while the program is running. Both are lists you reach by first
-letter, which is the whole point of them.</p>
-<p>Homer apps come in three shapes – a single tool with a command line
-and a dialog, a desktop-only program whose dependencies decided that,
-and a multiple-document program. They share almost everything;
-<code>HomerDev.md</code> says what differs.</p>
-<h3 id="check-the-whole-kit-with-a-compiler">8. Check the whole kit with
-a compiler</h3>
-<pre><code>checkHomerDev</code></pre>
-<p>It audits the kit, deletes what previous builds wrote, builds all
-three samples from clean, and writes an evidence report. Run it after
-changing anything in <code>exec\CSharp</code> or
-<code>exec\Python</code>, and before a release. It exists because three
-releases in a row shipped a fault that only a compiler could see.</p>
-<h3 id="gather-evidence">9. Gather evidence</h3>
-<pre><code>cd Tools
-check --path ..\Templates\samples</code></pre>
-<p>Eleven checks run, and an <code>evidence-&lt;date&gt;.md</code>
-appears saying what was verified, what was not checked, and what remains
-uncertain. Open it. The third list is the point: it names what no script
-can settle, so you know where your own judgement is still needed.</p>
-<p><code>accept.inix</code> beside the source is where you write what
-“done” means for your own program – a name, a command, an expected exit
-code – and the checker runs every one of them.</p>
-<h3 id="start-your-own-app">10. Start your own app</h3>
-<pre><code>newHomerApp JobDo               a C# app
-newHomerApp JobDo --python      a Python app</code></pre>
-<p>That writes <code>C:\JobDo</code> with everything a new app needs: a
-working one-dialog program, the build script, the installer script, the
-GitHub bootstrap, the local AI and screen reader install scripts,
-<code>RepoFiles.txt</code>, <code>.gitignore</code>,
-<code>self.md</code> and <code>version.txt</code>. Nothing already in
-the folder is overwritten.</p>
-<p>Two things need your hand, and both are marked CHANGE ME in the
-installer script: a fresh AppId, and the desktop hotkey.</p>
-<h3 id="build-run-and-publish">11. Build, run and publish</h3>
-<pre><code>cd \JobDo
-buildJobDo
-JobDo
-createJobDoRepo
-release</code></pre>
-<p><code>createJobDoRepo</code> makes the GitHub repository and pushes
-the first commit; after that <code>release</code> is how every release
-goes out. Copy <code>release.cmd</code> and <code>release.ps1</code>
-from <code>scripts\</code> into the app folder first, or keep one copy
-in a folder on your PATH – they act on the current directory, so one
-copy serves every project.</p>
-<h3 id="listen-instead">Listen instead</h3>
-<p><code>Tutorial_HomerDev.inix</code> is the same walkthrough as a
-spoken tutorial: what the kit is, unarchiving it, building both fruit
-baskets, and hearing that the two behave the same.
-<code>scripts\buildTutorials.cmd</code> renders it to audio in two
-voices – the narration in one, the screen reader’s answers in another –
-using Windows’ own voices, with nothing installed and nothing
-uploaded.</p>
-<pre><code>cd Tools
-buildTutorials --list
-buildTutorials ..\Tutorial_HomerDev.inix</code></pre>
-<h3 id="what-gets-published-and-what-does-not">What gets published, and
-what does not</h3>
-<p><code>RepoFiles.txt</code> names what the repository carries, and
-<code>tidy --gitignore</code> turns that into a <code>.gitignore</code>
-that ignores everything else. A file dropped into the folder is
-invisible to git until somebody names it. <code>self.md</code>, the
-project’s own notebook, is in the never-pushed list and stays on your
-machine.</p>
-<h2 id="what-is-in-the-kit">What is in the kit</h2>
+<h2 id="learning-more">Learning more</h2>
 <ul>
-<li><code>exec\CSharp\</code> – twelve modules in the <code>Homer</code>
-namespace: Inix (settings and tables), KeyMap, KeyName, Lbc (dialogs),
-Log (the session log), Mdi (multiple-document frames), Paths (the folder
-layout), PdfRead, Say (speech), Util, Web, inixVert.</li>
-<li><code>exec\Python\</code> – the same toolbox for Python and NVDA
-add-ons: inix, lbc, log, paths, say, util and web, each a module
-imported by its own name, with the same names and the same
-behaviour.</li>
-<li><code>Templates\</code> – the files a new app starts from.</li>
-<li><code>scripts\</code> – check, push, release, tidy, buildTutorials
-and release. No editing needed; they work out the app name from the
-folder, and any of them can be run from a shared tools folder.</li>
-<li><code>Templates\samples\</code> – four fruit basket programs: the
-single dialog in C# and in Python, and the multiple-document version in
-C# and in Python. Each pair is the same program in two languages,
-written block for block. The teaching material.</li>
-<li><code>help\</code> – every document, and the tutorial scripts.</li>
+<li><strong>Play Tutorials,</strong> on the Help menu, plays fifteen
+short spoken walkthroughs that follow one job seeker through JobTrail.
+Take them in order: each one builds on the last.</li>
+<li><strong><a href="help/DbDo.md">DbDo.md</a></strong> (F1) is the full
+guide.</li>
+<li><strong><a href="help/Hotkeys.md">Hotkeys.md</a></strong>
+(Control+Shift+F1) lists every key, by menu, by key and by command, with
+the reason for each.</li>
+<li><strong><a href="help/FAQ.md">FAQ.md</a></strong> answers common
+questions.</li>
+<li><strong><a href="help/History.md">History.md</a></strong> (Shift+F1)
+says what changed in each version.</li>
+<li><strong><a href="help/Developer.md">Developer.md</a></strong>
+explains how to build DbDo from its source.</li>
 </ul>
-<p><code>HomerDev.md</code> lists every file in the kit with one line
-saying why it is there.</p>
-<h2 id="where-the-documents-are">Where the documents are</h2>
-<p><code>ReadMe</code> and <code>License</code> are here at the top.
-Everything else is in <code>help</code>:</p>
+<h2
+id="convention-over-configuration-four-nouns-and-one-junction">Convention
+over configuration: four nouns and one junction</h2>
+<p>Most of the relational worlds people actually keep – a convention, a
+club roster, a project tracker, a contact book – reduce to a handful of
+nouns and the relationships among them. DbDo leans into that.
+NFB2026Convention.db uses exactly four noun tables plus DbDo’s two
+standard infrastructure tables, and every table – infrastructure
+included – carries the full standard column set
+(<code>&lt;singular&gt;_id</code> primary key, <code>added</code>,
+<code>edited</code>, …, <code>notes</code>, <code>tags</code>,
+<code>look</code>, <code>unq</code>, <code>marked</code>):</p>
 <ul>
-<li><code>HomerDev.md</code> – the guide: the classes, the conventions,
-the three shapes of Homer app, the folder layout, the evidence checks,
-and a list of every file in the kit with a line saying why it is
-there</li>
-<li><code>Tutorials.md</code> – nine worked scenarios, and the audio
-tutorial playlist</li>
-<li><code>Developer.md</code> – how to rebuild or change the kit</li>
-<li><code>HomerDev_update.md</code> – the briefing for bringing another
-Homer app up to the current kit: the contract, the lessons, the
-migration steps, and what DbDo and EdSharp each still need</li>
-<li><code>History.md</code> – what changed in each version, and why</li>
-<li><code>Hotkeys.md</code> – every key three ways</li>
-<li><code>FAQ.md</code> – the questions people ask, including why
-Windows only</li>
-<li><code>Announce.md</code> – three ready-to-post announcements,
-already the right length</li>
-<li><code>Tutorial_HomerDev.inix</code> – the spoken walkthrough, in two
-voices</li>
+<li><strong>contacts</strong> – people and organizations. The field
+roster (<code>first_name</code>, <code>middle_name</code>,
+<code>last_name</code>, <code>gender</code>, <code>date_of_birth</code>,
+three phone fields, two email fields,
+<code>address1</code>/<code>address2</code>/<code>city</code>/<code>state</code>/<code>zip</code>/<code>nation</code>,
+<code>enterprise</code>, <code>job</code>, <code>url</code>) is a
+general-purpose contact schema designed so the Record Edit dialog can
+give every field a distinct accelerator key.</li>
+<li><strong>events</strong> – one row per discrete agenda entry:
+<code>event_date</code>, <code>start_time</code>, <code>end_time</code>
+(24-hour, so chronological sort is plain text sort), <code>title</code>,
+and a <code>details</code> memo. No subevents, no tracks – every entry
+stands alone.</li>
+<li><strong>locations</strong> – the hotel’s rooms and spaces:
+<code>name</code>, <code>level</code>, <code>hotel</code>. Levels follow
+the agenda’s own rule (room numbers starting with N are on level N;
+lettered salons are the Lone Star Ballroom on 3; numbered salons are the
+JW Grand Ballroom on 4).</li>
+<li><strong>projects</strong> – products, services, and other ongoing
+endeavors: a work in progress that evolves over time justifies the term.
+Parsed from the agenda by named-program patterns (academies, awards,
+fairs, camps, scholarship programs) and a curated brand list
+(NFB-NEWSLINE, Aira, Monarch, Dot Pad), with shorter name variants
+merged into their fuller titles. Ownership and appearances are never
+columns here – an event <strong>features</strong> a project, and an
+organization <strong>offers</strong> one, both as maps rows.</li>
+<li><strong>maps</strong> – the heart of the model: a <em>generic typed
+association</em> between any two records in any tables. Each row holds
+<code>(tbl1, unq1, kind, tbl2, unq2)</code> – the subject, the
+relationship kind, and the object – identified by <code>unq</code>
+values rather than integer keys, so map rows are human-readable in the
+grid, survive export and re-import, and can be authored by script. The
+kinds here: <strong>presents</strong> (a contact presents at, chairs, or
+leads an event; the stated role and affiliation ride in the map row’s
+<code>notes</code>), <strong>located_at</strong> (an event happens at a
+location), <strong>sponsors</strong> (an organization sponsors an
+event), <strong>features</strong> (an event features, demonstrates, or
+discusses a project), and <strong>offers</strong> (an organization
+provides a project). Any table pair, any cardinality – one-to-many and
+many-to-many are the same row shape, and parent/child is just a matter
+of which side of a kind you read. The same one table could equally
+relate a contact to a location, an event to an event, or anything to
+anything – new relationship kinds need a lookups row, not a new junction
+table.</li>
+<li><strong>lookups</strong> – the standard valid-values table, seeded
+with the <code>maps.kind</code> vocabulary and the hotel names.</li>
 </ul>
-<h2 id="the-other-documents">The other documents</h2>
+<p>The point of the maps model: “all events related to this contact” and
+“all events at this location” are the SAME query shape – filter maps by
+one side, read the other side – and because the answer comes back as a
+single-table SELECT through an IN-subquery, the resulting view stays
+editable in DbDo.</p>
+<h2 id="valid-values-become-comboboxes-the-lookups-table">Valid values
+become comboboxes (the lookups table)</h2>
+<p>A <strong>lookups</strong> table defines the allowed values for a
+field, so the Record Edit dialog can present that field as a ComboBox –
+the Windows control that works best from the keyboard, with type-ahead
+and arrow navigation that every screen reader announces cleanly –
+instead of a bare text box. Each lookups row binds a value to a
+<code>tbl</code> and <code>fld</code> (with an optional <code>src</code>
+authority and a <code>descrip</code>). DbDo offers the combobox whenever
+a field has values defined.</p>
+<p>NFB2026Convention.db carries lookups for its own fields – every
+<code>maps.kind</code> it uses (presents, located_at, sponsors,
+features, offers, affiliated_with, part_of), the
+<code>projects.kind</code> list (product, service, program, app, …), and
+<code>locations.hotel</code>. A separate, shared
+<strong>lookups.db</strong> ships alongside with global lists –
+<code>state</code> and <code>country</code> – bound to any table that
+has a field of that name, so they serve the other template databases too
+(Northwind’s <code>country</code> field gets a combobox with no
+per-database setup).</p>
+<h2 id="background-four-decades-of-nonvisual-database-tools">Background:
+four decades of nonvisual database tools</h2>
+<p>DbDo is the latest in a line of accessible database managers I have
+built over nearly forty years. I worked as a database administrator at
+Harvard’s Kennedy School of Government in the 1980s; when the field
+moved from the DOS command line to the Windows graphical interface and
+tools like Microsoft Access, the screen readers of the day could not
+make those tools usable – a barrier that cost me a promotion and pushed
+me toward building accessible software myself.</p>
 <ul>
-<li><code>HomerDev.md</code> – the complete guide: the four kinds of
-Homer resource (app, collection, kit and page), the <code>.inix</code>
-format, AI-assisted coding and how to teach with the samples, Camel
-Type, direct speech across screen readers, Lbc and the standard dialogs,
-the launchpad app conventions, keys, scripts and logs, and the
-installer.</li>
-<li><code>Developer.md</code> – how to change the kit itself and how a
-fix reaches the apps.</li>
-<li><code>Hotkeys.md</code> – the keys every Homer dialog and text box
-gives you.</li>
-<li><code>History.md</code> – what changed, and when.</li>
-<li><code>License.md</code> – MIT.</li>
+<li><strong>Contact Tracking System (DOS).</strong> My first accessible
+database tool: a keyboard-and-speech contact and records manager for the
+DOS era, when a well-structured text screen was the most accessible
+interface available.</li>
+<li><strong>DbDialog (AutoIt).</strong> A friendly database manager for
+Windows, built in the AutoIt scripting language on top of my own
+label-based-controls library (LbC) so that every field was a standard,
+screen-reader-friendly Windows control. I later packaged DbDialog to run
+as a script package within the Window-Eyes screen reader as well.</li>
+<li><strong>DbDo (this program).</strong> A Windows desktop application
+with two interfaces over one live connection – a multiple-document
+graphical interface and a dBASE-style console dot prompt – supporting
+SQLite, Access, Excel, dBASE, and delimited files in a relational model
+designed from the ground up for screen-reader and keyboard
+efficiency.</li>
 </ul>
-<p>For resources beyond the kit on building apps with AI as a blind
-screen reader user, HomerDev among them, see <a
-href="https://jamalmazrui.github.io/BlindVibeCoding/">Blind Vibe Coding:
-Building Apps Nonvisually with AI</a>. The kit’s <code>post</code>
-script and homer-page skill publish a page like it.</p>
+<p>DbDo’s keyboard and command conventions also draw on two other
+accessible tools I build and maintain: <strong><a
+href="https://github.com/jamalmazrui/EdSharp">EdSharp</a></strong>, a
+text and code editor optimized for keyboard and screen-reader users, and
+<strong><a
+href="https://github.com/jamalmazrui/FileDir">FileDir</a></strong>, a
+file and directory manager in the same spirit. The multiple-window
+model, the Key Help mode that announces a command instead of running it,
+the spoken status-query commands, and the in-place text-field
+convenience keys all matured in those programs first; DbDo carries the
+same muscle memory into a relational-database setting.</p>
+<p>Across that span I also served as founding director of the Boston
+Computer Society’s Visually Impaired and Blind User Group, as an analyst
+at the National Council on Disability, and as deputy director of the
+FCC’s Accessibility and Innovation Initiative, and I maintain a large
+free-software repository for blind computer users. DbDo carries that
+history forward.</p>
+<p>To the best of my research, no other general-purpose relational
+database manager has been built specifically for screen-reader users;
+mainstream desktop database tools are designed for sighted, mouse-driven
+use and are accessible only incidentally, if at all. DbDo is built to
+close that gap.</p>
+<h2 id="license">License</h2>
+<p>DbDo is free and open source under the MIT License. See <a
+href="License.md">License.md</a>.</p>
 </body>
 </html>

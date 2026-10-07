@@ -1,37 +1,71 @@
-﻿# RepoFiles.txt -- what the HomerDev repository carries. The kit ships no
-# installer, so this file alone tells tidy what belongs here.
+﻿# RepoFiles.txt -- what the DbDo repository carries.
 #
 # One name per line. A trailing slash names a whole folder. Blank lines and
 # lines beginning with # or ; are ignored.
+#
+# THIS IS THE WHITELIST. scripts\tidy --gitignore (which scripts\push runs)
+# turns it into a .gitignore that ignores everything else, so a file dropped
+# into this folder is invisible to git until it is named here. The Homer
+# classes are NOT listed: DbDo compiles them from C:\HomerDev and no longer
+# carries copies. The scripts are named one by one, never scripts/ wholesale,
+# because the kit's release.cmd and release.ps1 sit there and stay out of git.
+# version.txt and Version.cs are not here: the version lives only on this
+# machine, and Version.cs is written from it by every build.
 
-exec/CSharp/
-exec/Python/
-Templates/
-
-# The Claude skills, where Claude Code finds them: one folder each, SKILL.md at the top
-.claude/
-
-# What fixEncoding and check leave as it is
-KeepEncoding.txt
-scripts/
-ReadMe.md
-ReadMe.htm
-License.md
-License.htm
-help/
-build.cmd
-build.py
-checkHomerDev.cmd
-checkHomerDev.py
-createHomerDevRepo.cmd
-createHomerDevRepo.ps1
-newHomerApp.cmd
-releaseHomerDev.cmd
-newHomerApp.py
-updateAppBuilds.cmd
-updateAppBuilds.py
-version.txt
-RepoFiles.txt
-LocalFiles.txt
-.gitignore
 .gitattributes
+.gitignore
+2db.cs
+accept.inix
+build.cmd
+configs/DbDo.inix
+data/lookups.db
+DbDo.cmd
+DbDo.cs
+DbDo.exe.config
+DbDo.ico
+DbDo.js
+DbDo.manifest
+DbDo_setup.iss
+getDbDoDeps.cmd
+getDbDoDeps.ps1
+help/
+help/Tutorials.md
+help/Tutorials.mkv
+License.htm
+License.md
+LocalFiles.txt
+ReadMe.htm
+ReadMe.md
+RepoFiles.txt
+scripts/acceptCheck.cmd
+scripts/auditPatterns.cmd
+scripts/auditPatterns.py
+scripts/buildTutorials.cmd
+scripts/buildTutorials.ps1
+scripts/check.cmd
+scripts/check.py
+scripts/checkTutorial.cmd
+scripts/checkTutorial.py
+scripts/finish.cmd
+scripts/fixEncoding.cmd
+scripts/fixEncoding.py
+scripts/installCommon.cmd
+scripts/installModels.cmd
+scripts/installOllama.cmd
+scripts/installScreenReaderSupport.cmd
+scripts/makeHotkeys.py
+scripts/makeTutorials.cmd
+scripts/makeTutorials.py
+scripts/push.cmd
+scripts/renameToPrime.sql
+scripts/summarizeSetup.cmd
+scripts/summarizeSetup.ps1
+scripts/tidy.cmd
+scripts/tidy.py
+scripts/uiCheck.cmd
+scripts/uiCheck.py
+scripts/unpushed.cmd
+scripts/unpushed.py
+templates/
+THIRD-PARTY-NOTICES.txt
+uiTest.inix

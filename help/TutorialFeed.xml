@@ -1,15 +1,15 @@
 ﻿<?xml version="1.0" encoding="UTF-8"?>
 <rss version="2.0" xmlns:itunes="http://www.itunes.com/dtds/podcast-1.0.dtd">
   <channel>
-    <title>HomerDev Walkthroughs</title>
+    <title>DbDo Walkthroughs</title>
     <link>Tutorials.htm</link>
-    <description>Spoken walks through the Homer Development Kit: what it is, how it builds and releases an app, and what its shared code makes a person hear. Twelve walks, each three to five minutes.</description>
+    <description>Short simulated walks through DbDo, using the JobTrail job search database that ships with it. Each one is about three minutes, with something to try at the end.</description>
     <language>en-us</language>
-    <lastBuildDate>Tue, 06 Oct 2026 22:46:08 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 07 Oct 2026 01:28:54 +0000</lastBuildDate>
     <itunes:author>Jamal Mazrui</itunes:author>
     <itunes:explicit>false</itunes:explicit>
     <itunes:category text="Technology"/>
-    <itunes:owner><itunes:name>Jamal Mazrui</itunes:name><itunes:email>jamal.mazrui@outlook.com</itunes:email></itunes:owner>
+    <itunes:owner><itunes:name>Jamal Mazrui</itunes:name><itunes:email>empowermentzone@gmail.com</itunes:email></itunes:owner>
     <item>
       <title>00 - Overview and Table of Contents</title>
       <description>Nothing is needed; this walk is listened to. Full transcript: Tutorials.htm#0-00-overview-and-table-of-contents</description>
@@ -21,7 +21,7 @@
     </item>
     <item>
       <title>01 - Install and Launch</title>
-      <description>Windows 10 or later, 64-bit, a screen reader running, and HomerDev dot zip downloaded. Everything else the kit fetches for itself. Full transcript: Tutorials.htm#0a-01-install-and-launch</description>
+      <description>The installer is downloaded, and your reader is running. Full transcript: Tutorials.htm#0a-01-install-and-launch</description>
       <link>Tutorials.htm#0a-01-install-and-launch</link>
       <guid isPermaLink="false">homer-tutorial_01_install_and_launch</guid>
       <enclosure url="tutorials/01_Install_and_Launch.mp3" length="1381458" type="audio/mpeg"/>
@@ -30,7 +30,7 @@
     </item>
     <item>
       <title>02 - User Interface Concepts</title>
-      <description>Nothing is needed; this walk is listened to. Full transcript: Tutorials.htm#0b-02-user-interface-concepts</description>
+      <description>DbDo is open with any database. Nothing needs pressing in this walk; it is listened to. Full transcript: Tutorials.htm#0b-02-user-interface-concepts</description>
       <link>Tutorials.htm#0b-02-user-interface-concepts</link>
       <guid isPermaLink="false">homer-tutorial_02_user_interface_concepts</guid>
       <enclosure url="tutorials/02_User_Interface_Concepts.mp3" length="1369028" type="audio/mpeg"/>
@@ -39,7 +39,7 @@
     </item>
     <item>
       <title>03 - Key Patterns</title>
-      <description>Nothing is needed; a Homer program open to try the keys is a bonus. Full transcript: Tutorials.htm#0c-03-key-patterns</description>
+      <description>DbDo is open with any database. Full transcript: Tutorials.htm#0c-03-key-patterns</description>
       <link>Tutorials.htm#0c-03-key-patterns</link>
       <guid isPermaLink="false">homer-tutorial_03_key_patterns</guid>
       <enclosure url="tutorials/03_Key_Patterns.mp3" length="1139471" type="audio/mpeg"/>

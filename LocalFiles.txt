@@ -1,34 +1,33 @@
-﻿# LocalFiles.txt -- what belongs to HomerDev on this disk, but never in the repository.
+﻿# LocalFiles.txt -- what belongs to DbDo on this disk, but never in the repository.
 #
-# tidy keeps these where they are, and writes each line into .gitignore
-# as never pushed. One path or pattern a line; a trailing slash means a folder.
+# scripts\tidy keeps these where they are and writes each line into .gitignore
+# as never pushed. The recording (help/Tutorials.mkv) and the transcript are in
+# RepoFiles.txt; the working material that makes them is here.
 
-# The tutorial voices, fetched once by scripts\buildTutorials.ps1 and shared by
-# every Homer app's build: piper and its two models, sherpa-onnx and the
-# Kokoro bundle. Binaries not in git, so exec, the Homer folder for those.
-# Hundreds of megabytes, and re-fetchable.
+# Made by every build: the program and its libraries, the installer, the
+# screen reader packages, and the version files.
+DbDo.nvda-addon
+DbDo_JAWS.zip
+DbDo_setup.exe
 exec/
+version.txt
+Version.cs
+work/
 
-# Build, tidy and tutorial logs, one file per run.
+# The spoken tutorials' working material.
+help/*.mp3
+help/Tutorial_*.inix
+help/Tutorials.m3u
+help/tutorials/
+scripts/ffmpeg.exe
+scripts/ffprobe.exe
+scripts/voices/
+
+# One log per run of anything; private notes and what tidy moves aside.
 logs/
+notes/
 
-# What building the sample programs leaves beside them: rebuilt by build,
-# never pushed, and not strays for tidy to carry off.
-Templates/samples/*.exe
-Templates/samples/*.log
-Templates/samples/build/
-Templates/samples/dist/
-
-# The release scripts come from a separate project of their own and, by
-# standing rule, stay out of every repository, the kit's included.
+# The release scripts belong to the separate tagRelease project and stay out
+# of every repository.
 scripts/release.cmd
 scripts/release.ps1
-
-# Copies of the kit's own documents a skill carries, made by build from
-# help at every build; git carries the originals.
-.claude/skills/homer-code/references/CamelType_*.md
-.claude/skills/homer-code/references/Logging.md
-.claude/skills/homer-installer/references/FinishPage.md
-.claude/skills/homer-tutorial/references/Tutorials.md
-.claude/skills/homer-ui/references/ui-guide.md
-.claude/skills/homer-screen-reader/references/CamelType_JAWSScript.md

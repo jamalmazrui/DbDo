@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
   <meta charset="utf-8" />
@@ -169,6 +169,333 @@
 <h1 class="title">HomerDev</h1>
 <p class="author">Jamal Mazrui</p>
 </header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#homerdev-the-homer-development-kit"
+id="toc-homerdev-the-homer-development-kit">HomerDev: the Homer
+Development Kit</a>
+<ul>
+<li><a href="#contents" id="toc-contents">Contents</a></li>
+<li><a href="#getting-started" id="toc-getting-started">Getting
+started</a>
+<ul>
+<li><a href="#what-you-need" id="toc-what-you-need">What you
+need</a></li>
+<li><a href="#install-the-kit" id="toc-install-the-kit">Install the
+kit</a></li>
+<li><a href="#where-the-kit-and-your-projects-live"
+id="toc-where-the-kit-and-your-projects-live">Where the kit and your
+projects live</a></li>
+<li><a href="#start-a-new-app" id="toc-start-a-new-app">Start a new
+app</a></li>
+</ul></li>
+<li><a href="#what-is-in-the-kit" id="toc-what-is-in-the-kit">What is in
+the kit</a>
+<ul>
+<li><a href="#csharp" id="toc-csharp">CSharp</a></li>
+<li><a href="#python" id="toc-python">Python</a></li>
+<li><a href="#templates" id="toc-templates">Templates</a></li>
+<li><a href="#tools" id="toc-tools">Tools</a></li>
+<li><a href="#templates-1" id="toc-templates-1">Templates</a></li>
+<li><a href="#style" id="toc-style">Style</a></li>
+</ul></li>
+<li><a href="#camel-type" id="toc-camel-type">Camel Type</a></li>
+<li><a href="#the-.inix-format" id="toc-the-.inix-format">The .inix
+format</a>
+<ul>
+<li><a href="#the-basics" id="toc-the-basics">The basics</a></li>
+<li><a href="#multi-line-values-are-verbatim"
+id="toc-multi-line-values-are-verbatim">Multi-line values are
+verbatim</a></li>
+<li><a href="#arrays" id="toc-arrays">Arrays</a></li>
+<li><a href="#as-a-table" id="toc-as-a-table">As a table</a></li>
+<li><a href="#in-code" id="toc-in-code">In code</a></li>
+</ul></li>
+<li><a href="#direct-speech-across-screen-readers"
+id="toc-direct-speech-across-screen-readers">Direct speech across screen
+readers</a>
+<ul>
+<li><a href="#how-it-reaches-the-reader"
+id="toc-how-it-reaches-the-reader">How it reaches the reader</a></li>
+<li><a href="#what-to-speak-and-what-not-to"
+id="toc-what-to-speak-and-what-not-to">What to speak, and what not
+to</a></li>
+</ul></li>
+<li><a href="#lbc-building-a-dialog" id="toc-lbc-building-a-dialog">Lbc:
+building a dialog</a>
+<ul>
+<li><a href="#the-shape-of-a-dialog" id="toc-the-shape-of-a-dialog">The
+shape of a dialog</a></li>
+<li><a href="#what-you-can-add" id="toc-what-you-can-add">What you can
+add</a></li>
+<li><a href="#bands" id="toc-bands">Bands</a></li>
+<li><a href="#showing-it" id="toc-showing-it">Showing it</a></li>
+<li><a href="#other-pieces" id="toc-other-pieces">Other pieces</a></li>
+<li><a href="#opening-focus" id="toc-opening-focus">Opening
+focus</a></li>
+</ul></li>
+<li><a href="#the-launchpad-app" id="toc-the-launchpad-app">The
+launchpad app</a>
+<ul>
+<li><a href="#the-controls-in-order" id="toc-the-controls-in-order">The
+controls, in order</a></li>
+<li><a href="#the-two-boxes" id="toc-the-two-boxes">The two
+boxes</a></li>
+<li><a href="#the-command-line-does-everything-the-dialog-does"
+id="toc-the-command-line-does-everything-the-dialog-does">The command
+line does everything the dialog does</a></li>
+<li><a href="#settings-are-saved-as-they-are-answered"
+id="toc-settings-are-saved-as-they-are-answered">Settings are saved as
+they are answered</a></li>
+</ul></li>
+<li><a href="#keys-and-key-names" id="toc-keys-and-key-names">Keys and
+key names</a>
+<ul>
+<li><a href="#one-spelling" id="toc-one-spelling">One spelling</a></li>
+<li><a href="#choosing-a-key" id="toc-choosing-a-key">Choosing a
+key</a></li>
+<li><a href="#keymap" id="toc-keymap">KeyMap</a></li>
+</ul></li>
+<li><a href="#every-file-in-the-kit-and-why-it-is-here"
+id="toc-every-file-in-the-kit-and-why-it-is-here">Every file in the kit,
+and why it is here</a>
+<ul>
+<li><a href="#top-level" id="toc-top-level">Top level</a></li>
+<li><a href="#csharp-the-shared-c-classes"
+id="toc-csharp-the-shared-c-classes">CSharp – the shared C#
+classes</a></li>
+<li><a href="#homer-the-same-toolbox-in-python"
+id="toc-homer-the-same-toolbox-in-python">homer – the same toolbox in
+Python</a></li>
+<li><a href="#templates-2" id="toc-templates-2">Templates</a></li>
+<li><a href="#templates-what-newhomerapp-copies"
+id="toc-templates-what-newhomerapp-copies">Templates – what newHomerApp
+copies</a></li>
+<li><a href="#tools-scripts-that-act-on-a-project"
+id="toc-tools-scripts-that-act-on-a-project">Tools – scripts that act on
+a project</a></li>
+<li><a href="#help-the-documents" id="toc-help-the-documents">help – the
+documents</a></li>
+</ul></li>
+<li><a href="#four-kinds-of-homer-resource"
+id="toc-four-kinds-of-homer-resource">Four kinds of Homer resource</a>
+<ul>
+<li><a href="#licenses-for-each-kind"
+id="toc-licenses-for-each-kind">Licenses for each kind</a></li>
+<li><a href="#what-each-script-does-for-each-kind"
+id="toc-what-each-script-does-for-each-kind">What each script does for
+each kind</a></li>
+</ul></li>
+<li><a href="#three-kinds-of-homer-app"
+id="toc-three-kinds-of-homer-app">Three kinds of Homer app</a>
+<ul>
+<li><a href="#one-a-single-tool-with-a-command-line-and-a-dialog"
+id="toc-one-a-single-tool-with-a-command-line-and-a-dialog">One: a
+single tool, with a command line and a dialog</a></li>
+<li><a href="#two-a-desktop-program-that-could-not-be-a-command-line"
+id="toc-two-a-desktop-program-that-could-not-be-a-command-line">Two: a
+desktop program that could not be a command line</a></li>
+<li><a href="#three-a-multiple-document-program"
+id="toc-three-a-multiple-document-program">Three: a multiple-document
+program</a></li>
+<li><a href="#what-all-three-share" id="toc-what-all-three-share">What
+all three share</a></li>
+</ul></li>
+<li><a href="#scripts-and-settings-the-two-lists-every-mdi-app-gets"
+id="toc-scripts-and-settings-the-two-lists-every-mdi-app-gets">Scripts
+and settings: the two lists every MDI app gets</a>
+<ul>
+<li><a href="#why-a-list-rather-than-a-path-to-type"
+id="toc-why-a-list-rather-than-a-path-to-type">Why a list, rather than a
+path to type</a></li>
+<li><a href="#why-the-jobs-live-in-a-folder-not-in-the-program"
+id="toc-why-the-jobs-live-in-a-folder-not-in-the-program">Why the jobs
+live in a folder, not in the program</a></li>
+<li><a href="#why-settings-change-without-a-restart"
+id="toc-why-settings-change-without-a-restart">Why settings change
+without a restart</a></li>
+<li><a href="#what-this-means-for-a-console-program"
+id="toc-what-this-means-for-a-console-program">What this means for a
+console program</a></li>
+</ul></li>
+<li><a href="#where-an-app-puts-its-files"
+id="toc-where-an-app-puts-its-files">Where an app puts its files</a>
+<ul>
+<li><a href="#the-letters-are-the-design"
+id="toc-the-letters-are-the-design">The letters are the design</a></li>
+<li><a href="#two-names-begin-with-t-and-they-never-meet"
+id="toc-two-names-begin-with-t-and-they-never-meet">Two names begin with
+t, and they never meet</a></li>
+<li><a href="#where-the-documents-live-and-what-github-thinks"
+id="toc-where-the-documents-live-and-what-github-thinks">Where the
+documents live, and what GitHub thinks</a></li>
+<li><a href="#three-trees" id="toc-three-trees">Three trees</a></li>
+<li><a href="#asking-for-a-folder" id="toc-asking-for-a-folder">Asking
+for a folder</a></li>
+</ul></li>
+<li><a href="#evidence-and-checking-without-sight"
+id="toc-evidence-and-checking-without-sight">Evidence, and checking
+without sight</a>
+<ul>
+<li><a href="#checkhomerdev-for-the-kit-itself"
+id="toc-checkhomerdev-for-the-kit-itself">checkHomerDev, for the kit
+itself</a></li>
+<li><a href="#check" id="toc-check">check</a></li>
+<li><a href="#the-report-says-three-things"
+id="toc-the-report-says-three-things">The report says three
+things</a></li>
+<li><a href="#accept.inix-what-done-means-written-before-the-code"
+id="toc-accept.inix-what-done-means-written-before-the-code">accept.inix:
+what “done” means, written before the code</a></li>
+<li><a href="#a-checker-that-cries-wolf-is-worse-than-none"
+id="toc-a-checker-that-cries-wolf-is-worse-than-none">A checker that
+cries wolf is worse than none</a></li>
+</ul></li>
+<li><a href="#automated-checks-and-the-one-thing-still-done-by-hand"
+id="toc-automated-checks-and-the-one-thing-still-done-by-hand">Automated
+checks, and the one thing still done by hand</a>
+<ul>
+<li><a href="#uicheck-pressing-the-keys-without-a-person"
+id="toc-uicheck-pressing-the-keys-without-a-person">uiCheck: pressing
+the keys without a person</a></li>
+<li><a href="#checking-the-machine-not-just-the-kit"
+id="toc-checking-the-machine-not-just-the-kit">Checking the machine, not
+just the kit</a></li>
+<li><a href="#what-is-still-not-automated"
+id="toc-what-is-still-not-automated">What is still not
+automated</a></li>
+<li><a href="#the-installers-own-pages"
+id="toc-the-installers-own-pages">The installer’s own pages</a></li>
+<li><a href="#anything-that-shells-out-to-an-installer-says-so-first"
+id="toc-anything-that-shells-out-to-an-installer-says-so-first">Anything
+that shells out to an installer says so first</a></li>
+<li><a href="#finish-page-checkboxes"
+id="toc-finish-page-checkboxes">Finish-page checkboxes</a></li>
+</ul></li>
+<li><a href="#spoken-tutorials" id="toc-spoken-tutorials">Spoken
+tutorials</a>
+<ul>
+<li><a href="#the-format-a-demo-script"
+id="toc-the-format-a-demo-script">The format: a demo script</a></li>
+<li><a href="#writing-from-a-speech-history"
+id="toc-writing-from-a-speech-history">Writing from a speech
+history</a></li>
+<li><a href="#the-tools" id="toc-the-tools">The tools</a></li>
+<li><a href="#the-voices-and-what-may-be-published"
+id="toc-the-voices-and-what-may-be-published">The voices, and what may
+be published</a></li>
+<li><a href="#what-ships" id="toc-what-ships">What ships</a></li>
+<li><a href="#three-more-documents" id="toc-three-more-documents">Three
+more documents</a></li>
+<li><a href="#not-twice-speech-that-repeats"
+id="toc-not-twice-speech-that-repeats">Not twice: speech that
+repeats</a></li>
+<li><a href="#evidence-for-the-ai" id="toc-evidence-for-the-ai">Evidence
+for the AI</a></li>
+<li><a href="#one-letter-per-menu" id="toc-one-letter-per-menu">One
+letter per menu</a></li>
+<li><a href="#altcontrol-and-the-one-exception"
+id="toc-altcontrol-and-the-one-exception">Alt+Control, and the one
+exception</a></li>
+<li><a href="#single-instance-or-several"
+id="toc-single-instance-or-several">Single instance, or several</a></li>
+<li><a href="#why-homer-menus-are-long-and-flat"
+id="toc-why-homer-menus-are-long-and-flat">Why Homer menus are long and
+flat</a></li>
+<li><a href="#function-key-families"
+id="toc-function-key-families">Function-key families</a></li>
+<li><a href="#two-rules-for-letters" id="toc-two-rules-for-letters">Two
+rules for letters</a></li>
+<li><a href="#hotkeys.md" id="toc-hotkeys.md">Hotkeys.md</a></li>
+<li><a href="#say-the-word-the-key-comes-from"
+id="toc-say-the-word-the-key-comes-from">Say the word the key comes
+from</a></li>
+</ul></li>
+<li><a href="#logging" id="toc-logging">Logging</a>
+<ul>
+<li><a href="#where-a-log-goes-and-what-it-is-called"
+id="toc-where-a-log-goes-and-what-it-is-called">Where a log goes, and
+what it is called</a></li>
+<li><a href="#writing-to-it" id="toc-writing-to-it">Writing to
+it</a></li>
+<li><a href="#what-to-log" id="toc-what-to-log">What to log</a></li>
+<li><a href="#how-a-log-line-is-written"
+id="toc-how-a-log-line-is-written">How a log line is written</a></li>
+<li><a href="#what-gets-published" id="toc-what-gets-published">What
+gets published</a></li>
+<li><a href="#a-whitelist-not-a-list-of-exclusions"
+id="toc-a-whitelist-not-a-list-of-exclusions">A whitelist, not a list of
+exclusions</a></li>
+<li><a href="#what-is-public-and-what-stays-on-your-machine"
+id="toc-what-is-public-and-what-stays-on-your-machine">What is public
+and what stays on your machine</a></li>
+</ul></li>
+<li><a href="#self.md-the-projects-notebook"
+id="toc-self.md-the-projects-notebook">self.md, the project’s
+notebook</a></li>
+<li><a href="#the-installers-log" id="toc-the-installers-log">The
+installer’s log</a>
+<ul>
+<li><a href="#later" id="toc-later">Later</a></li>
+<li><a href="#finish-page-wording" id="toc-finish-page-wording">Finish
+page wording</a></li>
+</ul></li>
+<li><a href="#scripts-logs-and-the-release-routine"
+id="toc-scripts-logs-and-the-release-routine">Scripts, logs, and the
+release routine</a>
+<ul>
+<li><a href="#every-script-writes-a-log"
+id="toc-every-script-writes-a-log">Every script writes a log</a></li>
+<li><a href="#the-four-scripts" id="toc-the-four-scripts">The four
+scripts</a></li>
+<li><a href="#the-build-scripts-name"
+id="toc-the-build-scripts-name">The build script’s name</a></li>
+<li><a href="#the-release-routine" id="toc-the-release-routine">The
+release routine</a></li>
+<li><a href="#stages-from-a-build-to-a-release-version"
+id="toc-stages-from-a-build-to-a-release-version">Stages: from a build
+to a release version</a></li>
+<li><a href="#publishing-a-page" id="toc-publishing-a-page">Publishing a
+page</a></li>
+</ul></li>
+<li><a href="#the-installer" id="toc-the-installer">The
+installer</a></li>
+<li><a href="#ai-assisted-coding"
+id="toc-ai-assisted-coding">AI-assisted coding</a>
+<ul>
+<li><a href="#why-the-name" id="toc-why-the-name">Why the name</a></li>
+<li><a href="#the-method-in-four-moves"
+id="toc-the-method-in-four-moves">The method, in four moves</a></li>
+<li><a href="#the-three-sentences" id="toc-the-three-sentences">The
+three sentences</a></li>
+<li><a href="#how-to-teach-with-it" id="toc-how-to-teach-with-it">How to
+teach with it</a></li>
+<li><a href="#twelve-blocks-two-languages"
+id="toc-twelve-blocks-two-languages">Twelve blocks, two
+languages</a></li>
+<li><a href="#what-the-samples-borrow-rather-than-write"
+id="toc-what-the-samples-borrow-rather-than-write">What the samples
+borrow rather than write</a></li>
+<li><a href="#the-nine-decisions" id="toc-the-nine-decisions">The nine
+decisions</a></li>
+<li><a href="#measuring-the-difference-the-skills-make"
+id="toc-measuring-the-difference-the-skills-make">Measuring the
+difference the skills make</a></li>
+<li><a href="#the-legacy-fruitbasket-collection"
+id="toc-the-legacy-fruitbasket-collection">The legacy FruitBasket
+collection</a></li>
+<li><a href="#tutorials-that-can-be-heard"
+id="toc-tutorials-that-can-be-heard">Tutorials that can be
+heard</a></li>
+</ul></li>
+<li><a href="#for-an-ai-writing-a-homer-app"
+id="toc-for-an-ai-writing-a-homer-app">For an AI writing a Homer
+app</a></li>
+<li><a href="#claude-skills" id="toc-claude-skills">Claude
+skills</a></li>
+</ul></li>
+</ul>
+</nav>
 <h1 id="homerdev-the-homer-development-kit">HomerDev: the Homer
 Development Kit</h1>
 <p>HomerDev is the shared toolbox behind the Homer Tools programs. It

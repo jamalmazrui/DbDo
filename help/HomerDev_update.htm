@@ -1,4 +1,4 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
   <meta charset="utf-8" />
@@ -167,6 +167,191 @@
 <header id="title-block-header">
 <h1 class="title">HomerDev_update</h1>
 </header>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a
+href="#homerdev-update-bringing-a-homer-app-up-to-the-current-kit"
+id="toc-homerdev-update-bringing-a-homer-app-up-to-the-current-kit">HomerDev
+Update: bringing a Homer app up to the current kit</a>
+<ul>
+<li><a href="#contents" id="toc-contents">Contents</a></li>
+<li><a href="#what-the-kit-is" id="toc-what-the-kit-is">What the kit
+is</a></li>
+<li><a href="#the-contract-between-an-app-and-the-kit"
+id="toc-the-contract-between-an-app-and-the-kit">The contract between an
+app and the kit</a>
+<ul>
+<li><a href="#find-the-kit-state-the-version-needed"
+id="toc-find-the-kit-state-the-version-needed">1. Find the kit, state
+the version needed</a></li>
+<li><a href="#compile-against-the-kits-sources-carry-no-copies"
+id="toc-compile-against-the-kits-sources-carry-no-copies">2. Compile
+against the kit’s sources; carry no copies</a></li>
+<li><a href="#refresh-the-kits-scripts-into-the-app-on-every-build"
+id="toc-refresh-the-kits-scripts-into-the-app-on-every-build">3. Refresh
+the kit’s scripts into the app on every build</a></li>
+<li><a href="#the-folder-layout-and-why-the-first-letters-differ"
+id="toc-the-folder-layout-and-why-the-first-letters-differ">4. The
+folder layout, and why the first letters differ</a></li>
+<li><a href="#repofiles.txt-and-localfiles.txt"
+id="toc-repofiles.txt-and-localfiles.txt">5. RepoFiles.txt and
+LocalFiles.txt</a></li>
+<li><a href="#the-four-scripts-and-the-order-they-run-in"
+id="toc-the-four-scripts-and-the-order-they-run-in">6. The four scripts,
+and the order they run in</a></li>
+<li><a href="#versions" id="toc-versions">7. Versions</a></li>
+<li><a href="#shared-components-install-machine-wide"
+id="toc-shared-components-install-machine-wide">8. Shared components
+install machine-wide</a></li>
+<li><a href="#the-build-fetches-what-it-needs"
+id="toc-the-build-fetches-what-it-needs">9. The build fetches what it
+needs</a></li>
+<li><a href="#logs-console-and-encoding"
+id="toc-logs-console-and-encoding">10. Logs, console and
+encoding</a></li>
+<li><a href="#the-installer-and-its-finish-page"
+id="toc-the-installer-and-its-finish-page">11. The installer and its
+finish page</a></li>
+<li><a href="#f11-and-the-version-box"
+id="toc-f11-and-the-version-box">12. F11 and the version box</a></li>
+<li><a href="#tutorials-the-spoken-walks"
+id="toc-tutorials-the-spoken-walks">13. Tutorials: the spoken
+walks</a></li>
+<li><a href="#the-check-and-what-done-means"
+id="toc-the-check-and-what-done-means">14. The check, and what “done”
+means</a></li>
+</ul></li>
+<li><a href="#lessons-paid-for-with-dates"
+id="toc-lessons-paid-for-with-dates">Lessons paid for, with
+dates</a></li>
+<li><a href="#the-renaming-of-26-september-2026"
+id="toc-the-renaming-of-26-september-2026">The renaming of 26 September
+2026</a></li>
+<li><a href="#lessons-from-homerview-25-26-september-2026"
+id="toc-lessons-from-homerview-25-26-september-2026">Lessons from
+HomerView, 25-26 September 2026</a>
+<ul>
+<li><a href="#plan-the-move-in-passes-and-build-green-between-them"
+id="toc-plan-the-move-in-passes-and-build-green-between-them">Plan the
+move in passes, and build green between them</a></li>
+<li><a href="#passing-data-from-cmd-to-powershell"
+id="toc-passing-data-from-cmd-to-powershell">Passing data from cmd to
+PowerShell</a></li>
+<li><a href="#the-compiler" id="toc-the-compiler">The compiler</a></li>
+<li><a href="#reading-the-kits-version"
+id="toc-reading-the-kits-version">Reading the kit’s version</a></li>
+<li><a href="#unzipping-never-deletes-and-never-moves"
+id="toc-unzipping-never-deletes-and-never-moves">Unzipping never deletes
+and never moves</a></li>
+<li><a href="#a-script-that-finds-the-project-by-its-own-location"
+id="toc-a-script-that-finds-the-project-by-its-own-location">A script
+that finds the project by its own location</a></li>
+<li><a
+href="#generated-files-one-source-and-regenerate-rather-than-mourn"
+id="toc-generated-files-one-source-and-regenerate-rather-than-mourn">Generated
+files: one source, and regenerate rather than mourn</a></li>
+<li><a href="#a-check-that-only-prints-is-ignored"
+id="toc-a-check-that-only-prints-is-ignored">A check that only prints is
+ignored</a></li>
+<li><a href="#reader-scripts-and-the-browser"
+id="toc-reader-scripts-and-the-browser">Reader scripts and the
+browser</a></li>
+<li><a href="#changing-the-kit-in-place"
+id="toc-changing-the-kit-in-place">Changing the kit in place</a></li>
+<li><a
+href="#never-run-anything-between-a-command-and-its-errorlevel-check"
+id="toc-never-run-anything-between-a-command-and-its-errorlevel-check">Never
+run anything between a command and its errorlevel check</a></li>
+<li><a href="#probing-with-git-and-gh-from-powershell-5.1"
+id="toc-probing-with-git-and-gh-from-powershell-5.1">Probing with git
+and gh from PowerShell 5.1</a></li>
+<li><a href="#a-remote-that-has-moved"
+id="toc-a-remote-that-has-moved">A remote that has moved</a></li>
+<li><a href="#everything-else" id="toc-everything-else">Everything
+else</a></li>
+</ul></li>
+<li><a href="#c-apps-urlfido-and-a-template-brought-level"
+id="toc-c-apps-urlfido-and-a-template-brought-level">C# apps: urlFido,
+and a template brought level</a></li>
+<li><a href="#bookfido-a-c-app-with-its-own-libraries-and-its-own-data"
+id="toc-bookfido-a-c-app-with-its-own-libraries-and-its-own-data">bookFido:
+a C# app with its own libraries and its own data</a></li>
+<li><a href="#python-apps-what-urlcheck-taught-26-september-2026"
+id="toc-python-apps-what-urlcheck-taught-26-september-2026">Python apps:
+what urlCheck taught, 26 September 2026</a>
+<ul>
+<li><a href="#the-contract-is-the-same-the-template-now-says-so"
+id="toc-the-contract-is-the-same-the-template-now-says-so">The contract
+is the same; the template now says so</a></li>
+<li><a href="#the-kits-modules-are-named-not-copied"
+id="toc-the-kits-modules-are-named-not-copied">The kit’s modules are
+named, not copied</a></li>
+<li><a href="#never-name-a-kit-module-version.py"
+id="toc-never-name-a-kit-module-version.py">Never name a kit module
+version.py</a></li>
+<li><a href="#where-each-python-program-goes"
+id="toc-where-each-python-program-goes">Where each Python program
+goes</a></li>
+<li><a
+href="#a-program-that-runs-from-exec-finds-its-documents-one-level-up"
+id="toc-a-program-that-runs-from-exec-finds-its-documents-one-level-up">A
+program that runs from exec finds its documents one level up</a></li>
+<li><a href="#logging-the-session-log-is-not-optional"
+id="toc-logging-the-session-log-is-not-optional">Logging: the session
+log is not optional</a></li>
+<li><a href="#settings-.inix-and-carry-the-old-file-over"
+id="toc-settings-.inix-and-carry-the-old-file-over">Settings: .inix, and
+carry the old file over</a></li>
+<li><a href="#winforms-through-pythonnet-keeps-its-own-dialog"
+id="toc-winforms-through-pythonnet-keeps-its-own-dialog">WinForms
+through pythonnet keeps its own dialog</a></li>
+<li><a href="#f11-in-a-python-program"
+id="toc-f11-in-a-python-program">F11 in a Python program</a></li>
+<li><a
+href="#the-old-layout-on-disk-renames-windows-will-not-do-for-you"
+id="toc-the-old-layout-on-disk-renames-windows-will-not-do-for-you">The
+old layout on disk: renames Windows will not do for you</a></li>
+<li><a href="#the-whitelist-left-out-every-file-named-inside-a-folder"
+id="toc-the-whitelist-left-out-every-file-named-inside-a-folder">The
+whitelist left out every file named inside a folder</a></li>
+<li><a href="#checks-that-caught-a-python-app-out"
+id="toc-checks-that-caught-a-python-app-out">Checks that caught a Python
+app out</a></li>
+</ul></li>
+<li><a
+href="#installer-template-the-program-from-exec-the-documents-from-help"
+id="toc-installer-template-the-program-from-exec-the-documents-from-help">Installer
+template: the program from exec, the documents from help</a></li>
+<li><a href="#the-kit-renames-only-where-it-should"
+id="toc-the-kit-renames-only-where-it-should">The kit renames only where
+it should</a></li>
+<li><a href="#installer-template-read-the-previous-version-once"
+id="toc-installer-template-read-the-previous-version-once">Installer
+template: read the previous version once</a></li>
+<li><a href="#the-migration-step-by-step"
+id="toc-the-migration-step-by-step">The migration, step by step</a></li>
+<li><a href="#dbdo-what-it-has-what-it-still-needs"
+id="toc-dbdo-what-it-has-what-it-still-needs">DbDo: what it has, what it
+still needs</a></li>
+<li><a href="#edsharp-the-full-migration"
+id="toc-edsharp-the-full-migration">EdSharp: the full migration</a></li>
+<li><a
+href="#filedir-two-branches-copied-classes-binaries-in-the-repository"
+id="toc-filedir-two-branches-copied-classes-binaries-in-the-repository">FileDir:
+two branches, copied classes, binaries in the repository</a></li>
+<li><a
+href="#what-homerview-looks-like-now-as-the-second-worked-example"
+id="toc-what-homerview-looks-like-now-as-the-second-worked-example">What
+HomerView looks like now, as the second worked example</a></li>
+<li><a href="#what-homerscribe-looks-like-now-as-the-worked-example"
+id="toc-what-homerscribe-looks-like-now-as-the-worked-example">What
+HomerScribe looks like now, as the worked example</a></li>
+<li><a href="#summary-of-the-rules-one-line-each"
+id="toc-summary-of-the-rules-one-line-each">Summary of the rules, one
+line each</a></li>
+</ul></li>
+</ul>
+</nav>
 <h1
 id="homerdev-update-bringing-a-homer-app-up-to-the-current-kit">HomerDev
 Update: bringing a Homer app up to the current kit</h1>

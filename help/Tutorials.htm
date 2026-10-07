@@ -1,10 +1,9 @@
-﻿<!DOCTYPE html>
+<!DOCTYPE html>
 <html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
 <head>
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <meta name="author" content="Jamal Mazrui" />
   <title>Tutorials</title>
   <style>
     html {
@@ -167,825 +166,1089 @@
 <body>
 <header id="title-block-header">
 <h1 class="title">Tutorials</h1>
-<p class="author">Jamal Mazrui</p>
 </header>
-<h1 id="homerdev-tutorials">HomerDev Tutorials</h1>
-<p>Short walkthroughs of the things you will actually do with the kit.
-Each one is a scenario, start to finish, with the commands you type and
-what comes back.</p>
-<p>Read <code>ReadMe.md</code> first if you have not installed the kit.
-Read <code>HomerDev.md</code> for the reference: what each class does
-and why the conventions are what they are.</p>
+<nav id="TOC" role="doc-toc">
+<ul>
+<li><a href="#dbdo-tutorials" id="toc-dbdo-tutorials">DbDo –
+Tutorials</a>
+<ul>
+<li><a href="#how-to-listen" id="toc-how-to-listen">How to
+listen</a></li>
+<li><a href="#contents" id="toc-contents">Contents</a></li>
+<li><a href="#overview-and-table-of-contents"
+id="toc-overview-and-table-of-contents">00 - Overview and Table of
+Contents</a>
+<ul>
+<li><a href="#step-1" id="toc-step-1">Step 1</a></li>
+<li><a href="#step-2-altcontrold" id="toc-step-2-altcontrold">Step 2:
+Alt+Control+D</a></li>
+<li><a href="#step-3-shiftz" id="toc-step-3-shiftz">Step 3:
+Shift+Z</a></li>
+<li><a href="#step-4" id="toc-step-4">Step 4</a></li>
+</ul></li>
+<li><a href="#installing-dbdo" id="toc-installing-dbdo">01 - Installing
+DbDo</a>
+<ul>
+<li><a href="#step-1-enter" id="toc-step-1-enter">Step 1: Enter</a></li>
+<li><a href="#step-2-altr" id="toc-step-2-altr">Step 2: Alt+R</a></li>
+<li><a href="#step-3-alty" id="toc-step-3-alty">Step 3: Alt+Y</a></li>
+<li><a href="#step-4-enter" id="toc-step-4-enter">Step 4: Enter</a></li>
+<li><a href="#step-5-enter" id="toc-step-5-enter">Step 5: Enter</a></li>
+<li><a href="#step-6-downarrow" id="toc-step-6-downarrow">Step 6:
+DownArrow</a></li>
+<li><a href="#step-7-downarrow" id="toc-step-7-downarrow">Step 7:
+DownArrow</a></li>
+<li><a href="#step-8-space" id="toc-step-8-space">Step 8: Space</a></li>
+<li><a href="#step-9-enter" id="toc-step-9-enter">Step 9: Enter</a></li>
+<li><a href="#step-10-enter" id="toc-step-10-enter">Step 10:
+Enter</a></li>
+</ul></li>
+<li><a href="#opening-jobtrail" id="toc-opening-jobtrail">02 - Opening
+JobTrail</a>
+<ul>
+<li><a href="#step-1-downarrow" id="toc-step-1-downarrow">Step 1:
+DownArrow</a></li>
+<li><a href="#step-2-rightarrow" id="toc-step-2-rightarrow">Step 2:
+RightArrow</a></li>
+<li><a href="#step-3-shiftc" id="toc-step-3-shiftc">Step 3:
+Shift+C</a></li>
+<li><a href="#step-4-downarrow" id="toc-step-4-downarrow">Step 4:
+DownArrow</a></li>
+<li><a href="#step-5-shiftz" id="toc-step-5-shiftz">Step 5:
+Shift+Z</a></li>
+<li><a href="#step-6-controlpagedown"
+id="toc-step-6-controlpagedown">Step 6: Control+PageDown</a></li>
+</ul></li>
+<li><a href="#menus-windows-and-help" id="toc-menus-windows-and-help">03
+- Menus, Windows and Help</a>
+<ul>
+<li><a href="#step-1-alt" id="toc-step-1-alt">Step 1: Alt</a></li>
+<li><a href="#step-2-downarrow" id="toc-step-2-downarrow">Step 2:
+DownArrow</a></li>
+<li><a href="#step-3-downarrow" id="toc-step-3-downarrow">Step 3:
+DownArrow</a></li>
+<li><a href="#step-4-downarrow-1" id="toc-step-4-downarrow-1">Step 4:
+DownArrow</a></li>
+<li><a href="#step-5-escape" id="toc-step-5-escape">Step 5:
+Escape</a></li>
+<li><a href="#step-6-controltab" id="toc-step-6-controltab">Step 6:
+Control+Tab</a></li>
+<li><a href="#step-7-controlf1" id="toc-step-7-controlf1">Step 7:
+Control+F1</a></li>
+<li><a href="#step-8-f11" id="toc-step-8-f11">Step 8: F11</a></li>
+</ul></li>
+<li><a href="#adding-a-new-record" id="toc-adding-a-new-record">04 -
+Adding a New Record</a>
+<ul>
+<li><a href="#step-1-controln" id="toc-step-1-controln">Step 1:
+Control+N</a></li>
+<li><a href="#step-2-tab" id="toc-step-2-tab">Step 2: Tab</a></li>
+<li><a href="#step-3-tab" id="toc-step-3-tab">Step 3: Tab</a></li>
+<li><a href="#step-4-f4" id="toc-step-4-f4">Step 4: F4</a></li>
+<li><a href="#step-5-l" id="toc-step-5-l">Step 5: l</a></li>
+<li><a href="#step-6-controlenter" id="toc-step-6-controlenter">Step 6:
+Control+Enter</a></li>
+</ul></li>
+<li><a href="#inspecting-a-record" id="toc-inspecting-a-record">05 -
+Inspecting a Record</a>
+<ul>
+<li><a href="#step-1-controli" id="toc-step-1-controli">Step 1:
+Control+I</a></li>
+<li><a href="#step-2-escape" id="toc-step-2-escape">Step 2:
+Escape</a></li>
+<li><a href="#step-3-shiftn" id="toc-step-3-shiftn">Step 3:
+Shift+N</a></li>
+<li><a href="#step-4-shifte" id="toc-step-4-shifte">Step 4:
+Shift+E</a></li>
+<li><a href="#step-5-altshiftn" id="toc-step-5-altshiftn">Step 5:
+Alt+Shift+N</a></li>
+</ul></li>
+<li><a href="#editing-a-record" id="toc-editing-a-record">06 - Editing a
+Record</a>
+<ul>
+<li><a href="#step-1-enter-1" id="toc-step-1-enter-1">Step 1:
+Enter</a></li>
+<li><a href="#step-2-o" id="toc-step-2-o">Step 2: o</a></li>
+<li><a href="#step-3-controlenter" id="toc-step-3-controlenter">Step 3:
+Control+Enter</a></li>
+<li><a href="#step-4-f2" id="toc-step-4-f2">Step 4: F2</a></li>
+<li><a href="#step-5-escape-1" id="toc-step-5-escape-1">Step 5:
+Escape</a></li>
+<li><a href="#step-6-shiftc" id="toc-step-6-shiftc">Step 6:
+Shift+C</a></li>
+</ul></li>
+<li><a href="#keywords-and-jump" id="toc-keywords-and-jump">07 -
+Keywords and Jump</a>
+<ul>
+<li><a href="#step-1-exa" id="toc-step-1-exa">Step 1: exa</a></li>
+<li><a href="#step-2-controlj" id="toc-step-2-controlj">Step 2:
+Control+J</a></li>
+<li><a href="#step-3-enter" id="toc-step-3-enter">Step 3: Enter</a></li>
+<li><a href="#step-4-controlk" id="toc-step-4-controlk">Step 4:
+Control+K</a></li>
+<li><a href="#step-5-enter-1" id="toc-step-5-enter-1">Step 5:
+Enter</a></li>
+<li><a href="#step-6-shiftf" id="toc-step-6-shiftf">Step 6:
+Shift+F</a></li>
+</ul></li>
+<li><a href="#order-and-filter-records"
+id="toc-order-and-filter-records">08 - Order and Filter Records</a>
+<ul>
+<li><a href="#step-1-alto" id="toc-step-1-alto">Step 1: Alt+O</a></li>
+<li><a href="#step-2-s" id="toc-step-2-s">Step 2: s</a></li>
+<li><a href="#step-3-enter-1" id="toc-step-3-enter-1">Step 3:
+Enter</a></li>
+<li><a href="#step-4-controlf" id="toc-step-4-controlf">Step 4:
+Control+F</a></li>
+<li><a href="#step-5-enter-2" id="toc-step-5-enter-2">Step 5:
+Enter</a></li>
+<li><a href="#step-6-controlshiftf" id="toc-step-6-controlshiftf">Step
+6: Control+Shift+F</a></li>
+</ul></li>
+<li><a href="#select-the-columns-you-hear"
+id="toc-select-the-columns-you-hear">09 - Select the Columns You
+Hear</a>
+<ul>
+<li><a href="#step-1-shifts" id="toc-step-1-shifts">Step 1:
+Shift+S</a></li>
+<li><a href="#step-2-alts" id="toc-step-2-alts">Step 2: Alt+S</a></li>
+<li><a href="#step-3-space" id="toc-step-3-space">Step 3: Space</a></li>
+<li><a href="#step-4-enter-1" id="toc-step-4-enter-1">Step 4:
+Enter</a></li>
+</ul></li>
+<li><a href="#related-records" id="toc-related-records">10 - Related
+Records</a>
+<ul>
+<li><a href="#step-1-shiftr" id="toc-step-1-shiftr">Step 1:
+Shift+R</a></li>
+<li><a href="#step-2-altrightarrow" id="toc-step-2-altrightarrow">Step
+2: Alt+RightArrow</a></li>
+<li><a href="#step-3-backspace" id="toc-step-3-backspace">Step 3:
+Backspace</a></li>
+</ul></li>
+<li><a href="#mark-and-unmark" id="toc-mark-and-unmark">11 - Mark and
+Unmark</a>
+<ul>
+<li><a href="#step-1-controlm" id="toc-step-1-controlm">Step 1:
+Control+M</a></li>
+<li><a href="#step-2-controlshiftm" id="toc-step-2-controlshiftm">Step
+2: Control+Shift+M</a></li>
+<li><a href="#step-3-controldownarrow"
+id="toc-step-3-controldownarrow">Step 3: Control+DownArrow</a></li>
+<li><a href="#step-4-shiftspace" id="toc-step-4-shiftspace">Step 4:
+Shift+Space</a></li>
+<li><a href="#step-5-controla" id="toc-step-5-controla">Step 5:
+Control+A</a></li>
+</ul></li>
+<li><a href="#look-and-prime" id="toc-look-and-prime">12 - Look and
+Prime</a>
+<ul>
+<li><a href="#step-1-shiftl" id="toc-step-1-shiftl">Step 1:
+Shift+L</a></li>
+<li><a href="#step-2-shiftp" id="toc-step-2-shiftp">Step 2:
+Shift+P</a></li>
+<li><a href="#step-3-shifti" id="toc-step-3-shifti">Step 3:
+Shift+I</a></li>
+</ul></li>
+<li><a href="#report-save-and-copy" id="toc-report-save-and-copy">13 -
+Report, Save and Copy</a>
+<ul>
+<li><a href="#step-1-controlshiftc" id="toc-step-1-controlshiftc">Step
+1: Control+Shift+C</a></li>
+<li><a href="#step-2-altshiftr" id="toc-step-2-altshiftr">Step 2:
+Alt+Shift+R</a></li>
+<li><a href="#step-3-enter-2" id="toc-step-3-enter-2">Step 3:
+Enter</a></li>
+<li><a href="#step-4-controlshifts" id="toc-step-4-controlshifts">Step
+4: Control+Shift+S</a></li>
+</ul></li>
+<li><a href="#work-search-record-for-a-claim-or-counselor"
+id="toc-work-search-record-for-a-claim-or-counselor">14 - Work Search
+Record for a Claim or Counselor</a>
+<ul>
+<li><a href="#step-1-shiftz" id="toc-step-1-shiftz">Step 1:
+Shift+Z</a></li>
+<li><a href="#step-2-shiftc" id="toc-step-2-shiftc">Step 2:
+Shift+C</a></li>
+<li><a href="#step-3-altshiftr" id="toc-step-3-altshiftr">Step 3:
+Alt+Shift+R</a></li>
+<li><a href="#step-4-w" id="toc-step-4-w">Step 4: w</a></li>
+<li><a href="#step-5-enter-3" id="toc-step-5-enter-3">Step 5:
+Enter</a></li>
+</ul></li>
+<li><a href="#where-to-go-next" id="toc-where-to-go-next">1. Where to Go
+Next</a></li>
+</ul></li>
+</ul>
+</nav>
+<h1 id="dbdo-tutorials">DbDo – Tutorials</h1>
+<p><strong>Version 1.0</strong><br />
+September 2026<br />
+Copyright 2026 by Jamal Mazrui<br />
+MIT License</p>
+<p>Nine short walkthroughs, each about three minutes, each a real job
+done from start to finish. Work through the first one and the rest will
+make sense; after that, take whichever matches what you need today.
+Every one uses JobTrail, the job search database that comes with DbDo,
+so you can follow along without having anything of your own to lose.</p>
+<p><strong>Simulations, made with AI.</strong> One synthetic voice works
+through a task; a second answers as a screen reader would. The voices
+are piper’s kristin and john, trained on public domain recordings;
+DbDo.md credits them. You always know which is talking without being
+told.</p>
+<p>The screen reader answers are written for the middle setting every
+reader has: <strong>JAWS at intermediate verbosity</strong>, or
+<strong>Narrator at its default level 3</strong>. You hear the name, the
+kind of control, its value and its state – and, in a dialog, the Alt key
+that jumps straight to it, because that letter is rarely the one you
+would guess. You do not hear the beginner’s help after each control,
+since anybody who knows what a check box is knows that Space toggles
+it.</p>
+<p>Where a tutorial says to read the current line, use your own say line
+key – JAWS or NVDA with Up Arrow – rather than anything of DbDo’s. It is
+the habit you already have, and in this grid a line is a record.</p>
+<p>Every key is named in full the first time it appears. If you forget
+one, press Control+F1 for the key describer and press the key: it says
+the command’s name and what it does instead of running it.</p>
+<h2 id="how-to-listen">How to listen</h2>
+<p>Help, Play Tutorials opens <code>Tutorials.mkv</code> in whatever
+program plays video and audio files on your computer. If none is set,
+Windows asks which app to use; pick a media player such as VLC and
+choose Always, and it will not ask again.</p>
+<p><strong><code>Tutorials.mkv</code></strong> holds all nine as one
+recording with a chapter at the start of each. In FileDir, put the
+cursor on it and press Control+Shift+H for the Homer Player: it opens as
+one track, and <strong>Control+Page Down and Control+Page Up move
+between tutorials</strong>, announcing “Chapter 3 of 9” as they go.
+Control+Shift+Page Down and Control+Shift+Page Up jump to the last and
+first.</p>
+<p><strong>If you have the nine .mp3 files</strong>, open
+<code>Tutorials.m3u</code> in the Homer Player instead. A playlist opens
+as nine separate tracks, each named for its tutorial, and moving between
+tracks is then an arrow key in a list. The .mp3 files are not in the
+repository – they are rebuilt by
+<code>scripts\buildTutorials</code>.</p>
 <h2 id="contents">Contents</h2>
 <ul>
-<li>Audio tutorials — the spoken walkthroughs and how to make more</li>
-<li>Scenario 1: start a new app from nothing</li>
-<li>Scenario 2: add a field to a dialog</li>
-<li>Scenario 3: work out what a key already does</li>
-<li>Scenario 4: turn a one-window app into a multiple-document app</li>
-<li>Scenario 5: find out why something failed</li>
-<li>Scenario 6: write down what “done” means, then prove it</li>
-<li>Scenario 7: change a shared class without breaking four apps</li>
-<li>Scenario 8: release it</li>
-<li>Scenario 9: ask an AI for a Homer app and get one</li>
+<li><a href="#10-related-records">10 - Related Records</a></li>
+<li><a href="#11-mark-and-unmark">11 - Mark and Unmark</a></li>
+<li><a href="#12-inspecting-a-record">12 - Inspecting a Record</a></li>
+<li><a href="#13-work-search-record-for-a-claim-or-counselor">13 - Work
+Search Record for a Claim or Counselor</a></li>
+<li><a href="#10-related-records">10 - Related Records</a></li>
+<li><a href="#11-mark-and-unmark">11 - Mark and Unmark</a></li>
+<li><a href="#12-inspecting-a-record">12 - Inspecting a Record</a></li>
+<li><a href="#13-work-search-record-for-a-claim-or-counselor">13 - Work
+Search Record for a Claim or Counselor</a></li>
+<li><a href="#10-related-records">10 - Related Records</a></li>
+<li><a href="#11-mark-and-unmark">11 - Mark and Unmark</a></li>
+<li><a href="#12-inspecting-a-record">12 - Inspecting a Record</a></li>
+<li><a href="#13-work-search-record-for-a-claim-or-counselor">13 - Work
+Search Record for a Claim or Counselor</a></li>
+<li><a href="#10-related-records">10 - Related Records</a></li>
+<li><a href="#11-mark-and-unmark">11 - Mark and Unmark</a></li>
+<li><a href="#12-inspecting-a-record">12 - Inspecting a Record</a></li>
+<li><a href="#13-work-search-record-for-a-claim-or-counselor">13 - Work
+Search Record for a Claim or Counselor</a></li>
+<li><a href="#10-related-records">10 - Related Records</a></li>
+<li><a href="#11-mark-and-unmark">11 - Mark and Unmark</a></li>
+<li><a href="#12-inspecting-a-record">12 - Inspecting a Record</a></li>
+<li><a href="#13-work-search-record-for-a-claim-or-counselor">13 - Work
+Search Record for a Claim or Counselor</a></li>
+<li><a href="#10-related-records">10 - Related Records</a></li>
+<li><a href="#11-mark-and-unmark">11 - Mark and Unmark</a></li>
+<li><a href="#12-inspecting-a-record">12 - Inspecting a Record</a></li>
+<li><a href="#13-work-search-record-for-a-claim-or-counselor">13 - Work
+Search Record for a Claim or Counselor</a></li>
+<li><a href="#14-menus-windows-and-help">14 - Menus, Windows and
+Help</a></li>
+<li><a href="#10-related-records">10 - Related Records</a></li>
+<li><a href="#11-mark-and-unmark">11 - Mark and Unmark</a></li>
+<li><a href="#12-inspecting-a-record">12 - Inspecting a Record</a></li>
+<li><a href="#13-work-search-record-for-a-claim-or-counselor">13 - Work
+Search Record for a Claim or Counselor</a></li>
+<li><a href="#14-menus-windows-and-help">14 - Menus, Windows and
+Help</a></li>
+<li><a href="#10-related-records">10 - Related Records</a></li>
+<li><a href="#11-mark-and-unmark">11 - Mark and Unmark</a></li>
+<li><a href="#12-look-and-prime">12 - Look and Prime</a></li>
+<li><a href="#13-report-save-and-copy">13 - Report, Save and
+Copy</a></li>
+<li><a href="#14-work-search-record-for-a-claim-or-counselor">14 - Work
+Search Record for a Claim or Counselor</a></li>
+<li><a href="#10-related-records">10 - Related Records</a></li>
+<li><a href="#11-mark-and-unmark">11 - Mark and Unmark</a></li>
+<li><a href="#12-look-and-prime">12 - Look and Prime</a></li>
+<li><a href="#13-report-save-and-copy">13 - Report, Save and
+Copy</a></li>
+<li><a href="#14-work-search-record-for-a-claim-or-counselor">14 - Work
+Search Record for a Claim or Counselor</a></li>
+<li><a href="#10-related-records">10 - Related Records</a></li>
+<li><a href="#11-mark-and-unmark">11 - Mark and Unmark</a></li>
+<li><a href="#12-look-and-prime">12 - Look and Prime</a></li>
+<li><a href="#13-report-save-and-copy">13 - Report, Save and
+Copy</a></li>
+<li><a href="#14-work-search-record-for-a-claim-or-counselor">14 - Work
+Search Record for a Claim or Counselor</a></li>
+<li><a href="#10-related-records">10 - Related Records</a></li>
+<li><a href="#11-mark-and-unmark">11 - Mark and Unmark</a></li>
+<li><a href="#12-look-and-prime">12 - Look and Prime</a></li>
+<li><a href="#13-report-save-and-copy">13 - Report, Save and
+Copy</a></li>
+<li><a href="#14-work-search-record-for-a-claim-or-counselor">14 - Work
+Search Record for a Claim or Counselor</a></li>
+<li><a href="#00-overview-and-table-of-contents">00 - Overview and Table
+of Contents</a></li>
+<li><a href="#01-installing-dbdo">01 - Installing DbDo</a></li>
+<li><a href="#02-opening-jobtrail">02 - Opening JobTrail</a></li>
+<li><a href="#03-menus-windows-and-help">03 - Menus, Windows and
+Help</a></li>
+<li><a href="#04-adding-a-new-record">04 - Adding a New Record</a></li>
+<li><a href="#05-inspecting-a-record">05 - Inspecting a Record</a></li>
+<li><a href="#06-editing-a-record">06 - Editing a Record</a></li>
+<li><a href="#07-keywords-and-jump">07 - Keywords and Jump</a></li>
+<li><a href="#08-order-and-filter-records">08 - Order and Filter
+Records</a></li>
+<li><a href="#09-select-the-columns-you-hear">09 - Select the Columns
+You Hear</a></li>
+<li><a href="#10-related-records">10 - Related Records</a></li>
+<li><a href="#11-mark-and-unmark">11 - Mark and Unmark</a></li>
+<li><a href="#12-look-and-prime">12 - Look and Prime</a></li>
+<li><a href="#13-report-save-and-copy">13 - Report, Save and
+Copy</a></li>
+<li><a href="#14-work-search-record-for-a-claim-or-counselor">14 - Work
+Search Record for a Claim or Counselor</a></li>
+<li><a href="#1-where-to-go-next">1. Where to Go Next</a></li>
 </ul>
-<h2 id="audio-tutorials">Audio tutorials</h2>
-<p>The spoken tutorials live in <code>help</code>, beside this file, as
-<code>Tutorial_*.inix</code>. Each is a script: what the narrator says,
-the key to press, and what the screen reader answers in a different
-voice.</p>
-<h3 id="the-playlist">The playlist</h3>
-<ol type="1">
-<li><strong>Tutorial_HomerDev</strong> — the kit in twelve minutes: what
-it is, unarchiving it into <code>C:\HomerDev</code>, running
-<code>build</code>, building and running both fruit baskets, and hearing
-that the two behave the same. Start here.</li>
-</ol>
-<p>Two more are planned. Neither is written yet, and they are listed so
-the shape of the series is clear rather than to promise a date:</p>
-<ol start="2" type="1">
-<li><strong>Tutorial_Verify</strong> — the session that becomes the
-conference demonstration: specify a small change, generate it, reveal a
-plausible failure, show the check that catches it, fix it, and run the
-evidence again.</li>
-<li><strong>Tutorial_Mdi</strong> — the third shape, and why a window
-beats a tab for somebody using a screen reader.</li>
-</ol>
-<h3 id="making-the-audio">Making the audio</h3>
-<pre><code>scripts\buildTutorials</code></pre>
-<p>An app’s build script runs this itself whenever a walk has no audio
-yet, after refreshing the three tools from the kit into
-<code>scripts\</code>: <code>buildTutorials.cmd</code>,
-<code>buildTutorials.ps1</code> and <code>makeTutorials.py</code>. The
-kit’s copies are the source of truth; the app carries copies because the
-tool works out the project from its own location. Calling the kit’s copy
-in place builds the kit’s tutorials, not the app’s.</p>
-<p>What it writes, all under the app’s <code>help</code> folder:</p>
-<ul>
-<li><code>tutorials\&lt;name&gt;.mp3</code> – one file per walk, named
-as the script is named. A folder of audio files is found by anybody who
-looks, each is recognised as audio by its extension, and a person plays
-the one they want. There is no longer a single chaptered
-<code>Tutorials.mkv</code>; players treated it as one track.</li>
-<li><code>tutorials\Tutorials.m3u</code> – a playlist of the same files
-in order, which the Homer Player in FileDir opens as one track per
-walk.</li>
-<li><code>Tutorials.md</code> – the written walks, spliced between two
-markers the tool maintains, so the hand-written head of the file stays
-yours.</li>
-<li><code>TutorialFeed.xml</code> – a podcast feed of the audio.</li>
-</ul>
-<p>A walk whose <code>.mp3</code> exists is not spoken again. Delete the
-file to have it spoken again; name one script on the command line to
-speak just that one.</p>
-<h3 id="where-the-voices-live-and-who-fetches-them">Where the voices
-live, and who fetches them</h3>
-<p>One copy, in <code>C:\HomerDev\exec</code>, and <strong>only
-<code>build</code> fetches it</strong>. The kit’s build passes
-<code>-fetch</code> to the tutorial tool; an app’s build never does. So
-an app’s build finds the voices in the kit, or, when they are not there,
-says “Run build” and speaks nothing – it never downloads a copy of its
-own. Neither piper nor sherpa-onnx has an installer, so there is no
-default location the way there is for Whisper or Pandoc; the kit is the
-one place every Homer app already relies on, and <code>exec</code> is
-the Homer folder for binaries that are not in git.
-<code>LocalFiles.txt</code> names it as never pushed, and the kit’s own
-build skips it. To keep the voices somewhere else, set the
-<code>HOMER_VOICES</code> environment variable; a <code>Piper</code> or
-<code>sherpa-onnx</code> folder under Program Files is found too.</p>
-<p>The sherpa-onnx package taken is the <strong>shared</strong> one,
-<code>win-x64-shared</code>, which carries
-<code>bin\sherpa-onnx-offline-tts.exe</code>. The “static … lib”
-packages are libraries for linking, hundreds of megabytes and no
-executable; one was fetched by mistake on 25 September 2026, and the
-tool now removes such a folder when it finds one.</p>
-<h3 id="the-voices-and-why-these">The voices, and why these</h3>
-<p>Two voices, told apart three ways: who is speaking, how fast, and how
-flat. The narrator is a woman at a rate just brisker than natural; the
-reader a man, faster and even, the way a screen reader sounds to
-somebody who listens all day. A beta tester asked for the reader to be a
-bit slower, so its speed is 0.64 on piper’s scale (it was 0.56), still
-ahead of the narrator’s 0.80. <code>ReaderScale</code> in a script’s
-<code>[global]</code> section changes it for a series.</p>
-<p><strong>Two engines, one each.</strong> Kokoro speaks the narrator;
-piper’s john speaks the reader. Half the lines in a walk are the
-reader’s, and piper speaks a line in a second where Kokoro takes twenty
-– on a laptop Kokoro runs at two to three times real time, and a long
-unbroken line, such as a web address spelled out as words, far slower,
-which is what made a build look hung on 25 September 2026. Kokoro’s
-naturalness goes where it is heard, and a flattened piper voice is what
-a reader sounds like anyway. The tool cuts long text at sentences and
-commas before handing it to Kokoro, and runs it on two threads, which
-measured faster than all of them. <code>ReaderOnKokoro=1</code> in
-<code>[global]</code> puts the reader on Kokoro too, at the cost in
-minutes.</p>
-<p><strong>One loudness.</strong> Every piece is brought to the same
-measured loudness before the join, so the narrator is no longer louder
-than the reader; <code>ReaderGain</code> in <code>[global]</code> scales
-the reader’s pieces on top of that, 1.0 unless set.</p>
-<p><strong>Kokoro, when it can be fetched.</strong> Re-investigated on
-25 September 2026. Kokoro-82M is an open-weight neural voice model
-released under Apache 2.0, trained on public-domain audio, audio under
-permissive licences, and synthetic audio – no share-alike clause and no
-non-commercial clause anywhere in its lineage, so audio made with it can
-be published under MIT beside the program. It is markedly more natural
-than piper’s medium voices. The tool runs it through sherpa-onnx, also
-Apache 2.0, as a single Windows executable with the phoneme data inside
-the model bundle: nothing to install. Narrator af_sarah, reader
-am_michael; <code>KokoroNarrator</code> and <code>KokoroReader</code> in
-<code>[global]</code> take other speaker numbers, and
-<code>Engine=piper</code> forces piper.</p>
-<p><strong>Piper, otherwise.</strong> kristin (LJ Speech, public domain)
-and john (LibriVox, public domain), chosen for licence before sound.
-Most of piper’s better-known English voices cannot be used this way:
-lessac’s corpus is research-only, ryan and the hfc voices are CC
-BY-NC-SA, and libritts_r is fine-tuned from lessac.</p>
-<p><strong>Ruled out again, on the evidence available.</strong> The
-voices built into Windows, and the neural voices behind Edge’s Read
-Aloud, come with terms written for reading on that computer; nothing in
-them clearly permits publishing recordings made with them, and the safe
-reading is that they do not. Among the open models: those trained on the
-Emilia corpus, such as F5-TTS, publish under a non-commercial licence;
-Fish Speech is CC BY-NC-SA; XTTS is under Coqui’s non-commercial model
-licence. Chatterbox (MIT) and Parler-TTS (Apache 2.0) are clean on
-licence but need Python and, in practice, a graphics card; Kokoro gives
-the same permission at a size that runs on any processor. Licences
-change; the tool’s log names the voice used for every file, so a later
-check knows what to look at.</p>
-<h3 id="checking-one">Checking one</h3>
-<pre><code>scripts\checkTutorial              every help\Tutorial_*.inix
-scripts\checkTutorial Tutorial_01  one of them</code></pre>
-<p>The check reads each script against the format and the reader’s
-grammar and names the script and step for every problem: a key with no
-<code>Hear</code> line and nothing naming the silence;
-<code>Alt+T</code> in a <code>Hear</code> line, where the reader says
-the words; a screen reader named anywhere; a check box line out of the
-reader’s order; a file name written rather than said; a first walk that
-does not teach the repeat key. <code>buildTutorials</code> runs it first
-and speaks nothing while it reports a problem. Zero problems is a real
-answer.</p>
-<h3 id="the-skill-for-an-ai-writing-these">The skill, for an AI writing
-these</h3>
-<p><code>.claude\skills\homer-tutorial\SKILL.md</code> is a skill for
-Claude, or any assistant that reads one: the format, the four beats, the
-reader’s grammar, where the truth of a <code>Hear</code> line comes from
-(the dialog’s code, the program’s own announcements, a speech history, a
-transcript), and the check-then-build commands. Give it to the assistant
-along with the app’s dialog code and it writes walks that pass the
-check. Name no screen reader is in there too.</p>
-<h3 id="writing-one">Writing one</h3>
-<p>One <code>[step]</code> per keystroke. <code>Say</code> is the
-narration, <code>Key</code> is what to press, <code>Hear</code> is what
-the screen reader answers – repeat it for several lines – and
-<code>Note</code> is for the written version only and is never
-spoken.</p>
-<p>Write every <code>Hear</code> line the way the reader actually says
-it, not the way the screen looks. “1 fruit in the basket”, not “Count:
-1”.</p>
-<h3 id="how-a-screen-reader-trainer-narrates">How a screen reader
-trainer narrates</h3>
-<p>These come from a professional JAWS training recording, “Introduction
-to Windows”, read back through HomerScribe on 25 September 2026. A
-tutorial script follows the same beats, because they are the ones a
-listener who cannot see the screen has come to expect.</p>
-<ul>
-<li><strong>Say the key, then press it, then let the reader speak, then
-translate.</strong> Four beats, every time. “I’ll press Insert T, Tango,
-to read the title of the current window.” – key – “Title is Excel
-Backstage View.” – “JAWS confirmed that focus is in the Excel window.”
-In a script that is <code>Say</code>, <code>Key</code>,
-<code>Hear</code>, then a second <code>Say</code> that turns what was
-heard into what it means.</li>
-<li><strong>Spell a letter key with its phonetic word.</strong> “Insert
-T, Tango.” “Windows key D, Delta.” A single letter is the easiest thing
-to mishear in speech, and the phonetic word costs half a second.</li>
-<li><strong>Quote the reader word for word, then paraphrase.</strong>
-“Start list box, toggle start navigation menu items, collapsed, 1 of 6”
-is what JAWS said; “JAWS reads it as toggle start navigation menu items”
-is what it meant. The <code>Hear</code> line is the quotation, exact and
-unimproved; the <code>Say</code> after it is the translation. Never tidy
-the quotation: the learner will hear the untidy version on their own
-machine and must recognise it.</li>
-<li><strong>Say when the reader says nothing.</strong> “When I pressed
-Alt F4, JAWS didn’t say anything.” Silence after a key is information
-the learner cannot see, so a script names it: a <code>Hear</code> line
-reading exactly “(nothing)”.</li>
-<li><strong>Verify after every change of focus.</strong> The trainer
-presses Insert T to read the window title after every switch, and says
-he is doing it and why. A script does the same after Alt+Tab, after
-opening a dialog, after closing one – and says the word: “to verify”.
-Inside a dialog the key is <strong>Insert Tab</strong>, which re-reads
-the control with its state, position and hint; Insert T is for the
-window. The Freedom Scientific trainers use both, and teach both in
-their first module.</li>
-<li><strong>Spell a lone letter.</strong> “Windows key R, Romeo”;
-“Insert W, whiskey”. A letter is the hardest thing to hear in speech, so
-when the key is one letter, the Say line gives its alphabet word.</li>
-<li><strong>Show the hint once, then turn it off.</strong> One step
-shows a tutor message; the next Say line says they are off from here;
-the Hear lines after carry none. That is what the trainers do, and it is
-what a reader at intermediate verbosity says.</li>
-<li><strong>One wrong turn, and the way back.</strong> Each walk has one
-planned misstep – the wrong letter, a dialog nobody wanted – and the
-Escape that undoes it, narrated as calmly as the rest. A walk with no
-misstep teaches no recovery.</li>
-<li><strong>End with the keys.</strong> The last step is a Say line
-naming the two or three keys the walk taught, and nothing else.</li>
-</ul>
-<p><code>TutorialLearnings.md</code> in this folder gives the evidence
-for each of these, from 98 transcripts of JAWS training. - <strong>Teach
-the recovery key early.</strong> “If you type too quickly and miss what
-is spoken, press Insert Up Arrow to repeat it.” The first tutorial says
-this before the first thing worth missing. - <strong>Use the count as
-orientation.</strong> “1 of 14” and “1 of 6” are how the listener knows
-the size of the place they have landed in. When the reader gives a
-count, the <code>Say</code> line uses it: “the first of 14 icons on the
-desktop”. - <strong>Name the control as the reader names it.</strong>
-“Search edit box”, “list box”, “split button”, “up down slider”. A
-tutorial that says “the search field” when the reader will say “edit
-box” makes the listener translate twice. - <strong>Pause before the next
-key.</strong> The trainer leaves a breath between the reader’s answer
-and his next instruction. <code>Pause=1</code> before each
-<code>[step]</code> is the script’s breath.</p>
-<h3 id="how-a-reader-phrases-a-control">How a reader phrases a
-control</h3>
-<p>Taken from two screen reader training classes read back through
-HomerScribe on 25 September 2026: one at the reader’s beginner
-verbosity, which speaks the whole grammar, and one at intermediate,
-which drops the tutor phrase at the end. <code>Hear</code> lines are
-written at intermediate. Nothing here names a reader; the grammar is
-common to the readers people use.</p>
-<ul>
-<li><strong>A window appears:</strong> its title alone first, then the
-title again with the word dialog, then the text, then the control that
-has focus. “HomerScribe results” / “HomerScribe results dialog” / “One
-source done. Took 14 minutes.” / “OK button”.</li>
-<li><strong>Check box:</strong> label, “check box”, state, access key.
-“Transcribe audio check box, checked, Alt plus T”. Toggled by its access
-key, the reader says the whole line again with the new state.</li>
-<li><strong>Button:</strong> label, “button”, access key. “OK button”. A
-label with a symbol is read as the symbol’s name: “Next greater button,
-Alt plus N”.</li>
-<li><strong>Radio button:</strong> label, “radio button”, state,
-position, access key. “Words radio button, checked, 2 of 4, Alt plus
-T”.</li>
-<li><strong>Combo box:</strong> label with its colon, “combo box”, the
-value, position, access key. “Use keyboard layout: combo box, Desktop, 1
-of 3, Alt plus L”.</li>
-<li><strong>Edit box:</strong> label with its colon, “edit”, then the
-contents. “Source paths: edit, https colon slash slash …”. Select All
-answers “selected” and the text; a paste answers nothing.</li>
-<li><strong>Slider:</strong> label, direction, value. “Rate: left right
-slider, 50 percent”.</li>
-<li><strong>Menus:</strong> “Menu bar” on entry; each menu as “Options
-menu”; each item with its letter after it; a submenu as “Voices submenu,
-V”; “Leaving menu bar” on exit. Opening a dialog from a menu says
-“Leaving menus” first.</li>
-<li><strong>Access keys are words:</strong> the reader says “Alt plus
-T”, never a plus sign, so a <code>Hear</code> line writes the
-words.</li>
-<li><strong>Names are read as the synthesizer reads them:</strong>
-“Introduction to Windows dot m p 3” for Introduction_to_Windows.mp3 at
-the default punctuation level; a web address is spelled through – “https
-colon slash slash www dot” – and a path is “C colon backslash Users
-backslash”.</li>
-<li><strong>The reader also confirms actions the program did not ask it
-to:</strong> “Copied selection to clipboard”, “Select All”, “376
-characters”. A tutorial that copies text should expect them.</li>
-<li><strong>A slider with a value:</strong> label with colon, the value,
-the direction, the position as a percentage.
-<code>Voice rate: 68, left right slider, 25 percent</code>. An edit box
-holding a number reads the number:
-<code>Voice pitch change   percent: edit, 20</code>.</li>
-<li><strong>A tabbed dialog:</strong> the title with “dialog”, then the
-tab with “page”: <code>Properties dialog, Shortcut page</code>.</li>
-<li><strong>A list view item:</strong> name, “object” or the item’s
-kind, position; typing a letter jumps and reads the item that letter
-reached:
-<code>Folder view   list view, not selected, Recycle Bin object, 1 of 12</code>
-then, after J, <code>JAWS object, 5 of 12</code> – the name of whatever
-program it is.</li>
-<li><strong>A program’s own loading message is read before its
-title:</strong> <code>Please   wait</code> and then the window title,
-then the focused control.</li>
-<li><strong>In an edit box, the reader echoes what the keys do.</strong>
-Typing speaks each character as it lands – “T”, “H”, “E”, “space” – and
-“Enter” for a new line, “Period” for the punctuation. Right Arrow speaks
-the character it moves onto; Control plus Right Arrow speaks the word it
-lands at the start of. Backspace speaks the character it erased. An
-empty line is “Blank”. Control plus Home says “Top of file” and then the
-first line; Control plus End says “Bottom of file” and then the last
-line, which is often “Blank”. Home and End say nothing on their
-own.</li>
-<li><strong>Selecting has its own words.</strong> Shift plus Right
-Arrow: the character, then “selected”; moving back off it: “unselected”.
-Control plus Shift plus Right Arrow: the word, then “selected”. Shift
-plus Down Arrow: “Selected” and the whole line. The reader’s own
-read-selection key answers “Selection is” and the text. Control plus C
-answers “Copied selection to clipboard”.</li>
-<li><strong>Reading without moving.</strong> The reader’s say-line key
-reads the current line and the cursor stays; say-word reads the word,
-twice for a spelling; say-all reads on from the cursor until Control
-stops it. A tutorial that types into a field uses say-line to verify the
-line, the way the trainer does.</li>
-<li><strong>A direct announcement from the program is a sentence of its
-own:</strong> “Done. Introduction to Windows dot m p 3” – the kind, a
-full stop, the detail – and it arrives before the results box.</li>
-</ul>
-<h2 id="scenario-1-start-a-new-app-from-nothing">Scenario 1: start a new
-app from nothing</h2>
-<p>You want a tool that renames files from a pattern. Call it
-PatternRename.</p>
-<pre><code>cd \HomerDev
-newHomerApp PatternRename
-cd \PatternRename
-buildPatternRename
-PatternRename</code></pre>
-<p><code>newHomerApp</code> writes a working one-dialog program, the
-build script, the installer script, the GitHub bootstrap,
-<code>accept.inix</code>, <code>RepoFiles.txt</code>,
-<code>.gitignore</code>, <code>self.md</code> and
-<code>version.txt</code>. Nothing already there is overwritten. Add
-<code>--python</code> for a Python app instead.</p>
-<p>Two things need your hand, both marked CHANGE ME in the installer
-script: a fresh AppId, and the desktop hotkey.</p>
-<p>Then open <code>self.md</code> and write the first entry: what this
-is for in two sentences, which Homer components it uses, and what is
-still undecided. Two minutes now saves an hour in a month.</p>
-<h2 id="scenario-2-add-a-field-to-a-dialog">Scenario 2: add a field to a
-dialog</h2>
-<p>You want a “Prefix” box between the pattern and the folder.</p>
-<p>Find the <code>add</code> calls in your source and put one line where
-the field belongs:</p>
-<pre><code>txtPrefix = dlg.addInputBox(&quot;&amp;Prefix:&quot;, &quot;&quot;, &quot;Text to put in front of each name.&quot;);</code></pre>
-<p>That is the whole change. <strong>Add order is focus order</strong>,
-so where you put the line is where the field lands in the tab order. The
-ampersand is the whole of the access key. The tip appears in the status
-line when focus arrives and again in the Help window on F1.</p>
-<p>Then check what you just did:</p>
-<pre><code>cd \HomerDev\Tools
-check --path \PatternRename</code></pre>
-<p>If <code>&amp;P</code> was already taken, the keys check says so.
-That is the check earning its place: two controls claiming one letter is
-invisible when you read the code and obvious when a script counts.</p>
-<h2 id="scenario-3-work-out-what-a-key-already-does">Scenario 3: work
-out what a key already does</h2>
-<p>Before you bind Alt+Shift+R to something, find out what has it.</p>
-<p>In an MDI app, press <strong>Control+F1</strong>. That is the key
-describer: every key now says what it would do instead of doing it.
-Press the key you are wondering about, listen, and press Control+F1
-again to turn it off.</p>
-<p>Outside a running program, <code>Hotkeys.md</code> in
-<code>help</code> lists every key three ways – by key, by description,
-and by binding – and <code>KeyMap</code> reports a key claimed twice
-into the session log when the menus are built.</p>
-<p>The rules that decide what you may use are in
-<code>HomerDev.md</code>: never Alt+Control (Windows desktop shortcuts
-own it), never a key whose Windows meaning is selection or navigation,
-and prefer Alt+Shift plus a letter that means something in the command’s
-name.</p>
-<h2
-id="scenario-4-turn-a-one-window-app-into-a-multiple-document-app">Scenario
-4: turn a one-window app into a multiple-document app</h2>
-<p>Your tool now opens one file at a time and you want several.</p>
-<ol type="1">
-<li>In the build script, uncomment the KeyMap and Mdi pair. They go on
-together: <code>Mdi.cs</code> registers every command with KeyMap, and
-turning on one without the other does not compile.</li>
-<li>Make your form a <code>MdiFrame</code> subclass, declare the menus
-with <code>addMenu</code> and <code>addItem</code>, and call
-<code>finishMenus</code>.</li>
-<li>Make your window a <code>MdiChild</code> subclass. Build its
-controls through <code>child.lbc</code>, which is the same builder a
-dialog uses, and finish with <code>finishLayout</code> instead of
-<code>run</code>.</li>
-<li>Title it with <code>setTitle(subject, view)</code> and never include
-the app name – the frame already carries it, and Windows merges the
-two.</li>
-</ol>
-<p>What you get without writing it: the window picker on F4, the spoken
-window list on Shift+F4, next and previous, close and close-others, the
-alternate menu on Alt+F10, the key describer on Control+F1, about on
-Alt+F1, the guide on F1.</p>
-<p><code>Templates\samples\FruitBasketMdiCs.cs</code> and
-<code>Templates\samples\FruitBasketMdiPy.py</code> are the worked
-examples, and its five marked blocks are exactly the five things that
-change.</p>
-<h2
-id="scenario-4b-let-people-extend-your-app-without-your-help">Scenario
-4b: let people extend your app without your help</h2>
-<p>Drop a script into the scripts folder and it is in the program’s
-script list, at once, with nothing to register.</p>
-<pre><code>%LOCALAPPDATA%\PatternRename\jobs\Weekly report.cmd</code></pre>
-<p>Press Alt+Shift+S in the app, arrow or type the first letter, press
-Enter. The shipped jobs come with the program; the user’s own live in
-the per-user tree where an update cannot overwrite them, and both appear
-in one list with the user’s first.</p>
-<p>For settings, declare what may change:</p>
-<pre><code>addSetting(&quot;folder&quot;, &quot;&quot;, &quot;Where renamed files go.&quot;);</code></pre>
-<p>and the frame gives you Alt+Shift+C: a list of what is settable, one
-field for the new value, saved at once and handed back to your code
-through <code>onSettingChanged</code>. No settings file to edit by hand,
-no preferences dialog to build, and no restart.</p>
-<h2 id="scenario-5-find-out-why-something-failed">Scenario 5: find out
-why something failed</h2>
-<p>Something went wrong and the screen said one short sentence, as it
-should.</p>
-<pre><code>%LOCALAPPDATA%\PatternRename\logs</code></pre>
-<p>Open the newest file. It is named for the moment the session began,
-and it holds the version, the program path, the working directory, the
-command line, the Windows build, every setting, every external command
-with its exit code, and every error with its stack.</p>
-<p>If the failure was in a build rather than a run, the log is
-<code>buildPatternRename.log</code> beside the build script, because
-that is a developer’s file and the developer is standing in that
-folder.</p>
-<p>If the failure was in an install, the setup log is in the same
-<code>logs</code> folder, named
-<code>PatternRename-setup-&lt;date&gt;.log</code>.</p>
-<p>The rule behind all three: the console is for a person, the log is
-for debugging. Never add a print statement where a log line belongs.</p>
-<h2 id="scenario-6-write-down-what-done-means-then-prove-it">Scenario 6:
-write down what “done” means, then prove it</h2>
-<p>Before you ask an AI for anything, write
-<code>accept.inix</code>:</p>
-<pre><code>[check]
-Name   = the help text names every switch
-Run    = PatternRename.exe --help
-Expect = 0
-Wants  = --pattern
-
-[check]
-Name   = a bad switch is refused rather than ignored
-Run    = PatternRename.exe --nonsense
-Expect = 1</code></pre>
-<p>Four fields and no more. Then:</p>
-<pre><code>check --path \PatternRename --build</code></pre>
-<p>It builds, smoke-runs <code>--help</code>, runs every acceptance
-check, and writes <code>evidence-&lt;date&gt;.md</code> saying what was
-verified, what was not checked, and what remains uncertain.</p>
-<p>Read the third list. It names what no script can settle – whether the
-program does the right thing, what a screen reader actually says,
-whether the code is secure – so you know exactly where your own
-judgement is still required.</p>
-<h2
-id="scenario-7-change-a-shared-class-without-breaking-four-apps">Scenario
-7: change a shared class without breaking four apps</h2>
-<p>You fixed something in <code>Lbc.cs</code>. Four programs compile
-against it.</p>
-<pre><code>cd \HomerDev
-checkHomerDev</code></pre>
-<p>It audits the kit, checks that every module’s REQUIRES line is
-satisfied by every build script, deletes what previous builds wrote, and
-builds all three samples from clean. Exit code 1 if anything failed.</p>
-<p>Then build the real apps, because <code>checkHomerDev</code> does
-not: EdSharp, FileDir, DbDo and HomerScribe all carry these modules, and
-a kit change that compiles against three samples can still break one of
-them. The evidence report says so in its uncertain list, every time.</p>
-<p>Finally, write what you changed and why in <code>self.md</code>.
-<code>History.md</code> is public and is about releases;
-<code>self.md</code> is where the rejected alternative goes.</p>
-<h2 id="scenario-8-release-it">Scenario 8: release it</h2>
-<pre><code>cd \PatternRename
-check --build
-push &quot;Add the prefix field.&quot;
-release</code></pre>
-<p><code>push</code> stages everything the whitelist allows, commits
-with your message, and pushes. <code>release</code> runs
-<code>release</code>, which reads <code>version.txt</code>, tags, and
-publishes the installer as a release asset.</p>
-<p>What gets pushed is decided by <code>RepoFiles.txt</code>, not by
-habit: <code>tidy --gitignore</code> turns that list into a
-<code>.gitignore</code> that ignores everything else, so a file you
-dropped in the folder cannot go up by accident.</p>
-<h2 id="scenario-9-ask-an-ai-for-a-homer-app-and-get-one">Scenario 9:
-ask an AI for a Homer app and get one</h2>
-<p>Three sentences carry the kit into an AI session:</p>
-<blockquote>
-<p>This is a Windows program for screen reader users, built on the Homer
-Development Kit at <code>C:\HomerDev</code>. Use <code>Lbc</code> for
-every dialog, <code>Inix</code> for settings, <code>Log</code> for the
-session log, <code>Paths</code> for folders, and <code>Say</code> only
-for what a screen reader cannot work out for itself. Follow the nine
-decisions marked in <code>Templates\samples\FruitBasketCs.cs</code>.</p>
-</blockquote>
-<p>Then work in this order, which is the method the whole kit is shaped
-around:</p>
-<ol type="1">
-<li><strong>Specify before you generate.</strong> Write
-<code>accept.inix</code> first. An AI asked for “a tool that does X”
-gives you its idea of done; an AI asked to satisfy five named checks
-gives you yours.</li>
-<li><strong>Build in small, recoverable steps.</strong> One change, one
-build, one <code>check</code>, one commit.</li>
-<li><strong>Verify without sight.</strong> The checks for what a script
-can settle, the log for what happened, your own ears for the rest.</li>
-<li><strong>Package, document and defend.</strong> The build makes the
-installer; the evidence report answers “what gives you confidence that
-it works?”</li>
-</ol>
-<p>Paste the sample into the session when the answers drift. A model
-that has read FruitBasketCs writes Homer code; a model that has not
-writes pixel coordinates and a tab order that is an accident.</p>
-<!-- walkthrough: written by makeTutorials.py, do not edit between the markers -->
-<h2 id="the-homer-development-kit-and-two-fruit-baskets">0. The Homer
-Development Kit, and two fruit baskets</h2>
-<p>This is a first look at HomerDev: what it is, how to install it, and
-how to build and run the two sample programs. It takes about twelve
-minutes. You can follow along, or just listen.</p>
-<p><strong>Before you start:</strong> You need Windows 10 or later,
-64-bit, and a screen reader running. Everything else the kit fetches for
-itself. Nothing in this tutorial costs anything.</p>
+<!-- walkthrough: written by makeTutorial.py, do not edit between the markers -->
+<h2 id="overview-and-table-of-contents">00 - Overview and Table of
+Contents</h2>
+<p>A simulated walk through DbDo, made with AI: a person working, and a
+screen reader answering.</p>
 <h3 id="step-1">Step 1</h3>
-<p>HomerDev is a kit of parts for building Windows programs that work
-well by keyboard and screen reader. Nine C sharp classes, seven Python
-modules, the build and release scripts, and two sample programs that do
-the same job in both languages. It is free and open source. If you miss
-a line the reader says, Insert plus Up Arrow says it again.</p>
-<p>The kit is at https://github.com/JamalMazrui/HomerDev</p>
-<h3 id="step-2">Step 2</h3>
-<p>The idea behind it is simple. Every decision that makes a program
-pleasant to use without sight – where the focus goes, what gets spoken,
-what the keys do – has already been made, tested, and put in a class.
-You get them by calling the class rather than by remembering them.</p>
-<p>The guide calls these the nine decisions, and both samples mark them
-where they occur.</p>
-<h3 id="step-3-controlv">Step 3: Control+V</h3>
-<p>Start by unarchiving HomerDev dot zip into a folder called C colon
-backslash HomerDev. That is the whole install. Open the archive, choose
-Extract All, and type the folder name.</p>
+<p>I am Kristin, the user.</p>
 <p>Screen reader:</p>
 <ul>
-<li>Destination, edit, C colon backslash HomerDev</li>
+<li>I am John, the screen reader.</li>
 </ul>
-<p>Any folder works. If you put it somewhere else, set an environment
-variable called HomerDev to that path, and every build script will find
+<p>Both voices are synthetic, made with piper from public domain
+recordings. They introduce themselves once, here.</p>
+<h3 id="step-2-altcontrold">Step 2: Alt+Control+D</h3>
+<p>I am on the trail of an accessibility analyst job. I keep every lead,
+contact, and step in JobTrail, a job search database built on DbDo.</p>
+<p>Screen reader:</p>
+<ul>
+<li>DbDo</li>
+<li>Records list view</li>
+</ul>
+<p>DbDo opens databases of any kind. JobTrail is the one that comes with
 it.</p>
-<h3 id="step-4-build">Step 4: build</h3>
-<p>Now open a command prompt in that folder and run the kit’s own
-build.</p>
+<h3 id="step-3-shiftz">Step 3: Shift+Z</h3>
+<p>These walkthroughs follow me in order. One installs DbDo, two opens
+JobTrail, three learns the menus. Four to six add, inspect and edit a
+job.</p>
 <p>Screen reader:</p>
 <ul>
-<li>Homer Development Kit 1.4.0 in C colon backslash HomerDev</li>
-<li>10 documents converted to HTML</li>
-<li>0 problems found. The kit is complete.</li>
+<li>status, jobs row 1 of 4, sort employer</li>
 </ul>
-<p>build converts every document to HTML with pandoc, fetching pandoc if
-this machine has none, then checks the kit over: every component
-present, every file in the right encoding, no empty files.</p>
-<h3 id="step-5">Step 5</h3>
-<p>Notice the last line. Zero problems is a real answer, said plainly.
-That is a rule in this kit: a count always matches its noun, and nothing
-reports zero as though it were an error.</p>
-<p>“1 match”, never “1 matches”; “0 matches” rather than silence.</p>
-<h3 id="step-6-cd-templates">Step 6: cd Templates</h3>
-<p>Next, the samples. Change into the samples folder under Templates.
-There are four files: a C sharp program, a Python program, and a build
-script for each. Both programs are the fruit basket – a window with a
-fruit field and an Add button, a basket list and a Delete button. Blind
-programmers have taught with that specification since 2005.</p>
-<p>Typed at the prompt: the reader echoes the letters, and says nothing
-else until the next command answers. The legacy FruitBasket collection
-has thirty-six of these, one per language. These two are different: they
-are parallel to each other.</p>
-<h3 id="step-7-buildfruitbasketcs">Step 7: buildFruitBasketCs</h3>
-<p>Build the C sharp one.</p>
+<h3 id="step-4">Step 4</h3>
+<p>Then finding, ordering and filtering, choosing what I hear, following
+links, marking, the two computed columns, getting things out, and last,
+the work search record my counselor asks for.</p>
+<p>Each one assumes the ones before it, so later ones say less.</p>
+<p><strong>Something to try:</strong> Take the next one: installing.</p>
+<h2 id="installing-dbdo">01 - Installing DbDo</h2>
+<p><strong>Before you start:</strong> The installer is downloaded, and a
+Windows screen reader is running.</p>
+<h3 id="step-1-enter">Step 1: Enter</h3>
+<p>I run the installer. Windows asks first, because it came from the
+internet.</p>
 <p>Screen reader:</p>
 <ul>
-<li>Kit, C colon backslash HomerDev version 1.4.0</li>
-<li>Compiler, Microsoft Visual Studio Build Tools</li>
-<li>Built FruitBasketCs dot exe version 1.0.0</li>
+<li>Open File - Security Warning dialog</li>
+<li>The publisher could not be verified. Are you sure you want to run
+this software?</li>
+<li>Run Button, alt+R</li>
 </ul>
-<p>The script finds the compiler, finds the three reference assemblies
-that are not on the default path, compiles the program together with the
-Homer classes straight out of the kit, and writes buildFruitBasketCs.log
-beside itself.</p>
-<h3 id="step-8-fruitbasketcs">Step 8: FruitBasketCs</h3>
-<p>Now run it.</p>
+<p>DbDo is not code signed, so this appears for every download.</p>
+<h3 id="step-2-altr">Step 2: Alt+R</h3>
+<p>Alt plus R, Run. Then Windows asks for administrator rights, because
+DbDo installs for everyone.</p>
 <p>Screen reader:</p>
 <ul>
-<li>Fruit Basket, the basket is empty</li>
-<li>Fruit, edit</li>
+<li>User Account Control</li>
 </ul>
-<p>The window title carries the state and the focus starts in the field,
-because typing a fruit is the first thing anybody does.</p>
-<h3 id="step-9-apple-enter">Step 9: apple, Enter</h3>
-<p>Type a fruit and press Enter.</p>
+<p>The prompt can open behind other windows. If nothing happens, Alt
+plus Tab finds it.</p>
+<h3 id="step-3-alty">Step 3: Alt+Y</h3>
+<p>Alt plus Y, Yes. The first page is the folder. Enter presses Next,
+the page’s default button.</p>
 <p>Screen reader:</p>
 <ul>
-<li>apple added, 1 fruit in the basket</li>
+<li>Setup - DbDo dialog</li>
+<li>To continue, click Next. If you would like to select a different
+folder, click Browse.</li>
+<li>Edit, C colon backslash Program Files backslash DbDo</li>
 </ul>
-<p>One fruit, not one fruits. The screen reader announced nothing about
-the field or the button, because it had nothing new to say; what you
-heard is the program telling you what it did.</p>
-<h3 id="step-10-tab-downarrow">Step 10: Tab, DownArrow</h3>
-<p>Add two more, then tab to the basket and arrow through it.</p>
+<p>A later update skips this page and goes where the last one went.</p>
+<h3 id="step-4-enter">Step 4: Enter</h3>
 <p>Screen reader:</p>
 <ul>
-<li>Basket, list box, apple, 1 of 3</li>
+<li>Click Install to continue with the installation, or click Back if
+you want to review or change any settings.</li>
+<li>Install Button, Alt+i</li>
 </ul>
-<p>An ordinary Windows list box. No custom control, no special mode,
-nothing to learn.</p>
-<h3 id="step-11-controlj">Step 11: Control+J</h3>
-<p>Press Control plus J to search inside the list.</p>
+<h3 id="step-5-enter">Step 5: Enter</h3>
+<p>Enter again presses Install. The last page lists the extras. I arrow
+through them; Space ticks one.</p>
 <p>Screen reader:</p>
 <ul>
-<li>Find in list, edit</li>
+<li>Setup has finished installing DbDo on your computer.</li>
+<li>Tree view, Install scripts for improving use with the JAWS screen
+reader, checked, 1 of 6</li>
 </ul>
-<p>That search, and F3 to repeat it, arrived with the list box. The
-program contains no code for either.</p>
-<h3 id="step-12-delete">Step 12: Delete</h3>
-<p>Press Delete on a fruit you no longer want.</p>
+<p>A screen reader line appears only for a reader you actually have.</p>
+<h3 id="step-6-downarrow">Step 6: DownArrow</h3>
 <p>Screen reader:</p>
 <ul>
-<li>banana deleted, 2 fruits in the basket</li>
+<li>Install add-on for improving use with the NVDA screen reader,
+checked, 2 of 6</li>
 </ul>
-<p>The selection moves to the neighbour, so the list still has somewhere
-to speak from. A list with nothing selected says nothing, and a person
-who hears nothing assumes the program has stopped.</p>
-<h3 id="step-13-altr">Step 13: Alt+R</h3>
-<p>Press Alt plus R for the report.</p>
+<h3 id="step-7-downarrow">Step 7: DownArrow</h3>
+<p>Ollama runs AI on my own computer. I want it, so I tick it.</p>
 <p>Screen reader:</p>
 <ul>
-<li>Fruit basket report, read only edit</li>
+<li>Install Ollama 0.34.2, not checked, 3 of 6</li>
 </ul>
-<p>A plain read-only window you arrow through line by line and close
-with Escape. The same window the Help button uses.</p>
-<h3 id="step-14-f1">Step 14: F1</h3>
-<p>Press F1 for help.</p>
+<h3 id="step-8-space">Step 8: Space</h3>
 <p>Screen reader:</p>
 <ul>
-<li>Help, Fields in this dialog, Fruit, type the name of a fruit</li>
+<li>checked</li>
 </ul>
-<p>That help was written once, as a tip beside each field, and it
-reaches the reader twice: in the status line when focus arrives, and in
-this window on demand.</p>
-<h3 id="step-15-altf4">Step 15: Alt+F4</h3>
-<p>Close the program, then run it again.</p>
+<p>The model comes next, about 2 gigabytes, and installs after
+Ollama.</p>
+<h3 id="step-9-enter">Step 9: Enter</h3>
+<p>Launch is ticked already. Enter presses Finish, and a results box
+says what was done.</p>
 <p>Screen reader:</p>
 <ul>
-<li>Fruit Basket, 2 fruits in the basket</li>
+<li>DbDo Setup Results dialog</li>
+<li>DbDo 1.0.172 is installed. Program files, C colon backslash Program
+Files backslash DbDo</li>
+<li>OK Button</li>
 </ul>
-<p>The basket was saved the moment each fruit went in, not on the way
-out. A program that saves at exit loses everything when it is
-killed.</p>
-<h3 id="step-16-buildfruitbasketpy">Step 16: buildFruitBasketPy</h3>
-<p>Now the same program in Python. Build it.</p>
+<h3 id="step-10-enter">Step 10: Enter</h3>
 <p>Screen reader:</p>
 <ul>
-<li>Creating the build environment</li>
-<li>Installing what the build needs</li>
-<li>Built FruitBasketPy dot exe version 1.0.0</li>
+<li>DbDo</li>
+<li>JobTrail dot d b, jobs</li>
+<li>Records list view</li>
+<li>Demo Data Cooperative (made up) Data Quality Specialist rejected, 1
+of 4</li>
+<li>DbDo ready</li>
 </ul>
-<p>The first build makes a virtual environment beside the script and
-installs PyInstaller and wxPython into it, which takes a few minutes
-once. What comes out is one file with Python and every dependency inside
-it, so whoever you give it to needs no Python of their own.</p>
-<h3 id="step-17-fruitbasketpy">Step 17: FruitBasketPy</h3>
-<p>Run the Python one.</p>
+<p>Alt plus Control plus D starts DbDo from anywhere afterwards. D for
+DbDo.</p>
+<p><strong>Something to try:</strong> Open the log the results box
+names, and find where DbDo was installed.</p>
+<h2 id="opening-jobtrail">02 - Opening JobTrail</h2>
+<p><strong>Before you start:</strong> DbDo has just opened JobTrail on
+the jobs table.</p>
+<h3 id="step-1-downarrow">Step 1: DownArrow</h3>
+<p>Each row is one job I am after: employer, title, and where it
+stands.</p>
 <p>Screen reader:</p>
 <ul>
-<li>Fruit Basket, the basket is empty</li>
-<li>Fruit, edit</li>
+<li>Example Widgets Company (sample employer) Accessibility Analyst
+interviewing, 2 of 4</li>
 </ul>
-<p>The same title, the same first control, the same starting focus.</p>
-<h3 id="step-18-cherry-enter">Step 18: cherry, Enter</h3>
-<p>Type a fruit and press Enter, exactly as before.</p>
+<p>That one is the job I want most.</p>
+<h3 id="step-2-rightarrow">Step 2: RightArrow</h3>
+<p>It is a grid. Down and Up move between records; Left and Right
+between fields.</p>
 <p>Screen reader:</p>
 <ul>
-<li>cherry added, 1 fruit in the basket</li>
+<li>Accessibility Analyst</li>
 </ul>
-<p>The same sentence, from a different language, because both programs
-call the same Say class through the same kit.</p>
-<h3 id="step-19-controlj">Step 19: Control+J</h3>
-<p>Tab to the basket, press Control plus J, press Delete, press Alt plus
-R. Every key does what it did in the C sharp version.</p>
+<h3 id="step-3-shiftc">Step 3: Shift+C</h3>
+<p>Shift plus C, Say Cell – C for Cell. The field I am on, and its
+value.</p>
 <p>Screen reader:</p>
 <ul>
-<li>Find in list, edit</li>
+<li>title, Accessibility Analyst</li>
 </ul>
-<p>Two differences, and only two. The C sharp dialog has a status line
-at the foot; a wx dialog has none, so the Python one puts the same
-sentence in the window title. And the tips are on Shift plus F1 in
-Python rather than in the status line.</p>
-<h3 id="step-20">Step 20</h3>
-<p>That is the claim this kit makes, and you have just heard it tested.
-Two languages, one behaviour, because the behaviour lives in the
-components rather than in either program.</p>
-<p>Both source files carry twelve markers – BLOCK 1 to BLOCK 12 – with
-the same numbers, the same titles and the same function names, so they
-can be read side by side in two windows.</p>
-<h3 id="step-21">Step 21</h3>
-<p>One last thing. Look in your local application data folder, under
-FruitBasketCs, then logs.</p>
+<p>Every Shift and letter asks a question, and none changes
+anything.</p>
+<h3 id="step-4-downarrow">Step 4: DownArrow</h3>
+<p>Down keeps the field, so I can compare one field down the list.</p>
 <p>Screen reader:</p>
 <ul>
-<li>FruitBasketCs dash 2026 09 18 dash 1 3 0 5 2 2 dot log</li>
+<li>Digital Services Assistant</li>
 </ul>
-<p>One log per session, named for when the session began, holding the
-environment, every setting and every error with its stack. Every Homer
-program writes one, from the same class, in the same place. So does
-every installer.</p>
-<h3 id="step-22">Step 22</h3>
-<p>That is HomerDev. The guide, HomerDev dot md, has the rest: the Lbc
-dialogs, the inix settings format, the coding style, the release
-scripts, and a part on AI-assisted coding which is what the kit is
-really for. Thank you for listening.</p>
-<p>Questions and corrections are welcome. The kit is early, and it
-improves by being used.</p>
-<p><strong>Something to try:</strong> Build the Python fruit basket the
-same way, and notice that it answers every key exactly as the C sharp
-one did.</p>
+<h3 id="step-5-shiftz">Step 5: Shift+Z</h3>
+<p>My screen reader’s say line key reads the whole row again. Shift plus
+Z, Say Status, gives the summary. H for Here.</p>
+<p>Screen reader:</p>
+<ul>
+<li>status, jobs row 3 of 4, sort employer</li>
+</ul>
+<h3 id="step-6-controlpagedown">Step 6: Control+PageDown</h3>
+<p>Control plus Page Down moves to the next table. JobTrail gives me
+five: actions, contacts, docs, jobs and stories.</p>
+<p>Screen reader:</p>
+<ul>
+<li>JobTrail dot d b, stories</li>
+<li>Records list view</li>
+</ul>
+<p>Two more tables hold DbDo’s own pick lists and links. It keeps those
+out of the way.</p>
+<p><strong>Something to try:</strong> Arrow through the four jobs, then
+Left and Right through one of them, checking each cell with Shift plus
+C.</p>
+<h2 id="menus-windows-and-help">03 - Menus, Windows and Help</h2>
+<p><strong>Before you start:</strong> JobTrail is open on the jobs
+table.</p>
+<h3 id="step-1-alt">Step 1: Alt</h3>
+<p>Alt opens the menu bar. Each menu’s first letter opens it
+directly.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Menu bar</li>
+<li>File, F</li>
+</ul>
+<p>File, Edit, Navigate, Query, Misc, Window, Help. Every letter
+differs.</p>
+<h3 id="step-2-downarrow">Step 2: DownArrow</h3>
+<p>Down Arrow opens File. Each item gives its key, then its letter.</p>
+<p>Screen reader:</p>
+<ul>
+<li>New Database…, N</li>
+</ul>
+<h3 id="step-3-downarrow">Step 3: DownArrow</h3>
+<p>Screen reader:</p>
+<ul>
+<li>Add Table…, A</li>
+</ul>
+<h3 id="step-4-downarrow-1">Step 4: DownArrow</h3>
+<p>Screen reader:</p>
+<ul>
+<li>Open Database…, Control+O, O</li>
+</ul>
+<p>The key works from anywhere. The letter works while the menu is open.
+They match whenever the key has a letter.</p>
+<h3 id="step-5-escape">Step 5: Escape</h3>
+<p>A few menus hold a submenu for a large or rarely used group. Edit, B
+for Bulk Marking, is one. Right Arrow goes in; Left Arrow comes
+back.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Leaving menus</li>
+</ul>
+<p>The others: Query, S for Say, Misc, T for Tools, and Help, M for More
+Documents. None goes deeper than one level.</p>
+<h3 id="step-6-controltab">Step 6: Control+Tab</h3>
+<p>DbDo can keep several tables open, each in its own window – the
+multiple document interface. Control plus Tab moves among DbDo
+windows.</p>
+<p>Screen reader:</p>
+<ul>
+<li>JobTrail dot d b, actions</li>
+<li>Records list view</li>
+</ul>
+<p>Control plus Shift plus T opens a table in a new window. Control plus
+F4 closes one.</p>
+<h3 id="step-7-controlf1">Step 7: Control+F1</h3>
+<p>F1 is help: the guide. Shift plus F1 is the history, Control plus F1
+describes the next key I press.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Key Describer On</li>
+</ul>
+<p>Help also holds the ReadMe, Hotkeys, the FAQ, and Play Tutorials.</p>
+<h3 id="step-8-f11">Step 8: F11</h3>
+<p>F11 is Elevate Version – elevate sounds like eleven. It checks for a
+newer DbDo.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Elevate Version dialog</li>
+</ul>
+<p>Nothing downloads without asking.</p>
+<p><strong>Something to try:</strong> Open Help and find the document
+you would read second.</p>
+<h2 id="adding-a-new-record">04 - Adding a New Record</h2>
+<p><strong>Before you start:</strong> JobTrail is open on the jobs
+table. This morning I found a support analyst opening at Widget
+Works.</p>
+<h3 id="step-1-controln">Step 1: Control+N</h3>
+<p>Control plus N, New record – N for New.</p>
+<p>Screen reader:</p>
+<ul>
+<li>New Record dialog</li>
+<li>Employer edit</li>
+</ul>
+<p>One box per field, in the order I would fill them in.</p>
+<h3 id="step-2-tab">Step 2: Tab</h3>
+<p>The employer, then Tab to the title.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Title edit</li>
+</ul>
+<h3 id="step-3-tab">Step 3: Tab</h3>
+<p>The title, then Tab to status.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Status edit</li>
+<li>F4 picks from 7 values</li>
+</ul>
+<h3 id="step-4-f4">Step 4: F4</h3>
+<p>F4 opens the pick list. F4 picks, all through Homer programs.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Status list box, applied, 1 of 7</li>
+</ul>
+<h3 id="step-5-l">Step 5: l</h3>
+<p>Screen reader:</p>
+<ul>
+<li>lead, 4 of 7</li>
+</ul>
+<h3 id="step-6-controlenter">Step 6: Control+Enter</h3>
+<p>Enter takes it. Control plus Enter saves the record from anywhere in
+the dialog.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Records list view</li>
+<li>Widget Works (your own entry) Support Analyst lead, 5 of 5</li>
+</ul>
+<p><strong>Something to try:</strong> Add a job you are actually after,
+with its status.</p>
+<h2 id="inspecting-a-record">05 - Inspecting a Record</h2>
+<p><strong>Before you start:</strong> JobTrail is open on the jobs
+table, on Example Widgets.</p>
+<h3 id="step-1-controli">Step 1: Control+I</h3>
+<p>A row speaks three fields. Control plus I, Inspect Record, reads them
+all.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Inspect Record dialog</li>
+<li>employer: Example Widgets Company (sample employer)</li>
+</ul>
+<p>I for Inspect. A read-only window; Escape closes it.</p>
+<h3 id="step-2-escape">Step 2: Escape</h3>
+<p>For one fact, I ask instead. Shift plus N, Say Notes.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Records list view</li>
+</ul>
+<h3 id="step-3-shiftn">Step 3: Shift+N</h3>
+<p>Screen reader:</p>
+<ul>
+<li>notes, Illustrative record. Interview booked for the 24th; ask about
+screen reader testing tools.</li>
+</ul>
+<p>Shift plus T, Say Tags, and Shift plus U, Say URL, work the same
+way.</p>
+<h3 id="step-4-shifte">Step 4: Shift+E</h3>
+<p>Shift plus E, Say Edited: when I last changed it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>edited, September 19, 2026 at 10:01 PM</li>
+</ul>
+<p>Shift plus A, Say Added, says when it arrived.</p>
+<h3 id="step-5-altshiftn">Step 5: Alt+Shift+N</h3>
+<p>Alt plus Shift plus N edits the notes in their own window, for a long
+one.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Notes dialog</li>
+<li>Notes edit, multiline, Illustrative record. Interview booked for the
+24th.</li>
+</ul>
+<p>Control plus Enter saves; Escape leaves.</p>
+<p><strong>Something to try:</strong> Walk the Shift keys on one record
+and notice which three you want while arrowing.</p>
+<h2 id="editing-a-record">06 - Editing a Record</h2>
+<p><strong>Before you start:</strong> JobTrail is open on the jobs
+table. The interview at Example Widgets went well, and they made an
+offer.</p>
+<h3 id="step-1-enter-1">Step 1: Enter</h3>
+<p>Enter opens the record in the same dialog I used to add one.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Edit Record dialog</li>
+<li>Employer edit, Example Widgets Company (sample employer)</li>
+</ul>
+<h3 id="step-2-o">Step 2: o</h3>
+<p>Tab to status, F4 for the list, O for offer.</p>
+<p>Screen reader:</p>
+<ul>
+<li>offer, 5 of 7</li>
+</ul>
+<h3 id="step-3-controlenter">Step 3: Control+Enter</h3>
+<p>Screen reader:</p>
+<ul>
+<li>Records list view</li>
+<li>Example Widgets Company (sample employer) Accessibility Analyst
+offer, 2 of 4</li>
+</ul>
+<h3 id="step-4-f2">Step 4: F2</h3>
+<p>For one field, F2 edits the cell in place – the same F2 that renames
+a file in Windows.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Cell edit, offer</li>
+</ul>
+<p>Enter saves the cell and keeps my place.</p>
+<h3 id="step-5-escape-1">Step 5: Escape</h3>
+<p>Shift plus C checks it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Records list view</li>
+</ul>
+<h3 id="step-6-shiftc">Step 6: Shift+C</h3>
+<p>Screen reader:</p>
+<ul>
+<li>status</li>
+<li>row 2 of 4</li>
+<li>offer</li>
+</ul>
+<p><strong>Something to try:</strong> Change the status of one of your
+own jobs both ways, and check it with Shift plus C.</p>
+<h2 id="keywords-and-jump">07 - Keywords and Jump</h2>
+<p><strong>Before you start:</strong> JobTrail is open on the jobs
+table.</p>
+<h3 id="step-1-exa">Step 1: exa</h3>
+<p>The quickest way is typing. The first letters of an employer go
+there.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Example Widgets Company (sample employer) Accessibility Analyst
+interviewing, 2 of 4</li>
+</ul>
+<h3 id="step-2-controlj">Step 2: Control+J</h3>
+<p>Control plus J, Jump to Record – J for Jump. It searches the field I
+am on.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Jump to Match (column, employer) dialog</li>
+<li>Text combo box, blank, ALT+T</li>
+</ul>
+<h3 id="step-3-enter">Step 3: Enter</h3>
+<p>Screen reader:</p>
+<ul>
+<li>Illustration City Library (fictional) Digital Services Assistant
+lead, 3 of 4</li>
+</ul>
+<h3 id="step-4-controlk">Step 4: Control+K</h3>
+<p>Control plus K, Keywords – K for Keywords. It searches every field,
+notes included, which is why it is not called Find.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Keywords dialog</li>
+<li>Text combo box, blank, ALT+T</li>
+</ul>
+<h3 id="step-5-enter-1">Step 5: Enter</h3>
+<p>Screen reader:</p>
+<ul>
+<li>Sample Health Network (illustration only) Records Coordinator
+applied, 4 of 4</li>
+</ul>
+<p>F3 searches again. Shift reverses: Shift plus F3 searches back,
+Control plus Shift plus F finds backwards.</p>
+<h3 id="step-6-shiftf">Step 6: Shift+F</h3>
+<p>Shift plus K, Say Keywords, reminds me what I looked for.</p>
+<p>Screen reader:</p>
+<ul>
+<li>find, screen reader</li>
+</ul>
+<p><strong>Something to try:</strong> Find a job by a word in its notes
+with Keywords, then jump back to it by employer.</p>
+<h2 id="order-and-filter-records">08 - Order and Filter Records</h2>
+<p><strong>Before you start:</strong> JobTrail is open on the jobs
+table.</p>
+<h3 id="step-1-alto">Step 1: Alt+O</h3>
+<p>Alt plus O, Order – O for Order. Control plus O is Open everywhere,
+so Order takes Alt.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Order Records dialog</li>
+<li>Column to sort by list box, employer, 4 of 16, ALT+C</li>
+</ul>
+<h3 id="step-2-s">Step 2: s</h3>
+<p>Screen reader:</p>
+<ul>
+<li>status, 13 of 16</li>
+</ul>
+<h3 id="step-3-enter-1">Step 3: Enter</h3>
+<p>Screen reader:</p>
+<ul>
+<li>Records list view</li>
+<li>Sample Health Network (illustration only) Records Coordinator
+applied, 1 of 4</li>
+</ul>
+<p>Shift plus O, Say Order, says it later.</p>
+<h3 id="step-4-controlf">Step 4: Control+F</h3>
+<p>Control plus F, Filter Records – F for Filter. It decides which rows
+I hear, and it writes the condition for me: one box per field, and a
+symbol in front of a value to compare instead of match.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Filter Records dialog</li>
+<li>Filter combo box, blank, ALT+F</li>
+</ul>
+<h3 id="step-5-enter-2">Step 5: Enter</h3>
+<p>I want what is still moving: status not rejected.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Records list view</li>
+<li>Example Widgets Company (sample employer) Accessibility Analyst
+interviewing, 1 of 3</li>
+</ul>
+<p>Shift plus F, Say Filter, and Shift plus Y, Say Yield – how many rows
+it left.</p>
+<h3 id="step-6-controlshiftf">Step 6: Control+Shift+F</h3>
+<p>Control plus Shift plus F clears it. Adding Shift reverses.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Records list view</li>
+<li>Demo Data Cooperative (made up) Data Quality Specialist rejected, 1
+of 4</li>
+</ul>
+<p><strong>Something to try:</strong> Filter to the jobs you applied to,
+order them by date applied, then clear the filter.</p>
+<h2 id="select-the-columns-you-hear">09 - Select the Columns You
+Hear</h2>
+<p><strong>Before you start:</strong> JobTrail is open on the jobs
+table.</p>
+<h3 id="step-1-shifts">Step 1: Shift+S</h3>
+<p>Shift plus S, Say Select, names the fields each row speaks.</p>
+<p>Screen reader:</p>
+<ul>
+<li>select, employer, title, status</li>
+</ul>
+<h3 id="step-2-alts">Step 2: Alt+S</h3>
+<p>Alt plus S, Select Columns – Control plus S saves, so Select takes
+Alt.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Select Columns dialog</li>
+<li>Columns check list box, employer check box checked, 1 of 16,
+ALT+C</li>
+</ul>
+<h3 id="step-3-space">Step 3: Space</h3>
+<p>I add the date I applied. Space ticks it.</p>
+<p>Screen reader:</p>
+<ul>
+<li>applied underscore date check box checked, 11 of 16</li>
+</ul>
+<h3 id="step-4-enter-1">Step 4: Enter</h3>
+<p>Screen reader:</p>
+<ul>
+<li>Records list view</li>
+<li>Example Widgets Company (sample employer) Accessibility Analyst
+interviewing 2026-09-02, 2 of 4</li>
+</ul>
+<p>Three or four fields is the useful range. Every row is heard, so
+every field costs time.</p>
+<p><strong>Something to try:</strong> Choose three fields for the
+actions table that tell you what to do next.</p>
+<h2 id="related-records">10 - Related Records</h2>
+<p><strong>Before you start:</strong> JobTrail is open on the jobs
+table, on Example Widgets.</p>
+<h3 id="step-1-shiftr">Step 1: Shift+R</h3>
+<p>Shift plus R, Say Related: every record linked to this job.</p>
+<p>Screen reader:</p>
+<ul>
+<li>related, actions (1 record)</li>
+<li>2026-09-08 bar First interview for Accessibility Analyst bar
+interview scheduled</li>
+</ul>
+<h3 id="step-2-altrightarrow">Step 2: Alt+RightArrow</h3>
+<p>Alt plus Right Arrow goes in, the way it goes forward in a
+browser.</p>
+<p>Screen reader:</p>
+<ul>
+<li>JobTrail dot d b, actions</li>
+<li>2026-09-08 First interview for Accessibility Analyst interview
+scheduled, 1 of 1</li>
+</ul>
+<h3 id="step-3-backspace">Step 3: Backspace</h3>
+<p>Backspace comes back, as it goes up a level everywhere.</p>
+<p>Screen reader:</p>
+<ul>
+<li>JobTrail dot d b, jobs</li>
+<li>Example Widgets Company (sample employer) Accessibility Analyst
+interviewing, 2 of 4</li>
+</ul>
+<p>Alt plus Left Arrow does the same.</p>
+<p><strong>Something to try:</strong> From a contact, reach the job they
+belong to, and come back.</p>
+<h2 id="mark-and-unmark">11 - Mark and Unmark</h2>
+<p><strong>Before you start:</strong> JobTrail is open on the jobs
+table. I want to follow up on two of them this week.</p>
+<h3 id="step-1-controlm">Step 1: Control+M</h3>
+<p>Control plus M, Mark – M for Mark.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Marked row 2</li>
+</ul>
+<h3 id="step-2-controlshiftm">Step 2: Control+Shift+M</h3>
+<p>Control plus Shift plus M unmarks. Adding Shift reverses.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Unmarked row 2</li>
+</ul>
+<p>Shift plus M, Say Mark, asks without changing anything.</p>
+<h3 id="step-3-controldownarrow">Step 3: Control+DownArrow</h3>
+<p>Control plus Down Arrow steps to the next marked record.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Sample Health Network (illustration only) Records Coordinator
+applied, 4 of 4</li>
+</ul>
+<h3 id="step-4-shiftspace">Step 4: Shift+Space</h3>
+<p>Shift plus Space counts them.</p>
+<p>Screen reader:</p>
+<ul>
+<li>2 marked rows: Example Widgets Company (sample employer), Sample
+Health Network (illustration only)</li>
+</ul>
+<h3 id="step-5-controla">Step 5: Control+A</h3>
+<p>For runs of rows: Edit, B for Bulk Marking, then A for Mark All.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Marked 4 rows</li>
+</ul>
+<p>Control plus A is the key for Mark All; Control plus Shift plus A
+unmarks all.</p>
+<p><strong>Something to try:</strong> Mark the jobs you will follow up
+on, then step through them.</p>
+<h2 id="look-and-prime">12 - Look and Prime</h2>
+<p><strong>Before you start:</strong> JobTrail is open on the jobs
+table, on Example Widgets.</p>
+<h3 id="step-1-shiftl">Step 1: Shift+L</h3>
+<p>Every table has two columns nobody types into. Shift plus L, Say
+Look.</p>
+<p>Screen reader:</p>
+<ul>
+<li>look, Example Widgets Company (sample employer) | Accessibility
+Analyst | interviewing</li>
+</ul>
+<p>Look is the record at a glance. It is what Say Related shows for a
+linked record.</p>
+<h3 id="step-2-shiftp">Step 2: Shift+P</h3>
+<p>Shift plus P, Say Prime: the fields that make the record unique.</p>
+<p>Screen reader:</p>
+<ul>
+<li>prime, Example Widgets Company (sample employer)|Accessibility
+Analyst</li>
+</ul>
+<p>Employer and title. Two jobs with both the same would be one job.</p>
+<h3 id="step-3-shifti">Step 3: Shift+I</h3>
+<p>Shift plus I, Say ID, gives the row number, which tells a person
+almost nothing.</p>
+<p>Screen reader:</p>
+<ul>
+<li>id, 2</li>
+</ul>
+<p>Look is for people; prime is for matching.</p>
+<p><strong>Something to try:</strong> Say the look and prime of three
+records and notice which tells you more.</p>
+<h2 id="report-save-and-copy">13 - Report, Save and Copy</h2>
+<p><strong>Before you start:</strong> JobTrail is open on the jobs
+table, on Example Widgets.</p>
+<h3 id="step-1-controlshiftc">Step 1: Control+Shift+C</h3>
+<p>To tell a friend about a job: Control plus Shift plus C copies the
+record. C for Copy; Control plus C alone copies the cell.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Row copied to clipboard</li>
+</ul>
+<p>Labelled lines, ready to paste.</p>
+<h3 id="step-2-altshiftr">Step 2: Alt+Shift+R</h3>
+<p>For a prepared document: File, R for Run Report. Its key is Alt plus
+Shift plus R.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Run Report dialog</li>
+<li>Output list box, application underscore history, 1 of 6, ALT+O</li>
+</ul>
+<h3 id="step-3-enter-2">Step 3: Enter</h3>
+<p>Screen reader:</p>
+<ul>
+<li>EdSharp, application underscore history dot m d</li>
+</ul>
+<h3 id="step-4-controlshifts">Step 4: Control+Shift+S</h3>
+<p>For the whole table as a file: Control plus Shift plus S, Save
+As.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Save As dialog</li>
+<li>File name edit, ALT+N</li>
+</ul>
+<p>The extension decides the format: dot x l s x, dot c s v, dot h t
+m.</p>
+<p><strong>Something to try:</strong> Copy one record into an email to
+yourself.</p>
+<h2 id="work-search-record-for-a-claim-or-counselor">14 - Work Search
+Record for a Claim or Counselor</h2>
+<p><strong>Before you start:</strong> JobTrail is open on the actions
+table, the log of everything I have done.</p>
+<h3 id="step-1-shiftz">Step 1: Shift+Z</h3>
+<p>My counselor asks what I did, when, with whom, and what came of it.
+The actions table holds exactly that.</p>
+<p>Screen reader:</p>
+<ul>
+<li>status, actions row 1 of 7, sort action date descending</li>
+</ul>
+<h3 id="step-2-shiftc">Step 2: Shift+C</h3>
+<p>Three fields matter to the agency: method, evidence, and counts –
+whether it was an employer contact.</p>
+<p>Screen reader:</p>
+<ul>
+<li>method</li>
+<li>row 1 of 7</li>
+<li>internet</li>
+</ul>
+<h3 id="step-3-altshiftr">Step 3: Alt+Shift+R</h3>
+<p>File, R for Run Report.</p>
+<p>Screen reader:</p>
+<ul>
+<li>Run Report dialog</li>
+<li>Output list box, application underscore history, 1 of 6, ALT+O</li>
+</ul>
+<h3 id="step-4-w">Step 4: w</h3>
+<p>Screen reader:</p>
+<ul>
+<li>work underscore search underscore record, 6 of 6</li>
+</ul>
+<h3 id="step-5-enter-3">Step 5: Enter</h3>
+<p>Screen reader:</p>
+<ul>
+<li>EdSharp, work underscore search underscore record dot m d</li>
+</ul>
+<p>Countable contacts first, with weekly totals; everything else
+after.</p>
+<p><strong>Something to try:</strong> Produce the record for the last
+four weeks and read it before sending.</p>
 <!-- walkthrough ends -->
-<h2 id="the-twelve-walks-every-homer-program-has">The twelve walks every
-Homer program has</h2>
-<p>A program’s walks follow one pattern, so a listener who has heard one
-program’s knows where to find a thing in another’s. The scripts are
-<code>help\Tutorial_NN_Title_With_Underscores.inix</code>; the audio is
-<code>help\tutorials\NN_Title_With_Underscores.mp3</code>, the same name
-without the word Tutorial, so a folder or a player shows the number and
-the title. Concepts come before the tasks; summaries come after them;
-More Information is always last.</p>
+<h2 id="where-to-go-next">1. Where to Go Next</h2>
+<p>The tutorials above cover the day-to-day. When you want more:</p>
 <ul>
-<li><strong>00_Overview_and_Table_of_Contents</strong> – what the
-program is, what each walk covers, and the two reader keys: Insert plus
-Up Arrow repeats a line, Insert plus Tab says where you are.</li>
-<li><strong>01_Install_and_Launch</strong> – the download, the
-installer’s pages, the finish page, and the program opening by
-itself.</li>
-<li><strong>02_User_Interface_Concepts</strong> – what the program is
-made of: its windows, its main view, its dialogs, its status bar.
-Listened to more than pressed.</li>
-<li><strong>03_Key_Patterns</strong> – the rules every key follows, so a
-key can be guessed before it is learned.</li>
-<li><strong>04 to 08, the tasks</strong> – each a whole piece of work
-from start to end, in the order a new person meets them. At least one,
-at most five, numbered from 04 with no gap. A program with more to teach
-merges tasks; a program with less stops early, and 09 to 11 keep their
-numbers.</li>
-<li><strong>09_Glossary</strong> – the program’s words in alphabetical
-order, one step per term: the host says the term, the reader says what
-it means.</li>
-<li><strong>10_Conclusion</strong> – four sentences to carry away, and
-where to begin.</li>
-<li><strong>11_More_Information</strong> – the guide and history from
-inside the program, the documents, the project page, updates, and the
-other Homer Tools.</li>
+<li><strong>The guide.</strong> F1 inside DbDo opens
+<code>DbDo.md</code>, which documents every command, the Say keys, and
+the two computed columns.</li>
+<li><strong>The hotkey list.</strong> Alt+Shift+H shows every command
+with its key and a line saying what it does. Control+F1 does the same
+one key at a time.</li>
+<li><strong>The alternate menu.</strong> Alt+F10 lists every command in
+one window you can filter by typing, which is the fastest way to find
+something whose name you half remember.</li>
+<li><strong>The sample databases.</strong> JobTrail is one of fourteen
+that ship with DbDo. The others hold recipes, music, books, contacts and
+more, and each is a different shape of database to practise on.</li>
+<li><strong>The audio.</strong> <code>Tutorials.mkv</code> holds all of
+these as one file with a chapter each, for listening through rather than
+reading.</li>
 </ul>
-<p><strong>Three to five minutes for parts 01 to 10.</strong> Under
-three minutes is usually too thin to repay a listener’s start; over five
-loses them. A walk that would run longer is cut – a thing taught in an
-earlier walk is named rather than shown again – or split into two tasks
-while the slots last; it is never hurried. A walk that runs short is
-given more substance – the adjacent thing the want needs, one planned
-misstep and its recovery, a two-voice exchange – never padding. The
-overview, 00, and More Information, 11, may be shorter. At the voices’
-pace, three minutes is about twenty steps of ordinary length and five
-about thirty; the tool measures the audio and says what runs under or
-over.</p>
-<p><strong>Walk 00 has a shape.</strong> Prose first: a paragraph on
-what the program is. Then the two reader keys. Then the table of
-contents as its own clean list, one step per walk, the host saying the
-number and the title and the reader saying what the walk covers. The two
-never mix: a contents list that wanders into explanation has lost its
-listener.</p>
-<p><strong>Help is taught twice.</strong> Walk 02 says where help is –
-F1 the guide, Shift plus F1 the history, Alt plus F1 the version, the
-Help menu with Play Tutorials, and the menus themselves, which say every
-key. Walk 03 names the keys that explain the keys: Control plus F1, the
-Key Describer; Hotkeys in the Help menu; and the reader’s own Insert
-plus Tab.</p>
-<p><code>checkTutorial</code> requires the seven fixed names, the task
-numbering, and the step ceiling.</p>
-<h2 id="tasks-are-wants-and-later-walks-lean-on-earlier-ones">Tasks are
-wants, and later walks lean on earlier ones</h2>
-<p>A task walk is built around a thing a person would actually want,
-stated first and in plain words – the station carrying the home team,
-jazz from anywhere, jazz near home, a job to record, a book to find
-again – and the program’s features are shown as the way to get it. Not
-“the Filter Records dialog”, but “jazz, from anywhere”, and the filter
-appears because the want needs it. A listener remembers the want and
-finds the feature attached to it.</p>
-<p>The walks are a course, not a reference. Each assumes the ones before
-it and says so in its Intro – “this walk assumes walks four to six” –
-and a thing taught earlier is named, not retaught: “Control plus F,
-which you know from walk six”, “the same way as in walk four”. A first
-walk explains a key; a later walk says it and moves on. Anyone who needs
-the explanation has the earlier walk, and the guide.</p>
-<h2 id="two-voices-and-what-they-are-for">Two voices, and what they are
-for</h2>
-<p>A walk has two voices because a program has two: the person, and the
-reader answering. That exchange is what makes a walk memorable, and it
-is used for more than keystrokes. A glossary is the host saying the term
-and the reader saying the meaning. A recap is the host saying the key
-and the reader saying the command. A key pattern is the host stating the
-rule and the reader giving the instance. Each is two short lines, and
-each lands better than one voice reading a list.</p>
-<p>What the voices never do is chat. No greeting, no banter, no “great
-question”, no comment from one voice on the other. A turn of phrase or a
-change of tone is allowed where it helps a line stick; nothing is
-allowed that costs the listener a second and teaches nothing. The
-measure is useful information in the least time, by the channel that
-makes it stay.</p>
 </body>
 </html>
