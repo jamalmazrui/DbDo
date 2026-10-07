@@ -1432,9 +1432,57 @@ In a dialog, Alt plus a letter jumps to a control, Control plus Enter is OK, Esc
 
 ### Step 19
 
-What this walk taught. I say the key; the reader says what it does.
+The other direction, which is how the Hotkeys list reads: I say the key, the reader says the command.
 
 ### Step 20
+
+Control plus I.
+
+Screen reader:
+
+- Inspect Record
+
+### Step 21
+
+Alt plus Shift plus R.
+
+Screen reader:
+
+- Run Report
+
+### Step 22
+
+Shift plus F.
+
+Screen reader:
+
+- Say Filter
+
+### Step 23
+
+F4.
+
+Screen reader:
+
+- Pick Value
+
+### Step 24
+
+A worked case. Play Stream arrived with RadioTrail. P was Pick Value's on the grid; Play had no control of its own; so Alt plus Shift plus P, by the rules, in a minute -- and anyone who knows the rules can guess it without having heard this walk.
+
+### Step 25
+
+Two keys that sound alike and are not: Control plus F filters and Control plus Shift plus F clears the filter; Control plus M marks and Control plus Shift plus M unmarks. Shift reverses; the letter stays. Learn the letter once.
+
+### Step 26
+
+A planned misstep. Press Shift plus C in a dialog rather than on the grid, and nothing happens: the Say keys answer about the grid, and a dialog has nothing for them to say. No error, no beep; a question without an answer here is not a mistake.
+
+### Step 27
+
+What this walk taught. I say the key; the reader says what it does.
+
+### Step 28
 
 Control plus F1.
 
@@ -2869,6 +2917,14 @@ Three things people do with DbDo every day, each in one breath. Log a job: Contr
 ### Step 16
 
 And three things the other Homer programs share with it, so the second program costs nothing to learn: the dialog that works one way, the Say keys that change nothing, and the player that opens the same whether a file or a radio station is behind it.
+
+### Step 17
+
+What a template gives you that an empty database does not: fields already named for the thing -- a job's employer and status, a book's author and series, a station's genre and stream -- pick lists already filled, a report already written, and a walk already spoken. Start from one even when you mean to change it; changing is easier than inventing.
+
+### Step 18
+
+What DbDo will not do, so you do not look for it: it does not draw charts, it does not sync to a phone, it does not share a database over a network. It keeps one file on one machine, in a form anyone's SQLite reads, which is also why nothing in it can be lost to a company's whim.
 
 **Something to try:** Open the template that fits you best and add your first record; then do one thing from each task walk in it.
 
@@ -3396,9 +3452,57 @@ In a dialog, Alt plus a letter jumps to a control, Control plus Enter is OK, Esc
 
 ### Step 19
 
-What this walk taught. I say the key; the reader says what it does.
+The other direction, which is how the Hotkeys list reads: I say the key, the reader says the command.
 
 ### Step 20
+
+Control plus I.
+
+Screen reader:
+
+- Inspect Record
+
+### Step 21
+
+Alt plus Shift plus R.
+
+Screen reader:
+
+- Run Report
+
+### Step 22
+
+Shift plus F.
+
+Screen reader:
+
+- Say Filter
+
+### Step 23
+
+F4.
+
+Screen reader:
+
+- Pick Value
+
+### Step 24
+
+A worked case. Play Stream arrived with RadioTrail. P was Pick Value's on the grid; Play had no control of its own; so Alt plus Shift plus P, by the rules, in a minute -- and anyone who knows the rules can guess it without having heard this walk.
+
+### Step 25
+
+Two keys that sound alike and are not: Control plus F filters and Control plus Shift plus F clears the filter; Control plus M marks and Control plus Shift plus M unmarks. Shift reverses; the letter stays. Learn the letter once.
+
+### Step 26
+
+A planned misstep. Press Shift plus C in a dialog rather than on the grid, and nothing happens: the Say keys answer about the grid, and a dialog has nothing for them to say. No error, no beep; a question without an answer here is not a mistake.
+
+### Step 27
+
+What this walk taught. I say the key; the reader says what it does.
+
+### Step 28
 
 Control plus F1.
 
@@ -4833,6 +4937,14 @@ Three things people do with DbDo every day, each in one breath. Log a job: Contr
 ### Step 16
 
 And three things the other Homer programs share with it, so the second program costs nothing to learn: the dialog that works one way, the Say keys that change nothing, and the player that opens the same whether a file or a radio station is behind it.
+
+### Step 17
+
+What a template gives you that an empty database does not: fields already named for the thing -- a job's employer and status, a book's author and series, a station's genre and stream -- pick lists already filled, a report already written, and a walk already spoken. Start from one even when you mean to change it; changing is easier than inventing.
+
+### Step 18
+
+What DbDo will not do, so you do not look for it: it does not draw charts, it does not sync to a phone, it does not share a database over a network. It keeps one file on one machine, in a form anyone's SQLite reads, which is also why nothing in it can be lost to a company's whim.
 
 **Something to try:** Open the template that fits you best and add your first record; then do one thing from each task walk in it.
 
