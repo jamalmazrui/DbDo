@@ -5,7 +5,7 @@
     <link>Tutorials.htm</link>
     <description>Short simulated walks through DbDo, using the JobTrail job search database that ships with it. Each one is about three minutes, with something to try at the end.</description>
     <language>en-us</language>
-    <lastBuildDate>Wed, 07 Oct 2026 08:12:17 +0000</lastBuildDate>
+    <lastBuildDate>Wed, 07 Oct 2026 14:53:08 +0000</lastBuildDate>
     <itunes:author>Jamal Mazrui</itunes:author>
     <itunes:explicit>false</itunes:explicit>
     <itunes:category text="Technology"/>
@@ -56,90 +56,45 @@
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>04 - Start an App from the Kit</title>
-      <description>The kit is at C colon backslash HomerDev, and a command prompt is open there. Full transcript: Tutorials.htm#0e-04-start-an-app-from-the-kit</description>
-      <link>Tutorials.htm#0e-04-start-an-app-from-the-kit</link>
-      <guid isPermaLink="false">homer-tutorial_04_start_an_app_from_the_kit</guid>
-      <enclosure url="tutorials/04_Start_an_App_from_the_Kit.mp3" length="1236942" type="audio/mpeg"/>
-      <itunes:duration>00:02:52</itunes:duration>
-      <itunes:explicit>false</itunes:explicit>
-    </item>
-    <item>
       <title>05 - Add, Inspect and Edit Records</title>
-      <description>JobTrail is open on the jobs table. This morning I found a support analyst opening at Widget Works. Full transcript: Tutorials.htm#0f-05-add-inspect-and-edit-records</description>
-      <link>Tutorials.htm#0f-05-add-inspect-and-edit-records</link>
+      <description>JobTrail is open on the jobs table. This morning I found a support analyst opening at Widget Works. Full transcript: Tutorials.htm#0e-05-add-inspect-and-edit-records</description>
+      <link>Tutorials.htm#0e-05-add-inspect-and-edit-records</link>
       <guid isPermaLink="false">homer-tutorial_05_add_inspect_and_edit_records</guid>
       <enclosure url="tutorials/05_Add_Inspect_and_Edit_Records.mp3" length="1287578" type="audio/mpeg"/>
       <itunes:duration>00:03:17</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>05 - Build, Check and Release</title>
-      <description>An app built on the kit is open in a command prompt, with a change made and GitHub signed in. Full transcript: Tutorials.htm#0g-05-build-check-and-release</description>
-      <link>Tutorials.htm#0g-05-build-check-and-release</link>
-      <guid isPermaLink="false">homer-tutorial_05_build_check_and_release</guid>
-      <enclosure url="tutorials/05_Build_Check_and_Release.mp3" length="1306400" type="audio/mpeg"/>
-      <itunes:duration>00:03:00</itunes:duration>
-      <itunes:explicit>false</itunes:explicit>
-    </item>
-    <item>
       <title>06 - Find, Order and Select</title>
-      <description>JobTrail is open on the jobs table. Full transcript: Tutorials.htm#0h-06-find-order-and-select</description>
-      <link>Tutorials.htm#0h-06-find-order-and-select</link>
+      <description>JobTrail is open on the jobs table. Full transcript: Tutorials.htm#0f-06-find-order-and-select</description>
+      <link>Tutorials.htm#0f-06-find-order-and-select</link>
       <guid isPermaLink="false">homer-tutorial_06_find_order_and_select</guid>
       <enclosure url="tutorials/06_Find_Order_and_Select.mp3" length="1227539" type="audio/mpeg"/>
       <itunes:duration>00:03:03</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>06 - The Installer and Its Finish Page</title>
-      <description>A Homer program's installer is downloaded, and your reader is running. Full transcript: Tutorials.htm#0i-06-the-installer-and-its-finish-page</description>
-      <link>Tutorials.htm#0i-06-the-installer-and-its-finish-page</link>
-      <guid isPermaLink="false">homer-tutorial_06_the_installer_and_its_finish_page</guid>
-      <enclosure url="tutorials/06_The_Installer_and_Its_Finish_Page.mp3" length="1192156" type="audio/mpeg"/>
-      <itunes:duration>00:02:45</itunes:duration>
-      <itunes:explicit>false</itunes:explicit>
-    </item>
-    <item>
       <title>07 - Related, Marked, Reports and a Work Search Record</title>
-      <description>JobTrail is open on the jobs table. Full transcript: Tutorials.htm#0j-07-related-marked-reports-and-a-work-search-record</description>
-      <link>Tutorials.htm#0j-07-related-marked-reports-and-a-work-search-record</link>
+      <description>JobTrail is open on the jobs table. Full transcript: Tutorials.htm#0g-07-related-marked-reports-and-a-work-search-record</description>
+      <link>Tutorials.htm#0g-07-related-marked-reports-and-a-work-search-record</link>
       <guid isPermaLink="false">homer-tutorial_07_related_marked_reports_and_a_work_search_record</guid>
       <enclosure url="tutorials/07_Related_Marked_Reports_and_a_Work_Search_Record.mp3" length="1329088" type="audio/mpeg"/>
       <itunes:duration>00:03:19</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>07 - Spoken Tutorials</title>
-      <description>An app built on the kit, with its help folder open. Full transcript: Tutorials.htm#0k-07-spoken-tutorials</description>
-      <link>Tutorials.htm#0k-07-spoken-tutorials</link>
-      <guid isPermaLink="false">homer-tutorial_07_spoken_tutorials</guid>
-      <enclosure url="tutorials/07_Spoken_Tutorials.mp3" length="1596737" type="audio/mpeg"/>
-      <itunes:duration>00:03:35</itunes:duration>
-      <itunes:explicit>false</itunes:explicit>
-    </item>
-    <item>
       <title>08 - RadioTrail: Find the Seahawks on the Air</title>
-      <description>DbDo is open, fetchStations has been run once, and no database is open yet. Full transcript: Tutorials.htm#0l-08-radiotrail-find-the-seahawks-on-the-air</description>
-      <link>Tutorials.htm#0l-08-radiotrail-find-the-seahawks-on-the-air</link>
+      <description>DbDo is open, fetchStations has been run once, and no database is open yet. Full transcript: Tutorials.htm#0h-08-radiotrail-find-the-seahawks-on-the-air</description>
+      <link>Tutorials.htm#0h-08-radiotrail-find-the-seahawks-on-the-air</link>
       <guid isPermaLink="false">homer-tutorial_08_radiotrail</guid>
       <enclosure url="tutorials/08_RadioTrail.mp3" length="1756806" type="audio/mpeg"/>
       <itunes:duration>00:04:19</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>08 - Shared Code and the Homer Player</title>
-      <description>FileDir and DbDo are installed, with mpv. Full transcript: Tutorials.htm#0m-08-shared-code-and-the-homer-player</description>
-      <link>Tutorials.htm#0m-08-shared-code-and-the-homer-player</link>
-      <guid isPermaLink="false">homer-tutorial_08_shared_code_and_the_homer_player</guid>
-      <enclosure url="tutorials/08_Shared_Code_and_the_Homer_Player.mp3" length="1240227" type="audio/mpeg"/>
-      <itunes:duration>00:02:50</itunes:duration>
-      <itunes:explicit>false</itunes:explicit>
-    </item>
-    <item>
       <title>09 - Glossary</title>
-      <description>Nothing is needed. Full transcript: Tutorials.htm#0n-09-glossary</description>
-      <link>Tutorials.htm#0n-09-glossary</link>
+      <description>Nothing is needed. Full transcript: Tutorials.htm#0i-09-glossary</description>
+      <link>Tutorials.htm#0i-09-glossary</link>
       <guid isPermaLink="false">homer-tutorial_09_glossary</guid>
       <enclosure url="tutorials/09_Glossary.mp3" length="1365748" type="audio/mpeg"/>
       <itunes:duration>00:03:27</itunes:duration>
@@ -147,8 +102,8 @@
     </item>
     <item>
       <title>10 - Conclusion</title>
-      <description>Nothing is needed. Full transcript: Tutorials.htm#0o-10-conclusion</description>
-      <link>Tutorials.htm#0o-10-conclusion</link>
+      <description>Nothing is needed. Full transcript: Tutorials.htm#0j-10-conclusion</description>
+      <link>Tutorials.htm#0j-10-conclusion</link>
       <guid isPermaLink="false">homer-tutorial_10_conclusion</guid>
       <enclosure url="tutorials/10_Conclusion.mp3" length="1105590" type="audio/mpeg"/>
       <itunes:duration>00:02:30</itunes:duration>
@@ -156,8 +111,8 @@
     </item>
     <item>
       <title>11 - More Information</title>
-      <description>Nothing is needed. Full transcript: Tutorials.htm#0p-11-more-information</description>
-      <link>Tutorials.htm#0p-11-more-information</link>
+      <description>Nothing is needed. Full transcript: Tutorials.htm#0k-11-more-information</description>
+      <link>Tutorials.htm#0k-11-more-information</link>
       <guid isPermaLink="false">homer-tutorial_11_more_information</guid>
       <enclosure url="tutorials/11_More_Information.mp3" length="361654" type="audio/mpeg"/>
       <itunes:duration>00:00:50</itunes:duration>

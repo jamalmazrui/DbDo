@@ -4,7 +4,13 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.243 (current)
+## v1.0.244 (current)
+
+**An acceptance build speaks nothing**; the walks spoken by the ordinary build
+are what ships, and the release's own test build no longer runs out its clock
+re-speaking them. Needs HomerDev 1.54.2.
+
+## v1.0.243
 
 **The build puts the folder right by itself.** Through the kit's tidy it removes
 any of the kit's files unarchived here by mistake, and the one-off repair

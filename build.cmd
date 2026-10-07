@@ -140,7 +140,7 @@ rem it -- Say.onSpoken, LbcMenuItem, Elevate -- and a kit older than the source
 rem fails deep in the compiler with "Say does not contain a definition for
 rem onSpoken", which names the symptom and not the cause. So the build says the
 rem cause, first. Raise this whenever DbDo starts using something new.
-set "kitNeeded=1.54.1"
+set "kitNeeded=1.54.2"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -801,6 +801,14 @@ rem not on disk. To re-record, delete help\Tutorials.mkv and the help\Tutorial*.
 rem files you want spoken again; each missing .mp3 is spoken, the rest are reused.
 rem WHAT COUNTS AS BUILT: the transcript, and some audio in either form -- the
 rem one recording with chapters, or one mp3 per walk in help\tutorials.
+rem AN ACCEPTANCE BUILD SPEAKS NOTHING (kit 1.54.2). check runs build.cmd nobump
+rem as an acceptance check with HomerAcceptance set; speaking twelve walks there
+rem ran out its fifteen-minute clock on 7 October 2026. The audio the ordinary
+rem build left is what ships; this build only proves the program compiles.
+if defined HomerAcceptance (
+  echo Tutorials: acceptance build, speaking left to the ordinary build >> "!log!"
+  goto :tutorialsDone
+)
 if not exist "help\Tutorials.md" goto :makeTutorials
 if exist "help\Tutorials.mkv" goto :haveAudio
 if not exist "help\tutorials\*.mp3" goto :makeTutorials
