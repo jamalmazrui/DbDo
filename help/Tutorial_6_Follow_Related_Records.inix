@@ -1,0 +1,86 @@
+﻿; Tutorial_6_Follow_Related_Records.inix -- moving between related tables.
+
+[about]
+Title=6 - Follow Related Records
+Intro=From a record into the records related to it with Alt plus Right Arrow, and back with Alt plus Left Arrow, as a browser goes back.
+Setup=A database with related tables is open; the chinook sample has them.
+Homework=Follow a relationship two levels deep, then return with Alt plus Home.
+
+[step]
+
+Say=One want: from an artist, to the albums, to the tracks, and back. Related tables let one record lead to others.
+Key=
+Hear=
+
+[step]
+
+Say=Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+Key=Alt+Control+D
+Hear=DbDo
+Hear=DbDo ready
+
+[step]
+
+Say=Shift plus R, R for Related, says what this record leads to, changing nothing.
+Key=Shift+R
+Hear=(the related tables and their counts)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Alt plus Right Arrow goes into the related records.
+Key=Alt+Right Arrow
+Hear=(the child table, and its first record)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Shift plus Z says where I am now.
+Key=Shift+Z
+Hear=(the child table, its record count, the filter that ties it to the parent)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Alt plus Right Arrow again goes a level deeper.
+Key=Alt+Right Arrow
+Hear=(the next table down)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Alt plus Left Arrow comes back a level, as a browser goes back.
+Key=Alt+Left Arrow
+Hear=(the table one level up)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A planned misstep: three levels deep, and lost. Alt plus Home returns to where I started, from any depth.
+Key=Alt+Home
+Hear=(the starting table, at the record I left)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=What this walk taught. I name the command; the reader gives the key.
+Key=
+Hear=
+
+[step]
+
+Say=Go into related records.
+Key=
+Hear=Alt plus Right Arrow
+
+[step]
+
+Say=Come back a level.
+Key=
+Hear=Alt plus Left Arrow
+
+[step]
+
+Say=Return to the start.
+Key=
+Hear=Alt plus Home

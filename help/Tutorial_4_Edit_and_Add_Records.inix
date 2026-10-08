@@ -1,0 +1,100 @@
+﻿; Tutorial_4_Edit_and_Add_Records.inix -- changing a record and adding one.
+
+[about]
+Title=4 - Edit and Add Records
+Intro=A cell edited with F2, a value picked from a list with Control plus F2, and a new record added with Control plus N.
+Setup=JobTrail is open in DbDo.
+Homework=Add a record of your own and fill three of its fields.
+
+[step]
+
+Say=One want: one job's status brought up to date, and a new job added.
+Key=
+Hear=
+
+[step]
+
+Say=Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+Key=Alt+Control+D
+Hear=DbDo
+Hear=DbDo ready
+
+[step]
+
+Say=I move to the status column of the record to change. F2 edits the cell under the cursor, as F2 renames a file in Windows.
+Key=F2
+Hear=status: edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I type the new value and press Enter to keep it.
+Key=Enter
+Hear=(the record, with its new status)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Where a field has fixed values, Control plus F2 edits by picking one, so nothing is mistyped.
+Key=Control+F2
+Hear=status: list box
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Down Arrow to the value, and Enter.
+Key=Enter
+Hear=(the record, with the picked status)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Control plus N, N for New, adds a record to the table, and focus goes to its first field.
+Key=Control+N
+Hear=New record
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I fill each field with F2 as before. Shift plus A, A for Added, says when this record was added.
+Key=Shift+A
+Hear=(the date and time the record was added)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A planned misstep: Control plus D deletes a record, D for Delete, and asks first. Escape answers no.
+Key=Control+D
+Hear=Delete this record? No button
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape keeps it.
+Key=Escape
+Hear=DbDo
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=What this walk taught. I name the command; the reader gives the key.
+Key=
+Hear=
+
+[step]
+
+Say=Edit the cell I am on.
+Key=
+Hear=F2
+
+[step]
+
+Say=Edit by picking a value.
+Key=
+Hear=Control plus F2
+
+[step]
+
+Say=Add a record.
+Key=
+Hear=Control plus N

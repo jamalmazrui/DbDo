@@ -1720,6 +1720,14 @@ namespace DbDo
                     {
                         string sWhereNewer = (sNorm == "newer" && lsShared.Contains("edited"))
                             ? " AND coalesce(i.\"edited\",'') > coalesce(main." + sQ + ".\"edited\",'')" : "";
+                        // ONE STATEMENT FOR EVERY SHARED COLUMN. Updating a column at a
+                        // time re-asked "is the incoming record newer?" after each, and
+                        // the first column updated was edited itself, so the rest saw an
+                        // equal timestamp and stayed old: a newer note never arrived
+                        // (audit of 8 October 2026). All columns now change in one
+                        // UPDATE, under one comparison, and the count is of rows the
+                        // statement actually changed.
+                        System.Text.StringBuilder sbSet = new System.Text.StringBuilder();
                         foreach (string sC in lsShared)
                         {
                             if (sC == "added") continue;
@@ -1728,11 +1736,22 @@ namespace DbDo
                             string sSet = (sNorm == "fill")
                                 ? "\"" + sC + "\" = coalesce(nullif(\"" + sC + "\", ''), " + sTake + ")"
                                 : "\"" + sC + "\" = coalesce(" + sTake + ", \"" + sC + "\")";
-                            invokeSql("UPDATE main." + sQ + " SET " + sSet
+                            if (sbSet.Length > 0) sbSet.Append(", ");
+                            sbSet.Append(sSet);
+                        }
+                        if (sbSet.Length > 0)
+                        {
+                            invokeSql("UPDATE main." + sQ + " SET " + sbSet.ToString()
                                 + " WHERE EXISTS (SELECT 1 FROM incoming." + sQ + " i WHERE i.\"prime\" = main." + sQ
                                 + ".\"prime\"" + sWhereNewer + ")", null);
+                            try
+                            {
+                                int iFoundChanges;
+                                System.Collections.Generic.List<string[]> lsChanges = queryRowsSql("SELECT changes()", 1, out iFoundChanges);
+                                iChanged = (lsChanges.Count > 0 && lsChanges[0].Length > 0) ? Convert.ToInt32(lsChanges[0][0]) : iMatched;
+                            }
+                            catch { iChanged = iMatched; }
                         }
-                        iChanged = iMatched;
                     }
                     iUpdated += iChanged;
                     iSame += (iChanged == 0) ? iMatched : 0;
@@ -1879,7 +1898,7 @@ namespace DbDo
                             System.IO.Path.GetDirectoryName(sFilePath) ?? "",
                             System.IO.Path.GetFileNameWithoutExtension(sFilePath) + "-before-prime"
                             + System.IO.Path.GetExtension(sFilePath));
-                        if (!System.IO.File.Exists(sCopy)) System.IO.File.Copy(sFilePath, sCopy);
+                        if (!System.IO.File.Exists(sCopy) && !copyDatabaseConsistent(sCopy)) System.IO.File.Copy(sFilePath, sCopy);
                         DbDoLog.write("copied " + sFilePath + " to " + sCopy + " before renaming prm to prime");
                         Say.say("Updating this database to the current column names. A copy of the original is beside it, named "
                             + System.IO.Path.GetFileName(sCopy) + ".");
@@ -8304,6 +8323,13 @@ namespace DbDo
 
             // Same-format save-as is a file copy. We close the
             // connection first to release file locks.
+            // THE COPY IS MADE BY SQLITE, NOT BY THE FILE SYSTEM. A plain file copy
+            // takes the main file and leaves the write-ahead log behind, so a record
+            // committed a moment ago can be missing from the copy while another
+            // window holds the database open (audit of 8 October 2026). VACUUM INTO
+            // writes a complete, consistent database from the live connection; the
+            // file copy remains only as the fallback for an engine too old for it.
+            if (copyDatabaseConsistent(sDestPath)) return;
             string sOriginalPath = sFilePath;
             string sOriginalTable = sCurrentTable;
             bool bOriginalReadOnly = bReadOnly;
@@ -8321,6 +8347,26 @@ namespace DbDo
             // Re-open the *original* file after the copy. The user is
             // making a backup, not switching to it.
             openDatabase(sOriginalPath, sOriginalTable, bOriginalReadOnly);
+        }
+
+        // copyDatabaseConsistent: a complete copy of the open database at
+        // sDest, written by SQLite's own VACUUM INTO, which includes every
+        // committed row whether it has reached the main file or still sits in
+        // the write-ahead log. True when the copy was made; false when the
+        // engine refused, so the caller may fall back to a file copy.
+        public bool copyDatabaseConsistent(string sDest)
+        {
+            try
+            {
+                if (File.Exists(sDest)) File.Delete(sDest);
+                invokeSql("VACUUM INTO '" + sDest.Replace("'", "''") + "'", null);
+                return File.Exists(sDest) && new FileInfo(sDest).Length > 0;
+            }
+            catch (Exception ex)
+            {
+                DbDoLog.write("copyDatabaseConsistent fell back to a file copy: " + ex.Message);
+                return false;
+            }
         }
 
         // =====================================================================
@@ -19653,7 +19699,10 @@ namespace DbDo
         // saveWorkbookToDisk: write the working copy's data back to the
         // original .xlsx via NPOI (formulas preserved), then clear the
         // unsaved-changes flag and refresh the indicator.
-        private void saveWorkbookToDisk()
+        // Returns true when the workbook was written; false when it was not,
+        // so a close that offered to save can stay open rather than discard the
+        // edits a failed save left behind (audit of 8 October 2026).
+        private bool saveWorkbookToDisk()
         {
             if (string.IsNullOrEmpty(sWorkbookOriginPath) || string.IsNullOrEmpty(sWorkbookTable)
                 || lWorkbookColumns == null || db == null || !db.isOpen())
@@ -19662,7 +19711,7 @@ namespace DbDo
                     "Save writes your changes back to the Excel workbook (.xlsx) opened for editing. "
                     + "No workbook is open for editing right now.",
                     "Save", MessageBoxButtons.OK, MessageBoxIcon.Information);
-                return;
+                return false;
             }
             try
             {
@@ -19692,11 +19741,13 @@ namespace DbDo
                 try { DbDoLog.write("Save: wrote " + iWritten + " data cell(s) to " + sWorkbookOriginPath + " (formulas preserved)."); } catch { }
                 Say.say("Saved your changes to " + Path.GetFileName(sWorkbookOriginPath)
                     + ". Formulas and other sheets were preserved.");
+                return true;
             }
             catch (Exception ex)
             {
                 ErrorDialog.show(this, "Save",
                     "Could not save your changes back to the workbook: " + ex.Message);
+                return false;
             }
         }
 
@@ -19715,7 +19766,13 @@ namespace DbDo
                 + ". Save them before closing?",
                 "Unsaved changes", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
             if (res == DialogResult.Cancel) return false;
-            if (res == DialogResult.Yes) saveWorkbookToDisk();
+            if (res == DialogResult.Yes)
+            {
+                // A SAVE THAT FAILED KEEPS THE WINDOW OPEN. The person chose to keep
+                // the edits; a locked file or a full disk must not turn that into
+                // their loss. The error has been shown; the working copy stays.
+                if (!saveWorkbookToDisk() || (db != null && db.bDataModified)) return false;
+            }
             return true;
         }
 

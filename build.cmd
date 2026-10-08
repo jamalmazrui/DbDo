@@ -104,7 +104,14 @@ exit /b 1
 
 :have_sources
 echo Found: DbDo.cs, DbDo.js >> "!log!"
-if not exist "DbDo.manifest" echo ERROR: DbDo.manifest not found.& popd & exit /b 1
+rem The three commands are one block, so the guard reads as what it is. (cmd
+rem already treats the chained commands as the if's consequent; an audit of
+rem 8 October 2026 read them as unconditional, and the block settles it.)
+if not exist "DbDo.manifest" (
+  echo ERROR: DbDo.manifest not found.
+  popd
+  exit /b 1
+)
 
 
 rem ---- find the Homer Development Kit ----
@@ -267,8 +274,15 @@ set "tagVer=!tagVer:v=!"
 if not "!tagVer!"=="" (
   for /f "tokens=1,2 delims=." %%a in ("!ver!") do set "verSeries=%%a.%%b"
   for /f "tokens=1,2 delims=." %%a in ("!tagVer!") do set "tagSeries=%%a.%%b"
-  if not "!verSeries!"=="!tagSeries!" (
-    echo version.txt held !ver!, not this app's series; the last published tag is !tagVer!, so that is the version now.
+  set "kitVerNow="
+  for /f "usebackq delims=" %%k in ("!homerDev!\version.txt") do if not defined kitVerNow set "kitVerNow=%%k"
+  set "kitVerNow=!kitVerNow: =!"
+  rem ONLY A VERSION THAT IS THE KIT'S IS PUT BACK. An intended change of series --
+  rem 2.0.0 after 1.0.244 -- keeps; a version.txt that holds the kit's own number,
+  rem as a HomerDev.zip unarchived here leaves it, goes back to the tag (audit of
+  rem 8 October 2026, which read the earlier test as too broad; it was).
+  if not "!verSeries!"=="!tagSeries!" if "!ver!"=="!kitVerNow!" (
+    echo version.txt held !ver!, the kit's own number, not this app's; the last published tag is !tagVer!, so that is the version now.
     echo version.txt held !ver!, not this app's series; set to the last published tag !tagVer! >> "!log!"
     > version.txt echo !tagVer!
     set "ver=!tagVer!"

@@ -160,9 +160,17 @@ namespace TwoDb
                 try { oSrc = openSource(sSource, sExt); }
                 catch (ProviderUnavailable pu) { err(pu.Message); return 2; }
 
-                // --- create / open the destination SQLite shell ---
+                // --- create the destination beside the old one, not over it ---
+                // THE OLD DATABASE OUTLIVES A FAILED IMPORT. The import is written
+                // to a sibling file, <dest>.importing; only when every table and row
+                // is in and committed does it take the destination's name, and the
+                // destination that was there becomes <dest>.before-import. A missing
+                // driver, a bad source or a failed row leaves the previous database
+                // exactly as it was (audit of 8 October 2026).
+                string sFinal = sDest;
+                sDest = sFinal + ".importing";
                 try { if (File.Exists(sDest)) File.Delete(sDest); }
-                catch (Exception exDel) { err("Could not replace destination: " + exDel.Message); return 3; }
+                catch (Exception exDel) { err("Could not clear the import's working file: " + exDel.Message); return 3; }
                 try
                 {
                     oDest = newCom("ADODB.Connection");
@@ -287,6 +295,24 @@ namespace TwoDb
                     oDest.Execute(sSql);
 
                 oDest.CommitTrans(); bInTrans = false;
+                // The working file takes the destination's name; the old one is kept.
+                try { if (bDestOpen) { oDest.Close(); bDestOpen = false; } } catch { }
+                try
+                {
+                    string sBefore = sFinal + ".before-import";
+                    if (File.Exists(sFinal))
+                    {
+                        if (File.Exists(sBefore)) File.Delete(sBefore);
+                        File.Move(sFinal, sBefore);
+                    }
+                    File.Move(sDest, sFinal);
+                    sDest = sFinal;
+                }
+                catch (Exception exMove)
+                {
+                    err("The import is complete in " + sDest + " but could not take the name " + sFinal + ": " + exMove.Message);
+                    return 3;
+                }
                 info("Done. " + iTables + " table(s), " + iRows + " row(s) -> " + sDest);
                 return 0;
             }

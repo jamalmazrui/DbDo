@@ -622,16 +622,30 @@ def copyTemplate(sDb):
 
 def setAside(sDb):
     """The copy at sDb becomes RadioTrail-old.db beside it; a previous old
-    copy goes. The journal files go with it."""
+    copy goes. Returns True when it was set aside, False when it was not --
+    and the caller must not make a new copy over a database that is still
+    there. THE WRITE-AHEAD LOG IS NEVER DELETED: a note committed a moment
+    ago may live only there. The database is checkpointed, which folds the
+    log into the main file and removes it, before the file is moved (audit
+    of 8 October 2026)."""
     sOld = os.path.join(os.path.dirname(sDb), "RadioTrail-old.db")
+    try:
+        c = sqlite3.connect(sDb)
+        try: c.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        finally: c.close()
+    except Exception as oError:
+        print("Could not checkpoint the database before setting it aside: " + str(oError)); return False
     try:
         if os.path.isfile(sOld): os.remove(sOld)
         for sSide in ("-wal", "-shm"):
-            if os.path.isfile(sDb + sSide): os.remove(sDb + sSide)
+            if os.path.isfile(sDb + sSide):
+                # Still here after the checkpoint: it goes with its database, not away.
+                os.replace(sDb + sSide, sOld + sSide)
         os.rename(sDb, sOld)
         print("The old copy is now " + sOld)
+        return True
     except Exception as oError:
-        print("Could not set the old copy aside: " + str(oError))
+        print("Could not set the old copy aside: " + str(oError)); return False
 
 def sameShape(sDb):
     """True when the copy's stations table has every column the template's
@@ -686,7 +700,8 @@ def main():
         # empty file left by a failed start. Nobody's work is in it that the
         # template does not supply, so it is set aside and a clean one made.
         # No migration: the structure going forward is the template's.
-        setAside(sDb)
+        if not setAside(sDb):
+            print("The copy was left as it is; nothing was replaced."); return 1
         if not copyTemplate(sDb): return 1
     # THE LOG GOES IN THE PROJECT'S logs FOLDER when the script runs from a
     # project -- C:\DbDo\logs, two levels above templates\RadioTrail -- because
@@ -760,7 +775,8 @@ def main():
         # copy made from the template at once. (Setting aside without copying
         # left an empty database on 5 October 2026, and the catalog then had
         # no table to land in.)
-        setAside(sDb)
+        if not setAside(sDb):
+            print("The copy was left as it is; nothing was replaced."); return 1
         if not copyTemplate(sDb): return 1
     say("Step 1 of 4: the copy is " + ("fresh from the template." if bFresh else "in place."))
     say("Step 2 of 4: the catalog.")
@@ -794,6 +810,7 @@ def main():
     logLine("Using " + sServer)
     say("Fetching the catalog from Radio Browser. A full catalog is about 75 MB and takes a minute.")
     iOffset = 0
+    bCatalogComplete = False
     while True:
         dQuery = {"hidebroken": "true", "limit": str(c_iPage), "offset": str(iOffset), "order": "votes", "reverse": "true"}
         sUrl = sServer + "/json/stations"
@@ -811,7 +828,7 @@ def main():
         logLine("  %d stations in this page" % len(lsPage))
         lsStations.extend(lsPage)
         say("  %d so far" % len(lsStations))
-        if len(lsPage) < c_iPage: break
+        if len(lsPage) < c_iPage: bCatalogComplete = True; break
         if iLimit and len(lsStations) >= iLimit: break
         iOffset += c_iPage
         time.sleep(c_dPause)
@@ -849,8 +866,22 @@ def main():
             "tags": "\n".join(s.strip() for s in (d.get("tags") or "").split(",") if s.strip() and "://" not in s and len(s.strip()) <= 40),
         })
     iCode = mergeRows(sDb, lsRows, logLine, say, sLog)
-    if iCode == 0 and not sCountry and not iLimit and sSource in ("all", "radiobrowser"):
-        markDropped(sDb, datetime.date.today().strftime("%Y-%m-%d"), logLine, say)
+    # DROPPED STATIONS ARE MARKED ONLY AFTER A COMPLETE FETCH: one that reached
+    # the catalog's last page, with no country and no limit. A fetch that
+    # stopped on page two would otherwise mark the rest of the catalog dead
+    # (audit of 8 October 2026). And never when the catalog came back far
+    # smaller than what is here, which is a catalog fault, not sixty thousand
+    # deaths.
+    if iCode == 0 and bCatalogComplete and not sCountry and not iLimit and sSource in ("all", "radiobrowser"):
+        try:
+            cCount = sqlite3.connect(sDb); iHave = cCount.execute("select count(*) from stations where source = 'Radio Browser'").fetchone()[0]; cCount.close()
+        except Exception: iHave = 0
+        if iHave == 0 or len(lsStations) * 2 >= iHave:
+            markDropped(sDb, datetime.date.today().strftime("%Y-%m-%d"), logLine, say)
+        else:
+            say("The catalog came back with %d stations against %d here; nothing was marked dead." % (len(lsStations), iHave)); logLine("markDropped skipped: catalog far smaller than the table")
+    elif iCode == 0 and not bCatalogComplete and not sCountry and not iLimit:
+        say("The fetch did not reach the catalog's end, so no station was marked dead."); logLine("markDropped skipped: incomplete fetch")
     if iCode != 0 or bCatalogOnly: return iCode
     say("Step 3 of 4: asking each station what it says about itself. Stop at any time; the next run carries on.")
     iCode = enrich(sDb, sCountry, 0, bAgain, logLine, say)
@@ -866,6 +897,18 @@ def mergeRows(sDb, lsRows, logLine, say, sLog):
     """Keyed by the source's own id, rewriting every catalog field and never
     status, rating, notes or tags."""
     sNow = datetime.datetime.now().strftime("%Y-%m-%d")
+    # ONE ROW PER SOURCE ID IN A BATCH. The catalog has listed the same station
+    # twice across pages while its order shifted under a fetch; the second
+    # would then fail the prime's uniqueness and stop the merge (audit of
+    # 8 October 2026). The last occurrence wins, and the count is said.
+    dSeen = {}
+    for dRow in lsRows:
+        sKey = dRow.get("source_id", "") or (dRow.get("name", "") + "|" + dRow.get("stream_url", ""))
+        dSeen[sKey] = dRow
+    if len(dSeen) < len(lsRows):
+        say("%d stations were listed more than once by the catalog; one of each is kept." % (len(lsRows) - len(dSeen)))
+        logLine("duplicates in batch: %d" % (len(lsRows) - len(dSeen)))
+    lsRows = list(dSeen.values())
     c = sqlite3.connect(sDb)
     c.execute("PRAGMA journal_mode=WAL")
     # THE COPY MAY BE OLDER THAN THE TEMPLATE. A copy made before a field was

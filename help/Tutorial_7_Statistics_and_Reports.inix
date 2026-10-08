@@ -1,0 +1,85 @@
+﻿; Tutorial_7_Statistics_and_Reports.inix -- counts, figures and reports.
+
+[about]
+Title=7 - Statistics and Reports
+Intro=The numbers in a column with Alt plus Shift plus S, a chart's figures with Control plus Shift plus G, and a report written as a document with Alt plus Shift plus R.
+Setup=JobTrail is open in DbDo.
+Homework=Run a report of your own table and read it in your browser.
+
+[step]
+
+Say=One want: how many applications, how they stand, and a page to keep.
+Key=
+Hear=
+
+[step]
+
+Say=Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+Key=Alt+Control+D
+Hear=DbDo
+Hear=DbDo ready
+
+[step]
+
+Say=I move to the status column. Alt plus Shift plus S, S for Statistics, describes the column.
+Key=Alt+Shift+S
+Hear=Statistics from Column
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The count of each value, and for numbers the sum, average, least and most. Escape closes it.
+Key=Escape
+Hear=DbDo
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Control plus Shift plus G, G for Graphics, turns a column into a chart and its figures in words.
+Key=Control+Shift+G
+Hear=Graphics Column
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape. Alt plus Shift plus R, R for Report, writes a saved report as a document.
+Key=Alt+Shift+R
+Hear=Run Report dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I choose a report and press Enter; DbDo writes it and opens it.
+Key=Enter
+Hear=(the report's title, as a heading)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A planned misstep: a report reads the whole table, filter or not, unless its template says otherwise. To report only some records, filter them and use the report that respects the filter.
+Key=
+Hear=
+
+[step]
+
+Say=What this walk taught. I name the command; the reader gives the key.
+Key=
+Hear=
+
+[step]
+
+Say=Describe a column.
+Key=
+Hear=Alt plus Shift plus S
+
+[step]
+
+Say=A column as a chart.
+Key=
+Hear=Control plus Shift plus G
+
+[step]
+
+Say=Run a report.
+Key=
+Hear=Alt plus Shift plus R

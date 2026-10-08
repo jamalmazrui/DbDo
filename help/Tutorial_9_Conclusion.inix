@@ -1,0 +1,130 @@
+﻿; Tutorial_9_Conclusion.inix -- what to carry away, the words DbDo uses, and where to learn more.
+
+[about]
+Title=9 - Conclusion
+Intro=The conclusion and summary of the walks; the words DbDo uses, in two voices; then more information: the help built into the program and where to learn more.
+Setup=Nothing is needed; this walk is listened to.
+Homework=Open a template database and describe one of its columns with Alt plus Shift plus S.
+
+[step]
+
+Say=To finish: what to carry away, the words DbDo uses, and where to get help. First, the summary. A table is a list you move through by row and column, and every question about where you are is a Shift key that changes nothing.
+Key=
+Hear=Shift plus Z, Say Status
+
+[step]
+
+Say=Keys follow words, so a key can be guessed: O opens and orders, F filters, M marks, and Shift reverses.
+Key=
+Hear=Control plus M, Mark
+Hear=Control plus Shift plus M, Unmark
+
+[step]
+
+Say=And when the commands run out, SQL asks the database anything, in one line.
+Key=
+Hear=Control plus Q, Query
+
+[step]
+
+Say=Now the words, in alphabetical order. I say the term; the reader says what it means.
+Key=
+Hear=
+
+[step]
+
+Say=data list.
+Key=
+Hear=The list of records the window shows: one table or query, a row per record, a column per field.
+
+[step]
+
+Say=filter.
+Key=
+Hear=A condition that hides the records not matching it, until it is cleared.
+
+[step]
+
+Say=mark.
+Key=
+Hear=A flag on a record, for a later command to act on; Control plus M sets it, and Shift reverses it.
+
+[step]
+
+Say=order.
+Key=
+Hear=The sort of the list, by one column, ascending or reversed.
+
+[step]
+
+Say=pick list.
+Key=
+Hear=A field's fixed values in a list, opened with F4, so nothing is mistyped.
+
+[step]
+
+Say=query.
+Key=
+Hear=A question in SQL, answered as records.
+
+[step]
+
+Say=record.
+Key=
+Hear=One row of a table: a job, an album, a contact.
+
+[step]
+
+Say=related table.
+Key=
+Hear=A table whose records belong to a record of another; Alt plus Right Arrow goes in.
+
+[step]
+
+Say=report.
+Key=
+Hear=A saved template that writes a table's records as a document.
+
+[step]
+
+Say=Say key.
+Key=
+Hear=Shift and a letter: a question answered aloud, changing nothing.
+
+[step]
+
+Say=SQLite.
+Key=
+Hear=The database format DbDo opens: one file, with its tables inside.
+
+[step]
+
+Say=standard fields.
+Key=
+Hear=The columns every DbDo table may carry: added, edited, marked, notes, tags, url.
+
+[step]
+
+Say=template database.
+Key=
+Hear=A ready-made database in the Help menu, to practice on or to start from.
+
+[step]
+
+Say=Last, more information. Help is built in. The guide, and what changed.
+Key=
+Hear=F1, the guide
+Hear=Shift plus F1, History
+
+[step]
+
+Say=The version, and what any key does without doing it.
+Key=
+Hear=Alt plus F1, About
+Hear=Control plus F1, Key Describer
+
+[step]
+
+Say=DbDo dot md, the guide, explains every command and the ideas behind them; Hotkeys dot md lists every key three ways; and the DbDo page on GitHub, at github dot com slash JamalMazrui slash DbDo, has the newest version.
+Key=
+Hear=

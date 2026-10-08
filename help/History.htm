@@ -235,11 +235,9 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
-<li><a href="#october-2026-tutorials-in-the-pattern-of-ten"
-id="toc-october-2026-tutorials-in-the-pattern-of-ten">8 October 2026 –
-tutorials in the pattern of ten</a></li>
-<li><a href="#v1.0.244-current" id="toc-v1.0.244-current">v1.0.244
+<li><a href="#v1.0.245-current" id="toc-v1.0.245-current">v1.0.245
 (current)</a></li>
+<li><a href="#v1.0.244" id="toc-v1.0.244">v1.0.244</a></li>
 <li><a href="#v1.0.243" id="toc-v1.0.243">v1.0.243</a></li>
 <li><a href="#v1.0.242" id="toc-v1.0.242">v1.0.242</a></li>
 <li><a href="#v1.0.241" id="toc-v1.0.241">v1.0.241</a></li>
@@ -385,25 +383,32 @@ id="toc-v1.0.112-and-v1.0.113">v1.0.112 and v1.0.113</a></li>
 </ul>
 </nav>
 <h1 id="dbdo-history-of-changes">DbDo History of Changes</h1>
-<h2 id="october-2026-tutorials-in-the-pattern-of-ten">8 October 2026 –
-tutorials in the pattern of ten</h2>
-<p>DbDo has spoken tutorials for the first time: ten walks in the Homer
-pattern of ten. 0 Overview; 1 User Interface, the window, the record
-list, the Say keys, the pick list, the menus, the key rules and the
-help; 2 Install and Launch; seven tasks, 3 Open a Database and Move
-Through Records, 4 Edit and Add Records, 5 Mark, Filter and Sort, 6
-Follow Related Records, 7 Statistics and Reports, 8 Ask with SQL; and 9
-Conclusion, the summary, the glossary and more information. The build
-speaks them and the installer and repository carry the audio. Reader
-lines not yet heard on a live run carry a note to confirm with
-buildTutorials -live.</p>
 <p>This file is the chronological record of DbDo releases. The most
 recent release is at the top. For the overview of what DbDo is, see
 <code>Announce.md</code> or <code>ReadMe.md</code>. For the full
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
-<h2 id="v1.0.244-current">v1.0.244 (current)</h2>
+<h2 id="v1.0.245-current">v1.0.245 (current)</h2>
+<p><strong>Edits outlive failures, and the walks travel.</strong> From
+an audit of 8 October 2026, with its findings checked against the code:
+a newer record’s fields all arrive in one statement when databases are
+merged, where before only its timestamp did; Save As and the migration
+backup copy through SQLite itself, so a row still in the write-ahead log
+is in the copy; a workbook whose save failed keeps its window open
+rather than discarding the edits; the standalone importer writes to a
+sibling file and keeps the old database as before-import; RadioTrail
+checkpoints before setting a copy aside and never deletes a write-ahead
+log, refuses to replace what it could not set aside, marks dropped
+stations only after a fetch that reached the catalog’s end, and merges
+one row per station in a batch. The build repairs version.txt only when
+it holds the kit’s own number, so an intended new series keeps. The
+twelve walks’ scripts now travel with the repository, so a clean
+checkout speaks them; an entry describing a different set of ten, which
+the repository never held, is withdrawn. The audit’s reading of the
+manifest guard was mistaken – cmd runs the chained commands as the if’s
+consequent – and the guard is a block now so nobody reads it twice.</p>
+<h2 id="v1.0.244">v1.0.244</h2>
 <p><strong>An acceptance build speaks nothing</strong>; the walks spoken
 by the ordinary build are what ships, and the release’s own test build
 no longer runs out its clock re-speaking them. Needs HomerDev

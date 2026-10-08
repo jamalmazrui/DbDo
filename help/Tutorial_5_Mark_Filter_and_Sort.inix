@@ -1,0 +1,102 @@
+﻿; Tutorial_5_Mark_Filter_and_Sort.inix -- choosing records, narrowing the list, ordering it.
+
+[about]
+Title=5 - Mark, Filter and Sort
+Intro=Records marked one at a time and in runs, the list narrowed by a filter, and put in order by a column.
+Setup=JobTrail is open in DbDo.
+Homework=Filter your own table to one value, then sort what is left.
+
+[step]
+
+Say=One want: only the jobs still waiting, the newest first.
+Key=
+Hear=
+
+[step]
+
+Say=Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+Key=Alt+Control+D
+Hear=DbDo
+Hear=DbDo ready
+
+[step]
+
+Say=Control plus M, M for Mark, marks the record I am on, for a later command to act on.
+Key=Control+M
+Hear=Marked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Shift plus M asks about marks, changing nothing.
+Key=Shift+M
+Hear=(how many records are marked)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Control plus Shift plus M reverses it: Shift reverses.
+Key=Control+Shift+M
+Hear=Unmarked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Control plus F, F for Filter, shows only the records that match.
+Key=Control+F
+Hear=Filter Records dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I choose the status column, the value waiting, and press Enter. Shift plus F says the filter.
+Key=Shift+F
+Hear=status is waiting
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Alt plus O, O for Order, sorts by a column; I choose the date added.
+Key=Alt+O
+Hear=Order Records dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter sorts. Alt plus Shift plus O reverses the order, newest first.
+Key=Alt+Shift+O
+Hear=(the newest waiting job)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A planned misstep: the filter stays until it is cleared, so a later search finds only waiting jobs. Control plus Shift plus F clears it.
+Key=Control+Shift+F
+Hear=No filter
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=What this walk taught. I name the command; the reader gives the key.
+Key=
+Hear=
+
+[step]
+
+Say=Mark, then unmark.
+Key=
+Hear=Control plus M
+Hear=Control plus Shift plus M
+
+[step]
+
+Say=Filter, then clear it.
+Key=
+Hear=Control plus F
+Hear=Control plus Shift plus F
+
+[step]
+
+Say=Order by a column.
+Key=
+Hear=Alt plus O

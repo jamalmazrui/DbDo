@@ -1,0 +1,129 @@
+﻿; Tutorial_1_User_Interface.inix -- what DbDo is made of, and the rules its keys follow.
+
+[about]
+Title=1 - User Interface
+Intro=DbDo's window and its parts, each named and then shown by the reader -- the record list, the Say keys, the pick list, the menus -- then the rules every key follows, and help in its four places.
+Setup=DbDo is installed, with the JobTrail template open.
+Homework=Guess three DbDo keys from their words, then check each with Control plus F1.
+
+[step]
+
+Say=DbDo is heard before it is seen. I name each part; the reader shows it: name, kind, value and state, then a hint.
+Key=
+Hear=
+
+[step]
+
+Say=Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+Key=Alt+Control+D
+Hear=DbDo
+Hear=DbDo ready
+
+[step]
+
+Say=The title, then the greeting in the message voice. The main view is a list of records: Down Arrow moves by row, and the reader speaks the record.
+Key=Down Arrow
+Hear=(the next record, its first column first)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Right Arrow moves by column within the record, speaking the column's name and its value.
+Key=Right Arrow
+Hear=(the next column's name and value)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Now the Say keys: Shift and a letter asks, and changes nothing. Shift plus Z is Say Status.
+Key=Shift+Z
+Hear=jobs, 12 records, no filter, sorted by employer
+
+[step]
+
+Say=Table, count, filter and sort in one breath; pressed twice, the words open in a window. Shift plus C, C for Cell, says the cell you are on.
+Key=Shift+C
+Hear=(the column's name and the cell's value)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Where a field has fixed values, F4 opens them as a pick list.
+Key=F4
+Hear=status: list box, untried, 4 of 5
+Hear=To move through items press Up or Down Arrow.
+
+[step]
+
+Say=A letter jumps to a value, so nothing is mistyped. Escape closes it. Menus say their own keys; F10 opens the menu bar.
+Key=F10
+Hear=Menu bar
+Hear=File menu
+
+[step]
+
+Say=Down Arrow to the first item.
+Key=Down Arrow
+Hear=Open Database..., Control plus O, O
+
+[step]
+
+Say=The item, its key, then its letter: learn a key from the menu once, then skip the menu.
+Key=Escape
+Hear=Leaving menus
+
+[step]
+
+Say=The rules behind every key. A letter is the first letter of a word: Control plus O opens, Alt plus O orders. Control does; Shift asks; adding Shift reverses: Control plus M marks, Control plus Shift plus M unmarks. Each function key is a family: F2 edits, F3 searches, F4 picks, F8 selects. Insert plus T, the reader's own, says the title.
+Key=Insert+T
+Hear=DbDo
+
+[step]
+
+Say=Control plus F1 is the Key Describer: each key says what it does instead of doing it.
+Key=Control+F1
+Hear=Key Describer On
+
+[step]
+
+Say=Again, and it is off.
+Key=Control+F1
+Hear=No Key Describer
+
+[step]
+
+Say=Help is in four places, the same in every Homer program. I say which; the reader says the key. The guide.
+Key=
+Hear=F1, the guide
+
+[step]
+
+Say=The changes, release by release; the version; the name of any key.
+Key=
+Hear=Shift plus F1, History
+Hear=Alt plus F1, About
+Hear=Control plus F1, Key Describer
+
+[step]
+
+Say=What this walk taught. I name the command; the reader gives the key.
+Key=
+Hear=
+
+[step]
+
+Say=Say Status.
+Key=
+Hear=Shift plus Z
+
+[step]
+
+Say=A field's fixed values.
+Key=
+Hear=F4, pick list
+
+[step]
+
+Say=Unmark, the reverse of Mark.
+Key=
+Hear=Control plus Shift plus M

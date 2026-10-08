@@ -1,0 +1,98 @@
+﻿; Tutorial_0_Overview.inix -- what DbDo is, the two reader keys, and the table of contents.
+
+[feed]
+Title=DbDo Walkthroughs
+Description=Spoken walks through DbDo, the database program built for working by ear. Ten walks, each under five minutes, in the order a new person meets them.
+Author=Jamal Mazrui
+Email=jamal.mazrui@outlook.com
+Base=
+
+[about]
+Title=0 - Overview
+Intro=What DbDo is, two keys of the screen reader's own, and the table of contents.
+Setup=Nothing is needed; this walk is listened to.
+Homework=Take walks one and two, then pick the task you need today.
+
+[step]
+
+Say=DbDo is a database program for people who listen to the screen. It opens SQLite databases, and imports from Excel and others, and shows one table at a time as a list of records you move through by row and by column. Every cell can be heard, edited, searched, marked and counted from the keyboard, and the program answers questions about where you are without changing anything.
+Key=
+Hear=
+
+[step]
+
+Say=Two keys before anything else, both the reader's own. If a line goes by too fast, Insert plus Up Arrow says it again.
+Key=Insert+Up Arrow
+Hear=(the last line, read a second time)
+
+[step]
+
+Say=And if you lose your place, Insert plus Tab says where you are: the control, its state and its position.
+Key=Insert+Tab
+Hear=(the current control, with its state and position)
+
+[step]
+
+Say=Now the table of contents. I say the number and the title; the reader says what the walk covers.
+Key=
+Hear=
+
+[step]
+
+Say=One, User Interface.
+Key=
+Hear=The window, the record list, the Say keys that ask without changing, the pick list, the menus, the rules every key follows, and where help lives.
+
+[step]
+
+Say=Two, Install and Launch.
+Key=
+Hear=The installer, the boxes on its last page, and DbDo opening with Alt plus Control plus D.
+
+[step]
+
+Say=Three, Open a Database and Move Through Records.
+Key=
+Hear=A template database opened, and moving by row, by column, by search and by number.
+
+[step]
+
+Say=Four, Edit and Add Records.
+Key=
+Hear=A cell changed, a value picked from a list, a record added.
+
+[step]
+
+Say=Five, Mark, Filter and Sort.
+Key=
+Hear=Records marked, the list narrowed to what matters, and put in order.
+
+[step]
+
+Say=Six, Follow Related Records.
+Key=
+Hear=From one record into the records related to it, and back.
+
+[step]
+
+Say=Seven, Statistics and Reports.
+Key=
+Hear=The numbers in a column, and a report written as a document.
+
+[step]
+
+Say=Eight, Ask with SQL.
+Key=
+Hear=A question in the database's own language, and the history of questions asked.
+
+[step]
+
+Say=Nine, Conclusion.
+Key=
+Hear=What to carry away, the words DbDo uses, the help built in, and where to learn more.
+
+[step]
+
+Say=Ten walks, each under five minutes, under an hour together: the overview, the user interface, seven tasks, and the conclusion. They are a course, not a reference: each one assumes those before it.
+Key=
+Hear=

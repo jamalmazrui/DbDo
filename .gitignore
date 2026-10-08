@@ -88,7 +88,6 @@ version.txt
 Version.cs
 work/
 help/*.mp3
-help/Tutorial_*.inix
 help/Tutorials.m3u
 help/tutorials/
 scripts/ffmpeg.exe

@@ -1,14 +1,29 @@
 ﻿# DbDo History of Changes
 
-## 8 October 2026 -- tutorials in the pattern of ten
-
-DbDo has spoken tutorials for the first time: ten walks in the Homer pattern of ten. 0 Overview; 1 User Interface, the window, the record list, the Say keys, the pick list, the menus, the key rules and the help; 2 Install and Launch; seven tasks, 3 Open a Database and Move Through Records, 4 Edit and Add Records, 5 Mark, Filter and Sort, 6 Follow Related Records, 7 Statistics and Reports, 8 Ask with SQL; and 9 Conclusion, the summary, the glossary and more information. The build speaks them and the installer and repository carry the audio. Reader lines not yet heard on a live run carry a note to confirm with buildTutorials -live.
-
 This file is the chronological record of DbDo releases. The most recent release is at the top. For the overview of what DbDo is, see `Announce.md` or `ReadMe.md`. For the full reference, see `DbDo.md`.
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
-## v1.0.244 (current)
+## v1.0.245 (current)
+
+**Edits outlive failures, and the walks travel.** From an audit of 8 October
+2026, with its findings checked against the code: a newer record's fields all
+arrive in one statement when databases are merged, where before only its
+timestamp did; Save As and the migration backup copy through SQLite itself, so
+a row still in the write-ahead log is in the copy; a workbook whose save failed
+keeps its window open rather than discarding the edits; the standalone importer
+writes to a sibling file and keeps the old database as before-import; RadioTrail
+checkpoints before setting a copy aside and never deletes a write-ahead log,
+refuses to replace what it could not set aside, marks dropped stations only
+after a fetch that reached the catalog's end, and merges one row per station in
+a batch. The build repairs version.txt only when it holds the kit's own number,
+so an intended new series keeps. The twelve walks' scripts now travel with the
+repository, so a clean checkout speaks them; an entry describing a different
+set of ten, which the repository never held, is withdrawn. The audit's reading
+of the manifest guard was mistaken -- cmd runs the chained commands as the
+if's consequent -- and the guard is a block now so nobody reads it twice.
+
+## v1.0.244
 
 **An acceptance build speaks nothing**; the walks spoken by the ordinary build
 are what ships, and the release's own test build no longer runs out its clock

@@ -1,0 +1,86 @@
+﻿; Tutorial_8_Ask_with_SQL.inix -- questions in SQL.
+
+[about]
+Title=8 - Ask with SQL
+Intro=A question in the database's own language with Control plus Q, the answer shown as records, and the history of questions asked.
+Setup=JobTrail is open in DbDo.
+Homework=Write a query that counts your records by one column.
+
+[step]
+
+Say=One want: an answer no single command gives -- how many jobs at each employer, most first. SQL, the database's own language, asks it in one line.
+Key=
+Hear=
+
+[step]
+
+Say=Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+Key=Alt+Control+D
+Hear=DbDo
+Hear=DbDo ready
+
+[step]
+
+Say=Control plus Q, Q for Query, opens a box for SQL.
+Key=Control+Q
+Hear=Query dialog
+Hear=SQL: edit, multiline
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I type the question.
+Key=select employer, count(*) as jobs from jobs group by employer order by jobs desc
+Hear=(each word echoed as it is typed)
+
+[step]
+
+Say=Control plus Enter runs it from inside the box, where Enter would start a new line.
+Key=Control+Enter
+Hear=(the first row of the answer)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The answer is shown as records, moved through like any table. Shift plus Q says the query in force.
+Key=Shift+Q
+Hear=(the query)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A planned misstep: a misspelled column. The database says which word it does not know, and the box keeps the query to fix.
+Key=Control+Q
+Hear=Query dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape. Alt plus Shift plus Q, the history, lists the questions asked, to run one again.
+Key=Alt+Shift+Q
+Hear=Query History
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=What this walk taught. I name the command; the reader gives the key.
+Key=
+Hear=
+
+[step]
+
+Say=Ask in SQL.
+Key=
+Hear=Control plus Q
+
+[step]
+
+Say=Run it from inside the box.
+Key=
+Hear=Control plus Enter
+
+[step]
+
+Say=The questions asked before.
+Key=
+Hear=Alt plus Shift plus Q

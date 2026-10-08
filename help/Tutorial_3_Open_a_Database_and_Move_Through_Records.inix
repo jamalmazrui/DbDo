@@ -1,0 +1,102 @@
+﻿; Tutorial_3_Open_a_Database_and_Move_Through_Records.inix -- opening a database and finding your way.
+
+[about]
+Title=3 - Open a Database and Move Through Records
+Intro=A template database opened from the Help menu, and moving through it by row, by column, by search and by record number.
+Setup=DbDo is installed.
+Homework=Open another template database and find a record by keyword.
+
+[step]
+
+Say=One want: a database open and a record found in it, quickly. DbDo ships template databases to practice on; JobTrail tracks job applications.
+Key=
+Hear=
+
+[step]
+
+Say=Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+Key=Alt+Control+D
+Hear=DbDo
+Hear=DbDo ready
+
+[step]
+
+Say=Control plus O, O for Open, opens a database file. The templates are in the Help menu, under Template Databases; I open JobTrail.
+Key=Control+O
+Hear=Open Database dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I choose JobTrail and press Enter. Shift plus Z says where I am.
+Key=Shift+Z
+Hear=jobs, 12 records, no filter, sorted by employer
+
+[step]
+
+Say=Down Arrow moves by record; Right Arrow by column. Control plus G, G for Go, goes to a record by its number.
+Key=Control+G
+Hear=Go to Record dialog
+Hear=Record number: edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I type 7 and press Enter.
+Key=Enter
+Hear=(record 7, its first column first)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Control plus K, K for Keywords, searches every column for words.
+Key=Control+K
+Hear=Keywords dialog
+Hear=Keywords: edit
+Hear=Type in text.
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I type Seattle and press Enter.
+Key=Enter
+Hear=(the first record holding Seattle)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=F3 goes to the next match, Shift plus F3 to the one before. Alt plus Delete says the column and the row number.
+Key=Alt+Delete
+Hear=(the column's name, row 3)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A planned misstep: Control plus F is not find here. In DbDo, F is for Filter, a later walk. Keywords is K. Escape leaves anything opened by mistake.
+Key=Escape
+Hear=DbDo
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=What this walk taught. I name the command; the reader gives the key.
+Key=
+Hear=
+
+[step]
+
+Say=Open a database.
+Key=
+Hear=Control plus O
+
+[step]
+
+Say=Go to a record by number.
+Key=
+Hear=Control plus G
+
+[step]
+
+Say=Search every column.
+Key=
+Hear=Control plus K

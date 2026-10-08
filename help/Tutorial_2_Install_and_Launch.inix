@@ -1,0 +1,88 @@
+﻿; Tutorial_2_Install_and_Launch.inix -- installing DbDo and opening it.
+
+[about]
+Title=2 - Install and Launch
+Intro=The installer, the boxes on its last page -- the screen reader scripts, the player, the model for its AI commands -- and DbDo opening from anywhere.
+Setup=DbDo_setup.exe is downloaded from the DbDo page on GitHub.
+Homework=Run the setup again; every box should now say Update or Reinstall.
+
+[step]
+
+Say=One want: DbDo on this computer, with what it works best with, in one sitting.
+Key=
+Hear=
+
+[step]
+
+Say=I open the downloaded setup program and allow it to make changes.
+Key=Enter
+Hear=Setup - DbDo dialog
+Hear=Welcome to the DbDo Setup Wizard
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The ordinary installer: Enter takes Next, and the defaults are right.
+Key=Enter
+Hear=Select Destination Location
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The last page offers what DbDo works best with, each as a box whose first word is the machine's state read for you: Install, Update or Reinstall.
+Key=Tab
+Hear=(the box for your screen reader's scripts, its first word, checked)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Scripts for the screen reader you use; the mpv player, which plays a record's stream; and, for the AI commands, Ollama and a model, downloaded once.
+Key=Down Arrow
+Hear=Install mpv check box, checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A planned misstep: clearing a box you need. Space clears it; Space again ticks it back.
+Key=Space
+Hear=not checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Space.
+Key=Space
+Hear=checked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter installs what is ticked.
+Key=Enter
+Hear=Finish button
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Then the key that opens DbDo from anywhere.
+Key=Alt+Control+D
+Hear=DbDo
+Hear=DbDo ready
+
+[step]
+
+Say=Installed and open. If something was left out, run the setup again and tick its box; what is already current costs nothing. What this walk taught. I name the step; the reader gives the answer.
+Key=
+Hear=
+
+[step]
+
+Say=What a box's first word tells you.
+Key=
+Hear=Install, Update or Reinstall
+
+[step]
+
+Say=The key that opens DbDo.
+Key=
+Hear=Alt plus Control plus D

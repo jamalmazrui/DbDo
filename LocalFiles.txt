@@ -15,8 +15,9 @@ Version.cs
 work/
 
 # The spoken tutorials' working material.
+# The walks' scripts, help/Tutorial_*.inix, travel with the repository: a clean
+# checkout speaks them. Only the audio stays local, since the build makes it.
 help/*.mp3
-help/Tutorial_*.inix
 help/Tutorials.m3u
 help/tutorials/
 scripts/ffmpeg.exe
