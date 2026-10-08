@@ -1,5 +1,9 @@
 ﻿# DbDo History of Changes
 
+## 8 October 2026 -- tutorials in the pattern of ten
+
+DbDo has spoken tutorials for the first time: ten walks in the Homer pattern of ten. 0 Overview; 1 User Interface, the window, the record list, the Say keys, the pick list, the menus, the key rules and the help; 2 Install and Launch; seven tasks, 3 Open a Database and Move Through Records, 4 Edit and Add Records, 5 Mark, Filter and Sort, 6 Follow Related Records, 7 Statistics and Reports, 8 Ask with SQL; and 9 Conclusion, the summary, the glossary and more information. The build speaks them and the installer and repository carry the audio. Reader lines not yet heard on a live run carry a note to confirm with buildTutorials -live.
+
 This file is the chronological record of DbDo releases. The most recent release is at the top. For the overview of what DbDo is, see `Announce.md` or `ReadMe.md`. For the full reference, see `DbDo.md`.
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.

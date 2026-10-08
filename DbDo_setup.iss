@@ -342,7 +342,7 @@ Source: "License.htm";  DestDir: "{app}"; Flags: ignoreversion
 ; where the Sample Databases Help command lists it. lookups.db is
 ; shared infrastructure, not a sample, so it stays in {app}.
 Source: "data\lookups.db"; DestDir: "{app}\data"; Flags: ignoreversion
-Source: "templates\*"; DestDir: "{app}\templates"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist
+Source: "templates\*"; DestDir: "{app}\templates"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist; Excludes: ".git,.venv,__pycache__,*.pyc,venv"
 Source: "configs\DbDo.inix";   DestDir: "{app}\configs"; Flags: ignoreversion onlyifdoesntexist
 ;
 ; Scripts: the generic example scripts (each of the three DbDo

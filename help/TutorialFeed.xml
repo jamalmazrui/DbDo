@@ -3,119 +3,101 @@
   <channel>
     <title>DbDo Walkthroughs</title>
     <link>Tutorials.htm</link>
-    <description>Short simulated walks through DbDo, using the JobTrail job search database that ships with it. Each one is about three minutes, with something to try at the end.</description>
+    <description>Spoken walks through DbDo, the database program built for working by ear. Ten walks, each under five minutes, in the order a new person meets them.</description>
     <language>en-us</language>
-    <lastBuildDate>Wed, 07 Oct 2026 17:27:21 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 08 Oct 2026 18:15:38 +0000</lastBuildDate>
     <itunes:author>Jamal Mazrui</itunes:author>
     <itunes:explicit>false</itunes:explicit>
     <itunes:category text="Technology"/>
-    <itunes:owner><itunes:name>Jamal Mazrui</itunes:name><itunes:email>empowermentzone@gmail.com</itunes:email></itunes:owner>
+    <itunes:owner><itunes:name>Jamal Mazrui</itunes:name><itunes:email>jamal.mazrui@outlook.com</itunes:email></itunes:owner>
     <item>
-      <title>00 - Overview and Table of Contents</title>
-      <description>Nothing is needed; this walk is listened to. Full transcript: Tutorials.htm#0-00-overview-and-table-of-contents</description>
-      <link>Tutorials.htm#0-00-overview-and-table-of-contents</link>
-      <guid isPermaLink="false">homer-tutorial_00_overview_and_table_of_contents</guid>
-      <enclosure url="tutorials/00_Overview_and_Table_of_Contents.mp3" length="939999" type="audio/mpeg"/>
-      <itunes:duration>00:02:16</itunes:duration>
+      <title>0 - Overview</title>
+      <description>Nothing is needed; this walk is listened to. Full transcript: Tutorials.htm#0-0-overview</description>
+      <link>Tutorials.htm#0-0-overview</link>
+      <guid isPermaLink="false">homer-tutorial_0_overview</guid>
+      <enclosure url="tutorials/0_Overview.mp3" length="845518" type="audio/mpeg"/>
+      <itunes:duration>00:02:01</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>01 - Install and Launch</title>
-      <description>The installer is downloaded, and your reader is running. Full transcript: Tutorials.htm#0a-01-install-and-launch</description>
-      <link>Tutorials.htm#0a-01-install-and-launch</link>
-      <guid isPermaLink="false">homer-tutorial_01_install_and_launch</guid>
-      <enclosure url="tutorials/01_Install_and_Launch.mp3" length="1459789" type="audio/mpeg"/>
-      <itunes:duration>00:03:27</itunes:duration>
+      <title>1 - User Interface</title>
+      <description>DbDo is installed, with the JobTrail template open. Full transcript: Tutorials.htm#0a-1-user-interface</description>
+      <link>Tutorials.htm#0a-1-user-interface</link>
+      <guid isPermaLink="false">homer-tutorial_1_user_interface</guid>
+      <enclosure url="tutorials/1_User_Interface.mp3" length="1139288" type="audio/mpeg"/>
+      <itunes:duration>00:02:49</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>02 - User Interface Concepts</title>
-      <description>DbDo is open with any database. Nothing needs pressing in this walk; it is listened to. Full transcript: Tutorials.htm#0b-02-user-interface-concepts</description>
-      <link>Tutorials.htm#0b-02-user-interface-concepts</link>
-      <guid isPermaLink="false">homer-tutorial_02_user_interface_concepts</guid>
-      <enclosure url="tutorials/02_User_Interface_Concepts.mp3" length="1557178" type="audio/mpeg"/>
-      <itunes:duration>00:03:26</itunes:duration>
+      <title>2 - Install and Launch</title>
+      <description>DbDo_setup.exe is downloaded from the DbDo page on GitHub. Full transcript: Tutorials.htm#0b-2-install-and-launch</description>
+      <link>Tutorials.htm#0b-2-install-and-launch</link>
+      <guid isPermaLink="false">homer-tutorial_2_install_and_launch</guid>
+      <enclosure url="tutorials/2_Install_and_Launch.mp3" length="622249" type="audio/mpeg"/>
+      <itunes:duration>00:01:34</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>03 - Key Patterns</title>
-      <description>DbDo is open with any database. Full transcript: Tutorials.htm#0c-03-key-patterns</description>
-      <link>Tutorials.htm#0c-03-key-patterns</link>
-      <guid isPermaLink="false">homer-tutorial_03_key_patterns</guid>
-      <enclosure url="tutorials/03_Key_Patterns.mp3" length="1389909" type="audio/mpeg"/>
-      <itunes:duration>00:03:17</itunes:duration>
+      <title>3 - Open a Database and Move Through Records</title>
+      <description>DbDo is installed. Full transcript: Tutorials.htm#0c-3-open-a-database-and-move-through-records</description>
+      <link>Tutorials.htm#0c-3-open-a-database-and-move-through-records</link>
+      <guid isPermaLink="false">homer-tutorial_3_open_a_database_and_move_through_records</guid>
+      <enclosure url="tutorials/3_Open_a_Database_and_Move_Through_Records.mp3" length="761111" type="audio/mpeg"/>
+      <itunes:duration>00:01:55</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>04 - Open and Move Through a Database</title>
-      <description>DbDo is open and no database is open yet. Full transcript: Tutorials.htm#0d-04-open-and-move-through-a-database</description>
-      <link>Tutorials.htm#0d-04-open-and-move-through-a-database</link>
-      <guid isPermaLink="false">homer-tutorial_04_open_and_move_through_a_database</guid>
-      <enclosure url="tutorials/04_Open_and_Move_Through_a_Database.mp3" length="1254790" type="audio/mpeg"/>
-      <itunes:duration>00:03:07</itunes:duration>
+      <title>4 - Edit and Add Records</title>
+      <description>JobTrail is open in DbDo. Full transcript: Tutorials.htm#0d-4-edit-and-add-records</description>
+      <link>Tutorials.htm#0d-4-edit-and-add-records</link>
+      <guid isPermaLink="false">homer-tutorial_4_edit_and_add_records</guid>
+      <enclosure url="tutorials/4_Edit_and_Add_Records.mp3" length="624776" type="audio/mpeg"/>
+      <itunes:duration>00:01:37</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>05 - Add, Inspect and Edit Records</title>
-      <description>JobTrail is open on the jobs table. This morning I found a support analyst opening at Widget Works. Full transcript: Tutorials.htm#0e-05-add-inspect-and-edit-records</description>
-      <link>Tutorials.htm#0e-05-add-inspect-and-edit-records</link>
-      <guid isPermaLink="false">homer-tutorial_05_add_inspect_and_edit_records</guid>
-      <enclosure url="tutorials/05_Add_Inspect_and_Edit_Records.mp3" length="1289769" type="audio/mpeg"/>
-      <itunes:duration>00:03:18</itunes:duration>
+      <title>5 - Mark, Filter and Sort</title>
+      <description>JobTrail is open in DbDo. Full transcript: Tutorials.htm#0e-5-mark-filter-and-sort</description>
+      <link>Tutorials.htm#0e-5-mark-filter-and-sort</link>
+      <guid isPermaLink="false">homer-tutorial_5_mark_filter_and_sort</guid>
+      <enclosure url="tutorials/5_Mark_Filter_and_Sort.mp3" length="663272" type="audio/mpeg"/>
+      <itunes:duration>00:01:41</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>06 - Find, Order and Select</title>
-      <description>JobTrail is open on the jobs table. Full transcript: Tutorials.htm#0f-06-find-order-and-select</description>
-      <link>Tutorials.htm#0f-06-find-order-and-select</link>
-      <guid isPermaLink="false">homer-tutorial_06_find_order_and_select</guid>
-      <enclosure url="tutorials/06_Find_Order_and_Select.mp3" length="1219872" type="audio/mpeg"/>
-      <itunes:duration>00:03:03</itunes:duration>
+      <title>6 - Follow Related Records</title>
+      <description>A database with related tables is open; the chinook sample has them. Full transcript: Tutorials.htm#0f-6-follow-related-records</description>
+      <link>Tutorials.htm#0f-6-follow-related-records</link>
+      <guid isPermaLink="false">homer-tutorial_6_follow_related_records</guid>
+      <enclosure url="tutorials/6_Follow_Related_Records.mp3" length="565671" type="audio/mpeg"/>
+      <itunes:duration>00:01:26</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>07 - Related, Marked, Reports and a Work Search Record</title>
-      <description>JobTrail is open on the jobs table. Full transcript: Tutorials.htm#0g-07-related-marked-reports-and-a-work-search-record</description>
-      <link>Tutorials.htm#0g-07-related-marked-reports-and-a-work-search-record</link>
-      <guid isPermaLink="false">homer-tutorial_07_related_marked_reports_and_a_work_search_record</guid>
-      <enclosure url="tutorials/07_Related_Marked_Reports_and_a_Work_Search_Record.mp3" length="1324797" type="audio/mpeg"/>
-      <itunes:duration>00:03:19</itunes:duration>
+      <title>7 - Statistics and Reports</title>
+      <description>JobTrail is open in DbDo. Full transcript: Tutorials.htm#0g-7-statistics-and-reports</description>
+      <link>Tutorials.htm#0g-7-statistics-and-reports</link>
+      <guid isPermaLink="false">homer-tutorial_7_statistics_and_reports</guid>
+      <enclosure url="tutorials/7_Statistics_and_Reports.mp3" length="582765" type="audio/mpeg"/>
+      <itunes:duration>00:01:27</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>08 - RadioTrail: Find the Seahawks on the Air</title>
-      <description>DbDo is open, fetchStations has been run once, and no database is open yet. Full transcript: Tutorials.htm#0h-08-radiotrail-find-the-seahawks-on-the-air</description>
-      <link>Tutorials.htm#0h-08-radiotrail-find-the-seahawks-on-the-air</link>
-      <guid isPermaLink="false">homer-tutorial_08_radiotrail</guid>
-      <enclosure url="tutorials/08_RadioTrail.mp3" length="1751120" type="audio/mpeg"/>
-      <itunes:duration>00:04:19</itunes:duration>
+      <title>8 - Ask with SQL</title>
+      <description>JobTrail is open in DbDo. Full transcript: Tutorials.htm#0h-8-ask-with-sql</description>
+      <link>Tutorials.htm#0h-8-ask-with-sql</link>
+      <guid isPermaLink="false">homer-tutorial_8_ask_with_sql</guid>
+      <enclosure url="tutorials/8_Ask_with_SQL.mp3" length="607238" type="audio/mpeg"/>
+      <itunes:duration>00:01:32</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
-      <title>09 - Glossary</title>
-      <description>Nothing is needed. Full transcript: Tutorials.htm#0i-09-glossary</description>
-      <link>Tutorials.htm#0i-09-glossary</link>
-      <guid isPermaLink="false">homer-tutorial_09_glossary</guid>
-      <enclosure url="tutorials/09_Glossary.mp3" length="1380855" type="audio/mpeg"/>
-      <itunes:duration>00:03:28</itunes:duration>
-      <itunes:explicit>false</itunes:explicit>
-    </item>
-    <item>
-      <title>10 - Conclusion</title>
-      <description>Nothing is needed. Full transcript: Tutorials.htm#0j-10-conclusion</description>
-      <link>Tutorials.htm#0j-10-conclusion</link>
-      <guid isPermaLink="false">homer-tutorial_10_conclusion</guid>
-      <enclosure url="tutorials/10_Conclusion.mp3" length="1345918" type="audio/mpeg"/>
-      <itunes:duration>00:03:01</itunes:duration>
-      <itunes:explicit>false</itunes:explicit>
-    </item>
-    <item>
-      <title>11 - More Information</title>
-      <description>Nothing is needed. Full transcript: Tutorials.htm#0k-11-more-information</description>
-      <link>Tutorials.htm#0k-11-more-information</link>
-      <guid isPermaLink="false">homer-tutorial_11_more_information</guid>
-      <enclosure url="tutorials/11_More_Information.mp3" length="360662" type="audio/mpeg"/>
-      <itunes:duration>00:00:50</itunes:duration>
+      <title>9 - Conclusion</title>
+      <description>Nothing is needed; this walk is listened to. Full transcript: Tutorials.htm#0i-9-conclusion</description>
+      <link>Tutorials.htm#0i-9-conclusion</link>
+      <guid isPermaLink="false">homer-tutorial_9_conclusion</guid>
+      <enclosure url="tutorials/9_Conclusion.mp3" length="960044" type="audio/mpeg"/>
+      <itunes:duration>00:02:21</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
   </channel>
