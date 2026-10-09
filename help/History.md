@@ -4,6 +4,12 @@ This file is the chronological record of DbDo releases. The most recent release 
 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
+
+## 9 October 2026 -- from the build and release logs
+
+- **RadioTrail keeps its links.** The kit's database check found RadioTrail without the triggers every other Trail has: editing or deleting a station left its map links pointing at nothing, and a person's edit did not set the edited date. fetchStations now adds whatever is missing on every run -- the prime indexes of lookups and maps, an edited trigger for each table, and the map-link triggers -- in the form BookTrail uses, so a listener's own copy gains them at its next refresh; the shipped template has them already. The edited date follows a person's edits, not plays, votes or the catalog's own refresh. Tested: an edit sets the date, a play does not, and deleting a station removes its links.
+- **The installer's per-user writes are acknowledged.** Inno warned that setup runs as administrator yet writes to per-user folders; it does so on purpose, for the launch flag, the logs folder and the JAWS settings stamp, and the reason is now stated beside UsedUserAreasWarning=no.
+
 ## v1.0.236 (current)
 
 **Every working copy is offered for saving, and the databases meet their own rules.** From the same audit of 8 October 2026, the findings v1.0.245 did not reach, checked against the code:
@@ -20,6 +26,8 @@ Press **Shift+F1** inside DbDo to open this file in your browser, or type `histo
 **The walks grow to the task.** Each of the eight task walks taught its core in about a minute and stopped. Each now also teaches the commands around it, shown by the reader as well as named: in installing, the four kinds of help, F11 and the template databases; in moving through records, Jump within one column, searching backward, Say Yield, Say Column as List, Inspect Record and Choose Table; in editing, notes and tags, Say Edited, Copy Record and Replace Column; in marking, ranges with F8, Mark All, Invert and Say Marked Rows; in related records, Say Prime and tables in windows of their own; in statistics, the table and database summaries, Export Data and Print; and in SQL, Chat about Table, exporting an answer and saved scripts. Every key in every walk was checked against Hotkeys. Walk 0's and walk 1's longest speeches are split.
 
 **Filter Records begins with Any Field, and the tutorials play in the Homer Player.** Control+F opens a list of choices, the first selected so Enter takes it, each beginning with its own letter. Any field contains text keeps the records where some field, read as text, holds the text, case aside: one test per field joined by OR, so a match never spans two fields and no separator has to be chosen. Fields, one by one is the form with an operator per field, as before; with a filter in force the list adds Clear, Edit, Narrow and, for a field filter, Widen. A search that finds nothing leaves the view as it was. Say Filter, Say Sort and Filter and Clear Filter now know a filter that opened the table with a WHERE -- Any Field's, and Filter Regex's, which until now Shift+F reported as none and Control+Shift+F left in force. Play Tutorials handed its playlist to Windows, which opened another player; it now opens the Homer Player, paused, with the cursor on the first walk, so Enter plays it and Down Arrow hears the next.
+
+**No folder added unasked.** A crashed session's working copies had been kept in a Recovered folder added to DbDo's data folder without the author's word; they now sit in the data folder itself, named Recovered, then the copy's name and time, so they sort together, and only files so named are cleared after thirty days.
 
 **Stray files leave the top folder.** Twelve files that no list names -- seven build_*.py scripts, conform_samples.py, migratePrm.py, NFB2026Convention.inix, report.inix and transfer.inix -- sat at the top of the project, because the kit's tidy counted any such file as belonging. With kit 1.64.8 the next tidy moves them into notes, where nothing is lost; scripts/kind.py, a kit tool the build copies in, is now named in RepoFiles so it stays.
 

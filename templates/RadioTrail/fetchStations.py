@@ -130,6 +130,51 @@ c_dWikiPause = 1.0
 c_lsCallSignCountries = ("US", "CA")
 c_reCallSign = re.compile(r"\b([KWC][A-Z]{2,3})(?:[- ]?(AM|FM))?\b")
 
+
+# THE TRAIL CONVENTIONS, KEPT BY EVERY RUN (9 October 2026). The kit's checkDb found RadioTrail without the triggers
+# every other Trail has: editing or deleting a station left its map links pointing at nothing, and "edited" changed
+# only when DbDo itself made the edit. This adds whatever is missing -- the unique prime indexes of lookups and maps,
+# an edited trigger for each table, and the map-link triggers of stations and lookups -- in the form BookTrail uses,
+# and changes nothing that is already there, so a listener's own copy gains them at its next refresh.
+c_lsAutomatic = ["votes", "clicks", "trend", "last_check", "last_seen", "probed", "plays", "last_played"]
+
+
+def ensureConventions(c):
+    """Adds the missing Trail indexes and triggers; returns how many were added."""
+    def quoted(s): return '"' + s.replace('"', '""') + '"'
+    iAdded = 0
+    lsExisting = [r[0] for r in c.execute("select name from sqlite_master where type in ('index', 'trigger')")]
+    for sTable in ("lookups", "maps"):
+        sName = "idx_" + sTable + "_prime"
+        if sName not in lsExisting:
+            c.execute("create unique index if not exists %s on %s (prime)" % (quoted(sName), quoted(sTable)))
+            iAdded += 1
+    for sTable in ("stations", "lookups", "maps"):
+        lsColumns = [r[1] for r in c.execute("pragma table_info(%s)" % quoted(sTable))]
+        if not lsColumns: continue
+        sKey = lsColumns[0]
+        lsWatched = [s for s in lsColumns if s not in (sKey, "added", "edited", "marked") and not (sTable == "stations" and s in c_lsAutomatic)]
+        sName = "trg_" + sTable + "_edited"
+        if sName not in lsExisting and lsWatched:
+            sOf = ", ".join(quoted(s) for s in lsWatched)
+            sWhen = " OR ".join("OLD.%s IS NOT NEW.%s" % (quoted(s), quoted(s)) for s in lsWatched)
+            c.execute("CREATE TRIGGER %s AFTER UPDATE OF %s ON %s FOR EACH ROW WHEN %s BEGIN UPDATE %s SET edited = CURRENT_TIMESTAMP WHERE %s = NEW.%s; END"
+                      % (quoted(sName), sOf, quoted(sTable), sWhen, quoted(sTable), quoted(sKey), quoted(sKey)))
+            iAdded += 1
+        if sTable == "maps": continue
+        sName = "trg_" + sTable + "_maps"
+        if sName not in lsExisting:
+            c.execute("CREATE TRIGGER %s AFTER UPDATE ON %s FOR EACH ROW WHEN OLD.prime IS NOT NEW.prime BEGIN UPDATE maps SET prime1 = NEW.prime WHERE tbl1 = '%s' AND prime1 = OLD.prime; UPDATE maps SET prime2 = NEW.prime WHERE tbl2 = '%s' AND prime2 = OLD.prime; END"
+                      % (quoted(sName), quoted(sTable), sTable, sTable))
+            iAdded += 1
+        sName = "trg_" + sTable + "_maps_delete"
+        if sName not in lsExisting:
+            c.execute("CREATE TRIGGER %s AFTER DELETE ON %s FOR EACH ROW BEGIN DELETE FROM maps WHERE (tbl1 = '%s' AND prime1 = OLD.prime) OR (tbl2 = '%s' AND prime2 = OLD.prime); END"
+                      % (quoted(sName), quoted(sTable), sTable, sTable))
+            iAdded += 1
+    c.commit()
+    return iAdded
+
 def addLines(sHave, lsNew):
     """Add lines to a one-per-line field, keeping every line already there."""
     lsOut = [s for s in (sHave or "").split("\n") if s.strip()]
@@ -778,6 +823,13 @@ def main():
         if not setAside(sDb):
             print("The copy was left as it is; nothing was replaced."); return 1
         if not copyTemplate(sDb): return 1
+    try:
+        cConventions = sqlite3.connect(sDb)
+        iConventions = ensureConventions(cConventions)
+        cConventions.close()
+        logLine("Trail conventions: %d index or trigger added" % iConventions if iConventions == 1 else "Trail conventions: %d indexes and triggers added" % iConventions)
+    except Exception as oError:
+        logLine("Trail conventions could not be checked: %s" % oError)
     say("Step 1 of 4: the copy is " + ("fresh from the template." if bFresh else "in place."))
     say("Step 2 of 4: the catalog.")
 

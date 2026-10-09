@@ -235,6 +235,9 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a href="#october-2026-from-the-build-and-release-logs"
+id="toc-october-2026-from-the-build-and-release-logs">9 October 2026 –
+from the build and release logs</a></li>
 <li><a href="#v1.0.236-current" id="toc-v1.0.236-current">v1.0.236
 (current)</a></li>
 <li><a href="#v1.0.245" id="toc-v1.0.245">v1.0.245</a></li>
@@ -390,6 +393,26 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="october-2026-from-the-build-and-release-logs">9 October 2026 –
+from the build and release logs</h2>
+<ul>
+<li><strong>RadioTrail keeps its links.</strong> The kit’s database
+check found RadioTrail without the triggers every other Trail has:
+editing or deleting a station left its map links pointing at nothing,
+and a person’s edit did not set the edited date. fetchStations now adds
+whatever is missing on every run – the prime indexes of lookups and
+maps, an edited trigger for each table, and the map-link triggers – in
+the form BookTrail uses, so a listener’s own copy gains them at its next
+refresh; the shipped template has them already. The edited date follows
+a person’s edits, not plays, votes or the catalog’s own refresh. Tested:
+an edit sets the date, a play does not, and deleting a station removes
+its links.</li>
+<li><strong>The installer’s per-user writes are acknowledged.</strong>
+Inno warned that setup runs as administrator yet writes to per-user
+folders; it does so on purpose, for the launch flag, the logs folder and
+the JAWS settings stamp, and the reason is now stated beside
+UsedUserAreasWarning=no.</li>
+</ul>
 <h2 id="v1.0.236-current">v1.0.236 (current)</h2>
 <p><strong>Every working copy is offered for saving, and the databases
 meet their own rules.</strong> From the same audit of 8 October 2026,
@@ -461,6 +484,11 @@ until now Shift+F reported as none and Control+Shift+F left in force.
 Play Tutorials handed its playlist to Windows, which opened another
 player; it now opens the Homer Player, paused, with the cursor on the
 first walk, so Enter plays it and Down Arrow hears the next.</p>
+<p><strong>No folder added unasked.</strong> A crashed session’s working
+copies had been kept in a Recovered folder added to DbDo’s data folder
+without the author’s word; they now sit in the data folder itself, named
+Recovered, then the copy’s name and time, so they sort together, and
+only files so named are cleared after thirty days.</p>
 <p><strong>Stray files leave the top folder.</strong> Twelve files that
 no list names – seven build_*.py scripts, conform_samples.py,
 migratePrm.py, NFB2026Convention.inix, report.inix and transfer.inix –
