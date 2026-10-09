@@ -35292,8 +35292,10 @@ namespace DbDo
         // KEPT, NOT DELETED (8 October 2026, from an audit by another AI): a working
         // copy left behind is one a closing DbDo did not remove -- a crash, a kill or
         // a power loss -- and it may hold the only copy of unsaved edits. Each is
-        // moved into Recovered in DbDo's data folder rather than deleted, and DbDo
-        // says once where they are. A copy in use by another running DbDo is locked,
+        // moved into DbDo's data folder, named Recovered-<name>-<time>.db so they
+        // sort together, and DbDo says once where they are. (A Recovered folder was
+        // first added for them, unasked; the Homer tree gains no folder without the
+        // author's word, so since 9 October they sit in data itself.) A copy in use by another running DbDo is locked,
         // so the move fails and it is left alone, as before. Recovered copies older
         // than thirty days are removed, so the folder does not grow for ever.
         private static void sweepOrphanManagedTemps()
@@ -35303,7 +35305,7 @@ namespace DbDo
             {
                 string sTempDir = Path.GetTempPath();
                 if (string.IsNullOrEmpty(sTempDir) || !Directory.Exists(sTempDir)) return;
-                string sRecovered = Path.Combine(Homer.Paths.data(), "Recovered");
+                string sRecovered = Homer.Paths.data();
                 int iKept = 0;
                 foreach (string sFile in Directory.GetFiles(sTempDir, "DbDo_managed_*.db"))
                 {
@@ -35311,7 +35313,7 @@ namespace DbDo
                     {
                         if (new FileInfo(sFile).Length == 0) { File.Delete(sFile); continue; }
                         Directory.CreateDirectory(sRecovered);
-                        string sTarget = Path.Combine(sRecovered, Path.GetFileNameWithoutExtension(sFile)
+                        string sTarget = Path.Combine(sRecovered, "Recovered-" + Path.GetFileNameWithoutExtension(sFile)
                             + "-" + File.GetLastWriteTime(sFile).ToString("yyyyMMdd-HHmmss") + ".db");
                         if (File.Exists(sTarget)) File.Delete(sTarget);
                         File.Move(sFile, sTarget);
@@ -35322,7 +35324,7 @@ namespace DbDo
                 }
                 if (Directory.Exists(sRecovered))
                 {
-                    foreach (string sOld in Directory.GetFiles(sRecovered, "*.db"))
+                    foreach (string sOld in Directory.GetFiles(sRecovered, "Recovered-*.db"))
                     {
                         try { if ((DateTime.Now - File.GetLastWriteTime(sOld)).TotalDays > c_iKeepDays) File.Delete(sOld); }
                         catch { }
@@ -35333,7 +35335,7 @@ namespace DbDo
                         + " from a DbDo session that did not close normally "
                         + (iKept == 1 ? "was" : "were") + " kept, in case "
                         + (iKept == 1 ? "it holds" : "they hold") + " unsaved edits. Open "
-                        + (iKept == 1 ? "it" : "one") + " with Control+O from:\n\n" + sRecovered
+                        + (iKept == 1 ? "it" : "one") + " with Control+O, named Recovered and the date, from:\n\n" + sRecovered
                         + "\n\nRecovered copies are removed after " + c_iKeepDays + " days.",
                         "DbDo", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
