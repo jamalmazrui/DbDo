@@ -63,6 +63,74 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
+Say=SQL is not the only way to ask. Shift plus F12, Chat about Table, sends the table with a question in plain words to the model on this computer.
+Key=Shift+F12
+Hear=Chat about Table dialog
+Hear=Question: edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I ask which employer has the most applications still waiting.
+Key=Which employer has the most applications still waiting?
+Hear=(each word echoed as it is typed)
+
+[step]
+
+Say=Enter. The answer comes in words, from the same records, and nothing leaves this computer.
+Key=Enter
+Hear=Answer dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape. An answer from SQL is a table like any other, so Alt plus X exports it, and Alt plus Shift plus S describes its columns.
+Key=Escape
+Hear=DbDo
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A question asked often can be saved as a script, a dot s q l file in the Scripts folder beside the database. Control plus Shift plus I, Invoke Script, lists them and runs the one chosen.
+Key=Control+Shift+I
+Hear=Invoke Script dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape. Scripts belong to their database, so the questions travel with the data they ask about.
+Key=Escape
+Hear=DbDo
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Before a query that changes data, Alt plus Z, Toggle Read Only, makes the database read only, so a mistyped statement cannot change anything.
+Key=Alt+Z
+Hear=Read only
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Alt plus Z again makes it writable when you mean to change it.
+Key=Alt+Z
+Hear=Read and write
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=After a query that does change records, F5, Refresh View, shows the table as it now stands.
+Key=F5
+Hear=jobs, 12 records
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Practise on a copy: Save As, Control plus Shift plus S, makes one, so the original stays as it was while you learn.
+Key=
+
+[step]
+
 Say=What this walk taught. I name the command; the reader gives the key.
 Key=
 Hear=

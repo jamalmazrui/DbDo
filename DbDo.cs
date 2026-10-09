@@ -1683,9 +1683,17 @@ namespace DbDo
             string sNorm = (sPolicy ?? "keep").Trim().ToLowerInvariant();
             System.Text.StringBuilder sbReport = new System.Text.StringBuilder();
             int iAdded = 0, iUpdated = 0, iSame = 0, iLinks = 0, iPicks = 0;
+            // ONE TRANSACTION (8 October 2026, from an audit by another AI): the merge's
+            // inserts, updates, links and pick lists were applied one by one, so a
+            // failure partway -- a schema mismatch, a uniqueness error -- left a half-
+            // merged database. They now commit together or not at all. SQLite allows
+            // neither ATTACH nor DETACH inside a transaction, so it begins after the
+            // one and ends before the other.
+            bool bInTrans = false;
             invokeSql("ATTACH DATABASE '" + sOtherPath.Replace("'", "''") + "' AS incoming", null);
             try
             {
+                oConn.BeginTrans(); bInTrans = true;
                 List<string> lsTables = new List<string>();
                 foreach (string sT in getTableAndViewNames())
                     if (!sT.Equals("maps", StringComparison.OrdinalIgnoreCase)
@@ -1780,6 +1788,13 @@ namespace DbDo
                         + "AND d.val = i.val)", null);
                     iPicks = countOf("main.\"lookups\"") - iB;
                 }
+                oConn.CommitTrans(); bInTrans = false;
+            }
+            catch
+            {
+                // Nothing of a failed merge stays: every change since the start is undone.
+                if (bInTrans) { try { oConn.RollbackTrans(); } catch { } bInTrans = false; }
+                throw;
             }
             finally { try { invokeSql("DETACH DATABASE incoming", null); } catch { } }
 
@@ -2636,6 +2651,7 @@ namespace DbDo
             if (!isOpen()) throw new InvalidOperationException("No database open.");
             if (string.IsNullOrEmpty(sTable))
                 throw new ArgumentException("selectTable requires a table name.");
+            sSqlWhere = ""; sSqlWhereSpoken = "";
 
             // Capture settings of the table we're leaving so a later
             // return restores them.
@@ -2733,6 +2749,38 @@ namespace DbDo
         // a drill view is defined by its WHERE clause, and restoring
         // a remembered filter on top would silently change the
         // result set.
+        // THE SQL FILTER IS REMEMBERED (8 October 2026): a table opened with a WHERE
+        // -- Filter Regex, or Control+F's Any Field -- was invisible to Say Filter and
+        // untouched by Clear Filter, which knew only the ADO filter. sqlFilter is the
+        // WHERE in force, and sqlFilterSpoken the same in words, until a table is
+        // opened plainly.
+        private string sSqlWhere = "";
+        private string sSqlWhereSpoken = "";
+        public string sqlFilter { get { return sSqlWhere ?? ""; } }
+        public string sqlFilterSpoken { get { return string.IsNullOrEmpty(sSqlWhereSpoken) ? (sSqlWhere ?? "") : sSqlWhereSpoken; } }
+
+        public void selectTableFiltered(string sTable, string sWhereSql, string sSpoken)
+        {
+            selectTableFiltered(sTable, sWhereSql);
+            if (!string.IsNullOrEmpty(sWhereSql)) sSqlWhereSpoken = sSpoken ?? "";
+        }
+
+        // anyFieldWhere: ANY FIELD CONTAINS THE TEXT. One test per field, joined by
+        // OR, rather than the fields joined into one string: a match can never span
+        // two fields, so no separator has to be chosen that the data might hold.
+        // Each value is read as text first, so numbers and dates are searched as
+        // they read, and both sides are lowered, so case is ignored -- for English
+        // letters, which is what SQLite's lower() folds. instr finds the text
+        // literally: % and _ in it are characters, not wildcards.
+        public string anyFieldWhere(string sText)
+        {
+            string sNeedle = "lower('" + (sText ?? "").Replace("'", "''") + "')";
+            List<string> lsTests = new List<string>();
+            foreach (string sField in getFieldNames())
+                lsTests.Add("instr(lower(CAST(\"" + sField.Replace("\"", "\"\"") + "\" AS TEXT)), " + sNeedle + ") > 0");
+            return lsTests.Count == 0 ? "" : "(" + string.Join(" OR ", lsTests.ToArray()) + ")";
+        }
+
         public void selectTableFiltered(string sTable, string sWhereSql)
         {
             if (!isOpen()) throw new InvalidOperationException("No database open.");
@@ -2767,6 +2815,7 @@ namespace DbDo
 
             sCurrentTable = sTable;
             sSourceSql = null;
+            sSqlWhere = sWhereSql; sSqlWhereSpoken = "";
             bCurrentIsView = bIsView;
             sActiveSort = "";   // fresh open starts unsorted; cached sort re-applied via applyTableSettings
             // A view is read-only by nature (SQLite/ADO cannot
@@ -5564,8 +5613,15 @@ namespace DbDo
             if (string.IsNullOrEmpty(sOldCreate))
             { sError = "Could not read the schema for '" + sTable + "'."; return false; }
 
-            string sNewTable = "new_" + sTable;
-            const string sHelper = "dbdo_oldprime";
+            // NAMES THIS OPERATION OWNS (8 October 2026, from an audit by another AI):
+            // the rebuild used new_<table> and dbdo_oldprime, and dropped any table so
+            // named before its transaction began, as a presumed leftover -- which a
+            // table of the user's could be, and a rollback could not bring back. A tag
+            // unique to this run makes both names its own, so nothing is dropped first
+            // and the clean-up after a failure removes only what this run made.
+            string sRunTag = Guid.NewGuid().ToString("N").Substring(0, 8);
+            string sNewTable = "dbdo_rebuild_" + sRunTag + "_" + sTable;
+            string sHelper = "dbdo_oldprime_" + sRunTag;
             string sNewCreate;
             try
             {
@@ -5599,8 +5655,6 @@ namespace DbDo
             string sTableEsc = sTable.Replace("'", "''");
 
             // Defensive cleanup of leftovers from any prior failed attempt.
-            try { invokeSql("DROP TABLE IF EXISTS \"" + sNewTable + "\"", null); } catch { }
-            try { invokeSql("DROP TABLE IF EXISTS " + sHelper, null); } catch { }
             // foreign_keys is a no-op inside a transaction, so set it first --
             // and REMEMBER what it was. Turning it on afterwards regardless
             // turns it on for a database whose owner had it off, and hides a
@@ -13564,7 +13618,7 @@ namespace DbDo
                 "Plain text only; non-text and empty clipboards announce that fact rather than going silent. Double-press opens the read-only memo dialog for line-by-line review of long pasted content.");
             add("Say Sort Filter",     "Speak the current sort and filter, or '(none)' for each",
                 "Single-press speaks; double-press opens the same text in the multi-line dialog. Useful when the filter or sort string is long.");
-            add("Filter Records",      "Show only rows matching one or more field conditions", "Control+F. Opens a form with one box per editable field. Type a value to match; a leading symbol picks the kind of match, and with no symbol \"=\" (exact) is implicit. Symbols: > >= < <= for comparisons, != for not-equal, and % for a substring (the value appears anywhere in the field). Filling several boxes ANDs them. Matches are case-insensitive. When a filter is already active, a chooser offers Edit (revise it), And / Or (add a condition joined to the current filter, parenthesized), New (replace), or Clear.");
+            add("Filter Records",      "Show only the records that hold some text in any field, or that meet a condition on each field", "Control+F. A list of choices, its first selected, so Enter takes it; each begins with its own letter. Any field contains text asks for the text and keeps the records where some field, read as text, contains it, case aside (for English letters). Fields, one by one opens a form with a box per field: a value on its own means equals, a symbol in front compares (> >= < <= !=), and % in front matches anywhere in the field; several boxes must all match. With a filter in force the list adds Clear, Edit (the field filter), Narrow (add a field condition) and, for a field filter, Widen. A search that finds nothing leaves the view as it was.");
             add("Filter Regex",        "Filter to rows whose current column matches a regular expression (SQLean REGEXP)",
                 "Server-side, so it works on large tables and the result stays editable. Prompts for a pattern and applies it to the column under virtual focus; an empty pattern clears the filter. Needs sqlean.dll beside DbDo.exe. Unbound by default -- assign a chord if you use it often.");
             add("Clear Filter",       "Clear the active filter", "Control+Shift+F.");
@@ -16376,9 +16430,14 @@ namespace DbDo
             if (db == null || !db.hasRecordset())
             { Say.say("filter: no recordset open"); return; }
             string sFilter = db.filter ?? "";
-            if (string.IsNullOrEmpty(sFilter))
+            string sSql = db.sqlFilterSpoken;
+            if (string.IsNullOrEmpty(sFilter) && string.IsNullOrEmpty(sSql))
             { Say.say("where: none"); return; }
-            speakOrShow("Filter", "where: " + sFilter, 118);
+            // Both kinds, in the words each was asked in (8 October 2026).
+            List<string> lsParts = new List<string>();
+            if (!string.IsNullOrEmpty(sSql)) lsParts.Add(sSql);
+            if (!string.IsNullOrEmpty(sFilter)) lsParts.Add("where: " + sFilter);
+            speakOrShow("Filter", string.Join("; and ", lsParts.ToArray()), 118);
         }
 
         // saySayFind: speak the current Find search string. Shift+F.
@@ -17014,6 +17073,9 @@ namespace DbDo
             { Say.say("sort filter: no table open"); return; }
             string sSort = db.sort ?? "";
             string sFilter = db.filter ?? "";
+            // Both kinds of filter, as Say Filter gives them (8 October 2026).
+            string sSql = db.sqlFilterSpoken;
+            if (!string.IsNullOrEmpty(sSql)) sFilter = string.IsNullOrEmpty(sFilter) ? sSql : sSql + "; and " + sFilter;
             StringBuilder sb = new StringBuilder();
             sb.Append("Sort: ").Append(string.IsNullOrEmpty(sSort) ? "(none)" : sSort);
             sb.Append("; Filter: ").Append(string.IsNullOrEmpty(sFilter) ? "(none)" : sFilter);
@@ -19672,9 +19734,9 @@ namespace DbDo
         // A delimited file has no formulas and no formatting to preserve, so
         // the whole table is written out. It also has no second chance, which
         // is why the first save leaves <name>-before-dbdo<ext> beside it.
-        private void saveDelimitedToSource()
+        private bool saveDelimitedToSource()
         {
-            if (string.IsNullOrEmpty(sDelimitedOriginPath)) return;
+            if (string.IsNullOrEmpty(sDelimitedOriginPath)) return false;
             try
             {
                 string sKeep = Path.Combine(Path.GetDirectoryName(sDelimitedOriginPath) ?? "",
@@ -19689,10 +19751,12 @@ namespace DbDo
                 DbDoLog.write("Saved back to " + sDelimitedOriginPath);
                 Say.say("Saved back to " + Path.GetFileName(sDelimitedOriginPath)
                     + ". The file as it was before is beside it, named " + Path.GetFileName(sKeep) + ".");
+                return true;
             }
             catch (Exception ex)
             {
                 ErrorDialog.show(this, "Save", "Could not write " + sDelimitedOriginPath + ".\n\n" + ex.Message);
+                return false;
             }
         }
 
@@ -19757,23 +19821,34 @@ namespace DbDo
         // Save writes them back, so closing without this prompt would lose
         // them silently. Returns true if the caller may proceed (the user
         // saved or chose to discard), false to abort the close (Cancel).
+        // EVERY WORKING COPY IS OFFERED FOR SAVING (8 October 2026, from an audit by
+        // another AI): only a workbook was asked about before its working copy was
+        // discarded. A CSV or TSV file, and any other file DbDo edits through a
+        // temporary database, lost its unsaved edits on close, on opening another
+        // file, and on Close without a word. Each now asks: a workbook or a
+        // delimited file is saved back to its source, anything else through Save
+        // As; a save that fails or is cancelled keeps the window as it was.
         private bool confirmSaveWorkbookIfDirty()
         {
-            if (string.IsNullOrEmpty(sWorkbookOriginPath) || db == null || !db.bDataModified)
-                return true;
+            if (db == null || !db.bDataModified) return true;
+            string sOrigin = !string.IsNullOrEmpty(sWorkbookOriginPath) ? sWorkbookOriginPath
+                : !string.IsNullOrEmpty(sDelimitedOriginPath) ? sDelimitedOriginPath
+                : !string.IsNullOrEmpty(sManagedTempPath) ? (sManagedOriginPath ?? sManagedTempPath) : null;
+            if (string.IsNullOrEmpty(sOrigin)) return true;   // an ordinary database saves as it goes
             DialogResult res = MessageBox.Show(this,
-                "You have unsaved changes to " + Path.GetFileName(sWorkbookOriginPath)
+                "You have unsaved changes to " + Path.GetFileName(sOrigin)
                 + ". Save them before closing?",
                 "Unsaved changes", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning);
             if (res == DialogResult.Cancel) return false;
-            if (res == DialogResult.Yes)
-            {
-                // A SAVE THAT FAILED KEEPS THE WINDOW OPEN. The person chose to keep
-                // the edits; a locked file or a full disk must not turn that into
-                // their loss. The error has been shown; the working copy stays.
-                if (!saveWorkbookToDisk() || (db != null && db.bDataModified)) return false;
-            }
-            return true;
+            if (res == DialogResult.No) return true;
+            if (!string.IsNullOrEmpty(sWorkbookOriginPath))
+                return saveWorkbookToDisk() && !(db != null && db.bDataModified);
+            if (!string.IsNullOrEmpty(sDelimitedOriginPath))
+                return saveDelimitedToSource() && !(db != null && db.bDataModified);
+            fileSaveAsClicked(this, EventArgs.Empty);
+            // Save As moves the work to a database of its own; while the working
+            // copy is still the one open and still changed, nothing was kept.
+            return !(db != null && db.bDataModified && !string.IsNullOrEmpty(sManagedTempPath));
         }
 
         // importInixRecordFile: open an .inix file written in the
@@ -21032,44 +21107,28 @@ namespace DbDo
         // through from the start.
         private void helpTutorialsClicked(object sender, EventArgs evArgs)
         {
-            // EITHER FORM PLAYS. One recording with a chapter per walk was the
-            // old shape; the kit's tool writes one mp3 per walk into a tutorials
-            // folder, with a playlist. Take whichever is installed.
-            string sPath = System.IO.Path.Combine(Homer.Paths.shippedHelp(), "Tutorials.mkv");
-            if (!System.IO.File.Exists(sPath))
-            {
-                string sFolder = System.IO.Path.Combine(Homer.Paths.shippedHelp(), "tutorials");
-                if (System.IO.Directory.Exists(sFolder))
-                {
-                    string[] aPlay = System.IO.Directory.GetFiles(sFolder, "*.m3u");
-                    if (aPlay.Length == 0) aPlay = System.IO.Directory.GetFiles(sFolder, "*.mp3");
-                    Array.Sort(aPlay);
-                    if (aPlay.Length > 0) sPath = aPlay[0];
-                }
-            }
-            if (!System.IO.File.Exists(sPath))
-                sPath = System.IO.Path.Combine(Application.StartupPath, "Tutorials.mkv");
-            if (!System.IO.File.Exists(sPath))
-            {
-                showInfoDialog("Play Tutorials",
-                    "The tutorials are not here.\r\n\r\nThey ship with DbDo and live in the help folder of the installation. "
-                    + "If you are running from the source folder, build it by running scripts\\buildTutorials from a command prompt "
-                    + "-- the first run fetches two voices and takes a few minutes.");
-                return;
-            }
+            // THE WALKS PLAY IN THE HOMER PLAYER (8 October 2026): the playlist went
+            // to Windows, which opened another player. The kit's player opens paused
+            // on the first walk, so Enter plays it and Down Arrow hears the next.
+            // The installed help folder first, then the one beside a development build.
             try
             {
-                System.Diagnostics.ProcessStartInfo psi = new System.Diagnostics.ProcessStartInfo(sPath);
-                psi.UseShellExecute = true;
-                System.Diagnostics.Process.Start(psi);
-                DbDoLog.write("Play-Tutorials: " + sPath);
+                foreach (string sHelp in new string[] {
+                    Homer.Paths.shippedHelp(),
+                    System.IO.Path.Combine(System.IO.Path.GetDirectoryName(Application.StartupPath) ?? "", "help") })
+                {
+                    if (Homer.MediaPlayer.playTutorials(this, "DbDo", sHelp)) { DbDoLog.write("Play-Tutorials from " + sHelp); return; }
+                }
             }
             catch (Exception ex)
             {
-                showInfoDialog("Play Tutorials",
-                    "Windows could not open the tutorials.\r\n\r\n" + ex.Message
-                    + "\r\n\r\nThe file is at:\r\n" + sPath);
+                showInfoDialog("Play Tutorials", "The tutorials could not be played.\r\n\r\n" + ex.Message);
+                return;
             }
+            showInfoDialog("Play Tutorials",
+                "The tutorials are not here.\r\n\r\nThey ship with DbDo and live in the help folder of the installation. "
+                + "If you are running from the source folder, build it by running scripts\\buildTutorials from a command prompt "
+                + "-- the first run fetches two voices and takes a few minutes.");
         }
 
         private void openTemplateDbClicked(object sender, EventArgs evArgs)
@@ -24109,56 +24168,74 @@ namespace DbDo
                 }
                 string sWhere = "\"" + sCol.Replace("\"", "\"\"") + "\" REGEXP '"
                     + sPattern.Replace("'", "''") + "'";
-                db.selectTableFiltered(db.currentTable, sWhere);
+                db.selectTableFiltered(db.currentTable, sWhere, sCol + " matches " + sPattern);
                 invokeRefresh();
                 Say.sayForced("Regex filter applied. " + db.recordCount + " matching records.");
             }
             catch (Exception ex) { ErrorDialog.show(this, "Filter Regex", ex.Message); }
         }
 
+        // viewSelectClicked (Control+F): FILTER RECORDS BEGINS WITH A CHOICE
+        // (8 October 2026). A list, its first choice selected, so Enter alone
+        // takes it; each choice begins with its own letter, so typing the letter
+        // lands on it. OK and Cancel carry no letter: Control+Enter and Escape
+        // press them anywhere in an Lbc dialog.
+        //   Any field contains text -- the commonest want: a station carrying a
+        //     game, whatever field names the team. SQL, through anyFieldWhere.
+        //   Fields, one by one -- the form with an operator per field, as before.
+        //   Clear the filter, Edit the field filter, Narrow with the field form,
+        //   Widen with the field form -- only when a filter is in force; Widen
+        //   only for a field filter, since an any-field search cannot be widened.
+        private string sLastAnyFieldText = "";
+
         private void viewSelectClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset()) return;
 
             string sExistingFilter = db.filter ?? "";
-            bool bFilterActive = !string.IsNullOrEmpty(sExistingFilter);
+            bool bFieldFilter = !string.IsNullOrEmpty(sExistingFilter);
+            bool bSqlFilter = !string.IsNullOrEmpty(db.sqlFilter);
+            const string c_sAny = "Any field contains text";
+            const string c_sFields = "Fields, one by one, with an operator for each";
+            const string c_sClear = "Clear the filter";
+            const string c_sEdit = "Edit the field filter";
+            const string c_sNarrow = "Narrow with the field form";
+            const string c_sWiden = "Widen with the field form";
+            List<string> lsChoices = new List<string> { c_sAny, c_sFields };
+            if (bFieldFilter || bSqlFilter) lsChoices.Add(c_sClear);
+            if (bFieldFilter) lsChoices.Add(c_sEdit);
+            if (bFieldFilter || bSqlFilter) lsChoices.Add(c_sNarrow);
+            if (bFieldFilter && !bSqlFilter) lsChoices.Add(c_sWiden);
 
-            string sAction = "Reset"; // default when no filter active
-
-            if (bFilterActive)
+            string sChoice;
+            using (LbcDialog dlg = new LbcDialog("Filter Records", this))
             {
-                using (LbcDialog dlg = new LbcDialog("Filter Records", this))
+                if (bFieldFilter || bSqlFilter)
                 {
-                    dlg.addLabel("A filter is active:");
-                    dlg.addLabel(sExistingFilter);
-                    dlg.addLabel("");
-                    dlg.addLabel("Choose an action:");
-                    // Exactly these six buttons (Help suppressed). Clear
-                    // is the default. And/Or open a blank form and
-                    // combine the new filter with the old; New opens a
-                    // blank form and replaces; Edit opens the form
-                    // pre-filled with the last values typed and
-                    // replaces.
-                    string sBtn = dlg.runWithButtons(new string[] {
-                        "&Edit", "&And", "&Or", "&New", "&Clear", "Cance&l"
-                    }, false);
-                    if (string.IsNullOrEmpty(sBtn)) return;
-                    string sB = sBtn.Replace("&", "");
-                    if (sB.Equals("Cancel", StringComparison.OrdinalIgnoreCase)) return;
-                    else if (sB.Equals("Clear", StringComparison.OrdinalIgnoreCase)) sAction = "Clear";
-                    else if (sB.Equals("And", StringComparison.OrdinalIgnoreCase)) sAction = "And";
-                    else if (sB.Equals("Or", StringComparison.OrdinalIgnoreCase)) sAction = "Or";
-                    else if (sB.Equals("New", StringComparison.OrdinalIgnoreCase)) sAction = "New";
-                    else if (sB.Equals("Edit", StringComparison.OrdinalIgnoreCase)) sAction = "Edit";
-                    else return;
+                    List<string> lsNow = new List<string>();
+                    if (bSqlFilter) lsNow.Add(db.sqlFilterSpoken);
+                    if (bFieldFilter) lsNow.Add("where " + sExistingFilter);
+                    dlg.addLabel("In force: " + string.Join("; and ", lsNow.ToArray()));
                 }
+                ListBox lb = dlg.addPickBox("&Filter by:", lsChoices, c_sAny,
+                    "Any field finds text wherever it is; Fields gives each field a value and an operator");
+                if (!dlg.runOkCancel() || lb.SelectedItem == null) return;
+                sChoice = lb.SelectedItem.ToString();
             }
 
-            // Phase 2: handle the chosen action.
+            if (sChoice == c_sAny) { filterAnyField(); return; }
+
+            string sAction = (sChoice == c_sClear) ? "Clear"
+                : (sChoice == c_sEdit) ? "Edit"
+                : (sChoice == c_sNarrow) ? "And"
+                : (sChoice == c_sWiden) ? "Or"
+                : "Reset";
+
             if (sAction == "Clear")
             {
                 try
                 {
+                    if (bSqlFilter) db.selectTable(db.currentTable);
                     db.filter = "";
                     invokeRefresh();
                     persistCurrentTableState();
@@ -24169,6 +24246,14 @@ namespace DbDo
                     ErrorDialog.show(this, "Filter Records", ex.Message);
                 }
                 return;
+            }
+            // Fields, chosen afresh, replaces whatever was in force, the
+            // any-field search included; Edit, Narrow and Widen keep it.
+            if (sAction == "Reset" && bSqlFilter)
+            {
+                try { db.selectTable(db.currentTable); db.filter = ""; }
+                catch (Exception ex) { ErrorDialog.show(this, "Filter Records", ex.Message); return; }
+                sExistingFilter = "";
             }
 
             // Field-based filter entry, the same form as Edit Record
@@ -24207,9 +24292,9 @@ namespace DbDo
                 // Combine with existing filter for And/Or; otherwise
                 // the new expression replaces the old.
                 string sFinalExpr;
-                if (sAction == "And" && !string.IsNullOrEmpty(sNewExpr))
+                if (sAction == "And" && !string.IsNullOrEmpty(sNewExpr) && !string.IsNullOrEmpty(sExistingFilter))
                     sFinalExpr = "(" + sExistingFilter + ") AND (" + sNewExpr + ")";
-                else if (sAction == "Or" && !string.IsNullOrEmpty(sNewExpr))
+                else if (sAction == "Or" && !string.IsNullOrEmpty(sNewExpr) && !string.IsNullOrEmpty(sExistingFilter))
                     sFinalExpr = "(" + sExistingFilter + ") OR (" + sNewExpr + ")";
                 else
                     sFinalExpr = sNewExpr;
@@ -24229,6 +24314,43 @@ namespace DbDo
                     ErrorDialog.show(this, "Filter Records", ex.Message);
                 }
             }
+        }
+
+        // filterAnyField: Control+F's first choice. Asks for the text, remembering the
+        // last answer, and shows the records where some field, read as text,
+        // contains it, case aside. A search that finds nothing says so and leaves
+        // the view as it was, rather than leaving an empty table to find out from.
+        private void filterAnyField()
+        {
+            if (db.currentIsCustomQuery)
+            { Say.sayForced("Any field applies to a table, not a query window."); return; }
+            string sText;
+            using (LbcDialog dlg = new LbcDialog("Any Field Contains", this))
+            {
+                TextBox tb = dlg.addInputBox("&Text to find in any field", sLastAnyFieldText,
+                    "Show only records where some field contains this text, whatever its case. Narrow further with Control+F.");
+                if (!dlg.runOkCancel()) return;
+                sText = (tb.Text ?? "").Trim();
+            }
+            if (sText.Length == 0) return;
+            sLastAnyFieldText = sText;
+            try
+            {
+                string sTable = db.currentTable;
+                string sWhere = db.anyFieldWhere(sText);
+                int iFound;
+                List<string[]> lCount = db.queryRowsSql("SELECT count(*) FROM \"" + sTable.Replace("\"", "\"\"") + "\" WHERE " + sWhere, 1, out iFound);
+                int iMatches = 0;
+                if (lCount != null && lCount.Count > 0 && lCount[0] != null && lCount[0].Length > 0) int.TryParse(lCount[0][0] ?? "0", out iMatches);
+                if (iMatches == 0) { Say.sayForced("No record has " + sText + " in any field."); return; }
+                db.selectTableFiltered(sTable, sWhere, "any field contains " + sText);
+                db.filter = "";
+                invokeRefresh();
+                persistCurrentTableState();
+                Say.sayForced(iMatches == 1 ? "1 record has " + sText + "." : iMatches + " records have " + sText + ".");
+                DbDoLog.write("Filter, any field contains " + sText + ": " + iMatches + " in " + sTable);
+            }
+            catch (Exception ex) { ErrorDialog.show(this, "Filter Records", ex.Message); }
         }
 
         // Last per-field filter values, for the Edit action's
@@ -24327,6 +24449,13 @@ namespace DbDo
         private void viewResetFilterClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset()) return;
+            // Both kinds of filter (8 October 2026): an any-field or regex filter is
+            // the table opened with a WHERE, so clearing it opens the table plainly.
+            if (!string.IsNullOrEmpty(db.sqlFilter))
+            {
+                try { db.selectTable(db.currentTable); }
+                catch (Exception ex) { ErrorDialog.show(this, "Clear Filter", ex.Message); return; }
+            }
             db.resetFilter();
             invokeRefresh();
             persistCurrentTableState();
@@ -24774,16 +24903,58 @@ namespace DbDo
                 return;
             }
             string sTable = db.currentTable;
-            string sFilter = db.filter ?? "";
             string sSet = bInvert
                 ? "CASE WHEN " + Metadata.MarkedColumn + " IS NULL OR " + Metadata.MarkedColumn + " = 0 THEN 1 ELSE 0 END"
                 : sNewValue;
             string sSql = "UPDATE " + sTable + " SET " + Metadata.MarkedColumn + " = " + sSet;
-            if (sFilter.Length > 0) sSql += " WHERE " + sFilter;
+            // THE ROWS IN VIEW, AND NO OTHERS (8 October 2026). This was one UPDATE
+            // scoped by the ADO filter's text used as SQL, which knew nothing of an
+            // any-field or regex search -- Mark All after "Dallas Cowboys" marked every
+            // station -- and read ADO's LIKE '*text*' as a literal asterisk. With any
+            // filter in force, the keys of the rows in view are gathered from the
+            // recordset itself and only those rows are updated, so marks never reach a
+            // record that cannot be seen.
+            bool bScoped = !string.IsNullOrEmpty(db.filter) || !string.IsNullOrEmpty(db.sqlFilter);
             try
             {
                 System.IO.StringWriter sw = new System.IO.StringWriter();
-                int iAffected = db.invokeSql(sSql, sw);
+                int iAffected = 0;
+                if (!bScoped) iAffected = db.invokeSql(sSql, sw);
+                else
+                {
+                    string sPk = db.actualPrimaryKey(sTable);
+                    if (string.IsNullOrEmpty(sPk) || !db.hasField(sPk))
+                    {
+                        MessageBox.Show(this, sTitle + " needs the table's primary key to act on just the records in view, and this table has none. "
+                            + "Clear the filter (Control+Shift+F) to act on every record.", sTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        return;
+                    }
+                    List<string> lsKeys = new List<string>();
+                    object oOriginal = null;
+                    try { oOriginal = db.bookmark; } catch { }
+                    try
+                    {
+                        int iCap = db.recordCount;
+                        for (int i = 1; i <= iCap; i++)
+                        {
+                            db.absolutePosition = i;
+                            string sKey = db.getFieldValue(sPk) ?? "";
+                            if (sKey.Length == 0) continue;
+                            long iNumber;
+                            lsKeys.Add(long.TryParse(sKey, System.Globalization.NumberStyles.Integer, System.Globalization.CultureInfo.InvariantCulture, out iNumber)
+                                ? iNumber.ToString(System.Globalization.CultureInfo.InvariantCulture)
+                                : "'" + sKey.Replace("'", "''") + "'");
+                        }
+                    }
+                    finally { if (oOriginal != null) try { db.bookmark = oOriginal; } catch { } }
+                    string sQuotedPk = "\"" + sPk.Replace("\"", "\"\"") + "\"";
+                    for (int iStart = 0; iStart < lsKeys.Count; iStart += 500)
+                    {
+                        int iTake = Math.Min(500, lsKeys.Count - iStart);
+                        iAffected += db.invokeSql(sSql + " WHERE " + sQuotedPk + " IN (" + string.Join(", ", lsKeys.GetRange(iStart, iTake).ToArray()) + ")", sw);
+                    }
+                    try { db.resync(); } catch { }
+                }
                 invokeRefresh();
                 Say.say(sTitle + ": " + iAffected + " row" + (iAffected == 1 ? "" : "s"));
             }
@@ -35077,19 +35248,53 @@ namespace DbDo
         // prior run didn't close cleanly. A file locked by another live
         // DbDo instance throws on delete and is skipped, so only truly
         // orphaned copies go. Best-effort: never throws.
+        // KEPT, NOT DELETED (8 October 2026, from an audit by another AI): a working
+        // copy left behind is one a closing DbDo did not remove -- a crash, a kill or
+        // a power loss -- and it may hold the only copy of unsaved edits. Each is
+        // moved into Recovered in DbDo's data folder rather than deleted, and DbDo
+        // says once where they are. A copy in use by another running DbDo is locked,
+        // so the move fails and it is left alone, as before. Recovered copies older
+        // than thirty days are removed, so the folder does not grow for ever.
         private static void sweepOrphanManagedTemps()
         {
+            const int c_iKeepDays = 30;
             try
             {
                 string sTempDir = Path.GetTempPath();
                 if (string.IsNullOrEmpty(sTempDir) || !Directory.Exists(sTempDir)) return;
-                int iSwept = 0;
+                string sRecovered = Path.Combine(Homer.Paths.data(), "Recovered");
+                int iKept = 0;
                 foreach (string sFile in Directory.GetFiles(sTempDir, "DbDo_managed_*.db"))
                 {
-                    try { File.Delete(sFile); iSwept++; }
+                    try
+                    {
+                        if (new FileInfo(sFile).Length == 0) { File.Delete(sFile); continue; }
+                        Directory.CreateDirectory(sRecovered);
+                        string sTarget = Path.Combine(sRecovered, Path.GetFileNameWithoutExtension(sFile)
+                            + "-" + File.GetLastWriteTime(sFile).ToString("yyyyMMdd-HHmmss") + ".db");
+                        if (File.Exists(sTarget)) File.Delete(sTarget);
+                        File.Move(sFile, sTarget);
+                        iKept++;
+                        DbDoLog.write("Kept a working copy left by a session that did not close: " + sTarget);
+                    }
                     catch { /* in use by another instance, or otherwise locked -- leave it */ }
                 }
-                if (iSwept > 0) DbDoLog.write("Swept " + iSwept + " orphaned managed-copy temp file(s).");
+                if (Directory.Exists(sRecovered))
+                {
+                    foreach (string sOld in Directory.GetFiles(sRecovered, "*.db"))
+                    {
+                        try { if ((DateTime.Now - File.GetLastWriteTime(sOld)).TotalDays > c_iKeepDays) File.Delete(sOld); }
+                        catch { }
+                    }
+                }
+                if (iKept > 0)
+                    MessageBox.Show((iKept == 1 ? "A working copy" : iKept + " working copies")
+                        + " from a DbDo session that did not close normally "
+                        + (iKept == 1 ? "was" : "were") + " kept, in case "
+                        + (iKept == 1 ? "it holds" : "they hold") + " unsaved edits. Open "
+                        + (iKept == 1 ? "it" : "one") + " with Control+O from:\n\n" + sRecovered
+                        + "\n\nRecovered copies are removed after " + c_iKeepDays + " days.",
+                        "DbDo", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)
             {
@@ -35197,8 +35402,8 @@ namespace DbDo
                 // prior run that didn't close cleanly -- a crash, a
                 // kill, or a power loss skips the OnFormClosing cleanup.
                 // A copy still open in another live DbDo instance is
-                // locked, so its delete throws and it is left alone;
-                // only truly orphaned files are removed.
+                // locked, so moving it fails and it is left alone; the
+                // others are kept in Recovered, not deleted (8 October 2026).
                 sweepOrphanManagedTemps();
 
                 // One-time migration: the per-user settings file is now

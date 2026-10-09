@@ -319,14 +319,22 @@ def checkTutorialKeys():
     dAlias = {"control": "control", "alt": "alt", "shift": "shift", "enter": "enter",
               "pagedown": "pagedown", "pageup": "pageup", "downarrow": "down", "uparrow": "up",
               "rightarrow": "right", "leftarrow": "left", "space": "space", "backspace": "back",
-              "escape": "escape", "tab": "tab", "home": "home", "end": "end", "delete": "delete"}
+              "escape": "escape", "tab": "tab", "home": "home", "end": "end", "delete": "delete",
+              # Punctuation keys go by their Oem names in C# (8 October 2026: Alt+Apostrophe,
+              # bound as Keys.Alt | Keys.OemQuotes, was reported as unbound).
+              "apostrophe": "oemquotes", "comma": "oemcomma", "period": "oemperiod",
+              "slash": "oemquestion", "semicolon": "oemsemicolon", "grave": "oemtilde",
+              "minus": "oemminus", "equals": "oemplus", "backslash": "oempipe",
+              "leftbracket": "oemopenbrackets", "rightbracket": "oemclosebrackets"}
     # The reader's own keys are not DbDo's to bind either. Insert plus Up Arrow
     # repeats the last line, and the first walk teaches it because every walk
     # after assumes it.
     lsFree = {"enter", "tab", "escape", "alt", "down", "up", "left", "right", "space", "back",
               "control+enter", "alt+tab", "alt+y", "alt+control+d", "alt+r", "alt+h",
               "insert+up", "insert+down", "insert+t", "insert+f12", "insert+space",
-              "insert+tab", "alt+f", "alt+e", "alt+v", "alt+h", "scrolllock"}
+              "insert+tab", "alt+f", "alt+e", "alt+v", "alt+h", "scrolllock",
+              # F10 opens the menu bar in every Windows program; DbDo does not bind it.
+              "f10"}
     lsBad = []
     iChecked = 0
     sHelp = os.path.join(sRoot, "help")
@@ -343,7 +351,11 @@ def checkTutorialKeys():
             # else of more than three characters that has no plus sign and is
             # not a key name is something the walk types.
             if "+" not in sKey and sKey.lower() not in ("scrolllock", "escape", "enter", "space", "backspace", "delete", "insert", "home", "end", "pageup", "pagedown", "uparrow", "downarrow", "leftarrow", "rightarrow") and not re.fullmatch(r"F\d{1,2}", sKey): continue
-            lsParts = [dAlias.get(s.strip().lower(), s.strip().lower()) for s in sKey.split("+")]
+            # A walk writes "Up Arrow", with a space, and a digit as "8"; DbDo.cs says
+            # Keys.Up and Keys.D8 (8 October 2026: Insert+Up Arrow and Alt+Right Arrow
+            # were reported as unbound because the space kept the alias from applying).
+            lsParts = [s.strip().lower().replace(" ", "") for s in sKey.split("+")]
+            lsParts = [dAlias.get(s, ("d" + s) if re.fullmatch(r"\d", s) else s) for s in lsParts]
             if "+".join(lsParts) in lsFree or (len(lsParts) == 1 and lsParts[0] in lsFree): continue
             iChecked += 1
             if frozenset(lsParts) not in lsBound:

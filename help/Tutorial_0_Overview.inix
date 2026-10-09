@@ -15,7 +15,13 @@ Homework=Take walks one and two, then pick the task you need today.
 
 [step]
 
-Say=DbDo is a database program for people who listen to the screen. It opens SQLite databases, and imports from Excel and others, and shows one table at a time as a list of records you move through by row and by column. Every cell can be heard, edited, searched, marked and counted from the keyboard, and the program answers questions about where you are without changing anything.
+Say=DbDo is a database program for people who listen to the screen.
+Key=
+Hear=
+
+[step]
+
+Say=It opens SQLite databases, and imports from Excel and others, and shows one table at a time as a list of records you move through by row and by column. Every cell can be heard, edited, searched, marked and counted from the keyboard, and the program answers questions about where you are without changing anything.
 Key=
 Hear=
 

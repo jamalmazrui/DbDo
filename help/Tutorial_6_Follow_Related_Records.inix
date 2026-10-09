@@ -63,6 +63,90 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
+Say=What ties a record to its relations is its prime, a key DbDo builds from the record itself. Shift plus P, Say Prime, says it.
+Key=Shift+P
+Hear=Miles Davis
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A related table can have a window of its own. Control plus Shift plus O, Open Table, opens a table in a new window, beside this one.
+Key=Control+Shift+O
+Hear=Open Table dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I choose albums and press Enter.
+Key=Enter
+Hear=albums, 40 records
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Shift plus F4 says the windows open, and Control plus Tab moves between them.
+Key=Shift+F4
+Hear=2 windows: artists, albums
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=In one window, Control plus F6 moves to the next table, and Alt plus F6 back through the tables visited, as a browser's history does.
+Key=Control+F6
+Hear=tracks, 412 records
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Control plus F4 closes this window, leaving the first.
+Key=Control+F4
+Hear=artists, 12 records
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=F4, Current Windows, lists the windows open, so you can pick one by name rather than cycle through them.
+Key=F4
+Hear=Current Windows dialog, artists, 1 of 2
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape. Alt plus F6 goes back through the tables visited in this window, the way a browser goes back.
+Key=Alt+F6
+Hear=albums, 40 records
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Alt plus Shift plus F6 goes forward again.
+Key=Alt+Shift+F6
+Hear=tracks, 412 records
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Control plus Shift plus F4 closes every window but this one, for a clean start.
+Key=Control+Shift+F4
+Hear=tracks, 412 records
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Within one window, Control plus Shift plus F6 moves to the previous table, as Control plus F6 moves to the next: Shift reverses.
+Key=Control+Shift+F6
+Hear=artists, 12 records
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Whichever way you arrived, Shift plus R still says what this record leads to, so the way down is never a guess.
+Key=Shift+R
+Hear=albums 3, tracks 31
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
 Say=What this walk taught. I name the command; the reader gives the key.
 Key=
 Hear=

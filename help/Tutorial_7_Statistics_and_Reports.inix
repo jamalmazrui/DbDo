@@ -62,6 +62,81 @@ Hear=
 
 [step]
 
+Say=Before the details, the shape. Alt plus T, Table Summary, says how many records and columns the table has, and how much room it takes.
+Key=Alt+T
+Hear=Table Summary
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape, and Alt plus D, Database Summary, does the same for every table in the database.
+Key=Alt+D
+Hear=Database Summary
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A filter narrows a summary to what matters: filter to waiting jobs, then Alt plus Shift plus S again, and the counts describe only those.
+Key=Alt+Shift+S
+Hear=Statistics from Column
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=When the numbers are to go somewhere else, Alt plus X, Export Data, writes the table, or the records in view, as CSV, a spreadsheet, JSON or another format.
+Key=Alt+X
+Hear=Export Data dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape, for now. And Control plus P prints the records in view, for a copy on paper or a PDF.
+Key=Escape
+Hear=DbDo
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A single number is often all that is wanted. Control plus C copies the cell under the cursor.
+Key=Control+C
+Hear=Copied
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Alt plus C appends another cell to what is on the clipboard, to gather a few figures in one go.
+Key=Alt+C
+Hear=Appended
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Alt plus Apostrophe, Say Clipboard, reads back what has been gathered before it is pasted anywhere.
+Key=Alt+Apostrophe
+Hear=12, waiting 4
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Then one paste puts those figures in an email or a document.
+Key=
+
+[step]
+
+Say=Before reading any summary, Shift plus 8 says the sort and filter in force, since both change what the numbers describe.
+Key=Shift+8
+Hear=Sort: employer. Filter: none.
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=And Alt plus L reads a whole column aloud, top to bottom, when hearing the values beats counting them.
+Key=Alt+L
+Hear=waiting, applied, interview, waiting
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
 Say=What this walk taught. I name the command; the reader gives the key.
 Key=
 Hear=

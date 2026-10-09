@@ -77,6 +77,69 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
+Say=Notes hold whatever does not fit a column. Alt plus Shift plus N, Edit Notes, opens this record's notes in a box of their own.
+Key=Alt+Shift+N
+Hear=Notes: edit, multiline
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I type a line about the interview, and Control plus Enter keeps it. Shift plus N says the notes back.
+Key=Shift+N
+Hear=Second interview Tuesday at ten.
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Tags work the same way, with Alt plus Shift plus T to edit and Shift plus T to hear them: words such as remote or referral, to filter by later.
+Key=Shift+T
+Hear=remote, referral
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Shift plus E, Say Edited, says when this record last changed, so a stale one is easy to spot.
+Key=Shift+E
+Hear=Edited today at 3:42 PM
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Control plus Shift plus C, Copy Record, adds a copy of this record as a new one: quicker than typing a second job at the same employer.
+Key=Control+Shift+C
+Hear=Record copied
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Control plus R, Replace Column, finds and replaces text in the column I am on, in every record, for a name spelled two ways.
+Key=Control+R
+Hear=Replace Column dialog, Find: edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape, for now. A replacement counts what it changed and says so.
+Key=Escape
+Hear=DbDo
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A record can carry a web address, such as a job posting. Alt plus Shift plus U, Edit URL, edits it.
+Key=Alt+Shift+U
+Hear=url: edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter keeps it. Shift plus U says it back, and Control plus Shift plus U opens it in the browser.
+Key=Shift+U
+Hear=https colon slash slash jobs dot example dot com slash 4821
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
 Say=What this walk taught. I name the command; the reader gives the key.
 Key=
 Hear=

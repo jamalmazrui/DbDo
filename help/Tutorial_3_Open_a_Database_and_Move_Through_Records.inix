@@ -79,6 +79,69 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
+Say=Keywords searches every column; Jump searches one. Control plus J, Jump to Record, asks which column and what to look for.
+Key=Control+J
+Hear=Jump to Record dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I choose employer, type Amazon, and press Enter. The cursor lands on the first job there.
+Key=Enter
+Hear=Amazon, employer, row 5
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Control plus Shift plus J jumps backward to the one before, and Control plus Shift plus K does the same for Keywords: Shift reverses, here as everywhere in DbDo.
+Key=Control+Shift+J
+Hear=Amazon, employer, row 2
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Shift plus Y, Say Yield, says how many records there are.
+Key=Shift+Y
+Hear=12 records
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Shift plus C, Say Cell, says the value under the cursor again, without moving.
+Key=Shift+C
+Hear=Amazon
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Alt plus L, Say Column as List, reads every value in the column, top to bottom, a quick way to hear what a column holds.
+Key=Alt+L
+Hear=Amazon, Boeing, Costco, Microsoft
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Control plus I, Inspect Record, shows the whole record at once, one field to a line.
+Key=Control+I
+Hear=Inspect Record dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape. A database can hold several tables; Control plus T, Choose Table, lists them.
+Key=Control+T
+Hear=Choose Table dialog, jobs, 1 of 3
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape keeps the table I am in.
+Key=Escape
+Hear=jobs, 12 records
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
 Say=What this walk taught. I name the command; the reader gives the key.
 Key=
 Hear=

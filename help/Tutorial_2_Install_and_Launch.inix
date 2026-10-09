@@ -71,7 +71,90 @@ Hear=DbDo ready
 
 [step]
 
-Say=Installed and open. If something was left out, run the setup again and tick its box; what is already current costs nothing. What this walk taught. I name the step; the reader gives the answer.
+Say=Installed and open. If something was left out, run the setup again and tick its box; what is already current costs nothing.
+Key=
+Hear=
+
+[step]
+
+Say=Help is four keys away, the same in every Homer program. F1 opens the full documentation in the browser.
+Key=F1
+Hear=DbDo documentation
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Alt plus Shift plus F1 opens the ReadMe, the short start, for when the full guide is more than you need today.
+Key=Alt+Shift+F1
+Hear=DbDo ReadMe
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Alt plus F1, About, says the version, so you always know which DbDo is installed.
+Key=Alt+F1
+Hear=About DbDo
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape, and F11 asks GitHub whether a newer version is out. If one is, Yes is the default, and Enter installs it.
+Key=F11
+Hear=Checking for a newer version
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The templates to practise on are in the Help menu: F10, then H for Help.
+Key=F10
+Hear=Help menu
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Down Arrow to Template Databases. Each is a complete example: JobTrail for job hunting, BookTrail for reading, RadioTrail for stations to play.
+Key=Down Arrow
+Hear=Template Databases
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape closes the menu. Once a database is open, Alt plus Backslash opens its folder in File Explorer, where its scripts and reports live beside it.
+Key=Escape
+Hear=DbDo ready
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Two more ways to learn the keys before you need them. Control plus F1 turns on the Key Describer: each key then says what it does instead of doing it.
+Key=Control+F1
+Hear=Key Describer on
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Now Control plus O only describes itself.
+Key=Control+O
+Hear=Open Database, Control plus O
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Control plus F1 again turns the describer off. Alt plus Shift plus H, Hotkey Summary, lists every key in a window you can search.
+Key=Alt+Shift+H
+Hear=Hotkey Summary
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape closes it, and the database is as it was.
+Key=Escape
+Hear=DbDo ready
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=What this walk taught. I name the step; the reader gives the answer.
 Key=
 Hear=
 

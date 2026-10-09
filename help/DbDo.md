@@ -214,7 +214,7 @@ Marked records can then be reported, filtered, or exported as a set, and several
 
 Filtering and sorting reshape the grid without touching the physical table.
 
-- **Filter Records** (Control+F) limits the grid to records matching a condition; **Clear Filter** (Control+Shift+F) removes it; **Filter by Regex** filters by pattern; **Say Filter** (Shift+F) speaks the current filter.
+- **Filter Records** (Control+F) limits the grid to records holding some text in any field, or matching a condition on each field; **Clear Filter** (Control+Shift+F) removes it; **Filter by Regex** filters by pattern; **Say Filter** (Shift+F) speaks the current filter.
 - **Order Records** (Alt+O) sorts the grid by a field; **Reverse Order** (Alt+Shift+O) reverses it; **Clear Sort** returns to natural order; **Say Order** (Shift+O) speaks the current sort.
 
 Sorting reads numbers as numbers: volume 9 comes after 7 and 6.5 even if some
@@ -761,12 +761,22 @@ Each has its own letter, and the letter is the first letter of its own word.
 - **Keywords, Control+K** -- search inside the records, every column, including
   ones not on screen. The cursor moves to the match; F3 finds the next one and
   Shift+F3 the one before. Shift+K says what you searched for.
-- **Filter Records, Control+F** -- shorten the list to the records you want. DbDo
-  writes the condition for you: a form with one box per field, where a value on
-  its own means equals, a symbol in front compares (`>`, `>=`, `<`, `<=`, `!=`),
-  and `%` in front matches anywhere in the field. Fill in several boxes and they
-  all have to match. With a filter already in force, DbDo first asks whether to
-  edit it, add a condition with And or Or, start again, or clear it.
+- **Filter Records, Control+F** -- shorten the list to the records you want. It
+  begins with a list of choices, the first already selected, so Enter takes it;
+  each choice begins with its own letter, so typing the letter lands on it.
+  - **Any field contains text** asks for the text and keeps every record where
+    some field holds it, whatever the field and whatever the case: type Dallas
+    Cowboys, and every station whose name, notes or tags mention the team stays.
+    Numbers and dates are searched as they read. Case is ignored for English
+    letters; type accented letters as they appear. A search that finds nothing
+    says so and leaves the list as it was.
+  - **Fields, one by one** opens a form with one box per field, where a value on
+    its own means equals, a symbol in front compares (`>`, `>=`, `<`, `<=`, `!=`),
+    and `%` in front matches anywhere in the field. Fill in several boxes and they
+    all have to match.
+  - With a filter in force, the list also offers **Clear the filter**, **Edit the
+    field filter**, **Narrow with the field form** (keep what is shown and add a
+    condition) and, for a field filter, **Widen with the field form**.
   **Control+Shift+F** clears; **Shift+F** says what is in force.
 - **Query, Control+Q** -- write SQL yourself, when you want to.
 

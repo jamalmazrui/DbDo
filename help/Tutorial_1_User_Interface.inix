@@ -74,7 +74,14 @@ Hear=Leaving menus
 
 [step]
 
-Say=The rules behind every key. A letter is the first letter of a word: Control plus O opens, Alt plus O orders. Control does; Shift asks; adding Shift reverses: Control plus M marks, Control plus Shift plus M unmarks. Each function key is a family: F2 edits, F3 searches, F4 picks, F8 selects. Insert plus T, the reader's own, says the title.
+Say=The rules behind every key. A letter is the first letter of a word: Control plus O opens, Alt plus O orders. Control does; Shift asks, changing nothing.
+Key=Shift+Z
+Hear=jobs, 12 records, no filter, sorted by employer
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Adding Shift reverses: Control plus M marks, Control plus Shift plus M unmarks. Each function key is a family: F2 edits, F3 searches, F4 picks, F8 selects. Insert plus T, the reader's own, says the title.
 Key=Insert+T
 Hear=DbDo
 
@@ -103,6 +110,28 @@ Key=
 Hear=Shift plus F1, History
 Hear=Alt plus F1, About
 Hear=Control plus F1, Key Describer
+
+[step]
+
+Say=When a key will not come to mind, Alt plus F10, the Alternate Menu, lists every command in one list you type into, with its key beside it.
+Key=Alt+F10
+Hear=Alternate Menu
+Hear=Command, list box
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I type the word mark, and the list narrows to the commands with that word.
+Key=mark
+Hear=Mark All, Control plus A
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape closes the list without running anything.
+Key=Escape
+Hear=jobs, 12 records
+Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 

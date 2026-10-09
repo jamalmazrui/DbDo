@@ -5,7 +5,7 @@
 // .xlsx/.xls/.xlsm/.xlsb, dBASE .dbf, delimited .csv/.tsv/.txt, or
 // SQLite .db/.sqlite/.sqlite3) and writes them into a NEW standard DbDo
 // SQLite shell -- every table in the standard shape (<singular>_id,
-// added, edited, the data fields, notes, tags, look, prm, marked) plus
+// added, edited, the data fields, notes, tags, look, prime, marked) plus
 // the builtin maps and lookups infrastructure. The shell is created
 // beside the source with the same root name and a .db extension.
 //
@@ -226,7 +226,7 @@ namespace TwoDb
                     // Shape the columns: notes/tags route to the standard
                     // fields; collisions with the key or a standard name get
                     // an "_in" suffix; duplicates get "_2", "_3", ...
-                    string[] aReserved = new string[] { "added", "edited", "look", "prm", "marked" };
+                    string[] aReserved = new string[] { "added", "edited", "look", "prime", "marked" };
                     List<string[]> lFieldDefs = new List<string[]>();
                     List<string> lColTarget = new List<string>();  // per source column -> dest column (or null)
                     List<string> lUsedNames = new List<string>();
@@ -250,7 +250,7 @@ namespace TwoDb
                         oDest.Execute(sSql);
 
                     // Copy the rows. Empty rows are skipped; a row that
-                    // would collide on the UNIQUE prm index is skipped with
+                    // would collide on the UNIQUE prime index is skipped with
                     // a note rather than aborting the import.
                     int iTableRows = 0;
                     while (!(bool)oRs.EOF)
@@ -464,7 +464,7 @@ namespace TwoDb
             catch { return oVal.ToString(); }
         }
 
-        // ---- standard shell DDL (identical shape to DbDo, emitting prm) ----
+        // ---- standard shell DDL (identical shape to DbDo, emitting prime) ----
 
         private static List<string> lStandardTableDdl(string sTable, List<string[]> lFieldDefs)
         {
@@ -495,7 +495,7 @@ namespace TwoDb
                 sbCreate.Append("\"" + aF[0] + "\" " + aF[1] + ", ");
             sbCreate.Append("notes TEXTMARKDOWN, tags TEXTMEMO, ");
             sbCreate.Append("look TEXT GENERATED ALWAYS AS (" + sbLook + ") STORED, ");
-            sbCreate.Append("prm TEXT GENERATED ALWAYS AS (" + sbPrm + ") STORED, ");
+            sbCreate.Append("prime TEXT GENERATED ALWAYS AS (" + sbPrm + ") STORED, ");
             sbCreate.Append("marked INTEGER NOT NULL DEFAULT 0)");
 
             List<string> lTrigCols = new List<string>(lCols);
@@ -516,23 +516,23 @@ namespace TwoDb
             List<string> lDdl = new List<string>();
             lDdl.Add(sbCreate.ToString());
             lDdl.Add(sTrigger);
-            lDdl.Add("CREATE UNIQUE INDEX \"idx_" + sTable + "_prm\" ON \"" + sTable + "\" (prm)");
+            lDdl.Add("CREATE UNIQUE INDEX \"idx_" + sTable + "_prime\" ON \"" + sTable + "\" (prime)");
             return lDdl;
         }
 
         // lInfraDdl: the builtin maps and lookups tables every DbDo
         // database carries, plus the lookups seed vocabulary -- emitting
-        // prm / prm1 / prm2 (the modern standard, replacing unq).
+        // prime / prime1 / prime2 (the standard since DbDo renamed prm, replacing unq).
         private static List<string> lInfraDdl()
         {
             List<string> lDdl = new List<string>();
 
             List<string[]> lMapFields = new List<string[]>();
-            foreach (string sC in new string[] { "tbl1", "prm1", "kind", "tbl2", "prm2" })
+            foreach (string sC in new string[] { "tbl1", "prime1", "kind", "tbl2", "prime2" })
                 lMapFields.Add(new string[] { sC, "TEXTLINE" });
             lDdl.AddRange(lStandardTableDdl("maps", lMapFields));
-            lDdl.Add("CREATE INDEX idx_maps_side1 ON maps (tbl1, prm1)");
-            lDdl.Add("CREATE INDEX idx_maps_side2 ON maps (tbl2, prm2)");
+            lDdl.Add("CREATE INDEX idx_maps_side1 ON maps (tbl1, prime1)");
+            lDdl.Add("CREATE INDEX idx_maps_side2 ON maps (tbl2, prime2)");
 
             List<string[]> lLkFields = new List<string[]>();
             lLkFields.Add(new string[] { "src", "TEXTLINE" });

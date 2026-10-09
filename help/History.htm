@@ -7,9 +7,6 @@
   <title>History</title>
   <style>
     html {
-      line-height: 1.5;
-      font-family: Georgia, serif;
-      font-size: 20px;
       color: #1a1a1a;
       background-color: #fdfdfd;
     }
@@ -28,13 +25,16 @@
     @media (max-width: 600px) {
       body {
         font-size: 0.9em;
-        padding: 1em;
+        padding: 12px;
       }
       h1 {
         font-size: 1.8em;
       }
     }
     @media print {
+      html {
+        background-color: white;
+      }
       body {
         background-color: transparent;
         color: black;
@@ -84,9 +84,10 @@
       color: #606060;
     }
     code {
-      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
       font-size: 85%;
       margin: 0;
+      hyphens: manual;
     }
     pre {
       margin: 1em 0;
@@ -151,14 +152,19 @@
     div.columns{display: flex; gap: min(4vw, 1.5em);}
     div.column{flex: auto; overflow-x: auto;}
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
     ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
       width: 0.8em;
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
+    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
+    /* CSS for syntax highlighting */
     pre > code.sourceCode { white-space: pre; position: relative; }
-    pre > code.sourceCode > span { display: inline-block; line-height: 1.25; }
+    pre > code.sourceCode > span { line-height: 1.25; }
     pre > code.sourceCode > span:empty { height: 1.2em; }
     .sourceCode { overflow: visible; }
     code.sourceCode > span { color: inherit; text-decoration: inherit; }
@@ -220,168 +226,12 @@
     code span.va { color: #19177c; } /* Variable */
     code span.vs { color: #4070a0; } /* VerbatimString */
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
 </head>
 <body>
 <header id="title-block-header">
 <h1 class="title">History</h1>
 </header>
-<nav id="TOC" role="doc-toc">
-<ul>
-<li><a href="#dbdo-history-of-changes"
-id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
-<ul>
-<li><a href="#v1.0.245-current" id="toc-v1.0.245-current">v1.0.245
-(current)</a></li>
-<li><a href="#v1.0.244" id="toc-v1.0.244">v1.0.244</a></li>
-<li><a href="#v1.0.243" id="toc-v1.0.243">v1.0.243</a></li>
-<li><a href="#v1.0.242" id="toc-v1.0.242">v1.0.242</a></li>
-<li><a href="#v1.0.241" id="toc-v1.0.241">v1.0.241</a></li>
-<li><a href="#v1.0.240" id="toc-v1.0.240">v1.0.240</a></li>
-<li><a href="#v1.0.239" id="toc-v1.0.239">v1.0.239</a></li>
-<li><a href="#v1.0.238" id="toc-v1.0.238">v1.0.238</a></li>
-<li><a href="#v1.0.237" id="toc-v1.0.237">v1.0.237</a></li>
-<li><a href="#v1.0.236" id="toc-v1.0.236">v1.0.236</a></li>
-<li><a href="#v1.0.235" id="toc-v1.0.235">v1.0.235</a></li>
-<li><a href="#v1.0.234" id="toc-v1.0.234">v1.0.234</a></li>
-<li><a href="#v1.0.233" id="toc-v1.0.233">v1.0.233</a></li>
-<li><a href="#v1.0.232" id="toc-v1.0.232">v1.0.232</a></li>
-<li><a href="#v1.0.231" id="toc-v1.0.231">v1.0.231</a></li>
-<li><a href="#v1.0.230" id="toc-v1.0.230">v1.0.230</a></li>
-<li><a href="#v1.0.229" id="toc-v1.0.229">v1.0.229</a></li>
-<li><a href="#v1.0.228" id="toc-v1.0.228">v1.0.228</a></li>
-<li><a href="#v1.0.227" id="toc-v1.0.227">v1.0.227</a></li>
-<li><a href="#v1.0.226" id="toc-v1.0.226">v1.0.226</a></li>
-<li><a href="#v1.0.225" id="toc-v1.0.225">v1.0.225</a></li>
-<li><a href="#v1.0.224" id="toc-v1.0.224">v1.0.224</a></li>
-<li><a href="#v1.0.223" id="toc-v1.0.223">v1.0.223</a></li>
-<li><a href="#v1.0.222" id="toc-v1.0.222">v1.0.222</a></li>
-<li><a href="#v1.0.221" id="toc-v1.0.221">v1.0.221</a></li>
-<li><a href="#v1.0.208" id="toc-v1.0.208">v1.0.208</a></li>
-<li><a href="#v1.0.207" id="toc-v1.0.207">v1.0.207</a></li>
-<li><a href="#v1.0.206" id="toc-v1.0.206">v1.0.206</a></li>
-<li><a href="#v1.0.205" id="toc-v1.0.205">v1.0.205</a></li>
-<li><a href="#v1.0.204" id="toc-v1.0.204">v1.0.204</a></li>
-<li><a href="#v1.0.200" id="toc-v1.0.200">v1.0.200</a></li>
-<li><a href="#v1.0.191" id="toc-v1.0.191">v1.0.191</a></li>
-<li><a href="#v1.0.190" id="toc-v1.0.190">v1.0.190</a></li>
-<li><a href="#v1.0.189" id="toc-v1.0.189">v1.0.189</a></li>
-<li><a href="#v1.0.188" id="toc-v1.0.188">v1.0.188</a></li>
-<li><a href="#v1.0.187" id="toc-v1.0.187">v1.0.187</a></li>
-<li><a href="#v1.0.186" id="toc-v1.0.186">v1.0.186</a></li>
-<li><a href="#v1.0.185" id="toc-v1.0.185">v1.0.185</a></li>
-<li><a href="#v1.0.184" id="toc-v1.0.184">v1.0.184</a></li>
-<li><a href="#v1.0.183" id="toc-v1.0.183">v1.0.183</a></li>
-<li><a href="#v1.0.182" id="toc-v1.0.182">v1.0.182</a></li>
-<li><a href="#v1.0.181" id="toc-v1.0.181">v1.0.181</a></li>
-<li><a href="#v1.0.180" id="toc-v1.0.180">v1.0.180</a></li>
-<li><a href="#v1.0.179" id="toc-v1.0.179">v1.0.179</a></li>
-<li><a href="#v1.0.178" id="toc-v1.0.178">v1.0.178</a></li>
-<li><a href="#v1.0.177" id="toc-v1.0.177">v1.0.177</a></li>
-<li><a href="#v1.0.172" id="toc-v1.0.172">v1.0.172</a></li>
-<li><a href="#v1.0.115" id="toc-v1.0.115">v1.0.115</a></li>
-<li><a href="#v1.0.114" id="toc-v1.0.114">v1.0.114</a></li>
-<li><a href="#v1.0.112-and-v1.0.113"
-id="toc-v1.0.112-and-v1.0.113">v1.0.112 and v1.0.113</a></li>
-<li><a href="#v1.0.111" id="toc-v1.0.111">v1.0.111</a></li>
-<li><a href="#v1.0.110" id="toc-v1.0.110">v1.0.110</a></li>
-<li><a href="#v1.0.109" id="toc-v1.0.109">v1.0.109</a></li>
-<li><a href="#v1.0.108" id="toc-v1.0.108">v1.0.108</a></li>
-<li><a href="#v1.0.107" id="toc-v1.0.107">v1.0.107</a></li>
-<li><a href="#v1.0.106" id="toc-v1.0.106">v1.0.106</a></li>
-<li><a href="#v1.0.105" id="toc-v1.0.105">v1.0.105</a></li>
-<li><a href="#v1.0.104" id="toc-v1.0.104">v1.0.104</a></li>
-<li><a href="#v1.0.103" id="toc-v1.0.103">v1.0.103</a></li>
-<li><a href="#v1.0.102" id="toc-v1.0.102">v1.0.102</a></li>
-<li><a href="#v1.0.101" id="toc-v1.0.101">v1.0.101</a></li>
-<li><a href="#v1.0.100" id="toc-v1.0.100">v1.0.100</a></li>
-<li><a href="#v1.0.99" id="toc-v1.0.99">v1.0.99</a></li>
-<li><a href="#v1.0.98" id="toc-v1.0.98">v1.0.98</a></li>
-<li><a href="#v1.0.97" id="toc-v1.0.97">v1.0.97</a></li>
-<li><a href="#v1.0.96" id="toc-v1.0.96">v1.0.96</a></li>
-<li><a href="#v1.0.95" id="toc-v1.0.95">v1.0.95</a></li>
-<li><a href="#v1.0.94" id="toc-v1.0.94">v1.0.94</a></li>
-<li><a href="#v1.0.93" id="toc-v1.0.93">v1.0.93</a></li>
-<li><a href="#v1.0.92" id="toc-v1.0.92">v1.0.92</a></li>
-<li><a href="#v1.0.91" id="toc-v1.0.91">v1.0.91</a></li>
-<li><a href="#v1.0.90" id="toc-v1.0.90">v1.0.90</a></li>
-<li><a href="#v1.0.89" id="toc-v1.0.89">v1.0.89</a></li>
-<li><a href="#v1.0.88" id="toc-v1.0.88">v1.0.88</a></li>
-<li><a href="#v1.0.87" id="toc-v1.0.87">v1.0.87</a></li>
-<li><a href="#v1.0.86" id="toc-v1.0.86">v1.0.86</a></li>
-<li><a href="#v1.0.85" id="toc-v1.0.85">v1.0.85</a></li>
-<li><a href="#v1.0.84" id="toc-v1.0.84">v1.0.84</a></li>
-<li><a href="#v1.0.83" id="toc-v1.0.83">v1.0.83</a></li>
-<li><a href="#v1.0.82" id="toc-v1.0.82">v1.0.82</a></li>
-<li><a href="#v1.0.81" id="toc-v1.0.81">v1.0.81</a></li>
-<li><a href="#v1.0.80" id="toc-v1.0.80">v1.0.80</a></li>
-<li><a href="#v1.0.79" id="toc-v1.0.79">v1.0.79</a></li>
-<li><a href="#v1.0.78" id="toc-v1.0.78">v1.0.78</a></li>
-<li><a href="#v1.0.77" id="toc-v1.0.77">v1.0.77</a></li>
-<li><a href="#v1.0.76" id="toc-v1.0.76">v1.0.76</a></li>
-<li><a href="#v1.0.75" id="toc-v1.0.75">v1.0.75</a></li>
-<li><a href="#v1.0.74" id="toc-v1.0.74">v1.0.74</a></li>
-<li><a href="#v1.0.73" id="toc-v1.0.73">v1.0.73</a></li>
-<li><a href="#v1.0.72" id="toc-v1.0.72">v1.0.72</a></li>
-<li><a href="#v1.0.71" id="toc-v1.0.71">v1.0.71</a></li>
-<li><a href="#v1.0.70" id="toc-v1.0.70">v1.0.70</a></li>
-<li><a href="#v1.0.69" id="toc-v1.0.69">v1.0.69</a></li>
-<li><a href="#v1.0.68" id="toc-v1.0.68">v1.0.68</a></li>
-<li><a href="#v1.0.67" id="toc-v1.0.67">v1.0.67</a></li>
-<li><a href="#v1.0.66" id="toc-v1.0.66">v1.0.66</a></li>
-<li><a href="#v1.0.65" id="toc-v1.0.65">v1.0.65</a></li>
-<li><a href="#v1.0.64" id="toc-v1.0.64">v1.0.64</a></li>
-<li><a href="#v1.0.63" id="toc-v1.0.63">v1.0.63</a></li>
-<li><a href="#v1.0.62" id="toc-v1.0.62">v1.0.62</a></li>
-<li><a href="#v1.0.61" id="toc-v1.0.61">v1.0.61</a></li>
-<li><a href="#v1.0.60" id="toc-v1.0.60">v1.0.60</a></li>
-<li><a href="#v1.0.59" id="toc-v1.0.59">v1.0.59</a></li>
-<li><a href="#v1.0.58" id="toc-v1.0.58">v1.0.58</a></li>
-<li><a href="#v1.0.57" id="toc-v1.0.57">v1.0.57</a></li>
-<li><a href="#v1.0.56" id="toc-v1.0.56">v1.0.56</a></li>
-<li><a href="#v1.0.55" id="toc-v1.0.55">v1.0.55</a></li>
-<li><a href="#v1.0.54" id="toc-v1.0.54">v1.0.54</a></li>
-<li><a href="#v1.0.53" id="toc-v1.0.53">v1.0.53</a></li>
-<li><a href="#v1.0.52" id="toc-v1.0.52">v1.0.52</a></li>
-<li><a href="#v1.0.51" id="toc-v1.0.51">v1.0.51</a></li>
-<li><a href="#v1.0.50" id="toc-v1.0.50">v1.0.50</a></li>
-<li><a href="#v1.0.49" id="toc-v1.0.49">v1.0.49</a></li>
-<li><a href="#v1.0.48" id="toc-v1.0.48">v1.0.48</a></li>
-<li><a href="#v1.0.47" id="toc-v1.0.47">v1.0.47</a></li>
-<li><a href="#v1.0.46" id="toc-v1.0.46">v1.0.46</a></li>
-<li><a href="#v1.0.45" id="toc-v1.0.45">v1.0.45</a></li>
-<li><a href="#v1.0.44" id="toc-v1.0.44">v1.0.44</a></li>
-<li><a href="#v1.0.43" id="toc-v1.0.43">v1.0.43</a></li>
-<li><a href="#v1.0.42" id="toc-v1.0.42">v1.0.42</a></li>
-<li><a href="#v1.0.41" id="toc-v1.0.41">v1.0.41</a></li>
-<li><a href="#v1.0.40" id="toc-v1.0.40">v1.0.40</a></li>
-<li><a href="#v1.0.39" id="toc-v1.0.39">v1.0.39</a></li>
-<li><a href="#v1.0.38" id="toc-v1.0.38">v1.0.38</a></li>
-<li><a href="#v1.0.37" id="toc-v1.0.37">v1.0.37</a></li>
-<li><a href="#v1.0.36" id="toc-v1.0.36">v1.0.36</a></li>
-<li><a href="#v1.0.35" id="toc-v1.0.35">v1.0.35</a></li>
-<li><a href="#v1.0.34" id="toc-v1.0.34">v1.0.34</a></li>
-<li><a href="#v1.0.33" id="toc-v1.0.33">v1.0.33</a></li>
-<li><a href="#v1.0.32" id="toc-v1.0.32">v1.0.32</a></li>
-<li><a href="#v1.0.31" id="toc-v1.0.31">v1.0.31</a></li>
-<li><a href="#v1.0.30" id="toc-v1.0.30">v1.0.30</a></li>
-<li><a href="#v1.0.29" id="toc-v1.0.29">v1.0.29</a></li>
-<li><a href="#v1.0.28" id="toc-v1.0.28">v1.0.28</a></li>
-<li><a href="#v1.0.27" id="toc-v1.0.27">v1.0.27</a></li>
-<li><a href="#v1.0.26" id="toc-v1.0.26">v1.0.26</a></li>
-<li><a href="#v1.0.25" id="toc-v1.0.25">v1.0.25</a></li>
-<li><a href="#v1.0.24" id="toc-v1.0.24">v1.0.24</a></li>
-<li><a href="#v1.0.23" id="toc-v1.0.23">v1.0.23</a></li>
-<li><a href="#v1.0.22" id="toc-v1.0.22">v1.0.22</a></li>
-<li><a href="#v1.0.21" id="toc-v1.0.21">v1.0.21</a></li>
-<li><a href="#pre-v1.0.20" id="toc-pre-v1.0.20">Pre-v1.0.20</a></li>
-</ul></li>
-</ul>
-</nav>
 <h1 id="dbdo-history-of-changes">DbDo History of Changes</h1>
 <p>This file is the chronological record of DbDo releases. The most
 recent release is at the top. For the overview of what DbDo is, see
@@ -389,7 +239,105 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
-<h2 id="v1.0.245-current">v1.0.245 (current)</h2>
+<h2 id="v1.0.246-current">v1.0.246 (current)</h2>
+<p><strong>Every working copy is offered for saving, and the databases
+meet their own rules.</strong> From the same audit of 8 October 2026,
+the findings v1.0.245 did not reach, checked against the code:</p>
+<ul>
+<li><strong>Closing never discards a CSV or TSV file’s edits
+unasked.</strong> Only a workbook was offered for saving before its
+working copy was thrown away; a CSV or TSV file, and any other file DbDo
+edits through a temporary database, lost unsaved edits on closing, on
+opening another file, and on Close. Each now asks; a delimited file is
+saved back to its source, anything else through Save As, and a save that
+fails or is cancelled keeps the window.</li>
+<li><strong>A merge happens whole or not at all.</strong> Its inserts,
+updates, links and pick lists now commit as one transaction, so a
+failure partway leaves the database as it was.</li>
+<li><strong>Rebuilding generated columns cannot drop a table of
+yours.</strong> It dropped any table named new_
+<table>
+or dbdo_oldprime before its transaction, as a presumed leftover; its
+helper tables now carry a tag unique to the run, so nothing is dropped
+first and a failure removes only what the run made.</li>
+<li><strong>A crashed session’s working copy is kept.</strong> Startup
+deleted every working copy left behind, which after a crash may be the
+only copy of unsaved edits. They are moved to Recovered in DbDo’s data
+folder, DbDo says where, and recovered copies are removed after thirty
+days.</li>
+</ul>
+<p><strong>The databases meet the conventions DbDo checks for.</strong>
+The kit’s checkDb, which the build now runs over every database in the
+project, found two: RadioTrail’s stations table had eight columns after
+marked, which DbDo expects last, and the shipped lookups.db still named
+its key prm. The stations table is rebuilt with marked last, every
+station and identity unchanged; lookups.db’s prm is renamed prime, as
+DbDo renames it on opening. 2db, which made every new database with prm,
+prm1 and prm2, now makes prime, prime1 and prime2, as DbDo does; and the
+ConventionTrail sample query that joined on prm, which failed on any
+current database, joins on prime.</p>
+<p><strong>A correction.</strong> v1.0.245 said the twelve walks’
+scripts travel with the repository and withdrew an entry about a set of
+ten. The repository holds ten walks, Tutorial_0 to Tutorial_9, in the
+Homer pattern of ten, published with the whole help folder; it was
+help/Tutorials.md, written by the build from the walks, that still
+described the old twelve. The next build writes it from the ten.</p>
+<p><strong>The walks grow to the task.</strong> Each of the eight task
+walks taught its core in about a minute and stopped. Each now also
+teaches the commands around it, shown by the reader as well as named: in
+installing, the four kinds of help, F11 and the template databases; in
+moving through records, Jump within one column, searching backward, Say
+Yield, Say Column as List, Inspect Record and Choose Table; in editing,
+notes and tags, Say Edited, Copy Record and Replace Column; in marking,
+ranges with F8, Mark All, Invert and Say Marked Rows; in related
+records, Say Prime and tables in windows of their own; in statistics,
+the table and database summaries, Export Data and Print; and in SQL,
+Chat about Table, exporting an answer and saved scripts. Every key in
+every walk was checked against Hotkeys. Walk 0’s and walk 1’s longest
+speeches are split.</p>
+<p><strong>Filter Records begins with Any Field, and the tutorials play
+in the Homer Player.</strong> Control+F opens a list of choices, the
+first selected so Enter takes it, each beginning with its own letter.
+Any field contains text keeps the records where some field, read as
+text, holds the text, case aside: one test per field joined by OR, so a
+match never spans two fields and no separator has to be chosen. Fields,
+one by one is the form with an operator per field, as before; with a
+filter in force the list adds Clear, Edit, Narrow and, for a field
+filter, Widen. A search that finds nothing leaves the view as it was.
+Say Filter, Say Sort and Filter and Clear Filter now know a filter that
+opened the table with a WHERE – Any Field’s, and Filter Regex’s, which
+until now Shift+F reported as none and Control+Shift+F left in force.
+Play Tutorials handed its playlist to Windows, which opened another
+player; it now opens the Homer Player, paused, with the cursor on the
+first walk, so Enter plays it and Down Arrow hears the next.</p>
+<p><strong>Mark All, Unmark All and Invert Marked act on the records in
+view, and no others.</strong> They ran one UPDATE scoped by the ADO
+filter’s text used as SQL, which knew nothing of an any-field or regex
+search – Mark All after “Dallas Cowboys” would have marked every
+station, and a later Delete of the marked records would have removed
+ones never seen – and read ADO’s LIKE ‘<em>text</em>’ as a literal
+asterisk, so a % field filter marked the wrong rows. With any filter in
+force they now gather the keys of the rows in view from the recordset
+and update only those; with none, the whole table is the view and one
+UPDATE serves. A table with no primary key is refused while filtered,
+rather than marked wrongly.</p>
+<p><strong>The walks reach three minutes, and the audit reads keys as
+written.</strong> Measured on 8 October, the walks as they were ran 1:26
+to 2:49; a model fitted to those measurements (now the kit’s
+checkTutorial) put the lengthened ones at 2.3 to 3.3 minutes, so each
+gained a little more, all from Hotkeys: the Alternate Menu, the Key
+Describer and Hotkey Summary, web addresses, toggling a mark and hearing
+marked rows, Current Windows and the visited tables, gathering figures
+on the clipboard, and Toggle Read Only before a query that changes data.
+Each now predicts 3.1 to 3.3 minutes. auditPatterns, whose tutorial-key
+test blocked the release of 8 October, read “Up Arrow” with its space as
+an unknown key and knew no punctuation keys, so it reported Insert+Up
+Arrow, Alt+Right Arrow, Alt+Left Arrow and Alt+Apostrophe as unbound;
+all are bound, or the reader’s own. It now reads a walk’s key names as
+written, digits and punctuation included, and finds all of the walks’
+keys bound in DbDo.cs.</p>
+<p>Kit tools updated from HomerDev 1.64.4.</p>
+<h2 id="v1.0.245">v1.0.245</h2>
 <p><strong>Edits outlive failures, and the walks travel.</strong> From
 an audit of 8 October 2026, with its findings checked against the code:
 a newer record’s fields all arrive in one statement when databases are
