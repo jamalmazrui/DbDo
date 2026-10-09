@@ -46,6 +46,7 @@ scripts/check.cmd
 scripts/check.py
 scripts/checkTutorial.cmd
 scripts/checkTutorial.py
+scripts/kind.py
 scripts/finish.cmd
 scripts/fixEncoding.cmd
 scripts/fixEncoding.py

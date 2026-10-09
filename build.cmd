@@ -147,7 +147,9 @@ rem it -- Say.onSpoken, LbcMenuItem, Elevate -- and a kit older than the source
 rem fails deep in the compiler with "Say does not contain a definition for
 rem onSpoken", which names the symptom and not the cause. So the build says the
 rem cause, first. Raise this whenever DbDo starts using something new.
-set "kitNeeded=1.55.0"
+rem 1.64.5: Play Tutorials calls MediaPlayer.playTutorials, which older kits lack;
+rem a build against 1.64.4 failed to compile on 8 October 2026 rather than saying so.
+set "kitNeeded=1.64.5"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -308,6 +310,16 @@ rem ---- locate csc.exe ----
 rem Prefer Roslyn from Visual Studio Build Tools / VS 2022/2019, fall
 rem back to legacy csc bundled with the Framework runtime.
 set "csc="
+rem ---- the previous installer goes first (9 October 2026) --------------------
+rem A build that stopped before the installer step -- a compile error, say -- left
+rem the last build's DbDo_setup.exe in place, and installing it looked like
+rem installing this build. It is removed before anything compiles, so a failed
+rem build leaves no installer at all rather than an old one that seems new.
+if exist DbDo_setup.exe (
+  del /f /q DbDo_setup.exe
+  >> "!log!" echo Removed the previous DbDo_setup.exe before compiling
+)
+
 if exist "C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\Roslyn\csc.exe" set "csc=C:\Program Files (x86)\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\Roslyn\csc.exe"
 if not defined csc if exist "C:\Program Files\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\Roslyn\csc.exe" set "csc=C:\Program Files\Microsoft Visual Studio\2022\BuildTools\MSBuild\Current\Bin\Roslyn\csc.exe"
 if not defined csc if exist "C:\Program Files (x86)\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\Roslyn\csc.exe" set "csc=C:\Program Files (x86)\Microsoft Visual Studio\2022\Community\MSBuild\Current\Bin\Roslyn\csc.exe"

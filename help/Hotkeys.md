@@ -313,7 +313,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Clear the active filter. F for Filter. Shift reverses Filter Records.\
   Control+Shift+F
 - Filter Records\
-  Show only rows matching one or more field conditions. F for Filter.\
+  Show only the records that hold some text in any field, or that meet a condition on each field. F for Filter.\
   Control+F
 - Inspect Record\
   I for Inspect.\
@@ -584,7 +584,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Equals\
   Evaluate Expression
 - Control+F\
-  Show only rows matching one or more field conditions.\
+  Show only the records that hold some text in any field, or that meet a condition on each field.\
   Filter Records
 - Control+G\
   Jump to a specific row by number.\
@@ -946,7 +946,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Extract all regex matches in the current virtual column to the clipboard.\
   Control+Shift+X
 - Filter Records\
-  Show only rows matching one or more field conditions.\
+  Show only the records that hold some text in any field, or that meet a condition on each field.\
   Control+F
 - Find Regex\
   Search across all columns with a .NET regex pattern.\

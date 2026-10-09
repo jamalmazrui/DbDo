@@ -2449,7 +2449,7 @@ namespace DbDo
                 sPriorVirtual = prior.sVirtualColumn ?? "";
             }
             TableSettings snap = new TableSettings();
-            snap.sFilter           = filter ?? "";
+            snap.sFilter           = filterState;
             snap.sSort             = sort ?? "";
             snap.iAbsolutePosition = absolutePosition;
             snap.sSelectList       = sPriorSelect;
@@ -2488,9 +2488,18 @@ namespace DbDo
             if (dTableCache.ContainsKey(sTable))
             {
                 TableSettings snap = dTableCache[sTable];
-                if (!string.IsNullOrEmpty(snap.sFilter))
+                string sWhere, sSpoken, sAdoFilter;
+                decodeFilterState(snap.sFilter, out sWhere, out sSpoken, out sAdoFilter);
+                // The search first, by opening the table with it: selectTableFiltered
+                // does not come back here, and snap stays the object read above.
+                if (!string.IsNullOrEmpty(sWhere) && string.IsNullOrEmpty(sSqlWhere))
                 {
-                    try { filter = snap.sFilter; } catch { /* stale filter; skip */ }
+                    try { selectTableFiltered(sTable, sWhere, sSpoken); }
+                    catch { /* the search no longer opens -- a column gone, say; keep the plain table */ }
+                }
+                if (!string.IsNullOrEmpty(sAdoFilter))
+                {
+                    try { filter = sAdoFilter; } catch { /* stale filter; skip */ }
                 }
                 if (!string.IsNullOrEmpty(snap.sSort))
                 {
@@ -2651,11 +2660,11 @@ namespace DbDo
             if (!isOpen()) throw new InvalidOperationException("No database open.");
             if (string.IsNullOrEmpty(sTable))
                 throw new ArgumentException("selectTable requires a table name.");
-            sSqlWhere = ""; sSqlWhereSpoken = "";
-
             // Capture settings of the table we're leaving so a later
-            // return restores them.
+            // return restores them -- its any-field search included, so the
+            // search is forgotten only after the snapshot (9 October 2026).
             cacheCurrentTableSettings();
+            sSqlWhere = ""; sSqlWhereSpoken = "";
 
             closeRecordset();
 
@@ -2758,6 +2767,38 @@ namespace DbDo
         private string sSqlWhereSpoken = "";
         public string sqlFilter { get { return sSqlWhere ?? ""; } }
         public string sqlFilterSpoken { get { return string.IsNullOrEmpty(sSqlWhereSpoken) ? (sSqlWhere ?? "") : sSqlWhereSpoken; } }
+
+        // A TABLE'S FILTER STATE, BOTH LAYERS IN ONE STRING (9 October 2026). The
+        // snapshot kept when a table is left, and the session file kept between
+        // runs, held only the ADO filter, so a search came back as only its field
+        // filter -- a wider set of records than was left, with nothing to say so.
+        // filterState carries the SQL search too, behind a marker, its parts in
+        // base 64 so nothing in them can clash with ADO's syntax or the session
+        // file; with no search it is exactly the ADO filter, as before.
+        private const string c_sSqlStateMark = "{dbdo-sql}";
+        public string filterState { get { return encodeFilterState(sSqlWhere, sSqlWhereSpoken, filter); } }
+
+        public static string encodeFilterState(string sWhere, string sSpoken, string sAdo)
+        {
+            if (string.IsNullOrEmpty(sWhere)) return sAdo ?? "";
+            return c_sSqlStateMark + Convert.ToBase64String(Encoding.UTF8.GetBytes(sWhere))
+                + "|" + Convert.ToBase64String(Encoding.UTF8.GetBytes(sSpoken ?? "")) + "|" + (sAdo ?? "");
+        }
+
+        public static void decodeFilterState(string sState, out string sWhere, out string sSpoken, out string sAdo)
+        {
+            sWhere = ""; sSpoken = ""; sAdo = sState ?? "";
+            if (string.IsNullOrEmpty(sState) || !sState.StartsWith(c_sSqlStateMark)) return;
+            string[] aParts = sState.Substring(c_sSqlStateMark.Length).Split(new char[] { '|' }, 3);
+            if (aParts.Length < 3) return;
+            sAdo = aParts[2];
+            try
+            {
+                sWhere = Encoding.UTF8.GetString(Convert.FromBase64String(aParts[0]));
+                sSpoken = Encoding.UTF8.GetString(Convert.FromBase64String(aParts[1]));
+            }
+            catch { sWhere = ""; sSpoken = ""; }
+        }
 
         public void selectTableFiltered(string sTable, string sWhereSql, string sSpoken)
         {
@@ -25066,7 +25107,7 @@ namespace DbDo
                     || string.IsNullOrEmpty(db.filePath)
                     || string.IsNullOrEmpty(db.currentTable)) return;
                 RecentFiles.recordTableState(db.filePath, db.currentTable,
-                    db.filter ?? "", db.sort ?? "", db.absolutePosition,
+                    db.filterState ?? "", db.sort ?? "", db.absolutePosition,
                     virtCurrentColumnName() ?? "", db.getSelectList(db.currentTable) ?? "");
                 // Also write the view to the per-database <DbName>.inix
                 // [Table:<name>] section (SelectFields / OrderFields /
