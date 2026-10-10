@@ -24697,9 +24697,38 @@ namespace DbDo
             if (frame == null) return;
             lsTitles = frame.windowTitles();
             if (lsTitles.Count == 0) { Say.say("No windows!"); return; }
-            sChosen = promptListChoice("Current Windows", "Choose a window:", lsTitles, this.Text);
+            List<string> lsLabels = windowLabels(lsTitles);
+            int iCurrent = lsTitles.IndexOf(this.Text);
+            sChosen = promptListChoice("Current Windows", "Choose a window:", lsLabels, iCurrent >= 0 ? lsLabels[iCurrent] : "");
             if (string.IsNullOrEmpty(sChosen)) return;
-            frame.activateByTitle(sChosen);
+            int iChosen = lsLabels.IndexOf(sChosen);
+            if (iChosen >= 0) frame.activateByTitle(lsTitles[iChosen]);
+        }
+
+        // windowLabels: A WINDOW IS NAMED BY ITS TABLE (10 October 2026). A window's title is "<database> - <table>",
+        // so Current Windows (F4) and Say Windows Open (Shift+F4) said the database before every table, the same each
+        // time. With every window in one database, each is named by its table alone; with windows from several, the
+        // database follows the table ("apps in BlindCreations.db"), so the deciding word still comes first. A title
+        // without " - " is kept as it is. The labels are in the same order as the titles they stand for.
+        private static List<string> windowLabels(List<string> lsTitles)
+        {
+            List<string> lsDatabases = new List<string>();
+            foreach (string sTitle in lsTitles)
+            {
+                int iDash = sTitle.IndexOf(" - ");
+                if (iDash <= 0) continue;
+                string sDatabase = sTitle.Substring(0, iDash);
+                if (!lsDatabases.Contains(sDatabase)) lsDatabases.Add(sDatabase);
+            }
+            List<string> lsLabels = new List<string>();
+            foreach (string sTitle in lsTitles)
+            {
+                int iDash = sTitle.IndexOf(" - ");
+                if (iDash <= 0) { lsLabels.Add(sTitle); continue; }
+                string sTable = sTitle.Substring(iDash + 3);
+                lsLabels.Add(lsDatabases.Count == 1 ? sTable : sTable + " in " + sTitle.Substring(0, iDash));
+            }
+            return lsLabels;
         }
 
         private void windowToggleClicked(object sender, EventArgs evArgs)
@@ -24732,11 +24761,12 @@ namespace DbDo
             lsTitles = frame.windowTitles();
             if (lsTitles.Count == 0) { Say.say("No windows!"); return; }
             sbOut = new StringBuilder();
+            List<string> lsLabels = windowLabels(lsTitles);
             sbOut.Append(lsTitles.Count).Append(lsTitles.Count == 1 ? " window: " : " windows: ");
-            foreach (string sTitle in lsTitles)
+            for (int iWindow = 0; iWindow < lsTitles.Count; iWindow++)
             {
-                sbOut.Append(sTitle);
-                if (sTitle == this.Text) sbOut.Append(" (current)");
+                sbOut.Append(lsLabels[iWindow]);
+                if (lsTitles[iWindow] == this.Text) sbOut.Append(" (current)");
                 sbOut.Append("; ");
             }
             Say.say(sbOut.ToString().TrimEnd(' ', ';'));

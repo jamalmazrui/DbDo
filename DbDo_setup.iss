@@ -348,7 +348,8 @@ Source: "License.htm";  DestDir: "{app}"; Flags: ignoreversion
 ; where the Sample Databases Help command lists it. lookups.db is
 ; shared infrastructure, not a sample, so it stays in {app}.
 Source: "data\lookups.db"; DestDir: "{app}\data"; Flags: ignoreversion
-Source: "templates\*"; DestDir: "{app}\templates"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist; Excludes: ".git,.venv,__pycache__,*.pyc,venv"
+; The templates' logs folders hold the build's database checks, not anything a user needs (9 October 2026).
+Source: "templates\*"; DestDir: "{app}\templates"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist; Excludes: ".git,.venv,__pycache__,*.pyc,venv,logs,*.log"
 Source: "configs\DbDo.inix";   DestDir: "{app}\configs"; Flags: ignoreversion onlyifdoesntexist
 ;
 ; Scripts: the generic example scripts (each of the three DbDo
@@ -422,12 +423,12 @@ Name: "{autodesktop}\{#AppName}"; \
 ; kit's script straight into NVDA's add-ons folder, without starting NVDA.
 
 ; ---- 1. Install, ticked --------------------------------------------------------
-FileName: "{cmd}"; \
-  Parameters: "/s /c """"{app}\exec\DbDo.exe"" --install-jaws-settings && echo {#AppVersion}> ""{localappdata}\DbDo\jawsSettings.version"""""; \
-  WorkingDir: "{app}\exec"; \
+FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
+  Parameters: "noPause jaws"; \
+  WorkingDir: "{app}\scripts"; \
   Description: "{code:labelJaws}"; \
   Check: isInstallJaws; \
-  Flags: postinstall waituntilterminated runhidden skipifsilent runasoriginaluser
+  Flags: postinstall skipifsilent runascurrentuser waituntilterminated skipifdoesntexist
 FileName: "{cmd}"; \
   Parameters: "/c """"{app}\scripts\installModels.cmd"""""; \
   WorkingDir: "{app}\exec"; \
@@ -452,12 +453,12 @@ FileName: "{cmd}"; \
   Flags: postinstall skipifsilent runascurrentuser; Check: ollamaNeedsInstall
 
 ; ---- 2. Update, ticked ---------------------------------------------------------
-FileName: "{cmd}"; \
-  Parameters: "/s /c """"{app}\exec\DbDo.exe"" --install-jaws-settings && echo {#AppVersion}> ""{localappdata}\DbDo\jawsSettings.version"""""; \
-  WorkingDir: "{app}\exec"; \
+FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
+  Parameters: "noPause jaws"; \
+  WorkingDir: "{app}\scripts"; \
   Description: "{code:labelJaws}"; \
   Check: isUpdateJaws; \
-  Flags: postinstall waituntilterminated runhidden skipifsilent runasoriginaluser
+  Flags: postinstall skipifsilent runascurrentuser waituntilterminated skipifdoesntexist
 FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
   Parameters: "noPause nvda"; \
   WorkingDir: "{app}\scripts"; \
@@ -477,12 +478,12 @@ FileName: "{cmd}"; \
   Flags: postinstall skipifsilent runascurrentuser; Check: ollamaNeedsUpdate
 
 ; ---- 3. Reinstall, never ticked ------------------------------------------------
-FileName: "{cmd}"; \
-  Parameters: "/s /c """"{app}\exec\DbDo.exe"" --install-jaws-settings && echo {#AppVersion}> ""{localappdata}\DbDo\jawsSettings.version"""""; \
-  WorkingDir: "{app}\exec"; \
+FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
+  Parameters: "noPause jaws"; \
+  WorkingDir: "{app}\scripts"; \
   Description: "{code:labelJaws}"; \
   Check: isReinstallJaws; \
-  Flags: postinstall waituntilterminated runhidden skipifsilent runasoriginaluser unchecked
+  Flags: postinstall skipifsilent runascurrentuser waituntilterminated skipifdoesntexist unchecked
 FileName: "{cmd}"; \
   Parameters: "/c """"{app}\scripts\installModels.cmd"""""; \
   WorkingDir: "{app}\exec"; \
@@ -561,7 +562,7 @@ FileName: "{app}\exec\{#AppExeName}"; \
   #define HomerDev "C:\HomerDev"
 #endif
 // DbDo writes its own reader wrappers below, from before the kit had them.
-#define HomerReaderWrappersInApp
+// THE KIT'S SCREEN READER WRAPPERS (10 October 2026): DbDo used its own until now; check fails an installer that does.
 #include HomerDev + "\Templates\HomerComponents.iss"
 
 var
@@ -879,84 +880,14 @@ begin
          or RegKeyExists(HKEY_LOCAL_MACHINE, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\NVDA');
 end;
 
-{ ---- The screen readers, judged like any component (30 September 2026) ----
-  JAWS: DbDo.exe --install-jaws-settings records each file it places in
-  %LOCALAPPDATA%\DbDo\jawsSettings.log; the box also writes the DbDo version it
-  installed for into jawsSettings.version. No record: Install. A record for
-  this version: Reinstall. Otherwise: Update.
-  NVDA: the kit's installScreenReaderSupport.cmd state nvda compares the
-  add-on's manifest version with the installed add-on's. Each answer is
-  logged. -1 hides that reader's boxes. }
+{ THE SCREEN READERS ARE THE KIT'S (10 October 2026). labelJaws, isInstallJaws and the rest come from
+  HomerComponents.iss: homerReaderState asks installScreenReaderSupport.cmd's state mode, which compares a
+  fingerprint of DbDo_JAWS.zip with the one kept for each JAWS version, and the NVDA add-on's manifest version with
+  the installed one. DbDo's own version, which judged the JAWS scripts by DbDo's version and so said Update on
+  every new installer, is gone. }
 var
-  giJawsState, giNvdaState: Integer;
-  gbJawsRead, gbNvdaRead: Boolean;
   gsTicked: String;
 
-function readerState(sReader: String): Integer;
-var
-  sFile, sRecord, sVersionFile: String;
-  sAnswer: AnsiString;
-  iCode: Integer;
-begin
-  if (sReader = 'jaws') and gbJawsRead then begin Result := giJawsState; exit; end;
-  if (sReader = 'nvda') and gbNvdaRead then begin Result := giNvdaState; exit; end;
-  Result := -1;
-  sAnswer := '';
-  if sReader = 'jaws' then
-  begin
-    if haveJaws() then
-    begin
-      sRecord := ExpandConstant('{localappdata}\DbDo\jawsSettings.log');
-      sVersionFile := ExpandConstant('{localappdata}\DbDo\jawsSettings.version');
-      // The record lives in the Local tree only. An older version kept it in
-      // Roaming, and the one install after that change said "Install" where
-      // "Update" was true (5 October 2026); that install wrote the record in
-      // its new place, so the moment has passed, and the kit's check rightly
-      // refuses an installer that reads the Roaming tree at all.
-      if not FileExists(sRecord) then Result := 0
-      else if LoadStringFromFile(sVersionFile, sAnswer) and (Trim(sAnswer) = '{#AppVersion}') then Result := 2
-      else Result := 1;
-      Log('Component jaws: record ' + sRecord + ' present=' + IntToStr(Ord(FileExists(sRecord))) + '; installed for version "' + Trim(sAnswer) + '"; this version {#AppVersion}');
-    end;
-    giJawsState := Result; gbJawsRead := True;
-  end
-  else
-  begin
-    sFile := ExpandConstant('{tmp}\dbdoReader_nvda.txt');
-    if haveNvda() then
-      if Exec(ExpandConstant('{cmd}'), '/c ""' + ExpandConstant('{app}\scripts\installScreenReaderSupport.cmd') + '" state nvda "' + sFile + '""',
-              ExpandConstant('{app}\scripts'), SW_HIDE, ewWaitUntilTerminated, iCode) then
-        if LoadStringFromFile(sFile, sAnswer) then
-        begin
-          sAnswer := Trim(sAnswer);
-          if sAnswer = 'install' then Result := 0
-          else if sAnswer = 'update' then Result := 1
-          else if sAnswer = 'reinstall' then Result := 2;
-        end;
-    giNvdaState := Result; gbNvdaRead := True;
-  end;
-  Log('Component ' + sReader + ': state ' + IntToStr(Result) + ' (-1 not offered, 0 Install, 1 Update, 2 Reinstall)');
-end;
-
-function readerLabel(sReader: String): String;
-begin
-  case readerState(sReader) of
-    1: Result := 'Update';
-    2: Result := 'Reinstall';
-  else Result := 'Install';
-  end;
-  if sReader = 'jaws' then Result := Result + ' JAWS scripts'
-  else Result := Result + ' NVDA add-on';
-end;
-
-function labelJaws(sParam: String): String;  begin Result := readerLabel('jaws'); end;
-function isInstallJaws(): Boolean;           begin Result := readerState('jaws') = 0; end;
-function isUpdateJaws(): Boolean;            begin Result := readerState('jaws') = 1; end;
-function isReinstallJaws(): Boolean;         begin Result := readerState('jaws') = 2; end;
-function labelNvda(sParam: String): String;  begin Result := readerLabel('nvda'); end;
-function isInstallNvda(): Boolean;           begin Result := readerState('nvda') = 0; end;
-function isUpdateNvda(): Boolean;            begin Result := readerState('nvda') = 1; end;
-function isReinstallNvda(): Boolean;         begin Result := readerState('nvda') = 2; end;
 
 function descModel(sParam: String): String;
 (* The model is not a winget package, so there is no version pair to report --
@@ -1388,9 +1319,10 @@ begin
 
   if CurStep <> ssPostInstall then exit;
 
-  (* Extract JAWS keymap and script files BEFORE the Finish-page
-     Run-section entry invokes DbDo.exe --install-jaws-settings;
-     that command needs DbDo.jkm and DbDo.jss in {app}. *)
+  (* Extract JAWS keymap and script files into {app}\scripts. The Finish
+     page's JAWS box now runs the kit's installScreenReaderSupport.cmd, which
+     reads DbDo_JAWS.zip itself (10 October 2026); the unpacked copies stay
+     for anyone reading the scripts. *)
   ExtractJawsArchive;
 
   if bInstallSqliteOdbc then

@@ -393,6 +393,22 @@ browser, or type <code>history</code> at the dot prompt.</p>
 <h2 id="october-2026-from-the-build-and-release-logs">9 October 2026 –
 from the build and release logs</h2>
 <ul>
+<li><p><strong>The installer’s screen reader boxes are the
+kit’s.</strong> DbDo installed its JAWS scripts with its own command and
+judged them by DbDo’s version, so every new installer said Update
+although the scripts had not changed. The JAWS box now runs the kit’s
+installScreenReaderSupport.cmd, and every box is worded and ticked by
+HomerComponents.iss, which compares a fingerprint of DbDo_JAWS.zip with
+the one kept for each JAWS version: Update means the scripts changed.
+DbDo’s own wrappers, state function and version stamp are gone, and the
+Results box reads the kit’s report for the JAWS scripts as it did for
+the NVDA add-on. The first install after this says Update once, since no
+fingerprint has been kept yet.</p></li>
+<li><p><strong>F4 and Shift+F4 name a window by its table.</strong>
+Current Windows and Say Windows Open read each window’s whole title, so
+every item began with the database’s file name. With every window in one
+database each is now its table alone, “apps”; with several databases the
+database follows, “apps in BlindCreations.db”.</p></li>
 <li><p><strong>BlindCreations, a new template.</strong> The apps, books,
 presentations and creators of the Blind directories on GitHub Pages, in
 one database: 97 apps, 106 books, 58 presentations and 127 creators,

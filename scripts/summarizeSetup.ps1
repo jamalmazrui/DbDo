@@ -75,16 +75,14 @@ if (Test-Path -LiteralPath $sTickedFile) {
 function tickedLine($sWord) { return @($lsTicked | Where-Object { $_ -match [regex]::Escape($sWord) })[0] }
 $lsOutcomes = @()
 
-$sCaption = tickedLine "JAWS"
-if ($sCaption) {
-  $sRecord = Join-Path $env:LOCALAPPDATA "$sApp\jawsSettings.log"
-  $sStamp = Join-Path $env:LOCALAPPDATA "$sApp\jawsSettings.version"
-  if ((Test-Path -LiteralPath $sRecord) -and (Test-Path -LiteralPath $sStamp) -and
-      ((Get-Item -LiteralPath $sStamp).LastWriteTime -gt (Get-Date).AddMinutes(-30))) {
-    $lsOutcomes += "JAWS scripts: installed."
-  } else {
-    $lsOutcomes += "JAWS scripts: NOT installed. The log says why."
-  }
+# THE KIT'S SCRIPT REPORTS THE JAWS SCRIPTS TOO (10 October 2026), one line per JAWS version, as it does the NVDA
+# add-on; DbDo's own JAWS installer, and its record, are gone.
+if (tickedLine "JAWS") {
+  $sReaders = Join-Path $sLogDir "$sApp`_screenReaders.txt"
+  $lsReader = @()
+  if (Test-Path -LiteralPath $sReaders) { $lsReader = @(Get-Content -LiteralPath $sReaders | Where-Object { $_ -match "JAWS" }) }
+  if ($lsReader.Count -gt 0) { $lsOutcomes += ($lsReader | ForEach-Object { $_.Trim().TrimEnd(".") + "." }) }
+  else { $lsOutcomes += "JAWS scripts: the step left no record. The log says why." }
 }
 
 if (tickedLine "NVDA") {
