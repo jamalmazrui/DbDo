@@ -98,6 +98,7 @@ logs/
 notes/
 scripts/release.cmd
 scripts/release.ps1
+templates/RadioTrail/RadioTrail.db
 
 # Never pushed, whatever RepoFiles.txt says: private notes, maintainer
 # scripts, logs, and anything a build makes.

@@ -227,9 +227,6 @@
   <![endif]-->
 </head>
 <body>
-<header id="title-block-header">
-<h1 class="title">History</h1>
-</header>
 <nav id="TOC" role="doc-toc">
 <ul>
 <li><a href="#dbdo-history-of-changes"
@@ -396,7 +393,72 @@ browser, or type <code>history</code> at the dot prompt.</p>
 <h2 id="october-2026-from-the-build-and-release-logs">9 October 2026 –
 from the build and release logs</h2>
 <ul>
-<li><strong>RadioTrail keeps its links.</strong> The kit’s database
+<li><p><strong>The RadioTrail catalog stays on this disk.</strong> At
+about 60,000 stations and 77 MB, the catalog fetchStations fills is
+data, not source: the kit’s push refused it as too large, and every
+refresh would add another 77 MB to the repository’s history.
+LocalFiles.txt now names templates\RadioTrail\RadioTrail.db, so the
+installer still ships it from the development tree, and the kit’s push
+untracks it once.</p></li>
+<li><p><strong>The restored catalog passes the database check.</strong>
+The release of 1.0.239 stopped because the restored RadioTrail failed
+one rule: marked must be the last column, and a catalog grown over many
+fetches had eight columns added after it, since SQLite adds a new column
+at the end. fetchStations’ conventions now rebuild the stations table
+with marked last – from the table’s own definition, so every type,
+default and constraint is kept, its generated columns look and prime
+counted as columns, its rows copied by name, its indexes and triggers
+made again, in one transaction with foreign-key enforcement off. The
+build’s conventions step runs it. Tested on the 60,342 stations: every
+row, index, trigger and value kept, a second run changing nothing, and
+checkDb passing with 0 failures.</p></li>
+<li><p><strong>The restored catalog meets the Trail
+conventions.</strong> recoverRadioTrail brought back 60,342 stations
+from the Recycle Bin into templates\RadioTrail, but the copy predated
+RadioTrail’s triggers, which the database check requires. fetchStations
+–conventions adds whatever Trail indexes and triggers are missing and
+changes nothing else, and the build runs it on the development tree’s
+RadioTrail, so a catalog restored or fetched before the triggers existed
+passes without a new fetch. Tested on the restored catalog: 9 added, all
+60,342 stations kept, a second run adding nothing.</p></li>
+<li><p><strong>RadioTrail opens first.</strong> On a first run DbDo
+opens RadioTrail at its stations table, where Alt+Shift+P plays the
+current station in the Homer Player: one table, understood at a glance,
+doing something useful at once. JobTrail, the showcase of related
+tables, is one Open Template Database away.</p></li>
+<li><p><strong>fetchStations fills the development tree’s
+RadioTrail.</strong> Run from C:\DbDo\templates\RadioTrail, it now fills
+the RadioTrail.db beside it, the one the installer ships, so every user
+gets the whole catalog and clearing DbDo’s local folder cannot lose
+hours of fetching. Run from an installed DbDo, it fills the user’s own
+copy, as before.</p></li>
+<li><p><strong>scripts\recoverRadioTrail finds a deleted RadioTrail in
+the Recycle Bin.</strong> It reads every drive’s Recycle Bin, inspects
+each RadioTrail.db there from a temporary copy without touching the bin,
+restores the one with the most stations into templates\RadioTrail
+through SQLite’s backup (so stations still in a write-ahead log come
+too), checks it, and keeps the database it replaces in notes\retired.
+–list reports only. Tested on a simulated Recycle Bin: 6,860 stations
+restored, 60 of them from the log.</p></li>
+<li><p><strong>The tutorials start with RadioTrail and introduce
+JobTrail.</strong> Walk 3 finds stations by keyword and by country and
+plays one with Alt+Shift+P; walk 4 opens JobTrail, whose linked tables
+the later walks use. All ten walks pass checkTutorial.</p></li>
+<li><p><strong>A set-aside RadioTrail is never deleted (9 October
+2026).</strong> fetchStations sets aside a copy whose stations table is
+not the template’s shape; it named every such copy RadioTrail-old.db and
+removed the previous one, so a second set-aside could delete a database
+of sixty thousand stations kept from the first. Each set-aside now keeps
+its own dated name. Tested: two in a row keep both, the first with its
+data.</p></li>
+<li><p><strong>File, Close starts DbDo empty next time.</strong> Closing
+a database cleared the saved one so the next launch would start empty,
+but an empty saved database was taken for a first run, which opens the
+JobTrail showcase. DbDo now records once that a database has been
+opened, and only a true first run opens the showcase.</p></li>
+<li><p><strong>The installer leaves out the templates’ logs
+folders,</strong> which held the build’s database checks.</p></li>
+<li><p><strong>RadioTrail keeps its links.</strong> The kit’s database
 check found RadioTrail without the triggers every other Trail has:
 editing or deleting a station left its map links pointing at nothing,
 and a person’s edit did not set the edited date. fetchStations now adds
@@ -406,12 +468,12 @@ the form BookTrail uses, so a listener’s own copy gains them at its next
 refresh; the shipped template has them already. The edited date follows
 a person’s edits, not plays, votes or the catalog’s own refresh. Tested:
 an edit sets the date, a play does not, and deleting a station removes
-its links.</li>
-<li><strong>The installer’s per-user writes are acknowledged.</strong>
-Inno warned that setup runs as administrator yet writes to per-user
-folders; it does so on purpose, for the launch flag, the logs folder and
-the JAWS settings stamp, and the reason is now stated beside
-UsedUserAreasWarning=no.</li>
+its links.</p></li>
+<li><p><strong>The installer’s per-user writes are
+acknowledged.</strong> Inno warned that setup runs as administrator yet
+writes to per-user folders; it does so on purpose, for the launch flag,
+the logs folder and the JAWS settings stamp, and the reason is now
+stated beside UsedUserAreasWarning=no.</p></li>
 </ul>
 <h2 id="v1.0.236-current">v1.0.236 (current)</h2>
 <p><strong>Every working copy is offered for saving, and the databases

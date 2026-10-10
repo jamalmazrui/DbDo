@@ -1,14 +1,14 @@
-﻿; Tutorial_3_Open_a_Database_and_Move_Through_Records.inix -- opening a database and finding your way.
+﻿; Tutorial_3_Open_a_Database_and_Move_Through_Records.inix -- finding your way in RadioTrail, and playing a station.
 
 [about]
 Title=3 - Open a Database and Move Through Records
-Intro=A template database opened from the Help menu, and moving through it by row, by column, by search and by record number.
-Setup=DbDo is installed.
-Homework=Open another template database and find a record by keyword.
+Intro=RadioTrail, the database DbDo opens first, explored by row, by column, by search and by record number, and a station played in the Homer Player.
+Setup=DbDo is installed; on a first run it opens RadioTrail.
+Homework=Find a station by keyword, then play it with Alt plus Shift plus P.
 
 [step]
 
-Say=One want: a database open and a record found in it, quickly. DbDo ships template databases to practice on; JobTrail tracks job applications.
+Say=One want: a station found and playing, quickly. The first time DbDo starts, it opens RadioTrail, a list of internet radio stations to search, sort and play.
 Key=
 Hear=
 
@@ -21,16 +21,10 @@ Hear=DbDo ready
 
 [step]
 
-Say=Control plus O, O for Open, opens a database file. The templates are in the Help menu, under Template Databases; I open JobTrail.
-Key=Control+O
-Hear=Open Database dialog
-Note=Confirm the wording with a live run: buildTutorials -live.
-
-[step]
-
-Say=I choose JobTrail and press Enter. Shift plus Z says where I am.
+Say=Shift plus Z says where I am: the stations table of RadioTrail. Another database opens with Control plus O, O for Open, and the templates are in the Help menu, under Template Databases.
 Key=Shift+Z
-Hear=jobs, 12 records, no filter, sorted by employer
+Hear=(stations, the number of stations, no filter, sorted by name)
+Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
@@ -58,16 +52,16 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=I type Seattle and press Enter.
+Say=I type jazz and press Enter.
 Key=Enter
-Hear=(the first record holding Seattle)
+Hear=(the first station holding jazz)
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=F3 goes to the next match, Shift plus F3 to the one before. Alt plus Delete says the column and the row number.
 Key=Alt+Delete
-Hear=(the column's name, row 3)
+Hear=(the column's name and the row number)
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -86,80 +80,63 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=I choose employer, type Amazon, and press Enter. The cursor lands on the first job there.
+Say=I choose country, type Canada, and press Enter. The cursor lands on the first station there.
 Key=Enter
-Hear=Amazon, employer, row 5
+Hear=(Canada, country, its row)
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=Control plus Shift plus J jumps backward to the one before, and Control plus Shift plus K does the same for Keywords: Shift reverses, here as everywhere in DbDo.
 Key=Control+Shift+J
-Hear=Amazon, employer, row 2
+Hear=(Canada, country, an earlier row)
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=Shift plus Y, Say Yield, says how many records there are.
 Key=Shift+Y
-Hear=12 records
+Hear=(the number of stations)
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=Shift plus C, Say Cell, says the value under the cursor again, without moving.
 Key=Shift+C
-Hear=Amazon
+Hear=Canada
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Alt plus L, Say Column as List, reads every value in the column, top to bottom, a quick way to hear what a column holds.
-Key=Alt+L
-Hear=Amazon, Boeing, Costco, Microsoft
-Note=Confirm the wording with a live run: buildTutorials -live.
-
-[step]
-
-Say=Control plus I, Inspect Record, shows the whole record at once, one field to a line.
+Say=Control plus I, Inspect Record, shows the whole record at once, one field to a line: the station's name, genre, language and stream address among them. Escape closes it.
 Key=Control+I
 Hear=Inspect Record dialog
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Escape. A database can hold several tables; Control plus T, Choose Table, lists them.
-Key=Control+T
-Hear=Choose Table dialog, jobs, 1 of 3
+Say=Now the reason RadioTrail opens first. Alt plus Shift plus P, Play Stream, plays the current station in the Homer Player, the same player FileDir uses.
+Key=Alt+Shift+P
+Hear=(the Homer Player, playing the station)
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Escape keeps the table I am in.
+Say=Escape closes the player and returns to the station I was on, ready for the next one.
 Key=Escape
-Hear=jobs, 12 records
+Hear=(stations, the same row)
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=What this walk taught. I name the command; the reader gives the key.
-Key=
-Hear=
+Say=A database can hold several tables; Control plus T, Choose Table, lists them. Escape keeps the table I am in.
+Key=Control+T
+Hear=(Choose Table dialog, stations first)
+Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Open a database.
-Key=
-Hear=Control plus O
-
-[step]
-
-Say=Go to a record by number.
-Key=
-Hear=Control plus G
-
-[step]
-
-Say=Search every column.
-Key=
-Hear=Control plus K
+Say=Escape. RadioTrail is one table, easy to hold in mind. The next walk opens JobTrail, whose tables are linked to one another.
+Key=Escape
+Hear=stations
+Note=Confirm the wording with a live run: buildTutorials -live.

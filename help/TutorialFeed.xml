@@ -5,7 +5,7 @@
     <link>Tutorials.htm</link>
     <description>Spoken walks through DbDo, the database program built for working by ear. Ten walks, each under five minutes, in the order a new person meets them.</description>
     <language>en-us</language>
-    <lastBuildDate>Fri, 09 Oct 2026 20:35:51 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 10 Oct 2026 04:12:46 +0000</lastBuildDate>
     <itunes:author>Jamal Mazrui</itunes:author>
     <itunes:explicit>false</itunes:explicit>
     <itunes:category text="Technology"/>
@@ -21,10 +21,10 @@
     </item>
     <item>
       <title>1 - User Interface</title>
-      <description>DbDo is installed, with the JobTrail template open. Full transcript: Tutorials.htm#0a-1-user-interface</description>
+      <description>DbDo is installed, with RadioTrail open, as it is on a first run. Full transcript: Tutorials.htm#0a-1-user-interface</description>
       <link>Tutorials.htm#0a-1-user-interface</link>
       <guid isPermaLink="false">homer-tutorial_1_user_interface</guid>
-      <enclosure url="tutorials/1_User_Interface.mp3" length="1349542" type="audio/mpeg"/>
+      <enclosure url="tutorials/1_User_Interface.mp3" length="1348047" type="audio/mpeg"/>
       <itunes:duration>00:03:21</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
@@ -39,20 +39,20 @@
     </item>
     <item>
       <title>3 - Open a Database and Move Through Records</title>
-      <description>DbDo is installed. Full transcript: Tutorials.htm#0c-3-open-a-database-and-move-through-records</description>
+      <description>DbDo is installed; on a first run it opens RadioTrail. Full transcript: Tutorials.htm#0c-3-open-a-database-and-move-through-records</description>
       <link>Tutorials.htm#0c-3-open-a-database-and-move-through-records</link>
       <guid isPermaLink="false">homer-tutorial_3_open_a_database_and_move_through_records</guid>
-      <enclosure url="tutorials/3_Open_a_Database_and_Move_Through_Records.mp3" length="1307117" type="audio/mpeg"/>
-      <itunes:duration>00:03:16</itunes:duration>
+      <enclosure url="tutorials/3_Open_a_Database_and_Move_Through_Records.mp3" length="1353344" type="audio/mpeg"/>
+      <itunes:duration>00:03:18</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
       <title>4 - Edit and Add Records</title>
-      <description>JobTrail is open in DbDo. Full transcript: Tutorials.htm#0d-4-edit-and-add-records</description>
+      <description>DbDo is open; this walk opens JobTrail. Full transcript: Tutorials.htm#0d-4-edit-and-add-records</description>
       <link>Tutorials.htm#0d-4-edit-and-add-records</link>
       <guid isPermaLink="false">homer-tutorial_4_edit_and_add_records</guid>
-      <enclosure url="tutorials/4_Edit_and_Add_Records.mp3" length="1264154" type="audio/mpeg"/>
-      <itunes:duration>00:03:09</itunes:duration>
+      <enclosure url="tutorials/4_Edit_and_Add_Records.mp3" length="1451619" type="audio/mpeg"/>
+      <itunes:duration>00:03:36</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>

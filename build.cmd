@@ -194,6 +194,14 @@ rem reaches DbDo on its next build, and a change made here would be overwritten,
 rem which is the point.
 if not exist "scripts" mkdir "scripts"
 for %%F in (buildTutorials.cmd buildTutorials.ps1 check.cmd check.py checkTutorial.cmd checkTutorial.py finish.cmd fixEncoding.cmd fixEncoding.py installCommon.cmd installOllama.cmd installScreenReaderSupport.cmd kind.cmd kind.py makeTutorials.cmd makeTutorials.py push.cmd release.cmd release.ps1 tidy.cmd tidy.py uiCheck.cmd uiCheck.py unpushed.cmd unpushed.py) do (
+rem THE RADIOTRAIL CATALOG MEETS THE TRAIL CONVENTIONS (9 October 2026). A catalog
+rem fetched or restored before RadioTrail had its triggers lacks them, and the
+rem database check fails it; fetchStations --conventions adds whatever indexes and
+rem triggers are missing, in a moment, and changes nothing else.
+if exist "templates\RadioTrail\fetchStations.py" if exist "templates\RadioTrail\RadioTrail.db" (
+  python "templates\RadioTrail\fetchStations.py" --conventions "templates\RadioTrail\RadioTrail.db" >> "%log%" 2>&1
+  echo RadioTrail conventions: exit code !errorlevel!>> "%log%"
+)
   if exist "!homerDev!\scripts\%%F" copy /y "!homerDev!\scripts\%%F" scripts\ >nul
 )
 rem Tools the kit has retired or renamed, and DbDo's own near-duplicates of

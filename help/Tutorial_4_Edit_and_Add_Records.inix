@@ -2,8 +2,8 @@
 
 [about]
 Title=4 - Edit and Add Records
-Intro=A cell edited with F2, a value picked from a list with Control plus F2, and a new record added with Control plus N.
-Setup=JobTrail is open in DbDo.
+Intro=JobTrail, the job-search template, opened; then a cell edited with F2, a value picked from a list with Control plus F2, and a new record added with Control plus N.
+Setup=DbDo is open; this walk opens JobTrail.
 Homework=Add a record of your own and fill three of its fields.
 
 [step]
@@ -18,6 +18,20 @@ Say=Alt plus Control plus D, D for DbDo, opens it or brings it forward.
 Key=Alt+Control+D
 Hear=DbDo
 Hear=DbDo ready
+
+[step]
+
+Say=JobTrail comes next: a template for a job search, whose jobs, employers and contacts are linked to one another, so it shows more of what DbDo can do. Control plus O, O for Open; the templates are in the Help menu, under Template Databases, and I open JobTrail.
+Key=Control+O
+Hear=Open Database dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I choose JobTrail and press Enter. Shift plus Z says where I am.
+Key=Shift+Z
+Hear=jobs, 12 records, no filter, sorted by employer
+Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 

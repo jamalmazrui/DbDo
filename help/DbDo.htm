@@ -400,7 +400,7 @@ voices</a></li>
 </ul></li>
 </ul>
 </nav>
-<h1 id="dbdo-user-guide">DbDo User Guide</h1>
+<h2 id="dbdo-user-guide">DbDo User Guide</h2>
 <p>DbDo is a relational database manager built from the ground up for
 people who work by keyboard and screen reader. It opens SQLite, Access,
 Excel, dBASE, and delimited-text files, presents their tables as
@@ -418,8 +418,8 @@ command reference. If you are new to DbDo, read Part 1 in order. If you
 are returning for a specific answer, jump to the reference tables near
 the end.</p>
 <hr />
-<h1 id="part-1-key-concepts">Part 1 — Key concepts</h1>
-<h2 id="what-dbdo-is">What DbDo is</h2>
+<h2 id="part-1-key-concepts">Part 1 — Key concepts</h2>
+<h3 id="what-dbdo-is">What DbDo is</h3>
 <p>DbDo is a single desktop application that presents <strong>two
 interfaces over one live connection</strong> to whatever database you
 open:</p>
@@ -441,8 +441,8 @@ files in their native formats — a SQLite <code>.db</code>, an Access
 <code>.dbf</code>, a <code>.csv</code> — through the appropriate
 database driver. Its value is the <em>interface</em>, not the
 container.</p>
-<h2 id="windows-the-multiple-document-model">Windows: the
-multiple-document model</h2>
+<h3 id="windows-the-multiple-document-model">Windows: the
+multiple-document model</h3>
 <p>DbDo uses a <strong>multiple-document interface (MDI)</strong>. There
 is one application frame, and inside it each open recordset — normally a
 table, sometimes a view or a query result — lives in <strong>its own
@@ -475,7 +475,7 @@ table; <strong>Choose Table</strong> (Control+T) changes the table shown
 in the <em>current</em> window. Open when you want both tables visible
 at once; choose when you simply want to switch what this window is
 looking at.</p>
-<h2 id="the-data-list">The data list</h2>
+<h3 id="the-data-list">The data list</h3>
 <p>Inside each window the records are shown in a <strong>data
 list</strong> — a standard Windows list control with a row per record
 and a column per field. This is the surface you spend most of your time
@@ -488,7 +488,7 @@ instead it has an explicit <strong>marking</strong> system (covered in
 Part 2) so that “which records are selected for an operation” is a
 property you set and query on purpose, not a fragile visual
 highlight.</p>
-<h3 id="virtual-cell-navigation">Virtual cell navigation</h3>
+<h4 id="virtual-cell-navigation">Virtual cell navigation</h4>
 <p>Beyond moving row to row, DbDo lets you move <strong>cell by cell
 within a row</strong> without leaving the list. A <em>virtual
 cursor</em> tracks which column you are on. Move it left and right
@@ -498,8 +498,8 @@ value is and <em>which field</em> it belongs to. This is how you inspect
 a wide record one field at a time by keyboard, and it is what several
 commands mean when they act on “the current column” or “the cell under
 the cursor.”</p>
-<h2 id="two-vocabularies-schema-versus-interface">Two vocabularies:
-schema versus interface</h2>
+<h3 id="two-vocabularies-schema-versus-interface">Two vocabularies:
+schema versus interface</h3>
 <p>DbDo is careful about words, and the guide follows the same
 discipline, because the two halves of the program describe the same data
 with two different vocabularies:</p>
@@ -517,8 +517,8 @@ about moving around and reading.</li>
 angles; likewise a record and a row, and a cell is one field of one
 record. One more term: an absent value is <strong>blank</strong>, never
 “empty” or “null” in the interface.</p>
-<h2 id="the-grid-versus-the-physical-database">The grid versus the
-physical database</h2>
+<h3 id="the-grid-versus-the-physical-database">The grid versus the
+physical database</h3>
 <p>This is the single most important distinction in DbDo.</p>
 <p>The <strong>physical database</strong> is the table as stored on
 disk: every record, every field, in whatever order the file holds
@@ -554,7 +554,7 @@ viewing.</li>
 <p>Whenever a command’s behavior could depend on the current view, this
 guide says explicitly whether it acts on the grid or the physical
 table.</p>
-<h2 id="the-database-cursor">The database cursor</h2>
+<h3 id="the-database-cursor">The database cursor</h3>
 <p>Underneath the grid is a <strong>cursor</strong>: a pointer to the
 <strong>current record</strong>. Exactly one record is current at any
 moment. Almost everything is expressed relative to the cursor:</p>
@@ -574,14 +574,14 @@ file-based databases.</p>
 changing a record, DbDo writes it immediately. There is no separate
 “save the record” step. (The Save command, described later, is a
 different thing — it makes a copy of the whole database.)</p>
-<h2 id="how-fields-are-categorized">How fields are categorized</h2>
+<h3 id="how-fields-are-categorized">How fields are categorized</h3>
 <p>Every field has a <strong>type</strong> (also called its affinity),
 and DbDo uses that type to decide how the field is edited, displayed,
 and validated. On top of the type system sits a small set of
 <strong>standard fields</strong> that DbDo recognizes by name and treats
 specially. Understanding both is the key to designing a database that
 behaves well with a screen reader.</p>
-<h3 id="field-types">Field types</h3>
+<h4 id="field-types">Field types</h4>
 <p>DbDo recognizes these declared types. The first group is text
 refinements — all stored as text, but each tells DbDo how to present and
 edit the field:</p>
@@ -611,7 +611,7 @@ such.</li>
 versus TEXTMEMO versus TEXTMARKDOWN for a field is not cosmetic: it
 determines whether a screen-reader user gets a single-line box, a
 multi-line box, or a Markdown-aware box when they edit that field.</p>
-<h3 id="standard-fields">Standard fields</h3>
+<h4 id="standard-fields">Standard fields</h4>
 <p>DbDo recognizes certain field <strong>names</strong> and maintains or
 exposes them for you. A table need not have all of them; DbDo simply
 uses the ones present. They are, by convention, kept out of the way —
@@ -653,7 +653,7 @@ are <em>content</em> you edit through their own focused dialogs;
 <strong>look</strong>, <strong>prime</strong>, and <strong>unq</strong>
 are <em>derived identity</em> fields DbDo computes so records can be
 named and matched reliably.</p>
-<h3 id="lookups-and-maps">Lookups and maps</h3>
+<h4 id="lookups-and-maps">Lookups and maps</h4>
 <p>Two optional companion tables let a database describe its own
 vocabulary:</p>
 <ul>
@@ -672,11 +672,11 @@ of its own.</li>
 <p>These are conventions, not requirements; a database without them
 simply offers free-text editing, and its relationships are its foreign
 keys.</p>
-<h2 id="keyboard-patterns">Keyboard patterns</h2>
+<h3 id="keyboard-patterns">Keyboard patterns</h3>
 <p>DbDo has three distinct keyboard channels, and recognizing which one
 you are using clears up most confusion about “why did that key do
 that.”</p>
-<h3 id="command-chords">1. Command chords</h3>
+<h4 id="command-chords">1. Command chords</h4>
 <p>Every menu command has a name and, usually, a <strong>chord</strong>
 — a keyboard shortcut shown next to it in the menu. Chords follow a
 consistent <strong>mnemonic rule</strong>: the letter in the chord is
@@ -686,8 +686,8 @@ Column</em> is Alt+Shift+S; <em>Generate from Grid</em> is Alt+Shift+G;
 can usually guess its chord, and vice versa. Chords are grouped by
 modifier so related commands share a shape — the Say-something status
 commands are mostly Shift+letter, for instance.</p>
-<h3 id="convenience-keys-in-text-fields">2. Convenience keys in text
-fields</h3>
+<h4 id="convenience-keys-in-text-fields">2. Convenience keys in text
+fields</h4>
 <p>When you are <em>inside a text box</em> — editing a cell, a note, a
 filter — a set of <strong>convenience keys</strong> is available in
 addition to normal typing. These operate on the text under your cursor
@@ -712,8 +712,8 @@ in your browser.</li>
 </ul>
 <p>These are on by default and can be turned off with the
 <code>extraKeys</code> setting.</p>
-<h3 id="the-dot-prompt-and-status-queries">3. The dot prompt and status
-queries</h3>
+<h4 id="the-dot-prompt-and-status-queries">3. The dot prompt and status
+queries</h4>
 <p>The <strong>dot prompt</strong> (Enter Console, Control+GraveAccent)
 is the command-line channel: type dBASE-style commands or short SQL and
 press Enter. It is covered in Part 5.</p>
@@ -724,7 +724,7 @@ Status, Say Database, Say Order, Say Yield (record count), Say Filter,
 Say Position, Say Cell, and many more. These are how you interrogate the
 screen on demand instead of hunting for information, and they are listed
 in full in the command reference.</p>
-<h3 id="key-help">Key Help</h3>
+<h4 id="key-help">Key Help</h4>
 <p><strong>Key Help Toggle</strong> (Control+F1) turns on a learning
 mode: while it is on, pressing a command chord
 <strong>announces</strong> what that command is and does <strong>instead
@@ -734,9 +734,9 @@ you explore the keyboard safely. The <strong>Hotkey Summary</strong>
 respectively, an auditable listing of every command with its key, and a
 single filterable list of all commands you can search and run.</p>
 <hr />
-<h1 id="part-2-working-with-data">Part 2 — Working with data</h1>
-<h2 id="opening-databases-and-recordsets">Opening databases and
-recordsets</h2>
+<h2 id="part-2-working-with-data">Part 2 — Working with data</h2>
+<h3 id="opening-databases-and-recordsets">Opening databases and
+recordsets</h3>
 <ul>
 <li><strong>Open Template Database</strong> starts from one of the
 databases DbDo ships – BookTrail, JobTrail and the rest – opening your
@@ -758,7 +758,7 @@ Database</strong> compares two.</li>
 <em>Next/Previous Visited Table</em> commands walk the tables you have
 already looked at. <strong>Choose View</strong> (and the object-switch
 commands) do the same for saved views.</p>
-<h2 id="navigating-records">Navigating records</h2>
+<h3 id="navigating-records">Navigating records</h3>
 <p>The cursor moves with ordinary list navigation (arrow keys, Home,
 End) and with explicit commands:</p>
 <ul>
@@ -776,7 +776,7 @@ a long table.</li>
 current column starts with a new letter — type-ahead through a sorted
 column.</li>
 </ul>
-<h2 id="editing-records">Editing records</h2>
+<h3 id="editing-records">Editing records</h3>
 <ul>
 <li><strong>New Record</strong> (Control+N) adds a record; <strong>New
 Copy</strong> (Control+Shift+N) starts a new record pre-filled from the
@@ -803,7 +803,7 @@ record with confirmation; <strong>Delete Without Confirmation</strong>
 </ul>
 <p>All edits auto-commit. If a table is read-only, <strong>Read Only
 Toggle</strong> (Alt+Z) reports and controls that.</p>
-<h2 id="marking-records">Marking records</h2>
+<h3 id="marking-records">Marking records</h3>
 <p>Marking is DbDo’s explicit, queryable alternative to visual
 multi-select. The <code>marked</code> field carries the state.</p>
 <ul>
@@ -823,7 +823,7 @@ unmark range never clobber each other.</li>
 </ul>
 <p>Marked records can then be reported, filtered, or exported as a set,
 and several Say commands report only the marked ones.</p>
-<h2 id="filtering-and-sorting">Filtering and sorting</h2>
+<h3 id="filtering-and-sorting">Filtering and sorting</h3>
 <p>Filtering and sorting reshape the grid without touching the physical
 table.</p>
 <ul>
@@ -843,13 +843,13 @@ ignores capital letters, so “spencer” sorts with “Spencer”.</p>
 <p>Because these only change the view, you can slice a large table down
 to what you need, work on it, and clear the filter to see everything
 again — the records were never removed.</p>
-<h2 id="choosing-displayed-columns">Choosing displayed columns</h2>
+<h3 id="choosing-displayed-columns">Choosing displayed columns</h3>
 <p><strong>Select Columns to Display</strong> (Alt+S) chooses which
 fields appear in the grid, and in what order. Hiding the standard
 housekeeping fields and showing only the columns you are working with
 keeps cell-by-cell navigation short. The choice is part of the grid, so
 it travels with the window and is remembered.</p>
-<h2 id="relationships-between-tables">Relationships between tables</h2>
+<h3 id="relationships-between-tables">Relationships between tables</h3>
 <p>DbDo recognizes relationships recorded in either of two ways, or both
 in the same database, and treats them alike:</p>
 <ul>
@@ -889,15 +889,15 @@ them.</p>
 from a person to the jobs they are a contact for – entirely by keyboard,
 with each step announced.</p>
 <hr />
-<h1 id="part-3-producing-output">Part 3 — Producing output</h1>
+<h2 id="part-3-producing-output">Part 3 — Producing output</h2>
 <p>DbDo offers several ways to turn data into something you can read,
 share, or file. They differ in <strong>what they act on</strong> and
 <strong>what they produce</strong>, and it is worth learning the
 distinction so you reach for the right one. There are two single-column
 tools, one grid tool, one physical-table tool, and the scripting
 facility.</p>
-<h2 id="statistics-from-column-altshifts">Statistics from Column
-(Alt+Shift+S)</h2>
+<h3 id="statistics-from-column-altshifts">Statistics from Column
+(Alt+Shift+S)</h3>
 <p>Acts on <strong>one column</strong> — the column under the virtual
 cursor. It computes type-aware descriptive statistics: for a numeric
 column, things like count, populated percentage, minimum, maximum, mean,
@@ -906,15 +906,15 @@ fences, and mode; for dates, a temporal summary; for text, the most
 frequent values. It speaks and shows the result. Use it to understand a
 single field at a glance. Its name emphasizes that it works <em>from a
 column</em>.</p>
-<h2 id="graphics-column-controlshiftg">Graphics Column
-(Control+Shift+G)</h2>
+<h3 id="graphics-column-controlshiftg">Graphics Column
+(Control+Shift+G)</h3>
 <p>Also acts on <strong>one column</strong> — the column under the
 virtual cursor — but produces a <strong>chart</strong> of that column
 (via Excel, out of process – the one export that still needs Office)
 rather than a table of numbers. Use it when you want a quick visual of
 one field’s distribution.</p>
-<h2 id="generate-from-grid-altshiftg">Generate from Grid
-(Alt+Shift+G)</h2>
+<h3 id="generate-from-grid-altshiftg">Generate from Grid
+(Alt+Shift+G)</h3>
 <p>Acts on the <strong>virtual grid</strong> — the current filtered,
 sorted, column-selected view — and is the ad-hoc, exploratory tool. It
 profiles the grid’s columns by type and offers a menu of outputs:</p>
@@ -932,7 +932,7 @@ the physical database</strong>: it analyzes <em>what you are looking
 at</em>. Filter and sort first to shape the grid, then Generate from
 Grid to analyze that exact view. It is one-off and exploratory; nothing
 is saved except the specific output file you ask for.</p>
-<h2 id="run-report-altshiftr">Run Report (Alt+Shift+R)</h2>
+<h3 id="run-report-altshiftr">Run Report (Alt+Shift+R)</h3>
 <p>Acts on the <strong>physical table</strong> and produces a
 <strong>defined, reproducible document</strong>. Where Generate from
 Grid analyzes whatever you happen to be viewing, Run Report renders a
@@ -954,7 +954,7 @@ aggregates like <code>$count</code>, <code>$sum_&lt;field&gt;</code>,
 the open database, offers a pick-list of the definitions it finds, and
 writes the result as Markdown you can convert onward to HTML, DOCX, or
 PDF. The report-template language is detailed in Part 6.</p>
-<h2 id="snippets-and-scripts">Snippets and scripts</h2>
+<h3 id="snippets-and-scripts">Snippets and scripts</h3>
 <p>The scripting facility is for <strong>reusable automation</strong>
 rather than one-off output. A snippet is a small script file kept in the
 Scripts folder (and, for a database’s own automation, beside the
@@ -977,7 +977,7 @@ edit one with <strong>Edit Snippet</strong> (Alt+Shift+V), which offers
 the existing files plus a “new snippet” entry; open the folder with
 <strong>Open Script Folder</strong>. Use snippets when you find yourself
 doing the same multi-step task repeatedly.</p>
-<h2 id="which-one-do-i-want">Which one do I want?</h2>
+<h3 id="which-one-do-i-want">Which one do I want?</h3>
 <table>
 <colgroup>
 <col style="width: 16%" />
@@ -1032,8 +1032,8 @@ doing the same multi-step task repeatedly.</p>
 <em>there</em>; <strong>snippets</strong> automate what you
 <em>do</em>.</p>
 <hr />
-<h1 id="part-4-importing-exporting-opening-saving">Part 4 — Importing,
-exporting, opening, saving</h1>
+<h2 id="part-4-importing-exporting-opening-saving">Part 4 — Importing,
+exporting, opening, saving</h2>
 <p>DbDo distinguishes four file operations that are easy to confuse. The
 distinction is about whether the data keeps its original shape or is
 reshaped into DbDo’s conventions.</p>
@@ -1066,8 +1066,8 @@ dBASE (<code>.dbf</code>), and delimited text (<code>.csv</code>,
 <code>.tsv</code>, <code>.tab</code>, <code>.txt</code>). The right
 driver is chosen from the extension.</p>
 <hr />
-<h1 id="part-5-sql-and-scripting">Part 5 — SQL and scripting</h1>
-<h2 id="running-sql">Running SQL</h2>
+<h2 id="part-5-sql-and-scripting">Part 5 — SQL and scripting</h2>
+<h3 id="running-sql">Running SQL</h3>
 <ul>
 <li><strong>Query</strong> (Control+Q) opens a box where you type SQL
 and run it; the results open as a recordset you can navigate like any
@@ -1083,7 +1083,7 @@ console with the SQLean extension functions available (see Part 6).</li>
 uncommitted context the way the rest of the program does. Because the
 cursor is client-side, result sets are fully navigable — forward,
 backward, and by position.</p>
-<h2 id="the-scripting-engine">The scripting engine</h2>
+<h3 id="the-scripting-engine">The scripting engine</h3>
 <p>DbDo’s scripting language is <strong>JScript .NET</strong>. The same
 engine powers three things, so learning it once pays off in all of them:
 <strong>Invoke Script</strong> for <code>.js</code> snippets,
@@ -1103,11 +1103,11 @@ conditionally choose field values.</li>
 </ul>
 <p>Snippet types and how to run them are covered in Part 3.</p>
 <hr />
-<h1 id="part-6-reference">Part 6 — Reference</h1>
-<h2 id="command-reference-by-menu">Command reference by menu</h2>
+<h2 id="part-6-reference">Part 6 — Reference</h2>
+<h3 id="command-reference-by-menu">Command reference by menu</h3>
 <p>Chords use screen-reader-canonical key names. A command with no chord
 is reachable through its menu or through Alternate Menu (Alt+F10).</p>
-<h3 id="file-menu">File menu</h3>
+<h4 id="file-menu">File menu</h4>
 <table>
 <thead>
 <tr class="header">
@@ -1202,7 +1202,7 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 </tr>
 </tbody>
 </table>
-<h3 id="edit-menu">Edit menu</h3>
+<h4 id="edit-menu">Edit menu</h4>
 <table>
 <thead>
 <tr class="header">
@@ -1329,7 +1329,7 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 </tr>
 </tbody>
 </table>
-<h3 id="navigate-menu">Navigate menu</h3>
+<h4 id="navigate-menu">Navigate menu</h4>
 <table>
 <thead>
 <tr class="header">
@@ -1396,7 +1396,7 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 </tr>
 </tbody>
 </table>
-<h3 id="query-menu">Query menu</h3>
+<h4 id="query-menu">Query menu</h4>
 <p>The Query menu holds record inspection and the Say-X status
 family.</p>
 <table>
@@ -1557,7 +1557,7 @@ family.</p>
 </tr>
 </tbody>
 </table>
-<h3 id="misc-menu">Misc menu</h3>
+<h4 id="misc-menu">Misc menu</h4>
 <table>
 <thead>
 <tr class="header">
@@ -1692,7 +1692,7 @@ family.</p>
 </tr>
 </tbody>
 </table>
-<h3 id="window-menu">Window menu</h3>
+<h4 id="window-menu">Window menu</h4>
 <table>
 <thead>
 <tr class="header">
@@ -1735,7 +1735,7 @@ family.</p>
 </tr>
 </tbody>
 </table>
-<h3 id="help-menu">Help menu</h3>
+<h4 id="help-menu">Help menu</h4>
 <table>
 <thead>
 <tr class="header">
@@ -1786,7 +1786,7 @@ family.</p>
 </tr>
 </tbody>
 </table>
-<h2 id="standard-fields-summary">Standard fields (summary)</h2>
+<h3 id="standard-fields-summary">Standard fields (summary)</h3>
 <table>
 <thead>
 <tr class="header">
@@ -1853,7 +1853,7 @@ family.</p>
 </tr>
 </tbody>
 </table>
-<h2 id="field-types-summary">Field types (summary)</h2>
+<h3 id="field-types-summary">Field types (summary)</h3>
 <table>
 <thead>
 <tr class="header">
@@ -1915,7 +1915,7 @@ family.</p>
 </tr>
 </tbody>
 </table>
-<h2 id="the-report-template-language">The report-template language</h2>
+<h3 id="the-report-template-language">The report-template language</h3>
 <p>A report definition is a <code>[section]</code> in a
 <strong>report.inix</strong> file beside the database. Directives
 configure the source; bands lay out the text.</p>
@@ -1952,8 +1952,8 @@ whitespace normalized, so grouped output stays tidy.</li>
 </ul>
 <p>Reports render to Markdown, which you can convert to HTML, DOCX, or
 PDF.</p>
-<h2 id="the-.inix-configuration-format">The .inix configuration
-format</h2>
+<h3 id="the-.inix-configuration-format">The .inix configuration
+format</h3>
 <p>DbDo’s own settings and several data files use
 <strong>.inix</strong>, an INI-style format: <code>[Section]</code>
 headers followed by <code>name = value</code> lines, with <code>;</code>
@@ -1993,20 +1993,20 @@ which populate the matching command’s combo box. A
 view — <strong>SelectFields</strong>, <strong>OrderFields</strong>, and
 <strong>WhereFilter</strong> — recalled when the table is next
 opened.</p>
-<h2 id="sqlean-extensions">SQLean extensions</h2>
+<h3 id="sqlean-extensions">SQLean extensions</h3>
 <p>When the SQLean extension functions are available, they add a large
 library of SQL functions — string and text helpers, math, statistics,
 fuzzy matching, regular expressions, and more — usable in queries and
 reachable through the <strong>Sqlean Console</strong>
 (Control+Shift+GraveAccent). They extend what your <code>Query</code>
 and report expressions can compute without leaving SQL.</p>
-<h2 id="template-databases">Template databases</h2>
+<h3 id="template-databases">Template databases</h3>
 <p>DbDo ships with template databases that follow the same column
 conventions as your own data, reachable from <strong>Template
 Databases</strong> in the Help menu. They are the fastest way to see the
 standard fields, lookups, relationships, and reports working together on
 real records.</p>
-<h2 id="screen-reader-settings">Screen-reader settings</h2>
+<h3 id="screen-reader-settings">Screen-reader settings</h3>
 <p>DbDo speaks directly to supplement your screen reader’s own
 announcements. <strong>Extra Speech</strong> (toggled from the Help
 menu) controls DbDo’s additional commentary without affecting your
@@ -2015,7 +2015,7 @@ off leaves only the screen reader’s own speech. <strong>Command
 Echo</strong> controls whether commands announce a confirmation as they
 run. <strong>Test Screen Reader Speech</strong> verifies that DbDo can
 reach your screen reader.</p>
-<h2 id="persistence-and-logging">Persistence and logging</h2>
+<h3 id="persistence-and-logging">Persistence and logging</h3>
 <p>DbDo remembers per-database state in the database’s own
 <code>&lt;DbName&gt;.inix</code> — the last table, sort, filter, and
 displayed columns, plus a pinned <strong>InitialTable</strong> and the
@@ -2025,9 +2025,9 @@ database returns you to where you were. Activity is written to
 menu reveals the log and starts an email with its path, for reporting
 issues.</p>
 <hr />
-<h1 id="part-7-development">Part 7 — Development</h1>
+<h2 id="part-7-development">Part 7 — Development</h2>
 <p>This part is for people building DbDo from source.</p>
-<h2 id="requirements">Requirements</h2>
+<h3 id="requirements">Requirements</h3>
 <ul>
 <li>.NET Framework 4.8, 64-bit.</li>
 <li>The build tools invoked by <code>build.cmd</code> (the .NET
@@ -2035,22 +2035,22 @@ Framework C# compiler and Inno Setup for packaging).</li>
 <li>The SQLite ODBC driver and the bundled dependency DLLs the build
 fetches.</li>
 </ul>
-<h2 id="build">Build</h2>
+<h3 id="build">Build</h3>
 <p>Compile with <strong><code>build.cmd</code></strong>, which builds
 <code>DbDo.exe</code>, converts this guide and the README to HTML with
 pandoc, and packages the installer with Inno Setup
 (<code>DbDo_setup.iss</code>). The dependency DLLs are gathered by
 <code>getDbDoDeps.ps1</code>. To replicate the development layout, keep
 the program and its subfolders under <code>C:\DbDo</code>.</p>
-<h2 id="architecture-one-connection-two-interfaces">Architecture: one
-connection, two interfaces</h2>
+<h3 id="architecture-one-connection-two-interfaces">Architecture: one
+connection, two interfaces</h3>
 <p>DbDo maintains a single live database connection and presents it
 through both the graphical interface and the dot prompt, as described in
 Part 1. Each MDI child window owns its own manager and cursor, so tables
 are independent, while the connection and drivers are shared. The cursor
 is client-side, which is what makes instant sort, filter, and backward
 navigation possible on file-based databases.</p>
-<h2 id="coding-style">Coding style</h2>
+<h3 id="coding-style">Coding style</h3>
 <p>DbDo is written in the “Camel Type” style. The full, authoritative
 description is a separate distributed file,
 <strong><code>Camel_Type_CSharp.md</code></strong>; consult it for
@@ -2058,7 +2058,7 @@ specifics rather than duplicating them here. In brief, it uses
 Hungarian-style prefixes, lower-camel method names, alphabetized
 declarations, double-quoted strings, and for-each iteration; database
 identifiers use lower_snake_case.</p>
-<h2 id="layout-by-code">Layout by Code</h2>
+<h3 id="layout-by-code">Layout by Code</h3>
 <p>DbDo builds its dialogs and menus <strong>in code</strong> rather
 than with a visual designer, so that every control is a standard,
 screen-reader-friendly Windows control created and labeled explicitly.
@@ -2066,14 +2066,14 @@ The label-based-controls helpers assemble a dialog from labels, input
 boxes, memo boxes, list boxes, and pick boxes with OK/Cancel or custom
 buttons, keeping tab order and accessible names correct by
 construction.</p>
-<h2 id="file-layout">File layout</h2>
+<h3 id="file-layout">File layout</h3>
 <p>The source is a single large <code>DbDo.cs</code>. Alongside it live
 the build script, the installer script, the dependency fetcher, the
 <code>.inix</code> configuration, this guide (<code>DbDo.md</code>), the
 README, the coding-style file, and the template databases with their
 scripts and <code>report.inix</code> definitions.</p>
-<h2 id="nothing-and-the-two-kinds-of-it">Nothing, and the two kinds of
-it</h2>
+<h3 id="nothing-and-the-two-kinds-of-it">Nothing, and the two kinds of
+it</h3>
 <p>A field can be empty in two ways, and databases have always kept them
 apart.</p>
 <ul>
@@ -2082,7 +2082,7 @@ or does not apply.</li>
 <li><strong>blank</strong> means somebody said nothing: a real value, a
 string of no length.</li>
 </ul>
-<h3 id="what-dbdo-stores">What DbDo stores</h3>
+<h4 id="what-dbdo-stores">What DbDo stores</h4>
 <p><strong>An empty box stores null.</strong> When you leave a field
 alone, or clear it, DbDo writes null rather than an empty string.</p>
 <p>This is the settled practice, not a preference. Allowing both in one
@@ -2095,7 +2095,7 @@ values are written, rather than leaving it to each dialog.</p>
 <p>You can still store an empty string on purpose – a space is a value –
 and a database built elsewhere keeps whatever it already holds. DbDo
 changes nothing it did not write.</p>
-<h3 id="what-dbdo-says">What DbDo says</h3>
+<h4 id="what-dbdo-says">What DbDo says</h4>
 <p><strong>A null field says “null”. An empty one says
 “blank”.</strong></p>
 <p>Both words are borrowed rather than invented. Database tools print
@@ -2105,8 +2105,8 @@ Browser and SQL Server Management Studio do the same, and the sqlite3
 shell has a setting for choosing the word. “Blank” is what JAWS and NVDA
 say when they reach an empty cell, in Excel and in any grid, so it is a
 word you have heard for years that already means exactly this.</p>
-<h3 id="what-the-screen-readers-do-and-what-dbdo-does-about-it">What the
-screen readers do, and what DbDo does about it</h3>
+<h4 id="what-the-screen-readers-do-and-what-dbdo-does-about-it">What the
+screen readers do, and what DbDo does about it</h4>
 <p>The three readers disagree about an empty cell, and DbDo settles it
 rather than leaving it to them:</p>
 <ul>
@@ -2131,8 +2131,8 @@ which NVDA does not read either.</p>
 cell and you get what the cell holds, not the word; the same is true of
 exports and reports. Set <strong>ShowEmptyWords</strong> to No in
 DbDo.inix for the older, silent grid.</p>
-<h3 id="what-microsoft-access-does-for-comparison">What Microsoft Access
-does, for comparison</h3>
+<h4 id="what-microsoft-access-does-for-comparison">What Microsoft Access
+does, for comparison</h4>
 <p>Access reaches the same place from the other end. Its text boxes trim
 what you type and save an empty box as null; a zero-length string cannot
 be typed into a datasheet at all, and takes an update query to create.
@@ -2143,8 +2143,8 @@ there is no visible difference between a zero-length string and a null,
 and the distinction should not be forced on the end user.</p>
 <p>DbDo does the same thing at the point of writing and then, unlike
 Access, can tell you which one you are on when you ask.</p>
-<h3 id="why-it-is-worth-the-distinction">Why it is worth the
-distinction</h3>
+<h4 id="why-it-is-worth-the-distinction">Why it is worth the
+distinction</h4>
 <ul>
 <li>A job with no applied date has not been applied to. A job whose
 applied date was cleared has been un-applied. The first is a lead; the
@@ -2162,7 +2162,7 @@ before every value, so the rows nobody has filled in arrive at the top
 of an ascending sort. That is usually what you want and always worth
 knowing.</li>
 </ul>
-<h2 id="the-help-menu">The Help menu</h2>
+<h3 id="the-help-menu">The Help menu</h3>
 <p>Every document that comes with DbDo opens from Help, in your web
 browser. The F1 keys open the ones you will want most. F1 is help in
 every Windows program, and each extra key picks a different kind of
@@ -2185,7 +2185,7 @@ them all.</li>
 Guide, the License, and the Tutorials Transcript. These are used rarely,
 so they sit one level down.</li>
 </ul>
-<h2 id="four-ways-to-reach-a-record">Four ways to reach a record</h2>
+<h3 id="four-ways-to-reach-a-record">Four ways to reach a record</h3>
 <p>Each has its own letter, and the letter is the first letter of its
 own word.</p>
 <ul>
@@ -2227,8 +2227,8 @@ want to.</li>
 <p>The first three need no SQL at all. The old name for Filter Records
 was “Where Filter”, which promised SQL to people who never write any;
 the dialog has not changed.</p>
-<h2 id="sharing-a-database-with-somebody-else">Sharing a database with
-somebody else</h2>
+<h3 id="sharing-a-database-with-somebody-else">Sharing a database with
+somebody else</h3>
 <p>A DbDo database is one file, so sharing it is sending that file. What
 the person receiving it does depends on whether they already keep one of
 their own.</p>
@@ -2241,7 +2241,7 @@ Database</strong>, and pick BookTrail, which opens their own copy under
 their own account. Then <strong>Merge Data, Alt+M</strong>, and choose
 the file they were sent, wherever they saved it. DbDo folds the records
 in.</p>
-<h3 id="how-a-merge-decides">How a merge decides</h3>
+<h4 id="how-a-merge-decides">How a merge decides</h4>
 <p>Every record carries a <strong>prime</strong>, the computed key built
 from the fields that say which record it is – for books, the author and
 the title. That is what DbDo compares.</p>
@@ -2269,14 +2269,14 @@ one entry per table, field and value.</p>
 <p><strong>Nothing is ever deleted by a merge</strong>, and DbDo copies
 your database first, leaving it beside the original as
 <code>&lt;name&gt;-before-merge.db</code>.</p>
-<h3 id="a-shared-database-knows-how-to-present-itself">A shared database
-knows how to present itself</h3>
+<h4 id="a-shared-database-knows-how-to-present-itself">A shared database
+knows how to present itself</h4>
 <p>The fields a row speaks, the order and the filter are kept inside the
 database as well as in the settings file beside it. So a database you
 send somebody arrives looking the way you left it. Your own settings
 file still wins on your own computer, which means your column choices do
 not follow the file to everybody else.</p>
-<h2 id="files-that-are-not-databases">Files that are not databases</h2>
+<h3 id="files-that-are-not-databases">Files that are not databases</h3>
 <p>Spreadsheets and text files are not databases, so DbDo treats them
 all the same way, and the rule is one sentence: <strong>the file you
 opened stays the file of record.</strong></p>
@@ -2297,7 +2297,7 @@ opened from your documents stays in your documents.</li>
 </ul>
 <p>Access and SQLite files are databases already, so DbDo opens them as
 they are and your edits go straight into them.</p>
-<h2 id="bringing-in-a-spreadsheet">Bringing in a spreadsheet</h2>
+<h3 id="bringing-in-a-spreadsheet">Bringing in a spreadsheet</h3>
 <p>There are two ways, and one of them is almost always the right
 one.</p>
 <p><strong>Import, Alt+I</strong> – I for Import. DbDo reads the
@@ -2313,7 +2313,7 @@ engine is installed, and changes go back into the workbook.</p>
 Control+S writes your changes into the file you opened. Import is for
 when you want a new database and no further connection to the
 workbook.</p>
-<h2 id="where-a-databases-files-live">Where a database’s files live</h2>
+<h3 id="where-a-databases-files-live">Where a database’s files live</h3>
 <p>Everything that belongs to one database sits in one folder, named
 after the database:</p>
 <pre><code>BookTrail\BookTrail.db      the database
@@ -2333,7 +2333,7 @@ name appears in both, the database’s own script wins.</p>
 folder under <code>templates</code>, and DbDo copies them into
 <code>%LOCALAPPDATA%\DbDo\data</code> the first time you run it, so your
 copies are yours to change.</p>
-<h2 id="the-template-databases">The template databases</h2>
+<h3 id="the-template-databases">The template databases</h3>
 <p>Each template is a folder under <code>templates</code>, copied into
 your own folder the first time you run DbDo. The ones written for DbDo
 share the Trail name:</p>
@@ -2363,8 +2363,8 @@ teachers, classes</li>
 <p><strong>chinook</strong> and <strong>northwind</strong> keep their
 usual names. They are the two databases most database tutorials use, so
 the names are how people recognise them.</p>
-<h3 id="howtotrail-holds-both-systems">HowToTrail holds both
-systems</h3>
+<h4 id="howtotrail-holds-both-systems">HowToTrail holds both
+systems</h4>
 <p>The Windows and iOS how-to databases were the same shape, and
 answering “how do I do this on my phone?” meant opening a different
 file. They are one database now, and the system is a field:
@@ -2372,8 +2372,8 @@ file. They are one database now, and the system is a field:
 true on both. Press F4 in the field to pick. To work in one system only,
 put <code>platform = "Windows"</code> in the Filter Records, Control+F,
 and it stays until you clear it.</p>
-<h3 id="radiotrail-plays-internet-radio">RadioTrail plays Internet
-radio</h3>
+<h4 id="radiotrail-plays-internet-radio">RadioTrail plays Internet
+radio</h4>
 <p>Fourteen stations are in the template to start. To build the real
 thing, run <strong><code>fetchStations</code></strong> in the template’s
 folder, <code>templates\RadioTrail</code>. It begins by measuring what
@@ -2426,7 +2426,7 @@ status and rating are never written by the script, and notes and tags
 are only added to. <code>fetchStations --country "United States"</code>
 keeps a run to one country; <code>--catalog-only</code> skips the
 asking; <code>--enrich-only</code> does only that.</p>
-<h4 id="the-spoken-walks">The spoken walks</h4>
+<h5 id="the-spoken-walks">The spoken walks</h5>
 <p>Every Homer program has twelve spoken walks, Help menu, Play
 Tutorials, in the same order: 00 overview and table of contents; 01
 install and launch; 02 what the screen is made of; 03 the rules every
@@ -2442,8 +2442,8 @@ adding the state – then playing what was found, recording it, and
 keeping it as a favorite. The walks’ scripts live in <code>help</code>;
 a database’s own files – its settings, its scripts – live in its
 template folder.</p>
-<h4 id="where-radiotrails-data-and-design-come-from">Where RadioTrail’s
-data and design come from</h4>
+<h5 id="where-radiotrails-data-and-design-come-from">Where RadioTrail’s
+data and design come from</h5>
 <p>The stations are from <strong>Radio Browser</strong>, a public
 directory kept by volunteers, and from <strong>SomaFM</strong>’s own
 channel list; the official records are from <strong>Wikipedia</strong>.
@@ -2454,8 +2454,8 @@ listener has written – follow <strong>Quill Radio</strong>, the
 successor to the ACB Radio Tuner, whose published requirements and
 source were studied while RadioTrail was built. RadioTrail owes it a
 debt, and its listeners the ten ACB Media streams.</p>
-<h3 id="collectiontrail-holds-whatever-you-collect">CollectionTrail
-holds whatever you collect</h3>
+<h4 id="collectiontrail-holds-whatever-you-collect">CollectionTrail
+holds whatever you collect</h4>
 <p>Stamps, coins, records and tools answer the same questions, so they
 share one table and a <strong>collection</strong> field says which
 collection a thing belongs to. Keep everything in one file, or make a
@@ -2463,7 +2463,7 @@ copy for each collection.</p>
 <p>When a collection needs fields of its own, make it its own database.
 CellarTrail is the example: wine wants a vintage, a drinking window and
 a bottle count that falls as you drink it.</p>
-<h2 id="booktrail-for-books">BookTrail, for books</h2>
+<h3 id="booktrail-for-books">BookTrail, for books</h3>
 <p>BookTrail is a template database for the books you have read, are
 reading, and mean to read. One table, books, holds the author, title,
 subtitle, narrator, series and volume, status, format, source, catalog
@@ -2482,7 +2482,7 @@ between 6 and 7 sorts between them, and 10 comes after 9.</li>
 <li><strong>Formats a blind reader uses</strong>: BARD audio, commercial
 audio, braille, Bookshare text, large print, eBook and print.</li>
 </ul>
-<h2 id="the-spoken-walkthroughs">The spoken walkthroughs</h2>
+<h3 id="the-spoken-walkthroughs">The spoken walkthroughs</h3>
 <p><strong>Help, Play Tutorials</strong> opens
 <code>Tutorials.mkv</code> – fourteen walkthroughs, about three minutes
 each, as one recording with a chapter at the start of every one. DbDo
@@ -2493,8 +2493,8 @@ Control+Page Down and Control+Page Up move from one walkthrough to the
 next.</p>
 <p>The same walkthroughs are written out in <code>Tutorials.md</code>,
 in the help folder, for reading rather than listening.</p>
-<h2 id="asking-the-model-on-your-computer">Asking the model on your
-computer</h2>
+<h3 id="asking-the-model-on-your-computer">Asking the model on your
+computer</h3>
 <p><strong>F12, Chat with AI</strong>, asks a plain question.
 <strong>Shift+F12, Chat about Table</strong>, asks the same kind of
 question with the table sent alongside it: its name, its columns, how
@@ -2506,7 +2506,7 @@ across all three. Nothing leaves your computer: Ollama runs locally and
 the model sits in your own profile. If Ollama is not installed, either
 command says so and tells you how to add it – and it is shared with
 EdSharp and FileDir, so installing it once covers all three.</p>
-<h2 id="two-keys-worth-knowing-early">Two keys worth knowing early</h2>
+<h3 id="two-keys-worth-knowing-early">Two keys worth knowing early</h3>
 <p><strong>Shift+C, Say Cell</strong>, answers in three short
 utterances: the column, then where the row is, then the value – “title”,
 “row 2 of 4”, “Accessibility Analyst”. Three answers are easier to take
@@ -2514,7 +2514,7 @@ in than one long line, and nothing is added between them.</p>
 <p><strong>Shift+Z, Say Status</strong>, gives the summary: which table,
 which row of how many, and the order. Z is the bottom of the alphabet,
 and the status bar is the bottom of the window.</p>
-<h2 id="tables-dbdo-keeps-for-itself">Tables DbDo keeps for itself</h2>
+<h3 id="tables-dbdo-keeps-for-itself">Tables DbDo keeps for itself</h3>
 <p>Two tables in every DbDo database belong to DbDo rather than to
 you:</p>
 <ul>
@@ -2539,13 +2539,13 @@ while browsing, not about permission.</p>
 <p>SQLite’s own tables – anything beginning with <code>sqlite_</code>,
 and the <code>sqlean_</code> tables the extensions create – are filtered
 out earlier and are never offered at all.</p>
-<h2 id="look-and-prime-the-two-computed-columns">look and prime: the two
-computed columns</h2>
+<h3 id="look-and-prime-the-two-computed-columns">look and prime: the two
+computed columns</h3>
 <p>Every table DbDo makes carries two columns that nobody types into.
 They are computed from the fields beside them and kept up to date by the
 database itself.</p>
-<h3 id="look-a-glimpse-of-a-record-from-somewhere-else">look: a glimpse
-of a record from somewhere else</h3>
+<h4 id="look-a-glimpse-of-a-record-from-somewhere-else">look: a glimpse
+of a record from somewhere else</h4>
 <p><code>look</code> is what a record looks like when it is mentioned
 somewhere other than its own table.</p>
 <p>The idea is older than DbDo. In Clipper, under DOS, a form with a
@@ -2565,8 +2565,8 @@ line.</p>
 rest, it is one keystroke away: Enter opens the record, and Shift plus R
 lists what this record is related to, showing each related record by its
 own <code>look</code>.</p>
-<h3 id="prime-the-primary-key-computed">prime: the primary key,
-computed</h3>
+<h4 id="prime-the-primary-key-computed">prime: the primary key,
+computed</h4>
 <p><code>prime</code> is short for primary key, and it is a primary key
 in the sense that matters rather than the sense SQL means.</p>
 <p>The table does have a formal key – <code>&lt;table&gt;_id</code>, a
@@ -2587,11 +2587,11 @@ value instead of three, in SQL or in any language:
 records a link as <code>prime1</code>, a kind, and <code>prime2</code> –
 so a relationship needs no knowledge of how either table numbers its
 rows.</p>
-<h3 id="the-difference-in-one-line">The difference in one line</h3>
+<h4 id="the-difference-in-one-line">The difference in one line</h4>
 <p><code>look</code> is for a person, joined with spaces so it reads
 aloud. <code>prime</code> is for a program, joined without them so it
 matches exactly.</p>
-<h2 id="how-a-say-command-answers">How a Say command answers</h2>
+<h3 id="how-a-say-command-answers">How a Say command answers</h3>
 <p>Every Say command answers in one shape:</p>
 <pre><code>&lt;name&gt;: &lt;value&gt;</code></pre>
 <p>The name is the word in the Say menu and in the hotkey list, so the
@@ -2615,7 +2615,7 @@ already calls that field:</p>
 </ul>
 <p>One press speaks. A second press within a moment shows the same text
 in a read-only window you can read line by line and copy from.</p>
-<h3 id="the-say-keys">The Say keys</h3>
+<h4 id="the-say-keys">The Say keys</h4>
 <ul>
 <li>Shift+A – added</li>
 <li>Shift+B – bookmark, how many are saved and the newest</li>
@@ -2665,8 +2665,8 @@ they are different facts.</p>
 <p>Shift+J used to open the Jump dialog. It now says the jump text
 instead, which is what Say Jump on that key was always meant to do. Jump
 to Record keeps Control+J.</p>
-<h2 id="credits-for-the-tutorial-voices">Credits for the tutorial
-voices</h2>
+<h3 id="credits-for-the-tutorial-voices">Credits for the tutorial
+voices</h3>
 <p>The spoken tutorials in <code>Tutorials.mkv</code> were produced with
 <a href="https://github.com/rhasspy/piper">piper</a>, which is MIT
 licensed, using two voices trained by Bryce Beattie and published in the

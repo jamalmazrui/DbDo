@@ -139,10 +139,61 @@ c_reCallSign = re.compile(r"\b([KWC][A-Z]{2,3})(?:[- ]?(AM|FM))?\b")
 c_lsAutomatic = ["votes", "clicks", "trend", "last_check", "last_seen", "probed", "plays", "last_played"]
 
 
+def markedLast(c):
+    """MARKED IS THE LAST COLUMN (10 October 2026). The Trail rule, which the kit's database check fails, puts marked at
+    the end of the stations table. A catalog grown over many fetches gained call_sign, frequency, city, owner, format,
+    wikipedia, plays and last_played after marked, since SQLite adds a new column at the end; the 60,342 stations
+    restored from the Recycle Bin failed the release for it. The table is rebuilt from its own definition with marked
+    moved last -- every type, default and constraint kept -- its rows copied by column name, its indexes and triggers
+    made again, in one transaction with foreign-key enforcement off, so a failure leaves the database as it was and no
+    linked record is lost. Returns 1 when the table was rebuilt, 0 when marked was already last."""
+    # table_xinfo, not table_info: the generated columns look and prime count as columns for the rule, and table_info
+    # leaves them out. Only stored columns (hidden 0) are copied; generated ones compute themselves.
+    lInfo = list(c.execute("pragma table_xinfo(stations)"))
+    lsColumns = [r[1] for r in lInfo]
+    lsStored = [r[1] for r in lInfo if r[6] == 0]
+    if "marked" not in lsColumns or lsColumns[-1] == "marked": return 0
+    sCreate = c.execute("select sql from sqlite_master where type='table' and name='stations'").fetchone()[0]
+    iOpen, iClose = sCreate.index("("), sCreate.rindex(")")
+    lsItems, sItem, iDepth = [], "", 0
+    for sChar in sCreate[iOpen + 1:iClose]:
+        if sChar == "(": iDepth += 1
+        elif sChar == ")": iDepth -= 1
+        if sChar == "," and iDepth == 0: lsItems.append(sItem.strip()); sItem = ""
+        else: sItem += sChar
+    if sItem.strip(): lsItems.append(sItem.strip())
+    def columnOf(s): return s.split()[0].strip('"[]`') if s.split() else ""
+    lsDefs = [s for s in lsItems if columnOf(s) in lsColumns]
+    lsConstraints = [s for s in lsItems if columnOf(s) not in lsColumns]
+    sMarked = [s for s in lsDefs if columnOf(s) == "marked"][0]
+    lsDefs = [s for s in lsDefs if columnOf(s) != "marked"] + [sMarked]
+    lsOrder = [columnOf(s) for s in lsDefs if columnOf(s) in lsStored]
+    lsKeep = [r[0] for r in c.execute("select sql from sqlite_master where tbl_name='stations' and type in ('index', 'trigger') and sql is not null")]
+    sList = ", ".join('"%s"' % s for s in lsOrder)
+    c.execute("pragma foreign_keys=off")
+    try:
+        c.execute("begin")
+        c.execute('create table "stations_marked_last" (' + ", ".join(lsDefs + lsConstraints) + ")")
+        c.execute('insert into "stations_marked_last" (%s) select %s from stations' % (sList, sList))
+        iBefore = c.execute("select count(*) from stations").fetchone()[0]
+        iAfter = c.execute('select count(*) from "stations_marked_last"').fetchone()[0]
+        if iBefore != iAfter: raise RuntimeError("copied %d of %d stations" % (iAfter, iBefore))
+        c.execute("drop table stations")
+        c.execute('alter table "stations_marked_last" rename to stations')
+        for sSql in lsKeep: c.execute(sSql)
+        c.execute("commit")
+    except Exception:
+        c.execute("rollback")
+        raise
+    finally:
+        c.execute("pragma foreign_keys=on")
+    return 1
+
+
 def ensureConventions(c):
-    """Adds the missing Trail indexes and triggers; returns how many were added."""
+    """Adds the missing Trail indexes and triggers, after putting marked last; returns how many changes were made."""
     def quoted(s): return '"' + s.replace('"', '""') + '"'
-    iAdded = 0
+    iAdded = markedLast(c)
     lsExisting = [r[0] for r in c.execute("select name from sqlite_master where type in ('index', 'trigger')")]
     for sTable in ("lookups", "maps"):
         sName = "idx_" + sTable + "_prime"
@@ -666,14 +717,18 @@ def copyTemplate(sDb):
     return True
 
 def setAside(sDb):
-    """The copy at sDb becomes RadioTrail-old.db beside it; a previous old
-    copy goes. Returns True when it was set aside, False when it was not --
+    """The copy at sDb becomes RadioTrail-old-<date and time>.db beside it.
+    NOTHING SET ASIDE IS EVER DELETED (9 October 2026): this once named every
+    old copy RadioTrail-old.db and removed the previous one, so a second
+    set-aside could delete a database of sixty thousand stations kept from the
+    first. Each now keeps its own dated name. Returns True when it was set
+    aside, False when it was not --
     and the caller must not make a new copy over a database that is still
     there. THE WRITE-AHEAD LOG IS NEVER DELETED: a note committed a moment
     ago may live only there. The database is checkpointed, which folds the
     log into the main file and removes it, before the file is moved (audit
     of 8 October 2026)."""
-    sOld = os.path.join(os.path.dirname(sDb), "RadioTrail-old.db")
+    sOld = os.path.join(os.path.dirname(sDb), "RadioTrail-old-" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".db")
     try:
         c = sqlite3.connect(sDb)
         try: c.execute("PRAGMA wal_checkpoint(TRUNCATE)")
@@ -681,7 +736,6 @@ def setAside(sDb):
     except Exception as oError:
         print("Could not checkpoint the database before setting it aside: " + str(oError)); return False
     try:
-        if os.path.isfile(sOld): os.remove(sOld)
         for sSide in ("-wal", "-shm"):
             if os.path.isfile(sDb + sSide):
                 # Still here after the checkpoint: it goes with its database, not away.
@@ -714,6 +768,7 @@ def main():
     bNoOfficial = False
     bReportOnly = False
     bForce = False
+    bConventionsOnly = False
     sImport = ""
     bAgain = False
     bFresh = False
@@ -732,10 +787,32 @@ def main():
         if sArg == "--import" and i + 1 < len(lsArgs): sImport = lsArgs[i + 1]; i += 2; continue
         if sArg == "--fresh": bFresh = True; i += 1; continue
         if sArg == "--again": bAgain = True; i += 1; continue
+        if sArg == "--conventions": bConventionsOnly = True; i += 1; continue
         if sArg.startswith("-"): i += 1; continue
         sDb = sArg; i += 1
     if not sDb:
-        sDb = os.path.join(os.environ.get("LOCALAPPDATA", ""), "DbDo", "data", "RadioTrail", "RadioTrail.db")
+        # IN THE DEVELOPMENT TREE, THE TEMPLATE ITSELF (9 October 2026). Run from a project -- templates\RadioTrail
+        # under a folder that holds DbDo.cs -- the stations go into the RadioTrail.db beside this script, the one the
+        # installer ships, so every user gets the whole catalog and clearing DbDo's local folder cannot lose hours
+        # of fetching. Run from an installed DbDo, whose folder is not writable, they go into the user's own copy
+        # under %LOCALAPPDATA%, as before.
+        sHere = os.path.dirname(os.path.abspath(__file__))
+        sProjectDir = os.path.dirname(os.path.dirname(sHere))
+        bInProject = os.path.isfile(os.path.join(sProjectDir, "DbDo.cs")) and os.access(sHere, os.W_OK)
+        sDb = os.path.join(sHere, "RadioTrail.db") if bInProject else os.path.join(os.environ.get("LOCALAPPDATA", ""), "DbDo", "data", "RadioTrail", "RadioTrail.db")
+        print("Stations go into " + sDb + (" (the development tree's template)" if bInProject else " (your own copy)"))
+    if bConventionsOnly:
+        # --conventions (9 October 2026): only the Trail indexes and triggers, added where missing, then stop. DbDo's
+        # build runs this on the development tree's RadioTrail, so a catalog restored or fetched before the triggers
+        # existed meets the database check without a fetch.
+        if not os.path.isfile(sDb):
+            print("No database at " + sDb + "; nothing to do."); return 0
+        cConventions = sqlite3.connect(sDb)
+        try:
+            iAdded = ensureConventions(cConventions); cConventions.commit()
+        finally:
+            cConventions.close()
+        print("Trail conventions for %s: %d added." % (sDb, iAdded)); return 0
     if not os.path.isfile(sDb):
         # NO COPY YET? MAKE ONE from the template beside this script, rather
         # than sending the person away to open it in DbDo and come back.

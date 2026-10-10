@@ -32,3 +32,6 @@ notes/
 # of every repository.
 scripts/release.cmd
 scripts/release.ps1
+# The RadioTrail catalog, about 60,000 stations and 77 MB, fetched by fetchStations: shipped by the installer from
+# this disk, never pushed, since every refresh would add another 77 MB to the repository's history (10 October 2026).
+templates/RadioTrail/RadioTrail.db

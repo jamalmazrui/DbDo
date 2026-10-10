@@ -21116,6 +21116,10 @@ namespace DbDo
                 seedDbSettings();
                 IniSession.lastDatabase = sPath;
                 IniSession.lastTable    = db.currentTable ?? "";
+                // DbDo HAS RUN BEFORE (9 October 2026): marks that a database has been opened, so an empty
+                // lastDatabase after File, Close starts DbDo empty next time, as that command intends, instead
+                // of being taken for a first run that opens the JobTrail showcase.
+                IniSession.write("Session", "Opened", "yes");
                 // Record into Recent Files list (move-to-front).
                 RecentFiles.recordOpen(sPath);
                 announceTableOpened();
@@ -35114,7 +35118,8 @@ namespace DbDo
                         // definition that produces a document somebody else
                         // reads. Its records are illustrative rather than real. Silent failure: if the file is missing
                         // or unreadable, start with an empty form just as before.
-                        if (!bRestoredSomething && string.IsNullOrEmpty(sSavedDb))
+                        if (!bRestoredSomething && string.IsNullOrEmpty(sSavedDb)
+                            && string.IsNullOrEmpty(DbDoForm.IniSession.read("Session", "Opened")))
                         {
                             try
                             {
@@ -35129,13 +35134,17 @@ namespace DbDo
                                 // it. (The previous code looked for the file in
                                 // the install root, where it never exists, so
                                 // the showcase database never opened.)
+                                // RADIOTRAIL OPENS FIRST (9 October 2026): one table of stations is understood at a
+                                // glance, and Alt+Shift+P plays the station under the cursor in the Homer Player, so a
+                                // first-time user hears DbDo do something useful at once. JobTrail, the showcase of
+                                // related tables, is one Open Template Database away, and the tutorials introduce it.
                                 string sTemplateDir = ScriptHelper.getTemplateDir();
                                 string sDefaultSample = System.IO.Path.Combine(
-                                    sTemplateDir, "JobTrail", "JobTrail.db");
+                                    sTemplateDir, "RadioTrail", "RadioTrail.db");
                                 if (System.IO.File.Exists(sDefaultSample))
                                 {
                                     DbDoLog.write("First-run default: opening " + sDefaultSample);
-                                    frm.Db.openDatabase(sDefaultSample, "jobs", bReadOnly);
+                                    frm.Db.openDatabase(sDefaultSample, "stations", bReadOnly);
                                     if (!frm.Db.hasRecordset())
                                     {
                                         List<string> lT = frm.Db.getTableNames();

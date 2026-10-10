@@ -3,7 +3,7 @@
 [about]
 Title=1 - User Interface
 Intro=DbDo's window and its parts, each named and then shown by the reader -- the record list, the Say keys, the pick list, the menus -- then the rules every key follows, and help in its four places.
-Setup=DbDo is installed, with the JobTrail template open.
+Setup=DbDo is installed, with RadioTrail open, as it is on a first run.
 Homework=Guess three DbDo keys from their words, then check each with Control plus F1.
 
 [step]

@@ -153,6 +153,60 @@ in the repository -- they are rebuilt by `scripts\buildTutorials`.
 - [7 - Statistics and Reports](#7-statistics-and-reports)
 - [8 - Ask with SQL](#8-ask-with-sql)
 - [9 - Conclusion](#9-conclusion)
+- [1 - User Interface](#1-user-interface)
+- [2 - Install and Launch](#2-install-and-launch)
+- [3 - Open a Database and Move Through Records](#3-open-a-database-and-move-through-records)
+- [4 - Edit and Add Records](#4-edit-and-add-records)
+- [5 - Mark, Filter and Sort](#5-mark-filter-and-sort)
+- [6 - Follow Related Records](#6-follow-related-records)
+- [7 - Statistics and Reports](#7-statistics-and-reports)
+- [8 - Ask with SQL](#8-ask-with-sql)
+- [9 - Conclusion](#9-conclusion)
+- [1 - User Interface](#1-user-interface)
+- [2 - Install and Launch](#2-install-and-launch)
+- [3 - Open a Database and Move Through Records](#3-open-a-database-and-move-through-records)
+- [4 - Edit and Add Records](#4-edit-and-add-records)
+- [5 - Mark, Filter and Sort](#5-mark-filter-and-sort)
+- [6 - Follow Related Records](#6-follow-related-records)
+- [7 - Statistics and Reports](#7-statistics-and-reports)
+- [8 - Ask with SQL](#8-ask-with-sql)
+- [9 - Conclusion](#9-conclusion)
+- [1 - User Interface](#1-user-interface)
+- [2 - Install and Launch](#2-install-and-launch)
+- [3 - Open a Database and Move Through Records](#3-open-a-database-and-move-through-records)
+- [4 - Edit and Add Records](#4-edit-and-add-records)
+- [5 - Mark, Filter and Sort](#5-mark-filter-and-sort)
+- [6 - Follow Related Records](#6-follow-related-records)
+- [7 - Statistics and Reports](#7-statistics-and-reports)
+- [8 - Ask with SQL](#8-ask-with-sql)
+- [9 - Conclusion](#9-conclusion)
+- [1 - User Interface](#1-user-interface)
+- [2 - Install and Launch](#2-install-and-launch)
+- [3 - Open a Database and Move Through Records](#3-open-a-database-and-move-through-records)
+- [4 - Edit and Add Records](#4-edit-and-add-records)
+- [5 - Mark, Filter and Sort](#5-mark-filter-and-sort)
+- [6 - Follow Related Records](#6-follow-related-records)
+- [7 - Statistics and Reports](#7-statistics-and-reports)
+- [8 - Ask with SQL](#8-ask-with-sql)
+- [9 - Conclusion](#9-conclusion)
+- [1 - User Interface](#1-user-interface)
+- [2 - Install and Launch](#2-install-and-launch)
+- [3 - Open a Database and Move Through Records](#3-open-a-database-and-move-through-records)
+- [4 - Edit and Add Records](#4-edit-and-add-records)
+- [5 - Mark, Filter and Sort](#5-mark-filter-and-sort)
+- [6 - Follow Related Records](#6-follow-related-records)
+- [7 - Statistics and Reports](#7-statistics-and-reports)
+- [8 - Ask with SQL](#8-ask-with-sql)
+- [9 - Conclusion](#9-conclusion)
+- [1 - User Interface](#1-user-interface)
+- [2 - Install and Launch](#2-install-and-launch)
+- [3 - Open a Database and Move Through Records](#3-open-a-database-and-move-through-records)
+- [4 - Edit and Add Records](#4-edit-and-add-records)
+- [5 - Mark, Filter and Sort](#5-mark-filter-and-sort)
+- [6 - Follow Related Records](#6-follow-related-records)
+- [7 - Statistics and Reports](#7-statistics-and-reports)
+- [8 - Ask with SQL](#8-ask-with-sql)
+- [9 - Conclusion](#9-conclusion)
 - [0 - Overview](#0-overview)
 - [1 - User Interface](#1-user-interface)
 - [2 - Install and Launch](#2-install-and-launch)
@@ -13089,6 +13143,12282 @@ Screen reader:
 - Control plus F2
 
 ### Step 23
+
+Add a record.
+
+Screen reader:
+
+- Control plus N
+
+**Something to try:** Add a record of your own and fill three of its fields.
+
+## 5 - Mark, Filter and Sort
+
+Records marked one at a time and in runs, the list narrowed by a filter, and put in order by a column.
+
+**Before you start:** JobTrail is open in DbDo.
+
+### Step 1
+
+One want: only the jobs still waiting, the newest first.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Control+M
+
+Control plus M, M for Mark, marks the record I am on, for a later command to act on.
+
+Screen reader:
+
+- Marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Shift+M
+
+Shift plus M asks about marks, changing nothing.
+
+Screen reader:
+
+- (how many records are marked)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Control+Shift+M
+
+Control plus Shift plus M reverses it: Shift reverses.
+
+Screen reader:
+
+- Unmarked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Control+F
+
+Control plus F, F for Filter, shows only the records that match. It begins with a choice.
+
+Screen reader:
+
+- Filter Records dialog
+- Filter by: list box, Any field contains text, 1 of 2
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Enter
+
+Any field is the first choice, so Enter alone takes it. It asks for the text to find, wherever it is.
+
+Screen reader:
+
+- Any Field Contains dialog
+- Text to find in any field: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Enter
+
+I type Seattle and press Enter. Every job with Seattle in any field stays: the city, the address, the notes.
+
+Screen reader:
+
+- 3 records have Seattle.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: N
+
+Control plus F again. With a filter in force, the list offers more, each choice with its own first letter. N for Narrow keeps Seattle and adds a field.
+
+Screen reader:
+
+- Narrow with the field form, 4 of 4
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Enter
+
+Enter opens the form, a box for each field. I type waiting in the status box and press Enter.
+
+Screen reader:
+
+- Filter applied. 2 records match.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Shift+F
+
+Shift plus F says the filter, both parts, in the words each was asked in.
+
+Screen reader:
+
+- any field contains Seattle; and where: status = 'waiting'
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Alt+O
+
+Alt plus O, O for Order, sorts by a column; I choose the date added.
+
+Screen reader:
+
+- Order Records dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Alt+Shift+O
+
+Enter sorts. Alt plus Shift plus O reverses the order, newest first.
+
+Screen reader:
+
+- (the newest waiting job)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Control+Shift+F
+
+A planned misstep: the filter stays until it is cleared, so a later search finds only waiting jobs. Control plus Shift plus F clears it.
+
+Screen reader:
+
+- No filter
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: F8
+
+Marking one record at a time is slow for many. F8 drops an anchor at the record I am on.
+
+Screen reader:
+
+- Mark anchor
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Shift+F8
+
+Down Arrow four records, then Shift plus F8 marks everything from the anchor to here.
+
+Screen reader:
+
+- 5 records marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Control+Shift+A
+
+Control plus A marks every record, Control plus Shift plus A unmarks them all, and Alt plus Shift plus I swaps marked and unmarked.
+
+Screen reader:
+
+- All unmarked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Shift+Space
+
+Marks are for acting on: Delete, Copy and Export all work on the marked records when there are any. Shift plus Space reads every marked record in full, to check before acting.
+
+Screen reader:
+
+- No records are marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Shift+8
+
+With a filter and an order in force, Shift plus 8 says both at once, so you always know what you are looking at.
+
+Screen reader:
+
+- Sort: added, descending; Filter: any field contains Seattle; and status = 'waiting'
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Shift+O
+
+Shift plus O says just the order, and Shift plus F just the filter.
+
+Screen reader:
+
+- added, descending
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21: Control+Space
+
+Control plus Space toggles the mark on the record I am on, as it toggles a selection in any Windows list.
+
+Screen reader:
+
+- Marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 22: Shift+Y
+
+With a filter in force, Shift plus Y says how many records it leaves.
+
+Screen reader:
+
+- 4 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 23: Alt+Shift+L
+
+Alt plus Shift plus L reads one column for the marked records only: here, the employers of the jobs I marked.
+
+Screen reader:
+
+- Amazon, Costco
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 24
+
+A filter and marks work together: filter to narrow, mark to choose, then act on the marked.
+
+### Step 25
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 26
+
+Mark, then unmark.
+
+Screen reader:
+
+- Control plus M
+- Control plus Shift plus M
+
+### Step 27
+
+Filter, then clear it.
+
+Screen reader:
+
+- Control plus F
+- Control plus Shift plus F
+
+### Step 28
+
+Order by a column.
+
+Screen reader:
+
+- Alt plus O
+
+**Something to try:** Filter your own table to one value, then sort what is left.
+
+## 6 - Follow Related Records
+
+From a record into the records related to it with Alt plus Right Arrow, and back with Alt plus Left Arrow, as a browser goes back.
+
+**Before you start:** A database with related tables is open; the chinook sample has them.
+
+### Step 1
+
+One want: from an artist, to the albums, to the tracks, and back. Related tables let one record lead to others.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Shift+R
+
+Shift plus R, R for Related, says what this record leads to, changing nothing.
+
+Screen reader:
+
+- (the related tables and their counts)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Alt+Right Arrow
+
+Alt plus Right Arrow goes into the related records.
+
+Screen reader:
+
+- (the child table, and its first record)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Shift+Z
+
+Shift plus Z says where I am now.
+
+Screen reader:
+
+- (the child table, its record count, the filter that ties it to the parent)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Alt+Right Arrow
+
+Alt plus Right Arrow again goes a level deeper.
+
+Screen reader:
+
+- (the next table down)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Alt+Left Arrow
+
+Alt plus Left Arrow comes back a level, as a browser goes back.
+
+Screen reader:
+
+- (the table one level up)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Alt+Home
+
+A planned misstep: three levels deep, and lost. Alt plus Home returns to where I started, from any depth.
+
+Screen reader:
+
+- (the starting table, at the record I left)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Shift+P
+
+What ties a record to its relations is its prime, a key DbDo builds from the record itself. Shift plus P, Say Prime, says it.
+
+Screen reader:
+
+- Miles Davis
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Control+Shift+O
+
+A related table can have a window of its own. Control plus Shift plus O, Open Table, opens a table in a new window, beside this one.
+
+Screen reader:
+
+- Open Table dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Enter
+
+I choose albums and press Enter.
+
+Screen reader:
+
+- albums, 40 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Shift+F4
+
+Shift plus F4 says the windows open, and Control plus Tab moves between them.
+
+Screen reader:
+
+- 2 windows: artists, albums
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Control+F6
+
+In one window, Control plus F6 moves to the next table, and Alt plus F6 back through the tables visited, as a browser's history does.
+
+Screen reader:
+
+- tracks, 412 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Control+F4
+
+Control plus F4 closes this window, leaving the first.
+
+Screen reader:
+
+- artists, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: F4
+
+F4, Current Windows, lists the windows open, so you can pick one by name rather than cycle through them.
+
+Screen reader:
+
+- Current Windows dialog, artists, 1 of 2
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+F6
+
+Escape. Alt plus F6 goes back through the tables visited in this window, the way a browser goes back.
+
+Screen reader:
+
+- albums, 40 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Alt+Shift+F6
+
+Alt plus Shift plus F6 goes forward again.
+
+Screen reader:
+
+- tracks, 412 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+Shift+F4
+
+Control plus Shift plus F4 closes every window but this one, for a clean start.
+
+Screen reader:
+
+- tracks, 412 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Control+Shift+F6
+
+Within one window, Control plus Shift plus F6 moves to the previous table, as Control plus F6 moves to the next: Shift reverses.
+
+Screen reader:
+
+- artists, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Shift+R
+
+Whichever way you arrived, Shift plus R still says what this record leads to, so the way down is never a guess.
+
+Screen reader:
+
+- albums 3, tracks 31
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 22
+
+Go into related records.
+
+Screen reader:
+
+- Alt plus Right Arrow
+
+### Step 23
+
+Come back a level.
+
+Screen reader:
+
+- Alt plus Left Arrow
+
+### Step 24
+
+Return to the start.
+
+Screen reader:
+
+- Alt plus Home
+
+**Something to try:** Follow a relationship two levels deep, then return with Alt plus Home.
+
+## 7 - Statistics and Reports
+
+The numbers in a column with Alt plus Shift plus S, a chart's figures with Control plus Shift plus G, and a report written as a document with Alt plus Shift plus R.
+
+**Before you start:** JobTrail is open in DbDo.
+
+### Step 1
+
+One want: how many applications, how they stand, and a page to keep.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Alt+Shift+S
+
+I move to the status column. Alt plus Shift plus S, S for Statistics, describes the column.
+
+Screen reader:
+
+- Statistics from Column
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Escape
+
+The count of each value, and for numbers the sum, average, least and most. Escape closes it.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Control+Shift+G
+
+Control plus Shift plus G, G for Graphics, turns a column into a chart and its figures in words.
+
+Screen reader:
+
+- Graphics Column
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Alt+Shift+R
+
+Escape. Alt plus Shift plus R, R for Report, writes a saved report as a document.
+
+Screen reader:
+
+- Run Report dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Enter
+
+I choose a report and press Enter; DbDo writes it and opens it.
+
+Screen reader:
+
+- (the report's title, as a heading)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8
+
+A planned misstep: a report reads the whole table, filter or not, unless its template says otherwise. To report only some records, filter them and use the report that respects the filter.
+
+### Step 9: Alt+T
+
+Before the details, the shape. Alt plus T, Table Summary, says how many records and columns the table has, and how much room it takes.
+
+Screen reader:
+
+- Table Summary
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Alt+D
+
+Escape, and Alt plus D, Database Summary, does the same for every table in the database.
+
+Screen reader:
+
+- Database Summary
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Alt+Shift+S
+
+A filter narrows a summary to what matters: filter to waiting jobs, then Alt plus Shift plus S again, and the counts describe only those.
+
+Screen reader:
+
+- Statistics from Column
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Alt+X
+
+When the numbers are to go somewhere else, Alt plus X, Export Data, writes the table, or the records in view, as CSV, a spreadsheet, JSON or another format.
+
+Screen reader:
+
+- Export Data dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Escape
+
+Escape, for now. And Control plus P prints the records in view, for a copy on paper or a PDF.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Control+C
+
+A single number is often all that is wanted. Control plus C copies the cell under the cursor.
+
+Screen reader:
+
+- Copied
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Alt+C
+
+Alt plus C appends another cell to what is on the clipboard, to gather a few figures in one go.
+
+Screen reader:
+
+- Appended
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+Apostrophe
+
+Alt plus Apostrophe, Say Clipboard, reads back what has been gathered before it is pasted anywhere.
+
+Screen reader:
+
+- 12, waiting 4
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17
+
+Then one paste puts those figures in an email or a document.
+
+### Step 18: Shift+8
+
+Before reading any summary, Shift plus 8 says the sort and filter in force, since both change what the numbers describe.
+
+Screen reader:
+
+- Sort: employer. Filter: none.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Alt+L
+
+And Alt plus L reads a whole column aloud, top to bottom, when hearing the values beats counting them.
+
+Screen reader:
+
+- waiting, applied, interview, waiting
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 21
+
+Describe a column.
+
+Screen reader:
+
+- Alt plus Shift plus S
+
+### Step 22
+
+A column as a chart.
+
+Screen reader:
+
+- Control plus Shift plus G
+
+### Step 23
+
+Run a report.
+
+Screen reader:
+
+- Alt plus Shift plus R
+
+**Something to try:** Run a report of your own table and read it in your browser.
+
+## 8 - Ask with SQL
+
+A question in the database's own language with Control plus Q, the answer shown as records, and the history of questions asked.
+
+**Before you start:** JobTrail is open in DbDo.
+
+### Step 1
+
+One want: an answer no single command gives -- how many jobs at each employer, most first. SQL, the database's own language, asks it in one line.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Control+Q
+
+Control plus Q, Q for Query, opens a box for SQL.
+
+Screen reader:
+
+- Query dialog
+- SQL: edit, multiline
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: select employer, count(*) as jobs from jobs group by employer order by jobs desc
+
+I type the question.
+
+Screen reader:
+
+- (each word echoed as it is typed)
+
+### Step 5: Control+Enter
+
+Control plus Enter runs it from inside the box, where Enter would start a new line.
+
+Screen reader:
+
+- (the first row of the answer)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Shift+Q
+
+The answer is shown as records, moved through like any table. Shift plus Q says the query in force.
+
+Screen reader:
+
+- (the query)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Control+Q
+
+A planned misstep: a misspelled column. The database says which word it does not know, and the box keeps the query to fix.
+
+Screen reader:
+
+- Query dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Alt+Shift+Q
+
+Escape. Alt plus Shift plus Q, the history, lists the questions asked, to run one again.
+
+Screen reader:
+
+- Query History
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Shift+F12
+
+SQL is not the only way to ask. Shift plus F12, Chat about Table, sends the table with a question in plain words to the model on this computer.
+
+Screen reader:
+
+- Chat about Table dialog
+- Question: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Which employer has the most applications still waiting?
+
+I ask which employer has the most applications still waiting.
+
+Screen reader:
+
+- (each word echoed as it is typed)
+
+### Step 11: Enter
+
+Enter. The answer comes in words, from the same records, and nothing leaves this computer.
+
+Screen reader:
+
+- Answer dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Escape
+
+Escape. An answer from SQL is a table like any other, so Alt plus X exports it, and Alt plus Shift plus S describes its columns.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Control+Shift+I
+
+A question asked often can be saved as a script, a dot s q l file in the Scripts folder beside the database. Control plus Shift plus I, Invoke Script, lists them and runs the one chosen.
+
+Screen reader:
+
+- Invoke Script dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Escape
+
+Escape. Scripts belong to their database, so the questions travel with the data they ask about.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Alt+Z
+
+Before a query that changes data, Alt plus Z, Toggle Read Only, makes the database read only, so a mistyped statement cannot change anything.
+
+Screen reader:
+
+- Read only
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+Z
+
+Alt plus Z again makes it writable when you mean to change it.
+
+Screen reader:
+
+- Read and write
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: F5
+
+After a query that does change records, F5, Refresh View, shows the table as it now stands.
+
+Screen reader:
+
+- jobs, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18
+
+Practise on a copy: Save As, Control plus Shift plus S, makes one, so the original stays as it was while you learn.
+
+### Step 19
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 20
+
+Ask in SQL.
+
+Screen reader:
+
+- Control plus Q
+
+### Step 21
+
+Run it from inside the box.
+
+Screen reader:
+
+- Control plus Enter
+
+### Step 22
+
+The questions asked before.
+
+Screen reader:
+
+- Alt plus Shift plus Q
+
+**Something to try:** Write a query that counts your records by one column.
+
+## 9 - Conclusion
+
+The conclusion and summary of the walks; the words DbDo uses, in two voices; then more information: the help built into the program and where to learn more.
+
+**Before you start:** Nothing is needed; this walk is listened to.
+
+### Step 1
+
+To finish: what to carry away, the words DbDo uses, and where to get help. First, the summary. A table is a list you move through by row and column, and every question about where you are is a Shift key that changes nothing.
+
+Screen reader:
+
+- Shift plus Z, Say Status
+
+### Step 2
+
+Keys follow words, so a key can be guessed: O opens and orders, F filters, M marks, and Shift reverses.
+
+Screen reader:
+
+- Control plus M, Mark
+- Control plus Shift plus M, Unmark
+
+### Step 3
+
+And when the commands run out, SQL asks the database anything, in one line.
+
+Screen reader:
+
+- Control plus Q, Query
+
+### Step 4
+
+Now the words, in alphabetical order. I say the term; the reader says what it means.
+
+### Step 5
+
+data list.
+
+Screen reader:
+
+- The list of records the window shows: one table or query, a row per record, a column per field.
+
+### Step 6
+
+filter.
+
+Screen reader:
+
+- A condition that hides the records not matching it, until it is cleared.
+
+### Step 7
+
+mark.
+
+Screen reader:
+
+- A flag on a record, for a later command to act on; Control plus M sets it, and Shift reverses it.
+
+### Step 8
+
+order.
+
+Screen reader:
+
+- The sort of the list, by one column, ascending or reversed.
+
+### Step 9
+
+pick list.
+
+Screen reader:
+
+- A field's fixed values in a list, opened with F4, so nothing is mistyped.
+
+### Step 10
+
+query.
+
+Screen reader:
+
+- A question in SQL, answered as records.
+
+### Step 11
+
+record.
+
+Screen reader:
+
+- One row of a table: a job, an album, a contact.
+
+### Step 12
+
+related table.
+
+Screen reader:
+
+- A table whose records belong to a record of another; Alt plus Right Arrow goes in.
+
+### Step 13
+
+report.
+
+Screen reader:
+
+- A saved template that writes a table's records as a document.
+
+### Step 14
+
+Say key.
+
+Screen reader:
+
+- Shift and a letter: a question answered aloud, changing nothing.
+
+### Step 15
+
+SQLite.
+
+Screen reader:
+
+- The database format DbDo opens: one file, with its tables inside.
+
+### Step 16
+
+standard fields.
+
+Screen reader:
+
+- The columns every DbDo table may carry: added, edited, marked, notes, tags, url.
+
+### Step 17
+
+template database.
+
+Screen reader:
+
+- A ready-made database in the Help menu, to practice on or to start from.
+
+### Step 18
+
+Last, more information. Help is built in. The guide, and what changed.
+
+Screen reader:
+
+- F1, the guide
+- Shift plus F1, History
+
+### Step 19
+
+The version, and what any key does without doing it.
+
+Screen reader:
+
+- Alt plus F1, About
+- Control plus F1, Key Describer
+
+### Step 20
+
+DbDo dot md, the guide, explains every command and the ideas behind them; Hotkeys dot md lists every key three ways; and the DbDo page on GitHub, at github dot com slash JamalMazrui slash DbDo, has the newest version.
+
+**Something to try:** Open a template database and describe one of its columns with Alt plus Shift plus S.
+
+<!-- walkthrough ends -->
+
+<!-- walkthrough: written by makeTutorials.py, do not edit between the markers -->
+
+## 0 - Overview
+
+What DbDo is, two keys of the screen reader's own, and the table of contents.
+
+**Before you start:** Nothing is needed; this walk is listened to.
+
+### Step 1
+
+DbDo is a database program for people who listen to the screen.
+
+### Step 2
+
+It opens SQLite databases, and imports from Excel and others, and shows one table at a time as a list of records you move through by row and by column. Every cell can be heard, edited, searched, marked and counted from the keyboard, and the program answers questions about where you are without changing anything.
+
+### Step 3: Insert+Up Arrow
+
+Two keys before anything else, both the reader's own. If a line goes by too fast, Insert plus Up Arrow says it again.
+
+Screen reader:
+
+- (the last line, read a second time)
+
+### Step 4: Insert+Tab
+
+And if you lose your place, Insert plus Tab says where you are: the control, its state and its position.
+
+Screen reader:
+
+- (the current control, with its state and position)
+
+### Step 5
+
+Now the table of contents. I say the number and the title; the reader says what the walk covers.
+
+### Step 6
+
+One, User Interface.
+
+Screen reader:
+
+- The window, the record list, the Say keys that ask without changing, the pick list, the menus, the rules every key follows, and where help lives.
+
+### Step 7
+
+Two, Install and Launch.
+
+Screen reader:
+
+- The installer, the boxes on its last page, and DbDo opening with Alt plus Control plus D.
+
+### Step 8
+
+Three, Open a Database and Move Through Records.
+
+Screen reader:
+
+- A template database opened, and moving by row, by column, by search and by number.
+
+### Step 9
+
+Four, Edit and Add Records.
+
+Screen reader:
+
+- A cell changed, a value picked from a list, a record added.
+
+### Step 10
+
+Five, Mark, Filter and Sort.
+
+Screen reader:
+
+- Records marked, the list narrowed to what matters, and put in order.
+
+### Step 11
+
+Six, Follow Related Records.
+
+Screen reader:
+
+- From one record into the records related to it, and back.
+
+### Step 12
+
+Seven, Statistics and Reports.
+
+Screen reader:
+
+- The numbers in a column, and a report written as a document.
+
+### Step 13
+
+Eight, Ask with SQL.
+
+Screen reader:
+
+- A question in the database's own language, and the history of questions asked.
+
+### Step 14
+
+Nine, Conclusion.
+
+Screen reader:
+
+- What to carry away, the words DbDo uses, the help built in, and where to learn more.
+
+### Step 15
+
+Ten walks, each under five minutes, under an hour together: the overview, the user interface, seven tasks, and the conclusion. They are a course, not a reference: each one assumes those before it.
+
+**Something to try:** Take walks one and two, then pick the task you need today.
+
+## 1 - User Interface
+
+DbDo's window and its parts, each named and then shown by the reader -- the record list, the Say keys, the pick list, the menus -- then the rules every key follows, and help in its four places.
+
+**Before you start:** DbDo is installed, with RadioTrail open, as it is on a first run.
+
+### Step 1
+
+DbDo is heard before it is seen. I name each part; the reader shows it: name, kind, value and state, then a hint.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Down Arrow
+
+The title, then the greeting in the message voice. The main view is a list of records: Down Arrow moves by row, and the reader speaks the record.
+
+Screen reader:
+
+- (the next record, its first column first)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Right Arrow
+
+Right Arrow moves by column within the record, speaking the column's name and its value.
+
+Screen reader:
+
+- (the next column's name and value)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Shift+Z
+
+Now the Say keys: Shift and a letter asks, and changes nothing. Shift plus Z is Say Status.
+
+Screen reader:
+
+- jobs, 12 records, no filter, sorted by employer
+
+### Step 6: Shift+C
+
+Table, count, filter and sort in one breath; pressed twice, the words open in a window. Shift plus C, C for Cell, says the cell you are on.
+
+Screen reader:
+
+- (the column's name and the cell's value)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: F4
+
+Where a field has fixed values, F4 opens them as a pick list.
+
+Screen reader:
+
+- status: list box, untried, 4 of 5
+- To move through items press Up or Down Arrow.
+
+### Step 8: F10
+
+A letter jumps to a value, so nothing is mistyped. Escape closes it. Menus say their own keys; F10 opens the menu bar.
+
+Screen reader:
+
+- Menu bar
+- File menu
+
+### Step 9: Down Arrow
+
+Down Arrow to the first item.
+
+Screen reader:
+
+- Open Database..., Control plus O, O
+
+### Step 10: Escape
+
+The item, its key, then its letter: learn a key from the menu once, then skip the menu.
+
+Screen reader:
+
+- Leaving menus
+
+### Step 11: Shift+Z
+
+The rules behind every key. A letter is the first letter of a word: Control plus O opens, Alt plus O orders. Control does; Shift asks, changing nothing.
+
+Screen reader:
+
+- jobs, 12 records, no filter, sorted by employer
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Insert+T
+
+Adding Shift reverses: Control plus M marks, Control plus Shift plus M unmarks. Each function key is a family: F2 edits, F3 searches, F4 picks, F8 selects. Insert plus T, the reader's own, says the title.
+
+Screen reader:
+
+- DbDo
+
+### Step 13: Control+F1
+
+Control plus F1 is the Key Describer: each key says what it does instead of doing it.
+
+Screen reader:
+
+- Key Describer On
+
+### Step 14: Control+F1
+
+Again, and it is off.
+
+Screen reader:
+
+- No Key Describer
+
+### Step 15
+
+Help is in four places, the same in every Homer program. I say which; the reader says the key. The guide.
+
+Screen reader:
+
+- F1, the guide
+
+### Step 16
+
+The changes, release by release; the version; the name of any key.
+
+Screen reader:
+
+- Shift plus F1, History
+- Alt plus F1, About
+- Control plus F1, Key Describer
+
+### Step 17: Alt+F10
+
+When a key will not come to mind, Alt plus F10, the Alternate Menu, lists every command in one list you type into, with its key beside it.
+
+Screen reader:
+
+- Alternate Menu
+- Command, list box
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: mark
+
+I type the word mark, and the list narrows to the commands with that word.
+
+Screen reader:
+
+- Mark All, Control plus A
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Escape
+
+Escape closes the list without running anything.
+
+Screen reader:
+
+- jobs, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 21
+
+Say Status.
+
+Screen reader:
+
+- Shift plus Z
+
+### Step 22
+
+A field's fixed values.
+
+Screen reader:
+
+- F4, pick list
+
+### Step 23
+
+Unmark, the reverse of Mark.
+
+Screen reader:
+
+- Control plus Shift plus M
+
+**Something to try:** Guess three DbDo keys from their words, then check each with Control plus F1.
+
+## 2 - Install and Launch
+
+The installer, the boxes on its last page -- the screen reader scripts, the player, the model for its AI commands -- and DbDo opening from anywhere.
+
+**Before you start:** DbDo_setup.exe is downloaded from the DbDo page on GitHub.
+
+### Step 1
+
+One want: DbDo on this computer, with what it works best with, in one sitting.
+
+### Step 2: Enter
+
+I open the downloaded setup program and allow it to make changes.
+
+Screen reader:
+
+- Setup - DbDo dialog
+- Welcome to the DbDo Setup Wizard
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 3: Enter
+
+The ordinary installer: Enter takes Next, and the defaults are right.
+
+Screen reader:
+
+- Select Destination Location
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Tab
+
+The last page offers what DbDo works best with, each as a box whose first word is the machine's state read for you: Install, Update or Reinstall.
+
+Screen reader:
+
+- (the box for your screen reader's scripts, its first word, checked)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Down Arrow
+
+Scripts for the screen reader you use; the mpv player, which plays a record's stream; and, for the AI commands, Ollama and a model, downloaded once.
+
+Screen reader:
+
+- Install mpv check box, checked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Space
+
+A planned misstep: clearing a box you need. Space clears it; Space again ticks it back.
+
+Screen reader:
+
+- not checked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Space
+
+Space.
+
+Screen reader:
+
+- checked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Enter
+
+Enter installs what is ticked.
+
+Screen reader:
+
+- Finish button
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Alt+Control+D
+
+Then the key that opens DbDo from anywhere.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 10
+
+Installed and open. If something was left out, run the setup again and tick its box; what is already current costs nothing.
+
+### Step 11: F1
+
+Help is four keys away, the same in every Homer program. F1 opens the full documentation in the browser.
+
+Screen reader:
+
+- DbDo documentation
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Alt+Shift+F1
+
+Alt plus Shift plus F1 opens the ReadMe, the short start, for when the full guide is more than you need today.
+
+Screen reader:
+
+- DbDo ReadMe
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Alt+F1
+
+Alt plus F1, About, says the version, so you always know which DbDo is installed.
+
+Screen reader:
+
+- About DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: F11
+
+Escape, and F11 asks GitHub whether a newer version is out. If one is, Yes is the default, and Enter installs it.
+
+Screen reader:
+
+- Checking for a newer version
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: F10
+
+The templates to practise on are in the Help menu: F10, then H for Help.
+
+Screen reader:
+
+- Help menu
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Down Arrow
+
+Down Arrow to Template Databases. Each is a complete example: JobTrail for job hunting, BookTrail for reading, RadioTrail for stations to play.
+
+Screen reader:
+
+- Template Databases
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Escape
+
+Escape closes the menu. Once a database is open, Alt plus Backslash opens its folder in File Explorer, where its scripts and reports live beside it.
+
+Screen reader:
+
+- DbDo ready
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+F1
+
+Two more ways to learn the keys before you need them. Control plus F1 turns on the Key Describer: each key then says what it does instead of doing it.
+
+Screen reader:
+
+- Key Describer on
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Control+O
+
+Now Control plus O only describes itself.
+
+Screen reader:
+
+- Open Database, Control plus O
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Alt+Shift+H
+
+Control plus F1 again turns the describer off. Alt plus Shift plus H, Hotkey Summary, lists every key in a window you can search.
+
+Screen reader:
+
+- Hotkey Summary
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21: Escape
+
+Escape closes it, and the database is as it was.
+
+Screen reader:
+
+- DbDo ready
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 22
+
+What this walk taught. I name the step; the reader gives the answer.
+
+### Step 23
+
+What a box's first word tells you.
+
+Screen reader:
+
+- Install, Update or Reinstall
+
+### Step 24
+
+The key that opens DbDo.
+
+Screen reader:
+
+- Alt plus Control plus D
+
+**Something to try:** Run the setup again; every box should now say Update or Reinstall.
+
+## 3 - Open a Database and Move Through Records
+
+RadioTrail, the database DbDo opens first, explored by row, by column, by search and by record number, and a station played in the Homer Player.
+
+**Before you start:** DbDo is installed; on a first run it opens RadioTrail.
+
+### Step 1
+
+One want: a station found and playing, quickly. The first time DbDo starts, it opens RadioTrail, a list of internet radio stations to search, sort and play.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Shift+Z
+
+Shift plus Z says where I am: the stations table of RadioTrail. Another database opens with Control plus O, O for Open, and the templates are in the Help menu, under Template Databases.
+
+Screen reader:
+
+- (stations, the number of stations, no filter, sorted by name)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Control+G
+
+Down Arrow moves by record; Right Arrow by column. Control plus G, G for Go, goes to a record by its number.
+
+Screen reader:
+
+- Go to Record dialog
+- Record number: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Enter
+
+I type 7 and press Enter.
+
+Screen reader:
+
+- (record 7, its first column first)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Control+K
+
+Control plus K, K for Keywords, searches every column for words.
+
+Screen reader:
+
+- Keywords dialog
+- Keywords: edit
+- Type in text.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Enter
+
+I type jazz and press Enter.
+
+Screen reader:
+
+- (the first station holding jazz)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Alt+Delete
+
+F3 goes to the next match, Shift plus F3 to the one before. Alt plus Delete says the column and the row number.
+
+Screen reader:
+
+- (the column's name and the row number)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Escape
+
+A planned misstep: Control plus F is not find here. In DbDo, F is for Filter, a later walk. Keywords is K. Escape leaves anything opened by mistake.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Control+J
+
+Keywords searches every column; Jump searches one. Control plus J, Jump to Record, asks which column and what to look for.
+
+Screen reader:
+
+- Jump to Record dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Enter
+
+I choose country, type Canada, and press Enter. The cursor lands on the first station there.
+
+Screen reader:
+
+- (Canada, country, its row)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Control+Shift+J
+
+Control plus Shift plus J jumps backward to the one before, and Control plus Shift plus K does the same for Keywords: Shift reverses, here as everywhere in DbDo.
+
+Screen reader:
+
+- (Canada, country, an earlier row)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Shift+Y
+
+Shift plus Y, Say Yield, says how many records there are.
+
+Screen reader:
+
+- (the number of stations)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Shift+C
+
+Shift plus C, Say Cell, says the value under the cursor again, without moving.
+
+Screen reader:
+
+- Canada
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Control+I
+
+Control plus I, Inspect Record, shows the whole record at once, one field to a line: the station's name, genre, language and stream address among them. Escape closes it.
+
+Screen reader:
+
+- Inspect Record dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+Shift+P
+
+Now the reason RadioTrail opens first. Alt plus Shift plus P, Play Stream, plays the current station in the Homer Player, the same player FileDir uses.
+
+Screen reader:
+
+- (the Homer Player, playing the station)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Escape
+
+Escape closes the player and returns to the station I was on, ready for the next one.
+
+Screen reader:
+
+- (stations, the same row)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+T
+
+A database can hold several tables; Control plus T, Choose Table, lists them. Escape keeps the table I am in.
+
+Screen reader:
+
+- (Choose Table dialog, stations first)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Escape
+
+Escape. RadioTrail is one table, easy to hold in mind. The next walk opens JobTrail, whose tables are linked to one another.
+
+Screen reader:
+
+- stations
+
+Confirm the wording with a live run: buildTutorials -live.
+
+**Something to try:** Find a station by keyword, then play it with Alt plus Shift plus P.
+
+## 4 - Edit and Add Records
+
+JobTrail, the job-search template, opened; then a cell edited with F2, a value picked from a list with Control plus F2, and a new record added with Control plus N.
+
+**Before you start:** DbDo is open; this walk opens JobTrail.
+
+### Step 1
+
+One want: one job's status brought up to date, and a new job added.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Control+O
+
+JobTrail comes next: a template for a job search, whose jobs, employers and contacts are linked to one another, so it shows more of what DbDo can do. Control plus O, O for Open; the templates are in the Help menu, under Template Databases, and I open JobTrail.
+
+Screen reader:
+
+- Open Database dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Shift+Z
+
+I choose JobTrail and press Enter. Shift plus Z says where I am.
+
+Screen reader:
+
+- jobs, 12 records, no filter, sorted by employer
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: F2
+
+I move to the status column of the record to change. F2 edits the cell under the cursor, as F2 renames a file in Windows.
+
+Screen reader:
+
+- status: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Enter
+
+I type the new value and press Enter to keep it.
+
+Screen reader:
+
+- (the record, with its new status)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Control+F2
+
+Where a field has fixed values, Control plus F2 edits by picking one, so nothing is mistyped.
+
+Screen reader:
+
+- status: list box
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Enter
+
+Down Arrow to the value, and Enter.
+
+Screen reader:
+
+- (the record, with the picked status)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Control+N
+
+Control plus N, N for New, adds a record to the table, and focus goes to its first field.
+
+Screen reader:
+
+- New record
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Shift+A
+
+I fill each field with F2 as before. Shift plus A, A for Added, says when this record was added.
+
+Screen reader:
+
+- (the date and time the record was added)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Control+D
+
+A planned misstep: Control plus D deletes a record, D for Delete, and asks first. Escape answers no.
+
+Screen reader:
+
+- Delete this record? No button
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Escape
+
+Escape keeps it.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Alt+Shift+N
+
+Notes hold whatever does not fit a column. Alt plus Shift plus N, Edit Notes, opens this record's notes in a box of their own.
+
+Screen reader:
+
+- Notes: edit, multiline
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Shift+N
+
+I type a line about the interview, and Control plus Enter keeps it. Shift plus N says the notes back.
+
+Screen reader:
+
+- Second interview Tuesday at ten.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Shift+T
+
+Tags work the same way, with Alt plus Shift plus T to edit and Shift plus T to hear them: words such as remote or referral, to filter by later.
+
+Screen reader:
+
+- remote, referral
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Shift+E
+
+Shift plus E, Say Edited, says when this record last changed, so a stale one is easy to spot.
+
+Screen reader:
+
+- Edited today at 3:42 PM
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Control+Shift+C
+
+Control plus Shift plus C, Copy Record, adds a copy of this record as a new one: quicker than typing a second job at the same employer.
+
+Screen reader:
+
+- Record copied
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+R
+
+Control plus R, Replace Column, finds and replaces text in the column I am on, in every record, for a name spelled two ways.
+
+Screen reader:
+
+- Replace Column dialog, Find: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Escape
+
+Escape, for now. A replacement counts what it changed and says so.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Alt+Shift+U
+
+A record can carry a web address, such as a job posting. Alt plus Shift plus U, Edit URL, edits it.
+
+Screen reader:
+
+- url: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21: Shift+U
+
+Enter keeps it. Shift plus U says it back, and Control plus Shift plus U opens it in the browser.
+
+Screen reader:
+
+- https colon slash slash jobs dot example dot com slash 4821
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 22
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 23
+
+Edit the cell I am on.
+
+Screen reader:
+
+- F2
+
+### Step 24
+
+Edit by picking a value.
+
+Screen reader:
+
+- Control plus F2
+
+### Step 25
+
+Add a record.
+
+Screen reader:
+
+- Control plus N
+
+**Something to try:** Add a record of your own and fill three of its fields.
+
+## 5 - Mark, Filter and Sort
+
+Records marked one at a time and in runs, the list narrowed by a filter, and put in order by a column.
+
+**Before you start:** JobTrail is open in DbDo.
+
+### Step 1
+
+One want: only the jobs still waiting, the newest first.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Control+M
+
+Control plus M, M for Mark, marks the record I am on, for a later command to act on.
+
+Screen reader:
+
+- Marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Shift+M
+
+Shift plus M asks about marks, changing nothing.
+
+Screen reader:
+
+- (how many records are marked)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Control+Shift+M
+
+Control plus Shift plus M reverses it: Shift reverses.
+
+Screen reader:
+
+- Unmarked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Control+F
+
+Control plus F, F for Filter, shows only the records that match. It begins with a choice.
+
+Screen reader:
+
+- Filter Records dialog
+- Filter by: list box, Any field contains text, 1 of 2
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Enter
+
+Any field is the first choice, so Enter alone takes it. It asks for the text to find, wherever it is.
+
+Screen reader:
+
+- Any Field Contains dialog
+- Text to find in any field: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Enter
+
+I type Seattle and press Enter. Every job with Seattle in any field stays: the city, the address, the notes.
+
+Screen reader:
+
+- 3 records have Seattle.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: N
+
+Control plus F again. With a filter in force, the list offers more, each choice with its own first letter. N for Narrow keeps Seattle and adds a field.
+
+Screen reader:
+
+- Narrow with the field form, 4 of 4
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Enter
+
+Enter opens the form, a box for each field. I type waiting in the status box and press Enter.
+
+Screen reader:
+
+- Filter applied. 2 records match.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Shift+F
+
+Shift plus F says the filter, both parts, in the words each was asked in.
+
+Screen reader:
+
+- any field contains Seattle; and where: status = 'waiting'
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Alt+O
+
+Alt plus O, O for Order, sorts by a column; I choose the date added.
+
+Screen reader:
+
+- Order Records dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Alt+Shift+O
+
+Enter sorts. Alt plus Shift plus O reverses the order, newest first.
+
+Screen reader:
+
+- (the newest waiting job)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Control+Shift+F
+
+A planned misstep: the filter stays until it is cleared, so a later search finds only waiting jobs. Control plus Shift plus F clears it.
+
+Screen reader:
+
+- No filter
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: F8
+
+Marking one record at a time is slow for many. F8 drops an anchor at the record I am on.
+
+Screen reader:
+
+- Mark anchor
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Shift+F8
+
+Down Arrow four records, then Shift plus F8 marks everything from the anchor to here.
+
+Screen reader:
+
+- 5 records marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Control+Shift+A
+
+Control plus A marks every record, Control plus Shift plus A unmarks them all, and Alt plus Shift plus I swaps marked and unmarked.
+
+Screen reader:
+
+- All unmarked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Shift+Space
+
+Marks are for acting on: Delete, Copy and Export all work on the marked records when there are any. Shift plus Space reads every marked record in full, to check before acting.
+
+Screen reader:
+
+- No records are marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Shift+8
+
+With a filter and an order in force, Shift plus 8 says both at once, so you always know what you are looking at.
+
+Screen reader:
+
+- Sort: added, descending; Filter: any field contains Seattle; and status = 'waiting'
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Shift+O
+
+Shift plus O says just the order, and Shift plus F just the filter.
+
+Screen reader:
+
+- added, descending
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21: Control+Space
+
+Control plus Space toggles the mark on the record I am on, as it toggles a selection in any Windows list.
+
+Screen reader:
+
+- Marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 22: Shift+Y
+
+With a filter in force, Shift plus Y says how many records it leaves.
+
+Screen reader:
+
+- 4 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 23: Alt+Shift+L
+
+Alt plus Shift plus L reads one column for the marked records only: here, the employers of the jobs I marked.
+
+Screen reader:
+
+- Amazon, Costco
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 24
+
+A filter and marks work together: filter to narrow, mark to choose, then act on the marked.
+
+### Step 25
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 26
+
+Mark, then unmark.
+
+Screen reader:
+
+- Control plus M
+- Control plus Shift plus M
+
+### Step 27
+
+Filter, then clear it.
+
+Screen reader:
+
+- Control plus F
+- Control plus Shift plus F
+
+### Step 28
+
+Order by a column.
+
+Screen reader:
+
+- Alt plus O
+
+**Something to try:** Filter your own table to one value, then sort what is left.
+
+## 6 - Follow Related Records
+
+From a record into the records related to it with Alt plus Right Arrow, and back with Alt plus Left Arrow, as a browser goes back.
+
+**Before you start:** A database with related tables is open; the chinook sample has them.
+
+### Step 1
+
+One want: from an artist, to the albums, to the tracks, and back. Related tables let one record lead to others.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Shift+R
+
+Shift plus R, R for Related, says what this record leads to, changing nothing.
+
+Screen reader:
+
+- (the related tables and their counts)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Alt+Right Arrow
+
+Alt plus Right Arrow goes into the related records.
+
+Screen reader:
+
+- (the child table, and its first record)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Shift+Z
+
+Shift plus Z says where I am now.
+
+Screen reader:
+
+- (the child table, its record count, the filter that ties it to the parent)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Alt+Right Arrow
+
+Alt plus Right Arrow again goes a level deeper.
+
+Screen reader:
+
+- (the next table down)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Alt+Left Arrow
+
+Alt plus Left Arrow comes back a level, as a browser goes back.
+
+Screen reader:
+
+- (the table one level up)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Alt+Home
+
+A planned misstep: three levels deep, and lost. Alt plus Home returns to where I started, from any depth.
+
+Screen reader:
+
+- (the starting table, at the record I left)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Shift+P
+
+What ties a record to its relations is its prime, a key DbDo builds from the record itself. Shift plus P, Say Prime, says it.
+
+Screen reader:
+
+- Miles Davis
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Control+Shift+O
+
+A related table can have a window of its own. Control plus Shift plus O, Open Table, opens a table in a new window, beside this one.
+
+Screen reader:
+
+- Open Table dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Enter
+
+I choose albums and press Enter.
+
+Screen reader:
+
+- albums, 40 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Shift+F4
+
+Shift plus F4 says the windows open, and Control plus Tab moves between them.
+
+Screen reader:
+
+- 2 windows: artists, albums
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Control+F6
+
+In one window, Control plus F6 moves to the next table, and Alt plus F6 back through the tables visited, as a browser's history does.
+
+Screen reader:
+
+- tracks, 412 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Control+F4
+
+Control plus F4 closes this window, leaving the first.
+
+Screen reader:
+
+- artists, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: F4
+
+F4, Current Windows, lists the windows open, so you can pick one by name rather than cycle through them.
+
+Screen reader:
+
+- Current Windows dialog, artists, 1 of 2
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+F6
+
+Escape. Alt plus F6 goes back through the tables visited in this window, the way a browser goes back.
+
+Screen reader:
+
+- albums, 40 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Alt+Shift+F6
+
+Alt plus Shift plus F6 goes forward again.
+
+Screen reader:
+
+- tracks, 412 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+Shift+F4
+
+Control plus Shift plus F4 closes every window but this one, for a clean start.
+
+Screen reader:
+
+- tracks, 412 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Control+Shift+F6
+
+Within one window, Control plus Shift plus F6 moves to the previous table, as Control plus F6 moves to the next: Shift reverses.
+
+Screen reader:
+
+- artists, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Shift+R
+
+Whichever way you arrived, Shift plus R still says what this record leads to, so the way down is never a guess.
+
+Screen reader:
+
+- albums 3, tracks 31
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 22
+
+Go into related records.
+
+Screen reader:
+
+- Alt plus Right Arrow
+
+### Step 23
+
+Come back a level.
+
+Screen reader:
+
+- Alt plus Left Arrow
+
+### Step 24
+
+Return to the start.
+
+Screen reader:
+
+- Alt plus Home
+
+**Something to try:** Follow a relationship two levels deep, then return with Alt plus Home.
+
+## 7 - Statistics and Reports
+
+The numbers in a column with Alt plus Shift plus S, a chart's figures with Control plus Shift plus G, and a report written as a document with Alt plus Shift plus R.
+
+**Before you start:** JobTrail is open in DbDo.
+
+### Step 1
+
+One want: how many applications, how they stand, and a page to keep.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Alt+Shift+S
+
+I move to the status column. Alt plus Shift plus S, S for Statistics, describes the column.
+
+Screen reader:
+
+- Statistics from Column
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Escape
+
+The count of each value, and for numbers the sum, average, least and most. Escape closes it.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Control+Shift+G
+
+Control plus Shift plus G, G for Graphics, turns a column into a chart and its figures in words.
+
+Screen reader:
+
+- Graphics Column
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Alt+Shift+R
+
+Escape. Alt plus Shift plus R, R for Report, writes a saved report as a document.
+
+Screen reader:
+
+- Run Report dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Enter
+
+I choose a report and press Enter; DbDo writes it and opens it.
+
+Screen reader:
+
+- (the report's title, as a heading)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8
+
+A planned misstep: a report reads the whole table, filter or not, unless its template says otherwise. To report only some records, filter them and use the report that respects the filter.
+
+### Step 9: Alt+T
+
+Before the details, the shape. Alt plus T, Table Summary, says how many records and columns the table has, and how much room it takes.
+
+Screen reader:
+
+- Table Summary
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Alt+D
+
+Escape, and Alt plus D, Database Summary, does the same for every table in the database.
+
+Screen reader:
+
+- Database Summary
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Alt+Shift+S
+
+A filter narrows a summary to what matters: filter to waiting jobs, then Alt plus Shift plus S again, and the counts describe only those.
+
+Screen reader:
+
+- Statistics from Column
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Alt+X
+
+When the numbers are to go somewhere else, Alt plus X, Export Data, writes the table, or the records in view, as CSV, a spreadsheet, JSON or another format.
+
+Screen reader:
+
+- Export Data dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Escape
+
+Escape, for now. And Control plus P prints the records in view, for a copy on paper or a PDF.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Control+C
+
+A single number is often all that is wanted. Control plus C copies the cell under the cursor.
+
+Screen reader:
+
+- Copied
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Alt+C
+
+Alt plus C appends another cell to what is on the clipboard, to gather a few figures in one go.
+
+Screen reader:
+
+- Appended
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+Apostrophe
+
+Alt plus Apostrophe, Say Clipboard, reads back what has been gathered before it is pasted anywhere.
+
+Screen reader:
+
+- 12, waiting 4
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17
+
+Then one paste puts those figures in an email or a document.
+
+### Step 18: Shift+8
+
+Before reading any summary, Shift plus 8 says the sort and filter in force, since both change what the numbers describe.
+
+Screen reader:
+
+- Sort: employer. Filter: none.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Alt+L
+
+And Alt plus L reads a whole column aloud, top to bottom, when hearing the values beats counting them.
+
+Screen reader:
+
+- waiting, applied, interview, waiting
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 21
+
+Describe a column.
+
+Screen reader:
+
+- Alt plus Shift plus S
+
+### Step 22
+
+A column as a chart.
+
+Screen reader:
+
+- Control plus Shift plus G
+
+### Step 23
+
+Run a report.
+
+Screen reader:
+
+- Alt plus Shift plus R
+
+**Something to try:** Run a report of your own table and read it in your browser.
+
+## 8 - Ask with SQL
+
+A question in the database's own language with Control plus Q, the answer shown as records, and the history of questions asked.
+
+**Before you start:** JobTrail is open in DbDo.
+
+### Step 1
+
+One want: an answer no single command gives -- how many jobs at each employer, most first. SQL, the database's own language, asks it in one line.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Control+Q
+
+Control plus Q, Q for Query, opens a box for SQL.
+
+Screen reader:
+
+- Query dialog
+- SQL: edit, multiline
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: select employer, count(*) as jobs from jobs group by employer order by jobs desc
+
+I type the question.
+
+Screen reader:
+
+- (each word echoed as it is typed)
+
+### Step 5: Control+Enter
+
+Control plus Enter runs it from inside the box, where Enter would start a new line.
+
+Screen reader:
+
+- (the first row of the answer)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Shift+Q
+
+The answer is shown as records, moved through like any table. Shift plus Q says the query in force.
+
+Screen reader:
+
+- (the query)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Control+Q
+
+A planned misstep: a misspelled column. The database says which word it does not know, and the box keeps the query to fix.
+
+Screen reader:
+
+- Query dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Alt+Shift+Q
+
+Escape. Alt plus Shift plus Q, the history, lists the questions asked, to run one again.
+
+Screen reader:
+
+- Query History
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Shift+F12
+
+SQL is not the only way to ask. Shift plus F12, Chat about Table, sends the table with a question in plain words to the model on this computer.
+
+Screen reader:
+
+- Chat about Table dialog
+- Question: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Which employer has the most applications still waiting?
+
+I ask which employer has the most applications still waiting.
+
+Screen reader:
+
+- (each word echoed as it is typed)
+
+### Step 11: Enter
+
+Enter. The answer comes in words, from the same records, and nothing leaves this computer.
+
+Screen reader:
+
+- Answer dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Escape
+
+Escape. An answer from SQL is a table like any other, so Alt plus X exports it, and Alt plus Shift plus S describes its columns.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Control+Shift+I
+
+A question asked often can be saved as a script, a dot s q l file in the Scripts folder beside the database. Control plus Shift plus I, Invoke Script, lists them and runs the one chosen.
+
+Screen reader:
+
+- Invoke Script dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Escape
+
+Escape. Scripts belong to their database, so the questions travel with the data they ask about.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Alt+Z
+
+Before a query that changes data, Alt plus Z, Toggle Read Only, makes the database read only, so a mistyped statement cannot change anything.
+
+Screen reader:
+
+- Read only
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+Z
+
+Alt plus Z again makes it writable when you mean to change it.
+
+Screen reader:
+
+- Read and write
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: F5
+
+After a query that does change records, F5, Refresh View, shows the table as it now stands.
+
+Screen reader:
+
+- jobs, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18
+
+Practise on a copy: Save As, Control plus Shift plus S, makes one, so the original stays as it was while you learn.
+
+### Step 19
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 20
+
+Ask in SQL.
+
+Screen reader:
+
+- Control plus Q
+
+### Step 21
+
+Run it from inside the box.
+
+Screen reader:
+
+- Control plus Enter
+
+### Step 22
+
+The questions asked before.
+
+Screen reader:
+
+- Alt plus Shift plus Q
+
+**Something to try:** Write a query that counts your records by one column.
+
+## 9 - Conclusion
+
+The conclusion and summary of the walks; the words DbDo uses, in two voices; then more information: the help built into the program and where to learn more.
+
+**Before you start:** Nothing is needed; this walk is listened to.
+
+### Step 1
+
+To finish: what to carry away, the words DbDo uses, and where to get help. First, the summary. A table is a list you move through by row and column, and every question about where you are is a Shift key that changes nothing.
+
+Screen reader:
+
+- Shift plus Z, Say Status
+
+### Step 2
+
+Keys follow words, so a key can be guessed: O opens and orders, F filters, M marks, and Shift reverses.
+
+Screen reader:
+
+- Control plus M, Mark
+- Control plus Shift plus M, Unmark
+
+### Step 3
+
+And when the commands run out, SQL asks the database anything, in one line.
+
+Screen reader:
+
+- Control plus Q, Query
+
+### Step 4
+
+Now the words, in alphabetical order. I say the term; the reader says what it means.
+
+### Step 5
+
+data list.
+
+Screen reader:
+
+- The list of records the window shows: one table or query, a row per record, a column per field.
+
+### Step 6
+
+filter.
+
+Screen reader:
+
+- A condition that hides the records not matching it, until it is cleared.
+
+### Step 7
+
+mark.
+
+Screen reader:
+
+- A flag on a record, for a later command to act on; Control plus M sets it, and Shift reverses it.
+
+### Step 8
+
+order.
+
+Screen reader:
+
+- The sort of the list, by one column, ascending or reversed.
+
+### Step 9
+
+pick list.
+
+Screen reader:
+
+- A field's fixed values in a list, opened with F4, so nothing is mistyped.
+
+### Step 10
+
+query.
+
+Screen reader:
+
+- A question in SQL, answered as records.
+
+### Step 11
+
+record.
+
+Screen reader:
+
+- One row of a table: a job, an album, a contact.
+
+### Step 12
+
+related table.
+
+Screen reader:
+
+- A table whose records belong to a record of another; Alt plus Right Arrow goes in.
+
+### Step 13
+
+report.
+
+Screen reader:
+
+- A saved template that writes a table's records as a document.
+
+### Step 14
+
+Say key.
+
+Screen reader:
+
+- Shift and a letter: a question answered aloud, changing nothing.
+
+### Step 15
+
+SQLite.
+
+Screen reader:
+
+- The database format DbDo opens: one file, with its tables inside.
+
+### Step 16
+
+standard fields.
+
+Screen reader:
+
+- The columns every DbDo table may carry: added, edited, marked, notes, tags, url.
+
+### Step 17
+
+template database.
+
+Screen reader:
+
+- A ready-made database in the Help menu, to practice on or to start from.
+
+### Step 18
+
+Last, more information. Help is built in. The guide, and what changed.
+
+Screen reader:
+
+- F1, the guide
+- Shift plus F1, History
+
+### Step 19
+
+The version, and what any key does without doing it.
+
+Screen reader:
+
+- Alt plus F1, About
+- Control plus F1, Key Describer
+
+### Step 20
+
+DbDo dot md, the guide, explains every command and the ideas behind them; Hotkeys dot md lists every key three ways; and the DbDo page on GitHub, at github dot com slash JamalMazrui slash DbDo, has the newest version.
+
+**Something to try:** Open a template database and describe one of its columns with Alt plus Shift plus S.
+
+<!-- walkthrough ends -->
+
+<!-- walkthrough: written by makeTutorials.py, do not edit between the markers -->
+
+## 0 - Overview
+
+What DbDo is, two keys of the screen reader's own, and the table of contents.
+
+**Before you start:** Nothing is needed; this walk is listened to.
+
+### Step 1
+
+DbDo is a database program for people who listen to the screen.
+
+### Step 2
+
+It opens SQLite databases, and imports from Excel and others, and shows one table at a time as a list of records you move through by row and by column. Every cell can be heard, edited, searched, marked and counted from the keyboard, and the program answers questions about where you are without changing anything.
+
+### Step 3: Insert+Up Arrow
+
+Two keys before anything else, both the reader's own. If a line goes by too fast, Insert plus Up Arrow says it again.
+
+Screen reader:
+
+- (the last line, read a second time)
+
+### Step 4: Insert+Tab
+
+And if you lose your place, Insert plus Tab says where you are: the control, its state and its position.
+
+Screen reader:
+
+- (the current control, with its state and position)
+
+### Step 5
+
+Now the table of contents. I say the number and the title; the reader says what the walk covers.
+
+### Step 6
+
+One, User Interface.
+
+Screen reader:
+
+- The window, the record list, the Say keys that ask without changing, the pick list, the menus, the rules every key follows, and where help lives.
+
+### Step 7
+
+Two, Install and Launch.
+
+Screen reader:
+
+- The installer, the boxes on its last page, and DbDo opening with Alt plus Control plus D.
+
+### Step 8
+
+Three, Open a Database and Move Through Records.
+
+Screen reader:
+
+- A template database opened, and moving by row, by column, by search and by number.
+
+### Step 9
+
+Four, Edit and Add Records.
+
+Screen reader:
+
+- A cell changed, a value picked from a list, a record added.
+
+### Step 10
+
+Five, Mark, Filter and Sort.
+
+Screen reader:
+
+- Records marked, the list narrowed to what matters, and put in order.
+
+### Step 11
+
+Six, Follow Related Records.
+
+Screen reader:
+
+- From one record into the records related to it, and back.
+
+### Step 12
+
+Seven, Statistics and Reports.
+
+Screen reader:
+
+- The numbers in a column, and a report written as a document.
+
+### Step 13
+
+Eight, Ask with SQL.
+
+Screen reader:
+
+- A question in the database's own language, and the history of questions asked.
+
+### Step 14
+
+Nine, Conclusion.
+
+Screen reader:
+
+- What to carry away, the words DbDo uses, the help built in, and where to learn more.
+
+### Step 15
+
+Ten walks, each under five minutes, under an hour together: the overview, the user interface, seven tasks, and the conclusion. They are a course, not a reference: each one assumes those before it.
+
+**Something to try:** Take walks one and two, then pick the task you need today.
+
+## 1 - User Interface
+
+DbDo's window and its parts, each named and then shown by the reader -- the record list, the Say keys, the pick list, the menus -- then the rules every key follows, and help in its four places.
+
+**Before you start:** DbDo is installed, with RadioTrail open, as it is on a first run.
+
+### Step 1
+
+DbDo is heard before it is seen. I name each part; the reader shows it: name, kind, value and state, then a hint.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Down Arrow
+
+The title, then the greeting in the message voice. The main view is a list of records: Down Arrow moves by row, and the reader speaks the record.
+
+Screen reader:
+
+- (the next record, its first column first)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Right Arrow
+
+Right Arrow moves by column within the record, speaking the column's name and its value.
+
+Screen reader:
+
+- (the next column's name and value)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Shift+Z
+
+Now the Say keys: Shift and a letter asks, and changes nothing. Shift plus Z is Say Status.
+
+Screen reader:
+
+- jobs, 12 records, no filter, sorted by employer
+
+### Step 6: Shift+C
+
+Table, count, filter and sort in one breath; pressed twice, the words open in a window. Shift plus C, C for Cell, says the cell you are on.
+
+Screen reader:
+
+- (the column's name and the cell's value)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: F4
+
+Where a field has fixed values, F4 opens them as a pick list.
+
+Screen reader:
+
+- status: list box, untried, 4 of 5
+- To move through items press Up or Down Arrow.
+
+### Step 8: F10
+
+A letter jumps to a value, so nothing is mistyped. Escape closes it. Menus say their own keys; F10 opens the menu bar.
+
+Screen reader:
+
+- Menu bar
+- File menu
+
+### Step 9: Down Arrow
+
+Down Arrow to the first item.
+
+Screen reader:
+
+- Open Database..., Control plus O, O
+
+### Step 10: Escape
+
+The item, its key, then its letter: learn a key from the menu once, then skip the menu.
+
+Screen reader:
+
+- Leaving menus
+
+### Step 11: Shift+Z
+
+The rules behind every key. A letter is the first letter of a word: Control plus O opens, Alt plus O orders. Control does; Shift asks, changing nothing.
+
+Screen reader:
+
+- jobs, 12 records, no filter, sorted by employer
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Insert+T
+
+Adding Shift reverses: Control plus M marks, Control plus Shift plus M unmarks. Each function key is a family: F2 edits, F3 searches, F4 picks, F8 selects. Insert plus T, the reader's own, says the title.
+
+Screen reader:
+
+- DbDo
+
+### Step 13: Control+F1
+
+Control plus F1 is the Key Describer: each key says what it does instead of doing it.
+
+Screen reader:
+
+- Key Describer On
+
+### Step 14: Control+F1
+
+Again, and it is off.
+
+Screen reader:
+
+- No Key Describer
+
+### Step 15
+
+Help is in four places, the same in every Homer program. I say which; the reader says the key. The guide.
+
+Screen reader:
+
+- F1, the guide
+
+### Step 16
+
+The changes, release by release; the version; the name of any key.
+
+Screen reader:
+
+- Shift plus F1, History
+- Alt plus F1, About
+- Control plus F1, Key Describer
+
+### Step 17: Alt+F10
+
+When a key will not come to mind, Alt plus F10, the Alternate Menu, lists every command in one list you type into, with its key beside it.
+
+Screen reader:
+
+- Alternate Menu
+- Command, list box
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: mark
+
+I type the word mark, and the list narrows to the commands with that word.
+
+Screen reader:
+
+- Mark All, Control plus A
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Escape
+
+Escape closes the list without running anything.
+
+Screen reader:
+
+- jobs, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 21
+
+Say Status.
+
+Screen reader:
+
+- Shift plus Z
+
+### Step 22
+
+A field's fixed values.
+
+Screen reader:
+
+- F4, pick list
+
+### Step 23
+
+Unmark, the reverse of Mark.
+
+Screen reader:
+
+- Control plus Shift plus M
+
+**Something to try:** Guess three DbDo keys from their words, then check each with Control plus F1.
+
+## 2 - Install and Launch
+
+The installer, the boxes on its last page -- the screen reader scripts, the player, the model for its AI commands -- and DbDo opening from anywhere.
+
+**Before you start:** DbDo_setup.exe is downloaded from the DbDo page on GitHub.
+
+### Step 1
+
+One want: DbDo on this computer, with what it works best with, in one sitting.
+
+### Step 2: Enter
+
+I open the downloaded setup program and allow it to make changes.
+
+Screen reader:
+
+- Setup - DbDo dialog
+- Welcome to the DbDo Setup Wizard
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 3: Enter
+
+The ordinary installer: Enter takes Next, and the defaults are right.
+
+Screen reader:
+
+- Select Destination Location
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Tab
+
+The last page offers what DbDo works best with, each as a box whose first word is the machine's state read for you: Install, Update or Reinstall.
+
+Screen reader:
+
+- (the box for your screen reader's scripts, its first word, checked)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Down Arrow
+
+Scripts for the screen reader you use; the mpv player, which plays a record's stream; and, for the AI commands, Ollama and a model, downloaded once.
+
+Screen reader:
+
+- Install mpv check box, checked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Space
+
+A planned misstep: clearing a box you need. Space clears it; Space again ticks it back.
+
+Screen reader:
+
+- not checked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Space
+
+Space.
+
+Screen reader:
+
+- checked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Enter
+
+Enter installs what is ticked.
+
+Screen reader:
+
+- Finish button
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Alt+Control+D
+
+Then the key that opens DbDo from anywhere.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 10
+
+Installed and open. If something was left out, run the setup again and tick its box; what is already current costs nothing.
+
+### Step 11: F1
+
+Help is four keys away, the same in every Homer program. F1 opens the full documentation in the browser.
+
+Screen reader:
+
+- DbDo documentation
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Alt+Shift+F1
+
+Alt plus Shift plus F1 opens the ReadMe, the short start, for when the full guide is more than you need today.
+
+Screen reader:
+
+- DbDo ReadMe
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Alt+F1
+
+Alt plus F1, About, says the version, so you always know which DbDo is installed.
+
+Screen reader:
+
+- About DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: F11
+
+Escape, and F11 asks GitHub whether a newer version is out. If one is, Yes is the default, and Enter installs it.
+
+Screen reader:
+
+- Checking for a newer version
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: F10
+
+The templates to practise on are in the Help menu: F10, then H for Help.
+
+Screen reader:
+
+- Help menu
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Down Arrow
+
+Down Arrow to Template Databases. Each is a complete example: JobTrail for job hunting, BookTrail for reading, RadioTrail for stations to play.
+
+Screen reader:
+
+- Template Databases
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Escape
+
+Escape closes the menu. Once a database is open, Alt plus Backslash opens its folder in File Explorer, where its scripts and reports live beside it.
+
+Screen reader:
+
+- DbDo ready
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+F1
+
+Two more ways to learn the keys before you need them. Control plus F1 turns on the Key Describer: each key then says what it does instead of doing it.
+
+Screen reader:
+
+- Key Describer on
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Control+O
+
+Now Control plus O only describes itself.
+
+Screen reader:
+
+- Open Database, Control plus O
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Alt+Shift+H
+
+Control plus F1 again turns the describer off. Alt plus Shift plus H, Hotkey Summary, lists every key in a window you can search.
+
+Screen reader:
+
+- Hotkey Summary
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21: Escape
+
+Escape closes it, and the database is as it was.
+
+Screen reader:
+
+- DbDo ready
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 22
+
+What this walk taught. I name the step; the reader gives the answer.
+
+### Step 23
+
+What a box's first word tells you.
+
+Screen reader:
+
+- Install, Update or Reinstall
+
+### Step 24
+
+The key that opens DbDo.
+
+Screen reader:
+
+- Alt plus Control plus D
+
+**Something to try:** Run the setup again; every box should now say Update or Reinstall.
+
+## 3 - Open a Database and Move Through Records
+
+RadioTrail, the database DbDo opens first, explored by row, by column, by search and by record number, and a station played in the Homer Player.
+
+**Before you start:** DbDo is installed; on a first run it opens RadioTrail.
+
+### Step 1
+
+One want: a station found and playing, quickly. The first time DbDo starts, it opens RadioTrail, a list of internet radio stations to search, sort and play.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Shift+Z
+
+Shift plus Z says where I am: the stations table of RadioTrail. Another database opens with Control plus O, O for Open, and the templates are in the Help menu, under Template Databases.
+
+Screen reader:
+
+- (stations, the number of stations, no filter, sorted by name)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Control+G
+
+Down Arrow moves by record; Right Arrow by column. Control plus G, G for Go, goes to a record by its number.
+
+Screen reader:
+
+- Go to Record dialog
+- Record number: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Enter
+
+I type 7 and press Enter.
+
+Screen reader:
+
+- (record 7, its first column first)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Control+K
+
+Control plus K, K for Keywords, searches every column for words.
+
+Screen reader:
+
+- Keywords dialog
+- Keywords: edit
+- Type in text.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Enter
+
+I type jazz and press Enter.
+
+Screen reader:
+
+- (the first station holding jazz)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Alt+Delete
+
+F3 goes to the next match, Shift plus F3 to the one before. Alt plus Delete says the column and the row number.
+
+Screen reader:
+
+- (the column's name and the row number)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Escape
+
+A planned misstep: Control plus F is not find here. In DbDo, F is for Filter, a later walk. Keywords is K. Escape leaves anything opened by mistake.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Control+J
+
+Keywords searches every column; Jump searches one. Control plus J, Jump to Record, asks which column and what to look for.
+
+Screen reader:
+
+- Jump to Record dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Enter
+
+I choose country, type Canada, and press Enter. The cursor lands on the first station there.
+
+Screen reader:
+
+- (Canada, country, its row)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Control+Shift+J
+
+Control plus Shift plus J jumps backward to the one before, and Control plus Shift plus K does the same for Keywords: Shift reverses, here as everywhere in DbDo.
+
+Screen reader:
+
+- (Canada, country, an earlier row)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Shift+Y
+
+Shift plus Y, Say Yield, says how many records there are.
+
+Screen reader:
+
+- (the number of stations)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Shift+C
+
+Shift plus C, Say Cell, says the value under the cursor again, without moving.
+
+Screen reader:
+
+- Canada
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Control+I
+
+Control plus I, Inspect Record, shows the whole record at once, one field to a line: the station's name, genre, language and stream address among them. Escape closes it.
+
+Screen reader:
+
+- Inspect Record dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+Shift+P
+
+Now the reason RadioTrail opens first. Alt plus Shift plus P, Play Stream, plays the current station in the Homer Player, the same player FileDir uses.
+
+Screen reader:
+
+- (the Homer Player, playing the station)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Escape
+
+Escape closes the player and returns to the station I was on, ready for the next one.
+
+Screen reader:
+
+- (stations, the same row)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+T
+
+A database can hold several tables; Control plus T, Choose Table, lists them. Escape keeps the table I am in.
+
+Screen reader:
+
+- (Choose Table dialog, stations first)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Escape
+
+Escape. RadioTrail is one table, easy to hold in mind. The next walk opens JobTrail, whose tables are linked to one another.
+
+Screen reader:
+
+- stations
+
+Confirm the wording with a live run: buildTutorials -live.
+
+**Something to try:** Find a station by keyword, then play it with Alt plus Shift plus P.
+
+## 4 - Edit and Add Records
+
+JobTrail, the job-search template, opened; then a cell edited with F2, a value picked from a list with Control plus F2, and a new record added with Control plus N.
+
+**Before you start:** DbDo is open; this walk opens JobTrail.
+
+### Step 1
+
+One want: one job's status brought up to date, and a new job added.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Control+O
+
+JobTrail comes next: a template for a job search, whose jobs, employers and contacts are linked to one another, so it shows more of what DbDo can do. Control plus O, O for Open; the templates are in the Help menu, under Template Databases, and I open JobTrail.
+
+Screen reader:
+
+- Open Database dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Shift+Z
+
+I choose JobTrail and press Enter. Shift plus Z says where I am.
+
+Screen reader:
+
+- jobs, 12 records, no filter, sorted by employer
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: F2
+
+I move to the status column of the record to change. F2 edits the cell under the cursor, as F2 renames a file in Windows.
+
+Screen reader:
+
+- status: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Enter
+
+I type the new value and press Enter to keep it.
+
+Screen reader:
+
+- (the record, with its new status)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Control+F2
+
+Where a field has fixed values, Control plus F2 edits by picking one, so nothing is mistyped.
+
+Screen reader:
+
+- status: list box
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Enter
+
+Down Arrow to the value, and Enter.
+
+Screen reader:
+
+- (the record, with the picked status)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Control+N
+
+Control plus N, N for New, adds a record to the table, and focus goes to its first field.
+
+Screen reader:
+
+- New record
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Shift+A
+
+I fill each field with F2 as before. Shift plus A, A for Added, says when this record was added.
+
+Screen reader:
+
+- (the date and time the record was added)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Control+D
+
+A planned misstep: Control plus D deletes a record, D for Delete, and asks first. Escape answers no.
+
+Screen reader:
+
+- Delete this record? No button
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Escape
+
+Escape keeps it.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Alt+Shift+N
+
+Notes hold whatever does not fit a column. Alt plus Shift plus N, Edit Notes, opens this record's notes in a box of their own.
+
+Screen reader:
+
+- Notes: edit, multiline
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Shift+N
+
+I type a line about the interview, and Control plus Enter keeps it. Shift plus N says the notes back.
+
+Screen reader:
+
+- Second interview Tuesday at ten.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Shift+T
+
+Tags work the same way, with Alt plus Shift plus T to edit and Shift plus T to hear them: words such as remote or referral, to filter by later.
+
+Screen reader:
+
+- remote, referral
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Shift+E
+
+Shift plus E, Say Edited, says when this record last changed, so a stale one is easy to spot.
+
+Screen reader:
+
+- Edited today at 3:42 PM
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Control+Shift+C
+
+Control plus Shift plus C, Copy Record, adds a copy of this record as a new one: quicker than typing a second job at the same employer.
+
+Screen reader:
+
+- Record copied
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+R
+
+Control plus R, Replace Column, finds and replaces text in the column I am on, in every record, for a name spelled two ways.
+
+Screen reader:
+
+- Replace Column dialog, Find: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Escape
+
+Escape, for now. A replacement counts what it changed and says so.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Alt+Shift+U
+
+A record can carry a web address, such as a job posting. Alt plus Shift plus U, Edit URL, edits it.
+
+Screen reader:
+
+- url: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21: Shift+U
+
+Enter keeps it. Shift plus U says it back, and Control plus Shift plus U opens it in the browser.
+
+Screen reader:
+
+- https colon slash slash jobs dot example dot com slash 4821
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 22
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 23
+
+Edit the cell I am on.
+
+Screen reader:
+
+- F2
+
+### Step 24
+
+Edit by picking a value.
+
+Screen reader:
+
+- Control plus F2
+
+### Step 25
+
+Add a record.
+
+Screen reader:
+
+- Control plus N
+
+**Something to try:** Add a record of your own and fill three of its fields.
+
+## 5 - Mark, Filter and Sort
+
+Records marked one at a time and in runs, the list narrowed by a filter, and put in order by a column.
+
+**Before you start:** JobTrail is open in DbDo.
+
+### Step 1
+
+One want: only the jobs still waiting, the newest first.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Control+M
+
+Control plus M, M for Mark, marks the record I am on, for a later command to act on.
+
+Screen reader:
+
+- Marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Shift+M
+
+Shift plus M asks about marks, changing nothing.
+
+Screen reader:
+
+- (how many records are marked)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Control+Shift+M
+
+Control plus Shift plus M reverses it: Shift reverses.
+
+Screen reader:
+
+- Unmarked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Control+F
+
+Control plus F, F for Filter, shows only the records that match. It begins with a choice.
+
+Screen reader:
+
+- Filter Records dialog
+- Filter by: list box, Any field contains text, 1 of 2
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Enter
+
+Any field is the first choice, so Enter alone takes it. It asks for the text to find, wherever it is.
+
+Screen reader:
+
+- Any Field Contains dialog
+- Text to find in any field: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Enter
+
+I type Seattle and press Enter. Every job with Seattle in any field stays: the city, the address, the notes.
+
+Screen reader:
+
+- 3 records have Seattle.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: N
+
+Control plus F again. With a filter in force, the list offers more, each choice with its own first letter. N for Narrow keeps Seattle and adds a field.
+
+Screen reader:
+
+- Narrow with the field form, 4 of 4
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Enter
+
+Enter opens the form, a box for each field. I type waiting in the status box and press Enter.
+
+Screen reader:
+
+- Filter applied. 2 records match.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Shift+F
+
+Shift plus F says the filter, both parts, in the words each was asked in.
+
+Screen reader:
+
+- any field contains Seattle; and where: status = 'waiting'
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Alt+O
+
+Alt plus O, O for Order, sorts by a column; I choose the date added.
+
+Screen reader:
+
+- Order Records dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Alt+Shift+O
+
+Enter sorts. Alt plus Shift plus O reverses the order, newest first.
+
+Screen reader:
+
+- (the newest waiting job)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Control+Shift+F
+
+A planned misstep: the filter stays until it is cleared, so a later search finds only waiting jobs. Control plus Shift plus F clears it.
+
+Screen reader:
+
+- No filter
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: F8
+
+Marking one record at a time is slow for many. F8 drops an anchor at the record I am on.
+
+Screen reader:
+
+- Mark anchor
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Shift+F8
+
+Down Arrow four records, then Shift plus F8 marks everything from the anchor to here.
+
+Screen reader:
+
+- 5 records marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Control+Shift+A
+
+Control plus A marks every record, Control plus Shift plus A unmarks them all, and Alt plus Shift plus I swaps marked and unmarked.
+
+Screen reader:
+
+- All unmarked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Shift+Space
+
+Marks are for acting on: Delete, Copy and Export all work on the marked records when there are any. Shift plus Space reads every marked record in full, to check before acting.
+
+Screen reader:
+
+- No records are marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Shift+8
+
+With a filter and an order in force, Shift plus 8 says both at once, so you always know what you are looking at.
+
+Screen reader:
+
+- Sort: added, descending; Filter: any field contains Seattle; and status = 'waiting'
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Shift+O
+
+Shift plus O says just the order, and Shift plus F just the filter.
+
+Screen reader:
+
+- added, descending
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21: Control+Space
+
+Control plus Space toggles the mark on the record I am on, as it toggles a selection in any Windows list.
+
+Screen reader:
+
+- Marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 22: Shift+Y
+
+With a filter in force, Shift plus Y says how many records it leaves.
+
+Screen reader:
+
+- 4 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 23: Alt+Shift+L
+
+Alt plus Shift plus L reads one column for the marked records only: here, the employers of the jobs I marked.
+
+Screen reader:
+
+- Amazon, Costco
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 24
+
+A filter and marks work together: filter to narrow, mark to choose, then act on the marked.
+
+### Step 25
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 26
+
+Mark, then unmark.
+
+Screen reader:
+
+- Control plus M
+- Control plus Shift plus M
+
+### Step 27
+
+Filter, then clear it.
+
+Screen reader:
+
+- Control plus F
+- Control plus Shift plus F
+
+### Step 28
+
+Order by a column.
+
+Screen reader:
+
+- Alt plus O
+
+**Something to try:** Filter your own table to one value, then sort what is left.
+
+## 6 - Follow Related Records
+
+From a record into the records related to it with Alt plus Right Arrow, and back with Alt plus Left Arrow, as a browser goes back.
+
+**Before you start:** A database with related tables is open; the chinook sample has them.
+
+### Step 1
+
+One want: from an artist, to the albums, to the tracks, and back. Related tables let one record lead to others.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Shift+R
+
+Shift plus R, R for Related, says what this record leads to, changing nothing.
+
+Screen reader:
+
+- (the related tables and their counts)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Alt+Right Arrow
+
+Alt plus Right Arrow goes into the related records.
+
+Screen reader:
+
+- (the child table, and its first record)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Shift+Z
+
+Shift plus Z says where I am now.
+
+Screen reader:
+
+- (the child table, its record count, the filter that ties it to the parent)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Alt+Right Arrow
+
+Alt plus Right Arrow again goes a level deeper.
+
+Screen reader:
+
+- (the next table down)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Alt+Left Arrow
+
+Alt plus Left Arrow comes back a level, as a browser goes back.
+
+Screen reader:
+
+- (the table one level up)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Alt+Home
+
+A planned misstep: three levels deep, and lost. Alt plus Home returns to where I started, from any depth.
+
+Screen reader:
+
+- (the starting table, at the record I left)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Shift+P
+
+What ties a record to its relations is its prime, a key DbDo builds from the record itself. Shift plus P, Say Prime, says it.
+
+Screen reader:
+
+- Miles Davis
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Control+Shift+O
+
+A related table can have a window of its own. Control plus Shift plus O, Open Table, opens a table in a new window, beside this one.
+
+Screen reader:
+
+- Open Table dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Enter
+
+I choose albums and press Enter.
+
+Screen reader:
+
+- albums, 40 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Shift+F4
+
+Shift plus F4 says the windows open, and Control plus Tab moves between them.
+
+Screen reader:
+
+- 2 windows: artists, albums
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Control+F6
+
+In one window, Control plus F6 moves to the next table, and Alt plus F6 back through the tables visited, as a browser's history does.
+
+Screen reader:
+
+- tracks, 412 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Control+F4
+
+Control plus F4 closes this window, leaving the first.
+
+Screen reader:
+
+- artists, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: F4
+
+F4, Current Windows, lists the windows open, so you can pick one by name rather than cycle through them.
+
+Screen reader:
+
+- Current Windows dialog, artists, 1 of 2
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+F6
+
+Escape. Alt plus F6 goes back through the tables visited in this window, the way a browser goes back.
+
+Screen reader:
+
+- albums, 40 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Alt+Shift+F6
+
+Alt plus Shift plus F6 goes forward again.
+
+Screen reader:
+
+- tracks, 412 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+Shift+F4
+
+Control plus Shift plus F4 closes every window but this one, for a clean start.
+
+Screen reader:
+
+- tracks, 412 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Control+Shift+F6
+
+Within one window, Control plus Shift plus F6 moves to the previous table, as Control plus F6 moves to the next: Shift reverses.
+
+Screen reader:
+
+- artists, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Shift+R
+
+Whichever way you arrived, Shift plus R still says what this record leads to, so the way down is never a guess.
+
+Screen reader:
+
+- albums 3, tracks 31
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 22
+
+Go into related records.
+
+Screen reader:
+
+- Alt plus Right Arrow
+
+### Step 23
+
+Come back a level.
+
+Screen reader:
+
+- Alt plus Left Arrow
+
+### Step 24
+
+Return to the start.
+
+Screen reader:
+
+- Alt plus Home
+
+**Something to try:** Follow a relationship two levels deep, then return with Alt plus Home.
+
+## 7 - Statistics and Reports
+
+The numbers in a column with Alt plus Shift plus S, a chart's figures with Control plus Shift plus G, and a report written as a document with Alt plus Shift plus R.
+
+**Before you start:** JobTrail is open in DbDo.
+
+### Step 1
+
+One want: how many applications, how they stand, and a page to keep.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Alt+Shift+S
+
+I move to the status column. Alt plus Shift plus S, S for Statistics, describes the column.
+
+Screen reader:
+
+- Statistics from Column
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Escape
+
+The count of each value, and for numbers the sum, average, least and most. Escape closes it.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Control+Shift+G
+
+Control plus Shift plus G, G for Graphics, turns a column into a chart and its figures in words.
+
+Screen reader:
+
+- Graphics Column
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Alt+Shift+R
+
+Escape. Alt plus Shift plus R, R for Report, writes a saved report as a document.
+
+Screen reader:
+
+- Run Report dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Enter
+
+I choose a report and press Enter; DbDo writes it and opens it.
+
+Screen reader:
+
+- (the report's title, as a heading)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8
+
+A planned misstep: a report reads the whole table, filter or not, unless its template says otherwise. To report only some records, filter them and use the report that respects the filter.
+
+### Step 9: Alt+T
+
+Before the details, the shape. Alt plus T, Table Summary, says how many records and columns the table has, and how much room it takes.
+
+Screen reader:
+
+- Table Summary
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Alt+D
+
+Escape, and Alt plus D, Database Summary, does the same for every table in the database.
+
+Screen reader:
+
+- Database Summary
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Alt+Shift+S
+
+A filter narrows a summary to what matters: filter to waiting jobs, then Alt plus Shift plus S again, and the counts describe only those.
+
+Screen reader:
+
+- Statistics from Column
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Alt+X
+
+When the numbers are to go somewhere else, Alt plus X, Export Data, writes the table, or the records in view, as CSV, a spreadsheet, JSON or another format.
+
+Screen reader:
+
+- Export Data dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Escape
+
+Escape, for now. And Control plus P prints the records in view, for a copy on paper or a PDF.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Control+C
+
+A single number is often all that is wanted. Control plus C copies the cell under the cursor.
+
+Screen reader:
+
+- Copied
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Alt+C
+
+Alt plus C appends another cell to what is on the clipboard, to gather a few figures in one go.
+
+Screen reader:
+
+- Appended
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+Apostrophe
+
+Alt plus Apostrophe, Say Clipboard, reads back what has been gathered before it is pasted anywhere.
+
+Screen reader:
+
+- 12, waiting 4
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17
+
+Then one paste puts those figures in an email or a document.
+
+### Step 18: Shift+8
+
+Before reading any summary, Shift plus 8 says the sort and filter in force, since both change what the numbers describe.
+
+Screen reader:
+
+- Sort: employer. Filter: none.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Alt+L
+
+And Alt plus L reads a whole column aloud, top to bottom, when hearing the values beats counting them.
+
+Screen reader:
+
+- waiting, applied, interview, waiting
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 21
+
+Describe a column.
+
+Screen reader:
+
+- Alt plus Shift plus S
+
+### Step 22
+
+A column as a chart.
+
+Screen reader:
+
+- Control plus Shift plus G
+
+### Step 23
+
+Run a report.
+
+Screen reader:
+
+- Alt plus Shift plus R
+
+**Something to try:** Run a report of your own table and read it in your browser.
+
+## 8 - Ask with SQL
+
+A question in the database's own language with Control plus Q, the answer shown as records, and the history of questions asked.
+
+**Before you start:** JobTrail is open in DbDo.
+
+### Step 1
+
+One want: an answer no single command gives -- how many jobs at each employer, most first. SQL, the database's own language, asks it in one line.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Control+Q
+
+Control plus Q, Q for Query, opens a box for SQL.
+
+Screen reader:
+
+- Query dialog
+- SQL: edit, multiline
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: select employer, count(*) as jobs from jobs group by employer order by jobs desc
+
+I type the question.
+
+Screen reader:
+
+- (each word echoed as it is typed)
+
+### Step 5: Control+Enter
+
+Control plus Enter runs it from inside the box, where Enter would start a new line.
+
+Screen reader:
+
+- (the first row of the answer)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Shift+Q
+
+The answer is shown as records, moved through like any table. Shift plus Q says the query in force.
+
+Screen reader:
+
+- (the query)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Control+Q
+
+A planned misstep: a misspelled column. The database says which word it does not know, and the box keeps the query to fix.
+
+Screen reader:
+
+- Query dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Alt+Shift+Q
+
+Escape. Alt plus Shift plus Q, the history, lists the questions asked, to run one again.
+
+Screen reader:
+
+- Query History
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Shift+F12
+
+SQL is not the only way to ask. Shift plus F12, Chat about Table, sends the table with a question in plain words to the model on this computer.
+
+Screen reader:
+
+- Chat about Table dialog
+- Question: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Which employer has the most applications still waiting?
+
+I ask which employer has the most applications still waiting.
+
+Screen reader:
+
+- (each word echoed as it is typed)
+
+### Step 11: Enter
+
+Enter. The answer comes in words, from the same records, and nothing leaves this computer.
+
+Screen reader:
+
+- Answer dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Escape
+
+Escape. An answer from SQL is a table like any other, so Alt plus X exports it, and Alt plus Shift plus S describes its columns.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Control+Shift+I
+
+A question asked often can be saved as a script, a dot s q l file in the Scripts folder beside the database. Control plus Shift plus I, Invoke Script, lists them and runs the one chosen.
+
+Screen reader:
+
+- Invoke Script dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Escape
+
+Escape. Scripts belong to their database, so the questions travel with the data they ask about.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Alt+Z
+
+Before a query that changes data, Alt plus Z, Toggle Read Only, makes the database read only, so a mistyped statement cannot change anything.
+
+Screen reader:
+
+- Read only
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+Z
+
+Alt plus Z again makes it writable when you mean to change it.
+
+Screen reader:
+
+- Read and write
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: F5
+
+After a query that does change records, F5, Refresh View, shows the table as it now stands.
+
+Screen reader:
+
+- jobs, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18
+
+Practise on a copy: Save As, Control plus Shift plus S, makes one, so the original stays as it was while you learn.
+
+### Step 19
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 20
+
+Ask in SQL.
+
+Screen reader:
+
+- Control plus Q
+
+### Step 21
+
+Run it from inside the box.
+
+Screen reader:
+
+- Control plus Enter
+
+### Step 22
+
+The questions asked before.
+
+Screen reader:
+
+- Alt plus Shift plus Q
+
+**Something to try:** Write a query that counts your records by one column.
+
+## 9 - Conclusion
+
+The conclusion and summary of the walks; the words DbDo uses, in two voices; then more information: the help built into the program and where to learn more.
+
+**Before you start:** Nothing is needed; this walk is listened to.
+
+### Step 1
+
+To finish: what to carry away, the words DbDo uses, and where to get help. First, the summary. A table is a list you move through by row and column, and every question about where you are is a Shift key that changes nothing.
+
+Screen reader:
+
+- Shift plus Z, Say Status
+
+### Step 2
+
+Keys follow words, so a key can be guessed: O opens and orders, F filters, M marks, and Shift reverses.
+
+Screen reader:
+
+- Control plus M, Mark
+- Control plus Shift plus M, Unmark
+
+### Step 3
+
+And when the commands run out, SQL asks the database anything, in one line.
+
+Screen reader:
+
+- Control plus Q, Query
+
+### Step 4
+
+Now the words, in alphabetical order. I say the term; the reader says what it means.
+
+### Step 5
+
+data list.
+
+Screen reader:
+
+- The list of records the window shows: one table or query, a row per record, a column per field.
+
+### Step 6
+
+filter.
+
+Screen reader:
+
+- A condition that hides the records not matching it, until it is cleared.
+
+### Step 7
+
+mark.
+
+Screen reader:
+
+- A flag on a record, for a later command to act on; Control plus M sets it, and Shift reverses it.
+
+### Step 8
+
+order.
+
+Screen reader:
+
+- The sort of the list, by one column, ascending or reversed.
+
+### Step 9
+
+pick list.
+
+Screen reader:
+
+- A field's fixed values in a list, opened with F4, so nothing is mistyped.
+
+### Step 10
+
+query.
+
+Screen reader:
+
+- A question in SQL, answered as records.
+
+### Step 11
+
+record.
+
+Screen reader:
+
+- One row of a table: a job, an album, a contact.
+
+### Step 12
+
+related table.
+
+Screen reader:
+
+- A table whose records belong to a record of another; Alt plus Right Arrow goes in.
+
+### Step 13
+
+report.
+
+Screen reader:
+
+- A saved template that writes a table's records as a document.
+
+### Step 14
+
+Say key.
+
+Screen reader:
+
+- Shift and a letter: a question answered aloud, changing nothing.
+
+### Step 15
+
+SQLite.
+
+Screen reader:
+
+- The database format DbDo opens: one file, with its tables inside.
+
+### Step 16
+
+standard fields.
+
+Screen reader:
+
+- The columns every DbDo table may carry: added, edited, marked, notes, tags, url.
+
+### Step 17
+
+template database.
+
+Screen reader:
+
+- A ready-made database in the Help menu, to practice on or to start from.
+
+### Step 18
+
+Last, more information. Help is built in. The guide, and what changed.
+
+Screen reader:
+
+- F1, the guide
+- Shift plus F1, History
+
+### Step 19
+
+The version, and what any key does without doing it.
+
+Screen reader:
+
+- Alt plus F1, About
+- Control plus F1, Key Describer
+
+### Step 20
+
+DbDo dot md, the guide, explains every command and the ideas behind them; Hotkeys dot md lists every key three ways; and the DbDo page on GitHub, at github dot com slash JamalMazrui slash DbDo, has the newest version.
+
+**Something to try:** Open a template database and describe one of its columns with Alt plus Shift plus S.
+
+<!-- walkthrough ends -->
+
+<!-- walkthrough: written by makeTutorials.py, do not edit between the markers -->
+
+## 0 - Overview
+
+What DbDo is, two keys of the screen reader's own, and the table of contents.
+
+**Before you start:** Nothing is needed; this walk is listened to.
+
+### Step 1
+
+DbDo is a database program for people who listen to the screen.
+
+### Step 2
+
+It opens SQLite databases, and imports from Excel and others, and shows one table at a time as a list of records you move through by row and by column. Every cell can be heard, edited, searched, marked and counted from the keyboard, and the program answers questions about where you are without changing anything.
+
+### Step 3: Insert+Up Arrow
+
+Two keys before anything else, both the reader's own. If a line goes by too fast, Insert plus Up Arrow says it again.
+
+Screen reader:
+
+- (the last line, read a second time)
+
+### Step 4: Insert+Tab
+
+And if you lose your place, Insert plus Tab says where you are: the control, its state and its position.
+
+Screen reader:
+
+- (the current control, with its state and position)
+
+### Step 5
+
+Now the table of contents. I say the number and the title; the reader says what the walk covers.
+
+### Step 6
+
+One, User Interface.
+
+Screen reader:
+
+- The window, the record list, the Say keys that ask without changing, the pick list, the menus, the rules every key follows, and where help lives.
+
+### Step 7
+
+Two, Install and Launch.
+
+Screen reader:
+
+- The installer, the boxes on its last page, and DbDo opening with Alt plus Control plus D.
+
+### Step 8
+
+Three, Open a Database and Move Through Records.
+
+Screen reader:
+
+- A template database opened, and moving by row, by column, by search and by number.
+
+### Step 9
+
+Four, Edit and Add Records.
+
+Screen reader:
+
+- A cell changed, a value picked from a list, a record added.
+
+### Step 10
+
+Five, Mark, Filter and Sort.
+
+Screen reader:
+
+- Records marked, the list narrowed to what matters, and put in order.
+
+### Step 11
+
+Six, Follow Related Records.
+
+Screen reader:
+
+- From one record into the records related to it, and back.
+
+### Step 12
+
+Seven, Statistics and Reports.
+
+Screen reader:
+
+- The numbers in a column, and a report written as a document.
+
+### Step 13
+
+Eight, Ask with SQL.
+
+Screen reader:
+
+- A question in the database's own language, and the history of questions asked.
+
+### Step 14
+
+Nine, Conclusion.
+
+Screen reader:
+
+- What to carry away, the words DbDo uses, the help built in, and where to learn more.
+
+### Step 15
+
+Ten walks, each under five minutes, under an hour together: the overview, the user interface, seven tasks, and the conclusion. They are a course, not a reference: each one assumes those before it.
+
+**Something to try:** Take walks one and two, then pick the task you need today.
+
+## 1 - User Interface
+
+DbDo's window and its parts, each named and then shown by the reader -- the record list, the Say keys, the pick list, the menus -- then the rules every key follows, and help in its four places.
+
+**Before you start:** DbDo is installed, with RadioTrail open, as it is on a first run.
+
+### Step 1
+
+DbDo is heard before it is seen. I name each part; the reader shows it: name, kind, value and state, then a hint.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Down Arrow
+
+The title, then the greeting in the message voice. The main view is a list of records: Down Arrow moves by row, and the reader speaks the record.
+
+Screen reader:
+
+- (the next record, its first column first)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Right Arrow
+
+Right Arrow moves by column within the record, speaking the column's name and its value.
+
+Screen reader:
+
+- (the next column's name and value)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Shift+Z
+
+Now the Say keys: Shift and a letter asks, and changes nothing. Shift plus Z is Say Status.
+
+Screen reader:
+
+- jobs, 12 records, no filter, sorted by employer
+
+### Step 6: Shift+C
+
+Table, count, filter and sort in one breath; pressed twice, the words open in a window. Shift plus C, C for Cell, says the cell you are on.
+
+Screen reader:
+
+- (the column's name and the cell's value)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: F4
+
+Where a field has fixed values, F4 opens them as a pick list.
+
+Screen reader:
+
+- status: list box, untried, 4 of 5
+- To move through items press Up or Down Arrow.
+
+### Step 8: F10
+
+A letter jumps to a value, so nothing is mistyped. Escape closes it. Menus say their own keys; F10 opens the menu bar.
+
+Screen reader:
+
+- Menu bar
+- File menu
+
+### Step 9: Down Arrow
+
+Down Arrow to the first item.
+
+Screen reader:
+
+- Open Database..., Control plus O, O
+
+### Step 10: Escape
+
+The item, its key, then its letter: learn a key from the menu once, then skip the menu.
+
+Screen reader:
+
+- Leaving menus
+
+### Step 11: Shift+Z
+
+The rules behind every key. A letter is the first letter of a word: Control plus O opens, Alt plus O orders. Control does; Shift asks, changing nothing.
+
+Screen reader:
+
+- jobs, 12 records, no filter, sorted by employer
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Insert+T
+
+Adding Shift reverses: Control plus M marks, Control plus Shift plus M unmarks. Each function key is a family: F2 edits, F3 searches, F4 picks, F8 selects. Insert plus T, the reader's own, says the title.
+
+Screen reader:
+
+- DbDo
+
+### Step 13: Control+F1
+
+Control plus F1 is the Key Describer: each key says what it does instead of doing it.
+
+Screen reader:
+
+- Key Describer On
+
+### Step 14: Control+F1
+
+Again, and it is off.
+
+Screen reader:
+
+- No Key Describer
+
+### Step 15
+
+Help is in four places, the same in every Homer program. I say which; the reader says the key. The guide.
+
+Screen reader:
+
+- F1, the guide
+
+### Step 16
+
+The changes, release by release; the version; the name of any key.
+
+Screen reader:
+
+- Shift plus F1, History
+- Alt plus F1, About
+- Control plus F1, Key Describer
+
+### Step 17: Alt+F10
+
+When a key will not come to mind, Alt plus F10, the Alternate Menu, lists every command in one list you type into, with its key beside it.
+
+Screen reader:
+
+- Alternate Menu
+- Command, list box
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: mark
+
+I type the word mark, and the list narrows to the commands with that word.
+
+Screen reader:
+
+- Mark All, Control plus A
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Escape
+
+Escape closes the list without running anything.
+
+Screen reader:
+
+- jobs, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 21
+
+Say Status.
+
+Screen reader:
+
+- Shift plus Z
+
+### Step 22
+
+A field's fixed values.
+
+Screen reader:
+
+- F4, pick list
+
+### Step 23
+
+Unmark, the reverse of Mark.
+
+Screen reader:
+
+- Control plus Shift plus M
+
+**Something to try:** Guess three DbDo keys from their words, then check each with Control plus F1.
+
+## 2 - Install and Launch
+
+The installer, the boxes on its last page -- the screen reader scripts, the player, the model for its AI commands -- and DbDo opening from anywhere.
+
+**Before you start:** DbDo_setup.exe is downloaded from the DbDo page on GitHub.
+
+### Step 1
+
+One want: DbDo on this computer, with what it works best with, in one sitting.
+
+### Step 2: Enter
+
+I open the downloaded setup program and allow it to make changes.
+
+Screen reader:
+
+- Setup - DbDo dialog
+- Welcome to the DbDo Setup Wizard
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 3: Enter
+
+The ordinary installer: Enter takes Next, and the defaults are right.
+
+Screen reader:
+
+- Select Destination Location
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Tab
+
+The last page offers what DbDo works best with, each as a box whose first word is the machine's state read for you: Install, Update or Reinstall.
+
+Screen reader:
+
+- (the box for your screen reader's scripts, its first word, checked)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Down Arrow
+
+Scripts for the screen reader you use; the mpv player, which plays a record's stream; and, for the AI commands, Ollama and a model, downloaded once.
+
+Screen reader:
+
+- Install mpv check box, checked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Space
+
+A planned misstep: clearing a box you need. Space clears it; Space again ticks it back.
+
+Screen reader:
+
+- not checked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Space
+
+Space.
+
+Screen reader:
+
+- checked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Enter
+
+Enter installs what is ticked.
+
+Screen reader:
+
+- Finish button
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Alt+Control+D
+
+Then the key that opens DbDo from anywhere.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 10
+
+Installed and open. If something was left out, run the setup again and tick its box; what is already current costs nothing.
+
+### Step 11: F1
+
+Help is four keys away, the same in every Homer program. F1 opens the full documentation in the browser.
+
+Screen reader:
+
+- DbDo documentation
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Alt+Shift+F1
+
+Alt plus Shift plus F1 opens the ReadMe, the short start, for when the full guide is more than you need today.
+
+Screen reader:
+
+- DbDo ReadMe
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Alt+F1
+
+Alt plus F1, About, says the version, so you always know which DbDo is installed.
+
+Screen reader:
+
+- About DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: F11
+
+Escape, and F11 asks GitHub whether a newer version is out. If one is, Yes is the default, and Enter installs it.
+
+Screen reader:
+
+- Checking for a newer version
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: F10
+
+The templates to practise on are in the Help menu: F10, then H for Help.
+
+Screen reader:
+
+- Help menu
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Down Arrow
+
+Down Arrow to Template Databases. Each is a complete example: JobTrail for job hunting, BookTrail for reading, RadioTrail for stations to play.
+
+Screen reader:
+
+- Template Databases
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Escape
+
+Escape closes the menu. Once a database is open, Alt plus Backslash opens its folder in File Explorer, where its scripts and reports live beside it.
+
+Screen reader:
+
+- DbDo ready
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+F1
+
+Two more ways to learn the keys before you need them. Control plus F1 turns on the Key Describer: each key then says what it does instead of doing it.
+
+Screen reader:
+
+- Key Describer on
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Control+O
+
+Now Control plus O only describes itself.
+
+Screen reader:
+
+- Open Database, Control plus O
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Alt+Shift+H
+
+Control plus F1 again turns the describer off. Alt plus Shift plus H, Hotkey Summary, lists every key in a window you can search.
+
+Screen reader:
+
+- Hotkey Summary
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21: Escape
+
+Escape closes it, and the database is as it was.
+
+Screen reader:
+
+- DbDo ready
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 22
+
+What this walk taught. I name the step; the reader gives the answer.
+
+### Step 23
+
+What a box's first word tells you.
+
+Screen reader:
+
+- Install, Update or Reinstall
+
+### Step 24
+
+The key that opens DbDo.
+
+Screen reader:
+
+- Alt plus Control plus D
+
+**Something to try:** Run the setup again; every box should now say Update or Reinstall.
+
+## 3 - Open a Database and Move Through Records
+
+RadioTrail, the database DbDo opens first, explored by row, by column, by search and by record number, and a station played in the Homer Player.
+
+**Before you start:** DbDo is installed; on a first run it opens RadioTrail.
+
+### Step 1
+
+One want: a station found and playing, quickly. The first time DbDo starts, it opens RadioTrail, a list of internet radio stations to search, sort and play.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Shift+Z
+
+Shift plus Z says where I am: the stations table of RadioTrail. Another database opens with Control plus O, O for Open, and the templates are in the Help menu, under Template Databases.
+
+Screen reader:
+
+- (stations, the number of stations, no filter, sorted by name)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Control+G
+
+Down Arrow moves by record; Right Arrow by column. Control plus G, G for Go, goes to a record by its number.
+
+Screen reader:
+
+- Go to Record dialog
+- Record number: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Enter
+
+I type 7 and press Enter.
+
+Screen reader:
+
+- (record 7, its first column first)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Control+K
+
+Control plus K, K for Keywords, searches every column for words.
+
+Screen reader:
+
+- Keywords dialog
+- Keywords: edit
+- Type in text.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Enter
+
+I type jazz and press Enter.
+
+Screen reader:
+
+- (the first station holding jazz)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Alt+Delete
+
+F3 goes to the next match, Shift plus F3 to the one before. Alt plus Delete says the column and the row number.
+
+Screen reader:
+
+- (the column's name and the row number)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Escape
+
+A planned misstep: Control plus F is not find here. In DbDo, F is for Filter, a later walk. Keywords is K. Escape leaves anything opened by mistake.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Control+J
+
+Keywords searches every column; Jump searches one. Control plus J, Jump to Record, asks which column and what to look for.
+
+Screen reader:
+
+- Jump to Record dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Enter
+
+I choose country, type Canada, and press Enter. The cursor lands on the first station there.
+
+Screen reader:
+
+- (Canada, country, its row)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Control+Shift+J
+
+Control plus Shift plus J jumps backward to the one before, and Control plus Shift plus K does the same for Keywords: Shift reverses, here as everywhere in DbDo.
+
+Screen reader:
+
+- (Canada, country, an earlier row)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Shift+Y
+
+Shift plus Y, Say Yield, says how many records there are.
+
+Screen reader:
+
+- (the number of stations)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Shift+C
+
+Shift plus C, Say Cell, says the value under the cursor again, without moving.
+
+Screen reader:
+
+- Canada
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Control+I
+
+Control plus I, Inspect Record, shows the whole record at once, one field to a line: the station's name, genre, language and stream address among them. Escape closes it.
+
+Screen reader:
+
+- Inspect Record dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+Shift+P
+
+Now the reason RadioTrail opens first. Alt plus Shift plus P, Play Stream, plays the current station in the Homer Player, the same player FileDir uses.
+
+Screen reader:
+
+- (the Homer Player, playing the station)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Escape
+
+Escape closes the player and returns to the station I was on, ready for the next one.
+
+Screen reader:
+
+- (stations, the same row)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+T
+
+A database can hold several tables; Control plus T, Choose Table, lists them. Escape keeps the table I am in.
+
+Screen reader:
+
+- (Choose Table dialog, stations first)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Escape
+
+Escape. RadioTrail is one table, easy to hold in mind. The next walk opens JobTrail, whose tables are linked to one another.
+
+Screen reader:
+
+- stations
+
+Confirm the wording with a live run: buildTutorials -live.
+
+**Something to try:** Find a station by keyword, then play it with Alt plus Shift plus P.
+
+## 4 - Edit and Add Records
+
+JobTrail, the job-search template, opened; then a cell edited with F2, a value picked from a list with Control plus F2, and a new record added with Control plus N.
+
+**Before you start:** DbDo is open; this walk opens JobTrail.
+
+### Step 1
+
+One want: one job's status brought up to date, and a new job added.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Control+O
+
+JobTrail comes next: a template for a job search, whose jobs, employers and contacts are linked to one another, so it shows more of what DbDo can do. Control plus O, O for Open; the templates are in the Help menu, under Template Databases, and I open JobTrail.
+
+Screen reader:
+
+- Open Database dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Shift+Z
+
+I choose JobTrail and press Enter. Shift plus Z says where I am.
+
+Screen reader:
+
+- jobs, 12 records, no filter, sorted by employer
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: F2
+
+I move to the status column of the record to change. F2 edits the cell under the cursor, as F2 renames a file in Windows.
+
+Screen reader:
+
+- status: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Enter
+
+I type the new value and press Enter to keep it.
+
+Screen reader:
+
+- (the record, with its new status)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Control+F2
+
+Where a field has fixed values, Control plus F2 edits by picking one, so nothing is mistyped.
+
+Screen reader:
+
+- status: list box
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Enter
+
+Down Arrow to the value, and Enter.
+
+Screen reader:
+
+- (the record, with the picked status)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Control+N
+
+Control plus N, N for New, adds a record to the table, and focus goes to its first field.
+
+Screen reader:
+
+- New record
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Shift+A
+
+I fill each field with F2 as before. Shift plus A, A for Added, says when this record was added.
+
+Screen reader:
+
+- (the date and time the record was added)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Control+D
+
+A planned misstep: Control plus D deletes a record, D for Delete, and asks first. Escape answers no.
+
+Screen reader:
+
+- Delete this record? No button
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Escape
+
+Escape keeps it.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Alt+Shift+N
+
+Notes hold whatever does not fit a column. Alt plus Shift plus N, Edit Notes, opens this record's notes in a box of their own.
+
+Screen reader:
+
+- Notes: edit, multiline
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Shift+N
+
+I type a line about the interview, and Control plus Enter keeps it. Shift plus N says the notes back.
+
+Screen reader:
+
+- Second interview Tuesday at ten.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Shift+T
+
+Tags work the same way, with Alt plus Shift plus T to edit and Shift plus T to hear them: words such as remote or referral, to filter by later.
+
+Screen reader:
+
+- remote, referral
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Shift+E
+
+Shift plus E, Say Edited, says when this record last changed, so a stale one is easy to spot.
+
+Screen reader:
+
+- Edited today at 3:42 PM
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Control+Shift+C
+
+Control plus Shift plus C, Copy Record, adds a copy of this record as a new one: quicker than typing a second job at the same employer.
+
+Screen reader:
+
+- Record copied
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+R
+
+Control plus R, Replace Column, finds and replaces text in the column I am on, in every record, for a name spelled two ways.
+
+Screen reader:
+
+- Replace Column dialog, Find: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Escape
+
+Escape, for now. A replacement counts what it changed and says so.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Alt+Shift+U
+
+A record can carry a web address, such as a job posting. Alt plus Shift plus U, Edit URL, edits it.
+
+Screen reader:
+
+- url: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21: Shift+U
+
+Enter keeps it. Shift plus U says it back, and Control plus Shift plus U opens it in the browser.
+
+Screen reader:
+
+- https colon slash slash jobs dot example dot com slash 4821
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 22
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 23
+
+Edit the cell I am on.
+
+Screen reader:
+
+- F2
+
+### Step 24
+
+Edit by picking a value.
+
+Screen reader:
+
+- Control plus F2
+
+### Step 25
+
+Add a record.
+
+Screen reader:
+
+- Control plus N
+
+**Something to try:** Add a record of your own and fill three of its fields.
+
+## 5 - Mark, Filter and Sort
+
+Records marked one at a time and in runs, the list narrowed by a filter, and put in order by a column.
+
+**Before you start:** JobTrail is open in DbDo.
+
+### Step 1
+
+One want: only the jobs still waiting, the newest first.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Control+M
+
+Control plus M, M for Mark, marks the record I am on, for a later command to act on.
+
+Screen reader:
+
+- Marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Shift+M
+
+Shift plus M asks about marks, changing nothing.
+
+Screen reader:
+
+- (how many records are marked)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Control+Shift+M
+
+Control plus Shift plus M reverses it: Shift reverses.
+
+Screen reader:
+
+- Unmarked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Control+F
+
+Control plus F, F for Filter, shows only the records that match. It begins with a choice.
+
+Screen reader:
+
+- Filter Records dialog
+- Filter by: list box, Any field contains text, 1 of 2
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Enter
+
+Any field is the first choice, so Enter alone takes it. It asks for the text to find, wherever it is.
+
+Screen reader:
+
+- Any Field Contains dialog
+- Text to find in any field: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Enter
+
+I type Seattle and press Enter. Every job with Seattle in any field stays: the city, the address, the notes.
+
+Screen reader:
+
+- 3 records have Seattle.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: N
+
+Control plus F again. With a filter in force, the list offers more, each choice with its own first letter. N for Narrow keeps Seattle and adds a field.
+
+Screen reader:
+
+- Narrow with the field form, 4 of 4
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Enter
+
+Enter opens the form, a box for each field. I type waiting in the status box and press Enter.
+
+Screen reader:
+
+- Filter applied. 2 records match.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Shift+F
+
+Shift plus F says the filter, both parts, in the words each was asked in.
+
+Screen reader:
+
+- any field contains Seattle; and where: status = 'waiting'
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Alt+O
+
+Alt plus O, O for Order, sorts by a column; I choose the date added.
+
+Screen reader:
+
+- Order Records dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Alt+Shift+O
+
+Enter sorts. Alt plus Shift plus O reverses the order, newest first.
+
+Screen reader:
+
+- (the newest waiting job)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Control+Shift+F
+
+A planned misstep: the filter stays until it is cleared, so a later search finds only waiting jobs. Control plus Shift plus F clears it.
+
+Screen reader:
+
+- No filter
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: F8
+
+Marking one record at a time is slow for many. F8 drops an anchor at the record I am on.
+
+Screen reader:
+
+- Mark anchor
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Shift+F8
+
+Down Arrow four records, then Shift plus F8 marks everything from the anchor to here.
+
+Screen reader:
+
+- 5 records marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Control+Shift+A
+
+Control plus A marks every record, Control plus Shift plus A unmarks them all, and Alt plus Shift plus I swaps marked and unmarked.
+
+Screen reader:
+
+- All unmarked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Shift+Space
+
+Marks are for acting on: Delete, Copy and Export all work on the marked records when there are any. Shift plus Space reads every marked record in full, to check before acting.
+
+Screen reader:
+
+- No records are marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Shift+8
+
+With a filter and an order in force, Shift plus 8 says both at once, so you always know what you are looking at.
+
+Screen reader:
+
+- Sort: added, descending; Filter: any field contains Seattle; and status = 'waiting'
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Shift+O
+
+Shift plus O says just the order, and Shift plus F just the filter.
+
+Screen reader:
+
+- added, descending
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21: Control+Space
+
+Control plus Space toggles the mark on the record I am on, as it toggles a selection in any Windows list.
+
+Screen reader:
+
+- Marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 22: Shift+Y
+
+With a filter in force, Shift plus Y says how many records it leaves.
+
+Screen reader:
+
+- 4 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 23: Alt+Shift+L
+
+Alt plus Shift plus L reads one column for the marked records only: here, the employers of the jobs I marked.
+
+Screen reader:
+
+- Amazon, Costco
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 24
+
+A filter and marks work together: filter to narrow, mark to choose, then act on the marked.
+
+### Step 25
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 26
+
+Mark, then unmark.
+
+Screen reader:
+
+- Control plus M
+- Control plus Shift plus M
+
+### Step 27
+
+Filter, then clear it.
+
+Screen reader:
+
+- Control plus F
+- Control plus Shift plus F
+
+### Step 28
+
+Order by a column.
+
+Screen reader:
+
+- Alt plus O
+
+**Something to try:** Filter your own table to one value, then sort what is left.
+
+## 6 - Follow Related Records
+
+From a record into the records related to it with Alt plus Right Arrow, and back with Alt plus Left Arrow, as a browser goes back.
+
+**Before you start:** A database with related tables is open; the chinook sample has them.
+
+### Step 1
+
+One want: from an artist, to the albums, to the tracks, and back. Related tables let one record lead to others.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Shift+R
+
+Shift plus R, R for Related, says what this record leads to, changing nothing.
+
+Screen reader:
+
+- (the related tables and their counts)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Alt+Right Arrow
+
+Alt plus Right Arrow goes into the related records.
+
+Screen reader:
+
+- (the child table, and its first record)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Shift+Z
+
+Shift plus Z says where I am now.
+
+Screen reader:
+
+- (the child table, its record count, the filter that ties it to the parent)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Alt+Right Arrow
+
+Alt plus Right Arrow again goes a level deeper.
+
+Screen reader:
+
+- (the next table down)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Alt+Left Arrow
+
+Alt plus Left Arrow comes back a level, as a browser goes back.
+
+Screen reader:
+
+- (the table one level up)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Alt+Home
+
+A planned misstep: three levels deep, and lost. Alt plus Home returns to where I started, from any depth.
+
+Screen reader:
+
+- (the starting table, at the record I left)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Shift+P
+
+What ties a record to its relations is its prime, a key DbDo builds from the record itself. Shift plus P, Say Prime, says it.
+
+Screen reader:
+
+- Miles Davis
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Control+Shift+O
+
+A related table can have a window of its own. Control plus Shift plus O, Open Table, opens a table in a new window, beside this one.
+
+Screen reader:
+
+- Open Table dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Enter
+
+I choose albums and press Enter.
+
+Screen reader:
+
+- albums, 40 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Shift+F4
+
+Shift plus F4 says the windows open, and Control plus Tab moves between them.
+
+Screen reader:
+
+- 2 windows: artists, albums
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Control+F6
+
+In one window, Control plus F6 moves to the next table, and Alt plus F6 back through the tables visited, as a browser's history does.
+
+Screen reader:
+
+- tracks, 412 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Control+F4
+
+Control plus F4 closes this window, leaving the first.
+
+Screen reader:
+
+- artists, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: F4
+
+F4, Current Windows, lists the windows open, so you can pick one by name rather than cycle through them.
+
+Screen reader:
+
+- Current Windows dialog, artists, 1 of 2
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+F6
+
+Escape. Alt plus F6 goes back through the tables visited in this window, the way a browser goes back.
+
+Screen reader:
+
+- albums, 40 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Alt+Shift+F6
+
+Alt plus Shift plus F6 goes forward again.
+
+Screen reader:
+
+- tracks, 412 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+Shift+F4
+
+Control plus Shift plus F4 closes every window but this one, for a clean start.
+
+Screen reader:
+
+- tracks, 412 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Control+Shift+F6
+
+Within one window, Control plus Shift plus F6 moves to the previous table, as Control plus F6 moves to the next: Shift reverses.
+
+Screen reader:
+
+- artists, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Shift+R
+
+Whichever way you arrived, Shift plus R still says what this record leads to, so the way down is never a guess.
+
+Screen reader:
+
+- albums 3, tracks 31
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 22
+
+Go into related records.
+
+Screen reader:
+
+- Alt plus Right Arrow
+
+### Step 23
+
+Come back a level.
+
+Screen reader:
+
+- Alt plus Left Arrow
+
+### Step 24
+
+Return to the start.
+
+Screen reader:
+
+- Alt plus Home
+
+**Something to try:** Follow a relationship two levels deep, then return with Alt plus Home.
+
+## 7 - Statistics and Reports
+
+The numbers in a column with Alt plus Shift plus S, a chart's figures with Control plus Shift plus G, and a report written as a document with Alt plus Shift plus R.
+
+**Before you start:** JobTrail is open in DbDo.
+
+### Step 1
+
+One want: how many applications, how they stand, and a page to keep.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Alt+Shift+S
+
+I move to the status column. Alt plus Shift plus S, S for Statistics, describes the column.
+
+Screen reader:
+
+- Statistics from Column
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Escape
+
+The count of each value, and for numbers the sum, average, least and most. Escape closes it.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Control+Shift+G
+
+Control plus Shift plus G, G for Graphics, turns a column into a chart and its figures in words.
+
+Screen reader:
+
+- Graphics Column
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Alt+Shift+R
+
+Escape. Alt plus Shift plus R, R for Report, writes a saved report as a document.
+
+Screen reader:
+
+- Run Report dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Enter
+
+I choose a report and press Enter; DbDo writes it and opens it.
+
+Screen reader:
+
+- (the report's title, as a heading)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8
+
+A planned misstep: a report reads the whole table, filter or not, unless its template says otherwise. To report only some records, filter them and use the report that respects the filter.
+
+### Step 9: Alt+T
+
+Before the details, the shape. Alt plus T, Table Summary, says how many records and columns the table has, and how much room it takes.
+
+Screen reader:
+
+- Table Summary
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Alt+D
+
+Escape, and Alt plus D, Database Summary, does the same for every table in the database.
+
+Screen reader:
+
+- Database Summary
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Alt+Shift+S
+
+A filter narrows a summary to what matters: filter to waiting jobs, then Alt plus Shift plus S again, and the counts describe only those.
+
+Screen reader:
+
+- Statistics from Column
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Alt+X
+
+When the numbers are to go somewhere else, Alt plus X, Export Data, writes the table, or the records in view, as CSV, a spreadsheet, JSON or another format.
+
+Screen reader:
+
+- Export Data dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Escape
+
+Escape, for now. And Control plus P prints the records in view, for a copy on paper or a PDF.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Control+C
+
+A single number is often all that is wanted. Control plus C copies the cell under the cursor.
+
+Screen reader:
+
+- Copied
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Alt+C
+
+Alt plus C appends another cell to what is on the clipboard, to gather a few figures in one go.
+
+Screen reader:
+
+- Appended
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+Apostrophe
+
+Alt plus Apostrophe, Say Clipboard, reads back what has been gathered before it is pasted anywhere.
+
+Screen reader:
+
+- 12, waiting 4
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17
+
+Then one paste puts those figures in an email or a document.
+
+### Step 18: Shift+8
+
+Before reading any summary, Shift plus 8 says the sort and filter in force, since both change what the numbers describe.
+
+Screen reader:
+
+- Sort: employer. Filter: none.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Alt+L
+
+And Alt plus L reads a whole column aloud, top to bottom, when hearing the values beats counting them.
+
+Screen reader:
+
+- waiting, applied, interview, waiting
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 21
+
+Describe a column.
+
+Screen reader:
+
+- Alt plus Shift plus S
+
+### Step 22
+
+A column as a chart.
+
+Screen reader:
+
+- Control plus Shift plus G
+
+### Step 23
+
+Run a report.
+
+Screen reader:
+
+- Alt plus Shift plus R
+
+**Something to try:** Run a report of your own table and read it in your browser.
+
+## 8 - Ask with SQL
+
+A question in the database's own language with Control plus Q, the answer shown as records, and the history of questions asked.
+
+**Before you start:** JobTrail is open in DbDo.
+
+### Step 1
+
+One want: an answer no single command gives -- how many jobs at each employer, most first. SQL, the database's own language, asks it in one line.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Control+Q
+
+Control plus Q, Q for Query, opens a box for SQL.
+
+Screen reader:
+
+- Query dialog
+- SQL: edit, multiline
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: select employer, count(*) as jobs from jobs group by employer order by jobs desc
+
+I type the question.
+
+Screen reader:
+
+- (each word echoed as it is typed)
+
+### Step 5: Control+Enter
+
+Control plus Enter runs it from inside the box, where Enter would start a new line.
+
+Screen reader:
+
+- (the first row of the answer)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Shift+Q
+
+The answer is shown as records, moved through like any table. Shift plus Q says the query in force.
+
+Screen reader:
+
+- (the query)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Control+Q
+
+A planned misstep: a misspelled column. The database says which word it does not know, and the box keeps the query to fix.
+
+Screen reader:
+
+- Query dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Alt+Shift+Q
+
+Escape. Alt plus Shift plus Q, the history, lists the questions asked, to run one again.
+
+Screen reader:
+
+- Query History
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Shift+F12
+
+SQL is not the only way to ask. Shift plus F12, Chat about Table, sends the table with a question in plain words to the model on this computer.
+
+Screen reader:
+
+- Chat about Table dialog
+- Question: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Which employer has the most applications still waiting?
+
+I ask which employer has the most applications still waiting.
+
+Screen reader:
+
+- (each word echoed as it is typed)
+
+### Step 11: Enter
+
+Enter. The answer comes in words, from the same records, and nothing leaves this computer.
+
+Screen reader:
+
+- Answer dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Escape
+
+Escape. An answer from SQL is a table like any other, so Alt plus X exports it, and Alt plus Shift plus S describes its columns.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Control+Shift+I
+
+A question asked often can be saved as a script, a dot s q l file in the Scripts folder beside the database. Control plus Shift plus I, Invoke Script, lists them and runs the one chosen.
+
+Screen reader:
+
+- Invoke Script dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Escape
+
+Escape. Scripts belong to their database, so the questions travel with the data they ask about.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Alt+Z
+
+Before a query that changes data, Alt plus Z, Toggle Read Only, makes the database read only, so a mistyped statement cannot change anything.
+
+Screen reader:
+
+- Read only
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+Z
+
+Alt plus Z again makes it writable when you mean to change it.
+
+Screen reader:
+
+- Read and write
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: F5
+
+After a query that does change records, F5, Refresh View, shows the table as it now stands.
+
+Screen reader:
+
+- jobs, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18
+
+Practise on a copy: Save As, Control plus Shift plus S, makes one, so the original stays as it was while you learn.
+
+### Step 19
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 20
+
+Ask in SQL.
+
+Screen reader:
+
+- Control plus Q
+
+### Step 21
+
+Run it from inside the box.
+
+Screen reader:
+
+- Control plus Enter
+
+### Step 22
+
+The questions asked before.
+
+Screen reader:
+
+- Alt plus Shift plus Q
+
+**Something to try:** Write a query that counts your records by one column.
+
+## 9 - Conclusion
+
+The conclusion and summary of the walks; the words DbDo uses, in two voices; then more information: the help built into the program and where to learn more.
+
+**Before you start:** Nothing is needed; this walk is listened to.
+
+### Step 1
+
+To finish: what to carry away, the words DbDo uses, and where to get help. First, the summary. A table is a list you move through by row and column, and every question about where you are is a Shift key that changes nothing.
+
+Screen reader:
+
+- Shift plus Z, Say Status
+
+### Step 2
+
+Keys follow words, so a key can be guessed: O opens and orders, F filters, M marks, and Shift reverses.
+
+Screen reader:
+
+- Control plus M, Mark
+- Control plus Shift plus M, Unmark
+
+### Step 3
+
+And when the commands run out, SQL asks the database anything, in one line.
+
+Screen reader:
+
+- Control plus Q, Query
+
+### Step 4
+
+Now the words, in alphabetical order. I say the term; the reader says what it means.
+
+### Step 5
+
+data list.
+
+Screen reader:
+
+- The list of records the window shows: one table or query, a row per record, a column per field.
+
+### Step 6
+
+filter.
+
+Screen reader:
+
+- A condition that hides the records not matching it, until it is cleared.
+
+### Step 7
+
+mark.
+
+Screen reader:
+
+- A flag on a record, for a later command to act on; Control plus M sets it, and Shift reverses it.
+
+### Step 8
+
+order.
+
+Screen reader:
+
+- The sort of the list, by one column, ascending or reversed.
+
+### Step 9
+
+pick list.
+
+Screen reader:
+
+- A field's fixed values in a list, opened with F4, so nothing is mistyped.
+
+### Step 10
+
+query.
+
+Screen reader:
+
+- A question in SQL, answered as records.
+
+### Step 11
+
+record.
+
+Screen reader:
+
+- One row of a table: a job, an album, a contact.
+
+### Step 12
+
+related table.
+
+Screen reader:
+
+- A table whose records belong to a record of another; Alt plus Right Arrow goes in.
+
+### Step 13
+
+report.
+
+Screen reader:
+
+- A saved template that writes a table's records as a document.
+
+### Step 14
+
+Say key.
+
+Screen reader:
+
+- Shift and a letter: a question answered aloud, changing nothing.
+
+### Step 15
+
+SQLite.
+
+Screen reader:
+
+- The database format DbDo opens: one file, with its tables inside.
+
+### Step 16
+
+standard fields.
+
+Screen reader:
+
+- The columns every DbDo table may carry: added, edited, marked, notes, tags, url.
+
+### Step 17
+
+template database.
+
+Screen reader:
+
+- A ready-made database in the Help menu, to practice on or to start from.
+
+### Step 18
+
+Last, more information. Help is built in. The guide, and what changed.
+
+Screen reader:
+
+- F1, the guide
+- Shift plus F1, History
+
+### Step 19
+
+The version, and what any key does without doing it.
+
+Screen reader:
+
+- Alt plus F1, About
+- Control plus F1, Key Describer
+
+### Step 20
+
+DbDo dot md, the guide, explains every command and the ideas behind them; Hotkeys dot md lists every key three ways; and the DbDo page on GitHub, at github dot com slash JamalMazrui slash DbDo, has the newest version.
+
+**Something to try:** Open a template database and describe one of its columns with Alt plus Shift plus S.
+
+<!-- walkthrough ends -->
+
+<!-- walkthrough: written by makeTutorials.py, do not edit between the markers -->
+
+## 0 - Overview
+
+What DbDo is, two keys of the screen reader's own, and the table of contents.
+
+**Before you start:** Nothing is needed; this walk is listened to.
+
+### Step 1
+
+DbDo is a database program for people who listen to the screen.
+
+### Step 2
+
+It opens SQLite databases, and imports from Excel and others, and shows one table at a time as a list of records you move through by row and by column. Every cell can be heard, edited, searched, marked and counted from the keyboard, and the program answers questions about where you are without changing anything.
+
+### Step 3: Insert+Up Arrow
+
+Two keys before anything else, both the reader's own. If a line goes by too fast, Insert plus Up Arrow says it again.
+
+Screen reader:
+
+- (the last line, read a second time)
+
+### Step 4: Insert+Tab
+
+And if you lose your place, Insert plus Tab says where you are: the control, its state and its position.
+
+Screen reader:
+
+- (the current control, with its state and position)
+
+### Step 5
+
+Now the table of contents. I say the number and the title; the reader says what the walk covers.
+
+### Step 6
+
+One, User Interface.
+
+Screen reader:
+
+- The window, the record list, the Say keys that ask without changing, the pick list, the menus, the rules every key follows, and where help lives.
+
+### Step 7
+
+Two, Install and Launch.
+
+Screen reader:
+
+- The installer, the boxes on its last page, and DbDo opening with Alt plus Control plus D.
+
+### Step 8
+
+Three, Open a Database and Move Through Records.
+
+Screen reader:
+
+- A template database opened, and moving by row, by column, by search and by number.
+
+### Step 9
+
+Four, Edit and Add Records.
+
+Screen reader:
+
+- A cell changed, a value picked from a list, a record added.
+
+### Step 10
+
+Five, Mark, Filter and Sort.
+
+Screen reader:
+
+- Records marked, the list narrowed to what matters, and put in order.
+
+### Step 11
+
+Six, Follow Related Records.
+
+Screen reader:
+
+- From one record into the records related to it, and back.
+
+### Step 12
+
+Seven, Statistics and Reports.
+
+Screen reader:
+
+- The numbers in a column, and a report written as a document.
+
+### Step 13
+
+Eight, Ask with SQL.
+
+Screen reader:
+
+- A question in the database's own language, and the history of questions asked.
+
+### Step 14
+
+Nine, Conclusion.
+
+Screen reader:
+
+- What to carry away, the words DbDo uses, the help built in, and where to learn more.
+
+### Step 15
+
+Ten walks, each under five minutes, under an hour together: the overview, the user interface, seven tasks, and the conclusion. They are a course, not a reference: each one assumes those before it.
+
+**Something to try:** Take walks one and two, then pick the task you need today.
+
+## 1 - User Interface
+
+DbDo's window and its parts, each named and then shown by the reader -- the record list, the Say keys, the pick list, the menus -- then the rules every key follows, and help in its four places.
+
+**Before you start:** DbDo is installed, with RadioTrail open, as it is on a first run.
+
+### Step 1
+
+DbDo is heard before it is seen. I name each part; the reader shows it: name, kind, value and state, then a hint.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Down Arrow
+
+The title, then the greeting in the message voice. The main view is a list of records: Down Arrow moves by row, and the reader speaks the record.
+
+Screen reader:
+
+- (the next record, its first column first)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Right Arrow
+
+Right Arrow moves by column within the record, speaking the column's name and its value.
+
+Screen reader:
+
+- (the next column's name and value)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Shift+Z
+
+Now the Say keys: Shift and a letter asks, and changes nothing. Shift plus Z is Say Status.
+
+Screen reader:
+
+- jobs, 12 records, no filter, sorted by employer
+
+### Step 6: Shift+C
+
+Table, count, filter and sort in one breath; pressed twice, the words open in a window. Shift plus C, C for Cell, says the cell you are on.
+
+Screen reader:
+
+- (the column's name and the cell's value)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: F4
+
+Where a field has fixed values, F4 opens them as a pick list.
+
+Screen reader:
+
+- status: list box, untried, 4 of 5
+- To move through items press Up or Down Arrow.
+
+### Step 8: F10
+
+A letter jumps to a value, so nothing is mistyped. Escape closes it. Menus say their own keys; F10 opens the menu bar.
+
+Screen reader:
+
+- Menu bar
+- File menu
+
+### Step 9: Down Arrow
+
+Down Arrow to the first item.
+
+Screen reader:
+
+- Open Database..., Control plus O, O
+
+### Step 10: Escape
+
+The item, its key, then its letter: learn a key from the menu once, then skip the menu.
+
+Screen reader:
+
+- Leaving menus
+
+### Step 11: Shift+Z
+
+The rules behind every key. A letter is the first letter of a word: Control plus O opens, Alt plus O orders. Control does; Shift asks, changing nothing.
+
+Screen reader:
+
+- jobs, 12 records, no filter, sorted by employer
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Insert+T
+
+Adding Shift reverses: Control plus M marks, Control plus Shift plus M unmarks. Each function key is a family: F2 edits, F3 searches, F4 picks, F8 selects. Insert plus T, the reader's own, says the title.
+
+Screen reader:
+
+- DbDo
+
+### Step 13: Control+F1
+
+Control plus F1 is the Key Describer: each key says what it does instead of doing it.
+
+Screen reader:
+
+- Key Describer On
+
+### Step 14: Control+F1
+
+Again, and it is off.
+
+Screen reader:
+
+- No Key Describer
+
+### Step 15
+
+Help is in four places, the same in every Homer program. I say which; the reader says the key. The guide.
+
+Screen reader:
+
+- F1, the guide
+
+### Step 16
+
+The changes, release by release; the version; the name of any key.
+
+Screen reader:
+
+- Shift plus F1, History
+- Alt plus F1, About
+- Control plus F1, Key Describer
+
+### Step 17: Alt+F10
+
+When a key will not come to mind, Alt plus F10, the Alternate Menu, lists every command in one list you type into, with its key beside it.
+
+Screen reader:
+
+- Alternate Menu
+- Command, list box
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: mark
+
+I type the word mark, and the list narrows to the commands with that word.
+
+Screen reader:
+
+- Mark All, Control plus A
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Escape
+
+Escape closes the list without running anything.
+
+Screen reader:
+
+- jobs, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 21
+
+Say Status.
+
+Screen reader:
+
+- Shift plus Z
+
+### Step 22
+
+A field's fixed values.
+
+Screen reader:
+
+- F4, pick list
+
+### Step 23
+
+Unmark, the reverse of Mark.
+
+Screen reader:
+
+- Control plus Shift plus M
+
+**Something to try:** Guess three DbDo keys from their words, then check each with Control plus F1.
+
+## 2 - Install and Launch
+
+The installer, the boxes on its last page -- the screen reader scripts, the player, the model for its AI commands -- and DbDo opening from anywhere.
+
+**Before you start:** DbDo_setup.exe is downloaded from the DbDo page on GitHub.
+
+### Step 1
+
+One want: DbDo on this computer, with what it works best with, in one sitting.
+
+### Step 2: Enter
+
+I open the downloaded setup program and allow it to make changes.
+
+Screen reader:
+
+- Setup - DbDo dialog
+- Welcome to the DbDo Setup Wizard
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 3: Enter
+
+The ordinary installer: Enter takes Next, and the defaults are right.
+
+Screen reader:
+
+- Select Destination Location
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Tab
+
+The last page offers what DbDo works best with, each as a box whose first word is the machine's state read for you: Install, Update or Reinstall.
+
+Screen reader:
+
+- (the box for your screen reader's scripts, its first word, checked)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Down Arrow
+
+Scripts for the screen reader you use; the mpv player, which plays a record's stream; and, for the AI commands, Ollama and a model, downloaded once.
+
+Screen reader:
+
+- Install mpv check box, checked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Space
+
+A planned misstep: clearing a box you need. Space clears it; Space again ticks it back.
+
+Screen reader:
+
+- not checked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Space
+
+Space.
+
+Screen reader:
+
+- checked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Enter
+
+Enter installs what is ticked.
+
+Screen reader:
+
+- Finish button
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Alt+Control+D
+
+Then the key that opens DbDo from anywhere.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 10
+
+Installed and open. If something was left out, run the setup again and tick its box; what is already current costs nothing.
+
+### Step 11: F1
+
+Help is four keys away, the same in every Homer program. F1 opens the full documentation in the browser.
+
+Screen reader:
+
+- DbDo documentation
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Alt+Shift+F1
+
+Alt plus Shift plus F1 opens the ReadMe, the short start, for when the full guide is more than you need today.
+
+Screen reader:
+
+- DbDo ReadMe
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Alt+F1
+
+Alt plus F1, About, says the version, so you always know which DbDo is installed.
+
+Screen reader:
+
+- About DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: F11
+
+Escape, and F11 asks GitHub whether a newer version is out. If one is, Yes is the default, and Enter installs it.
+
+Screen reader:
+
+- Checking for a newer version
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: F10
+
+The templates to practise on are in the Help menu: F10, then H for Help.
+
+Screen reader:
+
+- Help menu
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Down Arrow
+
+Down Arrow to Template Databases. Each is a complete example: JobTrail for job hunting, BookTrail for reading, RadioTrail for stations to play.
+
+Screen reader:
+
+- Template Databases
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Escape
+
+Escape closes the menu. Once a database is open, Alt plus Backslash opens its folder in File Explorer, where its scripts and reports live beside it.
+
+Screen reader:
+
+- DbDo ready
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+F1
+
+Two more ways to learn the keys before you need them. Control plus F1 turns on the Key Describer: each key then says what it does instead of doing it.
+
+Screen reader:
+
+- Key Describer on
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Control+O
+
+Now Control plus O only describes itself.
+
+Screen reader:
+
+- Open Database, Control plus O
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Alt+Shift+H
+
+Control plus F1 again turns the describer off. Alt plus Shift plus H, Hotkey Summary, lists every key in a window you can search.
+
+Screen reader:
+
+- Hotkey Summary
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21: Escape
+
+Escape closes it, and the database is as it was.
+
+Screen reader:
+
+- DbDo ready
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 22
+
+What this walk taught. I name the step; the reader gives the answer.
+
+### Step 23
+
+What a box's first word tells you.
+
+Screen reader:
+
+- Install, Update or Reinstall
+
+### Step 24
+
+The key that opens DbDo.
+
+Screen reader:
+
+- Alt plus Control plus D
+
+**Something to try:** Run the setup again; every box should now say Update or Reinstall.
+
+## 3 - Open a Database and Move Through Records
+
+RadioTrail, the database DbDo opens first, explored by row, by column, by search and by record number, and a station played in the Homer Player.
+
+**Before you start:** DbDo is installed; on a first run it opens RadioTrail.
+
+### Step 1
+
+One want: a station found and playing, quickly. The first time DbDo starts, it opens RadioTrail, a list of internet radio stations to search, sort and play.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Shift+Z
+
+Shift plus Z says where I am: the stations table of RadioTrail. Another database opens with Control plus O, O for Open, and the templates are in the Help menu, under Template Databases.
+
+Screen reader:
+
+- (stations, the number of stations, no filter, sorted by name)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Control+G
+
+Down Arrow moves by record; Right Arrow by column. Control plus G, G for Go, goes to a record by its number.
+
+Screen reader:
+
+- Go to Record dialog
+- Record number: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Enter
+
+I type 7 and press Enter.
+
+Screen reader:
+
+- (record 7, its first column first)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Control+K
+
+Control plus K, K for Keywords, searches every column for words.
+
+Screen reader:
+
+- Keywords dialog
+- Keywords: edit
+- Type in text.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Enter
+
+I type jazz and press Enter.
+
+Screen reader:
+
+- (the first station holding jazz)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Alt+Delete
+
+F3 goes to the next match, Shift plus F3 to the one before. Alt plus Delete says the column and the row number.
+
+Screen reader:
+
+- (the column's name and the row number)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Escape
+
+A planned misstep: Control plus F is not find here. In DbDo, F is for Filter, a later walk. Keywords is K. Escape leaves anything opened by mistake.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Control+J
+
+Keywords searches every column; Jump searches one. Control plus J, Jump to Record, asks which column and what to look for.
+
+Screen reader:
+
+- Jump to Record dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Enter
+
+I choose country, type Canada, and press Enter. The cursor lands on the first station there.
+
+Screen reader:
+
+- (Canada, country, its row)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Control+Shift+J
+
+Control plus Shift plus J jumps backward to the one before, and Control plus Shift plus K does the same for Keywords: Shift reverses, here as everywhere in DbDo.
+
+Screen reader:
+
+- (Canada, country, an earlier row)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Shift+Y
+
+Shift plus Y, Say Yield, says how many records there are.
+
+Screen reader:
+
+- (the number of stations)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Shift+C
+
+Shift plus C, Say Cell, says the value under the cursor again, without moving.
+
+Screen reader:
+
+- Canada
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Control+I
+
+Control plus I, Inspect Record, shows the whole record at once, one field to a line: the station's name, genre, language and stream address among them. Escape closes it.
+
+Screen reader:
+
+- Inspect Record dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+Shift+P
+
+Now the reason RadioTrail opens first. Alt plus Shift plus P, Play Stream, plays the current station in the Homer Player, the same player FileDir uses.
+
+Screen reader:
+
+- (the Homer Player, playing the station)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Escape
+
+Escape closes the player and returns to the station I was on, ready for the next one.
+
+Screen reader:
+
+- (stations, the same row)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+T
+
+A database can hold several tables; Control plus T, Choose Table, lists them. Escape keeps the table I am in.
+
+Screen reader:
+
+- (Choose Table dialog, stations first)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Escape
+
+Escape. RadioTrail is one table, easy to hold in mind. The next walk opens JobTrail, whose tables are linked to one another.
+
+Screen reader:
+
+- stations
+
+Confirm the wording with a live run: buildTutorials -live.
+
+**Something to try:** Find a station by keyword, then play it with Alt plus Shift plus P.
+
+## 4 - Edit and Add Records
+
+JobTrail, the job-search template, opened; then a cell edited with F2, a value picked from a list with Control plus F2, and a new record added with Control plus N.
+
+**Before you start:** DbDo is open; this walk opens JobTrail.
+
+### Step 1
+
+One want: one job's status brought up to date, and a new job added.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Control+O
+
+JobTrail comes next: a template for a job search, whose jobs, employers and contacts are linked to one another, so it shows more of what DbDo can do. Control plus O, O for Open; the templates are in the Help menu, under Template Databases, and I open JobTrail.
+
+Screen reader:
+
+- Open Database dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Shift+Z
+
+I choose JobTrail and press Enter. Shift plus Z says where I am.
+
+Screen reader:
+
+- jobs, 12 records, no filter, sorted by employer
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: F2
+
+I move to the status column of the record to change. F2 edits the cell under the cursor, as F2 renames a file in Windows.
+
+Screen reader:
+
+- status: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Enter
+
+I type the new value and press Enter to keep it.
+
+Screen reader:
+
+- (the record, with its new status)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Control+F2
+
+Where a field has fixed values, Control plus F2 edits by picking one, so nothing is mistyped.
+
+Screen reader:
+
+- status: list box
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Enter
+
+Down Arrow to the value, and Enter.
+
+Screen reader:
+
+- (the record, with the picked status)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Control+N
+
+Control plus N, N for New, adds a record to the table, and focus goes to its first field.
+
+Screen reader:
+
+- New record
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Shift+A
+
+I fill each field with F2 as before. Shift plus A, A for Added, says when this record was added.
+
+Screen reader:
+
+- (the date and time the record was added)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Control+D
+
+A planned misstep: Control plus D deletes a record, D for Delete, and asks first. Escape answers no.
+
+Screen reader:
+
+- Delete this record? No button
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Escape
+
+Escape keeps it.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Alt+Shift+N
+
+Notes hold whatever does not fit a column. Alt plus Shift plus N, Edit Notes, opens this record's notes in a box of their own.
+
+Screen reader:
+
+- Notes: edit, multiline
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Shift+N
+
+I type a line about the interview, and Control plus Enter keeps it. Shift plus N says the notes back.
+
+Screen reader:
+
+- Second interview Tuesday at ten.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Shift+T
+
+Tags work the same way, with Alt plus Shift plus T to edit and Shift plus T to hear them: words such as remote or referral, to filter by later.
+
+Screen reader:
+
+- remote, referral
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Shift+E
+
+Shift plus E, Say Edited, says when this record last changed, so a stale one is easy to spot.
+
+Screen reader:
+
+- Edited today at 3:42 PM
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Control+Shift+C
+
+Control plus Shift plus C, Copy Record, adds a copy of this record as a new one: quicker than typing a second job at the same employer.
+
+Screen reader:
+
+- Record copied
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+R
+
+Control plus R, Replace Column, finds and replaces text in the column I am on, in every record, for a name spelled two ways.
+
+Screen reader:
+
+- Replace Column dialog, Find: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Escape
+
+Escape, for now. A replacement counts what it changed and says so.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Alt+Shift+U
+
+A record can carry a web address, such as a job posting. Alt plus Shift plus U, Edit URL, edits it.
+
+Screen reader:
+
+- url: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21: Shift+U
+
+Enter keeps it. Shift plus U says it back, and Control plus Shift plus U opens it in the browser.
+
+Screen reader:
+
+- https colon slash slash jobs dot example dot com slash 4821
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 22
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 23
+
+Edit the cell I am on.
+
+Screen reader:
+
+- F2
+
+### Step 24
+
+Edit by picking a value.
+
+Screen reader:
+
+- Control plus F2
+
+### Step 25
+
+Add a record.
+
+Screen reader:
+
+- Control plus N
+
+**Something to try:** Add a record of your own and fill three of its fields.
+
+## 5 - Mark, Filter and Sort
+
+Records marked one at a time and in runs, the list narrowed by a filter, and put in order by a column.
+
+**Before you start:** JobTrail is open in DbDo.
+
+### Step 1
+
+One want: only the jobs still waiting, the newest first.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Control+M
+
+Control plus M, M for Mark, marks the record I am on, for a later command to act on.
+
+Screen reader:
+
+- Marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Shift+M
+
+Shift plus M asks about marks, changing nothing.
+
+Screen reader:
+
+- (how many records are marked)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Control+Shift+M
+
+Control plus Shift plus M reverses it: Shift reverses.
+
+Screen reader:
+
+- Unmarked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Control+F
+
+Control plus F, F for Filter, shows only the records that match. It begins with a choice.
+
+Screen reader:
+
+- Filter Records dialog
+- Filter by: list box, Any field contains text, 1 of 2
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Enter
+
+Any field is the first choice, so Enter alone takes it. It asks for the text to find, wherever it is.
+
+Screen reader:
+
+- Any Field Contains dialog
+- Text to find in any field: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Enter
+
+I type Seattle and press Enter. Every job with Seattle in any field stays: the city, the address, the notes.
+
+Screen reader:
+
+- 3 records have Seattle.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: N
+
+Control plus F again. With a filter in force, the list offers more, each choice with its own first letter. N for Narrow keeps Seattle and adds a field.
+
+Screen reader:
+
+- Narrow with the field form, 4 of 4
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Enter
+
+Enter opens the form, a box for each field. I type waiting in the status box and press Enter.
+
+Screen reader:
+
+- Filter applied. 2 records match.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Shift+F
+
+Shift plus F says the filter, both parts, in the words each was asked in.
+
+Screen reader:
+
+- any field contains Seattle; and where: status = 'waiting'
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Alt+O
+
+Alt plus O, O for Order, sorts by a column; I choose the date added.
+
+Screen reader:
+
+- Order Records dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Alt+Shift+O
+
+Enter sorts. Alt plus Shift plus O reverses the order, newest first.
+
+Screen reader:
+
+- (the newest waiting job)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Control+Shift+F
+
+A planned misstep: the filter stays until it is cleared, so a later search finds only waiting jobs. Control plus Shift plus F clears it.
+
+Screen reader:
+
+- No filter
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: F8
+
+Marking one record at a time is slow for many. F8 drops an anchor at the record I am on.
+
+Screen reader:
+
+- Mark anchor
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Shift+F8
+
+Down Arrow four records, then Shift plus F8 marks everything from the anchor to here.
+
+Screen reader:
+
+- 5 records marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Control+Shift+A
+
+Control plus A marks every record, Control plus Shift plus A unmarks them all, and Alt plus Shift plus I swaps marked and unmarked.
+
+Screen reader:
+
+- All unmarked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Shift+Space
+
+Marks are for acting on: Delete, Copy and Export all work on the marked records when there are any. Shift plus Space reads every marked record in full, to check before acting.
+
+Screen reader:
+
+- No records are marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Shift+8
+
+With a filter and an order in force, Shift plus 8 says both at once, so you always know what you are looking at.
+
+Screen reader:
+
+- Sort: added, descending; Filter: any field contains Seattle; and status = 'waiting'
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Shift+O
+
+Shift plus O says just the order, and Shift plus F just the filter.
+
+Screen reader:
+
+- added, descending
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21: Control+Space
+
+Control plus Space toggles the mark on the record I am on, as it toggles a selection in any Windows list.
+
+Screen reader:
+
+- Marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 22: Shift+Y
+
+With a filter in force, Shift plus Y says how many records it leaves.
+
+Screen reader:
+
+- 4 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 23: Alt+Shift+L
+
+Alt plus Shift plus L reads one column for the marked records only: here, the employers of the jobs I marked.
+
+Screen reader:
+
+- Amazon, Costco
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 24
+
+A filter and marks work together: filter to narrow, mark to choose, then act on the marked.
+
+### Step 25
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 26
+
+Mark, then unmark.
+
+Screen reader:
+
+- Control plus M
+- Control plus Shift plus M
+
+### Step 27
+
+Filter, then clear it.
+
+Screen reader:
+
+- Control plus F
+- Control plus Shift plus F
+
+### Step 28
+
+Order by a column.
+
+Screen reader:
+
+- Alt plus O
+
+**Something to try:** Filter your own table to one value, then sort what is left.
+
+## 6 - Follow Related Records
+
+From a record into the records related to it with Alt plus Right Arrow, and back with Alt plus Left Arrow, as a browser goes back.
+
+**Before you start:** A database with related tables is open; the chinook sample has them.
+
+### Step 1
+
+One want: from an artist, to the albums, to the tracks, and back. Related tables let one record lead to others.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Shift+R
+
+Shift plus R, R for Related, says what this record leads to, changing nothing.
+
+Screen reader:
+
+- (the related tables and their counts)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Alt+Right Arrow
+
+Alt plus Right Arrow goes into the related records.
+
+Screen reader:
+
+- (the child table, and its first record)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Shift+Z
+
+Shift plus Z says where I am now.
+
+Screen reader:
+
+- (the child table, its record count, the filter that ties it to the parent)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Alt+Right Arrow
+
+Alt plus Right Arrow again goes a level deeper.
+
+Screen reader:
+
+- (the next table down)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Alt+Left Arrow
+
+Alt plus Left Arrow comes back a level, as a browser goes back.
+
+Screen reader:
+
+- (the table one level up)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Alt+Home
+
+A planned misstep: three levels deep, and lost. Alt plus Home returns to where I started, from any depth.
+
+Screen reader:
+
+- (the starting table, at the record I left)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Shift+P
+
+What ties a record to its relations is its prime, a key DbDo builds from the record itself. Shift plus P, Say Prime, says it.
+
+Screen reader:
+
+- Miles Davis
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Control+Shift+O
+
+A related table can have a window of its own. Control plus Shift plus O, Open Table, opens a table in a new window, beside this one.
+
+Screen reader:
+
+- Open Table dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Enter
+
+I choose albums and press Enter.
+
+Screen reader:
+
+- albums, 40 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Shift+F4
+
+Shift plus F4 says the windows open, and Control plus Tab moves between them.
+
+Screen reader:
+
+- 2 windows: artists, albums
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Control+F6
+
+In one window, Control plus F6 moves to the next table, and Alt plus F6 back through the tables visited, as a browser's history does.
+
+Screen reader:
+
+- tracks, 412 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Control+F4
+
+Control plus F4 closes this window, leaving the first.
+
+Screen reader:
+
+- artists, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: F4
+
+F4, Current Windows, lists the windows open, so you can pick one by name rather than cycle through them.
+
+Screen reader:
+
+- Current Windows dialog, artists, 1 of 2
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+F6
+
+Escape. Alt plus F6 goes back through the tables visited in this window, the way a browser goes back.
+
+Screen reader:
+
+- albums, 40 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Alt+Shift+F6
+
+Alt plus Shift plus F6 goes forward again.
+
+Screen reader:
+
+- tracks, 412 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+Shift+F4
+
+Control plus Shift plus F4 closes every window but this one, for a clean start.
+
+Screen reader:
+
+- tracks, 412 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Control+Shift+F6
+
+Within one window, Control plus Shift plus F6 moves to the previous table, as Control plus F6 moves to the next: Shift reverses.
+
+Screen reader:
+
+- artists, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Shift+R
+
+Whichever way you arrived, Shift plus R still says what this record leads to, so the way down is never a guess.
+
+Screen reader:
+
+- albums 3, tracks 31
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 22
+
+Go into related records.
+
+Screen reader:
+
+- Alt plus Right Arrow
+
+### Step 23
+
+Come back a level.
+
+Screen reader:
+
+- Alt plus Left Arrow
+
+### Step 24
+
+Return to the start.
+
+Screen reader:
+
+- Alt plus Home
+
+**Something to try:** Follow a relationship two levels deep, then return with Alt plus Home.
+
+## 7 - Statistics and Reports
+
+The numbers in a column with Alt plus Shift plus S, a chart's figures with Control plus Shift plus G, and a report written as a document with Alt plus Shift plus R.
+
+**Before you start:** JobTrail is open in DbDo.
+
+### Step 1
+
+One want: how many applications, how they stand, and a page to keep.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Alt+Shift+S
+
+I move to the status column. Alt plus Shift plus S, S for Statistics, describes the column.
+
+Screen reader:
+
+- Statistics from Column
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Escape
+
+The count of each value, and for numbers the sum, average, least and most. Escape closes it.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Control+Shift+G
+
+Control plus Shift plus G, G for Graphics, turns a column into a chart and its figures in words.
+
+Screen reader:
+
+- Graphics Column
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Alt+Shift+R
+
+Escape. Alt plus Shift plus R, R for Report, writes a saved report as a document.
+
+Screen reader:
+
+- Run Report dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Enter
+
+I choose a report and press Enter; DbDo writes it and opens it.
+
+Screen reader:
+
+- (the report's title, as a heading)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8
+
+A planned misstep: a report reads the whole table, filter or not, unless its template says otherwise. To report only some records, filter them and use the report that respects the filter.
+
+### Step 9: Alt+T
+
+Before the details, the shape. Alt plus T, Table Summary, says how many records and columns the table has, and how much room it takes.
+
+Screen reader:
+
+- Table Summary
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Alt+D
+
+Escape, and Alt plus D, Database Summary, does the same for every table in the database.
+
+Screen reader:
+
+- Database Summary
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Alt+Shift+S
+
+A filter narrows a summary to what matters: filter to waiting jobs, then Alt plus Shift plus S again, and the counts describe only those.
+
+Screen reader:
+
+- Statistics from Column
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Alt+X
+
+When the numbers are to go somewhere else, Alt plus X, Export Data, writes the table, or the records in view, as CSV, a spreadsheet, JSON or another format.
+
+Screen reader:
+
+- Export Data dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Escape
+
+Escape, for now. And Control plus P prints the records in view, for a copy on paper or a PDF.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Control+C
+
+A single number is often all that is wanted. Control plus C copies the cell under the cursor.
+
+Screen reader:
+
+- Copied
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Alt+C
+
+Alt plus C appends another cell to what is on the clipboard, to gather a few figures in one go.
+
+Screen reader:
+
+- Appended
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+Apostrophe
+
+Alt plus Apostrophe, Say Clipboard, reads back what has been gathered before it is pasted anywhere.
+
+Screen reader:
+
+- 12, waiting 4
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17
+
+Then one paste puts those figures in an email or a document.
+
+### Step 18: Shift+8
+
+Before reading any summary, Shift plus 8 says the sort and filter in force, since both change what the numbers describe.
+
+Screen reader:
+
+- Sort: employer. Filter: none.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Alt+L
+
+And Alt plus L reads a whole column aloud, top to bottom, when hearing the values beats counting them.
+
+Screen reader:
+
+- waiting, applied, interview, waiting
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 21
+
+Describe a column.
+
+Screen reader:
+
+- Alt plus Shift plus S
+
+### Step 22
+
+A column as a chart.
+
+Screen reader:
+
+- Control plus Shift plus G
+
+### Step 23
+
+Run a report.
+
+Screen reader:
+
+- Alt plus Shift plus R
+
+**Something to try:** Run a report of your own table and read it in your browser.
+
+## 8 - Ask with SQL
+
+A question in the database's own language with Control plus Q, the answer shown as records, and the history of questions asked.
+
+**Before you start:** JobTrail is open in DbDo.
+
+### Step 1
+
+One want: an answer no single command gives -- how many jobs at each employer, most first. SQL, the database's own language, asks it in one line.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Control+Q
+
+Control plus Q, Q for Query, opens a box for SQL.
+
+Screen reader:
+
+- Query dialog
+- SQL: edit, multiline
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: select employer, count(*) as jobs from jobs group by employer order by jobs desc
+
+I type the question.
+
+Screen reader:
+
+- (each word echoed as it is typed)
+
+### Step 5: Control+Enter
+
+Control plus Enter runs it from inside the box, where Enter would start a new line.
+
+Screen reader:
+
+- (the first row of the answer)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Shift+Q
+
+The answer is shown as records, moved through like any table. Shift plus Q says the query in force.
+
+Screen reader:
+
+- (the query)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Control+Q
+
+A planned misstep: a misspelled column. The database says which word it does not know, and the box keeps the query to fix.
+
+Screen reader:
+
+- Query dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Alt+Shift+Q
+
+Escape. Alt plus Shift plus Q, the history, lists the questions asked, to run one again.
+
+Screen reader:
+
+- Query History
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Shift+F12
+
+SQL is not the only way to ask. Shift plus F12, Chat about Table, sends the table with a question in plain words to the model on this computer.
+
+Screen reader:
+
+- Chat about Table dialog
+- Question: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Which employer has the most applications still waiting?
+
+I ask which employer has the most applications still waiting.
+
+Screen reader:
+
+- (each word echoed as it is typed)
+
+### Step 11: Enter
+
+Enter. The answer comes in words, from the same records, and nothing leaves this computer.
+
+Screen reader:
+
+- Answer dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Escape
+
+Escape. An answer from SQL is a table like any other, so Alt plus X exports it, and Alt plus Shift plus S describes its columns.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Control+Shift+I
+
+A question asked often can be saved as a script, a dot s q l file in the Scripts folder beside the database. Control plus Shift plus I, Invoke Script, lists them and runs the one chosen.
+
+Screen reader:
+
+- Invoke Script dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Escape
+
+Escape. Scripts belong to their database, so the questions travel with the data they ask about.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Alt+Z
+
+Before a query that changes data, Alt plus Z, Toggle Read Only, makes the database read only, so a mistyped statement cannot change anything.
+
+Screen reader:
+
+- Read only
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+Z
+
+Alt plus Z again makes it writable when you mean to change it.
+
+Screen reader:
+
+- Read and write
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: F5
+
+After a query that does change records, F5, Refresh View, shows the table as it now stands.
+
+Screen reader:
+
+- jobs, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18
+
+Practise on a copy: Save As, Control plus Shift plus S, makes one, so the original stays as it was while you learn.
+
+### Step 19
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 20
+
+Ask in SQL.
+
+Screen reader:
+
+- Control plus Q
+
+### Step 21
+
+Run it from inside the box.
+
+Screen reader:
+
+- Control plus Enter
+
+### Step 22
+
+The questions asked before.
+
+Screen reader:
+
+- Alt plus Shift plus Q
+
+**Something to try:** Write a query that counts your records by one column.
+
+## 9 - Conclusion
+
+The conclusion and summary of the walks; the words DbDo uses, in two voices; then more information: the help built into the program and where to learn more.
+
+**Before you start:** Nothing is needed; this walk is listened to.
+
+### Step 1
+
+To finish: what to carry away, the words DbDo uses, and where to get help. First, the summary. A table is a list you move through by row and column, and every question about where you are is a Shift key that changes nothing.
+
+Screen reader:
+
+- Shift plus Z, Say Status
+
+### Step 2
+
+Keys follow words, so a key can be guessed: O opens and orders, F filters, M marks, and Shift reverses.
+
+Screen reader:
+
+- Control plus M, Mark
+- Control plus Shift plus M, Unmark
+
+### Step 3
+
+And when the commands run out, SQL asks the database anything, in one line.
+
+Screen reader:
+
+- Control plus Q, Query
+
+### Step 4
+
+Now the words, in alphabetical order. I say the term; the reader says what it means.
+
+### Step 5
+
+data list.
+
+Screen reader:
+
+- The list of records the window shows: one table or query, a row per record, a column per field.
+
+### Step 6
+
+filter.
+
+Screen reader:
+
+- A condition that hides the records not matching it, until it is cleared.
+
+### Step 7
+
+mark.
+
+Screen reader:
+
+- A flag on a record, for a later command to act on; Control plus M sets it, and Shift reverses it.
+
+### Step 8
+
+order.
+
+Screen reader:
+
+- The sort of the list, by one column, ascending or reversed.
+
+### Step 9
+
+pick list.
+
+Screen reader:
+
+- A field's fixed values in a list, opened with F4, so nothing is mistyped.
+
+### Step 10
+
+query.
+
+Screen reader:
+
+- A question in SQL, answered as records.
+
+### Step 11
+
+record.
+
+Screen reader:
+
+- One row of a table: a job, an album, a contact.
+
+### Step 12
+
+related table.
+
+Screen reader:
+
+- A table whose records belong to a record of another; Alt plus Right Arrow goes in.
+
+### Step 13
+
+report.
+
+Screen reader:
+
+- A saved template that writes a table's records as a document.
+
+### Step 14
+
+Say key.
+
+Screen reader:
+
+- Shift and a letter: a question answered aloud, changing nothing.
+
+### Step 15
+
+SQLite.
+
+Screen reader:
+
+- The database format DbDo opens: one file, with its tables inside.
+
+### Step 16
+
+standard fields.
+
+Screen reader:
+
+- The columns every DbDo table may carry: added, edited, marked, notes, tags, url.
+
+### Step 17
+
+template database.
+
+Screen reader:
+
+- A ready-made database in the Help menu, to practice on or to start from.
+
+### Step 18
+
+Last, more information. Help is built in. The guide, and what changed.
+
+Screen reader:
+
+- F1, the guide
+- Shift plus F1, History
+
+### Step 19
+
+The version, and what any key does without doing it.
+
+Screen reader:
+
+- Alt plus F1, About
+- Control plus F1, Key Describer
+
+### Step 20
+
+DbDo dot md, the guide, explains every command and the ideas behind them; Hotkeys dot md lists every key three ways; and the DbDo page on GitHub, at github dot com slash JamalMazrui slash DbDo, has the newest version.
+
+**Something to try:** Open a template database and describe one of its columns with Alt plus Shift plus S.
+
+<!-- walkthrough ends -->
+
+<!-- walkthrough: written by makeTutorials.py, do not edit between the markers -->
+
+## 0 - Overview
+
+What DbDo is, two keys of the screen reader's own, and the table of contents.
+
+**Before you start:** Nothing is needed; this walk is listened to.
+
+### Step 1
+
+DbDo is a database program for people who listen to the screen.
+
+### Step 2
+
+It opens SQLite databases, and imports from Excel and others, and shows one table at a time as a list of records you move through by row and by column. Every cell can be heard, edited, searched, marked and counted from the keyboard, and the program answers questions about where you are without changing anything.
+
+### Step 3: Insert+Up Arrow
+
+Two keys before anything else, both the reader's own. If a line goes by too fast, Insert plus Up Arrow says it again.
+
+Screen reader:
+
+- (the last line, read a second time)
+
+### Step 4: Insert+Tab
+
+And if you lose your place, Insert plus Tab says where you are: the control, its state and its position.
+
+Screen reader:
+
+- (the current control, with its state and position)
+
+### Step 5
+
+Now the table of contents. I say the number and the title; the reader says what the walk covers.
+
+### Step 6
+
+One, User Interface.
+
+Screen reader:
+
+- The window, the record list, the Say keys that ask without changing, the pick list, the menus, the rules every key follows, and where help lives.
+
+### Step 7
+
+Two, Install and Launch.
+
+Screen reader:
+
+- The installer, the boxes on its last page, and DbDo opening with Alt plus Control plus D.
+
+### Step 8
+
+Three, Open a Database and Move Through Records.
+
+Screen reader:
+
+- A template database opened, and moving by row, by column, by search and by number.
+
+### Step 9
+
+Four, Edit and Add Records.
+
+Screen reader:
+
+- A cell changed, a value picked from a list, a record added.
+
+### Step 10
+
+Five, Mark, Filter and Sort.
+
+Screen reader:
+
+- Records marked, the list narrowed to what matters, and put in order.
+
+### Step 11
+
+Six, Follow Related Records.
+
+Screen reader:
+
+- From one record into the records related to it, and back.
+
+### Step 12
+
+Seven, Statistics and Reports.
+
+Screen reader:
+
+- The numbers in a column, and a report written as a document.
+
+### Step 13
+
+Eight, Ask with SQL.
+
+Screen reader:
+
+- A question in the database's own language, and the history of questions asked.
+
+### Step 14
+
+Nine, Conclusion.
+
+Screen reader:
+
+- What to carry away, the words DbDo uses, the help built in, and where to learn more.
+
+### Step 15
+
+Ten walks, each under five minutes, under an hour together: the overview, the user interface, seven tasks, and the conclusion. They are a course, not a reference: each one assumes those before it.
+
+**Something to try:** Take walks one and two, then pick the task you need today.
+
+## 1 - User Interface
+
+DbDo's window and its parts, each named and then shown by the reader -- the record list, the Say keys, the pick list, the menus -- then the rules every key follows, and help in its four places.
+
+**Before you start:** DbDo is installed, with RadioTrail open, as it is on a first run.
+
+### Step 1
+
+DbDo is heard before it is seen. I name each part; the reader shows it: name, kind, value and state, then a hint.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Down Arrow
+
+The title, then the greeting in the message voice. The main view is a list of records: Down Arrow moves by row, and the reader speaks the record.
+
+Screen reader:
+
+- (the next record, its first column first)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Right Arrow
+
+Right Arrow moves by column within the record, speaking the column's name and its value.
+
+Screen reader:
+
+- (the next column's name and value)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Shift+Z
+
+Now the Say keys: Shift and a letter asks, and changes nothing. Shift plus Z is Say Status.
+
+Screen reader:
+
+- jobs, 12 records, no filter, sorted by employer
+
+### Step 6: Shift+C
+
+Table, count, filter and sort in one breath; pressed twice, the words open in a window. Shift plus C, C for Cell, says the cell you are on.
+
+Screen reader:
+
+- (the column's name and the cell's value)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: F4
+
+Where a field has fixed values, F4 opens them as a pick list.
+
+Screen reader:
+
+- status: list box, untried, 4 of 5
+- To move through items press Up or Down Arrow.
+
+### Step 8: F10
+
+A letter jumps to a value, so nothing is mistyped. Escape closes it. Menus say their own keys; F10 opens the menu bar.
+
+Screen reader:
+
+- Menu bar
+- File menu
+
+### Step 9: Down Arrow
+
+Down Arrow to the first item.
+
+Screen reader:
+
+- Open Database..., Control plus O, O
+
+### Step 10: Escape
+
+The item, its key, then its letter: learn a key from the menu once, then skip the menu.
+
+Screen reader:
+
+- Leaving menus
+
+### Step 11: Shift+Z
+
+The rules behind every key. A letter is the first letter of a word: Control plus O opens, Alt plus O orders. Control does; Shift asks, changing nothing.
+
+Screen reader:
+
+- jobs, 12 records, no filter, sorted by employer
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Insert+T
+
+Adding Shift reverses: Control plus M marks, Control plus Shift plus M unmarks. Each function key is a family: F2 edits, F3 searches, F4 picks, F8 selects. Insert plus T, the reader's own, says the title.
+
+Screen reader:
+
+- DbDo
+
+### Step 13: Control+F1
+
+Control plus F1 is the Key Describer: each key says what it does instead of doing it.
+
+Screen reader:
+
+- Key Describer On
+
+### Step 14: Control+F1
+
+Again, and it is off.
+
+Screen reader:
+
+- No Key Describer
+
+### Step 15
+
+Help is in four places, the same in every Homer program. I say which; the reader says the key. The guide.
+
+Screen reader:
+
+- F1, the guide
+
+### Step 16
+
+The changes, release by release; the version; the name of any key.
+
+Screen reader:
+
+- Shift plus F1, History
+- Alt plus F1, About
+- Control plus F1, Key Describer
+
+### Step 17: Alt+F10
+
+When a key will not come to mind, Alt plus F10, the Alternate Menu, lists every command in one list you type into, with its key beside it.
+
+Screen reader:
+
+- Alternate Menu
+- Command, list box
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: mark
+
+I type the word mark, and the list narrows to the commands with that word.
+
+Screen reader:
+
+- Mark All, Control plus A
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Escape
+
+Escape closes the list without running anything.
+
+Screen reader:
+
+- jobs, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 21
+
+Say Status.
+
+Screen reader:
+
+- Shift plus Z
+
+### Step 22
+
+A field's fixed values.
+
+Screen reader:
+
+- F4, pick list
+
+### Step 23
+
+Unmark, the reverse of Mark.
+
+Screen reader:
+
+- Control plus Shift plus M
+
+**Something to try:** Guess three DbDo keys from their words, then check each with Control plus F1.
+
+## 2 - Install and Launch
+
+The installer, the boxes on its last page -- the screen reader scripts, the player, the model for its AI commands -- and DbDo opening from anywhere.
+
+**Before you start:** DbDo_setup.exe is downloaded from the DbDo page on GitHub.
+
+### Step 1
+
+One want: DbDo on this computer, with what it works best with, in one sitting.
+
+### Step 2: Enter
+
+I open the downloaded setup program and allow it to make changes.
+
+Screen reader:
+
+- Setup - DbDo dialog
+- Welcome to the DbDo Setup Wizard
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 3: Enter
+
+The ordinary installer: Enter takes Next, and the defaults are right.
+
+Screen reader:
+
+- Select Destination Location
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Tab
+
+The last page offers what DbDo works best with, each as a box whose first word is the machine's state read for you: Install, Update or Reinstall.
+
+Screen reader:
+
+- (the box for your screen reader's scripts, its first word, checked)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Down Arrow
+
+Scripts for the screen reader you use; the mpv player, which plays a record's stream; and, for the AI commands, Ollama and a model, downloaded once.
+
+Screen reader:
+
+- Install mpv check box, checked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Space
+
+A planned misstep: clearing a box you need. Space clears it; Space again ticks it back.
+
+Screen reader:
+
+- not checked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Space
+
+Space.
+
+Screen reader:
+
+- checked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Enter
+
+Enter installs what is ticked.
+
+Screen reader:
+
+- Finish button
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Alt+Control+D
+
+Then the key that opens DbDo from anywhere.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 10
+
+Installed and open. If something was left out, run the setup again and tick its box; what is already current costs nothing.
+
+### Step 11: F1
+
+Help is four keys away, the same in every Homer program. F1 opens the full documentation in the browser.
+
+Screen reader:
+
+- DbDo documentation
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Alt+Shift+F1
+
+Alt plus Shift plus F1 opens the ReadMe, the short start, for when the full guide is more than you need today.
+
+Screen reader:
+
+- DbDo ReadMe
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Alt+F1
+
+Alt plus F1, About, says the version, so you always know which DbDo is installed.
+
+Screen reader:
+
+- About DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: F11
+
+Escape, and F11 asks GitHub whether a newer version is out. If one is, Yes is the default, and Enter installs it.
+
+Screen reader:
+
+- Checking for a newer version
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: F10
+
+The templates to practise on are in the Help menu: F10, then H for Help.
+
+Screen reader:
+
+- Help menu
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Down Arrow
+
+Down Arrow to Template Databases. Each is a complete example: JobTrail for job hunting, BookTrail for reading, RadioTrail for stations to play.
+
+Screen reader:
+
+- Template Databases
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Escape
+
+Escape closes the menu. Once a database is open, Alt plus Backslash opens its folder in File Explorer, where its scripts and reports live beside it.
+
+Screen reader:
+
+- DbDo ready
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+F1
+
+Two more ways to learn the keys before you need them. Control plus F1 turns on the Key Describer: each key then says what it does instead of doing it.
+
+Screen reader:
+
+- Key Describer on
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Control+O
+
+Now Control plus O only describes itself.
+
+Screen reader:
+
+- Open Database, Control plus O
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Alt+Shift+H
+
+Control plus F1 again turns the describer off. Alt plus Shift plus H, Hotkey Summary, lists every key in a window you can search.
+
+Screen reader:
+
+- Hotkey Summary
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21: Escape
+
+Escape closes it, and the database is as it was.
+
+Screen reader:
+
+- DbDo ready
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 22
+
+What this walk taught. I name the step; the reader gives the answer.
+
+### Step 23
+
+What a box's first word tells you.
+
+Screen reader:
+
+- Install, Update or Reinstall
+
+### Step 24
+
+The key that opens DbDo.
+
+Screen reader:
+
+- Alt plus Control plus D
+
+**Something to try:** Run the setup again; every box should now say Update or Reinstall.
+
+## 3 - Open a Database and Move Through Records
+
+RadioTrail, the database DbDo opens first, explored by row, by column, by search and by record number, and a station played in the Homer Player.
+
+**Before you start:** DbDo is installed; on a first run it opens RadioTrail.
+
+### Step 1
+
+One want: a station found and playing, quickly. The first time DbDo starts, it opens RadioTrail, a list of internet radio stations to search, sort and play.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Shift+Z
+
+Shift plus Z says where I am: the stations table of RadioTrail. Another database opens with Control plus O, O for Open, and the templates are in the Help menu, under Template Databases.
+
+Screen reader:
+
+- (stations, the number of stations, no filter, sorted by name)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Control+G
+
+Down Arrow moves by record; Right Arrow by column. Control plus G, G for Go, goes to a record by its number.
+
+Screen reader:
+
+- Go to Record dialog
+- Record number: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Enter
+
+I type 7 and press Enter.
+
+Screen reader:
+
+- (record 7, its first column first)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Control+K
+
+Control plus K, K for Keywords, searches every column for words.
+
+Screen reader:
+
+- Keywords dialog
+- Keywords: edit
+- Type in text.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Enter
+
+I type jazz and press Enter.
+
+Screen reader:
+
+- (the first station holding jazz)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Alt+Delete
+
+F3 goes to the next match, Shift plus F3 to the one before. Alt plus Delete says the column and the row number.
+
+Screen reader:
+
+- (the column's name and the row number)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Escape
+
+A planned misstep: Control plus F is not find here. In DbDo, F is for Filter, a later walk. Keywords is K. Escape leaves anything opened by mistake.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Control+J
+
+Keywords searches every column; Jump searches one. Control plus J, Jump to Record, asks which column and what to look for.
+
+Screen reader:
+
+- Jump to Record dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Enter
+
+I choose country, type Canada, and press Enter. The cursor lands on the first station there.
+
+Screen reader:
+
+- (Canada, country, its row)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Control+Shift+J
+
+Control plus Shift plus J jumps backward to the one before, and Control plus Shift plus K does the same for Keywords: Shift reverses, here as everywhere in DbDo.
+
+Screen reader:
+
+- (Canada, country, an earlier row)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Shift+Y
+
+Shift plus Y, Say Yield, says how many records there are.
+
+Screen reader:
+
+- (the number of stations)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Shift+C
+
+Shift plus C, Say Cell, says the value under the cursor again, without moving.
+
+Screen reader:
+
+- Canada
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Control+I
+
+Control plus I, Inspect Record, shows the whole record at once, one field to a line: the station's name, genre, language and stream address among them. Escape closes it.
+
+Screen reader:
+
+- Inspect Record dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+Shift+P
+
+Now the reason RadioTrail opens first. Alt plus Shift plus P, Play Stream, plays the current station in the Homer Player, the same player FileDir uses.
+
+Screen reader:
+
+- (the Homer Player, playing the station)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Escape
+
+Escape closes the player and returns to the station I was on, ready for the next one.
+
+Screen reader:
+
+- (stations, the same row)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+T
+
+A database can hold several tables; Control plus T, Choose Table, lists them. Escape keeps the table I am in.
+
+Screen reader:
+
+- (Choose Table dialog, stations first)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Escape
+
+Escape. RadioTrail is one table, easy to hold in mind. The next walk opens JobTrail, whose tables are linked to one another.
+
+Screen reader:
+
+- stations
+
+Confirm the wording with a live run: buildTutorials -live.
+
+**Something to try:** Find a station by keyword, then play it with Alt plus Shift plus P.
+
+## 4 - Edit and Add Records
+
+JobTrail, the job-search template, opened; then a cell edited with F2, a value picked from a list with Control plus F2, and a new record added with Control plus N.
+
+**Before you start:** DbDo is open; this walk opens JobTrail.
+
+### Step 1
+
+One want: one job's status brought up to date, and a new job added.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Control+O
+
+JobTrail comes next: a template for a job search, whose jobs, employers and contacts are linked to one another, so it shows more of what DbDo can do. Control plus O, O for Open; the templates are in the Help menu, under Template Databases, and I open JobTrail.
+
+Screen reader:
+
+- Open Database dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Shift+Z
+
+I choose JobTrail and press Enter. Shift plus Z says where I am.
+
+Screen reader:
+
+- jobs, 12 records, no filter, sorted by employer
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: F2
+
+I move to the status column of the record to change. F2 edits the cell under the cursor, as F2 renames a file in Windows.
+
+Screen reader:
+
+- status: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Enter
+
+I type the new value and press Enter to keep it.
+
+Screen reader:
+
+- (the record, with its new status)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Control+F2
+
+Where a field has fixed values, Control plus F2 edits by picking one, so nothing is mistyped.
+
+Screen reader:
+
+- status: list box
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Enter
+
+Down Arrow to the value, and Enter.
+
+Screen reader:
+
+- (the record, with the picked status)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Control+N
+
+Control plus N, N for New, adds a record to the table, and focus goes to its first field.
+
+Screen reader:
+
+- New record
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Shift+A
+
+I fill each field with F2 as before. Shift plus A, A for Added, says when this record was added.
+
+Screen reader:
+
+- (the date and time the record was added)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Control+D
+
+A planned misstep: Control plus D deletes a record, D for Delete, and asks first. Escape answers no.
+
+Screen reader:
+
+- Delete this record? No button
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Escape
+
+Escape keeps it.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Alt+Shift+N
+
+Notes hold whatever does not fit a column. Alt plus Shift plus N, Edit Notes, opens this record's notes in a box of their own.
+
+Screen reader:
+
+- Notes: edit, multiline
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Shift+N
+
+I type a line about the interview, and Control plus Enter keeps it. Shift plus N says the notes back.
+
+Screen reader:
+
+- Second interview Tuesday at ten.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Shift+T
+
+Tags work the same way, with Alt plus Shift plus T to edit and Shift plus T to hear them: words such as remote or referral, to filter by later.
+
+Screen reader:
+
+- remote, referral
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Shift+E
+
+Shift plus E, Say Edited, says when this record last changed, so a stale one is easy to spot.
+
+Screen reader:
+
+- Edited today at 3:42 PM
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Control+Shift+C
+
+Control plus Shift plus C, Copy Record, adds a copy of this record as a new one: quicker than typing a second job at the same employer.
+
+Screen reader:
+
+- Record copied
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+R
+
+Control plus R, Replace Column, finds and replaces text in the column I am on, in every record, for a name spelled two ways.
+
+Screen reader:
+
+- Replace Column dialog, Find: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Escape
+
+Escape, for now. A replacement counts what it changed and says so.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Alt+Shift+U
+
+A record can carry a web address, such as a job posting. Alt plus Shift plus U, Edit URL, edits it.
+
+Screen reader:
+
+- url: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21: Shift+U
+
+Enter keeps it. Shift plus U says it back, and Control plus Shift plus U opens it in the browser.
+
+Screen reader:
+
+- https colon slash slash jobs dot example dot com slash 4821
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 22
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 23
+
+Edit the cell I am on.
+
+Screen reader:
+
+- F2
+
+### Step 24
+
+Edit by picking a value.
+
+Screen reader:
+
+- Control plus F2
+
+### Step 25
+
+Add a record.
+
+Screen reader:
+
+- Control plus N
+
+**Something to try:** Add a record of your own and fill three of its fields.
+
+## 5 - Mark, Filter and Sort
+
+Records marked one at a time and in runs, the list narrowed by a filter, and put in order by a column.
+
+**Before you start:** JobTrail is open in DbDo.
+
+### Step 1
+
+One want: only the jobs still waiting, the newest first.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Control+M
+
+Control plus M, M for Mark, marks the record I am on, for a later command to act on.
+
+Screen reader:
+
+- Marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Shift+M
+
+Shift plus M asks about marks, changing nothing.
+
+Screen reader:
+
+- (how many records are marked)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Control+Shift+M
+
+Control plus Shift plus M reverses it: Shift reverses.
+
+Screen reader:
+
+- Unmarked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Control+F
+
+Control plus F, F for Filter, shows only the records that match. It begins with a choice.
+
+Screen reader:
+
+- Filter Records dialog
+- Filter by: list box, Any field contains text, 1 of 2
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Enter
+
+Any field is the first choice, so Enter alone takes it. It asks for the text to find, wherever it is.
+
+Screen reader:
+
+- Any Field Contains dialog
+- Text to find in any field: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Enter
+
+I type Seattle and press Enter. Every job with Seattle in any field stays: the city, the address, the notes.
+
+Screen reader:
+
+- 3 records have Seattle.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: N
+
+Control plus F again. With a filter in force, the list offers more, each choice with its own first letter. N for Narrow keeps Seattle and adds a field.
+
+Screen reader:
+
+- Narrow with the field form, 4 of 4
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Enter
+
+Enter opens the form, a box for each field. I type waiting in the status box and press Enter.
+
+Screen reader:
+
+- Filter applied. 2 records match.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Shift+F
+
+Shift plus F says the filter, both parts, in the words each was asked in.
+
+Screen reader:
+
+- any field contains Seattle; and where: status = 'waiting'
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Alt+O
+
+Alt plus O, O for Order, sorts by a column; I choose the date added.
+
+Screen reader:
+
+- Order Records dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Alt+Shift+O
+
+Enter sorts. Alt plus Shift plus O reverses the order, newest first.
+
+Screen reader:
+
+- (the newest waiting job)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Control+Shift+F
+
+A planned misstep: the filter stays until it is cleared, so a later search finds only waiting jobs. Control plus Shift plus F clears it.
+
+Screen reader:
+
+- No filter
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: F8
+
+Marking one record at a time is slow for many. F8 drops an anchor at the record I am on.
+
+Screen reader:
+
+- Mark anchor
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Shift+F8
+
+Down Arrow four records, then Shift plus F8 marks everything from the anchor to here.
+
+Screen reader:
+
+- 5 records marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Control+Shift+A
+
+Control plus A marks every record, Control plus Shift plus A unmarks them all, and Alt plus Shift plus I swaps marked and unmarked.
+
+Screen reader:
+
+- All unmarked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Shift+Space
+
+Marks are for acting on: Delete, Copy and Export all work on the marked records when there are any. Shift plus Space reads every marked record in full, to check before acting.
+
+Screen reader:
+
+- No records are marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Shift+8
+
+With a filter and an order in force, Shift plus 8 says both at once, so you always know what you are looking at.
+
+Screen reader:
+
+- Sort: added, descending; Filter: any field contains Seattle; and status = 'waiting'
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Shift+O
+
+Shift plus O says just the order, and Shift plus F just the filter.
+
+Screen reader:
+
+- added, descending
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21: Control+Space
+
+Control plus Space toggles the mark on the record I am on, as it toggles a selection in any Windows list.
+
+Screen reader:
+
+- Marked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 22: Shift+Y
+
+With a filter in force, Shift plus Y says how many records it leaves.
+
+Screen reader:
+
+- 4 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 23: Alt+Shift+L
+
+Alt plus Shift plus L reads one column for the marked records only: here, the employers of the jobs I marked.
+
+Screen reader:
+
+- Amazon, Costco
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 24
+
+A filter and marks work together: filter to narrow, mark to choose, then act on the marked.
+
+### Step 25
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 26
+
+Mark, then unmark.
+
+Screen reader:
+
+- Control plus M
+- Control plus Shift plus M
+
+### Step 27
+
+Filter, then clear it.
+
+Screen reader:
+
+- Control plus F
+- Control plus Shift plus F
+
+### Step 28
+
+Order by a column.
+
+Screen reader:
+
+- Alt plus O
+
+**Something to try:** Filter your own table to one value, then sort what is left.
+
+## 6 - Follow Related Records
+
+From a record into the records related to it with Alt plus Right Arrow, and back with Alt plus Left Arrow, as a browser goes back.
+
+**Before you start:** A database with related tables is open; the chinook sample has them.
+
+### Step 1
+
+One want: from an artist, to the albums, to the tracks, and back. Related tables let one record lead to others.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Shift+R
+
+Shift plus R, R for Related, says what this record leads to, changing nothing.
+
+Screen reader:
+
+- (the related tables and their counts)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Alt+Right Arrow
+
+Alt plus Right Arrow goes into the related records.
+
+Screen reader:
+
+- (the child table, and its first record)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Shift+Z
+
+Shift plus Z says where I am now.
+
+Screen reader:
+
+- (the child table, its record count, the filter that ties it to the parent)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Alt+Right Arrow
+
+Alt plus Right Arrow again goes a level deeper.
+
+Screen reader:
+
+- (the next table down)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Alt+Left Arrow
+
+Alt plus Left Arrow comes back a level, as a browser goes back.
+
+Screen reader:
+
+- (the table one level up)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Alt+Home
+
+A planned misstep: three levels deep, and lost. Alt plus Home returns to where I started, from any depth.
+
+Screen reader:
+
+- (the starting table, at the record I left)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Shift+P
+
+What ties a record to its relations is its prime, a key DbDo builds from the record itself. Shift plus P, Say Prime, says it.
+
+Screen reader:
+
+- Miles Davis
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Control+Shift+O
+
+A related table can have a window of its own. Control plus Shift plus O, Open Table, opens a table in a new window, beside this one.
+
+Screen reader:
+
+- Open Table dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Enter
+
+I choose albums and press Enter.
+
+Screen reader:
+
+- albums, 40 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Shift+F4
+
+Shift plus F4 says the windows open, and Control plus Tab moves between them.
+
+Screen reader:
+
+- 2 windows: artists, albums
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Control+F6
+
+In one window, Control plus F6 moves to the next table, and Alt plus F6 back through the tables visited, as a browser's history does.
+
+Screen reader:
+
+- tracks, 412 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Control+F4
+
+Control plus F4 closes this window, leaving the first.
+
+Screen reader:
+
+- artists, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: F4
+
+F4, Current Windows, lists the windows open, so you can pick one by name rather than cycle through them.
+
+Screen reader:
+
+- Current Windows dialog, artists, 1 of 2
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+F6
+
+Escape. Alt plus F6 goes back through the tables visited in this window, the way a browser goes back.
+
+Screen reader:
+
+- albums, 40 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Alt+Shift+F6
+
+Alt plus Shift plus F6 goes forward again.
+
+Screen reader:
+
+- tracks, 412 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+Shift+F4
+
+Control plus Shift plus F4 closes every window but this one, for a clean start.
+
+Screen reader:
+
+- tracks, 412 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Control+Shift+F6
+
+Within one window, Control plus Shift plus F6 moves to the previous table, as Control plus F6 moves to the next: Shift reverses.
+
+Screen reader:
+
+- artists, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Shift+R
+
+Whichever way you arrived, Shift plus R still says what this record leads to, so the way down is never a guess.
+
+Screen reader:
+
+- albums 3, tracks 31
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 22
+
+Go into related records.
+
+Screen reader:
+
+- Alt plus Right Arrow
+
+### Step 23
+
+Come back a level.
+
+Screen reader:
+
+- Alt plus Left Arrow
+
+### Step 24
+
+Return to the start.
+
+Screen reader:
+
+- Alt plus Home
+
+**Something to try:** Follow a relationship two levels deep, then return with Alt plus Home.
+
+## 7 - Statistics and Reports
+
+The numbers in a column with Alt plus Shift plus S, a chart's figures with Control plus Shift plus G, and a report written as a document with Alt plus Shift plus R.
+
+**Before you start:** JobTrail is open in DbDo.
+
+### Step 1
+
+One want: how many applications, how they stand, and a page to keep.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Alt+Shift+S
+
+I move to the status column. Alt plus Shift plus S, S for Statistics, describes the column.
+
+Screen reader:
+
+- Statistics from Column
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Escape
+
+The count of each value, and for numbers the sum, average, least and most. Escape closes it.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Control+Shift+G
+
+Control plus Shift plus G, G for Graphics, turns a column into a chart and its figures in words.
+
+Screen reader:
+
+- Graphics Column
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Alt+Shift+R
+
+Escape. Alt plus Shift plus R, R for Report, writes a saved report as a document.
+
+Screen reader:
+
+- Run Report dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Enter
+
+I choose a report and press Enter; DbDo writes it and opens it.
+
+Screen reader:
+
+- (the report's title, as a heading)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8
+
+A planned misstep: a report reads the whole table, filter or not, unless its template says otherwise. To report only some records, filter them and use the report that respects the filter.
+
+### Step 9: Alt+T
+
+Before the details, the shape. Alt plus T, Table Summary, says how many records and columns the table has, and how much room it takes.
+
+Screen reader:
+
+- Table Summary
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Alt+D
+
+Escape, and Alt plus D, Database Summary, does the same for every table in the database.
+
+Screen reader:
+
+- Database Summary
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Alt+Shift+S
+
+A filter narrows a summary to what matters: filter to waiting jobs, then Alt plus Shift plus S again, and the counts describe only those.
+
+Screen reader:
+
+- Statistics from Column
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Alt+X
+
+When the numbers are to go somewhere else, Alt plus X, Export Data, writes the table, or the records in view, as CSV, a spreadsheet, JSON or another format.
+
+Screen reader:
+
+- Export Data dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Escape
+
+Escape, for now. And Control plus P prints the records in view, for a copy on paper or a PDF.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Control+C
+
+A single number is often all that is wanted. Control plus C copies the cell under the cursor.
+
+Screen reader:
+
+- Copied
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Alt+C
+
+Alt plus C appends another cell to what is on the clipboard, to gather a few figures in one go.
+
+Screen reader:
+
+- Appended
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+Apostrophe
+
+Alt plus Apostrophe, Say Clipboard, reads back what has been gathered before it is pasted anywhere.
+
+Screen reader:
+
+- 12, waiting 4
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17
+
+Then one paste puts those figures in an email or a document.
+
+### Step 18: Shift+8
+
+Before reading any summary, Shift plus 8 says the sort and filter in force, since both change what the numbers describe.
+
+Screen reader:
+
+- Sort: employer. Filter: none.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Alt+L
+
+And Alt plus L reads a whole column aloud, top to bottom, when hearing the values beats counting them.
+
+Screen reader:
+
+- waiting, applied, interview, waiting
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 21
+
+Describe a column.
+
+Screen reader:
+
+- Alt plus Shift plus S
+
+### Step 22
+
+A column as a chart.
+
+Screen reader:
+
+- Control plus Shift plus G
+
+### Step 23
+
+Run a report.
+
+Screen reader:
+
+- Alt plus Shift plus R
+
+**Something to try:** Run a report of your own table and read it in your browser.
+
+## 8 - Ask with SQL
+
+A question in the database's own language with Control plus Q, the answer shown as records, and the history of questions asked.
+
+**Before you start:** JobTrail is open in DbDo.
+
+### Step 1
+
+One want: an answer no single command gives -- how many jobs at each employer, most first. SQL, the database's own language, asks it in one line.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Control+Q
+
+Control plus Q, Q for Query, opens a box for SQL.
+
+Screen reader:
+
+- Query dialog
+- SQL: edit, multiline
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: select employer, count(*) as jobs from jobs group by employer order by jobs desc
+
+I type the question.
+
+Screen reader:
+
+- (each word echoed as it is typed)
+
+### Step 5: Control+Enter
+
+Control plus Enter runs it from inside the box, where Enter would start a new line.
+
+Screen reader:
+
+- (the first row of the answer)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Shift+Q
+
+The answer is shown as records, moved through like any table. Shift plus Q says the query in force.
+
+Screen reader:
+
+- (the query)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Control+Q
+
+A planned misstep: a misspelled column. The database says which word it does not know, and the box keeps the query to fix.
+
+Screen reader:
+
+- Query dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Alt+Shift+Q
+
+Escape. Alt plus Shift plus Q, the history, lists the questions asked, to run one again.
+
+Screen reader:
+
+- Query History
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Shift+F12
+
+SQL is not the only way to ask. Shift plus F12, Chat about Table, sends the table with a question in plain words to the model on this computer.
+
+Screen reader:
+
+- Chat about Table dialog
+- Question: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Which employer has the most applications still waiting?
+
+I ask which employer has the most applications still waiting.
+
+Screen reader:
+
+- (each word echoed as it is typed)
+
+### Step 11: Enter
+
+Enter. The answer comes in words, from the same records, and nothing leaves this computer.
+
+Screen reader:
+
+- Answer dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Escape
+
+Escape. An answer from SQL is a table like any other, so Alt plus X exports it, and Alt plus Shift plus S describes its columns.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Control+Shift+I
+
+A question asked often can be saved as a script, a dot s q l file in the Scripts folder beside the database. Control plus Shift plus I, Invoke Script, lists them and runs the one chosen.
+
+Screen reader:
+
+- Invoke Script dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Escape
+
+Escape. Scripts belong to their database, so the questions travel with the data they ask about.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Alt+Z
+
+Before a query that changes data, Alt plus Z, Toggle Read Only, makes the database read only, so a mistyped statement cannot change anything.
+
+Screen reader:
+
+- Read only
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+Z
+
+Alt plus Z again makes it writable when you mean to change it.
+
+Screen reader:
+
+- Read and write
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: F5
+
+After a query that does change records, F5, Refresh View, shows the table as it now stands.
+
+Screen reader:
+
+- jobs, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18
+
+Practise on a copy: Save As, Control plus Shift plus S, makes one, so the original stays as it was while you learn.
+
+### Step 19
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 20
+
+Ask in SQL.
+
+Screen reader:
+
+- Control plus Q
+
+### Step 21
+
+Run it from inside the box.
+
+Screen reader:
+
+- Control plus Enter
+
+### Step 22
+
+The questions asked before.
+
+Screen reader:
+
+- Alt plus Shift plus Q
+
+**Something to try:** Write a query that counts your records by one column.
+
+## 9 - Conclusion
+
+The conclusion and summary of the walks; the words DbDo uses, in two voices; then more information: the help built into the program and where to learn more.
+
+**Before you start:** Nothing is needed; this walk is listened to.
+
+### Step 1
+
+To finish: what to carry away, the words DbDo uses, and where to get help. First, the summary. A table is a list you move through by row and column, and every question about where you are is a Shift key that changes nothing.
+
+Screen reader:
+
+- Shift plus Z, Say Status
+
+### Step 2
+
+Keys follow words, so a key can be guessed: O opens and orders, F filters, M marks, and Shift reverses.
+
+Screen reader:
+
+- Control plus M, Mark
+- Control plus Shift plus M, Unmark
+
+### Step 3
+
+And when the commands run out, SQL asks the database anything, in one line.
+
+Screen reader:
+
+- Control plus Q, Query
+
+### Step 4
+
+Now the words, in alphabetical order. I say the term; the reader says what it means.
+
+### Step 5
+
+data list.
+
+Screen reader:
+
+- The list of records the window shows: one table or query, a row per record, a column per field.
+
+### Step 6
+
+filter.
+
+Screen reader:
+
+- A condition that hides the records not matching it, until it is cleared.
+
+### Step 7
+
+mark.
+
+Screen reader:
+
+- A flag on a record, for a later command to act on; Control plus M sets it, and Shift reverses it.
+
+### Step 8
+
+order.
+
+Screen reader:
+
+- The sort of the list, by one column, ascending or reversed.
+
+### Step 9
+
+pick list.
+
+Screen reader:
+
+- A field's fixed values in a list, opened with F4, so nothing is mistyped.
+
+### Step 10
+
+query.
+
+Screen reader:
+
+- A question in SQL, answered as records.
+
+### Step 11
+
+record.
+
+Screen reader:
+
+- One row of a table: a job, an album, a contact.
+
+### Step 12
+
+related table.
+
+Screen reader:
+
+- A table whose records belong to a record of another; Alt plus Right Arrow goes in.
+
+### Step 13
+
+report.
+
+Screen reader:
+
+- A saved template that writes a table's records as a document.
+
+### Step 14
+
+Say key.
+
+Screen reader:
+
+- Shift and a letter: a question answered aloud, changing nothing.
+
+### Step 15
+
+SQLite.
+
+Screen reader:
+
+- The database format DbDo opens: one file, with its tables inside.
+
+### Step 16
+
+standard fields.
+
+Screen reader:
+
+- The columns every DbDo table may carry: added, edited, marked, notes, tags, url.
+
+### Step 17
+
+template database.
+
+Screen reader:
+
+- A ready-made database in the Help menu, to practice on or to start from.
+
+### Step 18
+
+Last, more information. Help is built in. The guide, and what changed.
+
+Screen reader:
+
+- F1, the guide
+- Shift plus F1, History
+
+### Step 19
+
+The version, and what any key does without doing it.
+
+Screen reader:
+
+- Alt plus F1, About
+- Control plus F1, Key Describer
+
+### Step 20
+
+DbDo dot md, the guide, explains every command and the ideas behind them; Hotkeys dot md lists every key three ways; and the DbDo page on GitHub, at github dot com slash JamalMazrui slash DbDo, has the newest version.
+
+**Something to try:** Open a template database and describe one of its columns with Alt plus Shift plus S.
+
+<!-- walkthrough ends -->
+
+<!-- walkthrough: written by makeTutorials.py, do not edit between the markers -->
+
+## 0 - Overview
+
+What DbDo is, two keys of the screen reader's own, and the table of contents.
+
+**Before you start:** Nothing is needed; this walk is listened to.
+
+### Step 1
+
+DbDo is a database program for people who listen to the screen.
+
+### Step 2
+
+It opens SQLite databases, and imports from Excel and others, and shows one table at a time as a list of records you move through by row and by column. Every cell can be heard, edited, searched, marked and counted from the keyboard, and the program answers questions about where you are without changing anything.
+
+### Step 3: Insert+Up Arrow
+
+Two keys before anything else, both the reader's own. If a line goes by too fast, Insert plus Up Arrow says it again.
+
+Screen reader:
+
+- (the last line, read a second time)
+
+### Step 4: Insert+Tab
+
+And if you lose your place, Insert plus Tab says where you are: the control, its state and its position.
+
+Screen reader:
+
+- (the current control, with its state and position)
+
+### Step 5
+
+Now the table of contents. I say the number and the title; the reader says what the walk covers.
+
+### Step 6
+
+One, User Interface.
+
+Screen reader:
+
+- The window, the record list, the Say keys that ask without changing, the pick list, the menus, the rules every key follows, and where help lives.
+
+### Step 7
+
+Two, Install and Launch.
+
+Screen reader:
+
+- The installer, the boxes on its last page, and DbDo opening with Alt plus Control plus D.
+
+### Step 8
+
+Three, Open a Database and Move Through Records.
+
+Screen reader:
+
+- A template database opened, and moving by row, by column, by search and by number.
+
+### Step 9
+
+Four, Edit and Add Records.
+
+Screen reader:
+
+- A cell changed, a value picked from a list, a record added.
+
+### Step 10
+
+Five, Mark, Filter and Sort.
+
+Screen reader:
+
+- Records marked, the list narrowed to what matters, and put in order.
+
+### Step 11
+
+Six, Follow Related Records.
+
+Screen reader:
+
+- From one record into the records related to it, and back.
+
+### Step 12
+
+Seven, Statistics and Reports.
+
+Screen reader:
+
+- The numbers in a column, and a report written as a document.
+
+### Step 13
+
+Eight, Ask with SQL.
+
+Screen reader:
+
+- A question in the database's own language, and the history of questions asked.
+
+### Step 14
+
+Nine, Conclusion.
+
+Screen reader:
+
+- What to carry away, the words DbDo uses, the help built in, and where to learn more.
+
+### Step 15
+
+Ten walks, each under five minutes, under an hour together: the overview, the user interface, seven tasks, and the conclusion. They are a course, not a reference: each one assumes those before it.
+
+**Something to try:** Take walks one and two, then pick the task you need today.
+
+## 1 - User Interface
+
+DbDo's window and its parts, each named and then shown by the reader -- the record list, the Say keys, the pick list, the menus -- then the rules every key follows, and help in its four places.
+
+**Before you start:** DbDo is installed, with RadioTrail open, as it is on a first run.
+
+### Step 1
+
+DbDo is heard before it is seen. I name each part; the reader shows it: name, kind, value and state, then a hint.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Down Arrow
+
+The title, then the greeting in the message voice. The main view is a list of records: Down Arrow moves by row, and the reader speaks the record.
+
+Screen reader:
+
+- (the next record, its first column first)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Right Arrow
+
+Right Arrow moves by column within the record, speaking the column's name and its value.
+
+Screen reader:
+
+- (the next column's name and value)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Shift+Z
+
+Now the Say keys: Shift and a letter asks, and changes nothing. Shift plus Z is Say Status.
+
+Screen reader:
+
+- jobs, 12 records, no filter, sorted by employer
+
+### Step 6: Shift+C
+
+Table, count, filter and sort in one breath; pressed twice, the words open in a window. Shift plus C, C for Cell, says the cell you are on.
+
+Screen reader:
+
+- (the column's name and the cell's value)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: F4
+
+Where a field has fixed values, F4 opens them as a pick list.
+
+Screen reader:
+
+- status: list box, untried, 4 of 5
+- To move through items press Up or Down Arrow.
+
+### Step 8: F10
+
+A letter jumps to a value, so nothing is mistyped. Escape closes it. Menus say their own keys; F10 opens the menu bar.
+
+Screen reader:
+
+- Menu bar
+- File menu
+
+### Step 9: Down Arrow
+
+Down Arrow to the first item.
+
+Screen reader:
+
+- Open Database..., Control plus O, O
+
+### Step 10: Escape
+
+The item, its key, then its letter: learn a key from the menu once, then skip the menu.
+
+Screen reader:
+
+- Leaving menus
+
+### Step 11: Shift+Z
+
+The rules behind every key. A letter is the first letter of a word: Control plus O opens, Alt plus O orders. Control does; Shift asks, changing nothing.
+
+Screen reader:
+
+- jobs, 12 records, no filter, sorted by employer
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Insert+T
+
+Adding Shift reverses: Control plus M marks, Control plus Shift plus M unmarks. Each function key is a family: F2 edits, F3 searches, F4 picks, F8 selects. Insert plus T, the reader's own, says the title.
+
+Screen reader:
+
+- DbDo
+
+### Step 13: Control+F1
+
+Control plus F1 is the Key Describer: each key says what it does instead of doing it.
+
+Screen reader:
+
+- Key Describer On
+
+### Step 14: Control+F1
+
+Again, and it is off.
+
+Screen reader:
+
+- No Key Describer
+
+### Step 15
+
+Help is in four places, the same in every Homer program. I say which; the reader says the key. The guide.
+
+Screen reader:
+
+- F1, the guide
+
+### Step 16
+
+The changes, release by release; the version; the name of any key.
+
+Screen reader:
+
+- Shift plus F1, History
+- Alt plus F1, About
+- Control plus F1, Key Describer
+
+### Step 17: Alt+F10
+
+When a key will not come to mind, Alt plus F10, the Alternate Menu, lists every command in one list you type into, with its key beside it.
+
+Screen reader:
+
+- Alternate Menu
+- Command, list box
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: mark
+
+I type the word mark, and the list narrows to the commands with that word.
+
+Screen reader:
+
+- Mark All, Control plus A
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Escape
+
+Escape closes the list without running anything.
+
+Screen reader:
+
+- jobs, 12 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 21
+
+Say Status.
+
+Screen reader:
+
+- Shift plus Z
+
+### Step 22
+
+A field's fixed values.
+
+Screen reader:
+
+- F4, pick list
+
+### Step 23
+
+Unmark, the reverse of Mark.
+
+Screen reader:
+
+- Control plus Shift plus M
+
+**Something to try:** Guess three DbDo keys from their words, then check each with Control plus F1.
+
+## 2 - Install and Launch
+
+The installer, the boxes on its last page -- the screen reader scripts, the player, the model for its AI commands -- and DbDo opening from anywhere.
+
+**Before you start:** DbDo_setup.exe is downloaded from the DbDo page on GitHub.
+
+### Step 1
+
+One want: DbDo on this computer, with what it works best with, in one sitting.
+
+### Step 2: Enter
+
+I open the downloaded setup program and allow it to make changes.
+
+Screen reader:
+
+- Setup - DbDo dialog
+- Welcome to the DbDo Setup Wizard
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 3: Enter
+
+The ordinary installer: Enter takes Next, and the defaults are right.
+
+Screen reader:
+
+- Select Destination Location
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Tab
+
+The last page offers what DbDo works best with, each as a box whose first word is the machine's state read for you: Install, Update or Reinstall.
+
+Screen reader:
+
+- (the box for your screen reader's scripts, its first word, checked)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Down Arrow
+
+Scripts for the screen reader you use; the mpv player, which plays a record's stream; and, for the AI commands, Ollama and a model, downloaded once.
+
+Screen reader:
+
+- Install mpv check box, checked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Space
+
+A planned misstep: clearing a box you need. Space clears it; Space again ticks it back.
+
+Screen reader:
+
+- not checked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Space
+
+Space.
+
+Screen reader:
+
+- checked
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Enter
+
+Enter installs what is ticked.
+
+Screen reader:
+
+- Finish button
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Alt+Control+D
+
+Then the key that opens DbDo from anywhere.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 10
+
+Installed and open. If something was left out, run the setup again and tick its box; what is already current costs nothing.
+
+### Step 11: F1
+
+Help is four keys away, the same in every Homer program. F1 opens the full documentation in the browser.
+
+Screen reader:
+
+- DbDo documentation
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Alt+Shift+F1
+
+Alt plus Shift plus F1 opens the ReadMe, the short start, for when the full guide is more than you need today.
+
+Screen reader:
+
+- DbDo ReadMe
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Alt+F1
+
+Alt plus F1, About, says the version, so you always know which DbDo is installed.
+
+Screen reader:
+
+- About DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: F11
+
+Escape, and F11 asks GitHub whether a newer version is out. If one is, Yes is the default, and Enter installs it.
+
+Screen reader:
+
+- Checking for a newer version
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: F10
+
+The templates to practise on are in the Help menu: F10, then H for Help.
+
+Screen reader:
+
+- Help menu
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Down Arrow
+
+Down Arrow to Template Databases. Each is a complete example: JobTrail for job hunting, BookTrail for reading, RadioTrail for stations to play.
+
+Screen reader:
+
+- Template Databases
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Escape
+
+Escape closes the menu. Once a database is open, Alt plus Backslash opens its folder in File Explorer, where its scripts and reports live beside it.
+
+Screen reader:
+
+- DbDo ready
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+F1
+
+Two more ways to learn the keys before you need them. Control plus F1 turns on the Key Describer: each key then says what it does instead of doing it.
+
+Screen reader:
+
+- Key Describer on
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Control+O
+
+Now Control plus O only describes itself.
+
+Screen reader:
+
+- Open Database, Control plus O
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Alt+Shift+H
+
+Control plus F1 again turns the describer off. Alt plus Shift plus H, Hotkey Summary, lists every key in a window you can search.
+
+Screen reader:
+
+- Hotkey Summary
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21: Escape
+
+Escape closes it, and the database is as it was.
+
+Screen reader:
+
+- DbDo ready
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 22
+
+What this walk taught. I name the step; the reader gives the answer.
+
+### Step 23
+
+What a box's first word tells you.
+
+Screen reader:
+
+- Install, Update or Reinstall
+
+### Step 24
+
+The key that opens DbDo.
+
+Screen reader:
+
+- Alt plus Control plus D
+
+**Something to try:** Run the setup again; every box should now say Update or Reinstall.
+
+## 3 - Open a Database and Move Through Records
+
+RadioTrail, the database DbDo opens first, explored by row, by column, by search and by record number, and a station played in the Homer Player.
+
+**Before you start:** DbDo is installed; on a first run it opens RadioTrail.
+
+### Step 1
+
+One want: a station found and playing, quickly. The first time DbDo starts, it opens RadioTrail, a list of internet radio stations to search, sort and play.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Shift+Z
+
+Shift plus Z says where I am: the stations table of RadioTrail. Another database opens with Control plus O, O for Open, and the templates are in the Help menu, under Template Databases.
+
+Screen reader:
+
+- (stations, the number of stations, no filter, sorted by name)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Control+G
+
+Down Arrow moves by record; Right Arrow by column. Control plus G, G for Go, goes to a record by its number.
+
+Screen reader:
+
+- Go to Record dialog
+- Record number: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Enter
+
+I type 7 and press Enter.
+
+Screen reader:
+
+- (record 7, its first column first)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Control+K
+
+Control plus K, K for Keywords, searches every column for words.
+
+Screen reader:
+
+- Keywords dialog
+- Keywords: edit
+- Type in text.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Enter
+
+I type jazz and press Enter.
+
+Screen reader:
+
+- (the first station holding jazz)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Alt+Delete
+
+F3 goes to the next match, Shift plus F3 to the one before. Alt plus Delete says the column and the row number.
+
+Screen reader:
+
+- (the column's name and the row number)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Escape
+
+A planned misstep: Control plus F is not find here. In DbDo, F is for Filter, a later walk. Keywords is K. Escape leaves anything opened by mistake.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Control+J
+
+Keywords searches every column; Jump searches one. Control plus J, Jump to Record, asks which column and what to look for.
+
+Screen reader:
+
+- Jump to Record dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Enter
+
+I choose country, type Canada, and press Enter. The cursor lands on the first station there.
+
+Screen reader:
+
+- (Canada, country, its row)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Control+Shift+J
+
+Control plus Shift plus J jumps backward to the one before, and Control plus Shift plus K does the same for Keywords: Shift reverses, here as everywhere in DbDo.
+
+Screen reader:
+
+- (Canada, country, an earlier row)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Shift+Y
+
+Shift plus Y, Say Yield, says how many records there are.
+
+Screen reader:
+
+- (the number of stations)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Shift+C
+
+Shift plus C, Say Cell, says the value under the cursor again, without moving.
+
+Screen reader:
+
+- Canada
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Control+I
+
+Control plus I, Inspect Record, shows the whole record at once, one field to a line: the station's name, genre, language and stream address among them. Escape closes it.
+
+Screen reader:
+
+- Inspect Record dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Alt+Shift+P
+
+Now the reason RadioTrail opens first. Alt plus Shift plus P, Play Stream, plays the current station in the Homer Player, the same player FileDir uses.
+
+Screen reader:
+
+- (the Homer Player, playing the station)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Escape
+
+Escape closes the player and returns to the station I was on, ready for the next one.
+
+Screen reader:
+
+- (stations, the same row)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+T
+
+A database can hold several tables; Control plus T, Choose Table, lists them. Escape keeps the table I am in.
+
+Screen reader:
+
+- (Choose Table dialog, stations first)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Escape
+
+Escape. RadioTrail is one table, easy to hold in mind. The next walk opens JobTrail, whose tables are linked to one another.
+
+Screen reader:
+
+- stations
+
+Confirm the wording with a live run: buildTutorials -live.
+
+**Something to try:** Find a station by keyword, then play it with Alt plus Shift plus P.
+
+## 4 - Edit and Add Records
+
+JobTrail, the job-search template, opened; then a cell edited with F2, a value picked from a list with Control plus F2, and a new record added with Control plus N.
+
+**Before you start:** DbDo is open; this walk opens JobTrail.
+
+### Step 1
+
+One want: one job's status brought up to date, and a new job added.
+
+### Step 2: Alt+Control+D
+
+Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+
+Screen reader:
+
+- DbDo
+- DbDo ready
+
+### Step 3: Control+O
+
+JobTrail comes next: a template for a job search, whose jobs, employers and contacts are linked to one another, so it shows more of what DbDo can do. Control plus O, O for Open; the templates are in the Help menu, under Template Databases, and I open JobTrail.
+
+Screen reader:
+
+- Open Database dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: Shift+Z
+
+I choose JobTrail and press Enter. Shift plus Z says where I am.
+
+Screen reader:
+
+- jobs, 12 records, no filter, sorted by employer
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: F2
+
+I move to the status column of the record to change. F2 edits the cell under the cursor, as F2 renames a file in Windows.
+
+Screen reader:
+
+- status: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Enter
+
+I type the new value and press Enter to keep it.
+
+Screen reader:
+
+- (the record, with its new status)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Control+F2
+
+Where a field has fixed values, Control plus F2 edits by picking one, so nothing is mistyped.
+
+Screen reader:
+
+- status: list box
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Enter
+
+Down Arrow to the value, and Enter.
+
+Screen reader:
+
+- (the record, with the picked status)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Control+N
+
+Control plus N, N for New, adds a record to the table, and focus goes to its first field.
+
+Screen reader:
+
+- New record
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: Shift+A
+
+I fill each field with F2 as before. Shift plus A, A for Added, says when this record was added.
+
+Screen reader:
+
+- (the date and time the record was added)
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Control+D
+
+A planned misstep: Control plus D deletes a record, D for Delete, and asks first. Escape answers no.
+
+Screen reader:
+
+- Delete this record? No button
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Escape
+
+Escape keeps it.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Alt+Shift+N
+
+Notes hold whatever does not fit a column. Alt plus Shift plus N, Edit Notes, opens this record's notes in a box of their own.
+
+Screen reader:
+
+- Notes: edit, multiline
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: Shift+N
+
+I type a line about the interview, and Control plus Enter keeps it. Shift plus N says the notes back.
+
+Screen reader:
+
+- Second interview Tuesday at ten.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Shift+T
+
+Tags work the same way, with Alt plus Shift plus T to edit and Shift plus T to hear them: words such as remote or referral, to filter by later.
+
+Screen reader:
+
+- remote, referral
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Shift+E
+
+Shift plus E, Say Edited, says when this record last changed, so a stale one is easy to spot.
+
+Screen reader:
+
+- Edited today at 3:42 PM
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Control+Shift+C
+
+Control plus Shift plus C, Copy Record, adds a copy of this record as a new one: quicker than typing a second job at the same employer.
+
+Screen reader:
+
+- Record copied
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+R
+
+Control plus R, Replace Column, finds and replaces text in the column I am on, in every record, for a name spelled two ways.
+
+Screen reader:
+
+- Replace Column dialog, Find: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Escape
+
+Escape, for now. A replacement counts what it changed and says so.
+
+Screen reader:
+
+- DbDo
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Alt+Shift+U
+
+A record can carry a web address, such as a job posting. Alt plus Shift plus U, Edit URL, edits it.
+
+Screen reader:
+
+- url: edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21: Shift+U
+
+Enter keeps it. Shift plus U says it back, and Control plus Shift plus U opens it in the browser.
+
+Screen reader:
+
+- https colon slash slash jobs dot example dot com slash 4821
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 22
+
+What this walk taught. I name the command; the reader gives the key.
+
+### Step 23
+
+Edit the cell I am on.
+
+Screen reader:
+
+- F2
+
+### Step 24
+
+Edit by picking a value.
+
+Screen reader:
+
+- Control plus F2
+
+### Step 25
 
 Add a record.
 
