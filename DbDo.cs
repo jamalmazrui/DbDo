@@ -12825,7 +12825,9 @@ namespace DbDo
             miFileClose   = addItem(miFile, "&Close Database",            "Close Database",   Keys.None,                            fileCloseClicked);
             addSep(miFile);
             miFileBackup  = addItem(miFile, "&Backup Database...",        "Backup Database",  Keys.None,                            fileBackupClicked);
-            miFileCompare = addItem(miFile, "Compare &Database...",       "Compare Database", Keys.None,                            fileCompareClicked);
+            // No letter (10 October 2026): D belongs to Open Template Database, whose hotkey is Alt+Shift+D, and C to
+            // Close Database, so Compare Database, with both its initials taken, goes without one, by the Homer rule.
+            miFileCompare = addItem(miFile, "Compare Database...",       "Compare Database", Keys.None,                            fileCompareClicked);
             addSep(miFile);
             // Alt+I = Import (build a new DbDo shell from another file),
             // Alt+M = Merge (rows into the current table), Alt+E = Export
