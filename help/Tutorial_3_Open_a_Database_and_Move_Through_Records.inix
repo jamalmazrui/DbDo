@@ -21,7 +21,7 @@ Hear=DbDo ready
 
 [step]
 
-Say=Shift plus Z says where I am: the stations table of RadioTrail. Another database opens with Control plus O, O for Open, and the templates are in the Help menu, under Template Databases.
+Say=Shift plus Z says where I am: the stations table of RadioTrail. Another database opens with Control plus O, O for Open, and a template with Alt plus Shift plus D, D for Database.
 Key=Shift+Z
 Hear=(stations, the number of stations, no filter, sorted by name)
 Note=Confirm the wording with a live run: buildTutorials -live.

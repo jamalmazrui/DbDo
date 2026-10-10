@@ -2813,12 +2813,38 @@ namespace DbDo
         // they read, and both sides are lowered, so case is ignored -- for English
         // letters, which is what SQLite's lower() folds. instr finds the text
         // literally: % and _ in it are characters, not wildcards.
+        // UNICODE CASE WHEN SQLEAN IS THERE (10 October 2026): SQLite's own lower() folds English letters only, so
+        // "CAFÉ" did not match "café". SQLean's text extension, in the sqlean.dll bundle DbDo loads when it sits beside
+        // the program, has text_lower, which folds every letter Unicode defines. The connection is asked once whether
+        // text_lower answers, and lower() is used when it does not, so a copy without the bundle filters as before.
+        private object oTextLowerConn;
+        private bool bTextLower;
+        private string caseFoldFunction()
+        {
+            if (!ReferenceEquals(oTextLowerConn, oConn))
+            {
+                oTextLowerConn = oConn;
+                bTextLower = false;
+                try
+                {
+                    int iRows;
+                    List<string[]> lsAnswer = queryRowsSql("SELECT text_lower('\u00C9A')", 1, out iRows);
+                    bTextLower = lsAnswer != null && lsAnswer.Count > 0 && lsAnswer[0].Length > 0
+                        && lsAnswer[0][0] == "\u00E9a";
+                }
+                catch { bTextLower = false; }
+                try { DbDoLog.write("Any Field folds case with " + (bTextLower ? "SQLean's text_lower, for every Unicode letter" : "SQLite's lower, for English letters") + "."); } catch { }
+            }
+            return bTextLower ? "text_lower" : "lower";
+        }
+
         public string anyFieldWhere(string sText)
         {
-            string sNeedle = "lower('" + (sText ?? "").Replace("'", "''") + "')";
+            string sLower = caseFoldFunction();
+            string sNeedle = sLower + "('" + (sText ?? "").Replace("'", "''") + "')";
             List<string> lsTests = new List<string>();
             foreach (string sField in getFieldNames())
-                lsTests.Add("instr(lower(CAST(\"" + sField.Replace("\"", "\"\"") + "\" AS TEXT)), " + sNeedle + ") > 0");
+                lsTests.Add("instr(" + sLower + "(CAST(\"" + sField.Replace("\"", "\"\"") + "\" AS TEXT)), " + sNeedle + ") > 0");
             return lsTests.Count == 0 ? "" : "(" + string.Join(" OR ", lsTests.ToArray()) + ")";
         }
 
@@ -12827,7 +12853,8 @@ namespace DbDo
             // of "Database" in neither. Keep the pattern honest: no letter at
             // all is better than a wrong one, and this command is reached once
             // or twice a session.
-            miFileSampleDb= addItem(miFile, "Open Template Database...",  "Open Template Database", Keys.None,                      openTemplateDbClicked);
+            // Alt+Shift+D, D for Database (10 October 2026): it joins Shift+D, Say Database, and Alt+D, Database Summary.
+            miFileSampleDb= addItem(miFile, "Open Template &Database...",  "Open Template Database", Keys.Alt | Keys.Shift | Keys.D, openTemplateDbClicked);
             miFileMerge   = addItem(miFile, "&Merge Data...",             "Merge",            Keys.Alt | Keys.M,                    mergeClicked);
             addItem(miFile, "Transfer Import...",       "Transfer Import",  Keys.None,                            importTransferClicked);
             addItem(miFile, "Run Report...",           "Run Report",       Keys.Alt | Keys.Shift | Keys.R,       produceReportClicked);
@@ -13534,6 +13561,8 @@ namespace DbDo
             add("New Database",       "Create a new database file: define the first table's fields and types; the standard columns and the builtin maps and lookups tables are added automatically", "");
             add("Add Table",          "Add another table in the standard shape to the open database", "");
             add("Open Database",      "Open a database file", "");
+            add("Open Template Database", "Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail",
+                "Alt+Shift+D. Your own copy of the template is opened, so changes are yours to keep.");
             add("Play Stream",        "Play the current record's stream address in the Homer Player; with records marked, play all of them",
                 "Alt+Shift+P. Takes the first of stream_url, url, stream, link or address that begins with http, or the current cell. Marked records make a play list, current one first. The player is mpv; if it is not installed, DbDo offers to fetch it.");
             add("Close Database",     "Close the currently open database", "");
@@ -17595,6 +17624,31 @@ namespace DbDo
         // listbox. Returns the matching value from aValues, or null
         // if the user canceled. aLabels and aValues are parallel
         // arrays of the same length.
+        // chooseByButtons: FIXED CHOICES ARE BUTTONS (10 October 2026). When the choices are built into DbDo -- a
+        // filter action, a chart type, a settings category -- they are buttons in an Lbc button dialog; a pick list
+        // is for choices that come from the data or the session, such as columns, tables or recent files. Each
+        // button gets a letter that begins one of its words, the first button to claim a letter keeping it, with H
+        // left for the Help button Lbc adds and none for Cancel, whose key is Escape. Enter presses the first button.
+        // Returns the choice as given, or null when the dialog was cancelled.
+        private string chooseByButtons(string sTitle, IList<string> lsLines, IList<string> lsChoices)
+        {
+            if (lsChoices == null || lsChoices.Count == 0) return null;
+            List<string> lsMarked = LbcDialog.markTriggerLetters(new List<string>(lsChoices) { "&Help" });
+            lsMarked.RemoveAt(lsMarked.Count - 1);
+            lsMarked.Add("Cancel");
+            string sChosen;
+            using (LbcDialog dlg = new LbcDialog(sTitle, this))
+            {
+                if (lsLines != null)
+                    foreach (string sLine in lsLines)
+                        if (!string.IsNullOrEmpty(sLine)) dlg.addLabel(sLine);
+                sChosen = (dlg.runWithButtons(lsMarked.ToArray()) ?? "").Replace("&", "");
+            }
+            foreach (string sChoice in lsChoices)
+                if (string.Equals(sChoice.Replace("&", ""), sChosen, StringComparison.OrdinalIgnoreCase)) return sChoice;
+            return null;
+        }
+
         private string chooseChartKind(string sTitle, string sPrompt,
             string[] aLabels, string[] aValues)
         {
@@ -17602,18 +17656,8 @@ namespace DbDo
             if (aLabels.Length != aValues.Length) return null;
             if (aLabels.Length == 0) return null;
             if (aLabels.Length == 1) return aValues[0]; // no need to ask
-            string sPicked;
-            using (LbcDialog dlg = new LbcDialog(sTitle, this))
-            {
-                dlg.addLabel(sPrompt);
-                dlg.addSeparator();
-                List<string> lOpts = new List<string>(aLabels);
-                ComboBox cb = dlg.addComboPickBox("Chart type:",
-                    lOpts, aLabels[0],
-                    "Choose the chart shape best matched to your data");
-                if (!dlg.runOkCancel()) return null;
-                sPicked = (cb.SelectedItem ?? "").ToString();
-            }
+            string sPicked = chooseByButtons(sTitle, new string[] { sPrompt }, aLabels);
+            if (sPicked == null) return null;
             for (int i = 0; i < aLabels.Length; i++)
                 if (string.Equals(aLabels[i], sPicked, StringComparison.Ordinal))
                     return aValues[i];
@@ -24240,33 +24284,31 @@ namespace DbDo
             string sExistingFilter = db.filter ?? "";
             bool bFieldFilter = !string.IsNullOrEmpty(sExistingFilter);
             bool bSqlFilter = !string.IsNullOrEmpty(db.sqlFilter);
-            const string c_sAny = "Any field contains text";
-            const string c_sFields = "Fields, one by one, with an operator for each";
-            const string c_sClear = "Clear the filter";
-            const string c_sEdit = "Edit the field filter";
-            const string c_sNarrow = "Narrow with the field form";
-            const string c_sWiden = "Widen with the field form";
+            const string c_sAny = "Any Field";
+            const string c_sFields = "Fields";
+            const string c_sClear = "Clear";
+            const string c_sEdit = "Edit";
+            const string c_sNarrow = "Narrow";
+            const string c_sWiden = "Widen";
+            // FILTER RECORDS IS A BUTTON DIALOG (10 October 2026): its choices are DbDo's own actions, not data, so they
+            // are buttons rather than a pick list; the explanation each list entry carried is now a line above them.
             List<string> lsChoices = new List<string> { c_sAny, c_sFields };
             if (bFieldFilter || bSqlFilter) lsChoices.Add(c_sClear);
             if (bFieldFilter) lsChoices.Add(c_sEdit);
             if (bFieldFilter || bSqlFilter) lsChoices.Add(c_sNarrow);
             if (bFieldFilter && !bSqlFilter) lsChoices.Add(c_sWiden);
-
-            string sChoice;
-            using (LbcDialog dlg = new LbcDialog("Filter Records", this))
+            List<string> lsLines = new List<string>();
+            if (bFieldFilter || bSqlFilter)
             {
-                if (bFieldFilter || bSqlFilter)
-                {
-                    List<string> lsNow = new List<string>();
-                    if (bSqlFilter) lsNow.Add(db.sqlFilterSpoken);
-                    if (bFieldFilter) lsNow.Add("where " + sExistingFilter);
-                    dlg.addLabel("In force: " + string.Join("; and ", lsNow.ToArray()));
-                }
-                ListBox lb = dlg.addPickBox("&Filter by:", lsChoices, c_sAny,
-                    "Any field finds text wherever it is; Fields gives each field a value and an operator");
-                if (!dlg.runOkCancel() || lb.SelectedItem == null) return;
-                sChoice = lb.SelectedItem.ToString();
+                List<string> lsNow = new List<string>();
+                if (bSqlFilter) lsNow.Add(db.sqlFilterSpoken);
+                if (bFieldFilter) lsNow.Add("where " + sExistingFilter);
+                lsLines.Add("In force: " + string.Join("; and ", lsNow.ToArray()));
             }
+            lsLines.Add("Any Field finds text wherever it is. Fields gives each field a value and an operator.");
+            if (bFieldFilter || bSqlFilter) lsLines.Add("Narrow keeps only the records that also meet new conditions; Widen also takes in records that meet them.");
+            string sChoice = chooseByButtons("Filter Records", lsLines, lsChoices);
+            if (sChoice == null) return;
 
             if (sChoice == c_sAny) { filterAnyField(); return; }
 
@@ -24276,22 +24318,7 @@ namespace DbDo
                 : (sChoice == c_sWiden) ? "Or"
                 : "Reset";
 
-            if (sAction == "Clear")
-            {
-                try
-                {
-                    if (bSqlFilter) db.selectTable(db.currentTable);
-                    db.filter = "";
-                    invokeRefresh();
-                    persistCurrentTableState();
-                    Say.sayForced("Filter cleared. " + db.recordCount + " records visible.");
-                }
-                catch (Exception ex)
-                {
-                    ErrorDialog.show(this, "Filter Records", ex.Message);
-                }
-                return;
-            }
+            if (sAction == "Clear") { clearFilterKeepingRecord(); return; }
             // Fields, chosen afresh, replaces whatever was in force, the
             // any-field search included; Edit, Narrow and Widen keep it.
             if (sAction == "Reset" && bSqlFilter)
@@ -24493,17 +24520,68 @@ namespace DbDo
 
         private void viewResetFilterClicked(object sender, EventArgs evArgs)
         {
+            clearFilterKeepingRecord();
+        }
+
+        // clearFilterKeepingRecord: CLEARING A FILTER KEEPS YOUR PLACE (10 October 2026). Both kinds of filter are
+        // cleared -- an any-field or regex filter is the table opened with a WHERE, so clearing it opens the table
+        // plainly -- and the record you were on is found again in the whole table and given the focus, where before
+        // the cursor went back to the first record. A position cannot carry over, since a record's place differs with
+        // and without the filter, so the record is known by its prime key, else its id, else all its values, and
+        // found by the same in-memory walk Keywords uses. The screen reader announces the record from the focus
+        // change; DbDo says only what the reader cannot know: that the filter cleared, and how many records there are.
+        // Control+Shift+F and the Clear button of Filter Records both come here.
+        private void clearFilterKeepingRecord()
+        {
             if (db == null || !db.hasRecordset()) return;
-            // Both kinds of filter (8 October 2026): an any-field or regex filter is
-            // the table opened with a WHERE, so clearing it opens the table plainly.
-            if (!string.IsNullOrEmpty(db.sqlFilter))
+            List<string> lsFields = db.getFieldNames() ?? new List<string>();
+            string sKeyField = null, sKeyValue = null;
+            Dictionary<string, string> dAll = new Dictionary<string, string>();
+            try
             {
-                try { db.selectTable(db.currentTable); }
-                catch (Exception ex) { ErrorDialog.show(this, "Clear Filter", ex.Message); return; }
+                if (db.recordCount > 0)
+                {
+                    foreach (string sName in new string[] { "prime", "id" })
+                    {
+                        string sFound = lsFields.Find(s => string.Equals(s, sName, StringComparison.OrdinalIgnoreCase));
+                        if (sFound != null) { sKeyField = sFound; sKeyValue = db.getFieldValue(sFound) ?? ""; break; }
+                    }
+                    if (sKeyField == null)
+                        foreach (string sCol in lsFields) dAll[sCol] = db.getFieldValue(sCol) ?? "";
+                }
             }
-            db.resetFilter();
+            catch { }
+            try
+            {
+                if (!string.IsNullOrEmpty(db.sqlFilter)) db.selectTable(db.currentTable);
+                db.resetFilter();
+            }
+            catch (Exception ex) { ErrorDialog.show(this, "Clear Filter", ex.Message); return; }
             invokeRefresh();
             persistCurrentTableState();
+            int iFound = 0;
+            if (sKeyField != null || dAll.Count > 0)
+            {
+                int iCount = db.recordCount;
+                for (int iPos = 1; iPos <= iCount && iFound == 0; iPos++)
+                {
+                    try
+                    {
+                        db.absolutePosition = iPos;
+                        bool bSame = true;
+                        if (sKeyField != null) bSame = string.Equals(db.getFieldValue(sKeyField) ?? "", sKeyValue, StringComparison.Ordinal);
+                        else
+                            foreach (KeyValuePair<string, string> kv in dAll)
+                                if (!string.Equals(db.getFieldValue(kv.Key) ?? "", kv.Value, StringComparison.Ordinal)) { bSame = false; break; }
+                        if (bSame) iFound = iPos;
+                    }
+                    catch { }
+                }
+            }
+            try { DbDoLog.write("Clear Filter: " + (iFound > 0 ? "kept the record, now at position " + iFound : "the record was not found, so the first is current") + " of " + db.recordCount + (sKeyField != null ? ", known by " + sKeyField : "") + "."); } catch { }
+            finalizeSearchLanding(iFound > 0 ? iFound : 1);
+            int iRecords = db.recordCount;
+            Say.sayForced("Filter cleared. " + iRecords + (iRecords == 1 ? " record." : " records."));
         }
 
         // viewFormatClicked, viewSortAscClicked, viewSortDescClicked,
@@ -27279,18 +27357,14 @@ namespace DbDo
             if (lDate.Count > 0)    { lIds.Add("datechart"); lLabels.Add("Date chart: timeline / by year / by month (Excel)"); }
 
             string sId = null;
-            using (LbcDialog dlg = new LbcDialog("Generate from Grid", this))
-            {
-                dlg.addLabel("Choose an output. Memo results open in a read-only dialog you");
-                dlg.addLabel("can copy from; Markdown and charts are written to files.");
-                dlg.addSeparator();
-                ListBox lb = dlg.addPickBox("&Output (Enter to produce):", lLabels, lLabels[0],
-                    "Options are filtered to what your columns' data types support. Excel charts need Excel; the memo and Markdown outputs do not.");
-                if (!dlg.runOkCancel()) return;
-                int iIdx = lb.SelectedIndex;
-                if (iIdx < 0 || iIdx >= lIds.Count) return;
-                sId = lIds[iIdx];
-            }
+            // The outputs are DbDo's own, so they are buttons; the columns' types still decide which are offered.
+            string sOutput = chooseByButtons("Generate from Grid", new string[] {
+                "Choose an output. Memo results open in a read-only dialog you can copy from; Markdown and charts are written to files.",
+                "Only outputs your columns' data types support are offered. Excel charts need Excel." }, lLabels);
+            if (sOutput == null) return;
+            int iIdx = lLabels.IndexOf(sOutput);
+            if (iIdx < 0 || iIdx >= lIds.Count) return;
+            sId = lIds[iIdx];
             if (string.IsNullOrEmpty(sId)) return;
             try { DbDoLog.write("Generate from Grid: chose " + sId); } catch { }
 
@@ -28216,23 +28290,13 @@ namespace DbDo
             {
                 List<string> lCats = new List<string>
                     { sGeneral, sRegex, sConnStr, sTableVw, sLookPrm, sPerField, sRawFile };
-                string sPick;
-                LbcDialog dlg = new LbcDialog("Settings", this);
-                try
-                {
-                    dlg.addLabel("Choose what to edit, then press Edit.");
-                    string sDbInix = dbScopedInixPath();
-                    if (!string.IsNullOrEmpty(sDbInix))
-                        dlg.addLabel("This database's file: " + sDbInix);
-                    dlg.addLabel("Global file: " + sUserIni);
-                    dlg.addSeparator();
-                    ListBox lb = dlg.addListBox("Settings category:", lCats, sGeneral);
-                    string sBtn = dlg.runWithButtons(new string[] { "&Edit...", "Close" });
-                    if (!string.Equals(sBtn, "Edit...", StringComparison.OrdinalIgnoreCase))
-                        return;
-                    sPick = (lb.SelectedItem ?? sGeneral).ToString();
-                }
-                finally { dlg.Dispose(); }
+                // The categories are DbDo's own, so they are buttons: one press opens one (10 October 2026).
+                List<string> lsLines = new List<string> { "Choose what to edit." };
+                string sDbInix = dbScopedInixPath();
+                if (!string.IsNullOrEmpty(sDbInix)) lsLines.Add("This database's file: " + sDbInix);
+                lsLines.Add("Global file: " + sUserIni);
+                string sPick = chooseByButtons("Settings", lsLines, lCats);
+                if (sPick == null) return;
 
                 if (sPick == sGeneral)       editGeneralOptions();
                 else if (sPick == sRegex)    editAffinityRegex();
@@ -28257,16 +28321,14 @@ namespace DbDo
             LbcDialog dlg = new LbcDialog(sTitle, this);
             try
             {
+                // Two fixed choices, so two buttons (10 October 2026).
                 dlg.addLabel("Save these settings where?");
-                string sThisDb = "This database (" + System.IO.Path.GetFileName(sDbInix) + ")";
-                string sAllDb  = "All databases (DbDo.inix)";
-                ComboBox cb = dlg.addComboPickBox("Scope:",
-                    new string[] { sAllDb, sThisDb }, sAllDb,
-                    "All databases = the global default. This database = an override that travels with this .db file.");
-                string sBtn = dlg.runWithButtons(new string[] { "OK", "Cancel" });
-                if (!string.Equals(sBtn, "OK", StringComparison.OrdinalIgnoreCase)) return null;
-                bPerDb = (cb.SelectedItem ?? "").ToString().StartsWith("This database");
-                return bPerDb ? sDbInix : sUserIni;
+                dlg.addLabel("All Databases sets the default, in DbDo.inix. This Database sets an override that travels with "
+                    + System.IO.Path.GetFileName(sDbInix) + ".");
+                string sBtn = dlg.runWithButtons(new string[] { "&All Databases", "&This Database", "Cancel" });
+                if (string.Equals(sBtn, "All Databases", StringComparison.OrdinalIgnoreCase)) { bPerDb = false; return sUserIni; }
+                if (string.Equals(sBtn, "This Database", StringComparison.OrdinalIgnoreCase)) { bPerDb = true; return sDbInix; }
+                return null;
             }
             finally { dlg.Dispose(); }
         }

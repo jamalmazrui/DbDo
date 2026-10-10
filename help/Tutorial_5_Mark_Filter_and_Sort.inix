@@ -1,14 +1,14 @@
-﻿; Tutorial_5_Mark_Filter_and_Sort.inix -- choosing records, narrowing the list, ordering it.
+﻿; Tutorial_5_Mark_Filter_and_Sort.inix -- finding a station that may carry the Seahawks game: filter, narrow, order, mark and play.
 
 [about]
 Title=5 - Mark, Filter and Sort
-Intro=Records marked one at a time and in runs, the list narrowed by a filter, and put in order by a column.
-Setup=JobTrail is open in DbDo.
-Homework=Filter your own table to one value, then sort what is left.
+Intro=RadioTrail filtered to the stations that mention the Seattle Seahawks, narrowed to Washington, put in order, and one played; then records marked one at a time and in runs.
+Setup=DbDo is open; this walk opens RadioTrail.
+Homework=Filter RadioTrail for your own team or a favourite genre, then play what is left.
 
 [step]
 
-Say=One want: only the jobs still waiting, the newest first.
+Say=One want: a station that may be carrying the Seattle Seahawks game, ready to play.
 Key=
 Hear=
 
@@ -21,36 +21,29 @@ Hear=DbDo ready
 
 [step]
 
-Say=Control plus M, M for Mark, marks the record I am on, for a later command to act on.
-Key=Control+M
-Hear=Marked
+Say=RadioTrail holds the stations. Alt plus Shift plus D, D for Database, opens a template.
+Key=Alt+Shift+D
+Hear=Template Databases dialog
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Shift plus M asks about marks, changing nothing.
-Key=Shift+M
-Hear=(how many records are marked)
+Say=I choose RadioTrail and press Enter.
+Key=Enter
+Hear=(stations, the first station)
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Control plus Shift plus M reverses it: Shift reverses.
-Key=Control+Shift+M
-Hear=Unmarked
-Note=Confirm the wording with a live run: buildTutorials -live.
-
-[step]
-
-Say=Control plus F, F for Filter, shows only the records that match. It begins with a choice.
+Say=Control plus F, F for Filter, shows only the records that match. It begins with a choice, offered as buttons, each with its own letter.
 Key=Control+F
 Hear=Filter Records dialog
-Hear=Filter by: list box, Any field contains text, 1 of 2
+Hear=Any Field button
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Any field is the first choice, so Enter alone takes it. It asks for the text to find, wherever it is.
+Say=Any Field is the first button, so Enter alone presses it; Alt plus F would press Fields instead. It asks for the text to find, wherever it is.
 Key=Enter
 Hear=Any Field Contains dialog
 Hear=Text to find in any field: edit
@@ -58,21 +51,21 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=I type Seattle and press Enter. Every job with Seattle in any field stays: the city, the address, the notes.
+Say=I type seahawks and press Enter. Every station that mentions the team anywhere stays: in its name, its tags or its notes, whatever the case.
 Key=Enter
-Hear=3 records have Seattle.
+Hear=3 records have seahawks.
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Control plus F again. With a filter in force, the list offers more, each choice with its own first letter. N for Narrow keeps Seattle and adds a field.
+Say=Three: a sports station near Seattle, one in British Columbia, and a music station in eastern Washington. Control plus F again; with a filter in force there are more buttons. N for Narrow keeps seahawks and adds a field.
 Key=N
-Hear=Narrow with the field form, 4 of 4
+Hear=(the field form, a box for each field)
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Enter opens the form, a box for each field. I type waiting in the status box and press Enter.
+Say=I type Washington in the state box and press Enter.
 Key=Enter
 Hear=Filter applied. 2 records match.
 Note=Confirm the wording with a live run: buildTutorials -live.
@@ -81,36 +74,70 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=Shift plus F says the filter, both parts, in the words each was asked in.
 Key=Shift+F
-Hear=any field contains Seattle; and where: status = 'waiting'
+Hear=any field contains seahawks; and where: state = 'Washington'
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Alt plus O, O for Order, sorts by a column; I choose the date added.
+Say=Alt plus O, O for Order, sorts by a column; I choose the name, and Enter sorts.
 Key=Alt+O
 Hear=Order Records dialog
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Enter sorts. Alt plus Shift plus O reverses the order, newest first.
+Say=Alt plus Shift plus O reverses the order, so KIRO 710 ESPN Seattle, the sports station, comes first.
 Key=Alt+Shift+O
-Hear=(the newest waiting job)
+Hear=KIRO 710 ESPN Seattle
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=A planned misstep: the filter stays until it is cleared, so a later search finds only waiting jobs. Control plus Shift plus F clears it.
+Say=Alt plus Shift plus P, Play Stream, plays the station I am on in the Homer Player. If the game is on, I hear it.
+Key=Alt+Shift+P
+Hear=(the Homer Player, playing KIRO)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape closes the player and brings me back to the station.
+Key=Escape
+Hear=KIRO 710 ESPN Seattle
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Control plus M, M for Mark, marks it, to find it again or act on it later. Control plus Shift plus M would unmark it: Shift reverses.
+Key=Control+M
+Hear=Marked
+
+[step]
+
+Say=A planned misstep: the filter stays until it is cleared, so a later search finds only these two. Control plus Shift plus F clears it, and I stay on the same station.
 Key=Control+Shift+F
-Hear=No filter
+Hear=Filter cleared. (the number of stations) records.
+Hear=KIRO 710 ESPN Seattle
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Marking one record at a time is slow for many. F8 drops an anchor at the record I am on.
+Say=Shift plus M asks about marks, changing nothing.
+Key=Shift+M
+Hear=1 record marked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Shift plus Space reads every marked record in full, to check before acting. Marks are for acting on: Delete, Copy, Export and Play all work on the marked records when there are any.
+Key=Shift+Space
+Hear=(KIRO's record, field by field)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Marking one at a time is slow for many. F8 drops an anchor at the record I am on.
 Key=F8
 Hear=Mark anchor
-Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
@@ -124,54 +151,13 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 Say=Control plus A marks every record, Control plus Shift plus A unmarks them all, and Alt plus Shift plus I swaps marked and unmarked.
 Key=Control+Shift+A
 Hear=All unmarked
-Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Marks are for acting on: Delete, Copy and Export all work on the marked records when there are any. Shift plus Space reads every marked record in full, to check before acting.
-Key=Shift+Space
-Hear=No records are marked
-Note=Confirm the wording with a live run: buildTutorials -live.
-
-[step]
-
-Say=With a filter and an order in force, Shift plus 8 says both at once, so you always know what you are looking at.
+Say=Shift plus 8 says the order and the filter at once, so I always know what I am looking at.
 Key=Shift+8
-Hear=Sort: added, descending; Filter: any field contains Seattle; and status = 'waiting'
+Hear=Sort: name, descending; Filter: none
 Note=Confirm the wording with a live run: buildTutorials -live.
-
-[step]
-
-Say=Shift plus O says just the order, and Shift plus F just the filter.
-Key=Shift+O
-Hear=added, descending
-Note=Confirm the wording with a live run: buildTutorials -live.
-
-[step]
-
-Say=Control plus Space toggles the mark on the record I am on, as it toggles a selection in any Windows list.
-Key=Control+Space
-Hear=Marked
-Note=Confirm the wording with a live run: buildTutorials -live.
-
-[step]
-
-Say=With a filter in force, Shift plus Y says how many records it leaves.
-Key=Shift+Y
-Hear=4 records
-Note=Confirm the wording with a live run: buildTutorials -live.
-
-[step]
-
-Say=Alt plus Shift plus L reads one column for the marked records only: here, the employers of the jobs I marked.
-Key=Alt+Shift+L
-Hear=Amazon, Costco
-Note=Confirm the wording with a live run: buildTutorials -live.
-
-[step]
-
-Say=A filter and marks work together: filter to narrow, mark to choose, then act on the marked.
-Key=
 
 [step]
 
@@ -181,10 +167,9 @@ Hear=
 
 [step]
 
-Say=Mark, then unmark.
+Say=Open a template database.
 Key=
-Hear=Control plus M
-Hear=Control plus Shift plus M
+Hear=Alt plus Shift plus D
 
 [step]
 
@@ -195,6 +180,20 @@ Hear=Control plus Shift plus F
 
 [step]
 
-Say=Order by a column.
+Say=Order by a column, then reverse it.
 Key=
 Hear=Alt plus O
+Hear=Alt plus Shift plus O
+
+[step]
+
+Say=Mark, then unmark.
+Key=
+Hear=Control plus M
+Hear=Control plus Shift plus M
+
+[step]
+
+Say=Play the station.
+Key=
+Hear=Alt plus Shift plus P

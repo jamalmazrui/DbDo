@@ -21,9 +21,9 @@ Hear=DbDo ready
 
 [step]
 
-Say=JobTrail comes next: a template for a job search, whose jobs, employers and contacts are linked to one another, so it shows more of what DbDo can do. Control plus O, O for Open; the templates are in the Help menu, under Template Databases, and I open JobTrail.
-Key=Control+O
-Hear=Open Database dialog
+Say=JobTrail comes next: a template for a job search, whose jobs, employers and contacts are linked to one another, so it shows more of what DbDo can do. Alt plus Shift plus D, D for Database, opens a template.
+Key=Alt+Shift+D
+Hear=Template Databases dialog
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

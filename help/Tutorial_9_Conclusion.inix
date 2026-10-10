@@ -107,7 +107,7 @@ Hear=The columns every DbDo table may carry: added, edited, marked, notes, tags,
 
 Say=template database.
 Key=
-Hear=A ready-made database in the Help menu, to practice on or to start from.
+Hear=A ready-made database that comes with DbDo, opened with Alt plus Shift plus D, to practice on or to start from.
 
 [step]
 

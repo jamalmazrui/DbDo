@@ -172,7 +172,7 @@ Woven through the menus is a large **Say-X status family** in the Query menu: qu
 
 ## Opening databases and recordsets
 
-- **Open Template Database** starts from one of the databases DbDo ships -- BookTrail, JobTrail and the rest -- opening your own copy of it.
+- **Open Template Database** (Alt+Shift+D) starts from one of the databases DbDo ships -- BookTrail, JobTrail and the rest -- opening your own copy of it.
 - **Open Database** (Control+O) opens a database file, choosing the right driver from the extension. **New Database** creates a fresh SQLite database; **Add Table** adds a table to it.
 - **Open Table in New Window** (Control+Shift+T) opens a table (or arbitrary query) in a new window.
 - **Recent Files** (Alt+R) reopens something you used lately.
@@ -348,6 +348,7 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | New Database | — |
 | Add Table | — |
 | Open Database | Control+O |
+| Open Template Database | Alt+Shift+D |
 | Open Table in New Window | Control+Shift+T |
 | Recent Files | Alt+R |
 | Save | Control+S |
@@ -520,7 +521,6 @@ The Query menu holds record inspection and the Say-X status family.
 | Documentation | F1 |
 | History of Changes | Shift+F1 |
 | Readme Guide | — |
-| Template Databases | — |
 | Alternate Menu | Alt+F10 |
 | Key Help Toggle | Control+F1 |
 | Where Am I | — |
@@ -599,7 +599,7 @@ When the SQLean extension functions are available, they add a large library of S
 
 ## Template databases
 
-DbDo ships with template databases that follow the same column conventions as your own data, reachable from **Template Databases** in the Help menu. They are the fastest way to see the standard fields, lookups, relationships, and reports working together on real records.
+DbDo ships with template databases that follow the same column conventions as your own data, reachable with File, **Open Template Database**, or Alt+Shift+D from anywhere. They are the fastest way to see the standard fields, lookups, relationships, and reports working together on real records.
 
 ## Screen-reader settings
 

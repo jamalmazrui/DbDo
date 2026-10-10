@@ -141,6 +141,9 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Control+O
 - Open Table in New Window\
   Control+Shift+T
+- Open Template Database\
+  Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail. D for Database.\
+  Alt+Shift+D
 - Previous Table or View\
   F6 moves among parts; Shift reverses Control+F6.\
   Control+Shift+F6
@@ -526,6 +529,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 
 - Alt+Shift+C\
   Append Record to Clipboard
+- Alt+Shift+D\
+  Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail.\
+  Open Template Database
 - Alt+Shift+E\
   Open the Settings dialog.\
   Edit Settings
@@ -1027,6 +1033,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Control+Shift+O
 - Open Table in New Window\
   Control+Shift+T
+- Open Template Database\
+  Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail.\
+  Alt+Shift+D
 - Open Url\
   Control+Shift+U
 - Order Records\

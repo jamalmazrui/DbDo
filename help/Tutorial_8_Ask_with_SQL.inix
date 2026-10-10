@@ -3,7 +3,7 @@
 [about]
 Title=8 - Ask with SQL
 Intro=A question in the database's own language with Control plus Q, the answer shown as records, and the history of questions asked.
-Setup=JobTrail is open in DbDo.
+Setup=JobTrail is open in DbDo; Alt plus Shift plus D opens it.
 Homework=Write a query that counts your records by one column.
 
 [step]

@@ -105,21 +105,14 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=The templates to practise on are in the Help menu: F10, then H for Help.
-Key=F10
-Hear=Help menu
+Say=The templates to practise on open with Alt plus Shift plus D, D for Database, from anywhere in DbDo. Each is a complete example: JobTrail for job hunting, BookTrail for reading, RadioTrail for stations to play.
+Key=Alt+Shift+D
+Hear=Template Databases dialog
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Down Arrow to Template Databases. Each is a complete example: JobTrail for job hunting, BookTrail for reading, RadioTrail for stations to play.
-Key=Down Arrow
-Hear=Template Databases
-Note=Confirm the wording with a live run: buildTutorials -live.
-
-[step]
-
-Say=Escape closes the menu. Once a database is open, Alt plus Backslash opens its folder in File Explorer, where its scripts and reports live beside it.
+Say=Escape closes the dialog. Once a database is open, Alt plus Backslash opens its folder in File Explorer, where its scripts and reports live beside it.
 Key=Escape
 Hear=DbDo ready
 Note=Confirm the wording with a live run: buildTutorials -live.

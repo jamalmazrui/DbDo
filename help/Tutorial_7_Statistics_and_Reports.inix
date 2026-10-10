@@ -3,7 +3,7 @@
 [about]
 Title=7 - Statistics and Reports
 Intro=The numbers in a column with Alt plus Shift plus S, a chart's figures with Control plus Shift plus G, and a report written as a document with Alt plus Shift plus R.
-Setup=JobTrail is open in DbDo.
+Setup=JobTrail is open in DbDo; Alt plus Shift plus D opens it.
 Homework=Run a report of your own table and read it in your browser.
 
 [step]

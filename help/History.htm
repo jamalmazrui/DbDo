@@ -393,6 +393,45 @@ browser, or type <code>history</code> at the dot prompt.</p>
 <h2 id="october-2026-from-the-build-and-release-logs">9 October 2026 –
 from the build and release logs</h2>
 <ul>
+<li><p><strong>Walk 5 finds a station that may carry the Seahawks
+game.</strong> It opens RadioTrail with Alt+Shift+D, filters with Any
+Field for seahawks, narrows to Washington with the Narrow button, orders
+by name and reverses it so KIRO 710 ESPN Seattle comes first, plays it
+with Alt+Shift+P, marks it, and clears the filter with Control+Shift+F,
+staying on the station; then marks in runs, as before. It replaces a
+JobTrail example whose steps described the old Filter Records list.
+Walks 7 and 8 say how to reopen JobTrail.</p></li>
+<li><p><strong>Alt+Shift+D opens a template database.</strong> File,
+Open Template Database had no key; Alt+Shift+D, D for Database, joins
+Shift+D, Say Database, and Alt+D, Database Summary, and the menu item’s
+letter is D. The Key Describer now explains it. The guide and walks 2,
+3, 4 and 9 said the templates were in the Help menu, where there is no
+such item; they now give the key, and walk 2 presses it.</p></li>
+<li><p><strong>Any Field ignores case in every language when SQLean is
+present.</strong> SQLite’s own lower() folds English letters only, so
+“CAFÉ” did not match “café”. When the sqlean.dll bundle beside DbDo has
+loaded, Any Field folds case with SQLean’s text_lower, which covers
+every letter Unicode defines; the connection is asked once whether it
+answers, and SQLite’s lower() is used otherwise.</p></li>
+<li><p><strong>Clearing a filter keeps your place.</strong>
+Control+Shift+F, and the Clear button of Filter Records, used to leave
+the cursor on the first record, since clearing an any-field filter
+reopens the whole table. The record you were on is now found again and
+given the focus – known by its prime key, else its id, else all its
+values – and DbDo says the filter cleared and how many records there
+are; the screen reader announces the record itself. Both paths share one
+routine.</p></li>
+<li><p><strong>Fixed choices are buttons.</strong> A dialog whose whole
+job is choosing among DbDo’s own options now shows them as buttons, each
+with its own letter, in place of a pick list: Filter Records (Control+F:
+Any Field, Fields, and Clear, Edit, Narrow or Widen when a filter is in
+force), the chart type, the settings category, where settings are saved
+(All Databases or This Database), and Generate from Grid’s outputs. One
+shared routine, chooseByButtons, does it, leaving H for Help and none
+for Cancel. Lists stay where the choices come from the data or the
+session – columns, lookup values, recent files, bookmarks, query history
+and scripts – and in fields of larger forms. Walk 5 teaches the new
+Filter Records dialog.</p></li>
 <li><p><strong>The RadioTrail catalog stays on this disk.</strong> At
 about 60,000 stations and 77 MB, the catalog fetchStations fills is
 data, not source: the kit’s push refused it as too large, and every

@@ -5,7 +5,7 @@
     <link>Tutorials.htm</link>
     <description>Spoken walks through DbDo, the database program built for working by ear. Ten walks, each under five minutes, in the order a new person meets them.</description>
     <language>en-us</language>
-    <lastBuildDate>Sat, 10 Oct 2026 05:14:11 +0000</lastBuildDate>
+    <lastBuildDate>Sat, 10 Oct 2026 16:15:44 +0000</lastBuildDate>
     <itunes:author>Jamal Mazrui</itunes:author>
     <itunes:explicit>false</itunes:explicit>
     <itunes:category text="Technology"/>
@@ -15,8 +15,8 @@
       <description>Nothing is needed; this walk is listened to. Full transcript: Tutorials.htm#0-0-overview</description>
       <link>Tutorials.htm#0-0-overview</link>
       <guid isPermaLink="false">homer-tutorial_0_overview</guid>
-      <enclosure url="tutorials/0_Overview.mp3" length="841750" type="audio/mpeg"/>
-      <itunes:duration>00:02:02</itunes:duration>
+      <enclosure url="tutorials/0_Overview.mp3" length="855275" type="audio/mpeg"/>
+      <itunes:duration>00:02:04</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
@@ -33,8 +33,8 @@
       <description>DbDo_setup.exe is downloaded from the DbDo page on GitHub. Full transcript: Tutorials.htm#0b-2-install-and-launch</description>
       <link>Tutorials.htm#0b-2-install-and-launch</link>
       <guid isPermaLink="false">homer-tutorial_2_install_and_launch</guid>
-      <enclosure url="tutorials/2_Install_and_Launch.mp3" length="1310133" type="audio/mpeg"/>
-      <itunes:duration>00:03:15</itunes:duration>
+      <enclosure url="tutorials/2_Install_and_Launch.mp3" length="1311165" type="audio/mpeg"/>
+      <itunes:duration>00:03:13</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
@@ -42,7 +42,7 @@
       <description>DbDo is installed; on a first run it opens RadioTrail. Full transcript: Tutorials.htm#0c-3-open-a-database-and-move-through-records</description>
       <link>Tutorials.htm#0c-3-open-a-database-and-move-through-records</link>
       <guid isPermaLink="false">homer-tutorial_3_open_a_database_and_move_through_records</guid>
-      <enclosure url="tutorials/3_Open_a_Database_and_Move_Through_Records.mp3" length="1353344" type="audio/mpeg"/>
+      <enclosure url="tutorials/3_Open_a_Database_and_Move_Through_Records.mp3" length="1352734" type="audio/mpeg"/>
       <itunes:duration>00:03:18</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
@@ -51,17 +51,17 @@
       <description>DbDo is open; this walk opens JobTrail. Full transcript: Tutorials.htm#0d-4-edit-and-add-records</description>
       <link>Tutorials.htm#0d-4-edit-and-add-records</link>
       <guid isPermaLink="false">homer-tutorial_4_edit_and_add_records</guid>
-      <enclosure url="tutorials/4_Edit_and_Add_Records.mp3" length="1451619" type="audio/mpeg"/>
-      <itunes:duration>00:03:36</itunes:duration>
+      <enclosure url="tutorials/4_Edit_and_Add_Records.mp3" length="1437067" type="audio/mpeg"/>
+      <itunes:duration>00:03:34</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
       <title>5 - Mark, Filter and Sort</title>
-      <description>JobTrail is open in DbDo. Full transcript: Tutorials.htm#0e-5-mark-filter-and-sort</description>
+      <description>DbDo is open; this walk opens RadioTrail. Full transcript: Tutorials.htm#0e-5-mark-filter-and-sort</description>
       <link>Tutorials.htm#0e-5-mark-filter-and-sort</link>
       <guid isPermaLink="false">homer-tutorial_5_mark_filter_and_sort</guid>
-      <enclosure url="tutorials/5_Mark_Filter_and_Sort.mp3" length="1599053" type="audio/mpeg"/>
-      <itunes:duration>00:03:56</itunes:duration>
+      <enclosure url="tutorials/5_Mark_Filter_and_Sort.mp3" length="1691194" type="audio/mpeg"/>
+      <itunes:duration>00:04:10</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
@@ -75,19 +75,19 @@
     </item>
     <item>
       <title>7 - Statistics and Reports</title>
-      <description>JobTrail is open in DbDo. Full transcript: Tutorials.htm#0g-7-statistics-and-reports</description>
+      <description>JobTrail is open in DbDo; Alt plus Shift plus D opens it. Full transcript: Tutorials.htm#0g-7-statistics-and-reports</description>
       <link>Tutorials.htm#0g-7-statistics-and-reports</link>
       <guid isPermaLink="false">homer-tutorial_7_statistics_and_reports</guid>
-      <enclosure url="tutorials/7_Statistics_and_Reports.mp3" length="1256125" type="audio/mpeg"/>
+      <enclosure url="tutorials/7_Statistics_and_Reports.mp3" length="1253493" type="audio/mpeg"/>
       <itunes:duration>00:03:05</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
       <title>8 - Ask with SQL</title>
-      <description>JobTrail is open in DbDo. Full transcript: Tutorials.htm#0h-8-ask-with-sql</description>
+      <description>JobTrail is open in DbDo; Alt plus Shift plus D opens it. Full transcript: Tutorials.htm#0h-8-ask-with-sql</description>
       <link>Tutorials.htm#0h-8-ask-with-sql</link>
       <guid isPermaLink="false">homer-tutorial_8_ask_with_sql</guid>
-      <enclosure url="tutorials/8_Ask_with_SQL.mp3" length="1261100" type="audio/mpeg"/>
+      <enclosure url="tutorials/8_Ask_with_SQL.mp3" length="1268712" type="audio/mpeg"/>
       <itunes:duration>00:03:06</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
@@ -96,8 +96,8 @@
       <description>Nothing is needed; this walk is listened to. Full transcript: Tutorials.htm#0i-9-conclusion</description>
       <link>Tutorials.htm#0i-9-conclusion</link>
       <guid isPermaLink="false">homer-tutorial_9_conclusion</guid>
-      <enclosure url="tutorials/9_Conclusion.mp3" length="960044" type="audio/mpeg"/>
-      <itunes:duration>00:02:21</itunes:duration>
+      <enclosure url="tutorials/9_Conclusion.mp3" length="972684" type="audio/mpeg"/>
+      <itunes:duration>00:02:22</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
   </channel>
