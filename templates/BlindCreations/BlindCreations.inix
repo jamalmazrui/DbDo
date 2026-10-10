@@ -1,0 +1,52 @@
+﻿; BlindCreations.inix -- how this database opens, and how each table is heard.
+;
+; BlindCreations gathers the Blind directories -- apps, books, creators and presentations made by blind people --
+; into one database to search, filter, sort, mark and play. It began with a proposal on the BITS development list
+; for one searchable place for software and books by or for blind people. DbDo's developer rebuilds it from the
+; directories with scripts\buildBlindCreations; your own copy is yours to add to.
+;
+; DbDo reads this file beside the database. [Database] decides which table the window starts on; each
+; [Table:<name>] decides which columns the grid shows, in which order, and how the rows are sorted. DbDo writes these
+; keys back whenever you change the columns, the sort or the filter, so what you adjust is remembered here.
+;
+; A row is heard, not seen: three fields, the deciding one first, and the first column is the one you look a record
+; up by, since typing a letter searches it.
+;
+; WHO MADE WHAT is recorded in the maps table: a creator is author_of a book, developer_of an app, or
+; presenter_of a presentation. Shift+R says a record's links, and Alt+Right follows one. The by field also names the
+; makers, so a row says who made it and Keywords finds people too.
+
+[Database]
+
+; THE WINDOW OPENS ON apps: software was the proposal's first want, and Control+PageDown reaches the rest.
+InitialTable = apps
+
+[Table:apps]
+
+; name, then category, then platform: what it is, what it is for, where it runs. The platform answers the
+; proposal's question of operating system; Control+F, Fields, narrows by it.
+SelectFields = name, category, platform
+OrderFields = name
+WhereFilter =
+
+[Table:books]
+
+; title, then author, then year, the way a reader asks for a book.
+SelectFields = title, by, year
+OrderFields = title
+WhereFilter =
+
+[Table:creators]
+
+; surname, then first name, then roles -- author, developer, presenter -- so typing a letter finds a person by
+; surname, as in the directories.
+SelectFields = last_name, first_name, roles
+OrderFields = last_name, first_name
+WhereFilter =
+
+[Table:presentations]
+
+; title, then presenter, then kind: a podcast, a broadcast, a talk or keynote, a video series.
+SelectFields = title, by, kind
+OrderFields = title
+WhereFilter =

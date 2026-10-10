@@ -46,6 +46,8 @@
 !/scripts/acceptCheck.cmd
 !/scripts/auditPatterns.cmd
 !/scripts/auditPatterns.py
+!/scripts/buildBlindCreations.cmd
+!/scripts/buildBlindCreations.py
 !/scripts/buildTutorials.cmd
 !/scripts/buildTutorials.ps1
 !/scripts/check.cmd
@@ -64,6 +66,8 @@
 !/scripts/makeTutorials.cmd
 !/scripts/makeTutorials.py
 !/scripts/push.cmd
+!/scripts/recoverRadioTrail.cmd
+!/scripts/recoverRadioTrail.py
 !/scripts/renameToPrime.sql
 !/scripts/summarizeSetup.cmd
 !/scripts/summarizeSetup.ps1

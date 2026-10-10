@@ -893,7 +893,8 @@ time you run it, so your copies are yours to change.
 ## The template databases
 
 Each template is a folder under `templates`, copied into your own folder the first
-time you run DbDo. The ones written for DbDo share the Trail name:
+time you run DbDo, or the first time after an update that adds one. Your copy is
+yours: a later update never replaces it. The ones written for DbDo share the Trail name:
 
 - **BookTrail** -- books read, reading, and meant to be read
 - **CellarTrail** -- wine: the bottles, and what you thought of them
@@ -911,14 +912,29 @@ time you run DbDo. The ones written for DbDo share the Trail name:
 **chinook** and **northwind** keep their usual names. They are the two databases
 most database tutorials use, so the names are how people recognise them.
 
+### BlindCreations gathers work by blind people
+
+**BlindCreations** holds the apps, books, presentations and creators from the
+Blind directories on GitHub Pages: about a hundred apps, a hundred books, sixty
+presentations and over a hundred and twenty creators. It began with a proposal
+on the BITS development list for one searchable place for software and books
+made by or for blind people.
+
+Each record names its makers in its **by** field, and the **maps** table links
+each creator to their work: a creator is `author_of` a book, `developer_of` an
+app, or `presenter_of` a presentation. On a creator, Shift+R says what they made,
+and Alt+Right goes to it. An app's **platform** is where it runs, so Fields in
+Filter Records narrows the list to one system. Categories, platforms, formats and
+roles are also in **tags**, one to a line, so Keywords finds them.
+
 ### HowToTrail holds both systems
 
 The Windows and iOS how-to databases were the same shape, and answering "how do
 I do this on my phone?" meant opening a different file. They are one database
 now, and the system is a field: **platform**, holding Windows, iOS, or any for
 something true on both. Press F4 in the field to pick. To work in one system
-only, put `platform = "Windows"` in the Filter Records, Control+F, and it stays
-until you clear it.
+only, press Control+F, choose Fields, and type Windows in the platform box; the
+filter stays until you clear it with Control+Shift+F.
 
 ### RadioTrail plays Internet radio
 
