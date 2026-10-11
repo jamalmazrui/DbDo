@@ -258,6 +258,7 @@ namespace DbDo
                     if (!bFirstSeed) return;                 // don't resurrect deleted templates
                     System.IO.File.Copy(sSrcPath, sDstPath, false);
                     clearReadOnly(sDstPath);                 // keep the seeded copy editable
+                    if (sDstPath.EndsWith(".db", StringComparison.OrdinalIgnoreCase)) writeSeedRecord(sDstPath);
                     return;
                 }
                 // A DATABASE THAT EXISTS IS THE PERSON'S, NEVER THE TEMPLATE'S.
@@ -276,18 +277,46 @@ namespace DbDo
                     // last written before it was created; any change, by the person or by DbDo, writes it later. Only
                     // such an untouched copy is replaced, and only by a newer template, and it is first kept beside
                     // the new one as <name>.before-update-<stamp>.bak. A database anyone has changed is never touched.
-                    System.DateTime dtWritten = System.IO.File.GetLastWriteTimeUtc(sDstPath);
-                    System.DateTime dtCreated = System.IO.File.GetCreationTimeUtc(sDstPath);
-                    bool bUntouched = dtWritten <= dtCreated.AddSeconds(2);
-                    bool bNewer = System.IO.File.GetLastWriteTimeUtc(sSrcPath) > dtWritten;
-                    if (bUntouched && bNewer)
+                    // PROVED UNTOUCHED, REPLACED SAFELY (11 October 2026, from an audit). Timestamps cannot prove a database
+                    // unedited: an edit inside two seconds, a restored copy, or committed changes still in the write-ahead log
+                    // all looked untouched; and the copy was moved away before the new one was written, so a failed copy left
+                    // no database at all. Now a copy seeded since this change carries <name>.db.seed, the SHA-256 it was
+                    // seeded with, and is untouched only while its hash still matches; an older copy, with no record, keeps
+                    // the timestamp rule. Either way, a database with a write-ahead or shared-memory file is never replaced
+                    // (it may be open, or hold changes not yet in the file); the template is copied to <name>.db.new and
+                    // checked first; and File.Replace swaps it in with the old copy kept as the dated .bak, in one step,
+                    // so a failure leaves the person's copy where it was. Every outcome is logged.
+                    string sSeedRecord = sDstPath + ".seed";
+                    bool bRecorded = System.IO.File.Exists(sSeedRecord);
+                    bool bUntouched;
+                    if (bRecorded) bUntouched = string.Equals(System.IO.File.ReadAllText(sSeedRecord).Trim(), sha256Hex(sDstPath), StringComparison.OrdinalIgnoreCase);
+                    else bUntouched = System.IO.File.GetLastWriteTimeUtc(sDstPath) <= System.IO.File.GetCreationTimeUtc(sDstPath).AddSeconds(2);
+                    bool bNewer = System.IO.File.GetLastWriteTimeUtc(sSrcPath) > System.IO.File.GetLastWriteTimeUtc(sDstPath);
+                    if (!bUntouched || !bNewer) return;
+                    foreach (string sSide in new string[] { sDstPath + "-wal", sDstPath + "-shm" })
                     {
-                        string sKept = sDstPath + ".before-update-" + System.DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".bak";
+                        if (System.IO.File.Exists(sSide) && new System.IO.FileInfo(sSide).Length > 0)
+                        {
+                            try { DbDoLog.write("Seeding: " + sDstPath + " was not updated: " + System.IO.Path.GetFileName(sSide) + " shows it may be open or hold changes not yet written."); } catch { }
+                            return;
+                        }
+                    }
+                    string sNew = sDstPath + ".new";
+                    string sKept = sDstPath + ".before-update-" + System.DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".bak";
+                    try
+                    {
+                        System.IO.File.Copy(sSrcPath, sNew, true);
+                        clearReadOnly(sNew);
+                        if (!string.Equals(sha256Hex(sNew), sha256Hex(sSrcPath), StringComparison.OrdinalIgnoreCase)) throw new System.IO.IOException("the copied template did not match the installed one");
                         clearReadOnly(sDstPath);
-                        System.IO.File.Move(sDstPath, sKept);
-                        System.IO.File.Copy(sSrcPath, sDstPath, false);
-                        clearReadOnly(sDstPath);
-                        try { DbDoLog.write("Seeding: " + sDstPath + " was untouched since it was seeded, so the newer template replaced it; the old copy is " + sKept + "."); } catch { }
+                        System.IO.File.Replace(sNew, sDstPath, sKept);
+                        writeSeedRecord(sDstPath);
+                        try { DbDoLog.write("Seeding: " + sDstPath + " was untouched since it was seeded (" + (bRecorded ? "its fingerprint matched" : "by its dates; it had no fingerprint") + "), so the newer template replaced it; the old copy is " + sKept + "."); } catch { }
+                    }
+                    catch (Exception oError)
+                    {
+                        try { if (System.IO.File.Exists(sNew)) System.IO.File.Delete(sNew); } catch { }
+                        try { DbDoLog.write("Seeding: " + sDstPath + " was not updated, and is as it was: " + oError.Message); } catch { }
                     }
                     return;
                 }
@@ -299,7 +328,26 @@ namespace DbDo
                     clearReadOnly(sDstPath);                 // and stay editable afterward
                 }
             }
-            catch { /* keep going for the rest */ }
+            catch (Exception oError)
+            {
+                // Seeding never stops the picker, but a failure is recorded (11 October 2026), not swallowed.
+                try { DbDoLog.write("Seeding: " + sDstPath + " failed: " + oError.Message); } catch { }
+            }
+        }
+
+        // sha256Hex: a file's SHA-256 as lowercase hex.
+        private static string sha256Hex(string sPath)
+        {
+            using (System.Security.Cryptography.SHA256 oSha = System.Security.Cryptography.SHA256.Create())
+            using (System.IO.FileStream oStream = System.IO.File.OpenRead(sPath))
+                return BitConverter.ToString(oSha.ComputeHash(oStream)).Replace("-", "").ToLowerInvariant();
+        }
+
+        // writeSeedRecord: <name>.db.seed holds the SHA-256 a database had when it was seeded, the proof it is untouched.
+        private static void writeSeedRecord(string sDbPath)
+        {
+            try { System.IO.File.WriteAllText(sDbPath + ".seed", sha256Hex(sDbPath)); }
+            catch (Exception oError) { try { DbDoLog.write("Seeding: could not record " + sDbPath + ".seed: " + oError.Message); } catch { } }
         }
 
         // clearReadOnly: drop the read-only attribute a File.Copy may have

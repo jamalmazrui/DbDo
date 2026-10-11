@@ -232,6 +232,10 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a
+href="#october-2026-a-template-update-that-cannot-lose-a-database"
+id="toc-october-2026-a-template-update-that-cannot-lose-a-database">11
+October 2026 – a template update that cannot lose a database</a></li>
 <li><a href="#october-2026-searches-you-can-trust"
 id="toc-october-2026-searches-you-can-trust">11 October 2026 – searches
 you can trust</a></li>
@@ -393,6 +397,27 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="october-2026-a-template-update-that-cannot-lose-a-database">11
+October 2026 – a template update that cannot lose a database</h2>
+<ul>
+<li><strong>A database is replaced only when it is proved untouched, and
+only safely (from an audit by another AI).</strong> Since 10 October, a
+sample database nobody had changed took a newer template; whether it was
+changed was judged by its dates. Dates cannot prove that: an edit inside
+two seconds, a copy restored with its old dates, or changes still in
+SQLite’s write-ahead log all looked untouched; and the old copy was
+moved away before the new one was written, so a failed copy left no
+database. Now a database seeded from now on carries
+<code>&lt;name&gt;.db.seed</code>, the SHA-256 it was seeded with, and
+is untouched only while that still matches; a copy seeded before keeps
+the date rule. Either way, a database with a write-ahead or
+shared-memory file beside it is never replaced; the template is copied
+beside it and checked first; and Windows replaces the database in one
+step, keeping the old copy as
+<code>&lt;name&gt;.db.before-update-&lt;stamp&gt;.bak</code>, so a
+failure leaves the copy as it was. Every outcome, and any failure, is
+written to DbDo.log.</li>
+</ul>
 <h2 id="october-2026-searches-you-can-trust">11 October 2026 – searches
 you can trust</h2>
 <ul>

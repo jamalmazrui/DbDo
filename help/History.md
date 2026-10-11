@@ -5,6 +5,10 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 11 October 2026 -- a template update that cannot lose a database
+
+- **A database is replaced only when it is proved untouched, and only safely (from an audit by another AI).** Since 10 October, a sample database nobody had changed took a newer template; whether it was changed was judged by its dates. Dates cannot prove that: an edit inside two seconds, a copy restored with its old dates, or changes still in SQLite's write-ahead log all looked untouched; and the old copy was moved away before the new one was written, so a failed copy left no database. Now a database seeded from now on carries `<name>.db.seed`, the SHA-256 it was seeded with, and is untouched only while that still matches; a copy seeded before keeps the date rule. Either way, a database with a write-ahead or shared-memory file beside it is never replaced; the template is copied beside it and checked first; and Windows replaces the database in one step, keeping the old copy as `<name>.db.before-update-<stamp>.bak`, so a failure leaves the copy as it was. Every outcome, and any failure, is written to DbDo.log.
+
 ## 11 October 2026 -- searches you can trust
 
 - **fetchStations says what it was asked, and waits as long as it is told.** A run meant to import a playlist only reported on the catalog, and its log could not say why: the command line was not logged, and "--import" with no file after it, like any unknown option, was skipped in silence. The log now opens with the command line and working folder; "--import" without a playlist, or an option fetchStations does not know, stops the run with a plain message. When Wikipedia refuses a request, fetchStations now waits as long as the server's Retry-After asks, between five seconds and ten minutes, instead of a fixed minute.
