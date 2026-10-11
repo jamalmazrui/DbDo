@@ -232,6 +232,9 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a href="#october-2026-booktrail-holds-what-bookfido-gathers"
+id="toc-october-2026-booktrail-holds-what-bookfido-gathers">11 October
+2026 – BookTrail holds what bookFido gathers</a></li>
 <li><a href="#october-2026-radiotrails-quality-check-and-its-repairs"
 id="toc-october-2026-radiotrails-quality-check-and-its-repairs">11
 October 2026 – RadioTrail’s quality check, and its repairs</a></li>
@@ -403,6 +406,20 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="october-2026-booktrail-holds-what-bookfido-gathers">11 October
+2026 – BookTrail holds what bookFido gathers</h2>
+<ul>
+<li><strong>One row per copy.</strong> BookTrail’s prime is now author,
+title and source, so a book on Audible and from BARD is two rows, each
+with its own format, source, narrator and catalog number; the row’s
+spoken summary ends with its source. New fields: publisher, first
+published, language, length, pages, ISBN, progress, average rating,
+ratings count, Wikipedia, files, and work, the key every copy of one
+work shares. Goodreads joins the source pick list. bookFido writes all
+five of a reader’s libraries here, and brings an older BookTrail to this
+shape itself, keeping every row, any added column and every link. The
+template passes checkDb with 34 checks and no warnings.</li>
+</ul>
 <h2 id="october-2026-radiotrails-quality-check-and-its-repairs">11
 October 2026 – RadioTrail’s quality check, and its repairs</h2>
 <p>A full check of the shipped RadioTrail.db, 60,342 stations, found
@@ -448,6 +465,19 @@ triggers, lookups and views; and a second –clean found nothing left to
 do. The 609 stations whose wrong records were cleared have none until
 fetchStations next runs with the network, which looks them up again
 under the strict rules.</li>
+<li><strong>After the first run with the network, three gaps
+closed.</strong> The lookup took an article whose frequency it could not
+read even when the name stated one, so twenty-four American “KISS FM”
+streams took “Kiss (UK radio station)”, in London; the lookup and the
+repair now share one rule, confirmsFrequency, which still takes an
+unreadable frequency – KQED-FM, WTOP-FM and twenty-seven more are right
+– but not from an article whose title names another country or whose
+frequency is DAB. Tags its wrong article leaked stayed on a cleared
+station, and the next lookup counted them again; leaked tags are now cut
+on every station. And the lookups switched the shipped copy back to
+write-ahead logging; a plain run now repairs once more at the end. The
+catalog in this release: 2,875 stations with their official record, none
+failing any rule, and a second repair finds nothing to do.</li>
 <li><strong>Known limit:</strong> a record cleared as a wrong match
 keeps the network tags that article gave it, which cannot be told from
 good ones, because affiliations are not stored apart from other

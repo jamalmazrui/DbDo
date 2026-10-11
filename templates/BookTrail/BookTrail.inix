@@ -14,6 +14,17 @@
 ; is chosen rather than retyped. A series spelled two ways is the commonest cause
 ; of a book sorting in the wrong place.
 ;
+; ONE ROW PER COPY (11 October 2026). A book read on Audible and again from BARD is two rows, because format,
+; source, catalog number and narrator belong to a copy, not to the work: the Audible copy has its narrator and
+; ASIN, the BARD copy its reader and NLS number. A row is known by author, title and source, and ordering by
+; author, series and volume keeps a work's copies together. work holds the same key for every copy of one work.
+;
+; WHAT bookFido FILLS. bookFido gathers a reader's Audible, Kindle, Goodreads, Bookshare and BARD libraries, and
+; when DbDo is installed for that user it writes them here: publisher, first published, language, length, pages,
+; ISBN, progress, average rating and its count, the Wikipedia article, and the companion files it saved. What a
+; reader wrote -- status, rating, reason, notes -- is filled only where it is blank, and tags only gain lines.
+; Each author it found joins the author pick list, with a biography and a link.
+;
 ; VOLUME IS TEXT, as typed. A novella between books 6 and 7 is 6.5, and some
 ; readers write 06. DbDo sorts text that holds only a number as a number, so
 ; 6.5 falls between 6 and 7 and 10 comes after 9.
