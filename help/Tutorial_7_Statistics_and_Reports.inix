@@ -51,7 +51,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=I choose a report and press Enter; DbDo writes it and opens it.
 Key=Enter
-Hear=(the report's title, as a heading)
+Hear=Jobs by Status, heading level 1
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

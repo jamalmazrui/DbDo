@@ -31,20 +31,20 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=I type the question.
 Key=select employer, count(*) as jobs from jobs group by employer order by jobs desc
-Hear=(each word echoed as it is typed)
+Hear=select employer count as jobs from jobs group by employer order by jobs desc
 
 [step]
 
 Say=Control plus Enter runs it from inside the box, where Enter would start a new line.
 Key=Control+Enter
-Hear=(the first row of the answer)
+Hear=Northwind Health, 4, Row 1 of 7
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=The answer is shown as records, moved through like any table. Shift plus Q says the query in force.
 Key=Shift+Q
-Hear=(the query)
+Hear=query: select employer, count star as jobs from jobs group by employer order by jobs desc
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -73,7 +73,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=I ask which employer has the most applications still waiting.
 Key=Which employer has the most applications still waiting?
-Hear=(each word echoed as it is typed)
+Hear=Which employer has the most applications still waiting?
 
 [step]
 

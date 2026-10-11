@@ -55,6 +55,8 @@
 #   fetchStations --catalog-only        steps 1 and 2, no asking
 #   fetchStations --enrich-only         step 3 only, on what is there
 #   fetchStations --official-only       step 4 only, on what is there
+#   fetchStations --affiliations        the networks each matched article names
+#                                       (Seahawks Radio Network, ESPN Radio), as tags
 #   fetchStations --no-official         skip step 4
 #   fetchStations --report              the quality report alone, nothing fetched
 #   fetchStations --force               every step, whatever the check says
@@ -250,6 +252,14 @@ def infoboxFields(sWikitext):
     for mm in re.finditer(r"^\s*\|\s*([a-z_ ]+?)\s*=\s*(.*?)(?=^\s*\||\Z)", sBody, re.M | re.S):
         k = mm.group(1).strip().lower().replace(" ", "_"); v = mm.group(2)
         v = re.sub(r"<ref[^>]*/>|<ref.*?</ref>", "", v, flags=re.S)
+        # LISTS KEEP THEIR ITEMS (11 October 2026). An affiliations field is often a list -- {{hlist|ESPN Radio|
+        # Seahawks Radio Network}}, {{ubl|...}}, a plainlist of "* " lines, or items split by <br> -- and the generic
+        # template strip below dropped the whole list. Links are made plain first, then each list joined by commas.
+        v = re.sub(r"\[\[(?:[^|\]]*\|)?([^\]]*)\]\]", r"\1", v)
+        v = re.sub(r"<br\s*/?>", ", ", v, flags=re.I)
+        v = re.sub(r"\{\{\s*(?:ubl|ublist|unbulleted list|hlist|flatlist|plainlist|bulleted list|cslist)\s*\|([^{}]*)\}\}",
+                   lambda mm: ", ".join(s.strip(" *\n") for s in re.split(r"\||\n\s*\*", mm.group(1)) if s.strip(" *\n") and "=" not in s), v, flags=re.I)
+        v = re.sub(r"\n\s*\*\s*", ", ", v)
         v = re.sub(r"\{\{(?:nowrap|nobr)\|([^}]*)\}\}", r"\1", v, flags=re.I)
         v = re.sub(r"\{\{\s*Frequency\s*\|\s*([^|}]+)\s*\|\s*([^|}]+)\s*\}\}", r"\1 \2", v, flags=re.I)
         v = re.sub(r"\{\{\s*Start date(?: and age)?\s*\|\s*(\d{4})(?:\s*\|\s*(\d{1,2}))?(?:\s*\|\s*(\d{1,2}))?[^}]*\}\}",
@@ -262,7 +272,17 @@ def infoboxFields(sWikitext):
     return d
 
 class WikiRefused(Exception):
-    pass
+    """A refusal, and how long to wait: the server's Retry-After when it gives one (11 October 2026), else a minute.
+    A polite client waits as long as it is told, no longer, and between five seconds and ten minutes."""
+    def __init__(self, sWhy, iWait=60):
+        Exception.__init__(self, sWhy)
+        self.iWait = max(5, min(600, iWait))
+
+
+def retryAfter(oError):
+    """Seconds from an HTTP error's Retry-After header, or 60 when it has none or gives a date."""
+    try: return int(str(oError.headers.get("Retry-After", "")).strip())
+    except Exception: return 60
 
 def wikiPages(dParams):
     """One query; the pages it returns, or a WikiRefused when the answer is a
@@ -271,7 +291,7 @@ def wikiPages(dParams):
     try:
         d = wikiGet(dParams)
     except urllib.error.HTTPError as oError:
-        if oError.code in (403, 429, 503): raise WikiRefused(str(oError.code))
+        if oError.code in (403, 429, 503): raise WikiRefused(str(oError.code), retryAfter(oError))
         return [], "http " + str(oError.code)
     except Exception as oError:
         return [], "network: " + str(oError)[:80]
@@ -303,7 +323,8 @@ def pageRecord(oPage, sCall):
          "call_sign": dBox.get("call_sign") or dBox.get("callsign") or sCall,
          "frequency": dBox.get("frequency", ""), "city": dBox.get("city", "") or dBox.get("area", ""),
          "owner": dBox.get("owner", ""), "format": dBox.get("format", ""),
-         "extract": (oPage.get("extract") or "").strip()[:1500], "airdate": dBox.get("airdate", "")}
+         "extract": (oPage.get("extract") or "").strip()[:1500], "airdate": dBox.get("airdate", ""),
+         "affiliations": dBox.get("affiliations", "") or dBox.get("network", "")}
     return {k: v for k, v in d.items() if v}, ""
 
 def officialStation(sName):
@@ -336,6 +357,70 @@ def officialStation(sName):
         if d: return d, "by search " + oPage.get("title", "")
         if sReason: lsReasons.append(sReason)
     return {}, "; ".join(lsReasons[:4]) or "search found nothing"
+
+def affiliationItems(sValue):
+    """The items of an infobox affiliations field, one each: "ESPN Radio, Seahawks Radio Network" gives two."""
+    return [s.strip(" .") for s in re.split(r"\s*[,;]\s*", sValue or "") if len(s.strip(" .")) > 1]
+
+
+def affiliations(sDb, logLine, say):
+    """--affiliations: WHICH NETWORKS CARRY A STATION (11 October 2026). A listener asked for the station carrying his
+    team's game, and a station rarely says so itself: KTMT in Medford carries the Seahawks, yet nothing in its stream
+    or home page says Seahawks. Wikipedia's station infobox has an affiliations field -- "Seahawks Radio Network",
+    "ESPN Radio" -- and step 4 now files it as tags. This step reads it for stations step 4 already matched, fifty
+    articles a request, one request a second, so a catalog looked up before 11 October gains its networks in minutes
+    rather than hours. Each affiliation becomes a tag, so Any Field and Keywords find "Seahawks"; nothing else
+    changes, and a second run adds nothing new."""
+    c = sqlite3.connect(sDb)
+    c.execute("PRAGMA journal_mode=WAL")
+    lsCols = set(r[1] for r in c.execute("pragma table_info(stations)"))
+    if "wikipedia" not in lsCols:
+        say("This copy has no wikipedia column. Run fetchStations --fresh first."); c.close(); return 1
+    dByTitle = {}
+    for iId, sUrl, sTags in c.execute("select station_id, wikipedia, tags from stations where wikipedia like 'http%'"):
+        sTitle = urllib.parse.unquote(sUrl.rsplit("/wiki/", 1)[-1]).replace("_", " ")
+        dByTitle.setdefault(sTitle, []).append(iId)
+    lsTitles = sorted(dByTitle)
+    if not lsTitles:
+        say("No station here has its Wikipedia article yet; run fetchStations --official-only first."); c.close(); return 0
+    iMinutes = max(1, -(-(len(lsTitles) // 50 + 1) * 2 // 60))
+    say("Reading the affiliations of %d Wikipedia article%s, fifty a request, one request a second: about %d minute%s." % (len(lsTitles), "" if len(lsTitles) == 1 else "s", iMinutes, "" if iMinutes == 1 else "s"))
+    iStations = iTags = iArticles = 0
+    for iStart in range(0, len(lsTitles), 50):
+        lsBatch = lsTitles[iStart:iStart + 50]
+        dParams = {"action": "query", "prop": "revisions", "rvprop": "content", "rvslots": "main", "titles": "|".join(lsBatch)}
+        lsPages = None
+        for iTry in range(3):
+            try:
+                lsPages, sWhy = wikiPages(dParams)
+                if sWhy: logLine("affiliations batch %d: %s" % (iStart // 50 + 1, sWhy))
+                break
+            except WikiRefused as oRefused:
+                logLine("affiliations batch %d refused (%s); waiting %d seconds, as asked" % (iStart // 50 + 1, oRefused, oRefused.iWait)); time.sleep(oRefused.iWait)
+        if lsPages is None:
+            say("Wikipedia kept refusing, so the step stopped; run fetchStations --affiliations again later. Nothing is lost."); break
+        for oPage in lsPages:
+            sText = ""
+            try: sText = oPage["revisions"][0]["slots"]["main"]["*"]
+            except Exception:
+                try: sText = oPage["revisions"][0].get("content", "") or oPage["revisions"][0].get("*", "")
+                except Exception: pass
+            lsItems = affiliationItems(infoboxFields(sText).get("affiliations", "") or infoboxFields(sText).get("network", ""))
+            if not lsItems: continue
+            iArticles += 1
+            for iId in dByTitle.get(oPage.get("title", ""), []):
+                sHave = c.execute("select tags from stations where station_id=?", (iId,)).fetchone()[0] or ""
+                sNew = addLines(sHave, lsItems)
+                if sNew != sHave:
+                    c.execute("update stations set tags=? where station_id=?", (sNew, iId))
+                    iStations += 1; iTags += len(sNew.split("\n")) - len([s for s in sHave.split("\n") if s.strip()])
+                    logLine("affiliations %d %s: %s" % (iId, oPage.get("title", ""), "; ".join(lsItems)))
+        c.commit()
+        time.sleep(c_dWikiPause)
+    c.close()
+    say("Affiliations: %d articles name networks; %d stations gained %d tags." % (iArticles, iStations, iTags))
+    return 0
+
 
 def importPlaylist(sDb, sPath, logLine, say):
     """The stations in an .m3u, .m3u8 or .pls file, added as the listener's
@@ -478,7 +563,7 @@ def official(sDb, sCountry, iLimit, bAgain, logLine, say):
             iId, sNotes, sTags = r[0], r[2] or "", r[3] or ""
             if d:
                 iFilled[0] += 1
-                lsTagNew = [s.strip() for s in re.split(r"[,/;]", d.get("format", "")) if s.strip()]
+                lsTagNew = [s.strip() for s in re.split(r"[,/;]", d.get("format", "")) if s.strip()] + affiliationItems(d.get("affiliations", ""))
                 sNotesNew = sNotes
                 if d.get("extract") and d["extract"][:60].lower() not in sNotes.lower():
                     sNotesNew = (sNotes + "\n\n" if sNotes else "") + d["extract"]
@@ -499,8 +584,8 @@ def official(sDb, sCountry, iLimit, bAgain, logLine, say):
             try:
                 d, sWhy = officialStation(r[1] or "")
             except WikiRefused as oRefused:
-                d = None; sWhy = "refused: " + str(oRefused)
-                time.sleep(60)
+                d = None; sWhy = "refused: %s; waited %d seconds, as asked" % (oRefused, oRefused.iWait)
+                time.sleep(oRefused.iWait)
                 with oLock: bRefused[0] = True
             with oLock: lsOut.append((r, d, sWhy))
             time.sleep(c_dWikiPause)
@@ -769,6 +854,7 @@ def main():
     bReportOnly = False
     bForce = False
     bConventionsOnly = False
+    bAffiliations = False
     sImport = ""
     bAgain = False
     bFresh = False
@@ -784,11 +870,18 @@ def main():
         if sArg == "--no-official": bNoOfficial = True; i += 1; continue
         if sArg in ("--report", "--report-only"): bReportOnly = True; i += 1; continue
         if sArg == "--force": bForce = True; i += 1; continue
-        if sArg == "--import" and i + 1 < len(lsArgs): sImport = lsArgs[i + 1]; i += 2; continue
+        if sArg == "--import":
+            # A PLAYLIST MUST BE NAMED (11 October 2026): "--import" with no file after it was skipped in silence, so a
+            # run meant to import only reported on the catalog and nobody could tell why.
+            if i + 1 >= len(lsArgs) or lsArgs[i + 1].startswith("--"):
+                print("--import needs the playlist after it, for example: fetchStations --import stations.m3u"); return 2
+            sImport = lsArgs[i + 1]; i += 2; continue
         if sArg == "--fresh": bFresh = True; i += 1; continue
         if sArg == "--again": bAgain = True; i += 1; continue
         if sArg == "--conventions": bConventionsOnly = True; i += 1; continue
-        if sArg.startswith("-"): i += 1; continue
+        if sArg == "--affiliations": bAffiliations = True; i += 1; continue
+        if sArg.startswith("-"):
+            print("Unknown option %s, so nothing was done. Read the top of fetchStations.py for the options." % sArg); return 2
         sDb = sArg; i += 1
     if not sDb:
         # IN THE DEVELOPMENT TREE, THE TEMPLATE ITSELF (9 October 2026). Run from a project -- templates\RadioTrail
@@ -847,10 +940,14 @@ def main():
     print("Log: " + sLog)
     logLine("fetchStations started " + datetime.datetime.now().isoformat())
     logLine("Script: " + os.path.abspath(__file__) + " | Python " + sys.version.split()[0] + " | " + sys.platform)
+    logLine("Command line: " + " ".join(sys.argv) + " | working folder: " + os.getcwd())
     logLine("Database: " + sDb + " | source: " + sSource + " | country: " + (sCountry or "(all)") + " | limit: " + str(iLimit or "(none)"))
 
     if sImport:
         iCode = importPlaylist(sDb, sImport, logLine, say)
+        say("The log is " + sLog); logLine("finished " + datetime.datetime.now().isoformat()); return iCode
+    if bAffiliations:
+        iCode = affiliations(sDb, logLine, say)
         say("The log is " + sLog); logLine("finished " + datetime.datetime.now().isoformat()); return iCode
     if bOfficialOnly:
         iCode = official(sDb, sCountry, iLimit, bAgain, logLine, say)

@@ -19,6 +19,11 @@
 ; genre -- so Keywords finds Seahawks. fetchStations does this as its third
 ; step; --country "United States" keeps the whole run to one country.
 ;
+; WHICH NETWORKS CARRY IT (11 October 2026). Wikipedia's station infobox names a station's affiliations -- a team's
+; radio network, ESPN Radio -- which the station rarely says itself. They go to tags, one per line, so Any Field finds
+; "Seahawks" on every affiliate whose article says so. fetchStations --affiliations adds them to a copy looked up
+; before.
+;
 ; WHERE IT COMES FROM. The stations: Radio Browser, a volunteer directory, and
 ; SomaFM's channel list; the official records: Wikipedia. The design, and the
 ; ACB Media and NFB Radio addresses, follow Quill Radio, the successor to the

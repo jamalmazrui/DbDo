@@ -669,6 +669,28 @@ if exist "!sHere!DbDo.ico" (
 )
 if errorlevel 1 goto :build_failed
 echo DbDo.exe built.
+
+rem ---- the search self-test (10 October 2026) ----
+rem Any Field and Keywords both stopped finding "seahawks" in a full RadioTrail, and no build noticed. DbDo.exe
+rem --selftest-search opens the catalog read-only through the same code the window uses and runs both searches for
+rem each term; any term not found both ways, or records it could not read, stops the build here, before anything
+rem is packaged. It runs when the full catalog is present, which only the development tree keeps.
+if exist "!sHere!templates\RadioTrail\RadioTrail.db" (
+  echo Searching RadioTrail with Any Field and Keywords ...
+  echo Search self-test: DbDo.exe --selftest-search on templates\RadioTrail\RadioTrail.db >> "!log!"
+  "DbDo.exe" --selftest-search "!sHere!logs\DbDo-search-%sStamp%.log" "!sHere!templates\RadioTrail\RadioTrail.db" stations seahawks seattle bolivia "santa cruz" >> "!log!" 2>&1
+  set "iSearch=!errorlevel!"
+  if exist "!sHere!logs\DbDo-search-%sStamp%.log" type "!sHere!logs\DbDo-search-%sStamp%.log" >> "!log!"
+  echo Search self-test: exit code !iSearch!>> "!log!"
+  if not "!iSearch!"=="0" (
+    echo The search self-test failed: a search for a station in RadioTrail found nothing, or could not run.
+    echo Its report is logs\DbDo-search-%sStamp%.log, and the build log has the details.
+    popd & popd & exit /b 1
+  )
+  echo Searches found every station.
+) else (
+  echo Search self-test: skipped, no RadioTrail catalog in templates\RadioTrail>> "!log!"
+)
 dir DbDo.exe | findstr DbDo.exe
 
 rem ---- build the 2db importer in BOTH bitnesses ----

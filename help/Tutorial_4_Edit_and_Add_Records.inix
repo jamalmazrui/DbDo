@@ -44,7 +44,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=I type the new value and press Enter to keep it.
 Key=Enter
-Hear=(the record, with its new status)
+Hear=status, applied
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -58,7 +58,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=Down Arrow to the value, and Enter.
 Key=Enter
-Hear=(the record, with the picked status)
+Hear=status, interview
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -72,7 +72,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=I fill each field with F2 as before. Shift plus A, A for Added, says when this record was added.
 Key=Shift+A
-Hear=(the date and time the record was added)
+Hear=added: today at 3:40 PM
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

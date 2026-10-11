@@ -267,7 +267,30 @@ namespace DbDo
                 // replaced it with the fourteen-row template (5 October 2026).
                 // "Newer replaces older" is right for a report or a settings
                 // file beside the database; it is never right for the database.
-                if (sDstPath.EndsWith(".db", StringComparison.OrdinalIgnoreCase)) return;
+                if (sDstPath.EndsWith(".db", StringComparison.OrdinalIgnoreCase))
+                {
+                    // AN UNTOUCHED COPY TAKES THE NEWER TEMPLATE (10 October 2026). The rule above left a copy nobody had
+                    // changed as it was forever: a RadioTrail seeded with fourteen stations never received the catalog
+                    // of sixty thousand that later installs shipped. A copy keeps its source's last-write time and gets
+                    // the time it was copied as its creation time, so a copy never written since it was seeded was
+                    // last written before it was created; any change, by the person or by DbDo, writes it later. Only
+                    // such an untouched copy is replaced, and only by a newer template, and it is first kept beside
+                    // the new one as <name>.before-update-<stamp>.bak. A database anyone has changed is never touched.
+                    System.DateTime dtWritten = System.IO.File.GetLastWriteTimeUtc(sDstPath);
+                    System.DateTime dtCreated = System.IO.File.GetCreationTimeUtc(sDstPath);
+                    bool bUntouched = dtWritten <= dtCreated.AddSeconds(2);
+                    bool bNewer = System.IO.File.GetLastWriteTimeUtc(sSrcPath) > dtWritten;
+                    if (bUntouched && bNewer)
+                    {
+                        string sKept = sDstPath + ".before-update-" + System.DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".bak";
+                        clearReadOnly(sDstPath);
+                        System.IO.File.Move(sDstPath, sKept);
+                        System.IO.File.Copy(sSrcPath, sDstPath, false);
+                        clearReadOnly(sDstPath);
+                        try { DbDoLog.write("Seeding: " + sDstPath + " was untouched since it was seeded, so the newer template replaced it; the old copy is " + sKept + "."); } catch { }
+                    }
+                    return;
+                }
                 if (System.IO.File.GetLastWriteTimeUtc(sSrcPath)
                     > System.IO.File.GetLastWriteTimeUtc(sDstPath))
                 {
@@ -2813,29 +2836,60 @@ namespace DbDo
         // they read, and both sides are lowered, so case is ignored -- for English
         // letters, which is what SQLite's lower() folds. instr finds the text
         // literally: % and _ in it are characters, not wildcards.
-        // UNICODE CASE WHEN SQLEAN IS THERE (10 October 2026): SQLite's own lower() folds English letters only, so
-        // "CAFÉ" did not match "café". SQLean's text extension, in the sqlean.dll bundle DbDo loads when it sits beside
-        // the program, has text_lower, which folds every letter Unicode defines. The connection is asked once whether
-        // text_lower answers, and lower() is used when it does not, so a copy without the bundle filters as before.
-        private object oTextLowerConn;
-        private bool bTextLower;
+        // NOT SQLEAN'S text_lower (11 October 2026). SQLite's own lower() folds English letters only, so "CAFÉ" does not
+        // match "café", and SQLean's text_lower folds every letter Unicode defines. It answered a one-word probe
+        // correctly, but the build's search self-test, counting RadioTrail's 60,000 stations with it, ended in an
+        // access violation inside the native code -- which .NET cannot catch, so in the window it would have closed
+        // DbDo during an Any Field search. Any Field folds case with lower(), as it did before.
         private string caseFoldFunction()
         {
-            if (!ReferenceEquals(oTextLowerConn, oConn))
+            return "lower";
+        }
+
+        public string caseFold { get { return caseFoldFunction(); } }
+
+        // countAnyField: how many records of a table hold some text in any field, and the WHERE that finds them.
+        // A SEARCH THAT FAILS SAYS SO (10 October 2026). Any Field read a failed count as zero and said "No record
+        // has seahawks": queryRowsSql logs an error and returns no rows. The count now raises its error.
+        public int countAnyField(string sTable, string sText, out string sWhere)
+        {
+            sWhere = anyFieldWhere(sText);
+            int iRows;
+            List<string[]> lCount = queryRowsSqlOrThrow("SELECT count(*) FROM \"" + sTable.Replace("\"", "\"\"") + "\" WHERE " + sWhere, 1, out iRows);
+            int iMatches = 0;
+            if (lCount != null && lCount.Count > 0 && lCount[0] != null && lCount[0].Length > 0) int.TryParse(lCount[0][0] ?? "0", out iMatches);
+            return iMatches;
+        }
+
+        // scanForSubstring: Keywords' walk through the recordset, every field of every record from iFrom by iStep,
+        // for text it contains. It is here, not in the window, so DbDo's self-test runs the very code Keywords runs.
+        // A record that cannot be read is counted, with the first error, rather than skipped in silence: when every
+        // record failed, Keywords said "Not found" (10 October 2026). Returns the position found, or 0.
+        public int scanForSubstring(string sSub, bool bCaseSensitive, int iFrom, int iStep, out int iUnread, out string sFirstError)
+        {
+            iUnread = 0; sFirstError = "";
+            int iCount = recordCount;
+            List<string> lFields = getFieldNames();
+            if (string.IsNullOrEmpty(sSub) || iCount <= 0 || lFields == null || lFields.Count == 0) return 0;
+            StringComparison cmp = bCaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+            for (int iPos = iFrom; iPos >= 1 && iPos <= iCount; iPos += iStep)
             {
-                oTextLowerConn = oConn;
-                bTextLower = false;
                 try
                 {
-                    int iRows;
-                    List<string[]> lsAnswer = queryRowsSql("SELECT text_lower('\u00C9A')", 1, out iRows);
-                    bTextLower = lsAnswer != null && lsAnswer.Count > 0 && lsAnswer[0].Length > 0
-                        && lsAnswer[0][0] == "\u00E9a";
+                    absolutePosition = iPos;
+                    foreach (string sCol in lFields)
+                    {
+                        string sVal = getFieldValue(sCol) ?? "";
+                        if (sVal.Length > 0 && sVal.IndexOf(sSub, cmp) >= 0) return iPos;
+                    }
                 }
-                catch { bTextLower = false; }
-                try { DbDoLog.write("Any Field folds case with " + (bTextLower ? "SQLean's text_lower, for every Unicode letter" : "SQLite's lower, for English letters") + "."); } catch { }
+                catch (Exception oError)
+                {
+                    iUnread++;
+                    if (sFirstError.Length == 0) sFirstError = "record " + iPos + ": " + oError.Message;
+                }
             }
-            return bTextLower ? "text_lower" : "lower";
+            return 0;
         }
 
         public string anyFieldWhere(string sText)
@@ -4195,6 +4249,18 @@ namespace DbDo
         // conditions and multiple output columns.
         public List<string[]> queryRowsSql(string sSql, int iMaxRows, out int iCountFound)
         {
+            return queryRowsSqlCore(sSql, iMaxRows, out iCountFound, false);
+        }
+
+        // queryRowsSqlOrThrow: the same query, but a failure is raised, not logged and answered with no rows. A
+        // search must never read "the query failed" as "nothing matched" (10 October 2026).
+        public List<string[]> queryRowsSqlOrThrow(string sSql, int iMaxRows, out int iCountFound)
+        {
+            return queryRowsSqlCore(sSql, iMaxRows, out iCountFound, true);
+        }
+
+        private List<string[]> queryRowsSqlCore(string sSql, int iMaxRows, out int iCountFound, bool bThrow)
+        {
             iCountFound = 0;
             List<string[]> lRows = new List<string[]>();
             if (!isOpen() || string.IsNullOrEmpty(sSql)) return lRows;
@@ -4229,6 +4295,7 @@ namespace DbDo
             {
                 try { DbDoLog.write("queryRowsSql failed: " + ex.Message + " SQL=" + sSql); }
                 catch { }
+                if (bThrow) throw;
             }
             finally
             {
@@ -9106,6 +9173,10 @@ namespace DbDo
         // from the ACTIVE window's own table and calls this, so a chord
         // always acts on the focused window rather than whichever window
         // happened to register the chord first.
+        // dDisabledWhy: the reason a command is unavailable, when it is something other than "no database or table",
+        // so a refused hotkey says what is true ("No filter is in force.") rather than a guess (10 October 2026).
+        public static Dictionary<ToolStripMenuItem, string> dDisabledWhy = new Dictionary<ToolStripMenuItem, string>();
+
         public static bool dispatchMenuItem(ToolStripMenuItem mi, Keys key)
         {
             if (mi == null) return false;
@@ -9116,7 +9187,9 @@ namespace DbDo
                 // table selected). Announce why the key did nothing,
                 // and consume it so the grid never sees it.
                 string sCmd2 = dMenuToCommand.ContainsKey(mi) ? dMenuToCommand[mi] : mi.Text.Replace("&", "");
-                Say.say(sCmd2 + " is unavailable right now (open a database file or select a table first)");
+                string sWhy;
+                if (dDisabledWhy.TryGetValue(mi, out sWhy)) Say.say(sCmd2 + " is unavailable: " + sWhy);
+                else Say.say(sCmd2 + " is unavailable right now (open a database file or select a table first)");
                 return true;
             }
             if (bKeyDescriber)
@@ -15264,7 +15337,14 @@ namespace DbDo
 
             miViewSelect.Enabled = bHasTable;
             if (miViewFilterRegex != null) miViewFilterRegex.Enabled = bHasTable;
-            miViewResetFilter.Enabled = bHasTable && db.filter.Length > 0;
+            // CLEAR FILTER SEES BOTH KINDS OF FILTER (10 October 2026). It looked only at the field filter, so an Any
+            // Field search -- a SQL condition, remembered with the table and restored when it reopens -- could not be
+            // cleared: RadioTrail reopened at the three stations a search for "seahawks" had found, Clear Filter said it
+            // was unavailable, and every later Keywords search looked only at those three.
+            bool bAnyFilter = bHasTable && (db.filter.Length > 0 || db.sqlFilter.Length > 0);
+            miViewResetFilter.Enabled = bAnyFilter;
+            if (bHasTable && !bAnyFilter) KeyMap.dDisabledWhy[miViewResetFilter] = "No filter is in force.";
+            else KeyMap.dDisabledWhy.Remove(miViewResetFilter);
             miViewResetSort.Enabled = bHasTable && db.sort.Length > 0;
             miViewUpdate.Enabled = bHasTable;
             // Order / Reverse Order: explicit enable so the listbox
@@ -15349,7 +15429,12 @@ namespace DbDo
                 && kOnly != Keys.LShiftKey && kOnly != Keys.RShiftKey && kOnly != Keys.LControlKey
                 && kOnly != Keys.RControlKey && kOnly != Keys.LMenu && kOnly != Keys.RMenu)
             {
-                try { DbDoLog.write("key: " + KeyMap.friendlyKey(keyData)); } catch { }
+                // A modifier held alone is not a keystroke worth a line: holding Alt+Shift wrote "Alt+Shift+NoName"
+                // eleven times in a second (10 October 2026). The chord it becomes is logged.
+                Keys kCode = keyData & Keys.KeyCode;
+                bool bModifierOnly = kCode == Keys.ShiftKey || kCode == Keys.ControlKey || kCode == Keys.Menu
+                    || kCode == Keys.LWin || kCode == Keys.RWin || kCode == Keys.None;
+                if (!bModifierOnly) try { DbDoLog.write("key: " + KeyMap.friendlyKey(keyData)); } catch { }
             }
             // Key Describer mode intercepts EVERY key before any command
             // or grid navigation runs. A key bound to a command is
@@ -18430,6 +18515,10 @@ namespace DbDo
             int iCount = db.recordCount;
             string sTable = db.currentTable;
             string sMsg = sTable + ", " + iCount + (iCount == 1 ? " row" : " rows");
+            // A TABLE THAT REOPENS FILTERED SAYS SO (10 October 2026): RadioTrail came back as "stations, 3 rows",
+            // with nothing to say a search was still in force.
+            if (db.sqlFilter.Length > 0) sMsg += ", filtered: " + db.sqlFilterSpoken;
+            if (db.filter.Length > 0) sMsg += (db.sqlFilter.Length > 0 ? "; and " : ", filtered: ") + "where " + db.filter;
             Say.say(sMsg);
         }
 
@@ -23405,38 +23494,25 @@ namespace DbDo
             if (string.IsNullOrEmpty(sSub)) return false;
             int iCount = db.recordCount;
             if (iCount == 0) return false;
-            List<string> lFields = db.getFieldNames();
-            if (lFields == null || lFields.Count == 0) return false;
             int iStart = db.absolutePosition;
             int iStep = bForward ? 1 : -1;
-            int iFrom = bFromCurrent ? iStart : (bForward ? 1 : iCount);
-            int iPos = bFromCurrent ? iFrom + iStep : iFrom;
+            int iFrom = bFromCurrent ? iStart + iStep : (bForward ? 1 : iCount);
             object original = null;
             try { original = db.bookmark; } catch { }
-            StringComparison cmp = bCaseSensitive
-                ? StringComparison.Ordinal
-                : StringComparison.OrdinalIgnoreCase;
-            while (iPos >= 1 && iPos <= iCount)
+            int iUnread;
+            string sFirstError;
+            int iFound = db.scanForSubstring(sSub, bCaseSensitive, iFrom, iStep, out iUnread, out sFirstError);
+            if (iFound > 0)
             {
-                try
-                {
-                    db.absolutePosition = iPos;
-                    foreach (string sCol in lFields)
-                    {
-                        string sVal = db.getFieldValue(sCol) ?? "";
-                        if (sVal.Length == 0) continue;
-                        if (sVal.IndexOf(sSub, cmp) >= 0)
-                        {
-                            try { DbDoLog.write("Find: matched '" + sSub + "' at position " + iPos + " of " + iCount + " (column " + sCol + ")."); } catch { }
-                            return true;
-                        }
-                    }
-                }
-                catch { }
-                iPos += iStep;
+                db.absolutePosition = iFound;
+                try { DbDoLog.write("Find: matched '" + sSub + "' at position " + iFound + " of " + iCount + "."); } catch { }
+                return true;
             }
             if (original != null) try { db.bookmark = original; } catch { }
-            try { DbDoLog.write("Find: no match for '" + sSub + "' scanning " + iCount + " rows."); } catch { }
+            try { DbDoLog.write("Find: no match for '" + sSub + "' scanning " + iCount + " rows; " + iUnread + " could not be read" + (iUnread > 0 ? " (" + sFirstError + ")" : "") + "."); } catch { }
+            // A RECORD NOT READ IS NOT A RECORD WITHOUT THE TEXT (10 October 2026): say so, rather than "Not found".
+            if (iUnread > 0)
+                throw new InvalidOperationException("Keywords could not read " + iUnread + " of " + iCount + " records, so it cannot say the text is absent. First problem: " + sFirstError);
             return false;
         }
 
@@ -24195,7 +24271,8 @@ namespace DbDo
 
         // viewSelectClicked (Control+F): Filter Records via the
         // same field form as Edit Record. One textbox per editable
-        // field; a bare value is an exact match, a leading % is a
+        // field; on a text field a bare value is a case-insensitive substring and = asks for an exact match (10
+        // October 2026); elsewhere a bare value is an exact match. A leading % is a
         // case-insensitive substring (LIKE), and a leading operator
         // (= <= >= < > <> !=) compares instead. Several filled fields
         // AND together. When no filter is active the form opens
@@ -24358,7 +24435,10 @@ namespace DbDo
                     if (!dlg.dValues.TryGetValue(sF, out sVal)) continue;
                     sVal = (sVal ?? "").Trim();
                     if (sVal.Length == 0) continue;
-                    string sPred = sBuildFieldPredicate(sF, sVal);
+                    int iType = 0;
+                    try { iType = db.getFieldType(sF); } catch { }
+                    bool bText = iType == 8 || iType == 129 || iType == 130 || (iType >= 200 && iType <= 203);
+                    string sPred = sBuildFieldPredicate(sF, sVal, bText);
                     if (!string.IsNullOrEmpty(sPred)) lPredicates.Add(sPred);
                 }
                 string sNewExpr = string.Join(" AND ", lPredicates.ToArray());
@@ -24411,11 +24491,8 @@ namespace DbDo
             try
             {
                 string sTable = db.currentTable;
-                string sWhere = db.anyFieldWhere(sText);
-                int iFound;
-                List<string[]> lCount = db.queryRowsSql("SELECT count(*) FROM \"" + sTable.Replace("\"", "\"\"") + "\" WHERE " + sWhere, 1, out iFound);
-                int iMatches = 0;
-                if (lCount != null && lCount.Count > 0 && lCount[0] != null && lCount[0].Length > 0) int.TryParse(lCount[0][0] ?? "0", out iMatches);
+                string sWhere;
+                int iMatches = db.countAnyField(sTable, sText, out sWhere);
                 if (iMatches == 0) { Say.sayForced("No record has " + sText + " in any field."); return; }
                 db.selectTableFiltered(sTable, sWhere, "any field contains " + sText);
                 db.filter = "";
@@ -24451,9 +24528,20 @@ namespace DbDo
         // provider allows. Note the wildcard: ADO Filter's LIKE uses '*'
         // (not SQL's '%'), so the user-facing '%' prefix is translated to
         // a pair of '*' wildcards around the value.
+        // A BARE WORD ON A TEXT FIELD IS "CONTAINS" (10 October 2026). A bare value was an exact match, so "seattle"
+        // in RadioTrail's city box never matched "Seattle, Washington", and a listener could not guess to type
+        // "%seattle". On a text field a bare value is now a case-insensitive substring, ADO's LIKE '*value*'; "="
+        // still asks for an exact match. On a number or a date nothing changes, since ADO's LIKE fails there.
         private static string sBuildFieldPredicate(string sField, string sValue)
         {
+            return sBuildFieldPredicate(sField, sValue, false);
+        }
+
+        private static string sBuildFieldPredicate(string sField, string sValue, bool bText)
+        {
             string sV = (sValue ?? "").Trim();
+            if (bText && sV.Length > 0 && "%=<>!".IndexOf(sV[0]) < 0)
+                return sField + " LIKE '*" + sV.Replace("'", "''") + "*'";
             if (sV.Length == 0) return "";
 
             // '%' prefix: case-insensitive substring match.
@@ -35025,10 +35113,21 @@ namespace DbDo
         {
             string sExeDir = Path.GetDirectoryName(Application.ExecutablePath) ?? ".";
             string sCandidate = Path.Combine(Homer.Paths.logs(), "DbDo.log");
+            // THE LOG IS KEPT, NOT EMPTIED (10 October 2026). Every DbDo process emptied DbDo.log as it started,
+            // including the moment-long one the desktop hotkey starts to bring a running DbDo forward, so pressing
+            // the hotkey erased the running window's record: a search that went wrong left no trace. A session now
+            // appends; past 2 MB the log becomes DbDo.old.log and a new one begins.
             try
             {
-                using (FileStream fs = File.Create(sCandidate)) { }
+                if (File.Exists(sCandidate) && new FileInfo(sCandidate).Length > 2 * 1024 * 1024)
+                {
+                    string sOld = Path.Combine(Homer.Paths.logs(), "DbDo.old.log");
+                    if (File.Exists(sOld)) File.Delete(sOld);
+                    File.Move(sCandidate, sOld);
+                }
+                using (FileStream fs = new FileStream(sCandidate, FileMode.Append, FileAccess.Write, FileShare.ReadWrite)) { }
                 sPath = sCandidate;
+                write("----------------------------------------------------------------");
             }
             catch
             {
@@ -35479,6 +35578,44 @@ namespace DbDo
             if (lArgs.Count >= 2) sTable = lArgs[1];
         }
 
+        // runSearchSelfTest: DbDo.exe --selftest-search <report> <database> <table> <term> [<term> ...]
+        // THE BUILD SEARCHES THE CATALOG (10 October 2026). Any Field and Keywords both stopped finding "seahawks" in
+        // a full RadioTrail, and nothing noticed until a listener did. This opens the database read-only through the
+        // same DbDoManager and connection the window uses, and runs the very code each command runs: countAnyField
+        // for Any Field, scanForSubstring for Keywords. One line per term goes to the report; the exit code is 0 when
+        // every term is found both ways, 1 when one is not, and 2 when the test could not run.
+        private static int runSearchSelfTest(string[] aArgs)
+        {
+            int iAt = Array.FindIndex(aArgs, s => s.Equals("--selftest-search", StringComparison.OrdinalIgnoreCase));
+            List<string> lsOut = new List<string>();
+            if (aArgs.Length < iAt + 5) { Console.WriteLine("Usage: DbDo --selftest-search <report> <database> <table> <term> ..."); return 2; }
+            string sReport = aArgs[iAt + 1], sDb = aArgs[iAt + 2], sTable = aArgs[iAt + 3];
+            int iResult = 0;
+            try
+            {
+                using (DbDoManager oDb = new DbDoManager())
+                {
+                    oDb.openDatabase(sDb, sTable, true);
+                    lsOut.Add("database " + sDb + ", table " + sTable + ", " + oDb.recordCount + " records; Any Field folds case with " + oDb.caseFold);
+                    for (int i = iAt + 4; i < aArgs.Length; i++)
+                    {
+                        string sTerm = aArgs[i], sWhere, sError;
+                        int iUnread;
+                        int iAny = oDb.countAnyField(sTable, sTerm, out sWhere);
+                        int iPos = oDb.scanForSubstring(sTerm, false, 1, 1, out iUnread, out sError);
+                        bool bGood = iAny > 0 && iPos > 0 && iUnread == 0;
+                        if (!bGood) iResult = 1;
+                        lsOut.Add((bGood ? "PASS " : "FAIL ") + sTerm + ": Any Field " + iAny + (iAny == 1 ? " record" : " records") + "; Keywords "
+                            + (iPos > 0 ? "found at record " + iPos : "not found") + (iUnread > 0 ? "; " + iUnread + " records unread, " + sError : ""));
+                    }
+                }
+            }
+            catch (Exception oError) { lsOut.Add("ERROR the test could not run: " + oError.Message); iResult = 2; }
+            try { System.IO.File.WriteAllLines(sReport, lsOut.ToArray()); } catch { }
+            foreach (string s in lsOut) Console.WriteLine(s);
+            return iResult;
+        }
+
         public static int Main(string[] aArgs)
         {
             try
@@ -35584,6 +35721,7 @@ namespace DbDo
                 // re-running the install after a JAWS or NVDA upgrade.
                 foreach (string sArg in aArgs)
                 {
+                    if (sArg.Equals("--selftest-search", StringComparison.OrdinalIgnoreCase)) return runSearchSelfTest(aArgs);
                     if (sArg.Equals("--install-jaws-settings", StringComparison.OrdinalIgnoreCase)
                      || sArg.Equals("-install-jaws-settings", StringComparison.OrdinalIgnoreCase)
                      || sArg.Equals("/install-jaws-settings", StringComparison.OrdinalIgnoreCase))

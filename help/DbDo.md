@@ -214,7 +214,7 @@ Marked records can then be reported, filtered, or exported as a set, and several
 
 Filtering and sorting reshape the grid without touching the physical table.
 
-- **Filter Records** (Control+F) limits the grid to records holding some text in any field, or matching a condition on each field; **Clear Filter** (Control+Shift+F) removes it; **Filter by Regex** filters by pattern; **Say Filter** (Shift+F) speaks the current filter.
+- **Filter Records** (Control+F) limits the grid to records holding some text in any field, or matching a condition on each field; **Clear Filter** (Control+Shift+F) removes it, keeping you on the same record. A table that reopens with a filter still in force says so as it opens. In the Fields form, a word typed into a text field finds records containing it, whatever its case: `seattle` in RadioTrail's city box finds "Seattle, Washington". Begin with `=` for an exact match, or with `<`, `>`, `<=`, `>=` or `!=` to compare; several filled boxes must all match; **Filter by Regex** filters by pattern; **Say Filter** (Shift+F) speaks the current filter.
 - **Order Records** (Alt+O) sorts the grid by a field; **Reverse Order** (Alt+Shift+O) reverses it; **Clear Sort** returns to natural order; **Say Order** (Shift+O) speaks the current sort.
 
 Sorting reads numbers as numbers: volume 9 comes after 7 and 6.5 even if some
@@ -958,6 +958,25 @@ name, tags and place, and no more. "Official home of the Seattle Seahawks" is in
 the station's own stream headers and on its home page, and that is where
 fetchStations reads it: the slogan into **slogan**, the rest into **descrip**,
 new genre words into **genre**. Then Keywords, Control+K, finds "Seahawks".
+
+Most stations that carry a team's games never say so themselves. A small
+station in Medford, Oregon, may carry every Seahawks game while its stream and
+home page talk only about local news. So the Wikipedia step also keeps each
+station's **affiliations** -- the networks its article says it carries, such as
+"Seahawks Radio Network" or "ESPN Radio" -- one per line in **tags**. Any Field
+for `seahawks` then finds those stations too. Only some articles name a team's
+network, so this finds some of a team's stations, not all: on 11 October it
+added 4,059 network tags to 1,579 stations, but only KHTQ in Spokane and KIRO-FM
+in Seattle for the Seahawks, out of the 65 or so stations the team lists. A copy looked up before this was
+added gains its networks with `fetchStations --affiliations`, which takes
+minutes, not hours.
+
+Finding a station is not the same as hearing the game. Leagues often require
+a station to block game audio on its stream for listeners outside its own
+broadcast area, and teams say so on their own pages. Some listeners report
+hearing a game from one station one week and not the next. So treat a team's
+stations as candidates: try several, and record what worked in **status** and
+**notes**, which no refresh ever changes.
 
 A row reads name, genre and country. State is left off the row because it is
 empty for most of the world and an empty cell is spoken as "blank" on every

@@ -30,7 +30,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=I choose RadioTrail and press Enter.
 Key=Enter
-Hear=(stations, the first station)
+Hear=stations, 60342 rows
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -60,7 +60,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=Three: a sports station near Seattle, one in British Columbia, and a music station in eastern Washington. Control plus F again; with a filter in force there are more buttons. N for Narrow keeps seahawks and adds a field.
 Key=N
-Hear=(the field form, a box for each field)
+Hear=Filter Records dialog, name: edit
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -95,7 +95,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=Alt plus Shift plus P, Play Stream, plays the station I am on in the Homer Player. If the game is on, I hear it.
 Key=Alt+Shift+P
-Hear=(the Homer Player, playing KIRO)
+Hear=Homer Player, KIRO 710 ESPN Seattle
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -115,7 +115,7 @@ Hear=Marked
 
 Say=A planned misstep: the filter stays until it is cleared, so a later search finds only these two. Control plus Shift plus F clears it, and I stay on the same station.
 Key=Control+Shift+F
-Hear=Filter cleared. (the number of stations) records.
+Hear=Filter cleared. 60342 records.
 Hear=KIRO 710 ESPN Seattle
 Note=Confirm the wording with a live run: buildTutorials -live.
 
@@ -130,7 +130,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=Shift plus Space reads every marked record in full, to check before acting. Marks are for acting on: Delete, Copy, Export and Play all work on the marked records when there are any.
 Key=Shift+Space
-Hear=(KIRO's record, field by field)
+Hear=name: KIRO 710 ESPN Seattle; genre: sports; city: Tacoma, Washington; state: Washington
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

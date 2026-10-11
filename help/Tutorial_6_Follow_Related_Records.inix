@@ -23,42 +23,42 @@ Hear=DbDo ready
 
 Say=Shift plus R, R for Related, says what this record leads to, changing nothing.
 Key=Shift+R
-Hear=(the related tables and their counts)
+Hear=albums 2, tracks 19
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=Alt plus Right Arrow goes into the related records.
 Key=Alt+Right Arrow
-Hear=(the child table, and its first record)
+Hear=albums: 2 related records
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=Shift plus Z says where I am now.
 Key=Shift+Z
-Hear=(the child table, its record count, the filter that ties it to the parent)
+Hear=albums, 2 records, filtered: artist is Miles Davis
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=Alt plus Right Arrow again goes a level deeper.
 Key=Alt+Right Arrow
-Hear=(the next table down)
+Hear=tracks: 9 related records
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=Alt plus Left Arrow comes back a level, as a browser goes back.
 Key=Alt+Left Arrow
-Hear=(the table one level up)
+Hear=albums, Kind of Blue, Row 1 of 2
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=A planned misstep: three levels deep, and lost. Alt plus Home returns to where I started, from any depth.
 Key=Alt+Home
-Hear=(the starting table, at the record I left)
+Hear=Returned to root (2 levels)
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

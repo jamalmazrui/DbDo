@@ -232,6 +232,9 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a href="#october-2026-searches-you-can-trust"
+id="toc-october-2026-searches-you-can-trust">11 October 2026 – searches
+you can trust</a></li>
 <li><a href="#october-2026-from-the-build-and-release-logs"
 id="toc-october-2026-from-the-build-and-release-logs">9 October 2026 –
 from the build and release logs</a></li>
@@ -390,6 +393,77 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="october-2026-searches-you-can-trust">11 October 2026 – searches
+you can trust</h2>
+<ul>
+<li><p><strong>fetchStations says what it was asked, and waits as long
+as it is told.</strong> A run meant to import a playlist only reported
+on the catalog, and its log could not say why: the command line was not
+logged, and “–import” with no file after it, like any unknown option,
+was skipped in silence. The log now opens with the command line and
+working folder; “–import” without a playlist, or an option fetchStations
+does not know, stops the run with a plain message. When Wikipedia
+refuses a request, fetchStations now waits as long as the server’s
+Retry-After asks, between five seconds and ten minutes, instead of a
+fixed minute.</p></li>
+<li><p><strong>RadioTrail knows which networks carry a station.</strong>
+A listener asking for the station carrying his team’s game is rarely
+helped by what a station says about itself: an affiliate in a small
+market may carry every game while its stream and home page never name
+the team. Wikipedia’s station infobox has an affiliations field, such as
+“Seahawks Radio Network”, and fetchStations now keeps it, one network
+per line in tags, so Any Field and Keywords find every affiliate whose
+article names the team. A list of affiliations, written with templates
+such as hlist or plainlist, keeps its items; they were dropped before.
+<code>fetchStations --affiliations</code> adds the networks to a catalog
+looked up earlier, fifty articles a request, in minutes. The guide now
+says plainly that a station found is a candidate, since leagues often
+block game audio on streams outside a station’s own area.</p></li>
+<li><p><strong>Clear Filter clears an Any Field search, and a table that
+reopens filtered says so.</strong> RadioTrail could reopen as “stations,
+3 rows” – the three stations an earlier search for “seahawks” had found,
+remembered with the table – while Control+Shift+F answered that Clear
+Filter was unavailable, because it looked only at the field filter, not
+at the search. Every later Keywords search then looked at those three
+stations. Clear Filter now sees both, opening a filtered table says
+“stations, 3 rows, filtered: any field contains seahawks”, and Clear
+Filter with nothing to clear says “No filter is in force.”</p></li>
+<li><p><strong>Any Field folds case with SQLite’s lower again.</strong>
+SQLean’s text_lower, which folds every Unicode letter, ended in an
+access violation inside the native code while counting RadioTrail’s
+60,000 stations. .NET cannot catch one, so in the window it would have
+closed DbDo during a search. Any Field ignores case for English letters,
+as it did before.</p></li>
+<li><p><strong>A search that fails says so, and every build searches the
+catalog.</strong> Any Field read a failed query as “nothing found”, and
+Keywords skipped, in silence, every record it could not read. Both now
+report the error. Keywords’ scan moved into the database code, and
+DbDo.exe –selftest-search runs both searches through that same code; the
+build runs it on the RadioTrail catalog for seahawks, seattle, bolivia
+and santa cruz, stopping before packaging if any is not found both ways.
+The report is logs-search-<stamp>.log.</p></li>
+<li><p><strong>A word typed in the Fields form finds records containing
+it.</strong> A bare value was an exact match, so <code>seattle</code> in
+RadioTrail’s city box never matched “Seattle, Washington”. On a text
+field a bare value is now a case-insensitive substring; <code>=</code>
+asks for an exact match, and numbers and dates compare as before. The
+guide says so.</p></li>
+<li><p><strong>An untouched copy of a template takes the newer
+one.</strong> A copy nobody has changed since it was seeded – one last
+written before it was created, which is how Windows marks a copy – is
+replaced by a newer template, and kept beside it as
+<code>&lt;name&gt;.before-update-&lt;stamp&gt;.bak</code>. A database
+anyone has changed is never touched.</p></li>
+<li><p><strong>DbDo.log keeps every session.</strong> Each DbDo process
+emptied the log as it started, including the moment-long one the desktop
+hotkey starts to bring a running DbDo forward, so the hotkey erased the
+running window’s record. Sessions now append, past 2 MB the log becomes
+DbDo.old.log, and a modifier key held alone is no longer logged on every
+repeat.</p></li>
+<li><p><strong>Rebuilt from the published 9 October repository.</strong>
+These changes were made on 10 and 11 October and never published; they
+were applied again to the repository as published.</p></li>
+</ul>
 <h2 id="october-2026-from-the-build-and-release-logs">9 October 2026 –
 from the build and release logs</h2>
 <ul>

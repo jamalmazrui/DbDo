@@ -21,16 +21,16 @@ Hear=DbDo ready
 
 [step]
 
-Say=The title, then the greeting in the message voice. The main view is a list of records: Down Arrow moves by row, and the reader speaks the record.
+Say=The title, then DbDo's greeting. The main view is a list of records: Down Arrow moves by row, and the reader speaks the record.
 Key=Down Arrow
-Hear=(the next record, its first column first)
+Hear=KEXP 90.3 Seattle, WA, Row 2 of 60342
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=Right Arrow moves by column within the record, speaking the column's name and its value.
 Key=Right Arrow
-Hear=(the next column's name and value)
+Hear=city, Seattle, Washington
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -43,7 +43,7 @@ Hear=jobs, 12 records, no filter, sorted by employer
 
 Say=Table, count, filter and sort in one breath; pressed twice, the words open in a window. Shift plus C, C for Cell, says the cell you are on.
 Key=Shift+C
-Hear=(the column's name and the cell's value)
+Hear=cell: city, Seattle, Washington
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

@@ -31,7 +31,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=The last page offers what DbDo works best with, each as a box whose first word is the machine's state read for you: Install, Update or Reinstall.
 Key=Tab
-Hear=(the box for your screen reader's scripts, its first word, checked)
+Hear=Install mpv, plays a station for Play Stream, checked, 1 of 4
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
