@@ -49,21 +49,27 @@
 # to notes. Neither tags nor notes is ever emptied: lines are added, and a
 # line you wrote stays. status and rating are yours alone.
 #
-#   fetchStations                       all three steps, every station
+#   fetchStations                       everything the check finds wanting, then the networks:
+#                                       the best catalog, the one DbDo's installer ships
 #   fetchStations --country "United States"   the catalog for one country only
 #   fetchStations --limit 2000          the 2,000 most voted, for a taste
 #   fetchStations --catalog-only        steps 1 and 2, no asking
 #   fetchStations --enrich-only         step 3 only, on what is there
 #   fetchStations --official-only       step 4 only, on what is there
+#   fetchStations --clean               repairs alone: wrong article matches, leaked markup, duplicate
+#                                       rows; for the shipped template, nobody's own stations or plays
 #   fetchStations --affiliations        the networks each matched article names
 #                                       (Seahawks Radio Network, ESPN Radio), as tags
 #   fetchStations --no-official         skip step 4
 #   fetchStations --report              the quality report alone, nothing fetched
 #   fetchStations --force               every step, whatever the check says
-#   fetchStations --import list.m3u     add the stations in a playlist -- .m3u,
-#                                       .m3u8 or .pls -- as your own, source
-#                                       "mine", keyed by name and address;
-#                                       a station already there is left alone
+#   fetchStations --import              add the stations in every playlist -- .m3u,
+#                                       .m3u8 or .pls -- in Downloads, Documents and
+#                                       Desktop, as your own, source "mine", to YOUR
+#                                       copy, never the shipped template; a station
+#                                       already there is left alone
+#   fetchStations --import list.m3u     the same, from one playlist
+#   fetchStations --import C:\Folder    the same, from every playlist in a folder
 #
 # STATIONS THE CATALOG HAS DROPPED. After a full catalog fetch, a Radio Browser
 # station that was not in it any more -- its stream failed the directory's
@@ -243,13 +249,50 @@ def wikiGet(dParams):
     with urllib.request.urlopen(oReq, timeout=20) as oResp:
         return json.loads(oResp.read().decode("utf-8"))
 
+def infoboxBody(sWikitext):
+    """The text of the Infobox radio station template and nothing after it: the braces are counted, so the box ends
+    at its own closing braces, not at the end of the article."""
+    m = re.search(r"\{\{\s*Infobox radio station", sWikitext, re.I)
+    if not m: return ""
+    iDepth, i = 0, m.start()
+    while i < len(sWikitext) - 1:
+        if sWikitext[i:i + 2] == "{{": iDepth += 1; i += 2; continue
+        if sWikitext[i:i + 2] == "}}":
+            iDepth -= 1; i += 2
+            if iDepth == 0: return sWikitext[m.end():i - 2]
+            continue
+        i += 1
+    return sWikitext[m.end():]
+
+
+def topLevelParts(sBody):
+    """The template's parameters: the text split at each | that is not inside a nested template or link."""
+    lsParts, sCur, iBraces, iBrackets, i = [], "", 0, 0, 0
+    while i < len(sBody):
+        s2 = sBody[i:i + 2]
+        if s2 == "{{": iBraces += 1; sCur += s2; i += 2; continue
+        if s2 == "}}" and iBraces: iBraces -= 1; sCur += s2; i += 2; continue
+        if s2 == "[[": iBrackets += 1; sCur += s2; i += 2; continue
+        if s2 == "]]" and iBrackets: iBrackets -= 1; sCur += s2; i += 2; continue
+        if sBody[i] == "|" and not iBraces and not iBrackets: lsParts.append(sCur); sCur = ""; i += 1; continue
+        sCur += sBody[i]; i += 1
+    lsParts.append(sCur)
+    return lsParts
+
+
 def infoboxFields(sWikitext):
-    """The fields of a Template:Infobox radio station, lightly cleaned."""
-    m = re.search(r"\{\{\s*Infobox radio station(.*)", sWikitext, re.I | re.S)
-    if not m: return {}
-    sBody = m.group(1)
+    """The fields of a Template:Infobox radio station, lightly cleaned.
+
+    THE BOX AND ITS FIELDS, EXACTLY (11 October 2026). The box was taken to the end of the article and its fields split
+    only where a line began with a bar, so a field sharing a line took the next one with it -- 506 cities read like
+    "Key West, Florida | country = US" -- and the last field took the article's first sentence into a tag. Now the box
+    ends at its own closing braces and is split at each bar outside a nested template or link, wherever it falls."""
+    sBody = infoboxBody(sWikitext)
+    if not sBody: return {}
     d = {}
-    for mm in re.finditer(r"^\s*\|\s*([a-z_ ]+?)\s*=\s*(.*?)(?=^\s*\||\Z)", sBody, re.M | re.S):
+    for sPart in topLevelParts(sBody)[1:]:
+        mm = re.match(r"\s*([A-Za-z_ ]+?)\s*=\s*(.*)$", sPart, re.S)
+        if not mm: continue
         k = mm.group(1).strip().lower().replace(" ", "_"); v = mm.group(2)
         v = re.sub(r"<ref[^>]*/>|<ref.*?</ref>", "", v, flags=re.S)
         # LISTS KEEP THEIR ITEMS (11 October 2026). An affiliations field is often a list -- {{hlist|ESPN Radio|
@@ -301,7 +344,17 @@ def wikiPages(dParams):
         return [], "api error " + sCode
     return list(d.get("query", {}).get("pages", {}).values()), ""
 
-def pageRecord(oPage, sCall):
+def namedFrequencies(sText):
+    """Broadcast frequencies a text states: FM from 87.5 to 108.0 with its decimal, AM from 530 to 1710 kHz."""
+    lsOut = set()
+    for s in re.findall(r"(?<![\d.])(\d{2,3}\.\d)(?![\d])", sText or ""):
+        if 87.5 <= float(s) <= 108.0: lsOut.add(s)
+    for s in re.findall(r"(?<![\d.])(\d{3,4})(?![\d.])", sText or ""):
+        if 530 <= int(s) <= 1710: lsOut.add(s)
+    return lsOut
+
+
+def pageRecord(oPage, sCall, sName=""):
     """The record from one page, when its infobox is a station's and its
     call sign is ours; otherwise None, with the reason."""
     sTitle = oPage.get("title", "")
@@ -314,11 +367,17 @@ def pageRecord(oPage, sCall):
         except Exception: pass
     dBox = infoboxFields(sText)
     if not dBox: return None, "no infobox in " + sTitle
-    sBoxCall = (dBox.get("call_sign") or dBox.get("callsign") or dBox.get("name") or "").upper()
+    # A NAME IS NOT A CALL SIGN (11 October 2026): with no call-sign field, the box's name was used, and "CBC Radio 3"
+    # contains CBC, so sixty CBC streams took CBC Radio 3's record. Only the call-sign field, or the title, now counts.
+    sBoxCall = (dBox.get("call_sign") or dBox.get("callsign") or "").upper()
     # THE CALL SIGN MUST BE THE ARTICLE'S: in its infobox, or as the whole of
     # its title before a band or a bracket -- KALW, WCRB (FM), KQED-FM.
     bOurs = bool(re.search(r"\b" + re.escape(sCall) + r"\b", sBoxCall)) or bool(re.match(r"^" + re.escape(sCall) + r"(-(AM|FM|LP|HD\d?))?( \(.*\))?$", sTitle.upper()))
     if not bOurs: return None, "other call sign in " + sTitle
+    # THE FREQUENCY MUST AGREE (11 October 2026): when the station's name states a broadcast frequency and the article
+    # gives one, they must share it, so "106.1 KISS FM Seattle" is not given San Antonio's KISS-FM at 99.5.
+    lsName, lsBox = namedFrequencies(sName), namedFrequencies(dBox.get("frequency", ""))
+    if lsName and lsBox and not (lsName & lsBox): return None, "frequency %s is not the article's %s" % ("/".join(sorted(lsName)), "/".join(sorted(lsBox)))
     d = {"wikipedia": "https://en.wikipedia.org/wiki/" + urllib.parse.quote(sTitle.replace(" ", "_")),
          "call_sign": dBox.get("call_sign") or dBox.get("callsign") or sCall,
          "frequency": dBox.get("frequency", ""), "city": dBox.get("city", "") or dBox.get("area", ""),
@@ -334,7 +393,10 @@ def officialStation(sName):
     licensed station's article is named; a search is the fallback. Returns
     (record, reason): the record empty when nothing safe was found, the
     reason saying why, for the log."""
-    m = c_reCallSign.search(sName.upper())
+    # THE NAME AS WRITTEN (11 October 2026): call signs are written in capitals, and the name was searched after being
+    # made upper case, so "Kiss FM" yielded KISS and "Music City" CITY, and 834 stations took another station's
+    # article -- owner, city, frequency and all. A call sign is now only one written in capitals.
+    m = c_reCallSign.search(sName)
     if not m: return {}, "no call sign in name"
     sCall = m.group(1); sBand = m.group(2) or ""
     lsTitles = [sCall, sCall + "-FM", sCall + "-AM", sCall + " (FM)", sCall + " (AM)", sCall + "-LP"]
@@ -345,7 +407,7 @@ def officialStation(sName):
     lsPages, sWhy = wikiPages(dParams)
     if sWhy: lsReasons.append(sWhy)
     for oPage in lsPages:
-        d, sReason = pageRecord(oPage, sCall)
+        d, sReason = pageRecord(oPage, sCall, sName)
         if d: return d, "by title " + oPage.get("title", "")
         if sReason and not sReason.startswith("no page"): lsReasons.append(sReason)
     time.sleep(c_dWikiPause)
@@ -353,7 +415,7 @@ def officialStation(sName):
     lsPages, sWhy = wikiPages(dParams)
     if sWhy: lsReasons.append(sWhy)
     for oPage in lsPages:
-        d, sReason = pageRecord(oPage, sCall)
+        d, sReason = pageRecord(oPage, sCall, sName)
         if d: return d, "by search " + oPage.get("title", "")
         if sReason: lsReasons.append(sReason)
     return {}, "; ".join(lsReasons[:4]) or "search found nothing"
@@ -361,6 +423,93 @@ def officialStation(sName):
 def affiliationItems(sValue):
     """The items of an infobox affiliations field, one each: "ESPN Radio, Seahawks Radio Network" gives two."""
     return [s.strip(" .") for s in re.split(r"\s*[,;]\s*", sValue or "") if len(s.strip(" .")) > 1]
+
+
+def cleanCopy(sDb, bTemplate, logLine, say):
+    """REPAIR, MERGE AND, FOR THE SHIPPED COPY, MAKE IT EVERYONE'S (11 October 2026). A plain run does this first.
+
+    WRONG MATCHES. A station whose stored call sign is not one its name states in capitals, or whose name states a
+    frequency the article does not, took another station's article: its call sign, frequency, city, owner, format and
+    article are cleared, so the next lookup tries again under the strict rules, and the article's paragraph in the notes
+    -- which begins with that call sign -- and the format words it added to the tags are taken out. Text a listener
+    added is not touched. MARKUP that leaked from an article's infobox into a field or a tag is cut away.
+
+    DUPLICATES. Rows with the same stream and the same name are one station listed more than once by the catalog; the
+    most voted is kept, the others' tags and notes are added to it, and they go. A group with any row the listener has
+    touched -- rated, played, given a status or marked, or added as their own -- is left as it is.
+
+    THE SHIPPED COPY ONLY. The template DbDo's installer ships holds nobody's own stations, plays or ratings, no station
+    without a name, and no leftover empty table."""
+    c = sqlite3.connect(sDb)
+    lsCols = set(r[1] for r in c.execute("pragma table_info(stations)"))
+    dCount = {"cleared": 0, "markup": 0, "merged": 0, "mine": 0, "personal": 0, "nameless": 0}
+    def plainField(v):
+        v = re.split(r"\s*\|\s*[A-Za-z_ ]+\s*=", v or "")[0]
+        v = re.split(r"\}\}|\{\{", v)[0]; v = v.replace("'''", "").replace("''", "")
+        v = re.sub(r"\[\[(?:[^|\]]*\|)?([^\]]*)\]\]", r"\1", v)
+        return re.sub(r"\s+", " ", v).strip(" |}{")
+    if "call_sign" in lsCols:
+        for iId, sName, sCall, sFreq, sCity, sOwner, sFormat, sWiki, sNotes, sTags in c.execute(
+                "select station_id, name, call_sign, frequency, city, owner, format, wikipedia, notes, tags from stations where coalesce(wikipedia,'') not in ('', '-')").fetchall():
+            mName = c_reCallSign.search(sName or "")
+            mStored = re.match(r"[KWC][A-Z]{2,3}", (sCall or "").upper())
+            lsName, lsBox = namedFrequencies(sName), namedFrequencies(sFreq)
+            # Looked up again, under the strict rules, when: the name states no call sign in capitals, or another one; the
+            # name states a frequency the record does not share, or cannot confirm because it has none; or the stored
+            # call sign is a bare one the article's title is not -- the mark of a match through the box's name field.
+            sTitle = urllib.parse.unquote((sWiki or "").rsplit("/", 1)[-1]).replace("_", " ").upper()
+            bBare = bool(mStored) and (sCall or "").upper() == mStored.group(0)
+            bTitled = bool(mStored) and bool(re.match(r"^" + re.escape(mStored.group(0)) + r"(-(AM|FM|LP|HD\d?))?( \(.*\))?$", sTitle))
+            bWrong = (not mName or not mStored or mName.group(1) != mStored.group(0)
+                      or bool(lsName and not (lsName & lsBox)) or (bBare and not bTitled))
+            if bWrong:
+                lsParas = [p for p in (sNotes or "").split("\n\n") if not (sCall and p.strip().upper().startswith((sCall or "").upper()))]
+                lsFormat = set(s.strip().lower() for s in re.split(r"[,/;]", sFormat or "") if s.strip())
+                lsTagKeep = [t for t in (sTags or "").split("\n") if t.strip().lower() not in lsFormat]
+                c.execute("update stations set call_sign='', frequency='', city='', owner='', format='', wikipedia='', notes=?, tags=?, edited=CURRENT_TIMESTAMP where station_id=?",
+                          ("\n\n".join(lsParas), "\n".join(lsTagKeep), iId))
+                dCount["cleared"] += 1
+                logLine("cleared %d %s: had %s (%s)" % (iId, (sName or "")[:40], sCall, sWiki))
+                continue
+            lsNew = [plainField(v) for v in (sFreq, sCity, sOwner, sFormat)]
+            # A tag is a word or a phrase: a line with a sentence break, or longer than sixty characters, is leaked prose.
+            # Cut at leaked markup first, then judge what is left, so "Westwood One }} and the article's first sentence"
+            # keeps Westwood One.
+            lsTagNew = [s for s in (plainField(re.split(r"\}\}|'''|\{\{", t)[0]) for t in (sTags or "").split("\n")) if not (re.search(r"[a-z]\. [A-Z]", s) or len(s) > 60)]
+            sTagNew = "\n".join(t for t in lsTagNew if t)
+            if lsNew != [sFreq or "", sCity or "", sOwner or "", sFormat or ""] or sTagNew != (sTags or ""):
+                c.execute("update stations set frequency=?, city=?, owner=?, format=?, tags=? where station_id=?", tuple(lsNew) + (sTagNew, iId))
+                dCount["markup"] += 1
+    sTouched = "coalesce(rating,'') <> '' or coalesce(plays,'') not in ('', '0') or coalesce(status,'') not in ('', 'untried', 'dead') or coalesce(marked, 0) <> 0 or source = 'mine'"
+    for sUrl, sKey in c.execute("select stream_url, lower(trim(name)) from stations group by 1, 2 having count(*) > 1").fetchall():
+        lsRows = c.execute("select station_id, tags, notes, (" + sTouched + ") from stations where stream_url = ? and lower(trim(name)) = ? order by cast(votes as integer) desc, station_id", (sUrl, sKey)).fetchall()
+        if any(r[3] for r in lsRows): continue
+        iKeep, sTags, sNotes = lsRows[0][0], lsRows[0][1] or "", lsRows[0][2] or ""
+        for r in lsRows[1:]:
+            sTags = addLines(sTags, [t for t in (r[1] or "").split("\n") if t.strip()])
+            if r[2] and r[2].strip() and r[2].strip()[:60].lower() not in sNotes.lower(): sNotes = (sNotes + "\n\n" if sNotes else "") + r[2].strip()
+            c.execute("delete from stations where station_id = ?", (r[0],)); dCount["merged"] += 1
+        c.execute("update stations set tags=?, notes=? where station_id=?", (sTags, sNotes, iKeep))
+    if bTemplate:
+        dCount["mine"] = c.execute("delete from stations where source = 'mine'").rowcount
+        lsPersonal = [s for s in ("plays", "last_played", "rating") if s in lsCols]
+        if lsPersonal:
+            dCount["personal"] = c.execute("update stations set " + ", ".join(s + " = NULL" for s in lsPersonal) + " where " + " or ".join("coalesce(%s,'') not in ('', '0')" % s for s in lsPersonal)).rowcount
+        dCount["nameless"] = c.execute("delete from stations where coalesce(trim(name), '') = ''").rowcount
+        for (sTable,) in c.execute("select name from sqlite_master where type = 'table' and name = 'sqlean_define'").fetchall():
+            if c.execute("select count(*) from " + sTable).fetchone()[0] == 0: c.execute("drop table " + sTable); logLine("dropped the empty table " + sTable)
+    c.commit()
+    if bTemplate:
+        c.execute("vacuum")
+        # ONE FILE, NOTHING BESIDE IT (11 October 2026): the shipped copy is in the ordinary journal mode, not write-ahead
+        # logging, so everything is in RadioTrail.db itself and no -wal or -shm file is needed or left behind.
+        c.execute("pragma journal_mode=DELETE")
+    c.close()
+    say("Repaired: %d wrong article matches cleared for a fresh lookup, %d fields freed of markup, %d duplicate rows merged%s." % (
+        dCount["cleared"], dCount["markup"], dCount["merged"],
+        ("; for the shipped copy, %d of your own stations, %d plays or ratings and %d nameless rows removed" % (dCount["mine"], dCount["personal"], dCount["nameless"])) if bTemplate else ""))
+    logLine("clean " + repr(dCount))
+    return 0
 
 
 def affiliations(sDb, logLine, say):
@@ -514,7 +663,7 @@ def assess(sDb, logLine, say):
     lsCall = []; iOfficial = 0; iCallNames = 0; iDash = 0
     if "call_sign" in lsCols:
         for r in c.execute("select name, coalesce(wikipedia,'') from stations where stream_url <> '' and countrycode in ('US','CA')"):
-            if c_reCallSign.search((r[0] or "").upper()):
+            if c_reCallSign.search(r[0] or ""):
                 iCallNames += 1
                 if r[1] == "": lsCall.append(r[0])
                 elif r[1] == "-": iDash += 1
@@ -550,7 +699,7 @@ def official(sDb, sCountry, iLimit, bAgain, logLine, say):
     # looked up.
     sWhere += " and countrycode in ('US', 'CA')"
     lsRows = [r for r in c.execute("select station_id, name, notes, tags from stations where " + sWhere + " order by cast(votes as integer) desc", lsArgs)
-              if c_reCallSign.search((r[1] or "").upper())]
+              if c_reCallSign.search(r[1] or "")]
     if iLimit: lsRows = lsRows[:iLimit]
     if not lsRows:
         say("No station here with a call sign in its name is still unlooked-up."); c.close(); return 0
@@ -841,8 +990,44 @@ def sameShape(sDb):
     except Exception:
         return False
 
+def playlistsIn(lsFolders):
+    """Every .m3u, .m3u8 and .pls file at the top of each folder, newest first."""
+    lsFound = []
+    for sFolder in lsFolders:
+        if not sFolder or not os.path.isdir(sFolder): continue
+        for sName in os.listdir(sFolder):
+            sPath = os.path.join(sFolder, sName)
+            if os.path.isfile(sPath) and os.path.splitext(sName)[1].lower() in (".m3u", ".m3u8", ".pls"): lsFound.append(sPath)
+    return sorted(set(lsFound), key=lambda s: -os.path.getmtime(s))
+
+
+def personalFolders():
+    """The folders a downloaded playlist usually lands in: Downloads, Documents and Desktop, OneDrive's included."""
+    sHome = os.path.expanduser("~")
+    lsOut = []
+    for sRoot in (sHome, os.environ.get("OneDrive", "")):
+        if sRoot: lsOut += [os.path.join(sRoot, s) for s in ("Downloads", "Documents", "Desktop")]
+    return lsOut
+
+
 def main():
+    """A PLAIN RUN MAKES THE BEST CATALOG (11 October 2026): every step the check finds wanting, then the networks each
+    matched article names, so one command, with no options, leaves the copy as complete as the sources allow -- the one
+    DbDo's installer ships. Any option runs as before."""
     lsArgs = sys.argv[1:]
+    lsOptions = [s for s in lsArgs if s.startswith("--")]
+    lsDbArgs = [s for s in lsArgs if not s.startswith("--")]
+    if not lsOptions:
+        print("First, repairs: wrong article matches, leaked markup and duplicate rows.")
+        mainCore(lsDbArgs + ["--clean"])
+    iCode = mainCore(lsArgs)
+    if iCode == 0 and not lsOptions:
+        print("Last, the networks each matched Wikipedia article names, such as a team's radio network.")
+        iCode = mainCore([s for s in lsArgs if not s.startswith("--")] + ["--affiliations"])
+    return iCode
+
+
+def mainCore(lsArgs):
     sDb = ""
     sCountry = ""
     sSource = "all"
@@ -855,6 +1040,7 @@ def main():
     bForce = False
     bConventionsOnly = False
     bAffiliations = False
+    bClean = False
     sImport = ""
     bAgain = False
     bFresh = False
@@ -871,15 +1057,17 @@ def main():
         if sArg in ("--report", "--report-only"): bReportOnly = True; i += 1; continue
         if sArg == "--force": bForce = True; i += 1; continue
         if sArg == "--import":
-            # A PLAYLIST MUST BE NAMED (11 October 2026): "--import" with no file after it was skipped in silence, so a
-            # run meant to import only reported on the catalog and nobody could tell why.
+            # A PLAYLIST NEED NOT BE NAMED (11 October 2026): "--import" alone finds every .m3u, .m3u8 and .pls file in
+            # Downloads, Documents and Desktop; a folder after it means every playlist in that folder; a file, that
+            # file. (It was skipped in silence at first, then refused; neither helped someone with no file in mind.)
             if i + 1 >= len(lsArgs) or lsArgs[i + 1].startswith("--"):
-                print("--import needs the playlist after it, for example: fetchStations --import stations.m3u"); return 2
+                sImport = "*"; i += 1; continue
             sImport = lsArgs[i + 1]; i += 2; continue
         if sArg == "--fresh": bFresh = True; i += 1; continue
         if sArg == "--again": bAgain = True; i += 1; continue
         if sArg == "--conventions": bConventionsOnly = True; i += 1; continue
         if sArg == "--affiliations": bAffiliations = True; i += 1; continue
+        if sArg == "--clean": bClean = True; i += 1; continue
         if sArg.startswith("-"):
             print("Unknown option %s, so nothing was done. Read the top of fetchStations.py for the options." % sArg); return 2
         sDb = sArg; i += 1
@@ -893,7 +1081,15 @@ def main():
         sProjectDir = os.path.dirname(os.path.dirname(sHere))
         bInProject = os.path.isfile(os.path.join(sProjectDir, "DbDo.cs")) and os.access(sHere, os.W_OK)
         sDb = os.path.join(sHere, "RadioTrail.db") if bInProject else os.path.join(os.environ.get("LOCALAPPDATA", ""), "DbDo", "data", "RadioTrail", "RadioTrail.db")
+        # YOUR STATIONS GO TO YOUR COPY, NEVER THE TEMPLATE (11 October 2026): the template is what DbDo's installer
+        # ships, so stations imported from a person's own playlists, marked "mine", would go to everyone.
+        if sImport and bInProject:
+            sDb = os.path.join(os.environ.get("LOCALAPPDATA", ""), "DbDo", "data", "RadioTrail", "RadioTrail.db")
+            bInProject = False
         print("Stations go into " + sDb + (" (the development tree's template)" if bInProject else " (your own copy)"))
+    elif sImport and os.path.normcase(os.path.abspath(sDb)) == os.path.normcase(os.path.join(os.path.dirname(os.path.abspath(__file__)), "RadioTrail.db")):
+        print("That is the template DbDo's installer ships, and your own stations must not go to everyone. Run --import without a database, and they go to your own copy.")
+        return 2
     if bConventionsOnly:
         # --conventions (9 October 2026): only the Trail indexes and triggers, added where missing, then stop. DbDo's
         # build runs this on the development tree's RadioTrail, so a catalog restored or fetched before the triggers
@@ -944,7 +1140,21 @@ def main():
     logLine("Database: " + sDb + " | source: " + sSource + " | country: " + (sCountry or "(all)") + " | limit: " + str(iLimit or "(none)"))
 
     if sImport:
-        iCode = importPlaylist(sDb, sImport, logLine, say)
+        if sImport == "*": lsLists = playlistsIn(personalFolders()); sWhere = "Downloads, Documents and Desktop"
+        elif os.path.isdir(sImport): lsLists = playlistsIn([sImport]); sWhere = sImport
+        else: lsLists = [sImport]; sWhere = ""
+        if not lsLists:
+            say("No playlist was found in %s. A playlist is an .m3u, .m3u8 or .pls file; a station's Listen link often downloads one. Save it there, or name it after --import." % sWhere)
+            say("The log is " + sLog); logLine("finished " + datetime.datetime.now().isoformat()); return 0
+        say("Importing %d playlist%s into your own copy." % (len(lsLists), "" if len(lsLists) == 1 else "s"))
+        iCode = 0
+        for sList in lsLists:
+            say("From " + sList + ":")
+            iCode = max(iCode, importPlaylist(sDb, sList, logLine, say))
+        say("The log is " + sLog); logLine("finished " + datetime.datetime.now().isoformat()); return iCode
+    if bClean:
+        bTemplate = os.path.normcase(os.path.abspath(sDb)) == os.path.normcase(templatePath())
+        iCode = cleanCopy(sDb, bTemplate, logLine, say)
         say("The log is " + sLog); logLine("finished " + datetime.datetime.now().isoformat()); return iCode
     if bAffiliations:
         iCode = affiliations(sDb, logLine, say)
