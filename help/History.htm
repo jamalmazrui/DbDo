@@ -232,6 +232,11 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a
+href="#october-2026-clear-filter-clears-and-rows-read-without-null"
+id="toc-october-2026-clear-filter-clears-and-rows-read-without-null">11
+October 2026 – Clear Filter clears, and rows read without
+“null”</a></li>
 <li><a href="#october-2026-booktrail-holds-what-bookfido-gathers"
 id="toc-october-2026-booktrail-holds-what-bookfido-gathers">11 October
 2026 – BookTrail holds what bookFido gathers</a></li>
@@ -406,6 +411,21 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="october-2026-clear-filter-clears-and-rows-read-without-null">11
+October 2026 – Clear Filter clears, and rows read without “null”</h2>
+<ul>
+<li><strong>Control+Shift+F shows every record again.</strong> Clearing
+an SQL filter – Control+F’s Any Field, Filter Regex – reopened the
+table, but reopening first snapshots the table’s settings, its filter
+included, and then restores them, so the filter came straight back.
+Every filter is now emptied before the reopen, so the snapshot holds
+none; the sort and the record you were on are kept.</li>
+<li><strong>A row reads its values, not a word for every empty
+field.</strong> An empty cell showed “null” or “blank” so that moving by
+cell always says something, but a whole row then read as “null, Alien
+Worlds, null, null”. Only the cell in the cursor’s column carries the
+word now; moving by cell still says it.</li>
+</ul>
 <h2 id="october-2026-booktrail-holds-what-bookfido-gathers">11 October
 2026 – BookTrail holds what bookFido gathers</h2>
 <ul>

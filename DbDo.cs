@@ -4767,6 +4767,21 @@ namespace DbDo
         }
 
         public void resetFilter() { filter = ""; }
+
+        // clearAllFilters: every filter off, the table showing all its records (11 October 2026). Clear Filter reopened
+        // the table with selectTable to drop an SQL filter (Control+F's Any Field, Filter Regex), but selectTable first
+        // snapshots the table's settings -- its filter included -- and then restores that snapshot, so the filter came
+        // straight back and Control+Shift+F did not show all records. The filters are emptied before the reopen, so the
+        // snapshot holds none; the sort and the position are kept as before.
+        public void clearAllFilters()
+        {
+            bool bSql = !string.IsNullOrEmpty(sSqlWhere);
+            sSqlWhere = "";
+            sSqlWhereSpoken = "";
+            try { filter = ""; } catch { }
+            if (bSql && !string.IsNullOrEmpty(sCurrentTable)) selectTable(sCurrentTable);
+            try { filter = ""; } catch { }
+        }
         public void resetSort() { sort = ""; }
 
         // applyFilter: convenience alias used by Show-Related, identical
@@ -14327,7 +14342,13 @@ namespace DbDo
                             // "null" and "blank" are each ONE SYLLABLE, so the
                             // precise answer costs no more time than a vague one,
                             // and "blank" is the word JAWS would have said anyway.
-                            if (aRow[i].Length == 0 && DbDoManager.bShowEmptyWords)
+                            //
+                            // ONLY IN THE CURSOR'S COLUMN (11 October 2026). A word in every empty cell made a
+                            // row read as "null, Alien Worlds, null, null" -- one word for each empty field, which
+                            // is noise when moving by row. Only the cell the cursor is on carries the word now, so a
+                            // row reads its values and at most one word; moving by cell still speaks the word, as
+                            // DbDo says it itself.
+                            if (aRow[i].Length == 0 && DbDoManager.bShowEmptyWords && i == iVirtualCol)
                                 aRow[i] = db.emptyWord(sCol);
                         }
                     }
@@ -24691,8 +24712,7 @@ namespace DbDo
             catch { }
             try
             {
-                if (!string.IsNullOrEmpty(db.sqlFilter)) db.selectTable(db.currentTable);
-                db.resetFilter();
+                db.clearAllFilters();
             }
             catch (Exception ex) { ErrorDialog.show(this, "Clear Filter", ex.Message); return; }
             invokeRefresh();

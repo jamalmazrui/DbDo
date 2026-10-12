@@ -5,6 +5,11 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 11 October 2026 -- Clear Filter clears, and rows read without "null"
+
+- **Control+Shift+F shows every record again.** Clearing an SQL filter -- Control+F's Any Field, Filter Regex -- reopened the table, but reopening first snapshots the table's settings, its filter included, and then restores them, so the filter came straight back. Every filter is now emptied before the reopen, so the snapshot holds none; the sort and the record you were on are kept.
+- **A row reads its values, not a word for every empty field.** An empty cell showed "null" or "blank" so that moving by cell always says something, but a whole row then read as "null, Alien Worlds, null, null". Only the cell in the cursor's column carries the word now; moving by cell still says it.
+
 ## 11 October 2026 -- BookTrail holds what bookFido gathers
 
 - **One row per copy.** BookTrail's prime is now author, title and source, so a book on Audible and from BARD is two rows, each with its own format, source, narrator and catalog number; the row's spoken summary ends with its source. New fields: publisher, first published, language, length, pages, ISBN, progress, average rating, ratings count, Wikipedia, files, and work, the key every copy of one work shares. Goodreads joins the source pick list. bookFido writes all five of a reader's libraries here, and brings an older BookTrail to this shape itself, keeping every row, any added column and every link. The template passes checkDb with 34 checks and no warnings.
