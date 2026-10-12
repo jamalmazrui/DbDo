@@ -5,13 +5,19 @@
 -- procedures that configure the reader itself) and the with_reader link (the
 -- procedures in other apps whose steps are written for that reader).
 --
--- Adapt it by changing 'JAWS' on the WHERE line to 'NVDA' or 'Narrator'.
-SELECT m.name                       AS method,
-       ft.unq2                      AS task,
-       COALESCE(wa.unq2, '(general)') AS app
-FROM maps r
-JOIN methods m  ON m.unq = r.unq1
-LEFT JOIN maps ft ON ft.tbl1 = 'methods' AND ft.unq1 = m.unq AND ft.kind = 'for_task'
-LEFT JOIN maps wa ON wa.tbl1 = 'methods' AND wa.unq1 = m.unq AND wa.kind = 'with_app'
-WHERE r.kind IN ('with_reader', 'with_app') AND r.tbl2 = 'apps' AND r.unq2 = 'JAWS'
-ORDER BY app, task;
+-- Adapt it by changing 'JAWS' on the WHERE line to 'NVDA' or 'Narrator'. The
+-- iOS methods are written for VoiceOver, which the guide treats as part of
+-- iOS rather than as a separate app.
+SELECT m.name                          AS method,
+       t.name                          AS task,
+       COALESCE(ap.name, '(general)')  AS app
+FROM apps rd
+JOIN maps r        ON r.kind IN ('with_reader', 'with_app') AND r.tbl1 = 'methods' AND r.tbl2 = 'apps' AND r.prime2 = rd.prime
+JOIN methods m     ON m.prime = r.prime1
+LEFT JOIN maps ft  ON ft.kind = 'for_task' AND ft.tbl1 = 'methods' AND ft.tbl2 = 'tasks' AND ft.prime1 = m.prime
+LEFT JOIN tasks t  ON t.prime = ft.prime2
+LEFT JOIN maps wa  ON wa.kind = 'with_app' AND wa.tbl1 = 'methods' AND wa.tbl2 = 'apps' AND wa.prime1 = m.prime
+LEFT JOIN apps ap  ON ap.prime = wa.prime2
+WHERE rd.name = 'JAWS' AND rd.category = 'screen_reader'
+GROUP BY m.prime, t.prime, ap.prime
+ORDER BY app, task, method;

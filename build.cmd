@@ -194,16 +194,47 @@ rem reaches DbDo on its next build, and a change made here would be overwritten,
 rem which is the point.
 if not exist "scripts" mkdir "scripts"
 for %%F in (buildTutorials.cmd buildTutorials.ps1 check.cmd check.py checkTutorial.cmd checkTutorial.py finish.cmd fixEncoding.cmd fixEncoding.py installCommon.cmd installOllama.cmd installScreenReaderSupport.cmd kind.cmd kind.py makeTutorials.cmd makeTutorials.py push.cmd release.cmd release.ps1 tidy.cmd tidy.py uiCheck.cmd uiCheck.py unpushed.cmd unpushed.py) do (
-rem THE RADIOTRAIL CATALOG MEETS THE TRAIL CONVENTIONS (9 October 2026). A catalog
-rem fetched or restored before RadioTrail had its triggers lacks them, and the
-rem database check fails it; fetchStations --conventions adds whatever indexes and
-rem triggers are missing, in a moment, and changes nothing else.
-if exist "templates\RadioTrail\fetchStations.py" if exist "templates\RadioTrail\RadioTrail.db" (
-  python "templates\RadioTrail\fetchStations.py" --conventions "templates\RadioTrail\RadioTrail.db" >> "%log%" 2>&1
-  echo RadioTrail conventions: exit code !errorlevel!>> "%log%"
-)
   if exist "!homerDev!\scripts\%%F" copy /y "!homerDev!\scripts\%%F" scripts\ >nul
 )
+
+rem ---- the templates: RadioTrail made when missing, then every template repaired and checked ----
+rem
+rem RADIOTRAIL IS BUILT HERE, NEVER KEPT IN GIT. It is DbDo's first-run database
+rem and the installer ships it, but the installer takes templates with
+rem skipifsourcedoesntexist, so a missing RadioTrail.db once meant an installer
+rem without it and no error (audit of 12 October 2026). When it is missing, the
+rem catalog is fetched now, into an empty database built from RadioTrail.schema;
+rem if that fails, the template check below stops the build.
+rem
+rem THE CONVENTIONS STEP RAN ONCE PER KIT TOOL. It sat inside the loop above that
+rem copies the kit's tools, so every build ran it about twenty-five times. It now
+rem runs once.
+if exist "!sHere!templates\RadioTrail\fetchStations.py" if not exist "!sHere!templates\RadioTrail\RadioTrail.db" (
+  echo RadioTrail.db is missing, so its station catalog is being fetched. This can take up to fifteen minutes.
+  echo RadioTrail: no database; fetchStations --catalog-only >> "!log!"
+  python "!sHere!templates\RadioTrail\fetchStations.py" --catalog-only >> "!log!" 2>&1
+  echo RadioTrail catalog fetch: exit code !errorlevel!>> "!log!"
+)
+if exist "!sHere!templates\RadioTrail\fetchStations.py" if exist "!sHere!templates\RadioTrail\RadioTrail.db" (
+  python "!sHere!templates\RadioTrail\fetchStations.py" --conventions "!sHere!templates\RadioTrail\RadioTrail.db" >> "!log!" 2>&1
+  echo RadioTrail conventions: exit code !errorlevel!>> "!log!"
+)
+rem THE TEMPLATES AND THEIR COMPANION FILES ARE CHECKED TOGETHER (12 October 2026).
+rem An audit found every database healthy and 13 of 22 shipped SQL statements
+rem failing on them. scripts\checkTemplates repairs what DbDo's conventions settle
+rem (edited triggers, unique prime indexes, relationship kinds, duplicate records),
+rem writes RadioTrail.schema, then runs every SQL statement, setting and report on
+rem the database it ships with. Any failure stops the build here.
+echo Checking the templates ...
+echo Template check: python scripts\checkTemplates.py --repair --schema RadioTrail >> "!log!"
+python "!sHere!scripts\checkTemplates.py" --repair --schema RadioTrail
+set "iTemplates=!errorlevel!"
+echo Template check: exit code !iTemplates!>> "!log!"
+if not "!iTemplates!"=="0" (
+  echo The template check failed. Its log is in logs, named DbDo-checkTemplates with the date and time.
+  popd & exit /b 1
+)
+
 rem Tools the kit has retired or renamed, and DbDo's own near-duplicates of
 rem them. Similar names are how the wrong tool gets run: makeTutorial beside
 rem makeTutorials, cleanDir beside tidy, sayTutorial beside buildTutorials.

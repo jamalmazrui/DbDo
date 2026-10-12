@@ -15,6 +15,7 @@ FileTask = report
 ; and hand it to VLC, mpv, foobar2000 or a phone. The EXTINF line carries the
 ; station's name, so the player shows names and not addresses.
 [favorites_playlist]
+@table = stations
 @filter = status = 'favorite'
 @sort = name
 header = """
@@ -31,6 +32,7 @@ footer = """
 ; Most played first, with when you last played each. Play Stream keeps the
 ; count and the date; nothing else writes them.
 [most_played]
+@table = stations
 @filter = plays <> ''
 @sort = cast(plays as integer) desc, last_played desc
 header = """
@@ -51,6 +53,7 @@ $count {{ $count == 1 ? "station" : "stations" }} played so far.
 ; For reading, or for handing to someone: the slogan, where it broadcasts
 ; from, what it says of itself, and its addresses. A field earns its line.
 [favorites_guide]
+@table = stations
 @filter = status = 'favorite'
 @sort = name
 header = """

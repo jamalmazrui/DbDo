@@ -1,22 +1,22 @@
 ﻿-- Convention-Stats.sql
 -- A few "who and what is most popular" questions about the NFB 2026
 -- convention, answered by counting rows in the maps table. Open
--- NFB2026Convention.db and run this with Invoke Script; each query's
+-- ConventionTrail.db and run this with Invoke Script; each query's
 -- results appear in turn, ranked from most to least.
 --
--- These cross-table counts need a GROUP BY, which is why they are SQL
--- rather than dot-prompt commands. For single-table questions you do not
--- need SQL at all -- see the notes at the bottom.
+-- Every join here has the same shape: a map row names a table and a record's
+-- prime on each side (tbl1 and prime1, tbl2 and prime2), so each join matches
+-- the record's own prime and names both tables, and a value can never match a
+-- record in the wrong table.
 
 -- 1. Most popular speakers, by number of presentations.
 SELECT
-  c.first_name || ' ' || c.last_name AS speaker,
-  COUNT(*)                           AS presentations
+  trim(coalesce(c.first_name, '') || ' ' || coalesce(c.last_name, '')) AS speaker,
+  COUNT(*)                                                               AS presentations
 FROM maps m
-JOIN contacts c
-  ON c.first_name || '|' || IFNULL(c.middle_name, '') || '|' || c.last_name = m.prm1
+JOIN contacts c ON c.prime = m.prime1
 WHERE m.tbl1 = 'contacts' AND m.kind = 'presents' AND m.tbl2 = 'events'
-GROUP BY m.prm1
+GROUP BY c.prime
 ORDER BY presentations DESC, speaker
 LIMIT 10;
 
@@ -26,10 +26,9 @@ SELECT
   l.hotel  AS hotel,
   COUNT(*) AS events
 FROM maps m
-JOIN locations l
-  ON l.name || '|' || IFNULL(l.hotel, '') = m.prm2
+JOIN locations l ON l.prime = m.prime2
 WHERE m.tbl1 = 'events' AND m.kind = 'located_at' AND m.tbl2 = 'locations'
-GROUP BY m.prm2
+GROUP BY l.prime
 ORDER BY events DESC, room
 LIMIT 10;
 

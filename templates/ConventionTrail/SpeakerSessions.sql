@@ -8,7 +8,7 @@
 select e.event_date as Day, e.start_time as Start, e.title as Event,
        m.notes as Role
 from events e
-join maps m on m.tbl2 = 'events' and m.prm2 = e.prm
+join maps m on m.tbl2 = 'events' and m.prime2 = e.prime
            and m.kind = 'presents' and m.tbl1 = 'contacts'
-where m.prm1 in (select c.prm from contacts c where c.last_name = 'Chan')
+where m.prime1 in (select c.prime from contacts c where c.last_name = 'Chan')
 order by e.event_date, e.start_time;

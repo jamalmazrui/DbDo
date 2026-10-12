@@ -2,7 +2,7 @@
 -- Who is backing the convention, and with what? Two questions answered
 -- from the maps table using relationship kinds OTHER than 'presents':
 -- 'sponsors' (an organization backs an event) and 'offers' (an
--- organization provides a product or service). Open NFB2026Convention.db
+-- organization provides a product or service). Open ConventionTrail.db
 -- and run this with Invoke Script; each query's results appear in turn.
 --
 -- How it works: organizations live in the contacts table as rows with an

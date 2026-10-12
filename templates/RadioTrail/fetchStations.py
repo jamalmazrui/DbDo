@@ -937,12 +937,33 @@ c_dPause = 0.5
 def templatePath():
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), "RadioTrail.db")
 
+def buildFromSchema(sDb, sSchema):
+    """A new, empty RadioTrail at sDb built from RadioTrail.schema: its tables, indexes, triggers, lookups and views,
+    and no stations. THE TEMPLATE CAN BE MADE FROM SOURCE (12 October 2026): RadioTrail.db is built on the development
+    machine and kept out of git, and an audit found a clean checkout had no way to make one, since this script could
+    only copy it. The build writes the schema from the real database (scripts\\checkTemplates --schema RadioTrail), and
+    with no database to copy, the catalog fetch that follows fills this one."""
+    import sqlite3
+    os.makedirs(os.path.dirname(sDb), exist_ok=True)
+    with open(sSchema, encoding="utf-8-sig") as f: sText = f.read()
+    cNew = sqlite3.connect(sDb)
+    try:
+        cNew.executescript(sText)
+        cNew.commit()
+    finally:
+        cNew.close()
+    print("Built an empty RadioTrail at " + sDb + " from " + os.path.basename(sSchema) + "; the stations come next.")
+    return True
+
 def copyTemplate(sDb):
-    """A new copy of the template at sDb, with its settings file beside it."""
+    """A new copy of the template at sDb, with its settings file beside it. With no template database to copy, one is
+    built from RadioTrail.schema beside this script."""
     import shutil
     sTemplate = templatePath()
     if not os.path.isfile(sTemplate):
-        print("No RadioTrail.db beside this script to copy from."); return False
+        sSchema = os.path.join(os.path.dirname(sTemplate), "RadioTrail.schema")
+        if os.path.isfile(sSchema): return buildFromSchema(sDb, sSchema)
+        print("No RadioTrail.db beside this script to copy from, and no RadioTrail.schema to build one from."); return False
     os.makedirs(os.path.dirname(sDb), exist_ok=True)
     shutil.copy2(sTemplate, sDb)
     sInix = os.path.join(os.path.dirname(sTemplate), "RadioTrail.inix")

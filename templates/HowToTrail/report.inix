@@ -1,6 +1,10 @@
-﻿; Sample report definitions for the iOSTutorials database (parsed from
-; "Personal Power: Getting the Most From iOS as a Totally Blind User" by
-; Michael Feir). Run with Run Report (Alt+Shift+R): reads the whole physical table, not the grid view.
+﻿; Report definitions for HowToTrail, which gathers Windows procedures (for
+; JAWS, NVDA and Narrator) and iOS procedures (for VoiceOver, from "Personal
+; Power: Getting the Most From iOS as a Totally Blind User" by Michael Feir).
+; Run with Run Report (Alt+Shift+R). A report reads the whole table, not the
+; grid: filtering the grid first does not narrow it. To narrow a report, give
+; it an @filter line, as the examples below show; to output just the rows you
+; can see, use Generate from Grid (Alt+Shift+G) instead.
 
 ; The app catalog, grouped by category -- the iOS apps the guide teaches.
 ; FileTask marks this file's purpose so DbDo shows it only for the
@@ -23,8 +27,8 @@ footer = """
 **$count apps in total.**
 """
 
-; Topics the guide explains, grouped by area (its thematic sections). Filter
-; the tasks table first if you want just one area.
+; Topics the guide explains, grouped by area (its thematic sections). For one
+; area or one platform, add a line such as  @filter = platform = 'iOS'
 [tasks_by_area]
 @table = tasks
 @group = area
@@ -41,14 +45,16 @@ footer = """
 **$count topics documented in the guide.**
 """
 
-; A flat list of step-by-step methods. Filter the methods table (for example
-; to one app, via the maps table, or by a name search) before running, so
-; you get exactly the procedures you want. Every method is performed with
-; VoiceOver.
+; A flat list of step-by-step methods, each headed by its name and platform.
+; This reads every method -- several hundred -- so narrow it with @filter: for
+; one platform,  @filter = platform = 'Windows' ; for a name search,
+;  @filter = name LIKE '%Excel%' . Windows methods are written for JAWS, NVDA
+; or Narrator; iOS methods for VoiceOver.
 [method_steps]
 @table = methods
+@sort = platform, name
 detail = """
-### $name
+### $name ($platform)
 
 $steps
 """

@@ -46,6 +46,8 @@ scripts/buildTutorials.cmd
 scripts/buildTutorials.ps1
 scripts/check.cmd
 scripts/check.py
+scripts/checkTemplates.cmd
+scripts/checkTemplates.py
 scripts/checkTutorial.cmd
 scripts/checkTutorial.py
 scripts/finish.cmd

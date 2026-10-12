@@ -2,7 +2,7 @@
 -- A directory of everyone presenting at the convention: name, the
 -- organization and role they are billed under, how many sessions they
 -- appear on, and -- where it could be verified -- a link to their official
--- bio or professional profile. Open NFB2026Convention.db, run this with
+-- bio or professional profile. Open ConventionTrail.db, run this with
 -- Invoke Script, then Export the result (Control+Shift+X) if you want to
 -- keep a copy as a document or spreadsheet.
 --
@@ -12,7 +12,7 @@
 -- for. A blank link just means no authoritative page was verified for that
 -- person -- the row is still complete and useful.
 --
--- The join is c.prm = m.prm1: a person's identity is first|middle|last,
+-- The join is c.prime = m.prime1: a person's identity is first|middle|last,
 -- which is the value every 'presents' map stores on its contacts side.
 -- GROUP BY collapses a person's several sessions into one directory line
 -- and COUNT(*) reports how many there are.
@@ -24,10 +24,10 @@ SELECT
   COUNT(*)                            AS sessions,
   c.url                               AS link
 FROM maps m
-JOIN contacts c ON c.prm = m.prm1
+JOIN contacts c ON c.prime = m.prime1
 WHERE m.tbl1 = 'contacts' AND m.kind = 'presents' AND m.tbl2 = 'events'
   AND c.last_name IS NOT NULL AND c.last_name <> ''
-GROUP BY c.prm
+GROUP BY c.prime
 ORDER BY c.last_name, c.first_name;
 
 -- To see only the busiest presenters, change the ORDER BY line to

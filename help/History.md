@@ -5,6 +5,22 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 12 October 2026 -- The templates and their companion files work together
+
+An outside audit of the templates found every database healthy and the workflows around them broken: 13 of the 22 statements in the shipped SQL files failed on the very databases they shipped with. These are fixed, and a new build step makes sure it cannot happen again.
+
+- **Every shipped SQL file runs.** ConventionTrail's six and HowToTrail's six used field names from before prime, prime1 and prime2. Each now joins on the record's own prime and names both tables, so a value never matches the wrong table. HowToTrail's queries also show each app's and task's platform, since Word on Windows and an app of the same name on iOS are different records.
+- **The build checks the templates (scripts\\checkTemplates).** Before compiling, it runs every SQL statement on the database it ships with, read-only, and expects rows from each. It also checks every setting, every report's table, filter, sort, group and fields, and every map link, and the build stops on any failure. Its log is logs\\DbDo-checkTemplates with the date and time.
+- **Editing a url now updates "edited".** The url field came after most templates' triggers were written, so changing only a url left "edited" as it was. Every edited trigger now watches every field except the id, added, edited, look, prime and marked, the rule DbDo already uses for a new table. Marking a row is deliberately not an edit.
+- **HowToTrail's eight doubled organizations are one each.** Be My Eyes, Benetech, Dropbox, Google, Microsoft, OpenAI, Voice Dream and Zoom each had two contact records with the same identity, one from the Windows guide and one from the iOS guide. So 37 links pointed at two records at once, and deleting either copy would have removed both copies' links. Each pair is merged, keeping every detail and every link, and a unique index now prevents it.
+- **Every relationship kind in use can be picked from a list.** ContactTrail's in_group, FilmTrail's directed_by, MusicTrail's recorded and features, and RecipeTrail's uses were used in links but missing from lookups. Each is now there, with a sentence saying which way it reads.
+- **Reports say what they read.** HowToTrail's report file described an iOS-only guide and told you to filter the grid first, though a report reads the whole table. It now describes the combined Windows and iOS collection and shows how to narrow a report with @filter. Each RadioTrail report names its table, and the convention's daily agenda lists each day's sessions in time order.
+- **ConventionTrail's scripts name ConventionTrail.db**, not the old NFB2026Convention.db, and Daily-Schedule writes a .htm file.
+- **RadioTrail can be made from a clean checkout.** Its database is built on the development machine and kept out of git, and fetchStations could only copy it. The build now writes RadioTrail.schema from the database. With no database, fetchStations builds an empty one from that file, and the build fetches the catalog into it. The installer can no longer silently ship without RadioTrail.
+- **The RadioTrail conventions step runs once per build.** It sat inside the loop that copies the kit's tools, so it ran about twenty-five times.
+- **The empty sqlean_define tables are gone** from ten templates. DbDo makes the table again whenever the SQLean bundle loads, and never lists it.
+- **Your own copies are unchanged.** These repairs reach new copies of a template. A copy you already made keeps its old queries and triggers.
+
 ## 11 October 2026 -- Clear Filter clears, and rows read without "null"
 
 - **Control+Shift+F shows every record again.** Clearing an SQL filter -- Control+F's Any Field, Filter Regex -- reopened the table, but reopening first snapshots the table's settings, its filter included, and then restores them, so the filter came straight back. Every filter is now emptied before the reopen, so the snapshot holds none; the sort and the record you were on are kept.
