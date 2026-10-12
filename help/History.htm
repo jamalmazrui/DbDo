@@ -420,11 +420,15 @@ table, but reopening first snapshots the table’s settings, its filter
 included, and then restores them, so the filter came straight back.
 Every filter is now emptied before the reopen, so the snapshot holds
 none; the sort and the record you were on are kept.</li>
-<li><strong>A row reads its values, not a word for every empty
-field.</strong> An empty cell showed “null” or “blank” so that moving by
-cell always says something, but a whole row then read as “null, Alien
-Worlds, null, null”. Only the cell in the cursor’s column carries the
-word now; moving by cell still says it.</li>
+<li><strong>A row reads its values, with nothing for an empty
+field.</strong> An empty cell showed “null” or “blank” in the list, so
+Up and Down Arrow, which DbDo leaves to the screen reader, read a row as
+“null, Alien Worlds, null, null”. The list now shows nothing for an
+empty field, in every column, and the screen reader skips it. Say Cell,
+Say Row and Say Column, which answer a question, still name an empty
+field – as “blank”, NULL or empty text alike; “null” is said only to
+confirm setting a field to null. What is stored is unchanged: a field
+nobody filled stays NULL, as SQL and other tools expect.</li>
 </ul>
 <h2 id="october-2026-booktrail-holds-what-bookfido-gathers">11 October
 2026 – BookTrail holds what bookFido gathers</h2>

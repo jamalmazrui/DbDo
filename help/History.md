@@ -8,7 +8,7 @@ Press **Shift+F1** inside DbDo to open this file in your browser, or type `histo
 ## 11 October 2026 -- Clear Filter clears, and rows read without "null"
 
 - **Control+Shift+F shows every record again.** Clearing an SQL filter -- Control+F's Any Field, Filter Regex -- reopened the table, but reopening first snapshots the table's settings, its filter included, and then restores them, so the filter came straight back. Every filter is now emptied before the reopen, so the snapshot holds none; the sort and the record you were on are kept.
-- **A row reads its values, not a word for every empty field.** An empty cell showed "null" or "blank" so that moving by cell always says something, but a whole row then read as "null, Alien Worlds, null, null". Only the cell in the cursor's column carries the word now; moving by cell still says it.
+- **A row reads its values, with nothing for an empty field.** An empty cell showed "null" or "blank" in the list, so Up and Down Arrow, which DbDo leaves to the screen reader, read a row as "null, Alien Worlds, null, null". The list now shows nothing for an empty field, in every column, and the screen reader skips it. Say Cell, Say Row and Say Column, which answer a question, still name an empty field -- as "blank", NULL or empty text alike; "null" is said only to confirm setting a field to null. What is stored is unchanged: a field nobody filled stays NULL, as SQL and other tools expect.
 
 ## 11 October 2026 -- BookTrail holds what bookFido gathers
 

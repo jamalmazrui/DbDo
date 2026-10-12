@@ -5264,7 +5264,9 @@ namespace DbDo
         // learned. isFieldNull does the asking; this only chooses the word.
         public string emptyWord(string sName)
         {
-            return isFieldNull(sName) ? "null" : "blank";
+            // "blank" for every empty field, NULL or empty text, when DbDo is asked: the difference is rarely worth a
+            // listener's time, and SQL can still tell them apart (11 October 2026).
+            return "blank";
         }
 
         public string getFieldValue(string sName)
@@ -5367,7 +5369,11 @@ namespace DbDo
         // bShowEmptyWords: whether an empty cell shows "null" or "blank" in the
         // grid rather than nothing. On by default, and settable from DbDo.inix
         // for anybody who wants the older, silent grid back.
-        public static bool bShowEmptyWords = true;
+        // OFF BY DEFAULT (11 October 2026): moving through the list with Up and Down Arrow, the screen reader reads each
+        // row and skips an empty column, which is what a listener wants; a word in the cell -- "null" or "blank" --
+        // was read between the values instead. DbDo intercepts neither key, and puts no word in the list now. The
+        // commands that answer a question about a cell (Say Cell, Say Row, Say Column) still name an empty field.
+        public static bool bShowEmptyWords = false;
 
         public void setFieldValue(string sName, string sValue)
         {
@@ -17101,7 +17107,7 @@ namespace DbDo
         private string speakableValue(string sCol)
         {
             if (db == null) return "blank";
-            if (db.isFieldNull(sCol)) return "null";
+            if (db.isFieldNull(sCol)) return "blank";
             string sVal = db.getFieldValue(sCol);
             return string.IsNullOrEmpty(sVal) ? "blank" : sVal;
         }
@@ -27009,7 +27015,7 @@ namespace DbDo
                     bNull = db.isFieldNull(grid.Columns[iCol].Text);
             }
             catch { }
-            return bNull ? "null" : "blank";
+            return "blank";
         }
 
         // nullCurrentCell: Null Value (Control+Shift+Backspace) in
