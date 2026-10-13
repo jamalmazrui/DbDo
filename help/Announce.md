@@ -24,7 +24,7 @@ Every DbDo command can be accomplished efficiently from the keyboard. In additio
 
 **Three search families with persistent history.** Find (Control+K) for substring across all columns, Jump to Match (Control+J) for substring within one column, Find Regex (Control+F3) for .NET regex. Each family remembers its last 10 terms along with their case-sensitive flags. F3 / Shift+F3 repeats whichever family was most recent.
 
-**Parent-child drill.** Alt+RightArrow drills from a parent row into a filtered child table (a teacher's classes, a class's enrollments). Alt+LeftArrow returns to the exact parent row; Alt+Home pops the whole drill stack at once.
+**Parent-child drill.** Alt+RightArrow drills from a parent row into a filtered child table (an artist's albums, an album's tracks). Alt+LeftArrow returns to the exact parent row; Alt+Home pops the whole drill stack at once.
 
 **Recent files with per-table state.** Alt+R reopens any of the last 10 databases, restoring not just the file but the last-active table, filter, sort, and row position.
 
@@ -32,16 +32,27 @@ Every DbDo command can be accomplished efficiently from the keyboard. In additio
 
 **Snippet scripting.** Save small JavaScript or text snippets in your own editor, then invoke them inside DbDo with a single keystroke (Control+Shift+I, I for Invoke). Scripts can automate bulk record edits, filter changes, custom reports — anything the database manager itself can do.
 
-## Sample databases
+## Template databases
 
-DbDo ships four SQLite template databases adapted to its standard column conventions (`<singular>_id` primary keys, `added`/`edited` timestamps maintained by triggers, generated `look`/`unq` columns):
+DbDo comes with ten template databases, copied into your own data folder the first time it runs, so each is yours to change. Every one earns its place: it carries real data worth exploring, serves a task people do every day, or is taught by a recorded tutorial. Each follows DbDo's conventions: `<singular>_id` keys, `added` and `edited` stamps kept by triggers, a generated `prime` that names a record, and a `maps` table that links records across tables.
 
-- `NFB2026Convention.db` — the flagship demo: the 2026 NFB national convention agenda as a four-table relational model (contacts, events, locations, projects) wired together by a generic `maps` association table.
-- `template.db` — a small school domain (teachers, classes, students, enrollments) for first-launch exploration.
-- `northwind.db` — the classic Microsoft Northwind sales template (categories, suppliers, products, customers, employees, orders, order details, shippers).
-- `chinook.db` — the classic Chinook music-store template (artists, albums, tracks, genres, customers, invoices, invoice items), with deep parent-child chains.
+Real data to explore:
 
-The Northwind and Chinook templates are useful for exercising DbDo against real-shaped data with multiple parent-child relationships; the convention database shows the maps model on real-world associations.
+- **RadioTrail** — some 55,000 working Internet radio stations, with a script that refreshes the catalog. Find a station by name, place, language or genre, and play it.
+- **MusicTrail** — 100 great albums and 200 great musicians across ten genres, with who recorded what and who played in which band, each linked to Wikipedia.
+- **BlindCreations** — apps, books and presentations made by blind people, with their creators: about a hundred apps, a hundred books, sixty presentations and over a hundred and twenty creators.
+- **TechTraining** — about 1,170 free presentations on technology and accessibility, from webinars to podcasts. Press Alt+Shift+P to play one, or mark several and play them as a list.
+
+Everyday tasks:
+
+- **JobTrail** — a job search: applications, contacts, documents and actions, with the work search record an unemployment office asks for. DbDo opens it the first time, and its tutorials follow one job seeker through it.
+- **BookTrail** — your reading: what you have read, are reading and mean to read. Its companion bookFido fills it from your BARD, Audible and Kindle libraries.
+- **ContactTrail** — an address book with groups, an emergency list with every number, and an address book report to read or print.
+- **RecipeTrail** — recipes and their ingredients with amounts. Mark what you mean to cook, and its shopping list says what to buy, aisle by aisle.
+
+For learning:
+
+- **northwind** and **chinook** — the classic sales and music-store databases most database tutorials use, with real foreign keys and deep parent-child chains. DbDo's spoken tutorials use them to teach following related records and asking with SQL.
 
 ## Accessibility design
 

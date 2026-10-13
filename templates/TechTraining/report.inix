@@ -1,0 +1,32 @@
+﻿; Report definitions for the TechTraining sample database.
+;
+; Run them with Run Report (Alt+Shift+R). DbDo renders the chosen report and opens
+; it in your editor, where it can be read straight through or printed. Empty
+; fields print nothing, because a field earns its line.
+
+FileTask = report
+
+; The presentations you have marked, as a list to work through.
+[listening_list]
+@table = presentations
+@filter = marked = 1
+@sort = category, title
+header = """
+# Listening List
+
+Prepared {{ new Date().toISOString().substring(0,10) }} from TechTraining.
+"""
+detail = """
+## $title
+
+{{ $year ? "- Year: " + $year : "" }}
+{{ $minutes ? "- Length: " + $minutes + " minutes" : "" }}
+{{ $presenter ? "- Presenter: " + $presenter : "" }}
+- Topic: $category
+- From: $source
+{{ $summary ? "- About: " + $summary : "" }}
+- Address: $url
+"""
+footer = """
+**$count {{ $count == 1 ? "presentation" : "presentations" }} to hear.**
+"""

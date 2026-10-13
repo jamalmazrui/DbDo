@@ -1,0 +1,31 @@
+﻿; Report definitions for the ContactTrail sample database.
+;
+; Run them with Run Report (Alt+Shift+R). DbDo offers the reports below in a list,
+; renders the chosen one over the whole table, and opens it in your editor, where
+; it can be read straight through or printed. Empty fields print nothing, because
+; a field earns its line.
+
+FileTask = report
+
+; Everyone, by last name, with every way to reach them.
+[address_book]
+@table = contacts
+@sort = last_name, first_name
+header = """
+# Address Book
+
+Prepared {{ new Date().toISOString().substring(0,10) }} from ContactTrail.
+"""
+detail = """
+## $last_name, $first_name{{ $middle_name ? " " + $middle_name : "" }}
+
+{{ $job ? "- " + $job + ($enterprise ? ", " + $enterprise : "") : ($enterprise ? "- " + $enterprise : "") }}
+{{ $wireless_phone ? "- Mobile: " + $wireless_phone : "" }}
+{{ $home_phone ? "- Home: " + $home_phone : "" }}
+{{ $personal_email ? "- Email: " + $personal_email : "" }}
+{{ $business_email ? "- Work email: " + $business_email : "" }}
+{{ $address1 ? "- Address: " + $address1 + ($city ? ", " + $city : "") + ($state ? ", " + $state : "") + ($zip ? " " + $zip : "") + ($nation ? ", " + $nation : "") : "" }}
+"""
+footer = """
+**$count {{ $count == 1 ? "contact" : "contacts" }} in this address book.**
+"""

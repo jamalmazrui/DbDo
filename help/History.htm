@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
 <head>
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
@@ -227,11 +227,28 @@
   <![endif]-->
 </head>
 <body>
-<nav id="TOC" role="doc-toc">
+<nav id="TOC" role="doc-toc" aria-label="Contents">
 <ul>
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a href="#october-2026-techtraining-joins-and-two-templates-retire"
+id="toc-october-2026-techtraining-joins-and-two-templates-retire">12
+October 2026 – TechTraining joins, and two templates retire</a></li>
+<li><a
+href="#october-2026-a-build-with-nothing-to-change-builds-nothing"
+id="toc-october-2026-a-build-with-nothing-to-change-builds-nothing">12
+October 2026 – a build with nothing to change builds nothing</a></li>
+<li><a
+href="#october-2026-an-older-radiotrail-is-brought-up-to-date-in-place"
+id="toc-october-2026-an-older-radiotrail-is-brought-up-to-date-in-place">12
+October 2026 – an older RadioTrail is brought up to date in
+place</a></li>
+<li><a
+href="#october-2026-eleven-template-databases-each-one-worth-opening"
+id="toc-october-2026-eleven-template-databases-each-one-worth-opening">12
+October 2026 – eleven template databases, each one worth
+opening</a></li>
 <li><a
 href="#october-2026-musictrail-holds-a-hundred-albums-and-two-hundred-musicians-and-radiotrail-goes-to-github"
 id="toc-october-2026-musictrail-holds-a-hundred-albums-and-two-hundred-musicians-and-radiotrail-goes-to-github">12
@@ -424,6 +441,7 @@ id="toc-v1.0.112-and-v1.0.113">v1.0.112 and v1.0.113</a></li>
 </ul></li>
 </ul>
 </nav>
+<main>
 <h1 id="dbdo-history-of-changes">DbDo History of Changes</h1>
 <p>This file is the chronological record of DbDo releases. The most
 recent release is at the top. For the overview of what DbDo is, see
@@ -431,6 +449,116 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="october-2026-techtraining-joins-and-two-templates-retire">12
+October 2026 – TechTraining joins, and two templates retire</h2>
+<ul>
+<li><strong>TechTraining is a template.</strong> About 1,170 free
+presentations on technology and accessibility, from the Tech Training
+directory: each with its title, year, length in minutes, category,
+presenter, series, source and description, and the presentation’s own
+address as its url. Play Stream (Alt+Shift+P) plays it in the Homer
+Player – 616 audio files directly and 441 videos through yt-dlp – and
+marked presentations play as a list; the 109 that live on a publisher’s
+page open in the browser with Control+Enter. The row speaks title,
+minutes and medium, so you hear what it is, how long it takes and
+whether Alt+Shift+P plays it. Categories, sources, series and media are
+pick lists, each category with the directory’s own definition.
+Quick-Lessons finds playable ones of fifteen minutes or less, Newest
+those from this year and last, and the listening_list report writes up
+what you have marked; three short ones come marked to show how.
+scripts\makeTechTraining rebuilds it from the directory, with the table
+helpers MusicTrail’s builder uses.</li>
+<li><strong>ConventionTrail and HowToTrail are retired.</strong> The
+2026 convention is past, and how-to material reads better as documents
+than as a database. The build moves each into notes\retired and the
+installer removes it from an installed copy; a copy you already have
+stays and opens as before. For the next convention or conference of any
+organization, HomerDev’s new convention-database skill builds one from
+its agenda, with the schema, link kinds, schedule exports and lessons
+ConventionTrail taught.</li>
+<li><strong>The ReadMe explains the maps model with templates that
+ship,</strong> and the guide no longer describes a unq column, which
+prime replaced.</li>
+</ul>
+<h2 id="october-2026-a-build-with-nothing-to-change-builds-nothing">12
+October 2026 – a build with nothing to change builds nothing</h2>
+<ul>
+<li><strong>Nothing changed, nothing built.</strong> Every build
+compiled DbDo.exe and DbDo.dll, took a new number and built a new
+installer, so a cycle with nothing to change still published a new
+release. Now, after the templates are repaired, the build asks whether
+anything DbDo ships has changed since its last build: the program’s
+sources and the kit classes it compiles in, and everything the installer
+packs. If nothing has, the program, its number and the installer stay as
+they are, and release finds that version already published. Any change,
+even to a help page or a template, makes the full build with a new
+number. <code>build fresh</code> builds regardless.</li>
+</ul>
+<h2
+id="october-2026-an-older-radiotrail-is-brought-up-to-date-in-place">12
+October 2026 – an older RadioTrail is brought up to date in place</h2>
+<ul>
+<li><strong>A listener’s work is kept through a schema change.</strong>
+fetchStations set aside any copy of RadioTrail missing a column the
+template has, on the belief that nobody’s work was in it, and made a new
+one; notes, favourites, marks and added stations were left in a backup
+nobody would find. A copy with stations now gains the missing columns in
+place, after a dated backup, and keeps every row. Only an empty copy, or
+one lacking a column that cannot be added in place, is set aside as
+before.</li>
+<li><strong>A RadioTrail built from its schema comes with its
+settings.</strong> The schema path returned before RadioTrail.inix was
+copied, so a copy made that way opened without it. Both paths now bring
+the settings, and report.inix when the folder has none, so a report you
+have edited is kept.</li>
+<li><strong>The guide says what happens to a retired template.</strong>
+A copy you already have stays in your folder and opens as it always
+did.</li>
+</ul>
+<h2
+id="october-2026-eleven-template-databases-each-one-worth-opening">12
+October 2026 – eleven template databases, each one worth opening</h2>
+<ul>
+<li><strong>The set is held to one standard.</strong> A template ships
+when it carries real data worth exploring, serves a task people really
+do every day, or is taught by a recorded tutorial. Eleven do:
+RadioTrail, HowToTrail, MusicTrail, BlindCreations and ConventionTrail
+for their data; JobTrail, BookTrail, ContactTrail and RecipeTrail for
+their use; northwind and chinook, which the spoken tutorials teach
+with.</li>
+<li><strong>Four are retired.</strong> CellarTrail, well built but for a
+narrow use with eight sample wines; CollectionTrail, one flat table of
+five items, which is a spreadsheet rather than a database; FilmTrail,
+twelve films with no source behind them, repeating MusicTrail’s pattern
+with a fraction of its substance; and SchoolTrail, three students and
+three teachers, a toy beside northwind and chinook. The build moves each
+into notes\retired, and the installer removes them from an installed
+copy, so the template chooser no longer offers them. A copy already in
+your own data folder is yours and stays.</li>
+<li><strong>RecipeTrail makes a shopping list.</strong> Mark the recipes
+you mean to cook, and Shopping-List gives every ingredient once, aisle
+by aisle, with the amount each marked recipe needs: olive oil reads “2
+tbsp for Spaghetti Bolognese; 2 tbsp for Lemon Garlic Chicken”.
+Recipe-Ingredients reads any recipe at the counter, and Quick-Meals
+finds dinner in half an hour. Two recipes come marked, so the list shows
+what it does the first time.</li>
+<li><strong>ContactTrail keeps an emergency list.</strong>
+Emergency-Contacts gives the people to call with every number;
+Phone-List is the short list to call from; Group-Roster names each
+group’s members; and the address_book report writes an address book to
+read through or print. Two neighbours with phone numbers come in the
+Emergency group.</li>
+<li><strong>BookTrail shows what to read next.</strong> Reading-List
+puts the book in progress first, then each series in its order;
+Reading-By-Year counts each year’s books and how they came; and the
+reading_log report writes up everything finished, newest first.</li>
+<li><strong>The announcement describes the real set.</strong> It still
+named four templates, two of them by names retired long ago, and
+illustrated parent-child drill with the retired school database.</li>
+<li><strong>A stray left the templates folder.</strong> The kit’s
+app-build script had been copied in among the databases and shipped to
+every user.</li>
+</ul>
 <h2
 id="october-2026-musictrail-holds-a-hundred-albums-and-two-hundred-musicians-and-radiotrail-goes-to-github">12
 October 2026 – MusicTrail holds a hundred albums and two hundred
@@ -4143,8 +4271,8 @@ from <code>sayUiaString</code> itself was never dispatched.</p>
 <p>The Microsoft-documented working pattern, copied verbatim from the
 .NET Framework “what’s new in accessibility” page:</p>
 <div class="sourceCode" id="cb3"><pre
-class="sourceCode csharp"><code class="sourceCode cs"><span id="cb3-1"><a href="#cb3-1" aria-hidden="true" tabindex="-1"></a>raiseMethod<span class="op">.</span><span class="fu">Invoke</span><span class="op">(</span>progressBar1<span class="op">.</span><span class="fu">AccessibilityObject</span><span class="op">,</span></span>
-<span id="cb3-2"><a href="#cb3-2" aria-hidden="true" tabindex="-1"></a>    <span class="kw">new</span> <span class="dt">object</span><span class="op">[</span><span class="dv">3</span><span class="op">]</span> <span class="op">{</span> <span class="co">/*Other*/</span> <span class="dv">4</span><span class="op">,</span> <span class="co">/*All*/</span> <span class="dv">2</span><span class="op">,</span> <span class="st">&quot;The progress is 50%.&quot;</span> <span class="op">});</span></span></code></pre></div>
+class="sourceCode csharp"><code class="sourceCode cs"><span id="cb3-1">raiseMethod<span class="op">.</span><span class="fu">Invoke</span><span class="op">(</span>progressBar1<span class="op">.</span><span class="fu">AccessibilityObject</span><span class="op">,</span></span>
+<span id="cb3-2">    <span class="kw">new</span> <span class="dt">object</span><span class="op">[</span><span class="dv">3</span><span class="op">]</span> <span class="op">{</span> <span class="co">/*Other*/</span> <span class="dv">4</span><span class="op">,</span> <span class="co">/*All*/</span> <span class="dv">2</span><span class="op">,</span> <span class="st">&quot;The progress is 50%.&quot;</span> <span class="op">});</span></span></code></pre></div>
 <p>A <code>ProgressBar</code>’s <code>AccessibilityObject</code>. Not a
 Form’s, not a Button’s.</p>
 <p><strong>Fix in
@@ -6001,5 +6129,6 @@ late-bound ADO via the SQLite ODBC driver, parent-child drill via
 foreign-key inference, the Show Record / Related Records pattern,
 three-mode keyboard model (rows / column-announcements / virtual cells),
 and the dual-interface (GUI + dot prompt) design.</p>
+</main>
 </body>
 </html>

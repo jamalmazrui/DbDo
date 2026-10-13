@@ -1,0 +1,30 @@
+﻿; Report definitions for the BookTrail sample database.
+;
+; Run them with Run Report (Alt+Shift+R). DbDo offers the reports below in a list,
+; renders the chosen one over the whole table, and opens it in your editor. Empty
+; fields print nothing, because a field earns its line.
+
+FileTask = report
+
+; Every book you have finished, newest first: a reading log to keep or share.
+[reading_log]
+@table = books
+@filter = status = 'read'
+@sort = date_read DESC
+header = """
+# Reading Log
+
+Prepared {{ new Date().toISOString().substring(0,10) }} from BookTrail.
+"""
+detail = """
+## $title{{ $subtitle ? ": " + $subtitle : "" }}
+
+- {{ $author }}{{ $series ? ", " + $series + ($volume ? " " + $volume : "") : "" }}
+{{ $date_read ? "- Finished: " + $date_read : "" }}
+{{ $format ? "- Read as: " + $format : "" }}
+{{ $rating ? "- Your rating: " + $rating + " of 5" : "" }}
+{{ $reason ? "- Why: " + $reason : "" }}
+"""
+footer = """
+**$count {{ $count == 1 ? "book" : "books" }} finished.**
+"""

@@ -285,6 +285,37 @@ for %%f in (Inix.cs Lbc.cs Say.cs Web.cs) do (
   )
 )
 
+rem ---- NOTHING CHANGED, NOTHING BUILT (12 October 2026) ----
+rem A cycle with nothing to change compiled DbDo.exe and DbDo.dll, took a new
+rem number, built a new installer and published a new release every time. Now the
+rem build asks first, after the templates are repaired, whether anything DbDo ships
+rem has changed since its last success: what the program is made from (DbDo.cs,
+rem DbDo.js, 2db.cs, the icon and manifest, build.cmd, version.txt and the kit
+rem classes it compiles in) and what the installer packs (the .iss, the kit's
+rem component table, and the folders it ships). If nothing has, the program and the
+rem installer stay as they are, with their number, and release finds that version
+rem already published. If anything has -- a help page, a template -- the build is
+rem the full one with a new number, so the change reaches users in a new release.
+rem The kit's one fingerprint store decides (scripts\fingerprint.py in the kit,
+rem exec\fingerprints.json here). "build fresh" builds regardless.
+set "bNothingChanged="
+set "sFingerprint=!homerDev!\scripts\fingerprint.py"
+set "lsProgramInputs=DbDo.cs DbDo.js DbDo.ico DbDo.manifest 2db.cs build.cmd version.txt !homerSources!"
+set "lsSetupInputs=DbDo_setup.iss "!homerDev!\Templates\HomerComponents.iss" version.txt exec help scripts templates"
+for %%d in (configs data) do if exist "%%d" set "lsSetupInputs=!lsSetupInputs! %%d"
+for %%f in (License.md License.htm ReadMe.md ReadMe.htm DbDo.ico) do if exist "%%f" set "lsSetupInputs=!lsSetupInputs! %%f"
+if /i "%~1"=="fresh" goto :changesChecked
+if not exist "!sFingerprint!" goto :changesChecked
+if not exist DbDo_setup.exe goto :changesChecked
+python "!sFingerprint!" check "%CD%" "program DbDo" --in !lsProgramInputs! --out exec\DbDo.exe exec\DbDo.dll >> "!log!" 2>&1
+if errorlevel 1 goto :changesChecked
+python "!sFingerprint!" check "%CD%" "installer DbDo" --in !lsSetupInputs! --out DbDo_setup.exe >> "!log!" 2>&1
+if errorlevel 1 goto :changesChecked
+set "bNothingChanged=1"
+echo Nothing DbDo ships has changed since its last build, so nothing is built again.
+>> "!log!" echo Unchanged: exec\DbDo.exe, exec\DbDo.dll and DbDo_setup.exe are current with every input; not compiled, version kept
+:changesChecked
+
 rem ---- version: version.txt is the SINGLE source of truth ----
 rem The version lives in version.txt: one line, nothing else.  It is incremented
 rem here, BEFORE anything is compiled, because both the program and the installer
@@ -297,6 +328,7 @@ rem All three therefore always agree, which is what Elevate Version (F11) needs.
 rem The .iss contains NO version number, so an old copy of it cannot rewind one.
 rem
 rem Pass "nobump" to recompile without taking a new number: build.cmd nobump
+rem Pass "fresh" to build everything even when nothing has changed: build.cmd fresh
 if not exist "version.txt" (
   echo ERROR: version.txt not found. It must hold the current version, e.g. 1.0.0
   echo ERROR: version.txt not found. >> "!log!"
@@ -340,7 +372,10 @@ if not "!tagVer!"=="" (
   )
 )
 
-if /i "%~1"=="nobump" (
+if defined bNothingChanged (
+  echo Version: !ver! ^(nothing changed: keeping the current number^)
+  echo Version: !ver! ^(kept: nothing changed^) >> "!log!"
+) else if /i "%~1"=="nobump" (
   echo Version: !ver! ^(nobump: keeping the current number^)
   echo Version: !ver! ^(nobump^) >> "!log!"
 ) else (
@@ -364,7 +399,7 @@ rem A build that stopped before the installer step -- a compile error, say -- le
 rem the last build's DbDo_setup.exe in place, and installing it looked like
 rem installing this build. It is removed before anything compiles, so a failed
 rem build leaves no installer at all rather than an old one that seems new.
-if exist DbDo_setup.exe (
+if not defined bNothingChanged if exist DbDo_setup.exe (
   del /f /q DbDo_setup.exe
   >> "!log!" echo Removed the previous DbDo_setup.exe before compiling
 )
@@ -651,6 +686,11 @@ if errorlevel 1 (
 )
 :have_sqlean
 
+rem Nothing changed: the program, its self-test and the importers stay as they are.
+if defined bNothingChanged (
+  >> "!log!" echo Compiles skipped: nothing changed
+  goto :skip_2db
+)
 rem ---- compile DbDo.js -> DbDo.dll (JScript .NET) ----
 rem
 rem /target:library so the result is a DLL we can load at runtime.
@@ -716,11 +756,18 @@ rem Any Field and Keywords both stopped finding "seahawks" in a full RadioTrail,
 rem --selftest-search opens the catalog read-only through the same code the window uses and runs both searches for
 rem each term; any term not found both ways, or records it could not read, stops the build here, before anything
 rem is packaged. It runs when the full catalog is present, which only the development tree keeps.
+rem ON A COPY, NEVER THE SHIPPED FILE (12 October 2026). Opening the catalog loads SQLean, which adds a table of its
+rem own to the file, so every build changed RadioTrail.db; now that the catalog is pushed to GitHub, every changed
+rem byte would add another 67 MB to the repository's history. The test reads a copy in the temporary folder, which it
+rem deletes afterwards, and the catalog in templates is left exactly as it was.
 if exist "!sHere!templates\RadioTrail\RadioTrail.db" (
   echo Searching RadioTrail with Any Field and Keywords ...
-  echo Search self-test: DbDo.exe --selftest-search on templates\RadioTrail\RadioTrail.db >> "!log!"
-  "DbDo.exe" --selftest-search "!sHere!logs\DbDo-search-%sStamp%.log" "!sHere!templates\RadioTrail\RadioTrail.db" stations seahawks seattle bolivia "santa cruz" >> "!log!" 2>&1
+  set "sSearchCopy=%TEMP%\DbDo-selftest-RadioTrail.db"
+  copy /y "!sHere!templates\RadioTrail\RadioTrail.db" "!sSearchCopy!" >nul
+  echo Search self-test: DbDo.exe --selftest-search on a copy of templates\RadioTrail\RadioTrail.db, !sSearchCopy! >> "!log!"
+  "DbDo.exe" --selftest-search "!sHere!logs\DbDo-search-%sStamp%.log" "!sSearchCopy!" stations seahawks seattle bolivia "santa cruz" >> "!log!" 2>&1
   set "iSearch=!errorlevel!"
+  del /q "!sSearchCopy!" "!sSearchCopy!-journal" "!sSearchCopy!-wal" "!sSearchCopy!-shm" 2>nul
   if exist "!sHere!logs\DbDo-search-%sStamp%.log" type "!sHere!logs\DbDo-search-%sStamp%.log" >> "!log!"
   echo Search self-test: exit code !iSearch!>> "!log!"
   if not "!iSearch!"=="0" (
@@ -783,6 +830,34 @@ for %%f in (cellar contacts howtos iOSTutorials media music NFB2026Convention re
     rd /s /q "templates\%%f"
     echo Removed the retired sample "templates\%%f" >> "!log!"
   )
+)
+rem ---- TEMPLATES RETIRED ON THEIR MERITS (12 October 2026) ----
+rem
+rem The shipped set is held to one standard: real data, a real everyday task, or a
+rem recorded tutorial that teaches with it. CellarTrail (a narrow use, eight sample
+rem wines), CollectionTrail (one flat table of five items), FilmTrail (twelve films
+rem with no source behind them, repeating MusicTrail's pattern with a fraction of
+rem its substance) and SchoolTrail (three students, a toy beside chinook and
+rem northwind) met none well enough. Each folder MOVES to notes\retired\templates,
+rem which git never takes, so the repository drops it and this disk keeps it.
+rem ConventionTrail and HowToTrail followed the same evening: the 2026 convention
+rem is past, and a convention is now built fresh for each event from the kit's
+rem convention-database skill; and how-to material reads better as documents
+rem than as a database.
+for %%f in (CellarTrail CollectionTrail ConventionTrail FilmTrail HowToTrail SchoolTrail) do (
+  if exist "templates\%%f" (
+    if not exist "notes\retired\templates" mkdir "notes\retired\templates"
+    if exist "notes\retired\templates\%%f" rd /s /q "notes\retired\templates\%%f"
+    move "templates\%%f" "notes\retired\templates\%%f" >nul
+    echo Retired the template "templates\%%f" into notes\retired\templates >> "!log!"
+  )
+)
+rem The kit's app-build template had been copied in among the databases, and the
+rem installer shipped it to every user's templates folder. It belongs to the kit.
+if exist "templates\build_APP_.cmd" (
+  if not exist "notes\retired\templates" mkdir "notes\retired\templates"
+  move /y "templates\build_APP_.cmd" "notes\retired\templates\build_APP_.cmd" >nul
+  echo Retired the stray "templates\build_APP_.cmd" into notes\retired\templates >> "!log!"
 )
 rem A RENAMED SCRIPT LEAVES ITS OLD NAME BEHIND when a zip is unpacked over the
 rem folder, and two scripts with similar names that do nearly the same thing
@@ -1064,6 +1139,10 @@ for %%F in (installOllama.cmd installModels.cmd) do (
   )
 )
 
+if defined bNothingChanged (
+  >> "!log!" echo Installer: DbDo_setup.exe kept; Inno Setup not run
+  goto :installerDone
+)
 rem ---- build the installer ----
 rem DbDo_setup.exe is part of the build, not a separate errand: one command
 rem produces everything a release needs. Inno Setup is fetched with winget when
@@ -1118,6 +1197,13 @@ if defined verPending (
   > version.txt echo !ver!
   echo version.txt is now !ver! >> "!log!"
 )
+rem Recorded last, once version.txt holds the number this build used, so the next
+rem build compares against exactly what this one made.
+if exist "!sFingerprint!" (
+  python "!sFingerprint!" record "%CD%" "program DbDo" --in !lsProgramInputs! --out exec\DbDo.exe exec\DbDo.dll >> "!log!" 2>&1
+  python "!sFingerprint!" record "%CD%" "installer DbDo" --in !lsSetupInputs! --out DbDo_setup.exe >> "!log!" 2>&1
+)
+:installerDone
 
 echo.
 echo Build complete. Artifacts in this directory:

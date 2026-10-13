@@ -1003,9 +1003,9 @@ def templatePath():
 
 def buildFromSchema(sDb, sSchema):
     """A new, empty RadioTrail at sDb built from RadioTrail.schema: its tables, indexes, triggers, lookups and views,
-    and no stations. THE TEMPLATE CAN BE MADE FROM SOURCE (12 October 2026): RadioTrail.db is built on the development
-    machine and kept out of git, and an audit found a clean checkout had no way to make one, since this script could
-    only copy it. The build writes the schema from the real database (scripts\\checkTemplates --schema RadioTrail), and
+    and no stations. THE TEMPLATE CAN BE MADE FROM SOURCE (12 October 2026): RadioTrail.db was then kept out of
+    git, and an audit found a clean checkout had no way to make one, since this script could only copy it. The
+    repository carries the catalog now too, and the schema remains the way to build one from source. The build writes the schema from the real database (scripts\\checkTemplates --schema RadioTrail), and
     with no database to copy, the catalog fetch that follows fills this one."""
     import sqlite3
     os.makedirs(os.path.dirname(sDb), exist_ok=True)
@@ -1019,19 +1019,34 @@ def buildFromSchema(sDb, sSchema):
     print("Built an empty RadioTrail at " + sDb + " from " + os.path.basename(sSchema) + "; the stations come next.")
     return True
 
+def copyCompanions(sDb):
+    """The template's companion files beside a new copy at sDb. RadioTrail.inix, its settings, comes with every new copy
+    as it always has; report.inix, the report definitions, comes only when the folder has none, so a report the
+    listener has edited is kept. BOTH PATHS BRING THEM (12 October 2026, from an audit): a database built from the
+    schema returned before the settings were copied, so it opened without them."""
+    import shutil
+    sFrom, sTo = os.path.dirname(templatePath()), os.path.dirname(sDb)
+    for sName, bAlways in (("RadioTrail.inix", True), ("report.inix", False)):
+        sSource, sTarget = os.path.join(sFrom, sName), os.path.join(sTo, sName)
+        if os.path.isfile(sSource) and os.path.normcase(os.path.abspath(sSource)) != os.path.normcase(os.path.abspath(sTarget)) and (bAlways or not os.path.isfile(sTarget)):
+            shutil.copy2(sSource, sTarget)
+    return True
+
 def copyTemplate(sDb):
-    """A new copy of the template at sDb, with its settings file beside it. With no template database to copy, one is
+    """A new copy of the template at sDb, with its companion files beside it. With no template database to copy, one is
     built from RadioTrail.schema beside this script."""
     import shutil
     sTemplate = templatePath()
     if not os.path.isfile(sTemplate):
         sSchema = os.path.join(os.path.dirname(sTemplate), "RadioTrail.schema")
-        if os.path.isfile(sSchema): return buildFromSchema(sDb, sSchema)
-        print("No RadioTrail.db beside this script to copy from, and no RadioTrail.schema to build one from."); return False
+        if not os.path.isfile(sSchema):
+            print("No RadioTrail.db beside this script to copy from, and no RadioTrail.schema to build one from."); return False
+        if not buildFromSchema(sDb, sSchema): return False
+        copyCompanions(sDb)
+        return True
     os.makedirs(os.path.dirname(sDb), exist_ok=True)
     shutil.copy2(sTemplate, sDb)
-    sInix = os.path.join(os.path.dirname(sTemplate), "RadioTrail.inix")
-    if os.path.isfile(sInix): shutil.copy2(sInix, os.path.join(os.path.dirname(sDb), "RadioTrail.inix"))
+    copyCompanions(sDb)
     print("Made your copy of RadioTrail at " + sDb)
     return True
 
@@ -1064,6 +1079,49 @@ def setAside(sDb):
         return True
     except Exception as oError:
         print("Could not set the old copy aside: " + str(oError)); return False
+
+def migrateShape(sDb):
+    """THE COPY CATCHES UP IN PLACE (12 October 2026, from an audit). An older copy was set aside whole and a new one
+    made, on the belief that nobody's work was in it -- but its notes, favourites, marks and added stations are work,
+    and a backup nobody finds is not keeping them. A copy whose stations table has rows now gains the template's missing
+    columns in place, each with the template's type and default, after a dated backup is made. True when the copy now
+    has the template's shape; False, with nothing changed, when it has no rows to keep or lacks a column that cannot be
+    added in place (a stored generated column), and the caller sets it aside as before."""
+    import shutil
+    try:
+        cT = sqlite3.connect(templatePath())
+        lWant = [r for r in cT.execute("pragma table_xinfo(stations)")]
+        cT.close()
+        cD = sqlite3.connect(sDb)
+        setHave = set(r[1] for r in cD.execute("pragma table_xinfo(stations)"))
+        iRows = cD.execute("select count(*) from stations").fetchone()[0] if setHave else 0
+        cD.close()
+    except Exception as oError:
+        print("Could not compare the copy with the template: " + str(oError)); return False
+    lMissing = [r for r in lWant if r[1] not in setHave]
+    if not setHave or iRows == 0: return False
+    if any(r[6] for r in lMissing):
+        print("The copy lacks a column that cannot be added in place (" + ", ".join(r[1] for r in lMissing if r[6]) + "), so it is set aside instead."); return False
+    sBackup = os.path.join(os.path.dirname(sDb), "RadioTrail-before-update-" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S-%f") + ".db")
+    try:
+        cD = sqlite3.connect(sDb)
+        try: cD.execute("PRAGMA wal_checkpoint(TRUNCATE)")
+        finally: cD.close()
+        shutil.copy2(sDb, sBackup)
+        cD = sqlite3.connect(sDb)
+        try:
+            for r in lMissing:
+                sAdd = 'ALTER TABLE stations ADD COLUMN "%s" %s' % (r[1].replace('"', '""'), r[2] or "TEXT")
+                if r[4] is not None: sAdd += " DEFAULT " + str(r[4])
+                if r[3] and r[4] is not None: sAdd += " NOT NULL"
+                cD.execute(sAdd)
+            cD.commit()
+        finally:
+            cD.close()
+    except Exception as oError:
+        print("Could not bring the copy up to date in place: " + str(oError) + ". The copy was left as it was; a backup is at " + sBackup); return False
+    print("Brought your copy up to date in place, keeping its %d stations: added %s. A backup of the copy as it was is at %s." % (iRows, ", ".join(r[1] for r in lMissing), sBackup))
+    return True
 
 def sameShape(sDb):
     """True when the copy's stations table has every column the template's
@@ -1195,11 +1253,12 @@ def mainCore(lsArgs):
         # NO COPY YET? MAKE ONE from the template beside this script, rather
         # than sending the person away to open it in DbDo and come back.
         if not copyTemplate(sDb): return 1
-    elif not sameShape(sDb):
-        # THE COPY IS NOT THIS TEMPLATE'S SHAPE -- an older RadioTrail, or an
-        # empty file left by a failed start. Nobody's work is in it that the
-        # template does not supply, so it is set aside and a clean one made.
-        # No migration: the structure going forward is the template's.
+    elif not sameShape(sDb) and not migrateShape(sDb):
+        # THE COPY IS NOT THIS TEMPLATE'S SHAPE and could not be brought up to
+        # date in place: an empty file left by a failed start, a table with no
+        # rows, or a column only a new table can have. It is set aside under a
+        # dated name and a clean one made. A copy with stations to keep is
+        # migrated in place first (migrateShape), so this is the last resort.
         if not setAside(sDb):
             print("The copy was left as it is; nothing was replaced."); return 1
         if not copyTemplate(sDb): return 1

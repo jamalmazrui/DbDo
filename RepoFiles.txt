@@ -48,6 +48,10 @@ scripts/check.cmd
 scripts/check.py
 scripts/checkTemplates.cmd
 scripts/checkTemplates.py
+scripts/makeMusicTrail.cmd
+scripts/makeMusicTrail.py
+scripts/makeTechTraining.cmd
+scripts/makeTechTraining.py
 scripts/checkTutorial.cmd
 scripts/checkTutorial.py
 scripts/finish.cmd
@@ -74,5 +78,6 @@ scripts/uiCheck.py
 scripts/unpushed.cmd
 scripts/unpushed.py
 templates/
+templates/RadioTrail/RadioTrail.db
 THIRD-PARTY-NOTICES.txt
 uiTest.inix

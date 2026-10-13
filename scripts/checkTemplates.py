@@ -36,7 +36,7 @@ builds a new RadioTrail.db from it when there is none to copy. The file is rewri
 USAGE
   scripts\\checkTemplates                 check every template; exit 1 when anything fails
   scripts\\checkTemplates --repair        repair, then check
-  scripts\\checkTemplates --repair JobTrail HowToTrail    only these templates
+  scripts\\checkTemplates --repair JobTrail RadioTrail    only these templates
   scripts\\checkTemplates --repair --schema RadioTrail     also write RadioTrail.schema, as the build does
 
 Every run writes logs\\DbDo-checkTemplates-<date>-<time>.log with every check and its result.
@@ -46,9 +46,9 @@ import datetime, glob, os, platform, re, sqlite3, sys, traceback
 
 c_dKindNotes = {
     "ContactTrail|in_group": "Subject contact belongs to the object group.",
-    "FilmTrail|directed_by": "Subject film was directed by the object director.",
-    "MusicTrail|features": "Subject album features the object artist as a guest.",
-    "MusicTrail|recorded": "Subject artist recorded the object album.",
+    "MusicTrail|features": "Subject album features the object performer as a guest.",
+    "MusicTrail|member_of": "Subject performer is or was a member of the object performer, a band or group.",
+    "MusicTrail|recorded": "Subject performer recorded the object album.",
     "RecipeTrail|uses": "Subject recipe uses the object ingredient; the amount is in the map row's notes.",
 }
 c_lBandKeys = ["detail", "footer", "group_footer", "group_header", "header"]

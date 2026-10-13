@@ -123,7 +123,6 @@ DbDo recognizes certain field **names** and maintains or exposes them for you. A
 - **url** (TEXTLINE) — an associated link. Edit with Edit URL (Alt+Shift+U); open it with Open URL (Control+Shift+U); speak with Say URL (Shift+U).
 - **look** — a derived "display label" for the record: a short human-readable summary DbDo can compute so a record can be referred to by something friendlier than its key. Speak it with Say Look (Shift+L).
 - **prime** (the *prime* field) — a record's primary human-facing identity value. Speak it with Say Prime (Shift+P).
-- **unq** — a uniqueness/identity helper used internally for stable record identity.
 
 The distinction to hold onto: **added** and **edited** are *automatic* (DbDo writes them for you); **marked** is *state* you toggle; **notes**, **tags**, and **url** are *content* you edit through their own focused dialogs; **look**, **prime**, and **unq** are *derived identity* fields DbDo computes so records can be named and matched reliably.
 
@@ -540,7 +539,6 @@ The Query menu holds record inspection and the Say-X status family.
 | url | TEXTLINE | associated link | Shift+U |
 | look | derived | display label for the record | Shift+L |
 | prime | derived | prime human-facing identity | Shift+P |
-| unq | derived | internal uniqueness helper | — |
 
 ### Field types (summary)
 
@@ -894,20 +892,24 @@ time you run it, so your copies are yours to change.
 
 Each template is a folder under `templates`, copied into your own folder the first
 time you run DbDo, or the first time after an update that adds one. Your copy is
-yours: a later update never replaces it. The ones written for DbDo share the Trail name:
+yours: a later update never replaces it.
 
-- **BookTrail** -- books read, reading, and meant to be read
-- **CellarTrail** -- wine: the bottles, and what you thought of them
-- **CollectionTrail** -- anything you collect: stamps, coins, records, tools
-- **ContactTrail** -- people, and the groups you sort them into
-- **ConventionTrail** -- a convention: what is on, where, and who is speaking
-- **FilmTrail** -- films and the people who made them
-- **HowToTrail** -- how to do things on Windows and on iOS, in one database
-- **JobTrail** -- a job search: applications, contacts, and what you did
-- **MusicTrail** -- albums and artists
-- **RadioTrail** -- Internet radio stations, with a script that brings in the Radio Browser catalog and SomaFM
-- **RecipeTrail** -- recipes and their ingredients
-- **SchoolTrail** -- a small teaching database: students, teachers, classes
+Every template earns its place in one of three ways: it carries real data worth
+exploring, it serves a task people really do every day, or a recorded tutorial
+teaches with it. Six earlier templates were retired in October 2026: CellarTrail,
+CollectionTrail, FilmTrail and SchoolTrail for falling short of that, ConventionTrail
+because its convention is past, and HowToTrail because how-to material reads better as
+documents. If you already have one, it stays in your own folder and opens as it always
+did; it just is no longer offered as a new template. For the next convention or
+conference, HomerDev's convention-database skill builds one afresh from its agenda. The ones written for DbDo share the Trail name:
+
+- **BookTrail** -- books read, reading, and meant to be read. It comes with six sample books; bookFido fills your copy from your Audible, Kindle, Goodreads, Bookshare and BARD libraries, and removes the samples you have not touched once your own books are in. Reading-List shows what is next, series in order, and the reading_log report writes up what you have finished.
+- **ContactTrail** -- people, and the groups you sort them into. Emergency-Contacts gives the people to call with every number, Phone-List the short list to call from, Group-Roster each group's members, and the address_book report an address book to read through or print.
+- **JobTrail** -- a job search: applications, contacts, and what you did, with the work search record an unemployment office asks for
+- **MusicTrail** -- 100 great albums and 200 great musicians across ten genres, from two books by DbDo's author, with who recorded what and who played in which band
+- **RadioTrail** -- Internet radio, some 55,000 working stations, with a script that refreshes the catalog
+- **TechTraining** -- about 1,170 free presentations on technology and accessibility, from the Tech Training directory, each with its year, length, description and source. Play Stream (Alt+Shift+P) plays the presentation itself, and marked ones play as a list; Quick-Lessons finds the ones of fifteen minutes or less.
+- **RecipeTrail** -- recipes, their ingredients and the amounts each needs. Mark the recipes you mean to cook, and Shopping-List gives what to buy, aisle by aisle, with the amount each recipe needs; Quick-Meals finds dinner in half an hour.
 
 **chinook** and **northwind** keep their usual names. They are the two databases
 most database tutorials use, so the names are how people recognise them.
@@ -927,14 +929,17 @@ and Alt+Right goes to it. An app's **platform** is where it runs, so Fields in
 Filter Records narrows the list to one system. Categories, platforms, formats and
 roles are also in **tags**, one to a line, so Keywords finds them.
 
-#### HowToTrail holds both systems
+#### TechTraining plays what it lists
 
-The Windows and iOS how-to databases were the same shape, and answering "how do
-I do this on my phone?" meant opening a different file. They are one database
-now, and the system is a field: **platform**, holding Windows, iOS, or any for
-something true on both. Press F4 in the field to pick. To work in one system
-only, press Control+F, choose Fields, and type Windows in the platform box; the
-filter stays until you clear it with Control+Shift+F.
+Each presentation's **url** is the presentation itself, so Play Stream
+(Alt+Shift+P) plays it in the Homer Player: an audio file directly, a video on
+YouTube or a similar site through yt-dlp. Mark several with Space, and
+Alt+Shift+P plays them all, in order. The row speaks the title, the length in
+minutes, and the **medium**: audio or video play this way, and a page -- a
+presentation on its publisher's site -- opens in your browser with Control+Enter on
+its url. Control+Enter on **source_url** opens the publisher's page about it, and
+**resources** lists any slides, transcripts or handouts. Filter on **category**
+to stay in one topic; its pick list gives each category's definition.
 
 #### RadioTrail plays Internet radio
 
@@ -1028,16 +1033,6 @@ listener has written -- follow **Quill Radio**, the successor to the ACB Radio
 Tuner, whose published requirements and source were studied while RadioTrail
 was built. RadioTrail owes it a debt, and its listeners the ten ACB Media
 streams.
-
-#### CollectionTrail holds whatever you collect
-
-Stamps, coins, records and tools answer the same questions, so they share one
-table and a **collection** field says which collection a thing belongs to. Keep
-everything in one file, or make a copy for each collection.
-
-When a collection needs fields of its own, make it its own database. CellarTrail
-is the example: wine wants a vintage, a drinking window and a bottle count that
-falls as you drink it.
 
 ### BookTrail, for books
 

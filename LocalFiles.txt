@@ -32,6 +32,7 @@ notes/
 # of every repository.
 scripts/release.cmd
 scripts/release.ps1
-# The RadioTrail catalog, about 60,000 stations and 77 MB, fetched by fetchStations: shipped by the installer from
-# this disk, never pushed, since every refresh would add another 77 MB to the repository's history (10 October 2026).
-templates/RadioTrail/RadioTrail.db
+# The RadioTrail catalog, about 55,000 stations and 67 MB, IS PUSHED (12 October 2026, reversing 10 October): it is
+# shipped with DbDo, so the repository carries it too. GitHub refuses a file over 100 MB and warns over 50 MB. Each
+# refresh that changes it adds its size to the history, so the build's search test now reads a copy and leaves it
+# unchanged; only a deliberate refresh by fetchStations changes it.

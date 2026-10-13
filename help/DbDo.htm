@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
 <head>
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
@@ -164,7 +164,7 @@
   <![endif]-->
 </head>
 <body>
-<nav id="TOC" role="doc-toc">
+<nav id="TOC" role="doc-toc" aria-label="Contents">
 <ul>
 <li><a href="#dbdo-user-guide" id="toc-dbdo-user-guide">DbDo User
 Guide</a>
@@ -322,6 +322,7 @@ voices</a></li>
 </ul></li>
 </ul>
 </nav>
+<main>
 <h1 id="dbdo-user-guide">DbDo User Guide</h1>
 <p>DbDo is a relational database manager built from the ground up for
 people who work by keyboard and screen reader. It opens SQLite, Access,
@@ -564,8 +565,6 @@ referred to by something friendlier than its key. Speak it with Say Look
 <li><strong>prime</strong> (the <em>prime</em> field) — a record’s
 primary human-facing identity value. Speak it with Say Prime
 (Shift+P).</li>
-<li><strong>unq</strong> — a uniqueness/identity helper used internally
-for stable record identity.</li>
 </ul>
 <p>The distinction to hold onto: <strong>added</strong> and
 <strong>edited</strong> are <em>automatic</em> (DbDo writes them for
@@ -1774,12 +1773,6 @@ family.</p>
 <td>prime human-facing identity</td>
 <td>Shift+P</td>
 </tr>
-<tr class="odd">
-<td>unq</td>
-<td>derived</td>
-<td>internal uniqueness helper</td>
-<td>—</td>
-</tr>
 </tbody>
 </table>
 <h3 id="field-types-summary">Field types (summary)</h3>
@@ -2266,29 +2259,47 @@ copies are yours to change.</p>
 <p>Each template is a folder under <code>templates</code>, copied into
 your own folder the first time you run DbDo, or the first time after an
 update that adds one. Your copy is yours: a later update never replaces
-it. The ones written for DbDo share the Trail name:</p>
+it.</p>
+<p>Every template earns its place in one of three ways: it carries real
+data worth exploring, it serves a task people really do every day, or a
+recorded tutorial teaches with it. Six earlier templates were retired in
+October 2026: CellarTrail, CollectionTrail, FilmTrail and SchoolTrail
+for falling short of that, ConventionTrail because its convention is
+past, and HowToTrail because how-to material reads better as documents.
+If you already have one, it stays in your own folder and opens as it
+always did; it just is no longer offered as a new template. For the next
+convention or conference, HomerDev’s convention-database skill builds
+one afresh from its agenda. The ones written for DbDo share the Trail
+name:</p>
 <ul>
 <li><strong>BookTrail</strong> – books read, reading, and meant to be
-read</li>
-<li><strong>CellarTrail</strong> – wine: the bottles, and what you
-thought of them</li>
-<li><strong>CollectionTrail</strong> – anything you collect: stamps,
-coins, records, tools</li>
+read. It comes with six sample books; bookFido fills your copy from your
+Audible, Kindle, Goodreads, Bookshare and BARD libraries, and removes
+the samples you have not touched once your own books are in.
+Reading-List shows what is next, series in order, and the reading_log
+report writes up what you have finished.</li>
 <li><strong>ContactTrail</strong> – people, and the groups you sort them
-into</li>
-<li><strong>ConventionTrail</strong> – a convention: what is on, where,
-and who is speaking</li>
-<li><strong>FilmTrail</strong> – films and the people who made them</li>
-<li><strong>HowToTrail</strong> – how to do things on Windows and on
-iOS, in one database</li>
+into. Emergency-Contacts gives the people to call with every number,
+Phone-List the short list to call from, Group-Roster each group’s
+members, and the address_book report an address book to read through or
+print.</li>
 <li><strong>JobTrail</strong> – a job search: applications, contacts,
-and what you did</li>
-<li><strong>MusicTrail</strong> – albums and artists</li>
-<li><strong>RadioTrail</strong> – Internet radio stations, with a script
-that brings in the Radio Browser catalog and SomaFM</li>
-<li><strong>RecipeTrail</strong> – recipes and their ingredients</li>
-<li><strong>SchoolTrail</strong> – a small teaching database: students,
-teachers, classes</li>
+and what you did, with the work search record an unemployment office
+asks for</li>
+<li><strong>MusicTrail</strong> – 100 great albums and 200 great
+musicians across ten genres, from two books by DbDo’s author, with who
+recorded what and who played in which band</li>
+<li><strong>RadioTrail</strong> – Internet radio, some 55,000 working
+stations, with a script that refreshes the catalog</li>
+<li><strong>TechTraining</strong> – about 1,170 free presentations on
+technology and accessibility, from the Tech Training directory, each
+with its year, length, description and source. Play Stream (Alt+Shift+P)
+plays the presentation itself, and marked ones play as a list;
+Quick-Lessons finds the ones of fifteen minutes or less.</li>
+<li><strong>RecipeTrail</strong> – recipes, their ingredients and the
+amounts each needs. Mark the recipes you mean to cook, and Shopping-List
+gives what to buy, aisle by aisle, with the amount each recipe needs;
+Quick-Meals finds dinner in half an hour.</li>
 </ul>
 <p><strong>chinook</strong> and <strong>northwind</strong> keep their
 usual names. They are the two databases most database tutorials use, so
@@ -2309,15 +2320,20 @@ says what they made, and Alt+Right goes to it. An app’s
 narrows the list to one system. Categories, platforms, formats and roles
 are also in <strong>tags</strong>, one to a line, so Keywords finds
 them.</p>
-<h4 id="howtotrail-holds-both-systems">HowToTrail holds both
-systems</h4>
-<p>The Windows and iOS how-to databases were the same shape, and
-answering “how do I do this on my phone?” meant opening a different
-file. They are one database now, and the system is a field:
-<strong>platform</strong>, holding Windows, iOS, or any for something
-true on both. Press F4 in the field to pick. To work in one system only,
-press Control+F, choose Fields, and type Windows in the platform box;
-the filter stays until you clear it with Control+Shift+F.</p>
+<h4 id="techtraining-plays-what-it-lists">TechTraining plays what it
+lists</h4>
+<p>Each presentation’s <strong>url</strong> is the presentation itself,
+so Play Stream (Alt+Shift+P) plays it in the Homer Player: an audio file
+directly, a video on YouTube or a similar site through yt-dlp. Mark
+several with Space, and Alt+Shift+P plays them all, in order. The row
+speaks the title, the length in minutes, and the
+<strong>medium</strong>: audio or video play this way, and a page – a
+presentation on its publisher’s site – opens in your browser with
+Control+Enter on its url. Control+Enter on <strong>source_url</strong>
+opens the publisher’s page about it, and <strong>resources</strong>
+lists any slides, transcripts or handouts. Filter on
+<strong>category</strong> to stay in one topic; its pick list gives each
+category’s definition.</p>
 <h4 id="radiotrail-plays-internet-radio">RadioTrail plays Internet
 radio</h4>
 <p>Fourteen stations are in the template to start. To build the real
@@ -2420,15 +2436,6 @@ listener has written – follow <strong>Quill Radio</strong>, the
 successor to the ACB Radio Tuner, whose published requirements and
 source were studied while RadioTrail was built. RadioTrail owes it a
 debt, and its listeners the ten ACB Media streams.</p>
-<h4 id="collectiontrail-holds-whatever-you-collect">CollectionTrail
-holds whatever you collect</h4>
-<p>Stamps, coins, records and tools answer the same questions, so they
-share one table and a <strong>collection</strong> field says which
-collection a thing belongs to. Keep everything in one file, or make a
-copy for each collection.</p>
-<p>When a collection needs fields of its own, make it its own database.
-CellarTrail is the example: wine wants a vintage, a drinking window and
-a bottle count that falls as you drink it.</p>
 <h3 id="booktrail-for-books">BookTrail, for books</h3>
 <p>BookTrail is a template database for the books you have read, are
 reading, and mean to read. One table, books, holds the author, title,
@@ -2656,5 +2663,6 @@ on this repository.</p>
 <p>No acknowledgement is legally required for public domain material.
 These credits are here because the people who recorded and trained these
 voices deserve them.</p>
+</main>
 </body>
 </html>

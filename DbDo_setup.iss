@@ -200,6 +200,18 @@ Type: files; Name: "{app}\DbDo.exe.config"
 Type: files; Name: "{app}\DbDo.dll"
 Type: files; Name: "{app}\DbDo.ico"
 Type: files; Name: "{app}\DbDo.manifest"
+; FOUR TEMPLATES RETIRED (12 October 2026). The set shipped with DbDo is held to one standard: a template carries
+; real data, serves a real everyday task, or teaches in a recorded tutorial. CellarTrail, CollectionTrail, FilmTrail
+; and SchoolTrail met none of these well enough, so an installed copy leaves the template chooser. A person's own
+; copy in their data folder is theirs and is never touched.
+Type: filesandordirs; Name: "{app}\templates\CellarTrail"
+Type: filesandordirs; Name: "{app}\templates\CollectionTrail"
+Type: filesandordirs; Name: "{app}\templates\ConventionTrail"
+Type: filesandordirs; Name: "{app}\templates\FilmTrail"
+Type: filesandordirs; Name: "{app}\templates\HowToTrail"
+Type: filesandordirs; Name: "{app}\templates\SchoolTrail"
+; The kit's app-build template, which had been shipped among the databases by mistake.
+Type: files; Name: "{app}\templates\build_APP_.cmd"
 ; A renamed template script: fetchRadioBrowser became fetchStations.
 Type: files; Name: "{app}\templates\RadioTrail\fetchRadioBrowser.cmd"
 Type: files; Name: "{app}\templates\RadioTrail\fetchRadioBrowser.py"

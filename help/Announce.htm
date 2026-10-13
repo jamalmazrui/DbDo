@@ -1,5 +1,5 @@
 ﻿<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
 <head>
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
@@ -164,12 +164,12 @@
   <![endif]-->
 </head>
 <body>
-<nav id="TOC" role="doc-toc">
+<nav id="TOC" role="doc-toc" aria-label="Contents">
 <ul>
 <li><a href="#dbdo" id="toc-dbdo">DbDo</a>
 <ul>
 <li><a href="#highlights" id="toc-highlights">Highlights</a></li>
-<li><a href="#sample-databases" id="toc-sample-databases">Sample
+<li><a href="#template-databases" id="toc-template-databases">Template
 databases</a></li>
 <li><a href="#accessibility-design"
 id="toc-accessibility-design">Accessibility design</a></li>
@@ -178,6 +178,7 @@ id="toc-project-home-and-downloads">Project home and downloads</a></li>
 </ul></li>
 </ul>
 </nav>
+<main>
 <h1 id="dbdo">DbDo</h1>
 <p>Manage database files in a dual interface of console and graphical
 modes, maximizing productivity for screen reader and keyboard users.</p>
@@ -246,9 +247,9 @@ for substring within one column, Find Regex (Control+F3) for .NET regex.
 Each family remembers its last 10 terms along with their case-sensitive
 flags. F3 / Shift+F3 repeats whichever family was most recent.</p>
 <p><strong>Parent-child drill.</strong> Alt+RightArrow drills from a
-parent row into a filtered child table (a teacher’s classes, a class’s
-enrollments). Alt+LeftArrow returns to the exact parent row; Alt+Home
-pops the whole drill stack at once.</p>
+parent row into a filtered child table (an artist’s albums, an album’s
+tracks). Alt+LeftArrow returns to the exact parent row; Alt+Home pops
+the whole drill stack at once.</p>
 <p><strong>Recent files with per-table state.</strong> Alt+R reopens any
 of the last 10 databases, restoring not just the file but the
 last-active table, filter, sort, and row position.</p>
@@ -260,28 +261,54 @@ snippets in your own editor, then invoke them inside DbDo with a single
 keystroke (Control+Shift+I, I for Invoke). Scripts can automate bulk
 record edits, filter changes, custom reports — anything the database
 manager itself can do.</p>
-<h2 id="sample-databases">Sample databases</h2>
-<p>DbDo ships four SQLite template databases adapted to its standard
-column conventions (<code>&lt;singular&gt;_id</code> primary keys,
-<code>added</code>/<code>edited</code> timestamps maintained by
-triggers, generated <code>look</code>/<code>unq</code> columns):</p>
+<h2 id="template-databases">Template databases</h2>
+<p>DbDo comes with ten template databases, copied into your own data
+folder the first time it runs, so each is yours to change. Every one
+earns its place: it carries real data worth exploring, serves a task
+people do every day, or is taught by a recorded tutorial. Each follows
+DbDo’s conventions: <code>&lt;singular&gt;_id</code> keys,
+<code>added</code> and <code>edited</code> stamps kept by triggers, a
+generated <code>prime</code> that names a record, and a
+<code>maps</code> table that links records across tables.</p>
+<p>Real data to explore:</p>
 <ul>
-<li><code>NFB2026Convention.db</code> — the flagship demo: the 2026 NFB
-national convention agenda as a four-table relational model (contacts,
-events, locations, projects) wired together by a generic
-<code>maps</code> association table.</li>
-<li><code>template.db</code> — a small school domain (teachers, classes,
-students, enrollments) for first-launch exploration.</li>
-<li><code>northwind.db</code> — the classic Microsoft Northwind sales
-template (categories, suppliers, products, customers, employees, orders,
-order details, shippers).</li>
-<li><code>chinook.db</code> — the classic Chinook music-store template
-(artists, albums, tracks, genres, customers, invoices, invoice items),
-with deep parent-child chains.</li>
+<li><strong>RadioTrail</strong> — some 55,000 working Internet radio
+stations, with a script that refreshes the catalog. Find a station by
+name, place, language or genre, and play it.</li>
+<li><strong>MusicTrail</strong> — 100 great albums and 200 great
+musicians across ten genres, with who recorded what and who played in
+which band, each linked to Wikipedia.</li>
+<li><strong>BlindCreations</strong> — apps, books and presentations made
+by blind people, with their creators: about a hundred apps, a hundred
+books, sixty presentations and over a hundred and twenty creators.</li>
+<li><strong>TechTraining</strong> — about 1,170 free presentations on
+technology and accessibility, from webinars to podcasts. Press
+Alt+Shift+P to play one, or mark several and play them as a list.</li>
 </ul>
-<p>The Northwind and Chinook templates are useful for exercising DbDo
-against real-shaped data with multiple parent-child relationships; the
-convention database shows the maps model on real-world associations.</p>
+<p>Everyday tasks:</p>
+<ul>
+<li><strong>JobTrail</strong> — a job search: applications, contacts,
+documents and actions, with the work search record an unemployment
+office asks for. DbDo opens it the first time, and its tutorials follow
+one job seeker through it.</li>
+<li><strong>BookTrail</strong> — your reading: what you have read, are
+reading and mean to read. Its companion bookFido fills it from your
+BARD, Audible and Kindle libraries.</li>
+<li><strong>ContactTrail</strong> — an address book with groups, an
+emergency list with every number, and an address book report to read or
+print.</li>
+<li><strong>RecipeTrail</strong> — recipes and their ingredients with
+amounts. Mark what you mean to cook, and its shopping list says what to
+buy, aisle by aisle.</li>
+</ul>
+<p>For learning:</p>
+<ul>
+<li><strong>northwind</strong> and <strong>chinook</strong> — the
+classic sales and music-store databases most database tutorials use,
+with real foreign keys and deep parent-child chains. DbDo’s spoken
+tutorials use them to teach following related records and asking with
+SQL.</li>
+</ul>
 <h2 id="accessibility-design">Accessibility design</h2>
 <p>Three speech paths in priority order: JAWS via direct COM, NVDA via
 the controller-client DLL, UIA live-region fallback for Narrator and
@@ -314,5 +341,6 @@ the MIT License.</p>
 keyboard ergonomics, screen-reader announcements, command-name choices,
 anything that helps the tool fit how people actually work.</p>
 <p>Jamal</p>
+</main>
 </body>
 </html>

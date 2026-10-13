@@ -65,6 +65,10 @@
 !/scripts/installScreenReaderSupport.cmd
 !/scripts/kind.py
 !/scripts/makeHotkeys.py
+!/scripts/makeMusicTrail.cmd
+!/scripts/makeMusicTrail.py
+!/scripts/makeTechTraining.cmd
+!/scripts/makeTechTraining.py
 !/scripts/makeTutorials.cmd
 !/scripts/makeTutorials.py
 !/scripts/push.cmd
@@ -80,6 +84,7 @@
 !/scripts/unpushed.cmd
 !/scripts/unpushed.py
 !/templates/
+!/templates/RadioTrail/RadioTrail.db
 !/THIRD-PARTY-NOTICES.txt
 !/uiTest.inix
 !/.gitignore
@@ -104,7 +109,6 @@ logs/
 notes/
 scripts/release.cmd
 scripts/release.ps1
-templates/RadioTrail/RadioTrail.db
 
 # Never pushed, whatever RepoFiles.txt says: private notes, maintainer
 # scripts, logs, and anything a build makes.
