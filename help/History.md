@@ -5,6 +5,11 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 13 October 2026 -- two checks that had stopped checking
+
+- **The kit comparison runs again.** The audit looked for the kit's C# in the kit's CSharp folder, which moved to exec\\CSharp, so it skipped on every run with "no kit sources found". It now finds them, and reports that DbDo defines two classes the kit also has, KeyBinding and KeyMap, with DbDo's own taking precedence.
+- **The key list is checked again.** The audit read DbDo_hotkeys.inix, retired when the key list began to be made from the menus as help\\Hotkeys.md, so it skipped on every run. It now checks the list's own wording: 73 lines, none naming a Shift letter that is not a Say command.
+
 ## 13 October 2026 -- from an audit
 
 - **Importing Outlook contacts no longer depends on Office's type library.** On some computers the import stopped at once with "Unable to cast COM object of type 'Microsoft.Office.Interop.Outlook.ApplicationClass'", which happens when Windows cannot load Outlook's type library, often after several Office installations. The script now reaches Outlook by name, which needs no type library, and an error says which step it happened in, with the full text.

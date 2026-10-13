@@ -182,7 +182,9 @@ def checkShadowedKit():
                              sSource, re.M))
     sKit = os.environ.get("HOMERDEV", r"C:\HomerDev")
     lsKit = set()
-    for sDir in [os.path.join(sKit, "CSharp"), "/home/claude/kit/CSharp"]:
+    # THE KIT'S C# IS IN exec\\CSharp (13 October 2026, from an audit): this looked only in <kit>\\CSharp, where it no
+    # longer is, so the comparison skipped on every run with "no kit sources found" and checked nothing.
+    for sDir in [os.path.join(sKit, "exec", "CSharp"), os.path.join(sKit, "CSharp"), "/home/claude/kit/CSharp"]:
         if not os.path.isdir(sDir): continue
         for sName in sorted(os.listdir(sDir)):
             if not sName.endswith(".cs"): continue
@@ -196,7 +198,7 @@ def checkShadowedKit():
         logLine("SHADOW: %s is defined by DbDo and by the kit; unqualified uses mean DbDo's" % s)
     return finding("kit shadow", "pass",
                    "%s also defined by the kit: %s" %
-                   (countNoun(len(lsBoth), "class"), ", ".join(lsBoth) if lsBoth else "none"))
+                   (countNoun(len(lsBoth), "class", "classes"), ", ".join(lsBoth) if lsBoth else "none"))
 
 
 def checkSayLayer():
@@ -246,16 +248,25 @@ def checkHotkeyDoc():
     worse than no document, and the source-only audit could not see it, because
     it read .cs files and this is an .inix.
     """
-    sDoc = os.path.join(sRoot, "DbDo_hotkeys.inix")
+    # THE KEY LIST IS help\\Hotkeys.md NOW (13 October 2026, from an audit). DbDo_hotkeys.inix was retired when
+    # makeHotkeys began writing the list from the menus, and this check skipped on every run since. The table cannot
+    # drift, being made from DbDo.cs, but the prose around it names keys by hand, and that is what is checked here.
+    sDoc = os.path.join(sRoot, "help", "Hotkeys.md")
+    bMarkdown = os.path.isfile(sDoc)
+    if not bMarkdown: sDoc = os.path.join(sRoot, "DbDo_hotkeys.inix")
     if not os.path.isfile(sDoc):
-        return finding("hotkey doc", "skip", "no DbDo_hotkeys.inix in this folder")
+        return finding("hotkey doc", "skip", "neither help\\Hotkeys.md nor DbDo_hotkeys.inix is here")
     sSource = readText(os.path.join(sRoot, "DbDo.cs"))
     lsSay = set(re.findall(r'addItem\(miSay,[^;]*?Keys\.Shift \| Keys\.([A-Za-z0-9]+)', sSource, re.S))
     lsBad = []
     iChecked = 0
     for sLine in readText(sDoc).splitlines():
-        if "=" not in sLine or sLine.strip().startswith(";"): continue
-        sCommand, sRest = sLine.split("=", 1)
+        if bMarkdown:
+            if not re.search(r"(?<![+\w])Shift\+[A-Za-z]\b", sLine): continue
+            sCommand, sRest = sLine.strip()[:70], sLine
+        else:
+            if "=" not in sLine or sLine.strip().startswith(";"): continue
+            sCommand, sRest = sLine.split("=", 1)
         iChecked += 1
         for sKey in re.findall(r"(?<![+\w])Shift\+([A-Za-z])\b", sRest):
             if sKey.upper() in (s.upper() for s in lsSay): continue

@@ -232,6 +232,9 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a href="#october-2026-two-checks-that-had-stopped-checking"
+id="toc-october-2026-two-checks-that-had-stopped-checking">13 October
+2026 – two checks that had stopped checking</a></li>
 <li><a href="#october-2026-from-an-audit"
 id="toc-october-2026-from-an-audit">13 October 2026 – from an
 audit</a></li>
@@ -469,6 +472,20 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="october-2026-two-checks-that-had-stopped-checking">13 October
+2026 – two checks that had stopped checking</h2>
+<ul>
+<li><strong>The kit comparison runs again.</strong> The audit looked for
+the kit’s C# in the kit’s CSharp folder, which moved to exec\CSharp, so
+it skipped on every run with “no kit sources found”. It now finds them,
+and reports that DbDo defines two classes the kit also has, KeyBinding
+and KeyMap, with DbDo’s own taking precedence.</li>
+<li><strong>The key list is checked again.</strong> The audit read
+DbDo_hotkeys.inix, retired when the key list began to be made from the
+menus as help\Hotkeys.md, so it skipped on every run. It now checks the
+list’s own wording: 73 lines, none naming a Shift letter that is not a
+Say command.</li>
+</ul>
 <h2 id="october-2026-from-an-audit">13 October 2026 – from an audit</h2>
 <ul>
 <li><strong>Importing Outlook contacts no longer depends on Office’s
