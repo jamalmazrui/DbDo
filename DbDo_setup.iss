@@ -439,85 +439,85 @@ FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
   Parameters: "noPause jaws"; \
   WorkingDir: "{app}\scripts"; \
   Description: "{code:labelJaws}"; \
-  Check: isInstallJaws; \
-  Flags: postinstall skipifsilent runascurrentuser waituntilterminated skipifdoesntexist
+  Check: homerFinishRuns and isInstallJaws; \
+  Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist
 FileName: "{cmd}"; \
   Parameters: "/c """"{app}\scripts\installModels.cmd"""""; \
   WorkingDir: "{app}\exec"; \
   Description: "{code:descModel}"; \
-  Flags: postinstall skipifsilent runascurrentuser; Check: modelNeedsInstall
+  Flags: postinstall runascurrentuser; Check: homerFinishRuns and modelNeedsInstall
 FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
   Parameters: "noPause nvda"; \
   WorkingDir: "{app}\scripts"; \
   Description: "{code:labelNvda}"; \
-  Check: isInstallNvda; \
-  Flags: postinstall waituntilterminated runhidden skipifsilent runasoriginaluser
+  Check: homerFinishRuns and isInstallNvda; \
+  Flags: postinstall waituntilterminated runhidden runasoriginaluser
 FileName: "{app}\scripts\installMpv.cmd"; \
   Parameters: "noPause"; \
   WorkingDir: "{app}\scripts"; \
   Description: "{code:labelmpv}"; \
-  Check: isInstallmpv; \
-  Flags: postinstall skipifsilent runascurrentuser waituntilterminated skipifdoesntexist
+  Check: homerFinishRuns and isInstallmpv; \
+  Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist
 FileName: "{cmd}"; \
   Parameters: "/c """"{app}\scripts\installOllama.cmd"""""; \
   WorkingDir: "{app}\exec"; \
   Description: "{code:descOllama}"; \
-  Flags: postinstall skipifsilent runascurrentuser; Check: ollamaNeedsInstall
+  Flags: postinstall runascurrentuser; Check: homerFinishRuns and ollamaNeedsInstall
 
 ; ---- 2. Update, ticked ---------------------------------------------------------
 FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
   Parameters: "noPause jaws"; \
   WorkingDir: "{app}\scripts"; \
   Description: "{code:labelJaws}"; \
-  Check: isUpdateJaws; \
-  Flags: postinstall skipifsilent runascurrentuser waituntilterminated skipifdoesntexist
+  Check: homerFinishRuns and isUpdateJaws; \
+  Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist
 FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
   Parameters: "noPause nvda"; \
   WorkingDir: "{app}\scripts"; \
   Description: "{code:labelNvda}"; \
-  Check: isUpdateNvda; \
-  Flags: postinstall waituntilterminated runhidden skipifsilent runasoriginaluser
+  Check: homerFinishRuns and isUpdateNvda; \
+  Flags: postinstall waituntilterminated runhidden runasoriginaluser
 FileName: "{app}\scripts\installMpv.cmd"; \
   Parameters: "noPause update"; \
   WorkingDir: "{app}\scripts"; \
   Description: "{code:labelmpv}"; \
-  Check: isUpdatempv; \
-  Flags: postinstall skipifsilent runascurrentuser waituntilterminated skipifdoesntexist
+  Check: homerFinishRuns and isUpdatempv; \
+  Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist
 FileName: "{cmd}"; \
   Parameters: "/c """"{app}\scripts\installOllama.cmd"""" update"; \
   WorkingDir: "{app}\exec"; \
   Description: "{code:descOllama}"; \
-  Flags: postinstall skipifsilent runascurrentuser; Check: ollamaNeedsUpdate
+  Flags: postinstall runascurrentuser; Check: homerFinishRuns and ollamaNeedsUpdate
 
 ; ---- 3. Reinstall, never ticked ------------------------------------------------
 FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
   Parameters: "noPause jaws"; \
   WorkingDir: "{app}\scripts"; \
   Description: "{code:labelJaws}"; \
-  Check: isReinstallJaws; \
-  Flags: postinstall skipifsilent runascurrentuser waituntilterminated skipifdoesntexist unchecked
+  Check: homerFinishRuns and isReinstallJaws; \
+  Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist unchecked
 FileName: "{cmd}"; \
   Parameters: "/c """"{app}\scripts\installModels.cmd"""""; \
   WorkingDir: "{app}\exec"; \
   Description: "{code:descModel}"; \
-  Flags: postinstall skipifsilent runascurrentuser unchecked; Check: modelIsCurrent
+  Flags: postinstall runascurrentuser unchecked; Check: homerFinishRuns and modelIsCurrent
 FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
   Parameters: "noPause nvda"; \
   WorkingDir: "{app}\scripts"; \
   Description: "{code:labelNvda}"; \
-  Check: isReinstallNvda; \
-  Flags: postinstall waituntilterminated runhidden skipifsilent runasoriginaluser unchecked
+  Check: homerFinishRuns and isReinstallNvda; \
+  Flags: postinstall waituntilterminated runhidden runasoriginaluser unchecked
 FileName: "{app}\scripts\installMpv.cmd"; \
   Parameters: "noPause reinstall"; \
   WorkingDir: "{app}\scripts"; \
   Description: "{code:labelmpv}"; \
-  Check: isReinstallmpv; \
-  Flags: postinstall skipifsilent runascurrentuser waituntilterminated skipifdoesntexist unchecked
+  Check: homerFinishRuns and isReinstallmpv; \
+  Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist unchecked
 FileName: "{cmd}"; \
   Parameters: "/c """"{app}\scripts\installOllama.cmd"""" reinstall"; \
   WorkingDir: "{app}\exec"; \
   Description: "{code:descOllama}"; \
-  Flags: postinstall skipifsilent runascurrentuser unchecked; Check: ollamaIsCurrent
+  Flags: postinstall runascurrentuser unchecked; Check: homerFinishRuns and ollamaIsCurrent
 
 ; ---- 4. Launch, ticked; 5. the guide, unticked ---------------------------------
 ;
@@ -535,11 +535,11 @@ FileName: "{cmd}"; \
   Parameters: "/c echo launch > ""{localappdata}\{#AppName}\logs\{#AppName}_launch.flag"""; \
   WorkingDir: "{app}\exec"; \
   Description: "Launch DbDo (desktop hotkey Alt+Control+D)"; \
-  Flags: postinstall skipifsilent runhidden runasoriginaluser
+  Flags: postinstall runhidden runasoriginaluser; Check: homerFinishRuns
 
 FileName: "{app}\help\DbDo.htm"; \
   Description: "Open the user guide (F1 in DbDo)"; \
-  Flags: postinstall skipifsilent shellexec nowait runasoriginaluser unchecked
+  Flags: postinstall shellexec nowait runasoriginaluser unchecked; Check: homerFinishRuns
 
 ; The results summary is NOT listed here. It is not an option -- it always runs,
 ; and it must run last of all -- so it is started from code at the very end,
@@ -1408,6 +1408,9 @@ end;
 
 function InitializeSetup(): Boolean;
 begin
+  //  setup.exe /DEFAULTS: every Enter pressed for you (HomerComponents.iss). Alone,
+  //  it starts setup again very silently and this copy ends here.
+  if homerStartForDefaults() then begin Result := False; exit; end;
   //  mpv is MACHINE WIDE, in its own default folder under Program Files, never
   //  under {app}: an upgrade of DbDo replaces that tree and would take the
   //  player with it. The shared Mpv.cs looks there first.
@@ -1465,12 +1468,14 @@ begin
        starts DbDo as the person, not with the installer's elevated rights. *)
     if FileExists(ExpandConstant('{localappdata}\{#AppName}\logs\{#AppName}_launch.flag')) then
     begin
-      Exec(ExpandConstant('{cmd}'), '/s /c ""' + ExpandConstant('{app}\scripts\summarizeSetup.cmd') + '""',
-           ExpandConstant('{app}\exec'), SW_HIDE, ewWaitUntilTerminated, iResult);
+      //  /DEFAULTS takes the Results box as read: no box, straight to the launch.
+      if not homerDefaults() then
+        Exec(ExpandConstant('{cmd}'), '/s /c ""' + ExpandConstant('{app}\scripts\summarizeSetup.cmd') + '""',
+             ExpandConstant('{app}\exec'), SW_HIDE, ewWaitUntilTerminated, iResult);
       DeleteFile(ExpandConstant('{localappdata}\{#AppName}\logs\{#AppName}_launch.flag'));
       ExecAsOriginalUser(ExpandConstant('{app}\exec\{#AppExeName}'), '', ExpandConstant('{app}\exec'), SW_SHOW, ewNoWait, iResult);
     end
-    else
+    else if not homerDefaults() then
       Exec(ExpandConstant('{cmd}'), '/s /c ""' + ExpandConstant('{app}\scripts\summarizeSetup.cmd') + '""',
            ExpandConstant('{app}\exec'), SW_HIDE, ewNoWait, iResult);
   except
@@ -1484,7 +1489,10 @@ begin
   (* DeinitializeSetup runs whenever Setup exits, INCLUDING WHEN THE USER
      CANCELS. Announcing success to somebody who backed out would be a plain
      lie, and in a silent installation there is nobody to close a box. *)
-  if WizardSilent then exit;
+  //  /DEFAULTS: the copy that only started setup again has nothing to report;
+  //  the very silent copy carries on, takes the box as read and launches.
+  if homerDefaults() and not WizardSilent then exit;
+  if WizardSilent and not homerDefaults() then exit;
   if not FileExists(ExpandConstant('{app}\exec\{#AppExeName}')) then exit;
 
   sBreak := Chr(13) + Chr(10);

@@ -5,6 +5,10 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 12 October 2026 -- one switch to install with every default
+
+- **DbDo_setup.exe /DEFAULTS** installs as pressing Enter at every step would: it runs each finish-page entry ticked by default -- installing or updating the screen reader support, mpv, Ollama and the model where offered, never a reinstall -- takes the Results box as read, and launches DbDo. Alone it runs very silently; administrator approval is still asked. Plain /SILENT and /VERYSILENT still install the program alone.
+
 ## 12 October 2026 -- TechTraining joins, and two templates retire
 
 - **TechTraining is a template.** About 1,170 free presentations on technology and accessibility, from the Tech Training directory: each with its title, year, length in minutes, category, presenter, series, source and description, and the presentation's own address as its url. Play Stream (Alt+Shift+P) plays it in the Homer Player -- 616 audio files directly and 441 videos through yt-dlp -- and marked presentations play as a list; the 109 that live on a publisher's page open in the browser with Control+Enter. The row speaks title, minutes and medium, so you hear what it is, how long it takes and whether Alt+Shift+P plays it. Categories, sources, series and media are pick lists, each category with the directory's own definition. Quick-Lessons finds playable ones of fifteen minutes or less, Newest those from this year and last, and the listening_list report writes up what you have marked; three short ones come marked to show how. scripts\\makeTechTraining rebuilds it from the directory, with the table helpers MusicTrail's builder uses.
