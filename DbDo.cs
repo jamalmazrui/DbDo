@@ -24437,8 +24437,17 @@ namespace DbDo
                 // it, and a report naming it would fail there. Each field the template has and the copy lacks is added
                 // first, empty, and then the records merge with it.
                 int iFields = 0;
+                // A FAILED SCHEMA STEP STOPS THE MERGE (13 October 2026, from an audit). It used to be logged and the
+                // merge carried on into a schema it could not extend. The step is one transaction, rolled back on any
+                // failure, so the database is as it was; nothing is merged, and the reason is said.
                 try { iFields = addMissingColumns(sTemplate); }
-                catch (Exception exFields) { DbDoLog.write(sTitle + ": adding the template's new fields: " + exFields.Message); }
+                catch (Exception exFields)
+                {
+                    DbDoLog.write(sTitle + ": adding the template's new fields failed, so nothing was merged: " + exFields.ToString());
+                    Say.say("The template's new fields could not be added, so nothing was merged and your database is as it was. "
+                        + exFields.Message);
+                    return;
+                }
                 if (iFields > 0) Say.say((iFields == 1 ? "1 field" : iFields + " fields") + " from the template added.");
                 mergeWholeDatabase(sTemplate);
                 if (sFiles.Length > 0) Say.say(sFiles);
@@ -24471,8 +24480,11 @@ namespace DbDo
         {
             int iAdded = 0;
             db.invokeSql("ATTACH DATABASE '" + sTemplate.Replace("'", "''") + "' AS tplsrc", null);
+            bool bBegun = false;
             try
             {
+                db.invokeSql("BEGIN", null);
+                bBegun = true;
                 System.IO.StringWriter oTables = new System.IO.StringWriter();
                 db.invokeSql("SELECT '|' || name || '|' AS t FROM tplsrc.sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite%'", oTables);
                 foreach (System.Text.RegularExpressions.Match oTable in System.Text.RegularExpressions.Regex.Matches(oTables.ToString(), @"\|([A-Za-z0-9_]+)\|"))
@@ -24498,6 +24510,13 @@ namespace DbDo
                     // trigger, it is written again from the table's ordinary fields, the way contactPattern.py writes it.
                     if (bTableGrew) rewriteEditedTrigger(sTable);
                 }
+                db.invokeSql("COMMIT", null);
+                bBegun = false;
+            }
+            catch
+            {
+                if (bBegun) { try { db.invokeSql("ROLLBACK", null); } catch { } }
+                throw;
             }
             finally { try { db.invokeSql("DETACH DATABASE tplsrc", null); } catch { } }
             return iAdded;

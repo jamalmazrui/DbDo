@@ -232,6 +232,9 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a href="#october-2026-from-an-audit"
+id="toc-october-2026-from-an-audit">13 October 2026 – from an
+audit</a></li>
 <li><a href="#october-2026-contacts-in-the-dbdialog-pattern"
 id="toc-october-2026-contacts-in-the-dbdialog-pattern">13 October 2026 –
 contacts in the DbDialog pattern</a></li>
@@ -466,6 +469,26 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="october-2026-from-an-audit">13 October 2026 – from an audit</h2>
+<ul>
+<li><strong>Importing Outlook contacts no longer depends on Office’s
+type library.</strong> On some computers the import stopped at once with
+“Unable to cast COM object of type
+‘Microsoft.Office.Interop.Outlook.ApplicationClass’”, which happens when
+Windows cannot load Outlook’s type library, often after several Office
+installations. The script now reaches Outlook by name, which needs no
+type library, and an error says which step it happened in, with the full
+text.</li>
+<li><strong>People known only by a first name each get their own
+record.</strong> A contact with neither a last name nor a company had an
+empty identity, so only one such person could be added; the identity is
+now built from the first and middle names. The import lets the table
+decide who is already there, so the rule lives in one place.</li>
+<li><strong>A merge that cannot add the template’s new fields
+stops.</strong> Update from Template’s Merge used to log the failure and
+merge anyway; the field step is now one transaction, rolled back on
+failure, and nothing is merged.</li>
+</ul>
 <h2 id="october-2026-contacts-in-the-dbdialog-pattern">13 October 2026 –
 contacts in the DbDialog pattern</h2>
 <ul>

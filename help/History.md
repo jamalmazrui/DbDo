@@ -5,6 +5,12 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 13 October 2026 -- from an audit
+
+- **Importing Outlook contacts no longer depends on Office's type library.** On some computers the import stopped at once with "Unable to cast COM object of type 'Microsoft.Office.Interop.Outlook.ApplicationClass'", which happens when Windows cannot load Outlook's type library, often after several Office installations. The script now reaches Outlook by name, which needs no type library, and an error says which step it happened in, with the full text.
+- **People known only by a first name each get their own record.** A contact with neither a last name nor a company had an empty identity, so only one such person could be added; the identity is now built from the first and middle names. The import lets the table decide who is already there, so the rule lives in one place.
+- **A merge that cannot add the template's new fields stops.** Update from Template's Merge used to log the failure and merge anyway; the field step is now one transaction, rolled back on failure, and nothing is merged.
+
 ## 13 October 2026 -- contacts in the DbDialog pattern
 
 - **ContactTrail and JobTrail use the contact pattern from DbDialog**, whose fields were named so each has an Alt letter of its own: title, first, middle and last name, job, enterprise, two address lines, city, state, zip, nation, office, home and wireless phone, business and personal email, date of birth, gender, then URL, notes and tags, in that order. Five were missing -- title, Address 2, Office Phone, Date of Birth and Gender -- and now each has its letter on the record form; JobTrail's role keeps R. Every record and link is kept as it was.

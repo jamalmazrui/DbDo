@@ -23,12 +23,6 @@ function sqlText(vValue) {
   return "'" + sValue.replace(/'/g, "''") + "'";
 }
 
-function primeOf(sFirst, sMiddle, sLast, sCompany) {
-  // The same key DbDo computes for a contact: first|middle|last, or the company when there is no last name.
-  if (sLast != "") return sFirst + "|" + sMiddle + "|" + sLast;
-  return sCompany;
-}
-
 function text(vValue) {
   return (vValue == null) ? "" : String(vValue).replace(/^\s+|\s+$/g, "");
 }
@@ -65,9 +59,26 @@ function gender(vValue) {
   return "";
 }
 
+// OUTLOOK BY NAME, NOT BY TYPE (13 October 2026). new ActiveXObject reached Outlook through Office's interop assembly,
+// and on a computer whose Office type library cannot be loaded -- common after several Office installations -- the
+// first call failed: "Unable to cast COM object of type 'Microsoft.Office.Interop.Outlook.ApplicationClass'". Outlook
+// is now created from its program id and every call goes by member name through its dispatch interface, which needs no
+// type library. Any error names the stage it happened in and keeps .NET's full text, HRESULT included.
+var oComType = null, sStage = "";
+function comGet(oObject, sName) {
+  return oComType.InvokeMember(sName, System.Reflection.BindingFlags.GetProperty, null, oObject, null);
+}
+function comCall(oObject, sName, vArg) {
+  var aArgs = new System.Object[1];
+  aArgs[0] = vArg;
+  return oComType.InvokeMember(sName, System.Reflection.BindingFlags.InvokeMethod, null, oObject, aArgs);
+}
+
 iAdded = 0; iSeen = 0; iSkipped = 0; lFailures = [];
 try {
-  oOutlook = new ActiveXObject("Outlook.Application");
+  sStage = "finding Outlook";
+  oComType = System.Type.GetTypeFromProgID("Outlook.Application");
+  oOutlook = oComType == null ? null : System.Activator.CreateInstance(oComType);
 }
 catch (e) {
   oOutlook = null;
@@ -80,28 +91,37 @@ else if (!(dHas = tableColumns())["last_name"]) {
   sResult = "This database has no contacts table with names, so no contacts were added.";
 }
 else {
-  oNamespace = oOutlook.GetNamespace("MAPI");
-  oFolder = oNamespace.GetDefaultFolder(iContactsFolder);
-  oItems = oFolder.Items;
-  for (var iIndex = 1; iIndex <= oItems.Count; iIndex++) {
-    oContact = oItems.Item(iIndex);
-    if (oContact.Class != iContactClass) continue;
+  try {
+    sStage = "opening Outlook's address book";
+    oNamespace = comCall(oOutlook, "GetNamespace", "MAPI");
+    sStage = "opening the Contacts folder";
+    oFolder = comCall(oNamespace, "GetDefaultFolder", iContactsFolder);
+    oItems = comGet(oFolder, "Items");
+    iItems = comGet(oItems, "Count");
+  }
+  catch (e) {
+    throw new Error("Outlook could not be read while " + sStage + ". " + e.ToString());
+  }
+  for (var iIndex = 1; iIndex <= iItems; iIndex++) {
+    sStage = "reading contact " + iIndex;
+    oContact = comCall(oItems, "Item", iIndex);
+    if (comGet(oContact, "Class") != iContactClass) continue;
     iSeen++;
-    var sCompany = text(oContact.CompanyName), sFirst = text(oContact.FirstName), sLast = text(oContact.LastName), sMiddle = text(oContact.MiddleName);
+    var sCompany = text(comGet(oContact, "CompanyName")), sFirst = text(comGet(oContact, "FirstName")), sLast = text(comGet(oContact, "LastName")), sMiddle = text(comGet(oContact, "MiddleName"));
     if (sFirst == "" && sLast == "" && sCompany == "") { iSkipped++; continue; }
-    var aStreet = text(oContact.MailingAddressStreet).split(/\r?\n/);
-    var sBusinessPhone = text(oContact.BusinessTelephoneNumber);
+    var aStreet = text(comGet(oContact, "MailingAddressStreet")).split(/\r?\n/);
+    var sBusinessPhone = text(comGet(oContact, "BusinessTelephoneNumber"));
     // In the contact pattern's order.
     aColumns = [
-      ["title", text(oContact.Title)], ["first_name", sFirst], ["middle_name", sMiddle], ["last_name", sLast],
-      ["job", text(oContact.JobTitle)], ["enterprise", sCompany],
+      ["title", text(comGet(oContact, "Title"))], ["first_name", sFirst], ["middle_name", sMiddle], ["last_name", sLast],
+      ["job", text(comGet(oContact, "JobTitle"))], ["enterprise", sCompany],
       ["address1", aStreet[0]], ["address2", aStreet.slice(1).join(", ")],
-      ["city", text(oContact.MailingAddressCity)], ["state", text(oContact.MailingAddressState)],
-      ["zip", text(oContact.MailingAddressPostalCode)], ["nation", text(oContact.MailingAddressCountry)],
-      ["office_phone", sBusinessPhone], ["home_phone", text(oContact.HomeTelephoneNumber)],
-      ["wireless_phone", text(oContact.MobileTelephoneNumber)], ["business_email", email(oContact.Email1Address)],
-      ["personal_email", email(oContact.Email2Address)], ["date_of_birth", birthday(oContact.Birthday)],
-      ["gender", gender(oContact.Gender)], ["url", text(oContact.WebPage)], ["tags", "outlook"]];
+      ["city", text(comGet(oContact, "MailingAddressCity"))], ["state", text(comGet(oContact, "MailingAddressState"))],
+      ["zip", text(comGet(oContact, "MailingAddressPostalCode"))], ["nation", text(comGet(oContact, "MailingAddressCountry"))],
+      ["office_phone", sBusinessPhone], ["home_phone", text(comGet(oContact, "HomeTelephoneNumber"))],
+      ["wireless_phone", text(comGet(oContact, "MobileTelephoneNumber"))], ["business_email", email(comGet(oContact, "Email1Address"))],
+      ["personal_email", email(comGet(oContact, "Email2Address"))], ["date_of_birth", birthday(comGet(oContact, "Birthday"))],
+      ["gender", gender(comGet(oContact, "Gender"))], ["url", text(comGet(oContact, "WebPage"))], ["tags", "outlook"]];
     // A copy made before office_phone existed keeps the business phone, in its notes.
     if (!dHas["office_phone"] && sBusinessPhone != "") aColumns.push(["notes", "Business phone: " + sBusinessPhone]);
     var lNames = [], lValues = [];
@@ -110,10 +130,11 @@ else {
       lNames.push(aColumns[iColumn][0]);
       lValues.push(sqlText(aColumns[iColumn][1]));
     }
-    var sPrime = primeOf(sFirst, sMiddle, sLast, sCompany);
+    // THE TABLE DECIDES WHO IS ALREADY HERE (13 October 2026). Its generated prime and unique index are the one rule
+    // for a contact's identity; this script used to compute the same key itself, and two copies of one rule drift. A
+    // contact the table already holds is ignored, and counted as already here.
     try {
-      var iRows = db.invokeSql("INSERT INTO contacts (" + lNames.join(", ") + ") SELECT " + lValues.join(", ")
-        + " WHERE NOT EXISTS (SELECT 1 FROM contacts WHERE prime = " + sqlText(sPrime) + ")", null);
+      var iRows = db.invokeSql("INSERT OR IGNORE INTO contacts (" + lNames.join(", ") + ") VALUES (" + lValues.join(", ") + ")", null);
       if (iRows > 0) iAdded++; else iSkipped++;
     }
     catch (e) {
