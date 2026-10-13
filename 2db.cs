@@ -62,7 +62,7 @@ namespace TwoDb
 
         // The standard field-type vocabulary DbDo seeds into lookups, so
         // an imported shell looks like a DbDo-created one.
-        private static readonly string[] c_aFieldTypes = new string[]
+        private static readonly string[] aFieldTypes = new string[]
         { "BLOB", "BOOLEAN", "INTEGER", "REAL", "TEXT", "TEXTLINE", "TEXTMARKDOWN", "TEXTMEMO", "TEXTTIME" };
 
         private static bool bQuiet = false;
@@ -545,7 +545,7 @@ namespace TwoDb
             lDdl.AddRange(lStandardTableDdl("lookups", lLkFields));
 
             int iOrd = 0;
-            foreach (string sType in c_aFieldTypes)
+            foreach (string sType in aFieldTypes)
             {
                 iOrd++;
                 lDdl.Add("INSERT INTO lookups (src, tbl, fld, val, ordinal) VALUES "

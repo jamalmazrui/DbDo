@@ -44,24 +44,24 @@ Every run writes logs\\DbDo-checkTemplates-<date>-<time>.log with every check an
 
 import datetime, glob, os, platform, re, sqlite3, sys, traceback
 
-c_dKindNotes = {
+dKindNotes = {
     "ContactTrail|in_group": "Subject contact belongs to the object group.",
     "MusicTrail|features": "Subject album features the object performer as a guest.",
     "MusicTrail|member_of": "Subject performer is or was a member of the object performer, a band or group.",
     "MusicTrail|recorded": "Subject performer recorded the object album.",
     "RecipeTrail|uses": "Subject recipe uses the object ingredient; the amount is in the map row's notes.",
 }
-c_lBandKeys = ["detail", "footer", "group_footer", "group_header", "header"]
+lBandKeys = ["detail", "footer", "group_footer", "group_header", "header"]
 # FIELDS A TEMPLATE LEAVES UNWATCHED ON PURPOSE (12 October 2026). "edited" means a person or a deliberate repair changed
 # the record. RadioTrail's catalog refresh rewrites votes, clicks, trend and the check and seen dates of all 55,000
 # stations, the probes stamp probed, and every play counts plays: watching those would make every station "edited"
 # after each refresh or play. fetchStations keeps them out of its trigger, and this check honors that. The first run
 # of this script did not, and rewrote RadioTrail's trigger to watch them; that was put right the same day.
-c_dUnwatched = {"RadioTrail|stations": ["clicks", "last_check", "last_played", "last_seen", "plays", "probed", "trend", "votes"]}
-c_lNotWatched = ["added", "edited", "look", "marked", "prime"]
-c_lSchemaRows = ["lookups", "views"]
-c_lSkipTables = ["sqlean_define", "views"]
-c_sVersion = "2026-10-12 version 2: leaves sqlean_define alone; undoes a trigger that watches deliberately unwatched fields"
+dUnwatched = {"RadioTrail|stations": ["clicks", "last_check", "last_played", "last_seen", "plays", "probed", "trend", "votes"]}
+lNotWatched = ["added", "edited", "look", "marked", "prime"]
+lSchemaRows = ["lookups", "views"]
+lSkipTables = ["sqlean_define", "views"]
+sVersion = "2026-10-12 version 2: leaves sqlean_define alone; undoes a trigger that watches deliberately unwatched fields"
 
 lErrors = []
 lRepairs = []
@@ -163,7 +163,7 @@ def primaryKey(oDb, sTable):
 def contentColumns(oDb, sTable, sRoot=""):
     """The columns an edited trigger must watch: every stored column but the key, DbDo's bookkeeping ones, and any the
     template leaves unwatched on purpose."""
-    lSkip = c_lNotWatched + c_dUnwatched.get(sRoot + "|" + sTable, [])
+    lSkip = lNotWatched + dUnwatched.get(sRoot + "|" + sTable, [])
     return [s for s, iPk, iHidden in columns(oDb, sTable) if not iPk and iHidden == 0 and s.lower() not in lSkip]
 
 
@@ -191,7 +191,7 @@ def hasUniquePrime(oDb, sTable):
 
 def primeTables(oDb):
     """Tables carrying a prime, other than DbDo's own metadata."""
-    return [s for s in tables(oDb) if s not in c_lSkipTables and "prime" in columnNames(oDb, s)]
+    return [s for s in tables(oDb) if s not in lSkipTables and "prime" in columnNames(oDb, s)]
 
 
 # ---------------------------------------------------------------- repairs
@@ -235,7 +235,7 @@ def seedKinds(oDb, sRoot):
     iAdded = 0
     for sKind, sTbl1, sTbl2 in oDb.execute("SELECT kind, min(tbl1), min(tbl2) FROM maps WHERE kind IS NOT NULL AND kind <> '' GROUP BY kind ORDER BY kind").fetchall():
         if sKind in lSeeded: continue
-        sNote = c_dKindNotes.get(sRoot + "|" + sKind, "")
+        sNote = dKindNotes.get(sRoot + "|" + sKind, "")
         if not sNote:
             sNote = "Subject " + sTbl1.rstrip("s") + " " + sKind.replace("_", " ") + " the object " + sTbl2.rstrip("s") + "."
             log("No written description for " + sRoot + " kind " + sKind + "; using the generic one: " + sNote)
@@ -269,7 +269,7 @@ def repair(sRoot, sDb):
             lMissing = [s for s in lWanted if s not in lWatched]
             # A FIELD WATCHED THAT SHOULD NOT BE (12 October 2026): this script's first version rewrote RadioTrail's
             # trigger to watch votes, last_seen and plays, and DbDo 1.0.259 shipped that. It is undone here.
-            lExtra = [s for s in lWatched if s.lower() in c_dUnwatched.get(sRoot + "|" + sTable, [])]
+            lExtra = [s for s in lWatched if s.lower() in dUnwatched.get(sRoot + "|" + sTable, [])]
             if lMissing or lExtra:
                 oDb.execute("DROP TRIGGER " + quoted("trg_" + sTable + "_edited"))
                 oDb.execute(editedTrigger(sTable, primaryKey(oDb, sTable), [s for s in lWanted] + [s for s in lWatched if s not in lWanted and s not in lExtra]))
@@ -313,7 +313,7 @@ def saveSchema(sRoot, sFolder):
         lItems = oDb.execute("SELECT type, name, tbl_name, sql FROM sqlite_master WHERE sql IS NOT NULL AND name NOT LIKE 'sqlite_%' ORDER BY rowid").fetchall()
         lTables = [t for t in lItems if t[0] == "table"]
         for t in lTables: lOut.append(t[3].strip() + ";")
-        for sTable in [t[1] for t in lTables if t[1] in c_lSchemaRows]:
+        for sTable in [t[1] for t in lTables if t[1] in lSchemaRows]:
             lCols = [s for s, iPk, iHidden in columns(oDb, sTable) if iHidden == 0]
             for oRow in oDb.execute("SELECT " + ", ".join(quoted(c) for c in lCols) + " FROM " + quoted(sTable) + " ORDER BY rowid"):
                 lOut.append("INSERT INTO " + quoted(sTable) + " (" + ", ".join(quoted(c) for c in lCols) + ") VALUES (" + ", ".join(literal(v) for v in oRow) + ");")
@@ -350,7 +350,7 @@ def checkDatabase(sRoot, oDb):
         if lWatched is None: continue
         lMissing = [s for s in contentColumns(oDb, sTable, sRoot) if s not in lWatched]
         if lMissing: fail(sRoot, sTable + ": editing " + ", ".join(lMissing) + " does not update edited")
-        lExtra = [s for s in lWatched if s.lower() in c_dUnwatched.get(sRoot + "|" + sTable, [])]
+        lExtra = [s for s in lWatched if s.lower() in dUnwatched.get(sRoot + "|" + sTable, [])]
         if lExtra: fail(sRoot, sTable + ": the edited trigger watches " + ", ".join(lExtra) + ", which a refresh or a play changes on every station")
     if "maps" in lTables:
         iMaps = oDb.execute("SELECT count(*) FROM maps").fetchone()[0]
@@ -454,7 +454,7 @@ def checkReports(sRoot, sFolder, oDb):
             fail(sRoot, "report " + sSection + " @filter or @sort does not run: " + str(oError))
         sGroup = dKeys.get("@group", "").strip().lower()
         if sGroup and sGroup not in lCols: fail(sRoot, "report " + sSection + " groups by " + sGroup + ", which is not a column of " + sTable)
-        for sBand in c_lBandKeys:
+        for sBand in lBandKeys:
             sText = re.sub(r"\{\{.*?\}\}", "", dKeys.get(sBand, ""), flags=re.S)
             for sField in re.findall(r"\$([A-Za-z_][A-Za-z0-9_]*)", sText):
                 if sField.lower() == "count" or re.match(r"(sum|avg|min|max)_", sField, re.I): continue
@@ -486,7 +486,7 @@ def main():
     global sLogPath
     os.makedirs(os.path.join(sProject, "logs"), exist_ok=True)
     sLogPath = os.path.join(sProject, "logs", "DbDo-checkTemplates-" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".log")
-    log("checkTemplates.py started; " + c_sVersion + "; script " + os.path.abspath(__file__))
+    log("checkTemplates.py started; " + sVersion + "; script " + os.path.abspath(__file__))
     log("Python " + sys.version.split()[0] + " at " + sys.executable + "; SQLite " + sqlite3.sqlite_version + "; " + platform.platform() + "; cwd " + os.getcwd() + "; command line " + " ".join(sys.argv))
     lArgs = sys.argv[1:]
     lUnknown = [s for s in lArgs if s.startswith("--") and s not in ("--repair", "--schema")]

@@ -1546,7 +1546,7 @@ namespace DbDo
 
         // Synthetic current-table name for a multi-table / expression
         // query result that maps to no single base table.
-        private const string c_sQueryTable = "(query)";
+        private const string sQueryTable = "(query)";
         private string sConnectString;
         private string sCurrentTable;
         private string sFilePath;
@@ -1601,7 +1601,7 @@ namespace DbDo
         public string sourceSql { get { return sSourceSql; } }
         // True when the recordset is an ad-hoc query with no single
         // base table (shown as "Custom" rather than a table name).
-        public bool currentIsCustomQuery { get { return sCurrentTable == c_sQueryTable; } }
+        public bool currentIsCustomQuery { get { return sCurrentTable == sQueryTable; } }
         private bool bReadOnlyInnate;
         // bDataModified: set true whenever a record is committed (update)
         // or deleted, cleared when a database is opened. For a directly-
@@ -2874,21 +2874,21 @@ namespace DbDo
         // filterState carries the SQL search too, behind a marker, its parts in
         // base 64 so nothing in them can clash with ADO's syntax or the session
         // file; with no search it is exactly the ADO filter, as before.
-        private const string c_sSqlStateMark = "{dbdo-sql}";
+        private const string sSqlStateMark = "{dbdo-sql}";
         public string filterState { get { return encodeFilterState(sSqlWhere, sSqlWhereSpoken, filter); } }
 
         public static string encodeFilterState(string sWhere, string sSpoken, string sAdo)
         {
             if (string.IsNullOrEmpty(sWhere)) return sAdo ?? "";
-            return c_sSqlStateMark + Convert.ToBase64String(Encoding.UTF8.GetBytes(sWhere))
+            return sSqlStateMark + Convert.ToBase64String(Encoding.UTF8.GetBytes(sWhere))
                 + "|" + Convert.ToBase64String(Encoding.UTF8.GetBytes(sSpoken ?? "")) + "|" + (sAdo ?? "");
         }
 
         public static void decodeFilterState(string sState, out string sWhere, out string sSpoken, out string sAdo)
         {
             sWhere = ""; sSpoken = ""; sAdo = sState ?? "";
-            if (string.IsNullOrEmpty(sState) || !sState.StartsWith(c_sSqlStateMark)) return;
-            string[] aParts = sState.Substring(c_sSqlStateMark.Length).Split(new char[] { '|' }, 3);
+            if (string.IsNullOrEmpty(sState) || !sState.StartsWith(sSqlStateMark)) return;
+            string[] aParts = sState.Substring(sSqlStateMark.Length).Split(new char[] { '|' }, 3);
             if (aParts.Length < 3) return;
             sAdo = aParts[2];
             try
@@ -3167,7 +3167,7 @@ namespace DbDo
                 // Synthetic table name so dialogs and status bars
                 // have something to display; the leading '(' prevents
                 // collision with any real table.
-                sCurrentTable = c_sQueryTable;
+                sCurrentTable = sQueryTable;
                 bCurrentIsView = true;
                 bReadOnlyInnate = true;
             }
@@ -3221,7 +3221,7 @@ namespace DbDo
         {
             if (!isOpen()) return "No database is open.";
             string sTable = sCurrentTable;
-            if (string.IsNullOrEmpty(sTable) || sTable == c_sQueryTable)
+            if (string.IsNullOrEmpty(sTable) || sTable == sQueryTable)
                 return "Describe Table works on a base table; the current view is a custom query.";
 
             List<SchemaColumn> lCols = getSchemaColumns(sTable);
@@ -3341,12 +3341,12 @@ namespace DbDo
         //
         // sqlite_ and sqlean_ tables are filtered earlier, in
         // getCatalogObjectNames, because they are not DbDo's either.
-        public static readonly string[] c_lsHiddenTables = new string[] { "lookups", "maps", "views" };
+        public static readonly string[] lsHiddenTables = new string[] { "lookups", "maps", "views" };
 
         public static bool isHiddenTable(string sName)
         {
             if (string.IsNullOrEmpty(sName)) return false;
-            foreach (string sHidden in c_lsHiddenTables)
+            foreach (string sHidden in lsHiddenTables)
                 if (string.Equals(sName, sHidden, StringComparison.OrdinalIgnoreCase)) return true;
             return false;
         }
@@ -16782,7 +16782,7 @@ namespace DbDo
         // found.
         private string buildRelatedSummary()
         {
-            const int c_iChildCap = 5;
+            const int iChildCap = 5;
             StringBuilder sb = new StringBuilder();
             try
             {
@@ -16826,7 +16826,7 @@ namespace DbDo
                         if (!bHasFk) continue;
                         int iFound;
                         List<string> lLook = db.queryColumnValues(
-                            sChildTable, "look", sCurrentPk, sPkValue, c_iChildCap, out iFound);
+                            sChildTable, "look", sCurrentPk, sPkValue, iChildCap, out iFound);
                         if (iFound <= 0) continue;
                         sb.AppendLine(sChildTable + " (" + Str.plural("record", iFound) + "):");
                         foreach (string sLook in lLook)
@@ -16873,7 +16873,7 @@ namespace DbDo
                         int iShown = 0;
                         foreach (string[] aRel in lGroup)
                         {
-                            if (iShown >= c_iChildCap)
+                            if (iShown >= iChildCap)
                             {
                                 sb.AppendLine("  ... and "
                                     + (lGroup.Count - iShown) + " more");
@@ -16925,7 +16925,7 @@ namespace DbDo
                         int iShown = 0;
                         foreach (string sTu in lPrms)
                         {
-                            if (iShown >= c_iChildCap)
+                            if (iShown >= iChildCap)
                             {
                                 sb.AppendLine("  ... and " + (lPrms.Count - iShown) + " more");
                                 break;
@@ -19358,9 +19358,9 @@ namespace DbDo
         // The field types offered when defining a table, alphabetical.
         // These double as the lookups seed (src 'DbDo', fld 'type') so
         // later picklists can draw the same vocabulary from lookups.
-        private static readonly string[] c_aFieldTypes = new string[]
+        private static readonly string[] aFieldTypes = new string[]
         { "BLOB", "BOOLEAN", "INTEGER", "REAL", "TEXT", "TEXTLINE", "TEXTMARKDOWN", "TEXTMEMO", "TEXTTIME" };
-        private const int c_iMaxNewFields = 10;
+        private const int iMaxNewFields = 10;
 
         // bPromptTableDefinition: the shared definition form for New
         // Database and Add Table. A table name plus up to ten field
@@ -19378,11 +19378,11 @@ namespace DbDo
                 TextBox tbTable = dlg.addTextBox("", "Lower-case plural noun; the primary key becomes its singular plus _id.");
                 List<TextBox> lNames = new List<TextBox>();
                 List<ComboBox> lTypes = new List<ComboBox>();
-                for (int i = 1; i <= c_iMaxNewFields; i++)
+                for (int i = 1; i <= iMaxNewFields; i++)
                 {
                     dlg.addLabel("Field " + i + " &name (blank if unused):");
                     lNames.Add(dlg.addTextBox("", "Lower_snake_case field name."));
-                    lTypes.Add(dlg.addComboPickBox("Field " + i + " t&ype:", c_aFieldTypes, "TEXTLINE",
+                    lTypes.Add(dlg.addComboPickBox("Field " + i + " t&ype:", aFieldTypes, "TEXTLINE",
                         "Pick the field's type."));
                 }
                 string sBtn = dlg.runWithButtons(new string[] { "OK", "Cancel" });
@@ -19542,7 +19542,7 @@ namespace DbDo
                 lLkFields.Add(new string[] { "url", "TEXTLINE" });
                 lDdl.AddRange(lStandardTableDdl("lookups", lLkFields));
                 int iOrd = 0;
-                foreach (string sType in c_aFieldTypes)
+                foreach (string sType in aFieldTypes)
                 {
                     iOrd++;
                     lDdl.Add("INSERT INTO lookups (src, tbl, fld, val, ordinal) VALUES "
@@ -20154,7 +20154,7 @@ namespace DbDo
         // launch the same way File > Open does.
         internal string importInixRecordFile(string sInixPath)
         {
-            const string c_sQuote = "\"";
+            const string sQuote = "\"";
             int iSeq = 0;
             string sTable = Path.GetFileNameWithoutExtension(sInixPath).ToLowerInvariant();
             System.Text.StringBuilder sbName = new System.Text.StringBuilder();
@@ -20219,12 +20219,12 @@ namespace DbDo
                     foreach (KeyValuePair<string, string> pair in lRecords[i])
                     {
                         if (!bFirstCol) { sbCols.Append(", "); sbVals.Append(", "); }
-                        sbCols.Append(c_sQuote + pair.Key + c_sQuote);
+                        sbCols.Append(sQuote + pair.Key + sQuote);
                         sbVals.Append("'" + pair.Value.Replace("'", "''") + "'");
                         bFirstCol = false;
                     }
                     if (sbCols.Length == 0) continue;
-                    managerImport.invokeSql("INSERT INTO " + c_sQuote + sTable + c_sQuote
+                    managerImport.invokeSql("INSERT INTO " + sQuote + sTable + sQuote
                         + " (" + sbCols + ") VALUES (" + sbVals + ")", null);
                 }
             }
@@ -24469,19 +24469,19 @@ namespace DbDo
             string sExistingFilter = db.filter ?? "";
             bool bFieldFilter = !string.IsNullOrEmpty(sExistingFilter);
             bool bSqlFilter = !string.IsNullOrEmpty(db.sqlFilter);
-            const string c_sAny = "Any Field";
-            const string c_sFields = "Fields";
-            const string c_sClear = "Clear";
-            const string c_sEdit = "Edit";
-            const string c_sNarrow = "Narrow";
-            const string c_sWiden = "Widen";
+            const string sAny = "Any Field";
+            const string sFields = "Fields";
+            const string sClear = "Clear";
+            const string sEdit = "Edit";
+            const string sNarrow = "Narrow";
+            const string sWiden = "Widen";
             // FILTER RECORDS IS A BUTTON DIALOG (10 October 2026): its choices are DbDo's own actions, not data, so they
             // are buttons rather than a pick list; the explanation each list entry carried is now a line above them.
-            List<string> lsChoices = new List<string> { c_sAny, c_sFields };
-            if (bFieldFilter || bSqlFilter) lsChoices.Add(c_sClear);
-            if (bFieldFilter) lsChoices.Add(c_sEdit);
-            if (bFieldFilter || bSqlFilter) lsChoices.Add(c_sNarrow);
-            if (bFieldFilter && !bSqlFilter) lsChoices.Add(c_sWiden);
+            List<string> lsChoices = new List<string> { sAny, sFields };
+            if (bFieldFilter || bSqlFilter) lsChoices.Add(sClear);
+            if (bFieldFilter) lsChoices.Add(sEdit);
+            if (bFieldFilter || bSqlFilter) lsChoices.Add(sNarrow);
+            if (bFieldFilter && !bSqlFilter) lsChoices.Add(sWiden);
             List<string> lsLines = new List<string>();
             if (bFieldFilter || bSqlFilter)
             {
@@ -24495,12 +24495,12 @@ namespace DbDo
             string sChoice = chooseByButtons("Filter Records", lsLines, lsChoices);
             if (sChoice == null) return;
 
-            if (sChoice == c_sAny) { filterAnyField(); return; }
+            if (sChoice == sAny) { filterAnyField(); return; }
 
-            string sAction = (sChoice == c_sClear) ? "Clear"
-                : (sChoice == c_sEdit) ? "Edit"
-                : (sChoice == c_sNarrow) ? "And"
-                : (sChoice == c_sWiden) ? "Or"
+            string sAction = (sChoice == sClear) ? "Clear"
+                : (sChoice == sEdit) ? "Edit"
+                : (sChoice == sNarrow) ? "And"
+                : (sChoice == sWiden) ? "Or"
                 : "Reset";
 
             if (sAction == "Clear") { clearFilterKeepingRecord(); return; }
@@ -26440,7 +26440,7 @@ namespace DbDo
             // records)"; on an event, "contacts via presents
             // (incoming, 3 records)" and "locations via located_at
             // (1 record)".
-            const int c_iMapsDrillCap = 200;
+            const int iMapsDrillCap = 200;
             List<string> lChoices = new List<string>(lChildren);
             Dictionary<string, string[]> dMapsChoices = new Dictionary<string, string[]>();
             Dictionary<string, string[]> dTwoHopChoices = new Dictionary<string, string[]>();
@@ -26451,7 +26451,7 @@ namespace DbDo
                 + " maps=" + (db.hasMapsTable() ? "yes" : "no"));
             if (!string.IsNullOrEmpty(sPrmValue) && db.hasMapsTable())
             {
-                List<string[]> lRelations = db.lMapsRelations(sParentTable, sPrmValue, c_iMapsDrillCap);
+                List<string[]> lRelations = db.lMapsRelations(sParentTable, sPrmValue, iMapsDrillCap);
                 DbDoLog.write("Enter Child: " + lRelations.Count + " maps relations found");
                 Dictionary<string, int> dCounts = new Dictionary<string, int>();
                 List<string> lOrder = new List<string>();
@@ -28161,14 +28161,14 @@ namespace DbDo
         // common first; the user picks one and DbDo filters the grid to
         // it. The accessible form of "what's in this column, how is it
         // distributed -- now show me just those rows." The value scan is
-        // capped (c_iFacetMax) so a high-cardinality column can't flood
+        // capped (iFacetMax) so a high-cardinality column can't flood
         // the picker, per the Datasette lesson that an unbounded
         // distinct-value scan is a trap. The query, the distinct count,
         // and the applied filter are logged so a misbehaving facet is
         // diagnosable from the log rather than by guesswork.
         private void facetColumnClicked(object sender, EventArgs evArgs)
         {
-            const int c_iFacetMax = 1000;
+            const int iFacetMax = 1000;
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
             { Say.say("No record selected"); return; }
             string sTable = db.currentTable;
@@ -28183,12 +28183,12 @@ namespace DbDo
             string sQCol = "\"" + sField.Replace("\"", "\"\"") + "\"";
             string sSql = "SELECT " + sQCol + ", count(*) AS n FROM " + sQTable
                 + " GROUP BY " + sQCol + " ORDER BY n DESC, " + sQCol
-                + " LIMIT " + (c_iFacetMax + 1);
+                + " LIMIT " + (iFacetMax + 1);
             try { DbDoLog.write("Facet Column: table=" + sTable + " col=" + sField + " SQL=" + sSql); } catch { }
 
             int iFound;
             List<string[]> lRows;
-            try { lRows = db.queryRowsSql(sSql, c_iFacetMax, out iFound); }
+            try { lRows = db.queryRowsSql(sSql, iFacetMax, out iFound); }
             catch (Exception ex)
             {
                 ErrorDialog.show(this, "Facet Column", "Could not read column values: " + ex.Message);
@@ -28200,7 +28200,7 @@ namespace DbDo
             // to the raw value. GROUP BY keys are distinct, so the
             // displays are unique. A blank display marks SQL NULL or an
             // empty string.
-            bool bTruncated = iFound > c_iFacetMax;
+            bool bTruncated = iFound > iFacetMax;
             List<string> lDisplay = new List<string>();
             Dictionary<string, string> dDisplayToValue = new Dictionary<string, string>();
             foreach (string[] aRow in lRows)
@@ -28216,7 +28216,7 @@ namespace DbDo
             }
 
             string sPrompt = "Values in " + sField + ", most common first"
-                + (bTruncated ? " (showing the first " + c_iFacetMax + ")" : "")
+                + (bTruncated ? " (showing the first " + iFacetMax + ")" : "")
                 + " -- pick one to filter:";
             string sChosen = promptListChoice("Facet " + sField, sPrompt, lDisplay, null);
             if (string.IsNullOrEmpty(sChosen) || !dDisplayToValue.ContainsKey(sChosen)) return;
@@ -35607,7 +35607,7 @@ namespace DbDo
         // than thirty days are removed, so the folder does not grow for ever.
         private static void sweepOrphanManagedTemps()
         {
-            const int c_iKeepDays = 30;
+            const int iKeepDays = 30;
             try
             {
                 string sTempDir = Path.GetTempPath();
@@ -35633,7 +35633,7 @@ namespace DbDo
                 {
                     foreach (string sOld in Directory.GetFiles(sRecovered, "Recovered-*.db"))
                     {
-                        try { if ((DateTime.Now - File.GetLastWriteTime(sOld)).TotalDays > c_iKeepDays) File.Delete(sOld); }
+                        try { if ((DateTime.Now - File.GetLastWriteTime(sOld)).TotalDays > iKeepDays) File.Delete(sOld); }
                         catch { }
                     }
                 }
@@ -35643,7 +35643,7 @@ namespace DbDo
                         + (iKept == 1 ? "was" : "were") + " kept, in case "
                         + (iKept == 1 ? "it holds" : "they hold") + " unsaved edits. Open "
                         + (iKept == 1 ? "it" : "one") + " with Control+O, named Recovered and the date, from:\n\n" + sRecovered
-                        + "\n\nRecovered copies are removed after " + c_iKeepDays + " days.",
+                        + "\n\nRecovered copies are removed after " + iKeepDays + " days.",
                         "DbDo", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             catch (Exception ex)

@@ -118,25 +118,25 @@
 # DbDo's own logs go: everything it did, every request, every count.
 import datetime, html, json, os, random, re, socket, sqlite3, sys, threading, time, urllib.error, urllib.parse, urllib.request
 
-c_sAgent = "RadioTrail/1.0 (DbDo; https://github.com/JamalMazrui/DbDo)"
-c_lsServers = ["https://de1.api.radio-browser.info", "https://fi1.api.radio-browser.info",
+sAgent = "RadioTrail/1.0 (DbDo; https://github.com/JamalMazrui/DbDo)"
+lsCatalogServers = ["https://de1.api.radio-browser.info", "https://fi1.api.radio-browser.info",
                "https://nl1.api.radio-browser.info", "https://at1.api.radio-browser.info"]
-c_sAllHosts = "all.api.radio-browser.info"
-c_sSomaChannels = "https://somafm.com/channels.json"
-c_lsSomaFormats = ["mp3", "aac", "aacp"]
-c_lsSomaQuality = ["highest", "high", "low"]
-c_iProbeThreads = 40
-c_iProbeSeconds = 4
-c_sWikiApi = "https://en.wikipedia.org/w/api.php"
+sAllHosts = "all.api.radio-browser.info"
+sSomaChannels = "https://somafm.com/channels.json"
+lsSomaFormats = ["mp3", "aac", "aacp"]
+lsSomaQuality = ["highest", "high", "low"]
+iProbeThreads = 40
+iProbeSeconds = 4
+sWikiApi = "https://en.wikipedia.org/w/api.php"
 # ONE REQUEST A SECOND, ONE THREAD. Wikipedia asks exactly that of a script,
 # and refuses one that does more: on 5 October 2026 six threads were answered
 # for the first thousand stations and silently refused for the next six
 # thousand, which read as "no safe match" when it was "go away". A refusal is
 # now told apart from a miss, waited out, and the station left for next time.
-c_iWikiThreads = 1
-c_dWikiPause = 1.0
-c_lsCallSignCountries = ("US", "CA")
-c_reCallSign = re.compile(r"\b([KWC][A-Z]{2,3})(?:[- ]?(AM|FM))?\b")
+iWikiThreads = 1
+dWikiPause = 1.0
+lsCallSignCountries = ("US", "CA")
+reCallSign = re.compile(r"\b([KWC][A-Z]{2,3})(?:[- ]?(AM|FM))?\b")
 
 
 # THE TRAIL CONVENTIONS, KEPT BY EVERY RUN (9 October 2026). The kit's checkDb found RadioTrail without the triggers
@@ -144,7 +144,7 @@ c_reCallSign = re.compile(r"\b([KWC][A-Z]{2,3})(?:[- ]?(AM|FM))?\b")
 # only when DbDo itself made the edit. This adds whatever is missing -- the unique prime indexes of lookups and maps,
 # an edited trigger for each table, and the map-link triggers of stations and lookups -- in the form BookTrail uses,
 # and changes nothing that is already there, so a listener's own copy gains them at its next refresh.
-c_lsAutomatic = ["votes", "clicks", "trend", "last_check", "last_seen", "probed", "plays", "last_played"]
+lsAutomatic = ["votes", "clicks", "trend", "last_check", "last_seen", "probed", "plays", "last_played"]
 
 
 def markedLast(c):
@@ -212,7 +212,7 @@ def ensureConventions(c):
         lsColumns = [r[1] for r in c.execute("pragma table_info(%s)" % quoted(sTable))]
         if not lsColumns: continue
         sKey = lsColumns[0]
-        lsWatched = [s for s in lsColumns if s not in (sKey, "added", "edited", "marked") and not (sTable == "stations" and s in c_lsAutomatic)]
+        lsWatched = [s for s in lsColumns if s not in (sKey, "added", "edited", "marked") and not (sTable == "stations" and s in lsAutomatic)]
         sName = "trg_" + sTable + "_edited"
         if sName not in lsExisting and lsWatched:
             sOf = ", ".join(quoted(s) for s in lsWatched)
@@ -245,7 +245,7 @@ def addLines(sHave, lsNew):
 
 def wikiGet(dParams):
     dParams = dict(dParams); dParams["format"] = "json"
-    oReq = urllib.request.Request(c_sWikiApi + "?" + urllib.parse.urlencode(dParams), headers={"User-Agent": c_sAgent})
+    oReq = urllib.request.Request(sWikiApi + "?" + urllib.parse.urlencode(dParams), headers={"User-Agent": sAgent})
     with urllib.request.urlopen(oReq, timeout=20) as oResp:
         return json.loads(oResp.read().decode("utf-8"))
 
@@ -356,7 +356,7 @@ def namedFrequencies(sText):
 
 
 # Places a title's bracket can name that are not in the United States or Canada, where call signs like these belong.
-c_reForeignTitle = re.compile(r"\((?:[^)]*\b)?(UK|United Kingdom|British|England|Scotland|Wales|Ireland|Irish|Australia|Australian|New Zealand|India|Indian|Philippines|South Africa|Germany|German|France|French|Nigeria|Kenya|Jamaica|Malaysia|Singapore)\b", re.I)
+reForeignTitle = re.compile(r"\((?:[^)]*\b)?(UK|United Kingdom|British|England|Scotland|Wales|Ireland|Irish|Australia|Australian|New Zealand|India|Indian|Philippines|South Africa|Germany|German|France|French|Nigeria|Kenya|Jamaica|Malaysia|Singapore)\b", re.I)
 
 
 def confirmsFrequency(sName, sBoxFrequency, sTitle):
@@ -370,7 +370,7 @@ def confirmsFrequency(sName, sBoxFrequency, sTitle):
     lsName, lsBox = namedFrequencies(sName), namedFrequencies(sBoxFrequency)
     if not lsName: return True
     if lsBox: return bool(lsName & lsBox)
-    return not c_reForeignTitle.search(sTitle or "") and "DAB" not in (sBoxFrequency or "").upper()
+    return not reForeignTitle.search(sTitle or "") and "DAB" not in (sBoxFrequency or "").upper()
 
 
 def pageRecord(oPage, sCall, sName=""):
@@ -413,7 +413,7 @@ def officialStation(sName):
     # THE NAME AS WRITTEN (11 October 2026): call signs are written in capitals, and the name was searched after being
     # made upper case, so "Kiss FM" yielded KISS and "Music City" CITY, and 834 stations took another station's
     # article -- owner, city, frequency and all. A call sign is now only one written in capitals.
-    m = c_reCallSign.search(sName)
+    m = reCallSign.search(sName)
     if not m: return {}, "no call sign in name"
     sCall = m.group(1); sBand = m.group(2) or ""
     lsTitles = [sCall, sCall + "-FM", sCall + "-AM", sCall + " (FM)", sCall + " (AM)", sCall + "-LP"]
@@ -427,7 +427,7 @@ def officialStation(sName):
         d, sReason = pageRecord(oPage, sCall, sName)
         if d: return d, "by title " + oPage.get("title", "")
         if sReason and not sReason.startswith("no page"): lsReasons.append(sReason)
-    time.sleep(c_dWikiPause)
+    time.sleep(dWikiPause)
     dParams = dict(dCommon); dParams.update({"generator": "search", "gsrlimit": "5", "gsrsearch": sCall + (" " + sBand if sBand else "") + " radio station"})
     lsPages, sWhy = wikiPages(dParams)
     if sWhy: lsReasons.append(sWhy)
@@ -468,7 +468,7 @@ def cleanCopy(sDb, bTemplate, logLine, say):
     if "call_sign" in lsCols:
         for iId, sName, sCall, sFreq, sCity, sOwner, sFormat, sWiki, sNotes, sTags in c.execute(
                 "select station_id, name, call_sign, frequency, city, owner, format, wikipedia, notes, tags from stations where coalesce(wikipedia,'') not in ('', '-')").fetchall():
-            mName = c_reCallSign.search(sName or "")
+            mName = reCallSign.search(sName or "")
             mStored = re.match(r"[KWC][A-Z]{2,3}", (sCall or "").upper())
             # Looked up again, under the strict rules, when: the name states no call sign in capitals, or another one; the
             # name states a frequency the record does not share, or cannot confirm because it has none; or the stored
@@ -618,7 +618,7 @@ def affiliations(sDb, logLine, say):
                     iStations += 1; iTags += len(sNew.split("\n")) - len([s for s in sHave.split("\n") if s.strip()])
                     logLine("affiliations %d %s: %s" % (iId, oPage.get("title", ""), "; ".join(lsItems)))
         c.commit()
-        time.sleep(c_dWikiPause)
+        time.sleep(dWikiPause)
     c.close()
     say("Affiliations: %d articles name networks; %d stations gained %d tags." % (iArticles, iStations, iTags))
     return 0
@@ -722,7 +722,7 @@ def assess(sDb, logLine, say, bReadOnly=False):
     lsCall = []; iOfficial = 0; iCallNames = 0; iDash = 0
     if "call_sign" in lsCols:
         for r in c.execute("select name, coalesce(wikipedia,'') from stations where stream_url <> '' and countrycode in ('US','CA')"):
-            if c_reCallSign.search(r[0] or ""):
+            if reCallSign.search(r[0] or ""):
                 iCallNames += 1
                 if r[1] == "": lsCall.append(r[0])
                 elif r[1] == "-": iDash += 1
@@ -758,7 +758,7 @@ def official(sDb, sCountry, iLimit, bAgain, logLine, say):
     # looked up.
     sWhere += " and countrycode in ('US', 'CA')"
     lsRows = [r for r in c.execute("select station_id, name, notes, tags from stations where " + sWhere + " order by cast(votes as integer) desc", lsArgs)
-              if c_reCallSign.search(r[1] or "")]
+              if reCallSign.search(r[1] or "")]
     if iLimit: lsRows = lsRows[:iLimit]
     if not lsRows:
         say("No station here with a call sign in its name is still unlooked-up."); c.close(); return 0
@@ -799,8 +799,8 @@ def official(sDb, sCountry, iLimit, bAgain, logLine, say):
                 time.sleep(oRefused.iWait)
                 with oLock: bRefused[0] = True
             with oLock: lsOut.append((r, d, sWhy))
-            time.sleep(c_dWikiPause)
-    lsThreads = [threading.Thread(target=worker, daemon=True) for _ in range(c_iWikiThreads)]
+            time.sleep(dWikiPause)
+    lsThreads = [threading.Thread(target=worker, daemon=True) for _ in range(iWikiThreads)]
     for o in lsThreads: o.start()
     iSaid = 0
     try:
@@ -824,8 +824,8 @@ def probeStation(sUrl, sHomepage):
     d = {}
     if sUrl:
         try:
-            oReq = urllib.request.Request(sUrl, headers={"User-Agent": c_sAgent, "Icy-MetaData": "1"})
-            with urllib.request.urlopen(oReq, timeout=c_iProbeSeconds) as oResp:
+            oReq = urllib.request.Request(sUrl, headers={"User-Agent": sAgent, "Icy-MetaData": "1"})
+            with urllib.request.urlopen(oReq, timeout=iProbeSeconds) as oResp:
                 h = oResp.headers
                 for sKey, sField in (("icy-name", "icy_name"), ("icy-description", "icy_description"), ("icy-genre", "icy_genre"), ("icy-url", "icy_url")):
                     sVal = (h.get(sKey) or "").strip()
@@ -837,8 +837,8 @@ def probeStation(sUrl, sHomepage):
     sPage = sHomepage or d.get("icy_url", "")
     if sPage and sPage.lower().startswith("http"):
         try:
-            oReq = urllib.request.Request(sPage, headers={"User-Agent": c_sAgent})
-            with urllib.request.urlopen(oReq, timeout=c_iProbeSeconds) as oResp:
+            oReq = urllib.request.Request(sPage, headers={"User-Agent": sAgent})
+            with urllib.request.urlopen(oReq, timeout=iProbeSeconds) as oResp:
                 sHtml = oResp.read(65536).decode("utf-8", "replace")
             m = re.search(r"<title[^>]*>(.*?)</title>", sHtml, re.I | re.S)
             if m: d["page_title"] = html.unescape(re.sub(r"\s+", " ", m.group(1))).strip()[:200]
@@ -869,7 +869,7 @@ def enrich(sDb, sCountry, iLimit, bAgain, logLine, say):
     lsRows = c.execute(sSql, lsArgs).fetchall()
     if not lsRows:
         say("Nothing to probe: every station here has been asked already. Add --again to ask them again."); c.close(); return 0
-    say("Asking %d stations what they say about themselves, %d at a time. About %d minutes." % (len(lsRows), c_iProbeThreads, max(1, len(lsRows) * c_iProbeSeconds // c_iProbeThreads // 60)))
+    say("Asking %d stations what they say about themselves, %d at a time. About %d minutes." % (len(lsRows), iProbeThreads, max(1, len(lsRows) * iProbeSeconds // iProbeThreads // 60)))
     oLock = threading.Lock(); lsOut = []; lsQueue = list(lsRows)
     sNow = datetime.datetime.now().strftime("%Y-%m-%d")
     iFilled = [0]; iWritten = [0]
@@ -911,7 +911,7 @@ def enrich(sDb, sCountry, iLimit, bAgain, logLine, say):
                 r = lsQueue.pop()
             d = probeStation(r[1], r[2])
             with oLock: lsOut.append((r, d))
-    lsThreads = [threading.Thread(target=worker, daemon=True) for _ in range(c_iProbeThreads)]
+    lsThreads = [threading.Thread(target=worker, daemon=True) for _ in range(iProbeThreads)]
     for o in lsThreads: o.start()
     iSaid = 0
     try:
@@ -935,7 +935,7 @@ def resolveMirrors(logLine):
     lsHosts = []
     try:
         lsSeen = set()
-        for _oFamily, _oType, _oProto, _sCanon, oAddr in socket.getaddrinfo(c_sAllHosts, 443, 0, socket.SOCK_STREAM):
+        for _oFamily, _oType, _oProto, _sCanon, oAddr in socket.getaddrinfo(sAllHosts, 443, 0, socket.SOCK_STREAM):
             sIp = str(oAddr[0])
             if sIp in lsSeen: continue
             lsSeen.add(sIp)
@@ -945,10 +945,10 @@ def resolveMirrors(logLine):
                 continue
             if sHost and sHost not in lsHosts: lsHosts.append(sHost)
     except OSError as oError:
-        logLine("DNS for %s failed: %s" % (c_sAllHosts, oError))
+        logLine("DNS for %s failed: %s" % (sAllHosts, oError))
     lsServers = ["https://" + s for s in lsHosts]
     random.shuffle(lsServers)
-    if not lsServers: lsServers = list(c_lsServers)
+    if not lsServers: lsServers = list(lsCatalogServers)
     logLine("mirrors: " + ", ".join(lsServers))
     return lsServers
 
@@ -959,7 +959,7 @@ def firstStreamFromPls(sText):
 
 def fetchSomaFm(logLine, say):
     """The SomaFM channels as rows for the stations table."""
-    oReq = urllib.request.Request(c_sSomaChannels, headers={"User-Agent": c_sAgent, "Accept": "application/json"})
+    oReq = urllib.request.Request(sSomaChannels, headers={"User-Agent": sAgent, "Accept": "application/json"})
     with urllib.request.urlopen(oReq, timeout=30) as oResp:
         dDoc = json.loads(oResp.read().decode("utf-8"))
     lsRows = []
@@ -970,8 +970,8 @@ def fetchSomaFm(logLine, say):
         lsPlay = [p for p in d.get("playlists", []) if isinstance(p, dict)]
         def rank(p):
             sF = str(p.get("format", "")).lower(); sQ = str(p.get("quality", "")).lower()
-            return (c_lsSomaFormats.index(sF) if sF in c_lsSomaFormats else 9,
-                    c_lsSomaQuality.index(sQ) if sQ in c_lsSomaQuality else 9)
+            return (lsSomaFormats.index(sF) if sF in lsSomaFormats else 9,
+                    lsSomaQuality.index(sQ) if sQ in lsSomaQuality else 9)
         sStream = ""
         if lsPlay:
             pBest = min(lsPlay, key=rank)
@@ -979,7 +979,7 @@ def fetchSomaFm(logLine, say):
             if sPls:
                 sStream = sPls
                 try:
-                    oReq = urllib.request.Request(sPls, headers={"User-Agent": c_sAgent})
+                    oReq = urllib.request.Request(sPls, headers={"User-Agent": sAgent})
                     with urllib.request.urlopen(oReq, timeout=20) as oResp:
                         sDirect = firstStreamFromPls(oResp.read().decode("utf-8", "replace"))
                     if sDirect: sStream = sDirect
@@ -995,8 +995,8 @@ def fetchSomaFm(logLine, say):
         })
     say("SomaFM: %d channels" % len(lsRows))
     return lsRows
-c_iPage = 10000
-c_dPause = 0.5
+iPage = 10000
+dPause = 0.5
 
 def templatePath():
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), "RadioTrail.db")
@@ -1394,7 +1394,7 @@ def mainCore(lsArgs):
     sServer = ""
     for sTry in resolveMirrors(logLine):
         try:
-            oReq = urllib.request.Request(sTry + "/json/stats", headers={"User-Agent": c_sAgent})
+            oReq = urllib.request.Request(sTry + "/json/stats", headers={"User-Agent": sAgent})
             with urllib.request.urlopen(oReq, timeout=20) as oResp:
                 json.loads(oResp.read().decode("utf-8"))
             sServer = sTry; break
@@ -1408,13 +1408,13 @@ def mainCore(lsArgs):
     iOffset = 0
     bCatalogComplete = False
     while True:
-        dQuery = {"hidebroken": "true", "limit": str(c_iPage), "offset": str(iOffset), "order": "votes", "reverse": "true"}
+        dQuery = {"hidebroken": "true", "limit": str(iPage), "offset": str(iOffset), "order": "votes", "reverse": "true"}
         sUrl = sServer + "/json/stations"
         if sCountry:
             sUrl = sServer + "/json/stations/bycountryexact/" + urllib.parse.quote(sCountry)
         sUrl += "?" + urllib.parse.urlencode(dQuery)
         logLine("GET " + sUrl)
-        oReq = urllib.request.Request(sUrl, headers={"User-Agent": c_sAgent})
+        oReq = urllib.request.Request(sUrl, headers={"User-Agent": sAgent})
         try:
             with urllib.request.urlopen(oReq, timeout=120) as oResp:
                 lsPage = json.loads(oResp.read().decode("utf-8"))
@@ -1424,10 +1424,10 @@ def mainCore(lsArgs):
         logLine("  %d stations in this page" % len(lsPage))
         lsStations.extend(lsPage)
         say("  %d so far" % len(lsStations))
-        if len(lsPage) < c_iPage: bCatalogComplete = True; break
+        if len(lsPage) < iPage: bCatalogComplete = True; break
         if iLimit and len(lsStations) >= iLimit: break
-        iOffset += c_iPage
-        time.sleep(c_dPause)
+        iOffset += iPage
+        time.sleep(dPause)
     if iLimit: lsStations = lsStations[:iLimit]
     if not lsStations and not lsRows:
         say("No stations came back; nothing was changed."); return 1

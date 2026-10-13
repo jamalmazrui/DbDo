@@ -22,14 +22,14 @@ the books spell two ways.
 
 import datetime, glob, html, os, platform, re, sqlite3, string, subprocess, sys, traceback, zipfile
 
-c_sVersion = "2026-10-12 version 2: reads the manuscripts in MyBooks\\books; every performer keeps the book's address"
-c_sGenreBook = "Mastery in Music Genre"
-c_sSongBook = "Mastery in Popular Song"
-c_dCountries = {"UK": "British", "US": "American", "USA": "American"}
-c_setNations = {"American", "Australian", "Brazilian", "British", "Canadian", "Dutch", "English", "French", "German", "Irish", "Jamaican", "Northern Irish", "Scottish", "Swedish", "Welsh"}
-c_lsAlbumFields = ["name", "artist", "year", "genre", "rank", "summary", "awards", "format", "rating", "source"]
-c_lsPerformerFields = ["name", "sex", "nationality", "affiliation", "active", "role", "genre", "summary", "source"]
-c_dTypes = {"active": "TEXTLINE", "affiliation": "TEXTLINE", "artist": "TEXTLINE", "awards": "TEXTMARKDOWN", "format": "TEXTLINE", "genre": "TEXTLINE",
+sVersion = "2026-10-12 version 2: reads the manuscripts in MyBooks\\books; every performer keeps the book's address"
+sGenreBook = "Mastery in Music Genre"
+sSongBook = "Mastery in Popular Song"
+dCountries = {"UK": "British", "US": "American", "USA": "American"}
+setNations = {"American", "Australian", "Brazilian", "British", "Canadian", "Dutch", "English", "French", "German", "Irish", "Jamaican", "Northern Irish", "Scottish", "Swedish", "Welsh"}
+lsAlbumFields = ["name", "artist", "year", "genre", "rank", "summary", "awards", "format", "rating", "source"]
+lsPerformerFields = ["name", "sex", "nationality", "affiliation", "active", "role", "genre", "summary", "source"]
+dColumnTypes = {"active": "TEXTLINE", "affiliation": "TEXTLINE", "artist": "TEXTLINE", "awards": "TEXTMARKDOWN", "format": "TEXTLINE", "genre": "TEXTLINE",
             "name": "TEXTLINE", "nationality": "TEXTLINE", "rank": "INTEGER", "rating": "INTEGER", "role": "TEXTLINE", "sex": "TEXTLINE",
             "source": "TEXTLINE", "summary": "TEXTMARKDOWN", "year": "INTEGER"}
 
@@ -118,9 +118,9 @@ def splitDetails(sDetails):
     and the person first inside: "**Tuba Skinny** (Erika Lewis, American, Tuba Skinny, 2000s-present)"."""
     lsParts = [s.strip() for s in sDetails.split(", ")]
     sActive = lsParts.pop() if lsParts and re.search(r"\d{4}", lsParts[-1]) else ""
-    bNation = lambda s: s in c_setNations or s in c_dCountries
+    bNation = lambda s: s in setNations or s in dCountries
     sPerson = lsParts.pop(0) if len(lsParts) >= 2 and not bNation(lsParts[0]) and bNation(lsParts[1]) else ""
-    sNation = c_dCountries.get(lsParts[0], lsParts[0]) if lsParts else ""
+    sNation = dCountries.get(lsParts[0], lsParts[0]) if lsParts else ""
     return sPerson, sNation, ", ".join(lsParts[1:]), sActive
 
 
@@ -194,7 +194,7 @@ def primeExpr(lsFields):
 def tableDdl(sTable, sId, lsFields, lsLook, lsPrime, dTypes=None):
     """A user table as the homer-db skill gives it, with its triggers and its unique prime index. dTypes gives the
     column types; another Trail's builder (makeTechTraining) passes its own, and MusicTrail's are the default."""
-    dTypes = dTypes or c_dTypes
+    dTypes = dTypes or dColumnTypes
     lsColumns = ["\"%s\" INTEGER PRIMARY KEY AUTOINCREMENT" % sId, "added TEXTTIME NOT NULL DEFAULT CURRENT_TIMESTAMP", "edited TEXTTIME NOT NULL DEFAULT CURRENT_TIMESTAMP"]
     lsColumns += ["\"%s\" %s" % (s, dTypes[s]) for s in lsFields]
     lsColumns += ["url TEXTLINE", "notes TEXTMARKDOWN", "tags TEXTMEMO", "look TEXT GENERATED ALWAYS AS (%s) STORED" % lookExpr(lsLook),
@@ -260,7 +260,7 @@ def build(sGenreText, sSongText, sTarget):
     dPerformers = {}
     for dPerson in lPeople:
         sUrl = dPeopleLinks.get(dPerson["name"]) or dPeopleLinks.get(dPerson["affiliation"], "")
-        dPerformers[nameKey(dPerson["name"])] = dict(dPerson, source=c_sSongBook, url=sUrl)
+        dPerformers[nameKey(dPerson["name"])] = dict(dPerson, source=sSongBook, url=sUrl)
     lMaps = []
     for dAlbum in lAlbums:
         sCredit = dAlbum["artist"]
@@ -274,7 +274,7 @@ def build(sGenreText, sSongText, sTarget):
                 sKey = nameKey(sPart)
                 if sKey not in dPerformers:
                     sName, sUrl = dActs[sKey]
-                    dPerformers[sKey] = {"name": sName, "genre": dAlbum["genre"], "source": c_sGenreBook, "url": sUrl}
+                    dPerformers[sKey] = {"name": sName, "genre": dAlbum["genre"], "source": sGenreBook, "url": sUrl}
                 lMaps.append(("performers", dPerformers[sKey]["name"], "recorded", "albums", sAlbumPrime))
             log("Album %s: the duo %s is linked to each partner" % (dAlbum["name"], sListed))
             continue
@@ -285,7 +285,7 @@ def build(sGenreText, sSongText, sTarget):
         else:
             # A duo with no page of its own keeps the address the book gives it: the page of the album they made together.
             if sActUrl and sActUrl == dAlbumUrls.get(nameKey(dAlbum["name"]) + "|" + str(dAlbum["year"])): log("Act %s: the book links it to its album's page, which is kept as its address" % sListed)
-            dPerformers[sKey] = {"name": sListed, "genre": dAlbum["genre"], "source": c_sGenreBook, "url": sActUrl}
+            dPerformers[sKey] = {"name": sListed, "genre": dAlbum["genre"], "source": sGenreBook, "url": sActUrl}
         lMaps.append(("performers", dPerformers[sKey]["name"], "recorded", "albums", sAlbumPrime))
 
     # A musician's group, when the group is a performer here, is a link as well as a word.
@@ -300,16 +300,16 @@ def build(sGenreText, sSongText, sTarget):
     sTemp = sTarget + ".new"
     if os.path.exists(sTemp): os.remove(sTemp)
     oDb = sqlite3.connect(sTemp)
-    for sDdl in tableDdl("albums", "album_id", c_lsAlbumFields, ["name", "artist"], ["name", "artist"]) + tableDdl("performers", "performer_id", c_lsPerformerFields, ["name"], ["name"]) + systemDdl():
+    for sDdl in tableDdl("albums", "album_id", lsAlbumFields, ["name", "artist"], ["name", "artist"]) + tableDdl("performers", "performer_id", lsPerformerFields, ["name"], ["name"]) + systemDdl():
         oDb.execute(sDdl)
     for dAlbum in sorted(lAlbums, key=lambda d: (d["genre"], d["rank"])):
         sUrl = dAlbumUrls.get(nameKey(dAlbum["name"]) + "|" + str(dAlbum["year"]), "")
         if not sUrl: log("Album %s (%d): no link in the book's list" % (dAlbum["name"], dAlbum["year"]))
         oDb.execute("INSERT INTO albums (name, artist, year, genre, rank, summary, awards, source, url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                    (dAlbum["name"], dAlbum["artist"], dAlbum["year"], dAlbum["genre"], dAlbum["rank"], dAlbum["summary"] or None, dAlbum["awards"] or None, c_sGenreBook, sUrl or None))
+                    (dAlbum["name"], dAlbum["artist"], dAlbum["year"], dAlbum["genre"], dAlbum["rank"], dAlbum["summary"] or None, dAlbum["awards"] or None, sGenreBook, sUrl or None))
     for dPerson in sorted(dPerformers.values(), key=lambda d: d["name"].lower()):
-        oDb.execute("INSERT INTO performers (%s, url) VALUES (%s)" % (", ".join(c_lsPerformerFields), ", ".join("?" * (len(c_lsPerformerFields) + 1))),
-                    [dPerson.get(s) or None for s in c_lsPerformerFields] + [dPerson.get("url") or None])
+        oDb.execute("INSERT INTO performers (%s, url) VALUES (%s)" % (", ".join(lsPerformerFields), ", ".join("?" * (len(lsPerformerFields) + 1))),
+                    [dPerson.get(s) or None for s in lsPerformerFields] + [dPerson.get("url") or None])
     for tMap in lMaps: oDb.execute("INSERT INTO maps (tbl1, prime1, kind, tbl2, prime2) VALUES (?, ?, ?, ?, ?)", tMap)
 
     dGenres = {s: next((v for k, v in dGenreSentences.items() if k == s.lower()), "") for s in sorted({a["genre"] for a in lAlbums})}
@@ -319,8 +319,8 @@ def build(sGenreText, sSongText, sTarget):
     addLookups(oDb, "performers", "genre", dGenres, "MusicTrail")
     addLookups(oDb, "performers", "role", dRoles, "MusicTrail")
     addLookups(oDb, "performers", "sex", {"Female": "", "Male": ""}, "MusicTrail")
-    dSources = {c_sGenreBook: "Mastery in Music Genre: Among the Greatest Albums of All Time, by Jamal Mazrui.",
-                c_sSongBook: "Mastery in Popular Song: Among the Greatest Musicians of All Time, by Jamal Mazrui."}
+    dSources = {sGenreBook: "Mastery in Music Genre: Among the Greatest Albums of All Time, by Jamal Mazrui.",
+                sSongBook: "Mastery in Popular Song: Among the Greatest Musicians of All Time, by Jamal Mazrui."}
     addLookups(oDb, "albums", "source", dSources, "MusicTrail")
     addLookups(oDb, "performers", "source", dSources, "MusicTrail")
     addLookups(oDb, "albums", "format", {"CD": "", "Cassette": "", "Digital": "", "SACD": "", "Vinyl": ""}, "DbDo")
@@ -353,7 +353,7 @@ def build(sGenreText, sSongText, sTarget):
 
 
 def main(lsArgs):
-    log("makeMusicTrail.py started; %s; script %s" % (c_sVersion, os.path.abspath(__file__)))
+    log("makeMusicTrail.py started; %s; script %s" % (sVersion, os.path.abspath(__file__)))
     log("Python %s at %s on %s; cwd %s; command line %s" % (platform.python_version(), sys.executable, platform.platform(), os.getcwd(), " ".join(sys.argv)))
     dBooks = findBooks(lsArgs)
     log("Books found: %s" % dBooks)

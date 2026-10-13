@@ -25,13 +25,13 @@ import datetime, glob, os, platform, re, sqlite3, string, sys, traceback
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import makeMusicTrail as trail
 
-c_sVersion = "2026-10-12 version 1: from the Tech Training directory; Play Stream plays each presentation"
-c_lsFields = ["title", "year", "category", "minutes", "medium", "presenter", "series", "source", "summary", "source_url", "resources"]
-c_dTypes = {"category": "TEXTLINE", "medium": "TEXTLINE", "minutes": "INTEGER", "presenter": "TEXTLINE", "resources": "TEXTMARKDOWN",
+sVersion = "2026-10-12 version 1: from the Tech Training directory; Play Stream plays each presentation"
+lsFields = ["title", "year", "category", "minutes", "medium", "presenter", "series", "source", "summary", "source_url", "resources"]
+dColumnTypes = {"category": "TEXTLINE", "medium": "TEXTLINE", "minutes": "INTEGER", "presenter": "TEXTLINE", "resources": "TEXTMARKDOWN",
             "series": "TEXTLINE", "source": "TEXTLINE", "source_url": "TEXTLINE", "summary": "TEXTMARKDOWN", "title": "TEXTLINE", "year": "TEXTLINE"}
-c_lsStarterMarks = ["Convert PowerPoint to PDF and Maintain Document Structure", "Quiet the Noise: Managing VoiceOver Sensory Overload on iOS",
+lsStarterMarks = ["Convert PowerPoint to PDF and Maintain Document Structure", "Quiet the Noise: Managing VoiceOver Sensory Overload on iOS",
                     "Transform PDFs with AI-Powered OCR: Your Guide to PDFgear for Mac"]
-c_dMedia = {"audio": "An audio file: Play Stream (Alt+Shift+P) plays it in the Homer Player.",
+dMediaKinds = {"audio": "An audio file: Play Stream (Alt+Shift+P) plays it in the Homer Player.",
             "page": "A presentation page: Control+Enter on its url opens it in the browser, where it plays.",
             "video": "A video on a host such as YouTube: Play Stream (Alt+Shift+P) plays it in the Homer Player, through yt-dlp."}
 
@@ -109,11 +109,11 @@ def build(sText, sTarget):
     if os.path.exists(sTemp): os.remove(sTemp)
     os.makedirs(os.path.dirname(sTarget), exist_ok=True)
     oDb = sqlite3.connect(sTemp)
-    for sDdl in trail.systemDdl() + trail.tableDdl("presentations", "presentation_id", c_lsFields, ["title", "year", "source"], ["title", "year"], c_dTypes):
+    for sDdl in trail.systemDdl() + trail.tableDdl("presentations", "presentation_id", lsFields, ["title", "year", "source"], ["title", "year"], dColumnTypes):
         oDb.execute(sDdl)
     oDb.execute("CREATE INDEX idx_presentations_category ON presentations (category)")
     oDb.execute("CREATE INDEX idx_presentations_minutes ON presentations (minutes)")
-    lsColumns = c_lsFields + ["url"]
+    lsColumns = lsFields + ["url"]
     for dRow in sorted(lPresentations, key=lambda d: re.sub(r"^(a|an|the)\s+", "", d["title"].lower())):
         oDb.execute("INSERT INTO presentations (%s) VALUES (%s)" % (", ".join('"%s"' % s for s in lsColumns), ", ".join("?" * len(lsColumns))),
                     [dRow[s] if dRow[s] not in ("",) else None for s in lsColumns])
@@ -122,14 +122,14 @@ def build(sText, sTarget):
     trail.addLookups(oDb, "presentations", "category", dCategories, "TechTraining")
     trail.addLookups(oDb, "presentations", "source", dSources, "TechTraining")
     trail.addLookups(oDb, "presentations", "series", {d["series"]: "" for d in lPresentations if d["series"]}, "TechTraining")
-    trail.addLookups(oDb, "presentations", "medium", c_dMedia, "TechTraining")
+    trail.addLookups(oDb, "presentations", "medium", dMediaKinds, "TechTraining")
     for sTable, sSelect, sOrder in (("lookups", "fld, val", "fld, ordinal"), ("maps", "kind, prime1, prime2", "kind, prime1"),
                                     ("presentations", "title, minutes, medium", "title")):
         for sField, sValue in (("SelectFields", sSelect), ("OrderFields", sOrder), ("WhereFilter", "")):
             oDb.execute("INSERT INTO views (tbl, fld, val) VALUES (?, ?, ?)", (sTable, sField, sValue))
     # A STARTER LISTENING LIST: three short presentations come marked, so the listening_list report and a play list
     # from Play Stream (Alt+Shift+P with records marked) show what they do the first time. Unmark them freely.
-    for sTitle in c_lsStarterMarks:
+    for sTitle in lsStarterMarks:
         if oDb.execute("UPDATE presentations SET marked = 1 WHERE title = ?", (sTitle,)).rowcount: log("Marked as a starter: " + sTitle)
         else: log("Starter not found, so not marked: " + sTitle)
     oDb.commit()
@@ -149,7 +149,7 @@ def build(sText, sTarget):
 
 
 def main(lsArgs):
-    log("makeTechTraining.py started; %s; script %s" % (c_sVersion, os.path.abspath(__file__)))
+    log("makeTechTraining.py started; %s; script %s" % (sVersion, os.path.abspath(__file__)))
     log("Python %s at %s on %s; cwd %s; command line %s" % (platform.python_version(), sys.executable, platform.platform(), os.getcwd(), " ".join(sys.argv)))
     sSource = findDirectory(lsArgs)
     log("Directory: %s" % (sSource or "not found"))

@@ -1,65 +1,62 @@
 @echo off
-rem installModels.cmd -- fetch the local AI models this app uses, for a machine
-rem that already has Ollama.
+rem installModels.cmd -- fetch or update local AI models through Ollama.
 rem
-rem The companion to installOllama.cmd, and the reason both exist: somebody who
-rem already runs Ollama should not be made to reinstall it to get a model, and
-rem somebody with neither should not have to run two things. The installer
-rem offers Ollama-and-model as the checked box and this one unchecked beside it.
+rem KIT COPY (HomerDev 1.69.1). HomerDev_setup.iss's model entry named this script from 1.66.0 on, but it was never in
+rem the kit, so that entry did nothing, unnoticed where the model was already there. One copy now, for every app.
 rem
-rem AI NOTE FOR CUSTOMIZING THIS FILE: put every model this app needs on the
-rem c_sModels line, separated by spaces, and say in c_sModelNote what they are
-rem for. Nothing else here is app-specific.
+rem     installModels noPause                 the chat's model, qwen2.5:7b
+rem     installModels noPause llama3.2 ...    the models named
 rem
-rem LOG: %LOCALAPPDATA%\<App>\logs\<App>_setup.log, with the app name taken from
-rem the folder this script is installed into.
-setlocal EnableExtensions EnableDelayedExpansion
-
-set "c_sModels=llama3.2"
-set "c_sModelNote=the model that reads and summarizes text"
-
-rem The app name comes from the folder this script is installed into. That is
-rem exec in an installed copy, so climb one level when it is.
-for %%d in ("%~dp0.") do set "sApp=%%~nxd"
-if /i "%sApp%"=="exec" for %%d in ("%~dp0..") do set "sApp=%%~nxd"
-set "sLogDir=%LOCALAPPDATA%\%sApp%\logs"
-set "sLog=%sLogDir%\%sApp%_setup.log"
-if not exist "%sLogDir%" mkdir "%sLogDir%" >nul 2>&1
-
-call :logLine "installModels started %DATE% %TIME%"
-call :logLine "Script: %~f0"
-call :logLine "App: %sApp%"
-call :logLine "Models wanted: %c_sModels% (%c_sModelNote%)"
-
-where ollama >nul 2>&1
-if errorlevel 1 (
-  echo Ollama is not installed. Tick the Ollama box instead, or run installOllama.
-  call :logLine "ERROR: ollama not found."
-  goto :done
+rem COMPARED, NOT RE-FETCHED: ollama pull checks each layer of a model against the registry and downloads only what
+rem changed, so a current model costs a moment. Ollama is found on the PATH or in its own install folder, which the
+rem PATH may not show yet when Ollama was installed a moment ago. Every pull and exit code is in the log.
+setlocal enabledelayedexpansion
+set "sScript=%~n0"
+if not exist "%~dp0installCommon.cmd" (
+  echo(
+  echo installCommon.cmd is missing from %~dp0
+  echo That file is part of this program. Reinstall, or copy it from the
+  echo program's zip into this folder, and run this again.
+  echo(
+  if not defined noPause pause
+  exit /b 1
 )
+call "%~dp0installCommon.cmd" setup "%~f0" %*
 
-for %%m in (%c_sModels%) do (
-  echo Fetching %%m.
-  call :logLine "Pulling %%m"
-  ollama pull %%m >> "%sLog%" 2>&1
-  call :logLine "ollama pull %%m exit code: !ERRORLEVEL!"
+set "sModels="
+for %%A in (%*) do if /i not "%%A"=="noPause" if /i not "%%A"=="reinstall" set "sModels=!sModels! %%A"
+if not defined sModels set "sModels= qwen2.5:7b"
+set "sOllama="
+for /f "delims=" %%O in ('where ollama 2^>nul') do if not defined sOllama set "sOllama=%%O"
+if not defined sOllama if exist "%LOCALAPPDATA%\Programs\Ollama\ollama.exe" set "sOllama=%LOCALAPPDATA%\Programs\Ollama\ollama.exe"
+call "%~dp0installCommon.cmd" log "Ollama: !sOllama!; models wanted:!sModels!"
+if not defined sOllama (
+  echo Ollama is not installed, so no model can be fetched. Tick Ollama on the finish page, or run installOllama.
+  goto :failed
 )
+set "iFailed=0"
+for %%M in (!sModels!) do (
+  echo Fetching or updating %%M. A new model is several gigabytes; an up-to-date one takes a moment.
+  "!sOllama!" pull %%M >> "%log%" 2>&1
+  set "iCode=!ERRORLEVEL!"
+  call "%~dp0installCommon.cmd" log "ollama pull %%M exit code !iCode!"
+  if not "!iCode!"=="0" set "iFailed=1"
+)
+if "!iFailed!"=="1" goto :failed
 echo The models are ready.
-call :addAction "Installed the %c_sModel% model."
+goto :done
+
+:failed
+echo(
+echo Not every model could be fetched. The log says why:
+echo   %log%
+echo(
+if not defined noPause pause
+endlocal
+exit /b 1
 
 :done
-call :logLine "installModels finished %DATE% %TIME%"
+echo(
+if not defined noPause pause
 endlocal
-exit /b 0
-
-:logLine
-echo %~1>> "%sLog%"
-goto :eof
-
-rem RECORD WHAT THIS ACTUALLY DID, for the Results box. summarizeSetup reads
-rem this file and prints one line per action; a component that needed nothing
-rem writes nothing, which is why the box can say "no optional component needed
-rem installing" and be believed.
-:addAction
->> "%LOCALAPPDATA%\%sApp%\logs\%sApp%_setup_actions.txt" echo %~1
 exit /b 0

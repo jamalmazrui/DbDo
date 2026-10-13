@@ -43,7 +43,7 @@ import os
 import re
 import sys
 
-c_lsPlaceholders = [
+lsPlaceholders = [
     "the installed version",
     "do not check",
     "tbd",
@@ -53,7 +53,7 @@ c_lsPlaceholders = [
 
 # Say Mark answers "Marked" or "Unmarked": a two-state answer whose value
 # already names the setting. Say Cell and Say Id label with the column name.
-c_lsLabelExempt = ["saySayMark", "saySayCell", "saySayId"]
+lsLabelExempt = ["saySayMark", "saySayCell", "saySayId"]
 
 sScriptDir = os.path.dirname(os.path.abspath(__file__))
 sRoot = os.path.dirname(sScriptDir)
@@ -105,7 +105,7 @@ def checkLabels():
             sLabel = oMatch.group(1)
             iChecked += 1
             if sLabel.startswith("{code:"): continue
-            for sBad in c_lsPlaceholders:
+            for sBad in lsPlaceholders:
                 if sBad in sLabel.lower():
                     lsBad.append("%s: %r contains %r" % (sName, sLabel, sBad))
             if sLabel.count("(") > 1:
@@ -115,7 +115,7 @@ def checkLabels():
         if not sName.lower().endswith(".iss"): continue
         for sLine in readText(os.path.join(sRoot, sName)).splitlines():
             if "Result :=" not in sLine: continue
-            for sBad in c_lsPlaceholders:
+            for sBad in lsPlaceholders:
                 if sBad in sLine.lower():
                     lsBad.append("%s: a label function builds %r" % (sName, sBad))
     for s in lsBad: logLine("LABEL: " + s)
@@ -275,7 +275,7 @@ def checkSayAnswers():
     iChecked = 0
     for oMatch in re.finditer(r'private void (saySay\w+)\(object sender[^\n]*\n\s*\{(.*?)\n        \}', sSource, re.S):
         sName, sBody = oMatch.group(1), oMatch.group(2)
-        if sName in c_lsLabelExempt: continue
+        if sName in lsLabelExempt: continue
         iChecked += 1
         # Say.say and Say.sayForced speak their first argument. speakOrShow's
         # FIRST argument is the dialog title -- not speech -- so only its second

@@ -5,6 +5,10 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 12 October 2026 -- Camel Type constants without c_
+
+- **DbDo's code names its constants as Camel Type now does**, exactly like variables: 52 constants and 163 references, in DbDo.cs and its scripts, lose the obsolete c_ prefix. Three that shared a name with a variable made from them say what they hold: dColumnTypes, dMediaKinds, lsCatalogServers.
+
 ## 12 October 2026 -- one switch to install with every default
 
 - **DbDo_setup.exe /DEFAULTS** installs as pressing Enter at every step would: it runs each finish-page entry ticked by default -- installing or updating the screen reader support, mpv, Ollama and the model where offered, never a reinstall -- takes the Results box as read, and launches DbDo. Alone it runs very silently; administrator approval is still asked. Plain /SILENT and /VERYSILENT still install the program alone.
