@@ -286,13 +286,29 @@ namespace DbDo
                     // (it may be open, or hold changes not yet in the file); the template is copied to <name>.db.new and
                     // checked first; and File.Replace swaps it in with the old copy kept as the dated .bak, in one step,
                     // so a failure leaves the person's copy where it was. Every outcome is logged.
+                    // AN OPEN DATABASE WAITS (12 October 2026, from an audit). Listing the templates while BookTrail was open
+                    // logged "failed: the file is being used by another process": reading the copy to check its
+                    // fingerprint was refused while DbDo held it. It was never at risk -- its fingerprint could not have
+                    // matched -- but an open database is now left as it is before anything reads it, and checked again
+                    // the next time the templates are listed.
+                    if (fileInUse(sDstPath))
+                    {
+                        try { DbDoLog.write("Seeding: " + sDstPath + " is open, so it is left as it is and will be checked the next time the templates are listed."); } catch { }
+                        return;
+                    }
                     string sSeedRecord = sDstPath + ".seed";
                     bool bRecorded = System.IO.File.Exists(sSeedRecord);
                     bool bUntouched;
                     if (bRecorded) bUntouched = string.Equals(System.IO.File.ReadAllText(sSeedRecord).Trim(), sha256Hex(sDstPath), StringComparison.OrdinalIgnoreCase);
                     else bUntouched = System.IO.File.GetLastWriteTimeUtc(sDstPath) <= System.IO.File.GetCreationTimeUtc(sDstPath).AddSeconds(2);
                     bool bNewer = System.IO.File.GetLastWriteTimeUtc(sSrcPath) > System.IO.File.GetLastWriteTimeUtc(sDstPath);
-                    if (!bUntouched || !bNewer) return;
+                    if (!bUntouched)
+                    {
+                        // Every outcome is said: a copy kept because it was changed is named as kept.
+                        if (bNewer) { try { DbDoLog.write("Seeding: " + sDstPath + " was kept: it has changed since it was seeded, so the newer template does not replace it."); } catch { } }
+                        return;
+                    }
+                    if (!bNewer) return;
                     foreach (string sSide in new string[] { sDstPath + "-wal", sDstPath + "-shm" })
                     {
                         if (System.IO.File.Exists(sSide) && new System.IO.FileInfo(sSide).Length > 0)
@@ -333,6 +349,18 @@ namespace DbDo
                 // Seeding never stops the picker, but a failure is recorded (11 October 2026), not swallowed.
                 try { DbDoLog.write("Seeding: " + sDstPath + " failed: " + oError.Message); } catch { }
             }
+        }
+
+        // fileInUse: whether another handle -- DbDo's own open connection, most often -- refuses a plain read of the file.
+        private static bool fileInUse(string sPath)
+        {
+            try
+            {
+                using (System.IO.FileStream oStream = new System.IO.FileStream(sPath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.Read)) { }
+                return false;
+            }
+            catch (System.IO.IOException) { return true; }
+            catch { return false; }
         }
 
         // sha256Hex: a file's SHA-256 as lowercase hex.
@@ -15178,7 +15206,7 @@ namespace DbDo
                     if (bGridFirstPopulate && iCount > 0)
                     {
                         bGridFirstPopulate = false;
-                        try { DbDoLog.write("Grid first populate: row 1 of " + iCount + " selected with native focus/selection state forced."); } catch { }
+                        try { DbDoLog.write("Grid first populate: row " + iPos + " of " + iCount + " selected with native focus/selection state forced."); } catch { }
                         try
                         {
                             string sFirstColValue = "";
@@ -15191,7 +15219,10 @@ namespace DbDo
                             // first column's value plus the row count
                             // -- so the user gets immediate context
                             // without a lengthy speech blob.
-                            string sAnnounce = "Row 1 of " + iCount;
+                            // THE ROW SPOKEN IS THE ROW SELECTED (12 October 2026, from an audit). This said "Row 1"
+                            // whatever row the restored position put the cursor on: RadioTrail opened on its saved
+                            // ninth station, JAWS said "9 of 55280", and DbDo said "ACB Media 7, Row 1 of 55280".
+                            string sAnnounce = "Row " + iPos + " of " + iCount;
                             if (!string.IsNullOrEmpty(sFirstColValue))
                                 sAnnounce = sFirstColValue + ", " + sAnnounce;
                             Say.say(sAnnounce);

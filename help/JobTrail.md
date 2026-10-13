@@ -15,7 +15,7 @@ the scripts and reports beside it do the work. That means it inherits everything
 DbDo already does well by keyboard and screen reader, and it means the first
 version can be finished and used rather than merely started.
 
-## What this plan covers
+### What this plan covers
 
 - the naming conventions it follows, taken from the shipped DbDo databases
 - the seven tables and every field in them
@@ -24,7 +24,7 @@ version can be finished and used rather than merely started.
 - the scripts, and what each one saves you
 - the reports, and who reads them
 
-# The conventions this follows
+## The conventions this follows
 
 Read from `contacts.db`, `reads.db` and `lookups.db` as DbDo ships them, so
 JobTrail looks like a DbDo database to anybody who has used one.
@@ -55,9 +55,9 @@ table. Nothing is abbreviated past recognition: `employer`, not `emp`.
 seven tables begin with seven different letters: `actions`, `contacts`,
 `docs`, `jobs`, `lookups`, `maps`, `stories`.
 
-# The tables
+## The tables
 
-## jobs
+### jobs
 
 One row per opening you are pursuing. The heart of the database.
 
@@ -89,7 +89,7 @@ One row per opening you are pursuing. The heart of the database.
 A unique index on `prime` stops you applying to the same role twice without
 noticing, which is the most common wasted hour in a job search.
 
-## contacts
+### contacts
 
 The standard DbDo contacts table, unchanged. Keeping it identical means the
 lookups, the accelerator keys and anything built for contacts elsewhere work
@@ -100,7 +100,7 @@ here without adjustment.
 `business_email`, `address1`, `city`, `state`, `zip`, `nation`, `url`, `notes`,
 `tags`, `look`, `prime`, `marked`.
 
-## actions
+### actions
 
 Every contact made and every thing still to do, in one table. This is what the
 Work Search Record is built from, so its fields are the ones agencies ask for.
@@ -143,7 +143,7 @@ Work Search Record is built from, so its fields are the ones agencies ask for.
 Both foreign keys may be empty. A networking coffee is an action with a contact
 and no job; a speculative application is an action with a job and no contact.
 
-## docs
+### docs
 
 The resumes, cover letters and answer sets you send, so you know which version
 went where.
@@ -162,7 +162,7 @@ went where.
 - `prime` = name, version
 - `marked`
 
-## stories
+### stories
 
 For interview preparation, and the one table here that is not about
 record keeping.
@@ -190,24 +190,24 @@ story answers.
 Prepared once, used for years. Its first letter, s, is free among the other
 tables.
 
-## lookups and maps
+### lookups and maps
 
 The two standard DbDo tables, exactly as DbDo makes them. `lookups` fills the
 combo boxes; `maps` records the many-to-many links.
 
-# What the agency requires
+## What the agency requires
 
 Read from the Washington Employment Security Department's Unemployed Worker
 Handbook, which is the document behind the report. Other states differ in
 detail; the shape is the same everywhere, and the fields below cover it.
 
-## Every entry needs three things
+### Every entry needs three things
 
 The date of contact, the type of contact, and the result of contact. Those are
 `action_date`, `kind` and `outcome`, and none of them may be empty on an entry
 that counts.
 
-## What else depends on how you made contact
+### What else depends on how you made contact
 
 - **An application** needs the position applied for **or the job reference
   number**, the employer's name **and address**, and then one more thing
@@ -226,7 +226,7 @@ That is why `person`, `place` and `detail` exist as separate fields. Between
 them they hold everything the four cases above ask for, and the report prints
 only the ones that apply.
 
-## Not everything counts
+### Not everything counts
 
 The handbook is explicit that some activities are **not** employer contacts:
 contacting an employer you already know is not hiring, browsing job listings,
@@ -243,14 +243,14 @@ says what it is.
 Getting this wrong is expensive: an incomplete log, or one that does not show a
 genuine search, can mean benefits denied and already-paid benefits repaid.
 
-## Keep the log
+### Keep the log
 
 The handbook requires keeping it for at least thirty days after the end of the
 benefit year, or thirty days after benefits stop, whichever is later, and
 reviews are random. **JobTrail never deletes an action**, and the guide will say
 so plainly.
 
-# The lookup values
+## The lookup values
 
 Seeded into `lookups` so that the fields with fixed vocabularies offer them from
 the start. Each set is alphabetical, since that is the order a combo box is
@@ -271,7 +271,7 @@ searched by first letter.
 - `docs.kind`: answers, cover_letter, offer, portfolio, reference_list, resume
 - `maps.kind`: contact_for, sent_for, works_at
 
-# How records connect
+## How records connect
 
 Two mechanisms, each for a different frequency of use.
 
@@ -285,7 +285,7 @@ knows which job you are on.
 - `works_at` -- this person works at that employer, linking contact to contact
 - `sent_for` -- this document was sent for that job, with the date in the note
 
-# The scripts
+## The scripts
 
 In `Scripts\`, which is where DbDo looks and what the Homer layout calls the
 folder. Each one exists because it removes keystrokes from something you do many
@@ -318,13 +318,13 @@ times a week.
 - **Ats-Experience.sql** -- your own record of which application systems worked:
   jobs grouped by `ats`, with how many applications reached an interview.
 
-# The reports
+## The reports
 
 Defined in `report.inix` beside the database, in DbDo's report format. Each is
 Markdown first, so pandoc turns it into HTML to email or a Word file to hand
 across a desk.
 
-## Work Search Record
+### Work Search Record
 
 **The report that matters most, because somebody else reads it.**
 
@@ -349,35 +349,35 @@ The period comes from `Settings.LastReportDate` in `JobTrail.inix`, so
 the report updates that date, and a `--from` and `--to` let you produce any
 period again.
 
-## Pipeline Summary
+### Pipeline Summary
 
 For you. Jobs by status, with the count of each, then the open ones listed
 newest first. One page that answers what is live, what is waiting and what is
 closed.
 
-## Follow-Up Schedule
+### Follow-Up Schedule
 
 Every undone action, in date order, with what it is about. This is what you read
 on a Monday morning.
 
-## Contact Directory
+### Contact Directory
 
 Everybody in `contacts`, with their employer, their phone and email, and the
 jobs they are a contact for. Alphabetical by last name.
 
-## Interview Preparation
+### Interview Preparation
 
 For a specific job: the posting, every action taken on it, the people involved,
 and the stories from `stories` whose tags match the kind of role. Printed the
 night before.
 
-## Application History
+### Application History
 
 One job per section, with its posting details and every action taken on it in
 order. This is the report you read before an interview, and the one you keep
 after the search ends.
 
-# What happens first
+## What happens first
 
 Phase one is the database, the scripts and the reports, with no new program:
 `JobTrail.db`, `JobTrail.inix`, `report.inix`, the `Scripts\` folder, and the

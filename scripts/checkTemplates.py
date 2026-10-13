@@ -21,7 +21,6 @@ WHAT IT CHECKS, for each templates\\<root>\\<root>.db:
     when it is missing.
 
 WHAT --repair DOES, before checking, inside one transaction per database:
-  - Drops an empty sqlean_define table, the leftover of a withdrawn extension (DbDo makes it again if SQLean loads).
   - Merges records that share a prime: the first keeps its id, takes any field it lacks from the others, and gains
     their notes and tags lines; the others go. Their links were already the first's, since a map names a prime.
   - Adds a missing unique prime index once no duplicates remain.
@@ -53,10 +52,16 @@ c_dKindNotes = {
     "RecipeTrail|uses": "Subject recipe uses the object ingredient; the amount is in the map row's notes.",
 }
 c_lBandKeys = ["detail", "footer", "group_footer", "group_header", "header"]
+# FIELDS A TEMPLATE LEAVES UNWATCHED ON PURPOSE (12 October 2026). "edited" means a person or a deliberate repair changed
+# the record. RadioTrail's catalog refresh rewrites votes, clicks, trend and the check and seen dates of all 55,000
+# stations, the probes stamp probed, and every play counts plays: watching those would make every station "edited"
+# after each refresh or play. fetchStations keeps them out of its trigger, and this check honors that. The first run
+# of this script did not, and rewrote RadioTrail's trigger to watch them; that was put right the same day.
+c_dUnwatched = {"RadioTrail|stations": ["clicks", "last_check", "last_played", "last_seen", "plays", "probed", "trend", "votes"]}
 c_lNotWatched = ["added", "edited", "look", "marked", "prime"]
 c_lSchemaRows = ["lookups", "views"]
 c_lSkipTables = ["sqlean_define", "views"]
-c_sVersion = "2026-10-12 version 1: first version, from the template audit of 12 October 2026"
+c_sVersion = "2026-10-12 version 2: leaves sqlean_define alone; undoes a trigger that watches deliberately unwatched fields"
 
 lErrors = []
 lRepairs = []
@@ -155,9 +160,11 @@ def primaryKey(oDb, sTable):
     return next((s for s, iPk, iHidden in columns(oDb, sTable) if iPk), "")
 
 
-def contentColumns(oDb, sTable):
-    """The columns an edited trigger must watch: every stored column but the key and DbDo's bookkeeping ones."""
-    return [s for s, iPk, iHidden in columns(oDb, sTable) if not iPk and iHidden == 0 and s.lower() not in c_lNotWatched]
+def contentColumns(oDb, sTable, sRoot=""):
+    """The columns an edited trigger must watch: every stored column but the key, DbDo's bookkeeping ones, and any the
+    template leaves unwatched on purpose."""
+    lSkip = c_lNotWatched + c_dUnwatched.get(sRoot + "|" + sTable, [])
+    return [s for s, iPk, iHidden in columns(oDb, sTable) if not iPk and iHidden == 0 and s.lower() not in lSkip]
 
 
 def watchedColumns(oDb, sTable):
@@ -247,9 +254,9 @@ def repair(sRoot, sDb):
     iBefore = len(lRepairs)
     try:
         oDb.execute("BEGIN")
-        if "sqlean_define" in tables(oDb) and oDb.execute("SELECT count(*) FROM sqlean_define").fetchone()[0] == 0:
-            oDb.execute("DROP TABLE sqlean_define")
-            repaired(sRoot, "dropped the empty sqlean_define table")
+        # SQLEAN_DEFINE IS LEFT ALONE (12 October 2026). Dropping the empty table was churn, not repair: the build's
+        # search self-test opens RadioTrail with the SQLean bundle loaded, SQLean makes the table again, and the next
+        # check dropped it again -- three times in one release cycle, each rewriting a 67 MB file. DbDo never lists it.
         for sTable in primeTables(oDb):
             mergeDuplicates(oDb, sRoot, sTable)
             if not hasUniquePrime(oDb, sTable):
@@ -258,12 +265,15 @@ def repair(sRoot, sDb):
         for sTable in tables(oDb):
             lWatched = watchedColumns(oDb, sTable)
             if lWatched is None: continue
-            lWanted = contentColumns(oDb, sTable)
+            lWanted = contentColumns(oDb, sTable, sRoot)
             lMissing = [s for s in lWanted if s not in lWatched]
-            if lMissing:
+            # A FIELD WATCHED THAT SHOULD NOT BE (12 October 2026): this script's first version rewrote RadioTrail's
+            # trigger to watch votes, last_seen and plays, and DbDo 1.0.259 shipped that. It is undone here.
+            lExtra = [s for s in lWatched if s.lower() in c_dUnwatched.get(sRoot + "|" + sTable, [])]
+            if lMissing or lExtra:
                 oDb.execute("DROP TRIGGER " + quoted("trg_" + sTable + "_edited"))
-                oDb.execute(editedTrigger(sTable, primaryKey(oDb, sTable), lWanted))
-                repaired(sRoot, sTable + ": the edited trigger now also watches " + ", ".join(lMissing))
+                oDb.execute(editedTrigger(sTable, primaryKey(oDb, sTable), [s for s in lWanted] + [s for s in lWatched if s not in lWanted and s not in lExtra]))
+                repaired(sRoot, sTable + ": the edited trigger" + (" now also watches " + ", ".join(lMissing) if lMissing else "") + (" no longer watches " + ", ".join(lExtra) if lExtra else ""))
         seedKinds(oDb, sRoot)
         if len(lRepairs) == iBefore:
             oDb.execute("ROLLBACK")   # nothing to repair: the file is left byte for byte as it was, so git sees no change
@@ -338,8 +348,10 @@ def checkDatabase(sRoot, oDb):
     for sTable in lTables:
         lWatched = watchedColumns(oDb, sTable)
         if lWatched is None: continue
-        lMissing = [s for s in contentColumns(oDb, sTable) if s not in lWatched]
+        lMissing = [s for s in contentColumns(oDb, sTable, sRoot) if s not in lWatched]
         if lMissing: fail(sRoot, sTable + ": editing " + ", ".join(lMissing) + " does not update edited")
+        lExtra = [s for s in lWatched if s.lower() in c_dUnwatched.get(sRoot + "|" + sTable, [])]
+        if lExtra: fail(sRoot, sTable + ": the edited trigger watches " + ", ".join(lExtra) + ", which a refresh or a play changes on every station")
     if "maps" in lTables:
         iMaps = oDb.execute("SELECT count(*) FROM maps").fetchone()[0]
         for sSide in ("1", "2"):

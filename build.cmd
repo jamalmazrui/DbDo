@@ -199,6 +199,16 @@ for %%F in (buildTutorials.cmd buildTutorials.ps1 check.cmd check.py checkTutori
 
 rem ---- the templates: RadioTrail made when missing, then every template repaired and checked ----
 rem
+rem STRAY LOGS COME HOME (12 October 2026). The kit's checkDb wrote its logs in a
+rem logs folder beside each database until kit 1.72.2, so templates\RadioTrail\logs
+rem gathered two dozen of them, outside the project's logs and against the Homer
+rem pattern. Any logs folder inside templates is emptied into logs and removed.
+for /d %%D in ("!sHere!templates\*") do if exist "%%D\logs\" (
+  move /y "%%D\logs\*" "!sHere!logs\" >> "!log!" 2>&1
+  rd "%%D\logs" 2>nul
+  echo Moved stray logs from %%D\logs into logs>> "!log!"
+)
+rem
 rem RADIOTRAIL IS BUILT HERE, NEVER KEPT IN GIT. It is DbDo's first-run database
 rem and the installer ships it, but the installer takes templates with
 rem skipifsourcedoesntexist, so a missing RadioTrail.db once meant an installer
@@ -863,8 +873,10 @@ for %%m in (License.md) do (
 )
 rem The help folder too: Tutorials.md is written by makeTutorials and the podcast
 rem feed links to Tutorials.htm, so the pair has to stay together.
+rem DbDo.md is converted once, above, under its own title; this loop once made it a
+rem second time as plain "DbDo", over the first.
 if exist "help\*.md" for %%m in (help\*.md) do (
-  pandoc --standalone --toc --metadata=title:"%%~nm" -o "help\%%~nm.htm" "%%m" >> "!log!" 2>&1
+  if /i not "%%~nm"=="DbDo" pandoc --standalone --toc --metadata=title:"%%~nm" -o "help\%%~nm.htm" "%%m" >> "!log!" 2>&1
 )
 echo Documentation converted with pandoc. >> "!log!"
 goto :doc_done
@@ -896,9 +908,22 @@ if defined HomerAcceptance (
   echo Tutorials: acceptance build, speaking left to the ordinary build >> "!log!"
   goto :tutorialsDone
 )
-if not exist "help\Tutorials.md" goto :makeTutorials
+rem THE WALK AND ITS MP3 HAVE DIFFERENT NAMES (12 October 2026, from an audit).
+rem Since the pattern of ten, Tutorial_0_Overview.inix is spoken as
+rem help\tutorials\0_Overview.mp3, without the Tutorial_ prefix. This step looked
+rem for Tutorial_0_Overview.mp3, never found it, and called the tutorial tool on
+rem every build, logging "Tutorials.mkv missing" whatever the reason. The prefix is
+rem now taken off before looking, and the log says why a rebuild happens.
+set "sWhy="
+if not exist "help\Tutorials.md" (
+  set "sWhy=help\Tutorials.md is missing"
+  goto :makeTutorials
+)
 if exist "help\Tutorials.mkv" goto :haveAudio
-if not exist "help\tutorials\*.mp3" goto :makeTutorials
+if not exist "help\tutorials\*.mp3" (
+  set "sWhy=help\tutorials holds no mp3"
+  goto :makeTutorials
+)
 rem EVERY WALK MUST HAVE ITS AUDIO, AND THE AUDIO MUST BE AS NEW AS THE WALK.
 rem A walk added or changed since its mp3 was spoken sends the build back to
 rem the tutorial tool by itself -- four RadioTrail walks arrived on 5 October
@@ -906,8 +931,16 @@ rem 2026, and nobody should have to delete a folder by hand to hear them. The
 rem tool speaks only what is missing or stale, so this costs nothing when all
 rem is current.
 for %%F in (help\Tutorial_*.inix) do (
-  if not exist "help\tutorials\%%~nF.mp3" goto :makeTutorials
-  for /f %%N in ('powershell -NoProfile -Command "if ((Get-Item -LiteralPath '%%F').LastWriteTimeUtc -gt (Get-Item -LiteralPath 'help\tutorials\%%~nF.mp3').LastWriteTimeUtc) { 1 } else { 0 }"') do if "%%N"=="1" goto :makeTutorials
+  set "sWalk=%%~nF"
+  set "sWalk=!sWalk:Tutorial_=!"
+  if not exist "help\tutorials\!sWalk!.mp3" (
+    set "sWhy=help\tutorials\!sWalk!.mp3 is missing"
+    goto :makeTutorials
+  )
+  for /f %%N in ('powershell -NoProfile -Command "if ((Get-Item -LiteralPath '%%F').LastWriteTimeUtc -gt (Get-Item -LiteralPath 'help\tutorials\!sWalk!.mp3').LastWriteTimeUtc) { 1 } else { 0 }"') do if "%%N"=="1" (
+    set "sWhy=%%~nxF is newer than its mp3"
+    goto :makeTutorials
+  )
 )
 :haveAudio
 echo Tutorials already built and current. >> "!log!"
@@ -915,7 +948,7 @@ goto :tutorialsDone
 :makeTutorials
 if exist "help\Tutorial_*.inix" (
   echo Building the spoken tutorials. The first run fetches two voices...
-  echo Tutorials.mkv missing; running buildTutorials -build >> "!log!"
+  echo Tutorials: !sWhy!; running buildTutorials -build >> "!log!"
   rem TWO THINGS THIS LINE GETS RIGHT, both learned the hard way.
   rem
   rem An EXPLICIT ARGUMENT: a bare call does not reset %*, so a build run as

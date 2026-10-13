@@ -5,6 +5,31 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 12 October 2026 -- DbDo says the row it is on, and leaves an open database alone
+
+From the release logs of 1.0.259, your JAWS speech history, and an audit of both.
+
+- **The row spoken is the row selected.** Opening a database announced "Row 1 of" its count whatever row the saved position put you on: RadioTrail opened on its ninth station, JAWS said "9 of 55280", and DbDo said "ACB Media 7, Row 1 of 55280". The station was right and the number was not. DbDo now says the row it is actually on.
+- **An open database is left alone when the templates are listed.** Listing them while BookTrail was open logged a failure, because checking BookTrail's fingerprint meant reading a file DbDo was holding. BookTrail was never at risk -- with your 1,217 books in it, its fingerprint could not have matched the template's -- but an open database is now skipped before anything reads it, and checked the next time. A copy kept because you changed it is now named in the log as kept.
+- **RadioTrail's trigger is put right.** The first version of the template check made the record of a station's last edit change whenever a refresh or a play touched it, and 1.0.259 shipped that. The check now undoes it wherever it finds it, and fails any template that has it.
+- **One name for the United States, and no "tbd" genres.** The SomaFM, ACB Media and NFB Radio streams said "United States" with no country code, while Radio Browser says "The United States Of America", so filtering on one name missed the other; all 6,797 now share the catalog's name and code. The placeholder "tbd" is gone from 271 genres. A RadioTrail repair keeps both right.
+- **The tutorials are not rebuilt on every build.** The build looked for each walk's recording under the walk's own name, Tutorial_0_Overview.mp3, while the recordings are named 0_Overview.mp3, so it called the tutorial tool every time, saying "Tutorials.mkv missing" whatever the reason. It now looks for the right names, and says why when it does rebuild.
+- **One title in each guide.** The user guide and the JobTrail guide each had their parts as top-level headings -- eight and nine of them -- beside the guide's own title. Each now has one title, with its parts beneath it. The guide is also converted to a web page once, under its own title, rather than twice.
+- **The template check no longer drops RadioTrail's empty SQLean table.** The build's search test opens RadioTrail with SQLean loaded, SQLean makes the table again, and each check dropped it again, rewriting a 67 MB file three times a release. DbDo never lists it, so it stays.
+
+## 12 October 2026 -- RadioTrail keeps your work, and its logs come home
+
+A second audit, of RadioTrail, reproduced ways its repairs could lose a listener's work, and found fixes described in this History that were not in the script. Both are put right.
+
+- **Your notes and tags are never cut by a repair.** Nothing records which lines came from an article and which you wrote, and the audit showed a note of yours beginning with a call sign, and a long tag of yours, being removed. On your own copy the repair now clears only the catalog's fields -- call sign, frequency, city, owner, format and article -- and leaves notes and tags exactly as they are. The shipped template, which holds nobody's words, is still cleaned.
+- **An edit made during a long run is kept.** The lookups and the probes read notes and tags at the start and wrote them back at the end, so an edit made in DbDo meanwhile was lost. They now read them again just before each write.
+- **A linked station is never merged away.** Merging duplicates deleted the extra rows, and their links with them. A group where any station has a link is now left as it is.
+- **The options do what they say.** With a current catalog, --fresh was ignored, --catalog-only still asked every station, and --limit was dropped; each now works. --report changes nothing; it had been filling in country names. A fresh start on the template refuses, with nothing moved, when there is no RadioTrail.schema to rebuild it from. Two runs in the same second share a log rather than one erasing the other, and rebuildRadioTrail stops when its second step fails.
+- **The lost repairs are restored.** The 11 October entry below describes confirmsFrequency, the one rule the lookup and the repair share, and three more fixes; they were delivered with it but never reached the script. They are back, taken from that delivery, and the shipped catalog is repaired with them: 25 wrong matches cleared, among them the 24 American "KISS FM" streams that took the London station's record; 170 records freed of leaked markup; one file, in the ordinary journal mode; and a second repair finds nothing to do. 2,875 stations have their official record.
+- **Logs stay in logs.** The kit's database check wrote its logs in a logs folder beside each database, so templates\\RadioTrail\\logs held two dozen of them. The kit now writes them to the project's logs folder (HomerDev 1.72.2), and the build moves any strays home.
+- **RadioTrail's settings file describes what ships**: the whole catalog, and Play Stream, Alt+Shift+P, as the way to listen.
+- **Still to come, from the audit:** keeping what an article added apart from what you wrote, so a wrong article can be removed cleanly; telling a probe that failed from one that found nothing, so failures are tried again; telling "dropped from the catalog" apart from "dead" as you set it; and moving an older copy forward in place rather than setting it aside.
+
 ## 12 October 2026 -- The templates and their companion files work together
 
 An outside audit of the templates found every database healthy and the workflows around them broken: 13 of the 22 statements in the shipped SQL files failed on the very databases they shipped with. These are fixed, and a new build step makes sure it cannot happen again.

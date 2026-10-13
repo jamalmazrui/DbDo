@@ -4,7 +4,7 @@
   <meta charset="utf-8" />
   <meta name="generator" content="pandoc" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
-  <title>DbDo</title>
+  <title>DbDo User Guide</title>
   <style>
     html {
       line-height: 1.5;
@@ -164,13 +164,11 @@
   <![endif]-->
 </head>
 <body>
-<header id="title-block-header">
-<h1 class="title">DbDo</h1>
-</header>
 <nav id="TOC" role="doc-toc">
 <ul>
 <li><a href="#dbdo-user-guide" id="toc-dbdo-user-guide">DbDo User
-Guide</a></li>
+Guide</a>
+<ul>
 <li><a href="#part-1-key-concepts" id="toc-part-1-key-concepts">Part 1 —
 Key concepts</a>
 <ul>
@@ -178,11 +176,8 @@ Key concepts</a>
 <li><a href="#windows-the-multiple-document-model"
 id="toc-windows-the-multiple-document-model">Windows: the
 multiple-document model</a></li>
-<li><a href="#the-data-list" id="toc-the-data-list">The data list</a>
-<ul>
-<li><a href="#virtual-cell-navigation"
-id="toc-virtual-cell-navigation">Virtual cell navigation</a></li>
-</ul></li>
+<li><a href="#the-data-list" id="toc-the-data-list">The data
+list</a></li>
 <li><a href="#two-vocabularies-schema-versus-interface"
 id="toc-two-vocabularies-schema-versus-interface">Two vocabularies:
 schema versus interface</a></li>
@@ -192,27 +187,9 @@ physical database</a></li>
 <li><a href="#the-database-cursor" id="toc-the-database-cursor">The
 database cursor</a></li>
 <li><a href="#how-fields-are-categorized"
-id="toc-how-fields-are-categorized">How fields are categorized</a>
-<ul>
-<li><a href="#field-types" id="toc-field-types">Field types</a></li>
-<li><a href="#standard-fields" id="toc-standard-fields">Standard
-fields</a></li>
-<li><a href="#lookups-and-maps" id="toc-lookups-and-maps">Lookups and
-maps</a></li>
-</ul></li>
+id="toc-how-fields-are-categorized">How fields are categorized</a></li>
 <li><a href="#keyboard-patterns" id="toc-keyboard-patterns">Keyboard
-patterns</a>
-<ul>
-<li><a href="#command-chords" id="toc-command-chords">1. Command
-chords</a></li>
-<li><a href="#convenience-keys-in-text-fields"
-id="toc-convenience-keys-in-text-fields">2. Convenience keys in text
-fields</a></li>
-<li><a href="#the-dot-prompt-and-status-queries"
-id="toc-the-dot-prompt-and-status-queries">3. The dot prompt and status
-queries</a></li>
-<li><a href="#key-help" id="toc-key-help">Key Help</a></li>
-</ul></li>
+patterns</a></li>
 </ul></li>
 <li><a href="#part-2-working-with-data"
 id="toc-part-2-working-with-data">Part 2 — Working with data</a>
@@ -267,17 +244,7 @@ scripting engine</a></li>
 Reference</a>
 <ul>
 <li><a href="#command-reference-by-menu"
-id="toc-command-reference-by-menu">Command reference by menu</a>
-<ul>
-<li><a href="#file-menu" id="toc-file-menu">File menu</a></li>
-<li><a href="#edit-menu" id="toc-edit-menu">Edit menu</a></li>
-<li><a href="#navigate-menu" id="toc-navigate-menu">Navigate
-menu</a></li>
-<li><a href="#query-menu" id="toc-query-menu">Query menu</a></li>
-<li><a href="#misc-menu" id="toc-misc-menu">Misc menu</a></li>
-<li><a href="#window-menu" id="toc-window-menu">Window menu</a></li>
-<li><a href="#help-menu" id="toc-help-menu">Help menu</a></li>
-</ul></li>
+id="toc-command-reference-by-menu">Command reference by menu</a></li>
 <li><a href="#standard-fields-summary"
 id="toc-standard-fields-summary">Standard fields (summary)</a></li>
 <li><a href="#field-types-summary" id="toc-field-types-summary">Field
@@ -311,22 +278,7 @@ Code</a></li>
 <li><a href="#file-layout" id="toc-file-layout">File layout</a></li>
 <li><a href="#nothing-and-the-two-kinds-of-it"
 id="toc-nothing-and-the-two-kinds-of-it">Nothing, and the two kinds of
-it</a>
-<ul>
-<li><a href="#what-dbdo-stores" id="toc-what-dbdo-stores">What DbDo
-stores</a></li>
-<li><a href="#what-dbdo-says" id="toc-what-dbdo-says">What DbDo
-says</a></li>
-<li><a href="#what-the-screen-readers-do-and-what-dbdo-does-about-it"
-id="toc-what-the-screen-readers-do-and-what-dbdo-does-about-it">What the
-screen readers do, and what DbDo does about it</a></li>
-<li><a href="#what-microsoft-access-does-for-comparison"
-id="toc-what-microsoft-access-does-for-comparison">What Microsoft Access
-does, for comparison</a></li>
-<li><a href="#why-it-is-worth-the-distinction"
-id="toc-why-it-is-worth-the-distinction">Why it is worth the
-distinction</a></li>
-</ul></li>
+it</a></li>
 <li><a href="#the-help-menu" id="toc-the-help-menu">The Help
 menu</a></li>
 <li><a href="#four-ways-to-reach-a-record"
@@ -334,14 +286,7 @@ id="toc-four-ways-to-reach-a-record">Four ways to reach a
 record</a></li>
 <li><a href="#sharing-a-database-with-somebody-else"
 id="toc-sharing-a-database-with-somebody-else">Sharing a database with
-somebody else</a>
-<ul>
-<li><a href="#how-a-merge-decides" id="toc-how-a-merge-decides">How a
-merge decides</a></li>
-<li><a href="#a-shared-database-knows-how-to-present-itself"
-id="toc-a-shared-database-knows-how-to-present-itself">A shared database
-knows how to present itself</a></li>
-</ul></li>
+somebody else</a></li>
 <li><a href="#files-that-are-not-databases"
 id="toc-files-that-are-not-databases">Files that are not
 databases</a></li>
@@ -351,21 +296,7 @@ id="toc-bringing-in-a-spreadsheet">Bringing in a spreadsheet</a></li>
 id="toc-where-a-databases-files-live">Where a database’s files
 live</a></li>
 <li><a href="#the-template-databases"
-id="toc-the-template-databases">The template databases</a>
-<ul>
-<li><a href="#blindcreations-gathers-work-by-blind-people"
-id="toc-blindcreations-gathers-work-by-blind-people">BlindCreations
-gathers work by blind people</a></li>
-<li><a href="#howtotrail-holds-both-systems"
-id="toc-howtotrail-holds-both-systems">HowToTrail holds both
-systems</a></li>
-<li><a href="#radiotrail-plays-internet-radio"
-id="toc-radiotrail-plays-internet-radio">RadioTrail plays Internet
-radio</a></li>
-<li><a href="#collectiontrail-holds-whatever-you-collect"
-id="toc-collectiontrail-holds-whatever-you-collect">CollectionTrail
-holds whatever you collect</a></li>
-</ul></li>
+id="toc-the-template-databases">The template databases</a></li>
 <li><a href="#booktrail-for-books"
 id="toc-booktrail-for-books">BookTrail, for books</a></li>
 <li><a href="#the-spoken-walkthroughs"
@@ -381,29 +312,17 @@ id="toc-tables-dbdo-keeps-for-itself">Tables DbDo keeps for
 itself</a></li>
 <li><a href="#look-and-prime-the-two-computed-columns"
 id="toc-look-and-prime-the-two-computed-columns">look and prime: the two
-computed columns</a>
-<ul>
-<li><a href="#look-a-glimpse-of-a-record-from-somewhere-else"
-id="toc-look-a-glimpse-of-a-record-from-somewhere-else">look: a glimpse
-of a record from somewhere else</a></li>
-<li><a href="#prime-the-primary-key-computed"
-id="toc-prime-the-primary-key-computed">prime: the primary key,
-computed</a></li>
-<li><a href="#the-difference-in-one-line"
-id="toc-the-difference-in-one-line">The difference in one line</a></li>
-</ul></li>
+computed columns</a></li>
 <li><a href="#how-a-say-command-answers"
-id="toc-how-a-say-command-answers">How a Say command answers</a>
-<ul>
-<li><a href="#the-say-keys" id="toc-the-say-keys">The Say keys</a></li>
-</ul></li>
+id="toc-how-a-say-command-answers">How a Say command answers</a></li>
 <li><a href="#credits-for-the-tutorial-voices"
 id="toc-credits-for-the-tutorial-voices">Credits for the tutorial
 voices</a></li>
 </ul></li>
+</ul></li>
 </ul>
 </nav>
-<h2 id="dbdo-user-guide">DbDo User Guide</h2>
+<h1 id="dbdo-user-guide">DbDo User Guide</h1>
 <p>DbDo is a relational database manager built from the ground up for
 people who work by keyboard and screen reader. It opens SQLite, Access,
 Excel, dBASE, and delimited-text files, presents their tables as

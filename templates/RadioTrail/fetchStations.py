@@ -310,6 +310,7 @@ def infoboxFields(sWikitext):
         v = re.sub(r"\{\{[^}]*\}\}", "", v)
         v = re.sub(r"\[\[(?:[^|\]]*\|)?([^\]]*)\]\]", r"\1", v)
         v = re.sub(r"<[^>]+>", " ", v)
+        v = v.replace("'''", "").replace("''", "")
         v = re.sub(r"\s+", " ", v).strip(" \n}")
         if v: d[k] = v[:200]
     return d
@@ -354,6 +355,24 @@ def namedFrequencies(sText):
     return lsOut
 
 
+# Places a title's bracket can name that are not in the United States or Canada, where call signs like these belong.
+c_reForeignTitle = re.compile(r"\((?:[^)]*\b)?(UK|United Kingdom|British|England|Scotland|Wales|Ireland|Irish|Australia|Australian|New Zealand|India|Indian|Philippines|South Africa|Germany|German|France|French|Nigeria|Kenya|Jamaica|Malaysia|Singapore)\b", re.I)
+
+
+def confirmsFrequency(sName, sBoxFrequency, sTitle):
+    """ONE RULE FOR THE LOOKUP AND THE REPAIR (11 October 2026), so neither undoes the other. When the station's name
+    states a broadcast frequency: an article that gives one must share it; an article that gives none is taken only
+    when nothing marks it as another country's station -- a bracket in its title naming one, as in "Kiss (UK radio
+    station)", which twenty-four American KISS FM streams took, or a DAB frequency, which North America does not use.
+    KQED-FM, WTOP-FM and the like, whose infobox frequency the parser cannot read, are still taken. (Delivered on 11
+    October and lost before it reached the DbDo folder; restored 12 October from that delivery, after an audit found the
+    History describing it and the script without it.)"""
+    lsName, lsBox = namedFrequencies(sName), namedFrequencies(sBoxFrequency)
+    if not lsName: return True
+    if lsBox: return bool(lsName & lsBox)
+    return not c_reForeignTitle.search(sTitle or "") and "DAB" not in (sBoxFrequency or "").upper()
+
+
 def pageRecord(oPage, sCall, sName=""):
     """The record from one page, when its infobox is a station's and its
     call sign is ours; otherwise None, with the reason."""
@@ -374,10 +393,8 @@ def pageRecord(oPage, sCall, sName=""):
     # its title before a band or a bracket -- KALW, WCRB (FM), KQED-FM.
     bOurs = bool(re.search(r"\b" + re.escape(sCall) + r"\b", sBoxCall)) or bool(re.match(r"^" + re.escape(sCall) + r"(-(AM|FM|LP|HD\d?))?( \(.*\))?$", sTitle.upper()))
     if not bOurs: return None, "other call sign in " + sTitle
-    # THE FREQUENCY MUST AGREE (11 October 2026): when the station's name states a broadcast frequency and the article
-    # gives one, they must share it, so "106.1 KISS FM Seattle" is not given San Antonio's KISS-FM at 99.5.
-    lsName, lsBox = namedFrequencies(sName), namedFrequencies(dBox.get("frequency", ""))
-    if lsName and lsBox and not (lsName & lsBox): return None, "frequency %s is not the article's %s" % ("/".join(sorted(lsName)), "/".join(sorted(lsBox)))
+    # THE FREQUENCY MUST AGREE, by the rule the repair also uses.
+    if not confirmsFrequency(sName, dBox.get("frequency", ""), sTitle): return None, "frequency in the name not confirmed by " + sTitle
     d = {"wikipedia": "https://en.wikipedia.org/wiki/" + urllib.parse.quote(sTitle.replace(" ", "_")),
          "call_sign": dBox.get("call_sign") or dBox.get("callsign") or sCall,
          "frequency": dBox.get("frequency", ""), "city": dBox.get("city", "") or dBox.get("area", ""),
@@ -453,7 +470,6 @@ def cleanCopy(sDb, bTemplate, logLine, say):
                 "select station_id, name, call_sign, frequency, city, owner, format, wikipedia, notes, tags from stations where coalesce(wikipedia,'') not in ('', '-')").fetchall():
             mName = c_reCallSign.search(sName or "")
             mStored = re.match(r"[KWC][A-Z]{2,3}", (sCall or "").upper())
-            lsName, lsBox = namedFrequencies(sName), namedFrequencies(sFreq)
             # Looked up again, under the strict rules, when: the name states no call sign in capitals, or another one; the
             # name states a frequency the record does not share, or cannot confirm because it has none; or the stored
             # call sign is a bare one the article's title is not -- the mark of a match through the box's name field.
@@ -461,11 +477,13 @@ def cleanCopy(sDb, bTemplate, logLine, say):
             bBare = bool(mStored) and (sCall or "").upper() == mStored.group(0)
             bTitled = bool(mStored) and bool(re.match(r"^" + re.escape(mStored.group(0)) + r"(-(AM|FM|LP|HD\d?))?( \(.*\))?$", sTitle))
             bWrong = (not mName or not mStored or mName.group(1) != mStored.group(0)
-                      or bool(lsName and not (lsName & lsBox)) or (bBare and not bTitled))
+                      or not confirmsFrequency(sName, sFreq, urllib.parse.unquote((sWiki or "").rsplit("/", 1)[-1]).replace("_", " "))
+                      or (bBare and not bTitled))
             if bWrong:
                 lsParas = [p for p in (sNotes or "").split("\n\n") if not (sCall and p.strip().upper().startswith((sCall or "").upper()))]
                 lsFormat = set(s.strip().lower() for s in re.split(r"[,/;]", sFormat or "") if s.strip())
                 lsTagKeep = [t for t in (sTags or "").split("\n") if t.strip().lower() not in lsFormat]
+                if not bTemplate: lsParas, lsTagKeep = [sNotes or ""], (sTags or "").split("\n")
                 c.execute("update stations set call_sign='', frequency='', city='', owner='', format='', wikipedia='', notes=?, tags=?, edited=CURRENT_TIMESTAMP where station_id=?",
                           ("\n\n".join(lsParas), "\n".join(lsTagKeep), iId))
                 dCount["cleared"] += 1
@@ -476,11 +494,46 @@ def cleanCopy(sDb, bTemplate, logLine, say):
             # Cut at leaked markup first, then judge what is left, so "Westwood One }} and the article's first sentence"
             # keeps Westwood One.
             lsTagNew = [s for s in (plainField(re.split(r"\}\}|'''|\{\{", t)[0]) for t in (sTags or "").split("\n")) if not (re.search(r"[a-z]\. [A-Z]", s) or len(s) > 60)]
-            sTagNew = "\n".join(t for t in lsTagNew if t)
+            sTagNew = "\n".join(t for t in lsTagNew if t) if bTemplate else (sTags or "")
             if lsNew != [sFreq or "", sCity or "", sOwner or "", sFormat or ""] or sTagNew != (sTags or ""):
                 c.execute("update stations set frequency=?, city=?, owner=?, format=?, tags=? where station_id=?", tuple(lsNew) + (sTagNew, iId))
                 dCount["markup"] += 1
+    # LEAKED TAGS ARE CUT ON EVERY STATION (11 October 2026), not only on those whose match was kept: a cleared match
+    # kept the tags its wrong article leaked, and the next lookup counted them again. A line is cut at leaked markup,
+    # and what is left goes if it is prose -- a sentence break, an article's "is a ... station", or over eighty
+    # characters -- since a tag is a word or a phrase.
+    def tagLines(sTags):
+        lsOut = []
+        for t in (sTags or "").split("\n"):
+            s = plainField(re.split(r"\}\}|'''|\{\{", t)[0])
+            if s and not (re.search(r"[a-z]\. [A-Z]", s) or re.search(r"\bis an? .*\b(radio|station)\b", s) or len(s) > 80): lsOut.append(s)
+        return "\n".join(lsOut)
+    # YOUR NOTES AND TAGS ARE YOURS (12 October 2026, from an audit): nothing records which lines of notes and tags
+    # came from an article and which a listener wrote, and the audit showed a note beginning with a call sign and a
+    # long tag of the listener's being cut. So on a person's own copy the repair clears only the catalog's own fields
+    # -- call sign, frequency, city, owner, format, article -- and leaves notes and tags exactly as they are. The
+    # shipped template holds nobody's words, and there the text is still cleaned.
+    for iId, sTags in (c.execute("select station_id, tags from stations where tags like '%}}%' or tags like '%{{%' or tags like '%''''''%' or length(tags) > 80").fetchall() if bTemplate else []):
+        sNew = tagLines(sTags)
+        if sNew != (sTags or ""):
+            c.execute("update stations set tags=? where station_id=?", (sNew, iId)); dCount["markup"] += 1
+    # ONE NAME PER COUNTRY, AND NO PLACEHOLDER GENRES (12 October 2026, from an audit). The SomaFM channels and the
+    # ACB Media and NFB Radio streams said "United States" with no country code, while Radio Browser says "The United
+    # States Of America" with code US, so filtering on either name missed the other. And "tbd" stood in some genres
+    # where the source had none. Both are catalog fields, not the listener's, so this is safe on any copy.
+    if "countrycode" in lsCols:
+        sUs = (c.execute("select country from stations where countrycode = 'US' and coalesce(country,'') <> '' group by country order by count(*) desc limit 1").fetchone() or ["The United States Of America"])[0]
+        dCount["markup"] += c.execute("update stations set country = ?, countrycode = 'US' where country = 'United States' and coalesce(countrycode,'') = ''", (sUs,)).rowcount
+    if "genre" in lsCols:
+        for iId, sGenre in c.execute("select station_id, genre from stations where lower(genre) like '%tbd%'").fetchall():
+            sNew = ", ".join(s.strip() for s in (sGenre or "").split(",") if s.strip() and s.strip().lower() != "tbd")
+            if sNew != (sGenre or ""):
+                c.execute("update stations set genre = ? where station_id = ?", (sNew, iId)); dCount["markup"] += 1
     sTouched = "coalesce(rating,'') <> '' or coalesce(plays,'') not in ('', '0') or coalesce(status,'') not in ('', 'untried', 'dead') or coalesce(marked, 0) <> 0 or source = 'mine'"
+    # A STATION WITH LINKS IS TOUCHED (12 October 2026, from an audit): deleting a duplicate fires its maps trigger and
+    # takes its links with it, so a group where any row is linked is left as it is.
+    if c.execute("select count(*) from sqlite_master where type = 'table' and name = 'maps'").fetchone()[0]:
+        sTouched += " or prime in (select prime1 from maps where tbl1 = 'stations') or prime in (select prime2 from maps where tbl2 = 'stations')"
     for sUrl, sKey in c.execute("select stream_url, lower(trim(name)) from stations group by 1, 2 having count(*) > 1").fetchall():
         lsRows = c.execute("select station_id, tags, notes, (" + sTouched + ") from stations where stream_url = ? and lower(trim(name)) = ? order by cast(votes as integer) desc, station_id", (sUrl, sKey)).fetchall()
         if any(r[3] for r in lsRows): continue
@@ -620,7 +673,7 @@ def markDropped(sDb, sNow, logLine, say):
     if iDead: say("%d stations the catalog no longer lists are marked dead; they stay in the table." % iDead)
     logLine("dropped marked dead: %d" % iDead)
 
-def assess(sDb, logLine, say):
+def assess(sDb, logLine, say, bReadOnly=False):
     """How the database measures against what it is for: comprehensive --
     the whole catalog, recently; consistent -- every row playable, no litter;
     coherent -- the parts agree. Says a short report and returns what is
@@ -648,7 +701,11 @@ def assess(sDb, logLine, say):
     # each code's country is called: the name most of that code's stations
     # carry. A record with a code and no name gets the name, and the check's
     # own number for this goes down instead of being reported every time.
+    # REPORT-ONLY CHANGES NOTHING (12 October 2026, from an audit): --report reached this repair through assess and wrote
+    # country names, so a run asked only to report could change the database. bReadOnly skips it.
+    if bReadOnly: logLine("country repair skipped: report only")
     try:
+        if bReadOnly: raise StopIteration
         dCode = {}
         for sCode, sName, iCount in c.execute("select countrycode, country, count(*) from stations where coalesce(countrycode,'') <> '' and coalesce(country,'') <> '' group by countrycode, country order by count(*)"):
             dCode[sCode] = sName  # the last row for a code is its most common name
@@ -657,6 +714,8 @@ def assess(sDb, logLine, say):
             if sCode in dCode:
                 c.execute("update stations set country = ? where station_id = ?", (dCode[sCode], iId)); iRepaired += 1
         if iRepaired: c.commit(); say("  %d stations had a country code and no country name; the name is filled in from the code." % iRepaired)
+    except StopIteration:
+        pass
     except Exception as oError:
         logLine("country repair skipped: " + str(oError))
     iStateNoCountry = q("select count(*) from stations where coalesce(state,'') <> '' and coalesce(country,'') = ''")
@@ -709,7 +768,10 @@ def official(sDb, sCountry, iLimit, bAgain, logLine, say):
         with oLock:
             lsBatch = list(lsOut); del lsOut[:]
         for r, d, sWhy in lsBatch:
-            iId, sNotes, sTags = r[0], r[2] or "", r[3] or ""
+            # WHAT IS THERE NOW, NOT WHAT WAS READ AN HOUR AGO (12 October 2026, from an audit): notes and tags are read
+            # again just before the write, so an edit made in DbDo while the lookups ran is kept, not written over.
+            iId = r[0]
+            sNotes, sTags = [v or "" for v in c.execute("select notes, tags from stations where station_id=?", (iId,)).fetchone()]
             if d:
                 iFilled[0] += 1
                 lsTagNew = [s.strip() for s in re.split(r"[,/;]", d.get("format", "")) if s.strip()] + affiliationItems(d.get("affiliations", ""))
@@ -817,7 +879,9 @@ def enrich(sDb, sCountry, iLimit, bAgain, logLine, say):
         with oLock:
             lsBatch = list(lsOut); del lsOut[:]
         for r, d in lsBatch:
-            iId, sGenre, sSlogan, sDescrip, sTags, sNotes = r[0], r[3] or "", r[4] or "", r[5] or "", r[6] or "", r[7] or ""
+            # The fields are read again just before the write, so an edit made while the probes ran is kept.
+            iId = r[0]
+            sGenre, sSlogan, sDescrip, sTags, sNotes = [v or "" for v in c.execute("select genre, slogan, descrip, tags, notes from stations where station_id=?", (iId,)).fetchone()]
             lsParts = []
             for k in ("icy_description", "page_title", "page_description"):
                 v = d.get(k, "")
@@ -924,7 +988,7 @@ def fetchSomaFm(logLine, say):
         if not sStream: continue
         lsRows.append({
             "name": "SomaFM " + sTitle, "stream_url": sStream, "homepage": "https://somafm.com/" + sId + "/",
-            "country": "United States", "state": "", "language": "english",
+            "country": "The United States Of America", "countrycode": "US", "state": "", "language": "english",
             "genre": ", ".join(s.strip() for s in str(d.get("genre", "")).split("|") if s.strip()),
             "codec": "MP3", "bitrate": "", "votes": "", "clicks": str(d.get("listeners") or ""),
             "source": "SomaFM", "source_id": "somafm:" + sId, "descrip": (d.get("description") or "").strip(),
@@ -1045,6 +1109,10 @@ def main():
     if iCode == 0 and not lsOptions:
         print("Last, the networks each matched Wikipedia article names, such as a team's radio network.")
         iCode = mainCore([s for s in lsArgs if not s.startswith("--")] + ["--affiliations"])
+        # AND THE REPAIRS ONCE MORE (11 October 2026): the lookups and the affiliations write after the first pass, and
+        # the lookups switch the copy to write-ahead logging; this pass leaves the shipped copy one file, clean.
+        print("Finally, the repairs once more, over what this run added.")
+        mainCore(lsDbArgs + ["--clean"])
     return iCode
 
 
@@ -1151,7 +1219,7 @@ def mainCore(lsArgs):
         sLogDir = os.path.join(os.environ.get("LOCALAPPDATA", ""), "DbDo", "logs")
     os.makedirs(sLogDir, exist_ok=True)
     sLog = os.path.join(sLogDir, "RadioTrail-fetch-" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".log")
-    oLog = open(sLog, "w", encoding="utf-8")
+    oLog = open(sLog, "a", encoding="utf-8")   # two runs in one second share a log rather than one erasing the other
     def logLine(s): oLog.write(s + "\n"); oLog.flush()
     def say(s): print(s); logLine("CONSOLE: " + s)
     print("Log: " + sLog)
@@ -1190,20 +1258,26 @@ def mainCore(lsArgs):
     # that already holds the whole catalog, recently fetched, every station
     # asked and every call sign looked up, needs nothing; one that is partly
     # done gets the parts it lacks; --force runs everything regardless.
-    dNeed = assess(sDb, logLine, say)
+    dNeed = assess(sDb, logLine, say, bReadOnly=bReportOnly)
     if bReportOnly:
         if dNeed["catalog"] or dNeed["enrich"] or dNeed["official"]:
             say("This was the report only. To fetch what is needed, run fetchStations with no arguments.")
         say("The log is " + sLog); logLine("finished " + datetime.datetime.now().isoformat()); return 0
-    if not bForce and not dNeed["catalog"]:
+    # THE OPTIONS COME BEFORE THE SHORTCUT (12 October 2026, from an audit): with a current catalog, this shortcut ran
+    # even when --fresh asked for a clean copy, enriched under --catalog-only, and dropped --limit. --fresh now goes on
+    # to the fresh start below; --catalog-only asks nothing further; --limit is passed on.
+    if not bForce and not bFresh and not dNeed["catalog"]:
         say("The catalog is current; skipping to what is still needed.")
         iCode = 0
+        if bCatalogOnly:
+            say("Catalog only was asked for, so no station is asked and no call sign looked up.")
+            say("The log is " + sLog); logLine("finished " + datetime.datetime.now().isoformat()); return 0
         if dNeed["enrich"]:
             say("Asking the stations not yet asked.")
-            iCode = enrich(sDb, sCountry, 0, bAgain, logLine, say)
+            iCode = enrich(sDb, sCountry, iLimit, bAgain, logLine, say)
         if iCode == 0 and dNeed["official"] and not bNoOfficial:
             say("Looking up the call signs not yet looked up.")
-            iCode = official(sDb, sCountry, 0, bAgain, logLine, say)
+            iCode = official(sDb, sCountry, iLimit, bAgain, logLine, say)
         if iCode == 0 and (dNeed["enrich"] or dNeed["official"]):
             say("Done. The report afterwards:")
             assess(sDb, logLine, say)
@@ -1220,6 +1294,12 @@ def mainCore(lsArgs):
             else: print("Your copy has %d stations you have marked up, so it is kept and refreshed; --fresh would replace it." % iMine)
         except Exception:
             bFresh = True
+    if bFresh and os.path.isfile(sDb) and os.path.normcase(os.path.abspath(sDb)) == os.path.normcase(templatePath()) and not os.path.isfile(os.path.join(os.path.dirname(templatePath()), "RadioTrail.schema")):
+        # THE TEMPLATE IS NEVER MOVED ASIDE WITH NOTHING TO REBUILD IT FROM (12 October 2026, from an audit): a fresh
+        # start on the template itself set it aside and then had no template to copy, leaving no RadioTrail.db at all.
+        # With RadioTrail.schema beside it, an empty one is built and the catalog fetched into it; without, nothing moves.
+        print("A fresh start would set the template aside with no RadioTrail.schema to rebuild it from, so nothing was changed. Run DbDo's build once; it writes the schema.")
+        return 1
     if bFresh and os.path.isfile(sDb):
         # A FRESH START: the old copy set aside as RadioTrail-old.db, and a new
         # copy made from the template at once. (Setting aside without copying

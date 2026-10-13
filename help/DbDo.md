@@ -6,9 +6,9 @@ This guide is organized concepts first. The opening part explains the handful of
 
 ---
 
-# Part 1 — Key concepts
+## Part 1 — Key concepts
 
-## What DbDo is
+### What DbDo is
 
 DbDo is a single desktop application that presents **two interfaces over one live connection** to whatever database you open:
 
@@ -19,7 +19,7 @@ Both interfaces talk to the same open database at the same time, so a change mad
 
 DbDo does not invent its own storage format. It reads and writes real files in their native formats — a SQLite `.db`, an Access `.mdb`/`.accdb`, an Excel workbook, a dBASE `.dbf`, a `.csv` — through the appropriate database driver. Its value is the *interface*, not the container.
 
-## Windows: the multiple-document model
+### Windows: the multiple-document model
 
 DbDo uses a **multiple-document interface (MDI)**. There is one application frame, and inside it each open recordset — normally a table, sometimes a view or a query result — lives in **its own child window**. Opening a second table does not replace the first; it opens alongside it, and you move between them with window commands.
 
@@ -35,17 +35,17 @@ The window commands live in the **Window menu**:
 
 There is a deliberate distinction between **opening** a table and **going to** one. **Open Table in New Window** (Control+Shift+T) makes a *new window* for a table; **Choose Table** (Control+T) changes the table shown in the *current* window. Open when you want both tables visible at once; choose when you simply want to switch what this window is looking at.
 
-## The data list
+### The data list
 
 Inside each window the records are shown in a **data list** — a standard Windows list control with a row per record and a column per field. This is the surface you spend most of your time on. Your screen reader reads it the way it reads any Windows list: arrow down to the next row, and the row's contents are announced.
 
 The list is **single-select**: exactly one row is current at a time, and that row is the database cursor's current record (see below). DbDo deliberately does not use multi-select highlighting; instead it has an explicit **marking** system (covered in Part 2) so that "which records are selected for an operation" is a property you set and query on purpose, not a fragile visual highlight.
 
-### Virtual cell navigation
+#### Virtual cell navigation
 
 Beyond moving row to row, DbDo lets you move **cell by cell within a row** without leaving the list. A *virtual cursor* tracks which column you are on. Move it left and right across the columns and DbDo speaks the value in the current cell together with its field name, so you always know both *what* the value is and *which field* it belongs to. This is how you inspect a wide record one field at a time by keyboard, and it is what several commands mean when they act on "the current column" or "the cell under the cursor."
 
-## Two vocabularies: schema versus interface
+### Two vocabularies: schema versus interface
 
 DbDo is careful about words, and the guide follows the same discipline, because the two halves of the program describe the same data with two different vocabularies:
 
@@ -54,7 +54,7 @@ DbDo is careful about words, and the guide follows the same discipline, because 
 
 A field and a column are the same underlying thing seen from two angles; likewise a record and a row, and a cell is one field of one record. One more term: an absent value is **blank**, never "empty" or "null" in the interface.
 
-## The grid versus the physical database
+### The grid versus the physical database
 
 This is the single most important distinction in DbDo.
 
@@ -75,7 +75,7 @@ Editing writes **through** the grid to the physical table: when you change a cel
 
 Whenever a command's behavior could depend on the current view, this guide says explicitly whether it acts on the grid or the physical table.
 
-## The database cursor
+### The database cursor
 
 Underneath the grid is a **cursor**: a pointer to the **current record**. Exactly one record is current at any moment. Almost everything is expressed relative to the cursor:
 
@@ -87,11 +87,11 @@ DbDo uses a **client-side cursor**, meaning the working set is held in memory on
 
 Edits **auto-commit**. When you finish adding or changing a record, DbDo writes it immediately. There is no separate "save the record" step. (The Save command, described later, is a different thing — it makes a copy of the whole database.)
 
-## How fields are categorized
+### How fields are categorized
 
 Every field has a **type** (also called its affinity), and DbDo uses that type to decide how the field is edited, displayed, and validated. On top of the type system sits a small set of **standard fields** that DbDo recognizes by name and treats specially. Understanding both is the key to designing a database that behaves well with a screen reader.
 
-### Field types
+#### Field types
 
 DbDo recognizes these declared types. The first group is text refinements — all stored as text, but each tells DbDo how to present and edit the field:
 
@@ -111,7 +111,7 @@ The remaining types are the ordinary storage classes:
 
 Because the type controls the editing widget, choosing TEXTLINE versus TEXTMEMO versus TEXTMARKDOWN for a field is not cosmetic: it determines whether a screen-reader user gets a single-line box, a multi-line box, or a Markdown-aware box when they edit that field.
 
-### Standard fields
+#### Standard fields
 
 DbDo recognizes certain field **names** and maintains or exposes them for you. A table need not have all of them; DbDo simply uses the ones present. They are, by convention, kept out of the way — typically hidden from the default column display and reached through dedicated commands — so the grid stays focused on the data you care about while the housekeeping fields remain one keystroke away.
 
@@ -127,7 +127,7 @@ DbDo recognizes certain field **names** and maintains or exposes them for you. A
 
 The distinction to hold onto: **added** and **edited** are *automatic* (DbDo writes them for you); **marked** is *state* you toggle; **notes**, **tags**, and **url** are *content* you edit through their own focused dialogs; **look**, **prime**, and **unq** are *derived identity* fields DbDo computes so records can be named and matched reliably.
 
-### Lookups and maps
+#### Lookups and maps
 
 Two optional companion tables let a database describe its own vocabulary:
 
@@ -136,15 +136,15 @@ Two optional companion tables let a database describe its own vocabulary:
 
 These are conventions, not requirements; a database without them simply offers free-text editing, and its relationships are its foreign keys.
 
-## Keyboard patterns
+### Keyboard patterns
 
 DbDo has three distinct keyboard channels, and recognizing which one you are using clears up most confusion about "why did that key do that."
 
-### 1. Command chords
+#### 1. Command chords
 
 Every menu command has a name and, usually, a **chord** — a keyboard shortcut shown next to it in the menu. Chords follow a consistent **mnemonic rule**: the letter in the chord is the first letter of a word in the command's name. *Statistics from Column* is Alt+Shift+S; *Generate from Grid* is Alt+Shift+G; *Filter Records* is Control+F. Once you know a command's name you can usually guess its chord, and vice versa. Chords are grouped by modifier so related commands share a shape — the Say-something status commands are mostly Shift+letter, for instance.
 
-### 2. Convenience keys in text fields
+#### 2. Convenience keys in text fields
 
 When you are *inside a text box* — editing a cell, a note, a filter — a set of **convenience keys** is available in addition to normal typing. These operate on the text under your cursor and are meant to save a screen-reader user from hunting around:
 
@@ -156,21 +156,21 @@ When you are *inside a text box* — editing a cell, a note, a filter — a set 
 
 These are on by default and can be turned off with the `extraKeys` setting.
 
-### 3. The dot prompt and status queries
+#### 3. The dot prompt and status queries
 
 The **dot prompt** (Enter Console, Control+GraveAccent) is the command-line channel: type dBASE-style commands or short SQL and press Enter. It is covered in Part 5.
 
 Woven through the menus is a large **Say-X status family** in the Query menu: quick commands that *speak a fact about your current situation* without changing anything — Say Status, Say Database, Say Order, Say Yield (record count), Say Filter, Say Position, Say Cell, and many more. These are how you interrogate the screen on demand instead of hunting for information, and they are listed in full in the command reference.
 
-### Key Help
+#### Key Help
 
 **Key Help Toggle** (Control+F1) turns on a learning mode: while it is on, pressing a command chord **announces** what that command is and does **instead of running it**. Press Control+F1 again to turn it off. This lets you explore the keyboard safely. The **Hotkey Summary** (Alt+Shift+H) and **Alternate Menu** (Alt+F10) give you, respectively, an auditable listing of every command with its key, and a single filterable list of all commands you can search and run.
 
 ---
 
-# Part 2 — Working with data
+## Part 2 — Working with data
 
-## Opening databases and recordsets
+### Opening databases and recordsets
 
 - **Open Template Database** (Alt+Shift+D) starts from one of the databases DbDo ships -- BookTrail, JobTrail and the rest -- opening your own copy of it.
 - **Open Database** (Control+O) opens a database file, choosing the right driver from the extension. **New Database** creates a fresh SQLite database; **Add Table** adds a table to it.
@@ -180,7 +180,7 @@ Woven through the menus is a large **Say-X status family** in the Query menu: qu
 
 When a database has several tables, **Choose Table** (Control+T) switches the current window to another table, and the *Next/Previous Visited Table* commands walk the tables you have already looked at. **Choose View** (and the object-switch commands) do the same for saved views.
 
-## Navigating records
+### Navigating records
 
 The cursor moves with ordinary list navigation (arrow keys, Home, End) and with explicit commands:
 
@@ -189,7 +189,7 @@ The cursor moves with ordinary list navigation (arrow keys, Home, End) and with 
 - **Jump to Record** (Control+J) and **Reverse Jump** move by a jump increment for quickly covering distance in a long table.
 - **Jump to Next Initial** steps to the next record whose current column starts with a new letter — type-ahead through a sorted column.
 
-## Editing records
+### Editing records
 
 - **New Record** (Control+N) adds a record; **New Copy** (Control+Shift+N) starts a new record pre-filled from the current one; **Copy Record** (Control+Shift+C) copies it to the clipboard.
 - **Edit View** (Control+E) opens the whole record in a field-by-field dialog. **Edit Cell** (F2) edits just the current cell. **Open Cell Value** (Control+Enter) opens a large value in its own box for comfortable reading and editing.
@@ -200,7 +200,7 @@ The cursor moves with ordinary list navigation (arrow keys, Home, End) and with 
 
 All edits auto-commit. If a table is read-only, **Read Only Toggle** (Alt+Z) reports and controls that.
 
-## Marking records
+### Marking records
 
 Marking is DbDo's explicit, queryable alternative to visual multi-select. The `marked` field carries the state.
 
@@ -210,7 +210,7 @@ Marking is DbDo's explicit, queryable alternative to visual multi-select. The `m
 
 Marked records can then be reported, filtered, or exported as a set, and several Say commands report only the marked ones.
 
-## Filtering and sorting
+### Filtering and sorting
 
 Filtering and sorting reshape the grid without touching the physical table.
 
@@ -223,11 +223,11 @@ letters, so "spencer" sorts with "Spencer".
 
 Because these only change the view, you can slice a large table down to what you need, work on it, and clear the filter to see everything again — the records were never removed.
 
-## Choosing displayed columns
+### Choosing displayed columns
 
 **Select Columns to Display** (Alt+S) chooses which fields appear in the grid, and in what order. Hiding the standard housekeeping fields and showing only the columns you are working with keeps cell-by-cell navigation short. The choice is part of the grid, so it travels with the window and is remembered.
 
-## Relationships between tables
+### Relationships between tables
 
 DbDo recognizes relationships recorded in either of two ways, or both in the same database, and treats them alike:
 
@@ -247,19 +247,19 @@ This is how you walk a database -- from an order to its line items, from a perso
 
 ---
 
-# Part 3 — Producing output
+## Part 3 — Producing output
 
 DbDo offers several ways to turn data into something you can read, share, or file. They differ in **what they act on** and **what they produce**, and it is worth learning the distinction so you reach for the right one. There are two single-column tools, one grid tool, one physical-table tool, and the scripting facility.
 
-## Statistics from Column (Alt+Shift+S)
+### Statistics from Column (Alt+Shift+S)
 
 Acts on **one column** — the column under the virtual cursor. It computes type-aware descriptive statistics: for a numeric column, things like count, populated percentage, minimum, maximum, mean, median, standard deviation, quartiles and interquartile range, outlier fences, and mode; for dates, a temporal summary; for text, the most frequent values. It speaks and shows the result. Use it to understand a single field at a glance. Its name emphasizes that it works *from a column*.
 
-## Graphics Column (Control+Shift+G)
+### Graphics Column (Control+Shift+G)
 
 Also acts on **one column** — the column under the virtual cursor — but produces a **chart** of that column (via Excel, out of process -- the one export that still needs Office) rather than a table of numbers. Use it when you want a quick visual of one field's distribution.
 
-## Generate from Grid (Alt+Shift+G)
+### Generate from Grid (Alt+Shift+G)
 
 Acts on the **virtual grid** — the current filtered, sorted, column-selected view — and is the ad-hoc, exploratory tool. It profiles the grid's columns by type and offers a menu of outputs:
 
@@ -271,13 +271,13 @@ Acts on the **virtual grid** — the current filtered, sorted, column-selected v
 
 The point of the name is that it operates **on the grid, not the physical database**: it analyzes *what you are looking at*. Filter and sort first to shape the grid, then Generate from Grid to analyze that exact view. It is one-off and exploratory; nothing is saved except the specific output file you ask for.
 
-## Run Report (Alt+Shift+R)
+### Run Report (Alt+Shift+R)
 
 Acts on the **physical table** and produces a **defined, reproducible document**. Where Generate from Grid analyzes whatever you happen to be viewing, Run Report renders a **report definition** — a saved template — against *all* the records in the table (optionally with its own filter and sort baked into the definition), so the same report comes out the same way every time no matter what your grid was showing.
 
 Report definitions live in a **report.inix** file beside the database. Each definition is one `[section]` in that file, describing which table to read, how to group and order it, and a set of **bands** — header, detail, separators, footers, and group headers/footers — that lay out the text. Within a band, `$field` (or `${field}`) inserts a field's value, `{{ ... }}` evaluates a JScript expression, `{# ... #}` is a comment, and footer bands can compute aggregates like `$count`, `$sum_<field>`, `$avg_<field>`, `$min_<field>`, and `$max_<field>`. DbDo discovers the report files beside the open database, offers a pick-list of the definitions it finds, and writes the result as Markdown you can convert onward to HTML, DOCX, or PDF. The report-template language is detailed in Part 6.
 
-## Snippets and scripts
+### Snippets and scripts
 
 The scripting facility is for **reusable automation** rather than one-off output. A snippet is a small script file kept in the Scripts folder (and, for a database's own automation, beside the `.db` file). DbDo recognizes three snippet types by extension:
 
@@ -287,7 +287,7 @@ The scripting facility is for **reusable automation** rather than one-off output
 
 Run a snippet with **Invoke Script** (Alt+V); create or edit one with **Edit Snippet** (Alt+Shift+V), which offers the existing files plus a "new snippet" entry; open the folder with **Open Script Folder**. Use snippets when you find yourself doing the same multi-step task repeatedly.
 
-## Which one do I want?
+### Which one do I want?
 
 | Tool | Acts on | Produces | Reusable? |
 |------|---------|----------|-----------|
@@ -301,7 +301,7 @@ The mental shortcut: **Column** tools look at one field; **Generate from Grid** 
 
 ---
 
-# Part 4 — Importing, exporting, opening, saving
+## Part 4 — Importing, exporting, opening, saving
 
 DbDo distinguishes four file operations that are easy to confuse. The distinction is about whether the data keeps its original shape or is reshaped into DbDo's conventions.
 
@@ -314,9 +314,9 @@ Supported formats include SQLite (`.db`, `.sqlite`, `.sqlite3`), Access (`.mdb`,
 
 ---
 
-# Part 5 — SQL and scripting
+## Part 5 — SQL and scripting
 
-## Running SQL
+### Running SQL
 
 - **Query** (Control+Q) opens a box where you type SQL and run it; the results open as a recordset you can navigate like any table. **Query History** (Alt+Shift+Q) recalls previous queries.
 - The **dot prompt** (Enter Console, Control+GraveAccent) accepts both dBASE-style dot commands and short SQL inline. It is the fastest path for people who think in commands.
@@ -324,7 +324,7 @@ Supported formats include SQLite (`.db`, `.sqlite`, `.sqlite3`), Access (`.mdb`,
 
 DbDo runs your SQL against the live connection, so queries see uncommitted context the way the rest of the program does. Because the cursor is client-side, result sets are fully navigable — forward, backward, and by position.
 
-## The scripting engine
+### The scripting engine
 
 DbDo's scripting language is **JScript .NET**. The same engine powers three things, so learning it once pays off in all of them: **Invoke Script** for `.js` snippets, **Evaluate Expression** (Control+Equals) for one-off calculations, and the `{{ ... }}` expressions inside report templates.
 
@@ -335,13 +335,13 @@ Snippet types and how to run them are covered in Part 3.
 
 ---
 
-# Part 6 — Reference
+## Part 6 — Reference
 
-## Command reference by menu
+### Command reference by menu
 
 Chords use screen-reader-canonical key names. A command with no chord is reachable through its menu or through Alternate Menu (Alt+F10).
 
-### File menu
+#### File menu
 
 | Command | Chord |
 |---------|-------|
@@ -368,7 +368,7 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Next / Previous Table or View | Control+F6 / Control+Shift+F6 |
 | Exit DbDo | Alt+F4 |
 
-### Edit menu
+#### Edit menu
 
 | Command | Chord |
 |---------|-------|
@@ -402,7 +402,7 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Open URL | Control+Shift+U |
 | Pick Value | Control+F2 |
 
-### Navigate menu
+#### Navigate menu
 
 | Command | Chord |
 |---------|-------|
@@ -421,7 +421,7 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Exit Child Table | Alt+Left |
 | Exit to Root Table | Alt+Home |
 
-### Query menu
+#### Query menu
 
 The Query menu holds record inspection and the Say-X status family.
 
@@ -465,7 +465,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Order Records | Alt+O |
 | Reverse Order | Alt+Shift+O |
 
-### Misc menu
+#### Misc menu
 
 | Command | Chord |
 |---------|-------|
@@ -501,7 +501,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Evaluate Expression | Control+Equals |
 | Edit Settings | Alt+Shift+C |
 
-### Window menu
+#### Window menu
 
 | Command | Chord |
 |---------|-------|
@@ -514,7 +514,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Close Window | Control+F4 |
 | Close All But Current Window | Control+Shift+F4 |
 
-### Help menu
+#### Help menu
 
 | Command | Chord |
 |---------|-------|
@@ -528,7 +528,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Email Log File | — |
 | Elevate Version | F11 |
 
-## Standard fields (summary)
+### Standard fields (summary)
 
 | Field | Type | Role | Speak with |
 |-------|------|------|-----------|
@@ -542,7 +542,7 @@ The Query menu holds record inspection and the Say-X status family.
 | prime | derived | prime human-facing identity | Shift+P |
 | unq | derived | internal uniqueness helper | — |
 
-## Field types (summary)
+### Field types (summary)
 
 | Type | Stored as | Editor |
 |------|-----------|--------|
@@ -557,7 +557,7 @@ The Query menu holds record inspection and the Say-X status family.
 | BOOLEAN | true/false | toggle |
 | BLOB | binary | — |
 
-## The report-template language
+### The report-template language
 
 A report definition is a `[section]` in a **report.inix** file beside the database. Directives configure the source; bands lay out the text.
 
@@ -585,7 +585,7 @@ A report definition is a `[section]` in a **report.inix** file beside the databa
 
 Reports render to Markdown, which you can convert to HTML, DOCX, or PDF.
 
-## The .inix configuration format
+### The .inix configuration format
 
 DbDo's own settings and several data files use **.inix**, an INI-style format: `[Section]` headers followed by `name = value` lines, with `;` or `#` beginning a comment and case-insensitive key names written in UpperCamelCase (usually two words). Global defaults live in **DbDo.inix** beside the program; a database may carry its own **`<DbName>.inix`** beside the database file for per-database overrides. Notable sections include `[General]` and `[Options]` for behavior toggles (such as `ExtraSpeech`, `CommandEcho`, and the `ExtraKeys` convenience-key switch), `[Validation]` for per-field regex patterns, `[ConnectStrings]` for per-extension connection-string overrides, and `[Hotkeys]` which documents and can re-describe command chords. **Edit Settings** (Alt+Shift+C) exposes the common options in a dialog and can open the file directly for advanced editing.
 
@@ -593,65 +593,65 @@ Values are usually a single line, but a key may hold a **multi-line value** — 
 
 A `<DbName>.inix` holds the settings that belong to one database. Its `[Database]` section carries **InitialTable** (the table opened in the first window when the database opens, so there is always a starting window — other tables open via Open Table, Control+Shift+O) and the recent-input arrays **FindText**, **JumpText**, **ReplaceText**, **ReplaceRegex**, and **QueryText**, each up to ten items, most recent first, which populate the matching command's combo box. A `[Table:<name>]` section carries that table's saved view — **SelectFields**, **OrderFields**, and **WhereFilter** — recalled when the table is next opened.
 
-## SQLean extensions
+### SQLean extensions
 
 When the SQLean extension functions are available, they add a large library of SQL functions — string and text helpers, math, statistics, fuzzy matching, regular expressions, and more — usable in queries and reachable through the **Sqlean Console** (Control+Shift+GraveAccent). They extend what your `Query` and report expressions can compute without leaving SQL.
 
-## Template databases
+### Template databases
 
 DbDo ships with template databases that follow the same column conventions as your own data, reachable with File, **Open Template Database**, or Alt+Shift+D from anywhere. They are the fastest way to see the standard fields, lookups, relationships, and reports working together on real records.
 
-## Screen-reader settings
+### Screen-reader settings
 
 DbDo speaks directly to supplement your screen reader's own announcements. **Extra Speech** (toggled from the Help menu) controls DbDo's additional commentary without affecting your screen reader's natural focus and selection announcements; turning it off leaves only the screen reader's own speech. **Command Echo** controls whether commands announce a confirmation as they run. **Test Screen Reader Speech** verifies that DbDo can reach your screen reader.
 
-## Persistence and logging
+### Persistence and logging
 
 DbDo remembers per-database state in the database's own `<DbName>.inix` — the last table, sort, filter, and displayed columns, plus a pinned **InitialTable** and the recent Find, Jump, Replace, Regex, and Query inputs — so reopening a database returns you to where you were. Activity is written to **DbDo.log**; **Email Log File** in the Help menu reveals the log and starts an email with its path, for reporting issues.
 
 ---
 
-# Part 7 — Development
+## Part 7 — Development
 
 This part is for people building DbDo from source.
 
-## Requirements
+### Requirements
 
 - .NET Framework 4.8, 64-bit.
 - The build tools invoked by `build.cmd` (the .NET Framework C# compiler and Inno Setup for packaging).
 - The SQLite ODBC driver and the bundled dependency DLLs the build fetches.
 
-## Build
+### Build
 
 Compile with **`build.cmd`**, which builds `DbDo.exe`, converts this guide and the README to HTML with pandoc, and packages the installer with Inno Setup (`DbDo_setup.iss`). The dependency DLLs are gathered by `getDbDoDeps.ps1`. To replicate the development layout, keep the program and its subfolders under `C:\DbDo`.
 
-## Architecture: one connection, two interfaces
+### Architecture: one connection, two interfaces
 
 DbDo maintains a single live database connection and presents it through both the graphical interface and the dot prompt, as described in Part 1. Each MDI child window owns its own manager and cursor, so tables are independent, while the connection and drivers are shared. The cursor is client-side, which is what makes instant sort, filter, and backward navigation possible on file-based databases.
 
-## Coding style
+### Coding style
 
 DbDo is written in the "Camel Type" style. The full, authoritative description is a separate distributed file, **`Camel_Type_CSharp.md`**; consult it for specifics rather than duplicating them here. In brief, it uses Hungarian-style prefixes, lower-camel method names, alphabetized declarations, double-quoted strings, and for-each iteration; database identifiers use lower_snake_case.
 
-## Layout by Code
+### Layout by Code
 
 DbDo builds its dialogs and menus **in code** rather than with a visual designer, so that every control is a standard, screen-reader-friendly Windows control created and labeled explicitly. The label-based-controls helpers assemble a dialog from labels, input boxes, memo boxes, list boxes, and pick boxes with OK/Cancel or custom buttons, keeping tab order and accessible names correct by construction.
 
-## File layout
+### File layout
 
 The source is a single large `DbDo.cs`. Alongside it live the build script, the installer script, the dependency fetcher, the `.inix` configuration, this guide (`DbDo.md`), the README, the coding-style file, and the template databases with their scripts and `report.inix` definitions.
 
 
 
 
-## Nothing, and the two kinds of it
+### Nothing, and the two kinds of it
 
 A field can be empty in two ways, and databases have always kept them apart.
 
 - **null** means nobody has said. The value is unknown, or does not apply.
 - **blank** means somebody said nothing: a real value, a string of no length.
 
-### What DbDo stores
+#### What DbDo stores
 
 **An empty box stores null.** When you leave a field alone, or clear it, DbDo
 writes null rather than an empty string.
@@ -668,7 +668,7 @@ You can still store an empty string on purpose -- a space is a value -- and a
 database built elsewhere keeps whatever it already holds. DbDo changes nothing
 it did not write.
 
-### What DbDo says
+#### What DbDo says
 
 **A null field says "null". An empty one says "blank".**
 
@@ -680,7 +680,7 @@ the word. "Blank" is what JAWS and NVDA say when they reach an empty cell, in
 Excel and in any grid, so it is a word you have heard for years that already
 means exactly this.
 
-### What the screen readers do, and what DbDo does about it
+#### What the screen readers do, and what DbDo does about it
 
 The three readers disagree about an empty cell, and DbDo settles it rather than
 leaving it to them:
@@ -707,7 +707,7 @@ read either.
 cell holds, not the word; the same is true of exports and reports. Set
 **ShowEmptyWords** to No in DbDo.inix for the older, silent grid.
 
-### What Microsoft Access does, for comparison
+#### What Microsoft Access does, for comparison
 
 Access reaches the same place from the other end. Its text boxes trim what you
 type and save an empty box as null; a zero-length string cannot be typed into a
@@ -720,7 +720,7 @@ a null, and the distinction should not be forced on the end user.
 DbDo does the same thing at the point of writing and then, unlike Access, can
 tell you which one you are on when you ask.
 
-### Why it is worth the distinction
+#### Why it is worth the distinction
 
 - A job with no applied date has not been applied to. A job whose applied date
   was cleared has been un-applied. The first is a lead; the second is a mistake
@@ -736,7 +736,7 @@ tell you which one you are on when you ask.
   the rows nobody has filled in arrive at the top of an ascending sort. That is
   usually what you want and always worth knowing.
 
-## The Help menu
+### The Help menu
 
 Every document that comes with DbDo opens from Help, in your web browser. The
 F1 keys open the ones you will want most. F1 is help in every Windows program,
@@ -752,7 +752,7 @@ and each extra key picks a different kind of help.
 - **Play Tutorials.** The spoken walkthroughs.
 - **More Documents.** The Announcement, the Developer Guide, the License, and the Tutorials Transcript. These are used rarely, so they sit one level down.
 
-## Four ways to reach a record
+### Four ways to reach a record
 
 Each has its own letter, and the letter is the first letter of its own word.
 
@@ -784,7 +784,7 @@ The first three need no SQL at all. The old name for Filter Records was "Where
 Filter", which promised SQL to people who never write any; the dialog has not
 changed.
 
-## Sharing a database with somebody else
+### Sharing a database with somebody else
 
 A DbDo database is one file, so sharing it is sending that file. What the person
 receiving it does depends on whether they already keep one of their own.
@@ -798,7 +798,7 @@ File, **Open Template Database**, and pick BookTrail, which opens their own copy
 under their own account. Then **Merge Data, Alt+M**, and choose the file they
 were sent, wherever they saved it. DbDo folds the records in.
 
-### How a merge decides
+#### How a merge decides
 
 Every record carries a **prime**, the computed key built from the fields that say
 which record it is -- for books, the author and the title. That is what DbDo
@@ -819,7 +819,7 @@ records in yours. Pick lists merge too, one entry per table, field and value.
 **Nothing is ever deleted by a merge**, and DbDo copies your database first,
 leaving it beside the original as `<name>-before-merge.db`.
 
-### A shared database knows how to present itself
+#### A shared database knows how to present itself
 
 The fields a row speaks, the order and the filter are kept inside the database as
 well as in the settings file beside it. So a database you send somebody arrives
@@ -827,7 +827,7 @@ looking the way you left it. Your own settings file still wins on your own
 computer, which means your column choices do not follow the file to everybody
 else.
 
-## Files that are not databases
+### Files that are not databases
 
 Spreadsheets and text files are not databases, so DbDo treats them all the same
 way, and the rule is one sentence: **the file you opened stays the file of
@@ -849,7 +849,7 @@ reports -- and your file is only read.
 Access and SQLite files are databases already, so DbDo opens them as they are
 and your edits go straight into them.
 
-## Bringing in a spreadsheet
+### Bringing in a spreadsheet
 
 There are two ways, and one of them is almost always the right one.
 
@@ -867,7 +867,7 @@ Opening a spreadsheet does the same reading, and adds a way back: Control+S
 writes your changes into the file you opened. Import is for when you want a new
 database and no further connection to the workbook.
 
-## Where a database's files live
+### Where a database's files live
 
 Everything that belongs to one database sits in one folder, named after the
 database:
@@ -890,7 +890,7 @@ The templates that come with DbDo follow the same rule: each is a folder under
 `templates`, and DbDo copies them into `%LOCALAPPDATA%\DbDo\data` the first
 time you run it, so your copies are yours to change.
 
-## The template databases
+### The template databases
 
 Each template is a folder under `templates`, copied into your own folder the first
 time you run DbDo, or the first time after an update that adds one. Your copy is
@@ -912,7 +912,7 @@ yours: a later update never replaces it. The ones written for DbDo share the Tra
 **chinook** and **northwind** keep their usual names. They are the two databases
 most database tutorials use, so the names are how people recognise them.
 
-### BlindCreations gathers work by blind people
+#### BlindCreations gathers work by blind people
 
 **BlindCreations** holds the apps, books, presentations and creators from the
 Blind directories on GitHub Pages: about a hundred apps, a hundred books, sixty
@@ -927,7 +927,7 @@ and Alt+Right goes to it. An app's **platform** is where it runs, so Fields in
 Filter Records narrows the list to one system. Categories, platforms, formats and
 roles are also in **tags**, one to a line, so Keywords finds them.
 
-### HowToTrail holds both systems
+#### HowToTrail holds both systems
 
 The Windows and iOS how-to databases were the same shape, and answering "how do
 I do this on my phone?" meant opening a different file. They are one database
@@ -936,7 +936,7 @@ something true on both. Press F4 in the field to pick. To work in one system
 only, press Control+F, choose Fields, and type Windows in the platform box; the
 filter stays until you clear it with Control+Shift+F.
 
-### RadioTrail plays Internet radio
+#### RadioTrail plays Internet radio
 
 Fourteen stations are in the template to start. To build the real thing, run
 **`fetchStations`** in the template's folder, `templates\RadioTrail`. It begins
@@ -1002,7 +1002,7 @@ replaced by a clean one, so the structure is always the template's. Once you hav
 rating are never written by the script, and notes and tags are only added to. `fetchStations --country "United States"` keeps a run to
 one country; `--catalog-only` skips the asking; `--enrich-only` does only that.
 
-#### The spoken walks
+##### The spoken walks
 
 Every Homer program has twelve spoken walks, Help menu, Play Tutorials, in the
 same order: 00 overview and table of contents; 01 install and launch; 02 what
@@ -1017,7 +1017,7 @@ anywhere, by filtering on genre; jazz near home, by adding the state -- then
 playing what was found, recording it, and keeping it as a favorite. The walks' scripts live in `help`; a database's own files --
 its settings, its scripts -- live in its template folder.
 
-#### Where RadioTrail's data and design come from
+##### Where RadioTrail's data and design come from
 
 The stations are from **Radio Browser**, a public directory kept by
 volunteers, and from **SomaFM**'s own channel list; the official records are
@@ -1029,7 +1029,7 @@ Tuner, whose published requirements and source were studied while RadioTrail
 was built. RadioTrail owes it a debt, and its listeners the ten ACB Media
 streams.
 
-### CollectionTrail holds whatever you collect
+#### CollectionTrail holds whatever you collect
 
 Stamps, coins, records and tools answer the same questions, so they share one
 table and a **collection** field says which collection a thing belongs to. Keep
@@ -1039,7 +1039,7 @@ When a collection needs fields of its own, make it its own database. CellarTrail
 is the example: wine wants a vintage, a drinking window and a bottle count that
 falls as you drink it.
 
-## BookTrail, for books
+### BookTrail, for books
 
 BookTrail is a template database for the books you have read, are reading, and
 mean to read. One table, books, holds the author, title, subtitle, narrator,
@@ -1056,7 +1056,7 @@ dates added and read, why you chose it, a summary and your notes.
 - **Formats a blind reader uses**: BARD audio, commercial audio, braille,
   Bookshare text, large print, eBook and print.
 
-## The spoken walkthroughs
+### The spoken walkthroughs
 
 **Help, Play Tutorials** opens `Tutorials.mkv` -- fourteen walkthroughs, about
 three minutes each, as one recording with a chapter at the start of every one.
@@ -1067,7 +1067,7 @@ one walkthrough to the next.
 The same walkthroughs are written out in `Tutorials.md`, in the help folder, for
 reading rather than listening.
 
-## Asking the model on your computer
+### Asking the model on your computer
 
 **F12, Chat with AI**, asks a plain question. **Shift+F12, Chat about Table**,
 asks the same kind of question with the table sent alongside it: its name, its
@@ -1081,7 +1081,7 @@ your own profile. If Ollama is not installed, either command says so and tells
 you how to add it -- and it is shared with EdSharp and FileDir, so installing it
 once covers all three.
 
-## Two keys worth knowing early
+### Two keys worth knowing early
 
 **Shift+C, Say Cell**, answers in three short utterances: the column, then where
 the row is, then the value -- "title", "row 2 of 4", "Accessibility Analyst".
@@ -1092,7 +1092,7 @@ between them.
 and the order. Z is the bottom of the alphabet, and the status bar is the bottom
 of the window.
 
-## Tables DbDo keeps for itself
+### Tables DbDo keeps for itself
 
 Two tables in every DbDo database belong to DbDo rather than to you:
 
@@ -1118,12 +1118,12 @@ SQLite's own tables -- anything beginning with `sqlite_`, and the `sqlean_`
 tables the extensions create -- are filtered out earlier and are never offered
 at all.
 
-## look and prime: the two computed columns
+### look and prime: the two computed columns
 
 Every table DbDo makes carries two columns that nobody types into. They are
 computed from the fields beside them and kept up to date by the database itself.
 
-### look: a glimpse of a record from somewhere else
+#### look: a glimpse of a record from somewhere else
 
 `look` is what a record looks like when it is mentioned somewhere other than its
 own table.
@@ -1146,7 +1146,7 @@ A glimpse is deliberately not the whole record. When you need the rest, it is
 one keystroke away: Enter opens the record, and Shift plus R lists what this
 record is related to, showing each related record by its own `look`.
 
-### prime: the primary key, computed
+#### prime: the primary key, computed
 
 `prime` is short for primary key, and it is a primary key in the sense that
 matters rather than the sense SQL means.
@@ -1170,12 +1170,12 @@ or in any language: `WHERE prime = ?`. The maps table works the same way -- it
 records a link as `prime1`, a kind, and `prime2` -- so a relationship needs no
 knowledge of how either table numbers its rows.
 
-### The difference in one line
+#### The difference in one line
 
 `look` is for a person, joined with spaces so it reads aloud. `prime` is for a
 program, joined without them so it matches exactly.
 
-## How a Say command answers
+### How a Say command answers
 
 Every Say command answers in one shape:
 
@@ -1205,7 +1205,7 @@ field:
 One press speaks. A second press within a moment shows the same text in a
 read-only window you can read line by line and copy from.
 
-### The Say keys
+#### The Say keys
 
 - Shift+A -- added
 - Shift+B -- bookmark, how many are saved and the newest
@@ -1255,7 +1255,7 @@ Shift+J used to open the Jump dialog. It now says the jump text instead, which
 is what Say Jump on that key was always meant to do. Jump to Record keeps
 Control+J.
 
-## Credits for the tutorial voices
+### Credits for the tutorial voices
 
 The spoken tutorials in `Tutorials.mkv` were produced with
 [piper](https://github.com/rhasspy/piper), which is MIT licensed, using two
