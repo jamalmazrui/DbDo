@@ -31,7 +31,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=I type seahawks and press Enter. The cursor moves to the first station that mentions the team.
 Key=Enter
-Hear=99.3 KDRM, Row 3290 of 55280
+Hear=99.3 KDRM, Row 3301 of 55280
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

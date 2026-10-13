@@ -25,14 +25,16 @@ InitialTable = apps
 
 ; name, then category, then platform: what it is, what it is for, where it runs. The platform answers the
 ; proposal's question of operating system; Control+F, Fields, narrows by it.
-SelectFields = name, category, platform
+; SelectFields, 13 October 2026: who made it is the point of this database, so it is heard second.
+SelectFields = name, by, platform
 OrderFields = name
 WhereFilter =
 
 [Table:books]
 
 ; title, then author, then year, the way a reader asks for a book.
-SelectFields = title, by, year
+; SelectFields, 13 October 2026: the form a book comes in -- braille, audio, print -- tells a reader more than its year.
+SelectFields = title, by, format
 OrderFields = title
 WhereFilter =
 

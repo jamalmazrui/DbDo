@@ -95,10 +95,15 @@ The standard DbDo contacts table, unchanged. Keeping it identical means the
 lookups, the accelerator keys and anything built for contacts elsewhere work
 here without adjustment.
 
-`contact_id`, `added`, `edited`, `first_name`, `middle_name`, `last_name`,
-`enterprise`, `job`, `wireless_phone`, `home_phone`, `personal_email`,
-`business_email`, `address1`, `city`, `state`, `zip`, `nation`, `url`, `notes`,
-`tags`, `look`, `prime`, `marked`.
+The fields follow DbDo's contact pattern, from DbDialog, which names each field so
+that it has an Alt letter of its own on the record form, and JobTrail adds `role`
+(R) after the enterprise:
+
+`contact_id`, `added`, `edited`, `title`, `first_name`, `middle_name`,
+`last_name`, `job`, `enterprise`, `role`, `address1`, `address2`, `city`, `state`,
+`zip`, `nation`, `office_phone`, `home_phone`, `wireless_phone`, `business_email`,
+`personal_email`, `date_of_birth`, `gender`, `url`, `notes`, `tags`, `look`,
+`prime`, `marked`.
 
 ### actions
 

@@ -17,7 +17,8 @@ InitialTable = contacts
 
 [Table:contacts]
 
-SelectFields = last_name, first_name, enterprise
+; SelectFields, 13 October 2026: the number you reach for, in place of an employer most contacts lack.
+SelectFields = last_name, first_name, wireless_phone
 OrderFields = last_name, first_name
 WhereFilter =
 

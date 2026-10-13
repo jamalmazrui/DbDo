@@ -58,8 +58,10 @@ InitialTable = stations
 ; article's format -- are in tags, one per line. Prose is in notes: what the
 ; station says of itself, and the article's opening paragraph. Both only ever
 ; grow; a line you add stays. status and rating are yours alone.
-SelectFields = name, genre, country
-OrderFields = name
+; SelectFields, 13 October 2026: the long list of genres comes last, so Down Arrow can cut it off.
+SelectFields = name, country, genre
+; OrderFields, 13 October 2026: the American Council of the Blind's streams and the NFB Radio Network first, then every other station by name.
+OrderFields = source, name
 WhereFilter =
 
 [Table:lookups]

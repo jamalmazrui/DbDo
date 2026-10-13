@@ -104,7 +104,8 @@ detail = """
 
 - $job, $enterprise
 {{ $role ? "- Role in this search: " + $role : "" }}
-{{ $wireless_phone ? "- Phone: " + $wireless_phone : "" }}
+{{ $wireless_phone ? "- Mobile: " + $wireless_phone : "" }}
+{{ $office_phone ? "- Office: " + $office_phone : "" }}
 {{ $business_email ? "- Email: " + $business_email : "" }}
 {{ $personal_email ? "- Email: " + $personal_email : "" }}
 """

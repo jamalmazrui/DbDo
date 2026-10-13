@@ -46,5 +46,6 @@ WhereFilter =
 [Table:presentations]
 
 SelectFields = title, minutes, medium
-OrderFields = title
+; OrderFields, 13 October 2026: newest first, since recent presentations match the software people use now.
+OrderFields = year DESC, title
 WhereFilter =

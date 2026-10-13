@@ -38,7 +38,8 @@ InitialTable = books
 ; The row says who wrote it first, because a reader of series looks books up by
 ; author, and first-letter navigation searches the first column. Then the title,
 ; then where it sits in its series. Four fields, the ceiling.
-SelectFields = author, title, series, volume
+; SelectFields, 13 October 2026: the book is named first; the order stays by author and series, so a series is heard in order.
+SelectFields = title, author, series, volume
 OrderFields = author, series, volume, title
 WhereFilter =
 

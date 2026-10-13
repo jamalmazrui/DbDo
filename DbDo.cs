@@ -1392,9 +1392,15 @@ namespace DbDo
                 }
                 else
                 {
-                    sbOut.Append(char.ToUpperInvariant(sPart[0]));
-                    if (sPart.Length > 1)
-                        sbOut.Append(sPart.Substring(1).ToLowerInvariant());
+                    // A NUMBER AT THE END IS A WORD OF ITS OWN (13 October 2026): address2 is "Address 2", as DbDialog's
+                    // contact pattern spoke it, so the digit begins a word and Lbc can give it Alt+2 -- Lbc takes a
+                    // field's letter only from the start of a word, and "Address1" already holds A.
+                    System.Text.RegularExpressions.Match oDigits = System.Text.RegularExpressions.Regex.Match(sPart, @"^([A-Za-z]{4,})(\d+)$");
+                    string sWord = oDigits.Success ? oDigits.Groups[1].Value : sPart;
+                    sbOut.Append(char.ToUpperInvariant(sWord[0]));
+                    if (sWord.Length > 1)
+                        sbOut.Append(sWord.Substring(1).ToLowerInvariant());
+                    if (oDigits.Success) sbOut.Append(' ').Append(oDigits.Groups[2].Value);
                 }
             }
             return sbOut.ToString();
@@ -24426,6 +24432,14 @@ namespace DbDo
 
             if (sChoice.StartsWith("Merge", StringComparison.OrdinalIgnoreCase))
             {
+                // NEW FIELDS FIRST (13 October 2026). A merge adds records, not fields, so a copy made before a template
+                // gained a field -- office_phone, when the contact tables took DbDialog's pattern -- would never get
+                // it, and a report naming it would fail there. Each field the template has and the copy lacks is added
+                // first, empty, and then the records merge with it.
+                int iFields = 0;
+                try { iFields = addMissingColumns(sTemplate); }
+                catch (Exception exFields) { DbDoLog.write(sTitle + ": adding the template's new fields: " + exFields.Message); }
+                if (iFields > 0) Say.say((iFields == 1 ? "1 field" : iFields + " fields") + " from the template added.");
                 mergeWholeDatabase(sTemplate);
                 if (sFiles.Length > 0) Say.say(sFiles);
                 return;
@@ -24448,6 +24462,73 @@ namespace DbDo
             DbDoLog.write(sTitle + ": replaced " + sCopy + "; the copy as it was is " + sKept);
             showInfoDialog(sTitle, "Your " + sName + " is the template again. Your copy as it was is beside it, named "
                 + Path.GetFileName(sKept) + "." + (sFiles.Length > 0 ? "\r\n\r\n" + sFiles : ""));
+        }
+
+        // addMissingColumns: every ordinary field the template's tables have and this database's same-named tables lack
+        // is added, empty, at the end of the table; computed fields and tables the copy does not have are left alone.
+        // Returns how many fields were added, each one logged.
+        private int addMissingColumns(string sTemplate)
+        {
+            int iAdded = 0;
+            db.invokeSql("ATTACH DATABASE '" + sTemplate.Replace("'", "''") + "' AS tplsrc", null);
+            try
+            {
+                System.IO.StringWriter oTables = new System.IO.StringWriter();
+                db.invokeSql("SELECT '|' || name || '|' AS t FROM tplsrc.sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite%'", oTables);
+                foreach (System.Text.RegularExpressions.Match oTable in System.Text.RegularExpressions.Regex.Matches(oTables.ToString(), @"\|([A-Za-z0-9_]+)\|"))
+                {
+                    string sTable = oTable.Groups[1].Value;
+                    System.IO.StringWriter oHere = new System.IO.StringWriter(), oThere = new System.IO.StringWriter();
+                    db.invokeSql("SELECT '|' || name || '|' AS c FROM pragma_table_xinfo('" + sTable + "', 'main')", oHere);
+                    string sHere = oHere.ToString();
+                    if (sHere.IndexOf('|') < 0) continue;     // the copy has no such table
+                    bool bTableGrew = false;
+                    db.invokeSql("SELECT '#' || name || '#' || type || '#' || hidden || '#' AS c FROM pragma_table_xinfo('" + sTable + "', 'tplsrc')", oThere);
+                    foreach (System.Text.RegularExpressions.Match oColumn in System.Text.RegularExpressions.Regex.Matches(oThere.ToString(), @"#([A-Za-z0-9_]+)#([A-Za-z0-9_ ]*)#(\d+)#"))
+                    {
+                        string sColumn = oColumn.Groups[1].Value, sType = oColumn.Groups[2].Value.Trim();
+                        if (oColumn.Groups[3].Value != "0") continue;      // computed fields are the template's own
+                        if (sHere.IndexOf("|" + sColumn + "|", StringComparison.OrdinalIgnoreCase) >= 0) continue;
+                        db.invokeSql("ALTER TABLE main.\"" + sTable + "\" ADD COLUMN \"" + sColumn + "\" " + (sType.Length > 0 ? sType : "TEXTLINE"), null);
+                        iAdded++; bTableGrew = true;
+                        DbDoLog.write("Update from Template: added " + sTable + "." + sColumn + " " + sType);
+                    }
+                    // THE EDITED TRIGGER LEARNS THE NEW FIELDS. A Homer table's trigger names the fields whose change sets
+                    // edited, so a field added here would never mark the record edited. When the table has such a
+                    // trigger, it is written again from the table's ordinary fields, the way contactPattern.py writes it.
+                    if (bTableGrew) rewriteEditedTrigger(sTable);
+                }
+            }
+            finally { try { db.invokeSql("DETACH DATABASE tplsrc", null); } catch { } }
+            return iAdded;
+        }
+
+        // rewriteEditedTrigger: trg_<table>_edited, when the table has one, written again to cover every ordinary field
+        // but the id, added, edited and marked.
+        private void rewriteEditedTrigger(string sTable)
+        {
+            string sName = "trg_" + sTable + "_edited";
+            System.IO.StringWriter oHas = new System.IO.StringWriter();
+            db.invokeSql("SELECT '|' || name || '|' AS t FROM main.sqlite_master WHERE type = 'trigger' AND name = '" + sName + "'", oHas);
+            if (oHas.ToString().IndexOf("|" + sName + "|", StringComparison.OrdinalIgnoreCase) < 0) return;
+            System.IO.StringWriter oCols = new System.IO.StringWriter();
+            db.invokeSql("SELECT '#' || cid || '#' || name || '#' || hidden || '#' AS c FROM pragma_table_xinfo('" + sTable + "', 'main')", oCols);
+            List<string> lsFields = new List<string>(); string sId = "";
+            foreach (System.Text.RegularExpressions.Match oCol in System.Text.RegularExpressions.Regex.Matches(oCols.ToString(), @"#(\d+)#([A-Za-z0-9_]+)#(\d+)#"))
+            {
+                string sCol = oCol.Groups[2].Value;
+                if (oCol.Groups[1].Value == "0") { sId = sCol; continue; }
+                if (oCol.Groups[3].Value != "0") continue;
+                if (sCol == "added" || sCol == "edited" || sCol == "marked") continue;
+                lsFields.Add(sCol);
+            }
+            if (sId.Length == 0 || lsFields.Count == 0) return;
+            string sOf = string.Join(", ", lsFields.ConvertAll(f => "\"" + f + "\"").ToArray());
+            string sWhen = string.Join(" OR ", lsFields.ConvertAll(f => "OLD.\"" + f + "\" IS NOT NEW.\"" + f + "\"").ToArray());
+            db.invokeSql("DROP TRIGGER IF EXISTS \"" + sName + "\"", null);
+            db.invokeSql("CREATE TRIGGER \"" + sName + "\" AFTER UPDATE OF " + sOf + " ON \"" + sTable + "\" FOR EACH ROW WHEN " + sWhen
+                + " BEGIN UPDATE \"" + sTable + "\" SET edited = CURRENT_TIMESTAMP WHERE \"" + sId + "\" = NEW.\"" + sId + "\"; END", null);
+            DbDoLog.write("Update from Template: " + sName + " now covers " + lsFields.Count + " fields");
         }
 
         private void mergeWholeDatabase(string sOther)

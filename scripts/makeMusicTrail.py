@@ -37,6 +37,25 @@ sProject = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sLogPath = os.path.join(sProject, "logs", "DbDo-makeMusicTrail-%s.log" % datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
 
 
+
+def viewFromInix(sTemplate, sTable, sField, sDefault):
+    """THE TEMPLATE'S .inix DECIDES HOW A TABLE IS HEARD (13 October 2026). A builder wrote its own fields and order into
+    the views table, so every rebuild undid a choice made in the template's .inix -- the copy DbDo actually reads, and
+    the one a person changes. Now a builder asks the .inix first, and keeps its own value only for a table the .inix
+    does not mention, so the choice lives in one place."""
+    sInix = os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "templates", sTemplate, sTemplate + ".inix")
+    try:
+        sSection = ""
+        for sLine in open(sInix, encoding="utf-8-sig"):
+            sLine = sLine.strip()
+            if sLine.startswith("["): sSection = sLine
+            elif sSection.lower() == "[table:" + sTable.lower() + "]" and not sLine.startswith(";") and "=" in sLine:
+                sKey, sValue = sLine.split("=", 1)
+                if sKey.strip().lower() == sField.lower() and sValue.strip(): return sValue.strip()
+    except OSError:
+        pass
+    return sDefault
+
 def log(sText):
     os.makedirs(os.path.dirname(sLogPath), exist_ok=True)
     with open(sLogPath, "a", encoding="utf-8-sig") as fLog: fLog.write(datetime.datetime.now().strftime("%H:%M:%S ") + sText + "\n")
@@ -331,7 +350,7 @@ def build(sGenreText, sSongText, sTarget):
     for sTable, sSelect in (("albums", "name, artist, genre"), ("lookups", "fld, val"), ("maps", "kind, prime1, prime2"), ("performers", "name, role, genre")):
         sOrder = {"lookups": "fld, ordinal", "maps": "kind, prime1"}.get(sTable, "name")
         for sField, sValue in (("SelectFields", sSelect), ("OrderFields", sOrder), ("WhereFilter", "")):
-            oDb.execute("INSERT INTO views (tbl, fld, val) VALUES (?, ?, ?)", (sTable, sField, sValue))
+            oDb.execute("INSERT INTO views (tbl, fld, val) VALUES (?, ?, ?)", (sTable, sField, viewFromInix("MusicTrail", sTable, sField, sValue)))
     oDb.commit()
     sIntegrity = oDb.execute("PRAGMA integrity_check").fetchone()[0]
     iDangling = oDb.execute("SELECT count(*) FROM maps m WHERE NOT EXISTS (SELECT 1 FROM performers p WHERE m.tbl1 = 'performers' AND p.prime = m.prime1) "

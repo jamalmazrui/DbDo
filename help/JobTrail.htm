@@ -328,15 +328,20 @@ job search.</p>
 <p>The standard DbDo contacts table, unchanged. Keeping it identical
 means the lookups, the accelerator keys and anything built for contacts
 elsewhere work here without adjustment.</p>
+<p>The fields follow DbDo’s contact pattern, from DbDialog, which names
+each field so that it has an Alt letter of its own on the record form,
+and JobTrail adds <code>role</code> (R) after the enterprise:</p>
 <p><code>contact_id</code>, <code>added</code>, <code>edited</code>,
-<code>first_name</code>, <code>middle_name</code>,
-<code>last_name</code>, <code>enterprise</code>, <code>job</code>,
-<code>wireless_phone</code>, <code>home_phone</code>,
-<code>personal_email</code>, <code>business_email</code>,
-<code>address1</code>, <code>city</code>, <code>state</code>,
-<code>zip</code>, <code>nation</code>, <code>url</code>,
-<code>notes</code>, <code>tags</code>, <code>look</code>,
-<code>prime</code>, <code>marked</code>.</p>
+<code>title</code>, <code>first_name</code>, <code>middle_name</code>,
+<code>last_name</code>, <code>job</code>, <code>enterprise</code>,
+<code>role</code>, <code>address1</code>, <code>address2</code>,
+<code>city</code>, <code>state</code>, <code>zip</code>,
+<code>nation</code>, <code>office_phone</code>, <code>home_phone</code>,
+<code>wireless_phone</code>, <code>business_email</code>,
+<code>personal_email</code>, <code>date_of_birth</code>,
+<code>gender</code>, <code>url</code>, <code>notes</code>,
+<code>tags</code>, <code>look</code>, <code>prime</code>,
+<code>marked</code>.</p>
 <h3 id="actions">actions</h3>
 <p>Every contact made and every thing still to do, in one table. This is
 what the Work Search Record is built from, so its fields are the ones

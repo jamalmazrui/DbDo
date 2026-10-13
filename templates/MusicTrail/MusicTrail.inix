@@ -39,7 +39,8 @@ InitialTable = albums
 [Table:albums]
 
 SelectFields = name, artist, genre
-OrderFields = name
+; OrderFields, 13 October 2026: the books' own order: each genre's ten greatest albums, best first.
+OrderFields = genre, rank
 WhereFilter =
 
 [Table:lookups]

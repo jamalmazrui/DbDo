@@ -6,7 +6,8 @@
 SELECT last_name, first_name,
        coalesce(nullif(wireless_phone, ''), '') AS mobile,
        coalesce(nullif(home_phone, ''), '') AS home,
+       coalesce(nullif(office_phone, ''), '') AS office,
        coalesce(nullif(enterprise, ''), '') AS company
 FROM contacts
-WHERE coalesce(wireless_phone, '') <> '' OR coalesce(home_phone, '') <> ''
+WHERE coalesce(wireless_phone, '') <> '' OR coalesce(home_phone, '') <> '' OR coalesce(office_phone, '') <> ''
 ORDER BY last_name, first_name;

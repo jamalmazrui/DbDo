@@ -901,7 +901,8 @@ corrected record -- open your copy and choose **Update from Template** on the He
 menu (Alt+H, then U). It offers two buttons:
 
 - **Merge** adds what the template has and your copy lacks, and keeps everything of
-  yours. It uses Merge Database, so it first asks what to do with records both have;
+  yours. A field the template has gained is added to your copy first, empty, so a copy
+  made before it existed gets it too. It uses Merge Database, so it first asks what to do with records both have;
   Add new only, the first choice, changes none of yours. Your copy as it was is kept
   beside it, named with "before-merge".
 - **Replace** makes your copy the template again. Your copy as it was is kept beside it
@@ -909,6 +910,15 @@ menu (Alt+H, then U). It offers two buttons:
 
 Either way, a script, query or report the template has and your copy lacks is copied in
 beside it; none of yours is overwritten. Merge is the first button, so Enter takes it.
+
+**Your Outlook contacts, in one step.** ContactTrail and JobTrail each come with a script,
+Import Outlook Contacts. Open the database, press Control+Shift+I, Invoke Script, and choose
+it. If Microsoft Outlook is on your computer, every person in its Contacts folder who is not
+already in the database is added, with names, phones, email, address and job, and tagged
+outlook so a filter finds them all. Nothing already there is changed, so running it again
+adds only people who are new. Outlook's business phone becomes the Office Phone, and its
+title, second address line, birthday and gender fill those fields. If Outlook is not on your
+computer, the script says so and adds nothing. Press F5 afterwards to see them.
 
 Every template earns its place in one of three ways: it carries real data worth
 exploring, it serves a task people really do every day, or a recorded tutorial

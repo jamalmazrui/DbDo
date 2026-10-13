@@ -22,6 +22,7 @@ detail = """
 {{ $job ? "- " + $job + ($enterprise ? ", " + $enterprise : "") : ($enterprise ? "- " + $enterprise : "") }}
 {{ $wireless_phone ? "- Mobile: " + $wireless_phone : "" }}
 {{ $home_phone ? "- Home: " + $home_phone : "" }}
+{{ $office_phone ? "- Office: " + $office_phone : "" }}
 {{ $personal_email ? "- Email: " + $personal_email : "" }}
 {{ $business_email ? "- Work email: " + $business_email : "" }}
 {{ $address1 ? "- Address: " + $address1 + ($city ? ", " + $city : "") + ($state ? ", " + $state : "") + ($zip ? " " + $zip : "") + ($nation ? ", " + $nation : "") : "" }}

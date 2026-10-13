@@ -126,7 +126,7 @@ def build(sText, sTarget):
     for sTable, sSelect, sOrder in (("lookups", "fld, val", "fld, ordinal"), ("maps", "kind, prime1, prime2", "kind, prime1"),
                                     ("presentations", "title, minutes, medium", "title")):
         for sField, sValue in (("SelectFields", sSelect), ("OrderFields", sOrder), ("WhereFilter", "")):
-            oDb.execute("INSERT INTO views (tbl, fld, val) VALUES (?, ?, ?)", (sTable, sField, sValue))
+            oDb.execute("INSERT INTO views (tbl, fld, val) VALUES (?, ?, ?)", (sTable, sField, trail.viewFromInix("TechTraining", sTable, sField, sValue)))
     # A STARTER LISTENING LIST: three short presentations come marked, so the listening_list report and a play list
     # from Play Stream (Alt+Shift+P with records marked) show what they do the first time. Unmark them freely.
     for sTitle in lsStarterMarks:

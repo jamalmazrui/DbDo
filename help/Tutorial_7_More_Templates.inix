@@ -14,9 +14,9 @@ Hear=
 
 [step]
 
-Say=TechTraining first: more than a thousand free presentations about technology and accessibility, in audio, video and on the web. Alt plus Shift plus D, and I choose TechTraining.
+Say=TechTraining first: more than a thousand free presentations about technology and accessibility, in audio, video and on the web, newest first. Alt plus Shift plus D, and I choose TechTraining.
 Key=Enter
-Hear=presentations, 1166 records, no filter, sorted by title
+Hear=A Demonstration and Walkthrough of Be My Eyes for Mac, 26, audio, Row 1 of 1166
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

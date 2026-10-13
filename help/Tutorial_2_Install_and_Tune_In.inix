@@ -61,28 +61,21 @@ Hear=DbDo ready
 
 [step]
 
-Say=The first time, DbDo opens RadioTrail: internet radio stations, one to a row, sorted by name. Shift plus Z says so.
+Say=The first time, DbDo opens RadioTrail: internet radio stations, one to a row. The ten streams of the American Council of the Blind and the NFB Radio Network come first, then every other station by name. Shift plus Z says so.
 Key=Shift+Z
-Hear=stations, 55280 records, no filter, sorted by name
+Hear=stations, 55280 records, no filter, sorted by source, name
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Names that begin with a symbol sort first, so the top of the list is a mix. A station is quickest found by its name. Control plus J, Jump to Record, asks which column and what to look for.
-Key=Control+J
-Hear=Jump to Record dialog
+Say=The first station is already one of them. Insert plus Up Arrow says the line again.
+Key=Insert+Up Arrow
+Hear=ACB Media 1, The United States Of America, ACB Media, blindness, Row 1 of 55280
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=I leave the column as name, type A C B Media 1, and press Enter.
-Key=Enter
-Hear=ACB Media 1, Row 3592 of 55280
-Note=Confirm the wording with a live run: buildTutorials -live.
-
-[step]
-
-Say=One of the ten streams of the American Council of the Blind. Control plus I, Inspect Record, shows the whole record, one field to a line.
+Say=Control plus I, Inspect Record, shows the whole record, one field to a line.
 Key=Control+I
 Hear=Inspect Record dialog
 Hear=name: ACB Media 1
@@ -97,9 +90,16 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Escape closes the player and returns to the station, ready for the next.
-Key=Escape
-Hear=ACB Media 1, Row 3592 of 55280
+Say=Escape closes the player. A station I already know is quickest found by its name. Control plus J, Jump to Record, asks which column and what to look for.
+Key=Control+J
+Hear=Jump to Record dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I leave the column as name, type K E X P, and press Enter.
+Key=Enter
+Hear=KEXP, The United States Of America, various, Row 19193 of 55280
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

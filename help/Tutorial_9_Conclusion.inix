@@ -14,21 +14,29 @@ Hear=
 
 [step]
 
-Say=Keys follow words, so a key can be guessed: O opens and orders, F filters, M marks, P plays, and Shift reverses.
+Say=Keys follow words, so a key can be guessed. I name a word; the reader gives the key.
 Key=
-Hear=
+Hear=Open: Control plus O
+Hear=Order: Alt plus O
+Hear=Filter: Control plus F
+Hear=Play: Alt plus Shift plus P
 
 [step]
 
-Say=Records lead to others: Shift plus R says where, Alt plus Right Arrow goes there, and Alt plus Left Arrow comes back.
+Say=Records lead to others.
 Key=
-Hear=
+Hear=Say Related: Shift plus R
+Hear=Into the related records: Alt plus Right Arrow
+Hear=Back: Alt plus Left Arrow
 
 [step]
 
-Say=The templates are a start, not a museum: RadioTrail to listen, JobTrail to search for work, BookTrail to read, MusicTrail to explore, and four more. Make them yours, and Update from Template keeps them current.
+Say=The templates are a start, not a museum. Make them yours; when DbDo improves one, Help, Update from Template keeps your copy current.
 Key=
-Hear=
+Hear=RadioTrail, to listen
+Hear=JobTrail, to search for work
+Hear=BookTrail, to read
+Hear=MusicTrail, to explore
 
 [step]
 

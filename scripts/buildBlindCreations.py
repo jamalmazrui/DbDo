@@ -22,6 +22,8 @@ goes to the project's logs folder.
 """
 
 import datetime, html, os, platform, re, sqlite3, sys, unicodedata
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import makeMusicTrail as trail
 
 # A development tool in DbDo's scripts folder, not in the template's own folder: DbDo copies everything in a template
 # folder to each user, and this needs the MyPages source, which users do not have.
@@ -259,7 +261,7 @@ def main():
                                   ("creators", "last_name, first_name, roles", "last_name, first_name"),
                                   ("presentations", "title, by, kind", "title")):
         for sFld, sVal in (("SelectFields", sSelect), ("OrderFields", sOrder), ("WhereFilter", "")):
-            c.execute("INSERT INTO views (tbl, fld, val) VALUES (?,?,?)", (sTbl, sFld, sVal))
+            c.execute("INSERT INTO views (tbl, fld, val) VALUES (?,?,?)", (sTbl, sFld, trail.viewFromInix("BlindCreations", sTbl, sFld, sVal)))
     c.execute("COMMIT"); c.execute("VACUUM")
     dCount = {t: c.execute('SELECT count(*) FROM "%s"' % t).fetchone()[0] for t in ("apps", "books", "creators", "presentations", "maps")}
     c.close()

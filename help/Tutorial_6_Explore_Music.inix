@@ -28,16 +28,16 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=I choose MusicTrail and press Enter. Albums are in order by name.
+Say=I choose MusicTrail and press Enter. Albums are in the books' own order: by genre, and within each genre by rank, so the top blues album comes first.
 Key=Enter
-Hear=21, Adele, Pop, Row 1 of 100
+Hear=Born Under a Bad Sign, Albert King, Blues, Row 1 of 100
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Down Arrow.
-Key=Down Arrow
-Hear=A Night at the Opera, Queen, Hard Rock, Row 2 of 100
+Say=Control plus J, Jump to Record, finds an album by name. I type A Night at the Opera and press Enter.
+Key=Control+J
+Hear=A Night at the Opera, Queen, Hard Rock, Row 39 of 100
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -88,7 +88,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=A planned misstep: deep, and not sure how far. Alt plus Home returns to the table I started in, from any depth.
 Key=Alt+Home
-Hear=albums, A Night at the Opera, Row 2 of 100
+Hear=albums, A Night at the Opera, Row 39 of 100
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -114,8 +114,8 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Alt plus O, Order Records; I choose rank, and Enter.
-Key=Alt+O
+Say=Control plus Home goes to the first. They are already in rank order, since that is how MusicTrail is sorted.
+Key=Control+Home
 Hear=Ella Fitzgerald Sings the Cole Porter Song Book, Ella Fitzgerald, Vocal Jazz, Row 1 of 10
 Note=Confirm the wording with a live run: buildTutorials -live.
 

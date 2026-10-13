@@ -7,6 +7,7 @@
 SELECT c.last_name, c.first_name,
        coalesce(c.wireless_phone, '') AS mobile,
        coalesce(c.home_phone, '') AS home,
+       coalesce(c.office_phone, '') AS office,
        coalesce(nullif(c.personal_email, ''), c.business_email, '') AS email
 FROM contacts c
 JOIN maps m ON m.tbl1 = 'contacts' AND m.prime1 = c.prime AND m.kind = 'in_group' AND m.tbl2 = 'groups'

@@ -21,44 +21,44 @@ Hear=DbDo ready
 
 [step]
 
-Say=The main view is a list of records. Down Arrow moves by row, and the reader speaks the record: here, a station's name, its genres and its country.
+Say=The main view is a list of records. Down Arrow moves by row, and the reader speaks the record: here, a station's name, its country, and its genres.
 Key=Down Arrow
-Hear=!MODA, dance, electronic, house, Spain, Row 2 of 55280
+Hear=ACB Media 10, The United States Of America, ACB Media, blindness, Row 2 of 55280
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=Right Arrow moves by column within the record, saying the column's name and its value.
 Key=Right Arrow
-Hear=genre, dance, electronic, house, pop en espanol e ingles, top hits
+Hear=country, The United States Of America
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=Now the Say keys. Shift and a letter asks, and changes nothing. Shift plus Z is Say Status.
 Key=Shift+Z
-Hear=stations, 55280 records, no filter, sorted by name
+Hear=stations, 55280 records, no filter, sorted by source, name
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=Table, count, filter and sort in one breath. Shift plus C, C for Cell, says the cell you are on.
 Key=Shift+C
-Hear=genre, dance, electronic, house, pop en espanol e ingles, top hits
+Hear=country, The United States Of America
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=Shift plus Y, Say Yield, says how many records are in view; Shift plus 8 says the sort and filter.
 Key=Shift+8
-Hear=Sort: name. Filter: none.
+Hear=Sort: source, name. Filter: none.
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=Where a field has fixed values, Control plus F2, Pick Value, offers them as a list, so nothing is mistyped. On the country column:
 Key=Control+F2
-Hear=country: list box, Spain
+Hear=country: list box, The United States Of America
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

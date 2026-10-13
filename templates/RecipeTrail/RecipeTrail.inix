@@ -17,14 +17,17 @@ InitialTable = recipes
 
 [Table:recipes]
 
-SelectFields = name, course, cuisine
-OrderFields = name
+; SelectFields, 13 October 2026: cuisine is nearly always the same, so it says little.
+SelectFields = name, course
+; OrderFields, 13 October 2026: grouped by course, as a cookbook is.
+OrderFields = course, name
 WhereFilter =
 
 [Table:ingredients]
 
 SelectFields = name, category
-OrderFields = name
+; OrderFields, 13 October 2026: grouped by where each sits in the store, as the shopping list is.
+OrderFields = category, name
 WhereFilter =
 
 [Table:lookups]

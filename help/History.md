@@ -5,7 +5,24 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 13 October 2026 -- contacts in the DbDialog pattern
+
+- **ContactTrail and JobTrail use the contact pattern from DbDialog**, whose fields were named so each has an Alt letter of its own: title, first, middle and last name, job, enterprise, two address lines, city, state, zip, nation, office, home and wireless phone, business and personal email, date of birth, gender, then URL, notes and tags, in that order. Five were missing -- title, Address 2, Office Phone, Date of Birth and Gender -- and now each has its letter on the record form; JobTrail's role keeps R. Every record and link is kept as it was.
+- **Address 1 and Address 2** are shown with a space, so Address 2 gets Alt+2 as it did in DbDialog.
+- **Outlook's business phone is the Office Phone** when contacts are imported, and its title, second address line, birthday and gender are kept too. The phone list, the emergency contacts and both contact reports include the office number.
+- **Update from Template's Merge adds the template's new fields first**, so a copy made before Office Phone existed gets it, empty, before the records merge; and the table's edited trigger is written again to include them, so changing a new field marks the record edited.
+- **Editing any contact field marks the record edited.** The edited triggers named only the fields the tables had before, so changing an Office Phone or Gender left the edited date as it was; they now name every field.
+
+## 13 October 2026 -- Outlook contacts, and fresher directories
+
+- **Import Outlook Contacts.** ContactTrail and JobTrail each carry a script that adds the people in your Outlook contacts, through Outlook's own object model, the way KeyLine's contact scripts do. It adds only people who are not there already, tags them outlook, changes nothing else, and says plainly when Outlook is not installed. Run it with Invoke Script, Control+Shift+I.
+- **BlindCreations and TechTraining are rebuilt from the latest directories:** 107 books and 127 creators where the database had 104 and 126, and an APH presentation on BT Code, the Python environment for BT Speak and BT Braille.
+- **A rebuild keeps how each template is heard.** The scripts that build BlindCreations, MusicTrail and TechTraining wrote their own display fields and order into the database, so every rebuild undid the choices in the template's settings. They now take them from the template's .inix, the one place those choices live.
+- **The closing walk lets the reader speak** where five steps in a row had the host alone: the keys, the related-record moves and the templates are now said by the screen reader voice.
+
 ## 13 October 2026 -- walks around the templates, and Update from Template
+
+- **Each template opens to be heard well.** RadioTrail opens on the American Council of the Blind's ten streams and the NFB Radio Network, then every station by name, and speaks a station's name and country before its long list of genres. MusicTrail is in its books' own order, each genre's ten greatest albums best first. BookTrail names the book before its author. TechTraining puts the newest presentations first. RecipeTrail groups recipes by course and ingredients by store section. ContactTrail speaks a contact's mobile number where it spoke an employer most contacts lack. BlindCreations names who made each app, and the form each book comes in. JobTrail was already right. Each change is in the template's settings and in the database's own view, so a copy you share presents itself the same way.
 
 - **New spoken walks, built around the templates.** RadioTrail, JobTrail, BookTrail and MusicTrail each have a walk of their own -- install and tune in, find a station, track job leads, catalog your books, explore music -- and TechTraining, BlindCreations, ContactTrail and RecipeTrail are introduced together. Every key in them was checked against the menus, and every record the reader names is one the template holds. The old walks had drifted from the data: a station said to be at row 7, a count of stations two catalogs old, and F4 described as the pick list, which is Current Windows.
 - **Help, Update from Template.** Your copy of a template is brought up to date from the one installed with DbDo: Merge adds what the template has and your copy lacks, keeping everything of yours; Replace makes your copy the template again, keeping yours beside it as a dated backup. A new script or report in the template is added either way.
