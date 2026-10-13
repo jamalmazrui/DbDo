@@ -1408,9 +1408,13 @@ end;
 
 function InitializeSetup(): Boolean;
 begin
-  //  setup.exe /DEFAULTS: every Enter pressed for you (HomerComponents.iss). Alone,
-  //  it starts setup again very silently and this copy ends here.
+  //  setup.exe /verysilent /defaults: every default taken, no screens (HomerComponents.iss).
+  //  Alone, /defaults changes nothing and the log says so.
   if homerStartForDefaults() then begin Result := False; exit; end;
+  //  NO RESULTS FROM AN EARLIER RUN (13 October 2026, from an audit): DbDo_setup_results.txt
+  //  from a 1.0.270 install outlived a later run that did not rewrite it, and read as that
+  //  run's result. Whatever this run reports, it writes afresh.
+  DeleteFile(ExpandConstant('{localappdata}\{#AppName}\logs\{#AppName}_setup_results.txt'));
   //  mpv is MACHINE WIDE, in its own default folder under Program Files, never
   //  under {app}: an upgrade of DbDo replaces that tree and would take the
   //  player with it. The shared Mpv.cs looks there first.
@@ -1468,7 +1472,7 @@ begin
        starts DbDo as the person, not with the installer's elevated rights. *)
     if FileExists(ExpandConstant('{localappdata}\{#AppName}\logs\{#AppName}_launch.flag')) then
     begin
-      //  /DEFAULTS takes the Results box as read: no box, straight to the launch.
+      //  /defaults takes the Results box as read: no box, straight to the launch.
       if not homerDefaults() then
         Exec(ExpandConstant('{cmd}'), '/s /c ""' + ExpandConstant('{app}\scripts\summarizeSetup.cmd') + '""',
              ExpandConstant('{app}\exec'), SW_HIDE, ewWaitUntilTerminated, iResult);
@@ -1489,9 +1493,8 @@ begin
   (* DeinitializeSetup runs whenever Setup exits, INCLUDING WHEN THE USER
      CANCELS. Announcing success to somebody who backed out would be a plain
      lie, and in a silent installation there is nobody to close a box. *)
-  //  /DEFAULTS: the copy that only started setup again has nothing to report;
-  //  the very silent copy carries on, takes the box as read and launches.
-  if homerDefaults() and not WizardSilent then exit;
+  //  A silent install shows no box unless /defaults asks for its defaults, which
+  //  logs the box and launches; with screens, the box is shown as always.
   if WizardSilent and not homerDefaults() then exit;
   if not FileExists(ExpandConstant('{app}\exec\{#AppExeName}')) then exit;
 

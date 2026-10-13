@@ -5,6 +5,15 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 13 October 2026 -- results from this run only, and shared names explained
+
+- **The Results summary can no longer show an earlier run's result.** DbDo_setup_results.txt from a 1.0.270 install outlived a later run that did not rewrite it. Setup now deletes it when it starts, and the summary deletes it once read.
+- **A class DbDo shares with the kit passes the audit only with a reason.** KeyMap and KeyBinding are DbDo's own menu-dispatch types, different designs from the kit's context-aware ones; each is listed with why, and any other shared name fails until explained. Moving DbDo onto the kit's KeyMap is open work.
+
+## 13 October 2026 -- every default with no screens
+
+- **DbDo_setup.exe /verysilent /defaults installs with every default and no screens.** Inno Setup decides whether to show screens from the command line, before any installer code runs, so /defaults alone used to start setup again with /verysilent added. On 13 October 2026 that start failed on DbDo with no reason given, and HomerDev's and HomerScribe's installers never tried it, so all three showed every screen. /defaults now goes beside /verysilent, or /silent for a progress window, and alone changes nothing. A windowed install shows the Results box as always.
+
 ## 13 October 2026 -- two checks that had stopped checking
 
 - **The kit comparison runs again.** The audit looked for the kit's C# in the kit's CSharp folder, which moved to exec\\CSharp, so it skipped on every run with "no kit sources found". It now finds them, and reports that DbDo defines two classes the kit also has, KeyBinding and KeyMap, with DbDo's own taking precedence.

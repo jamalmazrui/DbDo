@@ -124,6 +124,8 @@ if ($lsOutcomes.Count -gt 0) {
 say ""
 say "Logs are kept in $sLogDir."
 try { Remove-Item -LiteralPath $sActionsFile -ErrorAction SilentlyContinue } catch { }
+# The results file too, once read, so a later run can never show this one's results (13 October 2026).
+try { Remove-Item -LiteralPath $sResultsFile -ErrorAction SilentlyContinue } catch { }
 if (-not $bQuiet) {
   Add-Type -AssemblyName System.Windows.Forms | Out-Null
   [System.Windows.Forms.MessageBox]::Show(($lLines -join [Environment]::NewLine), "$sApp Setup Results",

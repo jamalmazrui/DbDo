@@ -232,6 +232,14 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a
+href="#october-2026-results-from-this-run-only-and-shared-names-explained"
+id="toc-october-2026-results-from-this-run-only-and-shared-names-explained">13
+October 2026 – results from this run only, and shared names
+explained</a></li>
+<li><a href="#october-2026-every-default-with-no-screens"
+id="toc-october-2026-every-default-with-no-screens">13 October 2026 –
+every default with no screens</a></li>
 <li><a href="#october-2026-two-checks-that-had-stopped-checking"
 id="toc-october-2026-two-checks-that-had-stopped-checking">13 October
 2026 – two checks that had stopped checking</a></li>
@@ -472,6 +480,34 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
+<h2
+id="october-2026-results-from-this-run-only-and-shared-names-explained">13
+October 2026 – results from this run only, and shared names
+explained</h2>
+<ul>
+<li><strong>The Results summary can no longer show an earlier run’s
+result.</strong> DbDo_setup_results.txt from a 1.0.270 install outlived
+a later run that did not rewrite it. Setup now deletes it when it
+starts, and the summary deletes it once read.</li>
+<li><strong>A class DbDo shares with the kit passes the audit only with
+a reason.</strong> KeyMap and KeyBinding are DbDo’s own menu-dispatch
+types, different designs from the kit’s context-aware ones; each is
+listed with why, and any other shared name fails until explained. Moving
+DbDo onto the kit’s KeyMap is open work.</li>
+</ul>
+<h2 id="october-2026-every-default-with-no-screens">13 October 2026 –
+every default with no screens</h2>
+<ul>
+<li><strong>DbDo_setup.exe /verysilent /defaults installs with every
+default and no screens.</strong> Inno Setup decides whether to show
+screens from the command line, before any installer code runs, so
+/defaults alone used to start setup again with /verysilent added. On 13
+October 2026 that start failed on DbDo with no reason given, and
+HomerDev’s and HomerScribe’s installers never tried it, so all three
+showed every screen. /defaults now goes beside /verysilent, or /silent
+for a progress window, and alone changes nothing. A windowed install
+shows the Results box as always.</li>
+</ul>
 <h2 id="october-2026-two-checks-that-had-stopped-checking">13 October
 2026 – two checks that had stopped checking</h2>
 <ul>

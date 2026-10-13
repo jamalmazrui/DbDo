@@ -196,9 +196,29 @@ def checkShadowedKit():
     lsBoth = sorted(lsLocal & lsKit)
     for s in lsBoth:
         logLine("SHADOW: %s is defined by DbDo and by the kit; unqualified uses mean DbDo's" % s)
+    # A SHARED NAME PASSES ONLY WITH A REASON (13 October 2026, from an audit): the check named KeyBinding and KeyMap
+    # and called that a pass, which hides the judgment it should record. A class DbDo and the kit both define passes
+    # only when it is listed here with why; any other fails until it is either qualified away, moved to the kit, or
+    # listed with its reason.
+    lsUnexplained = [s for s in lsBoth if s not in dApprovedShadows]
+    for s in lsBoth:
+        if s in dApprovedShadows: logLine("SHADOW APPROVED: %s -- %s" % (s, dApprovedShadows[s]))
+    if lsUnexplained:
+        return finding("kit shadow", "fail", "%s defined by both DbDo and the kit with no recorded reason: %s; list each in dApprovedShadows with why, or remove the duplicate"
+                       % (countNoun(len(lsUnexplained), "class", "classes"), ", ".join(lsUnexplained)))
     return finding("kit shadow", "pass",
-                   "%s also defined by the kit: %s" %
+                   "%s also defined by the kit, each approved with its reason in the log: %s" %
                    (countNoun(len(lsBoth), "class", "classes"), ", ".join(lsBoth) if lsBoth else "none"))
+
+
+# Classes DbDo defines under a name the kit also uses, each with why it is not the kit's. Checked 13 October 2026: the
+# two are different designs, not copies.
+dApprovedShadows = {
+    "KeyMap": "DbDo's maps keys to menu items for dispatch; the kit's is the later context-aware binding table with summaries. "
+              "Moving DbDo onto the kit's design is open work.",
+    "KeyBinding": "DbDo's holds a key and a command for its menu map; the kit's adds context, summary and description. "
+                  "Goes with KeyMap.",
+}
 
 
 def checkSayLayer():
