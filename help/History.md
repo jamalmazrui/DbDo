@@ -5,6 +5,14 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 12 October 2026 -- MusicTrail holds a hundred albums and two hundred musicians, and RadioTrail goes to GitHub
+
+- **MusicTrail is rebuilt from two books.** It held a dozen sample albums. It now holds the 100 albums of Mastery in Music Genre -- ten in each of ten genres, in the book's ranked order, each with its artist, year, summary and awards -- and the 200 musicians of Mastery in Popular Song, a woman and a man for each of ten roles in each genre, with nationality, group, active years and the book's summary. Each has the Wikipedia page the book links it to. A performer "recorded" an album, and a musician is a "member_of" a band in the table, so John Bonham leads to Led Zeppelin and to Led Zeppelin IV. The genre and role pick lists carry the books' own descriptions.
+- **Albums and performers.** The artists table is now performers, so each table has its own first letter, as the Homer rules ask: albums and artists both began with A. A musician with an album of her own, such as Alicia Keys, is one performer.
+- **Every address whole, and the books corrected.** The first build cut every Wikipedia address short at its own closing parenthesis -- Humans_(album) became Humans_(album -- so 54 links led nowhere; every one of the 370 records now carries its whole address. The books themselves were corrected the same day: three albums named by a hit song now name the album (Completely Well, Humans, New Amerykah Part One), two dates and a title were put right, and Hard Rock gained the description the other genres had. makeMusicTrail now reads the manuscripts in MyBooks\books, which the published books are built from.
+- **scripts\makeMusicTrail rebuilds it** from the two EPUB files, found under any drive's MyBooks folder, and its log names every decision.
+- **RadioTrail is in the repository.** Its catalog of some 55,000 stations, 67 MB, ships with DbDo, and now the repository carries it too. Two changes keep that from growing the repository with every cycle: the build's search test reads a copy rather than the catalog, which it had changed every time by opening it; and push allows a file over 10 MB only when RepoFiles.txt names that file exactly, up to GitHub's limit of 100 MB.
+
 ## 12 October 2026 -- DbDo says the row it is on, and leaves an open database alone
 
 From the release logs of 1.0.259, your JAWS speech history, and an audit of both.

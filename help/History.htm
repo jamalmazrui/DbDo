@@ -233,6 +233,11 @@
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
 <li><a
+href="#october-2026-musictrail-holds-a-hundred-albums-and-two-hundred-musicians-and-radiotrail-goes-to-github"
+id="toc-october-2026-musictrail-holds-a-hundred-albums-and-two-hundred-musicians-and-radiotrail-goes-to-github">12
+October 2026 – MusicTrail holds a hundred albums and two hundred
+musicians, and RadioTrail goes to GitHub</a></li>
+<li><a
 href="#october-2026-dbdo-says-the-row-it-is-on-and-leaves-an-open-database-alone"
 id="toc-october-2026-dbdo-says-the-row-it-is-on-and-leaves-an-open-database-alone">12
 October 2026 – DbDo says the row it is on, and leaves an open database
@@ -426,6 +431,44 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
+<h2
+id="october-2026-musictrail-holds-a-hundred-albums-and-two-hundred-musicians-and-radiotrail-goes-to-github">12
+October 2026 – MusicTrail holds a hundred albums and two hundred
+musicians, and RadioTrail goes to GitHub</h2>
+<ul>
+<li><strong>MusicTrail is rebuilt from two books.</strong> It held a
+dozen sample albums. It now holds the 100 albums of Mastery in Music
+Genre – ten in each of ten genres, in the book’s ranked order, each with
+its artist, year, summary and awards – and the 200 musicians of Mastery
+in Popular Song, a woman and a man for each of ten roles in each genre,
+with nationality, group, active years and the book’s summary. Each has
+the Wikipedia page the book links it to. A performer “recorded” an
+album, and a musician is a “member_of” a band in the table, so John
+Bonham leads to Led Zeppelin and to Led Zeppelin IV. The genre and role
+pick lists carry the books’ own descriptions.</li>
+<li><strong>Albums and performers.</strong> The artists table is now
+performers, so each table has its own first letter, as the Homer rules
+ask: albums and artists both began with A. A musician with an album of
+her own, such as Alicia Keys, is one performer.</li>
+<li><strong>Every address whole, and the books corrected.</strong> The
+first build cut every Wikipedia address short at its own closing
+parenthesis – Humans_(album) became Humans_(album – so 54 links led
+nowhere; every one of the 370 records now carries its whole address. The
+books themselves were corrected the same day: three albums named by a
+hit song now name the album (Completely Well, Humans, New Amerykah Part
+One), two dates and a title were put right, and Hard Rock gained the
+description the other genres had. makeMusicTrail now reads the
+manuscripts in MyBooks, which the published books are built from.</li>
+<li><strong>scriptsrebuilds it</strong> from the two EPUB files, found
+under any drive’s MyBooks folder, and its log names every decision.</li>
+<li><strong>RadioTrail is in the repository.</strong> Its catalog of
+some 55,000 stations, 67 MB, ships with DbDo, and now the repository
+carries it too. Two changes keep that from growing the repository with
+every cycle: the build’s search test reads a copy rather than the
+catalog, which it had changed every time by opening it; and push allows
+a file over 10 MB only when RepoFiles.txt names that file exactly, up to
+GitHub’s limit of 100 MB.</li>
+</ul>
 <h2
 id="october-2026-dbdo-says-the-row-it-is-on-and-leaves-an-open-database-alone">12
 October 2026 – DbDo says the row it is on, and leaves an open database
