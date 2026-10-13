@@ -1,17 +1,17 @@
-﻿; Tutorial_0_Overview.inix -- what DbDo is, the two reader keys, and the table of contents.
+﻿; Tutorial_0_Overview.inix -- what DbDo is, the databases it comes with, two reader keys, and the table of contents.
 
 [feed]
 Title=DbDo Walkthroughs
-Description=Spoken walks through DbDo, the database program built for working by ear. Ten walks, each under five minutes, in the order a new person meets them.
+Description=Spoken walks through DbDo, the database program built for working by ear, and the ready-made databases that come with it. Ten walks, each under five minutes, in the order a new person meets them.
 Author=Jamal Mazrui
 Email=jamal.mazrui@outlook.com
 Base=
 
 [about]
 Title=0 - Overview
-Intro=What DbDo is, two keys of the screen reader's own, and the table of contents.
+Intro=What DbDo is, the ready-made databases that come with it, three keys of the screen reader's own, and the table of contents.
 Setup=Nothing is needed; this walk is listened to.
-Homework=Take walks one and two, then pick the task you need today.
+Homework=Take walks one and two, then the walk for the database you want first.
 
 [step]
 
@@ -21,31 +21,70 @@ Hear=
 
 [step]
 
-Say=It opens SQLite databases, and imports from Excel and others, and shows one table at a time as a list of records you move through by row and by column. Every cell can be heard, edited, searched, marked and counted from the keyboard, and the program answers questions about where you are without changing anything.
+Say=It shows one table at a time as a list of records you move through by row and by column. Every cell can be heard, edited, searched, marked and counted from the keyboard, and the program answers questions about where you are without changing anything.
 Key=
 Hear=
 
 [step]
 
-Say=You know your screen reader's own keys already, and three of them are worth remembering whenever you feel lost or unsure. Insert plus Up Arrow says the line you are on again.
+Say=It also comes with ready-made databases, called templates, each a complete example you can use as it is or make your own. These walks are built around them.
+Key=
+Hear=
+
+[step]
+
+Say=Radio comes first: RadioTrail, internet radio stations from around the world, each one a key press from playing.
+Key=
+Hear=55280 stations from 221 countries.
+
+[step]
+
+Say=Then JobTrail, for a job search: openings, the people at each employer, what you sent and what happened.
+Key=
+Hear=Jobs, contacts, actions, documents and stories, linked to one another.
+
+[step]
+
+Say=BookTrail, a catalog of what you read and want to read, in any form.
+Key=
+Hear=Audio from BARD, text from Bookshare, braille and eBooks, side by side.
+
+[step]
+
+Say=And MusicTrail, the greatest albums of ten genres and the people who made them.
+Key=
+Hear=100 albums and 270 performers, each album linked to who recorded it.
+
+[step]
+
+Say=Four more get a shorter visit in walk seven: TechTraining, BlindCreations, ContactTrail and RecipeTrail.
+Key=
+Hear=
+
+[step]
+
+Say=You know your screen reader's own keys already, and three of them are worth remembering whenever you feel lost. Insert plus Up Arrow says the line you are on again.
 Key=Insert+Up Arrow
-Hear=KEXP 90.3 Seattle, WA, Row 7 of 60342
+Hear=ACB Media 1, Row 3592 of 55280
+Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=Insert plus Tab says what has the focus: its name, its role, and its value or state.
 Key=Insert+Tab
-Hear=Records list view, KEXP 90.3 Seattle, WA, 7 of 60342
+Hear=Records list view, ACB Media 1, 3592 of 55280
+Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=Insert plus T says the title of the window.
 Key=Insert+T
 Hear=DbDo, RadioTrail dot d b, stations
+Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=If you set your screen reader to use Caps Lock in place of Insert, Caps Lock works the same way for all three.
+Say=If your screen reader uses Caps Lock in place of Insert, Caps Lock works the same way for all three.
 Key=
 Hear=
 
@@ -59,58 +98,52 @@ Hear=
 
 Say=One, User Interface.
 Key=
-Hear=The window, the record list, the Say keys that ask without changing, the pick list, the menus, the rules every key follows, and where help lives.
+Hear=The window, the record list, the Say keys that ask without changing, the menus, the rules every key follows, and where help lives.
 
 [step]
 
-Say=Two, Install and Launch.
+Say=Two, Install and Tune In.
 Key=
-Hear=The installer, the boxes on its last page, and DbDo opening with Alt plus Control plus D.
+Hear=The installer, DbDo opening on RadioTrail, a station found by name and playing.
 
 [step]
 
-Say=Three, Open a Database and Move Through Records.
+Say=Three, Find a Station.
 Key=
-Hear=A template database opened, and moving by row, by column, by search and by number.
+Hear=A station that may carry the Seahawks game: searched, filtered, narrowed, put in order and played.
 
 [step]
 
-Say=Four, Edit and Add Records.
+Say=Four, Track Job Leads.
 Key=
-Hear=A cell changed, a value picked from a list, a record added.
+Hear=JobTrail: a status brought up to date, a job added, notes kept, and the people linked to a job.
 
 [step]
 
-Say=Five, Mark, Filter and Sort.
+Say=Five, Catalog Your Books.
 Key=
-Hear=A station that may carry the Seahawks game: the list filtered, narrowed and put in order, then played; and records marked.
+Hear=BookTrail: what you are reading next, counts by format, and a reading log written as a document.
 
 [step]
 
-Say=Six, Follow Related Records.
+Say=Six, Explore Music.
 Key=
-Hear=From one record into the records related to it, and back.
+Hear=MusicTrail: from an album to the band that recorded it, to its members, and back.
 
 [step]
 
-Say=Seven, Statistics and Reports.
+Say=Seven, More Templates.
 Key=
-Hear=The numbers in a column, and a report written as a document.
+Hear=TechTraining, BlindCreations, ContactTrail and RecipeTrail, and bringing your copy up to date when a template improves.
 
 [step]
 
 Say=Eight, Ask with SQL.
 Key=
-Hear=A question in the database's own language, and the history of questions asked.
+Hear=A question in the database's own language, and the same question asked in plain words.
 
 [step]
 
 Say=Nine, Conclusion.
 Key=
-Hear=What to carry away, the words DbDo uses, the help built in, and where to learn more.
-
-[step]
-
-Say=Ten walks, each under five minutes, under an hour together: the overview, the user interface, seven tasks, and the conclusion. They are a course, not a reference: each one assumes those before it.
-Key=
-Hear=
+Hear=What to carry away, the words DbDo uses, and the help built in.

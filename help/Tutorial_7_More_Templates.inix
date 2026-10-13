@@ -1,0 +1,131 @@
+﻿; Tutorial_7_More_Templates.inix -- TechTraining, BlindCreations, ContactTrail and RecipeTrail in brief, and bringing a copy up to date from its template.
+
+[about]
+Title=7 - More Templates
+Intro=Four more ready-made databases in brief -- a lesson to play from TechTraining, a creator and their work in BlindCreations, the emergency list in ContactTrail, a shopping list from RecipeTrail -- and how to bring your copy of any template up to date when DbDo improves it.
+Setup=DbDo is open.
+Homework=Open the template nearest your own life and make one record your own.
+
+[step]
+
+Say=One want: to know what else is ready-made, and keep my copies current.
+Key=
+Hear=
+
+[step]
+
+Say=TechTraining first: more than a thousand free presentations about technology and accessibility, in audio, video and on the web. Alt plus Shift plus D, and I choose TechTraining.
+Key=Enter
+Hear=presentations, 1166 records, no filter, sorted by title
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A few minutes free? Control plus Shift plus I, Invoke Script, and Quick Lessons: the ones that play in fifteen minutes or less, shortest first.
+Key=Enter
+Hear=Accessible Design is Good Design (Part 3) -- At a Glance, 1, video, Row 1 of 372
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Alt plus Shift plus P, Play Stream, plays a presentation as it plays a station.
+Key=Alt+Shift+P
+Hear=Homer Player, Accessible Design is Good Design (Part 3) -- At a Glance
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape. BlindCreations next: apps, books and presentations made by or for blind people, and the people who made them, linked by kind. Alt plus Shift plus D, BlindCreations, and Control plus T to the creators.
+Key=Control+T
+Hear=Choose Table dialog, apps
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I choose creators, then Control plus J to the last name Bishop.
+Key=Enter
+Hear=Bishop, Jeff, Row 7 of 126
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Shift plus R says what this creator made, in each kind.
+Key=Shift+R
+Hear=apps 4, presentations 3
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Alt plus Right Arrow goes into any of them, as with the band in MusicTrail. Escape. ContactTrail keeps people and the groups they belong to. Its Emergency Contacts script lists everyone in the Emergency group, with every number.
+Key=
+Hear=
+
+[step]
+
+Say=RecipeTrail keeps recipes and their ingredients. Mark the recipes you mean to cook with Control plus M, then its Shopping List script lists each ingredient once, grouped by where it sits in the store.
+Key=
+Hear=
+
+[step]
+
+Say=Now the copies. The first time you open a template, DbDo gives you your own copy, so nothing you change touches the original. When a new DbDo brings an improved template, more stations or a new script, your copy stays as you left it.
+Key=
+Hear=
+
+[step]
+
+Say=To take the improvements, open your copy, and from the Help menu choose Update from Template. Alt plus H, then U.
+Key=U
+Hear=Update from Template dialog
+Hear=Merge button
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Two buttons. Merge adds what the template has and your copy lacks, and keeps everything of yours; it asks first what to do about records both have, and Add new only, the first choice, changes none of yours.
+Key=Tab
+Hear=Replace button
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Replace makes your copy the template again, and keeps your copy as it was beside it, as a dated backup, so nothing is lost. Either way, a new script or report in the template is added beside your copy.
+Key=
+Hear=
+
+[step]
+
+Say=A planned misstep: choosing Replace for a copy full of your own records. Merge is the first button, so Enter takes it; Escape leaves without a change.
+Key=Escape
+Hear=DbDo ready
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=What this walk taught. I name the command; the reader gives the key.
+Key=
+Hear=
+
+[step]
+
+Say=Run a saved script.
+Key=
+Hear=Control plus Shift plus I
+
+[step]
+
+Say=Play the record.
+Key=
+Hear=Alt plus Shift plus P
+
+[step]
+
+Say=Say what a record leads to.
+Key=
+Hear=Shift plus R
+
+[step]
+
+Say=Update your copy from its template.
+Key=
+Hear=Alt plus H, then U

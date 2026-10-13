@@ -30,6 +30,7 @@ getDbDoDeps.cmd
 getDbDoDeps.ps1
 help/
 help/Tutorials.md
+help/tutorials/
 help/Tutorials.mkv
 License.htm
 License.md

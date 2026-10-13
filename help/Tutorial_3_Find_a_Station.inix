@@ -1,0 +1,177 @@
+﻿; Tutorial_3_Find_a_Station.inix -- a station that may carry the Seahawks game: searched, filtered, narrowed, ordered, played and marked.
+
+[about]
+Title=3 - Find a Station
+Intro=RadioTrail searched for words, filtered to the stations that mention the Seattle Seahawks, narrowed to Washington, put in order, and one played; then stations marked to keep.
+Setup=DbDo is open on RadioTrail.
+Homework=Filter RadioTrail for your own team or a favorite genre, then play what is left.
+
+[step]
+
+Say=One want: a station that may be carrying the Seattle Seahawks game, ready to play.
+Key=
+Hear=
+
+[step]
+
+Say=Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+Key=Alt+Control+D
+Hear=DbDo
+Hear=DbDo ready
+
+[step]
+
+Say=Control plus K, K for Keywords, searches every column for words: names, genres, notes, all of them.
+Key=Control+K
+Hear=Keywords dialog
+Hear=Keywords: edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I type seahawks and press Enter. The cursor moves to the first station that mentions the team.
+Key=Enter
+Hear=99.3 KDRM, Row 3290 of 55280
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=F3 goes to the next match, Shift plus F3 to the one before. Keywords moves the cursor and hides nothing. To see only the matches, filter.
+Key=F3
+Hear=CISL Sportsnet 650 Richmond, BC
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A planned misstep: Control plus F is not Find here. In DbDo, F is for Filter. Control plus F shows only the records that match, beginning with a choice offered as buttons.
+Key=Control+F
+Hear=Filter Records dialog
+Hear=Any Field button
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Any Field is the first button, so Enter presses it. It asks for the text to find, wherever it is.
+Key=Enter
+Hear=Any Field Contains dialog
+Hear=Text to find in any field: edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I type seahawks and press Enter.
+Key=Enter
+Hear=7 records have seahawks.
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Seven: stations in Seattle and Tacoma, in British Columbia and in Idaho. Control plus F again; with a filter in force there are more buttons. N for Narrow keeps seahawks and adds a field.
+Key=N
+Hear=Filter Records dialog, name: edit
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I move to the state box, type Washington, and press Enter.
+Key=Enter
+Hear=Filter applied. 3 records match.
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Shift plus F, Say Filter, says both parts, in the words each was asked in.
+Key=Shift+F
+Hear=any field contains seahawks; and where: state = 'Washington'
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Alt plus O, O for Order, sorts by a column; I choose name, and Enter sorts.
+Key=Alt+O
+Hear=Order Records dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Down Arrow to the second.
+Key=Down Arrow
+Hear=KIRO 710 ESPN Seattle, Row 2 of 3
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The sports station. Alt plus Shift plus P plays it.
+Key=Alt+Shift+P
+Hear=Homer Player, KIRO 710 ESPN Seattle
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape. To keep stations, mark them. Control plus M, M for Mark, marks the station I am on, and Control plus Shift plus M unmarks: Shift reverses.
+Key=Control+M
+Hear=Marked
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=For a run of records, F8 starts it where I am, and Shift plus F8 completes it where I stop. Control plus A marks every record in view.
+Key=Control+A
+Hear=Marked 3 records
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Now the payoff. With records marked, Alt plus Shift plus P plays all of them, one after another, as a playlist.
+Key=Alt+Shift+P
+Hear=Homer Player, 3 tracks, 99.3 KDRM
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape. Control plus Shift plus F clears the filter, and every station is back, the marks kept. Marks stay when DbDo closes, so a marked station is a favorite to come back to.
+Key=Control+Shift+F
+Hear=Filter cleared. 55280 records.
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=What this walk taught. I name the command; the reader gives the key.
+Key=
+Hear=
+
+[step]
+
+Say=Search every column.
+Key=
+Hear=Control plus K
+
+[step]
+
+Say=Show only the matches.
+Key=
+Hear=Control plus F
+
+[step]
+
+Say=Say the filter.
+Key=
+Hear=Shift plus F
+
+[step]
+
+Say=Order by a column.
+Key=
+Hear=Alt plus O
+
+[step]
+
+Say=Mark a record.
+Key=
+Hear=Control plus M
+
+[step]
+
+Say=Play the marked stations.
+Key=
+Hear=Alt plus Shift plus P

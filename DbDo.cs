@@ -317,21 +317,13 @@ namespace DbDo
                             return;
                         }
                     }
-                    string sNew = sDstPath + ".new";
-                    string sKept = sDstPath + ".before-update-" + System.DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".bak";
                     try
                     {
-                        System.IO.File.Copy(sSrcPath, sNew, true);
-                        clearReadOnly(sNew);
-                        if (!string.Equals(sha256Hex(sNew), sha256Hex(sSrcPath), StringComparison.OrdinalIgnoreCase)) throw new System.IO.IOException("the copied template did not match the installed one");
-                        clearReadOnly(sDstPath);
-                        System.IO.File.Replace(sNew, sDstPath, sKept);
-                        writeSeedRecord(sDstPath);
+                        string sKept = replaceFromTemplate(sSrcPath, sDstPath);
                         try { DbDoLog.write("Seeding: " + sDstPath + " was untouched since it was seeded (" + (bRecorded ? "its fingerprint matched" : "by its dates; it had no fingerprint") + "), so the newer template replaced it; the old copy is " + sKept + "."); } catch { }
                     }
                     catch (Exception oError)
                     {
-                        try { if (System.IO.File.Exists(sNew)) System.IO.File.Delete(sNew); } catch { }
                         try { DbDoLog.write("Seeding: " + sDstPath + " was not updated, and is as it was: " + oError.Message); } catch { }
                     }
                     return;
@@ -349,6 +341,72 @@ namespace DbDo
                 // Seeding never stops the picker, but a failure is recorded (11 October 2026), not swallowed.
                 try { DbDoLog.write("Seeding: " + sDstPath + " failed: " + oError.Message); } catch { }
             }
+        }
+
+        // replaceFromTemplate: puts an installed template in place of a person's copy, safely, and returns where the copy as
+        // it was is kept. Shared by the seeding refresh, for a copy nobody has changed, and by Help > Update from
+        // Template, for a copy the person chose to replace (13 October 2026). The template is copied to <name>.db.new and
+        // checked against the original first; File.Replace then swaps it in, keeping the old copy as
+        // <name>.db.before-update-<stamp>.bak, in one step, so a failure leaves the person's copy where it was. The new
+        // copy's fingerprint is recorded, so a later install may refresh it while it stays untouched.
+        public static string replaceFromTemplate(string sSrcPath, string sDstPath)
+        {
+            string sNew = sDstPath + ".new";
+            string sKept = sDstPath + ".before-update-" + System.DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".bak";
+            try
+            {
+                System.IO.File.Copy(sSrcPath, sNew, true);
+                clearReadOnly(sNew);
+                if (!string.Equals(sha256Hex(sNew), sha256Hex(sSrcPath), StringComparison.OrdinalIgnoreCase)) throw new System.IO.IOException("the copied template did not match the installed one");
+                clearReadOnly(sDstPath);
+                System.IO.File.Replace(sNew, sDstPath, sKept);
+                writeSeedRecord(sDstPath);
+                return sKept;
+            }
+            catch
+            {
+                try { if (System.IO.File.Exists(sNew)) System.IO.File.Delete(sNew); } catch { }
+                throw;
+            }
+        }
+
+        // installedTemplateFor: the template installed with DbDo that a database is a copy of, found by its name --
+        // BookTrail.db anywhere is a copy of templates\BookTrail\BookTrail.db -- or null when DbDo installs none by
+        // that name.
+        public static string installedTemplateFor(string sDbPath)
+        {
+            try
+            {
+                string sName = System.IO.Path.GetFileNameWithoutExtension(sDbPath ?? "");
+                if (sName.Length == 0) return null;
+                string sTemplate = System.IO.Path.Combine(Homer.Paths.shippedTemplates(), sName, sName + ".db");
+                return System.IO.File.Exists(sTemplate) ? sTemplate : null;
+            }
+            catch { return null; }
+        }
+
+        // copyMissingCompanions: the files beside an installed template -- its queries, scripts, reports and settings --
+        // that are missing beside a person's copy are copied there; a file already there is the person's and is never
+        // overwritten. Returns how many were copied.
+        public static int copyMissingCompanions(string sTemplate, string sCopy)
+        {
+            int iCopied = 0;
+            try
+            {
+                string sFrom = System.IO.Path.GetDirectoryName(sTemplate), sTo = System.IO.Path.GetDirectoryName(sCopy);
+                foreach (string sSrc in System.IO.Directory.GetFiles(sFrom))
+                {
+                    if (sSrc.EndsWith(".db", StringComparison.OrdinalIgnoreCase)) continue;
+                    string sDst = System.IO.Path.Combine(sTo, System.IO.Path.GetFileName(sSrc));
+                    if (System.IO.File.Exists(sDst)) continue;
+                    System.IO.File.Copy(sSrc, sDst, false);
+                    clearReadOnly(sDst);
+                    iCopied++;
+                    try { DbDoLog.write("Update from Template: added " + sDst); } catch { }
+                }
+            }
+            catch (Exception oError) { try { DbDoLog.write("Update from Template: companion files: " + oError.Message); } catch { } }
+            return iCopied;
         }
 
         // fileInUse: whether another handle -- DbDo's own open connection, most often -- refuses a plain read of the file.
@@ -13563,6 +13621,10 @@ namespace DbDo
             // something somebody does once or twice, not a command they reach
             // for, and the free keys are worth keeping for commands that are.
             miHelpTutorials    = addItem(miHelp, "&Play Tutorials",                      "Play Tutorials",    Keys.None,                          helpTutorialsClicked);
+            // UPDATE FROM TEMPLATE (13 October 2026): a copy of a template brought up to date from the one installed with
+            // DbDo, by merging the template into it or replacing it. U for Update; no shortcut key, like Play Tutorials:
+            // something done after an update, not a command reached for daily.
+            addItem(miHelp, "&Update from Template...", "Update from Template", Keys.None, helpUpdateFromTemplateClicked);
 
             // The former per-sample items (Open Convention / Northwind /
             // Chinook) were removed: the Template Databases picker above
@@ -24321,6 +24383,73 @@ namespace DbDo
         // The shape of the question is FileDir's when it copies over files that
         // exist, adapted: there, the units are files and the test is the date;
         // here they are records and the test is the prime.
+        // helpUpdateFromTemplateClicked: Help > Update from Template. The open database is a copy of a template DbDo
+        // installs -- RadioTrail, JobTrail and the rest -- and a newer DbDo may install a newer template: more stations, a
+        // new query, a corrected record. The copy is the person's and is never changed by an install once they have
+        // changed it, so this is how they choose to take the template's changes. Two choices, as buttons:
+        //   Merge    the template folds into the copy through Merge Database: what the template has that the copy lacks
+        //            is added, and the same dialog asks what to do with records both have (Add new only keeps theirs).
+        //   Replace  the copy becomes the template again; the copy as it was is kept beside it as a dated backup.
+        // Either way, files beside the template that the copy lacks -- a new query or report -- are copied in, and none
+        // of the person's is overwritten.
+        private void helpUpdateFromTemplateClicked(object sender, EventArgs e)
+        {
+            const string sTitle = "Update from Template";
+            if (db == null || !db.isOpen() || string.IsNullOrEmpty(db.filePath)) { Say.sayForced("No database is open."); return; }
+            string sCopy = db.filePath;
+            string sName = Path.GetFileNameWithoutExtension(sCopy);
+            string sTemplate = ScriptHelper.installedTemplateFor(sCopy);
+            if (sTemplate == null)
+            {
+                ErrorDialog.show(this, sTitle, sName + " is not one of the templates DbDo installs, so there is no template to update it from.");
+                return;
+            }
+            if (string.Equals(Path.GetFullPath(sTemplate), Path.GetFullPath(sCopy), StringComparison.OrdinalIgnoreCase))
+            {
+                ErrorDialog.show(this, sTitle, "This is the installed template itself. Open your own copy with Template Databases, Alt+Shift+D, and update that.");
+                return;
+            }
+            if (db.readOnly) { Say.sayForced("This database is open read only."); return; }
+
+            string sChoice;
+            using (LbcDialog dlgAsk = new LbcDialog(sTitle, this))
+            {
+                dlgAsk.addLabel("Bring your " + sName + " up to date from the template installed with DbDo. Merge adds what the template has "
+                    + "and your copy lacks, and keeps everything of yours. Replace makes your copy the template again; your copy as it is "
+                    + "now is kept beside it as a dated backup.");
+                sChoice = dlgAsk.runWithButtons(new string[] { "Merge", "Replace", "Cancel" });
+            }
+            if (string.IsNullOrEmpty(sChoice) || sChoice.StartsWith("Cancel", StringComparison.OrdinalIgnoreCase)) return;
+            DbDoLog.write(sTitle + ": " + sChoice + " " + sCopy + " from " + sTemplate);
+            int iFiles = ScriptHelper.copyMissingCompanions(sTemplate, sCopy);
+            string sFiles = iFiles == 0 ? "" : (iFiles == 1 ? "1 file" : iFiles + " files") + " from the template, such as a query or report, added beside it.";
+
+            if (sChoice.StartsWith("Merge", StringComparison.OrdinalIgnoreCase))
+            {
+                mergeWholeDatabase(sTemplate);
+                if (sFiles.Length > 0) Say.say(sFiles);
+                return;
+            }
+
+            // Replace: the database is closed first, since Windows will not swap a file that is open.
+            RecentFiles.FileState stBefore = null;
+            try { stBefore = RecentFiles.findByPath(RecentFiles.loadAll(), sCopy); } catch { }
+            try { db.close(); } catch (Exception exClose) { DbDoLog.write(sTitle + ": closing " + sCopy + ": " + exClose.Message); }
+            string sKept = null, sProblem = null;
+            try { sKept = ScriptHelper.replaceFromTemplate(sTemplate, sCopy); }
+            catch (Exception exReplace) { sProblem = exReplace.Message; DbDoLog.write(sTitle + ": not replaced: " + sProblem); }
+            try { openDatabaseAndApplyState(sCopy, stBefore); }
+            catch (Exception exOpen) { ErrorDialog.show(this, sTitle, "Could not open " + sCopy + " again: " + exOpen.Message); return; }
+            if (sProblem != null)
+            {
+                ErrorDialog.show(this, sTitle, "Your " + sName + " was not replaced, and is as it was.\n\n" + sProblem);
+                return;
+            }
+            DbDoLog.write(sTitle + ": replaced " + sCopy + "; the copy as it was is " + sKept);
+            showInfoDialog(sTitle, "Your " + sName + " is the template again. Your copy as it was is beside it, named "
+                + Path.GetFileName(sKept) + "." + (sFiles.Length > 0 ? "\r\n\r\n" + sFiles : ""));
+        }
+
         private void mergeWholeDatabase(string sOther)
         {
             {

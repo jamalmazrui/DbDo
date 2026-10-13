@@ -14,12 +14,10 @@ version.txt
 Version.cs
 work/
 
-# The spoken tutorials' working material.
-# The walks' scripts, help/Tutorial_*.inix, travel with the repository: a clean
-# checkout speaks them. Only the audio stays local, since the build makes it.
-help/*.mp3
+# The spoken tutorials' working material. The walks' scripts and their audio,
+# help/tutorials, travel with the repository (13 October 2026): the audio ships
+# ready-made, and its fingerprints let a build elsewhere speak nothing it need not.
 help/Tutorials.m3u
-help/tutorials/
 scripts/ffmpeg.exe
 scripts/ffprobe.exe
 scripts/voices/

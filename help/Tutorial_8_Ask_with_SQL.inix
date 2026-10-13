@@ -1,14 +1,14 @@
-﻿; Tutorial_8_Ask_with_SQL.inix -- questions in SQL.
+﻿; Tutorial_8_Ask_with_SQL.inix -- a question in SQL, the database's own language, and the same kind of question in plain words.
 
 [about]
 Title=8 - Ask with SQL
-Intro=A question in the database's own language with Control plus Q, the answer shown as records, and the history of questions asked.
-Setup=JobTrail is open in DbDo; Alt plus Shift plus D opens it.
-Homework=Write a query that counts your records by one column.
+Intro=MusicTrail asked which genre's greatest albums go back furthest, in one line of SQL; the answer moved through like a table; the history of questions; a question in plain words to a model on this computer; and working safely.
+Setup=DbDo is open on MusicTrail.
+Homework=Ask RadioTrail how many stations each country has, most first.
 
 [step]
 
-Say=One want: an answer no single command gives -- how many jobs at each employer, most first. SQL, the database's own language, asks it in one line.
+Say=One want: an answer no single command gives: for each genre, how far back its greatest albums go. SQL, the database's own language, asks it in one line.
 Key=
 Hear=
 
@@ -30,40 +30,48 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 [step]
 
 Say=I type the question.
-Key=select employer, count(*) as jobs from jobs group by employer order by jobs desc
-Hear=select employer count as jobs from jobs group by employer order by jobs desc
+Key=select genre, min(year) as earliest, count(*) as albums from albums group by genre order by earliest
+Hear=select genre, min year as earliest, count as albums from albums group by genre order by earliest
+Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=Control plus Enter runs it from inside the box, where Enter would start a new line.
 Key=Control+Enter
-Hear=Northwind Health, 4, Row 1 of 7
+Hear=Vocal Jazz, 1954, 10, Row 1 of 10
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=The answer is shown as records, moved through like any table. Shift plus Q says the query in force.
+Say=Vocal Jazz goes back furthest. The answer is a table like any other. Control plus End.
+Key=Control+End
+Hear=Hip Hop, 1987, 10, Row 10 of 10
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=And Hip Hop, the youngest. Shift plus Q says the query in force.
 Key=Shift+Q
-Hear=query: select employer, count star as jobs from jobs group by employer order by jobs desc
+Hear=query: select genre, min year as earliest, count star as albums from albums group by genre order by earliest
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=A planned misstep: a misspelled column. The database says which word it does not know, and the box keeps the query to fix.
+Say=A planned misstep: a misspelled column. The database names the word it does not know, and the box keeps the query to fix.
 Key=Control+Q
 Hear=Query dialog
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Escape. Alt plus Shift plus Q, the history, lists the questions asked, to run one again.
+Say=Escape. Alt plus Shift plus Q, Query History, lists the questions asked, to run one again.
 Key=Alt+Shift+Q
 Hear=Query History
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=SQL is not the only way to ask. Shift plus F12, Chat about Table, sends the table with a question in plain words to the model on this computer.
+Say=SQL is not the only way to ask. Escape, then Shift plus F12, Chat about Table, sends the table with a question in plain words to the model on this computer.
 Key=Shift+F12
 Hear=Chat about Table dialog
 Hear=Question: edit
@@ -71,9 +79,9 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=I ask which employer has the most applications still waiting.
-Key=Which employer has the most applications still waiting?
-Hear=Which employer has the most applications still waiting?
+Say=I ask which Soul albums came out in the nineteen seventies.
+Key=Which Soul albums came out in the 1970s?
+Hear=Which Soul albums came out in the 1970s?
 
 [step]
 
@@ -84,50 +92,27 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Escape. An answer from SQL is a table like any other, so Alt plus X exports it, and Alt plus Shift plus S describes its columns.
-Key=Escape
-Hear=DbDo
-Note=Confirm the wording with a live run: buildTutorials -live.
-
-[step]
-
-Say=A question asked often can be saved as a script, a dot s q l file in the Scripts folder beside the database. Control plus Shift plus I, Invoke Script, lists them and runs the one chosen.
-Key=Control+Shift+I
-Hear=Invoke Script dialog
-Note=Confirm the wording with a live run: buildTutorials -live.
-
-[step]
-
-Say=Escape. Scripts belong to their database, so the questions travel with the data they ask about.
-Key=Escape
-Hear=DbDo
-Note=Confirm the wording with a live run: buildTutorials -live.
+Say=Escape. An answer from SQL is a table, so Alt plus X exports it and Alt plus Shift plus S describes its columns. A question asked often can be saved as a script, a dot s q l file beside the database, and run with Control plus Shift plus I, as BookTrail's were.
+Key=
+Hear=
 
 [step]
 
 Say=Before a query that changes data, Alt plus Z, Toggle Read Only, makes the database read only, so a mistyped statement cannot change anything.
 Key=Alt+Z
 Hear=Read only
-Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Alt plus Z again makes it writable when you mean to change it.
+Say=Alt plus Z again makes it writable when you mean to change it. After a change, F5 shows the table as it now stands.
 Key=Alt+Z
 Hear=Read and write
-Note=Confirm the wording with a live run: buildTutorials -live.
-
-[step]
-
-Say=After a query that does change records, F5, Refresh View, shows the table as it now stands.
-Key=F5
-Hear=jobs, 12 records
-Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=Practise on a copy: Save As, Control plus Shift plus S, makes one, so the original stays as it was while you learn.
 Key=
+Hear=
 
 [step]
 
@@ -152,3 +137,15 @@ Hear=Control plus Enter
 Say=The questions asked before.
 Key=
 Hear=Alt plus Shift plus Q
+
+[step]
+
+Say=Ask in plain words.
+Key=
+Hear=Shift plus F12
+
+[step]
+
+Say=Make the database read only.
+Key=
+Hear=Alt plus Z

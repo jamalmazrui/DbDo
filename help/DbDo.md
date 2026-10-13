@@ -748,6 +748,7 @@ and each extra key picks a different kind of help.
 - **Hotkeys, Control+Shift+F1.** Every key, by menu, by key and by command. Control+F1 describes one key; adding Shift describes them all.
 - **Frequently Asked Questions.**
 - **Play Tutorials.** The spoken walkthroughs.
+- **Update from Template.** Brings your copy of a template up to date from the one installed with DbDo, by merging or replacing; see the template databases, below.
 - **More Documents.** The Announcement, the Developer Guide, the License, and the Tutorials Transcript. These are used rarely, so they sit one level down.
 
 ### Four ways to reach a record
@@ -892,7 +893,22 @@ time you run it, so your copies are yours to change.
 
 Each template is a folder under `templates`, copied into your own folder the first
 time you run DbDo, or the first time after an update that adds one. Your copy is
-yours: a later update never replaces it.
+yours. An update refreshes it only while you have never changed it; once you have,
+it stays exactly as you left it.
+
+When a newer DbDo brings an improved template -- more stations, a new script, a
+corrected record -- open your copy and choose **Update from Template** on the Help
+menu (Alt+H, then U). It offers two buttons:
+
+- **Merge** adds what the template has and your copy lacks, and keeps everything of
+  yours. It uses Merge Database, so it first asks what to do with records both have;
+  Add new only, the first choice, changes none of yours. Your copy as it was is kept
+  beside it, named with "before-merge".
+- **Replace** makes your copy the template again. Your copy as it was is kept beside it
+  as a dated backup, named with "before-update", so nothing is lost.
+
+Either way, a script, query or report the template has and your copy lacks is copied in
+beside it; none of yours is overwritten. Merge is the first button, so Enter takes it.
 
 Every template earns its place in one of three ways: it carries real data worth
 exploring, it serves a task people really do every day, or a recorded tutorial

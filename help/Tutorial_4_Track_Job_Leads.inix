@@ -1,0 +1,181 @@
+﻿; Tutorial_4_Track_Job_Leads.inix -- JobTrail: a status brought up to date, a job added, notes kept, and the people linked to a job.
+
+[about]
+Title=4 - Track Job Leads
+Intro=JobTrail, a job search kept as linked tables: an interview's outcome recorded, a new opening added, a note kept, and from a job to the contact and documents linked to it.
+Setup=DbDo is open.
+Homework=Replace one sample job with a real lead of your own.
+
+[step]
+
+Say=One want: a job search in one place, with nothing forgotten.
+Key=
+Hear=
+
+[step]
+
+Say=Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+Key=Alt+Control+D
+Hear=DbDo
+Hear=DbDo ready
+
+[step]
+
+Say=JobTrail is a template for exactly that. Its records are samples, plainly named as samples, to show the shape before your own go in.
+Key=Alt+Shift+D
+Hear=Template Databases dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I choose JobTrail and press Enter. It opens on actions, newest first, so the last thing done is the first thing heard.
+Key=Enter
+Hear=2026-09-24, Follow up on the Accessibility Analyst interview, awaiting reply, Row 1 of 7
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Control plus T, Choose Table, lists its tables: jobs, contacts, actions, documents and stories. I choose jobs.
+Key=Control+T
+Hear=Choose Table dialog, actions
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter.
+Key=Enter
+Hear=jobs, 4 records, no filter, sorted by employer
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Four openings, each at a different stage. I move to the status column of the Accessibility Analyst job.
+Key=Right Arrow
+Hear=status, interviewing
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Status has fixed values, so Control plus F2, Pick Value, offers them and nothing is mistyped.
+Key=Control+F2
+Hear=status: list box, interviewing, 3 of 7
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Down Arrow twice to offer, and Enter. F2 would edit the cell as free text instead, as F2 renames a file in Windows.
+Key=Enter
+Hear=status, offer
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Control plus N, N for New, adds a record, and focus goes to its first field.
+Key=Control+N
+Hear=New record
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I fill employer, title and status with F2. Shift plus A, Say Added, says when it was added.
+Key=Shift+A
+Hear=added: today at 3:40 PM
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A planned misstep: Control plus D deletes a record, D for Delete, and asks first. Escape answers no.
+Key=Control+D
+Hear=Delete this record? No button
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape keeps it. Notes hold what does not fit a column. Alt plus Shift plus N, Edit Notes, opens them in a box of their own.
+Key=Alt+Shift+N
+Hear=Notes: edit, multiline
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I type a line about the opening, and Control plus Enter keeps it. Shift plus N says it back.
+Key=Shift+N
+Hear=Heard about it from a former colleague; apply by Friday.
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Tags work the same way: Alt plus Shift plus T to edit, Shift plus T to hear, single words such as remote, to filter by later. Alt plus Shift plus U edits the posting's web address.
+Key=
+Hear=
+
+[step]
+
+Say=Now the links. Up Arrow to the Accessibility Analyst job. Shift plus R, Say Related, says what it leads to, changing nothing.
+Key=Shift+R
+Hear=contacts 1, docs 2
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Alt plus Right Arrow goes into the related records.
+Key=Alt+Right Arrow
+Hear=contacts: 1 related record
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The hiring manager, linked as the contact for this job.
+Key=Down Arrow
+Hear=Rivera, Pat, Example Widgets Company (sample employer)
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Alt plus Left Arrow comes back, as a browser goes back.
+Key=Alt+Left Arrow
+Hear=jobs, Example Widgets Company (sample employer), Accessibility Analyst
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=JobTrail also keeps its own questions as scripts. Control plus Shift plus I, Invoke Script, lists them; Today shows the actions due, oldest first.
+Key=Control+Shift+I
+Hear=Invoke Script dialog, Today
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape, for now. When the samples have shown the shape, delete them and add your own.
+Key=
+Hear=
+
+[step]
+
+Say=What this walk taught. I name the command; the reader gives the key.
+Key=
+Hear=
+
+[step]
+
+Say=Pick a fixed value.
+Key=
+Hear=Control plus F2
+
+[step]
+
+Say=Add a record.
+Key=
+Hear=Control plus N
+
+[step]
+
+Say=Say what a record leads to.
+Key=
+Hear=Shift plus R
+
+[step]
+
+Say=Go into the related records.
+Key=
+Hear=Alt plus Right Arrow

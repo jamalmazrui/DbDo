@@ -1,0 +1,153 @@
+﻿; Tutorial_2_Install_and_Tune_In.inix -- the installer, DbDo opening on RadioTrail, and a station found by name and playing.
+
+[about]
+Title=2 - Install and Tune In
+Intro=DbDo installed with what it works best with, opened from anywhere, and on its first run a station from RadioTrail found by name and playing.
+Setup=The DbDo setup program is downloaded.
+Homework=Find and play a station you already know, by its name.
+
+[step]
+
+Say=One want: DbDo on this computer, and a station playing, in one sitting.
+Key=
+Hear=
+
+[step]
+
+Say=I open the downloaded setup program and allow it to make changes.
+Key=Enter
+Hear=Setup - DbDo dialog
+Hear=Welcome to the DbDo Setup Wizard
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The ordinary installer: Enter takes Next, and the defaults are right.
+Key=Enter
+Hear=Select Destination Location
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The last page offers what DbDo works best with, each as a box whose first word is your computer's state read for you: Install, Update or Reinstall.
+Key=Tab
+Hear=Install mpv, plays a station for Play Stream, checked, 1 of 4
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Scripts for the screen reader you use; the mpv player, which plays a station; and, for the AI commands, Ollama and a model, downloaded once. Install and Update are ticked; Reinstall is not, since what is current needs nothing.
+Key=
+Hear=
+
+[step]
+
+Say=A planned misstep: clearing a box you need. Space clears it; Space again ticks it back.
+Key=Space
+Hear=not checked
+
+[step]
+
+Say=Space.
+Key=Space
+Hear=checked
+
+[step]
+
+Say=Enter installs what is ticked, and then the key that opens DbDo from anywhere.
+Key=Alt+Control+D
+Hear=DbDo
+Hear=DbDo ready
+
+[step]
+
+Say=The first time, DbDo opens RadioTrail: internet radio stations, one to a row, sorted by name. Shift plus Z says so.
+Key=Shift+Z
+Hear=stations, 55280 records, no filter, sorted by name
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Names that begin with a symbol sort first, so the top of the list is a mix. A station is quickest found by its name. Control plus J, Jump to Record, asks which column and what to look for.
+Key=Control+J
+Hear=Jump to Record dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I leave the column as name, type A C B Media 1, and press Enter.
+Key=Enter
+Hear=ACB Media 1, Row 3592 of 55280
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=One of the ten streams of the American Council of the Blind. Control plus I, Inspect Record, shows the whole record, one field to a line.
+Key=Control+I
+Hear=Inspect Record dialog
+Hear=name: ACB Media 1
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Its genre, country, language, and the address it streams from. Escape. Now the reason RadioTrail opens first: Alt plus Shift plus P, Play Stream, plays the station in the Homer Player.
+Key=Alt+Shift+P
+Hear=Homer Player, ACB Media 1
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape closes the player and returns to the station, ready for the next.
+Key=Escape
+Hear=ACB Media 1, Row 3592 of 55280
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Control plus Shift plus J jumps backward to the match before, as Shift reverses everywhere in DbDo. Another database opens with Control plus O, and a template with Alt plus Shift plus D, D for Database.
+Key=
+Hear=
+
+[step]
+
+Say=Two help keys belong to this walk. Alt plus F1, About, says which DbDo is installed.
+Key=Alt+F1
+Hear=About DbDo
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape, and F11 asks GitHub whether a newer version is out. If one is, Enter installs it.
+Key=F11
+Hear=Checking for a newer version
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Installed, open and playing. If something was left out, run the setup again and tick its box; what is already current costs nothing.
+Key=
+Hear=
+
+[step]
+
+Say=What this walk taught. I name the command; the reader gives the key.
+Key=
+Hear=
+
+[step]
+
+Say=The key that opens DbDo.
+Key=
+Hear=Alt plus Control plus D
+
+[step]
+
+Say=Find a record by one column.
+Key=
+Hear=Control plus J
+
+[step]
+
+Say=Play the station.
+Key=
+Hear=Alt plus Shift plus P

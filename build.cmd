@@ -875,6 +875,15 @@ if exist "help\tutorials\Tutorial_*.mp3" (
   del /q "help\tutorials\Tutorial_*.mp3"
   echo Removed the audio of the retired walks >> "!log!"
 )
+rem THE WALKS WERE REBUILT AROUND THE TEMPLATES ON 13 October 2026: RadioTrail, JobTrail, BookTrail and
+rem MusicTrail each have a walk, and the other templates one between them. Six walks were renamed, so their
+rem old scripts, their audio and its fingerprint go; the build speaks the new ones.
+for %%f in (help\Tutorial_2_Install_and_Launch.inix help\tutorials\Tutorial_2_Install_and_Launch.mp3 help\tutorials\Tutorial_2_Install_and_Launch.sha256 help\Tutorial_3_Open_a_Database_and_Move_Through_Records.inix help\tutorials\Tutorial_3_Open_a_Database_and_Move_Through_Records.mp3 help\tutorials\Tutorial_3_Open_a_Database_and_Move_Through_Records.sha256 help\Tutorial_4_Edit_and_Add_Records.inix help\tutorials\Tutorial_4_Edit_and_Add_Records.mp3 help\tutorials\Tutorial_4_Edit_and_Add_Records.sha256 help\Tutorial_5_Mark_Filter_and_Sort.inix help\tutorials\Tutorial_5_Mark_Filter_and_Sort.mp3 help\tutorials\Tutorial_5_Mark_Filter_and_Sort.sha256 help\Tutorial_6_Follow_Related_Records.inix help\tutorials\Tutorial_6_Follow_Related_Records.mp3 help\tutorials\Tutorial_6_Follow_Related_Records.sha256 help\Tutorial_7_Statistics_and_Reports.inix help\tutorials\Tutorial_7_Statistics_and_Reports.mp3 help\tutorials\Tutorial_7_Statistics_and_Reports.sha256) do (
+  if exist "%%f" (
+    del /q "%%f"
+    echo Removed the retired walk file "%%f" >> "!log!"
+  )
+)
 for %%f in (templates\RadioTrail\fetchRadioBrowser.cmd templates\RadioTrail\fetchRadioBrowser.py) do (
   if exist "%%f" (
     del /q "%%f"

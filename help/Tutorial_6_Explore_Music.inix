@@ -1,0 +1,170 @@
+﻿; Tutorial_6_Explore_Music.inix -- MusicTrail: from an album to the band that made it, to its members, and back; then a genre in rank order.
+
+[about]
+Title=6 - Explore Music
+Intro=MusicTrail, the greatest albums of ten genres: from an album to the band that recorded it, on to the band's members, and back; an album's article opened; and a genre heard in rank order.
+Setup=DbDo is open.
+Homework=Pick a genre you love, and follow one album to everyone who made it.
+
+[step]
+
+Say=One want: from an album I know, to the people who made it.
+Key=
+Hear=
+
+[step]
+
+Say=Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+Key=Alt+Control+D
+Hear=DbDo
+Hear=DbDo ready
+
+[step]
+
+Say=MusicTrail holds a hundred albums, ten for each of ten genres, and the performers who recorded them.
+Key=Alt+Shift+D
+Hear=Template Databases dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I choose MusicTrail and press Enter. Albums are in order by name.
+Key=Enter
+Hear=21, Adele, Pop, Row 1 of 100
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Down Arrow.
+Key=Down Arrow
+Hear=A Night at the Opera, Queen, Hard Rock, Row 2 of 100
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Shift plus R, Say Related, says what this album leads to, changing nothing.
+Key=Shift+R
+Hear=performers 1
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Records here are linked through a table of links, called maps, each with a kind: this album was recorded by one performer. Alt plus Right Arrow goes in.
+Key=Alt+Right Arrow
+Hear=performers: 1 related record
+Hear=Queen
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Queen. Shift plus R again.
+Key=Shift+R
+Hear=albums 1, performers 2
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The album I came from, and two performers: members of the band. Alt plus Right Arrow, and I choose performers.
+Key=Alt+Right Arrow
+Hear=performers: 2 related records
+Hear=Freddie Mercury
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Down Arrow.
+Key=Down Arrow
+Hear=John Deacon, Row 2 of 2
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Two levels deep. Alt plus Left Arrow comes back one, as a browser goes back.
+Key=Alt+Left Arrow
+Hear=performers, Queen
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A planned misstep: deep, and not sure how far. Alt plus Home returns to the table I started in, from any depth.
+Key=Alt+Home
+Hear=albums, A Night at the Opera, Row 2 of 100
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=What ties one record to another is its prime, a key DbDo builds from the record itself. Shift plus P, Say Prime, says it.
+Key=Shift+P
+Hear=A Night at the Opera|Queen
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Every album carries the address of its article. Control plus Shift plus U, Open Url, opens it in the browser; Shift plus U says it.
+Key=Shift+U
+Hear=https colon slash slash en dot wikipedia dot org slash wiki slash A Night at the Opera Queen album
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Now a whole genre, in rank. Control plus F, then F for Fields, and I type Vocal Jazz in the genre box.
+Key=Enter
+Hear=Filter applied. 10 records match.
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Alt plus O, Order Records; I choose rank, and Enter.
+Key=Alt+O
+Hear=Ella Fitzgerald Sings the Cole Porter Song Book, Ella Fitzgerald, Vocal Jazz, Row 1 of 10
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Ranked first. A table can also have a window of its own: Control plus Shift plus O, Open Table, opens performers beside the albums.
+Key=Control+Shift+O
+Hear=Open Table dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter. Shift plus F4 says the windows open, and Control plus Tab moves between them; Control plus F4 closes this one.
+Key=Shift+F4
+Hear=2 windows: albums, performers
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=What this walk taught. I name the command; the reader gives the key.
+Key=
+Hear=
+
+[step]
+
+Say=Say what a record leads to.
+Key=
+Hear=Shift plus R
+
+[step]
+
+Say=Go into the related records.
+Key=
+Hear=Alt plus Right Arrow
+
+[step]
+
+Say=Come back a level.
+Key=
+Hear=Alt plus Left Arrow
+
+[step]
+
+Say=Return to the start.
+Key=
+Hear=Alt plus Home
+
+[step]
+
+Say=Open the record's web address.
+Key=
+Hear=Control plus Shift plus U

@@ -5,6 +5,13 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 13 October 2026 -- walks around the templates, and Update from Template
+
+- **New spoken walks, built around the templates.** RadioTrail, JobTrail, BookTrail and MusicTrail each have a walk of their own -- install and tune in, find a station, track job leads, catalog your books, explore music -- and TechTraining, BlindCreations, ContactTrail and RecipeTrail are introduced together. Every key in them was checked against the menus, and every record the reader names is one the template holds. The old walks had drifted from the data: a station said to be at row 7, a count of stations two catalogs old, and F4 described as the pick list, which is Current Windows.
+- **Help, Update from Template.** Your copy of a template is brought up to date from the one installed with DbDo: Merge adds what the template has and your copy lacks, keeping everything of yours; Replace makes your copy the template again, keeping yours beside it as a dated backup. A new script or report in the template is added either way.
+- **The tutorial audio is in the repository**, with the fingerprints that let a build elsewhere skip speaking it again.
+- **Two scripts named the wrong key.** BookTrail's Reading List and JobTrail's Today said to run them with Alt+Shift+S, which is Statistics; scripts run with Invoke Script, Control+Shift+I.
+
 ## 12 October 2026 -- Camel Type constants without c_
 
 - **DbDo's code names its constants as Camel Type now does**, exactly like variables: 52 constants and 163 references, in DbDo.cs and its scripts, lose the obsolete c_ prefix. Three that shared a name with a variable made from them say what they hold: dColumnTypes, dMediaKinds, lsCatalogServers.

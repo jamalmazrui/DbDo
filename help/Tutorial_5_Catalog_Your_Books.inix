@@ -1,0 +1,155 @@
+﻿; Tutorial_5_Catalog_Your_Books.inix -- BookTrail: what to read next, counts by format, a reading log, and the catalog filled for you.
+
+[about]
+Title=5 - Catalog Your Books
+Intro=BookTrail, a catalog of books in every form: the next book to read, a count of how books came, a reading log written as a document, and how bookFido fills it from your own libraries.
+Setup=DbDo is open.
+Homework=Add a book you are reading now, with its format and status.
+
+[step]
+
+Say=One want: what to read next, and a record of what I have read, in every form books come in.
+Key=
+Hear=
+
+[step]
+
+Say=Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+Key=Alt+Control+D
+Hear=DbDo
+Hear=DbDo ready
+
+[step]
+
+Say=BookTrail is the template for it.
+Key=Alt+Shift+D
+Hear=Template Databases dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I choose BookTrail and press Enter. Books are in order by author, then by series and volume, so a series reads in order.
+Key=Enter
+Hear=Austen, Jane, Pride and Prejudice, Row 1 of 6
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Six sample books: audio from BARD, text from Bookshare, braille, an eBook, and a commercial audiobook. Down Arrow twice.
+Key=Down Arrow
+Hear=Doyle, Arthur Conan, A Study in Scarlet, Sherlock Holmes, 1, Row 3 of 6
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Control plus I, Inspect Record, shows every field that has a value, one to a line; empty ones are left out.
+Key=Control+I
+Hear=Inspect Record dialog
+Hear=title: A Study in Scarlet
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Status, format, series, and when it was read. Escape. What to read next is a saved script. Control plus Shift plus I, Invoke Script, lists the scripts beside this database.
+Key=Control+Shift+I
+Hear=Invoke Script dialog, Reading-By-Year, 1 of 2
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Down Arrow to Reading List, and Enter. Books in progress come first, then what I want to read, each series in order.
+Key=Enter
+Hear=Doyle, Arthur Conan, The Adventures of Sherlock Holmes, Sherlock Holmes, 3, Row 1 of 2
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The third Holmes book, in text from Bookshare, then Frankenstein in braille. Shift plus Z confirms the view the script made.
+Key=Shift+Z
+Hear=books, 2 records, filtered, sorted by status
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Control plus Shift plus F clears it. Now counts. I move to the format column, and Alt plus Shift plus S, Statistics from Column, describes it.
+Key=Alt+Shift+S
+Hear=Statistics from Column
+Hear=audio (BARD), 2
+Hear=audio (commercial), 1
+Hear=braille, 1
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The count of each value; for a number column, the sum, average, least and most too. Escape. Alt plus Shift plus R, Run Report, writes a saved report as a document.
+Key=Alt+Shift+R
+Hear=Run Report dialog, reading log
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter. The reading log, every book finished, newest first, opens to keep or share.
+Key=Enter
+Hear=Reading Log, heading level 1
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A planned misstep: expecting the report to follow a filter. A report reads the table its definition names, not the records in view. To share only some, filter them and use Export Data, Alt plus X.
+Key=
+Hear=
+
+[step]
+
+Say=Alt plus X writes the records in view as a spreadsheet, CSV, JSON or another format.
+Key=Alt+X
+Hear=Export Data dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape, for now. Typing a whole library in is not the plan. bookFido, a companion Homer program, catalogs the books in your libraries into BookTrail, and once your own books are in, these six samples are removed.
+Key=
+Hear=
+
+[step]
+
+Say=Each book you add takes the same fields, so a reading log, a count by format, or the next in a series comes from the same few keys.
+Key=
+Hear=
+
+[step]
+
+Say=What this walk taught. I name the command; the reader gives the key.
+Key=
+Hear=
+
+[step]
+
+Say=Show a record whole.
+Key=
+Hear=Control plus I
+
+[step]
+
+Say=Run a saved script.
+Key=
+Hear=Control plus Shift plus I
+
+[step]
+
+Say=Describe a column.
+Key=
+Hear=Alt plus Shift plus S
+
+[step]
+
+Say=Run a report.
+Key=
+Hear=Alt plus Shift plus R
+
+[step]
+
+Say=Export the records in view.
+Key=
+Hear=Alt plus X
