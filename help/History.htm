@@ -232,6 +232,9 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a href="#october-2026-saves-that-cannot-lose-a-file"
+id="toc-october-2026-saves-that-cannot-lose-a-file">14 October 2026 –
+saves that cannot lose a file</a></li>
 <li><a
 href="#october-2026-results-from-this-run-only-and-shared-names-explained"
 id="toc-october-2026-results-from-this-run-only-and-shared-names-explained">13
@@ -480,6 +483,24 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="october-2026-saves-that-cannot-lose-a-file">14 October 2026 –
+saves that cannot lose a file</h2>
+<ul>
+<li><strong>A missing worksheet is refused.</strong> When the sheet a
+table came from was renamed or removed outside DbDo, the edits went into
+the first sheet instead: another sheet’s data. Now DbDo says so, saves
+nothing, and keeps your edits (from an audit by another AI).</li>
+<li><strong>Workbook saves are swapped in whole.</strong> The finished
+copy was copied over the workbook; now it replaces it in one step, and
+if that fails the workbook is unchanged and the finished copy is kept
+and named.</li>
+<li><strong>Saving to a CSV or other delimited file is staged
+first,</strong> then swapped in whole. The save before is kept as
+<code>&lt;name&gt;-previous-dbdo</code>, beside the original from before
+DbDo, and DbDo names both when it saves.</li>
+<li><strong>Setup creates its logs folder before leaving the launch
+marker.</strong></li>
+</ul>
 <h2
 id="october-2026-results-from-this-run-only-and-shared-names-explained">13
 October 2026 – results from this run only, and shared names

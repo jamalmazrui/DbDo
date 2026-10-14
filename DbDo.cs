@@ -11759,9 +11759,16 @@ namespace DbDo
             string sTmp = null;
             try
             {
-                NPOI.SS.UserModel.ISheet sheet = wb.GetSheet(sSheetName);
-                if (sheet == null && wb.NumberOfSheets > 0) sheet = wb.GetSheetAt(0);
-                if (sheet == null) throw new Exception("The workbook has no worksheet named " + sSheetName + ".");
+                // A NAMED SHEET IS NEVER SWAPPED FOR ANOTHER (14 October 2026, from
+                // an audit by another AI): when the worksheet the table came from was
+                // renamed or removed outside DbDo, the edits went into the first sheet
+                // instead -- another sheet's data. A named sheet that is missing is
+                // refused; the edits stay unsaved in DbDo. The first sheet is used only
+                // when no name was given.
+                NPOI.SS.UserModel.ISheet sheet = null;
+                if (!String.IsNullOrEmpty(sSheetName)) sheet = wb.GetSheet(sSheetName);
+                else if (wb.NumberOfSheets > 0) sheet = wb.GetSheetAt(0);
+                if (sheet == null) throw new Exception("The workbook no longer has a worksheet named " + sSheetName + ", so nothing was saved; your edits are still in DbDo. Rename the sheet back, or save the table elsewhere.");
 
                 foreach (CellWrite w in lWrites)
                 {
@@ -11787,7 +11794,21 @@ namespace DbDo
                 using (FileStream fo = new FileStream(sTmp, FileMode.Create, FileAccess.Write))
                     wb.Write(fo);
                 try { wb.Close(); } catch { }
-                File.Copy(sTmp, sPath, true);
+                // AN ATOMIC SWAP (14 October 2026, from an audit by another AI): the
+                // finished copy was copied over the workbook, which can leave it half
+                // written. It is now swapped in whole; on failure the workbook is as it
+                // was, and the completed copy is kept and named.
+                try
+                {
+                    Homer.Util.replaceFileSafely(sTmp, sPath, "");
+                }
+                catch (Exception exCommit)
+                {
+                    string sKept = sTmp;
+                    sTmp = null;
+                    throw new IOException(exCommit.Message + " The workbook is unchanged; the completed copy is kept at " + sKept + ".", exCommit);
+                }
+                sTmp = null;
                 return iWritten;
             }
             finally
@@ -20093,14 +20114,34 @@ namespace DbDo
                     Path.GetFileNameWithoutExtension(sDelimitedOriginPath) + "-before-dbdo"
                     + Path.GetExtension(sDelimitedOriginPath));
                 if (!File.Exists(sKeep)) File.Copy(sDelimitedOriginPath, sKeep);
-                // exportData picks the writer from the extension, which is the
-                // extension this file already had.
-                db.exportData(sDelimitedOriginPath);
+                // STAGED, THEN SWAPPED IN (14 October 2026, from an audit by another
+                // AI): the table was written straight over the file, so a failed save
+                // could leave it half written, and the only copy kept was the very
+                // first original. The table is now written to a staged copy -- with the
+                // file's own extension, since exportData picks the writer from it --
+                // and swapped in whole. The save before this one is kept as
+                // <name>-previous-dbdo<ext>; the first original stays as -before-dbdo.
+                string sDir = Path.GetDirectoryName(Path.GetFullPath(sDelimitedOriginPath));
+                string sStem = Path.GetFileNameWithoutExtension(sDelimitedOriginPath);
+                string sExt = Path.GetExtension(sDelimitedOriginPath);
+                string sStaged = Path.Combine(sDir, "~" + sStem + "." + Guid.NewGuid().ToString("N").Substring(0, 8) + sExt);
+                string sPrevious = Path.Combine(sDir, sStem + "-previous-dbdo" + sExt);
+                try
+                {
+                    db.exportData(sStaged);
+                    Homer.Util.replaceFileSafely(sStaged, sDelimitedOriginPath, sPrevious);
+                }
+                catch
+                {
+                    try { if (File.Exists(sStaged)) File.Delete(sStaged); } catch { }
+                    throw;
+                }
                 db.bDataModified = false;   // the file on disk now matches the working copy
                 updateStatusBar();
-                DbDoLog.write("Saved back to " + sDelimitedOriginPath);
+                DbDoLog.write("Saved back to " + sDelimitedOriginPath + "; the save before is " + sPrevious + "; the first original is " + sKeep);
                 Say.say("Saved back to " + Path.GetFileName(sDelimitedOriginPath)
-                    + ". The file as it was before is beside it, named " + Path.GetFileName(sKeep) + ".");
+                    + ". The previous save is beside it, named " + Path.GetFileName(sPrevious)
+                    + ", and the original from before DbDo, named " + Path.GetFileName(sKeep) + ".");
                 return true;
             }
             catch (Exception ex)

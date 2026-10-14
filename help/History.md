@@ -5,6 +5,13 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 14 October 2026 -- saves that cannot lose a file
+
+- **A missing worksheet is refused.** When the sheet a table came from was renamed or removed outside DbDo, the edits went into the first sheet instead: another sheet's data. Now DbDo says so, saves nothing, and keeps your edits (from an audit by another AI).
+- **Workbook saves are swapped in whole.** The finished copy was copied over the workbook; now it replaces it in one step, and if that fails the workbook is unchanged and the finished copy is kept and named.
+- **Saving to a CSV or other delimited file is staged first,** then swapped in whole. The save before is kept as `<name>-previous-dbdo`, beside the original from before DbDo, and DbDo names both when it saves.
+- **Setup creates its logs folder before leaving the launch marker.**
+
 ## 13 October 2026 -- results from this run only, and shared names explained
 
 - **The Results summary can no longer show an earlier run's result.** DbDo_setup_results.txt from a 1.0.270 install outlived a later run that did not rewrite it. Setup now deletes it when it starts, and the summary deletes it once read.

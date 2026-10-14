@@ -532,7 +532,7 @@ FileName: "{cmd}"; \
 ; summarizeSetup starts DbDo once the box has been closed. The checkbox reads
 ; the same either way.
 FileName: "{cmd}"; \
-  Parameters: "/c echo launch > ""{localappdata}\{#AppName}\logs\{#AppName}_launch.flag"""; \
+  Parameters: "/c md ""{localappdata}\{#AppName}\logs"" 2>nul & echo launch > ""{localappdata}\{#AppName}\logs\{#AppName}_launch.flag"""; \
   WorkingDir: "{app}\exec"; \
   Description: "Launch DbDo (desktop hotkey Alt+Control+D)"; \
   Flags: postinstall runhidden runasoriginaluser; Check: homerFinishRuns
