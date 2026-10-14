@@ -17,6 +17,9 @@ WHAT IT CHECKS, for each templates\\<root>\\<root>.db:
   - <root>.inix: every SelectFields and OrderFields column exists in its table, and WhereFilter is valid SQL.
   - report.inix: every report names its @table, which exists; @filter, @sort and @group work on it; and every $field
     the bands use is a column of it.
+  - The views table inside the database: each table it describes exists, its columns exist and its filter runs.
+  - Every .dbdo script, in either form: its table exists, and its filter and order run together.
+  - No record has an empty prime or look, so every record can be pointed at and spoken.
   - A template folder holds its database. RadioTrail's is built on this machine (it is not in git); the build makes it
     when it is missing.
 
@@ -462,6 +465,84 @@ def checkReports(sRoot, sFolder, oDb):
     return iReports
 
 
+def checkStoredViews(sRoot, oDb):
+    """The views table: each table it describes exists, the columns it shows and sorts by exist, and its filter runs.
+    These are the settings a database carries inside itself, the same ones <root>.inix holds, and were not checked
+    (14 October 2026, from an audit by another AI)."""
+    lTables = tables(oDb)
+    if "views" not in lTables: return 0
+    iRows = 0
+    for sTable, sField, sValue in oDb.execute("SELECT tbl, fld, coalesce(val, '') FROM views").fetchall():
+        iRows += 1
+        if sTable not in lTables:
+            fail(sRoot, "views describes the table " + str(sTable) + ", which is not in the database")
+            continue
+        if sField in ("SelectFields", "OrderFields"):
+            lCols = columnNames(oDb, sTable)
+            for sItem in [s.strip() for s in sValue.split(",") if s.strip()]:
+                sCol = re.sub(r"\s+(asc|desc)$", "", sItem, flags=re.I).strip().strip('"[]').lower()
+                if sCol not in lCols: fail(sRoot, "views " + sTable + " " + sField + " names " + sCol + ", which is not a column")
+        elif sField == "WhereFilter" and sValue.strip():
+            try:
+                oDb.execute("SELECT count(*) FROM " + quoted(sTable) + " WHERE " + sValue).fetchone()
+            except Exception as oError:
+                fail(sRoot, "views " + sTable + " WhereFilter does not run: " + str(oError))
+    return iRows
+
+
+def readScript(sPath):
+    """The table, filter and order of a .dbdo script, in either of its forms: settings (table = jobs, where = ...,
+    order = ...) or dot-prompt commands (table orders, filter ..., sort ...). Comment lines and ? lines are skipped."""
+    dScript = {}
+    for sLine in open(sPath, encoding="utf-8-sig").read().splitlines():
+        sText = sLine.strip()
+        if not sText or sText[0] in ";#?": continue
+        oMatch = re.match(r"(table|where|order)\s*=\s*(.*)$", sText, re.I)
+        if oMatch:
+            dScript[oMatch.group(1).lower()] = oMatch.group(2).strip()
+            continue
+        oMatch = re.match(r"(table|filter|sort)\s+(.*)$", sText, re.I)
+        if oMatch: dScript[{"table": "table", "filter": "where", "sort": "order"}[oMatch.group(1).lower()]] = oMatch.group(2).strip()
+    return dScript
+
+
+def checkScripts(sRoot, sFolder, oDb):
+    """Every .dbdo script beside the database: it names a table that exists, and its filter and order run together on
+    it, as Invoke Script would run them (14 October 2026, from an audit by another AI)."""
+    iScripts = 0
+    for sPath in sorted(glob.glob(os.path.join(sFolder, "*.dbdo"))):
+        iScripts += 1
+        sName = os.path.basename(sPath)
+        dScript = readScript(sPath)
+        sTable = dScript.get("table", "")
+        if not sTable:
+            fail(sRoot, sName + " names no table")
+            continue
+        if sTable not in tables(oDb):
+            fail(sRoot, sName + " names the table " + sTable + ", which is not in the database")
+            continue
+        sSql = "SELECT count(*) FROM " + quoted(sTable)
+        if dScript.get("where"): sSql += " WHERE " + dScript["where"]
+        if dScript.get("order"): sSql += " ORDER BY " + dScript["order"]
+        try:
+            oDb.execute(sSql).fetchone()
+        except Exception as oError:
+            fail(sRoot, sName + " does not run: " + str(oError))
+    return iScripts
+
+
+def checkRecordNames(sRoot, oDb):
+    """No record has an empty prime or look. A prime names a record, so maps point at it by its prime; a look is what
+    a row says. An empty one is a record nothing can point at and nothing speaks (14 October 2026, from an audit by
+    another AI)."""
+    for sTable in tables(oDb):
+        lCols = columnNames(oDb, sTable)
+        for sCol in ("prime", "look"):
+            if sCol not in lCols: continue
+            iEmpty = oDb.execute("SELECT count(*) FROM " + quoted(sTable) + " WHERE " + sCol + " IS NULL OR trim(" + sCol + ") = ''").fetchone()[0]
+            if iEmpty: fail(sRoot, sTable + " has " + plural(iEmpty, "record") + " with no " + sCol)
+
+
 def checkTemplate(sFolder, bRepair):
     """Repairs (when asked) and checks one template folder."""
     sRoot = os.path.basename(sFolder)
@@ -476,7 +557,11 @@ def checkTemplate(sFolder, bRepair):
         iSql = checkSqlFiles(sRoot, sFolder, oDb)
         checkSettings(sRoot, sFolder, oDb)
         iReports = checkReports(sRoot, sFolder, oDb)
-        log(sRoot + ": " + plural(iSql, "SQL statement") + " ran, " + plural(iReports, "report") + " checked")
+        iViews = checkStoredViews(sRoot, oDb)
+        iScripts = checkScripts(sRoot, sFolder, oDb)
+        checkRecordNames(sRoot, oDb)
+        log(sRoot + ": " + plural(iSql, "SQL statement") + " ran, " + plural(iReports, "report") + ", " + plural(iViews, "stored view setting")
+            + " and " + plural(iScripts, "script") + " checked")
     finally:
         oDb.close()
     return True

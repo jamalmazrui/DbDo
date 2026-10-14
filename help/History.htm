@@ -253,10 +253,10 @@
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
 <li><a
-href="#october-2026-a-csv-export-that-warns-before-a-spreadsheet-runs-it"
-id="toc-october-2026-a-csv-export-that-warns-before-a-spreadsheet-runs-it">14
-October 2026 – a CSV export that warns before a spreadsheet runs
-it</a></li>
+href="#october-2026-the-templates-checked-for-what-dbdo-needs-of-them"
+id="toc-october-2026-the-templates-checked-for-what-dbdo-needs-of-them">14
+October 2026 – the templates checked for what DbDo needs of
+them</a></li>
 <li><a href="#october-2026-the-announcement-in-plainer-words"
 id="toc-october-2026-the-announcement-in-plainer-words">14 October 2026
 – the announcement in plainer words</a></li>
@@ -515,9 +515,28 @@ reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
 <h2
-id="october-2026-a-csv-export-that-warns-before-a-spreadsheet-runs-it">14
-October 2026 – a CSV export that warns before a spreadsheet runs it</h2>
+id="october-2026-the-templates-checked-for-what-dbdo-needs-of-them">14
+October 2026 – the templates checked for what DbDo needs of them</h2>
 <ul>
+<li><p><strong>The build checks the parts of a template only DbDo
+understands.</strong> checkTemplates already proved each template’s
+links, relationship kinds, triggers, SQL files, settings and reports.
+Three things it did not look at: the views table inside each database,
+which holds the columns each table is shown and sorted by and its
+filter; the .dbdo scripts beside four of the databases; and records with
+an empty prime or look, which nothing can point at and nothing speaks.
+Each is now checked on every build: a stored view’s table and columns
+must exist and its filter must run; a script’s table must exist and its
+filter and order must run together, in either of the two forms a script
+can take; and every prime and look must have something in it. All ten
+templates pass. Tested the other way too: on a copy with five faults put
+in on purpose – a column that is not there, a filter that does not run,
+a broken script, and a record with no prime and no look – the check
+named all five and stopped the build. That test also caught a fault in
+the check itself before it reached DbDo: generated columns, which prime
+and look are, are left out by the usual way of listing columns (from an
+audit by another AI). ## 14 October 2026 – a CSV export that warns
+before a spreadsheet runs it</p></li>
 <li><p><strong>DbDo asks before opening a CSV file a spreadsheet might
 run.</strong> A value beginning with =, +, - or @ goes into a CSV or TSV
 export exactly as it is, which keeps a round trip exact, but a
