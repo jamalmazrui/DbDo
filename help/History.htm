@@ -252,6 +252,9 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a href="#october-2026-changes-not-written-stay-unsaved"
+id="toc-october-2026-changes-not-written-stay-unsaved">14 October 2026 –
+changes not written stay unsaved</a></li>
 <li><a
 href="#october-2026-the-templates-checked-for-what-dbdo-needs-of-them"
 id="toc-october-2026-the-templates-checked-for-what-dbdo-needs-of-them">14
@@ -514,6 +517,20 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="october-2026-changes-not-written-stay-unsaved">14 October 2026 –
+changes not written stay unsaved</h2>
+<ul>
+<li><strong>Edits a spreadsheet Save could not write keep DbDo’s unsaved
+mark.</strong> The mark was cleared even when Save had listed edits it
+could not make, so closing lost them without a word. It now stays while
+any remain, and closing asks about those edits by name: keep them in a
+DbDo database with Save As, discard them on purpose, or stay, staying
+being what Enter does (from a second audit by another AI).</li>
+<li><strong>A save that kept the file but not its earlier copy says
+so.</strong> The kit now reports separately when a save succeeded but
+-previous-dbdo could not be kept, and DbDo logs and says it; the staged
+copy is kept when it may be the only complete one.</li>
+</ul>
 <h2
 id="october-2026-the-templates-checked-for-what-dbdo-needs-of-them">14
 October 2026 – the templates checked for what DbDo needs of them</h2>

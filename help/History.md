@@ -5,6 +5,11 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 14 October 2026 -- changes not written stay unsaved
+
+- **Edits a spreadsheet Save could not write keep DbDo's unsaved mark.** The mark was cleared even when Save had listed edits it could not make, so closing lost them without a word. It now stays while any remain, and closing asks about those edits by name: keep them in a DbDo database with Save As, discard them on purpose, or stay, staying being what Enter does (from a second audit by another AI).
+- **A save that kept the file but not its earlier copy says so.** The kit now reports separately when a save succeeded but -previous-dbdo could not be kept, and DbDo logs and says it; the staged copy is kept when it may be the only complete one.
+
 ## 14 October 2026 -- the templates checked for what DbDo needs of them
 
 - **The build checks the parts of a template only DbDo understands.** checkTemplates already proved each template's links, relationship kinds, triggers, SQL files, settings and reports. Three things it did not look at: the views table inside each database, which holds the columns each table is shown and sorted by and its filter; the .dbdo scripts beside four of the databases; and records with an empty prime or look, which nothing can point at and nothing speaks. Each is now checked on every build: a stored view's table and columns must exist and its filter must run; a script's table must exist and its filter and order must run together, in either of the two forms a script can take; and every prime and look must have something in it. All ten templates pass. Tested the other way too: on a copy with five faults put in on purpose -- a column that is not there, a filter that does not run, a broken script, and a record with no prime and no look -- the check named all five and stopped the build. That test also caught a fault in the check itself before it reached DbDo: generated columns, which prime and look are, are left out by the usual way of listing columns (from an audit by another AI).

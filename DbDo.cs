@@ -20296,16 +20296,21 @@ namespace DbDo
                 string sExt = Path.GetExtension(sDelimitedOriginPath);
                 string sStaged = Path.Combine(sDir, "~" + sStem + "." + Guid.NewGuid().ToString("N").Substring(0, 8) + sExt);
                 string sPrevious = Path.Combine(sDir, sStem + "-previous-dbdo" + sExt);
+                // The kit throws only when the file was not replaced, and returns a warning when it was but the
+                // -previous-dbdo copy could not be kept; the staged copy is removed on a failure only while the
+                // file is still there (14 October 2026, from an audit by another AI).
+                string sWarn = "";
                 try
                 {
                     db.exportData(sStaged);
-                    Homer.Util.replaceFileSafely(sStaged, sDelimitedOriginPath, sPrevious);
+                    sWarn = Homer.Util.replaceFileSafely(sStaged, sDelimitedOriginPath, sPrevious);
                 }
                 catch
                 {
-                    try { if (File.Exists(sStaged)) File.Delete(sStaged); } catch { }
+                    try { if (File.Exists(sDelimitedOriginPath) && File.Exists(sStaged)) File.Delete(sStaged); } catch { }
                     throw;
                 }
+                if (sWarn != "") { DbDoLog.write("Save: " + sWarn); Say.say(sWarn); }
                 db.bDataModified = false;   // the file on disk now matches the working copy
                 updateStatusBar();
                 DbDoLog.write("Saved back to " + sDelimitedOriginPath + "; the save before is " + sPrevious + "; the first original is " + sKeep);
@@ -20369,7 +20374,11 @@ namespace DbDo
                 List<int> lNow = new List<int>();
                 foreach (XlsxNpoi.CellWrite w in lWrites) if (!lNow.Contains(w.WsRow)) lNow.Add(w.WsRow);
                 lWorkbookRows = lNow;
-                db.bDataModified = false;   // working copy now matches the .xlsx on disk, but for what lsKept names
+                // STILL UNSAVED WHILE ANY EDIT IS UNWRITTEN (14 October 2026, from an audit by another AI): the flag was
+                // cleared even when lsKept named edits Save could not write, so closing lost them without a word. The
+                // flag stays set while any remain, and closing asks about them by name (confirmSaveWorkbookIfDirty).
+                iWorkbookUnwritten = lsKept.Count;
+                db.bDataModified = lsKept.Count > 0;
                 updateStatusBar();          // flip the indicator to "saved"
                 string sDone = "Saved your changes to " + Path.GetFileName(sWorkbookOriginPath)
                     + (iAdded > 0 ? ", with " + iAdded + (iAdded == 1 ? " new row" : " new rows") : "")
@@ -20407,6 +20416,30 @@ namespace DbDo
         // file, and on Close without a word. Each now asks: a workbook or a
         // delimited file is saved back to its source, anything else through Save
         // As; a save that fails or is cancelled keeps the window as it was.
+        // How many edits the last workbook Save could not write, since it never replaces or removes a formula.
+        private int iWorkbookUnwritten = 0;
+
+        // Edits a workbook Save cannot write are not offered Save again, which would never succeed: they can be kept
+        // in a DbDo database with Save As, or discarded on purpose.
+        private bool confirmUnwrittenEdits()
+        {
+            DialogResult res = MessageBox.Show(this,
+                iWorkbookUnwritten + (iWorkbookUnwritten == 1 ? " change" : " changes") + " to " + Path.GetFileName(sWorkbookOriginPath)
+                + " could not be written to it, since Save never replaces or removes a formula. They are only in DbDo.\r\n\r\n"
+                + "Yes keeps them in a DbDo database with Save As. No discards them. Cancel keeps this window open.",
+                "Changes not written", MessageBoxButtons.YesNoCancel, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button3);
+            if (res == DialogResult.Cancel) return false;
+            if (res == DialogResult.No)
+            {
+                DbDoLog.write("Closing: " + iWorkbookUnwritten + " change(s) not written to " + sWorkbookOriginPath + " were discarded on purpose");
+                db.bDataModified = false;
+                iWorkbookUnwritten = 0;
+                return true;
+            }
+            fileSaveAsClicked(this, EventArgs.Empty);
+            return !(db != null && db.bDataModified && !string.IsNullOrEmpty(sManagedTempPath));
+        }
+
         private bool confirmSaveWorkbookIfDirty()
         {
             if (db == null || !db.bDataModified) return true;
@@ -20421,7 +20454,11 @@ namespace DbDo
             if (res == DialogResult.Cancel) return false;
             if (res == DialogResult.No) return true;
             if (!string.IsNullOrEmpty(sWorkbookOriginPath))
-                return saveWorkbookToDisk() && !(db != null && db.bDataModified);
+            {
+                if (!saveWorkbookToDisk()) return false;
+                if (db != null && db.bDataModified && iWorkbookUnwritten > 0) return confirmUnwrittenEdits();
+                return !(db != null && db.bDataModified);
+            }
             if (!string.IsNullOrEmpty(sDelimitedOriginPath))
                 return saveDelimitedToSource() && !(db != null && db.bDataModified);
             fileSaveAsClicked(this, EventArgs.Empty);
