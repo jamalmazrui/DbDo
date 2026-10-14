@@ -46,9 +46,13 @@ scripts/buildBlindCreations.py
 scripts/buildTutorials.cmd
 scripts/buildTutorials.ps1
 scripts/check.cmd
+scripts/checkBlindSkillsMedia.cmd
+scripts/checkBlindSkillsMedia.py
 scripts/check.py
 scripts/checkTemplates.cmd
 scripts/checkTemplates.py
+scripts/makeBlindSkills.cmd
+scripts/makeBlindSkills.py
 scripts/makeMusicTrail.cmd
 scripts/makeMusicTrail.py
 scripts/makeTechTraining.cmd

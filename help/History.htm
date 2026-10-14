@@ -252,6 +252,9 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a href="#october-2026-blindskills-joins-the-templates"
+id="toc-october-2026-blindskills-joins-the-templates">14 October 2026 –
+BlindSkills joins the templates</a></li>
 <li><a href="#october-2026-changes-not-written-stay-unsaved"
 id="toc-october-2026-changes-not-written-stay-unsaved">14 October 2026 –
 changes not written stay unsaved</a></li>
@@ -517,6 +520,57 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="october-2026-blindskills-joins-the-templates">14 October 2026 –
+BlindSkills joins the templates</h2>
+<ul>
+<li><strong>BlindSkills is a template.</strong> 84 free videos and
+podcast episodes that teach blindness skills, from the new Blind Skills
+directory: cane travel, human guide, braille, cooking, dressing,
+labeling, money, health, crafts and more, in twelve skill groups. Each
+lesson has its title, skill (the task it teaches), skill group, summary,
+source, presenter, series and medium; its year only where the publisher
+states one; its length, publisher page and transcript where they exist;
+and the lesson’s own address as its url, so Play Stream (Alt+Shift+P)
+plays it – 15 podcast episodes directly and 69 videos through yt-dlp.
+Marked lessons play as a list; none come marked, because a marked list
+takes over Alt+Shift+P from the lesson the cursor is on. The row speaks
+title, medium and source, in skill-group order. Skill groups, skills,
+sources, series, audiences, media and the two structured discovery
+values (Subject and Setting) are pick lists, and tags repeat group,
+skill and source so Keywords finds a lesson by any of them. Skill-Index,
+Audio-Lessons, With-Transcripts and Structured-Discovery are its
+queries; practice_list and skills_handbook its reports. scriptsrebuilds
+it from the directory, as makeTechTraining does for TechTraining, and
+refuses to replace a good database when a lesson has no skill or a
+lesson heading cannot be read: both tested by planting the fault.
+checkTemplates passes it.</li>
+<li><strong>Every lesson can be checked where it is heard.</strong>
+scriptsasks each lesson for its first bytes as an anonymous player would
+– no cookies, no browser session, no yt-dlp settings – audio directly
+and video through yt-dlp, which it fetches when missing. It takes each
+lesson’s address in Play Stream’s own order, stream_url before url, so
+it tests what Alt+Shift+P will play. It names each lesson that fails or
+meets a sign-in or bot check, which can be about one network rather than
+the lesson, writes results-media.json and a play list of the lessons
+that answered with audio or video, and changes nothing in the database.
+An answer is the start of a stream, not a play-through; Homer Player
+remains the final test. Adapted from the second AI’s checker, whose own
+run got audio from all fifteen audio lessons and the Vimeo lesson, found
+CNIB’s introductory guiding video gone (replaced by step two of the same
+series), and showed that AFB’s page now embeds a different Perkins
+Brailler video (adopted). Lengths rounded to minutes now read “About 64
+minutes” and leave the play list’s length unknown, rather than claim a
+precision nobody measured.</li>
+<li><strong>Built by two AIs auditing each other.</strong> A second AI
+found the ACB Crafters classes, a Vision Support America lesson, a CNIB
+guiding video and a Blind Abilities tip; proposed the skill, length,
+publisher-page and transcript fields; and argued for dropping the
+starter marks, years read from a search index rather than a publisher,
+and six talks about choices rather than techniques. All were adopted.
+Not adopted: a standalone builder copying helpers this repository
+already has, a prime made from the address, and Pinecast player pages in
+place of the MP3 files mpv can play.</li>
+</ul>
 <h2 id="october-2026-changes-not-written-stay-unsaved">14 October 2026 –
 changes not written stay unsaved</h2>
 <ul>

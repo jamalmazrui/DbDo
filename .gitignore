@@ -53,6 +53,8 @@
 !/scripts/buildTutorials.ps1
 !/scripts/check.cmd
 !/scripts/check.py
+!/scripts/checkBlindSkillsMedia.cmd
+!/scripts/checkBlindSkillsMedia.py
 !/scripts/checkTemplates.cmd
 !/scripts/checkTemplates.py
 !/scripts/checkTutorial.cmd
@@ -65,6 +67,8 @@
 !/scripts/installOllama.cmd
 !/scripts/installScreenReaderSupport.cmd
 !/scripts/kind.py
+!/scripts/makeBlindSkills.cmd
+!/scripts/makeBlindSkills.py
 !/scripts/makeHotkeys.py
 !/scripts/makeMusicTrail.cmd
 !/scripts/makeMusicTrail.py
@@ -106,6 +110,8 @@ scripts/ffprobe.exe
 scripts/voices/
 logs/
 notes/
+results/
+temp/
 scripts/release.cmd
 scripts/release.ps1
 

@@ -1,0 +1,58 @@
+﻿; Report definitions for the BlindSkills sample database.
+;
+; Run them with Run Report (Alt+Shift+R). DbDo renders the chosen report and opens
+; it in your editor, where it can be read straight through or printed. Empty
+; fields print nothing, because a field earns its line.
+
+FileTask = report
+
+; The lessons you have marked, as a list to practice from.
+[practice_list]
+@table = lessons
+@filter = marked = 1
+@sort = category, title
+header = """
+# Practice List
+
+Prepared {{ new Date().toISOString().substring(0,10) }} from BlindSkills.
+"""
+detail = """
+## $title
+
+- Skill: $skill
+{{ $source ? "- From: " + $source : "" }}
+{{ $presenter ? "- Presenter: " + $presenter : "" }}
+{{ $minutes ? "- Length: " + $minutes + " minutes" : "" }}
+{{ $summary ? "- About: " + $summary : "" }}
+- Address: $url
+{{ $transcript_url ? "- Transcript: " + $transcript_url : "" }}
+"""
+footer = """
+**$count {{ $count == 1 ? "lesson" : "lessons" }} to practice.**
+"""
+
+; Every lesson, grouped by skill group, as a handbook to read through or print.
+[skills_handbook]
+@table = lessons
+@group = category
+@sort = category, title
+header = """
+# Blind Skills Handbook
+
+Prepared {{ new Date().toISOString().substring(0,10) }} from BlindSkills.
+"""
+group_header = """
+## $category
+"""
+detail = """
+### $title
+
+{{ $summary ? $summary : "" }}
+
+- Skill: $skill
+{{ $source ? "- From: " + $source : "" }}
+- Address: $url
+"""
+group_footer = """
+$count {{ $count == 1 ? "lesson" : "lessons" }} in this group.
+"""

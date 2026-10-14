@@ -25,6 +25,9 @@ scripts/voices/
 # One log per run of anything; private notes and what tidy moves aside.
 logs/
 notes/
+# What checkBlindSkillsMedia finds on this computer, and the yt-dlp it fetches when there is none.
+results/
+temp/
 
 # The release scripts belong to the separate tagRelease project and stay out
 # of every repository.
