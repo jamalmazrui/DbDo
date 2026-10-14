@@ -1,36 +1,36 @@
 ﻿# DbDo
 
-Manage database files in a dual interface of console and graphical modes, maximizing productivity for screen reader and keyboard users.
+Manage database files in two interfaces, a console and a graphical window, built for the speed of screen reader and keyboard users.
 
-After decades of personal interest in how to achieve nonvisual usability in database management, I have developed a general-purpose program in this area with AI assistance. DbDo is a free, open source program designed to boost productivity in the input, querying, and output of data.
+For decades I have been interested in how to make database work usable without sight. With AI assistance, I have now developed a general-purpose program for it. DbDo is a free, open source program that makes entering, querying and reporting data faster.
 
-This is not my first attempt at the problem. My work on nonvisual database access goes back to a Contact Tracking System I wrote for DOS; it continued with DbDialog, a friendly database manager I built in the AutoIt language and later packaged to run as a script within the Window-Eyes screen reader; and it now reaches DbDo, a Windows desktop program offering both a graphical (multiple-document) interface and a console dot prompt, supporting several file formats in a relational model designed from the ground up for screen-reader and keyboard efficiency. As far as I have been able to determine, with research assistance, DbDo is the only general-purpose relational database manager built specifically for screen-reader users -- mainstream desktop database tools are designed for sighted, mouse-driven use and are accessible only incidentally, if at all.
+This is not my first attempt at the problem. My work on nonvisual database access began with a Contact Tracking System I wrote for DOS. It continued with DbDialog, a friendly database manager I built in the AutoIt language and later packaged to run as a script within the Window-Eyes screen reader. It now reaches DbDo, a Windows desktop program with both a graphical window, which can hold several documents, and a console dot prompt. DbDo supports several file formats, in a relational model designed from the ground up for screen reader and keyboard efficiency. As far as I have been able to find, with research help, DbDo is the only general-purpose relational database manager built for screen reader users. Mainstream desktop database tools are designed for sighted use with a mouse, and are accessible only by chance, if at all.
 
-My hope is that DbDo can grow into the most accessible general-purpose database manager available to screen-reader users. I don't claim it is there yet — it is early, evolving software, shared in the spirit of continuous improvement, and it will get better with use and feedback. To be clear about scope up front: DbDo today serves Windows users running the JAWS, NVDA, or Narrator screen readers. That is the goal I am building toward, and any feedback that moves it closer is genuinely welcome.
+My hope is that DbDo can grow into the most accessible general-purpose database manager for screen reader users. I don't claim it is there yet. It is early, evolving software, shared in the spirit of continuous improvement, and it will get better with use and feedback. To be clear about its scope from the start: DbDo today serves Windows users of the JAWS, NVDA or Narrator screen readers. That is the goal I am building toward, and any feedback that moves it closer is truly welcome.
 
 - [DbDo project page](https://github.com/JamalMazrui/DbDo)
 - [DbDo project archive](https://github.com/JamalMazrui/DbDo/archive/main.zip)
 - [DbDo executable installer](https://github.com/JamalMazrui/DbDo/releases/latest/download/DbDo_setup.exe)
 
-DbDo defaults to an SQLite database file (`.db` extension), which supports management of related tables via either a command-line interface (like the memorable dBASE dot prompt) or a graphical user interface with a menu system and standard controls. You can easily switch between the two interface windows, depending on what technique is more convenient for the task at hand. Other database-like file formats are also supported, for import or export, including `.dbf`, `.mdb`, `.accdb`, `.xlsx`, `.csv`, and `.tsv`.
+DbDo uses an SQLite database file, with the `.db` extension, by default. You can manage its related tables from a command line, like the memorable dBASE dot prompt, or from a graphical window with menus and standard controls. You can switch between the two windows easily, whichever suits the task at hand. DbDo also imports and exports other database-like formats, including `.dbf`, `.mdb`, `.accdb`, `.xlsx`, `.csv` and `.tsv`.
 
-Every DbDo command can be accomplished efficiently from the keyboard. In addition, extensions for the JAWS and NVDA screen readers are bundled with the DbDo installer to further optimize productivity. Advanced features include statistics, charts, and scripts.
+Every DbDo command can be done quickly from the keyboard. The installer also brings extensions for the JAWS and NVDA screen readers, to make you more productive still. Advanced features include statistics, charts and scripts.
 
 ## Highlights
 
-**A virtual table cursor for the data list.** Alt+Control plus arrow / Home / End / PageDown / PageUp / Numpad5 moves a `(row, column)` cursor through the data, with direction-aware announcements: a horizontal move says "Header: value"; a vertical move says "Row N: value"; a corner jump says both. The convention matches how JAWS and NVDA read HTML and Word tables, so the muscle memory transfers.
+**A table cursor for the data list.** Alt+Control with an arrow key, Home, End, PageUp, PageDown or NumPad5 moves through the data a cell at a time. Moving across says the column and its value, as "Header: value". Moving down says the row and its value, as "Row N: value". A jump to a corner says both. This is how JAWS and NVDA read tables on the web and in Word, so keys you already know work here.
 
-**Double-press to spell.** Any speech-only command spells its text character by character when pressed twice within 1.5 seconds — the convention familiar from EdSharp and FileDir.
+**Press twice to spell.** Any command that only speaks spells its text letter by letter when you press it twice within one and a half seconds, as in EdSharp and FileDir.
 
-**Three search families with persistent history.** Find (Control+K) for substring across all columns, Jump to Match (Control+J) for substring within one column, Find Regex (Control+F3) for .NET regex. Each family remembers its last 10 terms along with their case-sensitive flags. F3 / Shift+F3 repeats whichever family was most recent.
+**Three kinds of search, each with a history.** Find, Control+K, looks for text in every column. Jump to Match, Control+J, looks in one column. Find Regex, Control+F3, uses a .NET regular expression. Each remembers its last 10 searches, and whether each one matched case. F3 and Shift+F3 repeat whichever kind you used last.
 
-**Parent-child drill.** Alt+RightArrow drills from a parent row into a filtered child table (an artist's albums, an album's tracks). Alt+LeftArrow returns to the exact parent row; Alt+Home pops the whole drill stack at once.
+**From a row to the rows that belong to it.** Alt+RightArrow opens the rows under the current one, such as an artist's albums or an album's tracks. Alt+LeftArrow goes back to the exact row you came from, and Alt+Home goes all the way back at once.
 
-**Recent files with per-table state.** Alt+R reopens any of the last 10 databases, restoring not just the file but the last-active table, filter, sort, and row position.
+**Recent files that remember where you were.** Alt+R reopens any of your last 10 databases. It brings back the table you had open, with its filter, its sort order and the row you were on.
 
-**One connection, two interfaces.** The GUI window and the dot-prompt console drive the same live ADO recordset. Edits made in the prompt show up immediately in the data list, and vice versa.
+**One connection, two ways in.** The window and the dot-prompt console work on the same live data. An edit in one shows up in the other at once.
 
-**Snippet scripting.** Save small JavaScript or text snippets in your own editor, then invoke them inside DbDo with a single keystroke (Control+Shift+I, I for Invoke). Scripts can automate bulk record edits, filter changes, custom reports — anything the database manager itself can do.
+**Small scripts.** Save short JavaScript or text snippets in your own editor, then run one inside DbDo with a single key, Control+Shift+I (I for Invoke). A script can change many records, set filters or make a report: anything DbDo itself can do.
 
 ## Template databases
 
@@ -56,9 +56,9 @@ For learning:
 
 ## Accessibility design
 
-Three speech paths in priority order: JAWS via direct COM, NVDA via the controller-client DLL, UIA live-region fallback for Narrator and anything else. The data list is a virtual-mode `ListView` in Details view, which all three readers handle as a familiar Details list. JAWS settings (a JKM key map plus a compiled script) and an NVDA add-on ship with the installer so that both screen readers pass DbDo's chords through rather than intercepting them for their own table-navigation or browse-mode commands.
+DbDo speaks through three paths, in this order: to JAWS directly, to NVDA through its controller library, and otherwise through Windows' own live regions, for Narrator and other screen readers. The data list is a standard Details list, which all three read the way they read any such list in Windows. The installer adds JAWS settings, a key map and a compiled script, and an NVDA add-on. With them, both screen readers pass DbDo's keys through, instead of using those keys for their own table or browse commands.
 
-JAWS-canonical key names appear throughout the menus, help text, and status messages — UpArrow, DownArrow, NumPad0 through NumPad9, GraveAccent, Minus rather than Dash, modifiers always in alphabetical order (Alt+Control+Shift).
+Menus, help and messages name keys the way JAWS does: UpArrow, DownArrow, NumPad0 to NumPad9, GraveAccent, and Minus rather than Dash. Modifiers always come in alphabetical order, as in Alt+Control+Shift.
 
 ## Project home and downloads
 
