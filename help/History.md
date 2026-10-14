@@ -5,6 +5,10 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 14 October 2026 -- the newest Pandoc for the help pages
+
+- **The help pages are made by the newest Pandoc, not the first on the PATH.** The build took the first pandoc on the PATH, which was Pandoc 2.19 in C:\bin, while Pandoc 3.12.1 was installed in Program Files. It now asks the kit's newest.ps1, as the kit's app template has done since kit 1.56.0, and the log names every copy found and its version.
+
 ## 14 October 2026 -- saves that cannot lose a file
 
 - **A missing worksheet is refused.** When the sheet a table came from was renamed or removed outside DbDo, the edits went into the first sheet instead: another sheet's data. Now DbDo says so, saves nothing, and keeps your edits (from an audit by another AI).

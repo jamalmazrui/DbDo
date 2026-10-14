@@ -2,16 +2,19 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
+  <meta name="generator" content="pandoc 3.12.1" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>DbDo User Guide</title>
   <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
     html {
-      line-height: 1.5;
-      font-family: Georgia, serif;
-      font-size: 20px;
       color: #1a1a1a;
+      color: light-dark(#1a1a1a, #fdfdfd);
       background-color: #fdfdfd;
+      background-color: light-dark(#fdfdfd, #1a1a1a);
+      color-scheme: light dark;
     }
     body {
       margin: 0 auto;
@@ -28,17 +31,24 @@
     @media (max-width: 600px) {
       body {
         font-size: 0.9em;
-        padding: 1em;
+        padding: 12px;
       }
       h1 {
         font-size: 1.8em;
       }
     }
     @media print {
-      body {
+      html {
+        color-scheme: light only;
+      }
+      html, body, pre, code {
         background-color: transparent;
+      }
+      body, a, a:visited, blockquote {
         color: black;
-        font-size: 12pt;
+      }
+      pre, code {
+        padding: 0;
       }
       p, h2, h3 {
         orphans: 3;
@@ -51,13 +61,14 @@
     p {
       margin: 1em 0;
     }
-    a {
-      color: #1a1a1a;
-    }
-    a:visited {
-      color: #1a1a1a;
+    a, a:visited {
+      color: inherit;
     }
     img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
       max-width: 100%;
     }
     h1, h2, h3, h4, h5, h6 {
@@ -80,13 +91,18 @@
     blockquote {
       margin: 1em 0 1em 1.7em;
       padding-left: 1em;
-      border-left: 2px solid #e6e6e6;
+      border-left: 2px solid;
+      border-color: #e6e6e6;
+      border-color: light-dark(#e6e6e6, #4c4c4c);
       color: #606060;
+      color: light-dark(#606060, #b6b6b6);
     }
     code {
-      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
       font-size: 85%;
       margin: 0;
+      hyphens: manual;
     }
     pre {
       margin: 1em 0;
@@ -102,8 +118,8 @@
      overflow: visible;
     }
     hr {
-      background-color: #1a1a1a;
       border: none;
+      border-top: 1px solid currentColor;
       height: 1px;
       margin: 1em 0;
     }
@@ -120,11 +136,11 @@
     }
     tbody {
       margin-top: 0.5em;
-      border-top: 1px solid #1a1a1a;
-      border-bottom: 1px solid #1a1a1a;
+      border-top: 1px solid currentColor;
+      border-bottom: 1px solid currentColor;
     }
     th {
-      border-top: 1px solid #1a1a1a;
+      border-top: 1px solid currentColor;
       padding: 0.25em 0.5em 0.25em 0.5em;
     }
     td {
@@ -146,22 +162,24 @@
     #TOC a:not(:hover) {
       text-decoration: none;
     }
-    code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
     ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
       width: 0.8em;
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
 </head>
 <body>
 <nav id="TOC" role="doc-toc" aria-label="Contents">
@@ -914,7 +932,7 @@ doing the same multi-step task repeatedly.</p>
 <col style="width: 30%" />
 </colgroup>
 <thead>
-<tr class="header">
+<tr>
 <th>Tool</th>
 <th>Acts on</th>
 <th>Produces</th>
@@ -922,31 +940,31 @@ doing the same multi-step task repeatedly.</p>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>Statistics from Column</td>
 <td>one column</td>
 <td>descriptive statistics (spoken/shown)</td>
 <td>one-off</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Graphics Column</td>
 <td>one column</td>
 <td>a chart</td>
 <td>one-off</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Generate from Grid</td>
 <td>the virtual grid (current view)</td>
 <td>summary, frequency, cross-tab, Markdown, or chart</td>
 <td>one-off</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Run Report</td>
 <td>the physical table</td>
 <td>a formatted document from a saved definition</td>
 <td>reproducible</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Snippet / script</td>
 <td>whatever the script does</td>
 <td>anything (automation)</td>
@@ -1038,97 +1056,97 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <h4 id="file-menu">File menu</h4>
 <table>
 <thead>
-<tr class="header">
+<tr>
 <th>Command</th>
 <th>Chord</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>New Database</td>
 <td>—</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Add Table</td>
 <td>—</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Open Database</td>
 <td>Control+O</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Open Template Database</td>
 <td>Alt+Shift+D</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Open Table in New Window</td>
 <td>Control+Shift+T</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Recent Files</td>
 <td>Alt+R</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Save</td>
 <td>Control+S</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Save As</td>
 <td>Control+Shift+S</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Close Database</td>
 <td>—</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Backup Database</td>
 <td>—</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Compare Database</td>
 <td>—</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Import</td>
 <td>Alt+I</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Merge Data</td>
 <td>Alt+M</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Transfer Import</td>
 <td>—</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Run Report</td>
 <td>Alt+Shift+R</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Export Data</td>
 <td>Alt+X</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Print</td>
 <td>Control+P</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Choose Table</td>
 <td>Control+T</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Choose View</td>
 <td>—</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Next / Previous Visited Table</td>
 <td>Alt+F6 / Alt+Shift+F6</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Next / Previous Table or View</td>
 <td>Control+F6 / Control+Shift+F6</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Exit DbDo</td>
 <td>Alt+F4</td>
 </tr>
@@ -1137,125 +1155,125 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <h4 id="edit-menu">Edit menu</h4>
 <table>
 <thead>
-<tr class="header">
+<tr>
 <th>Command</th>
 <th>Chord</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>New Record</td>
 <td>Control+N</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Edit View</td>
 <td>Control+E</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Edit Cell</td>
 <td>F2</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Delete Record</td>
 <td>Control+D</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Delete Without Confirmation</td>
 <td>Control+Shift+D</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Copy Record</td>
 <td>Control+Shift+C</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Append Record to Clipboard</td>
 <td>Alt+Shift+C</td>
 </tr>
-<tr class="even">
+<tr>
 <td>New Copy</td>
 <td>Control+Shift+N</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Mail Record</td>
 <td>—</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Replace Column</td>
 <td>Control+R</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Regex Replace</td>
 <td>Control+Shift+R</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Mark Record</td>
 <td>Control+M</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Say Mark Status</td>
 <td>Shift+M</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Toggle Marked</td>
 <td>Control+Space</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Edit Notes</td>
 <td>Alt+Shift+N</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Edit Tags</td>
 <td>Alt+Shift+T</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Edit URL</td>
 <td>Alt+Shift+U</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Unmark Record</td>
 <td>Control+Shift+M</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Mark All</td>
 <td>Control+A</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Unmark All</td>
 <td>Control+Shift+A</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Invert Marked</td>
 <td>Alt+Shift+I</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Start Mark / Complete Mark</td>
 <td>F8 / Shift+F8</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Start Unmark / Complete Unmark to Anchor</td>
 <td>Alt+F8 / Alt+Shift+F8</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Save Bookmark</td>
 <td>Control+B</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>List Bookmarks</td>
 <td>Alt+B</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Clear Bookmark</td>
 <td>Control+Shift+B</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Open Cell Value</td>
 <td>Control+Enter</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Open URL</td>
 <td>Control+Shift+U</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Pick Value</td>
 <td>Control+F2</td>
 </tr>
@@ -1264,65 +1282,65 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <h4 id="navigate-menu">Navigate menu</h4>
 <table>
 <thead>
-<tr class="header">
+<tr>
 <th>Command</th>
 <th>Chord</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>First / Last Record</td>
 <td>—</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Next / Previous Record</td>
 <td>—</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Go to Record</td>
 <td>Control+G</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Repeat Go To</td>
 <td>Alt+G</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Keywords</td>
 <td>Control+K</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Reverse Keywords</td>
 <td>Control+Shift+K</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Jump to Record</td>
 <td>Control+J</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Reverse Jump</td>
 <td>Control+Shift+J</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Find Regex</td>
 <td>Control+F3</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Reverse Regex Find</td>
 <td>Control+Shift+F3</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Search Next / Previous</td>
 <td>F3 / Shift+F3</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Enter Child Table</td>
 <td>Alt+Right</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Exit Child Table</td>
 <td>Alt+Left</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Exit to Root Table</td>
 <td>Alt+Home</td>
 </tr>
@@ -1333,157 +1351,157 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 family.</p>
 <table>
 <thead>
-<tr class="header">
+<tr>
 <th>Command</th>
 <th>Chord</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>Inspect Record</td>
 <td>Control+I</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Table Properties</td>
 <td>Alt+Enter</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Related Records</td>
 <td>—</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Show Schema</td>
 <td>—</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Say Status</td>
 <td>Shift+Z</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Say Database</td>
 <td>Shift+D</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Say Order</td>
 <td>Shift+O</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Say Goto</td>
 <td>Shift+G</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Say Yield</td>
 <td>Shift+Y</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Say Marked</td>
 <td>—</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Say Edited</td>
 <td>Shift+E</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Say Notes</td>
 <td>Shift+N</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Say Tags</td>
 <td>Shift+T</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Say Column Rest</td>
 <td>Control+L</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Say Column Rest Marked</td>
 <td>Control+Shift+L</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Say Records Rest</td>
 <td>Alt+L</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Say Marked Rows</td>
 <td>Shift+Space</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Say Sort and Filter</td>
 <td>Shift+8</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Say Position</td>
 <td>Alt+Delete</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Say Clipboard</td>
 <td>Alt+Apostrophe</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Say Added</td>
 <td>Shift+A</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Say Cell</td>
 <td>Shift+C</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Say Filter</td>
 <td>Shift+F</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Say Keywords</td>
 <td>Shift+K</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Say Select Columns</td>
 <td>Shift+S</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Say Query</td>
 <td>Shift+Q</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Say Id</td>
 <td>Shift+I</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Say Look</td>
 <td>Shift+L</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Say Related</td>
 <td>Shift+R</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Say URL</td>
 <td>Shift+U</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Say Prime</td>
 <td>Shift+P</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Filter Records</td>
 <td>Control+F</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Clear Filter</td>
 <td>Control+Shift+F</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Filter by Regex</td>
 <td>—</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Clear Sort</td>
 <td>—</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Order Records</td>
 <td>Alt+O</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Reverse Order</td>
 <td>Alt+Shift+O</td>
 </tr>
@@ -1492,133 +1510,133 @@ family.</p>
 <h4 id="misc-menu">Misc menu</h4>
 <table>
 <thead>
-<tr class="header">
+<tr>
 <th>Command</th>
 <th>Chord</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>Refresh View</td>
 <td>F5</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Read Only Toggle</td>
 <td>Alt+Z</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Database Summary</td>
 <td>Alt+D</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Table Summary</td>
 <td>Alt+T</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Statistics from Column</td>
 <td>Alt+Shift+S</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Select Columns to Display</td>
 <td>Alt+S</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Graphics Column</td>
 <td>Control+Shift+G</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Generate from Grid</td>
 <td>Alt+Shift+G</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Extract with Regex</td>
 <td>Control+Shift+X</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Append Cell to Clipboard</td>
 <td>Alt+C</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Copy Cell to Clipboard</td>
 <td>Control+C</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Copy Visible Cells as TSV</td>
 <td>—</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Copy Column / Copy Grid</td>
 <td>—</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Jump to Next Initial</td>
 <td>—</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Query</td>
 <td>Control+Q</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Query History</td>
 <td>Alt+Shift+Q</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Test Integrity</td>
 <td>—</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Test Drivers</td>
 <td>—</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Hotkey Summary</td>
 <td>Alt+Shift+H</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Open as Managed Copy</td>
 <td>—</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Describe Table</td>
 <td>—</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Facet Column</td>
 <td>—</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Open in Explorer</td>
 <td>Alt+Pipe</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Open Command Prompt</td>
 <td>Control+Slash</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Open Dot Prompt</td>
 <td>Control+GraveAccent</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Sqlean Console</td>
 <td>Control+Shift+GraveAccent</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Invoke Script</td>
 <td>Alt+V</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Edit Snippet</td>
 <td>Alt+Shift+V</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Open Script Folder</td>
 <td>—</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Evaluate Expression</td>
 <td>Control+Equals</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Edit Settings</td>
 <td>Alt+Shift+C</td>
 </tr>
@@ -1627,41 +1645,41 @@ family.</p>
 <h4 id="window-menu">Window menu</h4>
 <table>
 <thead>
-<tr class="header">
+<tr>
 <th>Command</th>
 <th>Chord</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>Open Table</td>
 <td>Control+Shift+T</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Current Windows</td>
 <td>F4</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Window Toggle</td>
 <td>—</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Next Window</td>
 <td>Control+Tab</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Previous Window</td>
 <td>Control+Shift+Tab</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Say Windows Open</td>
 <td>Shift+F4</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Close Window</td>
 <td>Control+F4</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Close All But Current Window</td>
 <td>Control+Shift+F4</td>
 </tr>
@@ -1670,45 +1688,45 @@ family.</p>
 <h4 id="help-menu">Help menu</h4>
 <table>
 <thead>
-<tr class="header">
+<tr>
 <th>Command</th>
 <th>Chord</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>Documentation</td>
 <td>F1</td>
 </tr>
-<tr class="even">
+<tr>
 <td>History of Changes</td>
 <td>Shift+F1</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Readme Guide</td>
 <td>—</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Alternate Menu</td>
 <td>Alt+F10</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Key Help Toggle</td>
 <td>Control+F1</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Where Am I</td>
 <td>—</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Test Screen Reader Speech</td>
 <td>—</td>
 </tr>
-<tr class="even">
+<tr>
 <td>Email Log File</td>
 <td>—</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>Elevate Version</td>
 <td>F11</td>
 </tr>
@@ -1717,7 +1735,7 @@ family.</p>
 <h3 id="standard-fields-summary">Standard fields (summary)</h3>
 <table>
 <thead>
-<tr class="header">
+<tr>
 <th>Field</th>
 <th>Type</th>
 <th>Role</th>
@@ -1725,49 +1743,49 @@ family.</p>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>added</td>
 <td>TEXTTIME</td>
 <td>creation time, automatic</td>
 <td>Shift+A</td>
 </tr>
-<tr class="even">
+<tr>
 <td>edited</td>
 <td>TEXTTIME</td>
 <td>last-change time, automatic</td>
 <td>Shift+E</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>marked</td>
 <td>BOOLEAN</td>
 <td>batch-operation state you toggle</td>
 <td>Shift+M</td>
 </tr>
-<tr class="even">
+<tr>
 <td>notes</td>
 <td>TEXTMARKDOWN</td>
 <td>free-form Markdown note</td>
 <td>Shift+N</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>tags</td>
 <td>TEXTMEMO</td>
 <td>keywords</td>
 <td>Shift+T</td>
 </tr>
-<tr class="even">
+<tr>
 <td>url</td>
 <td>TEXTLINE</td>
 <td>associated link</td>
 <td>Shift+U</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>look</td>
 <td>derived</td>
 <td>display label for the record</td>
 <td>Shift+L</td>
 </tr>
-<tr class="even">
+<tr>
 <td>prime</td>
 <td>derived</td>
 <td>prime human-facing identity</td>
@@ -1778,59 +1796,59 @@ family.</p>
 <h3 id="field-types-summary">Field types (summary)</h3>
 <table>
 <thead>
-<tr class="header">
+<tr>
 <th>Type</th>
 <th>Stored as</th>
 <th>Editor</th>
 </tr>
 </thead>
 <tbody>
-<tr class="odd">
+<tr>
 <td>TEXT</td>
 <td>text</td>
 <td>text box</td>
 </tr>
-<tr class="even">
+<tr>
 <td>TEXTLINE</td>
 <td>text</td>
 <td>single-line box</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>TEXTMEMO</td>
 <td>text</td>
 <td>multi-line box</td>
 </tr>
-<tr class="even">
+<tr>
 <td>TEXTMARKDOWN</td>
 <td>text</td>
 <td>multi-line, Markdown-aware</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>TEXTTIME</td>
 <td>text</td>
 <td>sortable timestamp</td>
 </tr>
-<tr class="even">
+<tr>
 <td>INTEGER</td>
 <td>integer</td>
 <td>number</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>REAL</td>
 <td>real</td>
 <td>number</td>
 </tr>
-<tr class="even">
+<tr>
 <td>NUMERIC</td>
 <td>number</td>
 <td>number</td>
 </tr>
-<tr class="odd">
+<tr>
 <td>BOOLEAN</td>
 <td>true/false</td>
 <td>toggle</td>
 </tr>
-<tr class="even">
+<tr>
 <td>BLOB</td>
 <td>binary</td>
 <td>—</td>
