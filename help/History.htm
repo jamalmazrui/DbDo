@@ -252,9 +252,11 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
-<li><a href="#october-2026-sql-judged-by-what-it-does"
-id="toc-october-2026-sql-judged-by-what-it-does">14 October 2026 – SQL
-judged by what it does</a></li>
+<li><a
+href="#october-2026-a-csv-export-that-warns-before-a-spreadsheet-runs-it"
+id="toc-october-2026-a-csv-export-that-warns-before-a-spreadsheet-runs-it">14
+October 2026 – a CSV export that warns before a spreadsheet runs
+it</a></li>
 <li><a href="#october-2026-the-announcement-in-plainer-words"
 id="toc-october-2026-the-announcement-in-plainer-words">14 October 2026
 – the announcement in plainer words</a></li>
@@ -512,9 +514,23 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
-<h2 id="october-2026-sql-judged-by-what-it-does">14 October 2026 – SQL
-judged by what it does</h2>
+<h2
+id="october-2026-a-csv-export-that-warns-before-a-spreadsheet-runs-it">14
+October 2026 – a CSV export that warns before a spreadsheet runs it</h2>
 <ul>
+<li><p><strong>DbDo asks before opening a CSV file a spreadsheet might
+run.</strong> A value beginning with =, +, - or @ goes into a CSV or TSV
+export exactly as it is, which keeps a round trip exact, but a
+spreadsheet opening the file may run it as a formula – and Export Data
+opens what it writes in its usual program, for a CSV file usually Excel.
+The export now counts such values, leaving out plain numbers like -5.
+When there are any, the window says how many and asks whether to open
+the file anyway, No being the answer when you simply press Enter; the
+dot prompt says so and does not open it. An .xlsx export already kept
+every value as text, and is named as the safe way into a spreadsheet.
+Nothing in any export is changed. The test of what counts was checked on
+16 values before it was written into DbDo (from an audit by another AI).
+## 14 October 2026 – SQL judged by what it does</p></li>
 <li><p><strong>A statement typed at the dot prompt is shown as rows or
 run as a command by what it does, not its first word.</strong> A
 statement was taken for a query when it began SELECT, PRAGMA, EXPLAIN or

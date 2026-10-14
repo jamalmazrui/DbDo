@@ -996,7 +996,11 @@ Import when you want to bring foreign data into a proper DbDo database.
 bring data in alongside existing data.</li>
 <li><strong>Export Data</strong> (Alt+X) writes the
 <strong>grid</strong> — the current view — out to a new file in a chosen
-format. Use Export to hand off what you are looking at.</li>
+format. Use Export to hand off what you are looking at. A CSV or TSV
+file holds your values exactly as they are. Since a spreadsheet may run
+a value beginning with =, +, - or @ as a formula, DbDo asks before
+opening such a file, and an .xlsx export is the safe way into a
+spreadsheet: it keeps every value as text.</li>
 <li><strong>Save</strong> (Control+S) and <strong>Save As</strong>
 (Control+Shift+S) concern the <em>whole database</em>. For a workbook
 opened faithfully, Save writes your edits back to the

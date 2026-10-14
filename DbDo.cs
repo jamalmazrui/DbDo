@@ -6135,8 +6135,27 @@ namespace DbDo
         // method (saveAs) that copies the entire database, not just
         // the current view.
         // =====================================================================
+        // FORMULAS FROM A CSV FILE (14 October 2026, from an audit by another AI). A value beginning with =, +, - or @
+        // is written to a CSV or TSV file exactly as it is -- the file is your data, and a round trip must not change
+        // it -- but a spreadsheet opening the file may run such a value as a formula. The export counts them here,
+        // and whoever opens the file for you asks first; an .xlsx export keeps every value as text and is the safe
+        // way into a spreadsheet. A plain number such as -5 or +3 is a number, not a formula, and is not counted.
+        public int iLastFormulaLike;
+
+        internal static bool formulaLike(string sValue)
+        {
+            if (string.IsNullOrEmpty(sValue)) return false;
+            string sLead = sValue.TrimStart(' ', '\t', '\r', '\n');
+            if (sLead.Length == 0 || "=+-@".IndexOf(sLead[0]) < 0) return false;
+            double nNumber;
+            if (double.TryParse(sLead, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out nNumber))
+                return sLead[0] == '=' || sLead[0] == '@';
+            return true;
+        }
+
         public void exportData(string sDestPath)
         {
+            iLastFormulaLike = 0;
             if (!hasRecordset()) throw new InvalidOperationException("No recordset open.");
             if (string.IsNullOrEmpty(sDestPath)) throw new ArgumentException("exportData requires a path.");
 
@@ -6204,6 +6223,7 @@ namespace DbDo
         // is used (with non-filesystem-safe characters replaced).
         public List<string> exportDataMulti(string sExtensions, string sFolder, string sBaseName)
         {
+            iLastFormulaLike = 0;
             if (!hasRecordset()) throw new InvalidOperationException("No recordset open.");
             string sExt = (sExtensions ?? "").Trim();
             if (sExt.Length == 0) sExt = "xlsx";
@@ -8207,14 +8227,19 @@ namespace DbDo
             using (StreamWriter writer2 = new StreamWriter(sDestPath, false, new UTF8Encoding(true)))
             {
                 List<string> lH = new List<string>();
-                foreach (string sN in lFields) lH.Add(escapeDelimField(sN, sDelim));
+                foreach (string sN in lFields) { lH.Add(escapeDelimField(sN, sDelim)); if (formulaLike(sN)) iLastFormulaLike++; }
                 writer2.WriteLine(string.Join(sDelim, lH));
 
                 moveFirst();
                 while (!eof)
                 {
                     List<string> lV = new List<string>();
-                    foreach (string sN in lFields) lV.Add(escapeDelimField(getFieldValue(sN), sDelim));
+                    foreach (string sN in lFields)
+                    {
+                        string sValue = getFieldValue(sN);
+                        if (formulaLike(sValue)) iLastFormulaLike++;
+                        lV.Add(escapeDelimField(sValue, sDelim));
+                    }
                     writer2.WriteLine(string.Join(sDelim, lV));
                     moveNext();
                 }
@@ -22369,11 +22394,22 @@ namespace DbDo
                 try
                 {
                     db.exportData(dlgFile.FileName);
-                    DbDoLog.write("Exported to " + dlgFile.FileName);
+                    DbDoLog.write("Exported to " + dlgFile.FileName + (db.iLastFormulaLike > 0 ? "; " + db.iLastFormulaLike + " value(s) a spreadsheet may take for formulas" : ""));
                     // Open the result in its default application so
                     // the user sees their export immediately, matching
-                    // dbDot's behavior.
-                    ComAutomation.shellOpen(dlgFile.FileName);
+                    // dbDot's behavior -- after asking, when a spreadsheet
+                    // opening it might run some of its values as formulas.
+                    bool bOpen = true;
+                    if (db.iLastFormulaLike > 0)
+                    {
+                        int iMany = db.iLastFormulaLike;
+                        bOpen = MessageBox.Show(this, "Exported to " + Path.GetFileName(dlgFile.FileName) + ". "
+                            + iMany + (iMany == 1 ? " value in it begins" : " values in it begin") + " with =, +, - or @, and a spreadsheet opening this file may run "
+                            + (iMany == 1 ? "it as a formula" : "them as formulas") + ". The file holds your data exactly.\r\n\r\n"
+                            + "To open it in a spreadsheet safely, export to .xlsx instead, which keeps every value as text.\r\n\r\nOpen this file now anyway?",
+                            "Export Data", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes;
+                    }
+                    if (bOpen) ComAutomation.shellOpen(dlgFile.FileName);
                 }
                 catch (Exception ex)
                 {
@@ -34314,6 +34350,12 @@ namespace DbDo
                 {
                     db.exportData(sUnquoted);
                     Console.WriteLine("Exported to " + sUnquoted);
+                    if (db.iLastFormulaLike > 0)
+                    {
+                        Console.WriteLine("Not opened: " + db.iLastFormulaLike + (db.iLastFormulaLike == 1 ? " value begins" : " values begin")
+                            + " with =, +, - or @, which a spreadsheet may run as formulas. The file holds your data exactly; export to .xlsx to open it in a spreadsheet safely.");
+                        return;
+                    }
                     ComAutomation.shellOpen(sUnquoted);
                     return;
                 }
@@ -34329,6 +34371,13 @@ namespace DbDo
                 foreach (string sP in lWritten)
                 {
                     Console.WriteLine("  wrote " + sP);
+                    string sWrittenExt = Path.GetExtension(sP).ToLowerInvariant();
+                    if (db.iLastFormulaLike > 0 && (sWrittenExt == ".csv" || sWrittenExt == ".tsv" || sWrittenExt == ".tab"))
+                    {
+                        Console.WriteLine("  not opened: " + db.iLastFormulaLike + (db.iLastFormulaLike == 1 ? " value begins" : " values begin")
+                            + " with =, +, - or @, which a spreadsheet may run as formulas; the .xlsx form keeps every value as text.");
+                        continue;
+                    }
                     ComAutomation.shellOpen(sP);
                 }
             }
