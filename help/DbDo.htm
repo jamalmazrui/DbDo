@@ -2227,16 +2227,23 @@ opened stays the file of record.</strong></p>
 working copy and opens that. You get the whole program – sorting,
 filtering, the Say keys, reports – and your file is only read.</p>
 <ul>
-<li><strong>Control+S writes your changes back</strong> to the file you
-opened. A spreadsheet keeps its formulas, its formatting and its other
-sheets. A text file is written out afresh, and the first time you save,
-DbDo leaves the file as it was beside it, named
-<code>&lt;name&gt;-before-dbdo.csv</code>.</li>
-<li><strong>Control+Shift+S, Save As, keeps the working copy as a
+<li><p><strong>Control+S writes your changes back</strong> to the file
+you opened. A spreadsheet keeps its formulas, its formatting and its
+other sheets. A text file is written out afresh, and the first time you
+save, DbDo leaves the file as it was beside it, named
+<code>&lt;name&gt;-before-dbdo.csv</code>.</p>
+<p>In a spreadsheet, a row you deleted has its cells cleared, not
+removed, so a formula elsewhere that points at that row still points at
+a row. A row you added goes below the others. Save never replaces or
+removes a formula: if you changed a cell that holds one, Save writes
+everything else and then shows you which cells it left alone, by row and
+column. Those changes stay only in DbDo; to make one, edit the formula
+in Excel.</p></li>
+<li><p><strong>Control+Shift+S, Save As, keeps the working copy as a
 database</strong> instead, if you would rather leave the spreadsheet
-behind and work in DbDo from now on.</li>
-<li><strong>Nothing is copied into a hidden folder.</strong> A file you
-opened from your documents stays in your documents.</li>
+behind and work in DbDo from now on.</p></li>
+<li><p><strong>Nothing is copied into a hidden folder.</strong> A file
+you opened from your documents stays in your documents.</p></li>
 </ul>
 <p>Access and SQLite files are databases already, so DbDo opens them as
 they are and your edits go straight into them.</p>

@@ -845,6 +845,15 @@ namespace DbDo
                     }
                     continue;
                 }
+                // A NAME IN DOUBLE QUOTES, BRACKETS OR BACKQUOTES IS COPIED WHOLE (14 October 2026, from an audit by
+                // another AI), as text in single quotes is, so a semicolon inside a name does not end the statement.
+                if (c == '"' || c == '`' || c == '[')
+                {
+                    int j = DbDoManager.sqlSkipQuoted(sBatch, i);
+                    sb.Append(sBatch, i, j - i);
+                    i = j;
+                    continue;
+                }
                 // Statement boundary
                 if (c == ';')
                 {
@@ -5641,12 +5650,97 @@ namespace DbDo
             catch (COMException ex) { throw new Exception("Resync failed: " + ex.Message, ex); }
         }
 
+        // SQL BY WHAT IT DOES, NOT BY ITS FIRST WORD (14 October 2026, from an audit by another AI). A statement was a
+        // query when it began SELECT, PRAGMA, EXPLAIN or WITH, so a SELECT after a comment ran as a command and its rows
+        // were never shown, and a WITH that ends in UPDATE or DELETE -- a write -- was opened as a read-only query.
+        // sqlReturnsRows reads the statement's own words, outside quotes, comments and brackets: WITH is judged by the
+        // statement its common table expressions lead into; PRAGMA with an equals sign is a setting, without one a
+        // question; a write with RETURNING gives rows. Tested on 27 statements before it was written here.
+        internal static int sqlSkipQuoted(string s, int i)
+        {
+            char cOpen = s[i];
+            char cClose = cOpen == '[' ? ']' : cOpen;
+            i++;
+            while (i < s.Length)
+            {
+                if (s[i] == cClose)
+                {
+                    // A doubled quote is one quote inside the text, and the text goes on.
+                    if (cClose != ']' && i + 1 < s.Length && s[i + 1] == cClose) { i += 2; continue; }
+                    return i + 1;
+                }
+                i++;
+            }
+            return i;
+        }
+
+        internal static int sqlSkipSpace(string s, int i)
+        {
+            while (i < s.Length)
+            {
+                if (char.IsWhiteSpace(s[i])) { i++; continue; }
+                if (string.CompareOrdinal(s, i, "--", 0, 2) == 0) { int j = s.IndexOf('\n', i); i = j < 0 ? s.Length : j + 1; continue; }
+                if (string.CompareOrdinal(s, i, "/*", 0, 2) == 0) { int j = s.IndexOf("*/", i + 2, StringComparison.Ordinal); i = j < 0 ? s.Length : j + 2; continue; }
+                break;
+            }
+            return i;
+        }
+
+        // The statement's words outside quotes, comments and brackets, in capitals and in order; an equals sign
+        // outside brackets is a word of its own.
+        internal static List<string> sqlTopWords(string s)
+        {
+            List<string> lWords = new List<string>();
+            int i = sqlSkipSpace(s, 0);
+            int iDepth = 0;
+            while (i < s.Length)
+            {
+                char c = s[i];
+                if (c == '\'' || c == '"' || c == '`' || c == '[') { i = sqlSkipQuoted(s, i); continue; }
+                if (string.CompareOrdinal(s, i, "--", 0, 2) == 0 || string.CompareOrdinal(s, i, "/*", 0, 2) == 0) { i = sqlSkipSpace(s, i); continue; }
+                if (c == '(') { iDepth++; i++; continue; }
+                if (c == ')') { iDepth = Math.Max(0, iDepth - 1); i++; continue; }
+                if (iDepth == 0 && (char.IsLetter(c) || c == '_'))
+                {
+                    int j = i;
+                    while (j < s.Length && (char.IsLetterOrDigit(s[j]) || s[j] == '_')) j++;
+                    lWords.Add(s.Substring(i, j - i).ToUpperInvariant());
+                    i = j;
+                    continue;
+                }
+                if (iDepth == 0 && c == '=') lWords.Add("=");
+                i++;
+            }
+            return lWords;
+        }
+
+        internal static bool sqlReturnsRows(string sSql)
+        {
+            List<string> lWords = sqlTopWords(sSql ?? "");
+            if (lWords.Count == 0) return false;
+            string sFirst = lWords[0];
+            if (sFirst == "SELECT" || sFirst == "VALUES" || sFirst == "EXPLAIN") return true;
+            if (sFirst == "PRAGMA") return !lWords.Contains("=");
+            if (sFirst == "WITH")
+            {
+                for (int k = 1; k < lWords.Count; k++)
+                {
+                    string sWord = lWords[k];
+                    if (sWord == "SELECT" || sWord == "VALUES") return true;
+                    if (sWord == "INSERT" || sWord == "UPDATE" || sWord == "DELETE" || sWord == "REPLACE") return lWords.Contains("RETURNING");
+                }
+                return true;
+            }
+            if (sFirst == "INSERT" || sFirst == "UPDATE" || sFirst == "DELETE" || sFirst == "REPLACE") return lWords.Contains("RETURNING");
+            return false;
+        }
+
         // =====================================================================
         // invokeSql: raw SQL via Connection.Execute. Used by the CLI's
         // Invoke-Sql command and by the GUI's Verbatim SQL dialog.
         // Routing:
-        //   queries (SELECT/PRAGMA/EXPLAIN/WITH) -> render results to sbOut
-        //   statements (INSERT/UPDATE/DELETE/etc) -> records-affected count
+        //   statements that give rows, by sqlReturnsRows above -> render results to sbOut
+        //   everything else (INSERT/UPDATE/DELETE/etc) -> records-affected count
         // Returns the records-affected count, or -1 if we rendered
         // results to sbOut.
         // =====================================================================
@@ -5657,8 +5751,7 @@ namespace DbDo
 
             string sTrim = sSql.TrimStart();
             string sUpper = sTrim.ToUpperInvariant();
-            bool bIsQuery = sUpper.StartsWith("SELECT") || sUpper.StartsWith("PRAGMA")
-                         || sUpper.StartsWith("EXPLAIN") || sUpper.StartsWith("WITH");
+            bool bIsQuery = sqlReturnsRows(sSql);
 
             if (bIsQuery)
             {
@@ -11750,8 +11843,25 @@ namespace DbDo
         // cells are skipped (preserved). The workbook is reopened, patched
         // in memory, written to a sibling temp file, then moved over the
         // original, so a write failure can't truncate the source.
-        internal static int writeBackData(string sPath, string sSheetName, List<CellWrite> lWrites)
+        //
+        // NOTHING LEFT OUT WITHOUT A WORD (14 October 2026, from an audit by another
+        // AI). Save wrote each row back by its worksheet row and said it had saved,
+        // while three kinds of change went unwritten: a deleted row kept its data in
+        // the workbook; an edit to a cell holding a formula was skipped; and a row
+        // with no worksheet position was passed over. Now a row that held data when
+        // the workbook was read, and is gone from DbDo, has its data cells cleared --
+        // its contents, not the row, so formulas elsewhere that point at it still
+        // point at a row -- and is counted in iCleared. An edit to a formula cell is
+        // kept out of the workbook and named in lsKept by row and column; the
+        // formula's own value coming back unchanged is no edit and is not named.
+        // Rows not there when the workbook was read are counted in iAdded. Rows added
+        // to the worksheet outside DbDo are never cleared, since only rows DbDo read
+        // can be taken for deleted.
+        internal static int writeBackData(string sPath, string sSheetName, List<CellWrite> lWrites, List<int> lOpenedRows,
+            List<string> lsHeaders, List<string> lsKept, out int iCleared, out int iAdded)
         {
+            iCleared = 0;
+            iAdded = 0;
             NPOI.SS.UserModel.IWorkbook wb = null;
             using (FileStream fs = new FileStream(sPath, FileMode.Open, FileAccess.Read))
                 wb = new NPOI.XSSF.UserModel.XSSFWorkbook(fs);
@@ -11770,15 +11880,46 @@ namespace DbDo
                 else if (wb.NumberOfSheets > 0) sheet = wb.GetSheetAt(0);
                 if (sheet == null) throw new Exception("The workbook no longer has a worksheet named " + sSheetName + ", so nothing was saved; your edits are still in DbDo. Rename the sheet back, or save the table elsewhere.");
 
+                NPOI.SS.UserModel.DataFormatter fmt = new NPOI.SS.UserModel.DataFormatter();
+                HashSet<int> setOpened = new HashSet<int>(lOpenedRows ?? new List<int>());
+                HashSet<int> setNow = new HashSet<int>();
+                HashSet<int> setAdded = new HashSet<int>();
                 foreach (CellWrite w in lWrites)
                 {
+                    setNow.Add(w.WsRow);
+                    if (lOpenedRows != null && !setOpened.Contains(w.WsRow)) setAdded.Add(w.WsRow);
                     NPOI.SS.UserModel.IRow row = sheet.GetRow(w.WsRow);
                     if (row == null) row = sheet.CreateRow(w.WsRow);
                     NPOI.SS.UserModel.ICell cell = row.GetCell(w.Col);
                     if (cell == null) cell = row.CreateCell(w.Col);
-                    if (cell.CellType == NPOI.SS.UserModel.CellType.Formula) continue; // preserve formula
+                    if (cell.CellType == NPOI.SS.UserModel.CellType.Formula)
+                    {
+                        // The formula is kept. Its own value coming back is no edit; anything else is one Save cannot make.
+                        if (readCellText(cell, fmt) != (w.Value ?? ""))
+                            lsKept.Add("row " + (w.WsRow + 1) + ", " + (w.Col < lsHeaders.Count ? lsHeaders[w.Col] : "column " + (w.Col + 1)));
+                        continue;
+                    }
                     applyValue(cell, w.Value);
                     iWritten++;
+                }
+                iAdded = setAdded.Count;
+                foreach (int r in setOpened)
+                {
+                    if (setNow.Contains(r)) continue;
+                    NPOI.SS.UserModel.IRow row = sheet.GetRow(r);
+                    if (row == null) continue;
+                    bool bCleared = false, bFormulas = false;
+                    for (int c = 0; c < lsHeaders.Count; c++)
+                    {
+                        NPOI.SS.UserModel.ICell cell = row.GetCell(c);
+                        if (cell == null) continue;
+                        if (cell.CellType == NPOI.SS.UserModel.CellType.Formula) { bFormulas = true; continue; }
+                        if (readCellText(cell, fmt) == "") continue;
+                        applyValue(cell, "");
+                        bCleared = true;
+                    }
+                    if (bCleared) iCleared++;
+                    if (bFormulas) lsKept.Add("row " + (r + 1) + ", deleted: its formulas stay, since Save never removes a formula");
                 }
                 // SetForceFormulaRecalculation lives on the concrete
                 // XSSFWorkbook, not the IWorkbook interface, so cast to
@@ -12223,6 +12364,7 @@ namespace DbDo
         private string sWorkbookSheetName;    // the worksheet mirrored
         private string sWorkbookTable;        // the mirror table in the temp .db
         private List<string> lWorkbookColumns; // mirror columns, in worksheet column order
+        private List<int> lWorkbookRows;       // the worksheet rows that held data when it was read
         private ToolStripMenuItem miToolsOpenFolder;
         private ToolStripMenuItem miToolsCommandPrompt;
         private ToolStripMenuItem miToolsChatWithAi;     // F12
@@ -19827,6 +19969,7 @@ namespace DbDo
                     sWorkbookSheetName = wo.Sheet;
                     sWorkbookTable = wo.Table;
                     lWorkbookColumns = wo.Columns;
+                    lWorkbookRows = wo.Rows;
                     Say.say("Opened workbook " + Path.GetFileName(sOpenPath)
                         + " for editing. Edit data cells; formulas are preserved. Press Control+S to save your changes back to the file.");
                     return;
@@ -19967,6 +20110,7 @@ namespace DbDo
             sWorkbookSheetName = null;
             sWorkbookTable = null;
             lWorkbookColumns = null;
+            lWorkbookRows = null;
         }
 
         // openWorkbookForEditing: read one worksheet of an .xlsx (via
@@ -19986,6 +20130,7 @@ namespace DbDo
             public string Sheet;
             public string Table;
             public List<string> Columns;
+            public List<int> Rows;
         }
 
         private WorkbookOpen openWorkbookForEditing(string sXlsxPath)
@@ -20051,7 +20196,7 @@ namespace DbDo
 
             WorkbookOpen wo = new WorkbookOpen();
             wo.TempDb = sDbPath; wo.Origin = sXlsxPath; wo.Sheet = model.Name;
-            wo.Table = sTable; wo.Columns = lCols;
+            wo.Table = sTable; wo.Columns = lCols; wo.Rows = new List<int>(model.WsRowIndexes);
             return wo;
         }
 
@@ -20178,11 +20323,12 @@ namespace DbDo
                 List<string[]> lRows = db.queryRowsSql(sbSel.ToString(), int.MaxValue, out iFound);
 
                 List<XlsxNpoi.CellWrite> lWrites = new List<XlsxNpoi.CellWrite>();
+                int iUnplaced = 0;
                 foreach (string[] aRow in lRows)
                 {
                     if (aRow.Length == 0) continue;
                     int iWsRow;
-                    if (!int.TryParse(aRow[0], out iWsRow)) continue;
+                    if (!int.TryParse(aRow[0], out iWsRow)) { iUnplaced++; continue; }
                     for (int c = 0; c < lWorkbookColumns.Count; c++)
                     {
                         string sv = (c + 1 < aRow.Length) ? (aRow[c + 1] ?? "") : "";
@@ -20190,12 +20336,29 @@ namespace DbDo
                     }
                 }
 
-                int iWritten = XlsxNpoi.writeBackData(sWorkbookOriginPath, sWorkbookSheetName, lWrites);
-                db.bDataModified = false;   // working copy now matches the .xlsx on disk
+                List<string> lsKept = new List<string>();
+                if (iUnplaced > 0) lsKept.Add(iUnplaced + (iUnplaced == 1 ? " row" : " rows") + " with no position in the worksheet");
+                int iCleared, iAdded;
+                int iWritten = XlsxNpoi.writeBackData(sWorkbookOriginPath, sWorkbookSheetName, lWrites, lWorkbookRows, lWorkbookColumns, lsKept, out iCleared, out iAdded);
+                // The rows that now hold data are the ones the next Save measures deletions against.
+                List<int> lNow = new List<int>();
+                foreach (XlsxNpoi.CellWrite w in lWrites) if (!lNow.Contains(w.WsRow)) lNow.Add(w.WsRow);
+                lWorkbookRows = lNow;
+                db.bDataModified = false;   // working copy now matches the .xlsx on disk, but for what lsKept names
                 updateStatusBar();          // flip the indicator to "saved"
-                try { DbDoLog.write("Save: wrote " + iWritten + " data cell(s) to " + sWorkbookOriginPath + " (formulas preserved)."); } catch { }
-                Say.say("Saved your changes to " + Path.GetFileName(sWorkbookOriginPath)
-                    + ". Formulas and other sheets were preserved.");
+                string sDone = "Saved your changes to " + Path.GetFileName(sWorkbookOriginPath)
+                    + (iAdded > 0 ? ", with " + iAdded + (iAdded == 1 ? " new row" : " new rows") : "")
+                    + (iCleared > 0 ? (iAdded > 0 ? " and " : ", with ") + iCleared + (iCleared == 1 ? " deleted row" : " deleted rows") + " cleared" : "")
+                    + ". Formulas and other sheets were preserved.";
+                try { DbDoLog.write("Save: wrote " + iWritten + " data cell(s) to " + sWorkbookOriginPath + "; " + iAdded + " row(s) added, "
+                    + iCleared + " deleted row(s) cleared, " + lsKept.Count + " change(s) not written" + (lsKept.Count > 0 ? ": " + string.Join("; ", lsKept) : "") + "."); } catch { }
+                if (lsKept.Count > 0)
+                {
+                    MessageBox.Show(this, sDone + "\r\n\r\nThese changes were not written, since Save never replaces or removes a formula, "
+                        + "and they are still only in DbDo:\r\n" + string.Join("\r\n", lsKept)
+                        + "\r\n\r\nTo change one, edit the formula in Excel.", "Save", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                }
+                else Say.say(sDone);
                 return true;
             }
             catch (Exception ex)
@@ -21365,6 +21528,7 @@ namespace DbDo
                 sWorkbookSheetName = null;
                 sWorkbookTable = null;
                 lWorkbookColumns = null;
+                lWorkbookRows = null;
                 // Reset the first-populate flag so the JAWS "Unselected"
                 // workaround fires once for this new database.
                 bGridFirstPopulate = true;

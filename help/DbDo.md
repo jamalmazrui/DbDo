@@ -840,6 +840,13 @@ reports -- and your file is only read.
   keeps its formulas, its formatting and its other sheets. A text file is
   written out afresh, and the first time you save, DbDo leaves the file as it
   was beside it, named `<name>-before-dbdo.csv`.
+
+  In a spreadsheet, a row you deleted has its cells cleared, not removed, so a
+  formula elsewhere that points at that row still points at a row. A row you
+  added goes below the others. Save never replaces or removes a formula: if you
+  changed a cell that holds one, Save writes everything else and then shows you
+  which cells it left alone, by row and column. Those changes stay only in DbDo;
+  to make one, edit the formula in Excel.
 - **Control+Shift+S, Save As, keeps the working copy as a database** instead, if
   you would rather leave the spreadsheet behind and work in DbDo from now on.
 - **Nothing is copied into a hidden folder.** A file you opened from your

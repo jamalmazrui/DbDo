@@ -271,105 +271,108 @@ explains how to build DbDo from its source.</li>
 <h2
 id="convention-over-configuration-a-few-nouns-and-one-junction">Convention
 over configuration: a few nouns and one junction</h2>
-<p>Most of the relational worlds people actually keep – a club roster, a
-project tracker, a record collection, a convention – reduce to a handful
-of nouns and the relationships among them. DbDo leans into that. Every
-table, the infrastructure ones included, carries the same standard
-columns: a <code>&lt;singular&gt;_id</code> key, <code>added</code> and
-<code>edited</code> stamps kept by triggers, the table’s own fields,
-then <code>url</code>, <code>notes</code>, <code>tags</code>, a
-generated <code>look</code> that a row speaks, a generated
-<code>prime</code> that names the record, and <code>marked</code>.</p>
-<p>The <strong>maps</strong> table is the heart of the model: a generic,
-typed link between any two records in any tables. Each row holds
-<code>(tbl1, prime1, kind, tbl2, prime2)</code> – the subject, the kind
-of relationship, and the object – identified by <code>prime</code>
-values rather than integer keys, so map rows read plainly in the grid,
-survive export and re-import, and can be written by script. One-to-many
-and many-to-many are the same row shape. In MusicTrail, a performer
-<strong>recorded</strong> an album and a musician is a
-<strong>member_of</strong> a band, so John Bonham leads to Led Zeppelin
-and on to Led Zeppelin IV; in BlindCreations, a creator is
+<p>Most of the related records people actually keep – a club roster, a
+project tracker, a record collection, a convention – come down to a
+handful of nouns and how they relate. DbDo builds on that. Every table,
+the system tables included, has the same standard columns. First comes a
+<code>&lt;singular&gt;_id</code> key, then <code>added</code> and
+<code>edited</code> stamps kept by triggers, then the table’s own
+fields. After them come <code>url</code>, <code>notes</code> and
+<code>tags</code>, a generated <code>look</code> that a row speaks, a
+generated <code>prime</code> that names the record, and
+<code>marked</code>.</p>
+<p>The <strong>maps</strong> table is the heart of the model. It is a
+general, typed link between any two records in any two tables. Each row
+holds <code>(tbl1, prime1, kind, tbl2, prime2)</code>: the subject, the
+kind of relationship, and the object. Records are named by their
+<code>prime</code> values rather than by number keys. So map rows read
+plainly in the grid, survive export and import, and can be written by a
+script. One-to-many and many-to-many links have the same row shape. In
+MusicTrail, a performer <strong>recorded</strong> an album, and a
+musician is a <strong>member_of</strong> a band, so John Bonham leads to
+Led Zeppelin and on to Led Zeppelin IV. In BlindCreations, a creator is
 <strong>author_of</strong> a book or <strong>developer_of</strong> an
 app.</p>
-<p>The point of the maps model: “everything this person made” and
-“everyone who made this” are the SAME query shape – filter maps by one
-side, read the other – and because the answer comes back as a
-single-table SELECT through an IN-subquery, the resulting view stays
+<p>The point of the maps model is this: “everything this person made”
+and “everyone who made this” are the SAME kind of query. You filter maps
+by one side and read the other. The answer comes back as a query on a
+single table, through an IN-subquery, so the view it makes stays
 editable in DbDo.</p>
 <p>For a convention or conference of any organization, the HomerDev
 kit’s <strong>convention-database</strong> skill builds the model from
-the agenda: events, locations, projects and contacts, linked by
+the agenda. It makes events, locations, projects and contacts, linked by
 <strong>presents</strong>, <strong>located_at</strong>,
 <strong>sponsors</strong>, <strong>features</strong> and
-<strong>offers</strong>, with scripts that turn marked sessions into a
+<strong>offers</strong>. Its scripts turn the sessions you mark into a
 calendar file, an accessible schedule and contact cards.</p>
 <h2 id="valid-values-become-comboboxes-the-lookups-table">Valid values
 become comboboxes (the lookups table)</h2>
-<p>A <strong>lookups</strong> table defines the allowed values for a
-field, so the Record Edit dialog can present that field as a ComboBox –
-the Windows control that works best from the keyboard, with type-ahead
-and arrow navigation that every screen reader announces cleanly –
-instead of a bare text box. Each lookups row binds a value to a
-<code>tbl</code> and <code>fld</code> (with an optional <code>src</code>
-authority and a <code>descrip</code>). DbDo offers the combobox whenever
-a field has values defined.</p>
-<p>Each template carries lookups for its own fields – every
+<p>A <strong>lookups</strong> table lists the allowed values for a
+field. The Record Edit dialog can then show that field as a ComboBox
+instead of a bare text box. A ComboBox is the Windows control that works
+best from the keyboard: you can type ahead or use the arrows, and every
+screen reader announces it clearly. Each lookups row ties a value to a
+<code>tbl</code> and a <code>fld</code>, with an optional
+<code>src</code> source and a <code>descrip</code>. DbDo offers the
+combobox whenever a field has values listed.</p>
+<p>Each template carries lookups for its own fields. They include every
 <code>maps.kind</code> it uses, MusicTrail’s genres and roles with the
-books’ own descriptions, TechTraining’s categories with the directory’s
-definition of each. A separate, shared <strong>lookups.db</strong> ships
-alongside with global lists – <code>state</code> and
-<code>country</code> – bound to any table that has a field of that name,
-so they serve every database (Northwind’s <code>country</code> field
-gets a combobox with no per-database setup).</p>
+books’ own descriptions, and TechTraining’s categories with the
+directory’s definition of each. A separate, shared
+<strong>lookups.db</strong> comes with DbDo, holding the global lists
+<code>state</code> and <code>country</code>. They apply to any table
+with a field of that name, so they serve every database. For example,
+Northwind’s <code>country</code> field gets a combobox with no setup in
+that database.</p>
 <h2 id="background-four-decades-of-nonvisual-database-tools">Background:
 four decades of nonvisual database tools</h2>
 <p>DbDo is the latest in a line of accessible database managers I have
 built over nearly forty years. I worked as a database administrator at
-Harvard’s Kennedy School of Government in the 1980s; when the field
+Harvard’s Kennedy School of Government in the 1980s. Then the field
 moved from the DOS command line to the Windows graphical interface and
-tools like Microsoft Access, the screen readers of the day could not
-make those tools usable – a barrier that cost me a promotion and pushed
+tools like Microsoft Access, and the screen readers of the day could not
+make those tools usable. That barrier cost me a promotion, and it pushed
 me toward building accessible software myself.</p>
 <ul>
 <li><strong>Contact Tracking System (DOS).</strong> My first accessible
-database tool: a keyboard-and-speech contact and records manager for the
-DOS era, when a well-structured text screen was the most accessible
-interface available.</li>
+database tool. It managed contacts and records by keyboard and speech,
+in the DOS era, when a well-structured text screen was the most
+accessible interface there was.</li>
 <li><strong>DbDialog (AutoIt).</strong> A friendly database manager for
-Windows, built in the AutoIt scripting language on top of my own
-label-based-controls library (LbC) so that every field was a standard,
-screen-reader-friendly Windows control. I later packaged DbDialog to run
-as a script package within the Window-Eyes screen reader as well.</li>
+Windows, built in the AutoIt scripting language. It used my own
+label-based-controls library (LbC), so that every field was a standard
+Windows control that screen readers handle well. I later packaged
+DbDialog to run as a script package within the Window-Eyes screen reader
+as well.</li>
 <li><strong>DbDo (this program).</strong> A Windows desktop application
-with two interfaces over one live connection – a multiple-document
-graphical interface and a dBASE-style console dot prompt – supporting
-SQLite, Access, Excel, dBASE, and delimited files in a relational model
-designed from the ground up for screen-reader and keyboard
-efficiency.</li>
+with two interfaces over one live connection: a graphical interface that
+holds several documents, and a dBASE-style console dot prompt. It
+supports SQLite, Access, Excel, dBASE and delimited files, in a
+relational model designed from the ground up for screen reader and
+keyboard efficiency.</li>
 </ul>
 <p>DbDo’s keyboard and command conventions also draw on two other
-accessible tools I build and maintain: <strong><a
-href="https://github.com/jamalmazrui/EdSharp">EdSharp</a></strong>, a
-text and code editor optimized for keyboard and screen-reader users, and
+accessible tools I build and maintain. <strong><a
+href="https://github.com/jamalmazrui/EdSharp">EdSharp</a></strong> is a
+text and code editor made for keyboard and screen reader users, and
 <strong><a
-href="https://github.com/jamalmazrui/FileDir">FileDir</a></strong>, a
-file and directory manager in the same spirit. The multiple-window
-model, the Key Help mode that announces a command instead of running it,
-the spoken status-query commands, and the in-place text-field
-convenience keys all matured in those programs first; DbDo carries the
-same muscle memory into a relational-database setting.</p>
+href="https://github.com/jamalmazrui/FileDir">FileDir</a></strong> is a
+file and directory manager in the same spirit. Several ideas matured in
+those programs first: the model of several windows, the Key Help mode
+that announces a command instead of running it, the spoken status
+commands, and the convenience keys inside text fields. DbDo carries the
+same habits of hand into a relational database.</p>
 <p>Across that span I also served as founding director of the Boston
 Computer Society’s Visually Impaired and Blind User Group, as an analyst
 at the National Council on Disability, and as deputy director of the
-FCC’s Accessibility and Innovation Initiative, and I maintain a large
+FCC’s Accessibility and Innovation Initiative. I also maintain a large
 free-software repository for blind computer users. DbDo carries that
 history forward.</p>
 <p>To the best of my research, no other general-purpose relational
-database manager has been built specifically for screen-reader users;
-mainstream desktop database tools are designed for sighted, mouse-driven
-use and are accessible only incidentally, if at all. DbDo is built to
-close that gap.</p>
+database manager has been built for screen reader users. Mainstream
+desktop database tools are designed for sighted use with a mouse, and
+are accessible only by chance, if at all. DbDo is built to close that
+gap.</p>
 <h2 id="license">License</h2>
 <p>DbDo is free and open source under the MIT License. See <a
 href="License.md">License.md</a>.</p>

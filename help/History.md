@@ -5,6 +5,16 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 14 October 2026 -- SQL judged by what it does
+
+- **A statement typed at the dot prompt is shown as rows or run as a command by what it does, not its first word.** A statement was taken for a query when it began SELECT, PRAGMA, EXPLAIN or WITH. So a SELECT after a comment ran as a command and its rows were never shown, and a WITH that ends in UPDATE or DELETE -- a write -- was opened as a read-only query. DbDo now reads the statement's own words, outside quotes, comments and brackets: a WITH is judged by the statement it leads into; a PRAGMA with an equals sign is a setting, and without one a question; and an INSERT, UPDATE or DELETE with RETURNING gives rows, which are shown. A semicolon inside a name in double quotes, brackets or backquotes no longer ends the statement, as one inside quoted text already did not. The rules were tested on 27 statements, among them words like SELECT and RETURNING inside quoted text and names, before they were written into DbDo (from an audit by another AI).
+## 14 October 2026 -- a spreadsheet save that leaves nothing out without a word
+
+- **Save writes every kind of change back to a spreadsheet, or says which it could not.** It wrote each row back by its place in the worksheet and announced success, while three kinds of change went unwritten: a deleted row kept its data in the workbook, an edit to a cell holding a formula was skipped, and a row with no place in the worksheet was passed over. Now a deleted row has its cells cleared -- its contents, not the row, so formulas elsewhere that point at it still point at a row; a new row goes below the others, and both are counted in what Save says; and an edit Save cannot make, since it never replaces or removes a formula, is shown in a message by row and column, and stays only in DbDo. A formula's own value coming back unchanged is no edit and is not named. Only rows DbDo read when it opened the workbook can be taken for deleted, so rows added in Excel meanwhile are never cleared. The log gives every count (from an audit by another AI).
+## 14 October 2026 -- the ReadMe in plainer words
+
+- **ReadMe.md reads at grade 8.5, down from 11.4.** Long sentences in the sections on conventions, lookups and the background were split, with every fact, name and claim kept; the background keeps its author's own words and first person.
+
 ## 14 October 2026 -- the announcement in plainer words
 
 - **Announce.md now reads at grade 8.6, down from 11.7,** inside the ninth-grade target for documents shared publicly. Long sentences were split and dense phrases put plainly; every fact, key and link is kept, and first-person passages keep their author's own words. The section about the companion tools reads the same in each announcement that carries it, with the tools' hotkeys in alphabetical order.
