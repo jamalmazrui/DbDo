@@ -933,7 +933,11 @@ Screen reader:
 
 Four more get a shorter visit in walk seven: TechTraining, BlindCreations, ContactTrail and RecipeTrail.
 
-### Step 9: Insert+Up Arrow
+### Step 9
+
+Two voices take these walks. I am the host; the other voice plays the screen reader. It is a simulation, so your own reader's words may differ a little.
+
+### Step 10: Insert+Up Arrow
 
 You know your screen reader's own keys already, and three of them are worth remembering whenever you feel lost. Insert plus Up Arrow says the line you are on again.
 
@@ -943,7 +947,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 10: Insert+Tab
+### Step 11: Insert+Tab
 
 Insert plus Tab says what has the focus: its name, its role, and its value or state.
 
@@ -953,7 +957,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 11: Insert+T
+### Step 12: Insert+T
 
 Insert plus T says the title of the window.
 
@@ -963,15 +967,15 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 12
-
-If your screen reader uses Caps Lock in place of Insert, Caps Lock works the same way for all three.
-
 ### Step 13
+
+On a laptop keyboard, Caps Lock usually stands in for Insert, though in some laptop layouts the line command moves to a letter, such as Caps Lock plus L. And if speech goes by before you catch it, your reader can replay it: Insert plus X in some readers, a speech history in others.
+
+### Step 14
 
 Now the table of contents. I say the number and the title; the reader says what the walk covers.
 
-### Step 14
+### Step 15
 
 One, User Interface.
 
@@ -979,7 +983,7 @@ Screen reader:
 
 - The window, the record list, the Say keys that ask without changing, the menus, the rules every key follows, and where help lives.
 
-### Step 15
+### Step 16
 
 Two, Install and Tune In.
 
@@ -987,7 +991,7 @@ Screen reader:
 
 - The installer, DbDo opening on RadioTrail, a station found by name and playing.
 
-### Step 16
+### Step 17
 
 Three, Find a Station.
 
@@ -995,7 +999,7 @@ Screen reader:
 
 - A station that may carry the Seahawks game: searched, filtered, narrowed, put in order and played.
 
-### Step 17
+### Step 18
 
 Four, Track Job Leads.
 
@@ -1003,7 +1007,7 @@ Screen reader:
 
 - JobTrail: a status brought up to date, a job added, notes kept, and the people linked to a job.
 
-### Step 18
+### Step 19
 
 Five, Catalog Your Books.
 
@@ -1011,7 +1015,7 @@ Screen reader:
 
 - BookTrail: what you are reading next, counts by format, and a reading log written as a document.
 
-### Step 19
+### Step 20
 
 Six, Explore Music.
 
@@ -1019,7 +1023,7 @@ Screen reader:
 
 - MusicTrail: from an album to the band that recorded it, to its members, and back.
 
-### Step 20
+### Step 21
 
 Seven, More Templates.
 
@@ -1027,7 +1031,7 @@ Screen reader:
 
 - TechTraining, BlindCreations, ContactTrail and RecipeTrail, and bringing your copy up to date when a template improves.
 
-### Step 21
+### Step 22
 
 Eight, Ask with SQL.
 
@@ -1035,7 +1039,7 @@ Screen reader:
 
 - A question in the database's own language, and the same question asked in plain words.
 
-### Step 22
+### Step 23
 
 Nine, Conclusion.
 
@@ -2622,7 +2626,7 @@ Screen reader:
 
 ### Step 12: Enter
 
-Enter. The answer comes in words, from the same records, and nothing leaves this computer.
+Enter. The answer comes in words, from the same records, and with the model running on this computer, the records are not sent anywhere.
 
 Screen reader:
 

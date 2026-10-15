@@ -5,7 +5,7 @@
     <link>Tutorials.htm</link>
     <description>Spoken walks through DbDo, the database program built for working by ear, and the ready-made databases that come with it. Ten walks, each under five minutes, in the order a new person meets them.</description>
     <language>en-us</language>
-    <lastBuildDate>Wed, 14 Oct 2026 23:12:52 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 15 Oct 2026 19:07:24 +0000</lastBuildDate>
     <itunes:author>Jamal Mazrui</itunes:author>
     <itunes:explicit>false</itunes:explicit>
     <itunes:category text="Technology"/>
@@ -15,8 +15,8 @@
       <description>Nothing is needed; this walk is listened to. Full transcript: Tutorials.htm#0-0-overview</description>
       <link>Tutorials.htm#0-0-overview</link>
       <guid isPermaLink="false">homer-tutorial_0_overview</guid>
-      <enclosure url="tutorials/0_Overview.mp3" length="1260273" type="audio/mpeg"/>
-      <itunes:duration>00:03:00</itunes:duration>
+      <enclosure url="tutorials/0_Overview.mp3" length="1393209" type="audio/mpeg"/>
+      <itunes:duration>00:03:17</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
@@ -87,8 +87,8 @@
       <description>DbDo is open on MusicTrail. Full transcript: Tutorials.htm#0h-8-ask-with-sql</description>
       <link>Tutorials.htm#0h-8-ask-with-sql</link>
       <guid isPermaLink="false">homer-tutorial_8_ask_with_sql</guid>
-      <enclosure url="tutorials/8_Ask_with_SQL.mp3" length="1326377" type="audio/mpeg"/>
-      <itunes:duration>00:03:13</itunes:duration>
+      <enclosure url="tutorials/8_Ask_with_SQL.mp3" length="1350891" type="audio/mpeg"/>
+      <itunes:duration>00:03:15</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>

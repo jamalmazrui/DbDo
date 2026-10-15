@@ -85,7 +85,7 @@ Hear=Which Soul albums came out in the 1970s?
 
 [step]
 
-Say=Enter. The answer comes in words, from the same records, and nothing leaves this computer.
+Say=Enter. The answer comes in words, from the same records, and with the model running on this computer, the records are not sent anywhere.
 Key=Enter
 Hear=Answer dialog
 Note=Confirm the wording with a live run: buildTutorials -live.
