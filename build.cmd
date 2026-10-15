@@ -229,6 +229,50 @@ if exist "!sHere!templates\RadioTrail\fetchStations.py" if exist "!sHere!templat
   python "!sHere!templates\RadioTrail\fetchStations.py" --conventions "!sHere!templates\RadioTrail\RadioTrail.db" >> "!log!" 2>&1
   echo RadioTrail conventions: exit code !errorlevel!>> "!log!"
 )
+rem THE DIRECTORY TEMPLATES FOLLOW THEIR PAGES (15 October 2026). BlindSkills and
+rem BlindCreations are made from Jamal Mazrui's directories in MyPages, by
+rem scripts\makeBlindSkills and scripts\buildBlindCreations. Run by hand, a rebuild
+rem was easy to forget: two new presenters once missed a release that way. Each is
+rem now rebuilt here when its pages or its builder changed since its last
+rem successful rebuild, judged by the kit's fingerprints, and recorded only after
+rem the template check below passes, since that check may repair it. With no
+rem MyPages folder (MyPages environment variable, or MyPages at a drive's root),
+rem as on any other developer's machine, the shipped databases are kept as they are.
+set "sMyPages="
+set "bSkillsMade=0"
+set "bCreationsMade=0"
+set "sDirPrint=!homerDev!\scripts\fingerprint.py"
+if defined MyPages if exist "%MyPages%\pages\BlindSkills\BlindSkills.md" set "sMyPages=%MyPages%"
+if not defined sMyPages for %%D in (C D E F G H I J K L M N O P Q R S T U V W X Y Z) do if not defined sMyPages if exist "%%D:\MyPages\pages\BlindSkills\BlindSkills.md" set "sMyPages=%%D:\MyPages"
+if not defined sMyPages echo Directory templates: no MyPages folder found, so BlindSkills and BlindCreations are kept as shipped.>> "!log!"
+if defined sMyPages if not exist "!sDirPrint!" (
+  echo Directory templates: the kit's fingerprint.py is missing, so BlindSkills and BlindCreations are kept as shipped.>> "!log!"
+  set "sMyPages="
+)
+if defined sMyPages (
+  set "sPages=!sMyPages!\pages"
+  echo Directory templates: pages in !sPages!>> "!log!"
+  python "!sDirPrint!" check "%CD%" "template BlindSkills" --in "!sPages!\BlindSkills\BlindSkills.md" scripts\makeBlindSkills.py scripts\makeMusicTrail.py --out templates\BlindSkills\BlindSkills.db >> "!log!" 2>&1
+  if errorlevel 1 (
+    echo Rebuilding the BlindSkills template, since its page changed ...
+    python "!sHere!scripts\makeBlindSkills.py" "!sPages!\BlindSkills\BlindSkills.md" >> "!log!" 2>&1
+    if errorlevel 1 (
+      echo makeBlindSkills failed. Its log is in logs, named DbDo-makeBlindSkills with the date and time.
+      popd & exit /b 1
+    )
+    set "bSkillsMade=1"
+  )
+  python "!sDirPrint!" check "%CD%" "template BlindCreations" --in "!sPages!\BlindApps\BlindApps.md" "!sPages!\BlindBooks\BlindBooks.md" "!sPages!\BlindCreators\BlindCreators.md" "!sPages!\BlindPresenters\BlindPresenters.md" scripts\buildBlindCreations.py scripts\makeMusicTrail.py --out templates\BlindCreations\BlindCreations.db >> "!log!" 2>&1
+  if errorlevel 1 (
+    echo Rebuilding the BlindCreations template, since its directories changed ...
+    python "!sHere!scripts\buildBlindCreations.py" "!sPages!" >> "!log!" 2>&1
+    if errorlevel 1 (
+      echo buildBlindCreations failed. Its log is in logs, named DbDo-buildBlindCreations with the date and time.
+      popd & exit /b 1
+    )
+    set "bCreationsMade=1"
+  )
+)
 rem THE TEMPLATES AND THEIR COMPANION FILES ARE CHECKED TOGETHER (12 October 2026).
 rem An audit found every database healthy and 13 of 22 shipped SQL statements
 rem failing on them. scripts\checkTemplates repairs what DbDo's conventions settle
@@ -244,6 +288,9 @@ if not "!iTemplates!"=="0" (
   echo The template check failed. Its log is in logs, named DbDo-checkTemplates with the date and time.
   popd & exit /b 1
 )
+rem A directory template rebuilt above is recorded now that the check has passed.
+if "!bSkillsMade!"=="1" python "!sDirPrint!" record "%CD%" "template BlindSkills" --in "!sPages!\BlindSkills\BlindSkills.md" scripts\makeBlindSkills.py scripts\makeMusicTrail.py --out templates\BlindSkills\BlindSkills.db >> "!log!" 2>&1
+if "!bCreationsMade!"=="1" python "!sDirPrint!" record "%CD%" "template BlindCreations" --in "!sPages!\BlindApps\BlindApps.md" "!sPages!\BlindBooks\BlindBooks.md" "!sPages!\BlindCreators\BlindCreators.md" "!sPages!\BlindPresenters\BlindPresenters.md" scripts\buildBlindCreations.py scripts\makeMusicTrail.py --out templates\BlindCreations\BlindCreations.db >> "!log!" 2>&1
 
 rem Tools the kit has retired or renamed, and DbDo's own near-duplicates of
 rem them. Similar names are how the wrong tool gets run: makeTutorial beside

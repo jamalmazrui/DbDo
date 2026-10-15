@@ -5,16 +5,18 @@
 
 THE DIRECTORY. Blind Skills, Jamal Mazrui's GitHub Page of free videos and podcasts that teach blindness skills -- cane
 travel, braille, cooking, dressing, labeling and more -- kept in MyPages\\pages\\BlindSkills\\BlindSkills.md. Each lesson is
-a level-three heading under its skill group, linking the lesson itself inline, then
-fields in alphabetical order, one to a paragraph: Audience, Description, Duration, Episode page or Source page, Medium,
-Presenter, Series, Skill, Source, Structured discovery, Transcript, Year.
+a level-three heading under its skill group, linking the lesson itself inline, then a one- or two-sentence description
+with no label, then Source page and Transcript links in paragraphs of their own, then fields in alphabetical order, one
+to a paragraph: Audience, Length (whole minutes), Presenter, Series, Skill, Source, Structured discovery, Year. Medium
+is not on the page; an .mp3 address is audio and any other a video. The older layout, with labelled Description,
+Duration, Medium and Source page or Episode page, is still read.
 
 WHAT IT MAKES. templates\\BlindSkills\\BlindSkills.db, the Homer way, with the table helpers makeMusicTrail uses (as
 makeTechTraining does): one table, lessons, with the standard fields, look, prime and triggers. Its url field is the
 lesson's own address, so Play Stream (Alt+Shift+P) plays it in the Homer Player -- MP3 episodes directly, videos through
 yt-dlp -- and marked lessons play as a play list. lookups hold the skill groups with the directory's own definition of
 each, the skills, the sources, the series, the audiences, the media and the two structured discovery values. skill is
-the task a lesson teaches; minutes is its length where the publisher gives it; source_url and transcript_url open
+the task a lesson teaches; minutes is its Length; source_url and transcript_url open
 the publisher's page and the transcript with Control+Enter; tags repeat group, skill and source for Keywords.
 
 The old file is replaced only when the new one is complete and passes its own check. The log,
@@ -26,7 +28,7 @@ import datetime, glob, os, platform, re, sqlite3, string, sys, traceback
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import makeMusicTrail as trail
 
-sVersion = "2026-10-14 version 3: reads the FileDir-ready page (inline heading links, one field to a paragraph, Episode page links); no starter marks"
+sVersion = "2026-10-15 version 4: reads the shared directory entry shape (unlabelled description, Source page and Transcript links, Length); medium from the address"
 lsFields = ["title", "skill", "category", "year", "minutes", "medium", "audience", "presenter", "series", "source", "structured_discovery",
             "summary", "source_url", "transcript_url"]
 dColumnTypes = {"audience": "TEXTLINE", "category": "TEXTLINE", "medium": "TEXTLINE", "minutes": "INTEGER", "presenter": "TEXTLINE",
@@ -70,8 +72,9 @@ def linkOf(sValue, dRefs):
 
 
 def minutesOf(sDuration):
-    """A measured '3:56' or '1:04:00', or a rounded 'About 64 minutes', as whole minutes; '' when it is neither."""
-    oAbout = re.match(r"About (\d+) minutes?$", sDuration)
+    """A Length of '4 minutes' or '1 minute' (15 October 2026), a measured '3:56' or '1:04:00', or a rounded 'About 64
+    minutes', as whole minutes; '' when it is none of these."""
+    oAbout = re.match(r"(?:About )?(\d+) minutes?$", sDuration, re.I)
     if oAbout: return int(oAbout.group(1))
     lsParts = sDuration.split(":")
     if not sDuration or not all(p.isdigit() for p in lsParts) or len(lsParts) > 3: return ""
@@ -103,14 +106,26 @@ def readDirectory(sText):
         if not oHead or not sCategory: continue
         sTitle, sUrl = oHead.group(1).strip(), oHead.group(2).strip()
         dFields = {sLabel.strip().lower(): sValue.strip() for sLabel, sValue in re.findall(r"(?m)^\*\*([^*]+?):\*\* (.+)$", sChunk)}
-        oEpisode = re.search(r"(?m)^\[Episode page\]\[([^\]]+)\]\s*$", sChunk)
-        sPage = dRefs.get(oEpisode.group(1), "") if oEpisode else linkOf(dFields.get("source page", ""), dRefs)
+        # THE DIRECTORY'S ENTRY SHAPE OF 15 OCTOBER 2026 (HomerDev's homer-page skill, directory-entries.md): the
+        # description is the first paragraph under the heading, with no label; Source page and Transcript are links in
+        # paragraphs of their own, inline or reference-style; Length is whole minutes; Medium is no longer shown, so it
+        # is known from the address, as an .mp3 is audio and anything else a video. The older labelled fields
+        # (Description, Duration, Medium, Source page, Episode page) are still read, so either shape builds the same row.
+        lsParas = [x.strip() for x in sChunk.split("\n\n")[1:] if x.strip()]
+        sSummary = dFields.get("description", "") or next((x for x in lsParas if not x.startswith(("**", "["))), "")
+        def plainLink(sName):
+            for x in lsParas:
+                oLink = re.fullmatch(r"\[" + sName + r"\](?:\(([^)\s]+)\)|\[([^\]]+)\])", x)
+                if oLink: return oLink.group(1) or dRefs.get(oLink.group(2), "")
+            return ""
+        sPage = plainLink("Source page") or plainLink("Episode page") or linkOf(dFields.get("source page", ""), dRefs)
+        sTranscript = plainLink("Transcript") or linkOf(dFields.get("transcript", ""), dRefs)
+        sMedium = dFields.get("medium", "").lower() or ("audio" if re.search(r"\.mp3(\?|$)", sUrl, re.I) else "video")
         dRow = {"title": sTitle, "skill": dFields.get("skill", ""), "category": sCategory, "year": dFields.get("year", ""),
-                "minutes": minutesOf(dFields.get("duration", "")), "medium": dFields.get("medium", "").lower(),
+                "minutes": minutesOf(dFields.get("length", "") or dFields.get("duration", "")), "medium": sMedium,
                 "audience": dFields.get("audience", ""), "presenter": dFields.get("presenter", ""), "series": dFields.get("series", ""),
                 "source": dFields.get("source", ""), "structured_discovery": dFields.get("structured discovery", ""),
-                "summary": dFields.get("description", ""), "source_url": sPage,
-                "transcript_url": linkOf(dFields.get("transcript", ""), dRefs), "url": sUrl}
+                "summary": sSummary, "source_url": sPage, "transcript_url": sTranscript, "url": sUrl}
         # TAGS, one to a line, so Keywords (Control+K) finds a lesson by its group, task, source or method, as BlindCreations does.
         dRow["tags"] = "\n".join(s for s in [sCategory, dRow["skill"], dRow["source"],
                                              "structured discovery" if dRow["structured_discovery"] else ""] if s)
