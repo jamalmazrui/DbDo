@@ -605,7 +605,7 @@ DbDo speaks directly to supplement your screen reader's own announcements. **Ext
 
 ### Persistence and logging
 
-DbDo remembers per-database state in the database's own `<DbName>.inix` — the last table, sort, filter, and displayed columns, plus a pinned **InitialTable** and the recent Find, Jump, Replace, Regex, and Query inputs — so reopening a database returns you to where you were. Activity is written to **DbDo.log**; **Email Log File** in the Help menu reveals the log and starts an email with its path, for reporting issues.
+DbDo remembers per-database state in the database's own `<DbName>.inix` — the last table, sort, filter, and displayed columns, plus a pinned **InitialTable** and the recent Find, Jump, Replace, Regex, and Query inputs — so reopening a database returns you to where you were. Activity is written to a log for each session, named DbDo with the date and time it began, in `%LOCALAPPDATA%\DbDo\logs`; **Email Log File** in the Help menu reveals the log and starts an email with its path, for reporting issues.
 
 ---
 
@@ -913,7 +913,8 @@ menu (Alt+H, then U). It offers two buttons:
   Add new only, the first choice, changes none of yours. Your copy as it was is kept
   beside it, named with "before-merge".
 - **Replace** makes your copy the template again. Your copy as it was is kept beside it
-  as a dated backup, named with "before-update", so nothing is lost.
+  as a dated backup, named with "before-update". DbDo keeps the two newest of these
+  backups for each database and removes older ones, so they do not pile up.
 
 Either way, a script, query or report the template has and your copy lacks is copied in
 beside it; none of yours is overwritten. Merge is the first button, so Enter takes it.
@@ -984,7 +985,7 @@ many are playable, asked, looked up -- and says so; then it fetches only what
 is missing, and leaves a complete copy alone. `fetchStations --report` gives the
 report by itself, and fetches nothing. Its log is named first thing, in the project's `logs`
 folder. From nothing, one command does four things: a clean copy from the template; the whole catalog --
-some sixty thousand working stations from Radio Browser, a volunteer-kept public
+some fifty thousand working stations from Radio Browser, a volunteer-kept public
 directory, plus SomaFM's channels, a minute; each station asked what it says
 about itself, an hour or two that can be stopped and picked up again; and, for
 a station with a broadcast call sign in its name, its official record from

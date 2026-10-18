@@ -320,6 +320,15 @@ namespace DbDo
                     try
                     {
                         string sKept = replaceFromTemplate(sSrcPath, sDstPath);
+                        // A PROVED-UNTOUCHED COPY LEAVES NO BACKUP (15 October 2026). Its fingerprint showed it was the earlier
+                        // template exactly, with nothing of the person's in it, yet each refresh kept it as a dated .bak:
+                        // RadioTrail's two came to 128 MB. Such a backup is removed as soon as the new copy is in place. A copy
+                        // judged untouched only by its dates keeps its backup, since dates cannot prove nothing changed.
+                        if (bRecorded)
+                        {
+                            try { System.IO.File.Delete(sKept); sKept = "removed, since its fingerprint proved it was only the earlier template"; }
+                            catch (Exception oError) { sKept += " (it could not be removed: " + oError.Message + ")"; }
+                        }
                         try { DbDoLog.write("Seeding: " + sDstPath + " was untouched since it was seeded (" + (bRecorded ? "its fingerprint matched" : "by its dates; it had no fingerprint") + "), so the newer template replaced it; the old copy is " + sKept + "."); } catch { }
                     }
                     catch (Exception oError)
@@ -361,6 +370,7 @@ namespace DbDo
                 clearReadOnly(sDstPath);
                 System.IO.File.Replace(sNew, sDstPath, sKept);
                 writeSeedRecord(sDstPath);
+                pruneBackups(sDstPath);
                 return sKept;
             }
             catch
@@ -368,6 +378,29 @@ namespace DbDo
                 try { if (System.IO.File.Exists(sNew)) System.IO.File.Delete(sNew); } catch { }
                 throw;
             }
+        }
+
+        // pruneBackups: keeps the newest iKeepBackups of a database's <name>.db.before-update-<stamp>.bak files and removes
+        // the rest, logging each (15 October 2026). Every update from a template added one, and nothing ever removed any;
+        // two are the copy before the last update and the one before that. The stamp sorts by time, so the names sort the
+        // backups oldest first. Returns how many were removed.
+        public const int iKeepBackups = 2;
+        public static int pruneBackups(string sDbPath)
+        {
+            int iRemoved = 0;
+            try
+            {
+                string sFolder = System.IO.Path.GetDirectoryName(sDbPath), sPattern = System.IO.Path.GetFileName(sDbPath) + ".before-update-*.bak";
+                string[] aBackups = System.IO.Directory.GetFiles(sFolder, sPattern);
+                System.Array.Sort(aBackups, StringComparer.OrdinalIgnoreCase);
+                for (int i = 0; i < aBackups.Length - iKeepBackups; i++)
+                {
+                    try { System.IO.File.Delete(aBackups[i]); iRemoved++; DbDoLog.write("Backups: removed " + aBackups[i] + ", keeping the newest " + iKeepBackups); }
+                    catch (Exception oError) { DbDoLog.write("Backups: could not remove " + aBackups[i] + ": " + oError.Message); }
+                }
+            }
+            catch (Exception oError) { DbDoLog.write("Backups: not pruned for " + sDbPath + ": " + oError.Message); }
+            return iRemoved;
         }
 
         // installedTemplateFor: the template installed with DbDo that a database is a copy of, found by its name --
@@ -2655,6 +2688,15 @@ namespace DbDo
         private void applyTableSettings(string sTable)
         {
             if (oRecordset == null) return;
+            // ONE SORT, ONE QUERY (15 October 2026). The three layers below can each name a
+            // sort, and setting sort re-queries the whole table: RadioTrail's 55,280
+            // stations took ten seconds to open because two layers each sorted it in
+            // turn. The layers now only decide which sort wins, keeping the order of
+            // precedence they always had (a later layer overrides an earlier one), and
+            // the table is queried once, at the end, with the winner. The remembered
+            // position is restored after that query, so the sort no longer moves it.
+            string sSortWanted = null;
+            int iPositionWanted = 0;
             // (1) Session cache (this run's remembered filter / sort /
             // position for a previously-visited table).
             if (dTableCache.ContainsKey(sTable))
@@ -2673,14 +2715,8 @@ namespace DbDo
                 {
                     try { filter = sAdoFilter; } catch { /* stale filter; skip */ }
                 }
-                if (!string.IsNullOrEmpty(snap.sSort))
-                {
-                    try { sort = snap.sSort; } catch { /* stale sort; skip */ }
-                }
-                if (snap.iAbsolutePosition > 0)
-                {
-                    try { absolutePosition = snap.iAbsolutePosition; } catch { /* row may not exist anymore */ }
-                }
+                if (!string.IsNullOrEmpty(snap.sSort)) sSortWanted = snap.sSort;
+                if (snap.iAbsolutePosition > 0) iPositionWanted = snap.iAbsolutePosition;
             }
 
             // (2) Per-database [Table:<name>] config -- the saved view
@@ -2704,7 +2740,7 @@ namespace DbDo
                     string sSel = readIniFromFile(sInix, "Table:" + sTable, "SelectFields");
                     if (!string.IsNullOrEmpty(sSel)) setSelectList(sTable, sSel);
                     string sOrd = readIniFromFile(sInix, "Table:" + sTable, "OrderFields");
-                    if (!string.IsNullOrEmpty(sOrd)) { try { sort = sOrd; } catch { } }
+                    if (!string.IsNullOrEmpty(sOrd)) sSortWanted = sOrd;
                     string sWhr = readIniFromFile(sInix, "Table:" + sTable, "WhereFilter");
                     if (!string.IsNullOrEmpty(sWhr)) { try { filter = sWhr; } catch { } }
                 }
@@ -2731,12 +2767,23 @@ namespace DbDo
                     string sSelIn = readViewFromDatabase(sTable, "SelectFields");
                     if (!string.IsNullOrEmpty(sSelIn)) setSelectList(sTable, sSelIn);
                     string sOrdIn = readViewFromDatabase(sTable, "OrderFields");
-                    if (!string.IsNullOrEmpty(sOrdIn)) { try { sort = sOrdIn; } catch { } }
+                    if (!string.IsNullOrEmpty(sOrdIn)) sSortWanted = sOrdIn;
                     string sWhrIn = readViewFromDatabase(sTable, "WhereFilter");
                     if (!string.IsNullOrEmpty(sWhrIn)) { try { filter = sWhrIn; } catch { } }
                 }
             }
             catch { }
+
+            // (4) The winning sort, in one query, then the remembered position.
+            if (!string.IsNullOrEmpty(sSortWanted)
+                && !string.Equals(sSortWanted.Trim(), sActiveSort ?? "", StringComparison.OrdinalIgnoreCase))
+            {
+                try { sort = sSortWanted; } catch { /* stale sort; skip */ }
+            }
+            if (iPositionWanted > 0)
+            {
+                try { absolutePosition = iPositionWanted; } catch { /* row may not exist anymore */ }
+            }
         }
 
         // readViewFromDatabase: one saved view key, from the views table, or ""
@@ -4768,14 +4815,19 @@ namespace DbDo
             string sSql = "SELECT * FROM " + quoteOpenTable(sTable)
                 + (sOrderBy.Length > 0 ? " ORDER BY " + sOrderBy : "");
 
+            DateTime dtSortStarted = DateTime.Now;
             try
             {
                 closeRecordset();
                 oRecordset = createComObject("ADODB.Recordset");
                 oRecordset.CursorLocation = AdoConstants.adUseClient;
                 oRecordset.Open(sSql, oConn, AdoConstants.adOpenStatic, iLock, AdoConstants.adCmdText);
-                try { DbDoLog.write("Sort via ORDER BY: " + (sOrderBy.Length > 0 ? sOrderBy : "(cleared)")
-                    + "; rows=" + (int)oRecordset.RecordCount); } catch { }
+                // The ORDER BY clause runs to a thousand characters for two columns, because
+                // each column sorts numbers before text; the log names the sort as the user
+                // gave it, with the row count and how long the query took (15 October 2026).
+                try { DbDoLog.write("Sort: " + (string.IsNullOrEmpty(sActiveSort) ? "(cleared)" : sActiveSort)
+                    + "; rows=" + (int)oRecordset.RecordCount
+                    + "; milliseconds=" + (long)(DateTime.Now - dtSortStarted).TotalMilliseconds); } catch { }
             }
             catch (COMException ex)
             {
@@ -22355,7 +22407,7 @@ namespace DbDo
             }
         }
 
-        // emailLogFile: make it easy to send DbDo.log for troubleshooting.
+        // emailLogFile: make it easy to send this session's log for troubleshooting.
         // The clipboard is sometimes unavailable (the error dialog's Copy
         // button can report "could not access the clipboard"), so this does
         // not rely on it: it opens the folder containing the log with the
@@ -22367,7 +22419,7 @@ namespace DbDo
             string sLog = DbDoLog.getLogPath();
             if (string.IsNullOrEmpty(sLog) || !File.Exists(sLog))
             {
-                MessageBox.Show(owner, "There is no DbDo.log file to send yet.", "Email Log File",
+                MessageBox.Show(owner, "There is no DbDo log file to send yet.", "Email Log File",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -22380,11 +22432,11 @@ namespace DbDo
             {
                 string sBody = "Please attach the DbDo log file, which is located here:\r\n"
                     + sLog + "\r\n\r\nBriefly, what were you doing when the problem happened?\r\n";
-                System.Diagnostics.Process.Start("mailto:?subject=" + Uri.EscapeDataString("DbDo.log")
+                System.Diagnostics.Process.Start("mailto:?subject=" + Uri.EscapeDataString("DbDo log " + Path.GetFileName(sLog))
                     + "&body=" + Uri.EscapeDataString(sBody));
             }
             catch (Exception ex) { try { DbDoLog.write("emailLogFile mailto failed: " + ex.Message); } catch { } }
-            try { Say.say("Opened your email program and the folder holding DbDo.log. Attach the file at "
+            try { Say.say("Opened your email program and the folder holding the DbDo log. Attach the file at "
                 + sLog + " to your message."); } catch { }
         }
 
@@ -35405,14 +35457,10 @@ namespace DbDo
     }
 
     // =====================================================================
-    // DbDoLog: lightweight runtime log. Truncated to empty at every
-    // program startup so the file always reflects only the current
-    // session. Records database opens, table switches, errors, and
+    // DbDoLog: DbDo's name for writing to the session log, which Homer.Log
+    // keeps as %LOCALAPPDATA%\DbDo\logs\DbDo-yyyyMMdd-HHmmss.log, one file
+    // per run. Records database opens, table switches, errors, and
     // significant state changes.
-    //
-    // Location: DbDo.log next to the DbDo.exe binary. If that
-    // directory is not writable (e.g., Program Files install without
-    // admin rights), falls back to %TEMP%\DbDo.log.
     // =====================================================================
     // =====================================================================
     // ElevateVersion: implements the Help > Elevate-Version command (F11).
@@ -35731,63 +35779,35 @@ namespace DbDo
 
     public static class DbDoLog
     {
-        private static string sPath = "";
-        private static readonly object lockObj = new object();
-
+        // ONE LOG PER SESSION (15 October 2026). DbDoLog used to keep its own fixed-name DbDo.log beside the
+        // standard session log, so a session's header went to DbDo-<stamp>.log and everything it did
+        // went to DbDo.log, and a zipped logs folder held two halves of every story. DbDoLog now
+        // writes into the session log that Homer.Log opened, with the same INFO stamp as every other
+        // line, and the old DbDo.log and DbDo.old.log are removed the first time a session starts after that.
+        // The many DbDoLog.write calls stay as they are; they now land in the one place.
         public static void init()
         {
-            string sExeDir = Path.GetDirectoryName(Application.ExecutablePath) ?? ".";
-            string sCandidate = Path.Combine(Homer.Paths.logs(), "DbDo.log");
-            // THE LOG IS KEPT, NOT EMPTIED (10 October 2026). Every DbDo process emptied DbDo.log as it started,
-            // including the moment-long one the desktop hotkey starts to bring a running DbDo forward, so pressing
-            // the hotkey erased the running window's record: a search that went wrong left no trace. A session now
-            // appends; past 2 MB the log becomes DbDo.old.log and a new one begins.
             try
             {
-                if (File.Exists(sCandidate) && new FileInfo(sCandidate).Length > 2 * 1024 * 1024)
+                foreach (string sName in new string[] { "DbDo.log", "DbDo.old.log" })
                 {
-                    string sOld = Path.Combine(Homer.Paths.logs(), "DbDo.old.log");
-                    if (File.Exists(sOld)) File.Delete(sOld);
-                    File.Move(sCandidate, sOld);
-                }
-                using (FileStream fs = new FileStream(sCandidate, FileMode.Append, FileAccess.Write, FileShare.ReadWrite)) { }
-                sPath = sCandidate;
-                write("----------------------------------------------------------------");
-            }
-            catch
-            {
-                // Fall back to TEMP if the exe directory is not writable.
-                try
-                {
-                    sCandidate = Path.Combine(Path.GetTempPath(), "DbDo.log");
-                    using (FileStream fs = File.Create(sCandidate)) { }
-                    sPath = sCandidate;
-                }
-                catch
-                {
-                    sPath = "";  // logging disabled
-                    return;
+                    string sOld = Path.Combine(Homer.Paths.logs(), sName);
+                    if (!File.Exists(sOld)) continue;
+                    try { File.Delete(sOld); Homer.Log.info("Removed the retired fixed-name log " + sOld); }
+                    catch (Exception ex) { Homer.Log.warn("Could not remove the retired log " + sOld + ": " + ex.Message); }
                 }
             }
-            write("DbDo log initialized at " + DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
-            write("Executable: " + Application.ExecutablePath);
-            write("Working directory: " + Environment.CurrentDirectory);
+            catch { }
         }
 
-        public static string getLogPath() { return sPath; }
+        public static string getLogPath() { return Homer.Log.path ?? ""; }
 
         public static void write(string sMessage)
         {
-            if (string.IsNullOrEmpty(sPath)) return;
-            try
-            {
-                lock (lockObj)
-                {
-                    File.AppendAllText(sPath,
-                        DateTime.Now.ToString("HH:mm:ss") + "  " + sMessage + Environment.NewLine);
-                }
-            }
-            catch { /* logging never throws to callers */ }
+            // Key presses arrive as a modifier alone before the real chord (Alt+Shift+NoName
+            // just before Alt+Shift+D); that line says nothing, so it is not written.
+            if (string.IsNullOrEmpty(sMessage) || sMessage.EndsWith("+NoName", StringComparison.Ordinal)) return;
+            try { Homer.Log.info(sMessage); } catch { /* logging never throws to callers */ }
         }
     }
     // (SingleInstance -- the hand-rolled mutex plus broadcast window message -- has been
@@ -36172,7 +36192,6 @@ namespace DbDo
             }
         }
 
-        [STAThread]
         // resolveFileAndTable: turn the positional command-line args into
         // a file path plus an optional table name, tolerant of UNQUOTED
         // paths with spaces (which the OS has already split into multiple
@@ -36241,6 +36260,14 @@ namespace DbDo
             return iResult;
         }
 
+        // THE MAIN THREAD IS A SINGLE-THREADED APARTMENT (15 October 2026). The [STAThread]
+        // attribute must sit directly on Main. When resolveFileAndTable was added it
+        // went in between them, so the attribute landed on that function and Main ran
+        // in the multithreaded apartment: Copy Cell said "Clipboard error: Current
+        // thread must be set to single thread apartment", and every other clipboard
+        // command and common file dialog was at the same risk. scripts\check.py now
+        // fails the build if anything comes between the attribute and Main again.
+        [STAThread]
         public static int Main(string[] aArgs)
         {
             try
@@ -36260,9 +36287,7 @@ namespace DbDo
                 // every error with its stack. It is opened FIRST, so a failure
                 // in anything after this line is explainable.
                 //
-                // DbDoLog continues to work as it always has; this is the
-                // standard log beside it, and the two will be merged once the
-                // rest of DbDo has moved onto the kit.
+                // DbDoLog writes into this same log (merged 15 October 2026).
                 Homer.Paths.start("DbDo");
                 Homer.Log.start("DbDo");
                 Homer.Log.keyValue("Command line", string.Join(" ", aArgs));
@@ -36304,7 +36329,6 @@ namespace DbDo
                 };
 
                 DbDoLog.init();
-                DbDoLog.write("Command line: " + string.Join(" ", aArgs));
 
                 // Sweep orphaned managed-copy working files left by a
                 // prior run that didn't close cleanly -- a crash, a

@@ -5,6 +5,25 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 15 October 2026 -- RadioTrail lists each stream once
+
+- **RadioTrail ships with 49,186 stations, each stream listed once.** The repair described below was run on the shipped template: 6,094 rows that repeated a stream under another name were merged into one row each, keeping their other names as tags, and 355 names lost doubled spaces. The file is 58 MB instead of 67 MB. The template check passes, and the build's search self-test still finds every term it looks for.
+- **The tutorials say what DbDo now says.** Walks 0 to 3 give the new count, 49186 stations from 219 countries, and the new row positions: 99.3 KDRM at row 2514 for the Seahawks search, and KEXP at row 17872. The KEXP line had already been out of date, giving row 19193 where the catalog had 20477. The KEXP row kept is the most voted one, so the walk now speaks its full genre list. The build speaks each changed walk again by itself.
+- **A copy of RadioTrail you have used is not replaced.** A copy with any play, mark or rating recorded is yours, so DbDo keeps it. Choose Update from Template on the Help menu, then Replace, to take the new catalog; your copy as it was is kept as a dated backup.
+
+## 15 October 2026 -- backups that do not pile up, and a RadioTrail repair ready
+
+- **Template backups no longer pile up.** Each update from a template kept the old copy as a dated backup, and nothing removed any, so one data folder held 130 MB of them. When DbDo replaces a copy its fingerprint proves untouched, that backup is now removed at once, since it held only the earlier template. After any replacement, including Replace in Update from Template, DbDo keeps the two newest backups of that database and removes older ones, logging each.
+- **The mpv box can now say Update.** The installer reads the version of an mpv it finds by its file, compares it with the newest release, and ticks Update when it is older (kit 1.72.56).
+- **fetchStations merges stations that share a stream.** Its repair pass merged rows only when stream and name both matched, so 6,094 of the 55,280 stations repeated a stream under another name, such as KJEB beside 95.7 The Jet. Rows sharing a stream are now one station, a curated source's row kept first, and every other name it went by joins its tags, so Keywords still finds it. Doubled spaces in 355 names are made single. Tried on a copy of the shipped template, this leaves 49,186 stations with no stream listed twice, the build's search self-test terms all still found, and checkTemplates passing. The shipped RadioTrail.db is not changed yet, because its tutorials quote 55,280 and several row positions.
+
+## 15 October 2026 -- copying works again, and the finish page offers the JAWS scripts
+
+- **Copy Cell and the other clipboard commands work again.** Control+C said "Clipboard error: Current thread must be set to single thread apartment." A function added to DbDo had come between the [STAThread] attribute and Main, so Main ran without it, and the clipboard and the file dialogs need it. The attribute is back on Main, and the kit's check now fails any build where it drifts off again.
+- **The finish page offers the JAWS scripts and the NVDA add-on again.** The installer decides each box by asking installScreenReaderSupport.cmd, but it never installed that script. So it found no answer, and hid both boxes on a computer running JAWS. The script is now installed, and so is installMpv.cmd, which the mpv box runs and the build had not been copying from the kit.
+- **A large table opens in one query, not several.** A table's saved sort can come from this session, from the database's .inix file, or from the views table inside the database, and each one queried the whole table again. RadioTrail's 55,280 stations took about ten seconds to open. DbDo now decides which sort wins, queries once, and then returns to the remembered row.
+- **One log per session.** Each session's header went to a dated log, and everything else to a single DbDo.log, so a zipped logs folder held two halves of every story. Everything now goes into the dated log for that session, and the old DbDo.log is removed. A sort is logged as you gave it, with its row count and time, instead of a thousand characters of SQL.
+
 ## 15 October 2026 -- the directory templates follow their pages
 
 - **BlindCreations has two more presenters.** Ricky Enger, host of Hadley Presents, and Debra Erickson, founder of The Blind Kitchen, joined the Blind Presenters and Blind Creators directories, so BlindCreations now holds 129 creators and 62 presentations, with 270 links.

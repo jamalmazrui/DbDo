@@ -451,15 +451,17 @@ def cleanCopy(sDb, bTemplate, logLine, say):
     -- which begins with that call sign -- and the format words it added to the tags are taken out. Text a listener
     added is not touched. MARKUP that leaked from an article's infobox into a field or a tag is cut away.
 
-    DUPLICATES. Rows with the same stream and the same name are one station listed more than once by the catalog; the
-    most voted is kept, the others' tags and notes are added to it, and they go. A group with any row the listener has
-    touched -- rated, played, given a status or marked, or added as their own -- is left as it is.
+    DUPLICATES. Rows with the same stream are one station listed more than once by the catalog, whatever names they
+    carry (15 October 2026; before, the names had to match too); rows with no stream must share a name. A curated
+    source's row is kept before Radio Browser's, then the most voted; the others' names, tags and notes are added to
+    it, and they go. A group with any row the listener has touched -- rated, played, given a status, marked, linked,
+    or added as their own -- is left as it is. Doubled spaces in names are made single first.
 
     THE SHIPPED COPY ONLY. The template DbDo's installer ships holds nobody's own stations, plays or ratings, no station
     without a name, and no leftover empty table."""
     c = sqlite3.connect(sDb)
     lsCols = set(r[1] for r in c.execute("pragma table_info(stations)"))
-    dCount = {"cleared": 0, "markup": 0, "merged": 0, "mine": 0, "personal": 0, "nameless": 0}
+    dCount = {"cleared": 0, "markup": 0, "merged": 0, "mine": 0, "nameless": 0, "personal": 0, "spaces": 0}
     def plainField(v):
         v = re.split(r"\s*\|\s*[A-Za-z_ ]+\s*=", v or "")[0]
         v = re.split(r"\}\}|\{\{", v)[0]; v = v.replace("'''", "").replace("''", "")
@@ -534,12 +536,25 @@ def cleanCopy(sDb, bTemplate, logLine, say):
     # takes its links with it, so a group where any row is linked is left as it is.
     if c.execute("select count(*) from sqlite_master where type = 'table' and name = 'maps'").fetchone()[0]:
         sTouched += " or prime in (select prime1 from maps where tbl1 = 'stations') or prime in (select prime2 from maps where tbl2 = 'stations')"
-    for sUrl, sKey in c.execute("select stream_url, lower(trim(name)) from stations group by 1, 2 having count(*) > 1").fetchall():
-        lsRows = c.execute("select station_id, tags, notes, (" + sTouched + ") from stations where stream_url = ? and lower(trim(name)) = ? order by cast(votes as integer) desc, station_id", (sUrl, sKey)).fetchall()
+    # ONE STREAM, ONE STATION (15 October 2026). Rows merged only when stream and name both matched, and every one of
+    # the 4,635 streams listed more than once in the 55,280-station catalog had differing names: a renaming (CJXK's
+    # "K-Rock" and "Boom 95.3"), a station's own-language name beside its English one, "(AAC)" or "(low)" on one feed.
+    # They play the same audio, so they are now one row. The row kept is a curated source's (SomaFM, ACB Media) before
+    # Radio Browser's, then the most voted; every other name it went by joins its tags, so Keywords still finds it by
+    # that name. A row with no stream merges only with one of the same name, as before. Doubled spaces in a name are
+    # made single, so two names that differ only by spacing are one name.
+    for iId, sName in c.execute("select station_id, name from stations where name like '%  %'").fetchall():
+        c.execute("update stations set name = ? where station_id = ?", (re.sub(r"\s{2,}", " ", sName).strip(), iId)); dCount["spaces"] += 1
+    lsGroups = [("stream_url = ?", (sUrl,)) for (sUrl,) in c.execute("select stream_url from stations where coalesce(stream_url, '') <> '' group by stream_url having count(*) > 1").fetchall()]
+    lsGroups += [("coalesce(stream_url, '') = '' and lower(trim(name)) = ?", (sKey,)) for (sKey,) in c.execute("select lower(trim(name)) from stations where coalesce(stream_url, '') = '' group by 1 having count(*) > 1").fetchall()]
+    for sWhere, tArgs in lsGroups:
+        lsRows = c.execute("select station_id, tags, notes, (" + sTouched + "), name from stations where " + sWhere + " order by (coalesce(source, '') = 'Radio Browser'), cast(votes as integer) desc, station_id", tArgs).fetchall()
         if any(r[3] for r in lsRows): continue
-        iKeep, sTags, sNotes = lsRows[0][0], lsRows[0][1] or "", lsRows[0][2] or ""
+        iKeep, sTags, sNotes, sKeptName = lsRows[0][0], lsRows[0][1] or "", lsRows[0][2] or "", (lsRows[0][4] or "").strip().lower()
         for r in lsRows[1:]:
-            sTags = addLines(sTags, [t for t in (r[1] or "").split("\n") if t.strip()])
+            lsNew = [t for t in (r[1] or "").split("\n") if t.strip()]
+            if r[4] and r[4].strip() and r[4].strip().lower() != sKeptName: lsNew.append(r[4].strip())
+            sTags = addLines(sTags, lsNew)
             if r[2] and r[2].strip() and r[2].strip()[:60].lower() not in sNotes.lower(): sNotes = (sNotes + "\n\n" if sNotes else "") + r[2].strip()
             c.execute("delete from stations where station_id = ?", (r[0],)); dCount["merged"] += 1
         c.execute("update stations set tags=?, notes=? where station_id=?", (sTags, sNotes, iKeep))
@@ -558,8 +573,8 @@ def cleanCopy(sDb, bTemplate, logLine, say):
         # logging, so everything is in RadioTrail.db itself and no -wal or -shm file is needed or left behind.
         c.execute("pragma journal_mode=DELETE")
     c.close()
-    say("Repaired: %d wrong article matches cleared for a fresh lookup, %d fields freed of markup, %d duplicate rows merged%s." % (
-        dCount["cleared"], dCount["markup"], dCount["merged"],
+    say("Repaired: %d wrong article matches cleared for a fresh lookup, %d fields freed of markup, %d names freed of doubled spaces, %d duplicate rows merged%s." % (
+        dCount["cleared"], dCount["markup"], dCount["spaces"], dCount["merged"],
         ("; for the shipped copy, %d of your own stations, %d plays or ratings and %d nameless rows removed" % (dCount["mine"], dCount["personal"], dCount["nameless"])) if bTemplate else ""))
     logLine("clean " + repr(dCount))
     return 0

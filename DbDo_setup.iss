@@ -397,13 +397,18 @@ Source: "scripts\summarizeSetup.cmd"; DestDir: "{app}\scripts"; Flags: ignorever
 Source: "scripts\summarizeSetup.ps1"; DestDir: "{app}\scripts"; Flags: ignoreversion
 Source: "scripts\installOllama.cmd"; DestDir: "{app}\scripts"; Flags: ignoreversion skipifsourcedoesntexist
 ; mpv plays streams for Play Stream; installMpv fetches it with winget, from the Play Stream command when it is missing.
-Source: "scripts\installMpv.cmd"; DestDir: "{app}\scripts"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "scripts\installMpv.cmd"; DestDir: "{app}\scripts"; Flags: ignoreversion
+; THE SCREEN READER SCRIPT IS SHIPPED (15 October 2026). The kit's homerReaderState asks
+; this script whether the JAWS scripts and the NVDA add-on need Install, Update or
+; Reinstall. It was never installed, so 1.0.287 answered "not offered" for both on a
+; computer running JAWS, and the finish page had no screen reader box at all.
+Source: "scripts\installScreenReaderSupport.cmd"; DestDir: "{app}\scripts"; Flags: ignoreversion
 ; THE SHARED HALF OF EVERY INSTALL SCRIPT. installOllama.cmd calls it for its
 ; log folder, log name and environment header, and stops with a message when it
 ; is absent -- which, until kit 1.42 renamed it from homerInstall.cmd, the
 ; installed copy always was, because nothing shipped it.
 Source: "scripts\installCommon.cmd"; DestDir: "{app}\scripts"; Flags: ignoreversion
-Source: "scripts\installModels.cmd"; DestDir: "{app}\scripts"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "scripts\installModels.cmd"; DestDir: "{app}\scripts"; Flags: ignoreversion
 
 ; (No [Tasks] section. The JAWS settings install is exposed as a
 ; checkbox on the Finish page via [Run] above, delegating the work

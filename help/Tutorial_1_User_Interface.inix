@@ -23,7 +23,7 @@ Hear=DbDo ready
 
 Say=The main view is a list of records. Down Arrow moves by row, and the reader speaks the record: here, a station's name, its country, and its genres.
 Key=Down Arrow
-Hear=ACB Media 10, The United States Of America, ACB Media, blindness, Row 2 of 55280
+Hear=ACB Media 10, The United States Of America, ACB Media, blindness, Row 2 of 49186
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -37,7 +37,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=Now the Say keys. Shift and a letter asks, and changes nothing. Shift plus Z is Say Status.
 Key=Shift+Z
-Hear=stations, 55280 records, no filter, sorted by source, name
+Hear=stations, 49186 records, no filter, sorted by source, name
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

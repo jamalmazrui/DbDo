@@ -149,7 +149,7 @@ rem onSpoken", which names the symptom and not the cause. So the build says the
 rem cause, first. Raise this whenever DbDo starts using something new.
 rem 1.64.5: Play Tutorials calls MediaPlayer.playTutorials, which older kits lack;
 rem a build against 1.64.4 failed to compile on 8 October 2026 rather than saying so.
-set "kitNeeded=1.64.5"
+set "kitNeeded=1.72.56"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -193,8 +193,19 @@ rem version again. Nothing here is edited in place: a fix made in the kit
 rem reaches DbDo on its next build, and a change made here would be overwritten,
 rem which is the point.
 if not exist "scripts" mkdir "scripts"
-for %%F in (buildTutorials.cmd buildTutorials.ps1 check.cmd check.py checkTutorial.cmd checkTutorial.py finish.cmd fixEncoding.cmd fixEncoding.py installCommon.cmd installOllama.cmd installScreenReaderSupport.cmd kind.cmd kind.py makeTutorials.cmd makeTutorials.py push.cmd release.cmd release.ps1 tidy.cmd tidy.py uiCheck.cmd uiCheck.py unpushed.cmd unpushed.py) do (
-  if exist "!homerDev!\scripts\%%F" copy /y "!homerDev!\scripts\%%F" scripts\ >nul
+rem
+rem EVERY SCRIPT THE INSTALLER RUNS IS IN THIS LIST (15 October 2026). installMpv.cmd
+rem was missing, so the finish page's mpv box ran a script that was never shipped;
+rem installModels.cmd likewise. The kit's check (shipped) now fails a build whose
+rem installer runs a script that is not here. Each copy is logged, and a name the
+rem kit does not have is logged as missing rather than skipped in silence.
+for %%F in (buildTutorials.cmd buildTutorials.ps1 check.cmd check.py checkTutorial.cmd checkTutorial.py finish.cmd fixEncoding.cmd fixEncoding.py installCommon.cmd installModels.cmd installMpv.cmd installOllama.cmd installScreenReaderSupport.cmd kind.cmd kind.py makeTutorials.cmd makeTutorials.py push.cmd release.cmd release.ps1 tidy.cmd tidy.py uiCheck.cmd uiCheck.py unpushed.cmd unpushed.py) do (
+  if exist "!homerDev!\scripts\%%F" (
+    copy /y "!homerDev!\scripts\%%F" scripts\ >nul
+    echo Kit script copied: %%F, exit code !ERRORLEVEL! >> "!log!"
+  ) else (
+    echo WARN kit script not found in !homerDev!\scripts: %%F >> "!log!"
+  )
 )
 
 rem ---- the templates: RadioTrail made when missing, then every template repaired and checked ----

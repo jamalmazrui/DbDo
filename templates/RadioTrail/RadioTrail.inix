@@ -44,7 +44,7 @@ InitialTable = stations
 ; is. State is not on the row: it is empty for most of the world, and an empty
 ; cell is a "blank" spoken on every row. Within one country, Select Columns
 ; adds it. Filter Records on genre, country, state or language is the way
-; through sixty thousand rows; Keywords searches every field, on screen or
+; through fifty thousand rows; Keywords searches every field, on screen or
 ; off -- slogan, descrip, homepage, codec, all of them.
 ;
 ; FILLING IT IS ONE COMMAND: fetchStations, in this folder. A clean copy, the

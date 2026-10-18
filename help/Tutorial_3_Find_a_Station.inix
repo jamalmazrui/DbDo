@@ -31,7 +31,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=I type seahawks and press Enter. The cursor moves to the first station that mentions the team.
 Key=Enter
-Hear=99.3 KDRM, Row 3301 of 55280
+Hear=99.3 KDRM, Row 2514 of 49186
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -131,7 +131,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=Escape. Control plus Shift plus F clears the filter, and every station is back, the marks kept. Marks stay when DbDo closes, so a marked station is a favorite to come back to.
 Key=Control+Shift+F
-Hear=Filter cleared. 55280 records.
+Hear=Filter cleared. 49186 records.
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

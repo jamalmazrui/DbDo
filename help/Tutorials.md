@@ -903,7 +903,7 @@ Radio comes first: RadioTrail, internet radio stations from around the world, ea
 
 Screen reader:
 
-- 55280 stations from 221 countries.
+- 49186 stations from 219 countries.
 
 ### Step 5
 
@@ -943,7 +943,7 @@ You know your screen reader's own keys already, and three of them are worth reme
 
 Screen reader:
 
-- ACB Media 1, The United States Of America, ACB Media, blindness, Row 1 of 55280
+- ACB Media 1, The United States Of America, ACB Media, blindness, Row 1 of 49186
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -953,7 +953,7 @@ Insert plus Tab says what has the focus: its name, its role, and its value or st
 
 Screen reader:
 
-- Records list view, ACB Media 1, 1 of 55280
+- Records list view, ACB Media 1, 1 of 49186
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1074,7 +1074,7 @@ The main view is a list of records. Down Arrow moves by row, and the reader spea
 
 Screen reader:
 
-- ACB Media 10, The United States Of America, ACB Media, blindness, Row 2 of 55280
+- ACB Media 10, The United States Of America, ACB Media, blindness, Row 2 of 49186
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1094,7 +1094,7 @@ Now the Say keys. Shift and a letter asks, and changes nothing. Shift plus Z is 
 
 Screen reader:
 
-- stations, 55280 records, no filter, sorted by source, name
+- stations, 49186 records, no filter, sorted by source, name
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1358,7 +1358,7 @@ The first time, DbDo opens RadioTrail: internet radio stations, one to a row. Th
 
 Screen reader:
 
-- stations, 55280 records, no filter, sorted by source, name
+- stations, 49186 records, no filter, sorted by source, name
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1368,7 +1368,7 @@ The first station is already one of them. Insert plus Up Arrow says the line aga
 
 Screen reader:
 
-- ACB Media 1, The United States Of America, ACB Media, blindness, Row 1 of 55280
+- ACB Media 1, The United States Of America, ACB Media, blindness, Row 1 of 49186
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1409,7 +1409,7 @@ I leave the column as name, type K E X P, and press Enter.
 
 Screen reader:
 
-- KEXP, The United States Of America, various, Row 19193 of 55280
+- KEXP, The United States Of America, afrobeats, alternative, alternative rock, ambient, dj mixes, dj remix, djs, electronic, folk, highlife, hip hop, indie, indie rock, jazz, live sessions, local music, mrcrosby, music, punk, rock, talk, various, Row 17872 of 49186
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1507,7 +1507,7 @@ I type seahawks and press Enter. The cursor moves to the first station that ment
 
 Screen reader:
 
-- 99.3 KDRM, Row 3301 of 55280
+- 99.3 KDRM, Row 2514 of 49186
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1649,7 +1649,7 @@ Escape. Control plus Shift plus F clears the filter, and every station is back, 
 
 Screen reader:
 
-- Filter cleared. 55280 records.
+- Filter cleared. 49186 records.
 
 Confirm the wording with a live run: buildTutorials -live.
 

@@ -1964,10 +1964,11 @@ reach your screen reader.</p>
 <code>&lt;DbName&gt;.inix</code> — the last table, sort, filter, and
 displayed columns, plus a pinned <strong>InitialTable</strong> and the
 recent Find, Jump, Replace, Regex, and Query inputs — so reopening a
-database returns you to where you were. Activity is written to
-<strong>DbDo.log</strong>; <strong>Email Log File</strong> in the Help
-menu reveals the log and starts an email with its path, for reporting
-issues.</p>
+database returns you to where you were. Activity is written to a log for
+each session, named DbDo with the date and time it began, in
+<code>%LOCALAPPDATA%\DbDo\logs</code>; <strong>Email Log File</strong>
+in the Help menu reveals the log and starts an email with its path, for
+reporting issues.</p>
 <hr />
 <h2 id="part-7-development">Part 7 — Development</h2>
 <p>This part is for people building DbDo from source.</p>
@@ -2306,7 +2307,8 @@ both have; Add new only, the first choice, changes none of yours. Your
 copy as it was is kept beside it, named with “before-merge”.</li>
 <li><strong>Replace</strong> makes your copy the template again. Your
 copy as it was is kept beside it as a dated backup, named with
-“before-update”, so nothing is lost.</li>
+“before-update”. DbDo keeps the two newest of these backups for each
+database and removes older ones, so they do not pile up.</li>
 </ul>
 <p>Either way, a script, query or report the template has and your copy
 lacks is copied in beside it; none of yours is overwritten. Merge is the
@@ -2418,7 +2420,7 @@ missing, and leaves a complete copy alone.
 <code>fetchStations --report</code> gives the report by itself, and
 fetches nothing. Its log is named first thing, in the project’s
 <code>logs</code> folder. From nothing, one command does four things: a
-clean copy from the template; the whole catalog – some sixty thousand
+clean copy from the template; the whole catalog – some fifty thousand
 working stations from Radio Browser, a volunteer-kept public directory,
 plus SomaFM’s channels, a minute; each station asked what it says about
 itself, an hour or two that can be stopped and picked up again; and, for
