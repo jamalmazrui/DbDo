@@ -766,18 +766,39 @@ and several Say commands report only the marked ones.</p>
 <p>Filtering and sorting reshape the grid without touching the physical
 table.</p>
 <ul>
-<li><strong>Filter Records</strong> (Control+F) limits the grid to
-records holding some text in any field, or matching a condition on each
-field; <strong>Clear Filter</strong> (Control+Shift+F) removes it,
+<li><strong>Filter Records</strong> (Control+F) limits the grid to the
+records that meet a condition.
+<ul>
+<li><strong>How to give a condition.</strong> With no filter in force,
+it asks at once how to give one. <strong>Any Field</strong> finds text
+wherever it is, whatever its case. <strong>Fields</strong> gives a box
+for every field, and a word typed into a text field finds records
+containing it, whatever its case: <code>seattle</code> in RadioTrail’s
+city box finds “Seattle, Washington”. A value may begin with an
+operator: <code>=</code> is, <code>!=</code> is not, <code>&gt;</code>
+more than, <code>&gt;=</code> at least, <code>&lt;</code> less than,
+<code>&lt;=</code> at most, <code>%</code> contains. Several filled
+boxes must all match.</li>
+<li><strong>With a filter in force,</strong> Control+F first offers four
+buttons. <strong>New</strong> starts over. <strong>Clear</strong> shows
+every record again and returns you to the list on the same record.
+<strong>Narrow</strong> keeps only the records that also meet a new
+condition, joining it with AND. <strong>Expand</strong> also takes in
+the records that meet a new condition, joining it with OR. Then it asks
+how to give the new condition, as above.</li>
+<li><strong>Grouping.</strong> The condition in force, however many
+parts it has, is wrapped whole in parentheses before the AND or OR, and
+the new condition in its own. So narrowing and expanding in turn always
+mean exactly what was asked. Say Filter (Shift+F) speaks the whole
+condition, led by “where” and grouped the same way.</li>
+<li><strong>Nothing found.</strong> A condition that would keep no
+record says so and leaves the view as it was.</li>
+<li><strong>Clear Filter</strong> (Control+Shift+F) removes the filter,
 keeping you on the same record. A table that reopens with a filter still
-in force says so as it opens. In the Fields form, a word typed into a
-text field finds records containing it, whatever its case:
-<code>seattle</code> in RadioTrail’s city box finds “Seattle,
-Washington”. Begin with <code>=</code> for an exact match, or with
-<code>&lt;</code>, <code>&gt;</code>, <code>&lt;=</code>,
-<code>&gt;=</code> or <code>!=</code> to compare; several filled boxes
-must all match; <strong>Filter by Regex</strong> filters by pattern;
-<strong>Say Filter</strong> (Shift+F) speaks the current filter.</li>
+in force says so as it opens.</li>
+<li><strong>Filter by Regex</strong> filters by pattern; <strong>Say
+Filter</strong> (Shift+F) speaks the current filter.</li>
+</ul></li>
 <li><strong>Order Records</strong> (Alt+O) sorts the grid by a field;
 <strong>Reverse Order</strong> (Alt+Shift+O) reverses it; <strong>Clear
 Sort</strong> returns to natural order; <strong>Say Order</strong>

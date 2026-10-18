@@ -252,6 +252,10 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a
+href="#october-2026-filters-that-narrow-and-expand-nested-as-asked"
+id="toc-october-2026-filters-that-narrow-and-expand-nested-as-asked">19
+October 2026 – filters that narrow and expand, nested as asked</a></li>
 <li><a href="#october-2026-radiotrail-lists-each-stream-once"
 id="toc-october-2026-radiotrail-lists-each-stream-once">15 October 2026
 – RadioTrail lists each stream once</a></li>
@@ -536,6 +540,54 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="october-2026-filters-that-narrow-and-expand-nested-as-asked">19
+October 2026 – filters that narrow and expand, nested as asked</h2>
+<ul>
+<li><strong>Control+F offers New, Clear, Narrow and Expand when a filter
+is in force.</strong>
+<ul>
+<li><strong>New</strong> starts over.</li>
+<li><strong>Clear</strong> shows every record again and returns you to
+the list on the same record.</li>
+<li><strong>Narrow</strong> keeps only the records that also meet a new
+condition.</li>
+<li><strong>Expand</strong> also takes in the records that meet a new
+condition.</li>
+</ul>
+New, Narrow and Expand then ask how to give the condition: Any Field, or
+Fields with an operator at the start of a value. With no filter in
+force, Control+F asks that at once, as before.</li>
+<li><strong>Conditions nest exactly as asked.</strong> The condition in
+force, however many parts it has, is wrapped whole in parentheses before
+the AND or OR, and the new one in its own parentheses. Say Filter speaks
+it grouped the same way, led by “where”: for example, “where (any field
+contains seahawks) and (state contains Washington)”.</li>
+<li><strong>Why this needed a change underneath.</strong> The Fields
+form had been an ADO filter on the open records, and ADO’s filter
+grammar refuses an OR group joined to another clause by AND, which is
+exactly what narrowing after expanding builds. So Expand was refused
+after an Any Field search, and some combinations failed with “Filter
+rejected”. Every filter is now one SQL condition, applied by reading the
+table again with it, as DbDialog did and as Any Field already did, so
+any nesting works.</li>
+<li><strong>The Fields form keeps its operators:</strong> <code>=</code>
+is, <code>!=</code> is not, <code>&gt;</code> more than,
+<code>&gt;=</code> at least, <code>&lt;</code> less than,
+<code>&lt;=</code> at most, <code>%</code> contains. A bare word on a
+text field still means contains, whatever its case.</li>
+<li><strong>A filter that would keep no record says so</strong> and
+leaves the view as it was, for Fields as already for Any Field.</li>
+<li><strong>Edit is gone from Control+F’s choices.</strong> New with
+Fields does the same from a clean form, and the four buttons are the
+ones asked for.</li>
+<li><strong>Carried over:</strong> a filter saved before this change is
+carried into the new form the first time Control+F is pressed, so it can
+be narrowed or expanded too.</li>
+<li><strong>Unchanged:</strong> a query window, the result of your own
+SQL, keeps the earlier filter.</li>
+<li><strong>Tutorial walk 3</strong> now takes the narrowing in two
+keys, N for Narrow and F for Fields, and speaks the grouped filter.</li>
+</ul>
 <h2 id="october-2026-radiotrail-lists-each-stream-once">15 October 2026
 – RadioTrail lists each stream once</h2>
 <ul>

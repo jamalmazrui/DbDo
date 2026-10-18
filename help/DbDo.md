@@ -213,7 +213,13 @@ Marked records can then be reported, filtered, or exported as a set, and several
 
 Filtering and sorting reshape the grid without touching the physical table.
 
-- **Filter Records** (Control+F) limits the grid to records holding some text in any field, or matching a condition on each field; **Clear Filter** (Control+Shift+F) removes it, keeping you on the same record. A table that reopens with a filter still in force says so as it opens. In the Fields form, a word typed into a text field finds records containing it, whatever its case: `seattle` in RadioTrail's city box finds "Seattle, Washington". Begin with `=` for an exact match, or with `<`, `>`, `<=`, `>=` or `!=` to compare; several filled boxes must all match; **Filter by Regex** filters by pattern; **Say Filter** (Shift+F) speaks the current filter.
+- **Filter Records** (Control+F) limits the grid to the records that meet a condition.
+  - **How to give a condition.** With no filter in force, it asks at once how to give one. **Any Field** finds text wherever it is, whatever its case. **Fields** gives a box for every field, and a word typed into a text field finds records containing it, whatever its case: `seattle` in RadioTrail's city box finds "Seattle, Washington". A value may begin with an operator: `=` is, `!=` is not, `>` more than, `>=` at least, `<` less than, `<=` at most, `%` contains. Several filled boxes must all match.
+  - **With a filter in force,** Control+F first offers four buttons. **New** starts over. **Clear** shows every record again and returns you to the list on the same record. **Narrow** keeps only the records that also meet a new condition, joining it with AND. **Expand** also takes in the records that meet a new condition, joining it with OR. Then it asks how to give the new condition, as above.
+  - **Grouping.** The condition in force, however many parts it has, is wrapped whole in parentheses before the AND or OR, and the new condition in its own. So narrowing and expanding in turn always mean exactly what was asked. Say Filter (Shift+F) speaks the whole condition, led by "where" and grouped the same way.
+  - **Nothing found.** A condition that would keep no record says so and leaves the view as it was.
+  - **Clear Filter** (Control+Shift+F) removes the filter, keeping you on the same record. A table that reopens with a filter still in force says so as it opens.
+  - **Filter by Regex** filters by pattern; **Say Filter** (Shift+F) speaks the current filter.
 - **Order Records** (Alt+O) sorts the grid by a field; **Reverse Order** (Alt+Shift+O) reverses it; **Clear Sort** returns to natural order; **Say Order** (Shift+O) speaks the current sort.
 
 Sorting reads numbers as numbers: volume 9 comes after 7 and 6.5 even if some

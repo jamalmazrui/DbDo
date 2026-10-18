@@ -1549,13 +1549,24 @@ I type seahawks and press Enter.
 
 Screen reader:
 
-- 7 records have seahawks.
+- 7 records match.
 
 Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 9: N
 
-Seven: stations in Seattle and Tacoma, in British Columbia and in Idaho. Control plus F again; with a filter in force there are more buttons. N for Narrow keeps seahawks and adds a field.
+Seven: stations in Seattle and Tacoma, in British Columbia and in Idaho. Control plus F again; with a filter in force there are four buttons: New, Clear, Narrow and Expand. N for Narrow keeps seahawks and adds a condition.
+
+Screen reader:
+
+- Narrow Filter dialog
+- Any Field button
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: F
+
+Narrow asks how to give the new condition, just as the first filter did. F for Fields opens a box for every field.
 
 Screen reader:
 
@@ -1563,27 +1574,27 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 10: Enter
+### Step 11: Enter
 
 I move to the state box, type Washington, and press Enter.
 
 Screen reader:
 
-- Filter applied. 3 records match.
+- 3 records match.
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 11: Shift+F
+### Step 12: Shift+F
 
-Shift plus F, Say Filter, says both parts, in the words each was asked in.
+Shift plus F, Say Filter, says both parts, in the words each was asked in, each in its own parentheses.
 
 Screen reader:
 
-- any field contains seahawks; and where: state = 'Washington'
+- where (any field contains seahawks) and (state contains Washington)
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 12: Alt+O
+### Step 13: Alt+O
 
 Alt plus O, O for Order, sorts by a column; I choose name, and Enter sorts.
 
@@ -1593,7 +1604,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 13: Down Arrow
+### Step 14: Down Arrow
 
 Down Arrow to the second.
 
@@ -1603,7 +1614,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 14: Alt+Shift+P
+### Step 15: Alt+Shift+P
 
 The sports station. Alt plus Shift plus P plays it.
 
@@ -1613,7 +1624,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 15: Control+M
+### Step 16: Control+M
 
 Escape. To keep stations, mark them. Control plus M, M for Mark, marks the station I am on, and Control plus Shift plus M unmarks: Shift reverses.
 
@@ -1623,7 +1634,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 16: Control+A
+### Step 17: Control+A
 
 For a run of records, F8 starts it where I am, and Shift plus F8 completes it where I stop. Control plus A marks every record in view.
 
@@ -1633,7 +1644,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 17: Alt+Shift+P
+### Step 18: Alt+Shift+P
 
 Now the payoff. With records marked, Alt plus Shift plus P plays all of them, one after another, as a playlist.
 
@@ -1643,7 +1654,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 18: Control+Shift+F
+### Step 19: Control+Shift+F
 
 Escape. Control plus Shift plus F clears the filter, and every station is back, the marks kept. Marks stay when DbDo closes, so a marked station is a favorite to come back to.
 
@@ -1653,11 +1664,11 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 19
+### Step 20
 
 What this walk taught. I name the command; the reader gives the key.
 
-### Step 20
+### Step 21
 
 Search every column.
 
@@ -1665,7 +1676,7 @@ Screen reader:
 
 - Control plus K
 
-### Step 21
+### Step 22
 
 Show only the matches.
 
@@ -1673,7 +1684,7 @@ Screen reader:
 
 - Control plus F
 
-### Step 22
+### Step 23
 
 Say the filter.
 
@@ -1681,7 +1692,7 @@ Screen reader:
 
 - Shift plus F
 
-### Step 23
+### Step 24
 
 Order by a column.
 
@@ -1689,7 +1700,7 @@ Screen reader:
 
 - Alt plus O
 
-### Step 24
+### Step 25
 
 Mark a record.
 
@@ -1697,7 +1708,7 @@ Screen reader:
 
 - Control plus M
 
-### Step 25
+### Step 26
 
 Play the marked stations.
 

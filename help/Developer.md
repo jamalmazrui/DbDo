@@ -111,3 +111,46 @@ The scripts are not published; the recording and the transcript are.
 
 After a build, `scripts\release` tags the version stamped in `DbDo_setup.exe`,
 creates the GitHub release, and checks that the public download link answers.
+
+## Learnings from DbDialog
+
+DbDialog (2006 to 2015, AutoIt and ADO) was Jamal's single-dialog database manager, and DbDo's ancestor. Its source and guide were reviewed on 19 October 2026 for what DbDo should take back. The filter design is done; the rest are proposals, each small enough to be one change.
+
+### Done: filters as one SQL condition
+
+DbDialog built every filter as a SQL WHERE clause and read the table again with it. DbDo had moved field filters to ADO's Recordset.Filter, which cannot nest an OR group inside an AND. Control+F now builds one SQL condition again, with New, Clear, Narrow and Expand (see History, 19 October 2026). The operator prefixes in the Fields form (= != > >= < <= %) are DbDialog's, which read a value's first characters the same way.
+
+### Proposed: Clone Table
+
+DbDialog's New Table offered Clone: a new, empty table with the current table's structure, asked for in one question, the name. DbDo has no equivalent; Add Table always starts from a blank form.
+
+- **Design:** Add Table asks first, with buttons, whether to Define a new structure or Clone the current table's.
+- **How Clone works:** it reads the current table's distinct fields and their declared types (PRAGMA table_info). It passes them to lStandardTableDdl, so the clone gets DbDo's standard columns and triggers like any new table.
+
+### Proposed: define a table as text, without the ten-field limit
+
+DbDialog's Define offered a template in a multi-line text box, one field per line in the form "name: size", with a memo field last. A screen reader user reads and edits it like any text, can paste a structure copied from elsewhere, and is not limited to a fixed number of slots. DbDo's definition form has ten name-and-type slots, so a table with more fields needs SQL.
+
+- **Design:** a Text button beside the form opens the same definition as editable lines, "name: TYPE", prefilled with the slots already filled.
+- **Types:** the same type words as the form (TEXTLINE, TEXTMEMO, INTEGER and the rest), checked on OK.
+- **Copying a structure:** Describe Table's output in the same "name: TYPE" form would let one table's structure be copied to start another.
+
+### Proposed: fields named for unique access letters
+
+DbDialog named its Contact fields so each had a unique initial letter, and so a unique Alt letter in the record form. DbDo already keeps this for contact tables. The proposal is a check: on OK, the definition form says which fields share a first letter, and that only the first of them will get an Alt letter.
+
+### Proposed: Count by the shown columns
+
+DbDialog's Output offered Count: for the fields shown in the list, the number of records with each combination of values. For example, with State and City shown, the number of contacts in each state and city. DbDo's Statistics from Column (Alt+Shift+S) counts one column only.
+
+- **Design:** a Count by Columns report over the columns currently shown in the grid, within the filter in force. It runs SELECT those columns, count(*) ... WHERE the filter GROUP BY those columns ORDER BY those columns, and shows the result in a read-only window to review and copy, as Statistics from Column does.
+
+### Proposed: Invert and Marked as filter choices
+
+DbDialog's Filter choices included Invert (the records not matching), and Tagged and Untagged.
+
+- **Invert** is now simple and exact, since the filter is SQL: NOT (the condition in force).
+- **Marked and Unmarked** would filter on DbDo's marked column.
+
+Each would be one more button on Control+F when it applies. They are left for a ruling, since Control+F's four buttons are the ones asked for.
+

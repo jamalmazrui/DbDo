@@ -3098,6 +3098,68 @@ namespace DbDo
             return lsTests.Count == 0 ? "" : "(" + string.Join(" OR ", lsTests.ToArray()) + ")";
         }
 
+        // fieldConditionSql: ONE FIELD'S FILTER ENTRY AS SQL (19 October 2026). DbDialog built its filters as a SQL
+        // WHERE clause and re-selected the records, so conditions could nest without limit; DbDo had moved field
+        // filters to ADO's Recordset.Filter, whose grammar refuses an OR group joined to another clause by AND --
+        // "(A OR B) AND C" -- which is the very nesting Narrow and Expand build. Every filter is SQL again, applied by
+        // selectTableFiltered, the path Any Field already took.
+        //
+        // A value may begin with an operator, as DbDialog's form allowed: = (is), != or <> (is not), > >= < <=
+        // (compared), or % (contains). With none, a text field matches when it CONTAINS the value and any other field
+        // when it equals it. Text compares case aside, through caseFoldFunction, as Any Field does; contains reads the
+        // value literally, so % and _ in it are characters. A number typed for a number field is written as a number,
+        // so it compares as one. Returns "" for an empty entry; sSpoken gets the condition in words.
+        public string fieldConditionSql(string sField, string sValue, bool bText, out string sSpoken)
+        {
+            sSpoken = "";
+            string sV = (sValue ?? "").Trim();
+            if (sV.Length == 0) return "";
+            string sOp = "";
+            foreach (string sCand in new string[] { ">=", "<=", "!=", "<>", "=", ">", "<", "%" })
+                if (sV.StartsWith(sCand)) { sOp = sCand; sV = sV.Substring(sCand.Length).Trim(); break; }
+            if (sV.Length == 0) return "";
+            if (sOp == "") sOp = bText ? "%" : "=";
+            if (sOp == "!=") sOp = "<>";
+            string sCol = "\"" + sField.Replace("\"", "\"\"") + "\"";
+            string sLower = caseFoldFunction();
+            string sQuoted = "'" + sV.Replace("'", "''") + "'";
+            if (sOp == "%")
+            {
+                sSpoken = sField + " contains " + sV;
+                return "instr(" + sLower + "(CAST(" + sCol + " AS TEXT)), " + sLower + "(" + sQuoted + ")) > 0";
+            }
+            sSpoken = sField + " " + (sOp == "=" ? "is" : sOp == "<>" ? "is not" : sOp == ">" ? "is more than"
+                : sOp == ">=" ? "is at least" : sOp == "<" ? "is less than" : "is at most") + " " + sV;
+            double dNumber;
+            bool bNumber = double.TryParse(sV, System.Globalization.NumberStyles.Float,
+                System.Globalization.CultureInfo.InvariantCulture, out dNumber);
+            if (bText) return sLower + "(" + sCol + ") " + sOp + " " + sLower + "(" + sQuoted + ")";
+            if (bNumber) return sCol + " " + sOp + " " + dNumber.ToString("R", System.Globalization.CultureInfo.InvariantCulture);
+            return sCol + " " + sOp + " " + sQuoted;
+        }
+
+        // countWhere: how many records of a table a WHERE clause keeps, so a filter that would keep none can say so
+        // and leave the view as it was.
+        public int countWhere(string sTable, string sWhere)
+        {
+            int iRows;
+            List<string[]> lCount = queryRowsSqlOrThrow("SELECT count(*) FROM \"" + sTable.Replace("\"", "\"\"") + "\" WHERE " + sWhere, 1, out iRows);
+            int iMatches = 0;
+            if (lCount != null && lCount.Count > 0 && lCount[0] != null && lCount[0].Length > 0) int.TryParse(lCount[0][0] ?? "0", out iMatches);
+            return iMatches;
+        }
+
+        // adoFilterToSql: a filter saved before 19 October 2026, in ADO's Recordset.Filter grammar, as SQL, so it can
+        // be narrowed or expanded like any other. The grammars differ in one place DbDo used: LIKE's wildcard is * in
+        // ADO and % in SQL. Comparisons, quoted text, AND, OR and parentheses read the same.
+        public string adoFilterToSql(string sAdo)
+        {
+            if (string.IsNullOrEmpty(sAdo)) return "";
+            return System.Text.RegularExpressions.Regex.Replace(sAdo, @"LIKE\s+'((?:[^']|'')*)'",
+                m => "LIKE '" + m.Groups[1].Value.Replace('*', '%') + "'",
+                System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+        }
+
         public void selectTableFiltered(string sTable, string sWhereSql)
         {
             if (!isOpen()) throw new InvalidOperationException("No database open.");
@@ -17005,8 +17067,11 @@ namespace DbDo
             if (string.IsNullOrEmpty(sFilter) && string.IsNullOrEmpty(sSql))
             { Say.say("where: none"); return; }
             // Both kinds, in the words each was asked in (8 October 2026).
+            // WHERE FIRST (19 October 2026): a filter narrowed or expanded speaks its groups in parentheses, and a
+            // sentence that opens with a parenthesis is read as an aside, by a listener and by the tutorial check
+            // alike, so it is led by "where", as "where: none" already was.
             List<string> lsParts = new List<string>();
-            if (!string.IsNullOrEmpty(sSql)) lsParts.Add(sSql);
+            if (!string.IsNullOrEmpty(sSql)) lsParts.Add("where " + sSql);
             if (!string.IsNullOrEmpty(sFilter)) lsParts.Add("where: " + sFilter);
             speakOrShow("Filter", string.Join("; and ", lsParts.ToArray()), 118);
         }
@@ -25021,7 +25086,149 @@ namespace DbDo
         //   only for a field filter, since an any-field search cannot be widened.
         private string sLastAnyFieldText = "";
 
+        // viewSelectClicked: FILTER RECORDS, Control+F (19 October 2026, from DbDialog's filter sub-dialogs).
+        //
+        // With no filter in force it asks at once how to give the condition: Any Field, text found wherever it is,
+        // or Fields, the form of every field, where a value may begin with an operator. With a filter in force it
+        // first offers four buttons:
+        //   New     start over with a new condition
+        //   Clear   show every record again, and go back to the list on the same record
+        //   Narrow  keep only the records that also meet a new condition: (old) AND (new)
+        //   Expand  also take in the records that meet a new condition: (old) OR (new)
+        // then asks how to give that new condition, as above. The condition in force may itself be a combination;
+        // it is always wrapped whole in parentheses before AND or OR, and the new one in its own parentheses, so
+        // the grouping is exactly as asked however many times it is narrowed and expanded.
+        //
+        // Every condition is SQL, applied by re-selecting the table with a WHERE clause (selectTableFiltered), as
+        // DbDialog did; ADO's Recordset.Filter, which DbDo had used for the Fields form, refuses an OR group joined
+        // to another clause by AND. A condition that would keep no record says so and leaves the view as it was.
+        // A query window, the result of the person's own SQL, keeps the earlier ADO filter (filterQueryWindowAdo).
         private void viewSelectClicked(object sender, EventArgs evArgs)
+        {
+            if (db == null || !db.hasRecordset()) return;
+            if (db.currentIsCustomQuery) { filterQueryWindowAdo(); return; }
+            string sTable = db.currentTable;
+
+            // What is in force: the SQL filter, and an ADO filter saved before this change, carried into SQL.
+            string sOldWhere = db.sqlFilter ?? "";
+            string sOldSpoken = db.sqlFilterSpoken ?? "";
+            string sAdo = db.filter ?? "";
+            if (sAdo.Length > 0)
+            {
+                string sAdoSql = db.adoFilterToSql(sAdo);
+                sOldWhere = sOldWhere.Length > 0 ? "(" + sOldWhere + ") AND (" + sAdoSql + ")" : sAdoSql;
+                sOldSpoken = sOldSpoken.Length > 0 ? sOldSpoken + " and " + sAdo : sAdo;
+            }
+
+            const string sNew = "New";
+            const string sClear = "Clear";
+            const string sNarrow = "Narrow";
+            const string sExpand = "Expand";
+            string sCombine = sNew;
+            if (sOldWhere.Length > 0)
+            {
+                List<string> lsLines = new List<string>();
+                lsLines.Add("In force: " + sOldSpoken);
+                lsLines.Add("New starts over. Clear shows every record again. Narrow keeps only the records that also meet a new condition. Expand also takes in the records that meet a new condition.");
+                string sChoice = chooseByButtons("Filter Records", lsLines, new List<string> { sNew, sClear, sNarrow, sExpand });
+                if (sChoice == null) return;
+                if (sChoice == sClear) { clearFilterKeepingRecord(); return; }
+                sCombine = sChoice;
+            }
+
+            const string sAny = "Any Field";
+            const string sFields = "Fields";
+            string sHow = chooseByButtons(sCombine == sNew ? "Filter Records" : sCombine + " Filter",
+                new List<string> { "Any Field finds text wherever it is, whatever its case. Fields gives each field a value, which may begin with an operator: = is, != is not, > more than, >= at least, < less than, <= at most, % contains." },
+                new List<string> { sAny, sFields });
+            if (sHow == null) return;
+
+            string sNewWhere, sNewSpoken;
+            bool bGiven = (sHow == sAny) ? askAnyFieldCondition(out sNewWhere, out sNewSpoken)
+                                         : askFieldsCondition(out sNewWhere, out sNewSpoken);
+            if (!bGiven || string.IsNullOrEmpty(sNewWhere)) return;
+
+            string sWhere, sSpoken;
+            if (sCombine == sNarrow)
+            { sWhere = "(" + sOldWhere + ") AND (" + sNewWhere + ")"; sSpoken = "(" + sOldSpoken + ") and (" + sNewSpoken + ")"; }
+            else if (sCombine == sExpand)
+            { sWhere = "(" + sOldWhere + ") OR (" + sNewWhere + ")"; sSpoken = "(" + sOldSpoken + ") or (" + sNewSpoken + ")"; }
+            else
+            { sWhere = sNewWhere; sSpoken = sNewSpoken; }
+
+            try
+            {
+                int iMatches = db.countWhere(sTable, sWhere);
+                DbDoLog.write("Filter, " + sCombine + " by " + sHow + ": " + sSpoken + " -- " + iMatches + " in " + sTable + "; WHERE " + sWhere);
+                if (iMatches == 0)
+                { Say.sayForced("No record matches " + sSpoken + ". The filter is as it was."); return; }
+                db.selectTableFiltered(sTable, sWhere, sSpoken);
+                db.filter = "";
+                invokeRefresh();
+                persistCurrentTableState();
+                Say.sayForced(iMatches == 1 ? "1 record matches." : iMatches + " records match.");
+            }
+            catch (Exception ex) { ErrorDialog.show(this, "Filter Records", ex.Message); }
+        }
+
+        // askAnyFieldCondition: Any Field's question, remembering the last answer. The condition finds the text in
+        // any field, read as text, whatever its case (DbDoManager.anyFieldWhere).
+        private bool askAnyFieldCondition(out string sWhere, out string sSpoken)
+        {
+            sWhere = ""; sSpoken = "";
+            string sText;
+            using (LbcDialog dlg = new LbcDialog("Any Field Contains", this))
+            {
+                TextBox tb = dlg.addInputBox("&Text to find in any field", sLastAnyFieldText,
+                    "Records where some field contains this text, whatever its case.");
+                if (!dlg.runOkCancel()) return false;
+                sText = (tb.Text ?? "").Trim();
+            }
+            if (sText.Length == 0) return false;
+            sLastAnyFieldText = sText;
+            sWhere = db.anyFieldWhere(sText);
+            sSpoken = "any field contains " + sText;
+            return sWhere.Length > 0;
+        }
+
+        // askFieldsCondition: the Fields form, the same form as Edit Record, one box per field, blank. Each filled
+        // box is one condition (DbDoManager.fieldConditionSql); several filled boxes must all match, so they are
+        // joined by AND -- each its own test, so no parentheses are needed among them.
+        private bool askFieldsCondition(out string sWhere, out string sSpoken)
+        {
+            sWhere = ""; sSpoken = "";
+            List<string> lFields = db.getEditableFieldNames();
+            Dictionary<string, string> dInitial = new Dictionary<string, string>();
+            List<bool> lEditable = new List<bool>();
+            foreach (string sF in lFields) { dInitial[sF] = ""; lEditable.Add(true); }
+            using (RecordEditDialog dlg = new RecordEditDialog("Filter Records", lFields, dInitial, lEditable, db))
+            {
+                if (dlg.showDialog(this) != DialogResult.OK) return false;
+                List<string> lsTests = new List<string>();
+                List<string> lsWords = new List<string>();
+                foreach (string sF in lFields)
+                {
+                    string sVal;
+                    if (!dlg.dValues.TryGetValue(sF, out sVal) || string.IsNullOrEmpty((sVal ?? "").Trim())) continue;
+                    int iType = 0;
+                    try { iType = db.getFieldType(sF); } catch { }
+                    bool bText = iType == 8 || iType == 129 || iType == 130 || (iType >= 200 && iType <= 203);
+                    string sWords;
+                    string sTest = db.fieldConditionSql(sF, sVal, bText, out sWords);
+                    if (sTest.Length == 0) continue;
+                    lsTests.Add(sTest);
+                    lsWords.Add(sWords);
+                }
+                if (lsTests.Count == 0) { Say.sayForced("No field was filled in, so the filter is as it was."); return false; }
+                sWhere = string.Join(" AND ", lsTests.ToArray());
+                sSpoken = string.Join(" and ", lsWords.ToArray());
+                return true;
+            }
+        }
+
+        // filterQueryWindowAdo: Filter Records in a query window, whose records are the result of the person's own
+        // SQL rather than a table to re-select. It keeps the earlier behavior, an ADO filter on the results.
+        private void filterQueryWindowAdo()
         {
             if (db == null || !db.hasRecordset()) return;
 

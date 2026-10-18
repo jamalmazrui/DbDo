@@ -5,7 +5,7 @@
     <link>Tutorials.htm</link>
     <description>Spoken walks through DbDo, the database program built for working by ear, and the ready-made databases that come with it. Ten walks, each under five minutes, in the order a new person meets them.</description>
     <language>en-us</language>
-    <lastBuildDate>Sun, 18 Oct 2026 21:48:29 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 18 Oct 2026 22:37:00 +0000</lastBuildDate>
     <itunes:author>Jamal Mazrui</itunes:author>
     <itunes:explicit>false</itunes:explicit>
     <itunes:category text="Technology"/>
@@ -42,8 +42,8 @@
       <description>DbDo is open on RadioTrail. Full transcript: Tutorials.htm#0c-3-find-a-station</description>
       <link>Tutorials.htm#0c-3-find-a-station</link>
       <guid isPermaLink="false">homer-tutorial_3_find_a_station</guid>
-      <enclosure url="tutorials/3_Find_a_Station.mp3" length="1407018" type="audio/mpeg"/>
-      <itunes:duration>00:03:29</itunes:duration>
+      <enclosure url="tutorials/3_Find_a_Station.mp3" length="1491942" type="audio/mpeg"/>
+      <itunes:duration>00:03:41</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>

@@ -61,13 +61,21 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=I type seahawks and press Enter.
 Key=Enter
-Hear=7 records have seahawks.
+Hear=7 records match.
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Seven: stations in Seattle and Tacoma, in British Columbia and in Idaho. Control plus F again; with a filter in force there are more buttons. N for Narrow keeps seahawks and adds a field.
+Say=Seven: stations in Seattle and Tacoma, in British Columbia and in Idaho. Control plus F again; with a filter in force there are four buttons: New, Clear, Narrow and Expand. N for Narrow keeps seahawks and adds a condition.
 Key=N
+Hear=Narrow Filter dialog
+Hear=Any Field button
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Narrow asks how to give the new condition, just as the first filter did. F for Fields opens a box for every field.
+Key=F
 Hear=Filter Records dialog, name: edit
 Note=Confirm the wording with a live run: buildTutorials -live.
 
@@ -75,14 +83,14 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=I move to the state box, type Washington, and press Enter.
 Key=Enter
-Hear=Filter applied. 3 records match.
+Hear=3 records match.
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Shift plus F, Say Filter, says both parts, in the words each was asked in.
+Say=Shift plus F, Say Filter, says both parts, in the words each was asked in, each in its own parentheses.
 Key=Shift+F
-Hear=any field contains seahawks; and where: state = 'Washington'
+Hear=where (any field contains seahawks) and (state contains Washington)
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

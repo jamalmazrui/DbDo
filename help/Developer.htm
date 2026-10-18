@@ -198,6 +198,28 @@ and the order they run in</a></li>
 <li><a href="#keys" id="toc-keys">Keys</a></li>
 <li><a href="#tutorials" id="toc-tutorials">Tutorials</a></li>
 <li><a href="#releasing" id="toc-releasing">Releasing</a></li>
+<li><a href="#learnings-from-dbdialog"
+id="toc-learnings-from-dbdialog">Learnings from DbDialog</a>
+<ul>
+<li><a href="#done-filters-as-one-sql-condition"
+id="toc-done-filters-as-one-sql-condition">Done: filters as one SQL
+condition</a></li>
+<li><a href="#proposed-clone-table"
+id="toc-proposed-clone-table">Proposed: Clone Table</a></li>
+<li><a
+href="#proposed-define-a-table-as-text-without-the-ten-field-limit"
+id="toc-proposed-define-a-table-as-text-without-the-ten-field-limit">Proposed:
+define a table as text, without the ten-field limit</a></li>
+<li><a href="#proposed-fields-named-for-unique-access-letters"
+id="toc-proposed-fields-named-for-unique-access-letters">Proposed:
+fields named for unique access letters</a></li>
+<li><a href="#proposed-count-by-the-shown-columns"
+id="toc-proposed-count-by-the-shown-columns">Proposed: Count by the
+shown columns</a></li>
+<li><a href="#proposed-invert-and-marked-as-filter-choices"
+id="toc-proposed-invert-and-marked-as-filter-choices">Proposed: Invert
+and Marked as filter choices</a></li>
+</ul></li>
 </ul></li>
 </ul>
 </nav>
@@ -325,6 +347,85 @@ The scripts are not published; the recording and the transcript are.</p>
 <p>After a build, <code>scripts\release</code> tags the version stamped
 in <code>DbDo_setup.exe</code>, creates the GitHub release, and checks
 that the public download link answers.</p>
+<h2 id="learnings-from-dbdialog">Learnings from DbDialog</h2>
+<p>DbDialog (2006 to 2015, AutoIt and ADO) was Jamal’s single-dialog
+database manager, and DbDo’s ancestor. Its source and guide were
+reviewed on 19 October 2026 for what DbDo should take back. The filter
+design is done; the rest are proposals, each small enough to be one
+change.</p>
+<h3 id="done-filters-as-one-sql-condition">Done: filters as one SQL
+condition</h3>
+<p>DbDialog built every filter as a SQL WHERE clause and read the table
+again with it. DbDo had moved field filters to ADO’s Recordset.Filter,
+which cannot nest an OR group inside an AND. Control+F now builds one
+SQL condition again, with New, Clear, Narrow and Expand (see History, 19
+October 2026). The operator prefixes in the Fields form (= != &gt; &gt;=
+&lt; &lt;= %) are DbDialog’s, which read a value’s first characters the
+same way.</p>
+<h3 id="proposed-clone-table">Proposed: Clone Table</h3>
+<p>DbDialog’s New Table offered Clone: a new, empty table with the
+current table’s structure, asked for in one question, the name. DbDo has
+no equivalent; Add Table always starts from a blank form.</p>
+<ul>
+<li><strong>Design:</strong> Add Table asks first, with buttons, whether
+to Define a new structure or Clone the current table’s.</li>
+<li><strong>How Clone works:</strong> it reads the current table’s
+distinct fields and their declared types (PRAGMA table_info). It passes
+them to lStandardTableDdl, so the clone gets DbDo’s standard columns and
+triggers like any new table.</li>
+</ul>
+<h3
+id="proposed-define-a-table-as-text-without-the-ten-field-limit">Proposed:
+define a table as text, without the ten-field limit</h3>
+<p>DbDialog’s Define offered a template in a multi-line text box, one
+field per line in the form “name: size”, with a memo field last. A
+screen reader user reads and edits it like any text, can paste a
+structure copied from elsewhere, and is not limited to a fixed number of
+slots. DbDo’s definition form has ten name-and-type slots, so a table
+with more fields needs SQL.</p>
+<ul>
+<li><strong>Design:</strong> a Text button beside the form opens the
+same definition as editable lines, “name: TYPE”, prefilled with the
+slots already filled.</li>
+<li><strong>Types:</strong> the same type words as the form (TEXTLINE,
+TEXTMEMO, INTEGER and the rest), checked on OK.</li>
+<li><strong>Copying a structure:</strong> Describe Table’s output in the
+same “name: TYPE” form would let one table’s structure be copied to
+start another.</li>
+</ul>
+<h3 id="proposed-fields-named-for-unique-access-letters">Proposed:
+fields named for unique access letters</h3>
+<p>DbDialog named its Contact fields so each had a unique initial
+letter, and so a unique Alt letter in the record form. DbDo already
+keeps this for contact tables. The proposal is a check: on OK, the
+definition form says which fields share a first letter, and that only
+the first of them will get an Alt letter.</p>
+<h3 id="proposed-count-by-the-shown-columns">Proposed: Count by the
+shown columns</h3>
+<p>DbDialog’s Output offered Count: for the fields shown in the list,
+the number of records with each combination of values. For example, with
+State and City shown, the number of contacts in each state and city.
+DbDo’s Statistics from Column (Alt+Shift+S) counts one column only.</p>
+<ul>
+<li><strong>Design:</strong> a Count by Columns report over the columns
+currently shown in the grid, within the filter in force. It runs SELECT
+those columns, count(*) … WHERE the filter GROUP BY those columns ORDER
+BY those columns, and shows the result in a read-only window to review
+and copy, as Statistics from Column does.</li>
+</ul>
+<h3 id="proposed-invert-and-marked-as-filter-choices">Proposed: Invert
+and Marked as filter choices</h3>
+<p>DbDialog’s Filter choices included Invert (the records not matching),
+and Tagged and Untagged.</p>
+<ul>
+<li><strong>Invert</strong> is now simple and exact, since the filter is
+SQL: NOT (the condition in force).</li>
+<li><strong>Marked and Unmarked</strong> would filter on DbDo’s marked
+column.</li>
+</ul>
+<p>Each would be one more button on Control+F when it applies. They are
+left for a ruling, since Control+F’s four buttons are the ones asked
+for.</p>
 </main>
 </body>
 </html>

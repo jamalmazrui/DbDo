@@ -5,6 +5,24 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 19 October 2026 -- filters that narrow and expand, nested as asked
+
+- **Control+F offers New, Clear, Narrow and Expand when a filter is in force.**
+  - **New** starts over.
+  - **Clear** shows every record again and returns you to the list on the same record.
+  - **Narrow** keeps only the records that also meet a new condition.
+  - **Expand** also takes in the records that meet a new condition.
+  
+  New, Narrow and Expand then ask how to give the condition: Any Field, or Fields with an operator at the start of a value. With no filter in force, Control+F asks that at once, as before.
+- **Conditions nest exactly as asked.** The condition in force, however many parts it has, is wrapped whole in parentheses before the AND or OR, and the new one in its own parentheses. Say Filter speaks it grouped the same way, led by "where": for example, "where (any field contains seahawks) and (state contains Washington)".
+- **Why this needed a change underneath.** The Fields form had been an ADO filter on the open records, and ADO's filter grammar refuses an OR group joined to another clause by AND, which is exactly what narrowing after expanding builds. So Expand was refused after an Any Field search, and some combinations failed with "Filter rejected". Every filter is now one SQL condition, applied by reading the table again with it, as DbDialog did and as Any Field already did, so any nesting works.
+- **The Fields form keeps its operators:** `=` is, `!=` is not, `>` more than, `>=` at least, `<` less than, `<=` at most, `%` contains. A bare word on a text field still means contains, whatever its case.
+- **A filter that would keep no record says so** and leaves the view as it was, for Fields as already for Any Field.
+- **Edit is gone from Control+F's choices.** New with Fields does the same from a clean form, and the four buttons are the ones asked for.
+- **Carried over:** a filter saved before this change is carried into the new form the first time Control+F is pressed, so it can be narrowed or expanded too.
+- **Unchanged:** a query window, the result of your own SQL, keeps the earlier filter.
+- **Tutorial walk 3** now takes the narrowing in two keys, N for Narrow and F for Fields, and speaks the grouped filter.
+
 ## 15 October 2026 -- RadioTrail lists each stream once
 
 - **RadioTrail ships with 49,186 stations, each stream listed once.** The repair described below was run on the shipped template: 6,094 rows that repeated a stream under another name were merged into one row each, keeping their other names as tags, and 355 names lost doubled spaces. The file is 58 MB instead of 67 MB. The template check passes, and the build's search self-test still finds every term it looks for.
