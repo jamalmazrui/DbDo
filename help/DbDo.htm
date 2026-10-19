@@ -741,7 +741,7 @@ record with confirmation; <strong>Delete Without Confirmation</strong>
 (Control+Shift+D) skips the prompt.</li>
 </ul>
 <p>All edits auto-commit. If a table is read-only, <strong>Read Only
-Toggle</strong> (Alt+Z) reports and controls that.</p>
+Toggle</strong> (Control+Shift+Z) reports and controls that.</p>
 <h3 id="marking-records">Marking records</h3>
 <p>Marking is DbDo’s explicit, queryable alternative to visual
 multi-select. The <code>marked</code> field carries the state.</p>
@@ -1400,7 +1400,7 @@ family.</p>
 </tr>
 <tr>
 <td>Say Status</td>
-<td>Shift+Z</td>
+<td>Shift+Z or Alt+Z</td>
 </tr>
 <tr>
 <td>Say Database</td>
@@ -1547,7 +1547,7 @@ family.</p>
 </tr>
 <tr>
 <td>Read Only Toggle</td>
-<td>Alt+Z</td>
+<td>Control+Shift+Z</td>
 </tr>
 <tr>
 <td>Database Summary</td>
@@ -1976,10 +1976,15 @@ working together on real records.</p>
 announcements. <strong>Extra Speech</strong> (toggled from the Help
 menu) controls DbDo’s additional commentary without affecting your
 screen reader’s natural focus and selection announcements; turning it
-off leaves only the screen reader’s own speech. <strong>Command
-Echo</strong> controls whether commands announce a confirmation as they
-run. <strong>Test Screen Reader Speech</strong> verifies that DbDo can
-reach your screen reader.</p>
+off leaves only the screen reader’s own speech. A command says its own
+name as it starts only when nothing else would tell you at once that it
+is under way. A command that opens a dialog does not, because the
+dialog’s title says it. A Say command or a toggle does not, because it
+speaks its answer or its new state. A command that moves the focus does
+not, because your screen reader says where you landed. Others, such as
+Clear Filter, say their name at once, while the grid is being rebuilt.
+<strong>Test Screen Reader Speech</strong> verifies that DbDo can reach
+your screen reader.</p>
 <h3 id="persistence-and-logging">Persistence and logging</h3>
 <p>DbDo remembers per-database state in the database’s own
 <code>&lt;DbName&gt;.inix</code> — the last table, sort, filter, and

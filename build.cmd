@@ -149,7 +149,7 @@ rem onSpoken", which names the symptom and not the cause. So the build says the
 rem cause, first. Raise this whenever DbDo starts using something new.
 rem 1.64.5: Play Tutorials calls MediaPlayer.playTutorials, which older kits lack;
 rem a build against 1.64.4 failed to compile on 8 October 2026 rather than saying so.
-set "kitNeeded=1.72.56"
+set "kitNeeded=1.74.1"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -586,39 +586,25 @@ if not exist "!sHere!exec" mkdir "!sHere!exec"
 pushd "!sHere!exec"
 echo Binaries go to: %CD% >> "!log!"
 
-rem ---- fetch nvdaControllerClient.dll if missing (same as v1.0.43) ----
+rem ---- the NVDA controller client, from the kit (kit 1.74.0) ---------
+rem DbDo's direct speech to NVDA needs nvdaControllerClient.dll beside the
+rem program. This build used to download it from NV Access, whose address
+rem carries the NVDA release number and dies every few months; on 18 October
+rem 2026 it returned 404 and the installer build stopped. The kit carries the
+rem one 64-bit copy, and every Homer app's build copies it from there.
 set "nvdaDll=nvdaControllerClient.dll"
-set "nvdaUrl=https://download.nvaccess.org/releases/stable/nvda_2026.1_controllerClient.zip"
-if exist "%nvdaDll%" goto :have_nvda_dll
-echo Fetching %nvdaDll% ...
-powershell -NoProfile -ExecutionPolicy Bypass -Command ^
-  "$ErrorActionPreference='Stop';" ^
-  "$tmpZip = Join-Path $env:TEMP 'nvda_controllerClient.zip';" ^
-  "$tmpDir = Join-Path $env:TEMP 'nvda_controllerClient';" ^
-  "if (Test-Path $tmpZip) { Remove-Item -Force $tmpZip };" ^
-  "if (Test-Path $tmpDir) { Remove-Item -Recurse -Force $tmpDir };" ^
-  "Invoke-WebRequest -Uri '%nvdaUrl%' -OutFile $tmpZip -UseBasicParsing;" ^
-  "Expand-Archive -Path $tmpZip -DestinationPath $tmpDir;" ^
-  "$x64 = Join-Path $tmpDir 'x64';" ^
-  "$dll = $null;" ^
-  "foreach ($n in @('nvdaControllerClient.dll', 'nvdaControllerClient64.dll')) {" ^
-  "  $p = Join-Path $x64 $n;" ^
-  "  if (Test-Path $p) { $dll = $p; break }" ^
-  "}" ^
-  "if ($null -eq $dll) {" ^
-  "  $dll = Get-ChildItem -Path $tmpDir -Recurse | Where-Object { $_.Name -in @('nvdaControllerClient.dll', 'nvdaControllerClient64.dll') } | Select-Object -First 1 -ExpandProperty FullName;" ^
-  "}" ^
-  "if ($null -eq $dll) { throw 'nvdaControllerClient.dll (or nvdaControllerClient64.dll) not found in archive' };" ^
-  "Copy-Item -Path $dll -Destination '%nvdaDll%' -Force;" ^
-  "Remove-Item -Force $tmpZip;" ^
-  "Remove-Item -Recurse -Force $tmpDir;" >> "!log!" 2>&1
-if errorlevel 1 (
-    echo WARNING: NVDA controller DLL download failed; see %log%.
-    echo Manual fallback: fetch x64\nvdaControllerClient.dll from
-    echo   %nvdaUrl%
-    echo and place it next to DbDo.exe.
+if not exist "!homerDev!\exec\%nvdaDll%" (
+    echo ERROR: the kit at !homerDev! has no exec\%nvdaDll%. Unzip the latest HomerDev.zip, then build again.
+    echo ERROR: !homerDev!\exec\%nvdaDll% is missing.>> "!log!"
+    goto :build_failed
 )
-:have_nvda_dll
+copy /y "!homerDev!\exec\%nvdaDll%" "%nvdaDll%" >nul
+if errorlevel 1 (
+    echo ERROR: could not copy %nvdaDll% from the kit.
+    echo ERROR: copy of !homerDev!\exec\%nvdaDll% into exec failed.>> "!log!"
+    goto :build_failed
+)
+echo NVDA controller client copied from the kit into exec.>> "!log!"
 
 rem ---- fetch Newtonsoft.Json.dll if missing (JSON / .ipynb support) ----
 rem DbDo references Newtonsoft.Json (Json.NET, MIT license) for JSON

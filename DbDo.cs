@@ -13757,7 +13757,12 @@ namespace DbDo
             // Ctrl+Shift+R slot is better used for the more-common
             // regex-replace operation. Alt+Z is also one-handed which
             // is appropriate for a setting you flip once and forget.
-            miToggleReadOnly = addItem(miMisc, "Toggle Read Only",                       "Toggle Read Only",  Keys.Alt | Keys.Z,                  toggleReadOnlyClicked);
+            // KEYS FREED BY RETIRING COMMAND ECHO TOGGLE (19 October 2026). Read Only
+            // Toggle takes Control+Shift+Z -- Z keys are toggles, and DbDo has no
+            // Undo or Redo for it to meet -- and Say Status takes Alt+Z beside the
+            // grid's Shift+Z, as the suite contract planned for stage 3.
+            miToggleReadOnly = addItem(miMisc, "Toggle Read Only",                       "Toggle Read Only",  Keys.Control | Keys.Shift | Keys.Z, toggleReadOnlyClicked);
+            registerLocalAlias(Keys.Alt | Keys.Z, miSaySayStatus);
             // v1.0.67 deferred stubs. The chords are reserved so the
             // menu stays stable and the user can discover the planned
             // commands. The handlers display "Not yet implemented."
@@ -13958,7 +13963,6 @@ namespace DbDo
             // the command body runs. Mirrors the Extra Speech toggle's
             // mnemonic (Ctrl+Shift+Z is the keyboard companion to
             // Alt+Shift+Z, both "z for hushed speech"). Default ON.
-            miHelpCommandEcho   = addItem(miHelp, "Command Echo Toggle",                "Command Echo Toggle", Keys.Control | Keys.Shift | Keys.Z, helpCommandEchoClicked);
             addSep(miHelp);
             miHelpLog          = addItem(miHelp, "Show &Log Location",                   "Show Log",          Keys.None,                          helpLogClicked);
             addItem(miHelp, "File GitHub Issue...", "File GitHub Issue", Keys.None, helpFileIssueClicked);
@@ -14374,7 +14378,8 @@ namespace DbDo
             // LbcMenuItem reports both the shortcut and the access letter to the
             // screen reader; see Lbc.cs. The stock item reports only one of them.
             ToolStripMenuItem mi = new LbcMenuItem(sText);
-            mi.Click += (senderA, evA) => { commandEcho(sCommand); evHandler(senderA, evA); };
+            bool bOpensDialog = sText.TrimEnd().EndsWith("...");
+            mi.Click += (senderA, evA) => { if (!bOpensDialog) commandEcho(sCommand); evHandler(senderA, evA); };
             miParent.DropDownItems.Add(mi);
             KeyMap.registerDisplayOnly(key, mi, sCommand);
             attachSummary(mi, sCommand, sSummary, sDescription);
@@ -14485,18 +14490,18 @@ namespace DbDo
             // Ctrl+Shift+Z.
             return string.IsNullOrEmpty(sV) ? "N" : sV;
         }
+        // commandEcho: THE SUITE'S RULE, ALWAYS ON (19 October 2026). Command Echo
+        // Toggle is retired. A command's name is spoken as it starts if and only
+        // if nothing else would tell you at once that it is under way: not for a
+        // dialog (its title is the echo), not for a Say command or a toggle (each
+        // speaks its own answer or state), not for a command that moves the focus
+        // (the screen reader says where it landed); yes for the rest, such as
+        // Clear Filter, which reshapes the grid without moving the focus. The rule
+        // is the kit's Homer.KeyMap.shouldEcho, so every Homer app decides alike.
         private void commandEcho(string sCommand)
         {
-            if (!isCommandEchoOn()) return;
             if (string.IsNullOrEmpty(sCommand)) return;
-            // A command whose name ends in "Toggle" announces its NEW
-            // STATE itself -- the on/off modes say "<Feature> On" / "No
-            // <Feature>" via sayToggleState, and Window Toggle names the
-            // window it switched to -- so echoing the raw command name
-            // here would duplicate that and, worse, would not reflect the
-            // resulting state. Skip the raw echo and let that state
-            // announcement be the command echo.
-            if (sCommand.TrimEnd().EndsWith("Toggle", StringComparison.OrdinalIgnoreCase)) return;
+            if (!Homer.KeyMap.shouldEcho(sCommand, false)) return;
             try { Say.say(sCommand); } catch { /* swallow */ }
         }
 
@@ -29624,12 +29629,7 @@ namespace DbDo
             // Read current values from the ini, with sensible defaults
             // if the keys are missing.
             string sCurrentUiMode = readIniValue(sUserIni, "General", "UiMode", "gui");
-            string sCurrentEcho   = readIniValue(sUserIni, "Options", "CommandEcho", "N");
             string sCurrentExtra  = readIniValue(sUserIni, "General", "ExtraSpeech", "Y");
-            bool bCurrentEcho = !(sCurrentEcho.Equals("N", StringComparison.OrdinalIgnoreCase)
-                              || sCurrentEcho.Equals("No", StringComparison.OrdinalIgnoreCase)
-                              || sCurrentEcho.Equals("0", StringComparison.Ordinal)
-                              || sCurrentEcho.Equals("False", StringComparison.OrdinalIgnoreCase));
             bool bCurrentExtra = !(sCurrentExtra.Equals("N", StringComparison.OrdinalIgnoreCase)
                               || sCurrentExtra.Equals("No", StringComparison.OrdinalIgnoreCase)
                               || sCurrentExtra.Equals("0", StringComparison.Ordinal)
@@ -29651,16 +29651,6 @@ namespace DbDo
                     sCurrentUiMode,
                     "both = GUI + console, gui = window only, cli = dot prompt only");
 
-                // Command Echo toggle. ON by default; speaks the
-                // canonical command name through the live region
-                // just before each command runs.
-                // 'ExtraSpeech=Y' setting is the model. Takes effect
-                // on the next command, no restart needed. Also bound
-                // to Ctrl+Shift+Z on the Help menu.
-                CheckBox cbEcho = dlg.addCheckBox(
-                    "Command Echo (speak each command name as it runs)",
-                    bCurrentEcho,
-                    "When ON, every menu/hotkey command announces its name through the screen reader before executing. Off-by-toggle for users who prefer less speech. Has no effect in CLI / dot-prompt mode.");
 
                 // Extra Speech toggle. ON by default; controls whether
                 // DbDo's status messages, cell readouts, and the
@@ -29702,15 +29692,11 @@ namespace DbDo
                 if (string.Equals(sResult, "OK", StringComparison.OrdinalIgnoreCase))
                 {
                     string sNewUiMode = (cbUiMode.SelectedItem ?? "both").ToString();
-                    string sNewEcho = cbEcho.Checked ? "Y" : "N";
                     string sNewExtra = cbExtra.Checked ? "Y" : "N";
                     writeIniValue(sUserIni, "General", "UiMode", sNewUiMode);
-                    writeIniValue(sUserIni, "Options", "CommandEcho", sNewEcho);
                     writeIniValue(sUserIni, "General", "ExtraSpeech", sNewExtra);
-                    invalidateCommandEchoCache();
                     Say.bExtraSpeechEnabled = cbExtra.Checked;
                     if (miHelpExtraSpeech != null) miHelpExtraSpeech.Checked = Say.bExtraSpeechEnabled;
-                    if (miHelpCommandEcho != null) miHelpCommandEcho.Checked = isCommandEchoOn();
                     // Read-Only delta: if the dialog setting differs
                     // from the current connection state, reopen the
                     // database with the new flag. Skip if no db open.
@@ -29720,7 +29706,6 @@ namespace DbDo
                     }
                     Say.say("Configuration saved");
                     DbDoLog.write("Edit-Settings saved: uiMode=" + sNewUiMode
-                        + "; commandEcho=" + sNewEcho
                         + "; extraSpeech=" + sNewExtra
                         + "; readOnly=" + (cbReadOnly.Checked ? "Y" : "N"));
                     MessageBox.Show(this,
@@ -30297,36 +30282,6 @@ namespace DbDo
             // Force-speak the new state so the user hears confirmation
             // even when they just turned speech off.
             sayToggleState("Extra Speech Toggle", Say.bExtraSpeechEnabled);
-        }
-
-        // helpCommandEchoClicked: toggle whether DbDo speaks the
-        // canonical command name through the live region just before
-        // each menu/hotkey command runs. Mirrors helpExtraSpeechClicked
-        // -- same pattern of runtime toggle, persistent ini write, and
-        // forced confirmation announcement. The setting is persisted
-        // in DbDo.inix [Options] commandEcho. CLI/dot-prompt commands
-        // don't go through the addItem wrappers that fire commandEcho,
-        // so this toggle has no effect there -- intentional, since the
-        // user explicitly typed the command and shouldn't need it
-        // echoed back at them.
-        private void helpCommandEchoClicked(object sender, EventArgs evArgs)
-        {
-            // Persist to the SAME per-user file isCommandEchoOn reads
-            // (%LOCALAPPDATA%\DbDo\DbDo.inix via configIniPath / IniSession).
-            // This used to write the exe-dir DbDo.inix, which the reader
-            // never consults -- so isCommandEchoOn never saw the new value
-            // and the toggle re-announced the same state on every press.
-            string sUserIni = configIniPath();
-            bool bNew = !isCommandEchoOn();
-            if (!string.IsNullOrEmpty(sUserIni))
-            {
-                ensureConfigIniExists(sUserIni);
-                try { writeIniValue(sUserIni, "Options", "CommandEcho", bNew ? "Y" : "N"); }
-                catch { /* best-effort persist */ }
-            }
-            invalidateCommandEchoCache();
-            miHelpCommandEcho.Checked = bNew;
-            sayToggleState("Command Echo Toggle", bNew);
         }
 
         // toggleReadOnlyClicked: flip the open database between

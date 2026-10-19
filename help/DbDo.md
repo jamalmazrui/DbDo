@@ -197,7 +197,7 @@ The cursor moves with ordinary list navigation (arrow keys, Home, End) and with 
 - **Replace Column** (Control+R) replaces text across a column; **Regex Replace** (Control+Shift+R) does the same by pattern; **Extract with Regex** (Control+Shift+X) pulls matches out of a column.
 - **Delete Record** (Control+D) deletes the current record with confirmation; **Delete Without Confirmation** (Control+Shift+D) skips the prompt.
 
-All edits auto-commit. If a table is read-only, **Read Only Toggle** (Alt+Z) reports and controls that.
+All edits auto-commit. If a table is read-only, **Read Only Toggle** (Control+Shift+Z) reports and controls that.
 
 ### Marking records
 
@@ -436,7 +436,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Table Properties | Alt+Enter |
 | Related Records | — |
 | Show Schema | — |
-| Say Status | Shift+Z |
+| Say Status | Shift+Z or Alt+Z |
 | Say Database | Shift+D |
 | Say Order | Shift+O |
 | Say Goto | Shift+G |
@@ -475,7 +475,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Command | Chord |
 |---------|-------|
 | Refresh View | F5 |
-| Read Only Toggle | Alt+Z |
+| Read Only Toggle | Control+Shift+Z |
 | Database Summary | Alt+D |
 | Table Summary | Alt+T |
 | Statistics from Column | Alt+Shift+S |
@@ -607,7 +607,7 @@ DbDo ships with template databases that follow the same column conventions as yo
 
 ### Screen-reader settings
 
-DbDo speaks directly to supplement your screen reader's own announcements. **Extra Speech** (toggled from the Help menu) controls DbDo's additional commentary without affecting your screen reader's natural focus and selection announcements; turning it off leaves only the screen reader's own speech. **Command Echo** controls whether commands announce a confirmation as they run. **Test Screen Reader Speech** verifies that DbDo can reach your screen reader.
+DbDo speaks directly to supplement your screen reader's own announcements. **Extra Speech** (toggled from the Help menu) controls DbDo's additional commentary without affecting your screen reader's natural focus and selection announcements; turning it off leaves only the screen reader's own speech. A command says its own name as it starts only when nothing else would tell you at once that it is under way. A command that opens a dialog does not, because the dialog's title says it. A Say command or a toggle does not, because it speaks its answer or its new state. A command that moves the focus does not, because your screen reader says where you landed. Others, such as Clear Filter, say their name at once, while the grid is being rebuilt. **Test Screen Reader Speech** verifies that DbDo can reach your screen reader.
 
 ### Persistence and logging
 

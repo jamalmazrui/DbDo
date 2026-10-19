@@ -5,6 +5,13 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 19 October 2026 -- Command names spoken only when they help
+
+- **Command Echo Toggle is retired,** with its setting. A command now says its own name as it starts if and only if nothing else would tell you at once that it is under way. A dialog's title, a Say command's answer, a toggle's new state, or the screen reader's report of where the focus landed already does that. Commands that reshape the grid without moving the focus, such as Clear Filter, now say their name at once, while the grid is rebuilt. Every Homer app follows the same rule from the kit.
+- **Read Only Toggle is on Control+Shift+Z,** freed by the retired toggle. Z keys are toggles, and DbDo has no Undo or Redo for it to meet.
+- **Say Status is also on Alt+Z,** beside the grid's Shift+Z, so it works from anywhere.
+- **The build takes NVDA's controller client from the kit.** It used to download it from NV Access, whose address changes with each NVDA release; on 18 October the address returned Not Found and the installer could not be built.
+
 ## 19 October 2026 -- filters that narrow and expand, nested as asked
 
 - **Control+F offers New, Clear, Narrow and Expand when a filter is in force.**

@@ -174,9 +174,6 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Alternate Menu\
   Pick a command from a flat, filterable list. F10 is menus: F10 the menu bar, Shift+F10 the context menu, Alt+F10 the alternate menu.\
   Alt+F10
-- Command Echo Toggle\
-  Z is for sleep: it wakes this behavior or puts it to sleep.\
-  Control+Shift+Z
 - Documentation\
   Open the documentation in the default browser. F1 is help: this guide.\
   F1
@@ -239,7 +236,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Alt+T
 - Toggle Read Only\
   Flip the database between read-write and read-only at runtime. Z is for sleep: it wakes this behavior or puts it to sleep.\
-  Alt+Z
+  Control+Shift+Z
 
 ### Misc, Tools
 
@@ -521,9 +518,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+X\
   Export the current table or query to CSV, TSV, JSON, or another format.\
   Export Data
-- Alt+Z\
-  Flip the database between read-write and read-only at runtime.\
-  Toggle Read Only
 
 ### Alt+Shift
 
@@ -698,7 +692,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Extract all regex matches in the current virtual column to the clipboard.\
   Extract with Regex
 - Control+Shift+Z\
-  Command Echo Toggle
+  Flip the database between read-write and read-only at runtime.\
+  Toggle Read Only
 
 ### Function keys
 
@@ -883,8 +878,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Close Window\
   Close the current recordset window.\
   Control+F4
-- Command Echo Toggle\
-  Control+Shift+Z
 - Complete Mark\
   Mark every row from the F8 anchor to the current row.\
   Shift+F8
@@ -1216,7 +1209,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Control+Space
 - Toggle Read Only\
   Flip the database between read-write and read-only at runtime.\
-  Alt+Z
+  Control+Shift+Z
 - Unmark All\
   Control+Shift+A
 - Unmark Record\
