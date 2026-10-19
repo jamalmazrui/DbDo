@@ -12298,7 +12298,6 @@ namespace DbDo
         private ToolStripMenuItem miHelpEmailLog;
         private ToolStripMenuItem miHelpTutorials;
         private ToolStripMenuItem miHelpExtraSpeech;
-        private ToolStripMenuItem miHelpCommandEcho;
         private ToolStripMenuItem miEditNotes;
         private ToolStripMenuItem miSaySayMark;
         private ToolStripMenuItem miEditTags;
@@ -12417,6 +12416,7 @@ namespace DbDo
             buildMenus();
             buildGrid();
             buildStatusBar();
+            checkRouterEquivalence();
             Say.attach(this);
             // Load Extra-Speech setting from DbDo.inix [General].
             // Default ON (Y) on first launch. Off explicitly via "N".
@@ -12437,7 +12437,6 @@ namespace DbDo
             updateMenuEnabled();
             updateStatusBar();
             if (miHelpExtraSpeech != null) miHelpExtraSpeech.Checked = Say.bExtraSpeechEnabled;
-            if (miHelpCommandEcho != null) miHelpCommandEcho.Checked = isCommandEchoOn();
             if (miToggleReadOnly != null && db != null) miToggleReadOnly.Checked = db.readOnly;
         }
 
@@ -13165,7 +13164,7 @@ namespace DbDo
             miFileMerge   = addItem(miFile, "&Merge Data...",             "Merge",            Keys.Alt | Keys.M,                    mergeClicked);
             addItem(miFile, "Transfer Import...",       "Transfer Import",  Keys.None,                            importTransferClicked);
             addItem(miFile, "Run Report...",           "Run Report",       Keys.Alt | Keys.Shift | Keys.R,       produceReportClicked);
-            miFileExport  = addItem(miFile, "E&xport Data...",            "Export Data",      Keys.Alt | Keys.X,                    fileExportClicked);
+            miFileExport  = addItem(miFile, "E&xport Data...",            "Export Data",      Keys.Alt | Keys.Shift | Keys.X,                    fileExportClicked);
             addSep(miFile);
             miFilePrint   = addItem(miFile, "&Print...",                  "Out Printer",      Keys.Control | Keys.P,                filePrintClicked);
             addSep(miFile);
@@ -13229,7 +13228,7 @@ namespace DbDo
             miRecToggleMark  = addItem(miEdit, "Toggle Marked",          "Toggle Marked",       Keys.Control | Keys.Space,          recToggleMarkClicked);
             miEditNotes      = addItem(miEdit, "Edit Notes...",          "Edit Notes",          Keys.Alt | Keys.Shift | Keys.N,     editNotesClicked);
             miEditTags       = addItem(miEdit, "Edit &Tags...",           "Edit Tags",           Keys.Alt | Keys.Shift | Keys.T,     editTagsClicked);
-            miEditUrl        = addItem(miEdit, "Edit &URL...",            "Edit URL",            Keys.Alt | Keys.Shift | Keys.U,     editUrlClicked);
+            miEditUrl        = addItem(miEdit, "Edit &url...",            "Edit url",            Keys.Alt | Keys.Shift | Keys.U,     editUrlClicked);
             miRecUnmark      = addItem(miEdit, "Unmark Record",                          "Clear Mark",          Keys.Control | Keys.Shift | Keys.M, recUnmarkClicked);
             // Bulk mark operations (v1.0.67). All operate on the
             // current filtered view -- they set, clear, or invert the
@@ -13284,7 +13283,12 @@ namespace DbDo
             // Convenience chord for the most common Open-Cell case --
             // saves the user from having to navigate to the url cell
             // first.
-            miRecOpenUrl     = addItem(miEdit, "Open Url",   "Open URL",            Keys.Control | Keys.Shift | Keys.U, recOpenUrlClicked);
+            miRecOpenUrl     = addItem(miEdit, "Open url",   "Open url",            Keys.Control | Keys.Shift | Keys.U, recOpenUrlClicked);
+            // THE SUITE'S CLIPBOARD FAMILY (kit SuiteCommands, 19 October 2026): the same
+            // three commands, keys and code as in EdSharp and FileDir.
+            addItem(miEdit, "Save Clipboard...",   "Save Clipboard",   Keys.Control | Keys.OemQuotes,              editSaveClipboard);
+            addItem(miEdit, "Append Clipboard...", "Append Clipboard", Keys.Control | Keys.Shift | Keys.OemQuotes, editAppendClipboard);
+            addItem(miEdit, "Clear Clipboard",     "Clear Clipboard",  Keys.Alt | Keys.Shift | Keys.OemQuotes,     editClearClipboard);
             // Pick Value: v1.0.67 deferred stub. The chord (Ctrl+F2)
             // is reserved so the menu doesn't drift and the user can
             // discover the planned command.
@@ -13351,7 +13355,7 @@ namespace DbDo
             miQuery = addMenu("&Query");
             // Read-only inspection of current record / table / schema.
             miRecShow        = addItem(miQuery, "&Inspect Record",  "Inspect Record",   Keys.Control | Keys.I,            recShowClicked);
-            miSchemaProperties  = addItem(miQuery, "&Table Properties",              "Get Property",  Keys.Alt | Keys.Enter,            schemaPropertiesClicked);
+            miSchemaProperties  = addItem(miQuery, "&Table Properties",              "Table Properties",  Keys.Alt | Keys.Enter,            schemaPropertiesClicked);
             miRecRelated     = addItem(miQuery, "&Related Records...",   "Show Related",  Keys.None,                        recRelatedClicked);
             miSchemaShow     = addItem(miQuery, "&Show Schema",         "Show Schema",   Keys.None,                        schemaShowClicked);
             addSep(miQuery);
@@ -13367,7 +13371,7 @@ namespace DbDo
             // a word is worse than none.
             miSaySayDatabase     = addItem(miSay, "Say &Database",        "Say Database",     Keys.Shift | Keys.D,               saySayDatabase);
             miSaySayOrder        = addItem(miSay, "Say &Order",      "Say Order",        Keys.Shift | Keys.O,               saySayOrder);
-            miSaySayGoto         = addItem(miSay, "Say &Goto",      "Say Goto",         Keys.Shift | Keys.G,               saySayGoto);
+            miSaySayGoto         = addItem(miSay, "Say &Go to",      "Say Go to",         Keys.Shift | Keys.G,               saySayGoto);
             // Say Record retired in v1.0.101. Shift+Space is free. The
             // screen reader's built-in line-read command (e.g. JAWS
             // Ins+Down) reads the listview row's columns natively, so
@@ -13375,6 +13379,8 @@ namespace DbDo
             // Say Path retired in v1.0.99 (covered by Say Database on
             // Shift+D, single-press = name, double-press = full path).
             miSaySayYield        = addItem(miSay, "Say &Yield",       "Say Yield",        Keys.Shift | Keys.Y,               saySayYield);
+            // Alt+Y as well (suite manifest): the Say family's Alt+letter, as in EdSharp.
+            registerLocalAlias(Keys.Alt | Keys.Y, miSaySayYield);
             miSaySayTables       = addItem(miSay, "Say Tables",      "Say Tables",        Keys.None,              saySayTables);
             // Say Marked moved off Shift+L (which is now Say Column from
             // Cursor) to Alt+Shift+M. Mark Record itself uses Control+M.
@@ -13459,6 +13465,8 @@ namespace DbDo
             // clipboard)" rather than nothing. Double-press opens
             // the read-only memo dialog for line-by-line review.
             miSaySayClipboard    = addItem(miSay, "Say Clipboard", "Say Clipboard", Keys.Alt | Keys.OemQuotes,    saySayClipboard);
+            addItem(miSay, "Say Time",  "Say Time",  Keys.Alt | Keys.Oem1, saySayTime);
+            addItem(miSay, "Say Path",  "Say Path",  Keys.Alt | Keys.P,    saySayPath);
             miSaySayYieldMarked  = addItem(miSay, "Say Marked Yield", "Say Yield Marked",  Keys.None,                          saySayYieldMarked);
             // v1.0.67 Say-X family completions. Each speaks one piece
             // of state without changing recordset position. The chord
@@ -13476,7 +13484,7 @@ namespace DbDo
             miSaySayId           = addItem(miSay, "Say &Id",      "Say ID",      Keys.Shift | Keys.I,                saySayId);
             miSaySayLook         = addItem(miSay, "Say Look",           "Say Look",    Keys.Shift | Keys.L,                saySayLook);
             miSaySayRelated      = addItem(miSay, "Say &Related", "Say Related", Keys.Shift | Keys.R,           saySayRelated);
-            miSaySayUrl          = addItem(miSay, "Say &URL",          "Say URL",      Keys.Shift | Keys.U,                saySayUrl);
+            miSaySayUrl          = addItem(miSay, "Say &url",          "Say url",      Keys.Shift | Keys.U,                saySayUrl);
             // EVERY REMEMBERED INPUT HAS A KEY THAT SAYS IT.
             //
             // A dialog that offers a value next time you open it is a dialog
@@ -13611,9 +13619,11 @@ namespace DbDo
             ToolStripMenuItem miTools = new ToolStripMenuItem("&Tools");
             miMisc.DropDownItems.Add(miTools);
             miToolsOpenFolder= addItem(miTools, "&Open in Explorer",                      "Open File Folder",   Keys.Alt | Keys.OemPipe,            toolsOpenFolderClicked);
-            miToolsCommandPrompt = addItem(miTools, "Open &Command Prompt",                 "Command Prompt",    Keys.Control | Keys.OemQuestion,    toolsCommandPromptClicked,
+            miToolsCommandPrompt = addItem(miTools, "Open &Command Prompt",                 "Open Command Prompt",    Keys.Control | Keys.OemQuestion,    toolsCommandPromptClicked,
                 "Open a Windows command prompt in the folder of the currently-open database",
                 "Control+Slash. The prompt opens with its working directory set to the open database's folder, or your user folder when nothing is open. Companion to Open in Explorer (Alt+Backslash), which opens that same folder in the file manager.");
+            // Control+Backslash as well (suite manifest), the key EdSharp and FileDir use.
+            registerLocalAlias(Keys.Control | Keys.Oem5, miToolsCommandPrompt);
             // ASK THE MODEL ON THIS COMPUTER. The keys are EdSharp's and
             // FileDir's, unchanged: F12 asks a plain question, Shift+F12 sends
             // the thing you are looking at with it. Keeping them apart matters
@@ -13702,7 +13712,8 @@ namespace DbDo
             // PLAY THE WALKTHROUGHS. T for Tutorials, no shortcut key: this is
             // something somebody does once or twice, not a command they reach
             // for, and the free keys are worth keeping for commands that are.
-            miHelpTutorials    = addItem(miHelp, "&Play Tutorials",                      "Play Tutorials",    Keys.None,                          helpTutorialsClicked);
+            miHelpTutorials    = addItem(miHelp, "&Play Tutorials",                      "Play Tutorials",    Keys.Alt | Keys.F12,                          helpTutorialsClicked);
+            addItem(miHelp, "Copy Log", "Copy Log", Keys.Control | Keys.F12, helpCopyLog);
             // UPDATE FROM TEMPLATE (13 October 2026): a copy of a template brought up to date from the one installed with
             // DbDo, by merging the template into it or replacing it. U for Update; no shortcut key, like Play Tutorials:
             // something done after an update, not a command reached for daily.
@@ -13965,7 +13976,7 @@ namespace DbDo
                 "Shift+D. Replaces Say Path. Single-press announces just the filename for fast 'where am I' checks; double-press opens a memo dialog with the full path that can be copied via Ctrl+C.");
             add("Say Order",          "Speak the active sort/order expression",
                 "Shift+O. Counterpart to Say Where Filter (Shift+W). Reports 'No order applied' when nothing is sorted.");
-            add("Say URL",            "Speak the current record's url field",
+            add("Say url",            "Speak the current record's url field",
                 "Shift+U. Reports '(empty)' when the field is blank.");
             add("Say Prime",          "Speak the current record's prime (unique-key) field",
                 "Shift+P. The prime field is the unique/primary-key expression (formerly named 'prime'). Falls back to a legacy 'prime' column. Reports 'blank' when empty.");
@@ -13981,7 +13992,7 @@ namespace DbDo
             add("Say Notes",          "Speak the current row's 'notes' field",
                 "Shift+N. Field-level Say command alongside Say Tags (Shift+T); speaks the current record's notes value.");
             add("Say Tags",           "Speak the current row's 'tags' field", "");
-            add("Say Goto",           "Speak the most recently used Jump search string",
+            add("Say Go to",           "Speak the most recently used Jump search string",
                 "Shift+G. Companion to Say Where Filter (Shift+W) and Say Order (Shift+O) -- reveals the current state of the Ctrl+J Jump Record search. Reports 'No jump search active' when there's no remembered string.");
             add("Say Column as List",          "Speak every value of the current virtual column, from the top",
                 "Alt+L. Sweeps the whole column top to bottom. Position and virtual cursor unchanged; double-press shows the full list. Alt = All. Shift adds the marked-only filter (Say Column All Marked, Alt+Shift+L).");
@@ -13999,6 +14010,12 @@ namespace DbDo
                 "Shift+Space. Each row reads 'Row N -- col1: val1; col2: val2; ...' with null/blank for SQL NULL / empty values. Unlike Say Records Rest Marked (Alt+Shift+M), which starts at the cursor, this always scans from the top of the recordset. The cursor position is left unchanged. Double-press shows the rows in the read-only review dialog.");
             add("Say Position",       "Speak the column header and 1-based row number of the virtual cell",
                 "JAWS-style 'say cursor position' for the listview. Speech-only; does not move focus. Double-press opens the same text in a read-only multi-line dialog.");
+            add("Say Time",           "Speak the current date and time", "");
+            add("Say Path",           "Speak the open database's full path; press twice to show it", "");
+            add("Save Clipboard",     "Save the clipboard text to a file you name", "");
+            add("Append Clipboard",   "Add the clipboard text to the end of a file you name", "");
+            add("Clear Clipboard",    "Empty the clipboard", "");
+            add("Copy Log",           "Copy the session log to the clipboard as a file, ready to paste as an attachment", "");
             add("Say Clipboard",      "Speak the current Windows clipboard text",
                 "Plain text only; non-text and empty clipboards announce that fact rather than going silent. Double-press opens the read-only memo dialog for line-by-line review of long pasted content.");
             add("Say Sort Filter",     "Speak the current sort and filter, or '(none)' for each",
@@ -14220,45 +14237,94 @@ namespace DbDo
         }
 
 
-        // Command Echo: speak the canonical command name through the
-        // live region just before the command runs. Setting lives in
-        // [Options] commandEcho; default Y. Off-by-toggle for users
-        // who find the confirmation noisy. Key Help mode (Ctrl+F1)
-        // is the more verbose cousin: Key Help announces command,
-        // chord, and summary, and SUPPRESSES the command body; echo
-        // announces just the name and RUNS the body.
-        private static bool bCommandEchoCached = false;
-        private static bool bCommandEchoLoaded = false;
-        public static bool isCommandEchoOn()
+        // ------- THE KIT'S ROUTER, STAGE 3 PHASE A (19 October 2026) -------
+        //
+        // DbDo still dispatches its own keys; this phase changes no behavior. Two
+        // things prepare the move to the kit's router, Homer.KeyMap.route:
+        //
+        // 1. THE EQUIVALENCE REPORT. Every DbDo command is also declared to the kit's
+        //    router, which is then asked about every key DbDo binds. The session log
+        //    says how many keys resolve to the same command, which differ, and which
+        //    keys the router would leave to a text box for Lbc's own text keys. When a
+        //    run on Jamal's computer shows them the same, phase B switches
+        //    ProcessCmdKey to the router and retires DbDo's own dispatcher.
+        //
+        // 2. PRESSES ARE COUNTED FOR THE KIT, so the kit's Say commands (Say Time,
+        //    for one) speak on one press, spell on two and show a window on three.
+        //
+        // To roll this phase back, remove the two calls: checkRouterEquivalence in
+        // the constructor and noteKitPress in ProcessCmdKey.
+        private static bool bRouterChecked = false;
+        private static IntPtr hKitLastWindow = IntPtr.Zero, iKitLastWParam = IntPtr.Zero, iKitLastLParam = IntPtr.Zero;
+        private static int iKitLastTick = 0;
+
+        // noteKitPress: one keypress, counted once. ProcessCmdKey can see the same
+        // message more than once, so a repeat of it within 50 milliseconds is the
+        // same press, as the kit's own route treats it; counting it twice would make
+        // a Say command spell on its first press.
+        private void noteKitPress(ref Message msg, Keys keyData)
         {
-            if (!bCommandEchoLoaded)
+            try
             {
-                try
-                {
-                    string sV = readEchoSetting();
-                    bCommandEchoCached = !sV.Equals("N", StringComparison.OrdinalIgnoreCase)
-                                      && !sV.Equals("No", StringComparison.OrdinalIgnoreCase)
-                                      && !sV.Equals("0", StringComparison.Ordinal)
-                                      && !sV.Equals("False", StringComparison.OrdinalIgnoreCase);
-                }
-                catch { bCommandEchoCached = false; }
-                bCommandEchoLoaded = true;
+                Keys kCode = keyData & Keys.KeyCode;
+                if (kCode == Keys.ShiftKey || kCode == Keys.ControlKey || kCode == Keys.Menu || kCode == Keys.None
+                    || kCode == Keys.LShiftKey || kCode == Keys.RShiftKey || kCode == Keys.LControlKey
+                    || kCode == Keys.RControlKey || kCode == Keys.LMenu || kCode == Keys.RMenu
+                    || kCode == Keys.LWin || kCode == Keys.RWin) return;
+                int iNow = Environment.TickCount;
+                if (msg.HWnd == hKitLastWindow && msg.WParam == iKitLastWParam && msg.LParam == iKitLastLParam
+                    && unchecked(iNow - iKitLastTick) >= 0 && unchecked(iNow - iKitLastTick) < 50) return;
+                hKitLastWindow = msg.HWnd; iKitLastWParam = msg.WParam; iKitLastLParam = msg.LParam; iKitLastTick = iNow;
+                bool bAutoRepeat = (msg.LParam.ToInt64() & 0x40000000L) != 0;
+                Homer.KeyMap.notePress(keyData, this, bAutoRepeat);
             }
-            return bCommandEchoCached;
+            catch (Exception) { }
         }
-        public static void invalidateCommandEchoCache() { bCommandEchoLoaded = false; }
-        private static string readEchoSetting()
+
+        // checkRouterEquivalence: declare DbDo's commands to the kit's router, ask it
+        // about each key, and write what it found to the session log. Once a session.
+        private void checkRouterEquivalence()
         {
-            string sV = IniSession.read("Options", "CommandEcho");
-            // Default OFF. Echoing every command's name duplicates what the
-            // screen reader already announces on its own -- a dialog's title,
-            // a focus or selection change -- which is chatty (e.g. "Select
-            // Columns" spoken by the echo and again as the dialog title).
-            // Direct speech is reserved for the deliberate context a command
-            // adds itself. Users who want the pre-echo can turn it on with
-            // Ctrl+Shift+Z.
-            return string.IsNullOrEmpty(sV) ? "N" : sV;
+            if (bRouterChecked) return;
+            bRouterChecked = true;
+            try
+            {
+                int iSame = 0;
+                List<string> lsDiffer = new List<string>();
+                List<string> lsToTextBox = new List<string>();
+                List<Keys> lsKeys = new List<Keys>(dLocalKeyToMenu.Keys);
+                lsKeys.Sort(delegate(Keys a, Keys b) { return string.Compare(Homer.KeyMap.friendlyKey(a), Homer.KeyMap.friendlyKey(b), StringComparison.OrdinalIgnoreCase); });
+                foreach (Keys k in lsKeys)
+                {
+                    ToolStripMenuItem mi = dLocalKeyToMenu[k];
+                    string sCommand = KeyMap.dMenuToCommand.ContainsKey(mi) ? KeyMap.dMenuToCommand[mi] : mi.Text.Replace("&", "");
+                    string sId = Homer.KeyMap.toId(sCommand);
+                    string sKey = Homer.KeyMap.friendlyKey(k);
+                    Keys kRun = k;
+                    ToolStripMenuItem miRun = mi;
+                    if (Homer.KeyMap.commandById(sId) == null)
+                        Homer.KeyMap.addCommand(sCommand, sKey, Homer.KeyMap.sAnywhere, KeyMap.summaryFor(sCommand),
+                            delegate() { return KeyMap.dispatchMenuItem(miRun, kRun); });
+                    else Homer.KeyMap.addAlias(sId, sKey);
+                    Homer.KeyMap.Command oFound = Homer.KeyMap.findCommand(Homer.KeyMap.sAnywhere, k);
+                    if (oFound != null && oFound.sId == sId) iSame++;
+                    else lsDiffer.Add(sKey + ": DbDo runs " + sCommand + "; the router finds " + (oFound == null ? "nothing" : oFound.sName));
+                    if (Array.IndexOf(Homer.KeyMap.aLbcTextKeys, k) >= 0) lsToTextBox.Add(sKey + " (" + sCommand + ")");
+                }
+                DbDoLog.write("router equivalence: " + iSame + " of " + lsKeys.Count + " keys resolve to the same command in the kit's router"
+                    + (lsDiffer.Count == 0 ? "; none differ." : "; " + lsDiffer.Count + " differ:"));
+                foreach (string sLine in lsDiffer) DbDoLog.write("router equivalence:   " + sLine);
+                if (lsToTextBox.Count > 0)
+                    DbDoLog.write("router equivalence: in a text box that is not the grid's editor, the router leaves these to Lbc's text keys: "
+                        + string.Join(", ", lsToTextBox.ToArray()));
+                foreach (string sProblem in Homer.KeyMap.lsProblems) DbDoLog.write("router equivalence: kit problem: " + sProblem);
+            }
+            catch (Exception oError)
+            {
+                DbDoLog.write("router equivalence: could not run: " + oError.Message);
+            }
         }
+
         // commandEcho: THE SUITE'S RULE, ALWAYS ON (19 October 2026). Command Echo
         // Toggle is retired. A command's name is spoken as it starts if and only
         // if nothing else would tell you at once that it is under way: not for a
@@ -14267,9 +14333,20 @@ namespace DbDo
         // (the screen reader says where it landed); yes for the rest, such as
         // Clear Filter, which reshapes the grid without moving the focus. The rule
         // is the kit's Homer.KeyMap.shouldEcho, so every Homer app decides alike.
+        // THESE TELL YOU THEMSELVES (19 October 2026, the CommandEcho review): the
+        // copy commands each say what they copied, with a count, and Delete Record
+        // shows its Yes or No box at once, which the screen reader reads. Echoing the
+        // name first said everything twice. The kit's router has a field for this,
+        // Command.bNoEcho, which this set becomes when DbDo moves onto it (phase B).
+        // Delete Record keeps no ellipsis: by the Windows convention a confirmation
+        // alone does not earn one, since nothing more is asked of you.
+        private static readonly HashSet<string> hsTellsItself = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
+            "Copy Cell", "Copy Column", "Copy Grid", "Copy Record", "Copy Visible Cells", "Delete Record" };
+
         private void commandEcho(string sCommand)
         {
             if (string.IsNullOrEmpty(sCommand)) return;
+            if (hsTellsItself.Contains(sCommand)) return;
             if (!Homer.KeyMap.shouldEcho(sCommand, false)) return;
             try { Say.say(sCommand); } catch { /* swallow */ }
         }
@@ -15669,6 +15746,7 @@ namespace DbDo
         // =====================================================================
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
+            noteKitPress(ref msg, keyData);
             // EVERY KEY THE PROGRAM SEES IS LOGGED, by its Homer name. With the
             // commands and the speech also logged, the runtime log reads as the
             // session did: key, command, what was said. That is what makes a log
@@ -16405,16 +16483,6 @@ namespace DbDo
             { Say.say("goto: none"); return; }
             string sCol = string.IsNullOrEmpty(sLastJumpColumn) ? "(any column)" : sLastJumpColumn;
             speakOrShow("Goto", "goto: " + sLastJumpSubstring + " in " + sCol, 127);
-        }
-
-        // saySayPath: Shift+P retired in v1.0.99 (replaced by Say
-        // Database on Shift+D, which gives both the name and the
-        // path via the single-press / double-press dialog
-        // convention). The handler remains for callers who may
-        // reference it, but the chord and menu item are gone.
-        private void saySayPath(object sender, EventArgs evArgs)
-        {
-            saySayDatabase(sender, evArgs);
         }
 
         // saySayYield: Alt+Y. Speak the record count and any active
@@ -17446,6 +17514,9 @@ namespace DbDo
         // value with Shift+C, or pastes some text from another
         // app's window) and the simpler implementation has fewer
         // failure modes.
+        // saySayClipboard stays DbDo's own until DbDo is on the kit's router (stage 3): the kit's
+        // copy answers through KeyMap.answer, whose repeat presses the router counts, so moving
+        // it first would lose DbDo's double-press review window in the meantime.
         private void saySayClipboard(object sender, EventArgs evArgs)
         {
             string sText;
@@ -17469,6 +17540,22 @@ namespace DbDo
             }
             speakOrShow("Clipboard", sText, 115);
         }
+
+        // The rest of the suite's shared commands, each the kit's one copy.
+        private void editSaveClipboard(object sender, EventArgs evArgs) { Homer.SuiteCommands.saveClipboard(this); }
+        private void editAppendClipboard(object sender, EventArgs evArgs) { Homer.SuiteCommands.appendClipboard(this); }
+        private void editClearClipboard(object sender, EventArgs evArgs) { Homer.SuiteCommands.clearClipboard(); }
+        private void saySayTime(object sender, EventArgs evArgs) { Homer.SuiteCommands.sayTime(); }
+        private void helpCopyLog(object sender, EventArgs evArgs) { Homer.SuiteCommands.copyLog(DbDoLog.getLogPath()); }
+
+        // saySayPath: Alt+P, the open database's full path, as Say Path says the
+        // file's path in EdSharp; pressed twice, it is shown in a window to copy from.
+        private void saySayPath(object sender, EventArgs evArgs)
+        {
+            if (db == null || !db.isOpen()) { Say.say("path: no database open"); return; }
+            speakOrShow("Path", db.filePath ?? "", 130);
+        }
+
 
         // saySaySortFilter: Shift+8. Speaks the active sort order
         // and filter criteria for the current table. Either or both
@@ -23087,12 +23174,13 @@ namespace DbDo
 
         private void recCopyClicked(object sender, EventArgs evArgs)
         {
-            if (db == null || !db.hasRecordset()) return;
-            if (db.eof || db.bof) return;
+            if (db == null || !db.hasRecordset()) { Say.say("No table selected"); return; }
+            if (db.eof || db.bof) { Say.say("No record selected"); return; }
             List<string> lV = new List<string>();
             foreach (string sCol in db.getFieldNames()) lV.Add(db.getFieldValue(sCol));
-            try { Clipboard.SetText(string.Join("\t", lV)); }
-            catch { /* clipboard unavailable */ }
+            // It says what it did, as Copy Cell, Copy Column and Copy Grid do (19 October 2026).
+            try { Clipboard.SetText(string.Join("\t", lV)); Say.say("Record copied, " + lV.Count + (lV.Count == 1 ? " field" : " fields")); }
+            catch (Exception ex) { Say.say("Copy Record: " + ex.Message); }
         }
 
         // --- v1.0.69 wave-2 record-level commands ---
@@ -24755,13 +24843,16 @@ namespace DbDo
             const string sClear = "Clear";
             const string sNarrow = "Narrow";
             const string sExpand = "Expand";
+            // INVERT (19 October 2026, from DbDialog's filter choices): the records the
+            // filter in force leaves out. Exact now that the filter is one SQL condition.
+            const string sInvert = "Invert";
             string sCombine = sNew;
             if (sOldWhere.Length > 0)
             {
                 List<string> lsLines = new List<string>();
                 lsLines.Add("In force: " + sOldSpoken);
-                lsLines.Add("New starts over. Clear shows every record again. Narrow keeps only the records that also meet a new condition. Expand also takes in the records that meet a new condition.");
-                string sChoice = chooseByButtons("Filter Records", lsLines, new List<string> { sNew, sClear, sNarrow, sExpand });
+                lsLines.Add("New starts over. Clear shows every record again. Narrow keeps only the records that also meet a new condition. Expand also takes in the records that meet a new condition. Invert shows the records this filter leaves out.");
+                string sChoice = chooseByButtons("Filter Records", lsLines, new List<string> { sNew, sClear, sNarrow, sExpand, sInvert });
                 if (sChoice == null) return;
                 if (sChoice == sClear) { clearFilterKeepingRecord(); return; }
                 sCombine = sChoice;
@@ -24769,18 +24860,37 @@ namespace DbDo
 
             const string sAny = "Any Field";
             const string sFields = "Fields";
-            string sHow = chooseByButtons(sCombine == sNew ? "Filter Records" : sCombine + " Filter",
-                new List<string> { "Any Field finds text wherever it is, whatever its case. Fields gives each field a value, which may begin with an operator: = is, != is not, > more than, >= at least, < less than, <= at most, % contains." },
-                new List<string> { sAny, sFields });
-            if (sHow == null) return;
+            // MARKED AND UNMARKED (19 October 2026, from DbDialog's Tagged and Untagged):
+            // the records you have marked, or the rest, as a condition like any other, so
+            // New, Narrow and Expand combine them too. Offered when the table has DbDo's
+            // marked column, which DbDo writes as the text 'true'.
+            const string sMarked = "Marked";
+            const string sUnmarked = "Unmarked";
+            string sHow = sInvert;
+            string sNewWhere = "", sNewSpoken = "";
+            if (sCombine != sInvert)
+            {
+                bool bMarks = db.hasField("marked");
+                List<string> lsHow = new List<string> { sAny, sFields };
+                if (bMarks) { lsHow.Add(sMarked); lsHow.Add(sUnmarked); }
+                sHow = chooseByButtons(sCombine == sNew ? "Filter Records" : sCombine + " Filter",
+                    new List<string> { "Any Field finds text wherever it is, whatever its case. Fields gives each field a value, which may begin with an operator: = is, != is not, > more than, >= at least, < less than, <= at most, % contains."
+                        + (bMarks ? " Marked takes the records you have marked, and Unmarked the rest." : "") },
+                    lsHow);
+                if (sHow == null) return;
 
-            string sNewWhere, sNewSpoken;
-            bool bGiven = (sHow == sAny) ? askAnyFieldCondition(out sNewWhere, out sNewSpoken)
-                                         : askFieldsCondition(out sNewWhere, out sNewSpoken);
-            if (!bGiven || string.IsNullOrEmpty(sNewWhere)) return;
+                bool bGiven;
+                if (sHow == sMarked) { sNewWhere = "marked = 'true'"; sNewSpoken = "marked"; bGiven = true; }
+                else if (sHow == sUnmarked) { sNewWhere = "(marked IS NULL OR marked <> 'true')"; sNewSpoken = "unmarked"; bGiven = true; }
+                else bGiven = (sHow == sAny) ? askAnyFieldCondition(out sNewWhere, out sNewSpoken)
+                                             : askFieldsCondition(out sNewWhere, out sNewSpoken);
+                if (!bGiven || string.IsNullOrEmpty(sNewWhere)) return;
+            }
 
             string sWhere, sSpoken;
-            if (sCombine == sNarrow)
+            if (sCombine == sInvert)
+            { sWhere = "NOT COALESCE((" + sOldWhere + "), 0)"; sSpoken = "not (" + sOldSpoken + ")"; }  // NULL counts as not matching, so no record falls out of both
+            else if (sCombine == sNarrow)
             { sWhere = "(" + sOldWhere + ") AND (" + sNewWhere + ")"; sSpoken = "(" + sOldSpoken + ") and (" + sNewSpoken + ")"; }
             else if (sCombine == sExpand)
             { sWhere = "(" + sOldWhere + ") OR (" + sNewWhere + ")"; sSpoken = "(" + sOldSpoken + ") or (" + sNewSpoken + ")"; }

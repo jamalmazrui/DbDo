@@ -100,7 +100,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Every album carries the address of its article. Control plus Shift plus U, Open Url, opens it in the browser; Shift plus U says it.
+Say=Every album carries the address of its article. Control plus Shift plus U, Open url, opens it in the browser; Shift plus U says it.
 Key=Shift+U
 Hear=https colon slash slash en dot wikipedia dot org slash wiki slash A Night at the Opera Queen album
 Note=Confirm the wording with a live run: buildTutorials -live.

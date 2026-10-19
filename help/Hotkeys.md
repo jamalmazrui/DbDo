@@ -18,11 +18,17 @@ section says why each key is the one it is.
 
 ### Edit
 
+- Append Clipboard\
+  Add the clipboard text to the end of a file you name.\
+  Control+Shift+Apostrophe
 - Append Record to Clipboard\
   Alt+Shift+C
 - Clear Bookmark\
   Forget the saved bookmark. B for Bookmark. Shift reverses Save Bookmark.\
   Control+Shift+B
+- Clear Clipboard\
+  Empty the clipboard. Shift reverses Say Clipboard.\
+  Alt+Shift+Apostrophe
 - Copy Record\
   Duplicate the current row as a new row. C for Copy.\
   Control+Shift+C
@@ -41,8 +47,8 @@ section says why each key is the one it is.
 - Edit Tags\
   T for Tags.\
   Alt+Shift+T
-- Edit URL\
-  U for URL.\
+- Edit url\
+  U for url.\
   Alt+Shift+U
 - Edit View\
   E for Edit.\
@@ -62,8 +68,8 @@ section says why each key is the one it is.
 - Open Cell Value\
   Control+Enter acts from anywhere in a Homer dialog; here it opens the cell's value.\
   Control+Enter
-- Open Url\
-  U for URL.\
+- Open url\
+  U for url.\
   Control+Shift+U
 - Pick Value\
   F2 is editing; Control+F2 edits by picking a value.\
@@ -80,6 +86,9 @@ section says why each key is the one it is.
 - Save Bookmark\
   Save the current row position as a session bookmark. B for Bookmark.\
   Control+B
+- Save Clipboard\
+  Save the clipboard text to a file you name.\
+  Control+Apostrophe
 - Toggle Marked\
   Control+Space toggles a selection in any Windows list.\
   Control+Space
@@ -123,7 +132,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Alt+F4
 - Export Data\
   Export the current table or query to CSV, TSV, JSON, or another format. X for the sound of "ex".\
-  Alt+X
+  Alt+Shift+X
 - Import\
   Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and lookups. I for Import.\
   Alt+I
@@ -174,6 +183,9 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Alternate Menu\
   Pick a command from a flat, filterable list. F10 is menus: F10 the menu bar, Shift+F10 the context menu, Alt+F10 the alternate menu.\
   Alt+F10
+- Copy Log\
+  Copy the session log to the clipboard as a file, ready to paste as an attachment.\
+  Control+F12
 - Documentation\
   Open the documentation in the default browser. F1 is help: this guide.\
   F1
@@ -192,6 +204,8 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Key Describer Toggle\
   Describe each key instead of running it (Ctrl+F1). F1 is help; Control+F1 describes whatever key you press next.\
   Control+F1
+- Play Tutorials\
+  Alt+F12
 - ReadMe\
   F1 is help; Alt+Shift+F1 is the ReadMe, the short start.\
   Alt+Shift+F1
@@ -370,8 +384,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Filter\
   F for Filter.\
   Shift+F
-- Say Goto\
-  Speak the most recently used Jump search string. G for Goto.\
+- Say Go to\
+  Speak the most recently used Jump search string. G for Go.\
   Shift+G
 - Say Id\
   I for ID.\
@@ -397,6 +411,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Order\
   Speak the active sort/order expression. O for Order.\
   Shift+O
+- Say Path\
+  Speak the open database's full path; press twice to show it. P for Path.\
+  Alt+P
 - Say Position\
   Speak the column header and 1-based row number of the virtual cell. Delete echoes JAWS, where Insert+Delete says where the cursor is.\
   Alt+Delete
@@ -430,8 +447,11 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Tags\
   Speak the current row's 'tags' field. T for Tags.\
   Shift+T
-- Say URL\
-  Speak the current record's url field. U for URL.\
+- Say Time\
+  Speak the current date and time.\
+  Alt+Semicolon
+- Say url\
+  Speak the current record's url field. U for url.\
   Shift+U
 - Say Yield\
   Speak the current row count (after filter). Y for Yield.\
@@ -504,6 +524,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+O\
   Sort the current table by a chosen column, ascending.\
   Order Records
+- Alt+P\
+  Speak the open database's full path; press twice to show it.\
+  Say Path
 - Alt+R\
   Recent Files
 - Alt+RightArrow\
@@ -512,15 +535,18 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+S\
   Choose which columns the grid shows AND their order, via the Available/Chosen sequence picker.\
   Select Columns to Display
+- Alt+Semicolon\
+  Speak the current date and time.\
+  Say Time
 - Alt+T\
   Print row count, column count, and storage statistics for the open database.\
   Table Summary
-- Alt+X\
-  Export the current table or query to CSV, TSV, JSON, or another format.\
-  Export Data
 
 ### Alt+Shift
 
+- Alt+Shift+Apostrophe\
+  Empty the clipboard.\
+  Clear Clipboard
 - Alt+Shift+C\
   Append Record to Clipboard
 - Alt+Shift+D\
@@ -560,7 +586,10 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+Shift+T\
   Edit Tags
 - Alt+Shift+U\
-  Edit URL
+  Edit url
+- Alt+Shift+X\
+  Export the current table or query to CSV, TSV, JSON, or another format.\
+  Export Data
 - Alt+Shift+Z\
   Extra Speech Toggle
 
@@ -568,6 +597,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 
 - Control+A\
   Mark All
+- Control+Apostrophe\
+  Save the clipboard text to a file you name.\
+  Save Clipboard
 - Control+B\
   Save the current row position as a session bookmark.\
   Save Bookmark
@@ -636,6 +668,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 
 - Control+Shift+A\
   Unmark All
+- Control+Shift+Apostrophe\
+  Add the clipboard text to the end of a file you name.\
+  Append Clipboard
 - Control+Shift+B\
   Forget the saved bookmark.\
   Clear Bookmark
@@ -687,7 +722,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Activate the previous open window.\
   Previous Window
 - Control+Shift+U\
-  Open Url
+  Open url
 - Control+Shift+X\
   Extract all regex matches in the current virtual column to the clipboard.\
   Extract with Regex
@@ -703,6 +738,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+F10\
   Pick a command from a flat, filterable list.\
   Alternate Menu
+- Alt+F12\
+  Play Tutorials
 - Alt+F4\
   Close DbDo.\
   Exit DbDo
@@ -721,6 +758,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+F1\
   Describe each key instead of running it (Ctrl+F1).\
   Key Describer Toggle
+- Control+F12\
+  Copy the session log to the clipboard as a file, ready to paste as an attachment.\
+  Copy Log
 - Control+F2\
   Pick Value
 - Control+F3\
@@ -800,7 +840,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Say Filter
 - Shift+G\
   Speak the most recently used Jump search string.\
-  Say Goto
+  Say Go to
 - Shift+I\
   Say Id
 - Shift+J\
@@ -835,7 +875,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Say Tags
 - Shift+U\
   Speak the current record's url field.\
-  Say URL
+  Say url
 - Shift+V\
   Say Replacement Value
 - Shift+X\
@@ -858,6 +898,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Append Cell to Clipboard\
   Append the value of the cell under the virtual cursor to the clipboard.\
   Alt+C
+- Append Clipboard\
+  Add the clipboard text to the end of a file you name.\
+  Control+Shift+Apostrophe
 - Append Record to Clipboard\
   Alt+Shift+C
 - Chat about Table\
@@ -869,6 +912,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Clear Bookmark\
   Forget the saved bookmark.\
   Control+Shift+B
+- Clear Clipboard\
+  Empty the clipboard.\
+  Alt+Shift+Apostrophe
 - Clear Filter\
   Clear the active filter.\
   Control+Shift+F
@@ -887,6 +933,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Copy Cell to Clipboard\
   Copy the value of the cell under the virtual cursor to the clipboard.\
   Control+C
+- Copy Log\
+  Copy the session log to the clipboard as a file, ready to paste as an attachment.\
+  Control+F12
 - Copy Record\
   Duplicate the current row as a new row.\
   Control+Shift+C
@@ -915,7 +964,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Control+Shift+E
 - Edit Tags\
   Alt+Shift+T
-- Edit URL\
+- Edit url\
   Alt+Shift+U
 - Edit View\
   Control+E
@@ -938,7 +987,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Alt+Home
 - Export Data\
   Export the current table or query to CSV, TSV, JSON, or another format.\
-  Alt+X
+  Alt+Shift+X
 - Extra Speech Toggle\
   Alt+Shift+Z
 - Extract with Regex\
@@ -1029,7 +1078,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Open Template Database\
   Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail.\
   Alt+Shift+D
-- Open Url\
+- Open url\
   Control+Shift+U
 - Order Records\
   Sort the current table by a chosen column, ascending.\
@@ -1039,6 +1088,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Play Stream\
   Play the current record's stream address in the Homer Player; with records marked, play all of them.\
   Alt+Shift+P
+- Play Tutorials\
+  Alt+F12
 - Previous Table or View\
   Control+Shift+F6
 - Previous Visited Table\
@@ -1090,6 +1141,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Save Bookmark\
   Save the current row position as a session bookmark.\
   Control+B
+- Save Clipboard\
+  Save the clipboard text to a file you name.\
+  Control+Apostrophe
 - Say Added\
   Shift+A
 - Say Bookmark\
@@ -1119,7 +1173,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Shift+E
 - Say Filter\
   Shift+F
-- Say Goto\
+- Say Go to\
   Speak the most recently used Jump search string.\
   Shift+G
 - Say Id\
@@ -1142,6 +1196,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Order\
   Speak the active sort/order expression.\
   Shift+O
+- Say Path\
+  Speak the open database's full path; press twice to show it.\
+  Alt+P
 - Say Position\
   Speak the column header and 1-based row number of the virtual cell.\
   Alt+Delete
@@ -1170,7 +1227,10 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Tags\
   Speak the current row's 'tags' field.\
   Shift+T
-- Say URL\
+- Say Time\
+  Speak the current date and time.\
+  Alt+Semicolon
+- Say url\
   Speak the current record's url field.\
   Shift+U
 - Say Windows Open\

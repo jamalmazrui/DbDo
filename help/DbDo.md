@@ -120,7 +120,7 @@ DbDo recognizes certain field **names** and maintains or exposes them for you. A
 - **marked** (BOOLEAN) — whether the record is currently marked for a batch operation. This is what the marking commands set and clear.
 - **notes** (TEXTMARKDOWN) — a free-form Markdown note attached to the record. Edit it with Edit Notes (Alt+Shift+N); speak it with Say Notes (Shift+N).
 - **tags** (TEXTMEMO) — free-form tags or keywords. Edit with Edit Tags (Alt+Shift+T); speak with Say Tags (Shift+T).
-- **url** (TEXTLINE) — an associated link. Edit with Edit URL (Alt+Shift+U); open it with Open URL (Control+Shift+U); speak with Say URL (Shift+U).
+- **url** (TEXTLINE) — an associated link. Edit with Edit url (Alt+Shift+U); open it with Open url (Control+Shift+U); speak with Say url (Shift+U).
 - **look** — a derived "display label" for the record: a short human-readable summary DbDo can compute so a record can be referred to by something friendlier than its key. Speak it with Say Look (Shift+L).
 - **prime** (the *prime* field) — a record's primary human-facing identity value. Speak it with Say Prime (Shift+P).
 
@@ -193,7 +193,7 @@ The cursor moves with ordinary list navigation (arrow keys, Home, End) and with 
 - **New Record** (Control+N) adds a record; **New Copy** (Control+Shift+N) starts a new record pre-filled from the current one; **Copy Record** (Control+Shift+C) copies it to the clipboard.
 - **Edit View** (Control+E) opens the whole record in a field-by-field dialog. **Edit Cell** (F2) edits just the current cell. **Open Cell Value** (Control+Enter) opens a large value in its own box for comfortable reading and editing.
 - **Pick Value** (Control+F2) offers the legal values for a field that has lookups defined.
-- **Edit Notes** (Alt+Shift+N), **Edit Tags** (Alt+Shift+T), and **Edit URL** (Alt+Shift+U) each open one standard field in a focused single-field dialog with OK and Cancel — the quick way to touch a note, tags, or a link without opening the whole record.
+- **Edit Notes** (Alt+Shift+N), **Edit Tags** (Alt+Shift+T), and **Edit url** (Alt+Shift+U) each open one standard field in a focused single-field dialog with OK and Cancel — the quick way to touch a note, tags, or a link without opening the whole record.
 - **Replace Column** (Control+R) replaces text across a column; **Regex Replace** (Control+Shift+R) does the same by pattern; **Extract with Regex** (Control+Shift+X) pulls matches out of a column.
 - **Delete Record** (Control+D) deletes the current record with confirmation; **Delete Without Confirmation** (Control+Shift+D) skips the prompt.
 
@@ -312,7 +312,7 @@ DbDo distinguishes four file operations that are easy to confuse. The distinctio
 
 - **Open** (Control+O) opens a file *faithfully* — a round trip. An Excel workbook opens as its sheets, a CSV as its rows, and saving writes back to that same file in that same format. Use Open when you want to work with a file as it is.
 - **Import** (Alt+I) reads an outside file and reshapes it *into a DbDo database* — normalizing columns, applying conventions, and producing a `.db` you then work with. Use Import when you want to bring foreign data into a proper DbDo database. **Transfer Import** and **Merge Data** (Alt+M) bring data in alongside existing data.
-- **Export Data** (Alt+X) writes the **grid** — the current view — out to a new file in a chosen format. Use Export to hand off what you are looking at. A CSV or TSV file holds your values exactly as they are. Since a spreadsheet may run a value beginning with =, +, - or @ as a formula, DbDo asks before opening such a file, and an .xlsx export is the safe way into a spreadsheet: it keeps every value as text.
+- **Export Data** (Alt+Shift+X) writes the **grid** — the current view — out to a new file in a chosen format. Use Export to hand off what you are looking at. A CSV or TSV file holds your values exactly as they are. Since a spreadsheet may run a value beginning with =, +, - or @ as a formula, DbDo asks before opening such a file, and an .xlsx export is the safe way into a spreadsheet: it keeps every value as text.
 - **Save** (Control+S) and **Save As** (Control+Shift+S) concern the *whole database*. For a workbook opened faithfully, Save writes your edits back to the `.xlsx`. For a native database your edits were already committed, so Save reports that; Save As writes a fresh copy. **Open as Managed Copy** opens a file as a working copy so the original is untouched until you decide.
 
 Supported formats include SQLite (`.db`, `.sqlite`, `.sqlite3`), Access (`.mdb`, `.accdb`), Excel (`.xlsx`, `.xls`), dBASE (`.dbf`), and delimited text (`.csv`, `.tsv`, `.tab`, `.txt`). The right driver is chosen from the extension.
@@ -365,7 +365,7 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Merge Data | Alt+M |
 | Transfer Import | — |
 | Run Report | Alt+Shift+R |
-| Export Data | Alt+X |
+| Export Data | Alt+Shift+X |
 | Print | Control+P |
 | Choose Table | Control+T |
 | Choose View | — |
@@ -393,7 +393,7 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Toggle Marked | Control+Space |
 | Edit Notes | Alt+Shift+N |
 | Edit Tags | Alt+Shift+T |
-| Edit URL | Alt+Shift+U |
+| Edit url | Alt+Shift+U |
 | Unmark Record | Control+Shift+M |
 | Mark All | Control+A |
 | Unmark All | Control+Shift+A |
@@ -404,7 +404,7 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | List Bookmarks | Alt+B |
 | Clear Bookmark | Control+Shift+B |
 | Open Cell Value | Control+Enter |
-| Open URL | Control+Shift+U |
+| Open url | Control+Shift+U |
 | Pick Value | Control+F2 |
 
 #### Navigate menu
@@ -439,7 +439,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Say Status | Shift+Z or Alt+Z |
 | Say Database | Shift+D |
 | Say Order | Shift+O |
-| Say Goto | Shift+G |
+| Say Go to | Shift+G |
 | Say Yield | Shift+Y |
 | Say Marked | — |
 | Say Edited | Shift+E |
@@ -461,7 +461,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Say Id | Shift+I |
 | Say Look | Shift+L |
 | Say Related | Shift+R |
-| Say URL | Shift+U |
+| Say url | Shift+U |
 | Say Prime | Shift+P |
 | Filter Records | Control+F |
 | Clear Filter | Control+Shift+F |

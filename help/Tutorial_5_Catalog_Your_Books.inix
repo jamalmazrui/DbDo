@@ -95,14 +95,14 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=A planned misstep: expecting the report to follow a filter. A report reads the table its definition names, not the records in view. To share only some, filter them and use Export Data, Alt plus X.
+Say=A planned misstep: expecting the report to follow a filter. A report reads the table its definition names, not the records in view. To share only some, filter them and use Export Data, Alt plus Shift plus X.
 Key=
 Hear=
 
 [step]
 
-Say=Alt plus X writes the records in view as a spreadsheet, CSV, JSON or another format.
-Key=Alt+X
+Say=Alt plus Shift plus X writes the records in view as a spreadsheet, CSV, JSON or another format.
+Key=Alt+Shift+X
 Hear=Export Data dialog
 Note=Confirm the wording with a live run: buildTutorials -live.
 
@@ -152,4 +152,4 @@ Hear=Alt plus Shift plus R
 
 Say=Export the records in view.
 Key=
-Hear=Alt plus X
+Hear=Alt plus Shift plus X

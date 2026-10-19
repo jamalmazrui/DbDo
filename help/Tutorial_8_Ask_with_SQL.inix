@@ -92,7 +92,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Escape. An answer from SQL is a table, so Alt plus X exports it and Alt plus Shift plus S describes its columns. A question asked often can be saved as a script, a dot s q l file beside the database, and run with Control plus Shift plus I, as BookTrail's were.
+Say=Escape. An answer from SQL is a table, so Alt plus Shift plus X exports it and Alt plus Shift plus S describes its columns. A question asked often can be saved as a script, a dot s q l file beside the database, and run with Control plus Shift plus I, as BookTrail's were.
 Key=
 Hear=
 

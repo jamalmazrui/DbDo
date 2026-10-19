@@ -433,7 +433,7 @@ Screen reader:
 
 - notes, Illustrative record. Interview booked for the 24th; ask about screen reader testing tools.
 
-Shift plus T, Say Tags, and Shift plus U, Say URL, work the same way.
+Shift plus T, Say Tags, and Shift plus U, Say url, work the same way.
 
 ### Step 4: Shift+E
 
@@ -2078,11 +2078,11 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 13
 
-A planned misstep: expecting the report to follow a filter. A report reads the table its definition names, not the records in view. To share only some, filter them and use Export Data, Alt plus X.
+A planned misstep: expecting the report to follow a filter. A report reads the table its definition names, not the records in view. To share only some, filter them and use Export Data, Alt plus Shift plus X.
 
-### Step 14: Alt+X
+### Step 14: Alt+Shift+X
 
-Alt plus X writes the records in view as a spreadsheet, CSV, JSON or another format.
+Alt plus Shift plus X writes the records in view as a spreadsheet, CSV, JSON or another format.
 
 Screen reader:
 
@@ -2140,7 +2140,7 @@ Export the records in view.
 
 Screen reader:
 
-- Alt plus X
+- Alt plus Shift plus X
 
 **Something to try:** Add a book you are reading now, with its format and status.
 
@@ -2277,7 +2277,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 14: Shift+U
 
-Every album carries the address of its article. Control plus Shift plus U, Open Url, opens it in the browser; Shift plus U says it.
+Every album carries the address of its article. Control plus Shift plus U, Open url, opens it in the browser; Shift plus U says it.
 
 Screen reader:
 
@@ -2647,7 +2647,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 13
 
-Escape. An answer from SQL is a table, so Alt plus X exports it and Alt plus Shift plus S describes its columns. A question asked often can be saved as a script, a dot s q l file beside the database, and run with Control plus Shift plus I, as BookTrail's were.
+Escape. An answer from SQL is a table, so Alt plus Shift plus X exports it and Alt plus Shift plus S describes its columns. A question asked often can be saved as a script, a dot s q l file beside the database, and run with Control plus Shift plus I, as BookTrail's were.
 
 ### Step 14: Alt+Z
 

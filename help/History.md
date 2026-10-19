@@ -5,6 +5,28 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 19 October 2026 -- Filters from DbDialog, and less said twice
+
+- **Filter Records (Control+F) can Invert** the filter in force, showing the records it leaves out, including those whose field is empty.
+- **Marked and Unmarked** are filter choices beside Any Field and Fields, so you can show only your marked records, or the rest, and narrow or widen with them like any condition.
+- **The copy commands and Delete Record no longer say their names first.** Each already tells you: the copies say what they copied, and Delete Record asks Yes or No at once.
+- **Copy Record (Control+Shift+C) now says what it copied,** as the other copy commands do, and says so when no record is selected.
+- **Table Properties is the command's name, as on the menu** (it was Get Property), and it is not echoed, since its window names itself.
+- **Say Time and Say Path have no access letter on the Say menu.** Say Tags and Say Prime already had T and P, and one letter belongs to one item per menu.
+- **The build needs HomerDev 1.77.4 or later.**
+
+## 19 October 2026 -- The suite's shared commands
+
+- **A first step toward the Homer kit's key router.** Nothing about DbDo's keys changes yet. At startup DbDo checks every key against the kit's router and writes the result to its session log, and it counts repeated presses for the kit's Say commands, so Say Time speaks on one press, spells on two and shows a window on three.
+- **The previous build of this release stopped** on a second Say Path handler left from an old version; the old one is gone.
+- **New, as in EdSharp and FileDir:** Save Clipboard (Control+Apostrophe), Append Clipboard (Control+Shift+Apostrophe), Clear Clipboard (Alt+Shift+Apostrophe), Say Time (Alt+SemiColon) and Copy Log (Control+F12), each the Homer kit's one shared copy.
+- **Say Path (Alt+P)** says the open database's full path, as Say Path says a file's path in EdSharp; press it twice to see the path in a window.
+- **Play Tutorials has a key, Alt+F12,** the same in every Homer app.
+- **Export Data is Alt+Shift+X,** as in EdSharp.
+- **Say Yield also answers Alt+Y,** and **Open Command Prompt also answers Control+Backslash,** the keys the other apps use.
+- **Names match the other apps:** Say Go to, Edit url, Open url and Say url.
+- **The build needs HomerDev 1.77.2 or later.**
+
 ## 19 October 2026 -- Files convert through the Homer kit
 
 - **Word documents are written through the kit's shared conversions,** the same code as EdSharp and FileDir. DbDo writes its table as Markdown, and Pandoc makes the Word file. Microsoft Word is used only for the older .doc format, which only Word can write, with one Alert box when it is missing.

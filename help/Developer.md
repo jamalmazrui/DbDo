@@ -114,7 +114,7 @@ creates the GitHub release, and checks that the public download link answers.
 
 ## Learnings from DbDialog
 
-DbDialog (2006 to 2015, AutoIt and ADO) was Jamal's single-dialog database manager, and DbDo's ancestor. Its source and guide were reviewed on 19 October 2026 for what DbDo should take back. The filter design is done; the rest are proposals, each small enough to be one change.
+DbDialog (2006 to 2015, AutoIt and ADO) was Jamal's single-dialog database manager, and DbDo's ancestor. Its source and guide were reviewed on 19 October 2026 for what DbDo should take back. The filter design and its Invert, Marked and Unmarked choices are done; the other four proposals are accepted and scheduled.
 
 ### Done: filters as one SQL condition
 
@@ -145,12 +145,19 @@ DbDialog's Output offered Count: for the fields shown in the list, the number of
 
 - **Design:** a Count by Columns report over the columns currently shown in the grid, within the filter in force. It runs SELECT those columns, count(*) ... WHERE the filter GROUP BY those columns ORDER BY those columns, and shows the result in a read-only window to review and copy, as Statistics from Column does.
 
-### Proposed: Invert and Marked as filter choices
+### Done: Invert, Marked and Unmarked in Filter Records
 
-DbDialog's Filter choices included Invert (the records not matching), and Tagged and Untagged.
+DbDialog's Filter choices included Invert, Tagged and Untagged. Done on 19 October 2026:
 
-- **Invert** is now simple and exact, since the filter is SQL: NOT (the condition in force).
-- **Marked and Unmarked** would filter on DbDo's marked column.
+- **Invert** is a fifth button beside New, Clear, Narrow and Expand while a filter is in force. It shows the records the filter leaves out, as NOT COALESCE((condition), 0), so a record whose field is empty is counted as not matching rather than falling out of both views.
+- **Marked and Unmarked** sit beside Any Field and Fields, so New, Narrow and Expand combine them like any other condition. They appear when the table has DbDo's marked column.
 
-Each would be one more button on Control+F when it applies. They are left for a ruling, since Control+F's four buttons are the ones asked for.
+### Decided: the other four proposals are accepted
+
+Each was weighed on 19 October 2026 under the instruction to decide, justify and keep a way back. All four are accepted, to be built one per DbDo delivery after the router's phase B, since each is a small, separate change:
+
+- **Clone Table.** Accepted. It answers a real gap (Add Table always starts blank) in one question, and reuses lStandardTableDdl, so a clone is a standard DbDo table.
+- **Define a table as text.** Accepted. It removes the ten-field limit and lets a screen reader user read, paste and edit a structure as ordinary text, which is Homer's preference for text over forms of slots.
+- **Fields named for unique access letters.** Accepted, as a warning on OK, not a refusal: a shared first letter still works, it only costs an Alt letter.
+- **Count by Columns.** Accepted. It generalizes Statistics from Column to the columns shown, within the filter in force, in the same read-only window. Its key is chosen when it is built, under the key rules.
 

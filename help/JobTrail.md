@@ -15,7 +15,7 @@ the scripts and reports beside it do the work. That means it inherits everything
 DbDo already does well by keyboard and screen reader, and it means the first
 version can be finished and used rather than merely started.
 
-### What this plan covers
+## What this plan covers
 
 - the naming conventions it follows, taken from the shipped DbDo databases
 - the seven tables and every field in them
@@ -160,7 +160,7 @@ went where.
   reference_list, offer
 - `version` TEXTLINE -- your own marker, so "resume, plain text, March" is one
   row and "resume, chronological, March" is another
-- `url` TEXTLINE -- the path or link to the file, so Open URL opens it
+- `url` TEXTLINE -- the path or link to the file, so Open url opens it
 - `notes` TEXTMARKDOWN
 - `tags` TEXTMEMO
 - `look` = name, kind, version

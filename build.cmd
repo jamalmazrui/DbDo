@@ -149,7 +149,7 @@ rem onSpoken", which names the symptom and not the cause. So the build says the
 rem cause, first. Raise this whenever DbDo starts using something new.
 rem 1.64.5: Play Tutorials calls MediaPlayer.playTutorials, which older kits lack;
 rem a build against 1.64.4 failed to compile on 8 October 2026 rather than saying so.
-set "kitNeeded=1.77.1"
+set "kitNeeded=1.77.4"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -159,10 +159,10 @@ if errorlevel 1 (
   exit /b 1
 )
 
-rem A MODULE MAY NEED ANOTHER MODULE, and only two do: Mdi.cs uses KeyMap, so
-rem the pair is switched on together. DbDo has its own MDI frame for now, so
-rem neither is compiled here; KeyMap is, because DbDo's hotkey document and its
-rem alternate menu read from it.
+rem A MODULE MAY NEED ANOTHER MODULE: Mdi.cs uses KeyMap. DbDo keeps its own MDI
+rem frame for now, but compiles Mdi.cs (19 October 2026) for the kit's SuiteCommands,
+rem the one copy of the commands every Homer app shares: the clipboard family, Say
+rem Time and Copy Log. KeyMap was already here for the hotkey document.
 set "homerSources="
 rem EVERY FILE CONVERSION THROUGH THE KIT (19 October 2026): Conversion chooses the way
 rem from exec\conversions.inix, Table reads the formats it needs, and ConversionMedia
@@ -177,6 +177,7 @@ set "homerSources=!homerSources! "!homerDev!\exec\CSharp\KeyMap.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\KeyName.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Lbc.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Log.cs""
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Mdi.cs""
 rem THE HOMER PLAYER, shared with FileDir since kit 1.51.1: Play Stream hands a
 rem record's stream address to it, and mpv does the playing.
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Media.cs""
