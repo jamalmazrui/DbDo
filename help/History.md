@@ -5,6 +5,16 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 19 October 2026 -- No console left waiting after setup
+
+- **Setup no longer leaves a console window open.** The finish page's Ollama and model boxes ran their scripts without telling them not to pause, so a console could wait for a key after the installer had closed. They now run the way every other box does.
+- **The check that stopped the last release now passes:** it compares DbDo only with the Homer kit files DbDo builds with.
+
+## 19 October 2026 -- Keys through the Homer kit's router
+
+- **DbDo's keys now go through the same router as every Homer app's.** A check on Jamal's computer first showed all 153 of DbDo's keys reaching the same command through it. A command still acts on the window you pressed it in, and the grid's movement keys and Key Describer are unchanged.
+- **Typing in a cell is safer.** In a text box such as the cell editor, Control+C copies the text you selected, and Control+D is left to the text box, so it can no longer delete the record while you type.
+
 ## 19 October 2026 -- Filters from DbDialog, and less said twice
 
 - **Filter Records (Control+F) can Invert** the filter in force, showing the records it leaves out, including those whose field is empty.

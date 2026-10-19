@@ -441,6 +441,11 @@ Name: "{autodesktop}\{#AppName}"; \
 ; Launch, ticked, and the guide, unticked. The NVDA add-on is installed by the
 ; kit's script straight into NVDA's add-ons folder, without starting NVDA.
 
+; NO CONSOLE LEFT WAITING (19 October 2026). The Ollama and model entries ran through cmd /c without
+; noPause and without waiting, unlike every other entry here. installOllama.cmd pauses at each exit
+; unless told noPause, and Inno runs these after the wizard has closed, so a console sat at "press any
+; key" with no installer window behind it. They now run their scripts directly with noPause and wait,
+; the shared Homer pattern (help\FinishPage.md).
 ; ---- 1. Install, ticked --------------------------------------------------------
 FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
   Parameters: "noPause jaws"; \
@@ -448,11 +453,12 @@ FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
   Description: "{code:labelJaws}"; \
   Check: homerFinishRuns and isInstallJaws; \
   Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist
-FileName: "{cmd}"; \
-  Parameters: "/c """"{app}\scripts\installModels.cmd"""""; \
-  WorkingDir: "{app}\exec"; \
+FileName: "{app}\scripts\installModels.cmd"; \
+  Parameters: "noPause"; \
+  WorkingDir: "{app}\scripts"; \
   Description: "{code:descModel}"; \
-  Flags: postinstall runascurrentuser; Check: homerFinishRuns and modelNeedsInstall
+  Check: homerFinishRuns and modelNeedsInstall; \
+  Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist
 FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
   Parameters: "noPause nvda"; \
   WorkingDir: "{app}\scripts"; \
@@ -465,11 +471,12 @@ FileName: "{app}\scripts\installMpv.cmd"; \
   Description: "{code:labelmpv}"; \
   Check: homerFinishRuns and isInstallmpv; \
   Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist
-FileName: "{cmd}"; \
-  Parameters: "/c """"{app}\scripts\installOllama.cmd"""""; \
-  WorkingDir: "{app}\exec"; \
+FileName: "{app}\scripts\installOllama.cmd"; \
+  Parameters: "noPause"; \
+  WorkingDir: "{app}\scripts"; \
   Description: "{code:descOllama}"; \
-  Flags: postinstall runascurrentuser; Check: homerFinishRuns and ollamaNeedsInstall
+  Check: homerFinishRuns and ollamaNeedsInstall; \
+  Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist
 
 ; ---- 2. Update, ticked ---------------------------------------------------------
 FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
@@ -490,11 +497,12 @@ FileName: "{app}\scripts\installMpv.cmd"; \
   Description: "{code:labelmpv}"; \
   Check: homerFinishRuns and isUpdatempv; \
   Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist
-FileName: "{cmd}"; \
-  Parameters: "/c """"{app}\scripts\installOllama.cmd"""" update"; \
-  WorkingDir: "{app}\exec"; \
+FileName: "{app}\scripts\installOllama.cmd"; \
+  Parameters: "noPause update"; \
+  WorkingDir: "{app}\scripts"; \
   Description: "{code:descOllama}"; \
-  Flags: postinstall runascurrentuser; Check: homerFinishRuns and ollamaNeedsUpdate
+  Check: homerFinishRuns and ollamaNeedsUpdate; \
+  Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist
 
 ; ---- 3. Reinstall, never ticked ------------------------------------------------
 FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
@@ -503,11 +511,12 @@ FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
   Description: "{code:labelJaws}"; \
   Check: homerFinishRuns and isReinstallJaws; \
   Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist unchecked
-FileName: "{cmd}"; \
-  Parameters: "/c """"{app}\scripts\installModels.cmd"""""; \
-  WorkingDir: "{app}\exec"; \
+FileName: "{app}\scripts\installModels.cmd"; \
+  Parameters: "noPause"; \
+  WorkingDir: "{app}\scripts"; \
   Description: "{code:descModel}"; \
-  Flags: postinstall runascurrentuser unchecked; Check: homerFinishRuns and modelIsCurrent
+  Check: homerFinishRuns and modelIsCurrent; \
+  Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist unchecked
 FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
   Parameters: "noPause nvda"; \
   WorkingDir: "{app}\scripts"; \
@@ -520,11 +529,12 @@ FileName: "{app}\scripts\installMpv.cmd"; \
   Description: "{code:labelmpv}"; \
   Check: homerFinishRuns and isReinstallmpv; \
   Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist unchecked
-FileName: "{cmd}"; \
-  Parameters: "/c """"{app}\scripts\installOllama.cmd"""" reinstall"; \
-  WorkingDir: "{app}\exec"; \
+FileName: "{app}\scripts\installOllama.cmd"; \
+  Parameters: "noPause reinstall"; \
+  WorkingDir: "{app}\scripts"; \
   Description: "{code:descOllama}"; \
-  Flags: postinstall runascurrentuser unchecked; Check: homerFinishRuns and ollamaIsCurrent
+  Check: homerFinishRuns and ollamaIsCurrent; \
+  Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist unchecked
 
 ; ---- 4. Launch, ticked; 5. the guide, unticked ---------------------------------
 ;

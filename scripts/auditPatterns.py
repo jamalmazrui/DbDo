@@ -184,10 +184,16 @@ def checkShadowedKit():
     lsKit = set()
     # THE KIT'S C# IS IN exec\\CSharp (13 October 2026, from an audit): this looked only in <kit>\\CSharp, where it no
     # longer is, so the comparison skipped on every run with "no kit sources found" and checked nothing.
+    # ONLY THE KIT FILES DbDo COMPILES (19 October 2026). A class in a kit file DbDo never compiles cannot shadow
+    # anything: PdfReader.cs's nested Result, which DbDo does not build, failed this check and stopped a push. The
+    # files are the ones build.cmd names in homerSources; if none can be read, every kit file is compared, as before.
+    lsCompiled = set(s.lower() for s in re.findall(r"exec\\CSharp\\(\w+\.cs)", readText(os.path.join(sRoot, "build.cmd"))))
+    logLine("kit shadow: comparing %s that build.cmd compiles" % (countNoun(len(lsCompiled), "kit file", "kit files") if lsCompiled else "every kit file, since build.cmd names none"))
     for sDir in [os.path.join(sKit, "exec", "CSharp"), os.path.join(sKit, "CSharp"), "/home/claude/kit/CSharp"]:
         if not os.path.isdir(sDir): continue
         for sName in sorted(os.listdir(sDir)):
             if not sName.endswith(".cs"): continue
+            if lsCompiled and sName.lower() not in lsCompiled: continue
             lsKit |= set(re.findall(r"^\s*public\s+(?:static\s+|sealed\s+|partial\s+)*class\s+(\w+)",
                                     readText(os.path.join(sDir, sName)), re.M))
         break
@@ -214,8 +220,8 @@ def checkShadowedKit():
 # Classes DbDo defines under a name the kit also uses, each with why it is not the kit's. Checked 13 October 2026: the
 # two are different designs, not copies.
 dApprovedShadows = {
-    "KeyMap": "DbDo's maps keys to menu items for dispatch; the kit's is the later context-aware binding table with summaries. "
-              "Moving DbDo onto the kit's design is open work.",
+    "KeyMap": "DbDo's maps keys to its menu items for its menus, hotkey document and Key Describer; since 19 October 2026 "
+              "its keys are routed by the kit's KeyMap, which DbDo always writes as Homer.KeyMap.",
     "KeyBinding": "DbDo's holds a key and a command for its menu map; the kit's adds context, summary and description. "
                   "Goes with KeyMap.",
 }

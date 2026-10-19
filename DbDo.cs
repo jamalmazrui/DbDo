@@ -14252,9 +14252,23 @@ namespace DbDo
         // 2. PRESSES ARE COUNTED FOR THE KIT, so the kit's Say commands (Say Time,
         //    for one) speak on one press, spell on two and show a window on three.
         //
-        // To roll this phase back, remove the two calls: checkRouterEquivalence in
-        // the constructor and noteKitPress in ProcessCmdKey.
+        // Phase B (below, in ProcessCmdKey) now routes every key through the kit; the
+        // router counts presses itself, so noteKitPress is no longer called.
         private static bool bRouterChecked = false;
+
+        // THE WINDOW A ROUTED KEY BELONGS TO (phase B). DbDo can have several windows,
+        // each with its own copy of the menus, so a command declared once to the kit's
+        // router must run the item in the window that received the key, not the first
+        // window's. ProcessCmdKey sets this just before it hands the key to the router.
+        private static DbDoForm oRoutingForm = null;
+
+        private static bool runInRoutingForm(Keys k)
+        {
+            DbDoForm oForm = oRoutingForm;
+            ToolStripMenuItem mi;
+            if (oForm != null && oForm.dLocalKeyToMenu.TryGetValue(k, out mi)) return KeyMap.dispatchMenuItem(mi, k);
+            return false;
+        }
         private static IntPtr hKitLastWindow = IntPtr.Zero, iKitLastWParam = IntPtr.Zero, iKitLastLParam = IntPtr.Zero;
         private static int iKitLastTick = 0;
 
@@ -14301,10 +14315,9 @@ namespace DbDo
                     string sId = Homer.KeyMap.toId(sCommand);
                     string sKey = Homer.KeyMap.friendlyKey(k);
                     Keys kRun = k;
-                    ToolStripMenuItem miRun = mi;
                     if (Homer.KeyMap.commandById(sId) == null)
                         Homer.KeyMap.addCommand(sCommand, sKey, Homer.KeyMap.sAnywhere, KeyMap.summaryFor(sCommand),
-                            delegate() { return KeyMap.dispatchMenuItem(miRun, kRun); });
+                            delegate() { return runInRoutingForm(kRun); });
                     else Homer.KeyMap.addAlias(sId, sKey);
                     Homer.KeyMap.Command oFound = Homer.KeyMap.findCommand(Homer.KeyMap.sAnywhere, k);
                     if (oFound != null && oFound.sId == sId) iSame++;
@@ -15746,7 +15759,6 @@ namespace DbDo
         // =====================================================================
         protected override bool ProcessCmdKey(ref Message msg, Keys keyData)
         {
-            noteKitPress(ref msg, keyData);
             // EVERY KEY THE PROGRAM SEES IS LOGGED, by its Homer name. With the
             // commands and the speech also logged, the runtime log reads as the
             // session did: key, command, what was said. That is what makes a log
@@ -15939,9 +15951,23 @@ namespace DbDo
                 return true;
             }
 
-            ToolStripMenuItem miLocal;
-            if (dLocalKeyToMenu.TryGetValue(keyData, out miLocal))
-            { KeyMap.dispatchMenuItem(miLocal, keyData); return true; }
+            // PHASE B (19 October 2026): THE KIT'S ROUTER DECIDES. Its equivalence report on
+            // Jamal's computer found all 153 of DbDo's keys resolving to the same command.
+            // The router runs the command in THIS window (runInRoutingForm), counts
+            // repeated presses, leaves a plain or shifted key in a text box to type, and in
+            // a text box such as the cell editor leaves Lbc's text keys to the box: there
+            // Control+C copies the selected text, and Control+D, left to the box, can no
+            // longer delete a record while you are typing in a cell. DbDo's own table answers only if the router
+            // was never given the commands. ROLLBACK: restore the three lines of the
+            // dLocalKeyToMenu lookup in place of the two that call the router.
+            oRoutingForm = this;
+            if (bRouterChecked && Homer.KeyMap.route(this, ref msg, keyData)) return true;
+            if (!bRouterChecked)
+            {
+                ToolStripMenuItem miLocal;
+                if (dLocalKeyToMenu.TryGetValue(keyData, out miLocal))
+                { KeyMap.dispatchMenuItem(miLocal, keyData); return true; }
+            }
             return base.ProcessCmdKey(ref msg, keyData);
         }
 
