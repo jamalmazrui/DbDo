@@ -5,6 +5,15 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 19 October 2026 -- Files convert through the Homer kit
+
+- **Word documents are written through the kit's shared conversions,** the same code as EdSharp and FileDir. DbDo writes its table as Markdown, and Pandoc makes the Word file. Microsoft Word is used only for the older .doc format, which only Word can write, with one Alert box when it is missing.
+- **A .doc export is now a real .doc file.** It used to be the newer Word format under a .doc name.
+- **An .xls workbook opens without Microsoft Excel.** DbDo reads it with NPOI, the library it already used to write spreadsheets, and imports it exactly as it imports an .xlsx.
+- **Spreadsheets are written by NPOI alone.** If NPOI ever fails, DbDo now says why rather than quietly starting Excel.
+- **Charts still use Excel,** which draws them natively.
+- **The build needs HomerDev 1.77.1 or later.**
+
 ## 19 October 2026 -- Command names spoken only when they help
 
 - **Command Echo Toggle is retired,** with its setting. A command now says its own name as it starts if and only if nothing else would tell you at once that it is under way. A dialog's title, a Say command's answer, a toggle's new state, or the screen reader's report of where the focus landed already does that. Commands that reshape the grid without moving the focus, such as Clear Filter, now say their name at once, while the grid is rebuilt. Every Homer app follows the same rule from the kit.

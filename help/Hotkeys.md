@@ -125,7 +125,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Export the current table or query to CSV, TSV, JSON, or another format. X for the sound of "ex".\
   Alt+X
 - Import\
-  Build a new DbDo database from another file -- Excel (read through Excel itself, no Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and lookups. I for Import.\
+  Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and lookups. I for Import.\
   Alt+I
 - Merge Data\
   Merge rows from a Markdown table, JSON, or Inix file into the current table. M for Merge.\
@@ -490,7 +490,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Return from any drill-down depth to the original table.\
   Exit to Root Table
 - Alt+I\
-  Build a new DbDo database from another file -- Excel (read through Excel itself, no Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and lookups.\
+  Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and lookups.\
   Import
 - Alt+L\
   Speak every value of the current virtual column, from the top.\
@@ -967,7 +967,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Hotkeys\
   Control+Shift+F1
 - Import\
-  Build a new DbDo database from another file -- Excel (read through Excel itself, no Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and lookups.\
+  Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and lookups.\
   Alt+I
 - Inspect Record\
   Control+I

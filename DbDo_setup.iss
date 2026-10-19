@@ -289,6 +289,8 @@ Source: "exec\DbDo.exe";    DestDir: "{app}\exec"; Flags: ignoreversion
 ; DbDo.exe; ignoreversion keeps it refreshed in sync with the executable.
 Source: "DbDo.exe.config"; DestDir: "{app}\exec"; Flags: ignoreversion
 Source: "exec\DbDo.dll"; DestDir: "{app}\exec"; Flags: ignoreversion
+; The kit's conversion routes, read by Conversion beside the program (19 October 2026).
+Source: "exec\conversions.inix"; DestDir: "{app}\exec"; Flags: ignoreversion
 ; NPOI (Apache-2.0) + SharpZipLib (MIT) + BouncyCastle (MIT-style) -- the
 ; managed .xlsx engine that lets DbDo open, edit, and save Excel workbooks
 ; with no Office installed and no bitness dependency. All three licenses

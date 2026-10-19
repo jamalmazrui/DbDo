@@ -149,7 +149,7 @@ rem onSpoken", which names the symptom and not the cause. So the build says the
 rem cause, first. Raise this whenever DbDo starts using something new.
 rem 1.64.5: Play Tutorials calls MediaPlayer.playTutorials, which older kits lack;
 rem a build against 1.64.4 failed to compile on 8 October 2026 rather than saying so.
-set "kitNeeded=1.74.1"
+set "kitNeeded=1.77.1"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -164,6 +164,11 @@ rem the pair is switched on together. DbDo has its own MDI frame for now, so
 rem neither is compiled here; KeyMap is, because DbDo's hotkey document and its
 rem alternate menu read from it.
 set "homerSources="
+rem EVERY FILE CONVERSION THROUGH THE KIT (19 October 2026): Conversion chooses the way
+rem from exec\conversions.inix, Table reads the formats it needs, and ConversionMedia
+rem plugs Media.cs's audio and video conversions into it.
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Conversion.cs""
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\ConversionMedia.cs""
 rem ELEVATE GOES WHEREVER LBC GOES (kit 1.31 and later): Lbc's Help box carries
 rem the version section and the F11 update offer, which are Elevate's.
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Elevate.cs""
@@ -180,6 +185,7 @@ set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Mpv.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Ollama.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Paths.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Say.cs""
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Table.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Util.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Web.cs""
 echo Homer modules: !homerSources! >> "!log!"
@@ -605,6 +611,22 @@ if errorlevel 1 (
     goto :build_failed
 )
 echo NVDA controller client copied from the kit into exec.>> "!log!"
+
+rem ---- the kit's conversion routes, beside the program (19 October 2026) ----
+rem Conversion reads exec\conversions.inix to choose the way for each conversion;
+rem without it nothing converts, so a missing table stops the build here.
+if not exist "!homerDev!\exec\conversions.inix" (
+    echo ERROR: the kit at !homerDev! has no exec\conversions.inix. Unzip the latest HomerDev.zip, then build again.
+    echo ERROR: !homerDev!\exec\conversions.inix is missing.>> "!log!"
+    goto :build_failed
+)
+copy /y "!homerDev!\exec\conversions.inix" "conversions.inix" >nul
+if errorlevel 1 (
+    echo ERROR: could not copy conversions.inix from the kit.
+    echo ERROR: copy of !homerDev!\exec\conversions.inix into exec failed.>> "!log!"
+    goto :build_failed
+)
+echo conversions.inix copied from the kit into exec.>> "!log!"
 
 rem ---- fetch Newtonsoft.Json.dll if missing (JSON / .ipynb support) ----
 rem DbDo references Newtonsoft.Json (Json.NET, MIT license) for JSON

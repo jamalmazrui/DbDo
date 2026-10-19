@@ -6502,8 +6502,8 @@ namespace DbDo
         // DbDo writes tabular data. The tools that do that without Microsoft
         // Office are already here, and they are tried first:
         //
-        //   .xlsx and .xls   NPOI, then Excel through COM
-        //   .docx and .doc   pandoc from Markdown, then Word through COM
+        //   .xlsx and .xls   NPOI, writing and reading; no Office
+        //   .docx and .doc   the kit's Conversion from Markdown: Pandoc, Office last
         //   .html            DbDo's own writer, which needs nothing
         //
         // The order is HomerView's rule: a tool that drives Office through COM
@@ -6517,44 +6517,6 @@ namespace DbDo
         // is the whole of the job. The database drivers are untouched by any of
         // this: ADO and ACE are how DbDo CONNECTS, and connecting to Access,
         // ODBC and dBase sources is the capability nothing else here has.
-
-        // findPandoc: pandoc on the PATH, or where winget puts it. Empty when
-        // it is not installed, so a caller can say so rather than fail oddly.
-        public static string findPandoc()
-        {
-            try
-            {
-                foreach (string sDir in (Environment.GetEnvironmentVariable("PATH") ?? "").Split(';'))
-                {
-                    if (sDir.Trim().Length == 0) continue;
-                    string sTry = System.IO.Path.Combine(sDir.Trim(), "pandoc.exe");
-                    if (System.IO.File.Exists(sTry)) return sTry;
-                }
-            }
-            catch (Exception) { }
-            foreach (string sFolder in new string[] {
-                Environment.GetFolderPath(Environment.SpecialFolder.ProgramFiles),
-                Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData) })
-            {
-                try
-                {
-                    string sTry = System.IO.Path.Combine(sFolder, @"Pandoc\pandoc.exe");
-                    if (System.IO.File.Exists(sTry)) return sTry;
-                    sTry = System.IO.Path.Combine(sFolder, @"Microsoft\WinGet\Links\pandoc.exe");
-                    if (System.IO.File.Exists(sTry)) return sTry;
-                }
-                catch (Exception) { }
-            }
-            return "";
-        }
-
-        // hasExcelCom: is Excel actually registered? Asking first turns a COM
-        // exception into a sentence somebody can act on.
-        public static bool hasExcelCom()
-        {
-            try { return Type.GetTypeFromProgID("Excel.Application") != null; }
-            catch (Exception) { return false; }
-        }
 
         // exportSpreadsheet: the current recordset as a worksheet, written by
         // NPOI -- managed, AnyCPU, no Office, no bitness trap. The same library
@@ -6644,17 +6606,11 @@ namespace DbDo
             }
             catch (Exception ex)
             {
-                DbDoLog.write("exportSpreadsheet: NPOI failed (" + ex.Message + "); trying Excel.");
-                if (hasExcelCom())
-                {
-                    exportSpreadsheetViaExcel(sDestPath, sExt);
-                }
-                else
-                {
-                    throw new InvalidOperationException(
-                        "The spreadsheet could not be written: " + ex.Message
-                        + " Excel is not installed either, so there is no second way to try.");
-                }
+                // NO OFFICE FALLBACK (19 October 2026, the kit's conversion rule): NPOI writes
+                // .xls and .xlsx by itself, so a failure here is a fault to report and fix,
+                // not a reason to start Excel.
+                DbDoLog.write("exportSpreadsheet: NPOI failed: " + ex.Message);
+                throw new InvalidOperationException("The spreadsheet could not be written: " + ex.Message);
             }
             finally
             {
@@ -6685,126 +6641,24 @@ namespace DbDo
                 return;
             }
 
-            string sPandoc = findPandoc();
-            if (sPandoc.Length == 0)
-            {
-                DbDoLog.write("exportWord: pandoc not found; trying Word.");
-                if (hasWordCom()) { exportWordViaWord(sDestPath, sExt, bFilteredHtml); return; }
-                throw new InvalidOperationException(
-                    "Writing a Word document needs pandoc, which is free, or Microsoft Word. "
-                    + "Neither was found. Install pandoc with: winget install JohnMacFarlane.Pandoc");
-            }
-
+            // THE KIT CONVERTS (19 October 2026): DbDo writes its Markdown table and
+            // Homer.Conversion turns it into .docx, .doc, .rtf or .odt by the routes in
+            // conversions.inix -- Pandoc, with Office only as the kit's last resort and an
+            // Alert box when it is missing -- the same code every Homer app uses.
             string sMarkdown = System.IO.Path.Combine(
                 Homer.Paths.temp(), "export-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".md");
             try
             {
                 exportMarkdown(sMarkdown);
-                System.Diagnostics.ProcessStartInfo oStart =
-                    new System.Diagnostics.ProcessStartInfo(sPandoc,
-                        "-f markdown -t docx -o \"" + sDestPath + "\" \"" + sMarkdown + "\"");
-                oStart.UseShellExecute = false;
-                oStart.CreateNoWindow = true;
-                oStart.RedirectStandardError = true;
-                System.Diagnostics.Process oProcess = System.Diagnostics.Process.Start(oStart);
-                string sError = oProcess.StandardError.ReadToEnd();
-                oProcess.WaitForExit();
-                DbDoLog.write("exportWord: pandoc exit " + oProcess.ExitCode
-                    + (sError.Length > 0 ? "; " + sError.Trim() : ""));
-                if (oProcess.ExitCode != 0 || !System.IO.File.Exists(sDestPath))
-                {
-                    if (hasWordCom()) { exportWordViaWord(sDestPath, sExt, bFilteredHtml); return; }
-                    throw new InvalidOperationException(
-                        "pandoc could not write the document: " + sError.Trim());
-                }
+                string sError;
+                bool bMade = Homer.Conversion.convert(sMarkdown, sDestPath, out sError) && System.IO.File.Exists(sDestPath);
+                DbDoLog.write("exportWord: the kit's conversion to " + sDestPath + (bMade ? " succeeded." : " failed: " + sError));
+                if (!bMade) throw new InvalidOperationException("The document could not be written: " + sError);
             }
             finally
             {
                 try { if (System.IO.File.Exists(sMarkdown)) System.IO.File.Delete(sMarkdown); }
                 catch (Exception) { }
-            }
-        }
-
-        // hasWordCom: is Word actually registered?
-        public static bool hasWordCom()
-        {
-            try { return Type.GetTypeFromProgID("Word.Application") != null; }
-            catch (Exception) { return false; }
-        }
-
-        // exportSpreadsheet: write the current recordset to an .xlsx
-        // file via Excel.Application late-bound COM. Requires Excel
-        // to be installed. Throws InvalidOperationException with a
-        // human message if the ProgID isn't registered.
-        //
-        // The output replicates dbDot's HomerLib.multiArrayToTables:
-        // header row from getFieldNames, value rows below, column
-        // widths auto-fit, cells wrap-text, vertical alignment top,
-        // a named range "ColumnTitle" anchored at A1.
-        //
-        // For .xls (legacy), the same workflow runs and SaveAs uses
-        // xlExcel8 (56) instead of xlWorkbookDefault (51).
-        public void exportSpreadsheetViaExcel(string sDestPath, string sExt)
-        {
-            if (!hasRecordset()) throw new InvalidOperationException("No recordset open.");
-            object bookmarkObj = bookmark;
-
-            dynamic oApp = null;
-            dynamic oBook = null;
-            dynamic oSheet = null;
-            try
-            {
-                oApp = ComAutomation.createApp("Excel.Application");
-                oApp.Visible = false;
-                oApp.DisplayAlerts = false;
-                try { oApp.ScreenUpdating = false; } catch { }
-
-                oBook = oApp.Workbooks.Add();
-                oSheet = oBook.Sheets[1];
-
-                List<string> lFields = getDisplayFieldNames();
-                if (lFields.Count == 0) lFields = getFieldNames();
-
-                // Headers.
-                for (int i = 0; i < lFields.Count; i++)
-                    oSheet.Cells[1, i + 1] = lFields[i];
-
-                // Anchor a named range at A1, matching dbDot.
-                try { oSheet.Names.Add("ColumnTitle", oSheet.Range["A1"]); } catch { }
-
-                // Rows.
-                moveFirst();
-                int iRow = 2;
-                while (!eof)
-                {
-                    for (int i = 0; i < lFields.Count; i++)
-                    {
-                        string sVal = getFieldValue(lFields[i]) ?? "";
-                        oSheet.Cells[iRow, i + 1] = sVal;
-                    }
-                    moveNext();
-                    iRow++;
-                }
-
-                // Format like dbDot: auto-fit columns, wrap text,
-                // align top, auto-fit rows. AutomationSecurity low
-                // was set in dbDot to suppress macro prompts on Save.
-                try { oSheet.Columns.AutoFit(); } catch { }
-                try { oSheet.Cells.WrapText = true; } catch { }
-                try { oSheet.Rows.AutoFit(); } catch { }
-                try { oSheet.Rows.VerticalAlignment = -4160 /* xlVAlignTop */; } catch { }
-
-                int iFmt = (sExt == "xls") ? 56 /* xlExcel8 */ : 51 /* xlWorkbookDefault */;
-                oSheet.SaveAs(sDestPath, iFmt);
-                oBook.Close(false);
-            }
-            finally
-            {
-                if (bookmarkObj != null) try { bookmark = bookmarkObj; } catch { }
-                try { if (oApp != null) oApp.Quit(); } catch { }
-                releaseCom(oSheet);
-                releaseCom(oBook);
-                releaseCom(oApp);
             }
         }
 
@@ -6876,7 +6730,7 @@ namespace DbDo
             dynamic oRange = null;
             try
             {
-                oApp = ComAutomation.createApp("Excel.Application");
+                oApp = ComAutomation.createApp("Excel.Application"); // homer: not a conversion -- Excel draws a native chart
                 oApp.Visible = false;
                 oApp.DisplayAlerts = false;
                 try { oApp.ScreenUpdating = false; } catch { }
@@ -7014,7 +6868,7 @@ namespace DbDo
             dynamic oApp = null, oBook = null, oDataSheet = null, oRange = null;
             try
             {
-                oApp = ComAutomation.createApp("Excel.Application");
+                oApp = ComAutomation.createApp("Excel.Application"); // homer: not a conversion -- Excel draws a native chart
                 oApp.Visible = false;
                 oApp.DisplayAlerts = false;
                 try { oApp.ScreenUpdating = false; } catch { }
@@ -7314,7 +7168,7 @@ namespace DbDo
             dynamic oRange = null;
             try
             {
-                oApp = ComAutomation.createApp("Excel.Application");
+                oApp = ComAutomation.createApp("Excel.Application"); // homer: not a conversion -- Excel draws a native chart
                 oApp.Visible = false;
                 oApp.DisplayAlerts = false;
                 try { oApp.ScreenUpdating = false; } catch { }
@@ -7504,91 +7358,6 @@ namespace DbDo
             else if (dW >= 1) sFmt = "0.0";
             else sFmt = "0.000";
             return dLo.ToString(sFmt) + "-" + dHi.ToString(sFmt);
-        }
-
-        // exportWord: write the current recordset to a .docx file or
-        // a Filtered-HTML .html file via Word.Application late-bound
-        // COM. Requires Word to be installed.
-        //
-        // The output replicates dbDot's HomerLib.multiArrayToTables
-        // Word path: header row in the first row of a Word table,
-        // value rows below, heading-format on row 1, auto-fit
-        // behavior wdAutoFitContent, a bookmark "ColumnTitle"
-        // anchored at the second cell of the first row.
-        //
-        // bFilteredHtml = true uses wdFormatFilteredHtml (10), which
-        // produces clean HTML without MSO-specific markup. Filtered
-        // HTML is the user's preferred format for screen readers.
-        public void exportWordViaWord(string sDestPath, string sExt, bool bFilteredHtml)
-        {
-            if (!hasRecordset()) throw new InvalidOperationException("No recordset open.");
-            object bookmarkObj = bookmark;
-
-            dynamic oApp = null;
-            dynamic oDoc = null;
-            try
-            {
-                oApp = ComAutomation.createApp("Word.Application");
-                oApp.Visible = false;
-                try { oApp.DisplayAlerts = 0 /* wdAlertsNone */; } catch { }
-                try { oApp.ScreenUpdating = false; } catch { }
-
-                oDoc = oApp.Documents.Add();
-                dynamic oRange = oDoc.Content;
-
-                List<string> lFields = getDisplayFieldNames();
-                if (lFields.Count == 0) lFields = getFieldNames();
-                int iFieldCount = lFields.Count;
-
-                int iRowCount = recordCount;
-                if (iRowCount < 0) iRowCount = 0;
-
-                // Pre-size the table: header row + N value rows.
-                dynamic oTable = oDoc.Tables.Add(oRange, iRowCount + 1, iFieldCount);
-
-                // Header row.
-                for (int i = 0; i < iFieldCount; i++)
-                {
-                    try { oTable.Rows[1].Cells[i + 1].Range.Text = lFields[i]; } catch { }
-                }
-
-                // Value rows.
-                moveFirst();
-                int iRow = 2;
-                while (!eof && iRow <= iRowCount + 1)
-                {
-                    for (int i = 0; i < iFieldCount; i++)
-                    {
-                        string sVal = getFieldValue(lFields[i]) ?? "";
-                        try { oTable.Rows[iRow].Cells[i + 1].Range.Text = sVal; } catch { }
-                    }
-                    moveNext();
-                    iRow++;
-                }
-
-                // Format like dbDot: auto-fit, heading-format on
-                // header row, named bookmark anchored to row 1 / col 2.
-                try { oTable.AllowAutoFit = true; } catch { }
-                try { oTable.AutoFitBehavior(1 /* wdAutoFitContent */); } catch { }
-                try { oTable.Rows[1].HeadingFormat = true; } catch { }
-                try { oTable.ApplyStyleHeadingRows = true; } catch { }
-                try { if (iFieldCount >= 2) oDoc.Bookmarks.Add("ColumnTitle", oTable.Rows[1].Cells[2].Range); } catch { }
-
-                // SaveAs format codes:
-                //   wdFormatDocumentDefault  = 16  (docx)
-                //   wdFormatFilteredHtml     = 10  (filtered HTML)
-                int iFmt = bFilteredHtml ? 10 : 16;
-                oDoc.SaveAs(sDestPath, iFmt);
-                oDoc.Close(0 /* wdDoNotSaveChanges */);
-                try { if (!(bool)oApp.NormalTemplate.Saved) oApp.NormalTemplate.Saved = true; } catch { }
-            }
-            finally
-            {
-                if (bookmarkObj != null) try { bookmark = bookmarkObj; } catch { }
-                try { if (oApp != null) oApp.Quit(); } catch { }
-                releaseCom(oDoc);
-                releaseCom(oApp);
-            }
         }
 
         // exportDatabase: write the current recordset to a new
@@ -14130,7 +13899,7 @@ namespace DbDo
             add("Save",             "Save changes to disk (writes an open workbook back to its .xlsx; a .db is already saved as you go)", "");
             add("Save As",          "Save a copy to another path or file format", "");
             add("Backup Database",    "Write a timestamped copy of the open database", "");
-            add("Import",             "Build a new DbDo database from another file -- Excel (read through Excel itself, no Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and lookups",
+            add("Import",             "Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and lookups",
                 "Open mounts a file with a live driver; Import transfers its data into DbDo's own structure. The source is only read; Save As keeps the result as a .db.");
             add("Merge",              "Merge rows from a Markdown table, JSON, or Inix file into the current table",
                 "Fields are matched by name; unmatched fields are dropped and one bad row does not sink the import.");
@@ -20689,203 +20458,6 @@ namespace DbDo
             return sDbPath;
         }
 
-        // importWorkbookFile: read an Excel workbook (.xlsx / .xls) via
-        // Excel.Application COM automation and build a temporary SQLite
-        // database in the standard DbDo shape -- one table per worksheet,
-        // each sheet's first row taken as the field names and the rows
-        // below as data, wrapped in the standard columns, plus the builtin
-        // maps and lookups tables. Returns the temp .db path for the
-        // normal SQLite open; the caller treats it as a managed copy whose
-        // origin is the workbook, so the workbook is only ever read.
-        //
-        // COM is used, NOT the ACE OLE DB provider, on purpose: Excel
-        // automation is out-of-process, so a 64-bit DbDo reads a workbook
-        // through whatever Excel is installed (even 32-bit) with no
-        // provider-bitness or Office-architecture conflict. The only
-        // requirement is that Excel itself is present.
-        //
-        // A sheet header that collides with a standard column is handled,
-        // not duplicated: "notes" and "tags" route their data into the
-        // standard notes/tags columns; the rest of the reserved set is
-        // renamed with an "_in" suffix.
-        internal string importWorkbookFile(string sXlsxPath)
-        {
-            if (string.IsNullOrEmpty(sXlsxPath)) throw new ArgumentException("importWorkbookFile requires a path.");
-            if (!File.Exists(sXlsxPath)) throw new FileNotFoundException("Workbook not found: " + sXlsxPath);
-
-            string[] aReservedRename = new string[] { "added", "edited", "look", "prime", "prime", "marked" };
-            string sDbPath = Path.Combine(Path.GetTempPath(),
-                "DbDo_managed_" + Guid.NewGuid().ToString("N") + ".db");
-
-            dynamic oApp = null;
-            dynamic oBook = null;
-            int iSheetsImported = 0;
-            int iRowsImported = 0;
-            try
-            {
-                oApp = ComAutomation.createApp("Excel.Application");
-                // Suppress every prompt BEFORE opening -- the export path
-                // does the same. A hidden, automated Excel cannot show a
-                // dialog, so if Open would raise one -- a file-in-use notice
-                // (the workbook already open elsewhere), a Protected View
-                // block (the file arrived as an email attachment, carrying
-                // the mark-of-the-web), or a link/data prompt -- the call
-                // leaves an invalid workbook reference whose next use throws
-                // COM 0x80010114, "the requested object does not exist."
-                oApp.Visible = false;
-                oApp.DisplayAlerts = false;
-                try { oApp.ScreenUpdating = false; } catch { }
-                try { oApp.AskToUpdateLinks = false; } catch { }
-                try { oApp.AutomationSecurity = 1 /* msoAutomationSecurityLow */; } catch { }
-                // Open(Filename, UpdateLinks, ReadOnly): read-only.
-                oBook = oApp.Workbooks.Open(sXlsxPath, 0, true);
-                if (oBook == null)
-                    throw new InvalidOperationException("Excel could not open " + Path.GetFileName(sXlsxPath)
-                        + ". If the workbook is open in Excel, please close it and try again.");
-
-                if (File.Exists(sDbPath)) File.Delete(sDbPath);
-                using (FileStream fs = File.Create(sDbPath)) { }
-                using (DbDoManager managerImport = new DbDoManager())
-                {
-                    managerImport.openDatabase(sDbPath, null, false);
-                    List<string> lTableNames = new List<string>();
-                    int iSheetCount = (int)oBook.Worksheets.Count;
-                    for (int iSheet = 1; iSheet <= iSheetCount; iSheet++)
-                    {
-                        dynamic oSheet = oBook.Worksheets[iSheet];
-                        string sSheetName = (string)oSheet.Name;
-                        // One COM call pulls the whole used range as a
-                        // 1-based 2-D array; null when the sheet is empty
-                        // or holds a single blank cell.
-                        object oVals = oSheet.UsedRange.Value;
-                        object[,] aCells = oVals as object[,];
-                        if (aCells == null) continue;
-                        int iR0 = aCells.GetLowerBound(0), iR1 = aCells.GetUpperBound(0);
-                        int iC0 = aCells.GetLowerBound(1), iC1 = aCells.GetUpperBound(1);
-                        if (iR1 <= iR0 || iC1 < iC0) continue; // need a header row plus at least one data row
-
-                        // Find the header row. Some sheets begin with a
-                        // sparse title/metadata row (Richard's, for example,
-                        // opens with "Updated 2026/03/18" above the real
-                        // column names). The header is the first row whose
-                        // count of non-empty cells is at least 60% of the
-                        // widest row in the opening stretch of the sheet; any
-                        // rows above it are preamble and are skipped.
-                        int iScanEnd = Math.Min(iR1, iR0 + 14);
-                        int iWidest = 0;
-                        for (int r = iR0; r <= iScanEnd; r++)
-                        {
-                            int iFilled = 0;
-                            for (int c = iC0; c <= iC1; c++) if (sCellToString(aCells[r, c]).Length > 0) iFilled++;
-                            if (iFilled > iWidest) iWidest = iFilled;
-                        }
-                        int iThreshold = Math.Max(2, (iWidest * 6) / 10);
-                        int iHdr = iR0;
-                        for (int r = iR0; r <= iScanEnd; r++)
-                        {
-                            int iFilled = 0;
-                            for (int c = iC0; c <= iC1; c++) if (sCellToString(aCells[r, c]).Length > 0) iFilled++;
-                            if (iFilled >= iThreshold) { iHdr = r; break; }
-                        }
-                        if (iHdr >= iR1) continue; // a header but no data rows beneath it
-
-                        // Table name from the sheet name, made a safe,
-                        // unique snake_case identifier.
-                        string sTable = sNormalizeIdentifier(sSheetName);
-                        if (sTable.Length == 0) sTable = "sheet_" + iSheet;
-                        if (char.IsDigit(sTable[0])) sTable = "t_" + sTable;
-                        string sBaseT = sTable; int iDupT = 1;
-                        while (lTableNames.Contains(sTable)) { iDupT++; sTable = sBaseT + "_" + iDupT; }
-                        lTableNames.Add(sTable);
-                        string sSingular = sSingularOf(sTable);
-                        string sPk = sSingular + "_id";
-
-                        // Plan the columns from the header row. lColTarget
-                        // holds, per source column, the SQL column it writes
-                        // (or null to skip); lFieldDefs are the distinct data
-                        // fields handed to lStandardTableDdl.
-                        List<string[]> lFieldDefs = new List<string[]>();
-                        List<string> lColTarget = new List<string>();
-                        List<string> lUsedNames = new List<string>();
-                        for (int iCol = iC0; iCol <= iC1; iCol++)
-                        {
-                            string sHdr = sNormalizeIdentifier(sCellToString(aCells[iHdr, iCol]));
-                            if (sHdr.Length == 0) sHdr = "column_" + (iCol - iC0 + 1);
-                            if (char.IsDigit(sHdr[0])) sHdr = "c_" + sHdr;
-                            if (sHdr == "notes") { lColTarget.Add("notes"); continue; }
-                            if (sHdr == "tags") { lColTarget.Add("tags"); continue; }
-                            if (sHdr == sPk || Array.IndexOf(aReservedRename, sHdr) >= 0) sHdr = sHdr + "_in";
-                            string sBaseH = sHdr; int iDupH = 1;
-                            while (lUsedNames.Contains(sHdr)) { iDupH++; sHdr = sBaseH + "_" + iDupH; }
-                            lUsedNames.Add(sHdr);
-                            lFieldDefs.Add(new string[] { sHdr, "TEXTLINE" });
-                            lColTarget.Add(sHdr);
-                        }
-                        // Guarantee at least one distinct field so look/prime
-                        // are well-formed even for an all-notes/tags sheet.
-                        if (lFieldDefs.Count == 0) lFieldDefs.Add(new string[] { "value", "TEXTLINE" });
-
-                        foreach (string sSql in lStandardTableDdl(sTable, lFieldDefs))
-                            managerImport.invokeSql(sSql, null);
-
-                        for (int iRow = iHdr + 1; iRow <= iR1; iRow++)
-                        {
-                            List<string> lCols = new List<string>();
-                            List<string> lVals = new List<string>();
-                            bool bAny = false;
-                            int iColIdx = 0;
-                            for (int iCol = iC0; iCol <= iC1; iCol++, iColIdx++)
-                            {
-                                string sTarget = lColTarget[iColIdx];
-                                if (sTarget == null) continue;
-                                string sCell = sCellToString(aCells[iRow, iCol]);
-                                if (sCell.Length > 0) bAny = true;
-                                lCols.Add("\"" + sTarget + "\"");
-                                lVals.Add("'" + sCell.Replace("'", "''") + "'");
-                            }
-                            if (!bAny) continue; // skip a wholly-empty row
-                            string sInsert = "INSERT INTO \"" + sTable + "\" ("
-                                + string.Join(", ", lCols.ToArray()) + ") VALUES ("
-                                + string.Join(", ", lVals.ToArray()) + ")";
-                            try { managerImport.invokeSql(sInsert, null); iRowsImported++; }
-                            catch (Exception exRow)
-                            {
-                                // A duplicate prime (an identical data row) trips
-                                // the UNIQUE index; skip it, keep importing.
-                                try { DbDoLog.write("importWorkbookFile skipped a row in " + sTable + ": " + exRow.Message); } catch { }
-                            }
-                        }
-                        iSheetsImported++;
-                    }
-
-                    if (iSheetsImported == 0)
-                        throw new InvalidOperationException("No worksheets with a header row and data rows were found in " + Path.GetFileName(sXlsxPath) + ".");
-
-                    foreach (string sSql in lInfraDdl(true, true))
-                        managerImport.invokeSql(sSql, null);
-                }
-
-                try { DbDoLog.write("Imported workbook " + sXlsxPath + ": " + iSheetsImported
-                    + " sheet(s), " + iRowsImported + " row(s) -> " + sDbPath); } catch { }
-                return sDbPath;
-            }
-            catch
-            {
-                try { if (File.Exists(sDbPath)) File.Delete(sDbPath); } catch { }
-                throw;
-            }
-            finally
-            {
-                // Excel never attaches to a running instance (see
-                // ComAutomation); close the workbook without saving and
-                // quit the hidden process, then release the COM objects.
-                try { if (oBook != null) oBook.Close(false); } catch { }
-                try { if (oApp != null) oApp.Quit(); } catch { }
-                if (oBook != null) { try { Marshal.FinalReleaseComObject(oBook); } catch { } }
-                if (oApp != null) { try { Marshal.FinalReleaseComObject(oApp); } catch { } }
-            }
-        }
-
         // sCellToString: render one Excel cell value (from a UsedRange
         // .Value array) as a trimmed string. Empty cells arrive as null;
         // numbers as double (whole numbers without a trailing ".0"); dates
@@ -20986,6 +20558,60 @@ namespace DbDo
         // temp DbDo shell -- one standard-shape table per worksheet, plus
         // maps and lookups. Shared strings are resolved, dates (by cell
         // style) are rendered ISO, and an empty sheet is skipped.
+        // importXlsNative: a legacy .xls read by NPOI, with no Office (19 October 2026,
+        // replacing Excel through COM). NPOI copies it sheet by sheet and cell by cell,
+        // each cell as Excel would show it, into a temporary .xlsx with the same name,
+        // and DbDo's one native .xlsx importer reads that, so an .xls and an .xlsx of
+        // the same data come out alike.
+        internal string importXlsNative(string sXlsPath)
+        {
+            string sDir = System.IO.Path.Combine(Homer.Paths.temp(), "xls-" + DateTime.Now.ToString("yyyyMMdd-HHmmss-fff"));
+            System.IO.Directory.CreateDirectory(sDir);
+            string sXlsx = System.IO.Path.Combine(sDir, System.IO.Path.GetFileNameWithoutExtension(sXlsPath) + ".xlsx");
+            try
+            {
+                NPOI.SS.UserModel.DataFormatter oFormat = new NPOI.SS.UserModel.DataFormatter();
+                int iCells = 0;
+                using (System.IO.FileStream fsIn = new System.IO.FileStream(sXlsPath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite))
+                {
+                    NPOI.HSSF.UserModel.HSSFWorkbook wbIn = new NPOI.HSSF.UserModel.HSSFWorkbook(fsIn);
+                    NPOI.XSSF.UserModel.XSSFWorkbook wbOut = new NPOI.XSSF.UserModel.XSSFWorkbook();
+                    NPOI.SS.UserModel.IFormulaEvaluator oEval = wbIn.GetCreationHelper().CreateFormulaEvaluator();
+                    for (int iSheet = 0; iSheet < wbIn.NumberOfSheets; iSheet++)
+                    {
+                        NPOI.SS.UserModel.ISheet shIn = wbIn.GetSheetAt(iSheet);
+                        NPOI.SS.UserModel.ISheet shOut = wbOut.CreateSheet(shIn.SheetName);
+                        for (int iRow = shIn.FirstRowNum; iRow <= shIn.LastRowNum; iRow++)
+                        {
+                            NPOI.SS.UserModel.IRow rIn = shIn.GetRow(iRow);
+                            if (rIn == null || rIn.FirstCellNum < 0) continue;
+                            NPOI.SS.UserModel.IRow rOut = shOut.CreateRow(iRow);
+                            for (int iCol = rIn.FirstCellNum; iCol < rIn.LastCellNum; iCol++)
+                            {
+                                NPOI.SS.UserModel.ICell cIn = rIn.GetCell(iCol);
+                                if (cIn == null) continue;
+                                string sValue;
+                                try { sValue = oFormat.FormatCellValue(cIn, oEval); }
+                                catch (Exception) { sValue = cIn.ToString(); }
+                                rOut.CreateCell(iCol).SetCellValue(sValue);
+                                iCells++;
+                            }
+                        }
+                    }
+                    using (System.IO.FileStream fsOut = new System.IO.FileStream(sXlsx, System.IO.FileMode.Create, System.IO.FileAccess.Write))
+                    {
+                        wbOut.Write(fsOut);
+                    }
+                    DbDoLog.write("importXlsNative: NPOI read " + sXlsPath + ": " + wbIn.NumberOfSheets + " sheets, " + iCells + " cells, into " + sXlsx);
+                }
+                return importXlsxNative(sXlsx);
+            }
+            finally
+            {
+                try { System.IO.Directory.Delete(sDir, true); } catch (Exception) { }
+            }
+        }
+
         internal string importXlsxNative(string sXlsxPath)
         {
             if (string.IsNullOrEmpty(sXlsxPath)) throw new ArgumentException("importXlsxNative requires a path.");
@@ -21346,7 +20972,7 @@ namespace DbDo
             if (string.IsNullOrEmpty(sSourcePath)) throw new ArgumentException("importToShell requires a path.");
             string sExt = Path.GetExtension(sSourcePath).TrimStart('.').ToLowerInvariant();
             if (sExt == "xlsx") return importXlsxNative(sSourcePath);
-            if (sExt == "xls") return importWorkbookFile(sSourcePath); // legacy binary; read via Excel COM
+            if (sExt == "xls") return importXlsNative(sSourcePath);    // legacy binary, read by NPOI; no Office
             if (sExt == "dbf") return importDbfToShell(sSourcePath);   // native dBASE reader; no ACE
             if (sExt == "csv") return importDelimitedToShell(sSourcePath, ',');
             if (sExt == "tsv" || sExt == "tab") return importDelimitedToShell(sSourcePath, '\t');
@@ -35574,7 +35200,7 @@ namespace DbDo
             const int iWdAlertsNone = 0;
 
             string sLower = (sProgId ?? "").ToLowerInvariant();
-            if (sLower == "word.application")
+            if (sLower == "word.application") // homer: not a conversion -- the COM helper quiets Office prompts
             {
                 try { oApp.DisplayAlerts = iWdAlertsNone; } catch { }
                 try { oApp.Options.ConfirmConversions = false; } catch { }
@@ -35583,7 +35209,7 @@ namespace DbDo
                 try { oApp.Visible = false; } catch { }
                 try { oApp.ScreenUpdating = false; } catch { }
             }
-            else if (sLower == "excel.application")
+            else if (sLower == "excel.application") // homer: not a conversion -- the COM helper quiets Office prompts
             {
                 try { oApp.DisplayAlerts = false; } catch { }
                 try { oApp.AskToUpdateLinks = false; } catch { }

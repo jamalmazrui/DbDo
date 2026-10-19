@@ -252,6 +252,9 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a href="#october-2026-files-convert-through-the-homer-kit"
+id="toc-october-2026-files-convert-through-the-homer-kit">19 October
+2026 – Files convert through the Homer kit</a></li>
 <li><a href="#october-2026-command-names-spoken-only-when-they-help"
 id="toc-october-2026-command-names-spoken-only-when-they-help">19
 October 2026 – Command names spoken only when they help</a></li>
@@ -543,6 +546,25 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="october-2026-files-convert-through-the-homer-kit">19 October
+2026 – Files convert through the Homer kit</h2>
+<ul>
+<li><strong>Word documents are written through the kit’s shared
+conversions,</strong> the same code as EdSharp and FileDir. DbDo writes
+its table as Markdown, and Pandoc makes the Word file. Microsoft Word is
+used only for the older .doc format, which only Word can write, with one
+Alert box when it is missing.</li>
+<li><strong>A .doc export is now a real .doc file.</strong> It used to
+be the newer Word format under a .doc name.</li>
+<li><strong>An .xls workbook opens without Microsoft Excel.</strong>
+DbDo reads it with NPOI, the library it already used to write
+spreadsheets, and imports it exactly as it imports an .xlsx.</li>
+<li><strong>Spreadsheets are written by NPOI alone.</strong> If NPOI
+ever fails, DbDo now says why rather than quietly starting Excel.</li>
+<li><strong>Charts still use Excel,</strong> which draws them
+natively.</li>
+<li><strong>The build needs HomerDev 1.77.1 or later.</strong></li>
+</ul>
 <h2 id="october-2026-command-names-spoken-only-when-they-help">19
 October 2026 – Command names spoken only when they help</h2>
 <ul>
