@@ -276,6 +276,9 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Open in Explorer\
   Open the folder containing the open database in Windows Explorer.\
   Alt+Backslash
+- Show in FileDir\
+  Show the open database's file, selected in its folder, in FileDir.\
+  Control+Shift+Oem5
 - Sqlean Console\
   Open the bundled sqlean.exe shell in its own console window on the current database.\
   Control+Shift+Grave
@@ -710,6 +713,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Shift+O\
   Open a chosen table of the current database in a new window.\
   Open Table
+- Control+Shift+Oem5\
+  Show the open database's file, selected in its folder, in FileDir.\
+  Show in FileDir
 - Control+Shift+R\
   Regex find-and-replace within the current virtual column, over visible rows.\
   Regex Replace
@@ -1248,6 +1254,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Select Columns to Display\
   Choose which columns the grid shows AND their order, via the Available/Chosen sequence picker.\
   Alt+S
+- Show in FileDir\
+  Show the open database's file, selected in its folder, in FileDir.\
+  Control+Shift+Oem5
 - Sqlean Console\
   Open the bundled sqlean.exe shell in its own console window on the current database.\
   Control+Shift+Grave

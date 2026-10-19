@@ -5,6 +5,18 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 19 October 2026 -- Show in FileDir
+
+- **Show in FileDir (Control+Shift+Backslash)** shows the open database's file, selected in its folder, in FileDir.
+- **A file handed to the DbDo already running is opened.** Starting DbDo on a file while it was open used to bring DbDo forward and drop the file, so FileDir's Open in DbDo did nothing whenever DbDo was running.
+- **The build needs HomerDev 1.79.0 or later.**
+
+## 19 October 2026 -- Faster to open
+
+- **A sorted table loads once, not twice.** DbDo opened a table, then loaded it all again to apply its saved sort, so RadioTrail's 55,280 stations loaded twice at every launch: about 17 seconds. The saved sort now goes into the first load.
+- **DbDo remembers it has run.** The sample database it opens the first time was never recorded as your session, so every launch reopened it as if it were the first. Now DbDo reopens what you last used.
+- **The log says how long each table took to open,** with its rows, so a slow table shows itself.
+
 ## 19 October 2026 -- No console left waiting after setup
 
 - **Setup no longer leaves a console window open.** The finish page's Ollama and model boxes ran their scripts without telling them not to pause, so a console could wait for a key after the installer had closed. They now run the way every other box does.

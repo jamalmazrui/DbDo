@@ -252,6 +252,12 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a href="#october-2026-show-in-filedir"
+id="toc-october-2026-show-in-filedir">19 October 2026 – Show in
+FileDir</a></li>
+<li><a href="#october-2026-faster-to-open"
+id="toc-october-2026-faster-to-open">19 October 2026 – Faster to
+open</a></li>
 <li><a href="#october-2026-no-console-left-waiting-after-setup"
 id="toc-october-2026-no-console-left-waiting-after-setup">19 October
 2026 – No console left waiting after setup</a></li>
@@ -558,6 +564,31 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="october-2026-show-in-filedir">19 October 2026 – Show in
+FileDir</h2>
+<ul>
+<li><strong>Show in FileDir (Control+Shift+Backslash)</strong> shows the
+open database’s file, selected in its folder, in FileDir.</li>
+<li><strong>A file handed to the DbDo already running is
+opened.</strong> Starting DbDo on a file while it was open used to bring
+DbDo forward and drop the file, so FileDir’s Open in DbDo did nothing
+whenever DbDo was running.</li>
+<li><strong>The build needs HomerDev 1.79.0 or later.</strong></li>
+</ul>
+<h2 id="october-2026-faster-to-open">19 October 2026 – Faster to
+open</h2>
+<ul>
+<li><strong>A sorted table loads once, not twice.</strong> DbDo opened a
+table, then loaded it all again to apply its saved sort, so RadioTrail’s
+55,280 stations loaded twice at every launch: about 17 seconds. The
+saved sort now goes into the first load.</li>
+<li><strong>DbDo remembers it has run.</strong> The sample database it
+opens the first time was never recorded as your session, so every launch
+reopened it as if it were the first. Now DbDo reopens what you last
+used.</li>
+<li><strong>The log says how long each table took to open,</strong> with
+its rows, so a slow table shows itself.</li>
+</ul>
 <h2 id="october-2026-no-console-left-waiting-after-setup">19 October
 2026 – No console left waiting after setup</h2>
 <ul>

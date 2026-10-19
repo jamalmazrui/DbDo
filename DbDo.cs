@@ -2685,6 +2685,39 @@ namespace DbDo
         // Filter and sort are best-effort: if the cached expression no
         // longer parses (e.g., a referenced column was dropped), we
         // ignore the failure rather than fail the table switch.
+        private const bool bSortOnFirstOpen = true;
+
+        // savedSortFor: the sort applyTableSettings would apply to this table, found before the table
+        // opens: the session's cache, then the database's settings file, then the view stored in the
+        // database when no column list is set -- the same places, in the same order of precedence.
+        private string savedSortFor(string sTable)
+        {
+            string sSort = null;
+            if (dTableCache.ContainsKey(sTable) && !string.IsNullOrEmpty(dTableCache[sTable].sSort)) sSort = dTableCache[sTable].sSort;
+            bool bSelectList = getSelectList(sTable) != null && getSelectList(sTable).Length > 0;
+            try
+            {
+                string sInix = perDbInixPath();
+                if (!string.IsNullOrEmpty(sInix) && File.Exists(sInix))
+                {
+                    if (!string.IsNullOrEmpty(readIniFromFile(sInix, "Table:" + sTable, "SelectFields"))) bSelectList = true;
+                    string sOrd = readIniFromFile(sInix, "Table:" + sTable, "OrderFields");
+                    if (!string.IsNullOrEmpty(sOrd)) sSort = sOrd;
+                }
+            }
+            catch { }
+            try
+            {
+                if (!bSelectList)
+                {
+                    string sOrdIn = readViewFromDatabase(sTable, "OrderFields");
+                    if (!string.IsNullOrEmpty(sOrdIn)) sSort = sOrdIn;
+                }
+            }
+            catch { }
+            return sSort;
+        }
+
         private void applyTableSettings(string sTable)
         {
             if (oRecordset == null) return;
@@ -2908,6 +2941,42 @@ namespace DbDo
             else
                 iLock = AdoConstants.adLockOptimistic;
 
+            // THE SAVED SORT GOES INTO THE FIRST LOAD (19 October 2026). A table opened unsorted and then
+            // took its saved sort by loading again with ORDER BY, so RadioTrail's 55,280 stations loaded
+            // twice at every launch: about 11 seconds, then 5.6 (Jamal's session logs). The saved sort is
+            // found first, from the same places applyTableSettings looks, and the table opens sorted once;
+            // applyTableSettings then finds that sort in force and does not load again. If the sorted open
+            // fails, the plain open below runs as before. ROLLBACK: set bSortOnFirstOpen to false.
+            string sSortFirst = "";
+            if (bSortOnFirstOpen)
+            {
+                try { sSortFirst = (savedSortFor(sTable) ?? "").Trim(); } catch { sSortFirst = ""; }
+            }
+            DateTime dtOpenStarted = DateTime.Now;
+            bool bOpenedSorted = false;
+            if (sSortFirst.Length > 0)
+            {
+                try
+                {
+                    string sExtFirst = "";
+                    try { sExtFirst = System.IO.Path.GetExtension(sFilePath ?? "").TrimStart('.').ToLowerInvariant(); } catch { }
+                    string sOrderFirst = buildOrderByClause(sSortFirst, sExtFirst);
+                    if (sOrderFirst.Length > 0)
+                    {
+                        oRecordset.Open("SELECT * FROM " + quoteOpenTable(sTable) + " ORDER BY " + sOrderFirst, oConn,
+                            AdoConstants.adOpenStatic, iLock, AdoConstants.adCmdText);
+                        bOpenedSorted = true;
+                    }
+                }
+                catch (Exception exSorted)
+                {
+                    DbDoLog.write("selectTable: the sorted open of " + sTable + " failed, so it opens plain: " + exSorted.Message);
+                    releaseCom(oRecordset);
+                    oRecordset = createComObject("ADODB.Recordset");
+                    oRecordset.CursorLocation = AdoConstants.adUseClient;
+                }
+            }
+            if (!bOpenedSorted)
             try
             {
                 if (needsExplicitSelect())
@@ -2933,7 +3002,11 @@ namespace DbDo
             sCurrentTable = sTable;
             sSourceSql = null;
             bCurrentIsView = bIsView;
-            sActiveSort = "";   // fresh open starts unsorted; cached sort re-applied via applyTableSettings
+            // A table opened sorted keeps that sort; otherwise it starts unsorted and applyTableSettings applies any.
+            sActiveSort = bOpenedSorted ? sSortFirst : "";
+            try { DbDoLog.write("Open: " + sTable + "; rows=" + (int)oRecordset.RecordCount
+                + (bOpenedSorted ? "; sorted on open by " + sSortFirst : "") + "; milliseconds="
+                + (long)(DateTime.Now - dtOpenStarted).TotalMilliseconds); } catch { }
             // A view is read-only by nature (SQLite/ADO cannot
             // update it); mark it innate so edits are blocked and
             // Alt+Z cannot unlock it. A real table clears the flag.
@@ -13624,6 +13697,9 @@ namespace DbDo
                 "Control+Slash. The prompt opens with its working directory set to the open database's folder, or your user folder when nothing is open. Companion to Open in Explorer (Alt+Backslash), which opens that same folder in the file manager.");
             // Control+Backslash as well (suite manifest), the key EdSharp and FileDir use.
             registerLocalAlias(Keys.Control | Keys.Oem5, miToolsCommandPrompt);
+            // SHOW IN FILEDIR (19 October 2026), Control+Shift+Backslash, the same key as FileDir's Open
+            // in DbDo: the open database's file, selected in its folder in FileDir.
+            addItem(miTools, "Show in FileDir", "Show in FileDir", Keys.Control | Keys.Shift | Keys.Oem5, toolsShowInFileDirClicked);
             // ASK THE MODEL ON THIS COMPUTER. The keys are EdSharp's and
             // FileDir's, unchanged: F12 asks a plain question, Shift+F12 sends
             // the thing you are looking at with it. Keeping them apart matters
@@ -14010,6 +14086,7 @@ namespace DbDo
                 "Shift+Space. Each row reads 'Row N -- col1: val1; col2: val2; ...' with null/blank for SQL NULL / empty values. Unlike Say Records Rest Marked (Alt+Shift+M), which starts at the cursor, this always scans from the top of the recordset. The cursor position is left unchanged. Double-press shows the rows in the read-only review dialog.");
             add("Say Position",       "Speak the column header and 1-based row number of the virtual cell",
                 "JAWS-style 'say cursor position' for the listview. Speech-only; does not move focus. Double-press opens the same text in a read-only multi-line dialog.");
+            add("Show in FileDir",    "Show the open database's file, selected in its folder, in FileDir", "");
             add("Say Time",           "Speak the current date and time", "");
             add("Say Path",           "Speak the open database's full path; press twice to show it", "");
             add("Save Clipboard",     "Save the clipboard text to a file you name", "");
@@ -21436,6 +21513,20 @@ namespace DbDo
         // them (via Choose Table, Control+Tab, or dot prompt) lands
         // on the user's last filter / sort / position / virtual
         // column for that table.
+        private void toolsShowInFileDirClicked(object sender, EventArgs evArgs)
+        {
+            if (db == null || !db.isOpen() || string.IsNullOrEmpty(db.filePath)) { Say.say("No database open"); return; }
+            Homer.SuiteCommands.openInHomerApp(this, "FileDir", db.filePath);
+        }
+
+        // openFromHandoff: a path handed to the running DbDo by a second launch -- FileDir's Open in
+        // DbDo, for one -- opened as File, Open would open it, so it is recorded as the session.
+        public void openFromHandoff(string sPath)
+        {
+            try { openDatabaseAndApplyState(sPath, null); }
+            catch (Exception ex) { ErrorDialog.show(this, "Open Database", "Could not open " + sPath + ":\n\n" + ex.Message); }
+        }
+
         private void openDatabaseAndApplyState(string sPath, RecentFiles.FileState state)
         {
             try
@@ -35914,6 +36005,12 @@ namespace DbDo
                                         if (lT.Count > 0) frm.Db.selectTable(lT[0]);
                                     }
                                     frm.invokeRefresh();
+                                    // RECORDED AS A SESSION (19 October 2026): this open went around the path that
+                                    // saves the session, so every later launch looked like the first and opened
+                                    // RadioTrail again, whatever you had used. Now the next launch restores this.
+                                    DbDoForm.IniSession.lastDatabase = sDefaultSample;
+                                    DbDoForm.IniSession.lastTable = frm.Db.currentTable ?? "";
+                                    DbDoForm.IniSession.write("Session", "Opened", "yes");
                                     DbDoLog.write("First-run default database opened.");
                                 }
                             }
@@ -35962,6 +36059,20 @@ namespace DbDo
                     frameMain.BringToFront();
                 }
                 DbDoLog.write("Second launch handed off; existing instance brought forward.");
+                // A PATH HANDED OVER IS OPENED (19 October 2026): the second launch's command line used to
+                // be dropped, so FileDir's Open in DbDo did nothing whenever DbDo was already running.
+                // Switches such as -activate are skipped; the first path that exists is opened.
+                string sHanded = null;
+                foreach (string sArg in e.CommandLine)
+                {
+                    if (string.IsNullOrEmpty(sArg) || sArg.StartsWith("-") || sArg.StartsWith("/")) continue;
+                    if (System.IO.File.Exists(sArg) || System.IO.Directory.Exists(sArg)) { sHanded = sArg; break; }
+                }
+                if (sHanded != null && frameMain != null)
+                {
+                    DbDoForm oForm = frameMain.getActiveChild();
+                    if (oForm != null) { DbDoLog.write("Opening the path handed over: " + sHanded); oForm.openFromHandoff(sHanded); }
+                }
             }
             catch (Exception ex)
             {
