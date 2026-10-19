@@ -623,6 +623,17 @@ var
   gOllamaDesc: String;
   gModelDesc: String;
 
+// ONE LOG PER RUN (19 October 2026, help\Logging.md): this run's lines go to a file dated once per run,
+// <App>-<task>-<yyyymmdd-hhmmss>.log, rather than to one <App>_setup.log that every install appended to.
+var
+  gsLogStamp: String;
+
+function logStamp(): String;
+begin
+  if gsLogStamp = '' then gsLogStamp := GetDateTimeString('yyyymmdd-hhnnss', #0, #0);
+  Result := gsLogStamp;
+end;
+
 procedure logProbe(sLogDir, sCommand: String; iExit: Integer; bRead: Boolean; lsLines: TArrayOfString);
 var
   lsOut: TArrayOfString;
@@ -633,13 +644,13 @@ begin
   if not bRead then sText := sText + '   (no output captured)';
   SetArrayLength(lsOut, 1);
   lsOut[0] := sText;
-  SaveStringsToFile(AddBackslash(sLogDir) + '{#AppName}_setup.log', lsOut, True);
+  SaveStringsToFile(AddBackslash(sLogDir) + '{#AppName}-setupProbes-' + logStamp() + '.log', lsOut, True);
   if bRead then
     for i := 0 to GetArrayLength(lsLines) - 1 do
       if Trim(lsLines[i]) <> '' then
       begin
         lsOut[0] := '[probe]   ' + lsLines[i];
-        SaveStringsToFile(AddBackslash(sLogDir) + '{#AppName}_setup.log', lsOut, True);
+        SaveStringsToFile(AddBackslash(sLogDir) + '{#AppName}-setupProbes-' + logStamp() + '.log', lsOut, True);
       end;
 end;
 

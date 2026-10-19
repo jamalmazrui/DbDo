@@ -26,7 +26,8 @@ param([switch]$bQuiet)
 
 $sApp = "DbDo"
 $sLogDir = Join-Path $env:LOCALAPPDATA "$sApp\logs"
-$sLogFile = Join-Path $sLogDir "$sApp`_setup.log"
+# One log per run (19 October 2026), as help\Logging.md has it.
+$sLogFile = Join-Path $sLogDir ("$sApp-summarizeSetup-" + (Get-Date -Format "yyyyMMdd-HHmmss") + ".log")
 $sResultsFile = Join-Path $sLogDir "$sApp`_setup_results.txt"
 $sActionsFile = Join-Path $sLogDir "$sApp`_setup_actions.txt"
 $lLines = @()

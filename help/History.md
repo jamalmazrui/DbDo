@@ -7,6 +7,7 @@ Press **Shift+F1** inside DbDo to open this file in your browser, or type `histo
 
 ## 19 October 2026 -- Show in FileDir
 
+- **Setup writes one log per run,** dated, as every Homer log is: its version checks and its Results summary no longer append to one ever-growing DbDo_setup.log.
 - **Show in FileDir (Control+Shift+Backslash)** shows the open database's file, selected in its folder, in FileDir.
 - **A file handed to the DbDo already running is opened.** Starting DbDo on a file while it was open used to bring DbDo forward and drop the file, so FileDir's Open in DbDo did nothing whenever DbDo was running.
 - **The build needs HomerDev 1.79.0 or later.**

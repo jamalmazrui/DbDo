@@ -5,7 +5,7 @@
     <link>Tutorials.htm</link>
     <description>Spoken walks through DbDo, the database program built for working by ear, and the ready-made databases that come with it. Ten walks, each under five minutes, in the order a new person meets them.</description>
     <language>en-us</language>
-    <lastBuildDate>Mon, 19 Oct 2026 21:57:40 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 19 Oct 2026 23:51:48 +0000</lastBuildDate>
     <itunes:author>Jamal Mazrui</itunes:author>
     <itunes:explicit>false</itunes:explicit>
     <itunes:category text="Technology"/>
@@ -60,7 +60,7 @@
       <description>DbDo is open. Full transcript: Tutorials.htm#0e-5-catalog-your-books</description>
       <link>Tutorials.htm#0e-5-catalog-your-books</link>
       <guid isPermaLink="false">homer-tutorial_5_catalog_your_books</guid>
-      <enclosure url="tutorials/5_Catalog_Your_Books.mp3" length="1397220" type="audio/mpeg"/>
+      <enclosure url="tutorials/5_Catalog_Your_Books.mp3" length="1396640" type="audio/mpeg"/>
       <itunes:duration>00:03:23</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
@@ -69,7 +69,7 @@
       <description>DbDo is open. Full transcript: Tutorials.htm#0f-6-explore-music</description>
       <link>Tutorials.htm#0f-6-explore-music</link>
       <guid isPermaLink="false">homer-tutorial_6_explore_music</guid>
-      <enclosure url="tutorials/6_Explore_Music.mp3" length="1404495" type="audio/mpeg"/>
+      <enclosure url="tutorials/6_Explore_Music.mp3" length="1408948" type="audio/mpeg"/>
       <itunes:duration>00:03:28</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
@@ -87,7 +87,7 @@
       <description>DbDo is open on MusicTrail. Full transcript: Tutorials.htm#0h-8-ask-with-sql</description>
       <link>Tutorials.htm#0h-8-ask-with-sql</link>
       <guid isPermaLink="false">homer-tutorial_8_ask_with_sql</guid>
-      <enclosure url="tutorials/8_Ask_with_SQL.mp3" length="1342005" type="audio/mpeg"/>
+      <enclosure url="tutorials/8_Ask_with_SQL.mp3" length="1347064" type="audio/mpeg"/>
       <itunes:duration>00:03:16</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
