@@ -149,7 +149,7 @@ rem onSpoken", which names the symptom and not the cause. So the build says the
 rem cause, first. Raise this whenever DbDo starts using something new.
 rem 1.64.5: Play Tutorials calls MediaPlayer.playTutorials, which older kits lack;
 rem a build against 1.64.4 failed to compile on 8 October 2026 rather than saying so.
-set "kitNeeded=1.79.0"
+set "kitNeeded=1.84.0"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -169,6 +169,8 @@ rem from exec\conversions.inix, Table reads the formats it needs, and Conversion
 rem plugs Media.cs's audio and video conversions into it.
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Conversion.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\ConversionMedia.cs""
+rem Voice.cs too (kit 1.84.0): ConversionMedia transcribes speech through Voice.transcribe.
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Voice.cs""
 rem ELEVATE GOES WHEREVER LBC GOES (kit 1.31 and later): Lbc's Help box carries
 rem the version section and the F11 update offer, which are Elevate's.
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Elevate.cs""

@@ -5,6 +5,11 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 20 October 2026 -- Transcripts and speech through the Homer kit
+
+- **A recording converts to a transcript, and a document to speech,** through the Homer kit's conversion, which DbDo shares with every Homer app: Whisper transcribes on your computer, and Windows' own voice speaks.
+- **The build needs HomerDev 1.84.0 or later.**
+
 ## 19 October 2026 -- Show in FileDir
 
 - **Setup writes one log per run,** dated, as every Homer log is: its version checks and its Results summary no longer append to one ever-growing DbDo_setup.log.
