@@ -14212,6 +14212,8 @@ namespace DbDo
             mi.Click += (senderA, evA) =>
             {
                 DbDoLog.write("command: " + sCommand);
+                // A menu chosen by hand is one press; a routed key keeps its count (1.87.7).
+                if (!Homer.KeyMap.bRunningCommand) Homer.KeyMap.iPressCount = 1;
                 if (!bOpensDialog) commandEcho(sCommand);
                 evHandler(senderA, evA);
             };
@@ -15283,31 +15285,17 @@ namespace DbDo
         // called from. Two callers using the same key collude into
         // each other's double-press count; pick distinct values per
         // command (the existing convention is the 101-108 range).
+        // ONE, TWO OR THREE PRESSES (kit 1.87.7), as every Homer app's Say keys: one press speaks,
+        // a quick second press spells, a third shows the answer in the read-only window to review
+        // and copy. The kit's router counts the presses; KeyMap.answer is the one copy of the
+        // pattern. iChordKey is kept for the callers' sake and no longer used. Homer.KeyMap in full:
+        // DbDo has a KeyMap class of its own.
         private void speakOrShow(string sTitle, string sText, int iChordKey)
         {
             if (string.IsNullOrEmpty(sText)) return;
-            long iNow = DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond;
-            bool bDouble = (iChordKey == iLastSpeechChord)
-                        && (iNow - iLastSpeechTicks < DoublePressMillis);
-            iLastSpeechChord = iChordKey;
-            iLastSpeechTicks = iNow;
-            if (bDouble)
-            {
-                showInfoDialog(sTitle ?? "Information", sText);
-            }
-            else
-            {
-                Say.say(sText);
-            }
+            Homer.KeyMap.answer(sTitle ?? "Information", sText);
         }
 
-        // speakOrShowParts: the multi-unit form of speakOrShow. Single
-        // press speaks each unit as its own queued message, so logical
-        // units are heard with a natural pause between them; double
-        // press shows them in the dialog, one unit per line. Empty
-        // units are dropped so a missing piece adds neither a dead
-        // pause nor a blank line. Shares the double-press timing state
-        // with speakOrShow, so the two interoperate on the same chord.
         private void speakOrShowParts(string sTitle, List<string> lParts, int iChordKey)
         {
             if (lParts == null || lParts.Count == 0) return;
@@ -15315,15 +15303,7 @@ namespace DbDo
             foreach (string sPart in lParts)
                 if (!string.IsNullOrEmpty(sPart)) lClean.Add(sPart);
             if (lClean.Count == 0) return;
-            long iNow = DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond;
-            bool bDouble = (iChordKey == iLastSpeechChord)
-                        && (iNow - iLastSpeechTicks < DoublePressMillis);
-            iLastSpeechChord = iChordKey;
-            iLastSpeechTicks = iNow;
-            if (bDouble)
-                showInfoDialog(sTitle ?? "Information", string.Join("\r\n", lClean.ToArray()));
-            else
-                Say.sayParts(lClean);
+            Homer.KeyMap.answer(sTitle ?? "Information", lClean.ToArray());
         }
 
         // showInfoDialog: open an LbcDialog with a single multi-line
@@ -17617,9 +17597,8 @@ namespace DbDo
         // value with Shift+C, or pastes some text from another
         // app's window) and the simpler implementation has fewer
         // failure modes.
-        // saySayClipboard stays DbDo's own until DbDo is on the kit's router (stage 3): the kit's
-        // copy answers through KeyMap.answer, whose repeat presses the router counts, so moving
-        // it first would lose DbDo's double-press review window in the meantime.
+        // saySayClipboard answers through KeyMap.answer by way of speakOrShow (1.87.7), now that
+        // DbDo is on the kit's router: one press speaks, two spell, three show the window.
         private void saySayClipboard(object sender, EventArgs evArgs)
         {
             string sText;

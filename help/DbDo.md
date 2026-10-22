@@ -1238,8 +1238,9 @@ field:
 - Say Cell answers `employer: Example Widgets Company`
 - Say Id answers `job_id: 3`
 
-One press speaks. A second press within a moment shows the same text in a
-read-only window you can read line by line and copy from.
+One press speaks. A quick second press spells the answer, a character at a
+time. A third shows it in a read-only window you can read line by line,
+spell phonetically and copy from. Every Homer app's Say keys work this way.
 
 #### The Say keys
 
