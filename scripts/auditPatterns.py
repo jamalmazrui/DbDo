@@ -224,6 +224,8 @@ dApprovedShadows = {
               "its keys are routed by the kit's KeyMap, which DbDo always writes as Homer.KeyMap.",
     "KeyBinding": "DbDo's holds a key and a command for its menu map; the kit's adds context, summary and description. "
                   "Goes with KeyMap.",
+    "Result": "DbDo's is its own result type; the kit's is nested in PdfReader, Homer.PdfReader.Result, so the two never "
+              "meet. Listed when DbDo began compiling PdfReader.cs for the kit's own PDF reading, 22 October 2026.",
 }
 
 

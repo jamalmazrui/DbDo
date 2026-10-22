@@ -149,7 +149,7 @@ rem onSpoken", which names the symptom and not the cause. So the build says the
 rem cause, first. Raise this whenever DbDo starts using something new.
 rem 1.64.5: Play Tutorials calls MediaPlayer.playTutorials, which older kits lack;
 rem a build against 1.64.4 failed to compile on 8 October 2026 rather than saying so.
-set "kitNeeded=1.87.7"
+set "kitNeeded=1.88.2"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -171,6 +171,8 @@ set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Conversion.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\ConversionMedia.cs""
 rem ConversionPage.cs too (kit 1.87.1): every web page in the Homer page form, as in every app.
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\ConversionPage.cs""
+rem ConversionPdf.cs and PdfReader.cs (kit 1.88.0): PDFs read with the kit's own reader, as in every app.
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\ConversionPdf.cs" "!homerDev!\exec\CSharp\PdfReader.cs""
 rem Voice.cs too (kit 1.84.0): ConversionMedia transcribes speech through Voice.transcribe.
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Voice.cs""
 rem ELEVATE GOES WHEREVER LBC GOES (kit 1.31 and later): Lbc's Help box carries
@@ -340,6 +342,45 @@ rem module states what it needs in an ASSEMBLIES line at the top of its file.
 set "homerRefs=/reference:System.IO.Compression.dll /reference:System.IO.Compression.FileSystem.dll"
 set "homerRefs=!homerRefs! /reference:System.Core.dll /reference:System.Net.Http.dll"
 set "homerRefs=!homerRefs! /reference:System.Web.Extensions.dll"
+
+rem ---- PdfPig, for the kit's own PdfReader (kit 1.88.0; DbDo from 22 October 2026) -------------------
+rem Every converting Homer app reads a PDF with the kit's PdfReader, the one technique;
+rem PdfPig (Apache 2.0) is what it reads with. The kit's getPdfPig fetches it, pinned, with
+rem every assembly it needs, into exec, and writes the program's .exe.config with the binding
+rem redirects they need -- HomerScribe's proven way. nuget.exe is used when present, and
+rem nuget.org directly when not.
+where nuget >nul 2>&1
+if not errorlevel 1 (
+  >> "!log!" echo Asking nuget for PdfPig and its dependencies
+  nuget install PdfPig -Version 0.1.16 -OutputDirectory work\packages -ExcludeVersion -NonInteractive -DependencyVersion Highest >> "!log!" 2>&1
+)
+rem The kit's own copy is run, not the one refreshed into scripts: some builds refresh their
+rem kit scripts after compiling, when this step has already run (2htm, FileDir, 22 October 2026).
+if not exist "!homerDev!\scripts\getPdfPig.ps1" (
+  echo The kit has no scripts\getPdfPig.ps1. Update HomerDev to !kitNeeded! or later.
+  >> "!log!" echo ERROR: !homerDev!\scripts\getPdfPig.ps1 missing
+  goto :build_failed
+)
+powershell -NoProfile -ExecutionPolicy Bypass -File "!homerDev!\scripts\getPdfPig.ps1" -App "DbDo" -Base "DbDo.exe.config" >> "!log!" 2>&1
+>> "!log!" echo Ran: getPdfPig, exit code !errorlevel!
+set "pdfDll="
+if exist "exec\pdfpig.name" set /p pdfDll=<exec\pdfpig.name
+if not defined pdfDll (
+  echo PdfPig could not be found or fetched, so PDFs could not be read. The log says what was tried.
+  >> "!log!" echo ERROR: PdfPig could not be found or fetched
+  goto :build_failed
+)
+if not exist "exec\DbDo.exe.config" (
+  echo DbDo.exe.config was not written, so PDFs would fail at run time. The log says why.
+  >> "!log!" echo ERROR: exec\DbDo.exe.config missing
+  goto :build_failed
+)
+for %%F in (exec\*PdfPig*.dll) do set "homerRefs=!homerRefs! /reference:"%%~fF""
+rem The companions are named bare, so each is found in exec by its full path there; %%~fF
+rem would resolve a bare name against the project folder (BatCon's first build, 22 October 2026).
+for %%F in (Microsoft.Bcl.HashCode.dll System.Buffers.dll System.Memory.dll System.Numerics.Vectors.dll System.Runtime.CompilerServices.Unsafe.dll System.ValueTuple.dll) do if exist "exec\%%F" set "homerRefs=!homerRefs! /reference:"%CD%\exec\%%F""
+>> "!log!" echo PdfPig: !pdfDll! and its companions referenced from exec
+rem DbDo authors DbDo.exe.config; getPdfPig started from it, so the installer ships exec's.
 echo Homer references: !homerRefs! >> "!log!"
 
 rem ---- remove the local copies the kit has replaced ----

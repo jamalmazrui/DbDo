@@ -287,7 +287,16 @@ Source: "exec\DbDo.exe";    DestDir: "{app}\exec"; Flags: ignoreversion
 ; Runtime configuration for DbDo.exe -- startup tuning (disables Authenticode
 ; publisher-evidence/CRL checks, enables concurrent GC). It must sit next to
 ; DbDo.exe; ignoreversion keeps it refreshed in sync with the executable.
-Source: "DbDo.exe.config"; DestDir: "{app}\exec"; Flags: ignoreversion
+; DbDo.exe.config from exec, where the build writes it from the authored one with PdfPig's
+; binding redirects added (1.88.0); PdfPig and its companions beside it, for the kit's PdfReader.
+Source: "exec\DbDo.exe.config"; DestDir: "{app}\exec"; Flags: ignoreversion
+Source: "exec\UglyToad.PdfPig*.dll"; DestDir: "{app}\exec"; Flags: ignoreversion
+Source: "exec\Microsoft.Bcl.HashCode.dll"; DestDir: "{app}\exec"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "exec\System.Buffers.dll"; DestDir: "{app}\exec"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "exec\System.Memory.dll"; DestDir: "{app}\exec"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "exec\System.Numerics.Vectors.dll"; DestDir: "{app}\exec"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "exec\System.Runtime.CompilerServices.Unsafe.dll"; DestDir: "{app}\exec"; Flags: ignoreversion skipifsourcedoesntexist
+Source: "exec\System.ValueTuple.dll"; DestDir: "{app}\exec"; Flags: ignoreversion skipifsourcedoesntexist
 Source: "exec\DbDo.dll"; DestDir: "{app}\exec"; Flags: ignoreversion
 ; The kit's conversion routes, read by Conversion beside the program (19 October 2026).
 Source: "exec\conversions.inix"; DestDir: "{app}\exec"; Flags: ignoreversion

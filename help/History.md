@@ -7,6 +7,7 @@ Press **Shift+F1** inside DbDo to open this file in your browser, or type `histo
 
 ## 20 October 2026 -- Transcripts and speech through the Homer kit
 
+- **PDFs are read with the Homer kit's own PDF reader,** as in every Homer app, keeping a tagged PDF's structure and reading an untagged one by its layout. The build fetches PdfPig by itself, and DbDo.exe.config keeps its own settings with PdfPig's redirects added. It needs HomerDev 1.88.2 or later.
 - **The Say keys follow the suite's one, two or three presses:** one press speaks, a quick second press spells, and a third shows the answer in the window to review and copy, as in every Homer app. The second press used to show the window; it now spells, and the window is one press further. A Say command chosen from the menu always speaks. The build needs HomerDev 1.87.7 or later.
 - **Web pages in the Homer page form,** as every Homer app makes them: one heading for the title, the page's parts marked for a screen reader, and pictures carried inside the page. The build needs HomerDev 1.87.1 or later.
 - **A recording converts to a transcript, and a document to speech,** through the Homer kit's conversion, which DbDo shares with every Homer app: Whisper transcribes on your computer, and Windows' own voice speaks.
