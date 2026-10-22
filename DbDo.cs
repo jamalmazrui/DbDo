@@ -13634,6 +13634,7 @@ namespace DbDo
             // TextBox plus an OK button, focus-stealing, Control+C
             // copies the whole report.
             miDescribeColumn = addItem(miMisc, "&Statistics from Column",     "Statistics from Column", Keys.Alt | Keys.Shift | Keys.S, describeColumnClicked);
+            addItem(miMisc, "Count &by Columns", "Count by Columns", Keys.Alt | Keys.Shift | Keys.B, countByColumnsClicked);
             // Select Columns: per-table visibility picker. Alt+S as
             // the S-letter productivity primary; the dialog has one
             // checkbox per column, plus Select All / Select None /
@@ -14110,6 +14111,8 @@ namespace DbDo
             add("Table Summary",      "Print row count, column count, and storage statistics for the open database", "");
             add("Statistics from Column", "Print descriptive statistics for the column under the virtual cursor",
                 "Alt+Shift+S. Type-aware: numeric columns get count/populated/min/max/mean/median/stdev/variance/CV/quartiles/IQR/outliers; date columns get range and modal year; boolean columns get true/false splits; text columns get cardinality and top-N most-frequent values. Shown in a read-only memo dialog (Control+C copies it).");
+            add("Count by Columns", "Count the records with each combination of values in the columns shown",
+                "Alt+Shift+B. Within the filter in force, over the columns the grid shows apart from the standard ones (the id, added, edited and marked), lists each combination of values with how many records have it, most common first, in a read-only window to review and copy. With State and City shown: how many contacts in each state and city.");
             add("Select Columns",        "Choose which columns the grid shows AND their order, via the Available/Chosen sequence picker",
                 "Alt+S. Opens a dialog with one checkbox per column in the current table; the user picks which columns to display. Three quick-action buttons: Select All (every column), Select None (revert to DbDo's default visible-columns rule), OK (apply selection). The choice persists with the table via the SelectList mechanism.");
             add("Generate from Grid",         "Alt+Shift+G. Ad-hoc analysis of the VIRTUAL grid (the current filtered, sorted view): profile the columns by type and pick an output -- summary statistics, frequency table, cross-tab, Markdown table, or an Excel chart (bar, pie, histogram, box-whisker, scatter, timeline). One-off and exploratory; acts on what you are looking at.", "");
@@ -18023,6 +18026,70 @@ namespace DbDo
         // Writes an .xlsx to <database-folder>/<table>-<col>-<kind>.xlsx
         // and opens it with the registered Excel handler. Same I/O
         // pattern as the existing Frequency Chart command.
+        // COUNT BY COLUMNS (22 October 2026), DbDialog's Count, accepted on 19 October: for the
+        // columns the grid shows, within the filter in force, the number of records with each
+        // combination of values. It reads the recordset as Statistics from Column does, so the
+        // filter is already applied. The standard columns every DbDo table has -- its id, added,
+        // edited and marked -- are left out: the id alone would make every record its own group.
+        private void countByColumnsClicked(object sender, EventArgs evArgs)
+        {
+            if (db == null || !db.hasRecordset() || db.recordCount == 0)
+            { Say.say("No records to count"); return; }
+            List<string> lColumns = new List<string>();
+            foreach (ColumnHeader oColumn in grid.Columns)
+            {
+                string sName = oColumn.Text ?? "";
+                string sLower = sName.ToLowerInvariant();
+                if (sName.Length == 0 || sLower.EndsWith("_id") || sLower == "added" || sLower == "edited" || sLower == "marked") continue;
+                lColumns.Add(sName);
+            }
+            if (lColumns.Count == 0) { Say.say("No columns to count by; show some with Choose Visible Columns"); return; }
+
+            object bookmarkSaved = null;
+            try { bookmarkSaved = db.bookmark; } catch { }
+            Dictionary<string, int> dCounts = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+            int iRecords = 0;
+            try
+            {
+                int iCount = db.recordCount;
+                for (int i = 1; i <= iCount; i++)
+                {
+                    try { db.absolutePosition = i; } catch { continue; }
+                    List<string> lValues = new List<string>();
+                    foreach (string sColumn in lColumns)
+                    {
+                        string sValue = "";
+                        try { sValue = db.getFieldValue(sColumn) ?? ""; } catch { sValue = ""; }
+                        sValue = sValue.Replace("\r", " ").Replace("\n", " ").Trim();
+                        lValues.Add(sValue.Length == 0 ? "(blank)" : sValue);
+                    }
+                    string sKey = string.Join(", ", lValues.ToArray());
+                    int iSoFar;
+                    dCounts.TryGetValue(sKey, out iSoFar);
+                    dCounts[sKey] = iSoFar + 1;
+                    iRecords++;
+                }
+            }
+            finally
+            {
+                if (bookmarkSaved != null) try { db.bookmark = bookmarkSaved; } catch { }
+            }
+
+            List<KeyValuePair<string, int>> lGroups = new List<KeyValuePair<string, int>>(dCounts);
+            lGroups.Sort(delegate(KeyValuePair<string, int> a, KeyValuePair<string, int> b)
+            {
+                int iOrder = b.Value.CompareTo(a.Value);
+                return iOrder != 0 ? iOrder : string.Compare(a.Key, b.Key, StringComparison.OrdinalIgnoreCase);
+            });
+            StringBuilder sbReport = new StringBuilder();
+            sbReport.AppendLine(lGroups.Count + (lGroups.Count == 1 ? " combination" : " combinations") + " of " + string.Join(", ", lColumns.ToArray())
+                + " in " + iRecords + (iRecords == 1 ? " record" : " records") + ", most common first.");
+            sbReport.AppendLine();
+            foreach (KeyValuePair<string, int> oGroup in lGroups)
+                sbReport.AppendLine(oGroup.Key + ": " + oGroup.Value);
+            showInfoDialog("Count by Columns: " + string.Join(", ", lColumns.ToArray()), sbReport.ToString());
+        }
+
         private void plotColumnClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)

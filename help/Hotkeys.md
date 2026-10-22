@@ -218,6 +218,9 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Copy Cell to Clipboard\
   Copy the value of the cell under the virtual cursor to the clipboard. C for Copy.\
   Control+C
+- Count by Columns\
+  Count the records with each combination of values in the columns shown. B for by.\
+  Alt+Shift+B
 - Database Summary\
   D for Database.\
   Alt+D
@@ -550,6 +553,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+Shift+Apostrophe\
   Empty the clipboard.\
   Clear Clipboard
+- Alt+Shift+B\
+  Count the records with each combination of values in the columns shown.\
+  Count by Columns
 - Alt+Shift+C\
   Append Record to Clipboard
 - Alt+Shift+D\
@@ -945,6 +951,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Copy Record\
   Duplicate the current row as a new row.\
   Control+Shift+C
+- Count by Columns\
+  Count the records with each combination of values in the columns shown.\
+  Alt+Shift+B
 - Current Windows\
   Pick from the list of open recordset windows and activate the chosen one.\
   F4

@@ -260,6 +260,10 @@ DbDo offers several ways to turn data into something you can read, share, or fil
 
 Acts on **one column** — the column under the virtual cursor. It computes type-aware descriptive statistics: for a numeric column, things like count, populated percentage, minimum, maximum, mean, median, standard deviation, quartiles and interquartile range, outlier fences, and mode; for dates, a temporal summary; for text, the most frequent values. It speaks and shows the result. Use it to understand a single field at a glance. Its name emphasizes that it works *from a column*.
 
+### Count by Columns (Alt+Shift+B)
+
+Counts the records with each combination of values in the columns the grid shows, within the filter in force, and lists the combinations most common first in a window you can read and copy. With State and City shown, it says how many contacts are in each state and city. The standard columns every table has -- its id, added, edited and marked -- are left out, since the id alone would make every record its own group. Choose Visible Columns sets which columns it counts by.
+
 ### Graphics Column (Control+Shift+G)
 
 Also acts on **one column** — the column under the virtual cursor — but produces a **chart** of that column (via Excel, out of process -- the one export that still needs Office) rather than a table of numbers. Use it when you want a quick visual of one field's distribution.
@@ -297,6 +301,7 @@ Run a snippet with **Invoke Script** (Alt+V); create or edit one with **Edit Sni
 | Tool | Acts on | Produces | Reusable? |
 |------|---------|----------|-----------|
 | Statistics from Column | one column | descriptive statistics (spoken/shown) | one-off |
+| Count by Columns | the columns shown | how many records have each combination of values | one-off |
 | Graphics Column | one column | a chart | one-off |
 | Generate from Grid | the virtual grid (current view) | summary, frequency, cross-tab, Markdown, or chart | one-off |
 | Run Report | the physical table | a formatted document from a saved definition | reproducible |
@@ -479,6 +484,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Database Summary | Alt+D |
 | Table Summary | Alt+T |
 | Statistics from Column | Alt+Shift+S |
+| Count by Columns | Alt+Shift+B |
 | Select Columns to Display | Alt+S |
 | Graphics Column | Control+Shift+G |
 | Generate from Grid | Alt+Shift+G |
