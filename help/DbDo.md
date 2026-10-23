@@ -173,6 +173,8 @@ Woven through the menus is a large **Say-X status family** in the Query menu: qu
 
 - **Open Template Database** (Alt+Shift+D) starts from one of the databases DbDo ships -- BookTrail, JobTrail and the rest -- opening your own copy of it.
 - **Open Database** (Control+O) opens a database file, choosing the right driver from the extension. **New Database** creates a fresh SQLite database; **Add Table** adds a table to it.
+
+  **Add Table** asks first, when a table is open, whether to **Define** a new table or **Clone** the open one's fields, which then fill the form for you to name the new table and change what you like. Every new table gets DbDo's standard columns: its id, added, edited, notes, tags and marked. The form has ten name-and-type slots; its **Text** button opens the same fields as lines you can read and edit like any text, one field a line in the form `name: TYPE`, with no limit to how many, and you can paste a structure in. On OK, if fields begin with the same letter, DbDo says which, since only the first of each gets an Alt letter in the record form, and offers to go back and rename them.
 - **Open Table in New Window** (Control+Shift+T) opens a table (or arbitrary query) in a new window.
 - **Recent Files** (Alt+R) reopens something you used lately.
 - **Close Database** closes the current database; **Backup Database** writes a copy; **Compare Database** compares two.

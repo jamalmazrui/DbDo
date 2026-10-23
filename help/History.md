@@ -7,6 +7,8 @@ Press **Shift+F1** inside DbDo to open this file in your browser, or type `histo
 
 ## 20 October 2026 -- Transcripts and speech through the Homer kit
 
+- **Add Table: Clone, Text, and shared letters,** DbDialog's last accepted features. With a table open, Add Table asks whether to define a new table or clone the open one's fields into the form. The form's Text button opens the fields as lines, name: TYPE, with no ten-field limit. On OK, fields that begin with the same letter are named, since only the first gets an Alt letter in the record form, with the choice to go back.
+- **Count by Columns also leaves out look and prime,** the two columns made from a record's values, which like the id would make every record its own group.
 - **Count by Columns, Alt+Shift+B:** how many records have each combination of values in the columns shown, within the filter in force, most common first, in a window to read and copy. DbDialog's Count, accepted on 19 October. The standard columns are left out.
 - **PDFs are read with the Homer kit's own PDF reader,** as in every Homer app, keeping a tagged PDF's structure and reading an untagged one by its layout. The build fetches PdfPig by itself, and DbDo.exe.config keeps its own settings with PdfPig's redirects added. It needs HomerDev 1.88.2 or later.
 - **The Say keys follow the suite's one, two or three presses:** one press speaks, a quick second press spells, and a third shows the answer in the window to review and copy, as in every Homer app. The second press used to show the window; it now spells, and the window is one press further. A Say command chosen from the menu always speaks. The build needs HomerDev 1.87.7 or later.

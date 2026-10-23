@@ -680,20 +680,31 @@ single filterable list of all commands you can search and run.</p>
 <h3 id="opening-databases-and-recordsets">Opening databases and
 recordsets</h3>
 <ul>
-<li><strong>Open Template Database</strong> (Alt+Shift+D) starts from
+<li><p><strong>Open Template Database</strong> (Alt+Shift+D) starts from
 one of the databases DbDo ships – BookTrail, JobTrail and the rest –
-opening your own copy of it.</li>
-<li><strong>Open Database</strong> (Control+O) opens a database file,
+opening your own copy of it.</p></li>
+<li><p><strong>Open Database</strong> (Control+O) opens a database file,
 choosing the right driver from the extension. <strong>New
 Database</strong> creates a fresh SQLite database; <strong>Add
-Table</strong> adds a table to it.</li>
-<li><strong>Open Table in New Window</strong> (Control+Shift+T) opens a
-table (or arbitrary query) in a new window.</li>
-<li><strong>Recent Files</strong> (Alt+R) reopens something you used
-lately.</li>
-<li><strong>Close Database</strong> closes the current database;
+Table</strong> adds a table to it.</p>
+<p><strong>Add Table</strong> asks first, when a table is open, whether
+to <strong>Define</strong> a new table or <strong>Clone</strong> the
+open one’s fields, which then fill the form for you to name the new
+table and change what you like. Every new table gets DbDo’s standard
+columns: its id, added, edited, notes, tags and marked. The form has ten
+name-and-type slots; its <strong>Text</strong> button opens the same
+fields as lines you can read and edit like any text, one field a line in
+the form <code>name: TYPE</code>, with no limit to how many, and you can
+paste a structure in. On OK, if fields begin with the same letter, DbDo
+says which, since only the first of each gets an Alt letter in the
+record form, and offers to go back and rename them.</p></li>
+<li><p><strong>Open Table in New Window</strong> (Control+Shift+T) opens
+a table (or arbitrary query) in a new window.</p></li>
+<li><p><strong>Recent Files</strong> (Alt+R) reopens something you used
+lately.</p></li>
+<li><p><strong>Close Database</strong> closes the current database;
 <strong>Backup Database</strong> writes a copy; <strong>Compare
-Database</strong> compares two.</li>
+Database</strong> compares two.</p></li>
 </ul>
 <p>When a database has several tables, <strong>Choose Table</strong>
 (Control+T) switches the current window to another table, and the

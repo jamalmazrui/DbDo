@@ -3860,6 +3860,43 @@ namespace DbDo
         // Returns the actual column name (preserving case) or null
         // if no PK can be determined. For composite primary keys
         // returns the FIRST column of the key.
+        // userColumns: a table's own columns and their declared types, in order, leaving out the
+        // eight every DbDo table has -- its id, added, edited, notes, tags, look, prime and marked
+        // (22 October 2026, for Clone Table). SQLite only; another database gives none.
+        public List<string[]> userColumns(string sTable)
+        {
+            List<string[]> lColumns = new List<string[]>();
+            if (!isOpen() || string.IsNullOrEmpty(sTable)) return lColumns;
+            string sExt = currentExtensionForSql();
+            if (sExt != "db" && sExt != "sqlite" && sExt != "sqlite3") return lColumns;
+            string sQuoted = "\"" + sTable.Replace("\"", "\"\"") + "\"";
+            dynamic oRs = null;
+            try
+            {
+                oRs = createComObject("ADODB.Recordset");
+                oRs.Open("PRAGMA table_info(" + sQuoted + ")", oConn, 0, 1, 1);
+                while (!(bool)oRs.EOF)
+                {
+                    try
+                    {
+                        string sName = Convert.ToString(oRs.Fields["name"].Value);
+                        string sType = Convert.ToString(oRs.Fields["type"].Value);
+                        int iPk = 0;
+                        try { iPk = Convert.ToInt32(oRs.Fields["pk"].Value); } catch { iPk = 0; }
+                        string sLower = (sName ?? "").ToLowerInvariant();
+                        bool bStandard = iPk > 0 || sLower == "added" || sLower == "edited" || sLower == "notes" || sLower == "tags"
+                            || sLower == "look" || sLower == "prime" || sLower == "marked";
+                        if (!bStandard && sName.Length > 0) lColumns.Add(new string[] { sName, string.IsNullOrEmpty(sType) ? "TEXTLINE" : sType.ToUpperInvariant() });
+                    }
+                    catch { }
+                    oRs.MoveNext();
+                }
+            }
+            catch { }
+            finally { try { if (oRs != null) oRs.Close(); } catch { } }
+            return lColumns;
+        }
+
         public string actualPrimaryKey(string sTable)
         {
             if (!isOpen() || string.IsNullOrEmpty(sTable)) return null;
@@ -13962,7 +13999,7 @@ namespace DbDo
 
             // ===== File menu =====
             add("New Database",       "Create a new database file: define the first table's fields and types; the standard columns and the builtin maps and lookups tables are added automatically", "");
-            add("Add Table",          "Add another table in the standard shape to the open database", "");
+            add("Add Table",          "Add another table in the standard shape to the open database: define its fields, or clone the open table's", "With a table open, asks Define or Clone first. The form has ten name-and-type slots and a Text button for the fields as lines, name: TYPE, without that limit; on OK it names fields that share a first letter, since only the first gets an Alt letter.");
             add("Open Database",      "Open a database file", "");
             add("Open Template Database", "Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail",
                 "Alt+Shift+D. Your own copy of the template is opened, so changes are yours to keep.");
@@ -18030,7 +18067,8 @@ namespace DbDo
         // columns the grid shows, within the filter in force, the number of records with each
         // combination of values. It reads the recordset as Statistics from Column does, so the
         // filter is already applied. The standard columns every DbDo table has -- its id, added,
-        // edited and marked -- are left out: the id alone would make every record its own group.
+        // edited, marked, and look and prime, made from the record's values -- are left out: each
+        // alone would make every record its own group.
         private void countByColumnsClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
@@ -18040,7 +18078,7 @@ namespace DbDo
             {
                 string sName = oColumn.Text ?? "";
                 string sLower = sName.ToLowerInvariant();
-                if (sName.Length == 0 || sLower.EndsWith("_id") || sLower == "added" || sLower == "edited" || sLower == "marked") continue;
+                if (sName.Length == 0 || sLower.EndsWith("_id") || sLower == "added" || sLower == "edited" || sLower == "marked" || sLower == "look" || sLower == "prime") continue;
                 lColumns.Add(sName);
             }
             if (lColumns.Count == 0) { Say.say("No columns to count by; show some with Choose Visible Columns"); return; }
@@ -19753,31 +19791,63 @@ namespace DbDo
         // on cancel or when nothing valid was entered.
         private bool bPromptTableDefinition(string sTitle, out string sTableName, out List<string[]> lFieldDefs)
         {
+            return bPromptTableDefinition(sTitle, null, out sTableName, out lFieldDefs);
+        }
+
+        // THE TABLE DEFINITION FORM (22 October 2026, from DbDialog, accepted 19 October): ten name-and-
+        // type slots, now with a Text button that opens the same definition as editable lines,
+        // "name: TYPE", one field a line and no limit to how many; and, on OK, a word when fields share
+        // a first letter, since only the first of them gets an Alt letter in the record form. lStart
+        // fills the form to begin with, as Clone Table does. The form returns with what was typed
+        // whenever it is shown again.
+        private bool bPromptTableDefinition(string sTitle, List<string[]> lStart, out string sTableName, out List<string[]> lFieldDefs)
+        {
             sTableName = "";
             lFieldDefs = new List<string[]>();
-            using (LbcDialog dlg = new LbcDialog(sTitle, this))
+            List<string[]> lCurrent = lStart != null ? new List<string[]>(lStart) : new List<string[]>();
+            string sTableKept = "";
+            while (true)
             {
-                dlg.addLabel("&Table name (plural noun, e.g. contacts):");
-                TextBox tbTable = dlg.addTextBox("", "Lower-case plural noun; the primary key becomes its singular plus _id.");
-                List<TextBox> lNames = new List<TextBox>();
-                List<ComboBox> lTypes = new List<ComboBox>();
-                for (int i = 1; i <= iMaxNewFields; i++)
+                string sBtn;
+                List<string[]> lSlots = new List<string[]>();
+                using (LbcDialog dlg = new LbcDialog(sTitle, this))
                 {
-                    dlg.addLabel("Field " + i + " &name (blank if unused):");
-                    lNames.Add(dlg.addTextBox("", "Lower_snake_case field name."));
-                    lTypes.Add(dlg.addComboPickBox("Field " + i + " t&ype:", aFieldTypes, "TEXTLINE",
-                        "Pick the field's type."));
+                    dlg.addLabel("&Table name (plural noun, e.g. contacts):");
+                    TextBox tbTable = dlg.addTextBox(sTableKept, "Lower-case plural noun; the primary key becomes its singular plus _id.");
+                    List<TextBox> lNames = new List<TextBox>();
+                    List<ComboBox> lTypes = new List<ComboBox>();
+                    for (int i = 1; i <= iMaxNewFields; i++)
+                    {
+                        string[] aStart = i <= lCurrent.Count ? lCurrent[i - 1] : null;
+                        dlg.addLabel("Field " + i + " &name (blank if unused):");
+                        lNames.Add(dlg.addTextBox(aStart != null ? aStart[0] : "", "Lower_snake_case field name."));
+                        string sStartType = aStart != null && Array.IndexOf(aFieldTypes, aStart[1]) >= 0 ? aStart[1] : "TEXTLINE";
+                        lTypes.Add(dlg.addComboPickBox("Field " + i + " t&ype:", aFieldTypes, sStartType, "Pick the field's type."));
+                    }
+                    sBtn = dlg.runWithButtons(new string[] { "OK", "Text", "Cancel" });
+                    sTableKept = tbTable.Text ?? "";
+                    for (int i = 0; i < lNames.Count; i++)
+                    {
+                        string sN = sNormalizeIdentifier(lNames[i].Text);
+                        if (sN.Length == 0) continue;
+                        string sT = lTypes[i].SelectedItem != null ? lTypes[i].SelectedItem.ToString() : "TEXTLINE";
+                        lSlots.Add(new string[] { sN, sT });
+                    }
                 }
-                string sBtn = dlg.runWithButtons(new string[] { "OK", "Cancel" });
-                if (!string.Equals(sBtn, "OK", StringComparison.OrdinalIgnoreCase)) return false;
-                sTableName = sNormalizeIdentifier(tbTable.Text);
-                for (int i = 0; i < lNames.Count; i++)
+                if (string.IsNullOrEmpty(sBtn) || string.Equals(sBtn, "Cancel", StringComparison.OrdinalIgnoreCase)) return false;
+                // Fields beyond the ten slots, from text or a clone, are kept after the slots.
+                List<string[]> lAll = new List<string[]>(lSlots);
+                for (int i = iMaxNewFields; i < lCurrent.Count; i++) lAll.Add(lCurrent[i]);
+                if (string.Equals(sBtn, "Text", StringComparison.OrdinalIgnoreCase))
                 {
-                    string sN = sNormalizeIdentifier(lNames[i].Text);
-                    if (sN.Length == 0) continue;
-                    string sT = lTypes[i].SelectedItem != null ? lTypes[i].SelectedItem.ToString() : "TEXTLINE";
-                    lFieldDefs.Add(new string[] { sN, sT });
+                    List<string[]> lFromText;
+                    if (!bPromptDefinitionText(sTitle, lAll, out lFromText)) { lCurrent = lAll; continue; }
+                    lAll = lFromText;
                 }
+                if (lAll.Count > 0 && !bSharedLettersAccepted(lAll)) { lCurrent = lAll; continue; }
+                sTableName = sNormalizeIdentifier(sTableKept);
+                lFieldDefs = lAll;
+                break;
             }
             if (string.IsNullOrEmpty(sTableName))
             { Say.say("No table name entered"); return false; }
@@ -19786,8 +19856,71 @@ namespace DbDo
             return true;
         }
 
-        // sNormalizeIdentifier: trim, spaces and hyphens to
-        // underscores, lower-case; strip anything else non-word.
+        // bPromptDefinitionText: the definition as lines, "name: TYPE", read back on OK. A line in error
+        // is named, and the text returns as it was typed.
+        private bool bPromptDefinitionText(string sTitle, List<string[]> lFields, out List<string[]> lParsed)
+        {
+            lParsed = new List<string[]>();
+            StringBuilder sbText = new StringBuilder();
+            foreach (string[] aF in lFields) sbText.Append(aF[0] + ": " + aF[1] + "\r\n");
+            string sText = sbText.ToString();
+            while (true)
+            {
+                string sBtn;
+                using (LbcDialog dlg = new LbcDialog(sTitle + ": Fields as Text", this))
+                {
+                    TextBox tbText = dlg.addMemoBox("&Fields, one a line, name: TYPE", sText,
+                        "Types: " + string.Join(", ", aFieldTypes) + ". As many fields as you like.");
+                    sBtn = dlg.runWithButtons(new string[] { "OK", "Cancel" });
+                    sText = tbText.Text ?? "";
+                }
+                if (!string.Equals(sBtn, "OK", StringComparison.OrdinalIgnoreCase)) return false;
+                lParsed = new List<string[]>();
+                HashSet<string> hsNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+                string sProblem = "";
+                int iLine = 0;
+                foreach (string sRaw in sText.Replace("\r\n", "\n").Split('\n'))
+                {
+                    iLine++;
+                    string sLine = sRaw.Trim();
+                    if (sLine.Length == 0) continue;
+                    int iColon = sLine.IndexOf(':');
+                    string sName = sNormalizeIdentifier(iColon >= 0 ? sLine.Substring(0, iColon) : sLine);
+                    string sType = iColon >= 0 ? sLine.Substring(iColon + 1).Trim().ToUpperInvariant() : "TEXTLINE";
+                    if (sName.Length == 0) { sProblem = "Line " + iLine + " has no field name."; break; }
+                    if (Array.IndexOf(aFieldTypes, sType) < 0) { sProblem = "Line " + iLine + ", " + sName + ", has the type " + sType + ", which is not one of " + string.Join(", ", aFieldTypes) + "."; break; }
+                    if (!hsNames.Add(sName)) { sProblem = "Line " + iLine + " names " + sName + " a second time."; break; }
+                    lParsed.Add(new string[] { sName, sType });
+                }
+                if (sProblem.Length == 0) return true;
+                ErrorDialog.show(this, sTitle, sProblem);
+            }
+        }
+
+        // bSharedLettersAccepted: fields that begin with the same letter share one Alt letter in the
+        // record form, so only the first of them gets it. Says which, and asks whether to keep them;
+        // No returns to the form. True when no letter is shared.
+        private bool bSharedLettersAccepted(List<string[]> lFields)
+        {
+            Dictionary<char, List<string>> dByLetter = new Dictionary<char, List<string>>();
+            List<char> lOrder = new List<char>();
+            foreach (string[] aF in lFields)
+            {
+                char cFirst = '\0';
+                foreach (char ch in aF[0]) if (char.IsLetter(ch)) { cFirst = char.ToUpperInvariant(ch); break; }
+                if (cFirst == '\0') continue;
+                if (!dByLetter.ContainsKey(cFirst)) { dByLetter[cFirst] = new List<string>(); lOrder.Add(cFirst); }
+                dByLetter[cFirst].Add(aF[0]);
+            }
+            List<string> lShared = new List<string>();
+            foreach (char c in lOrder)
+                if (dByLetter[c].Count > 1) lShared.Add(c + ": " + string.Join(", ", dByLetter[c].ToArray()) + " -- only " + dByLetter[c][0] + " gets Alt+" + c);
+            if (lShared.Count == 0) return true;
+            string sMessage = "Some fields begin with the same letter, so only the first of each gets an Alt letter in the record form:\r\n\r\n"
+                + string.Join("\r\n", lShared.ToArray()) + "\r\n\r\nKeep these names? No returns to the form to rename them.";
+            return MessageBox.Show(this, sMessage, "Shared access letters", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes;
+        }
+
         private static string sNormalizeIdentifier(string sRaw)
         {
             if (sRaw == null) return "";
@@ -20006,7 +20139,28 @@ namespace DbDo
             { Say.say("Database is read-only"); return; }
             string sTableName;
             List<string[]> lFieldDefs;
-            if (!bPromptTableDefinition("Add Table", out sTableName, out lFieldDefs)) return;
+            // CLONE TABLE (22 October 2026, from DbDialog, accepted 19 October): with a table open, Add
+            // Table asks first whether to define a new structure or clone the open table's fields, which
+            // then fill the form to be named and adjusted. A clone gets DbDo's standard columns and
+            // triggers like any new table, from lStandardTableDdl.
+            List<string[]> lStart = null;
+            string sFrom = db.currentTable;
+            if (!string.IsNullOrEmpty(sFrom))
+            {
+                string sChoice;
+                using (LbcDialog dlgHow = new LbcDialog("Add Table", this))
+                {
+                    dlgHow.addLabel("Define a new table, or clone the fields of " + sFrom + "?");
+                    sChoice = dlgHow.runWithButtons(new string[] { "Define", "Clone", "Cancel" });
+                }
+                if (string.IsNullOrEmpty(sChoice) || string.Equals(sChoice, "Cancel", StringComparison.OrdinalIgnoreCase)) return;
+                if (string.Equals(sChoice, "Clone", StringComparison.OrdinalIgnoreCase))
+                {
+                    lStart = db.userColumns(sFrom);
+                    if (lStart.Count == 0) { Say.say(sFrom + " has no fields of its own to clone"); return; }
+                }
+            }
+            if (!bPromptTableDefinition(lStart == null ? "Add Table" : "Add Table: Clone of " + sFrom, lStart, out sTableName, out lFieldDefs)) return;
             try
             {
                 bool bHasMaps = false, bHasLookups = false;
