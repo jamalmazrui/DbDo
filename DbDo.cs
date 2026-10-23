@@ -2497,6 +2497,7 @@ namespace DbDo
         // ------- close -------
         public void close()
         {
+            try { releaseFullCache(); } catch { }
             try { closeRecordset(); } catch { }
             try { if (oConn != null && ((int)oConn.State) != 0) oConn.Close(); } catch { }
             releaseCom(oRecordset); oRecordset = null;
@@ -2509,6 +2510,73 @@ namespace DbDo
             bReadOnlyInnate = false;
             clearTableCache();
             dColumnTypes.Clear();
+        }
+
+        // THE UNFILTERED RECORDSET IS KEPT WHILE A FILTER IS ON (23 October 2026). Clear Filter used to
+        // reopen the whole table, reading every row again, so a large table answered slowly. Now the
+        // first filter on a table keeps its unfiltered recordset, and Clear Filter puts it back, at
+        // once, when nothing has changed since: SQLite's total_changes() counts every insert, update
+        // and delete on this connection, and PRAGMA data_version moves when another program commits.
+        // If either moved -- a record deleted or edited while filtered -- the kept copy is stale and
+        // the table is reopened as before, so every change is respected. SQLite only; another kind of
+        // database reopens as it always did. WHY NOT ADO's Filter PROPERTY: it cannot express DbDo's
+        // filters -- SQLite functions such as lower and instr, an OR group inside an AND (Narrow and
+        // Expand), any condition typed as SQL -- so filters would lose their power for the sake of
+        // clearing. ROLLBACK: have changeStamp return "" and nothing is kept.
+        private dynamic oFullCache = null;
+        private string sFullCacheTable = "", sFullCacheSort = "", sFullCacheStamp = "";
+        private bool bFullCacheView = false, bFullCacheReadOnlyInnate = false;
+
+        private string changeStamp()
+        {
+            string sExt = currentExtensionForSql();
+            if (sExt != "db" && sExt != "sqlite" && sExt != "sqlite3") return "";
+            try
+            {
+                int iRows;
+                List<string[]> lChanges = queryRowsSqlOrThrow("SELECT total_changes()", 1, out iRows);
+                List<string[]> lVersion = queryRowsSqlOrThrow("PRAGMA data_version", 1, out iRows);
+                if (lChanges == null || lChanges.Count == 0 || lVersion == null || lVersion.Count == 0) return "";
+                return (lChanges[0][0] ?? "") + ":" + (lVersion[0][0] ?? "");
+            }
+            catch { return ""; }
+        }
+
+        private void releaseFullCache()
+        {
+            if (oFullCache == null) return;
+            try { if (((int)oFullCache.State) != 0) oFullCache.Close(); } catch { }
+            releaseCom(oFullCache); oFullCache = null;
+            sFullCacheTable = ""; sFullCacheStamp = "";
+        }
+
+        // tryRestoreFullCache: the kept unfiltered recordset back in place, if it is still true to the
+        // table; false, and the cache let go, otherwise.
+        private bool tryRestoreFullCache()
+        {
+            if (oFullCache == null) return false;
+            string sWhy = "";
+            if (!string.Equals(sFullCacheTable, sCurrentTable, StringComparison.OrdinalIgnoreCase)) sWhy = "another table is open";
+            else if (!string.Equals(sActiveSort ?? "", sFullCacheSort ?? "", StringComparison.Ordinal)) sWhy = "the sort changed while filtered";
+            else
+            {
+                string sNow = changeStamp();
+                if (sNow.Length == 0 || sNow != sFullCacheStamp) sWhy = "the table changed while filtered (" + sFullCacheStamp + " then " + sNow + ")";
+            }
+            if (sWhy.Length > 0)
+            {
+                try { DbDoLog.write("Clear Filter: the kept recordset is not used, because " + sWhy + "; the table is reopened"); } catch { }
+                releaseFullCache();
+                return false;
+            }
+            closeRecordset();
+            oRecordset = oFullCache; oFullCache = null;
+            sSourceSql = null;
+            bCurrentIsView = bFullCacheView;
+            bReadOnlyInnate = bFullCacheReadOnlyInnate;
+            sFullCacheTable = ""; sFullCacheStamp = "";
+            try { DbDoLog.write("Clear Filter: the kept unfiltered recordset of " + sCurrentTable + " is back, with no reopening"); } catch { }
+            return true;
         }
 
         private void closeRecordset()
@@ -2909,6 +2977,7 @@ namespace DbDo
 
         public void selectTable(string sTable)
         {
+            releaseFullCache();
             if (!isOpen()) throw new InvalidOperationException("No database open.");
             if (string.IsNullOrEmpty(sTable))
                 throw new ArgumentException("selectTable requires a table name.");
@@ -3242,6 +3311,20 @@ namespace DbDo
             { selectTable(sTable); return; }
 
             cacheCurrentTableSettings();
+            // The first filter on this table keeps its unfiltered recordset for Clear Filter.
+            if (string.IsNullOrEmpty(sSqlWhere) && sSourceSql == null && oRecordset != null
+                && string.Equals(sCurrentTable, sTable, StringComparison.OrdinalIgnoreCase))
+            {
+                string sStamp = changeStamp();
+                if (sStamp.Length > 0)
+                {
+                    releaseFullCache();
+                    oFullCache = oRecordset; oRecordset = null;
+                    sFullCacheTable = sTable; sFullCacheSort = sActiveSort ?? ""; sFullCacheStamp = sStamp;
+                    bFullCacheView = bCurrentIsView; bFullCacheReadOnlyInnate = bReadOnlyInnate;
+                    try { DbDoLog.write("Filter: the unfiltered recordset of " + sTable + " is kept for Clear Filter (" + sStamp + ")"); } catch { }
+                }
+            }
             closeRecordset();
 
             oRecordset = createComObject("ADODB.Recordset");
@@ -4839,6 +4922,27 @@ namespace DbDo
             }
         }
 
+        // findPosition: the position of the first record whose sField equals sValue, by ADO's own Find,
+        // one native call where Clear Filter used to read the records one at a time (23 October 2026).
+        // 0 when no record matches; -1 when Find could not be used, so the caller can look the slow way.
+        public int findPosition(string sField, string sValue)
+        {
+            if (!hasRecordset() || string.IsNullOrEmpty(sField)) return -1;
+            try
+            {
+                int iType = (int)oRecordset.Fields[sField].Type;
+                bool bNumber = iType == 2 || iType == 3 || iType == 4 || iType == 5 || iType == 6 || iType == 14
+                    || iType == 16 || iType == 17 || iType == 18 || iType == 19 || iType == 20 || iType == 21 || iType == 131;
+                string sLiteral = bNumber ? (sValue ?? "") : "'" + (sValue ?? "").Replace("'", "''") + "'";
+                if (bNumber && sLiteral.Length == 0) return -1;
+                oRecordset.MoveFirst();
+                oRecordset.Find("[" + sField.Replace("]", "]]") + "] = " + sLiteral, 0, 1);
+                if ((bool)oRecordset.EOF) return 0;
+                return (int)oRecordset.AbsolutePosition;
+            }
+            catch { return -1; }
+        }
+
         public int recordCount
         {
             get
@@ -5104,7 +5208,7 @@ namespace DbDo
             sSqlWhere = "";
             sSqlWhereSpoken = "";
             try { filter = ""; } catch { }
-            if (bSql && !string.IsNullOrEmpty(sCurrentTable)) selectTable(sCurrentTable);
+            if (bSql && !string.IsNullOrEmpty(sCurrentTable) && !tryRestoreFullCache()) selectTable(sCurrentTable);
             try { filter = ""; } catch { }
         }
         public void resetSort() { sort = ""; }
@@ -25553,6 +25657,7 @@ namespace DbDo
         // Control+Shift+F and the Clear button of Filter Records both come here.
         private void clearFilterKeepingRecord()
         {
+            DateTime dtClearStarted = DateTime.Now;
             if (db == null || !db.hasRecordset()) return;
             List<string> lsFields = db.getFieldNames() ?? new List<string>();
             string sKeyField = null, sKeyValue = null;
@@ -25561,8 +25666,12 @@ namespace DbDo
             {
                 if (db.recordCount > 0)
                 {
-                    foreach (string sName in new string[] { "prime", "id" })
+                    // The table's own primary key first: unique, so the very record is found again.
+                    string sPk = null;
+                    try { sPk = db.actualPrimaryKey(db.currentTable); } catch { sPk = null; }
+                    foreach (string sName in new string[] { sPk ?? "", "prime", "id" })
                     {
+                        if (sName.Length == 0) continue;
                         string sFound = lsFields.Find(s => string.Equals(s, sName, StringComparison.OrdinalIgnoreCase));
                         if (sFound != null) { sKeyField = sFound; sKeyValue = db.getFieldValue(sFound) ?? ""; break; }
                     }
@@ -25579,7 +25688,14 @@ namespace DbDo
             invokeRefresh();
             persistCurrentTableState();
             int iFound = 0;
-            if (sKeyField != null || dAll.Count > 0)
+            // ADO's Find first, one native call; the record-by-record walk only if Find cannot be used.
+            bool bFindUsed = false;
+            if (sKeyField != null)
+            {
+                int iAt = db.findPosition(sKeyField, sKeyValue);
+                if (iAt >= 0) { iFound = iAt; bFindUsed = true; }
+            }
+            if (!bFindUsed && (sKeyField != null || dAll.Count > 0))
             {
                 int iCount = db.recordCount;
                 for (int iPos = 1; iPos <= iCount && iFound == 0; iPos++)
@@ -25597,7 +25713,7 @@ namespace DbDo
                     catch { }
                 }
             }
-            try { DbDoLog.write("Clear Filter: " + (iFound > 0 ? "kept the record, now at position " + iFound : "the record was not found, so the first is current") + " of " + db.recordCount + (sKeyField != null ? ", known by " + sKeyField : "") + "."); } catch { }
+            try { DbDoLog.write("Clear Filter: " + (iFound > 0 ? "kept the record, now at position " + iFound : "the record was not found, so the first is current") + " of " + db.recordCount + (sKeyField != null ? ", known by " + sKeyField : "") + "." + "; " + (long)(DateTime.Now - dtClearStarted).TotalMilliseconds + " ms in all"); } catch { }
             finalizeSearchLanding(iFound > 0 ? iFound : 1);
             int iRecords = db.recordCount;
             Say.sayForced("Filter cleared. " + iRecords + (iRecords == 1 ? " record." : " records."));
