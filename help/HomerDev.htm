@@ -1,18 +1,21 @@
 ﻿<!DOCTYPE html>
-<html xmlns="http://www.w3.org/1999/xhtml" lang="" xml:lang="">
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc" />
+  <meta name="generator" content="pandoc 3.12.1" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <meta name="author" content="Jamal Mazrui" />
   <title>HomerDev</title>
   <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
     html {
-      line-height: 1.5;
-      font-family: Georgia, serif;
-      font-size: 20px;
       color: #1a1a1a;
+      color: light-dark(#1a1a1a, #fdfdfd);
       background-color: #fdfdfd;
+      background-color: light-dark(#fdfdfd, #1a1a1a);
+      color-scheme: light dark;
     }
     body {
       margin: 0 auto;
@@ -29,17 +32,24 @@
     @media (max-width: 600px) {
       body {
         font-size: 0.9em;
-        padding: 1em;
+        padding: 12px;
       }
       h1 {
         font-size: 1.8em;
       }
     }
     @media print {
-      body {
+      html {
+        color-scheme: light only;
+      }
+      html, body, pre, code {
         background-color: transparent;
+      }
+      body, a, a:visited, blockquote {
         color: black;
-        font-size: 12pt;
+      }
+      pre, code {
+        padding: 0;
       }
       p, h2, h3 {
         orphans: 3;
@@ -52,13 +62,14 @@
     p {
       margin: 1em 0;
     }
-    a {
-      color: #1a1a1a;
-    }
-    a:visited {
-      color: #1a1a1a;
+    a, a:visited {
+      color: inherit;
     }
     img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
       max-width: 100%;
     }
     h1, h2, h3, h4, h5, h6 {
@@ -81,13 +92,18 @@
     blockquote {
       margin: 1em 0 1em 1.7em;
       padding-left: 1em;
-      border-left: 2px solid #e6e6e6;
+      border-left: 2px solid;
+      border-color: #e6e6e6;
+      border-color: light-dark(#e6e6e6, #4c4c4c);
       color: #606060;
+      color: light-dark(#606060, #b6b6b6);
     }
     code {
-      font-family: Menlo, Monaco, 'Lucida Console', Consolas, monospace;
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
       font-size: 85%;
       margin: 0;
+      hyphens: manual;
     }
     pre {
       margin: 1em 0;
@@ -103,8 +119,8 @@
      overflow: visible;
     }
     hr {
-      background-color: #1a1a1a;
       border: none;
+      border-top: 1px solid currentColor;
       height: 1px;
       margin: 1em 0;
     }
@@ -121,11 +137,11 @@
     }
     tbody {
       margin-top: 0.5em;
-      border-top: 1px solid #1a1a1a;
-      border-bottom: 1px solid #1a1a1a;
+      border-top: 1px solid currentColor;
+      border-bottom: 1px solid currentColor;
     }
     th {
-      border-top: 1px solid #1a1a1a;
+      border-top: 1px solid currentColor;
       padding: 0.25em 0.5em 0.25em 0.5em;
     }
     td {
@@ -147,29 +163,30 @@
     #TOC a:not(:hover) {
       text-decoration: none;
     }
-    code{white-space: pre-wrap;}
     span.smallcaps{font-variant: small-caps;}
-    div.columns{display: flex; gap: min(4vw, 1.5em);}
-    div.column{flex: auto; overflow-x: auto;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
     div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
-    ul.task-list{list-style: none;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
     ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
       width: 0.8em;
       margin: 0 0.8em 0.2em -1.6em;
       vertical-align: middle;
     }
-    .display.math{display: block; text-align: center; margin: 0.5rem auto;}
   </style>
-  <!--[if lt IE 9]>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7.3/html5shiv-printshiv.min.js"></script>
-  <![endif]-->
 </head>
 <body>
 <header id="title-block-header">
-<h1 class="title">HomerDev</h1>
 <p class="author">Jamal Mazrui</p>
 </header>
-<nav id="TOC" role="doc-toc">
+<nav id="TOC" role="doc-toc" aria-label="Contents">
 <ul>
 <li><a href="#homerdev-the-homer-development-kit"
 id="toc-homerdev-the-homer-development-kit">HomerDev: the Homer
@@ -188,6 +205,25 @@ id="toc-where-the-kit-and-your-projects-live">Where the kit and your
 projects live</a></li>
 <li><a href="#start-a-new-app" id="toc-start-a-new-app">Start a new
 app</a></li>
+</ul></li>
+<li><a href="#the-homerdev-dialog" id="toc-the-homerdev-dialog">The
+HomerDev dialog</a>
+<ul>
+<li><a href="#asking-by-voice" id="toc-asking-by-voice">Asking by
+voice</a></li>
+</ul></li>
+<li><a href="#telling-your-ai-about-homerdev"
+id="toc-telling-your-ai-about-homerdev">Telling your AI about
+HomerDev</a>
+<ul>
+<li><a href="#connect-once" id="toc-connect-once">Connect once</a></li>
+<li><a href="#what-to-say-once-connected"
+id="toc-what-to-say-once-connected">What to say once connected</a></li>
+<li><a href="#what-to-say-without-connecting"
+id="toc-what-to-say-without-connecting">What to say without
+connecting</a></li>
+<li><a href="#each-tools-own-way" id="toc-each-tools-own-way">Each
+tool’s own way</a></li>
 </ul></li>
 <li><a href="#what-is-in-the-kit" id="toc-what-is-in-the-kit">What is in
 the kit</a>
@@ -234,19 +270,18 @@ add</a></li>
 <li><a href="#opening-focus" id="toc-opening-focus">Opening
 focus</a></li>
 </ul></li>
-<li><a href="#the-launchpad-app" id="toc-the-launchpad-app">The
-launchpad app</a>
+<li><a href="#the-launch-app" id="toc-the-launch-app">The launch app</a>
 <ul>
-<li><a href="#the-controls-in-order" id="toc-the-controls-in-order">The
-controls, in order</a></li>
-<li><a href="#the-two-boxes" id="toc-the-two-boxes">The two
-boxes</a></li>
+<li><a href="#the-bands-in-order" id="toc-the-bands-in-order">The bands,
+in order</a></li>
+<li><a href="#the-results-box" id="toc-the-results-box">The Results
+box</a></li>
 <li><a href="#the-command-line-does-everything-the-dialog-does"
 id="toc-the-command-line-does-everything-the-dialog-does">The command
 line does everything the dialog does</a></li>
-<li><a href="#settings-are-saved-as-they-are-answered"
-id="toc-settings-are-saved-as-they-are-answered">Settings are saved as
-they are answered</a></li>
+<li><a href="#settings-are-saved-when-use-configuration-is-checked"
+id="toc-settings-are-saved-when-use-configuration-is-checked">Settings
+are saved when Use configuration is checked</a></li>
 </ul></li>
 <li><a href="#keys-and-key-names" id="toc-keys-and-key-names">Keys and
 key names</a>
@@ -496,6 +531,7 @@ skills</a></li>
 </ul></li>
 </ul>
 </nav>
+<main>
 <h1 id="homerdev-the-homer-development-kit">HomerDev: the Homer
 Development Kit</h1>
 <p>HomerDev is the shared toolbox behind the Homer Tools programs. It
@@ -518,13 +554,16 @@ program is before the AI writes one.</p>
 <h2 id="contents">Contents</h2>
 <ul>
 <li><a href="#getting-started">Getting started</a></li>
+<li><a href="#the-homerdev-dialog">The HomerDev dialog</a></li>
+<li><a href="#telling-your-ai-about-homerdev">Telling your AI about
+HomerDev</a></li>
 <li><a href="#what-is-in-the-kit">What is in the kit</a></li>
 <li><a href="#camel-type">Camel Type</a></li>
 <li><a href="#the-.inix-format">The .inix format</a></li>
 <li><a href="#direct-speech-across-screen-readers">Direct speech across
 screen readers</a></li>
 <li><a href="#lbc-building-a-dialog">Lbc: building a dialog</a></li>
-<li><a href="#the-launchpad-app">The launchpad app</a></li>
+<li><a href="#the-launch-app">The launch app</a></li>
 <li><a href="#keys-and-key-names">Keys and key names</a></li>
 <li><a href="#every-file-in-the-kit-and-why-it-is-here">Every file in
 the kit, and why it is here</a></li>
@@ -564,14 +603,38 @@ assemblies the build needs.</li>
 <li>The Visual Studio Build Tools, free, for the Roslyn C#
 compiler.</li>
 <li>Python 3, for the kit’s own scripts.</li>
-<li>Inno Setup 6, if you want an installer.</li>
+<li>Inno Setup 6, if you want an installer; the kit’s build fetches
+it.</li>
 <li>Git and the GitHub CLI (<code>gh</code>), if you want to
 publish.</li>
+<li>Node.js, for Ace by DAISY and other JavaScript tools.</li>
 </ul>
+<p>HomerDev’s setup program offers Python, Git, the GitHub CLI and
+Node.js on its last page, with every other tool, each checked against
+what is installed.</p>
 <h3 id="install-the-kit">Install the kit</h3>
-<p>Unzip <code>HomerDev.zip</code> into a folder named
-<code>HomerDev</code> – <code>C:\HomerDev</code>, or one beside your
-projects on any drive. That is the whole install. Then run:</p>
+<p>There are two ways, and the kit works the same either way.</p>
+<ul>
+<li><strong>Run the setup program</strong>,
+<code>HomerDev_setup.exe</code>, from the kit’s latest release. It
+installs the kit to <code>C:\Program Files\HomerDev</code>, the standard
+place for programs, and puts a HomerDev shortcut on the desktop with the
+hotkey <strong>Alt+Control+Shift+D</strong>. Its last page offers every
+tool any Homer program or the kit uses – Ace by DAISY, EPUBCheck,
+ExifTool, ffmpeg, Git, GitHub CLI, ImageMagick, Java, mpv, Node.js,
+Ollama, Pandoc, PDF tools, Python, Tesseract, Whisper and yt-dlp – and a
+local AI model, each worded Install, Update or Reinstall by what is
+already there, so pressing Enter sets the computer up for all of them at
+once. It also sets the <code>HomerDev</code> environment variable for
+the whole computer, unless one is already set, so every app’s build
+finds the kit there.</li>
+<li><strong>Unzip <code>HomerDev.zip</code></strong> into a folder named
+<code>HomerDev</code>. If you work at the command line,
+<code>C:\HomerDev</code> is a good choice: the paths are shorter to type
+than ones under Program Files. A copy here needs no setting when your
+projects are beside it.</li>
+</ul>
+<p>To build the kit itself, from its folder run:</p>
 <pre><code>build</code></pre>
 <p>It converts every document to HTML with pandoc, fetching pandoc if
 the machine does not have it, and then checks the kit over: every
@@ -620,39 +683,193 @@ installer script: a fresh AppId, and the desktop hotkey.</p>
 <p>Then:</p>
 <pre><code>cd \JobDo
 buildJobDo</code></pre>
+<h2 id="the-homerdev-dialog">The HomerDev dialog</h2>
+<p>Press <strong>Alt+Control+Shift+D</strong> from anywhere in Windows,
+after setup, or run <code>exec\HomerDev.exe</code> in the kit. The
+dialog is a tour of the kit, and it is built only from the kit’s own
+classes, so it shows them at work: its dialogs are Lbc, its player is
+the Homer Player, its reading window is the help box, and its chat is
+the kit’s Ollama class.</p>
+<p>D stands for development. The H keys, with and without Shift, belong
+to HomerScribe and HomerView, and Alt+Control+D belongs to DbDo.</p>
+<p>The controls, in tab order:</p>
+<ul>
+<li><strong>Kit contents</strong>, a list of everything the kit holds,
+by kind and then by name: documents, the plugin, samples and their
+sources, scripts, shared code in C# and in Python, skills, subagents and
+templates. Each line says what the item is. Control+J searches the
+list.</li>
+<li><strong>Open</strong>, or Enter in the list: a document opens in
+your browser; a sample runs, so you can compare the one-dialog fruit
+basket with the version with several windows, and the C# versions with
+the Python ones; any other file opens in a window you read line by
+line.</li>
+<li><strong>Play tutorials</strong> plays the kit’s ten spoken walks in
+the Homer Player. Focus starts on the first walk: Enter plays it, and
+Down Arrow moves to the next.</li>
+<li><strong>Homer projects</strong>, a list of every Homer project, each
+with what it does. <strong>Run setup</strong> (Alt+S) downloads the
+newest installer of the one you are on from GitHub and runs it;
+<strong>Download</strong> (Alt+D) saves the installer in your Downloads
+folder instead. Enter in the list runs setup. The list comes from
+data.inix, so a new project is added there, not in code.</li>
+<li><strong>Inix explained</strong> shows the inix format with an
+example file, and then what the kit’s own reader made of that file,
+section by section.</li>
+<li><strong>Layout by Code</strong> explains how every Homer dialog is
+made, shows the whole code of a small dialog, and then opens that
+dialog, so you can tab through it and hear that the order is the order
+of the lines.</li>
+<li><strong>Ask an AI</strong> opens a chat about the kit, with a choice
+of who answers. The local AI, through Ollama, runs on this computer and
+nothing leaves it; before your first question it is given the kit’s own
+maps for AI agents (<code>llms.txt</code> and <code>AGENTS.md</code>)
+and the list of everything in the kit. Claude Code, offered when it is
+installed, reads the kit itself: it runs in the kit’s folder in plan
+mode, so it reads files and changes none, and the dialog is one
+conversation with it. Type a question and press Enter, or ask by voice;
+see “Asking by voice” below. While it thinks, a soft tick sounds and the
+dialog says every ten seconds how long it has waited. The answer is
+added to the conversation as plain text, focus goes to where it begins,
+and the dialog says how long it took. An answer is also spoken when you
+asked by voice, or when Speak answers is ticked. Control+Period stops
+waiting, Control+Shift+R says the last answer again, and Control+Shift+C
+copies it – keys borrowed from The Chat Place, Kelly Ford’s accessible
+companion for Claude Code.</li>
+</ul>
+<p>F1 lists every control with its tip, and F11 checks for a newer
+HomerDev.</p>
+<h3 id="asking-by-voice">Asking by voice</h3>
+<p>In the chat, press <strong>Voice</strong> (Alt+V). A rising pair of
+tones means it is listening: say your question. When you stop talking
+for about a second and a half, it stops by itself, with a falling pair
+of tones; or press Voice again to stop sooner, the way Windows+H voice
+typing works. Escape throws the recording away. Whisper then writes what
+you said into the Question box, the dialog says what it heard, and you
+press Enter to send it, after correcting it if need be. Tick
+<strong>Send when heard</strong> to send it straight away instead.</p>
+<p>Nothing leaves the computer. The recording is made with Windows’ own
+audio input, written down by Whisper, which HomerDev’s setup program
+offers, and deleted once written down. While it listens, the dialog says
+nothing, so your screen reader is not recorded into the question; the
+tones say when it starts and stops.</p>
+<p>Why not start by saying a word, as a smart speaker does? That needs a
+wake-word model, and the free one, openWakeWord, licenses its trained
+models for non-commercial use only, which does not fit the kit’s MIT
+license; the strong alternatives are commercial. A key to start, and
+silence or the same key to stop, needs no extra model at all.</p>
+<h2 id="telling-your-ai-about-homerdev">Telling your AI about
+HomerDev</h2>
+<p>You work in your own project’s folder, such as
+<code>C:\PlantLog</code>, not in the kit’s. An AI tool started there
+knows nothing about HomerDev until something tells it. There are two
+ways: connect once, or say one sentence each time.</p>
+<h3 id="connect-once">Connect once</h3>
+<p>HomerDev’s setup program does it while it installs, and its Results
+box ends with a line naming the AI tools it connected. To do it again –
+after installing a new AI tool, say – run <code>scripts\connectAI</code>
+in the kit’s folder. For each AI tool on your computer, it does two
+things:</p>
+<ul>
+<li>It adds a short note to the tool’s personal instructions, which the
+tool reads in every project: where the kit is, and to read its
+<code>AGENTS.md</code> first. The note sits between two marker lines, so
+your own instructions in the same file are left alone.</li>
+<li>It links each of the kit’s skills into the tool’s personal skills
+folder. These are links, not copies, so they always match the kit.</li>
+</ul>
+<p>A skill folder of your own with the same name is never replaced.
+<code>connectAI --check</code> says what is connected, and
+<code>connectAI --remove</code> takes it all back out, leaving your
+files exactly as they were. Run it again after moving the kit. A tool
+you install later is connected the next time you run it.</p>
+<h3 id="what-to-say-once-connected">What to say once connected</h3>
+<p>Mention Homer or HomerDev, and say what you want in plain words. The
+AI reads the kit’s instructions and picks the matching skill. For
+example:</p>
+<ul>
+<li>“Using HomerDev, start a new app called PlantLog, a list of my
+houseplants with when each was last watered.”</li>
+<li>“Add a settings dialog to this Homer app, the Homer way.”</li>
+<li>“Here are my build logs. Why did the release step fail?”</li>
+<li>“Write the spoken tutorials for this app, following the Homer
+pattern of ten.”</li>
+</ul>
+<p>In Claude Code you can also name a skill as a command:
+<code>/homer-new-app</code>, for example. Codex and Antigravity pick a
+skill from what you ask; saying “use the homer-new-app skill” makes
+sure.</p>
+<h3 id="what-to-say-without-connecting">What to say without
+connecting</h3>
+<p>One sentence at the start of a session is enough:</p>
+<ul>
+<li>“Read the AGENTS.md of the Homer Development Kit, in the folder the
+HomerDev environment variable names, and follow it for this
+project.”</li>
+</ul>
+<p>Or name the folder itself, such as
+<code>C:\Program Files\HomerDev</code>.</p>
+<h3 id="each-tools-own-way">Each tool’s own way</h3>
+<ul>
+<li><strong>Claude Code</strong> reads <code>CLAUDE.md</code> and skills
+in <code>.claude\skills</code>. It can also install the kit as a plugin:
+type <code>/plugin marketplace add JamalMazrui/HomerDev</code>, then
+<code>/plugin install homer-dev@homer-dev-kit</code>.</li>
+<li><strong>Gemini CLI and Antigravity</strong> read
+<code>GEMINI.md</code> and <code>AGENTS.md</code>, and skills in
+<code>.agents\skills</code>.</li>
+<li><strong>OpenAI Codex</strong> reads <code>AGENTS.md</code>, and
+skills in <code>.agents\skills</code>. Start a new session after
+connecting, so it loads them.</li>
+</ul>
+<p>These tools change often. If one stops finding the kit, the
+one-sentence way always works, and running <code>connectAI</code> again
+picks up any new place a tool looks.</p>
 <h2 id="what-is-in-the-kit">What is in the kit</h2>
 <h3 id="csharp">CSharp</h3>
-<p>Twelve modules, all in the <code>Homer</code> namespace. Add
-<code>using Homer;</code> and compile the ones you use straight from
-<code>C:\HomerDev\exec\CSharp</code>; the build template already
-does.</p>
+<p>Seventeen modules, all in the <code>Homer</code> namespace. Add
+<code>using Homer;</code> and compile the ones you use straight from the
+kit’s <code>exec\CSharp</code>; the build template already does.</p>
 <ul>
-<li><strong>Mdi.cs</strong> – the frame and child of a multiple-document
-app.</li>
+<li><strong>Elevate.cs</strong> – F11’s check for a newer version on
+GitHub, and starting its setup program.</li>
+<li><strong>Inix.cs</strong> – the <code>.inix</code> settings format,
+plus table conversion between <code>.inix</code>, <code>.csv</code>,
+<code>.tsv</code>, Markdown and <code>.xlsx</code>.</li>
+<li><strong>inixVert.cs</strong> – a command-line wrapper over the table
+converter in Inix.cs.</li>
+<li><strong>KeyMap.cs</strong> – one table of commands, summaries, and
+their keys, which the menus, the key describer and the hotkey list all
+read from.</li>
+<li><strong>KeyName.cs</strong> – one spelling for every key, and
+converters to what each API wants.</li>
 <li><strong>Lbc.cs</strong> – Layout By Code. Dialogs built from
 labelled standard controls. The biggest and most used module. Its own
 section is below.</li>
 <li><strong>Log.cs</strong> – the session log every Homer program
 writes.</li>
+<li><strong>Mdi.cs</strong> – the frame and child of a multiple-document
+app.</li>
+<li><strong>Media.cs</strong> – finding and running ExifTool, ffmpeg and
+ffprobe.</li>
+<li><strong>MediaPlayer.cs</strong> – the Homer Player dialog, which
+plays tracks and playlists, including an app’s spoken tutorials.</li>
+<li><strong>Mpv.cs</strong> – driving the mpv player from another
+program, with no window of its own.</li>
+<li><strong>Ollama.cs</strong> – asking the local AI model, through
+Ollama, on this computer.</li>
+<li><strong>Paths.cs</strong> – the Homer folders: the installed ones,
+and the per-user ones under
+<code>%LOCALAPPDATA%\&lt;App&gt;</code>.</li>
 <li><strong>Say.cs</strong> – direct speech to whichever screen reader
 is running.</li>
-<li><strong>Inix.cs</strong> – the <code>.inix</code> settings format,
-plus table conversion between <code>.inix</code>, <code>.csv</code>,
-<code>.tsv</code>, Markdown and <code>.xlsx</code>.</li>
-<li><strong>KeyName.cs</strong> – one spelling for every key, and
-converters to what each API wants.</li>
-<li><strong>KeyMap.cs</strong> – one table of commands, summaries, and
-their keys, which the menus, the key describer and the hotkey list all
-read from.</li>
 <li><strong>Util.cs</strong> – string and file helpers, ported from the
 older HomerLib so the names match.</li>
+<li><strong>Voice.cs</strong> – recording a spoken question from the
+microphone, ending when the person stops talking, and writing it down
+with Whisper, all on this computer.</li>
 <li><strong>Web.cs</strong> – a small dependency-free web client: fetch
 a page, pull its links, download a file with a sensible name.</li>
-<li><strong>inixVert.cs</strong> – a command-line wrapper over the table
-converter in Inix.cs.</li>
-<li><strong>PdfRead.cs</strong> – reading a PDF with position and font
-size, so headings can be worked out. Optional: it needs the PdfPig
-package, which the app’s own build script fetches.</li>
 </ul>
 <h3 id="python">Python</h3>
 <p><code>exec\Python\</code> is the Python side of the same toolbox,
@@ -735,8 +952,10 @@ Pandas, <code>browser</code> for a browser object.</li>
 <li><strong>Lower camel case for names you define</strong> – functions,
 methods, variables, properties. Avoid upper camel case and snake case
 except where the language or an API demands them.</li>
-<li><strong>A constant is a variable with <code>c_</code> in
-front</strong>: <code>c_sFormat</code>, <code>c_iMaximum</code>.</li>
+<li><strong>A constant is named like a variable</strong>, type prefix
+and all: <code>sFormat</code>, <code>iMaximum</code>. It is set apart by
+being declared as a constant, at the top, before the variables. The old
+<code>c_</code> prefix is obsolete.</li>
 <li><strong>Functions, not subprocedures.</strong> If a routine is
 needed, make it a function, even when the result is ignored.</li>
 <li><strong>A simple if-then goes on one line</strong>, condition and
@@ -950,20 +1169,26 @@ band.</li>
 one row, which is what you want for a field and the button that fills it
 in:</p>
 <pre><code>dlg.addBand();
-TextBox tbSource = dlg.addInputBox(&quot;&amp;Source:&quot;, sSource, &quot;The file to work on.&quot;);
-Button btnBrowse = dlg.addButton(&quot;&amp;Browse source...&quot;, &quot;Pick it from a dialog.&quot;);
+TextBox tbPicture = dlg.addInputBox(&quot;&amp;Picture:&quot;, sPicture, &quot;The picture to describe.&quot;);
+Button btnPick = dlg.addButton(&quot;Pick &amp;file&quot;, &quot;Choose it from an Open dialog.&quot;);
 dlg.endBand();</code></pre>
 <p>A band changes only the arrangement. The tab order is still the order
-of the calls.</p>
+of the calls. A field’s label goes inside the band, just before its box,
+which is what lets a screen reader name the box (Insert+Tab says
+“Picture”). A band reads left to right and wraps onto a second line only
+when it is wider than the dialog can grow. A launch app does not build
+its bands this way: the kit’s LaunchDialog builds them, as the next part
+of this guide says.</p>
 <h3 id="showing-it">Showing it</h3>
 <ul>
 <li><code>runOkCancel()</code> – OK and Cancel; returns true on OK.</li>
 <li><code>runWithButtons(new string[] { "Default settings", "OK", "Cancel" })</code>
 – returns the label of the button pressed, or an empty string if the
 user pressed Escape or closed the window.</li>
-<li>A <strong>Help</strong> button is added for you and placed
-rightmost, per Windows layout. It lists every field with its tip, then
-the universal dialog keys. F1 does the same.</li>
+<li>A <strong>Help</strong> button is added for you at the end of the
+button row. It lists every field with its tip, then the universal dialog
+keys. F1 does the same. A launch dialog puts Help in a band of its own
+instead, above OK and Cancel, with <code>addHelpButton</code>.</li>
 <li><strong>Enter</strong> presses the button that means accept,
 wherever it sits in the row, and <strong>Control+Enter</strong> does it
 from any control including a memo. <strong>Escape</strong> cancels.</li>
@@ -996,68 +1221,60 @@ focus.</li>
 or pasting replaces it and Tab leaves it alone. A
 <strong>multi-line</strong> box is the exception: its caret opens on the
 first line, because its value is a document rather than a field.</p>
-<h2 id="the-launchpad-app">The launchpad app</h2>
-<p>Most Homer tools are one dialog with one job: 2htm, extCheck,
-urlCheck, bookFido, urlFido, HomerScribe. They share a shape, and a user
-who learns one has learnt them all. <code>Templates\_APP_.cs</code> is
-that shape, ready to fill in.</p>
-<h3 id="the-controls-in-order">The controls, in order</h3>
-<p>The order below is the order they are added, which is the order they
-are tabbed through and read.</p>
+<h2 id="the-launch-app">The launch app</h2>
+<p>Many Homer tools are one dialog with one job: 2htm, BatCon, extCheck,
+HomerScribe, urlCheck and urlFido. Each takes source paths and settings,
+runs a process, writes results into an output directory, shows a Results
+box and closes. They share one dialog, built by the kit’s
+<code>LaunchDialog</code> class, so a user who learns one has learnt
+them all. <code>Templates\_APP_.cs</code> is that shape, ready to fill
+in, and <a href="LaunchDialog.htm">LaunchDialog.md</a> says why each
+part is where it is.</p>
+<h3 id="the-bands-in-order">The bands, in order</h3>
 <ol type="1">
-<li><strong>Source</strong> – a text box named <code>&amp;Source</code>.
-What to work on.</li>
-<li><strong>Browse source</strong> – a button named
-<code>&amp;Browse source...</code> on the same band, opening a standard
-Open dialog.</li>
-<li><strong>Options</strong> – whatever check boxes this app needs, each
-with its own access key and tip.</li>
-<li><strong>Output</strong> – a text box named <code>&amp;Output</code>.
-Where the result goes. Blank means beside the source.</li>
-<li><strong>Choose output</strong> – a button named
-<code>&amp;Choose output...</code> on the same band, opening a standard
-folder dialog.</li>
-<li><strong>Use configuration</strong> – a check box named
-<code>&amp;Use configuration</code>. Take the saved answers next time
-without asking.</li>
-<li><strong>View output</strong> – a check box named
-<code>&amp;View output</code>. Open the result when the work
-finishes.</li>
-<li><strong>Default settings</strong> – a button that puts every field
-back as it started.</li>
-<li><strong>OK</strong> – starts the work. Enter and Control+Enter do
-the same.</li>
-<li><strong>Cancel</strong> – closes without doing anything. Escape does
-the same.</li>
-<li><strong>Help</strong> – shows the help box. F1 does the same. Lbc
-adds it and places it rightmost.</li>
+<li><strong>Source:</strong> the “Source paths” box, then the “Browse
+local source” button.</li>
+<li><strong>Transformations:</strong> the app’s own checkboxes choosing
+what is done.</li>
+<li><strong>More choices:</strong> the app’s other controls shaping that
+work.</li>
+<li><strong>Output:</strong> the “Output directory” box, then the
+“Choose output directory” button.</li>
+<li><strong>Operation:</strong> “Force replacements”, “Use
+configuration” and “View output directory”.</li>
+<li><strong>Commands:</strong> “Default settings” and “Help”.</li>
+<li><strong>Commit:</strong> OK and Cancel, alone at the bottom
+right.</li>
 </ol>
-<h3 id="the-two-boxes">The two boxes</h3>
-<ul>
-<li>The <strong>help box</strong> says what the program does, what each
-field means, what each button does, and the command line that matches.
-It is the same text the <code>--help</code> switch prints.</li>
-<li>The <strong>results box</strong> says what this run actually did,
-one short line per fact. Only actions actually taken are listed. Counts
-match their nouns.</li>
-</ul>
+<p>Control+Enter is OK and Escape is Cancel from any control. F1 is
+Help, and F11 checks the web for a newer version from anywhere. There is
+no Guide button and no log checkbox: logging is automatic, and Help says
+where the logs are.</p>
+<h3 id="the-results-box">The Results box</h3>
+<p>Every run from the dialog ends with <code>LaunchDialog.finish</code>:
+a box titled with the app’s name and Results, whose one OK button has
+the focus, so Enter, Space or Escape closes it. Then the output
+directory opens if View output directory is checked, and the app closes.
+Only actions actually taken are listed, and counts match their
+nouns.</p>
 <h3 id="the-command-line-does-everything-the-dialog-does">The command
 line does everything the dialog does</h3>
-<p>Each field has a switch, and the switch is named after the field:</p>
-<pre><code>&lt;App&gt; --source &lt;path&gt; [--output &lt;path&gt;] [--config] [--view]
-&lt;App&gt; --defaults
-&lt;App&gt; --help</code></pre>
+<p>A switch’s long form is the control’s label and its short form the
+control’s Alt letter, written /switch, -switch or –switch, in any
+case:</p>
+<pre><code>&lt;app&gt; &lt;paths&gt; [-o &lt;folder&gt;] [-f] [-u] [-v]
+&lt;app&gt; -d
+&lt;app&gt; -h</code></pre>
 <p>With any argument the program runs without opening a window, so it
 can be driven from a batch file, a scheduled task, or another program. A
-bare path with no switch is taken as the source, because that is what
-dropping a file on the program means.</p>
-<h3 id="settings-are-saved-as-they-are-answered">Settings are saved as
-they are answered</h3>
-<p>Every answer is written to <code>&lt;App&gt;.inix</code> the moment
-it is given, not at exit, so a crash or a kill loses nothing. The file
-sits beside the executable when that folder is writable, which is the
-portable case, and under <code>%LOCALAPPDATA%\&lt;App&gt;</code>
-otherwise, which is the installed case.</p>
+bare path with no switch is a source, because that is what dropping a
+file on the program means.</p>
+<h3 id="settings-are-saved-when-use-configuration-is-checked">Settings
+are saved when Use configuration is checked</h3>
+<p>When Use configuration is checked at OK, every field is written to
+<code>%LOCALAPPDATA%\&lt;App&gt;\configs\&lt;App&gt;.inix</code> and
+loaded next time; when it is not, that file is removed. Default
+settings, or <code>-d</code>, removes it too.</p>
 <h2 id="keys-and-key-names">Keys and key names</h2>
 <h3 id="one-spelling">One spelling</h3>
 <p><code>KeyName.cs</code> holds the one spelling for every key, taken
@@ -1157,8 +1374,6 @@ for when it began, with the environment and every error</li>
 app, with the window, job, settings and help commands built in</li>
 <li><strong>Paths.cs</strong> – the folder layout: the two trees, the
 nine folders, and the shipped-default-then-user-copy pattern</li>
-<li><strong>PdfRead.cs</strong> – reading text out of a PDF, including a
-tagged one</li>
 <li><strong>Say.cs</strong> – speech that reaches JAWS, NVDA and
 Narrator without the program knowing which is running</li>
 <li><strong>Util.cs</strong> – the small shared helpers, including the
@@ -1172,12 +1387,14 @@ tabular formats</li>
 Python</h3>
 <ul>
 <li><strong><strong>init</strong>.py</strong> – the package</li>
-<li><strong>elevate.py, inix.py, lbc.py, log.py, mdi.py, paths.py,
-say.py, util.py, web.py</strong> – the Python counterparts of Elevate,
-Inix, Lbc, Log, Mdi, Paths, Say, Util and Web, with the same names and
-the same behaviour. lbc and mdi use wx; a program whose windows are
-WinForms through pythonnet uses the others and keeps its own dialog
-code.</li>
+<li><strong>elevate.py, inix.py, lbc.py, log.py, mdi.py, media.py,
+paths.py, say.py, util.py, web.py</strong> – the Python counterparts of
+Elevate, Inix, Lbc, Log, Mdi, Media, Paths, Say, Util and Web, with the
+same names and the same behaviour. media.py ports only Media’s finding
+half, and adds newestInstalled, which runs every copy of a tool and
+chooses the newest, for any script where a version matters (1.56.0). lbc
+and mdi use wx; a program whose windows are WinForms through pythonnet
+uses the others and keeps its own dialog code.</li>
 </ul>
 <h3 id="templates-2">Templates</h3>
 <ul>
@@ -1271,9 +1488,9 @@ why</li>
 description, by binding</li>
 <li><strong>Tutorials.md</strong> – walkthroughs of common scenarios,
 and the audio tutorial playlist</li>
-<li><strong>Tutorial_00 to Tutorial_11</strong> – the kit’s twelve
-spoken walks, narrator and screen reader in two voices, in the pattern
-every Homer app follows</li>
+<li><strong>Tutorial_0 to Tutorial_9</strong> – the kit’s ten spoken
+walks, in the pattern of ten, narrator and screen reader in two voices,
+in the pattern every Homer app follows</li>
 <li><strong>CamelType_CSharp.md, CamelType_CSharp_Reference.md,
 CamelType_JAWSScript.md</strong> – the coding style</li>
 <li><strong>self.md</strong> – the private notebook: decisions, findings
@@ -1317,8 +1534,8 @@ bare address:</p>
 <ul>
 <li><strong>An app and the kit: the MIT License,</strong> in License.md
 beside the source, naming the program and its author. The ReadMe says so
-in a sentence: “free and open source under the <a href="License.htm">MIT
-License</a>.” Every Homer app is MIT, the one with an NVDA add-on
+in a sentence: “free and open source under the MIT
+License.” Every Homer app is MIT, the one with an NVDA add-on
 included: NV Access’s Add-on Store records an add-on’s license without
 requiring any particular one, and MIT is compatible with NVDA’s own GPL.
 Nothing else in an app claims another license – a source header, an
@@ -2111,14 +2328,14 @@ material. The transcript, <code>Tutorials.md</code>, ships like any
 other document.</p>
 <h3 id="three-more-documents">Three more documents</h3>
 <ul>
-<li><strong><a href="Rulings-2026-09-25.md">Rulings of 25
-September</a></strong> – one letter per menu, Alt+Control and its
+<li><strong>Rulings of 25
+September</strong> – one letter per menu, Alt+Control and its
 navigation-key exception, single-instance programs.</li>
-<li><strong><a href="ReaderVoices.md">The reader’s voices</a></strong> –
+<li><strong>The reader’s voices</strong> –
 how JAWS varies its voice by context, and how a spoken walk follows
 it.</li>
-<li><strong><a href="Kit-Findings-2026-09-25.md">Kit
-findings</a></strong> – where the kit let an app down in the logs of 25
+<li><strong>Kit
+findings</strong> – where the kit let an app down in the logs of 25
 September, and what was done about each.</li>
 </ul>
 <h3 id="not-twice-speech-that-repeats">Not twice: speech that
@@ -2958,9 +3175,9 @@ is built out of components that already know the conventions. The old
 collection is still worth reading for the breadth; these two are what to
 copy.</p>
 <h3 id="tutorials-that-can-be-heard">Tutorials that can be heard</h3>
-<p>The kit’s own walks are the twelve in <code>help</code>,
-<code>Tutorial_00</code> to <code>Tutorial_11</code>, in the pattern the
-kit prescribes for every app: overview, install and launch, the
+<p>The kit’s own walks are the ten in <code>help</code>,
+<code>Tutorial_0</code> to <code>Tutorial_9</code>, in the pattern of
+ten the kit prescribes for every app: overview, install and launch, the
 interface, the key rules, five tasks, glossary, conclusion, more
 information. Where the kit has no screen of its own, the walks use an
 app built on it – DbDo, EdSharp, FileDir – so a listener hears what the
@@ -3058,5 +3275,6 @@ full text, as a reference when writing or improving a Homer skill. <a
 href="HomerSkills.htm">Homer Skills</a> reads them for what they teach
 the kit: what fits the Homer guidelines, what needs a decision first,
 and which new and improved Homer skills are proposed.</p>
+</main>
 </body>
 </html>

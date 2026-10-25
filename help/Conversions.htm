@@ -1,0 +1,660 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.12.1" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <meta name="author" content="Jamal Mazrui" />
+  <title>Conversions</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      color: light-dark(#1a1a1a, #fdfdfd);
+      background-color: #fdfdfd;
+      background-color: light-dark(#fdfdfd, #1a1a1a);
+      color-scheme: light dark;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        color-scheme: light only;
+      }
+      html, body, pre, code {
+        background-color: transparent;
+      }
+      body, a, a:visited, blockquote {
+        color: black;
+      }
+      pre, code {
+        padding: 0;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a, a:visited {
+      color: inherit;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid;
+      border-color: #e6e6e6;
+      border-color: light-dark(#e6e6e6, #4c4c4c);
+      color: #606060;
+      color: light-dark(#606060, #b6b6b6);
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid currentColor;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid currentColor;
+      border-bottom: 1px solid currentColor;
+    }
+    th {
+      border-top: 1px solid currentColor;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+<header id="title-block-header">
+<h1 class="title">Conversions</h1>
+<p class="author">Jamal Mazrui</p>
+</header>
+<nav id="TOC" role="doc-toc" aria-label="Contents">
+<ul>
+<li><a href="#names-and-routes" id="toc-names-and-routes">Names and
+Routes</a></li>
+<li><a href="#engines" id="toc-engines">Engines</a></li>
+<li><a href="#any-two-types-pdf-included"
+id="toc-any-two-types-pdf-included">Any Two Types, PDF Included</a></li>
+<li><a href="#every-file-finished-for-a-screen-reader"
+id="toc-every-file-finished-for-a-screen-reader">Every File Finished for
+a Screen Reader</a>
+<ul>
+<li><a href="#header-names-in-a-workbook"
+id="toc-header-names-in-a-workbook">Header names in a workbook</a></li>
+<li><a href="#a-workbook-laid-out-for-reading"
+id="toc-a-workbook-laid-out-for-reading">A workbook laid out for
+reading</a></li>
+<li><a href="#tables-in-a-word-file"
+id="toc-tables-in-a-word-file">Tables in a Word file</a></li>
+<li><a href="#databases-in-dbdos-form"
+id="toc-databases-in-dbdos-form">Databases in DbDo’s form</a></li>
+</ul></li>
+<li><a href="#records-contacts-calendars-playlists-feeds-and-subtitles"
+id="toc-records-contacts-calendars-playlists-feeds-and-subtitles">Records:
+Contacts, Calendars, Playlists, Feeds and Subtitles</a></li>
+<li><a href="#audio-and-video" id="toc-audio-and-video">Audio and
+Video</a></li>
+<li><a href="#htm-never-.html" id="toc-htm-never-.html">.htm, Never
+.html</a></li>
+<li><a href="#recognizing-a-file"
+id="toc-recognizing-a-file">Recognizing a File</a></li>
+<li><a href="#the-best-engine-for-each-conversion"
+id="toc-the-best-engine-for-each-conversion">The Best Engine for Each
+Conversion</a></li>
+<li><a href="#for-an-app" id="toc-for-an-app">For an App</a></li>
+<li><a href="#the-check" id="toc-the-check">The Check</a></li>
+<li><a href="#moves" id="toc-moves">Moves</a></li>
+<li><a href="#learnings-from-frame-pdf-studio"
+id="toc-learnings-from-frame-pdf-studio">Learnings from FRAME PDF
+Studio</a>
+<ul>
+<li><a href="#taken-into-pdfreader-kit-1.77.5"
+id="toc-taken-into-pdfreader-kit-1.77.5">Taken into PdfReader (kit
+1.77.5)</a></li>
+<li><a href="#not-taken-and-why" id="toc-not-taken-and-why">Not taken,
+and why</a></li>
+</ul></li>
+<li><a href="#speech-and-text-kit-1.84.0"
+id="toc-speech-and-text-kit-1.84.0">Speech and text (kit
+1.84.0)</a></li>
+</ul>
+</nav>
+<main>
+<p>Every Homer app converts files through one shared copy of the code:
+Conversion.cs in C#, conversion.py in Python, and one routing table both
+read, exec\conversions.inix. This page explains the design and records
+which engine each conversion uses and why.</p>
+<h2 id="names-and-routes">Names and Routes</h2>
+<p>Each conversion is named by its source and target types, joined by a
+2: pdf2txt, pdf2docx, docx2md. The routing table has one section per
+conversion. Its ways line lists the engines to try, best first; the
+first whose engines are all present is used. A way can take steps, as in
+pdfstructure:md &gt; pandoc, which makes Markdown and then hands it to
+Pandoc.</p>
+<p>Both the source and the target decide the way. A plain text target
+wants speed, so pdf2txt reads only the PDF’s text layer. A Word target
+wants structure, so pdf2docx works out headings, lists and tables
+first.</p>
+<h2 id="engines">Engines</h2>
+<p>Each engine is either internal code, which starts no program and is
+the quickest, or an outside program, used where its quality is worth the
+start-up time.</p>
+<ul>
+<li><strong>copy</strong> (internal): the file as it is.</li>
+<li><strong>edge</strong> (outside, comes with Windows): Microsoft Edge
+prints a web page to a tagged PDF, headless and with a profile of its
+own, so a PDF needs no Office (kit 1.90.0). Whether every Edge version
+tags the PDF is unconfirmed; test a result with a screen reader.</li>
+<li><strong>ocr</strong> (outside): Tesseract reads a scanned page. In
+C#, the kit’s PdfReader runs it, so a scanned page gets headings and
+lists too; in Python, pypdfium2 draws each page for it. Never used for a
+quick read, since it can take minutes.</li>
+<li><strong>officecom</strong> (outside, last resort): Microsoft Office
+through COM. Used only where nothing free will do. When Office is needed
+and missing, an Alert box says so once per session, and says how to
+avoid it.</li>
+<li><strong>pandoc</strong> (outside): Pandoc, for the markup and
+document formats it reads and writes.</li>
+<li><strong>pdfstructure</strong> (internal where it can be): a PDF’s
+headings, lists and reading order. In C#, the kit’s PdfReader,
+HomerScribe’s reader, in an app that compiles PdfReader.cs and
+ConversionPdf.cs with PdfPig; otherwise pymupdf4llm through Python. A
+document of scans fails it, so OCR reads it next.</li>
+<li><strong>pdftext</strong> (internal when it can be): a PDF’s text
+layer. PdfPig in-process when PdfPig is beside the program; otherwise
+PyMuPDF’s plain text through Python.</li>
+<li><strong>sqlite</strong> (outside, Python): a table to an SQLite
+database, one table named after the file with its fields from the first
+row, or a database to Markdown, each table under its own heading (kit
+1.90.0). Python has SQLite built in and the kit has none of its own, so
+both languages run the same short script; the kit’s build fails if the
+two copies ever differ.</li>
+<li><strong>table</strong> (internal): rows and columns, through the
+kit’s Table class, with cells placed by their references.</li>
+<li><strong>zipxml</strong> (internal): the text inside a Word, Excel,
+PowerPoint or OpenDocument file, read straight from its XML.</li>
+</ul>
+<h2 id="any-two-types-pdf-included">Any Two Types, PDF Included</h2>
+<p>Every Homer app converts between any two of the types the kit knows,
+with the same code (kit 1.90.0, the author’s rule of 24 October 2026).
+The types are known by their usual Windows extensions, plus .inix.</p>
+<ul>
+<li><strong>Through Markdown.</strong> The table names 100 pairs and
+cannot name every one. A pair it does not name goes in two of its own
+steps through Markdown, which nearly every type reads into and writes
+out of: pdf to xlsx is pdf2md, then md2xlsx. A type with no Markdown
+route goes through a web page instead: json to pdf is json2htm, then
+htm2pdf. Each step is an ordinary route, with its own best-first ways
+and its own log lines.</li>
+<li><strong>Even when a route exists.</strong> When every way of a named
+pair fails, as docx2pdf’s Word does on a computer without Office, the
+same two steps are tried before giving up, and the error says what each
+attempt found.</li>
+<li><strong>PDF in and out.</strong> A PDF is read by pdfstructure, with
+OCR for scans. A PDF is made by Edge from a web page, so md2pdf, htm2pdf
+and anything that reaches them need no Office. Word stays first for
+docx2pdf and odt2pdf, since its own export keeps the most of a Word
+file’s layout.</li>
+<li><strong>Databases in and out.</strong> The sqlite engine makes and
+reads SQLite databases, so a table becomes a .db and a .db becomes
+anything Markdown can.</li>
+<li><strong>What cannot be made.</strong> JSON to a table, EPUB or
+PowerPoint, since JSON has no single table and those two would need a
+third step. A type to itself.</li>
+<li><strong>Asking first.</strong> Conversion.canConvert, and canConvert
+in Python, answer for the hub too, so BatCon’s list and every app’s
+picker offer exactly what convert can do.</li>
+</ul>
+<h2 id="every-file-finished-for-a-screen-reader">Every File Finished for
+a Screen Reader</h2>
+<p>Whatever engine makes a file – the kit’s own writers, Pandoc, Edge or
+Office – the kit opens it once more when it is done, gives it what a
+screen reader needs, and logs what it could not fix (kit 1.91.0). The
+findings use extCheck’s rule names, so a log reads like an extCheck
+report. A middle file of a two-step conversion is left alone, since a
+program reads it next, not a person.</p>
+<ul>
+<li><p><strong>Excel (.xlsx):</strong> header names for every table, a
+frozen header row, a sheet name from the file’s name in place of a lone
+“Sheet1” or “Data”, and the workbook’s title, author and language.
+Merged cells are reported.</p></li>
+<li><p><strong>EPUB (.epub):</strong> a title from the book’s first
+heading and a language, when the package has none.</p></li>
+<li><p><strong>Markdown (.md):</strong> front matter with a title from
+the first heading and a language, when there is none. Skipped heading
+levels, no headings at all, and pictures without alternative text are
+reported.</p></li>
+<li><p><strong>PDF (.pdf):</strong> tagged. Edge prints a page that has
+its language and title; Word now exports with its structure tags and
+heading bookmarks rather than Save As, whose tags depend on a setting in
+Word.</p></li>
+<li><p><strong>PowerPoint (.pptx):</strong> title, author and language.
+Slides without a title and pictures without alternative text are
+reported.</p></li>
+<li><p><strong>Web pages (.htm):</strong> the Homer page form, as
+before: one H1, main, language and title. Pictures without alternative
+text are reported.</p></li>
+<li><p><strong>Word (.docx):</strong> title from the first heading,
+author and language, and the language in the default style, so every run
+of text is read in it. A document without headings, and pictures without
+alternative text, are reported.</p></li>
+<li><p><strong>extCheck’s rules judge every file the kit makes,</strong>
+in an app that compiles the kit’s Quality.cs, where they now live.
+Markdown has all of extCheck’s rules (kit 1.92.0), and extCheck runs
+them from there too. Word, Excel and PowerPoint have extCheck’s rules
+read from the file’s own XML, with extCheck’s names, wording and
+thresholds, so no Office is needed (kit 1.92.1): capitals, typed
+bullets, repeated spaces, skipped or repeated headings, a long stretch
+before the first heading, empty table cells, two-way table headers,
+vague or plain links, floating text boxes and unlabeled form fields in
+Word; hidden rows and columns, blank rows used for layout, default table
+names, tables without headers, long sheet names, and charts and pictures
+without alternative text in Excel; small text, typed bullets, capitals,
+fast or automatic advancing, repeating or rapid animation, a title not
+read first, and missing speaker notes in PowerPoint. Two need Office’s
+rendering and stay in extCheck for now: color used alone, and a form
+field’s help text beyond what the file holds.</p></li>
+<li><p><strong>Every EPUB gets EPUB Accessibility 1.1 metadata</strong>
+where it has none (kit 1.92.2, from GLOW): how it can be read (textual,
+and visual when it has pictures), that text alone suffices, its features
+(structural navigation, a table of contents when it has one, alternative
+text when it has pictures), no hazards, and a short summary. Each is a
+claim the kit can stand behind for a book it made from a document; it
+claims no conformance it has not tested.</p></li>
+<li><p><strong>A Word paragraph that looks like a heading but is not
+styled as one</strong> is reported as FauxHeading, scored by GLOW’s
+signals: bold, large type, short, no closing punctuation, capitals or
+title case, one line, a numbering pattern, less for a name or a “Note:”.
+Only bold or large text is reported.</p></li>
+<li><p><strong>A Markdown file with more than one top heading</strong>
+is reported, MultipleTopHeadings: one H1, its title.</p></li>
+<li><p><strong>Every PDF is checked for a title and bookmarks</strong>
+as well (kit 1.92.2, from GLOW), since the title is what a reader
+announces and bookmarks let it move by headings.</p></li>
+<li><p><strong>Every PDF is checked for tags and a language,</strong>
+from IsTagged in KeyLine: a structure tree, the marked-content flag and
+/Lang. A PDF whose catalog is packed in a compressed stream could hide
+them, so the finding asks you to listen to it before taking it as
+untagged.</p></li>
+</ul>
+<p>The title is the document’s first heading where it has one, else its
+file’s name with underscores read as spaces. The language is Windows’
+own, and the author is the Windows user.</p>
+<h3 id="header-names-in-a-workbook">Header names in a workbook</h3>
+<p>JAWS and NVDA read a table’s column or row headers as you move
+through it when the table’s top-left cell carries a workbook name
+beginning ColumnTitle, RowTitle or Title (both). This comes from the
+author’s xlHeaders.vbs of 2024, which drove Excel to do it. The kit
+reads and writes the workbook’s own XML instead, so no Office is needed,
+and it improves the test in two ways.</p>
+<ul>
+<li><strong>A table is a region:</strong> a rectangle of filled cells
+set apart by blank rows and columns, as Excel’s own CurrentRegion finds
+it. It needs at least two rows and two columns.</li>
+<li><strong>Column headers</strong> are a top row whose every cell is
+filled, text, and different from the rest, ignoring case. <strong>Row
+headers</strong> are the same, down the first column.</li>
+<li><strong>An empty top-left corner</strong> no longer hides a two-way
+table: the top row is tested from its second cell and the first column
+from its second cell, and both passing makes a Title. xlHeaders found no
+headers in such a table.</li>
+<li><strong>A header must be text,</strong> so a row of different
+numbers is not taken for headers.</li>
+<li><strong>A table already named</strong> keeps its name. A new name
+takes the next free two-digit number: ColumnTitle01, ColumnTitle02.</li>
+<li><strong>The first named table’s headers are frozen,</strong> so they
+stay in view while a sighted reader scrolls.</li>
+</ul>
+<h3 id="a-workbook-laid-out-for-reading">A workbook laid out for
+reading</h3>
+<p>From the author’s xlFormat.vbs in KeyLine (kit 1.91.1). A workbook
+the kit’s own writer made, which has no styles of its own, is also laid
+out: each column as wide as its longest text, up to 40 characters, with
+longer text wrapped; the header row bold; and every row set to the top,
+so a wrapped row reads in step with its neighbors. A workbook that
+already has styles keeps them. xlFormat also deleted any column with a
+blank header; the kit keeps the column, since deleting it loses data,
+and reports it (BlankOrGenericColumnHeader).</p>
+<h3 id="tables-in-a-word-file">Tables in a Word file</h3>
+<p>From docxIt’s FormatTables in KeyLine (kit 1.91.1). A table whose
+first row is all text, every cell different, has that row marked as its
+header row, so Word repeats it on each page and a screen reader
+announces it as headers, and its header-row style is turned on. It also
+gets a bookmark JAWS reads as it does an Excel name: ColumnTitle01, or
+Title01 when its first column is distinct text too. docxIt gave every
+table the same bookmark, ColumnTitle, so each replaced the last; the kit
+numbers them. A table without such a first row is reported
+(TableMissingHeaderRow).</p>
+<h3 id="databases-in-dbdos-form">Databases in DbDo’s form</h3>
+<p>A database the kit makes is one DbDo opens with nothing to set up, as
+the homer-db skill describes. Its table is named for the file, plural
+and in lower case, with the English singular for its id: people.db holds
+people, with person_id. Its fields come in DbDo’s order: the id, added
+and edited, the data fields with DbDo’s types (TEXTLINE, TEXTMEMO,
+INTEGER or REAL, from what the column holds), url, notes and tags, look
+(the first three fields, joined with ” | “), prime (every data field)
+and marked. It has the edited and maps triggers, a unique index on
+prime, and DbDo’s own lookups, maps and views tables, seeded with DbDo’s
+field types and link kinds. A row that repeats another exactly is left
+out and counted. checkDb passes such a database with no warnings.
+Turning a database back into Markdown leaves out DbDo’s own tables and
+the fields DbDo keeps for itself.</p>
+<h2
+id="records-contacts-calendars-playlists-feeds-and-subtitles">Records:
+Contacts, Calendars, Playlists, Feeds and Subtitles</h2>
+<p>The plain-text formats people pass records in convert like any other
+type (kit 1.93.0). Each becomes a table, one record to a row, and a
+table becomes each of them, so they reach every other type through the
+table: contact cards to Excel, a calendar to a web page, a spreadsheet
+of names back to contact cards.</p>
+<ul>
+<li><strong>Contact cards (.vcf):</strong> name, given and family names,
+organization, title, email, phone, mobile, address, web, birthday and
+note. Several emails or phones share one field, separated by
+semicolons.</li>
+<li><strong>Calendars (.ics, and vCalendar’s .vcs):</strong> summary,
+start, end, location, description, web, organizer, the repeat rule and
+the event’s id. Times keep their time zone, and an all-day event stays a
+date.</li>
+<li><strong>Playlists (.m3u, .m3u8, .pls, .xspf, .wpl, .asx):</strong>
+title, location and length in seconds. A .m3u8 that is a streaming
+manifest rather than a playlist is refused, as QUILL’s playlist reader
+taught; the two share a first line.</li>
+<li><strong>Feed lists (.opml):</strong> title, feed, site and the group
+it sits in.</li>
+<li><strong>Subtitles (.srt, .vtt):</strong> start, end and text, so one
+turns into the other.</li>
+</ul>
+<p>Writing one, a table’s field names are matched loosely: Email, E-mail
+and Email Address all fill the email. It is one short Python script that
+both languages run, as the SQLite engine is, and the kit’s build fails
+if the two copies differ. The table is the third hub, after Markdown and
+a web page.</p>
+<h2 id="audio-and-video">Audio and Video</h2>
+<p>Audio (mp3, wav, flac, m4a, aac, ogg, opus, wma, aiff) and video
+(mp4, mkv, avi, mov, wmv, webm, flv, m4v, mpg, mpeg, ts, m2ts, 3gp, ogv)
+convert among themselves through ffmpeg; video to audio keeps the sound.
+Either becomes a transcript – text, Markdown, a web page, Word, PDF,
+EPUB – through Whisper, and a document becomes spoken audio or video
+through the kit’s voices.</p>
+<h2 id="htm-never-.html">.htm, Never .html</h2>
+<p>A web page a Homer app makes is .htm. Every Homer app reads .html as
+.htm, in C# and in Python alike, so the table has no html2 sections;
+four were removed in 1.90.0, since they could never be reached. A picker
+offers “htm” and never “html”.</p>
+<h2 id="recognizing-a-file">Recognizing a File</h2>
+<p>Before converting, the kit works out what a file is, from its
+extension and from its first bytes:</p>
+<ul>
+<li><strong>A magic number settles it.</strong> A file that starts like
+a PDF, a zip, a PNG, a JPEG, a program or a 1997 Office file is that,
+whatever its name.</li>
+<li><strong>A byte order mark or no zero bytes means text.</strong> So a
+.inix, a .m3u, or a file with an extension nobody listed is read as text
+when its bytes are text.</li>
+<li><strong>The encoding comes from Ude</strong> when Ude.dll is beside
+the program. Ude is the NuGet port of Mozilla’s encoding detector.
+Without it, a strict UTF-8 test decides between UTF-8 and the Windows
+code page.</li>
+<li><strong>Zero bytes with no byte order mark mean binary.</strong> So
+a binary file wearing a .txt name is not read aloud as gibberish.</li>
+</ul>
+<p>Conversion.recognize returns what was found, and Conversion.describe
+turns it into one line a person hears, such as “M3U play list, text in
+UTF-8, 12 lines”.</p>
+<h2 id="the-best-engine-for-each-conversion">The Best Engine for Each
+Conversion</h2>
+<p>This is the review of October 2026, across DbDo, EdSharp, FileDir,
+HomerScribe, HomerView and 2htm. Each choice is the best way any app
+had, with Office last.</p>
+<ul>
+<li><strong>csv, tsv and inix to md, htm or docx:</strong> the table
+engine, from FileDir. Pandoc has no writer for csv or tsv.</li>
+<li><strong>doc, xls and ppt (the 1997 Office formats):</strong> Office
+through COM, with the Alert box when it is missing. Recommended next:
+NPOI, a free NuGet package DbDo already uses, reads .xls without Office,
+so xls2csv and xls2md can move off COM.</li>
+<li><strong>docx2htm, docx2md, docx2epub and docx2odt:</strong> Pandoc.
+2htm used Word for docx2htm; Pandoc needs no Office and keeps the
+structure.</li>
+<li><strong>docx2txt and odt2txt:</strong> zipxml, new in kit 1.74.0,
+since no program starts; then Pandoc.</li>
+<li><strong>md2docx, md2htm and md2epub:</strong> Pandoc, with the
+page-break filter where the program ships it, as HomerScribe does.</li>
+<li><strong>pdf2md, pdf2docx and pdf2htm:</strong> HomerScribe’s reader
+is the best in the suite. It uses PdfPig’s layout analysis and reading
+order, so a two-column page reads down each column. It uses the PDF’s
+own tag tree when there is one, infers headings from type size, reads
+scanned pages with Tesseract above a confidence floor, and describes
+pictures with a local model. Since kit 1.75.0 it is the kit’s PdfReader
+class, the pdfstructure and ocr engines in any app that compiles it;
+apps that do not yet still get pymupdf4llm.</li>
+<li><strong>pdf2txt:</strong> pdftext, for speed. This is what FileDir’s
+? key uses. It replaces pymupdf4llm, which worked out the whole
+structure only to throw it away, and 2htm, which read PDFs through
+Word.</li>
+<li><strong>pptx2md and pptx2txt:</strong> zipxml, with a heading for
+each slide in Markdown. PowerPoint only for the old .ppt.</li>
+<li><strong>xlsx2csv, xlsx2md and xlsx2txt:</strong> the table engine,
+then zipxml. Excel only for the old .xls.</li>
+<li><strong>Audio, video and pictures:</strong> ffmpeg and ImageMagick,
+in ConversionMedia.cs, moved from FileDir.</li>
+</ul>
+<p>Every conversion is logged with its route and its time in
+milliseconds, so the order of the ways can be tuned from measurements
+over many test cycles.</p>
+<h2 id="for-an-app">For an App</h2>
+<p>An app compiles Conversion.cs and Table.cs from the kit, and
+ConversionMedia.cs if it converts media. Its build copies
+exec\conversions.inix beside the program, and its installer ships it.
+Then:</p>
+<pre><code>string sError;
+string sText = Homer.Conversion.toText(sPath, out sError);
+bool bMade = Homer.Conversion.convert(sSource, sTarget, out sError);</code></pre>
+<p>toText takes the quickest way and never uses OCR, for a key that must
+answer at once. convert takes the best way for the target.</p>
+<h2 id="the-check">The Check</h2>
+<p>The shared check’s conversion step scans an app’s own C# for private
+conversion code: its own Pandoc finder, a 2htm call, an Office COM
+object or pymupdf4llm. An app listed in conversionsMoved, in
+data\SuiteCommands.inix, fails on any such line; others get a warning
+that counts them until their move.</p>
+<h2 id="moves">Moves</h2>
+<ul>
+<li><strong>DbDo:</strong> moved in kit 1.77.1. Its Word export goes
+through the kit from Markdown; it reads .xls with NPOI, which it already
+used to write spreadsheets, so no Office is needed; Excel remains only
+for its native charts, marked as not conversions.</li>
+<li><strong>HomerView:</strong> next. It still has 5 lines of its own
+conversion code.</li>
+<li><strong>EdSharp:</strong> moved in kit 1.76.0. Import and Export
+offer and use the kit’s routes first; its [Import] and [Export] sections
+serve only the targets the kit does not cover, such as MediaWiki, LaTeX
+and braille. Its Word conversion code is gone; Word remains only for its
+optional Word spelling, thesaurus and mail.</li>
+<li><strong>FileDir:</strong> moved in kit 1.74.0. Its Convert.cs and
+Table.cs became the kit’s Conversion.cs and Table.cs.</li>
+<li><strong>HomerScribe:</strong> its PDF reader moved into the kit in
+1.75.0 as PdfReader.cs, and HomerScribe calls it. Its Word version is
+still made by its own Pandoc call, which moves to Conversion when
+HomerScribe compiles it.</li>
+<li><strong>2htm:</strong> becomes a thin command-line and dialog face
+over Conversion, keeping its own csv and json readers until they move
+into the kit too, and its Office converters as the last resort.</li>
+</ul>
+<h2 id="learnings-from-frame-pdf-studio">Learnings from FRAME PDF
+Studio</h2>
+<p>FRAME PDF Studio (MIT licensed, by ripplelearning) is a browser tool
+for remediating PDFs by hand. It reads a PDF with pdf.js, recognizes
+scanned pages with tesseract.js, and writes a tagged PDF with pdf-lib.
+It was reviewed on 19 October 2026 for what the kit’s PdfReader should
+learn.</p>
+<h3 id="taken-into-pdfreader-kit-1.77.5">Taken into PdfReader (kit
+1.77.5)</h3>
+<ul>
+<li><strong>Drop caps.</strong> A paragraph’s first letter set large
+across several lines came out as a one-letter heading. It is now joined
+back to its word.</li>
+<li><strong>Form fields.</strong> A fillable PDF’s fields are listed at
+the end under Form fields, each with its label (its tooltip, else its
+name) and its value. Before, a filled form lost its answers.</li>
+<li><strong>Links.</strong> A PDF’s links to the web or to mail become
+Markdown links on the words they cover, in reading order. Any link whose
+words cannot be found is listed at the end under Links, so none is
+lost.</li>
+</ul>
+<h3 id="not-taken-and-why">Not taken, and why</h3>
+<ul>
+<li><strong>Column order by clustering line centers.</strong> PdfReader
+already uses PdfPig’s Docstrum blocks and reading-order detector, which
+handle columns and full-width headings more reliably than a fixed
+60-point cluster.</li>
+<li><strong>Headings by a fixed size ratio and list markers by
+pattern.</strong> PdfReader already does both, with the body size
+measured by characters and a length test that FRAME’s rule lacks.</li>
+<li><strong>Tables built by hand, and writing a tagged PDF.</strong>
+These are remediation, making a better PDF, rather than conversion. They
+would suit a future pdf2pdf route, not pdf2md.</li>
+<li><strong>Its accessibility checker.</strong> A list of a PDF’s
+accessibility problems could become a kit report one day; it is not a
+conversion.</li>
+</ul>
+<h2 id="speech-and-text-kit-1.84.0">Speech and text (kit 1.84.0)</h2>
+<ul>
+<li><strong>Audio or video to a document:</strong> a transcript, by
+Whisper on this computer, as plain text, Markdown, a web page, Word,
+PDF, OpenDocument, rich text, EPUB or Word 97. It needs ffmpeg and
+Whisper, both offered by the Homer installers.</li>
+<li><strong>A document to audio:</strong> its words spoken by Windows’
+speech synthesis, as MP3, M4A, WAV, Ogg, FLAC or Opus. It needs
+ffmpeg.</li>
+<li><strong>A document to video:</strong> the same speech over a plain
+black picture, as MP4, Matroska, WebM or QuickTime, since the kit makes
+no pictures of its own.</li>
+<li><strong>A video to a described document:</strong> with HomerScribe
+installed, what is said and what can be seen, as one document with a
+heading for each; HomerScribe describes, as the kit’s engine for it.
+Without HomerScribe, the transcript alone.</li>
+</ul>
+</main>
+</body>
+</html>

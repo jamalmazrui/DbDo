@@ -5,6 +5,17 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 25 October 2026, later
+
+- **Built against HomerDev 1.93.5,** whose checks and tidy use the newest kit found, and whose tidy cleared the kit copy from the top of C:\. kitNeeded is 1.93.5.
+
+## 25 October 2026 -- the newest kit, and extCheck's rules
+
+- **ReadMe.md is back.** A copy of the HomerDev kit unarchived into this folder replaced it with the kit's ReadMe, which tidy then removed as a stray, so the installer could not be built. Kit 1.93.1's tidy restores such a file from this project's own history by itself.
+- **Learnings from Quill Radio** are in the Developer guide, as a plan to weigh: instant search with SQLite's full-text index, choosing columns with two lists rather than checkboxes, rebuilding derived files beside the live ones, and one reorder dialog for every list.
+- **The build uses the newest Homer kit it finds,** and logs each one: your HomerDev variable and C:\HomerDev. The variable named an older installed kit in Program Files (1.77.6), which a build took first.
+- **Files it makes are judged by extCheck's rules,** from the kit's Quality.cs, now compiled in (HomerDev 1.92.5). A route table the build puts in exec is no longer removed by tidy, so conversions use the kit's current ways.
+
 ## 20 October 2026 -- Transcripts and speech through the Homer kit
 
 - **Clear Filter, Control+Shift+F, answers much sooner on a large table.** The first filter on a table keeps the unfiltered records, and Clear Filter puts them back at once instead of reading the whole table again -- unless anything changed while the filter was on, such as a record deleted or edited, or another program writing to the database; then the table is read again, so every change shows. Your record is found again with one quick search instead of a walk through every record, and by the table's own key, so it is the very record. The log gives Clear Filter's time in milliseconds. Filters keep their full power: any SQL condition still works.

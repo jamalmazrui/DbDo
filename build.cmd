@@ -119,9 +119,14 @@ rem DbDo no longer carries its own copies of the Homer classes. They live in
 rem one place, so a fix reaches every app that uses them, and so the version
 rem DbDo compiles against is a fact rather than a guess. Looked for in order:
 rem the HomerDev environment variable, C:\HomerDev, then this folder.
+rem THE NEWEST KIT FOUND IS USED (HomerDev 1.92.5). The HomerDev variable and C:\HomerDev are each considered
+rem and the higher version wins; the log names both. Names in cmd ignore case, so the variable is read before
+rem homerDev is emptied. Taken first as it stood, the variable named an installed kit at 1.77.6 in Program Files.
+set "sKitFromEnv=%HomerDev%"
 set "homerDev="
-if defined HomerDev if exist "%HomerDev%\exec\CSharp\Lbc.cs" set "homerDev=%HomerDev%"
-if not defined homerDev if exist "C:\HomerDev\exec\CSharp\Lbc.cs" set "homerDev=C:\HomerDev"
+set "sKitVersion="
+call :considerKit "%sKitFromEnv%"
+call :considerKit "C:\HomerDev"
 if not defined homerDev if exist "%CD%\exec\CSharp\Lbc.cs" set "homerDev=%CD%"
 if not defined homerDev (
   echo ERROR: The Homer Development Kit was not found.
@@ -149,7 +154,7 @@ rem onSpoken", which names the symptom and not the cause. So the build says the
 rem cause, first. Raise this whenever DbDo starts using something new.
 rem 1.64.5: Play Tutorials calls MediaPlayer.playTutorials, which older kits lack;
 rem a build against 1.64.4 failed to compile on 8 October 2026 rather than saying so.
-set "kitNeeded=1.88.4"
+set "kitNeeded=1.93.5"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -175,6 +180,8 @@ rem ConversionPdf.cs and PdfReader.cs (kit 1.88.0): PDFs read with the kit's own
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\ConversionPdf.cs" "!homerDev!\exec\CSharp\PdfReader.cs""
 rem Voice.cs too (kit 1.84.0): ConversionMedia transcribes speech through Voice.transcribe.
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Voice.cs""
+rem Quality.cs too (kit 1.92.0): extCheck's rules, which judge every file Conversion makes.
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Quality.cs""
 rem ELEVATE GOES WHEREVER LBC GOES (kit 1.31 and later): Lbc's Help box carries
 rem the version section and the F11 update offer, which are Elevate's.
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Elevate.cs""
@@ -1409,4 +1416,21 @@ echo Version: !ver! -^> !new! (not yet written to version.txt)
 echo Version: !ver! -^> !new! (pending a successful build) >> "!log!"
 set "ver=!new!"
 set "verPending=1"
+goto :eof
+
+:considerKit
+rem One kit candidate (24 October 2026, from the kit's templates): used when it is a kit -- HomerDev.cs at its
+rem top, exec\CSharp\Lbc.cs inside -- and newer than the kit chosen so far, so an installed kit in Program Files
+rem that lags C:\HomerDev is never the one compiled against.
+set "sTry=%~1"
+if not defined sTry goto :eof
+if "!sTry:~-1!"=="\" set "sTry=!sTry:~0,-1!"
+if not exist "!sTry!\HomerDev.cs" goto :eof
+if not exist "!sTry!\exec\CSharp\Lbc.cs" goto :eof
+set "sTryVersion=0.0.0"
+if exist "!sTry!\version.txt" for /f "usebackq delims=" %%v in (`powershell -NoProfile -Command "(Get-Content -Raw -LiteralPath '!sTry!\version.txt').Trim([char]0xFEFF, ' ', [char]13, [char]10)"`) do set "sTryVersion=%%v"
+>> "%log%" echo Kit candidate: !sTry! version !sTryVersion!
+if not defined homerDev (set "homerDev=!sTry!" & set "sKitVersion=!sTryVersion!" & goto :eof)
+powershell -NoProfile -Command "try { if ([version]'!sTryVersion!' -gt [version]'!sKitVersion!') { exit 0 } else { exit 1 } } catch { exit 1 }"
+if not errorlevel 1 (set "homerDev=!sTry!" & set "sKitVersion=!sTryVersion!")
 goto :eof

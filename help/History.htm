@@ -252,6 +252,11 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a href="#october-2026-later" id="toc-october-2026-later">25 October
+2026, later</a></li>
+<li><a href="#october-2026-the-newest-kit-and-extchecks-rules"
+id="toc-october-2026-the-newest-kit-and-extchecks-rules">25 October 2026
+– the newest kit, and extCheck’s rules</a></li>
 <li><a href="#october-2026-transcripts-and-speech-through-the-homer-kit"
 id="toc-october-2026-transcripts-and-speech-through-the-homer-kit">20
 October 2026 – Transcripts and speech through the Homer kit</a></li>
@@ -567,6 +572,34 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="october-2026-later">25 October 2026, later</h2>
+<ul>
+<li><strong>Built against HomerDev 1.93.5,</strong> whose checks and
+tidy use the newest kit found, and whose tidy cleared the kit copy from
+the top of C:. kitNeeded is 1.93.5.</li>
+</ul>
+<h2 id="october-2026-the-newest-kit-and-extchecks-rules">25 October 2026
+– the newest kit, and extCheck’s rules</h2>
+<ul>
+<li><strong>ReadMe.md is back.</strong> A copy of the HomerDev kit
+unarchived into this folder replaced it with the kit’s ReadMe, which
+tidy then removed as a stray, so the installer could not be built. Kit
+1.93.1’s tidy restores such a file from this project’s own history by
+itself.</li>
+<li><strong>Learnings from Quill Radio</strong> are in the Developer
+guide, as a plan to weigh: instant search with SQLite’s full-text index,
+choosing columns with two lists rather than checkboxes, rebuilding
+derived files beside the live ones, and one reorder dialog for every
+list.</li>
+<li><strong>The build uses the newest Homer kit it finds,</strong> and
+logs each one: your HomerDev variable and C:. The variable named an
+older installed kit in Program Files (1.77.6), which a build took
+first.</li>
+<li><strong>Files it makes are judged by extCheck’s rules,</strong> from
+the kit’s Quality.cs, now compiled in (HomerDev 1.92.5). A route table
+the build puts in exec is no longer removed by tidy, so conversions use
+the kit’s current ways.</li>
+</ul>
 <h2 id="october-2026-transcripts-and-speech-through-the-homer-kit">20
 October 2026 – Transcripts and speech through the Homer kit</h2>
 <ul>
