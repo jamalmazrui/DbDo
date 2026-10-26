@@ -10960,16 +10960,20 @@ namespace DbDo
             cbMode.SelectedItem = (sCurrentMode != null && cbMode.Items.Contains(sCurrentMode)) ? (object)sCurrentMode : (object)"Contains";
             this.Controls.Add(cbMode);
 
-            // Three-button row: OK (default, Enter), Clear (Alt+C),
+            // Three-button row: Clear (Alt+C), OK (default, Enter),
             // Cancel (Escape). Clear restores the full unfiltered
             // view with one keystroke; the user's typed input is
-            // discarded.
+            // discarded. CLEAR COMES FIRST (25 October 2026, the
+            // author's ruling): Control+Shift+F clears a filter with
+            // one hotkey from the grid, so in this dialog Clear is the
+            // last choice before the OK and Cancel pair, which stay
+            // together at the end, in Tab order and on screen.
             Button btnOk = new Button();
             btnOk.Text = "&OK";
             btnOk.DialogResult = DialogResult.OK;
             btnOk.Size = new Size(80, 28);
-            btnOk.Location = new Point(150, 150);
-            btnOk.TabIndex = 3;
+            btnOk.Location = new Point(240, 150);
+            btnOk.TabIndex = 4;
             btnOk.UseVisualStyleBackColor = true;
             btnOk.Click += (s, e) => {
                 sFilterText = tbFilter.Text;
@@ -10982,8 +10986,8 @@ namespace DbDo
             Button btnClear = new Button();
             btnClear.Text = "&Clear";
             btnClear.Size = new Size(80, 28);
-            btnClear.Location = new Point(240, 150);
-            btnClear.TabIndex = 4;
+            btnClear.Location = new Point(150, 150);
+            btnClear.TabIndex = 3;
             btnClear.UseVisualStyleBackColor = true;
             btnClear.Click += (s, e) => {
                 bClearRequested = true;
@@ -16195,11 +16199,14 @@ namespace DbDo
                 Say.say("No marked rows");
                 return;
             }
+            // THE FOCUS GOES THERE TOO (25 October 2026). This moved only the database cursor and announced "Marked row
+            // N", so the grid's focused row stayed where it was: Control+Down named the next marked record without going
+            // to it. virtMoveTo moves both, as every other navigation key does -- the ListView's selection and focus
+            // through virtSyncListSelection -- keeps the column the user is in, and announces the row and cell the way
+            // JAWS reads a table.
             try
             {
-                db.absolutePosition = iTarget;
-                invokeRefresh();
-                Say.say("Marked row " + iTarget);
+                virtMoveTo(iTarget, iVirtualCol);
             }
             catch (Exception ex)
             {

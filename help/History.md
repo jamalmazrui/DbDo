@@ -5,6 +5,12 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 25 October 2026, evening
+
+- **Every table has a url field,** as DbDo's pattern asks: twenty-two template tables in ContactTrail, RadioTrail, RecipeTrail, chinook and northwind had none, so Shift+U said "no url field". Each was rebuilt with url just before notes, keeping every row, trigger and index; data\lookups.db's lookups table too. In RadioTrail, a station's url is its stream, or its playlist when it has no stream, kept in step by itself, so Shift+U reaches what you would play; RadioTrail.schema makes it so in a rebuilt RadioTrail. The kit's checkDb now fails a table missing any standard field, which is why this was not caught before.
+- **Control+Down goes to the next marked record.** It moved only the database cursor and announced the row, so the grid's focus stayed where it was; it now moves the focus too, keeps your column, and reads the row and cell. Control+Up, Control+Shift+Home and Control+Shift+End go there the same way.
+- **The filter dialog's Clear button comes before OK and Cancel,** since Control+Shift+F clears a filter in one key from the grid: Clear, OK, Cancel, in Tab order and on screen.
+
 ## 25 October 2026, later
 
 - **Built against HomerDev 1.93.5,** whose checks and tidy use the newest kit found, and whose tidy cleared the kit copy from the top of C:\. kitNeeded is 1.93.5.
