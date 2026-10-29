@@ -195,26 +195,27 @@ Enter Child=Alt+RightArrow, Drill into related records: foreign-key children, or
 Exit Child=Alt+LeftArrow, Exit (back out of) the child relation to the parent record (Backspace also steps out)
 Exit Child to Root=Alt+Home, Exit all child relations back to the root table
 Table Properties=Alt+Enter, Get (show) properties of the current table
-Find=Control+F, Find a record by case-insensitive substring match across all fields
-Find Previous=Control+Shift+F, Find the previous match across all columns
+Keywords=Control+K, Go to the next record whose fields hold the keywords, case aside: red & blue (both), red | blue (either), re*d (anything in the middle); a link field is searched by the look it shows
+Keywords Previous=Control+Shift+K, Go to the previous record whose fields hold the keywords
 Find Regex=Control+F3, Find using a regular expression across all columns
 Find Previous Regex=Control+Shift+F3, Find the previous regex match across all columns
-Jump Record=Control+J, Jump to a record by case-insensitive substring match in the db cursor's column
-Jump Previous Record=Control+Shift+J, Jump to the previous record matching text in the current column
-Search Next=F3, Search (repeat) the last find forward
-Search Previous=Shift+F3, Search the last find in reverse (backward)
+Jump Record=Control+J, Go to the next record whose current column holds the text, case aside
+Jump Previous Record=Control+Shift+J, Go to the previous record whose current column holds the text
+Search Next=F3, Repeat the last Keywords, Jump or Find Regex, forward
+Search Previous=Shift+F3, Repeat the last Keywords, Jump or Find Regex, backward
 
 ; ===== Order and Filter =====
-Order Records=Alt+O, Order the records with the Names/Picks dialog: Ascending (the default) or Descending moves the selected column to Picks with its direction (shown as: name asc); the Picks order is the sort precedence; Remove returns a pick to Names; OK applies, and empty Picks clears the sort
+Order Records=Alt+O, Sort the records by one or more columns, each ascending or descending: Fields lists every column in DbDo's natural order (main fields, then standard fields) with the cursor's column selected; Enter or Add Ascending adds it to Picks, Add Descending adds it the other way; the Picks order is the sort order and starts with the order in force; Remove (or Enter or Delete in Picks) takes one back; Clear empties Picks; OK with no picks clears the sort
 Reverse Order=Alt+Shift+O, Reverse the current sort by flipping each column's direction (ASC becomes DESC and vice versa), so records run in the exact reverse order
-Filter Records=Alt+Shift+F, Filter with a field form like the edit dialog. With no filter active it opens straight to the first field; with one active a chooser offers Clear (default), And, Or, New, Edit, Cancel. Per field: a bare value is a case-insensitive substring (same as a leading %; field like %value%), a leading = forces an exact match, and =, <=, >=, <, >, <> (or !=) compare; filled fields AND together
+Filter Records=Control+F, Show only the records you want: Any field (text anywhere, case aside), Fields (Main, Standard or All, then a box per field in DbDo's natural order), Marked or Unmarked; with a filter in force, also New, Clear, Narrow, Expand and Invert. Per field: a plain value matches anywhere in the field, case aside; = in front means is; <=, >=, <, >, <> (or !=) compare; dates as year-month-day; filled fields must all match
+Clear Filter=Control+Shift+F, Show every record again, staying on the same record
 
 ; ===== Query/Say menu =====
 Say Added=Shift+A, Say when the current record was added
 Say Cell=Shift+C, Say the current cell value (NumPad5 with NumLock off is equivalent)
 Say Database=Shift+D, Say the open database's file name and path
 Say Filter=Shift+F, Say the active filter expression, or that none is active
-Say Select=Shift+S, Say the columns currently shown (the selection made with Select Columns, Alt+S)
+Say Select Columns=Shift+S, Say the columns the grid shows (the choice made with Select Columns, Alt+S)
 Say Query=Shift+Q, Say the query behind the current recordset: the exact SELECT for a custom query (Control+Q), or SELECT * FROM the table for a directly-opened table or view
 Say Go to=Shift+G, Say the most recent Goto (jump) search target
 Say ID=Shift+I, Say the primary key of the current record
@@ -243,7 +244,7 @@ Table Summary=Alt+T, Display a summary of the current table: columns, types, and
 Statistics Column=Control+Shift+S, Show descriptive statistics for the current virtual column
 Graphics Column=Control+Shift+G, Graph (chart) the current virtual column in Excel
 Graphics Grid=Alt+Shift+G, Graph the displayed grid (multi-column chart) in Excel
-Select Columns=Alt+S, Choose the displayed columns and their order with the Names/Picks dialog: Names lists every column in natural order with the db cursor's column preselected; Add (the default) moves the selected name to the bottom of Picks; Remove returns it to its natural place in Names with focus there; the Picks order is the column order shown
+Select Columns=Alt+S, Choose which columns the grid shows and in what order: Default (the fields of look), Main, Standard, All, Look and prime, Exact (the Fields and Picks lists, starting from the columns shown) or Type (names separated by commas); the choice is remembered with the table
 Update View=F5, Refresh the current rows' values from the database via the ADO Resync method, preserving the cursor position
 Extract Regex=Control+Shift+X, Extract matches of a regular expression to the clipboard
 Query=Control+Q, Enter a manual SQL statement: SELECT or WITH opens the result in a new window (editable when it draws on a single table, read-only by nature otherwise); any other statement executes and reports records affected

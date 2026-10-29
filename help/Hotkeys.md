@@ -242,8 +242,8 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Refresh View\
   Refresh the visible row set from the database. F5 is refreshing.\
   F5
-- Select Columns to Display\
-  Choose which columns the grid shows AND their order, via the Available/Chosen sequence picker. S for Select.\
+- Select Columns\
+  Choose which columns the grid shows, and in what order. S for Select.\
   Alt+S
 - Statistics from Column\
   Print descriptive statistics for the column under the virtual cursor. S for Statistics.\
@@ -304,10 +304,10 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Jump to a specific row by number. G for Go, as Control+G goes to a line in Windows editors.\
   Control+G
 - Jump to Record\
-  Search within one chosen column for a substring. J for Jump.\
+  Go to the next record whose current column holds the text, case aside. J for Jump.\
   Control+J
 - Keywords\
-  Search across all columns for a substring. K for Keywords.\
+  Go to the next record whose fields hold the keywords: red & blue (both), red | blue (either), re*d (a star for anything), case aside. K for Keywords.\
   Control+K
 - Repeat Go To\
   Alt+G
@@ -315,7 +315,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Jump Record backward. J for Jump. Shift reverses Jump to Record.\
   Control+Shift+J
 - Reverse Keywords\
-  Keywords backward: the previous match across all columns. K for Keywords. Shift reverses Keywords.\
+  Keywords backward: the previous record whose fields hold the keywords. K for Keywords. Shift reverses Keywords.\
   Control+Shift+K
 - Reverse Regex Find\
   Find Regex backward. F3 searches; Control makes it a pattern and Shift reverses it.\
@@ -339,7 +339,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   I for Inspect.\
   Control+I
 - Order Records\
-  Sort the current table by a chosen column, ascending. O for Order.\
+  Sort the records by one or more columns, each ascending or descending. O for Order.\
   Alt+O
 - Query\
   Q for Query.\
@@ -348,7 +348,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Q for Query.\
   Alt+Shift+Q
 - Reverse Order\
-  O for Order. Shift reverses Order Records.\
+  Reverse the order in force, every column's direction flipped. O for Order. Shift reverses Order Records.\
   Alt+Shift+O
 - Table Properties\
   Alt+Enter
@@ -528,7 +528,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Merge rows from a Markdown table, JSON, or Inix file into the current table.\
   Merge Data
 - Alt+O\
-  Sort the current table by a chosen column, ascending.\
+  Sort the records by one or more columns, each ascending or descending.\
   Order Records
 - Alt+P\
   Speak the open database's full path; press twice to show it.\
@@ -539,8 +539,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Drill into related records: foreign-key child tables, plus any tables related to this record through the maps table (by kind).\
   Enter Child Table
 - Alt+S\
-  Choose which columns the grid shows AND their order, via the Available/Chosen sequence picker.\
-  Select Columns to Display
+  Choose which columns the grid shows, and in what order.\
+  Select Columns
 - Alt+Semicolon\
   Speak the current date and time.\
   Say Time
@@ -580,6 +580,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+Shift+N\
   Edit Notes
 - Alt+Shift+O\
+  Reverse the order in force, every column's direction flipped.\
   Reverse Order
 - Alt+Shift+P\
   Play the current record's stream address in the Homer Player; with records marked, play all of them.\
@@ -636,10 +637,10 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+I\
   Inspect Record
 - Control+J\
-  Search within one chosen column for a substring.\
+  Go to the next record whose current column holds the text, case aside.\
   Jump to Record
 - Control+K\
-  Search across all columns for a substring.\
+  Go to the next record whose fields hold the keywords: red & blue (both), red | blue (either), re*d (a star for anything), case aside.\
   Keywords
 - Control+L\
   Speak the current virtual column from the current row down.\
@@ -706,7 +707,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Jump Record backward.\
   Reverse Jump
 - Control+Shift+K\
-  Keywords backward: the previous match across all columns.\
+  Keywords backward: the previous record whose fields hold the keywords.\
   Reverse Keywords
 - Control+Shift+L\
   Speak the current virtual column for marked rows only, from the current row down.\
@@ -1041,13 +1042,13 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Run a script from the Scripts folder (.js, .sql, or .dbdo).\
   Control+Shift+I
 - Jump to Record\
-  Search within one chosen column for a substring.\
+  Go to the next record whose current column holds the text, case aside.\
   Control+J
 - Key Describer Toggle\
   Describe each key instead of running it (Ctrl+F1).\
   Control+F1
 - Keywords\
-  Search across all columns for a substring.\
+  Go to the next record whose fields hold the keywords: red & blue (both), red | blue (either), re*d (a star for anything), case aside.\
   Control+K
 - List Bookmarks\
   Show saved bookmarks in a listbox; navigate to the selected one.\
@@ -1096,7 +1097,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Open url\
   Control+Shift+U
 - Order Records\
-  Sort the current table by a chosen column, ascending.\
+  Sort the records by one or more columns, each ascending or descending.\
   Alt+O
 - Pick Value\
   Control+F2
@@ -1137,9 +1138,10 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Jump Record backward.\
   Control+Shift+J
 - Reverse Keywords\
-  Keywords backward: the previous match across all columns.\
+  Keywords backward: the previous record whose fields hold the keywords.\
   Control+Shift+K
 - Reverse Order\
+  Reverse the order in force, every column's direction flipped.\
   Alt+Shift+O
 - Reverse Regex Find\
   Find Regex backward.\
@@ -1260,8 +1262,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Search Previous\
   Repeat the last Find backward.\
   Shift+F3
-- Select Columns to Display\
-  Choose which columns the grid shows AND their order, via the Available/Chosen sequence picker.\
+- Select Columns\
+  Choose which columns the grid shows, and in what order.\
   Alt+S
 - Show in FileDir\
   Show the open database's file, selected in its folder, in FileDir.\

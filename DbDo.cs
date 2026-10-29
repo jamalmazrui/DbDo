@@ -1254,7 +1254,6 @@ namespace DbDo
             "marked",
             "look",
             "prime",
-            "prime",
             "url",
             "tags",
             "notes"
@@ -1284,7 +1283,6 @@ namespace DbDo
             "marked",
             "method",
             "observed",
-            "prime",
             "prime"
         };
 
@@ -1383,19 +1381,81 @@ namespace DbDo
             return false;
         }
 
-        // isDistinctColumn: the "distinct" summary columns that
-        // distinctly identify a row -- the human-readable 'look'
-        // summary and the 'prime' unique-key expression (plus the legacy
-        // 'prime'). These are the default listview ("select") set: opening
-        // a table shows look + prime unless the user has saved a different
-        // SelectFields list. They are computed columns, so they are not
-        // editable and not admin; they form their own category between
-        // the leading admin keys and the editable data fields.
+        // isDistinctColumn: the two identity columns, look and prime, which
+        // SQLite computes from the row's other columns. They are read-only
+        // and meant to be read; the default grid shows the FIELDS of look
+        // instead (see getDisplayFieldNames), and Select Columns offers
+        // "Look and prime" for a two-column view of them.
         public static bool isDistinctColumn(string sColumn)
         {
             if (string.IsNullOrEmpty(sColumn)) return false;
             string sLower = sColumn.ToLowerInvariant();
             return sLower == LookColumn || sLower == PrimeColumn;
+        }
+
+        // TWO KINDS OF FIELD (29 October 2026, replacing the six roles).
+        //   main     -- the table's subject: every field a person enters about the
+        //               record, foreign keys such as category_id included, in table
+        //               order.
+        //   standard -- the fields every DbDo table shares, in this order: url,
+        //               tags, notes, marked, look, prime, added, edited (and the
+        //               legacy observed and method), then the table's own id.
+        // ONE NATURAL ORDER everywhere -- Select Columns, Order Records, Filter
+        // Records, record forms: main fields in table order, then the standard
+        // fields in the order above. The default columns are look's fields in
+        // look's order; the default sort is prime's fields in prime's order.
+        public const string KindMain     = "main";
+        public const string KindStandard = "standard";
+        public static readonly string[] StandardSequence = new string[] { "url", "tags", "notes", "marked", "look", "prime", "added", "edited", "observed", "method" };
+
+        // isOwnKeyColumn: the table's own primary key -- bare 'id', or the table
+        // name in singular or plural before '_id' (contacts -> contact_id,
+        // categories -> category_id, boxes -> box_id).
+        public static bool isOwnKeyColumn(string sColumn, string sTable)
+        {
+            if (string.IsNullOrEmpty(sColumn)) return false;
+            string sLower = sColumn.ToLowerInvariant();
+            if (sLower == "id") return true;
+            if (!sLower.EndsWith(PrimaryKeySuffix)) return false;
+            string sStem = sLower.Substring(0, sLower.Length - PrimaryKeySuffix.Length);
+            string sTableLower = (sTable ?? "").ToLowerInvariant();
+            if (sTableLower.Length == 0) return false;
+            if (sStem == sTableLower) return true;
+            if (sTableLower.EndsWith("ies") && sStem == sTableLower.Substring(0, sTableLower.Length - 3) + "y") return true;
+            if (sTableLower.EndsWith("es") && sStem == sTableLower.Substring(0, sTableLower.Length - 2)) return true;
+            if (sTableLower.EndsWith("s") && sStem == sTableLower.Substring(0, sTableLower.Length - 1)) return true;
+            return false;
+        }
+
+        // fieldKind: main or standard. The table's own id is standard; any
+        // other *_id field is a main field, chosen by relating records.
+        public static string fieldKind(string sColumn, string sTable)
+        {
+            if (string.IsNullOrEmpty(sColumn)) return KindMain;
+            if (Array.IndexOf(StandardSequence, sColumn.ToLowerInvariant()) >= 0) return KindStandard;
+            if (isOwnKeyColumn(sColumn, sTable)) return KindStandard;
+            return KindMain;
+        }
+
+        // orderNatural: the columns given, in the natural order -- main fields
+        // in the order they arrived (table order), then the standard fields in
+        // StandardSequence, the table's own id last.
+        public static List<string> orderNatural(IList<string> lColumns, string sTable)
+        {
+            List<string> lResult = new List<string>();
+            if (lColumns == null) return lResult;
+            List<string> lStandard = new List<string>();
+            string sOwnId = null;
+            foreach (string sColumn in lColumns)
+            {
+                if (fieldKind(sColumn, sTable) == KindMain) lResult.Add(sColumn);
+                else if (isOwnKeyColumn(sColumn, sTable) && Array.IndexOf(StandardSequence, sColumn.ToLowerInvariant()) < 0) sOwnId = sColumn;
+                else lStandard.Add(sColumn);
+            }
+            lStandard.Sort((sA, sB) => Array.IndexOf(StandardSequence, sA.ToLowerInvariant()).CompareTo(Array.IndexOf(StandardSequence, sB.ToLowerInvariant())));
+            lResult.AddRange(lStandard);
+            if (sOwnId != null) lResult.Add(sOwnId);
+            return lResult;
         }
 
 
@@ -1840,6 +1900,9 @@ namespace DbDo
                 try { renamePrmToPrime(); }
                 catch (Exception exRen)
                 { try { DbDoLog.write("renamePrmToPrime failed: " + exRen.Message); } catch { } }
+                try { migratePartSeparator(); }
+                catch (Exception exSep)
+                { try { DbDoLog.write("migratePartSeparator failed: " + exSep.Message); } catch { } }
                 try { ensureRecommendedIndexes(); }
                 catch (Exception exIdx)
                 { try { DbDoLog.write("ensureRecommendedIndexes failed: " + exIdx.Message); } catch { } }
@@ -2875,6 +2938,19 @@ namespace DbDo
             }
             catch { }
 
+            // (3b) THE NATURAL DEFAULT SORT (29 Oct 2026). With no saved sort
+            // anywhere, records sort by prime's fields in prime's order. (The
+            // default columns, look's fields, are getDisplayFieldNames's rule.)
+            try
+            {
+                if (string.IsNullOrEmpty(sSortWanted))
+                {
+                    List<string> lPrime = lParseGeneratedFields(sTable, "prime");
+                    if (lPrime.Count > 0) sSortWanted = string.Join(", ", lPrime.ToArray());
+                }
+            }
+            catch { }
+
             // (4) The winning sort, in one query, then the remembered position.
             if (!string.IsNullOrEmpty(sSortWanted)
                 && !string.Equals(sSortWanted.Trim(), sActiveSort ?? "", StringComparison.OrdinalIgnoreCase))
@@ -3209,17 +3285,20 @@ namespace DbDo
             int iCount = recordCount;
             List<string> lFields = getFieldNames();
             if (string.IsNullOrEmpty(sSub) || iCount <= 0 || lFields == null || lFields.Count == 0) return 0;
-            StringComparison cmp = bCaseSensitive ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
+            // HOMER KEYWORD SYNTAX (29 October 2026), from HomerDev's LbcDialog.keywordsMatch, the
+            // syntax FileDir and the media player use: red & blue (both), red | blue (either), re*d
+            // (wildcard). The whole record is one text, each field as the screen shows it (a link
+            // as its look), so the words of & may sit in different fields.
+            string sPattern = bCaseSensitive ? sSub : sSub.ToLowerInvariant();
             for (int iPos = iFrom; iPos >= 1 && iPos <= iCount; iPos += iStep)
             {
                 try
                 {
                     absolutePosition = iPos;
-                    foreach (string sCol in lFields)
-                    {
-                        string sVal = getFieldValue(sCol) ?? "";
-                        if (sVal.Length > 0 && sVal.IndexOf(sSub, cmp) >= 0) return iPos;
-                    }
+                    StringBuilder sbRecord = new StringBuilder();
+                    foreach (string sCol in lFields) sbRecord.Append(getScreenValue(sCol) ?? "").Append('\n');
+                    string sRecord = bCaseSensitive ? sbRecord.ToString() : sbRecord.ToString().ToLowerInvariant();
+                    if (LbcDialog.keywordsMatch(sRecord, sPattern)) return iPos;
                 }
                 catch (Exception oError)
                 {
@@ -3230,13 +3309,42 @@ namespace DbDo
             return 0;
         }
 
+        // anyFieldWhere: Any Field's condition in the Homer keyword syntax, the same as Keywords
+        // (29 October 2026): red & blue -- each word in some field; red | blue -- either word;
+        // re*d -- a wildcard. & and | are not mixed: whichever comes first decides, as in
+        // LbcDialog.keywordsMatch. A term with no star is found literally, % and _ included.
         public string anyFieldWhere(string sText)
         {
+            string sPattern = (sText ?? "").Trim();
+            if (sPattern.Length == 0) return "";
+            char chJoin = sPattern.Contains("|") ? '|' : '&';
+            List<string> lsTerms = new List<string>();
+            foreach (string sRaw in sPattern.Split(chJoin))
+            {
+                string sTest = anyFieldTermWhere(sRaw.Trim());
+                if (sTest.Length > 0) lsTerms.Add(sTest);
+            }
+            if (lsTerms.Count == 0) return "";
+            if (lsTerms.Count == 1) return lsTerms[0];
+            return "(" + string.Join(chJoin == '|' ? " OR " : " AND ", lsTerms.ToArray()) + ")";
+        }
+
+        // anyFieldTermWhere: one keyword term found in any field, case aside.
+        private string anyFieldTermWhere(string sTerm)
+        {
+            if (string.IsNullOrEmpty(sTerm)) return "";
             string sLower = caseFoldFunction();
-            string sNeedle = sLower + "('" + (sText ?? "").Replace("'", "''") + "')";
             List<string> lsTests = new List<string>();
+            string sTest;
+            if (sTerm.IndexOf('*') < 0)
+                sTest = "instr(" + sLower + "(CAST({0} AS TEXT)), " + sLower + "('" + sTerm.Replace("'", "''") + "')) > 0";
+            else
+            {
+                string sLike = sTerm.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_").Replace('*', '%');
+                sTest = sLower + "(CAST({0} AS TEXT)) LIKE " + sLower + "('%" + sLike.Replace("'", "''") + "%') ESCAPE '\\'";
+            }
             foreach (string sField in getFieldNames())
-                lsTests.Add("instr(" + sLower + "(CAST(\"" + sField.Replace("\"", "\"\"") + "\" AS TEXT)), " + sNeedle + ") > 0");
+                lsTests.Add(sTest.Replace("{0}", "\"" + sField.Replace("\"", "\"\"") + "\""));
             return lsTests.Count == 0 ? "" : "(" + string.Join(" OR ", lsTests.ToArray()) + ")";
         }
 
@@ -3247,8 +3355,8 @@ namespace DbDo
         // selectTableFiltered, the path Any Field already took.
         //
         // A value may begin with an operator, as DbDialog's form allowed: = (is), != or <> (is not), > >= < <=
-        // (compared), or % (contains). With none, a text field matches when it CONTAINS the value and any other field
-        // when it equals it. Text compares case aside, through caseFoldFunction, as Any Field does; contains reads the
+        // (compared), or % (contains). With none, every field matches when it CONTAINS the value (29 October 2026;
+        // before, only a text field did, and any other field had to equal it). Text compares case aside, through caseFoldFunction, as Any Field does; contains reads the
         // value literally, so % and _ in it are characters. A number typed for a number field is written as a number,
         // so it compares as one. Returns "" for an empty entry; sSpoken gets the condition in words.
         public string fieldConditionSql(string sField, string sValue, bool bText, out string sSpoken)
@@ -3260,7 +3368,7 @@ namespace DbDo
             foreach (string sCand in new string[] { ">=", "<=", "!=", "<>", "=", ">", "<", "%" })
                 if (sV.StartsWith(sCand)) { sOp = sCand; sV = sV.Substring(sCand.Length).Trim(); break; }
             if (sV.Length == 0) return "";
-            if (sOp == "") sOp = bText ? "%" : "=";
+            if (sOp == "") sOp = "%";   // a plain value is a case-insensitive substring in every field (29 Oct 2026)
             if (sOp == "!=") sOp = "<>";
             string sCol = "\"" + sField.Replace("\"", "\"\"") + "\"";
             string sLower = caseFoldFunction();
@@ -3268,7 +3376,14 @@ namespace DbDo
             if (sOp == "%")
             {
                 sSpoken = sField + " contains " + sV;
-                return "instr(" + sLower + "(CAST(" + sCol + " AS TEXT)), " + sLower + "(" + sQuoted + ")) > 0";
+                string sContains = "instr(" + sLower + "(CAST(" + sCol + " AS TEXT)), " + sLower + "(" + sQuoted + ")) > 0";
+                // A LINK IS FOUND BY WHAT IT SHOWS (29 October 2026): its linked look or prime.
+                foreach (string sPart in new string[] { "look", "prime" })
+                {
+                    string sLinked = linkLookSql(sField, sCurrentTable, sPart);
+                    if (sLinked.Length > 0) sContains += " OR instr(" + sLower + "(" + sLinked + "), " + sLower + "(" + sQuoted + ")) > 0";
+                }
+                return "(" + sContains + ")";
             }
             sSpoken = sField + " " + (sOp == "=" ? "is" : sOp == "<>" ? "is not" : sOp == ">" ? "is more than"
                 : sOp == ">=" ? "is at least" : sOp == "<" ? "is less than" : "is at most") + " " + sV;
@@ -5183,6 +5298,15 @@ namespace DbDo
                         + sT + " <> '' AND " + sT + " GLOB '*[0-9]*' AND ("
                         + sT + " NOT GLOB '*[^0-9.]*' OR (substr(" + sT + ",1,1) = '-' AND substr("
                         + sT + ",2) NOT GLOB '*[^0-9.]*'))))";
+                    // A LINK SORTS BY WHAT IT SHOWS (29 October 2026): the linked look,
+                    // then the linked prime, before the id itself.
+                    string sLinkLook = linkLookSql(sCol, sCurrentTable, "look");
+                    if (sLinkLook.Length > 0)
+                    {
+                        lParts.Add(sLinkLook + " COLLATE NOCASE " + sDir);
+                        string sLinkPrime = linkLookSql(sCol, sCurrentTable, "prime");
+                        if (sLinkPrime.Length > 0) lParts.Add(sLinkPrime + " COLLATE NOCASE " + sDir);
+                    }
                     lParts.Add("(CASE WHEN " + sNumeric + " THEN 0 ELSE 1 END) " + sDir);
                     lParts.Add("(CASE WHEN " + sNumeric + " THEN CAST(" + sQ + " AS REAL) END) " + sDir);
                     lParts.Add(sQ + " COLLATE NOCASE " + sDir);
@@ -5425,7 +5549,7 @@ namespace DbDo
         //   (B) Otherwise apply the default rules:
         //       1. Standard-visible columns (none currently) -- always shown.
         //       2. Standard-hidden columns (added, edited, marked,
-        //          look, prime) -- always hidden.
+        //          look, prime, url, tags, notes) -- always hidden.
         //       3. Any column ending in '_id' or named 'id' --
         //          always hidden (primary and foreign keys).
         //       4. Calculated columns from the schema (PRAGMA
@@ -5462,37 +5586,22 @@ namespace DbDo
                 // valid; the user expects to see something.
             }
 
-            // (B) Default selection: the component fields that compose
-            // the look/prime expression -- the substantive columns that
-            // form the record's human-readable identity -- rather than
-            // the derived look/prime columns themselves. Only applies to
-            // tables that carry the standard summary columns; xlsx/csv
-            // sources fall through to the rule-based selection in (C).
-            bool bHasSummary = false;
-            foreach (string sName in getFieldNames())
-                if (Metadata.isDistinctColumn(sName)) { bHasSummary = true; break; }
-            if (bHasSummary)
+            // (B) Default selection (29 October 2026): look's fields in look's
+            // order -- the fields that name a record -- rather than the stored
+            // look itself. A table with no look falls through to (C).
+            if (hasField("look"))
             {
-                List<string> lComp = getPrmComponentFields();
-                if (lComp.Count > 0) return lComp;
+                List<string> lLook = lParseGeneratedFields(sCurrentTable, "look");
+                if (lLook.Count > 0) return lLook;
             }
 
-            // (C) Fallback for tables without the standard summary
-            // columns (e.g. .xlsx / .csv sources): the rule-based
-            // selection -- every field except standard-hidden and
-            // calculated columns.
+            // (C) Fallback: every main field, in table order (foreign keys such
+            // as category_id included), leaving out calculated columns.
             List<string> lResult = new List<string>();
             foreach (string sName in getFieldNames())
             {
-                if (Metadata.isStandardVisible(sName))
-                {
-                    lResult.Add(sName);
-                    continue;
-                }
-                if (Metadata.isStandardHidden(sName, sCurrentTable))
-                    continue;
-                if (isCalculatedColumn(sCurrentTable, sName))
-                    continue;
+                if (Metadata.fieldKind(sName, sCurrentTable) != Metadata.KindMain) continue;
+                if (isCalculatedColumn(sCurrentTable, sName)) continue;
                 lResult.Add(sName);
             }
             // If the rules hid every column -- e.g. an ad-hoc query
@@ -5633,7 +5742,17 @@ namespace DbDo
         //
         // Pattern lifted from db.py's getDistinctFields, applied here at
         // the field level rather than the table-info level.
+        // IN NATURAL ORDER (29 October 2026): main fields in table order, then
+        // url, tags and notes -- the order every DbDo dialog shares (see
+        // Metadata's TWO KINDS OF FIELD).
         public List<string> getEditableFieldNames()
+        {
+            return Metadata.orderNatural(getEditableFieldNamesNatural(), sCurrentTable ?? "");
+        }
+
+        // The editable fields in table order. getPrmComponentFields falls back
+        // to this list, so it must not depend on the parts in turn.
+        private List<string> getEditableFieldNamesNatural()
         {
             List<string> lResult = new List<string>();
             string sTable = sCurrentTable ?? "";
@@ -5643,6 +5762,31 @@ namespace DbDo
                     lResult.Add(sField);
             }
             return lResult;
+        }
+
+        // getPartFieldNames: the parts of prime, or none when the table has no
+        // prime column. Reading them parses the table's CREATE statement, so the
+        // answer is kept per table and field list; a changed schema changes the
+        // field list and so reads afresh.
+        private Dictionary<string, List<string>> dPartCache = new Dictionary<string, List<string>>(StringComparer.OrdinalIgnoreCase);
+        public List<string> getPartFieldNames()
+        {
+            if (!hasField(Metadata.PrimeColumn)) return new List<string>();
+            string sKey = (sCurrentTable ?? "") + "|" + string.Join(",", getFieldNames().ToArray());
+            List<string> lParts;
+            if (!dPartCache.TryGetValue(sKey, out lParts))
+            {
+                lParts = getPrmComponentFields();
+                dPartCache[sKey] = lParts;
+            }
+            return new List<string>(lParts);
+        }
+
+        // getNaturalFieldNames: every field of the current table in the natural
+        // order -- the list Select Columns, Order Records and Filter Records offer.
+        public List<string> getNaturalFieldNames()
+        {
+            return Metadata.orderNatural(getFieldNames(), sCurrentTable ?? "");
         }
 
         // admin fields = the complement of editable fields: the
@@ -5696,6 +5840,159 @@ namespace DbDo
             // "blank" for every empty field, NULL or empty text, when DbDo is asked: the difference is rarely worth a
             // listener's time, and SQL can still tell them apart (11 October 2026).
             return "blank";
+        }
+
+        // getExportValue: getFieldValue for text exports -- a stored look or
+        // prime has its char(31) part separators shown as "; " (29 Oct 2026).
+        // Database exports keep the raw value so the data stays exact.
+        public string getExportValue(string sName)
+        {
+            string sVal = getFieldValue(sName);
+            return Util.sExportText(sVal);
+        }
+
+        // getScreenValue: getFieldValue for the grid, status bar and Inspect --
+        // char(31) part separators shown as a single space.
+        // =====================================================================
+        // LINKS READ AS LOOK (29 October 2026). A link field (any *_id other than
+        // the table's own id) holds a number that means nothing to a listener.
+        // Everywhere a person meets it -- grid, speech, Keywords, Jump, filter,
+        // sort, pick lists -- DbDo shows the linked record's look; when another
+        // record of that table shares the look, its prime instead, which the
+        // table asserts is unique. Never the bare id, except as a last resort
+        // when the linked table has neither. Exports for machines keep the id.
+        // One query per linked table reads id, look and prime; the labels are
+        // kept until the next change (clearLinkLabels, from the refresh).
+        // =====================================================================
+        private Dictionary<string, string> dLinkTableOf = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+        private Dictionary<string, Dictionary<string, string>> dLinkLabels = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
+
+        public void clearLinkLabels()
+        {
+            dLinkLabels.Clear();
+            dLinkTableOf.Clear();
+        }
+
+        // clearLinkLabelsIfChanged: drop the labels when the database has changed
+        // since they were read -- SQLite's total_changes() counts every insert,
+        // update and delete on this connection, so one small query per refresh
+        // keeps labels true without rereading them on every move.
+        private string sLinkChangeMark = null;
+        public void clearLinkLabelsIfChanged()
+        {
+            if (dLinkLabels.Count == 0 && dLinkTableOf.Count == 0) return;
+            string sMark = "";
+            try
+            {
+                int iRows;
+                List<string[]> l = queryRowsSql("SELECT total_changes()", 1, out iRows);
+                if (l != null && l.Count > 0 && l[0] != null && l[0].Length > 0) sMark = l[0][0] ?? "";
+            }
+            catch { }
+            if (sLinkChangeMark != null && sMark == sLinkChangeMark) return;
+            if (sLinkChangeMark != null) DbDoLog.write("Link labels cleared: the database changed.");
+            sLinkChangeMark = sMark;
+            clearLinkLabels();
+        }
+
+        // linkTableOf: the table a link field points to, or "" when it is not a
+        // link or no table answers to it. A table answers when its own key --
+        // declared, or by DbDo's naming rule -- is the field's name.
+        public string linkTableOf(string sColumn, string sTable)
+        {
+            if (string.IsNullOrEmpty(sColumn) || !sColumn.ToLowerInvariant().EndsWith(Metadata.PrimaryKeySuffix)) return "";
+            if (Metadata.isOwnKeyColumn(sColumn, sTable)) return "";
+            string sFound;
+            if (dLinkTableOf.TryGetValue(sColumn, out sFound)) return sFound;
+            sFound = "";
+            try
+            {
+                foreach (string sT in getTableNames())
+                {
+                    string sPk = "";
+                    try { sPk = actualPrimaryKey(sT) ?? ""; } catch { }
+                    if (sPk.Length == 0)
+                        foreach (string sC in getColumnsOfTable(sT))
+                            if (Metadata.isOwnKeyColumn(sC, sT)) { sPk = sC; break; }
+                    if (string.Equals(sPk, sColumn, StringComparison.OrdinalIgnoreCase)) { sFound = sT; break; }
+                }
+            }
+            catch (Exception ex) { DbDoLog.write("linkTableOf " + sColumn + ": " + ex.Message); }
+            dLinkTableOf[sColumn] = sFound;
+            return sFound;
+        }
+
+        // linkLabels: id -> label for every record of a linked table, look when
+        // unique and prime when shared, each as the screen shows it. Empty when
+        // the table has no look.
+        public Dictionary<string, string> linkLabels(string sLinkTable, string sKeyColumn)
+        {
+            Dictionary<string, string> dLabels;
+            if (dLinkLabels.TryGetValue(sLinkTable, out dLabels)) return dLabels;
+            dLabels = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            dLinkLabels[sLinkTable] = dLabels;
+            try
+            {
+                List<string> lCols = getColumnsOfTable(sLinkTable);
+                bool bLook = lCols.Exists(c => string.Equals(c, "look", StringComparison.OrdinalIgnoreCase));
+                bool bPrime = lCols.Exists(c => string.Equals(c, "prime", StringComparison.OrdinalIgnoreCase));
+                if (!bLook) return dLabels;
+                string sQT = "\"" + sLinkTable.Replace("\"", "\"\"") + "\"";
+                string sQK = "\"" + sKeyColumn.Replace("\"", "\"\"") + "\"";
+                int iRows;
+                List<string[]> lRows = queryRowsSql("SELECT " + sQK + ", look" + (bPrime ? ", prime" : "") + " FROM " + sQT, 1000000, out iRows);
+                Dictionary<string, int> dCount = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                foreach (string[] a in lRows)
+                {
+                    string sLook = a.Length > 1 ? (a[1] ?? "") : "";
+                    int n; dCount.TryGetValue(sLook, out n); dCount[sLook] = n + 1;
+                }
+                foreach (string[] a in lRows)
+                {
+                    if (a == null || a.Length < 2 || a[0] == null) continue;
+                    string sLook = a[1] ?? "";
+                    string sLabel = sLook;
+                    if (bPrime && dCount[sLook] > 1 && a.Length > 2 && !string.IsNullOrEmpty(a[2])) sLabel = a[2];
+                    if (sLabel.Length == 0) continue;
+                    dLabels[a[0]] = Util.sScreenText(sLabel);
+                }
+                DbDoLog.write("linkLabels: " + lRows.Count + " records of " + sLinkTable + " read for links by " + sKeyColumn);
+            }
+            catch (Exception ex) { DbDoLog.write("linkLabels " + sLinkTable + ": " + ex.Message); }
+            return dLabels;
+        }
+
+        // linkLabel: the label for one value of a link field, or null when the
+        // field is not a link or the value has no label (then the raw value shows).
+        public string linkLabel(string sColumn, string sValue)
+        {
+            if (string.IsNullOrEmpty(sValue)) return null;
+            string sLinkTable = linkTableOf(sColumn, sCurrentTable);
+            if (sLinkTable.Length == 0) return null;
+            string sLabel;
+            return linkLabels(sLinkTable, sColumn).TryGetValue(sValue, out sLabel) ? sLabel : null;
+        }
+
+        // linkLookSql: SQL for the look of the record a link field points to, with
+        // the parts joined by spaces as the screen shows them; "" when not a link.
+        public string linkLookSql(string sColumn, string sTable, string sField)
+        {
+            string sLinkTable = linkTableOf(sColumn, sTable);
+            if (sLinkTable.Length == 0) return "";
+            if (!getColumnsOfTable(sLinkTable).Exists(c => string.Equals(c, sField, StringComparison.OrdinalIgnoreCase))) return "";
+            // The outer column is qualified by its table: unqualified, inside this
+            // subquery it would name the linked table's own key and match every row.
+            string sQK = "\"" + sColumn.Replace("\"", "\"\"") + "\"";
+            string sOuter = "\"" + (sTable ?? "").Replace("\"", "\"\"") + "\"." + sQK;
+            return "(SELECT replace(CAST(l." + sField + " AS TEXT), char(31), ' ') FROM \"" + sLinkTable.Replace("\"", "\"\"") + "\" l WHERE l." + sQK + " = " + sOuter + ")";
+        }
+
+        public string getScreenValue(string sName)
+        {
+            string sVal = getFieldValue(sName);
+            string sLabel = linkLabel(sName, sVal);
+            if (sLabel != null) return sLabel;
+            return Util.sScreenText(sVal);
         }
 
         public string getFieldValue(string sName)
@@ -5900,7 +6197,7 @@ namespace DbDo
         // the expression cannot be read or parsed.
         public List<string> getPrmComponentFields()
         {
-            List<string> lEditable = getEditableFieldNames();
+            List<string> lEditable = getEditableFieldNamesNatural();
             try
             {
                 string sCreate = getTableCreateSql(sCurrentTable);
@@ -6154,8 +6451,17 @@ namespace DbDo
         // fields would not uniquely identify every record.
         // =====================================================================
 
+        // Look and prime join their parts with Util.PartSeparator (ASCII 31);
+        // the split, screen and export helpers are the kit's, in Util.cs
+        // (HomerDev 1.94.0), shared by every Homer app (29 Oct 2026).
+        internal static bool sayStoredParts(string sValue)
+        {
+            Say.sayParts(Util.aPartsOf(sValue));
+            return true;
+        }
+
         // sLookExprFromFields: the human-readable summary expression --
-        // each non-empty field rendered "value | ", concatenated, then the
+        // each non-empty field rendered value + char(31), concatenated, then the
         // trailing separator trimmed. Mirrors lStandardTableDdl's shape.
         internal static string sLookExprFromFields(List<string> lFields)
         {
@@ -6166,14 +6472,14 @@ namespace DbDo
                 string sC = "\"" + lFields[i] + "\"";
                 if (i > 0) sb.Append(" || ");
                 sb.Append("iif(" + sC + " IS NOT NULL AND length(CAST(" + sC
-                    + " AS TEXT))>0, CAST(" + sC + " AS TEXT) || ' | ', '')");
+                    + " AS TEXT))>0, CAST(" + sC + " AS TEXT) || char(31), '')");
             }
-            sb.Append(", ' | ')");
+            sb.Append(", char(31))");
             return sb.ToString();
         }
 
         // sPrmExprFromFields: the unique-key expression -- the positional
-        // pipe-join of the component fields, each coalesced to '' so NULLs
+        // char(31)-join of the component fields, each coalesced to '' so NULLs
         // do not poison the key. Mirrors lStandardTableDdl's prime shape.
         internal static string sPrmExprFromFields(List<string> lFields)
         {
@@ -6181,7 +6487,7 @@ namespace DbDo
             StringBuilder sb = new StringBuilder();
             for (int i = 0; i < lFields.Count; i++)
             {
-                if (i > 0) sb.Append("||'|'||");
+                if (i > 0) sb.Append("||char(31)||");
                 sb.Append("coalesce(CAST(\"" + lFields[i] + "\" AS TEXT),'')");
             }
             return sb.ToString();
@@ -6263,6 +6569,39 @@ namespace DbDo
             }
             catch { }
             return lResult;
+        }
+
+        // migratePartSeparator (29 Oct 2026): rebuild any table whose look or
+        // prime still joins parts with a vertical bar so both use char(31),
+        // the unit separator. rebuildGeneratedColumns keeps the same fields
+        // and re-points maps links to the new prime. Runs on every read-write
+        // SQLite open and does nothing once a database is converted.
+        public int migratePartSeparator()
+        {
+            int iDone = 0;
+            foreach (string sTable in getTableNames())
+            {
+                int iN, iMaps;
+                string sErr;
+                List<string[]> lRows = queryRowsSql("SELECT sql FROM sqlite_schema WHERE type='table' AND name='"
+                    + sTable.Replace("'", "''") + "'", 1, out iN);
+                if (lRows.Count == 0 || lRows[0].Length == 0) continue;
+                string sCreate = lRows[0][0] ?? "";
+                string sLookExpr = sExtractGeneratedExpr(sCreate, "look");
+                string sPrimeExpr = sExtractGeneratedExpr(sCreate, "prime");
+                if (sPrimeExpr.Length == 0) continue;
+                if (sLookExpr.IndexOf("' | '") < 0 && sPrimeExpr.IndexOf("'|'") < 0) continue;
+                List<string> lLook = lParseGeneratedFields(sTable, "look");
+                List<string> lPrime = lParseGeneratedFields(sTable, "prime");
+                if (lPrime.Count == 0) continue;
+                if (rebuildGeneratedColumns(sTable, lLook, lPrime, out sErr, out iMaps))
+                {
+                    iDone++;
+                    DbDoLog.write("migratePartSeparator: '" + sTable + "' now joins look and prime with char(31); maps re-pointed=" + iMaps);
+                }
+                else DbDoLog.write("migratePartSeparator: '" + sTable + "' not converted: " + sErr);
+            }
+            return iDone;
         }
 
         // rebuildGeneratedColumns: reconfigure 'look' and 'prime' for a table
@@ -6787,7 +7126,7 @@ namespace DbDo
                     for (int i = 0; i < lFields.Count; i++)
                     {
                         NPOI.SS.UserModel.ICell cell = row.CreateCell(i);
-                        string sValue = getFieldValue(lFields[i]);
+                        string sValue = getExportValue(lFields[i]);
                         cell.SetCellValue(sValue ?? "");
                         cell.CellStyle = styleBody;
                     }
@@ -7897,7 +8236,7 @@ namespace DbDo
                     foreach (string sN in lFields)
                     {
                         writer2.Write(" ");
-                        writer2.Write(escapeMarkdownCell(getFieldValue(sN)));
+                        writer2.Write(escapeMarkdownCell(getExportValue(sN)));
                         writer2.Write(" |");
                     }
                     writer2.WriteLine();
@@ -8333,7 +8672,7 @@ namespace DbDo
                     List<string> lV = new List<string>();
                     foreach (string sN in lFields)
                     {
-                        string sValue = getFieldValue(sN);
+                        string sValue = getExportValue(sN);
                         if (formulaLike(sValue)) iLastFormulaLike++;
                         lV.Add(escapeDelimField(sValue, sDelim));
                     }
@@ -8375,7 +8714,7 @@ namespace DbDo
                 Dictionary<string, string> dRow = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
                 foreach (string sN in lFields)
                 {
-                    string sV = getFieldValue(sN);
+                    string sV = getExportValue(sN);
                     if (sV != null) dRow[sN] = sV;
                 }
                 lRows.Add(dRow);
@@ -8823,7 +9162,7 @@ namespace DbDo
                 while (!eof)
                 {
                     writer2.Write("<tr>");
-                    foreach (string sN in lFields) writer2.Write("<td>" + htmlEscape(getFieldValue(sN)) + "</td>");
+                    foreach (string sN in lFields) writer2.Write("<td>" + htmlEscape(getExportValue(sN)) + "</td>");
                     writer2.WriteLine("</tr>");
                     moveNext();
                 }
@@ -10622,205 +10961,111 @@ namespace DbDo
     }
 
     // =====================================================================
+    // ColumnSequenceDialog: the Fields and Picks chooser behind Select Columns
+    // (Custom) and Order Records. REBUILT ON LBC PRIMITIVES (29 October 2026): it
+    // had placed its own controls, numbered its own tab order and given OK and
+    // Cancel letters, against the Lbc rules. Now LbcDialog lays it out, add order
+    // is focus order, OK and Cancel carry no letter (Control+Enter and Escape press
+    // them anywhere), and F1 or Help explains it.
+    //
+    // Sequence, top to bottom, each band acting on the list above it:
+    //   Fields list -- every column in the order the caller gives (DbDo passes the
+    //                  natural order), the cursor's column selected.
+    //   Add band    -- Add, or in sort mode Add Ascending and Add Descending.
+    //   Picks list  -- the result, its order the sequence applied; the caller's
+    //                  current choice is already there.
+    //   Remove band -- Remove, then Clear (empties Picks), last before OK.
+    //   OK, Cancel, Help.
+    // Enter in Fields adds (ascending in sort mode); Enter or Delete in Picks
+    // removes. A removed name returns to its own place in Fields.
     // =====================================================================
-    // ColumnSequenceDialog: the reusable Lbc-family picker for an
-    // ORDERED sequence of column names. Two side-by-side listboxes,
-    // "Available:" and "Chosen:"; Add (Alt+A, or Enter in Available)
-    // moves the selected available column to the END of the chosen
-    // list -- so the order of adding IS the sequence; Remove (Alt+R,
-    // or Enter/Delete in Chosen) sends a chosen column back,
-    // re-inserted alphabetically. OK yields the chosen names and
-    // their comma-separated form, ready to become a select list, a
-    // Sort property value, or any other column-sequence argument.
-    // The available list is alphabetical, initially selecting the
-    // column the caller passes (typically the virtual cursor column).
-    // =====================================================================
-    // ColumnSequenceDialog: the side-by-side Names / Picks chooser
-    // behind Select Columns and Order Records. Names lists every
-    // column in NATURAL order with the db cursor's column
-    // preselected; the Picks order IS the result sequence. Tab
-    // order: Names, Picks, then the action row, then OK / Cancel /
-    // Help. In select mode the action row is Add and Remove; in
-    // sort mode it is Ascending (the default), Descending, and
-    // Remove, and each pick reads "name asc" or "name desc".
-    // Remove restores the name to its natural position in Names and
-    // puts focus there. Enter in Names invokes the default action;
-    // Enter or Delete in Picks removes.
-    public class ColumnSequenceDialog : LbcForm
+    public class ColumnSequenceDialog : IDisposable
     {
         private bool bSortStyle;
-        private Button btnDefault;
         private ListBox lbNames;
         private ListBox lbPicks;
+        private List<string> lsInitialChosen;
         private List<string> lsNatural;
+        private string sInitialSelection;
+        private string sTitle;
 
         public List<string> lChosenColumns = new List<string>();
         public string sChosenCsv { get { return string.Join(", ", lChosenColumns.ToArray()); } }
 
-        public ColumnSequenceDialog(string sTitle, IList<string> lAllColumns,
-            string sInitialSelection, IList<string> lInitialChosen)
-            : this(sTitle, lAllColumns, sInitialSelection, lInitialChosen, false) { }
+        public ColumnSequenceDialog(string sDialogTitle, IList<string> lAllColumns,
+            string sSelection, IList<string> lInitialChosen)
+            : this(sDialogTitle, lAllColumns, sSelection, lInitialChosen, false) { }
 
-        public ColumnSequenceDialog(string sTitle, IList<string> lAllColumns,
-            string sInitialSelection, IList<string> lInitialChosen, bool bSortMode)
+        public ColumnSequenceDialog(string sDialogTitle, IList<string> lAllColumns,
+            string sSelection, IList<string> lInitialChosen, bool bSortMode)
         {
             bSortStyle = bSortMode;
-            lsNatural = new List<string>(lAllColumns);
-            Text = sTitle;
-            StartPosition = FormStartPosition.CenterParent;
-            FormBorderStyle = FormBorderStyle.FixedDialog;
-            MinimizeBox = false; MaximizeBox = false; ShowInTaskbar = false;
-            ClientSize = new System.Drawing.Size(560, 348);
-
-            Label lblNames = new Label();
-            lblNames.Text = "&Fields:";
-            lblNames.SetBounds(12, 9, 200, 18);
-            lblNames.TabIndex = 0;
-
-            lbNames = new ListBox();
-            lbNames.SetBounds(12, 30, 250, 226);
-            lbNames.TabIndex = 1;
-            lbNames.KeyDown += (sndr, evK) =>
-            {
-                if (evK.KeyCode == Keys.Return)
-                { addClicked(bSortStyle ? "asc" : null); evK.Handled = true; evK.SuppressKeyPress = true; }
-            };
-            lbNames.DoubleClick += (sndr, evA) => addClicked(bSortStyle ? "asc" : null);
-
-            Label lblPicks = new Label();
-            lblPicks.Text = "&Picks:";
-            lblPicks.SetBounds(286, 9, 200, 18);
-            lblPicks.TabIndex = bSortStyle ? 5 : 4;
-
-            lbPicks = new ListBox();
-            lbPicks.SetBounds(286, 30, 250, 226);
-            lbPicks.TabIndex = bSortStyle ? 6 : 5;
-            lbPicks.KeyDown += (sndr, evK) =>
-            {
-                if (evK.KeyCode == Keys.Return || evK.KeyCode == Keys.Delete)
-                { removeClicked(null, null); evK.Handled = true; evK.SuppressKeyPress = true; }
-            };
-            lbPicks.DoubleClick += removeClicked;
-
-            int iX = 12;
-            if (bSortStyle)
-            {
-                Button btnAsc = new Button();
-                btnAsc.Text = "Add &Ascending";
-                btnAsc.SetBounds(iX, 266, 110, 26); iX += 118;
-                btnAsc.TabIndex = 2;
-                btnAsc.Click += (sndr, evA) => addClicked("asc");
-                btnDefault = btnAsc;
-                Controls.Add(btnAsc);
-
-                Button btnDesc = new Button();
-                btnDesc.Text = "Add &Descending";
-                btnDesc.SetBounds(iX, 266, 110, 26); iX += 118;
-                btnDesc.TabIndex = 3;
-                btnDesc.Click += (sndr, evA) => addClicked("desc");
-                Controls.Add(btnDesc);
-            }
-            else
-            {
-                Button btnAdd = new Button();
-                btnAdd.Text = "Add";
-                btnAdd.SetBounds(iX, 266, 96, 26); iX += 104;
-                btnAdd.TabIndex = 2;
-                btnAdd.Click += (sndr, evA) => addClicked(null);
-                btnDefault = btnAdd;
-                Controls.Add(btnAdd);
-            }
-            Button btnRemove = new Button();
-            btnRemove.Text = "&Remove";
-            btnRemove.SetBounds(iX, 266, 96, 26); iX += 104;
-            btnRemove.TabIndex = bSortStyle ? 4 : 3;
-            btnRemove.Click += removeClicked;
-            Controls.Add(btnRemove);
-
-            // Clear: empty the Picks list in one gesture and return every
-            // field to its natural place in Fields (its own band below).
-            Button btnClear = new Button();
-            btnClear.Text = "C&lear";
-            btnClear.SetBounds(12, 300, 96, 26);
-            btnClear.TabIndex = bSortStyle ? 7 : 6;
-            btnClear.Click += (sndr, evA) =>
-            {
-                int iCleared = lbPicks.Items.Count;
-                lbPicks.Items.Clear();
-                lbNames.Items.Clear();
-                foreach (string sN in lsNatural) lbNames.Items.Add(sN);
-                if (lbNames.Items.Count > 0) lbNames.SelectedIndex = 0;
-                lbNames.Focus();
-                Say.say(iCleared + (iCleared == 1 ? " pick cleared" : " picks cleared"));
-            };
-            Controls.Add(btnClear);
-
-            Button btnOk = new Button();
-            btnOk.Text = "&OK";
-            btnOk.SetBounds(286, 306, 76, 26);
-            btnOk.TabIndex = bSortStyle ? 8 : 7;
-            btnOk.Click += (sndr, evA) =>
-            {
-                lChosenColumns.Clear();
-                foreach (object o in lbPicks.Items) lChosenColumns.Add(o.ToString());
-                DialogResult = DialogResult.OK;
-            };
-
-            Button btnCancel = new Button();
-            btnCancel.Text = "&Cancel";
-            btnCancel.SetBounds(370, 306, 76, 26);
-            btnCancel.TabIndex = bSortStyle ? 9 : 8;
-            btnCancel.DialogResult = DialogResult.Cancel;
-            CancelButton = btnCancel;
-
-            Button btnHelp = new Button();
-            btnHelp.Text = "&Help";
-            btnHelp.SetBounds(454, 306, 76, 26);
-            btnHelp.TabIndex = bSortStyle ? 10 : 9;
-            btnHelp.Click += (sndr, evA) => HelpDialog.show(this, Text, helpText());
-
-            // The action default (Add / Ascending) is the dialog's
-            // AcceptButton, per spec; the listbox Enter handlers
-            // above take precedence inside the lists, so Enter in
-            // Picks still removes.
-            AcceptButton = btnDefault;
-
-            Controls.Add(lblNames); Controls.Add(lbNames);
-            Controls.Add(lblPicks); Controls.Add(lbPicks);
-            Controls.Add(btnClear);
-            Controls.Add(btnOk); Controls.Add(btnCancel); Controls.Add(btnHelp);
-
-            // Populate: Picks first (caller's order, suffixes intact
-            // in sort mode), then Names = the rest in NATURAL order.
-            HashSet<string> hPicked = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            sTitle = sDialogTitle;
+            sInitialSelection = sSelection ?? "";
+            lsNatural = new List<string>(lAllColumns ?? new List<string>());
+            lsInitialChosen = new List<string>();
             if (lInitialChosen != null)
-            {
-                foreach (string sC in lInitialChosen)
-                {
-                    if (string.IsNullOrEmpty(sC)) continue;
-                    lbPicks.Items.Add(sC);
-                    hPicked.Add(bareName(sC));
-                }
-            }
-            foreach (string sC in lsNatural)
-                if (!hPicked.Contains(sC)) lbNames.Items.Add(sC);
+                foreach (string sChosen in lInitialChosen)
+                    if (!string.IsNullOrEmpty(sChosen)) lsInitialChosen.Add(sChosen);
+        }
 
-            if (lbNames.Items.Count > 0)
+        public void Dispose() { }
+
+        public DialogResult ShowDialog(IWin32Window owner)
+        {
+            HashSet<string> hPicked = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            foreach (string sChosen in lsInitialChosen) hPicked.Add(bareName(sChosen));
+            List<string> lsNames = new List<string>();
+            foreach (string sName in lsNatural) if (!hPicked.Contains(sName)) lsNames.Add(sName);
+
+            using (LbcDialog dlg = new LbcDialog(sTitle, owner))
             {
-                int iInit = 0;
-                if (!string.IsNullOrEmpty(sInitialSelection))
+                dlg.helpNote = helpText();
+                lbNames = dlg.addPickBox("&Fields:", lsNames, sInitialSelection, null);
+                dlg.addBand();
+                if (bSortStyle) addSortButtons(dlg); else addSelectButton(dlg);
+                dlg.endBand();
+                lbPicks = dlg.addPickBox("&Picks:", lsInitialChosen, null, null);
+                dlg.addBand();
+                dlg.addButton("&Remove").Click += (oSender, evA) => removeClicked();
+                dlg.addButton("&Clear").Click += (oSender, evA) => clearClicked();
+                dlg.endBand();
+
+                // Plain Enter belongs to the lists (add or remove) rather than to OK;
+                // Control+Enter still presses OK from anywhere.
+                lbNames.PreviewKeyDown += (oSender, evP) => { if (evP.KeyData == Keys.Enter) evP.IsInputKey = true; };
+                lbPicks.PreviewKeyDown += (oSender, evP) => { if (evP.KeyData == Keys.Enter) evP.IsInputKey = true; };
+                lbNames.KeyDown += (oSender, evK) =>
                 {
-                    for (int i = 0; i < lbNames.Items.Count; i++)
-                    {
-                        if (string.Equals(lbNames.Items[i].ToString(), sInitialSelection,
-                            StringComparison.OrdinalIgnoreCase))
-                        { iInit = i; break; }
-                    }
-                }
-                lbNames.SelectedIndex = iInit;
+                    if (evK.KeyData == Keys.Enter)
+                    { addClicked(bSortStyle ? "asc" : null); evK.Handled = true; evK.SuppressKeyPress = true; }
+                };
+                lbPicks.KeyDown += (oSender, evK) =>
+                {
+                    if (evK.KeyData == Keys.Enter || evK.KeyData == Keys.Delete)
+                    { removeClicked(); evK.Handled = true; evK.SuppressKeyPress = true; }
+                };
+
+                string sResult = dlg.runWithButtons(new string[] { "OK", "Cancel" });
+                if (sResult != "OK") return DialogResult.Cancel;
+                lChosenColumns.Clear();
+                foreach (object oItem in lbPicks.Items) lChosenColumns.Add(oItem.ToString());
+                return DialogResult.OK;
             }
-            if (lbPicks.Items.Count > 0) lbPicks.SelectedIndex = 0;
-            Shown += (sndr, evA) => lbNames.Focus();
+        }
+
+        // The add band. Sort mode and select mode each have their own letters,
+        // so each is built in its own routine: Add Ascending and Add Descending,
+        // or Add.
+        private void addSortButtons(LbcDialog dlg)
+        {
+            dlg.addButton("Add &Ascending").Click += (oSender, evA) => addClicked("asc");
+            dlg.addButton("Add &Descending").Click += (oSender, evA) => addClicked("desc");
+        }
+
+        private void addSelectButton(LbcDialog dlg)
+        {
+            dlg.addButton("&Add").Click += (oSender, evA) => addClicked(null);
         }
 
         // bareName: a pick without its sort-mode direction suffix.
@@ -10834,7 +11079,7 @@ namespace DbDo
         private void addClicked(string sSuffix)
         {
             if (lbNames.SelectedIndex < 0)
-            { Say.say("No name selected"); return; }
+            { Say.say("No field selected"); return; }
             int iIdx = lbNames.SelectedIndex;
             string sName = lbNames.Items[iIdx].ToString();
             lbNames.Items.RemoveAt(iIdx);
@@ -10843,49 +11088,66 @@ namespace DbDo
             lbPicks.SelectedIndex = lbPicks.Items.Count - 1;
             if (lbNames.Items.Count > 0)
                 lbNames.SelectedIndex = Math.Min(iIdx, lbNames.Items.Count - 1);
-            Say.say(sPick + " picked, " + lbPicks.Items.Count + " picks");
+            lbNames.Focus();
+            Say.say(sPick + " picked, " + lbPicks.Items.Count + (lbPicks.Items.Count == 1 ? " pick" : " picks"));
         }
 
-        private void removeClicked(object sender, EventArgs evArgs)
+        private void removeClicked()
         {
             if (lbPicks.SelectedIndex < 0)
             { Say.say("No pick selected"); return; }
             int iIdx = lbPicks.SelectedIndex;
             string sName = bareName(lbPicks.Items[iIdx].ToString());
             lbPicks.Items.RemoveAt(iIdx);
-            // Restore at the name's NATURAL position among the names
-            // currently present, then put focus there, per spec.
-            int iRank = lsNatural.FindIndex(
-                sN => string.Equals(sN, sName, StringComparison.OrdinalIgnoreCase));
-            int iInsert = 0;
-            while (iInsert < lbNames.Items.Count
-                && lsNatural.FindIndex(sN => string.Equals(sN,
-                       lbNames.Items[iInsert].ToString(), StringComparison.OrdinalIgnoreCase)) < iRank)
-                iInsert++;
-            lbNames.Items.Insert(iInsert, sName);
+            int iInsert = restoreName(sName);
             lbNames.SelectedIndex = iInsert;
             if (lbPicks.Items.Count > 0)
                 lbPicks.SelectedIndex = Math.Min(iIdx, lbPicks.Items.Count - 1);
             lbNames.Focus();
-            Say.say(sName + " removed, " + lbPicks.Items.Count + " picks");
+            Say.say(sName + " removed, " + lbPicks.Items.Count + (lbPicks.Items.Count == 1 ? " pick" : " picks"));
         }
 
-        // helpText: generated for the Help button / dialog mode.
+        private void clearClicked()
+        {
+            int iCleared = lbPicks.Items.Count;
+            List<string> lsBack = new List<string>();
+            foreach (object oItem in lbPicks.Items) lsBack.Add(bareName(oItem.ToString()));
+            lbPicks.Items.Clear();
+            foreach (string sName in lsBack) restoreName(sName);
+            if (lbNames.Items.Count > 0) lbNames.SelectedIndex = 0;
+            lbNames.Focus();
+            Say.say(iCleared + (iCleared == 1 ? " pick cleared" : " picks cleared"));
+        }
+
+        // restoreName: put a name back in Fields at its own place in the
+        // caller's order; returns where it went.
+        private int restoreName(string sName)
+        {
+            int iRank = lsNatural.FindIndex(s => string.Equals(s, sName, StringComparison.OrdinalIgnoreCase));
+            int iInsert = 0;
+            while (iInsert < lbNames.Items.Count
+                && lsNatural.FindIndex(s => string.Equals(s, lbNames.Items[iInsert].ToString(), StringComparison.OrdinalIgnoreCase)) < iRank)
+                iInsert++;
+            lbNames.Items.Insert(iInsert, sName);
+            return iInsert;
+        }
+
         private string helpText()
         {
             System.Text.StringBuilder sbHelp = new System.Text.StringBuilder();
-            sbHelp.AppendLine("Fields lists the columns in natural order; Picks holds your choices, and the order of Picks is the order applied.");
-            sbHelp.AppendLine();
+            sbHelp.AppendLine("Fields lists the columns in DbDo's natural order: main fields in table order, then url, tags, notes, marked, look, prime, added, edited and the id.");
+            sbHelp.AppendLine("Picks holds your choices; their order is the order applied.");
             if (bSortStyle)
-                sbHelp.AppendLine("Add Ascending (the default; Enter in Fields) or Add Descending moves the selected field to Picks with its direction. Each pick reads like: city asc.");
+                sbHelp.AppendLine("Enter in Fields, or Add Ascending, adds the selected field to Picks in ascending order; Add Descending adds it in descending order. Each pick reads like: city asc.");
             else
-                sbHelp.AppendLine("Add (the default; Enter in Fields) moves the selected field to the bottom of Picks.");
-            sbHelp.AppendLine("Remove (or Enter or Delete in Picks) returns the selected pick to its natural place in Fields and moves focus there.");
-            sbHelp.AppendLine("Clear empties the Picks list at once. OK applies the picks; an empty Picks list clears the setting. Escape cancels.");
+                sbHelp.AppendLine("Enter in Fields, or Add, adds the selected field to the end of Picks.");
+            sbHelp.AppendLine("Remove, or Enter or Delete in Picks, returns the selected pick to its place in Fields. Clear empties Picks at once.");
+            sbHelp.AppendLine("OK applies the picks; with no picks it returns to the default. Escape cancels.");
             return sbHelp.ToString();
         }
     }
 
+    // =====================================================================
     // FilterDialog: Select-Record dialog. Three controls -- filter
     // text, column chooser, match-mode chooser. The column chooser
     // includes "All columns" as the first option (for any-column
@@ -13207,6 +13469,7 @@ namespace DbDo
         public void invokeRefresh()
         {
             if (this.IsDisposed) return;
+            try { if (db != null) db.clearLinkLabelsIfChanged(); } catch { }
             if (this.InvokeRequired)
             {
                 try { this.Invoke(new Action(updateGrid)); } catch { }
@@ -13697,7 +13960,7 @@ namespace DbDo
             miSaySayCell         = addItem(miSay, "Say &Cell",       "Say Cell",    Keys.Shift | Keys.C,                saySayCell);
             miSaySayFilter       = addItem(miSay, "Say &Filter",        "Say Filter",       Keys.Shift | Keys.F,            saySayFilter);
             miSaySayFind         = addItem(miSay, "Say &Keywords",      "Say Keywords", Keys.Shift | Keys.K,               saySayFind);
-            miSaySaySelect       = addItem(miSay, "&Say Select Columns", "Say Select",  Keys.Shift | Keys.S,                saySaySelect);
+            miSaySaySelect       = addItem(miSay, "&Say Select Columns", "Say Select Columns",  Keys.Shift | Keys.S,                saySaySelect);
             miSaySayQuery        = addItem(miSay, "Say &Query",          "Say Query",   Keys.Shift | Keys.Q,                saySayQuery);
             miSaySayId           = addItem(miSay, "Say &Id",      "Say ID",      Keys.Shift | Keys.I,                saySayId);
             miSaySayLook         = addItem(miSay, "Say Look",           "Say Look",    Keys.Shift | Keys.L,                saySayLook);
@@ -13727,7 +13990,7 @@ namespace DbDo
             miViewResetFilter= addItem(miQuery, "Clear Filter",                                    "Clear Filter",      Keys.Control | Keys.Shift | Keys.F, viewResetFilterClicked);
             miViewFilterRegex= addItem(miQuery, "Filter by Regex...",                                 "Filter Regex",      Keys.None,                          filterRegexClicked);
             addSep(miQuery);
-            miViewResetSort  = addItem(miQuery, "&Clear Sort",                                      "Reset Sort",        Keys.None,                          viewResetSortClicked);
+            miViewResetSort  = addItem(miQuery, "&Clear Sort",                                      "Clear Sort",        Keys.None,                          viewResetSortClicked);
             // Sort Records: the universal sort. Defaults to the
             // current virtual column with an opt-in Descending
             // checkbox. Replaces the entire family of per-column
@@ -13735,10 +13998,10 @@ namespace DbDo
             // Sort-Object, Sort-ById, Sort-ByLook, Sort-ByTags,
             // Sort-ByUrl, Sort-OldestFirst, Sort-RecentFirst) that
             // earlier versions provided. Their handlers are removed.
-            // Order Records moved to Alt+Shift+O (v1.0.113),
-            // vacating Alt+O; Reverse Order retired -- its
-            // descending half lives in the dialog's Descending
-            // button, per-column.
+            // Order Records is Alt+O (Control+O opens a database, so
+            // Alt takes the letter); Reverse Order, Alt+Shift+O, flips
+            // every direction of the order in force in one key, which
+            // the dialog's Add Descending cannot do for a whole order.
             miOrderRecords   = addItem(miQuery, "&Order Records...",  "Order Records",   Keys.Alt | Keys.O,                  orderRecordsClicked);
             miReverseOrder   = addItem(miQuery, "Reverse Order",   "Reverse Order",  Keys.Alt | Keys.Shift | Keys.O,     reverseOrderClicked);
 
@@ -13778,14 +14041,15 @@ namespace DbDo
             // commands use on double-press: multi-line read-only
             // TextBox plus an OK button, focus-stealing, Control+C
             // copies the whole report.
-            miDescribeColumn = addItem(miMisc, "&Statistics from Column",     "Statistics from Column", Keys.Alt | Keys.Shift | Keys.S, describeColumnClicked);
+            // SELECT COLUMNS TAKES S (29 October 2026). Alt+S is its key, and a menu
+            // item's trigger letter must be its key's letter, so it now comes before
+            // Statistics from Column, which yields the letter (one trigger letter per
+            // menu, first claim wins) and keeps Alt+Shift+S. The caption is the
+            // command name. Choose Visible Columns, which typed the same list into a
+            // text box, is retired: Select Columns offers that as its Type button.
+            miSelectColumns = addItem(miMisc, "&Select Columns...",  "Select Columns",   Keys.Alt | Keys.S,                  selectColumnsClicked);
+            miDescribeColumn = addItem(miMisc, "Statistics from Column",     "Statistics from Column", Keys.Alt | Keys.Shift | Keys.S, describeColumnClicked);
             addItem(miMisc, "Count &by Columns", "Count by Columns", Keys.Alt | Keys.Shift | Keys.B, countByColumnsClicked);
-            // Select Columns: per-table visibility picker. Alt+S as
-            // the S-letter productivity primary; the dialog has one
-            // checkbox per column, plus Select All / Select None /
-            // OK / Cancel buttons. Persists with the table (uses
-            // the existing db.setSelectList mechanism).
-            miSelectColumns = addItem(miMisc, "Select Columns to Display...",  "Select Columns",   Keys.Alt | Keys.S,                  selectColumnsClicked);
             // Plot Column: graphical sibling of Describe Column. Picks
             // a chart type from the column's detected data type --
             // numeric -> histogram or box plot; date -> timeline or
@@ -13794,7 +14058,6 @@ namespace DbDo
             // Excel, same pattern as the Frequency Chart command.
             miPlotColumn = addItem(miMisc, "&Graphics Column...", "Graphics Column",         Keys.Control | Keys.Shift | Keys.G, plotColumnClicked);
             miToolsChart     = addItem(miMisc, "Generate from Grid...",  "Generate from Grid",       Keys.Alt | Keys.Shift | Keys.G,     generateFromGridClicked);
-            miViewSelectColumn = addItem(miMisc, "Choose &Visible Columns...",           "Select Column",     Keys.None,                          viewSelectColumnClicked);
             // Extract Matches: walk every visible row, find every
             // regex match across every visible column, copy matches
             // to the clipboard. Alt+E ("E for Extract").
@@ -14174,13 +14437,13 @@ namespace DbDo
             add("Set Position",       "Jump to a specific row by number", "");
             add("Jump Next Initial", "Move to the next row where the first display field's initial letter changes",
                 "Useful in alphabetically sorted lists for moving by letter group.");
-            add("Keywords",           "Search across all columns for a substring",
-                "Case-insensitive substring match against every visible column. Find Previous goes backward.");
-            add("Keywords Previous",  "Keywords backward: the previous match across all columns", "");
+            add("Keywords",           "Go to the next record whose fields hold the keywords: red & blue (both), red | blue (either), re*d (a star for anything), case aside",
+                "Searches every field of each record, shown or not, a link by the look it shows. Keywords Previous, Control+Shift+K, goes backward; F3 and Shift+F3 repeat.");
+            add("Keywords Previous",  "Keywords backward: the previous record whose fields hold the keywords", "");
             add("Find Regex",         "Search across all columns with a .NET regex pattern", "");
             add("Find Previous Regex", "Find Regex backward", "");
             add("Find Regex Again",    "Repeat the last Find Regex forward", "");
-            add("Jump Record",        "Search within one chosen column for a substring", "");
+            add("Jump Record",        "Go to the next record whose current column holds the text, case aside", "");
             add("Jump Previous Record","Jump Record backward", "");
             add("Jump Record Again",   "Repeat the last Jump Record", "");
             add("Search Next",        "Repeat the last Find forward", "");
@@ -14243,13 +14506,14 @@ namespace DbDo
                 "Plain text only; non-text and empty clipboards announce that fact rather than going silent. Double-press opens the read-only memo dialog for line-by-line review of long pasted content.");
             add("Say Sort Filter",     "Speak the current sort and filter, or '(none)' for each",
                 "Single-press speaks; double-press opens the same text in the multi-line dialog. Useful when the filter or sort string is long.");
-            add("Filter Records",      "Show only the records that hold some text in any field, or that meet a condition on each field", "Control+F. A list of choices, its first selected, so Enter takes it; each begins with its own letter. Any field contains text asks for the text and keeps the records where some field, read as text, contains it, case aside (for English letters). Fields, one by one opens a form with a box per field: a value on its own means equals, a symbol in front compares (> >= < <= !=), and % in front matches anywhere in the field; several boxes must all match. With a filter in force the list adds Clear, Edit (the field filter), Narrow (add a field condition) and, for a field filter, Widen. A search that finds nothing leaves the view as it was.");
+            add("Filter Records",      "Show only the records that hold some text in any field, or that meet a condition on each field", "Control+F. A list of choices, its first selected, so Enter takes it; each begins with its own letter. Any field contains text asks for the text and keeps the records where some field, read as text, contains it, case aside (for English letters). Fields asks Main, Standard or All, then opens a form with a box per field in DbDo's natural order: a value on its own matches anywhere in the field, case aside; = in front means is, and a symbol in front compares (> >= < <= !=); dates are typed as year-month-day; several boxes must all match. Marked and Unmarked take the records you have marked, or the rest. With a filter in force the list adds Clear, Edit (the field filter), Narrow (add a field condition) and, for a field filter, Widen. A search that finds nothing leaves the view as it was.");
             add("Filter Regex",        "Filter to rows whose current column matches a regular expression (SQLean REGEXP)",
                 "Server-side, so it works on large tables and the result stays editable. Prompts for a pattern and applies it to the column under virtual focus; an empty pattern clears the filter. Needs sqlean.dll beside DbDo.exe. Unbound by default -- assign a chord if you use it often.");
             add("Clear Filter",       "Clear the active filter", "Control+Shift+F.");
-            add("Order Records",       "Sort the current table by a chosen column, ascending",
-                "Alt+O. Shows a list box of all field names (alpha-sorted, including hidden columns), with the current virtual column as the default. Press Enter to sort by the default, or arrow + Enter to pick another. Sorting by hidden columns is the main feature -- no need to display, sort, then re-hide.");
-            add("Reset Sort",         "Clear the active sort", "");
+            add("Order Records",       "Sort the records by one or more columns, each ascending or descending",
+                "Alt+O. Fields lists every column, shown or not, in DbDo's natural order (main fields in table order, then url, tags, notes, marked, look, prime, added, edited and the id), the column under the cursor selected. Enter or Add Ascending adds it to Picks; Add Descending adds it the other way. The Picks order is the sort order, and the order in force is already there to change. Remove (or Enter or Delete in Picks) takes one back; Clear empties Picks, and OK with no picks clears the sort.");
+            add("Reverse Order",      "Reverse the order in force, every column's direction flipped", "Alt+Shift+O.");
+            add("Clear Sort",         "Clear the order in force, so records return to table order", "");
 
             // ===== Misc menu =====
             add("Update View",        "Refresh the visible row set from the database", "");
@@ -14258,8 +14522,8 @@ namespace DbDo
                 "Alt+Shift+S. Type-aware: numeric columns get count/populated/min/max/mean/median/stdev/variance/CV/quartiles/IQR/outliers; date columns get range and modal year; boolean columns get true/false splits; text columns get cardinality and top-N most-frequent values. Shown in a read-only memo dialog (Control+C copies it).");
             add("Count by Columns", "Count the records with each combination of values in the columns shown",
                 "Alt+Shift+B. Within the filter in force, over the columns the grid shows apart from the standard ones (the id, added, edited and marked), lists each combination of values with how many records have it, most common first, in a read-only window to review and copy. With State and City shown: how many contacts in each state and city.");
-            add("Select Columns",        "Choose which columns the grid shows AND their order, via the Available/Chosen sequence picker",
-                "Alt+S. Opens a dialog with one checkbox per column in the current table; the user picks which columns to display. Three quick-action buttons: Select All (every column), Select None (revert to DbDo's default visible-columns rule), OK (apply selection). The choice persists with the table via the SelectList mechanism.");
+            add("Select Columns",        "Choose which columns the grid shows, and in what order",
+                "Alt+S. Seven buttons: Default (the fields of look, or every main field when a table has no look), Main (the fields about the table's subject), Standard (url, tags, notes, marked, look, prime, added, edited and the id), All (every field in DbDo's natural order), Look and prime, Exact (the Fields and Picks lists, with the columns now shown already in Picks), and Type (the names typed with commas). The choice is remembered with the table.");
             add("Generate from Grid",         "Alt+Shift+G. Ad-hoc analysis of the VIRTUAL grid (the current filtered, sorted view): profile the columns by type and pick an output -- summary statistics, frequency table, cross-tab, Markdown table, or an Excel chart (bar, pie, histogram, box-whisker, scatter, timeline). One-off and exploratory; acts on what you are looking at.", "");
             add("Run Report",              "Alt+Shift+R. Render a saved report definition to a Markdown document. A report reads the whole PHYSICAL table (not the grid view), so it is reproducible regardless of your current filter or sort.",
                 "Report definitions live in an .inix file beside the database whose [Global] section declares FileTask = report (each [section] is one report, with header/detail/footer/group bands, $field and {{ jscript }} substitution, and footer aggregates like $count and $sum_<field>). DbDo lists only the FileTask = report files -- so a transfer map or settings file in the same folder is never offered -- then writes Markdown you can convert to HTML/DOCX/PDF. A legacy file with report bands but no FileTask still works. The contrast to remember: Generate from Grid = analyze what you SEE (virtual grid, ad-hoc); Run Report = produce a DEFINED document from the physical table (reproducible).");
@@ -14824,7 +15088,7 @@ namespace DbDo
                         }
                         else
                         {
-                            aRow[i] = formatCellValue(db.getFieldValue(sCol));
+                            aRow[i] = formatCellValue(db.getScreenValue(sCol));
                             // AN EMPTY CELL SAYS WHICH KIND OF EMPTY IT IS.
                             //
                             // Silence is the one answer a cell must not give: it
@@ -14913,7 +15177,7 @@ namespace DbDo
                     int iAdoPos = iCheck + 1;
                     try { db.absolutePosition = iAdoPos; } catch { continue; }
                     string sValue = "";
-                    try { sValue = db.getFieldValue(sFieldName) ?? ""; } catch { }
+                    try { sValue = db.getScreenValue(sFieldName) ?? ""; } catch { }
                     if (sValue.StartsWith(sNeedle, StringComparison.OrdinalIgnoreCase))
                     {
                         evArgs.Index = iCheck;
@@ -15185,7 +15449,7 @@ namespace DbDo
             try
             {
                 if (iSavedPos != iRow) db.absolutePosition = iRow;
-                return formatCellValue(db.getFieldValue(sHeader)) ?? "";
+                return formatCellValue(db.getScreenValue(sHeader)) ?? "";
             }
             catch { return ""; }
         }
@@ -15652,7 +15916,7 @@ namespace DbDo
                             if (grid.Columns.Count > 0)
                             {
                                 string sHeader = grid.Columns[0].Text;
-                                sFirstColValue = db.getFieldValue(sHeader) ?? "";
+                                sFirstColValue = db.getScreenValue(sHeader) ?? "";
                             }
                             // Use a short announcement -- just the
                             // first column's value plus the row count
@@ -15775,7 +16039,7 @@ namespace DbDo
             {
                 try
                 {
-                    string sVal = db.getFieldValue(Metadata.MarkedColumn) ?? "";
+                    string sVal = db.getScreenValue(Metadata.MarkedColumn) ?? "";
                     sVal = sVal.Trim().ToLowerInvariant();
                     bool bMarked = (sVal == "1" || sVal == "true" || sVal == "yes" || sVal == "-1");
                     if (bMarked) sMarked = "marked";
@@ -15788,7 +16052,7 @@ namespace DbDo
             {
                 try
                 {
-                    string sRaw = db.getFieldValue("edited") ?? "";
+                    string sRaw = db.getScreenValue("edited") ?? "";
                     if (sRaw.Length > 0)
                     {
                         DateTime dt;
@@ -16662,7 +16926,7 @@ namespace DbDo
             {
                 try
                 {
-                    string sM = db.getFieldValue(Metadata.MarkedColumn) ?? "";
+                    string sM = db.getScreenValue(Metadata.MarkedColumn) ?? "";
                     if (isMarkedTrue(sM)) sb.Append("Marked. ");
                 }
                 catch { }
@@ -16854,9 +17118,9 @@ namespace DbDo
                     try
                     {
                         db.absolutePosition = i;
-                        if (!isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn))) continue;
+                        if (!isMarkedTrue(db.getScreenValue(Metadata.MarkedColumn))) continue;
                         iTotal++;
-                        string sLook = db.getFieldValue("look");
+                        string sLook = db.getScreenValue("look");
                         if (string.IsNullOrEmpty(sLook)) sLook = "row " + i;
                         lLooks.Add(sLook);
                     }
@@ -16960,7 +17224,7 @@ namespace DbDo
                     try
                     {
                         db.absolutePosition = i;
-                        if (isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn))) iCount++;
+                        if (isMarkedTrue(db.getScreenValue(Metadata.MarkedColumn))) iCount++;
                     }
                     catch { }
                 }
@@ -17199,9 +17463,13 @@ namespace DbDo
             { Say.say("look: no record selected"); return; }
             if (!db.hasField("look"))
             { Say.say("look: this table has no look column"); return; }
-            string sVal = db.getFieldValue("look");
+            // Each part in its own say call, so the pause marks the boundary (29 Oct 2026).
+            string sRaw = db.getFieldValue("look");
+            string sVal = db.getScreenValue("look");
             if (string.IsNullOrEmpty(sVal)) sVal = "blank";
-            speakOrShow("Look", "look: " + sVal, 120);
+            if (sVal.Length <= 120 && sRaw.IndexOf(Util.PartSeparator) >= 0)
+            { Say.say("look:"); DbDoManager.sayStoredParts(sRaw); }
+            else speakOrShow("Look", "look: " + sVal, 120);
         }
 
         // saySayRelated: speak the foreign-key relationships of the
@@ -17245,7 +17513,7 @@ namespace DbDo
                     if (!sCol.EndsWith(Metadata.PrimaryKeySuffix, StringComparison.OrdinalIgnoreCase))
                         continue;
                     string sFkValue = "";
-                    try { sFkValue = db.getFieldValue(sCol) ?? ""; } catch { }
+                    try { sFkValue = db.getScreenValue(sCol) ?? ""; } catch { }
                     if (string.IsNullOrEmpty(sFkValue)) continue;
                     string sParentTable = findParentTableForFk(sCol, lAllTables);
                     if (string.IsNullOrEmpty(sParentTable)) continue;
@@ -17261,7 +17529,7 @@ namespace DbDo
                 // both-places convention). One look line per record.
                 string sPkValue = "";
                 if (!string.IsNullOrEmpty(sCurrentPk))
-                    try { sPkValue = db.getFieldValue(sCurrentPk) ?? ""; } catch { }
+                    try { sPkValue = db.getScreenValue(sCurrentPk) ?? ""; } catch { }
                 if (!string.IsNullOrEmpty(sPkValue))
                 {
                     foreach (string sChildTable in lAllTables)
@@ -17481,9 +17749,13 @@ namespace DbDo
                           : (db.hasField(Metadata.PrimeColumn) ? Metadata.PrimeColumn : null);
             if (sField == null)
             { Say.say("prime: this table has no prime column"); return; }
-            string sVal = db.getFieldValue(sField);
+            // Each part in its own say call, so the pause marks the boundary (29 Oct 2026).
+            string sRaw = db.getFieldValue(sField);
+            string sVal = db.getScreenValue(sField);
             if (string.IsNullOrEmpty(sVal)) sVal = "blank";
-            speakOrShow("Prime", sField + ": " + sVal, 123);
+            if (sVal.Length <= 123 && sRaw.IndexOf(Util.PartSeparator) >= 0)
+            { Say.say(sField + ":"); DbDoManager.sayStoredParts(sRaw); }
+            else speakOrShow("Prime", sField + ": " + sVal, 123);
         }
 
         // The Say-Column family sweeps the current virtual column and
@@ -17543,7 +17815,7 @@ namespace DbDo
                         db.absolutePosition = i;
                         if (bMarkedOnly)
                         {
-                            if (!isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn))) continue;
+                            if (!isMarkedTrue(db.getScreenValue(Metadata.MarkedColumn))) continue;
                         }
                         iTotal++;
                         lValues.Add(speakableValue(sHeader));
@@ -17588,7 +17860,7 @@ namespace DbDo
         {
             if (db == null) return "blank";
             if (db.isFieldNull(sCol)) return "blank";
-            string sVal = db.getFieldValue(sCol);
+            string sVal = db.getScreenValue(sCol);
             return string.IsNullOrEmpty(sVal) ? "blank" : sVal;
         }
 
@@ -17619,7 +17891,7 @@ namespace DbDo
                     try
                     {
                         db.absolutePosition = i;
-                        if (!isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn))) continue;
+                        if (!isMarkedTrue(db.getScreenValue(Metadata.MarkedColumn))) continue;
                         StringBuilder sbRow = new StringBuilder();
                         sbRow.Append("Row ").Append(i).Append(" -- ");
                         for (int j = 0; j < lDispCols.Count; j++)
@@ -17680,7 +17952,7 @@ namespace DbDo
                         db.absolutePosition = i;
                         if (bMarkedOnly)
                         {
-                            if (!isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn))) continue;
+                            if (!isMarkedTrue(db.getScreenValue(Metadata.MarkedColumn))) continue;
                         }
                         iTotal++;
                         StringBuilder sbRow = new StringBuilder();
@@ -17852,7 +18124,7 @@ namespace DbDo
                 if (!sCol.EndsWith(Metadata.PrimaryKeySuffix, StringComparison.OrdinalIgnoreCase))
                     continue;
                 string sFkValue = "";
-                try { sFkValue = db.getFieldValue(sCol) ?? ""; }
+                try { sFkValue = db.getScreenValue(sCol) ?? ""; }
                 catch { sFkValue = ""; }
                 if (string.IsNullOrEmpty(sFkValue)) continue;
                 string sParentTable = findParentTableForFk(sCol, lAllTables);
@@ -17871,7 +18143,7 @@ namespace DbDo
             string sCurrentPkValue = "";
             if (!string.IsNullOrEmpty(sCurrentPk))
             {
-                try { sCurrentPkValue = db.getFieldValue(sCurrentPk) ?? ""; }
+                try { sCurrentPkValue = db.getScreenValue(sCurrentPk) ?? ""; }
                 catch { sCurrentPkValue = ""; }
             }
             List<string> lChildLines = new List<string>();
@@ -18006,23 +18278,20 @@ namespace DbDo
         // anyway, and linear-prose is more navigable).
         // =======================================================================
 
-        // selectColumnsClicked: Alt+S. Show a dialog with one
-        // checkbox per column in the current table; the user picks
-        // which columns are visible in the grid. The result is
-        // stored via db.setSelectList(), which the existing
-        // db.getDisplayFieldNames() consults when populating the
-        // grid. Persists with the table.
-        //
-        // Behavior:
-        //   - "Select All" button (Alt+A) checks every box.
-        //   - "Select None" button (Alt+N) clears every box; equivalent
-        //     to "revert to default visible columns" because the rule-
-        //     based default applies when no select list is stored.
-        //   - "OK" applies the selection.
-        //   - "Cancel" leaves the current selection unchanged.
-        //
-        // The dialog is built with LbcDialog and one addCheckBox call
-        // per column. For tables with many columns, the dialog scrolls.
+        // selectColumnsClicked: SELECT COLUMNS, Alt+S (29 October 2026). The choices
+        // are fixed, so this is an Lbc button dialog, every list in the natural
+        // order (Metadata's TWO KINDS OF FIELD). Each button takes the first letter
+        // of its first word; Lbc adds Help last, with Alt+H and F1.
+        //   Default        -- forget the saved choice: look's fields in look's
+        //                     order, or every main field when there is no look.
+        //   Main           -- every main field, in table order.
+        //   Standard       -- every standard field present.
+        //   All            -- every field.
+        //   Look and prime -- the two stored summaries.
+        //   Exact...       -- the Fields and Picks lists, the columns now shown
+        //                     already in Picks.
+        //   Type...        -- the names typed with commas.
+        // The choice is saved with the table at once.
         private void selectColumnsClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset())
@@ -18036,81 +18305,71 @@ namespace DbDo
                 Say.say("No table selected.");
                 return;
             }
-            List<string> lAllColumns = db.getFieldNames();
-
-            // Build the named field sets:
-            //   Distinct = the summary/key columns (look + prime)
-            //   Edit     = the editable fields (everything that isn't an
-            //              admin or computed column -- the nonstandard
-            //              columns plus notes/tags/url)
-            //   All      = every field, in natural order
-            List<string> lDistinct = new List<string>();
-            List<string> lEdit = new List<string>();
-            foreach (string sN in lAllColumns)
+            List<string> lAllColumns = db.getNaturalFieldNames();
+            List<string> lMain = new List<string>(), lStandard = new List<string>(), lIdentity = new List<string>();
+            foreach (string sName in lAllColumns)
             {
-                if (Metadata.isDistinctColumn(sN)) lDistinct.Add(sN);
-                if (!Metadata.isAdminColumn(sN, sTable)) lEdit.Add(sN);
+                if (Metadata.fieldKind(sName, sTable) == Metadata.KindMain) lMain.Add(sName); else lStandard.Add(sName);
+                if (Metadata.isDistinctColumn(sName)) lIdentity.Add(sName);
             }
 
-            // Chooser: Custom (the exact-sequence picker), Distinct,
-            // Edit, or All. Custom is first.
-            string sBtn;
+            string sButton;
             using (LbcDialog dlg = new LbcDialog("Select Columns", this))
             {
-                dlg.addLabel("Which columns should the listview show for " + sTable + "?");
-                dlg.addLabel("Custom = pick an exact sequence. Distinct = look + prime.");
-                dlg.addLabel("Edit = the editable fields. All = every field.");
-                sBtn = dlg.runWithButtons(new string[]
-                    { "&Custom...", "&Edit", "&Distinct", "&All", "Cancel" });
+                dlg.addLabel("Which columns should the grid show for " + sTable + "?");
+                dlg.helpNote = "Default shows the fields of look, in look's order, or every main field when the table has no look. "
+                    + "Main shows the fields about the table's subject. Standard shows url, tags, notes, marked, look, prime, added, edited and the id. "
+                    + "All shows every field. Look and prime shows the two summaries. Exact picks an exact sequence; Type takes the names separated by commas. "
+                    + "The choice is remembered with the table.";
+                sButton = dlg.runWithButtons(new string[]
+                    { "&Default", "&Main", "&Standard", "&All", "&Look and prime", "&Exact...", "&Type...", "Cancel" });
             }
-            if (string.IsNullOrEmpty(sBtn)
-                || string.Equals(sBtn, "Cancel", StringComparison.OrdinalIgnoreCase))
-                return;
+            if (string.IsNullOrEmpty(sButton) || sButton == "Cancel") return;
 
-            // The three named sets apply immediately and persist.
-            if (!string.Equals(sBtn, "Custom...", StringComparison.OrdinalIgnoreCase))
+            string sStored;
+            if (sButton == "Default") sStored = applySelectList(sTable, "");
+            else if (sButton == "Look and prime") sStored = applySelectList(sTable, string.Join(", ", lIdentity.ToArray()));
+            else if (sButton == "Main") sStored = applySelectList(sTable, string.Join(", ", lMain.ToArray()));
+            else if (sButton == "Standard") sStored = applySelectList(sTable, string.Join(", ", lStandard.ToArray()));
+            else if (sButton == "All") sStored = applySelectList(sTable, string.Join(", ", lAllColumns.ToArray()));
+            else if (sButton == "Type...")
             {
-                List<string> lPick = string.Equals(sBtn, "Distinct", StringComparison.OrdinalIgnoreCase) ? lDistinct
-                                   : string.Equals(sBtn, "Edit",     StringComparison.OrdinalIgnoreCase) ? lEdit
-                                   : lAllColumns;
-                string sStored = db.setSelectList(sTable, string.Join(", ", lPick.ToArray()));
-                invokeRefresh();
-                persistCurrentTableState();
-                Say.sayForced(sBtn + ": "
-                    + (string.IsNullOrEmpty(sStored) ? "(no matching columns)" : sStored));
-                return;
+                string sInitial = db.getSelectList(sTable);
+                if (string.IsNullOrEmpty(sInitial)) sInitial = string.Join(", ", db.getDisplayFieldNames().ToArray());
+                string sTyped = promptSelectList(sInitial);
+                if (sTyped == null) return;
+                sStored = applySelectList(sTable, sTyped);
+                List<string> lDropped = new List<string>();
+                HashSet<string> hAccepted = new HashSet<string>(DbDoManager.parseSelectList(sStored), StringComparer.OrdinalIgnoreCase);
+                foreach (string sName in DbDoManager.parseSelectList(sTyped))
+                    if (!hAccepted.Contains(sName)) lDropped.Add(sName);
+                if (lDropped.Count > 0)
+                    MessageBox.Show(this, "Not columns of " + sTable + ", so left out: " + string.Join(", ", lDropped.ToArray()),
+                        "Select Columns", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
-
-            // Custom: the Names/Picks sequence picker. The Picks order IS
-            // the column sequence the grid shows, so this controls ORDER
-            // as well as visibility. The form opens with every column in
-            // Names (natural order, db cursor's column preselected) and
-            // Picks empty -- the user states the wanted sequence anew.
-            using (ColumnSequenceDialog dlg = new ColumnSequenceDialog(
-                "Pick Fields to Display", lAllColumns,
-                virtCurrentColumnName(), null, false))
+            else
             {
-                if (dlg.ShowDialog(this) != DialogResult.OK) return;
-                if (dlg.lChosenColumns.Count == 0)
+                List<string> lShown = db.getDisplayFieldNames();
+                using (ColumnSequenceDialog dlg = new ColumnSequenceDialog(
+                    "Select Columns", lAllColumns, virtCurrentColumnName(), lShown, false))
                 {
-                    DialogResult res = MessageBox.Show(this,
-                        "No columns chosen. Reset to default visible columns?",
-                        "Select Columns",
-                        MessageBoxButtons.YesNo, MessageBoxIcon.Question);
-                    if (res != DialogResult.Yes) return;
-                    db.setSelectList(sTable, "");
-                    invokeRefresh();
-                    persistCurrentTableState();
-                    Say.sayForced("Reset to default visible columns.");
-                    return;
+                    if (dlg.ShowDialog(this) != DialogResult.OK) return;
+                    sStored = applySelectList(sTable, dlg.sChosenCsv);
                 }
-                db.setSelectList(sTable, dlg.sChosenCsv);
-                invokeRefresh();
-                persistCurrentTableState();
-                Say.sayForced("Showing " + dlg.lChosenColumns.Count
-                    + " column" + (dlg.lChosenColumns.Count == 1 ? "" : "s")
-                    + ": " + dlg.sChosenCsv);
             }
+            List<string> lNow = db.getDisplayFieldNames();
+            string sCount = lNow.Count + (lNow.Count == 1 ? " column" : " columns");
+            Say.sayForced((string.IsNullOrEmpty(sStored) ? "Default, " : "") + sCount + ": " + string.Join(", ", lNow.ToArray()));
+        }
+
+        // applySelectList: save a table's select list (empty = the default rule),
+        // redraw the grid and keep the choice. Returns the list as stored.
+        private string applySelectList(string sTable, string sList)
+        {
+            string sStored = db.setSelectList(sTable, sList ?? "");
+            invokeRefresh();
+            persistCurrentTableState();
+            return sStored ?? "";
         }
 
         private void describeColumnClicked(object sender, EventArgs evArgs)
@@ -18192,7 +18451,7 @@ namespace DbDo
                 if (sName.Length == 0 || sLower.EndsWith("_id") || sLower == "added" || sLower == "edited" || sLower == "marked" || sLower == "look" || sLower == "prime") continue;
                 lColumns.Add(sName);
             }
-            if (lColumns.Count == 0) { Say.say("No columns to count by; show some with Choose Visible Columns"); return; }
+            if (lColumns.Count == 0) { Say.say("No columns to count by; show some with Select Columns, Alt+S"); return; }
 
             object bookmarkSaved = null;
             try { bookmarkSaved = db.bookmark; } catch { }
@@ -18844,7 +19103,7 @@ namespace DbDo
                 for (int i = 0; i < lFields.Count; i++)
                 {
                     if (i > 0) sb.Append('\t');
-                    string sV = db.getFieldValue(lFields[i]) ?? "";
+                    string sV = db.getScreenValue(lFields[i]) ?? "";
                     // Tab and newline are TSV-killers; replace with
                     // space and a slash-n marker respectively.
                     sV = sV.Replace('\t', ' ').Replace("\r\n", "\\n").Replace("\n", "\\n").Replace("\r", "\\n");
@@ -18883,7 +19142,7 @@ namespace DbDo
                     {
                         try { db.absolutePosition = iPos; } catch { continue; }
                         string sV = "";
-                        try { sV = db.getFieldValue(sField) ?? ""; } catch { }
+                        try { sV = db.getScreenValue(sField) ?? ""; } catch { }
                         sV = sV.Replace('\t', ' ').Replace("\r\n", "\\n").Replace("\n", "\\n").Replace("\r", "\\n");
                         sb.Append("\r\n").Append(sV);
                     }
@@ -18933,7 +19192,7 @@ namespace DbDo
                         {
                             if (iCol > 0) sb.Append('\t');
                             string sV = "";
-                            try { sV = db.getFieldValue(lFields[iCol]) ?? ""; } catch { }
+                            try { sV = db.getScreenValue(lFields[iCol]) ?? ""; } catch { }
                             sV = sV.Replace('\t', ' ').Replace("\r\n", "\\n").Replace("\n", "\\n").Replace("\r", "\\n");
                             sb.Append(sV);
                         }
@@ -20100,12 +20359,12 @@ namespace DbDo
             for (int i = 0; i < lCols.Count; i++)
             {
                 string sC = "\"" + lCols[i] + "\"";
-                if (i > 0) { sbLook.Append(" || "); sbPrm.Append("||'|'||"); }
+                if (i > 0) { sbLook.Append(" || "); sbPrm.Append("||char(31)||"); }
                 sbLook.Append("iif(" + sC + " IS NOT NULL AND length(CAST(" + sC
-                    + " AS TEXT))>0, CAST(" + sC + " AS TEXT) || ' | ', '')");
+                    + " AS TEXT))>0, CAST(" + sC + " AS TEXT) || char(31), '')");
                 sbPrm.Append("coalesce(CAST(" + sC + " AS TEXT),'')");
             }
-            sbLook.Append(", ' | ')");
+            sbLook.Append(", char(31))");
 
             StringBuilder sbCreate = new StringBuilder();
             sbCreate.Append("CREATE TABLE \"" + sTable + "\" (");
@@ -20114,7 +20373,7 @@ namespace DbDo
             sbCreate.Append("edited TEXTTIME NOT NULL DEFAULT CURRENT_TIMESTAMP, ");
             foreach (string[] aF in lFieldDefs)
                 sbCreate.Append("\"" + aF[0] + "\" " + aF[1] + ", ");
-            sbCreate.Append("notes TEXTMARKDOWN, tags TEXTMEMO, ");
+            sbCreate.Append("url TEXTLINE, notes TEXTMARKDOWN, tags TEXTMEMO, ");
             sbCreate.Append("look TEXT GENERATED ALWAYS AS (" + sbLook + ") STORED, ");
             sbCreate.Append("prime TEXT GENERATED ALWAYS AS (" + sbPrm + ") STORED, ");
             sbCreate.Append("marked INTEGER NOT NULL DEFAULT 0)");
@@ -21860,6 +22119,7 @@ namespace DbDo
                 // Session-lifetime bookmarks: clear on database open.
                 lBookmarks.Clear();
                 db.openDatabase(sPath, null, false);
+                upgradeWithoutLoss(sPath);
                 // Set the per-database settings path NOW, before the initial
                 // selectTable below. selectTable -> applyTableSettings reads
                 // the saved view (SelectFields / OrderFields / WhereFilter)
@@ -22884,7 +23144,7 @@ namespace DbDo
                 List<string> lsInitialNull = new List<string>();
                 foreach (string s in lDistinct)
                 {
-                    dInitial[s] = db.getFieldValue(s);
+                    dInitial[s] = db.getScreenValue(s);
                     lEditable.Add(true);
                     if (db.isFieldNull(s)) lsInitialNull.Add(s);
                 }
@@ -23439,7 +23699,7 @@ namespace DbDo
             string sCurrentPkValue = "";
             if (!string.IsNullOrEmpty(sCurrentPk))
             {
-                try { sCurrentPkValue = db.getFieldValue(sCurrentPk) ?? ""; }
+                try { sCurrentPkValue = db.getScreenValue(sCurrentPk) ?? ""; }
                 catch { sCurrentPkValue = ""; }
             }
 
@@ -23460,7 +23720,7 @@ namespace DbDo
 
                 // The FK value on the current row.
                 string sFkValue = "";
-                try { sFkValue = db.getFieldValue(sCol) ?? ""; }
+                try { sFkValue = db.getScreenValue(sCol) ?? ""; }
                 catch { sFkValue = ""; }
                 if (string.IsNullOrEmpty(sFkValue)) continue;
 
@@ -25015,6 +25275,47 @@ namespace DbDo
                 + Path.GetFileName(sKept) + "." + (sFiles.Length > 0 ? "\r\n\r\n" + sFiles : ""));
         }
 
+        // upgradeWithoutLoss (29 Oct 2026): changes that lose no data happen
+        // by themselves when a newer DbDo opens a database -- a field the
+        // installed template has gained, a missing url field on a standard
+        // table, look and prime rebuilt (migratePartSeparator, at open).
+        // Records are never added, changed or removed here; taking the
+        // template's records stays the person's choice through Update from
+        // Template (Merge or Replace). Skipped when read only or when this
+        // is the installed template itself. Each step is logged.
+        private bool upgradeWithoutLoss(string sPath)
+        {
+            if (db == null || !db.isOpen() || db.readOnly) return false;
+            string sExt = Path.GetExtension(sPath ?? "").TrimStart('.').ToLowerInvariant();
+            if (sExt != "db" && sExt != "sqlite" && sExt != "sqlite3") return false;
+            try
+            {
+                string sTemplate = ScriptHelper.installedTemplateFor(sPath);
+                if (sTemplate != null && !string.Equals(Path.GetFullPath(sTemplate), Path.GetFullPath(sPath), StringComparison.OrdinalIgnoreCase))
+                {
+                    int iFields = addMissingColumns(sTemplate);
+                    DbDoLog.write("Upgrade without loss: " + (iFields == 1 ? "1 field" : iFields + " fields") + " added from " + sTemplate);
+                }
+            }
+            catch (Exception exT) { DbDoLog.write("Upgrade without loss: template fields not added: " + exT.Message); }
+            try
+            {
+                foreach (string sTable in db.getTableNames())
+                {
+                    List<string> lCols = db.getColumnsOfTable(sTable);
+                    bool bHomer = lCols.Exists(c => string.Equals(c, "prime", StringComparison.OrdinalIgnoreCase));
+                    bool bHasUrl = lCols.Exists(c => string.Equals(c, "url", StringComparison.OrdinalIgnoreCase));
+                    if (!bHomer || bHasUrl) continue;
+                    Schema.Column oUrl = new Schema.Column(); oUrl.sName = "url"; oUrl.sType = "TEXTLINE";
+                    db.invokeSql(Schema.sAddColumnSql(sTable, oUrl), null);
+                    rewriteEditedTrigger(sTable);
+                    DbDoLog.write("Upgrade without loss: added " + sTable + ".url TEXTLINE");
+                }
+            }
+            catch (Exception exU) { DbDoLog.write("Upgrade without loss: url not added: " + exU.Message); }
+            return true;
+        }
+
         // addMissingColumns: every ordinary field the template's tables have and this database's same-named tables lack
         // is added, empty, at the end of the table; computed fields and tables the copy does not have are left alone.
         // Returns how many fields were added, each one logged.
@@ -25032,24 +25333,17 @@ namespace DbDo
                 foreach (System.Text.RegularExpressions.Match oTable in System.Text.RegularExpressions.Regex.Matches(oTables.ToString(), @"\|([A-Za-z0-9_]+)\|"))
                 {
                     string sTable = oTable.Groups[1].Value;
+                    // The kit decides which fields are missing and writes the SQL (Schema.cs, HomerDev 1.94.0).
                     System.IO.StringWriter oHere = new System.IO.StringWriter(), oThere = new System.IO.StringWriter();
-                    db.invokeSql("SELECT '|' || name || '|' AS c FROM pragma_table_xinfo('" + sTable + "', 'main')", oHere);
-                    string sHere = oHere.ToString();
-                    if (sHere.IndexOf('|') < 0) continue;     // the copy has no such table
+                    db.invokeSql(Schema.sColumnsSql(sTable, "main"), oHere);
+                    db.invokeSql(Schema.sColumnsSql(sTable, "tplsrc"), oThere);
                     bool bTableGrew = false;
-                    db.invokeSql("SELECT '#' || name || '#' || type || '#' || hidden || '#' AS c FROM pragma_table_xinfo('" + sTable + "', 'tplsrc')", oThere);
-                    foreach (System.Text.RegularExpressions.Match oColumn in System.Text.RegularExpressions.Regex.Matches(oThere.ToString(), @"#([A-Za-z0-9_]+)#([A-Za-z0-9_ ]*)#(\d+)#"))
+                    foreach (Schema.Column oColumn in Schema.lMissingColumns(Schema.lParseColumns(oHere.ToString()), Schema.lParseColumns(oThere.ToString())))
                     {
-                        string sColumn = oColumn.Groups[1].Value, sType = oColumn.Groups[2].Value.Trim();
-                        if (oColumn.Groups[3].Value != "0") continue;      // computed fields are the template's own
-                        if (sHere.IndexOf("|" + sColumn + "|", StringComparison.OrdinalIgnoreCase) >= 0) continue;
-                        db.invokeSql("ALTER TABLE main.\"" + sTable + "\" ADD COLUMN \"" + sColumn + "\" " + (sType.Length > 0 ? sType : "TEXTLINE"), null);
+                        db.invokeSql(Schema.sAddColumnSql(sTable, oColumn), null);
                         iAdded++; bTableGrew = true;
-                        DbDoLog.write("Update from Template: added " + sTable + "." + sColumn + " " + sType);
+                        DbDoLog.write("Schema: added " + sTable + "." + oColumn.sName + " " + oColumn.sType);
                     }
-                    // THE EDITED TRIGGER LEARNS THE NEW FIELDS. A Homer table's trigger names the fields whose change sets
-                    // edited, so a field added here would never mark the record edited. When the table has such a
-                    // trigger, it is written again from the table's ordinary fields, the way contactPattern.py writes it.
                     if (bTableGrew) rewriteEditedTrigger(sTable);
                 }
                 db.invokeSql("COMMIT", null);
@@ -25068,28 +25362,16 @@ namespace DbDo
         // but the id, added, edited and marked.
         private void rewriteEditedTrigger(string sTable)
         {
-            string sName = "trg_" + sTable + "_edited";
+            // The rules and the SQL are the kit's (Schema.cs, HomerDev 1.94.0); DbDo runs it.
+            string sName = Schema.sEditedTriggerName(sTable);
             System.IO.StringWriter oHas = new System.IO.StringWriter();
-            db.invokeSql("SELECT '|' || name || '|' AS t FROM main.sqlite_master WHERE type = 'trigger' AND name = '" + sName + "'", oHas);
+            db.invokeSql("SELECT '|' || name || '|' AS t FROM main.sqlite_master WHERE type = 'trigger' AND name = '" + sName.Replace("'", "''") + "'", oHas);
             if (oHas.ToString().IndexOf("|" + sName + "|", StringComparison.OrdinalIgnoreCase) < 0) return;
             System.IO.StringWriter oCols = new System.IO.StringWriter();
-            db.invokeSql("SELECT '#' || cid || '#' || name || '#' || hidden || '#' AS c FROM pragma_table_xinfo('" + sTable + "', 'main')", oCols);
-            List<string> lsFields = new List<string>(); string sId = "";
-            foreach (System.Text.RegularExpressions.Match oCol in System.Text.RegularExpressions.Regex.Matches(oCols.ToString(), @"#(\d+)#([A-Za-z0-9_]+)#(\d+)#"))
-            {
-                string sCol = oCol.Groups[2].Value;
-                if (oCol.Groups[1].Value == "0") { sId = sCol; continue; }
-                if (oCol.Groups[3].Value != "0") continue;
-                if (sCol == "added" || sCol == "edited" || sCol == "marked") continue;
-                lsFields.Add(sCol);
-            }
-            if (sId.Length == 0 || lsFields.Count == 0) return;
-            string sOf = string.Join(", ", lsFields.ConvertAll(f => "\"" + f + "\"").ToArray());
-            string sWhen = string.Join(" OR ", lsFields.ConvertAll(f => "OLD.\"" + f + "\" IS NOT NEW.\"" + f + "\"").ToArray());
-            db.invokeSql("DROP TRIGGER IF EXISTS \"" + sName + "\"", null);
-            db.invokeSql("CREATE TRIGGER \"" + sName + "\" AFTER UPDATE OF " + sOf + " ON \"" + sTable + "\" FOR EACH ROW WHEN " + sWhen
-                + " BEGIN UPDATE \"" + sTable + "\" SET edited = CURRENT_TIMESTAMP WHERE \"" + sId + "\" = NEW.\"" + sId + "\"; END", null);
-            DbDoLog.write("Update from Template: " + sName + " now covers " + lsFields.Count + " fields");
+            db.invokeSql(Schema.sColumnsSql(sTable, "main"), oCols);
+            string[] aSql = Schema.aEditedTriggerSql(sTable, Schema.lParseColumns(oCols.ToString()));
+            foreach (string sSql in aSql) db.invokeSql(sSql, null);
+            if (aSql.Length > 0) DbDoLog.write("Schema: " + sName + " written again to cover the table's fields");
         }
 
         private void mergeWholeDatabase(string sOther)
@@ -25366,7 +25648,20 @@ namespace DbDo
         private bool askFieldsCondition(out string sWhere, out string sSpoken)
         {
             sWhere = ""; sSpoken = "";
-            List<string> lFields = db.getEditableFieldNames();
+            // WHICH FIELDS (29 October 2026): Main, Standard or All, so every field can be
+            // filtered while the common ones stay one step away. Each box follows the
+            // natural order, which is also the Tab order.
+            string sGroup = chooseByButtons("Filter Fields",
+                new List<string> { "Main gives a box for each field about the table's subject. Standard gives url, tags, notes, marked, look, prime, added, edited and the id. All gives every field." },
+                new List<string> { "Main", "Standard", "All" });
+            if (sGroup == null) return false;
+            List<string> lFields = new List<string>();
+            foreach (string sF in db.getNaturalFieldNames())
+            {
+                bool bMain = Metadata.fieldKind(sF, db.currentTable) == Metadata.KindMain;
+                if (sGroup == "All" || (sGroup == "Main") == bMain) lFields.Add(sF);
+            }
+            if (lFields.Count == 0) { Say.sayForced("This table has no " + sGroup.ToLowerInvariant() + " fields."); return false; }
             Dictionary<string, string> dInitial = new Dictionary<string, string>();
             List<bool> lEditable = new List<bool>();
             foreach (string sF in lFields) { dInitial[sF] = ""; lEditable.Add(true); }
@@ -26353,7 +26648,7 @@ namespace DbDo
         // drop the change. Writing here means the LAST sort (and filter)
         // is saved the instant it is set and restored on the next open.
         // Never allowed to throw: persistence must not break a command.
-        private void persistCurrentTableState()
+        internal void persistCurrentTableState()
         {
             try
             {
@@ -26410,19 +26705,13 @@ namespace DbDo
             catch (Exception ex) { ErrorDialog.show(this, "Reverse Order", ex, db); }
         }
 
-        // orderRecordsClicked: Alt+O. Sort records by a chosen column
-        // ascending. The dialog shows an alpha-sorted listbox of ALL
-        // field names (including hidden columns -- the user can sort
-        // by columns they don't currently display), focused on the
-        // current virtual column. Press Enter to sort by the focused
-        // (default) column, or arrow + Enter to pick another.
-        //
-        // Sorting by hidden columns is the key feature: today users
-        // need to display a column, sort, then optionally hide it
-        // again. The all-fields listbox eliminates that workflow.
+        // orderRecordsClicked: ORDER RECORDS, Alt+O. The Fields and Picks dialog in
+        // sort mode. Fields lists every column, shown or hidden, in the shared role
+        // order (Metadata's COLUMN ROLES), the column under the cursor selected, so
+        // sorting by a hidden column needs no trip through Select Columns.
         private void orderRecordsClicked(object sender, EventArgs evArgs)
         {
-            // Order Records (Alt+Shift+O): the Names/Picks dialog in
+            // Order Records (Alt+O): the Fields and Picks dialog in
             // sort mode. The active sort pre-loads into Picks as
             // "name asc" / "name desc" entries, so editing,
             // reordering by remove-and-re-add, and clearing (empty
@@ -26430,7 +26719,7 @@ namespace DbDo
             // the sort precedence, applied via the ADO
             // Recordset.Sort property.
             if (db == null || !db.hasRecordset()) return;
-            List<string> lAllFields = db.getFieldNames();
+            List<string> lAllFields = db.getNaturalFieldNames();
             if (lAllFields == null || lAllFields.Count == 0)
             { Say.say("No columns to sort by"); return; }
 
@@ -26448,7 +26737,7 @@ namespace DbDo
             }
 
             using (ColumnSequenceDialog dlg = new ColumnSequenceDialog(
-                "Pick Fields for Sort Order", lAllFields, virtCurrentColumnName(), lInitial, true))
+                "Order Records", lAllFields, virtCurrentColumnName(), lInitial, true))
             {
                 if (dlg.ShowDialog(this) != DialogResult.OK) return;
                 List<string> lClauses = new List<string>();
@@ -27640,7 +27929,7 @@ namespace DbDo
         //
         // Scope clarification: this command operates ONLY on the
         // currently filtered rows. To replace across all rows, the
-        // user should clear the filter first (Alt+Shift+F, Alt+C).
+        // user should clear the filter first (Control+Shift+F).
         //
         // For regex replacement, see recRegexReplaceClicked (bound
         // to Ctrl+Shift+R).
@@ -28132,6 +28421,9 @@ namespace DbDo
         // PowerShell takes -Property to pick fields). Persisted
         // per-table for the session via TableSettings.sSelectList.
         // =====================================================================
+        // RETIRED FROM THE MENU (29 October 2026): Select Columns' Type button now
+        // offers this typed list, so one command owns choosing columns. Kept for
+        // any caller outside the menu.
         private void viewSelectColumnClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset())
@@ -31206,10 +31498,10 @@ namespace DbDo
                     try
                     {
                         db.absolutePosition = i;
-                        if (!db.getFieldValue(Metadata.MarkedColumn).Trim().Equals("true",
+                        if (!db.getScreenValue(Metadata.MarkedColumn).Trim().Equals("true",
                             StringComparison.OrdinalIgnoreCase)
-                            && db.getFieldValue(Metadata.MarkedColumn).Trim() != "1") continue;
-                        string sLook = db.getFieldValue("look");
+                            && db.getScreenValue(Metadata.MarkedColumn).Trim() != "1") continue;
+                        string sLook = db.getScreenValue("look");
                         if (string.IsNullOrEmpty(sLook)) sLook = "row " + i;
                         Console.WriteLine(sLook);
                         iCount++;
@@ -31449,7 +31741,7 @@ namespace DbDo
                 if (!sCol.EndsWith(Metadata.PrimaryKeySuffix, StringComparison.OrdinalIgnoreCase))
                     continue;
                 string sFkValue = "";
-                try { sFkValue = db.getFieldValue(sCol) ?? ""; }
+                try { sFkValue = db.getScreenValue(sCol) ?? ""; }
                 catch { sFkValue = ""; }
                 if (string.IsNullOrEmpty(sFkValue)) continue;
                 string sParentTable = findParentTableForFkStatic(sCol, lAllTables);
@@ -31468,7 +31760,7 @@ namespace DbDo
             string sCurrentPkValue = "";
             if (!string.IsNullOrEmpty(sCurrentPk))
             {
-                try { sCurrentPkValue = db.getFieldValue(sCurrentPk) ?? ""; }
+                try { sCurrentPkValue = db.getScreenValue(sCurrentPk) ?? ""; }
                 catch { sCurrentPkValue = ""; }
             }
             int iMaxPerChild = 25;
@@ -33554,7 +33846,7 @@ namespace DbDo
             string sCurrentPkValue = "";
             if (!string.IsNullOrEmpty(sCurrentPk))
             {
-                try { sCurrentPkValue = db.getFieldValue(sCurrentPk) ?? ""; }
+                try { sCurrentPkValue = db.getScreenValue(sCurrentPk) ?? ""; }
                 catch { sCurrentPkValue = ""; }
             }
             List<string> lAllTables = db.getTableNames();
@@ -33567,7 +33859,7 @@ namespace DbDo
                 if (!sCol.EndsWith(Metadata.PrimaryKeySuffix, StringComparison.OrdinalIgnoreCase)) continue;
 
                 string sFkValue = "";
-                try { sFkValue = db.getFieldValue(sCol) ?? ""; }
+                try { sFkValue = db.getScreenValue(sCol) ?? ""; }
                 catch { sFkValue = ""; }
                 if (string.IsNullOrEmpty(sFkValue)) continue;
 
@@ -34092,6 +34384,7 @@ namespace DbDo
             try
             {
                 db.filter = sExpr;
+                if (frm != null) frm.persistCurrentTableState();
                 refresh();
                 Console.WriteLine("Filter: " + (db.filter.Length > 0 ? db.filter : "(none)"));
                 printRowSummary();
@@ -34141,6 +34434,7 @@ namespace DbDo
 
             List<string> lRequested = DbDoManager.parseSelectList(sExpr);
             string sStored = db.setSelectList(sTable, sExpr);
+            if (frm != null) frm.persistCurrentTableState();
             List<string> lAccepted = DbDoManager.parseSelectList(sStored);
             HashSet<string> hAccepted = new HashSet<string>(lAccepted, StringComparer.OrdinalIgnoreCase);
             List<string> lDropped = new List<string>();
@@ -34167,6 +34461,7 @@ namespace DbDo
             try
             {
                 db.sort = sArg.Trim();
+                if (frm != null) frm.persistCurrentTableState();
                 refresh();
                 Console.WriteLine("Sort: " + (db.sort.Length > 0 ? db.sort : "(none)"));
                 printRowSummary();
@@ -34248,6 +34543,7 @@ namespace DbDo
             try
             {
                 db.sort = sClause;
+                if (frm != null) frm.persistCurrentTableState();
                 refresh();
                 Console.WriteLine("Ordered by " + sClause + ".");
                 printRowSummary();

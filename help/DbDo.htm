@@ -225,6 +225,10 @@ records</a></li>
 id="toc-filtering-and-sorting">Filtering and sorting</a></li>
 <li><a href="#choosing-displayed-columns"
 id="toc-choosing-displayed-columns">Choosing displayed columns</a></li>
+<li><a href="#kinds-of-fields" id="toc-kinds-of-fields">Kinds of
+fields</a></li>
+<li><a href="#links-read-as-look" id="toc-links-read-as-look">Links read
+as look</a></li>
 <li><a href="#relationships-between-tables"
 id="toc-relationships-between-tables">Relationships between
 tables</a></li>
@@ -813,10 +817,11 @@ in force says so as it opens.</li>
 <li><strong>Filter by Regex</strong> filters by pattern; <strong>Say
 Filter</strong> (Shift+F) speaks the current filter.</li>
 </ul></li>
-<li><strong>Order Records</strong> (Alt+O) sorts the grid by a field;
-<strong>Reverse Order</strong> (Alt+Shift+O) reverses it; <strong>Clear
-Sort</strong> returns to natural order; <strong>Say Order</strong>
-(Shift+O) speaks the current sort.</li>
+<li><strong>Order Records</strong> (Alt+O) sorts the grid by one or more
+fields, each ascending or descending, including fields the grid does not
+show; <strong>Reverse Order</strong> (Alt+Shift+O) reverses the order in
+force; <strong>Clear Sort</strong> returns to table order; <strong>Say
+Order</strong> (Shift+O) speaks the current sort.</li>
 </ul>
 <p>Sorting reads numbers as numbers: volume 9 comes after 7 and 6.5 even
 if some values were stored as text and others as numbers. It also
@@ -825,11 +830,60 @@ ignores capital letters, so “spencer” sorts with “Spencer”.</p>
 to what you need, work on it, and clear the filter to see everything
 again — the records were never removed.</p>
 <h3 id="choosing-displayed-columns">Choosing displayed columns</h3>
-<p><strong>Select Columns to Display</strong> (Alt+S) chooses which
-fields appear in the grid, and in what order. Hiding the standard
-housekeeping fields and showing only the columns you are working with
-keeps cell-by-cell navigation short. The choice is part of the grid, so
-it travels with the window and is remembered.</p>
+<p><strong>Select Columns</strong> (Alt+S) chooses which fields appear
+in the grid, and in what order. Showing only the columns you are working
+with keeps cell-by-cell navigation short. Its buttons are:</p>
+<ul>
+<li><strong>Default</strong> shows the fields of look, in look’s order,
+or every main field when a table has no look. Enter picks it.</li>
+<li><strong>Main</strong> shows every main field, the fields about the
+table’s subject.</li>
+<li><strong>Standard</strong> shows the standard fields the table
+has.</li>
+<li><strong>All</strong> shows every field.</li>
+<li><strong>Look and prime</strong> shows just the two summary
+columns.</li>
+<li><strong>Exact</strong> opens two lists, Fields and Picks, with the
+columns now shown already in Picks, so you can add or drop one; the
+order of Picks is the order shown.</li>
+<li><strong>Type</strong> takes the field names separated by
+commas.</li>
+</ul>
+<p>The choice is remembered with the table. <strong>Say Select
+Columns</strong> (Shift+S) speaks it.</p>
+<h3 id="kinds-of-fields">Kinds of fields</h3>
+<p>A table has two kinds of field, and every DbDo dialog lists them in
+the same order. Knowing the order tells you where to find a field in
+Select Columns, Order Records, Filter Records and the record forms
+alike.</p>
+<ul>
+<li><strong>Main fields</strong> come first, in the table’s own order.
+They are about the table’s subject: a contact’s names and phone numbers,
+a station’s name and country. A field ending in _id that points to a
+record in another table, such as category_id, is a main field too.</li>
+<li><strong>Standard fields</strong> come last, in this order: url,
+tags, notes, marked, look, prime, added, edited, and the record’s own
+id. Every DbDo table has them. You type url, tags and notes. Look is a
+short summary that tells one record from the others, and prime is the
+combination of fields that must be unique in the table; DbDo figures out
+both from the record’s main fields. DbDo keeps marked, added, edited and
+the id up to date by itself.</li>
+</ul>
+<p>By default the grid shows the fields of look and sorts by the fields
+of prime. Every change to the columns, sort or filter is saved at once
+with the table.</p>
+<p>Look and prime never include url, notes, tags, marked, added, edited
+or the record’s own id.</p>
+<h3 id="links-read-as-look">Links read as look</h3>
+<p>A field ending in _id that points to a record in another table holds
+a number that means nothing to a listener. So DbDo shows and speaks that
+record’s <strong>look</strong> instead, such as “Mazrui, Ali”. When
+another record in that table has the same look, DbDo shows its
+<strong>prime</strong>, which is unique, so you can tell the two apart.
+You never have to hear the bare number. Sorting by a link sorts by what
+it shows, and Keywords, Jump and Filter Records find a link by what it
+shows. Exports to CSV and spreadsheets keep the number, so the data can
+come back in cleanly.</p>
 <h3 id="relationships-between-tables">Relationships between tables</h3>
 <p>DbDo recognizes relationships recorded in either of two ways, or both
 in the same database, and treats them alike:</p>
@@ -894,7 +948,7 @@ common first in a window you can read and copy. With State and City
 shown, it says how many contacts are in each state and city. The
 standard columns every table has – its id, added, edited and marked –
 are left out, since the id alone would make every record its own group.
-Choose Visible Columns sets which columns it counts by.</p>
+Select Columns (Alt+S) sets which columns it counts by.</p>
 <h3 id="graphics-column-controlshiftg">Graphics Column
 (Control+Shift+G)</h3>
 <p>Also acts on <strong>one column</strong> — the column under the
@@ -1594,7 +1648,7 @@ family.</p>
 <td>Alt+Shift+B</td>
 </tr>
 <tr>
-<td>Select Columns to Display</td>
+<td>Select Columns</td>
 <td>Alt+S</td>
 </tr>
 <tr>
@@ -2210,20 +2264,30 @@ typing the letter lands on it.
 <li><strong>Any field contains text</strong> asks for the text and keeps
 every record where some field holds it, whatever the field and whatever
 the case: type Dallas Cowboys, and every station whose name, notes or
-tags mention the team stays. Numbers and dates are searched as they
-read. Case is ignored for English letters; type accented letters as they
+tags mention the team stays. It takes the same keyword syntax as
+Keywords and every Homer program: <code>red &amp; blue</code> means
+both, <code>red | blue</code> means either, and <code>re*d</code> lets a
+star stand for anything. Numbers and dates are searched as they read.
+Case is ignored for English letters; type accented letters as they
 appear. A search that finds nothing says so and leaves the list as it
 was.</li>
-<li><strong>Fields, one by one</strong> opens a form with one box per
-field, where a value on its own means equals, a symbol in front compares
-(<code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code>,
-<code>&lt;=</code>, <code>!=</code>), and <code>%</code> in front
-matches anywhere in the field. Fill in several boxes and they all have
-to match.</li>
-<li>With a filter in force, the list also offers <strong>Clear the
-filter</strong>, <strong>Edit the field filter</strong>, <strong>Narrow
-with the field form</strong> (keep what is shown and add a condition)
-and, for a field filter, <strong>Widen with the field form</strong>.
+<li><strong>Fields</strong> asks which fields: <strong>Main</strong>
+(the fields about the table’s subject), <strong>Standard</strong> (url,
+tags, notes, marked, look, prime, added, edited and the id) or
+<strong>All</strong>. It then opens a form with one box per field, in
+DbDo’s natural order. A value on its own matches anywhere in the field,
+whatever the case; <code>=</code> in front means the field is exactly
+that; a symbol in front compares (<code>&gt;</code>, <code>&gt;=</code>,
+<code>&lt;</code>, <code>&lt;=</code>, <code>!=</code>). Type dates as
+year-month-day, such as 2026-10-29. Fill in several boxes and they all
+have to match.</li>
+<li><strong>Marked</strong> keeps the records you have marked, and
+<strong>Unmarked</strong> the rest.</li>
+<li>With a filter in force, the list first offers <strong>New</strong>
+(start over), <strong>Clear</strong> (show every record),
+<strong>Narrow</strong> (keep only records that also meet a new
+condition), <strong>Expand</strong> (also take in records that meet one)
+and <strong>Invert</strong> (the records the filter leaves out).
 <strong>Control+Shift+F</strong> clears; <strong>Shift+F</strong> says
 what is in force.</li>
 </ul></li>

@@ -222,7 +222,7 @@ Filtering and sorting reshape the grid without touching the physical table.
   - **Nothing found.** A condition that would keep no record says so and leaves the view as it was.
   - **Clear Filter** (Control+Shift+F) removes the filter, keeping you on the same record. A table that reopens with a filter still in force says so as it opens.
   - **Filter by Regex** filters by pattern; **Say Filter** (Shift+F) speaks the current filter.
-- **Order Records** (Alt+O) sorts the grid by a field; **Reverse Order** (Alt+Shift+O) reverses it; **Clear Sort** returns to natural order; **Say Order** (Shift+O) speaks the current sort.
+- **Order Records** (Alt+O) sorts the grid by one or more fields, each ascending or descending, including fields the grid does not show; **Reverse Order** (Alt+Shift+O) reverses the order in force; **Clear Sort** returns to table order; **Say Order** (Shift+O) speaks the current sort.
 
 Sorting reads numbers as numbers: volume 9 comes after 7 and 6.5 even if some
 values were stored as text and others as numbers. It also ignores capital
@@ -232,7 +232,32 @@ Because these only change the view, you can slice a large table down to what you
 
 ### Choosing displayed columns
 
-**Select Columns to Display** (Alt+S) chooses which fields appear in the grid, and in what order. Hiding the standard housekeeping fields and showing only the columns you are working with keeps cell-by-cell navigation short. The choice is part of the grid, so it travels with the window and is remembered.
+**Select Columns** (Alt+S) chooses which fields appear in the grid, and in what order. Showing only the columns you are working with keeps cell-by-cell navigation short. Its buttons are:
+
+- **Default** shows the fields of look, in look's order, or every main field when a table has no look. Enter picks it.
+- **Main** shows every main field, the fields about the table's subject.
+- **Standard** shows the standard fields the table has.
+- **All** shows every field.
+- **Look and prime** shows just the two summary columns.
+- **Exact** opens two lists, Fields and Picks, with the columns now shown already in Picks, so you can add or drop one; the order of Picks is the order shown.
+- **Type** takes the field names separated by commas.
+
+The choice is remembered with the table. **Say Select Columns** (Shift+S) speaks it.
+
+### Kinds of fields
+
+A table has two kinds of field, and every DbDo dialog lists them in the same order. Knowing the order tells you where to find a field in Select Columns, Order Records, Filter Records and the record forms alike.
+
+- **Main fields** come first, in the table's own order. They are about the table's subject: a contact's names and phone numbers, a station's name and country. A field ending in _id that points to a record in another table, such as category_id, is a main field too.
+- **Standard fields** come last, in this order: url, tags, notes, marked, look, prime, added, edited, and the record's own id. Every DbDo table has them. You type url, tags and notes. Look is a short summary that tells one record from the others, and prime is the combination of fields that must be unique in the table; DbDo figures out both from the record's main fields. DbDo keeps marked, added, edited and the id up to date by itself.
+
+By default the grid shows the fields of look and sorts by the fields of prime. Every change to the columns, sort or filter is saved at once with the table.
+
+Look and prime never include url, notes, tags, marked, added, edited or the record's own id.
+
+### Links read as look
+
+A field ending in _id that points to a record in another table holds a number that means nothing to a listener. So DbDo shows and speaks that record's **look** instead, such as "Mazrui, Ali". When another record in that table has the same look, DbDo shows its **prime**, which is unique, so you can tell the two apart. You never have to hear the bare number. Sorting by a link sorts by what it shows, and Keywords, Jump and Filter Records find a link by what it shows. Exports to CSV and spreadsheets keep the number, so the data can come back in cleanly.
 
 ### Relationships between tables
 
@@ -264,7 +289,7 @@ Acts on **one column** — the column under the virtual cursor. It computes type
 
 ### Count by Columns (Alt+Shift+B)
 
-Counts the records with each combination of values in the columns the grid shows, within the filter in force, and lists the combinations most common first in a window you can read and copy. With State and City shown, it says how many contacts are in each state and city. The standard columns every table has -- its id, added, edited and marked -- are left out, since the id alone would make every record its own group. Choose Visible Columns sets which columns it counts by.
+Counts the records with each combination of values in the columns the grid shows, within the filter in force, and lists the combinations most common first in a window you can read and copy. With State and City shown, it says how many contacts are in each state and city. The standard columns every table has -- its id, added, edited and marked -- are left out, since the id alone would make every record its own group. Select Columns (Alt+S) sets which columns it counts by.
 
 ### Graphics Column (Control+Shift+G)
 
@@ -487,7 +512,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Table Summary | Alt+T |
 | Statistics from Column | Alt+Shift+S |
 | Count by Columns | Alt+Shift+B |
-| Select Columns to Display | Alt+S |
+| Select Columns | Alt+S |
 | Graphics Column | Control+Shift+G |
 | Generate from Grid | Alt+Shift+G |
 | Extract with Regex | Control+Shift+X |
@@ -780,16 +805,24 @@ Each has its own letter, and the letter is the first letter of its own word.
   - **Any field contains text** asks for the text and keeps every record where
     some field holds it, whatever the field and whatever the case: type Dallas
     Cowboys, and every station whose name, notes or tags mention the team stays.
+    It takes the same keyword syntax as Keywords and every Homer program:
+    `red & blue` means both, `red | blue` means either, and `re*d` lets a star
+    stand for anything.
     Numbers and dates are searched as they read. Case is ignored for English
     letters; type accented letters as they appear. A search that finds nothing
     says so and leaves the list as it was.
-  - **Fields, one by one** opens a form with one box per field, where a value on
-    its own means equals, a symbol in front compares (`>`, `>=`, `<`, `<=`, `!=`),
-    and `%` in front matches anywhere in the field. Fill in several boxes and they
-    all have to match.
-  - With a filter in force, the list also offers **Clear the filter**, **Edit the
-    field filter**, **Narrow with the field form** (keep what is shown and add a
-    condition) and, for a field filter, **Widen with the field form**.
+  - **Fields** asks which fields: **Main** (the fields about the table's
+    subject), **Standard** (url, tags, notes, marked, look, prime, added, edited
+    and the id) or **All**. It then opens a form with one box per field, in
+    DbDo's natural order. A value on its own matches anywhere in the field,
+    whatever the case; `=` in front means the field is exactly that; a symbol in
+    front compares (`>`, `>=`, `<`, `<=`, `!=`). Type dates as year-month-day,
+    such as 2026-10-29. Fill in several boxes and they all have to match.
+  - **Marked** keeps the records you have marked, and **Unmarked** the rest.
+  - With a filter in force, the list first offers **New** (start over),
+    **Clear** (show every record), **Narrow** (keep only records that also meet
+    a new condition), **Expand** (also take in records that meet one) and
+    **Invert** (the records the filter leaves out).
   **Control+Shift+F** clears; **Shift+F** says what is in force.
 - **Query, Control+Q** -- write SQL yourself, when you want to.
 

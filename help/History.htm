@@ -252,8 +252,9 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
-<li><a href="#october-2026-evening" id="toc-october-2026-evening">25
-October 2026, evening</a></li>
+<li><a href="#october-2026-one-order-for-columns"
+id="toc-october-2026-one-order-for-columns">29 October 2026 – One order
+for columns</a></li>
 <li><a href="#october-2026-later" id="toc-october-2026-later">25 October
 2026, later</a></li>
 <li><a href="#october-2026-the-newest-kit-and-extchecks-rules"
@@ -574,9 +575,66 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
-<h2 id="october-2026-evening">25 October 2026, evening</h2>
+<h2 id="october-2026-one-order-for-columns">29 October 2026 – One order
+for columns</h2>
 <ul>
-<li><strong>Every table has a url field,</strong> as DbDo’s pattern
+<li><p>Look and prime now join their parts with the unit separator
+(character 31) instead of a vertical bar. Exports show the parts joined
+by a semicolon and a space; the screen joins them with a space; speech
+says each part on its own. DbDo converts older databases the first time
+it opens them for editing, and keeps maps links whole.</p></li>
+<li><p><strong>Upgrades that lose nothing happen by themselves.</strong>
+When a newer DbDo opens a database it can edit, it adds any field the
+installed template has gained, adds url to a standard table that lacks
+it, and rebuilds look and prime; it never adds, changes or removes a
+record. Taking a template’s records is still your choice, through Update
+from Template.</p></li>
+<li><p><strong>Every change to columns, sort or filter is saved at
+once,</strong> including those made at the dot prompt.</p></li>
+<li><p><strong>Two kinds of field, one natural order.</strong> Main
+fields, the ones about the table’s subject (foreign keys such as
+category_id included), come first in table order; standard fields
+follow: url, tags, notes, marked, look, prime, added, edited and the
+record’s own id. Select Columns, Order Records and the record forms all
+list fields this way. By default the grid shows the fields of look and
+sorts by the fields of prime.</p></li>
+<li><p><strong>Select Columns, Alt+S,</strong> has seven buttons:
+Default (the fields of look, and Enter picks it), Main, Standard, All,
+Look and prime, Exact and Type, each taking the first letter of its
+first word; Help follows Cancel. Exact opens with the columns now shown
+already in Picks.</p></li>
+<li><p><strong>Filter Records: a plain value matches anywhere in any
+field,</strong> case aside – numbers and dates too, which before had to
+be typed exactly; <code>=</code> in front still means exactly.
+<strong>Fields</strong> first asks Main, Standard or All, so every field
+can be filtered while the common ones stay one step away, and its boxes
+follow the natural order.</p></li>
+<li><p><strong>Links read as look.</strong> A link field such as
+author_id shows and speaks the linked record’s look, or its prime when
+another record shares that look, never the bare number. Sorting by a
+link sorts by what it shows; Keywords, Jump and Filter Records find a
+link by what it shows. The labels are read once per linked table and
+read again only after the database changes. CSV and spreadsheet exports
+keep the number.</p></li>
+<li><p><strong>Keywords, Control+K, and Any Field take the Homer keyword
+syntax</strong> from HomerDev, the same as FileDir and the media player:
+<code>red &amp; blue</code> (both), <code>red | blue</code> (either),
+<code>re*d</code> (a star for anything). Keywords reads the whole
+record, so the words of &amp; may sit in different fields.</p></li>
+<li><p><strong>The hotkey list is current:</strong> Control+F is Filter
+Records, Control+Shift+F is Clear Filter, Control+K and Control+Shift+K
+are Keywords, and F3 and Shift+F3 repeat the last Keywords, Jump or Find
+Regex.</p></li>
+<li><p><strong>Order Records, Alt+O,</strong> lists fields in the same
+order and its window is titled Order Records. Its description now says
+it sorts by several columns, each either way.</p></li>
+<li><p><strong>The Fields and Picks window follows the Homer dialog
+rules:</strong> built from the kit’s dialog parts, OK and Cancel with no
+letter (Control+Enter and Escape press them), Clear last before them,
+and Help or F1 explaining it.</p></li>
+<li><p><strong>Names match captions:</strong> Clear Sort (it was Reset
+Sort inside) and Say Select Columns.</p></li>
+<li><p><strong>Every table has a url field,</strong> as DbDo’s pattern
 asks: twenty-two template tables in ContactTrail, RadioTrail,
 RecipeTrail, chinook and northwind had none, so Shift+U said “no url
 field”. Each was rebuilt with url just before notes, keeping every row,
@@ -585,15 +643,15 @@ station’s url is its stream, or its playlist when it has no stream, kept
 in step by itself, so Shift+U reaches what you would play;
 RadioTrail.schema makes it so in a rebuilt RadioTrail. The kit’s checkDb
 now fails a table missing any standard field, which is why this was not
-caught before.</li>
-<li><strong>Control+Down goes to the next marked record.</strong> It
+caught before.</p></li>
+<li><p><strong>Control+Down goes to the next marked record.</strong> It
 moved only the database cursor and announced the row, so the grid’s
 focus stayed where it was; it now moves the focus too, keeps your
 column, and reads the row and cell. Control+Up, Control+Shift+Home and
-Control+Shift+End go there the same way.</li>
-<li><strong>The filter dialog’s Clear button comes before OK and
+Control+Shift+End go there the same way.</p></li>
+<li><p><strong>The filter dialog’s Clear button comes before OK and
 Cancel,</strong> since Control+Shift+F clears a filter in one key from
-the grid: Clear, OK, Cancel, in Tab order and on screen.</li>
+the grid: Clear, OK, Cancel, in Tab order and on screen.</p></li>
 </ul>
 <h2 id="october-2026-later">25 October 2026, later</h2>
 <ul>

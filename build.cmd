@@ -154,7 +154,7 @@ rem onSpoken", which names the symptom and not the cause. So the build says the
 rem cause, first. Raise this whenever DbDo starts using something new.
 rem 1.64.5: Play Tutorials calls MediaPlayer.playTutorials, which older kits lack;
 rem a build against 1.64.4 failed to compile on 8 October 2026 rather than saying so.
-set "kitNeeded=1.93.6"
+set "kitNeeded=1.94.0"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -198,6 +198,8 @@ set "homerSources=!homerSources! "!homerDev!\exec\CSharp\MediaPlayer.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Mpv.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Ollama.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Paths.cs""
+rem Schema.cs too (kit 1.94.0): upgrades without loss -- a template's new fields, the edited trigger.
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Schema.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Say.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Table.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Util.cs""
