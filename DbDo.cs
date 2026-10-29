@@ -8272,6 +8272,9 @@ namespace DbDo
                     try { oVal = oRecordset.Fields[sN].Value; } catch { }
                     JToken tok;
                     if (oVal == null || oVal is DBNull) tok = JValue.CreateNull();
+                    // Text joining stored parts (look, prime) leaves as its export form, "; " between
+                    // parts, like every other export, rather than the raw unit separator (29 October 2026).
+                    else if (oVal is string) tok = new JValue(Util.sExportText((string) oVal));
                     else { try { tok = JToken.FromObject(oVal); } catch { tok = new JValue(oVal.ToString()); } }
                     oRow[sN] = tok;
                 }
@@ -10156,6 +10159,12 @@ namespace DbDo
         private List<string>               lColumnNames;
         private List<TextBox>              lTextBoxes;
         private List<List<string>>         lLookupLists;  // per field: lookup values, or null when none
+        // LINK FIELDS READ AS LOOK (29 October 2026): per field, label -> id for a
+        // link field (the linked record's look, or prime when looks are shared),
+        // or null. The box shows the label; OK stores the id. The filter form
+        // keeps the typed text, since a filter value is matched against the look.
+        private List<Dictionary<string, string>> lLinkIds;
+        private bool bFilterForm;
         private List<string>               lDeclaredTypes;
         private DbDoManager               mgr;
         private string                     sTableName;
@@ -10175,6 +10184,8 @@ namespace DbDo
             lColumnNames = new List<string>();
             lTextBoxes = new List<TextBox>();
             lLookupLists = new List<List<string>>();
+            lLinkIds = new List<Dictionary<string, string>>();
+            bFilterForm = (sTitle ?? "").StartsWith("Filter", StringComparison.OrdinalIgnoreCase);
             lDeclaredTypes = new List<string>();
             mgr = inputMgr;
             sTableName = (inputMgr != null) ? inputMgr.currentTable : "";
@@ -10241,6 +10252,25 @@ namespace DbDo
                 // Format for display.
                 string sDisplay = convertForDisplay(sValue, sDeclared);
 
+                // A link field shows the linked record's look (or prime), not its id.
+                Dictionary<string, string> dIds = null;
+                List<string> lsLinkLabels = null;
+                string sLinkTable = (inputMgr != null) ? inputMgr.linkTableOf(sCol, sTableName) : "";
+                if (sLinkTable.Length > 0)
+                {
+                    Dictionary<string, string> dLabels = inputMgr.linkLabels(sLinkTable, sCol);
+                    if (dLabels.Count > 0)
+                    {
+                        dIds = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                        foreach (KeyValuePair<string, string> kv in dLabels) if (!dIds.ContainsKey(kv.Value)) dIds[kv.Value] = kv.Key;
+                        lsLinkLabels = new List<string>(dIds.Keys);
+                        lsLinkLabels.Sort(StringComparer.OrdinalIgnoreCase);
+                        string sLabel;
+                        if (!bFilterForm && !string.IsNullOrEmpty(sValue) && dLabels.TryGetValue(sValue, out sLabel)) sDisplay = sLabel;
+                    }
+                }
+                lLinkIds.Add(bFilterForm ? null : dIds);
+
                 // Tip: type plus optional read-only marker plus the
                 // regex constraint string from DbDo.inix if one is
                 // configured for <table>.<column>.
@@ -10270,14 +10300,15 @@ namespace DbDo
                 // Windows open-the-combo pair -- and the field's tip
                 // says so, which the dialog's status line speaks and
                 // shows on focus.
-                List<string> lsLookups = (inputMgr != null)
-                    ? inputMgr.getLookupValues(sTableName, sCol, 500)
+                List<string> lsLookups = (lsLinkLabels != null) ? lsLinkLabels
+                    : (inputMgr != null) ? inputMgr.getLookupValues(sTableName, sCol, 500)
                     : new List<string>();
                 if (lsLookups.Count > 0)
                 {
                     if (sbTip.Length > 0) sbTip.Append(' ');
                     sbTip.Append("F4 picks from ").Append(lsLookups.Count)
-                        .Append(lsLookups.Count == 1 ? " value" : " values");
+                        .Append(lsLinkLabels != null ? (lsLookups.Count == 1 ? " record of " : " records of ") + sLinkTable
+                            : (lsLookups.Count == 1 ? " value" : " values"));
                 }
                 string sTip = sbTip.ToString();
 
@@ -10556,7 +10587,7 @@ namespace DbDo
                 {
                     ok = true;
                     for (int i = 0; i < lTextBoxes.Count; i++)
-                        dValues[lColumnNames[i]] = convertForStorage(lTextBoxes[i].Text, lDeclaredTypes[i]);
+                        dValues[lColumnNames[i]] = convertForStorage(linkIdFor(i, lTextBoxes[i].Text), lDeclaredTypes[i]);
                     return DialogResult.OK;
                 }
                 // Least-intrusive correction (v1.0.108): no modal
@@ -10599,6 +10630,15 @@ namespace DbDo
                 // Empty values are allowed (nullable columns; the
                 // database layer decides if NULL is acceptable).
                 if (sVal.Length == 0) continue;
+
+                // A link field takes a linked record's look (or prime), or its id.
+                if (i < lLinkIds.Count && lLinkIds[i] != null)
+                {
+                    if (linkIdFor(i, sVal) != null) continue;
+                    sErr = "Field '" + sCol + "': no linked record reads " + sVal.Trim() + ". F4 picks one.";
+                    iOffending = i;
+                    return false;
+                }
 
                 // Type-aware parse check.
                 string sTypeErr = checkTypeParse(sVal, sDeclared);
@@ -10751,6 +10791,20 @@ namespace DbDo
         // a passthrough; for dates we always emit ISO yyyy-MM-dd[T...]
         // since that's what every backend (SQLite, Access, dBASE)
         // accepts unambiguously.
+        // linkIdFor: the id a link field's text stands for -- the text when it is
+        // a label, the text itself when it is already an id, else null. A field
+        // that is not a link returns its text unchanged.
+        private string linkIdFor(int iField, string sText)
+        {
+            if (iField >= lLinkIds.Count || lLinkIds[iField] == null) return sText;
+            string sTrim = (sText ?? "").Trim();
+            if (sTrim.Length == 0) return sText;
+            string sId;
+            if (lLinkIds[iField].TryGetValue(sTrim, out sId)) return sId;
+            if (lLinkIds[iField].ContainsValue(sTrim)) return sTrim;
+            return null;
+        }
+
         private static string convertForStorage(string sValue, string sDeclared)
         {
             if (string.IsNullOrEmpty(sValue) || string.IsNullOrEmpty(sDeclared)) return sValue;

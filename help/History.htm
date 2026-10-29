@@ -616,6 +616,16 @@ link sorts by what it shows; Keywords, Jump and Filter Records find a
 link by what it shows. The labels are read once per linked table and
 read again only after the database changes. CSV and spreadsheet exports
 keep the number.</p></li>
+<li><p><strong>Record forms show a link as its look too.</strong> A link
+field such as author_id shows the linked record’s look (or prime), and
+F4 or Alt+Down Arrow picks from the linked records, sorted by what they
+show. OK stores the id. Typing the look or the id both work; text that
+names no linked record says so and keeps the form open. In the Filter
+Records form, F4 puts the look in the box, which then matches records
+whose link shows it.</p></li>
+<li><p><strong>JSON export writes a look or prime with “;” between its
+parts,</strong> like every other export, rather than the raw unit
+separator.</p></li>
 <li><p><strong>Keywords, Control+K, and Any Field take the Homer keyword
 syntax</strong> from HomerDev, the same as FileDir and the media player:
 <code>red &amp; blue</code> (both), <code>red | blue</code> (either),

@@ -257,7 +257,7 @@ Look and prime never include url, notes, tags, marked, added, edited or the reco
 
 ### Links read as look
 
-A field ending in _id that points to a record in another table holds a number that means nothing to a listener. So DbDo shows and speaks that record's **look** instead, such as "Mazrui, Ali". When another record in that table has the same look, DbDo shows its **prime**, which is unique, so you can tell the two apart. You never have to hear the bare number. Sorting by a link sorts by what it shows, and Keywords, Jump and Filter Records find a link by what it shows. Exports to CSV and spreadsheets keep the number, so the data can come back in cleanly.
+A field ending in _id that points to a record in another table holds a number that means nothing to a listener. So DbDo shows and speaks that record's **look** instead, such as "Mazrui, Ali". When another record in that table has the same look, DbDo shows its **prime**, which is unique, so you can tell the two apart. You never have to hear the bare number. Sorting by a link sorts by what it shows, and Keywords, Jump and Filter Records find a link by what it shows. In a record form, the link's box shows the look too: press F4 or Alt+Down Arrow to pick from the linked records, or type the look or the id. DbDo stores the id. Exports to CSV and spreadsheets keep the number, so the data can come back in cleanly.
 
 ### Relationships between tables
 
