@@ -31,14 +31,14 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=I type seahawks and press Enter. The cursor moves to the first station that mentions the team.
 Key=Enter
-Hear=99.3 KDRM, Row 2514 of 49186
+Hear=Radio Browser, 99.3 KDRM, Row 2514 of 49186
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=F3 goes to the next match, Shift plus F3 to the one before. Keywords moves the cursor and hides nothing. To see only the matches, filter.
 Key=F3
-Hear=CISL Sportsnet 650 Richmond, BC
+Hear=Radio Browser, CISL "Sportsnet 650" Richmond, BC
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -95,7 +95,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Alt plus O, O for Order, sorts by a column; I choose name, and Enter sorts.
+Say=Alt plus O, O for Order, sorts by a column; I choose name, and Enter sorts. In that dialog, Default Order puts back the table's own order.
 Key=Alt+O
 Hear=Order Records dialog
 Note=Confirm the wording with a live run: buildTutorials -live.
@@ -104,7 +104,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=Down Arrow to the second.
 Key=Down Arrow
-Hear=KIRO 710 ESPN Seattle, Row 2 of 3
+Hear=Radio Browser, KIRO 710 ESPN Seattle, Row 2 of 3
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

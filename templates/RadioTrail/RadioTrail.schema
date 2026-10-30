@@ -1641,7 +1641,7 @@ INSERT INTO "lookups" ("lookup_id", "added", "edited", "tbl", "fld", "val", "ord
 INSERT INTO "lookups" ("lookup_id", "added", "edited", "tbl", "fld", "val", "ordinal", "src", "descrip", "url", "notes", "tags", "marked") VALUES (1611, '2026-10-06 01:24:34', '2026-10-06 01:24:34', 'stations', 'source', 'NFB Radio', 3, 'fetched', NULL, NULL, NULL, NULL, 0);
 INSERT INTO "lookups" ("lookup_id", "added", "edited", "tbl", "fld", "val", "ordinal", "src", "descrip", "url", "notes", "tags", "marked") VALUES (1612, '2026-10-06 01:24:34', '2026-10-06 01:24:34', 'stations', 'source', 'Radio Browser', 4, 'fetched', NULL, NULL, NULL, NULL, 0);
 INSERT INTO "lookups" ("lookup_id", "added", "edited", "tbl", "fld", "val", "ordinal", "src", "descrip", "url", "notes", "tags", "marked") VALUES (1613, '2026-10-06 01:24:34', '2026-10-06 01:24:34', 'stations', 'source', 'SomaFM', 5, 'fetched', NULL, NULL, NULL, NULL, 0);
-INSERT INTO "views" ("tbl", "fld", "val") VALUES ('stations', 'SelectFields', 'name, country, genre');
+INSERT INTO "views" ("tbl", "fld", "val") VALUES ('stations', 'SelectFields', 'source, name, genre, state, country');
 INSERT INTO "views" ("tbl", "fld", "val") VALUES ('stations', 'OrderFields', 'source, name');
 INSERT INTO "views" ("tbl", "fld", "val") VALUES ('stations', 'WhereFilter', '');
 INSERT INTO "views" ("tbl", "fld", "val") VALUES ('lookups', 'SelectFields', 'fld, val');

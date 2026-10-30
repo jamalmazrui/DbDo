@@ -28,16 +28,16 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=I choose BookTrail and press Enter. Each book is heard title first; the order is by author, then series and volume, so a series reads in order.
+Say=I choose BookTrail and press Enter. Each book is heard author first, then series, volume and title, the order it is sorted in, so a series reads in order.
 Key=Enter
-Hear=Pride and Prejudice, Austen, Jane, Row 1 of 6
+Hear=Austen, Jane, Pride and Prejudice, library, Row 1 of 6
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=Six sample books: audio from BARD, text from Bookshare, braille, an eBook, and a commercial audiobook. Down Arrow twice.
 Key=Down Arrow
-Hear=A Study in Scarlet, Doyle, Arthur Conan, Sherlock Holmes, 1, Row 3 of 6
+Hear=Doyle, Arthur Conan, Sherlock Holmes, 1, A Study in Scarlet, BARD (NLS), Row 3 of 6
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -59,14 +59,14 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=Down Arrow to Reading List, and Enter. Books in progress come first, then what I want to read, each series in order.
 Key=Enter
-Hear=The Adventures of Sherlock Holmes, Doyle, Arthur Conan, Sherlock Holmes, 3, Row 1 of 2
+Hear=Doyle, Arthur Conan, Sherlock Holmes, 3, The Adventures of Sherlock Holmes, Bookshare, Row 1 of 2
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=The third Holmes book, in text from Bookshare, then Frankenstein in braille. Shift plus Z confirms the view the script made.
 Key=Shift+Z
-Hear=books, 2 records, filtered, sorted by status
+Hear=books, 2 records, filtered, sorted by status, series, volume, title
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

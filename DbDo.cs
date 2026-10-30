@@ -1358,7 +1358,7 @@ namespace DbDo
         }
 
         // isAdminColumn: true for the program-maintained fields that
-        // the record dialogs never present -- the primary key, added,
+        // the record dialogs never present -- the table's own key, added,
         // edited, look, prime, marked (plus the legacy observed and
         // method). Everything else, including notes/tags/url, is an
         // editable field.
@@ -1369,15 +1369,14 @@ namespace DbDo
             if (sLower == "id") return true;
             foreach (string sBk in AdminColumns)
                 if (sLower == sBk) return true;
+            // ONLY THE TABLE'S OWN ID (29 October 2026). This returned true for every
+            // *_id field: the check for the own key was made and then ignored. So no
+            // record form ever showed a link such as author_id -- a new record could
+            // not be given its parent, New Copy dropped it, and Edit Cell refused it.
+            // A link is chosen by a person, a main field; only the own id is kept by
+            // SQLite. With no table to compare, a *_id field stays admin, as before.
             if (sLower.EndsWith(PrimaryKeySuffix))
-            {
-                if (!string.IsNullOrEmpty(sTable))
-                {
-                    string sExpected = sTable.ToLowerInvariant() + PrimaryKeySuffix;
-                    if (sLower == sExpected) return true;
-                }
-                return true;
-            }
+                return string.IsNullOrEmpty(sTable) || isOwnKeyColumn(sColumn, sTable);
             return false;
         }
 
@@ -3053,6 +3052,10 @@ namespace DbDo
 
         public void selectTable(string sTable)
         {
+            // OPEN TIMING (30 October 2026): every step of opening a table is timed and logged
+            // ("Open timing:"), so the wait on a large table such as RadioTrail's stations can be
+            // laid where it belongs before anything is changed to shorten it. Logging only.
+            System.Diagnostics.Stopwatch swOpen = System.Diagnostics.Stopwatch.StartNew();
             releaseFullCache();
             if (!isOpen()) throw new InvalidOperationException("No database open.");
             if (string.IsNullOrEmpty(sTable))
@@ -3167,7 +3170,9 @@ namespace DbDo
                 { bAlreadyVisited = true; break; }
             }
             if (!bAlreadyVisited) lVisitedTables.Add(sTable);
+            long iBeforeSettings = swOpen.ElapsedMilliseconds;
             applyTableSettings(sTable);
+            long iAfterSettings = swOpen.ElapsedMilliseconds;
 
             // Populate the calculated-columns cache for this table
             // by running PRAGMA table_xinfo. SQLite returns a row
@@ -3182,6 +3187,15 @@ namespace DbDo
             // column those tables will hide is 'look', which is
             // hardcoded in Metadata.
             populateCalculatedColumnsCache(sTable);
+            try
+            {
+                DbDoLog.write("Open timing: " + sTable + "; rows=" + (int)oRecordset.RecordCount
+                    + "; ADO load and earlier steps ms=" + iBeforeSettings
+                    + "; saved settings (sort, filter, position) ms=" + (iAfterSettings - iBeforeSettings)
+                    + "; calculated-columns cache ms=" + (swOpen.ElapsedMilliseconds - iAfterSettings)
+                    + "; total ms=" + swOpen.ElapsedMilliseconds);
+            }
+            catch { }
         }
 
         // selectTableFiltered: open a table restricted by a SQL WHERE
@@ -3355,7 +3369,7 @@ namespace DbDo
         // selectTableFiltered, the path Any Field already took.
         //
         // A value may begin with an operator, as DbDialog's form allowed: = (is), != or <> (is not), > >= < <=
-        // (compared), or % (contains). With none, every field matches when it CONTAINS the value (29 October 2026;
+        // (compared), % (contains), or !% (does not contain). With none, every field matches when it CONTAINS the value (29 October 2026;
         // before, only a text field did, and any other field had to equal it). Text compares case aside, through caseFoldFunction, as Any Field does; contains reads the
         // value literally, so % and _ in it are characters. A number typed for a number field is written as a number,
         // so it compares as one. Returns "" for an empty entry; sSpoken gets the condition in words.
@@ -3365,7 +3379,7 @@ namespace DbDo
             string sV = (sValue ?? "").Trim();
             if (sV.Length == 0) return "";
             string sOp = "";
-            foreach (string sCand in new string[] { ">=", "<=", "!=", "<>", "=", ">", "<", "%" })
+            foreach (string sCand in new string[] { ">=", "<=", "!%", "!=", "<>", "=", ">", "<", "%" })
                 if (sV.StartsWith(sCand)) { sOp = sCand; sV = sV.Substring(sCand.Length).Trim(); break; }
             if (sV.Length == 0) return "";
             if (sOp == "") sOp = "%";   // a plain value is a case-insensitive substring in every field (29 Oct 2026)
@@ -3373,26 +3387,34 @@ namespace DbDo
             string sCol = "\"" + sField.Replace("\"", "\"\"") + "\"";
             string sLower = caseFoldFunction();
             string sQuoted = "'" + sV.Replace("'", "''") + "'";
-            if (sOp == "%")
+            if (sOp == "%" || sOp == "!%")
             {
-                sSpoken = sField + " contains " + sV;
-                string sContains = "instr(" + sLower + "(CAST(" + sCol + " AS TEXT)), " + sLower + "(" + sQuoted + ")) > 0";
+                // NOT CONTAINS (30 October 2026): !% keeps the records whose field lacks the
+                // text, an empty field included. coalesce makes an empty field read as "",
+                // so NOT gives true for it rather than an unknown that drops the record.
+                bool bNot = sOp == "!%";
+                sSpoken = sField + (bNot ? " does not contain " : " contains ") + sV;
+                string sContains = "instr(" + sLower + "(coalesce(CAST(" + sCol + " AS TEXT), '')), " + sLower + "(" + sQuoted + ")) > 0";
                 // A LINK IS FOUND BY WHAT IT SHOWS (29 October 2026): its linked look or prime.
                 foreach (string sPart in new string[] { "look", "prime" })
                 {
                     string sLinked = linkLookSql(sField, sCurrentTable, sPart);
-                    if (sLinked.Length > 0) sContains += " OR instr(" + sLower + "(" + sLinked + "), " + sLower + "(" + sQuoted + ")) > 0";
+                    if (sLinked.Length > 0) sContains += " OR instr(" + sLower + "(coalesce(" + sLinked + ", '')), " + sLower + "(" + sQuoted + ")) > 0";
                 }
-                return "(" + sContains + ")";
+                return bNot ? "NOT (" + sContains + ")" : "(" + sContains + ")";
             }
             sSpoken = sField + " " + (sOp == "=" ? "is" : sOp == "<>" ? "is not" : sOp == ">" ? "is more than"
                 : sOp == ">=" ? "is at least" : sOp == "<" ? "is less than" : "is at most") + " " + sV;
             double dNumber;
             bool bNumber = double.TryParse(sV, System.Globalization.NumberStyles.Float,
                 System.Globalization.CultureInfo.InvariantCulture, out dNumber);
-            if (bText) return sLower + "(" + sCol + ") " + sOp + " " + sLower + "(" + sQuoted + ")";
-            if (bNumber) return sCol + " " + sOp + " " + dNumber.ToString("R", System.Globalization.CultureInfo.InvariantCulture);
-            return sCol + " " + sOp + " " + sQuoted;
+            string sTest;
+            if (bText) sTest = sLower + "(" + sCol + ") " + sOp + " " + sLower + "(" + sQuoted + ")";
+            else if (bNumber) sTest = sCol + " " + sOp + " " + dNumber.ToString("R", System.Globalization.CultureInfo.InvariantCulture);
+            else sTest = sCol + " " + sOp + " " + sQuoted;
+            // IS NOT TAKES IN EMPTY FIELDS (30 October 2026): an empty field is not the value.
+            if (sOp == "<>") sTest = "(" + sCol + " IS NULL OR " + sTest + ")";
+            return sTest;
         }
 
         // countWhere: how many records of a table a WHERE clause keeps, so a filter that would keep none can say so
@@ -4925,6 +4947,20 @@ namespace DbDo
         // Each result row is: kind, other table, other prime, direction
         // ("subject" when the given record is tbl1/prime1, "object"
         // when it is tbl2/prime2), and the map row's notes.
+        // lMapsKindsForTable: every (kind, other table, direction) that ANY record
+        // of a table takes part in -- so a record that has not yet used a kind can
+        // still be drilled into it, to add its first such relation (29 October 2026).
+        public List<string[]> lMapsKindsForTable(string sTable)
+        {
+            List<string[]> lAll = new List<string[]>();
+            if (string.IsNullOrEmpty(sTable) || !hasMapsTable()) return lAll;
+            string sT = sQuoteSqlLiteral(sTable);
+            int iFound;
+            foreach (string[] aRow in queryRowsSql("SELECT DISTINCT kind, tbl2, 'subject' FROM maps WHERE tbl1 = " + sT, 500, out iFound)) lAll.Add(aRow);
+            foreach (string[] aRow in queryRowsSql("SELECT DISTINCT kind, tbl1, 'object' FROM maps WHERE tbl2 = " + sT, 500, out iFound)) lAll.Add(aRow);
+            return lAll;
+        }
+
         public List<string[]> lMapsRelations(string sTable, string sPrmValue, int iMaxRows)
         {
             List<string[]> lAll = new List<string[]>();
@@ -10510,7 +10546,11 @@ namespace DbDo
         {
             ContextMenuStrip cms = new ContextMenuStrip();
             ToolStripMenuItem item;
-            item = new ToolStripMenuItem("Cu&t");
+            // ACCESS KEYS (30 October 2026, house style): first letter of the first
+            // word, else of another word, never from inside a word. Copy holds C, so
+            // Cut has none (Control+X still cuts); Paste holds P, so Pick Value
+            // takes V; Next takes R from Record, and Previous takes S from Save.
+            item = new ToolStripMenuItem("Cut");
             item.Click += delegate(object o, EventArgs e) { tb.Cut(); };
             cms.Items.Add(item);
             item = new ToolStripMenuItem("&Copy");
@@ -10520,7 +10560,7 @@ namespace DbDo
             item.Click += delegate(object o, EventArgs e) { tb.Paste(); };
             cms.Items.Add(item);
             cms.Items.Add(new ToolStripSeparator());
-            item = new ToolStripMenuItem("Null &Value");
+            item = new ToolStripMenuItem("&Null Value");
             item.ShortcutKeyDisplayString = "Control+Shift+Backspace";
             item.Click += delegate(object o, EventArgs e)
             {
@@ -10531,7 +10571,7 @@ namespace DbDo
             cms.Items.Add(item);
             if (lsLookups != null)
             {
-                item = new ToolStripMenuItem("Pick Va&lue...");
+                item = new ToolStripMenuItem("Pick &Value...");
                 item.ShortcutKeyDisplayString = "F4";
                 item.Click += delegate(object o, EventArgs e)
                 {
@@ -10549,7 +10589,7 @@ namespace DbDo
             item.Click += delegate(object o, EventArgs e)
             { iNavigate = 1; dlg.pressButton("OK"); };
             cms.Items.Add(item);
-            item = new ToolStripMenuItem("Save and Previo&us Record");
+            item = new ToolStripMenuItem("&Save and Previous Record");
             item.ShortcutKeyDisplayString = "Control+PageUp";
             item.Click += delegate(object o, EventArgs e)
             { iNavigate = -1; dlg.pressButton("OK"); };
@@ -11044,6 +11084,10 @@ namespace DbDo
         private string sTitle;
 
         public List<string> lChosenColumns = new List<string>();
+        // lsDefaultPicks: what Default Order puts in Picks -- prime's fields for
+        // Order Records, look's fields for Select Columns (29 October 2026). Null
+        // or empty, and the button is not offered.
+        public List<string> lsDefaultPicks;
         public string sChosenCsv { get { return string.Join(", ", lChosenColumns.ToArray()); } }
 
         public ColumnSequenceDialog(string sDialogTitle, IList<string> lAllColumns,
@@ -11081,6 +11125,11 @@ namespace DbDo
                 dlg.endBand();
                 lbPicks = dlg.addPickBox("&Picks:", lsInitialChosen, null, null);
                 dlg.addBand();
+                // DEFAULT ORDER (29 October 2026): Picks becomes the table's default --
+                // prime's fields for a sort, look's fields for columns -- each field
+                // back in Fields first. The letter is O: D is Add Descending's.
+                if (lsDefaultPicks != null && lsDefaultPicks.Count > 0)
+                    dlg.addButton("Default &Order").Click += (oSender, evA) => defaultClicked();
                 dlg.addButton("&Remove").Click += (oSender, evA) => removeClicked();
                 dlg.addButton("&Clear").Click += (oSender, evA) => clearClicked();
                 dlg.endBand();
@@ -11161,6 +11210,32 @@ namespace DbDo
             Say.say(sName + " removed, " + lbPicks.Items.Count + (lbPicks.Items.Count == 1 ? " pick" : " picks"));
         }
 
+        // defaultClicked: empty Picks back into Fields, then pick the default
+        // fields in order (ascending in a sort) and say what they are.
+        private void defaultClicked()
+        {
+            List<string> lsBack = new List<string>();
+            foreach (object oItem in lbPicks.Items) lsBack.Add(bareName(oItem.ToString()));
+            lbPicks.Items.Clear();
+            foreach (string sName in lsBack) restoreName(sName);
+            List<string> lsAdded = new List<string>();
+            foreach (string sDefault in lsDefaultPicks)
+            {
+                int iIdx = -1;
+                for (int i = 0; i < lbNames.Items.Count; i++)
+                    if (string.Equals(lbNames.Items[i].ToString(), sDefault, StringComparison.OrdinalIgnoreCase)) { iIdx = i; break; }
+                if (iIdx < 0) continue;
+                string sName = lbNames.Items[iIdx].ToString();
+                lbNames.Items.RemoveAt(iIdx);
+                lbPicks.Items.Add(sName + (bSortStyle ? " asc" : ""));
+                lsAdded.Add(sName);
+            }
+            if (lbNames.Items.Count > 0) lbNames.SelectedIndex = 0;
+            if (lbPicks.Items.Count > 0) lbPicks.SelectedIndex = 0;
+            lbPicks.Focus();
+            Say.say("Default order, " + lsAdded.Count + (lsAdded.Count == 1 ? " pick: " : " picks: ") + string.Join(", ", lsAdded.ToArray()));
+        }
+
         private void clearClicked()
         {
             int iCleared = lbPicks.Items.Count;
@@ -11195,7 +11270,7 @@ namespace DbDo
                 sbHelp.AppendLine("Enter in Fields, or Add Ascending, adds the selected field to Picks in ascending order; Add Descending adds it in descending order. Each pick reads like: city asc.");
             else
                 sbHelp.AppendLine("Enter in Fields, or Add, adds the selected field to the end of Picks.");
-            sbHelp.AppendLine("Remove, or Enter or Delete in Picks, returns the selected pick to its place in Fields. Clear empties Picks at once.");
+            sbHelp.AppendLine("Default Order puts the table's default in Picks: prime's fields for a sort, look's fields for columns. Remove, or Enter or Delete in Picks, returns the selected pick to its place in Fields. Clear empties Picks at once.");
             sbHelp.AppendLine("OK applies the picks; with no picks it returns to the default. Escape cancels.");
             return sbHelp.ToString();
         }
@@ -11646,7 +11721,7 @@ namespace DbDo
             if (sLow.Contains("syntax error"))
                 return "SQLite could not parse the SQL statement. Check the syntax near the place the raw message names.";
             if (sLow.Contains("read-only") || sLow.Contains("readonly"))
-                return "The recordset or file is read-only, so writes are refused. If the Alt+Z safeguard is on, turn it off; views and query joins cannot be made writable.";
+                return "The recordset or file is read-only, so writes are refused. If the read-only safeguard is on, turn it off with Control+Shift+Z; views and query joins cannot be made writable.";
             return "";
         }
 
@@ -12519,6 +12594,22 @@ namespace DbDo
         public int      iDrillCallerRow;    // 1-based row to restore in the caller
         public string   sDrillTable = "";   // this window's drill target table (reactivation match)
         public string   sDrillWhere = "";   // this window's drill WHERE clause (reactivation match)
+        // HOW THIS WINDOW WAS REACHED (29 October 2026), so New Record and New
+        // Copy can relate a new record the way the window's records are related:
+        // a foreign key filled in, or a maps row written. Null on a window not
+        // opened by a drill.
+        public DrillLink drillLink;
+        public class DrillLink
+        {
+            public string sKind = "";         // "fk", "map" or "hop"
+            public string sParentTable = "";  // the table drilled from
+            public string sParentPrime = "";  // the parent record's prime
+            public string sFkColumn = "";     // fk: the link field, e.g. author_id
+            public string sFkValue = "";      // fk: the parent record's id
+            public string sMapKind = "";      // map: the maps kind, e.g. presents
+            public string sMapDir = "";       // map: "subject" (parent is side 1) or "object"
+            public string sVia = "";          // hop: the table in the middle
+        }
         // dLocalKeyToMenu: this window's own chord -> menu-item table.
         // Command dispatch (ProcessCmdKey) resolves chords here, against
         // THIS window's items, so a command acts on the focused window.
@@ -12833,7 +12924,7 @@ namespace DbDo
         private ToolStripMenuItem miHelpTutorials;
         private ToolStripMenuItem miHelpExtraSpeech;
         private ToolStripMenuItem miEditNotes;
-        private ToolStripMenuItem miSaySayMark;
+        private ToolStripMenuItem miSaySayMarked;
         private ToolStripMenuItem miEditTags;
         private ToolStripMenuItem miEditUrl;
         private ToolStripMenuItem miRecGoToRepeat;
@@ -12889,7 +12980,6 @@ namespace DbDo
         // miSaySayRecord retired v1.0.101.
         private ToolStripMenuItem miSaySayYield;
         private ToolStripMenuItem miSaySayTables;
-        private ToolStripMenuItem miSaySayMarked;
         private ToolStripMenuItem miSaySayEdited;
         private ToolStripMenuItem miSaySayNotes;
         private ToolStripMenuItem miSaySayTags;
@@ -13760,7 +13850,7 @@ namespace DbDo
             // unmark differ only by the letter, not by an added
             // modifier).
             miRecMark        = addItem(miEdit, "&Mark Record",                            "Set Mark",            Keys.Control | Keys.M,              recMarkClicked);
-            miRecToggleMark  = addItem(miEdit, "Toggle Marked",          "Toggle Marked",       Keys.Control | Keys.Space,          recToggleMarkClicked);
+            miRecToggleMark  = addItem(miEdit, "Marked Toggle",          "Marked Toggle",       Keys.Control | Keys.Space,          recToggleMarkClicked);
             miEditNotes      = addItem(miEdit, "Edit Notes...",          "Edit Notes",          Keys.Alt | Keys.Shift | Keys.N,     editNotesClicked);
             miEditTags       = addItem(miEdit, "Edit &Tags...",           "Edit Tags",           Keys.Alt | Keys.Shift | Keys.T,     editTagsClicked);
             miEditUrl        = addItem(miEdit, "Edit &url...",            "Edit url",            Keys.Alt | Keys.Shift | Keys.U,     editUrlClicked);
@@ -13898,7 +13988,7 @@ namespace DbDo
             // recordset position (the Say-X status family).
             ToolStripMenuItem miSay = new ToolStripMenuItem("&Say");
             miQuery.DropDownItems.Add(miSay);
-            miSaySayMark         = addItem(miSay, "Say &Mark Status", "Say Mark", Keys.Shift | Keys.M, saySayMark);
+            miSaySayMarked       = addItem(miSay, "Say &Marked", "Say Marked", Keys.Shift | Keys.M, saySayMarked);
             miSaySayStatus       = addItem(miSay, "Say Status",  "Say Status",     Keys.Shift | Keys.Z,               saySayStatus);
             // Z FOR STATUS: Z is the bottom of the alphabet, and the status bar
             // is the bottom of the window. The caption carries no access letter,
@@ -13919,7 +14009,6 @@ namespace DbDo
             miSaySayTables       = addItem(miSay, "Say Tables",      "Say Tables",        Keys.None,              saySayTables);
             // Say Marked moved off Shift+L (which is now Say Column from
             // Cursor) to Alt+Shift+M. Mark Record itself uses Control+M.
-            miSaySayMarked       = addItem(miSay, "Say Marked", "Say Marked",      Keys.None,                         saySayMarked);
             // Shift+E: Say Edited -- the 'edited' value, rendered in
             // a human-friendly local-time form, parallel to Shift+A
             // for the 'added' value.
@@ -13948,10 +14037,13 @@ namespace DbDo
             miSaySayColumnMarked    = addItem(miSay, "Say Column as List from Current Marked","Say Column as List from Current Marked",Keys.Control | Keys.Shift | Keys.L, saySayColumnMarked);
             // Say Records Rest gave up Alt+L to the Say Column All command
             // above; it remains on the menu (and the Alternate Menu) with
-            // no chord for now. Say Records Rest Marked keeps Alt+Shift+M.
-            miSaySayRows         = addItem(miSay, "Say Records Rest", "Say Records Rest",        Keys.None,                         saySayRows);
-            miSaySayRowsMarked   = addItem(miSay, "Say Records Rest Marked", "Say Records Rest Marked", Keys.Alt | Keys.Shift | Keys.M,    saySayRowsMarked);
-            miSaySayMarkedRows   = addItem(miSay, "Say Marked Rows", "Say Marked Rows", Keys.Shift | Keys.Space, saySayMarkedRows);
+            // no chord for now. Say Records from Current Marked keeps Alt+Shift+M.
+            // NAMES (29 October 2026): Say Records Rest, Say Records Rest Marked and Say Marked
+            // Rows became Say Records from Current, Say Records from Current Marked and Say
+            // Records of Marked, word for word the Say Column as List family.
+            miSaySayRows         = addItem(miSay, "Say Records from Current", "Say Records from Current", Keys.None,                         saySayRows);
+            miSaySayRowsMarked   = addItem(miSay, "Say Records from Current Marked", "Say Records from Current Marked", Keys.Alt | Keys.Shift | Keys.M,    saySayRowsMarked);
+            miSaySayMarkedRows   = addItem(miSay, "Say Records of Marked", "Say Records of Marked", Keys.Shift | Keys.Space, saySayMarkedRows);
 
             // THE SAY LAYER ANSWERS FOR EVERY DIALOG THAT REMEMBERS AN ANSWER.
             //
@@ -14073,7 +14165,7 @@ namespace DbDo
             // Toggle takes Control+Shift+Z -- Z keys are toggles, and DbDo has no
             // Undo or Redo for it to meet -- and Say Status takes Alt+Z beside the
             // grid's Shift+Z, as the suite contract planned for stage 3.
-            miToggleReadOnly = addItem(miMisc, "Toggle Read Only",                       "Toggle Read Only",  Keys.Control | Keys.Shift | Keys.Z, toggleReadOnlyClicked);
+            miToggleReadOnly = addItem(miMisc, "Read Only Toggle",                       "Read Only Toggle",  Keys.Control | Keys.Shift | Keys.Z, toggleReadOnlyClicked);
             registerLocalAlias(Keys.Alt | Keys.Z, miSaySayStatus);
             // v1.0.67 deferred stubs. The chords are reserved so the
             // menu stays stable and the user can discover the planned
@@ -14523,8 +14615,6 @@ namespace DbDo
                 "Shift+F. Reports the most recent Find substring (or regex). Says 'No find string' when nothing has been searched yet. Companion to Say Where Filter (Shift+W).");
             add("Say Yield",          "Speak the current row count (after filter)", "");
             add("Say Tables",         "Speak the visited-tables list", "");
-            add("Say Marked",         "Speak the 'look' values of every marked row",
-                "On the Query menu (no default chord -- Alt+M opens the Misc menu). Compact list of look-values for marked rows; complements Say Records Rest Marked (Alt+Shift+M) which gives full content.");
             add("Say Yield Marked",    "Speak the count of marked rows", "");
             add("Say Edited",          "Speak the current row's 'edited' value in human-friendly local time",
                 "Shift+E. Reads the standard 'edited' timestamp column. Falls back to 'added' if 'edited' is absent.");
@@ -14538,15 +14628,15 @@ namespace DbDo
             add("Say Column as List of Marked",   "Speak the current virtual column for marked rows only, from the top",
                 "Alt+Shift+L. Same as Say Column All but limited to marked rows. Reports 'No marked rows in this column' when nothing is marked.");
             add("Say Column as List from Current", "Speak the current virtual column from the current row down",
-                "Control+L. Sweeps from the current row to the bottom. Control = from Current. Shift adds the marked-only filter (Say Column from Current Marked, Control+Shift+L).");
+                "Control+L. Sweeps from the current row to the bottom. Control = from Current. Shift adds the marked-only filter (Say Column as List from Current Marked, Control+Shift+L).");
             add("Say Column as List from Current Marked", "Speak the current virtual column for marked rows only, from the current row down",
-                "Control+Shift+L. Same as Say Column from Current but limited to marked rows. Reports 'No marked rows from here' when nothing is marked at or after the current row.");
-            add("Say Records Rest",        "Speak every visible record in full, from the cursor row down (all displayed columns)",
-                "Alt+L. Each record formatted as 'Record N -- col1: val1; col2: val2; ...' with newlines between records. Cap 25 in spoken form; double-press for the full list.");
-            add("Say Records Rest Marked", "Speak full marked records from the cursor row down",
-                "Alt+Shift+M. Like Say Records Rest but only marked records. The full-detail companion to Say Marked (Alt+M), which speaks only the look column.");
-            add("Say Marked Rows",    "Speak every marked row in full, scanning from the first row down (all displayed columns)",
-                "Shift+Space. Each row reads 'Row N -- col1: val1; col2: val2; ...' with null/blank for SQL NULL / empty values. Unlike Say Records Rest Marked (Alt+Shift+M), which starts at the cursor, this always scans from the top of the recordset. The cursor position is left unchanged. Double-press shows the rows in the read-only review dialog.");
+                "Control+Shift+L. Same as Say Column as List from Current but limited to marked rows. Reports 'No marked rows from here' when nothing is marked at or after the current row.");
+            add("Say Records from Current", "Speak every record in full, from the current record down (all displayed columns)",
+                "No key of its own. Each record formatted as 'Record N -- col1: val1; col2: val2; ...' with newlines between records. Cap 25 in spoken form; double-press for the full list.");
+            add("Say Records from Current Marked", "Speak every marked record in full, from the current record down",
+                "Alt+Shift+M. Like Say Records from Current, but only marked records; Say Records of Marked (Shift+Space) starts at the top instead.");
+            add("Say Records of Marked", "Speak every marked record in full, from the first record down (all displayed columns)",
+                "Shift+Space. Each record reads 'Row N -- col1: val1; col2: val2; ...' with null/blank for SQL NULL / empty values. Unlike Say Records from Current Marked (Alt+Shift+M), which starts at the current record, this always starts at the top. The cursor position is left unchanged. Double-press shows the rows in the read-only review dialog.");
             add("Say Position",       "Speak the column header and 1-based row number of the virtual cell",
                 "JAWS-style 'say cursor position' for the listview. Speech-only; does not move focus. Double-press opens the same text in a read-only multi-line dialog.");
             add("Show in FileDir",    "Show the open database's file, selected in its folder, in FileDir", "");
@@ -14625,9 +14715,9 @@ namespace DbDo
             add("Toggle Command Echo",
                 "Toggle whether each menu/hotkey command's name is spoken before it runs",
                 "When ON, every command activated through the menu or a hotkey announces its canonical name through the screen reader just before executing. When OFF, commands run silently and you hear only their direct effects plus the screen reader's own natural announcements (dialog titles, focus changes). Default OFF, so DbDo does not echo command names over what the screen reader already says. Persisted in DbDo.inix [Options] commandEcho. Ctrl+Shift+Z to toggle; the keyboard companion to Alt+Shift+Z (Extra Speech). Note: this toggle has no effect in CLI / dot-prompt mode, where the user has explicitly typed the command and shouldn't need it echoed back.");
-            add("Toggle Read Only",
+            add("Read Only Toggle",
                 "Flip the database between read-write and read-only at runtime",
-                "When ON, the database is opened read-only and edit commands fail with a clear error message. Use this to browse data without risk of accidental edits. Alt+Z to toggle in the GUI; at the dot prompt type 'toggle-readonly', 'read-only', or 'readonly' (with optional 'on'/'off' argument). Also exposed as a checkbox in the Settings dialog and as the -readonly command-line flag at launch.");
+                "When ON, the database is opened read-only and edit commands fail with a clear error message. Use this to browse data without risk of accidental edits. Control+Shift+Z to toggle in the GUI; at the dot prompt type 'toggle-readonly', 'read-only', or 'readonly' (with optional 'on'/'off' argument). Also exposed as a checkbox in the Settings dialog and as the -readonly command-line flag at launch.");
             add("Replace Column",
                 "Substring find-and-replace within the current virtual column, over visible rows",
                 "Opens a dialog prompting for find text, replacement text, case-sensitivity, and an optional dry-run mode. Operates only on the currently filtered rows; clear the filter (Alt+Shift+F, Alt+C) to apply across the whole table. Ctrl+R is the GUI chord; menu label 'Replace Column'.");
@@ -15833,8 +15923,14 @@ namespace DbDo
         // event during the rebuild so we don't echo our own
         // programmatic position changes back to the recordset.
         // =====================================================================
+        // bGridTimingAlways: log every grid refresh's timing, not only one of 100 ms or more.
+        private bool bGridTimingAlways = false;
+
         private void updateGrid()
         {
+            // GRID TIMING (30 October 2026): logged as "Grid timing:" so the open's wait can be
+            // split between loading the records and showing them. Logging only.
+            System.Diagnostics.Stopwatch swGrid = System.Diagnostics.Stopwatch.StartNew();
             bSuppressCellChanged = true;
             try
             {
@@ -15995,8 +16091,17 @@ namespace DbDo
             finally
             {
                 bSuppressCellChanged = false;
+                long iBeforeStatus = swGrid.ElapsedMilliseconds;
                 updateStatusBar();
                 updateMenuEnabled();
+                try
+                {
+                    if (swGrid.ElapsedMilliseconds >= 100 || bGridTimingAlways)
+                        DbDoLog.write("Grid timing: " + (db != null ? db.currentTable : "") + "; columns and rows ms=" + iBeforeStatus
+                            + "; status bar and menus ms=" + (swGrid.ElapsedMilliseconds - iBeforeStatus)
+                            + "; total ms=" + swGrid.ElapsedMilliseconds);
+                }
+                catch { }
             }
         }
 
@@ -16178,7 +16283,7 @@ namespace DbDo
             miRecSearchAgain.Enabled = bHasTable && bAnySearch;
             miRecSearchPrev.Enabled  = bHasTable && bAnySearch;
             miRecMark.Enabled = bWritable && bHasTable;
-            if (miSaySayMark != null) miSaySayMark.Enabled = bHasTable;
+            if (miSaySayMarked != null) miSaySayMarked.Enabled = bHasTable;
             miRecUnmark.Enabled = bWritable && bHasTable;
             if (miRecMarkAnchor != null) miRecMarkAnchor.Enabled = bWritable && bHasTable;
             if (miRecMarkToAnchor != null) miRecMarkToAnchor.Enabled = bWritable && bHasTable;
@@ -17073,7 +17178,10 @@ namespace DbDo
             speakOrShow("Visited Tables", sb.ToString(), 104);
         }
 
-        // saySayMark (Shift+M): speak the current record's mark
+        // saySayMarked (Shift+M, 29 October 2026, was Say Mark): speak the current record's marked field, as
+        // Shift+N says notes and Shift+T tags. One name for one idea: the keyless Say Marked that listed the
+        // look of every marked record was retired, since Say Column All Marked (Alt+Shift+L) on look does that.
+        // Speak the current record's mark
         // status, "Marked" or "Unmarked" -- the say half of the M
         // mark family (Control+M marks, Control+Shift+M unmarks).
         // saySayJump: what the Jump dialog would offer next time.
@@ -17128,12 +17236,12 @@ namespace DbDo
             return sValue;
         }
 
-        private void saySayMark(object sender, EventArgs evArgs)
+        private void saySayMarked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
             { Say.say("No record selected"); return; }
             if (!db.hasField(Metadata.MarkedColumn))
-            { Say.say("mark: this table has no marked column"); return; }
+            { Say.say("marked: this table has no marked column"); return; }
             bool bMarked;
             try { bMarked = isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn) ?? ""); }
             catch { bMarked = false; }
@@ -17147,57 +17255,6 @@ namespace DbDo
             Say.sayForced(bMarked ? "Marked" : "Unmarked");
         }
 
-        // saySayMarked: Shift+L. Speak the look-column values of every
-        // row whose 'marked' column is true. Shift+L =
-        // "List Tagged." Limited to the first 25 marked rows with a
-        // "(plus N more)" footer if the list is longer, to keep the
-        // announcement tractable.
-        private void saySayMarked(object sender, EventArgs evArgs)
-        {
-            if (db == null || !db.hasRecordset())
-            { Say.say("marked: no table selected"); return; }
-            if (!db.hasField(Metadata.MarkedColumn))
-            { Say.say("marked: this table has no marked column"); return; }
-
-            object original = null;
-            try { original = db.bookmark; } catch { }
-            // No cap: every marked row's look value is spoken;
-            // JAWS queues them and the user presses Control to stop.
-            List<string> lLooks = new List<string>();
-            int iTotal = 0;
-            try
-            {
-                for (int i = 1; i <= db.recordCount; i++)
-                {
-                    try
-                    {
-                        db.absolutePosition = i;
-                        if (!isMarkedTrue(db.getScreenValue(Metadata.MarkedColumn))) continue;
-                        iTotal++;
-                        string sLook = db.getScreenValue("look");
-                        if (string.IsNullOrEmpty(sLook)) sLook = "row " + i;
-                        lLooks.Add(sLook);
-                    }
-                    catch { }
-                }
-            }
-            finally
-            {
-                if (original != null) try { db.bookmark = original; } catch { }
-            }
-            if (iTotal == 0)
-            { Say.say("marked: no marked rows"); return; }
-            StringBuilder sb = new StringBuilder();
-            sb.Append(iTotal).Append(" marked row").Append(iTotal == 1 ? "" : "s").Append(": ");
-            for (int i = 0; i < lLooks.Count; i++)
-            {
-                if (i > 0) sb.Append("; ");
-                sb.Append(lLooks[i]);
-            }
-            if (iTotal > lLooks.Count)
-                sb.Append("; plus ").Append(iTotal - lLooks.Count).Append(" more");
-            speakOrShow("Marked Rows", sb.ToString(), 105);
-        }
 
         // saySayEdited: Shift+E. Speak the 'edited' value of the
         // current row in a human-friendly local-time form. The
@@ -17964,7 +18021,7 @@ namespace DbDo
             }
             if (lParts.Count == 0)
             { Say.say("marked rows: no marked rows."); return; }
-            speakOrShowParts("Say Marked Rows", lParts, 128);
+            speakOrShowParts("Say Records of Marked", lParts, 128);
         }
 
         private void saySayRows(object sender, EventArgs evArgs)
@@ -18034,7 +18091,7 @@ namespace DbDo
             List<string> lParts = new List<string>();
             for (int i = 0; i < lRows.Count; i++)
                 lParts.Add("Row " + (iStart + i) + " -- " + lRows[i]);
-            speakOrShowParts(bMarkedOnly ? "Say Records Rest Marked" : "Say Records Rest",
+            speakOrShowParts(bMarkedOnly ? "Say Records from Current Marked" : "Say Records from Current",
                 lParts, bMarkedOnly ? 114 : 113);
         }
 
@@ -18407,6 +18464,7 @@ namespace DbDo
                 using (ColumnSequenceDialog dlg = new ColumnSequenceDialog(
                     "Select Columns", lAllColumns, virtCurrentColumnName(), lShown, false))
                 {
+                    if (db.hasField("look")) dlg.lsDefaultPicks = db.lParseGeneratedFields(sTable, "look");
                     if (dlg.ShowDialog(this) != DialogResult.OK) return;
                     sStored = applySelectList(sTable, dlg.sChosenCsv);
                 }
@@ -23053,6 +23111,89 @@ namespace DbDo
         // =====================================================================
         // RECORD menu handlers
         // =====================================================================
+        // applyRelationDefaults: NEW RECORD STARTS RELATED (29 October 2026). In a
+        // window drilled in by a foreign key, the link field starts as the record
+        // drilled from -- shown as its look, and F4 picks another. In any window
+        // filtered to one linked record ("author_id = 17"), the same. A window
+        // reached any other way starts every field blank.
+        internal void applyRelationDefaults(Dictionary<string, string> dInitial)
+        {
+            string sColumn = "", sValue = "";
+            if (drillLink != null && drillLink.sKind == "fk")
+            { sColumn = drillLink.sFkColumn; sValue = drillLink.sFkValue; }
+            else
+            {
+                System.Text.RegularExpressions.Match m = System.Text.RegularExpressions.Regex.Match(db.sqlFilter ?? "",
+                    @"^\s*""?([A-Za-z_][A-Za-z0-9_]*)""?\s*=\s*(\d+)\s*$");
+                if (m.Success && db.linkTableOf(m.Groups[1].Value, db.currentTable).Length > 0)
+                { sColumn = m.Groups[1].Value; sValue = m.Groups[2].Value; }
+            }
+            if (sColumn.Length == 0) return;
+            foreach (string sKey in new List<string>(dInitial.Keys))
+                if (string.Equals(sKey, sColumn, StringComparison.OrdinalIgnoreCase) && string.IsNullOrEmpty(dInitial[sKey]))
+                {
+                    dInitial[sKey] = sValue;
+                    DbDoLog.write("New Record: " + sKey + " starts as " + sValue + ", the record this window is related to.");
+                }
+        }
+
+        // relateNewRecord: after New Record or New Copy inserts, relate the record
+        // the way this window's records are related, so it stays in view:
+        //   fk  -- already done by its link field; if the person picked another
+        //          record, say the new one belongs elsewhere.
+        //   map -- write the maps row joining it to the record drilled from, with
+        //          this window's kind and direction. The new record is found as
+        //          the table's highest rowid, read on the same connection right
+        //          after the insert; its prime is what maps stores.
+        //   hop -- two steps away through another table, which DbDo cannot pick
+        //          for the person, so it says the record is not linked yet.
+        internal void relateNewRecord(Dictionary<string, string> dValues)
+        {
+            DrillLink o = drillLink;
+            if (o == null || db == null) return;
+            string sTable = db.currentTable ?? "";
+            try
+            {
+                if (o.sKind == "fk")
+                {
+                    string sGiven = "";
+                    foreach (KeyValuePair<string, string> kv in dValues)
+                        if (string.Equals(kv.Key, o.sFkColumn, StringComparison.OrdinalIgnoreCase)) sGiven = kv.Value ?? "";
+                    if (sGiven != o.sFkValue)
+                        Say.say("It is related to another record of " + o.sParentTable + ", so this window will not list it after a refresh.");
+                    return;
+                }
+                if (o.sKind == "hop")
+                {
+                    Say.say("It is not linked yet: this window lists records related through " + o.sVia + ", so link it from a record of " + o.sVia + ".");
+                    return;
+                }
+                if (o.sKind != "map" || string.IsNullOrEmpty(o.sParentPrime)) return;
+                string sPrimeCol = db.primeColumnFor(sTable);
+                if (string.IsNullOrEmpty(sPrimeCol)) { Say.say("It could not be linked: " + sTable + " has no prime field."); return; }
+                int iRows;
+                List<string[]> lNew = db.queryRowsSql("SELECT \"" + sPrimeCol.Replace("\"", "\"\"") + "\" FROM \""
+                    + sTable.Replace("\"", "\"\"") + "\" ORDER BY rowid DESC LIMIT 1", 1, out iRows);
+                string sNewPrime = (lNew != null && lNew.Count > 0 && lNew[0] != null && lNew[0].Length > 0) ? (lNew[0][0] ?? "") : "";
+                if (sNewPrime.Length == 0) { Say.say("It could not be linked: its prime is empty."); return; }
+                bool bSubject = (o.sMapDir == "subject");
+                string sSql = "INSERT INTO maps (tbl1, prime1, kind, tbl2, prime2) VALUES ("
+                    + DbDoManager.sQuoteSqlLiteral(bSubject ? o.sParentTable : sTable) + ", "
+                    + DbDoManager.sQuoteSqlLiteral(bSubject ? o.sParentPrime : sNewPrime) + ", "
+                    + DbDoManager.sQuoteSqlLiteral(o.sMapKind) + ", "
+                    + DbDoManager.sQuoteSqlLiteral(bSubject ? sTable : o.sParentTable) + ", "
+                    + DbDoManager.sQuoteSqlLiteral(bSubject ? sNewPrime : o.sParentPrime) + ")";
+                db.invokeSql(sSql, null);
+                DbDoLog.write("New record linked: " + sSql);
+                Say.say("Linked to the record you came from, as " + o.sMapKind + ".");
+            }
+            catch (Exception ex)
+            {
+                DbDoLog.write("relateNewRecord: " + ex.Message);
+                ErrorDialog.show(this, "Link New Record", "The record was added, but it could not be linked: " + ex.Message);
+            }
+        }
+
         private void recNewClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset()) return;
@@ -23076,6 +23217,7 @@ namespace DbDo
                 dInitial[s] = "";
                 lEditable.Add(true);
             }
+            applyRelationDefaults(dInitial);
             // Loop so a duplicate-identity rejection can return the user to
             // the editor with their entries intact -- to change a content
             // field and try again -- instead of discarding the work behind a
@@ -23094,6 +23236,7 @@ namespace DbDo
                             if (!string.IsNullOrEmpty(kv.Value))
                                 db.setFieldValue(kv.Key, kv.Value);
                         db.update();
+                        relateNewRecord(dlg.dValues);
                         invokeRefresh();
                         return;
                     }
@@ -23338,6 +23481,29 @@ namespace DbDo
             }
             catch { /* if positioning fails, fall through and let getFieldValue throw or return empty */ }
             sOriginal = db.getFieldValue(sColumn) ?? "";
+            // A LINK IS EDITED AS ITS LOOK (29 October 2026): the record form, with
+            // this one field, shows the linked record's look, F4 picks another and
+            // OK stores its id -- the same handling as every record form.
+            if (db.linkTableOf(sColumn, db.currentTable).Length > 0)
+            {
+                Dictionary<string, string> dOne = new Dictionary<string, string>();
+                dOne[sColumn] = sOriginal;
+                using (RecordEditDialog dlgLink = new RecordEditDialog("Edit Cell", new List<string> { sColumn }, dOne, new List<bool> { true }, db))
+                {
+                    if (dlgLink.showDialog(this) != DialogResult.OK) return;
+                    string sId;
+                    if (!dlgLink.dValues.TryGetValue(sColumn, out sId) || sId == sOriginal) return;
+                    try
+                    {
+                        if (string.IsNullOrEmpty(sId)) db.setFieldNull(sColumn); else db.setFieldValue(sColumn, sId);
+                        db.update();
+                        invokeRefresh();
+                        Say.say(sColumn + ": " + (db.getScreenValue(sColumn) ?? ""));
+                    }
+                    catch (Exception ex) { try { db.cancelUpdate(); } catch { } ErrorDialog.show(this, "Edit Cell", ex, db); }
+                }
+                return;
+            }
             string sConfiguredRegex = null;
             try { sConfiguredRegex = IniValidation.lookup(db.currentTable, sColumn); }
             catch { sConfiguredRegex = null; }
@@ -24011,8 +24177,9 @@ namespace DbDo
                             if (!string.IsNullOrEmpty(kv.Value))
                                 db.setFieldValue(kv.Key, kv.Value);
                         db.update();
-                        invokeRefresh();
                         Say.say("New copy inserted");
+                        relateNewRecord(dlg.dValues);
+                        invokeRefresh();
                         return;
                     }
                     catch (Exception ex)
@@ -24352,7 +24519,9 @@ namespace DbDo
             if (string.IsNullOrEmpty(sLastJumpColumn) || string.IsNullOrEmpty(sLastJumpSubstring)) return;
             try
             {
+                System.Diagnostics.Stopwatch swScan = System.Diagnostics.Stopwatch.StartNew();
                 bool bFound = jumpInColumn(sLastJumpColumn, sLastJumpSubstring, bLastJumpCaseSensitive, bForward, bAgain);
+                try { DbDoLog.write("Search timing: Jump " + (bForward ? "forward" : "backward") + (bAgain ? " (repeat)" : "") + ", " + (bFound ? "found at " + db.absolutePosition : "not found") + " in " + swScan.ElapsedMilliseconds + " ms over " + db.recordCount + " records"); } catch { }
                 if (bFound)
                 {
                     int iMatch = db.absolutePosition;
@@ -24395,7 +24564,7 @@ namespace DbDo
                 try
                 {
                     db.absolutePosition = iPos;
-                    string sVal = db.getFieldValue(sCol) ?? "";
+                    string sVal = db.getScreenValue(sCol) ?? "";
                     if (sVal.IndexOf(sSub, cmp) >= 0)
                     {
                         try { DbDoLog.write("Jump: matched '" + sSub + "' in column " + sCol + " at position " + iPos + " of " + iCount + "."); } catch { }
@@ -24492,7 +24661,9 @@ namespace DbDo
             if (string.IsNullOrEmpty(sLastFindSubstring)) return;
             try
             {
+                System.Diagnostics.Stopwatch swScan = System.Diagnostics.Stopwatch.StartNew();
                 bool bFound = findAcrossColumns(sLastFindSubstring, bLastFindCaseSensitive, bForward, bAgain);
+                try { DbDoLog.write("Search timing: Keywords " + (bForward ? "forward" : "backward") + (bAgain ? " (repeat)" : "") + ", " + (bFound ? "found at " + db.absolutePosition : "not found") + " in " + swScan.ElapsedMilliseconds + " ms over " + db.recordCount + " records"); } catch { }
                 if (bFound)
                 {
                     int iMatch = db.absolutePosition;
@@ -24602,7 +24773,9 @@ namespace DbDo
             if (string.IsNullOrEmpty(sLastFindRegex)) return;
             try
             {
+                System.Diagnostics.Stopwatch swScan = System.Diagnostics.Stopwatch.StartNew();
                 bool bFound = findRegexAcrossColumns(sLastFindRegex, bLastRegexCaseSensitive, bForward, bAgain);
+                try { DbDoLog.write("Search timing: Find Regex " + (bForward ? "forward" : "backward") + (bAgain ? " (repeat)" : "") + ", " + (bFound ? "found at " + db.absolutePosition : "not found") + " in " + swScan.ElapsedMilliseconds + " ms over " + db.recordCount + " records"); } catch { }
                 if (bFound)
                 {
                     int iMatch = db.absolutePosition;
@@ -24656,7 +24829,7 @@ namespace DbDo
                     db.absolutePosition = iPos;
                     foreach (string sCol in lFields)
                     {
-                        string sVal = db.getFieldValue(sCol) ?? "";
+                        string sVal = db.getScreenValue(sCol) ?? "";
                         if (sVal.Length == 0) continue;
                         if (re.IsMatch(sVal)) return true;
                     }
@@ -24873,7 +25046,7 @@ namespace DbDo
                     doFindRegex(bForward, true);
                     break;
                 default:
-                    Say.sayForced("No previous search. Use Find, Jump, or Find Regex first.");
+                    Say.sayForced("No previous search. Use Keywords, Jump or Find Regex first.");
                     break;
             }
         }
@@ -26458,7 +26631,7 @@ namespace DbDo
             if (db.currentIsView)
             {
                 MessageBox.Show(this, "Cannot mark rows of a view (read-only).",
-                    "Toggle Marked",
+                    "Marked Toggle",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -26467,8 +26640,8 @@ namespace DbDo
             {
                 MessageBox.Show(this,
                     "Current table has no '" + Metadata.MarkedColumn + "' column. "
-                    + "Toggle Marked requires the standard metadata column.",
-                    "Toggle Marked",
+                    + "Marked Toggle requires the standard metadata column.",
+                    "Marked Toggle",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -26793,6 +26966,11 @@ namespace DbDo
             using (ColumnSequenceDialog dlg = new ColumnSequenceDialog(
                 "Order Records", lAllFields, virtCurrentColumnName(), lInitial, true))
             {
+                // Default Order: prime's fields, in prime's order; with no prime,
+                // look's; with neither, the button is not offered.
+                List<string> lsDefault = db.hasField("prime") ? db.lParseGeneratedFields(db.currentTable, "prime") : new List<string>();
+                if (lsDefault.Count == 0 && db.hasField("look")) lsDefault = db.lParseGeneratedFields(db.currentTable, "look");
+                dlg.lsDefaultPicks = lsDefault;
                 if (dlg.ShowDialog(this) != DialogResult.OK) return;
                 List<string> lClauses = new List<string>();
                 foreach (string sPick in dlg.lChosenColumns)
@@ -27535,6 +27713,11 @@ namespace DbDo
         // not left on screen: the child is closed and focus stays put.
         private void openDrillChild(string sTargetTable, string sWhereSql)
         {
+            openDrillChild(sTargetTable, sWhereSql, null);
+        }
+
+        private void openDrillChild(string sTargetTable, string sWhereSql, DrillLink oLink)
+        {
             DbDoFrame frame = mdiFrame();
             if (frame == null) return;
             string sFile = "";
@@ -27554,6 +27737,7 @@ namespace DbDo
                 try { DbDoLog.write("Drill: reactivating existing window for '" + sTargetTable + "'."); } catch { }
                 frmExisting.frmDrillCaller = this;
                 frmExisting.iDrillCallerRow = iCallerRow;
+                frmExisting.drillLink = oLink;
                 try { frmExisting.Activate(); } catch { }
                 frmExisting.focusOwnRow();
                 Say.say(sTargetTable + ": already open");
@@ -27580,6 +27764,7 @@ namespace DbDo
             frmChild.iDrillCallerRow = iCallerRow;
             frmChild.sDrillTable = sTargetTable;
             frmChild.sDrillWhere = sWhere;
+            frmChild.drillLink = oLink;
             frmChild.invokeRefresh();
             frmChild.Show();
             frmChild.Activate();
@@ -27588,13 +27773,12 @@ namespace DbDo
             try { iCount = frmChild.Db.recordCount; } catch { }
             if (iCount == 0)
             {
-                // Empty related view: don't strand the user in a blank
-                // window. Close the child and stay on this row.
-                try { DbDoLog.write("Drill: no related records in '" + sTargetTable + "'; closing child, staying."); } catch { }
-                try { frmChild.Close(); } catch { }
-                try { this.Activate(); } catch { }
-                focusOwnRow();
-                Say.say("No related records in " + sTargetTable + "; staying here");
+                // AN EMPTY RELATED VIEW STAYS OPEN (29 October 2026). Closing it, as
+                // DbDo did, left no way to add the FIRST related record: New Record
+                // in this window fills in the relation. Alt+Left goes back.
+                try { DbDoLog.write("Drill: no related records in '" + sTargetTable + "'; window kept open for a first record."); } catch { }
+                frmChild.focusOwnRow();
+                Say.say(sTargetTable + ": no related records yet. Control+N adds one.");
                 return;
             }
             try { DbDoLog.write("Drill: opened window for '" + sTargetTable + "' (" + iCount + " rows)."); } catch { }
@@ -27808,6 +27992,25 @@ namespace DbDo
                 }
             }
 
+            // KINDS THIS RECORD HAS NOT USED YET (29 October 2026): a relation kind
+            // other records of this table already have is offered with a count of
+            // 0, so the first such relation can be added from the window it opens.
+            if (!string.IsNullOrEmpty(sPrmValue) && db.hasMapsTable())
+            {
+                foreach (string[] aKind in db.lMapsKindsForTable(sParentTable))
+                {
+                    if (aKind == null || aKind.Length < 3) continue;
+                    bool bHave = false;
+                    foreach (string[] aSel in dMapsChoices.Values)
+                        if (aSel[0] == aKind[0] && string.Equals(aSel[1], aKind[1], StringComparison.OrdinalIgnoreCase) && aSel[2] == aKind[2]) { bHave = true; break; }
+                    if (bHave) continue;
+                    string sLabel = aKind[1] + " via " + aKind[0] + ((aKind[2] == "object") ? " incoming" : "") + " (0)";
+                    if (dMapsChoices.ContainsKey(sLabel)) continue;
+                    dMapsChoices[sLabel] = new string[] { aKind[0], aKind[1], aKind[2] };
+                    lChoices.Add(sLabel);
+                }
+            }
+
             if (lChoices.Count == 0)
             {
                 // Self-diagnosing empty message: each line names a
@@ -27873,7 +28076,9 @@ namespace DbDo
                         + " AND e2.tt = " + DbDoManager.sQuoteSqlLiteral(sTarget)
                         + " AND NOT (e2.tt = " + DbDoManager.sQuoteSqlLiteral(sParentTable)
                         + " AND e2.tu = " + DbDoManager.sQuoteSqlLiteral(sPrmValue) + "))";
-                    openDrillChild(sTarget, sWhere);
+                    DrillLink oHop = new DrillLink();
+                    oHop.sKind = "hop"; oHop.sParentTable = sParentTable; oHop.sParentPrime = sPrmValue; oHop.sVia = sVia;
+                    openDrillChild(sTarget, sWhere, oHop);
                 }
                 else if (aMapsSel != null)
                 {
@@ -27898,7 +28103,10 @@ namespace DbDo
                           + " AND prime2 = " + DbDoManager.sQuoteSqlLiteral(sPrmValue)
                           + " AND kind = " + DbDoManager.sQuoteSqlLiteral(sKind)
                           + " AND tbl1 = " + DbDoManager.sQuoteSqlLiteral(sOther) + ")";
-                    openDrillChild(sOther, sWhere);
+                    DrillLink oMap = new DrillLink();
+                    oMap.sKind = "map"; oMap.sParentTable = sParentTable; oMap.sParentPrime = sPrmValue;
+                    oMap.sMapKind = sKind; oMap.sMapDir = sDir;
+                    openDrillChild(sOther, sWhere, oMap);
                 }
                 else
                 {
@@ -27907,7 +28115,10 @@ namespace DbDo
                     // (buildFkFilter emits valid SQL: numeric values
                     // bare, strings quoted with doubled apostrophes).
                     string sFkFilter = buildFkFilter(sParentPk, sParentPkValue);
-                    openDrillChild(sChosen, sFkFilter);
+                    DrillLink oFk = new DrillLink();
+                    oFk.sKind = "fk"; oFk.sParentTable = sParentTable; oFk.sParentPrime = sPrmValue;
+                    oFk.sFkColumn = sParentPk; oFk.sFkValue = sParentPkValue;
+                    openDrillChild(sChosen, sFkFilter, oFk);
                 }
             }
             catch (Exception ex)
@@ -28015,7 +28226,7 @@ namespace DbDo
             }
             if (db.readOnly)
             {
-                Say.sayForced("Database is read-only. Press Alt+Z to toggle read-only off, then try again.");
+                Say.sayForced("Database is read-only. Press Control+Shift+Z to turn read-only off, then try again.");
                 return;
             }
             if (db.currentIsView)
@@ -28203,15 +28414,15 @@ namespace DbDo
             ContextMenuStrip cms = new ContextMenuStrip();
             addContextItem(cms, "&Edit Record...", "Control+E", recSetClicked, true);
             addContextItem(cms, "&New Record...", "Control+N", recNewClicked, false);
-            addContextItem(cms, "Copy Record as Ne&w...", "Control+Shift+N", recNewCopyClicked, false);
+            addContextItem(cms, "Copy &Record as New...", "Control+Shift+N", recNewCopyClicked, false);
             addContextItem(cms, "&Delete Record", "Control+D", recRemoveClicked, false);
             cms.Items.Add(new ToolStripSeparator());
-            addContextItem(cms, "&Toggle Marked", "Control+Space", recToggleMarkClicked, false);
+            addContextItem(cms, "&Marked Toggle", "Control+Space", recToggleMarkClicked, false);
             addContextItem(cms, "Null &Value", "Control+Shift+Backspace",
                 delegate(object o, EventArgs e) { nullCurrentCell(); }, false);
-            addContextItem(cms, "Say &Cell", "Shift+C", saySayCell, false);
+            addContextItem(cms, "&Say Cell", "Shift+C", saySayCell, false);
             cms.Items.Add(new ToolStripSeparator());
-            addContextItem(cms, "Enter Child Ta&ble...", "Alt+RightArrow", recEnterChildClicked, false);
+            addContextItem(cms, "Enter &Child Table...", "Alt+RightArrow", recEnterChildClicked, false);
             addContextItem(cms, "Table &Properties...", "Alt+Enter", schemaPropertiesClicked, false);
             return cms;
         }
@@ -28304,7 +28515,7 @@ namespace DbDo
         // recordset is read-only, explaining WHICH layer applies:
         // innate (a view or a query result ADO cannot update --
         // nothing can unlock it) versus the user's safeguard toggle
-        // (Alt+Z turns it off).
+        // (Control+Shift+Z turns it off).
         private bool blockIfReadOnly(string sCommandName)
         {
             if (db == null || db.readOnly == false) return false;
@@ -28315,7 +28526,7 @@ namespace DbDo
                     + "Open the underlying table to make changes.");
             else
                 Say.sayForced(sCommandName + " is unavailable: the read-only "
-                    + "safeguard is on. Press Alt+Z to turn it off, then try again.");
+                    + "safeguard is on. Press Control+Shift+Z to turn it off, then try again.");
             return true;
         }
 
@@ -30849,7 +31060,7 @@ namespace DbDo
             }
             catch (Exception ex)
             {
-                ErrorDialog.show(this, "Toggle Read Only", ex.Message);
+                ErrorDialog.show(this, "Read Only Toggle", ex.Message);
             }
         }
 
@@ -34619,18 +34830,28 @@ namespace DbDo
             if (!requireRecordset()) return;
             if (db.readOnly) { Console.WriteLine("Database is read-only."); return; }
             List<string> lFields = db.getFieldNames();
-            Console.WriteLine("(Press Enter to skip a field. Type a value to set it.)");
+            // THE SAME START AS THE WINDOW'S NEW RECORD (29 October 2026): a link
+            // field this window is related by is offered in brackets, and Enter
+            // keeps it; the record is then related as the window's are.
+            Dictionary<string, string> dDefault = new Dictionary<string, string>();
+            foreach (string sCol in lFields) dDefault[sCol] = "";
+            if (frm != null) frm.applyRelationDefaults(dDefault);
+            Dictionary<string, string> dGiven = new Dictionary<string, string>();
+            Console.WriteLine("(Press Enter to skip a field, or to keep a value in brackets. Type a value to set it.)");
             try
             {
                 db.addNew();
                 foreach (string sCol in lFields)
                 {
-                    Console.Write(sCol + ": ");
+                    string sDefault = dDefault[sCol] ?? "";
+                    Console.Write(sCol + (sDefault.Length > 0 ? " [" + sDefault + "]" : "") + ": ");
                     string sV = Console.ReadLine();
                     if (sV == null) { db.cancelUpdate(); return; }
-                    if (sV.Length > 0) db.setFieldValue(sCol, sV);
+                    if (sV.Length == 0) sV = sDefault;
+                    if (sV.Length > 0) { db.setFieldValue(sCol, sV); dGiven[sCol] = sV; }
                 }
                 db.update();
+                if (frm != null) frm.relateNewRecord(dGiven);
                 refresh();
                 Console.WriteLine("Saved new record.");
             }
@@ -36037,7 +36258,7 @@ namespace DbDo
             }
             catch (Exception ex)
             {
-                Console.WriteLine("Toggle Read Only failed: " + ex.Message);
+                Console.WriteLine("Read Only Toggle failed: " + ex.Message);
             }
         }
     }

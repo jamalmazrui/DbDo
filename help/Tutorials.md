@@ -1507,7 +1507,7 @@ I type seahawks and press Enter. The cursor moves to the first station that ment
 
 Screen reader:
 
-- 99.3 KDRM, Row 2514 of 49186
+- Radio Browser, 99.3 KDRM, Row 2514 of 49186
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1517,7 +1517,7 @@ F3 goes to the next match, Shift plus F3 to the one before. Keywords moves the c
 
 Screen reader:
 
-- CISL Sportsnet 650 Richmond, BC
+- Radio Browser, CISL "Sportsnet 650" Richmond, BC
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1596,7 +1596,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 13: Alt+O
 
-Alt plus O, O for Order, sorts by a column; I choose name, and Enter sorts.
+Alt plus O, O for Order, sorts by a column; I choose name, and Enter sorts. In that dialog, Default Order puts back the table's own order.
 
 Screen reader:
 
@@ -1610,7 +1610,7 @@ Down Arrow to the second.
 
 Screen reader:
 
-- KIRO 710 ESPN Seattle, Row 2 of 3
+- Radio Browser, KIRO 710 ESPN Seattle, Row 2 of 3
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1773,7 +1773,7 @@ Enter.
 
 Screen reader:
 
-- jobs, 4 records, no filter, sorted by employer
+- jobs, 4 records, no filter, sorted by employer, title
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1887,7 +1887,7 @@ The hiring manager, linked as the contact for this job.
 
 Screen reader:
 
-- Rivera, Pat, Example Widgets Company (sample employer)
+- Pat, Rivera, Example Widgets Company (sample employer)
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1984,11 +1984,11 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 4: Enter
 
-I choose BookTrail and press Enter. Each book is heard title first; the order is by author, then series and volume, so a series reads in order.
+I choose BookTrail and press Enter. Each book is heard author first, then series, volume and title, the order it is sorted in, so a series reads in order.
 
 Screen reader:
 
-- Pride and Prejudice, Austen, Jane, Row 1 of 6
+- Austen, Jane, Pride and Prejudice, library, Row 1 of 6
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1998,7 +1998,7 @@ Six sample books: audio from BARD, text from Bookshare, braille, an eBook, and a
 
 Screen reader:
 
-- A Study in Scarlet, Doyle, Arthur Conan, Sherlock Holmes, 1, Row 3 of 6
+- Doyle, Arthur Conan, Sherlock Holmes, 1, A Study in Scarlet, BARD (NLS), Row 3 of 6
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -2029,7 +2029,7 @@ Down Arrow to Reading List, and Enter. Books in progress come first, then what I
 
 Screen reader:
 
-- The Adventures of Sherlock Holmes, Doyle, Arthur Conan, Sherlock Holmes, 3, Row 1 of 2
+- Doyle, Arthur Conan, Sherlock Holmes, 3, The Adventures of Sherlock Holmes, Bookshare, Row 1 of 2
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -2039,7 +2039,7 @@ The third Holmes book, in text from Bookshare, then Frankenstein in braille. Shi
 
 Screen reader:
 
-- books, 2 records, filtered, sorted by status
+- books, 2 records, filtered, sorted by status, series, volume, title
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -2175,11 +2175,11 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 4: Enter
 
-I choose MusicTrail and press Enter. Albums are in the books' own order: by genre, and within each genre by rank, so the top blues album comes first.
+I choose MusicTrail and press Enter. Albums are in the books' own order: by genre, and within each genre by rank, so the top blues album comes first, and each album is heard genre and rank first.
 
 Screen reader:
 
-- Born Under a Bad Sign, Albert King, Blues, Row 1 of 100
+- Blues, 1, Born Under a Bad Sign, Albert King, Row 1 of 100
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -2189,7 +2189,7 @@ Control plus J, Jump to Record, finds an album by name. I type A Night at the Op
 
 Screen reader:
 
-- A Night at the Opera, Queen, Hard Rock, Row 39 of 100
+- Hard Rock, 9, A Night at the Opera, Queen, Row 39 of 100
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -2297,11 +2297,11 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 16: Control+Home
 
-Control plus Home goes to the first. They are already in rank order, since that is how MusicTrail is sorted.
+Control plus Home goes to the first. They are already in rank order, since MusicTrail sorts by genre, then rank.
 
 Screen reader:
 
-- Ella Fitzgerald Sings the Cole Porter Song Book, Ella Fitzgerald, Vocal Jazz, Row 1 of 10
+- Vocal Jazz, 1, Ella Fitzgerald Sings the Cole Porter Song Book, Ella Fitzgerald, Row 1 of 10
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -2387,7 +2387,7 @@ TechTraining first: more than a thousand free presentations about technology and
 
 Screen reader:
 
-- A Demonstration and Walkthrough of Be My Eyes for Mac, 26, audio, Row 1 of 1166
+- 2026, A Demonstration and Walkthrough of Be My Eyes for Mac, AppleVis, Row 1 of 1167
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -2427,7 +2427,7 @@ I choose creators, then Control plus J to the last name Bishop.
 
 Screen reader:
 
-- Bishop, Jeff, Row 7 of 126
+- Jeff, Bishop, Row 7 of 133
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -2649,21 +2649,21 @@ Confirm the wording with a live run: buildTutorials -live.
 
 Escape. An answer from SQL is a table, so Alt plus Shift plus X exports it and Alt plus Shift plus S describes its columns. A question asked often can be saved as a script, a dot s q l file beside the database, and run with Control plus Shift plus I, as BookTrail's were.
 
-### Step 14: Alt+Z
+### Step 14: Control+Shift+Z
 
-Before a query that changes data, Alt plus Z, Toggle Read Only, makes the database read only, so a mistyped statement cannot change anything.
-
-Screen reader:
-
-- Read only
-
-### Step 15: Alt+Z
-
-Alt plus Z again makes it writable when you mean to change it. After a change, F5 shows the table as it now stands.
+Before a query that changes data, Control plus Shift plus Z, Read Only Toggle, makes the database read only, so a mistyped statement cannot change anything.
 
 Screen reader:
 
-- Read and write
+- Read Only On
+
+### Step 15: Control+Shift+Z
+
+Control plus Shift plus Z again makes it writable when you mean to change it. After a change, F5 shows the table as it now stands.
+
+Screen reader:
+
+- No Read Only
 
 ### Step 16
 
@@ -2711,7 +2711,7 @@ Make the database read only.
 
 Screen reader:
 
-- Alt plus Z
+- Control plus Shift plus Z
 
 **Something to try:** Ask RadioTrail how many stations each country has, most first.
 

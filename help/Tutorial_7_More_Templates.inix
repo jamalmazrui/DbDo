@@ -16,7 +16,7 @@ Hear=
 
 Say=TechTraining first: more than a thousand free presentations about technology and accessibility, in audio, video and on the web, newest first. Alt plus Shift plus D, and I choose TechTraining.
 Key=Enter
-Hear=A Demonstration and Walkthrough of Be My Eyes for Mac, 26, audio, Row 1 of 1166
+Hear=2026, A Demonstration and Walkthrough of Be My Eyes for Mac, AppleVis, Row 1 of 1167
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -44,7 +44,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=I choose creators, then Control plus J to the last name Bishop.
 Key=Enter
-Hear=Bishop, Jeff, Row 7 of 126
+Hear=Jeff, Bishop, Row 7 of 133
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

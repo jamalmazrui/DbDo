@@ -46,7 +46,7 @@ Select Columns on Alt+S, since Control+S saves.
 ## What does Z mean in a key?
 
 Sleep. Every Z key is a toggle that wakes a behavior or puts it to sleep, such
-as Control+Shift+Z for Toggle Read Only.
+as Control+Shift+Z for Read Only Toggle.
 
 ## Can DbDo use AI?
 

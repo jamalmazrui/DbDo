@@ -232,6 +232,8 @@ as look</a></li>
 <li><a href="#relationships-between-tables"
 id="toc-relationships-between-tables">Relationships between
 tables</a></li>
+<li><a href="#adding-related-records"
+id="toc-adding-related-records">Adding related records</a></li>
 </ul></li>
 <li><a href="#part-3-producing-output"
 id="toc-part-3-producing-output">Part 3 — Producing output</a>
@@ -671,8 +673,8 @@ Say Position, Say Cell, and many more. These are how you interrogate the
 screen on demand instead of hunting for information, and they are listed
 in full in the command reference.</p>
 <h4 id="key-help">Key Help</h4>
-<p><strong>Key Help Toggle</strong> (Control+F1) turns on a learning
-mode: while it is on, pressing a command chord
+<p><strong>Key Describer Toggle</strong> (Control+F1) turns on a
+learning mode: while it is on, pressing a command chord
 <strong>announces</strong> what that command is and does <strong>instead
 of running it</strong>. Press Control+F1 again to turn it off. This lets
 you explore the keyboard safely. The <strong>Hotkey Summary</strong>
@@ -766,8 +768,8 @@ multi-select. The <code>marked</code> field carries the state.</p>
 <ul>
 <li><strong>Mark Record</strong> (Control+M) marks the current record;
 <strong>Unmark Record</strong> (Control+Shift+M) clears it;
-<strong>Toggle Marked</strong> (Control+Space) flips it; <strong>Say
-Mark Status</strong> (Shift+M) speaks it.</li>
+<strong>Marked Toggle</strong> (Control+Space) flips it; <strong>Say
+Marked</strong> (Shift+M) speaks it.</li>
 <li><strong>Mark All</strong> (Control+A), <strong>Unmark All</strong>
 (Control+Shift+A), and <strong>Invert Marked</strong> (Alt+Shift+I) act
 across the current view.</li>
@@ -790,13 +792,15 @@ records that meet a condition.
 <li><strong>How to give a condition.</strong> With no filter in force,
 it asks at once how to give one. <strong>Any Field</strong> finds text
 wherever it is, whatever its case. <strong>Fields</strong> gives a box
-for every field, and a word typed into a text field finds records
-containing it, whatever its case: <code>seattle</code> in RadioTrail’s
-city box finds “Seattle, Washington”. A value may begin with an
-operator: <code>=</code> is, <code>!=</code> is not, <code>&gt;</code>
-more than, <code>&gt;=</code> at least, <code>&lt;</code> less than,
-<code>&lt;=</code> at most, <code>%</code> contains. Several filled
-boxes must all match.</li>
+for every field, and a value typed with no operator finds records whose
+field contains it, whatever its case: <code>seattle</code> in
+RadioTrail’s city box finds “Seattle, Washington”. A value may begin
+with an operator: <code>=</code> is, <code>!=</code> is not,
+<code>&gt;</code> more than, <code>&gt;=</code> at least,
+<code>&lt;</code> less than, <code>&lt;=</code> at most, <code>%</code>
+contains, <code>!%</code> does not contain. Is not and does not contain
+also keep records whose field is empty. Several filled boxes must all
+match.</li>
 <li><strong>With a filter in force,</strong> Control+F first offers four
 buttons. <strong>New</strong> starts over. <strong>Clear</strong> shows
 every record again and returns you to the list on the same record.
@@ -870,8 +874,12 @@ both from the record’s main fields. DbDo keeps marked, added, edited and
 the id up to date by itself.</li>
 </ul>
 <p>By default the grid shows the fields of look and sorts by the fields
-of prime. Every change to the columns, sort or filter is saved at once
-with the table.</p>
+of prime. Look is how a record is said, so a person reads first name
+first; prime holds the same fields in the order they sort, with
+tiebreakers, so people sort by last name. In Order Records, Default
+Order puts prime’s fields back in Picks; in Select Columns’ Exact list,
+it puts look’s. Every change to the columns, sort or filter is saved at
+once with the table.</p>
 <p>Look and prime never include url, notes, tags, marked, added, edited
 or the record’s own id.</p>
 <h3 id="links-read-as-look">Links read as look</h3>
@@ -915,6 +923,32 @@ filtered to the record you came from.</li>
 you came from; <strong>Exit to Root Table</strong> (Alt+Home) returns
 all the way up a chain.</li>
 </ul>
+<h3 id="adding-related-records">Adding related records</h3>
+<p>New Record (Control+N) and New Copy (Control+Shift+N) work in every
+window, however you reached its table. When the window holds related
+records, a new record starts out related the same way, so it stays in
+the window:</p>
+<ul>
+<li><strong>By a link field.</strong> In a window opened from a contact,
+a new record’s contact_id starts as that contact, shown as its look.
+Press F4 in the field to pick another. If you pick another, DbDo says
+the record now belongs elsewhere, since this window lists only the first
+contact’s records. A window you filtered to one linked record, such as
+author_id = 17, starts new records the same way.</li>
+<li><strong>By a map.</strong> In a window opened through a map, such as
+events via presents, DbDo adds the map that links the new record to the
+record you came from, and says so.</li>
+<li><strong>Through another table.</strong> In a window opened two steps
+away, such as locations via events, DbDo cannot tell which record in the
+middle to use. It adds the record and says it is not linked yet.</li>
+</ul>
+<p>A related table with no records yet still opens, so you can add the
+first one. Enter Child also offers a map kind that other records of the
+table use but this one does not yet, with a count of 0, so its first
+such link can be made the same way.</p>
+<p>In any record form, a link field shows the linked record’s look, F4
+or Alt+Down Arrow picks another, and Edit Cell on a link column works
+the same way.</p>
 <p>A map names each record by its table and its prime, not its number,
 so a link still holds after a merge or an export, when the numbers
 change. Two small triggers on each table keep links whole as you work:
@@ -1319,11 +1353,11 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <td>Control+M</td>
 </tr>
 <tr>
-<td>Say Mark Status</td>
+<td>Say Marked</td>
 <td>Shift+M</td>
 </tr>
 <tr>
-<td>Toggle Marked</td>
+<td>Marked Toggle</td>
 <td>Control+Space</td>
 </tr>
 <tr>
@@ -1504,7 +1538,7 @@ family.</p>
 </tr>
 <tr>
 <td>Say Marked</td>
-<td>—</td>
+<td>Shift+M</td>
 </tr>
 <tr>
 <td>Say Edited</td>
@@ -1519,19 +1553,23 @@ family.</p>
 <td>Shift+T</td>
 </tr>
 <tr>
-<td>Say Column Rest</td>
+<td>Say Column as List from Current</td>
 <td>Control+L</td>
 </tr>
 <tr>
-<td>Say Column Rest Marked</td>
+<td>Say Column as List from Current Marked</td>
 <td>Control+Shift+L</td>
 </tr>
 <tr>
-<td>Say Records Rest</td>
-<td>Alt+L</td>
+<td>Say Records from Current</td>
+<td>—</td>
 </tr>
 <tr>
-<td>Say Marked Rows</td>
+<td>Say Records from Current Marked</td>
+<td>Alt+Shift+M</td>
+</tr>
+<tr>
+<td>Say Records of Marked</td>
 <td>Shift+Space</td>
 </tr>
 <tr>
@@ -1674,7 +1712,7 @@ family.</p>
 <td>Control+C</td>
 </tr>
 <tr>
-<td>Copy Visible Cells as TSV</td>
+<td>Copy Visible Cells</td>
 <td>—</td>
 </tr>
 <tr>
@@ -1695,10 +1733,6 @@ family.</p>
 </tr>
 <tr>
 <td>Test Integrity</td>
-<td>—</td>
-</tr>
-<tr>
-<td>Test Drivers</td>
 <td>—</td>
 </tr>
 <tr>
@@ -1735,11 +1769,11 @@ family.</p>
 </tr>
 <tr>
 <td>Invoke Script</td>
-<td>Alt+V</td>
+<td>Control+Shift+I</td>
 </tr>
 <tr>
 <td>Edit Snippet</td>
-<td>Alt+Shift+V</td>
+<td>Control+Shift+E</td>
 </tr>
 <tr>
 <td>Open Script Folder</td>
@@ -1751,7 +1785,7 @@ family.</p>
 </tr>
 <tr>
 <td>Edit Settings</td>
-<td>Alt+Shift+C</td>
+<td>Alt+Shift+E</td>
 </tr>
 </tbody>
 </table>
@@ -1766,7 +1800,7 @@ family.</p>
 <tbody>
 <tr>
 <td>Open Table</td>
-<td>Control+Shift+T</td>
+<td>Control+Shift+O</td>
 </tr>
 <tr>
 <td>Current Windows</td>
@@ -1816,23 +1850,19 @@ family.</p>
 <td>Shift+F1</td>
 </tr>
 <tr>
-<td>Readme Guide</td>
-<td>—</td>
+<td>ReadMe</td>
+<td>Alt+Shift+F1</td>
 </tr>
 <tr>
 <td>Alternate Menu</td>
 <td>Alt+F10</td>
 </tr>
 <tr>
-<td>Key Help Toggle</td>
+<td>Key Describer Toggle</td>
 <td>Control+F1</td>
 </tr>
 <tr>
 <td>Where Am I</td>
-<td>—</td>
-</tr>
-<tr>
-<td>Test Screen Reader Speech</td>
 <td>—</td>
 </tr>
 <tr>
@@ -2774,7 +2804,7 @@ produced it, and “mark: unmarked” does.</p>
 find string” – and every count matches its noun.</p>
 <p><strong>One exception, and it is a rule of its own.</strong> A
 two-state answer whose value already names the setting says the state
-alone: Say Mark answers “Marked” or “Unmarked”, not “mark: marked”.
+alone: Say Marked answers “Marked” or “Unmarked”, not “mark: marked”.
 Prefixing it would say the same word twice, and only the second word
 carries information. It is the shape a toggle uses everywhere else:
 “<setting> on” and “no <setting>”, never “<setting>: on”.</p>

@@ -98,15 +98,15 @@ Hear=
 
 [step]
 
-Say=Before a query that changes data, Alt plus Z, Toggle Read Only, makes the database read only, so a mistyped statement cannot change anything.
-Key=Alt+Z
-Hear=Read only
+Say=Before a query that changes data, Control plus Shift plus Z, Read Only Toggle, makes the database read only, so a mistyped statement cannot change anything.
+Key=Control+Shift+Z
+Hear=Read Only On
 
 [step]
 
-Say=Alt plus Z again makes it writable when you mean to change it. After a change, F5 shows the table as it now stands.
-Key=Alt+Z
-Hear=Read and write
+Say=Control plus Shift plus Z again makes it writable when you mean to change it. After a change, F5 shows the table as it now stands.
+Key=Control+Shift+Z
+Hear=No Read Only
 
 [step]
 
@@ -148,4 +148,4 @@ Hear=Shift plus F12
 
 Say=Make the database read only.
 Key=
-Hear=Alt plus Z
+Hear=Control plus Shift plus Z

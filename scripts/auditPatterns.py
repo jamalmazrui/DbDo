@@ -24,9 +24,11 @@ WHAT IT CHECKS
                      and an audit that reads one of them is not an audit
   hotkey doc         DbDo_hotkeys.inix claims no Shift letter that is not a Say
                      command -- the source-only check cannot see an .inix
+  inix keys          every DbDo.inix [Hotkeys] line naming a menu command
+                     carries the key DbDo.cs binds to it (None when unbound)
   say answers        every Say command speaks "<name>: <value>", with the two
                      documented exceptions: Say Cell and Say Id use the column
-                     name, and Say Mark answers Marked or Unmarked
+                     name, and Say Marked answers Marked or Unmarked
   tutorials          every tutorial script has a title, three or more steps,
                      and something spoken in each
   section edits      a line that opens a section heading contains nothing else.
@@ -51,9 +53,9 @@ lsPlaceholders = [
     "xxx",
 ]
 
-# Say Mark answers "Marked" or "Unmarked": a two-state answer whose value
+# Say Marked answers "Marked" or "Unmarked": a two-state answer whose value
 # already names the setting. Say Cell and Say Id label with the column name.
-lsLabelExempt = ["saySayMark", "saySayCell", "saySayId"]
+lsLabelExempt = ["saySayMarked", "saySayCell", "saySayId"]
 
 sScriptDir = os.path.dirname(os.path.abspath(__file__))
 sRoot = os.path.dirname(sScriptDir)
@@ -306,6 +308,47 @@ def checkHotkeyDoc():
     return finding("hotkey doc", "pass",
                    "%s, none claiming a Shift letter that is not a Say command" %
                    countNoun(iChecked, "documented command"))
+
+
+def checkInixKeys():
+    """configs\\DbDo.inix [Hotkeys] names the key of every menu command it lists.
+
+    Its keys are documentation only -- DbDo reads the descriptions and ignores
+    the keys -- so nothing stopped them drifting: by 29 October 2026 thirty-odd
+    lines named keys that had moved (Edit Notes on Control+F9, Invoke Script on
+    Alt+V) or commands since renamed. Each line naming a menu command must carry
+    that command's key, named as Hotkeys.md names it, or None for a command with
+    no key. Lines for keys handled outside the menus (Home, F6 in the record
+    form) name no menu command and are left alone.
+    """
+    sInix = os.path.join(sRoot, "configs", "DbDo.inix")
+    if not os.path.isfile(sInix): return finding("inix keys", "skip", "no configs\\DbDo.inix")
+    import importlib.util
+    oSpec = importlib.util.spec_from_file_location("makeHotkeys", os.path.join(sRoot, "scripts", "makeHotkeys.py"))
+    oMake = importlib.util.module_from_spec(oSpec); oSpec.loader.exec_module(oMake)
+    sSource = readText(os.path.join(sRoot, "DbDo.cs"))
+    dKeys = {}
+    for sMenu, sCaption, sCommand, sExpr in re.findall(r'addItem\(mi([A-Za-z]+),\s*"([^"]*)",\s*"([^"]*)",\s*([^,]+?),', sSource):
+        dKeys.setdefault(sCommand.lower(), []).append("" if "Keys.None" in sExpr else oMake.keyName(sExpr))
+    lsBad = []
+    iChecked = 0
+    sSection = ""
+    for sLine in readText(sInix).splitlines():
+        sTrim = sLine.strip()
+        if sTrim.startswith("["): sSection = sTrim.lower(); continue
+        if sSection != "[hotkeys]" or not sTrim or sTrim.startswith(";") or "=" not in sTrim: continue
+        sName, sRest = sTrim.split("=", 1)
+        sName = sName.strip()
+        if sName.lower() not in dKeys: continue
+        iChecked += 1
+        sChord = sRest.split(",", 1)[0].strip()
+        lsCode = [s for s in dKeys[sName.lower()] if s]
+        sWanted = " or ".join(dict.fromkeys(lsCode)) if lsCode else "None"
+        if sChord != sWanted: lsBad.append("%s says %s; DbDo.cs binds %s" % (sName, sChord or "nothing", sWanted))
+    for s in lsBad: logLine("INIX KEY: " + s)
+    if lsBad:
+        return finding("inix keys", "fail", "%s; each is in the log" % countNoun(len(lsBad), "line"))
+    return finding("inix keys", "pass", "%s in DbDo.inix, each with the key DbDo.cs binds" % countNoun(iChecked, "command"))
 
 
 def checkSayAnswers():
@@ -600,6 +643,7 @@ def main():
     checkShadowedKit()
     checkSayLayer()
     checkHotkeyDoc()
+    checkInixKeys()
     checkSayAnswers()
     checkSections()
     checkTutorials()

@@ -7,7 +7,7 @@ section says why each key is the one it is.
 
 - **A letter is the first letter of a word in the command.** Shift+C is Say Cell; Alt+O is Order.
 - **Shift and a letter asks.** Every Say command is Shift and a letter, and none changes anything.
-- **Adding Shift reverses.** Control+M marks and Control+Shift+M unmarks; Control+W sets the Where filter and Control+Shift+W clears it.
+- **Adding Shift reverses.** Control+M marks and Control+Shift+M unmarks; Control+F filters and Control+Shift+F clears the filter.
 - **Z is for sleep.** Every Z key is a toggle: it wakes a behavior or puts it to sleep. Control+Z undoes in Windows, and restoring a behavior is the same idea.
 - **X is for the sound of "ex"**, as in Export.
 - **Alt takes the letter when Control already means something in Windows.** Control+O opens and Control+S saves everywhere, so Order is Alt+O and Select Columns is Alt+S.
@@ -59,6 +59,9 @@ section says why each key is the one it is.
 - Mark Record\
   Set the 'marked' flag on the current row. M for Mark.\
   Control+M
+- Marked Toggle\
+  Control+Space toggles a selection in any Windows list.\
+  Control+Space
 - New Copy\
   N for New.\
   Control+Shift+N
@@ -89,9 +92,6 @@ section says why each key is the one it is.
 - Save Clipboard\
   Save the clipboard text to a file you name.\
   Control+Apostrophe
-- Toggle Marked\
-  Control+Space toggles a selection in any Windows list.\
-  Control+Space
 - Unmark Record\
   Clear the 'marked' flag on the current row. M for Mark. Shift reverses Mark Record.\
   Control+Shift+M
@@ -239,6 +239,9 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Hotkey Summary\
   H for Hotkey.\
   Alt+Shift+H
+- Read Only Toggle\
+  Flip the database between read-write and read-only at runtime. Z is for sleep: it wakes this behavior or puts it to sleep.\
+  Control+Shift+Z
 - Refresh View\
   Refresh the visible row set from the database. F5 is refreshing.\
   F5
@@ -251,9 +254,6 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Table Summary\
   Print row count, column count, and storage statistics for the open database. T for Table.\
   Alt+T
-- Toggle Read Only\
-  Flip the database between read-write and read-only at runtime. Z is for sleep: it wakes this behavior or puts it to sleep.\
-  Control+Shift+Z
 
 ### Misc, Tools
 
@@ -405,12 +405,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Look\
   L for Look.\
   Shift+L
-- Say Mark Status\
-  M for Mark.\
+- Say Marked\
+  M for Marked.\
   Shift+M
-- Say Marked Rows\
-  Speak every marked row in full, scanning from the first row down (all displayed columns). Space marks in a list; Shift and Space asks how many are marked.\
-  Shift+Space
 - Say Notes\
   Speak the current row's 'notes' field. N for Notes.\
   Shift+N
@@ -429,9 +426,12 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Query\
   Q for Query.\
   Shift+Q
-- Say Records Rest Marked\
-  Speak full marked records from the cursor row down. M for Marked.\
+- Say Records from Current Marked\
+  Speak every marked record in full, from the current record down. M for Marked.\
   Alt+Shift+M
+- Say Records of Marked\
+  Speak every marked record in full, from the first record down (all displayed columns). Space marks in a list; Shift and Space asks how many are marked.\
+  Shift+Space
 - Say Regex Replace\
   X for the sound of "ex".\
   Shift+X
@@ -575,8 +575,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Speak the current virtual column for marked rows only, from the top.\
   Say Column as List of Marked
 - Alt+Shift+M\
-  Speak full marked records from the cursor row down.\
-  Say Records Rest Marked
+  Speak every marked record in full, from the current record down.\
+  Say Records from Current Marked
 - Alt+Shift+N\
   Edit Notes
 - Alt+Shift+O\
@@ -667,7 +667,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Slash\
   Open Command Prompt
 - Control+Space\
-  Toggle Marked
+  Marked Toggle
 - Control+T\
   Choose Table
 - Control+Tab\
@@ -741,7 +741,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Extract with Regex
 - Control+Shift+Z\
   Flip the database between read-write and read-only at runtime.\
-  Toggle Read Only
+  Read Only Toggle
 
 ### Function keys
 
@@ -864,7 +864,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Shift+L\
   Say Look
 - Shift+M\
-  Say Mark Status
+  Say Marked
 - Shift+N\
   Speak the current row's 'notes' field.\
   Say Notes
@@ -881,8 +881,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Shift+S\
   Say Select Columns
 - Shift+Space\
-  Speak every marked row in full, scanning from the first row down (all displayed columns).\
-  Say Marked Rows
+  Speak every marked record in full, from the first record down (all displayed columns).\
+  Say Records of Marked
 - Shift+T\
   Speak the current row's 'tags' field.\
   Say Tags
@@ -1058,6 +1058,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Mark Record\
   Set the 'marked' flag on the current row.\
   Control+M
+- Marked Toggle\
+  Control+Space
 - Merge Data\
   Merge rows from a Markdown table, JSON, or Inix file into the current table.\
   Alt+M
@@ -1119,6 +1121,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Control+Q
 - Query History\
   Alt+Shift+Q
+- Read Only Toggle\
+  Flip the database between read-write and read-only at runtime.\
+  Control+Shift+Z
 - ReadMe\
   Alt+Shift+F1
 - Recent Files\
@@ -1202,11 +1207,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Shift+K
 - Say Look\
   Shift+L
-- Say Mark Status\
+- Say Marked\
   Shift+M
-- Say Marked Rows\
-  Speak every marked row in full, scanning from the first row down (all displayed columns).\
-  Shift+Space
 - Say Notes\
   Speak the current row's 'notes' field.\
   Shift+N
@@ -1224,9 +1226,12 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Shift+P
 - Say Query\
   Shift+Q
-- Say Records Rest Marked\
-  Speak full marked records from the cursor row down.\
+- Say Records from Current Marked\
+  Speak every marked record in full, from the current record down.\
   Alt+Shift+M
+- Say Records of Marked\
+  Speak every marked record in full, from the first record down (all displayed columns).\
+  Shift+Space
 - Say Regex Replace\
   Shift+X
 - Say Related\
@@ -1285,11 +1290,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Table Summary\
   Print row count, column count, and storage statistics for the open database.\
   Alt+T
-- Toggle Marked\
-  Control+Space
-- Toggle Read Only\
-  Flip the database between read-write and read-only at runtime.\
-  Control+Shift+Z
 - Unmark All\
   Control+Shift+A
 - Unmark Record\

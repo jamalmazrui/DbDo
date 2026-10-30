@@ -44,7 +44,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=Enter.
 Key=Enter
-Hear=jobs, 4 records, no filter, sorted by employer
+Hear=jobs, 4 records, no filter, sorted by employer, title
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -127,7 +127,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=The hiring manager, linked as the contact for this job.
 Key=Down Arrow
-Hear=Rivera, Pat, Example Widgets Company (sample employer)
+Hear=Pat, Rivera, Example Widgets Company (sample employer)
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

@@ -623,6 +623,116 @@ show. OK stores the id. Typing the look or the id both work; text that
 names no linked record says so and keeps the form open. In the Filter
 Records form, F4 puts the look in the box, which then matches records
 whose link shows it.</p></li>
+<li><p><strong>Tutorial walks 3 to 7 match the templates again.</strong>
+Each walk now hears a record the way the grid reads it after the look
+and prime changes: stations source first, contacts first name first,
+books by author, albums genre and rank first, presentations year first.
+The counts are current, and walk 3 mentions Default Order. The build
+speaks these five walks again by itself.</p></li>
+<li><p><strong>BlindCreations has a new developer.</strong> Brandon
+Bracey and six of his apps, linked as their developer: BlindFB,
+BlindPilot for Android, BlindRSS and its Android and iOS editions, and
+BlindTerm.</p></li>
+<li><p><strong>Opening a table is timed step by step in the
+log.</strong> “Open timing:” gives the milliseconds for loading the
+records, applying the saved sort, filter and position, and reading the
+calculated columns; “Grid timing:” gives the time to show them, whenever
+it is 100 milliseconds or more. Nothing else changed: this finds where a
+large table’s wait goes before anything is done to shorten it.</p></li>
+<li><p><strong>Does not contain, in Filter Records’ Fields
+form.</strong> Begin a value with <code>!%</code> to keep the records
+whose field lacks the text, case aside; a link field is judged by what
+it shows. Both it and <code>!=</code> (is not) now keep records whose
+field is empty, since an empty field neither contains the text nor
+equals the value.</p></li>
+<li><p><strong>Access keys follow the house rule in the record form’s
+and the grid’s context menus.</strong> A letter comes from the first
+letter of a word, never from inside one. Record form: Null Value takes
+N, Pick Value takes V, Save and Previous Record takes S, and Cut has
+none, since Copy holds C (Control+X still cuts). Grid: Copy Record as
+New takes R, Say Cell takes S, and Enter Child Table takes C. Select
+Columns, Order Records, the Fields and Picks dialog, Filter by Form and
+Filter Regex were reviewed and already complied.</p></li>
+<li><p><strong>Default Order in Order Records and in Select Columns’
+Exact list.</strong> Order Records (Alt+O) has a Default Order button,
+Alt+O inside the dialog, since D is Add Descending’s: it returns every
+pick to Fields and fills Picks with prime’s fields, ascending, in
+prime’s order. In Select Columns’ Exact list it fills Picks with look’s
+fields.</p></li>
+<li><p><strong>Every template follows one rule for look, prime, columns
+and sort.</strong> Look is how a record is said; prime is look’s fields
+in the order they sort, with tiebreakers; the grid shows look’s fields
+and sorts by prime’s. People tables now sort by last name, then first
+name, while showing first name first: the contacts of ContactTrail and
+JobTrail, the customers and employees of chinook, the employees of
+northwind, and BlindCreations’ creators. Title tables sort by title,
+then creator. BookTrail is said and sorted by author, series, volume and
+title. Tables browsed by a group – recipes by course, ingredients by
+category, lessons by category, albums by genre, stations by source –
+show the group first, so the first thing heard is what they are sorted
+by; logs – actions, invoices, orders, presentations – stay newest first.
+Changing a prime re-pointed the maps rows that use it; every link in
+every template still finds its record.</p></li>
+<li><p><strong>JobTrail’s contacts read first name first.</strong> The
+contacts look is now first name, last name, enterprise, so a linked
+contact in actions reads as it is said; the grid shows those three and
+sorts by last name, first name, enterprise, as phone books and most
+contact programs do.</p></li>
+<li><p><strong>Record forms show link fields.</strong> Every field
+ending in _id was treated as one DbDo keeps by itself, like the table’s
+own id, so no record form showed a link such as author_id: a new record
+could not be given its parent, New Copy dropped it, and Edit Cell
+refused it. Only the table’s own id is kept by DbDo now; a link is a
+field you choose, shown as its look, with F4 to pick another. Edit Cell
+on a link column opens the same one-field form.</p></li>
+<li><p><strong>A new record starts related, however you reached the
+table.</strong> In a window opened by a link field, New Record starts
+that field as the record you came from; in a window filtered to one
+linked record, the same. In a window opened by a map, New Record and New
+Copy add the map linking the new record to the record you came from, so
+it stays in the window. Two steps away, through a table in the middle,
+DbDo says the new record is not linked yet. The dot prompt’s new-record
+command does the same, offering the value in brackets.</p></li>
+<li><p><strong>The first related record can be added.</strong> A related
+table with no records yet used to close at once with “No related
+records”; it now stays open, saying Control+N adds one. Enter Child also
+offers map kinds other records of the table use, with a count of 0, so a
+record’s first such link can be made.</p></li>
+<li><p><strong>The Say Records commands are named like the Say Column
+ones.</strong> Say Marked Rows (Shift+Space) is now Say Records of
+Marked, Say Records Rest Marked (Alt+Shift+M) is Say Records from
+Current Marked, and Say Records Rest is Say Records from Current – word
+for word the Say Column as List family, and “record”, DbDo’s word,
+rather than “row”.</p></li>
+<li><p><strong>Every toggle ends in Toggle.</strong> Toggle Marked
+(Control+Space) and Toggle Read Only (Control+Shift+Z) are now Marked
+Toggle and Read Only Toggle, like Extra Speech Toggle and Key Describer
+Toggle.</p></li>
+<li><p><strong>The read-only messages name the right key.</strong> Three
+messages said to press Alt+Z to turn read-only off; Alt+Z is Say Status.
+They now say Control+Shift+Z. Tutorial 8 taught the same wrong key and
+had the reader say “Read only” and “Read and write”, which DbDo never
+says; it now teaches Control+Shift+Z and the real answers, “Read Only
+On” and “No Read Only”, and the build speaks that walk again.</p></li>
+<li><p><strong>The key list in DbDo.inix matches DbDo.</strong> About
+thirty lines named keys that had moved or commands since renamed or
+retired; each now carries the key DbDo.cs binds, and a new audit check,
+inix keys, fails a build when one drifts again. The key table in DbDo.md
+was corrected the same way, and every key is named one way: Grave, as
+JAWS says it, not GraveAccent.</p></li>
+<li><p><strong>One Say Marked.</strong> Shift+M, which said whether the
+current record is marked, was called Say Mark Status; it is now Say
+Marked, matching Say Notes and Say Tags. The keyless command that had
+that name, listing the look of every marked record, is retired: Say
+Column All Marked (Alt+Shift+L) on the look column says the
+same.</p></li>
+<li><p><strong>Every search reads what the screen shows.</strong> Jump
+and Find Regex read the stored value, so Jump could not find a link by
+its look and a pattern met the hidden separator inside look and prime;
+like Keywords, they now read each field as shown. The log records how
+long each Keywords, Jump and Find Regex scan takes, forward or backward,
+first or repeated, so their speed on large tables can be judged from
+numbers.</p></li>
 <li><p><strong>JSON export writes a look or prime with “;” between its
 parts,</strong> like every other export, rather than the raw unit
 separator.</p></li>

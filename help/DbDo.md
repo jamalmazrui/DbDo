@@ -163,7 +163,7 @@ Woven through the menus is a large **Say-X status family** in the Query menu: qu
 
 #### Key Help
 
-**Key Help Toggle** (Control+F1) turns on a learning mode: while it is on, pressing a command chord **announces** what that command is and does **instead of running it**. Press Control+F1 again to turn it off. This lets you explore the keyboard safely. The **Hotkey Summary** (Alt+Shift+H) and **Alternate Menu** (Alt+F10) give you, respectively, an auditable listing of every command with its key, and a single filterable list of all commands you can search and run.
+**Key Describer Toggle** (Control+F1) turns on a learning mode: while it is on, pressing a command chord **announces** what that command is and does **instead of running it**. Press Control+F1 again to turn it off. This lets you explore the keyboard safely. The **Hotkey Summary** (Alt+Shift+H) and **Alternate Menu** (Alt+F10) give you, respectively, an auditable listing of every command with its key, and a single filterable list of all commands you can search and run.
 
 ---
 
@@ -205,7 +205,7 @@ All edits auto-commit. If a table is read-only, **Read Only Toggle** (Control+Sh
 
 Marking is DbDo's explicit, queryable alternative to visual multi-select. The `marked` field carries the state.
 
-- **Mark Record** (Control+M) marks the current record; **Unmark Record** (Control+Shift+M) clears it; **Toggle Marked** (Control+Space) flips it; **Say Mark Status** (Shift+M) speaks it.
+- **Mark Record** (Control+M) marks the current record; **Unmark Record** (Control+Shift+M) clears it; **Marked Toggle** (Control+Space) flips it; **Say Marked** (Shift+M) speaks it.
 - **Mark All** (Control+A), **Unmark All** (Control+Shift+A), and **Invert Marked** (Alt+Shift+I) act across the current view.
 - To mark a **range**, set an anchor with **Start Mark** (F8) and extend to the cursor with **Complete Mark** (Shift+F8). **Start Unmark** (Alt+F8) and **Complete Unmark to Anchor** (Alt+Shift+F8) do the same for clearing, with a separate anchor so building a mark range and an unmark range never clobber each other.
 
@@ -216,7 +216,7 @@ Marked records can then be reported, filtered, or exported as a set, and several
 Filtering and sorting reshape the grid without touching the physical table.
 
 - **Filter Records** (Control+F) limits the grid to the records that meet a condition.
-  - **How to give a condition.** With no filter in force, it asks at once how to give one. **Any Field** finds text wherever it is, whatever its case. **Fields** gives a box for every field, and a word typed into a text field finds records containing it, whatever its case: `seattle` in RadioTrail's city box finds "Seattle, Washington". A value may begin with an operator: `=` is, `!=` is not, `>` more than, `>=` at least, `<` less than, `<=` at most, `%` contains. Several filled boxes must all match.
+  - **How to give a condition.** With no filter in force, it asks at once how to give one. **Any Field** finds text wherever it is, whatever its case. **Fields** gives a box for every field, and a value typed with no operator finds records whose field contains it, whatever its case: `seattle` in RadioTrail's city box finds "Seattle, Washington". A value may begin with an operator: `=` is, `!=` is not, `>` more than, `>=` at least, `<` less than, `<=` at most, `%` contains, `!%` does not contain. Is not and does not contain also keep records whose field is empty. Several filled boxes must all match.
   - **With a filter in force,** Control+F first offers four buttons. **New** starts over. **Clear** shows every record again and returns you to the list on the same record. **Narrow** keeps only the records that also meet a new condition, joining it with AND. **Expand** also takes in the records that meet a new condition, joining it with OR. Then it asks how to give the new condition, as above.
   - **Grouping.** The condition in force, however many parts it has, is wrapped whole in parentheses before the AND or OR, and the new condition in its own. So narrowing and expanding in turn always mean exactly what was asked. Say Filter (Shift+F) speaks the whole condition, led by "where" and grouped the same way.
   - **Nothing found.** A condition that would keep no record says so and leaves the view as it was.
@@ -251,7 +251,7 @@ A table has two kinds of field, and every DbDo dialog lists them in the same ord
 - **Main fields** come first, in the table's own order. They are about the table's subject: a contact's names and phone numbers, a station's name and country. A field ending in _id that points to a record in another table, such as category_id, is a main field too.
 - **Standard fields** come last, in this order: url, tags, notes, marked, look, prime, added, edited, and the record's own id. Every DbDo table has them. You type url, tags and notes. Look is a short summary that tells one record from the others, and prime is the combination of fields that must be unique in the table; DbDo figures out both from the record's main fields. DbDo keeps marked, added, edited and the id up to date by itself.
 
-By default the grid shows the fields of look and sorts by the fields of prime. Every change to the columns, sort or filter is saved at once with the table.
+By default the grid shows the fields of look and sorts by the fields of prime. Look is how a record is said, so a person reads first name first; prime holds the same fields in the order they sort, with tiebreakers, so people sort by last name. In Order Records, Default Order puts prime's fields back in Picks; in Select Columns' Exact list, it puts look's. Every change to the columns, sort or filter is saved at once with the table.
 
 Look and prime never include url, notes, tags, marked, added, edited or the record's own id.
 
@@ -272,6 +272,18 @@ The same commands follow both:
 - **Related Records** (Query menu) shows the same list in a window.
 - **Enter Child Table** (Alt+Right) follows a relationship into the related records in another table, opening them filtered to the record you came from.
 - **Exit Child Table** (Alt+Left) returns to the record you came from; **Exit to Root Table** (Alt+Home) returns all the way up a chain.
+
+### Adding related records
+
+New Record (Control+N) and New Copy (Control+Shift+N) work in every window, however you reached its table. When the window holds related records, a new record starts out related the same way, so it stays in the window:
+
+- **By a link field.** In a window opened from a contact, a new record's contact_id starts as that contact, shown as its look. Press F4 in the field to pick another. If you pick another, DbDo says the record now belongs elsewhere, since this window lists only the first contact's records. A window you filtered to one linked record, such as author_id = 17, starts new records the same way.
+- **By a map.** In a window opened through a map, such as events via presents, DbDo adds the map that links the new record to the record you came from, and says so.
+- **Through another table.** In a window opened two steps away, such as locations via events, DbDo cannot tell which record in the middle to use. It adds the record and says it is not linked yet.
+
+A related table with no records yet still opens, so you can add the first one. Enter Child also offers a map kind that other records of the table use but this one does not yet, with a count of 0, so its first such link can be made the same way.
+
+In any record form, a link field shows the linked record's look, F4 or Alt+Down Arrow picks another, and Edit Cell on a link column works the same way.
 
 A map names each record by its table and its prime, not its number, so a link still holds after a merge or an export, when the numbers change. Two small triggers on each table keep links whole as you work: when you edit a field that is part of a record's prime, its links follow the new prime, and when you delete a record, its links go with it. DbDo adds these triggers to every table it makes, and every template carries them.
 
@@ -421,8 +433,8 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Replace Column | Control+R |
 | Regex Replace | Control+Shift+R |
 | Mark Record | Control+M |
-| Say Mark Status | Shift+M |
-| Toggle Marked | Control+Space |
+| Say Marked | Shift+M |
+| Marked Toggle | Control+Space |
 | Edit Notes | Alt+Shift+N |
 | Edit Tags | Alt+Shift+T |
 | Edit url | Alt+Shift+U |
@@ -473,14 +485,15 @@ The Query menu holds record inspection and the Say-X status family.
 | Say Order | Shift+O |
 | Say Go to | Shift+G |
 | Say Yield | Shift+Y |
-| Say Marked | — |
+| Say Marked | Shift+M |
 | Say Edited | Shift+E |
 | Say Notes | Shift+N |
 | Say Tags | Shift+T |
-| Say Column Rest | Control+L |
-| Say Column Rest Marked | Control+Shift+L |
-| Say Records Rest | Alt+L |
-| Say Marked Rows | Shift+Space |
+| Say Column as List from Current | Control+L |
+| Say Column as List from Current Marked | Control+Shift+L |
+| Say Records from Current | — |
+| Say Records from Current Marked | Alt+Shift+M |
+| Say Records of Marked | Shift+Space |
 | Say Sort and Filter | Shift+8 |
 | Say Position | Alt+Delete |
 | Say Clipboard | Alt+Apostrophe |
@@ -518,13 +531,12 @@ The Query menu holds record inspection and the Say-X status family.
 | Extract with Regex | Control+Shift+X |
 | Append Cell to Clipboard | Alt+C |
 | Copy Cell to Clipboard | Control+C |
-| Copy Visible Cells as TSV | — |
+| Copy Visible Cells | — |
 | Copy Column / Copy Grid | — |
 | Jump to Next Initial | — |
 | Query | Control+Q |
 | Query History | Alt+Shift+Q |
 | Test Integrity | — |
-| Test Drivers | — |
 | Hotkey Summary | Alt+Shift+H |
 | Open as Managed Copy | — |
 | Describe Table | — |
@@ -533,17 +545,17 @@ The Query menu holds record inspection and the Say-X status family.
 | Open Command Prompt | Control+Slash |
 | Open Dot Prompt | Control+GraveAccent |
 | Sqlean Console | Control+Shift+GraveAccent |
-| Invoke Script | Alt+V |
-| Edit Snippet | Alt+Shift+V |
+| Invoke Script | Control+Shift+I |
+| Edit Snippet | Control+Shift+E |
 | Open Script Folder | — |
 | Evaluate Expression | Control+Equals |
-| Edit Settings | Alt+Shift+C |
+| Edit Settings | Alt+Shift+E |
 
 #### Window menu
 
 | Command | Chord |
 |---------|-------|
-| Open Table | Control+Shift+T |
+| Open Table | Control+Shift+O |
 | Current Windows | F4 |
 | Window Toggle | — |
 | Next Window | Control+Tab |
@@ -558,11 +570,10 @@ The Query menu holds record inspection and the Say-X status family.
 |---------|-------|
 | Documentation | F1 |
 | History of Changes | Shift+F1 |
-| Readme Guide | — |
+| ReadMe | Alt+Shift+F1 |
 | Alternate Menu | Alt+F10 |
-| Key Help Toggle | Control+F1 |
+| Key Describer Toggle | Control+F1 |
 | Where Am I | — |
-| Test Screen Reader Speech | — |
 | Email Log File | — |
 | Elevate Version | F11 |
 
@@ -1267,7 +1278,7 @@ An empty answer keeps its label and says none -- "find: none", not "No find
 string" -- and every count matches its noun.
 
 **One exception, and it is a rule of its own.** A two-state answer whose value
-already names the setting says the state alone: Say Mark answers "Marked" or
+already names the setting says the state alone: Say Marked answers "Marked" or
 "Unmarked", not "mark: marked". Prefixing it would say the same word twice, and
 only the second word carries information. It is the shape a toggle uses
 everywhere else: "<setting> on" and "no <setting>", never "<setting>: on".
