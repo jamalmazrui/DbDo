@@ -30216,11 +30216,29 @@ namespace DbDo
                     string sSort = (tbSort.Text ?? "").Trim();
                     string sFilter = (tbFilter.Text ?? "").Trim();
 
-                    // Apply live (best-effort; a stale expression is
-                    // skipped rather than fatal).
-                    try { db.setSelectList(sTable, sSelect); } catch { }
-                    try { db.filter = sFilter; } catch { }
-                    try { db.sort = sSort; } catch { }
+                    // SAVED ONLY WHEN IT WORKS (30 October 2026, from an audit by another AI).
+                    // Each part was applied with its error ignored, then all three were saved
+                    // and "View settings saved" said, so a misspelled column, filter or sort was
+                    // stored to break the table's next opening while the view in front had not
+                    // changed. Now a column that does not exist, or a filter or sort the data
+                    // refuses, is named; what was in force is put back; and nothing is saved.
+                    List<string> lsProblems = new List<string>();
+                    foreach (string sCol in lCols)
+                        if (!db.hasField(sCol)) lsProblems.Add("Columns: there is no field named " + sCol);
+                    if (lsProblems.Count == 0) { try { db.setSelectList(sTable, sSelect); } catch (Exception exSel) { lsProblems.Add("Columns: " + exSel.Message); } }
+                    if (lsProblems.Count == 0) { try { db.filter = sFilter; } catch (Exception exFil) { lsProblems.Add("Filter: " + exFil.Message); } }
+                    if (lsProblems.Count == 0) { try { db.sort = sSort; } catch (Exception exSort) { lsProblems.Add("Sort: " + exSort.Message); } }
+                    if (lsProblems.Count > 0)
+                    {
+                        try { db.setSelectList(sTable, sCurSelect); } catch { }
+                        try { db.filter = sCurFilter; } catch { }
+                        try { db.sort = sCurSort; } catch { }
+                        invokeRefresh();
+                        DbDoLog.write("Edit-Settings view: [Table:" + sTable + "] not saved: " + string.Join("; ", lsProblems.ToArray()));
+                        MessageBox.Show(this, "Nothing was saved, and the view is as it was.\n\n" + string.Join("\n", lsProblems.ToArray()),
+                            "This Table's View", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        return;
+                    }
                     invokeRefresh();
 
                     // Persist to the per-database settings file, under the
