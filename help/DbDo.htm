@@ -215,6 +215,10 @@ id="toc-part-2-working-with-data">Part 2 — Working with data</a>
 <li><a href="#opening-databases-and-recordsets"
 id="toc-opening-databases-and-recordsets">Opening databases and
 recordsets</a></li>
+<li><a href="#moving-in-the-grid" id="toc-moving-in-the-grid">Moving in
+the grid</a></li>
+<li><a href="#search-syntax" id="toc-search-syntax">Search
+syntax</a></li>
 <li><a href="#navigating-records" id="toc-navigating-records">Navigating
 records</a></li>
 <li><a href="#editing-records" id="toc-editing-records">Editing
@@ -717,9 +721,97 @@ Database</strong> compares two.</p></li>
 <em>Next/Previous Visited Table</em> commands walk the tables you have
 already looked at. <strong>Choose View</strong> (and the object-switch
 commands) do the same for saved views.</p>
+<h3 id="moving-in-the-grid">Moving in the grid</h3>
+<p>The grid has one keyboard grammar. Plain keys move within what you
+are on. Control jumps along the column. Shift marks along the same jump,
+and adding Alt unmarks. Alt with Control keeps the meanings it has in
+tables in web pages, Word and Adobe Reader.</p>
+<ul>
+<li><strong>Arrows</strong> move one cell. Up and Down Arrow are left to
+your screen reader, which reads the row as it moves; Left and Right
+Arrow move DbDo’s cursor from column to column.</li>
+<li><strong>Home and End</strong> go to the first and last column of the
+row.</li>
+<li><strong>Page Up and Page Down</strong> move a screenful, staying in
+the column.</li>
+<li><strong>Control+Home and Control+End</strong> go to the first and
+last row, staying in the column.</li>
+<li><strong>Control+Up Arrow and Control+Down Arrow</strong> go to the
+previous and next marked record.</li>
+<li><strong>Control+Page Up and Control+Page Down</strong> go to the
+first and last marked record.</li>
+</ul>
+<p>The screen reader table keys work as they do in tables in web pages,
+Word and Adobe Reader:</p>
+<ul>
+<li><strong>Alt+Control+arrows</strong> move one cell. Moving along a
+row, DbDo says the new column’s name, then the cell. Moving down a
+column, it says the record’s look, then the cell, just as a screen
+reader says a row header; when the cell is itself part of the look, it
+says the cell alone. At the edge of the grid, the cursor stays, and DbDo
+says First row, Last row, First column or Last column.</li>
+<li><strong>Alt+Control+Home and Alt+Control+End</strong> go to the
+top-left and bottom-right corners, as in JAWS and Narrator. (NVDA uses
+them for the first and last column of the row; in DbDo, Home and End do
+that.)</li>
+<li><strong>Alt+Control+Page Up and Alt+Control+Page Down</strong> go to
+the first and last row of the column, as in NVDA.</li>
+<li><strong>Alt+Control+Number Pad 5</strong> says the cell, as
+<strong>Shift+C</strong> does.</li>
+</ul>
+<p>Narrator’s table reading keys read without moving:</p>
+<ul>
+<li><strong>Alt+Control+Shift+Left Arrow</strong> says the record’s
+look, its row header.</li>
+<li><strong>Alt+Control+Shift+Up Arrow</strong> says the column’s name,
+its column header.</li>
+<li><strong>Alt+Control+Shift+Right Arrow</strong> says every shown
+field of the record.</li>
+<li><strong>Alt+Control+Shift+Down Arrow</strong> says every value in
+the column, from the top.</li>
+<li><strong>Alt+Control+Shift+Number Pad 5</strong> says the cell’s row
+and column numbers.</li>
+</ul>
+<p>In the Key Describer (Control+F1), every one of these keys says what
+it does.</p>
+<h3 id="search-syntax">Search syntax</h3>
+<p>Every Homer search that is not a regular expression reads what you
+type the same way. A plain word is enough most of the time; the symbols
+are there when you need more.</p>
+<ul>
+<li><strong>A word</strong> is found anywhere, whatever its case:
+<code>river</code> finds “Riverside”.</li>
+<li><strong><code>*</code></strong> stands for any run of characters,
+and <strong><code>?</code></strong> for any one character:
+<code>chap*</code>, <code>c?t</code>.</li>
+<li><strong><code>&amp;</code></strong> means all of them:
+<code>red &amp; blue</code>.</li>
+<li><strong><code>|</code></strong> means any of them:
+<code>red | blue</code>. <code>&amp;</code> is read first, so
+<code>red &amp; blue | green</code> means red and blue, or else
+green.</li>
+<li><strong><code>!</code></strong> before a word means not:
+<code>!draft</code>.</li>
+<li><strong>Quotes</strong> find exactly what is inside, symbols and
+all: <code>"C#"</code>, <code>"a &amp; b"</code>.</li>
+</ul>
+<p>Where a wildcard counts depends on what is searched. When the search
+reads a <strong>name</strong> – a file name, a line of a list, one field
+– a word with <code>*</code> or <code>?</code> must match the whole
+name, so <code>*.md</code> means a name ending in .md, and
+<code>chap*</code> one starting with chap. When it reads
+<strong>text</strong> – a file’s contents, a whole record – every word
+may match anywhere. A word with no wildcard is found anywhere in
+both.</p>
+<p>F3 repeats the last search, in the same way and over the same things,
+going forward; Shift+F3 repeats it going back.</p>
+<p>In DbDo, Keywords and Any Field read a whole record as text, so the
+words of <code>red &amp; blue</code> may sit in different fields; Jump
+Record and a Fields box read one field as a name. Find Regex and Regex
+Replace take regular expressions instead, and Replace Column finds
+exactly the text you type.</p>
 <h3 id="navigating-records">Navigating records</h3>
-<p>The cursor moves with ordinary list navigation (arrow keys, Home,
-End) and with explicit commands:</p>
+<p>Beyond the grid’s keys, the cursor moves with these commands:</p>
 <ul>
 <li><strong>Go to Record</strong> (Control+G) jumps to a record number;
 <strong>Repeat Go To</strong> (Alt+G) repeats it.</li>
@@ -773,6 +865,18 @@ Marked</strong> (Shift+M) speaks it.</li>
 <li><strong>Mark All</strong> (Control+A), <strong>Unmark All</strong>
 (Control+Shift+A), and <strong>Invert Marked</strong> (Alt+Shift+I) act
 across the current view.</li>
+<li><strong>Shift+Down Arrow and Shift+Up Arrow</strong> mark the record
+and move to the next or previous one. <strong>Alt+Shift+Down Arrow and
+Alt+Shift+Up Arrow</strong> unmark it and move.</li>
+<li><strong>Control+Shift+Home</strong> marks every record from the
+first to this one; <strong>Control+Shift+End</strong> marks from this
+one to the last. <strong>Alt+Control+Shift+Home</strong> and
+<strong>Alt+Control+Shift+End</strong> unmark the same spans. These were
+Shift+Home and Shift+End through version 1.0.316; those keys now say
+where marking went.</li>
+<li><strong>Control+Up Arrow and Control+Down Arrow</strong> go to the
+previous and next marked record; <strong>Control+Page Up and
+Control+Page Down</strong> go to the first and last.</li>
 <li>To mark a <strong>range</strong>, set an anchor with <strong>Start
 Mark</strong> (F8) and extend to the cursor with <strong>Complete
 Mark</strong> (Shift+F8). <strong>Start Unmark</strong> (Alt+F8) and
@@ -794,8 +898,11 @@ it asks at once how to give one. <strong>Any Field</strong> finds text
 wherever it is, whatever its case. <strong>Fields</strong> gives a box
 for every field, and a value typed with no operator finds records whose
 field contains it, whatever its case: <code>seattle</code> in
-RadioTrail’s city box finds “Seattle, Washington”. A value may begin
-with an operator: <code>=</code> is, <code>!=</code> is not,
+RadioTrail’s city box finds “Seattle, Washington”. A value with no
+operator also takes the Homer search syntax, reading the field as a
+name: <code>*.com</code> is a value ending in .com,
+<code>smith | jones</code> either, <code>!draft</code> not. A value may
+begin with an operator: <code>=</code> is, <code>!=</code> is not,
 <code>&gt;</code> more than, <code>&gt;=</code> at least,
 <code>&lt;</code> less than, <code>&lt;=</code> at most, <code>%</code>
 contains, <code>!%</code> does not contain. Is not and does not contain
@@ -1297,6 +1404,10 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 </table>
 <h4 id="edit-menu">Edit menu</h4>
 <table>
+<colgroup>
+<col style="width: 56%" />
+<col style="width: 43%" />
+</colgroup>
 <thead>
 <tr>
 <th>Command</th>
@@ -1389,6 +1500,30 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <td>Alt+Shift+I</td>
 </tr>
 <tr>
+<td>Mark and Next / Previous</td>
+<td>Shift+Down / Shift+Up</td>
+</tr>
+<tr>
+<td>Unmark and Next / Previous</td>
+<td>Alt+Shift+Down / Alt+Shift+Up</td>
+</tr>
+<tr>
+<td>Mark to First / Last</td>
+<td>Control+Shift+Home / Control+Shift+End</td>
+</tr>
+<tr>
+<td>Unmark to First / Last</td>
+<td>Alt+Control+Shift+Home / Alt+Control+Shift+End</td>
+</tr>
+<tr>
+<td>Next / Previous Marked</td>
+<td>Control+Down / Control+Up</td>
+</tr>
+<tr>
+<td>First / Last Marked</td>
+<td>Control+Page Up / Control+Page Down</td>
+</tr>
+<tr>
 <td>Start Mark / Complete Mark</td>
 <td>F8 / Shift+F8</td>
 </tr>
@@ -1431,6 +1566,14 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 </tr>
 </thead>
 <tbody>
+<tr>
+<td>First / Last Column of the Row</td>
+<td>Home / End</td>
+</tr>
+<tr>
+<td>First / Last Row of the Column</td>
+<td>Control+Home / Control+End</td>
+</tr>
 <tr>
 <td>First / Last Record</td>
 <td>—</td>
@@ -1573,7 +1716,7 @@ family.</p>
 <td>Shift+Space</td>
 </tr>
 <tr>
-<td>Say Sort and Filter</td>
+<td>Say Order and Filter</td>
 <td>Shift+8</td>
 </tr>
 <tr>
@@ -2296,13 +2439,13 @@ typing the letter lands on it.
 <li><strong>Any field contains text</strong> asks for the text and keeps
 every record where some field holds it, whatever the field and whatever
 the case: type Dallas Cowboys, and every station whose name, notes or
-tags mention the team stays. It takes the same keyword syntax as
-Keywords and every Homer program: <code>red &amp; blue</code> means
-both, <code>red | blue</code> means either, and <code>re*d</code> lets a
-star stand for anything. Numbers and dates are searched as they read.
-Case is ignored for English letters; type accented letters as they
-appear. A search that finds nothing says so and leaves the list as it
-was.</li>
+tags mention the team stays. It takes the Homer search syntax, as
+Keywords does: <code>red &amp; blue</code> means both,
+<code>red | blue</code> either, <code>!red</code> not, and
+<code>re*d</code> lets a star stand for anything (see Search syntax).
+Numbers and dates are searched as they read. Case is ignored for English
+letters; type accented letters as they appear. A search that finds
+nothing says so and leaves the list as it was.</li>
 <li><strong>Fields</strong> asks which fields: <strong>Main</strong>
 (the fields about the table’s subject), <strong>Standard</strong> (url,
 tags, notes, marked, look, prime, added, edited and the id) or
@@ -2726,8 +2869,9 @@ what this table holds for that table and field.</li>
 Say Related reads.</li>
 </ul>
 <p>Neither is offered when you choose a table, open a table in a new
-window, or step through tables with Control+Page Down. They are on a
-hidden list, and anything NOT on that list is yours and is offered.</p>
+window, or step through the tables you have visited with Alt+F6. They
+are on a hidden list, and anything NOT on that list is yours and is
+offered.</p>
 <p>DbDo knows them by their columns as well as their names: its maps
 table has <code>tbl1</code>, <code>prime1</code>, <code>kind</code>,
 <code>tbl2</code> and <code>prime2</code>, and lookups and views have
@@ -2800,8 +2944,8 @@ matches exactly.</p>
 answer says which question was asked. That matters when you are walking
 the alphabet and lose your place: “Unmarked” does not say which key
 produced it, and “mark: unmarked” does.</p>
-<p>An empty answer keeps its label and says none – “find: none”, not “No
-find string” – and every count matches its noun.</p>
+<p>An empty answer keeps its label and says none – “keywords: none”, not
+“No find string” – and every count matches its noun.</p>
 <p><strong>One exception, and it is a rule of its own.</strong> A
 two-state answer whose value already names the setting says the state
 alone: Say Marked answers “Marked” or “Unmarked”, not “mark: marked”.
@@ -2826,10 +2970,11 @@ this way.</p>
 <li>Shift+C – cell, as column and value</li>
 <li>Shift+D – database, as file and folder</li>
 <li>Shift+E – edited</li>
-<li>Shift+F – filter, the condition in force</li>
-<li>Shift+G – goto, the jump search</li>
+<li>Shift+F – filter, the condition in force, or none</li>
+<li>Shift+G – go to, what Go to Record (Control+G) would offer next</li>
 <li>Shift+I – id</li>
-<li>Shift+J – jump, the text the Jump dialog would offer next</li>
+<li>Shift+J – jump, the text Jump Record would search for next, and its
+column</li>
 <li>Shift+K – keywords, the text Keywords would search for</li>
 <li>Shift+L – look</li>
 <li>Shift+M – mark</li>
@@ -2838,11 +2983,11 @@ this way.</p>
 <li>Shift+P – prime</li>
 <li>Shift+Q – query</li>
 <li>Shift+R – related, by foreign key and by map</li>
-<li>Shift+S – select, the columns shown</li>
+<li>Shift+S – columns, the columns shown</li>
 <li>Shift+T – tags</li>
 <li>Shift+U – url</li>
-<li>Shift+V – replacement value, the text Replace would offer and what
-it would put there</li>
+<li>Shift+V – replace, the text Replace Column would find and what it
+would put there, or none</li>
 <li>Shift+X – regex replace, the pattern Regex Replace would offer
 next</li>
 <li>Shift+Y – yield, how many rows</li>
@@ -2854,9 +2999,9 @@ case and without regard to case. The two layers do not collide, which is
 why the Say commands live on Shift.</p>
 <p>Two letters are still unused – H and W – and are kept that way on
 purpose, so a new question can be added later without moving an answer
-somebody has learned. Pressing one of them says so rather than staying
-silent: the say layer always answers, because silence cannot be told
-from a key that did not register.</p>
+somebody has learned. Pressing one of them says so – “Shift+H: no Say
+command” – rather than staying silent: the say layer always answers,
+because silence cannot be told from a key that did not register.</p>
 <p><strong>A command that opens a dialog with a value already in it has
 a value worth hearing first.</strong> That is what Shift+B, Shift+J and
 Shift+V are: the bookmark list, the text Jump would offer, and the pair

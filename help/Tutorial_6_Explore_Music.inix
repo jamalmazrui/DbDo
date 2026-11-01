@@ -114,7 +114,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Control plus Home goes to the first. They are already in rank order, since MusicTrail sorts by genre, then rank.
+Say=Control plus Home goes to the first row. They are already in rank order, since MusicTrail sorts by genre, then rank.
 Key=Control+Home
 Hear=Vocal Jazz, 1, Ella Fitzgerald Sings the Cole Porter Song Book, Ella Fitzgerald, Row 1 of 10
 Note=Confirm the wording with a live run: buildTutorials -live.

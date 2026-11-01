@@ -49,9 +49,9 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Shift plus Y, Say Yield, says how many records are in view; Shift plus 8 says the sort and filter.
+Say=Shift plus Y, Say Yield, says how many records are in view; Shift plus 8 says the order and filter.
 Key=Shift+8
-Hear=Sort: source, name. Filter: none.
+Hear=order: source, name; filter: none.
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

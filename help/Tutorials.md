@@ -1110,11 +1110,11 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 7: Shift+8
 
-Shift plus Y, Say Yield, says how many records are in view; Shift plus 8 says the sort and filter.
+Shift plus Y, Say Yield, says how many records are in view; Shift plus 8 says the order and filter.
 
 Screen reader:
 
-- Sort: source, name. Filter: none.
+- order: source, name; filter: none.
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1636,7 +1636,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 17: Control+A
 
-For a run of records, F8 starts it where I am, and Shift plus F8 completes it where I stop. Control plus A marks every record in view.
+Shift plus Down Arrow marks a station and moves to the next. For a run of records, F8 starts it where I am, and Shift plus F8 completes it where I stop. Control plus A marks every record in view.
 
 Screen reader:
 
@@ -2297,7 +2297,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 16: Control+Home
 
-Control plus Home goes to the first. They are already in rank order, since MusicTrail sorts by genre, then rank.
+Control plus Home goes to the first row. They are already in rank order, since MusicTrail sorts by genre, then rank.
 
 Screen reader:
 

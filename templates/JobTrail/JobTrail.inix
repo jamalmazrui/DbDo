@@ -38,7 +38,7 @@
 ; jobs is the bigger table and the obvious choice, and it is the wrong one. The
 ; first question of a working day is not "what am I applying to" -- it is "what
 ; do I owe somebody". actions answers that, sorted newest first, and jobs is one
-; keystroke away on Control+PageDown.
+; keystroke away on Choose Table, Control+T.
 InitialTable = actions
 
 [Table:actions]

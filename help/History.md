@@ -5,6 +5,35 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 1 November 2026 -- The maps table upgrades at last
+
+- **The maps table takes the new part separator.** Since the 29 October upgrade, DbDo tried at every start to rebuild maps with the unit separator, and failed with "error in trigger trg_stations_maps: no such table: main.maps": another table's trigger names maps, and SQLite re-read that trigger while maps was briefly gone. The rebuild now uses SQLite's legacy_alter_table setting for that step, restoring it afterward. Tested in SQLite: the error reproduced exactly without the setting, and with it the rebuild finished and the trigger still worked. The next start converts maps in RadioTrail and lookups.
+
+## 1 November 2026 -- Every Say command speaks its own word
+
+- **From a walk through the Shift letters:** Shift+F says "filter:" where it said "where:"; Shift+K says "keywords: none" where it said "find: none"; Shift+S says "columns:" where it said "select:"; the status line and Shift+Z say "order:" where they said "sort:", the word of the Order Records command.
+- **Shift+G reports Go to Record** (Control+G), the command its letter names: what it would offer next. It used to repeat the Jump Record text, which is Shift+J's answer; Shift+J now also says the column it searches.
+- **Shift+J and Shift+V say none when there is nothing,** where they said "blank" and "blank with blank"; a replacement of nothing is said as "nothing".
+- **Shift+8 is Say Order and Filter,** saying "order: ...; filter: ..." where it was Say Sort and Filter, saying "Sort:" and "(none)".
+- **Shift+H and Shift+W say "no Say command"** where they said "no question on this key".
+- **Enter Child with no child records says so** instead of opening an error dialog; the diagnosis behind it goes to the log.
+
+## 31 October 2026 -- One search syntax
+
+- **Keywords, Any Field, Jump Record and the Fields boxes share the Homer search syntax:** a word anywhere, `*` and `?`, `&` all, `|` any (with `&` read first), `!` not, quotes for exact text. A Fields box with no operator reads its field as a name, so `*.com` is a value ending in .com; its operators work as before.
+- **Jump Record goes round** past the last record, so F3 and Shift+F3 find the same records in either direction.
+
+## 31 October 2026 -- One grammar for the grid's keys
+
+- **Plain keys move, Control jumps along the column, Shift marks, Alt unmarks.** Home and End go to the first and last column of the row, as before. Control+Home and Control+End now go to the first and last row and stay in your column, where they went to the grid's corners.
+- **Marking to the first or last row is Control+Shift+Home and Control+Shift+End,** and unmarking is Alt+Control+Shift+Home and End. They were Shift+Home and Shift+End, which meant marking while plain Home and End moved along the row. In the grid, Shift+Home and Shift+End now say where marking went.
+- **First and last marked record are Control+Page Up and Control+Page Down,** beside Control+Up and Down Arrow for the previous and next. They were Control+Shift+Home and End.
+- **The screen reader table keys are unchanged:** Alt+Control with the arrows, Home, End, Page Up, Page Down and Number Pad 5.
+- **The table keys read like a screen reader's.** Checked against JAWS, NVDA and Narrator in web page tables: an Alt+Control arrow along a row says the column's name and then the cell; down a column, it says the record's look -- DbDo's row header -- and then the cell, where it used to say a row number. Each part is its own utterance. At an edge, DbDo says First row, Last row, First column or Last column, where it used to repeat the cell.
+- **Narrator's reading keys work too.** Alt+Control+Shift with Left, Up, Right and Down Arrow says the row header, the column header, the whole row and the whole column, without moving; with Number Pad 5, the cell's row and column numbers.
+- **The Key Describer names every grid key.** Control+F1, then a grid key such as Control+Home, says what it does, where it used to say no command was bound.
+- The help guide has a new section, Moving in the grid; tutorials 3 and 6 follow the new keys; and notes in the BlindCreations and JobTrail templates no longer say Control+Page Down steps between tables, which it has not done since 1.0.110.
+
 ## 29 October 2026 -- One order for columns
 
 - Look and prime now join their parts with the unit separator (character 31) instead of a vertical bar. Exports show the parts joined by a semicolon and a space; the screen joins them with a space; speech says each part on its own. DbDo converts older databases the first time it opens them for editing, and keeps maps links whole.

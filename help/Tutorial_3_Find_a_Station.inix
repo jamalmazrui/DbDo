@@ -123,7 +123,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=For a run of records, F8 starts it where I am, and Shift plus F8 completes it where I stop. Control plus A marks every record in view.
+Say=Shift plus Down Arrow marks a station and moves to the next. For a run of records, F8 starts it where I am, and Shift plus F8 completes it where I stop. Control plus A marks every record in view.
 Key=Control+A
 Hear=Marked 3 records
 Note=Confirm the wording with a live run: buildTutorials -live.

@@ -414,6 +414,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Order\
   Speak the active sort/order expression. O for Order.\
   Shift+O
+- Say Order and Filter\
+  Speak the current order and filter, or none for each. Shift+8 is the asterisk, the SQL sign for everything: sort and filter together.\
+  Shift+8
 - Say Path\
   Speak the open database's full path; press twice to show it. P for Path.\
   Alt+P
@@ -444,9 +447,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Select Columns\
   S for Say.\
   Shift+S
-- Say Sort and Filter\
-  Speak the current sort and filter, or '(none)' for each. Shift+8 is the asterisk, the SQL sign for everything: sort and filter together.\
-  Shift+8
 - Say Status\
   Speak the table, row count, filter, and sort. Z is for sleep: it wakes this behavior or puts it to sleep.\
   Shift+Z
@@ -835,8 +835,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 ### Shift
 
 - Shift+8\
-  Speak the current sort and filter, or '(none)' for each.\
-  Say Sort and Filter
+  Speak the current order and filter, or none for each.\
+  Say Order and Filter
 - Shift+A\
   Say Added
 - Shift+B\
@@ -1215,6 +1215,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Order\
   Speak the active sort/order expression.\
   Shift+O
+- Say Order and Filter\
+  Speak the current order and filter, or none for each.\
+  Shift+8
 - Say Path\
   Speak the open database's full path; press twice to show it.\
   Alt+P
@@ -1240,9 +1243,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Shift+V
 - Say Select Columns\
   Shift+S
-- Say Sort and Filter\
-  Speak the current sort and filter, or '(none)' for each.\
-  Shift+8
 - Say Status\
   Speak the table, row count, filter, and sort.\
   Shift+Z

@@ -3303,7 +3303,9 @@ namespace DbDo
             // syntax FileDir and the media player use: red & blue (both), red | blue (either), re*d
             // (wildcard). The whole record is one text, each field as the screen shows it (a link
             // as its look), so the words of & may sit in different fields.
-            string sPattern = bCaseSensitive ? sSub : sSub.ToLowerInvariant();
+            // THE HOMER SEARCH SYNTAX (31 October 2026, kit 1.95.0): Homer.Search reads the record as text, so
+            // ! (not), ? (one character), quotes and & before | now work as they do in every Homer search.
+            List<List<Search.Term>> llPattern = Search.parse(sSub);
             for (int iPos = iFrom; iPos >= 1 && iPos <= iCount; iPos += iStep)
             {
                 try
@@ -3311,8 +3313,7 @@ namespace DbDo
                     absolutePosition = iPos;
                     StringBuilder sbRecord = new StringBuilder();
                     foreach (string sCol in lFields) sbRecord.Append(getScreenValue(sCol) ?? "").Append('\n');
-                    string sRecord = bCaseSensitive ? sbRecord.ToString() : sbRecord.ToString().ToLowerInvariant();
-                    if (LbcDialog.keywordsMatch(sRecord, sPattern)) return iPos;
+                    if (Search.isMatch(sbRecord.ToString(), llPattern, false, bCaseSensitive)) return iPos;
                 }
                 catch (Exception oError)
                 {
@@ -3329,37 +3330,43 @@ namespace DbDo
         // LbcDialog.keywordsMatch. A term with no star is found literally, % and _ included.
         public string anyFieldWhere(string sText)
         {
-            string sPattern = (sText ?? "").Trim();
-            if (sPattern.Length == 0) return "";
-            char chJoin = sPattern.Contains("|") ? '|' : '&';
-            List<string> lsTerms = new List<string>();
-            foreach (string sRaw in sPattern.Split(chJoin))
-            {
-                string sTest = anyFieldTermWhere(sRaw.Trim());
-                if (sTest.Length > 0) lsTerms.Add(sTest);
-            }
-            if (lsTerms.Count == 0) return "";
-            if (lsTerms.Count == 1) return lsTerms[0];
-            return "(" + string.Join(chJoin == '|' ? " OR " : " AND ", lsTerms.ToArray()) + ")";
+            // THE HOMER SEARCH SYNTAX (31 October 2026, kit 1.95.0): each term found in some field, read as text.
+            List<string> lsCols = new List<string>();
+            foreach (string sField in getFieldNames()) lsCols.Add("CAST(\"" + sField.Replace("\"", "\"\"") + "\" AS TEXT)");
+            return searchSql(sText, lsCols, false);
         }
 
-        // anyFieldTermWhere: one keyword term found in any field, case aside.
-        private string anyFieldTermWhere(string sTerm)
+        // searchSql: a pattern in the Homer search syntax as SQL, over one or more column expressions. Each term
+        // must be found in one of them; & joins terms, | joins alternatives, ! negates a term (an empty value counts
+        // as not holding it). bName reads each expression as a name, so a wildcard term must match all of it -- the
+        // rule for a field box -- where Any Field reads text. A term with no wildcard is a case-aside instr, as
+        // before; one with a wildcard is LIKE, its % and _ escaped and * and ? turned into them.
+        public string searchSql(string sPattern, List<string> lsColExprs, bool bName)
         {
-            if (string.IsNullOrEmpty(sTerm)) return "";
+            List<List<Search.Term>> llPattern = Search.parse(sPattern);
+            if (llPattern.Count == 0 || lsColExprs == null || lsColExprs.Count == 0) return "";
             string sLower = caseFoldFunction();
-            List<string> lsTests = new List<string>();
-            string sTest;
-            if (sTerm.IndexOf('*') < 0)
-                sTest = "instr(" + sLower + "(CAST({0} AS TEXT)), " + sLower + "('" + sTerm.Replace("'", "''") + "')) > 0";
-            else
+            List<string> lsAlternatives = new List<string>();
+            foreach (List<Search.Term> lTerms in llPattern)
             {
-                string sLike = sTerm.Replace("\\", "\\\\").Replace("%", "\\%").Replace("_", "\\_").Replace('*', '%');
-                sTest = sLower + "(CAST({0} AS TEXT)) LIKE " + sLower + "('%" + sLike.Replace("'", "''") + "%') ESCAPE '\\'";
+                List<string> lsAll = new List<string>();
+                foreach (Search.Term t in lTerms)
+                {
+                    List<string> lsAny = new List<string>();
+                    foreach (string sExpr in lsColExprs)
+                    {
+                        string sValue = sLower + "(coalesce(" + sExpr + ", ''))";
+                        if (!t.bWild)
+                            lsAny.Add("instr(" + sValue + ", " + sLower + "('" + t.sText.Replace("'", "''") + "')) > 0");
+                        else
+                            lsAny.Add(sValue + " LIKE " + sLower + "('" + Search.likePattern(t, bName).Replace("'", "''") + "') ESCAPE '\\'");
+                    }
+                    string sTest = "(" + string.Join(" OR ", lsAny.ToArray()) + ")";
+                    lsAll.Add(t.bNot ? "NOT " + sTest : sTest);
+                }
+                lsAlternatives.Add(lsAll.Count == 1 ? lsAll[0] : "(" + string.Join(" AND ", lsAll.ToArray()) + ")");
             }
-            foreach (string sField in getFieldNames())
-                lsTests.Add(sTest.Replace("{0}", "\"" + sField.Replace("\"", "\"\"") + "\""));
-            return lsTests.Count == 0 ? "" : "(" + string.Join(" OR ", lsTests.ToArray()) + ")";
+            return lsAlternatives.Count == 1 ? lsAlternatives[0] : "(" + string.Join(" OR ", lsAlternatives.ToArray()) + ")";
         }
 
         // fieldConditionSql: ONE FIELD'S FILTER ENTRY AS SQL (19 October 2026). DbDialog built its filters as a SQL
@@ -3382,6 +3389,23 @@ namespace DbDo
             foreach (string sCand in new string[] { ">=", "<=", "!%", "!=", "<>", "=", ">", "<", "%" })
                 if (sV.StartsWith(sCand)) { sOp = sCand; sV = sV.Substring(sCand.Length).Trim(); break; }
             if (sV.Length == 0) return "";
+            // A FIELD BOX TAKES THE HOMER SEARCH SYNTAX (31 October 2026, kit 1.95.0) when no operator starts it:
+            // *.com, smith | jones, !draft, "a & b". The field is read as a name, so a wildcard must match all of
+            // it; a plain value is still the case-aside contains it has been since 29 October. A link field is read
+            // by its linked look and prime, as contains reads it.
+            if (sOp == "" && sV.IndexOfAny(new char[] { '&', '|', '!', '*', '?', '"' }) >= 0)
+            {
+                string sColText = "CAST(\"" + sField.Replace("\"", "\"\"") + "\" AS TEXT)";
+                List<string> lsExprs = new List<string>();
+                lsExprs.Add(sColText);
+                foreach (string sPart in new string[] { "look", "prime" })
+                {
+                    string sLinked = linkLookSql(sField, sCurrentTable, sPart);
+                    if (sLinked.Length > 0) lsExprs.Add(sLinked);
+                }
+                sSpoken = sField + " matches " + sV;
+                return searchSql(sV, lsExprs, true);
+            }
             if (sOp == "") sOp = "%";   // a plain value is a case-insensitive substring in every field (29 Oct 2026)
             if (sOp == "!=") sOp = "<>";
             string sCol = "\"" + sField.Replace("\"", "\"\"") + "\"";
@@ -6762,6 +6786,25 @@ namespace DbDo
             }
             catch (Exception) { }
             try { invokeSql("PRAGMA foreign_keys=OFF", null); } catch { }
+            // TRIGGERS ON OTHER TABLES (1 November 2026, from Jamal's DbDo logs). Another table's trigger can
+            // name this one in its body -- RadioTrail's trg_stations_maps and lookups' trg_lookups_maps name
+            // maps. Modern SQLite re-reads every trigger during ALTER TABLE ... RENAME, and between DROP and
+            // RENAME this table does not exist, so the rename failed with "error in trigger trg_stations_maps:
+            // no such table: main.maps", and the 29 October part-separator upgrade of maps failed at every
+            // start. legacy_alter_table is SQLite's own setting for exactly this step: the rename does not
+            // re-read other triggers, which name the table correctly once it is back. Read, set, restore.
+            string sLegacyWas = "OFF";
+            try
+            {
+                int iLegacyFound;
+                foreach (string[] aLegacy in queryRowsSql("PRAGMA legacy_alter_table", 1, out iLegacyFound))
+                {
+                    if (aLegacy != null && aLegacy.Length > 0) sLegacyWas = (aLegacy[0] == "1") ? "ON" : "OFF";
+                    break;
+                }
+            }
+            catch (Exception) { }
+            try { invokeSql("PRAGMA legacy_alter_table=ON", null); } catch { }
 
             bool bInTrans = false;
             try
@@ -6794,10 +6837,12 @@ namespace DbDo
                 try { invokeSql("DROP TABLE IF EXISTS \"" + sNewTable + "\"", null); } catch { }
                 try { invokeSql("DROP TABLE IF EXISTS " + sHelper, null); } catch { }
                 try { invokeSql("PRAGMA foreign_keys=" + sFkWas, null); } catch { }
+                try { invokeSql("PRAGMA legacy_alter_table=" + sLegacyWas, null); } catch { }
                 try { DbDoLog.write("rebuildGeneratedColumns failed for '" + sTable + "': " + ex.Message); } catch { }
                 return false;
             }
             try { invokeSql("PRAGMA foreign_keys=" + sFkWas, null); } catch { }
+            try { invokeSql("PRAGMA legacy_alter_table=" + sLegacyWas, null); } catch { }
             try { DbDoLog.write("Rebuilt look/prime for '" + sTable + "'. maps re-pointed=" + iMapsUpdated); } catch { }
             return true;
         }
@@ -13472,9 +13517,10 @@ namespace DbDo
 
         // KeyPreview=true routes every keystroke through this handler
         // BEFORE the focused control sees it. We use it as a backstop
-        // for the Control+arrow / Control+Home/End mark-navigation
-        // chords and the Shift+Home / Shift+End / Alt+Shift+Home /
-        // Alt+Shift+End bulk-mark chords, because either family can
+        // for the grid keys -- Control+Home/End, Control+arrows and the
+        // Control+Shift+Home/End and Alt+Control+Shift+Home/End bulk-mark
+        // chords (the grid keyboard model of 31 October 2026, explained
+        // at the top of formKeyDown) -- because these chords can
         // be intercepted by the MenuStrip on its way through normal
         // dispatch. Routing them here first guarantees they get to
         // the form-level handlers.
@@ -13496,62 +13542,59 @@ namespace DbDo
         private void formKeyDown(object sender, KeyEventArgs evArgs)
         {
             Keys key = evArgs.KeyData;
-            // Db cursor extremes (v1.0.108 redesign): Control+Home
-            // moves the db cursor to the first column of the first
-            // row; Control+End to the last column of the last row --
-            // the universal grid-corner convention (Excel, Access,
-            // DataGridView, WPF). The marked-row first/last jumps
-            // that previously owned this pair (the tagged-nav
-            // convention) moved to Control+Shift+Home/End below;
-            // Control+Up/Down remain previous/next marked. The ListView's native handling of these chords
-            // is a no-op in our MultiSelect=false config, so nothing
-            // visible is stolen.
+            // THE GRID KEYBOARD MODEL (31 October 2026, agreed with Jamal by voice). One grammar:
+            // plain keys move within what you are on, Control jumps along the column, Shift
+            // marks along the same jump, Alt reverses a mark, and Alt+Control keeps its
+            // usual screen reader table meanings (handled in ProcessCmdKey).
+            //   Home / End                       first / last column of this row
+            //   Control+Home / Control+End       first / last row, in this column
+            //   Control+Shift+Home / End         mark from here to the first / last row
+            //   Alt+Control+Shift+Home / End     unmark from here to the first / last row
+            //   Control+Up / Control+Down        previous / next marked record
+            //   Control+PageUp / PageDown        first / last marked record
+            // WHY. Control+Home and Control+End went to the grid's corners, which no data
+            // task needs more than the top or bottom of the column you are reading; the
+            // corners stay on Alt+Control+Home and End. Shift+Home and Shift+End marked to
+            // the first and last row while plain Home and End moved along the row, so the
+            // same key meant two directions; marking now rides on Control+Home and End,
+            // whose direction it shares. First and last marked moved to Control+PageUp and
+            // PageDown: Page is the bigger jump of the kind Control+Up and Down make.
+            // ROLLBACK: the bindings of 1.0.316 are in git and in the History of 31 October 2026.
             if (key == (Keys.Control | Keys.Home))
-            { evArgs.Handled = true; evArgs.SuppressKeyPress = true; virtMoveTo(1, 0); return; }
+            { evArgs.Handled = true; evArgs.SuppressKeyPress = true; virtMoveTo(1, iVirtualCol); return; }
             if (key == (Keys.Control | Keys.End))
-            {
-                evArgs.Handled = true; evArgs.SuppressKeyPress = true;
-                virtMoveTo((db != null && db.hasRecordset()) ? db.recordCount : 1,
-                    (grid != null) ? grid.Columns.Count - 1 : 0);
-                return;
-            }
+            { evArgs.Handled = true; evArgs.SuppressKeyPress = true; virtMoveTo(((db != null && db.hasRecordset()) ? db.recordCount : 1), iVirtualCol); return; }
             if (key == (Keys.Control | Keys.Shift | Keys.Home))
-            { evArgs.Handled = true; evArgs.SuppressKeyPress = true; jumpToMarkedRow(MarkJump.First);    return; }
+            { evArgs.Handled = true; evArgs.SuppressKeyPress = true; bulkMark(BulkMark.MarkToStart);   return; }
             if (key == (Keys.Control | Keys.Shift | Keys.End))
-            { evArgs.Handled = true; evArgs.SuppressKeyPress = true; jumpToMarkedRow(MarkJump.Last);     return; }
+            { evArgs.Handled = true; evArgs.SuppressKeyPress = true; bulkMark(BulkMark.MarkToEnd);     return; }
+            if (key == (Keys.Alt | Keys.Control | Keys.Shift | Keys.Home))
+            { evArgs.Handled = true; evArgs.SuppressKeyPress = true; bulkMark(BulkMark.UnmarkToStart); return; }
+            if (key == (Keys.Alt | Keys.Control | Keys.Shift | Keys.End))
+            { evArgs.Handled = true; evArgs.SuppressKeyPress = true; bulkMark(BulkMark.UnmarkToEnd);   return; }
             if (key == (Keys.Control | Keys.Up))
             { evArgs.Handled = true; evArgs.SuppressKeyPress = true; jumpToMarkedRow(MarkJump.Previous); return; }
             if (key == (Keys.Control | Keys.Down))
             { evArgs.Handled = true; evArgs.SuppressKeyPress = true; jumpToMarkedRow(MarkJump.Next);     return; }
-            // Bare Home/End: db cursor column extremes within the
-            // current row (first / last column), per the WPF DataGrid
-            // and Access row-extremes convention. Gated on grid focus
-            // so text controls elsewhere keep their native Home/End.
-            // PageUp/PageDown are deliberately NOT handled anywhere:
-            // the ListView's native paging moves the focused row a
-            // screenful while the virtual cursor column, stored on
-            // the grid itself, is untouched -- the column-preservation
-            // principle for free.
+            // Bare Home/End: db cursor column extremes within the current row (first / last
+            // column), gated on grid focus so text controls elsewhere keep their own Home and
+            // End. PageUp and PageDown are left to the list view, which moves a screenful
+            // and keeps the cursor's column.
             if (key == Keys.Home && grid != null && grid.Focused)
             { evArgs.Handled = true; evArgs.SuppressKeyPress = true; virtMoveTo(iVirtualRow, 0); return; }
             if (key == Keys.End && grid != null && grid.Focused)
             { evArgs.Handled = true; evArgs.SuppressKeyPress = true; virtMoveTo(iVirtualRow, (grid.Columns.Count > 0) ? grid.Columns.Count - 1 : 0); return; }
-
-            // Shift+Home / Shift+End / Alt+Shift+Home / Alt+Shift+End
-            // for bulk marking. Shift+Home marks every row from the
-            // first up to and including the current; Shift+End marks
-            // every row from the current to the last. Alt+Shift+Home
-            // and Alt+Shift+End unmark the same spans. The
-            // ListView's MultiSelect=false config makes Shift+Home/End
-            // a no-op natively, so we are not stealing anything.
-            if (key == (Keys.Shift | Keys.Home))
-            { evArgs.Handled = true; evArgs.SuppressKeyPress = true; bulkMark(BulkMark.MarkToStart);   return; }
-            if (key == (Keys.Shift | Keys.End))
-            { evArgs.Handled = true; evArgs.SuppressKeyPress = true; bulkMark(BulkMark.MarkToEnd);     return; }
-            if (key == (Keys.Alt | Keys.Shift | Keys.Home))
-            { evArgs.Handled = true; evArgs.SuppressKeyPress = true; bulkMark(BulkMark.UnmarkToStart); return; }
-            if (key == (Keys.Alt | Keys.Shift | Keys.End))
-            { evArgs.Handled = true; evArgs.SuppressKeyPress = true; bulkMark(BulkMark.UnmarkToEnd);   return; }
+            // THE RETIRED MARKING KEYS SAY WHERE MARKING WENT. Shift+Home and Shift+End, and
+            // Alt+Shift+Home and End, marked and unmarked to the first and last row through
+            // 1.0.316. Left to the list view they would move to the top or bottom without a
+            // word, so in the grid each says its new key and does nothing else.
+            if (grid != null && grid.Focused)
+            {
+                if (key == (Keys.Shift | Keys.Home) || key == (Keys.Shift | Keys.End))
+                { evArgs.Handled = true; evArgs.SuppressKeyPress = true; Say.say("Marking to the " + ((key & Keys.KeyCode) == Keys.Home ? "first" : "last") + " row is Control+Shift+" + ((key & Keys.KeyCode) == Keys.Home ? "Home" : "End")); return; }
+                if (key == (Keys.Alt | Keys.Shift | Keys.Home) || key == (Keys.Alt | Keys.Shift | Keys.End))
+                { evArgs.Handled = true; evArgs.SuppressKeyPress = true; Say.say("Unmarking to the " + ((key & Keys.KeyCode) == Keys.Home ? "first" : "last") + " row is Alt+Control+Shift+" + ((key & Keys.KeyCode) == Keys.Home ? "Home" : "End")); return; }
+            }
 
             // Mark-and-move chords for the data list. The user can
             // mark or unmark the current record and step to the next
@@ -14072,12 +14115,12 @@ namespace DbDo
             // foreign-key relationship readout is still available via
             // Say Related (Shift+R), which is a separate command with
             // a clearer name.
-            // Shift+8 (the asterisk key) -- Say Sort and Filter. JAWS
+            // Shift+8 (the asterisk key) -- Say Order and Filter. JAWS
             // calls Shift+8 "asterisk"; the symbol evokes "everything
             // about how the data is being shaped" which is what this
             // command reports. Numpad-asterisk (Keys.Multiply) is a
             // hidden alias for users with a numeric keypad.
-            miSaySaySortFilter   = addItem(miSay, "Say Sort and Filter", "Say Sort Filter", Keys.Shift | Keys.D8,         saySaySortFilter);
+            miSaySaySortFilter   = addItem(miSay, "Say Order and Filter", "Say Order Filter", Keys.Shift | Keys.D8,         saySaySortFilter);
             // Alt+Delete: JAWS-style "say cursor position." Speaks the
             // current virtual column's header followed by the current
             // (1-based) row number. The single most useful "where am
@@ -14399,7 +14442,7 @@ namespace DbDo
             // it. Edit Config keeps its menu item and its own key; a second key
             // for it is not worth the one key the whole suite agrees on.
 
-            // Numpad asterisk: alias for Say Sort and Filter, for
+            // Numpad asterisk: alias for Say Order and Filter, for
             // users with a numpad. The primary chord is Shift+8 on
             // the main row; this lets the same command fire from
             // Numpad-* without the user reaching across the keyboard.
@@ -14648,7 +14691,7 @@ namespace DbDo
             add("Copy Log",           "Copy the session log to the clipboard as a file, ready to paste as an attachment", "");
             add("Say Clipboard",      "Speak the current Windows clipboard text",
                 "Plain text only; non-text and empty clipboards announce that fact rather than going silent. Double-press opens the read-only memo dialog for line-by-line review of long pasted content.");
-            add("Say Sort Filter",     "Speak the current sort and filter, or '(none)' for each",
+            add("Say Order Filter",    "Speak the current order and filter, or none for each",
                 "Single-press speaks; double-press opens the same text in the multi-line dialog. Useful when the filter or sort string is long.");
             add("Filter Records",      "Show only the records that hold some text in any field, or that meet a condition on each field", "Control+F. A list of choices, its first selected, so Enter takes it; each begins with its own letter. Any field contains text asks for the text and keeps the records where some field, read as text, contains it, case aside (for English letters). Fields asks Main, Standard or All, then opens a form with a box per field in DbDo's natural order: a value on its own matches anywhere in the field, case aside; = in front means is, and a symbol in front compares (> >= < <= !=); dates are typed as year-month-day; several boxes must all match. Marked and Unmarked take the records you have marked, or the rest. With a filter in force the list adds Clear, Edit (the field filter), Narrow (add a field condition) and, for a field filter, Widen. A search that finds nothing leaves the view as it was.");
             add("Filter Regex",        "Filter to rows whose current column matches a regular expression (SQLean REGEXP)",
@@ -15748,38 +15791,82 @@ namespace DbDo
             string sHeader = grid.Columns[iCol].Text;
             string sValue = speakableCellText(iRow, iCol);
 
-            // Build the announcement per JAWS table-reading conventions:
-            //   horizontal move (col changed only): header + value
-            //   vertical move (row changed only):   row label + value
-            //   corner jump (both changed):         row + header + value
-            //   no change (refresh, Numpad5):       header + value
-            // The "Row N" label is the bare row number; tables don't
-            // have row headers per se. JAWS speaks the row index in
-            // a similar context.
-            string sSpoken;
-            if (bRowChanged && bColChanged)
+            // THE SCREEN READERS' TABLE MODEL (31 October 2026, researched against JAWS,
+            // NVDA and Narrator in HTML tables). Moving along a row, they say the new column's
+            // header and then the cell; moving down a column, the row's header and then the
+            // cell; a jump that changes both says both. DbDo's row header is the record's look
+            // -- the fields that name it -- and it is left out when the cell is itself one of
+            // those fields, which would say the same words twice. A table with no look uses
+            // "row" and the row's number. Each part is its own utterance, the Homer rule, so
+            // the reader gives each its own phrase.
+            string sRowLabel = bRowChanged ? rowLabel(iRow, sHeader) : "";
+            if (bRowChanged && bColChanged) Say.say(sRowLabel, sHeader, sValue);
+            else if (bRowChanged) Say.say(sRowLabel, sValue);
+            else Say.say(sHeader, sValue);
+        }
+
+        // rowLabel: what a screen reader calls the row header -- the record's look, read
+        // from the current record (virtSyncListSelection has just moved there) -- or "" when
+        // the cell under the cursor is one of the look's fields, or "row N" when the table
+        // has no look.
+        private string rowLabel(int iRow, string sHeader)
+        {
+            try
             {
-                // Row-crossing column move (Tab wrap, corner jumps):
-                // header first, then "row N", then the value -- the
-                // same pattern as Say Cell, so every cell read leads
-                // with its most distinguishing token.
-                sSpoken = sHeader + " row " + iRow + ": " + sValue;
+                if (db.hasField("look"))
+                {
+                    List<string> lLook = db.lParseGeneratedFields(db.currentTable, "look");
+                    foreach (string sField in lLook)
+                        if (string.Equals(sField, sHeader, StringComparison.OrdinalIgnoreCase)) return "";
+                    string sLook = db.getScreenValue("look");
+                    if (!string.IsNullOrEmpty(sLook)) return sLook;
+                }
             }
-            else if (bColChanged)
+            catch { }
+            return "row " + iRow;
+        }
+
+        // virtStep: one cell up, down, left or right for the Alt+Control arrows. At the
+        // table's edge the cursor stays and DbDo says which edge, as screen readers do
+        // ("edge of table" in NVDA, "bottom of column" in JAWS), in the words DbDo's own
+        // Left and Right Arrow already use.
+        private void virtStep(int iRowStep, int iColStep)
+        {
+            if (db == null || !db.hasRecordset() || db.recordCount == 0) { Say.say("No rows"); return; }
+            if (grid == null || grid.Columns.Count == 0) { Say.say("No columns"); return; }
+            int iRow = iVirtualRow + iRowStep;
+            int iCol = iVirtualCol + iColStep;
+            if (iRow < 1) { Say.say("First row"); return; }
+            if (iRow > db.recordCount) { Say.say("Last row"); return; }
+            if (iCol < 0) { Say.say("First column"); return; }
+            if (iCol >= grid.Columns.Count) { Say.say("Last column"); return; }
+            virtMoveTo(iRow, iCol);
+        }
+
+        // virtSayPosition: the cell's coordinates, as Narrator's Alt+Control+Shift+Number
+        // Pad 5 says them.
+        private void virtSayPosition()
+        {
+            if (db == null || !db.hasRecordset() || db.recordCount == 0 || grid == null || grid.Columns.Count == 0)
+            { Say.say("No rows"); return; }
+            Say.say("row " + iVirtualRow + " of " + db.recordCount, "column " + (iVirtualCol + 1) + " of " + grid.Columns.Count);
+        }
+
+        // virtSayRow: every shown column of the current record, header and value, one
+        // utterance each -- Narrator's Read Current Row.
+        private void virtSayRow()
+        {
+            if (db == null || !db.hasRecordset() || db.recordCount == 0 || grid == null) { Say.say("No rows"); return; }
+            List<string> lParts = new List<string>();
+            // An empty field earns no words: its header is left out with it.
+            for (int iCol = 0; iCol < grid.Columns.Count; iCol++)
             {
-                sSpoken = sHeader + ": " + sValue;
+                string sValue = speakableCellText(iVirtualRow, iCol);
+                if (string.IsNullOrEmpty(sValue)) continue;
+                lParts.Add(grid.Columns[iCol].Text);
+                lParts.Add(sValue);
             }
-            else if (bRowChanged)
-            {
-                sSpoken = "Row " + iRow + ": " + sValue;
-            }
-            else
-            {
-                // No change -- happens on Numpad5 single-press, or
-                // when the user hits the same arrow at the edge.
-                sSpoken = sHeader + ": " + sValue;
-            }
-            Say.say(sSpoken);
+            Say.say(lParts.ToArray());
         }
 
         // virtSayCurrent: announce the current virtual cell. On a
@@ -16173,7 +16260,7 @@ namespace DbDo
 
             // Left status: filter and sort indicators when active.
             string sFilter = string.IsNullOrEmpty(db.filter) ? "" : "filter: " + db.filter;
-            string sSort = string.IsNullOrEmpty(db.sort) ? "" : "sort: " + db.sort;
+            string sSort = string.IsNullOrEmpty(db.sort) ? "" : "order: " + db.sort;
             string sViewState = "";
             if (sFilter.Length > 0 && sSort.Length > 0) sViewState = sFilter + "  " + sSort;
             else if (sFilter.Length > 0) sViewState = sFilter;
@@ -16353,16 +16440,14 @@ namespace DbDo
         // anywhere in the form, including from inside the data list:
         //   - Control+Tab        => cycle to next previously-opened table
         //   - Control+Shift+Tab  => cycle to previous previously-opened table
-        //   - Control+Page Down  => same as Control+Tab
-        //   - Control+Page Up    => same as Control+Shift+Tab
-        //   - Control+Home       => first marked row
-        //   - Control+End        => last marked row
+        //   - Control+Page Up    => first marked row
+        //   - Control+Page Down  => last marked row
         //   - Control+Up         => previous marked row
         //   - Control+Down       => next marked row
-        //   - Shift+Home         => mark from first row through current
-        //   - Shift+End          => mark from current row through last
-        //   - Alt+Shift+Home     => unmark from first row through current
-        //   - Alt+Shift+End      => unmark from current row through last
+        //   - Control+Shift+Home => mark from first row through current
+        //   - Control+Shift+End  => mark from current row through last
+        //   - Alt+Control+Shift+Home => unmark from first row through current
+        //   - Alt+Control+Shift+End  => unmark from current row through last
         //
         // The Control+ family for marked-row navigation matches
         // The convention for tagged-record nav. Our ListView is
@@ -16373,9 +16458,9 @@ namespace DbDo
         // the focus rectangle without changing the selected row --
         // invisible to a screen reader since the selection didn't
         // change. So commandeering these chords doesn't conflict
-        // with anything the user can observe. Shift+Home / Shift+End
+        // with anything the user can observe. Control+Shift+Home/End
         // similarly need MultiSelect=true to do anything natively,
-        // and Alt+Shift+ chords have no native ListView meaning.
+        // and Alt+Control+Shift chords have no native ListView meaning.
         //
         // Tables without a 'marked' column ignore mark-related
         // keystrokes with a brief live-region notice. Bulk-mark
@@ -16423,6 +16508,9 @@ namespace DbDo
                     ToolStripMenuItem miDesc;
                     if (dLocalKeyToMenu.TryGetValue(keyData, out miDesc))
                         return KeyMap.dispatchMenuItem(miDesc, keyData);
+                    string sSummary;
+                    if (dChordToSummary.TryGetValue(KeyMap.friendlyKey(keyData), out sSummary))
+                    { Say.say(KeyMap.friendlyKey(keyData) + ". " + sSummary); return true; }
                     Say.say(KeyMap.friendlyKey(keyData)
                         + ". No DbDo command is bound to this key.");
                     return true;
@@ -16434,9 +16522,9 @@ namespace DbDo
             // Shift plus a letter is a question, and a question that produces
             // silence cannot be told from a key that did not register, a
             // mishearing, or a program that has stopped. The bound letters
-            // answer with their value; the free ones say so. Six letters have no
-            // question yet -- and a person walking the alphabet to learn the
-            // layer now hears that, rather than wondering.
+            // answer with their value; the free ones -- H and W, as of 1 November
+            // 2026 -- say so, so a person walking the alphabet hears that rather
+            // than wondering.
             if ((keyData & (Keys.Control | Keys.Alt)) == 0
                 && (keyData & Keys.Shift) == Keys.Shift)
             {
@@ -16449,7 +16537,7 @@ namespace DbDo
                     && !dLocalKeyToMenu.ContainsKey(keyData)
                     && !KeyMap.dKeyToMenu.ContainsKey(keyData))
                 {
-                    Say.say("Shift+" + kLetter.ToString() + ": no question on this key");
+                    Say.say("Shift+" + kLetter.ToString() + ": no Say command");
                     return true;
                 }
             }
@@ -16475,13 +16563,32 @@ namespace DbDo
                 return true;
             }
             if (keyData == (Keys.Alt | Keys.Control | Keys.Right))
-            { virtMoveTo(iVirtualRow, iVirtualCol + 1); return true; }
+            { virtStep(0, 1); return true; }
             if (keyData == (Keys.Alt | Keys.Control | Keys.Left))
-            { virtMoveTo(iVirtualRow, iVirtualCol - 1); return true; }
+            { virtStep(0, -1); return true; }
             if (keyData == (Keys.Alt | Keys.Control | Keys.Down))
-            { virtMoveTo(iVirtualRow + 1, iVirtualCol); return true; }
+            { virtStep(1, 0); return true; }
             if (keyData == (Keys.Alt | Keys.Control | Keys.Up))
-            { virtMoveTo(iVirtualRow - 1, iVirtualCol); return true; }
+            { virtStep(-1, 0); return true; }
+            // NARRATOR'S READING KEYS (31 October 2026): Alt+Control+Shift with an arrow
+            // reads without moving -- Left the row's header (the look), Up the column's
+            // header, Right the whole row, Down the whole column -- and with Number Pad 5
+            // the cell's row and column.
+            if (keyData == (Keys.Alt | Keys.Control | Keys.Shift | Keys.Left))
+            {
+                string sLabel = (db != null && db.hasRecordset() && db.recordCount > 0) ? rowLabel(iVirtualRow, "") : "";
+                Say.say(sLabel.Length > 0 ? sLabel : "No rows");
+                return true;
+            }
+            if (keyData == (Keys.Alt | Keys.Control | Keys.Shift | Keys.Up))
+            {
+                Say.say((grid != null && iVirtualCol >= 0 && iVirtualCol < grid.Columns.Count) ? grid.Columns[iVirtualCol].Text : "No columns");
+                return true;
+            }
+            if (keyData == (Keys.Alt | Keys.Control | Keys.Shift | Keys.Right)) { virtSayRow(); return true; }
+            if (keyData == (Keys.Alt | Keys.Control | Keys.Shift | Keys.Down)) { saySayColumnAll(this, EventArgs.Empty); return true; }
+            if (keyData == (Keys.Alt | Keys.Control | Keys.Shift | Keys.Clear) || keyData == (Keys.Alt | Keys.Control | Keys.Shift | Keys.NumPad5))
+            { virtSayPosition(); return true; }
             if (keyData == (Keys.Alt | Keys.Control | Keys.PageDown))
             {
                 int iLastRow = (db != null && db.hasRecordset()) ? db.recordCount : 1;
@@ -16500,84 +16607,20 @@ namespace DbDo
             if (keyData == (Keys.Alt | Keys.Control | Keys.NumPad5))
             { virtSayCurrent((int)keyData); return true; }
 
-            // Control+PageDown / Control+PageUp (v1.0.110): move the
-            // db cursor to the last / first row of the CURRENT
-            // column -- the column-preserving vertical extremes,
-            // standard chords for the Alt+Control+PageDown/PageUp
-            // pair that remains for screen-reader-layer symmetry.
-            // (These keys were previously aliases for the visited-
-            // table ring, whose primary Alt+F6 / Alt+Shift+F6
-            // bindings remain.)
-            if (keyData == (Keys.Control | Keys.PageDown))
-            {
-                virtMoveTo((db != null && db.hasRecordset()) ? db.recordCount : 1, iVirtualCol);
-                return true;
-            }
-            if (keyData == (Keys.Control | Keys.PageUp))
-            {
-                virtMoveTo(1, iVirtualCol);
-                return true;
-            }
-            // Control+Home/End/Up/Down for marked-row navigation.
-            // The tagged-record convention. The
-            // formKeyDown handler is the primary intercept; this
-            // ProcessCmdKey hook is a safety backstop because the
-            // menu strip can sometimes consume modifier+key chords
-            // during the routing dance.
-            if (keyData == (Keys.Control | Keys.Home))
-            {
-                virtMoveTo(1, 0);
-                return true;
-            }
-            if (keyData == (Keys.Control | Keys.End))
-            {
-                virtMoveTo((db != null && db.hasRecordset()) ? db.recordCount : 1,
-                    (grid != null) ? grid.Columns.Count - 1 : 0);
-                return true;
-            }
-            if (keyData == (Keys.Control | Keys.Shift | Keys.Home))
-            {
-                jumpToMarkedRow(MarkJump.First);
-                return true;
-            }
-            if (keyData == (Keys.Control | Keys.Shift | Keys.End))
-            {
-                jumpToMarkedRow(MarkJump.Last);
-                return true;
-            }
-            if (keyData == (Keys.Control | Keys.Up))
-            {
-                jumpToMarkedRow(MarkJump.Previous);
-                return true;
-            }
-            if (keyData == (Keys.Control | Keys.Down))
-            {
-                jumpToMarkedRow(MarkJump.Next);
-                return true;
-            }
-
-            // Bulk-mark span chords. Same backstop pattern as the
-            // marked-nav block above.
-            if (keyData == (Keys.Shift | Keys.Home))
-            {
-                bulkMark(BulkMark.MarkToStart);
-                return true;
-            }
-            if (keyData == (Keys.Shift | Keys.End))
-            {
-                bulkMark(BulkMark.MarkToEnd);
-                return true;
-            }
-            if (keyData == (Keys.Alt | Keys.Shift | Keys.Home))
-            {
-                bulkMark(BulkMark.UnmarkToStart);
-                return true;
-            }
-            if (keyData == (Keys.Alt | Keys.Shift | Keys.End))
-            {
-                bulkMark(BulkMark.UnmarkToEnd);
-                return true;
-            }
+            // THE GRID KEYBOARD MODEL (31 October 2026): the same bindings as formKeyDown, which
+            // explains them. This is the backstop, since the menu strip can consume
+            // modifier+key chords before KeyDown sees them. Control+PageUp and PageDown are
+            // first and last marked record; they reach only here, never formKeyDown.
+            if (keyData == (Keys.Control | Keys.PageUp))   { jumpToMarkedRow(MarkJump.First); return true; }
+            if (keyData == (Keys.Control | Keys.PageDown)) { jumpToMarkedRow(MarkJump.Last);  return true; }
+            if (keyData == (Keys.Control | Keys.Home))     { virtMoveTo(1, iVirtualCol); return true; }
+            if (keyData == (Keys.Control | Keys.End))      { virtMoveTo(((db != null && db.hasRecordset()) ? db.recordCount : 1), iVirtualCol); return true; }
+            if (keyData == (Keys.Control | Keys.Shift | Keys.Home))               { bulkMark(BulkMark.MarkToStart);   return true; }
+            if (keyData == (Keys.Control | Keys.Shift | Keys.End))                { bulkMark(BulkMark.MarkToEnd);     return true; }
+            if (keyData == (Keys.Alt | Keys.Control | Keys.Shift | Keys.Home))    { bulkMark(BulkMark.UnmarkToStart); return true; }
+            if (keyData == (Keys.Alt | Keys.Control | Keys.Shift | Keys.End))     { bulkMark(BulkMark.UnmarkToEnd);   return true; }
+            if (keyData == (Keys.Control | Keys.Up))       { jumpToMarkedRow(MarkJump.Previous); return true; }
+            if (keyData == (Keys.Control | Keys.Down))     { jumpToMarkedRow(MarkJump.Next);     return true; }
 
             // PHASE B (19 October 2026): THE KIT'S ROUTER DECIDES. Its equivalence report on
             // Jamal's computer found all 153 of DbDo's keys resolving to the same command.
@@ -16735,9 +16778,10 @@ namespace DbDo
         // current to the last (MarkToEnd). UnmarkToStart and
         // UnmarkToEnd do the same in reverse, setting marked FALSE.
         //
-        // The chord family follows the tagged-record convention:
-        // Shift+Home to tag from start, Shift+End to tag to end,
-        // Alt+Shift+Home / Alt+Shift+End to untag the same spans.
+        // The chords (31 October 2026): Control+Shift+Home marks to the
+        // first row, Control+Shift+End to the last; Alt+Control+Shift+Home
+        // and End unmark the same spans. Shift rides on the Control+Home
+        // and End jump whose direction it shares.
         private enum BulkMark { MarkToStart, MarkToEnd, UnmarkToStart, UnmarkToEnd }
 
         // Apply a bulk-marking operation across a contiguous span
@@ -17093,7 +17137,7 @@ namespace DbDo
             sb.Append(db.currentTable ?? "(no table)");
             sb.Append(" row ").Append(db.absolutePosition).Append(" of ").Append(db.recordCount);
             if (db.filter.Length > 0) sb.Append("; filter: ").Append(db.filter);
-            if (db.sort.Length > 0) sb.Append("; sort: ").Append(db.sort);
+            if (db.sort.Length > 0) sb.Append("; order: ").Append(db.sort);
             speakOrShow("Status", "status: " + sb.ToString(), 101);
         }
 
@@ -17134,12 +17178,15 @@ namespace DbDo
         // Order; reveals the current state of the column-substring
         // search target. Reports a clear no-state message when the
         // user has not yet performed a Jump.
+        // EACH SAY COMMAND SPEAKS ITS OWN COMMAND'S WORD (1 November 2026, from Jamal's walk through the
+        // Shift letters). Shift+G said the Jump Record text, as Shift+J does, under the old word "goto", while
+        // Go to Record (Control+G) -- the command the letter names -- was never reported. It now says what Go to
+        // Record would offer next: its last entry.
         private void saySayGoto(object sender, EventArgs evArgs)
         {
-            if (string.IsNullOrEmpty(sLastJumpSubstring))
-            { Say.say("goto: none"); return; }
-            string sCol = string.IsNullOrEmpty(sLastJumpColumn) ? "(any column)" : sLastJumpColumn;
-            speakOrShow("Goto", "goto: " + sLastJumpSubstring + " in " + sCol, 127);
+            string sLast = SearchHistory.lastText(SearchHistory.SectionGoTo);
+            if (string.IsNullOrEmpty(sLast)) { Say.say("go to: none"); return; }
+            speakOrShow("Go to", "go to: " + sLast, 127);
         }
 
         // saySayYield: Alt+Y. Speak the record count and any active
@@ -17192,8 +17239,12 @@ namespace DbDo
         // questions.
         private void saySayJump(object sender, EventArgs evArgs)
         {
-            string sText = SearchHistory.lastText(SearchHistory.SectionJump);
-            speakOrShow("Jump", "jump: " + sayableValue(sText), 128);
+            // The column Jump Record searched is part of the answer (1 November 2026); it was on Shift+G.
+            string sText = sLastJumpSubstring;
+            if (string.IsNullOrEmpty(sText)) sText = SearchHistory.lastText(SearchHistory.SectionJump);
+            if (string.IsNullOrEmpty(sText)) { Say.say("jump: none"); return; }
+            string sJumpCol = string.IsNullOrEmpty(sLastJumpColumn) ? "" : " in " + sLastJumpColumn;
+            speakOrShow("Jump", "jump: " + sText + sJumpCol, 128);
         }
 
         // saySayBookmark: the bookmarks saved this session, newest first.
@@ -17219,8 +17270,9 @@ namespace DbDo
         {
             string sFrom = SearchHistory.lastText(SearchHistory.SectionReplace);
             string sTo = SearchHistory.lastText(SearchHistory.SectionReplaceWith);
-            speakOrShow("Replace", "replace: " + sayableValue(sFrom)
-                + " with " + sayableValue(sTo), 130);
+            // "replace: blank with blank" (1 November 2026) meant nothing had been replaced yet.
+            if (string.IsNullOrEmpty(sFrom)) { Say.say("replace: none"); return; }
+            speakOrShow("Replace", "replace: " + sFrom + " with " + (string.IsNullOrEmpty(sTo) ? "nothing" : sTo), 130);
         }
 
         // sayableValue: the convention for an answer that has no answer.
@@ -17409,7 +17461,7 @@ namespace DbDo
         // an answer of "Unmarked" or "4 rows" does not say which key produced
         // it. "mark: unmarked" and "yield: 4 rows" do.
         //
-        // An empty answer keeps the label and says none: "find: none", not "No
+        // An empty answer keeps the label and says none: "keywords: none", not "No
         // find string". A count matches its noun. Two commands use the COLUMN
         // NAME as the label instead of the menu word -- Say Cell and Say Id --
         // because there the column is the more useful word, and it is what the
@@ -17475,14 +17527,14 @@ namespace DbDo
         private void saySaySelect(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
-            { Say.say("select: no database open"); return; }
+            { Say.say("columns: no database open"); return; }
             if (!db.hasRecordset())
-            { Say.say("select: no table selected"); return; }
+            { Say.say("columns: no table selected"); return; }
             List<string> lsCols = new List<string>();
             if (grid != null)
                 foreach (ColumnHeader oCol in grid.Columns) lsCols.Add(oCol.Text);
             if (lsCols.Count == 0)
-            { Say.say("select: none"); return; }
+            { Say.say("columns: none"); return; }
             // One queued message per column, for a natural pause
             // between column names rather than a run-on list.
             // One line rather than one part per column: the answer is a list,
@@ -17516,14 +17568,14 @@ namespace DbDo
             string sFilter = db.filter ?? "";
             string sSql = db.sqlFilterSpoken;
             if (string.IsNullOrEmpty(sFilter) && string.IsNullOrEmpty(sSql))
-            { Say.say("where: none"); return; }
+            { Say.say("filter: none"); return; }
             // Both kinds, in the words each was asked in (8 October 2026).
             // WHERE FIRST (19 October 2026): a filter narrowed or expanded speaks its groups in parentheses, and a
             // sentence that opens with a parenthesis is read as an aside, by a listener and by the tutorial check
-            // alike, so it is led by "where", as "where: none" already was.
+            // alike, so it is led by "filter", the command's own word (1 November 2026).
             List<string> lsParts = new List<string>();
             if (!string.IsNullOrEmpty(sSql)) lsParts.Add("where " + sSql);
-            if (!string.IsNullOrEmpty(sFilter)) lsParts.Add("where: " + sFilter);
+            if (!string.IsNullOrEmpty(sFilter)) lsParts.Add("filter: " + sFilter);
             speakOrShow("Filter", string.Join("; and ", lsParts.ToArray()), 118);
         }
 
@@ -17541,7 +17593,7 @@ namespace DbDo
                 try { sFind = SearchHistory.lastText(SearchHistory.SectionFind) ?? ""; } catch { }
             }
             if (string.IsNullOrEmpty(sFind))
-            { Say.say("find: none"); return; }
+            { Say.say("keywords: none"); return; }
             speakOrShow("Keywords", "keywords: " + sFind, 126);
         }
 
@@ -18183,16 +18235,17 @@ namespace DbDo
         private void saySaySortFilter(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset())
-            { Say.say("sort filter: no table open"); return; }
+            { Say.say("order and filter: no table open"); return; }
             string sSort = db.sort ?? "";
             string sFilter = db.filter ?? "";
             // Both kinds of filter, as Say Filter gives them (8 October 2026).
             string sSql = db.sqlFilterSpoken;
             if (!string.IsNullOrEmpty(sSql)) sFilter = string.IsNullOrEmpty(sFilter) ? sSql : sSql + "; and " + sFilter;
             StringBuilder sb = new StringBuilder();
-            sb.Append("Sort: ").Append(string.IsNullOrEmpty(sSort) ? "(none)" : sSort);
-            sb.Append("; Filter: ").Append(string.IsNullOrEmpty(sFilter) ? "(none)" : sFilter);
-            speakOrShow("Sort and Filter", sb.ToString(), 113);
+            // "order", the word of Order Records, and "none" as every Say answer says it (1 November 2026).
+            sb.Append("order: ").Append(string.IsNullOrEmpty(sSort) ? "none" : sSort);
+            sb.Append("; filter: ").Append(string.IsNullOrEmpty(sFilter) ? "none" : sFilter);
+            speakOrShow("Order and Filter", sb.ToString(), 113);
         }
 
         // saySayKin: Shift+K. Speak the 'look' field of every related
@@ -19588,8 +19641,21 @@ namespace DbDo
                 if (sDescr.EndsWith(".")) sDescr = sDescr.Substring(0, sDescr.Length - 1);
                 if (!string.IsNullOrEmpty(sDescr))
                     KeyMap.dCommandToSummary[sCommand] = sDescr;
+                // THE GRID KEYS ARE DESCRIBED TOO (31 October 2026). Keys handled outside the
+                // menus -- Home, Control+Home, Shift+DownArrow -- had no menu item for the Key
+                // Describer to find, so it said no command was bound to them. Each chord here
+                // is now remembered with its command and description, for the describer.
+                foreach (string sChord in sRest.Substring(0, iComma).Split(new string[] { " or " }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    string sKey = sChord.Trim();
+                    if (sKey.Length > 0 && !sKey.Equals("None", StringComparison.OrdinalIgnoreCase))
+                        dChordToSummary[sKey] = sCommand + ". " + sDescr;
+                }
             }
         }
+
+        // Chord name (as KeyMap.friendlyKey names it) to "Command. Description", from DbDo.inix.
+        private static Dictionary<string, string> dChordToSummary = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         // findChordCommaSplit: locate the comma that separates the
         // chord from the description. Skip any comma immediately
@@ -24556,16 +24622,22 @@ namespace DbDo
             int iPos = bFromCurrent ? iFrom + iStep : iFrom;
             object original = null;
             try { original = db.bookmark; } catch { }
-            StringComparison cmp = bCaseSensitive
-                ? StringComparison.Ordinal
-                : StringComparison.OrdinalIgnoreCase;
-            while (iPos >= 1 && iPos <= iCount)
+            // THE HOMER SEARCH SYNTAX (31 October 2026, kit 1.95.0): the column's value is read as a name, so a plain
+            // word is found anywhere in it and *.com is a value ending in .com. A repeat goes round past the end, as
+            // Jump does in every Homer list, so F3 and Shift+F3 find the same records in two directions.
+            List<List<Search.Term>> llPattern = Search.parse(sSub);
+            for (int iTry = 0; iTry < iCount; iTry++)
             {
+                if (iPos < 1 || iPos > iCount)
+                {
+                    if (!bFromCurrent) break;
+                    iPos = bForward ? 1 : iCount;
+                }
                 try
                 {
                     db.absolutePosition = iPos;
                     string sVal = db.getScreenValue(sCol) ?? "";
-                    if (sVal.IndexOf(sSub, cmp) >= 0)
+                    if (Search.isMatch(sVal, llPattern, true, bCaseSensitive))
                     {
                         try { DbDoLog.write("Jump: matched '" + sSub + "' in column " + sCol + " at position " + iPos + " of " + iCount + "."); } catch { }
                         return true;
@@ -28019,10 +28091,12 @@ namespace DbDo
                 // schema mismatch is visible in the dialog itself.
                 string sDbPath = "";
                 try { sDbPath = db.filePath ?? ""; } catch { }
-                // Presented through ErrorDialog so the diagnostics can
-                // be copied (Alt+C) and pasted for debugging verbatim.
-                ErrorDialog.show(this, "Enter Child",
-                    "No related tables found for this row.\r\n\r\n"
+                // NOT AN ERROR (1 November 2026): a record with no child records is an
+                // ordinary answer, and it came as an error dialog to close. It is now
+                // said; the diagnosis that explains it goes to the log, where a
+                // stale file or a schema mismatch can still be read.
+                Say.say("No child records");
+                DbDoLog.write("Enter Child: no related tables for this row. "
                     + "Database file: " + (string.IsNullOrEmpty(sDbPath) ? "(unknown)" : sDbPath) + "\r\n"
                     + "Table: " + sParentTable + "; primary key " + sParentPk + " = " + sParentPkValue + "\r\n"
                     + "Tables referencing " + sParentPk + ": none\r\n"
@@ -31715,7 +31789,7 @@ namespace DbDo
             string sTable = dbMgr.currentTable;
             if (string.IsNullOrEmpty(sTable)) { Console.WriteLine("(no table selected)"); return; }
             string sFilter = string.IsNullOrEmpty(dbMgr.filter) ? "" : "  filter: " + dbMgr.filter;
-            string sSort = string.IsNullOrEmpty(dbMgr.sort) ? "" : "  sort: " + dbMgr.sort;
+            string sSort = string.IsNullOrEmpty(dbMgr.sort) ? "" : "  order: " + dbMgr.sort;
             Console.WriteLine(string.Format("[{0}] row {1} of {2}{3}{4}",
                 sTable, dbMgr.absolutePosition, dbMgr.recordCount, sFilter, sSort));
         }
@@ -31985,7 +32059,7 @@ namespace DbDo
             }
         }
 
-        // cmdSaySortFilter: console form of Shift+8 Say Sort and
+        // cmdSaySortFilter: console form of Shift+8 Say Order and
         // Filter. Prints both, with explicit "(none)" for empty.
         private static void cmdSaySortFilter()
         {

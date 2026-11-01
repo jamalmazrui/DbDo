@@ -252,6 +252,18 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a href="#november-2026-the-maps-table-upgrades-at-last"
+id="toc-november-2026-the-maps-table-upgrades-at-last">1 November 2026 –
+The maps table upgrades at last</a></li>
+<li><a href="#november-2026-every-say-command-speaks-its-own-word"
+id="toc-november-2026-every-say-command-speaks-its-own-word">1 November
+2026 – Every Say command speaks its own word</a></li>
+<li><a href="#october-2026-one-search-syntax"
+id="toc-october-2026-one-search-syntax">31 October 2026 – One search
+syntax</a></li>
+<li><a href="#october-2026-one-grammar-for-the-grids-keys"
+id="toc-october-2026-one-grammar-for-the-grids-keys">31 October 2026 –
+One grammar for the grid’s keys</a></li>
 <li><a href="#october-2026-one-order-for-columns"
 id="toc-october-2026-one-order-for-columns">29 October 2026 – One order
 for columns</a></li>
@@ -575,6 +587,94 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="november-2026-the-maps-table-upgrades-at-last">1 November 2026 –
+The maps table upgrades at last</h2>
+<ul>
+<li><strong>The maps table takes the new part separator.</strong> Since
+the 29 October upgrade, DbDo tried at every start to rebuild maps with
+the unit separator, and failed with “error in trigger trg_stations_maps:
+no such table: main.maps”: another table’s trigger names maps, and
+SQLite re-read that trigger while maps was briefly gone. The rebuild now
+uses SQLite’s legacy_alter_table setting for that step, restoring it
+afterward. Tested in SQLite: the error reproduced exactly without the
+setting, and with it the rebuild finished and the trigger still worked.
+The next start converts maps in RadioTrail and lookups.</li>
+</ul>
+<h2 id="november-2026-every-say-command-speaks-its-own-word">1 November
+2026 – Every Say command speaks its own word</h2>
+<ul>
+<li><strong>From a walk through the Shift letters:</strong> Shift+F says
+“filter:” where it said “where:”; Shift+K says “keywords: none” where it
+said “find: none”; Shift+S says “columns:” where it said “select:”; the
+status line and Shift+Z say “order:” where they said “sort:”, the word
+of the Order Records command.</li>
+<li><strong>Shift+G reports Go to Record</strong> (Control+G), the
+command its letter names: what it would offer next. It used to repeat
+the Jump Record text, which is Shift+J’s answer; Shift+J now also says
+the column it searches.</li>
+<li><strong>Shift+J and Shift+V say none when there is nothing,</strong>
+where they said “blank” and “blank with blank”; a replacement of nothing
+is said as “nothing”.</li>
+<li><strong>Shift+8 is Say Order and Filter,</strong> saying “order: …;
+filter: …” where it was Say Sort and Filter, saying “Sort:” and
+“(none)”.</li>
+<li><strong>Shift+H and Shift+W say “no Say command”</strong> where they
+said “no question on this key”.</li>
+<li><strong>Enter Child with no child records says so</strong> instead
+of opening an error dialog; the diagnosis behind it goes to the
+log.</li>
+</ul>
+<h2 id="october-2026-one-search-syntax">31 October 2026 – One search
+syntax</h2>
+<ul>
+<li><strong>Keywords, Any Field, Jump Record and the Fields boxes share
+the Homer search syntax:</strong> a word anywhere, <code>*</code> and
+<code>?</code>, <code>&amp;</code> all, <code>|</code> any (with
+<code>&amp;</code> read first), <code>!</code> not, quotes for exact
+text. A Fields box with no operator reads its field as a name, so
+<code>*.com</code> is a value ending in .com; its operators work as
+before.</li>
+<li><strong>Jump Record goes round</strong> past the last record, so F3
+and Shift+F3 find the same records in either direction.</li>
+</ul>
+<h2 id="october-2026-one-grammar-for-the-grids-keys">31 October 2026 –
+One grammar for the grid’s keys</h2>
+<ul>
+<li><strong>Plain keys move, Control jumps along the column, Shift
+marks, Alt unmarks.</strong> Home and End go to the first and last
+column of the row, as before. Control+Home and Control+End now go to the
+first and last row and stay in your column, where they went to the
+grid’s corners.</li>
+<li><strong>Marking to the first or last row is Control+Shift+Home and
+Control+Shift+End,</strong> and unmarking is Alt+Control+Shift+Home and
+End. They were Shift+Home and Shift+End, which meant marking while plain
+Home and End moved along the row. In the grid, Shift+Home and Shift+End
+now say where marking went.</li>
+<li><strong>First and last marked record are Control+Page Up and
+Control+Page Down,</strong> beside Control+Up and Down Arrow for the
+previous and next. They were Control+Shift+Home and End.</li>
+<li><strong>The screen reader table keys are unchanged:</strong>
+Alt+Control with the arrows, Home, End, Page Up, Page Down and Number
+Pad 5.</li>
+<li><strong>The table keys read like a screen reader’s.</strong> Checked
+against JAWS, NVDA and Narrator in web page tables: an Alt+Control arrow
+along a row says the column’s name and then the cell; down a column, it
+says the record’s look – DbDo’s row header – and then the cell, where it
+used to say a row number. Each part is its own utterance. At an edge,
+DbDo says First row, Last row, First column or Last column, where it
+used to repeat the cell.</li>
+<li><strong>Narrator’s reading keys work too.</strong> Alt+Control+Shift
+with Left, Up, Right and Down Arrow says the row header, the column
+header, the whole row and the whole column, without moving; with Number
+Pad 5, the cell’s row and column numbers.</li>
+<li><strong>The Key Describer names every grid key.</strong> Control+F1,
+then a grid key such as Control+Home, says what it does, where it used
+to say no command was bound.</li>
+<li>The help guide has a new section, Moving in the grid; tutorials 3
+and 6 follow the new keys; and notes in the BlindCreations and JobTrail
+templates no longer say Control+Page Down steps between tables, which it
+has not done since 1.0.110.</li>
+</ul>
 <h2 id="october-2026-one-order-for-columns">29 October 2026 – One order
 for columns</h2>
 <ul>

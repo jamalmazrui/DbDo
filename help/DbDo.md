@@ -181,9 +181,54 @@ Woven through the menus is a large **Say-X status family** in the Query menu: qu
 
 When a database has several tables, **Choose Table** (Control+T) switches the current window to another table, and the *Next/Previous Visited Table* commands walk the tables you have already looked at. **Choose View** (and the object-switch commands) do the same for saved views.
 
+### Moving in the grid
+
+The grid has one keyboard grammar. Plain keys move within what you are on. Control jumps along the column. Shift marks along the same jump, and adding Alt unmarks. Alt with Control keeps the meanings it has in tables in web pages, Word and Adobe Reader.
+
+- **Arrows** move one cell. Up and Down Arrow are left to your screen reader, which reads the row as it moves; Left and Right Arrow move DbDo's cursor from column to column.
+- **Home and End** go to the first and last column of the row.
+- **Page Up and Page Down** move a screenful, staying in the column.
+- **Control+Home and Control+End** go to the first and last row, staying in the column.
+- **Control+Up Arrow and Control+Down Arrow** go to the previous and next marked record.
+- **Control+Page Up and Control+Page Down** go to the first and last marked record.
+
+The screen reader table keys work as they do in tables in web pages, Word and Adobe Reader:
+
+- **Alt+Control+arrows** move one cell. Moving along a row, DbDo says the new column's name, then the cell. Moving down a column, it says the record's look, then the cell, just as a screen reader says a row header; when the cell is itself part of the look, it says the cell alone. At the edge of the grid, the cursor stays, and DbDo says First row, Last row, First column or Last column.
+- **Alt+Control+Home and Alt+Control+End** go to the top-left and bottom-right corners, as in JAWS and Narrator. (NVDA uses them for the first and last column of the row; in DbDo, Home and End do that.)
+- **Alt+Control+Page Up and Alt+Control+Page Down** go to the first and last row of the column, as in NVDA.
+- **Alt+Control+Number Pad 5** says the cell, as **Shift+C** does.
+
+Narrator's table reading keys read without moving:
+
+- **Alt+Control+Shift+Left Arrow** says the record's look, its row header.
+- **Alt+Control+Shift+Up Arrow** says the column's name, its column header.
+- **Alt+Control+Shift+Right Arrow** says every shown field of the record.
+- **Alt+Control+Shift+Down Arrow** says every value in the column, from the top.
+- **Alt+Control+Shift+Number Pad 5** says the cell's row and column numbers.
+
+In the Key Describer (Control+F1), every one of these keys says what it does.
+
+### Search syntax
+
+Every Homer search that is not a regular expression reads what you type the same way. A plain word is enough most of the time; the symbols are there when you need more.
+
+- **A word** is found anywhere, whatever its case: `river` finds "Riverside".
+- **`*`** stands for any run of characters, and **`?`** for any one character: `chap*`, `c?t`.
+- **`&`** means all of them: `red & blue`.
+- **`|`** means any of them: `red | blue`. `&` is read first, so `red & blue | green` means red and blue, or else green.
+- **`!`** before a word means not: `!draft`.
+- **Quotes** find exactly what is inside, symbols and all: `"C#"`, `"a & b"`.
+
+Where a wildcard counts depends on what is searched. When the search reads a **name** -- a file name, a line of a list, one field -- a word with `*` or `?` must match the whole name, so `*.md` means a name ending in .md, and `chap*` one starting with chap. When it reads **text** -- a file's contents, a whole record -- every word may match anywhere. A word with no wildcard is found anywhere in both.
+
+F3 repeats the last search, in the same way and over the same things, going forward; Shift+F3 repeats it going back.
+
+In DbDo, Keywords and Any Field read a whole record as text, so the words of `red & blue` may sit in different fields; Jump Record and a Fields box read one field as a name. Find Regex and Regex Replace take regular expressions instead, and Replace Column finds exactly the text you type.
+
 ### Navigating records
 
-The cursor moves with ordinary list navigation (arrow keys, Home, End) and with explicit commands:
+Beyond the grid's keys, the cursor moves with these commands:
 
 - **Go to Record** (Control+G) jumps to a record number; **Repeat Go To** (Alt+G) repeats it.
 - **Keywords** (Control+K) searches for text; **Reverse Keywords** (Control+Shift+K) searches backward; **Search Next** (F3) and **Search Previous** (Shift+F3) repeat the last search. **Find Regex** (Control+F3) searches by regular expression.
@@ -207,6 +252,9 @@ Marking is DbDo's explicit, queryable alternative to visual multi-select. The `m
 
 - **Mark Record** (Control+M) marks the current record; **Unmark Record** (Control+Shift+M) clears it; **Marked Toggle** (Control+Space) flips it; **Say Marked** (Shift+M) speaks it.
 - **Mark All** (Control+A), **Unmark All** (Control+Shift+A), and **Invert Marked** (Alt+Shift+I) act across the current view.
+- **Shift+Down Arrow and Shift+Up Arrow** mark the record and move to the next or previous one. **Alt+Shift+Down Arrow and Alt+Shift+Up Arrow** unmark it and move.
+- **Control+Shift+Home** marks every record from the first to this one; **Control+Shift+End** marks from this one to the last. **Alt+Control+Shift+Home** and **Alt+Control+Shift+End** unmark the same spans. These were Shift+Home and Shift+End through version 1.0.316; those keys now say where marking went.
+- **Control+Up Arrow and Control+Down Arrow** go to the previous and next marked record; **Control+Page Up and Control+Page Down** go to the first and last.
 - To mark a **range**, set an anchor with **Start Mark** (F8) and extend to the cursor with **Complete Mark** (Shift+F8). **Start Unmark** (Alt+F8) and **Complete Unmark to Anchor** (Alt+Shift+F8) do the same for clearing, with a separate anchor so building a mark range and an unmark range never clobber each other.
 
 Marked records can then be reported, filtered, or exported as a set, and several Say commands report only the marked ones.
@@ -216,7 +264,7 @@ Marked records can then be reported, filtered, or exported as a set, and several
 Filtering and sorting reshape the grid without touching the physical table.
 
 - **Filter Records** (Control+F) limits the grid to the records that meet a condition.
-  - **How to give a condition.** With no filter in force, it asks at once how to give one. **Any Field** finds text wherever it is, whatever its case. **Fields** gives a box for every field, and a value typed with no operator finds records whose field contains it, whatever its case: `seattle` in RadioTrail's city box finds "Seattle, Washington". A value may begin with an operator: `=` is, `!=` is not, `>` more than, `>=` at least, `<` less than, `<=` at most, `%` contains, `!%` does not contain. Is not and does not contain also keep records whose field is empty. Several filled boxes must all match.
+  - **How to give a condition.** With no filter in force, it asks at once how to give one. **Any Field** finds text wherever it is, whatever its case. **Fields** gives a box for every field, and a value typed with no operator finds records whose field contains it, whatever its case: `seattle` in RadioTrail's city box finds "Seattle, Washington". A value with no operator also takes the Homer search syntax, reading the field as a name: `*.com` is a value ending in .com, `smith | jones` either, `!draft` not. A value may begin with an operator: `=` is, `!=` is not, `>` more than, `>=` at least, `<` less than, `<=` at most, `%` contains, `!%` does not contain. Is not and does not contain also keep records whose field is empty. Several filled boxes must all match.
   - **With a filter in force,** Control+F first offers four buttons. **New** starts over. **Clear** shows every record again and returns you to the list on the same record. **Narrow** keeps only the records that also meet a new condition, joining it with AND. **Expand** also takes in the records that meet a new condition, joining it with OR. Then it asks how to give the new condition, as above.
   - **Grouping.** The condition in force, however many parts it has, is wrapped whole in parentheses before the AND or OR, and the new condition in its own. So narrowing and expanding in turn always mean exactly what was asked. Say Filter (Shift+F) speaks the whole condition, led by "where" and grouped the same way.
   - **Nothing found.** A condition that would keep no record says so and leaves the view as it was.
@@ -442,6 +490,12 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Mark All | Control+A |
 | Unmark All | Control+Shift+A |
 | Invert Marked | Alt+Shift+I |
+| Mark and Next / Previous | Shift+Down / Shift+Up |
+| Unmark and Next / Previous | Alt+Shift+Down / Alt+Shift+Up |
+| Mark to First / Last | Control+Shift+Home / Control+Shift+End |
+| Unmark to First / Last | Alt+Control+Shift+Home / Alt+Control+Shift+End |
+| Next / Previous Marked | Control+Down / Control+Up |
+| First / Last Marked | Control+Page Up / Control+Page Down |
 | Start Mark / Complete Mark | F8 / Shift+F8 |
 | Start Unmark / Complete Unmark to Anchor | Alt+F8 / Alt+Shift+F8 |
 | Save Bookmark | Control+B |
@@ -455,6 +509,8 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 
 | Command | Chord |
 |---------|-------|
+| First / Last Column of the Row | Home / End |
+| First / Last Row of the Column | Control+Home / Control+End |
 | First / Last Record | — |
 | Next / Previous Record | — |
 | Go to Record | Control+G |
@@ -494,7 +550,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Say Records from Current | — |
 | Say Records from Current Marked | Alt+Shift+M |
 | Say Records of Marked | Shift+Space |
-| Say Sort and Filter | Shift+8 |
+| Say Order and Filter | Shift+8 |
 | Say Position | Alt+Delete |
 | Say Clipboard | Alt+Apostrophe |
 | Say Added | Shift+A |
@@ -816,9 +872,9 @@ Each has its own letter, and the letter is the first letter of its own word.
   - **Any field contains text** asks for the text and keeps every record where
     some field holds it, whatever the field and whatever the case: type Dallas
     Cowboys, and every station whose name, notes or tags mention the team stays.
-    It takes the same keyword syntax as Keywords and every Homer program:
-    `red & blue` means both, `red | blue` means either, and `re*d` lets a star
-    stand for anything.
+    It takes the Homer search syntax, as Keywords does: `red & blue` means
+    both, `red | blue` either, `!red` not, and `re*d` lets a star stand for
+    anything (see Search syntax).
     Numbers and dates are searched as they read. Case is ignored for English
     letters; type accented letters as they appear. A search that finds nothing
     says so and leaves the list as it was.
@@ -1189,7 +1245,7 @@ Two tables in every DbDo database belong to DbDo rather than to you:
 - **maps** records links between records, which is what Say Related reads.
 
 Neither is offered when you choose a table, open a table in a new window, or
-step through tables with Control+Page Down. They are on a hidden list, and
+step through the tables you have visited with Alt+F6. They are on a hidden list, and
 anything NOT on that list is yours and is offered.
 
 DbDo knows them by their columns as well as their names: its maps table has
@@ -1274,7 +1330,7 @@ which question was asked. That matters when you are walking the alphabet and
 lose your place: "Unmarked" does not say which key produced it, and
 "mark: unmarked" does.
 
-An empty answer keeps its label and says none -- "find: none", not "No find
+An empty answer keeps its label and says none -- "keywords: none", not "No find
 string" -- and every count matches its noun.
 
 **One exception, and it is a rule of its own.** A two-state answer whose value
@@ -1301,10 +1357,10 @@ spell phonetically and copy from. Every Homer app's Say keys work this way.
 - Shift+C -- cell, as column and value
 - Shift+D -- database, as file and folder
 - Shift+E -- edited
-- Shift+F -- filter, the condition in force
-- Shift+G -- goto, the jump search
+- Shift+F -- filter, the condition in force, or none
+- Shift+G -- go to, what Go to Record (Control+G) would offer next
 - Shift+I -- id
-- Shift+J -- jump, the text the Jump dialog would offer next
+- Shift+J -- jump, the text Jump Record would search for next, and its column
 - Shift+K -- keywords, the text Keywords would search for
 - Shift+L -- look
 - Shift+M -- mark
@@ -1313,10 +1369,10 @@ spell phonetically and copy from. Every Homer app's Say keys work this way.
 - Shift+P -- prime
 - Shift+Q -- query
 - Shift+R -- related, by foreign key and by map
-- Shift+S -- select, the columns shown
+- Shift+S -- columns, the columns shown
 - Shift+T -- tags
 - Shift+U -- url
-- Shift+V -- replacement value, the text Replace would offer and what it would put there
+- Shift+V -- replace, the text Replace Column would find and what it would put there, or none
 - Shift+X -- regex replace, the pattern Regex Replace would offer next
 - Shift+Y -- yield, how many rows
 - Shift+Z -- status: the table, the row and the order
@@ -1328,7 +1384,7 @@ commands live on Shift.
 
 Two letters are still unused -- H and W -- and are kept that way on purpose,
 so a new question can be added later without moving an answer somebody has
-learned. Pressing one of them says so rather than staying silent: the say layer
+learned. Pressing one of them says so -- "Shift+H: no Say command" -- rather than staying silent: the say layer
 always answers, because silence cannot be told from a key that did not register.
 
 **A command that opens a dialog with a value already in it has a value worth
