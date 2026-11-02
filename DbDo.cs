@@ -12904,7 +12904,6 @@ namespace DbDo
         // miViewFormat/SortAsc/SortDesc/SortRecent/SortOldest dropped in v1.0.86.
         private ToolStripMenuItem miViewResetSort;
         private ToolStripMenuItem miViewUpdate;
-        private ToolStripMenuItem miViewSelectColumn;
 
         private ToolStripMenuItem miSchemaSelectTable;
         private ToolStripMenuItem miSchemaSelectView;
