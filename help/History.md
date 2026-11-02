@@ -7,6 +7,8 @@ Press **Shift+F1** inside DbDo to open this file in your browser, or type `histo
 
 ## 1 November 2026 -- The maps table upgrades at last
 
+- **Shift+O always names an order.** With no Order Records in force it said "no order applied"; records are always in some order, so it now says the one they are stored in, such as "order: station_id, as stored".
+- **Shift+R says "related: none"** when a record has no related records, where it said "related: (no related records found)".
 - **The maps table takes the new part separator.** Since the 29 October upgrade, DbDo tried at every start to rebuild maps with the unit separator, and failed with "error in trigger trg_stations_maps: no such table: main.maps": another table's trigger names maps, and SQLite re-read that trigger while maps was briefly gone. The rebuild now uses SQLite's legacy_alter_table setting for that step, restoring it afterward. Tested in SQLite: the error reproduced exactly without the setting, and with it the rebuild finished and the trigger still worked. The next start converts maps in RadioTrail and lookups.
 
 ## 1 November 2026 -- Every Say command speaks its own word

@@ -17166,9 +17166,17 @@ namespace DbDo
             { Say.say("order: no database open"); return; }
             if (!db.hasRecordset())
             { Say.say("order: no table selected"); return; }
+            // THERE IS ALWAYS AN ORDER (1 November 2026, from Jamal's speech history). Records always come in
+            // some order; with no Order Records in force it is the order they are stored in, which for a DbDo
+            // table is its id. Shift+O says that, where it said "no order applied".
             string s = db.sort ?? "";
             if (s.Length == 0)
-            { Say.say("order: no order applied"); return; }
+            {
+                string sKey = "";
+                try { sKey = db.actualPrimaryKey(db.currentTable) ?? ""; } catch { }
+                Say.say("order: " + (sKey.Length > 0 ? sKey + ", as stored" : "as stored"));
+                return;
+            }
             speakOrShow("Order", "order: " + s, 125);
         }
 
@@ -17649,8 +17657,10 @@ namespace DbDo
             // neighbors; for the detailed form, show their look
             // values. We borrow the same logic Say-Kin uses (kin =
             // related). The text we display is the brief Kin form.
+            // "related: none" (1 November 2026), as every Say command answers when there is nothing, where it
+            // said "related: (no related records found)" -- the command's word, then the same thing again.
             string sSummary = buildRelatedSummary();
-            if (string.IsNullOrEmpty(sSummary)) sSummary = "(no related records found)";
+            if (string.IsNullOrEmpty(sSummary)) { Say.say("related: none"); return; }
             speakOrShow("Related", "related: " + sSummary, 121);
         }
 

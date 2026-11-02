@@ -5,7 +5,7 @@
     <link>Tutorials.htm</link>
     <description>Spoken walks through DbDo, the database program built for working by ear, and the ready-made databases that come with it. Ten walks, each under five minutes, in the order a new person meets them.</description>
     <language>en-us</language>
-    <lastBuildDate>Sun, 01 Nov 2026 23:43:59 +0000</lastBuildDate>
+    <lastBuildDate>Mon, 02 Nov 2026 01:40:01 +0000</lastBuildDate>
     <itunes:author>Jamal Mazrui</itunes:author>
     <itunes:explicit>false</itunes:explicit>
     <itunes:category text="Technology"/>
@@ -24,7 +24,7 @@
       <description>DbDo is open on RadioTrail. Full transcript: Tutorials.htm#0a-1-user-interface</description>
       <link>Tutorials.htm#0a-1-user-interface</link>
       <guid isPermaLink="false">homer-tutorial_1_user_interface</guid>
-      <enclosure url="tutorials/1_User_Interface.mp3" length="1477305" type="audio/mpeg"/>
+      <enclosure url="tutorials/1_User_Interface.mp3" length="1481161" type="audio/mpeg"/>
       <itunes:duration>00:03:42</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
@@ -42,8 +42,8 @@
       <description>DbDo is open on RadioTrail. Full transcript: Tutorials.htm#0c-3-find-a-station</description>
       <link>Tutorials.htm#0c-3-find-a-station</link>
       <guid isPermaLink="false">homer-tutorial_3_find_a_station</guid>
-      <enclosure url="tutorials/3_Find_a_Station.mp3" length="1491942" type="audio/mpeg"/>
-      <itunes:duration>00:03:41</itunes:duration>
+      <enclosure url="tutorials/3_Find_a_Station.mp3" length="1561746" type="audio/mpeg"/>
+      <itunes:duration>00:03:50</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
@@ -51,7 +51,7 @@
       <description>DbDo is open. Full transcript: Tutorials.htm#0d-4-track-job-leads</description>
       <link>Tutorials.htm#0d-4-track-job-leads</link>
       <guid isPermaLink="false">homer-tutorial_4_track_job_leads</guid>
-      <enclosure url="tutorials/4_Track_Job_Leads.mp3" length="1508725" type="audio/mpeg"/>
+      <enclosure url="tutorials/4_Track_Job_Leads.mp3" length="1513413" type="audio/mpeg"/>
       <itunes:duration>00:03:42</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
@@ -60,7 +60,7 @@
       <description>DbDo is open. Full transcript: Tutorials.htm#0e-5-catalog-your-books</description>
       <link>Tutorials.htm#0e-5-catalog-your-books</link>
       <guid isPermaLink="false">homer-tutorial_5_catalog_your_books</guid>
-      <enclosure url="tutorials/5_Catalog_Your_Books.mp3" length="1423177" type="audio/mpeg"/>
+      <enclosure url="tutorials/5_Catalog_Your_Books.mp3" length="1424122" type="audio/mpeg"/>
       <itunes:duration>00:03:26</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
@@ -69,7 +69,7 @@
       <description>DbDo is open. Full transcript: Tutorials.htm#0f-6-explore-music</description>
       <link>Tutorials.htm#0f-6-explore-music</link>
       <guid isPermaLink="false">homer-tutorial_6_explore_music</guid>
-      <enclosure url="tutorials/6_Explore_Music.mp3" length="1440740" type="audio/mpeg"/>
+      <enclosure url="tutorials/6_Explore_Music.mp3" length="1444231" type="audio/mpeg"/>
       <itunes:duration>00:03:32</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
@@ -78,7 +78,7 @@
       <description>DbDo is open. Full transcript: Tutorials.htm#0g-7-more-templates</description>
       <link>Tutorials.htm#0g-7-more-templates</link>
       <guid isPermaLink="false">homer-tutorial_7_more_templates</guid>
-      <enclosure url="tutorials/7_More_Templates.mp3" length="1270814" type="audio/mpeg"/>
+      <enclosure url="tutorials/7_More_Templates.mp3" length="1272175" type="audio/mpeg"/>
       <itunes:duration>00:03:01</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
@@ -87,7 +87,7 @@
       <description>DbDo is open on MusicTrail. Full transcript: Tutorials.htm#0h-8-ask-with-sql</description>
       <link>Tutorials.htm#0h-8-ask-with-sql</link>
       <guid isPermaLink="false">homer-tutorial_8_ask_with_sql</guid>
-      <enclosure url="tutorials/8_Ask_with_SQL.mp3" length="1373287" type="audio/mpeg"/>
+      <enclosure url="tutorials/8_Ask_with_SQL.mp3" length="1377173" type="audio/mpeg"/>
       <itunes:duration>00:03:19</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>

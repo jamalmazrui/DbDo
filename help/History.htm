@@ -590,6 +590,13 @@ browser, or type <code>history</code> at the dot prompt.</p>
 <h2 id="november-2026-the-maps-table-upgrades-at-last">1 November 2026 –
 The maps table upgrades at last</h2>
 <ul>
+<li><strong>Shift+O always names an order.</strong> With no Order
+Records in force it said “no order applied”; records are always in some
+order, so it now says the one they are stored in, such as “order:
+station_id, as stored”.</li>
+<li><strong>Shift+R says “related: none”</strong> when a record has no
+related records, where it said “related: (no related records
+found)”.</li>
 <li><strong>The maps table takes the new part separator.</strong> Since
 the 29 October upgrade, DbDo tried at every start to rebuild maps with
 the unit separator, and failed with “error in trigger trg_stations_maps:
