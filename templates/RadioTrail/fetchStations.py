@@ -1537,7 +1537,19 @@ def mergeRows(sDb, lsRows, logLine, say, sLog):
         say("The copy lacks columns the catalog needs: " + ", ".join(lsMissing) + ". Run fetchStations --fresh.")
         logLine("missing columns: " + ", ".join(lsMissing)); c.close(); return 1
     dHave = {r[0]: r[1] for r in c.execute("select source_id, station_id from stations where source_id is not null and source_id <> ''")}
-    iAdded = iUpdated = 0
+    # WHAT CHANGED, SAID HONESTLY (2 November 2026, from Quill Radio's catalog requirements: the listener can always
+    # answer how old the catalog is and what changed last time). Every station already here used to be rewritten and
+    # given a new edited time on every refresh, so "updated" counted the whole table and sorting by edited buried the
+    # listener's own recent changes under the refresh. Now a station is rewritten only when a catalog fact really
+    # changed; one that did not change only has its last_seen moved. The age of the catalog is said first.
+    try:
+        sLast = (c.execute("select max(last_seen) from stations where coalesce(source,'') <> 'mine'").fetchone() or [""])[0] or ""
+        if sLast:
+            iDays = (datetime.datetime.now() - datetime.datetime.fromisoformat(str(sLast)[:19].replace(" ", "T"))).days
+            say("The catalog was last refreshed on %s, %s." % (str(sLast)[:10], "today" if iDays <= 0 else ("1 day ago" if iDays == 1 else "%d days ago" % iDays)))
+    except Exception as oError:
+        logLine("catalog age could not be read: %s" % oError)
+    iAdded = iChanged = iSame = 0
     for dRow in lsRows:
         sKey = dRow.get("source_id", "")
         if not sKey: continue
@@ -1566,10 +1578,17 @@ def mergeRows(sDb, lsRows, logLine, say, sLog):
                         dRow["genre"] = (dRow.get("genre", "") + ", " if dRow.get("genre") else "") + sWord
             except Exception: pass
         if sKey in dHave:
-            sSet = ", ".join('"%s" = ?' % k for k in dRow if k != "source_id")
-            c.execute('update stations set %s, edited = CURRENT_TIMESTAMP where station_id = ?' % sSet,
-                      [v for k, v in dRow.items() if k != "source_id"] + [dHave[sKey]])
-            iUpdated += 1
+            lsCols = [sCol for sCol in dRow if sCol not in ("source_id", "last_seen")]
+            oOld = c.execute("select %s from stations where station_id = ?" % ", ".join('"%s"' % sCol for sCol in lsCols), (dHave[sKey],)).fetchone() if lsCols else ()
+            bChanged = any(str(vOld if vOld is not None else "") != str(dRow[sCol] if dRow[sCol] is not None else "") for sCol, vOld in zip(lsCols, oOld or ()))
+            if bChanged:
+                sSet = ", ".join('"%s" = ?' % k for k in dRow if k != "source_id")
+                c.execute('update stations set %s, edited = CURRENT_TIMESTAMP where station_id = ?' % sSet,
+                          [v for k, v in dRow.items() if k != "source_id"] + [dHave[sKey]])
+                iChanged += 1
+            else:
+                c.execute("update stations set last_seen = ? where station_id = ?", (sNow, dHave[sKey]))
+                iSame += 1
         else:
             dRow["status"] = "untried"
             c.execute("insert into stations (%s) values (%s)" % (",".join('"%s"' % k for k in dRow), ",".join("?" * len(dRow))), list(dRow.values()))
@@ -1583,7 +1602,7 @@ def mergeRows(sDb, lsRows, logLine, say, sLog):
     c.commit()
     iTotal = c.execute("select count(*) from stations").fetchone()[0]
     c.close()
-    say("%d stations added, %d updated; the database now holds %d. Your status, rating, notes and tags were kept." % (iAdded, iUpdated, iTotal))
+    say("%d %s added, %d changed and %d unchanged; the database now holds %d. Your status, rating, notes and tags were kept." % (iAdded, "station" if iAdded == 1 else "stations", iChanged, iSame, iTotal))
     say("The log is " + sLog)
     logLine("finished " + datetime.datetime.now().isoformat())
     return 0

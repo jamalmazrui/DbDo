@@ -5,7 +5,8 @@
 # RepoFiles.txt; the working material that makes them is here.
 
 # Made by every build: the program and its libraries, the installer, the
-# screen reader packages, and the version files.
+# screen reader packages (packed from scripts\jaws and scripts\nvda), and the
+# version files.
 DbDo.nvda-addon
 DbDo_JAWS.zip
 DbDo_setup.exe

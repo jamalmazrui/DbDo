@@ -1,0 +1,29 @@
+﻿<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>DbDo NVDA Add-on</title>
+</head>
+<body>
+<h1>DbDo NVDA Add-on</h1>
+<p>This add-on lets DbDo handle its own keyboard chords directly instead of NVDA intercepting them for browse-mode or table-navigation commands. It does not add features to NVDA; it only steps out of DbDo's way for a specific set of chords inside the DbDo application.</p>
+<h2>What it covers</h2>
+<p>The add-on passes the following chord families straight through to DbDo when DbDo is the foreground application:</p>
+<ul>
+<li>Virtual-cell navigation: Alt+Control + Home / End / arrows / PageUp / PageDown / NumPad5</li>
+<li>Alt-letter command shortcuts: Alt+A, C, D, E, K, L, P, R, T, Y, Z (plus Alt+Shift+A, D, R)</li>
+<li>Parent-child drill: Alt+RightArrow, Alt+LeftArrow, Alt+Home, Alt+End</li>
+<li>Three search families: Control+F / Control+J / Control+F3 plus Shift variants, F3, Shift+F3</li>
+<li>Marked-row navigation: Control+Home, Control+End, Control+UpArrow, Control+DownArrow</li>
+<li>Bulk-mark span: Shift+Home, Shift+End, plus Alt+Shift variants</li>
+<li>Say-X data-list chords: Shift+D, L, T, Y, F4</li>
+</ul>
+<p>The coverage is identical to what the DbDo.jkm key map does for JAWS.</p>
+<h2>Without this add-on</h2>
+<p>NVDA intercepts the Alt+Control+arrow family for its own table-navigation commands. Inside DbDo's virtual-mode ListView this produces "Not in a table" or similar messages, and DbDo's own cell-navigation announcements never fire. Several Alt-letter and Shift-letter chords run unrelated default NVDA actions.</p>
+<h2>How to (re)install or uninstall</h2>
+<p>DbDo's installer ships this add-on at <code>{app}\DbDo.nvda-addon</code> and offers to install it as a Finish-page checkbox. To reinstall manually, double-click <code>DbDo.nvda-addon</code> — NVDA opens its add-on install dialog. To uninstall, use NVDA's Tools menu &gt; Manage Add-ons.</p>
+<h2>License</h2>
+<p>MIT, same as DbDo. See the DbDo project page for source and issues: <a href="https://github.com/JamalMazrui/DbDo">https://github.com/JamalMazrui/DbDo</a>.</p>
+</body>
+</html>

@@ -49,6 +49,8 @@ scripts/check.cmd
 scripts/checkBlindSkillsMedia.cmd
 scripts/checkBlindSkillsMedia.py
 scripts/check.py
+scripts/jaws/
+scripts/nvda/
 scripts/checkTemplates.cmd
 scripts/checkTemplates.py
 scripts/makeBlindSkills.cmd

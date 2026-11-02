@@ -185,9 +185,9 @@ When a database has several tables, **Choose Table** (Control+T) switches the cu
 
 The grid has one keyboard grammar. Plain keys move within what you are on. Control jumps along the column. Shift marks along the same jump, and adding Alt unmarks. Alt with Control keeps the meanings it has in tables in web pages, Word and Adobe Reader.
 
-- **Arrows** move one cell. Up and Down Arrow are left to your screen reader, which reads the row as it moves; Left and Right Arrow move DbDo's cursor from column to column.
+- **Arrows** move one cell. Up and Down Arrow move to the row above or below, and DbDo reads it: its shown values, then its position, such as 44838, without the count of rows. Page Up and Page Down do the same a screenful at a time. Left and Right Arrow move DbDo's cursor from column to column. DbDo's JAWS scripts and NVDA add-on pass these keys to DbDo quietly in the grid, so you hear DbDo's reading and not your screen reader's, and pressing the next key cuts off the last row as usual.
 - **Home and End** go to the first and last column of the row.
-- **Page Up and Page Down** move a screenful, staying in the column.
+- **Alt+Up Arrow and Alt+Down Arrow** move to the cell above or below in the same column and read it -- the row's look, then the cell -- as Alt+Control+Up and Down Arrow do, with one key fewer.
 - **Control+Home and Control+End** go to the first and last row, staying in the column.
 - **Control+Up Arrow and Control+Down Arrow** go to the previous and next marked record.
 - **Control+Page Up and Control+Page Down** go to the first and last marked record.

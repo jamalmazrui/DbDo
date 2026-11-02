@@ -154,7 +154,7 @@ rem onSpoken", which names the symptom and not the cause. So the build says the
 rem cause, first. Raise this whenever DbDo starts using something new.
 rem 1.64.5: Play Tutorials calls MediaPlayer.playTutorials, which older kits lack;
 rem a build against 1.64.4 failed to compile on 8 October 2026 rather than saying so.
-set "kitNeeded=1.95.0"
+set "kitNeeded=1.100.0"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -671,6 +671,20 @@ if errorlevel 1 (
     goto :build_failed
 )
 echo NVDA controller client copied from the kit into exec.>> "!log!"
+
+rem ---- the screen reader scripts, packed by the kit (kit 1.98.0) ----
+rem The sources live in the repository, as every Homer app keeps them: scripts\jaws
+rem for the JAWS script and key map, scripts\nvda for the NVDA add-on. The kit's
+rem packScreenReaderSupport packs both the same way -- sources only for JAWS, the
+rem kit's keys.py copied into the add-on for NVDA -- and logs each step.
+call "!homerDev!\scripts\packScreenReaderSupport.cmd" -Root "%~dp0." -App DbDo -Kit "!homerDev!" >> "!log!" 2>&1
+if errorlevel 1 (
+  echo ERROR: the screen reader packages could not be packed; logs\DbDo-packScreenReaderSupport-*.log has the detail.
+  echo ERROR: packScreenReaderSupport failed>> "!log!"
+  goto :build_failed
+)
+echo Screen reader packages packed by the kit.>> "!log!"
+)
 
 rem ---- the kit's conversion routes, beside the program (19 October 2026) ----
 rem Conversion reads exec\conversions.inix to choose the way for each conversion;

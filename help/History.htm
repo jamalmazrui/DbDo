@@ -252,6 +252,16 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a href="#november-2026-dbdos-scripts-say-who-they-are"
+id="toc-november-2026-dbdos-scripts-say-who-they-are">2 November 2026 –
+DbDo’s scripts say who they are</a></li>
+<li><a
+href="#november-2026-radiotrail-says-what-a-refresh-really-changed"
+id="toc-november-2026-radiotrail-says-what-a-refresh-really-changed">2
+November 2026 – RadioTrail says what a refresh really changed</a></li>
+<li><a href="#november-2026-dbdo-reads-its-own-rows"
+id="toc-november-2026-dbdo-reads-its-own-rows">2 November 2026 – DbDo
+reads its own rows</a></li>
 <li><a href="#november-2026-the-maps-table-upgrades-at-last"
 id="toc-november-2026-the-maps-table-upgrades-at-last">1 November 2026 –
 The maps table upgrades at last</a></li>
@@ -587,9 +597,73 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="november-2026-dbdos-scripts-say-who-they-are">2 November 2026 –
+DbDo’s scripts say who they are</h2>
+<ul>
+<li><strong>JAWS+Q, JAWS+F1 twice, and NVDA+Shift+V.</strong> With JAWS,
+JAWS+Q now starts with “DbDo scripts, for DbDo” and the program’s
+version, and JAWS+F1 pressed twice opens DbDo’s guide. With NVDA,
+NVDA+Shift+V says DbDo’s version and the add-on’s, and every DbDo key
+appears in NVDA’s Input Gestures dialog under DbDo, where it can be
+rebound. Needs kit 1.100.0.</li>
+</ul>
+<h2 id="november-2026-radiotrail-says-what-a-refresh-really-changed">2
+November 2026 – RadioTrail says what a refresh really changed</h2>
+<ul>
+<li><strong>fetchStations reports added, changed and unchanged, and how
+old the catalog was.</strong> Every station already in RadioTrail used
+to be rewritten, and given a new edited time, on every refresh, so its
+report counted the whole table as updated and sorting by edited buried
+your own recent changes under the refresh. Now only a station whose
+catalog facts changed is rewritten; the rest only have last_seen moved.
+Before merging it says when the catalog was last refreshed. Both follow
+Quill Radio’s catalog requirement that a listener can always tell how
+old the catalog is and what changed.</li>
+</ul>
+<h2 id="november-2026-dbdo-reads-its-own-rows">2 November 2026 – DbDo
+reads its own rows</h2>
+<ul>
+<li><strong>Up and Down Arrow, and Page Up and Page Down, are DbDo’s in
+the grid.</strong> They were left to the list, and the screen reader
+read each row with the count of rows, as in “44838 of 49186”. DbDo now
+moves the row and reads it itself: the row’s shown values, then its
+position alone. Its JAWS script and NVDA add-on pass these keys through
+quietly in the grid and nowhere else, so dialogs and edit fields sound
+as before, and the next key cuts off the last row as usual.</li>
+<li><strong>The screen reader scripts live in the repository and are
+packed by every build.</strong> DbDo_JAWS.zip and DbDo.nvda-addon were
+kept by hand, with their sources only inside them. The sources are now
+in scriptsand scripts, and the build packs both packages.</li>
+<li><strong>The kit packs and installs both screen reader packages the
+same way.</strong> The build calls the kit’s packScreenReaderSupport
+instead of a block of its own. The installer now puts the JAWS scripts
+into every language folder of every installed JAWS, and the NVDA add-on
+into every NVDA settings folder, including a JAWS or NVDA never yet
+started, and judges each box by comparing the shipped files with the
+installed ones. Needs kit 1.98.0.</li>
+<li><strong>The NVDA add-on runs the kit’s shared key handling.</strong>
+Its scripts call the kit’s keys.py, which the build copies into the
+add-on, instead of keeping their own copies of the helpers; HomerView’s
+add-on runs the same code. Needs kit 1.97.1, whose installer also offers
+the add-on as an Update, ticked, whenever its files differ from the
+installed ones, even at the same version.</li>
+<li><strong>The NVDA add-on loads for DbDo.</strong> It was still named
+for DbDuo, DbDo’s old name, so NVDA looked for it under the wrong
+program name and never loaded it; it is now dbdo, version 1.1.0. Both
+scripts also carry the keyboard model of 31 October: Alt+Up and Down
+Arrow, Control+Page Up and Down, the Control+Shift and Alt+Control+Shift
+marking keys, and Narrator’s Alt+Control+Shift reading keys.</li>
+</ul>
 <h2 id="november-2026-the-maps-table-upgrades-at-last">1 November 2026 –
 The maps table upgrades at last</h2>
 <ul>
+<li><strong>Alt+Up Arrow and Alt+Down Arrow</strong> move to the cell
+above or below in the same column and read it, as Alt+Control+Up and
+Down Arrow do, with one key fewer. Only in the grid; on a record form
+Alt+Down Arrow still opens a pick list.</li>
+<li><strong>Clear comes last among the Filter Records choices,</strong>
+after New, Narrow, Expand and Invert, since Control+Shift+F clears a
+filter from anywhere.</li>
 <li><strong>Shift+O always names an order.</strong> With no Order
 Records in force it said “no order applied”; records are always in some
 order, so it now says the one they are stored in, such as “order:
