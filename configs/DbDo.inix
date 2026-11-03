@@ -284,6 +284,7 @@ What This Does=Shift+F1, What this does: say in one sentence what the control wi
 Show History=None, Show the history of DbDo fixes and enhancements; on the Help menu (no hotkey)
 About DbDo=Alt+F1, About: display DbDo version number and release date
 Alternate Menu=Alt+F10, Alternate menu: pick a command to run from the complete alphabetized list
+Show Status=Alt+Shift+Slash, Where am I: the database, table, record, filter and order; in any dialog, the dialog, its purpose and the control with focus, twice every control, three times the keys
 Elevate Version=F11, Elevate (download and install) the latest DbDo version
 
 [Folders]

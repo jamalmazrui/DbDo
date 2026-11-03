@@ -1,0 +1,62 @@
+﻿; pilot.inix -- recordWalk's first walk: the dialogs changed on 3 November 2026, under JAWS.
+; Start with DbDo open on a table, RadioTrail if you have it. recordWalk brings DbDo to the front.
+
+[about]
+Title=Pilot - Select Columns, Filter Records and Order Records
+
+[step]
+Say=Alt plus S opens Select Columns, which says what is shown before its buttons.
+Key=Alt+S
+Hear=Select Columns dialog
+Hear=Shown now
+Hear=Look columns button
+Wait=6
+
+[step]
+Say=Shift plus F1 says what Look columns does.
+Key=Shift+F1
+Hear=Shows look's columns in look's order
+
+[step]
+Say=Tab moves to Prime columns.
+Key=Tab
+Hear=Prime columns button
+
+[step]
+Say=Shift plus F1 on Prime columns.
+Key=Shift+F1
+Hear=the default sort order
+
+[step]
+Say=Escape closes the dialog and changes nothing.
+Key=Escape
+
+[step]
+Say=Control plus F opens Filter Records.
+Key=Control+F
+Hear=Filter Records
+Wait=5
+
+[step]
+Say=Shift plus F1 on the first button.
+Key=Shift+F1
+
+[step]
+Say=Escape closes it.
+Key=Escape
+
+[step]
+Say=Alt plus O opens Order Records.
+Key=Alt+O
+Hear=Order Records dialog
+Hear=Fields available
+Wait=5
+
+[step]
+Say=Shift plus F1 on Fields available.
+Key=Shift+F1
+Hear=The fields not yet in the sort
+
+[step]
+Say=Escape closes it.
+Key=Escape

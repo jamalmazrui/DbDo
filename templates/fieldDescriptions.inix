@@ -1,0 +1,394 @@
+﻿; fieldDescriptions.inix -- one sentence for every field of every template table, written into each template's
+; lookups table by scripts\describeFields.py when DbDo builds: tbl and fld filled, val empty, descrip the sentence.
+; Shift+F1 on a field in the record, new-record and filter forms says it. [*] holds fields of the same name in every
+; table; [<template>/<table>] holds one table's own, and wins. [lookups], [maps] and [views] describe DbDo's own tables.
+; A sentence a person has written into a database's lookups is never replaced.
+
+[*]
+added = When this record was added; DbDo fills it in.
+edited = When this record was last changed; DbDo updates it on every save.
+look = How the record is said in a list, built by DbDo from the table's look fields.
+marked = Whether you have marked this record, 1 for marked and 0 for not; Control+Space toggles it.
+notes = Your own notes in sentences, as long as you like; Markdown is welcome.
+prime = What makes this record unique and how records sort by default, built by DbDo from the table's prime fields.
+tags = Words that help find this record, one per line, such as a topic, a team or a feeling.
+url = The web address most about this record, opened with Control+Shift+U.
+
+[BlindCreations/apps]
+available_from = Where to get the app, such as a store, a website or GitHub.
+by = Who made the app: a person, a group or a company.
+category = What kind of app it is, such as productivity, games or reference.
+name = The app's name as its maker gives it.
+platform = Where the app runs, such as Windows, iOS, Android or the web.
+summary = What the app does and why a blind person might want it, in a few sentences.
+tech = What the app is built with, such as Python, C# or a web framework.
+
+[BlindCreations/books]
+available_from = Where to get the book, such as Amazon, Bookshare or the author's site.
+by = Who wrote the book.
+category = What kind of book it is, such as memoir, fiction or how-to.
+format = How the book can be read, such as print, Kindle, audio or braille.
+summary = What the book is about, in a few sentences.
+title = The book's title.
+year = The year the book was published.
+
+[BlindCreations/creators]
+first_name = The creator's given name.
+last_name = The creator's family name, which lists sort by.
+roles = What the creator makes, such as author, developer or presenter, separated by commas.
+summary = Who the creator is and what they are known for, in a few sentences.
+
+[BlindCreations/presentations]
+by = Who gave the presentation.
+kind = What sort of presentation it is, such as a talk, a webinar or a podcast episode.
+summary = What the presentation covers, in a few sentences.
+title = The presentation's title.
+
+[BlindSkills/lessons]
+audience = Who the lesson is for, such as beginners, teachers or parents.
+category = The broad area of the skill, such as travel, home or technology.
+medium = What form the lesson takes, such as audio, video or text.
+minutes = How long the lesson runs, in minutes.
+presenter = Who teaches the lesson.
+series = The series the lesson belongs to, if any.
+skill = The skill the lesson teaches, such as cane travel, braille or cooking.
+source = Who publishes the lesson.
+source_url = The web address of the lesson itself.
+structured_discovery = Whether the lesson follows the structured discovery method, which teaches by problem solving.
+summary = What the lesson teaches, in a few sentences.
+title = The lesson's title.
+transcript_url = The web address of the lesson's transcript, if there is one.
+year = The year the lesson was made.
+
+[BookTrail/books]
+author = Who wrote the book; more than one author goes with commas.
+avg_rating = The average rating readers give the book online.
+catalog_number = The book's number in a library catalog, such as a BARD or Bookshare number.
+date_added = When you added or started the book, as year-month-day.
+date_read = When you finished the book, as year-month-day; Filter takes a range such as 2025..2026.
+files = Where your copy of the book is on this computer, one path per line.
+first_published = The year the book first came out.
+format = The edition you have, such as Kindle, audio, braille or print; F4 offers the choices.
+genre = The book's genre, such as mystery, history or memoir.
+isbn = The edition's ISBN, the number that identifies it everywhere.
+language = The language of this edition.
+length = How long an audio edition runs, in hours and minutes.
+narrator = Who reads an audio edition aloud.
+pages = How many pages a print edition has.
+progress = How far you have got, such as a page, a chapter or a percentage.
+publisher = Who published this edition.
+rating = Your own rating of the book, from 1 to 5.
+ratings_count = How many readers have rated the book online.
+reason = Why you want to read it, or who recommended it.
+series = The series the book belongs to, if any.
+source = Where the book came from, such as bought, a gift, the library, BARD or Bookshare; F4 offers the choices.
+status = Where you are with the book: want to read, reading, read or abandoned; F4 offers the choices.
+subtitle = The book's subtitle, if it has one.
+summary = What the book is about, in a few sentences.
+title = The book's title, without its subtitle.
+volume = The book's number in its series.
+wikipedia = The web address of the book's Wikipedia article.
+work = An id that ties together every edition of the same work.
+
+[ContactTrail/contacts]
+address1 = The first line of the street address.
+address2 = The second line of the address, such as an apartment or suite.
+business_email = The person's work email address.
+city = The city of the address.
+date_of_birth = The person's birthday, as year-month-day, or month-day when the year is not known.
+enterprise = The company or organization the person works for.
+first_name = The person's given name.
+gender = The person's gender, as they describe it.
+home_phone = The person's home phone number.
+job = The person's job title.
+last_name = The person's family name, which lists sort by.
+middle_name = The person's middle name or initial.
+nation = The country of the address.
+office_phone = The person's work phone number.
+personal_email = The person's own email address.
+state = The state or province of the address.
+title = A courtesy title, such as Dr. or Ms.
+wireless_phone = The person's mobile phone number.
+zip = The postal code of the address.
+
+[ContactTrail/groups]
+name = The group's name, such as Family, Work or Book Club.
+summary = What the group is for, in a sentence or two.
+
+[JobTrail/actions]
+accommodation = Any disability accommodation asked for or given at this step.
+action_date = When the step happened, or is planned, as year-month-day.
+contact_id = The person this step involved.
+counts = Whether the step counts as a work search activity for unemployment reports, 1 for yes.
+detail = A short detail worth remembering.
+details = The full account of the step, as long as you need.
+done = Whether the step is done, 1 for done and 0 for still to do.
+evidence = Where proof of the step is kept, such as an email or a file.
+job_id = The job this step belongs to.
+kind = What sort of step it is, such as application, interview, call or follow-up; F4 offers the choices.
+method = How it happened, such as email, phone, video or in person.
+outcome = How it turned out.
+person = Who you dealt with.
+place = Where it happened.
+summary = The step in a line.
+
+[JobTrail/contacts]
+address1 = The first line of the street address.
+address2 = The second line of the address, such as an apartment or suite.
+business_email = The person's work email address.
+city = The city of the address.
+date_of_birth = The person's birthday, as year-month-day, or month-day when the year is not known.
+enterprise = The company or organization the person works for.
+first_name = The person's given name.
+gender = The person's gender, as they describe it.
+home_phone = The person's home phone number.
+job = The person's job title.
+last_name = The person's family name, which lists sort by.
+middle_name = The person's middle name or initial.
+nation = The country of the address.
+office_phone = The person's work phone number.
+personal_email = The person's own email address.
+role = How the person matters to your search, such as recruiter, hiring manager or reference.
+state = The state or province of the address.
+title = A courtesy title, such as Dr. or Ms.
+wireless_phone = The person's mobile phone number.
+zip = The postal code of the address.
+
+[JobTrail/docs]
+kind = What sort of document it is; F4 offers the choices.
+name = The document's name, such as a resume or a cover letter.
+version = Which version this is, such as a date or a number.
+
+[JobTrail/jobs]
+applied_date = When you applied, as year-month-day.
+ats = The applicant tracking system the employer uses, such as Workday or Greenhouse.
+closing_date = The last day to apply, as year-month-day.
+employer = The company or agency offering the job.
+employer_contact = The person at the employer you are dealing with.
+hiring_path = The way in, such as an open posting, Schedule A or a referral.
+location = Where the job is, or remote.
+pay = The pay the posting offers, as written there.
+posting = The job posting itself, pasted in, so it is kept when the web page goes away.
+reference = The employer's own number for the job, if it has one.
+source = Where you found the job, such as a job board, a referral or the employer's site.
+status = Where the application stands, such as interested, applied, interviewing, offered or closed; F4 offers the choices.
+title = The job's title as the posting gives it.
+
+[JobTrail/stories]
+action = What you did about it.
+challenge = The situation or problem you faced.
+name = A short name for the story, to find it by.
+result = What came of it, with numbers where you have them.
+story_id = The story's own number, given by DbDo.
+takeaway = What the story shows about you, for an interviewer.
+
+[MusicTrail/albums]
+artist = Who recorded the album.
+awards = Awards the album won.
+format = The form you have it in, such as CD, vinyl or streaming.
+genre = The album's genre, such as soul, jazz or rock.
+name = The album's title.
+rank = The album's place on the list it came from.
+rating = Your own rating of the album, from 1 to 5.
+source = Where the album's facts came from.
+summary = What the album is and why it matters, in a few sentences.
+year = The year the album came out.
+
+[MusicTrail/performers]
+active = The years the performer has been active.
+affiliation = A label, band or group the performer belongs to.
+genre = The performer's main genre.
+name = The performer's or band's name.
+nationality = The country the performer comes from.
+role = What the performer does, such as singer, guitarist or band.
+sex = The performer's sex, or group for a band.
+source = Where the performer's facts came from.
+summary = Who the performer is, in a few sentences.
+
+[RadioTrail/stations]
+bitrate = The stream's quality, in kilobits per second; higher sounds better and uses more data.
+call_sign = The broadcast call sign, such as KUOW, for an over-the-air station.
+city = The city the station is licensed to.
+clicks = How often people have played the station through Radio Browser.
+codec = The audio format of the stream, such as MP3 or AAC.
+country = The country the station is in.
+countrycode = The country's two-letter code, such as US or GB.
+descrip = What the station says about itself, from its stream or home page.
+format = The station's broadcast format, such as news, sports or classic rock.
+frequency = Where the station is on the dial, such as 94.9 FM.
+genre = The kinds of music or talk the station plays, as the directory lists them.
+hls = Whether the stream uses HLS, a streaming method some players need to handle differently.
+homepage = The station's own web site.
+language = The language the station broadcasts in.
+last_check = When the directory last found the stream working, as year-month-day.
+last_played = When you last played the station in DbDo.
+last_seen = When DbDo last found the station in the directory.
+name = The station's name as Radio Browser or SomaFM gives it.
+owner = Who owns the station.
+playlist_url = The address of a playlist file that leads to the stream, when the directory gives one.
+plays = How many times you have played the station in DbDo.
+probed = When DbDo last asked the stream and home page about themselves.
+rating = Your own rating of the station, from 1 to 5.
+slogan = The station's own slogan, from its stream or home page.
+source = Which directory the station came from: Radio Browser, SomaFM, or mine for your own.
+source_id = The station's id in that directory, which keeps it the same station across refreshes.
+state = The state or region the station is in.
+status = Your own verdict on the station, such as favorite, tried, untried, want to try or dead; F4 offers the choices.
+stream_url = The address of the audio stream itself, which the player plays.
+trend = Whether plays are rising or falling lately on Radio Browser.
+votes = How many people have voted for the station on Radio Browser.
+wikipedia = The web address of the station's Wikipedia article.
+
+[RecipeTrail/ingredients]
+category = What kind of ingredient it is, such as produce, dairy or spice; F4 offers the choices.
+name = The ingredient's name.
+
+[RecipeTrail/recipes]
+cook_minutes = How long the cooking takes, in minutes.
+course = Where it fits in a meal, such as main, side or dessert; F4 offers the choices.
+cuisine = The cooking tradition, such as Italian or Mexican; F4 offers the choices.
+image = Where a picture of the dish is, as a file path or web address.
+name = The recipe's name.
+prep_minutes = How long the preparation takes, in minutes.
+servings = How many people it serves.
+steps = How to make it, one step per line or paragraph.
+summary = What the dish is, in a sentence or two.
+
+[TechTraining/presentations]
+category = The topic area, such as screen readers, phones or the web; F4 offers the choices.
+medium = Its form, such as audio, video or webinar.
+minutes = How long it runs, in minutes.
+presenter = Who gives the presentation.
+resources = Links and notes that go with the presentation.
+series = The series it belongs to, if any.
+source = Who publishes it.
+source_url = The web address of the recording.
+summary = What it covers, in a few sentences.
+title = The presentation's title.
+year = The year it was given.
+
+[chinook/albums]
+artist_id = The artist who recorded the album, by their number in artists.
+title = The album's title.
+
+[chinook/artists]
+name = The artist's or band's name.
+
+[chinook/customers]
+city = The customer's city.
+company = The customer's company, if any.
+country = The customer's country.
+email = The customer's email address.
+employee_id = The sales agent who looks after the customer.
+first_name = The customer's given name.
+last_name = The customer's family name.
+phone = The customer's phone number.
+
+[chinook/employees]
+city = The employee's city.
+country = The employee's country.
+first_name = The employee's given name.
+last_name = The employee's family name.
+phone = The employee's phone number.
+title = The employee's job title.
+
+[chinook/genres]
+name = The genre's name.
+
+[chinook/invoice_items]
+invoice_id = The invoice this line belongs to.
+quantity = How many copies were sold.
+track_id = The track sold.
+unit_price = The price of one copy.
+
+[chinook/invoices]
+billing_city = The city of the billing address.
+billing_country = The country of the billing address.
+customer_id = The customer billed.
+invoice_date = When the sale was made.
+total = The total of the invoice.
+
+[chinook/media_types]
+name = The file format, such as MPEG audio or AAC.
+
+[chinook/tracks]
+album_id = The album the track is on.
+composer = Who wrote the music.
+genre_id = The track's genre.
+media_type_id = The track's file format.
+milliseconds = How long the track runs, in thousandths of a second.
+name = The track's title.
+unit_price = What one copy of the track costs.
+
+[northwind/categories]
+category_id = The category's own number.
+description = What the category holds.
+name = The category's name, such as Beverages.
+
+[northwind/customers]
+city = The customer's city.
+company = The customer company's name.
+contact = The person to contact there.
+country = The customer's country.
+phone = The customer's phone number.
+
+[northwind/employees]
+city = The employee's city.
+country = The employee's country.
+first_name = The employee's given name.
+last_name = The employee's family name.
+phone = The employee's phone number.
+title = The employee's job title.
+
+[northwind/order_details]
+discount = The discount given, as a fraction such as 0.1 for ten percent.
+order_id = The order this line belongs to.
+product_id = The product ordered.
+quantity = How many units were ordered.
+unit_price = The price of one unit.
+
+[northwind/orders]
+customer_id = The customer who placed the order.
+employee_id = The employee who took the order.
+order_date = When the order was placed.
+ship_city = The city the order ships to.
+ship_country = The country the order ships to.
+shipper_id = The company shipping the order.
+
+[northwind/products]
+category_id = The product's category.
+name = The product's name.
+supplier_id = The company that supplies the product.
+unit_price = The price of one unit.
+units_in_stock = How many units are in stock.
+
+[northwind/shippers]
+name = The shipping company's name.
+phone = The shipper's phone number.
+
+[northwind/suppliers]
+city = The supplier's city.
+contact = The person to contact there.
+country = The supplier's country.
+name = The supplier company's name.
+phone = The supplier's phone number.
+
+[lookups]
+descrip = A one-sentence description: of the value, or of the field itself when val is empty, which Shift+F1 says.
+fld = The field a choice or description belongs to.
+ordinal = Where the value comes in F4's list, smallest first.
+src = Where the row came from, such as the template's name.
+tbl = The table a choice or description belongs to; * means every table.
+val = One value F4 offers for that field; empty when the row describes the field itself.
+
+[maps]
+kind = What the link means, such as member of or wrote.
+prime1 = The prime of the record in the first table.
+prime2 = The prime of the record in the second table.
+tbl1 = The first table of a link between two records.
+tbl2 = The second table of the link.
+
+[views]
+fld = Which setting is saved: the columns shown, the order or the filter.
+tbl = The table a saved view belongs to.
+val = The saved setting itself.

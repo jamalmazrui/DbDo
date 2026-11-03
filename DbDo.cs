@@ -4682,6 +4682,29 @@ namespace DbDo
         // Pick Value command). Convention over configuration: any
         // table whose rows carry matching tbl and fld values opts
         // that field into pick lists with no further setup.
+        // getFieldDescriptions: WHAT EACH FIELD IS FOR, FROM THE LOOKUPS TABLE (3 November 2026). A row of lookups
+        // with tbl and fld filled, val empty and descrip written describes the field itself, in one sentence;
+        // tbl = '*' describes a field of that name in every table, such as notes or added, and a table's own row
+        // wins over it. getLookupValues never offers such a row, since it has no val. The record, new-record and
+        // filter forms put the sentence first in each field's tip, which Shift+F1 says. Missing lookups table or
+        // descrip column: an empty answer, never an error.
+        public Dictionary<string, string> getFieldDescriptions(string sTbl)
+        {
+            Dictionary<string, string> dOut = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (!isOpen() || string.IsNullOrEmpty(sTbl)) return dOut;
+            try
+            {
+                int iFound;
+                string sSql = "SELECT fld, descrip FROM lookups WHERE (tbl = '" + sTbl.Replace("'", "''") + "' OR tbl = '*')"
+                    + " AND coalesce(val, '') = '' AND coalesce(descrip, '') <> ''"
+                    + " ORDER BY CASE WHEN tbl = '*' THEN 1 ELSE 0 END";
+                foreach (string[] aRow in queryRowsSql(sSql, 2000, out iFound))
+                    if (aRow.Length > 1 && aRow[0].Length > 0 && !dOut.ContainsKey(aRow[0])) dOut[aRow[0]] = aRow[1].Trim();
+            }
+            catch (Exception exceptionDesc) { try { DbDoLog.write("Field descriptions not read for " + sTbl + ": " + exceptionDesc.Message); } catch { } }
+            return dOut;
+        }
+
         public List<string> getLookupValues(string sTbl, string sFld, int iMaxRows)
         {
             int iFound;
@@ -10334,6 +10357,13 @@ namespace DbDo
             // doc comment are left exactly as before.
             Dictionary<string, string> dColumnDoc =
                 new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            // The lookups table's field descriptions come first (3 November 2026); a schema doc comment fills in
+            // only for a field lookups does not describe.
+            if (inputMgr != null)
+            {
+                try { foreach (KeyValuePair<string, string> kv in inputMgr.getFieldDescriptions(sTableName)) dColumnDoc[kv.Key] = kv.Value; }
+                catch { }
+            }
             if (inputMgr != null)
             {
                 try
@@ -11197,19 +11227,24 @@ namespace DbDo
             using (LbcDialog dlg = new LbcDialog(sTitle, owner))
             {
                 dlg.helpNote = helpText();
-                lbNames = dlg.addPickBox("&Fields:", lsNames, sInitialSelection, null);
+                // ONE DIALOG, TWO PURPOSES, ITS OWN WORDS FOR EACH (3 November 2026). Order Records sorts by fields;
+                // Choose columns, from Select Columns, arranges the grid's columns. Every name has two words, and
+                // the letters: sort -- F, A, D, O, P, R, E; columns -- C, A, S, L, R, E.
+                string sNoun = bSortStyle ? "field" : "column";
+                lbNames = dlg.addPickBox(bSortStyle ? "&Fields available:" : "&Columns available:", lsNames, sInitialSelection, null);
                 dlg.addBand();
                 if (bSortStyle) addSortButtons(dlg); else addSelectButton(dlg);
                 dlg.endBand();
-                lbPicks = dlg.addPickBox("&Picks:", lsInitialChosen, null, null);
+                lbPicks = dlg.addPickBox(bSortStyle ? "&Order of fields:" : "Columns &shown:", lsInitialChosen, null, null);  // O, not S: the key check reads both names and counts S twice
                 dlg.addBand();
                 // DEFAULT ORDER (29 October 2026): Picks becomes the table's default --
                 // prime's fields for a sort, look's fields for columns -- each field
                 // back in Fields first. The letter is O: D is Add Descending's.
+                // The default is named for what it is: prime's order for a sort, look's columns for the grid.
                 if (lsDefaultPicks != null && lsDefaultPicks.Count > 0)
-                    dlg.addButton("Default &Order").Click += (oSender, evA) => defaultClicked();
-                dlg.addButton("&Remove").Click += (oSender, evA) => removeClicked();
-                dlg.addButton("&Clear").Click += (oSender, evA) => clearClicked();
+                    dlg.addButton(bSortStyle ? "&Prime order" : "&Look columns").Click += (oSender, evA) => defaultClicked();
+                dlg.addButton("&Remove " + sNoun).Click += (oSender, evA) => removeClicked();
+                dlg.addButton("&Empty list").Click += (oSender, evA) => clearClicked();
                 dlg.endBand();
 
                 // Plain Enter belongs to the lists (add or remove) rather than to OK;
@@ -11240,13 +11275,13 @@ namespace DbDo
         // or Add.
         private void addSortButtons(LbcDialog dlg)
         {
-            dlg.addButton("Add &Ascending").Click += (oSender, evA) => addClicked("asc");
-            dlg.addButton("Add &Descending").Click += (oSender, evA) => addClicked("desc");
+            dlg.addButton("Add &ascending").Click += (oSender, evA) => addClicked("asc");
+            dlg.addButton("Add &descending").Click += (oSender, evA) => addClicked("desc");
         }
 
         private void addSelectButton(LbcDialog dlg)
         {
-            dlg.addButton("&Add").Click += (oSender, evA) => addClicked(null);
+            dlg.addButton("&Add column").Click += (oSender, evA) => addClicked(null);
         }
 
         // bareName: a pick without its sort-mode direction suffix.
@@ -11342,14 +11377,21 @@ namespace DbDo
         private string helpText()
         {
             System.Text.StringBuilder sbHelp = new System.Text.StringBuilder();
-            sbHelp.AppendLine("Fields lists the columns in DbDo's natural order: main fields in table order, then url, tags, notes, marked, look, prime, added, edited and the id.");
-            sbHelp.AppendLine("Picks holds your choices; their order is the order applied.");
             if (bSortStyle)
-                sbHelp.AppendLine("Enter in Fields, or Add Ascending, adds the selected field to Picks in ascending order; Add Descending adds it in descending order. Each pick reads like: city asc.");
+            {
+                sbHelp.AppendLine("Fields available lists the fields in DbDo's natural order: main fields in table order, then url, tags, notes, marked, look, prime, added, edited and the id.");
+                sbHelp.AppendLine("Order of fields holds the order chosen: the first field sorts first. Each reads like: city asc.");
+                sbHelp.AppendLine("Enter in Fields available, or Add ascending, adds the selected field ascending; Add descending adds it descending.");
+                sbHelp.AppendLine("Prime order puts prime's fields in Order of fields: the table's default order. Remove field, or Enter or Delete in Order of fields, puts the selected one back. Empty list clears Order of fields at once.");
+            }
             else
-                sbHelp.AppendLine("Enter in Fields, or Add, adds the selected field to the end of Picks.");
-            sbHelp.AppendLine("Default Order puts the table's default in Picks: prime's fields for a sort, look's fields for columns. Remove, or Enter or Delete in Picks, returns the selected pick to its place in Fields. Clear empties Picks at once.");
-            sbHelp.AppendLine("OK applies the picks; with no picks it returns to the default. Escape cancels.");
+            {
+                sbHelp.AppendLine("Columns available lists the columns in DbDo's natural order: main columns in table order, then url, tags, notes, marked, look, prime, added, edited and the id.");
+                sbHelp.AppendLine("Columns shown holds the grid's columns in the order they will appear.");
+                sbHelp.AppendLine("Enter in Columns available, or Add column, adds the selected column to the end of Columns shown.");
+                sbHelp.AppendLine("Look columns puts look's columns in Columns shown: the table's default. Remove column, or Enter or Delete in Columns shown, puts the selected one back. Empty list clears Columns shown at once.");
+            }
+            sbHelp.AppendLine("OK applies the list; an empty list returns to the default. Escape cancels. Shift+F1 on any control says what it does.");
             return sbHelp.ToString();
         }
     }
@@ -14441,7 +14483,7 @@ namespace DbDo
             // and when on, intercept hotkeys to announce them rather
             // than execute them.
             miHelpTraceCommand = addItem(miHelp, "&Key Describer Toggle",           "Key Describer Toggle", Keys.Control | Keys.F1,             helpTraceCommandClicked);
-            miHelpStatus       = addItem(miHelp, "&Where Am I",                            "Show Status",       Keys.None,                          helpStatusClicked);
+            miHelpStatus       = addItem(miHelp, "&Where Am I",                            "Show Status",       Keys.Alt | Keys.Shift | Keys.OemQuestion, helpStatusClicked);  // Alt+Shift+Slash, the question key, as in every Lbc dialog (3 November 2026)
             miHelpEmailLog     = addItem(miHelp, "&Email Log File...",                   "Email Log",         Keys.None,                          emailLogClicked);
             // Toggle-Extra-Speech: silence DbDo's direct speech
             // messages without affecting the screen reader's natural
@@ -15996,7 +16038,7 @@ namespace DbDo
             {
                 using (LbcDialog dlg = new LbcDialog(sTitle ?? "Information", this))
                 {
-                    TextBox tb = dlg.addMemoBox("&Information:", sBody ?? "", null);
+                    TextBox tb = dlg.addMemoBox("&Information shown:", sBody ?? "", null);
                     tb.ReadOnly = true;
                     // We do not need to capture an OK/Cancel result --
                     // either button just closes the dialog. runWithButtons
@@ -20766,10 +20808,10 @@ namespace DbDo
                 using (LbcDialog dlgHow = new LbcDialog("Add Table", this))
                 {
                     dlgHow.addLabel("Define a new table, or clone the fields of " + sFrom + "?");
-                    sChoice = dlgHow.runWithButtons(new string[] { "Define", "Clone", "Cancel" });
+                    sChoice = dlgHow.runWithButtons(new string[] { "&Define table", "&Clone fields", "Cancel" });
                 }
                 if (string.IsNullOrEmpty(sChoice) || string.Equals(sChoice, "Cancel", StringComparison.OrdinalIgnoreCase)) return;
-                if (string.Equals(sChoice, "Clone", StringComparison.OrdinalIgnoreCase))
+                if (string.Equals(sChoice, "Clone fields", StringComparison.OrdinalIgnoreCase))
                 {
                     lStart = db.userColumns(sFrom);
                     if (lStart.Count == 0) { Say.say(sFrom + " has no fields of its own to clone"); return; }
@@ -23668,9 +23710,9 @@ namespace DbDo
                     : sBaseTip;
                 TextBox tb;
                 if (sOriginal.IndexOf('\n') >= 0 || sOriginal.Length > 100)
-                    tb = dlg.addMemoBox("&Value:", sOriginal, sFullTip);
+                    tb = dlg.addMemoBox("Field &value:", sOriginal, sFullTip);
                 else
-                    tb = dlg.addInputBox("Value:", sOriginal, sFullTip);
+                    tb = dlg.addInputBox("Field &value:", sOriginal, sFullTip);
                 LbcTextBox tbLbc = tb as LbcTextBox;
                 if (tbLbc != null && bHasLookups) tbLbc.lsLookupValues = lsCellLookups;
                 if (!dlg.runOkCancel()) return;
@@ -25400,7 +25442,7 @@ namespace DbDo
             using (LbcDialog dlg = new LbcDialog("List Bookmarks", this))
             {
                 dlg.addLabel("Select a bookmark to navigate to:");
-                ListBox lb = dlg.addListBox("Bookmarks", lDisplay, lDisplay[0]);
+                ListBox lb = dlg.addListBox("&Bookmarks saved:", lDisplay, lDisplay[0]);
                 if (!dlg.runOkCancel()) return;
                 iChosen = lb.SelectedIndex;
             }
@@ -25457,7 +25499,7 @@ namespace DbDo
             using (LbcDialog dlg = new LbcDialog("Clear Bookmark", this))
             {
                 dlg.addLabel("Clear all bookmarks (default), or select one to clear:");
-                ListBox lb = dlg.addListBox("Bookmarks", lDisplay, lDisplay[0]);
+                ListBox lb = dlg.addListBox("&Bookmarks saved:", lDisplay, lDisplay[0]);
                 sBtn = dlg.runWithButtons(new string[] {
                     "Clear &All",
                     "Clear &Selected",
@@ -25591,7 +25633,7 @@ namespace DbDo
                 dlgAsk.addLabel("Bring your " + sName + " up to date from the template installed with DbDo. Merge adds what the template has "
                     + "and your copy lacks, and keeps everything of yours. Replace makes your copy the template again; your copy as it is "
                     + "now is kept beside it as a dated backup.");
-                sChoice = dlgAsk.runWithButtons(new string[] { "Merge", "Replace", "Cancel" });
+                sChoice = dlgAsk.runWithButtons(new string[] { "&Merge template", "&Replace copy", "Cancel" });
             }
             if (string.IsNullOrEmpty(sChoice) || sChoice.StartsWith("Cancel", StringComparison.OrdinalIgnoreCase)) return;
             DbDoLog.write(sTitle + ": " + sChoice + " " + sCopy + " from " + sTemplate);
@@ -25752,7 +25794,7 @@ namespace DbDo
                 {
                     dlgAsk.addLabel("Merging " + Path.GetFileName(sOther) + " into " + Path.GetFileName(db.filePath)
                         + ". Records it holds that are not here are added. For records that are already here:");
-                    sChoice = dlgAsk.runWithButtons(new string[] { "Add new only", "Update", "Fill blanks", "Newer wins", "Cancel" });
+                    sChoice = dlgAsk.runWithButtons(new string[] { "&Add new only", "&Update records", "&Fill blanks", "&Newer wins", "Cancel" });
                 }
                 if (string.IsNullOrEmpty(sChoice) || sChoice.StartsWith("Cancel", StringComparison.OrdinalIgnoreCase)) return;
                 string sPolicy = "keep";
@@ -25915,19 +25957,21 @@ namespace DbDo
                 sOldSpoken = sOldSpoken.Length > 0 ? sOldSpoken + " and " + sAdo : sAdo;
             }
 
-            const string sNew = "New";
-            const string sClear = "Clear";
-            const string sNarrow = "Narrow";
-            const string sExpand = "Expand";
+            // TWO WORDS EACH, AND EXPAND EVERYWHERE (3 November 2026): the other Filter Records dialog said Widen for
+            // what this one called Expand; both now say Expand filter.
+            const string sNew = "Start over";  // not New filter: New would take N, which Narrow filter keeps
+            const string sClear = "Clear filter";
+            const string sNarrow = "Narrow filter";
+            const string sExpand = "Expand filter";
             // INVERT (19 October 2026, from DbDialog's filter choices): the records the
             // filter in force leaves out. Exact now that the filter is one SQL condition.
-            const string sInvert = "Invert";
+            const string sInvert = "Invert filter";
             string sCombine = sNew;
             if (sOldWhere.Length > 0)
             {
                 List<string> lsLines = new List<string>();
                 lsLines.Add("In force: " + sOldSpoken);
-                lsLines.Add("New starts over. Clear shows every record again. Narrow keeps only the records that also meet a new condition. Expand also takes in the records that meet a new condition. Invert shows the records this filter leaves out.");
+                lsLines.Add("Start over begins a new filter. Clear filter shows every record again. Narrow filter keeps only the records that also meet a new condition. Expand filter also takes in the records that meet a new condition. Invert filter shows the records this filter leaves out. Shift+F1 on a button says what it does.");
                 string sChoice = chooseByButtons("Filter Records", lsLines, new List<string> { sNew, sClear, sNarrow, sExpand, sInvert });
                 if (sChoice == null) return;
                 if (sChoice == sClear) { clearFilterKeepingRecord(); return; }
@@ -26018,14 +26062,14 @@ namespace DbDo
             // filtered while the common ones stay one step away. Each box follows the
             // natural order, which is also the Tab order.
             string sGroup = chooseByButtons("Filter Fields",
-                new List<string> { "Main gives a box for each field about the table's subject. Standard gives url, tags, notes, marked, look, prime, added, edited and the id. All gives every field." },
-                new List<string> { "Main", "Standard", "All" });
+                new List<string> { "Main fields gives a box for each field about the table's subject. Standard fields gives url, tags, notes, marked, look, prime, added, edited and the id. All fields gives every field." },
+                new List<string> { "Main fields", "Standard fields", "All fields" });
             if (sGroup == null) return false;
             List<string> lFields = new List<string>();
             foreach (string sF in db.getNaturalFieldNames())
             {
                 bool bMain = Metadata.fieldKind(sF, db.currentTable) == Metadata.KindMain;
-                if (sGroup == "All" || (sGroup == "Main") == bMain) lFields.Add(sF);
+                if (sGroup == "All fields" || (sGroup == "Main fields") == bMain) lFields.Add(sF);
             }
             if (lFields.Count == 0) { Say.sayForced("This table has no " + sGroup.ToLowerInvariant() + " fields."); return false; }
             Dictionary<string, string> dInitial = new Dictionary<string, string>();
@@ -26065,12 +26109,12 @@ namespace DbDo
             string sExistingFilter = db.filter ?? "";
             bool bFieldFilter = !string.IsNullOrEmpty(sExistingFilter);
             bool bSqlFilter = !string.IsNullOrEmpty(db.sqlFilter);
-            const string sAny = "Any Field";
-            const string sFields = "Fields";
-            const string sClear = "Clear";
-            const string sEdit = "Edit";
-            const string sNarrow = "Narrow";
-            const string sWiden = "Widen";
+            const string sAny = "Any field";
+            const string sFields = "Field boxes";
+            const string sClear = "Clear filter";
+            const string sEdit = "Edit filter";
+            const string sNarrow = "Narrow filter";
+            const string sWiden = "Expand filter";
             // FILTER RECORDS IS A BUTTON DIALOG (10 October 2026): its choices are DbDo's own actions, not data, so they
             // are buttons rather than a pick list; the explanation each list entry carried is now a line above them.
             List<string> lsChoices = new List<string> { sAny, sFields };
@@ -26086,8 +26130,8 @@ namespace DbDo
                 if (bFieldFilter) lsNow.Add("where " + sExistingFilter);
                 lsLines.Add("In force: " + string.Join("; and ", lsNow.ToArray()));
             }
-            lsLines.Add("Any Field finds text wherever it is. Fields gives each field a value and an operator.");
-            if (bFieldFilter || bSqlFilter) lsLines.Add("Narrow keeps only the records that also meet new conditions; Widen also takes in records that meet them.");
+            lsLines.Add("Any field finds text wherever it is. Field boxes gives each field a value and an operator.");
+            if (bFieldFilter || bSqlFilter) lsLines.Add("Narrow filter keeps only the records that also meet new conditions; Expand filter also takes in records that meet them.");
             string sChoice = chooseByButtons("Filter Records", lsLines, lsChoices);
             if (sChoice == null) return;
 
@@ -27383,7 +27427,7 @@ namespace DbDo
 
             using (LbcDialog dlg = new LbcDialog("Database Summary", this))
             {
-                dlg.addMemoBox("&Summary", sb.ToString().TrimEnd(),
+                dlg.addMemoBox("Database &summary:", sb.ToString().TrimEnd(),
                     "Read-only overview. Each table shows its record count and its related tables, with the related tables' record counts in parentheses.");
                 dlg.runWithButtons(new string[] { "OK" });
             }
@@ -28400,14 +28444,14 @@ namespace DbDo
             {
                 TextBox tbFind = dlg.addInputBox(sSearchLabel + ":",
                     SearchHistory.lastText(SearchHistory.SectionReplace));
-                TextBox tbRepl = dlg.addInputBox("Replace with"
+                TextBox tbRepl = dlg.addInputBox("&Replace with"
                     + (bIsRegex ? " (use $1, $2 for groups)" : "")
                     + ":", SearchHistory.lastText(SearchHistory.SectionReplaceWith));
                 // Replace Column is substring and case-insensitive by
                 // definition (v1.0.108 centralization); only the regex
                 // flavor offers a case choice.
                 CheckBox cbCase = bIsRegex
-                    ? dlg.addCheckBox("Case-&sensitive", false, null)
+                    ? dlg.addCheckBox("Case &sensitive", false, null)
                     : null;
                 CheckBox cbDry  = dlg.addCheckBox("&Dry run (count only, no changes)", false,
                     "Run the replacement but do not write changes. Useful for sanity-checking how many cells would be affected before committing.");
@@ -29330,7 +29374,7 @@ namespace DbDo
             {
                 dlg.addLabel(sPrompt);
                 dlg.addSeparator();
-                ComboBox cb = dlg.addComboPickBox("Column:", lCandidates, sDefault, "Pick a column");
+                ComboBox cb = dlg.addComboPickBox("&Column name:", lCandidates, sDefault, "Pick a column");
                 if (!dlg.runOkCancel()) return null;
                 string s = (cb.SelectedItem ?? "").ToString();
                 return string.IsNullOrEmpty(s) ? null : s;
@@ -29571,7 +29615,7 @@ namespace DbDo
                 string sDefaultCol = currentVirtualColumnName();
                 if (string.IsNullOrEmpty(sDefaultCol) || !lCols.Contains(sDefaultCol))
                     sDefaultCol = lCols[0];
-                ComboBox cbCol = dlg.addComboPickBox("Column:",
+                ComboBox cbCol = dlg.addComboPickBox("Chart &column:",
                     lCols, sDefaultCol,
                     "Pick a categorical column with a few distinct values");
                 if (!dlg.runOkCancel()) return;
@@ -31274,7 +31318,7 @@ namespace DbDo
             string[] aNames = new List<string>(dScripts.Keys).ToArray();
             using (LbcDialog dlg = new LbcDialog("Invoke Script", this))
             {
-                dlg.addLabel("&Script:");
+                dlg.addLabel("&Script name:");
                 ListBox lb = dlg.addListBox(aNames, aNames[0], null);
                 if (!dlg.runOkCancel()) return;
                 if (lb.SelectedItem == null) return;
@@ -31339,7 +31383,7 @@ namespace DbDo
                 string sPicked;
                 using (LbcDialog dlg = new LbcDialog("Edit Script", this))
                 {
-                    dlg.addLabel("&Script:");
+                    dlg.addLabel("&Script name:");
                     ListBox lb = dlg.addListBox(aChoices, aChoices[0], null);
                     if (!dlg.runOkCancel()) return;
                     if (lb.SelectedItem == null) return;
@@ -37362,6 +37406,9 @@ namespace DbDo
             {
                 Application.EnableVisualStyles();
                 Application.SetCompatibleTextRenderingDefault(false);
+                // A DIALOG'S summaryScript RUNS AS JSCRIPT .NET (3 November 2026): Lbc's Where Am I adds what a
+                // dialog's script returns, with $title, $focus, $value and $count bound, through this evaluator.
+                Homer.LbcHints.scriptEvaluator = (sScript, dVars) => JScriptExpr.eval(sScript, "", dVars);
 
                 // THE HOMER SESSION LOG AND FOLDER LAYOUT.
                 //

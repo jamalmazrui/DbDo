@@ -20,3 +20,67 @@ Standard columns = Shows only the standard columns: url, tags, notes, marked, lo
 All columns = Shows every column of the table.
 Choose columns = Lets you pick the columns one by one, in the order they should appear.
 Type columns = Lets you type the column names, separated by commas, in the order they should appear.
+Columns available = The columns not yet shown, in DbDo's natural order; Enter adds the one you are on to the end of Columns shown.
+Add column = Adds the column selected in Columns available to the end of Columns shown.
+Columns shown = The grid's columns in the order they will appear; Enter or Delete puts one back.
+Remove column = Takes the column selected in Columns shown out of it and back into Columns available.
+Empty list = Clears the list at once, so OK returns to the default.
+
+[Order Records]
+Fields available = The fields not yet in the sort, in DbDo's natural order; Enter adds the one you are on, ascending.
+Add ascending = Adds the selected field to the sort, smallest or earliest first.
+Add descending = Adds the selected field to the sort, largest or latest first.
+Order of fields = The sort, first field first; each reads like city asc, and Enter or Delete takes one out.
+Prime order = Fills the sort with prime's fields in prime's order: the table's default order.
+Remove field = Takes the field selected in Order of fields out of the sort.
+Empty list = Clears the sort at once, so OK returns to the default order.
+
+[Filter Records]
+Start over = Begins a new filter, replacing the one in force.
+Clear filter = Removes the filter, so every record shows again.
+Narrow filter = Keeps only the records that also meet a new condition.
+Expand filter = Also takes in the records that meet a new condition.
+Invert filter = Shows the records this filter leaves out, and hides the ones it keeps.
+Edit filter = Opens the filter in force so its values can be changed.
+Any field = Finds records holding some text in any field.
+Field boxes = Gives a box for each field, where a value and an operator such as >= or a range such as 2025..2026 can be typed.
+
+[Filter Fields]
+Main fields = Gives a box for each field about the table's subject.
+Standard fields = Gives a box for url, tags, notes, marked, look, prime, added, edited and the id.
+All fields = Gives a box for every field of the table.
+
+[Add Table]
+Define table = Starts a new table from blank, naming its fields one by one.
+Clone fields = Starts a new table with the same fields as the table now open, and none of its records.
+
+[Update from Template]
+Merge template = Adds what the template has and your copy lacks, keeping everything of yours.
+Replace copy = Makes your copy the template again, keeping your old copy beside it as a dated backup.
+
+[Merge Database]
+Add new only = Adds records this database lacks, and leaves every record already here as it is.
+Update records = Adds new records, and replaces each matching record here with the other database's.
+Fill blanks = Adds new records, and fills only the empty fields of matching records here.
+Newer wins = Adds new records, and for a matching record keeps whichever was edited last.
+
+[List Bookmarks]
+Bookmarks saved = Your bookmarks, by table and record; Enter goes to the one you are on.
+
+[Clear Bookmark]
+Bookmarks saved = Your bookmarks, by table and record; pick one to clear, or clear them all.
+
+[Edit Cell]
+Field value = The value of this field in this record; Control+Enter saves it.
+
+[Database Summary]
+Database summary = The tables of this database, their fields and record counts; read it by line, or copy it.
+
+[Graphics Grid]
+Chart column = The column to chart; the chart shows how often each value appears in the records shown.
+
+[Invoke Script]
+Script name = The scripts you can run; Enter runs the one you are on.
+
+[Edit Script]
+Script name = The scripts you can open for editing; Enter opens the one you are on.

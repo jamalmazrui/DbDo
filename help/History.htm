@@ -252,6 +252,18 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a href="#november-2026-what-each-field-is-for"
+id="toc-november-2026-what-each-field-is-for">3 November 2026 – What
+each field is for</a></li>
+<li><a href="#november-2026-where-am-i-in-every-dialog"
+id="toc-november-2026-where-am-i-in-every-dialog">3 November 2026 –
+Where Am I, in every dialog</a></li>
+<li><a href="#november-2026-recordwalk-a-recorded-walk"
+id="toc-november-2026-recordwalk-a-recorded-walk">3 November 2026 –
+recordWalk, a recorded walk</a></li>
+<li><a href="#november-2026-one-way-of-naming-things-in-every-dialog"
+id="toc-november-2026-one-way-of-naming-things-in-every-dialog">3
+November 2026 – One way of naming things in every dialog</a></li>
 <li><a href="#november-2026-select-columns-simpler"
 id="toc-november-2026-select-columns-simpler">3 November 2026 – Select
 Columns, simpler</a></li>
@@ -596,6 +608,86 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="november-2026-what-each-field-is-for">3 November 2026 – What
+each field is for</h2>
+<ul>
+<li><strong>Shift+F1 on a field says what it is for,</strong> in the
+record, new-record and filter forms, from the database’s own lookups
+table. A row of lookups with tbl and fld filled, val empty and descrip
+written describes the field itself; tbl <code>*</code> covers a field of
+that name in every table, such as notes or added, and a table’s own row
+wins. The F4 choices are unchanged: they are the rows that have a
+val.</li>
+<li><strong>Every field of every template is described,</strong> 309
+sentences in templates.inix, which scriptswrites into each template’s
+lookups when DbDo builds: 585 rows across the eleven templates. A
+sentence someone wrote is never replaced, and Update from Template
+brings the descriptions into your own copies.</li>
+<li><strong>Order of fields,</strong> not Sort fields, in Order Records,
+on Alt+O. The key check counted S twice in the dialog it shares with
+Choose columns, and stopped the push.</li>
+</ul>
+<h2 id="november-2026-where-am-i-in-every-dialog">3 November 2026 –
+Where Am I, in every dialog</h2>
+<ul>
+<li><strong>Where Am I on Alt+Shift+Slash, Alt and the question mark, in
+every dialog, and on the Help menu’s Where Am I in the main
+window.</strong> Pressed once it says the dialog, what it is for – its
+first line of text, or the first sentence of its help – and the control
+with focus: name, kind, value and place, such as “3 of 9”. Twice, every
+control in Tab order with its kind and what it holds. Three times, the
+keys the whole dialog answers. The key was free everywhere: the F1
+family is taken in main windows, Alt+Shift+Q is DbDo’s Query History and
+Alt+Q HomerView’s lookup, Alt+Slash is EdSharp’s Say Styles, and the
+kit’s key ownership data shows nothing in JAWS, NVDA or Windows on
+Alt+Shift+Slash.</li>
+<li><strong>Shift+F1 answers more when pressed again:</strong> once, one
+sentence; twice, the control’s whole description; three times, the keys
+that work in it. A press within 1.2 seconds of the last counts as the
+next, as with JAWS’s own keys.</li>
+<li><strong>A dialog may add context of its own</strong> through a
+summaryScript, which the app’s evaluator runs at the moment of asking;
+Lbc itself takes no new reference. DbDo registers its JScript .NET
+evaluator, with $title, $focus, $value and $count bound.</li>
+<li><strong>recordWalk runs:</strong> it loads soundcard before
+pywinauto, which stopped its first three runs.</li>
+</ul>
+<h2 id="november-2026-recordwalk-a-recorded-walk">3 November 2026 –
+recordWalk, a recorded walk</h2>
+<ul>
+<li>**scripts* presses a walk’s keys in DbDo while JAWS runs, records
+what the computer says, writes it down with a local recognizer, and
+reports each step beside what the walk expected, what UI Automation says
+has focus, and what DbDo said in its own speech log. Its first walk,
+scripts.inix, checks the dialogs renamed today: Select Columns, Filter
+Records and Order Records, with Shift+F1.</li>
+</ul>
+<h2 id="november-2026-one-way-of-naming-things-in-every-dialog">3
+November 2026 – One way of naming things in every dialog</h2>
+<ul>
+<li><strong>Columns for the grid, fields for the records.</strong>
+Choose columns and Order Records share one dialog, which named its lists
+Fields and Picks for both. Choosing columns, it now says Columns
+available, Add column, Columns shown and Look columns; ordering records,
+Fields available, Add ascending, Add descending, Sort fields and Prime
+order, prime’s order being the default sort. Both have Remove and Empty
+list.</li>
+<li><strong>One filter vocabulary.</strong> Filter Records’ two button
+dialogs called one action Expand in one and Widen in the other. Every
+filter action is now Start over, Clear filter, Narrow filter, Expand
+filter, Invert filter or Edit filter; the condition is Any field or
+Field boxes; and Filter Fields offers Main fields, Standard fields and
+All fields.</li>
+<li><strong>Two words to a name</strong> in Add Table (Define table,
+Clone fields), Update from Template (Merge template, Replace copy),
+Merge Database (Add new only, Update records, Fill blanks, Newer wins),
+both bookmark lists (Bookmarks saved), Edit Cell (Field value), Database
+Summary, Graphics Column (Chart column), the column picker (Column
+name), the script lists (Script name) and Replace Column (Replace with,
+Case sensitive).</li>
+<li><strong>Shift+F1 hints</strong> for every control in those dialogs,
+in configs.inix.</li>
+</ul>
 <h2 id="november-2026-select-columns-simpler">3 November 2026 – Select
 Columns, simpler</h2>
 <ul>

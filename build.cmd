@@ -154,7 +154,7 @@ rem onSpoken", which names the symptom and not the cause. So the build says the
 rem cause, first. Raise this whenever DbDo starts using something new.
 rem 1.64.5: Play Tutorials calls MediaPlayer.playTutorials, which older kits lack;
 rem a build against 1.64.4 failed to compile on 8 October 2026 rather than saying so.
-set "kitNeeded=1.100.0"
+set "kitNeeded=1.95.0"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -319,6 +319,17 @@ set "iTemplates=!errorlevel!"
 echo Template check: exit code !iTemplates!>> "!log!"
 if not "!iTemplates!"=="0" (
   echo The template check failed. Its log is in logs, named DbDo-checkTemplates with the date and time.
+  popd & exit /b 1
+)
+rem WHAT EACH FIELD IS FOR (3 November 2026): templates\fieldDescriptions.inix holds one sentence per
+rem field, and scripts\describeFields writes them into every template's lookups table, which Shift+F1 reads
+rem in the record, new-record and filter forms. A sentence someone wrote by hand is never replaced.
+echo Field descriptions: python scripts\describeFields.py >> "!log!"
+python "!sHere!scripts\describeFields.py"
+set "iDescribed=!errorlevel!"
+echo Field descriptions: exit code !iDescribed!>> "!log!"
+if not "!iDescribed!"=="0" (
+  echo The field descriptions could not be written. Their log is in logs, named DbDo-describeFields with the date and time.
   popd & exit /b 1
 )
 rem A directory template rebuilt above is recorded now that the check has passed.
@@ -671,20 +682,6 @@ if errorlevel 1 (
     goto :build_failed
 )
 echo NVDA controller client copied from the kit into exec.>> "!log!"
-
-rem ---- the screen reader scripts, packed by the kit (kit 1.98.0) ----
-rem The sources live in the repository, as every Homer app keeps them: scripts\jaws
-rem for the JAWS script and key map, scripts\nvda for the NVDA add-on. The kit's
-rem packScreenReaderSupport packs both the same way -- sources only for JAWS, the
-rem kit's keys.py copied into the add-on for NVDA -- and logs each step.
-call "!homerDev!\scripts\packScreenReaderSupport.cmd" -Root "%~dp0." -App DbDo -Kit "!homerDev!" >> "!log!" 2>&1
-if errorlevel 1 (
-  echo ERROR: the screen reader packages could not be packed; logs\DbDo-packScreenReaderSupport-*.log has the detail.
-  echo ERROR: packScreenReaderSupport failed>> "!log!"
-  goto :build_failed
-)
-echo Screen reader packages packed by the kit.>> "!log!"
-)
 
 rem ---- the kit's conversion routes, beside the program (19 October 2026) ----
 rem Conversion reads exec\conversions.inix to choose the way for each conversion;

@@ -5,6 +5,30 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 3 November 2026 -- What each field is for
+
+- **Shift+F1 on a field says what it is for,** in the record, new-record and filter forms, from the database's own lookups table. A row of lookups with tbl and fld filled, val empty and descrip written describes the field itself; tbl `*` covers a field of that name in every table, such as notes or added, and a table's own row wins. The F4 choices are unchanged: they are the rows that have a val.
+- **Every field of every template is described,** 309 sentences in templates\fieldDescriptions.inix, which scripts\describeFields writes into each template's lookups when DbDo builds: 585 rows across the eleven templates. A sentence someone wrote is never replaced, and Update from Template brings the descriptions into your own copies.
+- **Order of fields,** not Sort fields, in Order Records, on Alt+O. The key check counted S twice in the dialog it shares with Choose columns, and stopped the push.
+
+## 3 November 2026 -- Where Am I, in every dialog
+
+- **Where Am I on Alt+Shift+Slash, Alt and the question mark, in every dialog, and on the Help menu's Where Am I in the main window.** Pressed once it says the dialog, what it is for -- its first line of text, or the first sentence of its help -- and the control with focus: name, kind, value and place, such as "3 of 9". Twice, every control in Tab order with its kind and what it holds. Three times, the keys the whole dialog answers. The key was free everywhere: the F1 family is taken in main windows, Alt+Shift+Q is DbDo's Query History and Alt+Q HomerView's lookup, Alt+Slash is EdSharp's Say Styles, and the kit's key ownership data shows nothing in JAWS, NVDA or Windows on Alt+Shift+Slash.
+- **Shift+F1 answers more when pressed again:** once, one sentence; twice, the control's whole description; three times, the keys that work in it. A press within 1.2 seconds of the last counts as the next, as with JAWS's own keys.
+- **A dialog may add context of its own** through a summaryScript, which the app's evaluator runs at the moment of asking; Lbc itself takes no new reference. DbDo registers its JScript .NET evaluator, with $title, $focus, $value and $count bound.
+- **recordWalk runs:** it loads soundcard before pywinauto, which stopped its first three runs.
+
+## 3 November 2026 -- recordWalk, a recorded walk
+
+- **scripts\recordWalk** presses a walk's keys in DbDo while JAWS runs, records what the computer says, writes it down with a local recognizer, and reports each step beside what the walk expected, what UI Automation says has focus, and what DbDo said in its own speech log. Its first walk, scripts\walks\pilot.inix, checks the dialogs renamed today: Select Columns, Filter Records and Order Records, with Shift+F1.
+
+## 3 November 2026 -- One way of naming things in every dialog
+
+- **Columns for the grid, fields for the records.** Choose columns and Order Records share one dialog, which named its lists Fields and Picks for both. Choosing columns, it now says Columns available, Add column, Columns shown and Look columns; ordering records, Fields available, Add ascending, Add descending, Sort fields and Prime order, prime's order being the default sort. Both have Remove and Empty list.
+- **One filter vocabulary.** Filter Records' two button dialogs called one action Expand in one and Widen in the other. Every filter action is now Start over, Clear filter, Narrow filter, Expand filter, Invert filter or Edit filter; the condition is Any field or Field boxes; and Filter Fields offers Main fields, Standard fields and All fields.
+- **Two words to a name** in Add Table (Define table, Clone fields), Update from Template (Merge template, Replace copy), Merge Database (Add new only, Update records, Fill blanks, Newer wins), both bookmark lists (Bookmarks saved), Edit Cell (Field value), Database Summary, Graphics Column (Chart column), the column picker (Column name), the script lists (Script name) and Replace Column (Replace with, Case sensitive).
+- **Shift+F1 hints** for every control in those dialogs, in configs\Hints.inix.
+
 ## 3 November 2026 -- Select Columns, simpler
 
 - **Select Columns says what is shown before it offers a choice:** how many columns, their names, and whether they are the look columns, the default, or the prime columns. Its line of text had never been spoken.

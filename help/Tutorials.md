@@ -1528,7 +1528,7 @@ A planned misstep: Control plus F is not Find here. In DbDo, F is for Filter. Co
 Screen reader:
 
 - Filter Records dialog
-- Any Field button
+- Any field button
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1555,18 +1555,18 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 9: N
 
-Seven: stations in Seattle and Tacoma, in British Columbia and in Idaho. Control plus F again; with a filter in force there are four buttons: New, Clear, Narrow and Expand. N for Narrow keeps seahawks and adds a condition.
+Seven: stations in Seattle and Tacoma, in British Columbia and in Idaho. Control plus F again; with a filter in force there are five buttons: Start over, Clear filter, Narrow filter, Expand filter and Invert filter. N for Narrow keeps seahawks and adds a condition.
 
 Screen reader:
 
 - Narrow Filter dialog
-- Any Field button
+- Any field button
 
 Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 10: F
 
-Narrow asks how to give the new condition, just as the first filter did. F for Fields opens a box for every field.
+Narrow asks how to give the new condition, just as the first filter did. F for Field boxes opens a box for every field.
 
 Screen reader:
 
@@ -1596,7 +1596,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 13: Alt+O
 
-Alt plus O, O for Order, sorts by a column; I choose name, and Enter sorts. In that dialog, Default Order puts back the table's own order.
+Alt plus O, O for Order, sorts by a column; I choose name, and Enter sorts. In that dialog, Prime order puts back the table's own order.
 
 Screen reader:
 

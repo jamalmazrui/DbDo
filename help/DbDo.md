@@ -264,8 +264,8 @@ Marked records can then be reported, filtered, or exported as a set, and several
 Filtering and sorting reshape the grid without touching the physical table.
 
 - **Filter Records** (Control+F) limits the grid to the records that meet a condition.
-  - **How to give a condition.** With no filter in force, it asks at once how to give one. **Any Field** finds text wherever it is, whatever its case. **Fields** gives a box for every field, and a value typed with no operator finds records whose field contains it, whatever its case: `seattle` in RadioTrail's city box finds "Seattle, Washington". A value with no operator also takes the Homer search syntax, reading the field as a name: `*.com` is a value ending in .com, `smith | jones` either, `!draft` not. A value may begin with an operator: `=` is, `!=` is not, `>` more than, `>=` at least, `<` less than, `<=` at most, `%` contains, `!%` does not contain. Is not and does not contain also keep records whose field is empty. Two values joined by two dots give a range, both ends included: `2025..2026` in date_read finds the books finished in those two years, `2026-01-01..2026-03-31` a span of dates, and `5..12` a span of numbers. A year stands for every day in it, since dates are kept as year-month-day. Several filled boxes must all match.
-  - **With a filter in force,** Control+F first offers four buttons. **New** starts over. **Clear** shows every record again and returns you to the list on the same record. **Narrow** keeps only the records that also meet a new condition, joining it with AND. **Expand** also takes in the records that meet a new condition, joining it with OR. Then it asks how to give the new condition, as above.
+  - **How to give a condition.** With no filter in force, it asks at once how to give one. **Any field** finds text wherever it is, whatever its case. **Field boxes** gives a box for every field, and a value typed with no operator finds records whose field contains it, whatever its case: `seattle` in RadioTrail's city box finds "Seattle, Washington". A value with no operator also takes the Homer search syntax, reading the field as a name: `*.com` is a value ending in .com, `smith | jones` either, `!draft` not. A value may begin with an operator: `=` is, `!=` is not, `>` more than, `>=` at least, `<` less than, `<=` at most, `%` contains, `!%` does not contain. Is not and does not contain also keep records whose field is empty. Two values joined by two dots give a range, both ends included: `2025..2026` in date_read finds the books finished in those two years, `2026-01-01..2026-03-31` a span of dates, and `5..12` a span of numbers. A year stands for every day in it, since dates are kept as year-month-day. Several filled boxes must all match.
+  - **With a filter in force,** Control+F first offers its buttons. **Start over** begins a new filter. **Clear filter** shows every record again and returns you to the list on the same record. **Narrow filter** keeps only the records that also meet a new condition, joining it with AND. **Expand filter** also takes in the records that meet a new condition, joining it with OR. Then it asks how to give the new condition, as above.
   - **Grouping.** The condition in force, however many parts it has, is wrapped whole in parentheses before the AND or OR, and the new condition in its own. So narrowing and expanding in turn always mean exactly what was asked. Say Filter (Shift+F) speaks the whole condition, led by "where" and grouped the same way.
   - **Nothing found.** A condition that would keep no record says so and leaves the view as it was.
   - **Clear Filter** (Control+Shift+F) removes the filter, keeping you on the same record. A table that reopens with a filter still in force says so as it opens.
@@ -289,8 +289,14 @@ The dialog first says which columns are shown now, and whether they are the look
 - **Main columns** shows the columns about the table's subject.
 - **Standard columns** shows the standard columns the table has.
 - **All columns** shows every column.
-- **Choose columns** opens two lists, Fields and Picks, with the columns now shown already in Picks, so you can add or drop one; the order of Picks is the order shown.
+- **Choose columns** opens two lists, Columns available and Columns shown, with the columns now shown already in Columns shown, so you can add or drop one; the order of Columns shown is the grid's order. Order Records uses the same dialog for a sort, as Fields available and Order of fields, with Add ascending, Add descending and Prime order.
 - **Type columns** takes the column names separated by commas.
+
+**Where am I, and what does this do?** Alt+Shift+Slash, Alt and the question mark, says where you are: in a dialog, the dialog, what it is for and the control with focus; pressed twice, every control and what it holds; three times, the keys. In the main window it is the Help menu's Where Am I. Shift+F1 says what a control does in one sentence; twice, its whole description; three times, the keys that work in it.
+
+**What each field is for.** In the record, new-record and filter forms, Shift+F1 on a field says what it is for. The sentences are rows of the database's own lookups table: tbl and fld name the field, val is left empty, and descrip holds the sentence; tbl `*` covers a field of that name in every table. Edit a row of lookups to change a sentence. The rows that do have a val are the choices F4 offers for that field.
+
+**How DbDo's dialogs name things.** Every control's name has at least two words, OK, Cancel, Help and Close aside, and its letter begins one of them. Columns are what the grid shows and arranges; fields are what a record holds, which filters and sorts work on. A filter's actions are Start over, Clear filter, Narrow filter, Expand filter, Invert filter and Edit filter wherever they appear. Shift+F1 on any control says what it does in one sentence.
 
 The choice is remembered with the table. **Say Select Columns** (Shift+S) speaks it.
 
@@ -890,10 +896,10 @@ Each has its own letter, and the letter is the first letter of its own word.
     front compares (`>`, `>=`, `<`, `<=`, `!=`). Type dates as year-month-day,
     such as 2026-10-29. Fill in several boxes and they all have to match.
   - **Marked** keeps the records you have marked, and **Unmarked** the rest.
-  - With a filter in force, the list first offers **New** (start over),
-    **Clear** (show every record), **Narrow** (keep only records that also meet
-    a new condition), **Expand** (also take in records that meet one) and
-    **Invert** (the records the filter leaves out).
+  - With a filter in force, the list first offers **Start over** (a new filter),
+    **Clear filter** (show every record), **Narrow filter** (keep only records that also meet
+    a new condition), **Expand filter** (also take in records that meet one) and
+    **Invert filter** (the records the filter leaves out).
   **Control+Shift+F** clears; **Shift+F** says what is in force.
 - **Query, Control+Q** -- write SQL yourself, when you want to.
 

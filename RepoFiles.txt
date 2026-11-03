@@ -40,6 +40,12 @@ ReadMe.htm
 ReadMe.md
 RepoFiles.txt
 scripts/acceptCheck.cmd
+scripts/describeFields.cmd
+scripts/describeFields.py
+# recordWalk (3 November 2026): drives DbDo through a walk under the screen reader and records what is said.
+scripts/recordWalk.cmd
+scripts/recordWalk.py
+scripts/walks/pilot.inix
 # DbDo's screen reader sources (3 November 2026). They were not named here, so tidy moved scripts\jaws and
 # scripts\nvda to notes, every build after that packed no JAWS or NVDA support, and Setup compiled an old
 # DbDo_JAWS.zip left in Program Files. Named one by one, as the scripts are.
@@ -96,3 +102,4 @@ templates/
 templates/RadioTrail/RadioTrail.db
 THIRD-PARTY-NOTICES.txt
 uiTest.inix
+templates/fieldDescriptions.inix

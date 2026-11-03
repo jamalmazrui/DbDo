@@ -22,6 +22,8 @@
 /scripts/jaws/*
 !/scripts/nvda/
 /scripts/nvda/*
+!/scripts/walks/
+/scripts/walks/*
 !/scripts/nvda/appModules/
 /scripts/nvda/appModules/*
 !/scripts/nvda/appModules/homer/
@@ -68,6 +70,8 @@
 !/scripts/checkTemplates.py
 !/scripts/checkTutorial.cmd
 !/scripts/checkTutorial.py
+!/scripts/describeFields.cmd
+!/scripts/describeFields.py
 !/scripts/finish.cmd
 !/scripts/fixEncoding.cmd
 !/scripts/fixEncoding.py
@@ -92,6 +96,8 @@
 !/scripts/nvda/manifest.ini
 !/scripts/nvda/readme.html
 !/scripts/push.cmd
+!/scripts/recordWalk.cmd
+!/scripts/recordWalk.py
 !/scripts/recoverRadioTrail.cmd
 !/scripts/recoverRadioTrail.py
 !/scripts/renameToPrime.sql
@@ -103,7 +109,9 @@
 !/scripts/uiCheck.py
 !/scripts/unpushed.cmd
 !/scripts/unpushed.py
+!/scripts/walks/pilot.inix
 !/templates/
+!/templates/fieldDescriptions.inix
 !/templates/RadioTrail/RadioTrail.db
 !/THIRD-PARTY-NOTICES.txt
 !/uiTest.inix

@@ -46,7 +46,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 Say=A planned misstep: Control plus F is not Find here. In DbDo, F is for Filter. Control plus F shows only the records that match, beginning with a choice offered as buttons.
 Key=Control+F
 Hear=Filter Records dialog
-Hear=Any Field button
+Hear=Any field button
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -66,15 +66,15 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Seven: stations in Seattle and Tacoma, in British Columbia and in Idaho. Control plus F again; with a filter in force there are four buttons: New, Clear, Narrow and Expand. N for Narrow keeps seahawks and adds a condition.
+Say=Seven: stations in Seattle and Tacoma, in British Columbia and in Idaho. Control plus F again; with a filter in force there are five buttons: Start over, Clear filter, Narrow filter, Expand filter and Invert filter. N for Narrow keeps seahawks and adds a condition.
 Key=N
 Hear=Narrow Filter dialog
-Hear=Any Field button
+Hear=Any field button
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Narrow asks how to give the new condition, just as the first filter did. F for Fields opens a box for every field.
+Say=Narrow asks how to give the new condition, just as the first filter did. F for Field boxes opens a box for every field.
 Key=F
 Hear=Filter Records dialog, name: edit
 Note=Confirm the wording with a live run: buildTutorials -live.
@@ -95,7 +95,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Alt plus O, O for Order, sorts by a column; I choose name, and Enter sorts. In that dialog, Default Order puts back the table's own order.
+Say=Alt plus O, O for Order, sorts by a column; I choose name, and Enter sorts. In that dialog, Prime order puts back the table's own order.
 Key=Alt+O
 Hear=Order Records dialog
 Note=Confirm the wording with a live run: buildTutorials -live.

@@ -894,10 +894,10 @@ table.</p>
 records that meet a condition.
 <ul>
 <li><strong>How to give a condition.</strong> With no filter in force,
-it asks at once how to give one. <strong>Any Field</strong> finds text
-wherever it is, whatever its case. <strong>Fields</strong> gives a box
-for every field, and a value typed with no operator finds records whose
-field contains it, whatever its case: <code>seattle</code> in
+it asks at once how to give one. <strong>Any field</strong> finds text
+wherever it is, whatever its case. <strong>Field boxes</strong> gives a
+box for every field, and a value typed with no operator finds records
+whose field contains it, whatever its case: <code>seattle</code> in
 RadioTrail’s city box finds “Seattle, Washington”. A value with no
 operator also takes the Homer search syntax, reading the field as a
 name: <code>*.com</code> is a value ending in .com,
@@ -913,13 +913,14 @@ finds the books finished in those two years,
 <code>5..12</code> a span of numbers. A year stands for every day in it,
 since dates are kept as year-month-day. Several filled boxes must all
 match.</li>
-<li><strong>With a filter in force,</strong> Control+F first offers four
-buttons. <strong>New</strong> starts over. <strong>Clear</strong> shows
-every record again and returns you to the list on the same record.
-<strong>Narrow</strong> keeps only the records that also meet a new
-condition, joining it with AND. <strong>Expand</strong> also takes in
-the records that meet a new condition, joining it with OR. Then it asks
-how to give the new condition, as above.</li>
+<li><strong>With a filter in force,</strong> Control+F first offers its
+buttons. <strong>Start over</strong> begins a new filter. <strong>Clear
+filter</strong> shows every record again and returns you to the list on
+the same record. <strong>Narrow filter</strong> keeps only the records
+that also meet a new condition, joining it with AND. <strong>Expand
+filter</strong> also takes in the records that meet a new condition,
+joining it with OR. Then it asks how to give the new condition, as
+above.</li>
 <li><strong>Grouping.</strong> The condition in force, however many
 parts it has, is wrapped whole in parentheses before the AND or OR, and
 the new condition in its own. So narrowing and expanding in turn always
@@ -963,12 +964,36 @@ subject.</li>
 <li><strong>Standard columns</strong> shows the standard columns the
 table has.</li>
 <li><strong>All columns</strong> shows every column.</li>
-<li><strong>Choose columns</strong> opens two lists, Fields and Picks,
-with the columns now shown already in Picks, so you can add or drop one;
-the order of Picks is the order shown.</li>
+<li><strong>Choose columns</strong> opens two lists, Columns available
+and Columns shown, with the columns now shown already in Columns shown,
+so you can add or drop one; the order of Columns shown is the grid’s
+order. Order Records uses the same dialog for a sort, as Fields
+available and Order of fields, with Add ascending, Add descending and
+Prime order.</li>
 <li><strong>Type columns</strong> takes the column names separated by
 commas.</li>
 </ul>
+<p><strong>Where am I, and what does this do?</strong> Alt+Shift+Slash,
+Alt and the question mark, says where you are: in a dialog, the dialog,
+what it is for and the control with focus; pressed twice, every control
+and what it holds; three times, the keys. In the main window it is the
+Help menu’s Where Am I. Shift+F1 says what a control does in one
+sentence; twice, its whole description; three times, the keys that work
+in it.</p>
+<p><strong>What each field is for.</strong> In the record, new-record
+and filter forms, Shift+F1 on a field says what it is for. The sentences
+are rows of the database’s own lookups table: tbl and fld name the
+field, val is left empty, and descrip holds the sentence; tbl
+<code>*</code> covers a field of that name in every table. Edit a row of
+lookups to change a sentence. The rows that do have a val are the
+choices F4 offers for that field.</p>
+<p><strong>How DbDo’s dialogs name things.</strong> Every control’s name
+has at least two words, OK, Cancel, Help and Close aside, and its letter
+begins one of them. Columns are what the grid shows and arranges; fields
+are what a record holds, which filters and sorts work on. A filter’s
+actions are Start over, Clear filter, Narrow filter, Expand filter,
+Invert filter and Edit filter wherever they appear. Shift+F1 on any
+control says what it does in one sentence.</p>
 <p>The choice is remembered with the table. <strong>Say Select
 Columns</strong> (Shift+S) speaks it.</p>
 <h3 id="kinds-of-fields">Kinds of fields</h3>
@@ -2474,13 +2499,13 @@ year-month-day, such as 2026-10-29. Fill in several boxes and they all
 have to match.</li>
 <li><strong>Marked</strong> keeps the records you have marked, and
 <strong>Unmarked</strong> the rest.</li>
-<li>With a filter in force, the list first offers <strong>New</strong>
-(start over), <strong>Clear</strong> (show every record),
-<strong>Narrow</strong> (keep only records that also meet a new
-condition), <strong>Expand</strong> (also take in records that meet one)
-and <strong>Invert</strong> (the records the filter leaves out).
-<strong>Control+Shift+F</strong> clears; <strong>Shift+F</strong> says
-what is in force.</li>
+<li>With a filter in force, the list first offers <strong>Start
+over</strong> (a new filter), <strong>Clear filter</strong> (show every
+record), <strong>Narrow filter</strong> (keep only records that also
+meet a new condition), <strong>Expand filter</strong> (also take in
+records that meet one) and <strong>Invert filter</strong> (the records
+the filter leaves out). <strong>Control+Shift+F</strong> clears;
+<strong>Shift+F</strong> says what is in force.</li>
 </ul></li>
 <li><strong>Query, Control+Q</strong> – write SQL yourself, when you
 want to.</li>

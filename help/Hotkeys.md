@@ -209,6 +209,9 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - What This Does\
   F1 is help; Shift+F1 is the history of changes.\
   Shift+F1
+- Where Am I\
+  Show the table, row, filter, and sort in a read-only dialog.\
+  Alt+Shift+Slash
 
 ### Misc
 
@@ -593,6 +596,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+Shift+S\
   Print descriptive statistics for the column under the virtual cursor.\
   Statistics from Column
+- Alt+Shift+Slash\
+  Show the table, row, filter, and sort in a read-only dialog.\
+  Where Am I
 - Alt+Shift+T\
   Edit Tags
 - Alt+Shift+U\
@@ -1293,3 +1299,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Control+Shift+M
 - What This Does\
   Shift+F1
+- Where Am I\
+  Show the table, row, filter, and sort in a read-only dialog.\
+  Alt+Shift+Slash
