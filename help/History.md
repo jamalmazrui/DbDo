@@ -5,6 +5,13 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 3 November 2026 -- Select Columns, simpler
+
+- **Select Columns says what is shown before it offers a choice:** how many columns, their names, and whether they are the look columns, the default, or the prime columns. Its line of text had never been spoken.
+- **Every choice is "something columns,"** where some said fields and some columns: Look columns, Prime columns, Main columns, Standard columns, All columns, Choose columns and Type columns, with the letters L, P, M, S, A, C and T. Default and the look's columns were the same sequence, so they are one choice; Look and prime is gone; Prime columns is new, prime's columns in prime's order, the default sort. Shift+F1 on each says the rest.
+- **Shift+F1 on the records list** in the main window now says what it is, from an [All dialogs] hint.
+- **DbDo's JAWS scripts and NVDA add-on are built again.** Their sources were not in RepoFiles.txt, so tidy moved them to notes and every build since packed neither; Setup then compiled an old JAWS package left in Program Files, which failed in all three JAWS versions on a fault in the kit's template, fixed in HomerDev 1.107.0. The sources are made again from the kit's templates and named in RepoFiles.txt.
+
 ## 2 November 2026 -- What This Does, on Shift+F1
 
 - **Shift+F1 says what the control with focus does,** in one sentence, in every dialog and in the main window. The sentences live in configs\Hints.inix, by dialog title and control name, and a copy in your own configs folder wins, so a hint can be changed without a new release. A control with no hint written there says the first sentence of its own description. History of Changes gives up Shift+F1 and stays on the Help menu and the Alternate Menu. The new Help menu item is What This Does, Alt+H then T, since W is Where Am I's.

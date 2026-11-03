@@ -18516,35 +18516,54 @@ namespace DbDo
                 return;
             }
             List<string> lAllColumns = db.getNaturalFieldNames();
-            List<string> lMain = new List<string>(), lStandard = new List<string>(), lIdentity = new List<string>();
+            List<string> lMain = new List<string>(), lStandard = new List<string>();
             foreach (string sName in lAllColumns)
             {
                 if (Metadata.fieldKind(sName, sTable) == Metadata.KindMain) lMain.Add(sName); else lStandard.Add(sName);
-                if (Metadata.isDistinctColumn(sName)) lIdentity.Add(sName);
             }
+
+            // SELECT COLUMNS, REDESIGNED (3 November 2026). Every choice is now "something columns", since the grid
+            // shows columns; "fields" beside "columns" made two words for one thing. Default and the look's fields
+            // were the same sequence, so they are one choice, Look columns; Look and prime, the two summary columns
+            // themselves, is gone. Prime columns is new: prime's fields in prime's order, which is the default sort
+            // and, together, what makes each record unique. Names stay two words; what each means at length is
+            // Shift+F1's job, from configs\Hints.inix. Letters: L, P, M, S, A, C, T, all first letters.
+            List<string> lLook = db.hasField("look") ? db.lParseGeneratedFields(sTable, "look") : new List<string>();
+            List<string> lPrime = db.hasField("prime") ? db.lParseGeneratedFields(sTable, "prime") : new List<string>();
+            List<string> lNow = db.getDisplayFieldNames();
+            string sNow = string.Join(", ", lNow.ToArray());
+            string sWhich = "";
+            if (lLook.Count > 0 && string.Join(",", lLook.ToArray()) == string.Join(",", lNow.ToArray())) sWhich = "the look columns, the default";
+            else if (lPrime.Count > 0 && string.Join(",", lPrime.ToArray()) == string.Join(",", lNow.ToArray())) sWhich = "the prime columns";
+            else if (lNow.Count == lAllColumns.Count) sWhich = "all columns";
+            // THE CURRENT SEQUENCE, SAID BEFORE THE CHOICES. The dialog's line of text was never spoken: a screen
+            // reader reads a dialog's title and then the button with focus. So the line is shown as the dialog's
+            // text and also said once it opens.
+            string sShown = "Shown now" + (sWhich.Length > 0 ? ", " + sWhich : "") + ": " + lNow.Count
+                + (lNow.Count == 1 ? " column, " : " columns, ") + sNow + ".";
 
             string sButton;
             using (LbcDialog dlg = new LbcDialog("Select Columns", this))
             {
-                dlg.addLabel("Which columns should the grid show for " + sTable + "?");
-                dlg.helpNote = "Default columns shows the fields of look, in look's order, or every main field when the table has no look. "
-                    + "Main fields shows the fields about the table's subject. Standard fields shows url, tags, notes, marked, look, prime, added, edited and the id. "
-                    + "All columns shows every field. Look and prime shows the two summaries. Exact sequence picks the columns and their order one by one; Type names takes the names separated by commas. "
+                dlg.addLabel(sShown);
+                dlg.helpNote = "Look columns shows look's fields in look's order, the default, or every main column when the table has no look. "
+                    + "Prime columns shows prime's fields in prime's order: the default sort, and together the values unique to each record. "
+                    + "Main columns shows the columns about the table's subject. Standard columns shows url, tags, notes, marked, look, prime, added, edited and the id. "
+                    + "All columns shows every column. Choose columns picks columns and their order one by one; Type columns takes the names separated by commas. "
                     + "The choice is remembered with the table. Shift+F1 on a button says what it does.";
-                // TWO WORDS TO A BUTTON (2 November 2026, the guideline on trial): Default, Main, Standard and All
-                // were forgotten between one visit and the next. Each letter is unchanged.
+                dlg.form.Shown += delegate(object o, EventArgs e) { Say.say(sShown); };
                 sButton = dlg.runWithButtons(new string[]
-                    { "&Default columns", "&Main fields", "&Standard fields", "&All columns", "&Look and prime", "&Exact sequence...", "&Type names...", "Cancel" });
+                    { "&Look columns", "&Prime columns", "&Main columns", "&Standard columns", "&All columns", "&Choose columns...", "&Type columns...", "Cancel" });
             }
             if (string.IsNullOrEmpty(sButton) || sButton == "Cancel") return;
 
             string sStored;
-            if (sButton == "Default columns") sStored = applySelectList(sTable, "");
-            else if (sButton == "Look and prime") sStored = applySelectList(sTable, string.Join(", ", lIdentity.ToArray()));
-            else if (sButton == "Main fields") sStored = applySelectList(sTable, string.Join(", ", lMain.ToArray()));
-            else if (sButton == "Standard fields") sStored = applySelectList(sTable, string.Join(", ", lStandard.ToArray()));
+            if (sButton == "Look columns") sStored = applySelectList(sTable, "");
+            else if (sButton == "Prime columns") sStored = applySelectList(sTable, lPrime.Count > 0 ? string.Join(", ", lPrime.ToArray()) : "");
+            else if (sButton == "Main columns") sStored = applySelectList(sTable, string.Join(", ", lMain.ToArray()));
+            else if (sButton == "Standard columns") sStored = applySelectList(sTable, string.Join(", ", lStandard.ToArray()));
             else if (sButton == "All columns") sStored = applySelectList(sTable, string.Join(", ", lAllColumns.ToArray()));
-            else if (sButton == "Type names...")
+            else if (sButton == "Type columns...")
             {
                 string sInitial = db.getSelectList(sTable);
                 if (string.IsNullOrEmpty(sInitial)) sInitial = string.Join(", ", db.getDisplayFieldNames().ToArray());
@@ -18570,9 +18589,9 @@ namespace DbDo
                     sStored = applySelectList(sTable, dlg.sChosenCsv);
                 }
             }
-            List<string> lNow = db.getDisplayFieldNames();
-            string sCount = lNow.Count + (lNow.Count == 1 ? " column" : " columns");
-            Say.sayForced((string.IsNullOrEmpty(sStored) ? "Default, " : "") + sCount + ": " + string.Join(", ", lNow.ToArray()));
+            List<string> lAfter = db.getDisplayFieldNames();
+            string sCount = lAfter.Count + (lAfter.Count == 1 ? " column" : " columns");
+            Say.sayForced((string.IsNullOrEmpty(sStored) ? "Look columns, the default, " : "") + sCount + ": " + string.Join(", ", lAfter.ToArray()));
         }
 
         // applySelectList: save a table's select list (empty = the default rule),

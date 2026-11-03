@@ -1,0 +1,58 @@
+﻿;DbDo.jss -- JAWS scripts for DbDo.exe, from the HomerDev template.
+;
+; Each key has a way and a scope, the same as in DbDo's NVDA add-on (see the
+; homer-screen-reader skill's references\key-handling.md). The app speaks for
+; itself through the kit's Say; these scripts only decide who gets the key.
+; No Include or Use: scompile builds it against any installed JAWS version.
+
+; Way: pass quietly. Where: everywhere in DbDo.
+Script passDbDoKey ()
+TypeCurrentScriptKey ()
+EndScript
+
+; Way: pass quietly. Where: only here, in DbDo's list; elsewhere JAWS's own script.
+Int Function inDbDoList ()
+Return StringContains (GetWindowClass (GetFocus ()), "SysListView32") > 0
+EndFunction
+
+Script nextDbDoRow ()
+If inDbDoList () Then
+TypeCurrentScriptKey ()
+Else
+PerformScript SayNextLine ()
+EndIf
+EndScript
+
+Script priorDbDoRow ()
+If inDbDoList () Then
+TypeCurrentScriptKey ()
+Else
+PerformScript SayPriorLine ()
+EndIf
+EndScript
+
+; WHO THESE SCRIPTS ARE, AND THEIR GUIDE (2 November 2026). Two standard entry
+; points every Homer app's scripts share. JAWS+Q starts with the scripts' name
+; and the program's own version, read from the running program so it is never
+; stale. JAWS+F1 pressed twice opens the program's guide; pressed once, JAWS's
+; own help, as always.
+
+Script ScriptFileName ()
+ScriptAndAppNames ("DbDo scripts, for DbDo " + GetVersionInfoString (GetAppFilePath (), "FileVersion"))
+EndScript
+
+Script ScreenSensitiveHelp ()
+Var
+    ; EACH NAME TAKES ITS TYPE (3 November 2026): "string sHelp, sPath" stopped scompile at the second
+    ; name, in every JAWS version, so no Homer app's JAWS scripts could install from this template.
+    string sHelp, string sPath
+If IsSameScript () Then
+Let sPath = GetAppFilePath ()
+Let sHelp = StringLeft (sPath, StringLength (sPath) - StringLength (GetAppFileName ())) + "help\\DbDo.htm"
+If FileExists (sHelp) Then
+Run (sHelp)
+Return
+EndIf
+EndIf
+PerformScript ScreenSensitiveHelp ()
+EndScript

@@ -10,12 +10,13 @@ OK = Saves what you have chosen and closes the dialog; Control+Enter does this f
 Cancel = Closes the dialog and changes nothing; Escape does this from any control.
 Help = Opens this dialog's help, which F1 also does from any control.
 Close = Closes this window.
+Records = The table's records, one to a row; arrows move by record and by column, and Enter opens the record.
 
 [Select Columns]
-Default columns = Shows the fields of look, in look's order, or every main field when the table has no look.
-Main fields = Shows only the fields about the table's subject, leaving out url, tags, notes and the other standard fields.
-Standard fields = Shows only the standard fields: url, tags, notes, marked, look, prime, added, edited and the id.
-All columns = Shows every field of the table.
-Look and prime = Shows just the two summary columns, look and prime.
-Exact sequence = Lets you pick the columns one by one, in the order they should appear.
-Type names = Lets you type the column names, separated by commas, in the order they should appear.
+Look columns = Shows look's columns in look's order, the default the table opens with; with no look, every main column.
+Prime columns = Shows prime's columns in prime's order: the default sort order, and together the values unique to each record.
+Main columns = Shows only the columns about the table's subject, leaving out url, tags, notes and the other standard columns.
+Standard columns = Shows only the standard columns: url, tags, notes, marked, look, prime, added, edited and the id.
+All columns = Shows every column of the table.
+Choose columns = Lets you pick the columns one by one, in the order they should appear.
+Type columns = Lets you type the column names, separated by commas, in the order they should appear.

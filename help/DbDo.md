@@ -282,13 +282,15 @@ Because these only change the view, you can slice a large table down to what you
 
 **Select Columns** (Alt+S) chooses which fields appear in the grid, and in what order. Showing only the columns you are working with keeps cell-by-cell navigation short. Its buttons are:
 
-- **Default columns** shows the fields of look, in look's order, or every main field when a table has no look. Enter picks it.
-- **Main fields** shows every main field, the fields about the table's subject.
-- **Standard fields** shows the standard fields the table has.
-- **All columns** shows every field.
-- **Look and prime** shows just the two summary columns.
-- **Exact sequence** opens two lists, Fields and Picks, with the columns now shown already in Picks, so you can add or drop one; the order of Picks is the order shown.
-- **Type names** takes the field names separated by commas.
+The dialog first says which columns are shown now, and whether they are the look columns or the prime columns.
+
+- **Look columns** shows look's columns in look's order: the default, the columns a table opens with. With no look, every main column. Enter picks it.
+- **Prime columns** shows prime's columns in prime's order: the default sort order, and together the values unique to each record.
+- **Main columns** shows the columns about the table's subject.
+- **Standard columns** shows the standard columns the table has.
+- **All columns** shows every column.
+- **Choose columns** opens two lists, Fields and Picks, with the columns now shown already in Picks, so you can add or drop one; the order of Picks is the order shown.
+- **Type columns** takes the column names separated by commas.
 
 The choice is remembered with the table. **Say Select Columns** (Shift+S) speaks it.
 

@@ -40,6 +40,15 @@ ReadMe.htm
 ReadMe.md
 RepoFiles.txt
 scripts/acceptCheck.cmd
+# DbDo's screen reader sources (3 November 2026). They were not named here, so tidy moved scripts\jaws and
+# scripts\nvda to notes, every build after that packed no JAWS or NVDA support, and Setup compiled an old
+# DbDo_JAWS.zip left in Program Files. Named one by one, as the scripts are.
+scripts/jaws/DbDo.jkm
+scripts/jaws/DbDo.jss
+scripts/nvda/appModules/dbdo.py
+scripts/nvda/appModules/homer/__init__.py
+scripts/nvda/manifest.ini
+scripts/nvda/readme.html
 scripts/auditPatterns.cmd
 scripts/auditPatterns.py
 scripts/buildBlindCreations.cmd

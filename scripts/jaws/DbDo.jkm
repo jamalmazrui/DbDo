@@ -1,0 +1,17 @@
+﻿; DbDo.jkm -- JAWS key map for DbDo.exe, from the HomerDev template.
+; Each line names a Script in DbDo.jss. The kit's tidy adds a marked block of
+; keys JAWS takes everywhere, from data\KeyOwnership.inix; leave it alone.
+[Common Keys]
+; Homer suite pass-through -- written by the kit's tidy from data\KeyOwnership.inix; do not edit
+Alt+Delete=TypeCurrentScriptKey
+; end of Homer suite pass-through
+; Pass quietly: chords the app owns.
+Alt+Control+RightArrow=passDbDoKey
+Alt+Control+LeftArrow=passDbDoKey
+; Pass only here: arrows, quiet only in the app's list view.
+DownArrow=nextDbDoRow
+UpArrow=priorDbDoRow
+
+[Keyboard Layouts]
+Desktop=Common
+Laptop=Common

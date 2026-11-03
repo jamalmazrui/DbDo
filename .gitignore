@@ -18,6 +18,14 @@
 /data/*
 !/scripts/
 /scripts/*
+!/scripts/jaws/
+/scripts/jaws/*
+!/scripts/nvda/
+/scripts/nvda/*
+!/scripts/nvda/appModules/
+/scripts/nvda/appModules/*
+!/scripts/nvda/appModules/homer/
+/scripts/nvda/appModules/homer/*
 !/.gitattributes
 !/.gitignore
 !/2db.cs
@@ -67,6 +75,8 @@
 !/scripts/installModels.cmd
 !/scripts/installOllama.cmd
 !/scripts/installScreenReaderSupport.cmd
+!/scripts/jaws/DbDo.jkm
+!/scripts/jaws/DbDo.jss
 !/scripts/kind.py
 !/scripts/makeBlindSkills.cmd
 !/scripts/makeBlindSkills.py
@@ -77,6 +87,10 @@
 !/scripts/makeTechTraining.py
 !/scripts/makeTutorials.cmd
 !/scripts/makeTutorials.py
+!/scripts/nvda/appModules/dbdo.py
+!/scripts/nvda/appModules/homer/__init__.py
+!/scripts/nvda/manifest.ini
+!/scripts/nvda/readme.html
 !/scripts/push.cmd
 !/scripts/recoverRadioTrail.cmd
 !/scripts/recoverRadioTrail.py
