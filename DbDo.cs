@@ -3406,6 +3406,39 @@ namespace DbDo
                 sSpoken = sField + " matches " + sV;
                 return searchSql(sV, lsExprs, true);
             }
+            // A RANGE, FROM..TO (2 November 2026, after Leasey's Date from and Date to). "2025..2026" keeps the records
+            // whose field falls in those years, both included; "2026-01-01..2026-03-31" a span of dates; "5..12" a span
+            // of numbers. Dates are kept as text in year-month-day order, so a bound is compared with the same number of
+            // leading characters of the field: "2026" then takes in every day of 2026, as Leasey's year-only bound
+            // does, where >= and <= alone would stop at "2026" itself. Two numbers that are not four-digit years compare
+            // as numbers, whatever the field's type, so 9 falls between 5 and 12.
+            int iRange = sOp == "" ? sV.IndexOf("..", StringComparison.Ordinal) : -1;
+            if (iRange > 0 && iRange < sV.Length - 2)
+            {
+                string sFrom = sV.Substring(0, iRange).Trim(), sTo = sV.Substring(iRange + 2).Trim();
+                if (sFrom.Length > 0 && sTo.Length > 0)
+                {
+                    string sRangeCol = "\"" + sField.Replace("\"", "\"\"") + "\"";
+                    double nFrom, nTo;
+                    bool bYears = System.Text.RegularExpressions.Regex.IsMatch(sFrom, @"^\d{4}$") && System.Text.RegularExpressions.Regex.IsMatch(sTo, @"^\d{4}$");
+                    bool bNumbers = !bYears
+                        && double.TryParse(sFrom, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out nFrom)
+                        && double.TryParse(sTo, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out nTo);
+                    sSpoken = sField + " is from " + sFrom + " to " + sTo;
+                    if (bNumbers)
+                    {
+                        double.TryParse(sFrom, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out nFrom);
+                        double.TryParse(sTo, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out nTo);
+                        return "(CAST(" + sRangeCol + " AS REAL) BETWEEN " + nFrom.ToString("R", System.Globalization.CultureInfo.InvariantCulture)
+                            + " AND " + nTo.ToString("R", System.Globalization.CultureInfo.InvariantCulture)
+                            + " AND trim(coalesce(CAST(" + sRangeCol + " AS TEXT), '')) <> '')";
+                    }
+                    string sText = "lower(trim(coalesce(CAST(" + sRangeCol + " AS TEXT), '')))";
+                    string sFromQ = "'" + sFrom.ToLowerInvariant().Replace("'", "''") + "'", sToQ = "'" + sTo.ToLowerInvariant().Replace("'", "''") + "'";
+                    return "(" + sText + " <> '' AND substr(" + sText + ", 1, " + sFrom.Length + ") >= " + sFromQ
+                        + " AND substr(" + sText + ", 1, " + sTo.Length + ") <= " + sToQ + ")";
+                }
+            }
             if (sOp == "") sOp = "%";   // a plain value is a case-insensitive substring in every field (29 Oct 2026)
             if (sOp == "!=") sOp = "<>";
             string sCol = "\"" + sField.Replace("\"", "\"\"") + "\"";
@@ -15644,46 +15677,6 @@ namespace DbDo
         // to the virtual row, so the user can see the row they are
         // virtually browsing. Suppresses the cell-changed handler's
         // spoken announcement (we'll do our own direction-aware one).
-        // gridRowStep: Up or Down Arrow, Page Up or Page Down in the grid. Moves the row, keeps the column, and speaks
-        // the row at once.
-        private void gridRowStep(Keys key)
-        {
-            if (db == null || !db.hasRecordset() || db.recordCount == 0) { Say.say("No rows"); return; }
-            int iCount = db.recordCount;
-            int iPage = 1;
-            try
-            {
-                int iHeight = grid.VirtualListSize > 0 ? grid.GetItemRect(Math.Max(0, Math.Min(iVirtualRow - 1, grid.VirtualListSize - 1))).Height : 0;
-                if (iHeight > 0) iPage = Math.Max(1, grid.ClientSize.Height / iHeight - 1);
-            }
-            catch { iPage = 10; }
-            int iStep = key == Keys.Down ? 1 : key == Keys.Up ? -1 : key == Keys.PageDown ? iPage : -iPage;
-            int iTarget = Math.Max(1, Math.Min(iCount, iVirtualRow + iStep));
-            if (iTarget == iVirtualRow) { Say.sayForced(iStep > 0 ? "Last row" : "First row"); return; }
-            iPrevVirtualRow = iVirtualRow;
-            iPrevVirtualCol = iVirtualCol;
-            iVirtualRow = iTarget;
-            virtSyncListSelection(iTarget);
-            sayGridRow(iTarget);
-        }
-
-        // sayGridRow: the row's shown values, each its own utterance, then its position -- the number alone, never
-        // "of" the count, which Say Position (Alt+Delete) and Alt+Control+Shift+Number Pad 5 give when wanted.
-        private void sayGridRow(int iRow)
-        {
-            if (grid == null || db == null || !db.hasRecordset() || iRow < 1 || iRow > db.recordCount) return;
-            List<string> lsParts = new List<string>();
-            for (int iCol = 0; iCol < grid.Columns.Count; iCol++)
-            {
-                string sValue = speakableCellText(iRow, iCol);
-                if (!string.IsNullOrEmpty(sValue)) lsParts.Add(sValue);
-            }
-            lsParts.Add(iRow.ToString());
-            // sayForced, past the Extra Speech gate: in the grid the scripts keep the screen reader quiet, so DbDo's
-            // reading of the row is the only one, and turning extra speech off must not leave the grid silent.
-            foreach (string sPart in lsParts) Say.sayForced(sPart);
-        }
-
         private void virtSyncListSelection(int iRow)
         {
             if (grid == null) return;
@@ -16609,25 +16602,6 @@ namespace DbDo
             { virtStep(1, 0); return true; }
             if (keyData == (Keys.Alt | Keys.Control | Keys.Up))
             { virtStep(-1, 0); return true; }
-            // ALT+UP AND ALT+DOWN ARROW (1 November 2026, at Jamal's request): the cell above or below, in
-            // the same column, read as Alt+Control+Up and Down read it, with one modifier fewer -- as plain
-            // Left and Right Arrow already move along the row. Only in the grid: elsewhere Alt+Down Arrow
-            // keeps its Windows meaning, opening a list, as it does on a record form's pick-list field.
-            // THE GRID'S ROW KEYS BELONG TO DBDO (2 November 2026, at Jamal's request). Up and Down Arrow and Page Up and
-            // Down were left to the list, and the screen reader read each row with its own words and the count of rows:
-            // "Radio Wiracocha, Bolivia, 44838 of 49186". DbDo now moves the row itself and speaks it with ordinary direct
-            // speech: the row's shown values, then its position alone. The screen reader stays quiet because DbDo's JAWS
-            // script and NVDA add-on pass these keys through without speaking in the grid -- the Homer pattern of a quiet
-            // pass-through -- and the reader's keyboard interrupt cuts off the previous row when the next key comes.
-            // The rows are read whatever the Extra Speech setting, since the scripts keep the reader quiet here.
-            if (grid != null && grid.Focused
-                && (keyData == Keys.Down || keyData == Keys.Up || keyData == Keys.PageDown || keyData == Keys.PageUp))
-            { gridRowStep(keyData); return true; }
-            if (grid != null && grid.Focused)
-            {
-                if (keyData == (Keys.Alt | Keys.Down)) { virtStep(1, 0); return true; }
-                if (keyData == (Keys.Alt | Keys.Up)) { virtStep(-1, 0); return true; }
-            }
             // NARRATOR'S READING KEYS (31 October 2026): Alt+Control+Shift with an arrow
             // reads without moving -- Left the row's header (the look), Up the column's
             // header, Right the whole row, Down the whole column -- and with Number Pad 5
@@ -25928,11 +25902,8 @@ namespace DbDo
             {
                 List<string> lsLines = new List<string>();
                 lsLines.Add("In force: " + sOldSpoken);
-                // CLEAR COMES LAST (1 November 2026, at Jamal's request): Control+Shift+F clears a filter
-                // from anywhere, so here Clear is the least needed choice; the ones that build on the
-                // filter come first.
-                lsLines.Add("New starts over. Narrow keeps only the records that also meet a new condition. Expand also takes in the records that meet a new condition. Invert shows the records this filter leaves out. Clear shows every record again.");
-                string sChoice = chooseByButtons("Filter Records", lsLines, new List<string> { sNew, sNarrow, sExpand, sInvert, sClear });
+                lsLines.Add("New starts over. Clear shows every record again. Narrow keeps only the records that also meet a new condition. Expand also takes in the records that meet a new condition. Invert shows the records this filter leaves out.");
+                string sChoice = chooseByButtons("Filter Records", lsLines, new List<string> { sNew, sClear, sNarrow, sExpand, sInvert });
                 if (sChoice == null) return;
                 if (sChoice == sClear) { clearFilterKeepingRecord(); return; }
                 sCombine = sChoice;
@@ -26078,10 +26049,10 @@ namespace DbDo
             // FILTER RECORDS IS A BUTTON DIALOG (10 October 2026): its choices are DbDo's own actions, not data, so they
             // are buttons rather than a pick list; the explanation each list entry carried is now a line above them.
             List<string> lsChoices = new List<string> { sAny, sFields };
+            if (bFieldFilter || bSqlFilter) lsChoices.Add(sClear);
             if (bFieldFilter) lsChoices.Add(sEdit);
             if (bFieldFilter || bSqlFilter) lsChoices.Add(sNarrow);
             if (bFieldFilter && !bSqlFilter) lsChoices.Add(sWiden);
-            if (bFieldFilter || bSqlFilter) lsChoices.Add(sClear);   // last: Control+Shift+F clears from anywhere
             List<string> lsLines = new List<string>();
             if (bFieldFilter || bSqlFilter)
             {

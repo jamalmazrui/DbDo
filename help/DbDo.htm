@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc 3.12.1" />
+  <meta name="generator" content="pandoc 3.13" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>DbDo User Guide</title>
   <style>
@@ -727,19 +727,13 @@ are on. Control jumps along the column. Shift marks along the same jump,
 and adding Alt unmarks. Alt with Control keeps the meanings it has in
 tables in web pages, Word and Adobe Reader.</p>
 <ul>
-<li><strong>Arrows</strong> move one cell. Up and Down Arrow move to the
-row above or below, and DbDo reads it: its shown values, then its
-position, such as 44838, without the count of rows. Page Up and Page
-Down do the same a screenful at a time. Left and Right Arrow move DbDo’s
-cursor from column to column. DbDo’s JAWS scripts and NVDA add-on pass
-these keys to DbDo quietly in the grid, so you hear DbDo’s reading and
-not your screen reader’s, and pressing the next key cuts off the last
-row as usual.</li>
+<li><strong>Arrows</strong> move one cell. Up and Down Arrow are left to
+your screen reader, which reads the row as it moves; Left and Right
+Arrow move DbDo’s cursor from column to column.</li>
 <li><strong>Home and End</strong> go to the first and last column of the
 row.</li>
-<li><strong>Alt+Up Arrow and Alt+Down Arrow</strong> move to the cell
-above or below in the same column and read it – the row’s look, then the
-cell – as Alt+Control+Up and Down Arrow do, with one key fewer.</li>
+<li><strong>Page Up and Page Down</strong> move a screenful, staying in
+the column.</li>
 <li><strong>Control+Home and Control+End</strong> go to the first and
 last row, staying in the column.</li>
 <li><strong>Control+Up Arrow and Control+Down Arrow</strong> go to the
@@ -912,7 +906,12 @@ begin with an operator: <code>=</code> is, <code>!=</code> is not,
 <code>&gt;</code> more than, <code>&gt;=</code> at least,
 <code>&lt;</code> less than, <code>&lt;=</code> at most, <code>%</code>
 contains, <code>!%</code> does not contain. Is not and does not contain
-also keep records whose field is empty. Several filled boxes must all
+also keep records whose field is empty. Two values joined by two dots
+give a range, both ends included: <code>2025..2026</code> in date_read
+finds the books finished in those two years,
+<code>2026-01-01..2026-03-31</code> a span of dates, and
+<code>5..12</code> a span of numbers. A year stands for every day in it,
+since dates are kept as year-month-day. Several filled boxes must all
 match.</li>
 <li><strong>With a filter in force,</strong> Control+F first offers four
 buttons. <strong>New</strong> starts over. <strong>Clear</strong> shows
