@@ -5,6 +5,11 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 3 November 2026 -- Field descriptions in your own copies
+
+- **Your own databases describe their fields too.** A copy made from a template before its lookups held descriptions, such as RadioTrail in %LOCALAPPDATA%\DbDo\data, had none, so Edit View's tips said only "type TEXTLINE". A field the database's lookups table does not describe now takes its sentence from the templates\fieldDescriptions.inix DbDo ships: the section for the database and table, such as RadioTrail/stations, then [*]. A sentence in your lookups still wins.
+- **Where Am I names the field,** "On name edit", not "On field edit", from HomerDev 1.113.0.
+
 ## 3 November 2026 -- What each field is for
 
 - **Shift+F1 on a field says what it is for,** in the record, new-record and filter forms, from the database's own lookups table. A row of lookups with tbl and fld filled, val empty and descrip written describes the field itself; tbl `*` covers a field of that name in every table, such as notes or added, and a table's own row wins. The F4 choices are unchanged: they are the rows that have a val.

@@ -4702,7 +4702,54 @@ namespace DbDo
                     if (aRow.Length > 1 && aRow[0].Length > 0 && !dOut.ContainsKey(aRow[0])) dOut[aRow[0]] = aRow[1].Trim();
             }
             catch (Exception exceptionDesc) { try { DbDoLog.write("Field descriptions not read for " + sTbl + ": " + exceptionDesc.Message); } catch { } }
+            // YOUR OWN COPY GETS THEM TOO (3 November 2026). A database copied from a template before its lookups
+            // held descriptions -- Jamal's RadioTrail in %LOCALAPPDATA%\DbDo\data -- has none, and Edit View said only
+            // "type TEXTLINE". So a field the lookups table does not describe takes its sentence from the shipped
+            // templates\fieldDescriptions.inix: the section named for this database and table, such as
+            // RadioTrail/stations, then the table's own name for DbDo's lookups, maps and views, then [*].
+            try
+            {
+                Dictionary<string, Dictionary<string, string>> dFile = shippedFieldDescriptions();
+                string sBase = System.IO.Path.GetFileNameWithoutExtension(sFilePath ?? "");
+                foreach (string sSection in new string[] { sBase + "/" + sTbl, sTbl, "*" })
+                {
+                    Dictionary<string, string> dSection;
+                    if (!dFile.TryGetValue(sSection, out dSection)) continue;
+                    foreach (KeyValuePair<string, string> kv in dSection)
+                        if (!dOut.ContainsKey(kv.Key)) dOut[kv.Key] = kv.Value;
+                }
+            }
+            catch (Exception exceptionFile) { try { DbDoLog.write("Shipped field descriptions not read: " + exceptionFile.Message); } catch { } }
             return dOut;
+        }
+
+        // shippedFieldDescriptions: templates\fieldDescriptions.inix as {section: {field: sentence}}, read once.
+        private static Dictionary<string, Dictionary<string, string>> dShippedDescriptions;
+        private static Dictionary<string, Dictionary<string, string>> shippedFieldDescriptions()
+        {
+            if (dShippedDescriptions != null) return dShippedDescriptions;
+            Dictionary<string, Dictionary<string, string>> dAll = new Dictionary<string, Dictionary<string, string>>(StringComparer.OrdinalIgnoreCase);
+            string sPath = System.IO.Path.Combine(Homer.Paths.shippedTemplates(), "fieldDescriptions.inix");
+            if (System.IO.File.Exists(sPath))
+            {
+                Dictionary<string, string> dNow = null;
+                foreach (string sRaw in System.IO.File.ReadAllLines(sPath, Encoding.UTF8))
+                {
+                    string sLine = sRaw.Trim();
+                    if (sLine.Length == 0 || sLine.StartsWith(";")) continue;
+                    if (sLine.StartsWith("[") && sLine.EndsWith("]"))
+                    {
+                        string sName = sLine.Substring(1, sLine.Length - 2).Trim();
+                        if (!dAll.TryGetValue(sName, out dNow)) { dNow = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase); dAll[sName] = dNow; }
+                        continue;
+                    }
+                    int iEq = sLine.IndexOf('=');
+                    if (dNow != null && iEq > 0) dNow[sLine.Substring(0, iEq).Trim()] = sLine.Substring(iEq + 1).Trim();
+                }
+            }
+            else { try { DbDoLog.write("No shipped field descriptions at " + sPath); } catch { } }
+            dShippedDescriptions = dAll;
+            return dAll;
         }
 
         public List<string> getLookupValues(string sTbl, string sFld, int iMaxRows)
