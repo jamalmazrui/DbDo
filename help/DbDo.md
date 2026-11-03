@@ -282,13 +282,13 @@ Because these only change the view, you can slice a large table down to what you
 
 **Select Columns** (Alt+S) chooses which fields appear in the grid, and in what order. Showing only the columns you are working with keeps cell-by-cell navigation short. Its buttons are:
 
-- **Default** shows the fields of look, in look's order, or every main field when a table has no look. Enter picks it.
-- **Main** shows every main field, the fields about the table's subject.
-- **Standard** shows the standard fields the table has.
-- **All** shows every field.
+- **Default columns** shows the fields of look, in look's order, or every main field when a table has no look. Enter picks it.
+- **Main fields** shows every main field, the fields about the table's subject.
+- **Standard fields** shows the standard fields the table has.
+- **All columns** shows every field.
 - **Look and prime** shows just the two summary columns.
-- **Exact** opens two lists, Fields and Picks, with the columns now shown already in Picks, so you can add or drop one; the order of Picks is the order shown.
-- **Type** takes the field names separated by commas.
+- **Exact sequence** opens two lists, Fields and Picks, with the columns now shown already in Picks, so you can add or drop one; the order of Picks is the order shown.
+- **Type names** takes the field names separated by commas.
 
 The choice is remembered with the table. **Say Select Columns** (Shift+S) speaks it.
 
@@ -625,7 +625,8 @@ The Query menu holds record inspection and the Say-X status family.
 | Command | Chord |
 |---------|-------|
 | Documentation | F1 |
-| History of Changes | Shift+F1 |
+| What This Does | Shift+F1 |
+| History of Changes | none; on the Help menu |
 | ReadMe | Alt+Shift+F1 |
 | Alternate Menu | Alt+F10 |
 | Key Describer Toggle | Control+F1 |
@@ -847,7 +848,8 @@ F1 keys open the ones you will want most. F1 is help in every Windows program,
 and each extra key picks a different kind of help.
 
 - **Documentation, F1.** This guide.
-- **History of Changes, Shift+F1.** What changed in each version.
+- **What This Does, Shift+F1.** One sentence on what the control with focus does, here and in every dialog. The sentences live in configs\Hints.inix, where you can change them.
+- **History of Changes.** What changed in each version; on the Help menu and the Alternate Menu, without a key of its own.
 - **About, Alt+F1.** The version and the license.
 - **Key Describer, Control+F1.** Press it, then any key, to hear what that key does.
 - **ReadMe, Alt+Shift+F1.** The short start: installing and a first walk.

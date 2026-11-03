@@ -5,6 +5,11 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 2 November 2026 -- What This Does, on Shift+F1
+
+- **Shift+F1 says what the control with focus does,** in one sentence, in every dialog and in the main window. The sentences live in configs\Hints.inix, by dialog title and control name, and a copy in your own configs folder wins, so a hint can be changed without a new release. A control with no hint written there says the first sentence of its own description. History of Changes gives up Shift+F1 and stays on the Help menu and the Alternate Menu. The new Help menu item is What This Does, Alt+H then T, since W is Where Am I's.
+- **Select Columns names each button in two words:** Default columns, Main fields, Standard fields, All columns, Look and prime, Exact sequence and Type names, each with its old letter. This tries a proposed Homer guideline: a control's name has at least two words, OK, Cancel, Help and Close aside. DbDo's log now names every control in a dialog whose name has one word, as it opens.
+
 ## 2 November 2026 -- A range in Filter Records
 
 - **A filter box takes a range.** Two values joined by two dots keep the records between them, both ends included: `2025..2026` in a date field finds those two years, `2026-01-01..2026-03-31` a span of dates, and `5..12` a span of numbers. A year-only bound takes in every day of that year, as Leasey's Database Manager does with its Date from and Date to; before, `<=2026` stopped short of 2026-05-01, and a range needed Narrow as a second step.

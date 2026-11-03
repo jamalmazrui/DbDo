@@ -159,8 +159,6 @@ Cell Down=Alt+Control+DownArrow, Move the db cursor one cell down (the screen re
 Cell Left=Alt+Control+LeftArrow, Move the db cursor one cell left (the screen reader table key)
 Cell Right=Alt+Control+RightArrow, Move the db cursor one cell right (the screen reader table key)
 Cell Up=Alt+Control+UpArrow, Move the db cursor one cell up (the screen reader table key)
-Next in Column=Alt+DownArrow, Move to the cell below in the same column and read it
-Previous in Column=Alt+UpArrow, Move to the cell above in the same column and read it
 Column Top=Alt+Control+PageUp, Move the db cursor to the first row of the current column (the screen reader table key)
 Column Bottom=Alt+Control+PageDown, Move the db cursor to the last row of the current column (the screen reader table key)
 Say Row Header=Alt+Control+Shift+LeftArrow, Say the current record's look, its row header, without moving (Narrator's table key)
@@ -282,7 +280,8 @@ Key Describer Toggle=Control+F1, Toggle key describer mode: pressing a key says 
 
 ; ===== Help menu =====
 Get Help=F1, Get (display) DbDo documentation
-Show History=Shift+F1, Show the history of DbDo fixes and enhancements
+What This Does=Shift+F1, What this does: say in one sentence what the control with focus does
+Show History=None, Show the history of DbDo fixes and enhancements; on the Help menu (no hotkey)
 About DbDo=Alt+F1, About: display DbDo version number and release date
 Alternate Menu=Alt+F10, Alternate menu: pick a command to run from the complete alphabetized list
 Elevate Version=F11, Elevate (download and install) the latest DbDo version

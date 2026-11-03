@@ -12991,6 +12991,7 @@ namespace DbDo
 
         private ToolStripMenuItem miHelp;
         private ToolStripMenuItem miHelpContents;
+        private ToolStripMenuItem miHelpWhatThisDoes;
         private ToolStripMenuItem miHelpHistory;
         private ToolStripMenuItem miHelpReadme;
         private ToolStripMenuItem miHelpHotkeysDoc;
@@ -14387,8 +14388,11 @@ namespace DbDo
             // ===== Help menu =====
             miHelp = addMenu("&Help");
             miHelpContents     = addItem(miHelp, "&Documentation",                       "Get Help",          Keys.F1,                            (s, e) => openHelpDocument("DbDo", "Documentation"));
-            // Shift+F1 -- Version History.
-            miHelpHistory      = addItem(miHelp, "&History of Changes",                  "Show History",      Keys.Shift | Keys.F1,               (s, e) => openHelpDocument("History", "History of Changes"));
+            // SHIFT+F1 IS NOW "WHAT THIS DOES" (2 November 2026, a Homer guideline on trial in DbDo): one sentence on
+            // the control with focus, as in every Lbc dialog. History of Changes keeps its place on this menu and on
+            // the Alternate Menu; few people need it often enough to spend a key on it.
+            miHelpWhatThisDoes = addItem(miHelp, "What &This Does",                      "What This Does",    Keys.Shift | Keys.F1,               (s, e) => Homer.Say.say(Homer.LbcHints.sentenceForFocused(this)));
+            miHelpHistory      = addItem(miHelp, "&History of Changes",                  "Show History",      Keys.None,                          (s, e) => openHelpDocument("History", "History of Changes"));
             // THE F1 FAMILY IS HELP. F1 is the guide, Shift+F1 the history, Alt+F1
             // About and Control+F1 the key describer, as in EdSharp and FileDir.
             // The two left over go to the two documents people reach for most:
@@ -18523,22 +18527,24 @@ namespace DbDo
             using (LbcDialog dlg = new LbcDialog("Select Columns", this))
             {
                 dlg.addLabel("Which columns should the grid show for " + sTable + "?");
-                dlg.helpNote = "Default shows the fields of look, in look's order, or every main field when the table has no look. "
-                    + "Main shows the fields about the table's subject. Standard shows url, tags, notes, marked, look, prime, added, edited and the id. "
-                    + "All shows every field. Look and prime shows the two summaries. Exact picks an exact sequence; Type takes the names separated by commas. "
-                    + "The choice is remembered with the table.";
+                dlg.helpNote = "Default columns shows the fields of look, in look's order, or every main field when the table has no look. "
+                    + "Main fields shows the fields about the table's subject. Standard fields shows url, tags, notes, marked, look, prime, added, edited and the id. "
+                    + "All columns shows every field. Look and prime shows the two summaries. Exact sequence picks the columns and their order one by one; Type names takes the names separated by commas. "
+                    + "The choice is remembered with the table. Shift+F1 on a button says what it does.";
+                // TWO WORDS TO A BUTTON (2 November 2026, the guideline on trial): Default, Main, Standard and All
+                // were forgotten between one visit and the next. Each letter is unchanged.
                 sButton = dlg.runWithButtons(new string[]
-                    { "&Default", "&Main", "&Standard", "&All", "&Look and prime", "&Exact...", "&Type...", "Cancel" });
+                    { "&Default columns", "&Main fields", "&Standard fields", "&All columns", "&Look and prime", "&Exact sequence...", "&Type names...", "Cancel" });
             }
             if (string.IsNullOrEmpty(sButton) || sButton == "Cancel") return;
 
             string sStored;
-            if (sButton == "Default") sStored = applySelectList(sTable, "");
+            if (sButton == "Default columns") sStored = applySelectList(sTable, "");
             else if (sButton == "Look and prime") sStored = applySelectList(sTable, string.Join(", ", lIdentity.ToArray()));
-            else if (sButton == "Main") sStored = applySelectList(sTable, string.Join(", ", lMain.ToArray()));
-            else if (sButton == "Standard") sStored = applySelectList(sTable, string.Join(", ", lStandard.ToArray()));
-            else if (sButton == "All") sStored = applySelectList(sTable, string.Join(", ", lAllColumns.ToArray()));
-            else if (sButton == "Type...")
+            else if (sButton == "Main fields") sStored = applySelectList(sTable, string.Join(", ", lMain.ToArray()));
+            else if (sButton == "Standard fields") sStored = applySelectList(sTable, string.Join(", ", lStandard.ToArray()));
+            else if (sButton == "All columns") sStored = applySelectList(sTable, string.Join(", ", lAllColumns.ToArray()));
+            else if (sButton == "Type names...")
             {
                 string sInitial = db.getSelectList(sTable);
                 if (string.IsNullOrEmpty(sInitial)) sInitial = string.Join(", ", db.getDisplayFieldNames().ToArray());

@@ -195,9 +195,6 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Extra Speech Toggle\
   Z is for sleep: it wakes this behavior or puts it to sleep.\
   Alt+Shift+Z
-- History of Changes\
-  Open the history of changes in the default browser. F1 is help; Shift+F1 is the history of changes.\
-  Shift+F1
 - Hotkeys\
   F1 is help; Control+F1 describes one key, and adding Shift describes them all.\
   Control+Shift+F1
@@ -209,6 +206,9 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - ReadMe\
   F1 is help; Alt+Shift+F1 is the ReadMe, the short start.\
   Alt+Shift+F1
+- What This Does\
+  F1 is help; Shift+F1 is the history of changes.\
+  Shift+F1
 
 ### Misc
 
@@ -818,8 +818,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Drop a mark anchor at the current row.\
   Start Mark
 - Shift+F1\
-  Open the history of changes in the default browser.\
-  History of Changes
+  What This Does
 - Shift+F12\
   Chat about Table
 - Shift+F3\
@@ -1024,9 +1023,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Graphics Column\
   Plot the column under the virtual cursor as an Excel chart.\
   Control+Shift+G
-- History of Changes\
-  Open the history of changes in the default browser.\
-  Shift+F1
 - Hotkey Summary\
   Alt+Shift+H
 - Hotkeys\
@@ -1295,3 +1291,5 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Unmark Record\
   Clear the 'marked' flag on the current row.\
   Control+Shift+M
+- What This Does\
+  Shift+F1

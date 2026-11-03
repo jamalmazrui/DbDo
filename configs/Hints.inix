@@ -1,0 +1,21 @@
+﻿; Hints.inix -- what each control in a DbDo dialog does, in one sentence, spoken by Shift+F1.
+; A section is a dialog's title as its window shows it; a key is a control's name, without its
+; underline letter or trailing colon; add the kind in parentheses, as in "Search (Button)", only when
+; two controls of one dialog share a name. [All dialogs] holds names that mean the same everywhere.
+; A control with no hint here says the first sentence of its own description instead.
+; Your own copy, in %LOCALAPPDATA%\DbDo\configs, wins over this one, so you can change a hint.
+
+[All dialogs]
+OK = Saves what you have chosen and closes the dialog; Control+Enter does this from any control.
+Cancel = Closes the dialog and changes nothing; Escape does this from any control.
+Help = Opens this dialog's help, which F1 also does from any control.
+Close = Closes this window.
+
+[Select Columns]
+Default columns = Shows the fields of look, in look's order, or every main field when the table has no look.
+Main fields = Shows only the fields about the table's subject, leaving out url, tags, notes and the other standard fields.
+Standard fields = Shows only the standard fields: url, tags, notes, marked, look, prime, added, edited and the id.
+All columns = Shows every field of the table.
+Look and prime = Shows just the two summary columns, look and prime.
+Exact sequence = Lets you pick the columns one by one, in the order they should appear.
+Type names = Lets you type the column names, separated by commas, in the order they should appear.

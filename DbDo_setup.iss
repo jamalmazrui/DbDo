@@ -374,6 +374,8 @@ Source: "data\lookups.db"; DestDir: "{app}\data"; Flags: ignoreversion
 ; The templates' logs folders hold the build's database checks, not anything a user needs (9 October 2026).
 Source: "templates\*"; DestDir: "{app}\templates"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist; Excludes: ".git,.venv,__pycache__,*.pyc,venv,logs,*.log"
 Source: "configs\DbDo.inix";   DestDir: "{app}\configs"; Flags: ignoreversion onlyifdoesntexist
+; Shift+F1's sentences (2 November 2026). Always replaced: a person's own edits live in %LOCALAPPDATA%\DbDo\configs and win.
+Source: "configs\Hints.inix";  DestDir: "{app}\configs"; Flags: ignoreversion
 ;
 ; Scripts: the generic example scripts (each of the three DbDo
 ; script types) that apply to any database. DbDo seeds these into
