@@ -17,8 +17,8 @@ Unmarked records = Keeps the records you have not marked.
 Records = The table's records, one to a row; arrows move by record and by column, and Enter opens the record.
 
 [Select Columns]
-Look columns = Shows look's columns in look's order, the default the table opens with; with no look, every main column.
-Prime columns = Shows prime's columns in prime's order: the default sort order, and together the values unique to each record.
+Look columns = Shows the default columns: look's fields, in look's order, the way each record is said; with no look, every main column.
+Prime columns = Shows the primary key: prime's fields, in prime's order, which together make each record unique and set the default order.
 Main columns = Shows only the columns about the table's subject, leaving out url, tags, notes and the other standard columns.
 Standard columns = Shows only the standard columns: url, tags, notes, marked, look, prime, added, edited and the id.
 All columns = Shows every column of the table.
@@ -35,8 +35,8 @@ Fields available = The fields not yet in the sort, in DbDo's natural order; Ente
 Add ascending = Adds the selected field to the sort, smallest or earliest first.
 Add descending = Adds the selected field to the sort, largest or latest first.
 Order of fields = The sort, first field first; each reads like city asc, and Enter or Delete takes one out.
-Prime order = Sorts by prime's fields in prime's order, ascending: the table's default order, which also gives each record a place of its own.
-Look order = Sorts by look's fields in look's order, ascending: the way records are said.
+Prime order = The default order: by the primary key, prime's fields in prime's order, ascending, which together make each record unique.
+Look order = Sorts by look's fields, the default columns, in look's order, ascending: the way records are said.
 Choose order = Lets you pick the fields and the direction of each, one by one.
 Type order = Lets you type the fields separated by commas, with desc after a field to sort it largest or latest first.
 Reverse order = Turns each field of the order in force the other way: ascending becomes descending.

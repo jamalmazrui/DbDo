@@ -270,7 +270,7 @@ Filtering and sorting reshape the grid without touching the physical table.
   - **Nothing found.** A condition that would keep no record says so and leaves the view as it was.
   - **Clear Filter** (Control+Shift+F) removes the filter, keeping you on the same record. A table that reopens with a filter still in force says so as it opens.
   - **Filter by Regex** filters by pattern; **Say Filter** (Shift+F) speaks the current filter.
-- **Order Records** (Alt+O) works as Select Columns does: it first says the order in force, then offers **Prime order** (the default, prime's fields ascending, and the first button), **Look order** (look's fields, the way records are said), **Choose order** (pick fields and directions one by one, in two lists), **Type order** (the fields typed with commas, desc after a field for largest or latest first) and **Reverse order** (each field of the order in force turned the other way). It can sort by one or more fields, each ascending or descending, including fields the grid does not show; **Reverse Order** (Alt+Shift+O) reverses the order in force; **Clear Sort** returns to table order; **Say Order** (Shift+O) speaks the current sort.
+- **Order Records** (Alt+O) works as Select Columns does: it first says the order in force, then offers **Prime order** (the default order, by the primary key, prime's fields ascending, and the first button), **Look order** (by look's fields, the default columns, the way records are said), **Choose order** (pick fields and directions one by one, in two lists), **Type order** (the fields typed with commas, desc after a field for largest or latest first) and **Reverse order** (each field of the order in force turned the other way). It can sort by one or more fields, each ascending or descending, including fields the grid does not show; **Reverse Order** (Alt+Shift+O) reverses the order in force; **Clear Sort** returns to table order; **Say Order** (Shift+O) speaks the current sort.
 
 Sorting reads numbers as numbers: volume 9 comes after 7 and 6.5 even if some
 values were stored as text and others as numbers. It also ignores capital
@@ -284,8 +284,8 @@ Because these only change the view, you can slice a large table down to what you
 
 The dialog first says which columns are shown now, and whether they are the look columns or the prime columns.
 
-- **Look columns** shows look's columns in look's order: the default, the columns a table opens with. With no look, every main column. Enter picks it.
-- **Prime columns** shows prime's columns in prime's order: the default sort order, and together the values unique to each record.
+- **Look columns** shows the default columns: look's fields, in look's order, the way each record is said, and the columns a table opens with. With no look, every main column. Enter picks it.
+- **Prime columns** shows the primary key: prime's fields, in prime's order, which together make each record unique and set the default order.
 - **Main columns** shows the columns about the table's subject.
 - **Standard columns** shows the standard columns the table has.
 - **All columns** shows every column.
@@ -315,7 +315,7 @@ A table has two kinds of field, and every DbDo dialog lists them in the same ord
 - **Main fields** come first, in the table's own order. They are about the table's subject: a contact's names and phone numbers, a station's name and country. A field ending in _id that points to a record in another table, such as category_id, is a main field too.
 - **Standard fields** come last, in this order: url, tags, notes, marked, look, prime, added, edited, and the record's own id. Every DbDo table has them. You type url, tags and notes. Look is a short summary that tells one record from the others, and prime is the combination of fields that must be unique in the table; DbDo figures out both from the record's main fields. DbDo keeps marked, added, edited and the id up to date by itself.
 
-By default the grid shows the fields of look and sorts by the fields of prime. Look is how a record is said, so a person reads first name first; prime holds the same fields in the order they sort, with tiebreakers, so people sort by last name. In Order Records, Default Order puts prime's fields back in Picks; in Select Columns' Exact list, it puts look's. Every change to the columns, sort or filter is saved at once with the table.
+**Look and prime, in one sentence each.** Look is how a record is said, and its fields are the **default columns**: the grid shows them unless you choose others. Prime is the **primary key**: its fields, together, make each record unique, and they set the **default order**. So a person is said first name first, by look, and sorted last name first, by prime, with tiebreakers until no two records can share a place. In Select Columns, Look columns brings back the default columns and Prime columns shows the primary key; in Order Records, Prime order brings back the default order and Look order sorts the way records are said. Every change to the columns, sort or filter is saved at once with the table.
 
 Look and prime never include url, notes, tags, marked, added, edited or the record's own id.
 

@@ -11,10 +11,10 @@
 [*]
 added = When this record was added; DbDo fills it in.
 edited = When this record was last changed; DbDo updates it on every save.
-look = How the record is said in a list, built by DbDo from the table's look fields.
+look = How the record is said in a list, built by DbDo from the table's look fields, which are also the default columns.
 marked = Whether you have marked this record, 1 for marked and 0 for not; Control+Space toggles it.
 notes = Your own notes in sentences, as long as you like; Markdown is welcome.
-prime = What makes this record unique and how records sort by default, built by DbDo from the table's prime fields.
+prime = The record's primary key: what makes it unique and how records sort by default, built by DbDo from the table's prime fields.
 tags = Words that help find this record, one per line, such as a topic, a team or a feeling.
 url = The web address most about this record, opened with Control+Shift+U.
 

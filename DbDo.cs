@@ -6921,7 +6921,7 @@ namespace DbDo
             // Validate the field lists against the live columns.
             HashSet<string> hCols = new HashSet<string>(getColumnsOfTable(sTable), StringComparer.OrdinalIgnoreCase);
             foreach (string sF in lLookFields) if (!hCols.Contains(sF)) { sError = "Look field not found: " + sF; return false; }
-            foreach (string sF in lPrmFields) if (!hCols.Contains(sF)) { sError = "Prm field not found: " + sF; return false; }
+            foreach (string sF in lPrmFields) if (!hCols.Contains(sF)) { sError = "Prime field not found: " + sF; return false; }
 
             string sLookExpr = sLookExprFromFields(lLookFields);
             string sPrmExpr  = sPrmExprFromFields(lPrmFields);
@@ -6933,7 +6933,7 @@ namespace DbDo
             { if (aRow.Length > 0) int.TryParse(aRow[0], out iDup); break; }
             if (iDup > 0)
             {
-                sError = "The chosen Prm fields do not uniquely identify every record: " + iDup
+                sError = "The chosen prime fields, the primary key, do not make every record unique: " + iDup
                     + (iDup == 1 ? " value is" : " values are") + " shared by more than one record. "
                     + "Pick fields whose combination is unique for every record.";
                 return false;
@@ -15807,6 +15807,17 @@ namespace DbDo
                 return;
             }
 
+            // UP AT THE FIRST ROW, DOWN AT THE LAST (3 November 2026): the list does not move and said nothing, so the
+            // edge is named and the cell said, as at the first and last column.
+            if ((evArgs.KeyCode == Keys.Up || evArgs.KeyCode == Keys.Down) && !evArgs.Control && !evArgs.Alt && !evArgs.Shift
+                && db != null && db.hasRecordset() && db.recordCount > 0)
+            {
+                if (evArgs.KeyCode == Keys.Up && iVirtualRow <= 1)
+                { sayEdge("First row"); evArgs.Handled = true; evArgs.SuppressKeyPress = true; return; }
+                if (evArgs.KeyCode == Keys.Down && iVirtualRow >= db.recordCount)
+                { sayEdge("Last row"); evArgs.Handled = true; evArgs.SuppressKeyPress = true; return; }
+            }
+
             if (evArgs.KeyCode == Keys.Tab || evArgs.KeyCode == Keys.Right
                 || evArgs.KeyCode == Keys.Left)
             {
@@ -15821,14 +15832,14 @@ namespace DbDo
                 int iNewRow = iVirtualRow;
                 if (iNewCol < 0)
                 {
-                    if (!bCrossRows) { Say.say("First column"); iNewRow = -1; }
-                    else if (iVirtualRow <= 1) { Say.say("First cell"); iNewRow = -1; }
+                    if (!bCrossRows) { sayEdge("First column"); iNewRow = -1; }
+                    else if (iVirtualRow <= 1) { sayEdge("First cell"); iNewRow = -1; }
                     else { iNewRow = iVirtualRow - 1; iNewCol = iColCount - 1; }
                 }
                 else if (iNewCol >= iColCount)
                 {
-                    if (!bCrossRows) { Say.say("Last column"); iNewRow = -1; }
-                    else if (iVirtualRow >= iRowCount) { Say.say("Last cell"); iNewRow = -1; }
+                    if (!bCrossRows) { sayEdge("Last column"); iNewRow = -1; }
+                    else if (iVirtualRow >= iRowCount) { sayEdge("Last cell"); iNewRow = -1; }
                     else { iNewRow = iVirtualRow + 1; iNewCol = 0; }
                 }
                 if (iNewRow > 0) virtMoveTo(iNewRow, iNewCol);
@@ -16107,11 +16118,20 @@ namespace DbDo
             if (grid == null || grid.Columns.Count == 0) { Say.say("No columns"); return; }
             int iRow = iVirtualRow + iRowStep;
             int iCol = iVirtualCol + iColStep;
-            if (iRow < 1) { Say.say("First row"); return; }
-            if (iRow > db.recordCount) { Say.say("Last row"); return; }
-            if (iCol < 0) { Say.say("First column"); return; }
-            if (iCol >= grid.Columns.Count) { Say.say("Last column"); return; }
+            if (iRow < 1) { sayEdge("First row"); return; }
+            if (iRow > db.recordCount) { sayEdge("Last row"); return; }
+            if (iCol < 0) { sayEdge("First column"); return; }
+            if (iCol >= grid.Columns.Count) { sayEdge("Last column"); return; }
             virtMoveTo(iRow, iCol);
+        }
+
+        // sayEdge: AT AN EDGE, WHICH EDGE AND THEN THE CELL (3 November 2026). "First column" alone left a person to
+        // ask where they were; the cell the cursor stays on is said after the edge, or "blank" for an empty one.
+        private void sayEdge(string sEdge)
+        {
+            string sCell = "";
+            try { sCell = speakableCellText(iVirtualRow, iVirtualCol) ?? ""; } catch { }
+            Say.say(sEdge + ", " + (sCell.Trim().Length == 0 ? "blank" : sCell));
         }
 
         // virtSayPosition: the cell's coordinates, as Narrator's Alt+Control+Shift+Number
@@ -18768,8 +18788,8 @@ namespace DbDo
             List<string> lNow = db.getDisplayFieldNames();
             string sNow = string.Join(", ", lNow.ToArray());
             string sWhich = "";
-            if (lLook.Count > 0 && string.Join(",", lLook.ToArray()) == string.Join(",", lNow.ToArray())) sWhich = "the look columns, the default";
-            else if (lPrime.Count > 0 && string.Join(",", lPrime.ToArray()) == string.Join(",", lNow.ToArray())) sWhich = "the prime columns";
+            if (lLook.Count > 0 && string.Join(",", lLook.ToArray()) == string.Join(",", lNow.ToArray())) sWhich = "the look columns, the default columns";
+            else if (lPrime.Count > 0 && string.Join(",", lPrime.ToArray()) == string.Join(",", lNow.ToArray())) sWhich = "the prime columns, the primary key";
             else if (lNow.Count == lAllColumns.Count) sWhich = "all columns";
             // THE CURRENT SEQUENCE, SAID BEFORE THE CHOICES. The dialog's line of text was never spoken: a screen
             // reader reads a dialog's title and then the button with focus. So the line is shown as the dialog's
@@ -18781,8 +18801,8 @@ namespace DbDo
             using (LbcDialog dlg = new LbcDialog("Select Columns", this))
             {
                 dlg.addLabel(sShown);
-                dlg.helpNote = "Look columns shows look's fields in look's order, the default, or every main column when the table has no look. "
-                    + "Prime columns shows prime's fields in prime's order: the default sort, and together the values unique to each record. "
+                dlg.helpNote = "Look columns shows the default columns: look's fields, in look's order, the way each record is said; with no look, every main column. "
+                    + "Prime columns shows the primary key: prime's fields, in prime's order, which together make each record unique and set the default order. "
                     + "Main columns shows the columns about the table's subject. Standard columns shows url, tags, notes, marked, look, prime, added, edited and the id. "
                     + "All columns shows every column. Choose columns picks columns and their order one by one; Type columns takes the names separated by commas. "
                     + "The choice is remembered with the table. Shift+F1 on a button says what it does.";
@@ -27358,8 +27378,8 @@ namespace DbDo
             foreach (string sF in lLook) lLookAsc.Add(sF + " asc");
             string sWhich = "";
             if (lNow.Count == 0) sWhich = ", as stored";
-            else if (lPrimeAsc.Count > 0 && string.Join(",", lNow.ToArray()) == string.Join(",", lPrimeAsc.ToArray())) sWhich = ", the prime order, the default";
-            else if (lLookAsc.Count > 0 && string.Join(",", lNow.ToArray()) == string.Join(",", lLookAsc.ToArray())) sWhich = ", the look order";
+            else if (lPrimeAsc.Count > 0 && string.Join(",", lNow.ToArray()) == string.Join(",", lPrimeAsc.ToArray())) sWhich = ", the prime order, by the primary key, the default";
+            else if (lLookAsc.Count > 0 && string.Join(",", lNow.ToArray()) == string.Join(",", lLookAsc.ToArray())) sWhich = ", the look order, by the default columns";
             string sShown = "Ordered now" + sWhich + (lNow.Count == 0 ? "." : ": " + string.Join(", ", lNow.ToArray()) + ".");
 
             List<string> lsButtons = new List<string>();
@@ -27373,8 +27393,8 @@ namespace DbDo
             using (LbcDialog dlgAsk = new LbcDialog("Order Records", this))
             {
                 dlgAsk.addLabel(sShown);
-                dlgAsk.helpNote = "Prime order sorts by prime's fields in prime's order, the default, which also makes each record's place unique. "
-                    + "Look order sorts by look's fields, the way records are said. Choose order picks fields and their direction one by one; "
+                dlgAsk.helpNote = "Prime order, the default, sorts by the primary key: prime's fields, in prime's order, which together make each record unique. "
+                    + "Look order sorts by look's fields, the default columns, the way records are said. Choose order picks fields and their direction one by one; "
                     + "Type order takes the fields separated by commas, with desc after a field to sort it largest or latest first. "
                     + "Reverse order turns each field of the order in force the other way. The order is remembered with the table. "
                     + "Shift+F1 on a button says what it does.";
@@ -30508,7 +30528,7 @@ namespace DbDo
             const string sRegex    = "Field Regex by Type";
             const string sConnStr  = "Connection Strings by File Type";
             const string sTableVw  = "This Table's View (columns, sort, filter)";
-            const string sLookPrm  = "This Table's Look/Prm Fields (rebuilds the table)";
+            const string sLookPrm  = "This Table's Look and Prime Fields (rebuilds the table)";
             const string sPerField = "Field Validation for This Table";
             const string sRawFile  = "Open the .inix File in a Text Editor";
 
@@ -30766,7 +30786,7 @@ namespace DbDo
             {
                 MessageBox.Show(this,
                     "Open a base table first; look and prime are per-table.",
-                    "Look/Prm Fields", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Look and Prime Fields", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             string sDbInix = dbScopedInixPath();
@@ -30774,7 +30794,7 @@ namespace DbDo
             {
                 MessageBox.Show(this,
                     "This database has no folder to hold a settings file.",
-                    "Look/Prm Fields", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Look and Prime Fields", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             string sTable = db.currentTable;
@@ -30788,15 +30808,15 @@ namespace DbDo
             if (string.IsNullOrEmpty(sCurPrm))
                 sCurPrm = string.Join(", ", db.lParseGeneratedFields(sTable, "prime").ToArray());
 
-            LbcDialog dlg = new LbcDialog("Look/Prm Fields: " + sTable, this);
+            LbcDialog dlg = new LbcDialog("Look and Prime Fields: " + sTable, this);
             try
             {
                 dlg.addLabel("Choose the fields that build this table's look and prime.");
-                dlg.addLabel("look is the readable summary; prime is the unique key.");
+                dlg.addLabel("Look is how a record is said, and its fields are the default columns; prime is the primary key, which makes each record unique and sets the default order.");
                 dlg.addLabel("Saving a change REBUILDS the table to recompute them.");
                 dlg.addSeparator();
                 TextBox tbLook = dlg.addTextLine("Look fields (comma-separated, in order):", sCurLook);
-                TextBox tbPrm  = dlg.addTextLine("Prm fields (comma-separated, in order):", sCurPrm);
+                TextBox tbPrm  = dlg.addTextLine("Prime fields, the primary key (comma-separated, in order):", sCurPrm);
                 string sBtn = dlg.runWithButtons(new string[] { "OK", "Cancel" });
                 if (!string.Equals(sBtn, "OK", StringComparison.OrdinalIgnoreCase)) return;
 
@@ -30805,7 +30825,7 @@ namespace DbDo
                 if (lPrm.Count == 0)
                 {
                     MessageBox.Show(this, "At least one Prm field is required.",
-                        "Look/Prm Fields", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        "Look and Prime Fields", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }
 

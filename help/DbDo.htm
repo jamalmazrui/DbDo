@@ -936,17 +936,18 @@ Filter</strong> (Shift+F) speaks the current filter.</li>
 </ul></li>
 <li><strong>Order Records</strong> (Alt+O) works as Select Columns does:
 it first says the order in force, then offers <strong>Prime
-order</strong> (the default, prime’s fields ascending, and the first
-button), <strong>Look order</strong> (look’s fields, the way records are
-said), <strong>Choose order</strong> (pick fields and directions one by
-one, in two lists), <strong>Type order</strong> (the fields typed with
-commas, desc after a field for largest or latest first) and
-<strong>Reverse order</strong> (each field of the order in force turned
-the other way). It can sort by one or more fields, each ascending or
-descending, including fields the grid does not show; <strong>Reverse
-Order</strong> (Alt+Shift+O) reverses the order in force; <strong>Clear
-Sort</strong> returns to table order; <strong>Say Order</strong>
-(Shift+O) speaks the current sort.</li>
+order</strong> (the default order, by the primary key, prime’s fields
+ascending, and the first button), <strong>Look order</strong> (by look’s
+fields, the default columns, the way records are said), <strong>Choose
+order</strong> (pick fields and directions one by one, in two lists),
+<strong>Type order</strong> (the fields typed with commas, desc after a
+field for largest or latest first) and <strong>Reverse order</strong>
+(each field of the order in force turned the other way). It can sort by
+one or more fields, each ascending or descending, including fields the
+grid does not show; <strong>Reverse Order</strong> (Alt+Shift+O)
+reverses the order in force; <strong>Clear Sort</strong> returns to
+table order; <strong>Say Order</strong> (Shift+O) speaks the current
+sort.</li>
 </ul>
 <p>Sorting reads numbers as numbers: volume 9 comes after 7 and 6.5 even
 if some values were stored as text and others as numbers. It also
@@ -961,12 +962,12 @@ with keeps cell-by-cell navigation short. Its buttons are:</p>
 <p>The dialog first says which columns are shown now, and whether they
 are the look columns or the prime columns.</p>
 <ul>
-<li><strong>Look columns</strong> shows look’s columns in look’s order:
-the default, the columns a table opens with. With no look, every main
-column. Enter picks it.</li>
-<li><strong>Prime columns</strong> shows prime’s columns in prime’s
-order: the default sort order, and together the values unique to each
-record.</li>
+<li><strong>Look columns</strong> shows the default columns: look’s
+fields, in look’s order, the way each record is said, and the columns a
+table opens with. With no look, every main column. Enter picks it.</li>
+<li><strong>Prime columns</strong> shows the primary key: prime’s
+fields, in prime’s order, which together make each record unique and set
+the default order.</li>
 <li><strong>Main columns</strong> shows the columns about the table’s
 subject.</li>
 <li><strong>Standard columns</strong> shows the standard columns the
@@ -1050,13 +1051,18 @@ combination of fields that must be unique in the table; DbDo figures out
 both from the record’s main fields. DbDo keeps marked, added, edited and
 the id up to date by itself.</li>
 </ul>
-<p>By default the grid shows the fields of look and sorts by the fields
-of prime. Look is how a record is said, so a person reads first name
-first; prime holds the same fields in the order they sort, with
-tiebreakers, so people sort by last name. In Order Records, Default
-Order puts prime’s fields back in Picks; in Select Columns’ Exact list,
-it puts look’s. Every change to the columns, sort or filter is saved at
-once with the table.</p>
+<p><strong>Look and prime, in one sentence each.</strong> Look is how a
+record is said, and its fields are the <strong>default columns</strong>:
+the grid shows them unless you choose others. Prime is the
+<strong>primary key</strong>: its fields, together, make each record
+unique, and they set the <strong>default order</strong>. So a person is
+said first name first, by look, and sorted last name first, by prime,
+with tiebreakers until no two records can share a place. In Select
+Columns, Look columns brings back the default columns and Prime columns
+shows the primary key; in Order Records, Prime order brings back the
+default order and Look order sorts the way records are said. Every
+change to the columns, sort or filter is saved at once with the
+table.</p>
 <p>Look and prime never include url, notes, tags, marked, added, edited
 or the record’s own id.</p>
 <h3 id="links-read-as-look">Links read as look</h3>
