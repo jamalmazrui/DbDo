@@ -60,6 +60,11 @@ def describeDatabase(sDb, sTemplate, dSections, bDry):
         if "descrip" not in lLookupCols:
             logLine(sTemplate + ": no lookups table with a descrip column; nothing written")
             return (0, 0, 0)
+        # THE PATTERN COLUMN (3 November 2026): a field's own row holds what it is for (descrip) and the form its
+        # value takes (pattern), so the value column stays for the choices F4 offers.
+        if "pattern" not in lLookupCols:
+            if not bDry: oConn.execute("ALTER TABLE lookups ADD COLUMN pattern TEXTLINE")
+            logLine(sTemplate + ": lookups gained its pattern column")
         lWanted = []
         for sField, sSentence in dSections.get("*", {}).items(): lWanted.append(("*", sField, sSentence))
         lTables = [r[0] for r in oConn.execute("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'")]
@@ -74,18 +79,45 @@ def describeDatabase(sDb, sTemplate, dSections, bDry):
                     logLine(sTemplate + ": no sentence for " + sTable + "." + sField)
                     continue
                 lWanted.append((sTable, sField, sSentence))
+        # THE TABLES THEMSELVES (3 November 2026): [tables] keys "<template>/<table>", or a DbDo table's name alone,
+        # written with fld empty, so DbDo's table lists and Database Summary can say what each table is for.
+        dTables = dSections.get("tables", {})
+        for sTable in lTables:
+            sSentence = dTables.get(sTemplate + "/" + sTable) or dTables.get(sTable) or ""
+            if sSentence: lWanted.append((sTable, "", sSentence))
+            else: logLine(sTemplate + ": no sentence for the table " + sTable)
+        # THE DATABASE ITSELF (3 November 2026): [database] by template name, as a row with tbl * and fld and val empty --
+        # "every table", the whole database. Not tbl empty, as first written: a row's look is built from tbl, fld and val,
+        # so it had no look, and the template check refuses a record with none. A * field row always names its field.
+        oConn.execute("UPDATE lookups SET tbl = '*' WHERE coalesce(tbl, '') = '' AND coalesce(fld, '') = '' AND coalesce(val, '') = '' AND src = ?", (sSource,))
+        sAboutDb = dSections.get("database", {}).get(sTemplate, "")
+        if sAboutDb: lWanted.append(("*", "", sAboutDb))
         for sTable, sField, sSentence in lWanted:
-            oHave = oConn.execute("SELECT lookup_id, coalesce(descrip, ''), coalesce(src, '') FROM lookups WHERE tbl = ? AND fld = ? AND coalesce(val, '') = '' ORDER BY lookup_id LIMIT 1", (sTable, sField)).fetchone()
+            oHave = oConn.execute("SELECT lookup_id, coalesce(descrip, ''), coalesce(src, '') FROM lookups WHERE coalesce(tbl, '') = ? AND coalesce(fld, '') = ? AND coalesce(val, '') = '' ORDER BY lookup_id LIMIT 1", (sTable, sField)).fetchone()
             if oHave is None:
                 iWritten += 1
                 if not bDry:
-                    oConn.execute("INSERT INTO lookups (tbl, fld, val, src, descrip) VALUES (?, ?, NULL, ?, ?)", (sTable, sField, sSource, sSentence))
+                    oConn.execute("INSERT INTO lookups (tbl, fld, val, src, descrip) VALUES (?, ?, NULL, ?, ?)", (sTable or None, sField or None, sSource, sSentence))
             elif oHave[1] == "" or (oHave[2] == sSource and oHave[1] != sSentence):
                 iUpdated += 1
                 if not bDry:
                     oConn.execute("UPDATE lookups SET descrip = ?, src = ?, edited = CURRENT_TIMESTAMP WHERE lookup_id = ?", (sSentence, sSource, oHave[0]))
             else:
                 iKept += 1
+        # Each field's pattern, into the pattern column of its own row: set where it is empty or this step wrote it.
+        iPatterns = 0
+        for sKey, sPattern in dSections.get("patterns", {}).items():
+            lParts = sKey.split("/")
+            if len(lParts) != 3 or lParts[0] != sTemplate: continue
+            oRow = oConn.execute("SELECT lookup_id, coalesce(pattern, ''), coalesce(src, '') FROM lookups WHERE tbl = ? AND fld = ? AND coalesce(val, '') = '' ORDER BY lookup_id LIMIT 1", (lParts[1], lParts[2])).fetchone() if not bDry or "pattern" in lLookupCols else None
+            if oRow is None:
+                logLine(sTemplate + ": no row for the pattern of " + lParts[1] + "." + lParts[2])
+                continue
+            if oRow[1] == sPattern or (oRow[1] and oRow[2] != sSource): continue
+            iPatterns += 1
+            if not bDry: oConn.execute("UPDATE lookups SET pattern = ?, edited = CURRENT_TIMESTAMP WHERE lookup_id = ?", (sPattern, oRow[0]))
+        if iPatterns: logLine("%s: %d pattern%s written" % (sTemplate, iPatterns, "" if iPatterns == 1 else "s"))
+        iUpdated += iPatterns
         if not bDry: oConn.commit()
     finally:
         oConn.close()

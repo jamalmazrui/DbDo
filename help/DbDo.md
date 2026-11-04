@@ -270,7 +270,7 @@ Filtering and sorting reshape the grid without touching the physical table.
   - **Nothing found.** A condition that would keep no record says so and leaves the view as it was.
   - **Clear Filter** (Control+Shift+F) removes the filter, keeping you on the same record. A table that reopens with a filter still in force says so as it opens.
   - **Filter by Regex** filters by pattern; **Say Filter** (Shift+F) speaks the current filter.
-- **Order Records** (Alt+O) sorts the grid by one or more fields, each ascending or descending, including fields the grid does not show; **Reverse Order** (Alt+Shift+O) reverses the order in force; **Clear Sort** returns to table order; **Say Order** (Shift+O) speaks the current sort.
+- **Order Records** (Alt+O) works as Select Columns does: it first says the order in force, then offers **Prime order** (the default, prime's fields ascending, and the first button), **Look order** (look's fields, the way records are said), **Choose order** (pick fields and directions one by one, in two lists), **Type order** (the fields typed with commas, desc after a field for largest or latest first) and **Reverse order** (each field of the order in force turned the other way). It can sort by one or more fields, each ascending or descending, including fields the grid does not show; **Reverse Order** (Alt+Shift+O) reverses the order in force; **Clear Sort** returns to table order; **Say Order** (Shift+O) speaks the current sort.
 
 Sorting reads numbers as numbers: volume 9 comes after 7 and 6.5 even if some
 values were stored as text and others as numbers. It also ignores capital
@@ -295,6 +295,14 @@ The dialog first says which columns are shown now, and whether they are the look
 **Where am I, and what does this do?** Alt+Shift+Slash, Alt and the question mark, says where you are: in a dialog, the dialog, what it is for and the control with focus; pressed twice, every control and what it holds; three times, the keys. In the main window it is the Help menu's Where Am I. Shift+F1 says what a control does in one sentence; twice, its whole description; three times, the keys that work in it.
 
 **What each field is for.** In the record, new-record and filter forms, Shift+F1 on a field says what it is for. The sentences are rows of the database's own lookups table: tbl and fld name the field, val is left empty, and descrip holds the sentence; tbl `*` covers a field of that name in every table. Edit a row of lookups to change a sentence. The rows that do have a val are the choices F4 offers for that field.
+
+**What each table is for.** A lookups row with tbl naming a table, and fld and val both empty, describes the table in one sentence. Shift+F1 says it in Choose Table and Open Table, Database Summary prints it, and Where Am I pressed twice says it for the table open.
+
+**Patterns for fields.** A field's own row in lookups -- tbl and fld naming the field, val empty -- has a pattern column beside descrip. Put a .NET regular expression there, and the field's value must match it when you press OK in a record form; the first field that does not is said and takes focus, with its text selected. An empty value is tested too, so a pattern can make a field required: `^\s*\S` refuses a blank, and `^$|` in front of any pattern lets the field stay blank. What DbDo says on a failure is the field's description, so write the form a value takes into descrip, such as "starting with http:// or https://". Filter Records checks no patterns.
+
+**Why descrip, not desc.** lookups's column names are short so they cannot be mistaken for SQL words: tbl, fld, val. AccAudit, where lookups began, called its description column desc, the commonest short form; but DESC is SQL's word for descending order, reserved in Access, SQL Server, MySQL and PostgreSQL, where a column of that name must be quoted in every query, and "ORDER BY desc DESC" reads as a riddle. So the column is descrip, by decision of 3 November 2026.
+
+**What the database is for.** A lookups row with tbl `*` -- every table, which is to say the database -- and fld and val empty describes the database itself; Database Summary prints it as About. (A `*` row with a field named describes that field in every table.)
 
 **How DbDo's dialogs name things.** Every control's name has at least two words, OK, Cancel, Help and Close aside, and its letter begins one of them. Columns are what the grid shows and arranges; fields are what a record holds, which filters and sorts work on. A filter's actions are Start over, Clear filter, Narrow filter, Expand filter, Invert filter and Edit filter wherever they appear. Shift+F1 on any control says what it does in one sentence.
 

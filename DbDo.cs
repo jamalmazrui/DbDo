@@ -4752,6 +4752,122 @@ namespace DbDo
             return dAll;
         }
 
+        // getTableDescription: WHAT A TABLE IS FOR (3 November 2026). A lookups row with tbl filled and fld and val
+        // empty describes the table itself, in one sentence; without one, the shipped fieldDescriptions.inix's
+        // [tables] section answers, by "<database>/<table>" and then by the table's name alone.
+        public string getTableDescription(string sTbl)
+        {
+            if (!isOpen() || string.IsNullOrEmpty(sTbl)) return "";
+            try
+            {
+                int iFound;
+                string sSql = "SELECT descrip FROM lookups WHERE tbl = '" + sTbl.Replace("'", "''")
+                    + "' AND coalesce(fld, '') = '' AND coalesce(val, '') = '' AND coalesce(descrip, '') <> '' LIMIT 1";
+                foreach (string[] aRow in queryRowsSql(sSql, 1, out iFound))
+                    if (aRow.Length > 0 && aRow[0].Trim().Length > 0) return aRow[0].Trim();
+            }
+            catch (Exception exceptionTable) { try { DbDoLog.write("Table description not read for " + sTbl + ": " + exceptionTable.Message); } catch { } }
+            try
+            {
+                Dictionary<string, string> dTables;
+                if (shippedFieldDescriptions().TryGetValue("tables", out dTables))
+                {
+                    string sBase = System.IO.Path.GetFileNameWithoutExtension(sFilePath ?? "");
+                    string sOne;
+                    if (dTables.TryGetValue(sBase + "/" + sTbl, out sOne) || dTables.TryGetValue(sTbl, out sOne)) return sOne;
+                }
+            }
+            catch { }
+            return "";
+        }
+
+        public Dictionary<string, string> getTableDescriptions(IList<string> lsTables)
+        {
+            Dictionary<string, string> dOut = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (lsTables == null) return dOut;
+            foreach (string sTbl in lsTables)
+            {
+                string sOne = getTableDescription(sTbl);
+                if (sOne.Length > 0) dOut[sTbl] = sOne;
+            }
+            return dOut;
+        }
+
+        // getFieldPatterns: A PATTERN FOR A FIELD, IN ITS OWN COLUMN OF LOOKUPS (3 November 2026). lookups gains a
+        // pattern column, so one row per field -- tbl and fld filled, val empty -- holds both what the field is for
+        // (descrip) and a .NET regular expression its value must match (pattern), checked only when OK is pressed.
+        // An empty value is tested too, so a pattern can require a field: ^\s*\S makes it required, and ^$| in front
+        // lets it stay blank. A database whose lookups lacks the column gets it, unless the database is read-only;
+        // the shipped fieldDescriptions.inix's [patterns] answers for any field the database does not cover.
+        // Answer: field -> pattern.
+        private bool bPatternColumnChecked;
+        public Dictionary<string, string> getFieldPatterns(string sTbl)
+        {
+            Dictionary<string, string> dOut = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            if (!isOpen() || string.IsNullOrEmpty(sTbl)) return dOut;
+            try
+            {
+                int iFound;
+                if (!bPatternColumnChecked)
+                {
+                    bPatternColumnChecked = true;
+                    bool bHas = false;
+                    foreach (string[] aCol in queryRowsSql("PRAGMA table_info(lookups)", 200, out iFound))
+                        if (aCol.Length > 1 && string.Equals(aCol[1], "pattern", StringComparison.OrdinalIgnoreCase)) bHas = true;
+                    if (!bHas && iFound > 0 && !readOnly)
+                    {
+                        invokeSql("ALTER TABLE lookups ADD COLUMN pattern TEXTLINE", TextWriter.Null);
+                        DbDoLog.write("lookups gained its pattern column");
+                    }
+                }
+                string sSql = "SELECT fld, pattern FROM lookups WHERE tbl = '" + sTbl.Replace("'", "''")
+                    + "' AND coalesce(fld, '') <> '' AND coalesce(val, '') = '' AND coalesce(pattern, '') <> ''";
+                foreach (string[] aRow in queryRowsSql(sSql, 1000, out iFound))
+                    if (aRow.Length > 1 && aRow[0].Length > 0 && !dOut.ContainsKey(aRow[0])) dOut[aRow[0]] = aRow[1];
+            }
+            catch (Exception exceptionPattern) { try { DbDoLog.write("Field patterns not read for " + sTbl + ": " + exceptionPattern.Message); } catch { } }
+            try
+            {
+                Dictionary<string, string> dFile;
+                if (shippedFieldDescriptions().TryGetValue("patterns", out dFile))
+                {
+                    string sPrefix = System.IO.Path.GetFileNameWithoutExtension(sFilePath ?? "") + "/" + sTbl + "/";
+                    foreach (KeyValuePair<string, string> kv in dFile)
+                        if (kv.Key.StartsWith(sPrefix, StringComparison.OrdinalIgnoreCase))
+                        {
+                            string sField = kv.Key.Substring(sPrefix.Length);
+                            if (!dOut.ContainsKey(sField)) dOut[sField] = kv.Value;
+                        }
+                }
+            }
+            catch { }
+            return dOut;
+        }
+
+        // getDatabaseDescription: WHAT THE DATABASE IS FOR (3 November 2026): the lookups row with tbl * -- every table, the
+        // whole database -- and fld and val empty, or the shipped file's [database] section, by the database's file
+        // name. A row with tbl empty is read too, for a database that has one.
+        public string getDatabaseDescription()
+        {
+            if (!isOpen()) return "";
+            try
+            {
+                int iFound;
+                foreach (string[] aRow in queryRowsSql("SELECT descrip FROM lookups WHERE coalesce(tbl, '') IN ('', '*') AND coalesce(fld, '') = '' AND coalesce(val, '') = '' AND coalesce(descrip, '') <> '' ORDER BY coalesce(tbl, '') DESC LIMIT 1", 1, out iFound))
+                    if (aRow.Length > 0 && aRow[0].Trim().Length > 0) return aRow[0].Trim();
+            }
+            catch { }
+            try
+            {
+                Dictionary<string, string> dDb;
+                string sOne;
+                if (shippedFieldDescriptions().TryGetValue("database", out dDb)
+                    && dDb.TryGetValue(System.IO.Path.GetFileNameWithoutExtension(sFilePath ?? ""), out sOne)) return sOne;
+            }
+            catch { }
+            return "";
+        }
+
         public List<string> getLookupValues(string sTbl, string sFld, int iMaxRows)
         {
             int iFound;
@@ -10482,8 +10598,10 @@ namespace DbDo
                 }
                 if (!string.IsNullOrEmpty(sRegex))
                 {
+                    string[] aPatternTip = lookupFieldPattern(sCol);
                     if (sbTip.Length > 0) sbTip.Append(' ');
-                    sbTip.Append("must match ").Append(sRegex);
+                    if (aPatternTip != null && aPatternTip[1].Length > 0) sbTip.Append(aPatternTip[1]);
+                    else sbTip.Append("must match ").Append(sRegex);
                 }
                 // Lookups-driven pick list: when the builtin lookups
                 // table offers values for this table+field pair, F4
@@ -10523,6 +10641,23 @@ namespace DbDo
                     tb = dlg.addInlineInputBox(sCol, sDisplay, sTip);
                 }
                 if (!bEditable) tb.ReadOnly = true;
+                // THE FIELD'S PATTERN, CHECKED BY LBC WHEN OK IS PRESSED (3 November 2026): the lookups pattern or the
+                // DbDo.inix one, else the declared type's own, each with a sentence to say when a value does not fit.
+                // Not in the filter form, whose values carry operators such as >= and ranges such as 2025..2026.
+                if (!bFilterForm && bEditable)
+                {
+                    // On a failure, Lbc says the field's name, what is wrong -- blank, or not fitting -- and then what
+                    // the field is for: the same sentence Shift+F1 says, which is where the form a value takes is written.
+                    string sAboutField;
+                    if (!dColumnDoc.TryGetValue(sCol, out sAboutField)) sAboutField = "";
+                    string[] aPatternNow = lookupFieldPattern(sCol);
+                    if (aPatternNow != null) dlg.addPattern(tb, aPatternNow[0], sAboutField.Trim());
+                    else
+                    {
+                        string sTypePattern = typeDefaultRegex(sDeclared);
+                        if (!string.IsNullOrEmpty(sTypePattern)) dlg.addPattern(tb, "^$|(?:" + sTypePattern + ")", typeMessage(sDeclared));
+                    }
+                }
                 if (lsLookups.Count > 0 && bEditable)
                 {
                     string sColCaptured = sCol;
@@ -10844,29 +10979,8 @@ namespace DbDo
                     return false;
                 }
 
-                // Regex check: a per-field pattern from DbDo.inix
-                // wins; otherwise the field's declared type supplies
-                // a default "picture" pattern (dBASE III+ PICTURE
-                // clause spirit), also configurable in [Validation].
-                string sRegex = lookupFieldRegex(sCol);
-                if (string.IsNullOrEmpty(sRegex)) sRegex = typeDefaultRegex(sDeclared);
-                if (!string.IsNullOrEmpty(sRegex))
-                {
-                    bool bMatch = false;
-                    try { bMatch = System.Text.RegularExpressions.Regex.IsMatch(sVal, sRegex); }
-                    catch (Exception ex)
-                    {
-                        sErr = "Field '" + sCol + "': invalid regex in DbDo.inix: " + ex.Message;
-                        iOffending = i;
-                        return false;
-                    }
-                    if (!bMatch)
-                    {
-                        sErr = "Field '" + sCol + "': value does not match required pattern (" + sRegex + ")";
-                        iOffending = i;
-                        return false;
-                    }
-                }
+                // Patterns are Lbc's now (3 November 2026): each field's pattern is registered with the dialog when the
+                // field is built and checked when OK is pressed, with a sentence of its own; see addPattern above.
             }
             return true;
         }
@@ -11059,11 +11173,29 @@ namespace DbDo
         // A missing entry means no regex applied. The lookup is
         // table-scoped, so the same column name can have different
         // regexes in different tables.
-        private string lookupFieldRegex(string sColumn)
+        // A field's pattern comes first from the database's own lookups, in its pattern column, or the shipped
+        // [patterns] (3 November 2026). DbDo.inix's [Validation:<table>] still answers for a field neither covers,
+        // with "or empty" put in front, since those patterns were written when an empty value was never tested.
+        private Dictionary<string, string> dFieldPatterns;
+        private string[] lookupFieldPattern(string sColumn)
         {
             if (string.IsNullOrEmpty(sColumn) || string.IsNullOrEmpty(sTableName)) return null;
-            try { return IniValidation.lookup(sTableName, sColumn); }
-            catch { return null; }
+            if (dFieldPatterns == null)
+            {
+                dFieldPatterns = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                try { if (mgr != null) dFieldPatterns = mgr.getFieldPatterns(sTableName); } catch { }
+            }
+            string sFound;
+            if (dFieldPatterns.TryGetValue(sColumn, out sFound)) return new string[] { sFound, "" };
+            string sIni = null;
+            try { sIni = IniValidation.lookup(sTableName, sColumn); } catch { }
+            return string.IsNullOrEmpty(sIni) ? null : new string[] { "^$|(?:" + sIni + ")", "" };
+        }
+
+        private string lookupFieldRegex(string sColumn)
+        {
+            string[] aPattern = lookupFieldPattern(sColumn);
+            return aPattern == null ? null : aPattern[0];
         }
 
         // typeDefaultRegex: the "picture" pattern for a declared type
@@ -11075,6 +11207,20 @@ namespace DbDo
         // defaults below apply when no entry exists. Empty values
         // never reach here (nullable columns pass), and unknown
         // types validate freely.
+        // typeMessage: what to say when a value does not fit its type's pattern.
+        private static string typeMessage(string sDeclared)
+        {
+            switch ((sDeclared ?? "").Trim().ToUpperInvariant())
+            {
+                case "BOOLEAN":  return "Type 1 for yes or 0 for no.";
+                case "INTEGER":  return "Type a whole number, such as 12.";
+                case "REAL":     return "Type a number, such as 3.5.";
+                case "NUMERIC":  return "Type a number, such as 3.5.";
+                case "TEXTTIME": return "Type a date as year-month-day, such as 2026-11-03, with a time after it if you like.";
+                default:         return "";
+            }
+        }
+
         private string typeDefaultRegex(string sDeclared)
         {
             string sKey = (sDeclared ?? "").Trim().ToUpperInvariant();
@@ -23253,6 +23399,16 @@ namespace DbDo
         private void fileExportClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset()) return;
+            // WHAT WILL BE EXPORTED, SAID FIRST (3 November 2026), as Select Columns and Order Records say what is in force
+            // before their choices: Windows's Save As box has no room for a line of text, so it is spoken.
+            try
+            {
+                string sFilterNow = db.filter ?? "";
+                Say.say("Export Data: the " + db.recordCount + (db.recordCount == 1 ? " record" : " records") + " shown"
+                    + (sFilterNow.Length > 0 || !string.IsNullOrEmpty(db.sqlFilter) ? ", as filtered" : "")
+                    + (string.IsNullOrEmpty(db.sort) ? "" : ", in the order shown") + ". Choose a file name and a type.");
+            }
+            catch { }
             using (SaveFileDialog dlgFile = new SaveFileDialog())
             {
                 dlgFile.Title = "Export Data";
@@ -26025,14 +26181,14 @@ namespace DbDo
                 sCombine = sChoice;
             }
 
-            const string sAny = "Any Field";
-            const string sFields = "Fields";
+            const string sAny = "Any field";
+            const string sFields = "Field boxes";  // the same names as the other Filter Records dialog (3 November 2026)
             // MARKED AND UNMARKED (19 October 2026, from DbDialog's Tagged and Untagged):
             // the records you have marked, or the rest, as a condition like any other, so
             // New, Narrow and Expand combine them too. Offered when the table has DbDo's
             // marked column, which DbDo writes as the text 'true'.
-            const string sMarked = "Marked";
-            const string sUnmarked = "Unmarked";
+            const string sMarked = "Marked records";
+            const string sUnmarked = "Unmarked records";
             string sHow = sInvert;
             string sNewWhere = "", sNewSpoken = "";
             if (sCombine != sInvert)
@@ -26040,9 +26196,9 @@ namespace DbDo
                 bool bMarks = db.hasField("marked");
                 List<string> lsHow = new List<string> { sAny, sFields };
                 if (bMarks) { lsHow.Add(sMarked); lsHow.Add(sUnmarked); }
-                sHow = chooseByButtons(sCombine == sNew ? "Filter Records" : sCombine + " Filter",
-                    new List<string> { "Any Field finds text wherever it is, whatever its case. Fields gives each field a value, which may begin with an operator: = is, != is not, > more than, >= at least, < less than, <= at most, % contains."
-                        + (bMarks ? " Marked takes the records you have marked, and Unmarked the rest." : "") },
+                sHow = chooseByButtons(sCombine == sNew ? "Filter Records" : sCombine.Replace(" filter", " Filter"),  // "Narrow Filter", not "Narrow filter Filter"
+                    new List<string> { "Any field finds text wherever it is, whatever its case. Field boxes gives each field a value, which may begin with an operator: = is, != is not, > more than, >= at least, < less than, <= at most, % contains."
+                        + (bMarks ? " Marked records takes the records you have marked, and Unmarked records the rest." : "") },
                     lsHow);
                 if (sHow == null) return;
 
@@ -26574,7 +26730,7 @@ namespace DbDo
             if (lsClosed.Count == 0)
             { Say.say("All tables of this database are already open in windows."); return; }
             lsNames = lsClosed;
-            sChosen = promptListChoice("Open Table", "Choose a table to open in a new window:", lsNames, lsNames[0]);
+            sChosen = promptListChoice("Open Table", "Choose a table to open in a new window:", lsNames, lsNames[0], db.getTableDescriptions(lsNames));
             if (string.IsNullOrEmpty(sChosen)) return;
             frame.openChildWindow(mode, db.filePath, sChosen);
         }
@@ -26705,7 +26861,8 @@ namespace DbDo
                 return;
             }
             string sChosen = promptListChoice(sCommand,
-                "Choose a " + sNoun + ":", lNames, db.currentTable);
+                "Choose a " + sNoun + ":", lNames, db.currentTable,
+                sNoun == "table" ? db.getTableDescriptions(lNames) : null);
             if (string.IsNullOrEmpty(sChosen)) return;
             try
             {
@@ -27168,19 +27325,21 @@ namespace DbDo
         // sorting by a hidden column needs no trip through Select Columns.
         private void orderRecordsClicked(object sender, EventArgs evArgs)
         {
-            // Order Records (Alt+O): the Fields and Picks dialog in
-            // sort mode. The active sort pre-loads into Picks as
-            // "name asc" / "name desc" entries, so editing,
-            // reordering by remove-and-re-add, and clearing (empty
-            // Picks) are all the same gesture; the Picks order is
-            // the sort precedence, applied via the ADO
-            // Recordset.Sort property.
+            // ORDER RECORDS, ON SELECT COLUMNS' PATTERN (3 November 2026). Alt+S says what is shown and then offers
+            // Look, Prime, Choose and Type; Alt+O went straight into the two lists, so the two commands that arrange
+            // the grid worked two ways. Now Alt+O says the order in force, then offers:
+            //   Prime order    prime's fields in prime's order, ascending: the default, and the first button
+            //   Look order     look's fields in look's order, ascending
+            //   Choose order   the two lists, Fields available and Order of fields, as before
+            //   Type order     the fields typed with commas, each with desc after it to sort largest or latest first
+            //   Reverse order  the order in force, each field turned the other way
+            // Letters P, L, C, T, R; Shift+F1 on each says what it does.
             if (db == null || !db.hasRecordset()) return;
             List<string> lAllFields = db.getNaturalFieldNames();
             if (lAllFields == null || lAllFields.Count == 0)
             { Say.say("No columns to sort by"); return; }
 
-            List<string> lInitial = new List<string>();
+            List<string> lNow = new List<string>();
             foreach (string sPart in (db.sort ?? "").Split(','))
             {
                 string sP = sPart.Trim();
@@ -27190,43 +27349,124 @@ namespace DbDo
                 if (bDesc) sName = sP.Substring(0, sP.Length - 5).Trim();
                 else if (sP.EndsWith(" ASC", StringComparison.OrdinalIgnoreCase))
                     sName = sP.Substring(0, sP.Length - 4).Trim();
-                lInitial.Add(sName + (bDesc ? " desc" : " asc"));
+                lNow.Add(sName + (bDesc ? " desc" : " asc"));
             }
+            List<string> lPrime = db.hasField("prime") ? db.lParseGeneratedFields(db.currentTable, "prime") : new List<string>();
+            List<string> lLook = db.hasField("look") ? db.lParseGeneratedFields(db.currentTable, "look") : new List<string>();
+            List<string> lPrimeAsc = new List<string>(), lLookAsc = new List<string>();
+            foreach (string sF in lPrime) lPrimeAsc.Add(sF + " asc");
+            foreach (string sF in lLook) lLookAsc.Add(sF + " asc");
+            string sWhich = "";
+            if (lNow.Count == 0) sWhich = ", as stored";
+            else if (lPrimeAsc.Count > 0 && string.Join(",", lNow.ToArray()) == string.Join(",", lPrimeAsc.ToArray())) sWhich = ", the prime order, the default";
+            else if (lLookAsc.Count > 0 && string.Join(",", lNow.ToArray()) == string.Join(",", lLookAsc.ToArray())) sWhich = ", the look order";
+            string sShown = "Ordered now" + sWhich + (lNow.Count == 0 ? "." : ": " + string.Join(", ", lNow.ToArray()) + ".");
 
-            using (ColumnSequenceDialog dlg = new ColumnSequenceDialog(
-                "Order Records", lAllFields, virtCurrentColumnName(), lInitial, true))
+            List<string> lsButtons = new List<string>();
+            if (lPrime.Count > 0) lsButtons.Add("&Prime order");
+            if (lLook.Count > 0) lsButtons.Add("&Look order");
+            lsButtons.Add("&Choose order...");
+            lsButtons.Add("&Type order...");
+            if (lNow.Count > 0) lsButtons.Add("&Reverse order");
+            lsButtons.Add("Cancel");
+            string sButton;
+            using (LbcDialog dlgAsk = new LbcDialog("Order Records", this))
             {
-                // Default Order: prime's fields, in prime's order; with no prime,
-                // look's; with neither, the button is not offered.
-                List<string> lsDefault = db.hasField("prime") ? db.lParseGeneratedFields(db.currentTable, "prime") : new List<string>();
-                if (lsDefault.Count == 0 && db.hasField("look")) lsDefault = db.lParseGeneratedFields(db.currentTable, "look");
-                dlg.lsDefaultPicks = lsDefault;
-                if (dlg.ShowDialog(this) != DialogResult.OK) return;
-                List<string> lClauses = new List<string>();
-                foreach (string sPick in dlg.lChosenColumns)
-                {
-                    int iSpace = sPick.LastIndexOf(' ');
-                    if (iSpace <= 0) continue;
-                    bool bDesc = sPick.Substring(iSpace + 1)
-                        .Equals("desc", StringComparison.OrdinalIgnoreCase);
-                    lClauses.Add(sPick.Substring(0, iSpace) + (bDesc ? " DESC" : " ASC"));
-                }
-                string sFinal = string.Join(", ", lClauses.ToArray());
-                try
-                {
-                    db.sort = sFinal;
-                    invokeRefresh();
-                    // Persist the new sort for this table immediately,
-                    // rather than only on form close (see
-                    // persistCurrentTableState) -- the "I have to re-sort
-                    // every time I open it" report.
-                    persistCurrentTableState();
-                    Say.sayForced(lClauses.Count == 0
-                        ? "Sort cleared. " + db.recordCount + " records in original order."
-                        : "Ordered by " + sFinal + ". " + db.recordCount + " records.");
-                }
-                catch (Exception ex) { ErrorDialog.show(this, "Order Records", ex, db); }
+                dlgAsk.addLabel(sShown);
+                dlgAsk.helpNote = "Prime order sorts by prime's fields in prime's order, the default, which also makes each record's place unique. "
+                    + "Look order sorts by look's fields, the way records are said. Choose order picks fields and their direction one by one; "
+                    + "Type order takes the fields separated by commas, with desc after a field to sort it largest or latest first. "
+                    + "Reverse order turns each field of the order in force the other way. The order is remembered with the table. "
+                    + "Shift+F1 on a button says what it does.";
+                dlgAsk.form.Shown += delegate(object o, EventArgs e) { Say.say(sShown); };
+                sButton = dlgAsk.runWithButtons(lsButtons.ToArray());
             }
+            if (string.IsNullOrEmpty(sButton) || sButton == "Cancel") return;
+
+            List<string> lPicks = null;
+            if (sButton == "Prime order") lPicks = lPrimeAsc;
+            else if (sButton == "Look order") lPicks = lLookAsc;
+            else if (sButton == "Reverse order")
+            {
+                lPicks = new List<string>();
+                foreach (string sPick in lNow)
+                    lPicks.Add(sPick.EndsWith(" desc") ? sPick.Substring(0, sPick.Length - 5) + " asc" : sPick.Substring(0, sPick.Length - 4) + " desc");
+            }
+            else if (sButton == "Type order...")
+            {
+                lPicks = promptOrderTyped(lNow, lAllFields);
+                if (lPicks == null) return;
+            }
+            else
+            {
+                using (ColumnSequenceDialog dlg = new ColumnSequenceDialog(
+                    "Order Records", lAllFields, virtCurrentColumnName(), lNow, true))
+                {
+                    // Its Prime order button appears only when there is a prime to put in.
+                    if (lPrime.Count > 0) dlg.lsDefaultPicks = lPrime;
+                    if (dlg.ShowDialog(this) != DialogResult.OK) return;
+                    lPicks = dlg.lChosenColumns;
+                }
+            }
+            applyOrder(lPicks);
+        }
+
+        // promptOrderTyped: Type order's box, the order in force written out to edit; null when cancelled.
+        // A name that is not a field of the table is left out and said.
+        private List<string> promptOrderTyped(List<string> lNow, List<string> lAllFields)
+        {
+            string sTyped;
+            using (LbcDialog dlg = new LbcDialog("Type Order", this))
+            {
+                dlg.addLabel("Type the fields in order, separated by commas; put desc after a field to sort it largest or latest first.");
+                TextBox tb = dlg.addInputBox("&Fields in order:", string.Join(", ", lNow.ToArray()).Replace(" asc", ""),
+                    "The fields to sort by, first field first, such as country, name desc.");
+                if (!dlg.runOkCancel()) return null;
+                sTyped = tb.Text ?? "";
+            }
+            List<string> lOut = new List<string>(), lDropped = new List<string>();
+            foreach (string sRaw in sTyped.Split(','))
+            {
+                string sOne = sRaw.Trim();
+                if (sOne.Length == 0) continue;
+                bool bDesc = false;
+                string[] aWords = sOne.Split(new char[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+                string sName = aWords[0];
+                if (aWords.Length > 1 && aWords[aWords.Length - 1].Equals("desc", StringComparison.OrdinalIgnoreCase)) { bDesc = true; sName = string.Join(" ", aWords, 0, aWords.Length - 1); }
+                else if (aWords.Length > 1 && aWords[aWords.Length - 1].Equals("asc", StringComparison.OrdinalIgnoreCase)) sName = string.Join(" ", aWords, 0, aWords.Length - 1);
+                string sMatch = null;
+                foreach (string sField in lAllFields) if (string.Equals(sField, sName, StringComparison.OrdinalIgnoreCase)) { sMatch = sField; break; }
+                if (sMatch == null) { lDropped.Add(sName); continue; }
+                lOut.Add(sMatch + (bDesc ? " desc" : " asc"));
+            }
+            if (lDropped.Count > 0) Say.sayForced("Not fields of " + db.currentTable + ", so left out: " + string.Join(", ", lDropped.ToArray()));
+            return lOut;
+        }
+
+        // applyOrder: put an order of "field asc" / "field desc" picks in force, remember it, and say it.
+        private void applyOrder(List<string> lPicks)
+        {
+            List<string> lClauses = new List<string>();
+            foreach (string sPick in lPicks ?? new List<string>())
+            {
+                int iSpace = sPick.LastIndexOf(' ');
+                if (iSpace <= 0) continue;
+                bool bDesc = sPick.Substring(iSpace + 1).Equals("desc", StringComparison.OrdinalIgnoreCase);
+                lClauses.Add(sPick.Substring(0, iSpace) + (bDesc ? " DESC" : " ASC"));
+            }
+            string sFinal = string.Join(", ", lClauses.ToArray());
+            try
+            {
+                db.sort = sFinal;
+                invokeRefresh();
+                // Persist the new sort for this table immediately, rather than only on form close (see
+                // persistCurrentTableState) -- the "I have to re-sort every time I open it" report.
+                persistCurrentTableState();
+                Say.sayForced(lClauses.Count == 0
+                    ? "Sort cleared. " + db.recordCount + " records in original order."
+                    : "Ordered by " + sFinal + ". " + db.recordCount + " records.");
+            }
+            catch (Exception ex) { ErrorDialog.show(this, "Order Records", ex, db); }
         }
 
         private void sortRecordsClicked(object sender, EventArgs evArgs)
@@ -27346,6 +27586,10 @@ namespace DbDo
             }
             catch { }
             sb.AppendLine("Database: " + sShownPath);
+            // What the database is for (3 November 2026), from its lookups or the shipped descriptions.
+            string sDatabaseAbout = "";
+            try { sDatabaseAbout = db.getDatabaseDescription(); } catch { }
+            if (sDatabaseAbout.Length > 0) sb.AppendLine("About: " + sDatabaseAbout);
             // If the file doesn't exist at that resolved path, note
             // it -- this catches the case where the path stored on
             // the manager is no longer reachable on disk.
@@ -27379,6 +27623,10 @@ namespace DbDo
                 long nCount = dCounts.ContainsKey(sT) ? dCounts[sT] : -1;
                 string sCountStr = (nCount < 0) ? "?" : nCount.ToString();
                 sb.AppendLine(sT + " (" + sCountStr + " record" + (nCount == 1 ? "" : "s") + ")");
+                // What the table is for, from lookups or the shipped descriptions (3 November 2026).
+                string sTableAbout = "";
+                try { sTableAbout = db.getTableDescription(sT); } catch { }
+                if (sTableAbout.Length > 0) sb.AppendLine("  " + sTableAbout);
 
                 // Outbound: this table's columns named "<other>_id" pointing to a known table.
                 List<string> lOutbound = new List<string>();
@@ -29029,6 +29277,13 @@ namespace DbDo
 
         private string promptListChoice(string sTitle, string sPrompt, List<string> lItems, string sCurrent)
         {
+            return promptListChoice(sTitle, sPrompt, lItems, sCurrent, null);
+        }
+
+        // With item hints (3 November 2026): Shift+F1 on the list says the hint for the item selected -- a table's
+        // description in Choose Table and Open Table -- twice adds the list's own tip, three times its keys.
+        private string promptListChoice(string sTitle, string sPrompt, List<string> lItems, string sCurrent, Dictionary<string, string> dItemHints)
+        {
             using (Form dlg = new LbcForm())
             {
                 dlg.Text = sTitle;
@@ -29055,6 +29310,16 @@ namespace DbDo
                 else if (lb.Items.Count > 0) lb.SelectedIndex = 0;
                 lb.DoubleClick += (s, e) => { dlg.DialogResult = DialogResult.OK; dlg.Close(); };
                 dlg.Controls.Add(lb);
+                if (dItemHints != null && dItemHints.Count > 0)
+                {
+                    Homer.LbcHints.setItemHints(lb, dItemHints);
+                    dlg.KeyDown += (s, e) =>
+                    {
+                        if (e.KeyData != (Keys.Shift | Keys.F1)) return;
+                        e.Handled = true; e.SuppressKeyPress = true;
+                        Say.say(Homer.LbcHints.hintFor(lb, "Enter chooses the one you are on.", Homer.LbcHints.pressCount("Shift+F1")));
+                    };
+                }
 
                 Button btnOk = new Button();
                 btnOk.Text = "&OK";
@@ -31182,6 +31447,14 @@ namespace DbDo
         private void helpStatusClicked(object sender, EventArgs evArgs)
         {
             string sMsg = buildStatusMessage();
+            // PRESSED TWICE, WHAT THE TABLE IS FOR (3 November 2026), as Where Am I in a dialog says more the more it
+            // is pressed: the table's description from lookups or the shipped descriptions.
+            if (Homer.LbcHints.pressCount("Alt+Shift+Slash") >= 2 && db != null && !string.IsNullOrEmpty(db.currentTable))
+            {
+                string sAbout = "";
+                try { sAbout = db.getTableDescription(db.currentTable); } catch { }
+                if (sAbout.Length > 0) sMsg = db.currentTable + ": " + sAbout;
+            }
             Say.say(sMsg);
             // Also dump to the StatusStrip label so the user can
             // tab-navigate to it (or use the screen reader's "say

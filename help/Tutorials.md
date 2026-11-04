@@ -1534,7 +1534,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 7: Enter
 
-Any Field is the first button, so Enter presses it. It asks for the text to find, wherever it is.
+Any field is the first button, so Enter presses it. It asks for the text to find, wherever it is.
 
 Screen reader:
 
@@ -1596,15 +1596,27 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 13: Alt+O
 
-Alt plus O, O for Order, sorts by a column; I choose name, and Enter sorts. In that dialog, Prime order puts back the table's own order.
+Alt plus O, O for Order, says the order in force, then offers Prime order, Look order, Choose order, Type order and Reverse order, as Select Columns offers its own.
 
 Screen reader:
 
+- Ordered now
 - Order Records dialog
+- Prime order button
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 14: Down Arrow
+### Step 14: L
+
+L for Look order sorts by name, the way stations are said. Prime order puts back the table's own order.
+
+Screen reader:
+
+- Ordered by name ASC
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Down Arrow
 
 Down Arrow to the second.
 
@@ -1614,7 +1626,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 15: Alt+Shift+P
+### Step 16: Alt+Shift+P
 
 The sports station. Alt plus Shift plus P plays it.
 
@@ -1624,7 +1636,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 16: Control+M
+### Step 17: Control+M
 
 Escape. To keep stations, mark them. Control plus M, M for Mark, marks the station I am on, and Control plus Shift plus M unmarks: Shift reverses.
 
@@ -1634,7 +1646,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 17: Control+A
+### Step 18: Control+A
 
 Shift plus Down Arrow marks a station and moves to the next. For a run of records, F8 starts it where I am, and Shift plus F8 completes it where I stop. Control plus A marks every record in view.
 
@@ -1644,7 +1656,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 18: Alt+Shift+P
+### Step 19: Alt+Shift+P
 
 Now the payoff. With records marked, Alt plus Shift plus P plays all of them, one after another, as a playlist.
 
@@ -1654,7 +1666,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 19: Control+Shift+F
+### Step 20: Control+Shift+F
 
 Escape. Control plus Shift plus F clears the filter, and every station is back, the marks kept. Marks stay when DbDo closes, so a marked station is a favorite to come back to.
 
@@ -1664,11 +1676,11 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 20
+### Step 21
 
 What this walk taught. I name the command; the reader gives the key.
 
-### Step 21
+### Step 22
 
 Search every column.
 
@@ -1676,7 +1688,7 @@ Screen reader:
 
 - Control plus K
 
-### Step 22
+### Step 23
 
 Show only the matches.
 
@@ -1684,7 +1696,7 @@ Screen reader:
 
 - Control plus F
 
-### Step 23
+### Step 24
 
 Say the filter.
 
@@ -1692,7 +1704,7 @@ Screen reader:
 
 - Shift plus F
 
-### Step 24
+### Step 25
 
 Order by a column.
 
@@ -1700,7 +1712,7 @@ Screen reader:
 
 - Alt plus O
 
-### Step 25
+### Step 26
 
 Mark a record.
 
@@ -1708,7 +1720,7 @@ Screen reader:
 
 - Control plus M
 
-### Step 26
+### Step 27
 
 Play the marked stations.
 

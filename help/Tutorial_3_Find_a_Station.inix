@@ -51,7 +51,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Any Field is the first button, so Enter presses it. It asks for the text to find, wherever it is.
+Say=Any field is the first button, so Enter presses it. It asks for the text to find, wherever it is.
 Key=Enter
 Hear=Any Field Contains dialog
 Hear=Text to find in any field: edit
@@ -95,9 +95,18 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Alt plus O, O for Order, sorts by a column; I choose name, and Enter sorts. In that dialog, Prime order puts back the table's own order.
+Say=Alt plus O, O for Order, says the order in force, then offers Prime order, Look order, Choose order, Type order and Reverse order, as Select Columns offers its own.
 Key=Alt+O
+Hear=Ordered now
 Hear=Order Records dialog
+Hear=Prime order button
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=L for Look order sorts by name, the way stations are said. Prime order puts back the table's own order.
+Key=L
+Hear=Ordered by name ASC
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

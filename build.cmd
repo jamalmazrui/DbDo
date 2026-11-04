@@ -312,15 +312,6 @@ rem failing on them. scripts\checkTemplates repairs what DbDo's conventions sett
 rem (edited triggers, unique prime indexes, relationship kinds, duplicate records),
 rem writes RadioTrail.schema, then runs every SQL statement, setting and report on
 rem the database it ships with. Any failure stops the build here.
-echo Checking the templates ...
-echo Template check: python scripts\checkTemplates.py --repair --schema RadioTrail >> "!log!"
-python "!sHere!scripts\checkTemplates.py" --repair --schema RadioTrail
-set "iTemplates=!errorlevel!"
-echo Template check: exit code !iTemplates!>> "!log!"
-if not "!iTemplates!"=="0" (
-  echo The template check failed. Its log is in logs, named DbDo-checkTemplates with the date and time.
-  popd & exit /b 1
-)
 rem WHAT EACH FIELD IS FOR (3 November 2026): templates\fieldDescriptions.inix holds one sentence per
 rem field, and scripts\describeFields writes them into every template's lookups table, which Shift+F1 reads
 rem in the record, new-record and filter forms. A sentence someone wrote by hand is never replaced.
@@ -330,6 +321,15 @@ set "iDescribed=!errorlevel!"
 echo Field descriptions: exit code !iDescribed!>> "!log!"
 if not "!iDescribed!"=="0" (
   echo The field descriptions could not be written. Their log is in logs, named DbDo-describeFields with the date and time.
+  popd & exit /b 1
+)
+echo Checking the templates ...
+echo Template check: python scripts\checkTemplates.py --repair --schema RadioTrail >> "!log!"
+python "!sHere!scripts\checkTemplates.py" --repair --schema RadioTrail
+set "iTemplates=!errorlevel!"
+echo Template check: exit code !iTemplates!>> "!log!"
+if not "!iTemplates!"=="0" (
+  echo The template check failed. Its log is in logs, named DbDo-checkTemplates with the date and time.
   popd & exit /b 1
 )
 rem A directory template rebuilt above is recorded now that the check has passed.

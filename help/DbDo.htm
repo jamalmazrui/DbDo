@@ -934,11 +934,19 @@ in force says so as it opens.</li>
 <li><strong>Filter by Regex</strong> filters by pattern; <strong>Say
 Filter</strong> (Shift+F) speaks the current filter.</li>
 </ul></li>
-<li><strong>Order Records</strong> (Alt+O) sorts the grid by one or more
-fields, each ascending or descending, including fields the grid does not
-show; <strong>Reverse Order</strong> (Alt+Shift+O) reverses the order in
-force; <strong>Clear Sort</strong> returns to table order; <strong>Say
-Order</strong> (Shift+O) speaks the current sort.</li>
+<li><strong>Order Records</strong> (Alt+O) works as Select Columns does:
+it first says the order in force, then offers <strong>Prime
+order</strong> (the default, prime’s fields ascending, and the first
+button), <strong>Look order</strong> (look’s fields, the way records are
+said), <strong>Choose order</strong> (pick fields and directions one by
+one, in two lists), <strong>Type order</strong> (the fields typed with
+commas, desc after a field for largest or latest first) and
+<strong>Reverse order</strong> (each field of the order in force turned
+the other way). It can sort by one or more fields, each ascending or
+descending, including fields the grid does not show; <strong>Reverse
+Order</strong> (Alt+Shift+O) reverses the order in force; <strong>Clear
+Sort</strong> returns to table order; <strong>Say Order</strong>
+(Shift+O) speaks the current sort.</li>
 </ul>
 <p>Sorting reads numbers as numbers: volume 9 comes after 7 and 6.5 even
 if some values were stored as text and others as numbers. It also
@@ -987,6 +995,34 @@ field, val is left empty, and descrip holds the sentence; tbl
 <code>*</code> covers a field of that name in every table. Edit a row of
 lookups to change a sentence. The rows that do have a val are the
 choices F4 offers for that field.</p>
+<p><strong>What each table is for.</strong> A lookups row with tbl
+naming a table, and fld and val both empty, describes the table in one
+sentence. Shift+F1 says it in Choose Table and Open Table, Database
+Summary prints it, and Where Am I pressed twice says it for the table
+open.</p>
+<p><strong>Patterns for fields.</strong> A field’s own row in lookups –
+tbl and fld naming the field, val empty – has a pattern column beside
+descrip. Put a .NET regular expression there, and the field’s value must
+match it when you press OK in a record form; the first field that does
+not is said and takes focus, with its text selected. An empty value is
+tested too, so a pattern can make a field required: <code>^\s*\S</code>
+refuses a blank, and <code>^$|</code> in front of any pattern lets the
+field stay blank. What DbDo says on a failure is the field’s
+description, so write the form a value takes into descrip, such as
+“starting with http:// or https://”. Filter Records checks no
+patterns.</p>
+<p><strong>Why descrip, not desc.</strong> lookups’s column names are
+short so they cannot be mistaken for SQL words: tbl, fld, val. AccAudit,
+where lookups began, called its description column desc, the commonest
+short form; but DESC is SQL’s word for descending order, reserved in
+Access, SQL Server, MySQL and PostgreSQL, where a column of that name
+must be quoted in every query, and “ORDER BY desc DESC” reads as a
+riddle. So the column is descrip, by decision of 3 November 2026.</p>
+<p><strong>What the database is for.</strong> A lookups row with tbl
+<code>*</code> – every table, which is to say the database – and fld and
+val empty describes the database itself; Database Summary prints it as
+About. (A <code>*</code> row with a field named describes that field in
+every table.)</p>
 <p><strong>How DbDo’s dialogs name things.</strong> Every control’s name
 has at least two words, OK, Cancel, Help and Close aside, and its letter
 begins one of them. Columns are what the grid shows and arranges; fields

@@ -5,6 +5,49 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 3 November 2026 -- Descriptions are written before the template check
+
+- **The field descriptions are written before the templates are checked,** not after. The build stopped at 16:15 because the database rows written at 15:38, with an empty tbl, were checked before the describe step could give them tbl *; and run after the check, the step's own rows were never checked at all.
+
+## 3 November 2026 -- Edges say where you are; look and prime say what they are
+
+- **At an edge the grid says the edge and then the cell.** "First column, Sonic Radio", "Last row, blank": the Left and Right Arrows, Tab and Shift+Tab, and the Alt+Control arrows already named the edge, and now say the cell the cursor stays on. Up Arrow at the first row and Down Arrow at the last, which moved nothing and said nothing, now say "First row" and "Last row" with the cell.
+- **Look is the default columns; prime is the primary key.** Every place a person meets them now says so: Select Columns' status line ("the look columns, the default columns"; "the prime columns, the primary key"), Order Records' ("the prime order, by the primary key, the default"), their Shift+F1 sentences and help, the look and prime field descriptions, and the guide, which explains the pair in a sentence each. The dialog for setting them is Look and Prime Fields, not "Look/Prm Fields", and asks for "Prime fields, the primary key"; its messages say prime, never Prm.
+
+## 3 November 2026 -- The database's own row takes tbl *
+
+- **The build passes its template check again.** The row describing a database had tbl, fld and val all empty, so its look -- built from those three -- was empty too, and the template check, which refuses a record with no look, stopped the acceptance rebuild at 15:47 for BookTrail, JobTrail and RadioTrail. (The first build at 15:38 passed only because the descriptions are written after the check.) The row now has tbl `*`, every table, the whole database, with fld and val empty, and its look is `*`; the build changes the rows it wrote before. DbDo reads either form.
+
+## 3 November 2026 -- Order Records works as Select Columns does
+
+- **Alt+O says the order in force, then offers its choices,** as Alt+S says the columns shown and then offers its own: Prime order (the default, and the first button), Look order, Choose order (the two lists, as before), Type order and Reverse order, on P, L, C, T and R, each with a Shift+F1 sentence. Until now Alt+O went straight into the two lists, so the two commands that arrange the grid worked two ways; the earlier rename of the lists' controls had not made them alike.
+- **Export Data says what it is about to export** -- how many records, whether filtered and whether in a chosen order -- before Windows's Save As box, which has no room for a line of text.
+- **The tutorial walk Find a Station** presses L for Look order after Alt+O.
+- **Commands checked for the same pattern.** Say the state, then offer fixed choices as buttons: Select Columns, Order Records, Filter Records, and the button dialogs of Add Table, Merge Data, Update from Template, Generate from Grid and Edit Settings. Pick from the data in a list: Choose Table, Open Table, Choose View, Recent Files, Query History, the bookmarks, scripts and windows. Give values in a form: the record forms, Edit Cell, Keywords, Go to, Jump, the regex commands, Query and Evaluate. Files go through Windows's own boxes, and Export Data now says first what it will write. Print is not yet built and says so.
+
+## 3 November 2026 -- descrip, by decision
+
+- **lookups keeps descrip for its description column, now as a recorded decision.** AccAudit, where DbDo's schema began, called it desc; the change to descrip had never been written down. desc is the commoner abbreviation, but DESC is an SQL keyword -- reserved in Access, SQL Server, MySQL and PostgreSQL -- and lookups's names were chosen precisely so they could not be confused with SQL words, as tbl, fld and val are. descr would also avoid the keyword but is not clearly commoner, and changing would mean migrating every template and every database for two letters. AccAudit's other change, updated to edited, follows DbDo's terms and stands.
+
+## 3 November 2026 -- A pattern column in lookups, and RadioTrail's patterns
+
+- **lookups has a pattern column.** A field's own row -- tbl and fld filled, val empty -- now holds both what the field is for, in descrip, and the form its value takes, in pattern, a .NET regular expression. This replaces the regex: prefix in val from earlier the same day, which nothing yet used, so val stays for the choices F4 offers. The table column was always descrip, never desc; nothing was renamed. A database whose lookups lacks the pattern column gets it when DbDo first reads its patterns, unless it is read-only.
+- **An empty value is tested,** so a pattern can make a field required. On a failure DbDo says the field's name, whether it is blank or does not fit, and then the field's own description, which says the form it takes.
+- **RadioTrail's stations have 19 patterns,** each tested against all 49,186 stations so that none refuses a record already there: name, stream_url and source are required; addresses start with http:// or https://; counts are whole numbers; dates are year-month-day; status is one of its five choices; rating is 1 to 5. The test found one real typo, a homepage beginning "hthttps", which the pattern will now catch when that record is edited. Your own copies use the shipped patterns until their lookups has some.
+- **Each database is described,** in a row with tbl, fld and val all empty; Database Summary prints it as About.
+
+## 3 November 2026 -- What each table is for, and patterns in lookups
+
+- **Every template table is described,** in a lookups row with tbl filled and fld and val empty: 39 sentences, from templates\fieldDescriptions.inix's new [tables] section, written by the build. Your own databases fall back to that file.
+- **Choose Table and Open Table say a table's description** on Shift+F1 for the table you are on; **Database Summary** prints it under each table's name; and the main window's **Where Am I, pressed twice,** says it for the table open.
+- **A pattern for any field can live in lookups:** a row with tbl and fld filled, val beginning regex: and then the pattern, and descrip the sentence to say when a value does not fit. It is checked only when OK is pressed in the record and new-record forms, through HomerDev 1.116.0's Lbc patterns; the first field that fails takes focus with its text selected. A pattern in DbDo.inix's [Validation:<table>] still counts for a field lookups does not cover, and each declared type still has its own, now with a plain sentence, such as "Type a whole number, such as 12." Pattern rows are never offered by F4, and the filter form checks no patterns.
+
+## 3 November 2026 -- The last of the old filter names
+
+- **Control+F's condition step says Any field, Field boxes, Marked records and Unmarked records,** the names the other Filter Records dialogs already used; recordWalk found the old "Any Field" still there. Its title after Narrow filter or Expand filter is Narrow Filter or Expand Filter again, not "Narrow filter Filter", which the earlier rename had made it.
+- **Shift+F1 on those four buttons,** under any filter dialog's title.
+- **recordWalk matches near-misses,** from HomerDev 1.114.0.
+
 ## 3 November 2026 -- Field descriptions in your own copies
 
 - **Your own databases describe their fields too.** A copy made from a template before its lookups held descriptions, such as RadioTrail in %LOCALAPPDATA%\DbDo\data, had none, so Edit View's tips said only "type TEXTLINE". A field the database's lookups table does not describe now takes its sentence from the templates\fieldDescriptions.inix DbDo ships: the section for the database and table, such as RadioTrail/stations, then [*]. A sentence in your lookups still wins.

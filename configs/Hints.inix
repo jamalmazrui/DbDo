@@ -10,6 +10,10 @@ OK = Saves what you have chosen and closes the dialog; Control+Enter does this f
 Cancel = Closes the dialog and changes nothing; Escape does this from any control.
 Help = Opens this dialog's help, which F1 also does from any control.
 Close = Closes this window.
+Any field = Finds records holding some text in any field.
+Field boxes = Gives a box for each field, where a value and an operator such as >= or a range such as 2025..2026 can be typed.
+Marked records = Keeps the records you have marked.
+Unmarked records = Keeps the records you have not marked.
 Records = The table's records, one to a row; arrows move by record and by column, and Enter opens the record.
 
 [Select Columns]
@@ -31,7 +35,14 @@ Fields available = The fields not yet in the sort, in DbDo's natural order; Ente
 Add ascending = Adds the selected field to the sort, smallest or earliest first.
 Add descending = Adds the selected field to the sort, largest or latest first.
 Order of fields = The sort, first field first; each reads like city asc, and Enter or Delete takes one out.
-Prime order = Fills the sort with prime's fields in prime's order: the table's default order.
+Prime order = Sorts by prime's fields in prime's order, ascending: the table's default order, which also gives each record a place of its own.
+Look order = Sorts by look's fields in look's order, ascending: the way records are said.
+Choose order = Lets you pick the fields and the direction of each, one by one.
+Type order = Lets you type the fields separated by commas, with desc after a field to sort it largest or latest first.
+Reverse order = Turns each field of the order in force the other way: ascending becomes descending.
+
+[Type Order]
+Fields in order = The fields to sort by, first field first, separated by commas; desc after a field sorts it largest or latest first.
 Remove field = Takes the field selected in Order of fields out of the sort.
 Empty list = Clears the sort at once, so OK returns to the default order.
 
@@ -43,6 +54,8 @@ Expand filter = Also takes in the records that meet a new condition.
 Invert filter = Shows the records this filter leaves out, and hides the ones it keeps.
 Edit filter = Opens the filter in force so its values can be changed.
 Any field = Finds records holding some text in any field.
+Marked records = Keeps the records you have marked.
+Unmarked records = Keeps the records you have not marked.
 Field boxes = Gives a box for each field, where a value and an operator such as >= or a range such as 2025..2026 can be typed.
 
 [Filter Fields]

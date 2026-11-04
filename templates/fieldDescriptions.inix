@@ -2,6 +2,10 @@
 ; lookups table by scripts\describeFields.py when DbDo builds: tbl and fld filled, val empty, descrip the sentence.
 ; Shift+F1 on a field in the record, new-record and filter forms says it. [*] holds fields of the same name in every
 ; table; [<template>/<table>] holds one table's own, and wins. [lookups], [maps] and [views] describe DbDo's own tables.
+; [tables] describes each table: "<template>/<table>", or a table's name alone for DbDo's own tables; written as rows
+; with tbl filled and fld and val empty. [patterns] gives a field a .NET regular expression, "<template>/<table>/<field>",
+; written to the pattern column of the field's own row; an empty value is tested too, so ^$| in front lets a field stay
+; blank. [database] describes each database, written as a row with tbl * (every table) and fld and val empty.
 ; A sentence a person has written into a database's lookups is never replaced.
 
 [*]
@@ -206,38 +210,38 @@ source = Where the performer's facts came from.
 summary = Who the performer is, in a few sentences.
 
 [RadioTrail/stations]
-bitrate = The stream's quality, in kilobits per second; higher sounds better and uses more data.
+bitrate = The stream's quality as a whole number, usually in kilobits per second; higher sounds better and uses more data.
 call_sign = The broadcast call sign, such as KUOW, for an over-the-air station.
 city = The city the station is licensed to.
 clicks = How often people have played the station through Radio Browser.
 codec = The audio format of the stream, such as MP3 or AAC.
 country = The country the station is in.
-countrycode = The country's two-letter code, such as US or GB.
+countrycode = The country's two-letter code in capitals, such as US or GB.
 descrip = What the station says about itself, from its stream or home page.
 format = The station's broadcast format, such as news, sports or classic rock.
 frequency = Where the station is on the dial, such as 94.9 FM.
 genre = The kinds of music or talk the station plays, as the directory lists them.
 hls = Whether the stream uses HLS, a streaming method some players need to handle differently.
-homepage = The station's own web site.
+homepage = The station's own web site, starting with http:// or https://.
 language = The language the station broadcasts in.
 last_check = When the directory last found the stream working, as year-month-day.
 last_played = When you last played the station in DbDo.
 last_seen = When DbDo last found the station in the directory.
-name = The station's name as Radio Browser or SomaFM gives it.
+name = The station's name as Radio Browser or SomaFM gives it; it cannot be left blank.
 owner = Who owns the station.
-playlist_url = The address of a playlist file that leads to the stream, when the directory gives one.
+playlist_url = The address of a playlist file that leads to the stream, starting with http:// or https://, when the directory gives one.
 plays = How many times you have played the station in DbDo.
 probed = When DbDo last asked the stream and home page about themselves.
 rating = Your own rating of the station, from 1 to 5.
 slogan = The station's own slogan, from its stream or home page.
-source = Which directory the station came from: Radio Browser, SomaFM, or mine for your own.
+source = Which directory the station came from, such as Radio Browser or SomaFM, or mine for your own; it cannot be left blank.
 source_id = The station's id in that directory, which keeps it the same station across refreshes.
 state = The state or region the station is in.
 status = Your own verdict on the station, such as favorite, tried, untried, want to try or dead; F4 offers the choices.
-stream_url = The address of the audio stream itself, which the player plays.
+stream_url = The address of the audio stream itself, which the player plays, starting with http:// or https://; it cannot be left blank.
 trend = Whether plays are rising or falling lately on Radio Browser.
 votes = How many people have voted for the station on Radio Browser.
-wikipedia = The web address of the station's Wikipedia article.
+wikipedia = The web address of the station's Wikipedia article, or a dash when there is none.
 
 [RecipeTrail/ingredients]
 category = What kind of ingredient it is, such as produce, dairy or spice; F4 offers the choices.
@@ -377,6 +381,7 @@ phone = The supplier's phone number.
 descrip = A one-sentence description: of the value, or of the field itself when val is empty, which Shift+F1 says.
 fld = The field a choice or description belongs to.
 ordinal = Where the value comes in F4's list, smallest first.
+pattern = A .NET regular expression a field's value must match when OK is pressed; ^$| in front lets the field stay blank.
 src = Where the row came from, such as the template's name.
 tbl = The table a choice or description belongs to; * means every table.
 val = One value F4 offers for that field; empty when the row describes the field itself.
@@ -392,3 +397,78 @@ tbl2 = The second table of the link.
 fld = Which setting is saved: the columns shown, the order or the filter.
 tbl = The table a saved view belongs to.
 val = The saved setting itself.
+
+[tables]
+BlindCreations/apps = Apps made by blind people, with where to get each one.
+BlindCreations/books = Books written by blind authors, with where to read each one.
+BlindCreations/creators = Blind authors, developers and presenters, and what each one makes.
+BlindCreations/presentations = Talks, webinars and podcast episodes given by blind presenters.
+BlindSkills/lessons = Lessons that teach the skills of blindness, such as cane travel, braille and cooking.
+BookTrail/books = The books you want to read, are reading or have read, with your notes on each.
+ContactTrail/contacts = The people you keep in touch with, with their addresses, phones and emails.
+ContactTrail/groups = Groups of contacts, such as Family or Work, that a contact can belong to.
+JobTrail/actions = Each step of your job search, such as an application, an interview or a follow-up.
+JobTrail/contacts = The people in your job search, such as recruiters, hiring managers and references.
+JobTrail/docs = The documents you send, such as resumes and cover letters, by version.
+JobTrail/jobs = The jobs you are interested in or have applied for, with where each one stands.
+JobTrail/stories = Your work stories for interviews, each told as challenge, action and result.
+MusicTrail/albums = Albums worth hearing, with their artists, years and genres.
+MusicTrail/performers = Singers, players and bands, with what each is known for.
+RadioTrail/stations = Internet radio stations from Radio Browser and SomaFM, with your own verdicts and notes.
+RecipeTrail/ingredients = The ingredients your recipes use, by kind.
+RecipeTrail/recipes = Your recipes, with how long each takes and how many it serves.
+TechTraining/presentations = Free audio and video presentations about technology and accessibility.
+chinook/albums = Albums in the Chinook sample music store.
+chinook/artists = Artists whose music the Chinook store sells.
+chinook/customers = The Chinook store's customers.
+chinook/employees = The Chinook store's staff.
+chinook/genres = The genres of music the Chinook store sells.
+chinook/invoice_items = One line of a Chinook sale: a track and how many copies.
+chinook/invoices = The Chinook store's sales, one per invoice.
+chinook/media_types = The file formats of the Chinook store's tracks.
+chinook/tracks = The songs the Chinook store sells.
+lookups = DbDo's own table of choices, descriptions and patterns for the other tables' fields.
+maps = DbDo's own table of links between records, such as a contact who belongs to a group.
+northwind/categories = The kinds of product the Northwind sample company sells.
+northwind/customers = The Northwind company's customers.
+northwind/employees = The Northwind company's staff.
+northwind/order_details = One line of a Northwind order: a product, its price and how many.
+northwind/orders = The Northwind company's orders.
+northwind/products = The products the Northwind company sells.
+northwind/shippers = The companies that ship Northwind's orders.
+northwind/suppliers = The companies that supply Northwind's products.
+views = DbDo's own table of saved views: the columns shown, the order and the filter of each table.
+
+[patterns]
+RadioTrail/stations/bitrate = ^$|^[0-9]{1,6}$
+RadioTrail/stations/clicks = ^$|^[0-9]+$
+RadioTrail/stations/countrycode = ^$|^[A-Z]{2}$
+RadioTrail/stations/hls = ^$|^yes$
+RadioTrail/stations/homepage = ^$|^https?://\S+$
+RadioTrail/stations/last_check = ^$|^[0-9]{4}-[0-9]{2}-[0-9]{2}([ T][0-9]{2}:[0-9]{2}(:[0-9]{2})?)?$
+RadioTrail/stations/last_played = ^$|^[0-9]{4}-[0-9]{2}-[0-9]{2}([ T][0-9]{2}:[0-9]{2}(:[0-9]{2})?)?$
+RadioTrail/stations/last_seen = ^$|^[0-9]{4}-[0-9]{2}-[0-9]{2}([ T][0-9]{2}:[0-9]{2}(:[0-9]{2})?)?$
+RadioTrail/stations/name = ^\s*\S[\s\S]*$
+RadioTrail/stations/playlist_url = ^$|^https?://\S+$
+RadioTrail/stations/plays = ^$|^[0-9]+$
+RadioTrail/stations/probed = ^$|^[0-9]{4}-[0-9]{2}-[0-9]{2}([ T][0-9]{2}:[0-9]{2}(:[0-9]{2})?)?$
+RadioTrail/stations/rating = ^$|^[1-5]$
+RadioTrail/stations/source = ^\s*\S.*$
+RadioTrail/stations/status = ^$|^(favorite|tried|untried|want to try|dead)$
+RadioTrail/stations/stream_url = ^(https?|rtmps?|mms)://\S+$
+RadioTrail/stations/trend = ^$|^-?[0-9]+$
+RadioTrail/stations/votes = ^$|^[0-9]+$
+RadioTrail/stations/wikipedia = ^$|^-$|^https://[a-z-]+\.wikipedia\.org/\S+$
+
+[database]
+BlindCreations = Apps, books and presentations by blind creators, and the creators themselves.
+BlindSkills = Lessons that teach the skills of blindness, gathered from many publishers.
+BookTrail = A reading log: books to read, being read and read, with notes on each.
+chinook = Chinook, a sample music store database for practicing queries.
+ContactTrail = An address book of people and the groups they belong to.
+JobTrail = A job search: the jobs, the people, each step taken, documents and interview stories.
+MusicTrail = Albums and performers worth hearing.
+northwind = Northwind, a sample trading company database for practicing queries.
+RadioTrail = A catalog of Internet radio stations to find, try and keep, with your own verdicts.
+RecipeTrail = Recipes and the ingredients they use.
+TechTraining = Free audio and video presentations about technology and accessibility.
