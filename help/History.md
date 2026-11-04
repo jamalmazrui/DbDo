@@ -5,6 +5,11 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 3 November 2026 -- The pilot walk follows Order Records' new shape
+
+- **scripts\walks\pilot.inix** expects Alt+O's Ordered now, Prime order and its Shift+F1, then C for Choose order and the two lists, and the reworded hints for Look columns and Prime columns; the 16:49 walk's misses were the walk's own, written for the old dialogs.
+- **recordWalk --axe,** from HomerDev 1.120.0, adds an Axe.Windows scan to every step.
+
 ## 3 November 2026 -- Descriptions are written before the template check
 
 - **The field descriptions are written before the templates are checked,** not after. The build stopped at 16:15 because the database rows written at 15:38, with an empty tbl, were checked before the describe step could give them tbl *; and run after the check, the step's own rows were never checked at all.

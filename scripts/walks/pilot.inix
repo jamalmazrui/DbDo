@@ -15,7 +15,7 @@ Wait=6
 [step]
 Say=Shift plus F1 says what Look columns does.
 Key=Shift+F1
-Hear=Shows look's columns in look's order
+Hear=Shows the default columns
 
 [step]
 Say=Tab moves to Prime columns.
@@ -25,7 +25,7 @@ Hear=Prime columns button
 [step]
 Say=Shift plus F1 on Prime columns.
 Key=Shift+F1
-Hear=the default sort order
+Hear=Shows the primary key
 
 [step]
 Say=Escape closes the dialog and changes nothing.
@@ -48,15 +48,25 @@ Key=Escape
 [step]
 Say=Alt plus O opens Order Records.
 Key=Alt+O
+Hear=Ordered now
 Hear=Order Records dialog
-Hear=Fields available
-Wait=5
+Hear=Prime order button
 
 [step]
-Say=Shift plus F1 on Fields available.
+Say=Shift+F1 on Prime order says it is the default order, by the primary key.
+Key=Shift+F1
+Hear=The default order
+
+[step]
+Say=C for Choose order opens the two lists.
+Key=C
+Hear=Fields available
+
+[step]
+Say=Shift+F1 on the first list.
 Key=Shift+F1
 Hear=The fields not yet in the sort
 
 [step]
-Say=Escape closes it.
+Say=Escape leaves without changing the order.
 Key=Escape
