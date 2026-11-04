@@ -1010,8 +1010,9 @@ tested too, so a pattern can make a field required: <code>^\s*\S</code>
 refuses a blank, and <code>^$|</code> in front of any pattern lets the
 field stay blank. What DbDo says on a failure is the field’s
 description, so write the form a value takes into descrip, such as
-“starting with http:// or https://”. Filter Records checks no
-patterns.</p>
+“starting with http:// or https://”. Filter Records checks no patterns.
+To set them without editing lookups, use Settings, then Field Validation
+for This Table: one box per field, saved into lookups.</p>
 <p><strong>Why descrip, not desc.</strong> lookups’s column names are
 short so they cannot be mistaken for SQL words: tbl, fld, val. AccAudit,
 where lookups began, called its description column desc, the commonest

@@ -4,6 +4,16 @@
 [about]
 Title=Pilot - Select Columns, Filter Records and Order Records
 
+; THE SAME START EVERY TIME (3 November 2026): the 18:49 run found the grid left on the standard columns from an earlier
+; test, so every return to the grid read Sonic Radio's whole notes paragraph, over fifteen seconds. The walk first puts
+; back the default columns, look's, with Alt+S and L, and then begins.
+[step]
+Say=First the default columns: Alt plus S, then L for Look columns.
+Key=Alt+S
+
+[step]
+Key=L
+
 [step]
 Say=Alt plus S opens Select Columns, which says what is shown before its buttons.
 Key=Alt+S

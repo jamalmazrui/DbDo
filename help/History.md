@@ -5,6 +5,15 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 3 November 2026 -- Short rows, and patterns set in a dialog
+
+- **A long cell is short in the row.** Landing on a record makes the screen reader read the whole row, so with notes shown every arrow press read a paragraph -- over fifteen seconds in the 18:49 walk. A cell over 120 characters now shows in the row as its first sentence, when that fits, or else is cut at a word and ended with an ellipsis. Moving to the cell still reads it whole, and editing and copying use the database's value, never the row's text.
+- **Field Validation for This Table saves into lookups,** in the pattern column of each field's row, beside its description, so a database carries its own rules. It shows the pattern from lookups, the shipped patterns or an older DbDo.inix entry; an older DbDo.inix entry is cleared when saved, so it cannot count again; and clearing a field whose pattern DbDo ships stores one that accepts anything, since an empty column would let the shipped one return. A read-only database says it cannot be changed.
+
+## 3 November 2026 -- The pilot walk starts the same way every time
+
+- **scripts\walks\pilot.inix first puts back the default columns,** look's, with Alt+S and L. The 18:49 run, which heard 12 of 13 expected lines, found the grid left on the standard columns from an earlier test, so each return to the grid read Sonic Radio's whole notes paragraph for over fifteen seconds.
+
 ## 3 November 2026 -- recordWalk listens until JAWS stops
 
 - **recordWalk listens until JAWS stops, not for a fixed time.** The recordings of nine walks on 3 November showed JAWS still speaking when the four-second window closed -- Filter Records, every Escape back to the grid, and the Order Records steps -- with the rest spilling into the next step's recording, where it was taken for that step's words. Before each key it now waits for half a second of quiet (up to ten seconds), and after it records until JAWS has been quiet for 0.8 seconds (at most fifteen); Wait= is only how long to wait for speech to begin. Each step reports its seconds of speech and says when speech ran past the limit.

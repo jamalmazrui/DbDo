@@ -4844,6 +4844,29 @@ namespace DbDo
             return dOut;
         }
 
+        // setFieldPattern: put a field's pattern into the pattern column of its own lookups row, tbl and fld filled and
+        // val empty, adding the row when there is none. An empty pattern clears it -- unless DbDo ships one for that
+        // field, which would then count again, so "any value" is stored instead (3 November 2026).
+        public void setFieldPattern(string sTbl, string sFld, string sPattern)
+        {
+            if (!isOpen() || string.IsNullOrEmpty(sTbl) || string.IsNullOrEmpty(sFld)) return;
+            string sT = sTbl.Replace("'", "''"), sF = sFld.Replace("'", "''");
+            string sStore = sPattern ?? "";
+            if (sStore.Length == 0)
+            {
+                Dictionary<string, string> dFile;
+                string sBase = System.IO.Path.GetFileNameWithoutExtension(sFilePath ?? "");
+                if (shippedFieldDescriptions().TryGetValue("patterns", out dFile) && dFile.ContainsKey(sBase + "/" + sTbl + "/" + sFld))
+                    sStore = "^[\\s\\S]*$";
+            }
+            string sValue = sStore.Length == 0 ? "NULL" : "'" + sStore.Replace("'", "''") + "'";
+            int iFound;
+            bool bHave = queryRowsSql("SELECT lookup_id FROM lookups WHERE tbl = '" + sT + "' AND fld = '" + sF + "' AND coalesce(val, '') = '' LIMIT 1", 1, out iFound).Count > 0;
+            if (bHave) invokeSql("UPDATE lookups SET pattern = " + sValue + " WHERE tbl = '" + sT + "' AND fld = '" + sF + "' AND coalesce(val, '') = ''", TextWriter.Null);
+            else if (sStore.Length > 0) invokeSql("INSERT INTO lookups (tbl, fld, src, pattern) VALUES ('" + sT + "', '" + sF + "', 'mine', " + sValue + ")", TextWriter.Null);
+            DbDoLog.write("Field pattern for " + sTbl + "." + sFld + ": " + (sStore.Length == 0 ? "cleared" : sStore));
+        }
+
         // getDatabaseDescription: WHAT THE DATABASE IS FOR (3 November 2026): the lookups row with tbl * -- every table, the
         // whole database -- and fld and val empty, or the shipped file's [database] section, by the database's file
         // name. A row with tbl empty is read too, for a database that has one.
@@ -15428,8 +15451,26 @@ namespace DbDo
             catch { }
             string[] aFit = new string[iCols];
             for (int i = 0; i < iCols; i++)
-                aFit[i] = (aRow != null && i < aRow.Length && aRow[i] != null) ? aRow[i] : "";
+                aFit[i] = rowCellText((aRow != null && i < aRow.Length && aRow[i] != null) ? aRow[i] : "");
             return new ListViewItem(aFit);
+        }
+
+        // rowCellText: A LONG CELL, SHORT IN THE ROW (3 November 2026). Landing on a record makes the screen reader read
+        // the whole row, so with notes shown, every arrow press read a paragraph -- over fifteen seconds for Sonic Radio
+        // in the 18:49 walk. A cell over 120 characters is shown in the row as its first sentence, when that fits, or
+        // else cut at a word and ended with an ellipsis. Only the row is shortened: moving to the cell reads it whole,
+        // and editing and copying use the value in the database, never the row's text.
+        private const int iRowCellLimit = 120;
+        private static string rowCellText(string sValue)
+        {
+            if (sValue == null || sValue.Length <= iRowCellLimit) return sValue ?? "";
+            string sOne = sValue.Replace("\r\n", " ").Replace('\n', ' ').Replace('\r', ' ');
+            int iEnd = -1;
+            for (int i = 0; i < sOne.Length - 1 && i < iRowCellLimit; i++)
+                if ((sOne[i] == '.' || sOne[i] == '?' || sOne[i] == '!') && sOne[i + 1] == ' ') { iEnd = i; break; }
+            if (iEnd >= 20) return sOne.Substring(0, iEnd + 1) + " …";
+            int iSpace = sOne.LastIndexOf(' ', iRowCellLimit);
+            return sOne.Substring(0, iSpace > 40 ? iSpace : iRowCellLimit).TrimEnd() + " …";
         }
 
         // gridEnterEnsureSelection: when the grid gains focus, make the
@@ -31052,32 +31093,44 @@ namespace DbDo
 
             // Build a parallel list of TextBox controls so we can pull
             // values out after OK without having to track names.
+            // PATTERNS LIVE IN THE DATABASE'S OWN LOOKUPS (3 November 2026), in the pattern column of each field's row --
+            // tbl and fld filled, val empty -- beside the sentence that says what the field is for, so a database
+            // carries its own rules wherever it goes. This dialog wrote DbDo.inix's [Validation:<table>]; such a pattern
+            // is shown here, saved into lookups and cleared from DbDo.inix, which would otherwise still count.
+            if (db.readOnly)
+            {
+                MessageBox.Show(this, "This database is open read-only, so its patterns cannot be changed.",
+                    "Field Validation", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            Dictionary<string, string> dNow = db.getFieldPatterns(sTable);  // also gives lookups its pattern column
             List<TextBox> lTextBoxes = new List<TextBox>(lEditableFields.Count);
             string sSection = "Validation:" + sTable;
             using (LbcDialog dlg = new LbcDialog("Field Validation: " + sTable, this))
             {
-                dlg.addLabel("Each field accepts a .NET regex pattern.");
-                dlg.addLabel("Empty = no constraint. Examples below.");
-                dlg.addLabel("  Email:       ^[^@\\s]+@[^@\\s]+\\.[a-z]+$");
-                dlg.addLabel("  US phone:    ^\\d{3}-\\d{3}-\\d{4}$");
-                dlg.addLabel("  ISO date:    ^\\d{4}-\\d{2}-\\d{2}$");
-                dlg.addLabel("  Year choice: ^(Freshman|Sophomore|Junior|Senior)$");
+                dlg.addLabel("Each field can have a .NET regular expression its value must match when OK is pressed in a record form. "
+                    + "An empty value is tested too: ^\\s*\\S makes a field required, and ^$| in front lets it stay blank. "
+                    + "The patterns are kept in this database's lookups table.");
+                dlg.addLabel("Examples: email ^$|^[^@\\s]+@[^@\\s]+\\.[a-z]+$; date ^$|^\\d{4}-\\d{2}-\\d{2}$; one of a few ^(Freshman|Sophomore|Junior|Senior)$.");
                 dlg.addSeparator();
                 foreach (string sCol in lEditableFields)
                 {
-                    string sExisting = "";
-                    try { sExisting = readIniValue(sUserIni, sSection, sCol, ""); }
-                    catch { sExisting = ""; }
+                    string sExisting;
+                    if (!dNow.TryGetValue(sCol, out sExisting))
+                    {
+                        sExisting = "";
+                        try { sExisting = readIniValue(sUserIni, sSection, sCol, ""); }
+                        catch { sExisting = ""; }
+                    }
+                    if (sExisting == sAnyValue) sExisting = "";
                     TextBox tb = dlg.addInputBox(sCol + ":", sExisting,
-                        "Regex pattern that values for \"" + sCol + "\" must match. Empty for no constraint.");
+                        "The pattern values of " + sCol + " must match; empty for none.");
                     lTextBoxes.Add(tb);
                 }
                 if (!dlg.runOkCancel()) return;
 
-                // Save: write every non-empty pattern; remove keys that
-                // the user emptied. We test each regex compiles before
-                // writing so we can warn on bad input.
                 List<string> lWarnings = new List<string>();
+                int iSaved = 0;
                 for (int i = 0; i < lEditableFields.Count; i++)
                 {
                     string sCol = lEditableFields[i];
@@ -31090,23 +31143,27 @@ namespace DbDo
                             lWarnings.Add(sCol + ": " + exRx.Message);
                             continue;
                         }
-                        writeIniValue(sUserIni, sSection, sCol, sNewVal);
                     }
-                    else
+                    string sOld;
+                    if (!dNow.TryGetValue(sCol, out sOld)) sOld = "";
+                    if (sOld == sAnyValue) sOld = "";
+                    bool bHadIni = false;
+                    try { bHadIni = readIniValue(sUserIni, sSection, sCol, "").Length > 0; } catch { }
+                    if (sNewVal == sOld && !bHadIni) continue;
+                    try
                     {
-                        // Empty -> remove the key if it was previously set.
-                        try { writeIniValue(sUserIni, sSection, sCol, ""); }
-                        catch { }
+                        db.setFieldPattern(sTable, sCol, sNewVal);
+                        iSaved++;
+                        if (bHadIni) writeIniValue(sUserIni, sSection, sCol, "");
                     }
+                    catch (Exception exSave) { lWarnings.Add(sCol + ": not saved, " + exSave.Message); }
                 }
-                // Invalidate the cache so subsequent Edit Record /
-                // Edit Cell dialogs pick up the new regexes.
                 try { IniValidation.reset(); } catch { }
-                Say.say("Field validation saved");
+                Say.say(iSaved == 0 ? "No pattern changed" : (iSaved + (iSaved == 1 ? " pattern" : " patterns") + " saved in lookups"));
                 if (lWarnings.Count > 0)
                 {
                     StringBuilder sbWarn = new StringBuilder();
-                    sbWarn.Append("Some patterns did not compile and were skipped:\r\n\r\n");
+                    sbWarn.Append("Some patterns were not saved:\r\n\r\n");
                     foreach (string s in lWarnings) sbWarn.Append("  ").Append(s).Append("\r\n");
                     MessageBox.Show(this, sbWarn.ToString(),
                         "Field Validation", MessageBoxButtons.OK, MessageBoxIcon.Warning);
@@ -31114,8 +31171,10 @@ namespace DbDo
             }
         }
 
-        // Helper: path of the per-user DbDo.inix. Returns null and
-        // shows an error dialog if %LOCALAPPDATA% is unavailable.
+        // A pattern that accepts any value, stored when a person clears a field whose pattern DbDo ships (RadioTrail's,
+        // say): an empty column would let the shipped one count again, so clearing it records "anything goes" instead.
+        private const string sAnyValue = "^[\\s\\S]*$";
+
         private string configIniPath()
         {
             string sBase = Environment.GetFolderPath(Environment.SpecialFolder.LocalApplicationData);
