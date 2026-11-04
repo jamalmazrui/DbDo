@@ -5,6 +5,10 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 3 November 2026 -- recordWalk listens until JAWS stops
+
+- **recordWalk listens until JAWS stops, not for a fixed time.** The recordings of nine walks on 3 November showed JAWS still speaking when the four-second window closed -- Filter Records, every Escape back to the grid, and the Order Records steps -- with the rest spilling into the next step's recording, where it was taken for that step's words. Before each key it now waits for half a second of quiet (up to ten seconds), and after it records until JAWS has been quiet for 0.8 seconds (at most fifteen); Wait= is only how long to wait for speech to begin. Each step reports its seconds of speech and says when speech ran past the limit.
+
 ## 3 November 2026 -- The pilot walk follows Order Records' new shape
 
 - **scripts\walks\pilot.inix** expects Alt+O's Ordered now, Prime order and its Shift+F1, then C for Choose order and the two lists, and the reworded hints for Look columns and Prime columns; the 16:49 walk's misses were the walk's own, written for the old dialogs.
