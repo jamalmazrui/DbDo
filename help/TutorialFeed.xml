@@ -5,7 +5,7 @@
     <link>Tutorials.htm</link>
     <description>Spoken walks through DbDo, the database program built for working by ear, and the ready-made databases that come with it. Ten walks, each under five minutes, in the order a new person meets them.</description>
     <language>en-us</language>
-    <lastBuildDate>Thu, 05 Nov 2026 19:05:10 +0000</lastBuildDate>
+    <lastBuildDate>Thu, 05 Nov 2026 19:45:44 +0000</lastBuildDate>
     <itunes:author>Jamal Mazrui</itunes:author>
     <itunes:explicit>false</itunes:explicit>
     <itunes:category text="Technology"/>
@@ -84,10 +84,10 @@
     </item>
     <item>
       <title>8 - Analyze a Dataset</title>
-      <description>DbDo is open, and installed in the usual place, with its samples folder. Full transcript: Tutorials.htm#0h-8-analyze-a-dataset</description>
+      <description>DbDo is open, and installed in the usual place, with its data folder. Full transcript: Tutorials.htm#0h-8-analyze-a-dataset</description>
       <link>Tutorials.htm#0h-8-analyze-a-dataset</link>
       <guid isPermaLink="false">homer-tutorial_8_analyze_a_dataset</guid>
-      <enclosure url="tutorials/8_Analyze_a_Dataset.mp3" length="2018398" type="audio/mpeg"/>
+      <enclosure url="tutorials/8_Analyze_a_Dataset.mp3" length="2014499" type="audio/mpeg"/>
       <itunes:duration>00:04:53</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>

@@ -346,8 +346,9 @@ Source: "help\Tutorials.mkv"; DestDir: "{app}\help"; Flags: ignoreversion skipif
 ; One mp3 per walk, the form the kit's tool writes.
 Source: "help\tutorials\*.mp3"; DestDir: "{app}\help\tutorials"; Flags: ignoreversion skipifsourcedoesntexist
 Source: "help\TutorialFeed.xml"; DestDir: "{app}\help"; Flags: ignoreversion skipifsourcedoesntexist
-; SAMPLES (5 November 2026): datasets to practise on; Tutorial 8 imports samples\iris.csv, R. A. Fisher's iris measurements.
-Source: "samples\*.csv"; DestDir: "{app}\samples"; Flags: ignoreversion
+; A DATASET TO PRACTISE ON (5 November 2026): Tutorial 8 imports data\iris.csv, R. A. Fisher's iris measurements. It
+; sits in data, beside DbDo's other shipped data, not in a top-level folder of its own.
+Source: "data\iris.csv"; DestDir: "{app}\data"; Flags: ignoreversion
 Source: "help\Tutorials.md";  DestDir: "{app}\help"; Flags: ignoreversion
 Source: "help\Tutorials.htm"; DestDir: "{app}\help"; Flags: ignoreversion
 Source: "help\Hotkeys.md";  DestDir: "{app}\help"; Flags: ignoreversion

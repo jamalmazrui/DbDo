@@ -2578,7 +2578,7 @@ Screen reader:
 
 Fisher's iris measurements, brought in from a CSV file; a question in SQL, the database's own language, and in plain words to a model on this computer; a number grouped by species; two measurements that rise together; and the answer handed on to Excel.
 
-**Before you start:** DbDo is open, and installed in the usual place, with its samples folder.
+**Before you start:** DbDo is open, and installed in the usual place, with its data folder.
 
 ### Step 1
 
@@ -2604,13 +2604,13 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 4: C:\Program Files\DbDo\samples\iris.csv
+### Step 4: C:\Program Files\DbDo\data\iris.csv
 
 I type where the sample is, in DbDo's own folder.
 
 Screen reader:
 
-- C:\Program Files\DbDo\samples\iris.csv
+- C:\Program Files\DbDo\data\iris.csv
 
 Confirm the wording with a live run: buildTutorials -live.
 

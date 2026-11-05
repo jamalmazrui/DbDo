@@ -586,6 +586,7 @@ def main():
             logLine("AxeWindowsCLI not available: " + traceback.format_exc())
             sayLine("AxeWindowsCLI could not be got, so no scans; the log says why.")
     lLive = []
+    bAxeStopped = False
     for iIndex, dStep in enumerate(lSteps, 1):
         sExeNow, sTitleNow = foregroundExe()
         if sExeNow.lower() != (oArgs.app + ".exe").lower():
@@ -648,12 +649,18 @@ def main():
         sFocus = focusNow()
         sApp = speechSince(oArgs.app, dBefore)
         sAxe = ""
-        if sAxeCli:
+        if sAxeCli and not bAxeStopped:
             try:
                 lWindows = windowsOf(oArgs.app + ".exe")
                 if lWindows:
                     iErrors, sSummary, sFile = axeScan(sAxeCli, lWindows[0][1], os.path.join(sWaves, "axe"), "step%02d" % iIndex)
                     if iErrors is not None: iAxeErrors += iErrors
+                    # ONE FAILED SCAN STOPS THE SCANS (5 November 2026): a window Axe.Windows cannot finish -- DbDo's
+                    # 49,186-row record list took it 2 minutes 44 seconds and then failed -- will not be finished at the
+                    # next step either, and the walk seemed to hang. So the walk says so once and goes on unscanned.
+                    if iErrors is None and not sFile:
+                        bAxeStopped = True
+                        sayLine("Axe.Windows could not finish a scan, so the rest of the walk is not scanned: " + sSummary + ".")
                     sAxe = ((str(iErrors) + (" error" if iErrors == 1 else " errors")) if iErrors is not None else "count not read") + "; " + sSummary + ((" -- " + os.path.relpath(sFile, sProject)) if sFile else "")
             except Exception:
                 logLine("axe scan failed for step " + str(iIndex) + ": " + traceback.format_exc())

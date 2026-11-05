@@ -5,7 +5,7 @@
 [about]
 Title=8 - Analyze a Dataset
 Intro=Fisher's iris measurements, brought in from a CSV file; a question in SQL, the database's own language, and in plain words to a model on this computer; a number grouped by species; two measurements that rise together; and the answer handed on to Excel.
-Setup=DbDo is open, and installed in the usual place, with its samples folder.
+Setup=DbDo is open, and installed in the usual place, with its data folder.
 Homework=Bring in a CSV file of your own -- readings from an experiment, a budget, a fitness log -- and ask it which group is highest.
 
 [step]
@@ -31,8 +31,8 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 [step]
 
 Say=I type where the sample is, in DbDo's own folder.
-Key=C:\Program Files\DbDo\samples\iris.csv
-Hear=C:\Program Files\DbDo\samples\iris.csv
+Key=C:\Program Files\DbDo\data\iris.csv
+Hear=C:\Program Files\DbDo\data\iris.csv
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

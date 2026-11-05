@@ -5,9 +5,14 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 5 November 2026 -- The iris dataset in data
+
+- **iris.csv is in data, beside DbDo's other shipped data.** It had been given a top-level samples folder of its own, made without approval and clashing with scripts for the letter S, and the acceptance check already says no samples folder remains. The installer already removes an old Samples folder, and Tutorial 8 imports C:\Program Files\DbDo\data\iris.csv.
+
 ## 5 November 2026 -- An accessibility scan at every push
 
 - **Tutorials can be heard performed live:** scripts\recordWalk --tutorial --walk 1 drives DbDo through Tutorial 1, menus and all, records the real screen reader at each key, and joins it with the host's lines into one recording.
+- **A scan that cannot finish no longer hangs a push or a walk.** Axe.Windows could not finish DbDo's window holding RadioTrail's 49,186 records: it worked for 2 minutes 44 seconds and failed inside itself. Scans now stop after 60 seconds and say why.
 - **The build copies the kit's axeScan,** with recordWalk and the check, so every push scans DbDo's window with Axe.Windows and writes logs\DbDo-a11yScan-<time>.md: warnings to review, never failures, and never a reason to add an accessible name the screen reader already has from a label, a caption or the window's title.
 
 ## 5 November 2026 -- Walks name what they walk
@@ -48,7 +53,7 @@ Press **Shift+F1** inside DbDo to open this file in your browser, or type `histo
 - **One map of DbDo's ways to work with data,** in the guide's Part 3, each with one role, chosen by what you want to do: to ask (Filter Records, Facet Column, Query, Chat about Table, Evaluate Expression, the dot prompt); to analyze (Generate from Grid); to produce (Export Data, Run Report, Print, the clipboard, Save As); and to automate (scripts: .sql for a saved question, .dbdo for a saved routine, .js for a program). The guide's stale keys for Invoke Script and Edit Snippet, and its account of the retired single-column tools, are gone.
 - **.dbdo scripts work in both shapes they were written in.** Command batches ("table orders", "filter ...") worked; saved views ("table = books", "where = ...", "order = ...", with ; comments) failed at their first line, since ; is the dot prompt's shorthand for SQL and "table = books" named a table "= books". Both runners now read each line one way: #, ; and -- begin comments, a saved-view line becomes the command it means, and SQL is written with /. All sixteen lines of the four shipped .dbdo files resolve to commands. In the dot prompt's runner, a leading ? no longer shows the status.
 - **Generate from Grid gains the Group report (G)** -- a number column totalled and averaged for each value of another, or each year, month or weekday of a date -- **and the Relation report (R)** -- how strongly each pair of number columns rises and falls together, in plain words, and the line that best fits the strongest pair, with a reminder that a relation is not a cause. A numbering column, such as a record number, is left out of relations and named: in the iris sample the flower number would have shown 0.90 with petal width. Its Markdown table moved to Export Data, which writes Markdown as it writes every format.
-- **A STEM sample:** samples\iris.csv, R. A. Fisher's 1936 measurements of 150 iris flowers, three species, four measurements each, with a flower number added.
+- **A STEM dataset:** data\iris.csv, R. A. Fisher's 1936 measurements of 150 iris flowers, three species, four measurements each, with a flower number added.
 - **Tutorial 8 is Analyze a Dataset:** the iris file brought in with Import, asked in SQL and in plain words, grouped by species, related, exported, and the read-only safety lesson, keeping what Ask with SQL taught. The build removes the old walk's script and sound. The kit's tutorial check then found five problems at 19:37 -- four Hear lines written with underscores (petal_length) rather than as a screen reader says them, and an Escape with no Hear line -- and stopped the build; all are fixed, and the check passes all ten walks.
 - **The build fails clearly, not cryptically,** when the kit lacks LbcMessage, setPattern or fUnavailable (from earlier the same day).
 
