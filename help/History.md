@@ -5,6 +5,10 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 5 November 2026 -- The menu walk reaches the menus
+
+- **Tutorial 1, performed live, gets past its second step:** recordWalk no longer presses Alt+Control+D, DbDo's own launch key, since DbDo is already open; it had taken the focus to Windows Explorer. And **scans load the Axe.Windows library in 64-bit**, where the borrowed 32-bit runtime had failed silently.
+
 ## 5 November 2026 -- Walks and scans with nothing to remember
 
 - **scripts\recordWalk, alone,** walks the pilot, scans each window, and performs Tutorial 1 live -- the menus through JAWS -- when its recording is due. **Every push** scans DbDo's main window, saying why DbDo opens and how the scan goes, and its walk check says when a walk is due.
