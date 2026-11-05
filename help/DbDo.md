@@ -224,7 +224,7 @@ Where a wildcard counts depends on what is searched. When the search reads a **n
 
 F3 repeats the last search, in the same way and over the same things, going forward; Shift+F3 repeats it going back.
 
-In DbDo, Keywords and Any Field read a whole record as text, so the words of `red & blue` may sit in different fields; Jump Record and a Fields box read one field as a name. Find Regex and Regex Replace take regular expressions instead, and Replace Column finds exactly the text you type.
+In DbDo, Keywords and Any Field read a whole record as text, so the words of `red & blue` may sit in different fields; Jump Record and a Fields box read one field as a name. Find Regex, and Replace with Use regex pattern checked, take regular expressions instead; otherwise Replace finds exactly the text you type.
 
 ### Navigating records
 
@@ -241,7 +241,8 @@ Beyond the grid's keys, the cursor moves with these commands:
 - **Edit View** (Control+E) opens the whole record in a field-by-field dialog. **Edit Cell** (F2) edits just the current cell. **Open Cell Value** (Control+Enter) opens a large value in its own box for comfortable reading and editing.
 - **Pick Value** (Control+F2) offers the legal values for a field whose choices are in defs.
 - **Edit Notes** (Alt+Shift+N), **Edit Tags** (Alt+Shift+T), and **Edit url** (Alt+Shift+U) each open one standard field in a focused single-field dialog with OK and Cancel — the quick way to touch a note, tags, or a link without opening the whole record.
-- **Replace Column** (Control+R) replaces text across a column; **Regex Replace** (Control+Shift+R) does the same by pattern; **Extract with Regex** (Control+Shift+X) pulls matches out of a column.
+- **Replace** (Control+R) puts new text in place of old. One dialog asks what to find and what to put in its place, then where: **Columns** -- the current column, the shown columns, or all columns, hidden ones too -- and **Which records** -- all records in view, the marked records, or the current record. It starts on the current column, and on the marked records when some are marked, else all records in view; changing more than one record asks once, naming how many. Check **Use regex pattern** to find by regular expression, with $1 and $2 putting back the parts in parentheses; **Replace with Regex** (Control+Shift+R) opens the same dialog with it checked. **Dry run** counts what would change and changes nothing. Replace never writes the fields DbDo keeps itself: look, prime, added, edited, marked and the id.
+- **Extract with Regex** (Control+Shift+E) copies every match of a regular expression to the clipboard, one per line, from the same Columns and Records choices; it starts on all columns, hidden ones too, so an email address in the notes is found. It has the same name and key as in EdSharp and FileDir.
 - **Delete Record** (Control+D) deletes the current record with confirmation; **Delete Without Confirmation** (Control+Shift+D) skips the prompt.
 
 All edits auto-commit. If a table is read-only, **Read Only Toggle** (Control+Shift+Z) reports and controls that.
@@ -391,13 +392,25 @@ Filter and order first to shape the grid, then report on exactly what you see.
 
 ### To automate what you repeat
 
-A **script** is a file that does a task again, run with **Invoke Script** (Control+Shift+I), written or changed with **Edit Snippet** (Control+Shift+E). A database's own scripts sit beside it, and shared ones in DbDo's Scripts folder (**Open Script Folder** opens it). There are three kinds, from the simplest:
+A **script** is a file that does a task again, run with **Invoke Script** (Control+Shift+I), written or changed with **Edit Snippet** (Alt+Shift+S). A database's own scripts sit beside it, and shared ones in DbDo's Scripts folder (**Open Script Folder** opens it). There are three kinds, from the simplest:
 
 - **.sql -- a saved question.** One or more SQL statements: a Query you keep. Most templates come with some: ContactTrail's Emergency Contacts, RecipeTrail's Shopping List, JobTrail's Weekly Count.
 - **.dbdo -- a saved sequence of DbDo commands,** one per line, as typed at the dot prompt: filter, order, select columns, export. For a routine you would otherwise do by hand each week, such as JobTrail's Stale Applications.
 - **.js -- a program,** in JScript .NET, for work that needs decisions and loops: reading and changing records one by one, or bringing data in from another program, such as ContactTrail's Import Outlook Contacts.
 
 The same JScript .NET works inside Evaluate Expression and in a report definition's {{ ... }} expressions, so learning it once serves all three.
+
+### Ordering by one column, then another
+
+**Add Column to Order** (Alt+A) orders the records by the column you are in, smallest or earliest first, and keeps the order that was already in force for breaking ties. **Alt+Shift+A** does the same, largest or latest first.
+
+The column you add last counts most. To order contacts by state, and by city within each state, go to the City column and press Alt+A, then go to the State column and press Alt+A. It works the way a stack of index cards does: sort them by city, then sort them by state, and they end up by state, with each state's cards still in city order. DbDo says the result, such as "Ordered by state, then city."
+
+Pressing Alt+A or Alt+Shift+A on the column that is already first just sets its direction. Order Records (Alt+O) shows the whole order and lets you start over from look or prime; Reverse Order (Alt+Shift+O) turns every column around.
+
+### Hearing a whole record
+
+**Say Whole Record** (Shift+W) says every field of the current record that has a value, each name followed by its value, including the columns that Select Columns hides. A link field says the linked record's look, not its number. Press Shift+W twice to read the same lines in a window. The screen reader's own read-line command already says the columns you see; Shift+W is for the whole record without leaving the grid.
 
 ### One file carries it all
 
@@ -503,8 +516,9 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Append Record to Clipboard | Alt+Shift+C |
 | New Copy | Control+Shift+N |
 | Mail Record | — |
-| Replace Column | Control+R |
-| Regex Replace | Control+Shift+R |
+| Replace | Control+R |
+| Replace with Regex | Control+Shift+R |
+| Extract with Regex | Control+Shift+E |
 | Mark Record | Control+M |
 | Say Marked | Shift+M |
 | Marked Toggle | Control+Space |
@@ -588,6 +602,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Say Look | Shift+L |
 | Say Related | Shift+R |
 | Say url | Shift+U |
+| Say Whole Record | Shift+W |
 | Say Prime | Shift+P |
 | Filter Records | Control+F |
 | Clear Filter | Control+Shift+F |
@@ -604,10 +619,10 @@ The Query menu holds record inspection and the Say-X status family.
 | Read Only Toggle | Control+Shift+Z |
 | Database Summary | Alt+D |
 | Table Summary | Alt+T |
-| Alpha Order | Alt+A |
+| Add Column to Order | Alt+A |
+| Add Column to Order Descending | Alt+Shift+A |
 | Select Columns | Alt+S |
 | Generate from Grid | Alt+Shift+G |
-| Extract with Regex | Control+Shift+X |
 | Append Cell to Clipboard | Alt+C |
 | Copy Cell to Clipboard | Control+C |
 | Copy Visible Cells | — |
@@ -625,7 +640,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Open Dot Prompt | Control+GraveAccent |
 | Sqlean Console | Control+Shift+GraveAccent |
 | Invoke Script | Control+Shift+I |
-| Edit Snippet | Control+Shift+E |
+| Edit Snippet | Alt+Shift+S |
 | Open Script Folder | — |
 | Evaluate Expression | Control+Equals |
 | Edit Settings | Alt+Shift+E |
@@ -1401,8 +1416,8 @@ spell phonetically and copy from. Every Homer app's Say keys work this way.
 - Shift+S -- columns, the columns shown
 - Shift+T -- tags
 - Shift+U -- url
-- Shift+V -- replace, the text Replace Column would find and what it would put there, or none
-- Shift+X -- regex replace, the pattern Regex Replace would offer next
+- Shift+V -- replace values, the text Replace would find and what it would put there, with the setting last used -- regex or not, the columns and the records -- or none
+- Shift+W -- whole record, every field with a value, hidden columns too
 - Shift+Y -- yield, how many rows
 - Shift+Z -- status: the table, the row and the order
 
@@ -1411,10 +1426,13 @@ first letters of a value and the list view goes there, in lower case and
 without regard to case. The two layers do not collide, which is why the Say
 commands live on Shift.
 
-Two letters are still unused -- H and W -- and are kept that way on purpose,
-so a new question can be added later without moving an answer somebody has
-learned. Pressing one of them says so -- "Shift+H: no Say command" -- rather than staying silent: the say layer
-always answers, because silence cannot be told from a key that did not register.
+Two letters are unused -- H and X -- and are kept that way on purpose, so a
+new question can be added later without moving an answer somebody has learned.
+W became Say Whole Record on 5 November 2026, and X was Say Regex Replace until
+the same day, when Replace became one dialog and Shift+V took on its pattern too.
+Pressing an unused letter says so -- "Shift+H: no Say command" -- rather than
+staying silent: the say layer always answers, because silence cannot be told
+from a key that did not register.
 
 **A command that opens a dialog with a value already in it has a value worth
 hearing first.** That is what Shift+B, Shift+J and Shift+V are: the bookmark

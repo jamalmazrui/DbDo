@@ -14477,12 +14477,12 @@ namespace DbDo
             // 'look' column for the subject; uses the 'notes' column
             // for the body. Falls back gracefully if any are missing.
             miRecMail        = addItem(miEdit, "Mail Record", "Send Mail",  Keys.None, recMailClicked);
-            miRecUpdateColumn = addItem(miEdit, "&Replace Column...", "Replace Column", Keys.Control | Keys.R, recUpdateColumnClicked);
+            miRecUpdateColumn = addItem(miEdit, "&Replace...", "Replace", Keys.Control | Keys.R, recUpdateColumnClicked);
             // Regex Replace: same as Update Column but interprets the
             // search text as a .NET regex pattern and supports $1, $2
             // back-references in the replacement. Ctrl+Shift+R as the
             // "power version" companion to Ctrl+R = Update Column.
-            miRecRegexReplace = addItem(miEdit, "Regex Replace...", "Regex Replace", Keys.Control | Keys.Shift | Keys.R, recRegexReplaceClicked);
+            miRecRegexReplace = addItem(miEdit, "Replace with Regex...", "Replace with Regex", Keys.Control | Keys.Shift | Keys.R, recRegexReplaceClicked);
             addSep(miEdit);
             // Marks: per-row boolean flags. Control+M / Control+U is
             // the canonical chord pair, chosen for symmetry (mark and
@@ -14698,7 +14698,7 @@ namespace DbDo
             miSaySayJump         = addItem(miSay, "Say &Jump", "Say Jump", Keys.Shift | Keys.J, saySayJump);
             // (Say Header on Shift+H was withdrawn the same day: Alt+Control+Shift+UpArrow says the column's name, and Shift+S the columns shown.)
             miSaySayBookmark     = addItem(miSay, "Say &Bookmark", "Say Bookmark", Keys.Shift | Keys.B, saySayBookmark);
-            miSaySayReplace      = addItem(miSay, "Say Replacement &Value", "Say Replacement Value", Keys.Shift | Keys.V, saySayReplace);
+            miSaySayReplace      = addItem(miSay, "Say Replace &Values", "Say Replace Values", Keys.Shift | Keys.V, saySayReplace);
             // Shift+K: Say Kin -- speak the 'look' values of every
             // related record (both directions: parents reached by
             // outbound FK columns, and children that point back to
@@ -14752,6 +14752,7 @@ namespace DbDo
             miSaySayLook         = addItem(miSay, "Say Look",           "Say Look",    Keys.Shift | Keys.L,                saySayLook);
             miSaySayRelated      = addItem(miSay, "Say &Related", "Say Related", Keys.Shift | Keys.R,           saySayRelated);
             miSaySayUrl          = addItem(miSay, "Say &url",          "Say url",      Keys.Shift | Keys.U,                saySayUrl);
+            addItem(miSay, "Say &Whole Record", "Say Whole Record", Keys.Shift | Keys.W, saySayWholeRecord);
             // EVERY REMEMBERED INPUT HAS A KEY THAT SAYS IT.
             //
             // A dialog that offers a value next time you open it is a dialog
@@ -14759,7 +14760,6 @@ namespace DbDo
             // Find, Jump, Query, Replace and Bookmark already had one. Regex
             // Replace kept its own history and had no key, so Shift+X says it --
             // x being the letter spelling has always given regex.
-            miSaySayRegex        = addItem(miSay, "Say Rege&x Replace", "Say Regex Replace", Keys.Shift | Keys.X, saySayRegex);
             miSaySayPrime        = addItem(miSay, "Say &Prime",        "Say Prime",    Keys.Shift | Keys.P,                saySayPrime);
             addSep(miQuery);
             // Filter / Sort -- data-shaping commands. As of v1.0.86
@@ -14793,7 +14793,11 @@ namespace DbDo
             // ALT+A, ALPHA ORDER (5 November 2026), as in FileDir: the records sorted by the column under the cursor,
             // ascending -- which Look columns and Prime columns cannot do, since they sort by look's or prime's fields.
             // For descending, Reverse Order (Alt+Shift+O) follows.
-            addItem(miQuery, "&Alpha Order",          "Alpha Order",          Keys.Alt | Keys.A,              (o, e) => alphaOrder(false));
+            // ADD COLUMN TO ORDER (5 November 2026): Alt+A puts the column under the cursor at the front of the order,
+            // ascending; Alt+Shift+A, descending. One menu, one letter: the second item gets none.
+            addItem(miQuery, "&Extract with Regex...", "Extract with Regex", Keys.Control | Keys.Shift | Keys.E, extractRegexClicked);  // the suite key, as in EdSharp and FileDir (5 November 2026)
+            addItem(miQuery, "&Add Column to Order",           "Add Column to Order",            Keys.Alt | Keys.A,              (o, e) => addColumnToOrder(false));
+            addItem(miQuery, "Add Column to Order Descending", "Add Column to Order Descending", Keys.Alt | Keys.Shift | Keys.A, (o, e) => addColumnToOrder(true));
             // (Reverse Alpha Order on Alt+Shift+A was withdrawn the same day: Alt+A then Alt+Shift+O, Reverse Order, does it.)
 
             // ===== Misc menu: utilities, tools, settings =====
@@ -14855,7 +14859,6 @@ namespace DbDo
             // Extract Matches: walk every visible row, find every
             // regex match across every visible column, copy matches
             // to the clipboard. Alt+E ("E for Extract").
-            miExtractRegex   = addItem(miMisc, "E&xtract with Regex...", "Extract Regex", Keys.Control | Keys.Shift | Keys.X, extractRegexClicked);
             addSep(miMisc);
             // Cell clipboard family. Operate on the virtual cell (the
             // cell under the Alt+Control+arrow cursor). Shift+A appends,
@@ -14894,8 +14897,8 @@ namespace DbDo
             addSep(miMisc);
             ToolStripMenuItem miTools = new ToolStripMenuItem("&Tools");
             miMisc.DropDownItems.Add(miTools);
-            miToolsOpenFolder= addItem(miTools, "&Open in Explorer",                      "Open File Folder",   Keys.Alt | Keys.OemPipe,            toolsOpenFolderClicked);
-            miToolsCommandPrompt = addItem(miTools, "Open &Command Prompt",                 "Open Command Prompt",    Keys.Control | Keys.OemQuestion,    toolsCommandPromptClicked,
+            miToolsOpenFolder= addItem(miTools, "Open in &Explorer",                      "Open File Folder",   Keys.Alt | Keys.OemPipe,            toolsOpenFolderClicked);
+            miToolsCommandPrompt = addItem(miTools, "&Open Command Prompt",                 "Open Command Prompt",    Keys.Control | Keys.OemQuestion,    toolsCommandPromptClicked,
                 "Open a Windows command prompt in the folder of the currently-open database",
                 "Control+Slash. The prompt opens with its working directory set to the open database's folder, or your user folder when nothing is open. Companion to Open in Explorer (Alt+Backslash), which opens that same folder in the file manager.");
             // Control+Backslash as well (suite manifest), the key EdSharp and FileDir use.
@@ -14911,7 +14914,7 @@ namespace DbDo
             miToolsChatWithAi = addItem(miTools, "Chat &with AI",                        "Chat with AI",      Keys.F12,                           toolsChatWithAiClicked);
             miToolsChatAboutTable = addItem(miTools, "Chat &about Table",                "Chat about Table",  Keys.Shift | Keys.F12,              toolsChatAboutTableClicked);
             miToolsConsole   = addItem(miTools, "Open &Dot Prompt",                       "Enter Console",     Keys.Control | Keys.Oemtilde,       toolsConsoleClicked);
-            miMiscSqleanConsole = addItem(miTools, "&Sqlean Console",                       "Sqlean Console",    Keys.Control | Keys.Shift | Keys.Oemtilde, sqleanConsoleClicked);
+            miMiscSqleanConsole = addItem(miTools, "Sqlean &Console",                       "Sqlean Console",    Keys.Control | Keys.Shift | Keys.Oemtilde, sqleanConsoleClicked);
             addSep(miTools);
             // Script family: Invoke / View
             // Script pattern. Scripts are plain files in
@@ -14925,7 +14928,7 @@ namespace DbDo
             // a new one (via a "[New script...]" entry at the top of
             // the pick list).
             miMiscInvokeScript     = addItem(miTools, "&Invoke Script...",                     "Invoke Script",     Keys.Control | Keys.Shift | Keys.I,                  miscInvokeScriptClicked);
-            miMiscEditScript       = addItem(miTools, "&Edit Snippet...",                       "Edit Snippet",       Keys.Control | Keys.Shift | Keys.E,     miscEditScriptClicked);
+            miMiscEditScript       = addItem(miTools, "Edit &Snippet...",                       "Edit Snippet",       Keys.Alt | Keys.Shift | Keys.S,     miscEditScriptClicked);
             miMiscOpenScriptFolder = addItem(miTools, "Open Script &Folder",                   "Open Script Folder", Keys.None,                          miscOpenScriptFolderClicked);
             // PACK AND UNPACK (5 November 2026): a database's companion files go into it, so the .db alone is the package.
             addItem(miTools, "&Pack Files into Database...",   "Pack Files",   Keys.None, toolsPackFilesClicked);
@@ -17973,7 +17976,10 @@ namespace DbDo
             string sTo = SearchHistory.lastText(SearchHistory.SectionReplaceWith);
             // "replace: blank with blank" (1 November 2026) meant nothing had been replaced yet.
             if (string.IsNullOrEmpty(sFrom)) { Say.say("replace: none"); return; }
-            speakOrShow("Replace", "replace: " + sFrom + " with " + (string.IsNullOrEmpty(sTo) ? "nothing" : sTo), 130);
+            // With the setting of the last Replace this session: regex or not, the columns and the records (5 November 2026),
+            // so one Say command answers for Replace and Replace with Regex alike; Say Regex Replace on Shift+X retired.
+            speakOrShow("Replace", "replace: " + sFrom + " with " + (string.IsNullOrEmpty(sTo) ? "nothing" : sTo)
+                + (string.IsNullOrEmpty(sLastReplaceHow) ? "" : ", " + sLastReplaceHow), 130);
         }
 
         // sayableValue: the convention for an answer that has no answer.
@@ -18301,6 +18307,31 @@ namespace DbDo
         // saySayId: speak the primary-key value of the current row.
         // Uses computePrimaryKeyColumn to determine which column holds
         // the key for this table (typically <table>_id).
+        // saySayWholeRecord: SHIFT+W (5 November 2026). Every field of the current record that has a value, name then value,
+        // each its own utterance, in the table's own order -- including the columns Select Columns hides, which the
+        // screen reader's read-line command cannot reach. Say Record, which spoke only the shown columns, was dropped in
+        // v1.0.101 as a duplicate of read-line; this is the whole record, which nothing else speaks without leaving the
+        // grid. A link field says the linked record's look, never its id; look and prime, summaries of the fields
+        // themselves, are left out, as is marked unless it is 1. Pressed twice, the kit shows the same lines to read.
+        private void saySayWholeRecord(object sender, EventArgs evArgs)
+        {
+            if (db == null || !db.hasRecordset() || db.recordCount == 0) { Say.say("whole record: no record selected"); return; }
+            List<string> lParts = new List<string>();
+            foreach (string sField in db.getNaturalFieldNames())
+            {
+                if (string.Equals(sField, "look", StringComparison.OrdinalIgnoreCase) || string.Equals(sField, "prime", StringComparison.OrdinalIgnoreCase)) continue;
+                string sValue = "";
+                try { sValue = db.getFieldValue(sField) ?? ""; } catch { }
+                if (sValue.Trim().Length == 0) continue;
+                if (string.Equals(sField, "marked", StringComparison.OrdinalIgnoreCase) && sValue.Trim() == "0") continue;
+                string sLabel = null;
+                try { sLabel = db.linkLabel(sField, sValue); } catch { }
+                lParts.Add(sField + ": " + (string.IsNullOrEmpty(sLabel) ? sValue : sLabel));
+            }
+            if (lParts.Count == 0) { Say.say("whole record: every field is empty"); return; }
+            speakOrShowParts("Whole Record", lParts, 131);
+        }
+
         private void saySayId(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
@@ -18596,17 +18627,7 @@ namespace DbDo
         // expression -- of the current record. Shift+P. Falls back to the
         // legacy 'prime' column for databases not yet migrated to 'prime';
         // tables with neither report so.
-        // saySayRegex: what Regex Replace would offer next time. X for regex,
-        // the letter that spelling has always used for it.
-        private void saySayRegex(object sender, EventArgs evArgs)
-        {
-            List<SearchHistory.Entry> lEntries = SearchHistory.load(SearchHistory.SectionRegex);
-            string sText = (lEntries != null && lEntries.Count > 0 && lEntries[0] != null)
-                ? (lEntries[0].sTerm ?? "") : "";
-            if (sText.Length == 0) { Say.say("regex: none"); return; }
-            speakOrShow("Regex", "regex: " + sText, 129);
-        }
-
+        // saySayRegex (Shift+X) retired 5 November 2026: one Replace dialog now, and Shift+V says its whole setting.
         private void saySayPrime(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
@@ -20196,52 +20217,49 @@ namespace DbDo
             catch (Exception ex) { Say.say("Next Initial Change: " + ex.Message); }
         }
 
-        // extractRegex: Control+Shift+E. Prompt for a .NET regex,
-        // walk every visible row, and copy to the clipboard every
-        // matching substring from every visible column.
-        // Control+Shift+E = "Extract with Regular Expression."
-        // Each match goes on its
-        // own line. Useful for pulling email addresses, urls, IDs,
-        // or any pattern out of free-text columns.
+        // EXTRACT WITH REGEX, CONTROL+SHIFT+E (5 November 2026): the suite's name and key, as in EdSharp and FileDir;
+        // DbDo had it on Control+Shift+X, a letter that begins no word of its name, and E&xtract took its menu letter
+        // from inside a word. Every match of a .NET regular expression goes to the clipboard, one per line. Its dialog
+        // is alike with Replace's: Regex pattern, Case sensitive, then Columns and Records. Columns starts on all
+        // columns, hidden ones too, as Extract always searched (spec v1.0.65), so notes, tags and url are included.
         private void extractRegexClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
             { Say.say("No table selected"); return; }
-            string sPattern;
-            using (LbcDialog dlg = new LbcDialog("Extract Regex", this))
+            string sColumn = virtCurrentColumnName();
+            if (string.IsNullOrEmpty(sColumn)) { Say.sayForced("No current column."); return; }
+            string sPattern; bool bCase; List<string> lFields; int iRecordScope;
+            int iMarkedNow = countMarkedInFilter();
+            using (LbcDialog dlg = new LbcDialog("Extract with Regex", this))
             {
-                dlg.addLabel("Extract every match of a .NET regex from every visible cell");
-                dlg.addLabel("in the current filtered view. Matches go to the clipboard,");
-                dlg.addLabel("one per line. Useful for pulling emails, urls, or IDs out");
-                dlg.addLabel("of free-text columns.");
-                dlg.addSeparator();
-                TextBox tbPat = dlg.addInlineInputBox("Regex pattern",
-                    "", "A standard .NET regex (e.g. \\b\\w+@\\w+\\.\\w+\\b for emails)");
+                TextBox tbPat = dlg.addInputBox("Regex &pattern:", "",
+                    "A .NET regular expression; for example \\b\\S+@\\S+\\.\\w+\\b finds email addresses. Every match goes to the clipboard, one per line.");
+                CheckBox cbCase = dlg.addCheckBox("Case &sensitive", false, "Match capital and small letters exactly.");
+                ComboBox cbColumns, cbRecords;
+                addScopeChoices(dlg, sColumn, true, iMarkedNow, out cbColumns, out cbRecords);
                 if (!dlg.runOkCancel()) return;
                 sPattern = tbPat.Text ?? "";
+                bCase = cbCase.Checked;
+                lFields = scopeColumns(cbColumns, sColumn);
+                iRecordScope = scopeRecords(cbRecords);
             }
             if (sPattern.Length == 0) return;
             System.Text.RegularExpressions.Regex re;
             try
             {
                 re = new System.Text.RegularExpressions.Regex(sPattern,
-                    System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                    bCase ? System.Text.RegularExpressions.RegexOptions.None : System.Text.RegularExpressions.RegexOptions.IgnoreCase);
             }
             catch (Exception ex)
             {
                 LbcMessage.show(this, "Invalid regex: " + ex.Message,
-                    "Extract Regex", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    "Extract with Regex", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
-
-            // Per spec v1.0.65, Extract searches the FULL field set
-            // (not just displayed columns), so hidden columns like
-            // notes, tags, url, and bookkeeping timestamps are
-            // included in the harvest.
-            List<string> lFields = db.getFieldNames();
+            int iSavePos = db.absolutePosition;
             object original = null;
             try { original = db.bookmark; } catch { }
-            int iMatches = 0;
+            int iMatches = 0, iRecordsWith = 0;
             StringBuilder sbOut = new StringBuilder();
             try
             {
@@ -20249,7 +20267,10 @@ namespace DbDo
                 {
                     try
                     {
+                        if (iRecordScope == 2 && i != iSavePos) continue;
                         db.absolutePosition = i;
+                        if (iRecordScope == 1 && !isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn))) continue;
+                        bool bAny = false;
                         foreach (string sCol in lFields)
                         {
                             string sV = db.getFieldValue(sCol) ?? "";
@@ -20258,8 +20279,10 @@ namespace DbDo
                             {
                                 sbOut.AppendLine(match.Value);
                                 iMatches++;
+                                bAny = true;
                             }
                         }
+                        if (bAny) iRecordsWith++;
                     }
                     catch { }
                 }
@@ -20274,9 +20297,10 @@ namespace DbDo
             try
             {
                 Clipboard.SetText(sbOut.ToString());
-                Say.say(iMatches + " match" + (iMatches == 1 ? "" : "es") + " copied to clipboard");
+                Say.say(iMatches + (iMatches == 1 ? " match" : " matches") + " copied to the clipboard, from "
+                    + iRecordsWith + (iRecordsWith == 1 ? " record" : " records"));
             }
-            catch (Exception ex) { Say.say("Extract Regex clipboard error: " + ex.Message); }
+            catch (Exception ex) { Say.say("Extract with Regex clipboard error: " + ex.Message); }
         }
 
         // Cycle through the list of tables visited in this session.
@@ -27948,12 +27972,33 @@ namespace DbDo
         // order (Metadata's COLUMN ROLES), the column under the cursor selected, so
         // sorting by a hidden column needs no trip through Select Columns.
         // alphaOrder: Alt+A and Alt+Shift+A -- the records sorted by the column under the cursor.
-        private void alphaOrder(bool bDescending)
+        // ADD COLUMN TO ORDER (5 November 2026, Jamal's design). Alt+A puts the column under the cursor first in the order,
+        // ascending, and keeps the order already in force after it, without that column; Alt+Shift+A does the same,
+        // descending. The last column added counts most, the way index cards sorted by city and then by state end up in
+        // order by state, and by city within each state. So to order by state, then city: Alt+A in City, then Alt+A in
+        // State. Pressed on the column already first, Alt+A or Alt+Shift+A just sets its direction. It replaced Alpha
+        // Order, which sorted by the one column alone; Alt+A from the default order now does that and more, since prime's
+        // fields then settle ties. FileDir's Alt+A and Alt+Shift+A sort a file list ascending and descending alike.
+        private void addColumnToOrder(bool bDescending)
         {
             if (db == null || !db.hasRecordset()) return;
             string sColumn = virtCurrentColumnName();
             if (string.IsNullOrEmpty(sColumn)) { Say.say("No current column"); return; }
-            applyOrder(new List<string> { sColumn + (bDescending ? " desc" : " asc") });
+            List<string> lPicks = new List<string> { sColumn + (bDescending ? " desc" : " asc") };
+            List<string> lSaid = new List<string> { sColumn + (bDescending ? " descending" : "") };
+            foreach (string sPart in (db.sort ?? "").Split(','))
+            {
+                string sP = sPart.Trim();
+                if (sP.Length == 0) continue;
+                bool bDesc = sP.EndsWith(" DESC", StringComparison.OrdinalIgnoreCase);
+                string sName = sP;
+                if (bDesc) sName = sP.Substring(0, sP.Length - 5).Trim();
+                else if (sP.EndsWith(" ASC", StringComparison.OrdinalIgnoreCase)) sName = sP.Substring(0, sP.Length - 4).Trim();
+                if (string.Equals(sName.Trim('"', '[', ']'), sColumn, StringComparison.OrdinalIgnoreCase)) continue;
+                lPicks.Add(sName + (bDesc ? " desc" : " asc"));
+                lSaid.Add(sName.Trim('"', '[', ']') + (bDesc ? " descending" : ""));
+            }
+            applyOrder(lPicks, "Ordered by " + string.Join(", then ", lSaid.ToArray()) + ".");
         }
 
         private void orderRecordsClicked(object sender, EventArgs evArgs)
@@ -28103,7 +28148,9 @@ namespace DbDo
         }
 
         // applyOrder: put an order of "field asc" / "field desc" picks in force, remember it, and say it.
-        private void applyOrder(List<string> lPicks)
+        private void applyOrder(List<string> lPicks) { applyOrder(lPicks, null); }
+        // sSaid, when given, is spoken in place of the clauses (Add Column to Order says "Ordered by state, then city.").
+        private void applyOrder(List<string> lPicks, string sSaid)
         {
             List<string> lClauses = new List<string>();
             foreach (string sPick in lPicks ?? new List<string>())
@@ -28121,9 +28168,12 @@ namespace DbDo
                 // Persist the new sort for this table immediately, rather than only on form close (see
                 // persistCurrentTableState) -- the "I have to re-sort every time I open it" report.
                 persistCurrentTableState();
-                Say.sayForced(lClauses.Count == 0
-                    ? "Sort cleared. " + db.recordCount + " records in original order."
-                    : "Ordered by " + sFinal + ". " + db.recordCount + " records.");
+                if (!string.IsNullOrEmpty(sSaid) && lClauses.Count > 0)
+                    Say.sayForced(sSaid + " " + db.recordCount + (db.recordCount == 1 ? " record." : " records."));
+                else
+                    Say.sayForced(lClauses.Count == 0
+                        ? "Sort cleared. " + db.recordCount + " records in original order."
+                        : "Ordered by " + sFinal + ". " + db.recordCount + " records.");
             }
             catch (Exception ex) { ErrorDialog.show(this, "Order Records", ex, db); }
         }
@@ -29382,33 +29432,30 @@ namespace DbDo
                 return;
             }
 
-            string sTitle = bIsRegex ? "Regex Replace" : "Replace Column";
-            string sSearchLabel = bIsRegex ? "Regex pattern" : "Find text";
-
-            // Target scope (data-changing command policy): with no
-            // marks present, the current record alone is the target;
-            // with marks present, the user chooses Current, Marked,
-            // or Cancel -- which doubles as the confirmation prompt.
-            // (Before v1.0.111 the replace family spanned every
-            // filtered row; the scope model supersedes that.)
-            ScopeChoice scope = promptScope(sTitle);
-            if (scope == ScopeChoice.Cancel) return;
-
-            using (LbcDialog dlg = new LbcDialog(sTitle + " (column: " + sColumn + ")", this))
+            // REPLACE, ONE DIALOG (5 November 2026). Replace Column and Regex Replace were two dialogs that worked two
+            // ways: since v1.0.111 both asked first for the current record or the marked ones, so with nothing marked
+            // Replace Column changed one cell, not the column its name promised; and Regex Replace searched every shown
+            // column though its title named one. Now one dialog, alike for both keys, says where it works and lets you
+            // choose: Find text, Replace with, Use regex pattern, Case sensitive, then Columns (the current column, the
+            // shown columns, or all columns, hidden ones too) and Records (all records in view, the marked ones, or the
+            // current record), then Dry run. Control+R opens it as plain text; Control+Shift+R with Use regex pattern
+            // checked. Records starts on the marked records when some are marked, else on all records in view; changing
+            // more than one record asks once, naming how many. The fields DbDo keeps itself -- look, prime, added, edited,
+            // marked and the id -- are never written.
+            string sTitle = bIsRegex ? "Replace with Regex" : "Replace";
+            int iMarkedNow = countMarkedInFilter();
+            using (LbcDialog dlg = new LbcDialog(sTitle, this))
             {
-                TextBox tbFind = dlg.addInputBox(sSearchLabel + ":",
-                    SearchHistory.lastText(SearchHistory.SectionReplace));
-                TextBox tbRepl = dlg.addInputBox("&Replace with"
-                    + (bIsRegex ? " (use $1, $2 for groups)" : "")
-                    + ":", SearchHistory.lastText(SearchHistory.SectionReplaceWith));
-                // Replace Column is substring and case-insensitive by
-                // definition (v1.0.108 centralization); only the regex
-                // flavor offers a case choice.
-                CheckBox cbCase = bIsRegex
-                    ? dlg.addCheckBox("Case &sensitive", false, null)
-                    : null;
+                TextBox tbFind = dlg.addInputBox("&Find text:", SearchHistory.lastText(SearchHistory.SectionReplace),
+                    "The text to look for, or with Use regex pattern checked, a .NET regular expression.");
+                TextBox tbRepl = dlg.addInputBox("Replace &with:", SearchHistory.lastText(SearchHistory.SectionReplaceWith),
+                    "The text to put in place of each match; with a regex pattern, $1, $2 and so on put back the parts in parentheses.");
+                CheckBox cbRegex = dlg.addCheckBox("&Use regex pattern", bIsRegex, "Read the find text as a .NET regular expression rather than as plain text.");
+                CheckBox cbCase = dlg.addCheckBox("Case &sensitive", false, "Match capital and small letters exactly.");
+                ComboBox cbColumns, cbRecords;
+                addScopeChoices(dlg, sColumn, false, iMarkedNow, out cbColumns, out cbRecords);
                 CheckBox cbDry  = dlg.addCheckBox("&Dry run (count only, no changes)", false,
-                    "Run the replacement but do not write changes. Useful for sanity-checking how many cells would be affected before committing.");
+                    "Count what would change, and change nothing.");
                 string sBtn = dlg.runWithButtons(new string[] { "OK", "Cancel" });
                 if (!string.Equals(sBtn, "OK", StringComparison.OrdinalIgnoreCase)) return;
 
@@ -29419,46 +29466,46 @@ namespace DbDo
                     Say.sayForced("Find text empty. Nothing to do.");
                     return;
                 }
-                bool bCase = (cbCase != null) && cbCase.Checked;
-                bool bDry  = cbDry.Checked;
-                // Like every search command, the inputs persist in
-                // DbDo.inix for prefill and cross-session recall.
+                bool bRegex = cbRegex.Checked, bCase = cbCase.Checked, bDry = cbDry.Checked;
+                List<string> lScanFields = writableColumns(scopeColumns(cbColumns, sColumn));
+                int iRecordScope = scopeRecords(cbRecords);
+                string sColumnsSaid = columnsSaid(cbColumns, sColumn);
+                if (lScanFields.Count == 0) { Say.sayForced("None of those columns can be changed."); return; }
+                if (!bDry && iRecordScope != 2)
+                {
+                    int iHowMany = (iRecordScope == 1) ? iMarkedNow : db.recordCount;
+                    if (iHowMany > 1 && LbcMessage.show(this, "Replace \"" + sFind + "\" with \"" + sRepl + "\" in " + sColumnsSaid + " of "
+                            + iHowMany + (iRecordScope == 1 ? " marked records?" : " records in view?"), sTitle,
+                            MessageBoxButtons.OKCancel, MessageBoxIcon.Question) != DialogResult.OK) return;
+                }
+                // Like every search command, the inputs persist in DbDo.inix for prefill and cross-session recall;
+                // Shift+V says the whole setting back.
                 SearchHistory.record(SearchHistory.SectionReplace, sFind, bCase);
                 if (sRepl.Length > 0)
                     SearchHistory.record(SearchHistory.SectionReplaceWith, sRepl, false);
-
+                sLastReplaceHow = (bRegex ? "regex, " : "") + (bCase ? "case sensitive, " : "") + "in " + sColumnsSaid
+                    + ", " + (iRecordScope == 1 ? "marked records" : iRecordScope == 2 ? "the current record" : "all records in view");
                 int iChanged = 0;
-                int iScanned = 0;
+                int iScanned = 0, iRowsChanged = 0;
                 try
                 {
                     System.Text.RegularExpressions.Regex regex = null;
-                    if (bIsRegex)
+                    if (bRegex)
                     {
                         System.Text.RegularExpressions.RegexOptions opts =
                             System.Text.RegularExpressions.RegexOptions.None;
                         if (!bCase) opts |= System.Text.RegularExpressions.RegexOptions.IgnoreCase;
                         regex = new System.Text.RegularExpressions.Regex(sFind, opts);
                     }
-
-                    // Scope (v1.0.108 centralization): Replace Column
-                    // works the db cursor's column only; Regex Replace
-                    // works ALL display fields of every record. The
-                    // dialog title named the cursor column for the
-                    // former; the latter iterates lScanFields below.
-                    List<string> lScanFields = new List<string>();
-                    if (bIsRegex) lScanFields.AddRange(db.getDisplayFieldNames());
-                    else lScanFields.Add(sColumn);
-
+                    StringComparison scFind = bCase ? StringComparison.Ordinal : StringComparison.OrdinalIgnoreCase;
                     int iSavePos = db.absolutePosition;
                     db.moveFirst();
                     while (!db.eof)
                     {
-                        // Scope gate: skip rows outside the target set.
-                        if (scope == ScopeChoice.Current
-                            && db.absolutePosition != iSavePos)
+                        // Scope gate: skip rows outside the records chosen.
+                        if (iRecordScope == 2 && db.absolutePosition != iSavePos)
                         { db.moveNext(); continue; }
-                        if (scope == ScopeChoice.Marked
-                            && !isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn)))
+                        if (iRecordScope == 1 && !isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn)))
                         { db.moveNext(); continue; }
                         iScanned++;
                         bool bRowChanged = false;
@@ -29467,36 +29514,32 @@ namespace DbDo
                             string sCur = db.getFieldValue(sScanCol) ?? "";
                             string sNew;
                             bool bMatch;
-                            if (bIsRegex)
+                            if (bRegex)
                             {
                                 bMatch = regex.IsMatch(sCur);
                                 sNew = bMatch ? regex.Replace(sCur, sRepl) : sCur;
                             }
                             else
                             {
-                                bMatch = sCur.IndexOf(sFind, StringComparison.OrdinalIgnoreCase) >= 0;
-                                sNew = bMatch ? stringReplace(sCur, sFind, sRepl, StringComparison.OrdinalIgnoreCase) : sCur;
+                                bMatch = sCur.IndexOf(sFind, scFind) >= 0;
+                                sNew = bMatch ? stringReplace(sCur, sFind, sRepl, scFind) : sCur;
                             }
                             if (bMatch && sNew != sCur)
                             {
                                 iChanged++;
-                                if (!bDry)
-                                {
-                                    db.setFieldValue(sScanCol, sNew);
-                                    bRowChanged = true;
-                                }
+                                bRowChanged = true;
+                                if (!bDry) db.setFieldValue(sScanCol, sNew);
                             }
                         }
-                        if (bRowChanged) db.update();
+                        if (bRowChanged) { iRowsChanged++; if (!bDry) db.update(); }
                         db.moveNext();
                     }
                     if (iSavePos >= 0) db.absolutePosition = iSavePos;
                     invokeRefresh();
-
                     string sResult = (bDry ? "Dry run: " : "")
-                        + iChanged + " of " + iScanned + " cells "
-                        + (bDry ? "would be" : "were")
-                        + " changed.";
+                        + iChanged + (iChanged == 1 ? " cell " : " cells ") + (bDry ? "would change" : "changed")
+                        + " in " + iRowsChanged + (iRowsChanged == 1 ? " record" : " records")
+                        + ", of " + iScanned + (iScanned == 1 ? " record" : " records") + " searched.";
                     Say.sayForced(sResult);
                     LbcMessage.show(this, sResult, sTitle,
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
@@ -29515,6 +29558,55 @@ namespace DbDo
             }
         }
 
+        // SCOPE CHOICES, SHARED BY REPLACE AND EXTRACT WITH REGEX (5 November 2026): two combo boxes, alike in both
+        // dialogs. Columns: the current column, the shown columns, or all columns, hidden ones too. Records: all records
+        // in view, the marked ones (offered only when some are), or the current record; it starts on the marked records
+        // when some are marked. bAllColumns starts Columns on all columns, as Extract with Regex always searched.
+        private string sLastReplaceHow = "";
+        private void addScopeChoices(LbcDialog dlg, string sColumn, bool bAllColumns, int iMarked, out ComboBox cbColumns, out ComboBox cbRecords)
+        {
+            List<string> lColumns = new List<string> { "Current column, " + sColumn, "Shown columns", "All columns, hidden ones too" };
+            cbColumns = dlg.addComboBox("Which &columns:", lColumns, bAllColumns ? lColumns[2] : lColumns[0]);
+            List<string> lRecords = new List<string> { "All records in view, " + db.recordCount };
+            if (iMarked > 0) lRecords.Add("Marked records, " + iMarked);
+            lRecords.Add("Current record");
+            cbRecords = dlg.addComboBox("Which &records:", lRecords, iMarked > 0 ? lRecords[1] : lRecords[0]);
+        }
+        private List<string> scopeColumns(ComboBox cbColumns, string sColumn)
+        {
+            string s = cbColumns.Text ?? "";
+            if (s.StartsWith("Shown")) return new List<string>(db.getDisplayFieldNames());
+            if (s.StartsWith("All")) return new List<string>(db.getFieldNames());
+            return new List<string> { sColumn };
+        }
+        private static int scopeRecords(ComboBox cbRecords)
+        {
+            string s = cbRecords.Text ?? "";
+            if (s.StartsWith("Marked")) return 1;
+            if (s.StartsWith("Current")) return 2;
+            return 0;
+        }
+        private static string columnsSaid(ComboBox cbColumns, string sColumn)
+        {
+            string s = cbColumns.Text ?? "";
+            if (s.StartsWith("Shown")) return "the shown columns";
+            if (s.StartsWith("All")) return "all columns";
+            return "column " + sColumn;
+        }
+        // writableColumns: the columns Replace may change -- never the ones DbDo keeps itself.
+        private List<string> writableColumns(List<string> lColumns)
+        {
+            string sKey = "";
+            try { sKey = computePrimaryKeyColumn(db.currentTable, db.getFieldNames()) ?? ""; } catch { }
+            List<string> lKept = new List<string>();
+            foreach (string sCol in lColumns)
+            {
+                string s = sCol.ToLowerInvariant();
+                if (s == "look" || s == "prime" || s == "added" || s == "edited" || s == "marked" || string.Equals(sCol, sKey, StringComparison.OrdinalIgnoreCase)) continue;
+                lKept.Add(sCol);
+            }
+            return lKept;
+        }
         // stringReplace: case-aware substring replace helper. String.
         // Replace doesn't take a StringComparison argument until .NET
         // Standard 2.1; on .NET Framework 4.8 we implement it manually.

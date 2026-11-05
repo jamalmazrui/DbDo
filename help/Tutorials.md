@@ -895,9 +895,17 @@ It shows one table at a time as a list of records you move through by row and by
 
 ### Step 3
 
-It also comes with ready-made databases, called templates, each a complete example you can use as it is or make your own. These walks are built around them.
+Think of a table as a stack of index cards. Every card is one item, a radio station, say, and every card asks the same questions: its name, its country, its stream. A record is one card, and a column is one question asked of every card.
 
 ### Step 4
+
+A database is not always the right tool. To write about one thing, a document serves better. DbDo earns its keep when you keep many things of the same kind, each with the same questions.
+
+### Step 5
+
+It also comes with ready-made databases, called templates, each a complete example you can use as it is or make your own. These walks are built around them.
+
+### Step 6
 
 Radio comes first: RadioTrail, internet radio stations from around the world, each one a key press from playing.
 
@@ -905,7 +913,7 @@ Screen reader:
 
 - 49186 stations from 219 countries.
 
-### Step 5
+### Step 7
 
 Then JobTrail, for a job search: openings, the people at each employer, what you sent and what happened.
 
@@ -913,7 +921,7 @@ Screen reader:
 
 - Jobs, contacts, actions, documents and stories, linked to one another.
 
-### Step 6
+### Step 8
 
 BookTrail, a catalog of what you read and want to read, in any form.
 
@@ -921,7 +929,7 @@ Screen reader:
 
 - Audio from BARD, text from Bookshare, braille and eBooks, side by side.
 
-### Step 7
+### Step 9
 
 And MusicTrail, the greatest albums of ten genres and the people who made them.
 
@@ -929,15 +937,15 @@ Screen reader:
 
 - 100 albums and 270 performers, each album linked to who recorded it.
 
-### Step 8
+### Step 10
 
 Four more get a shorter visit in walk seven: TechTraining, BlindCreations, ContactTrail and RecipeTrail.
 
-### Step 9
+### Step 11
 
 Two voices take these walks. I am the host; the other voice plays the screen reader. It is a simulation, so your own reader's words may differ a little.
 
-### Step 10: Insert+Up Arrow
+### Step 12: Insert+Up Arrow
 
 You know your screen reader's own keys already, and three of them are worth remembering whenever you feel lost. Insert plus Up Arrow says the line you are on again.
 
@@ -947,7 +955,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 11: Insert+Tab
+### Step 13: Insert+Tab
 
 Insert plus Tab says what has the focus: its name, its role, and its value or state.
 
@@ -957,7 +965,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 12: Insert+T
+### Step 14: Insert+T
 
 Insert plus T says the title of the window.
 
@@ -967,15 +975,23 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 13
+### Step 15
 
 On a laptop keyboard, Caps Lock usually stands in for Insert, though in some laptop layouts the line command moves to a letter, such as Caps Lock plus L. And if speech goes by before you catch it, your reader can replay it: Insert plus X in some readers, a speech history in others.
 
-### Step 14
+### Step 16
+
+DbDo has three keys of its own for the same moments. Shift plus F1 says what the thing you are on is for. Alt plus Shift plus slash says where you are. And Alt plus Shift plus H, H for Hotkeys, lists every key. Walk one shows them; for now, just remember they are there.
+
+### Step 17
+
+These walks do not read the guide to you, and they do not cover every command. Each gives you a practical route into one task, so that you feel ready to try the rest yourself. The guide, on F1, has every detail.
+
+### Step 18
 
 Now the table of contents. I say the number and the title; the reader says what the walk covers.
 
-### Step 15
+### Step 19
 
 One, User Interface.
 
@@ -983,7 +999,7 @@ Screen reader:
 
 - The window, the record list, the Say keys that ask without changing, the menus, the rules every key follows, and where help lives.
 
-### Step 16
+### Step 20
 
 Two, Install and Tune In.
 
@@ -991,7 +1007,7 @@ Screen reader:
 
 - The installer, DbDo opening on RadioTrail, a station found by name and playing.
 
-### Step 17
+### Step 21
 
 Three, Find a Station.
 
@@ -999,7 +1015,7 @@ Screen reader:
 
 - A station that may carry the Seahawks game: searched, filtered, narrowed, put in order and played.
 
-### Step 18
+### Step 22
 
 Four, Track Job Leads.
 
@@ -1007,7 +1023,7 @@ Screen reader:
 
 - JobTrail: a status brought up to date, a job added, notes kept, and the people linked to a job.
 
-### Step 19
+### Step 23
 
 Five, Catalog Your Books.
 
@@ -1015,7 +1031,7 @@ Screen reader:
 
 - BookTrail: what you are reading next, counts by format, and a reading log written as a document.
 
-### Step 20
+### Step 24
 
 Six, Explore Music.
 
@@ -1023,7 +1039,7 @@ Screen reader:
 
 - MusicTrail: from an album to the band that recorded it, to its members, and back.
 
-### Step 21
+### Step 25
 
 Seven, More Templates.
 
@@ -1031,7 +1047,7 @@ Screen reader:
 
 - TechTraining, BlindCreations, ContactTrail and RecipeTrail, and bringing your copy up to date when a template improves.
 
-### Step 22
+### Step 26
 
 Eight, Analyze a Dataset: a scientist's measurements, asked in SQL and in plain words, grouped, related and handed on.
 
@@ -1039,13 +1055,17 @@ Screen reader:
 
 - A dataset brought in, asked in SQL and in plain words, grouped, related and handed on.
 
-### Step 23
+### Step 27
 
 Nine, Conclusion.
 
 Screen reader:
 
 - What to carry away, the words DbDo uses, and the help built in.
+
+### Step 28
+
+That is the map. Take walks one and two first; then the walk for the database you want most. It is your database, so make it your own as you go.
 
 **Something to try:** Take walks one and two, then the walk for the database you want first.
 

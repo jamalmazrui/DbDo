@@ -253,6 +253,11 @@ keep or share</a></li>
 <li><a href="#to-automate-what-you-repeat"
 id="toc-to-automate-what-you-repeat">To automate what you
 repeat</a></li>
+<li><a href="#ordering-by-one-column-then-another"
+id="toc-ordering-by-one-column-then-another">Ordering by one column,
+then another</a></li>
+<li><a href="#hearing-a-whole-record"
+id="toc-hearing-a-whole-record">Hearing a whole record</a></li>
 <li><a href="#one-file-carries-it-all"
 id="toc-one-file-carries-it-all">One file carries it all</a></li>
 <li><a href="#which-one-do-i-want" id="toc-which-one-do-i-want">Which
@@ -804,9 +809,9 @@ both.</p>
 going forward; Shift+F3 repeats it going back.</p>
 <p>In DbDo, Keywords and Any Field read a whole record as text, so the
 words of <code>red &amp; blue</code> may sit in different fields; Jump
-Record and a Fields box read one field as a name. Find Regex and Regex
-Replace take regular expressions instead, and Replace Column finds
-exactly the text you type.</p>
+Record and a Fields box read one field as a name. Find Regex, and
+Replace with Use regex pattern checked, take regular expressions
+instead; otherwise Replace finds exactly the text you type.</p>
 <h3 id="navigating-records">Navigating records</h3>
 <p>Beyond the grid’s keys, the cursor moves with these commands:</p>
 <ul>
@@ -841,10 +846,24 @@ Tags</strong> (Alt+Shift+T), and <strong>Edit url</strong> (Alt+Shift+U)
 each open one standard field in a focused single-field dialog with OK
 and Cancel — the quick way to touch a note, tags, or a link without
 opening the whole record.</li>
-<li><strong>Replace Column</strong> (Control+R) replaces text across a
-column; <strong>Regex Replace</strong> (Control+Shift+R) does the same
-by pattern; <strong>Extract with Regex</strong> (Control+Shift+X) pulls
-matches out of a column.</li>
+<li><strong>Replace</strong> (Control+R) puts new text in place of old.
+One dialog asks what to find and what to put in its place, then where:
+<strong>Columns</strong> – the current column, the shown columns, or all
+columns, hidden ones too – and <strong>Which records</strong> – all
+records in view, the marked records, or the current record. It starts on
+the current column, and on the marked records when some are marked, else
+all records in view; changing more than one record asks once, naming how
+many. Check <strong>Use regex pattern</strong> to find by regular
+expression, with $1 and $2 putting back the parts in parentheses;
+<strong>Replace with Regex</strong> (Control+Shift+R) opens the same
+dialog with it checked. <strong>Dry run</strong> counts what would
+change and changes nothing. Replace never writes the fields DbDo keeps
+itself: look, prime, added, edited, marked and the id.</li>
+<li><strong>Extract with Regex</strong> (Control+Shift+E) copies every
+match of a regular expression to the clipboard, one per line, from the
+same Columns and Records choices; it starts on all columns, hidden ones
+too, so an email address in the notes is found. It has the same name and
+key as in EdSharp and FileDir.</li>
 <li><strong>Delete Record</strong> (Control+D) deletes the current
 record with confirmation; <strong>Delete Without Confirmation</strong>
 (Control+Shift+D) skips the prompt.</li>
@@ -1225,7 +1244,7 @@ database, to keep it or to change its format.</li>
 <h3 id="to-automate-what-you-repeat">To automate what you repeat</h3>
 <p>A <strong>script</strong> is a file that does a task again, run with
 <strong>Invoke Script</strong> (Control+Shift+I), written or changed
-with <strong>Edit Snippet</strong> (Control+Shift+E). A database’s own
+with <strong>Edit Snippet</strong> (Alt+Shift+S). A database’s own
 scripts sit beside it, and shared ones in DbDo’s Scripts folder
 (<strong>Open Script Folder</strong> opens it). There are three kinds,
 from the simplest:</p>
@@ -1246,6 +1265,30 @@ Outlook Contacts.</li>
 <p>The same JScript .NET works inside Evaluate Expression and in a
 report definition’s {{ … }} expressions, so learning it once serves all
 three.</p>
+<h3 id="ordering-by-one-column-then-another">Ordering by one column,
+then another</h3>
+<p><strong>Add Column to Order</strong> (Alt+A) orders the records by
+the column you are in, smallest or earliest first, and keeps the order
+that was already in force for breaking ties.
+<strong>Alt+Shift+A</strong> does the same, largest or latest first.</p>
+<p>The column you add last counts most. To order contacts by state, and
+by city within each state, go to the City column and press Alt+A, then
+go to the State column and press Alt+A. It works the way a stack of
+index cards does: sort them by city, then sort them by state, and they
+end up by state, with each state’s cards still in city order. DbDo says
+the result, such as “Ordered by state, then city.”</p>
+<p>Pressing Alt+A or Alt+Shift+A on the column that is already first
+just sets its direction. Order Records (Alt+O) shows the whole order and
+lets you start over from look or prime; Reverse Order (Alt+Shift+O)
+turns every column around.</p>
+<h3 id="hearing-a-whole-record">Hearing a whole record</h3>
+<p><strong>Say Whole Record</strong> (Shift+W) says every field of the
+current record that has a value, each name followed by its value,
+including the columns that Select Columns hides. A link field says the
+linked record’s look, not its number. Press Shift+W twice to read the
+same lines in a window. The screen reader’s own read-line command
+already says the columns you see; Shift+W is for the whole record
+without leaving the grid.</p>
 <h3 id="one-file-carries-it-all">One file carries it all</h3>
 <p>A DbDo database can carry everything it needs besides its data – its
 scripts, its report definitions, its transfer maps and its settings –
@@ -1527,12 +1570,16 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <td>—</td>
 </tr>
 <tr>
-<td>Replace Column</td>
+<td>Replace</td>
 <td>Control+R</td>
 </tr>
 <tr>
-<td>Regex Replace</td>
+<td>Replace with Regex</td>
 <td>Control+Shift+R</td>
+</tr>
+<tr>
+<td>Extract with Regex</td>
+<td>Control+Shift+E</td>
 </tr>
 <tr>
 <td>Mark Record</td>
@@ -1843,6 +1890,10 @@ family.</p>
 <td>Shift+U</td>
 </tr>
 <tr>
+<td>Say Whole Record</td>
+<td>Shift+W</td>
+</tr>
+<tr>
 <td>Say Prime</td>
 <td>Shift+P</td>
 </tr>
@@ -1898,8 +1949,12 @@ family.</p>
 <td>Alt+T</td>
 </tr>
 <tr>
-<td>Alpha Order</td>
+<td>Add Column to Order</td>
 <td>Alt+A</td>
+</tr>
+<tr>
+<td>Add Column to Order Descending</td>
+<td>Alt+Shift+A</td>
 </tr>
 <tr>
 <td>Select Columns</td>
@@ -1908,10 +1963,6 @@ family.</p>
 <tr>
 <td>Generate from Grid</td>
 <td>Alt+Shift+G</td>
-</tr>
-<tr>
-<td>Extract with Regex</td>
-<td>Control+Shift+X</td>
 </tr>
 <tr>
 <td>Append Cell to Clipboard</td>
@@ -1983,7 +2034,7 @@ family.</p>
 </tr>
 <tr>
 <td>Edit Snippet</td>
-<td>Control+Shift+E</td>
+<td>Alt+Shift+S</td>
 </tr>
 <tr>
 <td>Open Script Folder</td>
@@ -3073,10 +3124,11 @@ column</li>
 <li>Shift+S – columns, the columns shown</li>
 <li>Shift+T – tags</li>
 <li>Shift+U – url</li>
-<li>Shift+V – replace, the text Replace Column would find and what it
-would put there, or none</li>
-<li>Shift+X – regex replace, the pattern Regex Replace would offer
-next</li>
+<li>Shift+V – replace values, the text Replace would find and what it
+would put there, with the setting last used – regex or not, the columns
+and the records – or none</li>
+<li>Shift+W – whole record, every field with a value, hidden columns
+too</li>
 <li>Shift+Y – yield, how many rows</li>
 <li>Shift+Z – status: the table, the row and the order</li>
 </ul>
@@ -3084,11 +3136,14 @@ next</li>
 type the first letters of a value and the list view goes there, in lower
 case and without regard to case. The two layers do not collide, which is
 why the Say commands live on Shift.</p>
-<p>Two letters are still unused – H and W – and are kept that way on
-purpose, so a new question can be added later without moving an answer
-somebody has learned. Pressing one of them says so – “Shift+H: no Say
-command” – rather than staying silent: the say layer always answers,
-because silence cannot be told from a key that did not register.</p>
+<p>Two letters are unused – H and X – and are kept that way on purpose,
+so a new question can be added later without moving an answer somebody
+has learned. W became Say Whole Record on 5 November 2026, and X was Say
+Regex Replace until the same day, when Replace became one dialog and
+Shift+V took on its pattern too. Pressing an unused letter says so –
+“Shift+H: no Say command” – rather than staying silent: the say layer
+always answers, because silence cannot be told from a key that did not
+register.</p>
 <p><strong>A command that opens a dialog with a value already in it has
 a value worth hearing first.</strong> That is what Shift+B, Shift+J and
 Shift+V are: the bookmark list, the text Jump would offer, and the pair

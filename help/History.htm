@@ -252,6 +252,16 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a
+href="#november-2026-replace-as-one-dialog-and-extract-with-regex-on-the-suites-key"
+id="toc-november-2026-replace-as-one-dialog-and-extract-with-regex-on-the-suites-key">5
+November 2026 – Replace as one dialog, and Extract with Regex on the
+suite’s key</a></li>
+<li><a
+href="#november-2026-ordering-by-several-columns-and-the-whole-record"
+id="toc-november-2026-ordering-by-several-columns-and-the-whole-record">5
+November 2026 – Ordering by several columns, and the whole
+record</a></li>
 <li><a href="#november-2026-text-that-names-its-format"
 id="toc-november-2026-text-that-names-its-format">5 November 2026 – Text
 that names its format</a></li>
@@ -721,6 +731,73 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Shift+F1</strong> inside DbDo to open this file in your
 browser, or type <code>history</code> at the dot prompt.</p>
+<h2
+id="november-2026-replace-as-one-dialog-and-extract-with-regex-on-the-suites-key">5
+November 2026 – Replace as one dialog, and Extract with Regex on the
+suite’s key</h2>
+<ul>
+<li><strong>Replace (Control+R) is one dialog that says where it
+works.</strong> Since v1.0.111, Replace Column and Regex Replace first
+asked for the current record or the marked ones, so with nothing marked
+Replace Column changed one cell, not the column its name promised; and
+Regex Replace searched every shown column though its title named one.
+Now one dialog, alike for both keys: Find text, Replace with, Use regex
+pattern, Case sensitive, Which columns (the current column, the shown
+columns, or all columns, hidden ones too), Which records (all records in
+view, the marked ones, or the current record) and Dry run; the two lists
+are named so that neither repeats the record list’s name, which the
+check caught at 09:03. Records starts on the marked records when some
+are marked, else all records in view; changing more than one record asks
+once, naming how many. Replace with Regex (Control+Shift+R) opens it
+with Use regex pattern checked. Case sensitive now works for plain text
+too. The fields DbDo keeps itself are never written.</li>
+<li><strong>Extract with Regex is on Control+Shift+E,</strong> the
+suite’s key for it, as in EdSharp and FileDir; Control+Shift+X began no
+word of its name, and its menu letter came from inside “Extract”. It
+sits on the Query menu, with the same Columns and Records choices,
+starting on all columns as it always searched. <strong>Edit Snippet
+moves to Alt+Shift+S,</strong> S for Snippet, freed when Statistics
+joined Generate from Grid. So that every menu letter matches its item’s
+hotkey, four Tools letters moved, each still the first letter of a word:
+Open in Explorer to E, Open Command Prompt to O, Sqlean Console to C,
+and Edit Snippet to S.</li>
+<li><strong>Say Replace Values (Shift+V)</strong> says the text Replace
+would find and put in its place, and now the setting last used: regex or
+not, the columns and the records. <strong>Say Regex Replace (Shift+X) is
+retired:</strong> one dialog needs one answer, and its menu letter came
+from inside “Regex”.</li>
+<li><strong>Tutorial 0</strong> gives a picture of a table as index
+cards, says when a document serves better, names DbDo’s three keys for
+getting unstuck, promises a practical route rather than every command,
+and ends by saying where to start – lessons from Brian Hartgen’s
+database lessons, recorded in the kit’s TutorialLearnings.md.</li>
+</ul>
+<h2
+id="november-2026-ordering-by-several-columns-and-the-whole-record">5
+November 2026 – Ordering by several columns, and the whole record</h2>
+<ul>
+<li><strong>Add Column to Order (Alt+A) and its descending twin
+(Alt+Shift+A)</strong> put the column under the cursor first in the
+order and keep the order already in force after it, so pressing Alt+A in
+City and then in State orders by state, then city: the last column added
+counts most, as with index cards sorted twice. DbDo says the result in
+words, such as “Ordered by state, then city. 52 records.” They replace
+Alpha Order, which sorted by one column alone; Alt+A from the default
+order now does that and settles ties by prime besides. As in FileDir,
+Alt+A sorts ascending by what is under focus and Alt+Shift+A
+descending.</li>
+<li><strong>Say Whole Record (Shift+W)</strong> says every field of the
+current record that has a value, name then value, each its own
+utterance, including the columns Select Columns hides; links say the
+linked record’s look. Say Record, which spoke only the shown columns,
+was dropped long ago because the screen reader’s read-line command does
+that; nothing else spoke the whole record from the grid.</li>
+<li><strong>H was weighed and left free.</strong> Say Header is already
+Alt+Control+Shift+UpArrow and Shift+S; help is F1, its hint Shift+F1 and
+History on the Help menu; Hotkey Summary is Alt+Shift+H; and a
+hidden-columns command would be a smaller part of Say Whole Record. A
+key without a distinct role would only be something more to learn.</li>
+</ul>
 <h2 id="november-2026-text-that-names-its-format">5 November 2026 – Text
 that names its format</h2>
 <ul>

@@ -27,6 +27,18 @@ Hear=
 
 [step]
 
+Say=Think of a table as a stack of index cards. Every card is one item, a radio station, say, and every card asks the same questions: its name, its country, its stream. A record is one card, and a column is one question asked of every card.
+Key=
+Hear=
+
+[step]
+
+Say=A database is not always the right tool. To write about one thing, a document serves better. DbDo earns its keep when you keep many things of the same kind, each with the same questions.
+Key=
+Hear=
+
+[step]
+
 Say=It also comes with ready-made databases, called templates, each a complete example you can use as it is or make your own. These walks are built around them.
 Key=
 Hear=
@@ -95,6 +107,18 @@ Hear=
 
 [step]
 
+Say=DbDo has three keys of its own for the same moments. Shift plus F1 says what the thing you are on is for. Alt plus Shift plus slash says where you are. And Alt plus Shift plus H, H for Hotkeys, lists every key. Walk one shows them; for now, just remember they are there.
+Key=
+Hear=
+
+[step]
+
+Say=These walks do not read the guide to you, and they do not cover every command. Each gives you a practical route into one task, so that you feel ready to try the rest yourself. The guide, on F1, has every detail.
+Key=
+Hear=
+
+[step]
+
 Say=Now the table of contents. I say the number and the title; the reader says what the walk covers.
 Key=
 Hear=
@@ -152,3 +176,9 @@ Hear=A dataset brought in, asked in SQL and in plain words, grouped, related and
 Say=Nine, Conclusion.
 Key=
 Hear=What to carry away, the words DbDo uses, and the help built in.
+
+[step]
+
+Say=That is the map. Take walks one and two first; then the walk for the database you want most. It is your database, so make it your own as you go.
+Key=
+Hear=

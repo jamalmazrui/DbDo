@@ -80,12 +80,12 @@ section says why each key is the one it is.
 - Play Stream\
   Play the current record's stream address in the Homer Player; with records marked, play all of them. P for Play.\
   Alt+Shift+P
-- Regex Replace\
-  Regex find-and-replace within the current virtual column, over visible rows. R for Regex.\
-  Control+Shift+R
-- Replace Column\
-  Substring find-and-replace within the current virtual column, over visible rows. R for Replace.\
+- Replace\
+  R for Replace.\
   Control+R
+- Replace with Regex\
+  R for Replace.\
+  Control+Shift+R
 - Save Bookmark\
   Save the current row position as a session bookmark. B for Bookmark.\
   Control+B
@@ -219,9 +219,6 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Edit Settings\
   Open the Settings dialog. E for Edit.\
   Alt+Shift+E
-- Extract with Regex\
-  Extract all regex matches in the current virtual column to the clipboard. X for the sound of "ex".\
-  Control+Shift+X
 - Generate from Grid\
   Analyze the grid: a statistics report, a frequency report of the current column or the shown columns, a cross-tab, a Markdown table, or an Excel chart. G for Generate.\
   Alt+Shift+G
@@ -250,8 +247,8 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   F12 is files and AI: F12 talks to the model on this computer.\
   F12
 - Edit Snippet\
-  E for Edit.\
-  Control+Shift+E
+  S for Snippet.\
+  Alt+Shift+S
 - Evaluate Expression\
   Control+Equals
 - Invoke Script\
@@ -315,12 +312,18 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 
 ### Query
 
-- Alpha Order\
-  Sort the records by the current column, smallest or earliest first. A for Alpha.\
+- Add Column to Order\
+  A for Add.\
   Alt+A
+- Add Column to Order Descending\
+  A for Add.\
+  Alt+Shift+A
 - Clear Filter\
   Clear the active filter. F for Filter. Shift reverses Filter Records.\
   Control+Shift+F
+- Extract with Regex\
+  E for Extract.\
+  Control+Shift+E
 - Filter Records\
   Show only the records that hold some text in any field, or that meet a condition on each field. F for Filter.\
   Control+F
@@ -424,14 +427,11 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Records of Marked\
   Speak every marked record in full, from the first record down (all displayed columns). Space marks in a list; Shift and Space asks how many are marked.\
   Shift+Space
-- Say Regex Replace\
-  X for the sound of "ex".\
-  Shift+X
 - Say Related\
   R for Related.\
   Shift+R
-- Say Replacement Value\
-  V for Value.\
+- Say Replace Values\
+  V for Values.\
   Shift+V
 - Say Select Columns\
   S for Say.\
@@ -448,6 +448,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say url\
   Speak the current record's url field. U for url.\
   Shift+U
+- Say Whole Record\
+  W for Whole.\
+  Shift+W
 - Say Yield\
   Speak the current row count (after filter). Y for Yield.\
   Shift+Y
@@ -481,8 +484,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 ### Alt
 
 - Alt+A\
-  Sort the records by the current column, smallest or earliest first.\
-  Alpha Order
+  Add Column to Order
 - Alt+Apostrophe\
   Speak the current Windows clipboard text.\
   Say Clipboard
@@ -542,6 +544,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 
 ### Alt+Shift
 
+- Alt+Shift+A\
+  Add Column to Order Descending
 - Alt+Shift+Apostrophe\
   Empty the clipboard.\
   Clear Clipboard
@@ -579,6 +583,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+Shift+R\
   Alt+Shift+R. Render a saved report definition to a Markdown document. A report reads the whole PHYSICAL table (not the grid view), so it is reproducible regardless of your current filter or sort.\
   Run Report
+- Alt+Shift+S\
+  Edit Snippet
 - Alt+Shift+Slash\
   Show the table, row, filter, and sort in a read-only dialog.\
   Where Am I
@@ -648,8 +654,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Q\
   Query
 - Control+R\
-  Substring find-and-replace within the current virtual column, over visible rows.\
-  Replace Column
+  Replace
 - Control+S\
   Save changes to disk (writes an open workbook back to its .xlsx; a .db is already saved as you go).\
   Save
@@ -679,7 +684,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Shift+D\
   Delete Without Confirmation
 - Control+Shift+E\
-  Edit Snippet
+  Extract with Regex
 - Control+Shift+F\
   Clear the active filter.\
   Clear Filter
@@ -710,8 +715,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Show the open database's file, selected in its folder, in FileDir.\
   Show in FileDir
 - Control+Shift+R\
-  Regex find-and-replace within the current virtual column, over visible rows.\
-  Regex Replace
+  Replace with Regex
 - Control+Shift+S\
   Save a copy to another path or file format.\
   Save As
@@ -720,9 +724,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Previous Window
 - Control+Shift+U\
   Open url
-- Control+Shift+X\
-  Extract all regex matches in the current virtual column to the clipboard.\
-  Extract with Regex
 - Control+Shift+Z\
   Flip the database between read-write and read-only at runtime.\
   Read Only Toggle
@@ -869,9 +870,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Speak the current record's url field.\
   Say url
 - Shift+V\
-  Say Replacement Value
-- Shift+X\
-  Say Regex Replace
+  Say Replace Values
+- Shift+W\
+  Say Whole Record
 - Shift+Y\
   Speak the current row count (after filter).\
   Say Yield
@@ -884,9 +885,10 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - About\
   Show the version, author, and license.\
   Alt+F1
-- Alpha Order\
-  Sort the records by the current column, smallest or earliest first.\
+- Add Column to Order\
   Alt+A
+- Add Column to Order Descending\
+  Alt+Shift+A
 - Alternate Menu\
   Pick a command from a flat, filterable list.\
   Alt+F10
@@ -956,7 +958,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Open the Settings dialog.\
   Alt+Shift+E
 - Edit Snippet\
-  Control+Shift+E
+  Alt+Shift+S
 - Edit Tags\
   Alt+Shift+T
 - Edit url\
@@ -986,8 +988,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Extra Speech Toggle\
   Alt+Shift+Z
 - Extract with Regex\
-  Extract all regex matches in the current virtual column to the clipboard.\
-  Control+Shift+X
+  Control+Shift+E
 - Filter Records\
   Show only the records that hold some text in any field, or that meet a condition on each field.\
   Control+F
@@ -1098,14 +1099,12 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Refresh View\
   Refresh the visible row set from the database.\
   F5
-- Regex Replace\
-  Regex find-and-replace within the current virtual column, over visible rows.\
-  Control+Shift+R
 - Repeat Go To\
   Alt+G
-- Replace Column\
-  Substring find-and-replace within the current virtual column, over visible rows.\
+- Replace\
   Control+R
+- Replace with Regex\
+  Control+Shift+R
 - Reverse Jump\
   Jump Record backward.\
   Control+Shift+J
@@ -1202,11 +1201,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Records of Marked\
   Speak every marked record in full, from the first record down (all displayed columns).\
   Shift+Space
-- Say Regex Replace\
-  Shift+X
 - Say Related\
   Shift+R
-- Say Replacement Value\
+- Say Replace Values\
   Shift+V
 - Say Select Columns\
   Shift+S
@@ -1222,6 +1219,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say url\
   Speak the current record's url field.\
   Shift+U
+- Say Whole Record\
+  Shift+W
 - Say Windows Open\
   Speak the count and titles of open recordset windows, marking the current one.\
   Shift+F4
