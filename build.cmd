@@ -182,7 +182,7 @@ if defined kitMissing (
 echo Kit code check: LbcMessage, setPattern and fUnavailable present >> "!log!"
 rem A RETIRED WALK'S AUDIO GOES (5 November 2026): Tutorial 8 became Analyze a Dataset, so the old walk's sound and
 rem fingerprint are removed, rather than ship beside the new one.
-for %%F in ("!sHere!help\Tutorial_8_Ask_with_SQL.inix" "!sHere!help\tutorials\8_Ask_with_SQL.mp3" "!sHere!help\tutorials\8_Ask_with_SQL.sha256") do if exist "%%~F" (
+for %%F in ("!sHere!help\Tutorial_8_Ask_with_SQL.inix" "!sHere!help\tutorials\8_Ask_with_SQL.mp3" "!sHere!help\tutorials\8_Ask_with_SQL.sha256" recordWalk.cmd recordWalk.py) do if exist "%%~F" (
   del /q "%%~F" && echo Retired tutorial file removed: %%~nxF >> "!log!"
 )
 
@@ -243,6 +243,8 @@ rem was missing, so the finish page's mpv box ran a script that was never shippe
 rem installModels.cmd likewise. The kit's check (shipped) now fails a build whose
 rem installer runs a script that is not here. Each copy is logged, and a name the
 rem kit does not have is logged as missing rather than skipped in silence.
+rem recordWalk joined the list on 5 November 2026: DbDo's own older copy kept running, so walks never named
+rem the build they walked; now every build brings the kit's.
 for %%F in (buildTutorials.cmd buildTutorials.ps1 check.cmd check.py checkTutorial.cmd checkTutorial.py finish.cmd fixEncoding.cmd fixEncoding.py installCommon.cmd installModels.cmd installMpv.cmd installOllama.cmd installScreenReaderSupport.cmd kind.cmd kind.py makeTutorials.cmd makeTutorials.py push.cmd release.cmd release.ps1 tidy.cmd tidy.py uiCheck.cmd uiCheck.py unpushed.cmd unpushed.py) do (
   if exist "!homerDev!\scripts\%%F" (
     copy /y "!homerDev!\scripts\%%F" scripts\ >nul

@@ -5,6 +5,10 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 5 November 2026 -- Walks name what they walk
+
+- **The build brings the kit's recordWalk,** with the scripts it already copies. DbDo's own older copy kept running from C:\DbDo\scripts, so the walk reports never named the program, version and build time they walked; the 09:44 walk heard 13 of 13, the first perfect run, and the 09:48 walk's one miss was speech recognition hearing "Filter Records" as "field director", with focus where it belonged.
+
 ## 5 November 2026 -- Replace as one dialog, and Extract with Regex on the suite's key
 
 - **Replace (Control+R) is one dialog that says where it works.** Since v1.0.111, Replace Column and Regex Replace first asked for the current record or the marked ones, so with nothing marked Replace Column changed one cell, not the column its name promised; and Regex Replace searched every shown column though its title named one. Now one dialog, alike for both keys: Find text, Replace with, Use regex pattern, Case sensitive, Which columns (the current column, the shown columns, or all columns, hidden ones too), Which records (all records in view, the marked ones, or the current record) and Dry run; the two lists are named so that neither repeats the record list's name, which the check caught at 09:03. Records starts on the marked records when some are marked, else all records in view; changing more than one record asks once, naming how many. Replace with Regex (Control+Shift+R) opens it with Use regex pattern checked. Case sensitive now works for plain text too. The fields DbDo keeps itself are never written.
