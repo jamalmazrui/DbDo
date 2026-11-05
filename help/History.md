@@ -5,6 +5,11 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 5 November 2026 -- An accessibility scan at every push
+
+- **Tutorials can be heard performed live:** scripts\recordWalk --tutorial --walk 1 drives DbDo through Tutorial 1, menus and all, records the real screen reader at each key, and joins it with the host's lines into one recording.
+- **The build copies the kit's axeScan,** with recordWalk and the check, so every push scans DbDo's window with Axe.Windows and writes logs\DbDo-a11yScan-<time>.md: warnings to review, never failures, and never a reason to add an accessible name the screen reader already has from a label, a caption or the window's title.
+
 ## 5 November 2026 -- Walks name what they walk
 
 - **The build brings the kit's recordWalk,** with the scripts it already copies. DbDo's own older copy kept running from C:\DbDo\scripts, so the walk reports never named the program, version and build time they walked; the 09:44 walk heard 13 of 13, the first perfect run, and the 09:48 walk's one miss was speech recognition hearing "Filter Records" as "field director", with focus where it belonged.

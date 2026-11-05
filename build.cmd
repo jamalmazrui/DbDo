@@ -182,7 +182,7 @@ if defined kitMissing (
 echo Kit code check: LbcMessage, setPattern and fUnavailable present >> "!log!"
 rem A RETIRED WALK'S AUDIO GOES (5 November 2026): Tutorial 8 became Analyze a Dataset, so the old walk's sound and
 rem fingerprint are removed, rather than ship beside the new one.
-for %%F in ("!sHere!help\Tutorial_8_Ask_with_SQL.inix" "!sHere!help\tutorials\8_Ask_with_SQL.mp3" "!sHere!help\tutorials\8_Ask_with_SQL.sha256" recordWalk.cmd recordWalk.py) do if exist "%%~F" (
+for %%F in ("!sHere!help\Tutorial_8_Ask_with_SQL.inix" "!sHere!help\tutorials\8_Ask_with_SQL.mp3" "!sHere!help\tutorials\8_Ask_with_SQL.sha256" axeScan.cmd axeScan.py recordWalk.cmd recordWalk.py) do if exist "%%~F" (
   del /q "%%~F" && echo Retired tutorial file removed: %%~nxF >> "!log!"
 )
 
