@@ -95,16 +95,16 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Alt plus O, O for Order, says the order in force, then offers Prime order, Look order, Choose order, Type order and Reverse order, as Select Columns offers its own.
+Say=Alt plus O, O for Order, says the order in force, then offers the same buttons as Select Columns: Look columns, Prime columns, Main, Standard and All columns, Choose columns and Type columns. Prime columns, the default order, has focus.
 Key=Alt+O
 Hear=Ordered now
 Hear=Order Records dialog
-Hear=Prime order button
+Hear=Prime columns button
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=L for Look order sorts by name, the way stations are said. Prime order puts back the table's own order.
+Say=L for Look columns sorts by look's columns, name first, the way stations are said. Prime columns puts back the table's own order.
 Key=L
 Hear=Ordered by name ASC
 Note=Confirm the wording with a live run: buildTutorials -live.

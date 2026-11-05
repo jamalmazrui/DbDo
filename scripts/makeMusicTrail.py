@@ -10,7 +10,7 @@ for each of ten roles in each of the same ten genres, each with nationality, gro
 conclusion links each one too. Both are the author's own, so the template ships their text.
 
 WHAT IT MAKES. templates\\MusicTrail\\MusicTrail.db, the Homer way (the homer-db skill): albums and performers, each with
-the standard fields, look, prime, the edited trigger and the two triggers that keep links whole; lookups holding the
+the standard fields, look, prime, the edited trigger and the two triggers that keep links whole; defs holding the
 genres and roles with the books' own descriptions; maps linking each performer to the albums it recorded and each
 musician to a band in the table; views matching MusicTrail.inix. The old file is replaced only when the new one is
 complete and passes its own check; no backup is left beside it, since everything in templates ships with DbDo and
@@ -233,11 +233,11 @@ def mapsTriggers(sTable):
 
 
 def systemDdl():
-    """lookups, maps and views, as every Trail template has them."""
+    """defs, maps and views, as every Trail template has them."""
     lsLookups = ["src", "tbl", "fld", "val"]
     lsMaps = ["tbl1", "prime1", "kind", "tbl2", "prime2"]
     lsDdl = []
-    for sTable, sId, lsData, lsPrime in (("lookups", "lookup_id", ["src TEXTLINE", "tbl TEXTLINE", "fld TEXTLINE", "val TEXTLINE", "ordinal INTEGER", "descrip TEXTMARKDOWN", "url TEXTLINE"], lsLookups),
+    for sTable, sId, lsData, lsPrime in (("defs", "def_id", ["src TEXTLINE", "tbl TEXTLINE", "fld TEXTLINE", "val TEXTLINE", "ordinal INTEGER", "descrip TEXTMARKDOWN", "url TEXTLINE"], lsLookups),
                                          ("maps", "map_id", ["tbl1 TEXTLINE", "prime1 TEXTLINE", "kind TEXTLINE", "tbl2 TEXTLINE", "prime2 TEXTLINE"], lsMaps)):
         lsColumns = ["%s INTEGER PRIMARY KEY AUTOINCREMENT" % sId, "added TEXTTIME NOT NULL DEFAULT CURRENT_TIMESTAMP", "edited TEXTTIME NOT NULL DEFAULT CURRENT_TIMESTAMP"] + lsData
         lsColumns += ["notes TEXTMARKDOWN", "tags TEXTMEMO", "look TEXT GENERATED ALWAYS AS (%s) STORED" % lookExpr(lsPrime),
@@ -256,7 +256,7 @@ def systemDdl():
 def addLookups(oDb, sTable, sField, dValues, sSource):
     """A pick list, alphabetical so a first letter lands on its value, with ordinal following."""
     for iOrdinal, sValue in enumerate(sorted(dValues, key=lambda s: s.lower()), 1):
-        oDb.execute("INSERT INTO lookups (src, tbl, fld, val, ordinal, descrip) VALUES (?, ?, ?, ?, ?, ?)", (sSource, sTable, sField, sValue, iOrdinal, dValues[sValue] or None))
+        oDb.execute("INSERT INTO defs (src, tbl, fld, val, ordinal, descrip) VALUES (?, ?, ?, ?, ?, ?)", (sSource, sTable, sField, sValue, iOrdinal, dValues[sValue] or None))
     log("Pick list %s.%s: %d values" % (sTable, sField, len(dValues)))
     return len(dValues)
 
@@ -347,8 +347,8 @@ def build(sGenreText, sSongText, sTarget):
     addLookups(oDb, "maps", "kind", {"features": "Subject album features the object performer as a guest.",
                                      "member_of": "Subject performer is or was a member of the object performer, a band or group.",
                                      "recorded": "Subject performer recorded the object album."}, "MusicTrail")
-    for sTable, sSelect in (("albums", "name, artist, genre"), ("lookups", "fld, val"), ("maps", "kind, prime1, prime2"), ("performers", "name, role, genre")):
-        sOrder = {"lookups": "fld, ordinal", "maps": "kind, prime1"}.get(sTable, "name")
+    for sTable, sSelect in (("albums", "name, artist, genre"), ("defs", "fld, val"), ("maps", "kind, prime1, prime2"), ("performers", "name, role, genre")):
+        sOrder = {"defs": "fld, ordinal", "maps": "kind, prime1"}.get(sTable, "name")
         for sField, sValue in (("SelectFields", sSelect), ("OrderFields", sOrder), ("WhereFilter", "")):
             oDb.execute("INSERT INTO views (tbl, fld, val) VALUES (?, ?, ?)", (sTable, sField, viewFromInix("MusicTrail", sTable, sField, sValue)))
     oDb.commit()
@@ -356,7 +356,7 @@ def build(sGenreText, sSongText, sTarget):
     iDangling = oDb.execute("SELECT count(*) FROM maps m WHERE NOT EXISTS (SELECT 1 FROM performers p WHERE m.tbl1 = 'performers' AND p.prime = m.prime1) "
                             "OR (m.tbl2 = 'albums' AND NOT EXISTS (SELECT 1 FROM albums a WHERE a.prime = m.prime2)) "
                             "OR (m.tbl2 = 'performers' AND NOT EXISTS (SELECT 1 FROM performers p WHERE p.prime = m.prime2))").fetchone()[0]
-    dCounts = {s: oDb.execute("SELECT count(*) FROM %s" % s).fetchone()[0] for s in ("albums", "performers", "maps", "lookups")}
+    dCounts = {s: oDb.execute("SELECT count(*) FROM %s" % s).fetchone()[0] for s in ("albums", "performers", "maps", "defs")}
     oDb.execute("PRAGMA journal_mode = DELETE")
     oDb.execute("VACUUM")
     oDb.close()
@@ -367,7 +367,7 @@ def build(sGenreText, sSongText, sTarget):
     # No backup beside it: everything in templates ships in the installer and goes to the repository, and Git
     # already keeps the version before.
     os.replace(sTemp, sTarget)
-    say("Wrote %s: %d albums, %d performers, %d links, %d pick-list values." % (sTarget, dCounts["albums"], dCounts["performers"], dCounts["maps"], dCounts["lookups"]))
+    say("Wrote %s: %d albums, %d performers, %d links, %d pick-list values." % (sTarget, dCounts["albums"], dCounts["performers"], dCounts["maps"], dCounts["defs"]))
     return dCounts
 
 

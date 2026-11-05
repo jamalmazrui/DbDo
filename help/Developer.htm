@@ -304,8 +304,8 @@ fetched voices.</p>
 <ul>
 <li><code>configs</code> – settings shipped with the program:
 <code>DbDo.inix</code></li>
-<li><code>data</code> – the shared lookups database,
-<code>lookups.db</code></li>
+<li><code>data</code> – the shared defs database,
+<code>defs.db</code></li>
 <li><code>exec</code> – the program and its libraries</li>
 <li><code>help</code> – the documents, the tutorials and their
 recording</li>
@@ -469,8 +469,8 @@ user table’s look and data fields, kept current by triggers like DbDo’s
 own edited trigger, would make Keywords instant on a large table, and
 could rank matches. Two things first: the SQLite build DbDo opens
 databases with must include FTS5, and the index is derived data, so it
-belongs beside DbDo’s own tables (lookups, maps, views), never mixed
-into a user’s.</li>
+belongs beside DbDo’s own tables (defs, maps, views), never mixed into a
+user’s.</li>
 <li><strong>Choose Columns as two lists, never checkboxes in a
 list.</strong> Quill Radio’s reasoning: a report list is read one column
 at a time, so the columns chosen <em>are</em> the sentence heard on

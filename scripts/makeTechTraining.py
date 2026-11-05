@@ -13,7 +13,7 @@ makeMusicTrail uses: one table, presentations, with the standard fields, look, p
 the presentation's own address, so Play Stream (Alt+Shift+P) plays it in the Homer Player -- audio files directly,
 YouTube and the like through yt-dlp -- and marked presentations play as a play list. medium says which: audio, video,
 or page (a presentation page, opened in the browser with Control+Enter on its url). minutes is the length in whole
-minutes, so lessons can be sorted and filtered by time. lookups hold the categories with the directory's own
+minutes, so lessons can be sorted and filtered by time. defs hold the categories with the directory's own
 definition of each, the sources, the series and the media.
 
 The old file is replaced only when the new one is complete and passes its own check. The log,
@@ -123,7 +123,7 @@ def build(sText, sTarget):
     trail.addLookups(oDb, "presentations", "source", dSources, "TechTraining")
     trail.addLookups(oDb, "presentations", "series", {d["series"]: "" for d in lPresentations if d["series"]}, "TechTraining")
     trail.addLookups(oDb, "presentations", "medium", dMediaKinds, "TechTraining")
-    for sTable, sSelect, sOrder in (("lookups", "fld, val", "fld, ordinal"), ("maps", "kind, prime1, prime2", "kind, prime1"),
+    for sTable, sSelect, sOrder in (("defs", "fld, val", "fld, ordinal"), ("maps", "kind, prime1, prime2", "kind, prime1"),
                                     ("presentations", "title, minutes, medium", "title")):
         for sField, sValue in (("SelectFields", sSelect), ("OrderFields", sOrder), ("WhereFilter", "")):
             oDb.execute("INSERT INTO views (tbl, fld, val) VALUES (?, ?, ?)", (sTable, sField, trail.viewFromInix("TechTraining", sTable, sField, sValue)))
@@ -134,7 +134,7 @@ def build(sText, sTarget):
         else: log("Starter not found, so not marked: " + sTitle)
     oDb.commit()
     sIntegrity = oDb.execute("PRAGMA integrity_check").fetchone()[0]
-    dCounts = {s: oDb.execute("SELECT count(*) FROM %s" % s).fetchone()[0] for s in ("presentations", "lookups")}
+    dCounts = {s: oDb.execute("SELECT count(*) FROM %s" % s).fetchone()[0] for s in ("presentations", "defs")}
     dMedia = dict(oDb.execute("SELECT medium, count(*) FROM presentations GROUP BY medium").fetchall())
     oDb.execute("PRAGMA journal_mode = DELETE")
     oDb.execute("VACUUM")
@@ -144,7 +144,7 @@ def build(sText, sTarget):
         os.remove(sTemp)
         raise RuntimeError("the new database failed its own check (integrity %s, %d of %d presentations); the old one is kept" % (sIntegrity, dCounts["presentations"], len(lPresentations)))
     os.replace(sTemp, sTarget)
-    say("Wrote %s: %d presentations (%d audio, %d video, %d pages), %d pick-list values." % (sTarget, dCounts["presentations"], dMedia.get("audio", 0), dMedia.get("video", 0), dMedia.get("page", 0), dCounts["lookups"]))
+    say("Wrote %s: %d presentations (%d audio, %d video, %d pages), %d pick-list values." % (sTarget, dCounts["presentations"], dMedia.get("audio", 0), dMedia.get("video", 0), dMedia.get("page", 0), dCounts["defs"]))
     return dCounts
 
 

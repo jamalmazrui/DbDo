@@ -65,7 +65,7 @@ folder alone. `LocalFiles.txt` tells it what belongs on this disk but not in the
 repository: the tutorial scripts, the generated audio and the fetched voices.
 
 - `configs` -- settings shipped with the program: `DbDo.inix`
-- `data` -- the shared lookups database, `lookups.db`
+- `data` -- the shared defs database, `defs.db`
 - `exec` -- the program and its libraries
 - `help` -- the documents, the tutorials and their recording
 - `logs` -- in the development folder, one file per build, clean, tutorial or
@@ -165,7 +165,7 @@ Each was weighed on 19 October 2026 under the instruction to decide, justify and
 
 From Quill Radio, Community Access's internet radio app, whose 60,000-station offline catalog is a SQLite database a screen reader user searches and arrows through all day (read 25 October 2026 in the QUILL repository, where Quill Radio now lives). Each is a plan to weigh, not yet built.
 
-- **Instant search by SQLite's full-text index (FTS5).** Quill Radio keeps a `stations_fts` virtual table beside its catalog and answers Find Stations from it as each letter is typed. DbDo's Keywords (Control+K) reads every record. An FTS5 table over each user table's look and data fields, kept current by triggers like DbDo's own edited trigger, would make Keywords instant on a large table, and could rank matches. Two things first: the SQLite build DbDo opens databases with must include FTS5, and the index is derived data, so it belongs beside DbDo's own tables (lookups, maps, views), never mixed into a user's.
+- **Instant search by SQLite's full-text index (FTS5).** Quill Radio keeps a `stations_fts` virtual table beside its catalog and answers Find Stations from it as each letter is typed. DbDo's Keywords (Control+K) reads every record. An FTS5 table over each user table's look and data fields, kept current by triggers like DbDo's own edited trigger, would make Keywords instant on a large table, and could rank matches. Two things first: the SQLite build DbDo opens databases with must include FTS5, and the index is derived data, so it belongs beside DbDo's own tables (defs, maps, views), never mixed into a user's.
 - **Choose Columns as two lists, never checkboxes in a list.** Quill Radio's reasoning: a report list is read one column at a time, so the columns chosen *are* the sentence heard on every row. Its dialog has Shown and Hidden lists with Move Up, Move Down, Hide and Show, because a checkbox in a list is a state the reader must be asked for, while a position in a list is a place you land on, and the announcement after a move says where you are. DbDo's views table already records a view's fields; this is the shape a dialog for choosing and ordering them should take.
 - **A database rebuilt beside the live one, then switched.** Quill Radio never rewrites its live catalog: it builds the next copy as `catalog.<n+1>.db`, then replaces a tiny pointer file, so a crash leaves the old catalog untouched, and stale copies are removed on the next open. Windows will not replace a database file a connection holds open. This fits DbDo's derived files -- an FTS index, an import's staging copy -- not a user's database, which is edited in place.
 - **Quick Actions, one reorder pattern everywhere.** Wherever Quill Radio lets a list be rearranged, it is the same real list box with Move Up, Move Down and Make Default, and the dialog knows nothing of what it reorders, so every app shares one. DbDo's field order, report columns and view fields could all use one such dialog from the kit.

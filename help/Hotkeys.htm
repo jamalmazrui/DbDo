@@ -382,7 +382,7 @@ Alt+Shift+X</li>
 Build a new DbDo database from another file – Excel (read by DbDo
 itself, with no Office or Access driver needed), Access, dBASE, CSV, or
 SQLite – with one standard-shape table per source table, plus maps and
-lookups. I for Import.<br />
+defs. I for Import.<br />
 Alt+I</li>
 <li>Merge Data<br />
 Merge rows from a Markdown table, JSON, or Inix file into the current
@@ -392,14 +392,9 @@ Alt+M</li>
 F6 moves among parts of the window; Control+F6 moves to the next
 table.<br />
 Control+F6</li>
-<li>Next Visited Table<br />
-F6 moves among parts; Alt+F6 returns to tables you have visited.<br />
-Alt+F6</li>
 <li>Open Database<br />
 Open a database file. O for Open.<br />
 Control+O</li>
-<li>Open Table in New Window<br />
-Control+Shift+T</li>
 <li>Open Template Database<br />
 Open one of the template databases that come with DbDo, such as
 RadioTrail or JobTrail. D for Database.<br />
@@ -407,9 +402,6 @@ Alt+Shift+D</li>
 <li>Previous Table or View<br />
 F6 moves among parts; Shift reverses Control+F6.<br />
 Control+Shift+F6</li>
-<li>Previous Visited Table<br />
-F6 moves among parts; Shift reverses Alt+F6.<br />
-Alt+Shift+F6</li>
 <li>Print<br />
 P for Printer.<br />
 Control+P</li>
@@ -484,10 +476,6 @@ Alt+C</li>
 Copy the value of the cell under the virtual cursor to the clipboard. C
 for Copy.<br />
 Control+C</li>
-<li>Count by Columns<br />
-Count the records with each combination of values in the columns shown.
-B for by.<br />
-Alt+Shift+B</li>
 <li>Database Summary<br />
 D for Database.<br />
 Alt+D</li>
@@ -499,16 +487,10 @@ Extract all regex matches in the current virtual column to the
 clipboard. X for the sound of “ex”.<br />
 Control+Shift+X</li>
 <li>Generate from Grid<br />
-Alt+Shift+G. Ad-hoc analysis of the VIRTUAL grid (the current filtered,
-sorted view): profile the columns by type and pick an output – summary
-statistics, frequency table, cross-tab, Markdown table, or an Excel
-chart (bar, pie, histogram, box-whisker, scatter, timeline). One-off and
-exploratory; acts on what you are looking at. G for Generate.<br />
+Analyze the grid: a statistics report, a frequency report of the current
+column or the shown columns, a cross-tab, a Markdown table, or an Excel
+chart. G for Generate.<br />
 Alt+Shift+G</li>
-<li>Graphics Column<br />
-Plot the column under the virtual cursor as an Excel chart. G for
-Graphics.<br />
-Control+Shift+G</li>
 <li>Hotkey Summary<br />
 H for Hotkey.<br />
 Alt+Shift+H</li>
@@ -523,10 +505,6 @@ F5</li>
 Choose which columns the grid shows, and in what order. S for
 Select.<br />
 Alt+S</li>
-<li>Statistics from Column<br />
-Print descriptive statistics for the column under the virtual cursor. S
-for Statistics.<br />
-Alt+Shift+S</li>
 <li>Table Summary<br />
 Print row count, column count, and storage statistics for the open
 database. T for Table.<br />
@@ -621,6 +599,10 @@ Shift+F3</li>
 </ul>
 <h3 id="query">Query</h3>
 <ul>
+<li>Alpha Order<br />
+Sort the records by the current column, smallest or earliest first. A
+for Alpha.<br />
+Alt+A</li>
 <li>Clear Filter<br />
 Clear the active filter. F for Filter. Shift reverses Filter
 Records.<br />
@@ -694,7 +676,8 @@ Shift+E</li>
 F for Filter.<br />
 Shift+F</li>
 <li>Say Go to<br />
-Speak the most recently used Jump search string. G for Go.<br />
+Speak the last entry of Go to Record (Control+G), which Alt+G repeats. G
+for Go.<br />
 Shift+G</li>
 <li>Say Id<br />
 I for ID.<br />
@@ -806,6 +789,10 @@ Shift+F4</li>
 <h2 id="by-key">By key</h2>
 <h3 id="alt">Alt</h3>
 <ul>
+<li>Alt+A<br />
+Sort the records by the current column, smallest or earliest
+first.<br />
+Alpha Order</li>
 <li>Alt+Apostrophe<br />
 Speak the current Windows clipboard text.<br />
 Say Clipboard</li>
@@ -836,7 +823,7 @@ Exit to Root Table</li>
 Build a new DbDo database from another file – Excel (read by DbDo
 itself, with no Office or Access driver needed), Access, dBASE, CSV, or
 SQLite – with one standard-shape table per source table, plus maps and
-lookups.<br />
+defs.<br />
 Import</li>
 <li>Alt+L<br />
 Speak every value of the current virtual column, from the top.<br />
@@ -877,10 +864,6 @@ Table Summary</li>
 <li>Alt+Shift+Apostrophe<br />
 Empty the clipboard.<br />
 Clear Clipboard</li>
-<li>Alt+Shift+B<br />
-Count the records with each combination of values in the columns
-shown.<br />
-Count by Columns</li>
 <li>Alt+Shift+C<br />
 Append Record to Clipboard</li>
 <li>Alt+Shift+D<br />
@@ -891,11 +874,9 @@ Open Template Database</li>
 Open the Settings dialog.<br />
 Edit Settings</li>
 <li>Alt+Shift+G<br />
-Alt+Shift+G. Ad-hoc analysis of the VIRTUAL grid (the current filtered,
-sorted view): profile the columns by type and pick an output – summary
-statistics, frequency table, cross-tab, Markdown table, or an Excel
-chart (bar, pie, histogram, box-whisker, scatter, timeline). One-off and
-exploratory; acts on what you are looking at.<br />
+Analyze the grid: a statistics report, a frequency report of the current
+column or the shown columns, a cross-tab, a Markdown table, or an Excel
+chart.<br />
 Generate from Grid</li>
 <li>Alt+Shift+H<br />
 Hotkey Summary</li>
@@ -924,10 +905,6 @@ Alt+Shift+R. Render a saved report definition to a Markdown document. A
 report reads the whole PHYSICAL table (not the grid view), so it is
 reproducible regardless of your current filter or sort.<br />
 Run Report</li>
-<li>Alt+Shift+S<br />
-Print descriptive statistics for the column under the virtual
-cursor.<br />
-Statistics from Column</li>
 <li>Alt+Shift+Slash<br />
 Show the table, row, filter, and sort in a read-only dialog.<br />
 Where Am I</li>
@@ -1040,9 +1017,6 @@ Edit Snippet</li>
 <li>Control+Shift+F<br />
 Clear the active filter.<br />
 Clear Filter</li>
-<li>Control+Shift+G<br />
-Plot the column under the virtual cursor as an Excel chart.<br />
-Graphics Column</li>
 <li>Control+Shift+Grave<br />
 Open the bundled sqlean.exe shell in its own console window on the
 current database.<br />
@@ -1079,8 +1053,6 @@ Regex Replace</li>
 <li>Control+Shift+S<br />
 Save a copy to another path or file format.<br />
 Save As</li>
-<li>Control+Shift+T<br />
-Open Table in New Window</li>
 <li>Control+Shift+Tab<br />
 Activate the previous open window.<br />
 Previous Window</li>
@@ -1107,15 +1079,11 @@ Play Tutorials</li>
 <li>Alt+F4<br />
 Close DbDo.<br />
 Exit DbDo</li>
-<li>Alt+F6<br />
-Next Visited Table</li>
 <li>Alt+F8<br />
 Drop an unmark anchor at the current row.<br />
 Start Unmark</li>
 <li>Alt+Shift+F1<br />
 ReadMe</li>
-<li>Alt+Shift+F6<br />
-Previous Visited Table</li>
 <li>Alt+Shift+F8<br />
 Unmark every row from the Alt+F8 anchor to the current row.<br />
 Complete Unmark to Anchor</li>
@@ -1207,7 +1175,8 @@ Say Edited</li>
 <li>Shift+F<br />
 Say Filter</li>
 <li>Shift+G<br />
-Speak the most recently used Jump search string.<br />
+Speak the last entry of Go to Record (Control+G), which Alt+G
+repeats.<br />
 Say Go to</li>
 <li>Shift+I<br />
 Say Id</li>
@@ -1261,6 +1230,10 @@ Say Status</li>
 <li>About<br />
 Show the version, author, and license.<br />
 Alt+F1</li>
+<li>Alpha Order<br />
+Sort the records by the current column, smallest or earliest
+first.<br />
+Alt+A</li>
 <li>Alternate Menu<br />
 Pick a command from a flat, filterable list.<br />
 Alt+F10</li>
@@ -1311,10 +1284,6 @@ Control+F12</li>
 <li>Copy Record<br />
 Duplicate the current row as a new row.<br />
 Control+Shift+C</li>
-<li>Count by Columns<br />
-Count the records with each combination of values in the columns
-shown.<br />
-Alt+Shift+B</li>
 <li>Current Windows<br />
 Pick from the list of open recordset windows and activate the chosen
 one.<br />
@@ -1381,18 +1350,13 @@ Control+F</li>
 Search across all columns with a .NET regex pattern.<br />
 Control+F3</li>
 <li>Generate from Grid<br />
-Alt+Shift+G. Ad-hoc analysis of the VIRTUAL grid (the current filtered,
-sorted view): profile the columns by type and pick an output – summary
-statistics, frequency table, cross-tab, Markdown table, or an Excel
-chart (bar, pie, histogram, box-whisker, scatter, timeline). One-off and
-exploratory; acts on what you are looking at.<br />
+Analyze the grid: a statistics report, a frequency report of the current
+column or the shown columns, a cross-tab, a Markdown table, or an Excel
+chart.<br />
 Alt+Shift+G</li>
 <li>Go to Record<br />
 Jump to a specific row by number.<br />
 Control+G</li>
-<li>Graphics Column<br />
-Plot the column under the virtual cursor as an Excel chart.<br />
-Control+Shift+G</li>
 <li>Hotkey Summary<br />
 Alt+Shift+H</li>
 <li>Hotkeys<br />
@@ -1401,7 +1365,7 @@ Control+Shift+F1</li>
 Build a new DbDo database from another file – Excel (read by DbDo
 itself, with no Office or Access driver needed), Access, dBASE, CSV, or
 SQLite – with one standard-shape table per source table, plus maps and
-lookups.<br />
+defs.<br />
 Alt+I</li>
 <li>Inspect Record<br />
 Control+I</li>
@@ -1443,8 +1407,6 @@ Add a new row to the current table.<br />
 Control+N</li>
 <li>Next Table or View<br />
 Control+F6</li>
-<li>Next Visited Table<br />
-Alt+F6</li>
 <li>Next Window<br />
 Activate the next open window.<br />
 Control+Tab</li>
@@ -1464,8 +1426,6 @@ Alt+Backslash</li>
 <li>Open Table<br />
 Open a chosen table of the current database in a new window.<br />
 Control+Shift+O</li>
-<li>Open Table in New Window<br />
-Control+Shift+T</li>
 <li>Open Template Database<br />
 Open one of the template databases that come with DbDo, such as
 RadioTrail or JobTrail.<br />
@@ -1486,8 +1446,6 @@ Alt+Shift+P</li>
 Alt+F12</li>
 <li>Previous Table or View<br />
 Control+Shift+F6</li>
-<li>Previous Visited Table<br />
-Alt+Shift+F6</li>
 <li>Previous Window<br />
 Activate the previous open window.<br />
 Control+Shift+Tab</li>
@@ -1582,7 +1540,8 @@ Shift+E</li>
 <li>Say Filter<br />
 Shift+F</li>
 <li>Say Go to<br />
-Speak the most recently used Jump search string.<br />
+Speak the last entry of Go to Record (Control+G), which Alt+G
+repeats.<br />
 Shift+G</li>
 <li>Say Id<br />
 Shift+I</li>
@@ -1672,10 +1631,6 @@ F8</li>
 <li>Start Unmark<br />
 Drop an unmark anchor at the current row.<br />
 Alt+F8</li>
-<li>Statistics from Column<br />
-Print descriptive statistics for the column under the virtual
-cursor.<br />
-Alt+Shift+S</li>
 <li>Table Properties<br />
 Alt+Enter</li>
 <li>Table Summary<br />

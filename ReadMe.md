@@ -67,11 +67,11 @@ The point of the maps model is this: "everything this person made" and "everyone
 
 For a convention or conference of any organization, the HomerDev kit's **convention-database** skill builds the model from the agenda. It makes events, locations, projects and contacts, linked by **presents**, **located_at**, **sponsors**, **features** and **offers**. Its scripts turn the sessions you mark into a calendar file, an accessible schedule and contact cards.
 
-## Valid values become comboboxes (the lookups table)
+## Valid values become comboboxes (the defs table)
 
-A **lookups** table lists the allowed values for a field. The Record Edit dialog can then show that field as a ComboBox instead of a bare text box. A ComboBox is the Windows control that works best from the keyboard: you can type ahead or use the arrows, and every screen reader announces it clearly. Each lookups row ties a value to a `tbl` and a `fld`, with an optional `src` source and a `descrip`. DbDo offers the combobox whenever a field has values listed.
+A **defs** table lists the allowed values for a field. The Record Edit dialog can then show that field as a ComboBox instead of a bare text box. A ComboBox is the Windows control that works best from the keyboard: you can type ahead or use the arrows, and every screen reader announces it clearly. Each defs row ties a value to a `tbl` and a `fld`, with an optional `src` source and a `descrip`. DbDo offers the combobox whenever a field has values listed.
 
-Each template carries lookups for its own fields. They include every `maps.kind` it uses, MusicTrail's genres and roles with the books' own descriptions, and TechTraining's categories with the directory's definition of each. A separate, shared **lookups.db** comes with DbDo, holding the global lists `state` and `country`. They apply to any table with a field of that name, so they serve every database. For example, Northwind's `country` field gets a combobox with no setup in that database.
+Each template carries defs for its own fields. They include every `maps.kind` it uses, MusicTrail's genres and roles with the books' own descriptions, and TechTraining's categories with the directory's definition of each. A separate, shared **defs.db** comes with DbDo, holding the global lists `state` and `country`. They apply to any table with a field of that name, so they serve every database. For example, Northwind's `country` field gets a combobox with no setup in that database.
 
 ## Background: four decades of nonvisual database tools
 

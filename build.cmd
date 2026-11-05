@@ -154,7 +154,7 @@ rem onSpoken", which names the symptom and not the cause. So the build says the
 rem cause, first. Raise this whenever DbDo starts using something new.
 rem 1.64.5: Play Tutorials calls MediaPlayer.playTutorials, which older kits lack;
 rem a build against 1.64.4 failed to compile on 8 October 2026 rather than saying so.
-set "kitNeeded=1.95.0"
+set "kitNeeded=1.132.0"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -162,6 +162,28 @@ if errorlevel 1 (
   echo DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!.
   echo Unzip HomerDev.zip into C:\HomerDev, then build again.
   exit /b 1
+)
+rem THE KIT'S CODE, NOT ONLY ITS NUMBER (5 November 2026). A build at 18:40 on 4 November compiled against a kit
+rem whose version.txt said 1.132.0, yet whose Lbc.cs predated LbcMessage: the zip carrying that Lbc.cs was never
+rem unzipped, while later zips brought newer version files. 109 compile errors followed instead of one sentence. So
+rem the build also confirms the kit's code holds what DbDo calls, and names what is missing, before compiling.
+set "kitMissing="
+findstr /c:"public static class LbcMessage" "!homerDev!\exec\CSharp\Lbc.cs" >nul 2>&1 || set "kitMissing=!kitMissing! LbcMessage (Lbc.cs, kit 1.128.0)"
+findstr /c:"public void setPattern(" "!homerDev!\exec\CSharp\Lbc.cs" >nul 2>&1 || set "kitMissing=!kitMissing! setPattern (Lbc.cs, kit 1.127.0)"
+findstr /c:"public Func<string> fUnavailable" "!homerDev!\exec\CSharp\KeyMap.cs" >nul 2>&1 || set "kitMissing=!kitMissing! fUnavailable (KeyMap.cs)"
+findstr /c:"public static class ColumnTypes" "!homerDev!\exec\CSharp\Schema.cs" >nul 2>&1 || set "kitMissing=!kitMissing! ColumnTypes (Schema.cs, kit 1.138.0)"
+if defined kitMissing (
+  echo ERROR: C:\HomerDev says !homerVer! but its code lacks:!kitMissing! >> "!log!"
+  echo.
+  echo C:\HomerDev says version !homerVer!, but its code lacks what DbDo needs:!kitMissing!.
+  echo A HomerDev.zip was probably not unzipped. Unzip the newest HomerDev.zip into C:\HomerDev, then build again.
+  exit /b 1
+)
+echo Kit code check: LbcMessage, setPattern and fUnavailable present >> "!log!"
+rem A RETIRED WALK'S AUDIO GOES (5 November 2026): Tutorial 8 became Analyze a Dataset, so the old walk's sound and
+rem fingerprint are removed, rather than ship beside the new one.
+for %%F in ("!sHere!help\Tutorial_8_Ask_with_SQL.inix" "!sHere!help\tutorials\8_Ask_with_SQL.mp3" "!sHere!help\tutorials\8_Ask_with_SQL.sha256") do if exist "%%~F" (
+  del /q "%%~F" && echo Retired tutorial file removed: %%~nxF >> "!log!"
 )
 
 rem A MODULE MAY NEED ANOTHER MODULE: Mdi.cs uses KeyMap. DbDo keeps its own MDI
@@ -252,6 +274,16 @@ rem
 rem THE CONVENTIONS STEP RAN ONCE PER KIT TOOL. It sat inside the loop above that
 rem copies the kit's tools, so every build ran it about twenty-five times. It now
 rem runs once.
+rem THE DEFS RENAME FIRST (4 November 2026): every template's lookups table becomes defs before any step opens a
+rem template, since RadioTrail's conventions step below expects defs. describeFields --rename-only does only that, and
+rem repairs a template .inix still naming the old table; it changes nothing on later builds.
+echo defs rename: python scripts\describeFields.py --rename-only >> "!log!"
+python "!sHere!scripts\describeFields.py" --rename-only
+if errorlevel 1 (
+  echo The rename of the templates' definitions table failed. Its log is in logs, named DbDo-describeFields with the date and time.
+  echo defs rename failed>> "!log!"
+  popd & exit /b 1
+)
 if exist "!sHere!templates\RadioTrail\fetchStations.py" if not exist "!sHere!templates\RadioTrail\RadioTrail.db" (
   echo RadioTrail.db is missing, so its station catalog is being fetched. This can take up to fifteen minutes.
   echo RadioTrail: no database; fetchStations --catalog-only >> "!log!"
@@ -313,7 +345,7 @@ rem (edited triggers, unique prime indexes, relationship kinds, duplicate record
 rem writes RadioTrail.schema, then runs every SQL statement, setting and report on
 rem the database it ships with. Any failure stops the build here.
 rem WHAT EACH FIELD IS FOR (3 November 2026): templates\fieldDescriptions.inix holds one sentence per
-rem field, and scripts\describeFields writes them into every template's lookups table, which Shift+F1 reads
+rem field, and scripts\describeFields writes them into every template's defs table, which Shift+F1 reads
 rem in the record, new-record and filter forms. A sentence someone wrote by hand is never replaced.
 echo Field descriptions: python scripts\describeFields.py >> "!log!"
 python "!sHere!scripts\describeFields.py"
@@ -1273,13 +1305,13 @@ powershell -NoProfile -Command ^
   "}" ^
   "'Capitals checked: ReadMe'" >> "!log!" 2>&1
 rem THE PROJECT MIRRORS THE INSTALLED TREE. DbDo.inix is installed to configs
-rem and lookups.db to data, so that is where they live here too -- and where
+rem and defs.db to data, so that is where they live here too -- and where
 rem Homer.Paths finds them when exec\DbDo.exe runs from the project, since the
 rem project folder is the installed folder of that copy. git mv when git
 rem tracks them, so the history follows the file.
 powershell -NoProfile -Command ^
   "$lTracked = @(git ls-files 2>$null);" ^
-  "foreach ($sPair in @('DbDo.inix>configs', 'lookups.db>data')) {" ^
+  "foreach ($sPair in @('DbDo.inix>configs', 'defs.db>data')) {" ^
   "  $sOld, $sDir = $sPair.Split('>'); $sNew = $sDir + '/' + $sOld;" ^
   "  if (-not (Test-Path -LiteralPath $sOld) -or (Test-Path -LiteralPath $sNew)) { continue }" ^
   "  New-Item -ItemType Directory -Force -Path $sDir | Out-Null;" ^

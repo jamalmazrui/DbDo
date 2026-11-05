@@ -6,7 +6,7 @@
 // SQLite .db/.sqlite/.sqlite3) and writes them into a NEW standard DbDo
 // SQLite shell -- every table in the standard shape (<singular>_id,
 // added, edited, the data fields, notes, tags, look, prime, marked) plus
-// the builtin maps and lookups infrastructure. The shell is created
+// the builtin maps and defs infrastructure. The shell is created
 // beside the source with the same root name and a .db extension.
 //
 // WHY THIS EXISTS AS A SEPARATE PROGRAM (and in two bitnesses):
@@ -60,7 +60,7 @@ namespace TwoDb
         private const int adLockReadOnly    = 1;
         private const int adCmdText         = 1;
 
-        // The standard field-type vocabulary DbDo seeds into lookups, so
+        // The standard field-type vocabulary DbDo seeds into defs, so
         // an imported shell looks like a DbDo-created one.
         private static readonly string[] aFieldTypes = new string[]
         { "BLOB", "BOOLEAN", "INTEGER", "REAL", "TEXT", "TEXTLINE", "TEXTMARKDOWN", "TEXTMEMO", "TEXTTIME" };
@@ -193,7 +193,7 @@ namespace TwoDb
                 foreach (string sSrcTable in enumerateSourceTables(oSrc))
                 {
                     string sNorm = sNormalizeIdentifier(stripSheetSuffix(sSrcTable));
-                    if (sNorm == "maps" || sNorm == "lookups") continue; // shell supplies its own
+                    if (sNorm == "maps" || sNorm == "defs") continue; // shell supplies its own
 
                     // Read the source table's columns and rows.
                     dynamic oRs = newCom("ADODB.Recordset");
@@ -290,7 +290,7 @@ namespace TwoDb
                     return 3;
                 }
 
-                // Builtin infrastructure (maps + lookups + seed vocabulary).
+                // Builtin infrastructure (maps + defs + seed vocabulary).
                 foreach (string sSql in lInfraDdl())
                     oDest.Execute(sSql);
 
@@ -520,8 +520,8 @@ namespace TwoDb
             return lDdl;
         }
 
-        // lInfraDdl: the builtin maps and lookups tables every DbDo
-        // database carries, plus the lookups seed vocabulary -- emitting
+        // lInfraDdl: the builtin maps and defs tables every DbDo
+        // database carries, plus the defs seed vocabulary -- emitting
         // prime / prime1 / prime2 (the standard since DbDo renamed prm, replacing unq).
         private static List<string> lInfraDdl()
         {
@@ -542,20 +542,20 @@ namespace TwoDb
             lLkFields.Add(new string[] { "ordinal", "INTEGER" });
             lLkFields.Add(new string[] { "descrip", "TEXTMEMO" });
             lLkFields.Add(new string[] { "url", "TEXTLINE" });
-            lDdl.AddRange(lStandardTableDdl("lookups", lLkFields));
+            lDdl.AddRange(lStandardTableDdl("defs", lLkFields));
 
             int iOrd = 0;
             foreach (string sType in aFieldTypes)
             {
                 iOrd++;
-                lDdl.Add("INSERT INTO lookups (src, tbl, fld, val, ordinal) VALUES "
+                lDdl.Add("INSERT INTO defs (src, tbl, fld, val, ordinal) VALUES "
                     + "('DbDo', '*', 'type', '" + sType + "', " + iOrd + ")");
             }
             int iKindOrd = 0;
             foreach (string sKind in new string[] { "related_to", "part_of", "located_at", "member_of", "affiliated_with" })
             {
                 iKindOrd++;
-                lDdl.Add("INSERT INTO lookups (src, tbl, fld, val, ordinal) VALUES "
+                lDdl.Add("INSERT INTO defs (src, tbl, fld, val, ordinal) VALUES "
                     + "('DbDo', 'maps', 'kind', '" + sKind + "', " + iKindOrd + ")");
             }
             return lDdl;

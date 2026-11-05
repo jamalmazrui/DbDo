@@ -134,7 +134,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Export the current table or query to CSV, TSV, JSON, or another format. X for the sound of "ex".\
   Alt+Shift+X
 - Import\
-  Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and lookups. I for Import.\
+  Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and defs. I for Import.\
   Alt+I
 - Merge Data\
   Merge rows from a Markdown table, JSON, or Inix file into the current table. M for Merge.\
@@ -142,23 +142,15 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Next Table or View\
   F6 moves among parts of the window; Control+F6 moves to the next table.\
   Control+F6
-- Next Visited Table\
-  F6 moves among parts; Alt+F6 returns to tables you have visited.\
-  Alt+F6
 - Open Database\
   Open a database file. O for Open.\
   Control+O
-- Open Table in New Window\
-  Control+Shift+T
 - Open Template Database\
   Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail. D for Database.\
   Alt+Shift+D
 - Previous Table or View\
   F6 moves among parts; Shift reverses Control+F6.\
   Control+Shift+F6
-- Previous Visited Table\
-  F6 moves among parts; Shift reverses Alt+F6.\
-  Alt+Shift+F6
 - Print\
   P for Printer.\
   Control+P
@@ -221,9 +213,6 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Copy Cell to Clipboard\
   Copy the value of the cell under the virtual cursor to the clipboard. C for Copy.\
   Control+C
-- Count by Columns\
-  Count the records with each combination of values in the columns shown. B for by.\
-  Alt+Shift+B
 - Database Summary\
   D for Database.\
   Alt+D
@@ -234,11 +223,8 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Extract all regex matches in the current virtual column to the clipboard. X for the sound of "ex".\
   Control+Shift+X
 - Generate from Grid\
-  Alt+Shift+G. Ad-hoc analysis of the VIRTUAL grid (the current filtered, sorted view): profile the columns by type and pick an output -- summary statistics, frequency table, cross-tab, Markdown table, or an Excel chart (bar, pie, histogram, box-whisker, scatter, timeline). One-off and exploratory; acts on what you are looking at. G for Generate.\
+  Analyze the grid: a statistics report, a frequency report of the current column or the shown columns, a cross-tab, a Markdown table, or an Excel chart. G for Generate.\
   Alt+Shift+G
-- Graphics Column\
-  Plot the column under the virtual cursor as an Excel chart. G for Graphics.\
-  Control+Shift+G
 - Hotkey Summary\
   H for Hotkey.\
   Alt+Shift+H
@@ -251,9 +237,6 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Select Columns\
   Choose which columns the grid shows, and in what order. S for Select.\
   Alt+S
-- Statistics from Column\
-  Print descriptive statistics for the column under the virtual cursor. S for Statistics.\
-  Alt+Shift+S
 - Table Summary\
   Print row count, column count, and storage statistics for the open database. T for Table.\
   Alt+T
@@ -332,6 +315,9 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 
 ### Query
 
+- Alpha Order\
+  Sort the records by the current column, smallest or earliest first. A for Alpha.\
+  Alt+A
 - Clear Filter\
   Clear the active filter. F for Filter. Shift reverses Filter Records.\
   Control+Shift+F
@@ -394,7 +380,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   F for Filter.\
   Shift+F
 - Say Go to\
-  Speak the most recently used Jump search string. G for Go.\
+  Speak the last entry of Go to Record (Control+G), which Alt+G repeats. G for Go.\
   Shift+G
 - Say Id\
   I for ID.\
@@ -494,6 +480,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 
 ### Alt
 
+- Alt+A\
+  Sort the records by the current column, smallest or earliest first.\
+  Alpha Order
 - Alt+Apostrophe\
   Speak the current Windows clipboard text.\
   Say Clipboard
@@ -519,7 +508,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Return from any drill-down depth to the original table.\
   Exit to Root Table
 - Alt+I\
-  Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and lookups.\
+  Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and defs.\
   Import
 - Alt+L\
   Speak every value of the current virtual column, from the top.\
@@ -556,9 +545,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+Shift+Apostrophe\
   Empty the clipboard.\
   Clear Clipboard
-- Alt+Shift+B\
-  Count the records with each combination of values in the columns shown.\
-  Count by Columns
 - Alt+Shift+C\
   Append Record to Clipboard
 - Alt+Shift+D\
@@ -568,7 +554,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Open the Settings dialog.\
   Edit Settings
 - Alt+Shift+G\
-  Alt+Shift+G. Ad-hoc analysis of the VIRTUAL grid (the current filtered, sorted view): profile the columns by type and pick an output -- summary statistics, frequency table, cross-tab, Markdown table, or an Excel chart (bar, pie, histogram, box-whisker, scatter, timeline). One-off and exploratory; acts on what you are looking at.\
+  Analyze the grid: a statistics report, a frequency report of the current column or the shown columns, a cross-tab, a Markdown table, or an Excel chart.\
   Generate from Grid
 - Alt+Shift+H\
   Hotkey Summary
@@ -593,9 +579,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+Shift+R\
   Alt+Shift+R. Render a saved report definition to a Markdown document. A report reads the whole PHYSICAL table (not the grid view), so it is reproducible regardless of your current filter or sort.\
   Run Report
-- Alt+Shift+S\
-  Print descriptive statistics for the column under the virtual cursor.\
-  Statistics from Column
 - Alt+Shift+Slash\
   Show the table, row, filter, and sort in a read-only dialog.\
   Where Am I
@@ -700,9 +683,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Shift+F\
   Clear the active filter.\
   Clear Filter
-- Control+Shift+G\
-  Plot the column under the virtual cursor as an Excel chart.\
-  Graphics Column
 - Control+Shift+Grave\
   Open the bundled sqlean.exe shell in its own console window on the current database.\
   Sqlean Console
@@ -735,8 +715,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Shift+S\
   Save a copy to another path or file format.\
   Save As
-- Control+Shift+T\
-  Open Table in New Window
 - Control+Shift+Tab\
   Activate the previous open window.\
   Previous Window
@@ -762,15 +740,11 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+F4\
   Close DbDo.\
   Exit DbDo
-- Alt+F6\
-  Next Visited Table
 - Alt+F8\
   Drop an unmark anchor at the current row.\
   Start Unmark
 - Alt+Shift+F1\
   ReadMe
-- Alt+Shift+F6\
-  Previous Visited Table
 - Alt+Shift+F8\
   Unmark every row from the Alt+F8 anchor to the current row.\
   Complete Unmark to Anchor
@@ -857,7 +831,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Shift+F\
   Say Filter
 - Shift+G\
-  Speak the most recently used Jump search string.\
+  Speak the last entry of Go to Record (Control+G), which Alt+G repeats.\
   Say Go to
 - Shift+I\
   Say Id
@@ -910,6 +884,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - About\
   Show the version, author, and license.\
   Alt+F1
+- Alpha Order\
+  Sort the records by the current column, smallest or earliest first.\
+  Alt+A
 - Alternate Menu\
   Pick a command from a flat, filterable list.\
   Alt+F10
@@ -957,9 +934,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Copy Record\
   Duplicate the current row as a new row.\
   Control+Shift+C
-- Count by Columns\
-  Count the records with each combination of values in the columns shown.\
-  Alt+Shift+B
 - Current Windows\
   Pick from the list of open recordset windows and activate the chosen one.\
   F4
@@ -1021,20 +995,17 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Search across all columns with a .NET regex pattern.\
   Control+F3
 - Generate from Grid\
-  Alt+Shift+G. Ad-hoc analysis of the VIRTUAL grid (the current filtered, sorted view): profile the columns by type and pick an output -- summary statistics, frequency table, cross-tab, Markdown table, or an Excel chart (bar, pie, histogram, box-whisker, scatter, timeline). One-off and exploratory; acts on what you are looking at.\
+  Analyze the grid: a statistics report, a frequency report of the current column or the shown columns, a cross-tab, a Markdown table, or an Excel chart.\
   Alt+Shift+G
 - Go to Record\
   Jump to a specific row by number.\
   Control+G
-- Graphics Column\
-  Plot the column under the virtual cursor as an Excel chart.\
-  Control+Shift+G
 - Hotkey Summary\
   Alt+Shift+H
 - Hotkeys\
   Control+Shift+F1
 - Import\
-  Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and lookups.\
+  Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and defs.\
   Alt+I
 - Inspect Record\
   Control+I
@@ -1072,8 +1043,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Control+N
 - Next Table or View\
   Control+F6
-- Next Visited Table\
-  Alt+F6
 - Next Window\
   Activate the next open window.\
   Control+Tab
@@ -1093,8 +1062,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Open Table\
   Open a chosen table of the current database in a new window.\
   Control+Shift+O
-- Open Table in New Window\
-  Control+Shift+T
 - Open Template Database\
   Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail.\
   Alt+Shift+D
@@ -1112,8 +1079,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Alt+F12
 - Previous Table or View\
   Control+Shift+F6
-- Previous Visited Table\
-  Alt+Shift+F6
 - Previous Window\
   Activate the previous open window.\
   Control+Shift+Tab
@@ -1198,7 +1163,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Filter\
   Shift+F
 - Say Go to\
-  Speak the most recently used Jump search string.\
+  Speak the last entry of Go to Record (Control+G), which Alt+G repeats.\
   Shift+G
 - Say Id\
   Shift+I
@@ -1284,9 +1249,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Start Unmark\
   Drop an unmark anchor at the current row.\
   Alt+F8
-- Statistics from Column\
-  Print descriptive statistics for the column under the virtual cursor.\
-  Alt+Shift+S
 - Table Properties\
   Alt+Enter
 - Table Summary\

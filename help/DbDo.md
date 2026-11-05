@@ -126,12 +126,12 @@ DbDo recognizes certain field **names** and maintains or exposes them for you. A
 
 The distinction to hold onto: **added** and **edited** are *automatic* (DbDo writes them for you); **marked** is *state* you toggle; **notes**, **tags**, and **url** are *content* you edit through their own focused dialogs; **look**, **prime**, and **unq** are *derived identity* fields DbDo computes so records can be named and matched reliably.
 
-#### Lookups and maps
+#### Defs and maps
 
 Two optional companion tables let a database describe its own vocabulary:
 
-- A **lookups** table lists the valid values for a field. When a field has lookups defined, its editor becomes a combo box of those values instead of a free-text box — so a screen-reader user arrows through the legal choices rather than typing and risking a typo. Pick Value (Control+F2) surfaces the same choices on demand.
-- A **maps** table links any record in the database to any other record, with a **kind** saying how they are related -- "contact for", "sent for", "part of" -- and the kinds kept in the lookups table, so F4 offers them. One maps table serves every pair of tables, so an occasional or many-to-many relationship needs no table of its own.
+- A **defs** table lists the valid values for a field. When a field has choices in defs, its editor becomes a combo box of those values instead of a free-text box — so a screen-reader user arrows through the legal choices rather than typing and risking a typo. Pick Value (Control+F2) surfaces the same choices on demand.
+- A **maps** table links any record in the database to any other record, with a **kind** saying how they are related -- "contact for", "sent for", "part of" -- and the kinds kept in the defs table, so F4 offers them. One maps table serves every pair of tables, so an occasional or many-to-many relationship needs no table of its own.
 
 These are conventions, not requirements; a database without them simply offers free-text editing, and its relationships are its foreign keys.
 
@@ -239,7 +239,7 @@ Beyond the grid's keys, the cursor moves with these commands:
 
 - **New Record** (Control+N) adds a record; **New Copy** (Control+Shift+N) starts a new record pre-filled from the current one; **Copy Record** (Control+Shift+C) copies it to the clipboard.
 - **Edit View** (Control+E) opens the whole record in a field-by-field dialog. **Edit Cell** (F2) edits just the current cell. **Open Cell Value** (Control+Enter) opens a large value in its own box for comfortable reading and editing.
-- **Pick Value** (Control+F2) offers the legal values for a field that has lookups defined.
+- **Pick Value** (Control+F2) offers the legal values for a field whose choices are in defs.
 - **Edit Notes** (Alt+Shift+N), **Edit Tags** (Alt+Shift+T), and **Edit url** (Alt+Shift+U) each open one standard field in a focused single-field dialog with OK and Cancel — the quick way to touch a note, tags, or a link without opening the whole record.
 - **Replace Column** (Control+R) replaces text across a column; **Regex Replace** (Control+Shift+R) does the same by pattern; **Extract with Regex** (Control+Shift+X) pulls matches out of a column.
 - **Delete Record** (Control+D) deletes the current record with confirmation; **Delete Without Confirmation** (Control+Shift+D) skips the prompt.
@@ -264,13 +264,14 @@ Marked records can then be reported, filtered, or exported as a set, and several
 Filtering and sorting reshape the grid without touching the physical table.
 
 - **Filter Records** (Control+F) limits the grid to the records that meet a condition.
-  - **How to give a condition.** With no filter in force, it asks at once how to give one. **Any field** finds text wherever it is, whatever its case. **Field boxes** gives a box for every field, and a value typed with no operator finds records whose field contains it, whatever its case: `seattle` in RadioTrail's city box finds "Seattle, Washington". A value with no operator also takes the Homer search syntax, reading the field as a name: `*.com` is a value ending in .com, `smith | jones` either, `!draft` not. A value may begin with an operator: `=` is, `!=` is not, `>` more than, `>=` at least, `<` less than, `<=` at most, `%` contains, `!%` does not contain. Is not and does not contain also keep records whose field is empty. Two values joined by two dots give a range, both ends included: `2025..2026` in date_read finds the books finished in those two years, `2026-01-01..2026-03-31` a span of dates, and `5..12` a span of numbers. A year stands for every day in it, since dates are kept as year-month-day. Several filled boxes must all match.
+  - **In a query window too.** A window holding the results of your own SQL is filtered the same way: DbDo runs your query again inside SQL, with the condition around it, so every choice works there, Invert filter included.
+  - **How to give a condition.** With no filter in force, it asks at once how to give one. **Any field** finds text wherever it is, whatever its case. **Main columns**, **Standard columns** and **All columns** each give a box for those columns, and a value typed with no operator finds records whose field contains it, whatever its case: `seattle` in RadioTrail's city box finds "Seattle, Washington". A value with no operator also takes the Homer search syntax, reading the field as a name: `*.com` is a value ending in .com, `smith | jones` either, `!draft` not. A value may begin with an operator: `=` is, `!=` is not, `>` more than, `>=` at least, `<` less than, `<=` at most, `%` contains, `!%` does not contain. Is not and does not contain also keep records whose field is empty. Two values joined by two dots give a range, both ends included: `2025..2026` in date_read finds the books finished in those two years, `2026-01-01..2026-03-31` a span of dates, and `5..12` a span of numbers. A year stands for every day in it, since dates are kept as year-month-day. Several filled boxes must all match.
   - **With a filter in force,** Control+F first offers its buttons. **Start over** begins a new filter. **Clear filter** shows every record again and returns you to the list on the same record. **Narrow filter** keeps only the records that also meet a new condition, joining it with AND. **Expand filter** also takes in the records that meet a new condition, joining it with OR. Then it asks how to give the new condition, as above.
   - **Grouping.** The condition in force, however many parts it has, is wrapped whole in parentheses before the AND or OR, and the new condition in its own. So narrowing and expanding in turn always mean exactly what was asked. Say Filter (Shift+F) speaks the whole condition, led by "where" and grouped the same way.
   - **Nothing found.** A condition that would keep no record says so and leaves the view as it was.
   - **Clear Filter** (Control+Shift+F) removes the filter, keeping you on the same record. A table that reopens with a filter still in force says so as it opens.
   - **Filter by Regex** filters by pattern; **Say Filter** (Shift+F) speaks the current filter.
-- **Order Records** (Alt+O) works as Select Columns does: it first says the order in force, then offers **Prime order** (the default order, by the primary key, prime's fields ascending, and the first button), **Look order** (by look's fields, the default columns, the way records are said), **Choose order** (pick fields and directions one by one, in two lists), **Type order** (the fields typed with commas, desc after a field for largest or latest first) and **Reverse order** (each field of the order in force turned the other way). It can sort by one or more fields, each ascending or descending, including fields the grid does not show; **Reverse Order** (Alt+Shift+O) reverses the order in force; **Clear Sort** returns to table order; **Say Order** (Shift+O) speaks the current sort.
+- **Order Records** (Alt+O) has the same buttons as Select Columns, and first says the order in force. **Prime columns** is the default (the first focus, so Enter takes it): it sorts by the primary key, prime's fields, ascending. **Look columns** sorts by look's fields, the default columns. **Main columns**, **Standard columns** and **All columns** sort by those columns, ascending. **Choose columns** picks the columns and the direction of each, in two lists; **Type columns** takes them separated by commas, with desc after a column for largest or latest first. When look and prime hold the same fields, one button, **Look columns**, stands for both, in Order Records and Select Columns alike. Last comes **Reverse order** (R), which turns the order in force the other way, as **Reverse Order** (Alt+Shift+O) does from the grid.
 
 Sorting reads numbers as numbers: volume 9 comes after 7 and 6.5 even if some
 values were stored as text and others as numbers. It also ignores capital
@@ -294,17 +295,17 @@ The dialog first says which columns are shown now, and whether they are the look
 
 **Where am I, and what does this do?** Alt+Shift+Slash, Alt and the question mark, says where you are: in a dialog, the dialog, what it is for and the control with focus; pressed twice, every control and what it holds; three times, the keys. In the main window it is the Help menu's Where Am I. Shift+F1 says what a control does in one sentence; twice, its whole description; three times, the keys that work in it.
 
-**What each field is for.** In the record, new-record and filter forms, Shift+F1 on a field says what it is for. The sentences are rows of the database's own lookups table: tbl and fld name the field, val is left empty, and descrip holds the sentence; tbl `*` covers a field of that name in every table. Edit a row of lookups to change a sentence. The rows that do have a val are the choices F4 offers for that field.
+**What each field is for.** In the record, new-record and filter forms, Shift+F1 on a field says what it is for. The sentences are rows of the database's own defs table: tbl and fld name the field, val is left empty, and descrip holds the sentence; tbl `*` covers a field of that name in every table. Edit a row of defs to change a sentence. The rows that do have a val are the choices F4 offers for that field.
 
-**What each table is for.** A lookups row with tbl naming a table, and fld and val both empty, describes the table in one sentence. Shift+F1 says it in Choose Table and Open Table, Database Summary prints it, and Where Am I pressed twice says it for the table open.
+**What each table is for.** A defs row with tbl naming a table, and fld and val both empty, describes the table in one sentence. Shift+F1 says it in Choose Table and Open Table, Database Summary prints it, and Where Am I pressed twice says it for the table open.
 
-**Patterns for fields.** A field's own row in lookups -- tbl and fld naming the field, val empty -- has a pattern column beside descrip. Put a .NET regular expression there, and the field's value must match it when you press OK in a record form; the first field that does not is said and takes focus, with its text selected. An empty value is tested too, so a pattern can make a field required: `^\s*\S` refuses a blank, and `^$|` in front of any pattern lets the field stay blank. What DbDo says on a failure is the field's description, so write the form a value takes into descrip, such as "starting with http:// or https://". Filter Records checks no patterns. To set them without editing lookups, use Settings, then Field Validation for This Table: one box per field, saved into lookups.
+**Patterns for fields.** A field's own row in defs -- tbl and fld naming the field, val empty -- has a pattern column beside descrip. Put a .NET regular expression there, and the field's value must match it when you press OK in a record form; the first field that does not is said and takes focus, with its text selected. An empty value is tested too, so a pattern can make a field required: `^\s*\S` refuses a blank, and `^$|` in front of any pattern lets the field stay blank. What DbDo says on a failure is the field's description, so write the form a value takes into descrip, such as "starting with http:// or https://". Filter Records checks no patterns. To set them without editing defs, use Settings, then Field Validation for This Table: one box per field, saved into defs. In a record or new-record form, **Alt+Shift+P** (P for pattern; in the main window the same key plays a stream) edits the pattern of the field you are on: a small dialog shows it under the field's description, OK saves it and puts it in force at once, and an empty pattern removes it.
 
-**Why descrip, not desc.** lookups's column names are short so they cannot be mistaken for SQL words: tbl, fld, val. AccAudit, where lookups began, called its description column desc, the commonest short form; but DESC is SQL's word for descending order, reserved in Access, SQL Server, MySQL and PostgreSQL, where a column of that name must be quoted in every query, and "ORDER BY desc DESC" reads as a riddle. So the column is descrip, by decision of 3 November 2026.
+**Why descrip, not desc.** the defs table's column names are short so they cannot be mistaken for SQL words: tbl, fld, val. AccAudit, where this table began under the name lookups, called its description column desc, the commonest short form; but DESC is SQL's word for descending order, reserved in Access, SQL Server, MySQL and PostgreSQL, where a column of that name must be quoted in every query, and "ORDER BY desc DESC" reads as a riddle. So the column is descrip, by decision of 3 November 2026.
 
-**What the database is for.** A lookups row with tbl `*` -- every table, which is to say the database -- and fld and val empty describes the database itself; Database Summary prints it as About. (A `*` row with a field named describes that field in every table.)
+**What the database is for.** A defs row with tbl `*` -- every table, which is to say the database -- and fld and val empty describes the database itself; Database Summary prints it as About. (A `*` row with a field named describes that field in every table.)
 
-**How DbDo's dialogs name things.** Every control's name has at least two words, OK, Cancel, Help and Close aside, and its letter begins one of them. Columns are what the grid shows and arranges; fields are what a record holds, which filters and sorts work on. A filter's actions are Start over, Clear filter, Narrow filter, Expand filter, Invert filter and Edit filter wherever they appear. Shift+F1 on any control says what it does in one sentence.
+**How DbDo's dialogs name things.** Every control's name has at least two words, OK, Cancel, Help and Close aside, and its letter begins one of them. Columns are what the grid shows and arranges; fields are what a record holds, which filters and sorts work on. A filter's actions are Start over, Revise filter, Narrow filter, Expand filter, Invert filter and Clear filter wherever they appear, with Clear filter last, as Reverse order is last in Order Records: each has a key of its own from the grid. Shift+F1 on any control says what it does in one sentence.
 
 The choice is remembered with the table. **Say Select Columns** (Shift+S) speaks it.
 
@@ -355,62 +356,71 @@ This is how you walk a database -- from an order to its line items, from a perso
 
 ---
 
-## Part 3 — Producing output
+## Part 3 — Asking, analyzing, producing and automating
 
-DbDo offers several ways to turn data into something you can read, share, or file. They differ in **what they act on** and **what they produce**, and it is worth learning the distinction so you reach for the right one. There are two single-column tools, one grid tool, one physical-table tool, and the scripting facility.
+DbDo has many ways to work with data, and each has one job. Pick by what you want to do.
 
-### Statistics from Column (Alt+Shift+S)
+### To ask a question
 
-Acts on **one column** — the column under the virtual cursor. It computes type-aware descriptive statistics: for a numeric column, things like count, populated percentage, minimum, maximum, mean, median, standard deviation, quartiles and interquartile range, outlier fences, and mode; for dates, a temporal summary; for text, the most frequent values. It speaks and shows the result. Use it to understand a single field at a glance. Its name emphasizes that it works *from a column*.
+- **Filter Records** (Control+F) shows only the records that meet a condition, with no SQL: text in any field, or a value in each column. **Facet Column**, on the Query menu, lists the values of the current column with their counts, and shows just the records holding the one you pick.
+- **Query** (Control+Q) asks in **SQL**, the database's own language, for answers no single command gives: counts by group, averages, records joined from several tables. The answer opens as a table you move through like any other. **Query History** (Alt+Shift+Q) asks a recent question again.
+- **Chat about Table** (Shift+F12) asks in plain words, of a model on this computer, so the records are not sent anywhere.
+- **Evaluate Expression** (Control+Equals) works out a single calculation -- 2+2*10, a date plus 30 days -- and says the answer.
+- **The dot prompt** (Control+GraveAccent) takes the same commands and short SQL typed as lines, for people who think in commands.
 
-### Count by Columns (Alt+Shift+B)
+### To analyze what you see
 
-Counts the records with each combination of values in the columns the grid shows, within the filter in force, and lists the combinations most common first in a window you can read and copy. With State and City shown, it says how many contacts are in each state and city. The standard columns every table has -- its id, added, edited and marked -- are left out, since the id alone would make every record its own group. Select Columns (Alt+S) sets which columns it counts by.
+**Generate from Grid** (Alt+Shift+G) reports on the grid as it stands -- the shown columns, the records the filter keeps -- and starts every report with its takeaway, then the details:
 
-### Graphics Column (Control+Shift+G)
+- **Statistics report** (S): each shown column's range, middle and spread, and values far outside the rest.
+- **Frequency report** (F): how many records hold each value of the current column, or each combination of the shown columns, with a running percentage.
+- **Group report** (G): a number column totalled and averaged for each value of another column, or for each year, month or weekday of a date.
+- **Relation report** (R): how strongly each pair of number columns rises and falls together, and the straight line that best fits the strongest pair. A numbering, such as a record number, is left out.
+- **Cross-tab report** (C): one column by another.
+- **Excel chart** (E): a bar, Pareto, pie, histogram, box, scatter or date chart, with a description of what it shows.
 
-Also acts on **one column** — the column under the virtual cursor — but produces a **chart** of that column (via Excel, out of process -- the one export that still needs Office) rather than a table of numbers. Use it when you want a quick visual of one field's distribution.
+Filter and order first to shape the grid, then report on exactly what you see.
 
-### Generate from Grid (Alt+Shift+G)
+### To produce something to keep or share
 
-Acts on the **virtual grid** — the current filtered, sorted, column-selected view — and is the ad-hoc, exploratory tool. It profiles the grid's columns by type and offers a menu of outputs:
+- **Export Data** (Alt+Shift+X) writes the grid -- shown columns, kept records -- to a file: CSV, TSV, Markdown, a web page, Excel, Word, JSON, an .inix table, or another database. It is the one way to write data to a file.
+- **Run Report** (Alt+Shift+R) writes a designed document from a report definition, the same way every time, from the whole table rather than the grid. Definitions live in report.inix beside the database (see "The report-template language" in Part 6); BookTrail, ContactTrail, RadioTrail and TechTraining come with some.
+- **Print** (Control+P) prints the grid.
+- **The clipboard:** Copy Cell (Control+C) and Append Cell (Alt+C); Append Record (Alt+Shift+C); and, on the Misc menu, Copy Column, Copy Grid, and Copy Visible Cells, as tab-separated text that pastes into a spreadsheet.
+- **Save As** (Control+Shift+S) copies the whole database, to keep it or to change its format.
 
-- a **summary** across all columns,
-- a **frequency table** of one column,
-- a **cross-tab** of two columns,
-- a **Markdown table** saved to a file, and
-- **Excel charts** — bar, pareto, pie, histogram, box-and-whisker, scatter (two numeric columns), or timeline — generated out of process so they work regardless of your Office bitness.
+### To automate what you repeat
 
-The point of the name is that it operates **on the grid, not the physical database**: it analyzes *what you are looking at*. Filter and sort first to shape the grid, then Generate from Grid to analyze that exact view. It is one-off and exploratory; nothing is saved except the specific output file you ask for.
+A **script** is a file that does a task again, run with **Invoke Script** (Control+Shift+I), written or changed with **Edit Snippet** (Control+Shift+E). A database's own scripts sit beside it, and shared ones in DbDo's Scripts folder (**Open Script Folder** opens it). There are three kinds, from the simplest:
 
-### Run Report (Alt+Shift+R)
+- **.sql -- a saved question.** One or more SQL statements: a Query you keep. Most templates come with some: ContactTrail's Emergency Contacts, RecipeTrail's Shopping List, JobTrail's Weekly Count.
+- **.dbdo -- a saved sequence of DbDo commands,** one per line, as typed at the dot prompt: filter, order, select columns, export. For a routine you would otherwise do by hand each week, such as JobTrail's Stale Applications.
+- **.js -- a program,** in JScript .NET, for work that needs decisions and loops: reading and changing records one by one, or bringing data in from another program, such as ContactTrail's Import Outlook Contacts.
 
-Acts on the **physical table** and produces a **defined, reproducible document**. Where Generate from Grid analyzes whatever you happen to be viewing, Run Report renders a **report definition** — a saved template — against *all* the records in the table (optionally with its own filter and sort baked into the definition), so the same report comes out the same way every time no matter what your grid was showing.
+The same JScript .NET works inside Evaluate Expression and in a report definition's {{ ... }} expressions, so learning it once serves all three.
 
-Report definitions live in a **report.inix** file beside the database. Each definition is one `[section]` in that file, describing which table to read, how to group and order it, and a set of **bands** — header, detail, separators, footers, and group headers/footers — that lay out the text. Within a band, `$field` (or `${field}`) inserts a field's value, `{{ ... }}` evaluates a JScript expression, `{# ... #}` is a comment, and footer bands can compute aggregates like `$count`, `$sum_<field>`, `$avg_<field>`, `$min_<field>`, and `$max_<field>`. DbDo discovers the report files beside the open database, offers a pick-list of the definitions it finds, and writes the result as Markdown you can convert onward to HTML, DOCX, or PDF. The report-template language is detailed in Part 6.
+### One file carries it all
 
-### Snippets and scripts
+A DbDo database can carry everything it needs besides its data -- its scripts, its report definitions, its transfer maps and its settings -- inside the .db itself, so sharing the one file shares everything you have built around it. The person you send it to opens it in DbDo, and its reports, scripts, opening table and newest-first orders are there.
 
-The scripting facility is for **reusable automation** rather than one-off output. A snippet is a small script file kept in the Scripts folder (and, for a database's own automation, beside the `.db` file). DbDo recognizes three snippet types by extension:
+- **Pack Files into Database** (Tools menu, P) puts the scripts and .inix files beside the database into it. The database's own settings file travels as settings.inix, a name that survives renaming the database. Packing a file again replaces the copy it carried.
+- **Unpack Files from Database** (Tools menu, U) writes the carried files back beside the database, to read or change them; pack them again afterwards.
+- **A file beside the database wins** over a carried file of the same name, so you can always override what a database carries with a copy of your own.
+- **Your own choices stay yours.** The columns, orders and filters you pick are saved beside your copy, never inside the .db, so opening a shared database never changes it.
+- **Every template carries its own files,** so a template copied anywhere keeps its scripts and reports.
 
-- **`.js`** — **JScript .NET**. The general automation language: it can read and write fields, walk records, build strings, and call into DbDo. This is the same engine behind Evaluate Expression and the `{{ ... }}` substitutions in reports.
-- **`.sql`** — a **SQL batch**. One or more SQL statements run against the open database.
-- **`.dbdo`** — a **DbDo command batch**: a sequence of the same commands you would type at the dot prompt.
+Each carried file's **kind** names its format in the same words a column's declared type uses -- TEXTSQL for a question, TEXTDBDO for a routine, TEXTJSCRIPT for a program, TEXTINIX for a report definition or settings -- since one column holds them all. DbDo knows forty column types, from the kit's vocabulary, and offers every one when you define a table. A name's first word says how it is stored -- TEXT for text, BLOB for bytes -- and the rest names the format by its usual file extension, as downloads do: TEXTJSON, TEXTICS and TEXTSQL hold text in those formats and are edited on several lines; BLOBPNG, BLOBPDF and BLOBMP3 hold pictures, documents and sound; and TEXTURL, TEXTEMAIL, TEXTPHONE and TEXTPATH hold a single web address, email address, phone number or file path, each with its natural action.
 
-Run a snippet with **Invoke Script** (Alt+V); create or edit one with **Edit Snippet** (Alt+Shift+V), which offers the existing files plus a "new snippet" entry; open the folder with **Open Script Folder**. Use snippets when you find yourself doing the same multi-step task repeatedly.
+The files are kept in DbDo's own table, **files**, beside defs and maps; DbDo hides all three from Choose Table, as tables of its own. A program in another language, such as RadioTrail's fetchStations.py, which needs Python to refresh the station list, is not carried: it is a tool, not part of the database.
 
 ### Which one do I want?
 
-| Tool | Acts on | Produces | Reusable? |
-|------|---------|----------|-----------|
-| Statistics from Column | one column | descriptive statistics (spoken/shown) | one-off |
-| Count by Columns | the columns shown | how many records have each combination of values | one-off |
-| Graphics Column | one column | a chart | one-off |
-| Generate from Grid | the virtual grid (current view) | summary, frequency, cross-tab, Markdown, or chart | one-off |
-| Run Report | the physical table | a formatted document from a saved definition | reproducible |
-| Snippet / script | whatever the script does | anything (automation) | reusable |
-
-The mental shortcut: **Column** tools look at one field; **Generate from Grid** analyzes what you *see*; **Run Report** produces a defined document from what is *there*; **snippets** automate what you *do*.
+- **To see some records:** Filter Records, or Facet Column.
+- **To answer a question once:** Query, Chat about Table, or Evaluate Expression.
+- **To understand a column or a pair:** Generate from Grid.
+- **To hand data on:** Export Data, or the clipboard.
+- **To make a document:** Run Report.
+- **To do it again next week:** a script -- .sql for a question, .dbdo for a routine, .js for a program.
 
 ---
 
@@ -444,7 +454,7 @@ DbDo's scripting language is **JScript .NET**. The same engine powers three thin
 - **Evaluate Expression** (Control+Equals) prompts for an expression, evaluates it, and speaks and shows the result — `2+2*10`, string manipulation, date math. The result is shown rather than only copied, so it stays reachable even where clipboard access is restricted. The last expression is remembered for quick tweaking.
 - In scripts and report expressions, field values are available for substitution and computation, so an expression can combine, format, or conditionally choose field values.
 
-Snippet types and how to run them are covered in Part 3.
+How the three kinds of script divide the work, and how to run them, is in Part 3, under "To automate what you repeat".
 
 ---
 
@@ -477,7 +487,6 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Print | Control+P |
 | Choose Table | Control+T |
 | Choose View | — |
-| Next / Previous Visited Table | Alt+F6 / Alt+Shift+F6 |
 | Next / Previous Table or View | Control+F6 / Control+Shift+F6 |
 | Exit DbDo | Alt+F4 |
 
@@ -595,10 +604,8 @@ The Query menu holds record inspection and the Say-X status family.
 | Read Only Toggle | Control+Shift+Z |
 | Database Summary | Alt+D |
 | Table Summary | Alt+T |
-| Statistics from Column | Alt+Shift+S |
-| Count by Columns | Alt+Shift+B |
+| Alpha Order | Alt+A |
 | Select Columns | Alt+S |
-| Graphics Column | Control+Shift+G |
 | Generate from Grid | Alt+Shift+G |
 | Extract with Regex | Control+Shift+X |
 | Append Cell to Clipboard | Alt+C |
@@ -720,7 +727,7 @@ When the SQLean extension functions are available, they add a large library of S
 
 ### Template databases
 
-DbDo ships with template databases that follow the same column conventions as your own data, reachable with File, **Open Template Database**, or Alt+Shift+D from anywhere. They are the fastest way to see the standard fields, lookups, relationships, and reports working together on real records.
+DbDo ships with template databases that follow the same column conventions as your own data, reachable with File, **Open Template Database**, or Alt+Shift+D from anywhere. They are the fastest way to see the standard fields, defs, relationships, and reports working together on real records.
 
 ### Screen-reader settings
 
@@ -873,6 +880,7 @@ and each extra key picks a different kind of help.
 - **Frequently Asked Questions.**
 - **Play Tutorials.** The spoken walkthroughs.
 - **Update from Template.** Brings your copy of a template up to date from the one installed with DbDo, by merging or replacing; see the template databases, below.
+- **Update Copies from Templates** (Alt+H, then C). Does the same for every copy of DbDo's templates at once. It names your copies first, then offers **Replace all**, which makes each copy its template again -- the quick way to the newest when you have added or changed nothing -- keeping each copy as it was beside it as a dated backup, or **Merge all**, which adds to each copy what its template has and it lacks, keeps everything of yours, and asks once how records in both are treated. The database you had open is opened again afterwards, and a report names what happened to each copy.
 - **More Documents.** The Announcement, the Developer Guide, the License, and the Tutorials Transcript. These are used rarely, so they sit one level down.
 
 ### Four ways to reach a record
@@ -1258,21 +1266,24 @@ of the window.
 
 Two tables in every DbDo database belong to DbDo rather than to you:
 
-- **lookups** fills the pick lists. F4 in a field offers what this table holds
+- **defs** fills the pick lists. F4 in a field offers what this table holds
   for that table and field.
 - **maps** records links between records, which is what Say Related reads.
 
 Neither is offered when you choose a table, open a table in a new window, or
-step through the tables you have visited with Alt+F6. They are on a hidden list, and
+step through the tables with Control+F6. They are on a hidden list, and
 anything NOT on that list is yours and is offered.
 
 DbDo knows them by their columns as well as their names: its maps table has
-`tbl1`, `prime1`, `kind`, `tbl2` and `prime2`, and lookups and views have `tbl`,
-`fld` and `val`. A table of your own that only shares the name -- a table of
+`tbl1`, `prime1`, `kind`, `tbl2` and `prime2`, and defs has `tbl`,
+`fld` and `val`. (A table named views, which once kept a table's saved columns, sort
+and filter, is retired: those live in the database's .inix file, and DbDo removes an
+old views table when it opens the database. A database may still hold SQL views of
+its own, which DbDo offers like tables.) A table of your own that only shares the name -- a table of
 geographic maps, say -- is yours, is offered like any other, and is never read
 as links.
 
-They are not locked away. At the dot prompt, `select-table lookups` opens either
+They are not locked away. At the dot prompt, `select-table defs` opens either
 one by name, and any SQL statement can read or change them. The rule is about
 what a person meets while browsing, not about permission.
 

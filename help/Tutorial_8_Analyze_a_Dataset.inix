@@ -1,0 +1,213 @@
+﻿; Tutorial_8_Analyze_a_Dataset.inix -- a scientist's dataset brought in, asked in SQL and in plain words, grouped,
+; related, and handed on: the data-science end of DbDo, from 5 November 2026. It keeps what Ask with SQL taught --
+; Query, Control+Enter, Shift+Q, a misstep, Query History, Chat about Table, Read Only -- on a dataset of measurements.
+
+[about]
+Title=8 - Analyze a Dataset
+Intro=Fisher's iris measurements, brought in from a CSV file; a question in SQL, the database's own language, and in plain words to a model on this computer; a number grouped by species; two measurements that rise together; and the answer handed on to Excel.
+Setup=DbDo is open, and installed in the usual place, with its samples folder.
+Homework=Bring in a CSV file of your own -- readings from an experiment, a budget, a fitness log -- and ask it which group is highest.
+
+[step]
+
+Say=One want: to learn what a dataset says. DbDo comes with a famous one: Ronald Fisher's measurements of 150 iris flowers, three species, four measurements each, from 1936. Scientists still learn on it.
+Key=
+Hear=
+
+[step]
+
+Say=Alt plus Control plus D, D for DbDo, opens it or brings it forward.
+Key=Alt+Control+D
+Hear=DbDo
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Alt plus I, Import, builds a DbDo database from another file: a spreadsheet, an Access file, or, as here, a CSV file of comma-separated values.
+Key=Alt+I
+Hear=Import into a new DbDo database
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I type where the sample is, in DbDo's own folder.
+Key=C:\Program Files\DbDo\samples\iris.csv
+Hear=C:\Program Files\DbDo\samples\iris.csv
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter brings it in, as a working copy; the original file is untouched, and Control plus Shift plus S, Save As, keeps the database as my own.
+Key=Enter
+Hear=Imported iris.csv into a new DbDo database
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Now a question. For each species, how long are its petals on average? Control plus Q, Query.
+Key=Control+Q
+Hear=Query dialog
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I type the question in SQL.
+Key=select species, count(*) as flowers, round(avg(petal_length), 2) as petal from iris group by species order by petal
+Hear=select species, count as flowers, round avg petal length, 2 as petal from iris group by species order by petal
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Control plus Enter runs it from inside the box, where Enter would start a new line.
+Key=Control+Enter
+Hear=setosa, 50, 1.46, Row 1 of 3
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Setosa has the shortest petals. Control plus End.
+Key=Control+End
+Hear=virginica, 50, 5.55, Row 3 of 3
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Virginica the longest, almost four times as long. Shift plus Q says the query in force; Alt plus Shift plus Q, Query History, lists the questions asked, to ask one again.
+Key=Shift+Q
+Hear=query: select species
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=A planned misstep: a misspelled column. The database names the word it does not know, and the box keeps the question to fix. Escape.
+Key=Escape
+Hear=virginica, 50, 5.55, Row 3 of 3
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=SQL is not the only way to ask. Back in the flowers, Shift plus F12, Chat about Table, sends the table with a question in plain words to the model on this computer.
+Key=Shift+F12
+Hear=Chat about Table
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I ask which species has the widest sepals.
+Key=Which species has the widest sepals?
+Hear=Which species has the widest sepals?
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter. The answer comes in words, and the records are not sent anywhere.
+Key=Enter
+Hear=setosa
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape. A third way needs no SQL at all. Alt plus Shift plus G, Generate from Grid, is the one key for reports on the grid.
+Key=Alt+Shift+G
+Hear=Generate from Grid
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=G for Group report: a number totalled and averaged for each value of another column. It asks which column to group by.
+Key=G
+Hear=Group by which column?
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=I type s p, for species.
+Key=sp
+Hear=sp
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter chooses species.
+Key=Enter
+Hear=Total and average which number column?
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Then the start of petal length.
+Key=petal_l
+Hear=petal l
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Enter chooses petal length.
+Key=Enter
+Hear=In short, virginica has the highest average petal length
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=The takeaway comes first, then each species: its count, average, middle, smallest and largest. Escape, and Alt plus Shift plus G again.
+Key=Alt+Shift+G
+Hear=Generate from Grid
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=R for Relation report: how strongly each pair of measurements rises and falls together.
+Key=R
+Hear=In short, the strongest relation is between petal length and petal width: very strong, rising together
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Very strong: longer petals are wider. The report leaves out the flower number, a numbering rather than a measurement, and reminds that a relation is not a cause. Escape. To hand the answer on, Alt plus Shift plus X, Export Data, writes what the grid shows to a file: Excel, CSV, Markdown, a web page and more.
+Key=Alt+Shift+X
+Hear=Export Data: the 150 records shown
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Escape. Before a query that changes data, Control plus Shift plus Z, Read Only Toggle, makes the database read only, so a mistyped statement cannot change anything. Pressed again, it makes it writable.
+Key=Control+Shift+Z
+Hear=read only
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=What this walk taught. I name the command; the reader gives the key.
+Key=
+Hear=
+
+[step]
+
+Say=Bring in a file.
+Key=
+Hear=Import: Alt plus I
+
+[step]
+
+Say=Ask in SQL, and run it from inside the box.
+Key=
+Hear=Query: Control plus Q
+Hear=Run: Control plus Enter
+
+[step]
+
+Say=Ask in plain words.
+Key=
+Hear=Chat about Table: Shift plus F12
+
+[step]
+
+Say=Report on the grid.
+Key=
+Hear=Generate from Grid: Alt plus Shift plus G
+
+[step]
+
+Say=Hand it on.
+Key=
+Hear=Export Data: Alt plus Shift plus X

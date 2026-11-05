@@ -12,6 +12,9 @@ Help = Opens this dialog's help, which F1 also does from any control.
 Close = Closes this window.
 Any field = Finds records holding some text in any field.
 Field boxes = Gives a box for each field, where a value and an operator such as >= or a range such as 2025..2026 can be typed.
+Main columns = Gives a box for each column about the table's subject, where a value and an operator such as >= can be typed.
+Standard columns = Gives a box for url, tags, notes, marked, look, prime, added, edited and the id.
+All columns = Gives a box for every column.
 Marked records = Keeps the records you have marked.
 Unmarked records = Keeps the records you have not marked.
 Records = The table's records, one to a row; arrows move by record and by column, and Enter opens the record.
@@ -35,11 +38,15 @@ Fields available = The fields not yet in the sort, in DbDo's natural order; Ente
 Add ascending = Adds the selected field to the sort, smallest or earliest first.
 Add descending = Adds the selected field to the sort, largest or latest first.
 Order of fields = The sort, first field first; each reads like city asc, and Enter or Delete takes one out.
-Prime order = The default order: by the primary key, prime's fields in prime's order, ascending, which together make each record unique.
-Look order = Sorts by look's fields, the default columns, in look's order, ascending: the way records are said.
-Choose order = Lets you pick the fields and the direction of each, one by one.
-Type order = Lets you type the fields separated by commas, with desc after a field to sort it largest or latest first.
-Reverse order = Turns each field of the order in force the other way: ascending becomes descending.
+Prime order = Fills the sort with prime's fields in prime's order: the default order.
+Prime columns = The default order: sorts by the primary key, prime's fields in prime's order, ascending, which together make each record unique.
+Look columns = Sorts by look's fields, the default columns, in look's order, ascending: the way records are said.
+Main columns = Sorts by the columns about the table's subject, in their natural order, ascending.
+Standard columns = Sorts by url, tags, notes, marked, look, prime, added, edited and the id, ascending.
+All columns = Sorts by every column, in the natural order, ascending.
+Choose columns = Lets you pick the columns to sort by and the direction of each, one by one.
+Type columns = Lets you type the columns separated by commas, with desc after a column to sort it largest or latest first.
+Reverse order = Turns each column of the order in force the other way, as Alt+Shift+O does: ascending becomes descending.
 
 [Type Order]
 Fields in order = The fields to sort by, first field first, separated by commas; desc after a field sorts it largest or latest first.
@@ -48,15 +55,18 @@ Empty list = Clears the sort at once, so OK returns to the default order.
 
 [Filter Records]
 Start over = Begins a new filter, replacing the one in force.
-Clear filter = Removes the filter, so every record shows again.
+Clear filter = Removes the filter, so every record shows again, as Control+Shift+F does.
 Narrow filter = Keeps only the records that also meet a new condition.
 Expand filter = Also takes in the records that meet a new condition.
-Invert filter = Shows the records this filter leaves out, and hides the ones it keeps.
-Edit filter = Opens the filter in force so its values can be changed.
+Invert filter = Shows the records this filter leaves out, and hides the ones it keeps, by putting NOT before the filter in parentheses.
+Revise filter = Opens the filter in force so its values can be changed.
 Any field = Finds records holding some text in any field.
 Marked records = Keeps the records you have marked.
 Unmarked records = Keeps the records you have not marked.
 Field boxes = Gives a box for each field, where a value and an operator such as >= or a range such as 2025..2026 can be typed.
+Main columns = Gives a box for each column about the table's subject, where a value and an operator such as >= can be typed.
+Standard columns = Gives a box for url, tags, notes, marked, look, prime, added, edited and the id.
+All columns = Gives a box for every column.
 
 [Filter Fields]
 Main fields = Gives a box for each field about the table's subject.

@@ -204,7 +204,7 @@ follows</a></li>
 <li><a href="#actions" id="toc-actions">actions</a></li>
 <li><a href="#docs" id="toc-docs">docs</a></li>
 <li><a href="#stories" id="toc-stories">stories</a></li>
-<li><a href="#lookups-and-maps" id="toc-lookups-and-maps">lookups and
+<li><a href="#defs-and-maps" id="toc-defs-and-maps">defs and
 maps</a></li>
 </ul></li>
 <li><a href="#what-the-agency-requires"
@@ -268,8 +268,8 @@ databases</li>
 </ul>
 <h2 id="the-conventions-this-follows">The conventions this follows</h2>
 <p>Read from <code>contacts.db</code>, <code>reads.db</code> and
-<code>lookups.db</code> as DbDo ships them, so JobTrail looks like a
-DbDo database to anybody who has used one.</p>
+<code>defs.db</code> as DbDo ships them, so JobTrail looks like a DbDo
+database to anybody who has used one.</p>
 <p>Every table has, in this order:</p>
 <ol type="1">
 <li><code>&lt;singular&gt;_id INTEGER PRIMARY KEY AUTOINCREMENT</code> –
@@ -299,7 +299,7 @@ for the table. Nothing is abbreviated past recognition:
 <p><strong>First letters matter.</strong> The table list is reached by
 typing a letter, so the seven tables begin with seven different letters:
 <code>actions</code>, <code>contacts</code>, <code>docs</code>,
-<code>jobs</code>, <code>lookups</code>, <code>maps</code>,
+<code>jobs</code>, <code>defs</code>, <code>maps</code>,
 <code>stories</code>.</p>
 <h2 id="the-tables">The tables</h2>
 <h3 id="jobs">jobs</h3>
@@ -317,17 +317,17 @@ has gone</li>
 <li><code>reference</code> TEXTLINE – the job reference or requisition
 number. <strong>An agency accepts this in place of the position
 title</strong>, and an ATS confirmation usually quotes it</li>
-<li><code>status</code> TEXTLINE – from lookups; starts at
+<li><code>status</code> TEXTLINE – from defs; starts at
 <code>lead</code></li>
-<li><code>source</code> TEXTLINE – from lookups; where you found it</li>
+<li><code>source</code> TEXTLINE – from defs; where you found it</li>
 <li><code>location</code> TEXTLINE – city and state, or
 <code>remote</code></li>
 <li><code>pay</code> TEXTLINE – free text, because postings say “DOE” as
 often as a number</li>
 <li><code>applied_date</code> TEXTLINE – ISO date, empty until you
 apply</li>
-<li><code>ats</code> TEXTLINE – from lookups; whose application system
-it uses</li>
+<li><code>ats</code> TEXTLINE – from defs; whose application system it
+uses</li>
 <li><code>closing_date</code> TEXTLINE – ISO date, when the posting says
 one</li>
 <li><code>url</code> TEXTLINE – the posting</li>
@@ -344,7 +344,7 @@ role twice without noticing, which is the most common wasted hour in a
 job search.</p>
 <h3 id="contacts">contacts</h3>
 <p>The standard DbDo contacts table, unchanged. Keeping it identical
-means the lookups, the accelerator keys and anything built for contacts
+means the defs, the accelerator keys and anything built for contacts
 elsewhere work here without adjustment.</p>
 <p>The fields follow DbDo’s contact pattern, from DbDialog, which names
 each field so that it has an Alt letter of its own on the record form,
@@ -369,10 +369,10 @@ agencies ask for.</p>
 <li><code>added</code>, <code>edited</code> TEXTTIME</li>
 <li><code>action_date</code> TEXTLINE – ISO date; for a future action
 this is when it is due</li>
-<li><code>kind</code> TEXTLINE – from lookups: application, inquiry,
+<li><code>kind</code> TEXTLINE – from defs: application, inquiry,
 interview, follow_up, preparation, workshop… The agency calls this the
 type of contact and requires it</li>
-<li><code>method</code> TEXTLINE – from lookups, and the list is the
+<li><code>method</code> TEXTLINE – from defs, and the list is the
 agency’s own: email, fax, in person, internet, kiosk, mail, phone,
 video. <strong>Required, because what else you must record depends on
 it.</strong></li>
@@ -388,10 +388,10 @@ method, and one field covers them all because only one is ever
 required</li>
 <li><code>summary</code> TEXTLINE – one line, which is what appears in
 the report</li>
-<li><code>outcome</code> TEXTLINE – from lookups: awaiting reply,
-interview scheduled, no response, not hiring, offer, rejected,
-withdrawn. <strong>The agency calls this the result of contact and
-requires it on every entry</strong></li>
+<li><code>outcome</code> TEXTLINE – from defs: awaiting reply, interview
+scheduled, no response, not hiring, offer, rejected, withdrawn.
+<strong>The agency calls this the result of contact and requires it on
+every entry</strong></li>
 <li><code>evidence</code> TEXTLINE – what proof you kept and where:
 “confirmation email saved”, “screenshot in results folder”. Reviews are
 random, and this is the column people wish they had filled</li>
@@ -421,7 +421,7 @@ which version went where.</p>
 <li><code>doc_id</code> INTEGER PRIMARY KEY AUTOINCREMENT</li>
 <li><code>added</code>, <code>edited</code> TEXTTIME</li>
 <li><code>name</code> TEXTLINE – what you call it</li>
-<li><code>kind</code> TEXTLINE – from lookups: resume, cover_letter,
+<li><code>kind</code> TEXTLINE – from defs: resume, cover_letter,
 answers, portfolio, reference_list, offer</li>
 <li><code>version</code> TEXTLINE – your own marker, so “resume, plain
 text, March” is one row and “resume, chronological, March” is
@@ -464,10 +464,10 @@ answers</li>
 </ul>
 <p>Prepared once, used for years. Its first letter, s, is free among the
 other tables.</p>
-<h3 id="lookups-and-maps">lookups and maps</h3>
+<h3 id="defs-and-maps">defs and maps</h3>
 <p>The two standard DbDo tables, exactly as DbDo makes them.
-<code>lookups</code> fills the combo boxes; <code>maps</code> records
-the many-to-many links.</p>
+<code>defs</code> fills the combo boxes; <code>maps</code> records the
+many-to-many links.</p>
 <h2 id="what-the-agency-requires">What the agency requires</h2>
 <p>Read from the Washington Employment Security Department’s Unemployed
 Worker Handbook, which is the document behind the report. Other states
@@ -523,7 +523,7 @@ end of the benefit year, or thirty days after benefits stop, whichever
 is later, and reviews are random. <strong>JobTrail never deletes an
 action</strong>, and the guide will say so plainly.</p>
 <h2 id="the-lookup-values">The lookup values</h2>
-<p>Seeded into <code>lookups</code> so that the fields with fixed
+<p>Seeded into <code>defs</code> so that the fields with fixed
 vocabularies offer them from the start. Each set is alphabetical, since
 that is the order a combo box is searched by first letter.</p>
 <ul>

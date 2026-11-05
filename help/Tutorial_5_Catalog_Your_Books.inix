@@ -71,9 +71,19 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Control plus Shift plus F clears it. Now counts. I move to the format column, and Alt plus Shift plus S, Statistics from Column, describes it.
-Key=Alt+Shift+S
-Hear=Statistics from Column
+Say=Control plus Shift plus F clears it. Now counts. I move to the format column, and Alt plus Shift plus G, Generate from Grid, offers every report and chart of the grid.
+Key=Alt+Shift+G
+Hear=Generate from Grid
+
+[step]
+Say=F for Frequency report.
+Key=F
+Hear=Frequency Report
+
+[step]
+Say=C for Current column counts each format.
+Key=C
+Hear=Frequency: format
 Hear=audio (BARD), 2
 Hear=audio (commercial), 1
 Hear=braille, 1
@@ -138,9 +148,9 @@ Hear=Control plus Shift plus I
 
 [step]
 
-Say=Describe a column.
+Say=Report on the grid.
 Key=
-Hear=Alt plus Shift plus S
+Hear=Alt plus Shift plus G
 
 [step]
 

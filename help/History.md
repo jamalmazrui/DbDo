@@ -5,6 +5,109 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 5 November 2026 -- Text that names its format
+
+- **DbDo knows forty column types,** from the kit's vocabulary, Homer.ColumnTypes, which follows SQLite's storage rules and the web's naming conventions together: the first word says storage (TEXT or BLOB), the rest names the format by its usual file extension (TEXTJSON, TEXTSQL, BLOBPNG, BLOBPDF, BLOBZIP), each with its MIME type, and value types name a single value with its natural action (TEXTURL, TEXTEMAIL, TEXTPHONE, TEXTPATH). New Table and Field Regex by Type offer them all, and every format type is edited on several lines; before, only a type containing memo or markdown was, so a TEXTJSON column was a single line.
+- **The files table names each carried file's format** in a kind column, in that same vocabulary -- TEXTSQL, TEXTDBDO, TEXTJSCRIPT, TEXTINIX -- since its one content column holds them all. A files table made earlier is remade by the build, which packs it again from disk.
+
+## 5 November 2026 -- One file carries it all
+
+- **A database carries everything it needs besides its data,** in DbDo's third table of its own, files: its scripts (.sql, .dbdo, .js), its report and transfer definitions, and its settings, as settings.inix. On open they are unpacked into a private folder, and DbDo's settings, Run Report and Invoke Script look there after the database's own folder, so a file beside the database wins over a carried one, and a person's own column, order and filter choices are still saved only beside their copy. Pack Files into Database and Unpack Files from Database, on the Tools menu, move files in and out. defs and maps were weighed and kept to their own jobs: a script or report is a whole document, not a definition of a field or a link between records.
+- **Every template carries its own files,** packed by the build, so a copied template keeps its scripts and reports; a rehearsal on all eleven passed the template check and checkDb, and a second run changed nothing.
+- **RadioTrail.db is compacted after its rebuild:** 112.6 MB, over GitHub's 100 MB limit, which stopped the push at 20:39, back to 70.9 MB. The build now returns a template's freed space whenever it passes 1 MB or a twentieth of the file.
+
+## 5 November 2026 -- Two repairs the push's checks asked for
+
+- **Nine template .inix files had a comment split in two.** On 4 November a note was inserted before the first "[Database]" in each, which was the one inside a comment ("; [Database] decides which table..."), leaving "[Database] decides..." as a heading with a sentence trailing off it. The pattern audit caught it at 20:26 and stopped the push; each line has its semicolon back.
+- **Update All from Templates is Update Copies from Templates (Alt+H, then C).** Its letter, A, was also Alternate Menu's, and every word of the old name began with a letter the Help menu already used; C, for the copies it updates, was free.
+
+## 5 November 2026 -- Scripting and reporting as one whole, and data science
+
+- **One map of DbDo's ways to work with data,** in the guide's Part 3, each with one role, chosen by what you want to do: to ask (Filter Records, Facet Column, Query, Chat about Table, Evaluate Expression, the dot prompt); to analyze (Generate from Grid); to produce (Export Data, Run Report, Print, the clipboard, Save As); and to automate (scripts: .sql for a saved question, .dbdo for a saved routine, .js for a program). The guide's stale keys for Invoke Script and Edit Snippet, and its account of the retired single-column tools, are gone.
+- **.dbdo scripts work in both shapes they were written in.** Command batches ("table orders", "filter ...") worked; saved views ("table = books", "where = ...", "order = ...", with ; comments) failed at their first line, since ; is the dot prompt's shorthand for SQL and "table = books" named a table "= books". Both runners now read each line one way: #, ; and -- begin comments, a saved-view line becomes the command it means, and SQL is written with /. All sixteen lines of the four shipped .dbdo files resolve to commands. In the dot prompt's runner, a leading ? no longer shows the status.
+- **Generate from Grid gains the Group report (G)** -- a number column totalled and averaged for each value of another, or each year, month or weekday of a date -- **and the Relation report (R)** -- how strongly each pair of number columns rises and falls together, in plain words, and the line that best fits the strongest pair, with a reminder that a relation is not a cause. A numbering column, such as a record number, is left out of relations and named: in the iris sample the flower number would have shown 0.90 with petal width. Its Markdown table moved to Export Data, which writes Markdown as it writes every format.
+- **A STEM sample:** samples\iris.csv, R. A. Fisher's 1936 measurements of 150 iris flowers, three species, four measurements each, with a flower number added.
+- **Tutorial 8 is Analyze a Dataset:** the iris file brought in with Import, asked in SQL and in plain words, grouped by species, related, exported, and the read-only safety lesson, keeping what Ask with SQL taught. The build removes the old walk's script and sound. The kit's tutorial check then found five problems at 19:37 -- four Hear lines written with underscores (petal_length) rather than as a screen reader says them, and an Escape with no Hear line -- and stopped the build; all are fixed, and the check passes all ten walks.
+- **The build fails clearly, not cryptically,** when the kit lacks LbcMessage, setPattern or fUnavailable (from earlier the same day).
+
+## 5 November 2026 -- The meaning first, and a check of the kit's code
+
+- **Reports open with their takeaway,** after the Urban Institute's Do No Harm Guide on accessible data visualization: Statistics says the range, the middle and how many values lie far outside the rest; Frequency names the most common value, how few values cover 80% of records, and gives each value a running percentage; Cross-tab names the largest combination. The details follow, for whoever wants them.
+- **Every Excel chart carries a description:** its title and kind, its number of data points, and where its numbers are, in the workbook's Comments property and, for a chart on a sheet, its alternative text.
+- **The build checks the kit's code, not only its number.** At 18:40 on 4 November DbDo compiled against a kit that said 1.132.0 but whose Lbc.cs predated LbcMessage, and failed with 109 errors. Now the build looks for LbcMessage, setPattern and fUnavailable in the kit first, and names any that is missing; the minimum kit is 1.132.0.
+
+## 5 November 2026 -- The kit's Key Describer
+
+- **The kit's Key Describer now serves DbDo.** DbDo has routed every key through the kit's router since 19 October, but its older describer still answered first in describe mode, so the kit's never heard the key. Now there is one flag, the kit's; every command declared to the router carries its menu item and DbDo's own reason when it cannot run, and DbDo.inix's descriptions; and in describe mode a key goes straight to the router, before the grid's own keys could run. DbDo answers first only for grid keys such as Home and the arrows, which are not commands. The kit's rules then apply: every key described with the true reason, Alt+F4 leaves the mode, a nameless key is ignored. Before the router is ready, DbDo's older describer answers as it did.
+
+## 5 November 2026 -- One analysis key, fewer duplicate keys, and Alt+F4 leaves the Key Describer
+
+- **Generate from Grid (Alt+Shift+G) is the one analysis key:** Statistics report, Frequency report (of the current column or the shown columns), Cross-tab report, Markdown table and Excel chart, with the current column first wherever a column is asked for. Statistics from Column (Alt+Shift+S), Frequency by Columns and Graphics Column (Control+Shift+G) were slices of it; their keys are free and their work is there.
+- **Next and Previous Visited Table (Alt+F6, Alt+Shift+F6) are retired:** Control+F6 and Control+Shift+F6 step through every table and view of the window, of which the visited ones are a part.
+- **Withdrawn, the same day they were tried:** Reverse Alpha Order on Alt+Shift+A, since Alt+A then Reverse Order (Alt+Shift+O) gives it; Say Header on Shift+H, since Alt+Control+Shift+UpArrow says the column's name and Shift+S the columns shown; and Shift+W for Window Toggle, since Control+Tab and Control+Shift+Tab move between windows. Alpha Order (Alt+A) stays: it sorts by the column under the cursor, which Look and Prime columns cannot.
+- **Alt+F4 turns the Key Describer off** and says so, with "Alt+F4 again closes DbDo", for someone who turned it on by accident and does not know Control+F1; a second Alt+F4 closes DbDo.
+
+## 5 November 2026 -- A review of the keys, and a key describer that always describes
+
+- **The key describer describes every key,** even one whose command cannot run now, and says after the description what is unavailable and why; it had answered "is unavailable right now (open a database file or select a table first)" instead, for List Bookmarks, Clear Bookmark, Clear Filter and the Previous searches, with a database open. Outside the describer, a refused key now says "is not available now" rather than guessing a reason. A key the screen reader sends with no name is no longer announced as "NoName".
+- **The descriptions in configs\DbDo.inix load,** from where the installer puts it; they were looked for beside DbDo.exe, so commands without a description written into the code were described by their bare names ("Say Added. Shift+A. Say Added.").
+- **Keys, reviewed against the Homer rules and the suite manifest:**
+  - Count by Columns is **Frequency by Columns, Alt+Shift+F**; Alt+Shift+B, whose B began no word of the name but "by", is free.
+  - **Alpha Order, Alt+A,** sorts by the current column, ascending, and **Reverse Alpha Order, Alt+Shift+A,** descending, as in FileDir.
+  - **Say Header, Shift+H,** says the current column's name and place, joining the Say family of Shift+letters.
+  - **Window Toggle has Shift+W,** as in FileDir; it had no key.
+  - **Open Recordset is retired:** it did exactly what Query (Control+Q) does, under a menu name Open Table (Control+Shift+O) also means; Control+Shift+T is free.
+  - **Say Go to's description is corrected:** it says Go to's last entry, not a Jump search string.
+  - Kept, as the suite's keys in every Homer app: Say Path (Alt+P), Say Yield (Alt+Y beside Shift+Y), Say Status (Alt+Z beside Shift+Z), the Z toggles, and Export Data and Extract with Regex on X. Alt+H and Alt+W open the Help and Window menus and stay unbound.
+
+## 5 November 2026 -- Look and prime as decided, and SQL filters in query windows
+
+- **Four tables' look and prime, as decided:** BlindCreations' creators read first name first and still sort by last name; BookTrail's books read title, author, series, volume and still sort as a shelf does; Northwind's orders sort by date, then customer and employee; RadioTrail's stations sort by name, then stream address, with the directory's id breaking the one tie. A new [lookprime] section of templates\fieldDescriptions.inix names them, and the build rebuilds a table whose definition differs -- keeping every row, id, index and trigger and re-pointing its maps links -- and stops without change if a new prime would repeat. Rehearsed on copies: the same rows and ids, creators' 362 links all still pointing at records, the template check passing all eleven and checkDb finding no failures.
+- **Look and prime are the defaults when a table opens.** The template .inix files no longer ship saved columns, ascending orders or empty filters (143 lines); four orders that run newest first stay, since prime cannot say descending. A person's own choices are still saved in their copy's .inix.
+- **A query window filters by SQL:** its own query runs again inside SELECT * FROM (query) AS dbdoQuery WHERE condition, so Control+F works there as in a table, Invert filter included; until now it applied ADO's filter to the rows already fetched, whose syntax has no NOT. A trailing semicolon is set aside, and WITH queries work.
+
+## 5 November 2026 -- An audit of the templates and of Where Am I
+
+- **Every message answers Alt+Shift+Slash:** DbDo's 109 message boxes are HomerDev 1.128.0's LbcMessage, with the same buttons and answers, and every window built on Lbc answers it, the list pickers, filter and command pickers and error window among them. The Windows file dialogs remain Windows's own.
+- **Patterns for every template:** 92 more, so 111 in all, proposed from each field's name and type and kept only where every existing record fits -- web addresses, emails, phone numbers, years, dates, ratings, two-letter codes, ISBNs, and required for the field that names a record. A standard field such as url gets a row of its own table for its pattern, carrying the shared description. Checked on copies: the template check passes all eleven, and checkDb finds no failures.
+- **Audited and found complete:** every template database, table and field is described, Chinook and Northwind included; every template opens a table of its own (InitialTable in its .inix), and each one exists.
+
+## 4 November 2026 -- Reverse and Clear come last, and every button has its own letter
+
+- **Order Records ends with Reverse order** (R), after the column choices, when an order is in force; Alt+Shift+O still reverses straight from the grid.
+- **Filter Records ends with Clear filter** (C), after Start over, Narrow, Expand and Invert filter, since Control+Shift+F clears straight from the grid. Invert filter puts NOT before the filter in force, in parentheses, showing the records it leaves out.
+- **Every button has a letter of its own, each a word's first letter.** Any field takes F, its second word, so All columns keeps A, and Marked records takes R. In a query window's filter, Edit filter is now Revise filter (R), since with Edit, Expand filter had no letter left; that filter cannot offer Invert filter, because ADO's filter syntax has no NOT. Checked with the kit's own letter rule for every dialog.
+
+## 4 November 2026 -- One set of column buttons, and Alt+Shift+P for patterns
+
+- **Alt+S and Alt+O offer the same buttons** (Jamal's design): Look columns, the default columns for select; Prime columns, the default columns for order; Main, Standard and All columns; Choose columns; Type columns. In Order Records each sorts by those columns, ascending, and Prime columns is the default and has focus as the dialog opens. When look and prime hold the same fields in the same order, one button, Look columns, stands for both. Order Records' Prime order, Look order, Choose order, Type order and Reverse order buttons are gone; Reverse Order stays its own command, Alt+Shift+O.
+- **Filter Records offers Main columns, Standard columns and All columns** in place of Field boxes, which asked the same question one dialog later; each opens the boxes for those columns. The query window's filter offers them too.
+- **Alt+Shift+P in a record or new-record form edits the focused field's pattern**: a small dialog under the field's description; OK checks the pattern, saves it in the field's row of defs and puts it in force in the open form, through HomerDev 1.127.0's Lbc setPattern; an empty pattern removes it and the type check applies again.
+- **The build gave the shared database its new name too:** data\lookups.db is data\defs.db, renamed with its table by the build's first step; the installer stopped at 13:32 because the file it names was not there. An upgrade removes the old file.
+
+## 4 November 2026 -- The defs rename runs first
+
+- **The build renames the templates' table to defs before any other step opens them.** At 13:20 RadioTrail's conventions step, which expects defs, ran before the rename and failed; describeFields --rename-only now runs first and stops the build if it fails.
+- **The old views rows for the renamed table follow it,** and retiring views skips any row for a table that is not there. At 13:20 six templates' .inix files gained a [Table:lookups] section, for a table already renamed, and the template check refused them; the build now renames such a section [Table:defs], or drops it when [Table:defs] is already there. Rehearsed on copies in the build's order, with those sections planted: the rename, RadioTrail's conventions, the descriptions, then the template check -- 11 templates passed -- and checkDb with no failures.
+
+## 4 November 2026 -- lookups is now defs
+
+- **DbDo's own table of descriptions, patterns and choices is named defs, its key def_id,** by Jamal's choice: every row is a definition -- of the database, a table or a field, of the form a value takes, of the values allowed -- the name is short to type, and it no longer echoes the standard field look. The build renames the table in every template before anything reads it, with its key, the triggers and indexes named for them, the table's name inside the maps triggers, and the rows that name it; tested on copies of all eleven templates, with integrity intact and nothing named the old way left. DbDo renames an older database's table the same way when it opens it. Code, scripts, templates' .inix files, the descriptions file, the guide and the kit all say defs now; History keeps the old name where it was the name.
+- **A DbDo system table is named with a plain English plural ending in s**, its key the singular plus _id (defs and def_id, maps and map_id); not an SQL keyword, not the start of a standard field name (added, edited, id, look, marked, notes, prime, tags, url), and where it can be, beginning with a letter no common table uses.
+
+## 4 November 2026 -- The views table is retired
+
+- **DbDo's own tables are lookups and maps.** A table named views, which DbDo created by itself the first time it saved a table's shown columns, sort and filter, was never approved for its schema, and it added nothing: every one of its 147 rows in the templates was already in the template's .inix, which DbDo reads first. The build now drops it from every template with its descriptions; DbDo neither reads nor writes it, and when it opens an older database that has one, it gives the .inix any row the .inix lacks and drops the table. A database's own SQL views are untouched. HomerDev 1.124.0 stops creating and checking it.
+- **help\SchemaNames.md is revised:** "facts" is withdrawn, and the candidates for lookups -- blocks, defs, forms, frames, lookups, metas and settings among them -- are weighed; defs is recommended.
+
+## 4 November 2026 -- A proposal for the system tables' names
+
+- **help\SchemaNames.md weighs the names of DbDo's own tables** against one rule -- a plain English plural ending in s, its singular plus _id for the key, no SQL keyword, not the start of a standard field, and a first letter no common table uses -- and proposes renaming lookups to facts while keeping maps and views. It is a proposal only; nothing is renamed until it is accepted.
+
+## 4 November 2026 -- Update All from Templates
+
+- **Every copy of DbDo's templates can be brought up to date in one step,** from the Help menu. Update from Template works on the database open, one at a time; Update All from Templates names your copies, then offers Replace all -- each made its template again, kept as it was beside it as a dated backup -- or Merge all, which adds what each template has and the copy lacks and asks once how records in both are treated. The database open before is opened again, and one report covers every copy.
+
 ## 3 November 2026 -- Short rows, and patterns set in a dialog
 
 - **A long cell is short in the row.** Landing on a record makes the screen reader read the whole row, so with notes shown every arrow press read a paragraph -- over fifteen seconds in the 18:49 walk. A cell over 120 characters now shows in the row as its first sentence, when that fits, or else is cut at a word and ended with an ellipsis. Moving to the cell still reads it whole, and editing and copying use the database's value, never the row's text.

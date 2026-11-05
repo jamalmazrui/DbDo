@@ -1,0 +1,330 @@
+﻿<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
+<head>
+  <meta charset="utf-8" />
+  <meta name="generator" content="pandoc 3.13" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
+  <title>SchemaNames</title>
+  <style>
+    /* Default styles provided by pandoc.
+    ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
+    */
+    html {
+      color: #1a1a1a;
+      color: light-dark(#1a1a1a, #fdfdfd);
+      background-color: #fdfdfd;
+      background-color: light-dark(#fdfdfd, #1a1a1a);
+      color-scheme: light dark;
+    }
+    body {
+      margin: 0 auto;
+      max-width: 36em;
+      padding-left: 50px;
+      padding-right: 50px;
+      padding-top: 50px;
+      padding-bottom: 50px;
+      hyphens: auto;
+      overflow-wrap: break-word;
+      text-rendering: optimizeLegibility;
+      font-kerning: normal;
+    }
+    @media (max-width: 600px) {
+      body {
+        font-size: 0.9em;
+        padding: 12px;
+      }
+      h1 {
+        font-size: 1.8em;
+      }
+    }
+    @media print {
+      html {
+        color-scheme: light only;
+      }
+      html, body, pre, code {
+        background-color: transparent;
+      }
+      body, a, a:visited, blockquote {
+        color: black;
+      }
+      pre, code {
+        padding: 0;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }
+    p {
+      margin: 1em 0;
+    }
+    a, a:visited {
+      color: inherit;
+    }
+    img {
+      max-width: 100%;
+    }
+    svg {
+      height: auto;
+      max-width: 100%;
+    }
+    h1, h2, h3, h4, h5, h6 {
+      margin-top: 1.4em;
+    }
+    h5, h6 {
+      font-size: 1em;
+      font-style: italic;
+    }
+    h6 {
+      font-weight: normal;
+    }
+    ol, ul {
+      padding-left: 1.7em;
+      margin-top: 1em;
+    }
+    li > ol, li > ul {
+      margin-top: 0;
+    }
+    blockquote {
+      margin: 1em 0 1em 1.7em;
+      padding-left: 1em;
+      border-left: 2px solid;
+      border-color: #e6e6e6;
+      border-color: light-dark(#e6e6e6, #4c4c4c);
+      color: #606060;
+      color: light-dark(#606060, #b6b6b6);
+    }
+    code {
+      white-space: pre-wrap;
+      font-family: Menlo, Monaco, Consolas, 'Lucida Console', monospace;
+      font-size: 85%;
+      margin: 0;
+      hyphens: manual;
+    }
+    pre {
+      margin: 1em 0;
+      overflow: auto;
+    }
+    pre code {
+      padding: 0;
+      overflow: visible;
+      overflow-wrap: normal;
+    }
+    .sourceCode {
+     background-color: transparent;
+     overflow: visible;
+    }
+    hr {
+      border: none;
+      border-top: 1px solid currentColor;
+      height: 1px;
+      margin: 1em 0;
+    }
+    table {
+      margin: 1em 0;
+      border-collapse: collapse;
+      width: 100%;
+      overflow-x: auto;
+      display: block;
+      font-variant-numeric: lining-nums tabular-nums;
+    }
+    table caption {
+      margin-bottom: 0.75em;
+    }
+    tbody {
+      margin-top: 0.5em;
+      border-top: 1px solid currentColor;
+      border-bottom: 1px solid currentColor;
+    }
+    th {
+      border-top: 1px solid currentColor;
+      padding: 0.25em 0.5em 0.25em 0.5em;
+    }
+    td {
+      padding: 0.125em 0.5em 0.25em 0.5em;
+    }
+    header {
+      margin-bottom: 4em;
+      text-align: center;
+    }
+    #TOC li {
+      list-style: none;
+    }
+    #TOC ul {
+      padding-left: 1.3em;
+    }
+    #TOC > ul {
+      padding-left: 0;
+    }
+    #TOC a:not(:hover) {
+      text-decoration: none;
+    }
+    span.smallcaps{font-variant: small-caps;}
+    div.columns{display: flex; gap: 1.5em;}
+    div.column{flex: auto;}
+    @media screen {
+    div.columns{gap: min(4vw, 1.5em);}
+    div.column{overflow-x: auto;}
+    }
+    div.hanging-indent{margin-left: 1.5em; text-indent: -1.5em;}
+    /* The extra [class] is a hack that increases specificity enough to
+       override a similar rule in reveal.js */
+    ul.task-list[class]{list-style: none;}
+    ul.task-list li input[type="checkbox"] {
+      font-size: inherit;
+      width: 0.8em;
+      margin: 0 0.8em 0.2em -1.6em;
+      vertical-align: middle;
+    }
+  </style>
+</head>
+<body>
+<nav id="TOC" role="doc-toc" aria-label="Contents">
+<ul>
+<li><a href="#dbdo-system-table-names-analysis-and-proposal"
+id="toc-dbdo-system-table-names-analysis-and-proposal">DbDo System Table
+Names: Analysis and Proposal</a>
+<ul>
+<li><a href="#the-rule-the-names-should-follow"
+id="toc-the-rule-the-names-should-follow">The rule the names should
+follow</a></li>
+<li><a href="#what-the-table-holds" id="toc-what-the-table-holds">What
+the table holds</a></li>
+<li><a href="#the-candidates" id="toc-the-candidates">The
+candidates</a></li>
+<li><a href="#recommendation"
+id="toc-recommendation">Recommendation</a></li>
+<li><a href="#what-a-rename-would-involve"
+id="toc-what-a-rename-would-involve">What a rename would
+involve</a></li>
+<li><a href="#the-views-table-retired"
+id="toc-the-views-table-retired">The views table, retired</a></li>
+<li><a href="#files-added-5-november-2026"
+id="toc-files-added-5-november-2026">files, added 5 November
+2026</a></li>
+</ul></li>
+</ul>
+</nav>
+<main>
+<h1 id="dbdo-system-table-names-analysis-and-proposal">DbDo System Table
+Names: Analysis and Proposal</h1>
+<p><em>4 November 2026. Decided the same evening: <strong>defs</strong>,
+with def_id, is DbDo’s name for this table, and the naming rule below is
+a DbDo guideline. The weighing is kept as the record of why.</em></p>
+<p>DbDo’s own tables are now <strong>lookups</strong> and
+<strong>maps</strong>. A third, <strong>views</strong>, has been
+retired: see the last section. This note weighs a new name for
+lookups.</p>
+<h2 id="the-rule-the-names-should-follow">The rule the names should
+follow</h2>
+<p>A DbDo system table is named with a plain English plural ending in
+“s.” Its key is the singular plus “_id,” such as map_id. The name should
+also:</p>
+<ul>
+<li><strong>Avoid SQL keywords,</strong> so it can’t be mistaken for
+SQL.</li>
+<li><strong>Not begin like a standard field name:</strong> added,
+edited, id, look, marked, notes, prime, tags or url.</li>
+<li><strong>Begin with a letter no common table uses,</strong> so a
+letter press in a list of tables lands on it at once.</li>
+</ul>
+<p>The template tables already use the letters a, b, c, d, e, g, i, j,
+l, m, o, p, r, s, t and v. The free letters are f, h, k, n, q, u, w, x,
+y and z.</p>
+<h2 id="what-the-table-holds">What the table holds</h2>
+<p>Four kinds of row: a description of the database, of each table, and
+of each field; each field’s pattern; and the choices F4 offers. So it’s
+DbDo’s data dictionary as well as its list of permitted values.</p>
+<h2 id="the-candidates">The candidates</h2>
+<ul>
+<li><strong>blocks, block_id:</strong> too vague. A block could be
+anything, and nothing in the table is a block. B is taken by books.</li>
+<li><strong>defs, def_id:</strong> short for definitions, and every row
+is one: what the database, a table or a field is; the form a value must
+take; the values allowed. It’s short to type at the SQLite prompt, and
+nothing like “look.” It’s an abbreviation, though a common one in
+programming, and D is shared with docs, in JobTrail only.</li>
+<li><strong>forms, form_id:</strong> misleading. DbDo’s record forms are
+dialogs, so “forms” would suggest them. F is free.</li>
+<li><strong>frames, frame_id:</strong> too loose. “Frame of reference”
+fits only faintly. F is free.</li>
+<li><strong>lookups, lookup_id:</strong> the standard database term for
+a table of permitted values, and familiar to you. But it sounds like
+“look,” an unrelated standard field, and it now holds more than lookups.
+L is shared with lessons.</li>
+<li><strong>metas, meta_id:</strong> awkward. “Meta” is a prefix, so its
+plural isn’t an ordinary word. M is shared with maps, the next table in
+the list.</li>
+<li><strong>settings, setting_id:</strong> suggests options and
+preferences, not descriptions and permitted values. S is the busiest
+letter in the templates.</li>
+<li><strong>Others weighed:</strong>
+<ul>
+<li><strong>hints:</strong> matches Shift+F1 and F4, but would blur with
+Homer’s Hints.inix.</li>
+<li><strong>norms:</strong> fits values and patterns, not
+descriptions.</li>
+<li><strong>terms:</strong> fits values and descriptions; T is taken by
+tracks.</li>
+<li><strong>values:</strong> an SQL keyword.</li>
+</ul></li>
+</ul>
+<h2 id="recommendation">Recommendation</h2>
+<p><strong>defs, with def_id.</strong> It names what every row is, a
+definition. It’s the shortest of all to type. It removes the echo of
+“look,” and it was one of your own candidates. If you’d rather not
+rename, <strong>lookups</strong> remains a sound, standard name, and the
+guide can say plainly that look is a field and lookups is a table.</p>
+<h2 id="what-a-rename-would-involve">What a rename would involve</h2>
+<ul>
+<li><strong>The kit:</strong> checkDb, the conversion, and the homer-db
+skill’s schema.</li>
+<li><strong>DbDo:</strong> about 120 places in DbDo.cs, plus
+describeFields, checkTemplates and fieldDescriptions.inix.</li>
+<li><strong>The templates:</strong> renamed by the build itself: the
+table, lookup_id and the edited trigger.</li>
+<li><strong>The guide and tutorials.</strong></li>
+<li><strong>Older databases:</strong> DbDo renames an older table when
+it opens one, so nothing breaks.</li>
+</ul>
+<h2 id="the-views-table-retired">The views table, retired</h2>
+<p>A table named views kept each table’s shown columns, sort and filter
+inside the database. DbDo created it by itself, the first time it saved
+a table’s state, so a database sent to someone would arrive knowing its
+columns. It was never approved, and it added nothing:</p>
+<ul>
+<li><strong>Its rows were already elsewhere:</strong> every one of its
+147 rows across the templates was already in the template’s .inix. 125
+were identical, and the 22 that differed were overridden by the .inix,
+which DbDo reads first.</li>
+<li><strong>Its purpose is now served by defaults:</strong> look’s
+fields are the default columns and prime’s fields the default order, in
+any database.</li>
+</ul>
+<p>It is now retired:</p>
+<ul>
+<li><strong>The build</strong> drops it from every template, along with
+its descriptions.</li>
+<li><strong>DbDo</strong> no longer reads or writes it. When DbDo opens
+an older database that has one, it gives the .inix any row the .inix
+lacks, then drops the table.</li>
+<li><strong>The kit</strong> no longer creates or checks it.</li>
+</ul>
+<p>A database may of course hold SQL views of its own; SQLite tells
+views from tables.</p>
+<h2 id="files-added-5-november-2026">files, added 5 November 2026</h2>
+<p>A third table of DbDo’s own, <strong>files</strong>, with file_id,
+holds the files a database carries – scripts, report and transfer
+definitions, and its settings as settings.inix – so the .db alone is the
+whole package. It was not folded into defs, whose every row is one
+definition of a database, table or field, nor into maps, whose rows link
+records: a script or a report definition is a whole document with a
+name. The name follows the rule: a plain plural ending in s, not an SQL
+keyword, not the start of a standard field, and F is a letter no
+template table uses.</p>
+</main>
+</body>
+</html>

@@ -143,9 +143,9 @@ Hear=TechTraining, BlindCreations, ContactTrail and RecipeTrail, and bringing yo
 
 [step]
 
-Say=Eight, Ask with SQL.
+Say=Eight, Analyze a Dataset: a scientist's measurements, asked in SQL and in plain words, grouped, related and handed on.
 Key=
-Hear=A question in the database's own language, and the same question asked in plain words.
+Hear=A dataset brought in, asked in SQL and in plain words, grouped, related and handed on.
 
 [step]
 

@@ -227,6 +227,8 @@ Type: files; Name: "{app}\NPOI*.dll"
 Type: files; Name: "{app}\ICSharpCode.SharpZipLib.dll"
 Type: files; Name: "{app}\BouncyCastle.Crypto.dll"
 Type: files; Name: "{app}\lookups.db"
+; The shared database was data\lookups.db until 4 November 2026; it is data\defs.db now, so an upgrade removes the old file.
+Type: files; Name: "{app}\data\lookups.db"
 Type: files; Name: "{app}\Announce.*"
 Type: files; Name: "{app}\History.*"
 Type: files; Name: "{app}\CamelType_CSharp.*"
@@ -344,6 +346,8 @@ Source: "help\Tutorials.mkv"; DestDir: "{app}\help"; Flags: ignoreversion skipif
 ; One mp3 per walk, the form the kit's tool writes.
 Source: "help\tutorials\*.mp3"; DestDir: "{app}\help\tutorials"; Flags: ignoreversion skipifsourcedoesntexist
 Source: "help\TutorialFeed.xml"; DestDir: "{app}\help"; Flags: ignoreversion skipifsourcedoesntexist
+; SAMPLES (5 November 2026): datasets to practise on; Tutorial 8 imports samples\iris.csv, R. A. Fisher's iris measurements.
+Source: "samples\*.csv"; DestDir: "{app}\samples"; Flags: ignoreversion
 Source: "help\Tutorials.md";  DestDir: "{app}\help"; Flags: ignoreversion
 Source: "help\Tutorials.htm"; DestDir: "{app}\help"; Flags: ignoreversion
 Source: "help\Hotkeys.md";  DestDir: "{app}\help"; Flags: ignoreversion
@@ -368,9 +372,9 @@ Source: "License.htm";  DestDir: "{app}"; Flags: ignoreversion
 ; samples FOLDER: a template that shows what is possible is a sample with a
 ; purpose, so the two are one folder. On first access DbDo seeds it into
 ; %LOCALAPPDATA%\DbDo\data (see seedSampleDatabasesIfNew),
-; where the Sample Databases Help command lists it. lookups.db is
+; where the Sample Databases Help command lists it. defs.db is
 ; shared infrastructure, not a sample, so it stays in {app}.
-Source: "data\lookups.db"; DestDir: "{app}\data"; Flags: ignoreversion
+Source: "data\defs.db"; DestDir: "{app}\data"; Flags: ignoreversion
 ; The templates' logs folders hold the build's database checks, not anything a user needs (9 October 2026).
 Source: "templates\*"; DestDir: "{app}\templates"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist; Excludes: ".git,.venv,__pycache__,*.pyc,venv,logs,*.log"
 Source: "configs\DbDo.inix";   DestDir: "{app}\configs"; Flags: ignoreversion onlyifdoesntexist

@@ -19,7 +19,7 @@ accept.inix
 build.cmd
 configs/DbDo.inix
 configs/Hints.inix
-data/lookups.db
+data/defs.db
 DbDo.cmd
 DbDo.cs
 DbDo.exe.config
@@ -30,6 +30,7 @@ DbDo_setup.iss
 getDbDoDeps.cmd
 getDbDoDeps.ps1
 help/
+samples/
 help/Tutorials.md
 help/tutorials/
 help/Tutorials.mkv

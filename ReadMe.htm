@@ -196,9 +196,9 @@ more</a></li>
 href="#convention-over-configuration-a-few-nouns-and-one-junction"
 id="toc-convention-over-configuration-a-few-nouns-and-one-junction">Convention
 over configuration: a few nouns and one junction</a></li>
-<li><a href="#valid-values-become-comboboxes-the-lookups-table"
-id="toc-valid-values-become-comboboxes-the-lookups-table">Valid values
-become comboboxes (the lookups table)</a></li>
+<li><a href="#valid-values-become-comboboxes-the-defs-table"
+id="toc-valid-values-become-comboboxes-the-defs-table">Valid values
+become comboboxes (the defs table)</a></li>
 <li><a href="#background-four-decades-of-nonvisual-database-tools"
 id="toc-background-four-decades-of-nonvisual-database-tools">Background:
 four decades of nonvisual database tools</a></li>
@@ -305,21 +305,21 @@ the agenda. It makes events, locations, projects and contacts, linked by
 <strong>sponsors</strong>, <strong>features</strong> and
 <strong>offers</strong>. Its scripts turn the sessions you mark into a
 calendar file, an accessible schedule and contact cards.</p>
-<h2 id="valid-values-become-comboboxes-the-lookups-table">Valid values
-become comboboxes (the lookups table)</h2>
-<p>A <strong>lookups</strong> table lists the allowed values for a
-field. The Record Edit dialog can then show that field as a ComboBox
-instead of a bare text box. A ComboBox is the Windows control that works
-best from the keyboard: you can type ahead or use the arrows, and every
-screen reader announces it clearly. Each lookups row ties a value to a
+<h2 id="valid-values-become-comboboxes-the-defs-table">Valid values
+become comboboxes (the defs table)</h2>
+<p>A <strong>defs</strong> table lists the allowed values for a field.
+The Record Edit dialog can then show that field as a ComboBox instead of
+a bare text box. A ComboBox is the Windows control that works best from
+the keyboard: you can type ahead or use the arrows, and every screen
+reader announces it clearly. Each defs row ties a value to a
 <code>tbl</code> and a <code>fld</code>, with an optional
 <code>src</code> source and a <code>descrip</code>. DbDo offers the
 combobox whenever a field has values listed.</p>
-<p>Each template carries lookups for its own fields. They include every
+<p>Each template carries defs for its own fields. They include every
 <code>maps.kind</code> it uses, MusicTrail’s genres and roles with the
 books’ own descriptions, and TechTraining’s categories with the
 directory’s definition of each. A separate, shared
-<strong>lookups.db</strong> comes with DbDo, holding the global lists
+<strong>defs.db</strong> comes with DbDo, holding the global lists
 <code>state</code> and <code>country</code>. They apply to any table
 with a field of that name, so they serve every database. For example,
 Northwind’s <code>country</code> field gets a combobox with no setup in

@@ -26,7 +26,7 @@ version can be finished and used rather than merely started.
 
 ## The conventions this follows
 
-Read from `contacts.db`, `reads.db` and `lookups.db` as DbDo ships them, so
+Read from `contacts.db`, `reads.db` and `defs.db` as DbDo ships them, so
 JobTrail looks like a DbDo database to anybody who has used one.
 
 Every table has, in this order:
@@ -53,7 +53,7 @@ table. Nothing is abbreviated past recognition: `employer`, not `emp`.
 
 **First letters matter.** The table list is reached by typing a letter, so the
 seven tables begin with seven different letters: `actions`, `contacts`,
-`docs`, `jobs`, `lookups`, `maps`, `stories`.
+`docs`, `jobs`, `defs`, `maps`, `stories`.
 
 ## The tables
 
@@ -71,12 +71,12 @@ One row per opening you are pursuing. The heart of the database.
 - `reference` TEXTLINE -- the job reference or requisition number. **An agency
   accepts this in place of the position title**, and an ATS confirmation usually
   quotes it
-- `status` TEXTLINE -- from lookups; starts at `lead`
-- `source` TEXTLINE -- from lookups; where you found it
+- `status` TEXTLINE -- from defs; starts at `lead`
+- `source` TEXTLINE -- from defs; where you found it
 - `location` TEXTLINE -- city and state, or `remote`
 - `pay` TEXTLINE -- free text, because postings say "DOE" as often as a number
 - `applied_date` TEXTLINE -- ISO date, empty until you apply
-- `ats` TEXTLINE -- from lookups; whose application system it uses
+- `ats` TEXTLINE -- from defs; whose application system it uses
 - `closing_date` TEXTLINE -- ISO date, when the posting says one
 - `url` TEXTLINE -- the posting
 - `posting` TEXTMARKDOWN -- the text of the posting, captured at the time
@@ -92,7 +92,7 @@ noticing, which is the most common wasted hour in a job search.
 ### contacts
 
 The standard DbDo contacts table, unchanged. Keeping it identical means the
-lookups, the accelerator keys and anything built for contacts elsewhere work
+defs, the accelerator keys and anything built for contacts elsewhere work
 here without adjustment.
 
 The fields follow DbDo's contact pattern, from DbDialog, which names each field so
@@ -113,10 +113,10 @@ Work Search Record is built from, so its fields are the ones agencies ask for.
 - `action_id` INTEGER PRIMARY KEY AUTOINCREMENT
 - `added`, `edited` TEXTTIME
 - `action_date` TEXTLINE -- ISO date; for a future action this is when it is due
-- `kind` TEXTLINE -- from lookups: application, inquiry, interview, follow_up,
+- `kind` TEXTLINE -- from defs: application, inquiry, interview, follow_up,
   preparation, workshop... The agency calls this the type of contact and
   requires it
-- `method` TEXTLINE -- from lookups, and the list is the agency's own: email,
+- `method` TEXTLINE -- from defs, and the list is the agency's own: email,
   fax, in person, internet, kiosk, mail, phone, video. **Required, because what
   else you must record depends on it.**
 - `person` TEXTLINE -- the name or title of the person dealt with. Required for
@@ -127,7 +127,7 @@ Work Search Record is built from, so its fields are the ones agencies ask for.
   used. Which of those it holds depends on the method, and one field covers them
   all because only one is ever required
 - `summary` TEXTLINE -- one line, which is what appears in the report
-- `outcome` TEXTLINE -- from lookups: awaiting reply, interview scheduled,
+- `outcome` TEXTLINE -- from defs: awaiting reply, interview scheduled,
   no response, not hiring, offer, rejected, withdrawn. **The agency calls this
   the result of contact and requires it on every entry**
 - `evidence` TEXTLINE -- what proof you kept and where: "confirmation email
@@ -156,7 +156,7 @@ went where.
 - `doc_id` INTEGER PRIMARY KEY AUTOINCREMENT
 - `added`, `edited` TEXTTIME
 - `name` TEXTLINE -- what you call it
-- `kind` TEXTLINE -- from lookups: resume, cover_letter, answers, portfolio,
+- `kind` TEXTLINE -- from defs: resume, cover_letter, answers, portfolio,
   reference_list, offer
 - `version` TEXTLINE -- your own marker, so "resume, plain text, March" is one
   row and "resume, chronological, March" is another
@@ -195,9 +195,9 @@ story answers.
 Prepared once, used for years. Its first letter, s, is free among the other
 tables.
 
-### lookups and maps
+### defs and maps
 
-The two standard DbDo tables, exactly as DbDo makes them. `lookups` fills the
+The two standard DbDo tables, exactly as DbDo makes them. `defs` fills the
 combo boxes; `maps` records the many-to-many links.
 
 ## What the agency requires
@@ -257,7 +257,7 @@ so plainly.
 
 ## The lookup values
 
-Seeded into `lookups` so that the fields with fixed vocabularies offer them from
+Seeded into `defs` so that the fields with fixed vocabularies offer them from
 the start. Each set is alphabetical, since that is the order a combo box is
 searched by first letter.
 

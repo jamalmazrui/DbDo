@@ -57,7 +57,7 @@ in the repository -- they are rebuilt by `scripts\buildTutorials`.
 - [5 - Catalog Your Books](#5-catalog-your-books)
 - [6 - Explore Music](#6-explore-music)
 - [7 - More Templates](#7-more-templates)
-- [8 - Ask with SQL](#8-ask-with-sql)
+- [8 - Analyze a Dataset](#8-analyze-a-dataset)
 - [9 - Conclusion](#9-conclusion)
 - [1. Where to Go Next](#1-where-to-go-next)
 
@@ -1033,11 +1033,11 @@ Screen reader:
 
 ### Step 22
 
-Eight, Ask with SQL.
+Eight, Analyze a Dataset: a scientist's measurements, asked in SQL and in plain words, grouped, related and handed on.
 
 Screen reader:
 
-- A question in the database's own language, and the same question asked in plain words.
+- A dataset brought in, asked in SQL and in plain words, grouped, related and handed on.
 
 ### Step 23
 
@@ -1596,19 +1596,19 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 13: Alt+O
 
-Alt plus O, O for Order, says the order in force, then offers Prime order, Look order, Choose order, Type order and Reverse order, as Select Columns offers its own.
+Alt plus O, O for Order, says the order in force, then offers the same buttons as Select Columns: Look columns, Prime columns, Main, Standard and All columns, Choose columns and Type columns. Prime columns, the default order, has focus.
 
 Screen reader:
 
 - Ordered now
 - Order Records dialog
-- Prime order button
+- Prime columns button
 
 Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 14: L
 
-L for Look order sorts by name, the way stations are said. Prime order puts back the table's own order.
+L for Look columns sorts by look's columns, name first, the way stations are said. Prime columns puts back the table's own order.
 
 Screen reader:
 
@@ -2055,20 +2055,36 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 10: Alt+Shift+S
+### Step 10: Alt+Shift+G
 
-Control plus Shift plus F clears it. Now counts. I move to the format column, and Alt plus Shift plus S, Statistics from Column, describes it.
+Control plus Shift plus F clears it. Now counts. I move to the format column, and Alt plus Shift plus G, Generate from Grid, offers every report and chart of the grid.
 
 Screen reader:
 
-- Statistics from Column
+- Generate from Grid
+
+### Step 11: F
+
+F for Frequency report.
+
+Screen reader:
+
+- Frequency Report
+
+### Step 12: C
+
+C for Current column counts each format.
+
+Screen reader:
+
+- Frequency: format
 - audio (BARD), 2
 - audio (commercial), 1
 - braille, 1
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 11: Alt+Shift+R
+### Step 13: Alt+Shift+R
 
 The count of each value; for a number column, the sum, average, least and most too. Escape. Alt plus Shift plus R, Run Report, writes a saved report as a document.
 
@@ -2078,7 +2094,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 12: Enter
+### Step 14: Enter
 
 Enter. The reading log, every book finished, newest first, opens to keep or share.
 
@@ -2088,11 +2104,11 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 13
+### Step 15
 
 A planned misstep: expecting the report to follow a filter. A report reads the table its definition names, not the records in view. To share only some, filter them and use Export Data, Alt plus Shift plus X.
 
-### Step 14: Alt+Shift+X
+### Step 16: Alt+Shift+X
 
 Alt plus Shift plus X writes the records in view as a spreadsheet, CSV, JSON or another format.
 
@@ -2102,19 +2118,19 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 15
+### Step 17
 
 Escape, for now. Typing a whole library in is not the plan. bookFido, a companion Homer program, catalogs the books in your libraries into BookTrail, and once your own books are in, these six samples are removed.
 
-### Step 16
+### Step 18
 
 Each book you add takes the same fields, so a reading log, a count by format, or the next in a series comes from the same few keys.
 
-### Step 17
+### Step 19
 
 What this walk taught. I name the command; the reader gives the key.
 
-### Step 18
+### Step 20
 
 Show a record whole.
 
@@ -2122,7 +2138,7 @@ Screen reader:
 
 - Control plus I
 
-### Step 19
+### Step 21
 
 Run a saved script.
 
@@ -2130,15 +2146,15 @@ Screen reader:
 
 - Control plus Shift plus I
 
-### Step 20
+### Step 22
 
-Describe a column.
+Report on the grid.
 
 Screen reader:
 
-- Alt plus Shift plus S
+- Alt plus Shift plus G
 
-### Step 21
+### Step 23
 
 Run a report.
 
@@ -2146,7 +2162,7 @@ Screen reader:
 
 - Alt plus Shift plus R
 
-### Step 22
+### Step 24
 
 Export the records in view.
 
@@ -2538,15 +2554,15 @@ Screen reader:
 
 **Something to try:** Open the template nearest your own life and make one record your own.
 
-## 8 - Ask with SQL
+## 8 - Analyze a Dataset
 
-MusicTrail asked which genre's greatest albums go back furthest, in one line of SQL; the answer moved through like a table; the history of questions; a question in plain words to a model on this computer; and working safely.
+Fisher's iris measurements, brought in from a CSV file; a question in SQL, the database's own language, and in plain words to a model on this computer; a number grouped by species; two measurements that rise together; and the answer handed on to Excel.
 
-**Before you start:** DbDo is open on MusicTrail.
+**Before you start:** DbDo is open, and installed in the usual place, with its samples folder.
 
 ### Step 1
 
-One want: an answer no single command gives: for each genre, how far back its greatest albums go. SQL, the database's own language, asks it in one line.
+One want: to learn what a dataset says. DbDo comes with a famous one: Ronald Fisher's measurements of 150 iris flowers, three species, four measurements each, from 1936. Scientists still learn on it.
 
 ### Step 2: Alt+Control+D
 
@@ -2555,177 +2571,275 @@ Alt plus Control plus D, D for DbDo, opens it or brings it forward.
 Screen reader:
 
 - DbDo
-- DbDo ready
 
-### Step 3: Control+Q
+Confirm the wording with a live run: buildTutorials -live.
 
-Control plus Q, Q for Query, opens a box for SQL.
+### Step 3: Alt+I
+
+Alt plus I, Import, builds a DbDo database from another file: a spreadsheet, an Access file, or, as here, a CSV file of comma-separated values.
+
+Screen reader:
+
+- Import into a new DbDo database
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 4: C:\Program Files\DbDo\samples\iris.csv
+
+I type where the sample is, in DbDo's own folder.
+
+Screen reader:
+
+- C:\Program Files\DbDo\samples\iris.csv
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 5: Enter
+
+Enter brings it in, as a working copy; the original file is untouched, and Control plus Shift plus S, Save As, keeps the database as my own.
+
+Screen reader:
+
+- Imported iris.csv into a new DbDo database
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 6: Control+Q
+
+Now a question. For each species, how long are its petals on average? Control plus Q, Query.
 
 Screen reader:
 
 - Query dialog
-- SQL: edit, multiline
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 4: select genre, min(year) as earliest, count(*) as albums from albums group by genre order by earliest
+### Step 7: select species, count(*) as flowers, round(avg(petal_length), 2) as petal from iris group by species order by petal
 
-I type the question.
+I type the question in SQL.
 
 Screen reader:
 
-- select genre, min year as earliest, count as albums from albums group by genre order by earliest
+- select species, count as flowers, round avg petal length, 2 as petal from iris group by species order by petal
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 5: Control+Enter
+### Step 8: Control+Enter
 
 Control plus Enter runs it from inside the box, where Enter would start a new line.
 
 Screen reader:
 
-- Vocal Jazz, 1954, 10, Row 1 of 10
+- setosa, 50, 1.46, Row 1 of 3
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 6: Control+End
+### Step 9: Control+End
 
-Vocal Jazz goes back furthest. The answer is a table like any other. Control plus End.
+Setosa has the shortest petals. Control plus End.
 
 Screen reader:
 
-- Hip Hop, 1987, 10, Row 10 of 10
+- virginica, 50, 5.55, Row 3 of 3
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 7: Shift+Q
+### Step 10: Shift+Q
 
-And Hip Hop, the youngest. Shift plus Q says the query in force.
+Virginica the longest, almost four times as long. Shift plus Q says the query in force; Alt plus Shift plus Q, Query History, lists the questions asked, to ask one again.
 
 Screen reader:
 
-- query: select genre, min year as earliest, count star as albums from albums group by genre order by earliest
+- query: select species
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 8: Control+Q
+### Step 11: Escape
 
-A planned misstep: a misspelled column. The database names the word it does not know, and the box keeps the query to fix.
+A planned misstep: a misspelled column. The database names the word it does not know, and the box keeps the question to fix. Escape.
 
 Screen reader:
 
-- Query dialog
+- virginica, 50, 5.55, Row 3 of 3
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 9: Alt+Shift+Q
+### Step 12: Shift+F12
 
-Escape. Alt plus Shift plus Q, Query History, lists the questions asked, to run one again.
+SQL is not the only way to ask. Back in the flowers, Shift plus F12, Chat about Table, sends the table with a question in plain words to the model on this computer.
 
 Screen reader:
 
-- Query History
+- Chat about Table
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 10: Shift+F12
+### Step 13: Which species has the widest sepals?
 
-SQL is not the only way to ask. Escape, then Shift plus F12, Chat about Table, sends the table with a question in plain words to the model on this computer.
+I ask which species has the widest sepals.
 
 Screen reader:
 
-- Chat about Table dialog
-- Question: edit
+- Which species has the widest sepals?
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 11: Which Soul albums came out in the 1970s?
+### Step 14: Enter
 
-I ask which Soul albums came out in the nineteen seventies.
-
-Screen reader:
-
-- Which Soul albums came out in the 1970s?
-
-### Step 12: Enter
-
-Enter. The answer comes in words, from the same records, and with the model running on this computer, the records are not sent anywhere.
+Enter. The answer comes in words, and the records are not sent anywhere.
 
 Screen reader:
 
-- Answer dialog
+- setosa
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 13
+### Step 15: Alt+Shift+G
 
-Escape. An answer from SQL is a table, so Alt plus Shift plus X exports it and Alt plus Shift plus S describes its columns. A question asked often can be saved as a script, a dot s q l file beside the database, and run with Control plus Shift plus I, as BookTrail's were.
-
-### Step 14: Control+Shift+Z
-
-Before a query that changes data, Control plus Shift plus Z, Read Only Toggle, makes the database read only, so a mistyped statement cannot change anything.
+Escape. A third way needs no SQL at all. Alt plus Shift plus G, Generate from Grid, is the one key for reports on the grid.
 
 Screen reader:
 
-- Read Only On
+- Generate from Grid
 
-### Step 15: Control+Shift+Z
+Confirm the wording with a live run: buildTutorials -live.
 
-Control plus Shift plus Z again makes it writable when you mean to change it. After a change, F5 shows the table as it now stands.
+### Step 16: G
+
+G for Group report: a number totalled and averaged for each value of another column. It asks which column to group by.
 
 Screen reader:
 
-- No Read Only
+- Group by which column?
 
-### Step 16
+Confirm the wording with a live run: buildTutorials -live.
 
-Practise on a copy: Save As, Control plus Shift plus S, makes one, so the original stays as it was while you learn.
+### Step 17: sp
 
-### Step 17
+I type s p, for species.
+
+Screen reader:
+
+- sp
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Enter
+
+Enter chooses species.
+
+Screen reader:
+
+- Total and average which number column?
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: petal_l
+
+Then the start of petal length.
+
+Screen reader:
+
+- petal l
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Enter
+
+Enter chooses petal length.
+
+Screen reader:
+
+- In short, virginica has the highest average petal length
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 21: Alt+Shift+G
+
+The takeaway comes first, then each species: its count, average, middle, smallest and largest. Escape, and Alt plus Shift plus G again.
+
+Screen reader:
+
+- Generate from Grid
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 22: R
+
+R for Relation report: how strongly each pair of measurements rises and falls together.
+
+Screen reader:
+
+- In short, the strongest relation is between petal length and petal width: very strong, rising together
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 23: Alt+Shift+X
+
+Very strong: longer petals are wider. The report leaves out the flower number, a numbering rather than a measurement, and reminds that a relation is not a cause. Escape. To hand the answer on, Alt plus Shift plus X, Export Data, writes what the grid shows to a file: Excel, CSV, Markdown, a web page and more.
+
+Screen reader:
+
+- Export Data: the 150 records shown
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 24: Control+Shift+Z
+
+Escape. Before a query that changes data, Control plus Shift plus Z, Read Only Toggle, makes the database read only, so a mistyped statement cannot change anything. Pressed again, it makes it writable.
+
+Screen reader:
+
+- read only
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 25
 
 What this walk taught. I name the command; the reader gives the key.
 
-### Step 18
+### Step 26
 
-Ask in SQL.
-
-Screen reader:
-
-- Control plus Q
-
-### Step 19
-
-Run it from inside the box.
+Bring in a file.
 
 Screen reader:
 
-- Control plus Enter
+- Import: Alt plus I
 
-### Step 20
+### Step 27
 
-The questions asked before.
+Ask in SQL, and run it from inside the box.
 
 Screen reader:
 
-- Alt plus Shift plus Q
+- Query: Control plus Q
+- Run: Control plus Enter
 
-### Step 21
+### Step 28
 
 Ask in plain words.
 
 Screen reader:
 
-- Shift plus F12
+- Chat about Table: Shift plus F12
 
-### Step 22
+### Step 29
 
-Make the database read only.
+Report on the grid.
 
 Screen reader:
 
-- Control plus Shift plus Z
+- Generate from Grid: Alt plus Shift plus G
 
-**Something to try:** Ask RadioTrail how many stations each country has, most first.
+### Step 30
+
+Hand it on.
+
+Screen reader:
+
+- Export Data: Alt plus Shift plus X
+
+**Something to try:** Bring in a CSV file of your own -- readings from an experiment, a budget, a fitness log -- and ask it which group is highest.
 
 ## 9 - Conclusion
 

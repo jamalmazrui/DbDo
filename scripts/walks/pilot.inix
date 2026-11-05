@@ -60,15 +60,15 @@ Say=Alt plus O opens Order Records.
 Key=Alt+O
 Hear=Ordered now
 Hear=Order Records dialog
-Hear=Prime order button
+Hear=Prime columns button
 
 [step]
-Say=Shift+F1 on Prime order says it is the default order, by the primary key.
+Say=Shift+F1 on Prime columns says it is the default order, by the primary key.
 Key=Shift+F1
 Hear=The default order
 
 [step]
-Say=C for Choose order opens the two lists.
+Say=C for Choose columns opens the two lists.
 Key=C
 Hear=Fields available
 

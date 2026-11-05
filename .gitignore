@@ -35,7 +35,7 @@
 !/build.cmd
 !/configs/DbDo.inix
 !/configs/Hints.inix
-!/data/lookups.db
+!/data/defs.db
 !/DbDo.cmd
 !/DbDo.cs
 !/DbDo.exe.config
@@ -55,6 +55,7 @@
 !/ReadMe.htm
 !/ReadMe.md
 !/RepoFiles.txt
+!/samples/
 !/scripts/acceptCheck.cmd
 !/scripts/auditPatterns.cmd
 !/scripts/auditPatterns.py

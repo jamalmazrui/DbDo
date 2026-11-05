@@ -5,7 +5,10 @@
 ; for one searchable place for software and books by or for blind people. DbDo's developer rebuilds it from the
 ; directories with scripts\buildBlindCreations; your own copy is yours to add to.
 ;
-; DbDo reads this file beside the database. [Database] decides which table the window starts on; each
+; DbDo reads this file beside the database. ; Look is each table's default columns and prime its default order (5 November 2026); a table's
+; saved columns, order and filter are written here only when a person chooses them, except an order
+; that runs newest first, which prime cannot say.
+; [Database] decides which table the window starts on; each
 ; [Table:<name>] decides which columns the grid shows, in which order, and how the rows are sorted. DbDo writes these
 ; keys back whenever you change the columns, the sort or the filter, so what you adjust is remembered here.
 ;
@@ -26,29 +29,35 @@ InitialTable = apps
 ; name, then category, then platform: what it is, what it is for, where it runs. The platform answers the
 ; proposal's question of operating system; Control+F, Fields, narrows by it.
 ; SelectFields, 13 October 2026: who made it is the point of this database, so it is heard second.
-SelectFields = name, by, platform
-OrderFields = name
-WhereFilter =
 
 [Table:books]
 
 ; title, then author, then year, the way a reader asks for a book.
 ; SelectFields, 13 October 2026: the form a book comes in -- braille, audio, print -- tells a reader more than its year.
-SelectFields = title, by, format
-OrderFields = title
-WhereFilter =
 
 [Table:creators]
 
 ; surname, then first name, then roles -- author, developer, presenter -- so typing a letter finds a person by
 ; surname, as in the directories.
-SelectFields = last_name, first_name, roles
-OrderFields = last_name, first_name
-WhereFilter =
 
 [Table:presentations]
 
 ; title, then presenter, then kind: a podcast, a broadcast, a talk or keynote, a video series.
-SelectFields = title, by, kind
+
+; Saved view settings moved from the retired views table (describeFields, 4 November 2026).
+[Table:apps]
+SelectFields = name, category, platform
+[Table:apps]
+OrderFields = name
+[Table:books]
+SelectFields = title, by, year
+[Table:books]
 OrderFields = title
-WhereFilter =
+[Table:creators]
+SelectFields = last_name, first_name, roles
+[Table:creators]
+OrderFields = last_name, first_name
+[Table:presentations]
+SelectFields = title, by, kind
+[Table:presentations]
+OrderFields = title

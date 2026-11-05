@@ -29,6 +29,9 @@
 ; readers write 06. DbDo sorts text that holds only a number as a number, so
 ; 6.5 falls between 6 and 7 and 10 comes after 9.
 
+; Look is each table's default columns and prime its default order (5 November 2026); a table's
+; saved columns, order and filter are written here only when a person chooses them, except an order
+; that runs newest first, which prime cannot say.
 [Database]
 
 InitialTable = books
@@ -39,18 +42,9 @@ InitialTable = books
 ; author, and first-letter navigation searches the first column. Then the title,
 ; then where it sits in its series. Four fields, the ceiling.
 ; SelectFields, 13 October 2026: the book is named first; the order stays by author and series, so a series is heard in order.
-SelectFields = title, author, series, volume
-OrderFields = author, series, volume, title
-WhereFilter =
 
-[Table:lookups]
+[Table:defs]
 
-SelectFields = fld, val
-OrderFields = fld, ordinal
-WhereFilter =
 
 [Table:maps]
 
-SelectFields = kind, prime1, prime2
-OrderFields = kind, prime1
-WhereFilter =

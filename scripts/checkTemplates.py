@@ -9,7 +9,7 @@ cannot see that. This script runs every statement on the database it ships besid
 WHAT IT CHECKS, for each templates\\<root>\\<root>.db:
   - SQLite's integrity and foreign-key checks.
   - Every map row resolves, at both ends, to exactly one record of the table it names.
-  - Every relationship kind used in maps is a value in lookups (tbl = maps, fld = kind), so the edit dialog offers it.
+  - Every relationship kind used in maps is a value in defs (tbl = maps, fld = kind), so the edit dialog offers it.
   - Every table with a prime has a unique index on it, so a map can never point at two records.
   - Every edited trigger watches every content field: all but the id, added, edited, look, prime and marked, the same
     rule DbDo uses when it creates a table. Marking a row is deliberately not an edit.
@@ -28,12 +28,12 @@ WHAT --repair DOES, before checking, inside one transaction per database:
     their notes and tags lines; the others go. Their links were already the first's, since a map names a prime.
   - Adds a missing unique prime index once no duplicates remain.
   - Rewrites an edited trigger that misses a content field, in DbDo's own form.
-  - Adds each relationship kind used in maps but missing from lookups, with a sentence saying which way it reads.
+  - Adds each relationship kind used in maps but missing from defs, with a sentence saying which way it reads.
 Repairs change only the templates in this development folder. A user's own copy is never touched.
 
 WHAT --schema <root> DOES. RadioTrail's database is built on this machine and kept out of git, so a clean checkout
 had no way to make one: fetchStations could only copy it. --schema writes templates\\<root>\\<root>.schema from the
-database -- every table, index and trigger, and the rows of lookups and views, but no records -- and fetchStations
+database -- every table, index and trigger, and the rows of defs and views, but no records -- and fetchStations
 builds a new RadioTrail.db from it when there is none to copy. The file is rewritten only when it would change.
 
 USAGE
@@ -62,7 +62,7 @@ lBandKeys = ["detail", "footer", "group_footer", "group_header", "header"]
 # of this script did not, and rewrote RadioTrail's trigger to watch them; that was put right the same day.
 dUnwatched = {"RadioTrail|stations": ["clicks", "last_check", "last_played", "last_seen", "plays", "probed", "trend", "votes"]}
 lNotWatched = ["added", "edited", "look", "marked", "prime"]
-lSchemaRows = ["lookups", "views"]
+lSchemaRows = ["defs"]  # the views table was retired on 4 November 2026
 lSkipTables = ["sqlean_define", "views"]
 sVersion = "2026-10-12 version 2: leaves sqlean_define alone; undoes a trigger that watches deliberately unwatched fields"
 
@@ -228,13 +228,13 @@ def mergeDuplicates(oDb, sRoot, sTable):
 
 
 def seedKinds(oDb, sRoot):
-    """Adds each relationship kind used in maps but missing from lookups."""
+    """Adds each relationship kind used in maps but missing from defs."""
     lHave = tables(oDb)
-    if "maps" not in lHave or "lookups" not in lHave: return 0
-    lLookupCols = columnNames(oDb, "lookups")
+    if "maps" not in lHave or "defs" not in lHave: return 0
+    lLookupCols = columnNames(oDb, "defs")
     if not all(s in lLookupCols for s in ("tbl", "fld", "val")): return 0
-    lSeeded = [r[0] for r in oDb.execute("SELECT val FROM lookups WHERE tbl = 'maps' AND fld = 'kind'")]
-    iOrdinal = (oDb.execute("SELECT max(ordinal) FROM lookups WHERE tbl = 'maps' AND fld = 'kind'").fetchone()[0] or 0) if "ordinal" in lLookupCols else 0
+    lSeeded = [r[0] for r in oDb.execute("SELECT val FROM defs WHERE tbl = 'maps' AND fld = 'kind'")]
+    iOrdinal = (oDb.execute("SELECT max(ordinal) FROM defs WHERE tbl = 'maps' AND fld = 'kind'").fetchone()[0] or 0) if "ordinal" in lLookupCols else 0
     iAdded = 0
     for sKind, sTbl1, sTbl2 in oDb.execute("SELECT kind, min(tbl1), min(tbl2) FROM maps WHERE kind IS NOT NULL AND kind <> '' GROUP BY kind ORDER BY kind").fetchall():
         if sKind in lSeeded: continue
@@ -245,8 +245,8 @@ def seedKinds(oDb, sRoot):
         iOrdinal += 1
         dRow = {"tbl": "maps", "fld": "kind", "val": sKind, "ordinal": iOrdinal, "src": sRoot, "descrip": sNote}
         lCols = [s for s in dRow if s in lLookupCols]
-        oDb.execute("INSERT INTO lookups (" + ", ".join(lCols) + ") VALUES (" + ", ".join("?" for s in lCols) + ")", [dRow[s] for s in lCols])
-        repaired(sRoot, "added the relationship kind " + sKind + " to lookups: " + sNote)
+        oDb.execute("INSERT INTO defs (" + ", ".join(lCols) + ") VALUES (" + ", ".join("?" for s in lCols) + ")", [dRow[s] for s in lCols])
+        repaired(sRoot, "added the relationship kind " + sKind + " to defs: " + sNote)
         iAdded += 1
     return iAdded
 
@@ -303,7 +303,7 @@ def literal(vValue):
 
 
 def saveSchema(sRoot, sFolder):
-    """Writes <root>.schema: tables, then the rows of lookups and views, then indexes and triggers (after the rows, so
+    """Writes <root>.schema: tables, then the rows of defs and views, then indexes and triggers (after the rows, so
     no trigger fires while they go in). Deterministic, so it changes only when the database's design does."""
     sDb = os.path.join(sFolder, sRoot + ".db")
     if not os.path.isfile(sDb): return fail(sRoot, "--schema asked for, but there is no " + sRoot + ".db to read it from")
@@ -364,9 +364,9 @@ def checkDatabase(sRoot, oDb):
                     continue
                 iBad = oDb.execute("SELECT count(*) FROM maps m WHERE m.tbl" + sSide + " = ? AND (SELECT count(*) FROM " + quoted(sTable) + " t WHERE t.prime = m.prime" + sSide + ") <> 1", (sTable,)).fetchone()[0]
                 if iBad: fail(sRoot, plural(iBad, "map row") + " point" + ("s" if iBad == 1 else "") + " at no single " + sTable + " record on side " + sSide)
-        if "lookups" in lTables:
-            lMissing = [r[0] for r in oDb.execute("SELECT DISTINCT kind FROM maps WHERE kind IS NOT NULL AND kind <> '' AND kind NOT IN (SELECT val FROM lookups WHERE tbl = 'maps' AND fld = 'kind') ORDER BY kind")]
-            if lMissing: fail(sRoot, "relationship kinds used but not offered in lookups: " + ", ".join(lMissing))
+        if "defs" in lTables:
+            lMissing = [r[0] for r in oDb.execute("SELECT DISTINCT kind FROM maps WHERE kind IS NOT NULL AND kind <> '' AND kind NOT IN (SELECT val FROM defs WHERE tbl = 'maps' AND fld = 'kind') ORDER BY kind")]
+            if lMissing: fail(sRoot, "relationship kinds used but not offered in defs: " + ", ".join(lMissing))
         log(sRoot + ": " + plural(iMaps, "map row") + " checked")
     return True
 

@@ -115,9 +115,8 @@ TEXTTIME=^[0-9]{4}-[0-9]{2}-[0-9]{2}([ T][0-9]{2}:[0-9]{2}(:[0-9]{2}(\.[0-9]+)?)
 
 ; ===== File menu =====
 Open Database=Control+O, Open a database file on disk
-New Database=None, Create a new database file: define the first table's fields and types; standard columns plus the builtin maps and lookups tables are added automatically
+New Database=None, Create a new database file: define the first table's fields and types; standard columns plus the builtin maps and defs tables are added automatically
 Add Table=None, Add another table in the standard shape to the open database
-Open Recordset=Control+Shift+T, Open an ad-hoc SELECT as a recordset
 Recent Files=Alt+R, Pick a recently opened database to reopen
 Close Database=None, Close the open database
 Export Data=Alt+Shift+X, Export the current grid (visible columns and filtered rows) to a file
@@ -199,12 +198,12 @@ View Cycle Back=Shift+F6, Cycle to the previous presentation of the current reco
 Set Position=Control+G, Go to a position by intelligent input: a number is an absolute row; a percent (50%) scales to the row count with rounding; a leading + or - moves relatively, in rows or in percent (+10, -25%); input with letters moves the db cursor to the next column, cyclically from the current one, whose header (or failing that, current-row value) contains the text. Inputs persist in DbDo.inix; Alt+G repeats the last one
 Switch Object=Control+F6, Switch (cycle forward) to the next opened recordset
 Switch Previous Object=Control+Shift+F6, Switch (cycle backward) to the previous opened recordset
-Switch Table=Alt+F6, Switch to the next visited table
-Switch Previous Table=Alt+Shift+F6, Switch to the previously visited table
+Switch Table=None, Switch to the next visited table
+Switch Previous Table=None, Switch to the previously visited table
 Select Table=Control+T, Select a table to open in the same window
 Open Table=Control+Shift+O, Open a chosen table of the current database in a new window
 Current Windows=F4, Pick window to activate from list of current ones
-Window Toggle=None, Toggle between most recently used windows
+Window Toggle=None, Toggle between the two most recently used windows (Control+Tab and Control+Shift+Tab move between windows)
 Next Window=Control+Tab, Activate next open window
 Previous Window=Control+Shift+Tab, Activate previous open window
 Say Windows Open=Shift+F4, Say count and titles of open windows
@@ -226,6 +225,7 @@ Search Previous=Shift+F3, Repeat the last Keywords, Jump or Find Regex, backward
 ; ===== Order and Filter =====
 Order Records=Alt+O, Sort the records by one or more columns, each ascending or descending: Fields lists every column in DbDo's natural order (main fields, then standard fields) with the cursor's column selected; Default Order fills Picks with the table's default, prime's fields; Enter or Add Ascending adds it to Picks, Add Descending adds it the other way; the Picks order is the sort order and starts with the order in force; Remove (or Enter or Delete in Picks) takes one back; Clear empties Picks; OK with no picks clears the sort
 Reverse Order=Alt+Shift+O, Reverse the current sort by flipping each column's direction (ASC becomes DESC and vice versa), so records run in the exact reverse order
+Alpha Order=Alt+A, Sort the records by the column under the cursor, smallest or earliest first; Reverse Order (Alt+Shift+O) then gives largest first
 Filter Records=Control+F, Show only the records you want: Any field (text anywhere, case aside), Fields (Main, Standard or All, then a box per field in DbDo's natural order), Marked or Unmarked; with a filter in force, also New, Clear, Narrow, Expand and Invert. Per field: a plain value matches anywhere in the field, case aside; = in front means is; <=, >=, <, >, <> (or !=) compare; dates as year-month-day; filled fields must all match
 Clear Filter=Control+Shift+F, Show every record again, staying on the same record
 
@@ -236,7 +236,7 @@ Say Database=Shift+D, Say the open database's file name and path
 Say Filter=Shift+F, Say the filter in force (filter: ...), or filter: none
 Say Select Columns=Shift+S, Say the columns the grid shows (the choice made with Select Columns, Alt+S)
 Say Query=Shift+Q, Say the query behind the current recordset: the exact SELECT for a custom query (Control+Q), or SELECT * FROM the table for a directly-opened table or view
-Say Go to=Shift+G, Say what Go to Record (Control+G) would offer next: its last entry
+Say Go to=Shift+G, Say what Go to Record (Control+G) would offer next: its last entry, which Alt+G repeats
 Say ID=Shift+I, Say the primary key of the current record
 Say Look=Shift+L, Say the look value distinguishing the current record
 Say Edited=Shift+E, Say when the current record was last edited
@@ -259,8 +259,7 @@ Say Records from Current Marked=Alt+Shift+M, Say every marked record in full fro
 ; ===== Misc menu =====
 Database Summary=Alt+D, Display a summary of the database: tables, record counts, and related tables
 Table Summary=Alt+T, Display a summary of the current table: columns, types, and key constraints
-Graphics Column=Control+Shift+G, Graph (chart) the current virtual column in Excel
-Generate from Grid=Alt+Shift+G, Graph the displayed grid (multi-column chart) in Excel
+Generate from Grid=Alt+Shift+G, Analyze the grid: a statistics report, a frequency report of the current column or the shown columns, a cross-tab, a Markdown table, or an Excel chart
 Select Columns=Alt+S, Choose which columns the grid shows and in what order: Default (the fields of look), Main, Standard, All, Look and prime, Exact (the Fields and Picks lists, starting from the columns shown) or Type (names separated by commas); the choice is remembered with the table
 Update View=F5, Refresh the current rows' values from the database via the ADO Resync method, preserving the cursor position
 Extract Regex=Control+Shift+X, Extract matches of a regular expression to the clipboard

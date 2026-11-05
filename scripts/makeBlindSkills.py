@@ -14,7 +14,7 @@ Duration, Medium and Source page or Episode page, is still read.
 WHAT IT MAKES. templates\\BlindSkills\\BlindSkills.db, the Homer way, with the table helpers makeMusicTrail uses (as
 makeTechTraining does): one table, lessons, with the standard fields, look, prime and triggers. Its url field is the
 lesson's own address, so Play Stream (Alt+Shift+P) plays it in the Homer Player -- MP3 episodes directly, videos through
-yt-dlp -- and marked lessons play as a play list. lookups hold the skill groups with the directory's own definition of
+yt-dlp -- and marked lessons play as a play list. defs hold the skill groups with the directory's own definition of
 each, the skills, the sources, the series, the audiences, the media and the two structured discovery values. skill is
 the task a lesson teaches; minutes is its Length; source_url and transcript_url open
 the publisher's page and the transcript with Control+Enter; tags repeat group, skill and source for Keywords.
@@ -161,7 +161,7 @@ def build(sText, sTarget):
     trail.addLookups(oDb, "lessons", "medium", dMediaKinds, "BlindSkills")
     trail.addLookups(oDb, "lessons", "skill", {d["skill"]: "" for d in lLessons if d["skill"]}, "BlindSkills")
     trail.addLookups(oDb, "lessons", "structured_discovery", dDiscovery, "BlindSkills")
-    for sTable, sSelect, sOrder in (("lookups", "fld, val", "fld, ordinal"), ("maps", "kind, prime1, prime2", "kind, prime1"),
+    for sTable, sSelect, sOrder in (("defs", "fld, val", "fld, ordinal"), ("maps", "kind, prime1, prime2", "kind, prime1"),
                                     ("lessons", "title, medium, source", "category, title")):
         for sField, sValue in (("SelectFields", sSelect), ("OrderFields", sOrder), ("WhereFilter", "")):
             oDb.execute("INSERT INTO views (tbl, fld, val) VALUES (?, ?, ?)", (sTable, sField, trail.viewFromInix("BlindSkills", sTable, sField, sValue)))
@@ -170,7 +170,7 @@ def build(sText, sTarget):
         else: log("Starter not found, so not marked: " + sTitle)
     oDb.commit()
     sIntegrity = oDb.execute("PRAGMA integrity_check").fetchone()[0]
-    dCounts = {s: oDb.execute("SELECT count(*) FROM %s" % s).fetchone()[0] for s in ("lessons", "lookups")}
+    dCounts = {s: oDb.execute("SELECT count(*) FROM %s" % s).fetchone()[0] for s in ("lessons", "defs")}
     dMedia = dict(oDb.execute("SELECT medium, count(*) FROM lessons GROUP BY medium").fetchall())
     iNoSkill = oDb.execute("SELECT count(*) FROM lessons WHERE skill IS NULL").fetchone()[0]
     if iNoSkill: log("Lessons with no skill: %d" % iNoSkill)
@@ -182,7 +182,7 @@ def build(sText, sTarget):
         os.remove(sTemp)
         raise RuntimeError("the new database failed its own check (integrity %s, %d of %d lessons, %d with no skill); the old one is kept" % (sIntegrity, dCounts["lessons"], len(lLessons), iNoSkill))
     os.replace(sTemp, sTarget)
-    say("Wrote %s: %d lessons (%d audio, %d video), %d pick-list values." % (sTarget, dCounts["lessons"], dMedia.get("audio", 0), dMedia.get("video", 0), dCounts["lookups"]))
+    say("Wrote %s: %d lessons (%d audio, %d video), %d pick-list values." % (sTarget, dCounts["lessons"], dMedia.get("audio", 0), dMedia.get("video", 0), dCounts["defs"]))
     return dCounts
 
 

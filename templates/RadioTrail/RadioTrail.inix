@@ -34,6 +34,9 @@
 ; never writes them, and the merge is keyed by the catalog's own id for each
 ; station, never by the stream address, which real stations share.
 
+; Look is each table's default columns and prime its default order (5 November 2026); a table's
+; saved columns, order and filter are written here only when a person chooses them, except an order
+; that runs newest first, which prime cannot say.
 [Database]
 
 InitialTable = stations
@@ -59,19 +62,10 @@ InitialTable = stations
 ; station says of itself, and the article's opening paragraph. Both only ever
 ; grow; a line you add stays. status and rating are yours alone.
 ; SelectFields, 13 October 2026: the long list of genres comes last, so Down Arrow can cut it off.
-SelectFields = name, country, genre
 ; OrderFields, 13 October 2026: the American Council of the Blind's streams and the NFB Radio Network first, then every other station by name.
-OrderFields = source, name
-WhereFilter =
 
-[Table:lookups]
+[Table:defs]
 
-SelectFields = fld, val
-OrderFields = fld, ordinal
-WhereFilter =
 
 [Table:maps]
 
-SelectFields = kind, prime1, prime2
-OrderFields = kind, prime1
-WhereFilter =

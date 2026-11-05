@@ -141,8 +141,8 @@ reCallSign = re.compile(r"\b([KWC][A-Z]{2,3})(?:[- ]?(AM|FM))?\b")
 
 # THE TRAIL CONVENTIONS, KEPT BY EVERY RUN (9 October 2026). The kit's checkDb found RadioTrail without the triggers
 # every other Trail has: editing or deleting a station left its map links pointing at nothing, and "edited" changed
-# only when DbDo itself made the edit. This adds whatever is missing -- the unique prime indexes of lookups and maps,
-# an edited trigger for each table, and the map-link triggers of stations and lookups -- in the form BookTrail uses,
+# only when DbDo itself made the edit. This adds whatever is missing -- the unique prime indexes of defs and maps,
+# an edited trigger for each table, and the map-link triggers of stations and defs -- in the form BookTrail uses,
 # and changes nothing that is already there, so a listener's own copy gains them at its next refresh.
 lsAutomatic = ["votes", "clicks", "trend", "last_check", "last_seen", "probed", "plays", "last_played"]
 
@@ -203,12 +203,12 @@ def ensureConventions(c):
     def quoted(s): return '"' + s.replace('"', '""') + '"'
     iAdded = markedLast(c)
     lsExisting = [r[0] for r in c.execute("select name from sqlite_master where type in ('index', 'trigger')")]
-    for sTable in ("lookups", "maps"):
+    for sTable in ("defs", "maps"):
         sName = "idx_" + sTable + "_prime"
         if sName not in lsExisting:
             c.execute("create unique index if not exists %s on %s (prime)" % (quoted(sName), quoted(sTable)))
             iAdded += 1
-    for sTable in ("stations", "lookups", "maps"):
+    for sTable in ("stations", "defs", "maps"):
         lsColumns = [r[1] for r in c.execute("pragma table_info(%s)" % quoted(sTable))]
         if not lsColumns: continue
         sKey = lsColumns[0]
@@ -784,7 +784,7 @@ def official(sDb, sCountry, iLimit, bAgain, logLine, say):
             lsBatch = list(lsOut); del lsOut[:]
         for r, d, sWhy in lsBatch:
             # WHAT IS THERE NOW, NOT WHAT WAS READ AN HOUR AGO (12 October 2026, from an audit): notes and tags are read
-            # again just before the write, so an edit made in DbDo while the lookups ran is kept, not written over.
+            # again just before the write, so an edit made in DbDo while the defs ran is kept, not written over.
             iId = r[0]
             sNotes, sTags = [v or "" for v in c.execute("select notes, tags from stations where station_id=?", (iId,)).fetchone()]
             if d:
@@ -1017,7 +1017,7 @@ def templatePath():
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), "RadioTrail.db")
 
 def buildFromSchema(sDb, sSchema):
-    """A new, empty RadioTrail at sDb built from RadioTrail.schema: its tables, indexes, triggers, lookups and views,
+    """A new, empty RadioTrail at sDb built from RadioTrail.schema: its tables, indexes, triggers, defs and views,
     and no stations. THE TEMPLATE CAN BE MADE FROM SOURCE (12 October 2026): RadioTrail.db was then kept out of
     git, and an audit found a clean checkout had no way to make one, since this script could only copy it. The
     repository carries the catalog now too, and the schema remains the way to build one from source. The build writes the schema from the real database (scripts\\checkTemplates --schema RadioTrail), and
@@ -1182,8 +1182,8 @@ def main():
     if iCode == 0 and not lsOptions:
         print("Last, the networks each matched Wikipedia article names, such as a team's radio network.")
         iCode = mainCore([s for s in lsArgs if not s.startswith("--")] + ["--affiliations"])
-        # AND THE REPAIRS ONCE MORE (11 October 2026): the lookups and the affiliations write after the first pass, and
-        # the lookups switch the copy to write-ahead logging; this pass leaves the shipped copy one file, clean.
+        # AND THE REPAIRS ONCE MORE (11 October 2026): the defs and the affiliations write after the first pass, and
+        # the defs switch the copy to write-ahead logging; this pass leaves the shipped copy one file, clean.
         print("Finally, the repairs once more, over what this run added.")
         mainCore(lsDbArgs + ["--clean"])
     return iCode
@@ -1595,10 +1595,10 @@ def mergeRows(sDb, lsRows, logLine, say, sLog):
             iAdded += 1
     # pick lists from what is now in the table, for F4
     for sFld in ("country", "language", "codec", "source"):
-        c.execute("delete from lookups where tbl = 'stations' and fld = ? and src = 'fetched'", (sFld,))
+        c.execute("delete from defs where tbl = 'stations' and fld = ? and src = 'fetched'", (sFld,))
         lsVals = [r[0] for r in c.execute("select distinct %s from stations where %s <> '' order by lower(%s)" % (sFld, sFld, sFld))]
         for iOrd, sVal in enumerate(lsVals, 1):
-            c.execute("insert or ignore into lookups (src, tbl, fld, val, ordinal) values ('fetched','stations',?,?,?)", (sFld, sVal, iOrd))
+            c.execute("insert or ignore into defs (src, tbl, fld, val, ordinal) values ('fetched','stations',?,?,?)", (sFld, sVal, iOrd))
     c.commit()
     iTotal = c.execute("select count(*) from stations").fetchone()[0]
     c.close()

@@ -1,12 +1,12 @@
 ﻿; fieldDescriptions.inix -- one sentence for every field of every template table, written into each template's
-; lookups table by scripts\describeFields.py when DbDo builds: tbl and fld filled, val empty, descrip the sentence.
+; defs table by scripts\describeFields.py when DbDo builds: tbl and fld filled, val empty, descrip the sentence.
 ; Shift+F1 on a field in the record, new-record and filter forms says it. [*] holds fields of the same name in every
-; table; [<template>/<table>] holds one table's own, and wins. [lookups], [maps] and [views] describe DbDo's own tables.
+; table; [<template>/<table>] holds one table's own, and wins. [defs], [maps] and [views] describe DbDo's own tables.
 ; [tables] describes each table: "<template>/<table>", or a table's name alone for DbDo's own tables; written as rows
 ; with tbl filled and fld and val empty. [patterns] gives a field a .NET regular expression, "<template>/<table>/<field>",
 ; written to the pattern column of the field's own row; an empty value is tested too, so ^$| in front lets a field stay
 ; blank. [database] describes each database, written as a row with tbl * (every table) and fld and val empty.
-; A sentence a person has written into a database's lookups is never replaced.
+; A sentence a person has written into a database's defs is never replaced.
 
 [*]
 added = When this record was added; DbDo fills it in.
@@ -377,7 +377,13 @@ country = The supplier's country.
 name = The supplier company's name.
 phone = The supplier's phone number.
 
-[lookups]
+[files]
+content = The file's text, as it would be on disk.
+file_id = The number DbDo gives each carried file.
+kind = The format of the file's text, named as a declared type is, such as TEXTSQL, TEXTINIX or TEXTJSCRIPT.
+name = The file's name, such as Weekly-Count.sql or report.inix; settings.inix is the database's own settings.
+
+[defs]
 descrip = A one-sentence description: of the value, or of the field itself when val is empty, which Shift+F1 says.
 fld = The field a choice or description belongs to.
 ordinal = Where the value comes in F4's list, smallest first.
@@ -392,11 +398,6 @@ prime1 = The prime of the record in the first table.
 prime2 = The prime of the record in the second table.
 tbl1 = The first table of a link between two records.
 tbl2 = The second table of the link.
-
-[views]
-fld = Which setting is saved: the columns shown, the order or the filter.
-tbl = The table a saved view belongs to.
-val = The saved setting itself.
 
 [tables]
 BlindCreations/apps = Apps made by blind people, with where to get each one.
@@ -427,7 +428,8 @@ chinook/invoice_items = One line of a Chinook sale: a track and how many copies.
 chinook/invoices = The Chinook store's sales, one per invoice.
 chinook/media_types = The file formats of the Chinook store's tracks.
 chinook/tracks = The songs the Chinook store sells.
-lookups = DbDo's own table of choices, descriptions and patterns for the other tables' fields.
+files = DbDo's own table of the files the database carries -- its scripts, report definitions and settings -- so the database alone is the whole package.
+defs = DbDo's own table of choices, descriptions and patterns for the other tables' fields.
 maps = DbDo's own table of links between records, such as a contact who belongs to a group.
 northwind/categories = The kinds of product the Northwind sample company sells.
 northwind/customers = The Northwind company's customers.
@@ -437,7 +439,6 @@ northwind/orders = The Northwind company's orders.
 northwind/products = The products the Northwind company sells.
 northwind/shippers = The companies that ship Northwind's orders.
 northwind/suppliers = The companies that supply Northwind's products.
-views = DbDo's own table of saved views: the columns shown, the order and the filter of each table.
 
 [patterns]
 RadioTrail/stations/bitrate = ^$|^[0-9]{1,6}$
@@ -459,6 +460,100 @@ RadioTrail/stations/stream_url = ^(https?|rtmps?|mms)://\S+$
 RadioTrail/stations/trend = ^$|^-?[0-9]+$
 RadioTrail/stations/votes = ^$|^[0-9]+$
 RadioTrail/stations/wikipedia = ^$|^-$|^https://[a-z-]+\.wikipedia\.org/\S+$
+; Patterns for every template, 5 November 2026: proposed from each field's name and type, and kept only where every
+; existing record fits; required (^\s*\S) only for the field that names a record, the first of its look.
+BlindCreations/apps/name = ^\s*\S[\s\S]*$
+BlindCreations/apps/url = ^$|^https?://\S+$
+BlindCreations/books/title = ^\s*\S[\s\S]*$
+BlindCreations/books/url = ^$|^https?://\S+$
+BlindCreations/books/year = ^$|^[0-9]{4}$
+BlindCreations/creators/url = ^$|^https?://\S+$
+BlindCreations/presentations/title = ^\s*\S[\s\S]*$
+BlindCreations/presentations/url = ^$|^https?://\S+$
+BlindSkills/lessons/source_url = ^$|^https?://\S+$
+BlindSkills/lessons/title = ^\s*\S[\s\S]*$
+BlindSkills/lessons/transcript_url = ^$|^https?://\S+$
+BlindSkills/lessons/url = ^$|^https?://\S+$
+BlindSkills/lessons/year = ^$|^[0-9]{4}$
+BookTrail/books/isbn = ^$|^[0-9X-]{10,17}$
+BookTrail/books/rating = ^$|^[1-5](\.5)?$
+BookTrail/books/url = ^$|^https?://\S+$
+BookTrail/books/wikipedia = ^$|^https?://\S+$
+chinook/albums/title = ^\s*\S[\s\S]*$
+chinook/albums/url = ^$|^https?://\S+$
+chinook/artists/name = ^\s*\S[\s\S]*$
+chinook/artists/url = ^$|^https?://\S+$
+chinook/customers/email = ^$|^[^@\s]+@[^@\s]+\.[^@\s]+$
+chinook/customers/phone = ^$|^[0-9+()\-. /x]{7,}$
+chinook/customers/url = ^$|^https?://\S+$
+chinook/employees/phone = ^$|^[0-9+()\-. /x]{7,}$
+chinook/employees/url = ^$|^https?://\S+$
+chinook/genres/name = ^\s*\S[\s\S]*$
+chinook/genres/url = ^$|^https?://\S+$
+chinook/invoice_items/url = ^$|^https?://\S+$
+chinook/invoices/invoice_date = ^$|^[0-9]{4}-[0-9]{2}-[0-9]{2}([ T][0-9]{2}:[0-9]{2}(:[0-9]{2}(\.[0-9]+)?)?)?$
+chinook/invoices/url = ^$|^https?://\S+$
+chinook/media_types/name = ^\s*\S[\s\S]*$
+chinook/media_types/url = ^$|^https?://\S+$
+chinook/tracks/name = ^\s*\S[\s\S]*$
+chinook/tracks/url = ^$|^https?://\S+$
+ContactTrail/contacts/business_email = ^$|^[^@\s]+@[^@\s]+\.[^@\s]+$
+ContactTrail/contacts/home_phone = ^$|^[0-9+()\-. /x]{7,}$
+ContactTrail/contacts/office_phone = ^$|^[0-9+()\-. /x]{7,}$
+ContactTrail/contacts/personal_email = ^$|^[^@\s]+@[^@\s]+\.[^@\s]+$
+ContactTrail/contacts/state = ^$|^[A-Z]{2}$
+ContactTrail/contacts/url = ^$|^https?://\S+$
+ContactTrail/contacts/wireless_phone = ^$|^[0-9+()\-. /x]{7,}$
+ContactTrail/groups/name = ^\s*\S[\s\S]*$
+ContactTrail/groups/url = ^$|^https?://\S+$
+JobTrail/actions/action_date = ^$|^[0-9]{4}-[0-9]{2}-[0-9]{2}([ T][0-9]{2}:[0-9]{2}(:[0-9]{2}(\.[0-9]+)?)?)?$
+JobTrail/actions/url = ^$|^https?://\S+$
+JobTrail/contacts/business_email = ^$|^[^@\s]+@[^@\s]+\.[^@\s]+$
+JobTrail/contacts/home_phone = ^$|^[0-9+()\-. /x]{7,}$
+JobTrail/contacts/office_phone = ^$|^[0-9+()\-. /x]{7,}$
+JobTrail/contacts/personal_email = ^$|^[^@\s]+@[^@\s]+\.[^@\s]+$
+JobTrail/contacts/state = ^$|^[A-Z]{2}$
+JobTrail/contacts/url = ^$|^https?://\S+$
+JobTrail/contacts/wireless_phone = ^$|^[0-9+()\-. /x]{7,}$
+JobTrail/docs/name = ^\s*\S[\s\S]*$
+JobTrail/docs/url = ^$|^https?://\S+$
+JobTrail/jobs/applied_date = ^$|^[0-9]{4}-[0-9]{2}-[0-9]{2}([ T][0-9]{2}:[0-9]{2}(:[0-9]{2}(\.[0-9]+)?)?)?$
+JobTrail/jobs/closing_date = ^$|^[0-9]{4}-[0-9]{2}-[0-9]{2}([ T][0-9]{2}:[0-9]{2}(:[0-9]{2}(\.[0-9]+)?)?)?$
+JobTrail/jobs/url = ^$|^https?://\S+$
+JobTrail/stories/name = ^\s*\S[\s\S]*$
+JobTrail/stories/url = ^$|^https?://\S+$
+MusicTrail/albums/name = ^\s*\S[\s\S]*$
+MusicTrail/albums/rating = ^$|^[1-5]$
+MusicTrail/albums/url = ^$|^https?://\S+$
+MusicTrail/albums/year = ^$|^[0-9]{4}$
+MusicTrail/performers/name = ^\s*\S[\s\S]*$
+MusicTrail/performers/url = ^$|^https?://\S+$
+northwind/categories/name = ^\s*\S[\s\S]*$
+northwind/categories/url = ^$|^https?://\S+$
+northwind/customers/phone = ^$|^[0-9+()\-. /x]{7,}$
+northwind/customers/url = ^$|^https?://\S+$
+northwind/employees/phone = ^$|^[0-9+()\-. /x]{7,}$
+northwind/employees/url = ^$|^https?://\S+$
+northwind/order_details/url = ^$|^https?://\S+$
+northwind/orders/order_date = ^$|^[0-9]{4}-[0-9]{2}-[0-9]{2}([ T][0-9]{2}:[0-9]{2}(:[0-9]{2}(\.[0-9]+)?)?)?$
+northwind/orders/url = ^$|^https?://\S+$
+northwind/products/name = ^\s*\S[\s\S]*$
+northwind/products/url = ^$|^https?://\S+$
+northwind/shippers/name = ^\s*\S[\s\S]*$
+northwind/shippers/phone = ^$|^[0-9+()\-. /x]{7,}$
+northwind/shippers/url = ^$|^https?://\S+$
+northwind/suppliers/name = ^\s*\S[\s\S]*$
+northwind/suppliers/phone = ^$|^[0-9+()\-. /x]{7,}$
+northwind/suppliers/url = ^$|^https?://\S+$
+RadioTrail/stations/url = ^$|^https?://\S+$
+RecipeTrail/ingredients/name = ^\s*\S[\s\S]*$
+RecipeTrail/ingredients/url = ^$|^https?://\S+$
+RecipeTrail/recipes/name = ^\s*\S[\s\S]*$
+RecipeTrail/recipes/url = ^$|^https?://\S+$
+TechTraining/presentations/source_url = ^$|^https?://\S+$
+TechTraining/presentations/title = ^\s*\S[\s\S]*$
+TechTraining/presentations/url = ^$|^https?://\S+$
+TechTraining/presentations/year = ^$|^[0-9]{4}$
 
 [database]
 BlindCreations = Apps, books and presentations by blind creators, and the creators themselves.
@@ -472,3 +567,12 @@ northwind = Northwind, a sample trading company database for practicing queries.
 RadioTrail = A catalog of Internet radio stations to find, try and keep, with your own verdicts.
 RecipeTrail = Recipes and the ingredients they use.
 TechTraining = Free audio and video presentations about technology and accessibility.
+
+[lookprime]
+; A table's look and prime, by template and table (5 November 2026). Look is how a record is said and the default columns;
+; prime is the primary key and the default order. describeFields rebuilds a table whose look or prime differs, keeping its
+; rows, ids, indexes and triggers and re-pointing its maps links, and stops without change if a new prime is not unique.
+BlindCreations/creators/look = first_name, last_name
+BookTrail/books/look = title, author, series, volume
+northwind/orders/prime = order_date, customer_id, employee_id
+RadioTrail/stations/prime = name, stream_url, source_id

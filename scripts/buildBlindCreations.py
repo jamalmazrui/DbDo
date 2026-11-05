@@ -196,13 +196,13 @@ def main():
     c = sqlite3.connect(sDb, isolation_level=None)
     c.execute("PRAGMA journal_mode = DELETE"); c.execute("BEGIN")
     # DbDo's own tables, as in JobTrail.
-    createTable(c, "lookups", "lookup_id", [("tbl", "TEXTLINE"), ("fld", "TEXTLINE"), ("val", "TEXTLINE"), ("ordinal", "INTEGER"), ("src", "TEXTLINE"), ("descrip", "TEXTMARKDOWN")], ["tbl", "fld", "val"], ["src", "tbl", "fld", "val"])
+    createTable(c, "defs", "def_id", [("tbl", "TEXTLINE"), ("fld", "TEXTLINE"), ("val", "TEXTLINE"), ("ordinal", "INTEGER"), ("src", "TEXTLINE"), ("descrip", "TEXTMARKDOWN")], ["tbl", "fld", "val"], ["src", "tbl", "fld", "val"])
     createTable(c, "maps", "map_id", [("kind", "TEXTLINE"), ("tbl1", "TEXTLINE"), ("prime1", "TEXTLINE"), ("tbl2", "TEXTLINE"), ("prime2", "TEXTLINE")], ["kind", "prime1", "prime2"], ["tbl1", "prime1", "kind", "tbl2", "prime2"], bUrl=False)
     c.execute("CREATE TABLE views (tbl TEXTLINE NOT NULL, fld TEXTLINE NOT NULL, val TEXTLINE, PRIMARY KEY (tbl, fld))")
     # The four tables, data fields in the order a person would fill them in.
     createTable(c, "apps", "app_id", [("name", "TEXTLINE"), ("by", "TEXTLINE"), ("category", "TEXTLINE"), ("platform", "TEXTLINE"), ("tech", "TEXTLINE"), ("available_from", "TEXTLINE"), ("summary", "TEXTMARKDOWN")], ["name", "by"], ["name", "by"])
     createTable(c, "books", "book_id", [("title", "TEXTLINE"), ("by", "TEXTLINE"), ("year", "TEXTLINE"), ("category", "TEXTLINE"), ("format", "TEXTLINE"), ("available_from", "TEXTLINE"), ("summary", "TEXTMARKDOWN")], ["title", "by"], ["title", "by"])
-    createTable(c, "creators", "creator_id", [("last_name", "TEXTLINE"), ("first_name", "TEXTLINE"), ("roles", "TEXTLINE"), ("summary", "TEXTMARKDOWN")], ["last_name", "first_name"], ["last_name", "first_name"])
+    createTable(c, "creators", "creator_id", [("last_name", "TEXTLINE"), ("first_name", "TEXTLINE"), ("roles", "TEXTLINE"), ("summary", "TEXTMARKDOWN")], ["first_name", "last_name"], ["last_name", "first_name"])  # look says first name first; prime sorts by last name (5 November 2026)
     createTable(c, "presentations", "presentation_id", [("title", "TEXTLINE"), ("by", "TEXTLINE"), ("kind", "TEXTLINE"), ("summary", "TEXTMARKDOWN")], ["title", "by"], ["title", "by"])
 
     dPrime = {}   # creator name key -> prime
@@ -250,7 +250,7 @@ def main():
     # Pick lists: the kinds of link, and each field whose values form a short fixed set, alphabetical.
     def lookup(sTbl, sFld, lValues, dDescrip=None):
         for i, v in enumerate(sorted(set(x for x in lValues if x), key=str.lower), 1):
-            c.execute("INSERT INTO lookups (src, tbl, fld, val, ordinal, descrip) VALUES ('', ?, ?, ?, ?, ?)", (sTbl, sFld, v, i, (dDescrip or {}).get(v, "")))
+            c.execute("INSERT INTO defs (src, tbl, fld, val, ordinal, descrip) VALUES ('', ?, ?, ?, ?, ?)", (sTbl, sFld, v, i, (dDescrip or {}).get(v, "")))
     lookup("maps", "kind", ["author_of", "developer_of", "presenter_of"], {"author_of": "The creator wrote the book.", "developer_of": "The creator made or co-made the app.", "presenter_of": "The creator presents or hosts the presentation."})
     lookup("apps", "category", [r[0] for r in c.execute("SELECT category FROM apps")])
     lookup("books", "category", [r[0] for r in c.execute("SELECT category FROM books")])
