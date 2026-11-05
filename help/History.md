@@ -5,6 +5,14 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 5 November 2026 -- Walks and scans with nothing to remember
+
+- **scripts\recordWalk, alone,** walks the pilot, scans each window, and performs Tutorial 1 live -- the menus through JAWS -- when its recording is due. **Every push** scans DbDo's main window, saying why DbDo opens and how the scan goes, and its walk check says when a walk is due.
+
+## 5 November 2026 -- One window scanned at a time
+
+- **scripts\axeWindow DbDo** scans the window DbDo has in front -- a dialog without the record list behind it -- through the kit's new helper, with JAWS saying how it goes every 10 seconds; **scripts\recordWalk --axe** scans each window once that way, and **scripts\recordWalk 1** performs Tutorial 1 live, menus and all.
+
 ## 5 November 2026 -- No scan at every push
 
 - **DbDo is no longer opened during build_release.** The accessibility check had started it at every push and waited a minute for a scan that could not finish, since Axe.Windows' command-line tool scans the whole program, record list and all. It now runs only with check --scan, and recordWalk scans only with --axe, until a kit helper scans one dialog at a time.
