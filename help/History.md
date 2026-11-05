@@ -5,6 +5,10 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 5 November 2026 -- No scan at every push
+
+- **DbDo is no longer opened during build_release.** The accessibility check had started it at every push and waited a minute for a scan that could not finish, since Axe.Windows' command-line tool scans the whole program, record list and all. It now runs only with check --scan, and recordWalk scans only with --axe, until a kit helper scans one dialog at a time.
+
 ## 5 November 2026 -- The iris dataset in data
 
 - **iris.csv is in data, beside DbDo's other shipped data.** It had been given a top-level samples folder of its own, made without approval and clashing with scripts for the letter S, and the acceptance check already says no samples folder remains. The installer already removes an old Samples folder, and Tutorial 8 imports C:\Program Files\DbDo\data\iris.csv.
