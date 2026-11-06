@@ -1138,38 +1138,34 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 8: Control+F2
+### Step 8: F10
 
-Where a field has fixed values, Control plus F2, Pick Value, offers them as a list, so nothing is mistyped. On the country column:
-
-Screen reader:
-
-- country: list box, The United States Of America
-
-Confirm the wording with a live run: buildTutorials -live.
-
-### Step 9: F10
-
-A letter jumps to a value. Escape closes the list and changes nothing. F10 opens the menu bar.
+F10 opens the menu bar.
 
 Screen reader:
 
 - Menu bar
 - File menu
 
-### Step 10: Down Arrow
+### Step 9: Down Arrow
 
 Down Arrow to the first item.
 
 Screen reader:
 
-- Open Database..., Control plus O, O
+- New Database
 
-Confirm the wording with a live run: buildTutorials -live.
+### Step 10: Escape
+
+The item, its key, then its letter: learn a key from the menu once, then skip the menu. Escape closes the menu.
+
+Screen reader:
+
+- File submenu
 
 ### Step 11: Escape
 
-The item, its key, then its letter: learn a key from the menu once, then skip the menu.
+Escape again leaves the menu bar.
 
 Screen reader:
 
@@ -1189,23 +1185,31 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 14: Control+F1
+### Step 14: Escape
 
-Escape. Control plus F1 is the Key Describer: each key says what it does instead of doing it.
+Escape closes it.
+
+Screen reader:
+
+- Records
+
+### Step 15: Control+F1
+
+Control plus F1 is the Key Describer: each key says what it does instead of doing it.
 
 Screen reader:
 
 - Key Describer On
 
-### Step 15: Control+O
+### Step 16: Control+O
 
 Now Control plus O only describes itself.
 
 Screen reader:
 
-- Open Database, Control plus O
+- Open Database. Control+O.
 
-### Step 16: Control+F1
+### Step 17: Control+F1
 
 Control plus F1 again, and it is off.
 
@@ -1213,7 +1217,7 @@ Screen reader:
 
 - No Key Describer
 
-### Step 17: Alt+F10
+### Step 18: Alt+F10
 
 When a key will not come to mind, Alt plus F10, the Alternate Menu, lists every command in one list you type into, with its key beside it.
 
@@ -1222,7 +1226,7 @@ Screen reader:
 - Alternate Menu
 - Command, list box
 
-### Step 18: play
+### Step 19
 
 I type the word play, and the list narrows to the commands with that word.
 
@@ -1232,7 +1236,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 19: Escape
+### Step 20: Escape
 
 Escape closes the list without running anything. Help lives in four places, the same in every Homer program. I say which; the reader says the key. The guide.
 
@@ -1240,7 +1244,7 @@ Screen reader:
 
 - F1
 
-### Step 20
+### Step 21
 
 The changes, release by release.
 
@@ -1248,7 +1252,7 @@ Screen reader:
 
 - Shift plus F1
 
-### Step 21
+### Step 22
 
 The version.
 
@@ -1256,7 +1260,7 @@ Screen reader:
 
 - Alt plus F1
 
-### Step 22
+### Step 23
 
 Every key in a window you can search.
 
@@ -1264,11 +1268,11 @@ Screen reader:
 
 - Alt plus Shift plus H, Hotkey Summary
 
-### Step 23
+### Step 24
 
 What this walk taught. I name the command; the reader gives the key.
 
-### Step 24
+### Step 25
 
 Say Status.
 
@@ -1276,7 +1280,7 @@ Screen reader:
 
 - Shift plus Z
 
-### Step 25
+### Step 26
 
 Pick a field's fixed value.
 
@@ -1284,7 +1288,7 @@ Screen reader:
 
 - Control plus F2
 
-### Step 26
+### Step 27
 
 Unmark, the reverse of Mark.
 
@@ -1292,7 +1296,7 @@ Screen reader:
 
 - Control plus Shift plus M
 
-### Step 27
+### Step 28
 
 Every command in one list.
 

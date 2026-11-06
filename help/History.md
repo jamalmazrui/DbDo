@@ -5,6 +5,10 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 6 November 2026 -- Tutorial 1 checked against what JAWS said
+
+- **Tutorial 1 matches a live run, read against JAWS's own speech history.** One Escape in the File menu only returns to the menu bar, so a second step, Escape again leaves the menu bar, follows it. Current Windows, opened by F4, is closed by a real Escape before the Key Describer; the narration once said Escape and no key was pressed. The word play is typed, not sent as a key. The first File item is New Database. And the Pick Value step is out until Pick Value is built: DbDo answers Control+F2 with Pick Value is deferred; not yet implemented.
+
 ## 6 November 2026 -- OK and Cancel without letters
 
 - **OK and Cancel have no access letter in any dialog,** as Homer's rule says: Control+Enter, Enter and Escape are their keys. Eight were built with &OK or &Cancel. And with kit 1.154.0, a dialog's own access keys now come before any app command on the same Alt+letter.

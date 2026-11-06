@@ -56,14 +56,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Where a field has fixed values, Control plus F2, Pick Value, offers them as a list, so nothing is mistyped. On the country column:
-Key=Control+F2
-Hear=country: list box, The United States Of America
-Note=Confirm the wording with a live run: buildTutorials -live.
-
-[step]
-
-Say=A letter jumps to a value. Escape closes the list and changes nothing. F10 opens the menu bar.
+Say=F10 opens the menu bar.
 Key=F10
 Hear=Menu bar
 Hear=File menu
@@ -72,12 +65,17 @@ Hear=File menu
 
 Say=Down Arrow to the first item.
 Key=Down Arrow
-Hear=Open Database..., Control plus O, O
-Note=Confirm the wording with a live run: buildTutorials -live.
+Hear=New Database
 
 [step]
 
-Say=The item, its key, then its letter: learn a key from the menu once, then skip the menu.
+Say=The item, its key, then its letter: learn a key from the menu once, then skip the menu. Escape closes the menu.
+Key=Escape
+Hear=File submenu
+
+[step]
+
+Say=Escape again leaves the menu bar.
 Key=Escape
 Hear=Leaving menus
 
@@ -96,7 +94,13 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Escape. Control plus F1 is the Key Describer: each key says what it does instead of doing it.
+Say=Escape closes it.
+Key=Escape
+Hear=Records
+
+[step]
+
+Say=Control plus F1 is the Key Describer: each key says what it does instead of doing it.
 Key=Control+F1
 Hear=Key Describer On
 
@@ -104,7 +108,7 @@ Hear=Key Describer On
 
 Say=Now Control plus O only describes itself.
 Key=Control+O
-Hear=Open Database, Control plus O
+Hear=Open Database. Control+O.
 
 [step]
 
@@ -122,7 +126,8 @@ Hear=Command, list box
 [step]
 
 Say=I type the word play, and the list narrows to the commands with that word.
-Key=play
+Key=
+Type=play
 Hear=Play Stream, Alt plus Shift plus P
 Note=Confirm the wording with a live run: buildTutorials -live.
 
