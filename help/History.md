@@ -5,6 +5,10 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 6 November 2026 -- OK and Cancel without letters
+
+- **OK and Cancel have no access letter in any dialog,** as Homer's rule says: Control+Enter, Enter and Escape are their keys. Eight were built with &OK or &Cancel. And with kit 1.154.0, a dialog's own access keys now come before any app command on the same Alt+letter.
+
 ## 5 November 2026 -- Tutorial 1 heard live
 
 - **Tutorial 1 was performed live for the first time** at 13:19, menus and all -- F10 into the menu bar, the File menu, the Alternate Menu narrowed by typing -- into results\recordWalk-20261105-131904\Tutorial_1_User_Interface-live.mp3. Its Hear lines, written before any live run, matched 2 of 18; the recording shows the real wording.

@@ -11930,7 +11930,7 @@ namespace DbDo
             // last choice before the OK and Cancel pair, which stay
             // together at the end, in Tab order and on screen.
             Button btnOk = new Button();
-            btnOk.Text = "&OK";
+            btnOk.Text = "OK";
             btnOk.DialogResult = DialogResult.OK;
             btnOk.Size = new Size(80, 28);
             btnOk.Location = new Point(240, 150);
@@ -25871,7 +25871,7 @@ namespace DbDo
 
                 // Buttons: OK and Cancel
                 Button btnOk = new Button();
-                btnOk.Text = "&OK";
+                btnOk.Text = "OK";
                 btnOk.DialogResult = DialogResult.OK;
                 btnOk.Size = new Size(90, 28);
                 btnOk.Location = new Point(360, iY);
@@ -26278,14 +26278,14 @@ namespace DbDo
                 dlg.Controls.Add(tb);
 
                 Button btnOk = new Button();
-                btnOk.Text = "&OK";
+                btnOk.Text = "OK";
                 btnOk.DialogResult = DialogResult.OK;
                 btnOk.Size = new Size(90, 28);
                 btnOk.Location = new Point(218, 96);
                 dlg.Controls.Add(btnOk);
 
                 Button btnCancel = new Button();
-                btnCancel.Text = "&Cancel";
+                btnCancel.Text = "Cancel";
                 btnCancel.DialogResult = DialogResult.Cancel;
                 btnCancel.Size = new Size(90, 28);
                 btnCancel.Location = new Point(316, 96);
@@ -30073,7 +30073,7 @@ namespace DbDo
                 }
 
                 Button btnOk = new Button();
-                btnOk.Text = "&OK";
+                btnOk.Text = "OK";
                 btnOk.DialogResult = DialogResult.OK;
                 btnOk.Size = new Size(90, 28);
                 btnOk.Location = new Point(218, 320);
@@ -30081,7 +30081,7 @@ namespace DbDo
                 dlg.Controls.Add(btnOk);
 
                 Button btnCancel = new Button();
-                btnCancel.Text = "&Cancel";
+                btnCancel.Text = "Cancel";
                 btnCancel.DialogResult = DialogResult.Cancel;
                 btnCancel.Size = new Size(90, 28);
                 btnCancel.Location = new Point(316, 320);
@@ -31100,7 +31100,7 @@ namespace DbDo
                 dlg.Controls.Add(tb);
 
                 Button btnOk = new Button();
-                btnOk.Text = "&OK";
+                btnOk.Text = "OK";
                 btnOk.DialogResult = DialogResult.OK;
                 btnOk.Size = new Size(90, 28);
                 btnOk.Location = new Point(440, 280);
@@ -31108,7 +31108,7 @@ namespace DbDo
                 dlg.Controls.Add(btnOk);
 
                 Button btnCancel = new Button();
-                btnCancel.Text = "&Cancel";
+                btnCancel.Text = "Cancel";
                 btnCancel.DialogResult = DialogResult.Cancel;
                 btnCancel.Size = new Size(90, 28);
                 btnCancel.Location = new Point(536, 280);
