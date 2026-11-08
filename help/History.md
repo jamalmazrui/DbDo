@@ -5,6 +5,12 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 7 November 2026 -- Exploring keys is safe and current
+
+- **The Key Describer describes today's keys.** The installer kept the first DbDo.inix it ever installed, so keys removed since went on being described, such as Control+U, Alt+V and Control+W. That copy is now replaced at every install; your own settings, kept under %LOCALAPPDATA%\DbDo, are untouched.
+- **One order for every answer:** the command's name, then the key, then what it does, each heard separately. Grid keys such as Home had said the key first.
+- **Each window answers for itself.** Whether a command can run now is asked of the window you are in, not the first DbDo window opened. With no reason known, the describer says only "Unavailable now".
+
 ## 6 November 2026 -- Tutorial 1 checked against what JAWS said
 
 - **Tutorial 1 matches a live run, read against JAWS's own speech history.** One Escape in the File menu only returns to the menu bar, so a second step, Escape again leaves the menu bar, follows it. Current Windows, opened by F4, is closed by a real Escape before the Key Describer; the narration once said Escape and no key was pressed. The word play is typed, not sent as a key. The first File item is New Database. And the Pick Value step is out until Pick Value is built: DbDo answers Control+F2 with Pick Value is deferred; not yet implemented.

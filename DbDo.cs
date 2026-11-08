@@ -15558,6 +15558,16 @@ namespace DbDo
         // window's. ProcessCmdKey sets this just before it hands the key to the router.
         private static DbDoForm oRoutingForm = null;
 
+        // itemInRoutingForm: the menu item a key clicks in the window the router last ran a key in, the
+        // active DbDo window; null when that window is gone or has no item on the key.
+        private static ToolStripMenuItem itemInRoutingForm(Keys k)
+        {
+            DbDoForm oForm = oRoutingForm;
+            if (oForm == null || oForm.IsDisposed) return null;
+            ToolStripMenuItem mi;
+            return oForm.dLocalKeyToMenu.TryGetValue(k, out mi) ? mi : null;
+        }
+
         private static bool runInRoutingForm(Keys k)
         {
             DbDoForm oForm = oRoutingForm;
@@ -15621,11 +15631,18 @@ namespace DbDo
                         {
                             ToolStripMenuItem miDeclared = mi;
                             oDeclared.oItem = miDeclared;
+                            // THE ACTIVE WINDOW'S ITEM (7 November 2026, both audits): the command is registered once,
+                            // from the first window's menu, but runs in the window that has the key. Whether it can run
+                            // is now asked of that same window's item, so a second window with a different table, filter
+                            // or read-only state gets its own answer, and closing the first window changes nothing.
+                            // With no reason known, the kit says only "Unavailable now".
                             oDeclared.fUnavailable = delegate()
                             {
-                                if (miDeclared.Enabled) return "";
+                                ToolStripMenuItem miNow = itemInRoutingForm(kRun);
+                                if (miNow == null) miNow = miDeclared;
+                                if (miNow.Enabled) return "";
                                 string sWhyNow;
-                                return KeyMap.dDisabledWhy.TryGetValue(miDeclared, out sWhyNow) ? sWhyNow : "it cannot run now";
+                                return KeyMap.dDisabledWhy.TryGetValue(miNow, out sWhyNow) ? sWhyNow : Homer.KeyMap.sUnknownReason;
                             };
                         }
                     }
@@ -17184,7 +17201,7 @@ namespace DbDo
                 string sGridSummary;
                 if (Homer.KeyMap.findCommand(Homer.KeyMap.sAnywhere, keyData) == null
                     && dChordToSummary.TryGetValue(KeyMap.friendlyKey(keyData), out sGridSummary))
-                { Say.say(KeyMap.friendlyKey(keyData) + ". " + sGridSummary); return true; }
+                { Homer.Say.sayForcedParts(gridDescription(KeyMap.friendlyKey(keyData), sGridSummary)); return true; }
                 oRoutingForm = this;
                 return Homer.KeyMap.route(this, ref msg, keyData) || base.ProcessCmdKey(ref msg, keyData);
             }
@@ -17206,9 +17223,8 @@ namespace DbDo
                         return KeyMap.dispatchMenuItem(miDesc, keyData);
                     string sSummary;
                     if (dChordToSummary.TryGetValue(KeyMap.friendlyKey(keyData), out sSummary))
-                    { Say.say(KeyMap.friendlyKey(keyData) + ". " + sSummary); return true; }
-                    Say.say(KeyMap.friendlyKey(keyData)
-                        + ". No DbDo command is bound to this key.");
+                    { Homer.Say.sayForcedParts(gridDescription(KeyMap.friendlyKey(keyData), sSummary)); return true; }
+                    Homer.Say.sayForcedParts(KeyMap.friendlyKey(keyData), "No DbDo command.");
                     return true;
                 }
             }
@@ -20453,12 +20469,23 @@ namespace DbDo
                 {
                     string sKey = sChord.Trim();
                     if (sKey.Length > 0 && !sKey.Equals("None", StringComparison.OrdinalIgnoreCase))
-                        dChordToSummary[sKey] = sCommand + ". " + sDescr;
+                        dChordToSummary[sKey] = sCommand + "\t" + sDescr;
                 }
             }
         }
 
-        // Chord name (as KeyMap.friendlyKey names it) to "Command. Description", from DbDo.inix.
+        // gridDescription: a grid key's answer in the kit's order, as separate utterances (7 November 2026):
+        // the command, the key, the description. It had been the key first, then the rest as one string.
+        private static string[] gridDescription(string sKey, string sStored)
+        {
+            int iTab = sStored.IndexOf('\t');
+            if (iTab < 0) return new string[] { sKey, sStored };
+            string sDescr = sStored.Substring(iTab + 1).Trim();
+            if (sDescr.Length > 0 && !sDescr.EndsWith(".")) sDescr += ".";
+            return new string[] { sStored.Substring(0, iTab), sKey, sDescr };
+        }
+
+        // Chord name (as KeyMap.friendlyKey names it) to "Command<tab>Description", from DbDo.inix.
         private static Dictionary<string, string> dChordToSummary = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         // findChordCommaSplit: locate the comma that separates the
