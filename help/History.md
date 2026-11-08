@@ -2,8 +2,14 @@
 
 This file is the chronological record of DbDo releases. The most recent release is at the top. For the overview of what DbDo is, see `Announce.md` or `ReadMe.md`. For the full reference, see `DbDo.md`.
 
-Press **Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
+Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
+
+## 7 November 2026 -- The same help keys as every Homer app
+
+- **Control+Shift+F1 opens this History of Changes,** as in EdSharp and FileDir. It had no key in DbDo.
+- **The Hotkeys document is on the Help menu.** Alt+Shift+H, Hotkey Summary, lists every key, live; the document gave up Control+Shift+F1.
+- **Shift+F1 is heard with extra speech off,** since you asked for it.
 
 ## 7 November 2026 -- Exploring keys is safe and current
 

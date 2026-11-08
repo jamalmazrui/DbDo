@@ -187,8 +187,8 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Extra Speech Toggle\
   Z is for sleep: it wakes this behavior or puts it to sleep.\
   Alt+Shift+Z
-- Hotkeys\
-  F1 is help; Control+F1 describes one key, and adding Shift describes them all.\
+- History of Changes\
+  Open the history of changes in the default browser. F1 is help; Control+Shift+F1 is the history of changes.\
   Control+Shift+F1
 - Key Describer Toggle\
   Describe each key instead of running it (Ctrl+F1). F1 is help; Control+F1 describes whatever key you press next.\
@@ -199,10 +199,10 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   F1 is help; Alt+Shift+F1 is the ReadMe, the short start.\
   Alt+Shift+F1
 - What This Does\
-  F1 is help; Shift+F1 is the history of changes.\
+  F1 is help; Shift+F1 says what the control with focus does.\
   Shift+F1
 - Where Am I\
-  Show the table, row, filter, and sort in a read-only dialog.\
+  Show the table, row, filter, and sort in a read-only dialog. Slash is the question mark: Alt+Shift+Slash asks where am I.\
   Alt+Shift+Slash
 
 ### Misc
@@ -766,7 +766,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+F6\
   Next Table or View
 - Control+Shift+F1\
-  Hotkeys
+  Open the history of changes in the default browser.\
+  History of Changes
 - Control+Shift+F3\
   Find Regex backward.\
   Reverse Regex Find
@@ -1001,10 +1002,11 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Go to Record\
   Jump to a specific row by number.\
   Control+G
+- History of Changes\
+  Open the history of changes in the default browser.\
+  Control+Shift+F1
 - Hotkey Summary\
   Alt+Shift+H
-- Hotkeys\
-  Control+Shift+F1
 - Import\
   Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and defs.\
   Alt+I

@@ -14970,8 +14970,8 @@ namespace DbDo
             // SHIFT+F1 IS NOW "WHAT THIS DOES" (2 November 2026, a Homer guideline on trial in DbDo): one sentence on
             // the control with focus, as in every Lbc dialog. History of Changes keeps its place on this menu and on
             // the Alternate Menu; few people need it often enough to spend a key on it.
-            miHelpWhatThisDoes = addItem(miHelp, "What &This Does",                      "What This Does",    Keys.Shift | Keys.F1,               (s, e) => Homer.Say.say(Homer.LbcHints.sentenceForFocused(this)));
-            miHelpHistory      = addItem(miHelp, "&History of Changes",                  "Show History",      Keys.None,                          (s, e) => openHelpDocument("History", "History of Changes"));
+            miHelpWhatThisDoes = addItem(miHelp, "What &This Does",                      "What This Does",    Keys.Shift | Keys.F1,               (s, e) => Homer.Say.sayForced(Homer.LbcHints.sentenceForFocused(this)));
+            miHelpHistory      = addItem(miHelp, "&History of Changes",                  "Show History",      Keys.Control | Keys.Shift | Keys.F1, (s, e) => openHelpDocument("History", "History of Changes"));  // Control+Shift+F1 in every Homer app (7 November 2026, help\KeyDecisions.md in the kit)
             // THE F1 FAMILY IS HELP. F1 is the guide, Shift+F1 the history, Alt+F1
             // About and Control+F1 the key describer, as in EdSharp and FileDir.
             // The two left over go to the two documents people reach for most:
@@ -14979,7 +14979,7 @@ namespace DbDo
             // Hotkeys document -- Control+F1 describes one key, and adding Shift
             // describes them all.
             miHelpReadme       = addItem(miHelp, "&ReadMe",                              "Show ReadMe",       Keys.Alt | Keys.Shift | Keys.F1,    (s, e) => openHelpDocument("README", "ReadMe"));
-            miHelpHotkeysDoc   = addItem(miHelp, "Hotkeys",                             "Show Hotkeys",      Keys.Control | Keys.Shift | Keys.F1, (s, e) => openHelpDocument("Hotkeys", "Hotkeys"));
+            miHelpHotkeysDoc   = addItem(miHelp, "Hotkeys",                             "Show Hotkeys",      Keys.None,                          (s, e) => openHelpDocument("Hotkeys", "Hotkeys"));  // menu only: Alt+Shift+H lists every key, live (7 November 2026)
             miHelpFaq          = addItem(miHelp, "&Frequently Asked Questions",          "Show FAQ",          Keys.None,                          (s, e) => openHelpDocument("FAQ", "Frequently Asked Questions"));
             // The documents almost nobody opens twice go one level down, which is
             // the case for a submenu: four items that would otherwise be arrowed

@@ -282,7 +282,7 @@ Key Describer Toggle=Control+F1, Toggle key describer mode: pressing a key says 
 ; ===== Help menu =====
 Get Help=F1, Get (display) DbDo documentation
 What This Does=Shift+F1, What this does: say in one sentence what the control with focus does
-Show History=None, Show the history of DbDo fixes and enhancements; on the Help menu (no hotkey)
+Show History=Control+Shift+F1, Open the history of DbDo's changes, newest first
 About DbDo=Alt+F1, About: display DbDo version number and release date
 Alternate Menu=Alt+F10, Alternate menu: pick a command to run from the complete alphabetized list
 Show Status=Alt+Shift+Slash, Where am I: the database, table, record, filter and order; in any dialog, the dialog, its purpose and the control with focus, twice every control, three times the keys
