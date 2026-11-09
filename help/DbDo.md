@@ -163,7 +163,7 @@ Woven through the menus is a large **Say-X status family** in the Query menu: qu
 
 #### Key Help
 
-**Key Describer Toggle** (Control+F1) turns on a learning mode: while it is on, pressing a command chord **announces** what that command is and does **instead of running it**. Press Control+F1 again to turn it off. This lets you explore the keyboard safely. The **Hotkey Summary** (Alt+Shift+H) and **Alternate Menu** (Alt+F10) give you, respectively, an auditable listing of every command with its key, and a single filterable list of all commands you can search and run.
+**Key Describer Toggle** (Control+F1) turns on a learning mode: while it is on, pressing a command chord **announces** what that command is and does **instead of running it**. Press Control+F1 again to turn it off. This lets you explore the keyboard safely. **Where Am I** (Control+Slash, pressed twice) lists every command with its key, and the **Alternate Menu** (Alt+F10) gives you one list of all commands to search and run, in menu, name or key order.
 
 ---
 

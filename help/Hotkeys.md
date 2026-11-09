@@ -170,7 +170,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Show the version, author, and license. F1 is help; Alt+F1 is About.\
   Alt+F1
 - Alternate Menu\
-  Pick a command from a flat, filterable list. F10 is menus: F10 the menu bar, Shift+F10 the context menu, Alt+F10 the alternate menu.\
+  Pick any command from one list, in menu, name or key order. F10 is menus: F10 the menu bar, Shift+F10 the context menu, Alt+F10 the alternate menu.\
   Alt+F10
 - Copy Log\
   Copy the session log to the clipboard as a file, ready to paste as an attachment.\
@@ -724,7 +724,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Show the version, author, and license.\
   About
 - Alt+F10\
-  Pick a command from a flat, filterable list.\
+  Pick any command from one list, in menu, name or key order.\
   Alternate Menu
 - Alt+F12\
   Play Tutorials
@@ -881,7 +881,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Add Column to Order Descending\
   Alt+Shift+A
 - Alternate Menu\
-  Pick a command from a flat, filterable list.\
+  Pick any command from one list, in menu, name or key order.\
   Alt+F10
 - Append Cell to Clipboard\
   Append the value of the cell under the virtual cursor to the clipboard.\

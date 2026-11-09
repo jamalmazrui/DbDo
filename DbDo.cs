@@ -11977,241 +11977,6 @@ namespace DbDo
     }
 
     // =====================================================================
-    // CommandPickerDialog: flat picker over every registered command.
-    // Filter text box on top, listbox below, detail pane at the
-    // bottom. Provides an Alternate Menu command
-    // (Alt+F10) -- same name, same chord, same idea: an alphabetized
-    // searchable list of every command in the application. The
-    // internal class name is kept as CommandPickerDialog to avoid
-    // an internal renaming churn; the user-visible name is
-    // "Alternate Menu" everywhere it surfaces.
-    // =====================================================================
-    public class CommandPickerDialog : LbcForm
-    {
-        public ToolStripMenuItem miChosen;
-        private List<ToolStripMenuItem> lAllItems = new List<ToolStripMenuItem>();
-        private List<string> lAllDisplay = new List<string>();
-        private TextBox tbFilter;
-        private ListBox lbCommands;
-        private TextBox tbDetail;
-
-        public CommandPickerDialog()
-        {
-            this.Text = "Alternate Menu";
-            this.AccessibleDescription = "";
-            this.StartPosition = FormStartPosition.CenterParent;
-            this.ClientSize = new Size(640, 520);
-            this.MinimumSize = new Size(420, 360);
-            this.FormBorderStyle = FormBorderStyle.Sizable;
-            this.MaximizeBox = true;
-            this.MinimizeBox = false;
-            this.ShowInTaskbar = false;
-            this.KeyPreview = true;
-
-            Label lblF = new Label();
-            lblF.Text = "&Filter:";
-            lblF.Location = new Point(12, 14);
-            lblF.Size = new Size(60, 20);
-            this.Controls.Add(lblF);
-
-            tbFilter = new TextBox();
-            tbFilter.Location = new Point(80, 11);
-            tbFilter.Size = new Size(540, 23);
-            tbFilter.TabIndex = 0;
-            tbFilter.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right;
-            tbFilter.TextChanged += filterChanged;
-            tbFilter.KeyDown += filterKeyDown;
-            this.Controls.Add(tbFilter);
-
-            Label lblL = new Label();
-            lblL.Text = "Commands:";
-            lblL.Location = new Point(12, 42);
-            lblL.Size = new Size(120, 20);
-            this.Controls.Add(lblL);
-
-            lbCommands = new ListBox();
-            lbCommands.Location = new Point(12, 64);
-            // Shrink the list height so the description detail box
-            // fits below it. The list still uses the form's full
-            // width and anchors to all four sides for resize.
-            lbCommands.Size = new Size(608, 220);
-            lbCommands.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
-            lbCommands.IntegralHeight = false;
-            lbCommands.TabIndex = 1;
-            lbCommands.DoubleClick += (s, e) => activateChosen();
-            lbCommands.KeyDown += listKeyDown;
-            lbCommands.SelectedIndexChanged += listSelectionChanged;
-            this.Controls.Add(lbCommands);
-
-            // Description detail box: read-only multi-line TextBox
-            // below the listbox. Shows the summary on its first line
-            // and the optional description below. Always populated
-            // so the user has a self-orientation cue without having
-            // to read the listbox row plus a separate doc.
-            Label lblD = new Label();
-            lblD.Text = "&Detail:";
-            lblD.Location = new Point(12, 292);
-            lblD.Size = new Size(60, 20);
-            lblD.Anchor = AnchorStyles.Left | AnchorStyles.Bottom;
-            this.Controls.Add(lblD);
-
-            tbDetail = new TextBox();
-            tbDetail.Location = new Point(12, 312);
-            tbDetail.Size = new Size(608, 64);
-            tbDetail.Anchor = AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
-            tbDetail.Multiline = true;
-            tbDetail.ReadOnly = true;
-            tbDetail.ScrollBars = ScrollBars.Vertical;
-            tbDetail.TabStop = false;
-            this.Controls.Add(tbDetail);
-
-            Button btnOk = new Button();
-            btnOk.Text = "OK";
-            btnOk.Size = new Size(90, 28);
-            btnOk.Location = new Point(440, 484);
-            btnOk.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnOk.TabIndex = 2;
-            btnOk.UseVisualStyleBackColor = true;
-            btnOk.Click += (s, e) => activateChosen();
-            this.Controls.Add(btnOk);
-
-            Button btnCancel = new Button();
-            btnCancel.Text = "Cancel";
-            btnCancel.DialogResult = DialogResult.Cancel;
-            btnCancel.Size = new Size(90, 28);
-            btnCancel.Location = new Point(536, 484);
-            btnCancel.Anchor = AnchorStyles.Bottom | AnchorStyles.Right;
-            btnCancel.TabIndex = 3;
-            btnCancel.UseVisualStyleBackColor = true;
-            this.Controls.Add(btnCancel);
-
-            this.CancelButton = btnCancel;
-
-            foreach (KeyValuePair<ToolStripMenuItem, string> kv in KeyMap.dMenuToCommand)
-            {
-                string sCmd = kv.Value;
-                string sKey = KeyMap.dCommandToKey.ContainsKey(sCmd) ? KeyMap.friendlyKey(KeyMap.dCommandToKey[sCmd]) : "(unbound)";
-                string sDisabled = kv.Key.Enabled ? "" : "  (disabled)";
-                string sSummary = KeyMap.summaryFor(sCmd);
-                lAllItems.Add(kv.Key);
-                // Inline format: "Verb-Name  [Chord]  — summary
-                // text"; the em dash separates the metadata block
-                // (verb + chord + enabled flag) from the prose.
-                lAllDisplay.Add(string.Format("{0}  [{1}]{2}  \u2014 {3}",
-                    sCmd, sKey, sDisabled, sSummary));
-            }
-            int[] aOrder = new int[lAllDisplay.Count];
-            for (int i = 0; i < aOrder.Length; i++) aOrder[i] = i;
-            Array.Sort(aOrder, (i, j) => string.Compare(lAllDisplay[i], lAllDisplay[j], StringComparison.OrdinalIgnoreCase));
-            List<ToolStripMenuItem> lSortedItems = new List<ToolStripMenuItem>();
-            List<string> lSortedDisplay = new List<string>();
-            foreach (int i in aOrder) { lSortedItems.Add(lAllItems[i]); lSortedDisplay.Add(lAllDisplay[i]); }
-            lAllItems = lSortedItems;
-            lAllDisplay = lSortedDisplay;
-
-            applyFilter("");
-            // Force initial detail fill in case SelectedIndexChanged
-            // didn't fire for index 0.
-            listSelectionChanged(null, EventArgs.Empty);
-            this.ActiveControl = tbFilter;
-        }
-
-        private void applyFilter(string sNeedle)
-        {
-            lbCommands.BeginUpdate();
-            lbCommands.Items.Clear();
-            string sLow = sNeedle.ToLowerInvariant();
-            for (int i = 0; i < lAllDisplay.Count; i++)
-            {
-                if (sLow.Length == 0 || lAllDisplay[i].ToLowerInvariant().Contains(sLow))
-                    lbCommands.Items.Add(new PickerItem(i, lAllDisplay[i]));
-            }
-            if (lbCommands.Items.Count > 0) lbCommands.SelectedIndex = 0;
-            lbCommands.EndUpdate();
-        }
-
-        private void filterChanged(object sender, EventArgs evArgs) { applyFilter(tbFilter.Text); }
-
-        // listSelectionChanged: update the detail panel when the user
-        // moves through the filtered list. The first line is the
-        // canonical verb plus chord; subsequent lines are the
-        // optional description. Always shows the summary in the
-        // listbox itself so this panel adds detail rather than
-        // duplicates.
-        private void listSelectionChanged(object sender, EventArgs evArgs)
-        {
-            if (tbDetail == null) return;
-            PickerItem pick = lbCommands.SelectedItem as PickerItem;
-            if (pick == null) { tbDetail.Text = ""; return; }
-            ToolStripMenuItem mi = lAllItems[pick.iOriginalIndex];
-            string sCmd = KeyMap.dMenuToCommand.ContainsKey(mi) ? KeyMap.dMenuToCommand[mi] : "";
-            string sSummary = KeyMap.summaryFor(sCmd);
-            string sDescription = KeyMap.descriptionFor(sCmd);
-            StringBuilder sb = new StringBuilder();
-            sb.Append(sCmd);
-            if (KeyMap.dCommandToKey.ContainsKey(sCmd))
-                sb.Append("  [").Append(KeyMap.friendlyKey(KeyMap.dCommandToKey[sCmd])).Append("]");
-            sb.AppendLine();
-            string sCtx = KeyMap.contextFor(sCmd);
-            if (sCtx != "Global") sb.Append("Context: ").AppendLine(sCtx);
-            sb.Append("Summary: ").AppendLine(sSummary);
-            if (!string.IsNullOrEmpty(sDescription))
-            {
-                sb.AppendLine();
-                sb.AppendLine(sDescription);
-            }
-            tbDetail.Text = sb.ToString();
-        }
-
-        private void filterKeyDown(object sender, KeyEventArgs evArgs)
-        {
-            if (evArgs.KeyCode == Keys.Down)
-            {
-                if (lbCommands.Items.Count > 0)
-                {
-                    lbCommands.Focus();
-                    if (lbCommands.SelectedIndex < 0) lbCommands.SelectedIndex = 0;
-                }
-                evArgs.Handled = true;
-            }
-            else if (evArgs.KeyCode == Keys.Enter)
-            {
-                activateChosen();
-                evArgs.Handled = true;
-                evArgs.SuppressKeyPress = true;
-            }
-        }
-
-        private void listKeyDown(object sender, KeyEventArgs evArgs)
-        {
-            if (evArgs.KeyCode == Keys.Enter)
-            {
-                activateChosen();
-                evArgs.Handled = true;
-                evArgs.SuppressKeyPress = true;
-            }
-        }
-
-        private void activateChosen()
-        {
-            if (lbCommands.SelectedItem == null) return;
-            PickerItem pick = lbCommands.SelectedItem as PickerItem;
-            if (pick == null) return;
-            miChosen = lAllItems[pick.iOriginalIndex];
-            this.DialogResult = DialogResult.OK;
-            this.Close();
-        }
-
-        private class PickerItem
-        {
-            public int iOriginalIndex;
-            public string sDisplay;
-            public PickerItem(int i, string s) { iOriginalIndex = i; sDisplay = s; }
-            public override string ToString() { return sDisplay; }
-        }
-    }
-
-    // =====================================================================
     // DbDoForm: the WinForms GUI. Holds a single DbDoManager
     // instance; the recordset inside is the single source of truth
     // for current position, filter, sort, and current table. The
@@ -15368,7 +15133,7 @@ namespace DbDo
                 "Menu label: About. Alt+F1.");
             add("Key Describer Toggle", "Describe each key instead of running it (Ctrl+F1)",
                 "When the Key Describer is on, pressing ANY key announces what it does -- its command, chord, and summary when one is bound, or just the key name otherwise -- instead of running it or moving the grid. Ctrl+F1 is the one key that still acts: press it again to turn the describer off (announced as \"No Key Describer\"). Because every other key is only described, this is also the safe way to explore the keyboard.");
-            add("Alternate Menu",     "Pick a command from a flat, filterable list",
+            add("Alternate Menu",     "Pick any command from one list, in menu, name or key order",
                 "Single alphabetized list of every command with its hotkey and one-line description. Type to filter, arrow to navigate, Enter to run.");
             add("Show Log",           "Open the DbDo session log", "");
             add("File GitHub Issue",   "Open the DbDo issue form on GitHub to report a bug or comment",
@@ -32455,15 +32220,32 @@ namespace DbDo
             }
         }
 
+        // THE KIT'S ALTERNATE MENU (9 November 2026). DbDo had its own, with a filter box before the list that was
+        // never asked for. Now every Homer app uses SuiteCommands.showAlternateMenu: the list alone, the suite's search
+        // keys, and Menu, Name and Key order buttons. DbDo supplies its commands' keys and summaries from its table.
         private void helpShowCommandClicked(object sender, EventArgs evArgs)
         {
-            using (CommandPickerDialog dlg = new CommandPickerDialog())
+            Dictionary<string, string> dCaptionToCommand = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+            foreach (KeyValuePair<ToolStripMenuItem, string> kv in KeyMap.dMenuToCommand)
             {
-                if (dlg.ShowDialog(this) == DialogResult.OK && dlg.miChosen != null)
-                {
-                    if (dlg.miChosen.Enabled) dlg.miChosen.PerformClick();
-                }
+                string sCaption = (kv.Key.Text ?? "").Replace("&", "");
+                if (!dCaptionToCommand.ContainsKey(sCaption)) dCaptionToCommand[sCaption] = kv.Value;
             }
+            Func<ToolStripMenuItem, string> fCommand = delegate(ToolStripMenuItem mi)
+            {
+                string sCmd;
+                if (KeyMap.dMenuToCommand.TryGetValue(mi, out sCmd)) return sCmd;
+                return dCaptionToCommand.TryGetValue((mi.Text ?? "").Replace("&", ""), out sCmd) ? sCmd : "";
+            };
+            List<Homer.AlternateEntry> lEntries = Homer.SuiteCommands.alternateEntries(this.MainMenuStrip,
+                delegate(ToolStripMenuItem mi) { string sCmd = fCommand(mi); return sCmd.Length > 0 ? KeyMap.summaryFor(sCmd) : ""; },
+                miHelpShowCommand);
+            foreach (Homer.AlternateEntry oEntry in lEntries)
+            {
+                string sCmd = fCommand((ToolStripMenuItem) oEntry.oItem);
+                if (sCmd.Length > 0 && KeyMap.dCommandToKey.ContainsKey(sCmd)) oEntry.sKeys = KeyMap.friendlyKey(KeyMap.dCommandToKey[sCmd]);
+            }
+            Homer.SuiteCommands.runAlternateEntry(Homer.SuiteCommands.showAlternateMenu(this, lEntries));
         }
 
         // Show-Status / Where am I: speak the current database file,
