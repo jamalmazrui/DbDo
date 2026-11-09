@@ -8,6 +8,9 @@ Alt+Delete=TypeCurrentScriptKey
 ; Pass quietly: chords the app owns.
 Alt+Control+RightArrow=passDbDoKey
 Alt+Control+LeftArrow=passDbDoKey
+; Passed to DbDo, as in EdSharp's and FileDir's scripts (9 November 2026): Open Command Prompt and Open in Explorer.
+Alt+Backslash=TypeCurrentScriptKey
+Control+Backslash=TypeCurrentScriptKey
 ; Pass only here: arrows, quiet only in the app's list view.
 DownArrow=nextDbDoRow
 UpArrow=priorDbDoRow

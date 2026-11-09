@@ -270,7 +270,7 @@ Query History=Alt+Shift+Q, Pick a previously-run custom query (Control+Q) from t
 Invoke Script=Control+Shift+I, Invoke a script file against DbDo
 Edit Snippet=Alt+Shift+S, Edit a script file in the configured text editor
 Edit Settings=Alt+Shift+E, Edit DbDo settings stored in the configuration file
-Open File Folder=Alt+Backslash, Open the folder containing the current database in Windows Explorer
+Open in Explorer=Alt+Backslash, Open the folder of the open database in Windows Explorer
 Out Printer=None, Print the current grid; hidden until it is built
 Enter Console=Control+Grave, Enter (summon) the DbDo console window
 

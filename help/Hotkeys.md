@@ -254,7 +254,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Send focus to the dot prompt console. Control+Grave opens a console, as it opens the terminal in Visual Studio Code.\
   Control+Grave
 - Open in Explorer\
-  Open the folder containing the open database in Windows Explorer.\
+  Open the folder of the open database in Windows Explorer.\
   Alt+Backslash
 - Show in FileDir\
   Show the open database's file, selected in its folder, in FileDir.\
@@ -486,7 +486,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Show saved bookmarks in a listbox; navigate to the selected one.\
   List Bookmarks
 - Alt+Backslash\
-  Open the folder containing the open database in Windows Explorer.\
+  Open the folder of the open database in Windows Explorer.\
   Open in Explorer
 - Alt+C\
   Append the value of the cell under the virtual cursor to the clipboard.\
@@ -1048,7 +1048,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Send focus to the dot prompt console.\
   Control+Grave
 - Open in Explorer\
-  Open the folder containing the open database in Windows Explorer.\
+  Open the folder of the open database in Windows Explorer.\
   Alt+Backslash
 - Open Table\
   Open a chosen table of the current database in a new window.\

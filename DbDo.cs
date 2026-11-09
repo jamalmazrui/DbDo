@@ -14900,7 +14900,7 @@ namespace DbDo
             addSep(miMisc);
             ToolStripMenuItem miTools = new ToolStripMenuItem("&Tools");
             miMisc.DropDownItems.Add(miTools);
-            miToolsOpenFolder= addItem(miTools, "Open in &Explorer",                      "Open File Folder",   Keys.Alt | Keys.OemPipe,            toolsOpenFolderClicked);
+            miToolsOpenFolder= addItem(miTools, "Open in &Explorer",                      "Open in Explorer",   Keys.Alt | Keys.OemPipe,            toolsOpenFolderClicked);
             // CONTROL+BACKSLASH ONLY (8 November 2026, help\KeyDecisions.md in the kit): Control+Slash now lists the keys,
             // as in Google Docs, Slack and ChatGPT, so Open Command Prompt keeps the key EdSharp and FileDir give it.
             miToolsCommandPrompt = addItem(miTools, "&Open Command Prompt",                 "Open Command Prompt",    Keys.Control | Keys.OemPipe,        toolsCommandPromptClicked,
@@ -15209,7 +15209,7 @@ namespace DbDo
                 "Fields are matched by name; unmatched fields are dropped and one bad row does not sink the import.");
             add("Export Data",        "Export the current table or query to CSV, TSV, JSON, or another format",
                 "Choose the destination file extension to pick the format; row order and filter match what is visible.");
-            add("Open File Folder",    "Open the folder containing the open database in Windows Explorer", "");
+            add("Open in Explorer",    "Open the folder of the open database in Windows Explorer", "");
             add("Exit Application",   "Close DbDo", "");
 
             // ===== Edit menu =====
@@ -32266,7 +32266,7 @@ namespace DbDo
             }
             catch (Exception ex)
             {
-                LbcMessage.show(this, ex.Message, "Open File Folder", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                LbcMessage.show(this, ex.Message, "Open in Explorer", MessageBoxButtons.OK, MessageBoxIcon.Warning);
             }
         }
 

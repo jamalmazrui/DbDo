@@ -7,6 +7,7 @@ Press **Control+Shift+F1** inside DbDo to open this file in your browser, or typ
 
 ## 9 November 2026 -- Three help keys, and Control+P plays
 
+- **Alt+Backslash is named Open in Explorer,** as on the menu and in EdSharp and FileDir; the Key Describer had said Open File Folder. DbDo's JAWS scripts now pass Control+Backslash and Alt+Backslash to DbDo, as EdSharp's and FileDir's do.
 - **Control+Slash is Where Am I,** in the main window and every dialog, in place of Alt+Shift+Slash. Pressed once, it reads everything; Control stops the speech. Pressed twice, it shows the same in a window you can review, followed by every command and key.
 - **Shift+F1 reads everything at once too:** the control's sentence, its whole description and its keys; pressed twice, the same in a window. Neither key has a third press now.
 - **JAWS+H lists this app's keys,** through its JAWS scripts: JAWS's Hot Key Help opens the Where Am I window.
