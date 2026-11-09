@@ -5,6 +5,10 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 9 November 2026 -- testSay, every Say key heard
+
+- **scripts\testSay presses every Shift+letter key,** once, then twice, then with the Key Describer on, while JAWS runs, records and writes down what is said, and gathers it all in logs\testSay-<stamp> with DbDo's own speech logs, to compare what DbDo meant to say with what was heard.
+
 ## 9 November 2026 -- The Alternate Menu, the same in every Homer app
 
 - **Alt+F10 shows every command in one list,** in menu order, with Menu order, Name order and Key order buttons to sort it. DbDo's own version had a filter box before the list, which was never asked for. In the list, Control+F filters and Control+Shift+F clears the filter; Control+J and Control+Shift+J jump to a line holding what you type; F3 and Shift+F3 go to the next and previous match.
