@@ -294,7 +294,7 @@ The dialog first says which columns are shown now, and whether they are the look
 - **Choose columns** opens two lists, Columns available and Columns shown, with the columns now shown already in Columns shown, so you can add or drop one; the order of Columns shown is the grid's order. Order Records uses the same dialog for a sort, as Fields available and Order of fields, with Add ascending, Add descending and Prime order.
 - **Type columns** takes the column names separated by commas.
 
-**Where am I, and what does this do?** Alt+Shift+Slash, Alt and the question mark, says where you are: in a dialog, the dialog, what it is for and the control with focus; pressed twice, every control and what it holds; three times, the keys. In the main window it is the Help menu's Where Am I. Shift+F1 says what a control does in one sentence; twice, its whole description; three times, the keys that work in it.
+**Where am I, and what does this do?** Control+Slash, Control and the question mark, says where you are: in a dialog, the dialog, what it is for, the control with focus, every control and the keys; in the main window, the database, table, record, filter and order, then what the table is for. Pressed twice, it shows the same in a window you can review, followed in the main window by every command and key. Shift+F1 says what a control does: its sentence, its whole description and the keys that work in it; pressed twice, the same in a window. Speech can always be stopped with Control.
 
 **What each field is for.** In the record, new-record and filter forms, Shift+F1 on a field says what it is for. The sentences are rows of the database's own defs table: tbl and fld name the field, val is left empty, and descrip holds the sentence; tbl `*` covers a field of that name in every table. Edit a row of defs to change a sentence. The rows that do have a val are the choices F4 offers for that field.
 
@@ -631,12 +631,12 @@ The Query menu holds record inspection and the Say-X status family.
 | Query | Control+Q |
 | Query History | Alt+Shift+Q |
 | Test Integrity | — |
-| Hotkey Summary | Alt+Shift+H |
+| Hotkey Summary | Help menu; Control+Slash pressed twice |
 | Open as Managed Copy | — |
 | Describe Table | — |
 | Facet Column | — |
 | Open in Explorer | Alt+Pipe |
-| Open Command Prompt | Control+Slash |
+| Open Command Prompt | Control+Backslash |
 | Open Dot Prompt | Control+GraveAccent |
 | Sqlean Console | Control+Shift+GraveAccent |
 | Invoke Script | Control+Shift+I |
@@ -1122,9 +1122,9 @@ roles are also in **tags**, one to a line, so Keywords finds them.
 #### TechTraining plays what it lists
 
 Each presentation's **url** is the presentation itself, so Play Stream
-(Alt+Shift+P) plays it in the Homer Player: an audio file directly, a video on
+(Control+P) plays it in the Homer Player: an audio file directly, a video on
 YouTube or a similar site through yt-dlp. Mark several with Space, and
-Alt+Shift+P plays them all, in order. The row speaks the title, the length in
+Control+P plays them all, in order. The row speaks the title, the length in
 minutes, and the **medium**: audio or video play this way, and a page -- a
 presentation on its publisher's site -- opens in your browser with Control+Enter on
 its url. Control+Enter on **source_url** opens the publisher's page about it, and
@@ -1183,7 +1183,7 @@ the station says of itself and the article's opening paragraph -- is in
 **notes**. Both only grow: a line you add to either stays through every
 refresh.
 
-To listen, press **Alt+Shift+P**, Play Stream, on any station's row. The Homer
+To listen, press **Control+P**, Play Stream, on any station's row. The Homer
 Player opens -- the same player FileDir has, built from the same code in the
 kit -- with the station playing: Scroll Lock pauses and resumes, the Volume and
 Rate sliders are ordinary controls, and Escape closes it. Mark several stations

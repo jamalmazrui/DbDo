@@ -41,8 +41,8 @@ Real data to explore:
 - **RadioTrail** — some 55,000 working Internet radio stations, with a script that refreshes the catalog. Find a station by name, place, language or genre, and play it.
 - **MusicTrail** — 100 great albums and 200 great musicians across ten genres, with who recorded what and who played in which band, each linked to Wikipedia.
 - **BlindCreations** — apps, books and presentations made by blind people, with their creators: about a hundred apps, a hundred books, sixty presentations and over a hundred and twenty creators.
-- **TechTraining** — about 1,170 free presentations on technology and accessibility, from webinars to podcasts. Press Alt+Shift+P to play one, or mark several and play them as a list.
-- **BlindSkills** — 84 free videos and podcast episodes that teach blindness skills, such as cane travel, braille, cooking and crafts. Press Alt+Shift+P to play a lesson.
+- **TechTraining** — about 1,170 free presentations on technology and accessibility, from webinars to podcasts. Press Control+P to play one, or mark several and play them as a list.
+- **BlindSkills** — 84 free videos and podcast episodes that teach blindness skills, such as cane travel, braille, cooking and crafts. Press Control+P to play a lesson.
 
 Everyday tasks:
 

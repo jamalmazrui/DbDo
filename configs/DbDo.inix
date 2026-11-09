@@ -271,7 +271,7 @@ Invoke Script=Control+Shift+I, Invoke a script file against DbDo
 Edit Snippet=Alt+Shift+S, Edit a script file in the configured text editor
 Edit Settings=Alt+Shift+E, Edit DbDo settings stored in the configuration file
 Open File Folder=Alt+Backslash, Open the folder containing the current database in Windows Explorer
-Out Printer=Control+P, Output (print) the current grid to the default printer
+Out Printer=None, Print the current grid; hidden until it is built
 Enter Console=Control+Grave, Enter (summon) the DbDo console window
 
 ; ===== Toggles =====
@@ -282,10 +282,13 @@ Key Describer Toggle=Control+F1, Toggle key describer mode: pressing a key says 
 ; ===== Help menu =====
 Get Help=F1, Get (display) DbDo documentation
 What This Does=Shift+F1, What this does: say in one sentence what the control with focus does
+Hotkey Summary=None, List every command with its key and description
+Open Command Prompt=Control+Backslash, Open a Windows command prompt in the folder of the open database
 Show History=Control+Shift+F1, Open the history of DbDo's changes, newest first
 About DbDo=Alt+F1, About: display DbDo version number and release date
 Alternate Menu=Alt+F10, Alternate menu: pick a command to run from the complete alphabetized list
-Show Status=Alt+Shift+Slash, Where am I: the database, table, record, filter and order; in any dialog, the dialog, its purpose and the control with focus, twice every control, three times the keys
+Show Status=Control+Slash, Say where you are, what has focus and the keys; twice, show them in a window
+Play Stream=Control+P, Play the current record's stream
 Elevate Version=F11, Elevate (download and install) the latest DbDo version
 
 [Folders]

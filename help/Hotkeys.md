@@ -79,7 +79,7 @@ section says why each key is the one it is.
   Control+F2
 - Play Stream\
   Play the current record's stream address in the Homer Player; with records marked, play all of them. P for Play.\
-  Alt+Shift+P
+  Control+P
 - Replace\
   R for Replace.\
   Control+R
@@ -151,9 +151,6 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Previous Table or View\
   F6 moves among parts; Shift reverses Control+F6.\
   Control+Shift+F6
-- Print\
-  P for Printer.\
-  Control+P
 - Recent Files\
   R for Recent.\
   Alt+R
@@ -202,8 +199,8 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   F1 is help; Shift+F1 says what the control with focus does.\
   Shift+F1
 - Where Am I\
-  Show the table, row, filter, and sort in a read-only dialog. Slash is the question mark: Alt+Shift+Slash asks where am I.\
-  Alt+Shift+Slash
+  Show the table, row, filter, and sort in a read-only dialog. Control+Slash lists the keys, as in Google Docs, Slack and ChatGPT.\
+  Control+Slash
 
 ### Misc
 
@@ -222,9 +219,6 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Generate from Grid\
   Analyze the grid: a statistics report, a frequency report of the current column or the shown columns, a cross-tab, a Markdown table, or an Excel chart. G for Generate.\
   Alt+Shift+G
-- Hotkey Summary\
-  H for Hotkey.\
-  Alt+Shift+H
 - Read Only Toggle\
   Flip the database between read-write and read-only at runtime. Z is for sleep: it wakes this behavior or puts it to sleep.\
   Control+Shift+Z
@@ -255,7 +249,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Run a script from the Scripts folder (.js, .sql, or .dbdo). I for Invoke.\
   Control+Shift+I
 - Open Command Prompt\
-  Control+Slash
+  Control+Backslash
 - Open Dot Prompt\
   Send focus to the dot prompt console. Control+Grave opens a console, as it opens the terminal in Visual Studio Code.\
   Control+Grave
@@ -560,8 +554,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+Shift+G\
   Analyze the grid: a statistics report, a frequency report of the current column or the shown columns, a cross-tab, a Markdown table, or an Excel chart.\
   Generate from Grid
-- Alt+Shift+H\
-  Hotkey Summary
 - Alt+Shift+I\
   Invert Marked
 - Alt+Shift+L\
@@ -575,9 +567,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+Shift+O\
   Reverse the order in force, every column's direction flipped.\
   Reverse Order
-- Alt+Shift+P\
-  Play the current record's stream address in the Homer Player; with records marked, play all of them.\
-  Play Stream
 - Alt+Shift+Q\
   Query History
 - Alt+Shift+R\
@@ -585,9 +574,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Run Report
 - Alt+Shift+S\
   Edit Snippet
-- Alt+Shift+Slash\
-  Show the table, row, filter, and sort in a read-only dialog.\
-  Where Am I
 - Alt+Shift+T\
   Edit Tags
 - Alt+Shift+U\
@@ -608,6 +594,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+B\
   Save the current row position as a session bookmark.\
   Save Bookmark
+- Control+Backslash\
+  Open Command Prompt
 - Control+C\
   Copy the value of the cell under the virtual cursor to the clipboard.\
   Copy Cell to Clipboard
@@ -650,7 +638,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Open a database file.\
   Open Database
 - Control+P\
-  Print
+  Play the current record's stream address in the Homer Player; with records marked, play all of them.\
+  Play Stream
 - Control+Q\
   Query
 - Control+R\
@@ -659,7 +648,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Save changes to disk (writes an open workbook back to its .xlsx; a .db is already saved as you go).\
   Save
 - Control+Slash\
-  Open Command Prompt
+  Show the table, row, filter, and sort in a read-only dialog.\
+  Where Am I
 - Control+Space\
   Marked Toggle
 - Control+T\
@@ -1005,8 +995,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - History of Changes\
   Open the history of changes in the default browser.\
   Control+Shift+F1
-- Hotkey Summary\
-  Alt+Shift+H
 - Import\
   Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and defs.\
   Alt+I
@@ -1052,7 +1040,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Open Cell Value\
   Control+Enter
 - Open Command Prompt\
-  Control+Slash
+  Control+Backslash
 - Open Database\
   Open a database file.\
   Control+O
@@ -1077,7 +1065,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Control+F2
 - Play Stream\
   Play the current record's stream address in the Homer Player; with records marked, play all of them.\
-  Alt+Shift+P
+  Control+P
 - Play Tutorials\
   Alt+F12
 - Previous Table or View\
@@ -1085,8 +1073,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Previous Window\
   Activate the previous open window.\
   Control+Shift+Tab
-- Print\
-  Control+P
 - Query\
   Control+Q
 - Query History\
@@ -1264,4 +1250,4 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Shift+F1
 - Where Am I\
   Show the table, row, filter, and sort in a read-only dialog.\
-  Alt+Shift+Slash
+  Control+Slash

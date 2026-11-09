@@ -107,7 +107,7 @@ Hear=
 
 [step]
 
-Say=DbDo has three keys of its own for the same moments. Shift plus F1 says what the thing you are on is for. Alt plus Shift plus slash says where you are. And Alt plus Shift plus H, H for Hotkeys, lists every key. Walk one shows them; for now, just remember they are there.
+Say=DbDo has two keys of its own for the same moments. Shift plus F1 says what the thing you are on is for. Control plus slash says where you are, and pressed twice lists every key. Walk one shows them; for now, just remember they are there.
 Key=
 Hear=
 

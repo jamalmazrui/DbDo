@@ -981,7 +981,7 @@ On a laptop keyboard, Caps Lock usually stands in for Insert, though in some lap
 
 ### Step 16
 
-DbDo has three keys of its own for the same moments. Shift plus F1 says what the thing you are on is for. Alt plus Shift plus slash says where you are. And Alt plus Shift plus H, H for Hotkeys, lists every key. Walk one shows them; for now, just remember they are there.
+DbDo has two keys of its own for the same moments. Shift plus F1 says what the thing you are on is for. Control plus slash says where you are, and pressed twice lists every key. Walk one shows them; for now, just remember they are there.
 
 ### Step 17
 
@@ -1262,11 +1262,11 @@ Screen reader:
 
 ### Step 23
 
-Every key in a window you can search.
+Where you are, then every key, in a window you can search.
 
 Screen reader:
 
-- Alt plus Shift plus H, Hotkey Summary
+- Control plus slash, pressed twice, Where Am I
 
 ### Step 24
 
@@ -3059,7 +3059,7 @@ The tutorials above cover the day-to-day. When you want more:
 
 - **The guide.** F1 inside DbDo opens `DbDo.md`, which documents every command,
   the Say keys, and the two computed columns.
-- **The hotkey list.** Alt+Shift+H shows every command with its key and a line
+- **The hotkey list.** Control+Slash pressed twice shows every command with its key and a line
   saying what it does. Control+F1 does the same one key at a time.
 - **The alternate menu.** Alt+F10 lists every command in one window you can
   filter by typing, which is the fastest way to find something whose name you

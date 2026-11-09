@@ -14430,7 +14430,9 @@ namespace DbDo
             addItem(miFile, "Run Report...",           "Run Report",       Keys.Alt | Keys.Shift | Keys.R,       produceReportClicked);
             miFileExport  = addItem(miFile, "E&xport Data...",            "Export Data",      Keys.Alt | Keys.Shift | Keys.X,                    fileExportClicked);
             addSep(miFile);
-            miFilePrint   = addItem(miFile, "&Print...",                  "Out Printer",      Keys.Control | Keys.P,                filePrintClicked);
+            // NO KEY, AND HIDDEN UNTIL IT PRINTS (9 November 2026): Control+P plays media in every Homer app, and Print is not built.
+            miFilePrint   = addItem(miFile, "&Print...",                  "Out Printer",      Keys.None,                            filePrintClicked);
+            miFilePrint.Visible = false;
             addSep(miFile);
             // Switch-Table family lives in File because choosing
             // which file/table is on screen is a file-level operation,
@@ -14541,7 +14543,8 @@ namespace DbDo
             // PLAY STREAM: the current record's stream address, in the Homer
             // Player. P for Play; Alt+Shift because the command has no control
             // of its own. No trigger letter, because Pick Value took P first.
-            miRecPlayStream  = addItem(miEdit, "Play Stream",               "Play Stream",         Keys.Alt | Keys.Shift | Keys.P,     recPlayStreamClicked);
+            // CONTROL+P PLAYS (9 November 2026), as in Windows Media Player and the Windows 11 Media Player; it was Alt+Shift+P.
+            miRecPlayStream  = addItem(miEdit, "Play Stream",               "Play Stream",         Keys.Control | Keys.P,              recPlayStreamClicked);
             // Open Url: open the row's 'url' column with the system
             // default handler (browser, mail client, file opener).
             // Convenience chord for the most common Open-Cell case --
@@ -14882,9 +14885,9 @@ namespace DbDo
             miToolsInvokeSql = addItem(miQuery, "&Query...",                              "Query",             Keys.Control | Keys.Q,              toolsInvokeSqlClicked);
             miToolsSqlHistory= addItem(miQuery, "Query History...",                      "Query History",     Keys.Alt | Keys.Shift | Keys.Q,     sqlHistoryClicked);
             miToolsTest      = addItem(miMisc, "Test &Integrity",                        "Test Database",     Keys.None,                          toolsTestClicked);
-            miMiscHotkeySummary = addItem(miMisc, "&Hotkey Summary",      "Hotkey Summary",      Keys.Alt | Keys.Shift | Keys.H, hotkeySummaryClicked,
-                "List every command with its key and description, then flag any inconsistencies",
-                "Joins the command, key, and description tables the menus and Key Help already use into one listing, sorted by command name, then notes duplicate key assignments and commands missing a description. Bound to Alt+Shift+H.");
+            miMiscHotkeySummary = addItem(miMisc, "&Hotkey Summary",      "Hotkey Summary",      Keys.None, hotkeySummaryClicked,
+                "List every command with its key and description",
+                "One listing of every command, its keys and its description, sorted by command name.");
             miMiscOpenManagedCopy = addItem(miMisc, "&Open as Managed Copy...", "Open Managed Copy", Keys.None, openManagedCopyClicked,
                 "Open a SQLite database as a throwaway working copy: edits stay in the copy and the original is untouched until you Save As",
                 "The document model: the chosen SQLite database is copied to a temp working file that becomes the live database, so every edit, add, and delete lands in the copy and the original on disk is left alone. Use Save (Control+S), which writes the working copy out to a .db file (a -copy name is suggested, so the source is never overwritten); closing without saving discards the changes. To bring an Excel, Access, dBASE, or CSV file into a new DbDo database instead, use Import. Unbound by default.");
@@ -14898,11 +14901,11 @@ namespace DbDo
             ToolStripMenuItem miTools = new ToolStripMenuItem("&Tools");
             miMisc.DropDownItems.Add(miTools);
             miToolsOpenFolder= addItem(miTools, "Open in &Explorer",                      "Open File Folder",   Keys.Alt | Keys.OemPipe,            toolsOpenFolderClicked);
-            miToolsCommandPrompt = addItem(miTools, "&Open Command Prompt",                 "Open Command Prompt",    Keys.Control | Keys.OemQuestion,    toolsCommandPromptClicked,
-                "Open a Windows command prompt in the folder of the currently-open database",
-                "Control+Slash. The prompt opens with its working directory set to the open database's folder, or your user folder when nothing is open. Companion to Open in Explorer (Alt+Backslash), which opens that same folder in the file manager.");
-            // Control+Backslash as well (suite manifest), the key EdSharp and FileDir use.
-            registerLocalAlias(Keys.Control | Keys.Oem5, miToolsCommandPrompt);
+            // CONTROL+BACKSLASH ONLY (8 November 2026, help\KeyDecisions.md in the kit): Control+Slash now lists the keys,
+            // as in Google Docs, Slack and ChatGPT, so Open Command Prompt keeps the key EdSharp and FileDir give it.
+            miToolsCommandPrompt = addItem(miTools, "&Open Command Prompt",                 "Open Command Prompt",    Keys.Control | Keys.OemPipe,        toolsCommandPromptClicked,
+                "Open a Windows command prompt in the folder of the open database",
+                "The prompt opens in the open database's folder, or your user folder when nothing is open.");
             // SHOW IN FILEDIR (19 October 2026), Control+Shift+Backslash, the same key as FileDir's Open
             // in DbDo: the open database's file, selected in its folder in FileDir.
             addItem(miTools, "Show in FileDir", "Show in FileDir", Keys.Control | Keys.Shift | Keys.Oem5, toolsShowInFileDirClicked);
@@ -15021,7 +15024,7 @@ namespace DbDo
             // and when on, intercept hotkeys to announce them rather
             // than execute them.
             miHelpTraceCommand = addItem(miHelp, "&Key Describer Toggle",           "Key Describer Toggle", Keys.Control | Keys.F1,             helpTraceCommandClicked);
-            miHelpStatus       = addItem(miHelp, "&Where Am I",                            "Show Status",       Keys.Alt | Keys.Shift | Keys.OemQuestion, helpStatusClicked);  // Alt+Shift+Slash, the question key, as in every Lbc dialog (3 November 2026)
+            miHelpStatus       = addItem(miHelp, "&Where Am I",                            "Show Status",       Keys.Control | Keys.OemQuestion,    helpStatusClicked);  // CONTROL+SLASH (9 November 2026), the same key as in every Lbc dialog; it was Alt+Shift+Slash  // Alt+Shift+Slash, the question key, as in every Lbc dialog (3 November 2026)
             miHelpEmailLog     = addItem(miHelp, "&Email Log File...",                   "Email Log",         Keys.None,                          emailLogClicked);
             // Toggle-Extra-Speech: silence DbDo's direct speech
             // messages without affecting the screen reader's natural
@@ -30095,7 +30098,7 @@ namespace DbDo
                     {
                         if (e.KeyData != (Keys.Shift | Keys.F1)) return;
                         e.Handled = true; e.SuppressKeyPress = true;
-                        Say.say(Homer.LbcHints.hintFor(lb, "Enter chooses the one you are on.", Homer.LbcHints.pressCount("Shift+F1")));
+                        Homer.LbcHints.answer(dlg, "Shift+F1", "What This Does", Homer.LbcHints.allLevels(delegate(int iLevel) { return Homer.LbcHints.hintFor(lb, "Enter chooses the one you are on.", iLevel); }));
                     };
                 }
 
@@ -32475,15 +32478,15 @@ namespace DbDo
         private void helpStatusClicked(object sender, EventArgs evArgs)
         {
             string sMsg = buildStatusMessage();
-            // PRESSED TWICE, WHAT THE TABLE IS FOR (3 November 2026), as Where Am I in a dialog says more the more it
-            // is pressed: the table's description from defs or the shipped descriptions.
-            if (Homer.LbcHints.pressCount("Alt+Shift+Slash") >= 2 && db != null && !string.IsNullOrEmpty(db.currentTable))
+            // EVERYTHING AT ONCE (9 November 2026): the status, then what the table is for, from defs or the shipped
+            // descriptions; pressed twice, the same in a window followed by every command and key.
+            string sAbout = "";
+            if (db != null && !string.IsNullOrEmpty(db.currentTable))
             {
-                string sAbout = "";
                 try { sAbout = db.getTableDescription(db.currentTable); } catch { }
-                if (sAbout.Length > 0) sMsg = db.currentTable + ": " + sAbout;
+                if (sAbout.Length > 0) sAbout = db.currentTable + ": " + sAbout;
             }
-            Say.say(sMsg);
+            Homer.SuiteCommands.whereAmI(this, new string[] { sMsg, sAbout });
             // Also dump to the StatusStrip label so the user can
             // tab-navigate to it (or use the screen reader's "say
             // status bar" hotkey -- JAWS Insert+PageDown) and have

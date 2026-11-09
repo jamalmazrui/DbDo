@@ -151,9 +151,9 @@ Hear=Alt plus F1
 
 [step]
 
-Say=Every key in a window you can search.
+Say=Where you are, then every key, in a window you can search.
 Key=
-Hear=Alt plus Shift plus H, Hotkey Summary
+Hear=Control plus slash, pressed twice, Where Am I
 
 [step]
 
