@@ -368,16 +368,16 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Speak the current virtual column for marked rows only, from the top. L for List.\
   Alt+Shift+L
 - Say Database\
-  Speak the open database's name (single-press) or full path (double-press). D for Database.\
+  Say the database's name and folder. D for Database.\
   Shift+D
 - Say Edited\
-  Speak the current row's 'edited' value in human-friendly local time. E for Edited.\
+  Say when the record was last edited. E for Edited.\
   Shift+E
 - Say Filter\
   F for Filter.\
   Shift+F
 - Say Go to\
-  Speak the last entry of Go to Record (Control+G), which Alt+G repeats. G for Go.\
+  Say the last Go to entry. G for Go.\
   Shift+G
 - Say Id\
   I for ID.\
@@ -386,7 +386,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   J for Jump.\
   Shift+J
 - Say Keywords\
-  Speak the current Keywords search string. K for Keywords.\
+  Say the last Keywords entry. K for Keywords.\
   Shift+K
 - Say Look\
   L for Look.\
@@ -395,10 +395,10 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   M for Marked.\
   Shift+M
 - Say Notes\
-  Speak the current row's 'notes' field. N for Notes.\
+  Say the record's notes. N for Notes.\
   Shift+N
 - Say Order\
-  Speak the active sort/order expression. O for Order.\
+  Say the order in force. O for Order.\
   Shift+O
 - Say Order and Filter\
   Speak the current order and filter, or none for each. Shift+8 is the asterisk, the SQL sign for everything: sort and filter together.\
@@ -410,7 +410,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Speak the column header and 1-based row number of the virtual cell. Delete echoes JAWS, where Insert+Delete says where the cursor is.\
   Alt+Delete
 - Say Prime\
-  Speak the current record's prime (unique-key) field. P for Prime.\
+  Say the record's prime fields. P for Prime.\
   Shift+P
 - Say Query\
   Q for Query.\
@@ -431,22 +431,22 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   S for Say.\
   Shift+S
 - Say Status\
-  Speak the table, row count, filter, and sort. Z is for sleep: it wakes this behavior or puts it to sleep.\
+  Say the table, row, order and filter. Z is for sleep: it wakes this behavior or puts it to sleep.\
   Shift+Z
 - Say Tags\
-  Speak the current row's 'tags' field. T for Tags.\
+  Say the record's tags. T for Tags.\
   Shift+T
 - Say Time\
   Speak the current date and time.\
   Alt+Semicolon
 - Say url\
-  Speak the current record's url field. U for url.\
+  Say the record's url. U for url.\
   Shift+U
 - Say Whole Record\
   W for Whole.\
   Shift+W
 - Say Yield\
-  Speak the current row count (after filter). Y for Yield.\
+  Say how many records are in view. Y for Yield.\
   Shift+Y
 
 ### Window
@@ -815,35 +815,35 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Shift+C\
   Say Cell
 - Shift+D\
-  Speak the open database's name (single-press) or full path (double-press).\
+  Say the database's name and folder.\
   Say Database
 - Shift+E\
-  Speak the current row's 'edited' value in human-friendly local time.\
+  Say when the record was last edited.\
   Say Edited
 - Shift+F\
   Say Filter
 - Shift+G\
-  Speak the last entry of Go to Record (Control+G), which Alt+G repeats.\
+  Say the last Go to entry.\
   Say Go to
 - Shift+I\
   Say Id
 - Shift+J\
   Say Jump
 - Shift+K\
-  Speak the current Keywords search string.\
+  Say the last Keywords entry.\
   Say Keywords
 - Shift+L\
   Say Look
 - Shift+M\
   Say Marked
 - Shift+N\
-  Speak the current row's 'notes' field.\
+  Say the record's notes.\
   Say Notes
 - Shift+O\
-  Speak the active sort/order expression.\
+  Say the order in force.\
   Say Order
 - Shift+P\
-  Speak the current record's prime (unique-key) field.\
+  Say the record's prime fields.\
   Say Prime
 - Shift+Q\
   Say Query
@@ -855,20 +855,20 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Speak every marked record in full, from the first record down (all displayed columns).\
   Say Records of Marked
 - Shift+T\
-  Speak the current row's 'tags' field.\
+  Say the record's tags.\
   Say Tags
 - Shift+U\
-  Speak the current record's url field.\
+  Say the record's url.\
   Say url
 - Shift+V\
   Say Replace Values
 - Shift+W\
   Say Whole Record
 - Shift+Y\
-  Speak the current row count (after filter).\
+  Say how many records are in view.\
   Say Yield
 - Shift+Z\
-  Speak the table, row count, filter, and sort.\
+  Say the table, row, order and filter.\
   Say Status
 
 ## By command
@@ -1142,32 +1142,32 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Speak the current virtual column for marked rows only, from the top.\
   Alt+Shift+L
 - Say Database\
-  Speak the open database's name (single-press) or full path (double-press).\
+  Say the database's name and folder.\
   Shift+D
 - Say Edited\
-  Speak the current row's 'edited' value in human-friendly local time.\
+  Say when the record was last edited.\
   Shift+E
 - Say Filter\
   Shift+F
 - Say Go to\
-  Speak the last entry of Go to Record (Control+G), which Alt+G repeats.\
+  Say the last Go to entry.\
   Shift+G
 - Say Id\
   Shift+I
 - Say Jump\
   Shift+J
 - Say Keywords\
-  Speak the current Keywords search string.\
+  Say the last Keywords entry.\
   Shift+K
 - Say Look\
   Shift+L
 - Say Marked\
   Shift+M
 - Say Notes\
-  Speak the current row's 'notes' field.\
+  Say the record's notes.\
   Shift+N
 - Say Order\
-  Speak the active sort/order expression.\
+  Say the order in force.\
   Shift+O
 - Say Order and Filter\
   Speak the current order and filter, or none for each.\
@@ -1179,7 +1179,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Speak the column header and 1-based row number of the virtual cell.\
   Alt+Delete
 - Say Prime\
-  Speak the current record's prime (unique-key) field.\
+  Say the record's prime fields.\
   Shift+P
 - Say Query\
   Shift+Q
@@ -1196,16 +1196,16 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Select Columns\
   Shift+S
 - Say Status\
-  Speak the table, row count, filter, and sort.\
+  Say the table, row, order and filter.\
   Shift+Z
 - Say Tags\
-  Speak the current row's 'tags' field.\
+  Say the record's tags.\
   Shift+T
 - Say Time\
   Speak the current date and time.\
   Alt+Semicolon
 - Say url\
-  Speak the current record's url field.\
+  Say the record's url.\
   Shift+U
 - Say Whole Record\
   Shift+W
@@ -1213,7 +1213,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Speak the count and titles of open recordset windows, marking the current one.\
   Shift+F4
 - Say Yield\
-  Speak the current row count (after filter).\
+  Say how many records are in view.\
   Shift+Y
 - Search Next\
   Repeat the last Find forward.\

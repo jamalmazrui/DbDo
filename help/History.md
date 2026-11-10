@@ -7,6 +7,7 @@ Press **Control+Shift+F1** inside DbDo to open this file in your browser, or typ
 
 ## 9 November 2026 -- testSay, every Say key heard
 
+- **The Say keys, as testSay heard them.** Each Shift+letter key now has one description, one short sentence beginning "Say the", where some had repeated their name and others named unrelated keys. A second press spells a short answer and shows a longer one in a window, where it had spelled every answer, however long. Say Database names the folder, not the whole path again.
 - **testSay is kept in scripts.** It was not named in RepoFiles.txt, so the release's tidy moved it to notes\\other as a stray; it is named now.
 - **The Alternate Menu lists DbDo's commands.** It had said "0 commands": DbDo's menus live in its frame's menu bar while a table window is active.
 - **The tutorials teach Control+P for Play Stream,** and the Alternate Menu's list as Commands.

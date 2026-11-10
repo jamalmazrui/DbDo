@@ -15029,26 +15029,26 @@ namespace DbDo
             add("Show Table",         "Show every row of the current table in a single read-only text view", "");
             add("Show Related",       "Jump to one related table via an outbound foreign key", "");
             add("Show Status",        "Show the table, row, filter, and sort in a read-only dialog", "");
-            add("Say Status",         "Speak the table, row count, filter, and sort", "");
-            add("Say Database",       "Speak the open database's name (single-press) or full path (double-press)",
+            add("Say Status",         "Say the table, row, order and filter", "");
+            add("Say Database",       "Say the database's name and folder",
                 "Shift+D. Replaces Say Path. Single-press announces just the filename for fast 'where am I' checks; double-press opens a memo dialog with the full path that can be copied via Ctrl+C.");
-            add("Say Order",          "Speak the active sort/order expression",
+            add("Say Order",          "Say the order in force",
                 "Shift+O. Counterpart to Say Where Filter (Shift+W). Reports 'No order applied' when nothing is sorted.");
-            add("Say url",            "Speak the current record's url field",
+            add("Say url",            "Say the record's url",
                 "Shift+U. Reports '(empty)' when the field is blank.");
-            add("Say Prime",          "Speak the current record's prime (unique-key) field",
+            add("Say Prime",          "Say the record's prime fields",
                 "Shift+P. The prime field is the unique/primary-key expression (formerly named 'prime'). Falls back to a legacy 'prime' column. Reports 'blank' when empty.");
-            add("Say Keywords",       "Speak the current Keywords search string",
+            add("Say Keywords",       "Say the last Keywords entry",
                 "Shift+F. Reports the most recent Find substring (or regex). Says 'No find string' when nothing has been searched yet. Companion to Say Where Filter (Shift+W).");
-            add("Say Yield",          "Speak the current row count (after filter)", "");
+            add("Say Yield",          "Say how many records are in view", "");
             add("Say Tables",         "Speak the visited-tables list", "");
             add("Say Yield Marked",    "Speak the count of marked rows", "");
-            add("Say Edited",          "Speak the current row's 'edited' value in human-friendly local time",
+            add("Say Edited",          "Say when the record was last edited",
                 "Shift+E. Reads the standard 'edited' timestamp column. Falls back to 'added' if 'edited' is absent.");
-            add("Say Notes",          "Speak the current row's 'notes' field",
+            add("Say Notes",          "Say the record's notes",
                 "Shift+N. Field-level Say command alongside Say Tags (Shift+T); speaks the current record's notes value.");
-            add("Say Tags",           "Speak the current row's 'tags' field", "");
-            add("Say Go to",           "Speak the last entry of Go to Record (Control+G), which Alt+G repeats",
+            add("Say Tags",           "Say the record's tags", "");
+            add("Say Go to",           "Say the last Go to entry",
                 "Shift+G. Companion to Say Where Filter (Shift+W) and Say Order (Shift+O) -- reveals the current state of the Ctrl+J Jump Record search. Reports 'No jump search active' when there's no remembered string.");
             add("Say Column as List",          "Speak every value of the current virtual column, from the top",
                 "Alt+L. Sweeps the whole column top to bottom. Position and virtual cursor unchanged; double-press shows the full list. Alt = All. Shift adds the marked-only filter (Say Column All Marked, Alt+Shift+L).");
@@ -17635,7 +17635,8 @@ namespace DbDo
             // (speakOrShow's standard memo dialog handles this).
             // "database: <file> in <folder>" rather than a path with a dash in it,
             // which a synthesizer reads as two dashes.
-            speakOrShow("Database", "database: " + sName + " in " + sPath, 124);
+            // The folder, not the path again (9 November 2026): testSay heard the file name twice.
+            speakOrShow("Database", "database: " + sName + " in " + (Path.GetDirectoryName(sPath) ?? sPath), 124);
         }
 
         // saySayOrder: Shift+O. Speak the active sort/order
