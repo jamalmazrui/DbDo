@@ -712,8 +712,8 @@ says which, since only the first of each gets an Alt letter in the
 record form, and offers to go back and rename them.</p></li>
 <li><p><strong>Open Table in New Window</strong> (Control+Shift+T) opens
 a table (or arbitrary query) in a new window.</p></li>
-<li><p><strong>Recent Files</strong> (Alt+R) reopens something you used
-lately.</p></li>
+<li><p><strong>Recent Databases</strong> (Alt+R) reopens something you
+used lately.</p></li>
 <li><p><strong>Close Database</strong> closes the current database;
 <strong>Backup Database</strong> writes a copy; <strong>Compare
 Database</strong> compares two.</p></li>
@@ -816,15 +816,15 @@ instead; otherwise Replace finds exactly the text you type.</p>
 <p>Beyond the grid’s keys, the cursor moves with these commands:</p>
 <ul>
 <li><strong>Go to Record</strong> (Control+G) jumps to a record number;
-<strong>Repeat Go To</strong> (Alt+G) repeats it.</li>
+<strong>Repeat Go to</strong> (Alt+G) repeats it.</li>
 <li><strong>Keywords</strong> (Control+K) searches for text;
 <strong>Reverse Keywords</strong> (Control+Shift+K) searches backward;
 <strong>Search Next</strong> (F3) and <strong>Search Previous</strong>
 (Shift+F3) repeat the last search. <strong>Find Regex</strong>
 (Control+F3) searches by regular expression.</li>
-<li><strong>Jump to Record</strong> (Control+J) and <strong>Reverse
-Jump</strong> move by a jump increment for quickly covering distance in
-a long table.</li>
+<li><strong>Jump</strong> (Control+J) and <strong>Reverse Jump</strong>
+move by a jump increment for quickly covering distance in a long
+table.</li>
 <li><strong>Jump to Next Initial</strong> steps to the next record whose
 current column starts with a new letter — type-ahead through a sorted
 column.</li>
@@ -835,7 +835,7 @@ column.</li>
 Copy</strong> (Control+Shift+N) starts a new record pre-filled from the
 current one; <strong>Copy Record</strong> (Control+Shift+C) copies it to
 the clipboard.</li>
-<li><strong>Edit View</strong> (Control+E) opens the whole record in a
+<li><strong>Edit Record</strong> (Control+E) opens the whole record in a
 field-by-field dialog. <strong>Edit Cell</strong> (F2) edits just the
 current cell. <strong>Open Cell Value</strong> (Control+Enter) opens a
 large value in its own box for comfortable reading and editing.</li>
@@ -896,9 +896,9 @@ Control+Page Down</strong> go to the first and last.</li>
 <li>To mark a <strong>range</strong>, set an anchor with <strong>Start
 Mark</strong> (F8) and extend to the cursor with <strong>Complete
 Mark</strong> (Shift+F8). <strong>Start Unmark</strong> (Alt+F8) and
-<strong>Complete Unmark to Anchor</strong> (Alt+Shift+F8) do the same
-for clearing, with a separate anchor so building a mark range and an
-unmark range never clobber each other.</li>
+<strong>Complete Unmark</strong> (Alt+Shift+F8) do the same for
+clearing, with a separate anchor so building a mark range and an unmark
+range never clobber each other.</li>
 </ul>
 <p>Marked records can then be reported, filtered, or exported as a set,
 and several Say commands report only the marked ones.</p>
@@ -952,7 +952,7 @@ record says so and leaves the view as it was.</li>
 <li><strong>Clear Filter</strong> (Control+Shift+F) removes the filter,
 keeping you on the same record. A table that reopens with a filter still
 in force says so as it opens.</li>
-<li><strong>Filter by Regex</strong> filters by pattern; <strong>Say
+<li><strong>Filter with Regex</strong> filters by pattern; <strong>Say
 Filter</strong> (Shift+F) speaks the current filter.</li>
 </ul></li>
 <li><strong>Order Records</strong> (Alt+O) has the same buttons as
@@ -1356,12 +1356,12 @@ reshaped into DbDo’s conventions.</p>
 a round trip. An Excel workbook opens as its sheets, a CSV as its rows,
 and saving writes back to that same file in that same format. Use Open
 when you want to work with a file as it is.</li>
-<li><strong>Import</strong> (Alt+I) reads an outside file and reshapes
-it <em>into a DbDo database</em> — normalizing columns, applying
-conventions, and producing a <code>.db</code> you then work with. Use
-Import when you want to bring foreign data into a proper DbDo database.
-<strong>Transfer Import</strong> and <strong>Merge Data</strong> (Alt+M)
-bring data in alongside existing data.</li>
+<li><strong>Import Data</strong> (Alt+I) reads an outside file and
+reshapes it <em>into a DbDo database</em> — normalizing columns,
+applying conventions, and producing a <code>.db</code> you then work
+with. Use Import when you want to bring foreign data into a proper DbDo
+database. <strong>Transfer Import</strong> and <strong>Merge
+Data</strong> (Alt+M) bring data in alongside existing data.</li>
 <li><strong>Export Data</strong> (Alt+Shift+X) writes the
 <strong>grid</strong> — the current view — out to a new file in a chosen
 format. Use Export to hand off what you are looking at. A CSV or TSV
@@ -1456,7 +1456,7 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <td>Control+Shift+T</td>
 </tr>
 <tr>
-<td>Recent Files</td>
+<td>Recent Databases</td>
 <td>Alt+R</td>
 </tr>
 <tr>
@@ -1480,7 +1480,7 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <td>—</td>
 </tr>
 <tr>
-<td>Import</td>
+<td>Import Data</td>
 <td>Alt+I</td>
 </tr>
 <tr>
@@ -1539,7 +1539,7 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <td>Control+N</td>
 </tr>
 <tr>
-<td>Edit View</td>
+<td>Edit Record</td>
 <td>Control+E</td>
 </tr>
 <tr>
@@ -1559,7 +1559,7 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <td>Control+Shift+C</td>
 </tr>
 <tr>
-<td>Append Record to Clipboard</td>
+<td>Append Record</td>
 <td>Alt+Shift+C</td>
 </tr>
 <tr>
@@ -1651,7 +1651,7 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <td>F8 / Shift+F8</td>
 </tr>
 <tr>
-<td>Start Unmark / Complete Unmark to Anchor</td>
+<td>Start Unmark / Complete Unmark</td>
 <td>Alt+F8 / Alt+Shift+F8</td>
 </tr>
 <tr>
@@ -1710,7 +1710,7 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <td>Control+G</td>
 </tr>
 <tr>
-<td>Repeat Go To</td>
+<td>Repeat Go to</td>
 <td>Alt+G</td>
 </tr>
 <tr>
@@ -1722,7 +1722,7 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <td>Control+Shift+K</td>
 </tr>
 <tr>
-<td>Jump to Record</td>
+<td>Jump</td>
 <td>Control+J</td>
 </tr>
 <tr>
@@ -1734,7 +1734,7 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <td>Control+F3</td>
 </tr>
 <tr>
-<td>Reverse Regex Find</td>
+<td>Reverse Find Regex</td>
 <td>Control+Shift+F3</td>
 </tr>
 <tr>
@@ -1915,11 +1915,11 @@ family.</p>
 <td>Control+Shift+F</td>
 </tr>
 <tr>
-<td>Filter by Regex</td>
+<td>Filter with Regex</td>
 <td>—</td>
 </tr>
 <tr>
-<td>Clear Sort</td>
+<td>Clear Order</td>
 <td>—</td>
 </tr>
 <tr>
@@ -1942,7 +1942,7 @@ family.</p>
 </thead>
 <tbody>
 <tr>
-<td>Refresh View</td>
+<td>Refresh Records</td>
 <td>F5</td>
 </tr>
 <tr>
@@ -1974,15 +1974,15 @@ family.</p>
 <td>Alt+Shift+G</td>
 </tr>
 <tr>
-<td>Append Cell to Clipboard</td>
+<td>Append Cell</td>
 <td>Alt+C</td>
 </tr>
 <tr>
-<td>Copy Cell to Clipboard</td>
+<td>Copy Cell</td>
 <td>Control+C</td>
 </tr>
 <tr>
-<td>Copy Visible Cells as TSV to Clipboard</td>
+<td>Copy Visible Cells</td>
 <td>—</td>
 </tr>
 <tr>
@@ -2014,7 +2014,7 @@ family.</p>
 <td>—</td>
 </tr>
 <tr>
-<td>Describe Table</td>
+<td>Field Statistics</td>
 <td>—</td>
 </tr>
 <tr>
@@ -3165,7 +3165,7 @@ and it is empty. A listener cannot tell those apart from silence, and
 they are different facts.</p>
 <p>Shift+J used to open the Jump dialog. It now says the jump text
 instead, which is what Say Jump on that key was always meant to do. Jump
-to Record keeps Control+J.</p>
+keeps Control+J.</p>
 <h3 id="credits-for-the-tutorial-voices">Credits for the tutorial
 voices</h3>
 <p>The spoken tutorials in <code>Tutorials.mkv</code> were produced with

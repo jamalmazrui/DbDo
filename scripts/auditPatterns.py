@@ -495,6 +495,20 @@ def checkAccessLetters():
     #      Z is sleep -- a Z key wakes a behaviour or puts it to sleep.
     #   2. In a menu, the trigger letter is the letter of the item's hotkey,
     #      when the hotkey has one.
+    # A KEY FAMILY, AS THE KIT'S GATE HAS IT (10 November 2026): a key letter another command on that letter starts a
+    # word with, and shares a word with this one -- Append Record keeps Copy Record's C. DbDo's audit and check.py's
+    # menu letters gate had judged the same rule two ways, and this one stopped a release the gate had passed.
+    lFacts = []
+    for sCaptionOne, sExprOne in re.findall(r'addItem\(mi[A-Za-z]+,\s*"([^"]*)",\s*"[^"]*",\s*([^,]+?),', sSource):
+        lLettersOne = [k for k in re.findall(r"Keys\.([A-Za-z0-9]+)", sExprOne) if len(k) == 1 and k.isalpha()]
+        sPlainOne = sCaptionOne.replace("&", "")
+        lFacts.append((sPlainOne, lLettersOne[0].upper() if lLettersOne else "", set(w.lower() for w in re.findall(r"[A-Za-z][A-Za-z0-9']*", sPlainOne))))
+    def keyFamily(sLetter, sPlain):
+        setWords = set(w.lower() for w in re.findall(r"[A-Za-z][A-Za-z0-9']*", sPlain))
+        for sOther, sOtherLetter, setOther in lFacts:
+            if sOther == sPlain or sOtherLetter != sLetter: continue
+            if sLetter.lower() in [w[0] for w in setOther] and setWords & setOther: return True
+        return False
     for sMenu, sCaption, sExpr in re.findall(r'addItem\((mi[A-Za-z]+),\s*"([^"]*)",\s*"[^"]*",\s*([^,]+?),', sSource):
         oAmp = re.search(r"&(.)", sCaption)
         lsLetters = [k for k in re.findall(r"Keys\.([A-Za-z0-9]+)", sExpr) if len(k) == 1 and k.isalpha()]
@@ -520,7 +534,7 @@ def checkAccessLetters():
                 lsBad.append("%s: %s puts its letter mid-word" % (sMenu[2:], sPlain))
             if sHot and oAmp.group(1).upper() != sHot:
                 lsBad.append("%s: %s has letter %s but hotkey letter %s" % (sMenu[2:], sPlain, oAmp.group(1).upper(), sHot))
-        if sHot and sHot not in lsInitials and not (bSoundX or bUnShift):
+        if sHot and sHot not in lsInitials and not (bSoundX or bUnShift) and not keyFamily(sHot, sPlain):
             lsBad.append("%s: %s is bound to %s, and %s starts none of its words"
                          % (sMenu[2:], sPlain, sExpr.replace("Keys.", "").strip(), sHot))
     for s in lsBad: logLine("LETTER: " + s)
@@ -646,6 +660,13 @@ def main():
     global oLog
     oLog = open(sLogPath, "w", encoding="utf-8")
     logLine("auditPatterns started %s" % datetime.datetime.now().isoformat(" ", "seconds"))
+    # WHICH AUDIT RAN (10 November 2026): a release stopped twice on a rule this script had been fixed to accept, and the
+    # log could not say whether the fixed copy was the one that ran. It says so now: this file's date, and its rules.
+    try:
+        sSelf = os.path.abspath(__file__)
+        logLine("Script: %s, %d bytes, dated %s; rules: key family (10 November 2026)" % (sSelf, os.path.getsize(sSelf),
+            datetime.datetime.fromtimestamp(os.path.getmtime(sSelf)).isoformat(" ", "seconds")))
+    except Exception as exceptionError: logLine("Script: could not be described: %s" % exceptionError)
     logLine("Project: %s" % sRoot)
     logLine("Python: %s" % sys.version.replace("\n", " "))
 

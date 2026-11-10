@@ -528,7 +528,7 @@ Screen reader:
 
 ### Step 2: Control+J
 
-Control plus J, Jump to Record -- J for Jump. It searches the field I am on.
+Control plus J, Jump -- J for Jump. It searches the field I am on.
 
 Screen reader:
 
@@ -1419,11 +1419,11 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 13: Control+J
 
-Escape closes the player. A station I already know is quickest found by its name. Control plus J, Jump to Record, asks which column and what to look for.
+Escape closes the player. A station I already know is quickest found by its name. Control plus J, Jump, asks which column and what to look for.
 
 Screen reader:
 
-- Jump to Record dialog
+- Jump dialog
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -2237,7 +2237,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 5: Control+J
 
-Control plus J, Jump to Record, finds an album by name. I type A Night at the Opera and press Enter.
+Control plus J, Jump, finds an album by name. I type A Night at the Opera and press Enter.
 
 Screen reader:
 

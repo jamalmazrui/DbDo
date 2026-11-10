@@ -250,8 +250,7 @@ among tabs everywhere else.</li>
 <li>Append Clipboard<br />
 Add the clipboard text to the end of a file you name.<br />
 Control+Shift+Apostrophe</li>
-<li>Append Record to Clipboard<br />
-C for Clipboard.<br />
+<li>Append Record<br />
 Alt+Shift+C</li>
 <li>Clear Bookmark<br />
 Forget the saved bookmark. B for Bookmark. Shift reverses Save
@@ -277,15 +276,15 @@ F2</li>
 <li>Edit Notes<br />
 N for Notes.<br />
 Alt+Shift+N</li>
+<li>Edit Record<br />
+Edit every field of the current row. E for Edit.<br />
+Control+E</li>
 <li>Edit Tags<br />
 T for Tags.<br />
 Alt+Shift+T</li>
 <li>Edit url<br />
 U for url.<br />
 Alt+Shift+U</li>
-<li>Edit View<br />
-E for Edit.<br />
-Control+E</li>
 <li>List Bookmarks<br />
 Show saved bookmarks in a listbox; navigate to the selected one. B for
 Bookmarks.<br />
@@ -342,7 +341,7 @@ instead of a mark.</p>
 Mark every row from the F8 anchor to the current row. F8 is selection;
 Shift completes the run F8 started.<br />
 Shift+F8</li>
-<li>Complete Unmark to Anchor<br />
+<li>Complete Unmark<br />
 Unmark every row from the Alt+F8 anchor to the current row. F8 is
 selection; Shift completes the run Alt+F8 started.<br />
 Alt+Shift+F8</li>
@@ -377,7 +376,7 @@ Alt+F4</li>
 Export the records in view, with the shown columns, to a file. X for the
 sound of “ex”.<br />
 Alt+Shift+X</li>
-<li>Import<br />
+<li>Import Data<br />
 Build a new DbDo database from another file – Excel (read by DbDo
 itself, with no Office or Access driver needed), Access, dBASE, CSV, or
 SQLite – with one standard-shape table per source table, plus maps and
@@ -401,7 +400,7 @@ Alt+Shift+D</li>
 <li>Previous Table or View<br />
 F6 moves among parts; Shift reverses Control+F6.<br />
 Control+Shift+F6</li>
-<li>Recent Files<br />
+<li>Recent Databases<br />
 R for Recent.<br />
 Alt+R</li>
 <li>Run Report<br />
@@ -467,11 +466,11 @@ Control+Slash</li>
 </ul>
 <h3 id="misc">Misc</h3>
 <ul>
-<li>Append Cell to Clipboard<br />
+<li>Append Cell<br />
 Append the value of the cell under the virtual cursor to the clipboard.
 C for Cell.<br />
 Alt+C</li>
-<li>Copy Cell to Clipboard<br />
+<li>Copy Cell<br />
 Copy the value of the cell under the virtual cursor to the clipboard. C
 for Copy.<br />
 Control+C</li>
@@ -488,7 +487,7 @@ Alt+Shift+G</li>
 Flip the database between read-write and read-only at runtime. Z is for
 sleep: it wakes this behavior or puts it to sleep.<br />
 Control+Shift+Z</li>
-<li>Refresh View<br />
+<li>Refresh Records<br />
 Refresh the records’ values from the database. F5 is refreshing.<br />
 F5</li>
 <li>Select Columns<br />
@@ -553,7 +552,7 @@ Control+F3</li>
 Go to a record by its number, a percent or text. G for Go, as Control+G
 goes to a line in Windows editors.<br />
 Control+G</li>
-<li>Jump to Record<br />
+<li>Jump<br />
 Go to the next record whose current field holds the text. J for
 Jump.<br />
 Control+J</li>
@@ -561,21 +560,21 @@ Control+J</li>
 Go to the next record whose fields hold the keywords. K for
 Keywords.<br />
 Control+K</li>
-<li>Repeat Go To<br />
+<li>Repeat Go to<br />
 G for Go.<br />
 Alt+G</li>
+<li>Reverse Find Regex<br />
+Find the previous record matching a regular expression. F3 searches;
+Control makes it a pattern and Shift reverses it.<br />
+Control+Shift+F3</li>
 <li>Reverse Jump<br />
 Go to the previous record whose current field holds the text. J for
-Jump. Shift reverses Jump to Record.<br />
+Jump. Shift reverses Jump.<br />
 Control+Shift+J</li>
 <li>Reverse Keywords<br />
 Go to the previous record whose fields hold the keywords. K for
 Keywords. Shift reverses Keywords.<br />
 Control+Shift+K</li>
-<li>Reverse Regex Find<br />
-Find the previous record matching a regular expression. F3 searches;
-Control makes it a pattern and Shift reverses it.<br />
-Control+Shift+F3</li>
 <li>Search Next<br />
 Repeat the last Find forward. F3 is searching and searching again.<br />
 F3</li>
@@ -790,7 +789,7 @@ Open in Explorer</li>
 <li>Alt+C<br />
 Append the value of the cell under the virtual cursor to the
 clipboard.<br />
-Append Cell to Clipboard</li>
+Append Cell</li>
 <li>Alt+D<br />
 Database Summary</li>
 <li>Alt+Delete<br />
@@ -800,7 +799,7 @@ Say Position</li>
 <li>Alt+Enter<br />
 Table Properties</li>
 <li>Alt+G<br />
-Repeat Go To</li>
+Repeat Go to</li>
 <li>Alt+Home<br />
 Go back to the first table.<br />
 Exit to Root Table</li>
@@ -809,7 +808,7 @@ Build a new DbDo database from another file – Excel (read by DbDo
 itself, with no Office or Access driver needed), Access, dBASE, CSV, or
 SQLite – with one standard-shape table per source table, plus maps and
 defs.<br />
-Import</li>
+Import Data</li>
 <li>Alt+L<br />
 Speak every value of the current virtual column, from the top.<br />
 Say Column as List</li>
@@ -827,7 +826,7 @@ Order Records</li>
 Speak the open database’s full path; press twice to show it.<br />
 Say Path</li>
 <li>Alt+R<br />
-Recent Files</li>
+Recent Databases</li>
 <li>Alt+RightArrow<br />
 Go into the records related to this one.<br />
 Enter Child Table</li>
@@ -855,7 +854,7 @@ Add Column to Order Descending</li>
 Empty the clipboard.<br />
 Clear Clipboard</li>
 <li>Alt+Shift+C<br />
-Append Record to Clipboard</li>
+Append Record</li>
 <li>Alt+Shift+D<br />
 Open one of the template databases that come with DbDo, such as
 RadioTrail or JobTrail.<br />
@@ -914,12 +913,13 @@ Open Command Prompt</li>
 <li>Control+C<br />
 Copy the value of the cell under the virtual cursor to the
 clipboard.<br />
-Copy Cell to Clipboard</li>
+Copy Cell</li>
 <li>Control+D<br />
 Delete the current record (or marked records, when marks exist).<br />
 Delete Record</li>
 <li>Control+E<br />
-Edit View</li>
+Edit every field of the current row.<br />
+Edit Record</li>
 <li>Control+Enter<br />
 Open Cell Value</li>
 <li>Control+Equals<br />
@@ -937,7 +937,7 @@ Open Dot Prompt</li>
 Inspect Record</li>
 <li>Control+J<br />
 Go to the next record whose current field holds the text.<br />
-Jump to Record</li>
+Jump</li>
 <li>Control+K<br />
 Go to the next record whose fields hold the keywords.<br />
 Keywords</li>
@@ -1055,7 +1055,7 @@ Start Unmark</li>
 ReadMe</li>
 <li>Alt+Shift+F8<br />
 Unmark every row from the Alt+F8 anchor to the current row.<br />
-Complete Unmark to Anchor</li>
+Complete Unmark</li>
 <li>Control+F1<br />
 Describe each key instead of running it (Ctrl+F1).<br />
 Key Describer Toggle</li>
@@ -1078,7 +1078,7 @@ Open the history of changes in the default browser.<br />
 History of Changes</li>
 <li>Control+Shift+F3<br />
 Find the previous record matching a regular expression.<br />
-Reverse Regex Find</li>
+Reverse Find Regex</li>
 <li>Control+Shift+F4<br />
 Close every window except the current one.<br />
 Close All But Current Window</li>
@@ -1104,7 +1104,7 @@ one.<br />
 Current Windows</li>
 <li>F5<br />
 Refresh the records’ values from the database.<br />
-Refresh View</li>
+Refresh Records</li>
 <li>F8<br />
 Drop a mark anchor at the current row.<br />
 Start Mark</li>
@@ -1204,14 +1204,14 @@ Alt+Shift+A</li>
 <li>Alternate Menu<br />
 Pick any command from one list, in menu, name or key order.<br />
 Alt+F10</li>
-<li>Append Cell to Clipboard<br />
+<li>Append Cell<br />
 Append the value of the cell under the virtual cursor to the
 clipboard.<br />
 Alt+C</li>
 <li>Append Clipboard<br />
 Add the clipboard text to the end of a file you name.<br />
 Control+Shift+Apostrophe</li>
-<li>Append Record to Clipboard<br />
+<li>Append Record<br />
 Alt+Shift+C</li>
 <li>Chat about Table<br />
 Shift+F12</li>
@@ -1237,10 +1237,10 @@ Control+F4</li>
 <li>Complete Mark<br />
 Mark every row from the F8 anchor to the current row.<br />
 Shift+F8</li>
-<li>Complete Unmark to Anchor<br />
+<li>Complete Unmark<br />
 Unmark every row from the Alt+F8 anchor to the current row.<br />
 Alt+Shift+F8</li>
-<li>Copy Cell to Clipboard<br />
+<li>Copy Cell<br />
 Copy the value of the cell under the virtual cursor to the
 clipboard.<br />
 Control+C</li>
@@ -1270,6 +1270,9 @@ Edit just the field under the virtual cursor.<br />
 F2</li>
 <li>Edit Notes<br />
 Alt+Shift+N</li>
+<li>Edit Record<br />
+Edit every field of the current row.<br />
+Control+E</li>
 <li>Edit Script<br />
 Alt+Shift+S</li>
 <li>Edit Settings<br />
@@ -1279,8 +1282,6 @@ Alt+Shift+E</li>
 Alt+Shift+T</li>
 <li>Edit url<br />
 Alt+Shift+U</li>
-<li>Edit View<br />
-Control+E</li>
 <li>Elevate Version<br />
 Check for a newer version on GitHub and offer to install it.<br />
 F11</li>
@@ -1320,7 +1321,7 @@ Control+G</li>
 <li>History of Changes<br />
 Open the history of changes in the default browser.<br />
 Control+Shift+F1</li>
-<li>Import<br />
+<li>Import Data<br />
 Build a new DbDo database from another file – Excel (read by DbDo
 itself, with no Office or Access driver needed), Access, dBASE, CSV, or
 SQLite – with one standard-shape table per source table, plus maps and
@@ -1333,7 +1334,7 @@ Alt+Shift+I</li>
 <li>Invoke Script<br />
 Run a script from the Scripts folder (.js, .sql, or .dbdo).<br />
 Alt+V</li>
-<li>Jump to Record<br />
+<li>Jump<br />
 Go to the next record whose current field holds the text.<br />
 Control+J</li>
 <li>Key Describer Toggle<br />
@@ -1413,17 +1414,20 @@ Flip the database between read-write and read-only at runtime.<br />
 Control+Shift+Z</li>
 <li>ReadMe<br />
 Alt+Shift+F1</li>
-<li>Recent Files<br />
+<li>Recent Databases<br />
 Alt+R</li>
-<li>Refresh View<br />
+<li>Refresh Records<br />
 Refresh the records’ values from the database.<br />
 F5</li>
-<li>Repeat Go To<br />
+<li>Repeat Go to<br />
 Alt+G</li>
 <li>Replace<br />
 Control+R</li>
 <li>Replace with Regex<br />
 Control+Shift+R</li>
+<li>Reverse Find Regex<br />
+Find the previous record matching a regular expression.<br />
+Control+Shift+F3</li>
 <li>Reverse Jump<br />
 Go to the previous record whose current field holds the text.<br />
 Control+Shift+J</li>
@@ -1433,9 +1437,6 @@ Control+Shift+K</li>
 <li>Reverse Order<br />
 Reverse the order of the records.<br />
 Alt+Shift+O</li>
-<li>Reverse Regex Find<br />
-Find the previous record matching a regular expression.<br />
-Control+Shift+F3</li>
 <li>Run Report<br />
 Alt+Shift+R. Render a saved report definition to a Markdown document. A
 report reads the whole PHYSICAL table (not the grid view), so it is

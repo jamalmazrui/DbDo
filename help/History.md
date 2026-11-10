@@ -5,6 +5,19 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 10 November 2026 -- One set of words for every command
+
+- **DbDo's own audit judges a key family as the release gate does,** so Append Record keeps Copy Record's C; the two had disagreed, and the audit stopped a release the gate had passed.
+- **Database words for data, screen words for the screen.** A command that works on data says database, table, view, record, field, value, query, filter or order; a command that works on what the grid shows, or where the cursor is, says grid, cell, column, window or list. No command says row.
+- **Names that said the wrong thing.** Edit View is Edit Record, since it edits a record and a view is something else in a database; Refresh View is Refresh Records; Recent Files is Recent Databases; and Describe Table is Field Statistics, which is what it shows.
+- **Families that read alike.** Clear Sort is Clear Order, beside Order Records and Reverse Order; Filter by Regex is Filter with Regex, beside Replace with Regex and Extract with Regex; Reverse Regex Find is Reverse Find Regex, as Reverse Keywords and Reverse Jump are; Jump to Record is Jump, beside Keywords; Repeat Go To is Repeat Go to; Import is Import Data, beside Export Data and Merge Data; Complete Unmark to Anchor is Complete Unmark, beside Complete Mark; and the clipboard commands are Copy Record, Append Record, Copy Cell, Append Cell, Copy Column, Copy Grid and Copy Visible Cells.
+- **One sentence for each command, said the same way.** Every description begins with what it does, in a single sentence, without a key or an aside; the 57 commands that had none, or only one buried in the program, have one in DbDo.inix, where the Key Describer reads it.
+- **Off the menu:** Compare Database and Pick Value, which only said they were not yet built, and Show Schema, whose list of tables and views Database Summary gives with their counts and relations. Each still runs by name, for scripts.
+
+## 10 November 2026 -- Named menu bars
+
+- **The menu bar is named for DbDo,** so a screen reader can say "DbDo menu bar"; Axe.Windows had found it with no name.
+
 ## 10 November 2026 -- Access letters only where the key is a letter
 
 - **No letter is shared in a menu.** The Say submenu and Show Schema both had S on the Query menu, Tools and Table Summary both had T on Misc, and Bulk Marking and Save Bookmark both had B on Edit. Say, Table Summary and Save Bookmark keep theirs, the letters of Say's keys and of Alt+T and Control+B; Show Schema, Tools and Bulk Marking have none, since every word of their names starts with a letter already taken.

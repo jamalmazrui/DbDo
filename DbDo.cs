@@ -12265,6 +12265,8 @@ namespace DbDo
             // the Homer-app pattern: no GetActiveChild() indirection,
             // and per-window state stays encapsulated.
             menuFrame = new MenuStrip();
+            // NAMED FOR THE PROGRAM (10 November 2026): Axe.Windows found the menu bar with no name; nothing else names a menu bar for the reader, so it takes the program's name, read as "<program> menu bar".
+            menuFrame.AccessibleName = Application.ProductName;
             menuFrame.AllowMerge = true;
             menuFrame.Dock = DockStyle.Top;
             this.MainMenuStrip = menuFrame;
@@ -14128,6 +14130,8 @@ namespace DbDo
         private void buildMenus()
         {
             menuMain = new MenuStrip();
+            // NAMED FOR THE PROGRAM (10 November 2026): Axe.Windows found the menu bar with no name; nothing else names a menu bar for the reader, so it takes the program's name, read as "<program> menu bar".
+            menuMain.AccessibleName = Application.ProductName;
 
             // Top-level menu layout: File / Edit /
             // Navigate / Query / Misc / Help. Each leaf item keeps
@@ -14151,7 +14155,7 @@ namespace DbDo
             // Its key, Control+Shift+T, is free; the command stays reachable by name for scripts, off the menu.
             miFileOpenSelect = addItem(miFile, "Open &Query in New Window...", "Open Query in New Window", Keys.None, fileOpenSelectClicked);
             miFileOpenSelect.Visible = false;
-            miFileRecent  = addItem(miFile, "&Recent Files...",           "Recent Files",     Keys.Alt | Keys.R,                    fileRecentClicked);
+            miFileRecent  = addItem(miFile, "&Recent Databases...",           "Recent Databases",     Keys.Alt | Keys.R,                    fileRecentClicked);
             // Export Database: primary chord Alt+Shift+E (parallel to
             // Alt+E = Export Data productivity pair). Ctrl+Shift+S was
             // the earlier primary, but the user moved it to Statistics
@@ -14164,6 +14168,8 @@ namespace DbDo
             // No letter (10 October 2026): D belongs to Open Template Database, whose hotkey is Alt+Shift+D, and C to
             // Close Database, so Compare Database, with both its initials taken, goes without one, by the Homer rule.
             miFileCompare = addItem(miFile, "Compare Database...",       "Compare Database", Keys.None,                            fileCompareClicked);
+            // OFF THE MENU (10 November 2026): it only says it is not yet implemented, and a menu should not offer what does not work. It stays reachable by name, for scripts.
+            miFileCompare.Visible = false;
             addSep(miFile);
             // Alt+I = Import (build a new DbDo shell from another file),
             // Alt+M = Merge (rows into the current table), Alt+E = Export
@@ -14171,7 +14177,7 @@ namespace DbDo
             // chords. (Ctrl+I and Ctrl+E are already used for Invert Marked
             // and Edit Record, which are high-frequency core operations that
             // should keep their plain-Ctrl chords.)
-            miFileImport  = addItem(miFile, "&Import...",                 "Import",           Keys.Alt | Keys.I,                    importClicked);
+            miFileImport  = addItem(miFile, "&Import Data...",                 "Import Data",           Keys.Alt | Keys.I,                    importClicked);
             // OPEN SAMPLE DATABASE, ALT+D. It lived on the Help menu, where a
             // beginner might look for an example -- but what it does is open a
             // database, and the person reaching for it after the first week is
@@ -14218,7 +14224,7 @@ namespace DbDo
             // ===== Edit menu: modify the data =====
             miEdit = addMenu("&Edit");
             miRecNew         = addItem(miEdit, "&New Record...",                          "New Record",          Keys.Control | Keys.N,              recNewClicked);
-            miRecSet         = addItem(miEdit, "&Edit View...",                           "Edit View",            Keys.Control | Keys.E,              recSetClicked);
+            miRecSet         = addItem(miEdit, "&Edit Record...",                           "Edit Record",            Keys.Control | Keys.E,              recSetClicked);
             // Edit Cell: single-field editor for the virtual cell
             // under the Alt+Control+arrow cursor. Same regex
             // validation as Edit Record (via [Validation:<table>]
@@ -14234,7 +14240,7 @@ namespace DbDo
             // Useful for collecting several rows from across the
             // database into one clipboard payload. Each appended
             // record is separated by a blank line.
-            miRecAppend      = addItem(miEdit, "Append Record to Clipboard",             "Append Record to Clipboard",       Keys.Alt | Keys.Shift | Keys.C,     recAppendClicked);
+            miRecAppend      = addItem(miEdit, "Append Record",             "Append Record",       Keys.Alt | Keys.Shift | Keys.C,     recAppendClicked);
             // New Copy: duplicate the current row. Pre-fills the New
             // Record dialog with all visible field values from the
             // current row; the user reviews, edits as needed, and
@@ -14290,7 +14296,7 @@ namespace DbDo
             miRecMarkAnchor      = addItem(miBulkMark, "Start Mark",                  "Start Mark",      Keys.F8,                            recMarkAnchorClicked);
             miRecMarkToAnchor    = addItem(miBulkMark, "Complete Mark",             "Complete Mark",          Keys.Shift | Keys.F8,               recMarkToAnchorClicked);
             miRecUnmarkAnchor    = addItem(miBulkMark, "Start Unmark",                 "Start Unmark",    Keys.Alt | Keys.F8,                 recUnmarkAnchorClicked);
-            miRecUnmarkToAnchor  = addItem(miBulkMark, "Complete Unmark to Anchor",           "Complete Unmark to Anchor",        Keys.Alt | Keys.Shift | Keys.F8,    recUnmarkToAnchorClicked);
+            miRecUnmarkToAnchor  = addItem(miBulkMark, "Complete Unmark",           "Complete Unmark",        Keys.Alt | Keys.Shift | Keys.F8,    recUnmarkToAnchorClicked);
             addSep(miEdit);
             // Bookmarks: the Set/Clear/Go-to Bookmark trio
             // on Control+K / Control+Shift+K / Alt+K. Identical
@@ -14328,6 +14334,9 @@ namespace DbDo
             // is reserved so the menu doesn't drift and the user can
             // discover the planned command.
             miRecPickValue   = addItem(miEdit, "Pick Value", "Pick Value", Keys.Control | Keys.F2,            recPickValueStub);
+            // OFF THE MENU (10 November 2026): it only says it is not yet implemented, and a menu should not offer what does
+            // not work. It stays reachable by name, for scripts.
+            miRecPickValue.Visible = false;
 
             // ===== Navigate menu: move around the data =====
             miNavigate = addMenu("&Navigate");
@@ -14340,7 +14349,7 @@ namespace DbDo
             miNavNext        = addItem(miNavigate, "&Next Record",                        "Next Record",     Keys.None,                          navNextClicked);
             miNavPrev        = addItem(miNavigate, "&Previous Record",                    "Previous Record", Keys.None,                          navPrevClicked);
             miRecGoTo        = addItem(miNavigate, "&Go to Record...",                    "Go to Record",         Keys.Control | Keys.G,              recGoToClicked);
-            miRecGoToRepeat  = addItem(miNavigate, "Repeat Go To",                       "Repeat Go To",  Keys.Alt | Keys.G,                  repeatGoToClicked);
+            miRecGoToRepeat  = addItem(miNavigate, "Repeat Go to",                       "Repeat Go to",  Keys.Alt | Keys.G,                  repeatGoToClicked);
             addSep(miNavigate);
             // Search families. Three distinct families with their
             // own chord pairs, plus a unified F3 / Shift+F3 "repeat
@@ -14370,10 +14379,10 @@ namespace DbDo
             // W was freed: raw SQL has its own key, Control+Q.
             miRecFind         = addItem(miNavigate, "&Keywords...",           "Keywords",            Keys.Control | Keys.K,              recFindAllClicked);
             miRecFindPrev     = addItem(miNavigate, "Reverse Keywords", "Reverse Keywords",  Keys.Control | Keys.Shift | Keys.K, recFindAllPrevClicked);
-            miRecJump         = addItem(miNavigate, "&Jump to Record...", "Jump to Record",        Keys.Control | Keys.J,              recJumpClicked);
+            miRecJump         = addItem(miNavigate, "&Jump...", "Jump",        Keys.Control | Keys.J,              recJumpClicked);
             miRecJumpPrev     = addItem(miNavigate, "Reverse Jump", "Reverse Jump", Keys.Control | Keys.Shift | Keys.J, recJumpPrevClicked);
             miRecFindRegex    = addItem(miNavigate, "Find Regex...", "Find Regex",       Keys.Control | Keys.F3,             recFindRegexClicked);
-            miRecFindRegexPrev = addItem(miNavigate, "Reverse Regex Find", "Reverse Regex Find", Keys.Control | Keys.Shift | Keys.F3, recFindRegexPrevClicked);
+            miRecFindRegexPrev = addItem(miNavigate, "Reverse Find Regex", "Reverse Find Regex", Keys.Control | Keys.Shift | Keys.F3, recFindRegexPrevClicked);
             miRecSearchAgain  = addItem(miNavigate, "Search Next",   "Search Next",         Keys.F3,                            recSearchNextClicked);
             miRecSearchPrev   = addItem(miNavigate, "Search Previous", "Search Previous",   Keys.Shift | Keys.F3,               recSearchPrevClicked);
             addSep(miNavigate);
@@ -14393,6 +14402,8 @@ namespace DbDo
             miSchemaProperties  = addItem(miQuery, "Table Properties",              "Table Properties",  Keys.Alt | Keys.Enter,            schemaPropertiesClicked);
             miRecRelated     = addItem(miQuery, "&Related Records...",   "Related Records",  Keys.None,                        recRelatedClicked);
             miSchemaShow     = addItem(miQuery, "Show Schema",         "Show Schema",   Keys.None,                        schemaShowClicked);
+            // OFF THE MENU (10 November 2026): it lists the database's tables and views, which Database Summary says with their counts and relations. It stays reachable by name, for scripts.
+            miSchemaShow.Visible = false;
             addSep(miQuery);
             // Say-X family: speaks state without changing focus or
             // recordset position (the Say-X status family).
@@ -14548,9 +14559,9 @@ namespace DbDo
             // SQL is Control+Q, Query, and always was.
             miViewSelect     = addItem(miQuery, "&Filter Records...",                               "Filter Records",     Keys.Control | Keys.F,             viewSelectClicked);
             miViewResetFilter= addItem(miQuery, "Clear Filter",                                    "Clear Filter",      Keys.Control | Keys.Shift | Keys.F, viewResetFilterClicked);
-            miViewFilterRegex= addItem(miQuery, "Filter by Regex...",                                 "Filter by Regex",      Keys.None,                          filterRegexClicked);
+            miViewFilterRegex= addItem(miQuery, "Filter with Regex...",                                 "Filter with Regex",      Keys.None,                          filterRegexClicked);
             addSep(miQuery);
-            miViewResetSort  = addItem(miQuery, "&Clear Sort",                                      "Clear Sort",        Keys.None,                          viewResetSortClicked);
+            miViewResetSort  = addItem(miQuery, "&Clear Order",                                      "Clear Order",        Keys.None,                          viewResetSortClicked);
             // Sort Records: the universal sort. Defaults to the
             // current virtual column with an opt-in Descending
             // checkbox. Replaces the entire family of per-column
@@ -14576,7 +14587,7 @@ namespace DbDo
 
             // ===== Misc menu: utilities, tools, settings =====
             miMisc = addMenu("&Misc");
-            miViewUpdate     = addItem(miMisc, "Refresh View",                          "Refresh View",       Keys.F5,                            viewUpdateClicked);
+            miViewUpdate     = addItem(miMisc, "Refresh Records",                          "Refresh Records",       Keys.F5,                            viewUpdateClicked);
             // Toggle Read Only: flip the database between read-write
             // and read-only at runtime. Restored in v1.0.95; v1.0.96
             // moved from Ctrl+Shift+R to Alt+Z per the user's
@@ -14640,16 +14651,16 @@ namespace DbDo
             // has no hotkey or mnemonic letter -- the word "Copy" is
             // taken (Control+C) and no other letter in the label is a
             // legitimate Camel-Type mnemonic.
-            miCellAppend     = addItem(miMisc, "Append &Cell to Clipboard",                "Append Cell to Clipboard",    Keys.Alt | Keys.C,                  cellAppendClicked);
-            miCellCopy       = addItem(miMisc, "Copy Cell to Clipboard",                  "Copy Cell to Clipboard",      Keys.Control | Keys.C,              cellCopyClicked);
-            miCopyRow        = addItem(miMisc, "Copy Visible Cells &as TSV to Clipboard",   "Copy Visible Cells as TSV to Clipboard", Keys.None,                          copyRowClicked);
+            miCellAppend     = addItem(miMisc, "Append &Cell",                "Append Cell",    Keys.Alt | Keys.C,                  cellAppendClicked);
+            miCellCopy       = addItem(miMisc, "Copy Cell",                  "Copy Cell",      Keys.Control | Keys.C,              cellCopyClicked);
+            miCopyRow        = addItem(miMisc, "Copy Visible Cells",   "Copy Visible Cells", Keys.None,                          copyRowClicked);
             // Column / whole-grid clipboard. Both walk every row with
             // the cursor suppressed and restore position when done (the
             // gridSearchForVirtualItem full-scan pattern). Unbound --
             // no free Camel-Type mnemonic letter in either label -- so
             // the user assigns chords from the Hotkey editor.
-            miCopyColumn     = addItem(miMisc, "Copy Column to Clipboard",                  "Copy Column to Clipboard",        Keys.None,                          copyColumnClicked);
-            miCopyGrid       = addItem(miMisc, "Copy Grid as TSV to Clipboard",             "Copy Grid as TSV to Clipboard",          Keys.None,                          copyGridClicked);
+            miCopyColumn     = addItem(miMisc, "Copy Column",                  "Copy Column",        Keys.None,                          copyColumnClicked);
+            miCopyGrid       = addItem(miMisc, "Copy Grid",             "Copy Grid",          Keys.None,                          copyGridClicked);
             miJumpNextInitial = addItem(miMisc, "&Jump to Next Initial...", "Jump to Next Initial", Keys.None,                         jumpNextInitialClicked);
             addSep(miMisc);
             addSep(miQuery);
@@ -14662,7 +14673,7 @@ namespace DbDo
             miMiscOpenManagedCopy = addItem(miMisc, "&Open as Managed Copy...", "Open as Managed Copy", Keys.None, openManagedCopyClicked,
                 "Open a SQLite database as a throwaway working copy: edits stay in the copy and the original is untouched until you Save As",
                 "The document model: the chosen SQLite database is copied to a temp working file that becomes the live database, so every edit, add, and delete lands in the copy and the original on disk is left alone. Use Save (Control+S), which writes the working copy out to a .db file (a -copy name is suggested, so the source is never overwritten); closing without saving discards the changes. To bring an Excel, Access, dBASE, or CSV file into a new DbDo database instead, use Import. Unbound by default.");
-            miMiscDescribeTable = addItem(miQuery, "&Describe Table", "Describe Table", Keys.None, describeTableClicked,
+            miMiscDescribeTable = addItem(miQuery, "Field Statistics", "Field Statistics", Keys.None, describeTableClicked,
                 "Per-column data profile of the current table: declared type and key/null/FK flags, plus live null and distinct counts with min and max values",
                 "A profile of the current base table, one column per entry: its declared type and any primary-key, not-null, or foreign-key flags from the schema, then the number of nulls, the number of distinct values, and the minimum and maximum values, each computed in SQL over the whole table. Read-only. It scans once per column, so it can take a moment on very large tables. Unbound by default.");
             miMiscFacetColumn = addItem(miQuery, "Facet Column...", "Facet Column", Keys.None, facetColumnClicked,
@@ -14974,7 +14985,7 @@ namespace DbDo
             add("Save",             "Save changes to disk (writes an open workbook back to its .xlsx; a .db is already saved as you go)", "");
             add("Save As",          "Save a copy to another path or file format", "");
             add("Backup Database",    "Write a timestamped copy of the open database", "");
-            add("Import",             "Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and defs",
+            add("Import Data",             "Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and defs",
                 "Open mounts a file with a live driver; Import transfers its data into DbDo's own structure. The source is only read; Save As keeps the result as a .db.");
             add("Merge Data",              "Merge rows from a Markdown table, JSON, or Inix file into the current table",
                 "Fields are matched by name; unmatched fields are dropped and one bad row does not sink the import.");
@@ -15001,7 +15012,7 @@ namespace DbDo
                 "Inclusive range. Direction does not matter: the anchor can be above or below the current row. Skips rows already marked.");
             add("Start Unmark",   "Drop an unmark anchor at the current row",
                 "Alt+F8 sets the unmark anchor; Alt+Shift+F8 unmarks every row from that anchor to the current row. Independent of the mark anchor.");
-            add("Complete Unmark to Anchor",       "Unmark every row from the Alt+F8 anchor to the current row",
+            add("Complete Unmark",       "Unmark every row from the Alt+F8 anchor to the current row",
                 "Inclusive range, direction-agnostic. Skips rows already unmarked.");
             add("Save Bookmark",      "Save the current row position as a session bookmark", "");
             add("List Bookmarks",     "Show saved bookmarks in a listbox; navigate to the selected one",
@@ -15020,9 +15031,9 @@ namespace DbDo
                 "Searches every field of each record, shown or not, a link by the look it shows. Keywords Previous, Control+Shift+K, goes backward; F3 and Shift+F3 repeat.");
             add("Reverse Keywords",  "Go to the previous record whose fields hold the keywords", "");
             add("Find Regex",         "Find the next record matching a regular expression", "");
-            add("Reverse Regex Find", "Find the previous record matching a regular expression", "");
+            add("Reverse Find Regex", "Find the previous record matching a regular expression", "");
             add("Find Regex Again",    "Repeat the last Find Regex forward", "");
-            add("Jump to Record",        "Go to the next record whose current field holds the text", "");
+            add("Jump",        "Go to the next record whose current field holds the text", "");
             add("Reverse Jump","Go to the previous record whose current field holds the text", "");
             add("Jump Record Again",   "Repeat the last Jump Record", "");
             add("Search Next",        "Repeat the last Find forward", "");
@@ -15084,7 +15095,7 @@ namespace DbDo
             add("Say Order and Filter",    "Speak the current order and filter, or none for each",
                 "Single-press speaks; double-press opens the same text in the multi-line dialog. Useful when the filter or sort string is long.");
             add("Filter Records",      "Show only the records that match what you choose", "Control+F. A list of choices, its first selected, so Enter takes it; each begins with its own letter. Any field contains text asks for the text and keeps the records where some field, read as text, contains it, case aside (for English letters). Fields asks Main, Standard or All, then opens a form with a box per field in DbDo's natural order: a value on its own matches anywhere in the field, case aside; = in front means is, and a symbol in front compares (> >= < <= !=); dates are typed as year-month-day; several boxes must all match. Marked and Unmarked take the records you have marked, or the rest. With a filter in force the list adds Clear, Edit (the field filter), Narrow (add a field condition) and, for a field filter, Widen. A search that finds nothing leaves the view as it was.");
-            add("Filter by Regex",        "Filter to rows whose current column matches a regular expression (SQLean REGEXP)",
+            add("Filter with Regex",        "Filter to rows whose current column matches a regular expression (SQLean REGEXP)",
                 "Server-side, so it works on large tables and the result stays editable. Prompts for a pattern and applies it to the column under virtual focus; an empty pattern clears the filter. Needs sqlean.dll beside DbDo.exe. Unbound by default -- assign a chord if you use it often.");
             add("Clear Filter",       "Clear the active filter", "Control+Shift+F.");
             add("Order Records",       "Order the records by the fields you choose",
@@ -15092,10 +15103,10 @@ namespace DbDo
             add("Reverse Order",      "Reverse the order of the records", "Alt+Shift+O.");
             add("Alpha Order",        "Sort the records by the current column, smallest or earliest first", "Alt+A, as in FileDir.");
 
-            add("Clear Sort",         "Clear the order in force, so records return to table order", "");
+            add("Clear Order",         "Clear the order in force, so records return to table order", "");
 
             // ===== Misc menu =====
-            add("Refresh View",        "Refresh the records' values from the database", "");
+            add("Refresh Records",        "Refresh the records' values from the database", "");
             add("Table Summary",      "Show a summary of the table: fields, types and keys", "");
             add("Statistics from Column", "Print descriptive statistics for the column under the virtual cursor",
                 "Alt+Shift+S. Type-aware: numeric columns get count/populated/min/max/mean/median/stdev/variance/CV/quartiles/IQR/outliers; date columns get range and modal year; boolean columns get true/false splits; text columns get cardinality and top-N most-frequent values. Shown in a read-only memo dialog (Control+C copies it).");
@@ -15108,12 +15119,12 @@ namespace DbDo
                 "Report definitions live in an .inix file beside the database whose [Global] section declares FileTask = report (each [section] is one report, with header/detail/footer/group bands, $field and {{ jscript }} substitution, and footer aggregates like $count and $sum_<field>). DbDo lists only the FileTask = report files -- so a transfer map or settings file in the same folder is never offered -- then writes Markdown you can convert to HTML/DOCX/PDF. A legacy file with report bands but no FileTask still works. The contrast to remember: Generate from Grid = analyze what you SEE (virtual grid, ad-hoc); Run Report = produce a DEFINED document from the physical table (reproducible).");
             add("Graphics Column",           "Plot the column under the virtual cursor as an Excel chart",
                 "Type-aware: numeric -> histogram or box plot, date -> timeline or seasonal, boolean -> pie, text -> Pareto bar.");
-            add("Copy Cell to Clipboard",          "Copy the value of the cell under the virtual cursor to the clipboard", "");
-            add("Append Cell to Clipboard",        "Append the value of the cell under the virtual cursor to the clipboard", "");
-            add("Copy Visible Cells as TSV to Clipboard",  "Copy the current record's visible cells to the clipboard as tab-separated values. Hidden columns (added, edited, look, prime, url, tags, notes, marked) are skipped; use Copy Record for the full set.", "");
-            add("Copy Column to Clipboard",        "Copy every value in the column under the virtual cursor to the clipboard, one value per line with the column name as a header line",
+            add("Copy Cell",          "Copy the value of the cell under the virtual cursor to the clipboard", "");
+            add("Append Cell",        "Append the value of the cell under the virtual cursor to the clipboard", "");
+            add("Copy Visible Cells",  "Copy the current record's visible cells to the clipboard as tab-separated values. Hidden columns (added, edited, look, prime, url, tags, notes, marked) are skipped; use Copy Record for the full set.", "");
+            add("Copy Column",        "Copy every value in the column under the virtual cursor to the clipboard, one value per line with the column name as a header line",
                 "Walks all rows and restores the cursor when done. Paste into a spreadsheet to drop the column into a single column of cells. Tabs and line breaks inside a value are flattened so the column stays aligned.");
-            add("Copy Grid as TSV to Clipboard",          "Copy the whole visible grid to the clipboard as tab-separated values with a header row",
+            add("Copy Grid",          "Copy the whole visible grid to the clipboard as tab-separated values with a header row",
                 "Header row of visible column names, then every row, tab-separated. Hidden columns (added, edited, look, prime, url, tags, notes, marked) are skipped, matching Copy Visible Cells. Paste straight into a spreadsheet; for a file on disk use Export Data instead.");
             add("Edit Settings", "Open the Settings dialog",
                 "Exposes UI Mode, Command Echo, and a Field Validation... sub-dialog for per-field regex patterns on the current table. 'Open file...' button edits DbDo.inix directly for advanced settings.");
@@ -15457,7 +15468,7 @@ namespace DbDo
         // Delete Record keeps no ellipsis: by the Windows convention a confirmation
         // alone does not earn one, since nothing more is asked of you.
         private static readonly HashSet<string> hsTellsItself = new HashSet<string>(StringComparer.OrdinalIgnoreCase) {
-            "Copy Cell to Clipboard", "Copy Column to Clipboard", "Copy Grid as TSV to Clipboard", "Copy Record", "Copy Visible Cells as TSV to Clipboard", "Delete Record" };
+            "Copy Cell", "Copy Column", "Copy Grid", "Copy Record", "Copy Visible Cells", "Delete Record" };
 
         private void commandEcho(string sCommand)
         {
@@ -22835,10 +22846,10 @@ namespace DbDo
             {
                 LbcMessage.show(this,
                     "No recent database files yet. Open a database from the File menu to start the list.",
-                    "Recent Files", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Recent Databases", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
-            LbcDialog dlg = new LbcDialog("Recent Files", this);
+            LbcDialog dlg = new LbcDialog("Recent Databases", this);
             try
             {
                 List<string> lDisplay = new List<string>();
@@ -23652,7 +23663,7 @@ namespace DbDo
                 try { sTemp = importToShell(sOrigin); }
                 catch (Exception ex)
                 {
-                    ErrorDialog.show(this, "Import", ex.Message);
+                    ErrorDialog.show(this, "Import Data", ex.Message);
                     return;
                 }
                 // Open the shell as the live database, managed like a
@@ -23662,7 +23673,7 @@ namespace DbDo
                 try { openDatabaseAndApplyState(sTemp, null); }
                 catch (Exception ex)
                 {
-                    ErrorDialog.show(this, "Import", ex.Message);
+                    ErrorDialog.show(this, "Import Data", ex.Message);
                     try { if (File.Exists(sTemp)) File.Delete(sTemp); } catch { }
                     return;
                 }
@@ -26521,7 +26532,7 @@ namespace DbDo
             if (string.IsNullOrEmpty(sCol)) { Say.sayForced("No current column."); return; }
 
             string sPattern;
-            using (LbcDialog dlg = new LbcDialog("Filter by Regex", this))
+            using (LbcDialog dlg = new LbcDialog("Filter with Regex", this))
             {
                 TextBox tbPat = dlg.addInputBox("Regex for column " + sCol, "",
                     "Show only rows where " + sCol + " matches this regular expression. "
@@ -26545,7 +26556,7 @@ namespace DbDo
                 invokeRefresh();
                 Say.sayForced("Regex filter applied. " + db.recordCount + " matching records.");
             }
-            catch (Exception ex) { ErrorDialog.show(this, "Filter by Regex", ex.Message); }
+            catch (Exception ex) { ErrorDialog.show(this, "Filter with Regex", ex.Message); }
         }
 
         // viewSelectClicked (Control+F): FILTER RECORDS BEGINS WITH A CHOICE
@@ -27118,7 +27129,7 @@ namespace DbDo
             }
             catch (Exception ex)
             {
-                ErrorDialog.show(this, "Refresh View", ex, db);
+                ErrorDialog.show(this, "Refresh Records", ex, db);
             }
         }
 
@@ -28362,7 +28373,7 @@ namespace DbDo
         // accordingly. Restores the user's row position when done.
         private void applyAnchorRange(bool bMark)
         {
-            string sVerb = bMark ? "Complete Mark" : "Complete Unmark to Anchor";
+            string sVerb = bMark ? "Complete Mark" : "Complete Unmark";
             int iAnchor = bMark ? iMarkAnchor : iUnmarkAnchor;
             string sAnchorTable = bMark ? sMarkAnchorTable : sUnmarkAnchorTable;
             string sKindWord = bMark ? "mark" : "unmark";
@@ -30940,7 +30951,7 @@ namespace DbDo
 
         private void describeTableClicked(object sender, EventArgs evArgs)
         {
-            HelpDialog.show(this, "Describe Table", db.describeTable());
+            HelpDialog.show(this, "Field Statistics", db.describeTable());
         }
 
         // facetColumnClicked: Datasette-style faceting for the column

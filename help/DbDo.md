@@ -176,7 +176,7 @@ Woven through the menus is a large **Say-X status family** in the Query menu: qu
 
   **Add Table** asks first, when a table is open, whether to **Define** a new table or **Clone** the open one's fields, which then fill the form for you to name the new table and change what you like. Every new table gets DbDo's standard columns: its id, added, edited, notes, tags and marked. The form has ten name-and-type slots; its **Text** button opens the same fields as lines you can read and edit like any text, one field a line in the form `name: TYPE`, with no limit to how many, and you can paste a structure in. On OK, if fields begin with the same letter, DbDo says which, since only the first of each gets an Alt letter in the record form, and offers to go back and rename them.
 - **Open Table in New Window** (Control+Shift+T) opens a table (or arbitrary query) in a new window.
-- **Recent Files** (Alt+R) reopens something you used lately.
+- **Recent Databases** (Alt+R) reopens something you used lately.
 - **Close Database** closes the current database; **Backup Database** writes a copy; **Compare Database** compares two.
 
 When a database has several tables, **Choose Table** (Control+T) switches the current window to another table, and the *Next/Previous Visited Table* commands walk the tables you have already looked at. **Choose View** (and the object-switch commands) do the same for saved views.
@@ -230,15 +230,15 @@ In DbDo, Keywords and Any Field read a whole record as text, so the words of `re
 
 Beyond the grid's keys, the cursor moves with these commands:
 
-- **Go to Record** (Control+G) jumps to a record number; **Repeat Go To** (Alt+G) repeats it.
+- **Go to Record** (Control+G) jumps to a record number; **Repeat Go to** (Alt+G) repeats it.
 - **Keywords** (Control+K) searches for text; **Reverse Keywords** (Control+Shift+K) searches backward; **Search Next** (F3) and **Search Previous** (Shift+F3) repeat the last search. **Find Regex** (Control+F3) searches by regular expression.
-- **Jump to Record** (Control+J) and **Reverse Jump** move by a jump increment for quickly covering distance in a long table.
+- **Jump** (Control+J) and **Reverse Jump** move by a jump increment for quickly covering distance in a long table.
 - **Jump to Next Initial** steps to the next record whose current column starts with a new letter — type-ahead through a sorted column.
 
 ### Editing records
 
 - **New Record** (Control+N) adds a record; **New Copy** (Control+Shift+N) starts a new record pre-filled from the current one; **Copy Record** (Control+Shift+C) copies it to the clipboard.
-- **Edit View** (Control+E) opens the whole record in a field-by-field dialog. **Edit Cell** (F2) edits just the current cell. **Open Cell Value** (Control+Enter) opens a large value in its own box for comfortable reading and editing.
+- **Edit Record** (Control+E) opens the whole record in a field-by-field dialog. **Edit Cell** (F2) edits just the current cell. **Open Cell Value** (Control+Enter) opens a large value in its own box for comfortable reading and editing.
 - **Pick Value** (Control+F2) offers the legal values for a field whose choices are in defs.
 - **Edit Notes** (Alt+Shift+N), **Edit Tags** (Alt+Shift+T), and **Edit url** (Alt+Shift+U) each open one standard field in a focused single-field dialog with OK and Cancel — the quick way to touch a note, tags, or a link without opening the whole record.
 - **Replace** (Control+R) puts new text in place of old. One dialog asks what to find and what to put in its place, then where: **Columns** -- the current column, the shown columns, or all columns, hidden ones too -- and **Which records** -- all records in view, the marked records, or the current record. It starts on the current column, and on the marked records when some are marked, else all records in view; changing more than one record asks once, naming how many. Check **Use regex pattern** to find by regular expression, with $1 and $2 putting back the parts in parentheses; **Replace with Regex** (Control+Shift+R) opens the same dialog with it checked. **Dry run** counts what would change and changes nothing. Replace never writes the fields DbDo keeps itself: look, prime, added, edited, marked and the id.
@@ -256,7 +256,7 @@ Marking is DbDo's explicit, queryable alternative to visual multi-select. The `m
 - **Shift+Down Arrow and Shift+Up Arrow** mark the record and move to the next or previous one. **Alt+Shift+Down Arrow and Alt+Shift+Up Arrow** unmark it and move.
 - **Control+Shift+Home** marks every record from the first to this one; **Control+Shift+End** marks from this one to the last. **Alt+Control+Shift+Home** and **Alt+Control+Shift+End** unmark the same spans. These were Shift+Home and Shift+End through version 1.0.316; those keys now say where marking went.
 - **Control+Up Arrow and Control+Down Arrow** go to the previous and next marked record; **Control+Page Up and Control+Page Down** go to the first and last.
-- To mark a **range**, set an anchor with **Start Mark** (F8) and extend to the cursor with **Complete Mark** (Shift+F8). **Start Unmark** (Alt+F8) and **Complete Unmark to Anchor** (Alt+Shift+F8) do the same for clearing, with a separate anchor so building a mark range and an unmark range never clobber each other.
+- To mark a **range**, set an anchor with **Start Mark** (F8) and extend to the cursor with **Complete Mark** (Shift+F8). **Start Unmark** (Alt+F8) and **Complete Unmark** (Alt+Shift+F8) do the same for clearing, with a separate anchor so building a mark range and an unmark range never clobber each other.
 
 Marked records can then be reported, filtered, or exported as a set, and several Say commands report only the marked ones.
 
@@ -271,7 +271,7 @@ Filtering and sorting reshape the grid without touching the physical table.
   - **Grouping.** The condition in force, however many parts it has, is wrapped whole in parentheses before the AND or OR, and the new condition in its own. So narrowing and expanding in turn always mean exactly what was asked. Say Filter (Shift+F) speaks the whole condition, led by "where" and grouped the same way.
   - **Nothing found.** A condition that would keep no record says so and leaves the view as it was.
   - **Clear Filter** (Control+Shift+F) removes the filter, keeping you on the same record. A table that reopens with a filter still in force says so as it opens.
-  - **Filter by Regex** filters by pattern; **Say Filter** (Shift+F) speaks the current filter.
+  - **Filter with Regex** filters by pattern; **Say Filter** (Shift+F) speaks the current filter.
 - **Order Records** (Alt+O) has the same buttons as Select Columns, and first says the order in force. **Prime columns** is the default (the first focus, so Enter takes it): it sorts by the primary key, prime's fields, ascending. **Look columns** sorts by look's fields, the default columns. **Main columns**, **Standard columns** and **All columns** sort by those columns, ascending. **Choose columns** picks the columns and the direction of each, in two lists; **Type columns** takes them separated by commas, with desc after a column for largest or latest first. When look and prime hold the same fields, one button, **Look columns**, stands for both, in Order Records and Select Columns alike. Last comes **Reverse order** (R), which turns the order in force the other way, as **Reverse Order** (Alt+Shift+O) does from the grid.
 
 Sorting reads numbers as numbers: volume 9 comes after 7 and 6.5 even if some
@@ -442,7 +442,7 @@ The files are kept in DbDo's own table, **files**, beside defs and maps; DbDo hi
 DbDo distinguishes four file operations that are easy to confuse. The distinction is about whether the data keeps its original shape or is reshaped into DbDo's conventions.
 
 - **Open** (Control+O) opens a file *faithfully* — a round trip. An Excel workbook opens as its sheets, a CSV as its rows, and saving writes back to that same file in that same format. Use Open when you want to work with a file as it is.
-- **Import** (Alt+I) reads an outside file and reshapes it *into a DbDo database* — normalizing columns, applying conventions, and producing a `.db` you then work with. Use Import when you want to bring foreign data into a proper DbDo database. **Transfer Import** and **Merge Data** (Alt+M) bring data in alongside existing data.
+- **Import Data** (Alt+I) reads an outside file and reshapes it *into a DbDo database* — normalizing columns, applying conventions, and producing a `.db` you then work with. Use Import when you want to bring foreign data into a proper DbDo database. **Transfer Import** and **Merge Data** (Alt+M) bring data in alongside existing data.
 - **Export Data** (Alt+Shift+X) writes the **grid** — the current view — out to a new file in a chosen format. Use Export to hand off what you are looking at. A CSV or TSV file holds your values exactly as they are. Since a spreadsheet may run a value beginning with =, +, - or @ as a formula, DbDo asks before opening such a file, and an .xlsx export is the safe way into a spreadsheet: it keeps every value as text.
 - **Save** (Control+S) and **Save As** (Control+Shift+S) concern the *whole database*. For a workbook opened faithfully, Save writes your edits back to the `.xlsx`. For a native database your edits were already committed, so Save reports that; Save As writes a fresh copy. **Open as Managed Copy** opens a file as a working copy so the original is untouched until you decide.
 
@@ -486,13 +486,13 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Open Database | Control+O |
 | Open Template Database | Alt+Shift+D |
 | Open Table in New Window | Control+Shift+T |
-| Recent Files | Alt+R |
+| Recent Databases | Alt+R |
 | Save | Control+S |
 | Save As | Control+Shift+S |
 | Close Database | — |
 | Backup Database | — |
 | Compare Database | — |
-| Import | Alt+I |
+| Import Data | Alt+I |
 | Merge Data | Alt+M |
 | Transfer Import | — |
 | Run Report | Alt+Shift+R |
@@ -508,12 +508,12 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Command | Chord |
 |---------|-------|
 | New Record | Control+N |
-| Edit View | Control+E |
+| Edit Record | Control+E |
 | Edit Cell | F2 |
 | Delete Record | Control+D |
 | Delete Without Confirmation | Control+Shift+D |
 | Copy Record | Control+Shift+C |
-| Append Record to Clipboard | Alt+Shift+C |
+| Append Record | Alt+Shift+C |
 | New Copy | Control+Shift+N |
 | Mail Record | — |
 | Replace | Control+R |
@@ -536,7 +536,7 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Next / Previous Marked | Control+Down / Control+Up |
 | First / Last Marked | Control+Page Up / Control+Page Down |
 | Start Mark / Complete Mark | F8 / Shift+F8 |
-| Start Unmark / Complete Unmark to Anchor | Alt+F8 / Alt+Shift+F8 |
+| Start Unmark / Complete Unmark | Alt+F8 / Alt+Shift+F8 |
 | Save Bookmark | Control+B |
 | List Bookmarks | Alt+B |
 | Clear Bookmark | Control+Shift+B |
@@ -553,13 +553,13 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | First / Last Record | — |
 | Next / Previous Record | — |
 | Go to Record | Control+G |
-| Repeat Go To | Alt+G |
+| Repeat Go to | Alt+G |
 | Keywords | Control+K |
 | Reverse Keywords | Control+Shift+K |
-| Jump to Record | Control+J |
+| Jump | Control+J |
 | Reverse Jump | Control+Shift+J |
 | Find Regex | Control+F3 |
-| Reverse Regex Find | Control+Shift+F3 |
+| Reverse Find Regex | Control+Shift+F3 |
 | Search Next / Previous | F3 / Shift+F3 |
 | Enter Child Table | Alt+Right |
 | Exit Child Table | Alt+Left |
@@ -608,8 +608,8 @@ The Query menu holds record inspection and the Say-X status family.
 | Say Prime | Shift+P |
 | Filter Records | Control+F |
 | Clear Filter | Control+Shift+F |
-| Filter by Regex | — |
-| Clear Sort | — |
+| Filter with Regex | — |
+| Clear Order | — |
 | Order Records | Alt+O |
 | Reverse Order | Alt+Shift+O |
 
@@ -617,7 +617,7 @@ The Query menu holds record inspection and the Say-X status family.
 
 | Command | Chord |
 |---------|-------|
-| Refresh View | F5 |
+| Refresh Records | F5 |
 | Read Only Toggle | Control+Shift+Z |
 | Database Summary | Alt+D |
 | Table Summary | Alt+T |
@@ -625,9 +625,9 @@ The Query menu holds record inspection and the Say-X status family.
 | Add Column to Order Descending | Alt+Shift+A |
 | Select Columns | Alt+S |
 | Generate from Grid | Alt+Shift+G |
-| Append Cell to Clipboard | Alt+C |
-| Copy Cell to Clipboard | Control+C |
-| Copy Visible Cells as TSV to Clipboard | — |
+| Append Cell | Alt+C |
+| Copy Cell | Control+C |
+| Copy Visible Cells | — |
 | Copy Column / Copy Grid | — |
 | Jump to Next Initial | — |
 | Query | Control+Q |
@@ -635,7 +635,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Test Integrity | — |
 | Hotkey Summary | Help menu; Control+Slash pressed twice |
 | Open as Managed Copy | — |
-| Describe Table | — |
+| Field Statistics | — |
 | Facet Column | — |
 | Open in Explorer | Alt+Pipe |
 | Open Command Prompt | Control+Backslash |
@@ -1446,7 +1446,7 @@ nothing was ever set. "blank" means there is a value and it is empty. A listener
 cannot tell those apart from silence, and they are different facts.
 
 Shift+J used to open the Jump dialog. It now says the jump text instead, which
-is what Say Jump on that key was always meant to do. Jump to Record keeps
+is what Say Jump on that key was always meant to do. Jump keeps
 Control+J.
 
 ### Credits for the tutorial voices

@@ -21,8 +21,7 @@ section says why each key is the one it is.
 - Append Clipboard\
   Add the clipboard text to the end of a file you name.\
   Control+Shift+Apostrophe
-- Append Record to Clipboard\
-  C for Clipboard.\
+- Append Record\
   Alt+Shift+C
 - Clear Bookmark\
   Forget the saved bookmark. B for Bookmark. Shift reverses Save Bookmark.\
@@ -45,15 +44,15 @@ section says why each key is the one it is.
 - Edit Notes\
   N for Notes.\
   Alt+Shift+N
+- Edit Record\
+  Edit every field of the current row. E for Edit.\
+  Control+E
 - Edit Tags\
   T for Tags.\
   Alt+Shift+T
 - Edit url\
   U for url.\
   Alt+Shift+U
-- Edit View\
-  E for Edit.\
-  Control+E
 - List Bookmarks\
   Show saved bookmarks in a listbox; navigate to the selected one. B for Bookmarks.\
   Alt+B
@@ -104,7 +103,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Complete Mark\
   Mark every row from the F8 anchor to the current row. F8 is selection; Shift completes the run F8 started.\
   Shift+F8
-- Complete Unmark to Anchor\
+- Complete Unmark\
   Unmark every row from the Alt+F8 anchor to the current row. F8 is selection; Shift completes the run Alt+F8 started.\
   Alt+Shift+F8
 - Invert Marked\
@@ -134,7 +133,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Export Data\
   Export the records in view, with the shown columns, to a file. X for the sound of "ex".\
   Alt+Shift+X
-- Import\
+- Import Data\
   Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and defs. I for Import.\
   Alt+I
 - Merge Data\
@@ -152,7 +151,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Previous Table or View\
   F6 moves among parts; Shift reverses Control+F6.\
   Control+Shift+F6
-- Recent Files\
+- Recent Databases\
   R for Recent.\
   Alt+R
 - Run Report\
@@ -205,10 +204,10 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 
 ### Misc
 
-- Append Cell to Clipboard\
+- Append Cell\
   Append the value of the cell under the virtual cursor to the clipboard. C for Cell.\
   Alt+C
-- Copy Cell to Clipboard\
+- Copy Cell\
   Copy the value of the cell under the virtual cursor to the clipboard. C for Copy.\
   Control+C
 - Database Summary\
@@ -223,7 +222,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Read Only Toggle\
   Flip the database between read-write and read-only at runtime. Z is for sleep: it wakes this behavior or puts it to sleep.\
   Control+Shift+Z
-- Refresh View\
+- Refresh Records\
   Refresh the records' values from the database. F5 is refreshing.\
   F5
 - Select Columns\
@@ -281,24 +280,24 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Go to Record\
   Go to a record by its number, a percent or text. G for Go, as Control+G goes to a line in Windows editors.\
   Control+G
-- Jump to Record\
+- Jump\
   Go to the next record whose current field holds the text. J for Jump.\
   Control+J
 - Keywords\
   Go to the next record whose fields hold the keywords. K for Keywords.\
   Control+K
-- Repeat Go To\
+- Repeat Go to\
   G for Go.\
   Alt+G
+- Reverse Find Regex\
+  Find the previous record matching a regular expression. F3 searches; Control makes it a pattern and Shift reverses it.\
+  Control+Shift+F3
 - Reverse Jump\
-  Go to the previous record whose current field holds the text. J for Jump. Shift reverses Jump to Record.\
+  Go to the previous record whose current field holds the text. J for Jump. Shift reverses Jump.\
   Control+Shift+J
 - Reverse Keywords\
   Go to the previous record whose fields hold the keywords. K for Keywords. Shift reverses Keywords.\
   Control+Shift+K
-- Reverse Regex Find\
-  Find the previous record matching a regular expression. F3 searches; Control makes it a pattern and Shift reverses it.\
-  Control+Shift+F3
 - Search Next\
   Repeat the last Find forward. F3 is searching and searching again.\
   F3
@@ -494,7 +493,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Open in Explorer
 - Alt+C\
   Append the value of the cell under the virtual cursor to the clipboard.\
-  Append Cell to Clipboard
+  Append Cell
 - Alt+D\
   Database Summary
 - Alt+Delete\
@@ -503,13 +502,13 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+Enter\
   Table Properties
 - Alt+G\
-  Repeat Go To
+  Repeat Go to
 - Alt+Home\
   Go back to the first table.\
   Exit to Root Table
 - Alt+I\
   Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and defs.\
-  Import
+  Import Data
 - Alt+L\
   Speak every value of the current virtual column, from the top.\
   Say Column as List
@@ -526,7 +525,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Speak the open database's full path; press twice to show it.\
   Say Path
 - Alt+R\
-  Recent Files
+  Recent Databases
 - Alt+RightArrow\
   Go into the records related to this one.\
   Enter Child Table
@@ -554,7 +553,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Empty the clipboard.\
   Clear Clipboard
 - Alt+Shift+C\
-  Append Record to Clipboard
+  Append Record
 - Alt+Shift+D\
   Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail.\
   Open Template Database
@@ -608,12 +607,13 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Open Command Prompt
 - Control+C\
   Copy the value of the cell under the virtual cursor to the clipboard.\
-  Copy Cell to Clipboard
+  Copy Cell
 - Control+D\
   Delete the current record (or marked records, when marks exist).\
   Delete Record
 - Control+E\
-  Edit View
+  Edit every field of the current row.\
+  Edit Record
 - Control+Enter\
   Open Cell Value
 - Control+Equals\
@@ -631,7 +631,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Inspect Record
 - Control+J\
   Go to the next record whose current field holds the text.\
-  Jump to Record
+  Jump
 - Control+K\
   Go to the next record whose fields hold the keywords.\
   Keywords
@@ -745,7 +745,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   ReadMe
 - Alt+Shift+F8\
   Unmark every row from the Alt+F8 anchor to the current row.\
-  Complete Unmark to Anchor
+  Complete Unmark
 - Control+F1\
   Describe each key instead of running it (Ctrl+F1).\
   Key Describer Toggle
@@ -767,7 +767,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   History of Changes
 - Control+Shift+F3\
   Find the previous record matching a regular expression.\
-  Reverse Regex Find
+  Reverse Find Regex
 - Control+Shift+F4\
   Close every window except the current one.\
   Close All But Current Window
@@ -792,7 +792,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Current Windows
 - F5\
   Refresh the records' values from the database.\
-  Refresh View
+  Refresh Records
 - F8\
   Drop a mark anchor at the current row.\
   Start Mark
@@ -890,13 +890,13 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alternate Menu\
   Pick any command from one list, in menu, name or key order.\
   Alt+F10
-- Append Cell to Clipboard\
+- Append Cell\
   Append the value of the cell under the virtual cursor to the clipboard.\
   Alt+C
 - Append Clipboard\
   Add the clipboard text to the end of a file you name.\
   Control+Shift+Apostrophe
-- Append Record to Clipboard\
+- Append Record\
   Alt+Shift+C
 - Chat about Table\
   Shift+F12
@@ -922,10 +922,10 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Complete Mark\
   Mark every row from the F8 anchor to the current row.\
   Shift+F8
-- Complete Unmark to Anchor\
+- Complete Unmark\
   Unmark every row from the Alt+F8 anchor to the current row.\
   Alt+Shift+F8
-- Copy Cell to Clipboard\
+- Copy Cell\
   Copy the value of the cell under the virtual cursor to the clipboard.\
   Control+C
 - Copy Log\
@@ -952,6 +952,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   F2
 - Edit Notes\
   Alt+Shift+N
+- Edit Record\
+  Edit every field of the current row.\
+  Control+E
 - Edit Script\
   Alt+Shift+S
 - Edit Settings\
@@ -961,8 +964,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Alt+Shift+T
 - Edit url\
   Alt+Shift+U
-- Edit View\
-  Control+E
 - Elevate Version\
   Check for a newer version on GitHub and offer to install it.\
   F11
@@ -1002,7 +1003,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - History of Changes\
   Open the history of changes in the default browser.\
   Control+Shift+F1
-- Import\
+- Import Data\
   Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and defs.\
   Alt+I
 - Inspect Record\
@@ -1012,7 +1013,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Invoke Script\
   Run a script from the Scripts folder (.js, .sql, or .dbdo).\
   Alt+V
-- Jump to Record\
+- Jump\
   Go to the next record whose current field holds the text.\
   Control+J
 - Key Describer Toggle\
@@ -1089,17 +1090,20 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Control+Shift+Z
 - ReadMe\
   Alt+Shift+F1
-- Recent Files\
+- Recent Databases\
   Alt+R
-- Refresh View\
+- Refresh Records\
   Refresh the records' values from the database.\
   F5
-- Repeat Go To\
+- Repeat Go to\
   Alt+G
 - Replace\
   Control+R
 - Replace with Regex\
   Control+Shift+R
+- Reverse Find Regex\
+  Find the previous record matching a regular expression.\
+  Control+Shift+F3
 - Reverse Jump\
   Go to the previous record whose current field holds the text.\
   Control+Shift+J
@@ -1109,9 +1113,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Reverse Order\
   Reverse the order of the records.\
   Alt+Shift+O
-- Reverse Regex Find\
-  Find the previous record matching a regular expression.\
-  Control+Shift+F3
 - Run Report\
   Alt+Shift+R. Render a saved report definition to a Markdown document. A report reads the whole PHYSICAL table (not the grid view), so it is reproducible regardless of your current filter or sort.\
   Alt+Shift+R

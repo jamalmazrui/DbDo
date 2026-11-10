@@ -35,7 +35,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Control plus J, Jump to Record, finds an album by name. I type A Night at the Opera and press Enter.
+Say=Control plus J, Jump, finds an album by name. I type A Night at the Opera and press Enter.
 Key=Control+J
 Hear=Hard Rock, 9, A Night at the Opera, Queen, Row 39 of 100
 Note=Confirm the wording with a live run: buildTutorials -live.

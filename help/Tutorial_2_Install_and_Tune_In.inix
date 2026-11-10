@@ -90,9 +90,9 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Escape closes the player. A station I already know is quickest found by its name. Control plus J, Jump to Record, asks which column and what to look for.
+Say=Escape closes the player. A station I already know is quickest found by its name. Control plus J, Jump, asks which column and what to look for.
 Key=Control+J
-Hear=Jump to Record dialog
+Hear=Jump dialog
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

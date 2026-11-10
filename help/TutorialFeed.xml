@@ -5,7 +5,7 @@
     <link>Tutorials.htm</link>
     <description>Spoken walks through DbDo, the database program built for working by ear, and the ready-made databases that come with it. Ten walks, each under five minutes, in the order a new person meets them.</description>
     <language>en-us</language>
-    <lastBuildDate>Tue, 10 Nov 2026 20:11:17 +0000</lastBuildDate>
+    <lastBuildDate>Tue, 10 Nov 2026 23:44:06 +0000</lastBuildDate>
     <itunes:author>Jamal Mazrui</itunes:author>
     <itunes:explicit>false</itunes:explicit>
     <itunes:category text="Technology"/>
@@ -33,8 +33,8 @@
       <description>The DbDo setup program is downloaded. Full transcript: Tutorials.htm#0b-2-install-and-tune-in</description>
       <link>Tutorials.htm#0b-2-install-and-tune-in</link>
       <guid isPermaLink="false">homer-tutorial_2_install_and_tune_in</guid>
-      <enclosure url="tutorials/2_Install_and_Tune_In.mp3" length="1514811" type="audio/mpeg"/>
-      <itunes:duration>00:03:38</itunes:duration>
+      <enclosure url="tutorials/2_Install_and_Tune_In.mp3" length="1509128" type="audio/mpeg"/>
+      <itunes:duration>00:03:37</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
@@ -69,8 +69,8 @@
       <description>DbDo is open. Full transcript: Tutorials.htm#0f-6-explore-music</description>
       <link>Tutorials.htm#0f-6-explore-music</link>
       <guid isPermaLink="false">homer-tutorial_6_explore_music</guid>
-      <enclosure url="tutorials/6_Explore_Music.mp3" length="1469214" type="audio/mpeg"/>
-      <itunes:duration>00:03:36</itunes:duration>
+      <enclosure url="tutorials/6_Explore_Music.mp3" length="1459355" type="audio/mpeg"/>
+      <itunes:duration>00:03:35</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
