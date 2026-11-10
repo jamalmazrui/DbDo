@@ -53,7 +53,7 @@ Run = scripts\acceptCheck.cmd exists exec\DbDo.exe
 
 [check]
 
-Name = the snippet module was produced
+Name = the script module was produced
 Run = scripts\acceptCheck.cmd exists exec\DbDo.dll
 
 [check]

@@ -22,6 +22,7 @@ section says why each key is the one it is.
   Add the clipboard text to the end of a file you name.\
   Control+Shift+Apostrophe
 - Append Record to Clipboard\
+  C for Clipboard.\
   Alt+Shift+C
 - Clear Bookmark\
   Forget the saved bookmark. B for Bookmark. Shift reverses Save Bookmark.\
@@ -93,7 +94,7 @@ section says why each key is the one it is.
   Save the clipboard text to a file you name.\
   Control+Apostrophe
 - Unmark Record\
-  Clear the 'marked' flag on the current row. M for Mark. Shift reverses Mark Record.\
+  Clear the 'marked' flag on the current row. Shift reverses Mark: M for Mark.\
   Control+Shift+M
 
 ### Edit, Bulk Marking
@@ -240,8 +241,8 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Chat with AI\
   F12 is files and AI: F12 talks to the model on this computer.\
   F12
-- Edit Snippet\
-  S for Snippet.\
+- Edit Script\
+  S for Script.\
   Alt+Shift+S
 - Evaluate Expression\
   Control+Equals
@@ -287,6 +288,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Go to the next record whose fields hold the keywords. K for Keywords.\
   Control+K
 - Repeat Go To\
+  G for Go.\
   Alt+G
 - Reverse Jump\
   Go to the previous record whose current field holds the text. J for Jump. Shift reverses Jump to Record.\
@@ -581,7 +583,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Alt+Shift+R. Render a saved report definition to a Markdown document. A report reads the whole PHYSICAL table (not the grid view), so it is reproducible regardless of your current filter or sort.\
   Run Report
 - Alt+Shift+S\
-  Edit Snippet
+  Edit Script
 - Alt+Shift+T\
   Edit Tags
 - Alt+Shift+U\
@@ -950,11 +952,11 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   F2
 - Edit Notes\
   Alt+Shift+N
+- Edit Script\
+  Alt+Shift+S
 - Edit Settings\
   Open the Settings dialog.\
   Alt+Shift+E
-- Edit Snippet\
-  Alt+Shift+S
 - Edit Tags\
   Alt+Shift+T
 - Edit url\

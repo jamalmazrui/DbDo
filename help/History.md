@@ -5,6 +5,11 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 10 November 2026 -- Script, the one word
+
+- **Each command's name is its menu caption.** 61 commands were spoken by one name and shown by another -- Mark Record on the menu was Set Mark to the Key Describer, Go to Record was Set Position, Where Am I was Show Status. The name now matches the caption everywhere: the describer, the Alternate Menu, the key list, the command echo and each command's window titles.
+- **Edit Script (Alt+Shift+S),** once Edit Snippet, beside Invoke Script (Alt+V): script is the word for both, as in EdSharp.
+
 ## 10 November 2026 -- Classes named for what they are
 
 - **DbDo's KeyMap is marked as kept on purpose,** with the reason its audit already records, so the kit's check agrees.

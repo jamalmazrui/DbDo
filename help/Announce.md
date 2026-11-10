@@ -30,7 +30,7 @@ Every DbDo command can be done quickly from the keyboard. The installer also bri
 
 **One connection, two ways in.** The window and the dot-prompt console work on the same live data. An edit in one shows up in the other at once.
 
-**Small scripts.** Save short JavaScript or text snippets in your own editor, then run one inside DbDo with a single key, Control+Shift+I (I for Invoke). A script can change many records, set filters or make a report: anything DbDo itself can do.
+**Small scripts.** Save short JavaScript or text scripts in your own editor, then run one inside DbDo with a single key, Control+Shift+I (I for Invoke). A script can change many records, set filters or make a report: anything DbDo itself can do.
 
 ## Template databases
 

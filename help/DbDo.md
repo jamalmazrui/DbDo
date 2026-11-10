@@ -392,7 +392,7 @@ Filter and order first to shape the grid, then report on exactly what you see.
 
 ### To automate what you repeat
 
-A **script** is a file that does a task again, run with **Invoke Script** (Alt+V), written or changed with **Edit Snippet** (Alt+Shift+S). A database's own scripts sit beside it, and shared ones in DbDo's Scripts folder (**Open Script Folder** opens it). There are three kinds, from the simplest:
+A **script** is a file that does a task again, run with **Invoke Script** (Alt+V), written or changed with **Edit Script** (Alt+Shift+S). A database's own scripts sit beside it, and shared ones in DbDo's Scripts folder (**Open Script Folder** opens it). There are three kinds, from the simplest:
 
 - **.sql -- a saved question.** One or more SQL statements: a Query you keep. Most templates come with some: ContactTrail's Emergency Contacts, RecipeTrail's Shopping List, JobTrail's Weekly Count.
 - **.dbdo -- a saved sequence of DbDo commands,** one per line, as typed at the dot prompt: filter, order, select columns, export. For a routine you would otherwise do by hand each week, such as JobTrail's Stale Applications.
@@ -462,7 +462,7 @@ DbDo runs your SQL against the live connection, so queries see uncommitted conte
 
 ### The scripting engine
 
-DbDo's scripting language is **JScript .NET**. The same engine powers three things, so learning it once pays off in all of them: **Invoke Script** for `.js` snippets, **Evaluate Expression** (Control+Equals) for one-off calculations, and the `{{ ... }}` expressions inside report templates.
+DbDo's scripting language is **JScript .NET**. The same engine powers three things, so learning it once pays off in all of them: **Invoke Script** for `.js` scripts, **Evaluate Expression** (Control+Equals) for one-off calculations, and the `{{ ... }}` expressions inside report templates.
 
 - **Evaluate Expression** (Control+Equals) prompts for an expression, evaluates it, and speaks and shows the result — `2+2*10`, string manipulation, date math. The result is shown rather than only copied, so it stays reachable even where clipboard access is restricted. The last expression is remembered for quick tweaking.
 - In scripts and report expressions, field values are available for substitution and computation, so an expression can combine, format, or conditionally choose field values.
@@ -627,7 +627,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Generate from Grid | Alt+Shift+G |
 | Append Cell to Clipboard | Alt+C |
 | Copy Cell to Clipboard | Control+C |
-| Copy Visible Cells | — |
+| Copy Visible Cells as TSV to Clipboard | — |
 | Copy Column / Copy Grid | — |
 | Jump to Next Initial | — |
 | Query | Control+Q |
@@ -642,7 +642,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Open Dot Prompt | Control+GraveAccent |
 | Sqlean Console | Control+Shift+GraveAccent |
 | Invoke Script | Alt+V |
-| Edit Snippet | Alt+Shift+S |
+| Edit Script | Alt+Shift+S |
 | Open Script Folder | — |
 | Evaluate Expression | Control+Equals |
 | Edit Settings | Alt+Shift+E |
@@ -1064,7 +1064,7 @@ When a newer DbDo brings an improved template -- more stations, a new script, a
 corrected record -- open your copy and choose **Update from Template** on the Help
 menu (Alt+H, then U). It offers two buttons:
 
-- **Merge** adds what the template has and your copy lacks, and keeps everything of
+- **Merge Data** adds what the template has and your copy lacks, and keeps everything of
   yours. A field the template has gained is added to your copy first, empty, so a copy
   made before it existed gets it too. It uses Merge Database, so it first asks what to do with records both have;
   Add new only, the first choice, changes none of yours. Your copy as it was is kept

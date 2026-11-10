@@ -1246,10 +1246,9 @@ database, to keep it or to change its format.</li>
 <h3 id="to-automate-what-you-repeat">To automate what you repeat</h3>
 <p>A <strong>script</strong> is a file that does a task again, run with
 <strong>Invoke Script</strong> (Alt+V), written or changed with
-<strong>Edit Snippet</strong> (Alt+Shift+S). A database’s own scripts
-sit beside it, and shared ones in DbDo’s Scripts folder (<strong>Open
-Script Folder</strong> opens it). There are three kinds, from the
-simplest:</p>
+<strong>Edit Script</strong> (Alt+Shift+S). A database’s own scripts sit
+beside it, and shared ones in DbDo’s Scripts folder (<strong>Open Script
+Folder</strong> opens it). There are three kinds, from the simplest:</p>
 <ul>
 <li><strong>.sql – a saved question.</strong> One or more SQL
 statements: a Query you keep. Most templates come with some:
@@ -1405,7 +1404,7 @@ backward, and by position.</p>
 <h3 id="the-scripting-engine">The scripting engine</h3>
 <p>DbDo’s scripting language is <strong>JScript .NET</strong>. The same
 engine powers three things, so learning it once pays off in all of them:
-<strong>Invoke Script</strong> for <code>.js</code> snippets,
+<strong>Invoke Script</strong> for <code>.js</code> scripts,
 <strong>Evaluate Expression</strong> (Control+Equals) for one-off
 calculations, and the <code>{{ ... }}</code> expressions inside report
 templates.</p>
@@ -1983,7 +1982,7 @@ family.</p>
 <td>Control+C</td>
 </tr>
 <tr>
-<td>Copy Visible Cells</td>
+<td>Copy Visible Cells as TSV to Clipboard</td>
 <td>—</td>
 </tr>
 <tr>
@@ -2043,7 +2042,7 @@ family.</p>
 <td>Alt+V</td>
 </tr>
 <tr>
-<td>Edit Snippet</td>
+<td>Edit Script</td>
 <td>Alt+Shift+S</td>
 </tr>
 <tr>
@@ -2741,7 +2740,7 @@ script, a corrected record – open your copy and choose <strong>Update
 from Template</strong> on the Help menu (Alt+H, then U). It offers two
 buttons:</p>
 <ul>
-<li><strong>Merge</strong> adds what the template has and your copy
+<li><strong>Merge Data</strong> adds what the template has and your copy
 lacks, and keeps everything of yours. A field the template has gained is
 added to your copy first, empty, so a copy made before it existed gets
 it too. It uses Merge Database, so it first asks what to do with records
