@@ -7,6 +7,7 @@ Press **Control+Shift+F1** inside DbDo to open this file in your browser, or typ
 
 ## 9 November 2026 -- Y, R, W and V, and one set of words
 
+- **Shift+Y answers at once.** Say Yield Marked counted the marked records one by one, which took 7 seconds in a table of 49,186, so a second press was never quick enough to spell the answer; it now asks the database directly.
 - **Invoke Script reads In&voke on the Tools menu, and Shift+V is Say Invoke Script.** V stands for the sound in Invoke, as X does for the "ex" sound; the release check had stopped the push on the V keys.
 - **Alt+Y says how many records are in view, and Shift+Y how many are marked,** as in FileDir.
 - **Shift+R says the Replace values,** in EdSharp's words: Replace's match and replace, and Replace with Regex's pattern and substitute.

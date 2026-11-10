@@ -17902,25 +17902,10 @@ namespace DbDo
             { Say.say("yield marked: no table selected"); return; }
             if (!db.hasField(Metadata.MarkedColumn))
             { Say.say("yield marked: this table has no marked column"); return; }
-            object original = null;
-            try { original = db.bookmark; } catch { }
-            int iCount = 0;
-            try
-            {
-                for (int i = 1; i <= db.recordCount; i++)
-                {
-                    try
-                    {
-                        db.absolutePosition = i;
-                        if (isMarkedTrue(db.getScreenValue(Metadata.MarkedColumn))) iCount++;
-                    }
-                    catch { }
-                }
-            }
-            finally
-            {
-                if (original != null) try { db.bookmark = original; } catch { }
-            }
+            // THE FAST COUNT (9 November 2026). Walking all 49,186 records took 7 seconds, so a second press arrived 7
+            // seconds after the first and was never a double press. countMarkedInFilter asks SQLite through the marked
+            // column's index, and walks the records only when that cannot answer.
+            int iCount = countMarkedInFilter();
             speakOrShow("Yield Marked", "yield marked: " + iCount + " record" + (iCount == 1 ? "" : "s"), 108);
         }
 
