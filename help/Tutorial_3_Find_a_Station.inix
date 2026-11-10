@@ -118,8 +118,8 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=The sports station. Alt plus Shift plus P plays it.
-Key=Alt+Shift+P
+Say=The sports station. Control plus P plays it.
+Key=Control+P
 Hear=Homer Player, KIRO 710 ESPN Seattle
 Note=Confirm the wording with a live run: buildTutorials -live.
 
@@ -139,8 +139,8 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Now the payoff. With records marked, Alt plus Shift plus P plays all of them, one after another, as a playlist.
-Key=Alt+Shift+P
+Say=Now the payoff. With records marked, Control plus P plays all of them, one after another, as a playlist.
+Key=Control+P
 Hear=Homer Player, 3 tracks, 99.3 KDRM
 Note=Confirm the wording with a live run: buildTutorials -live.
 
@@ -191,4 +191,4 @@ Hear=Control plus M
 
 Say=Play the marked stations.
 Key=
-Hear=Alt plus Shift plus P
+Hear=Control plus P

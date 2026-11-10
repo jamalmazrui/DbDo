@@ -118,17 +118,17 @@ Hear=No Key Describer
 
 [step]
 
-Say=When a key will not come to mind, Alt plus F10, the Alternate Menu, lists every command in one list you type into, with its key beside it.
+Say=When a key will not come to mind, Alt plus F10, the Alternate Menu, lists every command in one list you can search, with its key beside it.
 Key=Alt+F10
 Hear=Alternate Menu
-Hear=Command, list box
+Hear=Commands, list box
 
 [step]
 
 Say=I type the word play, and the list narrows to the commands with that word.
 Key=
 Type=play
-Hear=Play Stream, Alt plus Shift plus P
+Hear=Play Stream, Control plus P
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

@@ -83,8 +83,8 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Its genre, country, language, and the address it streams from. Escape. Now the reason RadioTrail opens first: Alt plus Shift plus P, Play Stream, plays the station in the Homer Player.
-Key=Alt+Shift+P
+Say=Its genre, country, language, and the address it streams from. Escape. Now the reason RadioTrail opens first: Control plus P, Play Stream, plays the station in the Homer Player.
+Key=Control+P
 Hear=Homer Player, ACB Media 1
 Note=Confirm the wording with a live run: buildTutorials -live.
 
@@ -150,4 +150,4 @@ Hear=Control plus J
 
 Say=Play the station.
 Key=
-Hear=Alt plus Shift plus P
+Hear=Control plus P

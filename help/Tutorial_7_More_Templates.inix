@@ -28,8 +28,8 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Alt plus Shift plus P, Play Stream, plays a presentation as it plays a station.
-Key=Alt+Shift+P
+Say=Control plus P, Play Stream, plays a presentation as it plays a station.
+Key=Control+P
 Hear=Homer Player, Accessible Design is Good Design (Part 3) -- At a Glance
 Note=Confirm the wording with a live run: buildTutorials -live.
 
@@ -116,7 +116,7 @@ Hear=Control plus Shift plus I
 
 Say=Play the record.
 Key=
-Hear=Alt plus Shift plus P
+Hear=Control plus P
 
 [step]
 

@@ -7,6 +7,9 @@ Press **Control+Shift+F1** inside DbDo to open this file in your browser, or typ
 
 ## 9 November 2026 -- testSay, every Say key heard
 
+- **testSay is kept in scripts.** It was not named in RepoFiles.txt, so the release's tidy moved it to notes\\other as a stray; it is named now.
+- **The Alternate Menu lists DbDo's commands.** It had said "0 commands": DbDo's menus live in its frame's menu bar while a table window is active.
+- **The tutorials teach Control+P for Play Stream,** and the Alternate Menu's list as Commands.
 - **scripts\testSay presses every Shift+letter key,** once, then twice, then with the Key Describer on, while JAWS runs, records and writes down what is said, and gathers it all in logs\testSay-<stamp> with DbDo's own speech logs, to compare what DbDo meant to say with what was heard.
 
 ## 9 November 2026 -- The Alternate Menu, the same in every Homer app

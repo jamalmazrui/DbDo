@@ -104,6 +104,8 @@
 !/scripts/renameToPrime.sql
 !/scripts/summarizeSetup.cmd
 !/scripts/summarizeSetup.ps1
+!/scripts/testSay.cmd
+!/scripts/testSay.py
 !/scripts/tidy.cmd
 !/scripts/tidy.py
 !/scripts/uiCheck.cmd

@@ -1219,12 +1219,12 @@ Screen reader:
 
 ### Step 18: Alt+F10
 
-When a key will not come to mind, Alt plus F10, the Alternate Menu, lists every command in one list you type into, with its key beside it.
+When a key will not come to mind, Alt plus F10, the Alternate Menu, lists every command in one list you can search, with its key beside it.
 
 Screen reader:
 
 - Alternate Menu
-- Command, list box
+- Commands, list box
 
 ### Step 19
 
@@ -1232,7 +1232,7 @@ I type the word play, and the list narrows to the commands with that word.
 
 Screen reader:
 
-- Play Stream, Alt plus Shift plus P
+- Play Stream, Control plus P
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1407,9 +1407,9 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 12: Alt+Shift+P
+### Step 12: Control+P
 
-Its genre, country, language, and the address it streams from. Escape. Now the reason RadioTrail opens first: Alt plus Shift plus P, Play Stream, plays the station in the Homer Player.
+Its genre, country, language, and the address it streams from. Escape. Now the reason RadioTrail opens first: Control plus P, Play Stream, plays the station in the Homer Player.
 
 Screen reader:
 
@@ -1491,7 +1491,7 @@ Play the station.
 
 Screen reader:
 
-- Alt plus Shift plus P
+- Control plus P
 
 **Something to try:** Find and play a station you already know, by its name.
 
@@ -1650,9 +1650,9 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 16: Alt+Shift+P
+### Step 16: Control+P
 
-The sports station. Alt plus Shift plus P plays it.
+The sports station. Control plus P plays it.
 
 Screen reader:
 
@@ -1680,9 +1680,9 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 19: Alt+Shift+P
+### Step 19: Control+P
 
-Now the payoff. With records marked, Alt plus Shift plus P plays all of them, one after another, as a playlist.
+Now the payoff. With records marked, Control plus P plays all of them, one after another, as a playlist.
 
 Screen reader:
 
@@ -1750,7 +1750,7 @@ Play the marked stations.
 
 Screen reader:
 
-- Alt plus Shift plus P
+- Control plus P
 
 **Something to try:** Filter RadioTrail for your own team or a favorite genre, then play what is left.
 
@@ -2453,9 +2453,9 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 4: Alt+Shift+P
+### Step 4: Control+P
 
-Alt plus Shift plus P, Play Stream, plays a presentation as it plays a station.
+Control plus P, Play Stream, plays a presentation as it plays a station.
 
 Screen reader:
 
@@ -2558,7 +2558,7 @@ Play the record.
 
 Screen reader:
 
-- Alt plus Shift plus P
+- Control plus P
 
 ### Step 18
 
@@ -2884,7 +2884,7 @@ Screen reader:
 - Open: Control plus O
 - Order: Alt plus O
 - Filter: Control plus F
-- Play: Alt plus Shift plus P
+- Play: Control plus P
 
 ### Step 3
 

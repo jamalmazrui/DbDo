@@ -47,6 +47,9 @@ scripts/describeFields.py
 scripts/recordWalk.cmd
 scripts/recordWalk.py
 scripts/walks/pilot.inix
+# testSay (9 November 2026): every Shift+letter key pressed once, twice and described, through recordWalk.
+scripts/testSay.cmd
+scripts/testSay.py
 # DbDo's screen reader sources (3 November 2026). They were not named here, so tidy moved scripts\jaws and
 # scripts\nvda to notes, every build after that packed no JAWS or NVDA support, and Setup compiled an old
 # DbDo_JAWS.zip left in Program Files. Named one by one, as the scripts are.
