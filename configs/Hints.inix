@@ -107,3 +107,8 @@ Script name = The scripts you can run; Enter runs the one you are on.
 
 [Edit Script]
 Script name = The scripts you can open for editing; Enter opens the one you are on.
+
+; [Main window] (10 November 2026): the table window, whose title changes with the table; keyed by the control's role.
+[Main window]
+role List=The records of the table, one per row, with their fields in columns.
+role Table=The records of the table, one per row, with their fields in columns.

@@ -5,8 +5,14 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 10 November 2026 -- Shift+F1 in the main window
+
+- **Shift+F1 in the table window** says what the grid is: the records of the table, one per row, with their fields in columns.
+- **JAWS passes every table key to DbDo.** Alt+Control with an arrow, Home, End, Page Up or Page Down, with or without Shift, reached JAWS's own table commands, which said "Not in a Table"; DbDo's JAWS scripts now pass all twelve.
+
 ## 9 November 2026 -- Y, R, W and V, and one set of words
 
+- **testSay finishes its walk** when its own command prompt comes to the front: the kit's recordWalk brings DbDo back instead of stopping.
 - **Shift+Y answers at once.** Say Yield Marked counted the marked records one by one, which took 7 seconds in a table of 49,186, so a second press was never quick enough to spell the answer; it now asks the database directly.
 - **Invoke Script reads In&voke on the Tools menu, and Shift+V is Say Invoke Script.** V stands for the sound in Invoke, as X does for the "ex" sound; the release check had stopped the push on the V keys.
 - **Alt+Y says how many records are in view, and Shift+Y how many are marked,** as in FileDir.

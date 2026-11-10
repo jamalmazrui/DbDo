@@ -8,6 +8,19 @@ Alt+Delete=TypeCurrentScriptKey
 ; Pass quietly: chords the app owns.
 Alt+Control+RightArrow=passDbDoKey
 Alt+Control+LeftArrow=passDbDoKey
+; DbDo's other table keys (10 November 2026): JAWS's own table commands took them, saying "Not in a Table".
+Alt+Control+UpArrow=passDbDoKey
+Alt+Control+DownArrow=passDbDoKey
+Alt+Control+Home=passDbDoKey
+Alt+Control+End=passDbDoKey
+Alt+Control+PageUp=passDbDoKey
+Alt+Control+PageDown=passDbDoKey
+Alt+Control+Shift+UpArrow=passDbDoKey
+Alt+Control+Shift+DownArrow=passDbDoKey
+Alt+Control+Shift+LeftArrow=passDbDoKey
+Alt+Control+Shift+RightArrow=passDbDoKey
+Alt+Control+Shift+Home=passDbDoKey
+Alt+Control+Shift+End=passDbDoKey
 ; Passed to DbDo, as in EdSharp's and FileDir's scripts (9 November 2026): Open Command Prompt and Open in Explorer.
 Alt+Backslash=TypeCurrentScriptKey
 Control+Backslash=TypeCurrentScriptKey
