@@ -5,6 +5,10 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 10 November 2026 -- Classes named for what they are
+
+- **DbDo's KeyMap is marked as kept on purpose,** with the reason its audit already records, so the kit's check agrees.
+
 ## 10 November 2026 -- Shift+F1 in the main window
 
 - **recordWalk menus reads DbDo's menus quickly and goes on to record,** where it had searched the whole grid and then stalled.

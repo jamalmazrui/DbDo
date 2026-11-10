@@ -9989,6 +9989,9 @@ namespace DbDo
     // Conflicts and parse-failures collect into lConflicts and surface
     // in a single startup dialog.
     // =====================================================================
+    // KEPT ON PURPOSE (10 November 2026), as scripts\\auditPatterns.py's dApprovedShadows records: DbDo's KeyMap maps
+    // keys to DbDo's menu items for its menus, hotkey document and Key Describer; the keys are routed by the kit's
+    // KeyMap, always written Homer.KeyMap here.
     public static class KeyMap
     {
         public static Dictionary<Keys, ToolStripMenuItem> dKeyToMenu =
