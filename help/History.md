@@ -5,6 +5,10 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 10 November 2026 -- Access letters only where the key is a letter
+
+- **Menu items on function keys or symbols have no access letter,** 33 of them -- Current Windows on F4, Close Window on Control+F4, Documentation on F1, Exit DbDo on Alt+F4 and the rest -- since their keys are not letters. The retired Open Recordset command, kept off the menu for scripts, is named for what it does, Open Query in New Window, rather than Open Table in New Window, which is what Open Table does.
+
 ## 10 November 2026 -- Shift+C says the cell
 
 - **Shift+C says the field and its value,** such as "country: Australia", and no longer adds "record 1 of 49186", which Shift+Z already says. A second press spells a short value, as every Say key's does.

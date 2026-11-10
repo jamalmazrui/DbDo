@@ -14149,7 +14149,7 @@ namespace DbDo
             // OPEN RECORDSET RETIRED (5 November 2026): it asked for a SELECT and opened it in a new window, exactly as Query
             // (Control+Q) does, under a menu name, "Open Table in New Window", that Open Table (Control+Shift+O) also means.
             // Its key, Control+Shift+T, is free; the command stays reachable by name for scripts, off the menu.
-            miFileOpenSelect = addItem(miFile, "Open &Table in New Window...", "Open Table in New Window", Keys.None, fileOpenSelectClicked);
+            miFileOpenSelect = addItem(miFile, "Open &Query in New Window...", "Open Query in New Window", Keys.None, fileOpenSelectClicked);
             miFileOpenSelect.Visible = false;
             miFileRecent  = addItem(miFile, "&Recent Files...",           "Recent Files",     Keys.Alt | Keys.R,                    fileRecentClicked);
             // Export Database: primary chord Alt+Shift+E (parallel to
@@ -14213,7 +14213,7 @@ namespace DbDo
             miSchemaSwitchAll     = addItem(miFile, "Next Table or View",     "Next Table or View",         Keys.Control | Keys.F6,            schemaSwitchAllClicked);
             miSchemaSwitchAllPrev = addItem(miFile, "Previous Table or View", "Previous Table or View", Keys.Control | Keys.Shift | Keys.F6, schemaSwitchAllPrevClicked);
             addSep(miFile);
-            miFileExit    = addItem(miFile, "&Exit DbDo",                "Exit DbDo", Keys.Alt | Keys.F4,                   fileExitClicked);
+            miFileExit    = addItem(miFile, "Exit DbDo",                "Exit DbDo", Keys.Alt | Keys.F4,                   fileExitClicked);
 
             // ===== Edit menu: modify the data =====
             miEdit = addMenu("&Edit");
@@ -14287,10 +14287,10 @@ namespace DbDo
             // Two distinct anchors let the user
             // build a mark range and an unmark range without one
             // gesture clobbering the other.
-            miRecMarkAnchor      = addItem(miBulkMark, "&Start Mark",                  "Start Mark",      Keys.F8,                            recMarkAnchorClicked);
-            miRecMarkToAnchor    = addItem(miBulkMark, "&Complete Mark",             "Complete Mark",          Keys.Shift | Keys.F8,               recMarkToAnchorClicked);
-            miRecUnmarkAnchor    = addItem(miBulkMark, "Start &Unmark",                 "Start Unmark",    Keys.Alt | Keys.F8,                 recUnmarkAnchorClicked);
-            miRecUnmarkToAnchor  = addItem(miBulkMark, "Complete Unmark &to Anchor",           "Complete Unmark to Anchor",        Keys.Alt | Keys.Shift | Keys.F8,    recUnmarkToAnchorClicked);
+            miRecMarkAnchor      = addItem(miBulkMark, "Start Mark",                  "Start Mark",      Keys.F8,                            recMarkAnchorClicked);
+            miRecMarkToAnchor    = addItem(miBulkMark, "Complete Mark",             "Complete Mark",          Keys.Shift | Keys.F8,               recMarkToAnchorClicked);
+            miRecUnmarkAnchor    = addItem(miBulkMark, "Start Unmark",                 "Start Unmark",    Keys.Alt | Keys.F8,                 recUnmarkAnchorClicked);
+            miRecUnmarkToAnchor  = addItem(miBulkMark, "Complete Unmark to Anchor",           "Complete Unmark to Anchor",        Keys.Alt | Keys.Shift | Keys.F8,    recUnmarkToAnchorClicked);
             addSep(miEdit);
             // Bookmarks: the Set/Clear/Go-to Bookmark trio
             // on Control+K / Control+Shift+K / Alt+K. Identical
@@ -14307,7 +14307,7 @@ namespace DbDo
             addSep(miEdit);
             // Open Cell Value: open the url, file path, or folder
             // path stored in a cell of the current row.
-            miRecOpenCell    = addItem(miEdit, "&Open Cell Value...",       "Open Cell Value",           Keys.Control | Keys.Enter,          recOpenCellClicked);
+            miRecOpenCell    = addItem(miEdit, "Open Cell Value...",       "Open Cell Value",           Keys.Control | Keys.Enter,          recOpenCellClicked);
             // PLAY STREAM: the current record's stream address, in the Homer
             // Player. P for Play; Alt+Shift because the command has no control
             // of its own. No trigger letter, because Pick Value took P first.
@@ -14327,7 +14327,7 @@ namespace DbDo
             // Pick Value: v1.0.67 deferred stub. The chord (Ctrl+F2)
             // is reserved so the menu doesn't drift and the user can
             // discover the planned command.
-            miRecPickValue   = addItem(miEdit, "&Pick Value", "Pick Value", Keys.Control | Keys.F2,            recPickValueStub);
+            miRecPickValue   = addItem(miEdit, "Pick Value", "Pick Value", Keys.Control | Keys.F2,            recPickValueStub);
 
             // ===== Navigate menu: move around the data =====
             miNavigate = addMenu("&Navigate");
@@ -14374,7 +14374,7 @@ namespace DbDo
             miRecJumpPrev     = addItem(miNavigate, "Reverse Jump", "Reverse Jump", Keys.Control | Keys.Shift | Keys.J, recJumpPrevClicked);
             miRecFindRegex    = addItem(miNavigate, "Find Regex...", "Find Regex",       Keys.Control | Keys.F3,             recFindRegexClicked);
             miRecFindRegexPrev = addItem(miNavigate, "Reverse Regex Find", "Reverse Regex Find", Keys.Control | Keys.Shift | Keys.F3, recFindRegexPrevClicked);
-            miRecSearchAgain  = addItem(miNavigate, "&Search Next",   "Search Next",         Keys.F3,                            recSearchNextClicked);
+            miRecSearchAgain  = addItem(miNavigate, "Search Next",   "Search Next",         Keys.F3,                            recSearchNextClicked);
             miRecSearchPrev   = addItem(miNavigate, "Search Previous", "Search Previous",   Keys.Shift | Keys.F3,               recSearchPrevClicked);
             addSep(miNavigate);
             // Parent-child drill family. Alt+RightArrow enters a
@@ -14382,15 +14382,15 @@ namespace DbDo
             // Alt+LeftArrow exits back to the parent row that drilled
             // in. Alt+Home pops all the way back to the topmost
             // ancestor.
-            miRecEnterChild      = addItem(miNavigate, "&Enter Child Table...", "Enter Child Table",      Keys.Alt | Keys.Right, recEnterChildClicked);
-            miRecExitChild       = addItem(miNavigate, "Exit &Child Table",        "Exit Child Table",       Keys.Alt | Keys.Left,  recExitChildClicked);
-            miRecExitChildToRoot = addItem(miNavigate, "Exit &to Root Table",    "Exit to Root Table", Keys.Alt | Keys.Home,  recExitChildToRootClicked);
+            miRecEnterChild      = addItem(miNavigate, "Enter Child Table...", "Enter Child Table",      Keys.Alt | Keys.Right, recEnterChildClicked);
+            miRecExitChild       = addItem(miNavigate, "Exit Child Table",        "Exit Child Table",       Keys.Alt | Keys.Left,  recExitChildClicked);
+            miRecExitChildToRoot = addItem(miNavigate, "Exit to Root Table",    "Exit to Root Table", Keys.Alt | Keys.Home,  recExitChildToRootClicked);
 
             // ===== Query menu: read aspects of the data =====
             miQuery = addMenu("&Query");
             // Read-only inspection of current record / table / schema.
             miRecShow        = addItem(miQuery, "&Inspect Record",  "Inspect Record",   Keys.Control | Keys.I,            recShowClicked);
-            miSchemaProperties  = addItem(miQuery, "&Table Properties",              "Table Properties",  Keys.Alt | Keys.Enter,            schemaPropertiesClicked);
+            miSchemaProperties  = addItem(miQuery, "Table Properties",              "Table Properties",  Keys.Alt | Keys.Enter,            schemaPropertiesClicked);
             miRecRelated     = addItem(miQuery, "&Related Records...",   "Related Records",  Keys.None,                        recRelatedClicked);
             miSchemaShow     = addItem(miQuery, "&Show Schema",         "Show Schema",   Keys.None,                        schemaShowClicked);
             addSep(miQuery);
@@ -14576,7 +14576,7 @@ namespace DbDo
 
             // ===== Misc menu: utilities, tools, settings =====
             miMisc = addMenu("&Misc");
-            miViewUpdate     = addItem(miMisc, "&Refresh View",                          "Refresh View",       Keys.F5,                            viewUpdateClicked);
+            miViewUpdate     = addItem(miMisc, "Refresh View",                          "Refresh View",       Keys.F5,                            viewUpdateClicked);
             // Toggle Read Only: flip the database between read-write
             // and read-only at runtime. Restored in v1.0.95; v1.0.96
             // moved from Ctrl+Shift+R to Alt+Z per the user's
@@ -14671,10 +14671,10 @@ namespace DbDo
             addSep(miMisc);
             ToolStripMenuItem miTools = new ToolStripMenuItem("&Tools");
             miMisc.DropDownItems.Add(miTools);
-            miToolsOpenFolder= addItem(miTools, "Open in &Explorer",                      "Open in Explorer",   Keys.Alt | Keys.OemPipe,            toolsOpenFolderClicked);
+            miToolsOpenFolder= addItem(miTools, "Open in Explorer",                      "Open in Explorer",   Keys.Alt | Keys.OemPipe,            toolsOpenFolderClicked);
             // CONTROL+BACKSLASH ONLY (8 November 2026, help\KeyDecisions.md in the kit): Control+Slash now lists the keys,
             // as in Google Docs, Slack and ChatGPT, so Open Command Prompt keeps the key EdSharp and FileDir give it.
-            miToolsCommandPrompt = addItem(miTools, "&Open Command Prompt",                 "Open Command Prompt",    Keys.Control | Keys.OemPipe,        toolsCommandPromptClicked,
+            miToolsCommandPrompt = addItem(miTools, "Open Command Prompt",                 "Open Command Prompt",    Keys.Control | Keys.OemPipe,        toolsCommandPromptClicked,
                 "Open a Windows command prompt in the folder of the open database",
                 "The prompt opens in the open database's folder, or your user folder when nothing is open.");
             // SHOW IN FILEDIR (19 October 2026), Control+Shift+Backslash, the same key as FileDir's Open
@@ -14685,10 +14685,10 @@ namespace DbDo
             // the thing you are looking at with it. Keeping them apart matters
             // -- how to phrase an SQL clause has nothing to do with whichever
             // record the cursor happens to be on.
-            miToolsChatWithAi = addItem(miTools, "Chat &with AI",                        "Chat with AI",      Keys.F12,                           toolsChatWithAiClicked);
-            miToolsChatAboutTable = addItem(miTools, "Chat &about Table",                "Chat about Table",  Keys.Shift | Keys.F12,              toolsChatAboutTableClicked);
-            miToolsConsole   = addItem(miTools, "Open &Dot Prompt",                       "Open Dot Prompt",     Keys.Control | Keys.Oemtilde,       toolsConsoleClicked);
-            miMiscSqleanConsole = addItem(miTools, "Sqlean &Console",                       "Sqlean Console",    Keys.Control | Keys.Shift | Keys.Oemtilde, sqleanConsoleClicked);
+            miToolsChatWithAi = addItem(miTools, "Chat with AI",                        "Chat with AI",      Keys.F12,                           toolsChatWithAiClicked);
+            miToolsChatAboutTable = addItem(miTools, "Chat about Table",                "Chat about Table",  Keys.Shift | Keys.F12,              toolsChatAboutTableClicked);
+            miToolsConsole   = addItem(miTools, "Open Dot Prompt",                       "Open Dot Prompt",     Keys.Control | Keys.Oemtilde,       toolsConsoleClicked);
+            miMiscSqleanConsole = addItem(miTools, "Sqlean Console",                       "Sqlean Console",    Keys.Control | Keys.Shift | Keys.Oemtilde, sqleanConsoleClicked);
             addSep(miTools);
             // Script family: Invoke / View
             // Script pattern. Scripts are plain files in
@@ -14729,30 +14729,30 @@ namespace DbDo
             // window.
             miWindow = addMenu("&Window");
             miWindowOpenTable     = addItem(miWindow, "&Open Table...",                 "Open Table",            Keys.Control | Keys.Shift | Keys.O,   windowOpenTableClicked);
-            miWindowCurrent       = addItem(miWindow, "&Current Windows...",            "Current Windows",       Keys.F4,                              windowCurrentClicked);
+            miWindowCurrent       = addItem(miWindow, "Current Windows...",            "Current Windows",       Keys.F4,                              windowCurrentClicked);
             // No key (5 November 2026): Control+Tab and Control+Shift+Tab already move between two windows.
             miWindowToggle        = addItem(miWindow, "&Window Toggle",                 "Window Toggle",         Keys.None,                            windowToggleClicked);
-            miWindowNext          = addItem(miWindow, "&Next Window",                   "Next Window",           Keys.Control | Keys.Tab,              windowNextClicked);
-            miWindowPrevious      = addItem(miWindow, "&Previous Window",               "Previous Window",       Keys.Control | Keys.Shift | Keys.Tab, windowPreviousClicked);
-            miWindowSayOpen       = addItem(miWindow, "&Say Windows Open",              "Say Windows Open",      Keys.Shift | Keys.F4,                 windowSayOpenClicked);
+            miWindowNext          = addItem(miWindow, "Next Window",                   "Next Window",           Keys.Control | Keys.Tab,              windowNextClicked);
+            miWindowPrevious      = addItem(miWindow, "Previous Window",               "Previous Window",       Keys.Control | Keys.Shift | Keys.Tab, windowPreviousClicked);
+            miWindowSayOpen       = addItem(miWindow, "Say Windows Open",              "Say Windows Open",      Keys.Shift | Keys.F4,                 windowSayOpenClicked);
             miWindowClose         = addItem(miWindow, "Close Window",                  "Close Window",          Keys.Control | Keys.F4,               windowCloseClicked);
-            miWindowCloseAllBut   = addItem(miWindow, "Close &All But Current Window",  "Close All But Current Window", Keys.Control | Keys.Shift | Keys.F4, windowCloseAllButClicked);
+            miWindowCloseAllBut   = addItem(miWindow, "Close All But Current Window",  "Close All But Current Window", Keys.Control | Keys.Shift | Keys.F4, windowCloseAllButClicked);
 
             // ===== Help menu =====
             miHelp = addMenu("&Help");
-            miHelpContents     = addItem(miHelp, "&Documentation",                       "Documentation",          Keys.F1,                            (s, e) => openHelpDocument("DbDo", "Documentation"));
+            miHelpContents     = addItem(miHelp, "Documentation",                       "Documentation",          Keys.F1,                            (s, e) => openHelpDocument("DbDo", "Documentation"));
             // SHIFT+F1 IS NOW "WHAT THIS DOES" (2 November 2026, a Homer guideline on trial in DbDo): one sentence on
             // the control with focus, as in every Lbc dialog. History of Changes keeps its place on this menu and on
             // the Alternate Menu; few people need it often enough to spend a key on it.
-            miHelpWhatThisDoes = addItem(miHelp, "What &This Does",                      "What This Does",    Keys.Shift | Keys.F1,               (s, e) => Homer.Say.sayForced(Homer.LbcHints.sentenceForFocused(this)));
-            miHelpHistory      = addItem(miHelp, "&History of Changes",                  "History of Changes",      Keys.Control | Keys.Shift | Keys.F1, (s, e) => openHelpDocument("History", "History of Changes"));  // Control+Shift+F1 in every Homer app (7 November 2026, help\KeyDecisions.md in the kit)
+            miHelpWhatThisDoes = addItem(miHelp, "What This Does",                      "What This Does",    Keys.Shift | Keys.F1,               (s, e) => Homer.Say.sayForced(Homer.LbcHints.sentenceForFocused(this)));
+            miHelpHistory      = addItem(miHelp, "History of Changes",                  "History of Changes",      Keys.Control | Keys.Shift | Keys.F1, (s, e) => openHelpDocument("History", "History of Changes"));  // Control+Shift+F1 in every Homer app (7 November 2026, help\KeyDecisions.md in the kit)
             // THE F1 FAMILY IS HELP. F1 is the guide, Shift+F1 the history, Alt+F1
             // About and Control+F1 the key describer, as in EdSharp and FileDir.
             // The two left over go to the two documents people reach for most:
             // Alt+Shift+F1 the ReadMe, the short start, and Control+Shift+F1 the
             // Hotkeys document -- Control+F1 describes one key, and adding Shift
             // describes them all.
-            miHelpReadme       = addItem(miHelp, "&ReadMe",                              "ReadMe",       Keys.Alt | Keys.Shift | Keys.F1,    (s, e) => openHelpDocument("README", "ReadMe"));
+            miHelpReadme       = addItem(miHelp, "ReadMe",                              "ReadMe",       Keys.Alt | Keys.Shift | Keys.F1,    (s, e) => openHelpDocument("README", "ReadMe"));
             miHelpHotkeysDoc   = addItem(miHelp, "Hotkeys",                             "Hotkeys",      Keys.None,                          (s, e) => openHelpDocument("Hotkeys", "Hotkeys"));  // menu only: Alt+Shift+H lists every key, live (7 November 2026)
             miHelpFaq          = addItem(miHelp, "&Frequently Asked Questions",          "Frequently Asked Questions",          Keys.None,                          (s, e) => openHelpDocument("FAQ", "Frequently Asked Questions"));
             // The documents almost nobody opens twice go one level down, which is
@@ -14775,7 +14775,7 @@ namespace DbDo
             // PLAY THE WALKTHROUGHS. T for Tutorials, no shortcut key: this is
             // something somebody does once or twice, not a command they reach
             // for, and the free keys are worth keeping for commands that are.
-            miHelpTutorials    = addItem(miHelp, "&Play Tutorials",                      "Play Tutorials",    Keys.Alt | Keys.F12,                          helpTutorialsClicked);
+            miHelpTutorials    = addItem(miHelp, "Play Tutorials",                      "Play Tutorials",    Keys.Alt | Keys.F12,                          helpTutorialsClicked);
             addItem(miHelp, "Copy Log", "Copy Log", Keys.Control | Keys.F12, helpCopyLog);
             // UPDATE FROM TEMPLATE (13 October 2026): a copy of a template brought up to date from the one installed with
             // DbDo, by merging the template into it or replacing it. U for Update; no shortcut key, like Play Tutorials:
@@ -14790,12 +14790,12 @@ namespace DbDo
             // entries. (templates that ship outside the templates folder must
             // be placed under it to remain on the list.)
             addSep(miHelp);
-            miHelpShowCommand  = addItem(miHelp, "&Alternate Menu...",                        "Alternate Menu",    Keys.Alt | Keys.F10,                helpShowCommandClicked);
+            miHelpShowCommand  = addItem(miHelp, "Alternate Menu...",                        "Alternate Menu",    Keys.Alt | Keys.F10,                helpShowCommandClicked);
             // Control+F1 = Key Help toggle: announce on/off via the screen reader,
             // and when on, intercept hotkeys to announce them rather
             // than execute them.
-            miHelpTraceCommand = addItem(miHelp, "&Key Describer Toggle",           "Key Describer Toggle", Keys.Control | Keys.F1,             helpTraceCommandClicked);
-            miHelpStatus       = addItem(miHelp, "&Where Am I",                            "Where Am I",       Keys.Control | Keys.OemQuestion,    helpStatusClicked);  // CONTROL+SLASH (9 November 2026), the same key as in every Lbc dialog; it was Alt+Shift+Slash  // Alt+Shift+Slash, the question key, as in every Lbc dialog (3 November 2026)
+            miHelpTraceCommand = addItem(miHelp, "Key Describer Toggle",           "Key Describer Toggle", Keys.Control | Keys.F1,             helpTraceCommandClicked);
+            miHelpStatus       = addItem(miHelp, "Where Am I",                            "Where Am I",       Keys.Control | Keys.OemQuestion,    helpStatusClicked);  // CONTROL+SLASH (9 November 2026), the same key as in every Lbc dialog; it was Alt+Shift+Slash  // Alt+Shift+Slash, the question key, as in every Lbc dialog (3 November 2026)
             miHelpEmailLog     = addItem(miHelp, "&Email Log File...",                   "Email Log File",         Keys.None,                          emailLogClicked);
             // Toggle-Extra-Speech: silence DbDo's direct speech
             // messages without affecting the screen reader's natural
@@ -14813,7 +14813,7 @@ namespace DbDo
             miHelpWebSite      = addItem(miHelp, "&Open Website",      "Open Website",      Keys.None,                          helpWebSiteClicked);
             // Elevate-Version: check GitHub for a newer DbDo_setup.exe
             // and offer to download / install.
-            miHelpElevate      = addItem(miHelp, "Elevate &Version...",                  "Elevate Version",   Keys.F11,                           helpElevateClicked);
+            miHelpElevate      = addItem(miHelp, "Elevate Version...",                  "Elevate Version",   Keys.F11,                           helpElevateClicked);
             miHelpAbout        = addItem(miHelp, "About",                                  "About",       Keys.Alt | Keys.F1,                 helpAboutClicked);
 
             // Delete key as a secondary binding for Remove-Record.
@@ -28267,7 +28267,7 @@ namespace DbDo
             if (db == null || !db.isOpen())
             { Say.say("No database open"); return; }
             string sSql;
-            using (LbcDialog dlg = new LbcDialog("Open Table in New Window", this))
+            using (LbcDialog dlg = new LbcDialog("Open Query in New Window", this))
             {
                 dlg.addLabel("Enter a SQL SELECT statement. The result will open as a");
                 dlg.addLabel("read-only recordset that you can browse with all the");
@@ -28289,7 +28289,7 @@ namespace DbDo
                 LbcMessage.show(this,
                     "Open New Recordset only accepts SELECT or WITH statements. "
                     + "Use File > Run SQL for other statement types.",
-                    "Open Table in New Window", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    "Open Query in New Window", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
             try
@@ -28301,7 +28301,7 @@ namespace DbDo
             }
             catch (Exception ex)
             {
-                ErrorDialog.show(this, "Open Table in New Window", "Could not open recordset: " + ex.Message);
+                ErrorDialog.show(this, "Open Query in New Window", "Could not open recordset: " + ex.Message);
             }
         }
 
