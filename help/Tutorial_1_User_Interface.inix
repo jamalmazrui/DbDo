@@ -23,35 +23,35 @@ Hear=DbDo ready
 
 Say=The main view is a list of records. Down Arrow moves by row, and the reader speaks the record: here, a station's name, its country, and its genres.
 Key=Down Arrow
-Hear=ACB Media 10, The United States Of America, ACB Media, blindness, Row 2 of 49186
-Note=Confirm the wording with a live run: buildTutorials -live.
+Hear=Row 2 of
+Note=Confirm the wording with a live run: buildTutorials -live. Hear keeps only the words that do not depend on the data (10 November 2026).
 
 [step]
 
 Say=Right Arrow moves by column within the record, saying the column's name and its value.
 Key=Right Arrow
-Hear=country, The United States Of America
+Hear=country
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=Now the Say keys. Shift and a letter asks, and changes nothing. Shift plus Z is Say Status.
 Key=Shift+Z
-Hear=stations, 49186 records, no filter, sorted by source, name
+Hear=stations, records, no filter, sorted by
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=Table, count, filter and sort in one breath. Shift plus C, C for Cell, says the cell you are on.
 Key=Shift+C
-Hear=country, The United States Of America
+Hear=country
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
 Say=Alt plus Y, Say Yield, says how many records are in view, and Shift plus Y how many are marked; Shift plus 8 says the order and filter.
 Key=Shift+8
-Hear=order: source, name; filter: none.
+Hear=order, filter
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -89,7 +89,7 @@ Hear=
 
 Say=Adding Shift reverses: Control plus M marks, Control plus Shift plus M unmarks. Z is for sleep, so every Z key is a toggle. And each function key is a family: F2 edits, F3 searches again, F4 lists the windows open.
 Key=F4
-Hear=Current Windows dialog, RadioTrail, stations, 1 of 1
+Hear=Current Windows dialog, RadioTrail, stations
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

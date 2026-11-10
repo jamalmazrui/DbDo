@@ -17994,18 +17994,11 @@ namespace DbDo
             // "none" when the column holds NULL, "blank" when it holds an empty
             // string. Same distinction everywhere, so the word is the answer.
             if (string.IsNullOrEmpty(sVal)) sVal = db.emptyWord(sCol);
-            // THREE UTTERANCES, NOT ONE SENTENCE: the column, then where the row
-            // is, then the value. Sent separately, a screen reader gives each its
-            // own phrase, and the three facts are heard as three answers rather
-            // than as one long line to unpick. Nothing is added between them, so
-            // it costs no time.
-            //
-            // Double-pressing still shows the whole thing in a window, which is
-            // why the joined form is built as well.
-            string sWhere = "record " + iVirtualRow + " of " + db.recordCount;
-            // THE KIT'S TWO PRESSES (9 November 2026), as every Say key: a second press shows the parts in the read-only
-            // window. Say Cell had its own timer and its own window.
-            speakOrShowParts("Cell", new List<string> { sCol, sWhere, sVal }, 117);
+            // FIELD AND VALUE ONLY (10 November 2026, decided as Jamal's standing rule asks): Shift+Z, Say Status, says
+            // where the record is, so Say Cell no longer repeats "record N of M". It answers in the shape every Say key
+            // uses, "field: value", so a second press spells a short value, as the kit's two presses do, and shows a
+            // long one in the read-only window.
+            speakOrShow("Cell", sCol + ": " + sVal, 117);
         }
 
         // saySayFilter: speak the active ADO filter expression. Empty

@@ -1094,9 +1094,9 @@ The main view is a list of records. Down Arrow moves by row, and the reader spea
 
 Screen reader:
 
-- ACB Media 10, The United States Of America, ACB Media, blindness, Row 2 of 49186
+- Row 2 of
 
-Confirm the wording with a live run: buildTutorials -live.
+Confirm the wording with a live run: buildTutorials -live. Hear keeps only the words that do not depend on the data (10 November 2026).
 
 ### Step 4: Right Arrow
 
@@ -1104,7 +1104,7 @@ Right Arrow moves by column within the record, saying the column's name and its 
 
 Screen reader:
 
-- country, The United States Of America
+- country
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1114,7 +1114,7 @@ Now the Say keys. Shift and a letter asks, and changes nothing. Shift plus Z is 
 
 Screen reader:
 
-- stations, 49186 records, no filter, sorted by source, name
+- stations, records, no filter, sorted by
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1124,7 +1124,7 @@ Table, count, filter and sort in one breath. Shift plus C, C for Cell, says the 
 
 Screen reader:
 
-- country, The United States Of America
+- country
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1134,7 +1134,7 @@ Alt plus Y, Say Yield, says how many records are in view, and Shift plus Y how m
 
 Screen reader:
 
-- order: source, name; filter: none.
+- order, filter
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1181,7 +1181,7 @@ Adding Shift reverses: Control plus M marks, Control plus Shift plus M unmarks. 
 
 Screen reader:
 
-- Current Windows dialog, RadioTrail, stations, 1 of 1
+- Current Windows dialog, RadioTrail, stations
 
 Confirm the wording with a live run: buildTutorials -live.
 

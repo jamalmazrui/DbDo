@@ -232,7 +232,7 @@ Clear Filter=Control+Shift+F, Show every record again, staying on the same recor
 ; ===== Query/Say menu =====
 Say Added=Shift+A, Say when the record was added
 Say Bookmark=Shift+B, Say the bookmarked record
-Say Cell=Shift+C, Say the column and value of the cell
+Say Cell=Shift+C, Say the cell's field and value
 Say Database=Shift+D, Say the database's name and folder
 Say Edited=Shift+E, Say when the record was last edited
 Say Filter=Shift+F, Say the filter in force

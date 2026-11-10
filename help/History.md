@@ -5,6 +5,11 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 10 November 2026 -- Shift+C says the cell
+
+- **Shift+C says the field and its value,** such as "country: Australia", and no longer adds "record 1 of 49186", which Shift+Z already says. A second press spells a short value, as every Say key's does.
+- **Tutorial 1's checks don't depend on your data.** Its expected lines keep only the words every database says, such as the field and table names, not a record count or a cell's value, so a walk of the tutorial passes whatever is in the table.
+
 ## 10 November 2026 -- Script, the one word
 
 - **Each command's name is its menu caption.** 61 commands were spoken by one name and shown by another -- Mark Record on the menu was Set Mark to the Key Describer, Go to Record was Set Position, Where Am I was Show Status. The name now matches the caption everywhere: the describer, the Alternate Menu, the key list, the command echo and each command's window titles.
