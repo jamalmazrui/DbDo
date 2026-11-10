@@ -7,6 +7,7 @@ Press **Control+Shift+F1** inside DbDo to open this file in your browser, or typ
 
 ## 10 November 2026 -- Shift+F1 in the main window
 
+- **recordWalk menus reads DbDo's menus quickly and goes on to record,** where it had searched the whole grid and then stalled.
 - **recordWalk menus checks DbDo's menus** against Homer's rules, and walks every item and submenu exactly once.
 - **Shift+F1 in the table window** says what the grid is: the records of the table, one per row, with their fields in columns.
 - **JAWS passes every table key to DbDo.** Alt+Control with an arrow, Home, End, Page Up or Page Down, with or without Shift, reached JAWS's own table commands, which said "Not in a Table"; DbDo's JAWS scripts now pass all twelve.
