@@ -14271,7 +14271,7 @@ namespace DbDo
             // convention: Ctrl+letter is the primary action, Ctrl+
             // Shift+letter is the variant. Invert Marked is on Alt+Shift+I,
             // off on its own because it doesn't have a paired counterpart.
-            ToolStripMenuItem miBulkMark = new ToolStripMenuItem("&Bulk Marking");
+            ToolStripMenuItem miBulkMark = new ToolStripMenuItem("Bulk Marking");
             miEdit.DropDownItems.Add(miBulkMark);
             miRecMarkAll     = addItem(miBulkMark, "Mark &All",   "Mark All",         Keys.Control | Keys.A,              recMarkAllClicked);
             miRecUnmarkAll   = addItem(miBulkMark, "Unmark All", "Unmark All",       Keys.Control | Keys.Shift | Keys.A, recUnmarkAllClicked);
@@ -14392,7 +14392,7 @@ namespace DbDo
             miRecShow        = addItem(miQuery, "&Inspect Record",  "Inspect Record",   Keys.Control | Keys.I,            recShowClicked);
             miSchemaProperties  = addItem(miQuery, "Table Properties",              "Table Properties",  Keys.Alt | Keys.Enter,            schemaPropertiesClicked);
             miRecRelated     = addItem(miQuery, "&Related Records...",   "Related Records",  Keys.None,                        recRelatedClicked);
-            miSchemaShow     = addItem(miQuery, "&Show Schema",         "Show Schema",   Keys.None,                        schemaShowClicked);
+            miSchemaShow     = addItem(miQuery, "Show Schema",         "Show Schema",   Keys.None,                        schemaShowClicked);
             addSep(miQuery);
             // Say-X family: speaks state without changing focus or
             // recordset position (the Say-X status family).
@@ -14669,7 +14669,7 @@ namespace DbDo
                 "List the distinct values in the column under the cursor with their row counts, then filter the grid to a chosen value",
                 "Datasette-style faceting: groups the current table by the cursor's column and lists each distinct value with how many rows have it, most common first; picking a value filters the grid to just those rows. An accessible way to hear what a column contains and how it's distributed, then drill in. The value list is capped (1000) so a high-cardinality column can't flood the picker; filtering replaces any current filter, and blank/null and date values aren't filterable yet. Read-only until you pick. Unbound by default.");
             addSep(miMisc);
-            ToolStripMenuItem miTools = new ToolStripMenuItem("&Tools");
+            ToolStripMenuItem miTools = new ToolStripMenuItem("Tools");
             miMisc.DropDownItems.Add(miTools);
             miToolsOpenFolder= addItem(miTools, "Open in Explorer",                      "Open in Explorer",   Keys.Alt | Keys.OemPipe,            toolsOpenFolderClicked);
             // CONTROL+BACKSLASH ONLY (8 November 2026, help\KeyDecisions.md in the kit): Control+Slash now lists the keys,

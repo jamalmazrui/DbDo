@@ -7,6 +7,7 @@ Press **Control+Shift+F1** inside DbDo to open this file in your browser, or typ
 
 ## 10 November 2026 -- Access letters only where the key is a letter
 
+- **No letter is shared in a menu.** The Say submenu and Show Schema both had S on the Query menu, Tools and Table Summary both had T on Misc, and Bulk Marking and Save Bookmark both had B on Edit. Say, Table Summary and Save Bookmark keep theirs, the letters of Say's keys and of Alt+T and Control+B; Show Schema, Tools and Bulk Marking have none, since every word of their names starts with a letter already taken.
 - **Menu items on function keys or symbols have no access letter,** 33 of them -- Current Windows on F4, Close Window on Control+F4, Documentation on F1, Exit DbDo on Alt+F4 and the rest -- since their keys are not letters. The retired Open Recordset command, kept off the menu for scripts, is named for what it does, Open Query in New Window, rather than Open Table in New Window, which is what Open Table does.
 
 ## 10 November 2026 -- Shift+C says the cell
