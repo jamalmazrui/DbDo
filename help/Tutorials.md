@@ -1130,7 +1130,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 7: Shift+8
 
-Shift plus Y, Say Yield, says how many records are in view; Shift plus 8 says the order and filter.
+Alt plus Y, Say Yield, says how many records are in view, and Shift plus Y how many are marked; Shift plus 8 says the order and filter.
 
 Screen reader:
 
@@ -1897,9 +1897,9 @@ Confirm the wording with a live run: buildTutorials -live.
 
 Tags work the same way: Alt plus Shift plus T to edit, Shift plus T to hear, single words such as remote, to filter by later. Alt plus Shift plus U edits the posting's web address.
 
-### Step 16: Shift+R
+### Step 16: Shift+W
 
-Now the links. Up Arrow to the Accessibility Analyst job. Shift plus R, Say Related, says what it leads to, changing nothing.
+Now the links. Up Arrow to the Accessibility Analyst job. Shift plus W, Say Whole Record, ends with what it leads to, changing nothing.
 
 Screen reader:
 
@@ -1937,9 +1937,9 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 20: Control+Shift+I
+### Step 20: Alt+V
 
-JobTrail also keeps its own questions as scripts. Control plus Shift plus I, Invoke Script, lists them; Today shows the actions due, oldest first.
+JobTrail also keeps its own questions as scripts. Alt plus V, Invoke Script, lists them; Today shows the actions due, oldest first.
 
 Screen reader:
 
@@ -1977,7 +1977,7 @@ Say what a record leads to.
 
 Screen reader:
 
-- Shift plus R
+- Shift plus W
 
 ### Step 26
 
@@ -2049,9 +2049,9 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 7: Control+Shift+I
+### Step 7: Alt+V
 
-Status, format, series, and when it was read. Escape. What to read next is a saved script. Control plus Shift plus I, Invoke Script, lists the scripts beside this database.
+Status, format, series, and when it was read. Escape. What to read next is a saved script. Alt plus V, Invoke Script, lists the scripts beside this database.
 
 Screen reader:
 
@@ -2168,7 +2168,7 @@ Run a saved script.
 
 Screen reader:
 
-- Control plus Shift plus I
+- Alt plus V
 
 ### Step 22
 
@@ -2245,9 +2245,9 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 6: Shift+R
+### Step 6: Shift+W
 
-Shift plus R, Say Related, says what this album leads to, changing nothing.
+Shift plus W, Say Whole Record, ends with what this album leads to, changing nothing.
 
 Screen reader:
 
@@ -2445,7 +2445,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 3: Enter
 
-A few minutes free? Control plus Shift plus I, Invoke Script, and Quick Lessons: the ones that play in fifteen minutes or less, shortest first.
+A few minutes free? Alt plus V, Invoke Script, and Quick Lessons: the ones that play in fifteen minutes or less, shortest first.
 
 Screen reader:
 
@@ -2550,7 +2550,7 @@ Run a saved script.
 
 Screen reader:
 
-- Control plus Shift plus I
+- Alt plus V
 
 ### Step 17
 
@@ -3005,7 +3005,7 @@ script.
 
 Screen reader:
 
-- A saved question beside a database, run with Control plus Shift plus I.
+- A saved question beside a database, run with Alt plus V.
 
 ### Step 18
 

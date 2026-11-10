@@ -334,7 +334,7 @@ DbDo recognizes relationships recorded in either of two ways, or both in the sam
 
 The same commands follow both:
 
-- **Say Related** (Shift+R) lists what the current record is related to, by foreign key and by map, each related record by its look.
+- **Say Whole Record** (Shift+W) ends with what the current record is related to, by foreign key and by map, each related record by its look.
 - **Related Records** (Query menu) shows the same list in a window.
 - **Enter Child Table** (Alt+Right) follows a relationship into the related records in another table, opening them filtered to the record you came from.
 - **Exit Child Table** (Alt+Left) returns to the record you came from; **Exit to Root Table** (Alt+Home) returns all the way up a chain.
@@ -392,7 +392,7 @@ Filter and order first to shape the grid, then report on exactly what you see.
 
 ### To automate what you repeat
 
-A **script** is a file that does a task again, run with **Invoke Script** (Control+Shift+I), written or changed with **Edit Snippet** (Alt+Shift+S). A database's own scripts sit beside it, and shared ones in DbDo's Scripts folder (**Open Script Folder** opens it). There are three kinds, from the simplest:
+A **script** is a file that does a task again, run with **Invoke Script** (Alt+V), written or changed with **Edit Snippet** (Alt+Shift+S). A database's own scripts sit beside it, and shared ones in DbDo's Scripts folder (**Open Script Folder** opens it). There are three kinds, from the simplest:
 
 - **.sql -- a saved question.** One or more SQL statements: a Query you keep. Most templates come with some: ContactTrail's Emergency Contacts, RecipeTrail's Shopping List, JobTrail's Weekly Count.
 - **.dbdo -- a saved sequence of DbDo commands,** one per line, as typed at the dot prompt: filter, order, select columns, export. For a routine you would otherwise do by hand each week, such as JobTrail's Stale Applications.
@@ -579,7 +579,8 @@ The Query menu holds record inspection and the Say-X status family.
 | Say Database | Shift+D |
 | Say Order | Shift+O |
 | Say Go to | Shift+G |
-| Say Yield | Shift+Y |
+| Say Yield | Alt+Y |
+| Say Yield Marked | Shift+Y |
 | Say Marked | Shift+M |
 | Say Edited | Shift+E |
 | Say Notes | Shift+N |
@@ -600,7 +601,8 @@ The Query menu holds record inspection and the Say-X status family.
 | Say Query | Shift+Q |
 | Say Id | Shift+I |
 | Say Look | Shift+L |
-| Say Related | Shift+R |
+| Say Replace Values | Shift+R |
+| Say Invoke Script | Shift+V |
 | Say url | Shift+U |
 | Say Whole Record | Shift+W |
 | Say Prime | Shift+P |
@@ -639,7 +641,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Open Command Prompt | Control+Backslash |
 | Open Dot Prompt | Control+GraveAccent |
 | Sqlean Console | Control+Shift+GraveAccent |
-| Invoke Script | Control+Shift+I |
+| Invoke Script | Alt+V |
 | Edit Snippet | Alt+Shift+S |
 | Open Script Folder | — |
 | Evaluate Expression | Control+Equals |
@@ -1075,7 +1077,7 @@ Either way, a script, query or report the template has and your copy lacks is co
 beside it; none of yours is overwritten. Merge is the first button, so Enter takes it.
 
 **Your Outlook contacts, in one step.** ContactTrail and JobTrail each come with a script,
-Import Outlook Contacts. Open the database, press Control+Shift+I, Invoke Script, and choose
+Import Outlook Contacts. Open the database, press Alt+V, Invoke Script, and choose
 it. If Microsoft Outlook is on your computer, every person in its Contacts folder who is not
 already in the database is added, with names, phones, email, address and job, and tagged
 outlook so a filter finds them all. Nothing already there is changed, so running it again
@@ -1114,7 +1116,7 @@ made by or for blind people.
 
 Each record names its makers in its **by** field, and the **maps** table links
 each creator to their work: a creator is `author_of` a book, `developer_of` an
-app, or `presenter_of` a presentation. On a creator, Shift+R says what they made,
+app, or `presenter_of` a presentation. On a creator, Shift+W ends with what they made,
 and Alt+Right goes to it. An app's **platform** is where it runs, so Fields in
 Filter Records narrows the list to one system. Categories, platforms, formats and
 roles are also in **tags**, one to a line, so Keywords finds them.
@@ -1331,7 +1333,7 @@ The separator is chosen for the ear: a screen reader pauses at punctuation, so
 the parts arrive as parts rather than as one run-on line.
 
 A glimpse is deliberately not the whole record. When you need the rest, it is
-one keystroke away: Enter opens the record, and Shift plus R lists what this
+one keystroke away: Enter opens the record, and Shift plus W ends by listing what this
 record is related to, showing each related record by its own `look`.
 
 #### prime: the primary key, computed
@@ -1412,14 +1414,14 @@ spell phonetically and copy from. Every Homer app's Say keys work this way.
 - Shift+O -- order
 - Shift+P -- prime
 - Shift+Q -- query
-- Shift+R -- related, by foreign key and by map
+- Shift+R -- replace values, what Replace (match and replace) and Replace with Regex (pattern and substitute) would offer, or none
 - Shift+S -- columns, the columns shown
 - Shift+T -- tags
 - Shift+U -- url
-- Shift+V -- replace values, the text Replace would find and what it would put there, with the setting last used -- regex or not, the columns and the records -- or none
-- Shift+W -- whole record, every field with a value, hidden columns too
-- Shift+Y -- yield, how many rows
-- Shift+Z -- status: the table, the row and the order
+- Shift+V -- script, the one Invoke Script (Alt+V) would choose
+- Shift+W -- whole record, every field with a value, hidden fields too, then the related records
+- Shift+Y -- yield marked, how many records are marked; Alt+Y says how many are in view
+- Shift+Z -- status: the table, the record and the order
 
 Shift plus a letter answers a question. A letter on its own moves: type the
 first letters of a value and the list view goes there, in lower case and
@@ -1435,8 +1437,8 @@ staying silent: the say layer always answers, because silence cannot be told
 from a key that did not register.
 
 **A command that opens a dialog with a value already in it has a value worth
-hearing first.** That is what Shift+B, Shift+J and Shift+V are: the bookmark
-list, the text Jump would offer, and the pair Replace would offer. Hearing the
+hearing first.** That is what Shift+B, Shift+J, Shift+R and Shift+V are: the bookmark
+list, the text Jump would offer, the pairs Replace would offer, and the script Invoke Script would offer. Hearing the
 answer is often enough, and the dialog never has to open.
 
 **none and blank are different answers.** "none" means there is no value --

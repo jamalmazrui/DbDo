@@ -66,7 +66,7 @@ section says why each key is the one it is.
   N for New.\
   Control+Shift+N
 - New Record\
-  Add a new row to the current table. N for New.\
+  Add a new record at the cursor. N for New.\
   Control+N
 - Open Cell Value\
   Control+Enter acts from anywhere in a Homer dialog; here it opens the cell's value.\
@@ -131,7 +131,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Close DbDo. Alt+F4 closes the program, as in every Windows program.\
   Alt+F4
 - Export Data\
-  Export the current table or query to CSV, TSV, JSON, or another format. X for the sound of "ex".\
+  Export the records in view, with the shown columns, to a file. X for the sound of "ex".\
   Alt+Shift+X
 - Import\
   Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and defs. I for Import.\
@@ -217,19 +217,19 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Open the Settings dialog. E for Edit.\
   Alt+Shift+E
 - Generate from Grid\
-  Analyze the grid: a statistics report, a frequency report of the current column or the shown columns, a cross-tab, a Markdown table, or an Excel chart. G for Generate.\
+  Make a report from the records in the grid. G for Generate.\
   Alt+Shift+G
 - Read Only Toggle\
   Flip the database between read-write and read-only at runtime. Z is for sleep: it wakes this behavior or puts it to sleep.\
   Control+Shift+Z
 - Refresh View\
-  Refresh the visible row set from the database. F5 is refreshing.\
+  Refresh the records' values from the database. F5 is refreshing.\
   F5
 - Select Columns\
-  Choose which columns the grid shows, and in what order. S for Select.\
+  Choose the columns the grid shows and their order. S for Select.\
   Alt+S
 - Table Summary\
-  Print row count, column count, and storage statistics for the open database. T for Table.\
+  Show a summary of the table: fields, types and keys. T for Table.\
   Alt+T
 
 ### Misc, Tools
@@ -246,8 +246,8 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Evaluate Expression\
   Control+Equals
 - Invoke Script\
-  Run a script from the Scripts folder (.js, .sql, or .dbdo). I for Invoke.\
-  Control+Shift+I
+  Run a script from the Scripts folder (.js, .sql, or .dbdo).\
+  Alt+V
 - Open Command Prompt\
   Control+Backslash
 - Open Dot Prompt\
@@ -266,36 +266,36 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 ### Navigate
 
 - Enter Child Table\
-  Drill into related records: foreign-key child tables, plus any tables related to this record through the maps table (by kind). Alt+Right Arrow goes forward, and deeper, as in a browser.\
+  Go into the records related to this one. Alt+Right Arrow goes forward, and deeper, as in a browser.\
   Alt+RightArrow
 - Exit Child Table\
   Return from a child drill-down to the parent table. Alt+Left Arrow goes back, as in a browser.\
   Alt+LeftArrow
 - Exit to Root Table\
-  Return from any drill-down depth to the original table. Home goes to the top; Alt+Home goes to the top table.\
+  Go back to the first table. Home goes to the top; Alt+Home goes to the top table.\
   Alt+Home
 - Find Regex\
-  Search across all columns with a .NET regex pattern. F3 searches; Control makes the search a pattern.\
+  Find the next record matching a regular expression. F3 searches; Control makes the search a pattern.\
   Control+F3
 - Go to Record\
-  Jump to a specific row by number. G for Go, as Control+G goes to a line in Windows editors.\
+  Go to a record by its number, a percent or text. G for Go, as Control+G goes to a line in Windows editors.\
   Control+G
 - Jump to Record\
-  Go to the next record whose current column holds the text, case aside. J for Jump.\
+  Go to the next record whose current field holds the text. J for Jump.\
   Control+J
 - Keywords\
-  Go to the next record whose fields hold the keywords: red & blue (both), red | blue (either), re*d (a star for anything), case aside. K for Keywords.\
+  Go to the next record whose fields hold the keywords. K for Keywords.\
   Control+K
 - Repeat Go To\
   Alt+G
 - Reverse Jump\
-  Jump Record backward. J for Jump. Shift reverses Jump to Record.\
+  Go to the previous record whose current field holds the text. J for Jump. Shift reverses Jump to Record.\
   Control+Shift+J
 - Reverse Keywords\
-  Keywords backward: the previous record whose fields hold the keywords. K for Keywords. Shift reverses Keywords.\
+  Go to the previous record whose fields hold the keywords. K for Keywords. Shift reverses Keywords.\
   Control+Shift+K
 - Reverse Regex Find\
-  Find Regex backward. F3 searches; Control makes it a pattern and Shift reverses it.\
+  Find the previous record matching a regular expression. F3 searches; Control makes it a pattern and Shift reverses it.\
   Control+Shift+F3
 - Search Next\
   Repeat the last Find forward. F3 is searching and searching again.\
@@ -319,13 +319,13 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   E for Extract.\
   Control+Shift+E
 - Filter Records\
-  Show only the records that hold some text in any field, or that meet a condition on each field. F for Filter.\
+  Show only the records that match what you choose. F for Filter.\
   Control+F
 - Inspect Record\
   I for Inspect.\
   Control+I
 - Order Records\
-  Sort the records by one or more columns, each ascending or descending. O for Order.\
+  Order the records by the fields you choose. O for Order.\
   Alt+O
 - Query\
   Q for Query.\
@@ -334,7 +334,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Q for Query.\
   Alt+Shift+Q
 - Reverse Order\
-  Reverse the order in force, every column's direction flipped. O for Order. Shift reverses Order Records.\
+  Reverse the order of the records. O for Order. Shift reverses Order Records.\
   Alt+Shift+O
 - Table Properties\
   Alt+Enter
@@ -359,10 +359,10 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Speak every value of the current virtual column, from the top. L for List.\
   Alt+L
 - Say Column as List from Current\
-  Speak the current virtual column from the current row down. L for List.\
+  Say the column's values from the current record down. L for List.\
   Control+L
 - Say Column as List from Current Marked\
-  Speak the current virtual column for marked rows only, from the current row down. L for List.\
+  Say the column's values for marked records from the current record down. L for List.\
   Control+Shift+L
 - Say Column as List of Marked\
   Speak the current virtual column for marked rows only, from the top. L for List.\
@@ -382,6 +382,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Id\
   I for ID.\
   Shift+I
+- Say Invoke Script\
+  Shift+V
 - Say Jump\
   J for Jump.\
   Shift+J
@@ -421,17 +423,14 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Records of Marked\
   Speak every marked record in full, from the first record down (all displayed columns). Space marks in a list; Shift and Space asks how many are marked.\
   Shift+Space
-- Say Related\
-  R for Related.\
-  Shift+R
 - Say Replace Values\
-  V for Values.\
-  Shift+V
+  R for Replace.\
+  Shift+R
 - Say Select Columns\
   S for Say.\
   Shift+S
 - Say Status\
-  Say the table, row, order and filter. Z is for sleep: it wakes this behavior or puts it to sleep.\
+  Say the table, record, order and filter. Z is for sleep: it wakes this behavior or puts it to sleep.\
   Shift+Z
 - Say Tags\
   Say the record's tags. T for Tags.\
@@ -447,6 +446,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Shift+W
 - Say Yield\
   Say how many records are in view. Y for Yield.\
+  Alt+Y
+- Say Yield Marked\
+  Say how many records are marked. Y for Yield.\
   Shift+Y
 
 ### Window
@@ -464,7 +466,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Activate the next open window. Control+Tab moves among DbDo windows.\
   Control+Tab
 - Open Table\
-  Open a chosen table of the current database in a new window. O for Open.\
+  Open a table in a new window. O for Open.\
   Control+Shift+O
 - Previous Window\
   Activate the previous open window. Shift reverses Control+Tab.\
@@ -501,7 +503,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+G\
   Repeat Go To
 - Alt+Home\
-  Return from any drill-down depth to the original table.\
+  Go back to the first table.\
   Exit to Root Table
 - Alt+I\
   Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and defs.\
@@ -516,7 +518,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Merge rows from a Markdown table, JSON, or Inix file into the current table.\
   Merge Data
 - Alt+O\
-  Sort the records by one or more columns, each ascending or descending.\
+  Order the records by the fields you choose.\
   Order Records
 - Alt+P\
   Speak the open database's full path; press twice to show it.\
@@ -524,17 +526,23 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+R\
   Recent Files
 - Alt+RightArrow\
-  Drill into related records: foreign-key child tables, plus any tables related to this record through the maps table (by kind).\
+  Go into the records related to this one.\
   Enter Child Table
 - Alt+S\
-  Choose which columns the grid shows, and in what order.\
+  Choose the columns the grid shows and their order.\
   Select Columns
 - Alt+Semicolon\
   Speak the current date and time.\
   Say Time
 - Alt+T\
-  Print row count, column count, and storage statistics for the open database.\
+  Show a summary of the table: fields, types and keys.\
   Table Summary
+- Alt+V\
+  Run a script from the Scripts folder (.js, .sql, or .dbdo).\
+  Invoke Script
+- Alt+Y\
+  Say how many records are in view.\
+  Say Yield
 
 ### Alt+Shift
 
@@ -552,7 +560,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Open the Settings dialog.\
   Edit Settings
 - Alt+Shift+G\
-  Analyze the grid: a statistics report, a frequency report of the current column or the shown columns, a cross-tab, a Markdown table, or an Excel chart.\
+  Make a report from the records in the grid.\
   Generate from Grid
 - Alt+Shift+I\
   Invert Marked
@@ -565,7 +573,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+Shift+N\
   Edit Notes
 - Alt+Shift+O\
-  Reverse the order in force, every column's direction flipped.\
+  Reverse the order of the records.\
   Reverse Order
 - Alt+Shift+Q\
   Query History
@@ -579,7 +587,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+Shift+U\
   Edit url
 - Alt+Shift+X\
-  Export the current table or query to CSV, TSV, JSON, or another format.\
+  Export the records in view, with the shown columns, to a file.\
   Export Data
 - Alt+Shift+Z\
   Extra Speech Toggle
@@ -609,10 +617,10 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Equals\
   Evaluate Expression
 - Control+F\
-  Show only the records that hold some text in any field, or that meet a condition on each field.\
+  Show only the records that match what you choose.\
   Filter Records
 - Control+G\
-  Jump to a specific row by number.\
+  Go to a record by its number, a percent or text.\
   Go to Record
 - Control+Grave\
   Send focus to the dot prompt console.\
@@ -620,19 +628,19 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+I\
   Inspect Record
 - Control+J\
-  Go to the next record whose current column holds the text, case aside.\
+  Go to the next record whose current field holds the text.\
   Jump to Record
 - Control+K\
-  Go to the next record whose fields hold the keywords: red & blue (both), red | blue (either), re*d (a star for anything), case aside.\
+  Go to the next record whose fields hold the keywords.\
   Keywords
 - Control+L\
-  Speak the current virtual column from the current row down.\
+  Say the column's values from the current record down.\
   Say Column as List from Current
 - Control+M\
   Set the 'marked' flag on the current row.\
   Mark Record
 - Control+N\
-  Add a new row to the current table.\
+  Add a new record at the cursor.\
   New Record
 - Control+O\
   Open a database file.\
@@ -681,17 +689,14 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Shift+Grave\
   Open the bundled sqlean.exe shell in its own console window on the current database.\
   Sqlean Console
-- Control+Shift+I\
-  Run a script from the Scripts folder (.js, .sql, or .dbdo).\
-  Invoke Script
 - Control+Shift+J\
-  Jump Record backward.\
+  Go to the previous record whose current field holds the text.\
   Reverse Jump
 - Control+Shift+K\
-  Keywords backward: the previous record whose fields hold the keywords.\
+  Go to the previous record whose fields hold the keywords.\
   Reverse Keywords
 - Control+Shift+L\
-  Speak the current virtual column for marked rows only, from the current row down.\
+  Say the column's values for marked records from the current record down.\
   Say Column as List from Current Marked
 - Control+Shift+M\
   Clear the 'marked' flag on the current row.\
@@ -699,7 +704,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Shift+N\
   New Copy
 - Control+Shift+O\
-  Open a chosen table of the current database in a new window.\
+  Open a table in a new window.\
   Open Table
 - Control+Shift+Oem5\
   Show the open database's file, selected in its folder, in FileDir.\
@@ -748,7 +753,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+F2\
   Pick Value
 - Control+F3\
-  Search across all columns with a .NET regex pattern.\
+  Find the next record matching a regular expression.\
   Find Regex
 - Control+F4\
   Close the current recordset window.\
@@ -759,7 +764,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Open the history of changes in the default browser.\
   History of Changes
 - Control+Shift+F3\
-  Find Regex backward.\
+  Find the previous record matching a regular expression.\
   Reverse Regex Find
 - Control+Shift+F4\
   Close every window except the current one.\
@@ -784,7 +789,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Pick from the list of open recordset windows and activate the chosen one.\
   Current Windows
 - F5\
-  Refresh the visible row set from the database.\
+  Refresh the records' values from the database.\
   Refresh View
 - F8\
   Drop a mark anchor at the current row.\
@@ -848,7 +853,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Shift+Q\
   Say Query
 - Shift+R\
-  Say Related
+  Say Replace Values
 - Shift+S\
   Say Select Columns
 - Shift+Space\
@@ -861,14 +866,14 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Say the record's url.\
   Say url
 - Shift+V\
-  Say Replace Values
+  Say Invoke Script
 - Shift+W\
   Say Whole Record
 - Shift+Y\
-  Say how many records are in view.\
-  Say Yield
+  Say how many records are marked.\
+  Say Yield Marked
 - Shift+Z\
-  Say the table, row, order and filter.\
+  Say the table, record, order and filter.\
   Say Status
 
 ## By command
@@ -960,7 +965,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Check for a newer version on GitHub and offer to install it.\
   F11
 - Enter Child Table\
-  Drill into related records: foreign-key child tables, plus any tables related to this record through the maps table (by kind).\
+  Go into the records related to this one.\
   Alt+RightArrow
 - Evaluate Expression\
   Control+Equals
@@ -971,26 +976,26 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Close DbDo.\
   Alt+F4
 - Exit to Root Table\
-  Return from any drill-down depth to the original table.\
+  Go back to the first table.\
   Alt+Home
 - Export Data\
-  Export the current table or query to CSV, TSV, JSON, or another format.\
+  Export the records in view, with the shown columns, to a file.\
   Alt+Shift+X
 - Extra Speech Toggle\
   Alt+Shift+Z
 - Extract with Regex\
   Control+Shift+E
 - Filter Records\
-  Show only the records that hold some text in any field, or that meet a condition on each field.\
+  Show only the records that match what you choose.\
   Control+F
 - Find Regex\
-  Search across all columns with a .NET regex pattern.\
+  Find the next record matching a regular expression.\
   Control+F3
 - Generate from Grid\
-  Analyze the grid: a statistics report, a frequency report of the current column or the shown columns, a cross-tab, a Markdown table, or an Excel chart.\
+  Make a report from the records in the grid.\
   Alt+Shift+G
 - Go to Record\
-  Jump to a specific row by number.\
+  Go to a record by its number, a percent or text.\
   Control+G
 - History of Changes\
   Open the history of changes in the default browser.\
@@ -1004,15 +1009,15 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Alt+Shift+I
 - Invoke Script\
   Run a script from the Scripts folder (.js, .sql, or .dbdo).\
-  Control+Shift+I
+  Alt+V
 - Jump to Record\
-  Go to the next record whose current column holds the text, case aside.\
+  Go to the next record whose current field holds the text.\
   Control+J
 - Key Describer Toggle\
   Describe each key instead of running it (Ctrl+F1).\
   Control+F1
 - Keywords\
-  Go to the next record whose fields hold the keywords: red & blue (both), red | blue (either), re*d (a star for anything), case aside.\
+  Go to the next record whose fields hold the keywords.\
   Control+K
 - List Bookmarks\
   Show saved bookmarks in a listbox; navigate to the selected one.\
@@ -1030,7 +1035,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - New Copy\
   Control+Shift+N
 - New Record\
-  Add a new row to the current table.\
+  Add a new record at the cursor.\
   Control+N
 - Next Table or View\
   Control+F6
@@ -1051,7 +1056,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Open the folder of the open database in Windows Explorer.\
   Alt+Backslash
 - Open Table\
-  Open a chosen table of the current database in a new window.\
+  Open a table in a new window.\
   Control+Shift+O
 - Open Template Database\
   Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail.\
@@ -1059,7 +1064,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Open url\
   Control+Shift+U
 - Order Records\
-  Sort the records by one or more columns, each ascending or descending.\
+  Order the records by the fields you choose.\
   Alt+O
 - Pick Value\
   Control+F2
@@ -1085,7 +1090,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Recent Files\
   Alt+R
 - Refresh View\
-  Refresh the visible row set from the database.\
+  Refresh the records' values from the database.\
   F5
 - Repeat Go To\
   Alt+G
@@ -1094,16 +1099,16 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Replace with Regex\
   Control+Shift+R
 - Reverse Jump\
-  Jump Record backward.\
+  Go to the previous record whose current field holds the text.\
   Control+Shift+J
 - Reverse Keywords\
-  Keywords backward: the previous record whose fields hold the keywords.\
+  Go to the previous record whose fields hold the keywords.\
   Control+Shift+K
 - Reverse Order\
-  Reverse the order in force, every column's direction flipped.\
+  Reverse the order of the records.\
   Alt+Shift+O
 - Reverse Regex Find\
-  Find Regex backward.\
+  Find the previous record matching a regular expression.\
   Control+Shift+F3
 - Run Report\
   Alt+Shift+R. Render a saved report definition to a Markdown document. A report reads the whole PHYSICAL table (not the grid view), so it is reproducible regardless of your current filter or sort.\
@@ -1133,10 +1138,10 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Speak every value of the current virtual column, from the top.\
   Alt+L
 - Say Column as List from Current\
-  Speak the current virtual column from the current row down.\
+  Say the column's values from the current record down.\
   Control+L
 - Say Column as List from Current Marked\
-  Speak the current virtual column for marked rows only, from the current row down.\
+  Say the column's values for marked records from the current record down.\
   Control+Shift+L
 - Say Column as List of Marked\
   Speak the current virtual column for marked rows only, from the top.\
@@ -1154,6 +1159,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Shift+G
 - Say Id\
   Shift+I
+- Say Invoke Script\
+  Shift+V
 - Say Jump\
   Shift+J
 - Say Keywords\
@@ -1189,14 +1196,12 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Records of Marked\
   Speak every marked record in full, from the first record down (all displayed columns).\
   Shift+Space
-- Say Related\
-  Shift+R
 - Say Replace Values\
-  Shift+V
+  Shift+R
 - Say Select Columns\
   Shift+S
 - Say Status\
-  Say the table, row, order and filter.\
+  Say the table, record, order and filter.\
   Shift+Z
 - Say Tags\
   Say the record's tags.\
@@ -1214,6 +1219,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Shift+F4
 - Say Yield\
   Say how many records are in view.\
+  Alt+Y
+- Say Yield Marked\
+  Say how many records are marked.\
   Shift+Y
 - Search Next\
   Repeat the last Find forward.\
@@ -1222,7 +1230,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Repeat the last Find backward.\
   Shift+F3
 - Select Columns\
-  Choose which columns the grid shows, and in what order.\
+  Choose the columns the grid shows and their order.\
   Alt+S
 - Show in FileDir\
   Show the open database's file, selected in its folder, in FileDir.\
@@ -1239,7 +1247,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Table Properties\
   Alt+Enter
 - Table Summary\
-  Print row count, column count, and storage statistics for the open database.\
+  Show a summary of the table: fields, types and keys.\
   Alt+T
 - Unmark All\
   Control+Shift+A

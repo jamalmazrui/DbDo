@@ -14410,9 +14410,9 @@ namespace DbDo
             // a DbDo-specific Say Record was redundant.
             // Say Path stays on Alt+P (5 November 2026): the suite gives it that key in every Homer app, though Say
             // Database's second press (Shift+D twice) says the path too. (A note that it was retired in v1.0.99 was stale.)
-            miSaySayYield        = addItem(miSay, "Say &Yield",       "Say Yield",        Keys.Shift | Keys.Y,               saySayYield);
+            // ALT+Y SAYS ALL, SHIFT+Y THE MARKED (9 November 2026), as in FileDir.
+            miSaySayYield        = addItem(miSay, "Say &Yield",       "Say Yield",        Keys.Alt | Keys.Y,                 saySayYield);
             // Alt+Y as well (suite manifest): the Say family's Alt+letter, as in EdSharp.
-            registerLocalAlias(Keys.Alt | Keys.Y, miSaySayYield);
             miSaySayTables       = addItem(miSay, "Say Tables",      "Say Tables",        Keys.None,              saySayTables);
             // Say Marked moved off Shift+L (which is now Say Column from
             // Cursor) to Alt+Shift+M. Mark Record itself uses Control+M.
@@ -14466,7 +14466,8 @@ namespace DbDo
             miSaySayJump         = addItem(miSay, "Say &Jump", "Say Jump", Keys.Shift | Keys.J, saySayJump);
             // (Say Header on Shift+H was withdrawn the same day: Alt+Control+Shift+UpArrow says the column's name, and Shift+S the columns shown.)
             miSaySayBookmark     = addItem(miSay, "Say &Bookmark", "Say Bookmark", Keys.Shift | Keys.B, saySayBookmark);
-            miSaySayReplace      = addItem(miSay, "Say Replace &Values", "Say Replace Values", Keys.Shift | Keys.V, saySayReplace);
+            // SHIFT+R SAYS THE REPLACE VALUES (9 November 2026), R for Replace; Say Related is part of Say Whole Record now.
+            miSaySayReplace      = addItem(miSay, "Say &Replace Values", "Say Replace Values", Keys.Shift | Keys.R, saySayReplace);
             // Shift+K: Say Kin -- speak the 'look' values of every
             // related record (both directions: parents reached by
             // outbound FK columns, and children that point back to
@@ -14502,7 +14503,7 @@ namespace DbDo
             miSaySayClipboard    = addItem(miSay, "Say Clipboard", "Say Clipboard", Keys.Alt | Keys.OemQuotes,    saySayClipboard);
             addItem(miSay, "Say Time",  "Say Time",  Keys.Alt | Keys.Oem1, saySayTime);
             addItem(miSay, "Say Path",  "Say Path",  Keys.Alt | Keys.P,    saySayPath);
-            miSaySayYieldMarked  = addItem(miSay, "Say Marked Yield", "Say Yield Marked",  Keys.None,                          saySayYieldMarked);
+            miSaySayYieldMarked  = addItem(miSay, "Say Yield Marked", "Say Yield Marked",  Keys.Shift | Keys.Y,               saySayYieldMarked);
             // v1.0.67 Say-X family completions. Each speaks one piece
             // of state without changing recordset position. The chord
             // family is Shift+Letter where Letter is the first letter
@@ -14518,9 +14519,11 @@ namespace DbDo
             miSaySayQuery        = addItem(miSay, "Say &Query",          "Say Query",   Keys.Shift | Keys.Q,                saySayQuery);
             miSaySayId           = addItem(miSay, "Say &Id",      "Say ID",      Keys.Shift | Keys.I,                saySayId);
             miSaySayLook         = addItem(miSay, "Say Look",           "Say Look",    Keys.Shift | Keys.L,                saySayLook);
-            miSaySayRelated      = addItem(miSay, "Say &Related", "Say Related", Keys.Shift | Keys.R,           saySayRelated);
+            miSaySayRelated      = addItem(miSay, "Say Related", "Say Related", Keys.None,           saySayRelated);
+            miSaySayRelated.Visible = false;   // folded into Say Whole Record (Shift+W), 9 November 2026
             miSaySayUrl          = addItem(miSay, "Say &url",          "Say url",      Keys.Shift | Keys.U,                saySayUrl);
             addItem(miSay, "Say &Whole Record", "Say Whole Record", Keys.Shift | Keys.W, saySayWholeRecord);
+            addItem(miSay, "Say In&voke Script", "Say Invoke Script", Keys.Shift | Keys.V, saySayScript);
             // EVERY REMEMBERED INPUT HAS A KEY THAT SAYS IT.
             //
             // A dialog that offers a value next time you open it is a dialog
@@ -14695,7 +14698,7 @@ namespace DbDo
             // handles both modifying an existing script and creating
             // a new one (via a "[New script...]" entry at the top of
             // the pick list).
-            miMiscInvokeScript     = addItem(miTools, "&Invoke Script...",                     "Invoke Script",     Keys.Control | Keys.Shift | Keys.I,                  miscInvokeScriptClicked);
+            miMiscInvokeScript     = addItem(miTools, "In&voke Script...",                     "Invoke Script",     Keys.Alt | Keys.V,                  miscInvokeScriptClicked);  // Alt+V (9 November 2026); Shift+V says which script it would pick
             miMiscEditScript       = addItem(miTools, "Edit &Snippet...",                       "Edit Snippet",       Keys.Alt | Keys.Shift | Keys.S,     miscEditScriptClicked);
             miMiscOpenScriptFolder = addItem(miTools, "Open Script &Folder",                   "Open Script Folder", Keys.None,                          miscOpenScriptFolderClicked);
             // PACK AND UNPACK (5 November 2026): a database's companion files go into it, so the .db alone is the package.
@@ -14942,7 +14945,7 @@ namespace DbDo
                 if (aPair.Length == 2) KeyMap.dCommandToContext[aPair[0]] = aPair[1];
 
             // ===== File menu =====
-            add("New Database",       "Create a new database file: define the first table's fields and types; the standard columns and the builtin maps and defs tables are added automatically", "");
+            add("New Database",       "Create a new database file", "");
             add("Add Table",          "Add another table in the standard shape to the open database: define its fields, or clone the open table's", "With a table open, asks Define or Clone first. The form has ten name-and-type slots and a Text button for the fields as lines, name: TYPE, without that limit; on OK it names fields that share a first letter, since only the first gets an Alt letter.");
             add("Open Database",      "Open a database file", "");
             add("Open Template Database", "Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail",
@@ -14951,7 +14954,7 @@ namespace DbDo
                 "Alt+Shift+P. Takes the first of stream_url, url, stream, link or address that begins with http, or the current cell. Marked records make a play list, current one first. The player is mpv; if it is not installed, DbDo offers to fetch it.");
             add("Close Database",     "Close the currently open database", "");
             // ===== Window menu =====
-            add("Open Table",         "Open a chosen table of the current database in a new window",
+            add("Open Table",         "Open a table in a new window",
                 "Open Table (Control+Shift+T) makes a new window; Choose Table (F6) changes the table in the same window.");
             add("Current Windows",    "Pick from the list of open recordset windows and activate the chosen one",
                 "F4. Each open recordset (typically a table) is an MDI child window.");
@@ -14972,13 +14975,13 @@ namespace DbDo
                 "Open mounts a file with a live driver; Import transfers its data into DbDo's own structure. The source is only read; Save As keeps the result as a .db.");
             add("Merge",              "Merge rows from a Markdown table, JSON, or Inix file into the current table",
                 "Fields are matched by name; unmatched fields are dropped and one bad row does not sink the import.");
-            add("Export Data",        "Export the current table or query to CSV, TSV, JSON, or another format",
+            add("Export Data",        "Export the records in view, with the shown columns, to a file",
                 "Choose the destination file extension to pick the format; row order and filter match what is visible.");
             add("Open in Explorer",    "Open the folder of the open database in Windows Explorer", "");
             add("Exit Application",   "Close DbDo", "");
 
             // ===== Edit menu =====
-            add("New Record",         "Add a new row to the current table",
+            add("New Record",         "Add a new record at the cursor",
                 "Opens an Edit-Record dialog with empty values for the substantive (non-housekeeping) fields. Validation rules from [Validation:<table>] in DbDo.inix are applied.");
             add("Edit Record",         "Edit every field of the current row",
                 "Opens an Edit-Record dialog with the current row's values in editable text boxes for substantive fields. Validation rules apply.");
@@ -15007,17 +15010,17 @@ namespace DbDo
             add("Step Record Previous",   "Move up one row", "");
             add("Step Record First",  "Move to the first row", "");
             add("Step Record Last",   "Move to the last row", "");
-            add("Set Position",       "Jump to a specific row by number", "");
+            add("Set Position",       "Go to a record by its number, a percent or text", "");
             add("Jump Next Initial", "Move to the next row where the first display field's initial letter changes",
                 "Useful in alphabetically sorted lists for moving by letter group.");
-            add("Keywords",           "Go to the next record whose fields hold the keywords: red & blue (both), red | blue (either), re*d (a star for anything), case aside",
+            add("Keywords",           "Go to the next record whose fields hold the keywords",
                 "Searches every field of each record, shown or not, a link by the look it shows. Keywords Previous, Control+Shift+K, goes backward; F3 and Shift+F3 repeat.");
-            add("Keywords Previous",  "Keywords backward: the previous record whose fields hold the keywords", "");
-            add("Find Regex",         "Search across all columns with a .NET regex pattern", "");
-            add("Find Previous Regex", "Find Regex backward", "");
+            add("Keywords Previous",  "Go to the previous record whose fields hold the keywords", "");
+            add("Find Regex",         "Find the next record matching a regular expression", "");
+            add("Find Previous Regex", "Find the previous record matching a regular expression", "");
             add("Find Regex Again",    "Repeat the last Find Regex forward", "");
-            add("Jump Record",        "Go to the next record whose current column holds the text, case aside", "");
-            add("Jump Previous Record","Jump Record backward", "");
+            add("Jump Record",        "Go to the next record whose current field holds the text", "");
+            add("Jump Previous Record","Go to the previous record whose current field holds the text", "");
             add("Jump Record Again",   "Repeat the last Jump Record", "");
             add("Search Next",        "Repeat the last Find forward", "");
             add("Search Previous",    "Repeat the last Find backward", "");
@@ -15029,7 +15032,7 @@ namespace DbDo
             add("Show Table",         "Show every row of the current table in a single read-only text view", "");
             add("Show Related",       "Jump to one related table via an outbound foreign key", "");
             add("Show Status",        "Show the table, row, filter, and sort in a read-only dialog", "");
-            add("Say Status",         "Say the table, row, order and filter", "");
+            add("Say Status",         "Say the table, record, order and filter", "");
             add("Say Database",       "Say the database's name and folder",
                 "Shift+D. Replaces Say Path. Single-press announces just the filename for fast 'where am I' checks; double-press opens a memo dialog with the full path that can be copied via Ctrl+C.");
             add("Say Order",          "Say the order in force",
@@ -15041,8 +15044,8 @@ namespace DbDo
             add("Say Keywords",       "Say the last Keywords entry",
                 "Shift+F. Reports the most recent Find substring (or regex). Says 'No find string' when nothing has been searched yet. Companion to Say Where Filter (Shift+W).");
             add("Say Yield",          "Say how many records are in view", "");
-            add("Say Tables",         "Speak the visited-tables list", "");
-            add("Say Yield Marked",    "Speak the count of marked rows", "");
+            add("Say Tables",         "Say the tables visited this session", "");
+            add("Say Yield Marked",    "Say how many records are marked", "");
             add("Say Edited",          "Say when the record was last edited",
                 "Shift+E. Reads the standard 'edited' timestamp column. Falls back to 'added' if 'edited' is absent.");
             add("Say Notes",          "Say the record's notes",
@@ -15054,9 +15057,9 @@ namespace DbDo
                 "Alt+L. Sweeps the whole column top to bottom. Position and virtual cursor unchanged; double-press shows the full list. Alt = All. Shift adds the marked-only filter (Say Column All Marked, Alt+Shift+L).");
             add("Say Column as List of Marked",   "Speak the current virtual column for marked rows only, from the top",
                 "Alt+Shift+L. Same as Say Column All but limited to marked rows. Reports 'No marked rows in this column' when nothing is marked.");
-            add("Say Column as List from Current", "Speak the current virtual column from the current row down",
+            add("Say Column as List from Current", "Say the column's values from the current record down",
                 "Control+L. Sweeps from the current row to the bottom. Control = from Current. Shift adds the marked-only filter (Say Column as List from Current Marked, Control+Shift+L).");
-            add("Say Column as List from Current Marked", "Speak the current virtual column for marked rows only, from the current row down",
+            add("Say Column as List from Current Marked", "Say the column's values for marked records from the current record down",
                 "Control+Shift+L. Same as Say Column as List from Current but limited to marked rows. Reports 'No marked rows from here' when nothing is marked at or after the current row.");
             add("Say Records from Current", "Speak every record in full, from the current record down (all displayed columns)",
                 "No key of its own. Each record formatted as 'Record N -- col1: val1; col2: val2; ...' with newlines between records. Cap 25 in spoken form; double-press for the full list.");
@@ -15077,27 +15080,27 @@ namespace DbDo
                 "Plain text only; non-text and empty clipboards announce that fact rather than going silent. Double-press opens the read-only memo dialog for line-by-line review of long pasted content.");
             add("Say Order Filter",    "Speak the current order and filter, or none for each",
                 "Single-press speaks; double-press opens the same text in the multi-line dialog. Useful when the filter or sort string is long.");
-            add("Filter Records",      "Show only the records that hold some text in any field, or that meet a condition on each field", "Control+F. A list of choices, its first selected, so Enter takes it; each begins with its own letter. Any field contains text asks for the text and keeps the records where some field, read as text, contains it, case aside (for English letters). Fields asks Main, Standard or All, then opens a form with a box per field in DbDo's natural order: a value on its own matches anywhere in the field, case aside; = in front means is, and a symbol in front compares (> >= < <= !=); dates are typed as year-month-day; several boxes must all match. Marked and Unmarked take the records you have marked, or the rest. With a filter in force the list adds Clear, Edit (the field filter), Narrow (add a field condition) and, for a field filter, Widen. A search that finds nothing leaves the view as it was.");
+            add("Filter Records",      "Show only the records that match what you choose", "Control+F. A list of choices, its first selected, so Enter takes it; each begins with its own letter. Any field contains text asks for the text and keeps the records where some field, read as text, contains it, case aside (for English letters). Fields asks Main, Standard or All, then opens a form with a box per field in DbDo's natural order: a value on its own matches anywhere in the field, case aside; = in front means is, and a symbol in front compares (> >= < <= !=); dates are typed as year-month-day; several boxes must all match. Marked and Unmarked take the records you have marked, or the rest. With a filter in force the list adds Clear, Edit (the field filter), Narrow (add a field condition) and, for a field filter, Widen. A search that finds nothing leaves the view as it was.");
             add("Filter Regex",        "Filter to rows whose current column matches a regular expression (SQLean REGEXP)",
                 "Server-side, so it works on large tables and the result stays editable. Prompts for a pattern and applies it to the column under virtual focus; an empty pattern clears the filter. Needs sqlean.dll beside DbDo.exe. Unbound by default -- assign a chord if you use it often.");
             add("Clear Filter",       "Clear the active filter", "Control+Shift+F.");
-            add("Order Records",       "Sort the records by one or more columns, each ascending or descending",
+            add("Order Records",       "Order the records by the fields you choose",
                 "Alt+O. Fields lists every column, shown or not, in DbDo's natural order (main fields in table order, then url, tags, notes, marked, look, prime, added, edited and the id), the column under the cursor selected. Enter or Add Ascending adds it to Picks; Add Descending adds it the other way. The Picks order is the sort order, and the order in force is already there to change. Remove (or Enter or Delete in Picks) takes one back; Clear empties Picks, and OK with no picks clears the sort.");
-            add("Reverse Order",      "Reverse the order in force, every column's direction flipped", "Alt+Shift+O.");
+            add("Reverse Order",      "Reverse the order of the records", "Alt+Shift+O.");
             add("Alpha Order",        "Sort the records by the current column, smallest or earliest first", "Alt+A, as in FileDir.");
 
             add("Clear Sort",         "Clear the order in force, so records return to table order", "");
 
             // ===== Misc menu =====
-            add("Update View",        "Refresh the visible row set from the database", "");
-            add("Table Summary",      "Print row count, column count, and storage statistics for the open database", "");
+            add("Update View",        "Refresh the records' values from the database", "");
+            add("Table Summary",      "Show a summary of the table: fields, types and keys", "");
             add("Statistics from Column", "Print descriptive statistics for the column under the virtual cursor",
                 "Alt+Shift+S. Type-aware: numeric columns get count/populated/min/max/mean/median/stdev/variance/CV/quartiles/IQR/outliers; date columns get range and modal year; boolean columns get true/false splits; text columns get cardinality and top-N most-frequent values. Shown in a read-only memo dialog (Control+C copies it).");
             add("Frequency by Columns", "Count the records with each combination of values in the columns shown",
                 "Alt+Shift+B. Within the filter in force, over the columns the grid shows apart from the standard ones (the id, added, edited and marked), lists each combination of values with how many records have it, most common first, in a read-only window to review and copy. With State and City shown: how many contacts in each state and city.");
-            add("Select Columns",        "Choose which columns the grid shows, and in what order",
+            add("Select Columns",        "Choose the columns the grid shows and their order",
                 "Alt+S. Seven buttons: Default (the fields of look, or every main field when a table has no look), Main (the fields about the table's subject), Standard (url, tags, notes, marked, look, prime, added, edited and the id), All (every field in DbDo's natural order), Look and prime, Exact (the Fields and Picks lists, with the columns now shown already in Picks), and Type (the names typed with commas). The choice is remembered with the table.");
-            add("Generate from Grid",         "Analyze the grid: a statistics report, a frequency report of the current column or the shown columns, a cross-tab, a Markdown table, or an Excel chart", "");
+            add("Generate from Grid",         "Make a report from the records in the grid", "");
             add("Run Report",              "Alt+Shift+R. Render a saved report definition to a Markdown document. A report reads the whole PHYSICAL table (not the grid view), so it is reproducible regardless of your current filter or sort.",
                 "Report definitions live in an .inix file beside the database whose [Global] section declares FileTask = report (each [section] is one report, with header/detail/footer/group bands, $field and {{ jscript }} substitution, and footer aggregates like $count and $sum_<field>). DbDo lists only the FileTask = report files -- so a transfer map or settings file in the same folder is never offered -- then writes Markdown you can convert to HTML/DOCX/PDF. A legacy file with report bands but no FileTask still works. The contrast to remember: Generate from Grid = analyze what you SEE (virtual grid, ad-hoc); Run Report = produce a DEFINED document from the physical table (reproducible).");
             add("Graphics Column",           "Plot the column under the virtual cursor as an Excel chart",
@@ -15116,9 +15119,9 @@ namespace DbDo
             add("Sqlean Console",     "Open the bundled sqlean.exe shell in its own console window on the current database",
                 "Control+Shift+GraveAccent. The full SQLite / SQLean command shell -- .tables, .schema, .dump, .import, REGEXP, median(), and the rest. Opens the current database read-only so it cannot contend with DbDo's writer; with no database open it starts on an in-memory database. The bundled sqlean.exe must sit beside DbDo.exe.");
             add("Exit-Console",       "Close the dot prompt and return to the GUI", "");
-            add("Enter Child",        "Drill into related records: foreign-key child tables, plus any tables related to this record through the maps table (by kind)", "");
+            add("Enter Child",        "Go into the records related to this one", "");
             add("Exit Child",         "Return from a child drill-down to the parent table", "");
-            add("Exit Child to Root",   "Return from any drill-down depth to the original table", "");
+            add("Exit Child to Root",   "Go back to the first table", "");
             add("Invoke SQL",         "Run an ad-hoc SQL statement against the open database", "");
             add("Invoke Script",      "Run a script from the Scripts folder (.js, .sql, or .dbdo)",
                 "The picker shows every .js (JScript .NET), .sql (SQL batch), and .dbdo (DbDo command batch) file in %LOCALAPPDATA%\\DbDo\\scripts. Type to filter the list; press Enter to run. The file extension determines the engine: .js gets full computational power and host objects (db, frm); .sql runs a semicolon-separated batch of statements; .dbdo dispatches each line through the dot-prompt as if you had typed it.");
@@ -17626,7 +17629,7 @@ namespace DbDo
                 catch { }
             }
             sb.Append(db.currentTable ?? "(no table)");
-            sb.Append(" row ").Append(db.absolutePosition).Append(" of ").Append(db.recordCount);
+            sb.Append(" record ").Append(db.absolutePosition).Append(" of ").Append(db.recordCount);
             if (db.filter.Length > 0) sb.Append("; filter: ").Append(db.filter);
             if (db.sort.Length > 0) sb.Append("; order: ").Append(db.sort);
             speakOrShow("Status", "status: " + sb.ToString(), 101);
@@ -17697,7 +17700,7 @@ namespace DbDo
             if (db == null || !db.hasRecordset())
             { Say.say("yield: no table selected"); return; }
             StringBuilder sb = new StringBuilder();
-            sb.Append(db.recordCount).Append(" row").Append(db.recordCount == 1 ? "" : "s");
+            sb.Append(db.recordCount).Append(" record").Append(db.recordCount == 1 ? "" : "s");
             if (db.filter.Length > 0) sb.Append(" (filter: ").Append(db.filter).Append(")");
             speakOrShow("Yield", "yield: " + sb.ToString(), 103);
         }
@@ -17766,16 +17769,35 @@ namespace DbDo
 
         // saySayReplace: what the Replace dialog would offer next time -- the
         // text to find and the text to put in its place.
+        // saySayReplace: Shift+R. The values Replace and Replace with Regex would offer, in EdSharp's words for their
+        // fields (9 November 2026): Replace asks for a Match and what to Replace it with; Replace with Regex for a
+        // Pattern and a Substitute. Each is said when it has been used; before either has run this session, the
+        // last remembered values are said as Replace's.
+        private string sLastMatch = "", sLastReplace = "", sLastPattern = "", sLastSubstitute = "";
         private void saySayReplace(object sender, EventArgs evArgs)
         {
-            string sFrom = SearchHistory.lastText(SearchHistory.SectionReplace);
-            string sTo = SearchHistory.lastText(SearchHistory.SectionReplaceWith);
-            // "replace: blank with blank" (1 November 2026) meant nothing had been replaced yet.
-            if (string.IsNullOrEmpty(sFrom)) { Say.say("replace: none"); return; }
-            // With the setting of the last Replace this session: regex or not, the columns and the records (5 November 2026),
-            // so one Say command answers for Replace and Replace with Regex alike; Say Regex Replace on Shift+X retired.
-            speakOrShow("Replace", "replace: " + sFrom + " with " + (string.IsNullOrEmpty(sTo) ? "nothing" : sTo)
-                + (string.IsNullOrEmpty(sLastReplaceHow) ? "" : ", " + sLastReplaceHow), 130);
+            List<string> lParts = new List<string>();
+            string sMatch = sLastMatch, sReplace = sLastReplace;
+            if (sMatch.Length == 0 && sLastPattern.Length == 0)
+            {
+                sMatch = SearchHistory.lastText(SearchHistory.SectionReplace) ?? "";
+                sReplace = SearchHistory.lastText(SearchHistory.SectionReplaceWith) ?? "";
+            }
+            if (sMatch.Length > 0) lParts.Add("replace: match " + sMatch + ", replace " + sayableValue(sReplace));
+            if (sLastPattern.Length > 0) lParts.Add("replace with regex: pattern " + sLastPattern + ", substitute " + sayableValue(sLastSubstitute));
+            if (lParts.Count == 0) { Say.say("replace: none"); return; }
+            if (!string.IsNullOrEmpty(sLastReplaceHow)) lParts.Add(sLastReplaceHow);
+            speakOrShowParts("Replace Values", lParts, 130);
+        }
+
+        // saySayScript: Shift+V. The script Invoke Script (Alt+V) would have chosen first in its list (9 November 2026).
+        private void saySayScript(object sender, EventArgs evArgs)
+        {
+            System.Collections.Generic.SortedDictionary<string, string> dScripts = gatherScripts();
+            if (dScripts.Count == 0) { Say.say("script: none"); return; }
+            string sFirst = "";
+            foreach (string sName in dScripts.Keys) { sFirst = sName; break; }
+            speakOrShow("Script", "script: " + sFirst, 132);
         }
 
         // sayableValue: the convention for an answer that has no answer.
@@ -17899,7 +17921,7 @@ namespace DbDo
             {
                 if (original != null) try { db.bookmark = original; } catch { }
             }
-            speakOrShow("Marked Yield", iCount + " marked row" + (iCount == 1 ? "" : "s"), 108);
+            speakOrShow("Yield Marked", "yield marked: " + iCount + " record" + (iCount == 1 ? "" : "s"), 108);
         }
 
         // saySayNotes: Shift+N. Speak the 'notes' field of the current
@@ -17992,7 +18014,7 @@ namespace DbDo
             //
             // Double-pressing still shows the whole thing in a window, which is
             // why the joined form is built as well.
-            string sWhere = "row " + iVirtualRow + " of " + db.recordCount;
+            string sWhere = "record " + iVirtualRow + " of " + db.recordCount;
             // THE KIT'S TWO PRESSES (9 November 2026), as every Say key: a second press shows the parts in the read-only
             // window. Say Cell had its own timer and its own window.
             speakOrShowParts("Cell", new List<string> { sCol, sWhere, sVal }, 117);
@@ -18111,6 +18133,10 @@ namespace DbDo
                 try { sLabel = db.linkLabel(sField, sValue); } catch { }
                 lParts.Add(sField + ": " + (string.IsNullOrEmpty(sLabel) ? sValue : sLabel));
             }
+            // THE RELATED RECORDS TOO (9 November 2026): Say Related, once Shift+R, is the last part of the whole record.
+            string sRelated = "";
+            try { sRelated = buildRelatedSummary(); } catch { }
+            if (!string.IsNullOrEmpty(sRelated)) lParts.Add("related: " + sRelated);
             if (lParts.Count == 0) { Say.say("whole record: every field is empty"); return; }
             speakOrShowParts("Whole Record", lParts, 131);
         }
@@ -29277,6 +29303,7 @@ namespace DbDo
                 SearchHistory.record(SearchHistory.SectionReplace, sFind, bCase);
                 if (sRepl.Length > 0)
                     SearchHistory.record(SearchHistory.SectionReplaceWith, sRepl, false);
+                if (bRegex) { sLastPattern = sFind; sLastSubstitute = sRepl; } else { sLastMatch = sFind; sLastReplace = sRepl; }
                 sLastReplaceHow = (bRegex ? "regex, " : "") + (bCase ? "case sensitive, " : "") + "in " + sColumnsSaid
                     + ", " + (iRecordScope == 1 ? "marked records" : iRecordScope == 2 ? "the current record" : "all records in view");
                 int iChanged = 0;

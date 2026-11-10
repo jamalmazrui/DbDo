@@ -111,8 +111,8 @@ Hear=
 
 [step]
 
-Say=Now the links. Up Arrow to the Accessibility Analyst job. Shift plus R, Say Related, says what it leads to, changing nothing.
-Key=Shift+R
+Say=Now the links. Up Arrow to the Accessibility Analyst job. Shift plus W, Say Whole Record, ends with what it leads to, changing nothing.
+Key=Shift+W
 Hear=contacts 1, docs 2
 Note=Confirm the wording with a live run: buildTutorials -live.
 
@@ -139,8 +139,8 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=JobTrail also keeps its own questions as scripts. Control plus Shift plus I, Invoke Script, lists them; Today shows the actions due, oldest first.
-Key=Control+Shift+I
+Say=JobTrail also keeps its own questions as scripts. Alt plus V, Invoke Script, lists them; Today shows the actions due, oldest first.
+Key=Alt+V
 Hear=Invoke Script dialog, Today
 Note=Confirm the wording with a live run: buildTutorials -live.
 
@@ -172,7 +172,7 @@ Hear=Control plus N
 
 Say=Say what a record leads to.
 Key=
-Hear=Shift plus R
+Hear=Shift plus W
 
 [step]
 

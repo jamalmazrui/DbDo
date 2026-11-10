@@ -50,8 +50,8 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Status, format, series, and when it was read. Escape. What to read next is a saved script. Control plus Shift plus I, Invoke Script, lists the scripts beside this database.
-Key=Control+Shift+I
+Say=Status, format, series, and when it was read. Escape. What to read next is a saved script. Alt plus V, Invoke Script, lists the scripts beside this database.
+Key=Alt+V
 Hear=Invoke Script dialog, Reading-By-Year, 1 of 2
 Note=Confirm the wording with a live run: buildTutorials -live.
 
@@ -144,7 +144,7 @@ Hear=Control plus I
 
 Say=Run a saved script.
 Key=
-Hear=Control plus Shift plus I
+Hear=Alt plus V
 
 [step]
 

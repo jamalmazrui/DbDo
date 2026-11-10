@@ -5,6 +5,15 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 9 November 2026 -- Y, R, W and V, and one set of words
+
+- **Invoke Script reads In&voke on the Tools menu, and Shift+V is Say Invoke Script.** V stands for the sound in Invoke, as X does for the "ex" sound; the release check had stopped the push on the V keys.
+- **Alt+Y says how many records are in view, and Shift+Y how many are marked,** as in FileDir.
+- **Shift+R says the Replace values,** in EdSharp's words: Replace's match and replace, and Replace with Regex's pattern and substitute.
+- **Shift+W ends with the related records,** which Say Related, once on Shift+R, said alone.
+- **Alt+V is Invoke Script, and Shift+V says the script it would choose.** Invoke Script was Control+Shift+I.
+- **One set of words.** Descriptions and answers say record for an entry, field for its named value, table for the database's table and grid for the view; row and column only for places in the grid. Asides and the names of other keys are gone from descriptions.
+
 ## 9 November 2026 -- testSay, every Say key heard
 
 - **A second press of a Say key works.** testSay's second run showed every second press taken as a first; it now spells a short answer or shows a longer one in the read-only window. Say Cell, Say Select Columns, Say Look, Say Prime and Say Marked follow the same two presses as the rest, where they had timers or windows of their own.

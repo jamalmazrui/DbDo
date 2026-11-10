@@ -114,7 +114,7 @@ Hear=Shift and a letter: it asks and changes nothing.
 
 Say=script.
 Key=
-Hear=A saved question beside a database, run with Control plus Shift plus I.
+Hear=A saved question beside a database, run with Alt plus V.
 
 [step]
 

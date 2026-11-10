@@ -1126,9 +1126,9 @@ for that one purpose.</li>
 </ul>
 <p>The same commands follow both:</p>
 <ul>
-<li><strong>Say Related</strong> (Shift+R) lists what the current record
-is related to, by foreign key and by map, each related record by its
-look.</li>
+<li><strong>Say Whole Record</strong> (Shift+W) ends with what the
+current record is related to, by foreign key and by map, each related
+record by its look.</li>
 <li><strong>Related Records</strong> (Query menu) shows the same list in
 a window.</li>
 <li><strong>Enter Child Table</strong> (Alt+Right) follows a
@@ -1245,11 +1245,11 @@ database, to keep it or to change its format.</li>
 </ul>
 <h3 id="to-automate-what-you-repeat">To automate what you repeat</h3>
 <p>A <strong>script</strong> is a file that does a task again, run with
-<strong>Invoke Script</strong> (Control+Shift+I), written or changed
-with <strong>Edit Snippet</strong> (Alt+Shift+S). A database’s own
-scripts sit beside it, and shared ones in DbDo’s Scripts folder
-(<strong>Open Script Folder</strong> opens it). There are three kinds,
-from the simplest:</p>
+<strong>Invoke Script</strong> (Alt+V), written or changed with
+<strong>Edit Snippet</strong> (Alt+Shift+S). A database’s own scripts
+sit beside it, and shared ones in DbDo’s Scripts folder (<strong>Open
+Script Folder</strong> opens it). There are three kinds, from the
+simplest:</p>
 <ul>
 <li><strong>.sql – a saved question.</strong> One or more SQL
 statements: a Query you keep. Most templates come with some:
@@ -1801,6 +1801,10 @@ family.</p>
 </tr>
 <tr>
 <td>Say Yield</td>
+<td>Alt+Y</td>
+</tr>
+<tr>
+<td>Say Yield Marked</td>
 <td>Shift+Y</td>
 </tr>
 <tr>
@@ -1884,8 +1888,12 @@ family.</p>
 <td>Shift+L</td>
 </tr>
 <tr>
-<td>Say Related</td>
+<td>Say Replace Values</td>
 <td>Shift+R</td>
+</tr>
+<tr>
+<td>Say Invoke Script</td>
+<td>Shift+V</td>
 </tr>
 <tr>
 <td>Say url</td>
@@ -2032,7 +2040,7 @@ family.</p>
 </tr>
 <tr>
 <td>Invoke Script</td>
-<td>Control+Shift+I</td>
+<td>Alt+V</td>
 </tr>
 <tr>
 <td>Edit Snippet</td>
@@ -2749,15 +2757,15 @@ lacks is copied in beside it; none of yours is overwritten. Merge is the
 first button, so Enter takes it.</p>
 <p><strong>Your Outlook contacts, in one step.</strong> ContactTrail and
 JobTrail each come with a script, Import Outlook Contacts. Open the
-database, press Control+Shift+I, Invoke Script, and choose it. If
-Microsoft Outlook is on your computer, every person in its Contacts
-folder who is not already in the database is added, with names, phones,
-email, address and job, and tagged outlook so a filter finds them all.
-Nothing already there is changed, so running it again adds only people
-who are new. Outlook’s business phone becomes the Office Phone, and its
-title, second address line, birthday and gender fill those fields. If
-Outlook is not on your computer, the script says so and adds nothing.
-Press F5 afterwards to see them.</p>
+database, press Alt+V, Invoke Script, and choose it. If Microsoft
+Outlook is on your computer, every person in its Contacts folder who is
+not already in the database is added, with names, phones, email, address
+and job, and tagged outlook so a filter finds them all. Nothing already
+there is changed, so running it again adds only people who are new.
+Outlook’s business phone becomes the Office Phone, and its title, second
+address line, birthday and gender fill those fields. If Outlook is not
+on your computer, the script says so and adds nothing. Press F5
+afterwards to see them.</p>
 <p>Every template earns its place in one of three ways: it carries real
 data worth exploring, it serves a task people really do every day, or a
 recorded tutorial teaches with it. Six earlier templates were retired in
@@ -2823,8 +2831,8 @@ searchable place for software and books made by or for blind people.</p>
 <p>Each record names its makers in its <strong>by</strong> field, and
 the <strong>maps</strong> table links each creator to their work: a
 creator is <code>author_of</code> a book, <code>developer_of</code> an
-app, or <code>presenter_of</code> a presentation. On a creator, Shift+R
-says what they made, and Alt+Right goes to it. An app’s
+app, or <code>presenter_of</code> a presentation. On a creator, Shift+W
+ends with what they made, and Alt+Right goes to it. An app’s
 <strong>platform</strong> is where it runs, so Fields in Filter Records
 narrows the list to one system. Categories, platforms, formats and roles
 are also in <strong>tags</strong>, one to a line, so Keywords finds
@@ -3048,9 +3056,9 @@ a space:</p>
 punctuation, so the parts arrive as parts rather than as one run-on
 line.</p>
 <p>A glimpse is deliberately not the whole record. When you need the
-rest, it is one keystroke away: Enter opens the record, and Shift plus R
-lists what this record is related to, showing each related record by its
-own <code>look</code>.</p>
+rest, it is one keystroke away: Enter opens the record, and Shift plus W
+ends by listing what this record is related to, showing each related
+record by its own <code>look</code>.</p>
 <h4 id="prime-the-primary-key-computed">prime: the primary key,
 computed</h4>
 <p><code>prime</code> is short for primary key, and it is a primary key
@@ -3122,17 +3130,17 @@ column</li>
 <li>Shift+O – order</li>
 <li>Shift+P – prime</li>
 <li>Shift+Q – query</li>
-<li>Shift+R – related, by foreign key and by map</li>
+<li>Shift+R – replace values, what Replace (match and replace) and
+Replace with Regex (pattern and substitute) would offer, or none</li>
 <li>Shift+S – columns, the columns shown</li>
 <li>Shift+T – tags</li>
 <li>Shift+U – url</li>
-<li>Shift+V – replace values, the text Replace would find and what it
-would put there, with the setting last used – regex or not, the columns
-and the records – or none</li>
-<li>Shift+W – whole record, every field with a value, hidden columns
-too</li>
-<li>Shift+Y – yield, how many rows</li>
-<li>Shift+Z – status: the table, the row and the order</li>
+<li>Shift+V – script, the one Invoke Script (Alt+V) would choose</li>
+<li>Shift+W – whole record, every field with a value, hidden fields too,
+then the related records</li>
+<li>Shift+Y – yield marked, how many records are marked; Alt+Y says how
+many are in view</li>
+<li>Shift+Z – status: the table, the record and the order</li>
 </ul>
 <p>Shift plus a letter answers a question. A letter on its own moves:
 type the first letters of a value and the list view goes there, in lower
@@ -3147,10 +3155,11 @@ Shift+V took on its pattern too. Pressing an unused letter says so –
 always answers, because silence cannot be told from a key that did not
 register.</p>
 <p><strong>A command that opens a dialog with a value already in it has
-a value worth hearing first.</strong> That is what Shift+B, Shift+J and
-Shift+V are: the bookmark list, the text Jump would offer, and the pair
-Replace would offer. Hearing the answer is often enough, and the dialog
-never has to open.</p>
+a value worth hearing first.</strong> That is what Shift+B, Shift+J,
+Shift+R and Shift+V are: the bookmark list, the text Jump would offer,
+the pairs Replace would offer, and the script Invoke Script would offer.
+Hearing the answer is often enough, and the dialog never has to
+open.</p>
 <p><strong>none and blank are different answers.</strong> “none” means
 there is no value – nothing was ever set. “blank” means there is a value
 and it is empty. A listener cannot tell those apart from silence, and

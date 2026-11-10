@@ -330,6 +330,13 @@ def checkInixKeys():
     dKeys = {}
     for sMenu, sCaption, sCommand, sExpr in re.findall(r'addItem\(mi([A-Za-z]+),\s*"([^"]*)",\s*"([^"]*)",\s*([^,]+?),', sSource):
         dKeys.setdefault(sCommand.lower(), []).append("" if "Keys.None" in sExpr else oMake.keyName(sExpr))
+    # ALIASES COUNT TOO (8 November 2026): a second key given by registerLocalAlias -- Control+Slash for Hotkey
+    # Summary -- may be named after the command's own key, "Alt+Shift+H or Control+Slash". A line naming the
+    # command's own key alone still passes.
+    dVarToCommand = dict((sVar, sCommand.lower()) for sVar, sCommand in re.findall(r'(mi[A-Za-z0-9]+)\s*=\s*addItem\(mi[A-Za-z]+,\s*"[^"]*",\s*"([^"]*)"', sSource))
+    dAliases = {}
+    for sExpr, sVar in re.findall(r'registerLocalAlias\(([^,]+?),\s*(mi[A-Za-z0-9]+)\)', sSource):
+        if sVar in dVarToCommand: dAliases.setdefault(dVarToCommand[sVar], []).append(oMake.keyName(sExpr))
     lsBad = []
     iChecked = 0
     sSection = ""
@@ -344,7 +351,8 @@ def checkInixKeys():
         sChord = sRest.split(",", 1)[0].strip()
         lsCode = [s for s in dKeys[sName.lower()] if s]
         sWanted = " or ".join(dict.fromkeys(lsCode)) if lsCode else "None"
-        if sChord != sWanted: lsBad.append("%s says %s; DbDo.cs binds %s" % (sName, sChord or "nothing", sWanted))
+        sWithAliases = " or ".join(dict.fromkeys(lsCode + dAliases.get(sName.lower(), []))) if lsCode else sWanted
+        if sChord != sWanted and sChord != sWithAliases: lsBad.append("%s says %s; DbDo.cs binds %s" % (sName, sChord or "nothing", sWithAliases))
     for s in lsBad: logLine("INIX KEY: " + s)
     if lsBad:
         return finding("inix keys", "fail", "%s; each is in the log" % countNoun(len(lsBad), "line"))
@@ -501,7 +509,10 @@ def checkAccessLetters():
         # the bottom of the alphabet, and the status bar is the bottom of the
         # window.
         bSleepZ = sHot == "Z" and re.search(r"\b(toggle|status)\b", sPlain, re.I)
-        bSoundX = bSoundX or bSleepZ
+        # V is the sound in Invoke (9 November 2026, Jamal's Alt+V for Invoke Script): like X for the "ex" sound, V may
+        # stand for a word with "voke" in it, Invoke Script and Say Invoke Script, mid-word when it must be.
+        bSoundV = sHot == "V" and re.search(r"voke", sPlain, re.I)
+        bSoundX = bSoundX or bSleepZ or bSoundV
         if oAmp:
             iAt = sCaption.index("&")
             bStart = iAt == 0 or not sCaption[iAt - 1].isalnum()

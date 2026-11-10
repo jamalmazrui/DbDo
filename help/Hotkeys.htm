@@ -299,7 +299,7 @@ Control+Space</li>
 N for New.<br />
 Control+Shift+N</li>
 <li>New Record<br />
-Add a new row to the current table. N for New.<br />
+Add a new record at the cursor. N for New.<br />
 Control+N</li>
 <li>Open Cell Value<br />
 Control+Enter acts from anywhere in a Homer dialog; here it opens the
@@ -373,8 +373,8 @@ Close DbDo. Alt+F4 closes the program, as in every Windows
 program.<br />
 Alt+F4</li>
 <li>Export Data<br />
-Export the current table or query to CSV, TSV, JSON, or another format.
-X for the sound of “ex”.<br />
+Export the records in view, with the shown columns, to a file. X for the
+sound of “ex”.<br />
 Alt+Shift+X</li>
 <li>Import<br />
 Build a new DbDo database from another file – Excel (read by DbDo
@@ -481,24 +481,20 @@ Alt+D</li>
 Open the Settings dialog. E for Edit.<br />
 Alt+Shift+E</li>
 <li>Generate from Grid<br />
-Analyze the grid: a statistics report, a frequency report of the current
-column or the shown columns, a cross-tab, a Markdown table, or an Excel
-chart. G for Generate.<br />
+Make a report from the records in the grid. G for Generate.<br />
 Alt+Shift+G</li>
 <li>Read Only Toggle<br />
 Flip the database between read-write and read-only at runtime. Z is for
 sleep: it wakes this behavior or puts it to sleep.<br />
 Control+Shift+Z</li>
 <li>Refresh View<br />
-Refresh the visible row set from the database. F5 is refreshing.<br />
+Refresh the records’ values from the database. F5 is refreshing.<br />
 F5</li>
 <li>Select Columns<br />
-Choose which columns the grid shows, and in what order. S for
-Select.<br />
+Choose the columns the grid shows and their order. S for Select.<br />
 Alt+S</li>
 <li>Table Summary<br />
-Print row count, column count, and storage statistics for the open
-database. T for Table.<br />
+Show a summary of the table: fields, types and keys. T for Table.<br />
 Alt+T</li>
 </ul>
 <h3 id="misc-tools">Misc, Tools</h3>
@@ -515,9 +511,8 @@ Alt+Shift+S</li>
 <li>Evaluate Expression<br />
 Control+Equals</li>
 <li>Invoke Script<br />
-Run a script from the Scripts folder (.js, .sql, or .dbdo). I for
-Invoke.<br />
-Control+Shift+I</li>
+Run a script from the Scripts folder (.js, .sql, or .dbdo).<br />
+Alt+V</li>
 <li>Open Command Prompt<br />
 Control+Backslash</li>
 <li>Open Dot Prompt<br />
@@ -538,47 +533,46 @@ Control+Shift+Grave</li>
 <h3 id="navigate">Navigate</h3>
 <ul>
 <li>Enter Child Table<br />
-Drill into related records: foreign-key child tables, plus any tables
-related to this record through the maps table (by kind). Alt+Right Arrow
-goes forward, and deeper, as in a browser.<br />
+Go into the records related to this one. Alt+Right Arrow goes forward,
+and deeper, as in a browser.<br />
 Alt+RightArrow</li>
 <li>Exit Child Table<br />
 Return from a child drill-down to the parent table. Alt+Left Arrow goes
 back, as in a browser.<br />
 Alt+LeftArrow</li>
 <li>Exit to Root Table<br />
-Return from any drill-down depth to the original table. Home goes to the
-top; Alt+Home goes to the top table.<br />
+Go back to the first table. Home goes to the top; Alt+Home goes to the
+top table.<br />
 Alt+Home</li>
 <li>Find Regex<br />
-Search across all columns with a .NET regex pattern. F3 searches;
-Control makes the search a pattern.<br />
+Find the next record matching a regular expression. F3 searches; Control
+makes the search a pattern.<br />
 Control+F3</li>
 <li>Go to Record<br />
-Jump to a specific row by number. G for Go, as Control+G goes to a line
-in Windows editors.<br />
+Go to a record by its number, a percent or text. G for Go, as Control+G
+goes to a line in Windows editors.<br />
 Control+G</li>
 <li>Jump to Record<br />
-Go to the next record whose current column holds the text, case aside. J
-for Jump.<br />
+Go to the next record whose current field holds the text. J for
+Jump.<br />
 Control+J</li>
 <li>Keywords<br />
-Go to the next record whose fields hold the keywords: red &amp; blue
-(both), red | blue (either), re*d (a star for anything), case aside. K
-for Keywords.<br />
+Go to the next record whose fields hold the keywords. K for
+Keywords.<br />
 Control+K</li>
 <li>Repeat Go To<br />
 Alt+G</li>
 <li>Reverse Jump<br />
-Jump Record backward. J for Jump. Shift reverses Jump to Record.<br />
+Go to the previous record whose current field holds the text. J for
+Jump. Shift reverses Jump to Record.<br />
 Control+Shift+J</li>
 <li>Reverse Keywords<br />
-Keywords backward: the previous record whose fields hold the keywords. K
-for Keywords. Shift reverses Keywords.<br />
+Go to the previous record whose fields hold the keywords. K for
+Keywords. Shift reverses Keywords.<br />
 Control+Shift+K</li>
 <li>Reverse Regex Find<br />
-Find Regex backward. F3 searches; Control makes it a pattern and Shift
-reverses it.<br />
+Find the previous record matching a regular expression. F3 searches;
+Control makes it a pattern and Shift reverses it.<br />
 Control+Shift+F3</li>
 <li>Search Next<br />
 Repeat the last Find forward. F3 is searching and searching again.<br />
@@ -604,15 +598,13 @@ Control+Shift+F</li>
 E for Extract.<br />
 Control+Shift+E</li>
 <li>Filter Records<br />
-Show only the records that hold some text in any field, or that meet a
-condition on each field. F for Filter.<br />
+Show only the records that match what you choose. F for Filter.<br />
 Control+F</li>
 <li>Inspect Record<br />
 I for Inspect.<br />
 Control+I</li>
 <li>Order Records<br />
-Sort the records by one or more columns, each ascending or descending. O
-for Order.<br />
+Order the records by the fields you choose. O for Order.<br />
 Alt+O</li>
 <li>Query<br />
 Q for Query.<br />
@@ -621,8 +613,8 @@ Control+Q</li>
 Q for Query.<br />
 Alt+Shift+Q</li>
 <li>Reverse Order<br />
-Reverse the order in force, every column’s direction flipped. O for
-Order. Shift reverses Order Records.<br />
+Reverse the order of the records. O for Order. Shift reverses Order
+Records.<br />
 Alt+Shift+O</li>
 <li>Table Properties<br />
 Alt+Enter</li>
@@ -649,12 +641,11 @@ Speak every value of the current virtual column, from the top. L for
 List.<br />
 Alt+L</li>
 <li>Say Column as List from Current<br />
-Speak the current virtual column from the current row down. L for
-List.<br />
+Say the column’s values from the current record down. L for List.<br />
 Control+L</li>
 <li>Say Column as List from Current Marked<br />
-Speak the current virtual column for marked rows only, from the current
-row down. L for List.<br />
+Say the column’s values for marked records from the current record down.
+L for List.<br />
 Control+Shift+L</li>
 <li>Say Column as List of Marked<br />
 Speak the current virtual column for marked rows only, from the top. L
@@ -675,6 +666,8 @@ Shift+G</li>
 <li>Say Id<br />
 I for ID.<br />
 Shift+I</li>
+<li>Say Invoke Script<br />
+Shift+V</li>
 <li>Say Jump<br />
 J for Jump.<br />
 Shift+J</li>
@@ -720,17 +713,14 @@ Speak every marked record in full, from the first record down (all
 displayed columns). Space marks in a list; Shift and Space asks how many
 are marked.<br />
 Shift+Space</li>
-<li>Say Related<br />
-R for Related.<br />
-Shift+R</li>
 <li>Say Replace Values<br />
-V for Values.<br />
-Shift+V</li>
+R for Replace.<br />
+Shift+R</li>
 <li>Say Select Columns<br />
 S for Say.<br />
 Shift+S</li>
 <li>Say Status<br />
-Say the table, row, order and filter. Z is for sleep: it wakes this
+Say the table, record, order and filter. Z is for sleep: it wakes this
 behavior or puts it to sleep.<br />
 Shift+Z</li>
 <li>Say Tags<br />
@@ -747,6 +737,9 @@ W for Whole.<br />
 Shift+W</li>
 <li>Say Yield<br />
 Say how many records are in view. Y for Yield.<br />
+Alt+Y</li>
+<li>Say Yield Marked<br />
+Say how many records are marked. Y for Yield.<br />
 Shift+Y</li>
 </ul>
 <h3 id="window">Window</h3>
@@ -768,8 +761,7 @@ Activate the next open window. Control+Tab moves among DbDo
 windows.<br />
 Control+Tab</li>
 <li>Open Table<br />
-Open a chosen table of the current database in a new window. O for
-Open.<br />
+Open a table in a new window. O for Open.<br />
 Control+Shift+O</li>
 <li>Previous Window<br />
 Activate the previous open window. Shift reverses Control+Tab.<br />
@@ -808,7 +800,7 @@ Table Properties</li>
 <li>Alt+G<br />
 Repeat Go To</li>
 <li>Alt+Home<br />
-Return from any drill-down depth to the original table.<br />
+Go back to the first table.<br />
 Exit to Root Table</li>
 <li>Alt+I<br />
 Build a new DbDo database from another file – Excel (read by DbDo
@@ -827,8 +819,7 @@ Merge rows from a Markdown table, JSON, or Inix file into the current
 table.<br />
 Merge Data</li>
 <li>Alt+O<br />
-Sort the records by one or more columns, each ascending or
-descending.<br />
+Order the records by the fields you choose.<br />
 Order Records</li>
 <li>Alt+P<br />
 Speak the open database’s full path; press twice to show it.<br />
@@ -836,19 +827,23 @@ Say Path</li>
 <li>Alt+R<br />
 Recent Files</li>
 <li>Alt+RightArrow<br />
-Drill into related records: foreign-key child tables, plus any tables
-related to this record through the maps table (by kind).<br />
+Go into the records related to this one.<br />
 Enter Child Table</li>
 <li>Alt+S<br />
-Choose which columns the grid shows, and in what order.<br />
+Choose the columns the grid shows and their order.<br />
 Select Columns</li>
 <li>Alt+Semicolon<br />
 Speak the current date and time.<br />
 Say Time</li>
 <li>Alt+T<br />
-Print row count, column count, and storage statistics for the open
-database.<br />
+Show a summary of the table: fields, types and keys.<br />
 Table Summary</li>
+<li>Alt+V<br />
+Run a script from the Scripts folder (.js, .sql, or .dbdo).<br />
+Invoke Script</li>
+<li>Alt+Y<br />
+Say how many records are in view.<br />
+Say Yield</li>
 </ul>
 <h3 id="altshift">Alt+Shift</h3>
 <ul>
@@ -867,9 +862,7 @@ Open Template Database</li>
 Open the Settings dialog.<br />
 Edit Settings</li>
 <li>Alt+Shift+G<br />
-Analyze the grid: a statistics report, a frequency report of the current
-column or the shown columns, a cross-tab, a Markdown table, or an Excel
-chart.<br />
+Make a report from the records in the grid.<br />
 Generate from Grid</li>
 <li>Alt+Shift+I<br />
 Invert Marked</li>
@@ -883,7 +876,7 @@ Say Records from Current Marked</li>
 <li>Alt+Shift+N<br />
 Edit Notes</li>
 <li>Alt+Shift+O<br />
-Reverse the order in force, every column’s direction flipped.<br />
+Reverse the order of the records.<br />
 Reverse Order</li>
 <li>Alt+Shift+Q<br />
 Query History</li>
@@ -899,8 +892,7 @@ Edit Tags</li>
 <li>Alt+Shift+U<br />
 Edit url</li>
 <li>Alt+Shift+X<br />
-Export the current table or query to CSV, TSV, JSON, or another
-format.<br />
+Export the records in view, with the shown columns, to a file.<br />
 Export Data</li>
 <li>Alt+Shift+Z<br />
 Extra Speech Toggle</li>
@@ -931,11 +923,10 @@ Open Cell Value</li>
 <li>Control+Equals<br />
 Evaluate Expression</li>
 <li>Control+F<br />
-Show only the records that hold some text in any field, or that meet a
-condition on each field.<br />
+Show only the records that match what you choose.<br />
 Filter Records</li>
 <li>Control+G<br />
-Jump to a specific row by number.<br />
+Go to a record by its number, a percent or text.<br />
 Go to Record</li>
 <li>Control+Grave<br />
 Send focus to the dot prompt console.<br />
@@ -943,22 +934,19 @@ Open Dot Prompt</li>
 <li>Control+I<br />
 Inspect Record</li>
 <li>Control+J<br />
-Go to the next record whose current column holds the text, case
-aside.<br />
+Go to the next record whose current field holds the text.<br />
 Jump to Record</li>
 <li>Control+K<br />
-Go to the next record whose fields hold the keywords: red &amp; blue
-(both), red | blue (either), re*d (a star for anything), case
-aside.<br />
+Go to the next record whose fields hold the keywords.<br />
 Keywords</li>
 <li>Control+L<br />
-Speak the current virtual column from the current row down.<br />
+Say the column’s values from the current record down.<br />
 Say Column as List from Current</li>
 <li>Control+M<br />
 Set the ‘marked’ flag on the current row.<br />
 Mark Record</li>
 <li>Control+N<br />
-Add a new row to the current table.<br />
+Add a new record at the cursor.<br />
 New Record</li>
 <li>Control+O<br />
 Open a database file.<br />
@@ -1010,19 +998,15 @@ Clear Filter</li>
 Open the bundled sqlean.exe shell in its own console window on the
 current database.<br />
 Sqlean Console</li>
-<li>Control+Shift+I<br />
-Run a script from the Scripts folder (.js, .sql, or .dbdo).<br />
-Invoke Script</li>
 <li>Control+Shift+J<br />
-Jump Record backward.<br />
+Go to the previous record whose current field holds the text.<br />
 Reverse Jump</li>
 <li>Control+Shift+K<br />
-Keywords backward: the previous record whose fields hold the
-keywords.<br />
+Go to the previous record whose fields hold the keywords.<br />
 Reverse Keywords</li>
 <li>Control+Shift+L<br />
-Speak the current virtual column for marked rows only, from the current
-row down.<br />
+Say the column’s values for marked records from the current record
+down.<br />
 Say Column as List from Current Marked</li>
 <li>Control+Shift+M<br />
 Clear the ‘marked’ flag on the current row.<br />
@@ -1030,7 +1014,7 @@ Unmark Record</li>
 <li>Control+Shift+N<br />
 New Copy</li>
 <li>Control+Shift+O<br />
-Open a chosen table of the current database in a new window.<br />
+Open a table in a new window.<br />
 Open Table</li>
 <li>Control+Shift+Oem5<br />
 Show the open database’s file, selected in its folder, in FileDir.<br />
@@ -1080,7 +1064,7 @@ Copy Log</li>
 <li>Control+F2<br />
 Pick Value</li>
 <li>Control+F3<br />
-Search across all columns with a .NET regex pattern.<br />
+Find the next record matching a regular expression.<br />
 Find Regex</li>
 <li>Control+F4<br />
 Close the current recordset window.<br />
@@ -1091,7 +1075,7 @@ Next Table or View</li>
 Open the history of changes in the default browser.<br />
 History of Changes</li>
 <li>Control+Shift+F3<br />
-Find Regex backward.<br />
+Find the previous record matching a regular expression.<br />
 Reverse Regex Find</li>
 <li>Control+Shift+F4<br />
 Close every window except the current one.<br />
@@ -1117,7 +1101,7 @@ Pick from the list of open recordset windows and activate the chosen
 one.<br />
 Current Windows</li>
 <li>F5<br />
-Refresh the visible row set from the database.<br />
+Refresh the records’ values from the database.<br />
 Refresh View</li>
 <li>F8<br />
 Drop a mark anchor at the current row.<br />
@@ -1182,7 +1166,7 @@ Say Prime</li>
 <li>Shift+Q<br />
 Say Query</li>
 <li>Shift+R<br />
-Say Related</li>
+Say Replace Values</li>
 <li>Shift+S<br />
 Say Select Columns</li>
 <li>Shift+Space<br />
@@ -1196,14 +1180,14 @@ Say Tags</li>
 Say the record’s url.<br />
 Say url</li>
 <li>Shift+V<br />
-Say Replace Values</li>
+Say Invoke Script</li>
 <li>Shift+W<br />
 Say Whole Record</li>
 <li>Shift+Y<br />
-Say how many records are in view.<br />
-Say Yield</li>
+Say how many records are marked.<br />
+Say Yield Marked</li>
 <li>Shift+Z<br />
-Say the table, row, order and filter.<br />
+Say the table, record, order and filter.<br />
 Say Status</li>
 </ul>
 <h2 id="by-command">By command</h2>
@@ -1299,8 +1283,7 @@ Control+E</li>
 Check for a newer version on GitHub and offer to install it.<br />
 F11</li>
 <li>Enter Child Table<br />
-Drill into related records: foreign-key child tables, plus any tables
-related to this record through the maps table (by kind).<br />
+Go into the records related to this one.<br />
 Alt+RightArrow</li>
 <li>Evaluate Expression<br />
 Control+Equals</li>
@@ -1311,30 +1294,26 @@ Alt+LeftArrow</li>
 Close DbDo.<br />
 Alt+F4</li>
 <li>Exit to Root Table<br />
-Return from any drill-down depth to the original table.<br />
+Go back to the first table.<br />
 Alt+Home</li>
 <li>Export Data<br />
-Export the current table or query to CSV, TSV, JSON, or another
-format.<br />
+Export the records in view, with the shown columns, to a file.<br />
 Alt+Shift+X</li>
 <li>Extra Speech Toggle<br />
 Alt+Shift+Z</li>
 <li>Extract with Regex<br />
 Control+Shift+E</li>
 <li>Filter Records<br />
-Show only the records that hold some text in any field, or that meet a
-condition on each field.<br />
+Show only the records that match what you choose.<br />
 Control+F</li>
 <li>Find Regex<br />
-Search across all columns with a .NET regex pattern.<br />
+Find the next record matching a regular expression.<br />
 Control+F3</li>
 <li>Generate from Grid<br />
-Analyze the grid: a statistics report, a frequency report of the current
-column or the shown columns, a cross-tab, a Markdown table, or an Excel
-chart.<br />
+Make a report from the records in the grid.<br />
 Alt+Shift+G</li>
 <li>Go to Record<br />
-Jump to a specific row by number.<br />
+Go to a record by its number, a percent or text.<br />
 Control+G</li>
 <li>History of Changes<br />
 Open the history of changes in the default browser.<br />
@@ -1351,18 +1330,15 @@ Control+I</li>
 Alt+Shift+I</li>
 <li>Invoke Script<br />
 Run a script from the Scripts folder (.js, .sql, or .dbdo).<br />
-Control+Shift+I</li>
+Alt+V</li>
 <li>Jump to Record<br />
-Go to the next record whose current column holds the text, case
-aside.<br />
+Go to the next record whose current field holds the text.<br />
 Control+J</li>
 <li>Key Describer Toggle<br />
 Describe each key instead of running it (Ctrl+F1).<br />
 Control+F1</li>
 <li>Keywords<br />
-Go to the next record whose fields hold the keywords: red &amp; blue
-(both), red | blue (either), re*d (a star for anything), case
-aside.<br />
+Go to the next record whose fields hold the keywords.<br />
 Control+K</li>
 <li>List Bookmarks<br />
 Show saved bookmarks in a listbox; navigate to the selected one.<br />
@@ -1381,7 +1357,7 @@ Alt+M</li>
 <li>New Copy<br />
 Control+Shift+N</li>
 <li>New Record<br />
-Add a new row to the current table.<br />
+Add a new record at the cursor.<br />
 Control+N</li>
 <li>Next Table or View<br />
 Control+F6</li>
@@ -1402,7 +1378,7 @@ Control+Grave</li>
 Open the folder of the open database in Windows Explorer.<br />
 Alt+Backslash</li>
 <li>Open Table<br />
-Open a chosen table of the current database in a new window.<br />
+Open a table in a new window.<br />
 Control+Shift+O</li>
 <li>Open Template Database<br />
 Open one of the template databases that come with DbDo, such as
@@ -1411,8 +1387,7 @@ Alt+Shift+D</li>
 <li>Open url<br />
 Control+Shift+U</li>
 <li>Order Records<br />
-Sort the records by one or more columns, each ascending or
-descending.<br />
+Order the records by the fields you choose.<br />
 Alt+O</li>
 <li>Pick Value<br />
 Control+F2</li>
@@ -1439,7 +1414,7 @@ Alt+Shift+F1</li>
 <li>Recent Files<br />
 Alt+R</li>
 <li>Refresh View<br />
-Refresh the visible row set from the database.<br />
+Refresh the records’ values from the database.<br />
 F5</li>
 <li>Repeat Go To<br />
 Alt+G</li>
@@ -1448,17 +1423,16 @@ Control+R</li>
 <li>Replace with Regex<br />
 Control+Shift+R</li>
 <li>Reverse Jump<br />
-Jump Record backward.<br />
+Go to the previous record whose current field holds the text.<br />
 Control+Shift+J</li>
 <li>Reverse Keywords<br />
-Keywords backward: the previous record whose fields hold the
-keywords.<br />
+Go to the previous record whose fields hold the keywords.<br />
 Control+Shift+K</li>
 <li>Reverse Order<br />
-Reverse the order in force, every column’s direction flipped.<br />
+Reverse the order of the records.<br />
 Alt+Shift+O</li>
 <li>Reverse Regex Find<br />
-Find Regex backward.<br />
+Find the previous record matching a regular expression.<br />
 Control+Shift+F3</li>
 <li>Run Report<br />
 Alt+Shift+R. Render a saved report definition to a Markdown document. A
@@ -1491,11 +1465,11 @@ Alt+Apostrophe</li>
 Speak every value of the current virtual column, from the top.<br />
 Alt+L</li>
 <li>Say Column as List from Current<br />
-Speak the current virtual column from the current row down.<br />
+Say the column’s values from the current record down.<br />
 Control+L</li>
 <li>Say Column as List from Current Marked<br />
-Speak the current virtual column for marked rows only, from the current
-row down.<br />
+Say the column’s values for marked records from the current record
+down.<br />
 Control+Shift+L</li>
 <li>Say Column as List of Marked<br />
 Speak the current virtual column for marked rows only, from the
@@ -1514,6 +1488,8 @@ Say the last Go to entry.<br />
 Shift+G</li>
 <li>Say Id<br />
 Shift+I</li>
+<li>Say Invoke Script<br />
+Shift+V</li>
 <li>Say Jump<br />
 Shift+J</li>
 <li>Say Keywords<br />
@@ -1551,14 +1527,12 @@ Alt+Shift+M</li>
 Speak every marked record in full, from the first record down (all
 displayed columns).<br />
 Shift+Space</li>
-<li>Say Related<br />
-Shift+R</li>
 <li>Say Replace Values<br />
-Shift+V</li>
+Shift+R</li>
 <li>Say Select Columns<br />
 Shift+S</li>
 <li>Say Status<br />
-Say the table, row, order and filter.<br />
+Say the table, record, order and filter.<br />
 Shift+Z</li>
 <li>Say Tags<br />
 Say the record’s tags.<br />
@@ -1577,6 +1551,9 @@ current one.<br />
 Shift+F4</li>
 <li>Say Yield<br />
 Say how many records are in view.<br />
+Alt+Y</li>
+<li>Say Yield Marked<br />
+Say how many records are marked.<br />
 Shift+Y</li>
 <li>Search Next<br />
 Repeat the last Find forward.<br />
@@ -1585,7 +1562,7 @@ F3</li>
 Repeat the last Find backward.<br />
 Shift+F3</li>
 <li>Select Columns<br />
-Choose which columns the grid shows, and in what order.<br />
+Choose the columns the grid shows and their order.<br />
 Alt+S</li>
 <li>Show in FileDir<br />
 Show the open database’s file, selected in its folder, in FileDir.<br />
@@ -1603,8 +1580,7 @@ Alt+F8</li>
 <li>Table Properties<br />
 Alt+Enter</li>
 <li>Table Summary<br />
-Print row count, column count, and storage statistics for the open
-database.<br />
+Show a summary of the table: fields, types and keys.<br />
 Alt+T</li>
 <li>Unmark All<br />
 Control+Shift+A</li>

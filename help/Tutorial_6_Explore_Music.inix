@@ -42,8 +42,8 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Shift plus R, Say Related, says what this album leads to, changing nothing.
-Key=Shift+R
+Say=Shift plus W, Say Whole Record, ends with what this album leads to, changing nothing.
+Key=Shift+W
 Hear=performers 1
 Note=Confirm the wording with a live run: buildTutorials -live.
 
