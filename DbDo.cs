@@ -16396,6 +16396,17 @@ namespace DbDo
             Homer.KeyMap.answer(sTitle ?? "Information", sText);
         }
 
+        // storedPartsWithLabel: a label, then each part of a stored multi-part value (look, prime), for speakOrShowParts
+        // (9 November 2026). The parts are spoken one by one as before, and a second press shows them in a window.
+        private static List<string> storedPartsWithLabel(string sLabel, string sRaw)
+        {
+            List<string> lParts = new List<string>();
+            lParts.Add(sLabel);
+            foreach (string sPart in (sRaw ?? "").Split(Util.PartSeparator))
+                if (sPart.Trim().Length > 0) lParts.Add(sPart.Trim());
+            return lParts;
+        }
+
         private void speakOrShowParts(string sTitle, List<string> lParts, int iChordKey)
         {
             if (lParts == null || lParts.Count == 0) return;
@@ -17796,7 +17807,7 @@ namespace DbDo
             // twice, and the second word is the only one carrying information.
             // The same shape a toggle uses elsewhere: "<setting> on" and
             // "no <setting>", never "<setting>: on".
-            Say.sayForced(bMarked ? "Marked" : "Unmarked");
+            Homer.KeyMap.answer("Marked", bMarked ? "Marked" : "Unmarked");
         }
 
 
@@ -17982,12 +17993,9 @@ namespace DbDo
             // Double-pressing still shows the whole thing in a window, which is
             // why the joined form is built as well.
             string sWhere = "row " + iVirtualRow + " of " + db.recordCount;
-            long iNowCell = DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond;
-            bool bDoubleCell = (117 == iLastSpeechChord) && (iNowCell - iLastSpeechTicks < DoublePressMillis);
-            iLastSpeechChord = 117;
-            iLastSpeechTicks = iNowCell;
-            if (bDoubleCell) showInfoDialog("Cell", sCol + "\r\n" + sWhere + "\r\n" + sVal);
-            else Say.sayParts(new string[] { sCol, sWhere, sVal });
+            // THE KIT'S TWO PRESSES (9 November 2026), as every Say key: a second press shows the parts in the read-only
+            // window. Say Cell had its own timer and its own window.
+            speakOrShowParts("Cell", new List<string> { sCol, sWhere, sVal }, 117);
         }
 
         // saySayFilter: speak the active ADO filter expression. Empty
@@ -18036,21 +18044,11 @@ namespace DbDo
             // A reader gives each its own phrase, so four field names are four
             // answers rather than one run-on line. Double-pressing shows them on
             // separate lines, in the same order.
-            long iNowSel = DateTime.UtcNow.Ticks / TimeSpan.TicksPerMillisecond;
-            bool bDoubleSel = (123 == iLastSpeechChord) && (iNowSel - iLastSpeechTicks < DoublePressMillis);
-            iLastSpeechChord = 123;
-            iLastSpeechTicks = iNowSel;
-            if (bDoubleSel)
-            {
-                showInfoDialog("Columns", "select\r\n" + string.Join("\r\n", lsCols.ToArray()));
-            }
-            else
-            {
-                List<string> lsParts = new List<string>();
-                lsParts.Add("select");
-                lsParts.AddRange(lsCols);
-                Say.sayParts(lsParts);
-            }
+            // THE KIT'S TWO PRESSES (9 November 2026): a second press shows the list in the read-only window.
+            List<string> lsParts = new List<string>();
+            lsParts.Add("select");
+            lsParts.AddRange(lsCols);
+            speakOrShowParts("Columns", lsParts, 123);
         }
 
         private void saySayFilter(object sender, EventArgs evArgs)
@@ -18148,7 +18146,7 @@ namespace DbDo
             string sVal = db.getScreenValue("look");
             if (string.IsNullOrEmpty(sVal)) sVal = "blank";
             if (sVal.Length <= 120 && sRaw.IndexOf(Util.PartSeparator) >= 0)
-            { Say.say("look:"); DbDoManager.sayStoredParts(sRaw); }
+            { speakOrShowParts("Look", storedPartsWithLabel("look:", sRaw), 120); }
             else speakOrShow("Look", "look: " + sVal, 120);
         }
 
@@ -18426,7 +18424,7 @@ namespace DbDo
             string sVal = db.getScreenValue(sField);
             if (string.IsNullOrEmpty(sVal)) sVal = "blank";
             if (sVal.Length <= 123 && sRaw.IndexOf(Util.PartSeparator) >= 0)
-            { Say.say(sField + ":"); DbDoManager.sayStoredParts(sRaw); }
+            { speakOrShowParts("Prime", storedPartsWithLabel(sField + ":", sRaw), 123); }
             else speakOrShow("Prime", sField + ": " + sVal, 123);
         }
 
