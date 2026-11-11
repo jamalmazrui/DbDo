@@ -168,13 +168,13 @@ Mark to First=Control+Shift+Home, Mark every record from the first to the curren
 Mark to Last=Control+Shift+End, Mark every record from the current one to the last
 Unmark to First=Alt+Control+Shift+Home, Unmark every record from the first to the current one
 Unmark to Last=Alt+Control+Shift+End, Unmark every record from the current one to the last
-Mark and Next=Shift+DownArrow, Mark the current record and move to the next
-Mark and Previous=Shift+UpArrow, Mark the current record and move to the previous
-Unmark and Next=Alt+Shift+DownArrow, Unmark the current record and move to the next
-Unmark and Previous=Alt+Shift+UpArrow, Unmark the current record and move to the previous
+Mark and Next=Shift+DownArrow, Mark the current record and go to the next
+Mark and Previous=Shift+UpArrow, Mark the current record and go to the previous
+Unmark and Next=Alt+Shift+DownArrow or Control+Shift+DownArrow, Unmark the current record and go to the next
+Unmark and Previous=Alt+Shift+UpArrow or Control+Shift+UpArrow, Unmark the current record and go to the previous
 Next Marked=Control+DownArrow, Go to the next marked record
 Previous Marked=Control+UpArrow, Go to the previous marked record
-Context Menu=Shift+F10, Open the context menu
+Context Menu=Shift+F10, Open the Windows context menu for the current record
 Repeat Go to=Alt+G, Go to the record that the last Go to entry finds
 Null Value=Control+Shift+Backspace, Set the current field to null
 First Marked=Control+PageUp, Go to the first marked record
@@ -183,9 +183,9 @@ Mark All=Control+A, Mark every record in view
 Unmark All=Control+Shift+A, Unmark every record in view
 Invert Marked=Alt+Shift+I, Mark the unmarked records in view and unmark the marked ones
 Start Mark=F8, Start marking a range at the current record
-Complete Mark=Shift+F8, Mark every record from the range's start to the current record
+Complete Mark=Shift+F8, Mark every record from the range's start to the current one
 Start Unmark=Alt+F8, Start unmarking a range at the current record
-Complete Unmark=Alt+Shift+F8, Unmark every record from the range's start to the current record
+Complete Unmark=Alt+Shift+F8, Unmark every record from the range's start to the current one
 Save Bookmark=Control+B, Bookmark the current record
 List Bookmarks=Alt+B, Go to a bookmarked record you pick from a list
 Clear Bookmark=Control+Shift+B, Remove a bookmark, or all of them
@@ -212,8 +212,8 @@ Enter Child Table=Alt+RightArrow, Go to the records related to the current recor
 Exit Child Table=Alt+LeftArrow, Go back to the record whose related records you are in
 Exit to Root Table=Alt+Home, Go back to the first table
 Table Properties=Alt+Enter, Show the current table's fields, types, indexes and links
-Keywords=Control+K, Go to the next record whose fields hold the keywords
-Reverse Keywords=Control+Shift+K, Go to the previous record whose fields hold the keywords
+Keywords=Control+K, Go to the next record whose fields holds the keywords
+Reverse Keywords=Control+Shift+K, Go to the previous record whose fields holds the keywords
 Find Regex=Control+F3, Go to the next record that matches a regular expression
 Reverse Find Regex=Control+Shift+F3, Go to the previous record that matches a regular expression
 Jump=Control+J, Go to the next record whose current field holds the text
@@ -253,7 +253,7 @@ Say url=Shift+U, Say the current record's url
 Say Replace Values=Shift+R, Say the last Replace and Replace with Regex values
 Say Whole Record=Shift+W, Say every field of the current record, then its related records
 Say Yield=Alt+Y, Say how many records are in view
-Say Status=Shift+Z, Say the table, the current record, the order and the filter
+Say Status=Shift+Z or Alt+Z, Say the table, the current record, the order and the filter
 Say Invoke Script=Shift+V, Say the script Invoke Script would choose
 Say Yield Marked=Shift+Y, Say how many records are marked
 Say Tables=None, Say the tables visited this session
@@ -271,19 +271,18 @@ Table Summary=Alt+T, Show the current table's record count and fields
 Generate from Grid=Alt+Shift+G, Make a report or chart from the records in the grid
 Select Columns=Alt+S, Choose the columns the grid shows, and their order
 Refresh Records=F5, Read the records again from the database
-Extract with Regex=Control+Shift+E, Copy every regular expression match from the fields and records you choose
+Extract with Regex=Control+Shift+E, Copy every match of a regular expression in the fields and records you choose, to the clipboard
 Query=Control+Q, Run an SQL statement and show its result
 Query History=Alt+Shift+Q, Run again a query you ran before
-Invoke Script=Alt+V, Run a script you pick from the list
+Invoke Script=Alt+V, Pick a script to run
 Edit Script=Alt+Shift+S, Edit a script in your text editor
 Edit Settings=Alt+Shift+E, Edit DbDo's settings file
 Open in Explorer=Alt+Backslash, Open the open database's folder in Windows Explorer
-Print=None, Print the current grid; hidden until it is built
+Print=None, Print the current record or the marked ones
 Open Dot Prompt=Control+Grave, Open DbDo's console window
 
 ; ===== Toggles =====
 Read Only Toggle=Control+Shift+Z, Turn read-only on or off, to keep the records from being changed
-Extra Speech Toggle=Alt+Shift+Z, Turn extra speech on or off
 Key Describer Toggle=Control+F1, Turn key describing on or off: a key says its command instead of running it
 
 ; ===== Help menu =====
@@ -339,12 +338,6 @@ Elevate Version=F11, Download and install the latest DbDo
 
 [Options]
 
-; CommandEcho controls whether DbDo announces each command's name
-; through the screen reader (GUI) or prints a [Command-Name] marker
-; (CLI) just before the command runs. Default Y. Set to N if you
-; find the confirmation
-; noisy.
-CommandEcho = N
 
 [ConnectStrings]
 
@@ -440,7 +433,7 @@ Say Column as List=Alt+L, Say the current column's values, from the first record
 Say Column as List of Marked=Alt+Shift+L, Say the current column's values in the marked records
 Say Records of Marked=Shift+Space, Say every marked record in full
 Say Time=Alt+Semicolon, Say the date and time
-Say Path=Alt+P, Say the open database's full path
+Say Path=Alt+P, Say the full path of the open database
 Filter with Regex=None, Show only the records whose current field matches a regular expression
 Clear Order=None, Show the records in the table's own order again
 Copy Visible Cells=None, Copy the current record's shown cells to the clipboard, tab-separated
@@ -458,7 +451,7 @@ Sqlean Console=Control+Shift+Grave, Open the SQLite console on the open database
 Open Script Folder=None, Open the scripts folder in Windows Explorer
 Pack Files into Database=None, Store the files that go with the open database inside it
 Unpack Files from Database=None, Write the files the open database carries beside it
-Evaluate Expression=Control+Equals, Run a JScript expression and say its result
+Evaluate Expression=Control+Equals, Evaluate an expression and say its result
 ReadMe=Alt+Shift+F1, Open the quick start
 Hotkeys=None, Open the list of every command and key
 Frequently Asked Questions=None, Open the answers to frequently asked questions

@@ -5,6 +5,14 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 10 November 2026 -- Every message, always
+
+- **Extra Speech Toggle is gone, and Alt+Shift+Z is free.** DbDo always speaks its messages, each chosen and short; a setting that had turned them off is no longer read, and Edit Settings no longer offers it. The CommandEcho setting, retired with its command on 19 October, is gone from DbDo.inix too.
+
+## 10 November 2026 -- Homer Suite
+
+- **Shared commands match EdSharp and FileDir word for word,** with the suite's keys: Control+Shift+DownArrow and UpArrow also unmark and move, as in FileDir, and Alt+Z, Say Status, is listed. The Help menu lists each document as an item; there is no More Documents submenu.
+
 ## 10 November 2026 -- One set of words for every command
 
 - **DbDo's own audit judges a key family as the release gate does,** so Append Record keeps Copy Record's C; the two had disagreed, and the audit stopped a release the gate had passed.

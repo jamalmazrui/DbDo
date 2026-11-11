@@ -181,9 +181,6 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Elevate Version\
   Check for a newer version on GitHub and offer to install it. F11 is the version: elevate sounds like eleven.\
   F11
-- Extra Speech Toggle\
-  Z is for sleep: it wakes this behavior or puts it to sleep.\
-  Alt+Shift+Z
 - History of Changes\
   Open the history of changes in the default browser. F1 is help; Control+Shift+F1 is the history of changes.\
   Control+Shift+F1
@@ -590,8 +587,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+Shift+X\
   Export the records in view, with the shown columns, to a file.\
   Export Data
-- Alt+Shift+Z\
-  Extra Speech Toggle
 
 ### Control
 
@@ -984,8 +979,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Export Data\
   Export the records in view, with the shown columns, to a file.\
   Alt+Shift+X
-- Extra Speech Toggle\
-  Alt+Shift+Z
 - Extract with Regex\
   Control+Shift+E
 - Filter Records\

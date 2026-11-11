@@ -2320,8 +2320,7 @@ written in UpperCamelCase (usually two words). Global defaults live in
 own <strong><code>&lt;DbName&gt;.inix</code></strong> beside the
 database file for per-database overrides. Notable sections include
 <code>[General]</code> and <code>[Options]</code> for behavior toggles
-(such as <code>ExtraSpeech</code>, <code>CommandEcho</code>, and the
-<code>ExtraKeys</code> convenience-key switch),
+(such as the <code>ExtraKeys</code> convenience-key switch),
 <code>[Validation]</code> for per-field regex patterns,
 <code>[ConnectStrings]</code> for per-extension connection-string
 overrides, and <code>[Hotkeys]</code> which documents and can
@@ -2365,18 +2364,15 @@ way to see the standard fields, defs, relationships, and reports working
 together on real records.</p>
 <h3 id="screen-reader-settings">Screen-reader settings</h3>
 <p>DbDo speaks directly to supplement your screen reader’s own
-announcements. <strong>Extra Speech</strong> (toggled from the Help
-menu) controls DbDo’s additional commentary without affecting your
-screen reader’s natural focus and selection announcements; turning it
-off leaves only the screen reader’s own speech. A command says its own
-name as it starts only when nothing else would tell you at once that it
-is under way. A command that opens a dialog does not, because the
-dialog’s title says it. A Say command or a toggle does not, because it
-speaks its answer or its new state. A command that moves the focus does
-not, because your screen reader says where you landed. Others, such as
-Clear Filter, say their name at once, while the grid is being rebuilt.
-<strong>Test Screen Reader Speech</strong> verifies that DbDo can reach
-your screen reader.</p>
+announcements. A command says its own name as it starts only when
+nothing else would tell you at once that it is under way. A command that
+opens a dialog does not, because the dialog’s title says it. A Say
+command or a toggle does not, because it speaks its answer or its new
+state. A command that moves the focus does not, because your screen
+reader says where you landed. Others, such as Clear Filter, say their
+name at once, while the grid is being rebuilt. <strong>Test Screen
+Reader Speech</strong> verifies that DbDo can reach your screen
+reader.</p>
 <h3 id="persistence-and-logging">Persistence and logging</h3>
 <p>DbDo remembers per-database state in the database’s own
 <code>&lt;DbName&gt;.inix</code> — the last table, sort, filter, and

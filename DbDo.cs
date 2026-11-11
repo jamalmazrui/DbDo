@@ -13262,7 +13262,6 @@ namespace DbDo
         private ToolStripMenuItem miHelpStatus;
         private ToolStripMenuItem miHelpEmailLog;
         private ToolStripMenuItem miHelpTutorials;
-        private ToolStripMenuItem miHelpExtraSpeech;
         private ToolStripMenuItem miEditNotes;
         private ToolStripMenuItem miSaySayMarked;
         private ToolStripMenuItem miEditTags;
@@ -13382,9 +13381,6 @@ namespace DbDo
             buildStatusBar();
             checkRouterEquivalence();
             Say.attach(this);
-            // Load Extra-Speech setting from DbDo.inix [General].
-            // Default ON (Y) on first launch. Off explicitly via "N".
-            string sExtra = IniSession.read("General", "ExtraSpeech");
             // What DbDo says goes into the runtime log beside what the user
             // pressed, so a log can be read as the conversation it was.
             Say.onSpoken = delegate(string sLine) { DbDoLog.write(sLine); };
@@ -13395,13 +13391,10 @@ namespace DbDo
             // carries the version section that comes from it.
             try { Elevate.configure("JamalMazrui", "DbDo", BuildInfo.VersionString); }
             catch (Exception exElev) { try { DbDoLog.write("Elevate.configure: " + exElev.Message); } catch { } }
-            Say.bExtraSpeechEnabled = string.IsNullOrEmpty(sExtra)
-                || !sExtra.Equals("N", StringComparison.OrdinalIgnoreCase);
             applyIniOverrides();
             syncKitSummaries();  // the kit's describer says DbDo.inix's descriptions too (5 November 2026)
             updateMenuEnabled();
             updateStatusBar();
-            if (miHelpExtraSpeech != null) miHelpExtraSpeech.Checked = Say.bExtraSpeechEnabled;
             if (miToggleReadOnly != null && db != null) miToggleReadOnly.Checked = db.readOnly;
         }
 
@@ -13980,9 +13973,10 @@ namespace DbDo
                 { evArgs.Handled = true; evArgs.SuppressKeyPress = true; markAndMove(true,  true);  return; }
                 if (key == (Keys.Shift | Keys.Up))
                 { evArgs.Handled = true; evArgs.SuppressKeyPress = true; markAndMove(true,  false); return; }
-                if (key == (Keys.Alt | Keys.Shift | Keys.Down))
+                // THE SUITE'S KEYS TOO (10 November 2026): FileDir unmarks with Control+Shift+arrows; DbDo answers both.
+                if (key == (Keys.Alt | Keys.Shift | Keys.Down) || key == (Keys.Control | Keys.Shift | Keys.Down))
                 { evArgs.Handled = true; evArgs.SuppressKeyPress = true; markAndMove(false, true);  return; }
-                if (key == (Keys.Alt | Keys.Shift | Keys.Up))
+                if (key == (Keys.Alt | Keys.Shift | Keys.Up) || key == (Keys.Control | Keys.Shift | Keys.Up))
                 { evArgs.Handled = true; evArgs.SuppressKeyPress = true; markAndMove(false, false); return; }
 
                 // ? (Shift+Slash) = Show-Where. Speaks the title
@@ -14769,12 +14763,12 @@ namespace DbDo
             // The documents almost nobody opens twice go one level down, which is
             // the case for a submenu: four items that would otherwise be arrowed
             // past every time, and a fresh set of letters for them.
-            ToolStripMenuItem miHelpMore = new ToolStripMenuItem("More Documents");
-            miHelp.DropDownItems.Add(miHelpMore);
-            addItem(miHelpMore, "&Announcement",          "Announcement",     Keys.None, (s, e) => openHelpDocument("Announce", "Announcement"));
-            addItem(miHelpMore, "&Developer Guide",       "Developer Guide",  Keys.None, (s, e) => openHelpDocument("Developer", "Developer Guide"));
-            addItem(miHelpMore, "&License",               "License",          Keys.None, (s, e) => openHelpDocument("License", "License"));
-            addItem(miHelpMore, "&Tutorials Transcript",  "Tutorials Transcript", Keys.None, (s, e) => openHelpDocument("Tutorials", "Tutorials Transcript"));
+            // NO MORE DOCUMENTS SUBMENU (10 November 2026, Jamal's ruling): each document is an item of the Help menu, as
+            // in EdSharp and FileDir, so every Homer app's Help menu lists the same documents the same way.
+            addItem(miHelp, "Announcement",          "Announcement",     Keys.None, (s, e) => openHelpDocument("Announce", "Announcement"));
+            addItem(miHelp, "Developer Guide",       "Developer Guide",  Keys.None, (s, e) => openHelpDocument("Developer", "Developer Guide"));
+            addItem(miHelp, "License",               "License",          Keys.None, (s, e) => openHelpDocument("License", "License"));
+            addItem(miHelp, "Tutorials Transcript",  "Tutorials Transcript", Keys.None, (s, e) => openHelpDocument("Tutorials", "Tutorials Transcript"));
             // Template Databases: a tour entry point that lists every .db
             // file in the user's templates folder (%APPDATA%\DbDo\templates,
             // seeded once from {app}\templates) and opens the chosen one
@@ -14812,7 +14806,6 @@ namespace DbDo
             // messages without affecting the screen reader's natural
             // focus and selection announcements. The "zzz" mnemonic on Alt+Shift+Z reads as a
             // hush -- speech going to sleep. Default ON.
-            miHelpExtraSpeech   = addItem(miHelp, "Extra Speech Toggle",                "Extra Speech Toggle", Keys.Alt | Keys.Shift | Keys.Z,    helpExtraSpeechClicked);
             // Toggle-Command-Echo: silence the spoken canonical command
             // name that fires from menu/hotkey activations just before
             // the command body runs. Mirrors the Extra Speech toggle's
@@ -15155,12 +15148,6 @@ namespace DbDo
             add("Show Log Location",           "Open the DbDo session log", "");
             add("File GitHub Issue",   "Open the DbDo issue form on GitHub to report a bug or comment",
                 "Opens https://github.com/JamalMazrui/DbDo/issues/new in the browser. GitHub may ask you to sign in first if it does not already recognize you.");
-            add("Toggle Extra Speech",
-                "Toggle DbDo's direct speech (status, command echo, cell readouts)",
-                "When ON, DbDo speaks status messages, command names, and cell readouts through the screen reader. When OFF, the screen reader still announces focus and selection changes naturally but DbDo's additional commentary is suppressed. Default ON. Persisted in DbDo.inix [General] extraSpeech. Alt+Shift+Z to toggle; the 'zzz' mnemonic reads as a hush.");
-            add("Toggle Command Echo",
-                "Toggle whether each menu/hotkey command's name is spoken before it runs",
-                "When ON, every command activated through the menu or a hotkey announces its canonical name through the screen reader just before executing. When OFF, commands run silently and you hear only their direct effects plus the screen reader's own natural announcements (dialog titles, focus changes). Default OFF, so DbDo does not echo command names over what the screen reader already says. Persisted in DbDo.inix [Options] commandEcho. Ctrl+Shift+Z to toggle; the keyboard companion to Alt+Shift+Z (Extra Speech). Note: this toggle has no effect in CLI / dot-prompt mode, where the user has explicitly typed the command and shouldn't need it echoed back.");
             add("Read Only Toggle",
                 "Flip the database between read-write and read-only at runtime",
                 "When ON, the database is opened read-only and edit commands fail with a clear error message. Use this to browse data without risk of accidental edits. Control+Shift+Z to toggle in the GUI; at the dot prompt type 'toggle-readonly', 'read-only', or 'readonly' (with optional 'on'/'off' argument). Also exposed as a checkbox in the Settings dialog and as the -readonly command-line flag at launch.");
@@ -31673,11 +31660,6 @@ namespace DbDo
             // Read current values from the ini, with sensible defaults
             // if the keys are missing.
             string sCurrentUiMode = readIniValue(sUserIni, "General", "UiMode", "gui");
-            string sCurrentExtra  = readIniValue(sUserIni, "General", "ExtraSpeech", "Y");
-            bool bCurrentExtra = !(sCurrentExtra.Equals("N", StringComparison.OrdinalIgnoreCase)
-                              || sCurrentExtra.Equals("No", StringComparison.OrdinalIgnoreCase)
-                              || sCurrentExtra.Equals("0", StringComparison.Ordinal)
-                              || sCurrentExtra.Equals("False", StringComparison.OrdinalIgnoreCase));
 
             LbcDialog dlg = new LbcDialog("Settings", this);
             try
@@ -31696,17 +31678,6 @@ namespace DbDo
                     "both = GUI + console, gui = window only, cli = dot prompt only");
 
 
-                // Extra Speech toggle. ON by default; controls whether
-                // DbDo's status messages, cell readouts, and the
-                // command echo itself reach the screen reader. When
-                // OFF, the screen reader still narrates focus and
-                // selection changes -- the toggle silences only the
-                // commentary DbDo adds on top. Also bound to
-                // Alt+Shift+Z on the Help menu.
-                CheckBox cbExtra = dlg.addCheckBox(
-                    "Extra Speech (DbDo's status messages and cell readouts)",
-                    bCurrentExtra,
-                    "When ON, DbDo speaks status messages, command echo, and virtual-cell readouts through the screen reader. When OFF, the screen reader still announces focus and selection changes naturally but DbDo's commentary is suppressed.");
 
                 // Read-Only toggle (v1.0.95). Mirrors the
                 // -readonly command-line flag so the CLI startup
@@ -31736,12 +31707,8 @@ namespace DbDo
                 if (string.Equals(sResult, "OK", StringComparison.OrdinalIgnoreCase))
                 {
                     string sNewUiMode = (cbUiMode.SelectedItem ?? "both").ToString();
-                    string sNewExtra = cbExtra.Checked ? "Y" : "N";
                     writeIniValue(sUserIni, "General", "UiMode", sNewUiMode);
-                    writeIniValue(sUserIni, "General", "ExtraSpeech", sNewExtra);
-                    Say.bExtraSpeechEnabled = cbExtra.Checked;
-                    if (miHelpExtraSpeech != null) miHelpExtraSpeech.Checked = Say.bExtraSpeechEnabled;
-                    // Read-Only delta: if the dialog setting differs
+                            // Read-Only delta: if the dialog setting differs
                     // from the current connection state, reopen the
                     // database with the new flag. Skip if no db open.
                     if (db != null && db.isOpen() && cbReadOnly.Checked != db.readOnly)
@@ -31750,12 +31717,11 @@ namespace DbDo
                     }
                     Say.say("Configuration saved");
                     DbDoLog.write("Edit-Settings saved: uiMode=" + sNewUiMode
-                        + "; extraSpeech=" + sNewExtra
                         + "; readOnly=" + (cbReadOnly.Checked ? "Y" : "N"));
                     LbcMessage.show(this,
                         "Configuration saved to " + sUserIni
                         + "\n\nuiMode takes effect on next DbDo launch."
-                        + "\nCommand Echo, Extra Speech, and Read Only take effect immediately.",
+                        + "\nRead Only takes effect immediately.",
                         "Edit Settings",
                         MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
@@ -32346,30 +32312,6 @@ namespace DbDo
                 MessageBoxButtons.OK, MessageBoxIcon.Information);
         }
 
-        // helpExtraSpeechClicked: toggle whether DbDo emits its own
-        // direct speech messages (status announcements, command echo,
-        // virtual-cell readouts) through the screen reader. When OFF
-        // the screen reader still hears DbDo via its own natural
-        // focus and selection announcements; the toggle suppresses
-        // only the additional commentary DbDo adds on top. The setting is
-        // persisted in DbDo.inix [General] extraSpeech.
-        private void helpExtraSpeechClicked(object sender, EventArgs evArgs)
-        {
-            Say.bExtraSpeechEnabled = !Say.bExtraSpeechEnabled;
-            miHelpExtraSpeech.Checked = Say.bExtraSpeechEnabled;
-            // Persist to the per-user file startup reads (configIniPath),
-            // not the exe-dir DbDo.inix, so the choice survives a restart.
-            string sUserIni = configIniPath();
-            if (!string.IsNullOrEmpty(sUserIni))
-            {
-                ensureConfigIniExists(sUserIni);
-                try { writeIniValue(sUserIni, "General", "ExtraSpeech", Say.bExtraSpeechEnabled ? "Y" : "N"); }
-                catch { /* best-effort persist; the runtime state is the source of truth */ }
-            }
-            // Force-speak the new state so the user hears confirmation
-            // even when they just turned speech off.
-            sayToggleState("Extra Speech Toggle", Say.bExtraSpeechEnabled);
-        }
 
         // toggleReadOnlyClicked: flip the open database between
         // read-write and read-only at runtime. Restored in v1.0.95
