@@ -5,6 +5,10 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 10 November 2026 -- Say Position, said as the suite says it
+
+- **Say Position's description** reads "Say the current position: the record's number, the count and the percent", the suite's sentence for every app.
+
 ## 10 November 2026 -- Every message, always
 
 - **Extra Speech Toggle is gone, and Alt+Shift+Z is free.** DbDo always speaks its messages, each chosen and short; a setting that had turned them off is no longer read, and Edit Settings no longer offers it. The CommandEcho setting, retired with its command on 19 October, is gone from DbDo.inix too.
