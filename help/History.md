@@ -5,6 +5,12 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 12 November 2026 -- RadioTrail learns from iHeartRadio, and BlindCreations is current
+
+- RadioTrail's usual fetch now reads iHeartRadio's list of United States stations once a month, and fetchStations --sources-only reads it at once. A station already in RadioTrail with the same call sign gains only what it lacks -- frequency, city, state, home page, slogan, playlist address -- and its genres in its tags; its stream, status, rating and notes stay as they are. A station not yet in RadioTrail is added with iHeartRadio as its source and its official stream, marked Spanish when its genres say so and English otherwise. The list is probed first, and an answer of another shape skips the step, never the run. TuneIn and Online Radio Box, which BlindRadio also reads, were weighed and left out: TuneIn's text is mostly what is playing now, and Online Radio Box's song histories would mean reading each station's page.
+- Its first live run read 4,215 iHeartRadio stations: 547 already in RadioTrail gained what they lacked, and 2,974 were added, for 52,160 in all. A station iHeartRadio lists twice is now counted once before anything is said, and the step leaves saying where the log is to the run that called it.
+- BlindCreations.db is rebuilt from the directories: 183 apps, 107 books, 137 creators and 71 presentations, with BlindRadio, Phonon, DexedAccessible and Jim Homme new.
+
 ## 10 November 2026 -- Say Position, said as the suite says it
 
 - **Say Position's description** reads "Say the current position: the record's number, the count and the percent", the suite's sentence for every app.

@@ -56,6 +56,7 @@
 #   fetchStations --catalog-only        steps 1 and 2, no asking
 #   fetchStations --enrich-only         step 3 only, on what is there
 #   fetchStations --official-only       step 4 only, on what is there
+#   fetchStations --sources-only        iHeartRadio's United States stations only (also monthly in the usual run)
 #   fetchStations --clean               repairs alone: wrong article matches, leaked markup, duplicate
 #                                       rows; for the shipped template, nobody's own stations or plays
 #   fetchStations --affiliations        the networks each matched article names
@@ -1203,6 +1204,7 @@ def mainCore(lsArgs):
     bConventionsOnly = False
     bAffiliations = False
     bClean = False
+    bSourcesOnly = False
     sImport = ""
     bAgain = False
     bFresh = False
@@ -1230,6 +1232,7 @@ def mainCore(lsArgs):
         if sArg == "--conventions": bConventionsOnly = True; i += 1; continue
         if sArg == "--affiliations": bAffiliations = True; i += 1; continue
         if sArg == "--clean": bClean = True; i += 1; continue
+        if sArg == "--sources-only": bSourcesOnly = True; i += 1; continue
         if sArg.startswith("-"):
             print("Unknown option %s, so nothing was done. Read the top of fetchStations.py for the options." % sArg); return 2
         sDb = sArg; i += 1
@@ -1328,6 +1331,9 @@ def mainCore(lsArgs):
     if bEnrichOnly:
         iCode = enrich(sDb, sCountry, iLimit, bAgain, logLine, say)
         say("The log is " + sLog); logLine("finished " + datetime.datetime.now().isoformat()); return iCode
+    if bSourcesOnly:
+        iCode = otherSources(sDb, logLine, say, bForce=True, sLog=sLog)
+        say("The log is " + sLog); logLine("finished " + datetime.datetime.now().isoformat()); return iCode
     # THE CHECK COMES FIRST, AND FETCHING FOLLOWS ONLY WHERE IT SAYS. A copy
     # that already holds the whole catalog, recently fetched, every station
     # asked and every call sign looked up, needs nothing; one that is partly
@@ -1352,6 +1358,7 @@ def mainCore(lsArgs):
         if iCode == 0 and dNeed["official"] and not bNoOfficial:
             say("Looking up the call signs not yet looked up.")
             iCode = official(sDb, sCountry, iLimit, bAgain, logLine, say)
+        if iCode == 0 and not sCountry and not iLimit: iCode = otherSources(sDb, logLine, say, bForce=bForce, sLog=sLog)
         if iCode == 0 and (dNeed["enrich"] or dNeed["official"]):
             say("Done. The report afterwards:")
             assess(sDb, logLine, say)
@@ -1499,10 +1506,140 @@ def mainCore(lsArgs):
     if iCode != 0 or bNoOfficial: return iCode
     say("Step 4 of 4: the official record, from Wikipedia, for stations with a call sign in their name.")
     iCode = official(sDb, sCountry, 0, bAgain, logLine, say)
+    if iCode == 0 and not sCountry and not iLimit: iCode = otherSources(sDb, logLine, say, bForce=True, sLog=sLog)
     if iCode == 0:
         say("Done. The report afterwards:")
         assess(sDb, logLine, say)
     return iCode
+
+# ---------------------------------------------------------------- iHeartRadio (12 November 2026)
+# WHY IT IS HERE. BlindRadio, a player by a blind developer, browses several station directories besides Radio
+# Browser. Of them, iHeartRadio's station list adds the most to RadioTrail's English stations: for about a thousand
+# United States broadcast stations it gives the call letters, frequency, market, genres, the station's own slogan and
+# its official stream, where a Radio Browser address is often a stale copy. TuneIn was weighed and left out: its
+# "subtext" is mostly what is playing now, not a slogan, and its genres are codes needing one lookup per station.
+# Online Radio Box's song histories would mean reading each station's web page.
+#
+# HOW IT WORKS, AND WHAT IT NEVER TOUCHES. Its station list is not an official interface, so it is probed first; an
+# answer of any other shape is logged and the step is skipped, never the run. A station already here with the same
+# call sign gains only what it lacks -- call sign, frequency, city, state, home page, slogan, playlist address -- and
+# its genres and "iHeartRadio" added to its tags; its stream, status, rating and notes stay as they are. A station not
+# here comes in through mergeRows, like any catalog station, with iHeartRadio as its source. The step runs once a
+# month in fetchStations' usual run, and alone with --sources-only.
+
+sIHeartApi = "https://api.iheart.com/api/v2/content/liveStations"
+iIHeartPage = 500
+iSourcesDays = 30
+lsSpanishGenres = ("spanish", "latino", "latin", "regional mexican", "tejano", "mexican", "tropical")
+
+
+def iHeartGet(dParams, logLine):
+    sUrl = sIHeartApi + "?" + urllib.parse.urlencode(dParams)
+    oReq = urllib.request.Request(sUrl, headers={"User-Agent": sAgent, "Accept": "application/json"})
+    with urllib.request.urlopen(oReq, timeout=60) as oResp:
+        sBody = oResp.read().decode("utf-8", "replace")
+    logLine("GET %s -> %d characters" % (sUrl, len(sBody)))
+    return json.loads(sBody)
+
+
+def callBase(sCall):
+    """WHTZ-FM -> WHTZ: the letters a station's name or call sign column would carry."""
+    return re.sub(r"[-\s]?(FM|AM|HD\d?|DB)$", "", (sCall or "").strip().upper())
+
+
+def iHeartRow(d):
+    """One iHeartRadio station as a RadioTrail catalog row."""
+    dStreams = d.get("streams") or {}
+    sStream = dStreams.get("secure_shoutcast_stream") or dStreams.get("shoutcast_stream") or ""
+    bHls = False
+    if not sStream:
+        sStream = dStreams.get("secure_hls_stream") or dStreams.get("hls_stream") or ""
+        bHls = bool(sStream)
+    lsGenres = [g.get("name", "").strip() for g in (d.get("genres") or []) if isinstance(g, dict) and g.get("name")]
+    dMarket = ((d.get("markets") or [{}])[0]) or {}
+    sFreq = " ".join(s for s in (str(d.get("freq") or "").strip(), str(d.get("band") or "").strip()) if s)
+    bSpanish = any(any(w in g.lower() for w in lsSpanishGenres) for g in lsGenres)
+    return {"source": "iHeartRadio", "source_id": "iheart:%s" % d.get("id"), "name": (d.get("name") or "").strip(),
+            "slogan": (d.get("description") or "").strip(), "genre": ", ".join(lsGenres), "country": "United States",
+            "countrycode": "US", "state": (dMarket.get("stateAbbreviation") or "").strip(), "city": (dMarket.get("city") or "").strip(),
+            "call_sign": (d.get("callLetters") or "").strip(), "frequency": sFreq, "homepage": (d.get("website") or "").strip(),
+            "stream_url": sStream, "playlist_url": dStreams.get("pls_stream") or "", "hls": "1" if bHls else "",
+            "language": "Spanish" if bSpanish else "English", "tags": "\n".join(["iHeartRadio"] + lsGenres)}
+
+
+def otherSources(sDb, logLine, say, bForce=False, sLog=""):
+    """The iHeartRadio step. Returns 0 unless the database itself could not be written."""
+    c = sqlite3.connect(sDb)
+    try:
+        oLast = c.execute("select content from files where name = 'iHeartRadio checked'").fetchone()
+        if oLast and not bForce:
+            iDays = (datetime.date.today() - datetime.date.fromisoformat(str(oLast[0])[:10])).days
+            if iDays < iSourcesDays:
+                logLine("iHeartRadio was read %d days ago; read again after %d" % (iDays, iSourcesDays)); return 0
+    except Exception as oError:
+        logLine("iHeartRadio's last reading could not be read: %s" % oError)
+    finally:
+        c.close()
+    say("iHeartRadio: its United States stations, for call signs, frequencies, slogans and official streams.")
+    try:
+        dProbe = iHeartGet({"countryCode": "US", "limit": 1}, logLine)
+        if not isinstance(dProbe, dict) or not isinstance(dProbe.get("hits"), list):
+            raise ValueError("an answer of another shape: " + str(dProbe)[:300])
+    except Exception as oError:
+        logLine("iHeartRadio PROBE FAILED: %s" % oError)
+        say("iHeartRadio's station list did not answer as expected, so this step was skipped; the log has its answer.")
+        return 0
+    lsHits, iOffset, iTotal = [], 0, int(dProbe.get("total") or 0)
+    while len(lsHits) < 20000:
+        try: dPage = iHeartGet({"countryCode": "US", "limit": iIHeartPage, "offset": iOffset}, logLine)
+        except Exception as oError:
+            logLine("iHeartRadio page at %d failed: %s" % (iOffset, oError)); break
+        lsPage = [d for d in (dPage.get("hits") or []) if isinstance(d, dict)]
+        if not lsPage: break
+        lsHits.extend(lsPage)
+        iOffset += len(lsPage)
+        if iTotal and iOffset >= iTotal: break
+        time.sleep(1)
+    # ONE OF EACH (12 November 2026): iHeartRadio's pages listed 578 of 4,215 stations twice, so the count said before
+    # the merge was 578 too high. A station's id is kept once, before anything is counted.
+    dById = {}
+    for d in lsHits: dById.setdefault(str(d.get("id")), d)
+    if len(dById) < len(lsHits): logLine("iHeartRadio: %d stations listed more than once; one of each kept" % (len(lsHits) - len(dById)))
+    lsHits = list(dById.values())
+    logLine("iHeartRadio: %d stations read (it reports %d)" % (len(lsHits), iTotal))
+    if not lsHits:
+        say("iHeartRadio answered with no stations, so nothing was changed."); return 0
+    c = sqlite3.connect(sDb)
+    dByCall = {}
+    for iId, sCall, sName in c.execute("select station_id, call_sign, name from stations where coalesce(source,'') <> 'iHeartRadio'"):
+        if sCall: dByCall.setdefault(callBase(sCall), iId)
+        for sWord in re.findall(r"\b([KW][A-Z]{2,3})\b", sName or ""): dByCall.setdefault(sWord, iId)
+    lsNew, iFilled = [], 0
+    lsFill = ("call_sign", "frequency", "city", "state", "homepage", "slogan", "playlist_url")
+    for d in lsHits:
+        dRow = iHeartRow(d)
+        if not dRow["name"] or not (dRow["stream_url"] or dRow["playlist_url"]): continue
+        iId = dByCall.get(callBase(dRow["call_sign"])) if dRow["call_sign"] else None
+        if iId is None:
+            lsNew.append(dRow); continue
+        oHave = c.execute("select %s, tags from stations where station_id = ?" % ", ".join(lsFill), (iId,)).fetchone()
+        dSet = {k: dRow[k] for k, v in zip(lsFill, oHave[:-1]) if not (v or "").strip() and dRow.get(k)}
+        sTags = addLines(oHave[-1], dRow["tags"].split("\n"))
+        if dSet or sTags != (oHave[-1] or ""):
+            dSet["tags"] = sTags
+            c.execute("update stations set %s where station_id = ?" % ", ".join(k + " = ?" for k in dSet), list(dSet.values()) + [iId])
+            iFilled += 1
+    if not c.execute("select 1 from defs where tbl = 'stations' and fld = 'source' and val = 'iHeartRadio'").fetchone():
+        iOrdinal = (c.execute("select max(ordinal) from defs where tbl = 'stations' and fld = 'source'").fetchone()[0] or 0) + 1
+        c.execute("insert into defs (tbl, fld, val, ordinal, src) values ('stations', 'source', 'iHeartRadio', ?, 'RadioTrail')", (iOrdinal,))
+    c.execute("delete from files where name = 'iHeartRadio checked'")
+    c.execute("insert into files (name, kind, content) values ('iHeartRadio checked', 'date', ?)", (datetime.date.today().isoformat(),))
+    c.commit(); c.close()
+    say("iHeartRadio: %d %s already here gained what %s lacked; %d not here %s added." % (iFilled, "station" if iFilled == 1 else "stations",
+        "it" if iFilled == 1 else "they", len(lsNew), "is" if len(lsNew) == 1 else "are"))
+    logLine("iHeartRadio: %d matched and filled, %d new" % (iFilled, len(lsNew)))
+    return mergeRows(sDb, lsNew, logLine, say, "") if lsNew else 0
+
 
 def mergeRows(sDb, lsRows, logLine, say, sLog):
     """Keyed by the source's own id, rewriting every catalog field and never
@@ -1603,8 +1740,11 @@ def mergeRows(sDb, lsRows, logLine, say, sLog):
     iTotal = c.execute("select count(*) from stations").fetchone()[0]
     c.close()
     say("%d %s added, %d changed and %d unchanged; the database now holds %d. Your status, rating, notes and tags were kept." % (iAdded, "station" if iAdded == 1 else "stations", iChanged, iSame, iTotal))
-    say("The log is " + sLog)
-    logLine("finished " + datetime.datetime.now().isoformat())
+    # SAID ONCE (12 November 2026): a step that merges and goes on -- iHeartRadio's -- passes no log name, and the
+    # run that called it says where the log is and that it finished, so neither is said twice.
+    if sLog:
+        say("The log is " + sLog)
+        logLine("finished " + datetime.datetime.now().isoformat())
     return 0
 
 if __name__ == "__main__":

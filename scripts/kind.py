@@ -102,7 +102,9 @@ def documentStems(sFolder):
     """The distinct document names at the top of a folder, less the standard
     ones every project may carry."""
     dStems = {}
-    for sName in sorted(os.listdir(sFolder)):
+    try: lsNames = sorted(os.listdir(sFolder))
+    except OSError: return []   # a folder this account may not read, such as C:\\Config.Msi, has no documents to count
+    for sName in lsNames:
         sStem, sExt = os.path.splitext(sName)
         if sExt.lower() in (".md", ".htm") and sStem.lower() not in lsStandardDocs:
             dStems.setdefault(sStem.lower(), sStem)
@@ -128,7 +130,7 @@ def projectKind(sFolder):
     lsIssFirst = [s for s in glob.glob(os.path.join(sFolder, "*_setup.iss")) if os.path.basename(s).lower() != "homerdev_setup.iss"]
     bNamedProgram = sName.lower() != "homerdev" and any(os.path.isfile(os.path.join(sFolder, sName + sExt)) for sExt in (".cs", ".py", ".js", ".ps1"))
     if (not lsIssFirst and not bNamedProgram
-            and (os.path.isfile(os.path.join(sFolder, "templates", "HomerComponents.iss")) or os.path.isfile(os.path.join(sFolder, "Templates", "HomerComponents.iss")))
+            and (os.path.isfile(os.path.join(sFolder, "templates", "HomerComponents.iss")) or os.path.isfile(os.path.join(sFolder, "templates", "HomerComponents.iss")))
             and os.path.isfile(os.path.join(sFolder, "exec", "CSharp", "Lbc.cs"))):
         return "kit", "Templates\\HomerComponents.iss and exec\\CSharp\\Lbc.cs are here, and no app's installer or program"
     lsIss = sorted(glob.glob(os.path.join(sFolder, "*_setup.iss")), key=lambda s: os.path.basename(s).lower() != (sName + "_setup.iss").lower())
@@ -147,6 +149,10 @@ def projectKind(sFolder):
         return "collection", "%d documents at the top, and no program" % len(lsStems)
     if len(lsStems) == 1:
         return "page", "%s is its one document, and there is no program" % lsStems[0]
+    # A BOOK PROJECT IS A PAGE PROJECT (1.212.0): published elsewhere, by kdpSubmit, and never a repository. Without
+    # this, retiring MyBooks.md -- a stale copy of the page MyPages publishes -- would have left MyBooks "unknown",
+    # and push would have tried to make a GitHub repository of commercial manuscripts.
+    if publishesBooks(sFolder): return "page", "configs\\books.inix is its catalog of books, which kdpSubmit publishes; it is not a repository"
     return "unknown", "no installer script, program source or document at the top"
 
 
@@ -213,7 +219,9 @@ def publishesPages(sFolder):
     the project is a page project, and pages joins its standard folders."""
     sPages = os.path.join(os.path.abspath(sFolder), "pages")
     if not os.path.isdir(sPages): return False
-    for sName in os.listdir(sPages):
+    try: lsPages = os.listdir(sPages)
+    except OSError: return False
+    for sName in lsPages:
         sPage = os.path.join(sPages, sName)
         if os.path.isdir(sPage) and any(s.lower().endswith(".md") for s in os.listdir(sPage)): return True
     return False
