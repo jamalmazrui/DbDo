@@ -243,7 +243,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Evaluate Expression\
   Control+Equals
 - Invoke Script\
-  Run a script from the Scripts folder (.js, .sql, or .dbdo).\
+  Run a script from the Scripts folder (.js, .sql, .dbdo, or a macro's .inix).\
   Alt+V
 - Open Command Prompt\
   Control+Backslash
@@ -253,6 +253,12 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Open in Explorer\
   Open the folder of the open database in Windows Explorer.\
   Alt+Backslash
+- Play Macro\
+  Play the macro you recorded or loaded last.\
+  Alt+Shift+F12
+- Record Macro\
+  Start recording a macro of record moves, or stop and save it, or stop one that is playing.\
+  Control+Shift+F12
 - Show in FileDir\
   Show the open database's file, selected in its folder, in FileDir.\
   Control+Shift+Oem5
@@ -536,7 +542,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Show a summary of the table: fields, types and keys.\
   Table Summary
 - Alt+V\
-  Run a script from the Scripts folder (.js, .sql, or .dbdo).\
+  Run a script from the Scripts folder (.js, .sql, .dbdo, or a macro's .inix).\
   Invoke Script
 - Alt+Y\
   Say how many records are in view.\
@@ -738,6 +744,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Start Unmark
 - Alt+Shift+F1\
   ReadMe
+- Alt+Shift+F12\
+  Play the macro you recorded or loaded last.\
+  Play Macro
 - Alt+Shift+F8\
   Unmark every row from the Alt+F8 anchor to the current row.\
   Complete Unmark
@@ -760,6 +769,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Shift+F1\
   Open the history of changes in the default browser.\
   History of Changes
+- Control+Shift+F12\
+  Start recording a macro of record moves, or stop and save it, or stop one that is playing.\
+  Record Macro
 - Control+Shift+F3\
   Find the previous record matching a regular expression.\
   Reverse Find Regex
@@ -1004,7 +1016,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Invert Marked\
   Alt+Shift+I
 - Invoke Script\
-  Run a script from the Scripts folder (.js, .sql, or .dbdo).\
+  Run a script from the Scripts folder (.js, .sql, .dbdo, or a macro's .inix).\
   Alt+V
 - Jump\
   Go to the next record whose current field holds the text.\
@@ -1064,6 +1076,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Alt+O
 - Pick Value\
   Control+F2
+- Play Macro\
+  Play the macro you recorded or loaded last.\
+  Alt+Shift+F12
 - Play Stream\
   Play the current record's stream address in the Homer Player; with records marked, play all of them.\
   Control+P
@@ -1085,6 +1100,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Alt+Shift+F1
 - Recent Databases\
   Alt+R
+- Record Macro\
+  Start recording a macro of record moves, or stop and save it, or stop one that is playing.\
+  Control+Shift+F12
 - Refresh Records\
   Refresh the records' values from the database.\
   F5

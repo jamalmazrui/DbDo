@@ -400,6 +400,22 @@ A **script** is a file that does a task again, run with **Invoke Script** (Alt+V
 
 The same JScript .NET works inside Evaluate Expression and in a report definition's {{ ... }} expressions, so learning it once serves all three.
 
+### Recording a macro
+
+A **macro** repeats a sequence of moves you made, without writing a script. In this first version a macro holds the record moves: **First Record**, **Last Record**, **Next Record** and **Previous Record** on the Navigate menu, and **Go to Record** (Control+G) with a row number.
+
+1. **Record Macro** (Control+Shift+F12, on the Tools menu) asks where the macro may play. **This View** keeps it to this database, table, filter and order; **Any View** lets it play on any table with records.
+2. Make your moves from the Navigate menu, or with Go to Record and a row number. DbDo says each one as usual.
+3. Press **Record Macro** (Control+Shift+F12) again to stop. DbDo says how many steps it recorded and asks for a name, which becomes the macro's file name in the Scripts folder. If you cancel, **Save Macro** (Tools menu, M) saves it later.
+
+**Play Macro** (Alt+Shift+F12) plays the macro you recorded or loaded last, in the window you are in. A saved macro is also listed by **Invoke Script** (Alt+V), beside your scripts; choosing it plays it. Press Control+Shift+F12 while a macro plays to stop it.
+
+**What makes a recording incomplete.** Only moves a macro can repeat are recorded. If you use another command while recording, press an arrow, Home, End or Page key in the grid, type a letter to jump to a row, or give Go to Record a percent, a relative amount or text, DbDo says so at once, and the recording will not play. Say commands are fine: they only listen. Cancelling Go to Record's prompt records nothing and keeps the recording complete.
+
+**Every step is checked.** As a macro plays, DbDo works out the row each step should reach -- Next Record from row 3 should reach row 4 -- and compares it with the row it did reach. Both go into DbDo's log, and a step that lands somewhere else stops the macro there and says why. scripts\auditMacros.cmd --runtime reads your newest log and lists every step compared.
+
+A macro is an .inix file you can read and edit in any text editor: a FileTask = macro header and one [step] section per move, each naming the command, such as Go to Record, and its row number when it has one.
+
 ### Ordering by one column, then another
 
 **Add Column to Order** (Alt+A) orders the records by the column you are in, smallest or earliest first, and keeps the order that was already in force for breaking ties. **Alt+Shift+A** does the same, largest or latest first.

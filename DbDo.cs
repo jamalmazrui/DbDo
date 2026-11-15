@@ -624,7 +624,8 @@ namespace DbDo
             foreach (System.IO.FileInfo fi in dirInfo.GetFiles())
             {
                 string sExt = fi.Extension.ToLowerInvariant();
-                if (sExt == ".js" || sExt == ".sql" || sExt == ".dbdo")
+                // A MACRO IS A SCRIPT TOO (15 November 2026): an .inix file whose header says FileTask = macro.
+                if (sExt == ".js" || sExt == ".sql" || sExt == ".dbdo" || (sExt == ".inix" && Homer.MacroSession.isMacroFile(fi.FullName)))
                     lNames.Add(fi.Name);
             }
             lNames.Sort(StringComparer.OrdinalIgnoreCase);
@@ -728,6 +729,8 @@ namespace DbDo
                     return runJScript(sBody, frm, db);
                 case ".sql":
                     return runSqlBatch(sBody, db);
+                case ".inix":
+                    return "ERROR: A macro plays from Invoke Script or Play Macro, in the window it was recorded for.";
                 case ".dbdo":
                     return runDuoBatch(sBody, frm, db);
                 default:
@@ -12880,7 +12883,7 @@ namespace DbDo
         }
     }
 
-    public class DbDoForm : Form
+    public partial class DbDoForm : Form
     {
         // ------- Constants -------
         private const int InitialFormWidth = 1100;
@@ -13379,6 +13382,7 @@ namespace DbDo
             buildMenus();
             buildGrid();
             buildStatusBar();
+            initializeMacros();
             checkRouterEquivalence();
             Say.attach(this);
             // What DbDo says goes into the runtime log beside what the user
@@ -13437,6 +13441,8 @@ namespace DbDo
         // bulk ini write.
         protected override void OnFormClosing(FormClosingEventArgs evArgs)
         {
+            // A macro that is playing is stopped first; the window closes on the next try.
+            if (cancelMacroBeforeClose()) { evArgs.Cancel = true; return; }
             // Offer to save unsaved workbook edits before they are dropped.
             if (!confirmSaveWorkbookIfDirty())
             {
@@ -14709,6 +14715,11 @@ namespace DbDo
             miMiscInvokeScript     = addItem(miTools, "In&voke Script...",                     "Invoke Script",     Keys.Alt | Keys.V,                  miscInvokeScriptClicked);  // Alt+V (9 November 2026); Shift+V says which script it would pick
             miMiscEditScript       = addItem(miTools, "Edit &Script...",                       "Edit Script",       Keys.Alt | Keys.Shift | Keys.S,     miscEditScriptClicked);
             miMiscOpenScriptFolder = addItem(miTools, "Open Script &Folder",                   "Open Script Folder", Keys.None,                          miscOpenScriptFolderClicked);
+            // MACROS (15 November 2026, kit 1.231.0): the handlers are in DbDoMacros.cs. Function keys, so no access
+            // letter on the first two.
+            addItem(miTools, "Record Macro",                        "Record Macro",       Keys.Control | Keys.Shift | Keys.F12, macroRecordClicked);
+            addItem(miTools, "Play Macro",                          "Play Macro",         Keys.Alt | Keys.Shift | Keys.F12,     macroPlayClicked);
+            addItem(miTools, "Save &Macro...",                      "Save Macro",         Keys.None,                          macroSaveClicked);
             // PACK AND UNPACK (5 November 2026): a database's companion files go into it, so the .db alone is the package.
             addItem(miTools, "&Pack Files into Database...",   "Pack Files into Database",   Keys.None, toolsPackFilesClicked);
             addItem(miTools, "&Unpack Files from Database...", "Unpack Files from Database", Keys.None, toolsUnpackFilesClicked);
@@ -15126,12 +15137,15 @@ namespace DbDo
             add("Sqlean Console",     "Open the bundled sqlean.exe shell in its own console window on the current database",
                 "Control+Shift+GraveAccent. The full SQLite / SQLean command shell -- .tables, .schema, .dump, .import, REGEXP, median(), and the rest. Opens the current database read-only so it cannot contend with DbDo's writer; with no database open it starts on an in-memory database. The bundled sqlean.exe must sit beside DbDo.exe.");
             add("Exit-Console",       "Close the dot prompt and return to the GUI", "");
+            add("Record Macro",       "Start recording a macro of record moves, or stop and save it, or stop one that is playing", "");
+            add("Play Macro",         "Play the macro you recorded or loaded last", "");
+            add("Save Macro",         "Save the macro you recorded or loaded last in the Scripts folder", "");
             add("Enter Child Table",        "Go into the records related to this one", "");
             add("Exit Child Table",         "Return from a child drill-down to the parent table", "");
             add("Exit to Root Table",   "Go back to the first table", "");
             add("Invoke SQL",         "Run an ad-hoc SQL statement against the open database", "");
-            add("Invoke Script",      "Run a script from the Scripts folder (.js, .sql, or .dbdo)",
-                "The picker shows every .js (JScript .NET), .sql (SQL batch), and .dbdo (DbDo command batch) file in %LOCALAPPDATA%\\DbDo\\scripts. Type to filter the list; press Enter to run. The file extension determines the engine: .js gets full computational power and host objects (db, frm); .sql runs a semicolon-separated batch of statements; .dbdo dispatches each line through the dot-prompt as if you had typed it.");
+            add("Invoke Script",      "Run a script from the Scripts folder (.js, .sql, .dbdo, or a macro's .inix)",
+                "The picker shows every .js (JScript .NET), .sql (SQL batch), and .dbdo (DbDo command batch) file in %LOCALAPPDATA%\\DbDo\\scripts, and every .inix file that is a macro (FileTask = macro). Type to filter the list; press Enter to run. The file extension determines the engine: .js gets full computational power and host objects (db, frm); .sql runs a semicolon-separated batch of statements; .dbdo dispatches each line through the dot-prompt as if you had typed it.");
 
             // ===== Help menu =====
             add("Documentation",           "Open the documentation in the default browser",
@@ -15204,7 +15218,8 @@ namespace DbDo
                 // A menu chosen by hand is one press; a routed key keeps its count (1.87.7).
                 if (!Homer.KeyMap.bRunningCommand) Homer.KeyMap.iPressCount = 1;
                 if (!bOpensDialog) commandEcho(sCommand);
-                evHandler(senderA, evA);
+                // THE ONE PLACE A MACRO SEES A COMMAND (15 November 2026): DbDoMacros.cs.
+                runWithMacro(sCommand, delegate { evHandler(senderA, evA); });
             };
             miParent.DropDownItems.Add(mi);
             KeyMap.register(key, mi, sCommand);
@@ -25762,7 +25777,7 @@ namespace DbDo
             string sInput = promptText("Go to Record",
                 "Row number (1 to " + iCount + "), percent (50%), relative (+10, -25%), or column text:",
                 (db.absolutePosition).ToString());
-            if (string.IsNullOrEmpty(sInput)) return;
+            if (string.IsNullOrEmpty(sInput)) { cancelMacroCapture(); return; }
             applyGoTo(sInput, true);
         }
 
@@ -25845,7 +25860,7 @@ namespace DbDo
                 : iAmount;
             if (iTarget < 1) iTarget = 1;
             if (iTarget > iCount) iTarget = iCount;
-            try { virtMoveTo(iTarget, iVirtualCol); }
+            try { virtMoveTo(iTarget, iVirtualCol); confirmMacroGoTo(sInput); }
             catch (Exception ex) { ErrorDialog.show(this, "Go to Record", ex, db); }
         }
 
@@ -25874,14 +25889,14 @@ namespace DbDo
         private void navFirstClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset()) return;
-            try { db.moveFirst(); invokeRefresh(); }
+            try { db.moveFirst(); invokeRefresh(); confirmMacroCommand("firstRecord", ""); }
             catch (Exception ex) { Say.say("Step Record First: " + ex.Message); }
         }
 
         private void navLastClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset()) return;
-            try { db.moveLast(); invokeRefresh(); }
+            try { db.moveLast(); invokeRefresh(); confirmMacroCommand("lastRecord", ""); }
             catch (Exception ex) { Say.say("Step Record Last: " + ex.Message); }
         }
 
@@ -25891,7 +25906,7 @@ namespace DbDo
             try
             {
                 if (db.absolutePosition < db.recordCount) db.absolutePosition = db.absolutePosition + 1;
-                invokeRefresh();
+                invokeRefresh(); confirmMacroCommand("nextRecord", "");
             }
             catch (Exception ex) { Say.say("Step Record Next: " + ex.Message); }
         }
@@ -25902,7 +25917,7 @@ namespace DbDo
             try
             {
                 if (db.absolutePosition > 1) db.absolutePosition = db.absolutePosition - 1;
-                invokeRefresh();
+                invokeRefresh(); confirmMacroCommand("previousRecord", "");
             }
             catch (Exception ex) { Say.say("Step Record Previous: " + ex.Message); }
         }
@@ -32390,7 +32405,7 @@ namespace DbDo
         // reference text. Output (last expression value or
         // "ERROR: ..." string) is shown in a MessageBox so the screen
         // reader reads it through the standard dialog focus path.
-        private void miscInvokeScriptClicked(object sender, EventArgs args)
+        private async void miscInvokeScriptClicked(object sender, EventArgs args)
         {
             System.Collections.Generic.SortedDictionary<string, string> dScripts = gatherScripts();
             if (dScripts.Count == 0)
@@ -32400,7 +32415,7 @@ namespace DbDo
                 if (!string.IsNullOrEmpty(sDbFolder)) sWhere = sDbFolder + "\n  or\n" + sWhere;
                 LbcMessage.show(this,
                     "No scripts found in:\n\n" + sWhere
-                    + "\n\nUse Edit Script to create one, or Open Script Folder to manage files in Explorer.",
+                    + "\n\nUse Record Macro to make a macro, Edit Script to create a script, or Open Script Folder to manage files in Explorer.",
                     "Invoke Script", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -32417,6 +32432,12 @@ namespace DbDo
                 if (lb.SelectedItem == null) return;
                 string sName = lb.SelectedItem.ToString();
                 string sPath = dScripts[sName];
+                // A macro plays in this window, step by step, rather than running as a script (15 November 2026).
+                if (string.Equals(Path.GetExtension(sPath), ".inix", StringComparison.OrdinalIgnoreCase))
+                {
+                    await playMacroFileAsync(sPath);
+                    return;
+                }
                 string sResult = ScriptHelper.runScript(sPath, this, this.db);
                 bool bIsError = sResult != null && sResult.StartsWith("ERROR:");
                 string sBody = string.IsNullOrEmpty(sResult) ? "(no output)" : sResult;

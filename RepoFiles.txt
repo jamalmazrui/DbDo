@@ -23,6 +23,7 @@ data/defs.db
 data/iris.csv
 DbDo.cmd
 DbDo.cs
+DbDoMacros.cs
 DbDo.exe.config
 DbDo.ico
 DbDo.js
@@ -60,6 +61,8 @@ scripts/nvda/appModules/homer/__init__.py
 scripts/nvda/manifest.ini
 scripts/nvda/readme.html
 scripts/auditPatterns.cmd
+scripts/auditMacros.cmd
+scripts/auditMacros.py
 scripts/auditPatterns.py
 scripts/buildBlindCreations.cmd
 scripts/buildBlindCreations.py

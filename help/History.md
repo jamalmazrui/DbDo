@@ -5,6 +5,15 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 15 November 2026 -- A macro recorder, first phase
+
+- **Record Macro** (Control+Shift+F12) records your record moves -- First, Last, Next and Previous Record, and Go to Record with a row number -- and **Play Macro** (Alt+Shift+F12) plays them back in the window you are in. A macro is saved as an .inix file in the Scripts folder, which Invoke Script lists and plays; **Save Macro** saves one later if you cancelled the name. This View keeps a macro to the database, table, filter and order it was recorded on; Any View lets it play on any table. The help's "Recording a macro" says how.
+- **Only what happened is recorded.** Each move's handler says it succeeded after the move; a cancelled Go To records nothing. Anything a macro cannot repeat yet -- another command, an arrow key in the grid, a percent Go To -- is said at once and marks the recording incomplete, and an incomplete macro does not play.
+- **Every step played is checked.** Before a step, DbDo works out the row it should reach; after it, the row it reached. Both are logged with the row before, and a step that lands elsewhere stops the macro and says why. scripts\auditMacros.cmd --runtime reads the newest log and lists each step compared.
+- **Gates.** The build runs the kit's macro engine test before compiling it (HomerDev 1.231.0 or later is needed), and accept.inix runs scripts\auditMacros, which fails when a command a macro can hold has no menu item, no confirmation after its move, or no case in the host's validate, expect or execute, or when the menu, its descriptions, the build or this guide leave something out.
+- Built on the kit's new Macro.cs, from Claude's plan and ChatGPT's second revision.
+- **The macro files stay put.** The first macro build did not name DbDoMacros.cs and scripts\auditMacros in RepoFiles.txt, so tidy moved them to notes\other as strays, and the release check could not build. RepoFiles.txt names them now, auditMacros fails if it ever stops, and the build removes the stray copies.
+
 ## 12 November 2026 -- RadioTrail learns from iHeartRadio, and BlindCreations is current
 
 - RadioTrail's usual fetch now reads iHeartRadio's list of United States stations once a month, and fetchStations --sources-only reads it at once. A station already in RadioTrail with the same call sign gains only what it lacks -- frequency, city, state, home page, slogan, playlist address -- and its genres in its tags; its stream, status, rating and notes stay as they are. A station not yet in RadioTrail is added with iHeartRadio as its source and its official stream, marked Spanish when its genres say so and English otherwise. The list is probed first, and an answer of another shape skips the step, never the run. TuneIn and Online Radio Box, which BlindRadio also reads, were weighed and left out: TuneIn's text is mostly what is playing now, and Online Radio Box's song histories would mean reading each station's page.

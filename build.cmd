@@ -87,12 +87,13 @@ echo. >> "!log!"
 
 rem ---- check source files ----
 if not exist "DbDo.cs"  goto :no_dbdo_cs
+if not exist "DbDoMacros.cs"  goto :no_dbdo_cs
 if not exist "DbDo.js"  goto :no_dbdo_js
 goto :have_sources
 
 :no_dbdo_cs
-echo ERROR: DbDo.cs not found. >> "!log!"
-echo ERROR: DbDo.cs not found in script directory.
+echo ERROR: DbDo.cs or DbDoMacros.cs not found. >> "!log!"
+echo ERROR: DbDo.cs or DbDoMacros.cs not found in script directory.
 popd
 exit /b 1
 
@@ -103,7 +104,13 @@ popd
 exit /b 1
 
 :have_sources
-echo Found: DbDo.cs, DbDo.js >> "!log!"
+echo Found: DbDo.cs, DbDoMacros.cs, DbDo.js >> "!log!"
+rem THE MACRO FILES' STRAY COPIES GO (15 November 2026). The first macro build did not name DbDoMacros.cs and
+rem scripts\auditMacros in RepoFiles.txt, so tidy moved them to notes\other as strays and the next check could not
+rem build. RepoFiles.txt names them now; a copy left in notes\other beside the real file is removed here.
+for %%F in (DbDoMacros.cs auditMacros.cmd auditMacros.py) do if exist "notes\other\%%F" (
+  del /q "notes\other\%%F" && echo Stray copy removed: notes\other\%%F >> "!log!"
+)
 rem The three commands are one block, so the guard reads as what it is. (cmd
 rem already treats the chained commands as the if's consequent; an audit of
 rem 8 October 2026 read them as unconditional, and the block settles it.)
@@ -154,7 +161,8 @@ rem onSpoken", which names the symptom and not the cause. So the build says the
 rem cause, first. Raise this whenever DbDo starts using something new.
 rem 1.64.5: Play Tutorials calls MediaPlayer.playTutorials, which older kits lack;
 rem a build against 1.64.4 failed to compile on 8 October 2026 rather than saying so.
-set "kitNeeded=1.202.0"
+rem 1.231.0: the macro recorder compiles the kit's Macro.cs, with its expected-against-actual audit.
+set "kitNeeded=1.231.0"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -172,6 +180,7 @@ findstr /c:"public static class LbcMessage" "!homerDev!\exec\CSharp\Lbc.cs" >nul
 findstr /c:"public void setPattern(" "!homerDev!\exec\CSharp\Lbc.cs" >nul 2>&1 || set "kitMissing=!kitMissing! setPattern (Lbc.cs, kit 1.127.0)"
 findstr /c:"public Func<string> fUnavailable" "!homerDev!\exec\CSharp\KeyMap.cs" >nul 2>&1 || set "kitMissing=!kitMissing! fUnavailable (KeyMap.cs)"
 findstr /c:"public static class ColumnTypes" "!homerDev!\exec\CSharp\Schema.cs" >nul 2>&1 || set "kitMissing=!kitMissing! ColumnTypes (Schema.cs, kit 1.138.0)"
+findstr /c:"string expect(MacroStep macroStep);" "!homerDev!\exec\CSharp\Macro.cs" >nul 2>&1 || set "kitMissing=!kitMissing! the macro engine's audit (Macro.cs, kit 1.231.0)"
 if defined kitMissing (
   echo ERROR: C:\HomerDev says !homerVer! but its code lacks:!kitMissing! >> "!log!"
   echo.
@@ -179,7 +188,22 @@ if defined kitMissing (
   echo A HomerDev.zip was probably not unzipped. Unzip the newest HomerDev.zip into C:\HomerDev, then build again.
   exit /b 1
 )
-echo Kit code check: LbcMessage, setPattern and fUnavailable present >> "!log!"
+echo Kit code check: LbcMessage, setPattern, fUnavailable, ColumnTypes and the macro engine present >> "!log!"
+rem THE MACRO ENGINE IS PROVED BEFORE DBDO COMPILES IT (15 November 2026). The kit's testMacro compiles Macro.cs at
+rem C# 5, the compiler this build uses, records, saves, loads and plays six steps against a pretend view, and compares
+rem the row each step was expected to reach with the row it reached; then it proves that a step which claims success
+rem without moving is stopped. A failure stops this build, so DbDo never ships an engine that has not passed on this
+rem computer. The test keeps its own log, logs\HomerDev-testMacro-<time>.log in the kit, and names it.
+echo Macro engine test: python "!homerDev!\scripts\testMacro.py" >> "!log!"
+python "!homerDev!\scripts\testMacro.py" >> "!log!" 2>&1
+if errorlevel 1 (
+  echo ERROR: the kit's macro engine test failed; its log is named above >> "!log!"
+  echo.
+  echo The kit's macro engine failed its test. See !log! for the test's own log, then fix the kit and build again.
+  popd
+  exit /b 1
+)
+echo Macro engine test passed >> "!log!"
 rem A RETIRED WALK'S AUDIO GOES (5 November 2026): Tutorial 8 became Analyze a Dataset, so the old walk's sound and
 rem fingerprint are removed, rather than ship beside the new one.
 for %%F in ("!sHere!help\Tutorial_8_Ask_with_SQL.inix" "!sHere!help\tutorials\8_Ask_with_SQL.mp3" "!sHere!help\tutorials\8_Ask_with_SQL.sha256" axeScan.cmd axeScan.py axeWindow.cmd axeWindow.py recordWalk.cmd recordWalk.py) do if exist "%%~F" (
@@ -212,6 +236,8 @@ set "homerSources=!homerSources! "!homerDev!\exec\CSharp\KeyMap.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\KeyName.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Lbc.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Log.cs""
+rem THE MACRO RECORDER (15 November 2026): DbDoMacros.cs plays and records on the kit's engine.
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Macro.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Mdi.cs""
 rem THE HOMER PLAYER, shared with FileDir since kit 1.51.1: Play Stream hands a
 rem record's stream address to it, and mpv does the playing.
@@ -464,7 +490,7 @@ rem The kit's one fingerprint store decides (scripts\fingerprint.py in the kit,
 rem exec\fingerprints.json here). "build fresh" builds regardless.
 set "bNothingChanged="
 set "sFingerprint=!homerDev!\scripts\fingerprint.py"
-set "lsProgramInputs=DbDo.cs DbDo.js DbDo.ico DbDo.manifest 2db.cs build.cmd version.txt !homerSources!"
+set "lsProgramInputs=DbDo.cs DbDoMacros.cs DbDo.js DbDo.ico DbDo.manifest 2db.cs build.cmd version.txt !homerSources!"
 set "lsSetupInputs=DbDo_setup.iss "!homerDev!\Templates\HomerComponents.iss" version.txt exec help scripts templates"
 for %%d in (configs data) do if exist "%%d" set "lsSetupInputs=!lsSetupInputs! %%d"
 for %%f in (License.md License.htm ReadMe.md ReadMe.htm DbDo.ico) do if exist "%%f" set "lsSetupInputs=!lsSetupInputs! %%f"
@@ -914,10 +940,10 @@ rem The icon is looked for where the sources are. After the build moved into
 rem exec\ this check still said "if exist DbDo.ico", found nothing there, and
 rem 1.0.173 was compiled without its icon.
 if exist "!sHere!DbDo.ico" (
-    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32icon:"!sHere!DbDo.ico" /win32manifest:"!sHere!DbDo.manifest" /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"Microsoft.VisualBasic.dll" /reference:"Microsoft.JScript.dll" /reference:"NPOI.dll" /reference:"NPOI.OOXML.dll" /reference:"NPOI.OpenXml4Net.dll" /reference:"NPOI.OpenXmlFormats.dll" /reference:"ICSharpCode.SharpZipLib.dll" /reference:"BouncyCastle.Crypto.dll" !homerRefs! /out:DbDo.exe "!sHere!Version.cs" "!sHere!DbDo.cs" !homerSources! >> "!log!" 2>&1
+    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32icon:"!sHere!DbDo.ico" /win32manifest:"!sHere!DbDo.manifest" /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"Microsoft.VisualBasic.dll" /reference:"Microsoft.JScript.dll" /reference:"NPOI.dll" /reference:"NPOI.OOXML.dll" /reference:"NPOI.OpenXml4Net.dll" /reference:"NPOI.OpenXmlFormats.dll" /reference:"ICSharpCode.SharpZipLib.dll" /reference:"BouncyCastle.Crypto.dll" !homerRefs! /out:DbDo.exe "!sHere!Version.cs" "!sHere!DbDo.cs" "!sHere!DbDoMacros.cs" !homerSources! >> "!log!" 2>&1
 ) else (
     echo NOTE: DbDo.ico not found; building without embedded icon. >> "!log!"
-    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32manifest:"!sHere!DbDo.manifest" /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"Microsoft.VisualBasic.dll" /reference:"Microsoft.JScript.dll" /reference:"NPOI.dll" /reference:"NPOI.OOXML.dll" /reference:"NPOI.OpenXml4Net.dll" /reference:"NPOI.OpenXmlFormats.dll" /reference:"ICSharpCode.SharpZipLib.dll" /reference:"BouncyCastle.Crypto.dll" !homerRefs! /out:DbDo.exe "!sHere!Version.cs" "!sHere!DbDo.cs" !homerSources! >> "!log!" 2>&1
+    "!csc!" /target:winexe /platform:x64 /optimize+ /nologo /win32manifest:"!sHere!DbDo.manifest" /reference:"!uiaProv!" /reference:"!uiaTypes!" /reference:"Newtonsoft.Json.dll" /reference:"Microsoft.VisualBasic.dll" /reference:"Microsoft.JScript.dll" /reference:"NPOI.dll" /reference:"NPOI.OOXML.dll" /reference:"NPOI.OpenXml4Net.dll" /reference:"NPOI.OpenXmlFormats.dll" /reference:"ICSharpCode.SharpZipLib.dll" /reference:"BouncyCastle.Crypto.dll" !homerRefs! /out:DbDo.exe "!sHere!Version.cs" "!sHere!DbDo.cs" "!sHere!DbDoMacros.cs" !homerSources! >> "!log!" 2>&1
 )
 if errorlevel 1 goto :build_failed
 echo DbDo.exe built.
