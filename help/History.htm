@@ -2,7 +2,7 @@
 <html xmlns="http://www.w3.org/1999/xhtml" lang="en-US" xml:lang="en-US">
 <head>
   <meta charset="utf-8" />
-  <meta name="generator" content="pandoc 3.13" />
+  <meta name="generator" content="pandoc 3.14" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes" />
   <title>History</title>
   <style>
@@ -35,27 +35,6 @@
       }
       h1 {
         font-size: 1.8em;
-      }
-    }
-    @media print {
-      html {
-        color-scheme: light only;
-      }
-      html, body, pre, code {
-        background-color: transparent;
-      }
-      body, a, a:visited, blockquote {
-        color: black;
-      }
-      pre, code {
-        padding: 0;
-      }
-      p, h2, h3 {
-        orphans: 3;
-        widows: 3;
-      }
-      h2, h3, h4 {
-        page-break-after: avoid;
       }
     }
     p {
@@ -163,6 +142,12 @@
       text-decoration: none;
     }
     span.smallcaps{font-variant: small-caps;}
+    em, em em em, em em em em em {
+      font-style: italic;
+    }
+    em em, em em em em {
+      font-style: normal;
+    }
     div.columns{display: flex; gap: 1.5em;}
     div.column{flex: auto;}
     @media screen {
@@ -244,7 +229,27 @@
     code span.va { color: #19177c; } /* Variable */
     code span.vs { color: #4070a0; } /* VerbatimString */
     code span.wa { color: #60a0b0; font-weight: bold; font-style: italic; } /* Warning */
-  </style>
+    @media print {
+      html {
+        color-scheme: light only;
+      }
+      html, body, pre, code {
+        background-color: transparent;
+      }
+      body, a, a:visited, blockquote {
+        color: black;
+      }
+      pre, code {
+        padding: 0;
+      }
+      p, h2, h3 {
+        orphans: 3;
+        widows: 3;
+      }
+      h2, h3, h4 {
+        page-break-after: avoid;
+      }
+    }  </style>
 </head>
 <body>
 <nav id="TOC" role="doc-toc" aria-label="Contents">
@@ -252,6 +257,11 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a
+href="#november-2026-pick-value-works-and-view-cycle-says-what-it-does"
+id="toc-november-2026-pick-value-works-and-view-cycle-says-what-it-does">15
+November 2026 – Pick Value works, and View Cycle says what it
+does</a></li>
 <li><a href="#november-2026-a-macro-recorder-first-phase"
 id="toc-november-2026-a-macro-recorder-first-phase">15 November 2026 – A
 macro recorder, first phase</a></li>
@@ -825,6 +835,28 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Control+Shift+F1</strong> inside DbDo to open this file
 in your browser, or type <code>history</code> at the dot prompt.</p>
+<h2
+id="november-2026-pick-value-works-and-view-cycle-says-what-it-does">15
+November 2026 – Pick Value works, and View Cycle says what it does</h2>
+<ul>
+<li><strong>Pick Value</strong> (Control+F2) is back on the Edit menu
+and does what Tutorial 4 and this guide say: it lists the current
+field’s fixed values from defs, opening on the value the field holds,
+and Enter writes your choice to the record. Escape changes nothing. A
+field without fixed values says so and names Edit Cell (F2). It had only
+said “not yet implemented”, and the keyboard audit’s rule that a planned
+command holds no key would otherwise have taken Control+F2 from a
+command a tutorial teaches.</li>
+<li><strong>View Cycle</strong> (F6) and <strong>View Cycle
+Back</strong> (Shift+F6) say they show the current record in its next or
+previous view: list, edit or inspect. <strong>Say Records from Current
+Marked</strong> (Alt+Shift+M) is worded as the marked partner of Say
+Records from Current. Open Table’s description names Control+Shift+O for
+a new window and Control+T for the same window, and Play Stream’s names
+Control+P.</li>
+<li>DbDo now needs HomerDev 1.235.0, whose suite check reads which
+shared commands each app has.</li>
+</ul>
 <h2 id="november-2026-a-macro-recorder-first-phase">15 November 2026 – A
 macro recorder, first phase</h2>
 <ul>

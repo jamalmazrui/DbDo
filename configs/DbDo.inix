@@ -135,7 +135,7 @@ Copy Record=Control+Shift+C, Copy the current record to the clipboard
 Append Record=Alt+Shift+C, Add the current record to the end of the clipboard
 Open Cell Value=Control+Enter, Open the current cell's value as a file, folder or url
 Open url=Control+Shift+U, Open the current record's url in the web browser
-Pick Value=Control+F2, Pick a value the current field already holds, once this is built
+Pick Value=Control+F2, Pick a value from the current field's fixed values
 Replace=Control+R, Replace text in the fields and records you choose
 Replace with Regex=Control+Shift+R, Replace a regular expression's matches in the fields and records you choose
 Mail Record=None, Send an email message made from the current record
@@ -192,8 +192,8 @@ Clear Bookmark=Control+Shift+B, Remove a bookmark, or all of them
 
 ; ===== Navigate menu =====
 Inspect Record=Control+I, Show the current record field by field, with its related records
-View Cycle=F6, Cycle to the next view of the current record: list to edit to inspect and back to list (Control+E and Control+I jump straight to the edit and inspect views)
-View Cycle Back=Shift+F6, Cycle to the previous presentation of the current record (list, show, form)
+View Cycle=F6, Show the current record in its next view: list, edit or inspect
+View Cycle Back=Shift+F6, Show the current record in its previous view: list, edit or inspect
 Go to Record=Control+G, Go to a record by its number, a percent or text
 Next Table or View=Control+F6, Switch to the next open table or view
 Previous Table or View=Control+Shift+F6, Switch to the previous open table or view
@@ -262,8 +262,8 @@ Say Position=Alt+Delete, Say the current position: the record's number, the coun
 Say Order and Filter=Shift+8, Say the order and the filter in force
 Say Column as List from Current=Control+L, Say the current column's values from the current record on
 Say Column as List from Current Marked=Control+Shift+L, Say the current column's values in the marked records from the current record on
-Say Records from Current=None, Say every record in full from the current record on
-Say Records from Current Marked=Alt+Shift+M, Say every marked record in full from the current record on
+Say Records from Current=None, Say all records in full from the current record on
+Say Records from Current Marked=Alt+Shift+M, Say marked records in full from the current record on
 
 ; ===== Misc menu =====
 Database Summary=Alt+D, Show the database's tables, record counts and relations

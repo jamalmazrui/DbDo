@@ -14330,13 +14330,11 @@ namespace DbDo
             addItem(miEdit, "Save Clipboard...",   "Save Clipboard",   Keys.Control | Keys.OemQuotes,              editSaveClipboard);
             addItem(miEdit, "Append Clipboard...", "Append Clipboard", Keys.Control | Keys.Shift | Keys.OemQuotes, editAppendClipboard);
             addItem(miEdit, "Clear Clipboard",     "Clear Clipboard",  Keys.Alt | Keys.Shift | Keys.OemQuotes,     editClearClipboard);
-            // Pick Value: v1.0.67 deferred stub. The chord (Ctrl+F2)
-            // is reserved so the menu doesn't drift and the user can
-            // discover the planned command.
-            miRecPickValue   = addItem(miEdit, "Pick Value", "Pick Value", Keys.Control | Keys.F2,            recPickValueStub);
-            // OFF THE MENU (10 November 2026): it only says it is not yet implemented, and a menu should not offer what does
-            // not work. It stays reachable by name, for scripts.
-            miRecPickValue.Visible = false;
+            // PICK VALUE WORKS (15 November 2026). It was a stub that said "not yet implemented" on a hidden item, yet
+            // Tutorial 4 teaches it, and the keyboard audit (A12) says a planned command holds no key. Rather than take
+            // the key from a command the tutorial needs, it now does what the tutorial says: the current field's fixed
+            // values in a list, the chosen one written to the record, as F4 does in the record form.
+            miRecPickValue   = addItem(miEdit, "Pick Value...", "Pick Value", Keys.Control | Keys.F2,          recPickValueClicked);
 
             // ===== Navigate menu: move around the data =====
             miNavigate = addMenu("&Navigate");
@@ -14969,11 +14967,11 @@ namespace DbDo
             add("Open Template Database", "Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail",
                 "Alt+Shift+D. Your own copy of the template is opened, so changes are yours to keep.");
             add("Play Stream",        "Play the current record's stream address in the Homer Player; with records marked, play all of them",
-                "Alt+Shift+P. Takes the first of stream_url, url, stream, link or address that begins with http, or the current cell. Marked records make a play list, current one first. The player is mpv; if it is not installed, DbDo offers to fetch it.");
+                "Control+P. Takes the first of stream_url, url, stream, link or address that begins with http, or the current cell. Marked records make a play list, current one first. The player is mpv; if it is not installed, DbDo offers to fetch it.");
             add("Close Database",     "Close the currently open database", "");
             // ===== Window menu =====
             add("Open Table",         "Open a table in a new window",
-                "Open Table (Control+Shift+T) makes a new window; Choose Table (F6) changes the table in the same window.");
+                "Open Table (Control+Shift+O) makes a new window; Choose Table (Control+T) changes the table in the same window. F6 cycles the current record's views.");
             add("Current Windows",    "Pick from the list of open recordset windows and activate the chosen one",
                 "F4. Each open recordset (typically a table) is an MDI child window.");
             add("Window Toggle",      "Switch between the two most recently used windows",
@@ -27156,9 +27154,9 @@ namespace DbDo
             return frame;
         }
 
-        // Open Table (Control+Shift+T): the Open-versus-Go-to
+        // Open Table (Control+Shift+O): the Open-versus-Go-to
         // pattern -- open the chosen table of the current database in
-        // a NEW window. Choose Table (F6) remains the same-window
+        // a NEW window. Choose Table (Control+T) remains the same-window
         // counterpart.
         private void windowOpenTableClicked(object sender, EventArgs evArgs)
         {
@@ -27697,14 +27695,48 @@ namespace DbDo
             }
         }
 
-        // --- Pick Value (Ctrl+F2) deferred stub ---
-        // Reserved chord; planned for v1.0.68 or later. Will offer a
-        // picker dialog showing existing distinct values in the
-        // current virtual column so the user can pick one rather
-        // than retyping. For now, announce deferral.
-        private void recPickValueStub(object sender, EventArgs evArgs)
+        // --- Pick Value (Control+F2) ---
+        // The current field's fixed values, from defs (getLookupValues, as Edit Cell's F4 and the record form use), in a
+        // list that opens on the current value; Enter writes the chosen one to the record, Escape changes nothing. A field
+        // with no fixed values says so and points to Edit Cell (F2).
+        private void recPickValueClicked(object sender, EventArgs evArgs)
         {
-            Say.say("Pick Value is deferred; not yet implemented");
+            string sChosen, sColumn;
+            List<string> lsValues = null;
+            ListBox lbValues;
+            if (db == null || !db.hasRecordset()) return;
+            if (blockIfReadOnly("This command")) return;
+            if (db.currentIsView) { Say.say("A view is read-only"); return; }
+            if (db.eof || db.bof) return;
+            if (grid == null || iVirtualCol < 0 || iVirtualCol >= grid.Columns.Count) { Say.say("No column under virtual cursor"); return; }
+            sColumn = grid.Columns[iVirtualCol].Text;
+            if (string.IsNullOrEmpty(sColumn) || !db.hasField(sColumn)) { Say.say("No field under the cursor"); return; }
+            if (Metadata.isAdminColumn(sColumn, db.currentTable)) { Say.say(sColumn + " is system-managed"); return; }
+            try { lsValues = db.getLookupValues(db.currentTable, sColumn, 500); }
+            catch (Exception ex) { DbDoLog.write("Pick Value: lookup values for " + sColumn + " failed: " + ex.Message); }
+            if (lsValues == null || lsValues.Count == 0) { Say.say(sColumn + " has no fixed values; Edit Cell, F2, edits it"); return; }
+            string sCurrent = "";
+            try { sCurrent = Convert.ToString(db.getFieldValue(sColumn)); } catch { }
+            using (LbcDialog dlgPick = new LbcDialog("Pick Value", this))
+            {
+                lbValues = dlgPick.addListBox(sColumn + ":", lsValues, sCurrent);
+                if (!string.Equals(dlgPick.runWithButtons(new string[] { "OK", "Cancel" }), "OK", StringComparison.OrdinalIgnoreCase)) return;
+                sChosen = lbValues.SelectedItem != null ? lbValues.SelectedItem.ToString() : null;
+            }
+            if (sChosen == null) return;
+            try
+            {
+                if (iVirtualRow >= 1 && iVirtualRow <= db.recordCount && db.absolutePosition != iVirtualRow) db.absolutePosition = iVirtualRow;
+                db.setFieldValue(sColumn, sChosen);
+                db.update();
+                invokeRefresh();
+                Say.say(sColumn + ", " + sChosen);
+            }
+            catch (Exception ex)
+            {
+                try { db.cancelUpdate(); } catch { }
+                ErrorDialog.show(this, "Pick Value", ex.Message);
+            }
         }
 
         // --- Sort Records (Alt+Shift+S) ---

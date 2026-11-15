@@ -5,6 +5,12 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 15 November 2026 -- Pick Value works, and View Cycle says what it does
+
+- **Pick Value** (Control+F2) is back on the Edit menu and does what Tutorial 4 and this guide say: it lists the current field's fixed values from defs, opening on the value the field holds, and Enter writes your choice to the record. Escape changes nothing. A field without fixed values says so and names Edit Cell (F2). It had only said "not yet implemented", and the keyboard audit's rule that a planned command holds no key would otherwise have taken Control+F2 from a command a tutorial teaches.
+- **View Cycle** (F6) and **View Cycle Back** (Shift+F6) say they show the current record in its next or previous view: list, edit or inspect. **Say Records from Current Marked** (Alt+Shift+M) is worded as the marked partner of Say Records from Current. Open Table's description names Control+Shift+O for a new window and Control+T for the same window, and Play Stream's names Control+P.
+- DbDo now needs HomerDev 1.235.0, whose suite check reads which shared commands each app has.
+
 ## 15 November 2026 -- A macro recorder, first phase
 
 - **Record Macro** (Control+Shift+F12) records your record moves -- First, Last, Next and Previous Record, and Go to Record with a row number -- and **Play Macro** (Alt+Shift+F12) plays them back in the window you are in. A macro is saved as an .inix file in the Scripts folder, which Invoke Script lists and plays; **Save Macro** saves one later if you cancelled the name. This View keeps a macro to the database, table, filter and order it was recorded on; Any View lets it play on any table. The help's "Recording a macro" says how.
