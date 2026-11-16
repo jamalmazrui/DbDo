@@ -5,6 +5,10 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 15 November 2026 -- Every key DbDo answers is named
+
+- **Delete Record** also answers Delete, **Enter Child Table** Enter, **Exit Child Table** Backspace, and **Say Order and Filter** the number pad's Star, and the Key Describer, the Alternate Menu and Hotkeys now say so. DbDo's first comparison of the keys it binds with the keys it shows found these four.
+
 ## 15 November 2026 -- What DbDo binds, shown truly
 
 - **The build uses the kit being developed when both kits have the same version.** With the installed kit in Program Files at the same version as C:\HomerDev, the build took the installed one, and the kit's macro test could not write its log there, so the build stopped. C:\HomerDev now wins a tie, and the test logs under %LOCALAPPDATA%\HomerDev when the kit's own folder cannot be written.
