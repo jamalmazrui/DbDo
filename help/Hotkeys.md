@@ -258,7 +258,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Alt+Shift+F12
 - Record Macro\
   Start recording a macro of record moves, or stop and save it, or stop one that is playing.\
-  Control+Shift+F12
+  Control+Shift+F9
 - Show in FileDir\
   Show the open database's file, selected in its folder, in FileDir.\
   Control+Shift+Oem5
@@ -769,9 +769,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Shift+F1\
   Open the history of changes in the default browser.\
   History of Changes
-- Control+Shift+F12\
-  Start recording a macro of record moves, or stop and save it, or stop one that is playing.\
-  Record Macro
 - Control+Shift+F3\
   Find the previous record matching a regular expression.\
   Reverse Find Regex
@@ -780,6 +777,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Close All But Current Window
 - Control+Shift+F6\
   Previous Table or View
+- Control+Shift+F9\
+  Start recording a macro of record moves, or stop and save it, or stop one that is playing.\
+  Record Macro
 - F1\
   Open the documentation in the default browser.\
   Documentation
@@ -1102,7 +1102,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Alt+R
 - Record Macro\
   Start recording a macro of record moves, or stop and save it, or stop one that is playing.\
-  Control+Shift+F12
+  Control+Shift+F9
 - Refresh Records\
   Refresh the records' values from the database.\
   F5

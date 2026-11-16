@@ -5,6 +5,10 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 15 November 2026 -- Record Macro moves to Control+Shift+F9
+
+- **Record Macro** is now Control+Shift+F9, and the same key stops a macro that is playing. Control+Shift+F12 is EdSharp's Go to Environment, and a command the suite shares needs one key in every app; no Homer app, Windows or screen reader claims Control+Shift+F9. **Play Macro** stays on Alt+Shift+F12. The guide, the recording message and scripts\auditMacros say so.
+
 ## 15 November 2026 -- Pick Value works, and View Cycle says what it does
 
 - **Pick Value** (Control+F2) is back on the Edit menu and does what Tutorial 4 and this guide say: it lists the current field's fixed values from defs, opening on the value the field holds, and Enter writes your choice to the record. Escape changes nothing. A field without fixed values says so and names Edit Cell (F2). It had only said "not yet implemented", and the keyboard audit's rule that a planned command holds no key would otherwise have taken Control+F2 from a command a tutorial teaches.

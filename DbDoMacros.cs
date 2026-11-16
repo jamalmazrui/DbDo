@@ -275,7 +275,7 @@ namespace DbDo
                 if (sChoice != "This View" && sChoice != "Any View") return false;
                 macroSession.start(sChoice == "Any View");
                 bMacroGapSaid = false;
-                Say.sayForced("Recording a macro. Press Control+Shift+F12 to stop.");
+                Say.sayForced("Recording a macro. Press Control+Shift+F9 to stop.");
                 return true;
             }
             catch (Exception exError) { return reportMacroError(exError); }

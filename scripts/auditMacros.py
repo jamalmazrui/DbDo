@@ -153,7 +153,7 @@ def checkCode():
     finding("one choke point", not lsChoke, "addItem runs every command through runWithMacro; the window starts the recorder and stops playback before closing" if not lsChoke else "; ".join(lsChoke))
     # 7. the menu and descriptions
     lsMenu = []
-    dWanted = {"Record Macro": "Keys.Control | Keys.Shift | Keys.F12", "Play Macro": "Keys.Alt | Keys.Shift | Keys.F12", "Save Macro": "Keys.None"}
+    dWanted = {"Record Macro": "Keys.Control | Keys.Shift | Keys.F9", "Play Macro": "Keys.Alt | Keys.Shift | Keys.F12", "Save Macro": "Keys.None"}
     for sCommand, sKeys in dWanted.items():
         if not re.search(r'addItem\(miTools,\s*"[^"]*",\s*"' + sCommand + r'",\s*' + re.escape(sKeys) + r"\s*,", sDbDo): lsMenu.append("%s is not on the Tools menu with %s" % (sCommand, sKeys))
     sInix = readText(os.path.join(sRoot, "configs", "DbDo.inix"))
@@ -174,7 +174,7 @@ def checkCode():
     finding("the build", not lsBuild, "both compile lines take DbDoMacros.cs, Macro.cs comes from a kit of 1.231.0 or later, its test runs first, and RepoFiles.txt keeps the macro files" if not lsBuild else "; ".join(lsBuild))
     # 9. the guide
     sGuide = readText(os.path.join(sRoot, "help", "DbDo.md"))
-    lsGuide = [s for s in ("Record Macro", "Play Macro", "Save Macro", "Control+Shift+F12", "Alt+Shift+F12") if s not in sGuide]
+    lsGuide = [s for s in ("Record Macro", "Play Macro", "Save Macro", "Control+Shift+F9", "Alt+Shift+F12") if s not in sGuide]
     finding("the guide", not lsGuide, "help\\DbDo.md explains recording, playing and saving" if not lsGuide else "help\\DbDo.md does not mention " + ", ".join(lsGuide))
 
 

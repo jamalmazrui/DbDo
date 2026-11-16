@@ -14715,7 +14715,10 @@ namespace DbDo
             miMiscOpenScriptFolder = addItem(miTools, "Open Script &Folder",                   "Open Script Folder", Keys.None,                          miscOpenScriptFolderClicked);
             // MACROS (15 November 2026, kit 1.231.0): the handlers are in DbDoMacros.cs. Function keys, so no access
             // letter on the first two.
-            addItem(miTools, "Record Macro",                        "Record Macro",       Keys.Control | Keys.Shift | Keys.F12, macroRecordClicked);
+            // RECORD MACRO ON CONTROL+SHIFT+F9 (15 November 2026, the keyboard audit's A10, agreed by Claude and ChatGPT):
+            // EdSharp's Go to Environment holds Control+Shift+F12, and a suite command needs one key in every app.
+            // Control+Shift+F9 is claimed by no Homer app, Windows or screen reader. Play Macro stays on Alt+Shift+F12.
+            addItem(miTools, "Record Macro",                        "Record Macro",       Keys.Control | Keys.Shift | Keys.F9, macroRecordClicked);
             addItem(miTools, "Play Macro",                          "Play Macro",         Keys.Alt | Keys.Shift | Keys.F12,     macroPlayClicked);
             addItem(miTools, "Save &Macro...",                      "Save Macro",         Keys.None,                          macroSaveClicked);
             // PACK AND UNPACK (5 November 2026): a database's companion files go into it, so the .db alone is the package.
