@@ -5,6 +5,11 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 15 November 2026 -- DbDo says which keys it binds
+
+- **DbDo.exe /exportkeys <file>** writes every command and key DbDo declares, without opening a window, and ends. The kit's check runs it at every push and compares the file with configs\\DbDo.inix, so a key the menus or the Key Describer name is a key that runs. For now a difference is a warning, listed in the check's log.
+- DbDo now needs HomerDev 1.238.0.
+
 ## 15 November 2026 -- Record Macro moves to Control+Shift+F9
 
 - **Record Macro** is now Control+Shift+F9, and the same key stops a macro that is playing. Control+Shift+F12 is EdSharp's Go to Environment, and a command the suite shares needs one key in every app; no Homer app, Windows or screen reader claims Control+Shift+F9. **Play Macro** stays on Alt+Shift+F12. The guide, the recording message and scripts\auditMacros say so.

@@ -38674,6 +38674,17 @@ namespace DbDo
                 // exit without launching the UI. Used by the installer's
                 // post-install task list and also by the user manually
                 // re-running the install after a JAWS or NVDA upgrade.
+                // THE KEYS AS DECLARED (15 November 2026, the keyboard audit's Phase 1): "DbDo.exe /exportkeys <file>" builds
+                // a window without showing it -- its constructor declares every keyed command to the kit's KeyMap -- writes
+                // them all, and ends, before the single instance, so a DbDo already open is never handed the request. The
+                // kit's check compares the file with configs\DbDo.inix, so a key shown is a key that runs.
+                if (Homer.KeyMap.exportKeysPath() != "")
+                {
+                    DbDoForm frmExport = new DbDoForm(UiMode.Both);
+                    Homer.KeyMap.exportAndExit("DbDo");
+                    frmExport.Dispose();
+                    return 1;
+                }
                 foreach (string sArg in aArgs)
                 {
                     if (sArg.Equals("--selftest-search", StringComparison.OrdinalIgnoreCase)) return runSearchSelfTest(aArgs);
