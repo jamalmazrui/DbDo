@@ -5,6 +5,10 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 15 November 2026 -- What DbDo binds, shown truly
+
+- **The build uses the kit being developed when both kits have the same version.** With the installed kit in Program Files at the same version as C:\HomerDev, the build took the installed one, and the kit's macro test could not write its log there, so the build stopped. C:\HomerDev now wins a tie, and the test logs under %LOCALAPPDATA%\HomerDev when the kit's own folder cannot be written.
+
 ## 15 November 2026 -- DbDo says which keys it binds
 
 - **DbDo.exe /exportkeys <file>** writes every command and key DbDo declares, without opening a window, and ends. The kit's check runs it at every push and compares the file with configs\\DbDo.inix, so a key the menus or the Key Describer name is a key that runs. For now a difference is a warning, listed in the check's log.
