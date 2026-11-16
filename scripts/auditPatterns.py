@@ -496,7 +496,7 @@ def checkAccessLetters():
     #   2. In a menu, the trigger letter is the letter of the item's hotkey,
     #      when the hotkey has one.
     # A KEY FAMILY, AS THE KIT'S GATE HAS IT (10 November 2026): a key letter another command on that letter starts a
-    # word with, and shares a word with this one -- Append Record keeps Copy Record's C. DbDo's audit and check.py's
+    # word with, and shares a word with this one -- Copy Append Record keeps Copy Record's C. DbDo's audit and check.py's
     # menu letters gate had judged the same rule two ways, and this one stopped a release the gate had passed.
     lFacts = []
     for sCaptionOne, sExprOne in re.findall(r'addItem\(mi[A-Za-z]+,\s*"([^"]*)",\s*"[^"]*",\s*([^,]+?),', sSource):

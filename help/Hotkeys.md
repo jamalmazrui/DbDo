@@ -21,14 +21,15 @@ section says why each key is the one it is.
 - Append Clipboard\
   Add the clipboard text to the end of a file you name.\
   Control+Shift+Apostrophe
-- Append Record\
-  Alt+Shift+C
 - Clear Bookmark\
   Forget the saved bookmark. B for Bookmark. Shift reverses Save Bookmark.\
   Control+Shift+B
 - Clear Clipboard\
   Empty the clipboard. Shift reverses Say Clipboard.\
   Alt+Shift+Apostrophe
+- Copy Append Record\
+  C for Copy.\
+  Alt+Shift+C
 - Copy Record\
   Duplicate the current row as a new row. C for Copy.\
   Control+Shift+C
@@ -59,9 +60,6 @@ section says why each key is the one it is.
 - Mark Record\
   Set the 'marked' flag on the current row. M for Mark.\
   Control+M
-- Marked Toggle\
-  Control+Space toggles a selection in any Windows list.\
-  Control+Space
 - New Copy\
   N for New.\
   Control+Shift+N
@@ -92,6 +90,9 @@ section says why each key is the one it is.
 - Save Clipboard\
   Save the clipboard text to a file you name.\
   Control+Apostrophe
+- Toggle Mark\
+  Control+Space toggles a selection in any Windows list.\
+  Control+Space
 - Unmark Record\
   Clear the 'marked' flag on the current row. Shift reverses Mark: M for Mark.\
   Control+Shift+M
@@ -201,8 +202,8 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 
 ### Misc
 
-- Append Cell\
-  Append the value of the cell under the virtual cursor to the clipboard. C for Cell.\
+- Copy Append\
+  Append the value of the cell under the virtual cursor to the clipboard. C for Copy.\
   Alt+C
 - Copy Cell\
   Copy the value of the cell under the virtual cursor to the clipboard. C for Copy.\
@@ -400,6 +401,12 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Marked\
   M for Marked.\
   Shift+M
+- Say Marked Records\
+  Speak every marked record in full, from the first record down (all displayed columns). Space marks in a list; Shift and Space asks how many are marked.\
+  Shift+Space
+- Say Marked Records from Current\
+  Speak every marked record in full, from the current record down. M for Marked.\
+  Alt+Shift+M
 - Say Notes\
   Say the record's notes. N for Notes.\
   Shift+N
@@ -421,12 +428,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Query\
   Q for Query.\
   Shift+Q
-- Say Records from Current Marked\
-  Speak every marked record in full, from the current record down. M for Marked.\
-  Alt+Shift+M
-- Say Records of Marked\
-  Speak every marked record in full, from the first record down (all displayed columns). Space marks in a list; Shift and Space asks how many are marked.\
-  Shift+Space
 - Say Replace Values\
   R for Replace.\
   Shift+R
@@ -496,7 +497,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Open in Explorer
 - Alt+C\
   Append the value of the cell under the virtual cursor to the clipboard.\
-  Append Cell
+  Copy Append
 - Alt+D\
   Database Summary
 - Alt+Delete\
@@ -556,7 +557,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Empty the clipboard.\
   Clear Clipboard
 - Alt+Shift+C\
-  Append Record
+  Copy Append Record
 - Alt+Shift+D\
   Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail.\
   Open Template Database
@@ -573,7 +574,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Say Column as List of Marked
 - Alt+Shift+M\
   Speak every marked record in full, from the current record down.\
-  Say Records from Current Marked
+  Say Marked Records from Current
 - Alt+Shift+N\
   Edit Notes
 - Alt+Shift+O\
@@ -662,7 +663,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Show the table, row, filter, and sort in a read-only dialog.\
   Where Am I
 - Control+Space\
-  Marked Toggle
+  Toggle Mark
 - Control+T\
   Choose Table
 - Control+Tab\
@@ -867,7 +868,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Say Select Columns
 - Shift+Space\
   Speak every marked record in full, from the first record down (all displayed columns).\
-  Say Records of Marked
+  Say Marked Records
 - Shift+T\
   Say the record's tags.\
   Say Tags
@@ -897,14 +898,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alternate Menu\
   Pick any command from one list, in menu, name or key order.\
   Alt+F10
-- Append Cell\
-  Append the value of the cell under the virtual cursor to the clipboard.\
-  Alt+C
 - Append Clipboard\
   Add the clipboard text to the end of a file you name.\
   Control+Shift+Apostrophe
-- Append Record\
-  Alt+Shift+C
 - Chat about Table\
   Shift+F12
 - Chat with AI\
@@ -932,6 +928,11 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Complete Unmark\
   Unmark every row from the Alt+F8 anchor to the current row.\
   Alt+Shift+F8
+- Copy Append\
+  Append the value of the cell under the virtual cursor to the clipboard.\
+  Alt+C
+- Copy Append Record\
+  Alt+Shift+C
 - Copy Cell\
   Copy the value of the cell under the virtual cursor to the clipboard.\
   Control+C
@@ -1035,8 +1036,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Mark Record\
   Set the 'marked' flag on the current row.\
   Control+M
-- Marked Toggle\
-  Control+Space
 - Merge Data\
   Merge rows from a Markdown table, JSON, or Inix file into the current table.\
   Alt+M
@@ -1184,6 +1183,12 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Shift+L
 - Say Marked\
   Shift+M
+- Say Marked Records\
+  Speak every marked record in full, from the first record down (all displayed columns).\
+  Shift+Space
+- Say Marked Records from Current\
+  Speak every marked record in full, from the current record down.\
+  Alt+Shift+M
 - Say Notes\
   Say the record's notes.\
   Shift+N
@@ -1204,12 +1209,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Shift+P
 - Say Query\
   Shift+Q
-- Say Records from Current Marked\
-  Speak every marked record in full, from the current record down.\
-  Alt+Shift+M
-- Say Records of Marked\
-  Speak every marked record in full, from the first record down (all displayed columns).\
-  Shift+Space
 - Say Replace Values\
   Shift+R
 - Say Select Columns\
@@ -1263,6 +1262,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Table Summary\
   Show a summary of the table: fields, types and keys.\
   Alt+T
+- Toggle Mark\
+  Control+Space
 - Unmark All\
   Control+Shift+A
 - Unmark Record\

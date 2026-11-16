@@ -130,9 +130,9 @@ Edit Cell=F2, Edit the current cell in place
 Delete Record=Control+D or Delete, Delete the current record, or the marked ones, after you confirm
 Delete Without Confirmation=Control+Shift+D, Delete the current record without asking
 Copy Cell=Control+C, Copy the current cell's value to the clipboard
-Append Cell=Alt+C, Add the current cell's value to the end of the clipboard
+Copy Append=Alt+C, Add the current cell's value to the end of the clipboard
 Copy Record=Control+Shift+C, Copy the current record to the clipboard
-Append Record=Alt+Shift+C, Add the current record to the end of the clipboard
+Copy Append Record=Alt+Shift+C, Add the current record to the end of the clipboard
 Open Cell Value=Control+Enter, Open the current cell's value as a file, folder or url
 Open url=Control+Shift+U, Open the current record's url in the web browser
 Pick Value=Control+F2, Pick a value from the current field's fixed values
@@ -142,7 +142,7 @@ Mail Record=None, Send an email message made from the current record
 
 ; ===== Mark menu =====
 Mark Record=Control+M, Mark the current record
-Marked Toggle=Control+Space, Mark or unmark the current record
+Toggle Mark=Control+Space, Mark or unmark the current record
 Edit Notes=Alt+Shift+N, Edit the current record's notes
 Edit Tags=Alt+Shift+T, Edit the current record's tags
 Edit url=Alt+Shift+U, Edit the current record's url
@@ -263,7 +263,7 @@ Say Order and Filter=Shift+8 or NumPadStar, Say the order and the filter in forc
 Say Column as List from Current=Control+L, Say the current column's values from the current record on
 Say Column as List from Current Marked=Control+Shift+L, Say the current column's values in the marked records from the current record on
 Say Records from Current=None, Say all records in full from the current record on
-Say Records from Current Marked=Alt+Shift+M, Say marked records in full from the current record on
+Say Marked Records from Current=Alt+Shift+M, Say marked records in full from the current record on
 
 ; ===== Misc menu =====
 Database Summary=Alt+D, Show the database's tables, record counts and relations
@@ -434,7 +434,7 @@ Related Records=None, Go to the records of another table that the current record
 Show Schema=None, List the database's tables and views
 Say Column as List=Alt+L, Say the current column's values, from the first record
 Say Column as List of Marked=Alt+Shift+L, Say the current column's values in the marked records
-Say Records of Marked=Shift+Space, Say every marked record in full
+Say Marked Records=Shift+Space, Say every marked record in full
 Say Time=Alt+Semicolon, Say the date and time
 Say Path=Alt+P, Say the full path of the open database
 Filter with Regex=None, Show only the records whose current field matches a regular expression

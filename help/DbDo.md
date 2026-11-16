@@ -251,7 +251,7 @@ All edits auto-commit. If a table is read-only, **Read Only Toggle** (Control+Sh
 
 Marking is DbDo's explicit, queryable alternative to visual multi-select. The `marked` field carries the state.
 
-- **Mark Record** (Control+M) marks the current record; **Unmark Record** (Control+Shift+M) clears it; **Marked Toggle** (Control+Space) flips it; **Say Marked** (Shift+M) speaks it.
+- **Mark Record** (Control+M) marks the current record; **Unmark Record** (Control+Shift+M) clears it; **Toggle Mark** (Control+Space) flips it; **Say Marked** (Shift+M) speaks it.
 - **Mark All** (Control+A), **Unmark All** (Control+Shift+A), and **Invert Marked** (Alt+Shift+I) act across the current view.
 - **Shift+Down Arrow and Shift+Up Arrow** mark the record and move to the next or previous one. **Alt+Shift+Down Arrow and Alt+Shift+Up Arrow** unmark it and move.
 - **Control+Shift+Home** marks every record from the first to this one; **Control+Shift+End** marks from this one to the last. **Alt+Control+Shift+Home** and **Alt+Control+Shift+End** unmark the same spans. These were Shift+Home and Shift+End through version 1.0.316; those keys now say where marking went.
@@ -387,7 +387,7 @@ Filter and order first to shape the grid, then report on exactly what you see.
 - **Export Data** (Alt+Shift+X) writes the grid -- shown columns, kept records -- to a file: CSV, TSV, Markdown, a web page, Excel, Word, JSON, an .inix table, or another database. It is the one way to write data to a file.
 - **Run Report** (Alt+Shift+R) writes a designed document from a report definition, the same way every time, from the whole table rather than the grid. Definitions live in report.inix beside the database (see "The report-template language" in Part 6); BookTrail, ContactTrail, RadioTrail and TechTraining come with some.
 - **Print** (Control+P) prints the grid.
-- **The clipboard:** Copy Cell (Control+C) and Append Cell (Alt+C); Append Record (Alt+Shift+C); and, on the Misc menu, Copy Column, Copy Grid, and Copy Visible Cells, as tab-separated text that pastes into a spreadsheet.
+- **The clipboard:** Copy Cell (Control+C) and Copy Append (Alt+C); Copy Append Record (Alt+Shift+C); and, on the Misc menu, Copy Column, Copy Grid, and Copy Visible Cells, as tab-separated text that pastes into a spreadsheet.
 - **Save As** (Control+Shift+S) copies the whole database, to keep it or to change its format.
 
 ### To automate what you repeat
@@ -529,7 +529,7 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Delete Record | Control+D |
 | Delete Without Confirmation | Control+Shift+D |
 | Copy Record | Control+Shift+C |
-| Append Record | Alt+Shift+C |
+| Copy Append Record | Alt+Shift+C |
 | New Copy | Control+Shift+N |
 | Mail Record | — |
 | Replace | Control+R |
@@ -537,7 +537,7 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Extract with Regex | Control+Shift+E |
 | Mark Record | Control+M |
 | Say Marked | Shift+M |
-| Marked Toggle | Control+Space |
+| Toggle Mark | Control+Space |
 | Edit Notes | Alt+Shift+N |
 | Edit Tags | Alt+Shift+T |
 | Edit url | Alt+Shift+U |
@@ -604,8 +604,8 @@ The Query menu holds record inspection and the Say-X status family.
 | Say Column as List from Current | Control+L |
 | Say Column as List from Current Marked | Control+Shift+L |
 | Say Records from Current | — |
-| Say Records from Current Marked | Alt+Shift+M |
-| Say Records of Marked | Shift+Space |
+| Say Marked Records from Current | Alt+Shift+M |
+| Say Marked Records | Shift+Space |
 | Say Order and Filter | Shift+8 |
 | Say Position | Alt+Delete |
 | Say Clipboard | Alt+Apostrophe |
@@ -641,7 +641,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Add Column to Order Descending | Alt+Shift+A |
 | Select Columns | Alt+S |
 | Generate from Grid | Alt+Shift+G |
-| Append Cell | Alt+C |
+| Copy Append | Alt+C |
 | Copy Cell | Control+C |
 | Copy Visible Cells | — |
 | Copy Column / Copy Grid | — |

@@ -13380,6 +13380,13 @@ namespace DbDo
             db = new DbDoManager();
             initializeForm();
             buildMenus();
+            // FORMER NAMES (15 November 2026, the keyboard audit's A11): the commands renamed today keep their old names
+            // findable -- the Alternate Menu ends each line with "Formerly <name>." -- through the kit's KeyMap.
+            Homer.KeyMap.addFormerName("Copy Append", "Append Cell");
+            Homer.KeyMap.addFormerName("Copy Append Record", "Append Record");
+            Homer.KeyMap.addFormerName("Say Marked Records", "Say Records of Marked");
+            Homer.KeyMap.addFormerName("Say Marked Records from Current", "Say Records from Current Marked");
+            Homer.KeyMap.addFormerName("Toggle Mark", "Marked Toggle");
             buildGrid();
             buildStatusBar();
             initializeMacros();
@@ -14235,12 +14242,12 @@ namespace DbDo
             miRecRemove      = addItem(miEdit, "&Delete Record",      "Delete Record",       Keys.Control | Keys.D,              recRemoveClicked);
             miRecRemoveForce = addItem(miEdit, "Delete Without Confirmation",            "Delete Without Confirmation",  Keys.Control | Keys.Shift | Keys.D, recRemoveForceClicked);
             miRecCopy        = addItem(miEdit, "&Copy Record", "Copy Record",         Keys.Control | Keys.Shift | Keys.C, recCopyClicked);
-            // Append Record: like Copy Record but adds to the
+            // Copy Append Record: like Copy Record but adds to the
             // existing clipboard contents rather than replacing.
             // Useful for collecting several rows from across the
             // database into one clipboard payload. Each appended
             // record is separated by a blank line.
-            miRecAppend      = addItem(miEdit, "Append Record",             "Append Record",       Keys.Alt | Keys.Shift | Keys.C,     recAppendClicked);
+            miRecAppend      = addItem(miEdit, "Copy Append Record",             "Copy Append Record",       Keys.Alt | Keys.Shift | Keys.C,     recAppendClicked);
             // New Copy: duplicate the current row. Pre-fills the New
             // Record dialog with all visible field values from the
             // current row; the user reviews, edits as needed, and
@@ -14265,7 +14272,7 @@ namespace DbDo
             // unmark differ only by the letter, not by an added
             // modifier).
             miRecMark        = addItem(miEdit, "&Mark Record",                            "Mark Record",            Keys.Control | Keys.M,              recMarkClicked);
-            miRecToggleMark  = addItem(miEdit, "Marked Toggle",          "Marked Toggle",       Keys.Control | Keys.Space,          recToggleMarkClicked);
+            miRecToggleMark  = addItem(miEdit, "Toggle Mark",          "Toggle Mark",       Keys.Control | Keys.Space,          recToggleMarkClicked);
             miEditNotes      = addItem(miEdit, "Edit Notes...",          "Edit Notes",          Keys.Alt | Keys.Shift | Keys.N,     editNotesClicked);
             miEditTags       = addItem(miEdit, "Edit &Tags...",           "Edit Tags",           Keys.Alt | Keys.Shift | Keys.T,     editTagsClicked);
             miEditUrl        = addItem(miEdit, "Edit &url...",            "Edit url",            Keys.Alt | Keys.Shift | Keys.U,     editUrlClicked);
@@ -14456,13 +14463,13 @@ namespace DbDo
             miSaySayColumnMarked    = addItem(miSay, "Say Column as List from Current Marked","Say Column as List from Current Marked",Keys.Control | Keys.Shift | Keys.L, saySayColumnMarked);
             // Say Records Rest gave up Alt+L to the Say Column All command
             // above; it remains on the menu (and the Alternate Menu) with
-            // no chord for now. Say Records from Current Marked keeps Alt+Shift+M.
+            // no chord for now. Say Marked Records from Current keeps Alt+Shift+M.
             // NAMES (29 October 2026): Say Records Rest, Say Records Rest Marked and Say Marked
-            // Rows became Say Records from Current, Say Records from Current Marked and Say
+            // Rows became Say Records from Current, Say Marked Records from Current and Say
             // Records of Marked, word for word the Say Column as List family.
             miSaySayRows         = addItem(miSay, "Say Records from Current", "Say Records from Current", Keys.None,                         saySayRows);
-            miSaySayRowsMarked   = addItem(miSay, "Say Records from Current Marked", "Say Records from Current Marked", Keys.Alt | Keys.Shift | Keys.M,    saySayRowsMarked);
-            miSaySayMarkedRows   = addItem(miSay, "Say Records of Marked", "Say Records of Marked", Keys.Shift | Keys.Space, saySayMarkedRows);
+            miSaySayRowsMarked   = addItem(miSay, "Say Marked Records from Current", "Say Marked Records from Current", Keys.Alt | Keys.Shift | Keys.M,    saySayRowsMarked);
+            miSaySayMarkedRows   = addItem(miSay, "Say Marked Records", "Say Marked Records", Keys.Shift | Keys.Space, saySayMarkedRows);
 
             // THE SAY LAYER ANSWERS FOR EVERY DIALOG THAT REMEMBERS AN ANSWER.
             //
@@ -14649,7 +14656,7 @@ namespace DbDo
             // has no hotkey or mnemonic letter -- the word "Copy" is
             // taken (Control+C) and no other letter in the label is a
             // legitimate Camel-Type mnemonic.
-            miCellAppend     = addItem(miMisc, "Append &Cell",                "Append Cell",    Keys.Alt | Keys.C,                  cellAppendClicked);
+            miCellAppend     = addItem(miMisc, "&Copy Append",                "Copy Append",    Keys.Alt | Keys.C,                  cellAppendClicked);
             miCellCopy       = addItem(miMisc, "Copy Cell",                  "Copy Cell",      Keys.Control | Keys.C,              cellCopyClicked);
             miCopyRow        = addItem(miMisc, "Copy Visible Cells",   "Copy Visible Cells", Keys.None,                          copyRowClicked);
             // Column / whole-grid clipboard. Both walk every row with
@@ -14907,7 +14914,7 @@ namespace DbDo
             // aliases. Each of those chords is now the primary chord
             // for one of the new Sort-by-<column> commands (Alt+T =
             // Sort-by-Tags, Alt+C used to be Sort-by-... but the user
-            // spec puts Append Cell there directly, Alt+L = Sort-by-
+            // spec puts Copy Append there directly, Alt+L = Sort-by-
             // Look). The tools they used to alias (Measure-Table,
             // New-Chart, Select-Table) keep their canonical chords
             // and menu locations.
@@ -15082,10 +15089,10 @@ namespace DbDo
                 "Control+Shift+L. Same as Say Column as List from Current but limited to marked rows. Reports 'No marked rows from here' when nothing is marked at or after the current row.");
             add("Say Records from Current", "Speak every record in full, from the current record down (all displayed columns)",
                 "No key of its own. Each record formatted as 'Record N -- col1: val1; col2: val2; ...' with newlines between records. Cap 25 in spoken form; double-press for the full list.");
-            add("Say Records from Current Marked", "Speak every marked record in full, from the current record down",
-                "Alt+Shift+M. Like Say Records from Current, but only marked records; Say Records of Marked (Shift+Space) starts at the top instead.");
-            add("Say Records of Marked", "Speak every marked record in full, from the first record down (all displayed columns)",
-                "Shift+Space. Each record reads 'Row N -- col1: val1; col2: val2; ...' with null/blank for SQL NULL / empty values. Unlike Say Records from Current Marked (Alt+Shift+M), which starts at the current record, this always starts at the top. The cursor position is left unchanged. Double-press shows the rows in the read-only review dialog.");
+            add("Say Marked Records from Current", "Speak every marked record in full, from the current record down",
+                "Alt+Shift+M. Like Say Records from Current, but only marked records; Say Marked Records (Shift+Space) starts at the top instead.");
+            add("Say Marked Records", "Speak every marked record in full, from the first record down (all displayed columns)",
+                "Shift+Space. Each record reads 'Row N -- col1: val1; col2: val2; ...' with null/blank for SQL NULL / empty values. Unlike Say Marked Records from Current (Alt+Shift+M), which starts at the current record, this always starts at the top. The cursor position is left unchanged. Double-press shows the rows in the read-only review dialog.");
             add("Say Position",       "Speak the column header and 1-based row number of the virtual cell",
                 "JAWS-style 'say cursor position' for the listview. Speech-only; does not move focus. Double-press opens the same text in a read-only multi-line dialog.");
             add("Show in FileDir",    "Show the open database's file, selected in its folder, in FileDir", "");
@@ -15125,7 +15132,7 @@ namespace DbDo
             add("Graphics Column",           "Plot the column under the virtual cursor as an Excel chart",
                 "Type-aware: numeric -> histogram or box plot, date -> timeline or seasonal, boolean -> pie, text -> Pareto bar.");
             add("Copy Cell",          "Copy the value of the cell under the virtual cursor to the clipboard", "");
-            add("Append Cell",        "Append the value of the cell under the virtual cursor to the clipboard", "");
+            add("Copy Append",        "Append the value of the cell under the virtual cursor to the clipboard", "");
             add("Copy Visible Cells",  "Copy the current record's visible cells to the clipboard as tab-separated values. Hidden columns (added, edited, look, prime, url, tags, notes, marked) are skipped; use Copy Record for the full set.", "");
             add("Copy Column",        "Copy every value in the column under the virtual cursor to the clipboard, one value per line with the column name as a header line",
                 "Walks all rows and restores the cursor when done. Paste into a spreadsheet to drop the column into a single column of cells. Tabs and line breaks inside a value are flattened so the column stays aligned.");
@@ -18601,7 +18608,7 @@ namespace DbDo
             }
             if (lParts.Count == 0)
             { Say.say("marked rows: no marked rows."); return; }
-            speakOrShowParts("Say Records of Marked", lParts, 128);
+            speakOrShowParts("Say Marked Records", lParts, 128);
         }
 
         private void saySayRows(object sender, EventArgs evArgs)
@@ -18671,7 +18678,7 @@ namespace DbDo
             List<string> lParts = new List<string>();
             for (int i = 0; i < lRows.Count; i++)
                 lParts.Add("Row " + (iStart + i) + " -- " + lRows[i]);
-            speakOrShowParts(bMarkedOnly ? "Say Records from Current Marked" : "Say Records from Current",
+            speakOrShowParts(bMarkedOnly ? "Say Marked Records from Current" : "Say Records from Current",
                 lParts, bMarkedOnly ? 114 : 113);
         }
 
@@ -24803,7 +24810,7 @@ namespace DbDo
 
         // --- v1.0.69 wave-2 record-level commands ---
 
-        // Append Record (Alt+Shift+C): like recCopyClicked but adds
+        // Copy Append Record (Alt+Shift+C): like recCopyClicked but adds
         // to existing clipboard contents instead of replacing. Each
         // record is rendered as "field: value" lines, with a blank
         // line separating one record from the next. Useful for
@@ -27481,7 +27488,7 @@ namespace DbDo
             if (db.currentIsView)
             {
                 LbcMessage.show(this, "Cannot mark rows of a view (read-only).",
-                    "Marked Toggle",
+                    "Toggle Mark",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -27490,8 +27497,8 @@ namespace DbDo
             {
                 LbcMessage.show(this,
                     "Current table has no '" + Metadata.MarkedColumn + "' column. "
-                    + "Marked Toggle requires the standard metadata column.",
-                    "Marked Toggle",
+                    + "Toggle Mark requires the standard metadata column.",
+                    "Toggle Mark",
                     MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -29498,7 +29505,7 @@ namespace DbDo
             addContextItem(cms, "Copy &Record as New...", "Control+Shift+N", recNewCopyClicked, false);
             addContextItem(cms, "&Delete Record", "Control+D", recRemoveClicked, false);
             cms.Items.Add(new ToolStripSeparator());
-            addContextItem(cms, "&Marked Toggle", "Control+Space", recToggleMarkClicked, false);
+            addContextItem(cms, "&Toggle Mark", "Control+Space", recToggleMarkClicked, false);
             addContextItem(cms, "Null &Value", "Control+Shift+Backspace",
                 delegate(object o, EventArgs e) { nullCurrentCell(); }, false);
             addContextItem(cms, "&Say Cell", "Shift+C", saySayCell, false);

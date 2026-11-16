@@ -5,6 +5,13 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 15 November 2026 -- The agreed names
+
+- **Copy Append** (Alt+C) was Append Cell, **Copy Append Record** (Alt+Shift+C) was Append Record, and **Toggle Mark** (Control+Space) was Marked Toggle, as in the other Homer apps.
+- **Say Marked Records** (Shift+Space) was Say Records of Marked, and **Say Marked Records from Current** (Alt+Shift+M) was Say Records from Current Marked.
+- The Alternate Menu still finds each by its old name: its line ends "Formerly" and the name.
+- DbDo now needs HomerDev 1.241.0.
+
 ## 15 November 2026 -- Every key DbDo answers is named
 
 - **Delete Record** also answers Delete, **Enter Child Table** Enter, **Exit Child Table** Backspace, and **Say Order and Filter** the number pad's Star, and the Key Describer, the Alternate Menu and Hotkeys now say so. DbDo's first comparison of the keys it binds with the keys it shows found these four.

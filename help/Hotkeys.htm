@@ -255,8 +255,6 @@ among tabs everywhere else.</li>
 <li>Append Clipboard<br />
 Add the clipboard text to the end of a file you name.<br />
 Control+Shift+Apostrophe</li>
-<li>Append Record<br />
-Alt+Shift+C</li>
 <li>Clear Bookmark<br />
 Forget the saved bookmark. B for Bookmark. Shift reverses Save
 Bookmark.<br />
@@ -264,6 +262,9 @@ Control+Shift+B</li>
 <li>Clear Clipboard<br />
 Empty the clipboard. Shift reverses Say Clipboard.<br />
 Alt+Shift+Apostrophe</li>
+<li>Copy Append Record<br />
+C for Copy.<br />
+Alt+Shift+C</li>
 <li>Copy Record<br />
 Duplicate the current row as a new row. C for Copy.<br />
 Control+Shift+C</li>
@@ -297,9 +298,6 @@ Alt+B</li>
 <li>Mark Record<br />
 Set the ‘marked’ flag on the current row. M for Mark.<br />
 Control+M</li>
-<li>Marked Toggle<br />
-Control+Space toggles a selection in any Windows list.<br />
-Control+Space</li>
 <li>New Copy<br />
 N for New.<br />
 Control+Shift+N</li>
@@ -333,6 +331,9 @@ Control+B</li>
 <li>Save Clipboard<br />
 Save the clipboard text to a file you name.<br />
 Control+Apostrophe</li>
+<li>Toggle Mark<br />
+Control+Space toggles a selection in any Windows list.<br />
+Control+Space</li>
 <li>Unmark Record<br />
 Clear the ‘marked’ flag on the current row. Shift reverses Mark: M for
 Mark.<br />
@@ -468,9 +469,9 @@ Control+Slash</li>
 </ul>
 <h3 id="misc">Misc</h3>
 <ul>
-<li>Append Cell<br />
+<li>Copy Append<br />
 Append the value of the cell under the virtual cursor to the clipboard.
-C for Cell.<br />
+C for Copy.<br />
 Alt+C</li>
 <li>Copy Cell<br />
 Copy the value of the cell under the virtual cursor to the clipboard. C
@@ -691,6 +692,15 @@ Shift+L</li>
 <li>Say Marked<br />
 M for Marked.<br />
 Shift+M</li>
+<li>Say Marked Records<br />
+Speak every marked record in full, from the first record down (all
+displayed columns). Space marks in a list; Shift and Space asks how many
+are marked.<br />
+Shift+Space</li>
+<li>Say Marked Records from Current<br />
+Speak every marked record in full, from the current record down. M for
+Marked.<br />
+Alt+Shift+M</li>
 <li>Say Notes<br />
 Say the record’s notes. N for Notes.<br />
 Shift+N</li>
@@ -715,15 +725,6 @@ Shift+P</li>
 <li>Say Query<br />
 Q for Query.<br />
 Shift+Q</li>
-<li>Say Records from Current Marked<br />
-Speak every marked record in full, from the current record down. M for
-Marked.<br />
-Alt+Shift+M</li>
-<li>Say Records of Marked<br />
-Speak every marked record in full, from the first record down (all
-displayed columns). Space marks in a list; Shift and Space asks how many
-are marked.<br />
-Shift+Space</li>
 <li>Say Replace Values<br />
 R for Replace.<br />
 Shift+R</li>
@@ -799,7 +800,7 @@ Open in Explorer</li>
 <li>Alt+C<br />
 Append the value of the cell under the virtual cursor to the
 clipboard.<br />
-Append Cell</li>
+Copy Append</li>
 <li>Alt+D<br />
 Database Summary</li>
 <li>Alt+Delete<br />
@@ -865,7 +866,7 @@ Add Column to Order Descending</li>
 Empty the clipboard.<br />
 Clear Clipboard</li>
 <li>Alt+Shift+C<br />
-Append Record</li>
+Copy Append Record</li>
 <li>Alt+Shift+D<br />
 Open one of the template databases that come with DbDo, such as
 RadioTrail or JobTrail.<br />
@@ -884,7 +885,7 @@ top.<br />
 Say Column as List of Marked</li>
 <li>Alt+Shift+M<br />
 Speak every marked record in full, from the current record down.<br />
-Say Records from Current Marked</li>
+Say Marked Records from Current</li>
 <li>Alt+Shift+N<br />
 Edit Notes</li>
 <li>Alt+Shift+O<br />
@@ -978,7 +979,7 @@ Save</li>
 Show the table, row, filter, and sort in a read-only dialog.<br />
 Where Am I</li>
 <li>Control+Space<br />
-Marked Toggle</li>
+Toggle Mark</li>
 <li>Control+T<br />
 Choose Table</li>
 <li>Control+Tab<br />
@@ -1190,7 +1191,7 @@ Say Select Columns</li>
 <li>Shift+Space<br />
 Speak every marked record in full, from the first record down (all
 displayed columns).<br />
-Say Records of Marked</li>
+Say Marked Records</li>
 <li>Shift+T<br />
 Say the record’s tags.<br />
 Say Tags</li>
@@ -1220,15 +1221,9 @@ Alt+Shift+A</li>
 <li>Alternate Menu<br />
 Pick any command from one list, in menu, name or key order.<br />
 Alt+F10</li>
-<li>Append Cell<br />
-Append the value of the cell under the virtual cursor to the
-clipboard.<br />
-Alt+C</li>
 <li>Append Clipboard<br />
 Add the clipboard text to the end of a file you name.<br />
 Control+Shift+Apostrophe</li>
-<li>Append Record<br />
-Alt+Shift+C</li>
 <li>Chat about Table<br />
 Shift+F12</li>
 <li>Chat with AI<br />
@@ -1256,6 +1251,12 @@ Shift+F8</li>
 <li>Complete Unmark<br />
 Unmark every row from the Alt+F8 anchor to the current row.<br />
 Alt+Shift+F8</li>
+<li>Copy Append<br />
+Append the value of the cell under the virtual cursor to the
+clipboard.<br />
+Alt+C</li>
+<li>Copy Append Record<br />
+Alt+Shift+C</li>
 <li>Copy Cell<br />
 Copy the value of the cell under the virtual cursor to the
 clipboard.<br />
@@ -1366,8 +1367,6 @@ Control+A</li>
 <li>Mark Record<br />
 Set the ‘marked’ flag on the current row.<br />
 Control+M</li>
-<li>Marked Toggle<br />
-Control+Space</li>
 <li>Merge Data<br />
 Merge rows from a Markdown table, JSON, or Inix file into the current
 table.<br />
@@ -1524,6 +1523,13 @@ Shift+K</li>
 Shift+L</li>
 <li>Say Marked<br />
 Shift+M</li>
+<li>Say Marked Records<br />
+Speak every marked record in full, from the first record down (all
+displayed columns).<br />
+Shift+Space</li>
+<li>Say Marked Records from Current<br />
+Speak every marked record in full, from the current record down.<br />
+Alt+Shift+M</li>
 <li>Say Notes<br />
 Say the record’s notes.<br />
 Shift+N</li>
@@ -1545,13 +1551,6 @@ Say the record’s prime fields.<br />
 Shift+P</li>
 <li>Say Query<br />
 Shift+Q</li>
-<li>Say Records from Current Marked<br />
-Speak every marked record in full, from the current record down.<br />
-Alt+Shift+M</li>
-<li>Say Records of Marked<br />
-Speak every marked record in full, from the first record down (all
-displayed columns).<br />
-Shift+Space</li>
 <li>Say Replace Values<br />
 Shift+R</li>
 <li>Say Select Columns<br />
@@ -1607,6 +1606,8 @@ Alt+Enter</li>
 <li>Table Summary<br />
 Show a summary of the table: fields, types and keys.<br />
 Alt+T</li>
+<li>Toggle Mark<br />
+Control+Space</li>
 <li>Unmark All<br />
 Control+Shift+A</li>
 <li>Unmark Record<br />
