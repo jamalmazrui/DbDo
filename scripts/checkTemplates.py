@@ -20,6 +20,8 @@ WHAT IT CHECKS, for each templates\\<root>\\<root>.db:
   - The views table inside the database: each table it describes exists, its columns exist and its filter runs.
   - Every .dbdo script, in either form: its table exists, and its filter and order run together.
   - No record has an empty prime or look, so every record can be pointed at and spoken.
+  - No template is in WAL mode, and no -wal, -shm or -journal file sits beside a template database, since the
+    installer copies the templates folder whole.
   - A template folder holds its database. RadioTrail's is built on this machine (it is not in git); the build makes it
     when it is missing.
 
@@ -29,6 +31,16 @@ WHAT --repair DOES, before checking, inside one transaction per database:
   - Adds a missing unique prime index once no duplicates remain.
   - Rewrites an edited trigger that misses a content field, in DbDo's own form.
   - Adds each relationship kind used in maps but missing from defs, with a sentence saying which way it reads.
+  - Adds any index of DbDo's standard set that is missing, by the same rule DbDo's open sweep uses (SQLite plan step
+    2, 15 November 2026): maps (tbl1, prime1) and (tbl2, prime2), defs (tbl, fld, ordinal, val), and each declared
+    foreign key or _id link. An index counts as present when an existing full index starts with those columns.
+  - Removes only an index proven redundant, after reading its definition: a plain index on the INTEGER PRIMARY KEY,
+    which is the rowid and already indexed, and a plain index on exactly the columns of a unique index. On the
+    templates of 15 November 2026 that is RadioTrail's three key indexes and JobTrail's idx_jobs_prime. Unique
+    indexes and the optional tags, added, edited, url and marked indexes are kept until a recorded decision.
+Before that transaction, a template in WAL mode is switched to the ordinary journal mode the way SQLite intends: a
+TRUNCATE checkpoint, then journal_mode=DELETE, then it is closed, reopened, and its row counts and integrity compared
+with what they were. No side file is ever deleted by hand.
 Repairs change only the templates in this development folder. A user's own copy is never touched.
 
 WHAT --schema <root> DOES. RadioTrail's database is built on this machine and kept out of git, so a clean checkout
@@ -64,7 +76,7 @@ dUnwatched = {"RadioTrail|stations": ["clicks", "last_check", "last_played", "la
 lNotWatched = ["added", "edited", "look", "marked", "prime"]
 lSchemaRows = ["defs"]  # the views table was retired on 4 November 2026
 lSkipTables = ["sqlean_define", "views"]
-sVersion = "2026-10-12 version 2: leaves sqlean_define alone; undoes a trigger that watches deliberately unwatched fields"
+sVersion = "2026-11-15 version 3: standard indexes, proven-redundant indexes removed, WAL templates switched to the ordinary journal"
 
 lErrors = []
 lRepairs = []
@@ -251,6 +263,142 @@ def seedKinds(oDb, sRoot):
     return iAdded
 
 
+# ---------------------------------------------------------------- indexes (SQLite plan step 2, 15 November 2026)
+
+def indexes(oDb, sTable):
+    """[(name, unique, origin, partial, [columns])] for every index of a table."""
+    lOut = []
+    for oRow in oDb.execute("PRAGMA index_list(" + quoted(sTable) + ")").fetchall():
+        lOut.append((oRow[1], oRow[2], oRow[3], oRow[4], [r[2] for r in oDb.execute("PRAGMA index_info(" + quoted(oRow[1]) + ")")]))
+    return lOut
+
+
+def rowidKey(oDb, sTable):
+    """The INTEGER PRIMARY KEY column, which is the rowid itself, or ''."""
+    lPk = [(s, sType) for iCid, s, sType, iNotNull, vDefault, iPk, iHidden in oDb.execute("PRAGMA table_xinfo(" + quoted(sTable) + ")") if iPk]
+    oSql = oDb.execute("SELECT sql FROM sqlite_master WHERE type = 'table' AND name = ?", (sTable,)).fetchone()
+    if len(lPk) != 1 or lPk[0][1].strip().upper() != "INTEGER" or (oSql and "WITHOUT ROWID" in (oSql[0] or "").upper()): return ""
+    return lPk[0][0]
+
+
+def indexTables(oDb):
+    """Ordinary tables, without virtual tables and their shadow tables."""
+    lVirtual = [r[0] for r in oDb.execute("SELECT name FROM sqlite_master WHERE type = 'table' AND sql LIKE 'CREATE VIRTUAL%'")]
+    return [s for s in tables(oDb) if s not in lVirtual and not any(s.startswith(v + "_") for v in lVirtual) and not s.startswith("sqlean_")]
+
+
+def standardIndexes(oDb, sTable):
+    """[(index name, [columns])] DbDo's standard set wants on a table; the same rule as DbDo.cs standardIndexColumns."""
+    lCols = [r[1] for r in oDb.execute("PRAGMA table_xinfo(" + quoted(sTable) + ")")]
+    lLower = [s.lower() for s in lCols]
+    lPk = [r[1] for r in oDb.execute("PRAGMA table_xinfo(" + quoted(sTable) + ")") if r[5]]
+    lWanted = []
+    def add(sName, lList):
+        if lList and [s.lower() for s in lList] not in [[x.lower() for x in t[1]] for t in lWanted]: lWanted.append((sName, lList))
+    if sTable.lower() == "maps" and all(s in lLower for s in ["tbl1", "prime1", "tbl2", "prime2"]):
+        add("idx_maps_record1", ["tbl1", "prime1"])
+        add("idx_maps_record2", ["tbl2", "prime2"])
+    if sTable.lower() == "defs" and all(s in lLower for s in ["tbl", "fld", "ordinal", "val"]):
+        add("idx_defs_lookup", ["tbl", "fld", "ordinal", "val"])
+    dKeys = {}
+    for oRow in oDb.execute("PRAGMA foreign_key_list(" + quoted(sTable) + ")"): dKeys.setdefault(oRow[0], []).append((oRow[1], oRow[3]))
+    for iId in sorted(dKeys):
+        lList = [s for iSeq, s in sorted(dKeys[iId])]
+        add("idx_" + sTable + "_" + "_".join(lList), lList)
+    for s in lCols:
+        if not s.lower().endswith("_id") or s.lower() == "id" or (len(lPk) == 1 and lPk[0].lower() == s.lower()) or s.lower() == (sTable + "_id").lower(): continue
+        add("idx_" + sTable + "_" + s, [s])
+    return lWanted
+
+
+def covered(oDb, sTable, lWanted):
+    """Whether a full index starts with these columns, or they are the rowid key."""
+    if len(lWanted) == 1 and rowidKey(oDb, sTable).lower() == lWanted[0].lower(): return True
+    for sName, iUnique, sOrigin, iPartial, lCols in indexes(oDb, sTable):
+        if not iPartial and [s.lower() for s in lCols[:len(lWanted)]] == [s.lower() for s in lWanted]: return True
+    return False
+
+
+def redundantIndexes(oDb, sTable):
+    """[(index name, reason)] for plain indexes proven redundant: one on the rowid key, or one on exactly the columns
+    of a unique index. Unique, automatic and partial indexes are never listed."""
+    lOut, lAll, sRowid = [], indexes(oDb, sTable), rowidKey(oDb, sTable)
+    for sName, iUnique, sOrigin, iPartial, lCols in lAll:
+        if iUnique or sOrigin != "c" or iPartial: continue
+        lLower = [s.lower() for s in lCols]
+        if sRowid and lLower == [sRowid.lower()]:
+            lOut.append((sName, "it indexes " + sRowid + ", the INTEGER PRIMARY KEY, which is the rowid and already indexed"))
+            continue
+        lTwin = [t[0] for t in lAll if t[1] and not t[3] and [s.lower() for s in t[4]] == lLower]
+        if lTwin: lOut.append((sName, "the unique index " + lTwin[0] + " has exactly the same columns"))
+    return lOut
+
+
+def repairIndexes(oDb, sRoot):
+    """Adds the missing standard indexes and removes the proven-redundant ones, inside the caller's transaction."""
+    lNames = [r[0].lower() for r in oDb.execute("SELECT name FROM sqlite_master WHERE type = 'index'")]
+    for sTable in indexTables(oDb):
+        for sName, sReason in redundantIndexes(oDb, sTable):
+            oSql = oDb.execute("SELECT sql FROM sqlite_master WHERE type = 'index' AND name = ?", (sName,)).fetchone()
+            log(sRoot + ": dropping " + sName + ", defined as " + (oSql[0] if oSql else "(no SQL)"))
+            oDb.execute("DROP INDEX " + quoted(sName))
+            lNames.remove(sName.lower())
+            repaired(sRoot, sTable + ": removed the redundant index " + sName + ", because " + sReason)
+        for sName, lWanted in standardIndexes(oDb, sTable):
+            if covered(oDb, sTable, lWanted): continue
+            sBase, iSuffix = sName, 2
+            while sName.lower() in lNames:
+                sName = sBase + "_" + str(iSuffix)
+                iSuffix += 1
+            oDb.execute("CREATE INDEX " + quoted(sName) + " ON " + quoted(sTable) + " (" + ", ".join(quoted(s) for s in lWanted) + ")")
+            lNames.append(sName.lower())
+            repaired(sRoot, sTable + ": added the standard index " + sName + " on " + ", ".join(lWanted))
+    return True
+
+
+# ---------------------------------------------------------------- journal mode and side files
+
+def rowCounts(oDb):
+    """{table: rows} for every ordinary table."""
+    return {s: oDb.execute("SELECT count(*) FROM " + quoted(s)).fetchone()[0] for s in tables(oDb)}
+
+
+def sideFiles(sDb):
+    """The -wal, -shm and -journal files beside a database."""
+    return [sDb + s for s in ("-wal", "-shm", "-journal") if os.path.isfile(sDb + s)]
+
+
+def leaveWal(sRoot, sDb):
+    """Switches a WAL template to the ordinary (DELETE) journal mode as SQLite intends -- a TRUNCATE checkpoint, then
+    journal_mode=DELETE -- then reopens it and proves nothing was lost: the same row counts, integrity ok, and no side
+    file left. A template ships as one file, and the installer must never copy a -wal or -shm beside it."""
+    oDb = sqlite3.connect(sDb, isolation_level=None)
+    try:
+        sMode = oDb.execute("PRAGMA journal_mode").fetchone()[0].lower()
+        if sMode != "wal": return True
+        dBefore = rowCounts(oDb)
+        oBusy = oDb.execute("PRAGMA wal_checkpoint(TRUNCATE)").fetchone()
+        log(sRoot + ": wal_checkpoint(TRUNCATE) gave busy " + str(oBusy[0]) + ", " + str(oBusy[1]) + " frames in the log, " + str(oBusy[2]) + " checkpointed")
+        if oBusy[0] != 0: return fail(sRoot, "the WAL checkpoint was blocked by another connection; close DbDo and build again")
+        sNew = oDb.execute("PRAGMA journal_mode=DELETE").fetchone()[0].lower()
+        if sNew != "delete": return fail(sRoot, "journal_mode=DELETE answered " + sNew + ", so the template is still in WAL mode")
+    finally:
+        oDb.close()
+    oDb = sqlite3.connect(sDb, isolation_level=None)
+    try:
+        sMode = oDb.execute("PRAGMA journal_mode").fetchone()[0].lower()
+        dAfter = rowCounts(oDb)
+        sIntegrity = oDb.execute("PRAGMA integrity_check").fetchone()[0]
+    finally:
+        oDb.close()
+    if sMode != "delete": return fail(sRoot, "after reopening, the journal mode is " + sMode + ", not delete")
+    if dAfter != dBefore: return fail(sRoot, "the row counts changed while leaving WAL mode: " + ", ".join(s + " " + str(dBefore.get(s)) + " to " + str(dAfter.get(s)) for s in sorted(set(dBefore) | set(dAfter)) if dBefore.get(s) != dAfter.get(s)))
+    if sIntegrity != "ok": return fail(sRoot, "integrity_check after leaving WAL mode: " + sIntegrity)
+    if sideFiles(sDb): return fail(sRoot, "side files remain after leaving WAL mode: " + ", ".join(os.path.basename(s) for s in sideFiles(sDb)))
+    repaired(sRoot, "switched from WAL to the ordinary journal mode; " + plural(sum(dAfter.values()), "row") + " in " + plural(len(dAfter), "table") + " unchanged, integrity ok, no side file")
+    return True
+
+
 def repair(sRoot, sDb):
     """Every repair DbDo's conventions settle, in one transaction."""
     oDb = sqlite3.connect(sDb, isolation_level=None)
@@ -278,6 +426,7 @@ def repair(sRoot, sDb):
                 oDb.execute(editedTrigger(sTable, primaryKey(oDb, sTable), [s for s in lWanted] + [s for s in lWatched if s not in lWanted and s not in lExtra]))
                 repaired(sRoot, sTable + ": the edited trigger" + (" now also watches " + ", ".join(lMissing) if lMissing else "") + (" no longer watches " + ", ".join(lExtra) if lExtra else ""))
         seedKinds(oDb, sRoot)
+        repairIndexes(oDb, sRoot)
         if len(lRepairs) == iBefore:
             oDb.execute("ROLLBACK")   # nothing to repair: the file is left byte for byte as it was, so git sees no change
             return True
@@ -550,7 +699,11 @@ def checkTemplate(sFolder, bRepair):
     if not os.path.isfile(sDb):
         return fail(sRoot, "the folder holds no " + sRoot + ".db, so the installer would ship this template without its database")
     log("Template " + sRoot + ": " + sDb + ", " + "{:,}".format(os.path.getsize(sDb)) + " bytes")
-    if bRepair: repair(sRoot, sDb)
+    if bRepair:
+        leaveWal(sRoot, sDb)
+        repair(sRoot, sDb)
+    lBefore = sideFiles(sDb)
+    if lBefore: fail(sRoot, "a side file sits beside the database and the installer would ship it: " + ", ".join(os.path.basename(x) for x in lBefore))
     oDb = sqlite3.connect("file:" + sDb.replace("\\", "/") + "?mode=ro", uri=True)
     try:
         checkDatabase(sRoot, oDb)
@@ -560,6 +713,12 @@ def checkTemplate(sFolder, bRepair):
         iViews = checkStoredViews(sRoot, oDb)
         iScripts = checkScripts(sRoot, sFolder, oDb)
         checkRecordNames(sRoot, oDb)
+        sMode = oDb.execute("PRAGMA journal_mode").fetchone()[0].lower()
+        if sMode == "wal": fail(sRoot, "the database is in WAL mode, so opening it makes side files; --repair switches it to the ordinary journal")
+        for sTable in indexTables(oDb):
+            for sName, lWanted in standardIndexes(oDb, sTable):
+                if not covered(oDb, sTable, lWanted): fail(sRoot, sTable + ": the standard index on " + ", ".join(lWanted) + " is missing; --repair adds it")
+            for sName, sReason in redundantIndexes(oDb, sTable): fail(sRoot, sTable + ": " + sName + " is redundant, because " + sReason + "; --repair removes it")
         log(sRoot + ": " + plural(iSql, "SQL statement") + " ran, " + plural(iReports, "report") + ", " + plural(iViews, "stored view setting")
             + " and " + plural(iScripts, "script") + " checked")
     finally:
@@ -592,6 +751,10 @@ def main():
         for sFolder in lFolders:
             checkTemplate(sFolder, bRepair)
             if os.path.basename(sFolder).lower() in [s.lower() for s in lSchema]: saveSchema(os.path.basename(sFolder), sFolder)
+        # NO SIDE FILE SHIPS (15 November 2026): the installer copies templates\\* whole, and an empty RadioTrail.db-wal
+        # did ship. Whatever the templates named on the command line, nothing beside any template database may remain.
+        for sSide in sorted(glob.glob(os.path.join(sTemplates, "**", "*.db-*"), recursive=True)):
+            if sSide.endswith(("-wal", "-shm", "-journal")): fail(os.path.basename(os.path.dirname(sSide)), "a side file would ship with the installer: " + os.path.relpath(sSide, sProject))
     except Exception as oError:
         log("CRASH: " + traceback.format_exc())
         say("checkTemplates hit an error: " + str(oError).splitlines()[0][:200] + ". Log: " + sLogPath)

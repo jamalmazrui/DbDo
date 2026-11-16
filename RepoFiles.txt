@@ -74,6 +74,9 @@ scripts/checkBlindSkillsMedia.py
 scripts/check.py
 scripts/checkTemplates.cmd
 scripts/checkTemplates.py
+# measureSqlite (15 November 2026): SQLite plan step 1, DbDo.exe --measure-sqlite on a copy of RadioTrail.
+scripts/measureSqlite.cmd
+scripts/measureSqlite.py
 scripts/makeBlindSkills.cmd
 scripts/makeBlindSkills.py
 scripts/makeMusicTrail.cmd

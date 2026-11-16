@@ -1884,13 +1884,18 @@ namespace DbDo
                 throw new Exception(translateConnectError(ex, sExt), ex);
             }
 
-            // Auto-create recommended indexes on SQLite databases:
-            // every foreign-key column (any column whose name ends
-            // in '_id' and is not the table's own primary key) and
-            // every 'marked' column gets a CREATE INDEX IF NOT
-            // EXISTS. This benefits Show-Object's related-records
-            // lookups (which issue SELECT look FROM <child> WHERE
-            // <fk> = <value>) and any filter on 'marked = true'.
+            // Probe the SQLite driver once per connect string, on this
+            // connection, and log what it supports (SQLite plan step 1).
+            if (sExt == "db" || sExt == "sqlite" || sExt == "sqlite3")
+            {
+                try { probeSqlite(); }
+                catch (Exception exProbe)
+                { try { DbDoLog.write("probeSqlite failed: " + exProbe.Message); } catch { } }
+            }
+
+            // Add any missing index of DbDo's standard set on SQLite
+            // databases: the maps endpoints, the defs lookup, and each
+            // declared foreign key or _id link (see ensureRecommendedIndexes).
             //
             // Skipped on read-only opens, on file formats other than
             // SQLite (Access manages indexes through ADOX; CSV and
@@ -2200,126 +2205,296 @@ namespace DbDo
             }
         }
 
-        // ensureRecommendedIndexes: for every base table in the
-        // currently-open SQLite database, issue CREATE INDEX IF
-        // NOT EXISTS on the columns that benefit from being indexed
-        // in DbDo's typical access patterns:
+        // measureSqlite: the measuring half of DbDo.exe --measure-sqlite
+        // (SQLite plan step 1). On the open table it times recordCount, a
+        // sort ascending and descending, a filter set and cleared, and the
+        // pick-list lookup, each through the very property or function the
+        // window uses. It then records SQLite's EXPLAIN QUERY PLAN for the
+        // queries those commands send -- the sorted SELECT, the defs lookup,
+        // both maps endpoint lookups, and each _id link lookup -- so the
+        // log shows which index, if any, each one really uses. Nothing in
+        // the database is changed. Returns the report lines.
+        public List<string> measureSqlite(string sTable, string sSortColumn, string sFilter, string sLookupField)
+        {
+            int iFound;
+            List<string> lOut = new List<string>();
+            string sExt = "", sMark = "'measure'", sT = sQuoteSqlLiteral(sTable);
+            try { sExt = System.IO.Path.GetExtension(sFilePath ?? "").TrimStart('.').ToLowerInvariant(); } catch { }
+            System.Diagnostics.Stopwatch oWatch = System.Diagnostics.Stopwatch.StartNew();
+            lOut.Add(sqliteProbeText == "" ? probeSqlite() : sqliteProbeText);
+            oWatch.Restart();
+            int iRecords = recordCount;
+            lOut.Add("TIME recordCount: " + iRecords + " records, " + oWatch.ElapsedMilliseconds + " ms");
+            if (!string.IsNullOrEmpty(sSortColumn))
+            {
+                foreach (string sDirection in new string[] { "", " DESC" })
+                {
+                    oWatch.Restart();
+                    try { sort = sSortColumn + sDirection; lOut.Add("TIME sort " + sSortColumn + sDirection + ": " + oWatch.ElapsedMilliseconds + " ms"); }
+                    catch (Exception exSort) { lOut.Add("ERROR sort " + sSortColumn + sDirection + ": " + exSort.Message); }
+                }
+                oWatch.Restart();
+                try { sort = ""; lOut.Add("TIME sort cleared: " + oWatch.ElapsedMilliseconds + " ms"); }
+                catch (Exception exClear) { lOut.Add("ERROR clearing the sort: " + exClear.Message); }
+            }
+            if (!string.IsNullOrEmpty(sFilter))
+            {
+                oWatch.Restart();
+                try { filter = sFilter; lOut.Add("TIME filter " + sFilter + ": " + recordCount + " records, " + oWatch.ElapsedMilliseconds + " ms"); }
+                catch (Exception exFilter) { lOut.Add("ERROR filter " + sFilter + ": " + exFilter.Message); }
+                oWatch.Restart();
+                try { filter = ""; lOut.Add("TIME filter cleared: " + recordCount + " records, " + oWatch.ElapsedMilliseconds + " ms"); }
+                catch (Exception exClearFilter) { lOut.Add("ERROR clearing the filter: " + exClearFilter.Message); }
+            }
+            if (!string.IsNullOrEmpty(sLookupField))
+            {
+                oWatch.Restart();
+                List<string> lValues = getLookupValues(sTable, sLookupField, 100000);
+                lOut.Add("TIME pick list " + sTable + "." + sLookupField + ": " + lValues.Count + " values, " + oWatch.ElapsedMilliseconds + " ms");
+            }
+            List<string[]> lPlans = new List<string[]>();
+            string sOrderBy = buildOrderByClause(sSortColumn, sExt);
+            lPlans.Add(new string[] { "sorted table", "SELECT * FROM " + sqliteName(sTable) + (sOrderBy.Length > 0 ? " ORDER BY " + sOrderBy : "") });
+            lPlans.Add(new string[] { "pick list", "SELECT val FROM defs WHERE tbl = " + sT + " AND fld = " + sQuoteSqlLiteral(sLookupField ?? "") + " ORDER BY ordinal, val" });
+            lPlans.Add(new string[] { "related, record as subject", "SELECT kind, tbl2, prime2, 'subject', notes FROM maps WHERE tbl1 = " + sT + " AND prime1 = " + sMark });
+            lPlans.Add(new string[] { "related, record as object", "SELECT kind, tbl1, prime1, 'object', notes FROM maps WHERE tbl2 = " + sT + " AND prime2 = " + sMark });
+            foreach (string[] aTable in queryRowsSql("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' AND COALESCE(sql, '') NOT LIKE 'CREATE VIRTUAL%' ORDER BY name", int.MaxValue, out iFound))
+                foreach (List<string> lWanted in standardIndexColumns(aTable[0]))
+                    if (lWanted.Count == 1 && lWanted[0].EndsWith("_id", StringComparison.OrdinalIgnoreCase))
+                        lPlans.Add(new string[] { "link " + aTable[0] + "." + lWanted[0], "SELECT * FROM " + sqliteName(aTable[0]) + " WHERE " + sqliteName(lWanted[0]) + " = 1" });
+            foreach (string[] aPlan in lPlans)
+            {
+                List<string> lSteps = new List<string>();
+                try
+                {
+                    // EXPLAIN QUERY PLAN rows: id, parent, notused, detail.
+                    foreach (string[] aStep in queryRowsSqlOrThrow("EXPLAIN QUERY PLAN " + aPlan[1], 1000, out iFound)) lSteps.Add(aStep[aStep.Length - 1]);
+                    lOut.Add("PLAN " + aPlan[0] + ": " + string.Join(" | ", lSteps.ToArray()));
+                }
+                catch (Exception exPlan) { lOut.Add("PLAN " + aPlan[0] + ": not available, " + exPlan.Message.Trim()); }
+            }
+            int iIndexes = 0;
+            foreach (string[] aIndex in queryRowsSql("SELECT name, tbl_name, COALESCE(sql, '(automatic)') FROM sqlite_master WHERE type = 'index' ORDER BY tbl_name, name", int.MaxValue, out iFound))
+            {
+                iIndexes++;
+                lOut.Add("INDEX " + aIndex[1] + ": " + aIndex[0] + " -- " + aIndex[2]);
+            }
+            lOut.Add("INDEXES " + iIndexes + " in all");
+            return lOut;
+        }
+
+        // probeSqlite: ask the SQLite driver, on DbDo's own connection,
+        // what it supports, and log it once per connect string (SQLite plan
+        // step 1). It records sqlite_version(), the compile options, the
+        // connection's foreign_keys setting, and whether FTS5 really works:
+        // a temporary FTS5 table is created, filled, searched and dropped,
+        // so the answer is proved rather than read from a list. The result
+        // is kept in sqliteProbeText for --measure-sqlite.
+        private static Dictionary<string, string> dSqliteProbes = new Dictionary<string, string>();
+        public string sqliteProbeText = "";
+
+        public string probeSqlite()
+        {
+            const string sProbeTable = "temp.homer_fts5_probe";
+            int iFound;
+            string sCached, sFts5, sKey = (bReadOnly ? "read-only|" : "writable|") + (sConnectString ?? ""), sOptions, sVersion = "", sForeignKeys = "";
+            List<string> lOptions = new List<string>();
+            lock (dSqliteProbes) { if (dSqliteProbes.TryGetValue(sKey, out sCached)) { sqliteProbeText = sCached; return sCached; } }
+            foreach (string[] aRow in queryRowsSql("SELECT sqlite_version()", 1, out iFound)) sVersion = aRow[0];
+            foreach (string[] aRow in queryRowsSql("PRAGMA compile_options", int.MaxValue, out iFound)) lOptions.Add(aRow[0]);
+            foreach (string[] aRow in queryRowsSql("PRAGMA foreign_keys", 1, out iFound)) sForeignKeys = aRow[0];
+            sOptions = lOptions.Count == 0 ? "(none reported)" : string.Join(" ", lOptions.ToArray());
+            try
+            {
+                oConn.Execute("CREATE VIRTUAL TABLE " + sProbeTable + " USING fts5(sText)", Type.Missing, 128 | 1);
+                oConn.Execute("INSERT INTO " + sProbeTable + " (sText) VALUES ('homer probe words')", Type.Missing, 128 | 1);
+                List<string[]> lHits = queryRowsSqlOrThrow("SELECT count(*) FROM " + sProbeTable + " WHERE homer_fts5_probe MATCH 'probe'", 1, out iFound);
+                sFts5 = (lHits.Count == 1 && lHits[0][0] == "1") ? "yes (temporary table created, searched and dropped)" : "no (the test search found nothing)";
+            }
+            catch (Exception exFts) { sFts5 = (bReadOnly && exFts.Message.IndexOf("read", StringComparison.OrdinalIgnoreCase) >= 0 ? "not proved, the read-only connection refused the test table (" : "no (") + exFts.Message.Trim() + ")"; }
+            finally
+            {
+                try { oConn.Execute("DROP TABLE IF EXISTS " + sProbeTable, Type.Missing, 128 | 1); } catch { }
+            }
+            string sResult = "SQLite driver probe: version " + (sVersion == "" ? "unknown" : sVersion)
+                + "; FTS5 " + sFts5
+                + "; foreign_keys " + (sForeignKeys == "" ? "unknown" : sForeignKeys) + " on this connection"
+                + "; optimize=0x10002 at open " + (versionAtLeast(sVersion, 3, 46) ? "supported" : "not supported before SQLite 3.46")
+                + "; read-only " + (bReadOnly ? "yes" : "no")
+                + "; compile options: " + sOptions;
+            lock (dSqliteProbes) { dSqliteProbes[sKey] = sResult; }
+            sqliteProbeText = sResult;
+            try { DbDoLog.write(sResult); } catch { }
+            return sResult;
+        }
+
+        // versionAtLeast: whether a dotted version such as 3.46.1 is at
+        // least iMajor.iMinor.
+        private static bool versionAtLeast(string sVersion, int iMajor, int iMinor)
+        {
+            int iHave, iHaveMinor;
+            string[] aParts = (sVersion ?? "").Split('.');
+            if (aParts.Length < 2 || !int.TryParse(aParts[0], out iHave) || !int.TryParse(aParts[1], out iHaveMinor)) return false;
+            return iHave > iMajor || (iHave == iMajor && iHaveMinor >= iMinor);
+        }
+
+        // ensureRecommendedIndexes: on a writable SQLite open, add any
+        // index of DbDo's small standard set that the database lacks
+        // (SQLite plan step 2, agreed by Claude and ChatGPT, 15 November
+        // 2026). The standard set is shared with scripts\checkTemplates.py:
         //
-        //   - Foreign-key columns (any column whose name ends in
-        //     '_id' and is not the table's own primary key) -- used
-        //     by Show-Object's related-records lookup.
-        //   - The 'marked' column -- used by filters and the
-        //     bulk-mark / unmark operations.
-        //   - Standard sortable columns reachable via the Alt+letter
-        //     Sort-by hotkeys: look (Alt+L), tags (Alt+T), url (Alt+
-        //     U), plus added and updated which are common sort
-        //     targets from the Custom Sort dialog.
+        //   - maps (tbl1, prime1) and maps (tbl2, prime2), the two link
+        //     endpoints Show Object and the related-records list query;
+        //   - defs (tbl, fld, ordinal, val), the pick-list lookup;
+        //   - every declared foreign key (PRAGMA foreign_key_list, with a
+        //     composite key's columns in order) and every DbDo link by the
+        //     _id naming rule, other than the table's own key.
         //
-        // The IF NOT EXISTS guard means re-opening a database is
-        // idempotent -- only the first open of a database adds
-        // indexes; subsequent opens do nothing observable.
-        //
-        // The naming convention is idx_<table>_<column>. SQLite
-        // requires index names unique across the whole database,
-        // so encoding both table and column in the name avoids
-        // collisions between tables that share a column name like
-        // 'marked'.
-        //
-        // The walk uses sqlite_master to enumerate tables, then
-        // PRAGMA table_info for each to discover columns. Both
-        // queries return ADODB recordsets in this DbDo path.
-        // INDEX creation goes through oConn.Execute directly,
-        // not a recordset.
-        //
-        // Every created index is logged to DbDoLog so the user
-        // can see what changed.
+        // Discovery reads table_xinfo (table_info on an older driver), so
+        // generated columns are seen, and skips virtual tables and their
+        // shadow tables. An index is judged by structure, not by name: a
+        // wanted column list is covered when an existing full (not
+        // partial) index starts with those columns, or when it is the
+        // table's INTEGER PRIMARY KEY. Only real creations are logged, and
+        // the sweep never drops an index. The old sweep also indexed
+        // marked, look, tags, url, added and edited; it no longer does,
+        // and indexes it made then are left alone until a recorded
+        // decision removes them from a template.
         private void ensureRecommendedIndexes()
         {
             if (oConn == null || ((int)oConn.State) == 0) return;
-
-            // Step 1: list all base tables.
-            List<string> lTables = new List<string>();
-            dynamic oRs = null;
-            try
+            HashSet<string> dIndexNames = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            List<string> lTables = new List<string>(), lVirtual = new List<string>();
+            int iCreated = 0, iFound;
+            foreach (string[] aRow in queryRowsSql("SELECT type, name, COALESCE(sql, '') FROM sqlite_master WHERE type IN ('table', 'index')", int.MaxValue, out iFound))
             {
-                oRs = createComObject("ADODB.Recordset");
-                oRs.Open("SELECT name FROM sqlite_master WHERE type='table' AND name NOT LIKE 'sqlite_%' AND name NOT LIKE 'sqlean_%'",
-                    oConn, 0 /* adOpenForwardOnly */, 1 /* adLockReadOnly */, 1 /* adCmdText */);
-                while (!(bool)oRs.EOF)
-                {
-                    object objName = oRs.Fields["name"].Value;
-                    if (objName != null && objName != DBNull.Value) lTables.Add(objName.ToString());
-                    oRs.MoveNext();
-                }
-                try { oRs.Close(); } catch { }
+                if (aRow[0] == "index") { dIndexNames.Add(aRow[1]); continue; }
+                if (aRow[1].StartsWith("sqlite_", StringComparison.OrdinalIgnoreCase) || aRow[1].StartsWith("sqlean_", StringComparison.OrdinalIgnoreCase)) continue;
+                if (aRow[2].TrimStart().StartsWith("CREATE VIRTUAL", StringComparison.OrdinalIgnoreCase)) lVirtual.Add(aRow[1]);
+                else lTables.Add(aRow[1]);
             }
-            finally { releaseCom(oRs); oRs = null; }
-
-            // Step 2: for each table, scan columns and create
-            // missing indexes. The PK-column name pattern is
-            // <table>_id; we skip indexes on that one since
-            // SQLite already maintains a rowid alias index.
             foreach (string sTable in lTables)
             {
-                string sPk = sTable + Metadata.PrimaryKeySuffix;
-                List<string> lColumns = new List<string>();
-                dynamic oCols = null;
-                try
+                bool bShadow = false;
+                foreach (string sVirtual in lVirtual) if (sTable.StartsWith(sVirtual + "_", StringComparison.OrdinalIgnoreCase)) bShadow = true;
+                if (bShadow) continue;
+                foreach (List<string> lWanted in standardIndexColumns(sTable))
                 {
-                    oCols = createComObject("ADODB.Recordset");
-                    string sQuoted = "\"" + sTable.Replace("\"", "\"\"") + "\"";
-                    oCols.Open("PRAGMA table_info(" + sQuoted + ")",
-                        oConn, 0, 1, 1);
-                    while (!(bool)oCols.EOF)
-                    {
-                        object objName = oCols.Fields["name"].Value;
-                        if (objName != null && objName != DBNull.Value) lColumns.Add(objName.ToString());
-                        oCols.MoveNext();
-                    }
-                    try { oCols.Close(); } catch { }
-                }
-                catch { /* table may be inaccessible; skip */ }
-                finally { releaseCom(oCols); oCols = null; }
-
-                foreach (string sCol in lColumns)
-                {
-                    bool bIsFk = sCol.EndsWith("_id", StringComparison.OrdinalIgnoreCase)
-                                 && !string.Equals(sCol, sPk, StringComparison.OrdinalIgnoreCase)
-                                 && !string.Equals(sCol, "id", StringComparison.OrdinalIgnoreCase);
-                    bool bIsMarked = string.Equals(sCol, Metadata.MarkedColumn,
-                                                    StringComparison.OrdinalIgnoreCase);
-                    // Standard columns reachable via the Alt+letter
-                    // Sort-by hotkeys (added v1.0.69): look (Alt+L),
-                    // tags (Alt+T), url (Alt+U). Also added and
-                    // updated which are sortable from the Custom Sort
-                    // dialog and are very common sort targets. The PK
-                    // already has SQLite's implicit rowid-alias
-                    // index, so id is excluded.
-                    bool bIsSortableStandard =
-                        string.Equals(sCol, "look",    StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(sCol, "tags",    StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(sCol, "url",     StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(sCol, "added",   StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(sCol, "edited", StringComparison.OrdinalIgnoreCase);
-                    if (!bIsFk && !bIsMarked && !bIsSortableStandard) continue;
-
-                    string sIdxName = "idx_" + sTable + "_" + sCol;
-                    string sSql = "CREATE INDEX IF NOT EXISTS \""
-                                + sIdxName.Replace("\"", "\"\"") + "\" ON \""
-                                + sTable.Replace("\"", "\"\"") + "\" (\""
-                                + sCol.Replace("\"", "\"\"") + "\")";
+                    if (indexCovers(sTable, lWanted)) continue;
+                    string sBase = "idx_" + sTable + "_" + string.Join("_", lWanted.ToArray()), sName = sBase;
+                    if (sTable.Equals("maps", StringComparison.OrdinalIgnoreCase) && lWanted[0].Equals("tbl1", StringComparison.OrdinalIgnoreCase)) sName = sBase = "idx_maps_record1";
+                    if (sTable.Equals("maps", StringComparison.OrdinalIgnoreCase) && lWanted[0].Equals("tbl2", StringComparison.OrdinalIgnoreCase)) sName = sBase = "idx_maps_record2";
+                    if (sTable.Equals("defs", StringComparison.OrdinalIgnoreCase) && lWanted[0].Equals("tbl", StringComparison.OrdinalIgnoreCase)) sName = sBase = "idx_defs_lookup";
+                    for (int iSuffix = 2; dIndexNames.Contains(sName); iSuffix++) sName = sBase + "_" + iSuffix;
+                    List<string> lQuoted = new List<string>();
+                    foreach (string sCol in lWanted) lQuoted.Add(sqliteName(sCol));
+                    string sSql = "CREATE INDEX " + sqliteName(sName) + " ON " + sqliteName(sTable) + " (" + string.Join(", ", lQuoted.ToArray()) + ")";
                     try
                     {
-                        oConn.Execute(sSql, Type.Missing,
-                            128 /* adExecuteNoRecords */ | 1 /* adCmdText */);
-                        try { DbDoLog.write("ensureRecommendedIndexes: " + sSql); } catch { }
+                        oConn.Execute(sSql, Type.Missing, 128 /* adExecuteNoRecords */ | 1 /* adCmdText */);
+                        dIndexNames.Add(sName);
+                        iCreated++;
+                        try { DbDoLog.write("ensureRecommendedIndexes created: " + sSql); } catch { }
                     }
                     catch (Exception exSql)
                     {
-                        try { DbDoLog.write("ensureRecommendedIndexes skip " + sIdxName + ": " + exSql.Message); } catch { }
+                        try { DbDoLog.write("ensureRecommendedIndexes could not create " + sName + ": " + exSql.Message); } catch { }
                     }
                 }
             }
+            if (iCreated > 0) try { DbDoLog.write("ensureRecommendedIndexes: " + iCreated + " index(es) created"); } catch { }
+        }
+
+        // sqliteName: a SQLite identifier in double quotes.
+        private static string sqliteName(string sName)
+        {
+            return "\"" + (sName ?? "").Replace("\"", "\"\"") + "\"";
+        }
+
+        // tableColumns: [name, pk position] for each column of a table,
+        // generated columns included, from table_xinfo, or table_info when
+        // the driver's SQLite predates table_xinfo.
+        private List<string[]> tableColumns(string sTable)
+        {
+            int iFound;
+            List<string[]> lCols = new List<string[]>();
+            List<string[]> lRows = queryRowsSql("PRAGMA table_xinfo(" + sqliteName(sTable) + ")", int.MaxValue, out iFound);
+            if (lRows.Count == 0) lRows = queryRowsSql("PRAGMA table_info(" + sqliteName(sTable) + ")", int.MaxValue, out iFound);
+            foreach (string[] aRow in lRows) if (aRow.Length > 5) lCols.Add(new string[] { aRow[1], aRow[5], aRow[2] });
+            return lCols;
+        }
+
+        // standardIndexColumns: the column lists DbDo's standard index set
+        // wants on one table; see ensureRecommendedIndexes.
+        private List<List<string>> standardIndexColumns(string sTable)
+        {
+            int iFound;
+            List<List<string>> lWanted = new List<List<string>>();
+            List<string[]> lCols = tableColumns(sTable);
+            HashSet<string> dCols = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
+            List<string> lPk = new List<string>();
+            foreach (string[] aCol in lCols) { dCols.Add(aCol[0]); if (aCol[1] != "0" && aCol[1] != "") lPk.Add(aCol[0]); }
+            if (sTable.Equals("maps", StringComparison.OrdinalIgnoreCase) && dCols.Contains("tbl1") && dCols.Contains("prime1") && dCols.Contains("tbl2") && dCols.Contains("prime2"))
+            {
+                lWanted.Add(new List<string> { "tbl1", "prime1" });
+                lWanted.Add(new List<string> { "tbl2", "prime2" });
+            }
+            if (sTable.Equals("defs", StringComparison.OrdinalIgnoreCase) && dCols.Contains("tbl") && dCols.Contains("fld") && dCols.Contains("ordinal") && dCols.Contains("val"))
+                lWanted.Add(new List<string> { "tbl", "fld", "ordinal", "val" });
+            // Declared foreign keys: rows of id, seq, table, from, to, ...
+            SortedDictionary<int, SortedDictionary<int, string>> dKeys = new SortedDictionary<int, SortedDictionary<int, string>>();
+            foreach (string[] aRow in queryRowsSql("PRAGMA foreign_key_list(" + sqliteName(sTable) + ")", int.MaxValue, out iFound))
+            {
+                int iId, iSeq;
+                if (aRow.Length < 4 || !int.TryParse(aRow[0], out iId) || !int.TryParse(aRow[1], out iSeq)) continue;
+                if (!dKeys.ContainsKey(iId)) dKeys[iId] = new SortedDictionary<int, string>();
+                dKeys[iId][iSeq] = aRow[3];
+            }
+            foreach (SortedDictionary<int, string> dKey in dKeys.Values) addWanted(lWanted, new List<string>(dKey.Values));
+            // DbDo's links by the _id naming rule.
+            foreach (string[] aCol in lCols)
+            {
+                string sCol = aCol[0];
+                if (!sCol.EndsWith("_id", StringComparison.OrdinalIgnoreCase) || sCol.Equals("id", StringComparison.OrdinalIgnoreCase)) continue;
+                if (lPk.Count == 1 && lPk[0].Equals(sCol, StringComparison.OrdinalIgnoreCase)) continue;
+                if (sCol.Equals(sTable + Metadata.PrimaryKeySuffix, StringComparison.OrdinalIgnoreCase)) continue;
+                addWanted(lWanted, new List<string> { sCol });
+            }
+            return lWanted;
+        }
+
+        // addWanted: add a column list unless an equal one is already there.
+        private static bool addWanted(List<List<string>> lWanted, List<string> lCols)
+        {
+            if (lCols.Count == 0) return false;
+            foreach (List<string> lOld in lWanted)
+                if (string.Join("\u0001", lOld.ToArray()).Equals(string.Join("\u0001", lCols.ToArray()), StringComparison.OrdinalIgnoreCase)) return false;
+            lWanted.Add(lCols);
+            return true;
+        }
+
+        // indexCovers: whether an existing full index of the table starts
+        // with exactly these columns, in order, or the list is the table's
+        // INTEGER PRIMARY KEY, which is the rowid and needs no index.
+        private bool indexCovers(string sTable, List<string> lWanted)
+        {
+            int iFound;
+            if (lWanted.Count == 1)
+                foreach (string[] aCol in tableColumns(sTable))
+                    if (aCol[0].Equals(lWanted[0], StringComparison.OrdinalIgnoreCase) && aCol[1] == "1" && aCol[2].Trim().Equals("INTEGER", StringComparison.OrdinalIgnoreCase)) return true;
+            // index_list rows: seq, name, unique, origin, partial.
+            foreach (string[] aIndex in queryRowsSql("PRAGMA index_list(" + sqliteName(sTable) + ")", int.MaxValue, out iFound))
+            {
+                if (aIndex.Length > 4 && aIndex[4] == "1") continue;
+                List<string> lHas = new List<string>();
+                // index_info rows: seqno, cid, name.
+                foreach (string[] aInfo in queryRowsSql("PRAGMA index_info(" + sqliteName(aIndex[1]) + ")", int.MaxValue, out iFound)) lHas.Add(aInfo.Length > 2 ? aInfo[2] : "");
+                if (lHas.Count < lWanted.Count) continue;
+                bool bMatch = true;
+                for (int i = 0; i < lWanted.Count; i++) if (!lHas[i].Equals(lWanted[i], StringComparison.OrdinalIgnoreCase)) bMatch = false;
+                if (bMatch) return true;
+            }
+            return false;
         }
 
 
@@ -21240,6 +21415,9 @@ namespace DbDo
                 lLkFields.Add(new string[] { "descrip", "TEXTMEMO" });
                 lLkFields.Add(new string[] { "url", "TEXTLINE" });
                 lDdl.AddRange(lStandardTableDdl("defs", lLkFields));
+                // The pick-list lookup index of DbDo's standard set (15 November 2026), the same one the open sweep
+                // and checkTemplates add to an older database.
+                lDdl.Add("CREATE INDEX idx_defs_lookup ON defs (tbl, fld, ordinal, val)");
                 int iOrd = 0;
                 foreach (string sType in aFieldTypes)
                 {
@@ -38532,6 +38710,36 @@ namespace DbDo
             if (lArgs.Count >= 2) sTable = lArgs[1];
         }
 
+        // runMeasureSqlite: DbDo.exe --measure-sqlite <report> <database> <table> [<sort column> [<filter> [<lookup field>]]]
+        // SQLITE PLAN STEP 1, MEASURE (15 November 2026). Claude and ChatGPT agreed that no speed change goes in until
+        // it is measured on Windows through DbDo's own ODBC connection. This opens the database through the same
+        // DbDoManager the window uses -- read-only, so nothing is written -- times the open, then lets measureSqlite time
+        // the commands and record each query's plan. scripts\measureSqlite runs it on a copy of RadioTrail. The exit code
+        // is 0 when the measurement ran and 2 when it could not.
+        private static int runMeasureSqlite(string[] aArgs)
+        {
+            int iAt = Array.FindIndex(aArgs, s => s.Equals("--measure-sqlite", StringComparison.OrdinalIgnoreCase)), iResult = 0;
+            List<string> lsOut = new List<string>();
+            if (aArgs.Length < iAt + 4) { Console.WriteLine("Usage: DbDo --measure-sqlite <report> <database> <table> [<sort column> [<filter> [<lookup field>]]]"); return 2; }
+            string sReport = aArgs[iAt + 1], sDb = aArgs[iAt + 2], sTable = aArgs[iAt + 3];
+            string sSort = aArgs.Length > iAt + 4 ? aArgs[iAt + 4] : "", sFilter = aArgs.Length > iAt + 5 ? aArgs[iAt + 5] : "", sLookup = aArgs.Length > iAt + 6 ? aArgs[iAt + 6] : "";
+            try
+            {
+                using (DbDoManager oDb = new DbDoManager())
+                {
+                    System.Diagnostics.Stopwatch oWatch = System.Diagnostics.Stopwatch.StartNew();
+                    oDb.openDatabase(sDb, sTable, true);
+                    lsOut.Add("database " + sDb + ", table " + sTable + ", DbDo " + Application.ProductVersion);
+                    lsOut.Add("TIME open, read-only, with the table loaded: " + oWatch.ElapsedMilliseconds + " ms");
+                    lsOut.AddRange(oDb.measureSqlite(sTable, sSort, sFilter, sLookup));
+                }
+            }
+            catch (Exception oError) { lsOut.Add("ERROR the measurement could not run: " + oError.Message); iResult = 2; }
+            try { System.IO.File.WriteAllLines(sReport, lsOut.ToArray()); } catch { }
+            foreach (string s in lsOut) Console.WriteLine(s);
+            return iResult;
+        }
+
         // runSearchSelfTest: DbDo.exe --selftest-search <report> <database> <table> <term> [<term> ...]
         // THE BUILD SEARCHES THE CATALOG (10 October 2026). Any Field and Keywords both stopped finding "seahawks" in
         // a full RadioTrail, and nothing noticed until a listener did. This opens the database read-only through the
@@ -38695,6 +38903,7 @@ namespace DbDo
                 foreach (string sArg in aArgs)
                 {
                     if (sArg.Equals("--selftest-search", StringComparison.OrdinalIgnoreCase)) return runSearchSelfTest(aArgs);
+                    if (sArg.Equals("--measure-sqlite", StringComparison.OrdinalIgnoreCase)) return runMeasureSqlite(aArgs);
                     if (sArg.Equals("--install-jaws-settings", StringComparison.OrdinalIgnoreCase)
                      || sArg.Equals("-install-jaws-settings", StringComparison.OrdinalIgnoreCase)
                      || sArg.Equals("/install-jaws-settings", StringComparison.OrdinalIgnoreCase))

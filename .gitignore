@@ -95,6 +95,8 @@
 !/scripts/makeTechTraining.py
 !/scripts/makeTutorials.cmd
 !/scripts/makeTutorials.py
+!/scripts/measureSqlite.cmd
+!/scripts/measureSqlite.py
 !/scripts/nvda/appModules/dbdo.py
 !/scripts/nvda/appModules/homer/__init__.py
 !/scripts/nvda/manifest.ini

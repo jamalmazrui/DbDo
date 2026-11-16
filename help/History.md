@@ -5,6 +5,17 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 15 November 2026 -- SQLite, measured and indexed by structure
+
+The first two steps of the SQLite plan Claude and ChatGPT agreed on. Nothing you hear changes; what changes is which indexes a database carries and what the log records.
+
+- **DbDo now asks the SQLite driver what it supports**, once for each database, on its own connection, and writes the answer to the session log: the SQLite version, its compile options, the connection's foreign-key setting, and whether full-text search (FTS5) really works. That last is proved by making, searching and removing a temporary table, not read from a list.
+- **DbDo.exe --measure-sqlite** times opening a table, counting it, sorting it both ways, filtering it and building a pick list, through the same code the window uses, read-only. It also records which index, if any, each of DbDo's queries uses. **scripts\measureSqlite** runs it three times on a copy of RadioTrail made in work\measureSqlite, and logs to logs\DbDo-measureSqlite with the date and time. Please run it on Windows and send the log: the speed changes in step 3 wait for it.
+- **The index sweep on opening a database now looks at structure, not names.** It reads the columns with table_xinfo, so generated columns are seen, reads declared foreign keys from foreign_key_list, and still counts DbDo's _id links. An index already there counts when it starts with the wanted columns, whatever its name. It adds only DbDo's small standard set: the two maps link indexes, the defs pick-list index, and one for each foreign key or _id link. It no longer adds indexes on marked, look, tags, url, added or edited, it never removes an index, and the log lists only indexes it really made. The old sweep indexed every table's own key again, by a name rule that did not match the key's real name.
+- **A new database gets the defs pick-list index** from the start.
+- **The templates are repaired at every build** (scripts\checkTemplates --repair): each gets the standard set, and four indexes proven redundant are removed after their definitions are checked -- RadioTrail's indexes on its three tables' own keys, which SQLite already indexes as the rowid, and JobTrail's plain idx_jobs_prime, which repeats its unique uc_jobs_prime. Optional indexes on tags, added, edited, url and marked stay until a decision recorded here removes them.
+- **RadioTrail leaves WAL mode the way SQLite intends**: a checkpoint, then the ordinary journal mode, then it is reopened and its row counts, integrity and side files checked. The installer had been shipping an empty RadioTrail.db-wal. The build now fails if any -wal, -shm or -journal file sits in templates, and the installer leaves them out too.
+
 ## 15 November 2026 -- The agreed names
 
 - **Copy Append** (Alt+C) was Append Cell, **Copy Append Record** (Alt+Shift+C) was Append Record, and **Toggle Mark** (Control+Space) was Marked Toggle, as in the other Homer apps.
