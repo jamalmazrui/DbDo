@@ -165,7 +165,7 @@ rem cause, first. Raise this whenever DbDo starts using something new.
 rem 1.64.5: Play Tutorials calls MediaPlayer.playTutorials, which older kits lack;
 rem a build against 1.64.4 failed to compile on 8 October 2026 rather than saying so.
 rem 1.231.0: the macro recorder compiles the kit's Macro.cs, with its expected-against-actual audit.
-set "kitNeeded=1.245.0"
+set "kitNeeded=1.246.0"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -1361,6 +1361,28 @@ if defined bNothingChanged (
   >> "!log!" echo Installer: DbDo_setup.exe kept; Inno Setup not run
   goto :installerDone
 )
+rem ---- pack the JAWS scripts and the NVDA add-on from their sources ----
+rem THE INSTALLER SHIPPED AN OLD DbDo_JAWS.zip (found 17 November 2026). DbDo_setup.iss takes
+rem DbDo_JAWS.zip and DbDo.nvda-addon from the top of the project, but no step of this build made them:
+rem the zip was left from an older build, so changes to scripts\jaws never reached anyone, and the
+rem installer, comparing what it ships with what is installed, called the old scripts current. testSay
+rem heard it: Alt+Delete still drew "unknown script call to TypeCurrentScriptKey" after DbDo.jss defined
+rem that script. Now the kit's packScreenReaderSupport makes both from scripts\jaws and scripts\nvda
+rem before every installer, the one way every Homer app packs them.
+if not exist "!homerDev!\scripts\packScreenReaderSupport.ps1" (
+  echo ERROR: the kit's packScreenReaderSupport.ps1 is missing from !homerDev!\scripts
+  >> "!log!" echo ERROR: !homerDev!\scripts\packScreenReaderSupport.ps1 missing; the installer would ship old screen reader scripts
+  goto :build_failed
+)
+>> "!log!" echo Packing the screen reader support: packScreenReaderSupport -Root "%CD%" -App DbDo -OutDir "%CD%"
+powershell -NoProfile -ExecutionPolicy Bypass -File "!homerDev!\scripts\packScreenReaderSupport.ps1" -Root "%CD%" -App "DbDo" -OutDir "%CD%" -Kit "!homerDev!" >> "!log!" 2>&1
+if errorlevel 1 (
+  echo ERROR: the JAWS scripts or the NVDA add-on could not be packed; see !log!
+  >> "!log!" echo ERROR: packScreenReaderSupport failed
+  goto :build_failed
+)
+>> "!log!" echo Packed DbDo_JAWS.zip and DbDo.nvda-addon from scripts\jaws and scripts\nvda
+
 rem ---- build the installer ----
 rem DbDo_setup.exe is part of the build, not a separate errand: one command
 rem produces everything a release needs. Inno Setup is fetched with winget when

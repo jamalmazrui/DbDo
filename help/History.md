@@ -5,6 +5,16 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 17 November 2026 -- JAWS gets the new scripts, and Say speaks of records
+
+- **The installer ships DbDo's JAWS scripts as they are now.** No step of the build packed them: the installer took an old DbDo_JAWS.zip left from an earlier build. So changes to DbDo's JAWS scripts never reached JAWS. That is why Alt+Delete drew "unknown script call to TypeCurrentScriptKey", and why Alt+Control+Shift with an arrow drew "not in a table" though the key map had passed those keys on since 10 November. The build now packs both screen readers' scripts with the kit's packScreenReaderSupport, as other Homer apps do.
+- **Alt+Shift+M and Alt+Shift+N reach DbDo under JAWS.** JAWS's laptop table commands took them; the key map now hands them on.
+- **Say Position (Alt+Delete) says what its description says,** the record's number, the count and the percent, as FileDir's does: "9 of 52550, 1 percent through". It said "Column: name, Row: 9". Say Cell Coordinates still gives the column.
+- **DbDo speaks of records, not rows,** in Say Cell Coordinates, Say Marked Records and the Say Column as List commands: "record 1 of 52550", "marked records: none".
+- **Two keys DbDo could never hear under JAWS are gone.** Alt+Shift+UpArrow and Alt+Shift+DownArrow are JAWS's mouse keys, and the number pad's Star clicks the right mouse button in JAWS and NVDA. Unmark and Next and Unmark and Previous keep Control+Shift+DownArrow and UpArrow, as in FileDir, and Say Filter and Order keeps Shift+8.
+- **The live test listens for "percent"** from Say Position.
+- DbDo now needs HomerDev 1.246.0.
+
 ## 17 November 2026 -- The suite's names for search and Shift+8
 
 - **Find Regex is Forward Find with Regex, and Reverse Find Regex is Reverse Find with Regex,** the names EdSharp and HomerView give Control+F3 and Control+Shift+F3. The keys are unchanged, and the Alternate Menu still finds the old names.

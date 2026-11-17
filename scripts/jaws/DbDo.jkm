@@ -4,6 +4,8 @@
 [Common Keys]
 ; Homer suite pass-through -- written by the kit's tidy from data\KeyOwnership.inix; do not edit
 Alt+Delete=TypeCurrentScriptKey
+Alt+Shift+M=TypeCurrentScriptKey
+Alt+Shift+N=TypeCurrentScriptKey
 ; end of Homer suite pass-through
 ; Pass quietly: chords the app owns.
 Alt+Control+RightArrow=passDbDoKey

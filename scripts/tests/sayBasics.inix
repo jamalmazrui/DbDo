@@ -13,7 +13,7 @@ Name = The Say family speaks, and the Key Describer describes
 Say Filter and Order
 Expect speech filter
 Say Position
-Expect speech row
+Expect speech percent
 Alternate Menu
 Expect window Alternate Menu
 Press Escape

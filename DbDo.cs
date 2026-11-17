@@ -14157,8 +14157,8 @@ namespace DbDo
             //
             //   Shift+DownArrow         = Mark and next
             //   Shift+UpArrow           = Mark and previous
-            //   Alt+Shift+DownArrow     = Unmark and next
-            //   Alt+Shift+UpArrow       = Unmark and previous
+            //   Control+Shift+DownArrow = Unmark and next
+            //   Control+Shift+UpArrow   = Unmark and previous
             bool bGridFocused = (this.ActiveControl == grid);
             if (bGridFocused)
             {
@@ -14166,10 +14166,12 @@ namespace DbDo
                 { evArgs.Handled = true; evArgs.SuppressKeyPress = true; markAndMove(true,  true);  return; }
                 if (key == (Keys.Shift | Keys.Up))
                 { evArgs.Handled = true; evArgs.SuppressKeyPress = true; markAndMove(true,  false); return; }
-                // THE SUITE'S KEYS TOO (10 November 2026): FileDir unmarks with Control+Shift+arrows; DbDo answers both.
-                if (key == (Keys.Alt | Keys.Shift | Keys.Down) || key == (Keys.Control | Keys.Shift | Keys.Down))
+                // THE SUITE'S KEYS (10 November 2026): FileDir unmarks with Control+Shift+arrows. ONLY THOSE (17 November
+                // 2026): Alt+Shift+UpArrow and DownArrow are JAWS's mouse up and down everywhere, so DbDo never heard
+                // them under JAWS, and the kit's KeyOwnership.inix says never bind them.
+                if (key == (Keys.Control | Keys.Shift | Keys.Down))
                 { evArgs.Handled = true; evArgs.SuppressKeyPress = true; markAndMove(false, true);  return; }
-                if (key == (Keys.Alt | Keys.Shift | Keys.Up) || key == (Keys.Control | Keys.Shift | Keys.Up))
+                if (key == (Keys.Control | Keys.Shift | Keys.Up))
                 { evArgs.Handled = true; evArgs.SuppressKeyPress = true; markAndMove(false, false); return; }
 
                 // ? (Shift+Slash) = Show-Where. Speaks the title
@@ -14683,8 +14685,9 @@ namespace DbDo
             // Shift+8 (the asterisk key) -- Say Filter and Order. JAWS
             // calls Shift+8 "asterisk"; the symbol evokes "everything
             // about how the data is being shaped" which is what this
-            // command reports. Numpad-asterisk (Keys.Multiply) is a
-            // hidden alias for users with a numeric keypad.
+            // command reports. The number pad's Star is not bound (17
+            // November 2026): JAWS and NVDA both click the right mouse
+            // button with it.
             miSaySaySortFilter   = addItem(miSay, "Say Filter and Order", "Say Filter and Order", Keys.Shift | Keys.D8,         saySaySortFilter);
             // Alt+Delete: JAWS-style "say cursor position." Speaks the
             // current virtual column's header followed by the current
@@ -15035,11 +15038,6 @@ namespace DbDo
             // it. Edit Config keeps its menu item and its own key; a second key
             // for it is not worth the one key the whole suite agrees on.
 
-            // Numpad asterisk: alias for Say Filter and Order, for
-            // users with a numpad. The primary chord is Shift+8 on
-            // the main row; this lets the same command fire from
-            // Numpad-* without the user reaching across the keyboard.
-            registerLocalAlias(Keys.Multiply, miSaySaySortFilter);
 
             // Get-Property: secondary alias on Shift+F6 ("Go to
             // Contents" -- structural where-am-I).
@@ -15262,11 +15260,11 @@ namespace DbDo
             add("Say Column as List",          "Speak every value of the current virtual column, from the top",
                 "Alt+L. Sweeps the whole column top to bottom. Position and virtual cursor unchanged; double-press shows the full list. Alt = All. Shift adds the marked-only filter (Say Column All Marked, Alt+Shift+L).");
             add("Say Column as List of Marked",   "Speak the current virtual column for marked rows only, from the top",
-                "Alt+Shift+L. Same as Say Column All but limited to marked rows. Reports 'No marked rows in this column' when nothing is marked.");
+                "Alt+Shift+L. Same as Say Column as List but limited to marked records. Reports 'No marked records' when nothing is marked.");
             add("Say Column as List from Current", "Say the column's values from the current record down",
                 "Control+L. Sweeps from the current row to the bottom. Control = from Current. Shift adds the marked-only filter (Say Column as List from Current Marked, Control+Shift+L).");
             add("Say Column as List from Current Marked", "Say the column's values for marked records from the current record down",
-                "Control+Shift+L. Same as Say Column as List from Current but limited to marked rows. Reports 'No marked rows from here' when nothing is marked at or after the current row.");
+                "Control+Shift+L. Same as Say Column as List from Current but limited to marked records. Reports 'No marked records from here' when nothing is marked at or after the current record.");
             add("Say Records from Current", "Speak every record in full, from the current record down (all displayed columns)",
                 "No key of its own. Each record formatted as 'Record N -- col1: val1; col2: val2; ...' with newlines between records. Cap 25 in spoken form; double-press for the full list.");
             add("Say Marked Records from Current", "Speak every marked record in full, from the current record down",
@@ -16513,7 +16511,8 @@ namespace DbDo
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0 || grid == null || grid.Columns.Count == 0)
             { Say.say("No rows"); return; }
-            Say.say("row " + iVirtualRow + " of " + db.recordCount, "column " + (iVirtualCol + 1) + " of " + grid.Columns.Count);
+            // RECORD, AS THE DESCRIPTION SAYS (17 November 2026): DbDo speaks of records, not rows; testSay heard "row 1 of 52550".
+            Say.say("record " + iVirtualRow + " of " + db.recordCount, "column " + (iVirtualCol + 1) + " of " + grid.Columns.Count);
         }
 
         // virtSayRow: every shown column of the current record, header and value, one
@@ -16837,7 +16836,7 @@ namespace DbDo
                             // THE ROW SPOKEN IS THE ROW SELECTED (12 October 2026, from an audit). This said "Row 1"
                             // whatever row the restored position put the cursor on: RadioTrail opened on its saved
                             // ninth station, JAWS said "9 of 55280", and DbDo said "ACB Media 7, Row 1 of 55280".
-                            string sAnnounce = "Row " + iPos + " of " + iCount;
+                            string sAnnounce = "Record " + iPos + " of " + iCount;
                             if (!string.IsNullOrEmpty(sFirstColValue))
                                 sAnnounce = sFirstColValue + ", " + sAnnounce;
                             Say.say(sAnnounce);
@@ -17360,7 +17359,7 @@ namespace DbDo
             int iTarget = findMarkedRowPosition(jumpDir);
             if (iTarget <= 0)
             {
-                Say.say("No marked rows");
+                Say.say("No marked records");
                 return;
             }
             // THE FOCUS GOES THERE TOO (25 October 2026). This moved only the database cursor and announced "Marked row
@@ -17581,8 +17580,8 @@ namespace DbDo
         //   <                  (Shift+Oemcomma) = Unmark and next
         //   Shift+DownArrow                       = Mark and next
         //   Shift+UpArrow                         = Mark and previous
-        //   Alt+Shift+DownArrow                   = Unmark and next
-        //   Alt+Shift+UpArrow                     = Unmark and previous
+        //   Control+Shift+DownArrow               = Unmark and next
+        //   Control+Shift+UpArrow                 = Unmark and previous
         //
         // If the current row is already in the requested state, the
         // marked column is left untouched (no needless UPDATE).
@@ -18708,8 +18707,8 @@ namespace DbDo
             if (iTotal == 0)
             {
                 string sNone = bFromCurrent
-                    ? (bMarkedOnly ? "No marked rows from here." : "No rows visible from here.")
-                    : (bMarkedOnly ? "No marked rows in this column." : "No rows in this column.");
+                    ? (bMarkedOnly ? "No marked records from here." : "No records from here.")
+                    : (bMarkedOnly ? "No marked records." : "No records.");
                 Say.say(sNone);
                 return;
             }
@@ -18753,12 +18752,12 @@ namespace DbDo
         private void saySayMarkedRows(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("marked rows: no row selected"); return; }
+            { Say.say("marked records: no record selected"); return; }
             if (!db.hasField(Metadata.MarkedColumn))
-            { Say.say("marked rows: this table has no marked column"); return; }
+            { Say.say("marked records: this table has no marked field"); return; }
             List<string> lDispCols = db.getDisplayFieldNames();
             if (lDispCols.Count == 0)
-            { Say.say("marked rows: no columns visible"); return; }
+            { Say.say("marked records: no columns shown"); return; }
             object oOriginal = null;
             try { oOriginal = db.bookmark; } catch { }
             List<string> lParts = new List<string>();
@@ -18787,7 +18786,7 @@ namespace DbDo
                 if (oOriginal != null) try { db.bookmark = oOriginal; } catch { }
             }
             if (lParts.Count == 0)
-            { Say.say("marked rows: no marked rows."); return; }
+            { Say.say("marked records: none"); return; }
             speakOrShowParts("Say Marked Records", lParts, 128);
         }
 
@@ -18850,7 +18849,7 @@ namespace DbDo
             }
             if (iTotal == 0)
             {
-                Say.say(bMarkedOnly ? "No marked rows from here." : "No rows visible from here.");
+                Say.say(bMarkedOnly ? "No marked records from here." : "No records from here.");
                 return;
             }
             // One queued message per row so the rows are spoken as a
@@ -18874,12 +18873,13 @@ namespace DbDo
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
             { Say.say("position: no record selected"); return; }
-            if (grid == null || iVirtualCol < 0 || iVirtualCol >= grid.Columns.Count)
-            { Say.say("position: no column under virtual cursor"); return; }
-            string sHeader = grid.Columns[iVirtualCol].Text;
-            if (string.IsNullOrEmpty(sHeader)) sHeader = "(unnamed)";
+            // AS ITS DESCRIPTION AND FILEDIR SAY IT (17 November 2026): the record's number, the count and the percent,
+            // "9 of 52550, 1 percent through", the suite's Alt+Delete. It said "Column: name, Row: 9", which matched
+            // neither its own description nor the other apps; the column is Say Cell Coordinates' to give.
             int iRow = iVirtualRow >= 1 ? iVirtualRow : db.absolutePosition;
-            speakOrShow("Position", "Column: " + sHeader + ", Row: " + iRow, 112);
+            long iCount = db.recordCount;
+            long iPercent = iCount > 0 ? (long)Math.Round(100.0 * iRow / iCount) : 0;
+            speakOrShow("Position", iRow + " of " + iCount + ", " + iPercent + " percent through", 112);
         }
 
         // saySayClipboard: Alt+Apostrophe. Speak the current Windows

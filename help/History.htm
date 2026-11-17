@@ -257,6 +257,11 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a
+href="#november-2026-jaws-gets-the-new-scripts-and-say-speaks-of-records"
+id="toc-november-2026-jaws-gets-the-new-scripts-and-say-speaks-of-records">17
+November 2026 – JAWS gets the new scripts, and Say speaks of
+records</a></li>
 <li><a href="#november-2026-the-suites-names-for-search-and-shift8"
 id="toc-november-2026-the-suites-names-for-search-and-shift8">17
 November 2026 – The suite’s names for search and Shift+8</a></li>
@@ -860,6 +865,38 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Control+Shift+F1</strong> inside DbDo to open this file
 in your browser, or type <code>history</code> at the dot prompt.</p>
+<h2
+id="november-2026-jaws-gets-the-new-scripts-and-say-speaks-of-records">17
+November 2026 – JAWS gets the new scripts, and Say speaks of
+records</h2>
+<ul>
+<li><strong>The installer ships DbDo’s JAWS scripts as they are
+now.</strong> No step of the build packed them: the installer took an
+old DbDo_JAWS.zip left from an earlier build. So changes to DbDo’s JAWS
+scripts never reached JAWS. That is why Alt+Delete drew “unknown script
+call to TypeCurrentScriptKey”, and why Alt+Control+Shift with an arrow
+drew “not in a table” though the key map had passed those keys on since
+10 November. The build now packs both screen readers’ scripts with the
+kit’s packScreenReaderSupport, as other Homer apps do.</li>
+<li><strong>Alt+Shift+M and Alt+Shift+N reach DbDo under JAWS.</strong>
+JAWS’s laptop table commands took them; the key map now hands them
+on.</li>
+<li><strong>Say Position (Alt+Delete) says what its description
+says,</strong> the record’s number, the count and the percent, as
+FileDir’s does: “9 of 52550, 1 percent through”. It said “Column: name,
+Row: 9”. Say Cell Coordinates still gives the column.</li>
+<li><strong>DbDo speaks of records, not rows,</strong> in Say Cell
+Coordinates, Say Marked Records and the Say Column as List commands:
+“record 1 of 52550”, “marked records: none”.</li>
+<li><strong>Two keys DbDo could never hear under JAWS are gone.</strong>
+Alt+Shift+UpArrow and Alt+Shift+DownArrow are JAWS’s mouse keys, and the
+number pad’s Star clicks the right mouse button in JAWS and NVDA. Unmark
+and Next and Unmark and Previous keep Control+Shift+DownArrow and
+UpArrow, as in FileDir, and Say Filter and Order keeps Shift+8.</li>
+<li><strong>The live test listens for “percent”</strong> from Say
+Position.</li>
+<li>DbDo now needs HomerDev 1.246.0.</li>
+</ul>
 <h2 id="november-2026-the-suites-names-for-search-and-shift8">17
 November 2026 – The suite’s names for search and Shift+8</h2>
 <ul>
