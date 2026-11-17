@@ -5,6 +5,11 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 17 November 2026 -- Live tests say when DbDo closes
+
+- **The kit's 1.249.0 recordWalk says when DbDo closes during a live test,** and keeps the end of DbDo's own log in the run's log. DbDo closed twice during the live test of 14:37, during Say Position and after the Alternate Menu; the next run will say why.
+- **A live test with other sound playing moves on** after two steps rather than waiting for quiet at every one.
+
 ## 17 November 2026 -- Marked or Current, and fewer keys to remember
 
 - **Marked or Current.** When some records in view are marked but the one you are on is not, a command that can act on many records asks first, in a dialog titled with the command's name: Marked records, with how many, which Enter chooses; Current record; Cancel; and Help. M and C choose too, Shift+F1 says what a button does, and Control+Slash says where you are. When the current record is marked, or none are, nothing is asked.
