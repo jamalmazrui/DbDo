@@ -520,9 +520,9 @@ Alt+V</li>
 <li>Open Command Prompt<br />
 Control+Backslash</li>
 <li>Open Dot Prompt<br />
-Send focus to the dot prompt console. Control+Grave opens a console, as
-it opens the terminal in Visual Studio Code.<br />
-Control+Grave</li>
+Send focus to the dot prompt console. Control+GraveAccent opens a
+console, as it opens the terminal in Visual Studio Code.<br />
+Control+GraveAccent</li>
 <li>Open in Explorer<br />
 Open the folder of the open database in Windows Explorer.<br />
 Alt+Backslash</li>
@@ -535,11 +535,11 @@ one that is playing.<br />
 Control+Shift+F9</li>
 <li>Show in FileDir<br />
 Show the open database’s file, selected in its folder, in FileDir.<br />
-Control+Shift+Oem5</li>
+Control+Shift+Backslash</li>
 <li>Sqlean Console<br />
 Open the bundled sqlean.exe shell in its own console window on the
 current database.<br />
-Control+Shift+Grave</li>
+Control+Shift+GraveAccent</li>
 </ul>
 <h3 id="navigate">Navigate</h3>
 <ul>
@@ -555,7 +555,7 @@ Alt+LeftArrow</li>
 Go back to the first table. Home goes to the top; Alt+Home goes to the
 top table.<br />
 Alt+Home</li>
-<li>Find Regex<br />
+<li>Forward Find with Regex<br />
 Find the next record matching a regular expression. F3 searches; Control
 makes the search a pattern.<br />
 Control+F3</li>
@@ -574,7 +574,7 @@ Control+K</li>
 <li>Repeat Go to<br />
 G for Go.<br />
 Alt+G</li>
-<li>Reverse Find Regex<br />
+<li>Reverse Find with Regex<br />
 Find the previous record matching a regular expression. F3 searches;
 Control makes it a pattern and Shift reverses it.<br />
 Control+Shift+F3</li>
@@ -672,6 +672,10 @@ Shift+E</li>
 <li>Say Filter<br />
 F for Filter.<br />
 Shift+F</li>
+<li>Say Filter and Order<br />
+Speak the current filter and order, or none for each. Shift+8 is the
+asterisk, the SQL sign for everything: sort and filter together.<br />
+Shift+8</li>
 <li>Say Go to<br />
 Say the last Go to entry. G for Go.<br />
 Shift+G</li>
@@ -707,10 +711,6 @@ Shift+N</li>
 <li>Say Order<br />
 Say the order in force. O for Order.<br />
 Shift+O</li>
-<li>Say Order and Filter<br />
-Speak the current order and filter, or none for each. Shift+8 is the
-asterisk, the SQL sign for everything: sort and filter together.<br />
-Shift+8</li>
 <li>Say Path<br />
 Speak the open database’s full path; press twice to show it. P for
 Path.<br />
@@ -940,7 +940,7 @@ Filter Records</li>
 <li>Control+G<br />
 Go to a record by its number, a percent or text.<br />
 Go to Record</li>
-<li>Control+Grave<br />
+<li>Control+GraveAccent<br />
 Send focus to the dot prompt console.<br />
 Open Dot Prompt</li>
 <li>Control+I<br />
@@ -996,6 +996,9 @@ Append Clipboard</li>
 <li>Control+Shift+B<br />
 Forget the saved bookmark.<br />
 Clear Bookmark</li>
+<li>Control+Shift+Backslash<br />
+Show the open database’s file, selected in its folder, in FileDir.<br />
+Show in FileDir</li>
 <li>Control+Shift+C<br />
 Duplicate the current row as a new row.<br />
 Copy Record</li>
@@ -1006,7 +1009,7 @@ Extract with Regex</li>
 <li>Control+Shift+F<br />
 Clear the active filter.<br />
 Clear Filter</li>
-<li>Control+Shift+Grave<br />
+<li>Control+Shift+GraveAccent<br />
 Open the bundled sqlean.exe shell in its own console window on the
 current database.<br />
 Sqlean Console</li>
@@ -1028,9 +1031,6 @@ New Copy</li>
 <li>Control+Shift+O<br />
 Open a table in a new window.<br />
 Open Table</li>
-<li>Control+Shift+Oem5<br />
-Show the open database’s file, selected in its folder, in FileDir.<br />
-Show in FileDir</li>
 <li>Control+Shift+R<br />
 Replace with Regex</li>
 <li>Control+Shift+S<br />
@@ -1080,7 +1080,7 @@ Copy Log</li>
 Pick Value</li>
 <li>Control+F3<br />
 Find the next record matching a regular expression.<br />
-Find Regex</li>
+Forward Find with Regex</li>
 <li>Control+F4<br />
 Close the current recordset window.<br />
 Close Window</li>
@@ -1091,7 +1091,7 @@ Open the history of changes in the default browser.<br />
 History of Changes</li>
 <li>Control+Shift+F3<br />
 Find the previous record matching a regular expression.<br />
-Reverse Find Regex</li>
+Reverse Find with Regex</li>
 <li>Control+Shift+F4<br />
 Close every window except the current one.<br />
 Close All But Current Window</li>
@@ -1143,8 +1143,8 @@ Complete Mark</li>
 <h3 id="shift">Shift</h3>
 <ul>
 <li>Shift+8<br />
-Speak the current order and filter, or none for each.<br />
-Say Order and Filter</li>
+Speak the current filter and order, or none for each.<br />
+Say Filter and Order</li>
 <li>Shift+A<br />
 Say Added</li>
 <li>Shift+B<br />
@@ -1324,7 +1324,7 @@ Control+Shift+E</li>
 <li>Filter Records<br />
 Show only the records that match what you choose.<br />
 Control+F</li>
-<li>Find Regex<br />
+<li>Forward Find with Regex<br />
 Find the next record matching a regular expression.<br />
 Control+F3</li>
 <li>Generate from Grid<br />
@@ -1390,7 +1390,7 @@ Open a database file.<br />
 Control+O</li>
 <li>Open Dot Prompt<br />
 Send focus to the dot prompt console.<br />
-Control+Grave</li>
+Control+GraveAccent</li>
 <li>Open in Explorer<br />
 Open the folder of the open database in Windows Explorer.<br />
 Alt+Backslash</li>
@@ -1446,7 +1446,7 @@ Alt+G</li>
 Control+R</li>
 <li>Replace with Regex<br />
 Control+Shift+R</li>
-<li>Reverse Find Regex<br />
+<li>Reverse Find with Regex<br />
 Find the previous record matching a regular expression.<br />
 Control+Shift+F3</li>
 <li>Reverse Jump<br />
@@ -1507,6 +1507,9 @@ Say when the record was last edited.<br />
 Shift+E</li>
 <li>Say Filter<br />
 Shift+F</li>
+<li>Say Filter and Order<br />
+Speak the current filter and order, or none for each.<br />
+Shift+8</li>
 <li>Say Go to<br />
 Say the last Go to entry.<br />
 Shift+G</li>
@@ -1536,9 +1539,6 @@ Shift+N</li>
 <li>Say Order<br />
 Say the order in force.<br />
 Shift+O</li>
-<li>Say Order and Filter<br />
-Speak the current order and filter, or none for each.<br />
-Shift+8</li>
 <li>Say Path<br />
 Speak the open database’s full path; press twice to show it.<br />
 Alt+P</li>
@@ -1590,11 +1590,11 @@ Choose the columns the grid shows and their order.<br />
 Alt+S</li>
 <li>Show in FileDir<br />
 Show the open database’s file, selected in its folder, in FileDir.<br />
-Control+Shift+Oem5</li>
+Control+Shift+Backslash</li>
 <li>Sqlean Console<br />
 Open the bundled sqlean.exe shell in its own console window on the
 current database.<br />
-Control+Shift+Grave</li>
+Control+Shift+GraveAccent</li>
 <li>Start Mark<br />
 Drop a mark anchor at the current row.<br />
 F8</li>

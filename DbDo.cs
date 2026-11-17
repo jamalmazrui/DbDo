@@ -13562,6 +13562,11 @@ namespace DbDo
             Homer.KeyMap.addFormerName("Say Marked Records", "Say Records of Marked");
             Homer.KeyMap.addFormerName("Say Marked Records from Current", "Say Records from Current Marked");
             Homer.KeyMap.addFormerName("Toggle Mark", "Marked Toggle");
+            // THE SUITE'S NAMES (17 November 2026): EdSharp and HomerView say Forward and Reverse Find with Regex on
+            // the same keys, and FileDir says Say Filter and Order on Shift+8.
+            Homer.KeyMap.addFormerName("Forward Find with Regex", "Find Regex");
+            Homer.KeyMap.addFormerName("Reverse Find with Regex", "Reverse Find Regex");
+            Homer.KeyMap.addFormerName("Say Filter and Order", "Say Order and Filter");
             buildGrid();
             buildStatusBar();
             initializeMacros();
@@ -14561,8 +14566,8 @@ namespace DbDo
             miRecFindPrev     = addItem(miNavigate, "Reverse Keywords", "Reverse Keywords",  Keys.Control | Keys.Shift | Keys.K, recFindAllPrevClicked);
             miRecJump         = addItem(miNavigate, "&Jump...", "Jump",        Keys.Control | Keys.J,              recJumpClicked);
             miRecJumpPrev     = addItem(miNavigate, "Reverse Jump", "Reverse Jump", Keys.Control | Keys.Shift | Keys.J, recJumpPrevClicked);
-            miRecFindRegex    = addItem(miNavigate, "Find Regex...", "Find Regex",       Keys.Control | Keys.F3,             recFindRegexClicked);
-            miRecFindRegexPrev = addItem(miNavigate, "Reverse Find Regex", "Reverse Find Regex", Keys.Control | Keys.Shift | Keys.F3, recFindRegexPrevClicked);
+            miRecFindRegex    = addItem(miNavigate, "Forward Find with Regex...", "Forward Find with Regex", Keys.Control | Keys.F3,             recFindRegexClicked);
+            miRecFindRegexPrev = addItem(miNavigate, "Reverse Find with Regex", "Reverse Find with Regex", Keys.Control | Keys.Shift | Keys.F3, recFindRegexPrevClicked);
             miRecSearchAgain  = addItem(miNavigate, "Search Next",   "Search Next",         Keys.F3,                            recSearchNextClicked);
             miRecSearchPrev   = addItem(miNavigate, "Search Previous", "Search Previous",   Keys.Shift | Keys.F3,               recSearchPrevClicked);
             addSep(miNavigate);
@@ -14675,12 +14680,12 @@ namespace DbDo
             // foreign-key relationship readout is still available via
             // Say Related (Shift+R), which is a separate command with
             // a clearer name.
-            // Shift+8 (the asterisk key) -- Say Order and Filter. JAWS
+            // Shift+8 (the asterisk key) -- Say Filter and Order. JAWS
             // calls Shift+8 "asterisk"; the symbol evokes "everything
             // about how the data is being shaped" which is what this
             // command reports. Numpad-asterisk (Keys.Multiply) is a
             // hidden alias for users with a numeric keypad.
-            miSaySaySortFilter   = addItem(miSay, "Say Order and Filter", "Say Order and Filter", Keys.Shift | Keys.D8,         saySaySortFilter);
+            miSaySaySortFilter   = addItem(miSay, "Say Filter and Order", "Say Filter and Order", Keys.Shift | Keys.D8,         saySaySortFilter);
             // Alt+Delete: JAWS-style "say cursor position." Speaks the
             // current virtual column's header followed by the current
             // (1-based) row number. The single most useful "where am
@@ -14870,7 +14875,7 @@ namespace DbDo
                 "The prompt opens in the open database's folder, or your user folder when nothing is open.");
             // SHOW IN FILEDIR (19 October 2026), Control+Shift+Backslash, the same key as FileDir's Open
             // in DbDo: the open database's file, selected in its folder in FileDir.
-            addItem(miTools, "Show in FileDir", "Show in FileDir", Keys.Control | Keys.Shift | Keys.Oem5, toolsShowInFileDirClicked);
+            addItem(miTools, "Show in FileDir", "Show in FileDir", Keys.Control | Keys.Shift | Keys.OemPipe, toolsShowInFileDirClicked);
             // ASK THE MODEL ON THIS COMPUTER. The keys are EdSharp's and
             // FileDir's, unchanged: F12 asks a plain question, Shift+F12 sends
             // the thing you are looking at with it. Keeping them apart matters
@@ -15030,7 +15035,7 @@ namespace DbDo
             // it. Edit Config keeps its menu item and its own key; a second key
             // for it is not worth the one key the whole suite agrees on.
 
-            // Numpad asterisk: alias for Say Order and Filter, for
+            // Numpad asterisk: alias for Say Filter and Order, for
             // users with a numpad. The primary chord is Shift+8 on
             // the main row; this lets the same command fire from
             // Numpad-* without the user reaching across the keyboard.
@@ -15217,9 +15222,9 @@ namespace DbDo
             add("Keywords",           "Go to the next record whose fields hold the keywords",
                 "Searches every field of each record, shown or not, a link by the look it shows. Keywords Previous, Control+Shift+K, goes backward; F3 and Shift+F3 repeat.");
             add("Reverse Keywords",  "Go to the previous record whose fields hold the keywords", "");
-            add("Find Regex",         "Find the next record matching a regular expression", "");
-            add("Reverse Find Regex", "Find the previous record matching a regular expression", "");
-            add("Find Regex Again",    "Repeat the last Find Regex forward", "");
+            add("Forward Find with Regex", "Find the next record matching a regular expression", "");
+            add("Reverse Find with Regex", "Find the previous record matching a regular expression", "");
+            add("Find Regex Again",    "Repeat the last Forward Find with Regex", "");
             add("Jump",        "Go to the next record whose current field holds the text", "");
             add("Reverse Jump","Go to the previous record whose current field holds the text", "");
             add("Jump Record Again",   "Repeat the last Jump Record", "");
@@ -15279,7 +15284,7 @@ namespace DbDo
             add("Copy Log",           "Copy the session log to the clipboard as a file, ready to paste as an attachment", "");
             add("Say Clipboard",      "Speak the current Windows clipboard text",
                 "Plain text only; non-text and empty clipboards announce that fact rather than going silent. Double-press opens the read-only memo dialog for line-by-line review of long pasted content.");
-            add("Say Order and Filter",    "Speak the current order and filter, or none for each",
+            add("Say Filter and Order",    "Speak the current filter and order, or none for each",
                 "Single-press speaks; double-press opens the same text in the multi-line dialog. Useful when the filter or sort string is long.");
             add("Filter Records",      "Show only the records that match what you choose", "Control+F. A list of choices, its first selected, so Enter takes it; each begins with its own letter. Any field contains text asks for the text and keeps the records where some field, read as text, contains it, case aside (for English letters). Fields asks Main, Standard or All, then opens a form with a box per field in DbDo's natural order: a value on its own matches anywhere in the field, case aside; = in front means is, and a symbol in front compares (> >= < <= !=); dates are typed as year-month-day; several boxes must all match. Marked and Unmarked take the records you have marked, or the rest. With a filter in force the list adds Clear, Edit (the field filter), Narrow (add a field condition) and, for a field filter, Widen. A search that finds nothing leaves the view as it was.");
             add("Filter with Regex",        "Filter to rows whose current column matches a regular expression (SQLean REGEXP)",
@@ -18945,7 +18950,7 @@ namespace DbDo
         private void saySaySortFilter(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset())
-            { Say.say("order and filter: no table open"); return; }
+            { Say.say("filter and order: no table open"); return; }
             string sSort = db.sort ?? "";
             string sFilter = db.filter ?? "";
             // Both kinds of filter, as Say Filter gives them (8 October 2026).
@@ -18953,9 +18958,10 @@ namespace DbDo
             if (!string.IsNullOrEmpty(sSql)) sFilter = string.IsNullOrEmpty(sFilter) ? sSql : sSql + "; and " + sFilter;
             StringBuilder sb = new StringBuilder();
             // "order", the word of Order Records, and "none" as every Say answer says it (1 November 2026).
-            sb.Append("order: ").Append(string.IsNullOrEmpty(sSort) ? "none" : sSort);
-            sb.Append("; filter: ").Append(string.IsNullOrEmpty(sFilter) ? "none" : sFilter);
-            speakOrShow("Order and Filter", sb.ToString(), 113);
+            // Filter first, as the name says, and as FileDir says it (17 November 2026).
+            sb.Append("filter: ").Append(string.IsNullOrEmpty(sFilter) ? "none" : sFilter);
+            sb.Append("; order: ").Append(string.IsNullOrEmpty(sSort) ? "none" : sSort);
+            speakOrShow("Filter and Order", sb.ToString(), 113);
         }
 
         // saySayKin: Shift+K. Speak the 'look' field of every related
@@ -25641,7 +25647,7 @@ namespace DbDo
                 if (string.IsNullOrEmpty(sLastFindRegex))
                     sLastFindRegex = SearchHistory.lastText(SearchHistory.SectionRegex);
                 SearchDialogResult res = runSearchDialog(
-                    "Find Regex",
+                    "Find with Regex",
                     ".NET regular expression (case-insensitive unless Case sensitive is checked):",
                     sLastFindRegex,
                     bLastRegexCaseSensitive,
@@ -25663,7 +25669,7 @@ namespace DbDo
                 catch (Exception exRe)
                 {
                     LbcMessage.show(this, "Invalid regex: " + exRe.Message,
-                        "Find Regex", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                        "Find with Regex", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
                 sLastFindRegex = res.sText;
@@ -25691,7 +25697,7 @@ namespace DbDo
             }
             catch (Exception ex)
             {
-                ErrorDialog.show(this, "Find Regex", ex.Message);
+                ErrorDialog.show(this, "Find with Regex", ex.Message);
             }
         }
 
@@ -25947,7 +25953,7 @@ namespace DbDo
                     doFindRegex(bForward, true);
                     break;
                 default:
-                    Say.sayForced("No previous search. Use Keywords, Jump or Find Regex first.");
+                    Say.sayForced("No previous search. Use Keywords, Jump or Find with Regex first.");
                     break;
             }
         }

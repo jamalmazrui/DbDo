@@ -86,7 +86,7 @@ dNamed = {
     "Delete": "Delete deletes, as everywhere.",
     "Shift+8": "Shift+8 is the asterisk, the SQL sign for everything: sort and filter together.",
     "Alt+Apostrophe": "The apostrophe is a quotation mark, and the clipboard is what you last quoted.",
-    "Control+Grave": "Control+Grave opens a console, as it opens the terminal in Visual Studio Code.",
+    "Control+GraveAccent": "Control+GraveAccent opens a console, as it opens the terminal in Visual Studio Code.",
     "Alt+Home": "Home goes to the top; Alt+Home goes to the top table.",
     "Control+G": "G for Go, as Control+G goes to a line in Windows editors.",
     "Shift+Space": "Space marks in a list; Shift and Space asks how many are marked.",
@@ -125,7 +125,12 @@ def keyName(sExpr):
             "Oemcomma": "Comma", "OemMinus": "Dash", "Oemplus": "Equals",
             "OemQuestion": "Slash", "OemSemicolon": "Semicolon", "Oem1": "Semicolon",
             "OemOpenBrackets": "LeftBracket", "OemCloseBrackets": "RightBracket",
-            "OemPipe": "Backslash", "OemBackslash": "Backslash", "Oemtilde": "Grave",
+            "OemPipe": "Backslash", "OemBackslash": "Backslash", "Oemtilde": "GraveAccent",
+            # THE KIT'S NAMES FOR EVERY OEM SPELLING (17 November 2026): Keys.Oem5 is Keys.OemPipe under another
+            # name, and Show in FileDir's Control+Shift+Oem5 was reported as unbound; the backtick key is GraveAccent,
+            # as DbDo's own friendlyKey and the kit's KeyName say it.
+            "Oem2": "Slash", "Oem3": "GraveAccent", "Oem4": "LeftBracket", "Oem5": "Backslash",
+            "Oem6": "RightBracket", "Oem7": "Apostrophe",
             "Multiply": "NumPadStar"}
     lsParts = [("D" + p[1:] if False else p) for p in lsParts]
     lsParts = [(p[1:] if re.match(r"^D\d$", p) else p) for p in lsParts]

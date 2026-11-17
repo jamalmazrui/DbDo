@@ -816,9 +816,10 @@ both.</p>
 going forward; Shift+F3 repeats it going back.</p>
 <p>In DbDo, Keywords and Any Field read a whole record as text, so the
 words of <code>red &amp; blue</code> may sit in different fields; Jump
-Record and a Fields box read one field as a name. Find Regex, and
-Replace with Use regex pattern checked, take regular expressions
-instead; otherwise Replace finds exactly the text you type.</p>
+Record and a Fields box read one field as a name. Forward Find with
+Regex, and Replace with Use regex pattern checked, take regular
+expressions instead; otherwise Replace finds exactly the text you
+type.</p>
 <h3 id="navigating-records">Navigating records</h3>
 <p>Beyond the grid’s keys, the cursor moves with these commands:</p>
 <ul>
@@ -827,8 +828,9 @@ instead; otherwise Replace finds exactly the text you type.</p>
 <li><strong>Keywords</strong> (Control+K) searches for text;
 <strong>Reverse Keywords</strong> (Control+Shift+K) searches backward;
 <strong>Search Next</strong> (F3) and <strong>Search Previous</strong>
-(Shift+F3) repeat the last search. <strong>Find Regex</strong>
-(Control+F3) searches by regular expression.</li>
+(Shift+F3) repeat the last search. <strong>Forward Find with
+Regex</strong> (Control+F3) and <strong>Reverse Find with Regex</strong>
+(Control+Shift+F3) search by regular expression.</li>
 <li><strong>Jump</strong> (Control+J) and <strong>Reverse Jump</strong>
 move by a jump increment for quickly covering distance in a long
 table.</li>
@@ -1242,7 +1244,8 @@ from a report definition, the same way every time, from the whole table
 rather than the grid. Definitions live in report.inix beside the
 database (see “The report-template language” in Part 6); BookTrail,
 ContactTrail, RadioTrail and TechTraining come with some.</li>
-<li><strong>Print</strong> (Control+P) prints the grid.</li>
+<li><strong>Print</strong> (File menu, no key) prints the current record
+or the marked ones. Control+P plays media, as in every Homer app.</li>
 <li><strong>The clipboard:</strong> Copy Cell (Control+C) and Copy
 Append (Alt+C); Copy Append Record (Alt+Shift+C); and, on the Misc menu,
 Copy Column, Copy Grid, and Copy Visible Cells, as tab-separated text
@@ -1548,7 +1551,7 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 </tr>
 <tr>
 <td>Print</td>
-<td>Control+P</td>
+<td>—</td>
 </tr>
 <tr>
 <td>Choose Table</td>
@@ -1777,11 +1780,11 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <td>Control+Shift+J</td>
 </tr>
 <tr>
-<td>Find Regex</td>
+<td>Forward Find with Regex</td>
 <td>Control+F3</td>
 </tr>
 <tr>
-<td>Reverse Find Regex</td>
+<td>Reverse Find with Regex</td>
 <td>Control+Shift+F3</td>
 </tr>
 <tr>
@@ -1890,7 +1893,7 @@ family.</p>
 <td>Shift+Space</td>
 </tr>
 <tr>
-<td>Say Order and Filter</td>
+<td>Say Filter and Order</td>
 <td>Shift+8</td>
 </tr>
 <tr>

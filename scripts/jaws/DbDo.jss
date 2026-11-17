@@ -64,3 +64,10 @@ Script HotKeyHelp ()
 TypeKey ("Control+Slash")
 TypeKey ("Control+Slash")
 EndScript
+
+; Homer suite pass-through script -- written by the kit's tidy, because the key map names it; do not edit
+; Way: pass quietly. Where: everywhere in DbDo. A key the suite hands on reaches the app.
+Script TypeCurrentScriptKey ()
+TypeCurrentScriptKey ()
+EndScript
+; end of Homer suite pass-through script

@@ -1,53 +1,63 @@
-﻿r"""testSay.py -- every Shift+letter key in DbDo, pressed once and twice, then described, with what JAWS said.
+﻿r"""testSay.py -- every Say command of a Homer app, pressed once and twice, then described, with what the reader said.
 
-WHY THIS EXISTS (9 November 2026)
+WHY THIS EXISTS (9 November 2026 in DbDo; in the kit for every app since 17 November 2026)
 
-DbDo's Shift+letter keys are its Say family: each speaks one fact about the record, and a second press may spell a
-short value or show a longer one in a window. Jamal hears them through JAWS, and what JAWS says can differ from what
-DbDo meant to say. This script presses each key in the real program, records the computer's sound while JAWS speaks,
-writes it down with a local speech recognizer, and gathers everything into one folder under logs to upload:
+A Homer app's Say commands each speak one fact, and a second press may spell a short value or show a longer one in a
+window. Jamal hears them through JAWS, and what JAWS says can differ from what the app meant to say. This script
+writes a macro script of every Say command in the app's key file and plays it with the kit's runMacro, which presses
+each key in the real program, records the computer's sound while the reader speaks, writes it down with a local
+speech recognizer, and sets it beside what the app's own log says it said:
 
-    1. Shift+A through Shift+Z, each pressed once, then pressed twice in quick succession, then Escape, which closes
-       any window a second press opened.
-    2. Control+F1 turns on the Key Describer, Shift+A through Shift+Z are each pressed once, so each is described
-       rather than run, and Control+F1 turns the Key Describer off.
+    1. Each Say command run once, then twice in quick succession, then Escape, which closes any window a second press
+       opened.
+    2. Control+F1 turns on the Key Describer, each Say command's key is pressed once, so it is described rather than
+       run, and Control+F1 turns the Key Describer off.
 
-It does the pressing, recording and transcribing through the kit's recordWalk, the tool the tutorials are checked
-with, by writing a walk for it. recordWalk sets beside each key what JAWS was heard to say and what DbDo's own speech
-log says it said.
+DbDo's testSay pressed Shift+A to Shift+Z; this one takes the Say commands from the key file, so FileDir's Shift+8
+and Alt+Y are heard too, and a command moved to another key is followed.
 
-BEFORE RUNNING. Open DbDo on a table with records, on a record worth hearing about, with JAWS running as usual.
-Then keep your hands off the keyboard: the script presses keys in DbDo. To stop it, switch to any other window;
-recordWalk checks before each key that DbDo is still in front, and stops if not.
+BEFORE RUNNING. Open the app on something worth hearing about -- DbDo on a table with records, FileDir on a folder
+with files -- with JAWS running as usual. Then keep your hands off the keyboard. To stop, switch to any other window.
 
-USAGE
+USAGE (from the app's folder or its scripts folder)
 
-    testSay                     the whole run, about 15 minutes
-    testSay --letters ABC       only those letters
+    testSay                     every Say command, about a minute for every three
+    testSay --only F,O,8        only the Say commands on those keys (a single letter or digit is a key)
+    testSay --only position     only the Say commands with that word in their names
+    testSay --letters ABC       only the Say commands on Shift+A, Shift+B and Shift+C (DbDo's old option)
     testSay --no-describer      leave out the Key Describer pass
     testSay --wait 8            listen up to eight seconds after each key (default 6)
-    testSay --model base.en     a smaller, faster recognizer, passed on to recordWalk (default small.en)
+    testSay --check             write the macro and check every line is understood, without pressing anything
 
 WHAT IT WRITES
 
-    logs\DbDo-testSay-<stamp>.log       this script's own log: environment, settings, every command and exit code
+    logs\<App>-testSay-<stamp>.log      this script's own log: environment, settings, every command and exit code
     logs\testSay-<stamp>\               the folder to upload:
-        testSay.inix                    the walk recordWalk performed
-        DbDo-recordWalk-<stamp>.md      recordWalk's report: key by key, heard and logged speech side by side
-        DbDo-recordWalk-<stamp>.log     recordWalk's log
+        testSay.inix                    the macro script it played, plain lines anyone can read and play again
+        <App>-recordWalk-<stamp>.md     the report: key by key, heard and logged speech side by side
+        <App>-recordWalk-<stamp>.log    recordWalk's log, and runMacro's
         recordings\                     one recording per key
-        appLogs\                        DbDo's own session logs from the run, with every say: line
+        appLogs\                        the app's own session logs from the run, with every say: line
         testSay.md                      what is in the folder
 
-Exit code: recordWalk's, or 2 when recordWalk could not be found or the run could not start.
+Exit code: runMacro's (1 is usual, since the macro expects nothing in particular), or 2 when it could not start.
 """
 
-import argparse, datetime, glob, os, platform, shutil, subprocess, sys, time, traceback
+import argparse, datetime, glob, os, platform, re, shutil, subprocess, sys, time, traceback
 
 sStamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
 sScriptDir = os.path.dirname(os.path.abspath(__file__))
-sProject = os.path.dirname(sScriptDir)
-sApp = os.path.basename(sProject) or "DbDo"
+
+
+def projectFolder():
+    """The app's folder: the working folder when it holds configs, else the folder above this script's."""
+    for sDir in (os.getcwd(), os.path.dirname(os.getcwd()), os.path.dirname(sScriptDir)):
+        if os.path.isdir(os.path.join(sDir, "configs")) and os.path.isdir(os.path.join(sDir, "scripts")): return sDir
+    return os.path.dirname(sScriptDir)
+
+
+sProject = projectFolder()
+sApp = os.path.basename(os.path.normpath(sProject))
 sLogDir = os.path.join(sProject, "logs")
 sLogPath = os.path.join(sLogDir, sApp + "-testSay-" + sStamp + ".log")
 sOutDir = os.path.join(sLogDir, "testSay-" + sStamp)
@@ -57,109 +67,129 @@ def logLine(sText):
     os.makedirs(sLogDir, exist_ok=True)
     with open(sLogPath, "a", encoding="utf-8-sig", newline="\r\n") as fLog:
         fLog.write(datetime.datetime.now().strftime("%Y-%m-%dT%H:%M:%S") + " " + sText + "\n")
+    return True
 
 
 def say(sText):
     print(sText, flush=True)
     logLine("CONSOLE: " + sText)
+    return True
 
 
-def findRecordWalk():
-    """The app's own copy of recordWalk.py, else the kit's, beside the project or at the root of its drive."""
-    lCandidates = [os.path.join(sScriptDir, "recordWalk.py"),
-                   os.path.join(os.path.dirname(sProject), "HomerDev", "scripts", "recordWalk.py"),
-                   os.path.join(os.path.splitdrive(sProject)[0] + os.sep, "HomerDev", "scripts", "recordWalk.py")]
-    for sCandidate in lCandidates:
-        logLine("recordWalk candidate " + sCandidate + (" found" if os.path.isfile(sCandidate) else " not found"))
+def findRunMacro():
+    """runMacro.py beside this script, in the app's scripts, or in the kit."""
+    lsCandidates = [os.path.join(sScriptDir, "runMacro.py"), os.path.join(sProject, "scripts", "runMacro.py"),
+                    os.path.join(os.path.dirname(sProject), "HomerDev", "scripts", "runMacro.py"),
+                    os.path.join(os.path.splitdrive(sProject)[0] + os.sep, "HomerDev", "scripts", "runMacro.py")]
+    for sCandidate in lsCandidates:
+        logLine("runMacro candidate " + sCandidate + (" found" if os.path.isfile(sCandidate) else " not found"))
         if os.path.isfile(sCandidate): return sCandidate
     return ""
 
 
-def writeWalk(sPath, sLetters, iWait, bDescriber):
-    """The walk: each letter once, twice and Escape; then, unless left out, the Key Describer pass."""
-    lLines = ["; testSay.inix -- written by testSay.py on " + sStamp + " for recordWalk", ""]
-    def step(sKey, iPress, iStepWait, sSay):
-        lLines.extend(["[step]", "Say=" + sSay, "Key=" + sKey, "Wait=" + str(iStepWait)])
-        if iPress > 1: lLines.append("Press=" + str(iPress))
-        lLines.append("")
-    for sLetter in sLetters:
-        step("Shift+" + sLetter, 1, iWait, "Shift+" + sLetter + ", pressed once.")
-        step("Shift+" + sLetter, 2, iWait + 2, "Shift+" + sLetter + ", pressed twice.")
-        step("Escape", 1, 2, "Escape, closing any window the second press opened.")
+def sayCommands(oRunMacro, sOnly, sLetters):
+    """[(name, key)] of the app's Say commands that have a key, by name, narrowed as asked."""
+    dCommands = oRunMacro.appCommands(oRunMacro.keyFileOf(sProject, sApp))
+    lsChosen = sorted(((sName, sKey) for sName, sKey in dCommands.values() if sName.lower().startswith("say ") and sKey),
+                      key=lambda t: t[0].lower())
+    if sLetters:
+        setKeys = set("shift+" + s.lower() for s in sLetters)
+        lsChosen = [t for t in lsChosen if t[1].lower() in setKeys]
+    if sOnly:
+        lsWanted = [s.strip().lower() for s in sOnly.split(",") if s.strip()]
+        def wanted(sName, sKey):
+            sBare = sKey.lower().split("+")[-1]
+            # A single letter or digit names a key (F is Shift+F); anything longer is a key or words of a name.
+            return any(s == sBare or s == sKey.lower() or (len(s) > 1 and s in sName.lower()) for s in lsWanted)
+        lsChosen = [t for t in lsChosen if wanted(*t)]
+    return lsChosen
+
+
+def writeMacro(sPath, lsChosen, iWait, bDescriber):
+    """The macro script: each Say command once, twice and Escape; then each key described."""
+    lsLines = ["FileTask = macroScript", "App = " + sApp, "Name = Every Say command of " + sApp + ", heard",
+               "Listen = " + str(iWait), "Note = written by testSay on " + sStamp, "", "[steps]"]
+    for sName, sKey in lsChosen:
+        lsLines += [sName, sName + " twice", "Press Escape"]
     if bDescriber:
-        step("Control+F1", 1, iWait, "Control+F1, the Key Describer on.")
-        for sLetter in sLetters:
-            step("Shift+" + sLetter, 1, iWait, "Shift+" + sLetter + ", described.")
-        step("Control+F1", 1, iWait, "Control+F1, the Key Describer off.")
-    with open(sPath, "w", encoding="utf-8-sig", newline="\r\n") as fWalk:
-        fWalk.write("\n".join(lLines))
-    logLine("walk written: %s, %d steps" % (sPath, sum(1 for s in lLines if s == "[step]")))
+        lsLines.append("Press Control+F1")
+        lsLines += ["Press " + sKey for sName, sKey in lsChosen]
+        lsLines.append("Press Control+F1")
+    with open(sPath, "w", encoding="utf-8-sig", newline="\r\n") as fOut:
+        fOut.write("\n".join(lsLines) + "\n")
+    logLine("macro written: %s, %d lines under [steps]" % (sPath, len(lsLines) - 7))
+    return sPath
 
 
 def newerThan(sPattern, nSince):
     return sorted(s for s in glob.glob(sPattern) if os.path.getmtime(s) >= nSince)
 
 
-def copyInto(lFiles, sFolder):
+def copyInto(lsFiles, sFolder):
     os.makedirs(sFolder, exist_ok=True)
-    for sFile in lFiles:
+    for sFile in lsFiles:
         shutil.copy2(sFile, sFolder)
         logLine("copied " + sFile + " into " + sFolder)
-    return len(lFiles)
+    return len(lsFiles)
 
 
 def main():
-    oParser = argparse.ArgumentParser(description="Press DbDo's Shift+letter keys, record what JAWS says, and gather it under logs.")
-    oParser.add_argument("--letters", default="ABCDEFGHIJKLMNOPQRSTUVWXYZ")
+    oParser = argparse.ArgumentParser(description="Run every Say command of a Homer app, record what the reader says, and gather it under logs.")
+    oParser.add_argument("--only", default="")
+    oParser.add_argument("--letters", default="")
     oParser.add_argument("--no-describer", action="store_true")
     oParser.add_argument("--wait", type=int, default=6)
-    oParser.add_argument("--model", default="")
-    oArgs = oParser.parse_args()
+    oParser.add_argument("--check", action="store_true")
+    oArgs = oParser.parse_args([s.lower() if s.startswith("--") else s for s in sys.argv[1:]])
     sLetters = "".join(s for s in oArgs.letters.upper() if "A" <= s <= "Z")
     logLine("testSay started; script=%s; Python %s; %s; cwd=%s; command line=%s" % (
         os.path.abspath(__file__), sys.version.split()[0], platform.platform(), os.getcwd(), " ".join(sys.argv)))
-    logLine("settings: app=%s; project=%s; letters=%s; wait=%d; describer=%s; model=%s; folder=%s" % (
-        sApp, sProject, sLetters, oArgs.wait, "no" if oArgs.no_describer else "yes", oArgs.model or "recordWalk's default", sOutDir))
-    if not sLetters:
-        say("No letters to press. Nothing was done.")
+    logLine("settings: app=%s; project=%s; only=%s; letters=%s; wait=%d; describer=%s; check=%s; folder=%s" % (
+        sApp, sProject, oArgs.only or "all", sLetters or "all", oArgs.wait, "no" if oArgs.no_describer else "yes", oArgs.check, sOutDir))
+    sRunMacro = findRunMacro()
+    if not sRunMacro:
+        say("runMacro.py was not found in this app's scripts or the kit's, so nothing was pressed.")
         return 2
-    sRecordWalk = findRecordWalk()
-    if not sRecordWalk:
-        say("recordWalk.py was not found in this project's scripts or the kit's, so nothing was pressed.")
+    sys.path.insert(0, os.path.dirname(sRunMacro))
+    import runMacro as oRunMacro
+    lsChosen = sayCommands(oRunMacro, oArgs.only, sLetters)
+    logLine("Say commands chosen: " + "; ".join("%s (%s)" % t for t in lsChosen))
+    if not lsChosen:
+        say("No Say command with a key matched, so nothing was pressed.")
         return 2
     os.makedirs(sOutDir, exist_ok=True)
-    sWalk = os.path.join(sOutDir, "testSay.inix")
-    writeWalk(sWalk, sLetters, oArgs.wait, not oArgs.no_describer)
-    iSteps = len(sLetters) * 3 + (0 if oArgs.no_describer else len(sLetters) + 2)
-    say("testSay: %d keys in %s, about %d minutes. Keep your hands off the keyboard; switch windows to stop." % (
-        iSteps, sApp, max(1, iSteps * (oArgs.wait + 3) // 60)))
-    lCommand = [sys.executable, sRecordWalk, "--walk", sWalk, "--app", sApp, "--no-axe", "--keep", "--wait", str(oArgs.wait)]
-    if oArgs.model: lCommand += ["--model", oArgs.model]
+    sMacro = writeMacro(os.path.join(sOutDir, "testSay.inix"), lsChosen, oArgs.wait, not oArgs.no_describer)
+    lCommand = [sys.executable, sRunMacro, sMacro, "--keep"] + (["--check"] if oArgs.check else [])
+    if not oArgs.check:
+        iSteps = len(lsChosen) * 3 + (0 if oArgs.no_describer else len(lsChosen) + 2)
+        iMinutes = max(1, iSteps * (oArgs.wait + 3) // 60)
+        say("testSay: %d Say command%s in %s, %d key%s, about %d minute%s." % (len(lsChosen), "" if len(lsChosen) == 1 else "s", sApp, iSteps, "" if iSteps == 1 else "s", iMinutes, "" if iMinutes == 1 else "s"))
     nStart = time.time()
     logLine("run: " + subprocess.list2cmdline(lCommand) + " in " + sProject)
     try:
         iCode = subprocess.call(lCommand, cwd=sProject)
     except Exception:
-        logLine("recordWalk did not start: " + traceback.format_exc())
-        say("recordWalk could not be started; the log says why.")
+        logLine("runMacro did not start: " + traceback.format_exc())
+        say("runMacro could not be started; the log says why.")
         return 2
-    logLine("recordWalk exit code %d after %.0f seconds" % (iCode, time.time() - nStart))
-    # GATHERED IN ONE FOLDER, to upload with logs: recordWalk's report and log, its recordings, DbDo's own logs.
-    iReports = copyInto(newerThan(os.path.join(sLogDir, sApp + "-recordWalk-*.*"), nStart), sOutDir)
-    lWaves = newerThan(os.path.join(sProject, "results", "recordWalk-*"), nStart)
+    logLine("runMacro exit code %d after %.0f seconds" % (iCode, time.time() - nStart))
+    if oArgs.check: return iCode
+    # GATHERED IN ONE FOLDER, to upload with logs: the reports and logs, the recordings, the app's own logs.
+    iReports = copyInto(newerThan(os.path.join(sLogDir, sApp + "-recordWalk-*.*"), nStart) + newerThan(os.path.join(sLogDir, sApp + "-runMacro-*.log"), nStart), sOutDir)
     iWaves = 0
-    for sFolder in lWaves:
+    for sFolder in newerThan(os.path.join(sProject, "results", "recordWalk-*"), nStart):
         if os.path.isdir(sFolder): iWaves += copyInto(sorted(glob.glob(os.path.join(sFolder, "*.wav"))), os.path.join(sOutDir, "recordings"))
     sAppLogs = os.path.join(os.environ.get("LOCALAPPDATA", os.path.expanduser("~")), sApp, "logs")
     iAppLogs = copyInto(newerThan(os.path.join(sAppLogs, sApp + "-*.log"), nStart - 60), os.path.join(sOutDir, "appLogs"))
     with open(os.path.join(sOutDir, "testSay.md"), "w", encoding="utf-8-sig", newline="\r\n") as fOut:
         fOut.write("\n".join([
-            "# testSay, " + sStamp, "",
-            "- Letters: " + sLetters + "; each pressed once, twice, then Escape" + ("" if oArgs.no_describer else "; then each described with the Key Describer on") + ".",
-            "- recordWalk exit code: %d (0 means every step was heard as its walk expected; this walk expects nothing, so 1 is usual)." % iCode,
-            "- recordWalk report and log: %d file%s." % (iReports, "" if iReports == 1 else "s"),
+            "# testSay, " + sApp + ", " + sStamp, "",
+            "- Say commands: %d; each run once, twice, then Escape%s." % (len(lsChosen), "" if oArgs.no_describer else "; then each key described with the Key Describer on"),
+            "- The macro played: testSay.inix, which runMacro can play again.",
+            "- runMacro exit code: %d (0 means every expectation held; this macro expects nothing, so 1 is usual)." % iCode,
+            "- Reports and logs: %d file%s." % (iReports, "" if iReports == 1 else "s"),
             "- Recordings: %d, in recordings." % iWaves,
-            "- DbDo's own logs: %d, in appLogs." % iAppLogs,
+            "- %s's own logs: %d, in appLogs." % (sApp, iAppLogs),
             "- This script's log: " + os.path.basename(sLogPath) + ", in logs.", ""]))
     say("testSay finished: %d recording%s and %d report file%s in %s. Upload the logs folder." % (
         iWaves, "" if iWaves == 1 else "s", iReports, "" if iReports == 1 else "s", sOutDir))

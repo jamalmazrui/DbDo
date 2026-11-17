@@ -165,7 +165,7 @@ rem cause, first. Raise this whenever DbDo starts using something new.
 rem 1.64.5: Play Tutorials calls MediaPlayer.playTutorials, which older kits lack;
 rem a build against 1.64.4 failed to compile on 8 October 2026 rather than saying so.
 rem 1.231.0: the macro recorder compiles the kit's Macro.cs, with its expected-against-actual audit.
-set "kitNeeded=1.241.0"
+set "kitNeeded=1.245.0"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -273,8 +273,9 @@ rem installModels.cmd likewise. The kit's check (shipped) now fails a build whos
 rem installer runs a script that is not here. Each copy is logged, and a name the
 rem kit does not have is logged as missing rather than skipped in silence.
 rem recordWalk joined the list on 5 November 2026: DbDo's own older copy kept running, so walks never named
-rem the build they walked; now every build brings the kit's.
-for %%F in (buildTutorials.cmd buildTutorials.ps1 check.cmd check.py checkTutorial.cmd checkTutorial.py finish.cmd fixEncoding.cmd fixEncoding.py installCommon.cmd installModels.cmd installMpv.cmd installOllama.cmd installScreenReaderSupport.cmd kind.cmd kind.py makeTutorials.cmd makeTutorials.py push.cmd release.cmd release.ps1 tidy.cmd tidy.py uiCheck.cmd uiCheck.py unpushed.cmd unpushed.py) do (
+rem the build they walked; now every build brings the kit's. runMacro and testSay joined on 17 November 2026: testSay
+rem is the kit's for every app now, and plays its Say commands as a macro script through runMacro.
+for %%F in (buildTutorials.cmd buildTutorials.ps1 check.cmd check.py checkTutorial.cmd checkTutorial.py finish.cmd fixEncoding.cmd fixEncoding.py installCommon.cmd installModels.cmd installMpv.cmd installOllama.cmd installScreenReaderSupport.cmd kind.cmd kind.py makeTutorials.cmd makeTutorials.py push.cmd release.cmd release.ps1 runMacro.cmd runMacro.py testSay.cmd testSay.py tidy.cmd tidy.py uiCheck.cmd uiCheck.py unpushed.cmd unpushed.py) do (
   if exist "!homerDev!\scripts\%%F" (
     copy /y "!homerDev!\scripts\%%F" scripts\ >nul
     echo Kit script copied: %%F, exit code !ERRORLEVEL! >> "!log!"

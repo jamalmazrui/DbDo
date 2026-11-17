@@ -48,7 +48,12 @@ scripts/describeFields.py
 scripts/recordWalk.cmd
 scripts/recordWalk.py
 scripts/walks/pilot.inix
-# testSay (9 November 2026): every Shift+letter key pressed once, twice and described, through recordWalk.
+# runMacro (17 November 2026): the kit's player of macro scripts, plain lines of commands heard through the reader;
+# scripts\tests holds the live tests tidy plays with it.
+scripts/runMacro.cmd
+scripts/runMacro.py
+scripts/tests/sayBasics.inix
+# testSay (9 November 2026; the kit's since 17 November 2026): every Say command run once, twice and described.
 scripts/testSay.cmd
 scripts/testSay.py
 # DbDo's screen reader sources (3 November 2026). They were not named here, so tidy moved scripts\jaws and

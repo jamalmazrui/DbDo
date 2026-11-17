@@ -5,6 +5,24 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 17 November 2026 -- The suite's names for search and Shift+8
+
+- **Find Regex is Forward Find with Regex, and Reverse Find Regex is Reverse Find with Regex,** the names EdSharp and HomerView give Control+F3 and Control+Shift+F3. The keys are unchanged, and the Alternate Menu still finds the old names.
+- **Say Order and Filter is Say Filter and Order,** FileDir's name for Shift+8, and it now says the filter first, then the order: "filter: none; order: none". The number pad's Star still runs it.
+- **Two keys are spelled as the kit spells them:** Control+GraveAccent and Control+Shift+GraveAccent, where DbDo.inix had Grave.
+- **The pattern audit reads every spelling of the Backslash key,** so Show in FileDir, bound as Oem5, no longer reads as unbound and stops the push. Show in FileDir is now bound as OemPipe, as Open in Explorer and Open Command Prompt are, and help\Hotkeys.md says GraveAccent and Backslash, as the key file does.
+- **testSay is the kit's now,** and hears every Say command in the key file, not only Shift+A to Shift+Z, so Alt+Y, Shift+8 and Alt+Delete are heard too. --letters still works, and --only takes keys or words of a name.
+- **A live test after every build.** scripts\tests\sayBasics.inix is a short macro script that the kit's tidy plays when DbDo is closed and a screen reader is running.
+- **Alt+Delete reaches DbDo under JAWS.** DbDo's JAWS key map handed Alt+Delete to a script that DbDo's JAWS scripts never defined, so JAWS spelled out "unknown script" and Say Position never ran. DbDo's first live test heard it. The kit's tidy now adds the missing script, and it takes effect once DbDo's JAWS scripts are installed again.
+- DbDo now needs HomerDev 1.245.0.
+
+## 17 November 2026 -- 58 commands back where the checks can see them
+
+- **58 command lines in DbDo.inix were inside the TSV connection string.** Added on 10 November, they landed between the backtick fences of tsv= in [ConnectStrings], so the TSV connection string carried them as text, and no key or suite check could see them. DbDo reads descriptions only from [Hotkeys], so the Key Describer, the Alternate Menu and Alt+Shift+H gave those commands their bare names. They are back at the end of [Hotkeys], and now say what they do: Run Report, Field Statistics, Chat about Table, Copy Log and the rest. Every key there matches what DbDo binds; no key changes.
+- **Show in FileDir (Control+Shift+Backslash) is now a suite command,** shared with EdSharp, which gains it on the same key, word for word.
+- **The guide gives Print correctly:** on the File menu, with no key, printing the current record or the marked ones. Control+P plays media.
+- DbDo now needs HomerDev 1.243.0.
+
 ## 15 November 2026 -- SQLite, measured and indexed by structure
 
 The first two steps of the SQLite plan Claude and ChatGPT agreed on. Nothing you hear changes; what changes is which indexes a database carries and what the log records.

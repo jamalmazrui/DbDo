@@ -249,8 +249,8 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Open Command Prompt\
   Control+Backslash
 - Open Dot Prompt\
-  Send focus to the dot prompt console. Control+Grave opens a console, as it opens the terminal in Visual Studio Code.\
-  Control+Grave
+  Send focus to the dot prompt console. Control+GraveAccent opens a console, as it opens the terminal in Visual Studio Code.\
+  Control+GraveAccent
 - Open in Explorer\
   Open the folder of the open database in Windows Explorer.\
   Alt+Backslash
@@ -262,10 +262,10 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Control+Shift+F9
 - Show in FileDir\
   Show the open database's file, selected in its folder, in FileDir.\
-  Control+Shift+Oem5
+  Control+Shift+Backslash
 - Sqlean Console\
   Open the bundled sqlean.exe shell in its own console window on the current database.\
-  Control+Shift+Grave
+  Control+Shift+GraveAccent
 
 ### Navigate
 
@@ -278,7 +278,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Exit to Root Table\
   Go back to the first table. Home goes to the top; Alt+Home goes to the top table.\
   Alt+Home
-- Find Regex\
+- Forward Find with Regex\
   Find the next record matching a regular expression. F3 searches; Control makes the search a pattern.\
   Control+F3
 - Go to Record\
@@ -293,7 +293,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Repeat Go to\
   G for Go.\
   Alt+G
-- Reverse Find Regex\
+- Reverse Find with Regex\
   Find the previous record matching a regular expression. F3 searches; Control makes it a pattern and Shift reverses it.\
   Control+Shift+F3
 - Reverse Jump\
@@ -381,6 +381,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Filter\
   F for Filter.\
   Shift+F
+- Say Filter and Order\
+  Speak the current filter and order, or none for each. Shift+8 is the asterisk, the SQL sign for everything: sort and filter together.\
+  Shift+8
 - Say Go to\
   Say the last Go to entry. G for Go.\
   Shift+G
@@ -413,9 +416,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Order\
   Say the order in force. O for Order.\
   Shift+O
-- Say Order and Filter\
-  Speak the current order and filter, or none for each. Shift+8 is the asterisk, the SQL sign for everything: sort and filter together.\
-  Shift+8
 - Say Path\
   Speak the open database's full path; press twice to show it. P for Path.\
   Alt+P
@@ -626,7 +626,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+G\
   Go to a record by its number, a percent or text.\
   Go to Record
-- Control+Grave\
+- Control+GraveAccent\
   Send focus to the dot prompt console.\
   Open Dot Prompt
 - Control+I\
@@ -680,6 +680,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Shift+B\
   Forget the saved bookmark.\
   Clear Bookmark
+- Control+Shift+Backslash\
+  Show the open database's file, selected in its folder, in FileDir.\
+  Show in FileDir
 - Control+Shift+C\
   Duplicate the current row as a new row.\
   Copy Record
@@ -690,7 +693,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Shift+F\
   Clear the active filter.\
   Clear Filter
-- Control+Shift+Grave\
+- Control+Shift+GraveAccent\
   Open the bundled sqlean.exe shell in its own console window on the current database.\
   Sqlean Console
 - Control+Shift+J\
@@ -710,9 +713,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Shift+O\
   Open a table in a new window.\
   Open Table
-- Control+Shift+Oem5\
-  Show the open database's file, selected in its folder, in FileDir.\
-  Show in FileDir
 - Control+Shift+R\
   Replace with Regex
 - Control+Shift+S\
@@ -761,7 +761,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Pick Value
 - Control+F3\
   Find the next record matching a regular expression.\
-  Find Regex
+  Forward Find with Regex
 - Control+F4\
   Close the current recordset window.\
   Close Window
@@ -772,7 +772,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   History of Changes
 - Control+Shift+F3\
   Find the previous record matching a regular expression.\
-  Reverse Find Regex
+  Reverse Find with Regex
 - Control+Shift+F4\
   Close every window except the current one.\
   Close All But Current Window
@@ -821,8 +821,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 ### Shift
 
 - Shift+8\
-  Speak the current order and filter, or none for each.\
-  Say Order and Filter
+  Speak the current filter and order, or none for each.\
+  Say Filter and Order
 - Shift+A\
   Say Added
 - Shift+B\
@@ -997,7 +997,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Filter Records\
   Show only the records that match what you choose.\
   Control+F
-- Find Regex\
+- Forward Find with Regex\
   Find the next record matching a regular expression.\
   Control+F3
 - Generate from Grid\
@@ -1058,7 +1058,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Control+O
 - Open Dot Prompt\
   Send focus to the dot prompt console.\
-  Control+Grave
+  Control+GraveAccent
 - Open in Explorer\
   Open the folder of the open database in Windows Explorer.\
   Alt+Backslash
@@ -1111,7 +1111,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Control+R
 - Replace with Regex\
   Control+Shift+R
-- Reverse Find Regex\
+- Reverse Find with Regex\
   Find the previous record matching a regular expression.\
   Control+Shift+F3
 - Reverse Jump\
@@ -1167,6 +1167,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Shift+E
 - Say Filter\
   Shift+F
+- Say Filter and Order\
+  Speak the current filter and order, or none for each.\
+  Shift+8
 - Say Go to\
   Say the last Go to entry.\
   Shift+G
@@ -1195,9 +1198,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Order\
   Say the order in force.\
   Shift+O
-- Say Order and Filter\
-  Speak the current order and filter, or none for each.\
-  Shift+8
 - Say Path\
   Speak the open database's full path; press twice to show it.\
   Alt+P
@@ -1247,10 +1247,10 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Alt+S
 - Show in FileDir\
   Show the open database's file, selected in its folder, in FileDir.\
-  Control+Shift+Oem5
+  Control+Shift+Backslash
 - Sqlean Console\
   Open the bundled sqlean.exe shell in its own console window on the current database.\
-  Control+Shift+Grave
+  Control+Shift+GraveAccent
 - Start Mark\
   Drop a mark anchor at the current row.\
   F8

@@ -214,12 +214,12 @@ Exit to Root Table=Alt+Home, Go back to the first table
 Table Properties=Alt+Enter, Show the current table's fields, types, indexes and links
 Keywords=Control+K, Go to the next record whose fields holds the keywords
 Reverse Keywords=Control+Shift+K, Go to the previous record whose fields holds the keywords
-Find Regex=Control+F3, Go to the next record that matches a regular expression
-Reverse Find Regex=Control+Shift+F3, Go to the previous record that matches a regular expression
+Forward Find with Regex=Control+F3, Go to the next record that matches a regular expression
+Reverse Find with Regex=Control+Shift+F3, Go to the previous record that matches a regular expression
 Jump=Control+J, Go to the next record whose current field holds the text
 Reverse Jump=Control+Shift+J, Go to the previous record whose current field holds the text
-Search Next=F3, Repeat the last Keywords, Jump or Find Regex, forward
-Search Previous=Shift+F3, Repeat the last Keywords, Jump or Find Regex, backward
+Search Next=F3, Repeat the last Keywords, Jump or Find with Regex, forward
+Search Previous=Shift+F3, Repeat the last Keywords, Jump or Find with Regex, backward
 
 ; ===== Order and Filter =====
 Order Records=Alt+O, Order the records by the fields you choose
@@ -259,7 +259,7 @@ Say Yield Marked=Shift+Y, Say how many records are marked
 Say Tables=None, Say the tables visited this session
 Say Clipboard=Alt+Apostrophe, Say the clipboard text
 Say Position=Alt+Delete, Say the current position: the record's number, the count and the percent
-Say Order and Filter=Shift+8 or NumPadStar, Say the order and the filter in force
+Say Filter and Order=Shift+8 or NumPadStar, Say the filter and the order in force
 Say Column as List from Current=Control+L, Say the current column's values from the current record on
 Say Column as List from Current Marked=Control+Shift+L, Say the current column's values in the marked records from the current record on
 Say Records from Current=None, Say all records in full from the current record on
@@ -282,7 +282,7 @@ Save Macro=None, Save the macro you recorded or loaded last in the Scripts folde
 Edit Settings=Alt+Shift+E, Edit DbDo's settings file
 Open in Explorer=Alt+Backslash, Open the open database's folder in Windows Explorer
 Print=None, Print the current record or the marked ones
-Open Dot Prompt=Control+Grave, Open DbDo's console window
+Open Dot Prompt=Control+GraveAccent, Open DbDo's console window
 
 ; ===== Toggles =====
 Read Only Toggle=Control+Shift+Z, Turn read-only on or off, to keep the records from being changed
@@ -299,6 +299,66 @@ Alternate Menu=Alt+F10, Pick any command from one list, in menu, name or key ord
 Where Am I=Control+Slash, Say where you are, what has focus and its keys
 Play Stream=Control+P, Play the current record's stream
 Elevate Version=F11, Download and install the latest DbDo
+; MOVED HERE 17 November 2026. These lines had been written inside the tsv connection string's backtick fence in
+; [ConnectStrings], so no check saw them as keys, and the TSV connection string carried them as text.
+; Added 10 November 2026: the commands whose descriptions had lived only in DbDo.cs, or nowhere.
+Save=Control+S, Save the open database's changes
+Save As=Control+Shift+S, Save a copy of the open database under another name or format
+Backup Database=None, Save a dated copy of the open database
+Compare Database=None, Compare two databases, once this is built
+Import Data=Alt+I, Make a new database from a spreadsheet, Access, dBASE or other file
+Open Template Database=Alt+Shift+D, Open one of the template databases that come with DbDo
+Merge Data=Alt+M, Add records from a Markdown table, JSON or Inix file to the current table
+Transfer Import=None, Add records from another database to the current table through a transfer map
+Run Report=Alt+Shift+R, Make a document from a saved report of the current table
+Choose View=None, Open a view of the database in this window
+Save Clipboard=Control+Apostrophe, Save the clipboard text to a file you name
+Append Clipboard=Control+Shift+Apostrophe, Add the clipboard text to the end of a file you name
+Clear Clipboard=Alt+Shift+Apostrophe, Empty the clipboard
+First Record=None, Go to the first record
+Last Record=None, Go to the last record
+Next Record=None, Go to the next record
+Previous Record=None, Go to the previous record
+Related Records=None, Go to the records of another table that the current record links to
+Show Schema=None, List the database's tables and views
+Say Column as List=Alt+L, Say the current column's values, from the first record
+Say Column as List of Marked=Alt+Shift+L, Say the current column's values in the marked records
+Say Marked Records=Shift+Space, Say every marked record in full
+Say Time=Alt+Semicolon, Say the date and time
+Say Path=Alt+P, Say the full path of the open database
+Filter with Regex=None, Show only the records whose current field matches a regular expression
+Clear Order=None, Show the records in the table's own order again
+Copy Visible Cells=None, Copy the current record's shown cells to the clipboard, tab-separated
+Copy Column=None, Copy the current column's values to the clipboard, one per line
+Copy Grid=None, Copy the whole grid to the clipboard, tab-separated, with a header row
+Jump to Next Initial=None, Go to the next record whose first letter differs
+Test Integrity=None, Check the open database for damage
+Open as Managed Copy=None, Open a database file through a working copy that is saved back when you save
+Field Statistics=None, Show each field's empty, distinct, lowest and highest values
+Facet Column=None, Show only the records with a value you pick from the current column
+Show in FileDir=Control+Shift+Backslash, Show the open database's file in FileDir
+Chat with AI=F12, Ask the AI model on this computer a question
+Chat about Table=Shift+F12, Ask the AI model on this computer about the current table
+Sqlean Console=Control+Shift+GraveAccent, Open the SQLite console on the open database
+Open Script Folder=None, Open the scripts folder in Windows Explorer
+Pack Files into Database=None, Store the files that go with the open database inside it
+Unpack Files from Database=None, Write the files the open database carries beside it
+Evaluate Expression=Control+Equals, Evaluate an expression and say its result
+ReadMe=Alt+Shift+F1, Open the quick start
+Hotkeys=None, Open the list of every command and key
+Frequently Asked Questions=None, Open the answers to frequently asked questions
+Announcement=None, Open the announcement of this version
+Developer Guide=None, Open the guide for developers
+License=None, Open the license
+Tutorials Transcript=None, Open the text of the tutorials
+Play Tutorials=Alt+F12, Play the spoken tutorials
+Copy Log=Control+F12, Copy the session log to the clipboard as a file
+Update from Template=None, Bring the open database up to date with its template
+Update Copies from Templates=None, Bring every copy of a template database up to date
+Email Log File=None, Email the session log to DbDo's developer
+Show Log Location=None, Open the session log
+File GitHub Issue=None, Report a problem or suggestion on GitHub
+Open Website=None, Open DbDo's web page
 
 [Folders]
 
@@ -412,64 +472,6 @@ Provider=Microsoft.ACE.OLEDB.12.0;Data Source={folder};Extended Properties="text
 `
 tsv=`
 Provider=Microsoft.ACE.OLEDB.12.0;Data Source={folder};Extended Properties="text;HDR=Yes;FMT=TabDelimited";
-; Added 10 November 2026: the commands whose descriptions had lived only in DbDo.cs, or nowhere.
-Save=Control+S, Save the open database's changes
-Save As=Control+Shift+S, Save a copy of the open database under another name or format
-Backup Database=None, Save a dated copy of the open database
-Compare Database=None, Compare two databases, once this is built
-Import Data=Alt+I, Make a new database from a spreadsheet, Access, dBASE or other file
-Open Template Database=Alt+Shift+D, Open one of the template databases that come with DbDo
-Merge Data=Alt+M, Add records from a Markdown table, JSON or Inix file to the current table
-Transfer Import=None, Add records from another database to the current table through a transfer map
-Run Report=Alt+Shift+R, Make a document from a saved report of the current table
-Choose View=None, Open a view of the database in this window
-Save Clipboard=Control+Apostrophe, Save the clipboard text to a file you name
-Append Clipboard=Control+Shift+Apostrophe, Add the clipboard text to the end of a file you name
-Clear Clipboard=Alt+Shift+Apostrophe, Empty the clipboard
-First Record=None, Go to the first record
-Last Record=None, Go to the last record
-Next Record=None, Go to the next record
-Previous Record=None, Go to the previous record
-Related Records=None, Go to the records of another table that the current record links to
-Show Schema=None, List the database's tables and views
-Say Column as List=Alt+L, Say the current column's values, from the first record
-Say Column as List of Marked=Alt+Shift+L, Say the current column's values in the marked records
-Say Marked Records=Shift+Space, Say every marked record in full
-Say Time=Alt+Semicolon, Say the date and time
-Say Path=Alt+P, Say the full path of the open database
-Filter with Regex=None, Show only the records whose current field matches a regular expression
-Clear Order=None, Show the records in the table's own order again
-Copy Visible Cells=None, Copy the current record's shown cells to the clipboard, tab-separated
-Copy Column=None, Copy the current column's values to the clipboard, one per line
-Copy Grid=None, Copy the whole grid to the clipboard, tab-separated, with a header row
-Jump to Next Initial=None, Go to the next record whose first letter differs
-Test Integrity=None, Check the open database for damage
-Open as Managed Copy=None, Open a database file through a working copy that is saved back when you save
-Field Statistics=None, Show each field's empty, distinct, lowest and highest values
-Facet Column=None, Show only the records with a value you pick from the current column
-Show in FileDir=Control+Shift+Backslash, Show the open database's file in FileDir
-Chat with AI=F12, Ask the AI model on this computer a question
-Chat about Table=Shift+F12, Ask the AI model on this computer about the current table
-Sqlean Console=Control+Shift+Grave, Open the SQLite console on the open database
-Open Script Folder=None, Open the scripts folder in Windows Explorer
-Pack Files into Database=None, Store the files that go with the open database inside it
-Unpack Files from Database=None, Write the files the open database carries beside it
-Evaluate Expression=Control+Equals, Evaluate an expression and say its result
-ReadMe=Alt+Shift+F1, Open the quick start
-Hotkeys=None, Open the list of every command and key
-Frequently Asked Questions=None, Open the answers to frequently asked questions
-Announcement=None, Open the announcement of this version
-Developer Guide=None, Open the guide for developers
-License=None, Open the license
-Tutorials Transcript=None, Open the text of the tutorials
-Play Tutorials=Alt+F12, Play the spoken tutorials
-Copy Log=Control+F12, Copy the session log to the clipboard as a file
-Update from Template=None, Bring the open database up to date with its template
-Update Copies from Templates=None, Bring every copy of a template database up to date
-Email Log File=None, Email the session log to DbDo's developer
-Show Log Location=None, Open the session log
-File GitHub Issue=None, Report a problem or suggestion on GitHub
-Open Website=None, Open DbDo's web page
 `
 
 ; =====================================================================

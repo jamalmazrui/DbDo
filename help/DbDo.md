@@ -224,14 +224,14 @@ Where a wildcard counts depends on what is searched. When the search reads a **n
 
 F3 repeats the last search, in the same way and over the same things, going forward; Shift+F3 repeats it going back.
 
-In DbDo, Keywords and Any Field read a whole record as text, so the words of `red & blue` may sit in different fields; Jump Record and a Fields box read one field as a name. Find Regex, and Replace with Use regex pattern checked, take regular expressions instead; otherwise Replace finds exactly the text you type.
+In DbDo, Keywords and Any Field read a whole record as text, so the words of `red & blue` may sit in different fields; Jump Record and a Fields box read one field as a name. Forward Find with Regex, and Replace with Use regex pattern checked, take regular expressions instead; otherwise Replace finds exactly the text you type.
 
 ### Navigating records
 
 Beyond the grid's keys, the cursor moves with these commands:
 
 - **Go to Record** (Control+G) jumps to a record number; **Repeat Go to** (Alt+G) repeats it.
-- **Keywords** (Control+K) searches for text; **Reverse Keywords** (Control+Shift+K) searches backward; **Search Next** (F3) and **Search Previous** (Shift+F3) repeat the last search. **Find Regex** (Control+F3) searches by regular expression.
+- **Keywords** (Control+K) searches for text; **Reverse Keywords** (Control+Shift+K) searches backward; **Search Next** (F3) and **Search Previous** (Shift+F3) repeat the last search. **Forward Find with Regex** (Control+F3) and **Reverse Find with Regex** (Control+Shift+F3) search by regular expression.
 - **Jump** (Control+J) and **Reverse Jump** move by a jump increment for quickly covering distance in a long table.
 - **Jump to Next Initial** steps to the next record whose current column starts with a new letter — type-ahead through a sorted column.
 
@@ -386,7 +386,7 @@ Filter and order first to shape the grid, then report on exactly what you see.
 
 - **Export Data** (Alt+Shift+X) writes the grid -- shown columns, kept records -- to a file: CSV, TSV, Markdown, a web page, Excel, Word, JSON, an .inix table, or another database. It is the one way to write data to a file.
 - **Run Report** (Alt+Shift+R) writes a designed document from a report definition, the same way every time, from the whole table rather than the grid. Definitions live in report.inix beside the database (see "The report-template language" in Part 6); BookTrail, ContactTrail, RadioTrail and TechTraining come with some.
-- **Print** (Control+P) prints the grid.
+- **Print** (File menu, no key) prints the current record or the marked ones. Control+P plays media, as in every Homer app.
 - **The clipboard:** Copy Cell (Control+C) and Copy Append (Alt+C); Copy Append Record (Alt+Shift+C); and, on the Misc menu, Copy Column, Copy Grid, and Copy Visible Cells, as tab-separated text that pastes into a spreadsheet.
 - **Save As** (Control+Shift+S) copies the whole database, to keep it or to change its format.
 
@@ -513,7 +513,7 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Transfer Import | — |
 | Run Report | Alt+Shift+R |
 | Export Data | Alt+Shift+X |
-| Print | Control+P |
+| Print | — |
 | Choose Table | Control+T |
 | Choose View | — |
 | Next / Previous Table or View | Control+F6 / Control+Shift+F6 |
@@ -574,8 +574,8 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Reverse Keywords | Control+Shift+K |
 | Jump | Control+J |
 | Reverse Jump | Control+Shift+J |
-| Find Regex | Control+F3 |
-| Reverse Find Regex | Control+Shift+F3 |
+| Forward Find with Regex | Control+F3 |
+| Reverse Find with Regex | Control+Shift+F3 |
 | Search Next / Previous | F3 / Shift+F3 |
 | Enter Child Table | Alt+Right |
 | Exit Child Table | Alt+Left |
@@ -606,7 +606,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Say Records from Current | — |
 | Say Marked Records from Current | Alt+Shift+M |
 | Say Marked Records | Shift+Space |
-| Say Order and Filter | Shift+8 |
+| Say Filter and Order | Shift+8 |
 | Say Position | Alt+Delete |
 | Say Clipboard | Alt+Apostrophe |
 | Say Added | Shift+A |
