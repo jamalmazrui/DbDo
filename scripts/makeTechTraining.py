@@ -10,7 +10,7 @@ description, length, presenter, series and source, then any further links (slide
 
 WHAT IT MAKES. templates\\TechTraining\\TechTraining.db, the Homer way (the homer-db skill), with the table helpers
 makeMusicTrail uses: one table, presentations, with the standard fields, look, prime and triggers. Its url field is
-the presentation's own address, so Play Stream (Alt+Shift+P) plays it in the Homer Player -- audio files directly,
+the presentation's own address, so Play Media (Alt+Shift+P) plays it in the Homer Player -- audio files directly,
 YouTube and the like through yt-dlp -- and marked presentations play as a play list. medium says which: audio, video,
 or page (a presentation page, opened in the browser with Control+Enter on its url). minutes is the length in whole
 minutes, so lessons can be sorted and filtered by time. defs hold the categories with the directory's own
@@ -25,15 +25,15 @@ import datetime, glob, os, platform, re, sqlite3, string, sys, traceback
 sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import makeMusicTrail as trail
 
-sVersion = "2026-10-12 version 1: from the Tech Training directory; Play Stream plays each presentation"
+sVersion = "2026-10-12 version 1: from the Tech Training directory; Play Media plays each presentation"
 lsFields = ["title", "year", "category", "minutes", "medium", "presenter", "series", "source", "summary", "source_url", "resources"]
 dColumnTypes = {"category": "TEXTLINE", "medium": "TEXTLINE", "minutes": "INTEGER", "presenter": "TEXTLINE", "resources": "TEXTMARKDOWN",
             "series": "TEXTLINE", "source": "TEXTLINE", "source_url": "TEXTLINE", "summary": "TEXTMARKDOWN", "title": "TEXTLINE", "year": "TEXTLINE"}
 lsStarterMarks = ["Convert PowerPoint to PDF and Maintain Document Structure", "Quiet the Noise: Managing VoiceOver Sensory Overload on iOS",
                     "Transform PDFs with AI-Powered OCR: Your Guide to PDFgear for Mac"]
-dMediaKinds = {"audio": "An audio file: Play Stream (Alt+Shift+P) plays it in the Homer Player.",
+dMediaKinds = {"audio": "An audio file: Play Media (Alt+Shift+P) plays it in the Homer Player.",
             "page": "A presentation page: Control+Enter on its url opens it in the browser, where it plays.",
-            "video": "A video on a host such as YouTube: Play Stream (Alt+Shift+P) plays it in the Homer Player, through yt-dlp."}
+            "video": "A video on a host such as YouTube: Play Media (Alt+Shift+P) plays it in the Homer Player, through yt-dlp."}
 
 sProject = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 sLogPath = os.path.join(sProject, "logs", "DbDo-makeTechTraining-%s.log" % datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
@@ -128,7 +128,7 @@ def build(sText, sTarget):
         for sField, sValue in (("SelectFields", sSelect), ("OrderFields", sOrder), ("WhereFilter", "")):
             oDb.execute("INSERT INTO views (tbl, fld, val) VALUES (?, ?, ?)", (sTable, sField, trail.viewFromInix("TechTraining", sTable, sField, sValue)))
     # A STARTER LISTENING LIST: three short presentations come marked, so the listening_list report and a play list
-    # from Play Stream (Alt+Shift+P with records marked) show what they do the first time. Unmark them freely.
+    # from Play Media (Alt+Shift+P with records marked) show what they do the first time. Unmark them freely.
     for sTitle in lsStarterMarks:
         if oDb.execute("UPDATE presentations SET marked = 1 WHERE title = ?", (sTitle,)).rowcount: log("Marked as a starter: " + sTitle)
         else: log("Starter not found, so not marked: " + sTitle)

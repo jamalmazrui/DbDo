@@ -75,7 +75,7 @@ section says why each key is the one it is.
 - Pick Value\
   F2 is editing; Control+F2 edits by picking a value.\
   Control+F2
-- Play Stream\
+- Play Media\
   Play the current record's stream address in the Homer Player; with records marked, play all of them. P for Play.\
   Control+P
 - Replace\
@@ -109,7 +109,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Alt+Shift+F8
 - Invert Marked\
   I for Invert.\
-  Alt+Shift+I
+  Control+I
 - Mark All\
   A for All.\
   Control+A
@@ -133,10 +133,10 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Alt+F4
 - Export Data\
   Export the records in view, with the shown columns, to a file. X for the sound of "ex".\
-  Alt+Shift+X
+  Control+Shift+X
 - Import Data\
   Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and defs. I for Import.\
-  Alt+I
+  Control+Shift+I
 - Merge Data\
   Merge rows from a Markdown table, JSON, or Inix file into the current table. M for Merge.\
   Alt+M
@@ -148,7 +148,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Control+O
 - Open Template Database\
   Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail. D for Database.\
-  Alt+Shift+D
+  Alt+D
 - Previous Table or View\
   F6 moves among parts; Shift reverses Control+F6.\
   Control+Shift+F6
@@ -208,9 +208,6 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 - Copy Cell\
   Copy the value of the cell under the virtual cursor to the clipboard. C for Copy.\
   Control+C
-- Database Summary\
-  D for Database.\
-  Alt+D
 - Edit Settings\
   Open the Settings dialog. E for Edit.\
   Alt+Shift+E
@@ -328,7 +325,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Control+F
 - Inspect Record\
   I for Inspect.\
-  Control+I
+  Alt+I
 - Order Records\
   Order the records by the fields you choose. O for Order.\
   Alt+O
@@ -440,9 +437,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Tags\
   Say the record's tags. T for Tags.\
   Shift+T
-- Say Time\
-  Speak the current date and time.\
-  Alt+Semicolon
 - Say url\
   Say the record's url. U for url.\
   Shift+U
@@ -499,7 +493,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Append the value of the cell under the virtual cursor to the clipboard.\
   Copy Append
 - Alt+D\
-  Database Summary
+  Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail.\
+  Open Template Database
 - Alt+Delete\
   Speak the column header and 1-based row number of the virtual cell.\
   Say Position
@@ -511,8 +506,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Go back to the first table.\
   Exit to Root Table
 - Alt+I\
-  Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and defs.\
-  Import Data
+  Inspect Record
 - Alt+L\
   Speak every value of the current virtual column, from the top.\
   Say Column as List
@@ -536,9 +530,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+S\
   Choose the columns the grid shows and their order.\
   Select Columns
-- Alt+Semicolon\
-  Speak the current date and time.\
-  Say Time
 - Alt+T\
   Show a summary of the table: fields, types and keys.\
   Table Summary
@@ -558,17 +549,12 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Clear Clipboard
 - Alt+Shift+C\
   Copy Append Record
-- Alt+Shift+D\
-  Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail.\
-  Open Template Database
 - Alt+Shift+E\
   Open the Settings dialog.\
   Edit Settings
 - Alt+Shift+G\
   Make a report from the records in the grid.\
   Generate from Grid
-- Alt+Shift+I\
-  Invert Marked
 - Alt+Shift+L\
   Speak the current virtual column for marked rows only, from the top.\
   Say Column as List of Marked
@@ -591,9 +577,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Edit Tags
 - Alt+Shift+U\
   Edit url
-- Alt+Shift+X\
-  Export the records in view, with the shown columns, to a file.\
-  Export Data
 
 ### Control
 
@@ -630,7 +613,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Send focus to the dot prompt console.\
   Open Dot Prompt
 - Control+I\
-  Inspect Record
+  Invert Marked
 - Control+J\
   Go to the next record whose current field holds the text.\
   Jump
@@ -651,7 +634,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Open Database
 - Control+P\
   Play the current record's stream address in the Homer Player; with records marked, play all of them.\
-  Play Stream
+  Play Media
 - Control+Q\
   Query
 - Control+R\
@@ -696,6 +679,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Shift+GraveAccent\
   Open the bundled sqlean.exe shell in its own console window on the current database.\
   Sqlean Console
+- Control+Shift+I\
+  Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and defs.\
+  Import Data
 - Control+Shift+J\
   Go to the previous record whose current field holds the text.\
   Reverse Jump
@@ -723,6 +709,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Previous Window
 - Control+Shift+U\
   Open url
+- Control+Shift+X\
+  Export the records in view, with the shown columns, to a file.\
+  Export Data
 - Control+Shift+Z\
   Flip the database between read-write and read-only at runtime.\
   Read Only Toggle
@@ -945,8 +934,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Current Windows\
   Pick from the list of open recordset windows and activate the chosen one.\
   F4
-- Database Summary\
-  Alt+D
 - Delete Record\
   Delete the current record (or marked records, when marks exist).\
   Control+D
@@ -991,7 +978,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Alt+Home
 - Export Data\
   Export the records in view, with the shown columns, to a file.\
-  Alt+Shift+X
+  Control+Shift+X
 - Extract with Regex\
   Control+Shift+E
 - Filter Records\
@@ -1011,11 +998,11 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Control+Shift+F1
 - Import Data\
   Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and defs.\
-  Alt+I
+  Control+Shift+I
 - Inspect Record\
-  Control+I
+  Alt+I
 - Invert Marked\
-  Alt+Shift+I
+  Control+I
 - Invoke Script\
   Run a script from the Scripts folder (.js, .sql, .dbdo, or a macro's .inix).\
   Alt+V
@@ -1067,7 +1054,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Control+Shift+O
 - Open Template Database\
   Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail.\
-  Alt+Shift+D
+  Alt+D
 - Open url\
   Control+Shift+U
 - Order Records\
@@ -1078,7 +1065,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Play Macro\
   Play the macro you recorded or loaded last.\
   Alt+Shift+F12
-- Play Stream\
+- Play Media\
   Play the current record's stream address in the Homer Player; with records marked, play all of them.\
   Control+P
 - Play Tutorials\
@@ -1219,9 +1206,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Tags\
   Say the record's tags.\
   Shift+T
-- Say Time\
-  Speak the current date and time.\
-  Alt+Semicolon
 - Say url\
   Say the record's url.\
   Shift+U

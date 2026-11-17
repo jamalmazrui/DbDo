@@ -22,7 +22,7 @@ Hear=DbDo ready
 [step]
 
 Say=MusicTrail holds a hundred albums, ten for each of ten genres, and the performers who recorded them.
-Key=Alt+Shift+D
+Key=Alt+D
 Hear=Template Databases dialog
 Note=Confirm the wording with a live run: buildTutorials -live.
 

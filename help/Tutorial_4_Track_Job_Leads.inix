@@ -22,7 +22,7 @@ Hear=DbDo ready
 [step]
 
 Say=JobTrail is a template for exactly that. Its records are samples, plainly named as samples, to show the shape before your own go in.
-Key=Alt+Shift+D
+Key=Alt+D
 Hear=Template Databases dialog
 Note=Confirm the wording with a live run: buildTutorials -live.
 

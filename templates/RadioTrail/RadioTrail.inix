@@ -7,7 +7,7 @@
 ; channels, the ten ACB Media streams and the NFB Radio Network. Run
 ; fetchStations, in this folder, to refresh it, or to bring in one country.
 ;
-; LISTENING IS ONE KEY. On a station's row, press Alt+Shift+P, Play Stream, and
+; LISTENING IS ONE KEY. On a station's row, press Alt+Shift+P, Play Media, and
 ; the station plays in the Homer Player. Control+Enter on the stream_url
 ; column, Open Cell Value, still hands the address to whatever plays streams on
 ; your computer, as VLC does. Shift+C says the cell.

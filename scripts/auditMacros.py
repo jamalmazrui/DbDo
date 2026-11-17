@@ -1,8 +1,12 @@
 ﻿r"""auditMacros: checks that DbDo's macro recorder does what it says (15 November 2026).
 
-    auditMacros                 check the code; exit 0 when every rule holds
-    auditMacros --runtime       also read DbDo's newest session log and check every macro played in it
-    auditMacros --runtime PATH  the same, for the session log named
+    auditMacros                 check the code, then every macro played in DbDo's newest session log; exit 0 when all hold
+    auditMacros PATH            the same, with the session log named
+    auditMacros --code          the code only, as the build's acceptance check runs it
+
+NO ARGUMENT IS NEEDED (17 November 2026). The runtime check used to wait for --runtime; a Homer script with no
+arguments does the most complete thing, so it now runs by default, and says so plainly when there is no session log
+yet rather than failing. --runtime is still understood.
 
 WHY. A macro is trusted to repeat what the person did. Two things can break that without any test noticing: a
 command that a macro may hold whose handler forgets to say it succeeded (so it records as a gap, or worse, a handler
@@ -187,7 +191,7 @@ def newestSessionLog():
 def checkRuntime(sPath):
     if not sPath: sPath = newestSessionLog()
     if not sPath or not os.path.isfile(sPath):
-        return finding("runtime", False, "no DbDo session log found%s" % (" at " + sPath if sPath else " in %LOCALAPPDATA%\\DbDo\\logs"))
+        return finding("runtime", True, "no DbDo session log found%s, so no playback to check" % (" at " + sPath if sPath else " in %LOCALAPPDATA%\\DbDo\\logs"))
     logLine("runtime log: %s" % sPath)
     iPlaybacks = iCompared = iSame = 0
     lsDifferent, lsStopped = [], []
@@ -215,7 +219,8 @@ def main():
         print(__doc__)
         return 0
     checkCode()
-    if lsArgs and lsArgs[0] == "--runtime": checkRuntime(lsArgs[1] if len(lsArgs) > 1 else "")
+    lsPaths = [s for s in lsArgs if not s.startswith("--")]
+    if "--code" not in [s.lower() for s in lsArgs]: checkRuntime(lsPaths[0] if lsPaths else "")
     iFailed = sum(1 for t in lFindings if not t[1])
     sayLine("auditMacros: %d passed, %d failed. Log: %s" % (len(lFindings) - iFailed, iFailed, sLog))
     return 1 if iFailed else 0

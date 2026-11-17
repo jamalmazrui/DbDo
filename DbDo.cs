@@ -13567,6 +13567,8 @@ namespace DbDo
             Homer.KeyMap.addFormerName("Forward Find with Regex", "Find Regex");
             Homer.KeyMap.addFormerName("Reverse Find with Regex", "Reverse Find Regex");
             Homer.KeyMap.addFormerName("Say Filter and Order", "Say Order and Filter");
+            // CONTROL+P IS PLAY MEDIA IN THE SUITE (17 November 2026), as in FileDir; DbDo called it Play Stream.
+            Homer.KeyMap.addFormerName("Play Media", "Play Stream");
             buildGrid();
             buildStatusBar();
             initializeMacros();
@@ -14366,7 +14368,9 @@ namespace DbDo
             // chords. (Ctrl+I and Ctrl+E are already used for Invert Marked
             // and Edit Record, which are high-frequency core operations that
             // should keep their plain-Ctrl chords.)
-            miFileImport  = addItem(miFile, "&Import Data...",                 "Import Data",           Keys.Alt | Keys.I,                    importClicked);
+            // THE SUITE'S IMPORT AND EXPORT PAIR (17 November 2026): Control+Shift+I imports and Control+Shift+X exports,
+            // beside Control+Shift+E Extract with Regex and Control+Shift+R Replace with Regex. Alt+I is Inspect Record.
+            miFileImport  = addItem(miFile, "&Import Data...",                 "Import Data",           Keys.Control | Keys.Shift | Keys.I,   importClicked);
             // OPEN SAMPLE DATABASE, ALT+D. It lived on the Help menu, where a
             // beginner might look for an example -- but what it does is open a
             // database, and the person reaching for it after the first week is
@@ -14387,11 +14391,13 @@ namespace DbDo
             // all is better than a wrong one, and this command is reached once
             // or twice a session.
             // Alt+Shift+D, D for Database (10 October 2026): it joins Shift+D, Say Database, and Alt+D, Database Summary.
-            miFileSampleDb= addItem(miFile, "Open Template &Database...",  "Open Template Database", Keys.Alt | Keys.Shift | Keys.D, openTemplateDbClicked);
+            // OPEN TEMPLATE DATABASE ON ALT+D (17 November 2026), the friendlier key, freed when Say Database took in the
+            // summary; Alt+Shift+D is free.
+            miFileSampleDb= addItem(miFile, "Open Template &Database...",  "Open Template Database", Keys.Alt | Keys.D, openTemplateDbClicked);
             miFileMerge   = addItem(miFile, "&Merge Data...",             "Merge Data",            Keys.Alt | Keys.M,                    mergeClicked);
             addItem(miFile, "Transfer Import...",       "Transfer Import",  Keys.None,                            importTransferClicked);
             addItem(miFile, "Run Report...",           "Run Report",       Keys.Alt | Keys.Shift | Keys.R,       produceReportClicked);
-            miFileExport  = addItem(miFile, "E&xport Data...",            "Export Data",      Keys.Alt | Keys.Shift | Keys.X,                    fileExportClicked);
+            miFileExport  = addItem(miFile, "E&xport Data...",            "Export Data",      Keys.Control | Keys.Shift | Keys.X,                fileExportClicked);
             addSep(miFile);
             // NO KEY, AND HIDDEN UNTIL IT PRINTS (9 November 2026): Control+P plays media in every Homer app, and Print is not built.
             miFilePrint   = addItem(miFile, "&Print...",                  "Print",      Keys.None,                            filePrintClicked);
@@ -14470,7 +14476,8 @@ namespace DbDo
             miEdit.DropDownItems.Add(miBulkMark);
             miRecMarkAll     = addItem(miBulkMark, "Mark &All",   "Mark All",         Keys.Control | Keys.A,              recMarkAllClicked);
             miRecUnmarkAll   = addItem(miBulkMark, "Unmark All", "Unmark All",       Keys.Control | Keys.Shift | Keys.A, recUnmarkAllClicked);
-            miRecInvertMarked= addItem(miBulkMark, "&Invert Marked",     "Invert Marked",         Keys.Alt | Keys.Shift | Keys.I, recInvertMarkedClicked);
+            // INVERT MARKED ON CONTROL+I, AS IN FILEDIR (17 November 2026); Inspect Record moved to Alt+I to make room.
+            miRecInvertMarked= addItem(miBulkMark, "&Invert Marked",     "Invert Marked",         Keys.Control | Keys.I, recInvertMarkedClicked);
             // F8 / Shift+F8 / Alt+F8 / Alt+Shift+F8 -- range mark
             // and range unmark families. Two INDEPENDENT anchors:
             // one for marking (F8 to set, Shift+F8 to complete) and
@@ -14507,7 +14514,7 @@ namespace DbDo
             // Player. P for Play; Alt+Shift because the command has no control
             // of its own. No trigger letter, because Pick Value took P first.
             // CONTROL+P PLAYS (9 November 2026), as in Windows Media Player and the Windows 11 Media Player; it was Alt+Shift+P.
-            miRecPlayStream  = addItem(miEdit, "Play Stream",               "Play Stream",         Keys.Control | Keys.P,              recPlayStreamClicked);
+            miRecPlayStream  = addItem(miEdit, "Play Media",               "Play Media",         Keys.Control | Keys.P,              recPlayStreamClicked);
             // Open Url: open the row's 'url' column with the system
             // default handler (browser, mail client, file opener).
             // Convenience chord for the most common Open-Cell case --
@@ -14585,7 +14592,7 @@ namespace DbDo
             // ===== Query menu: read aspects of the data =====
             miQuery = addMenu("&Query");
             // Read-only inspection of current record / table / schema.
-            miRecShow        = addItem(miQuery, "&Inspect Record",  "Inspect Record",   Keys.Control | Keys.I,            recShowClicked);
+            miRecShow        = addItem(miQuery, "&Inspect Record",  "Inspect Record",   Keys.Alt | Keys.I,                recShowClicked);
             miSchemaProperties  = addItem(miQuery, "Table Properties",              "Table Properties",  Keys.Alt | Keys.Enter,            schemaPropertiesClicked);
             miRecRelated     = addItem(miQuery, "&Related Records...",   "Related Records",  Keys.None,                        recRelatedClicked);
             miSchemaShow     = addItem(miQuery, "Show Schema",         "Show Schema",   Keys.None,                        schemaShowClicked);
@@ -14703,7 +14710,7 @@ namespace DbDo
             // clipboard)" rather than nothing. Double-press opens
             // the read-only memo dialog for line-by-line review.
             miSaySayClipboard    = addItem(miSay, "Say Clipboard", "Say Clipboard", Keys.Alt | Keys.OemQuotes,    saySayClipboard);
-            addItem(miSay, "Say Time",  "Say Time",  Keys.Alt | Keys.Oem1, saySayTime);
+            // SAY TIME IS GONE (17 November 2026): JAWS+F12 and NVDA+F12 say the time, and pressed twice the date, in every program, so a Homer key for it only took Alt+Semicolon and a menu line.
             addItem(miSay, "Say Path",  "Say Path",  Keys.Alt | Keys.P,    saySayPath);
             miSaySayYieldMarked  = addItem(miSay, "Say Yield Marked", "Say Yield Marked",  Keys.Shift | Keys.Y,               saySayYieldMarked);
             // v1.0.67 Say-X family completions. Each speaks one piece
@@ -14792,7 +14799,7 @@ namespace DbDo
             // v1.0.67 deferred stubs. The chords are reserved so the
             // menu stays stable and the user can discover the planned
             // commands. The handlers display "Not yet implemented."
-            miMiscDatabaseSummary = addItem(miMisc, "&Database Summary", "Database Summary", Keys.Alt | Keys.D, miscDatabaseSummaryClicked);
+            // Database Summary is part of Say Database now (17 November 2026); Alt+D opens a template database.
             // Window Summary stub retired v1.0.99. Shift+W is now Say Web.
             // If a future window-info command is added, it should use a
             // chord whose letter appears in its command name.
@@ -15154,7 +15161,7 @@ namespace DbDo
             add("Open Database",      "Open a database file", "");
             add("Open Template Database", "Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail",
                 "Alt+Shift+D. Your own copy of the template is opened, so changes are yours to keep.");
-            add("Play Stream",        "Play the current record's stream address in the Homer Player; with records marked, play all of them",
+            add("Play Media",        "Play the current record's stream address in the Homer Player; with records marked, play all of them",
                 "Control+P. Takes the first of stream_url, url, stream, link or address that begins with http, or the current cell. Marked records make a play list, current one first. The player is mpv; if it is not installed, DbDo offers to fetch it.");
             add("Close Database",     "Close the currently open database", "");
             // ===== Window menu =====
@@ -15274,7 +15281,6 @@ namespace DbDo
             add("Say Position",       "Speak the column header and 1-based row number of the virtual cell",
                 "JAWS-style 'say cursor position' for the listview. Speech-only; does not move focus. Double-press opens the same text in a read-only multi-line dialog.");
             add("Show in FileDir",    "Show the open database's file, selected in its folder, in FileDir", "");
-            add("Say Time",           "Speak the current date and time", "");
             add("Say Path",           "Speak the open database's full path; press twice to show it", "");
             add("Save Clipboard",     "Save the clipboard text to a file you name", "");
             add("Append Clipboard",   "Add the clipboard text to the end of a file you name", "");
@@ -17853,7 +17859,15 @@ namespace DbDo
             // "database: <file> in <folder>" rather than a path with a dash in it,
             // which a synthesizer reads as two dashes.
             // The folder, not the path again (9 November 2026): testSay heard the file name twice.
-            speakOrShow("Database", "database: " + sName + " in " + (Path.GetDirectoryName(sPath) ?? sPath), 124);
+            // THEN THE SUMMARY (17 November 2026): Say Database goes on to what Database Summary showed -- the
+            // database's own description, then each table with its record count and related tables -- one line to an
+            // utterance, so Control stops it where you have heard enough, and a second press shows it all in the
+            // read-only window. Database Summary's own command is gone, and Alt+D opens a template database.
+            List<string> lParts = new List<string>();
+            lParts.Add("database: " + sName + " in " + (Path.GetDirectoryName(sPath) ?? sPath));
+            foreach (string sLine in databaseSummaryText().Replace("\r\n", "\n").Split('\n'))
+                if (sLine.Trim().Length > 0) lParts.Add(sLine.Trim());
+            speakOrShowParts("Database", lParts, 124);
         }
 
         // saySayOrder: Shift+O. Speak the active sort/order
@@ -17981,14 +17995,18 @@ namespace DbDo
         {
             List<string> lParts = new List<string>();
             string sMatch = sLastMatch, sReplace = sLastReplace;
-            if (sMatch.Length == 0 && sLastPattern.Length == 0)
+            // BOTH REPLACES, ALWAYS (17 November 2026), in EdSharp's field names: Replace asks for Match and Replace,
+            // Replace with Regex for Pattern and Substitute. The plain values fell back to the saved history only when
+            // no regex had been used this session, so after a regex replace the plain one went unsaid; each is now
+            // looked up on its own, and one never used says "none".
+            if (sMatch.Length == 0)
             {
                 sMatch = SearchHistory.lastText(SearchHistory.SectionReplace) ?? "";
                 sReplace = SearchHistory.lastText(SearchHistory.SectionReplaceWith) ?? "";
             }
-            if (sMatch.Length > 0) lParts.Add("replace: match " + sMatch + ", replace " + sayableValue(sReplace));
-            if (sLastPattern.Length > 0) lParts.Add("replace with regex: pattern " + sLastPattern + ", substitute " + sayableValue(sLastSubstitute));
-            if (lParts.Count == 0) { Say.say("replace: none"); return; }
+            if (sMatch.Length == 0 && sLastPattern.Length == 0) { Say.say("replace: none"); return; }
+            lParts.Add(sMatch.Length > 0 ? "replace: match " + sMatch + ", replace " + sayableValue(sReplace) : "replace: none");
+            lParts.Add(sLastPattern.Length > 0 ? "replace with regex: pattern " + sLastPattern + ", substitute " + sayableValue(sLastSubstitute) : "replace with regex: none");
             if (!string.IsNullOrEmpty(sLastReplaceHow)) lParts.Add(sLastReplaceHow);
             speakOrShowParts("Replace Values", lParts, 130);
         }
@@ -24573,28 +24591,22 @@ namespace DbDo
         // sCommandName: shown in the dialog title (e.g., "Remove
         // Record") so the user always sees which command is about to
         // run.
+        // THE SUITE'S MARKED OR CURRENT (17 November 2026), the kit's Lbc dialog that FileDir asks too: titled with the
+        // command's name, "Marked records (7)" the default so Enter takes the batch, "Current record" or C the one record.
+        // It asks only when marked records are in view and the current one is not among them; a marked current record
+        // is one of the batch. Delete Record's own dialog had Current as its default, the opposite of FileDir's batch.
         private ScopeChoice promptScope(string sCommandName)
         {
             int iMarked = countMarkedInFilter();
             if (iMarked == 0) return ScopeChoice.Current;
-
-            using (LbcDialog dlg = new LbcDialog(sCommandName, this))
-            {
-                dlg.addLabel("Marks are present. Choose the scope:");
-                string sMarkedLabel = (iMarked == 1)
-                    ? "&Marked record (1 record)"
-                    : "Marked records (" + iMarked + " records)";
-                string sBtn = dlg.runWithButtons(new string[] {
-                    "&Current record (default)",
-                    sMarkedLabel,
-                    "Ca&ncel"
-                });
-                if (string.IsNullOrEmpty(sBtn) || sBtn.IndexOf("ancel", StringComparison.OrdinalIgnoreCase) >= 0)
-                    return ScopeChoice.Cancel;
-                if (sBtn.IndexOf("arked", StringComparison.OrdinalIgnoreCase) >= 0)
-                    return ScopeChoice.Marked;
-                return ScopeChoice.Current;
-            }
+            bool bCurrentMarked = false;
+            try { bCurrentMarked = db.hasField(Metadata.MarkedColumn) && isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn) ?? ""); }
+            catch { bCurrentMarked = false; }
+            if (bCurrentMarked) return ScopeChoice.Marked;
+            string sAnswer = Homer.LbcAsk.markedOrCurrent(sCommandName, iMarked, "record", "records");
+            if (sAnswer == "marked") return ScopeChoice.Marked;
+            if (sAnswer == "current") return ScopeChoice.Current;
+            return ScopeChoice.Cancel;
         }
 
         // recRemoveClicked: delete a record (or marked records) with
@@ -25196,11 +25208,11 @@ namespace DbDo
                 DialogResult dr = LbcMessage.show(this,
                     "mpv, the program that plays streams, is not on this computer.\r\n\r\n"
                     + "Install it now? It is fetched with winget and takes about a minute.",
-                    "Play Stream", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+                    "Play Media", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
                 if (dr == DialogResult.Yes && System.IO.File.Exists(sScript))
                 {
                     try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("cmd.exe", "/c \"" + sScript + "\"") { UseShellExecute = true }); }
-                    catch (Exception ex) { LbcMessage.show(this, "Could not start the install: " + ex.Message, "Play Stream"); }
+                    catch (Exception ex) { LbcMessage.show(this, "Could not start the install: " + ex.Message, "Play Media"); }
                 }
                 return;
             }
@@ -25211,7 +25223,11 @@ namespace DbDo
             System.Collections.Generic.List<Homer.MediaTrack> lsTracks = new System.Collections.Generic.List<Homer.MediaTrack>();
             try
             {
-                if (db.countMarked() > 0)
+                // ASKED AS EVERY BATCH COMMAND ASKS (17 November 2026): with records marked and the current one not, the
+                // suite's Marked or Current dialog decides between the play list and the one station.
+                ScopeChoice playScope = db.countMarked() > 0 ? promptScope("Play Media") : ScopeChoice.Current;
+                if (playScope == ScopeChoice.Cancel) return;
+                if (playScope == ScopeChoice.Marked)
                 {
                     int iFound;
                     string sTbl = db.currentTable;
@@ -25229,9 +25245,9 @@ namespace DbDo
                             }
                 }
             }
-            catch (Exception ex) { DbDoLog.write("Play Stream, marked list: " + ex.Message); lsTracks.Clear(); }
+            catch (Exception ex) { DbDoLog.write("Play Media, marked list: " + ex.Message); lsTracks.Clear(); }
             if (lsTracks.Count == 0) lsTracks.Add(new Homer.MediaTrack(sName, sUrl));
-            DbDoLog.write("Play Stream: " + lsTracks.Count + " track(s), first " + lsTracks[0].display() + " -> " + sUrl);
+            DbDoLog.write("Play Media: " + lsTracks.Count + " track(s), first " + lsTracks[0].display() + " -> " + sUrl);
             // LISTENING LEAVES A TRACE, IN THE RECORD. When the table has plays and
             // last_played fields, as RadioTrail does, playing counts one and dates
             // it, so Most Played and Order by last_played mean something. And a
@@ -25265,7 +25281,7 @@ namespace DbDo
                     });
                 }
             }
-            catch (Exception exTrace) { DbDoLog.write("Play Stream, trace: " + exTrace.Message); }
+            catch (Exception exTrace) { DbDoLog.write("Play Media, trace: " + exTrace.Message); }
             // The title is the database's name, as FileDir gives the folder's; the
             // player itself names the window after the track once it is playing.
             string sDbName = "";
@@ -28247,13 +28263,13 @@ namespace DbDo
         // The current table is the first one listed for screen-
         // reader convenience -- the user opens the dialog already
         // thinking about it.
-        private void miscDatabaseSummaryClicked(object sender, EventArgs evArgs)
+        private string databaseSummaryText()
         {
             if (db == null || !db.isOpen())
-            { Say.say("No database open"); return; }
+            return "";
             List<string> lAllTables = db.getTableAndViewNames();
             if (lAllTables == null || lAllTables.Count == 0)
-            { Say.say("Database has no tables"); return; }
+            return "no tables";
 
             // Order: current table first, then the rest alphabetically.
             string sCurrent = db.currentTable ?? "";
@@ -28469,12 +28485,7 @@ namespace DbDo
                 sb.AppendLine();
             }
 
-            using (LbcDialog dlg = new LbcDialog("Database Summary", this))
-            {
-                dlg.addMemoBox("Database &summary:", sb.ToString().TrimEnd(),
-                    "Read-only overview. Each table shows its record count and its related tables, with the related tables' record counts in parentheses.");
-                dlg.runWithButtons(new string[] { "OK" });
-            }
+            return sb.ToString().TrimEnd();
         }
         private void miscWindowSummaryStub(object sender, EventArgs evArgs)
         {

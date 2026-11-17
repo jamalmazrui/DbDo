@@ -21,7 +21,7 @@ Run = scripts\auditPatterns.cmd
 ; THE MACRO RECORDER KEEPS ITS PROMISES (15 November 2026): every command a macro can hold is confirmed by its
 ; handler and handled by the host, every command runs through the one wrapper, and the build proves the kit's engine.
 Name = the macro recorder's code is complete
-Run = scripts\auditMacros.cmd
+Run = scripts\auditMacros.cmd --code
 
 [check]
 

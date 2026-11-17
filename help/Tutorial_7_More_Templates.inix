@@ -14,7 +14,7 @@ Hear=
 
 [step]
 
-Say=TechTraining first: more than a thousand free presentations about technology and accessibility, in audio, video and on the web, newest first. Alt plus Shift plus D, and I choose TechTraining.
+Say=TechTraining first: more than a thousand free presentations about technology and accessibility, in audio, video and on the web, newest first. Alt plus D, and I choose TechTraining.
 Key=Enter
 Hear=2026, A Demonstration and Walkthrough of Be My Eyes for Mac, AppleVis, Row 1 of 1167
 Note=Confirm the wording with a live run: buildTutorials -live.
@@ -28,14 +28,14 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Control plus P, Play Stream, plays a presentation as it plays a station.
+Say=Control plus P, Play Media, plays a presentation as it plays a station.
 Key=Control+P
 Hear=Homer Player, Accessible Design is Good Design (Part 3) -- At a Glance
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Escape. BlindCreations next: apps, books and presentations made by or for blind people, and the people who made them, linked by kind. Alt plus Shift plus D, BlindCreations, and Control plus T to the creators.
+Say=Escape. BlindCreations next: apps, books and presentations made by or for blind people, and the people who made them, linked by kind. Alt plus D, BlindCreations, and Control plus T to the creators.
 Key=Control+T
 Hear=Choose Table dialog, apps
 Note=Confirm the wording with a live run: buildTutorials -live.

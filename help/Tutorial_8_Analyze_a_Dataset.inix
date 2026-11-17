@@ -23,8 +23,8 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Alt plus I, Import, builds a DbDo database from another file: a spreadsheet, an Access file, or, as here, a CSV file of comma-separated values.
-Key=Alt+I
+Say=Control plus Shift plus I, Import, builds a DbDo database from another file: a spreadsheet, an Access file, or, as here, a CSV file of comma-separated values.
+Key=Control+Shift+I
 Hear=Import into a new DbDo database
 Note=Confirm the wording with a live run: buildTutorials -live.
 
@@ -163,8 +163,8 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Very strong: longer petals are wider. The report leaves out the flower number, a numbering rather than a measurement, and reminds that a relation is not a cause. Escape. To hand the answer on, Alt plus Shift plus X, Export Data, writes what the grid shows to a file: Excel, CSV, Markdown, a web page and more.
-Key=Alt+Shift+X
+Say=Very strong: longer petals are wider. The report leaves out the flower number, a numbering rather than a measurement, and reminds that a relation is not a cause. Escape. To hand the answer on, Control plus Shift plus X, Export Data, writes what the grid shows to a file: Excel, CSV, Markdown, a web page and more.
+Key=Control+Shift+X
 Hear=Export Data: the 150 records shown
 Note=Confirm the wording with a live run: buildTutorials -live.
 
@@ -185,7 +185,7 @@ Hear=
 
 Say=Bring in a file.
 Key=
-Hear=Import: Alt plus I
+Hear=Import: Control plus Shift plus I
 
 [step]
 
@@ -210,4 +210,4 @@ Hear=Generate from Grid: Alt plus Shift plus G
 
 Say=Hand it on.
 Key=
-Hear=Export Data: Alt plus Shift plus X
+Hear=Export Data: Control plus Shift plus X

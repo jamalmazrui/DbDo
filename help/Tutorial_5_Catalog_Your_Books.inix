@@ -22,7 +22,7 @@ Hear=DbDo ready
 [step]
 
 Say=BookTrail is the template for it.
-Key=Alt+Shift+D
+Key=Alt+D
 Hear=Template Databases dialog
 Note=Confirm the wording with a live run: buildTutorials -live.
 
@@ -42,8 +42,8 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Control plus I, Inspect Record, shows every field that has a value, one to a line; empty ones are left out.
-Key=Control+I
+Say=Alt plus I, Inspect Record, shows every field that has a value, one to a line; empty ones are left out.
+Key=Alt+I
 Hear=Inspect Record dialog
 Hear=title: A Study in Scarlet
 Note=Confirm the wording with a live run: buildTutorials -live.
@@ -105,14 +105,14 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=A planned misstep: expecting the report to follow a filter. A report reads the table its definition names, not the records in view. To share only some, filter them and use Export Data, Alt plus Shift plus X.
+Say=A planned misstep: expecting the report to follow a filter. A report reads the table its definition names, not the records in view. To share only some, filter them and use Export Data, Control plus Shift plus X.
 Key=
 Hear=
 
 [step]
 
-Say=Alt plus Shift plus X writes the records in view as a spreadsheet, CSV, JSON or another format.
-Key=Alt+Shift+X
+Say=Control plus Shift plus X writes the records in view as a spreadsheet, CSV, JSON or another format.
+Key=Control+Shift+X
 Hear=Export Data dialog
 Note=Confirm the wording with a live run: buildTutorials -live.
 
@@ -138,7 +138,7 @@ Hear=
 
 Say=Show a record whole.
 Key=
-Hear=Control plus I
+Hear=Alt plus I
 
 [step]
 
@@ -162,4 +162,4 @@ Hear=Alt plus Shift plus R
 
 Say=Export the records in view.
 Key=
-Hear=Alt plus Shift plus X
+Hear=Control plus Shift plus X

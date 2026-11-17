@@ -408,9 +408,9 @@ Screen reader:
 
 **Before you start:** JobTrail is open on the jobs table, on Example Widgets.
 
-### Step 1: Control+I
+### Step 1: Alt+I
 
-A row speaks three fields. Control plus I, Inspect Record, reads them all.
+A row speaks three fields. Alt plus I, Inspect Record, reads them all.
 
 Screen reader:
 
@@ -1232,7 +1232,7 @@ I type the word play, and the list narrows to the commands with that word.
 
 Screen reader:
 
-- Play Stream, Control plus P
+- Play Media, Control plus P
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1343,7 +1343,7 @@ The last page offers what DbDo works best with, each as a box whose first word i
 
 Screen reader:
 
-- Install mpv, plays a station for Play Stream, checked, 1 of 4
+- Install mpv, plays a station for Play Media, checked, 1 of 4
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1396,9 +1396,9 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 11: Control+I
+### Step 11: Alt+I
 
-Control plus I, Inspect Record, shows the whole record, one field to a line.
+Alt plus I, Inspect Record, shows the whole record, one field to a line.
 
 Screen reader:
 
@@ -1409,7 +1409,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 12: Control+P
 
-Its genre, country, language, and the address it streams from. Escape. Now the reason RadioTrail opens first: Control plus P, Play Stream, plays the station in the Homer Player.
+Its genre, country, language, and the address it streams from. Escape. Now the reason RadioTrail opens first: Control plus P, Play Media, plays the station in the Homer Player.
 
 Screen reader:
 
@@ -1439,7 +1439,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 15
 
-Control plus Shift plus J jumps backward to the match before, as Shift reverses everywhere in DbDo. Another database opens with Control plus O, and a template with Alt plus Shift plus D, D for Database.
+Control plus Shift plus J jumps backward to the match before, as Shift reverses everywhere in DbDo. Another database opens with Control plus O, and a template with Alt plus D, D for Database.
 
 ### Step 16: Alt+F1
 
@@ -1773,7 +1773,7 @@ Screen reader:
 - DbDo
 - DbDo ready
 
-### Step 3: Alt+Shift+D
+### Step 3: Alt+D
 
 JobTrail is a template for exactly that. Its records are samples, plainly named as samples, to show the shape before your own go in.
 
@@ -2008,7 +2008,7 @@ Screen reader:
 - DbDo
 - DbDo ready
 
-### Step 3: Alt+Shift+D
+### Step 3: Alt+D
 
 BookTrail is the template for it.
 
@@ -2038,9 +2038,9 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 6: Control+I
+### Step 6: Alt+I
 
-Control plus I, Inspect Record, shows every field that has a value, one to a line; empty ones are left out.
+Alt plus I, Inspect Record, shows every field that has a value, one to a line; empty ones are left out.
 
 Screen reader:
 
@@ -2130,11 +2130,11 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 15
 
-A planned misstep: expecting the report to follow a filter. A report reads the table its definition names, not the records in view. To share only some, filter them and use Export Data, Alt plus Shift plus X.
+A planned misstep: expecting the report to follow a filter. A report reads the table its definition names, not the records in view. To share only some, filter them and use Export Data, Control plus Shift plus X.
 
-### Step 16: Alt+Shift+X
+### Step 16: Control+Shift+X
 
-Alt plus Shift plus X writes the records in view as a spreadsheet, CSV, JSON or another format.
+Control plus Shift plus X writes the records in view as a spreadsheet, CSV, JSON or another format.
 
 Screen reader:
 
@@ -2160,7 +2160,7 @@ Show a record whole.
 
 Screen reader:
 
-- Control plus I
+- Alt plus I
 
 ### Step 21
 
@@ -2192,7 +2192,7 @@ Export the records in view.
 
 Screen reader:
 
-- Alt plus Shift plus X
+- Control plus Shift plus X
 
 **Something to try:** Add a book you are reading now, with its format and status.
 
@@ -2215,7 +2215,7 @@ Screen reader:
 - DbDo
 - DbDo ready
 
-### Step 3: Alt+Shift+D
+### Step 3: Alt+D
 
 MusicTrail holds a hundred albums, ten for each of ten genres, and the performers who recorded them.
 
@@ -2435,7 +2435,7 @@ One want: to know what else is ready-made, and keep my copies current.
 
 ### Step 2: Enter
 
-TechTraining first: more than a thousand free presentations about technology and accessibility, in audio, video and on the web, newest first. Alt plus Shift plus D, and I choose TechTraining.
+TechTraining first: more than a thousand free presentations about technology and accessibility, in audio, video and on the web, newest first. Alt plus D, and I choose TechTraining.
 
 Screen reader:
 
@@ -2455,7 +2455,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 4: Control+P
 
-Control plus P, Play Stream, plays a presentation as it plays a station.
+Control plus P, Play Media, plays a presentation as it plays a station.
 
 Screen reader:
 
@@ -2465,7 +2465,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 5: Control+T
 
-Escape. BlindCreations next: apps, books and presentations made by or for blind people, and the people who made them, linked by kind. Alt plus Shift plus D, BlindCreations, and Control plus T to the creators.
+Escape. BlindCreations next: apps, books and presentations made by or for blind people, and the people who made them, linked by kind. Alt plus D, BlindCreations, and Control plus T to the creators.
 
 Screen reader:
 
@@ -2598,9 +2598,9 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 3: Alt+I
+### Step 3: Control+Shift+I
 
-Alt plus I, Import, builds a DbDo database from another file: a spreadsheet, an Access file, or, as here, a CSV file of comma-separated values.
+Control plus Shift plus I, Import, builds a DbDo database from another file: a spreadsheet, an Access file, or, as here, a CSV file of comma-separated values.
 
 Screen reader:
 
@@ -2798,9 +2798,9 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 23: Alt+Shift+X
+### Step 23: Control+Shift+X
 
-Very strong: longer petals are wider. The report leaves out the flower number, a numbering rather than a measurement, and reminds that a relation is not a cause. Escape. To hand the answer on, Alt plus Shift plus X, Export Data, writes what the grid shows to a file: Excel, CSV, Markdown, a web page and more.
+Very strong: longer petals are wider. The report leaves out the flower number, a numbering rather than a measurement, and reminds that a relation is not a cause. Escape. To hand the answer on, Control plus Shift plus X, Export Data, writes what the grid shows to a file: Excel, CSV, Markdown, a web page and more.
 
 Screen reader:
 
@@ -2828,7 +2828,7 @@ Bring in a file.
 
 Screen reader:
 
-- Import: Alt plus I
+- Import: Control plus Shift plus I
 
 ### Step 27
 
@@ -2861,7 +2861,7 @@ Hand it on.
 
 Screen reader:
 
-- Export Data: Alt plus Shift plus X
+- Export Data: Control plus Shift plus X
 
 **Something to try:** Bring in a CSV file of your own -- readings from an experiment, a budget, a fitness log -- and ask it which group is highest.
 
@@ -3021,7 +3021,7 @@ template database.
 
 Screen reader:
 
-- A ready-made database that comes with DbDo, opened with Alt plus Shift plus D; you work in your own copy of it.
+- A ready-made database that comes with DbDo, opened with Alt plus D; you work in your own copy of it.
 
 ### Step 20
 

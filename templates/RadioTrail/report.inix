@@ -29,7 +29,7 @@ footer = """
 """
 
 ; ---- The stations you actually listen to. ----
-; Most played first, with when you last played each. Play Stream keeps the
+; Most played first, with when you last played each. Play Media keeps the
 ; count and the date; nothing else writes them.
 [most_played]
 @table = stations

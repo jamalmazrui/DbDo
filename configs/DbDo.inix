@@ -119,7 +119,7 @@ New Database=None, Create a new database
 Add Table=None, Add a table in the standard shape to the open database
 Recent Databases=Alt+R, Reopen a database you opened recently
 Close Database=None, Close the open database
-Export Data=Alt+Shift+X, Save the records in view, with the columns shown, to a file
+Export Data=Control+Shift+X, Save the records in view, with the columns shown, to a file
 Exit DbDo=Alt+F4, Close DbDo
 
 ; ===== Edit menu =====
@@ -181,7 +181,7 @@ First Marked=Control+PageUp, Go to the first marked record
 Last Marked=Control+PageDown, Go to the last marked record
 Mark All=Control+A, Mark every record in view
 Unmark All=Control+Shift+A, Unmark every record in view
-Invert Marked=Alt+Shift+I, Mark the unmarked records in view and unmark the marked ones
+Invert Marked=Control+I, Mark the unmarked records in view and unmark the marked ones
 Start Mark=F8, Start marking a range at the current record
 Complete Mark=Shift+F8, Mark every record from the range's start to the current one
 Start Unmark=Alt+F8, Start unmarking a range at the current record
@@ -191,7 +191,7 @@ List Bookmarks=Alt+B, Go to a bookmarked record you pick from a list
 Clear Bookmark=Control+Shift+B, Remove a bookmark, or all of them
 
 ; ===== Navigate menu =====
-Inspect Record=Control+I, Show the current record field by field, with its related records
+Inspect Record=Alt+I, Show the current record field by field, with its related records
 View Cycle=F6, Show the current record in its next view: list, edit or inspect
 View Cycle Back=Shift+F6, Show the current record in its previous view: list, edit or inspect
 Go to Record=Control+G, Go to a record by its number, a percent or text
@@ -233,7 +233,7 @@ Clear Filter=Control+Shift+F, Show every record again, staying on the current on
 Say Added=Shift+A, Say when the current record was added
 Say Bookmark=Shift+B, Say the bookmarked record
 Say Cell=Shift+C, Say the current cell's field and value
-Say Database=Shift+D, Say the database's name and folder
+Say Database=Shift+D, Say the database's name and folder, then its tables, their record counts and how they relate
 Say Edited=Shift+E, Say when the current record was last edited
 Say Filter=Shift+F, Say the filter in force
 Say Go to=Shift+G, Say the last Go to entry
@@ -266,7 +266,6 @@ Say Records from Current=None, Say all records in full from the current record o
 Say Marked Records from Current=Alt+Shift+M, Say marked records in full from the current record on
 
 ; ===== Misc menu =====
-Database Summary=Alt+D, Show the database's tables, record counts and relations
 Table Summary=Alt+T, Show the current table's record count and fields
 Generate from Grid=Alt+Shift+G, Make a report or chart from the records in the grid
 Select Columns=Alt+S, Choose the columns the grid shows, and their order
@@ -297,7 +296,7 @@ History of Changes=Control+Shift+F1, Open the history of DbDo's changes, newest 
 About=Alt+F1, Say DbDo's version and release date
 Alternate Menu=Alt+F10, Pick any command from one list, in menu, name or key order
 Where Am I=Control+Slash, Say where you are, what has focus and its keys
-Play Stream=Control+P, Play the current record's stream
+Play Media=Control+P, Play the current record's address, or the marked records as a play list
 Elevate Version=F11, Download and install the latest DbDo
 ; MOVED HERE 17 November 2026. These lines had been written inside the tsv connection string's backtick fence in
 ; [ConnectStrings], so no check saw them as keys, and the TSV connection string carried them as text.
@@ -306,8 +305,8 @@ Save=Control+S, Save the open database's changes
 Save As=Control+Shift+S, Save a copy of the open database under another name or format
 Backup Database=None, Save a dated copy of the open database
 Compare Database=None, Compare two databases, once this is built
-Import Data=Alt+I, Make a new database from a spreadsheet, Access, dBASE or other file
-Open Template Database=Alt+Shift+D, Open one of the template databases that come with DbDo
+Import Data=Control+Shift+I, Make a new database from a spreadsheet, Access, dBASE or other file
+Open Template Database=Alt+D, Open one of the template databases that come with DbDo
 Merge Data=Alt+M, Add records from a Markdown table, JSON or Inix file to the current table
 Transfer Import=None, Add records from another database to the current table through a transfer map
 Run Report=Alt+Shift+R, Make a document from a saved report of the current table
@@ -324,7 +323,6 @@ Show Schema=None, List the database's tables and views
 Say Column as List=Alt+L, Say the current column's values, from the first record
 Say Column as List of Marked=Alt+Shift+L, Say the current column's values in the marked records
 Say Marked Records=Shift+Space, Say every marked record in full
-Say Time=Alt+Semicolon, Say the date and time
 Say Path=Alt+P, Say the full path of the open database
 Filter with Regex=None, Show only the records whose current field matches a regular expression
 Clear Order=None, Show the records in the table's own order again

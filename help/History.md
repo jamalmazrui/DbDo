@@ -5,6 +5,18 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 17 November 2026 -- Marked or Current, and fewer keys to remember
+
+- **Marked or Current.** When some records in view are marked but the one you are on is not, a command that can act on many records asks first, in a dialog titled with the command's name: Marked records, with how many, which Enter chooses; Current record; Cancel; and Help. M and C choose too, Shift+F1 says what a button does, and Control+Slash says where you are. When the current record is marked, or none are, nothing is asked.
+- **Say Database (Shift+D) now gives the summary too,** after the database's name; press it twice to read it all in a box. Database Summary is gone, so Alt+D opens a template database, which was Alt+Shift+D.
+- **Import Data is Control+Shift+I and Export Data is Control+Shift+X,** in and out on the same keys as Export in EdSharp and FileDir, beside Control+Shift+E, R and Y for Extract, Replace and Yield with Regex. They were Alt+I and Alt+Shift+X.
+- **Inspect Record is Alt+I, and Invert Marked is Control+I,** as in FileDir. They were Control+I and Alt+Shift+I.
+- **Play Stream is Play Media,** as in FileDir; the Alternate Menu still finds the old name.
+- **Say Time is gone.** Insert+F12 says the time in every program, under JAWS and NVDA alike.
+- **Say Replace Values (Shift+R) always says both,** the last Replace's Match and Replace and the last Replace with Regex's Pattern and Substitute, the names EdSharp's dialogs use. After a regex replace it left the plain one out.
+- **auditMacros needs no argument to check everything:** it now reads the newest session log by default, and says so plainly when there is none. The build runs it with --code.
+- **testSay, runMacro and recordWalk come from the kit's 1.247.0.** runMacro with no macro named plays the tests in scripts\tests.
+
 ## 17 November 2026 -- JAWS gets the new scripts, and Say speaks of records
 
 - **The installer ships DbDo's JAWS scripts as they are now.** No step of the build packed them: the installer took an old DbDo_JAWS.zip left from an earlier build. So changes to DbDo's JAWS scripts never reached JAWS. That is why Alt+Delete drew "unknown script call to TypeCurrentScriptKey", and why Alt+Control+Shift with an arrow drew "not in a table" though the key map had passed those keys on since 10 November. The build now packs both screen readers' scripts with the kit's packScreenReaderSupport, as other Homer apps do.

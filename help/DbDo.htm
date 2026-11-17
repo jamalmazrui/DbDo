@@ -699,9 +699,9 @@ commands to search and run, in menu, name or key order.</p>
 <h3 id="opening-databases-and-recordsets">Opening databases and
 recordsets</h3>
 <ul>
-<li><p><strong>Open Template Database</strong> (Alt+Shift+D) starts from
-one of the databases DbDo ships – BookTrail, JobTrail and the rest –
-opening your own copy of it.</p></li>
+<li><p><strong>Open Template Database</strong> (Alt+D) starts from one
+of the databases DbDo ships – BookTrail, JobTrail and the rest – opening
+your own copy of it.</p></li>
 <li><p><strong>Open Database</strong> (Control+O) opens a database file,
 choosing the right driver from the extension. <strong>New
 Database</strong> creates a fresh SQLite database; <strong>Add
@@ -888,11 +888,11 @@ multi-select. The <code>marked</code> field carries the state.</p>
 <strong>Toggle Mark</strong> (Control+Space) flips it; <strong>Say
 Marked</strong> (Shift+M) speaks it.</li>
 <li><strong>Mark All</strong> (Control+A), <strong>Unmark All</strong>
-(Control+Shift+A), and <strong>Invert Marked</strong> (Alt+Shift+I) act
+(Control+Shift+A), and <strong>Invert Marked</strong> (Control+I) act
 across the current view.</li>
 <li><strong>Shift+Down Arrow and Shift+Up Arrow</strong> mark the record
-and move to the next or previous one. <strong>Alt+Shift+Down Arrow and
-Alt+Shift+Up Arrow</strong> unmark it and move.</li>
+and move to the next or previous one. <strong>Control+Shift+Down Arrow
+and Control+Shift+Up Arrow</strong> unmark it and move.</li>
 <li><strong>Control+Shift+Home</strong> marks every record from the
 first to this one; <strong>Control+Shift+End</strong> marks from this
 one to the last. <strong>Alt+Control+Shift+Home</strong> and
@@ -1031,8 +1031,8 @@ a sentence. The rows that do have a val are the choices F4 offers for
 that field.</p>
 <p><strong>What each table is for.</strong> A defs row with tbl naming a
 table, and fld and val both empty, describes the table in one sentence.
-Shift+F1 says it in Choose Table and Open Table, Database Summary prints
-it, and Where Am I pressed twice says it for the table open.</p>
+Shift+F1 says it in Choose Table and Open Table, Say Database prints it,
+and Where Am I pressed twice says it for the table open.</p>
 <p><strong>Patterns for fields.</strong> A field’s own row in defs – tbl
 and fld naming the field, val empty – has a pattern column beside
 descrip. Put a .NET regular expression there, and the field’s value must
@@ -1060,7 +1060,7 @@ and “ORDER BY desc DESC” reads as a riddle. So the column is descrip, by
 decision of 3 November 2026.</p>
 <p><strong>What the database is for.</strong> A defs row with tbl
 <code>*</code> – every table, which is to say the database – and fld and
-val empty describes the database itself; Database Summary prints it as
+val empty describes the database itself; Say Database prints it as
 About. (A <code>*</code> row with a field named describes that field in
 every table.)</p>
 <p><strong>How DbDo’s dialogs name things.</strong> Every control’s name
@@ -1235,8 +1235,8 @@ you see.</p>
 <h3 id="to-produce-something-to-keep-or-share">To produce something to
 keep or share</h3>
 <ul>
-<li><strong>Export Data</strong> (Alt+Shift+X) writes the grid – shown
-columns, kept records – to a file: CSV, TSV, Markdown, a web page,
+<li><strong>Export Data</strong> (Control+Shift+X) writes the grid –
+shown columns, kept records – to a file: CSV, TSV, Markdown, a web page,
 Excel, Word, JSON, an .inix table, or another database. It is the one
 way to write data to a file.</li>
 <li><strong>Run Report</strong> (Alt+Shift+R) writes a designed document
@@ -1406,13 +1406,13 @@ reshaped into DbDo’s conventions.</p>
 a round trip. An Excel workbook opens as its sheets, a CSV as its rows,
 and saving writes back to that same file in that same format. Use Open
 when you want to work with a file as it is.</li>
-<li><strong>Import Data</strong> (Alt+I) reads an outside file and
-reshapes it <em>into a DbDo database</em> — normalizing columns,
+<li><strong>Import Data</strong> (Control+Shift+I) reads an outside file
+and reshapes it <em>into a DbDo database</em> — normalizing columns,
 applying conventions, and producing a <code>.db</code> you then work
 with. Use Import when you want to bring foreign data into a proper DbDo
 database. <strong>Transfer Import</strong> and <strong>Merge
 Data</strong> (Alt+M) bring data in alongside existing data.</li>
-<li><strong>Export Data</strong> (Alt+Shift+X) writes the
+<li><strong>Export Data</strong> (Control+Shift+X) writes the
 <strong>grid</strong> — the current view — out to a new file in a chosen
 format. Use Export to hand off what you are looking at. A CSV or TSV
 file holds your values exactly as they are. Since a spreadsheet may run
@@ -1499,7 +1499,7 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 </tr>
 <tr>
 <td>Open Template Database</td>
-<td>Alt+Shift+D</td>
+<td>Alt+D</td>
 </tr>
 <tr>
 <td>Open Table in New Window</td>
@@ -1531,7 +1531,7 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 </tr>
 <tr>
 <td>Import Data</td>
-<td>Alt+I</td>
+<td>Control+Shift+I</td>
 </tr>
 <tr>
 <td>Merge Data</td>
@@ -1547,7 +1547,7 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 </tr>
 <tr>
 <td>Export Data</td>
-<td>Alt+Shift+X</td>
+<td>Control+Shift+X</td>
 </tr>
 <tr>
 <td>Print</td>
@@ -1670,7 +1670,7 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 </tr>
 <tr>
 <td>Invert Marked</td>
-<td>Alt+Shift+I</td>
+<td>Control+I</td>
 </tr>
 <tr>
 <td>Mark and Next / Previous</td>
@@ -1678,7 +1678,7 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 </tr>
 <tr>
 <td>Unmark and Next / Previous</td>
-<td>Alt+Shift+Down / Alt+Shift+Up</td>
+<td>Control+Shift+Down / Control+Shift+Up</td>
 </tr>
 <tr>
 <td>Mark to First / Last</td>
@@ -1818,7 +1818,7 @@ family.</p>
 <tbody>
 <tr>
 <td>Inspect Record</td>
-<td>Control+I</td>
+<td>Alt+I</td>
 </tr>
 <tr>
 <td>Table Properties</td>
@@ -2000,8 +2000,8 @@ family.</p>
 <td>Control+Shift+Z</td>
 </tr>
 <tr>
-<td>Database Summary</td>
-<td>Alt+D</td>
+<td>Say Database, then its summary</td>
+<td>Shift+D</td>
 </tr>
 <tr>
 <td>Table Summary</td>
@@ -2409,8 +2409,8 @@ and report expressions can compute without leaving SQL.</p>
 <h3 id="template-databases">Template databases</h3>
 <p>DbDo ships with template databases that follow the same column
 conventions as your own data, reachable with File, <strong>Open Template
-Database</strong>, or Alt+Shift+D from anywhere. They are the fastest
-way to see the standard fields, defs, relationships, and reports working
+Database</strong>, or Alt+D from anywhere. They are the fastest way to
+see the standard fields, defs, relationships, and reports working
 together on real records.</p>
 <h3 id="screen-reader-settings">Screen-reader settings</h3>
 <p>DbDo speaks directly to supplement your screen reader’s own
@@ -2844,14 +2844,14 @@ recorded what and who played in which band</li>
 stations, with a script that refreshes the catalog</li>
 <li><strong>TechTraining</strong> – about 1,170 free presentations on
 technology and accessibility, from the Tech Training directory, each
-with its year, length, description and source. Play Stream (Alt+Shift+P)
+with its year, length, description and source. Play Media (Alt+Shift+P)
 plays the presentation itself, and marked ones play as a list;
 Quick-Lessons finds the ones of fifteen minutes or less.</li>
 <li><strong>BlindSkills</strong> – 84 free videos and podcast episodes
 that teach blindness skills, from the Blind Skills directory: cane
 travel, guiding, braille, cooking, dressing, labeling, money, crafts and
 more, in twelve skill groups, each lesson with the task it teaches. Play
-Stream (Alt+Shift+P) plays a lesson and marked ones play as a list; none
+Media (Alt+Shift+P) plays a lesson and marked ones play as a list; none
 come marked. Control+Enter on transcript_url opens a transcript.
 Skill-Index lists lessons by task, With-Transcripts those you can read,
 and the skills_handbook report writes up the whole set by group.
@@ -2885,7 +2885,7 @@ them.</p>
 <h4 id="techtraining-plays-what-it-lists">TechTraining plays what it
 lists</h4>
 <p>Each presentation’s <strong>url</strong> is the presentation itself,
-so Play Stream (Control+P) plays it in the Homer Player: an audio file
+so Play Media (Control+P) plays it in the Homer Player: an audio file
 directly, a video on YouTube or a similar site through yt-dlp. Mark
 several with Space, and Control+P plays them all, in order. The row
 speaks the title, the length in minutes, and the
@@ -2953,12 +2953,12 @@ are in <strong>tags</strong>, one per line. Prose – what the station
 says of itself and the article’s opening paragraph – is in
 <strong>notes</strong>. Both only grow: a line you add to either stays
 through every refresh.</p>
-<p>To listen, press <strong>Control+P</strong>, Play Stream, on any
+<p>To listen, press <strong>Control+P</strong>, Play Media, on any
 station’s row. The Homer Player opens – the same player FileDir has,
 built from the same code in the kit – with the station playing: Scroll
 Lock pauses and resumes, the Volume and Rate sliders are ordinary
 controls, and Escape closes it. Mark several stations first, Control+M,
-and Play Stream queues all of them, as tagged files are queued in
+and Play Media queues all of them, as tagged files are queued in
 FileDir, with the current one first. The first time, if mpv is not on
 your computer, DbDo offers to fetch it.</p>
 <p>A copy you have not marked up, or one not in the template’s current

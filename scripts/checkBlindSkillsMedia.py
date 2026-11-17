@@ -4,7 +4,7 @@
     scripts\\checkBlindSkillsMedia <database>       checks the lessons of another copy
     scripts\\checkBlindSkillsMedia --audio          checks the audio lessons only, which needs no yt-dlp
 
-WHY. Blind Skills promises that every lesson needs no sign-in and plays at once, in a browser, in DbDo's Play Stream
+WHY. Blind Skills promises that every lesson needs no sign-in and plays at once, in a browser, in DbDo's Play Media
 and in FileDir's Homer Player. Neither AI that built it could prove that: one sandbox had no network, and the other's
 data-center address was refused the video bytes YouTube sends a home computer. This check runs where the lessons are
 actually heard, and asks the way an anonymous player asks: no cookies, no browser session, no yt-dlp configuration.
@@ -22,13 +22,13 @@ every request and its result. The database itself is not changed. A failure here
 day -- a host can refuse one network and serve another -- so it is a reason to listen, not proof the lesson is gone.
 
 Adapted on 14 October 2026 from a checker the second AI wrote for this directory: same probes, reading DbDo's database
-rather than a separate data file, in Play Stream's own order of address fields, and logging the Homer way. What a probe
+rather than a separate data file, in Play Media's own order of address fields, and logging the Homer way. What a probe
 shows is said plainly: a lesson that answers has started a stream, which is strong evidence but not a play-through.
 """
 
 import datetime, json, os, platform, shutil, sqlite3, subprocess, sys, time, traceback, urllib.parse, urllib.request
 
-sVersion = "2026-10-14 version 2: Play Stream's own address order; says what a probe shows, not more"
+sVersion = "2026-10-14 version 2: Play Media's own address order; says what a probe shows, not more"
 iSampleBytes = 512
 iTimeoutSeconds = 20
 lsGateWords = ["sign in", "signin", "log in", "login", "cookies", "not a bot", "authenticate", "confirm your age"]

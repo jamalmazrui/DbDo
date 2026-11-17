@@ -13,7 +13,7 @@ Duration, Medium and Source page or Episode page, is still read.
 
 WHAT IT MAKES. templates\\BlindSkills\\BlindSkills.db, the Homer way, with the table helpers makeMusicTrail uses (as
 makeTechTraining does): one table, lessons, with the standard fields, look, prime and triggers. Its url field is the
-lesson's own address, so Play Stream (Alt+Shift+P) plays it in the Homer Player -- MP3 episodes directly, videos through
+lesson's own address, so Play Media (Alt+Shift+P) plays it in the Homer Player -- MP3 episodes directly, videos through
 yt-dlp -- and marked lessons play as a play list. defs hold the skill groups with the directory's own definition of
 each, the skills, the sources, the series, the audiences, the media and the two structured discovery values. skill is
 the task a lesson teaches; minutes is its Length; source_url and transcript_url open
@@ -34,12 +34,12 @@ lsFields = ["title", "skill", "category", "year", "minutes", "medium", "audience
 dColumnTypes = {"audience": "TEXTLINE", "category": "TEXTLINE", "medium": "TEXTLINE", "minutes": "INTEGER", "presenter": "TEXTLINE",
             "series": "TEXTLINE", "skill": "TEXTLINE", "source": "TEXTLINE", "source_url": "TEXTLINE", "structured_discovery": "TEXTLINE",
             "summary": "TEXTMARKDOWN", "title": "TEXTLINE", "transcript_url": "TEXTLINE", "year": "TEXTLINE"}
-# NO STARTER MARKS (14 October 2026): with any record marked, Play Stream plays the marked list rather than the lesson
+# NO STARTER MARKS (14 October 2026): with any record marked, Play Media plays the marked list rather than the lesson
 # the cursor is on, so marks made for a demonstration would hijack the first Alt+Shift+P a person presses. TechTraining
 # marks three; here the play list is a person's own, and the whole directory is a play list already (BlindSkills.m3u).
 lsStarterMarks = []
-dMediaKinds = {"audio": "An audio file, usually a podcast episode: Play Stream (Alt+Shift+P) plays it in the Homer Player.",
-            "video": "A video on a host such as YouTube or Vimeo: Play Stream (Alt+Shift+P) plays it in the Homer Player, through yt-dlp."}
+dMediaKinds = {"audio": "An audio file, usually a podcast episode: Play Media (Alt+Shift+P) plays it in the Homer Player.",
+            "video": "A video on a host such as YouTube or Vimeo: Play Media (Alt+Shift+P) plays it in the Homer Player, through yt-dlp."}
 dDiscovery = {"Setting": "Made by a training center or agency that teaches by structured discovery.",
             "Subject": "The lesson is about structured discovery itself, the method of learning by guided questions and problem solving."}
 

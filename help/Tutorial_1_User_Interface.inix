@@ -128,7 +128,7 @@ Hear=Commands, list box
 Say=I type the word play, and the list narrows to the commands with that word.
 Key=
 Type=play
-Hear=Play Stream, Control plus P
+Hear=Play Media, Control plus P
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

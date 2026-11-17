@@ -314,7 +314,7 @@ Control+Shift+U</li>
 <li>Pick Value<br />
 F2 is editing; Control+F2 edits by picking a value.<br />
 Control+F2</li>
-<li>Play Stream<br />
+<li>Play Media<br />
 Play the current record’s stream address in the Homer Player; with
 records marked, play all of them. P for Play.<br />
 Control+P</li>
@@ -353,7 +353,7 @@ selection; Shift completes the run Alt+F8 started.<br />
 Alt+Shift+F8</li>
 <li>Invert Marked<br />
 I for Invert.<br />
-Alt+Shift+I</li>
+Control+I</li>
 <li>Mark All<br />
 A for All.<br />
 Control+A</li>
@@ -381,13 +381,13 @@ Alt+F4</li>
 <li>Export Data<br />
 Export the records in view, with the shown columns, to a file. X for the
 sound of “ex”.<br />
-Alt+Shift+X</li>
+Control+Shift+X</li>
 <li>Import Data<br />
 Build a new DbDo database from another file – Excel (read by DbDo
 itself, with no Office or Access driver needed), Access, dBASE, CSV, or
 SQLite – with one standard-shape table per source table, plus maps and
 defs. I for Import.<br />
-Alt+I</li>
+Control+Shift+I</li>
 <li>Merge Data<br />
 Merge rows from a Markdown table, JSON, or Inix file into the current
 table. M for Merge.<br />
@@ -402,7 +402,7 @@ Control+O</li>
 <li>Open Template Database<br />
 Open one of the template databases that come with DbDo, such as
 RadioTrail or JobTrail. D for Database.<br />
-Alt+Shift+D</li>
+Alt+D</li>
 <li>Previous Table or View<br />
 F6 moves among parts; Shift reverses Control+F6.<br />
 Control+Shift+F6</li>
@@ -477,9 +477,6 @@ Alt+C</li>
 Copy the value of the cell under the virtual cursor to the clipboard. C
 for Copy.<br />
 Control+C</li>
-<li>Database Summary<br />
-D for Database.<br />
-Alt+D</li>
 <li>Edit Settings<br />
 Open the Settings dialog. E for Edit.<br />
 Alt+Shift+E</li>
@@ -614,7 +611,7 @@ Show only the records that match what you choose. F for Filter.<br />
 Control+F</li>
 <li>Inspect Record<br />
 I for Inspect.<br />
-Control+I</li>
+Alt+I</li>
 <li>Order Records<br />
 Order the records by the fields you choose. O for Order.<br />
 Alt+O</li>
@@ -738,9 +735,6 @@ Shift+Z</li>
 <li>Say Tags<br />
 Say the record’s tags. T for Tags.<br />
 Shift+T</li>
-<li>Say Time<br />
-Speak the current date and time.<br />
-Alt+Semicolon</li>
 <li>Say url<br />
 Say the record’s url. U for url.<br />
 Shift+U</li>
@@ -802,7 +796,9 @@ Append the value of the cell under the virtual cursor to the
 clipboard.<br />
 Copy Append</li>
 <li>Alt+D<br />
-Database Summary</li>
+Open one of the template databases that come with DbDo, such as
+RadioTrail or JobTrail.<br />
+Open Template Database</li>
 <li>Alt+Delete<br />
 Speak the column header and 1-based row number of the virtual
 cell.<br />
@@ -815,11 +811,7 @@ Repeat Go to</li>
 Go back to the first table.<br />
 Exit to Root Table</li>
 <li>Alt+I<br />
-Build a new DbDo database from another file – Excel (read by DbDo
-itself, with no Office or Access driver needed), Access, dBASE, CSV, or
-SQLite – with one standard-shape table per source table, plus maps and
-defs.<br />
-Import Data</li>
+Inspect Record</li>
 <li>Alt+L<br />
 Speak every value of the current virtual column, from the top.<br />
 Say Column as List</li>
@@ -844,9 +836,6 @@ Enter Child Table</li>
 <li>Alt+S<br />
 Choose the columns the grid shows and their order.<br />
 Select Columns</li>
-<li>Alt+Semicolon<br />
-Speak the current date and time.<br />
-Say Time</li>
 <li>Alt+T<br />
 Show a summary of the table: fields, types and keys.<br />
 Table Summary</li>
@@ -867,18 +856,12 @@ Empty the clipboard.<br />
 Clear Clipboard</li>
 <li>Alt+Shift+C<br />
 Copy Append Record</li>
-<li>Alt+Shift+D<br />
-Open one of the template databases that come with DbDo, such as
-RadioTrail or JobTrail.<br />
-Open Template Database</li>
 <li>Alt+Shift+E<br />
 Open the Settings dialog.<br />
 Edit Settings</li>
 <li>Alt+Shift+G<br />
 Make a report from the records in the grid.<br />
 Generate from Grid</li>
-<li>Alt+Shift+I<br />
-Invert Marked</li>
 <li>Alt+Shift+L<br />
 Speak the current virtual column for marked rows only, from the
 top.<br />
@@ -904,9 +887,6 @@ Edit Script</li>
 Edit Tags</li>
 <li>Alt+Shift+U<br />
 Edit url</li>
-<li>Alt+Shift+X<br />
-Export the records in view, with the shown columns, to a file.<br />
-Export Data</li>
 </ul>
 <h3 id="control">Control</h3>
 <ul>
@@ -944,7 +924,7 @@ Go to Record</li>
 Send focus to the dot prompt console.<br />
 Open Dot Prompt</li>
 <li>Control+I<br />
-Inspect Record</li>
+Invert Marked</li>
 <li>Control+J<br />
 Go to the next record whose current field holds the text.<br />
 Jump</li>
@@ -966,7 +946,7 @@ Open Database</li>
 <li>Control+P<br />
 Play the current record’s stream address in the Homer Player; with
 records marked, play all of them.<br />
-Play Stream</li>
+Play Media</li>
 <li>Control+Q<br />
 Query</li>
 <li>Control+R<br />
@@ -1013,6 +993,12 @@ Clear Filter</li>
 Open the bundled sqlean.exe shell in its own console window on the
 current database.<br />
 Sqlean Console</li>
+<li>Control+Shift+I<br />
+Build a new DbDo database from another file – Excel (read by DbDo
+itself, with no Office or Access driver needed), Access, dBASE, CSV, or
+SQLite – with one standard-shape table per source table, plus maps and
+defs.<br />
+Import Data</li>
 <li>Control+Shift+J<br />
 Go to the previous record whose current field holds the text.<br />
 Reverse Jump</li>
@@ -1041,6 +1027,9 @@ Activate the previous open window.<br />
 Previous Window</li>
 <li>Control+Shift+U<br />
 Open url</li>
+<li>Control+Shift+X<br />
+Export the records in view, with the shown columns, to a file.<br />
+Export Data</li>
 <li>Control+Shift+Z<br />
 Flip the database between read-write and read-only at runtime.<br />
 Read Only Toggle</li>
@@ -1272,8 +1261,6 @@ Control+Shift+C</li>
 Pick from the list of open recordset windows and activate the chosen
 one.<br />
 F4</li>
-<li>Database Summary<br />
-Alt+D</li>
 <li>Delete Record<br />
 Delete the current record (or marked records, when marks exist).<br />
 Control+D</li>
@@ -1318,7 +1305,7 @@ Go back to the first table.<br />
 Alt+Home</li>
 <li>Export Data<br />
 Export the records in view, with the shown columns, to a file.<br />
-Alt+Shift+X</li>
+Control+Shift+X</li>
 <li>Extract with Regex<br />
 Control+Shift+E</li>
 <li>Filter Records<br />
@@ -1341,11 +1328,11 @@ Build a new DbDo database from another file – Excel (read by DbDo
 itself, with no Office or Access driver needed), Access, dBASE, CSV, or
 SQLite – with one standard-shape table per source table, plus maps and
 defs.<br />
-Alt+I</li>
+Control+Shift+I</li>
 <li>Inspect Record<br />
-Control+I</li>
+Alt+I</li>
 <li>Invert Marked<br />
-Alt+Shift+I</li>
+Control+I</li>
 <li>Invoke Script<br />
 Run a script from the Scripts folder (.js, .sql, .dbdo, or a macro’s
 .inix).<br />
@@ -1400,7 +1387,7 @@ Control+Shift+O</li>
 <li>Open Template Database<br />
 Open one of the template databases that come with DbDo, such as
 RadioTrail or JobTrail.<br />
-Alt+Shift+D</li>
+Alt+D</li>
 <li>Open url<br />
 Control+Shift+U</li>
 <li>Order Records<br />
@@ -1411,7 +1398,7 @@ Control+F2</li>
 <li>Play Macro<br />
 Play the macro you recorded or loaded last.<br />
 Alt+Shift+F12</li>
-<li>Play Stream<br />
+<li>Play Media<br />
 Play the current record’s stream address in the Homer Player; with
 records marked, play all of them.<br />
 Control+P</li>
@@ -1561,9 +1548,6 @@ Shift+Z</li>
 <li>Say Tags<br />
 Say the record’s tags.<br />
 Shift+T</li>
-<li>Say Time<br />
-Speak the current date and time.<br />
-Alt+Semicolon</li>
 <li>Say url<br />
 Say the record’s url.<br />
 Shift+U</li>

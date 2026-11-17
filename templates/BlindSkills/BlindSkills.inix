@@ -6,7 +6,7 @@
 ; Each lesson has its skill (the task it teaches), summary, source, presenter,
 ; series, year, medium, and where known its length, publisher page and transcript.
 ;
-; PLAY ONE. Play Stream (Alt+Shift+P) plays the lesson itself in the Homer
+; PLAY ONE. Play Media (Alt+Shift+P) plays the lesson itself in the Homer
 ; Player: an audio episode directly, a video on YouTube or Vimeo through yt-dlp.
 ; Mark several (Space) and Alt+Shift+P plays them all, as a play list. None come
 ; marked, so the first Alt+Shift+P plays the lesson you are on. The whole

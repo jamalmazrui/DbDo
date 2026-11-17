@@ -31,7 +31,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=The last page offers what DbDo works best with, each as a box whose first word is your computer's state read for you: Install, Update or Reinstall.
 Key=Tab
-Hear=Install mpv, plays a station for Play Stream, checked, 1 of 4
+Hear=Install mpv, plays a station for Play Media, checked, 1 of 4
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -75,15 +75,15 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Control plus I, Inspect Record, shows the whole record, one field to a line.
-Key=Control+I
+Say=Alt plus I, Inspect Record, shows the whole record, one field to a line.
+Key=Alt+I
 Hear=Inspect Record dialog
 Hear=name: ACB Media 1
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Its genre, country, language, and the address it streams from. Escape. Now the reason RadioTrail opens first: Control plus P, Play Stream, plays the station in the Homer Player.
+Say=Its genre, country, language, and the address it streams from. Escape. Now the reason RadioTrail opens first: Control plus P, Play Media, plays the station in the Homer Player.
 Key=Control+P
 Hear=Homer Player, ACB Media 1
 Note=Confirm the wording with a live run: buildTutorials -live.
@@ -104,7 +104,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Control plus Shift plus J jumps backward to the match before, as Shift reverses everywhere in DbDo. Another database opens with Control plus O, and a template with Alt plus Shift plus D, D for Database.
+Say=Control plus Shift plus J jumps backward to the match before, as Shift reverses everywhere in DbDo. Another database opens with Control plus O, and a template with Alt plus D, D for Database.
 Key=
 Hear=
 

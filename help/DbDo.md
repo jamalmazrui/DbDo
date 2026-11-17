@@ -171,7 +171,7 @@ Woven through the menus is a large **Say-X status family** in the Query menu: qu
 
 ### Opening databases and recordsets
 
-- **Open Template Database** (Alt+Shift+D) starts from one of the databases DbDo ships -- BookTrail, JobTrail and the rest -- opening your own copy of it.
+- **Open Template Database** (Alt+D) starts from one of the databases DbDo ships -- BookTrail, JobTrail and the rest -- opening your own copy of it.
 - **Open Database** (Control+O) opens a database file, choosing the right driver from the extension. **New Database** creates a fresh SQLite database; **Add Table** adds a table to it.
 
   **Add Table** asks first, when a table is open, whether to **Define** a new table or **Clone** the open one's fields, which then fill the form for you to name the new table and change what you like. Every new table gets DbDo's standard columns: its id, added, edited, notes, tags and marked. The form has ten name-and-type slots; its **Text** button opens the same fields as lines you can read and edit like any text, one field a line in the form `name: TYPE`, with no limit to how many, and you can paste a structure in. On OK, if fields begin with the same letter, DbDo says which, since only the first of each gets an Alt letter in the record form, and offers to go back and rename them.
@@ -252,8 +252,8 @@ All edits auto-commit. If a table is read-only, **Read Only Toggle** (Control+Sh
 Marking is DbDo's explicit, queryable alternative to visual multi-select. The `marked` field carries the state.
 
 - **Mark Record** (Control+M) marks the current record; **Unmark Record** (Control+Shift+M) clears it; **Toggle Mark** (Control+Space) flips it; **Say Marked** (Shift+M) speaks it.
-- **Mark All** (Control+A), **Unmark All** (Control+Shift+A), and **Invert Marked** (Alt+Shift+I) act across the current view.
-- **Shift+Down Arrow and Shift+Up Arrow** mark the record and move to the next or previous one. **Alt+Shift+Down Arrow and Alt+Shift+Up Arrow** unmark it and move.
+- **Mark All** (Control+A), **Unmark All** (Control+Shift+A), and **Invert Marked** (Control+I) act across the current view.
+- **Shift+Down Arrow and Shift+Up Arrow** mark the record and move to the next or previous one. **Control+Shift+Down Arrow and Control+Shift+Up Arrow** unmark it and move.
 - **Control+Shift+Home** marks every record from the first to this one; **Control+Shift+End** marks from this one to the last. **Alt+Control+Shift+Home** and **Alt+Control+Shift+End** unmark the same spans. These were Shift+Home and Shift+End through version 1.0.316; those keys now say where marking went.
 - **Control+Up Arrow and Control+Down Arrow** go to the previous and next marked record; **Control+Page Up and Control+Page Down** go to the first and last.
 - To mark a **range**, set an anchor with **Start Mark** (F8) and extend to the cursor with **Complete Mark** (Shift+F8). **Start Unmark** (Alt+F8) and **Complete Unmark** (Alt+Shift+F8) do the same for clearing, with a separate anchor so building a mark range and an unmark range never clobber each other.
@@ -298,13 +298,13 @@ The dialog first says which columns are shown now, and whether they are the look
 
 **What each field is for.** In the record, new-record and filter forms, Shift+F1 on a field says what it is for. The sentences are rows of the database's own defs table: tbl and fld name the field, val is left empty, and descrip holds the sentence; tbl `*` covers a field of that name in every table. Edit a row of defs to change a sentence. The rows that do have a val are the choices F4 offers for that field.
 
-**What each table is for.** A defs row with tbl naming a table, and fld and val both empty, describes the table in one sentence. Shift+F1 says it in Choose Table and Open Table, Database Summary prints it, and Where Am I pressed twice says it for the table open.
+**What each table is for.** A defs row with tbl naming a table, and fld and val both empty, describes the table in one sentence. Shift+F1 says it in Choose Table and Open Table, Say Database prints it, and Where Am I pressed twice says it for the table open.
 
 **Patterns for fields.** A field's own row in defs -- tbl and fld naming the field, val empty -- has a pattern column beside descrip. Put a .NET regular expression there, and the field's value must match it when you press OK in a record form; the first field that does not is said and takes focus, with its text selected. An empty value is tested too, so a pattern can make a field required: `^\s*\S` refuses a blank, and `^$|` in front of any pattern lets the field stay blank. What DbDo says on a failure is the field's description, so write the form a value takes into descrip, such as "starting with http:// or https://". Filter Records checks no patterns. To set them without editing defs, use Settings, then Field Validation for This Table: one box per field, saved into defs. In a record or new-record form, **Alt+Shift+P** (P for pattern; in the main window the same key plays a stream) edits the pattern of the field you are on: a small dialog shows it under the field's description, OK saves it and puts it in force at once, and an empty pattern removes it.
 
 **Why descrip, not desc.** the defs table's column names are short so they cannot be mistaken for SQL words: tbl, fld, val. AccAudit, where this table began under the name lookups, called its description column desc, the commonest short form; but DESC is SQL's word for descending order, reserved in Access, SQL Server, MySQL and PostgreSQL, where a column of that name must be quoted in every query, and "ORDER BY desc DESC" reads as a riddle. So the column is descrip, by decision of 3 November 2026.
 
-**What the database is for.** A defs row with tbl `*` -- every table, which is to say the database -- and fld and val empty describes the database itself; Database Summary prints it as About. (A `*` row with a field named describes that field in every table.)
+**What the database is for.** A defs row with tbl `*` -- every table, which is to say the database -- and fld and val empty describes the database itself; Say Database prints it as About. (A `*` row with a field named describes that field in every table.)
 
 **How DbDo's dialogs name things.** Every control's name has at least two words, OK, Cancel, Help and Close aside, and its letter begins one of them. Columns are what the grid shows and arranges; fields are what a record holds, which filters and sorts work on. A filter's actions are Start over, Revise filter, Narrow filter, Expand filter, Invert filter and Clear filter wherever they appear, with Clear filter last, as Reverse order is last in Order Records: each has a key of its own from the grid. Shift+F1 on any control says what it does in one sentence.
 
@@ -384,7 +384,7 @@ Filter and order first to shape the grid, then report on exactly what you see.
 
 ### To produce something to keep or share
 
-- **Export Data** (Alt+Shift+X) writes the grid -- shown columns, kept records -- to a file: CSV, TSV, Markdown, a web page, Excel, Word, JSON, an .inix table, or another database. It is the one way to write data to a file.
+- **Export Data** (Control+Shift+X) writes the grid -- shown columns, kept records -- to a file: CSV, TSV, Markdown, a web page, Excel, Word, JSON, an .inix table, or another database. It is the one way to write data to a file.
 - **Run Report** (Alt+Shift+R) writes a designed document from a report definition, the same way every time, from the whole table rather than the grid. Definitions live in report.inix beside the database (see "The report-template language" in Part 6); BookTrail, ContactTrail, RadioTrail and TechTraining come with some.
 - **Print** (File menu, no key) prints the current record or the marked ones. Control+P plays media, as in every Homer app.
 - **The clipboard:** Copy Cell (Control+C) and Copy Append (Alt+C); Copy Append Record (Alt+Shift+C); and, on the Misc menu, Copy Column, Copy Grid, and Copy Visible Cells, as tab-separated text that pastes into a spreadsheet.
@@ -458,8 +458,8 @@ The files are kept in DbDo's own table, **files**, beside defs and maps; DbDo hi
 DbDo distinguishes four file operations that are easy to confuse. The distinction is about whether the data keeps its original shape or is reshaped into DbDo's conventions.
 
 - **Open** (Control+O) opens a file *faithfully* — a round trip. An Excel workbook opens as its sheets, a CSV as its rows, and saving writes back to that same file in that same format. Use Open when you want to work with a file as it is.
-- **Import Data** (Alt+I) reads an outside file and reshapes it *into a DbDo database* — normalizing columns, applying conventions, and producing a `.db` you then work with. Use Import when you want to bring foreign data into a proper DbDo database. **Transfer Import** and **Merge Data** (Alt+M) bring data in alongside existing data.
-- **Export Data** (Alt+Shift+X) writes the **grid** — the current view — out to a new file in a chosen format. Use Export to hand off what you are looking at. A CSV or TSV file holds your values exactly as they are. Since a spreadsheet may run a value beginning with =, +, - or @ as a formula, DbDo asks before opening such a file, and an .xlsx export is the safe way into a spreadsheet: it keeps every value as text.
+- **Import Data** (Control+Shift+I) reads an outside file and reshapes it *into a DbDo database* — normalizing columns, applying conventions, and producing a `.db` you then work with. Use Import when you want to bring foreign data into a proper DbDo database. **Transfer Import** and **Merge Data** (Alt+M) bring data in alongside existing data.
+- **Export Data** (Control+Shift+X) writes the **grid** — the current view — out to a new file in a chosen format. Use Export to hand off what you are looking at. A CSV or TSV file holds your values exactly as they are. Since a spreadsheet may run a value beginning with =, +, - or @ as a formula, DbDo asks before opening such a file, and an .xlsx export is the safe way into a spreadsheet: it keeps every value as text.
 - **Save** (Control+S) and **Save As** (Control+Shift+S) concern the *whole database*. For a workbook opened faithfully, Save writes your edits back to the `.xlsx`. For a native database your edits were already committed, so Save reports that; Save As writes a fresh copy. **Open as Managed Copy** opens a file as a working copy so the original is untouched until you decide.
 
 Supported formats include SQLite (`.db`, `.sqlite`, `.sqlite3`), Access (`.mdb`, `.accdb`), Excel (`.xlsx`, `.xls`), dBASE (`.dbf`), and delimited text (`.csv`, `.tsv`, `.tab`, `.txt`). The right driver is chosen from the extension.
@@ -500,7 +500,7 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | New Database | — |
 | Add Table | — |
 | Open Database | Control+O |
-| Open Template Database | Alt+Shift+D |
+| Open Template Database | Alt+D |
 | Open Table in New Window | Control+Shift+T |
 | Recent Databases | Alt+R |
 | Save | Control+S |
@@ -508,11 +508,11 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Close Database | — |
 | Backup Database | — |
 | Compare Database | — |
-| Import Data | Alt+I |
+| Import Data | Control+Shift+I |
 | Merge Data | Alt+M |
 | Transfer Import | — |
 | Run Report | Alt+Shift+R |
-| Export Data | Alt+Shift+X |
+| Export Data | Control+Shift+X |
 | Print | — |
 | Choose Table | Control+T |
 | Choose View | — |
@@ -544,9 +544,9 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Unmark Record | Control+Shift+M |
 | Mark All | Control+A |
 | Unmark All | Control+Shift+A |
-| Invert Marked | Alt+Shift+I |
+| Invert Marked | Control+I |
 | Mark and Next / Previous | Shift+Down / Shift+Up |
-| Unmark and Next / Previous | Alt+Shift+Down / Alt+Shift+Up |
+| Unmark and Next / Previous | Control+Shift+Down / Control+Shift+Up |
 | Mark to First / Last | Control+Shift+Home / Control+Shift+End |
 | Unmark to First / Last | Alt+Control+Shift+Home / Alt+Control+Shift+End |
 | Next / Previous Marked | Control+Down / Control+Up |
@@ -587,7 +587,7 @@ The Query menu holds record inspection and the Say-X status family.
 
 | Command | Chord |
 |---------|-------|
-| Inspect Record | Control+I |
+| Inspect Record | Alt+I |
 | Table Properties | Alt+Enter |
 | Related Records | — |
 | Show Schema | — |
@@ -635,7 +635,7 @@ The Query menu holds record inspection and the Say-X status family.
 |---------|-------|
 | Refresh Records | F5 |
 | Read Only Toggle | Control+Shift+Z |
-| Database Summary | Alt+D |
+| Say Database, then its summary | Shift+D |
 | Table Summary | Alt+T |
 | Add Column to Order | Alt+A |
 | Add Column to Order Descending | Alt+Shift+A |
@@ -760,7 +760,7 @@ When the SQLean extension functions are available, they add a large library of S
 
 ### Template databases
 
-DbDo ships with template databases that follow the same column conventions as your own data, reachable with File, **Open Template Database**, or Alt+Shift+D from anywhere. They are the fastest way to see the standard fields, defs, relationships, and reports working together on real records.
+DbDo ships with template databases that follow the same column conventions as your own data, reachable with File, **Open Template Database**, or Alt+D from anywhere. They are the fastest way to see the standard fields, defs, relationships, and reports working together on real records.
 
 ### Screen-reader settings
 
@@ -1115,8 +1115,8 @@ conference, HomerDev's convention-database skill builds one afresh from its agen
 - **JobTrail** -- a job search: applications, contacts, and what you did, with the work search record an unemployment office asks for
 - **MusicTrail** -- 100 great albums and 200 great musicians across ten genres, from two books by DbDo's author, with who recorded what and who played in which band
 - **RadioTrail** -- Internet radio, some 55,000 working stations, with a script that refreshes the catalog
-- **TechTraining** -- about 1,170 free presentations on technology and accessibility, from the Tech Training directory, each with its year, length, description and source. Play Stream (Alt+Shift+P) plays the presentation itself, and marked ones play as a list; Quick-Lessons finds the ones of fifteen minutes or less.
-- **BlindSkills** -- 84 free videos and podcast episodes that teach blindness skills, from the Blind Skills directory: cane travel, guiding, braille, cooking, dressing, labeling, money, crafts and more, in twelve skill groups, each lesson with the task it teaches. Play Stream (Alt+Shift+P) plays a lesson and marked ones play as a list; none come marked. Control+Enter on transcript_url opens a transcript. Skill-Index lists lessons by task, With-Transcripts those you can read, and the skills_handbook report writes up the whole set by group. scripts\checkBlindSkillsMedia, in DbDo's development folder, asks every lesson for the start of its stream, with no sign-in, as an anonymous player would, and writes a play list of those that answer with audio or video.
+- **TechTraining** -- about 1,170 free presentations on technology and accessibility, from the Tech Training directory, each with its year, length, description and source. Play Media (Alt+Shift+P) plays the presentation itself, and marked ones play as a list; Quick-Lessons finds the ones of fifteen minutes or less.
+- **BlindSkills** -- 84 free videos and podcast episodes that teach blindness skills, from the Blind Skills directory: cane travel, guiding, braille, cooking, dressing, labeling, money, crafts and more, in twelve skill groups, each lesson with the task it teaches. Play Media (Alt+Shift+P) plays a lesson and marked ones play as a list; none come marked. Control+Enter on transcript_url opens a transcript. Skill-Index lists lessons by task, With-Transcripts those you can read, and the skills_handbook report writes up the whole set by group. scripts\checkBlindSkillsMedia, in DbDo's development folder, asks every lesson for the start of its stream, with no sign-in, as an anonymous player would, and writes a play list of those that answer with audio or video.
 - **RecipeTrail** -- recipes, their ingredients and the amounts each needs. Mark the recipes you mean to cook, and Shopping-List gives what to buy, aisle by aisle, with the amount each recipe needs; Quick-Meals finds dinner in half an hour.
 
 **chinook** and **northwind** keep their usual names. They are the two databases
@@ -1139,7 +1139,7 @@ roles are also in **tags**, one to a line, so Keywords finds them.
 
 #### TechTraining plays what it lists
 
-Each presentation's **url** is the presentation itself, so Play Stream
+Each presentation's **url** is the presentation itself, so Play Media
 (Control+P) plays it in the Homer Player: an audio file directly, a video on
 YouTube or a similar site through yt-dlp. Mark several with Space, and
 Control+P plays them all, in order. The row speaks the title, the length in
@@ -1201,11 +1201,11 @@ the station says of itself and the article's opening paragraph -- is in
 **notes**. Both only grow: a line you add to either stays through every
 refresh.
 
-To listen, press **Control+P**, Play Stream, on any station's row. The Homer
+To listen, press **Control+P**, Play Media, on any station's row. The Homer
 Player opens -- the same player FileDir has, built from the same code in the
 kit -- with the station playing: Scroll Lock pauses and resumes, the Volume and
 Rate sliders are ordinary controls, and Escape closes it. Mark several stations
-first, Control+M, and Play Stream queues all of them, as tagged files are queued
+first, Control+M, and Play Media queues all of them, as tagged files are queued
 in FileDir, with the current one first. The first time, if mpv is not on your
 computer, DbDo offers to fetch it.
 
