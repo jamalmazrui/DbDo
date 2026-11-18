@@ -36,13 +36,13 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Scripts for the screen reader you use; the mpv player, which plays a station; and, for the AI commands, Ollama and a model, downloaded once. Install and Update are ticked; Reinstall is not, since what is current needs nothing.
+Say=Scripts for the screen reader you use; the mpv player, which plays a station; and, for the AI commands, Ollama and a model, downloaded once. Install and Update are marked; Reinstall is not, since what is current needs nothing.
 Key=
 Hear=
 
 [step]
 
-Say=A planned misstep: clearing a box you need. Space clears it; Space again ticks it back.
+Say=A planned misstep: clearing a box you need. Space clears it; Space again marks it back.
 Key=Space
 Hear=not checked
 
@@ -54,7 +54,7 @@ Hear=checked
 
 [step]
 
-Say=Enter installs what is ticked, and then the key that opens DbDo from anywhere.
+Say=Enter installs what is marked, and then the key that opens DbDo from anywhere.
 Key=Alt+Control+D
 Hear=DbDo
 Hear=DbDo ready
@@ -124,7 +124,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Installed, open and playing. If something was left out, run the setup again and tick its box; what is already current costs nothing.
+Say=Installed, open and playing. If something was left out, run the setup again and mark its box; what is already current costs nothing.
 Key=
 Hear=
 

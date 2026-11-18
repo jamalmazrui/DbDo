@@ -3,9 +3,16 @@
 ; keys JAWS takes everywhere, from data\KeyOwnership.inix; leave it alone.
 [Common Keys]
 ; Homer suite pass-through -- written by the kit's tidy from data\KeyOwnership.inix; do not edit
+Control+Space=TypeCurrentScriptKey
+Control+A=TypeCurrentScriptKey
+Control+F4=TypeCurrentScriptKey
+Alt+Enter=TypeCurrentScriptKey
 Alt+Delete=TypeCurrentScriptKey
-Alt+Shift+M=TypeCurrentScriptKey
 Alt+Shift+N=TypeCurrentScriptKey
+Control+E=TypeCurrentScriptKey
+Control+P=TypeCurrentScriptKey
+F3=TypeCurrentScriptKey
+Shift+F3=TypeCurrentScriptKey
 ; end of Homer suite pass-through
 ; Pass quietly: chords the app owns.
 Alt+Control+RightArrow=passDbDoKey
@@ -15,8 +22,8 @@ Alt+Control+UpArrow=passDbDoKey
 Alt+Control+DownArrow=passDbDoKey
 Alt+Control+Home=passDbDoKey
 Alt+Control+End=passDbDoKey
-Alt+Control+PageUp=passDbDoKey
-Alt+Control+PageDown=passDbDoKey
+; Alt+Control+PageUp and PageDown are JAWS's temporary voice rate, so they stay JAWS's here (18 November 2026);
+; DbDo binds them for NVDA, whose table keys they are, and Control+Home and Control+End do the same under JAWS.
 Alt+Control+Shift+UpArrow=passDbDoKey
 Alt+Control+Shift+DownArrow=passDbDoKey
 Alt+Control+Shift+LeftArrow=passDbDoKey

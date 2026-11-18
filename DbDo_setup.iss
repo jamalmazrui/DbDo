@@ -454,10 +454,10 @@ Name: "{autodesktop}\{#AppName}"; \
 
 [Run]
 ; THE FINISH PAGE (30 September 2026; HomerDev FinishPage.md). Three groups:
-; Install and Update ticked, Reinstall never ticked; within each, alphabetical
+; Install and Update marked, Reinstall never marked; within each, alphabetical
 ; by the component's name, ignoring case -- JAWS scripts, llama3.2, NVDA
 ; add-on, Ollama. Every box is worded from what is on the computer. Then
-; Launch, ticked, and the guide, unticked. The NVDA add-on is installed by the
+; Launch, marked, and the guide, unmarked. The NVDA add-on is installed by the
 ; kit's script straight into NVDA's add-ons folder, without starting NVDA.
 
 ; NO CONSOLE LEFT WAITING (19 October 2026). The Ollama and model entries ran through cmd /c without
@@ -465,7 +465,7 @@ Name: "{autodesktop}\{#AppName}"; \
 ; unless told noPause, and Inno runs these after the wizard has closed, so a console sat at "press any
 ; key" with no installer window behind it. They now run their scripts directly with noPause and wait,
 ; the shared Homer pattern (help\FinishPage.md).
-; ---- 1. Install, ticked --------------------------------------------------------
+; ---- 1. Install, marked --------------------------------------------------------
 FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
   Parameters: "noPause jaws"; \
   WorkingDir: "{app}\scripts"; \
@@ -497,7 +497,7 @@ FileName: "{app}\scripts\installOllama.cmd"; \
   Check: homerFinishRuns and ollamaNeedsInstall; \
   Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist
 
-; ---- 2. Update, ticked ---------------------------------------------------------
+; ---- 2. Update, marked ---------------------------------------------------------
 FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
   Parameters: "noPause jaws"; \
   WorkingDir: "{app}\scripts"; \
@@ -523,7 +523,7 @@ FileName: "{app}\scripts\installOllama.cmd"; \
   Check: homerFinishRuns and ollamaNeedsUpdate; \
   Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist
 
-; ---- 3. Reinstall, never ticked ------------------------------------------------
+; ---- 3. Reinstall, never marked ------------------------------------------------
 FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
   Parameters: "noPause jaws"; \
   WorkingDir: "{app}\scripts"; \
@@ -555,7 +555,7 @@ FileName: "{app}\scripts\installOllama.cmd"; \
   Check: homerFinishRuns and ollamaIsCurrent; \
   Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist unchecked
 
-; ---- 4. Launch, ticked; 5. the guide, unticked ---------------------------------
+; ---- 4. Launch, marked; 5. the guide, unmarked ---------------------------------
 ;
 ; Two ordinary things somebody may want the moment setup ends, offered last
 ; because they are not installations. runasoriginaluser matters -- setup is
@@ -603,7 +603,7 @@ FileName: "{app}\exec\{#AppExeName}"; \
 
 // THE SHARED COMPONENT TABLE from the kit: one line registers a component, and
 // the three states -- absent, outdated, current -- decide the finish page's
-// verb and tick. mpv, which Play Stream needs, is the first DbDo component on
+// verb and mark. mpv, which Play Stream needs, is the first DbDo component on
 // it; Ollama keeps DbDo's own older code below until it too is moved over.
 // The include goes INSIDE [Code]; HomerComponents.iss carries no [Code] line.
 #ifndef HomerDev
@@ -978,8 +978,8 @@ begin
   gModelDesc := Result;
 end;
 
-{ The model's two boxes: Install, ticked, when Ollama lacks it; Reinstall,
-  never ticked, when it has it. }
+{ The model's two boxes: Install, marked, when Ollama lacks it; Reinstall,
+  never marked, when it has it. }
 function modelNeedsInstall(): Boolean;
 begin
   Result := Pos('Install', descModel('')) = 1;
@@ -990,7 +990,7 @@ begin
   Result := Pos('Reinstall', descModel('')) = 1;
 end;
 
-{ THE RESULTS BOX REPORTS WHAT WAS TICKED: the captions are written down when
+{ THE RESULTS BOX REPORTS WHAT WAS MARKED: the captions are written down when
   Finish is pressed, before any step runs, for summarizeSetup. }
 function NextButtonClick(iCurPageID: Integer): Boolean;
 var
@@ -999,7 +999,7 @@ var
 begin
   Result := True;
   if iCurPageID <> wpFinished then exit;
-  homerNoteTicked();   // the shared table's record of which boxes were ticked
+  homerNoteTicked();   // the shared table's record of which boxes were marked
   gsTicked := '';
   SetArrayLength(lsLines, 0);
   for i := 0 to WizardForm.RunList.Items.Count - 1 do
@@ -1023,14 +1023,10 @@ var
   sPriorVersion: String;
 
 function priorVersion(): String;
-var
-  sFound: String;
+//  The kit's homerPriorVersion (1.261.0): this looked for the AppId with its doubled brace, found nothing, and called
+//  every update a fresh install.
 begin
-  Result := '';
-  if RegQueryStringValue(HKLM, 'SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall\{#emit SetupSetting("AppId")}_is1',
-                         'DisplayVersion', sFound) then Result := sFound
-  else if RegQueryStringValue(HKLM, 'SOFTWARE\WOW6432Node\Microsoft\Windows\CurrentVersion\Uninstall\{#emit SetupSetting("AppId")}_is1',
-                         'DisplayVersion', sFound) then Result := sFound;
+  Result := homerPriorVersion();
 end;
 
 function isFreshInstall(): Boolean;
@@ -1515,7 +1511,7 @@ begin
        unquoted, cmd tried to run "C:\Program", and the summary never started.
        That is why 1.0.168 showed no Results box. The probes survived the /s
        change because their commands carry their own quotes; this line did not. *)
-    (* With the Launch box ticked, setup waits for the box to be closed and then
+    (* With the Launch box marked, setup waits for the box to be closed and then
        starts DbDo as the person, not with the installer's elevated rights. *)
     if FileExists(ExpandConstant('{localappdata}\{#AppName}\logs\{#AppName}_launch.flag')) then
     begin
@@ -1551,7 +1547,7 @@ begin
 
   sMessage := '{#AppName} {#AppVersion} is installed in ' + ExpandConstant('{app}') + '.';
 
-  //  One past-tense line for mpv when its box was ticked, from a probe made
+  //  One past-tense line for mpv when its box was marked, from a probe made
   //  after the script ran -- what happened, not what was hoped.
   if homerOutcomeLine(iMpv) <> '' then addAction(sLogDir, homerOutcomeLine(iMpv));
   saveResultsForSummary(sLogDir, sMessage);

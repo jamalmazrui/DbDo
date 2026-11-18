@@ -151,7 +151,7 @@ Screen reader:
 
 ### Step 5: Enter
 
-Enter again presses Install. The last page lists the extras. I arrow through them; Space ticks one.
+Enter again presses Install. The last page lists the extras. I arrow through them; Space marks one.
 
 Screen reader:
 
@@ -168,7 +168,7 @@ Screen reader:
 
 ### Step 7: DownArrow
 
-Ollama runs AI on my own computer. I want it, so I tick it.
+Ollama runs AI on my own computer. I want it, so I mark it.
 
 Screen reader:
 
@@ -184,7 +184,7 @@ The model comes next, about 2 gigabytes, and installs after Ollama.
 
 ### Step 9: Enter
 
-Launch is ticked already. Enter presses Finish, and a results box says what was done.
+Launch is marked already. Enter presses Finish, and a results box says what was done.
 
 Screen reader:
 
@@ -650,7 +650,7 @@ Screen reader:
 
 ### Step 3: Space
 
-I add the date I applied. Space ticks it.
+I add the date I applied. Space marks it.
 
 Screen reader:
 
@@ -734,11 +734,12 @@ Screen reader:
 
 ### Step 4: Shift+Space
 
-Shift plus Space counts them.
+Shift plus Space reads them, value by value; any key stops it.
 
 Screen reader:
 
-- 2 marked rows: Example Widgets Company (sample employer), Sample Health Network (illustration only)
+- Example Widgets Company (sample employer)
+- Sample Health Network (illustration only)
 
 ### Step 5: Control+A
 
@@ -1349,11 +1350,11 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 5
 
-Scripts for the screen reader you use; the mpv player, which plays a station; and, for the AI commands, Ollama and a model, downloaded once. Install and Update are ticked; Reinstall is not, since what is current needs nothing.
+Scripts for the screen reader you use; the mpv player, which plays a station; and, for the AI commands, Ollama and a model, downloaded once. Install and Update are marked; Reinstall is not, since what is current needs nothing.
 
 ### Step 6: Space
 
-A planned misstep: clearing a box you need. Space clears it; Space again ticks it back.
+A planned misstep: clearing a box you need. Space clears it; Space again marks it back.
 
 Screen reader:
 
@@ -1369,7 +1370,7 @@ Screen reader:
 
 ### Step 8: Alt+Control+D
 
-Enter installs what is ticked, and then the key that opens DbDo from anywhere.
+Enter installs what is marked, and then the key that opens DbDo from anywhere.
 
 Screen reader:
 
@@ -1463,7 +1464,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 18
 
-Installed, open and playing. If something was left out, run the setup again and tick its box; what is already current costs nothing.
+Installed, open and playing. If something was left out, run the setup again and mark its box; what is already current costs nothing.
 
 ### Step 19
 

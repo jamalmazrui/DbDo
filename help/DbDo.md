@@ -196,7 +196,7 @@ The screen reader table keys work as they do in tables in web pages, Word and Ad
 
 - **Alt+Control+arrows** move one cell. Moving along a row, DbDo says the new column's name, then the cell. Moving down a column, it says the record's look, then the cell, just as a screen reader says a row header; when the cell is itself part of the look, it says the cell alone. At the edge of the grid, the cursor stays, and DbDo says First row, Last row, First column or Last column.
 - **Alt+Control+Home and Alt+Control+End** go to the top-left and bottom-right corners, as in JAWS and Narrator. (NVDA uses them for the first and last column of the row; in DbDo, Home and End do that.)
-- **Alt+Control+Page Up and Alt+Control+Page Down** go to the first and last row of the column, as in NVDA.
+- **Alt+Control+Page Up and Alt+Control+Page Down** go to the first and last row of the column, as in NVDA. Under JAWS they change the voice rate for the moment, as everywhere, so use Control+Home and Control+End, which do the same moves.
 - **Alt+Control+Number Pad 5** says the cell, as **Shift+C** does.
 
 Narrator's table reading keys read without moving:
@@ -601,11 +601,14 @@ The Query menu holds record inspection and the Say-X status family.
 | Say Edited | Shift+E |
 | Say Notes | Shift+N |
 | Say Tags | Shift+T |
-| Say Column as List from Current | Control+L |
-| Say Column as List from Current Marked | Control+Shift+L |
-| Say Records from Current | — |
-| Say Marked Records from Current | Alt+Shift+M |
-| Say Marked Records | Shift+Space |
+| Read List | Alt+L |
+| Read List of Marked | Alt+Shift+L or Shift+Space |
+| Read List from Current | Control+L |
+| Read List from Current Marked | Control+Shift+L |
+| Say Column as List | — |
+| Say Column as List of Marked | — |
+| Say Column as List from Current | — |
+| Say Column as List from Current Marked | — |
 | Say Filter and Order | Shift+8 |
 | Say Position | Alt+Delete |
 | Say Clipboard | Alt+Apostrophe |

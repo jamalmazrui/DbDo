@@ -63,7 +63,7 @@ if (Test-Path -LiteralPath $sResultsFile) {
 }
 
 # ---- what the finish-page entries did, one line each ----
-# ONLY WHAT WAS TICKED (30 September 2026). The installer wrote the ticked
+# ONLY WHAT WAS MARKED (30 September 2026). The installer wrote the marked
 # captions to DbDo_ticked.txt when Finish was pressed; each component is
 # reported only when its box was among them, and each line says whether what
 # the box asked for happened. Then where the logs are, and nothing else.

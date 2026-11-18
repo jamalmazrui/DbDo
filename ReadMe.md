@@ -17,7 +17,7 @@ Alt+Tab if nothing seems to happen.
 
 On the last page you can add scripts for JAWS and NVDA, and Ollama, which lets
 DbDo answer questions with AI that runs on your own computer. Leave **Launch
-DbDo** ticked and press Enter. After that, **Alt+Control+D** starts DbDo from
+DbDo** marked and press Enter. After that, **Alt+Control+D** starts DbDo from
 anywhere in Windows -- D for DbDo.
 
 To update later, press **F11** inside DbDo: Elevate Version. It checks for a

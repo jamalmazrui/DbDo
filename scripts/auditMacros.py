@@ -8,6 +8,12 @@ NO ARGUMENT IS NEEDED (17 November 2026). The runtime check used to wait for --r
 arguments does the most complete thing, so it now runs by default, and says so plainly when there is no session log
 yet rather than failing. --runtime is still understood.
 
+WHY ONLY DbDo HAS THIS SCRIPT (17 November 2026, Jamal asked). It audits DbDo's wiring of the kit's macro recorder,
+Macro.cs -- DbDoMacros.cs, its menu items and its build -- and DbDo is the only app that records macros so far. The
+recorder itself is tested in the kit, by scripts\testMacro, on every kit build. When a second app records macros,
+this audit moves into the kit and reads that app's <App>Macros.cs the same way. runMacro, which every app has, is a
+different thing: it plays a macro script, plain lines of commands, through the screen reader to hear the app.
+
 WHY. A macro is trusted to repeat what the person did. Two things can break that without any test noticing: a
 command that a macro may hold whose handler forgets to say it succeeded (so it records as a gap, or worse, a handler
 that says so before it has moved), and a step that plays but leaves the cursor somewhere else. The first is a fact

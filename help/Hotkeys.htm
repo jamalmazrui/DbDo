@@ -632,6 +632,22 @@ Alt+Enter</li>
 <p>Shift and a letter asks. Nothing here changes anything; each answers
 a question about where you are, in one short line.</p>
 <ul>
+<li>Read List<br />
+Read the records in view from the first, value by value. L for
+List.<br />
+Alt+L</li>
+<li>Read List from Current<br />
+Read the records in view from the current one on, value by value. L for
+List.<br />
+Control+L</li>
+<li>Read List from Current Marked<br />
+Read the marked records in view from the current one on, value by value.
+L for List.<br />
+Control+Shift+L</li>
+<li>Read List of Marked<br />
+Read the marked records in view from the first, value by value. L for
+List.<br />
+Alt+Shift+L</li>
 <li>Say Added<br />
 A for Added.<br />
 Shift+A</li>
@@ -645,21 +661,6 @@ Shift+C</li>
 Speak the current Windows clipboard text. The apostrophe is a quotation
 mark, and the clipboard is what you last quoted.<br />
 Alt+Apostrophe</li>
-<li>Say Column as List<br />
-Speak every value of the current virtual column, from the top. L for
-List.<br />
-Alt+L</li>
-<li>Say Column as List from Current<br />
-Say the column’s values from the current record down. L for List.<br />
-Control+L</li>
-<li>Say Column as List from Current Marked<br />
-Say the column’s values for marked records from the current record down.
-L for List.<br />
-Control+Shift+L</li>
-<li>Say Column as List of Marked<br />
-Speak the current virtual column for marked rows only, from the top. L
-for List.<br />
-Alt+Shift+L</li>
 <li>Say Database<br />
 Say the database’s name and folder. D for Database.<br />
 Shift+D</li>
@@ -693,15 +694,6 @@ Shift+L</li>
 <li>Say Marked<br />
 M for Marked.<br />
 Shift+M</li>
-<li>Say Marked Records<br />
-Speak every marked record in full, from the first record down (all
-displayed columns). Space marks in a list; Shift and Space asks how many
-are marked.<br />
-Shift+Space</li>
-<li>Say Marked Records from Current<br />
-Speak every marked record in full, from the current record down. M for
-Marked.<br />
-Alt+Shift+M</li>
 <li>Say Notes<br />
 Say the record’s notes. N for Notes.<br />
 Shift+N</li>
@@ -813,8 +805,8 @@ Exit to Root Table</li>
 <li>Alt+I<br />
 Inspect Record</li>
 <li>Alt+L<br />
-Speak every value of the current virtual column, from the top.<br />
-Say Column as List</li>
+Read the records in view from the first, value by value.<br />
+Read List</li>
 <li>Alt+LeftArrow<br />
 Return from a child drill-down to the parent table.<br />
 Exit Child Table</li>
@@ -863,12 +855,8 @@ Edit Settings</li>
 Make a report from the records in the grid.<br />
 Generate from Grid</li>
 <li>Alt+Shift+L<br />
-Speak the current virtual column for marked rows only, from the
-top.<br />
-Say Column as List of Marked</li>
-<li>Alt+Shift+M<br />
-Speak every marked record in full, from the current record down.<br />
-Say Marked Records from Current</li>
+Read the marked records in view from the first, value by value.<br />
+Read List of Marked</li>
 <li>Alt+Shift+N<br />
 Edit Notes</li>
 <li>Alt+Shift+O<br />
@@ -932,8 +920,8 @@ Jump</li>
 Go to the next record whose fields hold the keywords.<br />
 Keywords</li>
 <li>Control+L<br />
-Say the column’s values from the current record down.<br />
-Say Column as List from Current</li>
+Read the records in view from the current one on, value by value.<br />
+Read List from Current</li>
 <li>Control+M<br />
 Set the ‘marked’ flag on the current row.<br />
 Mark Record</li>
@@ -1006,9 +994,9 @@ Reverse Jump</li>
 Go to the previous record whose fields hold the keywords.<br />
 Reverse Keywords</li>
 <li>Control+Shift+L<br />
-Say the column’s values for marked records from the current record
-down.<br />
-Say Column as List from Current Marked</li>
+Read the marked records in view from the current one on, value by
+value.<br />
+Read List from Current Marked</li>
 <li>Control+Shift+M<br />
 Clear the ‘marked’ flag on the current row.<br />
 Unmark Record</li>
@@ -1177,10 +1165,6 @@ Say Query</li>
 Say Replace Values</li>
 <li>Shift+S<br />
 Say Select Columns</li>
-<li>Shift+Space<br />
-Speak every marked record in full, from the first record down (all
-displayed columns).<br />
-Say Marked Records</li>
 <li>Shift+T<br />
 Say the record’s tags.<br />
 Say Tags</li>
@@ -1413,6 +1397,19 @@ Control+Shift+Tab</li>
 Control+Q</li>
 <li>Query History<br />
 Alt+Shift+Q</li>
+<li>Read List<br />
+Read the records in view from the first, value by value.<br />
+Alt+L</li>
+<li>Read List from Current<br />
+Read the records in view from the current one on, value by value.<br />
+Control+L</li>
+<li>Read List from Current Marked<br />
+Read the marked records in view from the current one on, value by
+value.<br />
+Control+Shift+L</li>
+<li>Read List of Marked<br />
+Read the marked records in view from the first, value by value.<br />
+Alt+Shift+L</li>
 <li>Read Only Toggle<br />
 Flip the database between read-write and read-only at runtime.<br />
 Control+Shift+Z</li>
@@ -1472,20 +1469,6 @@ Shift+C</li>
 <li>Say Clipboard<br />
 Speak the current Windows clipboard text.<br />
 Alt+Apostrophe</li>
-<li>Say Column as List<br />
-Speak every value of the current virtual column, from the top.<br />
-Alt+L</li>
-<li>Say Column as List from Current<br />
-Say the column’s values from the current record down.<br />
-Control+L</li>
-<li>Say Column as List from Current Marked<br />
-Say the column’s values for marked records from the current record
-down.<br />
-Control+Shift+L</li>
-<li>Say Column as List of Marked<br />
-Speak the current virtual column for marked rows only, from the
-top.<br />
-Alt+Shift+L</li>
 <li>Say Database<br />
 Say the database’s name and folder.<br />
 Shift+D</li>
@@ -1513,13 +1496,6 @@ Shift+K</li>
 Shift+L</li>
 <li>Say Marked<br />
 Shift+M</li>
-<li>Say Marked Records<br />
-Speak every marked record in full, from the first record down (all
-displayed columns).<br />
-Shift+Space</li>
-<li>Say Marked Records from Current<br />
-Speak every marked record in full, from the current record down.<br />
-Alt+Shift+M</li>
 <li>Say Notes<br />
 Say the record’s notes.<br />
 Shift+N</li>

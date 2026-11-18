@@ -5,6 +5,37 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 18 November 2026 -- Updates are called updates
+
+- **The installer calls an update an update.** It looked for the version already installed under its AppId with a doubled brace, which Inno writes with one, so it never found it and said "Installed" on the welcome page and in the Results box for every update. It now asks the kit's homerPriorVersion, which finds it.
+- **This needs HomerDev 1.261.0.**
+
+## 18 November 2026 -- JAWS keeps its voice-rate keys
+
+- **Under JAWS, Alt+Control+PageUp and PageDown change the voice rate again.** DbDo's JAWS key map handed them to DbDo for Column Top and Column Bottom, so JAWS's temporary voice rate did nothing in DbDo. They are NVDA's table keys for the first and last row of a column, so DbDo keeps them for NVDA; under JAWS, Control+Home and Control+End do the same moves.
+- **JAWS hands DbDo the same keys it hands FileDir and EdSharp:** Control+A, Control+Space, Control+E, Control+P, Control+F4, Alt+Enter, F3 and Shift+F3, where JAWS answers with a script of its own first. The kit's tidy writes them into the key map from its key ownership table, so DbDo's own speech is the only speech.
+- **This needs HomerDev 1.259.0.**
+
+## 18 November 2026 -- Long readings start at once
+
+- **Say Column as List and the Read List family start speaking at once, however long the table.** On a table of 38,000 radio stations, Say Column as List gathered every value before it said the first, and Windows called DbDo Not Responding. The released build then sent all 38,000 values to JAWS in one burst. Now each record is read from the table only when the reader needs more, about fifteen seconds ahead, so the first value is heard at once, and any key still stops the reading. The cursor is put back after each record, so the grid never moves. This needs HomerDev 1.257.0.
+
+## 17 November 2026 -- Marked or Current asks whenever records are marked
+
+- **Commands that can act on marked records ask Marked or Current whenever marked records are in view,** as FileDir now does, not only when the current record is unmarked. Enter still takes the marked records; C takes the current one alone. A single marked record that is the current one is not asked about.
+
+## 17 November 2026 -- Marked, not ticked
+
+- **A checkbox is marked, never ticked,** in the installer, its finish page, the guides, the tutorials and every message, as Homer has said since 11 November; some thirty lines still said tick. The kit's check now fails on the word, so it cannot come back.
+- **runMacro with no macro named** writes its log from the first line, and the kit's 1.252.0 copy comes with the build.
+
+## 17 November 2026 -- Read List: the records in view, value by value
+
+- **The L keys read the records in view.** Read List (Alt+L) reads them from the first, Read List of Marked (Alt+Shift+L, or Shift+Space) only the marked ones, Read List from Current (Control+L) from the current record on, and Read List from Current Marked (Control+Shift+L) the marked ones from there. Every shown column is read, each value its own utterance, so the screen reader pauses between values and between records; empty values are skipped. The cursor does not move.
+- **Any key stops a reading, at once.** The reading is fed to JAWS or NVDA about fifteen seconds ahead, so nothing more arrives after a key; Control also tells the screen reader to stop, so its queue is emptied too. Press the key twice to see the records in a window instead.
+- **Say Records from Current, Say Marked Records from Current and Say Marked Records are retired into Read List.** They said each record as one long string. Alt+Shift+M is free; the old names still find the new commands in the Alternate Menu.
+- **The Say Column as List commands stay on the Say menu, without keys,** and read the same way. To hear one column with a key, show only that column (Alt+S) and press Alt+L.
+
 ## 17 November 2026 -- Live tests say when DbDo closes
 
 - **The kit's 1.249.0 recordWalk says when DbDo closes during a live test,** and keeps the end of DbDo's own log in the run's log. DbDo closed twice during the live test of 14:37, during Say Position and after the Alternate Menu; the next run will say why.

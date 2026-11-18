@@ -257,6 +257,27 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a href="#november-2026-updates-are-called-updates"
+id="toc-november-2026-updates-are-called-updates">18 November 2026 –
+Updates are called updates</a></li>
+<li><a href="#november-2026-jaws-keeps-its-voice-rate-keys"
+id="toc-november-2026-jaws-keeps-its-voice-rate-keys">18 November 2026 –
+JAWS keeps its voice-rate keys</a></li>
+<li><a href="#november-2026-long-readings-start-at-once"
+id="toc-november-2026-long-readings-start-at-once">18 November 2026 –
+Long readings start at once</a></li>
+<li><a
+href="#november-2026-marked-or-current-asks-whenever-records-are-marked"
+id="toc-november-2026-marked-or-current-asks-whenever-records-are-marked">17
+November 2026 – Marked or Current asks whenever records are
+marked</a></li>
+<li><a href="#november-2026-marked-not-ticked"
+id="toc-november-2026-marked-not-ticked">17 November 2026 – Marked, not
+ticked</a></li>
+<li><a
+href="#november-2026-read-list-the-records-in-view-value-by-value"
+id="toc-november-2026-read-list-the-records-in-view-value-by-value">17
+November 2026 – Read List: the records in view, value by value</a></li>
 <li><a href="#november-2026-live-tests-say-when-dbdo-closes"
 id="toc-november-2026-live-tests-say-when-dbdo-closes">17 November 2026
 – Live tests say when DbDo closes</a></li>
@@ -872,6 +893,89 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Control+Shift+F1</strong> inside DbDo to open this file
 in your browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="november-2026-updates-are-called-updates">18 November 2026 –
+Updates are called updates</h2>
+<ul>
+<li><strong>The installer calls an update an update.</strong> It looked
+for the version already installed under its AppId with a doubled brace,
+which Inno writes with one, so it never found it and said “Installed” on
+the welcome page and in the Results box for every update. It now asks
+the kit’s homerPriorVersion, which finds it.</li>
+<li><strong>This needs HomerDev 1.261.0.</strong></li>
+</ul>
+<h2 id="november-2026-jaws-keeps-its-voice-rate-keys">18 November 2026 –
+JAWS keeps its voice-rate keys</h2>
+<ul>
+<li><strong>Under JAWS, Alt+Control+PageUp and PageDown change the voice
+rate again.</strong> DbDo’s JAWS key map handed them to DbDo for Column
+Top and Column Bottom, so JAWS’s temporary voice rate did nothing in
+DbDo. They are NVDA’s table keys for the first and last row of a column,
+so DbDo keeps them for NVDA; under JAWS, Control+Home and Control+End do
+the same moves.</li>
+<li><strong>JAWS hands DbDo the same keys it hands FileDir and
+EdSharp:</strong> Control+A, Control+Space, Control+E, Control+P,
+Control+F4, Alt+Enter, F3 and Shift+F3, where JAWS answers with a script
+of its own first. The kit’s tidy writes them into the key map from its
+key ownership table, so DbDo’s own speech is the only speech.</li>
+<li><strong>This needs HomerDev 1.259.0.</strong></li>
+</ul>
+<h2 id="november-2026-long-readings-start-at-once">18 November 2026 –
+Long readings start at once</h2>
+<ul>
+<li><strong>Say Column as List and the Read List family start speaking
+at once, however long the table.</strong> On a table of 38,000 radio
+stations, Say Column as List gathered every value before it said the
+first, and Windows called DbDo Not Responding. The released build then
+sent all 38,000 values to JAWS in one burst. Now each record is read
+from the table only when the reader needs more, about fifteen seconds
+ahead, so the first value is heard at once, and any key still stops the
+reading. The cursor is put back after each record, so the grid never
+moves. This needs HomerDev 1.257.0.</li>
+</ul>
+<h2
+id="november-2026-marked-or-current-asks-whenever-records-are-marked">17
+November 2026 – Marked or Current asks whenever records are marked</h2>
+<ul>
+<li><strong>Commands that can act on marked records ask Marked or
+Current whenever marked records are in view,</strong> as FileDir now
+does, not only when the current record is unmarked. Enter still takes
+the marked records; C takes the current one alone. A single marked
+record that is the current one is not asked about.</li>
+</ul>
+<h2 id="november-2026-marked-not-ticked">17 November 2026 – Marked, not
+ticked</h2>
+<ul>
+<li><strong>A checkbox is marked, never ticked,</strong> in the
+installer, its finish page, the guides, the tutorials and every message,
+as Homer has said since 11 November; some thirty lines still said tick.
+The kit’s check now fails on the word, so it cannot come back.</li>
+<li><strong>runMacro with no macro named</strong> writes its log from
+the first line, and the kit’s 1.252.0 copy comes with the build.</li>
+</ul>
+<h2 id="november-2026-read-list-the-records-in-view-value-by-value">17
+November 2026 – Read List: the records in view, value by value</h2>
+<ul>
+<li><strong>The L keys read the records in view.</strong> Read List
+(Alt+L) reads them from the first, Read List of Marked (Alt+Shift+L, or
+Shift+Space) only the marked ones, Read List from Current (Control+L)
+from the current record on, and Read List from Current Marked
+(Control+Shift+L) the marked ones from there. Every shown column is
+read, each value its own utterance, so the screen reader pauses between
+values and between records; empty values are skipped. The cursor does
+not move.</li>
+<li><strong>Any key stops a reading, at once.</strong> The reading is
+fed to JAWS or NVDA about fifteen seconds ahead, so nothing more arrives
+after a key; Control also tells the screen reader to stop, so its queue
+is emptied too. Press the key twice to see the records in a window
+instead.</li>
+<li><strong>Say Records from Current, Say Marked Records from Current
+and Say Marked Records are retired into Read List.</strong> They said
+each record as one long string. Alt+Shift+M is free; the old names still
+find the new commands in the Alternate Menu.</li>
+<li><strong>The Say Column as List commands stay on the Say menu,
+without keys,</strong> and read the same way. To hear one column with a
+key, show only that column (Alt+S) and press Alt+L.</li>
+</ul>
 <h2 id="november-2026-live-tests-say-when-dbdo-closes">17 November 2026
 – Live tests say when DbDo closes</h2>
 <ul>

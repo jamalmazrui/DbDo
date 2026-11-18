@@ -13504,9 +13504,10 @@ namespace DbDo
         private ToolStripMenuItem miSaySayColumnMarked;
         private ToolStripMenuItem miSaySayColumnAll;
         private ToolStripMenuItem miSaySayColumnAllMarked;
-        private ToolStripMenuItem miSaySayRows;
-        private ToolStripMenuItem miSaySayRowsMarked;
-        private ToolStripMenuItem miSaySayMarkedRows;
+        private ToolStripMenuItem miReadList;
+        private ToolStripMenuItem miReadListCurrent;
+        private ToolStripMenuItem miReadListCurrentMarked;
+        private ToolStripMenuItem miReadListMarked;
         private ToolStripMenuItem miSaySayJump;
         private ToolStripMenuItem miSaySayBookmark;
         private ToolStripMenuItem miSaySayReplace;
@@ -13559,7 +13560,7 @@ namespace DbDo
             // findable -- the Alternate Menu ends each line with "Formerly <name>." -- through the kit's KeyMap.
             Homer.KeyMap.addFormerName("Copy Append", "Append Cell");
             Homer.KeyMap.addFormerName("Copy Append Record", "Append Record");
-            Homer.KeyMap.addFormerName("Say Marked Records", "Say Records of Marked");
+            Homer.KeyMap.addFormerName("Read List of Marked", "Say Records of Marked");
             Homer.KeyMap.addFormerName("Say Marked Records from Current", "Say Records from Current Marked");
             Homer.KeyMap.addFormerName("Toggle Mark", "Marked Toggle");
             // THE SUITE'S NAMES (17 November 2026): EdSharp and HomerView say Forward and Reverse Find with Regex on
@@ -14646,19 +14647,34 @@ namespace DbDo
             // names the bookmark family.
             // Say Column family. Scope: Alt = All (from top), Control =
             // from Current row. Filter: Shift = Marked rows only.
-            miSaySayColumnAll       = addItem(miSay, "Say Column as &List",                "Say Column as List",                Keys.Alt | Keys.L,                  saySayColumnAll);
-            miSaySayColumnAllMarked = addItem(miSay, "Say Column as List of Marked",         "Say Column as List of Marked",         Keys.Alt | Keys.Shift | Keys.L,     saySayColumnAllMarked);
-            miSaySayColumn          = addItem(miSay, "Say Column as List from Current",       "Say Column as List from Current",       Keys.Control | Keys.L,              saySayColumn);
-            miSaySayColumnMarked    = addItem(miSay, "Say Column as List from Current Marked","Say Column as List from Current Marked",Keys.Control | Keys.Shift | Keys.L, saySayColumnMarked);
+            // THE READ LIST FAMILY (17 November 2026, Jamal's request): the L keys read the records in view, every
+            // shown column, each value its own utterance, so a pause falls between values and between records, and a
+            // key stops it at once (Homer.ReadAloud). Alt = from the first record, Control = from the current one,
+            // Shift = marked records only. The Say Column as List commands gave up these keys and stay on this menu:
+            // a grid showing one column (Alt+S) reads that column the same way.
+            miReadList              = addItem(miSay, "Read &List",                    "Read List",                    Keys.Alt | Keys.L,                  readListAll);
+            miReadListMarked        = addItem(miSay, "Read List of Marked",           "Read List of Marked",          Keys.Alt | Keys.Shift | Keys.L,     readListAllMarked);
+            miReadListCurrent       = addItem(miSay, "Read List from Current",        "Read List from Current",       Keys.Control | Keys.L,              readListCurrent);
+            miReadListCurrentMarked = addItem(miSay, "Read List from Current Marked", "Read List from Current Marked", Keys.Control | Keys.Shift | Keys.L, readListCurrentMarked);
+            miSaySayColumnAll       = addItem(miSay, "Say Column as List",                    "Say Column as List",                    Keys.None, saySayColumnAll);
+            miSaySayColumnAllMarked = addItem(miSay, "Say Column as List of Marked",          "Say Column as List of Marked",          Keys.None, saySayColumnAllMarked);
+            miSaySayColumn          = addItem(miSay, "Say Column as List from Current",       "Say Column as List from Current",       Keys.None, saySayColumn);
+            miSaySayColumnMarked    = addItem(miSay, "Say Column as List from Current Marked","Say Column as List from Current Marked",Keys.None, saySayColumnMarked);
             // Say Records Rest gave up Alt+L to the Say Column All command
             // above; it remains on the menu (and the Alternate Menu) with
             // no chord for now. Say Marked Records from Current keeps Alt+Shift+M.
             // NAMES (29 October 2026): Say Records Rest, Say Records Rest Marked and Say Marked
             // Rows became Say Records from Current, Say Marked Records from Current and Say
             // Records of Marked, word for word the Say Column as List family.
-            miSaySayRows         = addItem(miSay, "Say Records from Current", "Say Records from Current", Keys.None,                         saySayRows);
-            miSaySayRowsMarked   = addItem(miSay, "Say Marked Records from Current", "Say Marked Records from Current", Keys.Alt | Keys.Shift | Keys.M,    saySayRowsMarked);
-            miSaySayMarkedRows   = addItem(miSay, "Say Marked Records", "Say Marked Records", Keys.Shift | Keys.Space, saySayMarkedRows);
+            // RETIRED INTO READ LIST (17 November 2026): Say Records from Current, Say Marked Records from Current
+            // (Alt+Shift+M) and Say Marked Records (Shift+Space) said each record as one long string, "Row 9 --
+            // name: x; url: y", which the reader ran together. The Read List commands say the same records value by
+            // value. Shift+Space stays, as a second key for Read List of Marked; Alt+Shift+M is free. The old names
+            // still find the new commands in the Alternate Menu.
+            registerLocalAlias(Keys.Shift | Keys.Space, miReadListMarked);
+            Homer.KeyMap.addFormerName("Read List from Current", "Say Records from Current");
+            Homer.KeyMap.addFormerName("Read List from Current Marked", "Say Marked Records from Current");
+            Homer.KeyMap.addFormerName("Read List of Marked", "Say Marked Records");
 
             // THE SAY LAYER ANSWERS FOR EVERY DIALOG THAT REMEMBERS AN ANSWER.
             //
@@ -15264,20 +15280,18 @@ namespace DbDo
             add("Say Tags",           "Say the record's tags", "");
             add("Say Go to",           "Say the last Go to entry",
                 "Shift+G. Companion to Say Where Filter (Shift+W) and Say Order (Shift+O) -- reveals the current state of the Ctrl+J Jump Record search. Reports 'No jump search active' when there's no remembered string.");
-            add("Say Column as List",          "Speak every value of the current virtual column, from the top",
-                "Alt+L. Sweeps the whole column top to bottom. Position and virtual cursor unchanged; double-press shows the full list. Alt = All. Shift adds the marked-only filter (Say Column All Marked, Alt+Shift+L).");
-            add("Say Column as List of Marked",   "Speak the current virtual column for marked rows only, from the top",
-                "Alt+Shift+L. Same as Say Column as List but limited to marked records. Reports 'No marked records' when nothing is marked.");
-            add("Say Column as List from Current", "Say the column's values from the current record down",
-                "Control+L. Sweeps from the current row to the bottom. Control = from Current. Shift adds the marked-only filter (Say Column as List from Current Marked, Control+Shift+L).");
-            add("Say Column as List from Current Marked", "Say the column's values for marked records from the current record down",
-                "Control+Shift+L. Same as Say Column as List from Current but limited to marked records. Reports 'No marked records from here' when nothing is marked at or after the current record.");
-            add("Say Records from Current", "Speak every record in full, from the current record down (all displayed columns)",
-                "No key of its own. Each record formatted as 'Record N -- col1: val1; col2: val2; ...' with newlines between records. Cap 25 in spoken form; double-press for the full list.");
-            add("Say Marked Records from Current", "Speak every marked record in full, from the current record down",
-                "Alt+Shift+M. Like Say Records from Current, but only marked records; Say Marked Records (Shift+Space) starts at the top instead.");
-            add("Say Marked Records", "Speak every marked record in full, from the first record down (all displayed columns)",
-                "Shift+Space. Each record reads 'Row N -- col1: val1; col2: val2; ...' with null/blank for SQL NULL / empty values. Unlike Say Marked Records from Current (Alt+Shift+M), which starts at the current record, this always starts at the top. The cursor position is left unchanged. Double-press shows the rows in the read-only review dialog.");
+            add("Read List", "Read the records in view from the first, value by value",
+                "Alt+L. Every shown column of every record in view, each value its own utterance, empty values skipped; any key stops it, and Control silences the reader at once. Twice shows the records in a window.");
+            add("Read List of Marked", "Read the marked records in view from the first, value by value",
+                "Alt+Shift+L or Shift+Space. Read List, for the marked records only.");
+            add("Read List from Current", "Read the records in view from the current one on, value by value",
+                "Control+L. Read List, starting at the current record.");
+            add("Read List from Current Marked", "Read the marked records in view from the current one on, value by value",
+                "Control+Shift+L. Read List from Current, for the marked records only.");
+            add("Say Column as List", "Read the current column's values from the first record", "No key; read as Read List reads, one value at a time, any key stopping it.");
+            add("Say Column as List of Marked", "Read the current column's values in the marked records", "No key.");
+            add("Say Column as List from Current", "Read the current column's values from the current record on", "No key.");
+            add("Say Column as List from Current Marked", "Read the current column's values in the marked records from the current record on", "No key.");
             add("Say Position",       "Speak the column header and 1-based row number of the virtual cell",
                 "JAWS-style 'say cursor position' for the listview. Speech-only; does not move focus. Double-press opens the same text in a read-only multi-line dialog.");
             add("Show in FileDir",    "Show the open database's file, selected in its folder, in FileDir", "");
@@ -17292,6 +17306,10 @@ namespace DbDo
             if (keyData == (Keys.Alt | Keys.Control | Keys.Shift | Keys.Down)) { saySayColumnAll(this, EventArgs.Empty); return true; }
             if (keyData == (Keys.Alt | Keys.Control | Keys.Shift | Keys.Clear) || keyData == (Keys.Alt | Keys.Control | Keys.Shift | Keys.NumPad5))
             { virtSayPosition(); return true; }
+            // NVDA'S TABLE KEYS, NOT JAWS'S (18 November 2026). Alt+Control+PageUp and PageDown are NVDA's first and
+            // last row of the column, and DbDo keeps them for NVDA. Under JAWS they are its temporary voice rate, so
+            // DbDo's JAWS key map no longer hands them on: JAWS keeps its rate, and Control+Home and Control+End do
+            // the same moves there.
             if (keyData == (Keys.Alt | Keys.Control | Keys.PageDown))
             {
                 int iLastRow = (db != null && db.hasRecordset()) ? db.recordCount : 1;
@@ -18696,33 +18714,10 @@ namespace DbDo
             // Alt (All) starts at row 1; Control (Current) starts at the
             // current virtual row and reads the rest of the column down.
             int iStart = bFromCurrent ? ((iVirtualRow >= 1) ? iVirtualRow : 1) : 1;
-            object oOriginal = null;
-            try { oOriginal = db.bookmark; } catch { }
-            // No cap: every value from the cursor down is spoken.
-            List<string> lValues = new List<string>();
-            int iTotal = 0;
-            try
-            {
-                for (int i = iStart; i <= db.recordCount; i++)
-                {
-                    try
-                    {
-                        db.absolutePosition = i;
-                        if (bMarkedOnly)
-                        {
-                            if (!isMarkedTrue(db.getScreenValue(Metadata.MarkedColumn))) continue;
-                        }
-                        iTotal++;
-                        lValues.Add(speakableValue(sHeader));
-                    }
-                    catch { lValues.Add("(error)"); }
-                }
-            }
-            finally
-            {
-                if (oOriginal != null) try { db.bookmark = oOriginal; } catch { }
-            }
-            if (iTotal == 0)
+            // No cap: every value from the cursor down is spoken. ONE RECORD AT A TIME (18 November 2026): the values
+            // are read from the table only as the reader needs them, so a table of 38,000 records starts speaking at
+            // once instead of leaving DbDo Not Responding while every value is gathered first.
+            if (!anyRecordFrom(iStart, bMarkedOnly))
             {
                 string sNone = bFromCurrent
                     ? (bMarkedOnly ? "No marked records from here." : "No records from here.")
@@ -18733,12 +18728,13 @@ namespace DbDo
             // Header lead-in, then each value as its own queued message
             // so the column reads as a paced sequence rather than a
             // run-on string.
-            string sScope = (bFromCurrent ? "from current" : "all") + (bMarkedOnly ? " marked" : "");
-            string sCmd = "Say Column " + (bFromCurrent ? "from Current" : "All") + (bMarkedOnly ? " Marked" : "");
-            List<string> lParts = new List<string>();
-            lParts.Add(sHeader + " (" + sScope + ")");
-            lParts.AddRange(lValues);
-            speakOrShowParts(sCmd, lParts, bMarkedOnly ? 112 : 111);
+            // READ, NOT SAID (17 November 2026): the header, then each value its own utterance through Homer.ReadAloud,
+            // which a key stops. Empty values are skipped, as in a list view, rather than said as "blank".
+            List<string> lCols = new List<string>();
+            lCols.Add(sHeader);
+            IEnumerable<string> lParts = readingParts(sHeader, lCols, iStart, bMarkedOnly);
+            string sCmd = "Say Column as List" + (bFromCurrent ? " from Current" : "") + (bMarkedOnly ? (bFromCurrent ? " Marked" : " of Marked") : "");
+            Homer.ReadAloud.start(sCmd, lParts, null);
         }
 
         // saySayRows: Shift+V. Speak every visible row in full -- each
@@ -18759,85 +18755,49 @@ namespace DbDo
             return string.IsNullOrEmpty(sVal) ? "blank" : sVal;
         }
 
-        // saySayMarkedRows: Shift+Space. Speak every marked row in the
-        // recordset, scanning from the FIRST row down (unlike Say Records
-        // Rest Marked, which starts at the cursor). Each row reads
-        // "Row N -- col1: val1; col2: val2; ..." with null/blank for SQL
-        // NULL / empty values. The cursor position is saved and restored,
-        // so the command never moves the user. Single press speaks the
-        // rows as a paced sequence; double press shows them in the
-        // read-only review dialog.
-        private void saySayMarkedRows(object sender, EventArgs evArgs)
+        // THE READ LIST FAMILY (17 November 2026). Alt+L, Alt+Shift+L (or Shift+Space), Control+L and Control+Shift+L
+        // read the records in view -- from the first or from the current one, all or only the marked -- every shown
+        // column, each value its own utterance through Homer.ReadAloud, so the reader pauses between values and
+        // between records, and any key stops it (Control silences JAWS or NVDA at once). Empty values are skipped, as
+        // a list view skips them. The cursor does not move. A second press stops the reading and shows the records in
+        // a window, one record a line, each value after its column's name.
+        private void readListAll(object sender, EventArgs evArgs) { readList(false, false); }
+        private void readListAllMarked(object sender, EventArgs evArgs) { readList(true, false); }
+        private void readListCurrent(object sender, EventArgs evArgs) { readList(false, true); }
+        private void readListCurrentMarked(object sender, EventArgs evArgs) { readList(true, true); }
+
+        private void readList(bool bMarkedOnly, bool bFromCurrent)
         {
+            string sCmd = "Read List" + (bFromCurrent ? " from Current" : "") + (bMarkedOnly ? (bFromCurrent ? " Marked" : " of Marked") : "");
+            bool bShow = Homer.KeyMap.iPressCount == 2;
+            if (bShow) Homer.ReadAloud.stop(true);
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("marked records: no record selected"); return; }
-            if (!db.hasField(Metadata.MarkedColumn))
+            { Say.say("records: none in view"); return; }
+            if (bMarkedOnly && !db.hasField(Metadata.MarkedColumn))
             { Say.say("marked records: this table has no marked field"); return; }
             List<string> lDispCols = db.getDisplayFieldNames();
             if (lDispCols.Count == 0)
-            { Say.say("marked records: no columns shown"); return; }
+            { Say.say("records: no columns shown"); return; }
+            int iStart = bFromCurrent ? ((iVirtualRow >= 1) ? iVirtualRow : 1) : 1;
+            if (!bShow)
+            {
+                // ONE RECORD AT A TIME (18 November 2026), as Say Column as List reads: the values are drawn from the
+                // table only as the reader needs them, so a long table starts speaking at once.
+                if (!anyRecordFrom(iStart, bMarkedOnly))
+                {
+                    Say.say(bMarkedOnly ? (bFromCurrent ? "marked records: none from here" : "marked records: none")
+                                        : "records: none from here");
+                    return;
+                }
+                Homer.ReadAloud.start(sCmd, readingParts(null, lDispCols, iStart, bMarkedOnly),
+                    delegate(int iSentParts, bool bStopped) { DbDoLog.write(sCmd + ": " + iSentParts + " values read" + (bStopped ? ", then a key stopped it" : "")); });
+                return;
+            }
             object oOriginal = null;
             try { oOriginal = db.bookmark; } catch { }
             List<string> lParts = new List<string>();
-            try
-            {
-                for (int i = 1; i <= db.recordCount; i++)
-                {
-                    try
-                    {
-                        db.absolutePosition = i;
-                        if (!isMarkedTrue(db.getScreenValue(Metadata.MarkedColumn))) continue;
-                        StringBuilder sbRow = new StringBuilder();
-                        sbRow.Append("Row ").Append(i).Append(" -- ");
-                        for (int j = 0; j < lDispCols.Count; j++)
-                        {
-                            if (j > 0) sbRow.Append("; ");
-                            sbRow.Append(lDispCols[j]).Append(": ").Append(speakableValue(lDispCols[j]));
-                        }
-                        lParts.Add(sbRow.ToString());
-                    }
-                    catch { lParts.Add("(error)"); }
-                }
-            }
-            finally
-            {
-                if (oOriginal != null) try { db.bookmark = oOriginal; } catch { }
-            }
-            if (lParts.Count == 0)
-            { Say.say("marked records: none"); return; }
-            speakOrShowParts("Say Marked Records", lParts, 128);
-        }
-
-        private void saySayRows(object sender, EventArgs evArgs)
-        {
-            saySayRowsCommon(false);
-        }
-
-        // saySayRowsMarked: Shift+X. Like saySayRows but only marked.
-        private void saySayRowsMarked(object sender, EventArgs evArgs)
-        {
-            saySayRowsCommon(true);
-        }
-
-        private void saySayRowsCommon(bool bMarkedOnly)
-        {
-            if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("No row selected"); return; }
-            if (bMarkedOnly && !db.hasField(Metadata.MarkedColumn))
-            { Say.say("This table has no marked column"); return; }
-
-            List<string> lDispCols = db.getDisplayFieldNames();
-            if (lDispCols.Count == 0)
-            { Say.say("No columns visible"); return; }
-            // v1.0.99: start at the current row (the "Rest" in the
-            // command name). Renamed from Say Rows to Say Records Rest
-            // for consistency with the rest of DbDo's entity vocabulary.
-            int iStart = (iVirtualRow >= 1) ? iVirtualRow : 1;
-            object oOriginal = null;
-            try { oOriginal = db.bookmark; } catch { }
-            // No cap: every row from the cursor down is spoken.
-            List<string> lRows = new List<string>();
-            int iTotal = 0;
+            List<string> lLines = new List<string>();
+            int iRecords = 0;
             try
             {
                 for (int i = iStart; i <= db.recordCount; i++)
@@ -18845,39 +18805,99 @@ namespace DbDo
                     try
                     {
                         db.absolutePosition = i;
-                        if (bMarkedOnly)
+                        if (bMarkedOnly && !isMarkedTrue(db.getScreenValue(Metadata.MarkedColumn))) continue;
+                        iRecords++;
+                        StringBuilder sbLine = new StringBuilder();
+                        foreach (string sCol in lDispCols)
                         {
-                            if (!isMarkedTrue(db.getScreenValue(Metadata.MarkedColumn))) continue;
+                            if (db.isFieldNull(sCol)) continue;
+                            string sValue = db.getScreenValue(sCol);
+                            if (string.IsNullOrEmpty(sValue)) continue;
+                            lParts.Add(sValue);
+                            if (bShow) sbLine.Append(sbLine.Length > 0 ? "; " : "").Append(sCol).Append(": ").Append(sValue);
                         }
-                        iTotal++;
-                        StringBuilder sbRow = new StringBuilder();
-                        for (int j = 0; j < lDispCols.Count; j++)
-                        {
-                            if (j > 0) sbRow.Append("; ");
-                            sbRow.Append(lDispCols[j]).Append(": ").Append(speakableValue(lDispCols[j]));
-                        }
-                        lRows.Add(sbRow.ToString());
+                        if (bShow) lLines.Add(sbLine.ToString());
                     }
-                    catch { lRows.Add("(error)"); }
+                    catch (Exception ex) { DbDoLog.write(sCmd + ": record " + i + " could not be read: " + ex.Message); }
                 }
             }
             finally
             {
                 if (oOriginal != null) try { db.bookmark = oOriginal; } catch { }
             }
-            if (iTotal == 0)
+            if (iRecords == 0)
             {
-                Say.say(bMarkedOnly ? "No marked records from here." : "No records from here.");
+                Say.say(bMarkedOnly ? (bFromCurrent ? "marked records: none from here" : "marked records: none")
+                                    : "records: none from here");
                 return;
             }
-            // One queued message per row so the rows are spoken as a
-            // paced sequence with a natural pause between records.
-            List<string> lParts = new List<string>();
-            for (int i = 0; i < lRows.Count; i++)
-                lParts.Add("Row " + (iStart + i) + " -- " + lRows[i]);
-            speakOrShowParts(bMarkedOnly ? "Say Marked Records from Current" : "Say Records from Current",
-                lParts, bMarkedOnly ? 114 : 113);
+            DbDoLog.write(sCmd + ": " + iRecords + " records, " + lParts.Count + " values");
+            showInfoDialog(sCmd, string.Join(Environment.NewLine, lLines.ToArray()));
         }
+
+        // anyRecordFrom: whether a record from iStart on is in view (and marked, when bMarkedOnly), so a reading of
+        // none says so before it starts. It stops at the first one found; the cursor is put back.
+        private bool anyRecordFrom(int iStart, bool bMarkedOnly)
+        {
+            if (db == null || !db.hasRecordset() || iStart > db.recordCount) return false;
+            if (!bMarkedOnly) return true;
+            object oOriginal = null;
+            try { oOriginal = db.bookmark; } catch { }
+            try
+            {
+                for (int i = iStart; i <= db.recordCount; i++)
+                {
+                    try { db.absolutePosition = i; if (isMarkedTrue(db.getScreenValue(Metadata.MarkedColumn))) return true; }
+                    catch { }
+                }
+                return false;
+            }
+            finally
+            {
+                if (oOriginal != null) try { db.bookmark = oOriginal; } catch { }
+            }
+        }
+
+        // readingParts: what Homer.ReadAloud reads for Say Column as List and the Read List family -- sLead first
+        // when given, then each record's values in the columns lCols, from iStart down, only the marked when
+        // bMarkedOnly. It is lazy: each record is read when ReadAloud asks for more, and the cursor is put back after
+        // each, so the grid never shows a record the user did not move to.
+        private IEnumerable<string> readingParts(string sLead, List<string> lCols, int iStart, bool bMarkedOnly)
+        {
+            if (!string.IsNullOrEmpty(sLead)) yield return sLead;
+            for (int i = iStart; db != null && db.hasRecordset() && i <= db.recordCount; i++)
+            {
+                List<string> lValues = recordValues(i, lCols, bMarkedOnly);
+                foreach (string sValue in lValues) yield return sValue;
+            }
+        }
+
+        // recordValues: the values of record i in lCols that are not empty; none when it is unmarked and bMarkedOnly.
+        // The cursor is put back.
+        private List<string> recordValues(int i, List<string> lCols, bool bMarkedOnly)
+        {
+            List<string> lValues = new List<string>();
+            object oOriginal = null;
+            try { oOriginal = db.bookmark; } catch { }
+            try
+            {
+                db.absolutePosition = i;
+                if (bMarkedOnly && !isMarkedTrue(db.getScreenValue(Metadata.MarkedColumn))) return lValues;
+                foreach (string sCol in lCols)
+                {
+                    if (db.isFieldNull(sCol)) continue;
+                    string sValue = db.getScreenValue(sCol);
+                    if (!string.IsNullOrEmpty(sValue)) lValues.Add(sValue);
+                }
+            }
+            catch (Exception ex) { DbDoLog.write("reading: record " + i + " could not be read: " + ex.Message); }
+            finally
+            {
+                if (oOriginal != null) try { db.bookmark = oOriginal; } catch { }
+            }
+            return lValues;
+        }
+
 
         // saySayPosition: Alt+Delete. JAWS-style "say cursor position":
         // speaks the current virtual column's header followed by the
@@ -24593,8 +24613,7 @@ namespace DbDo
         // run.
         // THE SUITE'S MARKED OR CURRENT (17 November 2026), the kit's Lbc dialog that FileDir asks too: titled with the
         // command's name, "Marked records (7)" the default so Enter takes the batch, "Current record" or C the one record.
-        // It asks only when marked records are in view and the current one is not among them; a marked current record
-        // is one of the batch. Delete Record's own dialog had Current as its default, the opposite of FileDir's batch.
+        // It asks whenever marked records are in view, unless the one marked record is the current one. Delete Record's own dialog had Current as its default, the opposite of FileDir's batch.
         private ScopeChoice promptScope(string sCommandName)
         {
             int iMarked = countMarkedInFilter();
@@ -24602,8 +24621,10 @@ namespace DbDo
             bool bCurrentMarked = false;
             try { bCurrentMarked = db.hasField(Metadata.MarkedColumn) && isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn) ?? ""); }
             catch { bCurrentMarked = false; }
-            if (bCurrentMarked) return ScopeChoice.Marked;
-            string sAnswer = Homer.LbcAsk.markedOrCurrent(sCommandName, iMarked, "record", "records");
+            // ASKED WHENEVER ANY ARE MARKED (17 November 2026, evening), as in FileDir: only when the one marked
+            // record is the current one is there no question.
+            if (bCurrentMarked && iMarked == 1) return ScopeChoice.Marked;
+            string sAnswer = Homer.LbcAsk.markedOrCurrent(sCommandName, iMarked, "record", "records", bCurrentMarked);
             if (sAnswer == "marked") return ScopeChoice.Marked;
             if (sAnswer == "current") return ScopeChoice.Current;
             return ScopeChoice.Cancel;
@@ -31383,7 +31404,7 @@ namespace DbDo
             if (!Homer.Ollama.isRunning())
             {
                 showInfoDialog(sTitle, "Ollama is not running on this computer, so there is nothing to ask."
-                    + "\r\n\r\nTo add it, run installOllama.cmd in the DbDo folder, or install DbDo again and tick the Ollama box."
+                    + "\r\n\r\nTo add it, run installOllama.cmd in the DbDo folder, or install DbDo again and mark the Ollama box."
                     + "\r\n\r\nOllama is shared with EdSharp and FileDir, so if you have it for one of those it is already here.");
                 return;
             }

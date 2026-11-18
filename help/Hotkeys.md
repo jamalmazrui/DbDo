@@ -345,6 +345,18 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 
 Shift and a letter asks. Nothing here changes anything; each answers a question about where you are, in one short line.
 
+- Read List\
+  Read the records in view from the first, value by value. L for List.\
+  Alt+L
+- Read List from Current\
+  Read the records in view from the current one on, value by value. L for List.\
+  Control+L
+- Read List from Current Marked\
+  Read the marked records in view from the current one on, value by value. L for List.\
+  Control+Shift+L
+- Read List of Marked\
+  Read the marked records in view from the first, value by value. L for List.\
+  Alt+Shift+L
 - Say Added\
   A for Added.\
   Shift+A
@@ -357,18 +369,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Clipboard\
   Speak the current Windows clipboard text. The apostrophe is a quotation mark, and the clipboard is what you last quoted.\
   Alt+Apostrophe
-- Say Column as List\
-  Speak every value of the current virtual column, from the top. L for List.\
-  Alt+L
-- Say Column as List from Current\
-  Say the column's values from the current record down. L for List.\
-  Control+L
-- Say Column as List from Current Marked\
-  Say the column's values for marked records from the current record down. L for List.\
-  Control+Shift+L
-- Say Column as List of Marked\
-  Speak the current virtual column for marked rows only, from the top. L for List.\
-  Alt+Shift+L
 - Say Database\
   Say the database's name and folder. D for Database.\
   Shift+D
@@ -401,12 +401,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Marked\
   M for Marked.\
   Shift+M
-- Say Marked Records\
-  Speak every marked record in full, from the first record down (all displayed columns). Space marks in a list; Shift and Space asks how many are marked.\
-  Shift+Space
-- Say Marked Records from Current\
-  Speak every marked record in full, from the current record down. M for Marked.\
-  Alt+Shift+M
 - Say Notes\
   Say the record's notes. N for Notes.\
   Shift+N
@@ -508,8 +502,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+I\
   Inspect Record
 - Alt+L\
-  Speak every value of the current virtual column, from the top.\
-  Say Column as List
+  Read the records in view from the first, value by value.\
+  Read List
 - Alt+LeftArrow\
   Return from a child drill-down to the parent table.\
   Exit Child Table
@@ -556,11 +550,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Make a report from the records in the grid.\
   Generate from Grid
 - Alt+Shift+L\
-  Speak the current virtual column for marked rows only, from the top.\
-  Say Column as List of Marked
-- Alt+Shift+M\
-  Speak every marked record in full, from the current record down.\
-  Say Marked Records from Current
+  Read the marked records in view from the first, value by value.\
+  Read List of Marked
 - Alt+Shift+N\
   Edit Notes
 - Alt+Shift+O\
@@ -621,8 +612,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Go to the next record whose fields hold the keywords.\
   Keywords
 - Control+L\
-  Say the column's values from the current record down.\
-  Say Column as List from Current
+  Read the records in view from the current one on, value by value.\
+  Read List from Current
 - Control+M\
   Set the 'marked' flag on the current row.\
   Mark Record
@@ -689,8 +680,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Go to the previous record whose fields hold the keywords.\
   Reverse Keywords
 - Control+Shift+L\
-  Say the column's values for marked records from the current record down.\
-  Say Column as List from Current Marked
+  Read the marked records in view from the current one on, value by value.\
+  Read List from Current Marked
 - Control+Shift+M\
   Clear the 'marked' flag on the current row.\
   Unmark Record
@@ -855,9 +846,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Say Replace Values
 - Shift+S\
   Say Select Columns
-- Shift+Space\
-  Speak every marked record in full, from the first record down (all displayed columns).\
-  Say Marked Records
 - Shift+T\
   Say the record's tags.\
   Say Tags
@@ -1079,6 +1067,18 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Control+Q
 - Query History\
   Alt+Shift+Q
+- Read List\
+  Read the records in view from the first, value by value.\
+  Alt+L
+- Read List from Current\
+  Read the records in view from the current one on, value by value.\
+  Control+L
+- Read List from Current Marked\
+  Read the marked records in view from the current one on, value by value.\
+  Control+Shift+L
+- Read List of Marked\
+  Read the marked records in view from the first, value by value.\
+  Alt+Shift+L
 - Read Only Toggle\
   Flip the database between read-write and read-only at runtime.\
   Control+Shift+Z
@@ -1134,18 +1134,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Clipboard\
   Speak the current Windows clipboard text.\
   Alt+Apostrophe
-- Say Column as List\
-  Speak every value of the current virtual column, from the top.\
-  Alt+L
-- Say Column as List from Current\
-  Say the column's values from the current record down.\
-  Control+L
-- Say Column as List from Current Marked\
-  Say the column's values for marked records from the current record down.\
-  Control+Shift+L
-- Say Column as List of Marked\
-  Speak the current virtual column for marked rows only, from the top.\
-  Alt+Shift+L
 - Say Database\
   Say the database's name and folder.\
   Shift+D
@@ -1173,12 +1161,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Shift+L
 - Say Marked\
   Shift+M
-- Say Marked Records\
-  Speak every marked record in full, from the first record down (all displayed columns).\
-  Shift+Space
-- Say Marked Records from Current\
-  Speak every marked record in full, from the current record down.\
-  Alt+Shift+M
 - Say Notes\
   Say the record's notes.\
   Shift+N
