@@ -5,6 +5,12 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 19 November 2026 -- DescribedFilms, English movies with audio description
+
+- **A new template, DescribedFilms,** holds the English movies in the Film and Series Title Directory of the Audio Description Project, run by the American Council of the Blind: about 10,000 movies available in the United States with audio description, documentaries included and series left out. DbDo opens it on films, where each row says the title, the year and the services that carry it. Alt+Right goes to the film's offers, one a service, with its terms (buy, rent, free with Prime and the like), whether ADP marks the description as text-to-speech, and a link that Control+Shift+U opens. Free-To-Watch, Documentaries, Newest and Services-Count come with it, and the watch_list report writes up the films you mark.
+- **scripts\makeDescribedFilms** builds it from ADP's directory, about two hundred pages in five minutes, and the build runs it when the database is missing. `--from <folder>` builds from pages already saved, fetching nothing.
+- **Tutorial 7** introduces it in a sentence.
+
 ## 18 November 2026 -- Updates are called updates
 
 - **The installer calls an update an update.** It looked for the version already installed under its AppId with a doubled brace, which Inno writes with one, so it never found it and said "Installed" on the welcome page and in the Results box for every update. It now asks the kit's homerPriorVersion, which finds it.

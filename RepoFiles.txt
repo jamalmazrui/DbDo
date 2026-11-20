@@ -84,6 +84,8 @@ scripts/measureSqlite.cmd
 scripts/measureSqlite.py
 scripts/makeBlindSkills.cmd
 scripts/makeBlindSkills.py
+scripts/makeDescribedFilms.cmd
+scripts/makeDescribedFilms.py
 scripts/makeMusicTrail.cmd
 scripts/makeMusicTrail.py
 scripts/makeTechTraining.cmd
@@ -114,6 +116,7 @@ scripts/uiCheck.py
 scripts/unpushed.cmd
 scripts/unpushed.py
 templates/
+templates/DescribedFilms/DescribedFilms.db
 templates/RadioTrail/RadioTrail.db
 THIRD-PARTY-NOTICES.txt
 uiTest.inix

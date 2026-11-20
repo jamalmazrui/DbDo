@@ -119,6 +119,19 @@ zip = The postal code of the address.
 name = The group's name, such as Family, Work or Book Club.
 summary = What the group is for, in a sentence or two.
 
+[DescribedFilms/films]
+genres = The kinds of film it is, as ADP lists them, such as Comedy, Documentary or Western; F4 offers each one.
+rating = Its age rating, such as PG-13, R or TV-MA; F4 offers the choices.
+services = The services that carry it with audio description, in ADP's order; Alt+Right lists each one's terms and link.
+title = The film's title, as ADP's directory gives it.
+year = The year the film was released.
+
+[DescribedFilms/offers]
+film_id = The film this offer is for, by its number in films; DbDo says its title and year.
+service = The service that carries the film with audio description, such as Netflix or Prime Video; F4 offers the choices.
+terms = What watching it takes there, as ADP notes it, such as Buy, Rent, Free with Prime or Channel Subscription Required.
+voice = Synthetic when ADP marks the description as text-to-speech; empty when it marks no synthetic voice.
+
 [JobTrail/actions]
 accommodation = Any disability accommodation asked for or given at this step.
 action_date = When the step happened, or is planned, as year-month-day.
@@ -405,6 +418,8 @@ BlindCreations/books = Books written by blind authors, with where to read each o
 BlindCreations/creators = Blind authors, developers and presenters, and what each one makes.
 BlindCreations/presentations = Talks, webinars and podcast episodes given by blind presenters.
 BlindSkills/lessons = Lessons that teach the skills of blindness, such as cane travel, braille and cooking.
+DescribedFilms/films = English movies with audio description in the United States, from ACB's Audio Description Project.
+DescribedFilms/offers = Where each film can be watched with audio description: one service, its terms and a link.
 BookTrail/books = The books you want to read, are reading or have read, with your notes on each.
 ContactTrail/contacts = The people you keep in touch with, with their addresses, phones and emails.
 ContactTrail/groups = Groups of contacts, such as Family or Work, that a contact can belong to.
@@ -497,6 +512,11 @@ chinook/media_types/name = ^\s*\S[\s\S]*$
 chinook/media_types/url = ^$|^https?://\S+$
 chinook/tracks/name = ^\s*\S[\s\S]*$
 chinook/tracks/url = ^$|^https?://\S+$
+DescribedFilms/films/title = ^\s*\S[\s\S]*$
+DescribedFilms/films/url = ^$|^https?://\S+$
+DescribedFilms/films/year = ^$|^[0-9]{4}$
+DescribedFilms/offers/url = ^$|^https?://\S+$
+DescribedFilms/offers/voice = ^$|^synthetic$
 ContactTrail/contacts/business_email = ^$|^[^@\s]+@[^@\s]+\.[^@\s]+$
 ContactTrail/contacts/home_phone = ^$|^[0-9+()\-. /x]{7,}$
 ContactTrail/contacts/office_phone = ^$|^[0-9+()\-. /x]{7,}$
@@ -561,6 +581,7 @@ BlindSkills = Lessons that teach the skills of blindness, gathered from many pub
 BookTrail = A reading log: books to read, being read and read, with notes on each.
 chinook = Chinook, a sample music store database for practicing queries.
 ContactTrail = An address book of people and the groups they belong to.
+DescribedFilms = English movies with audio description in the United States, and where to watch each one.
 JobTrail = A job search: the jobs, the people, each step taken, documents and interview stories.
 MusicTrail = Albums and performers worth hearing.
 northwind = Northwind, a sample trading company database for practicing queries.

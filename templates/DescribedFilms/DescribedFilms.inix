@@ -1,0 +1,44 @@
+﻿; DescribedFilms.inix -- how this database opens, and how its tables are heard.
+;
+; ABOUT 10,000 ENGLISH MOVIES WITH AUDIO DESCRIPTION, from the Film and Series Title Directory of the American Council
+; of the Blind's Audio Description Project (adp.acb.org): every movie it lists as available in the United States with
+; English description, documentaries included and series left out. Each comes with its year, rating and genres, and
+; the services that carry it.
+;
+; FIND ONE. The row speaks title, year and services: what it is, and where to watch it. Filter Records (Control+F) on
+; services finds every film on one service, and on genres every documentary, comedy or western; F4 offers the values.
+; Control+Shift+U opens the film's IMDb page.
+;
+; WATCH ONE. Alt+Right goes to the film's offers: one row a service, with its terms (buy, rent, free with Prime, a
+; channel subscription) and its voice, which says "synthetic" when ADP marks the description as text-to-speech.
+; Control+Shift+U on an offer opens the film on that service. Free-To-Watch lists the films free with a subscription
+; or ads; Documentaries and Newest do what they say; Services-Count counts the films each service carries. The
+; watch_list report writes up the marked films, to keep or print. Three come marked, to show how.
+;
+; scripts\makeDescribedFilms in DbDo's development folder rebuilds this file from the directory; the build runs it
+; when the database is missing.
+;
+; Look is each table's default columns and prime its default order (5 November 2026); a table's saved columns, order
+; and filter are written here only when a person chooses them.
+; [Database] decides which table the window starts on. [Table:<name>] decides which fields the row speaks, in what
+; order, and how the rows are sorted. DbDo writes these keys back whenever you change the columns, the sort or the
+; filter.
+
+[Database]
+
+InitialTable = films
+
+[Table:films]
+
+; SelectFields, 19 November 2026: the services follow the title and year, since where to watch it is the question.
+SelectFields = title, year, services
+
+[Table:offers]
+
+; SelectFields, 19 November 2026: the film first, which look leaves out because it is a link; DbDo says its title and year.
+SelectFields = film_id, service, terms, voice
+
+[Table:defs]
+
+
+[Table:maps]

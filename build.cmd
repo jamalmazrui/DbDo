@@ -326,6 +326,21 @@ if exist "!sHere!templates\RadioTrail\fetchStations.py" if exist "!sHere!templat
   python "!sHere!templates\RadioTrail\fetchStations.py" --conventions "!sHere!templates\RadioTrail\RadioTrail.db" >> "!log!" 2>&1
   echo RadioTrail conventions: exit code !errorlevel!>> "!log!"
 )
+rem DESCRIBEDFILMS IS FETCHED WHEN MISSING (19 November 2026). Its English movies come from the Audio
+rem Description Project's title directory at adp.acb.org, about two hundred pages fetched one a second, so the
+rem database is made here the first time and kept after that. scripts\makeDescribedFilms rebuilds it by hand.
+rem A failed fetch stops the build, since a template without its database would ship broken.
+if exist "!sHere!scripts\makeDescribedFilms.py" if not exist "!sHere!templates\DescribedFilms\DescribedFilms.db" (
+  echo DescribedFilms.db is missing, so the Audio Description Project's directory of English movies is being fetched. This takes about five minutes.
+  echo DescribedFilms: no database; python scripts\makeDescribedFilms.py >> "!log!"
+  python "!sHere!scripts\makeDescribedFilms.py"
+  set "iFilms=!errorlevel!"
+  echo DescribedFilms fetch: exit code !iFilms!>> "!log!"
+  if not "!iFilms!"=="0" (
+    echo makeDescribedFilms failed. Its log is in logs, named DbDo-makeDescribedFilms with the date and time.
+    popd & exit /b 1
+  )
+)
 rem THE DIRECTORY TEMPLATES FOLLOW THEIR PAGES (15 October 2026). BlindSkills and
 rem BlindCreations are made from Jamal Mazrui's directories in MyPages, by
 rem scripts\makeBlindSkills and scripts\buildBlindCreations. Run by hand, a rebuild

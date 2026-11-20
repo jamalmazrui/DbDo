@@ -1119,6 +1119,7 @@ conference, HomerDev's convention-database skill builds one afresh from its agen
 - **MusicTrail** -- 100 great albums and 200 great musicians across ten genres, from two books by DbDo's author, with who recorded what and who played in which band
 - **RadioTrail** -- Internet radio, some 55,000 working stations, with a script that refreshes the catalog
 - **TechTraining** -- about 1,170 free presentations on technology and accessibility, from the Tech Training directory, each with its year, length, description and source. Play Media (Alt+Shift+P) plays the presentation itself, and marked ones play as a list; Quick-Lessons finds the ones of fifteen minutes or less.
+- **DescribedFilms** -- about 10,000 English movies with audio description in the United States, documentaries included, from the Audio Description Project of the American Council of the Blind. Each film has its year, rating, genres and the services that carry it, and Alt+Right lists each service's terms and link. Free-To-Watch finds the ones free with a subscription or ads.
 - **BlindSkills** -- 84 free videos and podcast episodes that teach blindness skills, from the Blind Skills directory: cane travel, guiding, braille, cooking, dressing, labeling, money, crafts and more, in twelve skill groups, each lesson with the task it teaches. Play Media (Alt+Shift+P) plays a lesson and marked ones play as a list; none come marked. Control+Enter on transcript_url opens a transcript. Skill-Index lists lessons by task, With-Transcripts those you can read, and the skills_handbook report writes up the whole set by group. scripts\checkBlindSkillsMedia, in DbDo's development folder, asks every lesson for the start of its stream, with no sign-in, as an anonymous player would, and writes a play list of those that answer with audio or video.
 - **RecipeTrail** -- recipes, their ingredients and the amounts each needs. Mark the recipes you mean to cook, and Shopping-List gives what to buy, aisle by aisle, with the amount each recipe needs; Quick-Meals finds dinner in half an hour.
 
@@ -1151,6 +1152,29 @@ presentation on its publisher's site -- opens in your browser with Control+Enter
 its url. Control+Enter on **source_url** opens the publisher's page about it, and
 **resources** lists any slides, transcripts or handouts. Filter on **category**
 to stay in one topic; its pick list gives each category's definition.
+
+#### DescribedFilms says where to watch
+
+**DescribedFilms** holds the English movies in the Film and Series Title Directory
+of the Audio Description Project (ADP), run by the American Council of the Blind:
+every movie ADP lists as available in the United States with audio description.
+Documentaries are in, since ADP files them as movies; series are not. DbDo opens on
+**films**, and each row says the title, the year and the **services** that carry
+it, so Filter Records on services finds every film on one service, and on
+**genres** every documentary, comedy or western. Control+Shift+U opens the film's
+IMDb page.
+
+Alt+Right goes to the film's **offers**, one row a service. **terms** says what
+watching it takes there, as ADP notes it: buy, rent, free with Prime, free with
+ads, or a channel subscription. **voice** says "synthetic" when ADP marks the
+description as text-to-speech, for people who would rather hear a human narrator.
+Control+Shift+U on an offer opens the film on that service. Four scripts come with
+it: Free-To-Watch, Documentaries, Newest, and Services-Count, which counts the films
+each service carries. The watch_list report writes up the films you have marked.
+
+The database is made from ADP's directory by **`scripts\makeDescribedFilms`** in
+DbDo's development folder, which fetches its pages, fifty movies to a page, in
+about five minutes. The build runs it when the database is missing.
 
 #### RadioTrail plays Internet radio
 

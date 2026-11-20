@@ -2861,6 +2861,12 @@ technology and accessibility, from the Tech Training directory, each
 with its year, length, description and source. Play Media (Alt+Shift+P)
 plays the presentation itself, and marked ones play as a list;
 Quick-Lessons finds the ones of fifteen minutes or less.</li>
+<li><strong>DescribedFilms</strong> – about 10,000 English movies with
+audio description in the United States, documentaries included, from the
+Audio Description Project of the American Council of the Blind. Each
+film has its year, rating, genres and the services that carry it, and
+Alt+Right lists each service’s terms and link. Free-To-Watch finds the
+ones free with a subscription or ads.</li>
 <li><strong>BlindSkills</strong> – 84 free videos and podcast episodes
 that teach blindness skills, from the Blind Skills directory: cane
 travel, guiding, braille, cooking, dressing, labeling, money, crafts and
@@ -2910,6 +2916,31 @@ opens the publisher’s page about it, and <strong>resources</strong>
 lists any slides, transcripts or handouts. Filter on
 <strong>category</strong> to stay in one topic; its pick list gives each
 category’s definition.</p>
+<h4 id="describedfilms-says-where-to-watch">DescribedFilms says where to
+watch</h4>
+<p><strong>DescribedFilms</strong> holds the English movies in the Film
+and Series Title Directory of the Audio Description Project (ADP), run
+by the American Council of the Blind: every movie ADP lists as available
+in the United States with audio description. Documentaries are in, since
+ADP files them as movies; series are not. DbDo opens on
+<strong>films</strong>, and each row says the title, the year and the
+<strong>services</strong> that carry it, so Filter Records on services
+finds every film on one service, and on <strong>genres</strong> every
+documentary, comedy or western. Control+Shift+U opens the film’s IMDb
+page.</p>
+<p>Alt+Right goes to the film’s <strong>offers</strong>, one row a
+service. <strong>terms</strong> says what watching it takes there, as
+ADP notes it: buy, rent, free with Prime, free with ads, or a channel
+subscription. <strong>voice</strong> says “synthetic” when ADP marks the
+description as text-to-speech, for people who would rather hear a human
+narrator. Control+Shift+U on an offer opens the film on that service.
+Four scripts come with it: Free-To-Watch, Documentaries, Newest, and
+Services-Count, which counts the films each service carries. The
+watch_list report writes up the films you have marked.</p>
+<p>The database is made from ADP’s directory by
+<strong><code>scripts\makeDescribedFilms</code></strong> in DbDo’s
+development folder, which fetches its pages, fifty movies to a page, in
+about five minutes. The build runs it when the database is missing.</p>
 <h4 id="radiotrail-plays-internet-radio">RadioTrail plays Internet
 radio</h4>
 <p>Fourteen stations are in the template to start. To build the real

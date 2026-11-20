@@ -2426,7 +2426,7 @@ Screen reader:
 
 ## 7 - More Templates
 
-Four more ready-made databases in brief -- a lesson to play from TechTraining, a creator and their work in BlindCreations, the emergency list in ContactTrail, a shopping list from RecipeTrail -- and how to bring your copy of any template up to date when DbDo improves it.
+Five more ready-made databases in brief -- a lesson to play from TechTraining, a creator and their work in BlindCreations, a described movie in DescribedFilms, the emergency list in ContactTrail, a shopping list from RecipeTrail -- and how to bring your copy of any template up to date when DbDo improves it.
 
 **Before you start:** DbDo is open.
 
@@ -2496,17 +2496,21 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 8
 
-Alt plus Right Arrow goes into any of them, as with the band in MusicTrail. Escape. ContactTrail keeps people and the groups they belong to. Its Emergency Contacts script lists everyone in the Emergency group, with every number.
+Alt plus Right Arrow goes into any of them, as with the band in MusicTrail. Escape. DescribedFilms lists about ten thousand English movies with audio description, from the American Council of the Blind's Audio Description Project. Each row says the title, the year and the services that carry it, and Alt plus Right Arrow lists each service's terms and link.
 
 ### Step 9
 
-RecipeTrail keeps recipes and their ingredients. Mark the recipes you mean to cook with Control plus M, then its Shopping List script lists each ingredient once, grouped by where it sits in the store.
+ContactTrail keeps people and the groups they belong to. Its Emergency Contacts script lists everyone in the Emergency group, with every number.
 
 ### Step 10
 
+RecipeTrail keeps recipes and their ingredients. Mark the recipes you mean to cook with Control plus M, then its Shopping List script lists each ingredient once, grouped by where it sits in the store.
+
+### Step 11
+
 Now the copies. The first time you open a template, DbDo gives you your own copy, so nothing you change touches the original. When a new DbDo brings an improved template, more stations or a new script, your copy stays as you left it.
 
-### Step 11: U
+### Step 12: U
 
 To take the improvements, open your copy, and from the Help menu choose Update from Template. Alt plus H, then U.
 
@@ -2517,7 +2521,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 12: Tab
+### Step 13: Tab
 
 Two buttons. Merge adds what the template has and your copy lacks, and keeps everything of yours; it asks first what to do about records both have, and Add new only, the first choice, changes none of yours.
 
@@ -2527,11 +2531,11 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 13
+### Step 14
 
 Replace makes your copy the template again, and keeps your copy as it was beside it, as a dated backup, so nothing is lost. Either way, a new script or report in the template is added beside your copy.
 
-### Step 14: Escape
+### Step 15: Escape
 
 A planned misstep: choosing Replace for a copy full of your own records. Merge is the first button, so Enter takes it; Escape leaves without a change.
 
@@ -2541,11 +2545,11 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 15
+### Step 16
 
 What this walk taught. I name the command; the reader gives the key.
 
-### Step 16
+### Step 17
 
 Run a saved script.
 
@@ -2553,7 +2557,7 @@ Screen reader:
 
 - Alt plus V
 
-### Step 17
+### Step 18
 
 Play the record.
 
@@ -2561,7 +2565,7 @@ Screen reader:
 
 - Control plus P
 
-### Step 18
+### Step 19
 
 Say what a record leads to.
 
@@ -2569,7 +2573,7 @@ Screen reader:
 
 - Shift plus R
 
-### Step 19
+### Step 20
 
 Update your copy from its template.
 

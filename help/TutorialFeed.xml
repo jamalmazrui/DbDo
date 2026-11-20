@@ -5,7 +5,7 @@
     <link>Tutorials.htm</link>
     <description>Spoken walks through DbDo, the database program built for working by ear, and the ready-made databases that come with it. Ten walks, each under five minutes, in the order a new person meets them.</description>
     <language>en-us</language>
-    <lastBuildDate>Wed, 18 Nov 2026 02:24:14 +0000</lastBuildDate>
+    <lastBuildDate>Fri, 20 Nov 2026 02:53:05 +0000</lastBuildDate>
     <itunes:author>Jamal Mazrui</itunes:author>
     <itunes:explicit>false</itunes:explicit>
     <itunes:category text="Technology"/>
@@ -78,8 +78,8 @@
       <description>DbDo is open. Full transcript: Tutorials.htm#0g-7-more-templates</description>
       <link>Tutorials.htm#0g-7-more-templates</link>
       <guid isPermaLink="false">homer-tutorial_7_more_templates</guid>
-      <enclosure url="tutorials/7_More_Templates.mp3" length="1252576" type="audio/mpeg"/>
-      <itunes:duration>00:02:59</itunes:duration>
+      <enclosure url="tutorials/7_More_Templates.mp3" length="1360358" type="audio/mpeg"/>
+      <itunes:duration>00:03:12</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>

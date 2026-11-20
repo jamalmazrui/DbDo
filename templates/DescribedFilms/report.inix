@@ -1,0 +1,29 @@
+﻿; Report definitions for the DescribedFilms database.
+;
+; Run them with Run Report (Alt+Shift+R). DbDo renders the chosen report and opens it in your editor, where it can be
+; read straight through or printed. Empty fields print nothing, because a field earns its line.
+
+FileTask = report
+
+; The films you have marked, as a list to watch.
+[watch_list]
+@table = films
+@filter = marked = 1
+@sort = title
+header = """
+# Watch List
+
+Prepared {{ new Date().toISOString().substring(0,10) }} from DescribedFilms, the Audio Description Project's directory.
+"""
+detail = """
+## $title
+
+{{ $year ? "- Year: " + $year : "" }}
+{{ $rating ? "- Rating: " + $rating : "" }}
+{{ $genres ? "- Genres: " + $genres : "" }}
+{{ $services ? "- Where: " + $services : "" }}
+{{ $url ? "- IMDb: " + $url : "" }}
+"""
+footer = """
+**$count {{ $count == 1 ? "film" : "films" }} to watch.**
+"""
