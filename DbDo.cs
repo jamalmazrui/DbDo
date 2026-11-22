@@ -13467,7 +13467,6 @@ namespace DbDo
         private ToolStripMenuItem miQuery;
         private ToolStripMenuItem miMisc;
         // Window menu (MDI window management), alphabetical.
-        private ToolStripMenuItem miWindow;
         private ToolStripMenuItem miWindowClose;
         private ToolStripMenuItem miWindowCloseAllBut;
         private ToolStripMenuItem miWindowCurrent;
@@ -13559,8 +13558,9 @@ namespace DbDo
             // FORMER NAMES (15 November 2026, the keyboard audit's A11): the commands renamed today keep their old names
             // findable -- the Alternate Menu ends each line with "Formerly <name>." -- through the kit's KeyMap.
             Homer.KeyMap.addFormerName("Copy Append", "Append Cell");
+            Homer.KeyMap.addFormerName("Generate Graphics", "Generate from Grid");
             Homer.KeyMap.addFormerName("Copy Append Record", "Append Record");
-            Homer.KeyMap.addFormerName("Read List of Marked", "Say Records of Marked");
+            Homer.KeyMap.addFormerName("Read Wide Marked", "Say Records of Marked");
             Homer.KeyMap.addFormerName("Say Marked Records from Current", "Say Records from Current Marked");
             Homer.KeyMap.addFormerName("Toggle Mark", "Marked Toggle");
             // THE SUITE'S NAMES (17 November 2026): EdSharp and HomerView say Forward and Reverse Find with Regex on
@@ -14414,6 +14414,18 @@ namespace DbDo
             miSchemaSwitchPrev  = addItem(miFile, "Previous Visited Table",     "Previous Visited Table", Keys.None,   schemaSwitchPrevClicked); miSchemaSwitchPrev.Visible = false;  // as Switch Table (5 November 2026)
             miSchemaSwitchAll     = addItem(miFile, "Next Table or View",     "Next Table or View",         Keys.Control | Keys.F6,            schemaSwitchAllClicked);
             miSchemaSwitchAllPrev = addItem(miFile, "Previous Table or View", "Previous Table or View", Keys.Control | Keys.Shift | Keys.F6, schemaSwitchAllPrevClicked);
+            // OPEN TABLE BESIDE CHOOSE TABLE (21 November 2026): Open makes a new window, Choose changes this one.
+            miWindowOpenTable     = addItem(miFile, "Open Table...",                 "Open Table",            Keys.Control | Keys.Shift | Keys.O,   windowOpenTableClicked);
+            addSep(miFile);
+            // NO WINDOW MENU (21 November 2026, Jamal's ruling): Alt+W reads wide, so the window commands live here, as
+            // in EdSharp and FileDir, before Exit. Every key is a function key, Tab or none, so none takes a letter.
+            miWindowCurrent       = addItem(miFile, "Current Windows...",            "Current Windows",       Keys.F4,                              windowCurrentClicked);
+            miWindowNext          = addItem(miFile, "Next Window",                   "Next Window",           Keys.Control | Keys.Tab,              windowNextClicked);
+            miWindowPrevious      = addItem(miFile, "Previous Window",               "Previous Window",       Keys.Control | Keys.Shift | Keys.Tab, windowPreviousClicked);
+            miWindowToggle        = addItem(miFile, "Window Toggle",                 "Window Toggle",         Keys.None,                            windowToggleClicked);
+            miWindowSayOpen       = addItem(miFile, "Say Windows Open",              "Say Windows Open",      Keys.Shift | Keys.F4,                 windowSayOpenClicked);
+            miWindowClose         = addItem(miFile, "Close Window",                  "Close Window",          Keys.Control | Keys.F4,               windowCloseClicked);
+            miWindowCloseAllBut   = addItem(miFile, "Close All but Current Window",  "Close All but Current Window", Keys.Control | Keys.Shift | Keys.F4, windowCloseAllButClicked);
             addSep(miFile);
             miFileExit    = addItem(miFile, "Exit DbDo",                "Exit DbDo", Keys.Alt | Keys.F4,                   fileExitClicked);
 
@@ -14429,7 +14441,7 @@ namespace DbDo
             // Record.
             miRecSetCell     = addItem(miEdit, "Edit Cell...",    "Edit Cell",            Keys.F2,                            recSetCellClicked);
             miRecRemove      = addItem(miEdit, "&Delete Record",      "Delete Record",       Keys.Control | Keys.D,              recRemoveClicked);
-            miRecRemoveForce = addItem(miEdit, "Delete Without Confirmation",            "Delete Without Confirmation",  Keys.Control | Keys.Shift | Keys.D, recRemoveForceClicked);
+            miRecRemoveForce = addItem(miEdit, "Delete without Confirmation",            "Delete without Confirmation",  Keys.Control | Keys.Shift | Keys.D, recRemoveForceClicked);
             miRecCopy        = addItem(miEdit, "&Copy Record", "Copy Record",         Keys.Control | Keys.Shift | Keys.C, recCopyClicked);
             // Copy Append Record: like Copy Record but adds to the
             // existing clipboard contents rather than replacing.
@@ -14490,9 +14502,12 @@ namespace DbDo
             // Two distinct anchors let the user
             // build a mark range and an unmark range without one
             // gesture clobbering the other.
-            miRecMarkAnchor      = addItem(miBulkMark, "Start Mark",                  "Start Mark",      Keys.F8,                            recMarkAnchorClicked);
+            // ONE START, AS IN FILEDIR (21 November 2026, key groups): F8 starts a range, and Shift+F8 or Alt+Shift+F8 completes it as a mark or an
+            // unmark. Start Unmark is retired into it, and Alt+F8 reads everything (Read Wide), as Read All does in EdSharp
+            // and HomerView.
+            miRecMarkAnchor      = addItem(miBulkMark, "Start Mark or Unmark",        "Start Mark or Unmark", Keys.F8,                       recMarkAnchorClicked);
             miRecMarkToAnchor    = addItem(miBulkMark, "Complete Mark",             "Complete Mark",          Keys.Shift | Keys.F8,               recMarkToAnchorClicked);
-            miRecUnmarkAnchor    = addItem(miBulkMark, "Start Unmark",                 "Start Unmark",    Keys.Alt | Keys.F8,                 recUnmarkAnchorClicked);
+            miRecUnmarkAnchor    = addItem(miBulkMark, "Start Unmark",                 "Start Unmark",    Keys.None,                          recUnmarkAnchorClicked); miRecUnmarkAnchor.Visible = false;
             miRecUnmarkToAnchor  = addItem(miBulkMark, "Complete Unmark",           "Complete Unmark",        Keys.Alt | Keys.Shift | Keys.F8,    recUnmarkToAnchorClicked);
             addSep(miEdit);
             // Bookmarks: the Set/Clear/Go-to Bookmark trio
@@ -14516,6 +14531,8 @@ namespace DbDo
             // of its own. No trigger letter, because Pick Value took P first.
             // CONTROL+P PLAYS (9 November 2026), as in Windows Media Player and the Windows 11 Media Player; it was Alt+Shift+P.
             miRecPlayStream  = addItem(miEdit, "Play Media",               "Play Media",         Keys.Control | Keys.P,              recPlayStreamClicked);
+            // RECORD PLAYBACK (21 November 2026, the AV group): Shift adds recording to Play Media, P for Playback.
+            addItem(miEdit, "Record Playback", "Record Playback", Keys.Control | Keys.Shift | Keys.P, recordPlaybackClicked);
             // Open Url: open the row's 'url' column with the system
             // default handler (browser, mail client, file opener).
             // Convenience chord for the most common Open-Cell case --
@@ -14544,7 +14561,12 @@ namespace DbDo
             miNavNext        = addItem(miNavigate, "&Next Record",                        "Next Record",     Keys.None,                          navNextClicked);
             miNavPrev        = addItem(miNavigate, "&Previous Record",                    "Previous Record", Keys.None,                          navPrevClicked);
             miRecGoTo        = addItem(miNavigate, "&Go to Record...",                    "Go to Record",         Keys.Control | Keys.G,              recGoToClicked);
-            miRecGoToRepeat  = addItem(miNavigate, "Repeat Go to",                       "Repeat Go to",  Keys.Alt | Keys.G,                  repeatGoToClicked);
+            // THE AGAIN GROUP (21 November 2026, key groups): Alt and a search's letter repeats that search, named "<command> Again", as Go to Percent
+            // Again and Jump to Line Again in EdSharp and Jump Again and Keywords Again in FileDir. Repeat Go to is Go to Record
+            // Again; Jump Again and Keywords Again are new here, so DbDo and FileDir share them.
+            miRecGoToRepeat  = addItem(miNavigate, "Go to Record Again",                 "Go to Record Again",  Keys.Alt | Keys.G,            repeatGoToClicked);
+            addItem(miNavigate, "Jump Again",     "Jump Again",     Keys.Alt | Keys.J, jumpAgainClicked);
+            addItem(miNavigate, "Keywords Again", "Keywords Again", Keys.Alt | Keys.K, keywordsAgainClicked);
             addSep(miNavigate);
             // Search families. Three distinct families with their
             // own chord pairs, plus a unified F3 / Shift+F3 "repeat
@@ -14652,14 +14674,23 @@ namespace DbDo
             // key stops it at once (Homer.ReadAloud). Alt = from the first record, Control = from the current one,
             // Shift = marked records only. The Say Column as List commands gave up these keys and stay on this menu:
             // a grid showing one column (Alt+S) reads that column the same way.
-            miReadList              = addItem(miSay, "Read &List",                    "Read List",                    Keys.Alt | Keys.L,                  readListAll);
-            miReadListMarked        = addItem(miSay, "Read List of Marked",           "Read List of Marked",          Keys.Alt | Keys.Shift | Keys.L,     readListAllMarked);
-            miReadListCurrent       = addItem(miSay, "Read List from Current",        "Read List from Current",       Keys.Control | Keys.L,              readListCurrent);
-            miReadListCurrentMarked = addItem(miSay, "Read List from Current Marked", "Read List from Current Marked", Keys.Control | Keys.Shift | Keys.L, readListCurrentMarked);
-            miSaySayColumnAll       = addItem(miSay, "Say Column as List",                    "Say Column as List",                    Keys.None, saySayColumnAll);
-            miSaySayColumnAllMarked = addItem(miSay, "Say Column as List of Marked",          "Say Column as List of Marked",          Keys.None, saySayColumnAllMarked);
-            miSaySayColumn          = addItem(miSay, "Say Column as List from Current",       "Say Column as List from Current",       Keys.None, saySayColumn);
-            miSaySayColumnMarked    = addItem(miSay, "Say Column as List from Current Marked","Say Column as List from Current Marked",Keys.None, saySayColumnMarked);
+            // WIDE AND LEAN (21 November 2026, Jamal's design). W for wide, the grid's width: every shown column of each
+            // record. L for lean, the current column only. W and L are the widest and narrowest letters, which helps the
+            // memory. Alt reads from the first record, Control from the current one, and Shift narrows either to the
+            // marked records. Alt, the speech modifier, holds the everyday form; Control holds the "from here" form.
+            // CONTROL+SHIFT IS NOT A READING KEY (21 November 2026, second round): the marked-from-current form of W, L
+            // and Y keeps no key, in DbDo and FileDir alike. Control+Shift+Y is Yield with Regex in every suite app,
+            // FileDir's Control+Shift+L is Play List, and Control+Shift with a letter is left for commands that change
+            // things. So each family is three keys: Alt, Alt+Shift, Control.
+            // Read Wide is the former Read List family, Read Lean the former Say Column as List family.
+            miReadList              = addItem(miSay, "Read &Wide",                     "Read Wide",                     Keys.Alt | Keys.W,                  readListAll);
+            miReadListMarked        = addItem(miSay, "Read Wide Marked",               "Read Wide Marked",              Keys.Alt | Keys.Shift | Keys.W,     readListAllMarked);
+            miReadListCurrent       = addItem(miSay, "Read Wide from Current",         "Read Wide from Current",        Keys.Control | Keys.W,              readListCurrent);
+            miReadListCurrentMarked = addItem(miSay, "Read Wide Marked from Current",  "Read Wide Marked from Current", Keys.None,                          readListCurrentMarked);
+            miSaySayColumnAll       = addItem(miSay, "Read &Lean",                     "Read Lean",                     Keys.Alt | Keys.L,                  saySayColumnAll);
+            miSaySayColumnAllMarked = addItem(miSay, "Read Lean Marked",               "Read Lean Marked",              Keys.Alt | Keys.Shift | Keys.L,     saySayColumnAllMarked);
+            miSaySayColumn          = addItem(miSay, "Read Lean from Current",         "Read Lean from Current",        Keys.Control | Keys.L,              saySayColumn);
+            miSaySayColumnMarked    = addItem(miSay, "Read Lean Marked from Current",  "Read Lean Marked from Current", Keys.None,                          saySayColumnMarked);
             // Say Records Rest gave up Alt+L to the Say Column All command
             // above; it remains on the menu (and the Alternate Menu) with
             // no chord for now. Say Marked Records from Current keeps Alt+Shift+M.
@@ -14672,9 +14703,17 @@ namespace DbDo
             // value. Shift+Space stays, as a second key for Read List of Marked; Alt+Shift+M is free. The old names
             // still find the new commands in the Alternate Menu.
             registerLocalAlias(Keys.Shift | Keys.Space, miReadListMarked);
-            Homer.KeyMap.addFormerName("Read List from Current", "Say Records from Current");
-            Homer.KeyMap.addFormerName("Read List from Current Marked", "Say Marked Records from Current");
-            Homer.KeyMap.addFormerName("Read List of Marked", "Say Marked Records");
+            registerLocalAlias(Keys.Alt | Keys.F8, miReadList);  // Alt+F8 reads everything, as Read All does in EdSharp and HomerView
+            Homer.KeyMap.addFormerName("Read Wide", "Read List");
+            Homer.KeyMap.addFormerName("Go to Record Again", "Repeat Go to");
+            Homer.KeyMap.addFormerName("Start Mark or Unmark", "Start Mark");
+            Homer.KeyMap.addFormerName("Read Wide Marked", "Read List of Marked");
+            Homer.KeyMap.addFormerName("Read Wide from Current", "Read List from Current");
+            Homer.KeyMap.addFormerName("Read Wide Marked from Current", "Read List from Current Marked");
+            Homer.KeyMap.addFormerName("Read Lean", "Say Column as List");
+            Homer.KeyMap.addFormerName("Read Lean Marked", "Say Column as List of Marked");
+            Homer.KeyMap.addFormerName("Read Lean from Current", "Say Column as List from Current");
+            Homer.KeyMap.addFormerName("Read Lean Marked from Current", "Say Column as List from Current Marked");
 
             // THE SAY LAYER ANSWERS FOR EVERY DIALOG THAT REMEMBERS AN ANSWER.
             //
@@ -14728,7 +14767,12 @@ namespace DbDo
             miSaySayClipboard    = addItem(miSay, "Say Clipboard", "Say Clipboard", Keys.Alt | Keys.OemQuotes,    saySayClipboard);
             // SAY TIME IS GONE (17 November 2026): JAWS+F12 and NVDA+F12 say the time, and pressed twice the date, in every program, so a Homer key for it only took Alt+Semicolon and a menu line.
             addItem(miSay, "Say Path",  "Say Path",  Keys.Alt | Keys.P,    saySayPath);
-            miSaySayYieldMarked  = addItem(miSay, "Say Yield Marked", "Say Yield Marked",  Keys.Shift | Keys.Y,               saySayYieldMarked);
+            // THE Y FAMILY (21 November 2026), as the W and L families: Alt+Y the records in view, Alt+Shift+Y the marked,
+            // Control+Y those from the current one on. Shift+Y is free.
+            miSaySayYieldMarked  = addItem(miSay, "Say Yield Marked", "Say Yield Marked",  Keys.Alt | Keys.Shift | Keys.Y,       saySayYieldMarked);
+            addItem(miSay, "Say Yield from Current",        "Say Yield from Current",        Keys.Control | Keys.Y,              saySayYieldFromCurrent);
+            // NO KEY (21 November 2026): Control+Shift+Y is Yield with Regex in every suite app, beside Extract and Replace.
+            addItem(miSay, "Say Yield Marked from Current", "Say Yield Marked from Current", Keys.None,                          saySayYieldMarkedFromCurrent);
             // v1.0.67 Say-X family completions. Each speaks one piece
             // of state without changing recordset position. The chord
             // family is Shift+Letter where Letter is the first letter
@@ -14747,7 +14791,9 @@ namespace DbDo
             miSaySayRelated      = addItem(miSay, "Say Related", "Say Related", Keys.None,           saySayRelated);
             miSaySayRelated.Visible = false;   // folded into Say Whole Record (Shift+W), 9 November 2026
             miSaySayUrl          = addItem(miSay, "Say &url",          "Say url",      Keys.Shift | Keys.U,                saySayUrl);
-            addItem(miSay, "Say &Whole Record", "Say Whole Record", Keys.Shift | Keys.W, saySayWholeRecord);
+            // NO ACCESS LETTER (22 November 2026): Read Wide took W in this menu on 21 November, and the house rule wants
+            // one item per letter; Say Whole Record keeps its key, Shift+W, and the other words' letters are taken.
+            addItem(miSay, "Say Whole Record", "Say Whole Record", Keys.Shift | Keys.W, saySayWholeRecord);
             addItem(miSay, "Say In&voke Script", "Say Invoke Script", Keys.Shift | Keys.V, saySayScript);
             // EVERY REMEMBERED INPUT HAS A KEY THAT SAYS IT.
             //
@@ -14791,7 +14837,8 @@ namespace DbDo
             // For descending, Reverse Order (Alt+Shift+O) follows.
             // ADD COLUMN TO ORDER (5 November 2026): Alt+A puts the column under the cursor at the front of the order,
             // ascending; Alt+Shift+A, descending. One menu, one letter: the second item gets none.
-            addItem(miQuery, "&Extract with Regex...", "Extract with Regex", Keys.Control | Keys.Shift | Keys.E, extractRegexClicked);  // the suite key, as in EdSharp and FileDir (5 November 2026)
+            addItem(miQuery, "&Extract with Regex...", "Extract with Regex", Keys.Control | Keys.Shift | Keys.E, extractRegexClicked);
+            addItem(miQuery, "Yield with Regex...", "Yield with Regex", Keys.Control | Keys.Shift | Keys.Y, yieldRegexClicked);  // 21 November 2026, as in EdSharp, FileDir and HomerView  // the suite key, as in EdSharp and FileDir (5 November 2026)
             addItem(miQuery, "&Add Column to Order",           "Add Column to Order",            Keys.Alt | Keys.A,              (o, e) => addColumnToOrder(false));
             addItem(miQuery, "Add Column to Order Descending", "Add Column to Order Descending", Keys.Alt | Keys.Shift | Keys.A, (o, e) => addColumnToOrder(true));
             // (Reverse Alpha Order on Alt+Shift+A was withdrawn the same day: Alt+A then Alt+Shift+O, Reverse Order, does it.)
@@ -14851,7 +14898,10 @@ namespace DbDo
             // Writes an .xlsx to the database folder and opens it in
             // Excel, same pattern as the Frequency Chart command.
             miPlotColumn = addItem(miMisc, "&Graphics Column...", "Graphics Column",         Keys.None, plotColumnClicked); miPlotColumn.Visible = false;  // in Generate from Grid, Excel chart (5 November 2026)
-            miToolsChart     = addItem(miMisc, "Generate from Grid...",  "Generate from Grid",       Keys.Alt | Keys.Shift | Keys.G,     generateFromGridClicked);
+            // GENERATE STATISTICS AND GENERATE GRAPHICS (21 November 2026): Generate from Grid split in two over one dataset
+            // dialog, at generateStatisticsClicked, which says why Alt+Shift and not Control+Shift.
+            miGenerateStatistics = addItem(miMisc, "Generate Statistics...", "Generate Statistics",  Keys.Alt | Keys.Shift | Keys.S,     generateStatisticsClicked);
+            miToolsChart     = addItem(miMisc, "Generate Graphics...",  "Generate Graphics",       Keys.Alt | Keys.Shift | Keys.G,     generateGraphicsClicked);
             // Extract Matches: walk every visible row, find every
             // regex match across every visible column, copy matches
             // to the clipboard. Alt+E ("E for Extract").
@@ -14871,7 +14921,7 @@ namespace DbDo
             // no free Camel-Type mnemonic letter in either label -- so
             // the user assigns chords from the Hotkey editor.
             miCopyColumn     = addItem(miMisc, "Copy Column",                  "Copy Column",        Keys.None,                          copyColumnClicked);
-            miCopyGrid       = addItem(miMisc, "Copy Grid",             "Copy Grid",          Keys.None,                          copyGridClicked);
+            miCopyGrid       = addItem(miMisc, "Copy Grid",             "Copy Grid",          Keys.Control | Keys.F8,             copyGridClicked);  // Control+F8 copies everything, as Copy All in EdSharp and HomerView (21 November 2026, key groups)
             miJumpNextInitial = addItem(miMisc, "&Jump to Next Initial...", "Jump to Next Initial", Keys.None,                         jumpNextInitialClicked);
             addSep(miMisc);
             addSep(miQuery);
@@ -14924,7 +14974,9 @@ namespace DbDo
             // a new one (via a "[New script...]" entry at the top of
             // the pick list).
             miMiscInvokeScript     = addItem(miTools, "In&voke Script...",                     "Invoke Script",     Keys.Alt | Keys.V,                  miscInvokeScriptClicked);  // Alt+V (9 November 2026); Shift+V says which script it would pick
-            miMiscEditScript       = addItem(miTools, "Edit &Script...",                       "Edit Script",       Keys.Alt | Keys.Shift | Keys.S,     miscEditScriptClicked);
+            // EDIT SCRIPT ON ALT+SHIFT+V (21 November 2026, key groups): the script group keeps V, Alt+V to invoke, Shift+V to say, Alt+Shift+V to
+            // edit, as in EdSharp, whose View Script is now Edit Script too. Alt+Shift+S is free.
+            miMiscEditScript       = addItem(miTools, "Edit Script...",                        "Edit Script",       Keys.Alt | Keys.Shift | Keys.V,     miscEditScriptClicked);
             miMiscOpenScriptFolder = addItem(miTools, "Open Script &Folder",                   "Open Script Folder", Keys.None,                          miscOpenScriptFolderClicked);
             // MACROS (15 November 2026, kit 1.231.0): the handlers are in DbDoMacros.cs. Function keys, so no access
             // letter on the first two.
@@ -14948,26 +15000,6 @@ namespace DbDo
             miToolsEditConfig= addItem(miMisc, "&Edit Settings...",          "Edit Settings", Keys.Alt | Keys.Shift | Keys.E,    toolsEditConfigClicked);
 
             // ===== Help menu =====
-            // ===== Window menu: MDI window management =====
-            // Command names and keys: Current
-            // Windows (F4), Window Toggle (Shift+W), Next/Previous
-            // Window (Control+Tab / Control+Shift+Tab), Say Windows
-            // Open (Shift+F4), Close Window (Control+F4), Close All
-            // But Current Window (Control+Shift+F4). Open Table is
-            // DbDo's Open-versus-Go-to pair:
-            // Open = new window, Go to (Choose Table, F6) = same
-            // window.
-            miWindow = addMenu("&Window");
-            miWindowOpenTable     = addItem(miWindow, "&Open Table...",                 "Open Table",            Keys.Control | Keys.Shift | Keys.O,   windowOpenTableClicked);
-            miWindowCurrent       = addItem(miWindow, "Current Windows...",            "Current Windows",       Keys.F4,                              windowCurrentClicked);
-            // No key (5 November 2026): Control+Tab and Control+Shift+Tab already move between two windows.
-            miWindowToggle        = addItem(miWindow, "&Window Toggle",                 "Window Toggle",         Keys.None,                            windowToggleClicked);
-            miWindowNext          = addItem(miWindow, "Next Window",                   "Next Window",           Keys.Control | Keys.Tab,              windowNextClicked);
-            miWindowPrevious      = addItem(miWindow, "Previous Window",               "Previous Window",       Keys.Control | Keys.Shift | Keys.Tab, windowPreviousClicked);
-            miWindowSayOpen       = addItem(miWindow, "Say Windows Open",              "Say Windows Open",      Keys.Shift | Keys.F4,                 windowSayOpenClicked);
-            miWindowClose         = addItem(miWindow, "Close Window",                  "Close Window",          Keys.Control | Keys.F4,               windowCloseClicked);
-            miWindowCloseAllBut   = addItem(miWindow, "Close All But Current Window",  "Close All But Current Window", Keys.Control | Keys.Shift | Keys.F4, windowCloseAllButClicked);
-
             // ===== Help menu =====
             miHelp = addMenu("&Help");
             miHelpContents     = addItem(miHelp, "Documentation",                       "Documentation",          Keys.F1,                            (s, e) => openHelpDocument("DbDo", "Documentation"));
@@ -15180,20 +15212,20 @@ namespace DbDo
             add("Play Media",        "Play the current record's stream address in the Homer Player; with records marked, play all of them",
                 "Control+P. Takes the first of stream_url, url, stream, link or address that begins with http, or the current cell. Marked records make a play list, current one first. The player is mpv; if it is not installed, DbDo offers to fetch it.");
             add("Close Database",     "Close the currently open database", "");
-            // ===== Window menu =====
+            // ===== Window commands, on the File menu since 21 November 2026 =====
             add("Open Table",         "Open a table in a new window",
                 "Open Table (Control+Shift+O) makes a new window; Choose Table (Control+T) changes the table in the same window. F6 cycles the current record's views.");
             add("Current Windows",    "Pick from the list of open recordset windows and activate the chosen one",
                 "F4. Each open recordset (typically a table) is an MDI child window.");
             add("Window Toggle",      "Switch between the two most recently used windows",
-                "No key: Shift+W is on the Say layer. Use the Window menu.");
+                "No key: Control+Tab and Control+Shift+Tab move between windows. On the File menu.");
             add("Next Window",        "Activate the next open window", "Control+Tab.");
             add("Previous Window",    "Activate the previous open window", "Control+Shift+Tab.");
             add("Say Windows Open",   "Speak the count and titles of open recordset windows, marking the current one",
                 "Shift+F4.");
             add("Close Window",       "Close the current recordset window",
                 "Control+F4. Closing the last window exits DbDo, since the menu bar lives in the window.");
-            add("Close All But Current Window", "Close every window except the current one",
+            add("Close All but Current Window", "Close every window except the current one",
                 "Control+Shift+F4.");
             add("Save",             "Save changes to disk (writes an open workbook back to its .xlsx; a .db is already saved as you go)", "");
             add("Save As",          "Save a copy to another path or file format", "");
@@ -15219,13 +15251,13 @@ namespace DbDo
             add("Copy Record",        "Duplicate the current row as a new row", "");
             add("Mark Record",           "Set the 'marked' flag on the current row", "");
             add("Unmark Record",         "Clear the 'marked' flag on the current row", "");
-            add("Start Mark",     "Drop a mark anchor at the current row",
-                "F8 sets the anchor; Shift+F8 marks every row from the anchor to the current row (direction-agnostic).");
-            add("Complete Mark",         "Mark every row from the F8 anchor to the current row",
-                "Inclusive range. Direction does not matter: the anchor can be above or below the current row. Skips rows already marked.");
-            add("Start Unmark",   "Drop an unmark anchor at the current row",
-                "Alt+F8 sets the unmark anchor; Alt+Shift+F8 unmarks every row from that anchor to the current row. Independent of the mark anchor.");
-            add("Complete Unmark",       "Unmark every row from the Alt+F8 anchor to the current row",
+            add("Start Mark or Unmark", "Start marking or unmarking a range at the current record",
+                "F8 sets the start; Shift+F8 marks every record from it to the current one, Alt+Shift+F8 unmarks them (direction-agnostic). Start Unmark is retired into it.");
+            add("Complete Mark",         "Mark every row from the F8 start to the current row",
+                "Inclusive range. Direction does not matter: the start can be above or below the current row. Skips rows already marked.");
+            add("Start Unmark",   "Start unmarking a range at the current record",
+                "Retired into Start Mark or Unmark (F8), 21 November 2026; no key.");
+            add("Complete Unmark",       "Unmark every row from the F8 start to the current row",
                 "Inclusive range, direction-agnostic. Skips rows already unmarked.");
             add("Save Bookmark",      "Save the current row position as a session bookmark", "");
             add("List Bookmarks",     "Show saved bookmarks in a listbox; navigate to the selected one",
@@ -15273,6 +15305,9 @@ namespace DbDo
             add("Say Yield",          "Say how many records are in view", "");
             add("Say Tables",         "Say the tables visited this session", "");
             add("Say Yield Marked",    "Say how many records are marked", "");
+            add("Say Yield from Current",        "Say how many records there are from the current one on", "Control+Y. The current record counts.");
+            add("Say Yield Marked from Current", "Say how many marked records there are from the current one on", "No key: Control+Shift+Y is Yield with Regex.");
+            add("Yield with Regex", "Count the matches of a regular expression in the fields and records you choose", "Control+Shift+Y, beside Extract with Regex (Control+Shift+E) and Replace with Regex (Control+Shift+R).");
             add("Say Edited",          "Say when the record was last edited",
                 "Shift+E. Reads the standard 'edited' timestamp column. Falls back to 'added' if 'edited' is absent.");
             add("Say Notes",          "Say the record's notes",
@@ -15280,18 +15315,22 @@ namespace DbDo
             add("Say Tags",           "Say the record's tags", "");
             add("Say Go to",           "Say the last Go to entry",
                 "Shift+G. Companion to Say Where Filter (Shift+W) and Say Order (Shift+O) -- reveals the current state of the Ctrl+J Jump Record search. Reports 'No jump search active' when there's no remembered string.");
-            add("Read List", "Read the records in view from the first, value by value",
-                "Alt+L. Every shown column of every record in view, each value its own utterance, empty values skipped; any key stops it, and Control silences the reader at once. Twice shows the records in a window.");
-            add("Read List of Marked", "Read the marked records in view from the first, value by value",
-                "Alt+Shift+L or Shift+Space. Read List, for the marked records only.");
-            add("Read List from Current", "Read the records in view from the current one on, value by value",
-                "Control+L. Read List, starting at the current record.");
-            add("Read List from Current Marked", "Read the marked records in view from the current one on, value by value",
-                "Control+Shift+L. Read List from Current, for the marked records only.");
-            add("Say Column as List", "Read the current column's values from the first record", "No key; read as Read List reads, one value at a time, any key stopping it.");
-            add("Say Column as List of Marked", "Read the current column's values in the marked records", "No key.");
-            add("Say Column as List from Current", "Read the current column's values from the current record on", "No key.");
-            add("Say Column as List from Current Marked", "Read the current column's values in the marked records from the current record on", "No key.");
+            add("Read Wide", "Read the records in view from the first, every shown column",
+                "Alt+W, W for wide: the grid's whole width. Each value its own utterance, empty values skipped; any key stops it, and Control silences the reader at once. Twice shows the records in a window.");
+            add("Read Wide Marked", "Read the marked records in view from the first, every shown column",
+                "Alt+Shift+W or Shift+Space. Read Wide, for the marked records only.");
+            add("Read Wide from Current", "Read the records in view from the current one on, every shown column",
+                "Control+W. Read Wide, starting at the current record.");
+            add("Read Wide Marked from Current", "Read the marked records in view from the current one on, every shown column",
+                "No key. Read Wide from Current, for the marked records only.");
+            add("Read Lean", "Read the current column's values from the first record",
+                "Alt+L, L for lean: the current column alone. Read as Read Wide reads, one value at a time, any key stopping it.");
+            add("Read Lean Marked", "Read the current column's values in the marked records, from the first",
+                "Alt+Shift+L. Read Lean, for the marked records only.");
+            add("Read Lean from Current", "Read the current column's values from the current record on",
+                "Control+L. Read Lean, starting at the current record.");
+            add("Read Lean Marked from Current", "Read the current column's values in the marked records, from the current one on",
+                "No key. Read Lean from Current, for the marked records only.");
             add("Say Position",       "Speak the column header and 1-based row number of the virtual cell",
                 "JAWS-style 'say cursor position' for the listview. Speech-only; does not move focus. Double-press opens the same text in a read-only multi-line dialog.");
             add("Show in FileDir",    "Show the open database's file, selected in its folder, in FileDir", "");
@@ -15324,7 +15363,8 @@ namespace DbDo
                 "Alt+Shift+B. Within the filter in force, over the columns the grid shows apart from the standard ones (the id, added, edited and marked), lists each combination of values with how many records have it, most common first, in a read-only window to review and copy. With State and City shown: how many contacts in each state and city.");
             add("Select Columns",        "Choose the columns the grid shows and their order",
                 "Alt+S. Seven buttons: Default (the fields of look, or every main field when a table has no look), Main (the fields about the table's subject), Standard (url, tags, notes, marked, look, prime, added, edited and the id), All (every field in DbDo's natural order), Look and prime, Exact (the Fields and Picks lists, with the columns now shown already in Picks), and Type (the names typed with commas). The choice is remembered with the table.");
-            add("Generate from Grid",         "Make a report from the records in the grid", "");
+            add("Generate Statistics",        "Read statistics of the records and columns you choose: summary, frequency, group, relation or cross-tab", "Alt+Shift+S. The dataset dialog asks which columns, which records (all in view, the marked ones, or the current one), whether to arrange by column or by row, and the kind. The report opens in a window to read.");
+            add("Generate Graphics",          "Draw a chart of the records and columns you choose, as a picture, a web page and an Excel workbook", "Alt+Shift+G. The same dataset dialog as Generate Statistics, with a Drawn by choice: Python draws a PNG, an SVG, a page with the takeaway and the numbers as a table, and a workbook with a native chart, into Documents, DbDo Charts; Excel draws the chart in Excel when Microsoft Office is installed.");
             add("Run Report",              "Alt+Shift+R. Render a saved report definition to a Markdown document. A report reads the whole PHYSICAL table (not the grid view), so it is reproducible regardless of your current filter or sort.",
                 "Report definitions live in an .inix file beside the database whose [Global] section declares FileTask = report (each [section] is one report, with header/detail/footer/group bands, $field and {{ jscript }} substitution, and footer aggregates like $count and $sum_<field>). DbDo lists only the FileTask = report files -- so a transfer map or settings file in the same folder is never offered -- then writes Markdown you can convert to HTML/DOCX/PDF. A legacy file with report bands but no FileTask still works. The contrast to remember: Generate from Grid = analyze what you SEE (virtual grid, ad-hoc); Run Report = produce a DEFINED document from the physical table (reproducible).");
             add("Graphics Column",           "Plot the column under the virtual cursor as an Excel chart",
@@ -16131,6 +16171,9 @@ namespace DbDo
         // same letters continue to type-ahead. The user-side
         // convention: lowercase to navigate, uppercase to
         // shortcut.
+        private const int iTypeAheadMs = 1000;
+        private int iLastTypeAheadTick = Environment.TickCount - iTypeAheadMs - 1;
+
         private void gridKeyDown(object sender, KeyEventArgs evArgs)
         {
             // View cycle (F6 forward, Shift+F6 back): from the list
@@ -16150,6 +16193,26 @@ namespace DbDo
                 runRecordViews(2, false);
                 evArgs.Handled = true; evArgs.SuppressKeyPress = true;
                 return;
+            }
+
+            // SPACE TOGGLES THE MARK (21 November 2026, the Space bar scheme), as in FileDir and every Windows list with
+            // check boxes; Control+Space still does. But Space is also a character of type-ahead: "new y" finds New
+            // York. So a Space within a second of a typed letter or digit goes on to the type-ahead search, as Windows
+            // Explorer does, and only a Space on its own marks. Space is handled here, not as a menu key, so a text
+            // box in a dialog never loses it.
+            if (evArgs.KeyData == Keys.Space)
+            {
+                if (unchecked(Environment.TickCount - iLastTypeAheadTick) > iTypeAheadMs)
+                {
+                    recToggleMarkClicked(sender, EventArgs.Empty);
+                    evArgs.Handled = true; evArgs.SuppressKeyPress = true;
+                    return;
+                }
+            }
+            else if ((evArgs.Modifiers & (Keys.Alt | Keys.Control)) == Keys.None
+                && ((evArgs.KeyCode >= Keys.A && evArgs.KeyCode <= Keys.Z) || (evArgs.KeyCode >= Keys.D0 && evArgs.KeyCode <= Keys.D9)))
+            {
+                iLastTypeAheadTick = Environment.TickCount;
             }
 
             // Db cursor column movement (v1.0.109):
@@ -17114,6 +17177,7 @@ namespace DbDo
             miToolsTest.Enabled = bOpen;
             miToolsMeasure.Enabled = bHasTable;
             miToolsChart.Enabled = bHasTable;
+            if (miGenerateStatistics != null) miGenerateStatistics.Enabled = bHasTable;
             if (miDescribeColumn != null) miDescribeColumn.Enabled = bHasTable;
             if (miSelectColumns != null) miSelectColumns.Enabled = bHasTable;
             if (miPlotColumn != null) miPlotColumn.Enabled = bHasTable;
@@ -18133,7 +18197,7 @@ namespace DbDo
             return sLongDate + " at " + sShortTime;
         }
 
-        // saySayYieldMarked: Shift+Y. Speak the count of marked rows.
+        // saySayYieldMarked: Alt+Shift+Y (Shift+Y until 21 November 2026). Speak the count of marked rows.
         // Shift+Y = "Yield Tagged."
         private void saySayYieldMarked(object sender, EventArgs evArgs)
         {
@@ -18146,6 +18210,43 @@ namespace DbDo
             // column's index, and walks the records only when that cannot answer.
             int iCount = countMarkedInFilter();
             speakOrShow("Yield Marked", "yield marked: " + iCount + " record" + (iCount == 1 ? "" : "s"), 108);
+        }
+
+        // saySayYieldFromCurrent: Control+Y. The records from the current one to the last, the current one counted.
+        private void saySayYieldFromCurrent(object sender, EventArgs evArgs)
+        {
+            if (db == null || !db.hasRecordset())
+            { Say.say("yield from current: no table selected"); return; }
+            int iStart = (iVirtualRow >= 1) ? iVirtualRow : 1;
+            int iCount = Math.Max(0, db.recordCount - iStart + 1);
+            speakOrShow("Yield from Current", "yield from current: " + iCount + " record" + (iCount == 1 ? "" : "s"), 104);
+        }
+
+        // saySayYieldMarkedFromCurrent: Control+Shift+Y. The marked records from the current one to the last. It walks
+        // the records from here, as anyRecordFrom does, and puts the cursor back.
+        private void saySayYieldMarkedFromCurrent(object sender, EventArgs evArgs)
+        {
+            if (db == null || !db.hasRecordset())
+            { Say.say("yield marked from current: no table selected"); return; }
+            if (!db.hasField(Metadata.MarkedColumn))
+            { Say.say("yield marked from current: this table has no marked column"); return; }
+            int iStart = (iVirtualRow >= 1) ? iVirtualRow : 1;
+            int iCount = 0;
+            object oOriginal = null;
+            try { oOriginal = db.bookmark; } catch { }
+            try
+            {
+                for (int i = iStart; i <= db.recordCount; i++)
+                {
+                    try { db.absolutePosition = i; if (isMarkedTrue(db.getScreenValue(Metadata.MarkedColumn))) iCount++; }
+                    catch { }
+                }
+            }
+            finally
+            {
+                if (oOriginal != null) try { db.bookmark = oOriginal; } catch { }
+            }
+            speakOrShow("Yield Marked from Current", "yield marked from current: " + iCount + " record" + (iCount == 1 ? "" : "s"), 109);
         }
 
         // saySayNotes: Shift+N. Speak the 'notes' field of the current
@@ -18701,40 +18802,11 @@ namespace DbDo
             saySayColumnCommon(true, true);
         }
 
+        // READ LEAN IS READ WIDE OVER ONE COLUMN (21 November 2026): one reader for both, so a second press shows the
+        // values in a window for Read Lean as it does for Read Wide.
         private void saySayColumnCommon(bool bMarkedOnly, bool bFromCurrent)
         {
-            if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("No row selected"); return; }
-            if (grid == null || iVirtualCol < 0 || iVirtualCol >= grid.Columns.Count)
-            { Say.say("No column under virtual cursor"); return; }
-            if (bMarkedOnly && !db.hasField(Metadata.MarkedColumn))
-            { Say.say("This table has no marked column"); return; }
-
-            string sHeader = grid.Columns[iVirtualCol].Text;
-            // Alt (All) starts at row 1; Control (Current) starts at the
-            // current virtual row and reads the rest of the column down.
-            int iStart = bFromCurrent ? ((iVirtualRow >= 1) ? iVirtualRow : 1) : 1;
-            // No cap: every value from the cursor down is spoken. ONE RECORD AT A TIME (18 November 2026): the values
-            // are read from the table only as the reader needs them, so a table of 38,000 records starts speaking at
-            // once instead of leaving DbDo Not Responding while every value is gathered first.
-            if (!anyRecordFrom(iStart, bMarkedOnly))
-            {
-                string sNone = bFromCurrent
-                    ? (bMarkedOnly ? "No marked records from here." : "No records from here.")
-                    : (bMarkedOnly ? "No marked records." : "No records.");
-                Say.say(sNone);
-                return;
-            }
-            // Header lead-in, then each value as its own queued message
-            // so the column reads as a paced sequence rather than a
-            // run-on string.
-            // READ, NOT SAID (17 November 2026): the header, then each value its own utterance through Homer.ReadAloud,
-            // which a key stops. Empty values are skipped, as in a list view, rather than said as "blank".
-            List<string> lCols = new List<string>();
-            lCols.Add(sHeader);
-            IEnumerable<string> lParts = readingParts(sHeader, lCols, iStart, bMarkedOnly);
-            string sCmd = "Say Column as List" + (bFromCurrent ? " from Current" : "") + (bMarkedOnly ? (bFromCurrent ? " Marked" : " of Marked") : "");
-            Homer.ReadAloud.start(sCmd, lParts, null);
+            readList(bMarkedOnly, bFromCurrent, true);
         }
 
         // saySayRows: Shift+V. Speak every visible row in full -- each
@@ -18761,21 +18833,33 @@ namespace DbDo
         // between records, and any key stops it (Control silences JAWS or NVDA at once). Empty values are skipped, as
         // a list view skips them. The cursor does not move. A second press stops the reading and shows the records in
         // a window, one record a line, each value after its column's name.
-        private void readListAll(object sender, EventArgs evArgs) { readList(false, false); }
-        private void readListAllMarked(object sender, EventArgs evArgs) { readList(true, false); }
-        private void readListCurrent(object sender, EventArgs evArgs) { readList(false, true); }
-        private void readListCurrentMarked(object sender, EventArgs evArgs) { readList(true, true); }
+        private void readListAll(object sender, EventArgs evArgs) { readList(false, false, false); }
+        private void readListAllMarked(object sender, EventArgs evArgs) { readList(true, false, false); }
+        private void readListCurrent(object sender, EventArgs evArgs) { readList(false, true, false); }
+        private void readListCurrentMarked(object sender, EventArgs evArgs) { readList(true, true, false); }
 
-        private void readList(bool bMarkedOnly, bool bFromCurrent)
+        // readList: Read Wide (every shown column) or, with bLean, Read Lean (the column under the virtual cursor,
+        // its name said first).
+        private void readList(bool bMarkedOnly, bool bFromCurrent, bool bLean)
         {
-            string sCmd = "Read List" + (bFromCurrent ? " from Current" : "") + (bMarkedOnly ? (bFromCurrent ? " Marked" : " of Marked") : "");
+            string sCmd = (bLean ? "Read Lean" : "Read Wide") + (bMarkedOnly ? " Marked" : "") + (bFromCurrent ? " from Current" : "");
             bool bShow = Homer.KeyMap.iPressCount == 2;
             if (bShow) Homer.ReadAloud.stop(true);
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
             { Say.say("records: none in view"); return; }
             if (bMarkedOnly && !db.hasField(Metadata.MarkedColumn))
             { Say.say("marked records: this table has no marked field"); return; }
-            List<string> lDispCols = db.getDisplayFieldNames();
+            List<string> lDispCols;
+            string sHeader = null;
+            if (bLean)
+            {
+                if (grid == null || iVirtualCol < 0 || iVirtualCol >= grid.Columns.Count)
+                { Say.say("No column under virtual cursor"); return; }
+                sHeader = grid.Columns[iVirtualCol].Text;
+                lDispCols = new List<string>();
+                lDispCols.Add(sHeader);
+            }
+            else lDispCols = db.getDisplayFieldNames();
             if (lDispCols.Count == 0)
             { Say.say("records: no columns shown"); return; }
             int iStart = bFromCurrent ? ((iVirtualRow >= 1) ? iVirtualRow : 1) : 1;
@@ -18789,7 +18873,7 @@ namespace DbDo
                                         : "records: none from here");
                     return;
                 }
-                Homer.ReadAloud.start(sCmd, readingParts(null, lDispCols, iStart, bMarkedOnly),
+                Homer.ReadAloud.start(sCmd, readingParts(sHeader, lDispCols, iStart, bMarkedOnly),
                     delegate(int iSentParts, bool bStopped) { DbDoLog.write(sCmd + ": " + iSentParts + " values read" + (bStopped ? ", then a key stopped it" : "")); });
                 return;
             }
@@ -20075,21 +20159,28 @@ namespace DbDo
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
             { Say.say("No record selected"); return; }
+            // MARKED OR CURRENT (22 November 2026): the marked rows, one line each, or the current one.
+            List<int> lRows = scopePositions("Copy Visible Cells");
+            if (lRows == null) return;
             try
             {
                 List<string> lFields = db.getDisplayFieldNames();
                 StringBuilder sb = new StringBuilder();
-                for (int i = 0; i < lFields.Count; i++)
+                int iCopied = forEachPosition(lRows, delegate
                 {
-                    if (i > 0) sb.Append('\t');
-                    string sV = db.getScreenValue(lFields[i]) ?? "";
-                    // Tab and newline are TSV-killers; replace with
-                    // space and a slash-n marker respectively.
-                    sV = sV.Replace('\t', ' ').Replace("\r\n", "\\n").Replace("\n", "\\n").Replace("\r", "\\n");
-                    sb.Append(sV);
-                }
+                    if (sb.Length > 0) sb.Append("\r\n");
+                    for (int i = 0; i < lFields.Count; i++)
+                    {
+                        if (i > 0) sb.Append('\t');
+                        string sV = db.getScreenValue(lFields[i]) ?? "";
+                        // Tab and newline are TSV-killers; replace with
+                        // space and a slash-n marker respectively.
+                        sV = sV.Replace('\t', ' ').Replace("\r\n", "\\n").Replace("\n", "\\n").Replace("\r", "\\n");
+                        sb.Append(sV);
+                    }
+                });
                 Clipboard.SetText(sb.ToString());
-                Say.say("Row copied to clipboard");
+                Say.say(iCopied == 1 ? "Row copied to clipboard" : iCopied + " rows copied to clipboard");
             }
             catch (Exception ex) { Say.say("Copy Row: " + ex.Message); }
         }
@@ -20252,18 +20343,27 @@ namespace DbDo
         // from inside a word. Every match of a .NET regular expression goes to the clipboard, one per line. Its dialog
         // is alike with Replace's: Regex pattern, Case sensitive, then Columns and Records. Columns starts on all
         // columns, hidden ones too, as Extract always searched (spec v1.0.65), so notes, tags and url are included.
-        private void extractRegexClicked(object sender, EventArgs evArgs)
+        private void extractRegexClicked(object sender, EventArgs evArgs) { regexScan(false); }
+
+        // YIELD WITH REGEX (21 November 2026): Control+Shift+Y, as in EdSharp, FileDir and HomerView, completing DbDo's
+        // regex family beside Extract (E) and Replace (R). It asks what Extract asks and says how many matches there
+        // are, and in how many records, leaving the clipboard alone.
+        private void yieldRegexClicked(object sender, EventArgs evArgs) { regexScan(true); }
+
+        // regexScan: Extract with Regex, or with bYield, Yield with Regex.
+        private void regexScan(bool bYield)
         {
+            string sTitle = bYield ? "Yield with Regex" : "Extract with Regex";
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
             { Say.say("No table selected"); return; }
             string sColumn = virtCurrentColumnName();
             if (string.IsNullOrEmpty(sColumn)) { Say.sayForced("No current column."); return; }
             string sPattern; bool bCase; List<string> lFields; int iRecordScope;
             int iMarkedNow = countMarkedInFilter();
-            using (LbcDialog dlg = new LbcDialog("Extract with Regex", this))
+            using (LbcDialog dlg = new LbcDialog(sTitle, this))
             {
                 TextBox tbPat = dlg.addInputBox("Regex &pattern:", "",
-                    "A .NET regular expression; for example \\b\\S+@\\S+\\.\\w+\\b finds email addresses. Every match goes to the clipboard, one per line.");
+                    "A .NET regular expression; for example \\b\\S+@\\S+\\.\\w+\\b finds email addresses. " + (bYield ? "DbDo says how many matches there are." : "Every match goes to the clipboard, one per line."));
                 CheckBox cbCase = dlg.addCheckBox("Case &sensitive", false, "Match capital and small letters exactly.");
                 ComboBox cbColumns, cbRecords;
                 addScopeChoices(dlg, sColumn, true, iMarkedNow, out cbColumns, out cbRecords);
@@ -20283,7 +20383,7 @@ namespace DbDo
             catch (Exception ex)
             {
                 LbcMessage.show(this, "Invalid regex: " + ex.Message,
-                    "Extract with Regex", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    sTitle, MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
             int iSavePos = db.absolutePosition;
@@ -20324,6 +20424,11 @@ namespace DbDo
             invokeRefresh();
             if (iMatches == 0)
             { Say.say("No matches found"); return; }
+            if (bYield)
+            {
+                Say.say(iMatches + (iMatches == 1 ? " match" : " matches") + ", in " + iRecordsWith + (iRecordsWith == 1 ? " record" : " records"));
+                return;
+            }
             try
             {
                 Clipboard.SetText(sbOut.ToString());
@@ -24630,6 +24735,54 @@ namespace DbDo
             return ScopeChoice.Cancel;
         }
 
+        // BATCH OR SINGLE, ONE PATTERN (22 November 2026, Jamal's ruling): every command that can act on a batch of
+        // records or on the current one asks the suite's Marked or Current question whenever marked records are in
+        // view -- not only Delete Record and Play Media, but Copy Record, Copy Append Record, Copy Visible Cells, Mail
+        // Record, Open url and Delete without Confirmation too. Commands whose unit is the whole view (Export Data,
+        // Copy Grid, Read Wide) or one cell (Edit Cell, Open Cell Value) are not batch-or-single and do not ask; Say
+        // and Read commands never ask, since their Marked forms are keys of their own.
+        // scopePositions: the absolute positions the command acts on, in grid order -- the marked records in view, or
+        // the current record alone; null on Cancel. The cursor is left where it was.
+        private List<int> scopePositions(string sCommandName)
+        {
+            ScopeChoice scope = promptScope(sCommandName);
+            if (scope == ScopeChoice.Cancel) return null;
+            List<int> lPositions = new List<int>();
+            if (scope == ScopeChoice.Current) { lPositions.Add(db.absolutePosition); return lPositions; }
+            object oOriginal = null;
+            try { oOriginal = db.bookmark; } catch { }
+            try
+            {
+                int iCap = db.recordCount;
+                for (int i = 1; i <= iCap; i++)
+                {
+                    try { db.absolutePosition = i; } catch { continue; }
+                    try { if (isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn))) lPositions.Add(i); } catch { }
+                }
+            }
+            finally { if (oOriginal != null) try { db.bookmark = oOriginal; } catch { } }
+            return lPositions;
+        }
+
+        // forEachPosition: runs one record's work at each position, then puts the cursor back; returns how many ran.
+        private int forEachPosition(List<int> lPositions, Action actRecord)
+        {
+            int iDone = 0;
+            object oOriginal = null;
+            try { oOriginal = db.bookmark; } catch { }
+            try
+            {
+                foreach (int iPos in lPositions)
+                {
+                    try { db.absolutePosition = iPos; } catch { continue; }
+                    actRecord();
+                    iDone++;
+                }
+            }
+            finally { if (oOriginal != null) try { db.bookmark = oOriginal; } catch { } }
+            return iDone;
+        }
+
         // recRemoveClicked: delete a record (or marked records) with
         // confirmation. Ctrl+D. The marks-aware scope prompt fires
         // only when marks exist; if no marks are set, the command
@@ -25018,10 +25171,26 @@ namespace DbDo
         {
             if (db == null || !db.hasRecordset()) { Say.say("No table selected"); return; }
             if (db.eof || db.bof) { Say.say("No record selected"); return; }
-            List<string> lV = new List<string>();
-            foreach (string sCol in db.getFieldNames()) lV.Add(db.getFieldValue(sCol));
+            // MARKED OR CURRENT (22 November 2026): the marked records, one line each, or the current one.
+            List<int> lCopy = scopePositions("Copy Record");
+            if (lCopy == null) return;
+            List<string> lLines = new List<string>();
+            int iFields = 0;
+            forEachPosition(lCopy, delegate
+            {
+                List<string> lV = new List<string>();
+                foreach (string sCol in db.getFieldNames()) lV.Add(db.getFieldValue(sCol));
+                iFields = lV.Count;
+                lLines.Add(string.Join("\t", lV));
+            });
+            if (lLines.Count == 0) { Say.say("No record copied"); return; }
             // It says what it did, as Copy Cell, Copy Column and Copy Grid do (19 October 2026).
-            try { Clipboard.SetText(string.Join("\t", lV)); Say.say("Record copied, " + lV.Count + (lV.Count == 1 ? " field" : " fields")); }
+            try
+            {
+                Clipboard.SetText(string.Join("\r\n", lLines));
+                if (lLines.Count == 1) Say.say("Record copied, " + iFields + (iFields == 1 ? " field" : " fields"));
+                else Say.say(lLines.Count + " records copied");
+            }
             catch (Exception ex) { Say.say("Copy Record: " + ex.Message); }
         }
 
@@ -25047,15 +25216,23 @@ namespace DbDo
                 if (!sExisting.EndsWith("\n")) sb.Append("\r\n");
                 sb.Append("\r\n");  // blank-line separator
             }
-            foreach (string sCol in db.getFieldNames())
+            // MARKED OR CURRENT (22 November 2026): each marked record, a blank line between, or the current one.
+            List<int> lAppend = scopePositions("Copy Append Record");
+            if (lAppend == null) return;
+            int iAppended = forEachPosition(lAppend, delegate
             {
-                string sVal = db.getFieldValue(sCol) ?? "";
-                sb.Append(sCol).Append(": ").Append(sVal).Append("\r\n");
-            }
+                if (sb.Length > 0 && !sb.ToString().EndsWith("\r\n\r\n")) sb.Append("\r\n");
+                foreach (string sCol in db.getFieldNames())
+                {
+                    string sVal = db.getFieldValue(sCol) ?? "";
+                    sb.Append(sCol).Append(": ").Append(sVal).Append("\r\n");
+                }
+            });
+            if (iAppended == 0) { Say.say("No record appended"); return; }
             try
             {
                 Clipboard.SetText(sb.ToString());
-                Say.say("Appended record to clipboard");
+                Say.say(iAppended == 1 ? "Appended record to clipboard" : "Appended " + iAppended + " records to clipboard");
             }
             catch
             {
@@ -25153,12 +25330,26 @@ namespace DbDo
                     "Mail Record", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
-            string sTo = (db.getFieldValue(sEmailCol) ?? "").Trim();
-            if (sTo.Length == 0) { Say.say("Email field is empty"); return; }
+            // MARKED OR CURRENT (22 November 2026): one message to every marked record's address, or to the current one. With several
+            // records the subject and body stay empty, since no one record's look or notes speaks for them all.
+            List<int> lMail = scopePositions("Mail Record");
+            if (lMail == null) return;
+            List<string> lTo = new List<string>();
             string sSubject = "";
-            if (db.hasField("look")) sSubject = db.getFieldValue("look") ?? "";
             string sBody = "";
-            if (db.hasField("notes")) sBody = db.getFieldValue("notes") ?? "";
+            string sMailCol = sEmailCol;
+            forEachPosition(lMail, delegate
+            {
+                string sOne = (db.getFieldValue(sMailCol) ?? "").Trim();
+                if (sOne.Length > 0 && !lTo.Contains(sOne)) lTo.Add(sOne);
+                if (lMail.Count == 1)
+                {
+                    if (db.hasField("look")) sSubject = db.getFieldValue("look") ?? "";
+                    if (db.hasField("notes")) sBody = db.getFieldValue("notes") ?? "";
+                }
+            });
+            string sTo = string.Join(",", lTo.ToArray());
+            if (sTo.Length == 0) { Say.say(lMail.Count == 1 ? "Email field is empty" : "The marked records have no email"); return; }
             // Build mailto: with URI-encoded subject and body. We use
             // Uri.EscapeDataString for the subject and body, but
             // leave the address untouched (email addresses are not
@@ -25199,9 +25390,25 @@ namespace DbDo
         // name field, or its look. If mpv is not on this computer the program
         // offers to fetch it with scripts\installMpv, the same winget install
         // the installer's finish page offers.
+        private bool bRecordPlayback = false;
+
+        // recordPlaybackClicked: Control+Shift+P, Record Playback (21 November 2026, AV group): Play Media, playing at
+        // once and recording, through the kit's Homer Player, as in FileDir.
+        private void recordPlaybackClicked(object sender, EventArgs evArgs)
+        {
+            bRecordPlayback = true;
+            try { recPlayStreamClicked(sender, evArgs); }
+            finally { bRecordPlayback = false; }
+        }
+
         private void recPlayStreamClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen()) { Say.say("No database is open."); return; }
+            // THE QUESTION COMES FIRST (22 November 2026): with records marked, Marked or Current is asked before the
+            // current record's address is looked at, so a current record without one no longer hides the marked play
+            // list; only Current needs the current record's address.
+            ScopeChoice playScope = (db.hasRecordset() && countMarkedInFilter() > 0) ? promptScope(bRecordPlayback ? "Record Playback" : "Play Media") : ScopeChoice.Current;
+            if (playScope == ScopeChoice.Cancel) return;
             string sUrl = "";
             foreach (string sField in new string[] { "stream_url", "url", "stream", "link", "address" })
             {
@@ -25215,7 +25422,7 @@ namespace DbDo
                 try { sCell = (db.getFieldValue(virtCurrentColumnName()) ?? "").Trim(); } catch { }
                 if (sCell.StartsWith("http://", StringComparison.OrdinalIgnoreCase) || sCell.StartsWith("https://", StringComparison.OrdinalIgnoreCase)) sUrl = sCell;
             }
-            if (sUrl.Length == 0) { Say.say("This record has no stream address."); return; }
+            if (sUrl.Length == 0 && playScope != ScopeChoice.Marked) { Say.say("This record has no stream address."); return; }
             string sName = "";
             foreach (string sField in new string[] { "name", "title", "station", "look" })
             {
@@ -25244,10 +25451,8 @@ namespace DbDo
             System.Collections.Generic.List<Homer.MediaTrack> lsTracks = new System.Collections.Generic.List<Homer.MediaTrack>();
             try
             {
-                // ASKED AS EVERY BATCH COMMAND ASKS (17 November 2026): with records marked and the current one not, the
+                // ASKED AS EVERY BATCH COMMAND ASKS (17 November 2026; asked at the top since 22 November 2026): the
                 // suite's Marked or Current dialog decides between the play list and the one station.
-                ScopeChoice playScope = db.countMarked() > 0 ? promptScope("Play Media") : ScopeChoice.Current;
-                if (playScope == ScopeChoice.Cancel) return;
                 if (playScope == ScopeChoice.Marked)
                 {
                     int iFound;
@@ -25261,12 +25466,13 @@ namespace DbDo
                             + "\" WHERE marked = 1 AND \"" + sUrlField + "\" LIKE 'http%' ORDER BY \"" + sNameField + "\"", 10000, out iFound))
                             if (a != null && a.Length > 1 && !string.IsNullOrEmpty(a[1]))
                             {
-                                if (a[1] == sUrl) lsTracks.Insert(0, new Homer.MediaTrack(a[0] ?? a[1], a[1]));
+                                if (sUrl.Length > 0 && a[1] == sUrl) lsTracks.Insert(0, new Homer.MediaTrack(a[0] ?? a[1], a[1]));
                                 else lsTracks.Add(new Homer.MediaTrack(a[0] ?? a[1], a[1]));
                             }
                 }
             }
             catch (Exception ex) { DbDoLog.write("Play Media, marked list: " + ex.Message); lsTracks.Clear(); }
+            if (lsTracks.Count == 0 && sUrl.Length == 0) { Say.say("The marked records have no stream address."); return; }
             if (lsTracks.Count == 0) lsTracks.Add(new Homer.MediaTrack(sName, sUrl));
             DbDoLog.write("Play Media: " + lsTracks.Count + " track(s), first " + lsTracks[0].display() + " -> " + sUrl);
             // LISTENING LEAVES A TRACE, IN THE RECORD. When the table has plays and
@@ -25308,7 +25514,7 @@ namespace DbDo
             string sDbName = "";
             try { sDbName = System.IO.Path.GetFileNameWithoutExtension(db.filePath); } catch { }
             if (sDbName.Length == 0) sDbName = db.currentTable;
-            Homer.MediaPlayer.run(this, sDbName, db.currentTable, lsTracks);
+            Homer.MediaPlayer.run(this, sDbName, db.currentTable, lsTracks, bRecordPlayback);
         }
 
         private void recOpenCellClicked(object sender, EventArgs evArgs)
@@ -25966,6 +26172,23 @@ namespace DbDo
         // invoked, forward. Shift+F3 is the reverse counterpart.
         // F3 / Shift+F3 are "find again" -- DbDo
         // generalizes this to also include the Jump family.
+        // jumpAgainClicked and keywordsAgainClicked: Alt+J and Alt+K repeat Jump or Keywords forward, whichever was last.
+        private void jumpAgainClicked(object sender, EventArgs evArgs)
+        {
+            if (string.IsNullOrEmpty(sLastJumpSubstring) || string.IsNullOrEmpty(sLastJumpColumn))
+            { Say.sayForced("jump: none yet. Control+J asks for one."); return; }
+            sLastSearchKind = "jump";
+            doJump(true, true);
+        }
+
+        private void keywordsAgainClicked(object sender, EventArgs evArgs)
+        {
+            if (string.IsNullOrEmpty(sLastFindSubstring))
+            { Say.sayForced("keywords: none yet. Control+K asks for some."); return; }
+            sLastSearchKind = "find";
+            doFind(true, true);
+        }
+
         private void recSearchNextClicked(object sender, EventArgs evArgs)
         {
             recSearchAgain(true);
@@ -27877,6 +28100,24 @@ namespace DbDo
                 return;
             }
             if (db.eof || db.bof) { Say.say("Delete: no current row"); return; }
+            // MARKED OR CURRENT (22 November 2026): as Delete Record asks, so does this; "without confirmation" means no Yes or No
+            // after the choice, not no choice. Marked records are deleted from the last up, so positions hold.
+            List<int> lDelete = scopePositions("Delete without Confirmation");
+            if (lDelete == null) return;
+            if (lDelete.Count > 1 || (lDelete.Count == 1 && lDelete[0] != db.absolutePosition))
+            {
+                lDelete.Sort();
+                lDelete.Reverse();
+                int iGone = 0;
+                foreach (int iPos in lDelete)
+                {
+                    try { db.absolutePosition = iPos; db.deleteCurrent(); iGone++; }
+                    catch (Exception exOne) { DbDoLog.write("Delete without Confirmation, position " + iPos + ": " + exOne.Message); }
+                }
+                invokeRefresh();
+                Say.sayForced("Deleted " + iGone + " marked record" + (iGone == 1 ? "" : "s") + ".");
+                return;
+            }
             // Speak the row's look value (or primary key) BEFORE delete
             // so the user has confirmation feedback even after the
             // recordset moves to the next row.
@@ -27913,6 +28154,25 @@ namespace DbDo
             { Say.say("No record selected"); return; }
             if (!db.hasField("url"))
             { Say.say("This table has no url column"); return; }
+            // MARKED OR CURRENT (22 November 2026): each marked record's url, or the current one's. More than ten pages asks first.
+            List<int> lOpen = scopePositions("Open url");
+            if (lOpen == null) return;
+            if (lOpen.Count > 1 || (lOpen.Count == 1 && lOpen[0] != db.absolutePosition))
+            {
+                List<string> lUrls = new List<string>();
+                forEachPosition(lOpen, delegate { string sOne = (db.getFieldValue("url") ?? "").Trim(); if (sOne.Length > 0) lUrls.Add(sOne); });
+                if (lUrls.Count == 0) { Say.say("The marked records have no url"); return; }
+                if (lUrls.Count > 10 && LbcMessage.show(this, "Open " + lUrls.Count + " pages, one for each marked record?", "Open url",
+                    MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
+                int iOpened = 0;
+                foreach (string sOne in lUrls)
+                {
+                    try { System.Diagnostics.Process.Start(sOne); iOpened++; }
+                    catch (Exception exOne) { DbDoLog.write("Open url " + sOne + ": " + exOne.Message); }
+                }
+                Say.say("Opening " + iOpened + (iOpened == 1 ? " page" : " pages"));
+                return;
+            }
             string sUrl = db.getFieldValue("url") ?? "";
             if (sUrl.Length == 0) { Say.say("Url is empty"); return; }
             try
@@ -28603,7 +28863,9 @@ namespace DbDo
             { Say.say("No record selected"); return; }
             iMarkAnchor = db.absolutePosition;
             sMarkAnchorTable = db.currentTable;
-            Say.say("Mark anchor at row " + iMarkAnchor);
+            iUnmarkAnchor = iMarkAnchor;
+            sUnmarkAnchorTable = sMarkAnchorTable;
+            Say.say("Start at row " + iMarkAnchor);
         }
 
         private void recUnmarkAnchorClicked(object sender, EventArgs evArgs)
@@ -30319,6 +30581,439 @@ namespace DbDo
         // but not informative. The dialog warns when distinct-value
         // count equals row count.
         // ===================================================================
+        // GENERATE STATISTICS (Alt+Shift+S) AND GENERATE GRAPHICS (Alt+Shift+G), 21 November 2026, from Jamal's review of
+        // the analysis keys. Generate from Grid offered every report and chart from one row of buttons, over every
+        // record in view, and drew its charts only in Excel. Now:
+        //
+        // - TWO COMMANDS, ONE DIALOG. Statistics are read by the user, in a window; graphics are made for sighted
+        //   colleagues, as files. The outputs differ, so the commands do, and S and G name them. The data they work on
+        //   is chosen the same way, so both open the same dataset dialog -- the same four controls, in the same order,
+        //   with the same letters -- and only the Kind list differs. A checkbox in one shared command was weighed and
+        //   set aside: it would put a choice in front of every use that the key already makes.
+        // - WHY ALT+SHIFT, NOT CONTROL+SHIFT. Jamal proposed Control+Shift+S and Control+Shift+G. Control+Shift+S is
+        //   Save As in every Homer app, and by the suite's own factor Control is for commands that change data; these
+        //   change none, and they open a pick dialog, which Alt carries as well. Alt+Shift+S was free once Edit Script
+        //   went to Alt+Shift+V, and Alt+Shift+G is where Generate from Grid was, so nothing is relearned for charts.
+        // - MARKED OR CURRENT IS IN THE DIALOG. Which records: all in view, the marked ones (offered when some are, and
+        //   then chosen first), or the current record -- the kit's scope combo, as Extract and Replace use it, so no
+        //   separate Marked or Current question is asked. Which columns: the current one, the shown ones, or all.
+        // - ROW OR COLUMN. Arrange by column treats each column as a variable and the records as its values -- the
+        //   usual analysis. Arrange by row treats each record as a series across the columns -- a record of months, a
+        //   student's scores -- so the current record alone can be summed up or drawn.
+        // - CHARTS WITHOUT OFFICE. Graphics are drawn by the kit's DataReport, with Python's pandas, matplotlib,
+        //   seaborn and openpyxl (all free, all MIT-compatible): a PNG, an SVG, a web page with the takeaway sentence
+        //   and the numbers as a table, and a workbook with a native Excel chart. Excel, through COM, remains the
+        //   fallback when Python cannot draw, for the charts Excel drew before.
+        // ===================================================================
+        private ToolStripMenuItem miGenerateStatistics;
+
+        private static readonly string[] aStatisticsKinds = { "Summary", "Frequency", "Group", "Relation", "Cross-tab" };
+        private static readonly string[] aGraphicsKinds = { "Bar chart", "Pareto chart", "Pie chart", "Histogram", "Whisker plot", "Scatter plot", "Line chart", "Date chart" };
+        private string sLastStatisticsKind = "Summary";
+        private string sLastGraphicsKind = "Bar chart";
+        private bool bLastByRow = false;
+        private bool bLastExcel = false;
+
+        private class DataSetChoice
+        {
+            public List<string> lCols = new List<string>();
+            public int iScope = 0;          // 0 all records in view, 1 marked, 2 current
+            public bool bByRow = false;
+            public string sKind = "";
+            public bool bExcel = false;
+            public string sCurrentCol = "";
+            public Dictionary<string, List<string>> dValues = new Dictionary<string, List<string>>();
+            public int iRows = 0;
+            public List<string> lNumeric = new List<string>();
+            public List<string> lDate = new List<string>();
+            public List<string> lBoolean = new List<string>();
+            public List<string> lText = new List<string>();
+            public string sLabelCol = "";
+            public string sScopeSaid = "";
+        }
+
+        // chooseDataSet: the shared dialog, then one sweep that gathers the chosen records' values and types each column.
+        // Null on Cancel or when there is nothing to work on.
+        private DataSetChoice chooseDataSet(string sTitle, bool bGraphics)
+        {
+            if (db == null || !db.hasRecordset()) { LbcMessage.show(this, "Open a table first.", sTitle, MessageBoxButtons.OK, MessageBoxIcon.Information); return null; }
+            if (db.recordCount == 0) { LbcMessage.show(this, "No records in the current filter to work with.", sTitle, MessageBoxButtons.OK, MessageBoxIcon.Information); return null; }
+            DataSetChoice ds = new DataSetChoice();
+            ds.sCurrentCol = currentVirtualColumnName() ?? "";
+            int iMarkedNow = countMarkedInFilter();
+            List<string> lArrange = new List<string> { "By column, each column a variable", "By row, each record a series" };
+            List<string> lKinds = new List<string>(bGraphics ? aGraphicsKinds : aStatisticsKinds);
+            List<string> lDrawn = new List<string> { "Python: picture, page and workbook", "Excel: a chart in Excel, which must be installed" };
+            ComboBox cbColumns, cbRecords, cbArrange, cbKind, cbDrawn = null;
+            using (LbcDialog dlg = new LbcDialog(sTitle, this))
+            {
+                addScopeChoices(dlg, ds.sCurrentCol, false, iMarkedNow, out cbColumns, out cbRecords);
+                // Shown columns first: statistics and charts are usually of what is on the screen.
+                if (cbColumns.Items.Count > 1) cbColumns.SelectedIndex = 1;
+                cbArrange = dlg.addComboBox("&Arrange:", lArrange, bLastByRow ? lArrange[1] : lArrange[0]);
+                cbKind = dlg.addComboBox("&Kind:", lKinds, bGraphics ? sLastGraphicsKind : sLastStatisticsKind);
+                if (bGraphics) cbDrawn = dlg.addComboBox("&Drawn by:", lDrawn, bLastExcel ? lDrawn[1] : lDrawn[0]);
+                if (!dlg.runOkCancel()) return null;
+                ds.lCols = scopeColumns(cbColumns, ds.sCurrentCol);
+                ds.iScope = scopeRecords(cbRecords);
+                ds.bByRow = (cbArrange.Text ?? "").StartsWith("By row");
+                ds.sKind = cbKind.Text ?? "";
+                if (lKinds.IndexOf(ds.sKind) < 0) ds.sKind = lKinds[0];
+                ds.bExcel = cbDrawn != null && (cbDrawn.Text ?? "").StartsWith("Excel");
+                ds.sScopeSaid = columnsSaid(cbColumns, ds.sCurrentCol);
+            }
+            bLastByRow = ds.bByRow;
+            if (bGraphics) { sLastGraphicsKind = ds.sKind; bLastExcel = ds.bExcel; } else sLastStatisticsKind = ds.sKind;
+            if (ds.lCols.Count == 0) { Say.say("No columns to work with"); return null; }
+            // The current column first wherever a column is asked for.
+            if (ds.sCurrentCol.Length > 0 && ds.lCols.Contains(ds.sCurrentCol)) { ds.lCols.Remove(ds.sCurrentCol); ds.lCols.Insert(0, ds.sCurrentCol); }
+
+            foreach (string sC in ds.lCols) ds.dValues[sC] = new List<string>();
+            int iSavePos = db.absolutePosition;
+            object bookmarkSaved = null;
+            try { bookmarkSaved = db.bookmark; } catch { }
+            try
+            {
+                for (int i = 1; i <= db.recordCount; i++)
+                {
+                    if (ds.iScope == 2 && i != iSavePos) continue;
+                    try { db.absolutePosition = i; } catch { continue; }
+                    try { if (ds.iScope == 1 && !isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn))) continue; } catch { continue; }
+                    foreach (string sC in ds.lCols)
+                    {
+                        string sV = "";
+                        try { sV = db.getFieldValue(sC) ?? ""; } catch { sV = ""; }
+                        ds.dValues[sC].Add(sV);
+                    }
+                    ds.iRows++;
+                }
+            }
+            finally { if (bookmarkSaved != null) try { db.bookmark = bookmarkSaved; } catch { } }
+            invokeRefresh();
+            if (ds.iRows == 0) { Say.say("No records to work with"); return null; }
+
+            foreach (string sC in ds.lCols)
+            {
+                List<string> lNonEmpty = new List<string>();
+                foreach (string s in ds.dValues[sC]) if (!string.IsNullOrEmpty(s) && s.Trim().Length > 0) lNonEmpty.Add(s);
+                string sT = detectColumnDominantType(lNonEmpty);
+                if (sT == "numeric") ds.lNumeric.Add(sC);
+                else if (sT == "date") ds.lDate.Add(sC);
+                else if (sT == "boolean") ds.lBoolean.Add(sC);
+                else ds.lText.Add(sC);
+            }
+            // The column that names a record, when records are series: the first text column chosen.
+            if (ds.lText.Count > 0) ds.sLabelCol = ds.lText[0];
+            try { DbDoLog.write(sTitle + ": " + ds.sKind + (ds.bByRow ? " by row" : " by column") + ", " + ds.lCols.Count + " columns, "
+                + ds.iRows + " records (scope " + ds.iScope + "), numeric=" + ds.lNumeric.Count + " date=" + ds.lDate.Count
+                + " boolean=" + ds.lBoolean.Count + " text=" + ds.lText.Count + (ds.bExcel ? ", Excel" : "")); } catch { }
+            return ds;
+        }
+
+        // recordName: what a record is called in a by-row report or chart: its first text column, else its number.
+        private static string recordName(DataSetChoice ds, int iRow)
+        {
+            if (ds.sLabelCol.Length > 0)
+            {
+                string s = (ds.dValues[ds.sLabelCol][iRow] ?? "").Trim();
+                if (s.Length > 0) return s;
+            }
+            return "Record " + (iRow + 1);
+        }
+
+        private void generateStatisticsClicked(object sender, EventArgs evArgs)
+        {
+            const string c_sTitle = "Generate Statistics";
+            DataSetChoice ds = chooseDataSet(c_sTitle, false);
+            if (ds == null) return;
+            string sTable = db.currentTable ?? "table";
+            string sRecords = ds.iScope == 1 ? "marked records" : (ds.iScope == 2 ? "the current record" : "records in view");
+            if (ds.bByRow)
+            {
+                // BY ROW: each record summed up across its number columns. Only Summary has a meaning here.
+                if (ds.lNumeric.Count == 0) { Say.say("No number column among " + ds.sScopeSaid); return; }
+                if (ds.sKind != "Summary") Say.say(ds.sKind + " works by column; here is each record's summary instead.");
+                showInfoDialog("Statistics by row: " + sTable, buildRowStatistics(ds));
+                return;
+            }
+            if (ds.sKind == "Summary")
+            {
+                StringBuilder sb = new StringBuilder();
+                sb.Append("Statistics of ").Append(ds.iRows).Append(ds.iRows == 1 ? " record" : " records").Append(", ").Append(sRecords).Append(".\r\n\r\n");
+                foreach (string sC in ds.lCols)
+                {
+                    sb.Append(buildColumnReportPublic(sC, ds.dValues[sC]));
+                    sb.Append("\r\n----------------------------------------\r\n\r\n");
+                }
+                showInfoDialog("Summary statistics: " + sTable, sb.ToString());
+            }
+            else if (ds.sKind == "Frequency")
+            {
+                if (ds.lCols.Count == 1) { showInfoDialog("Frequency: " + ds.lCols[0], buildFrequencyReport(ds.lCols[0], ds.dValues[ds.lCols[0]])); return; }
+                // Several columns: each combination of their values, as Frequency by Columns counted.
+                List<string> lCombined = new List<string>();
+                for (int i = 0; i < ds.iRows; i++)
+                {
+                    List<string> lParts = new List<string>();
+                    foreach (string sC in ds.lCols) { string s = (ds.dValues[sC][i] ?? "").Trim(); lParts.Add(s.Length == 0 ? "blank" : s); }
+                    lCombined.Add(string.Join(" | ", lParts.ToArray()));
+                }
+                string sName = string.Join(" | ", ds.lCols.ToArray());
+                showInfoDialog("Frequency: " + sName, buildFrequencyReport(sName, lCombined));
+            }
+            else if (ds.sKind == "Group")
+            {
+                if (ds.lNumeric.Count == 0 || ds.lCols.Count < 2) { Say.say("A group report needs a number column and another column; choose Shown columns or All columns"); return; }
+                string sBy = pickOneColumn("Group Report", "Group by which column?", ds.lCols, ds.sCurrentCol);
+                if (sBy == null) return;
+                List<string> lMeasures = new List<string>(ds.lNumeric); lMeasures.Remove(sBy);
+                if (lMeasures.Count == 0) { Say.say("No number column besides " + sBy + " to total"); return; }
+                string sOf = lMeasures.Count == 1 ? lMeasures[0] : pickOneColumn("Group Report", "Total and average which number column?", lMeasures, lMeasures[0]);
+                if (sOf == null) return;
+                string sPeriod = "";
+                if (ds.lDate.Contains(sBy))
+                {
+                    sPeriod = chooseByButtons("Group by Date", new string[] { "Group the dates of " + sBy + " by year, by month, by weekday, or by each day." },
+                        new List<string> { "Year", "Month", "Weekday", "Day" });
+                    if (sPeriod == null) return;
+                }
+                showInfoDialog("Group: " + sOf + " by " + sBy, buildGroupReport(sBy, ds.dValues[sBy], sOf, ds.dValues[sOf], sPeriod));
+            }
+            else if (ds.sKind == "Relation")
+            {
+                if (ds.lNumeric.Count < 2) { Say.say("A relation report needs two number columns; choose Shown columns or All columns"); return; }
+                showInfoDialog("Relations: " + sTable, buildRelationReport(ds.lNumeric, ds.dValues));
+            }
+            else
+            {
+                if (ds.lCols.Count < 2) { Say.say("A cross-tab needs two columns; choose Shown columns or All columns"); return; }
+                string sA = pickOneColumn("Cross-tab", "Pick the row column:", ds.lCols, ds.sCurrentCol);
+                if (sA == null) return;
+                List<string> lOther = new List<string>(ds.lCols); lOther.Remove(sA);
+                string sB = lOther.Count == 1 ? lOther[0] : pickOneColumn("Cross-tab", "Pick the column column:", lOther, lOther[0]);
+                if (sB == null) return;
+                showInfoDialog("Cross-tab: " + sA + " by " + sB, buildCrosstabReport(sA, ds.dValues[sA], sB, ds.dValues[sB]));
+            }
+        }
+
+        // buildRowStatistics: each record's number columns summed up -- its total, average, middle, and which column
+        // is highest and lowest -- the takeaway first. At most 200 records, said when there are more.
+        private static string buildRowStatistics(DataSetChoice ds)
+        {
+            const int iMostRecords = 200;
+            StringBuilder sb = new StringBuilder();
+            int iShown = Math.Min(ds.iRows, iMostRecords);
+            sb.Append("Each record across ").Append(ds.lNumeric.Count).Append(ds.lNumeric.Count == 1 ? " number column" : " number columns")
+              .Append(": ").Append(string.Join(", ", ds.lNumeric.ToArray())).Append(".\r\n");
+            if (ds.iRows > iShown) sb.Append("The first ").Append(iShown).Append(" of ").Append(ds.iRows).Append(" records.\r\n");
+            sb.Append("\r\n");
+            for (int i = 0; i < iShown; i++)
+            {
+                List<double> lNumbers = new List<double>();
+                string sHigh = "", sLow = "";
+                double dHigh = double.MinValue, dLow = double.MaxValue, dSum = 0;
+                foreach (string sC in ds.lNumeric)
+                {
+                    double d;
+                    if (!double.TryParse((ds.dValues[sC][i] ?? "").Trim(), System.Globalization.NumberStyles.Any, System.Globalization.CultureInfo.InvariantCulture, out d)) continue;
+                    lNumbers.Add(d); dSum += d;
+                    if (d > dHigh) { dHigh = d; sHigh = sC; }
+                    if (d < dLow) { dLow = d; sLow = sC; }
+                }
+                sb.Append(recordName(ds, i)).Append(": ");
+                if (lNumbers.Count == 0) { sb.Append("no numbers.\r\n"); continue; }
+                lNumbers.Sort();
+                sb.Append(sHigh).Append(" is highest, ").Append(formatNumber(dHigh));
+                if (lNumbers.Count > 1) sb.Append("; ").Append(sLow).Append(" lowest, ").Append(formatNumber(dLow));
+                sb.Append(". Total ").Append(formatNumber(dSum)).Append(", average ").Append(formatNumber(dSum / lNumbers.Count))
+                  .Append(", middle ").Append(formatNumber(percentileSorted(lNumbers, 0.5))).Append(", ").Append(lNumbers.Count)
+                  .Append(lNumbers.Count == 1 ? " number" : " numbers").Append(".\r\n");
+            }
+            return sb.ToString();
+        }
+
+        private void generateGraphicsClicked(object sender, EventArgs evArgs)
+        {
+            const string c_sTitle = "Generate Graphics";
+            DataSetChoice ds = chooseDataSet(c_sTitle, true);
+            if (ds == null) return;
+            string sTable = db.currentTable ?? "table";
+            Homer.ChartSpec spec = new Homer.ChartSpec();
+            spec.sArrange = ds.bByRow ? "row" : "column";
+            spec.sLabel = ds.sLabelCol;
+            List<string> lUse = new List<string>();   // the columns the chart's table carries
+            string sKind = ds.sKind;
+            if (ds.bByRow && sKind != "Bar chart" && sKind != "Line chart")
+            {
+                Say.say(sKind + " works by column; drawing by column.");
+                ds.bByRow = false; spec.sArrange = "column";
+            }
+            if (ds.bByRow)
+            {
+                if (ds.lNumeric.Count == 0) { Say.say("No number column among " + ds.sScopeSaid); return; }
+                spec.sKind = sKind == "Bar chart" ? "rowbar" : "rowline";
+                spec.lsColumns = new List<string>(ds.lNumeric);
+                spec.sTitle = (sKind == "Bar chart" ? "Bars of " : "Lines of ") + (ds.iRows == 1 ? recordName(ds, 0) : ds.iRows + " records") + " across " + string.Join(", ", ds.lNumeric.ToArray());
+                lUse.AddRange(ds.lNumeric);
+            }
+            else if (sKind == "Bar chart" || sKind == "Pareto chart")
+            {
+                string sC = pickChartColumn(sKind, ds.lCols, ds.sCurrentCol);
+                if (sC == null) return;
+                spec.sKind = sKind == "Bar chart" ? "bar" : "pareto";
+                spec.sX = sC; lUse.Add(sC);
+                spec.sTitle = (sKind == "Bar chart" ? "How often each " : "Most common ") + sC + (sKind == "Bar chart" ? " occurs" : ", largest first");
+            }
+            else if (sKind == "Pie chart")
+            {
+                List<string> lPie = ds.lBoolean.Count > 0 ? ds.lBoolean : ds.lCols;
+                string sC = pickChartColumn(sKind, lPie, ds.sCurrentCol);
+                if (sC == null) return;
+                spec.sKind = "pie"; spec.sX = sC; lUse.Add(sC);
+                spec.sTitle = "The split of " + sC;
+            }
+            else if (sKind == "Histogram")
+            {
+                if (ds.lNumeric.Count == 0) { Say.say("No number column among " + ds.sScopeSaid); return; }
+                string sC = pickChartColumn(sKind, ds.lNumeric, ds.sCurrentCol);
+                if (sC == null) return;
+                spec.sKind = "histogram"; spec.sX = sC; lUse.Add(sC);
+                spec.sTitle = "How " + sC + " spreads";
+            }
+            else if (sKind == "Whisker plot")
+            {
+                if (ds.lNumeric.Count == 0) { Say.say("No number column among " + ds.sScopeSaid); return; }
+                spec.sKind = "box"; spec.lsColumns = new List<string>(ds.lNumeric); lUse.AddRange(ds.lNumeric);
+                spec.sTitle = "The middle and range of " + string.Join(", ", ds.lNumeric.ToArray());
+            }
+            else if (sKind == "Scatter plot")
+            {
+                if (ds.lNumeric.Count < 2) { Say.say("A scatter plot needs two number columns; choose Shown columns or All columns"); return; }
+                string sX = pickOneColumn("Scatter Plot", "Pick the across (X) number column:", ds.lNumeric, ds.lNumeric.Contains(ds.sCurrentCol) ? ds.sCurrentCol : ds.lNumeric[0]);
+                if (sX == null) return;
+                List<string> lYs = new List<string>(ds.lNumeric); lYs.Remove(sX);
+                string sY = lYs.Count == 1 ? lYs[0] : pickOneColumn("Scatter Plot", "Pick the up (Y) number column:", lYs, lYs[0]);
+                if (sY == null) return;
+                spec.sKind = "scatter"; spec.sX = sX; spec.sY = sY; lUse.Add(sX); lUse.Add(sY);
+                spec.sTitle = sY + " against " + sX;
+            }
+            else if (sKind == "Line chart")
+            {
+                if (ds.lNumeric.Count == 0) { Say.say("No number column among " + ds.sScopeSaid); return; }
+                spec.sKind = "line"; spec.lsColumns = new List<string>(ds.lNumeric); lUse.AddRange(ds.lNumeric);
+                spec.sTitle = string.Join(", ", ds.lNumeric.ToArray()) + " over the records";
+            }
+            else
+            {
+                if (ds.lDate.Count == 0) { Say.say("No date column among " + ds.sScopeSaid); return; }
+                string sC = pickChartColumn(sKind, ds.lDate, ds.sCurrentCol);
+                if (sC == null) return;
+                string sView = chooseByButtons("Date Chart: " + sC, new string[] { "Count the records by month, by year, or by month of the year, which shows a season." },
+                    new List<string> { "Month", "Year", "Season" });
+                if (sView == null) return;
+                spec.sKind = "datechart"; spec.sX = sC; lUse.Add(sC);
+                spec.sPeriod = sView == "Year" ? "year" : (sView == "Season" ? "monthofyear" : "month");
+                spec.sTitle = "Records by " + (sView == "Season" ? "month of the year" : sView.ToLowerInvariant()) + ", from " + sC;
+            }
+            if (ds.sLabelCol.Length > 0 && !lUse.Contains(ds.sLabelCol)) lUse.Insert(0, ds.sLabelCol);
+
+            if (ds.bExcel) { excelChart(spec, c_sTitle); return; }
+            if (Homer.Conversion.pythonProgram().Length == 0)
+            {
+                string sAnswer = chooseByButtons(c_sTitle, new string[] {
+                    "Python, which draws the charts, is not on this computer. Install it now, with the free chart packages? It is fetched with winget and takes a few minutes. Or draw this chart in Excel, if Microsoft Office is installed." },
+                    new List<string> { "Install", "Excel" });
+                if (sAnswer == "Install") runDataToolsInstall(c_sTitle);
+                else if (sAnswer == "Excel") excelChart(spec, c_sTitle);
+                return;
+            }
+            List<List<string>> llRows = new List<List<string>>();
+            for (int i = 0; i < ds.iRows; i++)
+            {
+                List<string> lRow = new List<string>();
+                foreach (string sC in lUse) lRow.Add(ds.dValues[sC][i] ?? "");
+                llRows.Add(lRow);
+            }
+            string sBase = Path.Combine(Homer.DataReport.chartFolder("DbDo"),
+                Homer.DataReport.safeName(sTable + " - " + spec.sTitle) + " " + DateTime.Now.ToString("yyyy-MM-dd HHmm"));
+            Say.say("Drawing the chart");
+            string sSummary, sHtm, sError;
+            Cursor = Cursors.WaitCursor;
+            bool bDrawn;
+            try { bDrawn = Homer.DataReport.drawChart(lUse, llRows, spec, sBase, out sSummary, out sHtm, out sError); }
+            finally { Cursor = Cursors.Default; }
+            if (!bDrawn)
+            {
+                try { DbDoLog.write(c_sTitle + ": Python could not draw: " + sError); } catch { }
+                bool bExcelCan = excelKind(spec) != null;
+                string sAnswer = chooseByButtons(c_sTitle, new string[] {
+                    "The chart could not be drawn: " + sError + ".",
+                    "Install repairs Python and the chart packages." + (bExcelCan ? " Excel draws this chart instead, if Microsoft Office is installed." : "") },
+                    bExcelCan ? new List<string> { "Install", "Excel" } : new List<string> { "Install" });
+                if (sAnswer == "Install") runDataToolsInstall(c_sTitle);
+                else if (sAnswer == "Excel") excelChart(spec, c_sTitle);
+                return;
+            }
+            string sFolder = Path.GetDirectoryName(sBase);
+            string sOpen = chooseByButtons(c_sTitle, new string[] {
+                sSummary,
+                "Saved in " + sFolder + " as a page, a picture (PNG and SVG) and an Excel workbook with the chart, each named " + Path.GetFileName(sBase) + ".",
+                "Page opens it in your browser, with the numbers as a table. Workbook opens the chart in Excel or another spreadsheet program. Folder opens the folder, to attach the files to a message." },
+                new List<string> { "Page", "Workbook", "Folder" });
+            string sTarget = sOpen == "Page" ? sHtm : (sOpen == "Workbook" ? sBase + ".xlsx" : (sOpen == "Folder" ? sFolder : ""));
+            if (sTarget.Length > 0) { try { System.Diagnostics.Process.Start(sTarget); } catch (Exception ex) { Say.say("Could not open " + sTarget + ": " + ex.Message); } }
+        }
+
+        // pickChartColumn: the column a one-column chart draws -- the current one when it qualifies and is alone,
+        // else asked, the current column first.
+        private string pickChartColumn(string sKind, List<string> lCandidates, string sCurrent)
+        {
+            if (lCandidates.Count == 0) return null;
+            if (lCandidates.Count == 1) return lCandidates[0];
+            return pickOneColumn(sKind, "Pick the column to chart:", lCandidates, lCandidates.Contains(sCurrent) ? sCurrent : lCandidates[0]);
+        }
+
+        // excelKind: the Excel engine's name for a chart, or null when Excel's engine has no such chart.
+        private static string excelKind(Homer.ChartSpec spec)
+        {
+            switch (spec.sKind)
+            {
+                case "bar": return "frequency";
+                case "pareto": return "pareto";
+                case "pie": return "pie";
+                case "histogram": return "histogram";
+                case "box": return "boxwhisker";
+                case "scatter": return "scatter";
+                case "datechart": return spec.sPeriod == "year" ? "byyear" : (spec.sPeriod == "monthofyear" ? "bymonth" : "timeline");
+                default: return null;
+            }
+        }
+
+        // excelChart: the chart drawn by Excel, as before 21 November 2026. Excel's engine charts every record in view.
+        private void excelChart(Homer.ChartSpec spec, string sTitle)
+        {
+            string sKind = excelKind(spec);
+            if (sKind == null) { LbcMessage.show(this, "Excel's charts here do not include this kind. Choose Python in Drawn by.", sTitle, MessageBoxButtons.OK, MessageBoxIcon.Information); return; }
+            string sColumn = spec.sX.Length > 0 ? spec.sX : (spec.lsColumns.Count > 0 ? spec.lsColumns[0] : "");
+            if (sColumn.Length == 0) return;
+            Say.say("Excel charts every record in view");
+            if (sKind == "scatter") runScatterChart(spec.sX, spec.sY);
+            else runColumnChart(sColumn, sKind);
+        }
+
+        // runDataToolsInstall: the kit's installDataTools.cmd in a window of its own, as Play Media runs installMpv.
+        private void runDataToolsInstall(string sTitle)
+        {
+            string sScript = Path.Combine(Homer.Paths.shippedScripts(), "installDataTools.cmd");
+            if (!File.Exists(sScript)) { LbcMessage.show(this, "installDataTools.cmd is missing from " + Homer.Paths.shippedScripts() + ". Install DbDo again.", sTitle); return; }
+            try { System.Diagnostics.Process.Start(new System.Diagnostics.ProcessStartInfo("cmd.exe", "/c \"" + sScript + "\"") { UseShellExecute = true }); }
+            catch (Exception ex) { LbcMessage.show(this, "Could not start the install: " + ex.Message, sTitle); }
+            Say.say("When the install finishes, press Alt+Shift+G again.");
+        }
+
+        // ===================================================================
+        // RETIRED 21 November 2026: Generate Statistics and Generate Graphics replace it, and "Generate from Grid" in an
+        // old key list runs Generate Graphics. Kept, unbound, as the record of the one-row-of-buttons design.
         // Generate from Grid (Alt+Shift+G): profile the grid's columns by data
         // type, then offer a pick-list of outputs matched to what the data
         // supports. Native outputs (summary statistics, frequency table,

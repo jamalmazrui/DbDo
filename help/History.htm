@@ -257,6 +257,19 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a href="#november-2026-marked-or-current-everywhere"
+id="toc-november-2026-marked-or-current-everywhere">22 November 2026 –
+Marked or Current everywhere</a></li>
+<li><a
+href="#november-2026-generate-statistics-generate-graphics-record-playback"
+id="toc-november-2026-generate-statistics-generate-graphics-record-playback">21
+November 2026 – Generate Statistics, Generate Graphics, Record
+Playback</a></li>
+<li><a href="#november-2026-key-groups"
+id="toc-november-2026-key-groups">21 November 2026 – Key groups</a></li>
+<li><a href="#november-2026-read-wide-read-lean-and-no-window-menu"
+id="toc-november-2026-read-wide-read-lean-and-no-window-menu">21
+November 2026 – Read wide, read lean, and no Window menu</a></li>
 <li><a
 href="#november-2026-describedfilms-english-movies-with-audio-description"
 id="toc-november-2026-describedfilms-english-movies-with-audio-description">19
@@ -898,6 +911,96 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Control+Shift+F1</strong> inside DbDo to open this file
 in your browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="november-2026-marked-or-current-everywhere">22 November 2026 –
+Marked or Current everywhere</h2>
+<ul>
+<li><strong>Every command that can act on one record or several asks
+Marked or Current</strong> when records are marked: now also Delete
+without Confirmation, Copy Record, Copy Append Record, Copy Visible
+Cells, Mail Record and Open url. Each takes all the marked records, or
+the current one alone.</li>
+<li><strong>Play Media asks first.</strong> With records marked, it asks
+before looking at the current record, so a current record with no
+address no longer stops the marked play list.</li>
+<li><strong>Say Whole Record has no menu letter,</strong> since Read
+Wide has W on the Say menu. Its key, Shift+W, is unchanged.</li>
+<li><strong>Toggle Mark is listed as Control+Space or
+Space.</strong></li>
+</ul>
+<h2
+id="november-2026-generate-statistics-generate-graphics-record-playback">21
+November 2026 – Generate Statistics, Generate Graphics, Record
+Playback</h2>
+<ul>
+<li><strong>Generate Statistics (Alt+Shift+S) and Generate Graphics
+(Alt+Shift+G) replace Generate from Grid.</strong> Both open one dataset
+dialog: which columns, which records (all in view, the marked ones, or
+the current one), arrange by column or by row, and the kind. Statistics
+open in a window to read. By row, each record is summed up across its
+number columns.</li>
+<li><strong>Charts without Microsoft Office.</strong> Generate Graphics
+draws with Python and free packages into Documents, DbDo Charts: a web
+page with the takeaway and the numbers as a table, a PNG and SVG
+picture, and an Excel workbook with a real chart, made without Excel.
+Drawn by Excel still works, and DbDo offers it, or the installer, when
+Python cannot draw. “Generate from Grid” in an old key list runs
+Generate Graphics.</li>
+<li><strong>Record Playback, Control+Shift+P,</strong> is new, as in
+FileDir: Play Media, playing at once and recording what plays to Music,
+Homer Player.</li>
+<li><strong>Space toggles the mark,</strong> as in FileDir;
+Control+Space still does. A Space typed within a second of a letter goes
+on to the type-ahead search, so “new y” still finds New York.</li>
+<li><strong>This needs HomerDev 1.269.0.</strong></li>
+</ul>
+<h2 id="november-2026-key-groups">21 November 2026 – Key groups</h2>
+<ul>
+<li><strong>The Again keys:</strong> Repeat Go to is Go to Record Again
+(Alt+G), and Jump Again (Alt+J) and Keywords Again (Alt+K) are new, as
+in FileDir. Each repeats its own search forward; F3 still repeats
+whichever came last.</li>
+<li><strong>One Start for a marking run,</strong> as in FileDir: Start
+Mark or Unmark (F8), then Complete Mark (Shift+F8) or Complete Unmark
+(Alt+Shift+F8). Start Unmark is retired into it.</li>
+<li><strong>Alt+F8 reads everything,</strong> as Read All does in
+EdSharp and HomerView: here, Read Wide. <strong>Control+F8 copies
+everything:</strong> Copy Grid.</li>
+<li><strong>Edit Script is Alt+Shift+V,</strong> beside Invoke Script on
+Alt+V, as in EdSharp. It was Alt+Shift+S.</li>
+<li><strong>Names with small words in lower case:</strong> Close All but
+Current Window, Delete without Confirmation. Keywords’ description now
+reads “with the keywords in its fields”.</li>
+<li><strong>Say Status</strong> lists Alt+Z first, the suite key, then
+Shift+Z.</li>
+</ul>
+<h2 id="november-2026-read-wide-read-lean-and-no-window-menu">21
+November 2026 – Read wide, read lean, and no Window menu</h2>
+<ul>
+<li><strong>W reads wide and L reads lean.</strong> W is the grid’s
+width, every shown column; L is lean, the current column alone. Alt
+reads from the first record, Alt+Shift only the marked records, and
+Control from the current one: Read Wide is Alt+W, Read Wide Marked
+Alt+Shift+W (or Shift+Space) and Read Wide from Current Control+W; Read
+Lean is Alt+L, with Alt+Shift+L and Control+L the same way. Read Wide
+was Read List, on the L keys; Read Lean was Say Column as List, with no
+keys. A second press of any of them shows the values in a window. The
+marked-from-current forms are on the menu with no key.</li>
+<li><strong>Y counts the same way.</strong> Say Yield stays Alt+Y; Say
+Yield Marked moves from Shift+Y to Alt+Shift+Y; Say Yield from Current
+(Control+Y) is new, and so is Say Yield Marked from Current, on the menu
+with no key. Shift+Y is free.</li>
+<li><strong>Yield with Regex is Control+Shift+Y,</strong> as in EdSharp,
+FileDir and HomerView, beside Extract with Regex and Replace with Regex.
+It asks what Extract asks and says how many matches there are, and in
+how many records.</li>
+<li><strong>No Window menu.</strong> Current Windows, Next and Previous
+Window, Window Toggle, Say Windows Open and the Close commands are on
+the File menu, before Exit DbDo, and Open Table sits beside Choose
+Table. No key changed.</li>
+<li><strong>The guide</strong> explains wide, lean and yield in a new
+section, and tutorial 1 says Alt plus Shift plus Y for the marked.</li>
+<li><strong>This needs HomerDev 1.269.0.</strong></li>
+</ul>
 <h2
 id="november-2026-describedfilms-english-movies-with-audio-description">19
 November 2026 – DescribedFilms, English movies with audio

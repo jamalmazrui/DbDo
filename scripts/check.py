@@ -109,6 +109,23 @@ lsTextExtensions = (".cs", ".py", ".ps1", ".md", ".htm", ".inix", ".txt", ".iss"
 sScriptDir = os.path.dirname(os.path.abspath(__file__))
 
 
+
+def gitCarriedFiles(sProject):
+    """The files git tracks or would add in a project, as whole paths, from git ls-files; [] when there is no repository
+    or git cannot be run, and the caller then reads the whole tree."""
+    if not os.path.isdir(os.path.join(sProject, ".git")): return []
+    try:
+        oRun = subprocess.run(["git", "-C", sProject, "ls-files", "-z", "--cached", "--others", "--exclude-standard"],
+                              capture_output=True, timeout=300)
+    except Exception as oError:
+        logLine("git ls-files could not run: %s" % oError)
+        return []
+    logLine("git ls-files: exit %d, %d bytes" % (oRun.returncode, len(oRun.stdout)))
+    if oRun.returncode != 0: return []
+    lsFiles = sorted({s for s in oRun.stdout.decode("utf-8", "replace").split("\0") if s})
+    return [os.path.join(sProject, s.replace("/", os.sep)) for s in lsFiles]
+
+
 def projectRoot(sStart):
     """The project is the current folder, or its parent when the current
     folder is the project's scripts or exec folder. One rule for every tool;
@@ -1664,7 +1681,31 @@ def installerFindings(sText):
         mRunAll = re.search(r"(?ms)^\[Run\]\s*\n(.*?)(?=^\[[A-Za-z]+\]\s*$)", s)
         if not mRunAll or sScript not in mRunAll.group(1): lBad.append("never runs %s, the script whose state decides its screen reader boxes" % sScript)
         if re.search(r"(?i)\b(jaws)\b", s) and not re.search(r"(?i)Check:\s*(?:homerFinishRuns\s+and\s+)?isInstallJaws", s): lBad.append("offers no Install box for the JAWS scripts")
+    # EVERY VERB BEFORE THE CHECKBOXES (22 November 2026, a long-standing rule Jamal restated): what is installed is asked
+    # in CurStepChanged(ssPostInstall), through the kit's homerProbeAll, so the finish page appears with each Install,
+    # Update or Reinstall already known and nothing is checked after it.
+    if re.search(r'(?mi)^\s*#include\b.*HomerComponents\.iss', s) and not re.search(r"(?i)\bhomerProbeAll\s*\(", s):
+        lBad.append("never calls homerProbeAll in CurStepChanged(ssPostInstall), so its components are first asked while the finish page is being drawn")
     return lBad
+
+def checkVersionInTitle():
+    """NO VERSION IN A WINDOW'S TITLE (22 November 2026, a Homer guideline at Jamal's request). A screen reader says
+    the title every time the window or dialog gains the focus, and a version number there is noise to the person
+    using the program. The version belongs in the documents, the help screen (F1, About) and Elevate Version (F11).
+    This fails a C# line that puts a version into a form's Text or an Lbc dialog's title."""
+    oTitle = re.compile(r"(?:\bnew\s+LbcDialog\s*\(|\b(?:this|form|frame|dlg\.form)\.Text\s*=|^\s*Text\s*=)[^;\n]*\b(?:BuildVersion\.Version|sVersion|ProductVersion|Application\.ProductVersion|sAppVersion)\b", re.M)
+    lsBad = []
+    for sPath in sourceFiles():
+        if not sPath.lower().endswith(".cs"): continue
+        sText = readText(sPath)
+        for oMatch in oTitle.finditer(sText):
+            lsBad.append("%s line %d" % (os.path.relpath(sPath, sRoot), sText.count("\n", 0, oMatch.start()) + 1))
+    for s in lsBad: logLine("VERSION IN TITLE: " + s)
+    if lsBad:
+        return finding("version in title", "fail", "%d window or dialog title%s name the version, which the reader repeats as noise; put it in the help and About instead: %s"
+                       % (len(lsBad), "" if len(lsBad) == 1 else "s", ", ".join(lsBad[:6])))
+    return finding("version in title", "pass", "no window or dialog title names the version")
+
 
 def checkInstaller():
     """The Homer installer pattern: the kit's HomerComponents.iss, its screen reader functions and script, and a
@@ -2413,7 +2454,14 @@ def main():
             # --FRESH MEANS EVERY FILE IS READ (14 October 2026, from an audit by another AI): a fresh check also verifies
             # the fingerprint, so a file changed without changing its size or time is not trusted by them.
             oCache = fingerprint.Cache(sRoot, logLine, True if dArguments.fresh else None)
-            sPrint = oCache.fingerprint([sRoot], [sKind, platform.python_version()])
+            # ONLY WHAT GIT WOULD CARRY IS FINGERPRINTED (1.265.1, 20 November 2026). Every file in the project was read,
+            # and with HomerVerify=1 read in full: AppHelpGuides holds gigabytes of harvested pages in data\harvests and
+            # results, none of them pushed, and push's check sat 25 minutes on them, saying nothing, until it was stopped.
+            # The pass now covers the files git tracks or would add, from git's own list; with no repository or no git,
+            # the whole tree as before. The count is logged and said, so a long read is never silent.
+            lsCheckInputs = gitCarriedFiles(sRoot) or [sRoot]
+            logLine("fingerprint inputs: %s" % ("%d files git carries" % len(lsCheckInputs) if lsCheckInputs != [sRoot] else "the whole project, as git gave no list"))
+            sPrint = oCache.fingerprint(lsCheckInputs, [sKind, platform.python_version()])
     except Exception as oError:
         logLine("fingerprint unavailable, so every check runs: %s" % oError)
         oCache = None
@@ -2468,6 +2516,7 @@ def main():
         checkSharedCode()
         checkIssComments()
         checkInstaller()
+        checkVersionInTitle()
         checkInstallerNames()
         checkShipped()
         checkMainThread()
@@ -2515,7 +2564,7 @@ def main():
             # checks was recorded, but a passing check runs the app's acceptance build, which rewrites the program, the
             # installer and generated pages; so release's check, a minute after push's, found "its inputs changed" and
             # built DbDo a third time. The files as they stand after a pass are the ones that passed.
-            oCache.record("check pass", oCache.fingerprint([sRoot], [sKind, platform.python_version()]), [], lsFindings)
+            oCache.record("check pass", oCache.fingerprint(gitCarriedFiles(sRoot) or [sRoot], [sKind, platform.python_version()]), [], lsFindings)
     logLine("check end")
     return 1 if iFailed else 0
 

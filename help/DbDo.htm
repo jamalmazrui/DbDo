@@ -416,7 +416,10 @@ commands.</p>
 state — its position, its filter, its sort, its selected columns —
 self-contained and announced per window. When you switch windows you
 switch whole working contexts.</p>
-<p>The window commands live in the <strong>Window menu</strong>:</p>
+<p>The window commands live on the <strong>File menu</strong>, just
+before Exit DbDo. DbDo has no Window menu, so Alt+W is free to read the
+grid wide (see “Reading the grid aloud: wide, lean and yield”,
+below):</p>
 <ul>
 <li><strong>Current Windows</strong> (F4) lists every open window; pick
 one to jump to it.</li>
@@ -427,17 +430,17 @@ Window</strong> (Control+Shift+Tab) cycle through them.</li>
 <li><strong>Say Windows Open</strong> (Shift+F4) speaks how many windows
 are open and their titles.</li>
 <li><strong>Close Window</strong> (Control+F4) closes the current one;
-<strong>Close All But Current Window</strong> (Control+Shift+F4) leaves
+<strong>Close All but Current Window</strong> (Control+Shift+F4) leaves
 only the active one. Closing the last window exits DbDo, because the
 menu bar lives in the window.</li>
 </ul>
 <p>There is a deliberate distinction between <strong>opening</strong> a
-table and <strong>going to</strong> one. <strong>Open Table in New
-Window</strong> (Control+Shift+T) makes a <em>new window</em> for a
-table; <strong>Choose Table</strong> (Control+T) changes the table shown
-in the <em>current</em> window. Open when you want both tables visible
-at once; choose when you simply want to switch what this window is
-looking at.</p>
+table and <strong>going to</strong> one. <strong>Open Table</strong>
+(Control+Shift+O) makes a <em>new window</em> for a table;
+<strong>Choose Table</strong> (Control+T) changes the table shown in the
+<em>current</em> window. Open when you want both tables visible at once;
+choose when you simply want to switch what this window is looking
+at.</p>
 <h3 id="the-data-list">The data list</h3>
 <p>Inside each window the records are shown in a <strong>data
 list</strong> — a standard Windows list control with a row per record
@@ -506,8 +509,9 @@ is which prevents surprises:</p>
 <ul>
 <li>Commands that act on <strong>the grid</strong> operate on <em>what
 you are looking at</em> — the current filtered, sorted, column-selected
-view. <strong>Generate from Grid</strong> is the clearest example: it
-analyzes the virtual grid.</li>
+view. <strong>Generate Statistics</strong> and <strong>Generate
+Graphics</strong> are the clearest examples: they analyze the virtual
+grid.</li>
 <li>Commands that act on <strong>the physical table</strong> operate on
 <em>all the records</em>, regardless of the current filter or sort.
 <strong>Run Report</strong> is the clearest example: it reads the whole
@@ -641,12 +645,12 @@ that.”</p>
 <p>Every menu command has a name and, usually, a <strong>chord</strong>
 — a keyboard shortcut shown next to it in the menu. Chords follow a
 consistent <strong>mnemonic rule</strong>: the letter in the chord is
-the first letter of a word in the command’s name. <em>Statistics from
-Column</em> is Alt+Shift+S; <em>Generate from Grid</em> is Alt+Shift+G;
-<em>Filter Records</em> is Control+F. Once you know a command’s name you
-can usually guess its chord, and vice versa. Chords are grouped by
-modifier so related commands share a shape — the Say-something status
-commands are mostly Shift+letter, for instance.</p>
+the first letter of a word in the command’s name. <em>Generate
+Statistics</em> is Alt+Shift+S; <em>Generate Graphics</em> is
+Alt+Shift+G; <em>Filter Records</em> is Control+F. Once you know a
+command’s name you can usually guess its chord, and vice versa. Chords
+are grouped by modifier so related commands share a shape — the
+Say-something status commands are mostly Shift+letter, for instance.</p>
 <h4 id="convenience-keys-in-text-fields">2. Convenience keys in text
 fields</h4>
 <p>When you are <em>inside a text box</em> — editing a cell, a note, a
@@ -685,6 +689,37 @@ Status, Say Database, Say Order, Say Yield (record count), Say Filter,
 Say Position, Say Cell, and many more. These are how you interrogate the
 screen on demand instead of hunting for information, and they are listed
 in full in the command reference.</p>
+<h4 id="reading-the-grid-aloud-wide-lean-and-yield">Reading the grid
+aloud: wide, lean and yield</h4>
+<p>Three letters read or count the records in view. Each works with the
+same three modifiers, so learning one teaches all three.</p>
+<ul>
+<li><strong>W, wide,</strong> reads every shown column of each record:
+the grid’s whole width. Read Wide is Alt+W.</li>
+<li><strong>L, lean,</strong> reads only the current column. Read Lean
+is Alt+L.</li>
+<li><strong>Y, yield,</strong> counts the records. Say Yield is
+Alt+Y.</li>
+</ul>
+<p>W and L are the widest and narrowest letters of the alphabet, which
+helps them stick.</p>
+<ul>
+<li><strong>Alt</strong> starts from the first record.</li>
+<li><strong>Alt+Shift</strong> keeps only the marked records.</li>
+<li><strong>Control</strong> starts from the current record.</li>
+</ul>
+<p>So Control+L reads the current column from here down, and Alt+Shift+Y
+says how many records are marked. Readings go one value at a time, and
+any key stops them. Press a reading key twice to see the same values in
+a window instead. Shift+Space also reads the marked records wide.</p>
+<p>The fourth form, marked records from the current one on, is on the
+menu with no key: Read Wide Marked from Current, Read Lean Marked from
+Current and Say Yield Marked from Current. Control and Shift with a
+letter is kept for commands that change things, and Control+Shift+Y is
+Yield with Regex, beside Extract with Regex (Control+Shift+E) and
+Replace with Regex (Control+Shift+R), as in every Homer Suite app.</p>
+<p>FileDir reads and counts its list with the same L and Y keys. It has
+no W keys, since its list has one column.</p>
 <h4 id="key-help">Key Help</h4>
 <p><strong>Key Describer Toggle</strong> (Control+F1) turns on a
 learning mode: while it is on, pressing a command chord
@@ -717,8 +752,8 @@ the form <code>name: TYPE</code>, with no limit to how many, and you can
 paste a structure in. On OK, if fields begin with the same letter, DbDo
 says which, since only the first of each gets an Alt letter in the
 record form, and offers to go back and rename them.</p></li>
-<li><p><strong>Open Table in New Window</strong> (Control+Shift+T) opens
-a table (or arbitrary query) in a new window.</p></li>
+<li><p><strong>Open Table</strong> (Control+Shift+O) opens a table (or
+arbitrary query) in a new window.</p></li>
 <li><p><strong>Recent Databases</strong> (Alt+R) reopens something you
 used lately.</p></li>
 <li><p><strong>Close Database</strong> closes the current database;
@@ -826,7 +861,10 @@ type.</p>
 <p>Beyond the grid’s keys, the cursor moves with these commands:</p>
 <ul>
 <li><strong>Go to Record</strong> (Control+G) jumps to a record number;
-<strong>Repeat Go to</strong> (Alt+G) repeats it.</li>
+<strong>Go to Record Again</strong> (Alt+G) repeats it. <strong>Jump
+Again</strong> (Alt+J) and <strong>Keywords Again</strong> (Alt+K)
+repeat those searches forward, as in FileDir; F3 repeats whichever
+search came last.</li>
 <li><strong>Keywords</strong> (Control+K) searches for text;
 <strong>Reverse Keywords</strong> (Control+Shift+K) searches backward;
 <strong>Search Next</strong> (F3) and <strong>Search Previous</strong>
@@ -875,8 +913,12 @@ match of a regular expression to the clipboard, one per line, from the
 same Columns and Records choices; it starts on all columns, hidden ones
 too, so an email address in the notes is found. It has the same name and
 key as in EdSharp and FileDir.</li>
+<li><strong>Yield with Regex</strong> (Control+Shift+Y) asks the same
+questions and says how many matches there are, and in how many records,
+leaving the clipboard alone. It has the same name and key as in EdSharp,
+FileDir and HomerView.</li>
 <li><strong>Delete Record</strong> (Control+D) deletes the current
-record with confirmation; <strong>Delete Without Confirmation</strong>
+record with confirmation; <strong>Delete without Confirmation</strong>
 (Control+Shift+D) skips the prompt.</li>
 </ul>
 <p>All edits auto-commit. If a table is read-only, <strong>Read Only
@@ -887,8 +929,10 @@ multi-select. The <code>marked</code> field carries the state.</p>
 <ul>
 <li><strong>Mark Record</strong> (Control+M) marks the current record;
 <strong>Unmark Record</strong> (Control+Shift+M) clears it;
-<strong>Toggle Mark</strong> (Control+Space) flips it; <strong>Say
-Marked</strong> (Shift+M) speaks it.</li>
+<strong>Toggle Mark</strong> (Control+Space or Space) flips it – a Space
+typed within a second of a letter goes on to the type-ahead search
+instead, so “new y” still finds New York; <strong>Say Marked</strong>
+(Shift+M) speaks it.</li>
 <li><strong>Mark All</strong> (Control+A), <strong>Unmark All</strong>
 (Control+Shift+A), and <strong>Invert Marked</strong> (Control+I) act
 across the current view.</li>
@@ -904,15 +948,24 @@ where marking went.</li>
 <li><strong>Control+Up Arrow and Control+Down Arrow</strong> go to the
 previous and next marked record; <strong>Control+Page Up and
 Control+Page Down</strong> go to the first and last.</li>
-<li>To mark a <strong>range</strong>, set an anchor with <strong>Start
-Mark</strong> (F8) and extend to the cursor with <strong>Complete
-Mark</strong> (Shift+F8). <strong>Start Unmark</strong> (Alt+F8) and
-<strong>Complete Unmark</strong> (Alt+Shift+F8) do the same for
-clearing, with a separate anchor so building a mark range and an unmark
-range never clobber each other.</li>
+<li>To mark a <strong>range</strong>, start it with <strong>Start Mark
+or Unmark</strong> (F8), move, and finish with <strong>Complete
+Mark</strong> (Shift+F8) to mark every record between, or
+<strong>Complete Unmark</strong> (Alt+Shift+F8) to unmark them. This is
+FileDir’s way too. Alt+F8 reads everything (Read Wide), as Read All does
+in EdSharp and HomerView.</li>
 </ul>
 <p>Marked records can then be reported, filtered, or exported as a set,
 and several Say commands report only the marked ones.</p>
+<p><strong>Marked or Current.</strong> A command that can act on one
+record or on several asks which you mean whenever records are marked:
+Delete Record, Delete without Confirmation, Copy Record, Copy Append
+Record, Copy Visible Cells, Mail Record, Open url, Play Media and Record
+Playback. Enter takes the marked records; C takes the current one alone
+and leaves the marks as they are. It does not ask when the only marked
+record is the current one. FileDir asks the same question, the same way.
+Commands that work on the whole view, such as Export Data and Copy Grid,
+and the Say and Read commands, never ask.</p>
 <h3 id="filtering-and-sorting">Filtering and sorting</h3>
 <p>Filtering and sorting reshape the grid without touching the physical
 table.</p>
@@ -1212,26 +1265,69 @@ commands and short SQL typed as lines, for people who think in
 commands.</li>
 </ul>
 <h3 id="to-analyze-what-you-see">To analyze what you see</h3>
-<p><strong>Generate from Grid</strong> (Alt+Shift+G) reports on the grid
-as it stands – the shown columns, the records the filter keeps – and
-starts every report with its takeaway, then the details:</p>
+<p>Two commands analyze the grid: <strong>Generate Statistics</strong>
+(Alt+Shift+S) for reports you read, and <strong>Generate
+Graphics</strong> (Alt+Shift+G) for charts you hand to sighted
+colleagues. Both open the same dataset dialog, with four choices:</p>
 <ul>
-<li><strong>Statistics report</strong> (S): each shown column’s range,
-middle and spread, and values far outside the rest.</li>
-<li><strong>Frequency report</strong> (F): how many records hold each
-value of the current column, or each combination of the shown columns,
-with a running percentage.</li>
-<li><strong>Group report</strong> (G): a number column totalled and
-averaged for each value of another column, or for each year, month or
-weekday of a date.</li>
-<li><strong>Relation report</strong> (R): how strongly each pair of
-number columns rises and falls together, and the straight line that best
-fits the strongest pair. A numbering, such as a record number, is left
-out.</li>
-<li><strong>Cross-tab report</strong> (C): one column by another.</li>
-<li><strong>Excel chart</strong> (E): a bar, Pareto, pie, histogram,
-box, scatter or date chart, with a description of what it shows.</li>
+<li><strong>Which columns</strong> (Alt+C): the current column, the
+shown columns (the usual start), or all columns, hidden ones too.</li>
+<li><strong>Which records</strong> (Alt+R): all records in view, the
+marked records (offered, and chosen first, when some are marked), or the
+current record. This takes the place of the Marked or Current
+question.</li>
+<li><strong>Arrange</strong> (Alt+A): by column, where each column is a
+variable and the records are its values – the usual way – or by row,
+where each record is a series across the columns, such as a record
+holding twelve months. By row lets you sum up or draw the current record
+alone.</li>
+<li><strong>Kind</strong> (Alt+K): what to make. Generate Graphics adds
+<strong>Drawn by</strong> (Alt+D): Python or Excel.</li>
 </ul>
+<p>Every report and chart starts with its takeaway, then the
+details.</p>
+<p>Generate Statistics offers these kinds:</p>
+<ul>
+<li><strong>Summary:</strong> each chosen column’s range, middle and
+spread, and values far outside the rest. Arranged by row, each record’s
+total, average and middle, and which column is highest and lowest.</li>
+<li><strong>Frequency:</strong> how many records hold each value of one
+column, or each combination of several, with a running percentage.</li>
+<li><strong>Group:</strong> a number column totalled and averaged for
+each value of another column, or for each year, month or weekday of a
+date.</li>
+<li><strong>Relation:</strong> how strongly each pair of number columns
+rises and falls together, and the straight line that best fits the
+strongest pair. A numbering, such as a record number, is left out.</li>
+<li><strong>Cross-tab:</strong> one column by another.</li>
+</ul>
+<p>Generate Graphics offers a bar chart (how often each value occurs), a
+Pareto chart (the same, largest first, with the running share), a pie
+chart (the split of a yes-or-no column), a histogram (how a number
+column spreads), a whisker plot (the middle and range of each number
+column), a scatter plot (one number column against another, with the
+line that fits), a line chart and a date chart (records by month, year
+or season). Arranged by row, the bar and line charts draw each record
+across its number columns, up to eight records.</p>
+<p>Drawn by Python, a chart is four files in Documents, DbDo Charts,
+named for the table, the chart and the time:</p>
+<ul>
+<li><strong>A web page</strong> with the takeaway sentence, the picture
+with the same sentence as its description, and the numbers as a
+table.</li>
+<li><strong>A picture,</strong> as PNG for a message or a slide, and SVG
+for print.</li>
+<li><strong>An Excel workbook</strong> with the numbers and a real Excel
+chart a colleague can restyle, then every record used. Excel is not
+needed to make it.</li>
+</ul>
+<p>DbDo says the takeaway, then offers to open the page, the workbook or
+the folder. The colors are chosen so that a reader with a color vision
+difference can tell them apart. Python and its free chart packages
+(pandas, matplotlib, seaborn and openpyxl) install themselves when first
+needed; if they cannot, DbDo offers the installer, or Excel. Drawn by
+Excel, the chart opens in Excel as before 21 November 2026, from every
+record in view, and needs Microsoft Office.</p>
 <p>Filter and order first to shape the grid, then report on exactly what
 you see.</p>
 <h3 id="to-produce-something-to-keep-or-share">To produce something to
@@ -1258,9 +1354,10 @@ database, to keep it or to change its format.</li>
 <h3 id="to-automate-what-you-repeat">To automate what you repeat</h3>
 <p>A <strong>script</strong> is a file that does a task again, run with
 <strong>Invoke Script</strong> (Alt+V), written or changed with
-<strong>Edit Script</strong> (Alt+Shift+S). A database’s own scripts sit
-beside it, and shared ones in DbDo’s Scripts folder (<strong>Open Script
-Folder</strong> opens it). There are three kinds, from the simplest:</p>
+<strong>Edit Script</strong> (Alt+Shift+V), its name and key in EdSharp
+too. A database’s own scripts sit beside it, and shared ones in DbDo’s
+Scripts folder (<strong>Open Script Folder</strong> opens it). There are
+three kinds, from the simplest:</p>
 <ul>
 <li><strong>.sql – a saved question.</strong> One or more SQL
 statements: a Query you keep. Most templates come with some:
@@ -1389,8 +1486,10 @@ carried: it is a tool, not part of the database.</p>
 Column.</li>
 <li><strong>To answer a question once:</strong> Query, Chat about Table,
 or Evaluate Expression.</li>
-<li><strong>To understand a column or a pair:</strong> Generate from
-Grid.</li>
+<li><strong>To understand a column or a pair:</strong> Generate
+Statistics.</li>
+<li><strong>To show a sighted colleague:</strong> Generate
+Graphics.</li>
 <li><strong>To hand data on:</strong> Export Data, or the
 clipboard.</li>
 <li><strong>To make a document:</strong> Run Report.</li>
@@ -1504,8 +1603,8 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <td>Alt+D</td>
 </tr>
 <tr>
-<td>Open Table in New Window</td>
-<td>Control+Shift+T</td>
+<td>Open Table</td>
+<td>Control+Shift+O</td>
 </tr>
 <tr>
 <td>Recent Databases</td>
@@ -1603,7 +1702,7 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <td>Control+D</td>
 </tr>
 <tr>
-<td>Delete Without Confirmation</td>
+<td>Delete without Confirmation</td>
 <td>Control+Shift+D</td>
 </tr>
 <tr>
@@ -1635,6 +1734,10 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <td>Control+Shift+E</td>
 </tr>
 <tr>
+<td>Yield with Regex</td>
+<td>Control+Shift+Y</td>
+</tr>
+<tr>
 <td>Mark Record</td>
 <td>Control+M</td>
 </tr>
@@ -1644,7 +1747,7 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 </tr>
 <tr>
 <td>Toggle Mark</td>
-<td>Control+Space</td>
+<td>Control+Space or Space</td>
 </tr>
 <tr>
 <td>Edit Notes</td>
@@ -1703,8 +1806,8 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <td>F8 / Shift+F8</td>
 </tr>
 <tr>
-<td>Start Unmark / Complete Unmark</td>
-<td>Alt+F8 / Alt+Shift+F8</td>
+<td>Complete Unmark</td>
+<td>Alt+Shift+F8</td>
 </tr>
 <tr>
 <td>Save Bookmark</td>
@@ -1762,8 +1865,16 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <td>Control+G</td>
 </tr>
 <tr>
-<td>Repeat Go to</td>
+<td>Go to Record Again</td>
 <td>Alt+G</td>
+</tr>
+<tr>
+<td>Jump Again</td>
+<td>Alt+J</td>
+</tr>
+<tr>
+<td>Keywords Again</td>
+<td>Alt+K</td>
 </tr>
 <tr>
 <td>Keywords</td>
@@ -1856,7 +1967,15 @@ family.</p>
 </tr>
 <tr>
 <td>Say Yield Marked</td>
-<td>Shift+Y</td>
+<td>Alt+Shift+Y</td>
+</tr>
+<tr>
+<td>Say Yield from Current</td>
+<td>Control+Y</td>
+</tr>
+<tr>
+<td>Say Yield Marked from Current</td>
+<td>—</td>
 </tr>
 <tr>
 <td>Say Marked</td>
@@ -1875,35 +1994,35 @@ family.</p>
 <td>Shift+T</td>
 </tr>
 <tr>
-<td>Read List</td>
+<td>Read Wide</td>
+<td>Alt+W</td>
+</tr>
+<tr>
+<td>Read Wide Marked</td>
+<td>Alt+Shift+W or Shift+Space</td>
+</tr>
+<tr>
+<td>Read Wide from Current</td>
+<td>Control+W</td>
+</tr>
+<tr>
+<td>Read Wide Marked from Current</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Read Lean</td>
 <td>Alt+L</td>
 </tr>
 <tr>
-<td>Read List of Marked</td>
-<td>Alt+Shift+L or Shift+Space</td>
+<td>Read Lean Marked</td>
+<td>Alt+Shift+L</td>
 </tr>
 <tr>
-<td>Read List from Current</td>
+<td>Read Lean from Current</td>
 <td>Control+L</td>
 </tr>
 <tr>
-<td>Read List from Current Marked</td>
-<td>Control+Shift+L</td>
-</tr>
-<tr>
-<td>Say Column as List</td>
-<td>—</td>
-</tr>
-<tr>
-<td>Say Column as List of Marked</td>
-<td>—</td>
-</tr>
-<tr>
-<td>Say Column as List from Current</td>
-<td>—</td>
-</tr>
-<tr>
-<td>Say Column as List from Current Marked</td>
+<td>Read Lean Marked from Current</td>
 <td>—</td>
 </tr>
 <tr>
@@ -2034,8 +2153,12 @@ family.</p>
 <td>Alt+S</td>
 </tr>
 <tr>
-<td>Generate from Grid</td>
+<td>Generate Graphics</td>
 <td>Alt+Shift+G</td>
+</tr>
+<tr>
+<td>Generate Statistics</td>
+<td>Alt+Shift+S</td>
 </tr>
 <tr>
 <td>Copy Append</td>
@@ -2050,8 +2173,12 @@ family.</p>
 <td>—</td>
 </tr>
 <tr>
-<td>Copy Column / Copy Grid</td>
+<td>Copy Column</td>
 <td>—</td>
+</tr>
+<tr>
+<td>Copy Grid</td>
+<td>Control+F8</td>
 </tr>
 <tr>
 <td>Jump to Next Initial</td>
@@ -2107,7 +2234,7 @@ family.</p>
 </tr>
 <tr>
 <td>Edit Script</td>
-<td>Alt+Shift+S</td>
+<td>Alt+Shift+V</td>
 </tr>
 <tr>
 <td>Open Script Folder</td>
@@ -2123,7 +2250,10 @@ family.</p>
 </tr>
 </tbody>
 </table>
-<h4 id="window-menu">Window menu</h4>
+<h4 id="window-commands-on-the-file-menu">Window commands, on the File
+menu</h4>
+<p>DbDo has no Window menu. These commands sit on the File menu, just
+before Exit DbDo; Open Table sits beside Choose Table.</p>
 <table>
 <thead>
 <tr>
@@ -2141,16 +2271,16 @@ family.</p>
 <td>F4</td>
 </tr>
 <tr>
-<td>Window Toggle</td>
-<td>—</td>
-</tr>
-<tr>
 <td>Next Window</td>
 <td>Control+Tab</td>
 </tr>
 <tr>
 <td>Previous Window</td>
 <td>Control+Shift+Tab</td>
+</tr>
+<tr>
+<td>Window Toggle</td>
+<td>—</td>
 </tr>
 <tr>
 <td>Say Windows Open</td>
@@ -2161,7 +2291,7 @@ family.</p>
 <td>Control+F4</td>
 </tr>
 <tr>
-<td>Close All But Current Window</td>
+<td>Close All but Current Window</td>
 <td>Control+Shift+F4</td>
 </tr>
 </tbody>
@@ -3228,22 +3358,20 @@ Replace with Regex (pattern and substitute) would offer, or none</li>
 <li>Shift+V – script, the one Invoke Script (Alt+V) would choose</li>
 <li>Shift+W – whole record, every field with a value, hidden fields too,
 then the related records</li>
-<li>Shift+Y – yield marked, how many records are marked; Alt+Y says how
-many are in view</li>
 <li>Shift+Z – status: the table, the record and the order</li>
 </ul>
 <p>Shift plus a letter answers a question. A letter on its own moves:
 type the first letters of a value and the list view goes there, in lower
 case and without regard to case. The two layers do not collide, which is
 why the Say commands live on Shift.</p>
-<p>Two letters are unused – H and X – and are kept that way on purpose,
-so a new question can be added later without moving an answer somebody
-has learned. W became Say Whole Record on 5 November 2026, and X was Say
-Regex Replace until the same day, when Replace became one dialog and
-Shift+V took on its pattern too. Pressing an unused letter says so –
-“Shift+H: no Say command” – rather than staying silent: the say layer
-always answers, because silence cannot be told from a key that did not
-register.</p>
+<p>Three letters are unused – H, X and Y – and are kept that way on
+purpose, so a new question can be added later without moving an answer
+somebody has learned. W became Say Whole Record on 5 November 2026, and
+X was Say Regex Replace until the same day, when Replace became one
+dialog and Shift+V took on its pattern too. Pressing an unused letter
+says so – “Shift+H: no Say command” – rather than staying silent: the
+say layer always answers, because silence cannot be told from a key that
+did not register.</p>
 <p><strong>A command that opens a dialog with a value already in it has
 a value worth hearing first.</strong> That is what Shift+B, Shift+J,
 Shift+R and Shift+V are: the bookmark list, the text Jump would offer,

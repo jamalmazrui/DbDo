@@ -337,6 +337,11 @@ def checkInixKeys():
     dAliases = {}
     for sExpr, sVar in re.findall(r'registerLocalAlias\(([^,]+?),\s*(mi[A-Za-z0-9]+)\)', sSource):
         if sVar in dVarToCommand: dAliases.setdefault(dVarToCommand[sVar], []).append(oMake.keyName(sExpr))
+    # KEYS THE GRID ITSELF HANDLES (22 November 2026): Space toggles the mark in gridKeyDown, not as a menu key, so a
+    # Space within a second of a typed letter can still go on to the ListView's own type-ahead search, and a Space on a
+    # button or check box elsewhere is never taken. It is named after the menu's key, "Control+Space or Space".
+    for sCommand, sKey in (("toggle mark", "Space"),):
+        if re.search(r"evArgs\.KeyData == Keys\." + sKey + r"\b", sSource): dAliases.setdefault(sCommand, []).append(sKey)
     lsBad = []
     iChecked = 0
     sSection = ""
@@ -525,7 +530,10 @@ def checkAccessLetters():
         bSleepZ = sHot == "Z" and re.search(r"\b(toggle|status)\b", sPlain, re.I)
         # V is the sound in Invoke (9 November 2026, Jamal's Alt+V for Invoke Script): like X for the "ex" sound, V may
         # stand for a word with "voke" in it, Invoke Script and Say Invoke Script, mid-word when it must be.
-        bSoundV = sHot == "V" and re.search(r"voke", sPlain, re.I)
+        # THE SCRIPT FAMILY (22 November 2026): Edit Script moved to Alt+Shift+V on 21 November, beside Invoke Script on
+        # Alt+V, as in EdSharp; Shift added to the family's V edits the script that V invokes, so V stands for Script
+        # here as it does for Invoke.
+        bSoundV = sHot == "V" and re.search(r"voke|\bScript\b", sPlain, re.I)
         bSoundX = bSoundX or bSleepZ or bSoundV
         if oAmp:
             iAt = sCaption.index("&")

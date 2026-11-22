@@ -107,15 +107,29 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Escape. A third way needs no SQL at all. Alt plus Shift plus G, Generate from Grid, is the one key for reports on the grid.
-Key=Alt+Shift+G
-Hear=Generate from Grid
+Say=Escape. A third way needs no SQL at all. Alt plus Shift plus S, Generate Statistics, reports on the grid. Its dialog asks which columns, which records, whether by column or by row, and the kind; it starts on the shown columns and the records in view, which is what I want.
+Key=Alt+Shift+S
+Hear=Generate Statistics
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=G for Group report: a number totalled and averaged for each value of another column. It asks which column to group by.
+Say=Alt plus K moves to the kind.
+Key=Alt+K
+Hear=Kind
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=G for Group: a number totalled and averaged for each value of another column.
 Key=G
+Hear=Group
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Control plus Enter is OK. It asks which column to group by.
+Key=Control+Enter
 Hear=Group by which column?
 Note=Confirm the wording with a live run: buildTutorials -live.
 
@@ -149,21 +163,35 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=The takeaway comes first, then each species: its count, average, middle, smallest and largest. Escape, and Alt plus Shift plus G again.
-Key=Alt+Shift+G
-Hear=Generate from Grid
+Say=The takeaway comes first, then each species: its count, average, middle, smallest and largest. Escape, and Alt plus Shift plus S again. It remembers Group.
+Key=Alt+Shift+S
+Hear=Generate Statistics
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=R for Relation report: how strongly each pair of measurements rises and falls together.
+Say=Alt plus K, the kind.
+Key=Alt+K
+Hear=Kind
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=R for Relation: how strongly each pair of measurements rises and falls together.
 Key=R
+Hear=Relation
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Control plus Enter.
+Key=Control+Enter
 Hear=In short, the strongest relation is between petal length and petal width: very strong, rising together
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Very strong: longer petals are wider. The report leaves out the flower number, a numbering rather than a measurement, and reminds that a relation is not a cause. Escape. To hand the answer on, Control plus Shift plus X, Export Data, writes what the grid shows to a file: Excel, CSV, Markdown, a web page and more.
+Say=Very strong: longer petals are wider. The report leaves out the flower number, a numbering rather than a measurement, and reminds that a relation is not a cause. Escape. Alt plus Shift plus G, Generate Graphics, asks the same questions and draws a chart for a sighted colleague: a picture, a web page and an Excel workbook. To hand the data itself on, Control plus Shift plus X, Export Data, writes what the grid shows to a file: Excel, CSV, Markdown, a web page and more.
 Key=Control+Shift+X
 Hear=Export Data: the 150 records shown
 Note=Confirm the wording with a live run: buildTutorials -live.
@@ -204,7 +232,13 @@ Hear=Chat about Table: Shift plus F12
 
 Say=Report on the grid.
 Key=
-Hear=Generate from Grid: Alt plus Shift plus G
+Hear=Generate Statistics: Alt plus Shift plus S
+
+[step]
+
+Say=Chart it for others.
+Key=
+Hear=Generate Graphics: Alt plus Shift plus G
 
 [step]
 

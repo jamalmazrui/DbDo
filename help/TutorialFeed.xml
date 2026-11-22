@@ -5,7 +5,7 @@
     <link>Tutorials.htm</link>
     <description>Spoken walks through DbDo, the database program built for working by ear, and the ready-made databases that come with it. Ten walks, each under five minutes, in the order a new person meets them.</description>
     <language>en-us</language>
-    <lastBuildDate>Fri, 20 Nov 2026 02:53:05 +0000</lastBuildDate>
+    <lastBuildDate>Sun, 22 Nov 2026 06:16:21 +0000</lastBuildDate>
     <itunes:author>Jamal Mazrui</itunes:author>
     <itunes:explicit>false</itunes:explicit>
     <itunes:category text="Technology"/>
@@ -24,8 +24,8 @@
       <description>DbDo is open on RadioTrail. Full transcript: Tutorials.htm#0a-1-user-interface</description>
       <link>Tutorials.htm#0a-1-user-interface</link>
       <guid isPermaLink="false">homer-tutorial_1_user_interface</guid>
-      <enclosure url="tutorials/1_User_Interface.mp3" length="1374796" type="audio/mpeg"/>
-      <itunes:duration>00:03:29</itunes:duration>
+      <enclosure url="tutorials/1_User_Interface.mp3" length="1378008" type="audio/mpeg"/>
+      <itunes:duration>00:03:30</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
@@ -60,8 +60,8 @@
       <description>DbDo is open. Full transcript: Tutorials.htm#0e-5-catalog-your-books</description>
       <link>Tutorials.htm#0e-5-catalog-your-books</link>
       <guid isPermaLink="false">homer-tutorial_5_catalog_your_books</guid>
-      <enclosure url="tutorials/5_Catalog_Your_Books.mp3" length="1497392" type="audio/mpeg"/>
-      <itunes:duration>00:03:38</itunes:duration>
+      <enclosure url="tutorials/5_Catalog_Your_Books.mp3" length="1558987" type="audio/mpeg"/>
+      <itunes:duration>00:03:49</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>
@@ -87,8 +87,8 @@
       <description>DbDo is open, and installed in the usual place, with its data folder. Full transcript: Tutorials.htm#0h-8-analyze-a-dataset</description>
       <link>Tutorials.htm#0h-8-analyze-a-dataset</link>
       <guid isPermaLink="false">homer-tutorial_8_analyze_a_dataset</guid>
-      <enclosure url="tutorials/8_Analyze_a_Dataset.mp3" length="2026473" type="audio/mpeg"/>
-      <itunes:duration>00:04:56</itunes:duration>
+      <enclosure url="tutorials/8_Analyze_a_Dataset.mp3" length="2300829" type="audio/mpeg"/>
+      <itunes:duration>00:05:36</itunes:duration>
       <itunes:explicit>false</itunes:explicit>
     </item>
     <item>

@@ -165,7 +165,7 @@ rem cause, first. Raise this whenever DbDo starts using something new.
 rem 1.64.5: Play Tutorials calls MediaPlayer.playTutorials, which older kits lack;
 rem a build against 1.64.4 failed to compile on 8 October 2026 rather than saying so.
 rem 1.231.0: the macro recorder compiles the kit's Macro.cs, with its expected-against-actual audit.
-set "kitNeeded=1.261.0"
+set "kitNeeded=1.270.0"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -184,6 +184,7 @@ findstr /c:"public void setPattern(" "!homerDev!\exec\CSharp\Lbc.cs" >nul 2>&1 |
 findstr /c:"public Func<string> fUnavailable" "!homerDev!\exec\CSharp\KeyMap.cs" >nul 2>&1 || set "kitMissing=!kitMissing! fUnavailable (KeyMap.cs)"
 findstr /c:"public static class ColumnTypes" "!homerDev!\exec\CSharp\Schema.cs" >nul 2>&1 || set "kitMissing=!kitMissing! ColumnTypes (Schema.cs, kit 1.138.0)"
 findstr /c:"string expect(MacroStep macroStep);" "!homerDev!\exec\CSharp\Macro.cs" >nul 2>&1 || set "kitMissing=!kitMissing! the macro engine's audit (Macro.cs, kit 1.231.0)"
+findstr /c:"public static bool drawChart(" "!homerDev!\exec\CSharp\DataReport.cs" >nul 2>&1 || set "kitMissing=!kitMissing! the chart engine (DataReport.cs, kit 1.269.0)"
 if defined kitMissing (
   echo ERROR: C:\HomerDev says !homerVer! but its code lacks:!kitMissing! >> "!log!"
   echo.
@@ -191,7 +192,7 @@ if defined kitMissing (
   echo A HomerDev.zip was probably not unzipped. Unzip the newest HomerDev.zip into C:\HomerDev, then build again.
   exit /b 1
 )
-echo Kit code check: LbcMessage, setPattern, fUnavailable, ColumnTypes and the macro engine present >> "!log!"
+echo Kit code check: LbcMessage, setPattern, fUnavailable, ColumnTypes, the macro engine and the chart engine present >> "!log!"
 rem THE MACRO ENGINE IS PROVED BEFORE DBDO COMPILES IT (15 November 2026). The kit's testMacro compiles Macro.cs at
 rem C# 5, the compiler this build uses, records, saves, loads and plays six steps against a pretend view, and compares
 rem the row each step was expected to reach with the row it reached; then it proves that a step which claims success
@@ -223,6 +224,8 @@ rem from exec\conversions.inix, Table reads the formats it needs, and Conversion
 rem plugs Media.cs's audio and video conversions into it.
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\Conversion.cs""
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\ConversionMedia.cs""
+rem DataReport.cs too (kit 1.269.0, 21 November 2026): Generate Graphics draws its charts with Python through it.
+set "homerSources=!homerSources! "!homerDev!\exec\CSharp\DataReport.cs""
 rem ConversionPage.cs too (kit 1.87.1): every web page in the Homer page form, as in every app.
 set "homerSources=!homerSources! "!homerDev!\exec\CSharp\ConversionPage.cs""
 rem ConversionPdf.cs and PdfReader.cs (kit 1.88.0): PDFs read with the kit's own reader, as in every app.
@@ -274,8 +277,9 @@ rem installer runs a script that is not here. Each copy is logged, and a name th
 rem kit does not have is logged as missing rather than skipped in silence.
 rem recordWalk joined the list on 5 November 2026: DbDo's own older copy kept running, so walks never named
 rem the build they walked; now every build brings the kit's. runMacro and testSay joined on 17 November 2026: testSay
-rem is the kit's for every app now, and plays its Say commands as a macro script through runMacro.
-for %%F in (buildTutorials.cmd buildTutorials.ps1 check.cmd check.py checkTutorial.cmd checkTutorial.py finish.cmd fixEncoding.cmd fixEncoding.py installCommon.cmd installModels.cmd installMpv.cmd installOllama.cmd installScreenReaderSupport.cmd kind.cmd kind.py makeTutorials.cmd makeTutorials.py push.cmd release.cmd release.ps1 runMacro.cmd runMacro.py testSay.cmd testSay.py tidy.cmd tidy.py uiCheck.cmd uiCheck.py unpushed.cmd unpushed.py) do (
+rem is the kit's for every app now, and plays its Say commands as a macro script through runMacro. installDataTools joined
+rem on 21 November 2026: Generate Graphics offers it when Python or its chart packages are missing.
+for %%F in (buildTutorials.cmd buildTutorials.ps1 check.cmd check.py checkTutorial.cmd checkTutorial.py finish.cmd fixEncoding.cmd fixEncoding.py installCommon.cmd installDataTools.cmd installModels.cmd installMpv.cmd installOllama.cmd installScreenReaderSupport.cmd kind.cmd kind.py makeTutorials.cmd makeTutorials.py push.cmd release.cmd release.ps1 runMacro.cmd runMacro.py testSay.cmd testSay.py tidy.cmd tidy.py uiCheck.cmd uiCheck.py unpushed.cmd unpushed.py) do (
   if exist "!homerDev!\scripts\%%F" (
     copy /y "!homerDev!\scripts\%%F" scripts\ >nul
     echo Kit script copied: %%F, exit code !ERRORLEVEL! >> "!log!"

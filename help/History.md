@@ -5,6 +5,39 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 22 November 2026 -- Marked or Current everywhere
+
+- **Every command that can act on one record or several asks Marked or Current** when records are marked: now also Delete without Confirmation, Copy Record, Copy Append Record, Copy Visible Cells, Mail Record and Open url. Each takes all the marked records, or the current one alone.
+- **Play Media asks first.** With records marked, it asks before looking at the current record, so a current record with no address no longer stops the marked play list.
+- **Say Whole Record has no menu letter,** since Read Wide has W on the Say menu. Its key, Shift+W, is unchanged.
+- **Toggle Mark is listed as Control+Space or Space.**
+
+## 21 November 2026 -- Generate Statistics, Generate Graphics, Record Playback
+
+- **Generate Statistics (Alt+Shift+S) and Generate Graphics (Alt+Shift+G) replace Generate from Grid.** Both open one dataset dialog: which columns, which records (all in view, the marked ones, or the current one), arrange by column or by row, and the kind. Statistics open in a window to read. By row, each record is summed up across its number columns.
+- **Charts without Microsoft Office.** Generate Graphics draws with Python and free packages into Documents, DbDo Charts: a web page with the takeaway and the numbers as a table, a PNG and SVG picture, and an Excel workbook with a real chart, made without Excel. Drawn by Excel still works, and DbDo offers it, or the installer, when Python cannot draw. "Generate from Grid" in an old key list runs Generate Graphics.
+- **Record Playback, Control+Shift+P,** is new, as in FileDir: Play Media, playing at once and recording what plays to Music, Homer Player.
+- **Space toggles the mark,** as in FileDir; Control+Space still does. A Space typed within a second of a letter goes on to the type-ahead search, so "new y" still finds New York.
+- **This needs HomerDev 1.269.0.**
+
+## 21 November 2026 -- Key groups
+
+- **The Again keys:** Repeat Go to is Go to Record Again (Alt+G), and Jump Again (Alt+J) and Keywords Again (Alt+K) are new, as in FileDir. Each repeats its own search forward; F3 still repeats whichever came last.
+- **One Start for a marking run,** as in FileDir: Start Mark or Unmark (F8), then Complete Mark (Shift+F8) or Complete Unmark (Alt+Shift+F8). Start Unmark is retired into it.
+- **Alt+F8 reads everything,** as Read All does in EdSharp and HomerView: here, Read Wide. **Control+F8 copies everything:** Copy Grid.
+- **Edit Script is Alt+Shift+V,** beside Invoke Script on Alt+V, as in EdSharp. It was Alt+Shift+S.
+- **Names with small words in lower case:** Close All but Current Window, Delete without Confirmation. Keywords' description now reads "with the keywords in its fields".
+- **Say Status** lists Alt+Z first, the suite key, then Shift+Z.
+
+## 21 November 2026 -- Read wide, read lean, and no Window menu
+
+- **W reads wide and L reads lean.** W is the grid's width, every shown column; L is lean, the current column alone. Alt reads from the first record, Alt+Shift only the marked records, and Control from the current one: Read Wide is Alt+W, Read Wide Marked Alt+Shift+W (or Shift+Space) and Read Wide from Current Control+W; Read Lean is Alt+L, with Alt+Shift+L and Control+L the same way. Read Wide was Read List, on the L keys; Read Lean was Say Column as List, with no keys. A second press of any of them shows the values in a window. The marked-from-current forms are on the menu with no key.
+- **Y counts the same way.** Say Yield stays Alt+Y; Say Yield Marked moves from Shift+Y to Alt+Shift+Y; Say Yield from Current (Control+Y) is new, and so is Say Yield Marked from Current, on the menu with no key. Shift+Y is free.
+- **Yield with Regex is Control+Shift+Y,** as in EdSharp, FileDir and HomerView, beside Extract with Regex and Replace with Regex. It asks what Extract asks and says how many matches there are, and in how many records.
+- **No Window menu.** Current Windows, Next and Previous Window, Window Toggle, Say Windows Open and the Close commands are on the File menu, before Exit DbDo, and Open Table sits beside Choose Table. No key changed.
+- **The guide** explains wide, lean and yield in a new section, and tutorial 1 says Alt plus Shift plus Y for the marked.
+- **This needs HomerDev 1.269.0.**
+
 ## 19 November 2026 -- DescribedFilms, English movies with audio description
 
 - **A new template, DescribedFilms,** holds the English movies in the Film and Series Title Directory of the Audio Description Project, run by the American Council of the Blind: about 10,000 movies available in the United States with audio description, documentaries included and series left out. DbDo opens it on films, where each row says the title, the year and the services that carry it. Alt+Right goes to the film's offers, one a service, with its terms (buy, rent, free with Prime and the like), whether ADP marks the description as text-to-speech, and a link that Control+Shift+U opens. Free-To-Watch, Documentaries, Newest and Services-Count come with it, and the watch_list report writes up the films you mark.

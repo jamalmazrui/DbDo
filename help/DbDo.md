@@ -25,15 +25,15 @@ DbDo uses a **multiple-document interface (MDI)**. There is one application fram
 
 This matters for a screen-reader user because it keeps each table's state — its position, its filter, its sort, its selected columns — self-contained and announced per window. When you switch windows you switch whole working contexts.
 
-The window commands live in the **Window menu**:
+The window commands live on the **File menu**, just before Exit DbDo. DbDo has no Window menu, so Alt+W is free to read the grid wide (see "Reading the grid aloud: wide, lean and yield", below):
 
 - **Current Windows** (F4) lists every open window; pick one to jump to it.
 - **Window Toggle** flips between the current window and the one you were in before it.
 - **Next Window** (Control+Tab) and **Previous Window** (Control+Shift+Tab) cycle through them.
 - **Say Windows Open** (Shift+F4) speaks how many windows are open and their titles.
-- **Close Window** (Control+F4) closes the current one; **Close All But Current Window** (Control+Shift+F4) leaves only the active one. Closing the last window exits DbDo, because the menu bar lives in the window.
+- **Close Window** (Control+F4) closes the current one; **Close All but Current Window** (Control+Shift+F4) leaves only the active one. Closing the last window exits DbDo, because the menu bar lives in the window.
 
-There is a deliberate distinction between **opening** a table and **going to** one. **Open Table in New Window** (Control+Shift+T) makes a *new window* for a table; **Choose Table** (Control+T) changes the table shown in the *current* window. Open when you want both tables visible at once; choose when you simply want to switch what this window is looking at.
+There is a deliberate distinction between **opening** a table and **going to** one. **Open Table** (Control+Shift+O) makes a *new window* for a table; **Choose Table** (Control+T) changes the table shown in the *current* window. Open when you want both tables visible at once; choose when you simply want to switch what this window is looking at.
 
 ### The data list
 
@@ -70,7 +70,7 @@ The grid is what you see and navigate. It can be a small, reordered slice of a l
 
 Editing writes **through** the grid to the physical table: when you change a cell, the underlying record is updated on disk. But *reading* commands split into two families, and knowing which is which prevents surprises:
 
-- Commands that act on **the grid** operate on *what you are looking at* — the current filtered, sorted, column-selected view. **Generate from Grid** is the clearest example: it analyzes the virtual grid.
+- Commands that act on **the grid** operate on *what you are looking at* — the current filtered, sorted, column-selected view. **Generate Statistics** and **Generate Graphics** are the clearest examples: they analyze the virtual grid.
 - Commands that act on **the physical table** operate on *all the records*, regardless of the current filter or sort. **Run Report** is the clearest example: it reads the whole physical table so a report is reproducible no matter what you were viewing.
 
 Whenever a command's behavior could depend on the current view, this guide says explicitly whether it acts on the grid or the physical table.
@@ -141,7 +141,7 @@ DbDo has three distinct keyboard channels, and recognizing which one you are usi
 
 #### 1. Command chords
 
-Every menu command has a name and, usually, a **chord** — a keyboard shortcut shown next to it in the menu. Chords follow a consistent **mnemonic rule**: the letter in the chord is the first letter of a word in the command's name. *Statistics from Column* is Alt+Shift+S; *Generate from Grid* is Alt+Shift+G; *Filter Records* is Control+F. Once you know a command's name you can usually guess its chord, and vice versa. Chords are grouped by modifier so related commands share a shape — the Say-something status commands are mostly Shift+letter, for instance.
+Every menu command has a name and, usually, a **chord** — a keyboard shortcut shown next to it in the menu. Chords follow a consistent **mnemonic rule**: the letter in the chord is the first letter of a word in the command's name. *Generate Statistics* is Alt+Shift+S; *Generate Graphics* is Alt+Shift+G; *Filter Records* is Control+F. Once you know a command's name you can usually guess its chord, and vice versa. Chords are grouped by modifier so related commands share a shape — the Say-something status commands are mostly Shift+letter, for instance.
 
 #### 2. Convenience keys in text fields
 
@@ -161,6 +161,26 @@ The **dot prompt** (Enter Console, Control+GraveAccent) is the command-line chan
 
 Woven through the menus is a large **Say-X status family** in the Query menu: quick commands that *speak a fact about your current situation* without changing anything — Say Status, Say Database, Say Order, Say Yield (record count), Say Filter, Say Position, Say Cell, and many more. These are how you interrogate the screen on demand instead of hunting for information, and they are listed in full in the command reference.
 
+#### Reading the grid aloud: wide, lean and yield
+
+Three letters read or count the records in view. Each works with the same three modifiers, so learning one teaches all three.
+
+- **W, wide,** reads every shown column of each record: the grid's whole width. Read Wide is Alt+W.
+- **L, lean,** reads only the current column. Read Lean is Alt+L.
+- **Y, yield,** counts the records. Say Yield is Alt+Y.
+
+W and L are the widest and narrowest letters of the alphabet, which helps them stick.
+
+- **Alt** starts from the first record.
+- **Alt+Shift** keeps only the marked records.
+- **Control** starts from the current record.
+
+So Control+L reads the current column from here down, and Alt+Shift+Y says how many records are marked. Readings go one value at a time, and any key stops them. Press a reading key twice to see the same values in a window instead. Shift+Space also reads the marked records wide.
+
+The fourth form, marked records from the current one on, is on the menu with no key: Read Wide Marked from Current, Read Lean Marked from Current and Say Yield Marked from Current. Control and Shift with a letter is kept for commands that change things, and Control+Shift+Y is Yield with Regex, beside Extract with Regex (Control+Shift+E) and Replace with Regex (Control+Shift+R), as in every Homer Suite app.
+
+FileDir reads and counts its list with the same L and Y keys. It has no W keys, since its list has one column.
+
 #### Key Help
 
 **Key Describer Toggle** (Control+F1) turns on a learning mode: while it is on, pressing a command chord **announces** what that command is and does **instead of running it**. Press Control+F1 again to turn it off. This lets you explore the keyboard safely. **Where Am I** (Control+Slash, pressed twice) lists every command with its key, and the **Alternate Menu** (Alt+F10) gives you one list of all commands to search and run, in menu, name or key order.
@@ -175,7 +195,7 @@ Woven through the menus is a large **Say-X status family** in the Query menu: qu
 - **Open Database** (Control+O) opens a database file, choosing the right driver from the extension. **New Database** creates a fresh SQLite database; **Add Table** adds a table to it.
 
   **Add Table** asks first, when a table is open, whether to **Define** a new table or **Clone** the open one's fields, which then fill the form for you to name the new table and change what you like. Every new table gets DbDo's standard columns: its id, added, edited, notes, tags and marked. The form has ten name-and-type slots; its **Text** button opens the same fields as lines you can read and edit like any text, one field a line in the form `name: TYPE`, with no limit to how many, and you can paste a structure in. On OK, if fields begin with the same letter, DbDo says which, since only the first of each gets an Alt letter in the record form, and offers to go back and rename them.
-- **Open Table in New Window** (Control+Shift+T) opens a table (or arbitrary query) in a new window.
+- **Open Table** (Control+Shift+O) opens a table (or arbitrary query) in a new window.
 - **Recent Databases** (Alt+R) reopens something you used lately.
 - **Close Database** closes the current database; **Backup Database** writes a copy; **Compare Database** compares two.
 
@@ -230,7 +250,7 @@ In DbDo, Keywords and Any Field read a whole record as text, so the words of `re
 
 Beyond the grid's keys, the cursor moves with these commands:
 
-- **Go to Record** (Control+G) jumps to a record number; **Repeat Go to** (Alt+G) repeats it.
+- **Go to Record** (Control+G) jumps to a record number; **Go to Record Again** (Alt+G) repeats it. **Jump Again** (Alt+J) and **Keywords Again** (Alt+K) repeat those searches forward, as in FileDir; F3 repeats whichever search came last.
 - **Keywords** (Control+K) searches for text; **Reverse Keywords** (Control+Shift+K) searches backward; **Search Next** (F3) and **Search Previous** (Shift+F3) repeat the last search. **Forward Find with Regex** (Control+F3) and **Reverse Find with Regex** (Control+Shift+F3) search by regular expression.
 - **Jump** (Control+J) and **Reverse Jump** move by a jump increment for quickly covering distance in a long table.
 - **Jump to Next Initial** steps to the next record whose current column starts with a new letter — type-ahead through a sorted column.
@@ -243,7 +263,8 @@ Beyond the grid's keys, the cursor moves with these commands:
 - **Edit Notes** (Alt+Shift+N), **Edit Tags** (Alt+Shift+T), and **Edit url** (Alt+Shift+U) each open one standard field in a focused single-field dialog with OK and Cancel — the quick way to touch a note, tags, or a link without opening the whole record.
 - **Replace** (Control+R) puts new text in place of old. One dialog asks what to find and what to put in its place, then where: **Columns** -- the current column, the shown columns, or all columns, hidden ones too -- and **Which records** -- all records in view, the marked records, or the current record. It starts on the current column, and on the marked records when some are marked, else all records in view; changing more than one record asks once, naming how many. Check **Use regex pattern** to find by regular expression, with $1 and $2 putting back the parts in parentheses; **Replace with Regex** (Control+Shift+R) opens the same dialog with it checked. **Dry run** counts what would change and changes nothing. Replace never writes the fields DbDo keeps itself: look, prime, added, edited, marked and the id.
 - **Extract with Regex** (Control+Shift+E) copies every match of a regular expression to the clipboard, one per line, from the same Columns and Records choices; it starts on all columns, hidden ones too, so an email address in the notes is found. It has the same name and key as in EdSharp and FileDir.
-- **Delete Record** (Control+D) deletes the current record with confirmation; **Delete Without Confirmation** (Control+Shift+D) skips the prompt.
+- **Yield with Regex** (Control+Shift+Y) asks the same questions and says how many matches there are, and in how many records, leaving the clipboard alone. It has the same name and key as in EdSharp, FileDir and HomerView.
+- **Delete Record** (Control+D) deletes the current record with confirmation; **Delete without Confirmation** (Control+Shift+D) skips the prompt.
 
 All edits auto-commit. If a table is read-only, **Read Only Toggle** (Control+Shift+Z) reports and controls that.
 
@@ -251,14 +272,16 @@ All edits auto-commit. If a table is read-only, **Read Only Toggle** (Control+Sh
 
 Marking is DbDo's explicit, queryable alternative to visual multi-select. The `marked` field carries the state.
 
-- **Mark Record** (Control+M) marks the current record; **Unmark Record** (Control+Shift+M) clears it; **Toggle Mark** (Control+Space) flips it; **Say Marked** (Shift+M) speaks it.
+- **Mark Record** (Control+M) marks the current record; **Unmark Record** (Control+Shift+M) clears it; **Toggle Mark** (Control+Space or Space) flips it -- a Space typed within a second of a letter goes on to the type-ahead search instead, so "new y" still finds New York; **Say Marked** (Shift+M) speaks it.
 - **Mark All** (Control+A), **Unmark All** (Control+Shift+A), and **Invert Marked** (Control+I) act across the current view.
 - **Shift+Down Arrow and Shift+Up Arrow** mark the record and move to the next or previous one. **Control+Shift+Down Arrow and Control+Shift+Up Arrow** unmark it and move.
 - **Control+Shift+Home** marks every record from the first to this one; **Control+Shift+End** marks from this one to the last. **Alt+Control+Shift+Home** and **Alt+Control+Shift+End** unmark the same spans. These were Shift+Home and Shift+End through version 1.0.316; those keys now say where marking went.
 - **Control+Up Arrow and Control+Down Arrow** go to the previous and next marked record; **Control+Page Up and Control+Page Down** go to the first and last.
-- To mark a **range**, set an anchor with **Start Mark** (F8) and extend to the cursor with **Complete Mark** (Shift+F8). **Start Unmark** (Alt+F8) and **Complete Unmark** (Alt+Shift+F8) do the same for clearing, with a separate anchor so building a mark range and an unmark range never clobber each other.
+- To mark a **range**, start it with **Start Mark or Unmark** (F8), move, and finish with **Complete Mark** (Shift+F8) to mark every record between, or **Complete Unmark** (Alt+Shift+F8) to unmark them. This is FileDir's way too. Alt+F8 reads everything (Read Wide), as Read All does in EdSharp and HomerView.
 
 Marked records can then be reported, filtered, or exported as a set, and several Say commands report only the marked ones.
+
+**Marked or Current.** A command that can act on one record or on several asks which you mean whenever records are marked: Delete Record, Delete without Confirmation, Copy Record, Copy Append Record, Copy Visible Cells, Mail Record, Open url, Play Media and Record Playback. Enter takes the marked records; C takes the current one alone and leaves the marks as they are. It does not ask when the only marked record is the current one. FileDir asks the same question, the same way. Commands that work on the whole view, such as Export Data and Copy Grid, and the Say and Read commands, never ask.
 
 ### Filtering and sorting
 
@@ -371,14 +394,32 @@ DbDo has many ways to work with data, and each has one job. Pick by what you wan
 
 ### To analyze what you see
 
-**Generate from Grid** (Alt+Shift+G) reports on the grid as it stands -- the shown columns, the records the filter keeps -- and starts every report with its takeaway, then the details:
+Two commands analyze the grid: **Generate Statistics** (Alt+Shift+S) for reports you read, and **Generate Graphics** (Alt+Shift+G) for charts you hand to sighted colleagues. Both open the same dataset dialog, with four choices:
 
-- **Statistics report** (S): each shown column's range, middle and spread, and values far outside the rest.
-- **Frequency report** (F): how many records hold each value of the current column, or each combination of the shown columns, with a running percentage.
-- **Group report** (G): a number column totalled and averaged for each value of another column, or for each year, month or weekday of a date.
-- **Relation report** (R): how strongly each pair of number columns rises and falls together, and the straight line that best fits the strongest pair. A numbering, such as a record number, is left out.
-- **Cross-tab report** (C): one column by another.
-- **Excel chart** (E): a bar, Pareto, pie, histogram, box, scatter or date chart, with a description of what it shows.
+- **Which columns** (Alt+C): the current column, the shown columns (the usual start), or all columns, hidden ones too.
+- **Which records** (Alt+R): all records in view, the marked records (offered, and chosen first, when some are marked), or the current record. This takes the place of the Marked or Current question.
+- **Arrange** (Alt+A): by column, where each column is a variable and the records are its values -- the usual way -- or by row, where each record is a series across the columns, such as a record holding twelve months. By row lets you sum up or draw the current record alone.
+- **Kind** (Alt+K): what to make. Generate Graphics adds **Drawn by** (Alt+D): Python or Excel.
+
+Every report and chart starts with its takeaway, then the details.
+
+Generate Statistics offers these kinds:
+
+- **Summary:** each chosen column's range, middle and spread, and values far outside the rest. Arranged by row, each record's total, average and middle, and which column is highest and lowest.
+- **Frequency:** how many records hold each value of one column, or each combination of several, with a running percentage.
+- **Group:** a number column totalled and averaged for each value of another column, or for each year, month or weekday of a date.
+- **Relation:** how strongly each pair of number columns rises and falls together, and the straight line that best fits the strongest pair. A numbering, such as a record number, is left out.
+- **Cross-tab:** one column by another.
+
+Generate Graphics offers a bar chart (how often each value occurs), a Pareto chart (the same, largest first, with the running share), a pie chart (the split of a yes-or-no column), a histogram (how a number column spreads), a whisker plot (the middle and range of each number column), a scatter plot (one number column against another, with the line that fits), a line chart and a date chart (records by month, year or season). Arranged by row, the bar and line charts draw each record across its number columns, up to eight records.
+
+Drawn by Python, a chart is four files in Documents, DbDo Charts, named for the table, the chart and the time:
+
+- **A web page** with the takeaway sentence, the picture with the same sentence as its description, and the numbers as a table.
+- **A picture,** as PNG for a message or a slide, and SVG for print.
+- **An Excel workbook** with the numbers and a real Excel chart a colleague can restyle, then every record used. Excel is not needed to make it.
+
+DbDo says the takeaway, then offers to open the page, the workbook or the folder. The colors are chosen so that a reader with a color vision difference can tell them apart. Python and its free chart packages (pandas, matplotlib, seaborn and openpyxl) install themselves when first needed; if they cannot, DbDo offers the installer, or Excel. Drawn by Excel, the chart opens in Excel as before 21 November 2026, from every record in view, and needs Microsoft Office.
 
 Filter and order first to shape the grid, then report on exactly what you see.
 
@@ -392,7 +433,7 @@ Filter and order first to shape the grid, then report on exactly what you see.
 
 ### To automate what you repeat
 
-A **script** is a file that does a task again, run with **Invoke Script** (Alt+V), written or changed with **Edit Script** (Alt+Shift+S). A database's own scripts sit beside it, and shared ones in DbDo's Scripts folder (**Open Script Folder** opens it). There are three kinds, from the simplest:
+A **script** is a file that does a task again, run with **Invoke Script** (Alt+V), written or changed with **Edit Script** (Alt+Shift+V), its name and key in EdSharp too. A database's own scripts sit beside it, and shared ones in DbDo's Scripts folder (**Open Script Folder** opens it). There are three kinds, from the simplest:
 
 - **.sql -- a saved question.** One or more SQL statements: a Query you keep. Most templates come with some: ContactTrail's Emergency Contacts, RecipeTrail's Shopping List, JobTrail's Weekly Count.
 - **.dbdo -- a saved sequence of DbDo commands,** one per line, as typed at the dot prompt: filter, order, select columns, export. For a routine you would otherwise do by hand each week, such as JobTrail's Stale Applications.
@@ -446,7 +487,8 @@ The files are kept in DbDo's own table, **files**, beside defs and maps; DbDo hi
 
 - **To see some records:** Filter Records, or Facet Column.
 - **To answer a question once:** Query, Chat about Table, or Evaluate Expression.
-- **To understand a column or a pair:** Generate from Grid.
+- **To understand a column or a pair:** Generate Statistics.
+- **To show a sighted colleague:** Generate Graphics.
 - **To hand data on:** Export Data, or the clipboard.
 - **To make a document:** Run Report.
 - **To do it again next week:** a script -- .sql for a question, .dbdo for a routine, .js for a program.
@@ -501,7 +543,7 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Add Table | — |
 | Open Database | Control+O |
 | Open Template Database | Alt+D |
-| Open Table in New Window | Control+Shift+T |
+| Open Table | Control+Shift+O |
 | Recent Databases | Alt+R |
 | Save | Control+S |
 | Save As | Control+Shift+S |
@@ -527,7 +569,7 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Edit Record | Control+E |
 | Edit Cell | F2 |
 | Delete Record | Control+D |
-| Delete Without Confirmation | Control+Shift+D |
+| Delete without Confirmation | Control+Shift+D |
 | Copy Record | Control+Shift+C |
 | Copy Append Record | Alt+Shift+C |
 | New Copy | Control+Shift+N |
@@ -535,9 +577,10 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Replace | Control+R |
 | Replace with Regex | Control+Shift+R |
 | Extract with Regex | Control+Shift+E |
+| Yield with Regex | Control+Shift+Y |
 | Mark Record | Control+M |
 | Say Marked | Shift+M |
-| Toggle Mark | Control+Space |
+| Toggle Mark | Control+Space or Space |
 | Edit Notes | Alt+Shift+N |
 | Edit Tags | Alt+Shift+T |
 | Edit url | Alt+Shift+U |
@@ -552,7 +595,7 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Next / Previous Marked | Control+Down / Control+Up |
 | First / Last Marked | Control+Page Up / Control+Page Down |
 | Start Mark / Complete Mark | F8 / Shift+F8 |
-| Start Unmark / Complete Unmark | Alt+F8 / Alt+Shift+F8 |
+| Complete Unmark | Alt+Shift+F8 |
 | Save Bookmark | Control+B |
 | List Bookmarks | Alt+B |
 | Clear Bookmark | Control+Shift+B |
@@ -569,7 +612,9 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | First / Last Record | — |
 | Next / Previous Record | — |
 | Go to Record | Control+G |
-| Repeat Go to | Alt+G |
+| Go to Record Again | Alt+G |
+| Jump Again | Alt+J |
+| Keywords Again | Alt+K |
 | Keywords | Control+K |
 | Reverse Keywords | Control+Shift+K |
 | Jump | Control+J |
@@ -596,19 +641,21 @@ The Query menu holds record inspection and the Say-X status family.
 | Say Order | Shift+O |
 | Say Go to | Shift+G |
 | Say Yield | Alt+Y |
-| Say Yield Marked | Shift+Y |
+| Say Yield Marked | Alt+Shift+Y |
+| Say Yield from Current | Control+Y |
+| Say Yield Marked from Current | — |
 | Say Marked | Shift+M |
 | Say Edited | Shift+E |
 | Say Notes | Shift+N |
 | Say Tags | Shift+T |
-| Read List | Alt+L |
-| Read List of Marked | Alt+Shift+L or Shift+Space |
-| Read List from Current | Control+L |
-| Read List from Current Marked | Control+Shift+L |
-| Say Column as List | — |
-| Say Column as List of Marked | — |
-| Say Column as List from Current | — |
-| Say Column as List from Current Marked | — |
+| Read Wide | Alt+W |
+| Read Wide Marked | Alt+Shift+W or Shift+Space |
+| Read Wide from Current | Control+W |
+| Read Wide Marked from Current | — |
+| Read Lean | Alt+L |
+| Read Lean Marked | Alt+Shift+L |
+| Read Lean from Current | Control+L |
+| Read Lean Marked from Current | — |
 | Say Filter and Order | Shift+8 |
 | Say Position | Alt+Delete |
 | Say Clipboard | Alt+Apostrophe |
@@ -643,11 +690,13 @@ The Query menu holds record inspection and the Say-X status family.
 | Add Column to Order | Alt+A |
 | Add Column to Order Descending | Alt+Shift+A |
 | Select Columns | Alt+S |
-| Generate from Grid | Alt+Shift+G |
+| Generate Graphics | Alt+Shift+G |
+| Generate Statistics | Alt+Shift+S |
 | Copy Append | Alt+C |
 | Copy Cell | Control+C |
 | Copy Visible Cells | — |
-| Copy Column / Copy Grid | — |
+| Copy Column | — |
+| Copy Grid | Control+F8 |
 | Jump to Next Initial | — |
 | Query | Control+Q |
 | Query History | Alt+Shift+Q |
@@ -661,23 +710,25 @@ The Query menu holds record inspection and the Say-X status family.
 | Open Dot Prompt | Control+GraveAccent |
 | Sqlean Console | Control+Shift+GraveAccent |
 | Invoke Script | Alt+V |
-| Edit Script | Alt+Shift+S |
+| Edit Script | Alt+Shift+V |
 | Open Script Folder | — |
 | Evaluate Expression | Control+Equals |
 | Edit Settings | Alt+Shift+E |
 
-#### Window menu
+#### Window commands, on the File menu
+
+DbDo has no Window menu. These commands sit on the File menu, just before Exit DbDo; Open Table sits beside Choose Table.
 
 | Command | Chord |
 |---------|-------|
 | Open Table | Control+Shift+O |
 | Current Windows | F4 |
-| Window Toggle | — |
 | Next Window | Control+Tab |
 | Previous Window | Control+Shift+Tab |
+| Window Toggle | — |
 | Say Windows Open | Shift+F4 |
 | Close Window | Control+F4 |
-| Close All But Current Window | Control+Shift+F4 |
+| Close All but Current Window | Control+Shift+F4 |
 
 #### Help menu
 
@@ -1463,7 +1514,6 @@ spell phonetically and copy from. Every Homer app's Say keys work this way.
 - Shift+U -- url
 - Shift+V -- script, the one Invoke Script (Alt+V) would choose
 - Shift+W -- whole record, every field with a value, hidden fields too, then the related records
-- Shift+Y -- yield marked, how many records are marked; Alt+Y says how many are in view
 - Shift+Z -- status: the table, the record and the order
 
 Shift plus a letter answers a question. A letter on its own moves: type the
@@ -1471,7 +1521,7 @@ first letters of a value and the list view goes there, in lower case and
 without regard to case. The two layers do not collide, which is why the Say
 commands live on Shift.
 
-Two letters are unused -- H and X -- and are kept that way on purpose, so a
+Three letters are unused -- H, X and Y -- and are kept that way on purpose, so a
 new question can be added later without moving an answer somebody has learned.
 W became Say Whole Record on 5 November 2026, and X was Say Regex Replace until
 the same day, when Replace became one dialog and Shift+V took on its pattern too.

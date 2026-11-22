@@ -1131,7 +1131,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 7: Shift+8
 
-Alt plus Y, Say Yield, says how many records are in view, and Shift plus Y how many are marked; Shift plus 8 says the order and filter.
+Alt plus Y, Say Yield, says how many records are in view, and Alt plus Shift plus Y how many are marked; Shift plus 8 says the order and filter.
 
 Screen reader:
 
@@ -2080,25 +2080,41 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 10: Alt+Shift+G
+### Step 10: Alt+Shift+S
 
-Control plus Shift plus F clears it. Now counts. I move to the format column, and Alt plus Shift plus G, Generate from Grid, offers every report and chart of the grid.
-
-Screen reader:
-
-- Generate from Grid
-
-### Step 11: F
-
-F for Frequency report.
+Control plus Shift plus F clears it. Now counts. I move to the format column, and Alt plus Shift plus S, Generate Statistics, asks what to report on.
 
 Screen reader:
 
-- Frequency Report
+- Generate Statistics
 
-### Step 12: C
+### Step 11: UpArrow
 
-C for Current column counts each format.
+Which columns starts on the shown ones. Up Arrow chooses the current column, format.
+
+Screen reader:
+
+- Current column, format
+
+### Step 12: Alt+K
+
+Alt plus K, the kind.
+
+Screen reader:
+
+- Kind
+
+### Step 13: F
+
+F for Frequency.
+
+Screen reader:
+
+- Frequency
+
+### Step 14: Control+Enter
+
+Control plus Enter counts each format.
 
 Screen reader:
 
@@ -2109,7 +2125,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 13: Alt+Shift+R
+### Step 15: Alt+Shift+R
 
 The count of each value; for a number column, the sum, average, least and most too. Escape. Alt plus Shift plus R, Run Report, writes a saved report as a document.
 
@@ -2119,7 +2135,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 14: Enter
+### Step 16: Enter
 
 Enter. The reading log, every book finished, newest first, opens to keep or share.
 
@@ -2129,11 +2145,11 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 15
+### Step 17
 
 A planned misstep: expecting the report to follow a filter. A report reads the table its definition names, not the records in view. To share only some, filter them and use Export Data, Control plus Shift plus X.
 
-### Step 16: Control+Shift+X
+### Step 18: Control+Shift+X
 
 Control plus Shift plus X writes the records in view as a spreadsheet, CSV, JSON or another format.
 
@@ -2143,19 +2159,19 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 17
+### Step 19
 
 Escape, for now. Typing a whole library in is not the plan. bookFido, a companion Homer program, catalogs the books in your libraries into BookTrail, and once your own books are in, these six samples are removed.
 
-### Step 18
+### Step 20
 
 Each book you add takes the same fields, so a reading log, a count by format, or the next in a series comes from the same few keys.
 
-### Step 19
+### Step 21
 
 What this walk taught. I name the command; the reader gives the key.
 
-### Step 20
+### Step 22
 
 Show a record whole.
 
@@ -2163,7 +2179,7 @@ Screen reader:
 
 - Alt plus I
 
-### Step 21
+### Step 23
 
 Run a saved script.
 
@@ -2171,15 +2187,15 @@ Screen reader:
 
 - Alt plus V
 
-### Step 22
+### Step 24
 
 Report on the grid.
 
 Screen reader:
 
-- Alt plus Shift plus G
+- Alt plus Shift plus S
 
-### Step 23
+### Step 25
 
 Run a report.
 
@@ -2187,7 +2203,7 @@ Screen reader:
 
 - Alt plus Shift plus R
 
-### Step 24
+### Step 26
 
 Export the records in view.
 
@@ -2723,19 +2739,39 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 15: Alt+Shift+G
+### Step 15: Alt+Shift+S
 
-Escape. A third way needs no SQL at all. Alt plus Shift plus G, Generate from Grid, is the one key for reports on the grid.
+Escape. A third way needs no SQL at all. Alt plus Shift plus S, Generate Statistics, reports on the grid. Its dialog asks which columns, which records, whether by column or by row, and the kind; it starts on the shown columns and the records in view, which is what I want.
 
 Screen reader:
 
-- Generate from Grid
+- Generate Statistics
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 16: G
+### Step 16: Alt+K
 
-G for Group report: a number totalled and averaged for each value of another column. It asks which column to group by.
+Alt plus K moves to the kind.
+
+Screen reader:
+
+- Kind
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: G
+
+G for Group: a number totalled and averaged for each value of another column.
+
+Screen reader:
+
+- Group
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: Control+Enter
+
+Control plus Enter is OK. It asks which column to group by.
 
 Screen reader:
 
@@ -2743,7 +2779,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 17: sp
+### Step 19: sp
 
 I type s p, for species.
 
@@ -2753,7 +2789,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 18: Enter
+### Step 20: Enter
 
 Enter chooses species.
 
@@ -2763,7 +2799,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 19: petal_l
+### Step 21: petal_l
 
 Then the start of petal length.
 
@@ -2773,7 +2809,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 20: Enter
+### Step 22: Enter
 
 Enter chooses petal length.
 
@@ -2783,19 +2819,39 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 21: Alt+Shift+G
+### Step 23: Alt+Shift+S
 
-The takeaway comes first, then each species: its count, average, middle, smallest and largest. Escape, and Alt plus Shift plus G again.
+The takeaway comes first, then each species: its count, average, middle, smallest and largest. Escape, and Alt plus Shift plus S again. It remembers Group.
 
 Screen reader:
 
-- Generate from Grid
+- Generate Statistics
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 22: R
+### Step 24: Alt+K
 
-R for Relation report: how strongly each pair of measurements rises and falls together.
+Alt plus K, the kind.
+
+Screen reader:
+
+- Kind
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 25: R
+
+R for Relation: how strongly each pair of measurements rises and falls together.
+
+Screen reader:
+
+- Relation
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 26: Control+Enter
+
+Control plus Enter.
 
 Screen reader:
 
@@ -2803,9 +2859,9 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 23: Control+Shift+X
+### Step 27: Control+Shift+X
 
-Very strong: longer petals are wider. The report leaves out the flower number, a numbering rather than a measurement, and reminds that a relation is not a cause. Escape. To hand the answer on, Control plus Shift plus X, Export Data, writes what the grid shows to a file: Excel, CSV, Markdown, a web page and more.
+Very strong: longer petals are wider. The report leaves out the flower number, a numbering rather than a measurement, and reminds that a relation is not a cause. Escape. Alt plus Shift plus G, Generate Graphics, asks the same questions and draws a chart for a sighted colleague: a picture, a web page and an Excel workbook. To hand the data itself on, Control plus Shift plus X, Export Data, writes what the grid shows to a file: Excel, CSV, Markdown, a web page and more.
 
 Screen reader:
 
@@ -2813,7 +2869,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 24: Control+Shift+Z
+### Step 28: Control+Shift+Z
 
 Escape. Before a query that changes data, Control plus Shift plus Z, Read Only Toggle, makes the database read only, so a mistyped statement cannot change anything. Pressed again, it makes it writable.
 
@@ -2823,11 +2879,11 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 25
+### Step 29
 
 What this walk taught. I name the command; the reader gives the key.
 
-### Step 26
+### Step 30
 
 Bring in a file.
 
@@ -2835,7 +2891,7 @@ Screen reader:
 
 - Import: Control plus Shift plus I
 
-### Step 27
+### Step 31
 
 Ask in SQL, and run it from inside the box.
 
@@ -2844,7 +2900,7 @@ Screen reader:
 - Query: Control plus Q
 - Run: Control plus Enter
 
-### Step 28
+### Step 32
 
 Ask in plain words.
 
@@ -2852,15 +2908,23 @@ Screen reader:
 
 - Chat about Table: Shift plus F12
 
-### Step 29
+### Step 33
 
 Report on the grid.
 
 Screen reader:
 
-- Generate from Grid: Alt plus Shift plus G
+- Generate Statistics: Alt plus Shift plus S
 
-### Step 30
+### Step 34
+
+Chart it for others.
+
+Screen reader:
+
+- Generate Graphics: Alt plus Shift plus G
+
+### Step 35
 
 Hand it on.
 

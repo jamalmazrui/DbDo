@@ -419,6 +419,8 @@ Source: "scripts\summarizeSetup.ps1"; DestDir: "{app}\scripts"; Flags: ignorever
 Source: "scripts\installOllama.cmd"; DestDir: "{app}\scripts"; Flags: ignoreversion skipifsourcedoesntexist
 ; mpv plays streams for Play Stream; installMpv fetches it with winget, from the Play Stream command when it is missing.
 Source: "scripts\installMpv.cmd"; DestDir: "{app}\scripts"; Flags: ignoreversion
+; Python and its chart packages draw Generate Graphics' charts; installDataTools fetches them, from that command when missing.
+Source: "scripts\installDataTools.cmd"; DestDir: "{app}\scripts"; Flags: ignoreversion
 ; THE SCREEN READER SCRIPT IS SHIPPED (15 October 2026). The kit's homerReaderState asks
 ; this script whether the JAWS scripts and the NVDA add-on need Install, Update or
 ; Reinstall. It was never installed, so 1.0.287 answered "not offered" for both on a
@@ -1412,6 +1414,10 @@ begin
      InstallJawsSettings procedure was removed in v1.0.40 along with
      the [Tasks] entry that gated it; the call site here is a no-op
      now. *)
+  //  EVERY VERB BEFORE THE CHECKBOXES (22 November 2026): the kit's homerProbeAll asks the screen readers and every
+  //  component now, with the progress bar still showing, so the finish page's Install, Update and Reinstall are known
+  //  before it appears and nothing is checked after it.
+  homerProbeAll(True);
 end;
 
 (* --------------------------------------------------------------------

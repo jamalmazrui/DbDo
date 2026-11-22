@@ -205,7 +205,6 @@ Marking</a></li>
 <li><a href="#navigate" id="toc-navigate">Navigate</a></li>
 <li><a href="#query" id="toc-query">Query</a></li>
 <li><a href="#query-say" id="toc-query-say">Query, Say</a></li>
-<li><a href="#window" id="toc-window">Window</a></li>
 </ul></li>
 <li><a href="#by-key" id="toc-by-key">By key</a>
 <ul>
@@ -238,6 +237,14 @@ the filter.</li>
 behavior or puts it to sleep. Control+Z undoes in Windows, and restoring
 a behavior is the same idea.</li>
 <li><strong>X is for the sound of “ex”</strong>, as in Export.</li>
+<li><strong>Alt says, Control changes.</strong> When a letter needs a
+modifier, a command that only speaks takes Alt and one that changes data
+takes Control. A command that opens a pick list may take either; a plain
+Alt and a letter never opens a box for typing.</li>
+<li><strong>W, L and Y read and count the grid.</strong> W is wide,
+every shown column; L is lean, the current column; Y is yield, a count.
+Alt starts from the first record, Control from the current one, and
+Shift keeps only the marked records.</li>
 <li><strong>Alt takes the letter when Control already means something in
 Windows.</strong> Control+O opens and Control+S saves everywhere, so
 Order is Alt+O and Select Columns is Alt+S.</li>
@@ -272,7 +279,7 @@ Control+Shift+C</li>
 Delete the current record (or marked records, when marks exist). D for
 Delete.<br />
 Control+D</li>
-<li>Delete Without Confirmation<br />
+<li>Delete without Confirmation<br />
 D for Delete.<br />
 Control+Shift+D</li>
 <li>Edit Cell<br />
@@ -318,6 +325,9 @@ Control+F2</li>
 Play the current record’s stream address in the Homer Player; with
 records marked, play all of them. P for Play.<br />
 Control+P</li>
+<li>Record Playback<br />
+P for Playback.<br />
+Control+Shift+P</li>
 <li>Replace<br />
 R for Replace.<br />
 Control+R</li>
@@ -344,12 +354,12 @@ Control+Shift+M</li>
 instead of a mark.</p>
 <ul>
 <li>Complete Mark<br />
-Mark every row from the F8 anchor to the current row. F8 is selection;
+Mark every row from the F8 start to the current row. F8 is selection;
 Shift completes the run F8 started.<br />
 Shift+F8</li>
 <li>Complete Unmark<br />
-Unmark every row from the Alt+F8 anchor to the current row. F8 is
-selection; Shift completes the run Alt+F8 started.<br />
+Unmark every row from the F8 start to the current row. F8 is selection;
+Shift completes the run Alt+F8 started.<br />
 Alt+Shift+F8</li>
 <li>Invert Marked<br />
 I for Invert.<br />
@@ -357,14 +367,10 @@ Control+I</li>
 <li>Mark All<br />
 A for All.<br />
 Control+A</li>
-<li>Start Mark<br />
-Drop a mark anchor at the current row. F8 is selection: F8 starts a run
-of marks.<br />
+<li>Start Mark or Unmark<br />
+Start marking or unmarking a range at the current record. F8 is
+selection: F8 starts a run of marks.<br />
 F8</li>
-<li>Start Unmark<br />
-Drop an unmark anchor at the current row. F8 is selection; Alt turns the
-run into an unmark.<br />
-Alt+F8</li>
 <li>Unmark All<br />
 A for All. Shift reverses Mark All.<br />
 Control+Shift+A</li>
@@ -374,6 +380,18 @@ Control+Shift+A</li>
 <li>Choose Table<br />
 T for Table.<br />
 Control+T</li>
+<li>Close All but Current Window<br />
+Close every window except the current one. F4 is open windows;
+Control+Shift+F4 closes all but this one.<br />
+Control+Shift+F4</li>
+<li>Close Window<br />
+Close the current recordset window. F4 is open windows; Control+F4
+closes this one, as in Windows.<br />
+Control+F4</li>
+<li>Current Windows<br />
+Pick from the list of open recordset windows and activate the chosen
+one. F4 picks, says or closes open windows: F4 picks one.<br />
+F4</li>
 <li>Exit DbDo<br />
 Close DbDo. Alt+F4 closes the program, as in every Windows
 program.<br />
@@ -396,9 +414,16 @@ Alt+M</li>
 F6 moves among parts of the window; Control+F6 moves to the next
 table.<br />
 Control+F6</li>
+<li>Next Window<br />
+Activate the next open window. Control+Tab moves among DbDo
+windows.<br />
+Control+Tab</li>
 <li>Open Database<br />
 Open a database file. O for Open.<br />
 Control+O</li>
+<li>Open Table<br />
+Open a table in a new window. O for Open.<br />
+Control+Shift+O</li>
 <li>Open Template Database<br />
 Open one of the template databases that come with DbDo, such as
 RadioTrail or JobTrail. D for Database.<br />
@@ -406,6 +431,9 @@ Alt+D</li>
 <li>Previous Table or View<br />
 F6 moves among parts; Shift reverses Control+F6.<br />
 Control+Shift+F6</li>
+<li>Previous Window<br />
+Activate the previous open window. Shift reverses Control+Tab.<br />
+Control+Shift+Tab</li>
 <li>Recent Databases<br />
 R for Recent.<br />
 Alt+R</li>
@@ -421,6 +449,10 @@ Control+S</li>
 <li>Save As<br />
 Save a copy to another path or file format. S for Save.<br />
 Control+Shift+S</li>
+<li>Say Windows Open<br />
+Speak the count and titles of open recordset windows, marking the
+current one. F4 is open windows; Shift+F4 says which are open.<br />
+Shift+F4</li>
 </ul>
 <h3 id="help">Help</h3>
 <ul>
@@ -477,12 +509,21 @@ Alt+C</li>
 Copy the value of the cell under the virtual cursor to the clipboard. C
 for Copy.<br />
 Control+C</li>
+<li>Copy Grid<br />
+Copy the whole visible grid to the clipboard as tab-separated values
+with a header row.<br />
+Control+F8</li>
 <li>Edit Settings<br />
 Open the Settings dialog. E for Edit.<br />
 Alt+Shift+E</li>
-<li>Generate from Grid<br />
-Make a report from the records in the grid. G for Generate.<br />
+<li>Generate Graphics<br />
+Draw a chart of the records and columns you choose, as a picture, a web
+page and an Excel workbook. G for Generate.<br />
 Alt+Shift+G</li>
+<li>Generate Statistics<br />
+Read statistics of the records and columns you choose: summary,
+frequency, group, relation or cross-tab. S for Statistics.<br />
+Alt+Shift+S</li>
 <li>Read Only Toggle<br />
 Flip the database between read-write and read-only at runtime. Z is for
 sleep: it wakes this behavior or puts it to sleep.<br />
@@ -506,8 +547,7 @@ Shift+F12</li>
 F12 is files and AI: F12 talks to the model on this computer.<br />
 F12</li>
 <li>Edit Script<br />
-S for Script.<br />
-Alt+Shift+S</li>
+Alt+Shift+V</li>
 <li>Evaluate Expression<br />
 Control+Equals</li>
 <li>Invoke Script<br />
@@ -560,17 +600,23 @@ Control+F3</li>
 Go to a record by its number, a percent or text. G for Go, as Control+G
 goes to a line in Windows editors.<br />
 Control+G</li>
+<li>Go to Record Again<br />
+G for Go.<br />
+Alt+G</li>
 <li>Jump<br />
 Go to the next record whose current field holds the text. J for
 Jump.<br />
 Control+J</li>
+<li>Jump Again<br />
+J for Jump.<br />
+Alt+J</li>
 <li>Keywords<br />
 Go to the next record whose fields hold the keywords. K for
 Keywords.<br />
 Control+K</li>
-<li>Repeat Go to<br />
-G for Go.<br />
-Alt+G</li>
+<li>Keywords Again<br />
+K for Keywords.<br />
+Alt+K</li>
 <li>Reverse Find with Regex<br />
 Find the previous record matching a regular expression. F3 searches;
 Control makes it a pattern and Shift reverses it.<br />
@@ -627,27 +673,39 @@ Records.<br />
 Alt+Shift+O</li>
 <li>Table Properties<br />
 Alt+Enter</li>
+<li>Yield with Regex<br />
+Count the matches of a regular expression in the fields and records you
+choose. Y for Yield.<br />
+Control+Shift+Y</li>
 </ul>
 <h3 id="query-say">Query, Say</h3>
 <p>Shift and a letter asks. Nothing here changes anything; each answers
 a question about where you are, in one short line.</p>
 <ul>
-<li>Read List<br />
-Read the records in view from the first, value by value. L for
-List.<br />
+<li>Read Lean<br />
+Read the current column’s values from the first record. L for
+Lean.<br />
 Alt+L</li>
-<li>Read List from Current<br />
-Read the records in view from the current one on, value by value. L for
-List.<br />
+<li>Read Lean from Current<br />
+Read the current column’s values from the current record on. L for
+Lean.<br />
 Control+L</li>
-<li>Read List from Current Marked<br />
-Read the marked records in view from the current one on, value by value.
-L for List.<br />
-Control+Shift+L</li>
-<li>Read List of Marked<br />
-Read the marked records in view from the first, value by value. L for
-List.<br />
+<li>Read Lean Marked<br />
+Read the current column’s values in the marked records, from the first.
+L for Lean.<br />
 Alt+Shift+L</li>
+<li>Read Wide<br />
+Read the records in view from the first, every shown column. W for
+Wide.<br />
+Alt+W</li>
+<li>Read Wide from Current<br />
+Read the records in view from the current one on, every shown column. W
+for Wide.<br />
+Control+W</li>
+<li>Read Wide Marked<br />
+Read the marked records in view from the first, every shown column. W
+for Wide.<br />
+Alt+Shift+W</li>
 <li>Say Added<br />
 A for Added.<br />
 Shift+A</li>
@@ -736,38 +794,13 @@ Shift+W</li>
 <li>Say Yield<br />
 Say how many records are in view. Y for Yield.<br />
 Alt+Y</li>
+<li>Say Yield from Current<br />
+Say how many records there are from the current one on. Y for
+Yield.<br />
+Control+Y</li>
 <li>Say Yield Marked<br />
 Say how many records are marked. Y for Yield.<br />
-Shift+Y</li>
-</ul>
-<h3 id="window">Window</h3>
-<ul>
-<li>Close All But Current Window<br />
-Close every window except the current one. F4 is open windows;
-Control+Shift+F4 closes all but this one.<br />
-Control+Shift+F4</li>
-<li>Close Window<br />
-Close the current recordset window. F4 is open windows; Control+F4
-closes this one, as in Windows.<br />
-Control+F4</li>
-<li>Current Windows<br />
-Pick from the list of open recordset windows and activate the chosen
-one. F4 picks, says or closes open windows: F4 picks one.<br />
-F4</li>
-<li>Next Window<br />
-Activate the next open window. Control+Tab moves among DbDo
-windows.<br />
-Control+Tab</li>
-<li>Open Table<br />
-Open a table in a new window. O for Open.<br />
-Control+Shift+O</li>
-<li>Previous Window<br />
-Activate the previous open window. Shift reverses Control+Tab.<br />
-Control+Shift+Tab</li>
-<li>Say Windows Open<br />
-Speak the count and titles of open recordset windows, marking the
-current one. F4 is open windows; Shift+F4 says which are open.<br />
-Shift+F4</li>
+Alt+Shift+Y</li>
 </ul>
 <h2 id="by-key">By key</h2>
 <h3 id="alt">Alt</h3>
@@ -798,15 +831,19 @@ Say Position</li>
 <li>Alt+Enter<br />
 Table Properties</li>
 <li>Alt+G<br />
-Repeat Go to</li>
+Go to Record Again</li>
 <li>Alt+Home<br />
 Go back to the first table.<br />
 Exit to Root Table</li>
 <li>Alt+I<br />
 Inspect Record</li>
+<li>Alt+J<br />
+Jump Again</li>
+<li>Alt+K<br />
+Keywords Again</li>
 <li>Alt+L<br />
-Read the records in view from the first, value by value.<br />
-Read List</li>
+Read the current column’s values from the first record.<br />
+Read Lean</li>
 <li>Alt+LeftArrow<br />
 Return from a child drill-down to the parent table.<br />
 Exit Child Table</li>
@@ -835,6 +872,9 @@ Table Summary</li>
 Run a script from the Scripts folder (.js, .sql, .dbdo, or a macro’s
 .inix).<br />
 Invoke Script</li>
+<li>Alt+W<br />
+Read the records in view from the first, every shown column.<br />
+Read Wide</li>
 <li>Alt+Y<br />
 Say how many records are in view.<br />
 Say Yield</li>
@@ -852,11 +892,13 @@ Copy Append Record</li>
 Open the Settings dialog.<br />
 Edit Settings</li>
 <li>Alt+Shift+G<br />
-Make a report from the records in the grid.<br />
-Generate from Grid</li>
+Draw a chart of the records and columns you choose, as a picture, a web
+page and an Excel workbook.<br />
+Generate Graphics</li>
 <li>Alt+Shift+L<br />
-Read the marked records in view from the first, value by value.<br />
-Read List of Marked</li>
+Read the current column’s values in the marked records, from the
+first.<br />
+Read Lean Marked</li>
 <li>Alt+Shift+N<br />
 Edit Notes</li>
 <li>Alt+Shift+O<br />
@@ -870,11 +912,22 @@ report reads the whole PHYSICAL table (not the grid view), so it is
 reproducible regardless of your current filter or sort.<br />
 Run Report</li>
 <li>Alt+Shift+S<br />
-Edit Script</li>
+Read statistics of the records and columns you choose: summary,
+frequency, group, relation or cross-tab.<br />
+Generate Statistics</li>
 <li>Alt+Shift+T<br />
 Edit Tags</li>
 <li>Alt+Shift+U<br />
 Edit url</li>
+<li>Alt+Shift+V<br />
+Edit Script</li>
+<li>Alt+Shift+W<br />
+Read the marked records in view from the first, every shown
+column.<br />
+Read Wide Marked</li>
+<li>Alt+Shift+Y<br />
+Say how many records are marked.<br />
+Say Yield Marked</li>
 </ul>
 <h3 id="control">Control</h3>
 <ul>
@@ -920,8 +973,8 @@ Jump</li>
 Go to the next record whose fields hold the keywords.<br />
 Keywords</li>
 <li>Control+L<br />
-Read the records in view from the current one on, value by value.<br />
-Read List from Current</li>
+Read the current column’s values from the current record on.<br />
+Read Lean from Current</li>
 <li>Control+M<br />
 Set the ‘marked’ flag on the current row.<br />
 Mark Record</li>
@@ -953,6 +1006,13 @@ Choose Table</li>
 <li>Control+Tab<br />
 Activate the next open window.<br />
 Next Window</li>
+<li>Control+W<br />
+Read the records in view from the current one on, every shown
+column.<br />
+Read Wide from Current</li>
+<li>Control+Y<br />
+Say how many records there are from the current one on.<br />
+Say Yield from Current</li>
 </ul>
 <h3 id="controlshift">Control+Shift</h3>
 <ul>
@@ -971,7 +1031,7 @@ Show in FileDir</li>
 Duplicate the current row as a new row.<br />
 Copy Record</li>
 <li>Control+Shift+D<br />
-Delete Without Confirmation</li>
+Delete without Confirmation</li>
 <li>Control+Shift+E<br />
 Extract with Regex</li>
 <li>Control+Shift+F<br />
@@ -993,10 +1053,6 @@ Reverse Jump</li>
 <li>Control+Shift+K<br />
 Go to the previous record whose fields hold the keywords.<br />
 Reverse Keywords</li>
-<li>Control+Shift+L<br />
-Read the marked records in view from the current one on, value by
-value.<br />
-Read List from Current Marked</li>
 <li>Control+Shift+M<br />
 Clear the ‘marked’ flag on the current row.<br />
 Unmark Record</li>
@@ -1005,6 +1061,8 @@ New Copy</li>
 <li>Control+Shift+O<br />
 Open a table in a new window.<br />
 Open Table</li>
+<li>Control+Shift+P<br />
+Record Playback</li>
 <li>Control+Shift+R<br />
 Replace with Regex</li>
 <li>Control+Shift+S<br />
@@ -1018,6 +1076,10 @@ Open url</li>
 <li>Control+Shift+X<br />
 Export the records in view, with the shown columns, to a file.<br />
 Export Data</li>
+<li>Control+Shift+Y<br />
+Count the matches of a regular expression in the fields and records you
+choose.<br />
+Yield with Regex</li>
 <li>Control+Shift+Z<br />
 Flip the database between read-write and read-only at runtime.<br />
 Read Only Toggle</li>
@@ -1035,16 +1097,13 @@ Play Tutorials</li>
 <li>Alt+F4<br />
 Close DbDo.<br />
 Exit DbDo</li>
-<li>Alt+F8<br />
-Drop an unmark anchor at the current row.<br />
-Start Unmark</li>
 <li>Alt+Shift+F1<br />
 ReadMe</li>
 <li>Alt+Shift+F12<br />
 Play the macro you recorded or loaded last.<br />
 Play Macro</li>
 <li>Alt+Shift+F8<br />
-Unmark every row from the Alt+F8 anchor to the current row.<br />
+Unmark every row from the F8 start to the current row.<br />
 Complete Unmark</li>
 <li>Control+F1<br />
 Describe each key instead of running it (Ctrl+F1).<br />
@@ -1063,6 +1122,10 @@ Close the current recordset window.<br />
 Close Window</li>
 <li>Control+F6<br />
 Next Table or View</li>
+<li>Control+F8<br />
+Copy the whole visible grid to the clipboard as tab-separated values
+with a header row.<br />
+Copy Grid</li>
 <li>Control+Shift+F1<br />
 Open the history of changes in the default browser.<br />
 History of Changes</li>
@@ -1071,7 +1134,7 @@ Find the previous record matching a regular expression.<br />
 Reverse Find with Regex</li>
 <li>Control+Shift+F4<br />
 Close every window except the current one.<br />
-Close All But Current Window</li>
+Close All but Current Window</li>
 <li>Control+Shift+F6<br />
 Previous Table or View</li>
 <li>Control+Shift+F9<br />
@@ -1100,8 +1163,8 @@ Current Windows</li>
 Refresh the records’ values from the database.<br />
 Refresh Records</li>
 <li>F8<br />
-Drop a mark anchor at the current row.<br />
-Start Mark</li>
+Start marking or unmarking a range at the current record.<br />
+Start Mark or Unmark</li>
 <li>Shift+F1<br />
 What This Does</li>
 <li>Shift+F12<br />
@@ -1114,7 +1177,7 @@ Speak the count and titles of open recordset windows, marking the
 current one.<br />
 Say Windows Open</li>
 <li>Shift+F8<br />
-Mark every row from the F8 anchor to the current row.<br />
+Mark every row from the F8 start to the current row.<br />
 Complete Mark</li>
 </ul>
 <h3 id="shift">Shift</h3>
@@ -1175,9 +1238,6 @@ Say url</li>
 Say Invoke Script</li>
 <li>Shift+W<br />
 Say Whole Record</li>
-<li>Shift+Y<br />
-Say how many records are marked.<br />
-Say Yield Marked</li>
 <li>Shift+Z<br />
 Say the table, record, order and filter.<br />
 Say Status</li>
@@ -1212,17 +1272,17 @@ Alt+Shift+Apostrophe</li>
 <li>Clear Filter<br />
 Clear the active filter.<br />
 Control+Shift+F</li>
-<li>Close All But Current Window<br />
+<li>Close All but Current Window<br />
 Close every window except the current one.<br />
 Control+Shift+F4</li>
 <li>Close Window<br />
 Close the current recordset window.<br />
 Control+F4</li>
 <li>Complete Mark<br />
-Mark every row from the F8 anchor to the current row.<br />
+Mark every row from the F8 start to the current row.<br />
 Shift+F8</li>
 <li>Complete Unmark<br />
-Unmark every row from the Alt+F8 anchor to the current row.<br />
+Unmark every row from the F8 start to the current row.<br />
 Alt+Shift+F8</li>
 <li>Copy Append<br />
 Append the value of the cell under the virtual cursor to the
@@ -1234,6 +1294,10 @@ Alt+Shift+C</li>
 Copy the value of the cell under the virtual cursor to the
 clipboard.<br />
 Control+C</li>
+<li>Copy Grid<br />
+Copy the whole visible grid to the clipboard as tab-separated values
+with a header row.<br />
+Control+F8</li>
 <li>Copy Log<br />
 Copy the session log to the clipboard as a file, ready to paste as an
 attachment.<br />
@@ -1248,7 +1312,7 @@ F4</li>
 <li>Delete Record<br />
 Delete the current record (or marked records, when marks exist).<br />
 Control+D</li>
-<li>Delete Without Confirmation<br />
+<li>Delete without Confirmation<br />
 Control+Shift+D</li>
 <li>Documentation<br />
 Open the documentation in the default browser.<br />
@@ -1262,7 +1326,7 @@ Alt+Shift+N</li>
 Edit every field of the current row.<br />
 Control+E</li>
 <li>Edit Script<br />
-Alt+Shift+S</li>
+Alt+Shift+V</li>
 <li>Edit Settings<br />
 Open the Settings dialog.<br />
 Alt+Shift+E</li>
@@ -1298,12 +1362,19 @@ Control+F</li>
 <li>Forward Find with Regex<br />
 Find the next record matching a regular expression.<br />
 Control+F3</li>
-<li>Generate from Grid<br />
-Make a report from the records in the grid.<br />
+<li>Generate Graphics<br />
+Draw a chart of the records and columns you choose, as a picture, a web
+page and an Excel workbook.<br />
 Alt+Shift+G</li>
+<li>Generate Statistics<br />
+Read statistics of the records and columns you choose: summary,
+frequency, group, relation or cross-tab.<br />
+Alt+Shift+S</li>
 <li>Go to Record<br />
 Go to a record by its number, a percent or text.<br />
 Control+G</li>
+<li>Go to Record Again<br />
+Alt+G</li>
 <li>History of Changes<br />
 Open the history of changes in the default browser.<br />
 Control+Shift+F1</li>
@@ -1324,12 +1395,16 @@ Alt+V</li>
 <li>Jump<br />
 Go to the next record whose current field holds the text.<br />
 Control+J</li>
+<li>Jump Again<br />
+Alt+J</li>
 <li>Key Describer Toggle<br />
 Describe each key instead of running it (Ctrl+F1).<br />
 Control+F1</li>
 <li>Keywords<br />
 Go to the next record whose fields hold the keywords.<br />
 Control+K</li>
+<li>Keywords Again<br />
+Alt+K</li>
 <li>List Bookmarks<br />
 Show saved bookmarks in a listbox; navigate to the selected one.<br />
 Alt+B</li>
@@ -1397,22 +1472,30 @@ Control+Shift+Tab</li>
 Control+Q</li>
 <li>Query History<br />
 Alt+Shift+Q</li>
-<li>Read List<br />
-Read the records in view from the first, value by value.<br />
+<li>Read Lean<br />
+Read the current column’s values from the first record.<br />
 Alt+L</li>
-<li>Read List from Current<br />
-Read the records in view from the current one on, value by value.<br />
+<li>Read Lean from Current<br />
+Read the current column’s values from the current record on.<br />
 Control+L</li>
-<li>Read List from Current Marked<br />
-Read the marked records in view from the current one on, value by
-value.<br />
-Control+Shift+L</li>
-<li>Read List of Marked<br />
-Read the marked records in view from the first, value by value.<br />
+<li>Read Lean Marked<br />
+Read the current column’s values in the marked records, from the
+first.<br />
 Alt+Shift+L</li>
 <li>Read Only Toggle<br />
 Flip the database between read-write and read-only at runtime.<br />
 Control+Shift+Z</li>
+<li>Read Wide<br />
+Read the records in view from the first, every shown column.<br />
+Alt+W</li>
+<li>Read Wide from Current<br />
+Read the records in view from the current one on, every shown
+column.<br />
+Control+W</li>
+<li>Read Wide Marked<br />
+Read the marked records in view from the first, every shown
+column.<br />
+Alt+Shift+W</li>
 <li>ReadMe<br />
 Alt+Shift+F1</li>
 <li>Recent Databases<br />
@@ -1421,11 +1504,11 @@ Alt+R</li>
 Start recording a macro of record moves, or stop and save it, or stop
 one that is playing.<br />
 Control+Shift+F9</li>
+<li>Record Playback<br />
+Control+Shift+P</li>
 <li>Refresh Records<br />
 Refresh the records’ values from the database.<br />
 F5</li>
-<li>Repeat Go to<br />
-Alt+G</li>
 <li>Replace<br />
 Control+R</li>
 <li>Replace with Regex<br />
@@ -1536,9 +1619,12 @@ Shift+F4</li>
 <li>Say Yield<br />
 Say how many records are in view.<br />
 Alt+Y</li>
+<li>Say Yield from Current<br />
+Say how many records there are from the current one on.<br />
+Control+Y</li>
 <li>Say Yield Marked<br />
 Say how many records are marked.<br />
-Shift+Y</li>
+Alt+Shift+Y</li>
 <li>Search Next<br />
 Repeat the last Find forward.<br />
 F3</li>
@@ -1555,12 +1641,9 @@ Control+Shift+Backslash</li>
 Open the bundled sqlean.exe shell in its own console window on the
 current database.<br />
 Control+Shift+GraveAccent</li>
-<li>Start Mark<br />
-Drop a mark anchor at the current row.<br />
+<li>Start Mark or Unmark<br />
+Start marking or unmarking a range at the current record.<br />
 F8</li>
-<li>Start Unmark<br />
-Drop an unmark anchor at the current row.<br />
-Alt+F8</li>
 <li>Table Properties<br />
 Alt+Enter</li>
 <li>Table Summary<br />
@@ -1578,6 +1661,10 @@ Shift+F1</li>
 <li>Where Am I<br />
 Show the table, row, filter, and sort in a read-only dialog.<br />
 Control+Slash</li>
+<li>Yield with Regex<br />
+Count the matches of a regular expression in the fields and records you
+choose.<br />
+Control+Shift+Y</li>
 </ul>
 </main>
 </body>
