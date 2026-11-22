@@ -5,6 +5,12 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 22 November 2026 -- The view survives a forced close
+
+- **Your filter, order, shown columns and current record are kept as they change,** at most two seconds after you change them, not only when DbDo closes. When DbDo's installer closed a running DbDo to update it, Windows ended it without that last step, so the view was lost.
+- **DbDo starting on its own brings the view back too.** When DbDo starts with no file named, it reopens the last database and table, as before, and now also its filter, order, shown columns and current record, as Recent Files and Open Database already did. A table that reopens filtered says so.
+- **Something to know:** a Homer Player that was playing does not come back after an update; the station has to be played again.
+
 ## 22 November 2026 -- The installer's boxes in alphabetical order
 
 - **The boxes on the installer's last page are in alphabetical order:** the JAWS scripts, the AI model, mpv, the NVDA add-on and Ollama. The NVDA add-on had come before mpv.

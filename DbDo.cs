@@ -13590,6 +13590,55 @@ namespace DbDo
             updateMenuEnabled();
             updateStatusBar();
             if (miToggleReadOnly != null && db != null) miToggleReadOnly.Checked = db.readOnly;
+            startStateKeeping();
+        }
+
+        // THE VIEW IS KEPT AS IT CHANGES, NOT ONLY AT CLOSE (22 November 2026). Each table's filter, order, current record
+        // and shown columns were written to the Recent Files settings only in OnFormClosing. When DbDo's installer closed
+        // a running DbDo to update it -- one playing a radio station in the Homer Player -- Windows ended it without that
+        // step, and the new DbDo opened with the filter and the current record lost. Now a quiet timer looks every two
+        // seconds and writes the state only when it has changed, so an update, a crash or a power loss costs at most two
+        // seconds of moving about. OnFormClosing still writes it once more, as before.
+        private const int iStateKeepMs = 2000;
+        private string sKeptState = "";
+        private System.Windows.Forms.Timer tmrStateKeep;
+
+        private bool startStateKeeping()
+        {
+            tmrStateKeep = new System.Windows.Forms.Timer();
+            tmrStateKeep.Interval = iStateKeepMs;
+            tmrStateKeep.Tick += delegate(object oSender, EventArgs evTick) { keepStateIfChanged(); };
+            tmrStateKeep.Start();
+            return true;
+        }
+
+        private bool keepStateIfChanged()
+        {
+            try
+            {
+                if (db == null || !db.isOpen() || string.IsNullOrEmpty(db.filePath) || string.IsNullOrEmpty(db.currentTable)) return false;
+                List<KeyValuePair<string, DbDoManager.TableSettings>> lsEntries = new List<KeyValuePair<string, DbDoManager.TableSettings>>(db.tableCacheEntries());
+                StringBuilder sbNow = new StringBuilder(db.filePath + "|" + db.currentTable);
+                foreach (KeyValuePair<string, DbDoManager.TableSettings> kvEntry in lsEntries)
+                {
+                    DbDoManager.TableSettings ts = kvEntry.Value;
+                    if (ts == null) continue;
+                    sbNow.Append("|" + kvEntry.Key + "=" + (ts.sFilter ?? "") + "/" + (ts.sSort ?? "") + "/" + ts.iAbsolutePosition
+                        + "/" + (ts.sVirtualColumn ?? "") + "/" + (ts.sSelectList ?? ""));
+                }
+                string sNow = sbNow.ToString();
+                if (sNow == sKeptState) return false;
+                RecentFiles.recordAllTableStates(db.filePath, db.currentTable, lsEntries);
+                if (sKeptState.Length == 0 || !sKeptState.StartsWith(db.filePath + "|", StringComparison.Ordinal))
+                    DbDoLog.write("Keeping the view of " + db.filePath + " as it changes, every " + (iStateKeepMs / 1000) + " seconds at most");
+                sKeptState = sNow;
+                return true;
+            }
+            catch (Exception exKeep)
+            {
+                try { DbDoLog.write("Keeping the view's state did not work this time: " + exKeep.Message); } catch { }
+                return false;
+            }
         }
 
         // OnShown fires after the form is first displayed and has a
@@ -13640,6 +13689,7 @@ namespace DbDo
                 base.OnFormClosing(evArgs);
                 return;
             }
+            if (tmrStateKeep != null) tmrStateKeep.Stop();
             try
             {
                 if (db != null && db.isOpen() && !string.IsNullOrEmpty(db.filePath))
@@ -23235,6 +23285,17 @@ namespace DbDo
         {
             try { openDatabaseAndApplyState(sPath, null); }
             catch (Exception ex) { ErrorDialog.show(this, "Open Database", "Could not open " + sPath + ":\n\n" + ex.Message); }
+        }
+
+        // restoreLastSession: the startup restore, opened as Recent Files and Open Database open, so the table's filter,
+        // order, shown columns and current record come back as they were left.
+        public bool restoreLastSession(string sPath)
+        {
+            RecentFiles.FileState state = null;
+            try { state = RecentFiles.findByPath(RecentFiles.loadAll(), sPath); } catch { }
+            DbDoLog.write("Restoring the last view" + (state == null ? ": none was kept for this database" : " kept in Recent Files"));
+            openDatabaseAndApplyState(sPath, state);
+            return db != null && db.isOpen();
         }
 
         private void openDatabaseAndApplyState(string sPath, RecentFiles.FileState state)
@@ -39123,9 +39184,17 @@ namespace DbDo
                             {
                                 DbDoLog.write("Restoring last session: " + sSavedDb
                                     + (string.IsNullOrEmpty(sSavedTbl) ? "" : " (table: " + sSavedTbl + ")"));
-                                frm.Db.openDatabase(sSavedDb,
-                                    string.IsNullOrEmpty(sSavedTbl) ? null : sSavedTbl,
-                                    bReadOnly);
+                                // THE LAST VIEW COMES BACK WITH THE LAST DATABASE (22 November 2026). This restore opened the
+                                // database and table only, so the filter, order and current record kept in Recent Files came
+                                // back when the database was chosen from Recent Files or Open Database, but never when DbDo
+                                // started on its own -- as it does after its installer closes and relaunches it. It now opens
+                                // the way those commands do. Read only still opens as before, with no saved view applied.
+                                if (bReadOnly)
+                                    frm.Db.openDatabase(sSavedDb,
+                                        string.IsNullOrEmpty(sSavedTbl) ? null : sSavedTbl,
+                                        bReadOnly);
+                                else
+                                    frm.restoreLastSession(sSavedDb);
                                 if (!frm.Db.hasRecordset())
                                 {
                                     List<string> lT = frm.Db.getTableNames();
