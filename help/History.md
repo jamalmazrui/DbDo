@@ -5,6 +5,11 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 22 November 2026 -- The tutorials say today's keys
+
+- **Shift+W, not Shift+R, says what a record leads to.** Three walks still pressed Shift+R, which has said the Replace values since 9 November; Say Whole Record, Shift+W, ends with the related records. The conclusion's History of Changes is Control+Shift+F1, not Shift+F1.
+- **The tutorials speak in the new screen reader voice,** Phonon Russell, once the kit is 1.275.0. Every walk is spoken again once.
+
 ## 22 November 2026 -- The view survives a forced close
 
 - **Your filter, order, shown columns and current record are kept as they change,** at most two seconds after you change them, not only when DbDo closes. When DbDo's installer closed a running DbDo to update it, Windows ended it without that last step, so the view was lost.

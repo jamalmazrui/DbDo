@@ -25,7 +25,7 @@ Hear=Play: Control plus P
 
 Say=Records lead to others.
 Key=
-Hear=Say Related: Shift plus R
+Hear=Say Whole Record, ending with what it leads to: Shift plus W
 Hear=Into the related records: Alt plus Right Arrow
 Hear=Back: Alt plus Left Arrow
 
@@ -133,7 +133,7 @@ Hear=A ready-made database that comes with DbDo, opened with Alt plus D; you wor
 Say=Last, more information. Help is built in. The guide, and what changed.
 Key=
 Hear=F1, the guide
-Hear=Shift plus F1, History
+Hear=Control plus Shift plus F1, History
 
 [step]
 

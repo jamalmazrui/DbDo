@@ -49,8 +49,8 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Shift plus R says what this creator made, in each kind.
-Key=Shift+R
+Say=Shift plus W, Say Whole Record, ends with what this creator made, in each kind.
+Key=Shift+W
 Hear=apps 4, presentations 3
 Note=Confirm the wording with a live run: buildTutorials -live.
 
@@ -128,7 +128,7 @@ Hear=Control plus P
 
 Say=Say what a record leads to.
 Key=
-Hear=Shift plus R
+Hear=Shift plus W
 
 [step]
 

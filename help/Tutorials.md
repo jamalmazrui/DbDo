@@ -2283,9 +2283,9 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 8: Shift+R
+### Step 8: Shift+W
 
-Queen. Shift plus R again.
+Queen. Shift plus W again.
 
 Screen reader:
 
@@ -2404,7 +2404,7 @@ Say what a record leads to.
 
 Screen reader:
 
-- Shift plus R
+- Shift plus W
 
 ### Step 21
 
@@ -2500,9 +2500,9 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 7: Shift+R
+### Step 7: Shift+W
 
-Shift plus R says what this creator made, in each kind.
+Shift plus W, Say Whole Record, ends with what this creator made, in each kind.
 
 Screen reader:
 
@@ -2587,7 +2587,7 @@ Say what a record leads to.
 
 Screen reader:
 
-- Shift plus R
+- Shift plus W
 
 ### Step 20
 
@@ -2961,7 +2961,7 @@ Records lead to others.
 
 Screen reader:
 
-- Say Related: Shift plus R
+- Say Whole Record, ending with what it leads to: Shift plus W
 - Into the related records: Alt plus Right Arrow
 - Back: Alt plus Left Arrow
 
@@ -3099,7 +3099,7 @@ Last, more information. Help is built in. The guide, and what changed.
 Screen reader:
 
 - F1, the guide
-- Shift plus F1, History
+- Control plus Shift plus F1, History
 
 ### Step 21
 
