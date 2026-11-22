@@ -5,6 +5,11 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 22 November 2026 -- The installer's boxes in alphabetical order
+
+- **The boxes on the installer's last page are in alphabetical order:** the JAWS scripts, the AI model, mpv, the NVDA add-on and Ollama. The NVDA add-on had come before mpv.
+- **This needs HomerDev 1.273.0.**
+
 ## 22 November 2026 -- Marked or Current everywhere
 
 - **Every command that can act on one record or several asks Marked or Current** when records are marked: now also Delete without Confirmation, Copy Record, Copy Append Record, Copy Visible Cells, Mail Record and Open url. Each takes all the marked records, or the current one alone.

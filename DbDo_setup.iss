@@ -480,18 +480,18 @@ FileName: "{app}\scripts\installModels.cmd"; \
   Description: "{code:descModel}"; \
   Check: homerFinishRuns and modelNeedsInstall; \
   Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist
-FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
-  Parameters: "noPause nvda"; \
-  WorkingDir: "{app}\scripts"; \
-  Description: "{code:labelNvda}"; \
-  Check: homerFinishRuns and isInstallNvda; \
-  Flags: postinstall waituntilterminated runhidden runasoriginaluser
 FileName: "{app}\scripts\installMpv.cmd"; \
   Parameters: "noPause"; \
   WorkingDir: "{app}\scripts"; \
   Description: "{code:labelmpv}"; \
   Check: homerFinishRuns and isInstallmpv; \
   Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist
+FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
+  Parameters: "noPause nvda"; \
+  WorkingDir: "{app}\scripts"; \
+  Description: "{code:labelNvda}"; \
+  Check: homerFinishRuns and isInstallNvda; \
+  Flags: postinstall waituntilterminated runhidden runasoriginaluser
 FileName: "{app}\scripts\installOllama.cmd"; \
   Parameters: "noPause"; \
   WorkingDir: "{app}\scripts"; \
@@ -506,18 +506,18 @@ FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
   Description: "{code:labelJaws}"; \
   Check: homerFinishRuns and isUpdateJaws; \
   Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist
-FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
-  Parameters: "noPause nvda"; \
-  WorkingDir: "{app}\scripts"; \
-  Description: "{code:labelNvda}"; \
-  Check: homerFinishRuns and isUpdateNvda; \
-  Flags: postinstall waituntilterminated runhidden runasoriginaluser
 FileName: "{app}\scripts\installMpv.cmd"; \
   Parameters: "noPause update"; \
   WorkingDir: "{app}\scripts"; \
   Description: "{code:labelmpv}"; \
   Check: homerFinishRuns and isUpdatempv; \
   Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist
+FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
+  Parameters: "noPause nvda"; \
+  WorkingDir: "{app}\scripts"; \
+  Description: "{code:labelNvda}"; \
+  Check: homerFinishRuns and isUpdateNvda; \
+  Flags: postinstall waituntilterminated runhidden runasoriginaluser
 FileName: "{app}\scripts\installOllama.cmd"; \
   Parameters: "noPause update"; \
   WorkingDir: "{app}\scripts"; \
@@ -538,18 +538,18 @@ FileName: "{app}\scripts\installModels.cmd"; \
   Description: "{code:descModel}"; \
   Check: homerFinishRuns and modelIsCurrent; \
   Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist unchecked
-FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
-  Parameters: "noPause nvda"; \
-  WorkingDir: "{app}\scripts"; \
-  Description: "{code:labelNvda}"; \
-  Check: homerFinishRuns and isReinstallNvda; \
-  Flags: postinstall waituntilterminated runhidden runasoriginaluser unchecked
 FileName: "{app}\scripts\installMpv.cmd"; \
   Parameters: "noPause reinstall"; \
   WorkingDir: "{app}\scripts"; \
   Description: "{code:labelmpv}"; \
   Check: homerFinishRuns and isReinstallmpv; \
   Flags: postinstall runascurrentuser waituntilterminated skipifdoesntexist unchecked
+FileName: "{app}\scripts\installScreenReaderSupport.cmd"; \
+  Parameters: "noPause nvda"; \
+  WorkingDir: "{app}\scripts"; \
+  Description: "{code:labelNvda}"; \
+  Check: homerFinishRuns and isReinstallNvda; \
+  Flags: postinstall waituntilterminated runhidden runasoriginaluser unchecked
 FileName: "{app}\scripts\installOllama.cmd"; \
   Parameters: "noPause reinstall"; \
   WorkingDir: "{app}\scripts"; \
