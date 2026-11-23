@@ -45,7 +45,7 @@ InitialTable = stations
 
 ; Name first, so a letter reaches the station; then what it plays and where it
 ; is. State is not on the row: it is empty for most of the world, and an empty
-; cell is a "blank" spoken on every row. Within one country, Select Columns
+; cell is a "blank" spoken on every row. Within one country, Show Columns
 ; adds it. Filter Records on genre, country, state or language is the way
 ; through fifty thousand rows; Keywords searches every field, on screen or
 ; off -- slogan, descrip, homepage, codec, all of them.

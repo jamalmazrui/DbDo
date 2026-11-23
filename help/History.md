@@ -5,6 +5,16 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 23 November 2026 -- Show Columns, and Design Database
+
+- **Select Columns is now Show Columns,** still on Alt+S, and Say Select Columns is **Say Shown Columns,** still on Shift+S. In Windows, to select is to highlight, so the old name sounded like marking a block of columns; the dialog's own list was already called Columns shown. Show Columns, Order Records and Filter Records are the three questions that shape what you see, and Shift with the same letter says each answer. The Alternate Menu still finds the old names.
+- **Design Database, Alt+Shift+D, is new.** It gathers the parts of a database you build rather than fill: Add table, Defs table, Files table, Maps table and Table properties. D is for Design and Database: Shift+D says the database, Alt+D opens a template database, and Alt+Shift+D designs this one. With no database open, it offers New database and Open template database.
+- **DbDo's own tables open in a design window.** Defs table, Files table and Maps table each open in a new window, where every record key works. In that window, Control+F6 and Control+T move among defs, files and maps only; in a window on your own data, they move among your tables only, as before. Control+F4 closes the design window, and DbDo never reopens one by itself.
+- **Merge Data moves to Alt+Shift+M,** so Alt+M opens the Misc menu, as it does in EdSharp and FileDir. On Alt+M, Merge Data ran before Windows saw the menu letter. M is still for Merge. Under JAWS's laptop layout, Alt+Shift+M is a table key that DbDo's key map hands on to DbDo.
+- **The files table is hidden as the guide always said.** It had no shape check, so Choose Table, Open Table and Control+F6 offered it beside your own tables.
+- **Hotkeys gives better reasons.** Say Shown Columns is S for Shown, not "S for Say"; Say Status is Z because Z is the bottom of the alphabet, as the status bar is the bottom of the window; Run Report and the Key Describer no longer repeat their keys in their descriptions. Building Hotkeys now warns when a hotkey sits on a menu's letter.
+- **The guide explains look and prime in the same two sentences everywhere,** and no longer mentions unq: look is how a record is said, its label; prime is its primary key. It also pairs Shift+L and Shift+W: lean and whole. Tutorial 1 gains that pair, and tutorial 3 names Show Columns; both are spoken again by the build.
+
 ## 22 November 2026 -- The tutorials say today's keys
 
 - **Shift+W, not Shift+R, says what a record leads to.** Three walks still pressed Shift+R, which has said the Replace values since 9 November; Say Whole Record, Shift+W, ends with the related records. The conclusion's History of Changes is Control+Shift+F1, not Shift+F1.

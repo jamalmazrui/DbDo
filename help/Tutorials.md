@@ -1129,7 +1129,17 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 7: Shift+8
+### Step 7: Shift+W
+
+Shift plus L says the record lean, just its look: the short label DbDo gives it everywhere. Shift plus W says it whole: every field with a value, then what it is related to.
+
+Screen reader:
+
+- name
+
+Added 23 November 2026, the lean and whole pair. Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Shift+8
 
 Alt plus Y, Say Yield, says how many records are in view, and Alt plus Shift plus Y how many are marked; Shift plus 8 says the order and filter.
 
@@ -1139,7 +1149,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 8: F10
+### Step 9: F10
 
 F10 opens the menu bar.
 
@@ -1148,7 +1158,7 @@ Screen reader:
 - Menu bar
 - File menu
 
-### Step 9: Down Arrow
+### Step 10: Down Arrow
 
 Down Arrow to the first item.
 
@@ -1156,7 +1166,7 @@ Screen reader:
 
 - New Database
 
-### Step 10: Escape
+### Step 11: Escape
 
 The item, its key, then its letter: learn a key from the menu once, then skip the menu. Escape closes the menu.
 
@@ -1164,7 +1174,7 @@ Screen reader:
 
 - File submenu
 
-### Step 11: Escape
+### Step 12: Escape
 
 Escape again leaves the menu bar.
 
@@ -1172,11 +1182,11 @@ Screen reader:
 
 - Leaving menus
 
-### Step 12
+### Step 13
 
 The rules behind every key. A letter is the first letter of a word: Control plus O opens, Alt plus O orders. Control does; Shift asks.
 
-### Step 13: F4
+### Step 14: F4
 
 Adding Shift reverses: Control plus M marks, Control plus Shift plus M unmarks. Z is for sleep, so every Z key is a toggle. And each function key is a family: F2 edits, F3 searches again, F4 lists the windows open.
 
@@ -1186,7 +1196,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 14: Escape
+### Step 15: Escape
 
 Escape closes it.
 
@@ -1194,7 +1204,7 @@ Screen reader:
 
 - Records
 
-### Step 15: Control+F1
+### Step 16: Control+F1
 
 Control plus F1 is the Key Describer: each key says what it does instead of doing it.
 
@@ -1202,7 +1212,7 @@ Screen reader:
 
 - Key Describer On
 
-### Step 16: Control+O
+### Step 17: Control+O
 
 Now Control plus O only describes itself.
 
@@ -1210,7 +1220,7 @@ Screen reader:
 
 - Open Database. Control+O.
 
-### Step 17: Control+F1
+### Step 18: Control+F1
 
 Control plus F1 again, and it is off.
 
@@ -1218,7 +1228,7 @@ Screen reader:
 
 - No Key Describer
 
-### Step 18: Alt+F10
+### Step 19: Alt+F10
 
 When a key will not come to mind, Alt plus F10, the Alternate Menu, lists every command in one list you can search, with its key beside it.
 
@@ -1227,7 +1237,7 @@ Screen reader:
 - Alternate Menu
 - Commands, list box
 
-### Step 19
+### Step 20
 
 I type the word play, and the list narrows to the commands with that word.
 
@@ -1237,7 +1247,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 20: Escape
+### Step 21: Escape
 
 Escape closes the list without running anything. Help lives in four places, the same in every Homer program. I say which; the reader says the key. The guide.
 
@@ -1245,7 +1255,7 @@ Screen reader:
 
 - F1
 
-### Step 21
+### Step 22
 
 The changes, release by release.
 
@@ -1253,7 +1263,7 @@ Screen reader:
 
 - Shift plus F1
 
-### Step 22
+### Step 23
 
 The version.
 
@@ -1261,7 +1271,7 @@ Screen reader:
 
 - Alt plus F1
 
-### Step 23
+### Step 24
 
 Where you are, then every key, in a window you can search.
 
@@ -1269,11 +1279,11 @@ Screen reader:
 
 - Control plus slash, pressed twice, Where Am I
 
-### Step 24
+### Step 25
 
 What this walk taught. I name the command; the reader gives the key.
 
-### Step 25
+### Step 26
 
 Say Status.
 
@@ -1281,7 +1291,7 @@ Screen reader:
 
 - Shift plus Z
 
-### Step 26
+### Step 27
 
 Pick a field's fixed value.
 
@@ -1289,7 +1299,7 @@ Screen reader:
 
 - Control plus F2
 
-### Step 27
+### Step 28
 
 Unmark, the reverse of Mark.
 
@@ -1297,7 +1307,7 @@ Screen reader:
 
 - Control plus Shift plus M
 
-### Step 28
+### Step 29
 
 Every command in one list.
 
@@ -1621,7 +1631,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 13: Alt+O
 
-Alt plus O, O for Order, says the order in force, then offers the same buttons as Select Columns: Look columns, Prime columns, Main, Standard and All columns, Choose columns and Type columns. Prime columns, the default order, has focus.
+Alt plus O, O for Order, says the order in force, then offers the same buttons as Show Columns, Alt plus S: Look columns, Prime columns, Main, Standard and All columns, Choose columns and Type columns. Prime columns, the default order, has focus.
 
 Screen reader:
 

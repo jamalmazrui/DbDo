@@ -19,7 +19,7 @@ Marked records = Keeps the records you have marked.
 Unmarked records = Keeps the records you have not marked.
 Records = The table's records, one to a row; arrows move by record and by column, and Enter opens the record.
 
-[Select Columns]
+[Show Columns]
 Look columns = Shows the default columns: look's fields, in look's order, the way each record is said; with no look, every main column.
 Prime columns = Shows the primary key: prime's fields, in prime's order, which together make each record unique and set the default order.
 Main columns = Shows only the columns about the table's subject, leaving out url, tags, notes and the other standard columns.
@@ -112,3 +112,12 @@ Script name = The scripts you can open for editing; Enter opens the one you are 
 [Main window]
 role List=The records of the table, one per row, with their fields in columns.
 role Table=The records of the table, one per row, with their fields in columns.
+
+[Design Database]
+Add table = Makes a new table with DbDo's standard fields, after you name it and its main fields.
+Defs table = Opens DbDo's defs table, the choices, descriptions and patterns for each field, in a design window.
+Files table = Opens DbDo's files table, the scripts, reports and settings the database carries, in a design window.
+Maps table = Opens DbDo's maps table, the links between records, in a design window.
+Table properties = Shows the current table's fields, types, indexes and links, as Alt+Enter does.
+New database = Makes an empty DbDo database to design.
+Open template database = Opens one of the databases that come with DbDo, to change into your own.

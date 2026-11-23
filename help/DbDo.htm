@@ -602,12 +602,13 @@ with Edit Tags (Alt+Shift+T); speak with Say Tags (Shift+T).</li>
 <li><strong>url</strong> (TEXTLINE) — an associated link. Edit with Edit
 url (Alt+Shift+U); open it with Open url (Control+Shift+U); speak with
 Say url (Shift+U).</li>
-<li><strong>look</strong> — a derived “display label” for the record: a
-short human-readable summary DbDo can compute so a record can be
-referred to by something friendlier than its key. Speak it with Say Look
+<li><strong>look</strong> — how a record is said when it is mentioned
+somewhere else: just enough to know it, such as first and last name. Its
+fields are the columns a table opens with. Speak it with Say Look
 (Shift+L).</li>
-<li><strong>prime</strong> (the <em>prime</em> field) — a record’s
-primary human-facing identity value. Speak it with Say Prime
+<li><strong>prime</strong> — short for primary key: the fields that
+together make a record one of a kind, such as name and zip code. Its
+fields set the order a table opens in. Speak it with Say Prime
 (Shift+P).</li>
 </ul>
 <p>The distinction to hold onto: <strong>added</strong> and
@@ -615,9 +616,9 @@ primary human-facing identity value. Speak it with Say Prime
 you); <strong>marked</strong> is <em>state</em> you toggle;
 <strong>notes</strong>, <strong>tags</strong>, and <strong>url</strong>
 are <em>content</em> you edit through their own focused dialogs;
-<strong>look</strong>, <strong>prime</strong>, and <strong>unq</strong>
-are <em>derived identity</em> fields DbDo computes so records can be
-named and matched reliably.</p>
+<strong>look</strong> and <strong>prime</strong> are <em>derived
+identity</em> fields DbDo computes so records can be named and matched
+reliably.</p>
 <h4 id="defs-and-maps">Defs and maps</h4>
 <p>Two optional companion tables let a database describe its own
 vocabulary:</p>
@@ -1019,8 +1020,8 @@ in force says so as it opens.</li>
 <li><strong>Filter with Regex</strong> filters by pattern; <strong>Say
 Filter</strong> (Shift+F) speaks the current filter.</li>
 </ul></li>
-<li><strong>Order Records</strong> (Alt+O) has the same buttons as
-Select Columns, and first says the order in force. <strong>Prime
+<li><strong>Order Records</strong> (Alt+O) has the same buttons as Show
+Columns, and first says the order in force. <strong>Prime
 columns</strong> is the default (the first focus, so Enter takes it): it
 sorts by the primary key, prime’s fields, ascending. <strong>Look
 columns</strong> sorts by look’s fields, the default columns.
@@ -1030,7 +1031,7 @@ columns</strong> sorts by look’s fields, the default columns.
 each, in two lists; <strong>Type columns</strong> takes them separated
 by commas, with desc after a column for largest or latest first. When
 look and prime hold the same fields, one button, <strong>Look
-columns</strong>, stands for both, in Order Records and Select Columns
+columns</strong>, stands for both, in Order Records and Show Columns
 alike. Last comes <strong>Reverse order</strong> (R), which turns the
 order in force the other way, as <strong>Reverse Order</strong>
 (Alt+Shift+O) does from the grid.</li>
@@ -1042,8 +1043,8 @@ ignores capital letters, so “spencer” sorts with “Spencer”.</p>
 to what you need, work on it, and clear the filter to see everything
 again — the records were never removed.</p>
 <h3 id="choosing-displayed-columns">Choosing displayed columns</h3>
-<p><strong>Select Columns</strong> (Alt+S) chooses which fields appear
-in the grid, and in what order. Showing only the columns you are working
+<p><strong>Show Columns</strong> (Alt+S) chooses which fields appear in
+the grid, and in what order. Showing only the columns you are working
 with keeps cell-by-cell navigation short. Its buttons are:</p>
 <p>The dialog first says which columns are shown now, and whether they
 are the look columns or the prime columns.</p>
@@ -1127,12 +1128,17 @@ Invert filter and Clear filter wherever they appear, with Clear filter
 last, as Reverse order is last in Order Records: each has a key of its
 own from the grid. Shift+F1 on any control says what it does in one
 sentence.</p>
-<p>The choice is remembered with the table. <strong>Say Select
-Columns</strong> (Shift+S) speaks it.</p>
+<p>The choice is remembered with the table. <strong>Say Shown
+Columns</strong> (Shift+S) speaks it. Show Columns, Order Records and
+Filter Records are the three questions that shape what you see – which
+columns, which order, which records – and Shift with the same letter
+says each answer: Shift+S, Shift+O and Shift+F. (Show Columns was called
+Select Columns until 23 November 2026; in Windows, to select is to
+highlight.)</p>
 <h3 id="kinds-of-fields">Kinds of fields</h3>
 <p>A table has two kinds of field, and every DbDo dialog lists them in
 the same order. Knowing the order tells you where to find a field in
-Select Columns, Order Records, Filter Records and the record forms
+Show Columns, Order Records, Filter Records and the record forms
 alike.</p>
 <ul>
 <li><strong>Main fields</strong> come first, in the table’s own order.
@@ -1153,10 +1159,11 @@ the grid shows them unless you choose others. Prime is the
 <strong>primary key</strong>: its fields, together, make each record
 unique, and they set the <strong>default order</strong>. So a person is
 said first name first, by look, and sorted last name first, by prime,
-with tiebreakers until no two records can share a place. In Select
+with tiebreakers until no two records can share a place. In Show
 Columns, Look columns brings back the default columns and Prime columns
-shows the primary key; in Order Records, Prime order brings back the
-default order and Look order sorts the way records are said. Every
+shows the primary key; in Order Records, Prime columns brings back the
+default order and Look columns sorts the way records are said. A short
+way to hold it: look is the record’s label; prime is its key. Every
 change to the columns, sort or filter is saved at once with the
 table.</p>
 <p>Look and prime never include url, notes, tags, marked, added, edited
@@ -1434,11 +1441,16 @@ turns every column around.</p>
 <h3 id="hearing-a-whole-record">Hearing a whole record</h3>
 <p><strong>Say Whole Record</strong> (Shift+W) says every field of the
 current record that has a value, each name followed by its value,
-including the columns that Select Columns hides. A link field says the
+including the columns that Show Columns hides. A link field says the
 linked record’s look, not its number. Press Shift+W twice to read the
 same lines in a window. The screen reader’s own read-line command
 already says the columns you see; Shift+W is for the whole record
 without leaving the grid.</p>
+<p><strong>Lean and whole.</strong> Shift+L says the current record
+lean: just its look. Shift+W says it whole: every field with a value,
+then what it is related to. They follow the reading keys, where W is
+wide and L is lean: Alt+W and Alt+L read many records, and Shift+W and
+Shift+L say the one you are on.</p>
 <h3 id="one-file-carries-it-all">One file carries it all</h3>
 <p>A DbDo database can carry everything it needs besides its data – its
 scripts, its report definitions, its transfer maps and its settings –
@@ -1512,7 +1524,7 @@ and reshapes it <em>into a DbDo database</em> — normalizing columns,
 applying conventions, and producing a <code>.db</code> you then work
 with. Use Import when you want to bring foreign data into a proper DbDo
 database. <strong>Transfer Import</strong> and <strong>Merge
-Data</strong> (Alt+M) bring data in alongside existing data.</li>
+Data</strong> (Alt+Shift+M) bring data in alongside existing data.</li>
 <li><strong>Export Data</strong> (Control+Shift+X) writes the
 <strong>grid</strong> — the current view — out to a new file in a chosen
 format. Use Export to hand off what you are looking at. A CSV or TSV
@@ -1603,6 +1615,10 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <td>Alt+D</td>
 </tr>
 <tr>
+<td>Design Database</td>
+<td>Alt+Shift+D</td>
+</tr>
+<tr>
 <td>Open Table</td>
 <td>Control+Shift+O</td>
 </tr>
@@ -1636,7 +1652,7 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 </tr>
 <tr>
 <td>Merge Data</td>
-<td>Alt+M</td>
+<td>Alt+Shift+M</td>
 </tr>
 <tr>
 <td>Transfer Import</td>
@@ -2054,7 +2070,7 @@ family.</p>
 <td>Shift+K</td>
 </tr>
 <tr>
-<td>Say Select Columns</td>
+<td>Say Shown Columns</td>
 <td>Shift+S</td>
 </tr>
 <tr>
@@ -2149,7 +2165,7 @@ family.</p>
 <td>Alt+Shift+A</td>
 </tr>
 <tr>
-<td>Select Columns</td>
+<td>Show Columns</td>
 <td>Alt+S</td>
 </tr>
 <tr>
@@ -2817,9 +2833,9 @@ Control+O. Nothing has to be copied into a folder belonging to DbDo.</p>
 <p><strong>If they want it in a database of their own</strong>, they
 start one from a template: File, <strong>Open Template
 Database</strong>, and pick BookTrail, which opens their own copy under
-their own account. Then <strong>Merge Data, Alt+M</strong>, and choose
-the file they were sent, wherever they saved it. DbDo folds the records
-in.</p>
+their own account. Then <strong>Merge Data, Alt+Shift+M</strong>, and
+choose the file they were sent, wherever they saved it. DbDo folds the
+records in.</p>
 <h4 id="how-a-merge-decides">How a merge decides</h4>
 <p>Every record carries a <strong>prime</strong>, the computed key built
 from the fields that say which record it is – for books, the author and
@@ -3120,7 +3136,7 @@ record what worked in <strong>status</strong> and
 <strong>notes</strong>, which no refresh ever changes.</p>
 <p>A row reads name, genre and country. State is left off the row
 because it is empty for most of the world and an empty cell is spoken as
-“blank” on every row; once you have filtered to one country, Select
+“blank” on every row; once you have filtered to one country, Show
 Columns adds it. Every other field is there for Keywords and Filter
 Records, and Inspect shows them all. Words that vary – the catalog’s
 tags, a stream’s genre words, a page’s keywords, the article’s format –
@@ -3225,29 +3241,49 @@ in than one long line, and nothing is added between them.</p>
 which row of how many, and the order. Z is the bottom of the alphabet,
 and the status bar is the bottom of the window.</p>
 <h3 id="tables-dbdo-keeps-for-itself">Tables DbDo keeps for itself</h3>
-<p>Two tables in every DbDo database belong to DbDo rather than to
+<p>Three tables in a DbDo database belong to DbDo rather than to
 you:</p>
 <ul>
-<li><strong>defs</strong> fills the pick lists. F4 in a field offers
-what this table holds for that table and field.</li>
+<li><strong>defs</strong> fills the pick lists and holds each field’s
+description and pattern. F4 in a field offers what this table holds for
+that table and field.</li>
+<li><strong>files</strong> holds the scripts, reports and settings the
+database carries.</li>
 <li><strong>maps</strong> records links between records, which is what
 Say Related reads.</li>
 </ul>
-<p>Neither is offered when you choose a table, open a table in a new
-window, or step through the tables with Control+F6. They are on a hidden
-list, and anything NOT on that list is yours and is offered.</p>
+<p>None is offered when you choose a table, open a table in a new
+window, or step through your tables with Control+F6. They are on a
+hidden list, and anything NOT on that list is yours and is offered.</p>
+<p><strong>Design Database (Alt+Shift+D)</strong> is where you reach
+them, along with the other parts of a database you build rather than
+fill. Its buttons are Add table, Defs table, Files table, Maps table and
+Table properties. D is for Design and for Database: Shift+D says the
+database, Alt+D opens a template database, and Alt+Shift+D designs this
+one. With no database open, it offers New database and Open template
+database.</p>
+<p>Defs table, Files table and Maps table each open that table in its
+own window, a <strong>design window</strong>, where every record key
+works: filter, edit, F4, export. The window decides the family: in a
+design window, Control+F6 and Control+T move among defs, files and maps
+only; in a window on your own data, they move among your tables only.
+Control+F4 closes the design window and takes you back. DbDo never
+reopens a design window by itself the next time it starts.</p>
+<p>Take care in maps: each link names its two records by table and
+prime, so a mistyped prime points nowhere.</p>
 <p>DbDo knows them by their columns as well as their names: its maps
 table has <code>tbl1</code>, <code>prime1</code>, <code>kind</code>,
-<code>tbl2</code> and <code>prime2</code>, and defs has
-<code>tbl</code>, <code>fld</code> and <code>val</code>. (A table named
-views, which once kept a table’s saved columns, sort and filter, is
-retired: those live in the database’s .inix file, and DbDo removes an
-old views table when it opens the database. A database may still hold
-SQL views of its own, which DbDo offers like tables.) A table of your
-own that only shares the name – a table of geographic maps, say – is
-yours, is offered like any other, and is never read as links.</p>
+<code>tbl2</code> and <code>prime2</code>, defs has <code>tbl</code>,
+<code>fld</code> and <code>val</code>, and files has <code>name</code>,
+<code>kind</code> and <code>content</code>. (A table named views, which
+once kept a table’s saved columns, sort and filter, is retired: those
+live in the database’s .inix file, and DbDo removes an old views table
+when it opens the database. A database may still hold SQL views of its
+own, which DbDo offers like tables.) A table of your own that only
+shares the name – a table of geographic maps, say – is yours, is offered
+like any other, and is never read as links.</p>
 <p>They are not locked away. At the dot prompt,
-<code>select-table defs</code> opens either one by name, and any SQL
+<code>select-table defs</code> opens any of them by name, and any SQL
 statement can read or change them. The rule is about what a person meets
 while browsing, not about permission.</p>
 <p>SQLite’s own tables – anything beginning with <code>sqlite_</code>,

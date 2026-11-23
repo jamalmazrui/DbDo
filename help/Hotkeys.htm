@@ -247,7 +247,7 @@ Alt starts from the first record, Control from the current one, and
 Shift keeps only the marked records.</li>
 <li><strong>Alt takes the letter when Control already means something in
 Windows.</strong> Control+O opens and Control+S saves everywhere, so
-Order is Alt+O and Select Columns is Alt+S.</li>
+Order is Alt+O and Show Columns is Alt+S.</li>
 <li><strong>Each function key is a family,</strong> from Windows and
 Office habits, extended: F1 help, F2 editing, F3 searching, F4 picking,
 saying or closing open windows, F5 refreshing, F6 moving among parts of
@@ -392,6 +392,10 @@ Control+F4</li>
 Pick from the list of open recordset windows and activate the chosen
 one. F4 picks, says or closes open windows: F4 picks one.<br />
 F4</li>
+<li>Design Database<br />
+Build or change this database: add a table, table properties, or DbDo’s
+own defs, files and maps tables. D for Design.<br />
+Alt+Shift+D</li>
 <li>Exit DbDo<br />
 Close DbDo. Alt+F4 closes the program, as in every Windows
 program.<br />
@@ -409,7 +413,7 @@ Control+Shift+I</li>
 <li>Merge Data<br />
 Merge rows from a Markdown table, JSON, or Inix file into the current
 table. M for Merge.<br />
-Alt+M</li>
+Alt+Shift+M</li>
 <li>Next Table or View<br />
 F6 moves among parts of the window; Control+F6 moves to the next
 table.<br />
@@ -438,9 +442,9 @@ Control+Shift+Tab</li>
 R for Recent.<br />
 Alt+R</li>
 <li>Run Report<br />
-Alt+Shift+R. Render a saved report definition to a Markdown document. A
-report reads the whole PHYSICAL table (not the grid view), so it is
-reproducible regardless of your current filter or sort. R for Run.<br />
+Render a saved report definition to a Markdown document. A report reads
+the whole physical table, not the grid view, so it comes out the same
+whatever your filter or order. R for Run.<br />
 Alt+Shift+R</li>
 <li>Save<br />
 Save changes to disk (writes an open workbook back to its .xlsx; a .db
@@ -482,8 +486,8 @@ Open the history of changes in the default browser. F1 is help;
 Control+Shift+F1 is the history of changes.<br />
 Control+Shift+F1</li>
 <li>Key Describer Toggle<br />
-Describe each key instead of running it (Ctrl+F1). F1 is help;
-Control+F1 describes whatever key you press next.<br />
+Describe each key instead of running it. F1 is help; Control+F1
+describes whatever key you press next.<br />
 Control+F1</li>
 <li>Play Tutorials<br />
 Alt+F12</li>
@@ -531,8 +535,8 @@ Control+Shift+Z</li>
 <li>Refresh Records<br />
 Refresh the records’ values from the database. F5 is refreshing.<br />
 F5</li>
-<li>Select Columns<br />
-Choose the columns the grid shows and their order. S for Select.<br />
+<li>Show Columns<br />
+Choose the columns the grid shows and their order. S for Show.<br />
 Alt+S</li>
 <li>Table Summary<br />
 Show a summary of the table: fields, types and keys. T for Table.<br />
@@ -775,12 +779,12 @@ Shift+Q</li>
 <li>Say Replace Values<br />
 R for Replace.<br />
 Shift+R</li>
-<li>Say Select Columns<br />
-S for Say.<br />
+<li>Say Shown Columns<br />
+Say the columns the grid shows. S for Shown.<br />
 Shift+S</li>
 <li>Say Status<br />
-Say the table, record, order and filter. Z is for sleep: it wakes this
-behavior or puts it to sleep.<br />
+Say the table, record, order and filter. Z is the bottom of the
+alphabet, as the status bar is the bottom of the window.<br />
 Shift+Z</li>
 <li>Say Tags<br />
 Say the record’s tags. T for Tags.<br />
@@ -847,10 +851,6 @@ Read Lean</li>
 <li>Alt+LeftArrow<br />
 Return from a child drill-down to the parent table.<br />
 Exit Child Table</li>
-<li>Alt+M<br />
-Merge rows from a Markdown table, JSON, or Inix file into the current
-table.<br />
-Merge Data</li>
 <li>Alt+O<br />
 Order the records by the fields you choose.<br />
 Order Records</li>
@@ -864,7 +864,7 @@ Go into the records related to this one.<br />
 Enter Child Table</li>
 <li>Alt+S<br />
 Choose the columns the grid shows and their order.<br />
-Select Columns</li>
+Show Columns</li>
 <li>Alt+T<br />
 Show a summary of the table: fields, types and keys.<br />
 Table Summary</li>
@@ -888,6 +888,10 @@ Empty the clipboard.<br />
 Clear Clipboard</li>
 <li>Alt+Shift+C<br />
 Copy Append Record</li>
+<li>Alt+Shift+D<br />
+Build or change this database: add a table, table properties, or DbDo’s
+own defs, files and maps tables.<br />
+Design Database</li>
 <li>Alt+Shift+E<br />
 Open the Settings dialog.<br />
 Edit Settings</li>
@@ -899,6 +903,10 @@ Generate Graphics</li>
 Read the current column’s values in the marked records, from the
 first.<br />
 Read Lean Marked</li>
+<li>Alt+Shift+M<br />
+Merge rows from a Markdown table, JSON, or Inix file into the current
+table.<br />
+Merge Data</li>
 <li>Alt+Shift+N<br />
 Edit Notes</li>
 <li>Alt+Shift+O<br />
@@ -907,9 +915,9 @@ Reverse Order</li>
 <li>Alt+Shift+Q<br />
 Query History</li>
 <li>Alt+Shift+R<br />
-Alt+Shift+R. Render a saved report definition to a Markdown document. A
-report reads the whole PHYSICAL table (not the grid view), so it is
-reproducible regardless of your current filter or sort.<br />
+Render a saved report definition to a Markdown document. A report reads
+the whole physical table, not the grid view, so it comes out the same
+whatever your filter or order.<br />
 Run Report</li>
 <li>Alt+Shift+S<br />
 Read statistics of the records and columns you choose: summary,
@@ -1106,7 +1114,7 @@ Play Macro</li>
 Unmark every row from the F8 start to the current row.<br />
 Complete Unmark</li>
 <li>Control+F1<br />
-Describe each key instead of running it (Ctrl+F1).<br />
+Describe each key instead of running it.<br />
 Key Describer Toggle</li>
 <li>Control+F12<br />
 Copy the session log to the clipboard as a file, ready to paste as an
@@ -1227,7 +1235,8 @@ Say Query</li>
 <li>Shift+R<br />
 Say Replace Values</li>
 <li>Shift+S<br />
-Say Select Columns</li>
+Say the columns the grid shows.<br />
+Say Shown Columns</li>
 <li>Shift+T<br />
 Say the record’s tags.<br />
 Say Tags</li>
@@ -1314,6 +1323,10 @@ Delete the current record (or marked records, when marks exist).<br />
 Control+D</li>
 <li>Delete without Confirmation<br />
 Control+Shift+D</li>
+<li>Design Database<br />
+Build or change this database: add a table, table properties, or DbDo’s
+own defs, files and maps tables.<br />
+Alt+Shift+D</li>
 <li>Documentation<br />
 Open the documentation in the default browser.<br />
 F1</li>
@@ -1398,7 +1411,7 @@ Control+J</li>
 <li>Jump Again<br />
 Alt+J</li>
 <li>Key Describer Toggle<br />
-Describe each key instead of running it (Ctrl+F1).<br />
+Describe each key instead of running it.<br />
 Control+F1</li>
 <li>Keywords<br />
 Go to the next record whose fields hold the keywords.<br />
@@ -1416,7 +1429,7 @@ Control+M</li>
 <li>Merge Data<br />
 Merge rows from a Markdown table, JSON, or Inix file into the current
 table.<br />
-Alt+M</li>
+Alt+Shift+M</li>
 <li>New Copy<br />
 Control+Shift+N</li>
 <li>New Record<br />
@@ -1526,9 +1539,9 @@ Control+Shift+K</li>
 Reverse the order of the records.<br />
 Alt+Shift+O</li>
 <li>Run Report<br />
-Alt+Shift+R. Render a saved report definition to a Markdown document. A
-report reads the whole PHYSICAL table (not the grid view), so it is
-reproducible regardless of your current filter or sort.<br />
+Render a saved report definition to a Markdown document. A report reads
+the whole physical table, not the grid view, so it comes out the same
+whatever your filter or order.<br />
 Alt+Shift+R</li>
 <li>Save<br />
 Save changes to disk (writes an open workbook back to its .xlsx; a .db
@@ -1599,7 +1612,8 @@ Shift+P</li>
 Shift+Q</li>
 <li>Say Replace Values<br />
 Shift+R</li>
-<li>Say Select Columns<br />
+<li>Say Shown Columns<br />
+Say the columns the grid shows.<br />
 Shift+S</li>
 <li>Say Status<br />
 Say the table, record, order and filter.<br />
@@ -1631,7 +1645,7 @@ F3</li>
 <li>Search Previous<br />
 Repeat the last Find backward.<br />
 Shift+F3</li>
-<li>Select Columns<br />
+<li>Show Columns<br />
 Choose the columns the grid shows and their order.<br />
 Alt+S</li>
 <li>Show in FileDir<br />

@@ -40,7 +40,7 @@ Five things to try:
   Control+Enter to save.
 - **Find something.** Type the first letters of what you want and the list goes
   there. Control+K, Find, searches every field.
-- **Choose what you hear.** Alt+S, Select Columns, picks the fields each row
+- **Choose what you hear.** Alt+S, Show Columns, picks the fields each row
   speaks.
 - **Get something out.** Alt+Shift+R runs a Report, such as the Work Search
   Record for a claim.

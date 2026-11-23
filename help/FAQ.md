@@ -41,7 +41,7 @@ filter by typing. Control+Shift+F1 opens the full list of keys.
 
 Control+O opens a file in every Windows program, so DbDo keeps it for that. Order
 takes Alt, and O is still the first letter of its name. The same reasoning puts
-Select Columns on Alt+S, since Control+S saves.
+Show Columns on Alt+S, since Control+S saves.
 
 ## What does Z mean in a key?
 

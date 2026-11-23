@@ -49,6 +49,13 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
+Say=Shift plus L says the record lean, just its look: the short label DbDo gives it everywhere. Shift plus W says it whole: every field with a value, then what it is related to.
+Key=Shift+W
+Hear=name
+Note=Added 23 November 2026, the lean and whole pair. Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
 Say=Alt plus Y, Say Yield, says how many records are in view, and Alt plus Shift plus Y how many are marked; Shift plus 8 says the order and filter.
 Key=Shift+8
 Hear=order, filter

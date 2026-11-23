@@ -95,7 +95,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Alt plus O, O for Order, says the order in force, then offers the same buttons as Select Columns: Look columns, Prime columns, Main, Standard and All columns, Choose columns and Type columns. Prime columns, the default order, has focus.
+Say=Alt plus O, O for Order, says the order in force, then offers the same buttons as Show Columns, Alt plus S: Look columns, Prime columns, Main, Standard and All columns, Choose columns and Type columns. Prime columns, the default order, has focus.
 Key=Alt+O
 Hear=Ordered now
 Hear=Order Records dialog

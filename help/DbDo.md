@@ -121,10 +121,10 @@ DbDo recognizes certain field **names** and maintains or exposes them for you. A
 - **notes** (TEXTMARKDOWN) — a free-form Markdown note attached to the record. Edit it with Edit Notes (Alt+Shift+N); speak it with Say Notes (Shift+N).
 - **tags** (TEXTMEMO) — free-form tags or keywords. Edit with Edit Tags (Alt+Shift+T); speak with Say Tags (Shift+T).
 - **url** (TEXTLINE) — an associated link. Edit with Edit url (Alt+Shift+U); open it with Open url (Control+Shift+U); speak with Say url (Shift+U).
-- **look** — a derived "display label" for the record: a short human-readable summary DbDo can compute so a record can be referred to by something friendlier than its key. Speak it with Say Look (Shift+L).
-- **prime** (the *prime* field) — a record's primary human-facing identity value. Speak it with Say Prime (Shift+P).
+- **look** — how a record is said when it is mentioned somewhere else: just enough to know it, such as first and last name. Its fields are the columns a table opens with. Speak it with Say Look (Shift+L).
+- **prime** — short for primary key: the fields that together make a record one of a kind, such as name and zip code. Its fields set the order a table opens in. Speak it with Say Prime (Shift+P).
 
-The distinction to hold onto: **added** and **edited** are *automatic* (DbDo writes them for you); **marked** is *state* you toggle; **notes**, **tags**, and **url** are *content* you edit through their own focused dialogs; **look**, **prime**, and **unq** are *derived identity* fields DbDo computes so records can be named and matched reliably.
+The distinction to hold onto: **added** and **edited** are *automatic* (DbDo writes them for you); **marked** is *state* you toggle; **notes**, **tags**, and **url** are *content* you edit through their own focused dialogs; **look** and **prime** are *derived identity* fields DbDo computes so records can be named and matched reliably.
 
 #### Defs and maps
 
@@ -295,7 +295,7 @@ Filtering and sorting reshape the grid without touching the physical table.
   - **Nothing found.** A condition that would keep no record says so and leaves the view as it was.
   - **Clear Filter** (Control+Shift+F) removes the filter, keeping you on the same record. A table that reopens with a filter still in force says so as it opens.
   - **Filter with Regex** filters by pattern; **Say Filter** (Shift+F) speaks the current filter.
-- **Order Records** (Alt+O) has the same buttons as Select Columns, and first says the order in force. **Prime columns** is the default (the first focus, so Enter takes it): it sorts by the primary key, prime's fields, ascending. **Look columns** sorts by look's fields, the default columns. **Main columns**, **Standard columns** and **All columns** sort by those columns, ascending. **Choose columns** picks the columns and the direction of each, in two lists; **Type columns** takes them separated by commas, with desc after a column for largest or latest first. When look and prime hold the same fields, one button, **Look columns**, stands for both, in Order Records and Select Columns alike. Last comes **Reverse order** (R), which turns the order in force the other way, as **Reverse Order** (Alt+Shift+O) does from the grid.
+- **Order Records** (Alt+O) has the same buttons as Show Columns, and first says the order in force. **Prime columns** is the default (the first focus, so Enter takes it): it sorts by the primary key, prime's fields, ascending. **Look columns** sorts by look's fields, the default columns. **Main columns**, **Standard columns** and **All columns** sort by those columns, ascending. **Choose columns** picks the columns and the direction of each, in two lists; **Type columns** takes them separated by commas, with desc after a column for largest or latest first. When look and prime hold the same fields, one button, **Look columns**, stands for both, in Order Records and Show Columns alike. Last comes **Reverse order** (R), which turns the order in force the other way, as **Reverse Order** (Alt+Shift+O) does from the grid.
 
 Sorting reads numbers as numbers: volume 9 comes after 7 and 6.5 even if some
 values were stored as text and others as numbers. It also ignores capital
@@ -305,7 +305,7 @@ Because these only change the view, you can slice a large table down to what you
 
 ### Choosing displayed columns
 
-**Select Columns** (Alt+S) chooses which fields appear in the grid, and in what order. Showing only the columns you are working with keeps cell-by-cell navigation short. Its buttons are:
+**Show Columns** (Alt+S) chooses which fields appear in the grid, and in what order. Showing only the columns you are working with keeps cell-by-cell navigation short. Its buttons are:
 
 The dialog first says which columns are shown now, and whether they are the look columns or the prime columns.
 
@@ -331,16 +331,16 @@ The dialog first says which columns are shown now, and whether they are the look
 
 **How DbDo's dialogs name things.** Every control's name has at least two words, OK, Cancel, Help and Close aside, and its letter begins one of them. Columns are what the grid shows and arranges; fields are what a record holds, which filters and sorts work on. A filter's actions are Start over, Revise filter, Narrow filter, Expand filter, Invert filter and Clear filter wherever they appear, with Clear filter last, as Reverse order is last in Order Records: each has a key of its own from the grid. Shift+F1 on any control says what it does in one sentence.
 
-The choice is remembered with the table. **Say Select Columns** (Shift+S) speaks it.
+The choice is remembered with the table. **Say Shown Columns** (Shift+S) speaks it. Show Columns, Order Records and Filter Records are the three questions that shape what you see -- which columns, which order, which records -- and Shift with the same letter says each answer: Shift+S, Shift+O and Shift+F. (Show Columns was called Select Columns until 23 November 2026; in Windows, to select is to highlight.)
 
 ### Kinds of fields
 
-A table has two kinds of field, and every DbDo dialog lists them in the same order. Knowing the order tells you where to find a field in Select Columns, Order Records, Filter Records and the record forms alike.
+A table has two kinds of field, and every DbDo dialog lists them in the same order. Knowing the order tells you where to find a field in Show Columns, Order Records, Filter Records and the record forms alike.
 
 - **Main fields** come first, in the table's own order. They are about the table's subject: a contact's names and phone numbers, a station's name and country. A field ending in _id that points to a record in another table, such as category_id, is a main field too.
 - **Standard fields** come last, in this order: url, tags, notes, marked, look, prime, added, edited, and the record's own id. Every DbDo table has them. You type url, tags and notes. Look is a short summary that tells one record from the others, and prime is the combination of fields that must be unique in the table; DbDo figures out both from the record's main fields. DbDo keeps marked, added, edited and the id up to date by itself.
 
-**Look and prime, in one sentence each.** Look is how a record is said, and its fields are the **default columns**: the grid shows them unless you choose others. Prime is the **primary key**: its fields, together, make each record unique, and they set the **default order**. So a person is said first name first, by look, and sorted last name first, by prime, with tiebreakers until no two records can share a place. In Select Columns, Look columns brings back the default columns and Prime columns shows the primary key; in Order Records, Prime order brings back the default order and Look order sorts the way records are said. Every change to the columns, sort or filter is saved at once with the table.
+**Look and prime, in one sentence each.** Look is how a record is said, and its fields are the **default columns**: the grid shows them unless you choose others. Prime is the **primary key**: its fields, together, make each record unique, and they set the **default order**. So a person is said first name first, by look, and sorted last name first, by prime, with tiebreakers until no two records can share a place. In Show Columns, Look columns brings back the default columns and Prime columns shows the primary key; in Order Records, Prime columns brings back the default order and Look columns sorts the way records are said. A short way to hold it: look is the record's label; prime is its key. Every change to the columns, sort or filter is saved at once with the table.
 
 Look and prime never include url, notes, tags, marked, added, edited or the record's own id.
 
@@ -467,7 +467,9 @@ Pressing Alt+A or Alt+Shift+A on the column that is already first just sets its 
 
 ### Hearing a whole record
 
-**Say Whole Record** (Shift+W) says every field of the current record that has a value, each name followed by its value, including the columns that Select Columns hides. A link field says the linked record's look, not its number. Press Shift+W twice to read the same lines in a window. The screen reader's own read-line command already says the columns you see; Shift+W is for the whole record without leaving the grid.
+**Say Whole Record** (Shift+W) says every field of the current record that has a value, each name followed by its value, including the columns that Show Columns hides. A link field says the linked record's look, not its number. Press Shift+W twice to read the same lines in a window. The screen reader's own read-line command already says the columns you see; Shift+W is for the whole record without leaving the grid.
+
+**Lean and whole.** Shift+L says the current record lean: just its look. Shift+W says it whole: every field with a value, then what it is related to. They follow the reading keys, where W is wide and L is lean: Alt+W and Alt+L read many records, and Shift+W and Shift+L say the one you are on.
 
 ### One file carries it all
 
@@ -500,7 +502,7 @@ The files are kept in DbDo's own table, **files**, beside defs and maps; DbDo hi
 DbDo distinguishes four file operations that are easy to confuse. The distinction is about whether the data keeps its original shape or is reshaped into DbDo's conventions.
 
 - **Open** (Control+O) opens a file *faithfully* — a round trip. An Excel workbook opens as its sheets, a CSV as its rows, and saving writes back to that same file in that same format. Use Open when you want to work with a file as it is.
-- **Import Data** (Control+Shift+I) reads an outside file and reshapes it *into a DbDo database* — normalizing columns, applying conventions, and producing a `.db` you then work with. Use Import when you want to bring foreign data into a proper DbDo database. **Transfer Import** and **Merge Data** (Alt+M) bring data in alongside existing data.
+- **Import Data** (Control+Shift+I) reads an outside file and reshapes it *into a DbDo database* — normalizing columns, applying conventions, and producing a `.db` you then work with. Use Import when you want to bring foreign data into a proper DbDo database. **Transfer Import** and **Merge Data** (Alt+Shift+M) bring data in alongside existing data.
 - **Export Data** (Control+Shift+X) writes the **grid** — the current view — out to a new file in a chosen format. Use Export to hand off what you are looking at. A CSV or TSV file holds your values exactly as they are. Since a spreadsheet may run a value beginning with =, +, - or @ as a formula, DbDo asks before opening such a file, and an .xlsx export is the safe way into a spreadsheet: it keeps every value as text.
 - **Save** (Control+S) and **Save As** (Control+Shift+S) concern the *whole database*. For a workbook opened faithfully, Save writes your edits back to the `.xlsx`. For a native database your edits were already committed, so Save reports that; Save As writes a fresh copy. **Open as Managed Copy** opens a file as a working copy so the original is untouched until you decide.
 
@@ -543,6 +545,7 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Add Table | — |
 | Open Database | Control+O |
 | Open Template Database | Alt+D |
+| Design Database | Alt+Shift+D |
 | Open Table | Control+Shift+O |
 | Recent Databases | Alt+R |
 | Save | Control+S |
@@ -551,7 +554,7 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Backup Database | — |
 | Compare Database | — |
 | Import Data | Control+Shift+I |
-| Merge Data | Alt+M |
+| Merge Data | Alt+Shift+M |
 | Transfer Import | — |
 | Run Report | Alt+Shift+R |
 | Export Data | Control+Shift+X |
@@ -663,7 +666,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Say Cell | Shift+C |
 | Say Filter | Shift+F |
 | Say Keywords | Shift+K |
-| Say Select Columns | Shift+S |
+| Say Shown Columns | Shift+S |
 | Say Query | Shift+Q |
 | Say Id | Shift+I |
 | Say Look | Shift+L |
@@ -689,7 +692,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Table Summary | Alt+T |
 | Add Column to Order | Alt+A |
 | Add Column to Order Descending | Alt+Shift+A |
-| Select Columns | Alt+S |
+| Show Columns | Alt+S |
 | Generate Graphics | Alt+Shift+G |
 | Generate Statistics | Alt+Shift+S |
 | Copy Append | Alt+C |
@@ -1021,7 +1024,7 @@ into a folder belonging to DbDo.
 
 **If they want it in a database of their own**, they start one from a template:
 File, **Open Template Database**, and pick BookTrail, which opens their own copy
-under their own account. Then **Merge Data, Alt+M**, and choose the file they
+under their own account. Then **Merge Data, Alt+Shift+M**, and choose the file they
 were sent, wherever they saved it. DbDo folds the records in.
 
 #### How a merge decides
@@ -1271,7 +1274,7 @@ stations as candidates: try several, and record what worked in **status** and
 
 A row reads name, genre and country. State is left off the row because it is
 empty for most of the world and an empty cell is spoken as "blank" on every
-row; once you have filtered to one country, Select Columns adds it. Every other
+row; once you have filtered to one country, Show Columns adds it. Every other
 field is there for Keywords and Filter Records, and Inspect shows them all.
 Words that vary -- the catalog's tags, a stream's genre words, a page's
 keywords, the article's format -- are in **tags**, one per line. Prose -- what
@@ -1375,27 +1378,45 @@ of the window.
 
 ### Tables DbDo keeps for itself
 
-Two tables in every DbDo database belong to DbDo rather than to you:
+Three tables in a DbDo database belong to DbDo rather than to you:
 
-- **defs** fills the pick lists. F4 in a field offers what this table holds
-  for that table and field.
+- **defs** fills the pick lists and holds each field's description and
+  pattern. F4 in a field offers what this table holds for that table and field.
+- **files** holds the scripts, reports and settings the database carries.
 - **maps** records links between records, which is what Say Related reads.
 
-Neither is offered when you choose a table, open a table in a new window, or
-step through the tables with Control+F6. They are on a hidden list, and
+None is offered when you choose a table, open a table in a new window, or
+step through your tables with Control+F6. They are on a hidden list, and
 anything NOT on that list is yours and is offered.
 
+**Design Database (Alt+Shift+D)** is where you reach them, along with the other
+parts of a database you build rather than fill. Its buttons are Add table, Defs
+table, Files table, Maps table and Table properties. D is for Design and for
+Database: Shift+D says the database, Alt+D opens a template database, and
+Alt+Shift+D designs this one. With no database open, it offers New database and
+Open template database.
+
+Defs table, Files table and Maps table each open that table in its own window,
+a **design window**, where every record key works: filter, edit, F4, export.
+The window decides the family: in a design window, Control+F6 and Control+T move
+among defs, files and maps only; in a window on your own data, they move among
+your tables only. Control+F4 closes the design window and takes you back. DbDo
+never reopens a design window by itself the next time it starts.
+
+Take care in maps: each link names its two records by table and prime, so a
+mistyped prime points nowhere.
+
 DbDo knows them by their columns as well as their names: its maps table has
-`tbl1`, `prime1`, `kind`, `tbl2` and `prime2`, and defs has `tbl`,
-`fld` and `val`. (A table named views, which once kept a table's saved columns, sort
+`tbl1`, `prime1`, `kind`, `tbl2` and `prime2`, defs has `tbl`,
+`fld` and `val`, and files has `name`, `kind` and `content`. (A table named views, which once kept a table's saved columns, sort
 and filter, is retired: those live in the database's .inix file, and DbDo removes an
 old views table when it opens the database. A database may still hold SQL views of
 its own, which DbDo offers like tables.) A table of your own that only shares the name -- a table of
 geographic maps, say -- is yours, is offered like any other, and is never read
 as links.
 
-They are not locked away. At the dot prompt, `select-table defs` opens either
-one by name, and any SQL statement can read or change them. The rule is about
+They are not locked away. At the dot prompt, `select-table defs` opens any
+of them by name, and any SQL statement can read or change them. The rule is about
 what a person meets while browsing, not about permission.
 
 SQLite's own tables -- anything beginning with `sqlite_`, and the `sqlean_`

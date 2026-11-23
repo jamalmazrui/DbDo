@@ -146,8 +146,19 @@ def association(sKey, sCaption, sCommand):
     if len(sLetter) != 1 or not sLetter.isalpha():
         return ""
     sWords = sCommand or sCaption
+    # SAY IS NOT THE REASON (23 November 2026). Every Say command is Shift and a letter, so the letter comes from
+    # the word after "Say": Say Shown Columns is S for Shown, not "S for Say", which explained nothing.
+    bSay = sWords.lower().startswith("say ")
     if sLetter == "Z":
+        # Say Status takes Z because Z is the bottom of the alphabet, as the status bar is the bottom of the window;
+        # the other Z keys are toggles.
+        if bSay:
+            return "Z is the bottom of the alphabet, as the status bar is the bottom of the window."
         return "Z is for sleep: it wakes this behavior or puts it to sleep."
+    if bSay:
+        oAfter = re.search(r"\b(" + sLetter + r"[A-Za-z']*)", sWords[4:], re.I)
+        if oAfter:
+            return "%s for %s." % (sLetter, oAfter.group(1))
     oWord = re.search(r"\b(" + sLetter + r"[A-Za-z']*)", sWords, re.I)
     sLead = ""
     if oWord:
@@ -188,6 +199,19 @@ def main():
         if sBase in dByKey and bOpposite and "reverses" not in i["assoc"] and "completes" not in i["assoc"]:
             i["assoc"] = (i["assoc"] + " Shift reverses %s." % dByKey[sBase]["name"]).strip()
     logLine("keys found: %d" % len(lsItems))
+    # A HOTKEY ON A MENU'S LETTER (23 November 2026). Alt and a letter opens the menu whose name has that letter
+    # underlined -- unless a command is bound to the same Alt and letter, which runs first, so the menu cannot open
+    # from the keyboard that way. Merge Data held Alt+M over the Misc menu. Reported, so the build log shows it.
+    lsMenuLetters = [m.group(1).upper() for m in (re.search(r"&(\w)", s) for s in re.findall(r'addMenu\("([^"]*)"\)', sSource)) if m]
+    iClashes = 0
+    for i in lsItems:
+        oMatch = re.match(r"^Alt\+([A-Z])$", i["key"])
+        if oMatch and oMatch.group(1) in lsMenuLetters:
+            iClashes += 1
+            sClash = "WARN: %s runs %s, so it cannot open the menu whose letter is %s." % (i["key"], i["name"], oMatch.group(1))
+            print(sClash)
+            logLine(sClash)
+    logLine("menu letters: %s; clashes: %d" % (", ".join(lsMenuLetters), iClashes))
 
     def entry(sFirst, sSecond, sThird):
         lsLines = [s for s in (sFirst, sSecond, sThird) if s]
@@ -204,7 +228,7 @@ def main():
              "- **X is for the sound of \"ex\"**, as in Export.",
              "- **Alt says, Control changes.** When a letter needs a modifier, a command that only speaks takes Alt and one that changes data takes Control. A command that opens a pick list may take either; a plain Alt and a letter never opens a box for typing.",
              "- **W, L and Y read and count the grid.** W is wide, every shown column; L is lean, the current column; Y is yield, a count. Alt starts from the first record, Control from the current one, and Shift keeps only the marked records.",
-             "- **Alt takes the letter when Control already means something in Windows.** Control+O opens and Control+S saves everywhere, so Order is Alt+O and Select Columns is Alt+S.",
+             "- **Alt takes the letter when Control already means something in Windows.** Control+O opens and Control+S saves everywhere, so Order is Alt+O and Show Columns is Alt+S.",
              "- **Each function key is a family,** from Windows and Office habits, extended: F1 help, F2 editing, F3 searching, F4 picking, saying or closing open windows, F5 refreshing, F6 moving among parts of the window, F7 review, F8 selection, F9 a more readable view, F10 menus, F11 the version (elevate sounds like eleven), F12 files and AI.",
              "- **Control+Tab moves among DbDo windows,** as it moves among tabs everywhere else.",
              "", "## By menu", ""]

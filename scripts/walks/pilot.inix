@@ -2,7 +2,7 @@
 ; Start with DbDo open on a table, RadioTrail if you have it. recordWalk brings DbDo to the front.
 
 [about]
-Title=Pilot - Select Columns, Filter Records and Order Records
+Title=Pilot - Show Columns, Filter Records and Order Records
 
 ; THE SAME START EVERY TIME (3 November 2026): the 18:49 run found the grid left on the standard columns from an earlier
 ; test, so every return to the grid read Sonic Radio's whole notes paragraph, over fifteen seconds. The walk first puts
@@ -15,9 +15,9 @@ Key=Alt+S
 Key=L
 
 [step]
-Say=Alt plus S opens Select Columns, which says what is shown before its buttons.
+Say=Alt plus S opens Show Columns, which says what is shown before its buttons.
 Key=Alt+S
-Hear=Select Columns dialog
+Hear=Show Columns dialog
 Hear=Shown now
 Hear=Look columns button
 Wait=6

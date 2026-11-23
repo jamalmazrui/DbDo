@@ -4212,6 +4212,18 @@ namespace DbDo
             return lsAll;
         }
 
+        // getOwnTableNames: DbDo's own tables this database has -- defs, files and maps, in that order -- for Design
+        // Database (Alt+Shift+D) and for Control+F6 and Choose Table in a design window (23 November 2026). The window
+        // decides the family: in a window on one of these, the table keys move among these; elsewhere, among yours.
+        public List<string> getOwnTableNames()
+        {
+            List<string> lsOwn = new List<string>();
+            foreach (string sName in getTableAndViewNames())
+                if (isHiddenTable(sName) && hasOwnTableShape(sName)) lsOwn.Add(sName);
+            lsOwn.Sort(StringComparer.OrdinalIgnoreCase);
+            return lsOwn;
+        }
+
         public List<string> getTableAndViewNames()
         {
             return getCatalogObjectNames(true, true);
@@ -5508,6 +5520,11 @@ namespace DbDo
             else if (string.Equals(sTable, "defs", StringComparison.OrdinalIgnoreCase)
                 || string.Equals(sTable, "views", StringComparison.OrdinalIgnoreCase))
                 aWanted = new string[] { "tbl", "fld", "val" };
+            // FILES HAS A SHAPE TOO (23 November 2026). It was on the hidden list with no shape here, so this answered
+            // false and getUserTableNames kept it: Choose Table, Open Table and Control+F6 offered files, though the
+            // guide says DbDo hides all three. Its carried files are a name, a kind and the content.
+            else if (string.Equals(sTable, "files", StringComparison.OrdinalIgnoreCase))
+                aWanted = new string[] { "name", "kind", "content" };
             else return false;
             try
             {
@@ -13570,6 +13587,9 @@ namespace DbDo
             Homer.KeyMap.addFormerName("Say Filter and Order", "Say Order and Filter");
             // CONTROL+P IS PLAY MEDIA IN THE SUITE (17 November 2026), as in FileDir; DbDo called it Play Stream.
             Homer.KeyMap.addFormerName("Play Media", "Play Stream");
+            // SHOW, NOT SELECT (23 November 2026): to select is to highlight in Windows.
+            Homer.KeyMap.addFormerName("Show Columns", "Select Columns");
+            Homer.KeyMap.addFormerName("Say Shown Columns", "Say Select Columns");
             buildGrid();
             buildStatusBar();
             initializeMacros();
@@ -14385,6 +14405,12 @@ namespace DbDo
             miFile = addMenu("&File");
             miFileNew     = addItem(miFile, "&New Database...",           "New Database",     Keys.None,                            fileNewClicked);
             miFileAddTable = addItem(miFile, "&Add Table...",              "Add Table",        Keys.None,                            fileAddTableClicked);
+            // DESIGN DATABASE, ALT+SHIFT+D (23 November 2026, Jamal's ruling on DbDo_Keys.md). One place to build or
+            // change a database rather than fill it: Add table, Table properties, and DbDo's own tables -- defs, files
+            // and maps -- each opened in a design window, where Control+F6 and Choose Table move among those three.
+            // D for Design and for Database: Shift+D says the database, Alt+D opens a template one, Alt+Shift+D
+            // designs this one. No trigger letter: Open Template Database, earlier on this menu, holds D.
+            addItem(miFile, "Design Database...",            "Design Database",  Keys.Alt | Keys.Shift | Keys.D,   designDatabaseClicked);
             miFileOpen    = addItem(miFile, "&Open Database...",          "Open Database",    Keys.Control | Keys.O,                fileOpenClicked);
             // Open New Recordset: prompt for a SQL SELECT and present
             // its result as the current recordset. The recordset is
@@ -14445,7 +14471,9 @@ namespace DbDo
             // OPEN TEMPLATE DATABASE ON ALT+D (17 November 2026), the friendlier key, freed when Say Database took in the
             // summary; Alt+Shift+D is free.
             miFileSampleDb= addItem(miFile, "Open Template &Database...",  "Open Template Database", Keys.Alt | Keys.D, openTemplateDbClicked);
-            miFileMerge   = addItem(miFile, "&Merge Data...",             "Merge Data",            Keys.Alt | Keys.M,                    mergeClicked);
+            // MERGE DATA ON ALT+SHIFT+M (23 November 2026): on Alt+M it ran before Windows saw the menu letter, so Alt+M
+            // could not open the Misc menu, as Alt+M does in EdSharp and FileDir. M for Merge still.
+            miFileMerge   = addItem(miFile, "&Merge Data...",             "Merge Data",            Keys.Alt | Keys.Shift | Keys.M,       mergeClicked);
             addItem(miFile, "Transfer Import...",       "Transfer Import",  Keys.None,                            importTransferClicked);
             addItem(miFile, "Run Report...",           "Run Report",       Keys.Alt | Keys.Shift | Keys.R,       produceReportClicked);
             miFileExport  = addItem(miFile, "E&xport Data...",            "Export Data",      Keys.Control | Keys.Shift | Keys.X,                fileExportClicked);
@@ -14834,7 +14862,9 @@ namespace DbDo
             miSaySayCell         = addItem(miSay, "Say &Cell",       "Say Cell",    Keys.Shift | Keys.C,                saySayCell);
             miSaySayFilter       = addItem(miSay, "Say &Filter",        "Say Filter",       Keys.Shift | Keys.F,            saySayFilter);
             miSaySayFind         = addItem(miSay, "Say &Keywords",      "Say Keywords", Keys.Shift | Keys.K,               saySayFind);
-            miSaySaySelect       = addItem(miSay, "&Say Select Columns", "Say Select Columns",  Keys.Shift | Keys.S,                saySaySelect);
+            // SAY SHOWN COLUMNS (23 November 2026), once Say Select Columns: it says the answer to Show Columns, as Say
+            // Order and Say Filter answer Order Records and Filter Records.
+            miSaySaySelect       = addItem(miSay, "Say &Shown Columns", "Say Shown Columns",  Keys.Shift | Keys.S,                saySaySelect);
             miSaySayQuery        = addItem(miSay, "Say &Query",          "Say Query",   Keys.Shift | Keys.Q,                saySayQuery);
             miSaySayId           = addItem(miSay, "Say &Id",      "Say ID",      Keys.Shift | Keys.I,                saySayId);
             miSaySayLook         = addItem(miSay, "Say Look",           "Say Look",    Keys.Shift | Keys.L,                saySayLook);
@@ -14935,7 +14965,10 @@ namespace DbDo
             // menu, first claim wins) and keeps Alt+Shift+S. The caption is the
             // command name. Choose Visible Columns, which typed the same list into a
             // text box, is retired: Select Columns offers that as its Type button.
-            miSelectColumns = addItem(miMisc, "&Select Columns...",  "Select Columns",   Keys.Alt | Keys.S,                  selectColumnsClicked);
+            // SHOW COLUMNS (23 November 2026, DbDo_Keys.md), once Select Columns. In Windows, and in the suite's F8
+            // family, to select is to highlight, so "Select Columns" sounded like marking a block of columns. The
+            // dialog's own list was already "Columns shown". Alt+S is unchanged; the old name stays findable.
+            miSelectColumns = addItem(miMisc, "&Show Columns...",  "Show Columns",   Keys.Alt | Keys.S,                  selectColumnsClicked);
             miDescribeColumn = addItem(miMisc, "Statistics from Column",     "Statistics from Column", Keys.None, describeColumnClicked); miDescribeColumn.Visible = false;  // in Generate from Grid, Statistics report (5 November 2026)
             // FREQUENCY BY COLUMNS, ALT+SHIFT+F (5 November 2026): Count by Columns sat on Alt+Shift+B, whose B began no
             // word of its name but "by"; F begins Frequency, which is what it reports, as Generate from Grid's frequency table.
@@ -15411,11 +15444,14 @@ namespace DbDo
                 "Alt+Shift+S. Type-aware: numeric columns get count/populated/min/max/mean/median/stdev/variance/CV/quartiles/IQR/outliers; date columns get range and modal year; boolean columns get true/false splits; text columns get cardinality and top-N most-frequent values. Shown in a read-only memo dialog (Control+C copies it).");
             add("Frequency by Columns", "Count the records with each combination of values in the columns shown",
                 "Alt+Shift+B. Within the filter in force, over the columns the grid shows apart from the standard ones (the id, added, edited and marked), lists each combination of values with how many records have it, most common first, in a read-only window to review and copy. With State and City shown: how many contacts in each state and city.");
-            add("Select Columns",        "Choose the columns the grid shows and their order",
-                "Alt+S. Seven buttons: Default (the fields of look, or every main field when a table has no look), Main (the fields about the table's subject), Standard (url, tags, notes, marked, look, prime, added, edited and the id), All (every field in DbDo's natural order), Look and prime, Exact (the Fields and Picks lists, with the columns now shown already in Picks), and Type (the names typed with commas). The choice is remembered with the table.");
+            add("Show Columns",        "Choose the columns the grid shows and their order",
+                "Alt+S. It first says the columns shown now, then offers Look columns (the default columns), Prime columns (the primary key), Main columns, Standard columns, All columns, Choose columns and Type columns. The choice is remembered with the table. Formerly Select Columns.");
+            add("Say Shown Columns",   "Say the columns the grid shows", "Shift+S. The answer to Show Columns, as Say Order answers Order Records.");
+            add("Design Database",     "Build or change this database: add a table, table properties, or DbDo's own defs, files and maps tables",
+                "Alt+Shift+D. A button dialog: Add table, Defs table, Files table, Maps table and Table properties. DbDo's own tables open in a design window, where Control+F6 and Choose Table move among those three. With no database open, it offers New database and Open template database.");
             add("Generate Statistics",        "Read statistics of the records and columns you choose: summary, frequency, group, relation or cross-tab", "Alt+Shift+S. The dataset dialog asks which columns, which records (all in view, the marked ones, or the current one), whether to arrange by column or by row, and the kind. The report opens in a window to read.");
             add("Generate Graphics",          "Draw a chart of the records and columns you choose, as a picture, a web page and an Excel workbook", "Alt+Shift+G. The same dataset dialog as Generate Statistics, with a Drawn by choice: Python draws a PNG, an SVG, a page with the takeaway and the numbers as a table, and a workbook with a native chart, into Documents, DbDo Charts; Excel draws the chart in Excel when Microsoft Office is installed.");
-            add("Run Report",              "Alt+Shift+R. Render a saved report definition to a Markdown document. A report reads the whole PHYSICAL table (not the grid view), so it is reproducible regardless of your current filter or sort.",
+            add("Run Report",              "Render a saved report definition to a Markdown document. A report reads the whole physical table, not the grid view, so it comes out the same whatever your filter or order.",
                 "Report definitions live in an .inix file beside the database whose [Global] section declares FileTask = report (each [section] is one report, with header/detail/footer/group bands, $field and {{ jscript }} substitution, and footer aggregates like $count and $sum_<field>). DbDo lists only the FileTask = report files -- so a transfer map or settings file in the same folder is never offered -- then writes Markdown you can convert to HTML/DOCX/PDF. A legacy file with report bands but no FileTask still works. The contrast to remember: Generate from Grid = analyze what you SEE (virtual grid, ad-hoc); Run Report = produce a DEFINED document from the physical table (reproducible).");
             add("Graphics Column",           "Plot the column under the virtual cursor as an Excel chart",
                 "Type-aware: numeric -> histogram or box plot, date -> timeline or seasonal, boolean -> pie, text -> Pareto bar.");
@@ -15451,7 +15487,7 @@ namespace DbDo
             add("Show Readme",        "Open the bundled readme.htm", "");
             add("About",        "Show the version, author, and license",
                 "Menu label: About. Alt+F1.");
-            add("Key Describer Toggle", "Describe each key instead of running it (Ctrl+F1)",
+            add("Key Describer Toggle", "Describe each key instead of running it",
                 "When the Key Describer is on, pressing ANY key announces what it does -- its command, chord, and summary when one is bound, or just the key name otherwise -- instead of running it or moving the grid. Ctrl+F1 is the one key that still acts: press it again to turn the describer off (announced as \"No Key Describer\"). Because every other key is only described, this is also the safe way to explore the keyboard.");
             add("Alternate Menu",     "Pick any command from one list, in menu, name or key order",
                 "Single alphabetized list of every command with its hotkey and one-line description. Type to filter, arrow to navigate, Enter to run.");
@@ -19385,7 +19421,7 @@ namespace DbDo
                 + (lNow.Count == 1 ? " column, " : " columns, ") + sNow + ".";
 
             string sButton;
-            using (LbcDialog dlg = new LbcDialog("Select Columns", this))
+            using (LbcDialog dlg = new LbcDialog("Show Columns", this))
             {
                 dlg.addLabel(sShown);
                 dlg.helpNote = (sameFieldList(lLook, lPrime) ? "Look and prime hold the same fields here, so Look columns stands for both: the default columns for select and for order. " : "")
@@ -19418,13 +19454,13 @@ namespace DbDo
                     if (!hAccepted.Contains(sName)) lDropped.Add(sName);
                 if (lDropped.Count > 0)
                     LbcMessage.show(this, "Not columns of " + sTable + ", so left out: " + string.Join(", ", lDropped.ToArray()),
-                        "Select Columns", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                        "Show Columns", MessageBoxButtons.OK, MessageBoxIcon.Information);
             }
             else
             {
                 List<string> lShown = db.getDisplayFieldNames();
                 using (ColumnSequenceDialog dlg = new ColumnSequenceDialog(
-                    "Select Columns", lAllColumns, virtCurrentColumnName(), lShown, false))
+                    "Show Columns", lAllColumns, virtCurrentColumnName(), lShown, false))
                 {
                     if (db.hasField("look")) dlg.lsDefaultPicks = db.lParseGeneratedFields(sTable, "look");
                     if (dlg.ShowDialog(this) != DialogResult.OK) return;
@@ -19553,7 +19589,7 @@ namespace DbDo
                 if (sName.Length == 0 || sLower.EndsWith("_id") || sLower == "added" || sLower == "edited" || sLower == "marked" || sLower == "look" || sLower == "prime") continue;
                 lColumns.Add(sName);
             }
-            if (lColumns.Count == 0) { Say.say("No columns to count by; show some with Select Columns, Alt+S"); return; }
+            if (lColumns.Count == 0) { Say.say("No columns to count by; show some with Show Columns, Alt+S"); return; }
 
             object bookmarkSaved = null;
             try { bookmarkSaved = db.bookmark; } catch { }
@@ -27655,7 +27691,83 @@ namespace DbDo
         {
             // The user's tables, not DbDo's own. defs and maps are on the
             // hidden list; the dot prompt still reaches them by name.
-            selectFromList(db == null ? null : db.getUserTableNames(), "Choose Table", "table");
+            // In a design window (23 November 2026), DbDo's own tables instead: the window decides the family.
+            selectFromList(db == null ? null : tableFamilyNames(), "Choose Table", "table");
+        }
+
+        // tableFamilyNames: the tables Control+F6 and Choose Table move among in this window. A window on one of
+        // DbDo's own tables (defs, files, maps) is a design window, and moves among those; any other window moves
+        // among the database's own tables and views, as always (23 November 2026, DbDo_Keys.md).
+        private List<string> tableFamilyNames()
+        {
+            if (db == null || !db.isOpen()) return null;
+            if (DbDoManager.isHiddenTable(db.currentTable) && db.hasOwnTableShape(db.currentTable)) return db.getOwnTableNames();
+            return db.getUserTableNames();
+        }
+
+        // designDatabaseClicked: DESIGN DATABASE, Alt+Shift+D (23 November 2026, DbDo_Keys.md). The parts of a database
+        // you build rather than fill, in one button dialog, since the choices are fixed. Every name has two words and
+        // its own first letter, in alphabetical order, which also puts Table properties, the one with its own key
+        // (Alt+Enter), last. DbDo's own tables open in a new window, as Open Table does, so Control+F4 returns to your
+        // data; in that window Control+F6 and Choose Table move among defs, files and maps (tableFamilyNames). With no
+        // database open, the dialog offers the two ways to get one to design.
+        private void designDatabaseClicked(object sender, EventArgs evArgs)
+        {
+            string sButton;
+            if (db == null || !db.isOpen())
+            {
+                using (LbcDialog dlg = new LbcDialog("Design Database", this))
+                {
+                    dlg.addLabel("No database is open.");
+                    dlg.helpNote = "New database makes an empty DbDo database. Open template database opens one of the databases that come with DbDo, to change into your own.";
+                    sButton = dlg.runWithButtons(new string[] { "&New database...", "&Open template database...", "Cancel" });
+                }
+                if (sButton == "New database...") fileNewClicked(sender, evArgs);
+                else if (sButton == "Open template database...") openTemplateDbClicked(sender, evArgs);
+                return;
+            }
+            List<string> lsOwn = db.getOwnTableNames();
+            using (LbcDialog dlg = new LbcDialog("Design Database", this))
+            {
+                dlg.addLabel("Build or change " + System.IO.Path.GetFileName(db.filePath ?? "") + ".");
+                dlg.helpNote = "Add table makes a new table with DbDo's standard fields. Defs table holds each field's choices, descriptions and patterns. "
+                    + "Files table holds the scripts, reports and settings the database carries. Maps table holds the links between records. "
+                    + "Table properties shows the current table's fields, types, indexes and links, as Alt+Enter does. "
+                    + "DbDo's own tables open in a new window, where Control+F6 and Control+T move among those three, and Control+F4 closes it.";
+                sButton = dlg.runWithButtons(new string[] { "&Add table...", "&Defs table", "&Files table", "&Maps table", "Table &properties", "Cancel" });
+            }
+            if (string.IsNullOrEmpty(sButton) || sButton == "Cancel") return;
+            if (sButton == "Add table...") { fileAddTableClicked(sender, evArgs); return; }
+            if (sButton == "Table properties") { schemaPropertiesClicked(sender, evArgs); return; }
+            string sTable = sButton.Replace(" table", "").ToLowerInvariant();
+            string sReal = null;
+            foreach (string sName in lsOwn) if (string.Equals(sName, sTable, StringComparison.OrdinalIgnoreCase)) sReal = sName;
+            if (sReal == null)
+            {
+                string sMissing = sTable == "files"
+                    ? "This database has no files table yet. Pack Files into Database, on the Tools menu, makes one."
+                    : "This database has no " + sTable + " table of DbDo's shape.";
+                LbcMessage.show(this, sMissing, "Design Database", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return;
+            }
+            DbDoFrame frame = mdiFrame();
+            if (frame == null) return;
+            // Already open in a window on this database: go there rather than open a second one.
+            foreach (Form frmChild in frame.MdiChildren)
+            {
+                DbDoForm formChild = frmChild as DbDoForm;
+                if (formChild == null || formChild.IsDisposed) continue;
+                if (string.Equals(formChild.openDatabasePath, db.filePath, StringComparison.OrdinalIgnoreCase)
+                    && string.Equals(formChild.openTableName, sReal, StringComparison.OrdinalIgnoreCase))
+                { formChild.Activate(); return; }
+            }
+            DbDoForm frmDesign = frame.openChildWindow(mode, db.filePath, sReal);
+            try
+            {
+                int iRows = frmDesign.Db.recordCount;
+                Say.say("DbDo table, " + iRows + (iRows == 1 ? " row" : " rows"));
+            }
+            catch { }
         }
 
         // ===== Window commands (MDI window management) =====
@@ -27844,7 +27956,8 @@ namespace DbDo
                 db.selectTable(sChosen);
                 invokeRefresh();
                 announceTableOpened();
-                IniSession.lastTable = sChosen;
+                // Only your own tables are remembered for next time, never a design window's (23 November 2026).
+                if (!DbDoManager.isHiddenTable(sChosen)) IniSession.lastTable = sChosen;
             }
             catch (Exception ex)
             {
@@ -27902,7 +28015,10 @@ namespace DbDo
             // The ring holds the user's tables. defs and maps are DbDo's
             // own, and arriving on one by pressing Control+Page Down is how
             // somebody meets a table they did not know existed and cannot use.
-            List<string> lAll = db.getUserTableNames();
+            // THE WINDOW DECIDES THE FAMILY (23 November 2026): in a design window, one on defs, files or maps, opened
+            // from Design Database (Alt+Shift+D), the ring is DbDo's own tables instead, so it never reaches yours.
+            bool bOwnFamily = DbDoManager.isHiddenTable(db.currentTable) && db.hasOwnTableShape(db.currentTable);
+            List<string> lAll = tableFamilyNames();
             if (lAll.Count == 0)
             {
                 Say.say("No tables or views in this database");
@@ -27930,11 +28046,12 @@ namespace DbDo
                 db.selectTable(sNext);
                 invokeRefresh();
                 int iCount = db.recordCount;
-                string sKind = db.isViewName(sNext) ? "view" : "table";
+                string sKind = bOwnFamily ? "DbDo table" : (db.isViewName(sNext) ? "view" : "table");
                 string sPosOf = "position " + (iNext + 1) + " of " + lAll.Count;
                 string sRows = ", " + iCount + (iCount == 1 ? " row" : " rows");
                 Say.say(sNext + " (" + sKind + "), " + sPosOf + sRows);
-                IniSession.lastTable = sNext;
+                // A design window is not where DbDo should reopen next time, so only your own tables are remembered.
+                if (!bOwnFamily) IniSession.lastTable = sNext;
             }
             catch (Exception ex)
             {
