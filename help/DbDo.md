@@ -177,6 +177,10 @@ W and L are the widest and narrowest letters of the alphabet, which helps them s
 
 So Control+L reads the current column from here down, and Alt+Shift+Y says how many records are marked. Readings go one value at a time, and any key stops them. Press a reading key twice to see the same values in a window instead. Shift+Space also reads the marked records wide.
 
+A fourth letter, **H, headed,** reads like W but names everything: "row 9", then each column's name before its value, such as "name", "Radio Nova", "country", "Germany". Use it on a table you do not know yet, or when values sound alike. H takes the same keys as W, except one: Read Headed Marked is Alt+Shift+H and Read Headed from Current is Control+H, but Alt+H opens the Help menu. To read headed from the first record, press Control+Home, then Control+H.
+
+**Say Header** (Shift+H) says the name of the column you are on, as Alt+Control+Shift+UpArrow does. Do not confuse it with **Say Look** (Shift+L), which says the record's look: the value in its look column, such as "Radio Nova | France", not the names of the columns that make it.
+
 The fourth form, marked records from the current one on, is on the menu with no key: Read Wide Marked from Current, Read Lean Marked from Current and Say Yield Marked from Current. Control and Shift with a letter is kept for commands that change things, and Control+Shift+Y is Yield with Regex, beside Extract with Regex (Control+Shift+E) and Replace with Regex (Control+Shift+R), as in every Homer Suite app.
 
 FileDir reads and counts its list with the same L and Y keys. It has no W keys, since its list has one column.
@@ -661,6 +665,10 @@ The Query menu holds record inspection and the Say-X status family.
 | Read Lean Marked | Alt+Shift+L |
 | Read Lean from Current | Control+L |
 | Read Lean Marked from Current | — |
+| Read Headed | — |
+| Read Headed Marked | Alt+Shift+H |
+| Read Headed from Current | Control+H |
+| Read Headed Marked from Current | — |
 | Say Filter and Order | Shift+8 |
 | Say Position | Alt+Delete |
 | Say Clipboard | Alt+Apostrophe |
@@ -672,6 +680,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Say Query | Shift+Q |
 | Say Id | Shift+I |
 | Say Look | Shift+L |
+| Say Header | Shift+H |
 | Say Replace Values | Shift+R |
 | Say Invoke Script | Shift+V |
 | Say url | Shift+U |

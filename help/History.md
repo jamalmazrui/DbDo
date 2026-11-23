@@ -5,6 +5,23 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 23 November 2026, night -- Read Headed and Say Header
+
+- **Control+H reads the records with their headers,** from the current record on, and Alt+Shift+H reads the marked ones from the first, as Control+W and Alt+Shift+W read wide: "row 9", then each column's name before its value, such as "name", "Radio Nova", "country", "Germany". It reads one piece at a time, any key stops it, and a second press shows the records in a window, as Read Wide does. It suits a table you do not know yet, or values that sound alike. Read Headed (from the first) and Read Headed Marked from Current are on the Query menu with no key, since Alt+H opens the Help menu and Control+Shift is kept for commands that change things.
+- **Shift+H says the current column's name,** as Alt+Control+Shift+UpArrow does. Shift+L, Say Look, still says the value of the record's look column.
+- **The name look stays.** Show was weighed and set aside: "Show columns" would take S from "Standard columns", Say Show would want Shift+S from Say Shown Columns, and show is already the verb of eight commands.
+
+## 23 November 2026, evening -- Measuring whether the local AI can answer questions about a table
+
+- **scripts\testAsk scores the local AI model before Ask the Table is built.** It asks 44 questions about the template tables, with known right answers. They cover counts, totals, averages, highest and lowest, top lists, groups, follow-ups such as "and how many of those use AAC", and questions it should decline. It reports, for each model installed, how many it got right, how many it got confidently wrong, and how long it took. Ask the Table joins DbDo only if a model is right at least 90 percent of the time, confidently wrong at most 5 percent, and takes a median of 5 seconds or less. notes\DbDo_AskTable.md explains why.
+
+## 23 November 2026, later -- What testSay heard, corrected
+
+- **Say Shown Columns says "shown columns:"**, not "select", the word of the command it answers.
+- **Say Filter says "filter:" for a search too.** It said "where any field contains buffalo bills" while Say Filter and Order said "filter: any field contains buffalo bills"; now both use one label.
+- **Say Status names a search filter.** It named only a field filter, so a table filtered by a search sounded unfiltered.
+- **Say Database says the path once.** The full path followed straight after the file and folder, the same place twice; Say Path, Alt+P, gives the full path.
+
 ## 23 November 2026, afternoon -- A saved search stays in force, and the column groups say their columns
 
 - **A saved search filter now holds when a table opens.** RadioTrail said "filtered: any field contains buffalo bills" yet showed all 52,550 stations. The search was applied first, and then the saved order reloaded the table without it. A sort now keeps the search in the same query, so the records shown are the records the filter names. The same fix holds when you sort a filtered table with Alt+O or Alt+A.

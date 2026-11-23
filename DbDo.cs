@@ -14778,6 +14778,12 @@ namespace DbDo
             miSaySayColumnAllMarked = addItem(miSay, "Read Lean Marked",               "Read Lean Marked",              Keys.Alt | Keys.Shift | Keys.L,     saySayColumnAllMarked);
             miSaySayColumn          = addItem(miSay, "Read Lean from Current",         "Read Lean from Current",        Keys.Control | Keys.L,              saySayColumn);
             miSaySayColumnMarked    = addItem(miSay, "Read Lean Marked from Current",  "Read Lean Marked from Current", Keys.None,                          saySayColumnMarked);
+            // READ HEADED (23 November 2026): H for headed, Read Wide with the row's number and each column's name.
+            // Alt+Shift+H and Control+H, as Alt+Shift+W and Control+W; Alt+H is the Help menu. See readHeadedAll.
+            addItem(miSay, "Read &Headed",                     "Read Headed",                   Keys.None,                          readHeadedAll);
+            addItem(miSay, "Read Headed Marked",               "Read Headed Marked",            Keys.Alt | Keys.Shift | Keys.H,     readHeadedAllMarked);
+            addItem(miSay, "Read Headed from Current",         "Read Headed from Current",      Keys.Control | Keys.H,              readHeadedCurrent);
+            addItem(miSay, "Read Headed Marked from Current",  "Read Headed Marked from Current", Keys.None,                        readHeadedCurrentMarked);
             // Say Records Rest gave up Alt+L to the Say Column All command
             // above; it remains on the menu (and the Alternate Menu) with
             // no chord for now. Say Marked Records from Current keeps Alt+Shift+M.
@@ -14877,6 +14883,8 @@ namespace DbDo
             miSaySayQuery        = addItem(miSay, "Say &Query",          "Say Query",   Keys.Shift | Keys.Q,                saySayQuery);
             miSaySayId           = addItem(miSay, "Say &Id",      "Say ID",      Keys.Shift | Keys.I,                saySayId);
             miSaySayLook         = addItem(miSay, "Say Look",           "Say Look",    Keys.Shift | Keys.L,                saySayLook);
+            // SAY HEADER (23 November 2026): Shift+H, the current column's name.
+            addItem(miSay, "Say Header",         "Say Header",  Keys.Shift | Keys.H,                saySayHeader);
             miSaySayRelated      = addItem(miSay, "Say Related", "Say Related", Keys.None,           saySayRelated);
             miSaySayRelated.Visible = false;   // folded into Say Whole Record (Shift+W), 9 November 2026
             miSaySayUrl          = addItem(miSay, "Say &url",          "Say url",      Keys.Shift | Keys.U,                saySayUrl);
@@ -15423,6 +15431,16 @@ namespace DbDo
                 "Control+L. Read Lean, starting at the current record.");
             add("Read Lean Marked from Current", "Read the current column's values in the marked records, from the current one on",
                 "No key. Read Lean from Current, for the marked records only.");
+            add("Read Headed", "Read the records in view from the first, each value after its column's name",
+                "No key, since Alt+H opens the Help menu; Control+Home then Control+H does the same. H for headed: Read Wide with \"row\" and the record's number before each record, and each column's name before its value. Empty values are skipped with their names. Twice shows the records in a window.");
+            add("Read Headed Marked", "Read the marked records in view from the first, each value after its column's name",
+                "Alt+Shift+H. Read Headed, for the marked records only.");
+            add("Read Headed from Current", "Read the records in view from the current one on, each value after its column's name",
+                "Control+H. Read Headed, starting at the current record.");
+            add("Read Headed Marked from Current", "Read the marked records in view from the current one on, each value after its column's name",
+                "No key. Read Headed from Current, for the marked records only.");
+            add("Say Header", "Say the current column's name",
+                "Shift+H. The column's name, as Alt+Control+Shift+UpArrow says it. Say Look, Shift+L, says the record's look: the value of the look column, not the names of the columns it is made from.");
             add("Say Position",       "Speak the column header and 1-based row number of the virtual cell",
                 "JAWS-style 'say cursor position' for the listview. Speech-only; does not move focus. Double-press opens the same text in a read-only multi-line dialog.");
             add("Show in FileDir",    "Show the open database's file, selected in its folder, in FileDir", "");
@@ -17398,8 +17416,7 @@ namespace DbDo
             // Shift plus a letter is a question, and a question that produces
             // silence cannot be told from a key that did not register, a
             // mishearing, or a program that has stopped. The bound letters
-            // answer with their value; the free ones -- H and W, as of 1 November
-            // 2026 -- say so, so a person walking the alphabet hears that rather
+            // answer with their value; a free one says so, so a person walking the alphabet hears that rather
             // than wondering.
             if ((keyData & (Keys.Control | Keys.Alt)) == 0
                 && (keyData & Keys.Shift) == Keys.Shift)
@@ -17456,11 +17473,7 @@ namespace DbDo
                 Say.say(sLabel.Length > 0 ? sLabel : "No rows");
                 return true;
             }
-            if (keyData == (Keys.Alt | Keys.Control | Keys.Shift | Keys.Up))
-            {
-                Say.say((grid != null && iVirtualCol >= 0 && iVirtualCol < grid.Columns.Count) ? grid.Columns[iVirtualCol].Text : "No columns");
-                return true;
-            }
+            if (keyData == (Keys.Alt | Keys.Control | Keys.Shift | Keys.Up)) { saySayHeader(this, EventArgs.Empty); return true; }
             if (keyData == (Keys.Alt | Keys.Control | Keys.Shift | Keys.Right)) { virtSayRow(); return true; }
             if (keyData == (Keys.Alt | Keys.Control | Keys.Shift | Keys.Down)) { saySayColumnAll(this, EventArgs.Empty); return true; }
             if (keyData == (Keys.Alt | Keys.Control | Keys.Shift | Keys.Clear) || keyData == (Keys.Alt | Keys.Control | Keys.Shift | Keys.NumPad5))
@@ -18016,7 +18029,12 @@ namespace DbDo
             }
             sb.Append(db.currentTable ?? "(no table)");
             sb.Append(" record ").Append(db.absolutePosition).Append(" of ").Append(db.recordCount);
-            if (db.filter.Length > 0) sb.Append("; filter: ").Append(db.filter);
+            // THE SEARCH TOO (23 November 2026, testSay): Say Status named only the field filter, so a table filtered
+            // by a search ("any field contains buffalo bills") was reported as if it were not filtered at all.
+            List<string> lsFilters = new List<string>();
+            if (!string.IsNullOrEmpty(db.sqlFilterSpoken)) lsFilters.Add(db.sqlFilterSpoken);
+            if (db.filter.Length > 0) lsFilters.Add(db.filter);
+            if (lsFilters.Count > 0) sb.Append("; filter: ").Append(string.Join("; and ", lsFilters.ToArray()));
             if (db.sort.Length > 0) sb.Append("; order: ").Append(db.sort);
             speakOrShow("Status", "status: " + sb.ToString(), 101);
         }
@@ -18042,8 +18060,10 @@ namespace DbDo
             // read-only window. Database Summary's own command is gone, and Alt+D opens a template database.
             List<string> lParts = new List<string>();
             lParts.Add("database: " + sName + " in " + (Path.GetDirectoryName(sPath) ?? sPath));
+            // THE PATH ONCE (23 November 2026, testSay): the summary's own "Database: <full path>" line came straight
+            // after "database: <file> in <folder>", the same path twice in a row. Say Path (Alt+P) gives the full path.
             foreach (string sLine in databaseSummaryText().Replace("\r\n", "\n").Split('\n'))
-                if (sLine.Trim().Length > 0) lParts.Add(sLine.Trim());
+                if (sLine.Trim().Length > 0 && !sLine.Trim().StartsWith("Database: ")) lParts.Add(sLine.Trim());
             speakOrShowParts("Database", lParts, 124);
         }
 
@@ -18480,8 +18500,10 @@ namespace DbDo
             // answers rather than one run-on line. Double-pressing shows them on
             // separate lines, in the same order.
             // THE KIT'S TWO PRESSES (9 November 2026): a second press shows the list in the read-only window.
+            // "shown columns", not "select" (23 November 2026, testSay): the command became Show Columns and this one Say
+            // Shown Columns, and the label is the command's own words, as "order:" and "filter:" are.
             List<string> lsParts = new List<string>();
-            lsParts.Add("select");
+            lsParts.Add("shown columns:");
             lsParts.AddRange(lsCols);
             speakOrShowParts("Columns", lsParts, 123);
         }
@@ -18498,10 +18520,13 @@ namespace DbDo
             // WHERE FIRST (19 October 2026): a filter narrowed or expanded speaks its groups in parentheses, and a
             // sentence that opens with a parenthesis is read as an aside, by a listener and by the tutorial check
             // alike, so it is led by "filter", the command's own word (1 November 2026).
+            // ONE LABEL, "filter:" (23 November 2026, testSay): a search said "where any field contains buffalo bills"
+            // here and "filter: any field contains buffalo bills" in Say Filter and Order; the spoken search already
+            // reads as English, so both kinds now follow the one label.
             List<string> lsParts = new List<string>();
-            if (!string.IsNullOrEmpty(sSql)) lsParts.Add("where " + sSql);
-            if (!string.IsNullOrEmpty(sFilter)) lsParts.Add("filter: " + sFilter);
-            speakOrShow("Filter", string.Join("; and ", lsParts.ToArray()), 118);
+            if (!string.IsNullOrEmpty(sSql)) lsParts.Add(sSql);
+            if (!string.IsNullOrEmpty(sFilter)) lsParts.Add(sFilter);
+            speakOrShow("Filter", "filter: " + string.Join("; and ", lsParts.ToArray()), 118);
         }
 
         // saySayFind: speak the current Find search string. Shift+F.
@@ -18901,7 +18926,7 @@ namespace DbDo
         // values in a window for Read Lean as it does for Read Wide.
         private void saySayColumnCommon(bool bMarkedOnly, bool bFromCurrent)
         {
-            readList(bMarkedOnly, bFromCurrent, true);
+            readList(bMarkedOnly, bFromCurrent, true, false);
         }
 
         // saySayRows: Shift+V. Speak every visible row in full -- each
@@ -18928,16 +18953,39 @@ namespace DbDo
         // between records, and any key stops it (Control silences JAWS or NVDA at once). Empty values are skipped, as
         // a list view skips them. The cursor does not move. A second press stops the reading and shows the records in
         // a window, one record a line, each value after its column's name.
-        private void readListAll(object sender, EventArgs evArgs) { readList(false, false, false); }
-        private void readListAllMarked(object sender, EventArgs evArgs) { readList(true, false, false); }
-        private void readListCurrent(object sender, EventArgs evArgs) { readList(false, true, false); }
-        private void readListCurrentMarked(object sender, EventArgs evArgs) { readList(true, true, false); }
+        private void readListAll(object sender, EventArgs evArgs) { readList(false, false, false, false); }
+        private void readListAllMarked(object sender, EventArgs evArgs) { readList(true, false, false, false); }
+        private void readListCurrent(object sender, EventArgs evArgs) { readList(false, true, false, false); }
+        private void readListCurrentMarked(object sender, EventArgs evArgs) { readList(true, true, false, false); }
+
+        // THE READ HEADED FAMILY (23 November 2026, Jamal's design). H for headed: Read Wide with each record's number
+        // and each column's header said before its value -- "row 9", "name", "Radio Nova", "country", "Germany" --
+        // each its own utterance, so the reader pauses between them and any key stops it. Read Wide is quicker once
+        // the columns are known; Read Headed is for a table you do not know yet, or columns whose values sound alike.
+        // The keys follow W, L and Y: Alt+Shift+H reads the marked records from the first, Control+H from the current
+        // record. Alt+Shift+H left Hotkey Summary (9 November 2026) only because a dialog's Help button answers
+        // Alt+H there; the reading keys act in the main window, where no Help button listens (Jamal, 23 November
+        // 2026). Alt+H itself is the Help menu, so Read Headed from the first has no key; Control+Home then Control+H
+        // does the same. Read Headed Marked from Current has no key, as the fourth forms of W, L and Y have none:
+        // Control+Shift with a letter is kept for commands that change things (21 November 2026), and EdSharp's
+        // Control+Shift+H is Hard Line Break.
+        private void readHeadedAll(object sender, EventArgs evArgs) { readList(false, false, false, true); }
+        private void readHeadedAllMarked(object sender, EventArgs evArgs) { readList(true, false, false, true); }
+        private void readHeadedCurrent(object sender, EventArgs evArgs) { readList(false, true, false, true); }
+        private void readHeadedCurrentMarked(object sender, EventArgs evArgs) { readList(true, true, false, true); }
+
+        // saySayHeader: Shift+H, the current column's name, as Alt+Control+Shift+UpArrow says it. Shift+L, Say Look,
+        // says the value of the record's look column, not the names of the columns it is computed from.
+        private void saySayHeader(object sender, EventArgs evArgs)
+        {
+            Say.say((grid != null && iVirtualCol >= 0 && iVirtualCol < grid.Columns.Count) ? grid.Columns[iVirtualCol].Text : "No columns");
+        }
 
         // readList: Read Wide (every shown column) or, with bLean, Read Lean (the column under the virtual cursor,
         // its name said first).
-        private void readList(bool bMarkedOnly, bool bFromCurrent, bool bLean)
+        private void readList(bool bMarkedOnly, bool bFromCurrent, bool bLean, bool bHeaded)
         {
-            string sCmd = (bLean ? "Read Lean" : "Read Wide") + (bMarkedOnly ? " Marked" : "") + (bFromCurrent ? " from Current" : "");
+            string sCmd = (bLean ? "Read Lean" : (bHeaded ? "Read Headed" : "Read Wide")) + (bMarkedOnly ? " Marked" : "") + (bFromCurrent ? " from Current" : "");
             bool bShow = Homer.KeyMap.iPressCount == 2;
             if (bShow) Homer.ReadAloud.stop(true);
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
@@ -18968,7 +19016,7 @@ namespace DbDo
                                         : "records: none from here");
                     return;
                 }
-                Homer.ReadAloud.start(sCmd, readingParts(sHeader, lDispCols, iStart, bMarkedOnly),
+                Homer.ReadAloud.start(sCmd, readingParts(sHeader, lDispCols, iStart, bMarkedOnly, bHeaded),
                     delegate(int iSentParts, bool bStopped) { DbDoLog.write(sCmd + ": " + iSentParts + " values read" + (bStopped ? ", then a key stopped it" : "")); });
                 return;
             }
@@ -18987,6 +19035,7 @@ namespace DbDo
                         if (bMarkedOnly && !isMarkedTrue(db.getScreenValue(Metadata.MarkedColumn))) continue;
                         iRecords++;
                         StringBuilder sbLine = new StringBuilder();
+                        if (bHeaded) sbLine.Append("row ").Append(i);
                         foreach (string sCol in lDispCols)
                         {
                             if (db.isFieldNull(sCol)) continue;
@@ -19041,19 +19090,20 @@ namespace DbDo
         // when given, then each record's values in the columns lCols, from iStart down, only the marked when
         // bMarkedOnly. It is lazy: each record is read when ReadAloud asks for more, and the cursor is put back after
         // each, so the grid never shows a record the user did not move to.
-        private IEnumerable<string> readingParts(string sLead, List<string> lCols, int iStart, bool bMarkedOnly)
+        private IEnumerable<string> readingParts(string sLead, List<string> lCols, int iStart, bool bMarkedOnly, bool bHeaded)
         {
             if (!string.IsNullOrEmpty(sLead)) yield return sLead;
             for (int i = iStart; db != null && db.hasRecordset() && i <= db.recordCount; i++)
             {
-                List<string> lValues = recordValues(i, lCols, bMarkedOnly);
+                List<string> lValues = recordValues(i, lCols, bMarkedOnly, bHeaded);
                 foreach (string sValue in lValues) yield return sValue;
             }
         }
 
         // recordValues: the values of record i in lCols that are not empty; none when it is unmarked and bMarkedOnly.
-        // The cursor is put back.
-        private List<string> recordValues(int i, List<string> lCols, bool bMarkedOnly)
+        // With bHeaded, "row i" comes first and each value follows its column's name, an empty value skipped with its
+        // name, as Read Wide skips it. The cursor is put back.
+        private List<string> recordValues(int i, List<string> lCols, bool bMarkedOnly, bool bHeaded)
         {
             List<string> lValues = new List<string>();
             object oOriginal = null;
@@ -19062,11 +19112,14 @@ namespace DbDo
             {
                 db.absolutePosition = i;
                 if (bMarkedOnly && !isMarkedTrue(db.getScreenValue(Metadata.MarkedColumn))) return lValues;
+                if (bHeaded) lValues.Add("row " + i);
                 foreach (string sCol in lCols)
                 {
                     if (db.isFieldNull(sCol)) continue;
                     string sValue = db.getScreenValue(sCol);
-                    if (!string.IsNullOrEmpty(sValue)) lValues.Add(sValue);
+                    if (string.IsNullOrEmpty(sValue)) continue;
+                    if (bHeaded) lValues.Add(sCol);
+                    lValues.Add(sValue);
                 }
             }
             catch (Exception ex) { DbDoLog.write("reading: record " + i + " could not be read: " + ex.Message); }

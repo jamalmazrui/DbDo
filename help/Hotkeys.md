@@ -385,6 +385,12 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 
 Shift and a letter asks. Nothing here changes anything; each answers a question about where you are, in one short line.
 
+- Read Headed from Current\
+  Read the records in view from the current one on, each value after its column's name. H for Headed.\
+  Control+H
+- Read Headed Marked\
+  Read the marked records in view from the first, each value after its column's name. H for Headed.\
+  Alt+Shift+H
 - Read Lean\
   Read the current column's values from the first record. L for Lean.\
   Alt+L
@@ -430,6 +436,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Go to\
   Say the last Go to entry. G for Go.\
   Shift+G
+- Say Header\
+  Say the current column's name. H for Header.\
+  Shift+H
 - Say Id\
   I for ID.\
   Shift+I
@@ -581,6 +590,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+Shift+G\
   Draw a chart of the records and columns you choose, as a picture, a web page and an Excel workbook.\
   Generate Graphics
+- Alt+Shift+H\
+  Read the marked records in view from the first, each value after its column's name.\
+  Read Headed Marked
 - Alt+Shift+L\
   Read the current column's values in the marked records, from the first.\
   Read Lean Marked
@@ -647,6 +659,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+GraveAccent\
   Send focus to the dot prompt console.\
   Open Dot Prompt
+- Control+H\
+  Read the records in view from the current one on, each value after its column's name.\
+  Read Headed from Current
 - Control+I\
   Invert Marked
 - Control+J\
@@ -872,6 +887,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Shift+G\
   Say the last Go to entry.\
   Say Go to
+- Shift+H\
+  Say the current column's name.\
+  Say Header
 - Shift+I\
   Say Id
 - Shift+J\
@@ -1132,6 +1150,12 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Control+Q
 - Query History\
   Alt+Shift+Q
+- Read Headed from Current\
+  Read the records in view from the current one on, each value after its column's name.\
+  Control+H
+- Read Headed Marked\
+  Read the marked records in view from the first, each value after its column's name.\
+  Alt+Shift+H
 - Read Lean\
   Read the current column's values from the first record.\
   Alt+L
@@ -1219,6 +1243,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Go to\
   Say the last Go to entry.\
   Shift+G
+- Say Header\
+  Say the current column's name.\
+  Shift+H
 - Say Id\
   Shift+I
 - Say Invoke Script\
