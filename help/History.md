@@ -5,6 +5,13 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 23 November 2026, afternoon -- A saved search stays in force, and the column groups say their columns
+
+- **A saved search filter now holds when a table opens.** RadioTrail said "filtered: any field contains buffalo bills" yet showed all 52,550 stations. The search was applied first, and then the saved order reloaded the table without it. A sort now keeps the search in the same query, so the records shown are the records the filter names. The same fix holds when you sort a filtered table with Alt+O or Alt+A.
+- **Show Columns and Order Records name each group's columns.** Each choice is a button on its own line that lists its columns in parentheses, such as Look columns (name, country); a long list wraps inside its button. Alt and the letter still choose in one keystroke, and Shift+F1 still says what each button does. A list box with an activate button was weighed and set aside: it takes two keys and loses the letters and the hints.
+- **Order Records opens on its first button.** Its default, Prime columns, was the second button and took focus as the dialog opened, which sounded like focus in the wrong place. Prime columns now comes first there, so the first button, the focus and Enter are the same choice; Show Columns keeps Look columns first, its own default. A table with no prime no longer offers an empty Prime columns button.
+- **DbDo needs HomerDev 1.278.0,** whose dialogs gained these choice buttons.
+
 ## 23 November 2026 -- Show Columns, and Design Database
 
 - **Select Columns is now Show Columns,** still on Alt+S, and Say Select Columns is **Say Shown Columns,** still on Shift+S. In Windows, to select is to highlight, so the old name sounded like marking a block of columns; the dialog's own list was already called Columns shown. Show Columns, Order Records and Filter Records are the three questions that shape what you see, and Shift with the same letter says each answer. The Alternate Menu still finds the old names.

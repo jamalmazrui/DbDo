@@ -165,7 +165,8 @@ rem cause, first. Raise this whenever DbDo starts using something new.
 rem 1.64.5: Play Tutorials calls MediaPlayer.playTutorials, which older kits lack;
 rem a build against 1.64.4 failed to compile on 8 October 2026 rather than saying so.
 rem 1.231.0: the macro recorder compiles the kit's Macro.cs, with its expected-against-actual audit.
-set "kitNeeded=1.273.0"
+rem 1.278.0: Show Columns and Order Records list each group's columns with Lbc's addChoiceButton.
+set "kitNeeded=1.278.0"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -185,6 +186,7 @@ findstr /c:"public Func<string> fUnavailable" "!homerDev!\exec\CSharp\KeyMap.cs"
 findstr /c:"public static class ColumnTypes" "!homerDev!\exec\CSharp\Schema.cs" >nul 2>&1 || set "kitMissing=!kitMissing! ColumnTypes (Schema.cs, kit 1.138.0)"
 findstr /c:"string expect(MacroStep macroStep);" "!homerDev!\exec\CSharp\Macro.cs" >nul 2>&1 || set "kitMissing=!kitMissing! the macro engine's audit (Macro.cs, kit 1.231.0)"
 findstr /c:"public static bool drawChart(" "!homerDev!\exec\CSharp\DataReport.cs" >nul 2>&1 || set "kitMissing=!kitMissing! the chart engine (DataReport.cs, kit 1.269.0)"
+findstr /c:"public Button addChoiceButton(" "!homerDev!\exec\CSharp\Lbc.cs" >nul 2>&1 || set "kitMissing=!kitMissing! addChoiceButton (Lbc.cs, kit 1.278.0)"
 if defined kitMissing (
   echo ERROR: C:\HomerDev says !homerVer! but its code lacks:!kitMissing! >> "!log!"
   echo.
@@ -192,7 +194,7 @@ if defined kitMissing (
   echo A HomerDev.zip was probably not unzipped. Unzip the newest HomerDev.zip into C:\HomerDev, then build again.
   exit /b 1
 )
-echo Kit code check: LbcMessage, setPattern, fUnavailable, ColumnTypes, the macro engine and the chart engine present >> "!log!"
+echo Kit code check: LbcMessage, setPattern, fUnavailable, ColumnTypes, the macro engine, the chart engine and addChoiceButton present >> "!log!"
 rem THE MACRO ENGINE IS PROVED BEFORE DBDO COMPILES IT (15 November 2026). The kit's testMacro compiles Macro.cs at
 rem C# 5, the compiler this build uses, records, saves, loads and plays six steps against a pretend view, and compares
 rem the row each step was expected to reach with the row it reached; then it proves that a step which claims success

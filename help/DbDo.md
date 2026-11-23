@@ -295,7 +295,7 @@ Filtering and sorting reshape the grid without touching the physical table.
   - **Nothing found.** A condition that would keep no record says so and leaves the view as it was.
   - **Clear Filter** (Control+Shift+F) removes the filter, keeping you on the same record. A table that reopens with a filter still in force says so as it opens.
   - **Filter with Regex** filters by pattern; **Say Filter** (Shift+F) speaks the current filter.
-- **Order Records** (Alt+O) has the same buttons as Show Columns, and first says the order in force. **Prime columns** is the default (the first focus, so Enter takes it): it sorts by the primary key, prime's fields, ascending. **Look columns** sorts by look's fields, the default columns. **Main columns**, **Standard columns** and **All columns** sort by those columns, ascending. **Choose columns** picks the columns and the direction of each, in two lists; **Type columns** takes them separated by commas, with desc after a column for largest or latest first. When look and prime hold the same fields, one button, **Look columns**, stands for both, in Order Records and Show Columns alike. Last comes **Reverse order** (R), which turns the order in force the other way, as **Reverse Order** (Alt+Shift+O) does from the grid.
+- **Order Records** (Alt+O) has the same buttons as Show Columns, and first says the order in force. **Prime columns** comes first and is the default (the first focus, so Enter takes it): it sorts by the primary key, prime's fields, ascending. **Look columns** sorts by look's fields, the default columns. **Main columns**, **Standard columns** and **All columns** sort by those columns, ascending. **Choose columns** picks the columns and the direction of each, in two lists; **Type columns** takes them separated by commas, with desc after a column for largest or latest first. When look and prime hold the same fields, one button, **Look columns**, stands for both, in Order Records and Show Columns alike. Last comes **Reverse order** (R), which turns the order in force the other way, as **Reverse Order** (Alt+Shift+O) does from the grid.
 
 Sorting reads numbers as numbers: volume 9 comes after 7 and 6.5 even if some
 values were stored as text and others as numbers. It also ignores capital
@@ -308,6 +308,8 @@ Because these only change the view, you can slice a large table down to what you
 **Show Columns** (Alt+S) chooses which fields appear in the grid, and in what order. Showing only the columns you are working with keeps cell-by-cell navigation short. Its buttons are:
 
 The dialog first says which columns are shown now, and whether they are the look columns or the prime columns.
+
+Each button is on its own line and names its columns in parentheses, so you hear what a choice holds before you make it: for example, **Look columns (name, country)**. A long list wraps inside its button. Alt and the button's letter still choose in one keystroke, and Shift+F1 says what the button does. Order Records lists its columns the same way.
 
 - **Look columns** shows the default columns: look's fields, in look's order, the way each record is said, and the columns a table opens with. With no look, every main column. Enter picks it.
 - **Prime columns** shows the primary key: prime's fields, in prime's order, which together make each record unique and set the default order.

@@ -5843,7 +5843,14 @@ namespace DbDo
                 ? AdoConstants.adLockReadOnly : AdoConstants.adLockOptimistic;
 
             string sOrderBy = buildOrderByClause(sActiveSort, sExt);
+            // THE SEARCH FILTER SURVIVES A SORT (23 November 2026). The re-query named the table and the order but not
+            // the SQL filter (Control+F's Any Field, Filter Regex), so sorting a filtered table brought back every
+            // record while DbDo still said "filtered". It struck on every open of a table with a saved search: the
+            // search opened first, then the saved sort re-queried without it -- RadioTrail said "filtered: any field
+            // contains buffalo bills" over all 52,550 stations. The WHERE goes in the same query as the ORDER BY.
+            string sWhereKept = sSqlWhere ?? "";
             string sSql = "SELECT * FROM " + quoteOpenTable(sTable)
+                + (sWhereKept.Length > 0 ? " WHERE " + sWhereKept : "")
                 + (sOrderBy.Length > 0 ? " ORDER BY " + sOrderBy : "");
 
             DateTime dtSortStarted = DateTime.Now;
@@ -5857,6 +5864,7 @@ namespace DbDo
                 // each column sorts numbers before text; the log names the sort as the user
                 // gave it, with the row count and how long the query took (15 October 2026).
                 try { DbDoLog.write("Sort: " + (string.IsNullOrEmpty(sActiveSort) ? "(cleared)" : sActiveSort)
+                    + (sWhereKept.Length > 0 ? "; search filter kept" : "")
                     + "; rows=" + (int)oRecordset.RecordCount
                     + "; milliseconds=" + (long)(DateTime.Now - dtSortStarted).TotalMilliseconds); } catch { }
             }
@@ -5868,7 +5876,8 @@ namespace DbDo
                 {
                     oRecordset = createComObject("ADODB.Recordset");
                     oRecordset.CursorLocation = AdoConstants.adUseClient;
-                    oRecordset.Open("SELECT * FROM " + quoteOpenTable(sTable), oConn,
+                    oRecordset.Open("SELECT * FROM " + quoteOpenTable(sTable)
+                        + (sWhereKept.Length > 0 ? " WHERE " + sWhereKept : ""), oConn,
                         AdoConstants.adOpenStatic, iLock, AdoConstants.adCmdText);
                     sActiveSort = "";
                 }
@@ -19431,7 +19440,10 @@ namespace DbDo
                     + "All columns shows every column. Choose columns picks columns and their order one by one; Type columns takes the names separated by commas. "
                     + "The choice is remembered with the table. Shift+F1 on a button says what it does.";
                 dlg.form.Shown += delegate(object o, EventArgs e) { Say.say(sShown); };
-                sButton = dlg.runWithButtons(columnSetButtons(lLook, lPrime));
+                // Each group lists its columns (23 November 2026); with no look, Look columns is every main column.
+                Dictionary<string, Button> dChoices = addColumnSetChoices(dlg, lLook, lPrime, lMain, lStandard, lAllColumns, lMain, false, false);
+                dlg.form.AcceptButton = dChoices["Look columns"];
+                sButton = dlg.runWithButtons(new string[] { "Cancel" });
             }
             if (string.IsNullOrEmpty(sButton) || sButton == "Cancel") return;
 
@@ -19474,7 +19486,7 @@ namespace DbDo
 
         // applySelectList: save a table's select list (empty = the default rule),
         // redraw the grid and keep the choice. Returns the list as stored.
-        // columnSetButtons: THE SAME BUTTONS FOR ALT+S AND ALT+O (4 November 2026, Jamal's design): Look columns, the
+        // addColumnSetChoices (below; once columnSetButtons): THE SAME BUTTONS FOR ALT+S AND ALT+O (4 November 2026, Jamal's design): Look columns, the
         // default columns for select; Prime columns, the default columns for order; Main, Standard and All columns;
         // Choose columns; Type columns. When look's and prime's fields are the same, in the same order, one button,
         // Look columns, stands for both -- the default columns for select and for order.
@@ -19487,12 +19499,38 @@ namespace DbDo
             }
         }
 
-        private static string[] columnSetButtons(List<string> lLook, List<string> lPrime)
+        // addColumnSetChoices: THE COLUMN GROUPS SAY THEIR COLUMNS (23 November 2026, Jamal's request). Each group is a
+        // button on its own line naming its columns, comma and space between them, in parentheses -- "Look columns
+        // (name, country)" -- through the kit's addChoiceButton, which wraps a long list inside the button and still
+        // reports the plain choice, so the code that acts on it is unchanged. Buttons rather than a list box: Alt and
+        // the letter still choose in one keystroke, and Shift+F1 still has each button's hint. Choose columns and Type
+        // columns open their own dialogs, so they list nothing. lLookFallback is what Look columns means when the table
+        // has no look: every main column for Show Columns, prime's fields for Order Records. Answers the buttons by
+        // choice, so the caller can make one the default.
+        private static Dictionary<string, Button> addColumnSetChoices(LbcDialog dlg, List<string> lLook, List<string> lPrime,
+            List<string> lMain, List<string> lStandard, List<string> lAll, List<string> lLookFallback, bool bReverse, bool bPrimeFirst)
         {
-            List<string> lButtons = new List<string> { "&Look columns" };
-            if (!sameFieldList(lLook, lPrime)) lButtons.Add("&Prime columns");
-            lButtons.AddRange(new string[] { "&Main columns", "&Standard columns", "&All columns", "&Choose columns...", "&Type columns...", "Cancel" });
-            return lButtons.ToArray();
+            Dictionary<string, Button> dButtons = new Dictionary<string, Button>(StringComparer.OrdinalIgnoreCase);
+            // bPrimeFirst: Order Records' default, Prime columns, leads, so its first button is its default.
+            bool bPrime = !sameFieldList(lLook, lPrime) && lPrime.Count > 0;
+            if (bPrime && bPrimeFirst) dButtons["Prime columns"] = dlg.addChoiceButton("&Prime columns", columnListText(lPrime));
+            dButtons["Look columns"] = dlg.addChoiceButton("&Look columns", columnListText(lLook.Count > 0 ? lLook : lLookFallback));
+            if (bPrime && !bPrimeFirst) dButtons["Prime columns"] = dlg.addChoiceButton("&Prime columns", columnListText(lPrime));
+            dButtons["Main columns"] = dlg.addChoiceButton("&Main columns", columnListText(lMain));
+            dButtons["Standard columns"] = dlg.addChoiceButton("&Standard columns", columnListText(lStandard));
+            dButtons["All columns"] = dlg.addChoiceButton("&All columns", columnListText(lAll));
+            dButtons["Choose columns..."] = dlg.addChoiceButton("&Choose columns...", null);
+            dButtons["Type columns..."] = dlg.addChoiceButton("&Type columns...", null);
+            if (bReverse) dButtons["Reverse order"] = dlg.addChoiceButton("&Reverse order", null);
+            return dButtons;
+        }
+
+        // columnListText: column names with a comma and a space between them; nothing at all for none, so an empty
+        // group shows no empty parentheses.
+        private static string columnListText(List<string> lColumns)
+        {
+            if (lColumns == null || lColumns.Count == 0) return null;
+            return string.Join(", ", lColumns.ToArray());
         }
 
         private static bool sameFieldList(List<string> lOne, List<string> lTwo)
@@ -28579,22 +28617,18 @@ namespace DbDo
                 // Enter presses the button with focus, and focus starts on the first, Look columns; so the default,
                 // Prime columns, takes focus as the dialog opens, after the status line is said.
                 string sDefault = bSame || lPrime.Count == 0 ? "Look columns" : "Prime columns";
-                dlgAsk.form.Shown += delegate(object o, EventArgs e)
-                {
-                    Say.say(sShown);
-                    foreach (Control ctl in allControlsOf(dlgAsk.form))
-                        if (ctl is Button && string.Equals(ctl.Text.Replace("&", ""), sDefault, StringComparison.OrdinalIgnoreCase))
-                        {
-                            Control ctlDefault = ctl;
-                            dlgAsk.form.BeginInvoke((Action)(() => ctlDefault.Focus()));  // after the dialog's own focus is set
-                            break;
-                        }
-                };
+                dlgAsk.form.Shown += delegate(object o, EventArgs e) { Say.say(sShown); };
                 // REVERSE ORDER LAST (4 November 2026, Jamal's rule): Alt+Shift+O reverses directly, so the dialog's own way
                 // comes after the other choices, with R, a letter no other button holds; offered when an order is in force.
-                List<string> lOrderButtons = new List<string>(columnSetButtons(lLook, lPrime));
-                if (lNow.Count > 0) lOrderButtons.Insert(lOrderButtons.Count - 1, "&Reverse order");
-                sButton = dlgAsk.runWithButtons(lOrderButtons.ToArray(), true, sDefault);
+                // Each group lists its columns (23 November 2026); Look columns with no look sorts by prime, so says prime's.
+                // THE DEFAULT IS THE FIRST BUTTON (23 November 2026). Prime columns, Order Records' default, was second, after
+                // Look columns, and took focus as the dialog opened -- which Jamal heard as focus on the wrong button. It
+                // now comes first here, so the first button, the focus and Enter are one choice. Show Columns keeps Look first.
+                Dictionary<string, Button> dChoices = addColumnSetChoices(dlgAsk, lLook, lPrime, lMain, lStandard, lAllFields, lPrime, lNow.Count > 0, true);
+                Button btnDefault = dChoices.ContainsKey(sDefault) ? dChoices[sDefault] : dChoices["Look columns"];
+                dlgAsk.form.AcceptButton = btnDefault;
+                dlgAsk.setInitialFocus(btnDefault);
+                sButton = dlgAsk.runWithButtons(new string[] { "Cancel" });
             }
             if (string.IsNullOrEmpty(sButton) || sButton == "Cancel") return;
 
