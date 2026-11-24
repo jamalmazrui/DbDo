@@ -215,23 +215,24 @@ def build(lFilms, sTarget):
     # THE VIEWS TABLE IS RETIRED (4 November 2026): the shared helpers still make it for older builders, so it is left out.
     lsDdl = [s for s in trail.systemDdl() if not s.startswith("CREATE TABLE views")]
     lsDdl += trail.tableDdl("films", "film_id", lsFilmFields, ["title", "year"], ["title", "year"], dFilmTypes)
-    # AN OFFER IS KNOWN BY ITS FILM (19 November 2026). Look and prime usually leave out an _id, but an offer has no name
-    # of its own: one service may carry two films at the same address (a collection), so film_id, service and url
-    # together are what make it unique, as northwind's orders keep customer_id and employee_id in theirs.
-    lsDdl += trail.tableDdl("offers", "offer_id", lsOfferFields, ["service", "terms", "voice"], ["film_id", "service", "url"], dOfferTypes)
+    # AN OFFER IS KNOWN BY ITS SERVICE AND ADDRESS (24 November 2026; until then by its film too). No prime holds an id:
+    # film_id is this database's number for the film, which another copy numbers differently, so a merge could never
+    # find the offer already there. The address of an offer is its own, and all 17,197 are different; were one service
+    # ever to list two films at one address, the second film's offer is left out and logged below.
+    lsDdl += trail.tableDdl("offers", "offer_id", lsOfferFields, ["service", "terms", "voice"], ["service", "url"], dOfferTypes)
     for sDdl in lsDdl: oDb.execute(sDdl)
     oDb.execute("CREATE INDEX idx_offers_film_id ON offers (film_id)")
     oDb.execute("CREATE INDEX idx_offers_service ON offers (service)")
     oDb.execute("CREATE INDEX idx_films_year ON films (year)")
     dCounts = collections.Counter()
+    setSeen = set()
     for dFilm in sorted(lFilms, key=lambda d: (re.sub(r"^(a|an|the)\s+", "", d["title"].lower()), d["year"])):
         oCursor = oDb.execute("INSERT INTO films (title, year, rating, genres, services, url) VALUES (?, ?, ?, ?, ?, ?)",
                               [dFilm[s] or None for s in ("title", "year", "rating", "genres", "services", "url")])
         iFilm = oCursor.lastrowid
-        setSeen = set()
         for sService, sTerms, sVoice, sUrl in dFilm["offers"]:
             if (sService, sUrl) in setSeen:
-                log("Offer listed twice, kept once: %s on %s" % (dFilm["title"], sService))
+                log("Offer listed twice, kept once: %s on %s at %s" % (dFilm["title"], sService, sUrl))
                 continue
             setSeen.add((sService, sUrl))
             oDb.execute("INSERT INTO offers (film_id, service, terms, voice, url) VALUES (?, ?, ?, ?, ?)", (iFilm, sService, sTerms or None, sVoice or None, sUrl or None))

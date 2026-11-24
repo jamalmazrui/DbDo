@@ -148,61 +148,271 @@ reCallSign = re.compile(r"\b([KWC][A-Z]{2,3})(?:[- ]?(AM|FM))?\b")
 lsAutomatic = ["votes", "clicks", "trend", "last_check", "last_seen", "probed", "plays", "last_played"]
 
 
-def markedLast(c):
-    """MARKED IS THE LAST COLUMN (10 October 2026). The Trail rule, which the kit's database check fails, puts marked at
-    the end of the stations table. A catalog grown over many fetches gained call_sign, frequency, city, owner, format,
-    wikipedia, plays and last_played after marked, since SQLite adds a new column at the end; the 60,342 stations
-    restored from the Recycle Bin failed the release for it. The table is rebuilt from its own definition with marked
-    moved last -- every type, default and constraint kept -- its rows copied by column name, its indexes and triggers
-    made again, in one transaction with foreign-key enforcement off, so a failure leaves the database as it was and no
-    linked record is lost. Returns 1 when the table was rebuilt, 0 when marked was already last."""
-    # table_xinfo, not table_info: the generated columns look and prime count as columns for the rule, and table_info
-    # leaves them out. Only stored columns (hidden 0) are copied; generated ones compute themselves.
-    lInfo = list(c.execute("pragma table_xinfo(stations)"))
-    lsColumns = [r[1] for r in lInfo]
-    lsStored = [r[1] for r in lInfo if r[6] == 0]
-    if "marked" not in lsColumns or lsColumns[-1] == "marked": return 0
-    sCreate = c.execute("select sql from sqlite_master where type='table' and name='stations'").fetchone()[0]
+def quotedName(s): return '"' + s.replace('"', '""') + '"'
+
+
+def tableItems(c, sTable):
+    """The column definitions and table constraints of a table's CREATE statement, split at the top level."""
+    sCreate = c.execute("select sql from sqlite_master where type='table' and name=?", (sTable,)).fetchone()[0]
     iOpen, iClose = sCreate.index("("), sCreate.rindex(")")
-    lsItems, sItem, iDepth = [], "", 0
+    lsItems, sItem, iDepth, cQuote = [], "", 0, ""
     for sChar in sCreate[iOpen + 1:iClose]:
-        if sChar == "(": iDepth += 1
+        if cQuote:
+            if sChar == cQuote: cQuote = ""
+        elif sChar in "'\"": cQuote = sChar
+        elif sChar == "(": iDepth += 1
         elif sChar == ")": iDepth -= 1
-        if sChar == "," and iDepth == 0: lsItems.append(sItem.strip()); sItem = ""
+        if sChar == "," and iDepth == 0 and not cQuote: lsItems.append(sItem.strip()); sItem = ""
         else: sItem += sChar
     if sItem.strip(): lsItems.append(sItem.strip())
-    def columnOf(s): return s.split()[0].strip('"[]`') if s.split() else ""
-    lsDefs = [s for s in lsItems if columnOf(s) in lsColumns]
-    lsConstraints = [s for s in lsItems if columnOf(s) not in lsColumns]
-    sMarked = [s for s in lsDefs if columnOf(s) == "marked"][0]
-    lsDefs = [s for s in lsDefs if columnOf(s) != "marked"] + [sMarked]
-    lsOrder = [columnOf(s) for s in lsDefs if columnOf(s) in lsStored]
-    lsKeep = [r[0] for r in c.execute("select sql from sqlite_master where tbl_name='stations' and type in ('index', 'trigger') and sql is not null")]
-    sList = ", ".join('"%s"' % s for s in lsOrder)
-    c.execute("pragma foreign_keys=off")
+    return lsItems
+
+
+def columnOfItem(s): return s.split()[0].strip('"[]`') if s.split() else ""
+
+
+def rebuildTable(c, sTable, lsItems, lsSkipSql=()):
+    """Remakes a table from new column definitions: its rows copied by column name (stored columns only; generated ones
+    compute themselves), its indexes and triggers made again, except any whose SQL is in lsSkipSql. Inside the caller's
+    transaction when one is open, else in its own, so a failure leaves the database as it was."""
+    lInfo = list(c.execute("pragma table_xinfo(%s)" % quotedName(sTable)))
+    lsNewColumns = [columnOfItem(s) for s in lsItems]
+    lsCopy = [r[1] for r in lInfo if r[6] == 0 and r[1] in lsNewColumns]
+    lsKeep = [r[0] for r in c.execute("select sql from sqlite_master where tbl_name=? and type in ('index', 'trigger') and sql is not null", (sTable,))
+              if r[0] not in lsSkipSql]
+    sTemp = sTable + "__rebuilt"
+    sList = ", ".join(quotedName(s) for s in lsCopy)
+    bOwn = not c.in_transaction
+    # LEGACY RENAME FOR THE SWAP: another table's trigger may name this one, which does not exist between the drop and
+    # the rename, and a modern rename would refuse a schema with such a reference. The legacy rename leaves triggers
+    # and views alone, as SQLite's own twelve-step procedure for remaking a table advises.
+    iLegacy = c.execute("pragma legacy_alter_table").fetchone()[0]
+    c.execute("pragma legacy_alter_table = on")
+    if bOwn: c.execute("begin")
     try:
-        c.execute("begin")
-        c.execute('create table "stations_marked_last" (' + ", ".join(lsDefs + lsConstraints) + ")")
-        c.execute('insert into "stations_marked_last" (%s) select %s from stations' % (sList, sList))
-        iBefore = c.execute("select count(*) from stations").fetchone()[0]
-        iAfter = c.execute('select count(*) from "stations_marked_last"').fetchone()[0]
-        if iBefore != iAfter: raise RuntimeError("copied %d of %d stations" % (iAfter, iBefore))
-        c.execute("drop table stations")
-        c.execute('alter table "stations_marked_last" rename to stations')
+        c.execute("create table %s (%s)" % (quotedName(sTemp), ", ".join(lsItems)))
+        c.execute("insert into %s (%s) select %s from %s" % (quotedName(sTemp), sList, sList, quotedName(sTable)))
+        iBefore = c.execute("select count(*) from %s" % quotedName(sTable)).fetchone()[0]
+        iAfter = c.execute("select count(*) from %s" % quotedName(sTemp)).fetchone()[0]
+        if iBefore != iAfter: raise RuntimeError("copied %d of %d rows of %s" % (iAfter, iBefore, sTable))
+        c.execute("drop table %s" % quotedName(sTable))
+        c.execute("alter table %s rename to %s" % (quotedName(sTemp), quotedName(sTable)))
         for sSql in lsKeep: c.execute(sSql)
+        if bOwn: c.execute("commit")
+    except Exception:
+        if bOwn: c.execute("rollback")
+        raise
+    finally:
+        c.execute("pragma legacy_alter_table = %d" % (1 if iLegacy else 0))
+
+
+# THE TABLE'S OWN ORDER (24 November 2026, Jamal's ruling). Every table of a template is built in one physical order:
+# the own id, added and edited; the main fields in the order a person enters them; then notes, tags, url, look, prime
+# and marked. DbDo lists columns in that order -- Show Columns, Order Records, Filter Records, record forms -- so a
+# list reads the way the table is built. A table that grew a field later had it at the end, after marked; this puts it
+# back among the main fields.
+lsStandardLead = ["added", "edited", "observed", "method"]
+lsStandardTrail = ["notes", "tags", "url", "look", "prime", "marked"]
+# The stations' main fields in the order a listener enters or reads them: who the station is, where, how to hear it,
+# the listener's own judgment, then what the catalogs and probes keep up to date.
+lsStationOrder = ["name", "call_sign", "frequency", "slogan", "genre", "format", "country", "state", "city", "countrycode",
+                  "language", "owner", "stream_url", "playlist_url", "homepage", "wikipedia", "codec", "bitrate", "hls",
+                  "status", "rating", "descrip", "source", "source_id", "votes", "clicks", "trend", "last_check",
+                  "last_seen", "probed", "plays", "last_played"]
+
+
+# Main-field orders by table name, for the tables every template shares and for RadioTrail's own: a pick-list row reads
+# table, field, value, its place in the list and what it means; a link reads as a sentence, record one, kind, record two.
+dMainOrders = {
+    "defs": ["tbl", "fld", "val", "ordinal", "descrip", "pattern", "src"],
+    "maps": ["tbl1", "prime1", "kind", "tbl2", "prime2"],
+    "stations": lsStationOrder,
+}
+
+
+def standardOrder(c, sTable, lsMainOrder=None):
+    """The column order a table should have: its key, then lsStandardLead, then the main fields -- in lsMainOrder where it
+    names them, the rest after in their present order -- then lsStandardTrail."""
+    lInfo = list(c.execute("pragma table_xinfo(%s)" % quotedName(sTable)))
+    lsNames = [r[1] for r in lInfo]
+    lsKey = [r[1] for r in lInfo if r[5]]
+    lsLead = [s for s in lsStandardLead if s in lsNames]
+    lsTrail = [s for s in lsStandardTrail if s in lsNames]
+    lsMain = [s for s in lsNames if s not in lsKey and s not in lsLead and s not in lsTrail]
+    if lsMainOrder:
+        lsMain = [s for s in lsMainOrder if s in lsMain] + [s for s in lsMain if s not in lsMainOrder]
+    return lsKey + lsLead + lsMain + lsTrail
+
+
+def putInOrder(c, sTable, lsMainOrder=None):
+    """Rebuilds a table in standardOrder when its columns are in any other; 1 when it did, 0 when the order was right.
+    Only a table of DbDo's shape -- an integer key and a marked column -- is touched."""
+    lsNames = [r[1] for r in c.execute("pragma table_xinfo(%s)" % quotedName(sTable))]
+    if "marked" not in lsNames or not any(r[5] for r in c.execute("pragma table_info(%s)" % quotedName(sTable))): return 0
+    lsWant = standardOrder(c, sTable, lsMainOrder)
+    if lsWant == lsNames: return 0
+    lsItems = tableItems(c, sTable)
+    dItem = {columnOfItem(s): s for s in lsItems if columnOfItem(s) in lsNames}
+    lsConstraints = [s for s in lsItems if columnOfItem(s) not in lsNames]
+    rebuildTable(c, sTable, [dItem[s] for s in lsWant] + lsConstraints)
+    return 1
+
+
+# markedLast, which put marked last in stations (10 October 2026), is now part of putInOrder above.
+
+
+# ---------------------------------------------------------------- NO ID IN A PRIME
+# NO ID IN A PRIME (24 November 2026, Jamal's ruling). A record's prime is what tells whether it is already in a table:
+# Merge Database, Update and the map links all match records by it, across databases. An id is no help there -- the
+# table's own id, or a source's id such as Radio Browser's station uuid, is different for every record, so a prime
+# holding one is always unique and never finds the record already here; and a link's id is this database's number for
+# another record, which another database numbers differently. RadioTrail's stations were primed on name, stream_url
+# and source_id, so the same station listed by Radio Browser and by iHeartRadio was two records. The prime is now name
+# and stream_url. These helpers are shared: scripts\checkTemplates imports them for the other templates, so one rule
+# and one rebuild serve every template and every listener's copy.
+
+def isIdColumn(sName):
+    """An id column: id itself, or a name ending in _id."""
+    s = (sName or "").lower()
+    return s == "id" or s.endswith("_id")
+
+
+def primeItem(c, sTable):
+    """The prime column's definition in the table's CREATE statement, or ''."""
+    for s in tableItems(c, sTable):
+        if columnOfItem(s).lower() == "prime": return s
+    return ""
+
+
+def primeFieldsOf(c, sTable):
+    """The fields a table's generated prime is built from, in order."""
+    sItem = primeItem(c, sTable)
+    return [m.group(1) or m.group(2) for m in re.finditer(r'CAST\(\s*(?:"([^"]+)"|([A-Za-z_][A-Za-z0-9_]*))\s+AS\s+TEXT\s*\)', sItem, re.I)]
+
+
+def primeIndexSql(c, sTable):
+    """The SQL of every index on exactly the prime column."""
+    lsOut = []
+    for oIndex in c.execute("pragma index_list(%s)" % quotedName(sTable)).fetchall():
+        if [r[2] for r in c.execute("pragma index_info(%s)" % quotedName(oIndex[1]))] == ["prime"]:
+            oSql = c.execute("select sql from sqlite_master where type='index' and name=?", (oIndex[1],)).fetchone()
+            if oSql and oSql[0]: lsOut.append(oSql[0])
+    return lsOut
+
+
+def setPrimeFields(c, sTable, lsFields):
+    """Rebuilds a table with its prime made of lsFields, in the separator its prime already used, and moves every map
+    link from a record's old prime to its new one. Any index on prime is left off, since records may now share a prime:
+    the caller merges them (mergeSamePrime) and then makes the unique index. Returns how many records' primes changed."""
+    sItem = primeItem(c, sTable)
+    if not sItem: return 0
+    sSep = "||char(31)||" if "char(31)" in sItem.replace(" ", "").lower() else "||'|'||"
+    sExpr = sSep.join("coalesce(CAST(%s AS TEXT),'')" % quotedName(s) for s in lsFields)
+    sNewItem = '"prime" TEXT GENERATED ALWAYS AS (%s) STORED' % sExpr
+    sPk = next((r[1] for r in c.execute("pragma table_info(%s)" % quotedName(sTable)) if r[5]), "")
+    if not sPk: raise RuntimeError(sTable + " has no integer key, so its links cannot follow a new prime")
+    dOld = dict(c.execute("select %s, prime from %s" % (quotedName(sPk), quotedName(sTable))))
+    lsItems = [sNewItem if s == sItem else s for s in tableItems(c, sTable)]
+    rebuildTable(c, sTable, lsItems, primeIndexSql(c, sTable))
+    lPairs = [(dOld.get(iId), sNew) for iId, sNew in c.execute("select %s, prime from %s" % (quotedName(sPk), quotedName(sTable)))
+              if dOld.get(iId) is not None and dOld.get(iId) != sNew]
+    if lPairs and c.execute("select 1 from sqlite_master where type='table' and name='maps'").fetchone():
+        c.execute("create temp table if not exists prime_moves (old_prime text primary key, new_prime text)")
+        c.execute("delete from prime_moves")
+        c.executemany("insert or replace into prime_moves values (?, ?)", lPairs)
+        for sSide in ("1", "2"):
+            # OR IGNORE: two old primes may now be one, and a link already there is not made twice; the leftover row
+            # still names the old prime and goes below.
+            c.execute("update or ignore maps set prime%s = (select new_prime from prime_moves where old_prime = maps.prime%s) "
+                      "where tbl%s = ? and prime%s in (select old_prime from prime_moves)" % (sSide, sSide, sSide, sSide), (sTable,))
+            c.execute("delete from maps where tbl%s = ? and prime%s in (select old_prime from prime_moves) "
+                      "and prime%s not in (select prime from %s)" % (sSide, sSide, sSide, quotedName(sTable)), (sTable,))
+        c.execute("drop table prime_moves")
+    return len(lPairs)
+
+
+def mergeSamePrime(c, sTable, lsColumns):
+    """Merges the records that share a prime into the first of them (lowest id): it takes any field it lacks from the
+    others and gains their notes and tags lines; the others go. Their links are the first's already, since a map names a
+    prime. Returns [(prime, [ids])] for each group merged."""
+    sPk = next((r[1] for r in c.execute("pragma table_info(%s)" % quotedName(sTable)) if r[5]), "")
+    if not sPk: return []
+    lGroups = c.execute("select prime, group_concat(%s) from %s where prime is not null group by prime having count(*) > 1"
+                        % (quotedName(sPk), quotedName(sTable))).fetchall()
+    if not lGroups: return []
+    lsCols = [s for s in lsColumns if s != sPk]
+    sSelect = "select %s from %s where %s = ?" % (", ".join(quotedName(s) for s in lsCols), quotedName(sTable), quotedName(sPk))
+    oDelete = c.execute("select name, sql from sqlite_master where type='trigger' and name=?", ("trg_" + sTable + "_maps_delete",)).fetchone()
+    if oDelete: c.execute("drop trigger %s" % quotedName(oDelete[0]))   # deleting a duplicate must not delete the links the keeper shares
+    lMerged = []
+    try:
+        for sPrime, sIds in lGroups:
+            lIds = sorted(int(s) for s in str(sIds).split(","))
+            dKeep = dict(zip(lsCols, c.execute(sSelect, (lIds[0],)).fetchone()))
+            for iOther in lIds[1:]:
+                dOther = dict(zip(lsCols, c.execute(sSelect, (iOther,)).fetchone()))
+                for sCol in lsCols:
+                    vKeep, vOther = dKeep[sCol], dOther[sCol]
+                    if vOther in (None, ""): continue
+                    if sCol.lower() in ("notes", "tags") and vKeep not in (None, ""):
+                        lsLines = str(vKeep).splitlines()
+                        dKeep[sCol] = "\n".join(lsLines + [s for s in str(vOther).splitlines() if s not in lsLines])
+                    elif vKeep in (None, ""):
+                        dKeep[sCol] = vOther
+                c.execute("delete from %s where %s = ?" % (quotedName(sTable), quotedName(sPk)), (iOther,))
+            c.execute("update %s set %s where %s = ?" % (quotedName(sTable), ", ".join(quotedName(s) + " = ?" for s in lsCols), quotedName(sPk)),
+                      [dKeep[s] for s in lsCols] + [lIds[0]])
+            lMerged.append((sPrime, lIds))
+    finally:
+        if oDelete: c.execute(oDelete[1])
+    return lMerged
+
+
+def storedColumns(c, sTable):
+    """Every stored column of a table: the ones a merge carries, generated ones left out."""
+    return [r[1] for r in c.execute("pragma table_xinfo(%s)" % quotedName(sTable)) if r[6] == 0]
+
+
+def primeWithoutIds(c, sTable="stations"):
+    """Takes every id out of a table's prime, merges the records that then share one, and makes the unique prime index.
+    A listener's own copy is backed up first, beside it, since records may merge. Returns how many changes were made."""
+    lsFields = primeFieldsOf(c, sTable)
+    lsKeep = [s for s in lsFields if not isIdColumn(s)]
+    if not lsFields or lsKeep == lsFields or not lsKeep: return 0
+    if c.in_transaction: c.commit()
+    sDb = c.execute("pragma database_list").fetchone()[2]
+    if sDb and os.path.normcase(os.path.abspath(sDb)) != os.path.normcase(os.path.abspath(templatePath())):
+        import shutil
+        sBackup = os.path.join(os.path.dirname(sDb), "RadioTrail-before-prime-" + datetime.datetime.now().strftime("%Y%m%d-%H%M%S") + ".db")
+        c.commit()
+        try: c.execute("pragma wal_checkpoint(TRUNCATE)")
+        except Exception: pass
+        shutil.copy2(sDb, sBackup)
+        print("Your copy was saved as " + os.path.basename(sBackup) + " before its stations were matched by name and stream address alone.")
+    c.execute("begin")
+    try:
+        iChanged = setPrimeFields(c, sTable, lsKeep)
+        lMerged = mergeSamePrime(c, sTable, storedColumns(c, sTable))
+        c.execute("create unique index if not exists %s on %s (prime)" % (quotedName("idx_" + sTable + "_prime"), quotedName(sTable)))
         c.execute("commit")
     except Exception:
         c.execute("rollback")
         raise
-    finally:
-        c.execute("pragma foreign_keys=on")
-    return 1
+    iRecords = sum(len(l) - 1 for _, l in lMerged)
+    print("The %s prime is now %s, without %s; %d %s matched as one, the first of each keeping the others' details."
+          % (sTable, ", ".join(lsKeep), ", ".join(s for s in lsFields if isIdColumn(s)), iRecords, "record was" if iRecords == 1 else "records were"))
+    return 1 + len(lMerged)
 
 
 def ensureConventions(c):
     """Adds the missing Trail indexes and triggers, after putting marked last; returns how many changes were made."""
     def quoted(s): return '"' + s.replace('"', '""') + '"'
-    iAdded = markedLast(c)
+    # In the table's own order (24 November 2026), which also puts marked last, as markedLast did alone before.
+    iAdded = 0
+    for sOrdered in ("stations", "defs", "maps", "files"):
+        if c.execute("select 1 from sqlite_master where type='table' and name=?", (sOrdered,)).fetchone():
+            iAdded += putInOrder(c, sOrdered, dMainOrders.get(sOrdered))
+    iAdded += primeWithoutIds(c, "stations")
     lsExisting = [r[0] for r in c.execute("select name from sqlite_master where type in ('index', 'trigger')")]
     for sTable in ("defs", "maps"):
         sName = "idx_" + sTable + "_prime"
@@ -1727,6 +1937,22 @@ def mergeRows(sDb, lsRows, logLine, say, sLog):
                 c.execute("update stations set last_seen = ? where station_id = ?", (sNow, dHave[sKey]))
                 iSame += 1
         else:
+            # THE PRIME DECIDES WHETHER IT IS HERE (24 November 2026). A station is known by its name and stream address;
+            # one another source already brought keeps its record, and this source fills only what it lacks. Inserting it
+            # again would break the prime's uniqueness and stop the run.
+            oHere = c.execute("select station_id from stations where coalesce(cast(name as text), '') = ? and coalesce(cast(stream_url as text), '') = ?",
+                              (str(dRow.get("name") or ""), str(dRow.get("stream_url") or ""))).fetchone()
+            if oHere:
+                lsFill = [k for k in dRow if k not in ("name", "stream_url", "tags", "last_seen")]
+                oOld = c.execute("select %s from stations where station_id = ?" % ", ".join('"%s"' % k for k in lsFill), (oHere[0],)).fetchone() if lsFill else ()
+                lsBlank = [k for k, vOld in zip(lsFill, oOld or ()) if vOld in (None, "") and dRow[k] not in (None, "")]
+                if lsBlank:
+                    c.execute("update stations set %s where station_id = ?" % ", ".join('"%s" = ?' % k for k in lsBlank), [dRow[k] for k in lsBlank] + [oHere[0]])
+                    iChanged += 1
+                else:
+                    iSame += 1
+                c.execute("update stations set last_seen = ? where station_id = ?", (sNow, oHere[0]))
+                continue
             dRow["status"] = "untried"
             c.execute("insert into stations (%s) values (%s)" % (",".join('"%s"' % k for k in dRow), ",".join("?" * len(dRow))), list(dRow.values()))
             iAdded += 1

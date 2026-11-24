@@ -216,7 +216,8 @@ def tableDdl(sTable, sId, lsFields, lsLook, lsPrime, dTypes=None):
     dTypes = dTypes or dColumnTypes
     lsColumns = ["\"%s\" INTEGER PRIMARY KEY AUTOINCREMENT" % sId, "added TEXTTIME NOT NULL DEFAULT CURRENT_TIMESTAMP", "edited TEXTTIME NOT NULL DEFAULT CURRENT_TIMESTAMP"]
     lsColumns += ["\"%s\" %s" % (s, dTypes[s]) for s in lsFields]
-    lsColumns += ["url TEXTLINE", "notes TEXTMARKDOWN", "tags TEXTMEMO", "look TEXT GENERATED ALWAYS AS (%s) STORED" % lookExpr(lsLook),
+    # notes, tags, url (24 November 2026): the standard order after the main fields.
+    lsColumns += ["notes TEXTMARKDOWN", "tags TEXTMEMO", "url TEXTLINE", "look TEXT GENERATED ALWAYS AS (%s) STORED" % lookExpr(lsLook),
                   "prime TEXT GENERATED ALWAYS AS (%s) STORED" % primeExpr(lsPrime), "marked INTEGER NOT NULL DEFAULT 0"]
     lsWatched = lsFields + ["url", "notes", "tags"]
     lsDdl = ["CREATE TABLE \"%s\" (\n  %s\n)" % (sTable, ",\n  ".join(lsColumns)),
@@ -237,12 +238,13 @@ def systemDdl():
     lsLookups = ["src", "tbl", "fld", "val"]
     lsMaps = ["tbl1", "prime1", "kind", "tbl2", "prime2"]
     lsDdl = []
-    for sTable, sId, lsData, lsPrime in (("defs", "def_id", ["src TEXTLINE", "tbl TEXTLINE", "fld TEXTLINE", "val TEXTLINE", "ordinal INTEGER", "descrip TEXTMARKDOWN", "url TEXTLINE"], lsLookups),
+    for sTable, sId, lsData, lsPrime in (("defs", "def_id", ["src TEXTLINE", "tbl TEXTLINE", "fld TEXTLINE", "val TEXTLINE", "ordinal INTEGER", "descrip TEXTMARKDOWN"], lsLookups),
                                          ("maps", "map_id", ["tbl1 TEXTLINE", "prime1 TEXTLINE", "kind TEXTLINE", "tbl2 TEXTLINE", "prime2 TEXTLINE"], lsMaps)):
         lsColumns = ["%s INTEGER PRIMARY KEY AUTOINCREMENT" % sId, "added TEXTTIME NOT NULL DEFAULT CURRENT_TIMESTAMP", "edited TEXTTIME NOT NULL DEFAULT CURRENT_TIMESTAMP"] + lsData
-        lsColumns += ["notes TEXTMARKDOWN", "tags TEXTMEMO", "look TEXT GENERATED ALWAYS AS (%s) STORED" % lookExpr(lsPrime),
+        # defs has a url after notes and tags (24 November 2026); maps, a link, has none.
+        lsColumns += ["notes TEXTMARKDOWN", "tags TEXTMEMO"] + (["url TEXTLINE"] if sTable == "defs" else []) + ["look TEXT GENERATED ALWAYS AS (%s) STORED" % lookExpr(lsPrime),
                       "prime TEXT GENERATED ALWAYS AS (%s) STORED" % primeExpr(lsPrime), "marked INTEGER NOT NULL DEFAULT 0"]
-        lsWatched = [s.split()[0] for s in lsData] + ["notes", "tags"]
+        lsWatched = [s.split()[0] for s in lsData] + ["notes", "tags"] + (["url"] if sTable == "defs" else [])
         lsDdl += ["CREATE TABLE \"%s\" (\n  %s\n)" % (sTable, ",\n  ".join(lsColumns)),
                   "CREATE TRIGGER \"trg_%s_edited\" AFTER UPDATE OF %s ON \"%s\" FOR EACH ROW WHEN %s BEGIN UPDATE \"%s\" SET edited = CURRENT_TIMESTAMP WHERE \"%s\" = NEW.\"%s\"; END" % (
                       sTable, ", ".join("\"%s\"" % s for s in lsWatched), sTable, " OR ".join("OLD.\"%s\" IS NOT NEW.\"%s\"" % (s, s) for s in lsWatched), sTable, sId, sId),

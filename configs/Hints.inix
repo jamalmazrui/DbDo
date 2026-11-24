@@ -13,8 +13,8 @@ Close = Closes this window.
 Any field = Finds records holding some text in any field.
 Field boxes = Gives a box for each field, where a value and an operator such as >= or a range such as 2025..2026 can be typed.
 Main columns = Gives a box for each column about the table's subject, where a value and an operator such as >= can be typed.
-Standard columns = Gives a box for url, tags, notes, marked, look, prime, added, edited and the id.
-All columns = Gives a box for every column.
+Standard columns = Gives a box for the id, added, edited, notes, tags, url and marked.
+All columns = Gives a box for every column but look and prime.
 Marked records = Keeps the records you have marked.
 Unmarked records = Keeps the records you have not marked.
 Records = The table's records, one to a row; arrows move by record and by column, and Enter opens the record.
@@ -23,8 +23,8 @@ Records = The table's records, one to a row; arrows move by record and by column
 Look columns = Shows the default columns: look's fields, in look's order, the way each record is said; with no look, every main column.
 Prime columns = Shows the primary key: prime's fields, in prime's order, which together make each record unique and set the default order.
 Main columns = Shows only the columns about the table's subject, leaving out url, tags, notes and the other standard columns.
-Standard columns = Shows only the standard columns: url, tags, notes, marked, look, prime, added, edited and the id.
-All columns = Shows every column of the table.
+Standard columns = Shows only the standard columns: the id, added, edited, notes, tags, url and marked.
+All columns = Shows every column of the table but look and prime, which repeat other columns.
 Choose columns = Lets you pick the columns one by one, in the order they should appear.
 Type columns = Lets you type the column names, separated by commas, in the order they should appear.
 Columns available = The columns not yet shown, in DbDo's natural order; Enter adds the one you are on to the end of Columns shown.
@@ -42,8 +42,8 @@ Prime order = Fills the sort with prime's fields in prime's order: the default o
 Prime columns = The default order: sorts by the primary key, prime's fields in prime's order, ascending, which together make each record unique.
 Look columns = Sorts by look's fields, the default columns, in look's order, ascending: the way records are said.
 Main columns = Sorts by the columns about the table's subject, in their natural order, ascending.
-Standard columns = Sorts by url, tags, notes, marked, look, prime, added, edited and the id, ascending.
-All columns = Sorts by every column, in the natural order, ascending.
+Standard columns = Sorts by the id, added, edited, notes, tags, url and marked, ascending.
+All columns = Sorts by every column but look and prime, in the table's own order, ascending.
 Choose columns = Lets you pick the columns to sort by and the direction of each, one by one.
 Type columns = Lets you type the columns separated by commas, with desc after a column to sort it largest or latest first.
 Reverse order = Turns each column of the order in force the other way, as Alt+Shift+O does: ascending becomes descending.
@@ -65,13 +65,13 @@ Marked records = Keeps the records you have marked.
 Unmarked records = Keeps the records you have not marked.
 Field boxes = Gives a box for each field, where a value and an operator such as >= or a range such as 2025..2026 can be typed.
 Main columns = Gives a box for each column about the table's subject, where a value and an operator such as >= can be typed.
-Standard columns = Gives a box for url, tags, notes, marked, look, prime, added, edited and the id.
-All columns = Gives a box for every column.
+Standard columns = Gives a box for the id, added, edited, notes, tags, url and marked.
+All columns = Gives a box for every column but look and prime.
 
 [Filter Fields]
 Main fields = Gives a box for each field about the table's subject.
-Standard fields = Gives a box for url, tags, notes, marked, look, prime, added, edited and the id.
-All fields = Gives a box for every field of the table.
+Standard fields = Gives a box for the id, added, edited, notes, tags, url and marked.
+All fields = Gives a box for every field of the table but look and prime.
 
 [Add Table]
 Define table = Starts a new table from blank, naming its fields one by one.

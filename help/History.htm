@@ -257,6 +257,9 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a href="#november-2026-evening-no-id-in-a-prime"
+id="toc-november-2026-evening-no-id-in-a-prime">24 November 2026,
+evening – No id in a prime</a></li>
 <li><a
 href="#november-2026-afternoon-everything-the-pandas-tutorials-teach"
 id="toc-november-2026-afternoon-everything-the-pandas-tutorials-teach">24
@@ -951,6 +954,75 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Control+Shift+F1</strong> inside DbDo to open this file
 in your browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="november-2026-evening-no-id-in-a-prime">24 November 2026,
+evening – No id in a prime</h2>
+<p>A prime is how DbDo tells whether a record is already in a table:
+Merge Database, Update and the links between records all match by it,
+across databases. An id cannot do that. The table’s own id, or a
+source’s id, is different for every record, so a prime holding one is
+always unique and never finds the record already there; and a link’s id
+is this database’s number for another record, which another database
+numbers differently. Some templates had ids in their primes.</p>
+<ul>
+<li><strong>RadioTrail’s stations are now known by name and stream
+address,</strong> not by those and Radio Browser’s or iHeartRadio’s id.
+The stations both catalogs listed – about 110 – were two records each;
+each pair is now one, the first keeping the other’s details, notes and
+tags, and every link following. A refresh that meets a station another
+catalog brought fills in what it lacks instead of adding it twice. Your
+own copy changes at its next refresh, after a dated backup beside
+it.</li>
+<li><strong>DescribedFilms’ offers are known by service and
+address,</strong> without the film’s id.</li>
+<li><strong>chinook and northwind:</strong> albums by title, tracks by
+name, invoices by date and total, products by name, orders by date and
+destination. Their invoice and order lines keep their two ids, since a
+line is nothing but a track on an invoice or a product on an order; the
+check names them as the only exceptions.</li>
+<li><strong>The build makes it so and keeps it so.</strong> The template
+check takes the ids out of a prime, refuses when records would then
+share one, moves every link to the new prime, and fails any template
+whose prime holds an id it does not name as an exception. The rule lives
+once, in fetchStations.py, which both the check and a listener’s
+RadioTrail use.</li>
+<li><strong>Import leaves a file’s own row numbers out of the
+prime</strong> – id, a name ending in _id, or one ending in id whose
+values are all different whole numbers, such as passengerid – unless the
+other fields alone would make two rows one.</li>
+<li><strong>Look and Prime Fields refuses an id,</strong> and says
+why.</li>
+<li><strong>A new table’s prime leaves out its id columns,</strong> when
+it has other fields.</li>
+</ul>
+<p><strong>Every table in its own order.</strong> A list of columns – in
+Show Columns, Order Records, Filter Records – had the main fields first
+and then the standard ones in an order of DbDo’s own, with the id last,
+so the lists in parentheses on the buttons were hard to follow. Now
+there is one order, the table’s own: the id, added and edited; the main
+fields, in the order a person enters them; then notes, tags, url, look,
+prime and marked.</p>
+<ul>
+<li><strong>The build puts every template table in that order,</strong>
+keeping every row, index, trigger and link, and fails a template that
+drifts from it. RadioTrail’s stations had eight fields added after
+marked over the months, and its main fields now run who the station is,
+where, how to hear it, your judgment, then what the catalogs keep up to
+date. A pick-list row reads table, field, value; a link reads record,
+kind, record. Your own RadioTrail copy is put in order at its next
+refresh.</li>
+<li><strong>Lists follow it everywhere,</strong> whatever order an older
+database was built in.</li>
+<li><strong>Look and prime are left out of Standard columns and All
+columns,</strong> to show, order or filter by, since they only repeat
+other columns. Choose columns and Type columns still offer them, and
+Shift+L and Shift+P still say them.</li>
+<li><strong>Import Data is fixed.</strong> The new database’s pick-list
+table named url twice, which SQLite refuses (“duplicate column name:
+url”), so an Import stopped before it began. Found while reordering; url
+is now named once, after notes and tags.</li>
+<li><strong>New tables, and the builders of every template, use the same
+order.</strong></li>
+</ul>
 <h2
 id="november-2026-afternoon-everything-the-pandas-tutorials-teach">24
 November 2026, afternoon – Everything the pandas tutorials teach</h2>

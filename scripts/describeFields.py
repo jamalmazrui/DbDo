@@ -267,7 +267,7 @@ def applyLookPrime(sDb, sTemplate, dSections, bDry):
 lsFilesTableSql = [
     "CREATE TABLE IF NOT EXISTS \"files\" (file_id INTEGER PRIMARY KEY AUTOINCREMENT, "
     "added TEXTTIME NOT NULL DEFAULT CURRENT_TIMESTAMP, edited TEXTTIME NOT NULL DEFAULT CURRENT_TIMESTAMP, "
-    "name TEXTLINE NOT NULL, kind TEXTLINE, content TEXTMEMO, url TEXTLINE, notes TEXTMARKDOWN, tags TEXTMEMO, "
+    "name TEXTLINE NOT NULL, kind TEXTLINE, content TEXTMEMO, notes TEXTMARKDOWN, tags TEXTMEMO, url TEXTLINE, "
     "look TEXT GENERATED ALWAYS AS (coalesce(CAST(name AS TEXT),'')) STORED, "
     "prime TEXT GENERATED ALWAYS AS (coalesce(CAST(name AS TEXT),'')) STORED, marked INTEGER NOT NULL DEFAULT 0)",
     "CREATE UNIQUE INDEX IF NOT EXISTS \"idx_files_prime\" ON \"files\" (prime)",

@@ -11,6 +11,10 @@ WHAT IT CHECKS, for each templates\\<root>\\<root>.db:
   - Every map row resolves, at both ends, to exactly one record of the table it names.
   - Every relationship kind used in maps is a value in defs (tbl = maps, fld = kind), so the edit dialog offers it.
   - Every table with a prime has a unique index on it, so a map can never point at two records.
+  - Every table of DbDo's shape is in the table's own order (24 November 2026): its id, added and edited; the main
+    fields; then notes, tags, url, look, prime and marked.
+  - No prime holds an id (24 November 2026): not the table's own, not a source's, not a link's -- with the two
+    exceptions named in dIdPrimeKept, tables whose records are nothing but a pair of links.
   - Every edited trigger watches every content field: all but the id, added, edited, look, prime and marked, the same
     rule DbDo uses when it creates a table. Marking a row is deliberately not an edit.
   - Every SQL file in the folder: each statement runs, read-only, and returns at least one row.
@@ -26,6 +30,10 @@ WHAT IT CHECKS, for each templates\\<root>\\<root>.db:
     when it is missing.
 
 WHAT --repair DOES, before checking, inside one transaction per database:
+  - Rebuilds a table whose columns are in any other order into the table's own, keeping every row, index and trigger;
+    the main fields keep their order, except where fetchStations.dMainOrders names one (defs, maps, stations).
+  - Takes every id out of a prime, keeping the other fields in order, or using the fields dPrimeFields names. It refuses,
+    changing nothing, when the records would then share a prime, so no record is ever lost to the rule.
   - Merges records that share a prime: the first keeps its id, takes any field it lacks from the others, and gains
     their notes and tags lines; the others go. Their links were already the first's, since a map names a prime.
   - Adds a missing unique prime index once no duplicates remain.
@@ -59,6 +67,13 @@ Every run writes logs\\DbDo-checkTemplates-<date>-<time>.log with every check an
 
 import datetime, glob, os, platform, re, sqlite3, sys, traceback
 
+# ONE RULE, ONE REBUILD (24 November 2026). The prime helpers live in RadioTrail's fetchStations.py, because a listener's
+# own RadioTrail copy needs them where DbDo is installed, with no scripts folder; this check imports them rather than
+# keeping a second copy. No bytecode is written, since the installer ships the templates folder whole.
+sys.dont_write_bytecode = True
+sys.path.insert(0, os.path.join(os.path.dirname(os.path.dirname(os.path.abspath(__file__))), "templates", "RadioTrail"))
+import fetchStations as primeRule
+
 dKindNotes = {
     "ContactTrail|in_group": "Subject contact belongs to the object group.",
     "MusicTrail|features": "Subject album features the object performer as a guest.",
@@ -76,7 +91,22 @@ dUnwatched = {"RadioTrail|stations": ["clicks", "last_check", "last_played", "la
 lNotWatched = ["added", "edited", "look", "marked", "prime"]
 lSchemaRows = ["defs"]  # the views table was retired on 4 November 2026
 lSkipTables = ["sqlean_define", "views"]
-sVersion = "2026-11-15 version 3: standard indexes, proven-redundant indexes removed, WAL templates switched to the ordinary journal"
+# NO ID IN A PRIME (24 November 2026, Jamal's ruling). A prime tells whether a record is already in a table, across
+# databases; an id cannot -- a table's own id or a source's id is different for every record, and a link's id is this
+# database's number for another record. --repair drops the ids and keeps the other prime fields in order; these
+# tables get fields of their own instead, because what remains would not say what the record is.
+dPrimeFields = {
+    # An order is known by its day and where it went; the day alone would make two orders of one day one.
+    "northwind|orders": ["order_date", "ship_city", "ship_country"],
+}
+# The two tables whose records are only a pair of links -- an invoice line is a track on an invoice, an order line a
+# product on an order -- have nothing but the two ids to be known by. They keep them, named here so the check passes
+# them and no other; the way to free them is to give each line words of its own, which these sample databases lack.
+dIdPrimeKept = {
+    "chinook|invoice_items": "an invoice line is only a track on an invoice",
+    "northwind|order_details": "an order line is only a product on an order",
+}
+sVersion = "2026-11-24 version 5: no id in a prime; every table in its own order"
 
 lErrors = []
 lRepairs = []
@@ -212,31 +242,36 @@ def primeTables(oDb):
 # ---------------------------------------------------------------- repairs
 
 def mergeDuplicates(oDb, sRoot, sTable):
-    """Merges records sharing a prime into the first of them (lowest id)."""
-    sPk = primaryKey(oDb, sTable)
-    lGroups = oDb.execute("SELECT prime, group_concat(" + quoted(sPk) + ") FROM " + quoted(sTable) + " WHERE prime IS NOT NULL GROUP BY prime HAVING count(*) > 1").fetchall()
-    if not lGroups or not sPk: return 0
-    lCols = contentColumns(oDb, sTable)
-    oDelete = oDb.execute("SELECT name, sql FROM sqlite_master WHERE type = 'trigger' AND name = ?", ("trg_" + sTable + "_maps_delete",)).fetchone()
-    if oDelete: oDb.execute("DROP TRIGGER " + quoted(oDelete[0]))   # deleting a duplicate must not delete the links the keeper shares
-    for sPrime, sIds in lGroups:
-        lIds = sorted(int(s) for s in sIds.split(","))
-        dKeep = dict(zip(lCols, oDb.execute("SELECT " + ", ".join(quoted(s) for s in lCols) + " FROM " + quoted(sTable) + " WHERE " + quoted(sPk) + " = ?", (lIds[0],)).fetchone()))
-        for iOther in lIds[1:]:
-            dOther = dict(zip(lCols, oDb.execute("SELECT " + ", ".join(quoted(s) for s in lCols) + " FROM " + quoted(sTable) + " WHERE " + quoted(sPk) + " = ?", (iOther,)).fetchone()))
-            for sCol in lCols:
-                vKeep, vOther = dKeep[sCol], dOther[sCol]
-                if vOther in (None, ""): continue
-                if sCol.lower() in ("notes", "tags") and vKeep not in (None, ""):
-                    lLines = str(vKeep).splitlines()
-                    dKeep[sCol] = "\n".join(lLines + [s for s in str(vOther).splitlines() if s not in lLines])
-                elif vKeep in (None, ""):
-                    dKeep[sCol] = vOther
-            oDb.execute("DELETE FROM " + quoted(sTable) + " WHERE " + quoted(sPk) + " = ?", (iOther,))
-        oDb.execute("UPDATE " + quoted(sTable) + " SET " + ", ".join(quoted(s) + " = ?" for s in lCols) + " WHERE " + quoted(sPk) + " = ?", [dKeep[s] for s in lCols] + [lIds[0]])
+    """Merges records sharing a prime into the first of them (lowest id), through the shared rule in fetchStations."""
+    lMerged = primeRule.mergeSamePrime(oDb, sTable, contentColumns(oDb, sTable))
+    for sPrime, lIds in lMerged:
         repaired(sRoot, sTable + ": merged " + plural(len(lIds), "record") + " sharing the prime " + repr(sPrime) + " into id " + str(lIds[0]))
-    if oDelete: oDb.execute(oDelete[1])
-    return len(lGroups)
+    return len(lMerged)
+
+
+def idsInPrime(oDb, sTable):
+    """The id columns a table's prime is built from."""
+    return [s for s in primeRule.primeFieldsOf(oDb, sTable) if primeRule.isIdColumn(s)]
+
+
+def primeWithoutIds(oDb, sRoot, sTable):
+    """Rebuilds a prime that holds an id from the fields dPrimeFields names, or from its other fields in order. Changes
+    nothing, and fails, when the records would then share a prime -- the rule never costs a record."""
+    lIds = idsInPrime(oDb, sTable)
+    if not lIds or (sRoot + "|" + sTable) in dIdPrimeKept: return 0
+    lFields = primeRule.primeFieldsOf(oDb, sTable)
+    lNew = dPrimeFields.get(sRoot + "|" + sTable) or [s for s in lFields if not primeRule.isIdColumn(s)]
+    if not lNew:
+        fail(sRoot, sTable + ": its prime is only " + ", ".join(lIds) + "; name its fields in dPrimeFields, or the reason it keeps them in dIdPrimeKept")
+        return 0
+    sKey = "||char(31)||".join("coalesce(CAST(" + quoted(s) + " AS TEXT),'')" for s in lNew)
+    iRows, iDistinct = oDb.execute("SELECT count(*), count(DISTINCT " + sKey + ") FROM " + quoted(sTable)).fetchone()
+    if iDistinct < iRows:
+        fail(sRoot, sTable + ": a prime of " + ", ".join(lNew) + " would make " + plural(iRows - iDistinct, "record") + " share one, so the ids stay until the fields are chosen")
+        return 0
+    iChanged = primeRule.setPrimeFields(oDb, sTable, lNew)
+    repaired(sRoot, sTable + ": the prime is now " + ", ".join(lNew) + ", without " + ", ".join(lIds) + "; " + plural(iChanged, "record") + " renamed, and their links followed")
+    return 1
 
 
 def seedKinds(oDb, sRoot):
@@ -408,7 +443,12 @@ def repair(sRoot, sDb):
         # SQLEAN_DEFINE IS LEFT ALONE (12 October 2026). Dropping the empty table was churn, not repair: the build's
         # search self-test opens RadioTrail with the SQLean bundle loaded, SQLean makes the table again, and the next
         # check dropped it again -- three times in one release cycle, each rewriting a 67 MB file. DbDo never lists it.
+        for sTable in tables(oDb):
+            if sTable in lSkipTables: continue
+            if primeRule.putInOrder(oDb, sTable, primeRule.dMainOrders.get(sTable)):
+                repaired(sRoot, sTable + ": columns put in the table's own order: " + ", ".join(r[1] for r in oDb.execute("PRAGMA table_xinfo(" + quoted(sTable) + ")")))
         for sTable in primeTables(oDb):
+            primeWithoutIds(oDb, sRoot, sTable)
             mergeDuplicates(oDb, sRoot, sTable)
             if not hasUniquePrime(oDb, sTable):
                 oDb.execute("CREATE UNIQUE INDEX " + quoted("idx_" + sTable + "_prime") + " ON " + quoted(sTable) + " (prime)")
@@ -493,7 +533,15 @@ def checkDatabase(sRoot, oDb):
     lForeign = oDb.execute("PRAGMA foreign_key_check").fetchall()
     if lForeign: fail(sRoot, plural(len(lForeign), "foreign-key violation") + ", first " + repr(lForeign[0]))
     lTables = tables(oDb)
+    for sTable in tables(oDb):
+        if sTable in lSkipTables or "marked" not in columnNames(oDb, sTable) or not primaryKey(oDb, sTable): continue
+        lHave = [s for s, iPk, iHidden in columns(oDb, sTable)]
+        lWant = primeRule.standardOrder(oDb, sTable, primeRule.dMainOrders.get(sTable))
+        if lHave != lWant: fail(sRoot, sTable + ": the columns are not in the table's own order; --repair puts them as " + ", ".join(lWant))
     for sTable in primeTables(oDb):
+        lIds = idsInPrime(oDb, sTable)
+        if lIds and (sRoot + "|" + sTable) not in dIdPrimeKept:
+            fail(sRoot, sTable + ": the prime holds " + ", ".join(lIds) + ", so it cannot tell whether a record is already here; --repair takes it out")
         if not hasUniquePrime(oDb, sTable): fail(sRoot, sTable + " has no unique index on prime, so a map could point at two records")
         lDup = oDb.execute("SELECT prime, count(*) FROM " + quoted(sTable) + " GROUP BY prime HAVING count(*) > 1 LIMIT 3").fetchall()
         if lDup: fail(sRoot, sTable + " has records sharing a prime, such as " + repr(lDup[0][0]))

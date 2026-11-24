@@ -346,9 +346,9 @@ The choice is remembered with the table. **Say Shown Columns** (Shift+S) speaks 
 A table has two kinds of field, and every DbDo dialog lists them in the same order. Knowing the order tells you where to find a field in Show Columns, Order Records, Filter Records and the record forms alike.
 
 - **Main fields** come first, in the table's own order. They are about the table's subject: a contact's names and phone numbers, a station's name and country. A field ending in _id that points to a record in another table, such as category_id, is a main field too.
-- **Standard fields** come last, in this order: url, tags, notes, marked, look, prime, added, edited, and the record's own id. Every DbDo table has them. You type url, tags and notes. Look is a short summary that tells one record from the others, and prime is the combination of fields that must be unique in the table; DbDo figures out both from the record's main fields. DbDo keeps marked, added, edited and the id up to date by itself.
+- **Standard fields** surround the main fields, in this order: the record's own id, added and edited first; then the main fields, in the order you would enter them; then notes, tags, url, look, prime and marked. That is the order every template's tables are built in, and the order every list of columns follows. Show Columns, Order Records and Filter Records leave look and prime out of Standard columns and All columns, since they only repeat other columns; Choose columns and Type columns still offer them. Every DbDo table has them. You type url, tags and notes. Look is a short summary that tells one record from the others, and prime is the combination of fields that must be unique in the table; DbDo figures out both from the record's main fields. DbDo keeps marked, added, edited and the id up to date by itself.
 
-**Look and prime, in one sentence each.** Look is how a record is said, and its fields are the **default columns**: the grid shows them unless you choose others. Prime is the **primary key**: its fields, together, make each record unique, and they set the **default order**. So a person is said first name first, by look, and sorted last name first, by prime, with tiebreakers until no two records can share a place. In Show Columns, Look columns brings back the default columns and Prime columns shows the primary key; in Order Records, Prime columns brings back the default order and Look columns sorts the way records are said. A short way to hold it: look is the record's label; prime is its key. Every change to the columns, sort or filter is saved at once with the table.
+**Look and prime, in one sentence each.** Look is how a record is said, and its fields are the **default columns**: the grid shows them unless you choose others. Prime is the **primary key**: its fields, together, make each record unique, and they set the **default order**. They are fields that say what the record is, never an id: Look and Prime Fields refuses an id, and Import leaves a file's own row numbers, such as the Titanic's passengerid, out of the prime. So a person is said first name first, by look, and sorted last name first, by prime, with tiebreakers until no two records can share a place. In Show Columns, Look columns brings back the default columns and Prime columns shows the primary key; in Order Records, Prime columns brings back the default order and Look columns sorts the way records are said. A short way to hold it: look is the record's label; prime is its key. Every change to the columns, sort or filter is saved at once with the table.
 
 Look and prime never include url, notes, tags, marked, added, edited or the record's own id.
 
@@ -1009,8 +1009,8 @@ Each has its own letter, and the letter is the first letter of its own word.
     letters; type accented letters as they appear. A search that finds nothing
     says so and leaves the list as it was.
   - **Fields** asks which fields: **Main** (the fields about the table's
-    subject), **Standard** (url, tags, notes, marked, look, prime, added, edited
-    and the id) or **All**. It then opens a form with one box per field, in
+    subject), **Standard** (the id, added, edited, notes, tags, url and
+    marked) or **All** (every field but look and prime). It then opens a form with one box per field, in
     DbDo's natural order. A value on its own matches anywhere in the field,
     whatever the case; `=` in front means the field is exactly that; a symbol in
     front compares (`>`, `>=`, `<`, `<=`, `!=`). Type dates as year-month-day,
@@ -1045,7 +1045,9 @@ were sent, wherever they saved it. DbDo folds the records in.
 
 Every record carries a **prime**, the computed key built from the fields that say
 which record it is -- for books, the author and the title. That is what DbDo
-compares.
+compares. A prime never holds an id, whether the table's own number, a source's
+code or a link's number: each differs from one database to another, so a prime
+with one would never find the record already there.
 
 - A record whose prime is **not** in your database is **new**, and is added.
 - A record whose prime **is** there is the **same record**, and you decide what

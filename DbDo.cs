@@ -1398,16 +1398,21 @@ namespace DbDo
         //   main     -- the table's subject: every field a person enters about the
         //               record, foreign keys such as category_id included, in table
         //               order.
-        //   standard -- the fields every DbDo table shares, in this order: url,
-        //               tags, notes, marked, look, prime, added, edited (and the
-        //               legacy observed and method), then the table's own id.
+        //   standard -- the fields every DbDo table shares: the table's own id,
+        //               added, edited (and the legacy observed and method),
+        //               notes, tags, url, look, prime and marked.
         // ONE NATURAL ORDER everywhere -- Select Columns, Order Records, Filter
-        // Records, record forms: main fields in table order, then the standard
-        // fields in the order above. The default columns are look's fields in
+        // Records, record forms: the table's own order, below. The default columns are look's fields in
         // look's order; the default sort is prime's fields in prime's order.
         public const string KindMain     = "main";
         public const string KindStandard = "standard";
-        public static readonly string[] StandardSequence = new string[] { "url", "tags", "notes", "marked", "look", "prime", "added", "edited", "observed", "method" };
+        // THE TABLE'S OWN ORDER (24 November 2026, Jamal's ruling, replacing the order above): the id, added and edited
+        // first; the main fields in the order a person enters them; then notes, tags, url, look, prime and marked. It is
+        // also the physical order of every template table, which the build keeps, so a list of columns reads the way the
+        // table is built. StandardLead comes before the main fields and StandardTrail after them; the own id leads.
+        public static readonly string[] StandardLead = new string[] { "added", "edited", "observed", "method" };
+        public static readonly string[] StandardTrail = new string[] { "notes", "tags", "url", "look", "prime", "marked" };
+        public static readonly string[] StandardSequence = new string[] { "added", "edited", "observed", "method", "notes", "tags", "url", "look", "prime", "marked" };
 
         // isOwnKeyColumn: the table's own primary key -- bare 'id', or the table
         // name in singular or plural before '_id' (contacts -> contact_id,
@@ -1438,25 +1443,37 @@ namespace DbDo
             return KindMain;
         }
 
-        // orderNatural: the columns given, in the natural order -- main fields
-        // in the order they arrived (table order), then the standard fields in
-        // StandardSequence, the table's own id last.
+        // orderNatural: the columns given, in the table's own order -- the own id, then StandardLead, then the main
+        // fields in the order they arrived (table order), then StandardTrail. A template is built in this order, so
+        // for it this is simply its physical order; an older copy built another way reads the same.
         public static List<string> orderNatural(IList<string> lColumns, string sTable)
         {
             List<string> lResult = new List<string>();
             if (lColumns == null) return lResult;
-            List<string> lStandard = new List<string>();
-            string sOwnId = null;
+            List<string> lMain = new List<string>(), lLead = new List<string>(), lTrail = new List<string>();
             foreach (string sColumn in lColumns)
             {
-                if (fieldKind(sColumn, sTable) == KindMain) lResult.Add(sColumn);
-                else if (isOwnKeyColumn(sColumn, sTable) && Array.IndexOf(StandardSequence, sColumn.ToLowerInvariant()) < 0) sOwnId = sColumn;
-                else lStandard.Add(sColumn);
+                string sLower = sColumn.ToLowerInvariant();
+                if (Array.IndexOf(StandardLead, sLower) >= 0) lLead.Add(sColumn);
+                else if (Array.IndexOf(StandardTrail, sLower) >= 0) lTrail.Add(sColumn);
+                else if (fieldKind(sColumn, sTable) == KindMain) lMain.Add(sColumn);
+                else lResult.Add(sColumn);   // the own id
             }
-            lStandard.Sort((sA, sB) => Array.IndexOf(StandardSequence, sA.ToLowerInvariant()).CompareTo(Array.IndexOf(StandardSequence, sB.ToLowerInvariant())));
-            lResult.AddRange(lStandard);
-            if (sOwnId != null) lResult.Add(sOwnId);
+            lLead.Sort((sA, sB) => Array.IndexOf(StandardLead, sA.ToLowerInvariant()).CompareTo(Array.IndexOf(StandardLead, sB.ToLowerInvariant())));
+            lTrail.Sort((sA, sB) => Array.IndexOf(StandardTrail, sA.ToLowerInvariant()).CompareTo(Array.IndexOf(StandardTrail, sB.ToLowerInvariant())));
+            lResult.AddRange(lLead); lResult.AddRange(lMain); lResult.AddRange(lTrail);
             return lResult;
+        }
+
+        // withoutLookAndPrime: LOOK AND PRIME LEFT OUT OF THE COLUMN GROUPS (24 November 2026). They are made from other
+        // columns, so in Standard columns and All columns -- to show, order or filter by -- they only repeat what those
+        // columns hold, and make a long list longer. They stay a column of the table: Choose columns and Type columns
+        // still offer them, and Say Look and Say Prime speak them.
+        public static List<string> withoutLookAndPrime(List<string> lColumns)
+        {
+            List<string> l = new List<string>();
+            foreach (string s in lColumns) if (!isDistinctColumn(s)) l.Add(s);
+            return l;
         }
 
 
@@ -2987,7 +3004,7 @@ namespace DbDo
         // own column, order and filter choices are still written only beside their copy, never into the .db.
         public const string sFilesTableSql = "CREATE TABLE IF NOT EXISTS \"files\" (file_id INTEGER PRIMARY KEY AUTOINCREMENT, "
             + "added TEXTTIME NOT NULL DEFAULT CURRENT_TIMESTAMP, edited TEXTTIME NOT NULL DEFAULT CURRENT_TIMESTAMP, "
-            + "name TEXTLINE NOT NULL, kind TEXTLINE, content TEXTMEMO, url TEXTLINE, notes TEXTMARKDOWN, tags TEXTMEMO, "
+            + "name TEXTLINE NOT NULL, kind TEXTLINE, content TEXTMEMO, notes TEXTMARKDOWN, tags TEXTMEMO, url TEXTLINE, "
             + "look TEXT GENERATED ALWAYS AS (coalesce(CAST(name AS TEXT),'')) STORED, "
             + "prime TEXT GENERATED ALWAYS AS (coalesce(CAST(name AS TEXT),'')) STORED, marked INTEGER NOT NULL DEFAULT 0)";
         public static readonly string[] aFilesTableExtras = new string[] {
@@ -12118,14 +12135,14 @@ namespace DbDo
             System.Text.StringBuilder sbHelp = new System.Text.StringBuilder();
             if (bSortStyle)
             {
-                sbHelp.AppendLine("Fields available lists the fields in DbDo's natural order: main fields in table order, then url, tags, notes, marked, look, prime, added, edited and the id.");
+                sbHelp.AppendLine("Fields available lists the fields in DbDo's natural order: the id, added and edited, then the main fields in table order, then notes, tags, url, look, prime and marked.");
                 sbHelp.AppendLine("Order of fields holds the order chosen: the first field sorts first. A field sorted largest or latest first reads like: city desc; one sorted the usual way is just its name.");
                 sbHelp.AppendLine("Enter in Fields available, or Add ascending, adds the selected field ascending; Add descending adds it descending.");
                 sbHelp.AppendLine("Prime order puts prime's fields in Order of fields: the table's default order. Remove field, or Enter or Delete in Order of fields, puts the selected one back. Empty list clears Order of fields at once.");
             }
             else
             {
-                sbHelp.AppendLine("Columns available lists the columns in DbDo's natural order: main columns in table order, then url, tags, notes, marked, look, prime, added, edited and the id.");
+                sbHelp.AppendLine("Columns available lists the columns in DbDo's natural order: the id, added and edited, then the main columns in table order, then notes, tags, url, look, prime and marked.");
                 sbHelp.AppendLine("Columns shown holds the grid's columns in the order they will appear.");
                 sbHelp.AppendLine("Enter in Columns available, or Add column, adds the selected column to the end of Columns shown.");
                 sbHelp.AppendLine("Look columns puts look's columns in Columns shown: the table's default. Remove column, or Enter or Delete in Columns shown, puts the selected one back. Empty list clears Columns shown at once.");
@@ -15545,7 +15562,7 @@ namespace DbDo
                 "Server-side, so it works on large tables and the result stays editable. Prompts for a pattern and applies it to the column under virtual focus; an empty pattern clears the filter. Needs sqlean.dll beside DbDo.exe. Unbound by default -- assign a chord if you use it often.");
             add("Clear Filter",       "Clear the active filter", "Control+Shift+F.");
             add("Order Records",       "Order the records by the fields you choose",
-                "Alt+O. Fields lists every column, shown or not, in DbDo's natural order (main fields in table order, then url, tags, notes, marked, look, prime, added, edited and the id), the column under the cursor selected. Enter or Add Ascending adds it to Picks; Add Descending adds it the other way. The Picks order is the sort order, and the order in force is already there to change. Remove (or Enter or Delete in Picks) takes one back; Clear empties Picks, and OK with no picks clears the sort.");
+                "Alt+O. Fields lists every column, shown or not, in DbDo's natural order (the id, added and edited, then the main fields in table order, then notes, tags, url, look, prime and marked), the column under the cursor selected. Enter or Add Ascending adds it to Picks; Add Descending adds it the other way. The Picks order is the sort order, and the order in force is already there to change. Remove (or Enter or Delete in Picks) takes one back; Clear empties Picks, and OK with no picks clears the sort.");
             add("Reverse Order",      "Reverse the order of the records", "Alt+Shift+O.");
             add("Alpha Order",        "Sort the records by the current column, smallest or earliest first", "Alt+A, as in FileDir.");
 
@@ -19574,8 +19591,9 @@ namespace DbDo
                 return;
             }
             List<string> lAllColumns = db.getNaturalFieldNames();
+            List<string> lGroupAll = Metadata.withoutLookAndPrime(lAllColumns);
             List<string> lMain = new List<string>(), lStandard = new List<string>();
-            foreach (string sName in lAllColumns)
+            foreach (string sName in lGroupAll)
             {
                 if (Metadata.fieldKind(sName, sTable) == Metadata.KindMain) lMain.Add(sName); else lStandard.Add(sName);
             }
@@ -19598,11 +19616,11 @@ namespace DbDo
                 dlg.helpNote = (sameFieldList(lLook, lPrime) ? "Look and prime hold the same fields here, so Look columns stands for both: the default columns for select and for order. " : "")
                     + "Look columns shows the default columns: look's fields, in look's order, the way each record is said; with no look, every main column. "
                     + "Prime columns shows the primary key: prime's fields, in prime's order, which together make each record unique and set the default order. "
-                    + "Main columns shows the columns about the table's subject. Standard columns shows url, tags, notes, marked, look, prime, added, edited and the id. "
-                    + "All columns shows every column. Choose columns picks columns and their order one by one; Type columns takes the names separated by commas. "
+                    + "Main columns shows the columns about the table's subject. Standard columns shows the id, added, edited, notes, tags, url and marked. "
+                    + "All columns shows every column but look and prime, which only repeat other columns; Choose columns and Type columns can still show them. Choose columns picks columns and their order one by one; Type columns takes the names separated by commas. "
                     + "The choice is remembered with the table. Shift+F1 on a button says what it does; Shift+S, back in the grid, says the columns shown now.";
                 // Each group lists its columns (23 November 2026); with no look, Look columns is every main column.
-                Dictionary<string, Button> dChoices = addColumnSetChoices(dlg, lLook, lPrime, lMain, lStandard, lAllColumns, lMain, false, false);
+                Dictionary<string, Button> dChoices = addColumnSetChoices(dlg, lLook, lPrime, lMain, lStandard, lGroupAll, lMain, false, false);
                 dlg.form.AcceptButton = dChoices["Look columns"];
                 sButton = dlg.runWithButtons(new string[] { "Cancel" });
             }
@@ -19613,7 +19631,7 @@ namespace DbDo
             else if (sButton == "Prime columns") sStored = applySelectList(sTable, lPrime.Count > 0 ? string.Join(", ", lPrime.ToArray()) : "");
             else if (sButton == "Main columns") sStored = applySelectList(sTable, string.Join(", ", lMain.ToArray()));
             else if (sButton == "Standard columns") sStored = applySelectList(sTable, string.Join(", ", lStandard.ToArray()));
-            else if (sButton == "All columns") sStored = applySelectList(sTable, string.Join(", ", lAllColumns.ToArray()));
+            else if (sButton == "All columns") sStored = applySelectList(sTable, string.Join(", ", lGroupAll.ToArray()));
             else if (sButton == "Type columns...")
             {
                 string sInitial = db.getSelectList(sTable);
@@ -21784,22 +21802,57 @@ namespace DbDo
             return lDdl;
         }
 
+        // isIdColumnName: NO ID IN A PRIME (24 November 2026, Jamal's ruling). A prime tells whether a record is already
+        // in a table, and Merge Database, Update and the map links match by it across databases. An id cannot: the
+        // table's own id, or a source's id, differs for every record, so a prime holding one is always unique and never
+        // finds the record already here; and a link's id is this database's number for another record, which another
+        // database numbers differently. An id column is id itself or a name ending in _id.
+        internal static bool isIdColumnName(string sName)
+        {
+            string s = (sName ?? "").ToLowerInvariant();
+            return s == "id" || s.EndsWith("_id");
+        }
+
+        private static List<string> allFieldNames(List<string[]> lFieldDefs)
+        {
+            List<string> l = new List<string>();
+            foreach (string[] aF in lFieldDefs) l.Add(aF[0]);
+            return l;
+        }
+
         private static List<string> lStandardTableDdl(string sTable, List<string[]> lFieldDefs)
+        {
+            return lStandardTableDdl(sTable, lFieldDefs, null);
+        }
+
+        // lPrimeFields: the fields of the prime, in order; null means every field but an id column, or every field
+        // when they are all ids.
+        private static List<string> lStandardTableDdl(string sTable, List<string[]> lFieldDefs, List<string> lPrimeFields)
         {
             string sSingular = sSingularOf(sTable);
             string sPk = sSingular + "_id";
             List<string> lCols = new List<string>();
             foreach (string[] aF in lFieldDefs) lCols.Add(aF[0]);
+            if (lPrimeFields == null || lPrimeFields.Count == 0)
+            {
+                lPrimeFields = new List<string>();
+                foreach (string sC in lCols) if (!isIdColumnName(sC)) lPrimeFields.Add(sC);
+                if (lPrimeFields.Count == 0) lPrimeFields = new List<string>(lCols);
+            }
 
             StringBuilder sbLook = new StringBuilder("rtrim(");
             StringBuilder sbPrm = new StringBuilder();
             for (int i = 0; i < lCols.Count; i++)
             {
                 string sC = "\"" + lCols[i] + "\"";
-                if (i > 0) { sbLook.Append(" || "); sbPrm.Append("||char(31)||"); }
+                if (i > 0) sbLook.Append(" || ");
                 sbLook.Append("iif(" + sC + " IS NOT NULL AND length(CAST(" + sC
                     + " AS TEXT))>0, CAST(" + sC + " AS TEXT) || char(31), '')");
-                sbPrm.Append("coalesce(CAST(" + sC + " AS TEXT),'')");
+            }
+            for (int i = 0; i < lPrimeFields.Count; i++)
+            {
+                if (i > 0) sbPrm.Append("||char(31)||");
+                sbPrm.Append("coalesce(CAST(\"" + lPrimeFields[i] + "\" AS TEXT),'')");
             }
             sbLook.Append(", char(31))");
 
@@ -21810,7 +21863,8 @@ namespace DbDo
             sbCreate.Append("edited TEXTTIME NOT NULL DEFAULT CURRENT_TIMESTAMP, ");
             foreach (string[] aF in lFieldDefs)
                 sbCreate.Append("\"" + aF[0] + "\" " + aF[1] + ", ");
-            sbCreate.Append("url TEXTLINE, notes TEXTMARKDOWN, tags TEXTMEMO, ");
+            // notes, tags, url, look, prime, marked (24 November 2026): the order Metadata.StandardTrail names.
+            sbCreate.Append("notes TEXTMARKDOWN, tags TEXTMEMO, url TEXTLINE, ");
             sbCreate.Append("look TEXT GENERATED ALWAYS AS (" + sbLook + ") STORED, ");
             sbCreate.Append("prime TEXT GENERATED ALWAYS AS (" + sbPrm + ") STORED, ");
             sbCreate.Append("marked INTEGER NOT NULL DEFAULT 0)");
@@ -21862,8 +21916,10 @@ namespace DbDo
                 lLkFields.Add(new string[] { "val", "TEXTLINE" });
                 lLkFields.Add(new string[] { "ordinal", "INTEGER" });
                 lLkFields.Add(new string[] { "descrip", "TEXTMEMO" });
-                lLkFields.Add(new string[] { "url", "TEXTLINE" });
-                lDdl.AddRange(lStandardTableDdl("defs", lLkFields));
+                // NO SECOND URL (24 November 2026): lStandardTableDdl gives every table its url, after notes and tags,
+                // so naming url here too made "duplicate column name: url" and stopped every Import. The prime is the
+                // templates' own, src, tbl, fld and val.
+                lDdl.AddRange(lStandardTableDdl("defs", lLkFields, new List<string> { "src", "tbl", "fld", "val" }));
                 // The pick-list lookup index of DbDo's standard set (15 November 2026), the same one the open sweep
                 // and checkTemplates add to an older database.
                 lDdl.Add("CREATE INDEX idx_defs_lookup ON defs (tbl, fld, ordinal, val)");
@@ -22685,7 +22741,9 @@ namespace DbDo
                 List<string[]> lFieldDefs = new List<string[]>();
                 foreach (string sKey in lsKeys)
                     lFieldDefs.Add(new string[] { sKey, "TEXTLINE" });
-                foreach (string sSql in lStandardTableDdl(sTable, lFieldDefs))
+                // Every field in the prime, ids too: these rows arrive one by one, so whether the other fields alone keep them
+                // apart cannot be known first, and a row is never lost to the no-id rule (24 November 2026).
+                foreach (string sSql in lStandardTableDdl(sTable, lFieldDefs, allFieldNames(lFieldDefs)))
                     managerImport.invokeSql(sSql, null);
                 foreach (string sSql in lInfraDdl(true, true))
                     managerImport.invokeSql(sSql, null);
@@ -23053,6 +23111,55 @@ namespace DbDo
             return sV.Trim();
         }
 
+        // importPrimeFields: AN IMPORTED TABLE'S PRIME LEAVES OUT ITS IDS (24 November 2026). Every field but the id
+        // columns: id, a name ending in _id, or a name ending in id whose values are all different whole numbers -- a
+        // file's own row number, such as the Titanic's passengerid, which would make every prime unique and match
+        // nothing on a later merge. When the other fields alone would make two rows one, the ids stay, so no row is
+        // lost, and the log says so.
+        private static List<string> importPrimeFields(List<string[]> aGrid, int iHdr, List<string> lColTarget, List<string[]> lFieldDefs, string sTable)
+        {
+            List<string> lAll = new List<string>();
+            foreach (string[] aDef in lFieldDefs) lAll.Add(aDef[0]);
+            List<int> lKeepIdx = new List<int>();
+            List<string> lPrime = new List<string>();
+            List<string> lLeft = new List<string>();
+            for (int c = 0; c < lColTarget.Count; c++)
+            {
+                string sCol = lColTarget[c];
+                if (sCol == null || !lAll.Contains(sCol)) continue;
+                bool bId = isIdColumnName(sCol);
+                if (!bId && sCol.ToLowerInvariant().EndsWith("id") && sCol.Length > 2)
+                {
+                    HashSet<string> hSeen = new HashSet<string>();
+                    bool bRowNumber = true;
+                    for (int r = iHdr + 1; r < aGrid.Count && bRowNumber; r++)
+                    {
+                        string sV = (c < aGrid[r].Length && aGrid[r][c] != null) ? aGrid[r][c].Trim() : "";
+                        if (sV.Length == 0) continue;
+                        if (!bIsIntegerText(sV) || !hSeen.Add(sV)) bRowNumber = false;
+                    }
+                    bId = bRowNumber && hSeen.Count > 0;
+                }
+                if (bId) { lLeft.Add(sCol); continue; }
+                lPrime.Add(sCol); lKeepIdx.Add(c);
+            }
+            if (lLeft.Count == 0 || lPrime.Count == 0) return null;
+            HashSet<string> hKeys = new HashSet<string>();
+            for (int r = iHdr + 1; r < aGrid.Count; r++)
+            {
+                if (iFilledCells(aGrid[r]) == 0) continue;
+                StringBuilder sbKey = new StringBuilder();
+                foreach (int c in lKeepIdx) sbKey.Append(c < aGrid[r].Length && aGrid[r][c] != null ? aGrid[r][c].Trim() : "").Append('\u001f');
+                if (!hKeys.Add(sbKey.ToString()))
+                {
+                    try { DbDoLog.write("Import " + sTable + ": the prime keeps " + string.Join(", ", lLeft.ToArray()) + ", since without it two rows would be one"); } catch { }
+                    return new List<string>(lAll);
+                }
+            }
+            try { DbDoLog.write("Import " + sTable + ": the prime is " + string.Join(", ", lPrime.ToArray()) + ", leaving out " + string.Join(", ", lLeft.ToArray())); } catch { }
+            return lPrime;
+        }
+
         // sInferColumnType: NUMBERS ARE NUMBERS (23 November 2026, the pandas study). An imported column whose every
         // filled cell is a whole number is INTEGER; one whose every filled cell is a number is REAL; any other column,
         // and one with no filled cell, stays TEXTLINE. A number with a leading zero, such as a zip code 02134, keeps the
@@ -23161,8 +23268,9 @@ namespace DbDo
             if (lFieldDefs.Count == 0) lFieldDefs.Add(new string[] { "value", "TEXTLINE" });
             Dictionary<string, string> dTypeOf = new Dictionary<string, string>();
             foreach (string[] aDef in lFieldDefs) dTypeOf[aDef[0]] = aDef[1];
+            List<string> lPrime = importPrimeFields(aGrid, iHdr, lColTarget, lFieldDefs, sTable);
 
-            foreach (string sSql in lStandardTableDdl(sTable, lFieldDefs)) managerImport.invokeSql(sSql, null);
+            foreach (string sSql in lStandardTableDdl(sTable, lFieldDefs, lPrime)) managerImport.invokeSql(sSql, null);
 
             int iRows = 0;
             for (int r = iHdr + 1; r < aGrid.Count; r++)
@@ -23400,7 +23508,9 @@ namespace DbDo
                         lColTarget.Add(sHdr);
                     }
                     if (lFieldDefs.Count == 0) lFieldDefs.Add(new string[] { "value", "TEXTLINE" });
-                    foreach (string sSql in lStandardTableDdl(sTable, lFieldDefs))
+                    // Every field in the prime, ids too: these rows arrive one by one, so whether the other fields alone keep them
+                    // apart cannot be known first, and a row is never lost to the no-id rule (24 November 2026).
+                    foreach (string sSql in lStandardTableDdl(sTable, lFieldDefs, allFieldNames(lFieldDefs)))
                         managerDest.invokeSql(sSql, null);
 
                     int iRows = 0;
@@ -23500,7 +23610,9 @@ namespace DbDo
                             lColTarget.Add(sHdr);
                         }
                         if (lFieldDefs.Count == 0) lFieldDefs.Add(new string[] { "value", "TEXTLINE" });
-                        foreach (string sSql in lStandardTableDdl(sTable, lFieldDefs))
+                        // Every field in the prime, ids too: these rows arrive one by one, so whether the other fields alone keep them
+                        // apart cannot be known first, and a row is never lost to the no-id rule (24 November 2026).
+                        foreach (string sSql in lStandardTableDdl(sTable, lFieldDefs, allFieldNames(lFieldDefs)))
                             managerDest.invokeSql(sSql, null);
 
                         managerSrc.moveFirst();
@@ -27560,11 +27672,11 @@ namespace DbDo
             // filtered while the common ones stay one step away. Each box follows the
             // natural order, which is also the Tab order.
             string sGroup = sGroupGiven ?? chooseByButtons("Filter Fields",
-                new List<string> { "Main fields gives a box for each field about the table's subject. Standard fields gives url, tags, notes, marked, look, prime, added, edited and the id. All fields gives every field." },
+                new List<string> { "Main fields gives a box for each field about the table's subject. Standard fields gives the id, added, edited, notes, tags, url and marked. All fields gives every field but look and prime." },
                 new List<string> { "Main fields", "Standard fields", "All fields" });
             if (sGroup == null) return false;
             List<string> lFields = new List<string>();
-            foreach (string sF in db.getNaturalFieldNames())
+            foreach (string sF in Metadata.withoutLookAndPrime(db.getNaturalFieldNames()))
             {
                 bool bMain = Metadata.fieldKind(sF, db.currentTable) == Metadata.KindMain;
                 if (sGroup == "All fields" || (sGroup == "Main fields") == bMain) lFields.Add(sF);
@@ -28848,8 +28960,9 @@ namespace DbDo
             // order, is the default button -- or Look columns when look and prime are the same. Reverse Order stays its
             // own command, Alt+Shift+O.
             bool bSame = sameFieldList(lLook, lPrime);
+            List<string> lGroupAll = Metadata.withoutLookAndPrime(lAllFields);
             List<string> lMain = new List<string>(), lStandard = new List<string>();
-            foreach (string sName in lAllFields)
+            foreach (string sName in lGroupAll)
             {
                 if (Metadata.fieldKind(sName, db.currentTable) == Metadata.KindMain) lMain.Add(sName); else lStandard.Add(sName);
             }
@@ -28859,8 +28972,8 @@ namespace DbDo
                 dlgAsk.helpNote = (bSame ? "Look and prime hold the same fields here, so Look columns stands for both: the default columns for select and for order. "
                         : "Prime columns, the default, sorts by the primary key: prime's fields, in prime's order, which together make each record unique. "
                           + "Look columns sorts by look's fields, the default columns, the way records are said. ")
-                    + "Main columns sorts by the columns about the table's subject; Standard columns by url, tags, notes, marked, look, prime, added, edited and the id; "
-                    + "All columns by every column, in the natural order. Choose columns picks the columns and the direction of each, one by one; "
+                    + "Main columns sorts by the columns about the table's subject; Standard columns by the id, added, edited, notes, tags, url and marked; "
+                    + "All columns by every column but look and prime, in the table's own order. Choose columns picks the columns and the direction of each, one by one; "
                     + "Type columns takes them separated by commas, with desc after a column to sort it largest or latest first. "
                     + "Reverse order, last, turns the order in force the other way, as Alt+Shift+O does. The order is remembered with the table. Shift+F1 on a button says what it does; Shift+O, back in the grid, says the order in force.";
                 // Enter presses the button with focus, and the default takes focus as the dialog opens.
@@ -28871,7 +28984,7 @@ namespace DbDo
                 // THE DEFAULT IS THE FIRST BUTTON (23 November 2026). Prime columns, Order Records' default, was second, after
                 // Look columns, and took focus as the dialog opened -- which Jamal heard as focus on the wrong button. It
                 // now comes first here, so the first button, the focus and Enter are one choice. Show Columns keeps Look first.
-                Dictionary<string, Button> dChoices = addColumnSetChoices(dlgAsk, lLook, lPrime, lMain, lStandard, lAllFields, lPrime, lNow.Count > 0, true);
+                Dictionary<string, Button> dChoices = addColumnSetChoices(dlgAsk, lLook, lPrime, lMain, lStandard, lGroupAll, lPrime, lNow.Count > 0, true);
                 Button btnDefault = dChoices.ContainsKey(sDefault) ? dChoices[sDefault] : dChoices["Look columns"];
                 dlgAsk.form.AcceptButton = btnDefault;
                 dlgAsk.setInitialFocus(btnDefault);
@@ -28891,7 +29004,7 @@ namespace DbDo
             else if (sButton == "Look columns") lPicks = lLookAsc.Count > 0 ? lLookAsc : lPrimeAsc;
             else if (sButton == "Main columns") lPicks = fAscending(lMain);
             else if (sButton == "Standard columns") lPicks = fAscending(lStandard);
-            else if (sButton == "All columns") lPicks = fAscending(lAllFields);
+            else if (sButton == "All columns") lPicks = fAscending(lGroupAll);
             else if (sButton == "Type columns...")
             {
                 lPicks = promptOrderTyped(lNow, lAllFields);
@@ -33457,6 +33570,15 @@ namespace DbDo
                 if (lPrm.Count == 0)
                 {
                     LbcMessage.show(this, "At least one Prm field is required.",
+                        "Look and Prime Fields", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    return;
+                }
+                // NO ID IN A PRIME (24 November 2026): see isIdColumnName.
+                List<string> lIdsChosen = lPrm.FindAll(s => isIdColumnName(s));
+                if (lIdsChosen.Count > 0)
+                {
+                    LbcMessage.show(this, string.Join(", ", lIdsChosen.ToArray()) + (lIdsChosen.Count == 1 ? " is an id" : " are ids")
+                        + ", which a prime leaves out: an id is this database's number for a record, so it cannot tell whether a record is already here. Choose the fields that say what the record is.",
                         "Look and Prime Fields", MessageBoxButtons.OK, MessageBoxIcon.Information);
                     return;
                 }

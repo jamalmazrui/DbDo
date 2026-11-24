@@ -1195,27 +1195,34 @@ alike.</p>
 They are about the table’s subject: a contact’s names and phone numbers,
 a station’s name and country. A field ending in _id that points to a
 record in another table, such as category_id, is a main field too.</li>
-<li><strong>Standard fields</strong> come last, in this order: url,
-tags, notes, marked, look, prime, added, edited, and the record’s own
-id. Every DbDo table has them. You type url, tags and notes. Look is a
-short summary that tells one record from the others, and prime is the
-combination of fields that must be unique in the table; DbDo figures out
-both from the record’s main fields. DbDo keeps marked, added, edited and
-the id up to date by itself.</li>
+<li><strong>Standard fields</strong> surround the main fields, in this
+order: the record’s own id, added and edited first; then the main
+fields, in the order you would enter them; then notes, tags, url, look,
+prime and marked. That is the order every template’s tables are built
+in, and the order every list of columns follows. Show Columns, Order
+Records and Filter Records leave look and prime out of Standard columns
+and All columns, since they only repeat other columns; Choose columns
+and Type columns still offer them. Every DbDo table has them. You type
+url, tags and notes. Look is a short summary that tells one record from
+the others, and prime is the combination of fields that must be unique
+in the table; DbDo figures out both from the record’s main fields. DbDo
+keeps marked, added, edited and the id up to date by itself.</li>
 </ul>
 <p><strong>Look and prime, in one sentence each.</strong> Look is how a
 record is said, and its fields are the <strong>default columns</strong>:
 the grid shows them unless you choose others. Prime is the
 <strong>primary key</strong>: its fields, together, make each record
-unique, and they set the <strong>default order</strong>. So a person is
-said first name first, by look, and sorted last name first, by prime,
-with tiebreakers until no two records can share a place. In Show
-Columns, Look columns brings back the default columns and Prime columns
-shows the primary key; in Order Records, Prime columns brings back the
-default order and Look columns sorts the way records are said. A short
-way to hold it: look is the record’s label; prime is its key. Every
-change to the columns, sort or filter is saved at once with the
-table.</p>
+unique, and they set the <strong>default order</strong>. They are fields
+that say what the record is, never an id: Look and Prime Fields refuses
+an id, and Import leaves a file’s own row numbers, such as the Titanic’s
+passengerid, out of the prime. So a person is said first name first, by
+look, and sorted last name first, by prime, with tiebreakers until no
+two records can share a place. In Show Columns, Look columns brings back
+the default columns and Prime columns shows the primary key; in Order
+Records, Prime columns brings back the default order and Look columns
+sorts the way records are said. A short way to hold it: look is the
+record’s label; prime is its key. Every change to the columns, sort or
+filter is saved at once with the table.</p>
 <p>Look and prime never include url, notes, tags, marked, added, edited
 or the record’s own id.</p>
 <h3 id="links-read-as-look">Links read as look</h3>
@@ -2906,15 +2913,15 @@ Numbers and dates are searched as they read. Case is ignored for English
 letters; type accented letters as they appear. A search that finds
 nothing says so and leaves the list as it was.</li>
 <li><strong>Fields</strong> asks which fields: <strong>Main</strong>
-(the fields about the table’s subject), <strong>Standard</strong> (url,
-tags, notes, marked, look, prime, added, edited and the id) or
-<strong>All</strong>. It then opens a form with one box per field, in
-DbDo’s natural order. A value on its own matches anywhere in the field,
-whatever the case; <code>=</code> in front means the field is exactly
-that; a symbol in front compares (<code>&gt;</code>, <code>&gt;=</code>,
-<code>&lt;</code>, <code>&lt;=</code>, <code>!=</code>). Type dates as
-year-month-day, such as 2026-10-29. Fill in several boxes and they all
-have to match.</li>
+(the fields about the table’s subject), <strong>Standard</strong> (the
+id, added, edited, notes, tags, url and marked) or <strong>All</strong>
+(every field but look and prime). It then opens a form with one box per
+field, in DbDo’s natural order. A value on its own matches anywhere in
+the field, whatever the case; <code>=</code> in front means the field is
+exactly that; a symbol in front compares (<code>&gt;</code>,
+<code>&gt;=</code>, <code>&lt;</code>, <code>&lt;=</code>,
+<code>!=</code>). Type dates as year-month-day, such as 2026-10-29. Fill
+in several boxes and they all have to match.</li>
 <li><strong>Marked</strong> keeps the records you have marked, and
 <strong>Unmarked</strong> the rest.</li>
 <li>With a filter in force, the list first offers <strong>Start
@@ -2948,7 +2955,10 @@ records in.</p>
 <h4 id="how-a-merge-decides">How a merge decides</h4>
 <p>Every record carries a <strong>prime</strong>, the computed key built
 from the fields that say which record it is – for books, the author and
-the title. That is what DbDo compares.</p>
+the title. That is what DbDo compares. A prime never holds an id,
+whether the table’s own number, a source’s code or a link’s number: each
+differs from one database to another, so a prime with one would never
+find the record already there.</p>
 <ul>
 <li>A record whose prime is <strong>not</strong> in your database is
 <strong>new</strong>, and is added.</li>
