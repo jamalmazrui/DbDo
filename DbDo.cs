@@ -326,7 +326,12 @@ namespace DbDo
                         // judged untouched only by its dates keeps its backup, since dates cannot prove nothing changed.
                         if (bRecorded)
                         {
-                            try { System.IO.File.Delete(sKept); sKept = "removed, since its fingerprint proved it was only the earlier template"; }
+                            try
+                            {
+                                System.IO.File.Delete(sKept);
+                                foreach (string sEnd in new string[] { "-wal", "-shm", "-journal" }) if (System.IO.File.Exists(sKept + sEnd)) System.IO.File.Delete(sKept + sEnd);
+                                sKept = "removed, since its fingerprint proved it was only the earlier template";
+                            }
                             catch (Exception oError) { sKept += " (it could not be removed: " + oError.Message + ")"; }
                         }
                         try { DbDoLog.write("Seeding: " + sDstPath + " was untouched since it was seeded (" + (bRecorded ? "its fingerprint matched" : "by its dates; it had no fingerprint") + "), so the newer template replaced it; the old copy is " + sKept + "."); } catch { }
@@ -369,6 +374,16 @@ namespace DbDo
                 if (!string.Equals(sha256Hex(sNew), sha256Hex(sSrcPath), StringComparison.OrdinalIgnoreCase)) throw new System.IO.IOException("the copied template did not match the installed one");
                 clearReadOnly(sDstPath);
                 System.IO.File.Replace(sNew, sDstPath, sKept);
+                // THE COPY'S SIDE FILES GO WITH IT (24 November 2026). A -wal or -shm beside the copy belonged to the copy
+                // as it was, now the backup, so each is moved beside the backup under the backup's name, where SQLite
+                // would look for it; none is left to sit beside the new database.
+                foreach (string sEnd in new string[] { "-wal", "-shm", "-journal" })
+                {
+                    string sSide = sDstPath + sEnd;
+                    if (!System.IO.File.Exists(sSide)) continue;
+                    try { clearReadOnly(sSide); System.IO.File.Move(sSide, sKept + sEnd); try { DbDoLog.write("Update from Template: moved " + sSide + " beside the backup, as " + System.IO.Path.GetFileName(sKept + sEnd)); } catch { } }
+                    catch (Exception oError) { try { DbDoLog.write("Update from Template: could not move " + sSide + ": " + oError.Message); } catch { } }
+                }
                 writeSeedRecord(sDstPath);
                 pruneBackups(sDstPath);
                 return sKept;
@@ -395,7 +410,11 @@ namespace DbDo
                 System.Array.Sort(aBackups, StringComparer.OrdinalIgnoreCase);
                 for (int i = 0; i < aBackups.Length - iKeepBackups; i++)
                 {
-                    try { System.IO.File.Delete(aBackups[i]); iRemoved++; DbDoLog.write("Backups: removed " + aBackups[i] + ", keeping the newest " + iKeepBackups); }
+                    try
+                    {
+                        System.IO.File.Delete(aBackups[i]); iRemoved++; DbDoLog.write("Backups: removed " + aBackups[i] + ", keeping the newest " + iKeepBackups);
+                        foreach (string sEnd in new string[] { "-wal", "-shm", "-journal" }) if (System.IO.File.Exists(aBackups[i] + sEnd)) System.IO.File.Delete(aBackups[i] + sEnd);
+                    }
                     catch (Exception oError) { DbDoLog.write("Backups: could not remove " + aBackups[i] + ": " + oError.Message); }
                 }
             }
@@ -418,6 +437,81 @@ namespace DbDo
             catch { return null; }
         }
 
+        // sReadTextFile: a text file's text in the encoding it was written in (24 November 2026, from sqlitebiter's
+        // automatic encoding detection and sqlite-utils' --encoding). A byte-order mark names the encoding -- UTF-8, UTF-16
+        // or UTF-32 -- and is honored. Without one, the bytes are read as UTF-8 strictly; a file that is not valid UTF-8,
+        // as a CSV saved by Excel in the United States often is, is read as Windows-1252 instead, so an accented name such
+        // as Zoë arrives as written rather than as a replacement mark. The choice is logged.
+        public static string sReadTextFile(string sPath)
+        {
+            byte[] binText = System.IO.File.ReadAllBytes(sPath);
+            bool bBom = (binText.Length >= 3 && binText[0] == 0xEF && binText[1] == 0xBB && binText[2] == 0xBF)
+                || (binText.Length >= 2 && ((binText[0] == 0xFF && binText[1] == 0xFE) || (binText[0] == 0xFE && binText[1] == 0xFF)))
+                || (binText.Length >= 4 && binText[0] == 0 && binText[1] == 0 && binText[2] == 0xFE && binText[3] == 0xFF);
+            if (bBom)
+            {
+                using (System.IO.StreamReader oReader = new System.IO.StreamReader(new System.IO.MemoryStream(binText), System.Text.Encoding.UTF8, true)) return oReader.ReadToEnd();
+            }
+            try { return new System.Text.UTF8Encoding(false, true).GetString(binText); }
+            catch (System.Text.DecoderFallbackException)
+            {
+                try { DbDoLog.write("Text file " + sPath + " is not valid UTF-8, so it is read as Windows-1252"); } catch { }
+                return System.Text.Encoding.GetEncoding(1252).GetString(binText);
+            }
+        }
+
+        // isDatabaseSideFile: a file SQLite or DbDo keeps beside a database while it works -- its -wal, -shm or -journal,
+        // a .seed fingerprint, a .new copy in progress, a .bak backup -- rather than a companion a person uses
+        // (24 November 2026). Update Copies from Templates copied every non-.db file beside a template, so a stale
+        // RadioTrail.db-wal and -shm left in the installed templates folder were "added" beside a fresh copy. These belong
+        // to one database file at one moment and are never copied.
+        public static bool isDatabaseSideFile(string sPath)
+        {
+            string sName = System.IO.Path.GetFileName(sPath ?? "").ToLowerInvariant();
+            foreach (string sEnd in new string[] { "-wal", "-shm", "-journal", ".seed", ".new", ".bak" })
+                if (sName.EndsWith(sEnd)) return true;
+            return false;
+        }
+
+        // removeStaleSideFiles: a -wal or -shm beside a database in the ordinary (rollback) journal mode is left over --
+        // SQLite reads a write-ahead log only for a database whose header says WAL (bytes 18 and 19 are 2), and removes
+        // both files when the last connection to a WAL database closes. Such leftovers are removed before DbDo opens the
+        // database, so a folder holds only what is real (24 November 2026). Nothing is removed when the header says WAL,
+        // when it cannot be read, or when another program holds the database or a side file open. Returns how many
+        // files were removed, each logged.
+        public static int removeStaleSideFiles(string sDbPath)
+        {
+            int iRemoved = 0;
+            try
+            {
+                if (string.IsNullOrEmpty(sDbPath) || !System.IO.File.Exists(sDbPath)) return 0;
+                string[] aSides = new string[] { sDbPath + "-wal", sDbPath + "-shm" };
+                if (!System.IO.File.Exists(aSides[0]) && !System.IO.File.Exists(aSides[1])) return 0;
+                byte[] binHeader = new byte[20];
+                using (System.IO.FileStream oStream = new System.IO.FileStream(sDbPath, System.IO.FileMode.Open, System.IO.FileAccess.Read, System.IO.FileShare.ReadWrite))
+                {
+                    if (oStream.Read(binHeader, 0, binHeader.Length) < binHeader.Length) return 0;
+                }
+                if (System.Text.Encoding.ASCII.GetString(binHeader, 0, 15) != "SQLite format 3") return 0;
+                if (binHeader[18] != 1 || binHeader[19] != 1) return 0;
+                if (fileInUse(sDbPath)) return 0;
+                foreach (string sSide in aSides)
+                {
+                    if (!System.IO.File.Exists(sSide)) continue;
+                    try
+                    {
+                        clearReadOnly(sSide);
+                        System.IO.File.Delete(sSide);
+                        iRemoved++;
+                        try { DbDoLog.write("Side files: removed " + sSide + ", left over beside a database in the ordinary journal mode"); } catch { }
+                    }
+                    catch (Exception oError) { try { DbDoLog.write("Side files: could not remove " + sSide + ": " + oError.Message); } catch { } }
+                }
+            }
+            catch (Exception oError) { try { DbDoLog.write("Side files: not checked for " + sDbPath + ": " + oError.Message); } catch { } }
+            return iRemoved;
+        }
+
         // copyMissingCompanions: the files beside an installed template -- its queries, scripts, reports and settings --
         // that are missing beside a person's copy are copied there; a file already there is the person's and is never
         // overwritten. Returns how many were copied.
@@ -430,6 +524,7 @@ namespace DbDo
                 foreach (string sSrc in System.IO.Directory.GetFiles(sFrom))
                 {
                     if (sSrc.EndsWith(".db", StringComparison.OrdinalIgnoreCase)) continue;
+                    if (isDatabaseSideFile(sSrc)) continue;
                     string sDst = System.IO.Path.Combine(sTo, System.IO.Path.GetFileName(sSrc));
                     if (System.IO.File.Exists(sDst)) continue;
                     System.IO.File.Copy(sSrc, sDst, false);
@@ -1981,7 +2076,7 @@ namespace DbDo
             // neither ATTACH nor DETACH inside a transaction, so it begins after the
             // one and ends before the other.
             bool bInTrans = false;
-            invokeSql("ATTACH DATABASE '" + sOtherPath.Replace("'", "''") + "' AS incoming", null);
+            attachForReading(sOtherPath, "incoming");
             try
             {
                 oConn.BeginTrans(); bInTrans = true;
@@ -2751,10 +2846,35 @@ namespace DbDo
         }
 
         // ------- close -------
+        // optimizeBeforeClose: PRAGMA optimize as a SQLite database closes (24 November 2026, from the sqlite-utils and
+        // SQLite documentation Jamal shared). SQLite recommends it before every connection closes: it runs ANALYZE only on
+        // the tables whose statistics are missing or stale and that this session's queries would have used, so a filter
+        // or sort on a large table -- RadioTrail's 52,440 stations -- gets a better plan next time. analysis_limit keeps
+        // each table's analysis to a sample, so closing stays quick. Writable SQLite files only; any failure is logged
+        // and the close goes on. The templates ship with their statistics (checkTemplates), so an untouched copy is
+        // usually left as it was. ROLLBACK: set bOptimizeOnClose to false.
+        public static bool bOptimizeOnClose = true;
+        private void optimizeBeforeClose()
+        {
+            if (!bOptimizeOnClose || bReadOnly) return;
+            try
+            {
+                if (oConn == null || ((int)oConn.State) == 0) return;
+                string sExt = currentExtensionForSql();
+                if (sExt != "db" && sExt != "sqlite" && sExt != "sqlite3") return;
+                DateTime dtStart = DateTime.Now;
+                invokeSql("PRAGMA analysis_limit=400", null);
+                invokeSql("PRAGMA optimize", null);
+                DbDoLog.write("Close: PRAGMA optimize on " + sFilePath + ", ms=" + (int)(DateTime.Now - dtStart).TotalMilliseconds);
+            }
+            catch (Exception ex) { try { DbDoLog.write("Close: PRAGMA optimize not run on " + sFilePath + ": " + ex.Message); } catch { } }
+        }
+
         public void close()
         {
             try { releaseFullCache(); } catch { }
             try { closeRecordset(); } catch { }
+            optimizeBeforeClose();
             try { if (oConn != null && ((int)oConn.State) != 0) oConn.Close(); } catch { }
             releaseCom(oRecordset); oRecordset = null;
             releaseCom(oCatalog); oCatalog = null;
@@ -7288,6 +7408,23 @@ namespace DbDo
             return lResult;
         }
 
+        // attachForReading: attaches another database that is only read -- a template, or a database merged in -- as
+        // read-only, through a file: uri with mode=ro (24 November 2026). Attached read-write, a template in the
+        // installed templates folder could be left with a -wal or -shm beside it, which Update Copies from Templates
+        // then copied. The SQLite driver is built with USE_URI; if it still refuses the uri, the plain attach runs, as
+        // before, and the refusal is logged.
+        public void attachForReading(string sPath, string sAlias)
+        {
+            string sFull = System.IO.Path.GetFullPath(sPath);
+            string sUri = "file:///" + Uri.EscapeDataString(sFull.Replace('\\', '/')).Replace("%2F", "/").Replace("%3A", ":") + "?mode=ro";
+            try { invokeSql("ATTACH DATABASE '" + sUri.Replace("'", "''") + "' AS " + sAlias, null); }
+            catch (Exception exUri)
+            {
+                try { DbDoLog.write("attachForReading: " + sFull + " not attached read-only (" + exUri.Message + "), so it is attached as before"); } catch { }
+                invokeSql("ATTACH DATABASE '" + sPath.Replace("'", "''") + "' AS " + sAlias, null);
+            }
+        }
+
         // migratePartSeparator (29 Oct 2026): rebuild any table whose look or
         // prime still joins parts with a vertical bar so both use char(31),
         // the unit separator. rebuildGeneratedColumns keeps the same fields
@@ -7485,6 +7622,17 @@ namespace DbDo
                         + " o2 JOIN \"" + sTable + "\" n2 ON n2." + sQPk + "=o2.k WHERE n2.prime<>o2.p)", null);
                 }
                 invokeSql("DROP TABLE " + sHelper, null);
+                // STEP 10 OF SQLITE'S PROCEDURE (24 November 2026, from the sqlite-utils documentation Jamal shared, which
+                // raises an error when a transform breaks a constraint): with foreign keys switched off for the swap, the
+                // rebuilt table could break one unnoticed, so when they were on, PRAGMA foreign_key_check runs before
+                // the commit, and any violation rolls the whole rebuild back.
+                if (sFkWas == "ON")
+                {
+                    int iFkRows;
+                    List<string[]> lFkBad = queryRowsSql("PRAGMA foreign_key_check", 1, out iFkRows);
+                    if (lFkBad != null && lFkBad.Count > 0)
+                        throw new InvalidOperationException("the rebuilt table would break a foreign key, first in " + (lFkBad[0].Length > 0 ? lFkBad[0][0] : "a table"));
+                }
                 oConn.CommitTrans(); bInTrans = false;
             }
             catch (Exception ex)
@@ -9219,7 +9367,7 @@ namespace DbDo
             if (readOnly) throw new InvalidOperationException("The database was opened read-only. Close it and reopen without the -readonly flag to enable editing.");
 
             string sText;
-            try { sText = File.ReadAllText(sSourcePath, Encoding.UTF8); }
+            try { sText = ScriptHelper.sReadTextFile(sSourcePath); }
             catch (Exception ex) { throw new Exception("Could not read " + sSourcePath + ": " + ex.Message, ex); }
 
             List<string[]> lRecords = parseDelimited(sText, cDelim);
@@ -23451,7 +23599,7 @@ namespace DbDo
         internal static List<string[]> lGridFromDelimitedFile(string sSourcePath, char cDelim)
         {
             string sText;
-            try { sText = File.ReadAllText(sSourcePath, Encoding.UTF8); }
+            try { sText = ScriptHelper.sReadTextFile(sSourcePath); }
             catch (Exception ex) { throw new Exception("Could not read " + sSourcePath + ": " + ex.Message, ex); }
             List<string[]> lGrid = new List<string[]>();
             foreach (string[] aRec in DbDoManager.parseDelimited(sText, cDelim))
@@ -23758,6 +23906,7 @@ namespace DbDo
                 bGridFirstPopulate = true;
                 // Session-lifetime bookmarks: clear on database open.
                 lBookmarks.Clear();
+                ScriptHelper.removeStaleSideFiles(sPath);
                 db.openDatabase(sPath, null, false);
                 upgradeWithoutLoss(sPath);
                 // Set the per-database settings path NOW, before the initial
@@ -27242,6 +27391,15 @@ namespace DbDo
                     try
                     {
                         string sKept = ScriptHelper.replaceFromTemplate(aPair[1], aPair[0]);
+                        // A REPLACED COPY OPENS AS THE TEMPLATE DOES (24 November 2026). The view remembered for the copy as it
+                        // was -- RadioTrail's sort by name, stream_url, source_id, from before source_id left the prime -- was
+                        // put back on the new copy when it opened again. The new copy is a different database, so it opens
+                        // with the template's own settings, and its view is remembered afresh from then on.
+                        if (sOpenBefore != null && string.Equals(Path.GetFullPath(sOpenBefore), Path.GetFullPath(aPair[0]), StringComparison.OrdinalIgnoreCase))
+                        {
+                            stBefore = null;
+                            DbDoLog.write(sTitle + ": " + sName + " was open before, so it opens again without the view remembered for the copy it replaced");
+                        }
                         int iFiles = ScriptHelper.copyMissingCompanions(aPair[1], aPair[0]);
                         lReport.Add(sName + ": replaced; as it was, " + Path.GetFileName(sKept) + (iFiles > 0 ? "; " + iFiles + (iFiles == 1 ? " file" : " files") + " added beside it" : "") + ".");
                         iDone++;
@@ -27325,7 +27483,7 @@ namespace DbDo
         private int addMissingColumns(string sTemplate)
         {
             int iAdded = 0;
-            db.invokeSql("ATTACH DATABASE '" + sTemplate.Replace("'", "''") + "' AS tplsrc", null);
+            db.attachForReading(sTemplate, "tplsrc");
             bool bBegun = false;
             try
             {

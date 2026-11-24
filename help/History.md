@@ -5,6 +5,20 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 24 November 2026, night -- Cleaner template updates
+
+Update Copies from Templates did its job: every copy was replaced, each with a dated backup beside it. Its log showed three rough edges, now smoothed.
+
+- **No stray side files.** Two files SQLite keeps while it works, RadioTrail.db-wal and RadioTrail.db-shm, were left over in the installed templates folder, and the update copied them beside your fresh copy. The update now never copies such files; DbDo reads a template without writing to it, so none is left there again; setup removes any an earlier version left; and when DbDo opens a database in the ordinary journal mode, it removes left-over ones beside it. A copy's own side files move beside its backup, where they belong.
+- **A replaced copy opens fresh.** The database you had open opened again with the sort remembered for the copy it replaced, such as RadioTrail's sort that still named source_id. It now opens with the template's own settings.
+- **No rebuild at the first open.** The templates joined the parts of look and prime with a vertical bar, and DbDo, which uses an invisible separator, rebuilt them the first time you opened a copy: two seconds for RadioTrail, and the copy then no longer matched its template, so a later template could not replace it as untouched. The build now gives every template DbDo's separator, links included, and the template check fails one that lacks it.
+
+Lessons from the documentation of three other SQLite tools -- SQLiteStudio, sqlitebiter and sqlite-utils -- went in too:
+
+- **Faster filters and sorts over time.** As a database closes, DbDo runs SQLite's own tune-up, PRAGMA optimize, which gathers statistics for any table that lacks them, so SQLite picks the best index for a filter or sort. It samples, so closing stays quick. The templates ship with their statistics already made.
+- **Accented letters survive a CSV import.** A CSV file that is not UTF-8, as Excel in the United States often saves one, was read as if it were, so a name such as Zoë arrived with a replacement mark. DbDo now honors a byte-order mark, reads UTF-8 when the file is valid UTF-8, and otherwise reads it as Windows-1252, saying so in the log.
+- **A safer table rebuild.** When foreign keys are on, a rebuild now checks them before it commits and undoes itself if one would break, the last step of SQLite's own procedure. The template scripts' rebuild keeps a STRICT or WITHOUT ROWID table as it was, and keeps each row's rowid in a table without an id of its own.
+
 ## 24 November 2026, evening -- No id in a prime
 
 A prime is how DbDo tells whether a record is already in a table: Merge Database, Update and the links between records all match by it, across databases. An id cannot do that. The table's own id, or a source's id, is different for every record, so a prime holding one is always unique and never finds the record already there; and a link's id is this database's number for another record, which another database numbers differently. Some templates had ids in their primes.

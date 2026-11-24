@@ -202,12 +202,12 @@ def nameKey(sName):
 # ---------------------------------------------------------------- the database
 
 def lookExpr(lsFields):
-    lsParts = ["iif(\"%s\" IS NOT NULL AND length(CAST(\"%s\" AS TEXT))>0, CAST(\"%s\" AS TEXT) || ' | ', '')" % (s, s, s) for s in lsFields]
-    return "rtrim(" + " || ".join(lsParts) + ", ' | ')"
+    lsParts = ["iif(\"%s\" IS NOT NULL AND length(CAST(\"%s\" AS TEXT))>0, CAST(\"%s\" AS TEXT) || char(31), '')" % (s, s, s) for s in lsFields]
+    return "rtrim(" + " || ".join(lsParts) + ", char(31))"
 
 
 def primeExpr(lsFields):
-    return " || '|' || ".join("coalesce(CAST(\"%s\" AS TEXT),'')" % s for s in lsFields)
+    return "||char(31)||".join("coalesce(CAST(\"%s\" AS TEXT),'')" % s for s in lsFields)
 
 
 def tableDdl(sTable, sId, lsFields, lsLook, lsPrime, dTypes=None):
@@ -287,7 +287,7 @@ def build(sGenreText, sSongText, sTarget):
         sCredit = dAlbum["artist"]
         sListed, sActUrl = dActs.get(nameKey(sCredit), (sCredit, ""))
         if nameKey(sCredit) not in dActs: log("Album %s: its artist %s is not in the book's list of artists; kept as credited" % (dAlbum["name"], sCredit))
-        sAlbumPrime = dAlbum["name"] + "|" + sCredit
+        sAlbumPrime = dAlbum["name"] + chr(31) + sCredit   # the albums prime, joined with char(31) as primeExpr joins it
         # A duo whose partners are both performers here is two performers, not a third.
         lsParts = [s.strip() for s in re.split(r"\s+(?:and|&)\s+", sListed)]
         if len(lsParts) == 2 and all(nameKey(s) in dPerformers or nameKey(s) in dActs for s in lsParts):

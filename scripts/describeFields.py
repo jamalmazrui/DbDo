@@ -176,12 +176,12 @@ def renameToDefs(sDb, sTemplate, bDry):
 
 def lookExpression(lsFields):
     """Look as DbDo's builders write it: each field with a separator, blanks left out, the last separator trimmed."""
-    return "rtrim(" + " || ".join("iif(%s IS NOT NULL AND length(CAST(%s AS TEXT))>0, CAST(%s AS TEXT) || ' | ', '')" % (f, f, f) for f in lsFields) + ", ' | ')"
+    return "rtrim(" + " || ".join("iif(%s IS NOT NULL AND length(CAST(%s AS TEXT))>0, CAST(%s AS TEXT) || char(31), '')" % (f, f, f) for f in lsFields) + ", char(31))"
 
 
 def primeExpression(lsFields):
     """Prime as DbDo's builders write it: each field as text, joined by bars."""
-    return "||'|'||".join("coalesce(CAST(%s AS TEXT),'')" % f for f in lsFields)
+    return "||char(31)||".join("coalesce(CAST(%s AS TEXT),'')" % f for f in lsFields)
 
 
 def generatedSpan(sSql, sColumn):

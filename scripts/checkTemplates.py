@@ -13,6 +13,8 @@ WHAT IT CHECKS, for each templates\\<root>\\<root>.db:
   - Every table with a prime has a unique index on it, so a map can never point at two records.
   - Every table of DbDo's shape is in the table's own order (24 November 2026): its id, added and edited; the main
     fields; then notes, tags, url, look, prime and marked.
+  - Every look and prime joins its parts with char(31), the unit separator, as DbDo does (24 November 2026), so no
+    table is rebuilt at a person's first open and a fresh copy keeps the fingerprint of its template.
   - No prime holds an id (24 November 2026): not the table's own, not a source's, not a link's -- with the two
     exceptions named in dIdPrimeKept, tables whose records are nothing but a pair of links.
   - Every edited trigger watches every content field: all but the id, added, edited, look, prime and marked, the same
@@ -32,6 +34,10 @@ WHAT IT CHECKS, for each templates\\<root>\\<root>.db:
 WHAT --repair DOES, before checking, inside one transaction per database:
   - Rebuilds a table whose columns are in any other order into the table's own, keeping every row, index and trigger;
     the main fields keep their order, except where fetchStations.dMainOrders names one (defs, maps, stations).
+  - Converts a look or prime joined with a vertical bar to char(31), by text, keeping its fields, and moves each map
+    link to the new primes: the linked tables first, then defs and maps.
+  - Runs ANALYZE when a table with an index and rows has no statistics, so SQLite picks the best index from the first
+    open and DbDo's PRAGMA optimize at close leaves an untouched copy as it was.
   - Takes every id out of a prime, keeping the other fields in order, or using the fields dPrimeFields names. It refuses,
     changing nothing, when the records would then share a prime, so no record is ever lost to the rule.
   - Merges records that share a prime: the first keeps its id, takes any field it lacks from the others, and gains
@@ -106,7 +112,7 @@ dIdPrimeKept = {
     "chinook|invoice_items": "an invoice line is only a track on an invoice",
     "northwind|order_details": "an order line is only a product on an order",
 }
-sVersion = "2026-11-24 version 5: no id in a prime; every table in its own order"
+sVersion = "2026-11-24 version 7: no id in a prime; every table in its own order; char(31) separators; statistics"
 
 lErrors = []
 lRepairs = []
@@ -434,6 +440,23 @@ def leaveWal(sRoot, sDb):
     return True
 
 
+def analyzeMissing(oDb, sRoot):
+    """Runs ANALYZE when a table with an index has no statistics (24 November 2026, from the sqlite-utils documentation's
+    --analyze and SQLite's advice). The statistics in sqlite_stat1 let SQLite choose the best index for a filter or a
+    sort; DbDo now runs PRAGMA optimize as a database closes, which analyzes a table that lacks them, so a template that
+    ships with them leaves a person's untouched copy as it was. Only missing statistics count, so a template already
+    analyzed is not rewritten on every build."""
+    lIndexed = sorted({r[0] for r in oDb.execute("SELECT tbl_name FROM sqlite_master WHERE type = 'index' AND tbl_name NOT LIKE 'sqlite_%'")})
+    if not lIndexed: return
+    bStats = oDb.execute("SELECT 1 FROM sqlite_master WHERE type = 'table' AND name = 'sqlite_stat1'").fetchone() is not None
+    lHave = {r[0] for r in oDb.execute("SELECT DISTINCT tbl FROM sqlite_stat1")} if bStats else set()
+    lMissing = [s for s in lIndexed if s not in lHave and oDb.execute("SELECT 1 FROM " + quoted(s) + " LIMIT 1").fetchone()]
+    if not lMissing: return
+    oDb.execute("PRAGMA analysis_limit = 400")
+    oDb.execute("ANALYZE")
+    repaired(sRoot, "statistics made for " + ", ".join(lMissing) + ", so SQLite picks the best index from the first open")
+
+
 def repair(sRoot, sDb):
     """Every repair DbDo's conventions settle, in one transaction."""
     oDb = sqlite3.connect(sDb, isolation_level=None)
@@ -447,6 +470,9 @@ def repair(sRoot, sDb):
             if sTable in lSkipTables: continue
             if primeRule.putInOrder(oDb, sTable, primeRule.dMainOrders.get(sTable)):
                 repaired(sRoot, sTable + ": columns put in the table's own order: " + ", ".join(r[1] for r in oDb.execute("PRAGMA table_xinfo(" + quoted(sTable) + ")")))
+        for sTable in [s for s in tables(oDb) if s not in ("maps", "defs")] + [s for s in ("defs", "maps") if s in tables(oDb)]:
+            if primeRule.useUnitSeparator(oDb, sTable):
+                repaired(sRoot, sTable + ": look and prime now join their parts with char(31), as DbDo does, so DbDo need not rebuild it at the first open")
         for sTable in primeTables(oDb):
             primeWithoutIds(oDb, sRoot, sTable)
             mergeDuplicates(oDb, sRoot, sTable)
@@ -467,6 +493,7 @@ def repair(sRoot, sDb):
                 repaired(sRoot, sTable + ": the edited trigger" + (" now also watches " + ", ".join(lMissing) if lMissing else "") + (" no longer watches " + ", ".join(lExtra) if lExtra else ""))
         seedKinds(oDb, sRoot)
         repairIndexes(oDb, sRoot)
+        analyzeMissing(oDb, sRoot)
         if len(lRepairs) == iBefore:
             oDb.execute("ROLLBACK")   # nothing to repair: the file is left byte for byte as it was, so git sees no change
             return True
@@ -538,6 +565,9 @@ def checkDatabase(sRoot, oDb):
         lHave = [s for s, iPk, iHidden in columns(oDb, sTable)]
         lWant = primeRule.standardOrder(oDb, sTable, primeRule.dMainOrders.get(sTable))
         if lHave != lWant: fail(sRoot, sTable + ": the columns are not in the table's own order; --repair puts them as " + ", ".join(lWant))
+    for sTable in tables(oDb):
+        if primeRule.barSeparated(oDb, sTable):
+            fail(sRoot, sTable + ": look or prime joins its parts with a vertical bar, so DbDo would rebuild it at the first open; --repair makes it char(31)")
     for sTable in primeTables(oDb):
         lIds = idsInPrime(oDb, sTable)
         if lIds and (sRoot + "|" + sTable) not in dIdPrimeKept:

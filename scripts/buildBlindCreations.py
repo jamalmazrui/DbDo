@@ -147,11 +147,11 @@ def parsePresentations(s):
 # ---- the schema, in the Trail conventions (homer-db skill), as JobTrail writes it ----
 
 def lookSql(lsFields):
-    return "rtrim(" + " || ".join("iif(%s IS NOT NULL AND length(CAST(%s AS TEXT))>0, CAST(%s AS TEXT) || ' | ', '')" % (f, f, f) for f in lsFields) + ", ' | ')"
+    return "rtrim(" + " || ".join("iif(%s IS NOT NULL AND length(CAST(%s AS TEXT))>0, CAST(%s AS TEXT) || char(31), '')" % (f, f, f) for f in lsFields) + ", char(31))"
 
 
 def primeSql(lsFields):
-    return "||'|'||".join("coalesce(CAST(%s AS TEXT),'')" % f for f in lsFields)
+    return "||char(31)||".join("coalesce(CAST(%s AS TEXT),'')" % f for f in lsFields)
 
 
 def createTable(c, sTable, sId, lData, lsLook, lsPrime, bUrl=True):

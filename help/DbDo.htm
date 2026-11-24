@@ -2880,8 +2880,10 @@ added or changed nothing – keeping each copy as it was beside it as a
 dated backup, or <strong>Merge all</strong>, which adds to each copy
 what its template has and it lacks, keeps everything of yours, and asks
 once how records in both are treated. The database you had open is
-opened again afterwards, and a report names what happened to each
-copy.</li>
+opened again afterwards – with the template’s own settings, if it was
+one of the copies replaced – and a report names what happened to each
+copy. Files SQLite keeps beside a database while it works, such as a
+-wal file, are never copied.</li>
 <li><strong>More Documents.</strong> The Announcement, the Developer
 Guide, the License, and the Tutorials Transcript. These are used rarely,
 so they sit one level down.</li>

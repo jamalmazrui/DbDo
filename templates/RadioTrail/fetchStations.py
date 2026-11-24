@@ -178,10 +178,19 @@ def rebuildTable(c, sTable, lsItems, lsSkipSql=()):
     lInfo = list(c.execute("pragma table_xinfo(%s)" % quotedName(sTable)))
     lsNewColumns = [columnOfItem(s) for s in lsItems]
     lsCopy = [r[1] for r in lInfo if r[6] == 0 and r[1] in lsNewColumns]
+    # KEPT THROUGH A REBUILD (24 November 2026, from the sqlite-utils documentation: its transform once lost a table's
+    # STRICT mode and renumbered a rowid table). The words after the column list -- STRICT, WITHOUT ROWID -- are kept,
+    # and a table with no INTEGER PRIMARY KEY of its own keeps each row's rowid, which a map or a person may know it by.
+    sOldSql = c.execute("select sql from sqlite_master where type='table' and name=?", (sTable,)).fetchone()[0] or ""
+    sOptions = sOldSql[sOldSql.rfind(")") + 1:].strip() if ")" in sOldSql else ""
+    lPk = [r for r in lInfo if r[5]]
+    bRowid = "without rowid" not in sOptions.lower() and not (len(lPk) == 1 and (lPk[0][2] or "").strip().upper() == "INTEGER")
     lsKeep = [r[0] for r in c.execute("select sql from sqlite_master where tbl_name=? and type in ('index', 'trigger') and sql is not null", (sTable,))
               if r[0] not in lsSkipSql]
     sTemp = sTable + "__rebuilt"
     sList = ", ".join(quotedName(s) for s in lsCopy)
+    sInto = ("rowid, " if bRowid else "") + sList
+    sFrom = ("rowid, " if bRowid else "") + sList
     bOwn = not c.in_transaction
     # LEGACY RENAME FOR THE SWAP: another table's trigger may name this one, which does not exist between the drop and
     # the rename, and a modern rename would refuse a schema with such a reference. The legacy rename leaves triggers
@@ -190,8 +199,8 @@ def rebuildTable(c, sTable, lsItems, lsSkipSql=()):
     c.execute("pragma legacy_alter_table = on")
     if bOwn: c.execute("begin")
     try:
-        c.execute("create table %s (%s)" % (quotedName(sTemp), ", ".join(lsItems)))
-        c.execute("insert into %s (%s) select %s from %s" % (quotedName(sTemp), sList, sList, quotedName(sTable)))
+        c.execute("create table %s (%s)%s" % (quotedName(sTemp), ", ".join(lsItems), (" " + sOptions) if sOptions else ""))
+        c.execute("insert into %s (%s) select %s from %s" % (quotedName(sTemp), sInto, sFrom, quotedName(sTable)))
         iBefore = c.execute("select count(*) from %s" % quotedName(sTable)).fetchone()[0]
         iAfter = c.execute("select count(*) from %s" % quotedName(sTemp)).fetchone()[0]
         if iBefore != iAfter: raise RuntimeError("copied %d of %d rows of %s" % (iAfter, iBefore, sTable))
@@ -314,9 +323,15 @@ def setPrimeFields(c, sTable, lsFields):
     dOld = dict(c.execute("select %s, prime from %s" % (quotedName(sPk), quotedName(sTable))))
     lsItems = [sNewItem if s == sItem else s for s in tableItems(c, sTable)]
     rebuildTable(c, sTable, lsItems, primeIndexSql(c, sTable))
+    return followLinks(c, sTable, sPk, dOld)
+
+
+def followLinks(c, sTable, sPk, dOld):
+    """Moves every map link from a record's old prime (dOld, by integer key) to its prime now. Returns how many records'
+    primes changed."""
     lPairs = [(dOld.get(iId), sNew) for iId, sNew in c.execute("select %s, prime from %s" % (quotedName(sPk), quotedName(sTable)))
               if dOld.get(iId) is not None and dOld.get(iId) != sNew]
-    if lPairs and c.execute("select 1 from sqlite_master where type='table' and name='maps'").fetchone():
+    if lPairs and sTable != "maps" and c.execute("select 1 from sqlite_master where type='table' and name='maps'").fetchone():
         c.execute("create temp table if not exists prime_moves (old_prime text primary key, new_prime text)")
         c.execute("delete from prime_moves")
         c.executemany("insert or replace into prime_moves values (?, ?)", lPairs)
@@ -328,6 +343,51 @@ def setPrimeFields(c, sTable, lsFields):
             c.execute("delete from maps where tbl%s = ? and prime%s in (select old_prime from prime_moves) "
                       "and prime%s not in (select prime from %s)" % (sSide, sSide, sSide, quotedName(sTable)), (sTable,))
         c.execute("drop table prime_moves")
+    return len(lPairs)
+
+
+# THE UNIT SEPARATOR AT BUILD TIME (24 November 2026). DbDo joins the parts of look and prime with char(31), the unit
+# separator, and converts a table still joined with a vertical bar the first time it opens one (migratePartSeparator).
+# A template built with bars was therefore rebuilt on a person's machine at its first open: RadioTrail's 52,440 stations
+# took two seconds, and the copy no longer matched the fingerprint of the template it was seeded from, so a later
+# template could never replace it as untouched. The same conversion is made here, once, at build time. It changes only
+# the separator, by text, so a table's own fields -- a contact pattern's prime included -- are kept exactly.
+reBarInPrime = re.compile(r"\|\|\s*'\|'\s*\|\|")
+reBarInLook = re.compile(r"' \| '")
+
+
+def barSeparated(c, sTable):
+    """Whether a table's look or prime still joins its parts with a vertical bar."""
+    for s in tableItems(c, sTable):
+        sName = columnOfItem(s).lower()
+        if sName == "prime" and reBarInPrime.search(s): return True
+        if sName == "look" and reBarInLook.search(s): return True
+    return False
+
+
+def useUnitSeparator(c, sTable):
+    """Rebuilds a table whose look or prime is joined with a vertical bar so both use char(31), as DbDo does, and moves
+    every map link to the new primes. maps and defs are converted last by the caller, since links name other tables'
+    primes. Returns 1 when the table was converted, else 0."""
+    if not barSeparated(c, sTable): return 0
+    lsItems = []
+    for s in tableItems(c, sTable):
+        sName = columnOfItem(s).lower()
+        if sName == "prime": s = reBarInPrime.sub("||char(31)||", s)
+        elif sName == "look": s = reBarInLook.sub("char(31)", s)
+        lsItems.append(s)
+    sPk = next((r[1] for r in c.execute("pragma table_info(%s)" % quotedName(sTable)) if r[5]), "")
+    dOld = dict(c.execute("select %s, prime from %s" % (quotedName(sPk), quotedName(sTable)))) if sPk and primeItem(c, sTable) else {}
+    rebuildTable(c, sTable, lsItems)
+    if dOld: followLinks(c, sTable, sPk, dOld)
+    return 1
+
+
+def unitSeparatorEverywhere(c):
+    """useUnitSeparator on every table, the linked tables first and maps and defs last. Returns how many were converted."""
+    lsTables = [r[0] for r in c.execute("select name from sqlite_master where type='table' and name not like 'sqlite%' order by name")]
+    lsTables = [s for s in lsTables if s not in ("maps", "defs")] + [s for s in ("defs", "maps") if s in lsTables]
+    return sum(useUnitSeparator(c, s) for s in lsTables)
     return len(lPairs)
 
 
@@ -413,6 +473,7 @@ def ensureConventions(c):
         if c.execute("select 1 from sqlite_master where type='table' and name=?", (sOrdered,)).fetchone():
             iAdded += putInOrder(c, sOrdered, dMainOrders.get(sOrdered))
     iAdded += primeWithoutIds(c, "stations")
+    iAdded += unitSeparatorEverywhere(c)
     lsExisting = [r[0] for r in c.execute("select name from sqlite_master where type in ('index', 'trigger')")]
     for sTable in ("defs", "maps"):
         sName = "idx_" + sTable + "_prime"
