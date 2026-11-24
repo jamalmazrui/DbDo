@@ -754,17 +754,22 @@ your own copy of it.</p></li>
 choosing the right driver from the extension. <strong>New
 Database</strong> creates a fresh SQLite database; <strong>Add
 Table</strong> adds a table to it.</p>
-<p><strong>Add Table</strong> asks first, when a table is open, whether
-to <strong>Define</strong> a new table or <strong>Clone</strong> the
-open one’s fields, which then fill the form for you to name the new
-table and change what you like. Every new table gets DbDo’s standard
-columns: its id, added, edited, notes, tags and marked. The form has ten
-name-and-type slots; its <strong>Text</strong> button opens the same
-fields as lines you can read and edit like any text, one field a line in
-the form <code>name: TYPE</code>, with no limit to how many, and you can
-paste a structure in. On OK, if fields begin with the same letter, DbDo
-says which, since only the first of each gets an Alt letter in the
-record form, and offers to go back and rename them.</p></li>
+<p><strong>Add Table</strong> asks first whether to
+<strong>Define</strong> a new table, <strong>Clone</strong> the open
+one’s fields (when a table is open), or make one <strong>From
+file</strong>: a CSV or TSV file becomes a table of the open database,
+named for the file and shaped as Import shapes it, numbers as numbers.
+That is how two files meet in one database, so a query can look a value
+up from one in the other. Define or Clone which then fill the form for
+you to name the new table and change what you like. Every new table gets
+DbDo’s standard columns: its id, added, edited, notes, tags and marked.
+The form has ten name-and-type slots; its <strong>Text</strong> button
+opens the same fields as lines you can read and edit like any text, one
+field a line in the form <code>name: TYPE</code>, with no limit to how
+many, and you can paste a structure in. On OK, if fields begin with the
+same letter, DbDo says which, since only the first of each gets an Alt
+letter in the record form, and offers to go back and rename
+them.</p></li>
 <li><p><strong>Open Table</strong> (Control+Shift+O) opens a table (or
 arbitrary query) in a new window.</p></li>
 <li><p><strong>Recent Databases</strong> (Alt+R) reopens something you
@@ -921,6 +926,26 @@ expression, with $1 and $2 putting back the parts in parentheses;
 dialog with it checked. <strong>Dry run</strong> counts what would
 change and changes nothing. Replace never writes the fields DbDo keeps
 itself: look, prime, added, edited, marked and the id.</li>
+<li><strong>Calculate Column</strong> (Edit menu, no key) adds a column
+whose values come from a formula over the others, as pandas does with
+<code>df["ratio"] = df["a"] / df["b"]</code>. It asks for the new
+column’s <strong>Name</strong>, a <strong>Kind of formula</strong> built
+on the current column, the <strong>Formula</strong> itself, and
+<strong>Which records</strong> to fill: all records, the records in
+view, or the marked ones. The kinds are: arithmetic with a number;
+divided by, or plus, another column; rounded; the length of a text;
+lower or upper case; the text before or after a comma (a surname from
+“Braund, Mr. Owen Harris”); the year, month, weekday or hour of a date;
+each value mapped to another (male to M); yes or no by a test; and a
+value looked up from another table. Each puts its formula in the Formula
+box to use as it is or change; the formula is SQL, with column names in
+double quotes. It is tried first, so an error is reported before
+anything changes. The new column holds whole numbers, numbers or text,
+as the formula gives, and is shown last.</li>
+<li><strong>Rename Column</strong> (Edit menu, no key) gives a column of
+the open table a new name and keeps its values; look and prime follow,
+and so do the order, the filter and the shown columns. The columns DbDo
+keeps itself keep their names.</li>
 <li><strong>Extract with Regex</strong> (Control+Shift+E) copies every
 match of a regular expression to the clipboard, one per line, from the
 same Columns and Records choices; it starts on all columns, hidden ones
@@ -1004,9 +1029,15 @@ begin with an operator: <code>=</code> is, <code>!=</code> is not,
 <code>&gt;</code> more than, <code>&gt;=</code> at least,
 <code>&lt;</code> less than, <code>&lt;=</code> at most, <code>%</code>
 contains, <code>!%</code> does not contain. Is not and does not contain
-also keep records whose field is empty. Two values joined by two dots
-give a range, both ends included: <code>2025..2026</code> in date_read
-finds the books finished in those two years,
+also keep records whose field is empty. An operator alone tests for an
+empty field: <code>=</code> alone finds records whose field is blank,
+and <code>!=</code> alone finds those whose field holds something. A
+number typed after <code>&gt;</code>, <code>&gt;=</code>,
+<code>&lt;</code> or <code>&lt;=</code> is compared as a number, so
+<code>&gt; 35</code> in an age box finds ages above 35; a blank, or text
+that is not a number, never passes. Two values joined by two dots give a
+range, both ends included: <code>2025..2026</code> in date_read finds
+the books finished in those two years,
 <code>2026-01-01..2026-03-31</code> a span of dates, and
 <code>5..12</code> a span of numbers. A year stands for every day in it,
 since dates are kept as year-month-day. Several filled boxes must all
@@ -1033,20 +1064,21 @@ in force says so as it opens.</li>
 Filter</strong> (Shift+F) speaks the current filter.</li>
 </ul></li>
 <li><strong>Order Records</strong> (Alt+O) has the same buttons as Show
-Columns, and first says the order in force. <strong>Prime
-columns</strong> comes first and is the default (the first focus, so
-Enter takes it): it sorts by the primary key, prime’s fields, ascending.
-<strong>Look columns</strong> sorts by look’s fields, the default
-columns. <strong>Main columns</strong>, <strong>Standard
-columns</strong> and <strong>All columns</strong> sort by those columns,
-ascending. <strong>Choose columns</strong> picks the columns and the
-direction of each, in two lists; <strong>Type columns</strong> takes
-them separated by commas, with desc after a column for largest or latest
-first. When look and prime hold the same fields, one button,
-<strong>Look columns</strong>, stands for both, in Order Records and
-Show Columns alike. Last comes <strong>Reverse order</strong> (R), which
-turns the order in force the other way, as <strong>Reverse
-Order</strong> (Alt+Shift+O) does from the grid.</li>
+Columns. In any order, blank values come last, whether the order is
+ascending or descending. <strong>Prime columns</strong> comes first and
+is the default (the first focus, so Enter takes it): it sorts by the
+primary key, prime’s fields, ascending. <strong>Look columns</strong>
+sorts by look’s fields, the default columns. <strong>Main
+columns</strong>, <strong>Standard columns</strong> and <strong>All
+columns</strong> sort by those columns, ascending. <strong>Choose
+columns</strong> picks the columns and the direction of each, in two
+lists; <strong>Type columns</strong> takes them separated by commas,
+with desc after a column for largest or latest first. When look and
+prime hold the same fields, one button, <strong>Look columns</strong>,
+stands for both, in Order Records and Show Columns alike. Last comes
+<strong>Reverse order</strong> (R), which turns the order in force the
+other way, as <strong>Reverse Order</strong> (Alt+Shift+O) does from the
+grid.</li>
 </ul>
 <p>Sorting reads numbers as numbers: volume 9 comes after 7 and 6.5 even
 if some values were stored as text and others as numbers. It also
@@ -1116,14 +1148,14 @@ tested too, so a pattern can make a field required: <code>^\s*\S</code>
 refuses a blank, and <code>^$|</code> in front of any pattern lets the
 field stay blank. What DbDo says on a failure is the field’s
 description, so write the form a value takes into descrip, such as
-“starting with http:// or https://”. Filter Records checks no patterns.
-To set them without editing defs, use Settings, then Field Validation
-for This Table: one box per field, saved into defs. In a record or
-new-record form, <strong>Alt+Shift+P</strong> (P for pattern; in the
-main window the same key plays a stream) edits the pattern of the field
-you are on: a small dialog shows it under the field’s description, OK
-saves it and puts it in force at once, and an empty pattern removes
-it.</p>
+“starting with <code>http://</code> or <code>https://</code>”. Filter
+Records checks no patterns. To set them without editing defs, use
+Settings, then Field Validation for This Table: one box per field, saved
+into defs. In a record or new-record form, <strong>Alt+Shift+P</strong>
+(P for pattern; in the main window the same key plays a stream) edits
+the pattern of the field you are on: a small dialog shows it under the
+field’s description, OK saves it and puts it in force at once, and an
+empty pattern removes it.</p>
 <p><strong>Why descrip, not desc.</strong> the defs table’s column names
 are short so they cannot be mistaken for SQL words: tbl, fld, val.
 AccAudit, where this table began under the name lookups, called its
@@ -1324,8 +1356,11 @@ total, average and middle, and which column is highest and lowest.</li>
 <li><strong>Frequency:</strong> how many records hold each value of one
 column, or each combination of several, with a running percentage.</li>
 <li><strong>Group:</strong> a number column totalled and averaged for
-each value of another column, or for each year, month or weekday of a
-date.</li>
+each value of another column, or for each year, month, weekday, day or
+hour of a date. Hour is offered when the dates carry a time, and the
+time is taken as written, so a time zone after it does not shift it. A
+yes-or-no column kept as 0 and 1, such as survived, can be averaged too:
+its average is the share that are 1.</li>
 <li><strong>Relation:</strong> how strongly each pair of number columns
 rises and falls together, and the straight line that best fits the
 strongest pair. A numbering, such as a record number, is left out. Last
@@ -1334,7 +1369,14 @@ into four equal parts, and one line for each quarter of the second
 column, highest first, counting the points across the quarters of the
 first, lowest first. It tells you where the points cluster, the way a
 sighted reader sees it on a scatter plot.</li>
-<li><strong>Cross-tab:</strong> one column by another.</li>
+<li><strong>Cross-tab:</strong> one column by another. <strong>Count
+records</strong> counts the records holding each pair of values.
+<strong>Average a number</strong>, offered when there is a number column
+besides the two, gives the average of that column for each pair – the
+average fare for each sex and class, say – then each row’s average, each
+column’s average and the overall average, the takeaway first. This is
+the table pandas calls a pivot table. Numbers among the values read in
+number order: class 1, 2, 3.</li>
 </ul>
 <p>Generate Graphics offers a bar chart (how often each value occurs), a
 Pareto chart (the same, largest first, with the running share), a pie
@@ -1342,13 +1384,16 @@ chart (the split of a yes-or-no column), a histogram (how a number
 column spreads), a whisker plot (the middle and range of each number
 column), a scatter plot (one number column against another, with the
 line that fits), a line chart and a date chart (records by month, year
-or season). Arranged by row, the bar and line charts draw each record
-across its number columns, up to eight records. Each chart’s web page
-says what the chart shows before its numbers: the kind of chart, each
-axis with the values marked on it, and what is drawn in words that fit
-the kind, such as each box of a whisker plot with its middle, box,
-whiskers and outliers. A scatter plot’s page adds a table of where its
-points fall.</p>
+or season). When a date column is among the columns chosen, the line
+chart draws each number column across its dates, in time order, and its
+page names the highest and lowest of each line and when they came.
+Arranged by row, the bar and line charts draw each record across its
+number columns, up to eight records. Each chart’s web page says what the
+chart shows before its numbers: the kind of chart, each axis with the
+values marked on it, and what is drawn in words that fit the kind, such
+as each box of a whisker plot with its middle, box, whiskers and
+outliers. A scatter plot’s page adds a table of where its points
+fall.</p>
 <p>Drawn by Python, a chart is four files in Documents, DbDo Charts,
 named for the table, the chart and the time:</p>
 <ul>
@@ -1557,14 +1602,25 @@ and reshapes it <em>into a DbDo database</em> — normalizing columns,
 applying conventions, and producing a <code>.db</code> you then work
 with. Use Import when you want to bring foreign data into a proper DbDo
 database. <strong>Transfer Import</strong> and <strong>Merge
-Data</strong> (Alt+Shift+M) bring data in alongside existing data.</li>
+Data</strong> (Alt+Shift+M) bring data in alongside existing data. When
+Import reads a CSV, TSV or Excel file, a column that holds only whole
+numbers becomes a column of whole numbers, and one that holds only
+numbers a column of numbers, so filters, orders and reports compare them
+as numbers; a blank in such a column stays empty, not zero. A number
+with a leading zero, such as the zip code 02134, keeps its column as
+text, so the zero is not lost. Column names become lowercase words
+joined by underscores: date.utc becomes date_utc. Merge Data finds a
+file’s columns by either name. A table keeps one record for each set of
+values, so a row that repeats another exactly is left out; Import says
+how many it left out.</li>
 <li><strong>Export Data</strong> (Control+Shift+X) writes the
 <strong>grid</strong> — the current view — out to a new file in a chosen
 format. Use Export to hand off what you are looking at. A CSV or TSV
 file holds your values exactly as they are. Since a spreadsheet may run
 a value beginning with =, +, - or @ as a formula, DbDo asks before
 opening such a file, and an .xlsx export is the safe way into a
-spreadsheet: it keeps every value as text.</li>
+spreadsheet: it keeps every text value as text, and writes a column the
+database keeps as numbers as Excel numbers, ready to sum and chart.</li>
 <li><strong>Save</strong> (Control+S) and <strong>Save As</strong>
 (Control+Shift+S) concern the <em>whole database</em>. For a workbook
 opened faithfully, Save writes your edits back to the

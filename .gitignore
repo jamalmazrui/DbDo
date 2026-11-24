@@ -37,8 +37,16 @@
 !/build.cmd
 !/configs/DbDo.inix
 !/configs/Hints.inix
+!/data/air_quality_long.csv
+!/data/air_quality_no2.csv
+!/data/air_quality_no2_long.csv
+!/data/air_quality_parameters.csv
+!/data/air_quality_pm25_long.csv
+!/data/air_quality_stations.csv
 !/data/defs.db
 !/data/iris.csv
+!/data/pandas_data_LICENSE.txt
+!/data/titanic.csv
 !/DbDo.cmd
 !/DbDo.cs
 !/DbDo.exe.config

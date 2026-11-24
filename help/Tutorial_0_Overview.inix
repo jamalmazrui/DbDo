@@ -167,7 +167,7 @@ Hear=TechTraining, BlindCreations, ContactTrail and RecipeTrail, and bringing yo
 
 [step]
 
-Say=Eight, Analyze a Dataset: a scientist's measurements, asked in SQL and in plain words, grouped, related and handed on.
+Say=Eight, Analyze a Dataset: the Titanic's passengers, the list the pandas tutorials use, filtered, averaged by group, counted, given a new column, asked in SQL and charted.
 Key=
 Hear=A dataset brought in, asked in SQL and in plain words, grouped, related and handed on.
 

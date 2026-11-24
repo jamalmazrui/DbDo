@@ -74,8 +74,8 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Narrow asks how to give the new condition, just as the first filter did. F for Field boxes opens a box for every field.
-Key=F
+Say=Narrow asks how to give the new condition, just as the first filter did. M for Main columns opens a box for each of the station's own columns.
+Key=M
 Hear=Filter Records dialog, name: edit
 Note=Confirm the wording with a live run: buildTutorials -live.
 

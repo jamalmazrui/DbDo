@@ -1050,7 +1050,7 @@ Screen reader:
 
 ### Step 26
 
-Eight, Analyze a Dataset: a scientist's measurements, asked in SQL and in plain words, grouped, related and handed on.
+Eight, Analyze a Dataset: the Titanic's passengers, the list the pandas tutorials use, filtered, averaged by group, counted, given a new column, asked in SQL and charted.
 
 Screen reader:
 
@@ -1607,9 +1607,9 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 10: F
+### Step 10: M
 
-Narrow asks how to give the new condition, just as the first filter did. F for Field boxes opens a box for every field.
+Narrow asks how to give the new condition, just as the first filter did. M for Main columns opens a box for each of the station's own columns.
 
 Screen reader:
 
@@ -2618,13 +2618,13 @@ Screen reader:
 
 ## 8 - Analyze a Dataset
 
-Fisher's iris measurements, brought in from a CSV file; a question in SQL, the database's own language, and in plain words to a model on this computer; a number grouped by species; two measurements that rise together; and the answer handed on to Excel.
+The passengers of the Titanic, the dataset the pandas tutorials teach with, brought in from a CSV file and asked the same questions: who was older than 35, how many rode in each class, the average age of men and women, the average fare by sex and class, the surname of each passenger, the longest name, and a chart of ages to hand on.
 
 **Before you start:** DbDo is open, and installed in the usual place, with its data folder.
 
 ### Step 1
 
-One want: to learn what a dataset says. DbDo comes with a famous one: Ronald Fisher's measurements of 150 iris flowers, three species, four measurements each, from 1936. Scientists still learn on it.
+One want: to learn what a dataset says, the way data scientists do with pandas, without writing a program. DbDo comes with the list they learn on: 891 passengers of the Titanic, with their class, name, sex, age, fare and whether they survived.
 
 ### Step 2: Alt+Control+D
 
@@ -2646,119 +2646,29 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 4: C:\Program Files\DbDo\data\iris.csv
+### Step 4: Enter
 
-I type where the sample is, in DbDo's own folder.
-
-Screen reader:
-
-- C:\Program Files\DbDo\data\iris.csv
-
-Confirm the wording with a live run: buildTutorials -live.
-
-### Step 5: Enter
-
-Enter brings it in, as a working copy; the original file is untouched, and Control plus Shift plus S, Save As, keeps the database as my own.
+I type where the passenger list is, in DbDo's own folder, and press Enter.
 
 Screen reader:
 
-- Imported iris.csv into a new DbDo database
+- Imported titanic.csv into a new DbDo database
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 6: Control+Q
+### Step 5: Shift+Z
 
-Now a question. For each species, how long are its petals on average? Control plus Q, Query.
+A column that holds only numbers comes in as numbers, so age compares and sorts as a number, and a blank age stays blank rather than counting as zero. Shift plus Z, Say Status.
 
 Screen reader:
 
-- Query dialog
+- status, titanic, record
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 7: select species, count(*) as flowers, round(avg(petal_length), 2) as petal from iris group by species order by petal
+### Step 6: Alt+Shift+S
 
-I type the question in SQL.
-
-Screen reader:
-
-- select species, count as flowers, round avg petal length, 2 as petal from iris group by species order by petal
-
-Confirm the wording with a live run: buildTutorials -live.
-
-### Step 8: Control+Enter
-
-Control plus Enter runs it from inside the box, where Enter would start a new line.
-
-Screen reader:
-
-- setosa, 50, 1.46, Row 1 of 3
-
-Confirm the wording with a live run: buildTutorials -live.
-
-### Step 9: Control+End
-
-Setosa has the shortest petals. Control plus End.
-
-Screen reader:
-
-- virginica, 50, 5.55, Row 3 of 3
-
-Confirm the wording with a live run: buildTutorials -live.
-
-### Step 10: Shift+Q
-
-Virginica the longest, almost four times as long. Shift plus Q says the query in force; Alt plus Shift plus Q, Query History, lists the questions asked, to ask one again.
-
-Screen reader:
-
-- query: select species
-
-Confirm the wording with a live run: buildTutorials -live.
-
-### Step 11: Escape
-
-A planned misstep: a misspelled column. The database names the word it does not know, and the box keeps the question to fix. Escape.
-
-Screen reader:
-
-- virginica, 50, 5.55, Row 3 of 3
-
-Confirm the wording with a live run: buildTutorials -live.
-
-### Step 12: Shift+F12
-
-SQL is not the only way to ask. Back in the flowers, Shift plus F12, Chat about Table, sends the table with a question in plain words to the model on this computer.
-
-Screen reader:
-
-- Chat about Table
-
-Confirm the wording with a live run: buildTutorials -live.
-
-### Step 13: Which species has the widest sepals?
-
-I ask which species has the widest sepals.
-
-Screen reader:
-
-- Which species has the widest sepals?
-
-Confirm the wording with a live run: buildTutorials -live.
-
-### Step 14: Enter
-
-Enter. The answer comes in words, and the records are not sent anywhere.
-
-Screen reader:
-
-- setosa
-
-Confirm the wording with a live run: buildTutorials -live.
-
-### Step 15: Alt+Shift+S
-
-Escape. A third way needs no SQL at all. Alt plus Shift plus S, Generate Statistics, reports on the grid. Its dialog asks which columns, which records, whether by column or by row, and the kind; it starts on the shown columns and the records in view, which is what I want.
+Before any question, a profile: what each column holds. Alt plus Shift plus S, Generate Statistics. Its kind starts on Profile.
 
 Screen reader:
 
@@ -2766,9 +2676,135 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 16: Alt+K
+### Step 7: Control+Enter
 
-Alt plus K moves to the kind.
+Control plus Enter. One line a column: its kind, how full it is, and what matters most. Age is filled for 714 of the 891, from 0.42 to 80, middle 28; survived is yes or no, 342 yes.
+
+Screen reader:
+
+- Profile of 891 records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 8: Escape
+
+Escape. Now the passengers older than 35. Control plus F, Filter Records, and M for Main columns, a box for each column of the passengers.
+
+Escape closes the report; nothing new is said until the next key.
+
+### Step 9: Control+F
+
+Control plus F, then M.
+
+Screen reader:
+
+- Filter Records dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 10: M
+
+M opens the boxes.
+
+Screen reader:
+
+- edit
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 11: Alt+A
+
+Alt plus A goes to the age box. I type greater than 35, and press Enter.
+
+Screen reader:
+
+- age
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 12: Enter
+
+Enter applies it.
+
+Screen reader:
+
+- 217 records match.
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 13: Alt+S
+
+217, as pandas finds. Only the names and ages, please: Alt plus S, Show Columns, and T for Type columns.
+
+Screen reader:
+
+- Show Columns dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 14: T
+
+T for Type columns.
+
+Screen reader:
+
+- Comma-separated list of column names
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 15: Enter
+
+I type name, comma, age, and press Enter.
+
+Screen reader:
+
+- 2 columns: name, age
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 16: Control+Shift+F
+
+Alt plus O, Order Records, would put them oldest first: age desc. In a box, 2 dot dot 3 is a range; an equals sign alone means blank, and exclamation point equals alone, not blank: 714 ages are known. Control plus Shift plus F, Clear Filter, brings back all 891.
+
+Screen reader:
+
+- 891
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 17: Alt+S
+
+And the passengers' columns: Alt plus S, Show Columns, and M for Main columns.
+
+Screen reader:
+
+- Show Columns dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 18: M
+
+M.
+
+Screen reader:
+
+- 12 columns: passengerid
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 19: Alt+Shift+S
+
+Now averages by group. Alt plus Shift plus S, then Alt plus K for the kind, and G for Group.
+
+Screen reader:
+
+- Generate Statistics
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 20: Alt+K
+
+Alt plus K.
 
 Screen reader:
 
@@ -2776,9 +2812,9 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 17: G
+### Step 21: G
 
-G for Group: a number totalled and averaged for each value of another column.
+G, Group.
 
 Screen reader:
 
@@ -2786,9 +2822,9 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 18: Control+Enter
+### Step 22: Control+Enter
 
-Control plus Enter is OK. It asks which column to group by.
+Control plus Enter. It asks which column to group by.
 
 Screen reader:
 
@@ -2796,19 +2832,9 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 19: sp
+### Step 23: Enter
 
-I type s p, for species.
-
-Screen reader:
-
-- sp
-
-Confirm the wording with a live run: buildTutorials -live.
-
-### Step 20: Enter
-
-Enter chooses species.
+I type s e, for sex, and press Enter. Average which number column?
 
 Screen reader:
 
@@ -2816,29 +2842,25 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 21: petal_l
+### Step 24: Enter
 
-Then the start of petal length.
-
-Screen reader:
-
-- petal l
-
-Confirm the wording with a live run: buildTutorials -live.
-
-### Step 22: Enter
-
-Enter chooses petal length.
+I type a g, for age, and Enter.
 
 Screen reader:
 
-- In short, virginica has the highest average petal length
+- In short, male has the highest average age, 30.7266
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 23: Alt+Shift+S
+### Step 25: Escape
 
-The takeaway comes first, then each species: its count, average, middle, smallest and largest. Escape, and Alt plus Shift plus S again. It remembers Group.
+Men averaged 30.7 years and women 27.9. Choosing survived instead of age gives the share who survived: 74 percent of women and 19 percent of men. Escape. Now two columns at once, sex and class: Alt plus Shift plus S, Alt plus K, and C for Cross-tab.
+
+Escape closes the report; nothing new is said until the next key.
+
+### Step 26: Alt+Shift+S
+
+Alt plus Shift plus S.
 
 Screen reader:
 
@@ -2846,9 +2868,9 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 24: Alt+K
+### Step 27: Alt+K
 
-Alt plus K, the kind.
+Alt plus K.
 
 Screen reader:
 
@@ -2856,51 +2878,235 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 25: R
+### Step 28: C
 
-R for Relation: how strongly each pair of measurements rises and falls together.
+C, Cross-tab.
 
 Screen reader:
 
-- Relation
+- Cross-tab
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 26: Control+Enter
+### Step 29: Control+Enter
+
+Control plus Enter. The row column: s e, for sex, and Enter.
+
+Screen reader:
+
+- Pick the row column
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 30: Enter
+
+Enter chooses sex. The column column: p c, for pclass.
+
+Screen reader:
+
+- Pick the column column
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 31: Enter
+
+Enter chooses pclass. Now a choice: Count records, or Average a number.
+
+Screen reader:
+
+- Count records
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 32: A
+
+A, Average a number. Which number? f for fare.
+
+Screen reader:
+
+- Average which number column?
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 33: Enter
+
+Enter.
+
+Screen reader:
+
+- In short, the highest average fare is female with 1, 106.1258
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 34: Escape
+
+Women in first class paid 106 on average, men in third class 12.66. Then one line for each sex, each class's average, and the average of each class and of all. The same table pandas makes with pivot table. Escape.
+
+Escape closes the report; nothing new is said until the next key.
+
+### Step 35: Right Arrow
+
+How many rode in each class? Frequency counts the values of the current column. Right Arrow twice goes from passengerid to pclass.
+
+Screen reader:
+
+- survived
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 36: Right Arrow
+
+Right Arrow.
+
+Screen reader:
+
+- pclass
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 37
+
+Alt plus Shift plus S; Alt plus C and C for the current column; Alt plus K and F for Frequency; then Control plus Enter. Third class, 491; first, 216; second, 184. Escape.
+
+### Step 38: Right Arrow
+
+A new column from another: each passenger's surname, the part of the name before the comma. Right Arrow once more, to name.
+
+Screen reader:
+
+- name
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 39: Alt+F10
+
+Calculate Column has no key, so Alt plus F10, the Alternate Menu, finds it.
+
+Screen reader:
+
+- Alternate Menu
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 40: Control+F
+
+Control plus F narrows the list.
+
+Screen reader:
+
+- Filter
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 41: Enter
+
+I type calculate and press Enter.
+
+Screen reader:
+
+- Calculate Column
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 42: Enter
+
+Enter runs it. The dialog asks for a name, a kind of formula built on the current column, the formula itself, and which records.
+
+Screen reader:
+
+- Calculate Column dialog
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 43: Alt+K
+
+I type surname. Alt plus K, Kind of formula, and T for Text before a comma; the formula box fills with it. Control plus Enter is OK.
+
+Screen reader:
+
+- Kind of formula
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 44: T
+
+T.
+
+Screen reader:
+
+- Text before a comma
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 45: Control+Enter
 
 Control plus Enter.
 
 Screen reader:
 
-- In short, the strongest relation is between petal length and petal width: very strong, rising together
+- Column surname added, of text, filled in 891 records, and shown last.
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 27: Control+Shift+X
+### Step 46
 
-Very strong: longer petals are wider. The report leaves out the flower number, a numbering rather than a measurement, and reminds that a relation is not a cause. Escape. Alt plus Shift plus G, Generate Graphics, asks the same questions and draws a chart for a sighted colleague: a picture, a web page and an Excel workbook. To hand the data itself on, Control plus Shift plus X, Export Data, writes what the grid shows to a file: Excel, CSV, Markdown, a web page and more.
+The formula is tried first, so a mistake changes nothing. Other kinds give a text's length -- the longest name has 82 letters -- a date's year or hour, a ratio, or values mapped, such as male to M. Now a chart for a sighted colleague: Alt plus Shift plus G, Generate Graphics, Alt plus K, and H for Histogram.
+
+### Step 47: Alt+Shift+G
+
+Alt plus Shift plus G.
 
 Screen reader:
 
-- Export Data: the 150 records shown
+- Generate Graphics
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 28: Control+Shift+Z
+### Step 48: Alt+K
 
-Escape. Before a query that changes data, Control plus Shift plus Z, Read Only Toggle, makes the database read only, so a mistyped statement cannot change anything. Pressed again, it makes it writable.
+Alt plus K.
 
 Screen reader:
 
-- read only
+- Kind
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 29
+### Step 49: H
+
+H, Histogram.
+
+Screen reader:
+
+- Histogram
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 50: Control+Enter
+
+Control plus Enter asks which number column; a g for age, and Enter. DbDo draws the chart and opens a web page: the takeaway, what the chart shows in words, bar by bar, and the numbers as a table, with the picture and an Excel workbook beside it.
+
+Screen reader:
+
+- Histogram
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 51: Control+Shift+X
+
+Escape. To hand the data itself on, Control plus Shift plus X, Export Data, writes what the grid shows to a file: Excel, CSV, Markdown, a web page and more.
+
+Screen reader:
+
+- Export Data
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 52
 
 What this walk taught. I name the command; the reader gives the key.
 
-### Step 30
+### Step 53
 
 Bring in a file.
 
@@ -2908,32 +3114,48 @@ Screen reader:
 
 - Import: Control plus Shift plus I
 
-### Step 31
+### Step 54
 
-Ask in SQL, and run it from inside the box.
-
-Screen reader:
-
-- Query: Control plus Q
-- Run: Control plus Enter
-
-### Step 32
-
-Ask in plain words.
+Keep only some records.
 
 Screen reader:
 
-- Chat about Table: Shift plus F12
+- Filter Records: Control plus F
 
-### Step 33
+### Step 55
 
-Report on the grid.
+Choose the columns, and their order.
+
+Screen reader:
+
+- Show Columns: Alt plus S
+- Order Records: Alt plus O
+
+### Step 56
+
+Report on the grid: a profile, groups, a cross-tab, counts.
 
 Screen reader:
 
 - Generate Statistics: Alt plus Shift plus S
 
-### Step 34
+### Step 57
+
+Find a command without a key.
+
+Screen reader:
+
+- Alternate Menu: Alt plus F10
+
+### Step 58
+
+Make a column from others.
+
+Screen reader:
+
+- Calculate Column: in the Edit menu, without a key
+
+### Step 59
 
 Chart it for others.
 
@@ -2941,7 +3163,7 @@ Screen reader:
 
 - Generate Graphics: Alt plus Shift plus G
 
-### Step 35
+### Step 60
 
 Hand it on.
 
@@ -2949,7 +3171,7 @@ Screen reader:
 
 - Export Data: Control plus Shift plus X
 
-**Something to try:** Bring in a CSV file of your own -- readings from an experiment, a budget, a fitness log -- and ask it which group is highest.
+**Something to try:** Bring in a CSV file of your own -- readings from an experiment, a budget, a fitness log -- and ask it the average of one number for each value of another.
 
 ## 9 - Conclusion
 

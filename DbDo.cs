@@ -3686,6 +3686,15 @@ namespace DbDo
             string sOp = "";
             foreach (string sCand in new string[] { ">=", "<=", "!%", "!=", "<>", "=", ">", "<", "%" })
                 if (sV.StartsWith(sCand)) { sOp = sCand; sV = sV.Substring(sCand.Length).Trim(); break; }
+            // BLANK AND NOT BLANK (23 November 2026, pandas isna and notna): = alone keeps the records whose field is
+            // empty; != or <> alone keeps those whose field holds something, as Age notna() does in the pandas tutorials.
+            if (sV.Length == 0 && (sOp == "=" || sOp == "!=" || sOp == "<>"))
+            {
+                string sBlankCol = "\"" + sField.Replace("\"", "\"\"") + "\"";
+                string sIsBlank = "(" + sBlankCol + " IS NULL OR trim(CAST(" + sBlankCol + " AS TEXT)) = '')";
+                sSpoken = sField + (sOp == "=" ? " is blank" : " is not blank");
+                return sOp == "=" ? sIsBlank : "NOT " + sIsBlank;
+            }
             if (sV.Length == 0) return "";
             // A FIELD BOX TAKES THE HOMER SEARCH SYNTAX (31 October 2026, kit 1.95.0) when no operator starts it:
             // *.com, smith | jones, !draft, "a & b". The field is read as a name, so a wildcard must match all of
@@ -3764,6 +3773,18 @@ namespace DbDo
             bool bNumber = double.TryParse(sV, System.Globalization.NumberStyles.Float,
                 System.Globalization.CultureInfo.InvariantCulture, out dNumber);
             string sTest;
+            // A NUMBER IS COMPARED AS A NUMBER (23 November 2026): "> 35" on a field kept as text, such as one imported
+            // before DbDo gave number columns a number type, read "4" as more than "35". A number typed with > >= < or <=
+            // now compares as a number in any field, and an empty field never passes.
+            // Text that is not a number never passes: CAST would read "unknown" as 0, and 0 < 5 (24 November 2026,
+            // from ChatGPT's review).
+            if (bNumber && sOp != "=" && sOp != "<>")
+            {
+                string sTrimmed = "trim(coalesce(CAST(" + sCol + " AS TEXT), ''))";
+                return "((typeof(" + sCol + ") IN ('integer', 'real') OR (" + sTrimmed + " <> '' AND " + sTrimmed + " NOT GLOB '*[^0-9.eE+-]*' AND "
+                    + sTrimmed + " GLOB '*[0-9]*')) AND CAST(" + sCol + " AS REAL) " + sOp + " "
+                    + dNumber.ToString("R", System.Globalization.CultureInfo.InvariantCulture) + ")";
+            }
             if (bText) sTest = sLower + "(" + sCol + ") " + sOp + " " + sLower + "(" + sQuoted + ")";
             else if (bNumber) sTest = sCol + " " + sOp + " " + dNumber.ToString("R", System.Globalization.CultureInfo.InvariantCulture);
             else sTest = sCol + " " + sOp + " " + sQuoted;
@@ -5811,6 +5832,25 @@ namespace DbDo
             }
         }
 
+        // reloadAfterColumnChange: OPEN THE TABLE AGAIN AFTER ITS COLUMNS CHANGE (23 November 2026, Calculate Column and
+        // Rename Column). The recordset holds the columns it was opened with, so a column added or renamed shows only
+        // when the table is read again. The order, the search filter and the cursor's record are kept; a renamed column
+        // is renamed in the order and the filter too.
+        public void reloadAfterColumnChange(string sOldName, string sNewName)
+        {
+            if (oRecordset == null || string.IsNullOrEmpty(sCurrentTable)) return;
+            int iPos = -1;
+            try { iPos = absolutePosition; } catch { }
+            if (!string.IsNullOrEmpty(sOldName) && !string.IsNullOrEmpty(sNewName))
+            {
+                string sPattern = @"(?<![A-Za-z0-9_])" + System.Text.RegularExpressions.Regex.Escape(sOldName) + @"(?![A-Za-z0-9_])";
+                sActiveSort = System.Text.RegularExpressions.Regex.Replace(sActiveSort ?? "", sPattern, sNewName, System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                sSqlWhere = (sSqlWhere ?? "").Replace("\"" + sOldName + "\"", "\"" + sNewName + "\"");
+            }
+            reopenWithCurrentSort();
+            try { if (iPos > 0 && iPos <= recordCount) absolutePosition = iPos; } catch { }
+        }
+
         // reopenWithCurrentSort: apply sActiveSort by re-querying the
         // current table with a SQL ORDER BY clause, preserving the
         // active filter and a valid cursor position. This deliberately
@@ -5947,6 +5987,10 @@ namespace DbDo
                         + sT + " <> '' AND " + sT + " GLOB '*[0-9]*' AND ("
                         + sT + " NOT GLOB '*[^0-9.]*' OR (substr(" + sT + ",1,1) = '-' AND substr("
                         + sT + ",2) NOT GLOB '*[^0-9.]*'))))";
+                    // BLANKS LAST, EITHER WAY (24 November 2026, from ChatGPT's review of the pandas tutorials): sorted
+                    // descending, the number-first key put blank ages ahead of every known age, so "age desc" began
+                    // with 177 passengers of no age. pandas puts missing values last in both directions; so does DbDo.
+                    lParts.Add("(CASE WHEN " + sQ + " IS NULL OR trim(CAST(" + sQ + " AS TEXT)) = '' THEN 1 ELSE 0 END)");
                     // A LINK SORTS BY WHAT IT SHOWS (29 October 2026): the linked look,
                     // then the linked prime, before the id itself.
                     string sLinkLook = linkLookSql(sCol, sCurrentTable, "look");
@@ -6653,7 +6697,13 @@ namespace DbDo
             {
                 dynamic oField = oRecordset.Fields[sName];
                 object fieldValue = oField.Value;
-                return (fieldValue == null || fieldValue is DBNull) ? "" : fieldValue.ToString();
+                if (fieldValue == null || fieldValue is DBNull) return "";
+                // A NUMBER WITH A POINT, WHEREVER THE COMPUTER IS (23 November 2026): an imported column of numbers is
+                // now kept as numbers, and a computer set to a comma for the decimal would have said 0,42 for an age
+                // the file wrote 0.42 -- and the reports, which read numbers with a point, would have skipped it.
+                if (fieldValue is double || fieldValue is float || fieldValue is decimal)
+                    return Convert.ToString(fieldValue, System.Globalization.CultureInfo.InvariantCulture);
+                return fieldValue.ToString();
             }
             catch { return ""; }
         }
@@ -7789,6 +7839,17 @@ namespace DbDo
                     cell.CellStyle = styleHead;
                 }
 
+                // NUMBERS GO OUT AS NUMBERS (23 November 2026, pandas' to_excel): a column the database keeps as numbers
+                // -- an imported age or fare -- is written as Excel numbers, so a colleague can sum and chart it. Every
+                // other column is still written as text, the safe way, so nothing in it can run as a formula.
+                bool[] abNumber = new bool[lFields.Count];
+                for (int i = 0; i < lFields.Count; i++)
+                {
+                    int iType = 0;
+                    try { iType = getFieldType(lFields[i]); } catch { }
+                    abNumber[i] = iType == 2 || iType == 3 || iType == 4 || iType == 5 || iType == 6 || iType == 14 || iType == 16
+                        || iType == 17 || iType == 18 || iType == 19 || iType == 20 || iType == 21 || iType == 131 || iType == 139;
+                }
                 int iRow = 1;
                 moveFirst();
                 while (!eof)
@@ -7798,7 +7859,11 @@ namespace DbDo
                     {
                         NPOI.SS.UserModel.ICell cell = row.CreateCell(i);
                         string sValue = getExportValue(lFields[i]);
-                        cell.SetCellValue(sValue ?? "");
+                        double nValue;
+                        if (abNumber[i] && double.TryParse((sValue ?? "").Trim(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out nValue))
+                            cell.SetCellValue(nValue);
+                        else if (!(abNumber[i] && (sValue ?? "").Trim().Length == 0))
+                            cell.SetCellValue(sValue ?? "");
                         cell.CellStyle = styleBody;
                     }
                     moveNext();
@@ -9156,6 +9221,9 @@ namespace DbDo
                 for (int i = 0; i < aRec.Length && i < aHeaders.Length; i++)
                 {
                     string sCol = (aHeaders[i] ?? "").Trim();
+                    // A HEADER MATCHES AS WRITTEN OR AS IMPORT NAMES IT (23 November 2026): Import Data made "date.utc"
+                    // into date_utc, so merging a second file of the same shape -- pandas' concat -- must find it there.
+                    if (sCol.Length > 0 && !hDestFields.Contains(sCol)) sCol = DbDoForm.sNormalizeIdentifier(sCol);
                     if (sCol.Length == 0 || !hDestFields.Contains(sCol)) continue;
                     dRow[sCol] = aRec[i] ?? "";
                 }
@@ -9164,8 +9232,9 @@ namespace DbDo
                 try
                 {
                     oRecordset.AddNew();
+                    // A BLANK CELL IS LEFT EMPTY (23 November 2026): set to "" it would put text in a number field.
                     foreach (KeyValuePair<string, string> kvp in dRow)
-                    { try { oRecordset.Fields[kvp.Key].Value = kvp.Value; } catch { /* skip un-settable cells */ } }
+                    { if (kvp.Value.Trim().Length == 0) continue; try { oRecordset.Fields[kvp.Key].Value = kvp.Value.Trim(); } catch { /* skip un-settable cells */ } }
                     oRecordset.Update();
                     iInserted++;
                 }
@@ -14567,6 +14636,11 @@ namespace DbDo
             // back-references in the replacement. Ctrl+Shift+R as the
             // "power version" companion to Ctrl+R = Update Column.
             miRecRegexReplace = addItem(miEdit, "Replace with Regex...", "Replace with Regex", Keys.Control | Keys.Shift | Keys.R, recRegexReplaceClicked);
+            // CALCULATE AND RENAME COLUMN (23 November 2026, the pandas study): a new column from a formula -- pandas'
+            // df["ratio"] = df["a"] / df["b"] and str.split -- and a column renamed, pandas' rename. Keyless: they are
+            // used now and then, so they take no key from the commands used every minute.
+            addItem(miEdit, "Calculate Column...", "Calculate Column", Keys.None, calculateColumnClicked);
+            addItem(miEdit, "Rename Column...", "Rename Column", Keys.None, renameColumnClicked);
             addSep(miEdit);
             // Marks: per-row boolean flags. Control+M / Control+U is
             // the canonical chord pair, chosen for symmetry (mark and
@@ -15540,6 +15614,12 @@ namespace DbDo
             add("Replace Column",
                 "Substring find-and-replace within the current virtual column, over visible rows",
                 "Opens a dialog prompting for find text, replacement text, case-sensitivity, and an optional dry-run mode. Operates only on the currently filtered rows; clear the filter (Alt+Shift+F, Alt+C) to apply across the whole table. Ctrl+R is the GUI chord; menu label 'Replace Column'.");
+            add("Calculate Column",
+                "Add a column whose values come from a formula over the other columns",
+                "In the Edit menu, without a key. Give the new column a name, pick a kind of formula -- arithmetic, text before or after a comma, the year, month, weekday or hour of a date, values mapped to others, a value from another table -- or type your own in SQL, and choose all records or those in view or marked. The formula is tried first; the column is then added, filled and shown last.");
+            add("Rename Column",
+                "Give a column of the open table a new name, keeping its values",
+                "In the Edit menu, without a key. The columns DbDo keeps itself -- look, prime, added, edited, marked, url, notes, tags and the id -- keep their names. The order, filter and shown columns follow the new name.");
             add("Regex Replace",
                 "Regex find-and-replace within the current virtual column, over visible rows",
                 "Same as Update Column but interprets the find text as a .NET regex pattern and supports $1, $2 back-references in the replacement. Ctrl+Shift+R is the GUI chord ('power version' of Ctrl+R).");
@@ -20040,6 +20120,9 @@ namespace DbDo
 
         private static bool tryParseDate(string s, out DateTime dt)
         {
+            // The clock time as written (23 November 2026): a date with a time zone, such as 2019-06-21 00:00:00+00:00,
+            // is not moved into this computer's zone, so a profile's span and a report's days are the file's own.
+            if (s != null && System.Text.RegularExpressions.Regex.IsMatch(s.Trim(), @"(Z|[+-]\d\d:?\d\d)$")) return tryParseClockTime(s, out dt);
             return DateTime.TryParse(s,
                 System.Globalization.CultureInfo.InvariantCulture,
                 System.Globalization.DateTimeStyles.AssumeLocal, out dt)
@@ -20301,9 +20384,14 @@ namespace DbDo
             // decimals to keep the report compact.
             if (Math.Abs(d - Math.Round(d)) < 1e-9) return d.ToString("0");
             double dAbs = Math.Abs(d);
-            if (dAbs >= 1000)   return d.ToString("0.00");
-            if (dAbs >= 1)      return d.ToString("0.0000");
-            return d.ToString("0.000000");
+            string s;
+            if (dAbs >= 1000)   s = d.ToString("0.00");
+            else if (dAbs >= 1) s = d.ToString("0.0000");
+            else                s = d.ToString("0.000000");
+            // NO TRAILING ZEROS (23 November 2026): an age of 0.42 was said "0.420000", and an average of 21.5 "21.5000".
+            string sPoint = System.Globalization.NumberFormatInfo.CurrentInfo.NumberDecimalSeparator;
+            if (s.Contains(sPoint)) s = s.TrimEnd('0').TrimEnd(sPoint.ToCharArray());
+            return s;
         }
 
         private static string formatPercent(int iPart, int iWhole)
@@ -21635,14 +21723,19 @@ namespace DbDo
             return LbcMessage.show(this, sMessage, "Shared access letters", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button1) == DialogResult.Yes;
         }
 
-        private static string sNormalizeIdentifier(string sRaw)
+        internal static string sNormalizeIdentifier(string sRaw)
         {
             if (sRaw == null) return "";
             StringBuilder sb = new StringBuilder();
-            foreach (char ch in sRaw.Trim().ToLowerInvariant())
+            string sLow = sRaw.Trim().ToLowerInvariant();
+            for (int i = 0; i < sLow.Length; i++)
             {
+                char ch = sLow[i];
                 if (char.IsLetterOrDigit(ch) || ch == '_') sb.Append(ch);
                 else if (ch == ' ' || ch == '-') sb.Append('_');
+                // A DOT BETWEEN WORDS IS A BREAK (23 November 2026): pandas' air-quality "date.utc" becomes date_utc,
+                // not dateutc; a dot at the end, as in "No.", is still dropped.
+                else if (ch == '.' && sb.Length > 0 && i + 1 < sLow.Length && char.IsLetterOrDigit(sLow[i + 1])) sb.Append('_');
             }
             return sb.ToString();
         }
@@ -21862,15 +21955,21 @@ namespace DbDo
             // triggers like any new table, from lStandardTableDdl.
             List<string[]> lStart = null;
             string sFrom = db.currentTable;
-            if (!string.IsNullOrEmpty(sFrom))
+            // FROM A FILE (23 November 2026, the pandas study): the air-quality tutorials join a table of measurements to
+            // a table of stations, which needs both in one database. From file makes a table of a CSV or TSV file in
+            // the open database, shaped as Import Data shapes one, numbers as numbers.
             {
                 string sChoice;
                 using (LbcDialog dlgHow = new LbcDialog("Add Table", this))
                 {
-                    dlgHow.addLabel("Define a new table, or clone the fields of " + sFrom + "?");
-                    sChoice = dlgHow.runWithButtons(new string[] { "&Define table", "&Clone fields", "Cancel" });
+                    bool bClone = !string.IsNullOrEmpty(sFrom);
+                    dlgHow.addLabel(bClone ? "Define a new table, clone the fields of " + sFrom + ", or make one from a CSV or TSV file?"
+                        : "Define a new table, or make one from a CSV or TSV file?");
+                    sChoice = dlgHow.runWithButtons(bClone ? new string[] { "&Define table", "&Clone fields", "&From file", "Cancel" }
+                        : new string[] { "&Define table", "&From file", "Cancel" });
                 }
                 if (string.IsNullOrEmpty(sChoice) || string.Equals(sChoice, "Cancel", StringComparison.OrdinalIgnoreCase)) return;
+                if (string.Equals(sChoice, "From file", StringComparison.OrdinalIgnoreCase)) { addTableFromFile(); return; }
                 if (string.Equals(sChoice, "Clone fields", StringComparison.OrdinalIgnoreCase))
                 {
                     lStart = db.userColumns(sFrom);
@@ -21905,6 +22004,55 @@ namespace DbDo
                 db.selectTable(sTableName);
                 invokeRefresh();
                 Say.say("Table " + sTableName + " created");
+            }
+            catch (Exception ex)
+            {
+                ErrorDialog.show(this, "Add Table", ex.Message);
+            }
+        }
+
+        // addTableFromFile: Add Table's From file. Picks a CSV or TSV file and makes a table of it in the open database,
+        // named for the file, through the same shaper as Import Data; then opens it.
+        private void addTableFromFile()
+        {
+            string sPath;
+            using (OpenFileDialog dlgFile = new OpenFileDialog())
+            {
+                prepareFileDialog(dlgFile);
+                dlgFile.Title = "Add Table from File";
+                dlgFile.Filter = "CSV or TSV files (*.csv;*.tsv;*.tab)|*.csv;*.tsv;*.tab|All files (*.*)|*.*";
+                if (dlgFile.ShowDialog(this) != DialogResult.OK) return;
+                sPath = dlgFile.FileName;
+            }
+            string sExt = Path.GetExtension(sPath).TrimStart('.').ToLowerInvariant();
+            char cDelim = (sExt == "tsv" || sExt == "tab") ? '\t' : ',';
+            try
+            {
+                List<string[]> lGrid = lGridFromDelimitedFile(sPath, cDelim);
+                bool bHasMaps = false, bHasLookups = false;
+                List<string> lTableNames = new List<string>();
+                foreach (string sT in db.getTableNames())
+                {
+                    lTableNames.Add(sT.ToLowerInvariant());
+                    if (string.Equals(sT, "maps", StringComparison.OrdinalIgnoreCase)) bHasMaps = true;
+                    if (string.Equals(sT, "defs", StringComparison.OrdinalIgnoreCase)) bHasLookups = true;
+                }
+                int iBefore = lTableNames.Count;
+                iShellRowsSkipped = 0;
+                int iRows = buildShellTableFromGrid(db, Path.GetFileNameWithoutExtension(sPath), lGrid, lTableNames);
+                if (iRows < 0 || lTableNames.Count == iBefore) { ErrorDialog.show(this, "Add Table", "No header row and data rows were found in " + Path.GetFileName(sPath) + "."); return; }
+                string sTableName = lTableNames[lTableNames.Count - 1];
+                foreach (string sSql in lInfraDdl(!bHasMaps, !bHasLookups))
+                    db.invokeSql(sSql, null);
+                db.refreshTableList();
+                if (db.hasMapsTable())
+                    foreach (string sSql in lMapsTriggerDdl(sTableName))
+                        db.invokeSql(sSql, null);
+                db.refreshTableList();
+                db.selectTable(sTableName);
+                invokeRefresh();
+                try { DbDoLog.write("Add Table from file " + sPath + ": " + sTableName + ", " + iRows + " rows"); } catch { }
+                Say.say("Table " + sTableName + " created, " + iRows + (iRows == 1 ? " record" : " records") + "." + skippedRowsSaid());
             }
             catch (Exception ex)
             {
@@ -22905,6 +23053,59 @@ namespace DbDo
             return sV.Trim();
         }
 
+        // sInferColumnType: NUMBERS ARE NUMBERS (23 November 2026, the pandas study). An imported column whose every
+        // filled cell is a whole number is INTEGER; one whose every filled cell is a number is REAL; any other column,
+        // and one with no filled cell, stays TEXTLINE. A number with a leading zero, such as a zip code 02134, keeps the
+        // column text, so its zero is not lost; so does a number with a thousands comma. pandas read_csv does the same,
+        // and with it a filter such as Age > 35 and an order by Fare compare numbers, not text.
+        internal static string sInferColumnType(List<string[]> aGrid, int iFirstRow, int iCol)
+        {
+            bool bAny = false, bAllInteger = true;
+            for (int r = iFirstRow; r < aGrid.Count; r++)
+            {
+                string[] aRow = aGrid[r];
+                string sCell = (aRow != null && iCol < aRow.Length && aRow[iCol] != null) ? aRow[iCol].Trim() : "";
+                if (sCell.Length == 0) continue;
+                bAny = true;
+                if (bIsIntegerText(sCell)) continue;
+                if (bIsRealText(sCell)) { bAllInteger = false; continue; }
+                return "TEXTLINE";
+            }
+            if (!bAny) return "TEXTLINE";
+            return bAllInteger ? "INTEGER" : "REAL";
+        }
+
+        private static bool bIsIntegerText(string s)
+        {
+            if (!System.Text.RegularExpressions.Regex.IsMatch(s, @"^[+-]?(0|[1-9][0-9]{0,17})$")) return false;
+            return true;
+        }
+
+        private static bool bIsRealText(string s)
+        {
+            if (!System.Text.RegularExpressions.Regex.IsMatch(s, @"^[+-]?(0|[1-9][0-9]*)?(\.[0-9]+)?([eE][+-]?[0-9]+)?$")) return false;
+            if (!System.Text.RegularExpressions.Regex.IsMatch(s, @"[0-9]")) return false;
+            double d;
+            return double.TryParse(s, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out d)
+                && !double.IsInfinity(d) && !double.IsNaN(d);
+        }
+
+        // sSqlLiteralFor: a cell as an SQL value for a column of the given type -- a number written as a number, a
+        // blank in a number column as NULL (pandas' missing value, so an average leaves it out), and text quoted.
+        internal static string sSqlLiteralFor(string sCell, string sType)
+        {
+            string sTrim = (sCell ?? "").Trim();
+            if (sType == "INTEGER" || sType == "REAL")
+            {
+                if (sTrim.Length == 0) return "NULL";
+                if (sType == "INTEGER" && bIsIntegerText(sTrim)) return sTrim.TrimStart('+');
+                double d;
+                if (double.TryParse(sTrim, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out d))
+                    return d.ToString("R", System.Globalization.CultureInfo.InvariantCulture);
+            }
+            return "'" + (sCell ?? "").Replace("'", "''") + "'";
+        }
+
         // buildShellTableFromGrid: create one standard-shape table from a
         // parsed grid and insert its data rows. The header row is detected
         // (a sparse title/metadata row above the column names is skipped); a
@@ -22954,10 +23155,12 @@ namespace DbDo
                 string sBaseH = sHdr; int iDupH = 1;
                 while (lUsedNames.Contains(sHdr)) { iDupH++; sHdr = sBaseH + "_" + iDupH; }
                 lUsedNames.Add(sHdr);
-                lFieldDefs.Add(new string[] { sHdr, "TEXTLINE" });
+                lFieldDefs.Add(new string[] { sHdr, sInferColumnType(aGrid, iHdr + 1, c) });
                 lColTarget.Add(sHdr);
             }
             if (lFieldDefs.Count == 0) lFieldDefs.Add(new string[] { "value", "TEXTLINE" });
+            Dictionary<string, string> dTypeOf = new Dictionary<string, string>();
+            foreach (string[] aDef in lFieldDefs) dTypeOf[aDef[0]] = aDef[1];
 
             foreach (string sSql in lStandardTableDdl(sTable, lFieldDefs)) managerImport.invokeSql(sSql, null);
 
@@ -22975,13 +23178,13 @@ namespace DbDo
                     string sCell = (c < aRow.Length && aRow[c] != null) ? aRow[c] : "";
                     if (sCell.Length > 0) bAny = true;
                     lCols.Add("\"" + sTarget + "\"");
-                    lVals.Add("'" + sCell.Replace("'", "''") + "'");
+                    lVals.Add(sSqlLiteralFor(sCell, dTypeOf.ContainsKey(sTarget) ? dTypeOf[sTarget] : "TEXTLINE"));
                 }
                 if (!bAny) continue;
                 string sInsert = "INSERT INTO \"" + sTable + "\" (" + string.Join(", ", lCols.ToArray())
                     + ") VALUES (" + string.Join(", ", lVals.ToArray()) + ")";
                 try { managerImport.invokeSql(sInsert, null); iRows++; }
-                catch (Exception exRow) { try { DbDoLog.write("Import skipped a row in " + sTable + ": " + exRow.Message); } catch { } }
+                catch (Exception exRow) { iShellRowsSkipped++; try { DbDoLog.write("Import skipped a row in " + sTable + ": " + exRow.Message); } catch { } }
             }
             return iRows;
         }
@@ -23074,8 +23277,20 @@ namespace DbDo
         // read through a short-lived ADO connection. Returns the temp .db
         // path; the caller opens it as a managed copy, so the source file
         // is only ever read.
+        // iShellRowsSkipped: ROWS LEFT OUT ARE SAID, NOT ONLY LOGGED (24 November 2026, from ChatGPT's review). A table
+        // keeps one record for each prime, so a row that repeats another exactly cannot be stored; pandas keeps both.
+        // Import and Add Table From file now say how many were left out.
+        internal static int iShellRowsSkipped;
+        internal static string skippedRowsSaid()
+        {
+            if (iShellRowsSkipped == 0) return "";
+            return " " + iShellRowsSkipped + (iShellRowsSkipped == 1 ? " row was" : " rows were")
+                + " left out, each a repeat of another row or not storable; the log names them.";
+        }
+
         internal string importToShell(string sSourcePath)
         {
+            iShellRowsSkipped = 0;
             if (string.IsNullOrEmpty(sSourcePath)) throw new ArgumentException("importToShell requires a path.");
             string sExt = Path.GetExtension(sSourcePath).TrimStart('.').ToLowerInvariant();
             if (sExt == "xlsx") return importXlsxNative(sSourcePath);
@@ -23093,25 +23308,8 @@ namespace DbDo
         internal string importDelimitedToShell(string sSourcePath, char cDelim)
         {
             if (string.IsNullOrEmpty(sSourcePath)) throw new ArgumentException("importDelimitedToShell requires a path.");
-            string sText;
-            try { sText = File.ReadAllText(sSourcePath, Encoding.UTF8); }
-            catch (Exception ex) { throw new Exception("Could not read " + sSourcePath + ": " + ex.Message, ex); }
-            List<string[]> lRecords = DbDoManager.parseDelimited(sText, cDelim);
-
-            // First non-empty record is the header.
-            List<string> lCols = null;
-            List<string[]> lRows = new List<string[]>();
-            foreach (string[] aRec in lRecords)
-            {
-                bool bEmpty = true;
-                foreach (string s in aRec) if (!string.IsNullOrEmpty(s) && s.Trim().Length > 0) { bEmpty = false; break; }
-                if (bEmpty) continue;
-                if (lCols == null) { lCols = new List<string>(aRec); continue; }
-                lRows.Add(aRec);
-            }
-            if (lCols == null) throw new InvalidOperationException("No header row was found in " + Path.GetFileName(sSourcePath) + ".");
-
-            string[] aReservedRename = new string[] { "added", "edited", "look", "prime", "prime", "marked" };
+            List<string[]> lGrid = lGridFromDelimitedFile(sSourcePath, cDelim);
+            if (lGrid.Count == 0) throw new InvalidOperationException("No header row was found in " + Path.GetFileName(sSourcePath) + ".");
             string sDbPath = Path.Combine(Path.GetTempPath(),
                 "DbDo_managed_" + Guid.NewGuid().ToString("N") + ".db");
             try
@@ -23121,57 +23319,12 @@ namespace DbDo
                 using (DbDoManager managerDest = new DbDoManager())
                 {
                     managerDest.openDatabase(sDbPath, null, false);
-                    string sTable = sNormalizeIdentifier(Path.GetFileNameWithoutExtension(sSourcePath));
-                    if (sTable.Length == 0) sTable = "table_1";
-                    if (char.IsDigit(sTable[0])) sTable = "t_" + sTable;
-                    string sSingular = sSingularOf(sTable);
-                    string sPk = sSingular + "_id";
-
-                    List<string[]> lFieldDefs = new List<string[]>();
-                    List<string> lColTarget = new List<string>();
-                    List<string> lUsedNames = new List<string>();
-                    foreach (string sCol in lCols)
-                    {
-                        string sHdr = sNormalizeIdentifier(sCol);
-                        if (sHdr.Length == 0) sHdr = "column_" + (lColTarget.Count + 1);
-                        if (char.IsDigit(sHdr[0])) sHdr = "c_" + sHdr;
-                        if (sHdr == "notes") { lColTarget.Add("notes"); continue; }
-                        if (sHdr == "tags") { lColTarget.Add("tags"); continue; }
-                        if (sHdr == sPk || Array.IndexOf(aReservedRename, sHdr) >= 0) sHdr = sHdr + "_in";
-                        string sBaseH = sHdr; int iDupH = 1;
-                        while (lUsedNames.Contains(sHdr)) { iDupH++; sHdr = sBaseH + "_" + iDupH; }
-                        lUsedNames.Add(sHdr);
-                        lFieldDefs.Add(new string[] { sHdr, "TEXTLINE" });
-                        lColTarget.Add(sHdr);
-                    }
-                    if (lFieldDefs.Count == 0) lFieldDefs.Add(new string[] { "value", "TEXTLINE" });
-                    foreach (string sSql in lStandardTableDdl(sTable, lFieldDefs))
-                        managerDest.invokeSql(sSql, null);
-
-                    int iRows = 0;
-                    foreach (string[] aRow in lRows)
-                    {
-                        List<string> lInsCols = new List<string>();
-                        List<string> lVals = new List<string>();
-                        bool bAny = false;
-                        for (int i = 0; i < lCols.Count && i < aRow.Length; i++)
-                        {
-                            string sTarget = (i < lColTarget.Count) ? lColTarget[i] : null;
-                            if (sTarget == null) continue;
-                            string sCell = aRow[i] ?? "";
-                            if (sCell.Length > 0) bAny = true;
-                            lInsCols.Add("\"" + sTarget + "\"");
-                            lVals.Add("'" + sCell.Replace("'", "''") + "'");
-                        }
-                        if (bAny)
-                        {
-                            string sInsert = "INSERT INTO \"" + sTable + "\" ("
-                                + string.Join(", ", lInsCols.ToArray()) + ") VALUES ("
-                                + string.Join(", ", lVals.ToArray()) + ")";
-                            try { managerDest.invokeSql(sInsert, null); iRows++; }
-                            catch (Exception exRow) { try { DbDoLog.write("importDelimitedToShell skipped a row: " + exRow.Message); } catch { } }
-                        }
-                    }
+                    // ONE SHAPER FOR SHEETS AND TEXT TABLES (23 November 2026, the pandas study): a CSV is a grid like a
+                    // worksheet, so it goes through buildShellTableFromGrid, which now also gives a column of numbers
+                    // a number type. Before, every CSV column was text, so "Age > 35" compared as text and Order put
+                    // 100 before 20.
+                    int iRows = buildShellTableFromGrid(managerDest, Path.GetFileNameWithoutExtension(sSourcePath), lGrid, new List<string>());
+                    if (iRows < 0) throw new InvalidOperationException("No header row and data rows were found in " + Path.GetFileName(sSourcePath) + ".");
                     foreach (string sSql in lInfraDdl(true, true))
                         managerDest.invokeSql(sSql, null);
                     try { DbDoLog.write("Imported delimited " + sSourcePath + ": " + iRows + " row(s) -> " + sDbPath); } catch { }
@@ -23183,6 +23336,23 @@ namespace DbDo
                 try { if (File.Exists(sDbPath)) File.Delete(sDbPath); } catch { }
                 throw;
             }
+        }
+
+        // lGridFromDelimitedFile: a CSV or TSV file as a grid of rows, the empty rows left out, so the header is the
+        // first row -- the shape buildShellTableFromGrid takes from a worksheet.
+        internal static List<string[]> lGridFromDelimitedFile(string sSourcePath, char cDelim)
+        {
+            string sText;
+            try { sText = File.ReadAllText(sSourcePath, Encoding.UTF8); }
+            catch (Exception ex) { throw new Exception("Could not read " + sSourcePath + ": " + ex.Message, ex); }
+            List<string[]> lGrid = new List<string[]>();
+            foreach (string[] aRec in DbDoManager.parseDelimited(sText, cDelim))
+            {
+                bool bEmpty = true;
+                foreach (string sCell in aRec) if (!string.IsNullOrEmpty(sCell) && sCell.Trim().Length > 0) { bEmpty = false; break; }
+                if (!bEmpty) lGrid.Add(aRec);
+            }
+            return lGrid;
         }
 
         // importDbfToShell: read a dBASE (.dbf, with its .dbt memo
@@ -24238,7 +24408,7 @@ namespace DbDo
                 sManagedTempPath = sTemp;
                 invokeRefresh();
                 Say.say("Imported " + Path.GetFileName(sOrigin)
-                    + " into a new DbDo database. Save As to keep it as a .db; the original file is unchanged.");
+                    + " into a new DbDo database. Save As to keep it as a .db; the original file is unchanged." + skippedRowsSaid());
             }
         }
 
@@ -27320,7 +27490,7 @@ namespace DbDo
                 List<string> lsHow = new List<string> { sAny, sMainCols, sStandardCols, sAllCols };
                 if (bMarks) { lsHow.Add(sMarked); lsHow.Add(sUnmarked); }
                 sHow = chooseByButtons(sCombine == sNew ? "Filter Records" : sCombine.Replace(" filter", " Filter"),  // "Narrow Filter", not "Narrow filter Filter"
-                    new List<string> { "Any field finds text wherever it is, whatever its case. Main columns, Standard columns and All columns each give a box for those columns, whose value may begin with an operator: = is, != is not, > more than, >= at least, < less than, <= at most, % contains."
+                    new List<string> { "Any field finds text wherever it is, whatever its case. Main columns, Standard columns and All columns each give a box for those columns, whose value may begin with an operator: = is, != is not, > more than, >= at least, < less than, <= at most, % contains; = alone is blank and != alone is not blank."
                         + (bMarks ? " Marked records takes the records you have marked, and Unmarked records the rest." : "") },
                     lsHow);
                 if (sHow == null) return;
@@ -30231,6 +30401,214 @@ namespace DbDo
             }
             return lKept;
         }
+        // RESERVED COLUMNS: the ones DbDo keeps itself, which Calculate Column and Rename Column never take or change.
+        private bool isReservedColumn(string sName)
+        {
+            string s = (sName ?? "").ToLowerInvariant();
+            if (s == "look" || s == "prime" || s == "added" || s == "edited" || s == "marked" || s == "url" || s == "notes" || s == "tags") return true;
+            string sKey = "";
+            try { sKey = computePrimaryKeyColumn(db.currentTable, db.getFieldNames()) ?? ""; } catch { }
+            return string.Equals(sName, sKey, StringComparison.OrdinalIgnoreCase);
+        }
+
+        private static string quoteName(string sName) { return "\"" + (sName ?? "").Replace("\"", "\"\"") + "\""; }
+
+        private const string sMarkedSql = "(marked = 1 OR lower(CAST(marked AS TEXT)) IN ('true', 'yes'))";
+
+        // calculateFormulas: the kinds of formula Calculate Column offers, each as a label and SQL built on the current
+        // column. The labels begin with different letters where they can, so a letter reaches each in the list.
+        private List<string[]> calculateFormulas(string sCol, string sTable)
+        {
+            string sC = quoteName(sCol);
+            string sOther = "";
+            foreach (string sName in db.getDisplayFieldNames())
+                if (!string.Equals(sName, sCol, StringComparison.OrdinalIgnoreCase) && !isReservedColumn(sName)) { sOther = sName; break; }
+            string sO = sOther.Length > 0 ? quoteName(sOther) : "other_column";
+            string sDate = "substr(" + sC + ", 1, 19)";
+            StringBuilder sbCase = new StringBuilder("CASE " + sC);
+            try
+            {
+                int iFound;
+                foreach (string[] aRow in db.queryRowsSqlOrThrow("SELECT DISTINCT " + sC + " FROM " + quoteName(sTable) + " WHERE " + sC + " IS NOT NULL ORDER BY 1 LIMIT 12", 12, out iFound))
+                {
+                    string sV = DbDoManager.sQuoteSqlLiteral(aRow.Length > 0 ? aRow[0] ?? "" : "");
+                    sbCase.Append(" WHEN " + sV + " THEN " + sV);
+                }
+            }
+            catch { }
+            sbCase.Append(" ELSE " + sC + " END");
+            return new List<string[]> {
+                new string[] { "Arithmetic with a number", sC + " * 1" },
+                new string[] { "Divided by another column", sC + " * 1.0 / " + sO },
+                new string[] { "Plus another column", sC + " + " + sO },
+                new string[] { "Rounded", "round(" + sC + ", 2)" },
+                new string[] { "Length of the text", "length(" + sC + ")" },
+                new string[] { "Lower case", "lower(" + sC + ")" },
+                new string[] { "Upper case", "upper(" + sC + ")" },
+                new string[] { "Text before a comma", "trim(substr(" + sC + ", 1, instr(" + sC + " || ',', ',') - 1))" },
+                new string[] { "Text after a comma", "trim(substr(" + sC + ", instr(" + sC + ", ',') + 1))" },
+                new string[] { "Year of a date", "CAST(strftime('%Y', " + sDate + ") AS INTEGER)" },
+                new string[] { "Month of a date", "CAST(strftime('%m', " + sDate + ") AS INTEGER)" },
+                // "1 Mon" to "7 Sun", Monday first as pandas counts, so the days sort in their own order.
+                new string[] { "Weekday of a date", "(((strftime('%w', " + sDate + ") + 6) % 7) + 1) || ' ' || substr('MonTueWedThuFriSatSun', 1 + 3 * ((strftime('%w', " + sDate + ") + 6) % 7), 3)" },
+                new string[] { "Hour of a date", "CAST(strftime('%H', " + sDate + ") AS INTEGER)" },
+                new string[] { "Map each value to another", sbCase.ToString() },
+                new string[] { "Yes or no by a test", "CASE WHEN " + sC + " > 0 THEN 'yes' ELSE 'no' END" },
+                new string[] { "Value from another table", "(SELECT other_column FROM other_table WHERE other_table.key_column = " + quoteName(sTable) + "." + sC + ")" },
+                new string[] { "Your own formula", "" } };
+        }
+
+        // calculateColumnClicked: CALCULATE COLUMN (23 November 2026, the pandas study). pandas makes a column from
+        // others in one line -- df["ratio"] = df["a"] / df["b"], df["surname"] = df["Name"].str.split(",").str[0].
+        // DbDo asks for a name and a formula in SQL, with a list of kinds of formula built on the current column to start
+        // from. The formula is tried on the records first, so a mistake is reported before anything changes; the type
+        // of the new column follows what the formula gives -- whole numbers, numbers or text. The column is added to
+        // the table, filled for the records chosen, and shown last.
+        private void calculateColumnClicked(object sender, EventArgs evArgs)
+        {
+            const string c_sTitle = "Calculate Column";
+            if (db == null || !db.hasRecordset() || string.IsNullOrEmpty(db.currentTable)) { Say.say("No table open"); return; }
+            if (db.readOnly) { Say.say("Database is read-only"); return; }
+            string sTable = db.currentTable;
+            if (db.userColumns(sTable).Count == 0) { Say.say("Calculate Column works on a table of a SQLite database"); return; }
+            string sCol = virtCurrentColumnName();
+            List<string[]> lFormulas = calculateFormulas(sCol, sTable);
+            List<string> lKinds = new List<string>();
+            foreach (string[] a in lFormulas) lKinds.Add(a[0]);
+            int iMarked = countMarkedInFilter();
+            bool bFiltered = db.sqlFilter.Length > 0;
+            List<string> lRecords = new List<string> { "All records" };
+            if (bFiltered) lRecords.Add("Records in view, " + db.recordCount);
+            if (iMarked > 0) lRecords.Add("Marked records, " + iMarked);
+            string sName, sFormula, sRecords;
+            using (LbcDialog dlg = new LbcDialog(c_sTitle, this))
+            {
+                TextBox tbName = dlg.addInputBox("&Name of the new column:", "", "A name of letters, digits and underscores, such as surname or fare_per_person.");
+                ComboBox cbKind = dlg.addComboPickBox("&Kind of formula:", lKinds, lKinds[0],
+                    "A kind of formula built on the current column, " + sCol + ". Choosing one puts its formula in the Formula box, to use as it is or change.");
+                TextBox tbFormula = dlg.addInputBox("&Formula:", lFormulas[0][1],
+                    "An SQL expression over the columns of " + sTable + ", each in double quotes, such as \"Fare\" * 1.0 / (\"SibSp\" + \"Parch\" + 1).");
+                cbKind.SelectedIndexChanged += delegate(object o, EventArgs e)
+                {
+                    int i = cbKind.SelectedIndex;
+                    if (i >= 0 && i < lFormulas.Count && lFormulas[i][1].Length > 0) tbFormula.Text = lFormulas[i][1];
+                };
+                ComboBox cbRecords = dlg.addComboPickBox("Which &records:", lRecords, lRecords[0],
+                    "All records fills the column in the whole table; the others fill only the records in view or the marked ones, and leave the rest blank.");
+                dlg.helpNote = "The formula is tried before anything changes, and an error says what is wrong. The new column is shown last; Shift+S says the columns shown.";
+                string sBtn = dlg.runWithButtons(new string[] { "OK", "Cancel" });
+                if (!string.Equals(sBtn, "OK", StringComparison.OrdinalIgnoreCase)) return;
+                sName = sNormalizeIdentifier(tbName.Text);
+                sFormula = (tbFormula.Text ?? "").Trim();
+                sRecords = cbRecords.Text ?? "";
+            }
+            if (sName.Length == 0) { Say.sayForced("No name was given, so nothing changed."); return; }
+            if (char.IsDigit(sName[0])) sName = "c_" + sName;
+            if (sFormula.Length == 0) { Say.sayForced("No formula was given, so nothing changed."); return; }
+            foreach (string sExisting in db.getColumnsOfTable(sTable))
+                if (string.Equals(sExisting, sName, StringComparison.OrdinalIgnoreCase))
+                { ErrorDialog.show(this, c_sTitle, sTable + " already has a column named " + sName + "."); return; }
+            if (isReservedColumn(sName)) { ErrorDialog.show(this, c_sTitle, sName + " is a column DbDo keeps itself."); return; }
+            string sWhere = "";
+            if (sRecords.StartsWith("Records in view")) sWhere = db.sqlFilter;
+            else if (sRecords.StartsWith("Marked")) sWhere = sMarkedSql + (bFiltered ? " AND (" + db.sqlFilter + ")" : "");
+            string sQTable = quoteName(sTable);
+            // Try the formula, and learn what it gives.
+            string sType = "TEXTLINE";
+            try
+            {
+                int iFound;
+                bool bInteger = false, bReal = false, bText = false;
+                foreach (string[] aRow in db.queryRowsSqlOrThrow("SELECT typeof(v), count(*) FROM (SELECT (" + sFormula + ") AS v FROM " + sQTable
+                    + (sWhere.Length > 0 ? " WHERE " + sWhere : "") + ") GROUP BY 1", 10, out iFound))
+                {
+                    string sKind = aRow.Length > 0 ? aRow[0] ?? "" : "";
+                    if (sKind == "integer") bInteger = true; else if (sKind == "real") bReal = true; else if (sKind != "null") bText = true;
+                }
+                if (!bText && bReal) sType = "REAL"; else if (!bText && bInteger) sType = "INTEGER";
+            }
+            catch (Exception exTry)
+            {
+                ErrorDialog.show(this, c_sTitle, "The formula did not work, so nothing changed: " + exTry.Message);
+                return;
+            }
+            try
+            {
+                db.invokeSql("ALTER TABLE " + sQTable + " ADD COLUMN " + quoteName(sName) + " " + sType, null);
+                int iChanged = db.invokeSql("UPDATE " + sQTable + " SET " + quoteName(sName) + " = (" + sFormula + ")"
+                    + (sWhere.Length > 0 ? " WHERE " + sWhere : ""), null);
+                try { DbDoLog.write(c_sTitle + ": " + sTable + "." + sName + " " + sType + " = " + sFormula + (sWhere.Length > 0 ? " WHERE " + sWhere : "") + "; records=" + iChanged); } catch { }
+                db.reloadAfterColumnChange(null, null);
+                List<string> lShown = new List<string>(db.getDisplayFieldNames());
+                if (!lShown.Contains(sName)) lShown.Add(sName);
+                applySelectList(sTable, string.Join(", ", lShown.ToArray()));
+                string sKindSaid = sType == "INTEGER" ? "whole numbers" : sType == "REAL" ? "numbers" : "text";
+                Say.sayForced("Column " + sName + " added, of " + sKindSaid + ", filled in " + iChanged + (iChanged == 1 ? " record" : " records") + ", and shown last.");
+            }
+            catch (Exception ex)
+            {
+                ErrorDialog.show(this, c_sTitle, ex.Message);
+            }
+        }
+
+        // renameColumnClicked: RENAME COLUMN (23 November 2026, pandas' rename). SQLite renames the column in place,
+        // keeping its values, and rewrites look, prime and the triggers that name it. The order, the filter and the
+        // shown columns follow the new name, as do a field's definitions in defs.
+        private void renameColumnClicked(object sender, EventArgs evArgs)
+        {
+            const string c_sTitle = "Rename Column";
+            if (db == null || !db.hasRecordset() || string.IsNullOrEmpty(db.currentTable)) { Say.say("No table open"); return; }
+            if (db.readOnly) { Say.say("Database is read-only"); return; }
+            string sTable = db.currentTable;
+            List<string> lNames = new List<string>();
+            foreach (string sC in db.getColumnsOfTable(sTable)) if (!isReservedColumn(sC)) lNames.Add(sC);
+            if (lNames.Count == 0) { Say.say(sTable + " has no column that can be renamed"); return; }
+            string sCurrent = virtCurrentColumnName();
+            string sStart = lNames.Contains(sCurrent) ? sCurrent : lNames[0];
+            string sOld, sNew;
+            using (LbcDialog dlg = new LbcDialog(c_sTitle, this))
+            {
+                ComboBox cbCol = dlg.addComboPickBox("&Column:", lNames, sStart, "The column to rename; it starts on the current column.");
+                TextBox tbNew = dlg.addInputBox("&New name:", sStart, "Letters, digits and underscores, such as passenger_class.");
+                cbCol.SelectedIndexChanged += delegate(object o, EventArgs e) { tbNew.Text = cbCol.Text; };
+                string sBtn = dlg.runWithButtons(new string[] { "OK", "Cancel" });
+                if (!string.Equals(sBtn, "OK", StringComparison.OrdinalIgnoreCase)) return;
+                sOld = cbCol.Text ?? "";
+                sNew = (tbNew.Text ?? "").Trim();
+            }
+            string sNorm = sNormalizeIdentifier(sNew);
+            if (sNorm.Length > 0 && char.IsDigit(sNorm[0])) sNorm = "c_" + sNorm;
+            // A name already plain is kept as typed, capitals and all; another is made plain.
+            if (!System.Text.RegularExpressions.Regex.IsMatch(sNew, @"^[A-Za-z_][A-Za-z0-9_]*$")) sNew = sNorm;
+            if (sNew.Length == 0 || sNew == sOld) { Say.sayForced("The name is unchanged."); return; }
+            if (isReservedColumn(sNew)) { ErrorDialog.show(this, c_sTitle, sNew + " is a column DbDo keeps itself."); return; }
+            foreach (string sExisting in db.getColumnsOfTable(sTable))
+                if (string.Equals(sExisting, sNew, StringComparison.OrdinalIgnoreCase) && !string.Equals(sExisting, sOld, StringComparison.OrdinalIgnoreCase))
+                { ErrorDialog.show(this, c_sTitle, sTable + " already has a column named " + sNew + "."); return; }
+            try
+            {
+                List<string> lShownBefore = new List<string>(db.getDisplayFieldNames());
+                string sListBefore = db.getSelectList(sTable) ?? "";
+                db.invokeSql("ALTER TABLE " + quoteName(sTable) + " RENAME COLUMN " + quoteName(sOld) + " TO " + quoteName(sNew), null);
+                try { db.invokeSql("UPDATE defs SET fld = " + DbDoManager.sQuoteSqlLiteral(sNew) + " WHERE tbl = " + DbDoManager.sQuoteSqlLiteral(sTable)
+                    + " AND fld = " + DbDoManager.sQuoteSqlLiteral(sOld), null); } catch { }
+                try { DbDoLog.write(c_sTitle + ": " + sTable + "." + sOld + " to " + sNew); } catch { }
+                db.reloadAfterColumnChange(sOld, sNew);
+                if (sListBefore.Length > 0)
+                {
+                    List<string> lShown = new List<string>();
+                    foreach (string s in lShownBefore) lShown.Add(string.Equals(s, sOld, StringComparison.OrdinalIgnoreCase) ? sNew : s);
+                    applySelectList(sTable, string.Join(", ", lShown.ToArray()));
+                }
+                else invokeRefresh();
+                Say.sayForced("Column " + sOld + " renamed " + sNew);
+            }
+            catch (Exception ex)
+            {
+                ErrorDialog.show(this, c_sTitle, ex.Message);
+            }
+        }
+
         // stringReplace: case-aware substring replace helper. String.
         // Replace doesn't take a StringComparison argument until .NET
         // Standard 2.1; on .NET Framework 4.8 we implement it manually.
@@ -31061,15 +31439,14 @@ namespace DbDo
                 if (ds.lNumeric.Count == 0 || ds.lCols.Count < 2) { Say.say("A group report needs a number column and another column; choose Shown columns or All columns"); return; }
                 string sBy = pickOneColumn("Group Report", "Group by which column?", ds.lCols, ds.sCurrentCol);
                 if (sBy == null) return;
-                List<string> lMeasures = new List<string>(ds.lNumeric); lMeasures.Remove(sBy);
+                List<string> lMeasures = measureColumns(ds.lCols, ds.lNumeric, ds.dValues); lMeasures.Remove(sBy);
                 if (lMeasures.Count == 0) { Say.say("No number column besides " + sBy + " to total"); return; }
                 string sOf = lMeasures.Count == 1 ? lMeasures[0] : pickOneColumn("Group Report", "Total and average which number column?", lMeasures, lMeasures[0]);
                 if (sOf == null) return;
                 string sPeriod = "";
                 if (ds.lDate.Contains(sBy))
                 {
-                    sPeriod = chooseByButtons("Group by Date", new string[] { "Group the dates of " + sBy + " by year, by month, by weekday, or by each day." },
-                        new List<string> { "Year", "Month", "Weekday", "Day" });
+                    sPeriod = choosePeriod(sBy, ds.dValues[sBy]);
                     if (sPeriod == null) return;
                 }
                 showInfoDialog("Group: " + sOf + " by " + sBy, buildGroupReport(sBy, ds.dValues[sBy], sOf, ds.dValues[sOf], sPeriod));
@@ -31087,7 +31464,7 @@ namespace DbDo
                 List<string> lOther = new List<string>(ds.lCols); lOther.Remove(sA);
                 string sB = lOther.Count == 1 ? lOther[0] : pickOneColumn("Cross-tab", "Pick the column column:", lOther, lOther[0]);
                 if (sB == null) return;
-                showInfoDialog("Cross-tab: " + sA + " by " + sB, buildCrosstabReport(sA, ds.dValues[sA], sB, ds.dValues[sB]));
+                showCrosstab(sA, sB, measureColumns(ds.lCols, ds.lNumeric, ds.dValues), ds.dValues);
             }
         }
 
@@ -31261,6 +31638,14 @@ namespace DbDo
                 if (ds.lNumeric.Count == 0) { Say.say("No number column among " + ds.sScopeSaid); return; }
                 spec.sKind = "line"; spec.lsColumns = new List<string>(ds.lNumeric); lUse.AddRange(ds.lNumeric);
                 spec.sTitle = string.Join(", ", ds.lNumeric.ToArray()) + " over the records";
+                // OVER A DATE (23 November 2026, pandas' plot of the air-quality stations over time): with a date column
+                // among those chosen, the lines run across its dates, in time order, rather than the grid's order.
+                if (ds.lDate.Count > 0)
+                {
+                    string sWhen = ds.lDate.Contains(ds.sCurrentCol) ? ds.sCurrentCol : ds.lDate[0];
+                    spec.sX = sWhen; lUse.Insert(0, sWhen);
+                    spec.sTitle = string.Join(", ", ds.lNumeric.ToArray()) + " over " + sWhen;
+                }
             }
             else
             {
@@ -31467,7 +31852,7 @@ namespace DbDo
                 + "Frequency report: how many records hold each value of the current column, or each combination of the shown columns. "
                 + "Group report: a number column summed and averaged for each value of another. "
                 + "Relation report: how strongly number columns rise and fall together, and the line that best fits two of them. "
-                + "Cross-tab report: one column by another. Excel chart: a chart of the grid, in Excel. "
+                + "Cross-tab report: one column by another, its records counted or a number averaged. Excel chart: a chart of the grid, in Excel. "
                 + "To write the grid to a file -- Markdown, Excel, CSV and more -- use Export Data, Alt+Shift+X." }, lTop);
             if (sTop == null) return;
             if (sTop == "Statistics report") sId = "summary_all";
@@ -31477,15 +31862,14 @@ namespace DbDo
                 List<string> lGroupable = new List<string>(lCols);
                 string sBy = pickOneColumn("Group Report", "Group by which column?", lGroupable, sCurrentCol);
                 if (sBy == null) return;
-                List<string> lMeasures = new List<string>(lNumeric); lMeasures.Remove(sBy);
+                List<string> lMeasures = measureColumns(lCols, lNumeric, dValues); lMeasures.Remove(sBy);
                 if (lMeasures.Count == 0) { Say.say("No number column besides " + sBy + " to total"); return; }
                 string sOf = lMeasures.Count == 1 ? lMeasures[0] : pickOneColumn("Group Report", "Total and average which number column?", lMeasures, lMeasures[0]);
                 if (sOf == null) return;
                 string sPeriod = "";
                 if (lDate.Contains(sBy))
                 {
-                    sPeriod = chooseByButtons("Group by Date", new string[] { "Group the dates of " + sBy + " by year, by month, by weekday, or by each day." },
-                        new List<string> { "Year", "Month", "Weekday", "Day" });
+                    sPeriod = choosePeriod(sBy, dValues[sBy]);
                     if (sPeriod == null) return;
                 }
                 try { DbDoLog.write("Generate from Grid: group " + sOf + " by " + sBy + (sPeriod.Length > 0 ? " (" + sPeriod + ")" : "")); } catch { }
@@ -31554,7 +31938,7 @@ namespace DbDo
                 List<string> lOther = new List<string>(lCols); lOther.Remove(sA);
                 string sB = pickOneColumn("Cross-tab", "Pick the COLUMN column:", lOther, null);
                 if (sB == null) return;
-                showInfoDialog("Cross-tab: " + sA + " by " + sB, buildCrosstabReport(sA, dValues[sA], sB, dValues[sB]));
+                showCrosstab(sA, sB, measureColumns(lCols, lNumeric, dValues), dValues);
             }
             else if (sId == "md_table")
             {
@@ -31685,6 +32069,37 @@ namespace DbDo
         // buildCrosstabReport: contingency counts of colA (rows) by colB
         // (columns), linearized one row-value per line (screen readers
         // flatten grids anyway), with column totals and a grand total.
+        // tryParseClockTime: A DATE AS WRITTEN (23 November 2026, the pandas air-quality data). "2019-06-21 00:00:00+00:00"
+        // carries a time zone; DateTime.TryParse turned it into the computer's own time, so midnight in Paris became 5 PM
+        // the day before in Seattle and every hour and day was off. The clock time as written is kept, as pandas does.
+        internal static bool tryParseClockTime(string sText, out DateTime dt)
+        {
+            dt = DateTime.MinValue;
+            string s = (sText ?? "").Trim();
+            if (s.Length == 0) return false;
+            DateTimeOffset dto;
+            if (DateTimeOffset.TryParse(s, System.Globalization.CultureInfo.InvariantCulture, System.Globalization.DateTimeStyles.AllowWhiteSpaces, out dto)) { dt = dto.DateTime; return true; }
+            return DateTime.TryParse(s, out dt);
+        }
+
+        // lPeriodsFor: the ways to group a date column. Hour is offered only when some value carries a clock time.
+        internal static List<string> lPeriodsFor(List<string> lValues)
+        {
+            List<string> l = new List<string> { "Year", "Month", "Weekday", "Day" };
+            if (lValues != null)
+                foreach (string s in lValues)
+                    if (!string.IsNullOrEmpty(s) && System.Text.RegularExpressions.Regex.IsMatch(s, @"\d:\d\d")) { l.Add("Hour"); break; }
+            return l;
+        }
+
+        // choosePeriod: ask how to group a date column; null when cancelled.
+        private string choosePeriod(string sBy, List<string> lValues)
+        {
+            List<string> lPeriods = lPeriodsFor(lValues);
+            string sWays = lPeriods.Contains("Hour") ? "by year, by month, by weekday, by each day, or by hour of the day" : "by year, by month, by weekday, or by each day";
+            return chooseByButtons("Group by Date", new string[] { "Group the dates of " + sBy + " " + sWays + "." }, lPeriods);
+        }
+
         // buildGroupReport: pandas' groupby for a screen reader (5 November 2026). For each value of one column -- or each
         // year, month, weekday or day of a date column -- the count, sum, mean, median, smallest and largest of a number
         // column, largest mean first; the takeaway first.
@@ -31700,7 +32115,8 @@ namespace DbDo
                 if (sPeriod.Length > 0)
                 {
                     DateTime dt;
-                    if (!DateTime.TryParse(sKey, out dt)) sKey = "";
+                    if (!tryParseClockTime(sKey, out dt)) sKey = "";
+                    else if (sPeriod == "Hour") sKey = dt.ToString("HH") + ":00";
                     else if (sPeriod == "Year") sKey = dt.ToString("yyyy");
                     else if (sPeriod == "Month") sKey = dt.ToString("yyyy-MM");
                     else if (sPeriod == "Weekday") sKey = ((int) dt.DayOfWeek + 6) % 7 + 1 + " " + dt.DayOfWeek;
@@ -31836,6 +32252,128 @@ namespace DbDo
             string sStrength = dA >= 0.8 ? "very strong" : dA >= 0.6 ? "strong" : dA >= 0.4 ? "moderate" : dA >= 0.2 ? "weak" : "little or none";
             if (dA < 0.2) return "little or no straight-line relation";
             return sStrength + ", " + (dR > 0 ? "rising together" : "one falls as the other rises");
+        }
+
+        // measureColumns: THE COLUMNS THAT CAN BE AVERAGED (23 November 2026). The number columns, and a yes-or-no column
+        // kept as 0 and 1, such as the Titanic's survived, whose average is the share that are 1 -- pandas'
+        // df.groupby("sex")["survived"].mean(), the survival rate. Kept in the order of lCols.
+        private static List<string> measureColumns(List<string> lCols, List<string> lNumeric, Dictionary<string, List<string>> dValues)
+        {
+            List<string> l = new List<string>();
+            foreach (string sC in lCols)
+            {
+                if (lNumeric.Contains(sC)) { l.Add(sC); continue; }
+                bool bAny = false, bAll = true;
+                foreach (string s in dValues[sC])
+                {
+                    string t = (s ?? "").Trim();
+                    if (t.Length == 0) continue;
+                    bAny = true;
+                    if (t != "0" && t != "1") { bAll = false; break; }
+                }
+                if (bAny && bAll) l.Add(sC);
+            }
+            return l;
+        }
+
+        // showCrosstab: COUNT OR AVERAGE (23 November 2026, pandas pivot_table). A cross-tab counted the records in each
+        // pair of values; the pandas tutorials' favorite table is instead the average of a number in each pair -- the
+        // average fare by sex and class. When a number column other than the two chosen is at hand, a choice comes
+        // first: Count records, or Average a number.
+        private void showCrosstab(string sA, string sB, List<string> lNumeric, Dictionary<string, List<string>> dValues)
+        {
+            List<string> lMeasures = new List<string>();
+            if (lNumeric != null) foreach (string s in lNumeric) if (s != sA && s != sB) lMeasures.Add(s);
+            string sHow = "Count records";
+            if (lMeasures.Count > 0)
+            {
+                sHow = chooseByButtons("Cross-tab", new string[] { "Count records gives how many records hold each pair of values of "
+                    + sA + " and " + sB + ". Average a number gives the average of a number column for each pair." },
+                    new List<string> { "Count records", "Average a number" });
+                if (sHow == null) return;
+            }
+            if (sHow == "Count records")
+            {
+                showInfoDialog("Cross-tab: " + sA + " by " + sB, buildCrosstabReport(sA, dValues[sA], sB, dValues[sB]));
+                return;
+            }
+            string sOf = lMeasures.Count == 1 ? lMeasures[0] : pickOneColumn("Cross-tab", "Average which number column?", lMeasures, lMeasures[0]);
+            if (sOf == null) return;
+            try { DbDoLog.write("Cross-tab: average " + sOf + " by " + sA + " and " + sB); } catch { }
+            showInfoDialog("Cross-tab: average " + sOf + " by " + sA + " and " + sB, buildCrosstabAverageReport(sA, dValues[sA], sB, dValues[sB], sOf, dValues[sOf]));
+        }
+
+        // buildCrosstabAverageReport: the average of a number column for each pair of values of two others, one row value
+        // per line, with each row's average, each column's average and the overall average -- pandas' pivot_table with
+        // margins. The takeaway first: the highest and lowest pair.
+        internal static string buildCrosstabAverageReport(string sColA, List<string> lA, string sColB, List<string> lB, string sOf, List<string> lOf)
+        {
+            int n = Math.Min(Math.Min(lA == null ? 0 : lA.Count, lB == null ? 0 : lB.Count), lOf == null ? 0 : lOf.Count);
+            Dictionary<string, double[]> dCell = new Dictionary<string, double[]>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, double[]> dRow = new Dictionary<string, double[]>(StringComparer.OrdinalIgnoreCase);
+            Dictionary<string, double[]> dCol = new Dictionary<string, double[]>(StringComparer.OrdinalIgnoreCase);
+            double[] aAll = new double[2];
+            List<string> lAVals = new List<string>(), lBVals = new List<string>();
+            int iSkipped = 0;
+            for (int i = 0; i < n; i++)
+            {
+                double d;
+                if (!double.TryParse((lOf[i] ?? "").Trim(), System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out d)) { iSkipped++; continue; }
+                string a = (lA[i] ?? "").Trim(); if (a.Length == 0) a = "blank";
+                string b = (lB[i] ?? "").Trim(); if (b.Length == 0) b = "blank";
+                if (!dRow.ContainsKey(a)) { dRow[a] = new double[2]; lAVals.Add(a); }
+                if (!dCol.ContainsKey(b)) { dCol[b] = new double[2]; lBVals.Add(b); }
+                string sKey = a + "\u001f" + b;
+                if (!dCell.ContainsKey(sKey)) dCell[sKey] = new double[2];
+                foreach (double[] aSum in new double[][] { dCell[sKey], dRow[a], dCol[b], aAll }) { aSum[0] += d; aSum[1] += 1; }
+            }
+            lAVals.Sort(compareValues); lBVals.Sort(compareValues);
+            StringBuilder sb = new StringBuilder();
+            sb.Append("Cross-tab: average ").Append(sOf).Append(" by ").Append(sColA).Append(" (rows) and ").Append(sColB).Append(" (columns)\r\n\r\n");
+            if (aAll[1] == 0) { sb.Append("No record holds a number in ").Append(sOf).Append(".\r\n"); return sb.ToString(); }
+            string sHigh = null, sLow = null;
+            foreach (string sKey in dCell.Keys)
+            {
+                double dMean = dCell[sKey][0] / dCell[sKey][1];
+                if (sHigh == null || dMean > dCell[sHigh][0] / dCell[sHigh][1]) sHigh = sKey;
+                if (sLow == null || dMean < dCell[sLow][0] / dCell[sLow][1]) sLow = sKey;
+            }
+            if (dCell.Count > 1)
+                sb.Append("In short, the highest average ").Append(sOf).Append(" is ").Append(pairWords(sHigh)).Append(", ")
+                  .Append(formatNumber(dCell[sHigh][0] / dCell[sHigh][1])).Append("; the lowest is ").Append(pairWords(sLow)).Append(", ")
+                  .Append(formatNumber(dCell[sLow][0] / dCell[sLow][1])).Append(".\r\n\r\n");
+            foreach (string a in lAVals)
+            {
+                List<string> lParts = new List<string>();
+                foreach (string b in lBVals)
+                {
+                    double[] aSum;
+                    lParts.Add(b + "=" + (dCell.TryGetValue(a + "\u001f" + b, out aSum) ? formatNumber(aSum[0] / aSum[1]) : "none"));
+                }
+                sb.Append("  ").Append(a).Append(" (average ").Append(formatNumber(dRow[a][0] / dRow[a][1])).Append("): ")
+                  .Append(string.Join(", ", lParts.ToArray())).Append("\r\n");
+            }
+            List<string> lColParts = new List<string>();
+            foreach (string b in lBVals) lColParts.Add(b + "=" + formatNumber(dCol[b][0] / dCol[b][1]));
+            sb.Append("\r\n  Column averages: ").Append(string.Join(", ", lColParts.ToArray())).Append("\r\n");
+            sb.Append("  Overall average: ").Append(formatNumber(aAll[0] / aAll[1])).Append(", of ").Append((int) aAll[1])
+              .Append(aAll[1] == 1 ? " record" : " records").Append("\r\n");
+            if (iSkipped > 0) sb.Append("\r\n").Append(iSkipped).Append(iSkipped == 1 ? " record has" : " records have").Append(" no number in ").Append(sOf).Append(", and ").Append(iSkipped == 1 ? "is" : "are").Append(" left out.\r\n");
+            return sb.ToString();
+        }
+
+        private static string pairWords(string sKey) { return sKey.Replace("\u001f", " with "); }
+
+        // compareValues: numbers in number order, other values alphabetically, case aside -- so classes 1, 2, 3 and
+        // 10 read in that order.
+        private static int compareValues(string a, string b)
+        {
+            double nA, nB;
+            bool bA = double.TryParse(a, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out nA);
+            bool bB = double.TryParse(b, System.Globalization.NumberStyles.Float, System.Globalization.CultureInfo.InvariantCulture, out nB);
+            if (bA && bB) return nA.CompareTo(nB);
+            if (bA != bB) return bA ? -1 : 1;
+            return string.Compare(a, b, StringComparison.OrdinalIgnoreCase);
         }
 
         private static string buildCrosstabReport(string sColA, List<string> lA, string sColB, List<string> lB)

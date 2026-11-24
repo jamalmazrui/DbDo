@@ -349,6 +349,16 @@ Source: "help\TutorialFeed.xml"; DestDir: "{app}\help"; Flags: ignoreversion ski
 ; A DATASET TO PRACTISE ON (5 November 2026): Tutorial 8 imports data\iris.csv, R. A. Fisher's iris measurements. It
 ; sits in data, beside DbDo's other shipped data, not in a top-level folder of its own.
 Source: "data\iris.csv"; DestDir: "{app}\data"; Flags: ignoreversion
+; THE PANDAS TUTORIALS' DATA (23 November 2026): Tutorial 8 imports data\titanic.csv, and notes\DbDo_Pandas_Equivalents.md
+; works the air-quality tasks on the rest. BSD-licensed, from the pandas project; the license travels with them.
+Source: "data\titanic.csv"; DestDir: "{app}\data"; Flags: ignoreversion
+Source: "data\air_quality_long.csv"; DestDir: "{app}\data"; Flags: ignoreversion
+Source: "data\air_quality_no2.csv"; DestDir: "{app}\data"; Flags: ignoreversion
+Source: "data\air_quality_no2_long.csv"; DestDir: "{app}\data"; Flags: ignoreversion
+Source: "data\air_quality_pm25_long.csv"; DestDir: "{app}\data"; Flags: ignoreversion
+Source: "data\air_quality_stations.csv"; DestDir: "{app}\data"; Flags: ignoreversion
+Source: "data\air_quality_parameters.csv"; DestDir: "{app}\data"; Flags: ignoreversion
+Source: "data\pandas_data_LICENSE.txt"; DestDir: "{app}\data"; Flags: ignoreversion
 Source: "help\Tutorials.md";  DestDir: "{app}\help"; Flags: ignoreversion
 Source: "help\Tutorials.htm"; DestDir: "{app}\help"; Flags: ignoreversion
 Source: "help\Hotkeys.md";  DestDir: "{app}\help"; Flags: ignoreversion

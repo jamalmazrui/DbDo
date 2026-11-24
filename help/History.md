@@ -5,6 +5,34 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 24 November 2026, afternoon -- Everything the pandas tutorials teach
+
+The ten pandas Getting Started tutorials were worked through in DbDo, task by task, on their own data. Where DbDo fell short, it gained what was missing; notes\DbDo_Pandas_Equivalents.md maps every task to DbDo's keys, with the answers pandas gives.
+
+- **Numbers come in as numbers.** Import Data gives a CSV, TSV or Excel column that holds only whole numbers a whole-number type, and one that holds only numbers a number type; a blank in it stays empty, not zero. Before, every column came in as text, so "age > 35" compared text and an order by fare put 100 before 20. A number with a leading zero, such as a zip code, keeps its column as text. A CSV now goes through the same shaper as a worksheet.
+- **A number is always compared as a number** after >, >=, < or <= in a filter box, even in a column kept as text, and a blank never passes.
+- **Blank and not blank in a filter:** an equals sign alone finds the records whose field is empty, and != alone those whose field holds something -- pandas' isna and notna.
+- **Cross-tab can average.** After the two columns, it offers Count records or Average a number: the average of a number column for each pair of values, then each row's, each column's and the overall average -- pandas' pivot table. Values that are numbers read in number order.
+- **A yes-or-no column of 0 and 1 can be averaged** in Group and Cross-tab, giving the share that are 1: 74 percent of the Titanic's women survived.
+- **Group by hour.** A date column with times can be grouped by hour of the day.
+- **Dates keep the time they were written with.** A date with a time zone, such as 2019-06-21 00:00:00+00:00, was moved into the computer's time zone, so midnight in Paris became late afternoon the day before in Seattle. Reports now keep the clock time as written, as pandas does.
+- **Calculate Column** (Edit menu, no key) adds a column from a formula over the others: arithmetic, a ratio of two columns, the text before or after a comma, the length of a text, the year, month, weekday or hour of a date, values mapped to others, a value looked up from another table, or your own SQL. The formula is tried before anything changes; the new column's type follows its values, and it is shown last.
+- **Rename Column** (Edit menu, no key) renames a column in place, keeping its values; the order, filter and shown columns follow the new name.
+- **Add Table, From file** makes a table of a CSV or TSV file in the open database, so two files can meet in one database for a lookup.
+- **Merge Data finds a column by either name:** a file's date.utc fills the column Import named date_utc. Import now makes a dot between words an underscore, where it dropped it.
+- **The line chart runs over a date column** when one is among the columns chosen, in time order, as pandas plots the air-quality stations.
+- **Excel exports write number columns as numbers,** ready to sum and chart; text stays text.
+- **Numbers are said without trailing zeros:** an age of 0.42, not 0.420000.
+- **Blanks sort last, in either direction.** Ordered descending, blank ages came before every known age; now, as in pandas, blanks are last both ways.
+- **A number comparison skips text that is not a number,** which SQLite would have read as 0.
+- **Import says how many rows it left out,** each a repeat of another row; before, only the log knew.
+- **air_quality_long.csv ships too,** for the pivot table of tutorial 7, and the data's license file records the pandas version and each file's SHA-256.
+- **Calculate Column's records box is named Which records,** as in Replace; named Records, it matched the grid's accessible name, which the naming check refused.
+- **Two web addresses in the docs are marked as code,** so the docs check no longer reads them as bare urls.
+- These last four, the no-code Tutorial 8 and several corrected answers in the pandas note came from ChatGPT's independent review of the same work.
+- **Tutorial 8, Analyze a Dataset, now uses the Titanic** passenger list, as the pandas tutorials do, with no code: import, profile, filters by number, range and blank, columns chosen, an average by group and by two columns at once, counts, a calculated surname, a histogram, and Export. DbDo ships titanic.csv and the tutorials' air-quality files in its data folder, with the pandas license.
+- **Tutorial 3** names the Main columns button, which replaced Field boxes.
+
 ## 24 November 2026 -- Hearing where the points fall
 
 - **The Relation report ends with where the points fall** for its strongest pair: each column's range split into four equal parts, a line for each quarter of the second column, highest first, counting the points across the quarters of the first. It is how a sighted reader takes in a scatter plot, as clusters rather than points, and it comes from BrailleR, the R package by a blind statistician.
@@ -551,7 +579,7 @@ The first two steps of the SQLite plan Claude and ChatGPT agreed on. Nothing you
 
 - **lookups has a pattern column.** A field's own row -- tbl and fld filled, val empty -- now holds both what the field is for, in descrip, and the form its value takes, in pattern, a .NET regular expression. This replaces the regex: prefix in val from earlier the same day, which nothing yet used, so val stays for the choices F4 offers. The table column was always descrip, never desc; nothing was renamed. A database whose lookups lacks the pattern column gets it when DbDo first reads its patterns, unless it is read-only.
 - **An empty value is tested,** so a pattern can make a field required. On a failure DbDo says the field's name, whether it is blank or does not fit, and then the field's own description, which says the form it takes.
-- **RadioTrail's stations have 19 patterns,** each tested against all 49,186 stations so that none refuses a record already there: name, stream_url and source are required; addresses start with http:// or https://; counts are whole numbers; dates are year-month-day; status is one of its five choices; rating is 1 to 5. The test found one real typo, a homepage beginning "hthttps", which the pattern will now catch when that record is edited. Your own copies use the shipped patterns until their lookups has some.
+- **RadioTrail's stations have 19 patterns,** each tested against all 49,186 stations so that none refuses a record already there: name, stream_url and source are required; addresses start with `http://` or `https://`; counts are whole numbers; dates are year-month-day; status is one of its five choices; rating is 1 to 5. The test found one real typo, a homepage beginning "hthttps", which the pattern will now catch when that record is edited. Your own copies use the shipped patterns until their lookups has some.
 - **Each database is described,** in a row with tbl, fld and val all empty; Database Summary prints it as About.
 
 ## 3 November 2026 -- What each table is for, and patterns in lookups

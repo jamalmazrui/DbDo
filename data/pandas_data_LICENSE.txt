@@ -1,0 +1,52 @@
+﻿Sample data from the pandas project
+
+titanic.csv and the air_quality_*.csv files in this folder are the sample data of the pandas Getting Started
+tutorials (pandas 3.1.1, doc/data in https://github.com/pandas-dev/pandas). DbDo ships them so the same tasks
+can be done in DbDo; Tutorial 8 and notes\DbDo_Pandas_Equivalents.md use them. The air quality data come from
+OpenAQ, through the py-openaq package.
+
+Provenance: pandas commit 3dcc6fbbbebc5e85dd3e83fe49b382ca7735cae1 (v3.1.1 docs). The SHA-256 of each file as
+pandas publishes it is below; the copies here differ only in having Windows line endings and a UTF-8 mark,
+as every Homer text file does.
+
+- titanic.csv: cd888141e6a2ca5906114d0b6a63d8a3e14edb3326f7bdd56327d14646b68c36
+- air_quality_long.csv: 9f2d707f133e6c5772ed8c89cbfca606654b2032a6182634a707b6f7d1f716f3
+- air_quality_no2.csv: 365ca31c9296ac200e73d357e16a3c1340f9ce6746c83bf81403046dcb374361
+- air_quality_no2_long.csv: 04bd59e6a99e192653547941d42cb2e6c21bbb2e645fb7b2c694a357bdbeb4ef
+- air_quality_pm25_long.csv: aa6e19bdacdb56c0ead0a3238f7c1712a2fc48f2863fca45dd91728f08600824
+- air_quality_stations.csv: 9bda250d00816ac2d90baff322c8ca844c43891f1d9c45e88fe6e9329826a4a6
+- air_quality_parameters.csv: 973973e5bbab821c62dfe4b36ddf1baf998358054a016b6abb9cf93834d62bf6
+
+The pandas license follows.
+
+BSD 3-Clause License
+
+Copyright (c) 2008-2011, AQR Capital Management, LLC, Lambda Foundry, Inc. and PyData Development Team
+All rights reserved.
+
+Copyright (c) 2011-2026, Open source contributors.
+
+Redistribution and use in source and binary forms, with or without
+modification, are permitted provided that the following conditions are met:
+
+* Redistributions of source code must retain the above copyright notice, this
+  list of conditions and the following disclaimer.
+
+* Redistributions in binary form must reproduce the above copyright notice,
+  this list of conditions and the following disclaimer in the documentation
+  and/or other materials provided with the distribution.
+
+* Neither the name of the copyright holder nor the names of its
+  contributors may be used to endorse or promote products derived from
+  this software without specific prior written permission.
+
+THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS"
+AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE
+IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE
+FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL
+DAMAGES (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR
+SERVICES; LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER
+CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
+OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
