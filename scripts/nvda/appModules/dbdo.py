@@ -14,7 +14,7 @@ from .homer import keys
 
 class DbDoList(NVDAObject):
 	# Way: pass quietly. Where: only here, in the list; elsewhere NVDA's own handling.
-	@scriptHandler.script(gestures=["kb:upArrow", "kb:downArrow", "kb:pageUp", "kb:pageDown"])
+	@scriptHandler.script(gestures=["kb:upArrow", "kb:downArrow", "kb:pageUp", "kb:pageDown", "kb:alt+upArrow", "kb:alt+downArrow"])
 	def script_passRowKey(self, gesture):
 		keys.quietNextFocus()
 		keys.passQuietly(gesture)

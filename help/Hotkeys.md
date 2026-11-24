@@ -244,7 +244,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Draw a chart of the records and columns you choose, as a picture, a web page and an Excel workbook. G for Generate.\
   Alt+Shift+G
 - Generate Statistics\
-  Read statistics of the records and columns you choose: summary, frequency, group, relation or cross-tab. S for Statistics.\
+  Read statistics of the records and columns you choose: profile, summary, frequency, group, relation or cross-tab. S for Statistics.\
   Alt+Shift+S
 - Read Only Toggle\
   Flip the database between read-write and read-only at runtime. Z is for sleep: it wakes this behavior or puts it to sleep.\
@@ -610,7 +610,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Render a saved report definition to a Markdown document. A report reads the whole physical table, not the grid view, so it comes out the same whatever your filter or order.\
   Run Report
 - Alt+Shift+S\
-  Read statistics of the records and columns you choose: summary, frequency, group, relation or cross-tab.\
+  Read statistics of the records and columns you choose: profile, summary, frequency, group, relation or cross-tab.\
   Generate Statistics
 - Alt+Shift+T\
   Edit Tags
@@ -1053,7 +1053,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Draw a chart of the records and columns you choose, as a picture, a web page and an Excel workbook.\
   Alt+Shift+G
 - Generate Statistics\
-  Read statistics of the records and columns you choose: summary, frequency, group, relation or cross-tab.\
+  Read statistics of the records and columns you choose: profile, summary, frequency, group, relation or cross-tab.\
   Alt+Shift+S
 - Go to Record\
   Go to a record by its number, a percent or text.\

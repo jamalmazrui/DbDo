@@ -311,7 +311,7 @@ Because these only change the view, you can slice a large table down to what you
 
 **Show Columns** (Alt+S) chooses which fields appear in the grid, and in what order. Showing only the columns you are working with keeps cell-by-cell navigation short. Its buttons are:
 
-The dialog first says which columns are shown now, and whether they are the look columns or the prime columns.
+The dialog goes straight to its buttons. To hear which columns are shown now, press Say Shown Columns (Shift+S) in the grid.
 
 Each button is on its own line and names its columns in parentheses, so you hear what a choice holds before you make it: for example, **Look columns (name, country)**. A long list wraps inside its button. Alt and the button's letter still choose in one keystroke, and Shift+F1 says what the button does. Order Records lists its columns the same way.
 
@@ -411,17 +411,18 @@ Every report and chart starts with its takeaway, then the details.
 
 Generate Statistics offers these kinds:
 
+- **Profile,** the first: one line per column, so you can arrow through the whole table's shape. Each line gives the column's kind, how full it is, and its range and middle, its span of dates, its yes count, or its number of different values and the most common one. Columns blank in every record are listed together at the end.
 - **Summary:** each chosen column's range, middle and spread, and values far outside the rest. Arranged by row, each record's total, average and middle, and which column is highest and lowest.
 - **Frequency:** how many records hold each value of one column, or each combination of several, with a running percentage.
 - **Group:** a number column totalled and averaged for each value of another column, or for each year, month or weekday of a date.
-- **Relation:** how strongly each pair of number columns rises and falls together, and the straight line that best fits the strongest pair. A numbering, such as a record number, is left out.
+- **Relation:** how strongly each pair of number columns rises and falls together, and the straight line that best fits the strongest pair. A numbering, such as a record number, is left out. Last comes where the strongest pair's points fall: each column's range split into four equal parts, and one line for each quarter of the second column, highest first, counting the points across the quarters of the first, lowest first. It tells you where the points cluster, the way a sighted reader sees it on a scatter plot.
 - **Cross-tab:** one column by another.
 
-Generate Graphics offers a bar chart (how often each value occurs), a Pareto chart (the same, largest first, with the running share), a pie chart (the split of a yes-or-no column), a histogram (how a number column spreads), a whisker plot (the middle and range of each number column), a scatter plot (one number column against another, with the line that fits), a line chart and a date chart (records by month, year or season). Arranged by row, the bar and line charts draw each record across its number columns, up to eight records.
+Generate Graphics offers a bar chart (how often each value occurs), a Pareto chart (the same, largest first, with the running share), a pie chart (the split of a yes-or-no column), a histogram (how a number column spreads), a whisker plot (the middle and range of each number column), a scatter plot (one number column against another, with the line that fits), a line chart and a date chart (records by month, year or season). Arranged by row, the bar and line charts draw each record across its number columns, up to eight records. Each chart's web page says what the chart shows before its numbers: the kind of chart, each axis with the values marked on it, and what is drawn in words that fit the kind, such as each box of a whisker plot with its middle, box, whiskers and outliers. A scatter plot's page adds a table of where its points fall.
 
 Drawn by Python, a chart is four files in Documents, DbDo Charts, named for the table, the chart and the time:
 
-- **A web page** with the takeaway sentence, the picture with the same sentence as its description, and the numbers as a table.
+- **A web page** with the takeaway sentence, the picture with the same sentence as its description, what the chart shows in words, and the numbers as a table.
 - **A picture,** as PNG for a message or a slide, and SVG for print.
 - **An Excel workbook** with the numbers and a real Excel chart a colleague can restyle, then every record used. Excel is not needed to make it.
 

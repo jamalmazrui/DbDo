@@ -166,7 +166,7 @@ rem 1.64.5: Play Tutorials calls MediaPlayer.playTutorials, which older kits lac
 rem a build against 1.64.4 failed to compile on 8 October 2026 rather than saying so.
 rem 1.231.0: the macro recorder compiles the kit's Macro.cs, with its expected-against-actual audit.
 rem 1.278.0: Show Columns and Order Records list each group's columns with Lbc's addChoiceButton.
-set "kitNeeded=1.282.0"
+set "kitNeeded=1.284.0"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -428,10 +428,12 @@ rem Since kit 1.42 the kit's scripts have plain names (checkHomerApp is check,
 rem gitPush is push, gitUnpushed is unpushed, homerFinish is finish,
 rem homerInstall is installCommon, homerTidy is tidy, tagRelease is release);
 rem the old copies go, so an old name typed from habit fails at once rather
-rem than running a stale tool.
-for %%F in (checkHomerApp.cmd checkHomerApp.py cleanDir.cmd cleanDir.py gitPush.cmd gitRelease.cmd gitUnpushed.cmd gitUnpushed.py homerFinish.cmd homerInstall.cmd homerPolicy.py homerTidy.cmd homerTidy.py installTools.cmd makeTutorial.cmd makeTutorial.py sayTutorial.cmd sayTutorial.py tagRelease.cmd tagRelease.ps1 tidyRepo.cmd tidyRepo.py) do (
+rem than running a stale tool. testAsk measured Ask the Table, the voice query
+rem feature dropped on 23 November 2026 as not worth its narrow use.
+for %%F in (checkHomerApp.cmd checkHomerApp.py cleanDir.cmd cleanDir.py gitPush.cmd gitRelease.cmd gitUnpushed.cmd gitUnpushed.py homerFinish.cmd homerInstall.cmd homerPolicy.py homerTidy.cmd homerTidy.py installTools.cmd makeTutorial.cmd makeTutorial.py sayTutorial.cmd sayTutorial.py tagRelease.cmd tagRelease.ps1 testAsk.cmd testAsk.py tidyRepo.cmd tidyRepo.py) do (
   if exist "scripts\%%F" del /q "scripts\%%F"
 )
+if exist "notes\DbDo_AskTable.md" del /q "notes\DbDo_AskTable.md" && echo Retired note removed: notes\DbDo_AskTable.md, Ask the Table being dropped >> "!log!"
 echo Refreshed the kit's tools into scripts. >> "!log!"
 
 rem ---- the assemblies the Homer modules need ----

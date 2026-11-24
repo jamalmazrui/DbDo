@@ -1095,7 +1095,7 @@ The main view is a list of records. Down Arrow moves by row, and the reader spea
 
 Screen reader:
 
-- Row 2 of
+- 2 of
 
 Confirm the wording with a live run: buildTutorials -live. Hear keeps only the words that do not depend on the data (10 November 2026).
 
@@ -1115,7 +1115,7 @@ Now the Say keys. Shift and a letter asks, and changes nothing. Shift plus Z is 
 
 Screen reader:
 
-- stations, records, no filter, sorted by
+- status, stations, record
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -1200,9 +1200,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 Escape closes it.
 
-Screen reader:
-
-- Records
+Back in the list, the reader says the current record again; its words depend on the data, and DbDo itself says nothing, so no Hear line (23 November 2026).
 
 ### Step 16: Control+F1
 
@@ -1237,9 +1235,19 @@ Screen reader:
 - Alternate Menu
 - Commands, list box
 
-### Step 20
+### Step 20: Control+F
 
-I type the word play, and the list narrows to the commands with that word.
+Control plus F filters the list: it asks for words.
+
+Screen reader:
+
+- Filter
+
+Typing a letter in the list jumps to the next command with that first letter; Control+F is what narrows it (23 November 2026, recordWalk heard Yield with Regex after typing play).
+
+### Step 21: Enter
+
+I type the word play and press Enter, and the list narrows to the commands with that word.
 
 Screen reader:
 
@@ -1247,7 +1255,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 21: Escape
+### Step 22: Escape
 
 Escape closes the list without running anything. Help lives in four places, the same in every Homer program. I say which; the reader says the key. The guide.
 
@@ -1255,7 +1263,7 @@ Screen reader:
 
 - F1
 
-### Step 22
+### Step 23
 
 The changes, release by release.
 
@@ -1263,7 +1271,7 @@ Screen reader:
 
 - Shift plus F1
 
-### Step 23
+### Step 24
 
 The version.
 
@@ -1271,7 +1279,7 @@ Screen reader:
 
 - Alt plus F1
 
-### Step 24
+### Step 25
 
 Where you are, then every key, in a window you can search.
 
@@ -1279,11 +1287,11 @@ Screen reader:
 
 - Control plus slash, pressed twice, Where Am I
 
-### Step 25
+### Step 26
 
 What this walk taught. I name the command; the reader gives the key.
 
-### Step 26
+### Step 27
 
 Say Status.
 
@@ -1291,7 +1299,7 @@ Screen reader:
 
 - Shift plus Z
 
-### Step 27
+### Step 28
 
 Pick a field's fixed value.
 
@@ -1299,7 +1307,7 @@ Screen reader:
 
 - Control plus F2
 
-### Step 28
+### Step 29
 
 Unmark, the reverse of Mark.
 
@@ -1307,7 +1315,7 @@ Screen reader:
 
 - Control plus Shift plus M
 
-### Step 29
+### Step 30
 
 Every command in one list.
 
@@ -1625,17 +1633,16 @@ Shift plus F, Say Filter, says both parts, in the words each was asked in, each 
 
 Screen reader:
 
-- where (any field contains seahawks) and (state contains Washington)
+- filter: (any field contains seahawks) and (state contains Washington)
 
 Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 13: Alt+O
 
-Alt plus O, O for Order, says the order in force, then offers the same buttons as Show Columns, Alt plus S: Look columns, Prime columns, Main, Standard and All columns, Choose columns and Type columns. Prime columns, the default order, has focus.
+Alt plus O, O for Order, offers the same buttons as Show Columns, Alt plus S: Look columns, Prime columns, Main, Standard and All columns, Choose columns and Type columns. Prime columns, the default order, has focus.
 
 Screen reader:
 
-- Ordered now
 - Order Records dialog
 - Prime columns button
 
@@ -1647,7 +1654,7 @@ L for Look columns sorts by look's columns, name first, the way stations are sai
 
 Screen reader:
 
-- Ordered by name ASC
+- Ordered by name, genre, state, country
 
 Confirm the wording with a live run: buildTutorials -live.
 

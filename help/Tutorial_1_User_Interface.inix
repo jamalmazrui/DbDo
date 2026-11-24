@@ -23,7 +23,7 @@ Hear=DbDo ready
 
 Say=The main view is a list of records. Down Arrow moves by row, and the reader speaks the record: here, a station's name, its country, and its genres.
 Key=Down Arrow
-Hear=Row 2 of
+Hear=2 of
 Note=Confirm the wording with a live run: buildTutorials -live. Hear keeps only the words that do not depend on the data (10 November 2026).
 
 [step]
@@ -37,7 +37,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=Now the Say keys. Shift and a letter asks, and changes nothing. Shift plus Z is Say Status.
 Key=Shift+Z
-Hear=stations, records, no filter, sorted by
+Hear=status, stations, record
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -103,7 +103,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=Escape closes it.
 Key=Escape
-Hear=Records
+Note=Back in the list, the reader says the current record again; its words depend on the data, and DbDo itself says nothing, so no Hear line (23 November 2026).
 
 [step]
 
@@ -132,9 +132,16 @@ Hear=Commands, list box
 
 [step]
 
-Say=I type the word play, and the list narrows to the commands with that word.
-Key=
+Say=Control plus F filters the list: it asks for words.
+Key=Control+F
+Hear=Filter
+Note=Typing a letter in the list jumps to the next command with that first letter; Control+F is what narrows it (23 November 2026, recordWalk heard Yield with Regex after typing play).
+
+[step]
+
+Say=I type the word play and press Enter, and the list narrows to the commands with that word.
 Type=play
+Key=Enter
 Hear=Play Media, Control plus P
 Note=Confirm the wording with a live run: buildTutorials -live.
 

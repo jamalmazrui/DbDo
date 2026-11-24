@@ -5,6 +5,22 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 24 November 2026 -- Hearing where the points fall
+
+- **The Relation report ends with where the points fall** for its strongest pair: each column's range split into four equal parts, a line for each quarter of the second column, highest first, counting the points across the quarters of the first. It is how a sighted reader takes in a scatter plot, as clusters rather than points, and it comes from BrailleR, the R package by a blind statistician.
+- **A chart's page says what the chart shows,** also from BrailleR: the kind, each axis with the values marked on it, then what is drawn in words that fit the kind -- a histogram's bars and their width, each box of a whisker plot with its middle, box, whiskers and outliers, and for a scatter plot a table of where its points fall.
+- **Tutorial 1 builds again.** Its Escape step now notes why it has no expected words.
+
+## 23 November 2026, late night -- Quieter dialogs, orders and letters
+
+- **Show Columns and Order Records go straight to their buttons.** They no longer say or show the columns or order in force first; a screen reader says the title and the focused button. Say Shown Columns (Shift+S) and Say Order (Shift+O) give those whenever they are wanted.
+- **An order says desc, never asc.** Ascending is the usual way, so Say Order, Say Filter and Order, Say Status, the status bar, Reverse Order and Order Records now say "name, votes desc" where they said "name ASC, votes DESC". The Choose list in Order Records shows a field sorted the usual way by its name alone.
+- **Alt+DownArrow and Alt+UpArrow move to the next or previous record and say the cell** in the current column, the short form of Alt+Control+DownArrow and UpArrow. The JAWS and NVDA scripts pass them quietly, so the reader does not read the row as well.
+- **Generate Statistics opens on a new kind, Profile:** one line per column, the way pandas' info and describe start an analysis. Each line gives the column's kind, how full it is, and what matters most: a number's range and middle, a date's span, the yes count, or a text column's different values and most common one. Columns blank in every record share one line at the end. Summary no longer puts a row of dashes between columns.
+- **Show Columns answers with the columns only,** "4 columns: name, genre, state, country", without repeating the button's name.
+- **Ask the Table is dropped.** The voice question feature was measured before being built and judged not worth its narrow use; the build removes scripts\testAsk.
+- **Tutorial 1 filters the Alternate Menu with Control+F.** Typing a word in the list jumps by first letters, so "play" landed on Yield with Regex; Control+F is what narrows it.
+
 ## 23 November 2026, night -- Read Headed and Say Header
 
 - **Control+H reads the records with their headers,** from the current record on, and Alt+Shift+H reads the marked ones from the first, as Control+W and Alt+Shift+W read wide: "row 9", then each column's name before its value, such as "name", "Radio Nova", "country", "Germany". It reads one piece at a time, any key stops it, and a second press shows the records in a window, as Read Wide does. It suits a table you do not know yet, or values that sound alike. Read Headed (from the first) and Read Headed Marked from Current are on the Query menu with no key, since Alt+H opens the Help menu and Control+Shift is kept for commands that change things.

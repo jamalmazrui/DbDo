@@ -90,14 +90,13 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=Shift plus F, Say Filter, says both parts, in the words each was asked in, each in its own parentheses.
 Key=Shift+F
-Hear=where (any field contains seahawks) and (state contains Washington)
+Hear=filter: (any field contains seahawks) and (state contains Washington)
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Alt plus O, O for Order, says the order in force, then offers the same buttons as Show Columns, Alt plus S: Look columns, Prime columns, Main, Standard and All columns, Choose columns and Type columns. Prime columns, the default order, has focus.
+Say=Alt plus O, O for Order, offers the same buttons as Show Columns, Alt plus S: Look columns, Prime columns, Main, Standard and All columns, Choose columns and Type columns. Prime columns, the default order, has focus.
 Key=Alt+O
-Hear=Ordered now
 Hear=Order Records dialog
 Hear=Prime columns button
 Note=Confirm the wording with a live run: buildTutorials -live.
@@ -106,7 +105,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=L for Look columns sorts by look's columns, name first, the way stations are said. Prime columns puts back the table's own order.
 Key=L
-Hear=Ordered by name ASC
+Hear=Ordered by name, genre, state, country
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

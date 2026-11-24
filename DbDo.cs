@@ -11869,7 +11869,7 @@ namespace DbDo
             lsInitialChosen = new List<string>();
             if (lInitialChosen != null)
                 foreach (string sChosen in lInitialChosen)
-                    if (!string.IsNullOrEmpty(sChosen)) lsInitialChosen.Add(sChosen);
+                    if (!string.IsNullOrEmpty(sChosen)) lsInitialChosen.Add(bSortStyle ? shownPick(sChosen) : sChosen);
         }
 
         public void Dispose() { }
@@ -11922,7 +11922,12 @@ namespace DbDo
                 string sResult = dlg.runWithButtons(new string[] { "OK", "Cancel" });
                 if (sResult != "OK") return DialogResult.Cancel;
                 lChosenColumns.Clear();
-                foreach (object oItem in lbPicks.Items) lChosenColumns.Add(oItem.ToString());
+                // The caller still gets "name asc" or "name desc" for every pick; only the list leaves asc unsaid.
+                foreach (object oItem in lbPicks.Items)
+                {
+                    string sItem = oItem.ToString();
+                    lChosenColumns.Add(bSortStyle ? bareName(sItem) + (sItem.EndsWith(" desc") ? " desc" : " asc") : sItem);
+                }
                 return DialogResult.OK;
             }
         }
@@ -11941,12 +11946,20 @@ namespace DbDo
             dlg.addButton("&Add column").Click += (oSender, evA) => addClicked(null);
         }
 
-        // bareName: a pick without its sort-mode direction suffix.
+        // bareName: a pick without its sort-mode direction. ORDER OF FIELDS SAYS ONLY DESC (23 November 2026, Jamal's
+        // ruling): an ascending pick is the bare name, a descending one "name desc", so only " desc" needs taking off.
         private string bareName(string sPick)
         {
             if (!bSortStyle) return sPick;
-            int iSpace = sPick.LastIndexOf(' ');
-            return (iSpace > 0) ? sPick.Substring(0, iSpace) : sPick;
+            if (sPick.EndsWith(" desc")) return sPick.Substring(0, sPick.Length - 5);
+            if (sPick.EndsWith(" asc")) return sPick.Substring(0, sPick.Length - 4);
+            return sPick;
+        }
+
+        // shownPick: a sort pick as the list shows it -- "city" for city asc, "city desc" for city desc.
+        private static string shownPick(string sPick)
+        {
+            return sPick.EndsWith(" asc", StringComparison.OrdinalIgnoreCase) ? sPick.Substring(0, sPick.Length - 4) : sPick;
         }
 
         private void addClicked(string sSuffix)
@@ -11956,7 +11969,7 @@ namespace DbDo
             int iIdx = lbNames.SelectedIndex;
             string sName = lbNames.Items[iIdx].ToString();
             lbNames.Items.RemoveAt(iIdx);
-            string sPick = sName + (bSortStyle ? " " + sSuffix : "");
+            string sPick = sName + (bSortStyle && sSuffix == "desc" ? " desc" : "");
             lbPicks.Items.Add(sPick);
             lbPicks.SelectedIndex = lbPicks.Items.Count - 1;
             if (lbNames.Items.Count > 0)
@@ -11997,7 +12010,7 @@ namespace DbDo
                 if (iIdx < 0) continue;
                 string sName = lbNames.Items[iIdx].ToString();
                 lbNames.Items.RemoveAt(iIdx);
-                lbPicks.Items.Add(sName + (bSortStyle ? " asc" : ""));
+                lbPicks.Items.Add(sName);
                 lsAdded.Add(sName);
             }
             if (lbNames.Items.Count > 0) lbNames.SelectedIndex = 0;
@@ -12037,7 +12050,7 @@ namespace DbDo
             if (bSortStyle)
             {
                 sbHelp.AppendLine("Fields available lists the fields in DbDo's natural order: main fields in table order, then url, tags, notes, marked, look, prime, added, edited and the id.");
-                sbHelp.AppendLine("Order of fields holds the order chosen: the first field sorts first. Each reads like: city asc.");
+                sbHelp.AppendLine("Order of fields holds the order chosen: the first field sorts first. A field sorted largest or latest first reads like: city desc; one sorted the usual way is just its name.");
                 sbHelp.AppendLine("Enter in Fields available, or Add ascending, adds the selected field ascending; Add descending adds it descending.");
                 sbHelp.AppendLine("Prime order puts prime's fields in Order of fields: the table's default order. Remove field, or Enter or Delete in Order of fields, puts the selected one back. Empty list clears Order of fields at once.");
             }
@@ -15472,11 +15485,11 @@ namespace DbDo
             add("Frequency by Columns", "Count the records with each combination of values in the columns shown",
                 "Alt+Shift+B. Within the filter in force, over the columns the grid shows apart from the standard ones (the id, added, edited and marked), lists each combination of values with how many records have it, most common first, in a read-only window to review and copy. With State and City shown: how many contacts in each state and city.");
             add("Show Columns",        "Choose the columns the grid shows and their order",
-                "Alt+S. It first says the columns shown now, then offers Look columns (the default columns), Prime columns (the primary key), Main columns, Standard columns, All columns, Choose columns and Type columns. The choice is remembered with the table. Formerly Select Columns.");
+                "Alt+S. It offers Look columns (the default columns), Prime columns (the primary key), Main columns, Standard columns, All columns, Choose columns and Type columns. The choice is remembered with the table. Formerly Select Columns.");
             add("Say Shown Columns",   "Say the columns the grid shows", "Shift+S. The answer to Show Columns, as Say Order answers Order Records.");
             add("Design Database",     "Build or change this database: add a table, table properties, or DbDo's own defs, files and maps tables",
                 "Alt+Shift+D. A button dialog: Add table, Defs table, Files table, Maps table and Table properties. DbDo's own tables open in a design window, where Control+F6 and Choose Table move among those three. With no database open, it offers New database and Open template database.");
-            add("Generate Statistics",        "Read statistics of the records and columns you choose: summary, frequency, group, relation or cross-tab", "Alt+Shift+S. The dataset dialog asks which columns, which records (all in view, the marked ones, or the current one), whether to arrange by column or by row, and the kind. The report opens in a window to read.");
+            add("Generate Statistics",        "Read statistics of the records and columns you choose: profile, summary, frequency, group, relation or cross-tab", "Alt+Shift+S. The dataset dialog asks which columns, which records (all in view, the marked ones, or the current one), whether to arrange by column or by row, and the kind. The report opens in a window to read.");
             add("Generate Graphics",          "Draw a chart of the records and columns you choose, as a picture, a web page and an Excel workbook", "Alt+Shift+G. The same dataset dialog as Generate Statistics, with a Drawn by choice: Python draws a PNG, an SVG, a page with the takeaway and the numbers as a table, and a workbook with a native chart, into Documents, DbDo Charts; Excel draws the chart in Excel when Microsoft Office is installed.");
             add("Run Report",              "Render a saved report definition to a Markdown document. A report reads the whole physical table, not the grid view, so it comes out the same whatever your filter or order.",
                 "Report definitions live in an .inix file beside the database whose [Global] section declares FileTask = report (each [section] is one report, with header/detail/footer/group bands, $field and {{ jscript }} substitution, and footer aggregates like $count and $sum_<field>). DbDo lists only the FileTask = report files -- so a transfer map or settings file in the same folder is never offered -- then writes Markdown you can convert to HTML/DOCX/PDF. A legacy file with report bands but no FileTask still works. The contrast to remember: Generate from Grid = analyze what you SEE (virtual grid, ad-hoc); Run Report = produce a DEFINED document from the physical table (reproducible).");
@@ -17130,7 +17143,7 @@ namespace DbDo
 
             // Left status: filter and sort indicators when active.
             string sFilter = string.IsNullOrEmpty(db.filter) ? "" : "filter: " + db.filter;
-            string sSort = string.IsNullOrEmpty(db.sort) ? "" : "order: " + db.sort;
+            string sSort = string.IsNullOrEmpty(db.sort) ? "" : "order: " + orderSpoken(db.sort);
             string sViewState = "";
             if (sFilter.Length > 0 && sSort.Length > 0) sViewState = sFilter + "  " + sSort;
             else if (sFilter.Length > 0) sViewState = sFilter;
@@ -17462,6 +17475,13 @@ namespace DbDo
             if (keyData == (Keys.Alt | Keys.Control | Keys.Down))
             { virtStep(1, 0); return true; }
             if (keyData == (Keys.Alt | Keys.Control | Keys.Up))
+            { virtStep(-1, 0); return true; }
+            // ALT+DOWNARROW AND ALT+UPARROW (23 November 2026, Jamal's design of 31 October): the next or previous
+            // record, then the cell in the current column -- the short form of Alt+Control+DownArrow and UpArrow,
+            // edges said the same way.
+            if (keyData == (Keys.Alt | Keys.Down))
+            { virtStep(1, 0); return true; }
+            if (keyData == (Keys.Alt | Keys.Up))
             { virtStep(-1, 0); return true; }
             // NARRATOR'S READING KEYS (31 October 2026): Alt+Control+Shift with an arrow
             // reads without moving -- Left the row's header (the look), Up the column's
@@ -18035,7 +18055,7 @@ namespace DbDo
             if (!string.IsNullOrEmpty(db.sqlFilterSpoken)) lsFilters.Add(db.sqlFilterSpoken);
             if (db.filter.Length > 0) lsFilters.Add(db.filter);
             if (lsFilters.Count > 0) sb.Append("; filter: ").Append(string.Join("; and ", lsFilters.ToArray()));
-            if (db.sort.Length > 0) sb.Append("; order: ").Append(db.sort);
+            if (db.sort.Length > 0) sb.Append("; order: ").Append(orderSpoken(db.sort));
             speakOrShow("Status", "status: " + sb.ToString(), 101);
         }
 
@@ -18069,6 +18089,24 @@ namespace DbDo
 
         // saySayOrder: Shift+O. Speak the active sort/order
         // expression. Counterpart to Say Where Filter (Shift+W).
+        // orderSpoken: an order as it is said and shown -- "name, votes desc" for "name ASC, votes DESC". Ascending
+        // is the usual way and goes unsaid; only desc is said (23 November 2026, Jamal's ruling: asc was noise).
+        // Quotes and brackets around a name are dropped. The dot prompt keeps SQL's own words.
+        private static string orderSpoken(string sSort)
+        {
+            List<string> lSaid = new List<string>();
+            foreach (string sPart in (sSort ?? "").Split(','))
+            {
+                string sP = sPart.Trim();
+                if (sP.Length == 0) continue;
+                bool bDesc = sP.EndsWith(" DESC", StringComparison.OrdinalIgnoreCase);
+                if (bDesc) sP = sP.Substring(0, sP.Length - 5).Trim();
+                else if (sP.EndsWith(" ASC", StringComparison.OrdinalIgnoreCase)) sP = sP.Substring(0, sP.Length - 4).Trim();
+                lSaid.Add(sP.Trim('"', '[', ']', '`') + (bDesc ? " desc" : ""));
+            }
+            return string.Join(", ", lSaid.ToArray());
+        }
+
         private void saySayOrder(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
@@ -18086,7 +18124,7 @@ namespace DbDo
                 Say.say("order: " + (sKey.Length > 0 ? sKey + ", as stored" : "as stored"));
                 return;
             }
-            speakOrShow("Order", "order: " + s, 125);
+            speakOrShow("Order", "order: " + orderSpoken(s), 125);
         }
 
         // saySayGoto: Shift+G. Speak the most recently used Jump
@@ -19230,7 +19268,7 @@ namespace DbDo
             // "order", the word of Order Records, and "none" as every Say answer says it (1 November 2026).
             // Filter first, as the name says, and as FileDir says it (17 November 2026).
             sb.Append("filter: ").Append(string.IsNullOrEmpty(sFilter) ? "none" : sFilter);
-            sb.Append("; order: ").Append(string.IsNullOrEmpty(sSort) ? "none" : sSort);
+            sb.Append("; order: ").Append(string.IsNullOrEmpty(sSort) ? "none" : orderSpoken(sSort));
             speakOrShow("Filter and Order", sb.ToString(), 113);
         }
 
@@ -19470,29 +19508,19 @@ namespace DbDo
             // Shift+F1's job, from configs\Hints.inix. Letters: L, P, M, S, A, C, T, all first letters.
             List<string> lLook = db.hasField("look") ? db.lParseGeneratedFields(sTable, "look") : new List<string>();
             List<string> lPrime = db.hasField("prime") ? db.lParseGeneratedFields(sTable, "prime") : new List<string>();
-            List<string> lNow = db.getDisplayFieldNames();
-            string sNow = string.Join(", ", lNow.ToArray());
-            string sWhich = "";
-            if (lLook.Count > 0 && string.Join(",", lLook.ToArray()) == string.Join(",", lNow.ToArray())) sWhich = "the look columns, the default columns";
-            else if (lPrime.Count > 0 && string.Join(",", lPrime.ToArray()) == string.Join(",", lNow.ToArray())) sWhich = "the prime columns, the primary key";
-            else if (lNow.Count == lAllColumns.Count) sWhich = "all columns";
-            // THE CURRENT SEQUENCE, SAID BEFORE THE CHOICES. The dialog's line of text was never spoken: a screen
-            // reader reads a dialog's title and then the button with focus. So the line is shown as the dialog's
-            // text and also said once it opens.
-            string sShown = "Shown now" + (sWhich.Length > 0 ? ", " + sWhich : "") + ": " + lNow.Count
-                + (lNow.Count == 1 ? " column, " : " columns, ") + sNow + ".";
+            // NO STATUS LINE (23 November 2026, Jamal's ruling). The dialog said and showed the columns shown now
+            // before its buttons; he found it too wordy. The title, then the focused button, is all a screen reader
+            // says, and Say Shown Columns (Shift+S) gives the current columns whenever they are wanted.
 
             string sButton;
             using (LbcDialog dlg = new LbcDialog("Show Columns", this))
             {
-                dlg.addLabel(sShown);
                 dlg.helpNote = (sameFieldList(lLook, lPrime) ? "Look and prime hold the same fields here, so Look columns stands for both: the default columns for select and for order. " : "")
                     + "Look columns shows the default columns: look's fields, in look's order, the way each record is said; with no look, every main column. "
                     + "Prime columns shows the primary key: prime's fields, in prime's order, which together make each record unique and set the default order. "
                     + "Main columns shows the columns about the table's subject. Standard columns shows url, tags, notes, marked, look, prime, added, edited and the id. "
                     + "All columns shows every column. Choose columns picks columns and their order one by one; Type columns takes the names separated by commas. "
-                    + "The choice is remembered with the table. Shift+F1 on a button says what it does.";
-                dlg.form.Shown += delegate(object o, EventArgs e) { Say.say(sShown); };
+                    + "The choice is remembered with the table. Shift+F1 on a button says what it does; Shift+S, back in the grid, says the columns shown now.";
                 // Each group lists its columns (23 November 2026); with no look, Look columns is every main column.
                 Dictionary<string, Button> dChoices = addColumnSetChoices(dlg, lLook, lPrime, lMain, lStandard, lAllColumns, lMain, false, false);
                 dlg.form.AcceptButton = dChoices["Look columns"];
@@ -19534,7 +19562,9 @@ namespace DbDo
             }
             List<string> lAfter = db.getDisplayFieldNames();
             string sCount = lAfter.Count + (lAfter.Count == 1 ? " column" : " columns");
-            Say.sayForced((string.IsNullOrEmpty(sStored) ? "Look columns, the default, " : "") + sCount + ": " + string.Join(", ", lAfter.ToArray()));
+            // THE COLUMNS, NOT THE BUTTON'S NAME AGAIN (23 November 2026, from recordWalk): the button just pressed already
+            // said which choice it was, so the answer is only what is now shown.
+            Say.sayForced(sCount + ": " + string.Join(", ", lAfter.ToArray()));
         }
 
         // applySelectList: save a table's select list (empty = the default rule),
@@ -28568,7 +28598,7 @@ namespace DbDo
                 db.sort = sNew;
                 invokeRefresh();
                 persistCurrentTableState();
-                Say.sayForced("Order reversed: " + sNew + ". " + db.recordCount + " records.");
+                Say.sayForced("Order reversed: " + orderSpoken(sNew) + ". " + db.recordCount + " records.");
             }
             catch (Exception ex) { ErrorDialog.show(this, "Reverse Order", ex, db); }
         }
@@ -28611,7 +28641,7 @@ namespace DbDo
         {
             // ORDER RECORDS, ON SELECT COLUMNS' PATTERN (3 November 2026). Alt+S says what is shown and then offers
             // Look, Prime, Choose and Type; Alt+O went straight into the two lists, so the two commands that arrange
-            // the grid worked two ways. Now Alt+O says the order in force, then offers:
+            // the grid worked two ways. Now Alt+O offers (since 23 November 2026 without first saying the order in force):
             //   Prime order    prime's fields in prime's order, ascending: the default, and the first button
             //   Look order     look's fields in look's order, ascending
             //   Choose order   the two lists, Fields available and Order of fields, as before
@@ -28640,11 +28670,8 @@ namespace DbDo
             List<string> lPrimeAsc = new List<string>(), lLookAsc = new List<string>();
             foreach (string sF in lPrime) lPrimeAsc.Add(sF + " asc");
             foreach (string sF in lLook) lLookAsc.Add(sF + " asc");
-            string sWhich = "";
-            if (lNow.Count == 0) sWhich = ", as stored";
-            else if (lPrimeAsc.Count > 0 && string.Join(",", lNow.ToArray()) == string.Join(",", lPrimeAsc.ToArray())) sWhich = ", the prime order, by the primary key, the default";
-            else if (lLookAsc.Count > 0 && string.Join(",", lNow.ToArray()) == string.Join(",", lLookAsc.ToArray())) sWhich = ", the look order, by the default columns";
-            string sShown = "Ordered now" + sWhich + (lNow.Count == 0 ? "." : ": " + string.Join(", ", lNow.ToArray()) + ".");
+            // NO STATUS LINE (23 November 2026, Jamal's ruling), as in Show Columns: Say Order (Shift+O) gives the
+            // order in force whenever it is wanted.
 
             // ALT+O HAS ALT+S'S BUTTONS (4 November 2026, Jamal's design): Look, Prime, Main, Standard and All columns sort
             // by those columns, ascending; Choose and Type columns pick them. Prime columns, the default columns for
@@ -28659,18 +28686,15 @@ namespace DbDo
             string sButton;
             using (LbcDialog dlgAsk = new LbcDialog("Order Records", this))
             {
-                dlgAsk.addLabel(sShown);
                 dlgAsk.helpNote = (bSame ? "Look and prime hold the same fields here, so Look columns stands for both: the default columns for select and for order. "
                         : "Prime columns, the default, sorts by the primary key: prime's fields, in prime's order, which together make each record unique. "
                           + "Look columns sorts by look's fields, the default columns, the way records are said. ")
                     + "Main columns sorts by the columns about the table's subject; Standard columns by url, tags, notes, marked, look, prime, added, edited and the id; "
                     + "All columns by every column, in the natural order. Choose columns picks the columns and the direction of each, one by one; "
                     + "Type columns takes them separated by commas, with desc after a column to sort it largest or latest first. "
-                    + "Reverse order, last, turns the order in force the other way, as Alt+Shift+O does. The order is remembered with the table. Shift+F1 on a button says what it does.";
-                // Enter presses the button with focus, and focus starts on the first, Look columns; so the default,
-                // Prime columns, takes focus as the dialog opens, after the status line is said.
+                    + "Reverse order, last, turns the order in force the other way, as Alt+Shift+O does. The order is remembered with the table. Shift+F1 on a button says what it does; Shift+O, back in the grid, says the order in force.";
+                // Enter presses the button with focus, and the default takes focus as the dialog opens.
                 string sDefault = bSame || lPrime.Count == 0 ? "Look columns" : "Prime columns";
-                dlgAsk.form.Shown += delegate(object o, EventArgs e) { Say.say(sShown); };
                 // REVERSE ORDER LAST (4 November 2026, Jamal's rule): Alt+Shift+O reverses directly, so the dialog's own way
                 // comes after the other choices, with R, a letter no other button holds; offered when an order is in force.
                 // Each group lists its columns (23 November 2026); Look columns with no look sorts by prime, so says prime's.
@@ -28775,7 +28799,7 @@ namespace DbDo
                 else
                     Say.sayForced(lClauses.Count == 0
                         ? "Sort cleared. " + db.recordCount + " records in original order."
-                        : "Ordered by " + sFinal + ". " + db.recordCount + " records.");
+                        : "Ordered by " + orderSpoken(sFinal) + ". " + db.recordCount + " records.");
             }
             catch (Exception ex) { ErrorDialog.show(this, "Order Records", ex, db); }
         }
@@ -30872,9 +30896,11 @@ namespace DbDo
         // ===================================================================
         private ToolStripMenuItem miGenerateStatistics;
 
-        private static readonly string[] aStatisticsKinds = { "Summary", "Frequency", "Group", "Relation", "Cross-tab" };
+        // PROFILE FIRST (23 November 2026, from pandas' info and describe): one line per column is what a data scientist
+        // reads first, and one line per column is what a screen reader moves through fastest, line by line.
+        private static readonly string[] aStatisticsKinds = { "Profile", "Summary", "Frequency", "Group", "Relation", "Cross-tab" };
         private static readonly string[] aGraphicsKinds = { "Bar chart", "Pareto chart", "Pie chart", "Histogram", "Whisker plot", "Scatter plot", "Line chart", "Date chart" };
-        private string sLastStatisticsKind = "Summary";
+        private string sLastStatisticsKind = "Profile";
         private string sLastGraphicsKind = "Bar chart";
         private bool bLastByRow = false;
         private bool bLastExcel = false;
@@ -31001,14 +31027,18 @@ namespace DbDo
                 showInfoDialog("Statistics by row: " + sTable, buildRowStatistics(ds));
                 return;
             }
-            if (ds.sKind == "Summary")
+            if (ds.sKind == "Profile")
+            {
+                showInfoDialog("Profile: " + sTable, buildProfileReport(ds, sRecords));
+            }
+            else if (ds.sKind == "Summary")
             {
                 StringBuilder sb = new StringBuilder();
                 sb.Append("Statistics of ").Append(ds.iRows).Append(ds.iRows == 1 ? " record" : " records").Append(", ").Append(sRecords).Append(".\r\n\r\n");
                 foreach (string sC in ds.lCols)
                 {
                     sb.Append(buildColumnReportPublic(sC, ds.dValues[sC]));
-                    sb.Append("\r\n----------------------------------------\r\n\r\n");
+                    sb.Append("\r\n");
                 }
                 showInfoDialog("Summary statistics: " + sTable, sb.ToString());
             }
@@ -31059,6 +31089,70 @@ namespace DbDo
                 if (sB == null) return;
                 showInfoDialog("Cross-tab: " + sA + " by " + sB, buildCrosstabReport(sA, ds.dValues[sA], sB, ds.dValues[sB]));
             }
+        }
+
+        // buildProfileReport: PROFILE, one line per column (23 November 2026, pandas' info and describe in one). The first
+        // line gives the whole: how many records and columns, and how many columns are always blank. Then each column in
+        // grid order, its kind, how full it is, and the one or two facts that matter most for that kind: a number's
+        // range and middle, a date's span, yes and no counts, or a text column's different values and most common one.
+        // Columns that are blank in every record share one line at the end, rather than a line each.
+        private static string buildProfileReport(DataSetChoice ds, string sRecords)
+        {
+            StringBuilder sb = new StringBuilder();
+            List<string> lBlank = new List<string>();
+            List<string> lLines = new List<string>();
+            foreach (string sC in ds.lCols)
+            {
+                List<string> lFilled = new List<string>();
+                foreach (string s in ds.dValues[sC]) if (!string.IsNullOrEmpty(s) && s.Trim().Length > 0) lFilled.Add(s.Trim());
+                if (lFilled.Count == 0) { lBlank.Add(sC); continue; }
+                string sFull = lFilled.Count == ds.iRows ? "all filled" : lFilled.Count + " of " + ds.iRows + " filled";
+                string sType = detectColumnDominantType(lFilled);
+                string sFacts;
+                if (sType == "numeric")
+                {
+                    List<double> lNumbers = new List<double>();
+                    foreach (string s in lFilled) { double d; if (tryParseDouble(s, out d)) lNumbers.Add(d); }
+                    lNumbers.Sort();
+                    double dMiddle = lNumbers.Count % 2 == 1 ? lNumbers[lNumbers.Count / 2]
+                        : (lNumbers[lNumbers.Count / 2 - 1] + lNumbers[lNumbers.Count / 2]) / 2.0;
+                    sFacts = "number, " + sFull + (lNumbers.Count == 0 ? "" : ", " + formatNumber(lNumbers[0]) + " to "
+                        + formatNumber(lNumbers[lNumbers.Count - 1]) + ", middle " + formatNumber(dMiddle));
+                }
+                else if (sType == "date")
+                {
+                    List<DateTime> lDates = new List<DateTime>();
+                    foreach (string s in lFilled) { DateTime dt; if (tryParseDate(s, out dt)) lDates.Add(dt); }
+                    lDates.Sort();
+                    sFacts = "date, " + sFull + (lDates.Count == 0 ? "" : ", " + lDates[0].ToString("MMMM d, yyyy") + " to "
+                        + lDates[lDates.Count - 1].ToString("MMMM d, yyyy"));
+                }
+                else if (sType == "boolean")
+                {
+                    int iYes = 0;
+                    foreach (string s in lFilled) if (isBooleanTrue(s)) iYes++;
+                    sFacts = "yes or no, " + sFull + ", " + iYes + " yes";
+                }
+                else
+                {
+                    Dictionary<string, int> dCount = new Dictionary<string, int>(StringComparer.OrdinalIgnoreCase);
+                    foreach (string s in lFilled) { int i; dCount.TryGetValue(s, out i); dCount[s] = i + 1; }
+                    string sTop = ""; int iTop = 0;
+                    foreach (KeyValuePair<string, int> kv in dCount) if (kv.Value > iTop) { sTop = kv.Key; iTop = kv.Value; }
+                    if (sTop.Length > 60) sTop = sTop.Substring(0, 57) + "...";
+                    if (dCount.Count == 1) sFacts = "text, " + sFull + ", always " + sTop;
+                    else if (dCount.Count == lFilled.Count) sFacts = "text, " + sFull + ", every value different";
+                    else sFacts = "text, " + sFull + ", " + dCount.Count + " different, most often " + sTop + " (" + iTop + ")";
+                }
+                lLines.Add(sC + ": " + sFacts + ".");
+            }
+            sb.Append("Profile of ").Append(ds.iRows).Append(ds.iRows == 1 ? " record" : " records").Append(", ").Append(sRecords)
+              .Append(", and ").Append(ds.lCols.Count).Append(ds.lCols.Count == 1 ? " column" : " columns");
+            if (lBlank.Count > 0) sb.Append(", ").Append(lBlank.Count).Append(" of them always blank");
+            sb.Append(".\r\n");
+            foreach (string sLine in lLines) sb.Append(sLine).Append("\r\n");
+            if (lBlank.Count > 0) sb.Append("Always blank: ").Append(string.Join(", ", lBlank.ToArray())).Append(".\r\n");
+            return sb.ToString();
         }
 
         // buildRowStatistics: each record's number columns summed up -- its total, average, middle, and which column
@@ -31223,7 +31317,7 @@ namespace DbDo
             string sOpen = chooseByButtons(c_sTitle, new string[] {
                 sSummary,
                 "Saved in " + sFolder + " as a page, a picture (PNG and SVG) and an Excel workbook with the chart, each named " + Path.GetFileName(sBase) + ".",
-                "Page opens it in your browser, with the numbers as a table. Workbook opens the chart in Excel or another spreadsheet program. Folder opens the folder, to attach the files to a message." },
+                "Page opens it in your browser, with what the chart shows in words and the numbers as a table. Workbook opens the chart in Excel or another spreadsheet program. Folder opens the folder, to attach the files to a message." },
                 new List<string> { "Page", "Workbook", "Folder" });
             string sTarget = sOpen == "Page" ? sHtm : (sOpen == "Workbook" ? sBase + ".xlsx" : (sOpen == "Folder" ? sFolder : ""));
             if (sTarget.Length > 0) { try { System.Diagnostics.Process.Start(sTarget); } catch (Exception ex) { Say.say("Could not open " + sTarget + ": " + ex.Message); } }
@@ -31443,7 +31537,7 @@ namespace DbDo
                 foreach (string sC in lCols)
                 {
                     sb.Append(buildColumnReportPublic(sC, dValues[sC]));
-                    sb.Append("\r\n----------------------------------------\r\n\r\n");
+                    sb.Append("\r\n");
                 }
                 showInfoDialog("Summary statistics: " + (db.currentTable ?? "table"), sb.ToString());
             }
@@ -31690,6 +31784,10 @@ namespace DbDo
                   .Append(" times ").Append(lPairs[iTop][0]).Append(dIntercept >= 0 ? ", plus " : ", minus ").Append(formatNumber(Math.Abs(dIntercept)))
                   .Append(". It explains ").Append((lR[iTop] * lR[iTop] * 100).ToString("0")).Append("% of the spread in ").Append(lPairs[iTop][1]).Append(".\r\n");
             }
+            // WHERE THE POINTS FALL (23 November 2026, from BrailleR): the strongest pair as a four by four grid of counts,
+            // the way a sighted reader takes in a scatter plot's clusters; the kit's DataReport writes it.
+            string sWhere = Homer.DataReport.whereThePointsFall(lTx, lTy, lPairs[iTop][0], lPairs[iTop][1]);
+            if (sWhere.Length > 0) sb.Append("\r\n").Append(sWhere);
             sb.Append("\r\nA correlation near 1 means the two rise together; near -1, one falls as the other rises; near 0, little straight-line relation. It shows association, not cause.\r\n");
             return sb.ToString();
         }
@@ -33525,7 +33623,7 @@ namespace DbDo
             else if (db.readOnly) sb.Append(" (read-only)");
             sb.Append(", " + sRow);
             if (!string.IsNullOrEmpty(sFilter)) sb.Append(", filter: " + sFilter);
-            if (!string.IsNullOrEmpty(sSort))   sb.Append(", sort: "   + sSort);
+            if (!string.IsNullOrEmpty(sSort))   sb.Append(", sort: "   + orderSpoken(sSort));
             return sb.ToString();
         }
 

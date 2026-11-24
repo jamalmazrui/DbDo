@@ -23,6 +23,13 @@ PerformScript SayNextLine ()
 EndIf
 EndScript
 
+; Way: pass quietly. Where: everywhere in DbDo; in the list DbDo moves a record and says the cell itself, and in
+; a dialog's box the key opens its list as always. JAWS reads a list's new row from its arrow scripts, not from an
+; event, so passing the key is enough to keep it quiet (23 November 2026).
+Script altDbDoRow ()
+TypeCurrentScriptKey ()
+EndScript
+
 Script priorDbDoRow ()
 If inDbDoList () Then
 TypeCurrentScriptKey ()

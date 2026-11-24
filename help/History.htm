@@ -257,6 +257,13 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a href="#november-2026-hearing-where-the-points-fall"
+id="toc-november-2026-hearing-where-the-points-fall">24 November 2026 –
+Hearing where the points fall</a></li>
+<li><a
+href="#november-2026-late-night-quieter-dialogs-orders-and-letters"
+id="toc-november-2026-late-night-quieter-dialogs-orders-and-letters">23
+November 2026, late night – Quieter dialogs, orders and letters</a></li>
 <li><a href="#november-2026-night-read-headed-and-say-header"
 id="toc-november-2026-night-read-headed-and-say-header">23 November
 2026, night – Read Headed and Say Header</a></li>
@@ -939,6 +946,57 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Control+Shift+F1</strong> inside DbDo to open this file
 in your browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="november-2026-hearing-where-the-points-fall">24 November 2026 –
+Hearing where the points fall</h2>
+<ul>
+<li><strong>The Relation report ends with where the points fall</strong>
+for its strongest pair: each column’s range split into four equal parts,
+a line for each quarter of the second column, highest first, counting
+the points across the quarters of the first. It is how a sighted reader
+takes in a scatter plot, as clusters rather than points, and it comes
+from BrailleR, the R package by a blind statistician.</li>
+<li><strong>A chart’s page says what the chart shows,</strong> also from
+BrailleR: the kind, each axis with the values marked on it, then what is
+drawn in words that fit the kind – a histogram’s bars and their width,
+each box of a whisker plot with its middle, box, whiskers and outliers,
+and for a scatter plot a table of where its points fall.</li>
+<li><strong>Tutorial 1 builds again.</strong> Its Escape step now notes
+why it has no expected words.</li>
+</ul>
+<h2 id="november-2026-late-night-quieter-dialogs-orders-and-letters">23
+November 2026, late night – Quieter dialogs, orders and letters</h2>
+<ul>
+<li><strong>Show Columns and Order Records go straight to their
+buttons.</strong> They no longer say or show the columns or order in
+force first; a screen reader says the title and the focused button. Say
+Shown Columns (Shift+S) and Say Order (Shift+O) give those whenever they
+are wanted.</li>
+<li><strong>An order says desc, never asc.</strong> Ascending is the
+usual way, so Say Order, Say Filter and Order, Say Status, the status
+bar, Reverse Order and Order Records now say “name, votes desc” where
+they said “name ASC, votes DESC”. The Choose list in Order Records shows
+a field sorted the usual way by its name alone.</li>
+<li><strong>Alt+DownArrow and Alt+UpArrow move to the next or previous
+record and say the cell</strong> in the current column, the short form
+of Alt+Control+DownArrow and UpArrow. The JAWS and NVDA scripts pass
+them quietly, so the reader does not read the row as well.</li>
+<li><strong>Generate Statistics opens on a new kind, Profile:</strong>
+one line per column, the way pandas’ info and describe start an
+analysis. Each line gives the column’s kind, how full it is, and what
+matters most: a number’s range and middle, a date’s span, the yes count,
+or a text column’s different values and most common one. Columns blank
+in every record share one line at the end. Summary no longer puts a row
+of dashes between columns.</li>
+<li><strong>Show Columns answers with the columns only,</strong> “4
+columns: name, genre, state, country”, without repeating the button’s
+name.</li>
+<li><strong>Ask the Table is dropped.</strong> The voice question
+feature was measured before being built and judged not worth its narrow
+use; the build removes scripts.</li>
+<li><strong>Tutorial 1 filters the Alternate Menu with
+Control+F.</strong> Typing a word in the list jumps by first letters, so
+“play” landed on Yield with Regex; Control+F is what narrows it.</li>
+</ul>
 <h2 id="november-2026-night-read-headed-and-say-header">23 November
 2026, night – Read Headed and Say Header</h2>
 <ul>

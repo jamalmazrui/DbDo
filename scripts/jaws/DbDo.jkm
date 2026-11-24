@@ -37,6 +37,10 @@ Alt+Backslash=TypeCurrentScriptKey
 Control+Backslash=TypeCurrentScriptKey
 ; Pass only here: arrows, quiet only in the app's list view.
 DownArrow=nextDbDoRow
+; Alt with an arrow (23 November 2026): in the list DbDo moves to the next or previous record and says the
+; cell, and JAWS stays quiet rather than reading the row too; in a dialog's box the key still opens its list.
+Alt+DownArrow=altDbDoRow
+Alt+UpArrow=altDbDoRow
 UpArrow=priorDbDoRow
 
 [Keyboard Layouts]
