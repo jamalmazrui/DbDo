@@ -219,6 +219,13 @@ def applyLookPrime(sDb, sTemplate, dSections, bDry):
             sNewSql, lChanges = sSql, []
             for sWantTable, sColumn, lsFields in lWanted:
                 if sWantTable != sTable or sColumn.lower() not in ("look", "prime"): continue
+                # NO ID IN A PRIME (24 November 2026): an id is different for every record, so a prime holding one can
+                # never tell that a record is already here. Such a line is refused, logged, and the table left alone;
+                # before, this section and checkTemplates undid each other on every build.
+                lIds = [s for s in lsFields if re.match(r"(?i)^(id|.*_id)$", s)]
+                if sColumn.lower() == "prime" and lIds:
+                    logLine("ERROR " + sTemplate + ": [lookprime] gives " + sTable + " a prime holding " + ", ".join(lIds) + ", which a prime never holds; left as it is")
+                    continue
                 oSpan = generatedSpan(sNewSql, sColumn)
                 if oSpan is None: logLine(sTemplate + ": " + sTable + " has no generated " + sColumn); continue
                 if [f.lower() for f in fieldsOf(sNewSql[oSpan[0]:oSpan[1]])] == [f.lower() for f in lsFields]: continue

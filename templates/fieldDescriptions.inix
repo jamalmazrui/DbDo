@@ -595,5 +595,8 @@ TechTraining = Free audio and video presentations about technology and accessibi
 ; rows, ids, indexes and triggers and re-pointing its maps links, and stops without change if a new prime is not unique.
 BlindCreations/creators/look = first_name, last_name
 BookTrail/books/look = title, author, series, volume
-northwind/orders/prime = order_date, customer_id, employee_id
-RadioTrail/stations/prime = name, stream_url, source_id
+; No id in a prime (24 November 2026): these two named ids, and checkTemplates took them out on every build while this
+; section put them back, rebuilding and compacting RadioTrail's 52,440 stations twice a build. They now name the same
+; fields checkTemplates does, and describeFields refuses a prime here that holds an id.
+northwind/orders/prime = order_date, ship_city, ship_country
+RadioTrail/stations/prime = name, stream_url

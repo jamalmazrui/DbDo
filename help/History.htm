@@ -997,6 +997,12 @@ read as if it were, so a name such as Zoë arrived with a replacement
 mark. DbDo now honors a byte-order mark, reads UTF-8 when the file is
 valid UTF-8, and otherwise reads it as Windows-1252, saying so in the
 log.</li>
+<li><strong>The build stops undoing itself.</strong> Two build steps
+disagreed on the primes of RadioTrail’s stations and northwind’s orders:
+the template check took the ids out, and the step that describes the
+fields put them back, every build. RadioTrail’s 52,440 stations were
+rebuilt and compacted twice each time. The field descriptions now name
+the same primes, and that step refuses a prime with an id in it.</li>
 <li><strong>A safer table rebuild.</strong> When foreign keys are on, a
 rebuild now checks them before it commits and undoes itself if one would
 break, the last step of SQLite’s own procedure. The template scripts’

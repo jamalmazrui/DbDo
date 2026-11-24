@@ -17,6 +17,7 @@ Lessons from the documentation of three other SQLite tools -- SQLiteStudio, sqli
 
 - **Faster filters and sorts over time.** As a database closes, DbDo runs SQLite's own tune-up, PRAGMA optimize, which gathers statistics for any table that lacks them, so SQLite picks the best index for a filter or sort. It samples, so closing stays quick. The templates ship with their statistics already made.
 - **Accented letters survive a CSV import.** A CSV file that is not UTF-8, as Excel in the United States often saves one, was read as if it were, so a name such as Zoë arrived with a replacement mark. DbDo now honors a byte-order mark, reads UTF-8 when the file is valid UTF-8, and otherwise reads it as Windows-1252, saying so in the log.
+- **The build stops undoing itself.** Two build steps disagreed on the primes of RadioTrail's stations and northwind's orders: the template check took the ids out, and the step that describes the fields put them back, every build. RadioTrail's 52,440 stations were rebuilt and compacted twice each time. The field descriptions now name the same primes, and that step refuses a prime with an id in it.
 - **A safer table rebuild.** When foreign keys are on, a rebuild now checks them before it commits and undoes itself if one would break, the last step of SQLite's own procedure. The template scripts' rebuild keeps a STRICT or WITHOUT ROWID table as it was, and keeps each row's rowid in a table without an id of its own.
 
 ## 24 November 2026, evening -- No id in a prime
