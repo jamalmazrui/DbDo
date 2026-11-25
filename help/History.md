@@ -5,6 +5,16 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 25 November 2026 -- Import and Export work on a table
+
+- **Import Data brings in one table.** Control+Shift+I reads a worksheet, a table of another database, or a CSV, Markdown, JSON or Inix file, and asks **New table** or **Merge records** into the table in this window. A database file also offers **All tables**, the whole-database merge. With no database open, the file opens as one.
+- **A merge asks whose values are final.** **Source values** takes the incoming ones; **Target values** keeps the table's and fills only its blanks. Unmatched records are added, and a blank never replaces a value. Columns match by name, ignoring case, spaces and underscores.
+- **Export Data can make or merge a table.** Choose a DbDo database as the type, and the records in view -- filtered, ordered, with the columns shown, or a query's result that joins tables -- become a table there, or merge into one.
+- **Open treats any file as a database,** as before for databases, workbooks and CSV files. An `.xls` or `.dbf` file still opens as itself through the Access Database Engine when the computer has the 64-bit engine.
+- **A missing engine is explained, not just reported.** When a task needs the 64-bit Access Database Engine and it is absent, DbDo says whether 32-bit Office is the reason and what else works: a converted copy of an `.xls` or `.dbf` file, which Control+S keeps as a DbDo database, or exporting an Access database's tables to `.xlsx` or CSV. Computers with the 64-bit engine work as before.
+- **Add Table's From file reads every format Import reads,** not only CSV and TSV.
+- **Merge Data is hidden and has no key,** since Import merges, from more formats. It is still in the Alternate Menu. Control+Shift+M is free.
+
 ## 24 November 2026, late night -- What the menu walk found
 
 - **Hotkey Summary is on the Help menu,** beside Hotkeys, the shipped list it is the live form of, as in EdSharp and FileDir. It was on the Misc menu.

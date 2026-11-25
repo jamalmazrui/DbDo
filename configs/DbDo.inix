@@ -114,12 +114,12 @@ TEXTTIME=^[0-9]{4}-[0-9]{2}-[0-9]{2}([ T][0-9]{2}:[0-9]{2}(:[0-9]{2}(\.[0-9]+)?)
 ; the mnemonic between the chord letter and the command name.
 
 ; ===== File menu =====
-Open Database=Control+O, Open a database file
+Open Database=Control+O, Open a database, workbook, CSV, dBASE or Inix file as a database
 New Database=None, Create a new database
 Add Table=None, Add a table in the standard shape to the open database
 Recent Databases=Alt+R, Reopen a database you opened recently
 Close Database=None, Close the open database
-Export Data=Control+Shift+X, Save the records in view, with the columns shown, to a file
+Export Data=Control+Shift+X, Save the records in view, with the columns shown, to a file or to a table of a DbDo database
 Exit DbDo=Alt+F4, Close DbDo
 
 ; ===== Edit menu =====
@@ -314,10 +314,10 @@ Save=Control+S, Save the open database's changes
 Save As=Control+Shift+S, Save a copy of the open database under another name or format
 Backup Database=None, Save a dated copy of the open database
 Compare Database=None, Compare two databases, once this is built
-Import Data=Control+Shift+I, Make a new database from a spreadsheet, Access, dBASE or other file
+Import Data=Control+Shift+I, Bring a table from a file into this database, as a new table or merged into the table in this window
 Open Template Database=Control+Shift+O, Open one of the template databases that come with DbDo
 Design Database=Alt+Shift+D, Build or change this database: add a table, table properties, or DbDo's own defs, files and maps tables
-Merge Data=Control+Shift+M, Add records from a Markdown table, JSON or Inix file to the current table
+Merge Data=None, Hidden, since Import Data merges: add records from a Markdown table, JSON or Inix file to the current table
 Transfer Import=None, Add records from another database to the current table through a transfer map
 Run Report=Alt+Shift+R, Make a document from a saved report of the current table
 Choose View=None, Open a view of the database in this window

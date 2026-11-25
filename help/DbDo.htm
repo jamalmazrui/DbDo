@@ -272,7 +272,14 @@ one do I want?</a></li>
 </ul></li>
 <li><a href="#part-4-importing-exporting-opening-saving"
 id="toc-part-4-importing-exporting-opening-saving">Part 4 — Importing,
-exporting, opening, saving</a></li>
+exporting, opening, saving</a>
+<ul>
+<li><a href="#how-a-merge-decides" id="toc-how-a-merge-decides">How a
+merge decides</a></li>
+<li><a href="#when-the-access-database-engine-is-missing"
+id="toc-when-the-access-database-engine-is-missing">When the Access
+Database Engine is missing</a></li>
+</ul></li>
 <li><a href="#part-5-sql-and-scripting"
 id="toc-part-5-sql-and-scripting">Part 5 — SQL and scripting</a>
 <ul>
@@ -1639,47 +1646,88 @@ question, .dbdo for a routine, .js for a program.</li>
 <hr />
 <h2 id="part-4-importing-exporting-opening-saving">Part 4 — Importing,
 exporting, opening, saving</h2>
-<p>DbDo distinguishes four file operations that are easy to confuse. The
-distinction is about whether the data keeps its original shape or is
-reshaped into DbDo’s conventions.</p>
+<p>Four commands move data in and out of DbDo. Open and Save work on a
+whole file. Import and Export work on one table at a time.</p>
 <ul>
-<li><strong>Open</strong> (Control+O) opens a file <em>faithfully</em> —
-a round trip. An Excel workbook opens as its sheets, a CSV as its rows,
-and saving writes back to that same file in that same format. Use Open
-when you want to work with a file as it is.</li>
-<li><strong>Import Data</strong> (Control+Shift+I) reads an outside file
-and reshapes it <em>into a DbDo database</em> — normalizing columns,
-applying conventions, and producing a <code>.db</code> you then work
-with. It pairs with <strong>Export Data</strong> (Control+Shift+X). Use
-Import when you want to bring foreign data into a proper DbDo database.
-<strong>Transfer Import</strong> and <strong>Merge Data</strong>
-(Control+Shift+M) bring data in alongside existing data. When Import
-reads a CSV, TSV or Excel file, a column that holds only whole numbers
-becomes a column of whole numbers, and one that holds only numbers a
-column of numbers, so filters, orders and reports compare them as
-numbers; a blank in such a column stays empty, not zero. A number with a
-leading zero, such as the zip code 02134, keeps its column as text, so
-the zero is not lost. Column names become lowercase words joined by
-underscores: date.utc becomes date_utc. Merge Data finds a file’s
-columns by either name. A table keeps one record for each set of values,
-so a row that repeats another exactly is left out; Import says how many
-it left out.</li>
-<li><strong>Export Data</strong> (Control+Shift+X) writes the
-<strong>grid</strong> — the current view — out to a new file in a chosen
-format. Use Export to hand off what you are looking at. A CSV or TSV
-file holds your values exactly as they are. Since a spreadsheet may run
-a value beginning with =, +, - or @ as a formula, DbDo asks before
+<li><strong>Export Data</strong> (Control+Shift+X) saves what you see –
+the records in view, in the order shown, with the columns shown – to a
+file, or to a table of a DbDo database. That works for the result of a
+query, too, so the records can come from more than one table. Choose a
+<code>.db</code> file as the type to keep them as a table: a new
+database gets a new table, and a database that already has tables asks
+<strong>New table</strong> or <strong>Merge records</strong>. A CSV or
+TSV file holds your values exactly as they are. Since a spreadsheet may
+run a value beginning with =, +, - or @ as a formula, DbDo asks before
 opening such a file, and an .xlsx export is the safe way into a
 spreadsheet: it keeps every text value as text, and writes a column the
 database keeps as numbers as Excel numbers, ready to sum and chart.</li>
-<li><strong>Save</strong> (Control+S) and <strong>Save As</strong>
-(Control+Shift+S) concern the <em>whole database</em>. For a workbook
-opened faithfully, Save writes your edits back to the
-<code>.xlsx</code>. For a native database your edits were already
-committed, so Save reports that; Save As writes a fresh copy.
-<strong>Open as Managed Copy</strong> opens a file as a working copy so
-the original is untouched until you decide.</li>
+<li><strong>Import Data</strong> (Control+Shift+I) brings one table of a
+file into the open database: a worksheet, a table of another database,
+or a CSV, Markdown, JSON or Inix file. If the file has more than one
+table, DbDo asks which. Then it asks <strong>New table</strong> or
+<strong>Merge records</strong>. A new table is shaped the DbDo way. A
+merge adds the records to the table in this window; it is offered when
+that window shows a table, not a query. A database file also offers
+<strong>All tables</strong>, which merges the whole database. With no
+database open, Import opens the file instead, as Open would.</li>
+<li><strong>Open Database</strong> (Control+O) opens any of these files
+as a database. Each kind opens the one way it can:
+<ul>
+<li>A DbDo or SQLite database opens as itself. Every change is saved as
+you make it.</li>
+<li>An Access database opens as itself, through Microsoft’s Access
+Database Engine.</li>
+<li>An Excel <code>.xlsx</code> workbook opens as a working copy of one
+worksheet. Control+S writes your changes back to the workbook and keeps
+its formulas.</li>
+<li>A CSV or text file opens as a working copy. Control+S writes your
+changes back to the file.</li>
+<li>An Excel <code>.xls</code> file or a dBASE <code>.dbf</code> file
+opens as itself through the engine, if the computer has it. If not, DbDo
+says why and offers a converted copy, which Control+S keeps as a DbDo
+database.</li>
+<li>An Inix file becomes a DbDo database beside it.</li>
+</ul></li>
+<li><strong>Save</strong> (Control+S) keeps your work in the file it
+came from: a workbook or CSV gets your changes written back. A converted
+copy asks where to keep it as a DbDo database. A database is already
+saved. <strong>Save As</strong> (Control+Shift+S) saves a copy of the
+whole database under a new name.</li>
 </ul>
+<h3 id="how-a-merge-decides">How a merge decides</h3>
+<p>Import and Export merge the same way. Records are matched by the
+table’s prime, the fields that say which record it is.</p>
+<ul>
+<li>A record found only in the source is added.</li>
+<li>For a record in both, DbDo asks which values are final.
+<strong>Source values</strong> takes the incoming values. <strong>Target
+values</strong> keeps the table’s own and only fills its blanks.</li>
+<li>A blank never replaces a value.</li>
+<li>Columns are matched by name, ignoring case, spaces and underscores,
+so “First Name” fills first_name. A column the table lacks is left
+out.</li>
+</ul>
+<p>When Import makes a new table from a CSV, TSV or Excel file, a column
+that holds only whole numbers becomes a column of whole numbers, and one
+that holds only numbers a column of numbers, so filters, orders and
+reports compare them as numbers; a blank in such a column stays empty,
+not zero. A number with a leading zero, such as the zip code 02134,
+keeps its column as text, so the zero is not lost. Column names become
+lowercase words joined by underscores: date.utc becomes date_utc. A
+table keeps one record for each set of values, so a row that repeats
+another exactly is left out; Import says how many it left out.</p>
+<h3 id="when-the-access-database-engine-is-missing">When the Access
+Database Engine is missing</h3>
+<p>DbDo uses Microsoft’s free Access Database Engine only for Access
+files, and to open <code>.xls</code> and <code>.dbf</code> files as
+themselves. Workbooks, CSV and everything else need nothing extra. A
+computer with 32-bit Office has the 32-bit engine, which DbDo, a 64-bit
+program, cannot use, and Microsoft will not install the 64-bit engine
+beside it. When a task needs the engine and it is missing, DbDo says so
+and what else works: a converted copy of an <code>.xls</code> or
+<code>.dbf</code> file, or, for an Access database, exporting its tables
+from Access to <code>.xlsx</code> or CSV files. With the 64-bit engine
+installed, nothing changes.</p>
 <p>Supported formats include SQLite (<code>.db</code>,
 <code>.sqlite</code>, <code>.sqlite3</code>), Access (<code>.mdb</code>,
 <code>.accdb</code>), Excel (<code>.xlsx</code>, <code>.xls</code>),
@@ -1785,10 +1833,6 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <tr>
 <td>Compare Database</td>
 <td>—</td>
-</tr>
-<tr>
-<td>Merge Data</td>
-<td>Control+Shift+M</td>
 </tr>
 <tr>
 <td>Transfer Import</td>
@@ -2979,10 +3023,10 @@ Control+O. Nothing has to be copied into a folder belonging to DbDo.</p>
 <p><strong>If they want it in a database of their own</strong>, they
 start one from a template: File, <strong>Open Template
 Database</strong>, and pick BookTrail, which opens their own copy under
-their own account. Then <strong>Merge Data, Control+Shift+M</strong>,
-and choose the file they were sent, wherever they saved it. DbDo folds
-the records in.</p>
-<h4 id="how-a-merge-decides">How a merge decides</h4>
+their own account. Then <strong>Import Data, Control+Shift+I</strong>,
+choose the file they were sent, wherever they saved it, and choose
+<strong>All tables</strong>. DbDo folds the records in.</p>
+<h4 id="how-a-merge-decides-1">How a merge decides</h4>
 <p>Every record carries a <strong>prime</strong>, the computed key built
 from the fields that say which record it is – for books, the author and
 the title. That is what DbDo compares. A prime never holds an id,
@@ -3097,14 +3141,15 @@ script, a corrected record – open your copy and choose <strong>Update
 from Template</strong> on the Help menu (Alt+H, then U). It offers two
 buttons:</p>
 <ul>
-<li><strong>Merge Data</strong> adds what the template has and your copy
-lacks, and keeps everything of yours. A field the template has gained is
-added to your copy first, empty, so a copy made before it existed gets
-it too. It uses Merge Database, so it first asks what to do with records
-both have; Add new only, the first choice, changes none of yours. Your
-copy as it was is kept beside it, named with “before-merge”.</li>
-<li><strong>Replace</strong> makes your copy the template again. Your
-copy as it was is kept beside it as a dated backup, named with
+<li><strong>Merge template</strong> adds what the template has and your
+copy lacks, and keeps everything of yours. A field the template has
+gained is added to your copy first, empty, so a copy made before it
+existed gets it too. It uses Merge Database, so it first asks what to do
+with records both have; Add new only, the first choice, changes none of
+yours. Your copy as it was is kept beside it, named with
+“before-merge”.</li>
+<li><strong>Replace copy</strong> makes your copy the template again.
+Your copy as it was is kept beside it as a dated backup, named with
 “before-update”. DbDo keeps the two newest of these backups for each
 database and removes older ones, so they do not pile up.</li>
 </ul>

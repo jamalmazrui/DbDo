@@ -230,9 +230,8 @@ The menu section says why each key is the one it is.</p>
 command.</strong> Shift+C is Say Cell; Alt+O is Order.</li>
 <li><strong>Shift and a letter asks.</strong> Every Say command is Shift
 and a letter, and none changes anything.</li>
-<li><strong>Adding Shift reverses.</strong> Control+M marks and
-Control+Shift+M unmarks; Control+F filters and Control+Shift+F clears
-the filter.</li>
+<li><strong>Adding Shift reverses.</strong> Control+F filters and
+Control+Shift+F clears the filter.</li>
 <li><strong>Z is for sleep.</strong> Every Z key is a toggle: it wakes a
 behavior or puts it to sleep. Control+Z undoes in Windows, and restoring
 a behavior is the same idea.</li>
@@ -394,25 +393,21 @@ Close DbDo. Alt+F4 closes the program, as in every Windows
 program.<br />
 Alt+F4</li>
 <li>Export Data<br />
-Export the records in view, with the shown columns, to a file. X for the
-sound of “ex”.<br />
+Export the records in view, with the shown columns, to a file or to a
+table of a DbDo database. X for the sound of “ex”.<br />
 Control+Shift+X</li>
 <li>Import Data<br />
-Build a new DbDo database from another file – Excel (read by DbDo
-itself, with no Office or Access driver needed), Access, dBASE, CSV, or
-SQLite – with one standard-shape table per source table, plus maps and
-defs. I for Import.<br />
+Bring one table of a file – a worksheet, a table of another database, a
+CSV, Markdown, JSON or Inix file – into this database, as a new table or
+merged into the table in this window. I for Import.<br />
 Control+Shift+I</li>
-<li>Merge Data<br />
-Merge rows from a Markdown table, JSON, or Inix file into the current
-table. M for Merge.<br />
-Control+Shift+M</li>
 <li>Next Window<br />
 Activate the next open window. Control+Tab moves among DbDo
 windows.<br />
 Control+Tab</li>
 <li>Open Database<br />
-Open a database file. O for Open.<br />
+Open a database, workbook, CSV, dBASE or Inix file as a database. O for
+Open.<br />
 Control+O</li>
 <li>Open Table<br />
 Open a table or view in a new window. T for Table.<br />
@@ -994,7 +989,7 @@ Mail Record</li>
 Add a new record at the cursor.<br />
 New Record</li>
 <li>Control+O<br />
-Open a database file.<br />
+Open a database, workbook, CSV, dBASE or Inix file as a database.<br />
 Open Database</li>
 <li>Control+P<br />
 Play the current record’s stream address in the Homer Player; with
@@ -1055,10 +1050,9 @@ Open the bundled sqlean.exe shell in its own console window on the
 current database.<br />
 Sqlean Console</li>
 <li>Control+Shift+I<br />
-Build a new DbDo database from another file – Excel (read by DbDo
-itself, with no Office or Access driver needed), Access, dBASE, CSV, or
-SQLite – with one standard-shape table per source table, plus maps and
-defs.<br />
+Bring one table of a file – a worksheet, a table of another database, a
+CSV, Markdown, JSON or Inix file – into this database, as a new table or
+merged into the table in this window.<br />
 Import Data</li>
 <li>Control+Shift+J<br />
 Go to the previous record whose current field holds the text.<br />
@@ -1066,10 +1060,6 @@ Reverse Jump</li>
 <li>Control+Shift+K<br />
 Go to the previous record whose fields hold the keywords.<br />
 Reverse Keywords</li>
-<li>Control+Shift+M<br />
-Merge rows from a Markdown table, JSON, or Inix file into the current
-table.<br />
-Merge Data</li>
 <li>Control+Shift+N<br />
 New Copy</li>
 <li>Control+Shift+O<br />
@@ -1089,7 +1079,8 @@ Previous Window</li>
 <li>Control+Shift+U<br />
 Open url</li>
 <li>Control+Shift+X<br />
-Export the records in view, with the shown columns, to a file.<br />
+Export the records in view, with the shown columns, to a file or to a
+table of a DbDo database.<br />
 Export Data</li>
 <li>Control+Shift+Y<br />
 Count the matches of a regular expression in the fields and records you
@@ -1369,7 +1360,8 @@ Alt+F4</li>
 Go back to the first table.<br />
 Alt+Home</li>
 <li>Export Data<br />
-Export the records in view, with the shown columns, to a file.<br />
+Export the records in view, with the shown columns, to a file or to a
+table of a DbDo database.<br />
 Control+Shift+X</li>
 <li>Extract with Regex<br />
 Control+Shift+E</li>
@@ -1396,10 +1388,9 @@ Alt+G</li>
 Open the history of changes in the default browser.<br />
 Control+Shift+F1</li>
 <li>Import Data<br />
-Build a new DbDo database from another file – Excel (read by DbDo
-itself, with no Office or Access driver needed), Access, dBASE, CSV, or
-SQLite – with one standard-shape table per source table, plus maps and
-defs.<br />
+Bring one table of a file – a worksheet, a table of another database, a
+CSV, Markdown, JSON or Inix file – into this database, as a new table or
+merged into the table in this window.<br />
 Control+Shift+I</li>
 <li>Inspect Record<br />
 Alt+I</li>
@@ -1429,10 +1420,6 @@ Alt+B</li>
 Control+M</li>
 <li>Mark All<br />
 Control+A</li>
-<li>Merge Data<br />
-Merge rows from a Markdown table, JSON, or Inix file into the current
-table.<br />
-Control+Shift+M</li>
 <li>New Copy<br />
 Control+Shift+N</li>
 <li>New Record<br />
@@ -1446,7 +1433,7 @@ Control+Enter</li>
 <li>Open Command Prompt<br />
 Control+Backslash</li>
 <li>Open Database<br />
-Open a database file.<br />
+Open a database, workbook, CSV, dBASE or Inix file as a database.<br />
 Control+O</li>
 <li>Open Dot Prompt<br />
 Send focus to the dot prompt console.<br />

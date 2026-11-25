@@ -7,7 +7,7 @@ section says why each key is the one it is.
 
 - **A letter is the first letter of a word in the command.** Shift+C is Say Cell; Alt+O is Order.
 - **Shift and a letter asks.** Every Say command is Shift and a letter, and none changes anything.
-- **Adding Shift reverses.** Control+M marks and Control+Shift+M unmarks; Control+F filters and Control+Shift+F clears the filter.
+- **Adding Shift reverses.** Control+F filters and Control+Shift+F clears the filter.
 - **Z is for sleep.** Every Z key is a toggle: it wakes a behavior or puts it to sleep. Control+Z undoes in Windows, and restoring a behavior is the same idea.
 - **X is for the sound of "ex"**, as in Export.
 - **Alt says, Control changes.** When a letter needs a modifier, a command that only speaks takes Alt and one that changes data takes Control. A command that opens a pick list may take either; a plain Alt and a letter never opens a box for typing.
@@ -140,19 +140,16 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Close DbDo. Alt+F4 closes the program, as in every Windows program.\
   Alt+F4
 - Export Data\
-  Export the records in view, with the shown columns, to a file. X for the sound of "ex".\
+  Export the records in view, with the shown columns, to a file or to a table of a DbDo database. X for the sound of "ex".\
   Control+Shift+X
 - Import Data\
-  Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and defs. I for Import.\
+  Bring one table of a file -- a worksheet, a table of another database, a CSV, Markdown, JSON or Inix file -- into this database, as a new table or merged into the table in this window. I for Import.\
   Control+Shift+I
-- Merge Data\
-  Merge rows from a Markdown table, JSON, or Inix file into the current table. M for Merge.\
-  Control+Shift+M
 - Next Window\
   Activate the next open window. Control+Tab moves among DbDo windows.\
   Control+Tab
 - Open Database\
-  Open a database file. O for Open.\
+  Open a database, workbook, CSV, dBASE or Inix file as a database. O for Open.\
   Control+O
 - Open Table\
   Open a table or view in a new window. T for Table.\
@@ -667,7 +664,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Add a new record at the cursor.\
   New Record
 - Control+O\
-  Open a database file.\
+  Open a database, workbook, CSV, dBASE or Inix file as a database.\
   Open Database
 - Control+P\
   Play the current record's stream address in the Homer Player; with records marked, play all of them.\
@@ -724,7 +721,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Open the bundled sqlean.exe shell in its own console window on the current database.\
   Sqlean Console
 - Control+Shift+I\
-  Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and defs.\
+  Bring one table of a file -- a worksheet, a table of another database, a CSV, Markdown, JSON or Inix file -- into this database, as a new table or merged into the table in this window.\
   Import Data
 - Control+Shift+J\
   Go to the previous record whose current field holds the text.\
@@ -732,9 +729,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Shift+K\
   Go to the previous record whose fields hold the keywords.\
   Reverse Keywords
-- Control+Shift+M\
-  Merge rows from a Markdown table, JSON, or Inix file into the current table.\
-  Merge Data
 - Control+Shift+N\
   New Copy
 - Control+Shift+O\
@@ -753,7 +747,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Shift+U\
   Open url
 - Control+Shift+X\
-  Export the records in view, with the shown columns, to a file.\
+  Export the records in view, with the shown columns, to a file or to a table of a DbDo database.\
   Export Data
 - Control+Shift+Y\
   Count the matches of a regular expression in the fields and records you choose.\
@@ -1021,7 +1015,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Go back to the first table.\
   Alt+Home
 - Export Data\
-  Export the records in view, with the shown columns, to a file.\
+  Export the records in view, with the shown columns, to a file or to a table of a DbDo database.\
   Control+Shift+X
 - Extract with Regex\
   Control+Shift+E
@@ -1046,7 +1040,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Open the history of changes in the default browser.\
   Control+Shift+F1
 - Import Data\
-  Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and defs.\
+  Bring one table of a file -- a worksheet, a table of another database, a CSV, Markdown, JSON or Inix file -- into this database, as a new table or merged into the table in this window.\
   Control+Shift+I
 - Inspect Record\
   Alt+I
@@ -1075,9 +1069,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Control+M
 - Mark All\
   Control+A
-- Merge Data\
-  Merge rows from a Markdown table, JSON, or Inix file into the current table.\
-  Control+Shift+M
 - New Copy\
   Control+Shift+N
 - New Record\
@@ -1091,7 +1082,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Open Command Prompt\
   Control+Backslash
 - Open Database\
-  Open a database file.\
+  Open a database, workbook, CSV, dBASE or Inix file as a database.\
   Control+O
 - Open Dot Prompt\
   Send focus to the dot prompt console.\

@@ -2061,7 +2061,7 @@ namespace DbDo
         //
         // The work is done in SQL through ATTACH, so a large file does not
         // travel through this program row by row.
-        public string mergeFromDatabase(string sOtherPath, string sPolicy)
+        public string mergeFromDatabase(string sOtherPath, string sPolicy, string sOnlyTable = null)
         {
             if (!isOpen()) throw new InvalidOperationException("No database is open.");
             if (string.IsNullOrEmpty(sOtherPath) || !System.IO.File.Exists(sOtherPath))
@@ -2081,9 +2081,12 @@ namespace DbDo
             {
                 oConn.BeginTrans(); bInTrans = true;
                 List<string> lsTables = new List<string>();
+                // ONE TABLE, WHEN ASKED (25 November 2026): Import Data and Export Data merge into one table, so only
+                // that table is merged, and the links and pick lists of the whole database are left alone.
                 foreach (string sT in getTableAndViewNames())
                     if (!sT.Equals("maps", StringComparison.OrdinalIgnoreCase)
-                        && !sT.Equals("defs", StringComparison.OrdinalIgnoreCase))
+                        && !sT.Equals("defs", StringComparison.OrdinalIgnoreCase)
+                        && (sOnlyTable == null || sT.Equals(sOnlyTable, StringComparison.OrdinalIgnoreCase)))
                         lsTables.Add(sT);
                 foreach (string sTable in lsTables)
                 {
@@ -2156,7 +2159,7 @@ namespace DbDo
                 }
 
                 // The links, once every record they point at is here.
-                if (hasTable("main", "maps") && hasTable("incoming", "maps"))
+                if (sOnlyTable == null && hasTable("main", "maps") && hasTable("incoming", "maps"))
                 {
                     int iB = countOf("main.\"maps\"");
                     invokeSql("INSERT INTO main.\"maps\" (tbl1, prime1, kind, tbl2, prime2, notes, tags) "
@@ -2165,7 +2168,7 @@ namespace DbDo
                         + "AND d.kind = i.kind AND d.tbl2 = i.tbl2 AND d.prime2 = i.prime2)", null);
                     iLinks = countOf("main.\"maps\"") - iB;
                 }
-                if (hasTable("main", "defs") && hasTable("incoming", "defs"))
+                if (sOnlyTable == null && hasTable("main", "defs") && hasTable("incoming", "defs"))
                 {
                     int iB = countOf("main.\"defs\"");
                     invokeSql("INSERT INTO main.\"defs\" (src, tbl, fld, val, ordinal, descrip) "
@@ -2189,6 +2192,121 @@ namespace DbDo
                 + countNoun(iPicks, "pick list value") + " added.";
             try { DbDoLog.write("Merge from " + sOtherPath + " (" + sNorm + "): " + sHead); } catch { }
             return sHead + (sbReport.Length > 0 ? "\r\n\r\n" + sbReport.ToString() : "");
+        }
+
+        // tableAsGrid: one table of a SQLite database as a grid, the column names first, then a row of text per record.
+        // It leaves out what DbDo keeps for itself -- the id, added, edited, look, prime and marked -- so the grid holds
+        // only what a person entered, ready to become a table elsewhere or to merge into one (25 November 2026).
+        public List<string[]> tableAsGrid(string sTable)
+        {
+            List<string[]> lGrid = new List<string[]>();
+            if (!isOpen() || string.IsNullOrEmpty(sTable)) return lGrid;
+            string sQ = "\"" + sTable.Replace("\"", "\"\"") + "\"";
+            int iFound;
+            List<string> lsCols = new List<string>();
+            foreach (string[] a in queryRowsSql("SELECT name, pk FROM pragma_table_info('" + sTable.Replace("'", "''") + "')", 1000, out iFound))
+            {
+                if (a == null || a.Length < 2 || string.IsNullOrEmpty(a[0])) continue;
+                string sLower = a[0].ToLowerInvariant();
+                if (a[1] != "0" && a[1] != "") continue;
+                if (sLower == "added" || sLower == "edited" || sLower == "look" || sLower == "prime" || sLower == "marked") continue;
+                lsCols.Add(a[0]);
+            }
+            if (lsCols.Count == 0) return lGrid;
+            lGrid.Add(lsCols.ToArray());
+            string sSel = "SELECT " + string.Join(", ", lsCols.ConvertAll(s => "\"" + s.Replace("\"", "\"\"") + "\"").ToArray()) + " FROM " + sQ;
+            lGrid.AddRange(queryRowsSqlOrThrow(sSel, int.MaxValue, out iFound));
+            return lGrid;
+        }
+
+        // mergeGrid: merge a grid -- column names first, then rows -- into one table of this database, as Merge
+        // Database merges a whole one (25 November 2026). The grid is first written into a scratch database holding
+        // a table made by this table's own CREATE statement, so each incoming row gets its prime by the same formula
+        // as the records here; mergeFromDatabase then matches the two by prime. A column is matched by name, ignoring
+        // case, spaces and underscores, and a column the table lacks is left out. A blank cell comes in as NULL, so
+        // it never replaces a value. sPolicy is mergeFromDatabase's: "update" makes the source's values final, "fill"
+        // keeps this table's values and fills only its blanks. Records with no match are added either way.
+        public string mergeGrid(string sTable, List<string[]> lGrid, string sPolicy)
+        {
+            if (!isOpen()) throw new InvalidOperationException("No database is open.");
+            if (readOnly) throw new InvalidOperationException("The database is open read only.");
+            if (lGrid == null || lGrid.Count < 2) throw new InvalidOperationException("The source has no records to merge.");
+            int iFound;
+            string sCreate = "";
+            foreach (string[] a in queryRowsSql("SELECT sql FROM sqlite_master WHERE type='table' AND name='" + sTable.Replace("'", "''") + "'", 1, out iFound))
+                if (a != null && a.Length > 0) sCreate = a[0];
+            if (string.IsNullOrEmpty(sCreate)) throw new InvalidOperationException(sTable + " is not a table of this database, so nothing can be merged into it.");
+            string sScratch = Path.Combine(Path.GetTempPath(), "DbDo_merge_" + Guid.NewGuid().ToString("N") + ".db");
+            int iSkipped = 0, iIn = 0;
+            try
+            {
+                using (FileStream fs = File.Create(sScratch)) { }
+                using (DbDoManager mScratch = new DbDoManager())
+                {
+                    mScratch.openDatabase(sScratch, null, false);
+                    // The scratch copy has only this one table, so a field that refers to another table must not be
+                    // checked against it here; the merge itself runs in the real database, where those tables are.
+                    try { mScratch.invokeSql("PRAGMA foreign_keys = OFF", null); } catch { }
+                    mScratch.invokeSql(sCreate, null);
+                    Dictionary<string, string> dTargetByKey = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                    foreach (string sC in mScratch.plainColumnsOf("main", sTable))
+                    {
+                        string sLower = sC.ToLowerInvariant();
+                        if (sLower == "prime" || sLower == "added" || sLower == "edited" || sLower == "marked" || sLower.EndsWith("_id")) continue;
+                        dTargetByKey[gridColumnKey(sC)] = sC;
+                    }
+                    string[] aHead = lGrid[0];
+                    List<int> liSource = new List<int>();
+                    List<string> lsTarget = new List<string>();
+                    for (int i = 0; i < aHead.Length; i++)
+                    {
+                        string sT;
+                        if (dTargetByKey.TryGetValue(gridColumnKey(aHead[i]), out sT) && !lsTarget.Contains(sT)) { liSource.Add(i); lsTarget.Add(sT); }
+                    }
+                    if (lsTarget.Count == 0)
+                        throw new InvalidOperationException("None of the source's columns has the name of a field of " + sTable + ", so nothing could be matched.");
+                    string sInsert = "INSERT OR IGNORE INTO \"" + sTable.Replace("\"", "\"\"") + "\" ("
+                        + string.Join(", ", lsTarget.ConvertAll(s => "\"" + s.Replace("\"", "\"\"") + "\"").ToArray()) + ") VALUES (";
+                    mScratch.oConn.BeginTrans();
+                    try
+                    {
+                        for (int r = 1; r < lGrid.Count; r++)
+                        {
+                            string[] aRow = lGrid[r];
+                            if (aRow == null) continue;
+                            System.Text.StringBuilder sbVals = new System.Text.StringBuilder();
+                            bool bAny = false;
+                            for (int k = 0; k < liSource.Count; k++)
+                            {
+                                string sV = liSource[k] < aRow.Length ? (aRow[liSource[k]] ?? "") : "";
+                                if (k > 0) sbVals.Append(", ");
+                                if (sV.Trim().Length == 0) sbVals.Append("NULL");
+                                else { sbVals.Append("'").Append(sV.Replace("'", "''")).Append("'"); bAny = true; }
+                            }
+                            if (!bAny) continue;
+                            iIn++;
+                            mScratch.invokeSql(sInsert + sbVals.ToString() + ")", null);
+                        }
+                        mScratch.oConn.CommitTrans();
+                    }
+                    catch { try { mScratch.oConn.RollbackTrans(); } catch { } throw; }
+                    iSkipped = iIn - mScratch.countOf("main.\"" + sTable.Replace("\"", "\"\"") + "\"");
+                    mScratch.close();
+                }
+                string sReport = mergeFromDatabase(sScratch, sPolicy, sTable);
+                if (iSkipped > 0) sReport += "\r\n\r\n" + countNoun(iSkipped, "source row") + " left out: a repeat of another row, or missing a field " + sTable + " requires.";
+                return sReport;
+            }
+            finally { try { if (File.Exists(sScratch)) File.Delete(sScratch); } catch { } }
+        }
+
+        // gridColumnKey: a column name as merging compares it -- lowercase, with spaces, underscores and other
+        // punctuation removed, so "First Name", "first_name" and "FirstName" match.
+        private static string gridColumnKey(string sName)
+        {
+            System.Text.StringBuilder sb = new System.Text.StringBuilder();
+            foreach (char c in (sName ?? "")) if (char.IsLetterOrDigit(c)) sb.Append(char.ToLowerInvariant(c));
+            return sb.ToString();
         }
 
         // plainColumnsOf: the columns of one table, leaving out the ones SQLite
@@ -14776,7 +14894,11 @@ namespace DbDo
             // could not open the Misc menu, as Alt+M does in EdSharp and FileDir. M for Merge still.
             // MERGE DATA ON CONTROL+SHIFT+M (24 November 2026): merging changes data, which prefers Control; Semicolon and
             // Slash now mark and unmark, so Control+Shift+M is free. EdSharp's Merge File takes the same key.
-            miFileMerge   = addItem(miFile, "&Merge Data...",             "Merge Data",            Keys.Control | Keys.Shift | Keys.M,       mergeClicked);
+            // MERGE DATA HIDDEN, NO KEY (25 November 2026): Import Data now merges a file's table into the table in this
+            // window, from every format Merge Data read and more, and asks whose values are final, so one command does
+            // what two did. Merge Data stays reachable by name in the Alternate Menu for anybody who used it; Control+
+            // Shift+M is free.
+            miFileMerge   = addItem(miFile, "Merge Data...",             "Merge Data",            Keys.None,       mergeClicked); miFileMerge.Visible = false;
             addItem(miFile, "Transfer Import...",       "Transfer Import",  Keys.None,                            importTransferClicked);
             addItem(miFile, "Run Report...",           "Run Report",       Keys.Alt | Keys.Shift | Keys.R,       produceReportClicked);
             miFileExport  = addItem(miFile, "E&xport Data...",            "Export Data",      Keys.Control | Keys.Shift | Keys.X,                fileExportClicked);
@@ -14876,7 +14998,7 @@ namespace DbDo
             // modifier).
             // SEMICOLON AND SLASH ONLY (24 November 2026, Jamal): the marking keys of every Homer app that marks, as in
             // FileDir. They are taken in the grid's own key code (formKeyDown), so a semicolon or slash typed in a text box
-            // or an edited cell is never taken; the menu shows the key. Control+M is Mail Record, Control+Shift+M Merge Data.
+            // or an edited cell is never taken; the menu shows the key. Control+M is Mail Record; Control+Shift+M is free.
             miRecMark        = addItem(miEdit, "Mark Record",                            "Mark Record",            Keys.None,              recMarkClicked);
             miRecMark.ShortcutKeyDisplayString = "SemiColon";
             miRecToggleMark  = addItem(miEdit, "Toggle Mark",          "Toggle Mark",       Keys.Control | Keys.Space,          recToggleMarkClicked);
@@ -15209,8 +15331,8 @@ namespace DbDo
             // the current db column?"). A screen reader's F key says the font where the cursor is, which in a grid of
             // records says nothing useful; the declared type is the field's format, so DbDo's scripts send JAWS+F and
             // NVDA+F here while the grid has focus. F begins Field, and Alt is the speech-only modifier; no other Homer
-            // app's command it could be mistaken for exists in DbDo (EdSharp's and FileDir's File Find, as DbDo's
-            // Control+Shift+M is Merge Data while FileDir's is Move to Folder). No trigger letter: Say Filter has F.
+            // app's command it could be mistaken for exists in DbDo (EdSharp's and FileDir's File Find).
+            // No trigger letter: Say Filter has F.
             addItem(miSay, "Say Field Type",     "Say Field Type", Keys.Alt | Keys.Shift | Keys.F,     saySayFieldType);
             miSaySayRelated      = addItem(miSay, "Say Related", "Say Related", Keys.None,           saySayRelated);
             miSaySayRelated.Visible = false;   // folded into Say Whole Record (Shift+W), 9 November 2026
@@ -15638,7 +15760,8 @@ namespace DbDo
             // ===== File menu =====
             add("New Database",       "Create a new database file", "");
             add("Add Table",          "Add another table in the standard shape to the open database: define its fields, or clone the open table's", "With a table open, asks Define or Clone first. The form has ten name-and-type slots and a Text button for the fields as lines, name: TYPE, without that limit; on OK it names fields that share a first letter, since only the first gets an Alt letter.");
-            add("Open Database",      "Open a database file", "");
+            add("Open Database",      "Open a database, workbook, CSV, dBASE or Inix file as a database",
+                "Databases open as themselves; a workbook or CSV opens as a working copy that Control+S writes back; an .xls or .dbf opens as a converted copy that Control+S keeps as a DbDo database.");
             add("Open Template Database", "Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail",
                 "Alt+Shift+D. Your own copy of the template is opened, so changes are yours to keep.");
             add("Play Media",        "Play the current record's stream address in the Homer Player; with records marked, play all of them",
@@ -15662,12 +15785,12 @@ namespace DbDo
             add("Save",             "Save changes to disk (writes an open workbook back to its .xlsx; a .db is already saved as you go)", "");
             add("Save As",          "Save a copy to another path or file format", "");
             add("Backup Database",    "Write a timestamped copy of the open database", "");
-            add("Import Data",             "Build a new DbDo database from another file -- Excel (read by DbDo itself, with no Office or Access driver needed), Access, dBASE, CSV, or SQLite -- with one standard-shape table per source table, plus maps and defs",
-                "Open mounts a file with a live driver; Import transfers its data into DbDo's own structure. The source is only read; Save As keeps the result as a .db.");
-            add("Merge Data",              "Merge rows from a Markdown table, JSON, or Inix file into the current table",
+            add("Import Data",             "Bring one table of a file -- a worksheet, a table of another database, a CSV, Markdown, JSON or Inix file -- into this database, as a new table or merged into the table in this window",
+                "A merge matches records by the table's prime, adds the ones not found, and asks whether the source's or the target's values are final; a blank never replaces a value. A database source also offers All tables. With no database open, the file opens as one.");
+            add("Merge Data",              "Hidden: Import Data merges now. Add rows from a Markdown table, JSON, or Inix file to the current table",
                 "Fields are matched by name; unmatched fields are dropped and one bad row does not sink the import.");
-            add("Export Data",        "Export the records in view, with the shown columns, to a file",
-                "Choose the destination file extension to pick the format; row order and filter match what is visible.");
+            add("Export Data",        "Export the records in view, with the shown columns, to a file or to a table of a DbDo database",
+                "Choose the destination file extension to pick the format; row order and filter match what is visible. A .db target takes the records as a new table or merges them into one of its tables, so a filtered view or a Control+Q query can be kept as a table.");
             add("Open in Explorer",    "Open the folder of the open database in Windows Explorer", "");
             add("Exit DbDo",   "Close DbDo", "");
 
@@ -22318,8 +22441,8 @@ namespace DbDo
                 using (LbcDialog dlgHow = new LbcDialog("Add Table", this))
                 {
                     bool bClone = !string.IsNullOrEmpty(sFrom);
-                    dlgHow.addLabel(bClone ? "Define a new table, clone the fields of " + sFrom + ", or make one from a CSV or TSV file?"
-                        : "Define a new table, or make one from a CSV or TSV file?");
+                    dlgHow.addLabel(bClone ? "Define a new table, clone the fields of " + sFrom + ", or make one from a file?"
+                        : "Define a new table, or make one from a file?");
                     sChoice = dlgHow.runWithButtons(bClone ? new string[] { "&Define table", "&Clone fields", "&From file", "Cancel" }
                         : new string[] { "&Define table", "&From file", "Cancel" });
                 }
@@ -22366,54 +22489,9 @@ namespace DbDo
             }
         }
 
-        // addTableFromFile: Add Table's From file. Picks a CSV or TSV file and makes a table of it in the open database,
-        // named for the file, through the same shaper as Import Data; then opens it.
-        private void addTableFromFile()
-        {
-            string sPath;
-            using (OpenFileDialog dlgFile = new OpenFileDialog())
-            {
-                prepareFileDialog(dlgFile);
-                dlgFile.Title = "Add Table from File";
-                dlgFile.Filter = "CSV or TSV files (*.csv;*.tsv;*.tab)|*.csv;*.tsv;*.tab|All files (*.*)|*.*";
-                if (dlgFile.ShowDialog(this) != DialogResult.OK) return;
-                sPath = dlgFile.FileName;
-            }
-            string sExt = Path.GetExtension(sPath).TrimStart('.').ToLowerInvariant();
-            char cDelim = (sExt == "tsv" || sExt == "tab") ? '\t' : ',';
-            try
-            {
-                List<string[]> lGrid = lGridFromDelimitedFile(sPath, cDelim);
-                bool bHasMaps = false, bHasLookups = false;
-                List<string> lTableNames = new List<string>();
-                foreach (string sT in db.getTableNames())
-                {
-                    lTableNames.Add(sT.ToLowerInvariant());
-                    if (string.Equals(sT, "maps", StringComparison.OrdinalIgnoreCase)) bHasMaps = true;
-                    if (string.Equals(sT, "defs", StringComparison.OrdinalIgnoreCase)) bHasLookups = true;
-                }
-                int iBefore = lTableNames.Count;
-                iShellRowsSkipped = 0;
-                int iRows = buildShellTableFromGrid(db, Path.GetFileNameWithoutExtension(sPath), lGrid, lTableNames);
-                if (iRows < 0 || lTableNames.Count == iBefore) { ErrorDialog.show(this, "Add Table", "No header row and data rows were found in " + Path.GetFileName(sPath) + "."); return; }
-                string sTableName = lTableNames[lTableNames.Count - 1];
-                foreach (string sSql in lInfraDdl(!bHasMaps, !bHasLookups))
-                    db.invokeSql(sSql, null);
-                db.refreshTableList();
-                if (db.hasMapsTable())
-                    foreach (string sSql in lMapsTriggerDdl(sTableName))
-                        db.invokeSql(sSql, null);
-                db.refreshTableList();
-                db.selectTable(sTableName);
-                invokeRefresh();
-                try { DbDoLog.write("Add Table from file " + sPath + ": " + sTableName + ", " + iRows + " rows"); } catch { }
-                Say.say("Table " + sTableName + " created, " + iRows + (iRows == 1 ? " record" : " records") + "." + skippedRowsSaid());
-            }
-            catch (Exception ex)
-            {
-                ErrorDialog.show(this, "Add Table", ex.Message);
-            }
-        }
+        // addTableFromFile: Add Table's From file is Import Data asked for a new table (25 November 2026), so it reads
+        // every file Import reads -- a worksheet, a table of another database, Markdown, JSON or Inix -- not only CSV.
+        private void addTableFromFile() { importTableFrom(null, true); }
 
         // prepareFileDialog: always use the classic Win32 file dialog
         // rather than the Vista-style IFileDialog. Two reasons: (1)
@@ -22454,9 +22532,40 @@ namespace DbDo
                 string sCurDb = (db != null) ? db.filePath : null;
                 dlgFile.InitialDirectory = IniFolders.bestDirectory(IniFolders.openFolder, sCurDb);
                 if (dlgFile.ShowDialog(this) != DialogResult.OK) return;
-                if (!confirmSaveWorkbookIfDirty()) return;
                 IniFolders.openFolder = Path.GetDirectoryName(dlgFile.FileName);
-                string sOpenPath = dlgFile.FileName;
+                openFileAsDatabase(dlgFile.FileName);
+            }
+        }
+
+        // OPEN TREATS ANY FILE AS A DATABASE (25 November 2026, Jamal: "I want Control+O or Control+Shift+O (you decide)
+        // to open a file and have it treated as a database, whether converted to DBDo's .db format or maintained
+        // natively using ADO."). Control+O it is: Open is the word every program uses, and Control+Shift+O stays Open
+        // Template Database. Each kind of file opens the one way that needs nothing installed beyond DbDo itself,
+        // except Access, which is a database already:
+        //   DbDo or SQLite   opens as itself; edits are saved as they are made
+        //   Access           opens as itself through ADO and the Access Database Engine
+        //   Excel .xlsx      a working copy; Control+S writes the data back to the workbook, formulas kept
+        //   CSV or text      a working copy; Control+S writes back to the file
+        //   Excel .xls,      opens as itself through the engine when it is installed; when it is not, DbDo says why
+        //   dBASE .dbf       and offers a converted working copy, read without it, that Control+S keeps as a DbDo
+        //                    database
+        //   Inix             converted to a DbDo database beside it
+        // THE ENGINE WHEN IT IS THERE, OPTIONS WHEN IT IS NOT (25 November 2026, Jamal: "I do not want to deny other
+        // users the benefits of 64-bit Office if they have it installed, just because someone has 32-bit Office. I
+        // would rather that condition be detected during a relevant task, and such a user be informed of their other
+        // options."). So nothing changes for a computer with the 64-bit Access Database Engine. Without it, the task
+        // that needs it -- opening or importing an Access, .xls or .dbf file -- says what is missing, whether 32-bit
+        // Office is the reason, and what else works: aceMissingAdvice has the words.
+        private void openFileAsDatabase(string sOpenPath)
+        {
+            {
+                if (!confirmSaveWorkbookIfDirty()) return;
+                string sKind = Path.GetExtension(sOpenPath).TrimStart('.').ToLowerInvariant();
+                if (sKind == "mdb" || sKind == "accdb")
+                {
+                    string sAdvice = aceMissingAdvice(sKind);
+                    if (sAdvice != null) { DbDoLog.write("Open Database: no 64-bit engine for " + sOpenPath + " (" + aceState() + ")"); showInfoDialog("Open Database", sAdvice); return; }
+                }
                 // Inix record files are not an ADO provider type;
                 // they convert to a SQLite database alongside the
                 // source (<name>.inix.db), which then opens normally.
@@ -22558,6 +22667,36 @@ namespace DbDo
                     cDelimitedOrigin = cDelim;
                     Say.say("Opened " + Path.GetFileName(sOpenPath)
                         + " for editing. Control+S writes your changes back to the file; Control+Shift+S keeps them as a database instead.");
+                    return;
+                }
+                if ((sDelimExt == "xls" || sDelimExt == "dbf") && aceMissingAdvice(sDelimExt) != null)
+                {
+                    DbDoLog.write("Open Database: no 64-bit engine for " + sOpenPath + " (" + aceState() + "); offering a converted copy");
+                    string sCopy;
+                    using (LbcDialog dlgCopy = new LbcDialog("Open Database", this))
+                    {
+                        dlgCopy.addLabel(aceMissingAdvice(sDelimExt));
+                        sCopy = dlgCopy.runWithButtons(new string[] { "&Converted copy", "Cancel" });
+                    }
+                    if (string.IsNullOrEmpty(sCopy) || sCopy.StartsWith("Cancel", StringComparison.OrdinalIgnoreCase)) return;
+                    string sConverted;
+                    try { sConverted = importToShell(sOpenPath); }
+                    catch (Exception ex)
+                    { ErrorDialog.show(this, "Open Database", "Could not read the file: " + ex.Message); return; }
+                    string sPrevTempConv = sManagedTempPath;
+                    try { openDatabaseAndApplyState(sConverted, null); }
+                    catch (Exception ex)
+                    {
+                        ErrorDialog.show(this, "Open Database", ex.Message);
+                        try { if (File.Exists(sConverted)) File.Delete(sConverted); } catch { }
+                        return;
+                    }
+                    if (!string.IsNullOrEmpty(sPrevTempConv) && !string.Equals(sPrevTempConv, sConverted, StringComparison.OrdinalIgnoreCase))
+                    { try { if (File.Exists(sPrevTempConv)) File.Delete(sPrevTempConv); } catch { } }
+                    sManagedOriginPath = sOpenPath;
+                    sManagedTempPath = sConverted;
+                    Say.say("Opened " + Path.GetFileName(sOpenPath)
+                        + " as a converted copy. The file itself is unchanged; Control+S keeps your work as a DbDo database.");
                     return;
                 }
                 // Reapply the per-table sort / filter / position this
@@ -24793,50 +24932,325 @@ namespace DbDo
         // to the current table). The new database is a managed temp copy:
         // the source file is only read, and Save Database keeps the result
         // as a .db. No open database is required.
-        private void importClicked(object sender, EventArgs evArgs)
+        // IMPORT DATA WORKS ON A TABLE (25 November 2026, Jamal: "I want Control+Shift+I and Control+Shift+X to import
+        // or export at a table rather than database level, offering whether to create a new table or merge into an open
+        // one in the current window. Merge options should offer whether to consider the source or target value to be the
+        // final value."). Opening a file as a database is Open Database's job (Control+O), so Import brings one table
+        // of a file -- a worksheet, a table of a database, a CSV, Markdown, JSON or Inix file -- into the open database:
+        //   New table      the source becomes a table of its own, in DbDo's standard shape
+        //   Merge records  its records join the table in this window, matched by the table's prime; records with no
+        //                  match are added, and for those that match, Source values or Target values says which is final
+        // A source database also offers All tables, which merges the whole database as Merge Database always has. With
+        // no database open, Import opens the file as a database, as Control+O would. This takes over Merge Data, whose
+        // formats it reads, and Add Table's From file, which now runs it.
+        private void importClicked(object sender, EventArgs evArgs) { importTableFrom(null, false); }
+
+        private void importTableFrom(string sGiven, bool bNewOnly)
         {
-            using (OpenFileDialog dlgFile = new OpenFileDialog())
+            const string sTitle = "Import Data";
+            string sOrigin = sGiven;
+            if (string.IsNullOrEmpty(sOrigin))
             {
-                dlgFile.Title = "Import into a new DbDo database";
-                prepareFileDialog(dlgFile);
-                dlgFile.Filter = "All supported (*.xlsx;*.xls;*.mdb;*.accdb;*.dbf;*.csv;*.tsv;*.txt;*.db;*.sqlite;*.sqlite3)|*.xlsx;*.xls;*.mdb;*.accdb;*.dbf;*.csv;*.tsv;*.txt;*.db;*.sqlite;*.sqlite3"
-                           + "|Excel workbook (*.xlsx;*.xls)|*.xlsx;*.xls"
-                           + "|Access (*.mdb;*.accdb)|*.mdb;*.accdb"
-                           + "|dBASE (*.dbf)|*.dbf"
-                           + "|CSV / text (*.csv;*.tsv;*.txt)|*.csv;*.tsv;*.txt"
-                           + "|SQLite (*.db;*.sqlite;*.sqlite3)|*.db;*.sqlite;*.sqlite3"
-                           + "|All Files (*.*)|*.*";
-                string sCurDb = (db != null) ? db.filePath : null;
-                dlgFile.InitialDirectory = IniFolders.bestDirectory(IniFolders.importFolder, sCurDb);
-                if (dlgFile.ShowDialog(this) != DialogResult.OK) return;
-                IniFolders.importFolder = Path.GetDirectoryName(dlgFile.FileName);
-                string sOrigin = dlgFile.FileName;
-                string sTemp;
-                try { sTemp = importToShell(sOrigin); }
-                catch (Exception ex)
+                using (OpenFileDialog dlgFile = new OpenFileDialog())
                 {
-                    ErrorDialog.show(this, "Import Data", ex.Message);
-                    return;
+                    dlgFile.Title = sTitle;
+                    prepareFileDialog(dlgFile);
+                    dlgFile.Filter = "All supported|" + sImportPatterns
+                               + "|Excel workbook (*.xlsx;*.xls)|*.xlsx;*.xls"
+                               + "|DbDo or SQLite database (*.db;*.sqlite;*.sqlite3)|*.db;*.sqlite;*.sqlite3"
+                               + "|Access database (*.mdb;*.accdb)|*.mdb;*.accdb"
+                               + "|CSV or TSV (*.csv;*.tsv;*.tab;*.txt)|*.csv;*.tsv;*.tab;*.txt"
+                               + "|Markdown table (*.md;*.markdown)|*.md;*.markdown"
+                               + "|JSON (*.json)|*.json"
+                               + "|Inix file (*.inix)|*.inix"
+                               + "|dBASE (*.dbf)|*.dbf"
+                               + "|All Files (*.*)|*.*";
+                    string sCurDb = (db != null) ? db.filePath : null;
+                    dlgFile.InitialDirectory = IniFolders.bestDirectory(IniFolders.importFolder, sCurDb);
+                    if (dlgFile.ShowDialog(this) != DialogResult.OK) return;
+                    sOrigin = dlgFile.FileName;
                 }
-                // Open the shell as the live database, managed like a
-                // working copy: a previous managed temp (if any) is unlocked
-                // by the open and then deleted.
-                string sPrevTemp = sManagedTempPath;
-                try { openDatabaseAndApplyState(sTemp, null); }
-                catch (Exception ex)
-                {
-                    ErrorDialog.show(this, "Import Data", ex.Message);
-                    try { if (File.Exists(sTemp)) File.Delete(sTemp); } catch { }
-                    return;
-                }
-                if (!string.IsNullOrEmpty(sPrevTemp) && !string.Equals(sPrevTemp, sTemp, StringComparison.OrdinalIgnoreCase))
-                { try { if (File.Exists(sPrevTemp)) File.Delete(sPrevTemp); } catch { } }
-                sManagedOriginPath = sOrigin;
-                sManagedTempPath = sTemp;
-                invokeRefresh();
-                Say.say("Imported " + Path.GetFileName(sOrigin)
-                    + " into a new DbDo database. Save As to keep it as a .db; the original file is unchanged." + skippedRowsSaid());
             }
+            IniFolders.importFolder = Path.GetDirectoryName(sOrigin);
+            if (db == null || !db.isOpen())
+            {
+                Say.say("No database is open, so " + Path.GetFileName(sOrigin) + " opens as one.");
+                openFileAsDatabase(sOrigin);
+                return;
+            }
+            if (db.readOnly) { Say.sayForced("This database is open read only."); return; }
+
+            // The table in this window, when it is one: a query or a view cannot take records.
+            string sTarget = null;
+            if (db.hasRecordset() && !string.IsNullOrEmpty(db.currentTable))
+                foreach (string sT in db.getTableNames())
+                    if (string.Equals(sT, db.currentTable, StringComparison.OrdinalIgnoreCase)) { sTarget = sT; break; }
+
+            string sScratch = null;
+            try
+            {
+                List<string> lsNames = sourceTableNames(sOrigin, out sScratch);
+                if (lsNames.Count == 0) { ErrorDialog.show(this, sTitle, "No table was found in " + Path.GetFileName(sOrigin) + "."); return; }
+                const string sAllTables = "All tables, merged as a whole database";
+                bool bDatabase = isDatabaseFile(sOrigin);
+                List<string> lsChoices = new List<string>(lsNames);
+                if (bDatabase && !bNewOnly && lsNames.Count > 1) lsChoices.Add(sAllTables);
+                string sSource = lsChoices.Count == 1 ? lsChoices[0]
+                    : promptListChoice(sTitle, "Choose a table of " + Path.GetFileName(sOrigin) + " to import:", lsChoices, lsChoices[0]);
+                if (string.IsNullOrEmpty(sSource)) return;
+                if (sSource == sAllTables) { mergeWholeDatabase(sOrigin); return; }
+
+                string sHow = "New table";
+                if (!bNewOnly && sTarget != null)
+                {
+                    using (LbcDialog dlgHow = new LbcDialog(sTitle, this))
+                    {
+                        dlgHow.addLabel("Make " + sSource + " a new table, or merge its records into " + sTarget + "?");
+                        sHow = dlgHow.runWithButtons(new string[] { "&New table", "&Merge records", "Cancel" });
+                    }
+                    if (string.IsNullOrEmpty(sHow) || sHow.StartsWith("Cancel", StringComparison.OrdinalIgnoreCase)) return;
+                }
+                List<string[]> lGrid = sourceTableGrid(sOrigin, sScratch, sSource);
+                if (sHow.StartsWith("New", StringComparison.OrdinalIgnoreCase))
+                {
+                    int iRows;
+                    string sMade = addGridAsTable(db, sSource, lGrid, out iRows);
+                    if (sMade == null) { ErrorDialog.show(this, sTitle, "No header row and data rows were found in " + sSource + "."); return; }
+                    db.selectTable(sMade);
+                    invokeRefresh();
+                    DbDoLog.write(sTitle + ": " + sOrigin + " [" + sSource + "] -> new table " + sMade + ", " + iRows + " rows");
+                    Say.say("Table " + sMade + " made, " + iRows + (iRows == 1 ? " record" : " records") + "." + skippedRowsSaid());
+                    return;
+                }
+                string sPolicy = askMergePolicy(sTitle, sSource, sTarget);
+                if (sPolicy == null) return;
+                string sReport = db.mergeGrid(sTarget, lGrid, sPolicy);
+                db.selectTable(sTarget);
+                invokeRefresh();
+                DbDoLog.write(sTitle + ": " + sOrigin + " [" + sSource + "] merged into " + sTarget + " (" + sPolicy + "): " + sReport.Replace("\r\n", " "));
+                showInfoDialog(sTitle, sReport);
+            }
+            catch (Exception ex) { ErrorDialog.show(this, sTitle, ex.Message); }
+            finally { if (!string.IsNullOrEmpty(sScratch)) { try { if (File.Exists(sScratch)) File.Delete(sScratch); } catch { } } }
+        }
+
+        // The file types Import reads, one table at a time.
+        private const string sImportPatterns = "*.xlsx;*.xls;*.db;*.sqlite;*.sqlite3;*.mdb;*.accdb;*.csv;*.tsv;*.tab;*.txt;*.md;*.markdown;*.json;*.inix;*.dbf";
+
+        private static bool isDatabaseFile(string sPath)
+        {
+            string sExt = Path.GetExtension(sPath ?? "").TrimStart('.').ToLowerInvariant();
+            return sExt == "db" || sExt == "sqlite" || sExt == "sqlite3";
+        }
+
+        // aceState: which Access Database Engine this computer has, as DbDo, a 64-bit program, can use it.
+        //   "64"      the 64-bit engine is registered, so Access, .xls and .dbf files open as themselves
+        //   "32only"  only the 32-bit engine is registered -- 32-bit Office put it there -- and Microsoft's 64-bit
+        //             installer refuses to go beside it, so DbDo cannot use either
+        //   "none"    no engine at all; the 64-bit one can be installed
+        // The 32-bit registration is read from the 32-bit view of the registry, where a 64-bit program does not look
+        // when it asks for the provider by name.
+        private static string aceState()
+        {
+            if (checkClsId("Microsoft.ACE.OLEDB.16.0") || checkClsId("Microsoft.ACE.OLEDB.12.0")) return "64";
+            try
+            {
+                using (Microsoft.Win32.RegistryKey k32 = Microsoft.Win32.RegistryKey.OpenBaseKey(Microsoft.Win32.RegistryHive.ClassesRoot, Microsoft.Win32.RegistryView.Registry32))
+                    foreach (string sProg in new string[] { "Microsoft.ACE.OLEDB.16.0", "Microsoft.ACE.OLEDB.12.0" })
+                        using (Microsoft.Win32.RegistryKey kProg = k32.OpenSubKey(sProg + "\\CLSID"))
+                        {
+                            object oClsid = kProg == null ? null : kProg.GetValue("");
+                            if (oClsid == null) continue;
+                            using (Microsoft.Win32.RegistryKey kServer = k32.OpenSubKey("CLSID\\" + oClsid + "\\InprocServer32"))
+                                if (kServer != null) return "32only";
+                        }
+            }
+            catch { }
+            return "none";
+        }
+
+        // aceMissingAdvice: null when the 64-bit engine is here; otherwise what the user can do instead, for the kind of
+        // file in hand, in plain words for a dialog.
+        private static string aceMissingAdvice(string sExt)
+        {
+            string sState = aceState();
+            if (sState == "64") return null;
+            bool bAccess = sExt == "mdb" || sExt == "accdb";
+            string sWhy = sState == "32only"
+                ? "This computer has 32-bit Microsoft Office, and its 32-bit Access Database Engine cannot be used by DbDo, which is a 64-bit program. Microsoft does not let the 64-bit engine install beside 32-bit Office."
+                : "The Microsoft Access Database Engine, which DbDo uses to open this kind of file as itself, is not installed.";
+            string sFix = sState == "32only"
+                ? "Changing Office to its 64-bit edition would let DbDo open the file as itself."
+                : "To install it, run this in a command prompt, then open the file again: winget install Microsoft.AccessDatabaseEngine.2016";
+            if (bAccess)
+                return sWhy + "\r\n\r\nOther options:\r\n"
+                    + "- In Access, export each table to an Excel workbook (.xlsx) or a CSV file, then open or import that in DbDo, which needs no engine for those.\r\n"
+                    + "- " + sFix;
+            return sWhy + "\r\n\r\nDbDo can open a converted copy instead, read without the engine. The file itself is left unchanged, and Control+S keeps your work as a DbDo database. "
+                + sFix;
+        }
+
+        // askMergePolicy: the one question a merge asks -- when a record is in both, whose values are final. The
+        // buttons say Source and Target in Import and in Export alike, since each knows which is which. A blank never
+        // replaces a value, and records with no match are added either way. Returns "update", "fill" or null.
+        private string askMergePolicy(string sTitle, string sSource, string sTarget)
+        {
+            string sWho;
+            using (LbcDialog dlgWho = new LbcDialog(sTitle, this))
+            {
+                dlgWho.addLabel("Merging " + sSource + " into " + sTarget + ". Records found only in " + sSource
+                    + " are added. When a record is in both, which values are final? A blank never replaces a value.");
+                sWho = dlgWho.runWithButtons(new string[] { "&Source values", "&Target values", "Cancel" });
+            }
+            if (string.IsNullOrEmpty(sWho) || sWho.StartsWith("Cancel", StringComparison.OrdinalIgnoreCase)) return null;
+            return sWho.StartsWith("Source", StringComparison.OrdinalIgnoreCase) ? "update" : "fill";
+        }
+
+        // sourceTableNames: the tables a file holds. A text file, Markdown, JSON or Inix file holds one, named for
+        // the file. A DbDo or SQLite database is read where it is. Any other file -- a workbook, an Access database,
+        // a dBASE file -- is first read into a scratch DbDo database by importToShell, whose path comes back in
+        // sScratch for the caller to delete; each worksheet is then a table.
+        private List<string> sourceTableNames(string sPath, out string sScratch)
+        {
+            sScratch = null;
+            string sExt = Path.GetExtension(sPath).TrimStart('.').ToLowerInvariant();
+            if (isTextSource(sExt)) return new List<string> { sNormalizeIdentifier(Path.GetFileNameWithoutExtension(sPath)) };
+            string sDb = sPath;
+            if (sExt == "mdb" || sExt == "accdb")
+            {
+                string sAdvice = aceMissingAdvice(sExt);
+                if (sAdvice != null) { DbDoLog.write("Import Data: no 64-bit engine for " + sPath + " (" + aceState() + ")"); throw new InvalidOperationException(sAdvice); }
+            }
+            if (!isDatabaseFile(sPath)) { sScratch = importToShell(sPath); sDb = sScratch; }
+            using (DbDoManager mSource = new DbDoManager())
+            {
+                mSource.openDatabase(sDb, null, true);
+                List<string> lsNames = new List<string>(mSource.getTableNames());
+                lsNames.RemoveAll(s => s.Equals("maps", StringComparison.OrdinalIgnoreCase) || s.Equals("defs", StringComparison.OrdinalIgnoreCase)
+                    || s.Equals("files", StringComparison.OrdinalIgnoreCase));
+                mSource.close();
+                return lsNames;
+            }
+        }
+
+        private static bool isTextSource(string sExt)
+        {
+            return sExt == "csv" || sExt == "tsv" || sExt == "tab" || sExt == "txt" || sExt == "md" || sExt == "markdown"
+                || sExt == "json" || sExt == "inix";
+        }
+
+        // sourceTableGrid: one table of the file as a grid, the column names first.
+        private List<string[]> sourceTableGrid(string sPath, string sScratch, string sTable)
+        {
+            string sExt = Path.GetExtension(sPath).TrimStart('.').ToLowerInvariant();
+            if (sExt == "csv") return lGridFromDelimitedFile(sPath, ',');
+            if (sExt == "tsv" || sExt == "tab") return lGridFromDelimitedFile(sPath, '\t');
+            if (sExt == "txt")
+            {
+                string sFirst = "";
+                try { foreach (string sLine in File.ReadLines(sPath)) { if (sLine.Trim().Length > 0) { sFirst = sLine; break; } } } catch { }
+                return lGridFromDelimitedFile(sPath, sFirst.IndexOf('\t') >= 0 ? '\t' : ',');
+            }
+            if (sExt == "md" || sExt == "markdown") return gridFromMarkdown(sPath);
+            if (sExt == "json") return gridFromJson(sPath);
+            if (sExt == "inix") return gridFromInix(sPath);
+            using (DbDoManager mSource = new DbDoManager())
+            {
+                mSource.openDatabase(string.IsNullOrEmpty(sScratch) ? sPath : sScratch, null, true);
+                List<string[]> lGrid = mSource.tableAsGrid(sTable);
+                mSource.close();
+                return lGrid;
+            }
+        }
+
+        // gridFromMarkdown: the first table in a Markdown file -- its header row, then its rows, the separator left out.
+        private static List<string[]> gridFromMarkdown(string sPath)
+        {
+            List<string[]> lGrid = new List<string[]>();
+            foreach (string sRaw in File.ReadAllLines(sPath, Encoding.UTF8))
+            {
+                string sLine = (sRaw ?? "").Trim();
+                if (!sLine.StartsWith("|")) { if (lGrid.Count > 0) break; continue; }
+                string[] aCells = sLine.Trim('|').Split('|');
+                for (int i = 0; i < aCells.Length; i++) aCells[i] = aCells[i].Trim();
+                bool bSeparator = true;
+                foreach (string sCell in aCells) if (sCell.Trim(new char[] { '-', ':', ' ' }).Length > 0) { bSeparator = false; break; }
+                if (bSeparator) continue;
+                lGrid.Add(aCells);
+            }
+            return lGrid;
+        }
+
+        // gridFromJson: an array of objects (or one object) as a grid; the columns are every property name met, in the
+        // order first met.
+        private static List<string[]> gridFromJson(string sPath)
+        {
+            JToken tRoot = JToken.Parse(File.ReadAllText(sPath));
+            JArray aRows = tRoot is JArray ? (JArray)tRoot : new JArray(tRoot);
+            List<string> lsCols = new List<string>();
+            foreach (JToken t in aRows) { JObject o = t as JObject; if (o == null) continue; foreach (JProperty p in o.Properties()) if (!lsCols.Contains(p.Name)) lsCols.Add(p.Name); }
+            List<string[]> lGrid = new List<string[]> { lsCols.ToArray() };
+            foreach (JToken t in aRows)
+            {
+                JObject o = t as JObject;
+                if (o == null) continue;
+                string[] aRow = new string[lsCols.Count];
+                for (int i = 0; i < lsCols.Count; i++)
+                {
+                    JToken v = o[lsCols[i]];
+                    aRow[i] = (v == null || v.Type == JTokenType.Null) ? "" : (v.Type == JTokenType.String ? (string)v : v.ToString(Newtonsoft.Json.Formatting.None));
+                }
+                lGrid.Add(aRow);
+            }
+            return lGrid;
+        }
+
+        // gridFromInix: one record per section, its keys the columns, in the order first met. A Global section is
+        // settings, not a record, when other sections follow it.
+        private static List<string[]> gridFromInix(string sPath)
+        {
+            List<InixCodec.Section> lSections = InixCodec.read(sPath);
+            List<string> lsCols = new List<string>();
+            foreach (InixCodec.Section sec in lSections)
+            {
+                if (sec == null || (string.Equals(sec.Name, "Global", StringComparison.OrdinalIgnoreCase) && lSections.Count > 1)) continue;
+                foreach (InixCodec.Pair p in sec.Pairs) if (!lsCols.Contains(p.Key)) lsCols.Add(p.Key);
+            }
+            List<string[]> lGrid = new List<string[]> { lsCols.ToArray() };
+            foreach (InixCodec.Section sec in lSections)
+            {
+                if (sec == null || sec.Pairs.Count == 0 || (string.Equals(sec.Name, "Global", StringComparison.OrdinalIgnoreCase) && lSections.Count > 1)) continue;
+                string[] aRow = new string[lsCols.Count];
+                for (int i = 0; i < aRow.Length; i++) aRow[i] = "";
+                foreach (InixCodec.Pair p in sec.Pairs) aRow[lsCols.IndexOf(p.Key)] = p.Value ?? "";
+                lGrid.Add(aRow);
+            }
+            return lGrid;
+        }
+
+        // addGridAsTable: a grid becomes a new table of a database in DbDo's standard shape, as Import Data has always
+        // shaped one, with the maps and defs tables made first if the database lacks them. Returns the table's name,
+        // or null when the grid has no header and data rows.
+        private string addGridAsTable(DbDoManager m, string sName, List<string[]> lGrid, out int iRows)
+        {
+            bool bHasMaps = false, bHasLookups = false;
+            List<string> lTableNames = new List<string>();
+            foreach (string sT in m.getTableNames())
+            {
+                lTableNames.Add(sT.ToLowerInvariant());
+                if (string.Equals(sT, "maps", StringComparison.OrdinalIgnoreCase)) bHasMaps = true;
+                if (string.Equals(sT, "defs", StringComparison.OrdinalIgnoreCase)) bHasLookups = true;
+            }
+            int iBefore = lTableNames.Count;
+            iShellRowsSkipped = 0;
+            iRows = buildShellTableFromGrid(m, sName, lGrid, lTableNames);
+            if (iRows < 0 || lTableNames.Count == iBefore) return null;
+            string sTableName = lTableNames[lTableNames.Count - 1];
+            foreach (string sSql in lInfraDdl(!bHasMaps, !bHasLookups)) m.invokeSql(sSql, null);
+            m.refreshTableList();
+            if (m.hasMapsTable()) foreach (string sSql in lMapsTriggerDdl(sTableName)) m.invokeSql(sSql, null);
+            m.refreshTableList();
+            return sTableName;
         }
 
         // emailLogFile: make it easy to send this session's log for troubleshooting.
@@ -24894,11 +25308,12 @@ namespace DbDo
             {
                 dlgFile.Title = "Export Data";
                 prepareFileDialog(dlgFile);
-                // Export targets the current grid (a table or a Ctrl+Q
-                // query result), so it offers file formats only. Whole-
-                // database targets (.db/.accdb/.dbf) belong to Save
-                // Database, which copies the physical database.
+                // Export targets the current grid (a table or a Ctrl+Q query result): the records shown, in the order
+                // shown, with the columns shown. A DbDo database is a target too (25 November 2026): the grid becomes a
+                // table of that database, new or merged, so a filtered view or a query that joins tables can be kept
+                // as a table. Copying a whole database stays with Save As.
                 dlgFile.Filter = "Excel workbook (*.xlsx)|*.xlsx"
+                           + "|DbDo database, as a table (*.db)|*.db"
                            + "|Word document (*.docx)|*.docx"
                            + "|HTML, filtered (*.html)|*.html"
                            + "|Markdown table (*.md)|*.md"
@@ -24914,7 +25329,18 @@ namespace DbDo
                 // Suggest a filename based on the current table.
                 if (!string.IsNullOrEmpty(db.currentTable))
                     dlgFile.FileName = db.currentTable;
+                // A database chosen here is added to, never replaced, so Windows's replace question is asked below
+                // only for the other formats.
+                dlgFile.OverwritePrompt = false;
                 if (dlgFile.ShowDialog(this) != DialogResult.OK) return;
+                if (isDatabaseFile(dlgFile.FileName))
+                {
+                    IniFolders.exportFolder = Path.GetDirectoryName(dlgFile.FileName);
+                    exportViewToDatabase(dlgFile.FileName);
+                    return;
+                }
+                if (File.Exists(dlgFile.FileName) && LbcMessage.show(this, Path.GetFileName(dlgFile.FileName) + " already exists. Replace it?",
+                    "Export Data", MessageBoxButtons.YesNo, MessageBoxIcon.Question, MessageBoxDefaultButton.Button2) != DialogResult.Yes) return;
                 // Lossy-format heads-up for structured targets that don't
                 // round-trip (Excel/CSV/TSV/dBASE). Report and snapshot
                 // formats (md/html/json/docx) and clean ones (db/accdb)
@@ -24947,6 +25373,102 @@ namespace DbDo
                     ErrorDialog.show(this, "Export Data", ex.Message);
                 }
             }
+        }
+
+        // exportViewToDatabase: the grid in this window -- filtered, ordered and with the columns shown, or the result of
+        // a Control+Q query -- becomes a table of a DbDo database. A new file gets a new table. An existing one asks New
+        // table or Merge records, and a merge asks which table and whose values are final, as Import does. The grid is
+        // read back through Export's own CSV writer, so what lands is exactly what Export to a file would write; the
+        // bookkeeping columns (added, edited, marked and the record id) are left for the target to keep for itself.
+        private void exportViewToDatabase(string sTarget)
+        {
+            const string sTitle = "Export Data";
+            if (db != null && !string.IsNullOrEmpty(db.filePath)
+                && string.Equals(Path.GetFullPath(sTarget), Path.GetFullPath(db.filePath), StringComparison.OrdinalIgnoreCase))
+            {
+                ErrorDialog.show(this, sTitle, "That is the database open in this window. To make a table from this view within it, export to another database, or use Import Data there.");
+                return;
+            }
+            string sCsv = Path.Combine(Path.GetTempPath(), "DbDo_export_" + Guid.NewGuid().ToString("N") + ".csv");
+            try
+            {
+                db.exportData(sCsv);
+                List<string[]> lGrid = gridWithoutBookkeeping(lGridFromDelimitedFile(sCsv, ','), db.currentTable);
+                string sName = sNormalizeIdentifier(string.IsNullOrEmpty(db.currentTable) ? "results" : db.currentTable);
+                if (sName.Length == 0) sName = "results";
+                bool bNewFile = !File.Exists(sTarget) || new FileInfo(sTarget).Length == 0;
+                if (bNewFile) using (FileStream fs = File.Create(sTarget)) { }
+                using (DbDoManager mTarget = new DbDoManager())
+                {
+                    mTarget.openDatabase(sTarget, null, false);
+                    List<string> lsTables = new List<string>(mTarget.getTableNames());
+                    lsTables.RemoveAll(t => t.Equals("maps", StringComparison.OrdinalIgnoreCase) || t.Equals("defs", StringComparison.OrdinalIgnoreCase)
+                        || t.Equals("files", StringComparison.OrdinalIgnoreCase));
+                    string sHow = "New table";
+                    if (lsTables.Count > 0)
+                    {
+                        using (LbcDialog dlgHow = new LbcDialog(sTitle, this))
+                        {
+                            dlgHow.addLabel(Path.GetFileName(sTarget) + " has " + lsTables.Count + (lsTables.Count == 1 ? " table" : " tables")
+                                + ". Make these records a new table, or merge them into one of its tables?");
+                            sHow = dlgHow.runWithButtons(new string[] { "&New table", "&Merge records", "Cancel" });
+                        }
+                        if (string.IsNullOrEmpty(sHow) || sHow.StartsWith("Cancel", StringComparison.OrdinalIgnoreCase)) { mTarget.close(); return; }
+                    }
+                    string sSaid;
+                    if (sHow.StartsWith("New", StringComparison.OrdinalIgnoreCase))
+                    {
+                        int iRows;
+                        string sMade = addGridAsTable(mTarget, sName, lGrid, out iRows);
+                        if (sMade == null) { mTarget.close(); ErrorDialog.show(this, sTitle, "There are no records to export."); return; }
+                        sSaid = "Exported " + iRows + (iRows == 1 ? " record" : " records") + " to table " + sMade + " of " + Path.GetFileName(sTarget) + "." + skippedRowsSaid();
+                        mTarget.close();
+                        Say.say(sSaid);
+                    }
+                    else
+                    {
+                        string sInto = lsTables.Count == 1 ? lsTables[0] : null;
+                        if (sInto == null)
+                        {
+                            string sGuess = lsTables.Find(t => t.Equals(sName, StringComparison.OrdinalIgnoreCase)) ?? lsTables[0];
+                            sInto = promptListChoice(sTitle, "Merge into which table of " + Path.GetFileName(sTarget) + "?", lsTables, sGuess);
+                            if (string.IsNullOrEmpty(sInto)) { mTarget.close(); return; }
+                        }
+                        string sPolicy = askMergePolicy(sTitle, string.IsNullOrEmpty(db.currentTable) ? "these records" : db.currentTable, sInto);
+                        if (sPolicy == null) { mTarget.close(); return; }
+                        sSaid = mTarget.mergeGrid(sInto, lGrid, sPolicy);
+                        mTarget.close();
+                        showInfoDialog(sTitle, sSaid);
+                    }
+                    DbDoLog.write(sTitle + ": view of " + (db.currentTable ?? "query") + " -> " + sTarget + " (" + sHow + "): " + sSaid.Replace("\r\n", " "));
+                }
+            }
+            catch (Exception ex) { ErrorDialog.show(this, sTitle, ex.Message); }
+            finally { try { if (File.Exists(sCsv)) File.Delete(sCsv); } catch { } }
+        }
+
+        // gridWithoutBookkeeping: a grid without the columns a table keeps for itself -- added, edited, marked, look,
+        // prime, and the source table's own record id -- so they are not copied in as data.
+        private static List<string[]> gridWithoutBookkeeping(List<string[]> lGrid, string sTable)
+        {
+            if (lGrid == null || lGrid.Count == 0) return lGrid ?? new List<string[]>();
+            string sOwnId = string.IsNullOrEmpty(sTable) ? "" : sSingularOf(sNormalizeIdentifier(sTable)) + "_id";
+            List<int> lKeep = new List<int>();
+            string[] aHeader = lGrid[0];
+            for (int c = 0; c < aHeader.Length; c++)
+            {
+                string sKey = sNormalizeIdentifier(aHeader[c] ?? "");
+                if (sKey == "added" || sKey == "edited" || sKey == "marked" || sKey == "look" || sKey == "prime" || sKey == "id" || sKey == sOwnId) continue;
+                lKeep.Add(c);
+            }
+            List<string[]> lOut = new List<string[]>();
+            foreach (string[] aRow in lGrid)
+            {
+                string[] aNew = new string[lKeep.Count];
+                for (int i = 0; i < lKeep.Count; i++) aNew[i] = lKeep[i] < aRow.Length ? aRow[lKeep[i]] : "";
+                lOut.Add(aNew);
+            }
+            return lOut;
         }
 
         private void filePrintClicked(object sender, EventArgs evArgs)
