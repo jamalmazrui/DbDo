@@ -40,11 +40,14 @@ DownArrow=nextDbDoRow
 ; cell, and JAWS stays quiet rather than reading the row too; in a dialog's box the key still opens its list.
 Alt+DownArrow=altDbDoRow
 Alt+UpArrow=altDbDoRow
-; JAWS+A (24 November 2026): the cell's address in the grid; JAWS's own reading of a browser's address bar has no
-; address bar to read in DbDo. JAWS+F, JAWS+NumPadDelete and Alt+Control+NumPad5 need no line here: DbDo.jss
-; replaces those scripts by name.
-Insert+A=sayDbDoAddress
+; JAWS+F (SayFont) and Alt+Control+NumPad5 (SayCell) need no line here: DbDo.jss replaces those scripts by name, so
+; whatever key a person has for them works. JAWS+A is in [Desktop Keys] below.
 UpArrow=priorDbDoRow
+
+[Desktop Keys]
+; JAWS+A only in the desktop layout (24 November 2026, checked against JAWS 2026's default.jkm): in the laptop layout
+; Insert+A and JAWSKey+A are Say All, which must keep working; the desktop layout leaves Insert+A unbound.
+Insert+A=sayDbDoAddress
 
 [Keyboard Layouts]
 Desktop=Common

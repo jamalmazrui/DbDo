@@ -139,6 +139,8 @@ Pick Value=Control+F2, Pick a value from the current field's fixed values
 Replace=Control+R, Replace text in the fields and records you choose
 Replace with Regex=Control+Shift+R, Replace a regular expression's matches in the fields and records you choose
 Mail Record=Control+M, Send an email message to the current record or the marked ones
+Calculate Column=None, Add a column whose values come from a formula over the other columns
+Rename Column=None, Give a column of the open table a new name, keeping its values
 
 ; ===== Mark menu =====
 Mark Record=SemiColon, Mark the current record
@@ -241,7 +243,7 @@ Say Filter=Shift+F, Say the filter in force
 Say Go to=Shift+G, Say the last Go to entry
 Say Header=Shift+H, Say the current column's name
 Say Field Type=Alt+Shift+F, Say the current field's declared type, and what it holds
-Say ID=Shift+I, Say the current record's id
+Say id=Shift+I, Say the current record's id
 Say Jump=Shift+J, Say the last Jump entry
 Say Keywords=Shift+K, Say the last Keywords entry
 Say Look=Shift+L, Say the current record's look

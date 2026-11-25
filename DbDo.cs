@@ -15201,7 +15201,7 @@ namespace DbDo
             // Order and Say Filter answer Order Records and Filter Records.
             miSaySaySelect       = addItem(miSay, "Say &Shown Columns", "Say Shown Columns",  Keys.Shift | Keys.S,                saySaySelect);
             miSaySayQuery        = addItem(miSay, "Say &Query",          "Say Query",   Keys.Shift | Keys.Q,                saySayQuery);
-            miSaySayId           = addItem(miSay, "Say &Id",      "Say ID",      Keys.Shift | Keys.I,                saySayId);
+            miSaySayId           = addItem(miSay, "Say &id",      "Say id",      Keys.Shift | Keys.I,                saySayId);
             miSaySayLook         = addItem(miSay, "Say Look",           "Say Look",    Keys.Shift | Keys.L,                saySayLook);
             // SAY HEADER (23 November 2026): Shift+H, the current column's name.
             addItem(miSay, "Say Header",         "Say Header",  Keys.Shift | Keys.H,                saySayHeader);
@@ -15442,7 +15442,12 @@ namespace DbDo
             // Hotkeys document -- Control+F1 describes one key, and adding Shift
             // describes them all.
             miHelpReadme       = addItem(miHelp, "ReadMe",                              "ReadMe",       Keys.Alt | Keys.Shift | Keys.F1,    (s, e) => openHelpDocument("README", "ReadMe"));
-            miHelpHotkeysDoc   = addItem(miHelp, "Hotkeys",                             "Hotkeys",      Keys.None,                          (s, e) => openHelpDocument("Hotkeys", "Hotkeys"));  // menu only: Alt+Shift+H lists every key, live (7 November 2026)
+            miHelpHotkeysDoc   = addItem(miHelp, "Hotkeys",                             "Hotkeys",      Keys.None,                          (s, e) => openHelpDocument("Hotkeys", "Hotkeys"));  // menu only: Hotkey Summary, just below, lists every key live (7 November 2026)
+            // HOTKEY SUMMARY ON THE HELP MENU (24 November 2026), where EdSharp and FileDir have it and the suite's ruling of
+            // 9 November puts it: the menu walk of 24 November found it on DbDo's Misc menu. It moves here, beside Hotkeys,
+            // the shipped list it is the live form of.
+            miMisc.DropDownItems.Remove(miMiscHotkeySummary);
+            miHelp.DropDownItems.Add(miMiscHotkeySummary);
             miHelpFaq          = addItem(miHelp, "&Frequently Asked Questions",          "Frequently Asked Questions",          Keys.None,                          (s, e) => openHelpDocument("FAQ", "Frequently Asked Questions"));
             // The documents almost nobody opens twice go one level down, which is
             // the case for a submenu: four items that would otherwise be arrowed
@@ -15769,7 +15774,7 @@ namespace DbDo
             add("Say Header", "Say the current column's name",
                 "Shift+H. The column's name, as Alt+Control+Shift+UpArrow says it. Say Look, Shift+L, says the record's look: the value of the look column, not the names of the columns it is made from.");
             add("Say Position",       "Say the current position: the record's number, the count and the percent",
-                "Alt+Delete, and JAWS+NumPadDelete or NVDA+NumPadDelete in the grid, where the reader would say where the cursor is on the screen.");
+                "Alt+Delete, which is also JAWS's own key for where the cursor is, and NVDA+NumPadDelete in the grid.");
             add("Say Field Type",     "Say the current field's declared type, and what it holds",
                 "Alt+Shift+F, and JAWS+F or NVDA+F in the grid, where the reader would say the font. F for field. textmemo is several lines of text, texturl a web address, blobjpg a JPEG picture's data; a link field also names the table it points to.");
             add("Show in FileDir",    "Show the open database's file, selected in its folder, in FileDir", "");
@@ -17046,7 +17051,7 @@ namespace DbDo
             { Say.say("No rows"); return; }
             // RECORD, AS THE DESCRIPTION SAYS (17 November 2026): DbDo speaks of records, not rows; testSay heard "row 1 of 52550".
             // THE CELL'S ADDRESS (24 November 2026, Jamal): the column's name first, then the record's number, as a
-            // spreadsheet's address names its column and row. JAWS+A and JAWS+NumPadDelete ask for it in the grid.
+            // spreadsheet's address names its column and row. JAWS+A asks for it in the grid, in JAWS's desktop layout.
             Say.say(grid.Columns[iVirtualCol].Text, "record " + iVirtualRow + " of " + db.recordCount, "column " + (iVirtualCol + 1) + " of " + grid.Columns.Count);
         }
 

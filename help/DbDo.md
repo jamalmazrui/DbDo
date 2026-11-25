@@ -240,8 +240,8 @@ In the Key Describer (Control+F1), every one of these keys says what it does.
 A few of JAWS's and NVDA's own keys ask a question that has no good answer in a grid of records, such as which font the text uses. DbDo's scripts answer those keys in the grid with DbDo's own answer, and leave them to the screen reader everywhere else, in dialogs and boxes too.
 
 - **Font (JAWS+F, or NVDA+F)** says the field's type instead, as **Say Field Type** (Alt+Shift+F) does: "type: textmemo, several lines of text".
-- **Where the cursor is (JAWS+Number Pad Delete, or NVDA+Number Pad Delete)** says the record's position, as **Say Position** (Alt+Delete) does.
-- **Address (JAWS+A)** says the cell's address, as Alt+Control+Shift+Number Pad 5 does: the column's name, then the record and column numbers. NVDA has no such key, and on a laptop keyboard NVDA+A is Say All, so DbDo leaves it alone.
+- **Where the cursor is (NVDA+Number Pad Delete)** says the record's position, as **Say Position** (Alt+Delete) does. JAWS's own key for where the cursor is, Alt+Delete, already reaches DbDo, as in every Homer app.
+- **Address (JAWS+A, in JAWS's desktop layout)** says the cell's address, as Alt+Control+Shift+Number Pad 5 does: the column's name, then the record and column numbers. In JAWS's laptop layout and in NVDA's, JAWS+A and NVDA+A are Say All, so DbDo leaves them alone there.
 - **Say Current Cell (JAWS's Alt+Control+Number Pad 5)** goes to DbDo, which says the cell, as above.
 - **NVDA's table reading keys** read DbDo's records: NVDA+Alt+Control+Left Arrow reads the whole record, as Alt+Control+Shift+Right Arrow does; NVDA+Alt+Control+Up Arrow the whole column, as Alt+Control+Shift+Down Arrow does; and NVDA+Alt+Control+Down Arrow the column from the current record down, as Read Lean from Current (Control+L) does.
 
@@ -692,7 +692,7 @@ The Query menu holds record inspection and the Say-X status family.
 | Say Keywords | Shift+K |
 | Say Shown Columns | Shift+S |
 | Say Query | Shift+Q |
-| Say Id | Shift+I |
+| Say id | Shift+I |
 | Say Look | Shift+L |
 | Say Header | Shift+H |
 | Say Replace Values | Shift+R |
@@ -1524,7 +1524,7 @@ already names the setting says the state alone: Say Marked answers "Marked" or
 only the second word carries information. It is the shape a toggle uses
 everywhere else: "<setting> on" and "no <setting>", never "<setting>: on".
 
-Two commands answer differently. Say Id uses the column name instead of the menu
+Two commands answer differently. Say id uses the column name instead of the menu
 word, because that is what the grid calls the field: `job_id: 3`. Say Cell says
 the value alone, `Example Widgets Company`, since Shift+H gives the column's
 name.

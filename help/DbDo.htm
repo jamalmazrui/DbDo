@@ -855,13 +855,15 @@ them to the screen reader everywhere else, in dialogs and boxes too.</p>
 <li><strong>Font (JAWS+F, or NVDA+F)</strong> says the field’s type
 instead, as <strong>Say Field Type</strong> (Alt+Shift+F) does: “type:
 textmemo, several lines of text”.</li>
-<li><strong>Where the cursor is (JAWS+Number Pad Delete, or NVDA+Number
-Pad Delete)</strong> says the record’s position, as <strong>Say
-Position</strong> (Alt+Delete) does.</li>
-<li><strong>Address (JAWS+A)</strong> says the cell’s address, as
-Alt+Control+Shift+Number Pad 5 does: the column’s name, then the record
-and column numbers. NVDA has no such key, and on a laptop keyboard
-NVDA+A is Say All, so DbDo leaves it alone.</li>
+<li><strong>Where the cursor is (NVDA+Number Pad Delete)</strong> says
+the record’s position, as <strong>Say Position</strong> (Alt+Delete)
+does. JAWS’s own key for where the cursor is, Alt+Delete, already
+reaches DbDo, as in every Homer app.</li>
+<li><strong>Address (JAWS+A, in JAWS’s desktop layout)</strong> says the
+cell’s address, as Alt+Control+Shift+Number Pad 5 does: the column’s
+name, then the record and column numbers. In JAWS’s laptop layout and in
+NVDA’s, JAWS+A and NVDA+A are Say All, so DbDo leaves them alone
+there.</li>
 <li><strong>Say Current Cell (JAWS’s Alt+Control+Number Pad 5)</strong>
 goes to DbDo, which says the cell, as above.</li>
 <li><strong>NVDA’s table reading keys</strong> read DbDo’s records:
@@ -2216,7 +2218,7 @@ family.</p>
 <td>Shift+Q</td>
 </tr>
 <tr>
-<td>Say Id</td>
+<td>Say id</td>
 <td>Shift+I</td>
 </tr>
 <tr>
@@ -3503,7 +3505,7 @@ alone: Say Marked answers “Marked” or “Unmarked”, not “mark: marked”
 Prefixing it would say the same word twice, and only the second word
 carries information. It is the shape a toggle uses everywhere else:
 “<setting> on” and “no <setting>”, never “<setting>: on”.</p>
-<p>Two commands answer differently. Say Id uses the column name instead
+<p>Two commands answer differently. Say id uses the column name instead
 of the menu word, because that is what the grid calls the field:
 <code>job_id: 3</code>. Say Cell says the value alone,
 <code>Example Widgets Company</code>, since Shift+H gives the column’s

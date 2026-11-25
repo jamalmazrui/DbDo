@@ -86,7 +86,8 @@ PerformScript SayFont ()
 EndIf
 EndScript
 
-; SayActiveCursor (JAWS+NumPadDelete): the cursor's place in pixels means nothing here; the record's place does, as
+; SayActiveCursor (JAWS's Alt+Delete, which the key map already hands to DbDo, and braille displays' keys for it): the
+; cursor's place in pixels means nothing here; the record's place does, as
 ; EdSharp and FileDir answer the same key with their own position.
 Script SayActiveCursor ()
 If inDbDoList () && IsPCCursor () Then
@@ -107,7 +108,7 @@ EndScript
 
 ; JAWS+A (Jamal's idea): in a browser JAWS reads the address bar; in DbDo's grid the address is the cell's -- its
 ; column's name, then its record and column numbers -- which DbDo gives on Alt+Control+Shift+NumPad5. The key map
-; names Insert+A, not JAWSKey+A, so a laptop's CapsLock+A stays Say All. Elsewhere the key goes on, as when unbound.
+; binds it in [Desktop Keys] only, since in the laptop layout Insert+A is Say All. Elsewhere the key goes on, as when unbound.
 Script sayDbDoAddress ()
 If inDbDoList () && IsPCCursor () Then
 TypeKey ("Alt+Control+Shift+NumPad5")

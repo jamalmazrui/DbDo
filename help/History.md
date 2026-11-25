@@ -5,6 +5,18 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 24 November 2026, late night -- What the menu walk found
+
+- **Hotkey Summary is on the Help menu,** beside Hotkeys, the shipped list it is the live form of, as in EdSharp and FileDir. It was on the Misc menu.
+- **Say id is spelled one way.** The menu said Say Id and the key file Say ID; both now say Say id, as Say url and Edit url write DbDo's own field names.
+- **Calculate Column and Rename Column are in the key file,** so the Hotkeys list and the Key Describer know them. They were on the Edit menu only.
+- **Every menu letter matches its key.** The walk's audit of all 199 items found no item whose letter differs from its key's letter; an item whose key letter is taken in its menu, such as Say Field Type beside Say Filter, has no letter.
+
+## 24 November 2026, late night -- JAWS+A on laptops stays Say All
+
+- **JAWS+A answers only in JAWS's desktop layout.** In the laptop layout, JAWS+A is Say All, and DbDo's key map had taken it there too. The address key now sits in the key map's desktop section, checked against JAWS 2026's own key map.
+- **JAWS's key for where the cursor is was Alt+Delete all along,** which DbDo's key map already hands to DbDo, so it already says Say Position. JAWS+Number Pad Delete is JAWS's Route Virtual to PC and is left to JAWS. The guide said otherwise and is corrected.
+
 ## 24 November 2026, night -- Quiet Alt arrows, and your screen reader's own keys
 
 - **Alt+Down Arrow and Alt+Up Arrow say only the cell, with JAWS too.** DbDo already said the cell alone, but JAWS then read the whole record, because it announces any new row in a list, however the row was reached. DbDo's JAWS scripts now keep JAWS quiet for a moment after a key DbDo answers itself: the Alt arrows and the Alt+Control table keys. The plain arrows still read the record. NVDA's add-on does the same for the Alt+Control table keys, as it did for the Alt arrows.
@@ -12,8 +24,8 @@ Press **Control+Shift+F1** inside DbDo to open this file in your browser, or typ
 - **Say Field Type, Alt+Shift+F,** says the current field's declared type and what it holds: "type: textmemo, several lines of text", or "type: integer, a whole number, links to contacts" for a link field. F for field.
 - **Your screen reader's own keys answer in the grid.** Where a key asks something with no good answer in a grid, DbDo answers instead, in the grid only:
   - JAWS+F and NVDA+F, the font, say the field's type.
-  - JAWS+Number Pad Delete and NVDA+Number Pad Delete, where the cursor is on the screen, say the record's position, as Alt+Delete does.
-  - JAWS+A, the address bar in a browser, says the cell's address.
+  - NVDA+Number Pad Delete, where the cursor is on the screen, says the record's position, as Alt+Delete does, JAWS's own key for it.
+  - JAWS+A, the address bar in a browser, says the cell's address, in JAWS's desktop layout; in the laptop layout JAWS+A is Say All and stays so.
   - JAWS's Say Current Cell, Alt+Control+Number Pad 5, reaches DbDo instead of saying there is no table.
   - NVDA's table reading keys, NVDA+Alt+Control with an arrow, read the record, the column, or the column from here down.
 - **Alt+Control+Shift+Number Pad 5 says the cell's address:** the column's name first, then the record and column numbers.

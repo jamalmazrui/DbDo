@@ -430,8 +430,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Header\
   Say the current column's name. H for Header.\
   Shift+H
-- Say Id\
-  I for ID.\
+- Say id\
+  I for id.\
   Shift+I
 - Say Invoke Script\
   Shift+V
@@ -875,7 +875,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Say the current column's name.\
   Say Header
 - Shift+I\
-  Say Id
+  Say id
 - Shift+J\
   Say Jump
 - Shift+K\
@@ -1226,7 +1226,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Header\
   Say the current column's name.\
   Shift+H
-- Say Id\
+- Say id\
   Shift+I
 - Say Invoke Script\
   Shift+V
