@@ -257,6 +257,9 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a href="#november-2026-midday-filter-and-read-what-a-search-finds"
+id="toc-november-2026-midday-filter-and-read-what-a-search-finds">25
+November 2026, midday – Filter and read what a search finds</a></li>
 <li><a href="#november-2026-import-and-export-work-on-a-table"
 id="toc-november-2026-import-and-export-work-on-a-table">25 November
 2026 – Import and Export work on a table</a></li>
@@ -976,6 +979,35 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Control+Shift+F1</strong> inside DbDo to open this file
 in your browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="november-2026-midday-filter-and-read-what-a-search-finds">25
+November 2026, midday – Filter and read what a search finds</h2>
+<ul>
+<li><strong>Filter Records offers Keywords match, Jump match and
+Bookmarked records.</strong> Keywords match replaces Any field, which
+always took the Keywords syntax; it keeps the records Keywords finds,
+now reading a link field by its look as Keywords does, and its box opens
+on the last keywords. Jump match keeps the records whose field under the
+cursor holds the text, as Jump finds them. Bookmarked records keeps the
+records saved with Control+B. They take K, J and B, and combine with
+Narrow, Expand and Invert like any condition.</li>
+<li><strong>They are SQL conditions, like every filter since 19
+October.</strong> ADO’s own filter cannot join an OR group with AND,
+which red &amp; blue over several fields needs, takes a wildcard only at
+a value’s start or end, and forgets bookmarks when a table is selected
+afresh.</li>
+<li><strong>Bookmarks remember the record’s key,</strong> so a filter,
+an order or a refresh no longer loses them for these commands.</li>
+<li><strong>Alt+J, Alt+K and Alt+B read what Jump, Keywords and the
+bookmarks find,</strong> wide, from the first record in view, without
+moving the cursor or changing the filter: Read Jump Matches, Read
+Keywords Matches and Read Bookmarked Records. Pressed twice, each shows
+the records.</li>
+<li><strong>Jump Again and Keywords Again move to Alt+Shift+J and
+Alt+Shift+K,</strong> and List Bookmarks to Alt+Shift+B. F3 still
+repeats whichever search came last.</li>
+<li><strong>Tutorial 3</strong> reads the Keywords matches with Alt+K
+and filters with Keywords match.</li>
+</ul>
 <h2 id="november-2026-import-and-export-work-on-a-table">25 November
 2026 – Import and Export work on a table</h2>
 <ul>

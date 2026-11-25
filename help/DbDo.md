@@ -185,6 +185,14 @@ The fourth form, marked records from the current one on, is on the menu with no 
 
 FileDir reads and counts its list with the same L and Y keys. It has no W keys, since its list has one column.
 
+Three more keys read wide, but only the records a search picks out, from the first record in view. The cursor stays where it is, and the filter does not change.
+
+- **Read Bookmarked Records** (Alt+B) reads the records of this table you saved with Control+B.
+- **Read Jump Matches** (Alt+J) reads the records Jump finds, with the last Jump text, in the field Jump searched.
+- **Read Keywords Matches** (Alt+K) reads the records Keywords finds, with the last keywords.
+
+Each pairs with a Say key: Shift+B says the bookmark, Shift+J the Jump text and Shift+K the keywords; Alt with the same letter reads the records they find. Press twice to see them in a window.
+
 #### Key Help
 
 **Key Describer Toggle** (Control+F1) turns on a learning mode: while it is on, pressing a command chord **announces** what that command is and does **instead of running it**. Press Control+F1 again to turn it off. This lets you explore the keyboard safely. **Where Am I** (Control+Slash, pressed twice) lists every command with its key, and the **Alternate Menu** (Alt+F10) gives you one list of all commands to search and run, in menu, name or key order.
@@ -262,15 +270,15 @@ Where a wildcard counts depends on what is searched. When the search reads a **n
 
 F3 repeats the last search, in the same way and over the same things, going forward; Shift+F3 repeats it going back.
 
-In DbDo, Keywords and Any Field read a whole record as text, so the words of `red & blue` may sit in different fields; Jump Record and a Fields box read one field as a name. Forward Find with Regex, and Replace with Use regex pattern checked, take regular expressions instead; otherwise Replace finds exactly the text you type.
+In DbDo, Keywords and a filter's Keywords match read a whole record as text, so the words of `red & blue` may sit in different fields; Jump, a filter's Jump match and a Fields box read one field as a name. Forward Find with Regex, and Replace with Use regex pattern checked, take regular expressions instead; otherwise Replace finds exactly the text you type.
 
 ### Navigating records
 
 Beyond the grid's keys, the cursor moves with these commands:
 
-- **Go to Record** (Control+G) jumps to a record number; **Go to Record Again** (Alt+G) repeats it. **Jump Again** (Alt+J) and **Keywords Again** (Alt+K) repeat those searches forward, as in FileDir; F3 repeats whichever search came last.
+- **Go to Record** (Control+G) jumps to a record number; **Go to Record Again** (Alt+G) repeats it. **Jump Again** (Alt+Shift+J) and **Keywords Again** (Alt+Shift+K) repeat those searches forward; F3 repeats whichever search came last. Alt+J and Alt+K read what those searches find without moving (see Reading the grid aloud).
 - **Keywords** (Control+K) searches for text; **Reverse Keywords** (Control+Shift+K) searches backward; **Search Next** (F3) and **Search Previous** (Shift+F3) repeat the last search. **Forward Find with Regex** (Control+F3) and **Reverse Find with Regex** (Control+Shift+F3) search by regular expression.
-- **Jump** (Control+J) and **Reverse Jump** move by a jump increment for quickly covering distance in a long table.
+- **Jump** (Control+J) and **Reverse Jump** (Control+Shift+J) go to the next or previous record whose current field holds the text you type, whatever its case.
 - **Jump to Next Initial** steps to the next record whose current column starts with a new letter — type-ahead through a sorted column.
 
 ### Editing records
@@ -310,7 +318,7 @@ Filtering and sorting reshape the grid without touching the physical table.
 
 - **Filter Records** (Control+F) limits the grid to the records that meet a condition.
   - **In a query window too.** A window holding the results of your own SQL is filtered the same way: DbDo runs your query again inside SQL, with the condition around it, so every choice works there, Invert filter included.
-  - **How to give a condition.** With no filter in force, it asks at once how to give one. **Any field** finds text wherever it is, whatever its case. **Main columns**, **Standard columns** and **All columns** each give a box for those columns, and a value typed with no operator finds records whose field contains it, whatever its case: `seattle` in RadioTrail's city box finds "Seattle, Washington". A value with no operator also takes the Homer search syntax, reading the field as a name: `*.com` is a value ending in .com, `smith | jones` either, `!draft` not. A value may begin with an operator: `=` is, `!=` is not, `>` more than, `>=` at least, `<` less than, `<=` at most, `%` contains, `!%` does not contain. Is not and does not contain also keep records whose field is empty. An operator alone tests for an empty field: `=` alone finds records whose field is blank, and `!=` alone finds those whose field holds something. A number typed after `>`, `>=`, `<` or `<=` is compared as a number, so `> 35` in an age box finds ages above 35; a blank, or text that is not a number, never passes. Two values joined by two dots give a range, both ends included: `2025..2026` in date_read finds the books finished in those two years, `2026-01-01..2026-03-31` a span of dates, and `5..12` a span of numbers. A year stands for every day in it, since dates are kept as year-month-day. Several filled boxes must all match.
+  - **How to give a condition.** With no filter in force, it asks at once how to give one. **Keywords match** keeps the records Keywords (Control+K) finds; its box opens on the last keywords, and what you type there becomes Control+K's keywords too. **Jump match** does the same for Jump (Control+J): the records whose field under the cursor holds the text. **Bookmarked records** keeps the records of this table saved with Control+B; it is offered when there are some. **Main columns**, **Standard columns** and **All columns** each give a box for those columns, and a value typed with no operator finds records whose field contains it, whatever its case: `seattle` in RadioTrail's city box finds "Seattle, Washington". A value with no operator also takes the Homer search syntax, reading the field as a name: `*.com` is a value ending in .com, `smith | jones` either, `!draft` not. A value may begin with an operator: `=` is, `!=` is not, `>` more than, `>=` at least, `<` less than, `<=` at most, `%` contains, `!%` does not contain. Is not and does not contain also keep records whose field is empty. An operator alone tests for an empty field: `=` alone finds records whose field is blank, and `!=` alone finds those whose field holds something. A number typed after `>`, `>=`, `<` or `<=` is compared as a number, so `> 35` in an age box finds ages above 35; a blank, or text that is not a number, never passes. Two values joined by two dots give a range, both ends included: `2025..2026` in date_read finds the books finished in those two years, `2026-01-01..2026-03-31` a span of dates, and `5..12` a span of numbers. A year stands for every day in it, since dates are kept as year-month-day. Several filled boxes must all match.
   - **With a filter in force,** Control+F first offers its buttons. **Start over** begins a new filter. **Clear filter** shows every record again and returns you to the list on the same record. **Narrow filter** keeps only the records that also meet a new condition, joining it with AND. **Expand filter** also takes in the records that meet a new condition, joining it with OR. Then it asks how to give the new condition, as above.
   - **Grouping.** The condition in force, however many parts it has, is wrapped whole in parentheses before the AND or OR, and the new condition in its own. So narrowing and expanding in turn always mean exactly what was asked. Say Filter (Shift+F) speaks the whole condition, led by "where" and grouped the same way.
   - **Nothing found.** A condition that would keep no record says so and leaves the view as it was.
@@ -640,7 +648,7 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Start Mark / Complete Mark | F8 / Shift+F8 |
 | Complete Unmark | Alt+Shift+F8 |
 | Save Bookmark | Control+B |
-| List Bookmarks | Alt+B |
+| List Bookmarks | Alt+Shift+B |
 | Clear Bookmark | Control+Shift+B |
 | Open Cell Value | Control+Enter |
 | Open url | Control+Shift+U |
@@ -656,8 +664,8 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Next / Previous Record | — |
 | Go to Record | Control+G |
 | Go to Record Again | Alt+G |
-| Jump Again | Alt+J |
-| Keywords Again | Alt+K |
+| Jump Again | Alt+Shift+J |
+| Keywords Again | Alt+Shift+K |
 | Keywords | Control+K |
 | Reverse Keywords | Control+Shift+K |
 | Jump | Control+J |
@@ -693,6 +701,9 @@ The Query menu holds record inspection and the Say-X status family.
 | Say Tags | Shift+T |
 | Read Wide | Alt+W |
 | Read Wide Marked | Alt+Shift+W or Shift+Space |
+| Read Bookmarked Records | Alt+B |
+| Read Jump Matches | Alt+J |
+| Read Keywords Matches | Alt+K |
 | Read Wide from Current | Control+W |
 | Read Wide Marked from Current | — |
 | Read Lean | Alt+L |
@@ -1030,9 +1041,10 @@ Each has its own letter, and the letter is the first letter of its own word.
 - **Filter Records, Control+F** -- shorten the list to the records you want. It
   begins with a list of choices, the first already selected, so Enter takes it;
   each choice begins with its own letter, so typing the letter lands on it.
-  - **Any field contains text** asks for the text and keeps every record where
-    some field holds it, whatever the field and whatever the case: type Dallas
+  - **Keywords match** asks for keywords and keeps every record where
+    some field holds them, whatever the field and whatever the case: type Dallas
     Cowboys, and every station whose name, notes or tags mention the team stays.
+    The box opens on the last keywords you searched for with Control+K.
     It takes the Homer search syntax, as Keywords does: `red & blue` means
     both, `red | blue` either, `!red` not, and `re*d` lets a star stand for
     anything (see Search syntax).
@@ -1304,7 +1316,7 @@ Most stations that carry a team's games never say so themselves. A small
 station in Medford, Oregon, may carry every Seahawks game while its stream and
 home page talk only about local news. So the Wikipedia step also keeps each
 station's **affiliations** -- the networks its article says it carries, such as
-"Seahawks Radio Network" or "ESPN Radio" -- one per line in **tags**. Any Field
+"Seahawks Radio Network" or "ESPN Radio" -- one per line in **tags**. Keywords
 for `seahawks` then finds those stations too. Only some articles name a team's
 network, so this finds some of a team's stations, not all: on 11 October it
 added 4,059 network tags to 1,579 stations, but only KHTQ in Spokane and KIRO-FM

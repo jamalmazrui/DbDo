@@ -36,9 +36,16 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=F3 goes to the next match, Shift plus F3 to the one before. Keywords moves the cursor and hides nothing. To see only the matches, filter.
+Say=F3 goes to the next match, Shift plus F3 to the one before.
 Key=F3
 Hear=Radio Browser, CISL "Sportsnet 650" Richmond, BC
+Note=Confirm the wording with a live run: buildTutorials -live.
+
+[step]
+
+Say=Alt plus K reads every station Keywords finds, from the first, and leaves the cursor where it is. Control stops it. Keywords hides nothing; to see only the matches, filter.
+Key=Alt+K
+Hear=Radio Browser, 99.3 KDRM
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -46,20 +53,20 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 Say=A planned misstep: Control plus F is not Find here. In DbDo, F is for Filter. Control plus F shows only the records that match, beginning with a choice offered as buttons.
 Key=Control+F
 Hear=Filter Records dialog
-Hear=Any field button
+Hear=Keywords match button
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Any field is the first button, so Enter presses it. It asks for the text to find, wherever it is.
+Say=Keywords match is the first button, so Enter presses it. It keeps the records Keywords finds, and its box already holds seahawks, the last keywords.
 Key=Enter
-Hear=Any Field Contains dialog
-Hear=Text to find in any field: edit
+Hear=Keywords Match dialog
+Hear=Keywords to find: edit, seahawks
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=I type seahawks and press Enter.
+Say=I press Enter.
 Key=Enter
 Hear=7 records match.
 Note=Confirm the wording with a live run: buildTutorials -live.
@@ -69,7 +76,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 Say=Seven: stations in Seattle and Tacoma, in British Columbia and in Idaho. Control plus F again; with a filter in force there are five buttons: Start over, Clear filter, Narrow filter, Expand filter and Invert filter. N for Narrow keeps seahawks and adds a condition.
 Key=N
 Hear=Narrow Filter dialog
-Hear=Any field button
+Hear=Keywords match button
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -90,7 +97,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 Say=Shift plus F, Say Filter, says both parts, in the words each was asked in, each in its own parentheses.
 Key=Shift+F
-Hear=filter: (any field contains seahawks) and (state contains Washington)
+Hear=filter: (keywords seahawks) and (state contains Washington)
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

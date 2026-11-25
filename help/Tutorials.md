@@ -1556,7 +1556,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 5: F3
 
-F3 goes to the next match, Shift plus F3 to the one before. Keywords moves the cursor and hides nothing. To see only the matches, filter.
+F3 goes to the next match, Shift plus F3 to the one before.
 
 Screen reader:
 
@@ -1564,31 +1564,41 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 6: Control+F
+### Step 6: Alt+K
+
+Alt plus K reads every station Keywords finds, from the first, and leaves the cursor where it is. Control stops it. Keywords hides nothing; to see only the matches, filter.
+
+Screen reader:
+
+- Radio Browser, 99.3 KDRM
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 7: Control+F
 
 A planned misstep: Control plus F is not Find here. In DbDo, F is for Filter. Control plus F shows only the records that match, beginning with a choice offered as buttons.
 
 Screen reader:
 
 - Filter Records dialog
-- Any field button
-
-Confirm the wording with a live run: buildTutorials -live.
-
-### Step 7: Enter
-
-Any field is the first button, so Enter presses it. It asks for the text to find, wherever it is.
-
-Screen reader:
-
-- Any Field Contains dialog
-- Text to find in any field: edit
+- Keywords match button
 
 Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 8: Enter
 
-I type seahawks and press Enter.
+Keywords match is the first button, so Enter presses it. It keeps the records Keywords finds, and its box already holds seahawks, the last keywords.
+
+Screen reader:
+
+- Keywords Match dialog
+- Keywords to find: edit, seahawks
+
+Confirm the wording with a live run: buildTutorials -live.
+
+### Step 9: Enter
+
+I press Enter.
 
 Screen reader:
 
@@ -1596,18 +1606,18 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 9: N
+### Step 10: N
 
 Seven: stations in Seattle and Tacoma, in British Columbia and in Idaho. Control plus F again; with a filter in force there are five buttons: Start over, Clear filter, Narrow filter, Expand filter and Invert filter. N for Narrow keeps seahawks and adds a condition.
 
 Screen reader:
 
 - Narrow Filter dialog
-- Any field button
+- Keywords match button
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 10: M
+### Step 11: M
 
 Narrow asks how to give the new condition, just as the first filter did. M for Main columns opens a box for each of the station's own columns.
 
@@ -1617,7 +1627,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 11: Enter
+### Step 12: Enter
 
 I move to the state box, type Washington, and press Enter.
 
@@ -1627,17 +1637,17 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 12: Shift+F
+### Step 13: Shift+F
 
 Shift plus F, Say Filter, says both parts, in the words each was asked in, each in its own parentheses.
 
 Screen reader:
 
-- filter: (any field contains seahawks) and (state contains Washington)
+- filter: (keywords seahawks) and (state contains Washington)
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 13: Alt+O
+### Step 14: Alt+O
 
 Alt plus O, O for Order, offers the same buttons as Show Columns, Alt plus S: Look columns, Prime columns, Main, Standard and All columns, Choose columns and Type columns. Prime columns, the default order, has focus.
 
@@ -1648,7 +1658,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 14: L
+### Step 15: L
 
 L for Look columns sorts by look's columns, name first, the way stations are said. Prime columns puts back the table's own order.
 
@@ -1658,7 +1668,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 15: Down Arrow
+### Step 16: Down Arrow
 
 Down Arrow to the second.
 
@@ -1668,7 +1678,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 16: Control+P
+### Step 17: Control+P
 
 The sports station. Control plus P plays it.
 
@@ -1678,7 +1688,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 17: SemiColon
+### Step 18: SemiColon
 
 Escape. To keep stations, mark them. Semicolon marks the station I am on, and Slash unmarks it; FileDir uses the same keys.
 
@@ -1688,7 +1698,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 18: Control+A
+### Step 19: Control+A
 
 Shift plus Down Arrow marks a station and moves to the next. For a run of records, F8 starts it where I am, and Shift plus F8 completes it where I stop. Control plus A marks every record in view.
 
@@ -1698,7 +1708,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 19: Control+P
+### Step 20: Control+P
 
 Now the payoff. With records marked, Control plus P plays all of them, one after another, as a playlist.
 
@@ -1708,7 +1718,7 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 20: Control+Shift+F
+### Step 21: Control+Shift+F
 
 Escape. Control plus Shift plus F clears the filter, and every station is back, the marks kept. Marks stay when DbDo closes, so a marked station is a favorite to come back to.
 
@@ -1718,11 +1728,11 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 21
+### Step 22
 
 What this walk taught. I name the command; the reader gives the key.
 
-### Step 22
+### Step 23
 
 Search every column.
 
@@ -1730,7 +1740,7 @@ Screen reader:
 
 - Control plus K
 
-### Step 23
+### Step 24
 
 Show only the matches.
 
@@ -1738,7 +1748,7 @@ Screen reader:
 
 - Control plus F
 
-### Step 24
+### Step 25
 
 Say the filter.
 
@@ -1746,7 +1756,7 @@ Screen reader:
 
 - Shift plus F
 
-### Step 25
+### Step 26
 
 Order by a column.
 
@@ -1754,7 +1764,7 @@ Screen reader:
 
 - Alt plus O
 
-### Step 26
+### Step 27
 
 Mark a record.
 
@@ -1762,7 +1772,7 @@ Screen reader:
 
 - Semicolon
 
-### Step 27
+### Step 28
 
 Play the marked stations.
 

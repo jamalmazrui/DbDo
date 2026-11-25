@@ -58,7 +58,7 @@ section says why each key is the one it is.
   Alt+Shift+U
 - List Bookmarks\
   Show saved bookmarks in a listbox; navigate to the selected one. B for Bookmarks.\
-  Alt+B
+  Alt+Shift+B
 - Mail Record\
   M for Mail.\
   Control+M
@@ -305,13 +305,13 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Control+J
 - Jump Again\
   J for Jump.\
-  Alt+J
+  Alt+Shift+J
 - Keywords\
   Go to the next record whose fields hold the keywords. K for Keywords.\
   Control+K
 - Keywords Again\
   K for Keywords.\
-  Alt+K
+  Alt+Shift+K
 - Reverse Find with Regex\
   Find the previous record matching a regular expression. F3 searches; Control makes it a pattern and Shift reverses it.\
   Control+Shift+F3
@@ -370,12 +370,21 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 
 Shift and a letter asks. Nothing here changes anything; each answers a question about where you are, in one short line.
 
+- Read Bookmarked Records\
+  Read the bookmarked records in view, from the first, every shown column. B for Bookmarked.\
+  Alt+B
 - Read Headed from Current\
   Read the records in view from the current one on, each value after its column's name. H for Headed.\
   Control+H
 - Read Headed Marked\
   Read the marked records in view from the first, each value after its column's name. H for Headed.\
   Alt+Shift+H
+- Read Jump Matches\
+  Read the records in view that Jump finds, from the first, every shown column. J for Jump.\
+  Alt+J
+- Read Keywords Matches\
+  Read the records in view that Keywords finds, from the first, every shown column. K for Keywords.\
+  Alt+K
 - Read Lean\
   Read the current column's values from the first record. L for Lean.\
   Alt+L
@@ -500,8 +509,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Speak the current Windows clipboard text.\
   Say Clipboard
 - Alt+B\
-  Show saved bookmarks in a listbox; navigate to the selected one.\
-  List Bookmarks
+  Read the bookmarked records in view, from the first, every shown column.\
+  Read Bookmarked Records
 - Alt+Backslash\
   Open the folder of the open database in Windows Explorer.\
   Open in Explorer
@@ -521,9 +530,11 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+I\
   Inspect Record
 - Alt+J\
-  Jump Again
+  Read the records in view that Jump finds, from the first, every shown column.\
+  Read Jump Matches
 - Alt+K\
-  Keywords Again
+  Read the records in view that Keywords finds, from the first, every shown column.\
+  Read Keywords Matches
 - Alt+L\
   Read the current column's values from the first record.\
   Read Lean
@@ -564,6 +575,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+Shift+Apostrophe\
   Empty the clipboard.\
   Clear Clipboard
+- Alt+Shift+B\
+  Show saved bookmarks in a listbox; navigate to the selected one.\
+  List Bookmarks
 - Alt+Shift+C\
   Copy Append Record
 - Alt+Shift+D\
@@ -581,6 +595,10 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+Shift+H\
   Read the marked records in view from the first, each value after its column's name.\
   Read Headed Marked
+- Alt+Shift+J\
+  Jump Again
+- Alt+Shift+K\
+  Keywords Again
 - Alt+Shift+L\
   Read the current column's values in the marked records, from the first.\
   Read Lean Marked
@@ -1053,7 +1071,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Go to the next record whose current field holds the text.\
   Control+J
 - Jump Again\
-  Alt+J
+  Alt+Shift+J
 - Key Describer Toggle\
   Describe each key instead of running it.\
   Control+F1
@@ -1061,10 +1079,10 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Go to the next record whose fields hold the keywords.\
   Control+K
 - Keywords Again\
-  Alt+K
+  Alt+Shift+K
 - List Bookmarks\
   Show saved bookmarks in a listbox; navigate to the selected one.\
-  Alt+B
+  Alt+Shift+B
 - Mail Record\
   Control+M
 - Mark All\
@@ -1118,12 +1136,21 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Control+Q
 - Query History\
   Alt+Shift+Q
+- Read Bookmarked Records\
+  Read the bookmarked records in view, from the first, every shown column.\
+  Alt+B
 - Read Headed from Current\
   Read the records in view from the current one on, each value after its column's name.\
   Control+H
 - Read Headed Marked\
   Read the marked records in view from the first, each value after its column's name.\
   Alt+Shift+H
+- Read Jump Matches\
+  Read the records in view that Jump finds, from the first, every shown column.\
+  Alt+J
+- Read Keywords Matches\
+  Read the records in view that Keywords finds, from the first, every shown column.\
+  Alt+K
 - Read Lean\
   Read the current column's values from the first record.\
   Alt+L

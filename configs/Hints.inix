@@ -10,7 +10,9 @@ OK = Saves what you have chosen and closes the dialog; Control+Enter does this f
 Cancel = Closes the dialog and changes nothing; Escape does this from any control.
 Help = Opens this dialog's help, which F1 also does from any control.
 Close = Closes this window.
-Any field = Finds records holding some text in any field.
+Bookmarked records = Keeps the records of this table you saved with Control+B.
+Jump match = Keeps the records whose field under the cursor holds the text, as Jump finds them.
+Keywords match = Keeps the records holding the keywords in any field, as Keywords finds them.
 Field boxes = Gives a box for each field, where a value and an operator such as >= or a range such as 2025..2026 can be typed.
 Main columns = Gives a box for each column about the table's subject, where a value and an operator such as >= can be typed.
 Standard columns = Gives a box for the id, added, edited, notes, tags, url and marked.
@@ -60,13 +62,18 @@ Narrow filter = Keeps only the records that also meet a new condition.
 Expand filter = Also takes in the records that meet a new condition.
 Invert filter = Shows the records this filter leaves out, and hides the ones it keeps, by putting NOT before the filter in parentheses.
 Revise filter = Opens the filter in force so its values can be changed.
-Any field = Finds records holding some text in any field.
+Bookmarked records = Keeps the records of this table you saved with Control+B.
+Jump match = Keeps the records whose field under the cursor holds the text, as Jump finds them.
+Keywords match = Keeps the records holding the keywords in any field, as Keywords finds them.
 Marked records = Keeps the records you have marked.
 Unmarked records = Keeps the records you have not marked.
 Field boxes = Gives a box for each field, where a value and an operator such as >= or a range such as 2025..2026 can be typed.
 Main columns = Gives a box for each column about the table's subject, where a value and an operator such as >= can be typed.
 Standard columns = Gives a box for the id, added, edited, notes, tags, url and marked.
 All columns = Gives a box for every column but look and prime.
+
+[Keywords Match]
+Keywords to find = The keywords, whatever their case: red & blue both, red | blue either, re*d a wildcard; Control+K uses them next.
 
 [Filter Fields]
 Main fields = Gives a box for each field about the table's subject.

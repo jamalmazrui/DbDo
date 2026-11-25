@@ -3884,9 +3884,31 @@ namespace DbDo
         public string anyFieldWhere(string sText)
         {
             // THE HOMER SEARCH SYNTAX (31 October 2026, kit 1.95.0): each term found in some field, read as text.
+            // KEYWORDS MATCH (25 November 2026): a link field is also read by its linked look, as Keywords (Control+K)
+            // reads it from the screen, so the filter keeps exactly the records Keywords stops on.
             List<string> lsCols = new List<string>();
-            foreach (string sField in getFieldNames()) lsCols.Add("CAST(\"" + sField.Replace("\"", "\"\"") + "\" AS TEXT)");
+            foreach (string sField in getFieldNames())
+            {
+                lsCols.Add("CAST(\"" + sField.Replace("\"", "\"\"") + "\" AS TEXT)");
+                string sLinked = linkLookSql(sField, sCurrentTable, "look");
+                if (sLinked.Length > 0) lsCols.Add(sLinked);
+            }
             return searchSql(sText, lsCols, false);
+        }
+
+        // columnSearchSql: one field matched by a pattern in the Homer search syntax, read as a name, as Jump
+        // (Control+J) reads the field under the cursor and as a field box reads its field: a plain word anywhere in
+        // it, *.com a value ending in .com. A link field is read by its linked look and prime too.
+        public string columnSearchSql(string sField, string sPattern)
+        {
+            List<string> lsExprs = new List<string>();
+            lsExprs.Add("CAST(\"" + sField.Replace("\"", "\"\"") + "\" AS TEXT)");
+            foreach (string sPart in new string[] { "look", "prime" })
+            {
+                string sLinked = linkLookSql(sField, sCurrentTable, sPart);
+                if (sLinked.Length > 0) lsExprs.Add(sLinked);
+            }
+            return searchSql(sPattern, lsExprs, true);
         }
 
         // searchSql: a pattern in the Homer search syntax as SQL, over one or more column expressions. Each term
@@ -3957,16 +3979,8 @@ namespace DbDo
             // by its linked look and prime, as contains reads it.
             if (sOp == "" && sV.IndexOfAny(new char[] { '&', '|', '!', '*', '?', '"' }) >= 0)
             {
-                string sColText = "CAST(\"" + sField.Replace("\"", "\"\"") + "\" AS TEXT)";
-                List<string> lsExprs = new List<string>();
-                lsExprs.Add(sColText);
-                foreach (string sPart in new string[] { "look", "prime" })
-                {
-                    string sLinked = linkLookSql(sField, sCurrentTable, sPart);
-                    if (sLinked.Length > 0) lsExprs.Add(sLinked);
-                }
                 sSpoken = sField + " matches " + sV;
-                return searchSql(sV, lsExprs, true);
+                return columnSearchSql(sField, sV);
             }
             // A RANGE, FROM..TO (2 November 2026, after Leasey's Date from and Date to). "2025..2026" keeps the records
             // whose field falls in those years, both included; "2026-01-01..2026-03-31" a span of dates; "5..12" a span
@@ -15049,7 +15063,9 @@ namespace DbDo
             // the K-family for future use and follows the strict
             // mnemonic rule throughout.
             miRecBookmark    = addItem(miEdit, "Save &Bookmark",                          "Save Bookmark",       Keys.Control | Keys.B,              recBookmarkClicked);
-            miRecGotoBookmark= addItem(miEdit, "List Bookmarks...",                       "List Bookmarks",      Keys.Alt | Keys.B,                  recGotoBookmarkClicked);
+            // LIST BOOKMARKS ON ALT+SHIFT+B (25 November 2026): Alt+B reads the bookmarked records (Read Bookmarked
+            // Records), as Alt+J and Alt+K read what Jump and Keywords find.
+            miRecGotoBookmark= addItem(miEdit, "List Bookmarks...",                       "List Bookmarks",      Keys.Alt | Keys.Shift | Keys.B,     recGotoBookmarkClicked);
             miRecClearBookmark=addItem(miEdit, "Clear Bookmark",                         "Clear Bookmark",      Keys.Control | Keys.Shift | Keys.B, recClearBookmarkClicked);
             addSep(miEdit);
             // Open Cell Value: open the url, file path, or folder
@@ -15094,8 +15110,12 @@ namespace DbDo
             // Again and Jump to Line Again in EdSharp and Jump Again and Keywords Again in FileDir. Repeat Go to is Go to Record
             // Again; Jump Again and Keywords Again are new here, so DbDo and FileDir share them.
             miRecGoToRepeat  = addItem(miNavigate, "Go to Record Again",                 "Go to Record Again",  Keys.Alt | Keys.G,            repeatGoToClicked);
-            addItem(miNavigate, "Jump Again",     "Jump Again",     Keys.Alt | Keys.J, jumpAgainClicked);
-            addItem(miNavigate, "Keywords Again", "Keywords Again", Keys.Alt | Keys.K, keywordsAgainClicked);
+            // AGAIN ON ALT+SHIFT (25 November 2026, Jamal's request): Alt+J and Alt+K now read the records Jump and
+            // Keywords find, without moving; their repeats keep a key with Shift added. This departs from the again
+            // group of 21 November (Alt and a search's letter repeats it, as FileDir's Alt+J and Alt+K still do), so
+            // it is one place to undo: swap the keys here and in Read Jump Matches and Read Keywords Matches.
+            addItem(miNavigate, "Jump Again",     "Jump Again",     Keys.Alt | Keys.Shift | Keys.J, jumpAgainClicked);
+            addItem(miNavigate, "Keywords Again", "Keywords Again", Keys.Alt | Keys.Shift | Keys.K, keywordsAgainClicked);
             addSep(miNavigate);
             // Search families. Three distinct families with their
             // own chord pairs, plus a unified F3 / Shift+F3 "repeat
@@ -15220,6 +15240,16 @@ namespace DbDo
             miSaySayColumnAllMarked = addItem(miSay, "Read Lean Marked",               "Read Lean Marked",              Keys.Alt | Keys.Shift | Keys.L,     saySayColumnAllMarked);
             miSaySayColumn          = addItem(miSay, "Read Lean from Current",         "Read Lean from Current",        Keys.Control | Keys.L,              saySayColumn);
             miSaySayColumnMarked    = addItem(miSay, "Read Lean Marked from Current",  "Read Lean Marked from Current", Keys.None,                          saySayColumnMarked);
+            // READ WHAT A SEARCH FINDS (25 November 2026, Jamal: "add commands for Alt+B, Alt+J, and Alt+K which read
+            // wide grid rows of those matching the criteria, starting from the first, all without moving keyboard
+            // focus. These commands do not change the current filter."). Each reads as Read Wide does -- every shown
+            // column, values only, from the first record in view -- but only the records Jump, Keywords or a bookmark
+            // picks out, by the same test Control+J, Control+K and Control+B use. Shift+J, Shift+K and Shift+B say
+            // the text or bookmark itself; Alt reads the records, as Alt+W reads. The Say menu's J, K and B belong to
+            // those Say commands, so these have no trigger letter.
+            addItem(miSay, "Read Jump Matches",                "Read Jump Matches",             Keys.Alt | Keys.J,                  readJumpMatches);
+            addItem(miSay, "Read Keywords Matches",            "Read Keywords Matches",         Keys.Alt | Keys.K,                  readKeywordsMatches);
+            addItem(miSay, "Read Bookmarked Records",          "Read Bookmarked Records",       Keys.Alt | Keys.B,                  readBookmarkedRecords);
             // READ HEADED (23 November 2026): H for headed, Read Wide with the row's number and each column's name.
             // Alt+Shift+H and Control+H, as Alt+Shift+W and Control+W; Alt+H is the Help menu. See readHeadedAll.
             addItem(miSay, "Read &Headed",                     "Read Headed",                   Keys.None,                          readHeadedAll);
@@ -15815,6 +15845,12 @@ namespace DbDo
             add("Complete Unmark",       "Unmark every row from the F8 start to the current row",
                 "Inclusive range, direction-agnostic. Skips rows already unmarked.");
             add("Save Bookmark",      "Save the current row position as a session bookmark", "");
+            add("Read Jump Matches",  "Read the records in view that Jump finds, from the first, every shown column",
+                "Alt+J. Uses the last Jump text and field; the cursor and the filter stay as they are. Twice shows them.");
+            add("Read Keywords Matches", "Read the records in view that Keywords finds, from the first, every shown column",
+                "Alt+K. Uses the last keywords; the cursor and the filter stay as they are. Twice shows them.");
+            add("Read Bookmarked Records", "Read the bookmarked records in view, from the first, every shown column",
+                "Alt+B. The records saved with Control+B in this table; the cursor and the filter stay as they are. Twice shows them.");
             add("List Bookmarks",     "Show saved bookmarks in a listbox; navigate to the selected one",
                 "Alt+B. Each entry shows table -- look value (row N). Bookmarks are session-lifetime: closing the database clears them. Save with Ctrl+B; clear with Ctrl+Shift+B.");
             add("Clear Bookmark",     "Forget the saved bookmark", "");
@@ -15910,7 +15946,7 @@ namespace DbDo
                 "Plain text only; non-text and empty clipboards announce that fact rather than going silent. Double-press opens the read-only memo dialog for line-by-line review of long pasted content.");
             add("Say Filter and Order",    "Speak the current filter and order, or none for each",
                 "Single-press speaks; double-press opens the same text in the multi-line dialog. Useful when the filter or sort string is long.");
-            add("Filter Records",      "Show only the records that match what you choose", "Control+F. A list of choices, its first selected, so Enter takes it; each begins with its own letter. Any field contains text asks for the text and keeps the records where some field, read as text, contains it, case aside (for English letters). Fields asks Main, Standard or All, then opens a form with a box per field in DbDo's natural order: a value on its own matches anywhere in the field, case aside; = in front means is, and a symbol in front compares (> >= < <= !=); dates are typed as year-month-day; several boxes must all match. Marked and Unmarked take the records you have marked, or the rest. With a filter in force the list adds Clear, Edit (the field filter), Narrow (add a field condition) and, for a field filter, Widen. A search that finds nothing leaves the view as it was.");
+            add("Filter Records",      "Show only the records that match what you choose", "Control+F. A list of choices, its first selected, so Enter takes it; each begins with its own letter. Keywords match asks for keywords, opening on the last ones, and keeps the records Keywords (Control+K) finds; Jump match does the same for the field under the cursor and Jump (Control+J); Bookmarked records keeps the records saved with Control+B. Fields asks Main, Standard or All, then opens a form with a box per field in DbDo's natural order: a value on its own matches anywhere in the field, case aside; = in front means is, and a symbol in front compares (> >= < <= !=); dates are typed as year-month-day; several boxes must all match. Marked and Unmarked take the records you have marked, or the rest. With a filter in force the list adds Clear, Edit (the field filter), Narrow (add a field condition) and, for a field filter, Widen. A search that finds nothing leaves the view as it was.");
             add("Filter with Regex",        "Filter to rows whose current column matches a regular expression (SQLean REGEXP)",
                 "Server-side, so it works on large tables and the result stays editable. Prompts for a pattern and applies it to the column under virtual focus; an empty pattern clears the filter. Needs sqlean.dll beside DbDo.exe. Unbound by default -- assign a chord if you use it often.");
             add("Clear Filter",       "Clear the active filter", "Control+Shift+F.");
@@ -19449,6 +19485,121 @@ namespace DbDo
         // a window, one record a line, each value after its column's name.
         private void readListAll(object sender, EventArgs evArgs) { readList(false, false, false, false); }
         private void readListAllMarked(object sender, EventArgs evArgs) { readList(true, false, false, false); }
+
+        // readJumpMatches, Alt+J: the records whose field Jump last searched holds its text, by Jump's own test. The
+        // field is the one Jump captured, as F3 keeps it; if this table lacks it, the field under the cursor.
+        private void readJumpMatches(object sender, EventArgs evArgs)
+        {
+            if (db == null || !db.hasRecordset()) return;
+            if (string.IsNullOrEmpty(sLastJumpSubstring)) sLastJumpSubstring = SearchHistory.lastText(SearchHistory.SectionJump);
+            if (string.IsNullOrEmpty(sLastJumpSubstring)) { Say.say("jump: none yet. Control+J asks for one."); return; }
+            string sCol = (!string.IsNullOrEmpty(sLastJumpColumn) && db.hasField(sLastJumpColumn)) ? sLastJumpColumn : virtCurrentColumnName();
+            if (string.IsNullOrEmpty(sCol)) { Say.say("jump: no column at the cursor"); return; }
+            List<List<Search.Term>> llPattern = Search.parse(sLastJumpSubstring);
+            bool bCase = bLastJumpCaseSensitive;
+            readMatches("Read Jump Matches", "jump matches: none for " + sLastJumpSubstring + " in " + sCol,
+                delegate() { return Search.isMatch(db.getScreenValue(sCol) ?? "", llPattern, true, bCase); });
+        }
+
+        // readKeywordsMatches, Alt+K: the records holding the last keywords, by Keywords' own test: the whole record,
+        // every field as the screen shows it, read as one text.
+        private void readKeywordsMatches(object sender, EventArgs evArgs)
+        {
+            if (db == null || !db.hasRecordset()) return;
+            if (string.IsNullOrEmpty(sLastFindSubstring)) sLastFindSubstring = SearchHistory.lastText(SearchHistory.SectionFind);
+            if (string.IsNullOrEmpty(sLastFindSubstring)) { Say.say("keywords: none yet. Control+K asks for some."); return; }
+            List<List<Search.Term>> llPattern = Search.parse(sLastFindSubstring);
+            List<string> lFields = db.getFieldNames();
+            bool bCase = bLastFindCaseSensitive;
+            readMatches("Read Keywords Matches", "keywords matches: none for " + sLastFindSubstring,
+                delegate()
+                {
+                    StringBuilder sbRecord = new StringBuilder();
+                    foreach (string sField in lFields) sbRecord.Append(db.getScreenValue(sField) ?? "").Append('\n');
+                    return Search.isMatch(sbRecord.ToString(), llPattern, false, bCase);
+                });
+        }
+
+        // readBookmarkedRecords, Alt+B: the records of this table saved with Control+B, in the order the grid shows
+        // them, found by each record's key; in a window with no key, by the ADO bookmark.
+        private void readBookmarkedRecords(object sender, EventArgs evArgs)
+        {
+            if (db == null || !db.hasRecordset()) return;
+            List<BookmarkEntry> lHere = lBookmarks.FindAll(oEntry => string.Equals(oEntry.sTable, db.currentTable, StringComparison.OrdinalIgnoreCase));
+            if (lHere.Count == 0) { Say.say(lBookmarks.Count == 0 ? "bookmarks: none" : "bookmarks: none in this table"); return; }
+            HashSet<string> hsKeys = new HashSet<string>(StringComparer.Ordinal);
+            string sKeyCol = null;
+            HashSet<int> hsPositions = new HashSet<int>();
+            object oOriginal = null;
+            try { oOriginal = db.bookmark; } catch { }
+            try
+            {
+                foreach (BookmarkEntry be in lHere)
+                {
+                    if (!string.IsNullOrEmpty(be.sKeyColumn) && be.sKeyValue != null && db.hasField(be.sKeyColumn)
+                        && (sKeyCol == null || string.Equals(sKeyCol, be.sKeyColumn, StringComparison.OrdinalIgnoreCase)))
+                    { sKeyCol = be.sKeyColumn; hsKeys.Add(be.sKeyValue); continue; }
+                    try { db.bookmark = be.oBookmark; hsPositions.Add(db.absolutePosition); } catch { }
+                }
+            }
+            finally { if (oOriginal != null) try { db.bookmark = oOriginal; } catch { } }
+            readMatches("Read Bookmarked Records", "bookmarked records: none in view",
+                delegate()
+                {
+                    if (sKeyCol != null && hsKeys.Contains(db.getFieldValue(sKeyCol) ?? "")) return true;
+                    return hsPositions.Contains(db.absolutePosition);
+                });
+        }
+
+        // readMatches: Read Wide over only the records fnMatch accepts, tested with the cursor on each record and put
+        // back after, so focus and the filter stay as they are. It says so at once when no record in view matches;
+        // otherwise it reads lazily, record by record, as Read Wide does, and a second press shows the records.
+        private void readMatches(string sCmd, string sNone, Func<bool> fnMatch)
+        {
+            bool bShow = Homer.KeyMap.iPressCount == 2;
+            if (bShow) Homer.ReadAloud.stop(true);
+            if (db.recordCount == 0) { Say.say("records: none in view"); return; }
+            List<string> lDispCols = db.getDisplayFieldNames();
+            if (lDispCols.Count == 0) { Say.say("records: no columns shown"); return; }
+            int iFirst = 0;
+            for (int i = 1; i <= db.recordCount && iFirst == 0; i++) if (recordMatches(i, fnMatch)) iFirst = i;
+            if (iFirst == 0) { Say.say(sNone); DbDoLog.write(sCmd + ": none"); return; }
+            if (!bShow)
+            {
+                Homer.ReadAloud.start(sCmd, matchingParts(lDispCols, iFirst, fnMatch),
+                    delegate(int iSentParts, bool bStopped) { DbDoLog.write(sCmd + ": " + iSentParts + " values read" + (bStopped ? ", then a key stopped it" : "")); });
+                return;
+            }
+            List<string> lLines = new List<string>();
+            for (int i = iFirst; i <= db.recordCount; i++)
+            {
+                if (!recordMatches(i, fnMatch)) continue;
+                List<string> lValues = recordValues(i, lDispCols, false, false);
+                if (lValues.Count > 0) lLines.Add(string.Join("; ", lValues.ToArray()));
+            }
+            DbDoLog.write(sCmd + ": " + lLines.Count + (lLines.Count == 1 ? " record" : " records") + " shown");
+            showInfoDialog(sCmd, string.Join(Environment.NewLine, lLines.ToArray()));
+        }
+
+        // recordMatches: whether record i passes fnMatch; the cursor is put back.
+        private bool recordMatches(int i, Func<bool> fnMatch)
+        {
+            object oOriginal = null;
+            try { oOriginal = db.bookmark; } catch { }
+            try { db.absolutePosition = i; return fnMatch(); }
+            catch (Exception ex) { DbDoLog.write("reading: record " + i + " could not be tested: " + ex.Message); return false; }
+            finally { if (oOriginal != null) try { db.bookmark = oOriginal; } catch { } }
+        }
+
+        // matchingParts: the values of each matching record from iStart on, drawn only as the reader asks for them.
+        private IEnumerable<string> matchingParts(List<string> lCols, int iStart, Func<bool> fnMatch)
+        {
+            for (int i = iStart; db != null && db.hasRecordset() && i <= db.recordCount; i++)
+            {
+                if (!recordMatches(i, fnMatch)) continue;
+                foreach (string sValue in recordValues(i, lCols, false, false)) yield return sValue;
+            }
+        }
         private void readListCurrent(object sender, EventArgs evArgs) { readList(false, true, false, false); }
         private void readListCurrentMarked(object sender, EventArgs evArgs) { readList(true, true, false, false); }
 
@@ -27667,6 +27818,12 @@ namespace DbDo
             public object oBookmark;
             public string sLook;        // look-value at save time
             public int    iRowAtSave;   // 1-based row number when saved
+            // THE RECORD'S KEY TOO (25 November 2026): an ADO bookmark belongs to one recordset, and every filter, order
+            // or refresh selects the table afresh, so a bookmark saved before it no longer names the record. The
+            // primary key does, so Bookmarked records (Filter Records) and Read Bookmarked Records (Alt+B) find the
+            // record by it. Null in a window with no key, such as a query, where the ADO bookmark is all there is.
+            public string sKeyColumn;
+            public string sKeyValue;
         }
         private List<BookmarkEntry> lBookmarks = new List<BookmarkEntry>();
         // Step-Record menu items. Each fires the manager's
@@ -27724,6 +27881,13 @@ namespace DbDo
                 be.sTable = db.currentTable;
                 be.oBookmark = db.bookmark;
                 be.iRowAtSave = db.absolutePosition;
+                try
+                {
+                    be.sKeyColumn = db.currentIsCustomQuery ? null : db.actualPrimaryKey(db.currentTable);
+                    if (!string.IsNullOrEmpty(be.sKeyColumn) && db.hasField(be.sKeyColumn)) be.sKeyValue = db.getFieldValue(be.sKeyColumn);
+                    else be.sKeyColumn = null;
+                }
+                catch { be.sKeyColumn = null; be.sKeyValue = null; }
                 if (db.hasField(Metadata.LookColumn))
                     try { be.sLook = db.getFieldValue(Metadata.LookColumn) ?? ""; } catch { be.sLook = ""; }
                 else
@@ -28430,7 +28594,21 @@ namespace DbDo
 
             // TRIGGER LETTERS (4 November 2026): Any field takes F, the first letter of its second word, so All columns
             // keeps A; Marked records then takes R and Unmarked records U. Every letter is a word's first.
-            const string sAny = "Any &field";
+            // JUMP, KEYWORDS AND BOOKMARKS (25 November 2026, Jamal: "add buttons to the Filter subdialog offering
+            // filters according to the Jump, Keywords, or Bookmark criteria"). Any field becomes Keywords match: it
+            // always took the Keywords syntax, so one name now says so, and its box opens on the last keywords, from
+            // Control+K or here. Jump match keeps the records whose field under the cursor matches, as Jump stops on
+            // them, and Bookmarked records the records saved with Control+B. Each takes its command's letter, J, K or
+            // B, which no other button here uses.
+            // WHY SQL, NOT ADO'S FILTER (Jamal asked for native ADO where it could be done): every filter here has been
+            // a SQL condition since 19 October 2026, so Narrow, Expand and Invert can join any two of them. ADO's
+            // Recordset.Filter refuses an OR group joined by AND -- "(A OR B) AND C" -- which is what Keywords' red &
+            // blue becomes over several fields; its LIKE takes a wildcard only at the start or end, so re*d cannot be
+            // said; and an array of ADO bookmarks names records only until the next filter or order selects the table
+            // afresh. So the three are SQL like the rest, and the bookmarks are found by each record's key.
+            const string sAny = "&Keywords match";
+            const string sJumpMatch = "&Jump match";
+            const string sBookmarked = "&Bookmarked records";
             const string sMainCols = "Main columns", sStandardCols = "Standard columns", sAllCols = "All columns";
             // MARKED AND UNMARKED (19 October 2026, from DbDialog's Tagged and Untagged):
             // the records you have marked, or the rest, as a condition like any other, so
@@ -28445,16 +28623,26 @@ namespace DbDo
                 bool bMarks = db.hasField("marked");
                 // MAIN, STANDARD AND ALL COLUMNS (4 November 2026, Jamal's design) in place of Field boxes, which asked the
                 // same question one dialog later: each opens the boxes for those columns.
-                List<string> lsHow = new List<string> { sAny, sMainCols, sStandardCols, sAllCols };
+                bool bJumpable = !string.IsNullOrEmpty(virtCurrentColumnName());
+                string sBookmarkWhere = bookmarkedWhere();
+                List<string> lsHow = new List<string> { sAny };
+                if (bJumpable) lsHow.Add(sJumpMatch);
+                lsHow.AddRange(new string[] { sMainCols, sStandardCols, sAllCols });
                 if (bMarks) { lsHow.Add(sMarked); lsHow.Add(sUnmarked); }
+                if (sBookmarkWhere.Length > 0) lsHow.Add(sBookmarked);
                 sHow = chooseByButtons(sCombine == sNew ? "Filter Records" : sCombine.Replace(" filter", " Filter"),  // "Narrow Filter", not "Narrow filter Filter"
-                    new List<string> { "Any field finds text wherever it is, whatever its case. Main columns, Standard columns and All columns each give a box for those columns, whose value may begin with an operator: = is, != is not, > more than, >= at least, < less than, <= at most, % contains; = alone is blank and != alone is not blank."
-                        + (bMarks ? " Marked records takes the records you have marked, and Unmarked records the rest." : "") },
+                    new List<string> { "Keywords match keeps the records Keywords finds, in any field, whatever its case."
+                        + (bJumpable ? " Jump match keeps the records whose " + virtCurrentColumnName() + " Jump finds." : "")
+                        + " Main columns, Standard columns and All columns each give a box for those columns, whose value may begin with an operator: = is, != is not, > more than, >= at least, < less than, <= at most, % contains; = alone is blank and != alone is not blank."
+                        + (bMarks ? " Marked records takes the records you have marked, and Unmarked records the rest." : "")
+                        + (sBookmarkWhere.Length > 0 ? " Bookmarked records takes the records saved with Control+B." : "") },
                     lsHow);
                 if (sHow == null) return;
 
                 bool bGiven;
                 if (sHow == sMarked) { sNewWhere = "marked = 'true'"; sNewSpoken = "marked"; bGiven = true; }
+                else if (sHow == sBookmarked) { sNewWhere = sBookmarkWhere; sNewSpoken = "bookmarked"; bGiven = true; }
+                else if (sHow == sJumpMatch) bGiven = askJumpCondition(out sNewWhere, out sNewSpoken);
                 else if (sHow == sUnmarked) { sNewWhere = "(marked IS NULL OR marked <> 'true')"; sNewSpoken = "unmarked"; bGiven = true; }
                 else bGiven = (sHow == sAny) ? askAnyFieldCondition(out sNewWhere, out sNewSpoken)
                                              : askFieldsCondition(out sNewWhere, out sNewSpoken, sHow);
@@ -28492,18 +28680,71 @@ namespace DbDo
         {
             sWhere = ""; sSpoken = "";
             string sText;
-            using (LbcDialog dlg = new LbcDialog("Any Field Contains", this))
+            // ONE SET OF KEYWORDS (25 November 2026): the box opens on the last keywords, from Control+K or from here,
+            // and what is typed becomes Control+K's too, so Keywords, F3 and this filter agree.
+            if (string.IsNullOrEmpty(sLastFindSubstring)) sLastFindSubstring = SearchHistory.lastText(SearchHistory.SectionFind);
+            string sStart = !string.IsNullOrEmpty(sLastFindSubstring) ? sLastFindSubstring : sLastAnyFieldText;
+            using (LbcDialog dlg = new LbcDialog("Keywords Match", this))
             {
-                TextBox tb = dlg.addInputBox("&Text to find in any field", sLastAnyFieldText,
-                    "Records where some field contains this text, whatever its case.");
+                TextBox tb = dlg.addInputBox("&Keywords to find", sStart,
+                    "Records holding these keywords in any field, whatever their case: red & blue both, red | blue either, re*d a wildcard.");
                 if (!dlg.runOkCancel()) return false;
                 sText = (tb.Text ?? "").Trim();
             }
             if (sText.Length == 0) return false;
             sLastAnyFieldText = sText;
+            sLastFindSubstring = sText;
+            bLastFindCaseSensitive = false;
+            SearchHistory.record(SearchHistory.SectionFind, sText, false);
             sWhere = db.anyFieldWhere(sText);
-            sSpoken = "any field contains " + sText;
+            sSpoken = "keywords " + sText;
             return sWhere.Length > 0;
+        }
+
+        // askJumpCondition: Jump match's question. The field is the one under the cursor, as Jump (Control+J) takes
+        // it; the box opens on the last Jump text, and what is typed becomes Jump's too.
+        private bool askJumpCondition(out string sWhere, out string sSpoken)
+        {
+            sWhere = ""; sSpoken = "";
+            string sCol = virtCurrentColumnName();
+            if (string.IsNullOrEmpty(sCol)) return false;
+            if (string.IsNullOrEmpty(sLastJumpSubstring)) sLastJumpSubstring = SearchHistory.lastText(SearchHistory.SectionJump);
+            string sText;
+            using (LbcDialog dlg = new LbcDialog("Jump Match", this))
+            {
+                TextBox tb = dlg.addInputBox("&Text in " + sCol, sLastJumpSubstring,
+                    "Records whose " + sCol + " holds this text, whatever its case; *.com is a value ending in .com.");
+                if (!dlg.runOkCancel()) return false;
+                sText = (tb.Text ?? "").Trim();
+            }
+            if (sText.Length == 0) return false;
+            sLastJumpSubstring = sText;
+            sLastJumpColumn = sCol;
+            bLastJumpCaseSensitive = false;
+            SearchHistory.record(SearchHistory.SectionJump, sText, false);
+            sWhere = db.columnSearchSql(sCol, sText);
+            sSpoken = sCol + " matches " + sText;
+            return sWhere.Length > 0;
+        }
+
+        // bookmarkedWhere: the records of this table saved with Control+B, as SQL on the table's key; "" when there
+        // are none, or this window has no key to find them by.
+        private string bookmarkedWhere()
+        {
+            if (db == null || !db.hasRecordset() || db.currentIsCustomQuery) return "";
+            string sKeyCol = null;
+            List<string> lsValues = new List<string>();
+            foreach (BookmarkEntry be in lBookmarks)
+            {
+                if (!string.Equals(be.sTable, db.currentTable, StringComparison.OrdinalIgnoreCase)) continue;
+                if (string.IsNullOrEmpty(be.sKeyColumn) || be.sKeyValue == null) continue;
+                if (sKeyCol == null) sKeyCol = be.sKeyColumn;
+                if (!string.Equals(sKeyCol, be.sKeyColumn, StringComparison.OrdinalIgnoreCase)) continue;
+                string sQuoted = "'" + be.sKeyValue.Replace("'", "''") + "'";
+                if (!lsValues.Contains(sQuoted)) lsValues.Add(sQuoted);
+            }
+            if (sKeyCol == null || lsValues.Count == 0) return "";
+            return "CAST(\"" + sKeyCol.Replace("\"", "\"\"") + "\" AS TEXT) IN (" + string.Join(", ", lsValues.ToArray()) + ")";
         }
 
         // askFieldsCondition: the Fields form, the same form as Edit Record, one box per field, blank. Each filled

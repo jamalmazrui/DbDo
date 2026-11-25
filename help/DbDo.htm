@@ -741,6 +741,20 @@ Yield with Regex, beside Extract with Regex (Control+Shift+E) and
 Replace with Regex (Control+Shift+R), as in every Homer Suite app.</p>
 <p>FileDir reads and counts its list with the same L and Y keys. It has
 no W keys, since its list has one column.</p>
+<p>Three more keys read wide, but only the records a search picks out,
+from the first record in view. The cursor stays where it is, and the
+filter does not change.</p>
+<ul>
+<li><strong>Read Bookmarked Records</strong> (Alt+B) reads the records
+of this table you saved with Control+B.</li>
+<li><strong>Read Jump Matches</strong> (Alt+J) reads the records Jump
+finds, with the last Jump text, in the field Jump searched.</li>
+<li><strong>Read Keywords Matches</strong> (Alt+K) reads the records
+Keywords finds, with the last keywords.</li>
+</ul>
+<p>Each pairs with a Say key: Shift+B says the bookmark, Shift+J the
+Jump text and Shift+K the keywords; Alt with the same letter reads the
+records they find. Press twice to see them in a window.</p>
 <h4 id="key-help">Key Help</h4>
 <p><strong>Key Describer Toggle</strong> (Control+F1) turns on a
 learning mode: while it is on, pressing a command chord
@@ -914,20 +928,21 @@ may match anywhere. A word with no wildcard is found anywhere in
 both.</p>
 <p>F3 repeats the last search, in the same way and over the same things,
 going forward; Shift+F3 repeats it going back.</p>
-<p>In DbDo, Keywords and Any Field read a whole record as text, so the
-words of <code>red &amp; blue</code> may sit in different fields; Jump
-Record and a Fields box read one field as a name. Forward Find with
-Regex, and Replace with Use regex pattern checked, take regular
-expressions instead; otherwise Replace finds exactly the text you
-type.</p>
+<p>In DbDo, Keywords and a filter’s Keywords match read a whole record
+as text, so the words of <code>red &amp; blue</code> may sit in
+different fields; Jump, a filter’s Jump match and a Fields box read one
+field as a name. Forward Find with Regex, and Replace with Use regex
+pattern checked, take regular expressions instead; otherwise Replace
+finds exactly the text you type.</p>
 <h3 id="navigating-records">Navigating records</h3>
 <p>Beyond the grid’s keys, the cursor moves with these commands:</p>
 <ul>
 <li><strong>Go to Record</strong> (Control+G) jumps to a record number;
 <strong>Go to Record Again</strong> (Alt+G) repeats it. <strong>Jump
-Again</strong> (Alt+J) and <strong>Keywords Again</strong> (Alt+K)
-repeat those searches forward, as in FileDir; F3 repeats whichever
-search came last.</li>
+Again</strong> (Alt+Shift+J) and <strong>Keywords Again</strong>
+(Alt+Shift+K) repeat those searches forward; F3 repeats whichever search
+came last. Alt+J and Alt+K read what those searches find without moving
+(see Reading the grid aloud).</li>
 <li><strong>Keywords</strong> (Control+K) searches for text;
 <strong>Reverse Keywords</strong> (Control+Shift+K) searches backward;
 <strong>Search Next</strong> (F3) and <strong>Search Previous</strong>
@@ -935,8 +950,8 @@ search came last.</li>
 Regex</strong> (Control+F3) and <strong>Reverse Find with Regex</strong>
 (Control+Shift+F3) search by regular expression.</li>
 <li><strong>Jump</strong> (Control+J) and <strong>Reverse Jump</strong>
-move by a jump increment for quickly covering distance in a long
-table.</li>
+(Control+Shift+J) go to the next or previous record whose current field
+holds the text you type, whatever its case.</li>
 <li><strong>Jump to Next Initial</strong> steps to the next record whose
 current column starts with a new letter — type-ahead through a sorted
 column.</li>
@@ -1066,8 +1081,13 @@ of your own SQL is filtered the same way: DbDo runs your query again
 inside SQL, with the condition around it, so every choice works there,
 Invert filter included.</li>
 <li><strong>How to give a condition.</strong> With no filter in force,
-it asks at once how to give one. <strong>Any field</strong> finds text
-wherever it is, whatever its case. <strong>Main columns</strong>,
+it asks at once how to give one. <strong>Keywords match</strong> keeps
+the records Keywords (Control+K) finds; its box opens on the last
+keywords, and what you type there becomes Control+K’s keywords too.
+<strong>Jump match</strong> does the same for Jump (Control+J): the
+records whose field under the cursor holds the text. <strong>Bookmarked
+records</strong> keeps the records of this table saved with Control+B;
+it is offered when there are some. <strong>Main columns</strong>,
 <strong>Standard columns</strong> and <strong>All columns</strong> each
 give a box for those columns, and a value typed with no operator finds
 records whose field contains it, whatever its case: <code>seattle</code>
@@ -1999,7 +2019,7 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 </tr>
 <tr>
 <td>List Bookmarks</td>
-<td>Alt+B</td>
+<td>Alt+Shift+B</td>
 </tr>
 <tr>
 <td>Clear Bookmark</td>
@@ -2054,11 +2074,11 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 </tr>
 <tr>
 <td>Jump Again</td>
-<td>Alt+J</td>
+<td>Alt+Shift+J</td>
 </tr>
 <tr>
 <td>Keywords Again</td>
-<td>Alt+K</td>
+<td>Alt+Shift+K</td>
 </tr>
 <tr>
 <td>Keywords</td>
@@ -2184,6 +2204,18 @@ family.</p>
 <tr>
 <td>Read Wide Marked</td>
 <td>Alt+Shift+W or Shift+Space</td>
+</tr>
+<tr>
+<td>Read Bookmarked Records</td>
+<td>Alt+B</td>
+</tr>
+<tr>
+<td>Read Jump Matches</td>
+<td>Alt+J</td>
+</tr>
+<tr>
+<td>Read Keywords Matches</td>
+<td>Alt+K</td>
 </tr>
 <tr>
 <td>Read Wide from Current</td>
@@ -2976,16 +3008,17 @@ records you want. It begins with a list of choices, the first already
 selected, so Enter takes it; each choice begins with its own letter, so
 typing the letter lands on it.
 <ul>
-<li><strong>Any field contains text</strong> asks for the text and keeps
-every record where some field holds it, whatever the field and whatever
-the case: type Dallas Cowboys, and every station whose name, notes or
-tags mention the team stays. It takes the Homer search syntax, as
-Keywords does: <code>red &amp; blue</code> means both,
-<code>red | blue</code> either, <code>!red</code> not, and
-<code>re*d</code> lets a star stand for anything (see Search syntax).
-Numbers and dates are searched as they read. Case is ignored for English
-letters; type accented letters as they appear. A search that finds
-nothing says so and leaves the list as it was.</li>
+<li><strong>Keywords match</strong> asks for keywords and keeps every
+record where some field holds them, whatever the field and whatever the
+case: type Dallas Cowboys, and every station whose name, notes or tags
+mention the team stays. The box opens on the last keywords you searched
+for with Control+K. It takes the Homer search syntax, as Keywords does:
+<code>red &amp; blue</code> means both, <code>red | blue</code> either,
+<code>!red</code> not, and <code>re*d</code> lets a star stand for
+anything (see Search syntax). Numbers and dates are searched as they
+read. Case is ignored for English letters; type accented letters as they
+appear. A search that finds nothing says so and leaves the list as it
+was.</li>
 <li><strong>Fields</strong> asks which fields: <strong>Main</strong>
 (the fields about the table’s subject), <strong>Standard</strong> (the
 id, added, edited, notes, tags, url and marked) or <strong>All</strong>
@@ -3315,7 +3348,7 @@ small station in Medford, Oregon, may carry every Seahawks game while
 its stream and home page talk only about local news. So the Wikipedia
 step also keeps each station’s <strong>affiliations</strong> – the
 networks its article says it carries, such as “Seahawks Radio Network”
-or “ESPN Radio” – one per line in <strong>tags</strong>. Any Field for
+or “ESPN Radio” – one per line in <strong>tags</strong>. Keywords for
 <code>seahawks</code> then finds those stations too. Only some articles
 name a team’s network, so this finds some of a team’s stations, not all:
 on 11 October it added 4,059 network tags to 1,579 stations, but only

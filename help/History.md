@@ -5,6 +5,15 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 25 November 2026, midday -- Filter and read what a search finds
+
+- **Filter Records offers Keywords match, Jump match and Bookmarked records.** Keywords match replaces Any field, which always took the Keywords syntax; it keeps the records Keywords finds, now reading a link field by its look as Keywords does, and its box opens on the last keywords. Jump match keeps the records whose field under the cursor holds the text, as Jump finds them. Bookmarked records keeps the records saved with Control+B. They take K, J and B, and combine with Narrow, Expand and Invert like any condition.
+- **They are SQL conditions, like every filter since 19 October.** ADO's own filter cannot join an OR group with AND, which red & blue over several fields needs, takes a wildcard only at a value's start or end, and forgets bookmarks when a table is selected afresh.
+- **Bookmarks remember the record's key,** so a filter, an order or a refresh no longer loses them for these commands.
+- **Alt+J, Alt+K and Alt+B read what Jump, Keywords and the bookmarks find,** wide, from the first record in view, without moving the cursor or changing the filter: Read Jump Matches, Read Keywords Matches and Read Bookmarked Records. Pressed twice, each shows the records.
+- **Jump Again and Keywords Again move to Alt+Shift+J and Alt+Shift+K,** and List Bookmarks to Alt+Shift+B. F3 still repeats whichever search came last.
+- **Tutorial 3** reads the Keywords matches with Alt+K and filters with Keywords match.
+
 ## 25 November 2026 -- Import and Export work on a table
 
 - **Import Data brings in one table.** Control+Shift+I reads a worksheet, a table of another database, or a CSV, Markdown, JSON or Inix file, and asks **New table** or **Merge records** into the table in this window. A database file also offers **All tables**, the whole-database merge. With no database open, the file opens as one.

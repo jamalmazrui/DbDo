@@ -190,7 +190,7 @@ Start Mark or Unmark=F8, Start marking or unmarking a range at the current recor
 Complete Mark=Shift+F8, Mark every record from the range's start to the current one
 Complete Unmark=Alt+Shift+F8, Unmark every record from the range's start to the current one
 Save Bookmark=Control+B, Bookmark the current record
-List Bookmarks=Alt+B, Go to a bookmarked record you pick from a list
+List Bookmarks=Alt+Shift+B, Go to a bookmarked record you pick from a list
 Clear Bookmark=Control+Shift+B, Remove a bookmark, or all of them
 
 ; ===== Navigate menu =====
@@ -220,8 +220,8 @@ Forward Find with Regex=Control+F3, Go to the next record that matches a regular
 Reverse Find with Regex=Control+Shift+F3, Go to the previous record that matches a regular expression
 Jump=Control+J, Go to the next record whose current field holds the text
 Reverse Jump=Control+Shift+J, Go to the previous record whose current field holds the text
-Jump Again=Alt+J, Repeat Jump forward with the same text
-Keywords Again=Alt+K, Repeat Keywords forward with the same keywords
+Jump Again=Alt+Shift+J, Repeat Jump forward with the same text
+Keywords Again=Alt+Shift+K, Repeat Keywords forward with the same keywords
 Search Next=F3, Repeat the last Keywords, Jump or Find with Regex, forward
 Search Previous=Shift+F3, Repeat the last Keywords, Jump or Find with Regex, backward
 
@@ -332,6 +332,9 @@ Related Records=None, Go to the records of another table that the current record
 Show Schema=None, List the database's tables and views
 Read Wide=Alt+W or Alt+F8, Read the records in view from the first, every shown column
 Read Wide Marked=Alt+Shift+W or Shift+Space, Read the marked records in view from the first, every shown column
+Read Bookmarked Records=Alt+B, Read the bookmarked records in view from the first, every shown column
+Read Jump Matches=Alt+J, Read the records in view that Jump finds, from the first, every shown column
+Read Keywords Matches=Alt+K, Read the records in view that Keywords finds, from the first, every shown column
 Read Lean=Alt+L, Read the current column's values from the first record
 Read Lean Marked=Alt+Shift+L, Read the current column's values in the marked records, from the first
 Read Lean from Current=Control+L, Read the current column's values from the current record on
