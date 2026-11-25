@@ -223,7 +223,7 @@ The screen reader table keys work as they do in tables in web pages, Word and Ad
 - **Alt+Control+arrows** move one cell. Moving along a row, DbDo says the new column's name, then the cell. Moving down a column, it says the record's look, then the cell, just as a screen reader says a row header; when the cell is itself part of the look, it says the cell alone. At the edge of the grid, the cursor stays, and DbDo says First row, Last row, First column or Last column.
 - **Alt+Control+Home and Alt+Control+End** go to the top-left and bottom-right corners, as in JAWS and Narrator. (NVDA uses them for the first and last column of the row; in DbDo, Home and End do that.)
 - **Alt+Control+Page Up and Alt+Control+Page Down** go to the first and last row of the column, as in NVDA. Under JAWS they change the voice rate for the moment, as everywhere, so use Control+Home and Control+End, which do the same moves.
-- **Alt+Control+Number Pad 5** says the cell, as **Shift+C** does.
+- **Alt+Control+Number Pad 5** says the cell with its column's name and record number; **Shift+C** says the value alone.
 
 Narrator's table reading keys read without moving:
 
@@ -231,9 +231,21 @@ Narrator's table reading keys read without moving:
 - **Alt+Control+Shift+Up Arrow** says the column's name, its column header.
 - **Alt+Control+Shift+Right Arrow** says every shown field of the record.
 - **Alt+Control+Shift+Down Arrow** says every value in the column, from the top.
-- **Alt+Control+Shift+Number Pad 5** says the cell's row and column numbers.
+- **Alt+Control+Shift+Number Pad 5** says the cell's address: its column's name, then its record and column numbers.
 
 In the Key Describer (Control+F1), every one of these keys says what it does.
+
+#### Your screen reader's own keys in the grid
+
+A few of JAWS's and NVDA's own keys ask a question that has no good answer in a grid of records, such as which font the text uses. DbDo's scripts answer those keys in the grid with DbDo's own answer, and leave them to the screen reader everywhere else, in dialogs and boxes too.
+
+- **Font (JAWS+F, or NVDA+F)** says the field's type instead, as **Say Field Type** (Alt+Shift+F) does: "type: textmemo, several lines of text".
+- **Where the cursor is (JAWS+Number Pad Delete, or NVDA+Number Pad Delete)** says the record's position, as **Say Position** (Alt+Delete) does.
+- **Address (JAWS+A)** says the cell's address, as Alt+Control+Shift+Number Pad 5 does: the column's name, then the record and column numbers. NVDA has no such key, and on a laptop keyboard NVDA+A is Say All, so DbDo leaves it alone.
+- **Say Current Cell (JAWS's Alt+Control+Number Pad 5)** goes to DbDo, which says the cell, as above.
+- **NVDA's table reading keys** read DbDo's records: NVDA+Alt+Control+Left Arrow reads the whole record, as Alt+Control+Shift+Right Arrow does; NVDA+Alt+Control+Up Arrow the whole column, as Alt+Control+Shift+Down Arrow does; and NVDA+Alt+Control+Down Arrow the column from the current record down, as Read Lean from Current (Control+L) does.
+
+The rest of the screen reader's keys work as always: JAWS+Tab or NVDA+Tab says the focused control, JAWS+T or NVDA+T the title, JAWS+Up Arrow or NVDA+Up Arrow the current row.
 
 ### Search syntax
 
@@ -1382,10 +1394,9 @@ once covers all three.
 
 ### Two keys worth knowing early
 
-**Shift+C, Say Cell**, answers in three short utterances: the column, then where
-the row is, then the value -- "title", "row 2 of 4", "Accessibility Analyst".
-Three answers are easier to take in than one long line, and nothing is added
-between them.
+**Shift+C, Say Cell**, says only what is in the cell -- "Accessibility Analyst".
+**Shift+H, Say Header**, says which column you are in -- "title". Shift+Z says
+where the record is, so each key answers one question.
 
 **Shift+Z, Say Status**, gives the summary: which table, which row of how many,
 and the order. Z is the bottom of the alphabet, and the status bar is the bottom
@@ -1513,12 +1524,10 @@ already names the setting says the state alone: Say Marked answers "Marked" or
 only the second word carries information. It is the shape a toggle uses
 everywhere else: "<setting> on" and "no <setting>", never "<setting>: on".
 
-Two commands use the column name instead of the menu word, because there the
-column is the more useful label and it is what the grid already calls that
-field:
-
-- Say Cell answers `employer: Example Widgets Company`
-- Say Id answers `job_id: 3`
+Two commands answer differently. Say Id uses the column name instead of the menu
+word, because that is what the grid calls the field: `job_id: 3`. Say Cell says
+the value alone, `Example Widgets Company`, since Shift+H gives the column's
+name.
 
 One press speaks. A quick second press spells the answer, a character at a
 time. A third shows it in a read-only window you can read line by line,
@@ -1528,7 +1537,7 @@ spell phonetically and copy from. Every Homer app's Say keys work this way.
 
 - Shift+A -- added
 - Shift+B -- bookmark, how many are saved and the newest
-- Shift+C -- cell, as column and value
+- Shift+C -- cell, its value alone
 - Shift+D -- database, as file and folder
 - Shift+E -- edited
 - Shift+F -- filter, the condition in force, or none

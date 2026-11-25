@@ -15205,6 +15205,13 @@ namespace DbDo
             miSaySayLook         = addItem(miSay, "Say Look",           "Say Look",    Keys.Shift | Keys.L,                saySayLook);
             // SAY HEADER (23 November 2026): Shift+H, the current column's name.
             addItem(miSay, "Say Header",         "Say Header",  Keys.Shift | Keys.H,                saySayHeader);
+            // SAY FIELD TYPE, ALT+SHIFT+F (24 November 2026, Jamal: "Might Insert/JAWS/NVDA+F say the type of data in
+            // the current db column?"). A screen reader's F key says the font where the cursor is, which in a grid of
+            // records says nothing useful; the declared type is the field's format, so DbDo's scripts send JAWS+F and
+            // NVDA+F here while the grid has focus. F begins Field, and Alt is the speech-only modifier; no other Homer
+            // app's command it could be mistaken for exists in DbDo (EdSharp's and FileDir's File Find, as DbDo's
+            // Control+Shift+M is Merge Data while FileDir's is Move to Folder). No trigger letter: Say Filter has F.
+            addItem(miSay, "Say Field Type",     "Say Field Type", Keys.Alt | Keys.Shift | Keys.F,     saySayFieldType);
             miSaySayRelated      = addItem(miSay, "Say Related", "Say Related", Keys.None,           saySayRelated);
             miSaySayRelated.Visible = false;   // folded into Say Whole Record (Shift+W), 9 November 2026
             miSaySayUrl          = addItem(miSay, "Say &url",          "Say url",      Keys.Shift | Keys.U,                saySayUrl);
@@ -15761,8 +15768,10 @@ namespace DbDo
                 "No key. Read Headed from Current, for the marked records only.");
             add("Say Header", "Say the current column's name",
                 "Shift+H. The column's name, as Alt+Control+Shift+UpArrow says it. Say Look, Shift+L, says the record's look: the value of the look column, not the names of the columns it is made from.");
-            add("Say Position",       "Speak the column header and 1-based row number of the virtual cell",
-                "JAWS-style 'say cursor position' for the listview. Speech-only; does not move focus. Double-press opens the same text in a read-only multi-line dialog.");
+            add("Say Position",       "Say the current position: the record's number, the count and the percent",
+                "Alt+Delete, and JAWS+NumPadDelete or NVDA+NumPadDelete in the grid, where the reader would say where the cursor is on the screen.");
+            add("Say Field Type",     "Say the current field's declared type, and what it holds",
+                "Alt+Shift+F, and JAWS+F or NVDA+F in the grid, where the reader would say the font. F for field. textmemo is several lines of text, texturl a web address, blobjpg a JPEG picture's data; a link field also names the table it points to.");
             add("Show in FileDir",    "Show the open database's file, selected in its folder, in FileDir", "");
             add("Say Path",           "Speak the open database's full path; press twice to show it", "");
             add("Save Clipboard",     "Save the clipboard text to a file you name", "");
@@ -15846,7 +15855,7 @@ namespace DbDo
                 "When ON, the database is opened read-only and edit commands fail with a clear error message. Use this to browse data without risk of accidental edits. Control+Shift+Z to toggle in the GUI; at the dot prompt type 'toggle-readonly', 'read-only', or 'readonly' (with optional 'on'/'off' argument). Also exposed as a checkbox in the Settings dialog and as the -readonly command-line flag at launch.");
             add("Replace Column",
                 "Substring find-and-replace within the current virtual column, over visible rows",
-                "Opens a dialog prompting for find text, replacement text, case-sensitivity, and an optional dry-run mode. Operates only on the currently filtered rows; clear the filter (Alt+Shift+F, Alt+C) to apply across the whole table. Ctrl+R is the GUI chord; menu label 'Replace Column'.");
+                "Opens a dialog prompting for find text, replacement text, case-sensitivity, and an optional dry-run mode. Operates only on the currently filtered rows; clear the filter (Control+Shift+F) to apply across the whole table. Ctrl+R is the GUI chord; menu label 'Replace Column'.");
             add("Calculate Column",
                 "Add a column whose values come from a formula over the other columns",
                 "In the Edit menu, without a key. Give the new column a name, pick a kind of formula -- arithmetic, text before or after a comma, the year, month, weekday or hour of a date, values mapped to others, a value from another table -- or type your own in SQL, and choose all records or those in view or marked. The formula is tried first; the column is then added, filled and shown last.");
@@ -17036,7 +17045,9 @@ namespace DbDo
             if (db == null || !db.hasRecordset() || db.recordCount == 0 || grid == null || grid.Columns.Count == 0)
             { Say.say("No rows"); return; }
             // RECORD, AS THE DESCRIPTION SAYS (17 November 2026): DbDo speaks of records, not rows; testSay heard "row 1 of 52550".
-            Say.say("record " + iVirtualRow + " of " + db.recordCount, "column " + (iVirtualCol + 1) + " of " + grid.Columns.Count);
+            // THE CELL'S ADDRESS (24 November 2026, Jamal): the column's name first, then the record's number, as a
+            // spreadsheet's address names its column and row. JAWS+A and JAWS+NumPadDelete ask for it in the grid.
+            Say.say(grid.Columns[iVirtualCol].Text, "record " + iVirtualRow + " of " + db.recordCount, "column " + (iVirtualCol + 1) + " of " + grid.Columns.Count);
         }
 
         // virtSayRow: every shown column of the current record, header and value, one
@@ -18801,11 +18812,11 @@ namespace DbDo
             // "none" when the column holds NULL, "blank" when it holds an empty
             // string. Same distinction everywhere, so the word is the answer.
             if (string.IsNullOrEmpty(sVal)) sVal = db.emptyWord(sCol);
-            // FIELD AND VALUE ONLY (10 November 2026, decided as Jamal's standing rule asks): Shift+Z, Say Status, says
-            // where the record is, so Say Cell no longer repeats "record N of M". It answers in the shape every Say key
-            // uses, "field: value", so a second press spells a short value, as the kit's two presses do, and shows a
-            // long one in the read-only window.
-            speakOrShow("Cell", sCol + ": " + sVal, 117);
+            // THE VALUE ALONE (24 November 2026, Jamal: "Make Shift+C only say the cell value, since Shift+H can say the
+            // header"). Shift+Z says where the record is and Shift+H the column's name, so Say Cell says only what is in
+            // the cell, as a screen reader's Number Pad 5 says the character under the cursor. A second press spells a
+            // short value and shows a long one in the read-only window, as every Say key does.
+            speakOrShow("Cell", sVal, 117);
         }
 
         // saySayFilter: speak the active ADO filter expression. Empty
@@ -19334,6 +19345,69 @@ namespace DbDo
         private void saySayHeader(object sender, EventArgs evArgs)
         {
             Say.say((grid != null && iVirtualCol >= 0 && iVirtualCol < grid.Columns.Count) ? grid.Columns[iVirtualCol].Text : "No columns");
+        }
+
+        // saySayFieldType: the current column's declared type, with a few plain words for the types DbDo's own databases
+        // use, and the table a link field points to. A column with no declared type, as in a spreadsheet or a CSV file,
+        // says so. Twice spells or shows it, as every Say key does.
+        private void saySayFieldType(object sender, EventArgs evArgs)
+        {
+            if (db == null || !db.hasRecordset() || grid == null || grid.Columns.Count == 0)
+            { Say.say("type: no column at the cursor"); return; }
+            string sCol = virtCurrentColumnName();
+            string sType = "";
+            string sLink = "";
+            try { sType = db.getColumnDeclaredType(db.currentTable, sCol) ?? ""; } catch { }
+            try
+            {
+                foreach (DbDoManager.SchemaColumn sc in db.getSchemaColumns(db.currentTable))
+                    if (string.Equals(sc.name, sCol, StringComparison.OrdinalIgnoreCase))
+                    {
+                        if (sType.Length == 0) sType = sc.dataType ?? "";
+                        if (!string.IsNullOrEmpty(sc.foreignKeyRef)) sLink = sc.foreignKeyRef.Split('.')[0];
+                        break;
+                    }
+            }
+            catch { }
+            if (sType.Length == 0) { speakOrShow("Field Type", "type: none declared", 102); return; }
+            string sMeaning = fieldTypeMeaning(sType);
+            string sText = "type: " + sType.ToLowerInvariant() + (sMeaning.Length > 0 ? ", " + sMeaning : "")
+                + (sLink.Length > 0 ? ", links to " + sLink : "");
+            speakOrShow("Field Type", sText, 102);
+        }
+
+        // fieldTypeMeaning: plain words for a declared type, from DbDo's naming convention -- text, blob or a number
+        // word, then the format (textmemo, textmarkdown, blobjpg). "" for a type whose name already says it.
+        private static string fieldTypeMeaning(string sType)
+        {
+            string s = (sType ?? "").Trim().ToLowerInvariant();
+            switch (s)
+            {
+                case "textline": return "one line of text";
+                case "textmemo": return "several lines of text";
+                case "texturl": return "a web address";
+                case "textmarkdown": return "Markdown text";
+                case "texthtml": return "HTML text";
+                case "textjson": return "JSON text";
+                case "textinix": return "settings text";
+                case "textcsv": return "comma-separated text";
+                case "texttsv": return "tab-separated text";
+                case "textsql": return "SQL text";
+                case "textjscript": return "JScript text";
+                case "textm3u": return "a play list";
+                case "textics": case "textvcal": return "a calendar event";
+                case "integer": case "int": case "bigint": case "smallint": return "a whole number";
+                case "real": case "float": case "double": case "numeric": case "decimal": case "number": return "a number";
+                case "boolean": case "bool": return "yes or no";
+                case "datetime": case "timestamp": return "a date and time";
+                case "date": return "a date";
+                case "time": return "a time";
+                case "text": return "";
+                case "blob": return "binary data";
+            }
+            if (s.StartsWith("blob") && s.Length > 4) return "binary data, " + s.Substring(4);
+            if (s.StartsWith("text") && s.Length > 4) return s.Substring(4) + " text";
+            return "";
         }
 
         // readList: Read Wide (every shown column) or, with bLean, Read Lean (the column under the virtual cursor,

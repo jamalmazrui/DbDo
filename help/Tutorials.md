@@ -1119,15 +1119,15 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 6: Shift+C
+### Step 6: Shift+H
 
-Table, count, filter and sort in one breath. Shift plus C, C for Cell, says the cell you are on.
+Table, count, filter and sort in one breath. Shift plus C, C for Cell, says only what is in the cell you are on; Shift plus H, H for Header, says which column it is.
 
 Screen reader:
 
 - country
 
-Confirm the wording with a live run: buildTutorials -live.
+Shift+C says the value alone since 24 November 2026, which depends on the data, so the walk presses Shift+H, whose answer does not. Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 7: Shift+W
 

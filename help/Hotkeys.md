@@ -415,6 +415,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Edited\
   Say when the record was last edited. E for Edited.\
   Shift+E
+- Say Field Type\
+  Say the current field's declared type, and what it holds. F for Field.\
+  Alt+Shift+F
 - Say Filter\
   F for Filter.\
   Shift+F
@@ -454,7 +457,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Speak the open database's full path; press twice to show it. P for Path.\
   Alt+P
 - Say Position\
-  Speak the column header and 1-based row number of the virtual cell. Delete echoes JAWS, where Insert+Delete says where the cursor is.\
+  Say the current position: the record's number, the count and the percent. Delete echoes JAWS, where Insert+Delete says where the cursor is.\
   Alt+Delete
 - Say Prime\
   Say the record's prime fields. P for Prime.\
@@ -509,7 +512,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Append the value of the cell under the virtual cursor to the clipboard.\
   Copy Append
 - Alt+Delete\
-  Speak the column header and 1-based row number of the virtual cell.\
+  Say the current position: the record's number, the count and the percent.\
   Say Position
 - Alt+Enter\
   Table Properties
@@ -572,6 +575,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+Shift+E\
   Open the Settings dialog.\
   Edit Settings
+- Alt+Shift+F\
+  Say the current field's declared type, and what it holds.\
+  Say Field Type
 - Alt+Shift+G\
   Draw a chart of the records and columns you choose, as a picture, a web page and an Excel workbook.\
   Generate Graphics
@@ -1206,6 +1212,9 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Edited\
   Say when the record was last edited.\
   Shift+E
+- Say Field Type\
+  Say the current field's declared type, and what it holds.\
+  Alt+Shift+F
 - Say Filter\
   Shift+F
 - Say Filter and Order\
@@ -1240,7 +1249,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Speak the open database's full path; press twice to show it.\
   Alt+P
 - Say Position\
-  Speak the column header and 1-based row number of the virtual cell.\
+  Say the current position: the record's number, the count and the percent.\
   Alt+Delete
 - Say Prime\
   Say the record's prime fields.\

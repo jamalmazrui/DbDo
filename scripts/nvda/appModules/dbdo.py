@@ -13,11 +13,41 @@ from .homer import keys
 
 
 class DbDoList(NVDAObject):
-	# Way: pass quietly. Where: only here, in the list; elsewhere NVDA's own handling.
-	@scriptHandler.script(gestures=["kb:upArrow", "kb:downArrow", "kb:pageUp", "kb:pageDown", "kb:alt+upArrow", "kb:alt+downArrow"])
+	# Way: pass quietly. Where: only here, in the list; elsewhere NVDA's own handling. DbDo moves the record and says
+	# what it should; NVDA's announcement of the new row is skipped. The Alt+Control moves are NVDA's own table keys,
+	# which DbDo answers by its table model (24 November 2026: they joined the quiet set, as the Alt arrows had).
+	@scriptHandler.script(gestures=["kb:upArrow", "kb:downArrow", "kb:pageUp", "kb:pageDown", "kb:alt+upArrow", "kb:alt+downArrow",
+		"kb:alt+control+upArrow", "kb:alt+control+downArrow", "kb:alt+control+home", "kb:alt+control+end",
+		"kb:alt+control+pageUp", "kb:alt+control+pageDown"])
 	def script_passRowKey(self, gesture):
 		keys.quietNextFocus()
 		keys.passQuietly(gesture)
+
+	# NVDA'S OWN QUESTIONS, ANSWERED BY DbDo IN THE GRID (24 November 2026, Jamal: "Might Insert/JAWS/NVDA+F say the
+	# type of data in the current db column?"). Way: answer with the app's key. Where: only here, in the grid; in
+	# dialogs and boxes NVDA's own command runs. Each sends the DbDo key that gives the better answer, the same keys
+	# DbDo's JAWS scripts send, so both readers hear the same words. NVDA+A is left alone: on a laptop keyboard it is
+	# Say All.
+	@scriptHandler.script(description="In DbDo's grid, say the current field's declared type.", gesture="kb:nvda+f")
+	def script_sayDbDoFieldType(self, gesture):
+		keys.answerWithKey("alt+shift+f")
+
+	@scriptHandler.script(description="In DbDo's grid, say the record's position: its number, the count and the percent.",
+		gestures=["kb:nvda+numpadDelete", "kb(laptop):nvda+delete"])
+	def script_sayDbDoPosition(self, gesture):
+		keys.answerWithKey("alt+delete")
+
+	@scriptHandler.script(description="In DbDo's grid, read every shown field of the record.", gesture="kb:nvda+alt+control+leftArrow")
+	def script_readDbDoRow(self, gesture):
+		keys.answerWithKey("alt+control+shift+rightArrow")
+
+	@scriptHandler.script(description="In DbDo's grid, read every value in the column from the first record.", gesture="kb:nvda+alt+control+upArrow")
+	def script_readDbDoColumn(self, gesture):
+		keys.answerWithKey("alt+control+shift+downArrow")
+
+	@scriptHandler.script(description="In DbDo's grid, read the column from the current record down.", gesture="kb:nvda+alt+control+downArrow")
+	def script_readDbDoColumnFromCurrent(self, gesture):
+		keys.answerWithKey("control+l")
 
 	def event_gainFocus(self):
 		if keys.focusIsQuiet():

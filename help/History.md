@@ -5,6 +5,21 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 24 November 2026, night -- Quiet Alt arrows, and your screen reader's own keys
+
+- **Alt+Down Arrow and Alt+Up Arrow say only the cell, with JAWS too.** DbDo already said the cell alone, but JAWS then read the whole record, because it announces any new row in a list, however the row was reached. DbDo's JAWS scripts now keep JAWS quiet for a moment after a key DbDo answers itself: the Alt arrows and the Alt+Control table keys. The plain arrows still read the record. NVDA's add-on does the same for the Alt+Control table keys, as it did for the Alt arrows.
+- **Shift+C, Say Cell, says the value alone.** Shift+H says the column's name and Shift+Z where the record is, so each key answers one question.
+- **Say Field Type, Alt+Shift+F,** says the current field's declared type and what it holds: "type: textmemo, several lines of text", or "type: integer, a whole number, links to contacts" for a link field. F for field.
+- **Your screen reader's own keys answer in the grid.** Where a key asks something with no good answer in a grid, DbDo answers instead, in the grid only:
+  - JAWS+F and NVDA+F, the font, say the field's type.
+  - JAWS+Number Pad Delete and NVDA+Number Pad Delete, where the cursor is on the screen, say the record's position, as Alt+Delete does.
+  - JAWS+A, the address bar in a browser, says the cell's address.
+  - JAWS's Say Current Cell, Alt+Control+Number Pad 5, reaches DbDo instead of saying there is no table.
+  - NVDA's table reading keys, NVDA+Alt+Control with an arrow, read the record, the column, or the column from here down.
+- **Alt+Control+Shift+Number Pad 5 says the cell's address:** the column's name first, then the record and column numbers.
+- **Tutorial 1 presses Shift+H** to show the column's name, since Shift+C's answer now depends on the data.
+- **This needs HomerDev 1.290.0.**
+
 ## 24 November 2026, late night -- One way to open a table, and the suite's marking keys
 
 - **Control+T opens a table or a view in a new window,** T for Table. It is Open Table, which was on Control+Shift+O. Choosing a table that is already in a window goes to that window. It only opens; Control+Tab and Control+Shift+Tab move among the windows, and Control+F4 closes one. Choose Table and Choose View, which changed the table in the same window, are retired, and so are Next Table or View and Previous Table or View on Control+F6 and Control+Shift+F6, which did the same job a step at a time. In a design window, Control+T lists defs, files and maps.

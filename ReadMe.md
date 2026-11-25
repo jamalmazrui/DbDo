@@ -33,7 +33,7 @@ Six things to try:
 
 - **Arrow through a table.** Each row is one record. Down and Up move between
   records; Left and Right move between fields. Shift+C, Say Cell, tells you
-  which field you are on and what it holds.
+  what the field holds, and Shift+H, Say Header, which field it is.
 - **Listen.** Control+P, Play Media, plays the station you are on in the Homer
   Player. Escape closes the player.
 - **Filter.** Control+F, Filter Records, keeps only the records that match, such
