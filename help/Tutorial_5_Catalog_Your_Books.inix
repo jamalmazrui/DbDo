@@ -22,7 +22,7 @@ Hear=DbDo ready
 [step]
 
 Say=BookTrail is the template for it.
-Key=Alt+D
+Key=Control+Shift+O
 Hear=Template Databases dialog
 Note=Confirm the wording with a live run: buildTutorials -live.
 

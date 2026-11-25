@@ -302,8 +302,8 @@ Alt+Shift+U</li>
 Show saved bookmarks in a listbox; navigate to the selected one. B for
 Bookmarks.<br />
 Alt+B</li>
-<li>Mark Record<br />
-Set the ‘marked’ flag on the current row. M for Mark.<br />
+<li>Mail Record<br />
+M for Mail.<br />
 Control+M</li>
 <li>New Copy<br />
 N for New.<br />
@@ -344,10 +344,6 @@ Control+Apostrophe</li>
 <li>Toggle Mark<br />
 Control+Space toggles a selection in any Windows list.<br />
 Control+Space</li>
-<li>Unmark Record<br />
-Clear the ‘marked’ flag on the current row. Shift reverses Mark: M for
-Mark.<br />
-Control+Shift+M</li>
 </ul>
 <h3 id="edit-bulk-marking">Edit, Bulk Marking</h3>
 <p>F8 starts a run and Shift completes it; Alt makes the run an unmark
@@ -377,9 +373,6 @@ Control+Shift+A</li>
 </ul>
 <h3 id="file">File</h3>
 <ul>
-<li>Choose Table<br />
-T for Table.<br />
-Control+T</li>
 <li>Close All but Current Window<br />
 Close every window except the current one. F4 is open windows;
 Control+Shift+F4 closes all but this one.<br />
@@ -413,11 +406,7 @@ Control+Shift+I</li>
 <li>Merge Data<br />
 Merge rows from a Markdown table, JSON, or Inix file into the current
 table. M for Merge.<br />
-Alt+Shift+M</li>
-<li>Next Table or View<br />
-F6 moves among parts of the window; Control+F6 moves to the next
-table.<br />
-Control+F6</li>
+Control+Shift+M</li>
 <li>Next Window<br />
 Activate the next open window. Control+Tab moves among DbDo
 windows.<br />
@@ -426,15 +415,12 @@ Control+Tab</li>
 Open a database file. O for Open.<br />
 Control+O</li>
 <li>Open Table<br />
-Open a table in a new window. O for Open.<br />
-Control+Shift+O</li>
+Open a table or view in a new window. T for Table.<br />
+Control+T</li>
 <li>Open Template Database<br />
 Open one of the template databases that come with DbDo, such as
-RadioTrail or JobTrail. D for Database.<br />
-Alt+D</li>
-<li>Previous Table or View<br />
-F6 moves among parts; Shift reverses Control+F6.<br />
-Control+Shift+F6</li>
+RadioTrail or JobTrail. O for Open.<br />
+Control+Shift+O</li>
 <li>Previous Window<br />
 Activate the previous open window. Shift reverses Control+Tab.<br />
 Control+Shift+Tab</li>
@@ -835,10 +821,6 @@ Open in Explorer</li>
 Append the value of the cell under the virtual cursor to the
 clipboard.<br />
 Copy Append</li>
-<li>Alt+D<br />
-Open one of the template databases that come with DbDo, such as
-RadioTrail or JobTrail.<br />
-Open Template Database</li>
 <li>Alt+Delete<br />
 Speak the column header and 1-based row number of the virtual
 cell.<br />
@@ -918,10 +900,6 @@ Read Headed Marked</li>
 Read the current column’s values in the marked records, from the
 first.<br />
 Read Lean Marked</li>
-<li>Alt+Shift+M<br />
-Merge rows from a Markdown table, JSON, or Inix file into the current
-table.<br />
-Merge Data</li>
 <li>Alt+Shift+N<br />
 Edit Notes</li>
 <li>Alt+Shift+O<br />
@@ -1003,8 +981,7 @@ Keywords</li>
 Read the current column’s values from the current record on.<br />
 Read Lean from Current</li>
 <li>Control+M<br />
-Set the ‘marked’ flag on the current row.<br />
-Mark Record</li>
+Mail Record</li>
 <li>Control+N<br />
 Add a new record at the cursor.<br />
 New Record</li>
@@ -1029,7 +1006,8 @@ Where Am I</li>
 <li>Control+Space<br />
 Toggle Mark</li>
 <li>Control+T<br />
-Choose Table</li>
+Open a table or view in a new window.<br />
+Open Table</li>
 <li>Control+Tab<br />
 Activate the next open window.<br />
 Next Window</li>
@@ -1081,13 +1059,15 @@ Reverse Jump</li>
 Go to the previous record whose fields hold the keywords.<br />
 Reverse Keywords</li>
 <li>Control+Shift+M<br />
-Clear the ‘marked’ flag on the current row.<br />
-Unmark Record</li>
+Merge rows from a Markdown table, JSON, or Inix file into the current
+table.<br />
+Merge Data</li>
 <li>Control+Shift+N<br />
 New Copy</li>
 <li>Control+Shift+O<br />
-Open a table in a new window.<br />
-Open Table</li>
+Open one of the template databases that come with DbDo, such as
+RadioTrail or JobTrail.<br />
+Open Template Database</li>
 <li>Control+Shift+P<br />
 Record Playback</li>
 <li>Control+Shift+R<br />
@@ -1147,8 +1127,6 @@ Forward Find with Regex</li>
 <li>Control+F4<br />
 Close the current recordset window.<br />
 Close Window</li>
-<li>Control+F6<br />
-Next Table or View</li>
 <li>Control+F8<br />
 Copy the whole visible grid to the clipboard as tab-separated values
 with a header row.<br />
@@ -1162,8 +1140,6 @@ Reverse Find with Regex</li>
 <li>Control+Shift+F4<br />
 Close every window except the current one.<br />
 Close All but Current Window</li>
-<li>Control+Shift+F6<br />
-Previous Table or View</li>
 <li>Control+Shift+F9<br />
 Start recording a macro of record moves, or stop and save it, or stop
 one that is playing.<br />
@@ -1292,8 +1268,6 @@ Control+Shift+Apostrophe</li>
 Shift+F12</li>
 <li>Chat with AI<br />
 F12</li>
-<li>Choose Table<br />
-Control+T</li>
 <li>Clear Bookmark<br />
 Forget the saved bookmark.<br />
 Control+Shift+B</li>
@@ -1443,22 +1417,19 @@ Alt+K</li>
 <li>List Bookmarks<br />
 Show saved bookmarks in a listbox; navigate to the selected one.<br />
 Alt+B</li>
+<li>Mail Record<br />
+Control+M</li>
 <li>Mark All<br />
 Control+A</li>
-<li>Mark Record<br />
-Set the ‘marked’ flag on the current row.<br />
-Control+M</li>
 <li>Merge Data<br />
 Merge rows from a Markdown table, JSON, or Inix file into the current
 table.<br />
-Alt+Shift+M</li>
+Control+Shift+M</li>
 <li>New Copy<br />
 Control+Shift+N</li>
 <li>New Record<br />
 Add a new record at the cursor.<br />
 Control+N</li>
-<li>Next Table or View<br />
-Control+F6</li>
 <li>Next Window<br />
 Activate the next open window.<br />
 Control+Tab</li>
@@ -1476,12 +1447,12 @@ Control+GraveAccent</li>
 Open the folder of the open database in Windows Explorer.<br />
 Alt+Backslash</li>
 <li>Open Table<br />
-Open a table in a new window.<br />
-Control+Shift+O</li>
+Open a table or view in a new window.<br />
+Control+T</li>
 <li>Open Template Database<br />
 Open one of the template databases that come with DbDo, such as
 RadioTrail or JobTrail.<br />
-Alt+D</li>
+Control+Shift+O</li>
 <li>Open url<br />
 Control+Shift+U</li>
 <li>Order Records<br />
@@ -1498,8 +1469,6 @@ records marked, play all of them.<br />
 Control+P</li>
 <li>Play Tutorials<br />
 Alt+F12</li>
-<li>Previous Table or View<br />
-Control+Shift+F6</li>
 <li>Previous Window<br />
 Activate the previous open window.<br />
 Control+Shift+Tab</li>
@@ -1700,9 +1669,6 @@ Alt+T</li>
 Control+Space</li>
 <li>Unmark All<br />
 Control+Shift+A</li>
-<li>Unmark Record<br />
-Clear the ‘marked’ flag on the current row.<br />
-Control+Shift+M</li>
 <li>What This Does<br />
 Shift+F1</li>
 <li>Where Am I<br />

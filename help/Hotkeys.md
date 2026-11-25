@@ -59,8 +59,8 @@ section says why each key is the one it is.
 - List Bookmarks\
   Show saved bookmarks in a listbox; navigate to the selected one. B for Bookmarks.\
   Alt+B
-- Mark Record\
-  Set the 'marked' flag on the current row. M for Mark.\
+- Mail Record\
+  M for Mail.\
   Control+M
 - New Copy\
   N for New.\
@@ -98,9 +98,6 @@ section says why each key is the one it is.
 - Toggle Mark\
   Control+Space toggles a selection in any Windows list.\
   Control+Space
-- Unmark Record\
-  Clear the 'marked' flag on the current row. Shift reverses Mark: M for Mark.\
-  Control+Shift+M
 
 ### Edit, Bulk Marking
 
@@ -127,9 +124,6 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
 
 ### File
 
-- Choose Table\
-  T for Table.\
-  Control+T
 - Close All but Current Window\
   Close every window except the current one. F4 is open windows; Control+Shift+F4 closes all but this one.\
   Control+Shift+F4
@@ -153,10 +147,7 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Control+Shift+I
 - Merge Data\
   Merge rows from a Markdown table, JSON, or Inix file into the current table. M for Merge.\
-  Alt+Shift+M
-- Next Table or View\
-  F6 moves among parts of the window; Control+F6 moves to the next table.\
-  Control+F6
+  Control+Shift+M
 - Next Window\
   Activate the next open window. Control+Tab moves among DbDo windows.\
   Control+Tab
@@ -164,14 +155,11 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Open a database file. O for Open.\
   Control+O
 - Open Table\
-  Open a table in a new window. O for Open.\
-  Control+Shift+O
+  Open a table or view in a new window. T for Table.\
+  Control+T
 - Open Template Database\
-  Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail. D for Database.\
-  Alt+D
-- Previous Table or View\
-  F6 moves among parts; Shift reverses Control+F6.\
-  Control+Shift+F6
+  Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail. O for Open.\
+  Control+Shift+O
 - Previous Window\
   Activate the previous open window. Shift reverses Control+Tab.\
   Control+Shift+Tab
@@ -520,9 +508,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+C\
   Append the value of the cell under the virtual cursor to the clipboard.\
   Copy Append
-- Alt+D\
-  Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail.\
-  Open Template Database
 - Alt+Delete\
   Speak the column header and 1-based row number of the virtual cell.\
   Say Position
@@ -596,9 +581,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Alt+Shift+L\
   Read the current column's values in the marked records, from the first.\
   Read Lean Marked
-- Alt+Shift+M\
-  Merge rows from a Markdown table, JSON, or Inix file into the current table.\
-  Merge Data
 - Alt+Shift+N\
   Edit Notes
 - Alt+Shift+O\
@@ -674,8 +656,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Read the current column's values from the current record on.\
   Read Lean from Current
 - Control+M\
-  Set the 'marked' flag on the current row.\
-  Mark Record
+  Mail Record
 - Control+N\
   Add a new record at the cursor.\
   New Record
@@ -698,7 +679,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Space\
   Toggle Mark
 - Control+T\
-  Choose Table
+  Open a table or view in a new window.\
+  Open Table
 - Control+Tab\
   Activate the next open window.\
   Next Window
@@ -745,13 +727,13 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Go to the previous record whose fields hold the keywords.\
   Reverse Keywords
 - Control+Shift+M\
-  Clear the 'marked' flag on the current row.\
-  Unmark Record
+  Merge rows from a Markdown table, JSON, or Inix file into the current table.\
+  Merge Data
 - Control+Shift+N\
   New Copy
 - Control+Shift+O\
-  Open a table in a new window.\
-  Open Table
+  Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail.\
+  Open Template Database
 - Control+Shift+P\
   Record Playback
 - Control+Shift+R\
@@ -809,8 +791,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+F4\
   Close the current recordset window.\
   Close Window
-- Control+F6\
-  Next Table or View
 - Control+F8\
   Copy the whole visible grid to the clipboard as tab-separated values with a header row.\
   Copy Grid
@@ -823,8 +803,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Shift+F4\
   Close every window except the current one.\
   Close All but Current Window
-- Control+Shift+F6\
-  Previous Table or View
 - Control+Shift+F9\
   Start recording a macro of record moves, or stop and save it, or stop one that is playing.\
   Record Macro
@@ -950,8 +928,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Shift+F12
 - Chat with AI\
   F12
-- Choose Table\
-  Control+T
 - Clear Bookmark\
   Forget the saved bookmark.\
   Control+Shift+B
@@ -1089,21 +1065,18 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - List Bookmarks\
   Show saved bookmarks in a listbox; navigate to the selected one.\
   Alt+B
+- Mail Record\
+  Control+M
 - Mark All\
   Control+A
-- Mark Record\
-  Set the 'marked' flag on the current row.\
-  Control+M
 - Merge Data\
   Merge rows from a Markdown table, JSON, or Inix file into the current table.\
-  Alt+Shift+M
+  Control+Shift+M
 - New Copy\
   Control+Shift+N
 - New Record\
   Add a new record at the cursor.\
   Control+N
-- Next Table or View\
-  Control+F6
 - Next Window\
   Activate the next open window.\
   Control+Tab
@@ -1121,11 +1094,11 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Open the folder of the open database in Windows Explorer.\
   Alt+Backslash
 - Open Table\
-  Open a table in a new window.\
-  Control+Shift+O
+  Open a table or view in a new window.\
+  Control+T
 - Open Template Database\
   Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail.\
-  Alt+D
+  Control+Shift+O
 - Open url\
   Control+Shift+U
 - Order Records\
@@ -1141,8 +1114,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Control+P
 - Play Tutorials\
   Alt+F12
-- Previous Table or View\
-  Control+Shift+F6
 - Previous Window\
   Activate the previous open window.\
   Control+Shift+Tab
@@ -1331,9 +1302,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Control+Space
 - Unmark All\
   Control+Shift+A
-- Unmark Record\
-  Clear the 'marked' flag on the current row.\
-  Control+Shift+M
 - What This Does\
   Shift+F1
 - Where Am I\

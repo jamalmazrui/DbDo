@@ -21,7 +21,7 @@
 
 [Database]
 
-; THE WINDOW OPENS ON apps: software was the proposal's first want, and Choose Table, Control+T, reaches the rest.
+; THE WINDOW OPENS ON apps: software was the proposal's first want, and Open Table, Control+T, opens the rest.
 InitialTable = apps
 
 [Table:apps]

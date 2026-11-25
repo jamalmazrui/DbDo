@@ -33,7 +33,7 @@ The window commands live on the **File menu**, just before Exit DbDo. DbDo has n
 - **Say Windows Open** (Shift+F4) speaks how many windows are open and their titles.
 - **Close Window** (Control+F4) closes the current one; **Close All but Current Window** (Control+Shift+F4) leaves only the active one. Closing the last window exits DbDo, because the menu bar lives in the window.
 
-There is a deliberate distinction between **opening** a table and **going to** one. **Open Table** (Control+Shift+O) makes a *new window* for a table; **Choose Table** (Control+T) changes the table shown in the *current* window. Open when you want both tables visible at once; choose when you simply want to switch what this window is looking at.
+**Open Table** (Control+T, T for Table) opens a table or a view in a *new window*, so you can keep several on screen. A table already open in a window is still listed; choosing it goes to that window. Control+T only opens; Control+Tab and Control+Shift+Tab move among the windows, and Control+F4 closes one you no longer want. O is for a database: **Open Database** (Control+O) opens a file, and **Open Template Database** (Control+Shift+O), a variation of Open, opens one of the databases that come with DbDo.
 
 ### The data list
 
@@ -195,15 +195,16 @@ FileDir reads and counts its list with the same L and Y keys. It has no W keys, 
 
 ### Opening databases and recordsets
 
-- **Open Template Database** (Alt+D) starts from one of the databases DbDo ships -- BookTrail, JobTrail and the rest -- opening your own copy of it.
+- **Open Template Database** (Control+Shift+O) starts from one of the databases DbDo ships -- BookTrail, JobTrail and the rest -- opening your own copy of it.
 - **Open Database** (Control+O) opens a database file, choosing the right driver from the extension. **New Database** creates a fresh SQLite database; **Add Table** adds a table to it.
 
   **Add Table** asks first whether to **Define** a new table, **Clone** the open one's fields (when a table is open), or make one **From file**: a CSV or TSV file becomes a table of the open database, named for the file and shaped as Import shapes it, numbers as numbers. That is how two files meet in one database, so a query can look a value up from one in the other. Define or Clone which then fill the form for you to name the new table and change what you like. Every new table gets DbDo's standard columns: its id, added, edited, notes, tags and marked. The form has ten name-and-type slots; its **Text** button opens the same fields as lines you can read and edit like any text, one field a line in the form `name: TYPE`, with no limit to how many, and you can paste a structure in. On OK, if fields begin with the same letter, DbDo says which, since only the first of each gets an Alt letter in the record form, and offers to go back and rename them.
-- **Open Table** (Control+Shift+O) opens a table (or arbitrary query) in a new window.
+- **Open Table** (Control+T) opens a table or view in a new window, or goes to the window it is already in.
+- **Import Data** (Control+Shift+I) makes a new DbDo database from a spreadsheet, Access, dBASE, CSV or other file, with every worksheet a table.
 - **Recent Databases** (Alt+R) reopens something you used lately.
 - **Close Database** closes the current database; **Backup Database** writes a copy; **Compare Database** compares two.
 
-When a database has several tables, **Choose Table** (Control+T) switches the current window to another table, and the *Next/Previous Visited Table* commands walk the tables you have already looked at. **Choose View** (and the object-switch commands) do the same for saved views.
+When a database has several tables, **Open Table** (Control+T) gives each its own window, and Control+Tab moves among them. Open Table lists a database's views beside its tables, so a view opens the same way.
 
 ### Moving in the grid
 
@@ -218,6 +219,7 @@ The grid has one keyboard grammar. Plain keys move within what you are on. Contr
 
 The screen reader table keys work as they do in tables in web pages, Word and Adobe Reader:
 
+- **Alt+Up Arrow and Alt+Down Arrow** move one cell up or down in the column and say only the cell, the quick way to read down a column.
 - **Alt+Control+arrows** move one cell. Moving along a row, DbDo says the new column's name, then the cell. Moving down a column, it says the record's look, then the cell, just as a screen reader says a row header; when the cell is itself part of the look, it says the cell alone. At the edge of the grid, the cursor stays, and DbDo says First row, Last row, First column or Last column.
 - **Alt+Control+Home and Alt+Control+End** go to the top-left and bottom-right corners, as in JAWS and Narrator. (NVDA uses them for the first and last column of the row; in DbDo, Home and End do that.)
 - **Alt+Control+Page Up and Alt+Control+Page Down** go to the first and last row of the column, as in NVDA. Under JAWS they change the voice rate for the moment, as everywhere, so use Control+Home and Control+End, which do the same moves.
@@ -278,9 +280,10 @@ All edits auto-commit. If a table is read-only, **Read Only Toggle** (Control+Sh
 
 Marking is DbDo's explicit, queryable alternative to visual multi-select. The `marked` field carries the state.
 
-- **Mark Record** (Control+M) marks the current record; **Unmark Record** (Control+Shift+M) clears it; **Toggle Mark** (Control+Space or Space) flips it -- a Space typed within a second of a letter goes on to the type-ahead search instead, so "new y" still finds New York; **Say Marked** (Shift+M) speaks it.
+- **Mark Record** (Semicolon) marks the current record; **Unmark Record** (Slash) clears it, the same keys as in FileDir; **Toggle Mark** (Control+Space or Space) flips it -- a Space typed within a second of a letter goes on to the type-ahead search instead, so "new y" still finds New York; **Say Marked** (Shift+M) speaks it.
 - **Mark All** (Control+A), **Unmark All** (Control+Shift+A), and **Invert Marked** (Control+I) act across the current view.
 - **Shift+Down Arrow and Shift+Up Arrow** mark the record and move to the next or previous one. **Control+Shift+Down Arrow and Control+Shift+Up Arrow** unmark it and move.
+- **> and <** (Shift+Period and Shift+Comma) are the same moves from the home row: > marks and moves to the next record, < unmarks and moves to the next. Like Space, Semicolon and Slash, they go to the type-ahead search instead when typed within a second of a letter or digit.
 - **Control+Shift+Home** marks every record from the first to this one; **Control+Shift+End** marks from this one to the last. **Alt+Control+Shift+Home** and **Alt+Control+Shift+End** unmark the same spans. These were Shift+Home and Shift+End through version 1.0.316; those keys now say where marking went.
 - **Control+Up Arrow and Control+Down Arrow** go to the previous and next marked record; **Control+Page Up and Control+Page Down** go to the first and last.
 - To mark a **range**, start it with **Start Mark or Unmark** (F8), move, and finish with **Complete Mark** (Shift+F8) to mark every record between, or **Complete Unmark** (Alt+Shift+F8) to unmark them. This is FileDir's way too. Alt+F8 reads everything (Read Wide), as Read All does in EdSharp and HomerView.
@@ -329,7 +332,7 @@ Each button is on its own line and names its columns in parentheses, so you hear
 
 **What each field is for.** In the record, new-record and filter forms, Shift+F1 on a field says what it is for. The sentences are rows of the database's own defs table: tbl and fld name the field, val is left empty, and descrip holds the sentence; tbl `*` covers a field of that name in every table. Edit a row of defs to change a sentence. The rows that do have a val are the choices F4 offers for that field.
 
-**What each table is for.** A defs row with tbl naming a table, and fld and val both empty, describes the table in one sentence. Shift+F1 says it in Choose Table and Open Table, Say Database prints it, and Where Am I pressed twice says it for the table open.
+**What each table is for.** A defs row with tbl naming a table, and fld and val both empty, describes the table in one sentence. Shift+F1 says it in Open Table, Say Database prints it, and Where Am I pressed twice says it for the table open.
 
 **Patterns for fields.** A field's own row in defs -- tbl and fld naming the field, val empty -- has a pattern column beside descrip. Put a .NET regular expression there, and the field's value must match it when you press OK in a record form; the first field that does not is said and takes focus, with its text selected. An empty value is tested too, so a pattern can make a field required: `^\s*\S` refuses a blank, and `^$|` in front of any pattern lets the field stay blank. What DbDo says on a failure is the field's description, so write the form a value takes into descrip, such as "starting with `http://` or `https://`". Filter Records checks no patterns. To set them without editing defs, use Settings, then Field Validation for This Table: one box per field, saved into defs. In a record or new-record form, **Alt+Shift+P** (P for pattern; in the main window the same key plays a stream) edits the pattern of the field you are on: a small dialog shows it under the field's description, OK saves it and puts it in force at once, and an empty pattern removes it.
 
@@ -492,7 +495,7 @@ A DbDo database can carry everything it needs besides its data -- its scripts, i
 
 Each carried file's **kind** names its format in the same words a column's declared type uses -- TEXTSQL for a question, TEXTDBDO for a routine, TEXTJSCRIPT for a program, TEXTINIX for a report definition or settings -- since one column holds them all. DbDo knows forty column types, from the kit's vocabulary, and offers every one when you define a table. A name's first word says how it is stored -- TEXT for text, BLOB for bytes -- and the rest names the format by its usual file extension, as downloads do: TEXTJSON, TEXTICS and TEXTSQL hold text in those formats and are edited on several lines; BLOBPNG, BLOBPDF and BLOBMP3 hold pictures, documents and sound; and TEXTURL, TEXTEMAIL, TEXTPHONE and TEXTPATH hold a single web address, email address, phone number or file path, each with its natural action.
 
-The files are kept in DbDo's own table, **files**, beside defs and maps; DbDo hides all three from Choose Table, as tables of its own. A program in another language, such as RadioTrail's fetchStations.py, which needs Python to refresh the station list, is not carried: it is a tool, not part of the database.
+The files are kept in DbDo's own table, **files**, beside defs and maps; DbDo leaves all three out of Open Table, as tables of its own, except in a design window, where Open Table lists only them. A program in another language, such as RadioTrail's fetchStations.py, which needs Python to refresh the station list, is not carried: it is a tool, not part of the database.
 
 ### Which one do I want?
 
@@ -511,7 +514,7 @@ The files are kept in DbDo's own table, **files**, beside defs and maps; DbDo hi
 DbDo distinguishes four file operations that are easy to confuse. The distinction is about whether the data keeps its original shape or is reshaped into DbDo's conventions.
 
 - **Open** (Control+O) opens a file *faithfully* — a round trip. An Excel workbook opens as its sheets, a CSV as its rows, and saving writes back to that same file in that same format. Use Open when you want to work with a file as it is.
-- **Import Data** (Control+Shift+I) reads an outside file and reshapes it *into a DbDo database* — normalizing columns, applying conventions, and producing a `.db` you then work with. Use Import when you want to bring foreign data into a proper DbDo database. **Transfer Import** and **Merge Data** (Alt+Shift+M) bring data in alongside existing data. When Import reads a CSV, TSV or Excel file, a column that holds only whole numbers becomes a column of whole numbers, and one that holds only numbers a column of numbers, so filters, orders and reports compare them as numbers; a blank in such a column stays empty, not zero. A number with a leading zero, such as the zip code 02134, keeps its column as text, so the zero is not lost. Column names become lowercase words joined by underscores: date.utc becomes date_utc. Merge Data finds a file's columns by either name. A table keeps one record for each set of values, so a row that repeats another exactly is left out; Import says how many it left out.
+- **Import Data** (Control+Shift+I) reads an outside file and reshapes it *into a DbDo database* — normalizing columns, applying conventions, and producing a `.db` you then work with. It pairs with **Export Data** (Control+Shift+X). Use Import when you want to bring foreign data into a proper DbDo database. **Transfer Import** and **Merge Data** (Control+Shift+M) bring data in alongside existing data. When Import reads a CSV, TSV or Excel file, a column that holds only whole numbers becomes a column of whole numbers, and one that holds only numbers a column of numbers, so filters, orders and reports compare them as numbers; a blank in such a column stays empty, not zero. A number with a leading zero, such as the zip code 02134, keeps its column as text, so the zero is not lost. Column names become lowercase words joined by underscores: date.utc becomes date_utc. Merge Data finds a file's columns by either name. A table keeps one record for each set of values, so a row that repeats another exactly is left out; Import says how many it left out.
 - **Export Data** (Control+Shift+X) writes the **grid** — the current view — out to a new file in a chosen format. Use Export to hand off what you are looking at. A CSV or TSV file holds your values exactly as they are. Since a spreadsheet may run a value beginning with =, +, - or @ as a formula, DbDo asks before opening such a file, and an .xlsx export is the safe way into a spreadsheet: it keeps every text value as text, and writes a column the database keeps as numbers as Excel numbers, ready to sum and chart.
 - **Save** (Control+S) and **Save As** (Control+Shift+S) concern the *whole database*. For a workbook opened faithfully, Save writes your edits back to the `.xlsx`. For a native database your edits were already committed, so Save reports that; Save As writes a fresh copy. **Open as Managed Copy** opens a file as a working copy so the original is untouched until you decide.
 
@@ -553,24 +556,20 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | New Database | — |
 | Add Table | — |
 | Open Database | Control+O |
-| Open Template Database | Alt+D |
+| Open Template Database | Control+Shift+O |
 | Design Database | Alt+Shift+D |
-| Open Table | Control+Shift+O |
+| Open Table | Control+T |
 | Recent Databases | Alt+R |
 | Save | Control+S |
 | Save As | Control+Shift+S |
 | Close Database | — |
 | Backup Database | — |
 | Compare Database | — |
-| Import Data | Control+Shift+I |
-| Merge Data | Alt+Shift+M |
+| Merge Data | Control+Shift+M |
 | Transfer Import | — |
 | Run Report | Alt+Shift+R |
 | Export Data | Control+Shift+X |
 | Print | — |
-| Choose Table | Control+T |
-| Choose View | — |
-| Next / Previous Table or View | Control+F6 / Control+Shift+F6 |
 | Exit DbDo | Alt+F4 |
 
 #### Edit menu
@@ -585,23 +584,23 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Copy Record | Control+Shift+C |
 | Copy Append Record | Alt+Shift+C |
 | New Copy | Control+Shift+N |
-| Mail Record | — |
+| Mail Record | Control+M |
 | Replace | Control+R |
 | Replace with Regex | Control+Shift+R |
 | Extract with Regex | Control+Shift+E |
 | Yield with Regex | Control+Shift+Y |
-| Mark Record | Control+M |
+| Mark Record | SemiColon |
 | Say Marked | Shift+M |
 | Toggle Mark | Control+Space or Space |
 | Edit Notes | Alt+Shift+N |
 | Edit Tags | Alt+Shift+T |
 | Edit url | Alt+Shift+U |
-| Unmark Record | Control+Shift+M |
+| Unmark Record | Slash |
 | Mark All | Control+A |
 | Unmark All | Control+Shift+A |
 | Invert Marked | Control+I |
-| Mark and Next / Previous | Shift+Down / Shift+Up |
-| Unmark and Next / Previous | Control+Shift+Down / Control+Shift+Up |
+| Mark and Next / Previous | Shift+Down or Shift+Period / Shift+Up |
+| Unmark and Next / Previous | Control+Shift+Down or Shift+Comma / Control+Shift+Up |
 | Mark to First / Last | Control+Shift+Home / Control+Shift+End |
 | Unmark to First / Last | Alt+Control+Shift+Home / Alt+Control+Shift+End |
 | Next / Previous Marked | Control+Down / Control+Up |
@@ -734,11 +733,11 @@ The Query menu holds record inspection and the Say-X status family.
 
 #### Window commands, on the File menu
 
-DbDo has no Window menu. These commands sit on the File menu, just before Exit DbDo; Open Table sits beside Choose Table.
+DbDo has no Window menu. These commands sit on the File menu, just before Exit DbDo.
 
 | Command | Chord |
 |---------|-------|
-| Open Table | Control+Shift+O |
+| Open Table | Control+T |
 | Current Windows | F4 |
 | Next Window | Control+Tab |
 | Previous Window | Control+Shift+Tab |
@@ -831,7 +830,7 @@ When the SQLean extension functions are available, they add a large library of S
 
 ### Template databases
 
-DbDo ships with template databases that follow the same column conventions as your own data, reachable with File, **Open Template Database**, or Alt+D from anywhere. They are the fastest way to see the standard fields, defs, relationships, and reports working together on real records.
+DbDo ships with template databases that follow the same column conventions as your own data, reachable with File, **Open Template Database**, or Control+Shift+O from anywhere. They are the fastest way to see the standard fields, defs, relationships, and reports working together on real records.
 
 ### Screen-reader settings
 
@@ -1038,7 +1037,7 @@ into a folder belonging to DbDo.
 
 **If they want it in a database of their own**, they start one from a template:
 File, **Open Template Database**, and pick BookTrail, which opens their own copy
-under their own account. Then **Merge Data, Alt+Shift+M**, and choose the file they
+under their own account. Then **Merge Data, Control+Shift+M**, and choose the file they
 were sent, wherever they saved it. DbDo folds the records in.
 
 #### How a merge decides
@@ -1078,7 +1077,7 @@ Spreadsheets and text files are not databases, so DbDo treats them all the same
 way, and the rule is one sentence: **the file you opened stays the file of
 record.**
 
-When you open a .xlsx, .csv, .tsv or .txt file, DbDo reads it into a working copy
+When you open a .xlsx, .csv, .tsv or .txt file with Control+O, DbDo reads it into a working copy
 and opens that. You get the whole program -- sorting, filtering, the Say keys,
 reports -- and your file is only read.
 
@@ -1105,19 +1104,19 @@ and your edits go straight into them.
 
 There are two ways, and one of them is almost always the right one.
 
-**Import, Alt+I** -- I for Import. DbDo reads the workbook itself, with no Excel
-and nothing else installed, and makes a new DbDo database from it. Each sheet
-with a header row becomes a table named after the sheet, each column becomes a
-field, and an empty sheet is skipped. The result opens as an unsaved copy; press
-Control+Shift+S, Save As, to keep it. Your workbook is only read.
+**Open, Control+O**, edits the workbook itself. DbDo reads it with no Excel and
+nothing else installed. A workbook with more than one worksheet asks which one
+to edit. Control+S writes your changes back to that worksheet, keeping formulas,
+formatting and the other worksheets.
 
-**Open, Control+O**, opens the workbook as it is, through Microsoft's Access
-Database Engine, so it works only where that engine is installed, and changes go
-back into the workbook.
+**Import, Control+Shift+I** -- I for Import, beside Control+Shift+X for Export --
+makes a new DbDo database from the workbook. Each sheet with a header row
+becomes a table named after the sheet, each column becomes a field, and an empty
+sheet is skipped. The result opens as an unsaved copy; press Control+Shift+S,
+Save As, to keep it. Your workbook is only read.
 
-Opening a spreadsheet does the same reading, and adds a way back: Control+S
-writes your changes into the file you opened. Import is for when you want a new
-database and no further connection to the workbook.
+Open is for when the workbook stays the file you share; Import is for when you
+want a new database and no further connection to the workbook.
 
 ### Where a database's files live
 
@@ -1302,7 +1301,7 @@ To listen, press **Control+P**, Play Media, on any station's row. The Homer
 Player opens -- the same player FileDir has, built from the same code in the
 kit -- with the station playing: Scroll Lock pauses and resumes, the Volume and
 Rate sliders are ordinary controls, and Escape closes it. Mark several stations
-first, Control+M, and Play Media queues all of them, as tagged files are queued
+first, with Semicolon, and Play Media queues all of them, as tagged files are queued
 in FileDir, with the current one first. The first time, if mpv is not on your
 computer, DbDo offers to fetch it.
 
@@ -1401,22 +1400,20 @@ Three tables in a DbDo database belong to DbDo rather than to you:
 - **files** holds the scripts, reports and settings the database carries.
 - **maps** records links between records, which is what Say Related reads.
 
-None is offered when you choose a table, open a table in a new window, or
-step through your tables with Control+F6. They are on a hidden list, and
+None is offered when you open a table with Control+T. They are on a hidden list, and
 anything NOT on that list is yours and is offered.
 
 **Design Database (Alt+Shift+D)** is where you reach them, along with the other
 parts of a database you build rather than fill. Its buttons are Add table, Defs
 table, Files table, Maps table and Table properties. D is for Design and for
-Database: Shift+D says the database, Alt+D opens a template database, and
-Alt+Shift+D designs this one. With no database open, it offers New database and
+Database: Shift+D says the database, and Alt+Shift+D designs this one. With no database open, it offers New database and
 Open template database.
 
 Defs table, Files table and Maps table each open that table in its own window,
 a **design window**, where every record key works: filter, edit, F4, export.
-The window decides the family: in a design window, Control+F6 and Control+T move
-among defs, files and maps only; in a window on your own data, they move among
-your tables only. Control+F4 closes the design window and takes you back. DbDo
+The window decides the family: in a design window, Open Table (Control+T) lists
+defs, files and maps only; in a window on your own data, it lists your tables
+and views only. Control+F4 closes the design window and takes you back. DbDo
 never reopens a design window by itself the next time it starts.
 
 Take care in maps: each link names its two records by table and prime, so a

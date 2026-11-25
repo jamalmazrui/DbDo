@@ -104,7 +104,7 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Control plus Shift plus J jumps backward to the match before, as Shift reverses everywhere in DbDo. Another database opens with Control plus O, and a template with Alt plus D, D for Database.
+Say=Control plus Shift plus J jumps backward to the match before, as Shift reverses everywhere in DbDo. Another database opens with Control plus O, and a template with Control plus Shift plus O, a variation of Open.
 Key=
 Hear=
 

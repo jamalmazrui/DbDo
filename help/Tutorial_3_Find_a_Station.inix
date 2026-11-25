@@ -124,8 +124,8 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Escape. To keep stations, mark them. Control plus M, M for Mark, marks the station I am on, and Control plus Shift plus M unmarks: Shift reverses.
-Key=Control+M
+Say=Escape. To keep stations, mark them. Semicolon marks the station I am on, and Slash unmarks it; FileDir uses the same keys.
+Key=SemiColon
 Hear=Marked
 Note=Confirm the wording with a live run: buildTutorials -live.
 
@@ -184,7 +184,7 @@ Hear=Alt plus O
 
 Say=Mark a record.
 Key=
-Hear=Control plus M
+Hear=Semicolon
 
 [step]
 

@@ -340,8 +340,11 @@ def checkInixKeys():
     # KEYS THE GRID ITSELF HANDLES (22 November 2026): Space toggles the mark in gridKeyDown, not as a menu key, so a
     # Space within a second of a typed letter can still go on to the ListView's own type-ahead search, and a Space on a
     # button or check box elsewhere is never taken. It is named after the menu's key, "Control+Space or Space".
-    for sCommand, sKey in (("toggle mark", "Space"),):
-        if re.search(r"evArgs\.KeyData == Keys\." + sKey + r"\b", sSource): dAliases.setdefault(sCommand, []).append(sKey)
+    # SEMICOLON AND SLASH (24 November 2026): Mark Record and Unmark Record take FileDir's keys in the grid's key
+    # handler, under the same type-ahead rule as Space, so they are named after the menu's key the same way.
+    for sCommand, sEnum, sKey in (("toggle mark", "Space", "Space"), ("mark record", "OemSemicolon", "SemiColon"),
+                                  ("unmark record", "OemQuestion", "Slash")):
+        if re.search(r"(?:evArgs\.KeyData|key) == Keys\." + sEnum + r"\)", sSource): dAliases.setdefault(sCommand, []).append(sKey)
     lsBad = []
     iChecked = 0
     sSection = ""
@@ -356,7 +359,10 @@ def checkInixKeys():
         sChord = sRest.split(",", 1)[0].strip()
         lsCode = [s for s in dKeys[sName.lower()] if s]
         sWanted = " or ".join(dict.fromkeys(lsCode)) if lsCode else "None"
-        sWithAliases = " or ".join(dict.fromkeys(lsCode + dAliases.get(sName.lower(), []))) if lsCode else sWanted
+        # A COMMAND WHOSE ONLY KEY IS THE GRID'S (24 November 2026): Mark Record and Unmark Record have no menu key, only
+        # SemiColon and Slash in the grid's own key code, so their aliases alone are what the line must name.
+        lsAll = list(dict.fromkeys(lsCode + dAliases.get(sName.lower(), [])))
+        sWithAliases = " or ".join(lsAll) if lsAll else sWanted
         if sChord != sWanted and sChord != sWithAliases: lsBad.append("%s says %s; DbDo.cs binds %s" % (sName, sChord or "nothing", sWithAliases))
     for s in lsBad: logLine("INIX KEY: " + s)
     if lsBad:

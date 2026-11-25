@@ -14,7 +14,7 @@ Hear=
 
 [step]
 
-Say=TechTraining first: more than a thousand free presentations about technology and accessibility, in audio, video and on the web, newest first. Alt plus D, and I choose TechTraining.
+Say=TechTraining first: more than a thousand free presentations about technology and accessibility, in audio, video and on the web, newest first. Control plus Shift plus O, Open Template Database, and I choose TechTraining.
 Key=Enter
 Hear=2026, A Demonstration and Walkthrough of Be My Eyes for Mac, AppleVis, Row 1 of 1167
 Note=Confirm the wording with a live run: buildTutorials -live.
@@ -35,9 +35,9 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Escape. BlindCreations next: apps, books and presentations made by or for blind people, and the people who made them, linked by kind. Alt plus D, BlindCreations, and Control plus T to the creators.
+Say=Escape. BlindCreations next: apps, books and presentations made by or for blind people, and the people who made them, linked by kind. Control plus Shift plus O, BlindCreations, and Control plus T to the creators.
 Key=Control+T
-Hear=Choose Table dialog, apps
+Hear=Open Table dialog
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
@@ -68,7 +68,7 @@ Hear=
 
 [step]
 
-Say=RecipeTrail keeps recipes and their ingredients. Mark the recipes you mean to cook with Control plus M, then its Shopping List script lists each ingredient once, grouped by where it sits in the store.
+Say=RecipeTrail keeps recipes and their ingredients. Mark the recipes you mean to cook with Semicolon, then its Shopping List script lists each ingredient once, grouped by where it sits in the store.
 Key=
 Hear=
 

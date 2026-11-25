@@ -21,8 +21,8 @@ Hear=DbDo ready
 
 [step]
 
-Say=JobTrail is a template for exactly that. Its records are samples, plainly named as samples, to show the shape before your own go in.
-Key=Alt+D
+Say=JobTrail is a template for exactly that. Its records are samples, plainly named as samples, to show the shape before your own go in. Control plus Shift plus O, Open Template Database, lists the templates.
+Key=Control+Shift+O
 Hear=Template Databases dialog
 Note=Confirm the wording with a live run: buildTutorials -live.
 
@@ -35,9 +35,9 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Control plus T, Choose Table, lists its tables: jobs, contacts, actions, documents and stories. I choose jobs.
+Say=Control plus T, T for Table, Open Table, lists its tables: jobs, contacts, actions, documents and stories. I choose jobs, and it opens in a window of its own.
 Key=Control+T
-Hear=Choose Table dialog, actions
+Hear=Open Table dialog
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

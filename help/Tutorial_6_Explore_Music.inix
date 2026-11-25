@@ -22,7 +22,7 @@ Hear=DbDo ready
 [step]
 
 Say=MusicTrail holds a hundred albums, ten for each of ten genres, and the performers who recorded them.
-Key=Alt+D
+Key=Control+Shift+O
 Hear=Template Databases dialog
 Note=Confirm the wording with a live run: buildTutorials -live.
 
@@ -121,8 +121,8 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Ranked first. A table can also have a window of its own: Control plus Shift plus O, Open Table, opens performers beside the albums.
-Key=Control+Shift+O
+Say=Ranked first. Every table can have a window of its own: Control plus T, Open Table, opens performers beside the albums.
+Key=Control+T
 Hear=Open Table dialog
 Note=Confirm the wording with a live run: buildTutorials -live.
 

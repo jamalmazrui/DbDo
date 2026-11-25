@@ -13091,7 +13091,34 @@ namespace DbDo
             public string Value;
         }
 
+        // listSheets: the names of the worksheets that hold anything, in workbook order (24 November 2026), so Open
+        // Database can ask which one to edit when there are several.
+        internal static List<string> listSheets(string sPath)
+        {
+            List<string> lNames = new List<string>();
+            NPOI.SS.UserModel.IWorkbook wb = null;
+            using (FileStream fs = new FileStream(sPath, FileMode.Open, FileAccess.Read))
+                wb = new NPOI.XSSF.UserModel.XSSFWorkbook(fs);
+            try
+            {
+                for (int s = 0; s < wb.NumberOfSheets; s++)
+                {
+                    NPOI.SS.UserModel.ISheet sh = wb.GetSheetAt(s);
+                    if (sh != null && sh.PhysicalNumberOfRows > 0) lNames.Add(sh.SheetName);
+                }
+            }
+            finally { try { wb.Close(); } catch { } }
+            return lNames;
+        }
+
         internal static SheetModel readFirstSheet(string sPath)
+        {
+            return readSheet(sPath, null);
+        }
+
+        // readSheet: the named worksheet, or the first that holds anything when no name is given (24 November 2026:
+        // Open Database lets you choose any worksheet, not only the first).
+        internal static SheetModel readSheet(string sPath, string sSheetName)
         {
             NPOI.SS.UserModel.IWorkbook wb = null;
             using (FileStream fs = new FileStream(sPath, FileMode.Open, FileAccess.Read))
@@ -13099,7 +13126,8 @@ namespace DbDo
             try
             {
                 NPOI.SS.UserModel.ISheet sheet = null;
-                for (int s = 0; s < wb.NumberOfSheets; s++)
+                if (!string.IsNullOrEmpty(sSheetName)) sheet = wb.GetSheet(sSheetName);
+                for (int s = 0; sheet == null && s < wb.NumberOfSheets; s++)
                 {
                     NPOI.SS.UserModel.ISheet sh = wb.GetSheetAt(s);
                     if (sh != null && sh.PhysicalNumberOfRows > 0) { sheet = sh; break; }
@@ -14475,14 +14503,13 @@ namespace DbDo
 
             // Mark-and-move chords for the data list. The user can
             // mark or unmark the current record and step to the next
-            // (or previous) record in a single keystroke. The
-            // The > and < bindings were retired in v1.0.74
-            // to eliminate conflict with the data list's type-to-
-            // search: typing > or < to mark would also enter those
-            // characters into the search buffer. The Shift+arrow
-            // family is the surviving binding because Shift+arrow has
-            // no native meaning on a single-select ListView (so the
-            // chord is unambiguous).
+            // (or previous) record in a single keystroke.
+            // > AND < ARE BACK (24 November 2026, Jamal: "an efficiency gain from the home row"), in DbDo and FileDir
+            // alike: > (Shift+Period) marks and goes to the next record, < (Shift+Comma) unmarks and goes to the next.
+            // They were retired in v1.0.74 because typing them to mark also fed the type-ahead search. Now they follow
+            // Space's rule: within a second of a typed letter or digit, the character goes on to the type-ahead search;
+            // on its own, it marks. Semicolon (Mark Record) and Slash (Unmark Record), FileDir's keys and now the only ones
+            // for those two commands, follow the same rule.
             //
             //   Shift+DownArrow         = Mark and next
             //   Shift+UpArrow           = Mark and previous
@@ -14502,6 +14529,18 @@ namespace DbDo
                 { evArgs.Handled = true; evArgs.SuppressKeyPress = true; markAndMove(false, true);  return; }
                 if (key == (Keys.Control | Keys.Shift | Keys.Up))
                 { evArgs.Handled = true; evArgs.SuppressKeyPress = true; markAndMove(false, false); return; }
+                bool bStillTyping = unchecked(Environment.TickCount - iLastTypeAheadTick) <= iTypeAheadMs;
+                if (!bStillTyping)
+                {
+                    if (key == (Keys.Shift | Keys.OemPeriod))
+                    { evArgs.Handled = true; evArgs.SuppressKeyPress = true; markAndMove(true,  true);  return; }
+                    if (key == (Keys.Shift | Keys.Oemcomma))
+                    { evArgs.Handled = true; evArgs.SuppressKeyPress = true; markAndMove(false, true);  return; }
+                    if (key == Keys.OemSemicolon)
+                    { evArgs.Handled = true; evArgs.SuppressKeyPress = true; recMarkClicked(this, EventArgs.Empty);   return; }
+                    if (key == Keys.OemQuestion)
+                    { evArgs.Handled = true; evArgs.SuppressKeyPress = true; recUnmarkClicked(this, EventArgs.Empty); return; }
+                }
 
                 // ? (Shift+Slash) = Show-Where. Speaks the title
                 // bar, the status bar, and the current row's
@@ -14703,6 +14742,9 @@ namespace DbDo
             // should keep their plain-Ctrl chords.)
             // THE SUITE'S IMPORT AND EXPORT PAIR (17 November 2026): Control+Shift+I imports and Control+Shift+X exports,
             // beside Control+Shift+E Extract with Regex and Control+Shift+R Replace with Regex. Alt+I is Inspect Record.
+            // IMPORT DATA STAYS ON CONTROL+SHIFT+I (24 November 2026, Jamal): the suite's import and export pair,
+            // Control+Shift+I and Control+Shift+X. Import makes a new DbDo database from another file; Open Database
+            // (Control+O) edits a file in its own format.
             miFileImport  = addItem(miFile, "&Import Data...",                 "Import Data",           Keys.Control | Keys.Shift | Keys.I,   importClicked);
             // OPEN SAMPLE DATABASE, ALT+D. It lived on the Help menu, where a
             // beginner might look for an example -- but what it does is open a
@@ -14726,10 +14768,15 @@ namespace DbDo
             // Alt+Shift+D, D for Database (10 October 2026): it joins Shift+D, Say Database, and Alt+D, Database Summary.
             // OPEN TEMPLATE DATABASE ON ALT+D (17 November 2026), the friendlier key, freed when Say Database took in the
             // summary; Alt+Shift+D is free.
-            miFileSampleDb= addItem(miFile, "Open Template &Database...",  "Open Template Database", Keys.Alt | Keys.D, openTemplateDbClicked);
+            // OPEN TEMPLATE DATABASE ON CONTROL+SHIFT+O (24 November 2026, Jamal: Control+Shift+O is a variation of Control+O):
+            // the templates are DbDo's special databases, as FileDir's Open Special Folder, on the same key, opens Windows'
+            // special folders. No menu letter: Open Database has O. Alt+D is free.
+            miFileSampleDb= addItem(miFile, "Open Template Database...",  "Open Template Database", Keys.Control | Keys.Shift | Keys.O, openTemplateDbClicked);
             // MERGE DATA ON ALT+SHIFT+M (23 November 2026): on Alt+M it ran before Windows saw the menu letter, so Alt+M
             // could not open the Misc menu, as Alt+M does in EdSharp and FileDir. M for Merge still.
-            miFileMerge   = addItem(miFile, "&Merge Data...",             "Merge Data",            Keys.Alt | Keys.Shift | Keys.M,       mergeClicked);
+            // MERGE DATA ON CONTROL+SHIFT+M (24 November 2026): merging changes data, which prefers Control; Semicolon and
+            // Slash now mark and unmark, so Control+Shift+M is free. EdSharp's Merge File takes the same key.
+            miFileMerge   = addItem(miFile, "&Merge Data...",             "Merge Data",            Keys.Control | Keys.Shift | Keys.M,       mergeClicked);
             addItem(miFile, "Transfer Import...",       "Transfer Import",  Keys.None,                            importTransferClicked);
             addItem(miFile, "Run Report...",           "Run Report",       Keys.Alt | Keys.Shift | Keys.R,       produceReportClicked);
             miFileExport  = addItem(miFile, "E&xport Data...",            "Export Data",      Keys.Control | Keys.Shift | Keys.X,                fileExportClicked);
@@ -14742,14 +14789,29 @@ namespace DbDo
             // which file/table is on screen is a file-level operation,
             // and the File menu carries Current Windows (F4)
             // by the same logic.
-            miSchemaSelectTable = addItem(miFile, "Choose Table...",          "Choose Table",         Keys.Control | Keys.T,                            schemaSelectTableClicked);
-            miSchemaSelectView  = addItem(miFile, "Choose &View...",            "Choose View",          Keys.None,                          schemaSelectViewClicked);
+            // CHOOSE TABLE RETIRED (24 November 2026, Jamal): "There is no need for two commands that open a table, one in the same
+            // window and one in a new one." Open Table, the new-window one, takes Control+T, T for Table; Control+F4 closes a
+            // window no longer wanted. The item stays, hidden and keyless, so a script or the Alternate Menu still finds it.
+            miSchemaSelectTable = addItem(miFile, "Choose Table...",          "Choose Table",         Keys.None,                            schemaSelectTableClicked);
+            miSchemaSelectTable.Visible = false;
+            // CHOOSE VIEW RETIRED WITH CHOOSE TABLE (24 November 2026): Open Table (Control+T) lists views beside tables
+            // and opens either in a new window. Hidden, keyless and
+            // still findable by name, as Choose Table is.
+            miSchemaSelectView  = addItem(miFile, "Choose View...",            "Choose View",          Keys.None,                          schemaSelectViewClicked);
+            miSchemaSelectView.Visible = false;
             miSchemaSwitch      = addItem(miFile, "Next Visited Table",         "Next Visited Table",         Keys.None,                 schemaSwitchClicked); miSchemaSwitch.Visible = false;  // Control+F6 steps through every table and view, these only the visited ones (5 November 2026)
             miSchemaSwitchPrev  = addItem(miFile, "Previous Visited Table",     "Previous Visited Table", Keys.None,   schemaSwitchPrevClicked); miSchemaSwitchPrev.Visible = false;  // as Switch Table (5 November 2026)
-            miSchemaSwitchAll     = addItem(miFile, "Next Table or View",     "Next Table or View",         Keys.Control | Keys.F6,            schemaSwitchAllClicked);
-            miSchemaSwitchAllPrev = addItem(miFile, "Previous Table or View", "Previous Table or View", Keys.Control | Keys.Shift | Keys.F6, schemaSwitchAllPrevClicked);
+            // CONTROL+F6 RETIRED (24 November 2026, Jamal: Control+F6 and Control+Shift+F6 "must distinguish themselves or not
+            // be used"). They switched this window to the next table or view: the same-window job Choose Table did. Control+T
+            // opens a table or view in a window of its own and Control+Tab moves among the windows, so these are hidden and
+            // keyless, still found by name.
+            miSchemaSwitchAll     = addItem(miFile, "Next Table or View",     "Next Table or View",         Keys.None,            schemaSwitchAllClicked);
+            miSchemaSwitchAllPrev = addItem(miFile, "Previous Table or View", "Previous Table or View", Keys.None, schemaSwitchAllPrevClicked);
+            miSchemaSwitchAll.Visible = false; miSchemaSwitchAllPrev.Visible = false;
             // OPEN TABLE BESIDE CHOOSE TABLE (21 November 2026): Open makes a new window, Choose changes this one.
-            miWindowOpenTable     = addItem(miFile, "Open Table...",                 "Open Table",            Keys.Control | Keys.Shift | Keys.O,   windowOpenTableClicked);
+            // OPEN TABLE ON CONTROL+T (24 November 2026): T applies to a table and O to a database, so Control+O opens a
+            // database, Control+Shift+O opens a template database, and Control+T opens a table or view. It opens; it never cycles.
+            miWindowOpenTable     = addItem(miFile, "Open &Table...",                 "Open Table",            Keys.Control | Keys.T,   windowOpenTableClicked);
             addSep(miFile);
             // NO WINDOW MENU (21 November 2026, Jamal's ruling): Alt+W reads wide, so the window commands live here, as
             // in EdSharp and FileDir, before Exit. Every key is a function key, Tab or none, so none takes a letter.
@@ -14794,7 +14856,8 @@ namespace DbDo
             // 'email', 'e_mail', 'mail') for the address; uses the
             // 'look' column for the subject; uses the 'notes' column
             // for the body. Falls back gracefully if any are missing.
-            miRecMail        = addItem(miEdit, "Mail Record", "Mail Record",  Keys.None, recMailClicked);
+            // MAIL ON CONTROL+M IN EVERY HOMER APP (24 November 2026), as in EdSharp and FileDir; it asks Marked or Current.
+            miRecMail        = addItem(miEdit, "&Mail Record", "Mail Record",  Keys.Control | Keys.M, recMailClicked);
             miRecUpdateColumn = addItem(miEdit, "&Replace...", "Replace", Keys.Control | Keys.R, recUpdateColumnClicked);
             // Regex Replace: same as Update Column but interprets the
             // search text as a .NET regex pattern and supports $1, $2
@@ -14811,12 +14874,17 @@ namespace DbDo
             // the canonical chord pair, chosen for symmetry (mark and
             // unmark differ only by the letter, not by an added
             // modifier).
-            miRecMark        = addItem(miEdit, "&Mark Record",                            "Mark Record",            Keys.Control | Keys.M,              recMarkClicked);
+            // SEMICOLON AND SLASH ONLY (24 November 2026, Jamal): the marking keys of every Homer app that marks, as in
+            // FileDir. They are taken in the grid's own key code (formKeyDown), so a semicolon or slash typed in a text box
+            // or an edited cell is never taken; the menu shows the key. Control+M is Mail Record, Control+Shift+M Merge Data.
+            miRecMark        = addItem(miEdit, "Mark Record",                            "Mark Record",            Keys.None,              recMarkClicked);
+            miRecMark.ShortcutKeyDisplayString = "SemiColon";
             miRecToggleMark  = addItem(miEdit, "Toggle Mark",          "Toggle Mark",       Keys.Control | Keys.Space,          recToggleMarkClicked);
             miEditNotes      = addItem(miEdit, "Edit Notes...",          "Edit Notes",          Keys.Alt | Keys.Shift | Keys.N,     editNotesClicked);
             miEditTags       = addItem(miEdit, "Edit &Tags...",           "Edit Tags",           Keys.Alt | Keys.Shift | Keys.T,     editTagsClicked);
             miEditUrl        = addItem(miEdit, "Edit &url...",            "Edit url",            Keys.Alt | Keys.Shift | Keys.U,     editUrlClicked);
-            miRecUnmark      = addItem(miEdit, "Unmark Record",                          "Unmark Record",          Keys.Control | Keys.Shift | Keys.M, recUnmarkClicked);
+            miRecUnmark      = addItem(miEdit, "Unmark Record",                          "Unmark Record",          Keys.None, recUnmarkClicked);
+            miRecUnmark.ShortcutKeyDisplayString = "Slash";
             // Bulk mark operations (v1.0.67). All operate on the
             // current filtered view -- they set, clear, or invert the
             // 'marked' column for every row currently visible. The
@@ -15565,8 +15633,8 @@ namespace DbDo
                 "Control+P. Takes the first of stream_url, url, stream, link or address that begins with http, or the current cell. Marked records make a play list, current one first. The player is mpv; if it is not installed, DbDo offers to fetch it.");
             add("Close Database",     "Close the currently open database", "");
             // ===== Window commands, on the File menu since 21 November 2026 =====
-            add("Open Table",         "Open a table in a new window",
-                "Open Table (Control+Shift+O) makes a new window; Choose Table (Control+T) changes the table in the same window. F6 cycles the current record's views.");
+            add("Open Table",         "Open a table or view in a new window",
+                "Open Table (Control+T) opens a table or view in a window of its own, or goes to the window it is already in. Control+Tab moves among the windows, and Control+F4 closes one. F6 cycles the current record's views.");
             add("Current Windows",    "Pick from the list of open recordset windows and activate the chosen one",
                 "F4. Each open recordset (typically a table) is an MDI child window.");
             add("Window Toggle",      "Switch between the two most recently used windows",
@@ -15727,7 +15795,7 @@ namespace DbDo
                 "Alt+S. It offers Look columns (the default columns), Prime columns (the primary key), Main columns, Standard columns, All columns, Choose columns and Type columns. The choice is remembered with the table. Formerly Select Columns.");
             add("Say Shown Columns",   "Say the columns the grid shows", "Shift+S. The answer to Show Columns, as Say Order answers Order Records.");
             add("Design Database",     "Build or change this database: add a table, table properties, or DbDo's own defs, files and maps tables",
-                "Alt+Shift+D. A button dialog: Add table, Defs table, Files table, Maps table and Table properties. DbDo's own tables open in a design window, where Control+F6 and Choose Table move among those three. With no database open, it offers New database and Open template database.");
+                "Alt+Shift+D. A button dialog: Add table, Defs table, Files table, Maps table and Table properties. DbDo's own tables open in a design window, where Open Table (Control+T) lists those three. With no database open, it offers New database and Open template database.");
             add("Generate Statistics",        "Read statistics of the records and columns you choose: profile, summary, frequency, group, relation or cross-tab", "Alt+Shift+S. The dataset dialog asks which columns, which records (all in view, the marked ones, or the current one), whether to arrange by column or by row, and the kind. The report opens in a window to read.");
             add("Generate Graphics",          "Draw a chart of the records and columns you choose, as a picture, a web page and an Excel workbook", "Alt+Shift+G. The same dataset dialog as Generate Statistics, with a Drawn by choice: Python draws a PNG, an SVG, a page with the takeaway and the numbers as a table, and a workbook with a native chart, into Documents, DbDo Charts; Excel draws the chart in Excel when Microsoft Office is installed.");
             add("Run Report",              "Render a saved report definition to a Markdown document. A report reads the whole physical table, not the grid view, so it comes out the same whatever your filter or order.",
@@ -16856,7 +16924,7 @@ namespace DbDo
         // iCol differs from iPrevVirtualCol; row label is spoken
         // when iRow differs from iPrevVirtualRow. If both differ
         // (corner jumps from Home / End), both are spoken.
-        private void virtMoveTo(int iRow, int iCol)
+        private void virtMoveTo(int iRow, int iCol, bool bCellOnly = false)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
             {
@@ -16906,6 +16974,8 @@ namespace DbDo
             // those fields, which would say the same words twice. A table with no look uses
             // "row" and the row's number. Each part is its own utterance, the Homer rule, so
             // the reader gives each its own phrase.
+            // bCellOnly (24 November 2026): Alt+DownArrow and Alt+UpArrow say the cell alone.
+            if (bCellOnly) { Say.say(sValue); return; }
             string sRowLabel = bRowChanged ? rowLabel(iRow, sHeader) : "";
             if (bRowChanged && bColChanged) Say.say(sRowLabel, sHeader, sValue);
             else if (bRowChanged) Say.say(sRowLabel, sValue);
@@ -16937,7 +17007,7 @@ namespace DbDo
         // table's edge the cursor stays and DbDo says which edge, as screen readers do
         // ("edge of table" in NVDA, "bottom of column" in JAWS), in the words DbDo's own
         // Left and Right Arrow already use.
-        private void virtStep(int iRowStep, int iColStep)
+        private void virtStep(int iRowStep, int iColStep, bool bCellOnly = false)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0) { Say.say("No rows"); return; }
             if (grid == null || grid.Columns.Count == 0) { Say.say("No columns"); return; }
@@ -16947,7 +17017,7 @@ namespace DbDo
             if (iRow > db.recordCount) { sayEdge("Last row"); return; }
             if (iCol < 0) { sayEdge("First column"); return; }
             if (iCol >= grid.Columns.Count) { sayEdge("Last column"); return; }
-            virtMoveTo(iRow, iCol);
+            virtMoveTo(iRow, iCol, bCellOnly);
         }
 
         // sayEdge: AT AN EDGE, WHICH EDGE AND THEN THE CELL (3 November 2026). "First column" alone left a person to
@@ -17722,12 +17792,14 @@ namespace DbDo
             if (keyData == (Keys.Alt | Keys.Control | Keys.Up))
             { virtStep(-1, 0); return true; }
             // ALT+DOWNARROW AND ALT+UPARROW (23 November 2026, Jamal's design of 31 October): the next or previous
-            // record, then the cell in the current column -- the short form of Alt+Control+DownArrow and UpArrow,
-            // edges said the same way.
+            // record in the current column. ONLY THE CELL (24 November 2026, Jamal: they read "the whole line rather
+            // than just the cell"): Alt+Control+DownArrow and UpArrow keep the screen readers' table model, the row's
+            // header (the record's look) and then the cell; the Alt forms say the cell alone, so each pair has its own
+            // role. Edges are said the same way.
             if (keyData == (Keys.Alt | Keys.Down))
-            { virtStep(1, 0); return true; }
+            { virtStep(1, 0, true); return true; }
             if (keyData == (Keys.Alt | Keys.Up))
-            { virtStep(-1, 0); return true; }
+            { virtStep(-1, 0, true); return true; }
             // NARRATOR'S READING KEYS (31 October 2026): Alt+Control+Shift with an arrow
             // reads without moving -- Left the row's header (the look), Up the column's
             // header, Right the whole row, Down the whole column -- and with Number Pad 5
@@ -22324,8 +22396,23 @@ namespace DbDo
                 // bitness.
                 if (string.Equals(Path.GetExtension(sOpenPath), ".xlsx", StringComparison.OrdinalIgnoreCase))
                 {
+                    // ANY WORKSHEET (24 November 2026): a workbook with more than one worksheet that holds anything asks
+                    // which to edit, in workbook order, the first selected. Save writes that one back; the others are
+                    // left as they are. Import Data (Control+Shift+I) takes every worksheet into a new database.
+                    string sSheetChosen = null;
+                    try
+                    {
+                        List<string> lSheets = XlsxNpoi.listSheets(sOpenPath);
+                        if (lSheets.Count > 1)
+                        {
+                            sSheetChosen = promptListChoice("Choose Worksheet", "Choose a worksheet of " + Path.GetFileName(sOpenPath) + " to edit:", lSheets, lSheets[0]);
+                            if (string.IsNullOrEmpty(sSheetChosen)) return;
+                        }
+                    }
+                    catch (Exception ex)
+                    { ErrorDialog.show(this, "Open Database", "Could not open the workbook: " + ex.Message); return; }
                     WorkbookOpen wo;
-                    try { wo = openWorkbookForEditing(sOpenPath); }
+                    try { wo = openWorkbookForEditing(sOpenPath, sSheetChosen); }
                     catch (Exception ex)
                     { ErrorDialog.show(this, "Open Database", "Could not open the workbook: " + ex.Message); return; }
                     string sPrevTempWb = sManagedTempPath;
@@ -22508,9 +22595,9 @@ namespace DbDo
             public List<int> Rows;
         }
 
-        private WorkbookOpen openWorkbookForEditing(string sXlsxPath)
+        private WorkbookOpen openWorkbookForEditing(string sXlsxPath, string sSheetName)
         {
-            XlsxNpoi.SheetModel model = XlsxNpoi.readFirstSheet(sXlsxPath);
+            XlsxNpoi.SheetModel model = XlsxNpoi.readSheet(sXlsxPath, sSheetName);
             string sDbPath = Path.Combine(Path.GetTempPath(),
                 "DbDo_managed_" + Guid.NewGuid().ToString("N") + ".db");
             if (File.Exists(sDbPath)) File.Delete(sDbPath);
@@ -24620,7 +24707,7 @@ namespace DbDo
             return false;
         }
 
-        // Import (Alt+I): build a brand-new DbDo database from another file
+        // Import Data (Control+Shift+I): build a brand-new DbDo database from another file
         // -- one standard-shape table per source table, plus maps and
         // defs -- and open it. This is distinct from Open (which mounts a
         // live ADO driver on the file as-is) and from Merge (which adds rows
@@ -25148,7 +25235,7 @@ namespace DbDo
             if (sColLower == "marked")
             {
                 LbcMessage.show(this,
-                    "Use Mark Record (Control+M) or Unmark Record (Control+U) to change the \"marked\" field.",
+                    "Use Mark Record (Semicolon), Unmark Record (Slash) or Toggle Mark (Space) to change the \"marked\" field.",
                     "Edit Cell", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
@@ -28294,7 +28381,7 @@ namespace DbDo
                 dlg.helpNote = "Add table makes a new table with DbDo's standard fields. Defs table holds each field's choices, descriptions and patterns. "
                     + "Files table holds the scripts, reports and settings the database carries. Maps table holds the links between records. "
                     + "Table properties shows the current table's fields, types, indexes and links, as Alt+Enter does. "
-                    + "DbDo's own tables open in a new window, where Control+F6 and Control+T move among those three, and Control+F4 closes it.";
+                    + "DbDo's own tables open in a new window, where Open Table (Control+T) lists those three, and Control+F4 closes it.";
                 sButton = dlg.runWithButtons(new string[] { "&Add table...", "&Defs table", "&Files table", "&Maps table", "Table &properties", "Cancel" });
             }
             if (string.IsNullOrEmpty(sButton) || sButton == "Cancel") return;
@@ -28342,10 +28429,9 @@ namespace DbDo
             return frame;
         }
 
-        // Open Table (Control+Shift+O): the Open-versus-Go-to
-        // pattern -- open the chosen table of the current database in
-        // a NEW window. Choose Table (Control+T) remains the same-window
-        // counterpart.
+        // Open Table (Control+T since 24 November 2026; Control+Shift+O before): open the chosen table of the current
+        // database in a NEW window, or go to the window it is already in. Choose Table, the same-window counterpart, is
+        // retired: Control+F4 closes a window no longer wanted.
         private void windowOpenTableClicked(object sender, EventArgs evArgs)
         {
             DbDoFrame frame = mdiFrame();
@@ -28356,30 +28442,29 @@ namespace DbDo
             // The hidden tables are DbDo's own; getUserTableNames leaves them
             // out. This was two names written into this one method, which is
             // why the table ring and the chooser still offered them.
-            lsNames = db.getUserTableNames();
+            // THE WINDOW DECIDES THE FAMILY (24 November 2026): in a design window, DbDo's own tables (defs, files, maps),
+            // as Choose Table offered there; elsewhere the database's own tables.
+            lsNames = tableFamilyNames();
             if (lsNames == null || lsNames.Count == 0) { Say.say("No tables found in this database file."); return; }
-            if (lsNames.Count == 0) { Say.say("No user tables to open."); return; }
-            // Offer only tables NOT already open in a window on this
-            // database; opening a table that is already on screen is
-            // Window-menu territory (F4 / Control+Tab), not Open
-            // Table territory.
-            List<string> lsOpen = new List<string>();
+            // EVERY TABLE IS OFFERED (24 November 2026). Open Table now does Choose Table's job too, so a table already in
+            // a window is still listed, and choosing it goes to that window rather than opening a second one. The first
+            // table not yet in a window is selected, as before.
+            Dictionary<string, DbDoForm> dOpen = new Dictionary<string, DbDoForm>(StringComparer.OrdinalIgnoreCase);
             foreach (Form frmChild in frame.MdiChildren)
             {
                 DbDoForm formChild = frmChild as DbDoForm;
-                if (formChild == null) continue;
+                if (formChild == null || formChild.IsDisposed) continue;
                 if (string.Equals(formChild.openDatabasePath, db.filePath, StringComparison.OrdinalIgnoreCase)
-                    && !string.IsNullOrEmpty(formChild.openTableName))
-                    lsOpen.Add(formChild.openTableName);
+                    && !string.IsNullOrEmpty(formChild.openTableName) && !dOpen.ContainsKey(formChild.openTableName))
+                    dOpen[formChild.openTableName] = formChild;
             }
-            List<string> lsClosed = new List<string>();
+            string sFirstClosed = lsNames[0];
             foreach (string sName in lsNames)
-                if (!containsIgnoreCase(lsOpen, sName)) lsClosed.Add(sName);
-            if (lsClosed.Count == 0)
-            { Say.say("All tables of this database are already open in windows."); return; }
-            lsNames = lsClosed;
-            sChosen = promptListChoice("Open Table", "Choose a table to open in a new window:", lsNames, lsNames[0], db.getTableDescriptions(lsNames));
+                if (!dOpen.ContainsKey(sName)) { sFirstClosed = sName; break; }
+            sChosen = promptListChoice("Open Table", "Choose a table to open in a new window:", lsNames, sFirstClosed, db.getTableDescriptions(lsNames));
             if (string.IsNullOrEmpty(sChosen)) return;
+            DbDoForm formOpen;
+            if (dOpen.TryGetValue(sChosen, out formOpen)) { formOpen.Activate(); return; }
             frame.openChildWindow(mode, db.filePath, sChosen);
         }
 
@@ -39328,7 +39413,7 @@ namespace DbDo
                          + "If a window is already showing that table of the current\n"
                          + "database, it is activated and the console binds to it. If\n"
                          + "none is, the table is opened in a new window, exactly as the\n"
-                         + "GUI's Open Table (Control+Shift+O) would. Contrast with\n"
+                         + "GUI's Open Table (Control+T) would. Contrast with\n"
                          + "Select-Table, which swaps the recordset of the current\n"
                          + "window in place rather than moving to another window.\n"
                          + "When the dot prompt is first opened, its context is the GUI\n"

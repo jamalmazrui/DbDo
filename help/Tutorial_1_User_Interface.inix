@@ -94,7 +94,7 @@ Hear=
 
 [step]
 
-Say=Adding Shift reverses: Control plus M marks, Control plus Shift plus M unmarks. Z is for sleep, so every Z key is a toggle. And each function key is a family: F2 edits, F3 searches again, F4 lists the windows open.
+Say=Adding Shift reverses: Control plus J jumps forward, Control plus Shift plus J jumps back. Z is for sleep, so every Z key is a toggle. And each function key is a family: F2 edits, F3 searches again, F4 lists the windows open.
 Key=F4
 Hear=Current Windows dialog, RadioTrail, stations
 Note=Confirm the wording with a live run: buildTutorials -live.
@@ -191,7 +191,7 @@ Hear=Control plus F2
 
 Say=Unmark, the reverse of Mark.
 Key=
-Hear=Control plus Shift plus M
+Hear=Slash
 
 [step]
 

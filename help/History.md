@@ -5,6 +5,19 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 24 November 2026, late night -- One way to open a table, and the suite's marking keys
+
+- **Control+T opens a table or a view in a new window,** T for Table. It is Open Table, which was on Control+Shift+O. Choosing a table that is already in a window goes to that window. It only opens; Control+Tab and Control+Shift+Tab move among the windows, and Control+F4 closes one. Choose Table and Choose View, which changed the table in the same window, are retired, and so are Next Table or View and Previous Table or View on Control+F6 and Control+Shift+F6, which did the same job a step at a time. In a design window, Control+T lists defs, files and maps.
+- **Control+Shift+O opens a template database,** a variation of Open, as FileDir's Open Special Folder is on the same key. It was Alt+D, which is now free.
+- **Import Data stays on Control+Shift+I,** beside Export Data on Control+Shift+X.
+- **A workbook with several worksheets asks which one to edit** when you open it with Control+O. Control+S writes that worksheet back, keeping formulas, formatting and the other worksheets. Import Data still takes every worksheet into a new database.
+- **Semicolon marks and Slash unmarks,** the same keys as in FileDir; they are now the only keys for Mark Record and Unmark Record.
+- **Control+M is Mail Record,** as Mail is in EdSharp and FileDir. It asks Marked or Current when records are marked.
+- **Control+Shift+M is Merge Data,** since merging changes data; it was Alt+Shift+M. EdSharp's Merge File moves to the same key.
+- **> marks and moves to the next record, and < unmarks and moves to the next,** from the home row. They had been retired because typing them also fed the type-ahead search. Now, like Space, Semicolon and Slash, each goes to the search only when typed within a second of a letter or digit.
+- **Alt+DownArrow and Alt+UpArrow say only the cell.** They said the record's look first, so they sounded like the whole line. Alt+Control+DownArrow and UpArrow keep the screen readers' table model, the look and then the cell.
+- **This needs HomerDev 1.289.0.**
+
 ## 24 November 2026, night -- Cleaner template updates
 
 Update Copies from Templates did its job: every copy was replaced, each with a dated backup beside it. Its log showed three rough edges, now smoothed.

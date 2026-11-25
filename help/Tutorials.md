@@ -1188,7 +1188,7 @@ The rules behind every key. A letter is the first letter of a word: Control plus
 
 ### Step 14: F4
 
-Adding Shift reverses: Control plus M marks, Control plus Shift plus M unmarks. Z is for sleep, so every Z key is a toggle. And each function key is a family: F2 edits, F3 searches again, F4 lists the windows open.
+Adding Shift reverses: Control plus J jumps forward, Control plus Shift plus J jumps back. Z is for sleep, so every Z key is a toggle. And each function key is a family: F2 edits, F3 searches again, F4 lists the windows open.
 
 Screen reader:
 
@@ -1313,7 +1313,7 @@ Unmark, the reverse of Mark.
 
 Screen reader:
 
-- Control plus Shift plus M
+- Slash
 
 ### Step 30
 
@@ -1458,7 +1458,7 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 15
 
-Control plus Shift plus J jumps backward to the match before, as Shift reverses everywhere in DbDo. Another database opens with Control plus O, and a template with Alt plus D, D for Database.
+Control plus Shift plus J jumps backward to the match before, as Shift reverses everywhere in DbDo. Another database opens with Control plus O, and a template with Control plus Shift plus O, a variation of Open.
 
 ### Step 16: Alt+F1
 
@@ -1678,9 +1678,9 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 17: Control+M
+### Step 17: SemiColon
 
-Escape. To keep stations, mark them. Control plus M, M for Mark, marks the station I am on, and Control plus Shift plus M unmarks: Shift reverses.
+Escape. To keep stations, mark them. Semicolon marks the station I am on, and Slash unmarks it; FileDir uses the same keys.
 
 Screen reader:
 
@@ -1760,7 +1760,7 @@ Mark a record.
 
 Screen reader:
 
-- Control plus M
+- Semicolon
 
 ### Step 27
 
@@ -1791,9 +1791,9 @@ Screen reader:
 - DbDo
 - DbDo ready
 
-### Step 3: Alt+D
+### Step 3: Control+Shift+O
 
-JobTrail is a template for exactly that. Its records are samples, plainly named as samples, to show the shape before your own go in.
+JobTrail is a template for exactly that. Its records are samples, plainly named as samples, to show the shape before your own go in. Control plus Shift plus O, Open Template Database, lists the templates.
 
 Screen reader:
 
@@ -1813,11 +1813,11 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 5: Control+T
 
-Control plus T, Choose Table, lists its tables: jobs, contacts, actions, documents and stories. I choose jobs.
+Control plus T, T for Table, Open Table, lists its tables: jobs, contacts, actions, documents and stories. I choose jobs, and it opens in a window of its own.
 
 Screen reader:
 
-- Choose Table dialog, actions
+- Open Table dialog
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -2026,7 +2026,7 @@ Screen reader:
 - DbDo
 - DbDo ready
 
-### Step 3: Alt+D
+### Step 3: Control+Shift+O
 
 BookTrail is the template for it.
 
@@ -2249,7 +2249,7 @@ Screen reader:
 - DbDo
 - DbDo ready
 
-### Step 3: Alt+D
+### Step 3: Control+Shift+O
 
 MusicTrail holds a hundred albums, ten for each of ten genres, and the performers who recorded them.
 
@@ -2391,9 +2391,9 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 17: Control+Shift+O
+### Step 17: Control+T
 
-Ranked first. A table can also have a window of its own: Control plus Shift plus O, Open Table, opens performers beside the albums.
+Ranked first. Every table can have a window of its own: Control plus T, Open Table, opens performers beside the albums.
 
 Screen reader:
 
@@ -2469,7 +2469,7 @@ One want: to know what else is ready-made, and keep my copies current.
 
 ### Step 2: Enter
 
-TechTraining first: more than a thousand free presentations about technology and accessibility, in audio, video and on the web, newest first. Alt plus D, and I choose TechTraining.
+TechTraining first: more than a thousand free presentations about technology and accessibility, in audio, video and on the web, newest first. Control plus Shift plus O, Open Template Database, and I choose TechTraining.
 
 Screen reader:
 
@@ -2499,11 +2499,11 @@ Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 5: Control+T
 
-Escape. BlindCreations next: apps, books and presentations made by or for blind people, and the people who made them, linked by kind. Alt plus D, BlindCreations, and Control plus T to the creators.
+Escape. BlindCreations next: apps, books and presentations made by or for blind people, and the people who made them, linked by kind. Control plus Shift plus O, BlindCreations, and Control plus T to the creators.
 
 Screen reader:
 
-- Choose Table dialog, apps
+- Open Table dialog
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -2537,7 +2537,7 @@ ContactTrail keeps people and the groups they belong to. Its Emergency Contacts 
 
 ### Step 10
 
-RecipeTrail keeps recipes and their ingredients. Mark the recipes you mean to cook with Control plus M, then its Shopping List script lists each ingredient once, grouped by where it sits in the store.
+RecipeTrail keeps recipes and their ingredients. Mark the recipes you mean to cook with Semicolon, then its Shopping List script lists each ingredient once, grouped by where it sits in the store.
 
 ### Step 11
 
@@ -3241,7 +3241,7 @@ mark.
 
 Screen reader:
 
-- A flag on a record, for a later command to act on; Control plus M sets it, and Shift reverses it.
+- A flag on a record, for a later command to act on; Semicolon sets it, and Slash clears it.
 
 ### Step 9
 
@@ -3329,7 +3329,7 @@ template database.
 
 Screen reader:
 
-- A ready-made database that comes with DbDo, opened with Alt plus D; you work in your own copy of it.
+- A ready-made database that comes with DbDo, opened with Control plus Shift plus O; you work in your own copy of it.
 
 ### Step 20
 

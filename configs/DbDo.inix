@@ -138,25 +138,27 @@ Open url=Control+Shift+U, Open the current record's url in the web browser
 Pick Value=Control+F2, Pick a value from the current field's fixed values
 Replace=Control+R, Replace text in the fields and records you choose
 Replace with Regex=Control+Shift+R, Replace a regular expression's matches in the fields and records you choose
-Mail Record=None, Send an email message made from the current record
+Mail Record=Control+M, Send an email message to the current record or the marked ones
 
 ; ===== Mark menu =====
-Mark Record=Control+M, Mark the current record
+Mark Record=SemiColon, Mark the current record
 Toggle Mark=Control+Space or Space, Mark or unmark the current record
 Edit Notes=Alt+Shift+N, Edit the current record's notes
 Edit Tags=Alt+Shift+T, Edit the current record's tags
 Edit url=Alt+Shift+U, Edit the current record's url
-Unmark Record=Control+Shift+M, Unmark the current record
+Unmark Record=Slash, Unmark the current record
 Cursor Row Start=Home, Move to the record's first column
 Cursor Row End=End, Move to the record's last column
 Cursor Column First=Control+Home, Move to the column's first record
 Cursor Column Last=Control+End, Move to the column's last record
 Cursor Grid Start=Alt+Control+Home, Move to the first column of the first record
 Cursor Grid End=Alt+Control+End, Move to the last column of the last record
-Cell Down=Alt+Control+DownArrow or Alt+DownArrow, Move one cell down and say it
+Cell Down=Alt+Control+DownArrow, Move one cell down and say the record's look, then the cell
+Cell Value Down=Alt+DownArrow, Move one cell down and say only the cell
 Cell Left=Alt+Control+LeftArrow, Move one cell left
 Cell Right=Alt+Control+RightArrow, Move one cell right
-Cell Up=Alt+Control+UpArrow or Alt+UpArrow, Move one cell up and say it
+Cell Up=Alt+Control+UpArrow, Move one cell up and say the record's look, then the cell
+Cell Value Up=Alt+UpArrow, Move one cell up and say only the cell
 Column Top=Alt+Control+PageUp, Move to the column's first record
 Column Bottom=Alt+Control+PageDown, Move to the column's last record
 Say Row Header=Alt+Control+Shift+LeftArrow, Say the record's look without moving
@@ -168,9 +170,9 @@ Mark to First=Control+Shift+Home, Mark every record from the first to the curren
 Mark to Last=Control+Shift+End, Mark every record from the current one to the last
 Unmark to First=Alt+Control+Shift+Home, Unmark every record from the first to the current one
 Unmark to Last=Alt+Control+Shift+End, Unmark every record from the current one to the last
-Mark and Next=Shift+DownArrow, Mark the current record and go to the next
+Mark and Next=Shift+DownArrow or Shift+Period, Mark the current record and go to the next
 Mark and Previous=Shift+UpArrow, Mark the current record and go to the previous
-Unmark and Next=Control+Shift+DownArrow, Unmark the current record and go to the next
+Unmark and Next=Control+Shift+DownArrow or Shift+Comma, Unmark the current record and go to the next
 Unmark and Previous=Control+Shift+UpArrow, Unmark the current record and go to the previous
 Next Marked=Control+DownArrow, Go to the next marked record
 Previous Marked=Control+UpArrow, Go to the previous marked record
@@ -194,12 +196,11 @@ Inspect Record=Alt+I, Show the current record field by field, with its related r
 View Cycle=F6, Show the current record in its next view: list, edit or inspect
 View Cycle Back=Shift+F6, Show the current record in its previous view: list, edit or inspect
 Go to Record=Control+G, Go to a record by its number, a percent or text
-Next Table or View=Control+F6, Switch to the next open table or view
-Previous Table or View=Control+Shift+F6, Switch to the previous open table or view
+Next Table or View=None, Switch to the next open table or view
+Previous Table or View=None, Switch to the previous open table or view
 Next Visited Table=None, Switch to the next visited table
 Previous Visited Table=None, Switch to the previously visited table
-Choose Table=Control+T, Open a table of the database in this window
-Open Table=Control+Shift+O, Open a table of the database in a new window
+Open Table=Control+T, Open a table or view in a new window, or go to its window
 Current Windows=F4, Switch to a window you pick from the list
 Window Toggle=None, Switch between the two windows used last
 Next Window=Control+Tab, Switch to the next window
@@ -311,9 +312,9 @@ Save As=Control+Shift+S, Save a copy of the open database under another name or 
 Backup Database=None, Save a dated copy of the open database
 Compare Database=None, Compare two databases, once this is built
 Import Data=Control+Shift+I, Make a new database from a spreadsheet, Access, dBASE or other file
-Open Template Database=Alt+D, Open one of the template databases that come with DbDo
+Open Template Database=Control+Shift+O, Open one of the template databases that come with DbDo
 Design Database=Alt+Shift+D, Build or change this database: add a table, table properties, or DbDo's own defs, files and maps tables
-Merge Data=Alt+Shift+M, Add records from a Markdown table, JSON or Inix file to the current table
+Merge Data=Control+Shift+M, Add records from a Markdown table, JSON or Inix file to the current table
 Transfer Import=None, Add records from another database to the current table through a transfer map
 Run Report=Alt+Shift+R, Make a document from a saved report of the current table
 Choose View=None, Open a view of the database in this window
@@ -502,7 +503,7 @@ Provider=Microsoft.ACE.OLEDB.12.0;Data Source={folder};Extended Properties="text
 ;   InitialTable   The table opened in the first window when the
 ;                  database is opened, so there is always a starting
 ;                  window. Additional tables open in their own windows
-;                  via Open Table (Control+Shift+O). A single table
+;                  via Open Table (Control+T). A single table
 ;                  name; if you pin one here it wins over the
 ;                  last-used table.
 ;
