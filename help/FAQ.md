@@ -22,14 +22,15 @@ No. Spreadsheets and Word documents are written without Office.
 
 ## What is JobTrail?
 
-A job search database that comes with DbDo and opens the first time you run it.
-It keeps jobs, contacts, documents, interview stories and a log of every step
-you take. The spoken tutorials use it throughout.
+A job search database that comes with DbDo. It keeps jobs, contacts, documents,
+interview stories and a log of every step you take. Control+Shift+O, Open
+Template Database, opens it. The first time you run DbDo, it opens RadioTrail,
+a database of Internet radio stations, instead.
 
 ## How do I learn it?
 
-Help, Play Tutorials. Fifteen walkthroughs, about three minutes each, meant to
-be heard in order.
+Alt+F12, Play Tutorials, on the Help menu. Ten spoken lessons, three to five
+minutes each, meant to be heard in order.
 
 ## I forgot a key. How do I find it?
 

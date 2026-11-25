@@ -25,36 +25,53 @@ newer release and offers to install it.
 
 ## Quick start
 
-The first time it runs, DbDo opens **JobTrail**, a job search database that
-comes with it. JobTrail keeps the jobs you are after, the people you meet, the
-documents you send, the stories you tell in interviews, and a log of every step
-you take -- the log an unemployment office or a rehabilitation counselor asks
-for.
+The first time it runs, DbDo opens **RadioTrail**, a database of Internet radio
+stations that comes with it. One table of stations is easy to understand, and
+you hear DbDo do something useful at once.
 
-Five things to try:
+Six things to try:
 
 - **Arrow through a table.** Each row is one record. Down and Up move between
   records; Left and Right move between fields. Shift+C, Say Cell, tells you
   which field you are on and what it holds.
-- **Add a record.** Control+N, New. Tab through the fields and press
-  Control+Enter to save.
+- **Listen.** Control+P, Play Media, plays the station you are on in the Homer
+  Player. Escape closes the player.
+- **Filter.** Control+F, Filter Records, keeps only the records that match, such
+  as the stations in your city. Control+Shift+F clears the filter.
 - **Find something.** Type the first letters of what you want and the list goes
-  there. Control+K, Find, searches every field.
-- **Choose what you hear.** Alt+S, Show Columns, picks the fields each row
-  speaks.
-- **Get something out.** Alt+Shift+R runs a Report, such as the Work Search
-  Record for a claim.
+  there. Control+K, Keywords, finds the next record with your words in any
+  field.
+- **Mark records.** Semicolon marks the record you are on and Slash unmarks it;
+  Space switches the mark either way. A command that can act on several
+  records, such as Play Media, then asks whether you mean the marked ones or
+  the current one.
+- **Open another database.** Control+Shift+O, Open Template Database, offers the
+  others that come with DbDo: JobTrail for a job search, BookTrail for books,
+  MusicTrail for music and more. Control+O, Open Database, opens your own files,
+  spreadsheets and text files included.
 
 ## Learning more
 
-- **Play Tutorials,** on the Help menu, plays fifteen short spoken walkthroughs
-  that follow one job seeker through JobTrail. Take them in order: each one
-  builds on the last.
+These keys work the same way in every Homer app:
+
+- **Shift+F1, What This Does,** says what the control with focus does.
+- **Control+Slash, Where Am I,** says where you are and what you can press.
+- **Control+F1, Key Describer,** makes each key say what it does instead of
+  doing it. Press Control+F1 again to turn it off.
+- **Alt+F10, Alternate Menu,** lists every command, by menu, name or key, and
+  runs the one you choose.
+- **Alt+F12, Play Tutorials,** plays ten short spoken lessons, from an overview
+  to RadioTrail, JobTrail, BookTrail, MusicTrail and the analysis of a dataset.
+  Take them in order: each one builds on the last.
+
+The documents are on the Help menu:
+
 - **[DbDo.md](help/DbDo.md)** (F1) is the full guide.
-- **[Hotkeys.md](help/Hotkeys.md)** (Control+Shift+F1) lists every key, by menu, by key and by
-  command, with the reason for each.
+- **[History.md](help/History.md)** (Control+Shift+F1, History of Changes) says
+  what changed in each version, newest first.
+- **[Hotkeys.md](help/Hotkeys.md)** lists every key, by menu, by key and by
+  command.
 - **[FAQ.md](help/FAQ.md)** answers common questions.
-- **[History.md](help/History.md)** (Shift+F1) says what changed in each version.
 - **[Developer.md](help/Developer.md)** explains how to build DbDo from its source.
 
 ## Convention over configuration: a few nouns and one junction

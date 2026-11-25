@@ -16,6 +16,7 @@ Press **Control+Shift+F1** inside DbDo to open this file in your browser, or typ
 - **Control+Shift+M is Merge Data,** since merging changes data; it was Alt+Shift+M. EdSharp's Merge File moves to the same key.
 - **> marks and moves to the next record, and < unmarks and moves to the next,** from the home row. They had been retired because typing them also fed the type-ahead search. Now, like Space, Semicolon and Slash, each goes to the search only when typed within a second of a letter or digit.
 - **Alt+DownArrow and Alt+UpArrow say only the cell.** They said the record's look first, so they sounded like the whole line. Alt+Control+DownArrow and UpArrow keep the screen readers' table model, the look and then the cell.
+- **The quick start teaches today's keys.** It said JobTrail opens first, that there are fifteen spoken walks, and that Shift+F1 opens History and Control+Shift+F1 Hotkeys. RadioTrail opens first, there are ten lessons, Shift+F1 is What This Does and Control+Shift+F1 is History of Changes. It now also teaches the help keys every Homer app shares. The FAQ says the same, and the guide gives Play Media its key, Control+P, where it still said Alt+Shift+P.
 - **This needs HomerDev 1.289.0.**
 
 ## 24 November 2026, night -- Cleaner template updates
