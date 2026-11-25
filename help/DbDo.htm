@@ -430,8 +430,6 @@ below):</p>
 <ul>
 <li><strong>Current Windows</strong> (F4) lists every open window; pick
 one to jump to it.</li>
-<li><strong>Window Toggle</strong> flips between the current window and
-the one you were in before it.</li>
 <li><strong>Next Window</strong> (Control+Tab) and <strong>Previous
 Window</strong> (Control+Shift+Tab) cycle through them.</li>
 <li><strong>Say Windows Open</strong> (Shift+F4) speaks how many windows
@@ -752,6 +750,9 @@ finds, with the last Jump text, in the field Jump searched.</li>
 <li><strong>Read Keywords Matches</strong> (Alt+K) reads the records
 Keywords finds, with the last keywords.</li>
 </ul>
+<p>Add Shift to Alt+J or Alt+K to read only the marked records among
+them, as Alt+Shift+W does for Read Wide. Alt+Shift+B stays List
+Bookmarks, the way to go to a bookmark.</p>
 <p>Each pairs with a Say key: Shift+B says the bookmark, Shift+J the
 Jump text and Shift+K the keywords; Alt with the same letter reads the
 records they find. Press twice to see them in a window.</p>
@@ -937,12 +938,22 @@ finds exactly the text you type.</p>
 <h3 id="navigating-records">Navigating records</h3>
 <p>Beyond the grid’s keys, the cursor moves with these commands:</p>
 <ul>
-<li><strong>Go to Record</strong> (Control+G) jumps to a record number;
-<strong>Go to Record Again</strong> (Alt+G) repeats it. <strong>Jump
-Again</strong> (Alt+Shift+J) and <strong>Keywords Again</strong>
-(Alt+Shift+K) repeat those searches forward; F3 repeats whichever search
-came last. Alt+J and Alt+K read what those searches find without moving
-(see Reading the grid aloud).</li>
+<li><strong>Go to Record</strong> (Control+G) takes one of these:
+<ul>
+<li>a number, such as 42, to go to that record;</li>
+<li>a plus or minus and a number, such as +5 or -5, to move that many
+records forward or back;</li>
+<li>a percent sign and a number, such as %50, to go that far through the
+records in view: %50 is halfway;</li>
+<li>a plus or minus, a percent sign and a number, such as +%10 or -%10,
+to move that percent of the records in view;</li>
+<li>or text, to go to the column whose name holds it.</li>
+</ul></li>
+<li><strong>Search Next</strong> (F3) and <strong>Search
+Previous</strong> (Shift+F3) repeat whichever came last: Go to Record,
+Jump, Keywords or Find with Regex. A Go to is done again the same way by
+either key, so +5 then F3 moves 5 more. Alt+J and Alt+K read what those
+searches find without moving (see Reading the grid aloud).</li>
 <li><strong>Keywords</strong> (Control+K) searches for text;
 <strong>Reverse Keywords</strong> (Control+Shift+K) searches backward;
 <strong>Search Next</strong> (F3) and <strong>Search Previous</strong>
@@ -952,9 +963,9 @@ Regex</strong> (Control+F3) and <strong>Reverse Find with Regex</strong>
 <li><strong>Jump</strong> (Control+J) and <strong>Reverse Jump</strong>
 (Control+Shift+J) go to the next or previous record whose current field
 holds the text you type, whatever its case.</li>
-<li><strong>Jump to Next Initial</strong> steps to the next record whose
-current column starts with a new letter — type-ahead through a sorted
-column.</li>
+<li><strong>Initial Change</strong>, on the Navigate menu, goes to the
+next record whose current column starts with another letter: a quick way
+through a sorted column, as in FileDir.</li>
 </ul>
 <h3 id="editing-records">Editing records</h3>
 <ul>
@@ -2069,18 +2080,6 @@ is reachable through its menu or through Alternate Menu (Alt+F10).</p>
 <td>Control+G</td>
 </tr>
 <tr>
-<td>Go to Record Again</td>
-<td>Alt+G</td>
-</tr>
-<tr>
-<td>Jump Again</td>
-<td>Alt+Shift+J</td>
-</tr>
-<tr>
-<td>Keywords Again</td>
-<td>Alt+Shift+K</td>
-</tr>
-<tr>
 <td>Keywords</td>
 <td>Control+K</td>
 </tr>
@@ -2216,6 +2215,14 @@ family.</p>
 <tr>
 <td>Read Keywords Matches</td>
 <td>Alt+K</td>
+</tr>
+<tr>
+<td>Read Jump Matches Marked</td>
+<td>Alt+Shift+J</td>
+</tr>
+<tr>
+<td>Read Keywords Matches Marked</td>
+<td>Alt+Shift+K</td>
 </tr>
 <tr>
 <td>Read Wide from Current</td>
@@ -2417,7 +2424,7 @@ family.</p>
 <td>Control+F8</td>
 </tr>
 <tr>
-<td>Jump to Next Initial</td>
+<td>Initial Change</td>
 <td>—</td>
 </tr>
 <tr>
@@ -2435,10 +2442,6 @@ family.</p>
 <tr>
 <td>Hotkey Summary</td>
 <td>Help menu; Control+Slash pressed twice</td>
-</tr>
-<tr>
-<td>Open as Managed Copy</td>
-<td>—</td>
 </tr>
 <tr>
 <td>Field Statistics</td>
@@ -2513,10 +2516,6 @@ before Exit DbDo.</p>
 <tr>
 <td>Previous Window</td>
 <td>Control+Shift+Tab</td>
-</tr>
-<tr>
-<td>Window Toggle</td>
-<td>—</td>
 </tr>
 <tr>
 <td>Say Windows Open</td>

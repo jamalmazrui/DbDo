@@ -12804,7 +12804,7 @@ namespace DbDo
     // keys: Current Windows (F4), Say Windows Open (Shift+F4),
     // Close Window (Control+F4), Close All But Current Window
     // (Control+Shift+F4), Next Window (Control+Tab), Previous Window
-    // (Control+Shift+Tab), and Window Toggle (Shift+W). The handlers
+    // (Control+Shift+Tab); Window Toggle is retired (25 November 2026). The handlers
     // live on DbDoForm (whose menu and ProcessCmdKey dispatch already
     // exist); they act through this frame. The frame itself carries
     // no MenuStrip: each child keeps its own menu bar, so the 200+
@@ -14910,8 +14910,8 @@ namespace DbDo
             // Slash now mark and unmark, so Control+Shift+M is free. EdSharp's Merge File takes the same key.
             // MERGE DATA HIDDEN, NO KEY (25 November 2026): Import Data now merges a file's table into the table in this
             // window, from every format Merge Data read and more, and asks whose values are final, so one command does
-            // what two did. Merge Data stays reachable by name in the Alternate Menu for anybody who used it; Control+
-            // Shift+M is free.
+            // what two did. Control+Shift+M is free. A hidden item is not in the Alternate Menu either (the kit lists
+            // only available items), so Merge Data is retired; its code stays, for a rollback.
             miFileMerge   = addItem(miFile, "Merge Data...",             "Merge Data",            Keys.None,       mergeClicked); miFileMerge.Visible = false;
             addItem(miFile, "Transfer Import...",       "Transfer Import",  Keys.None,                            importTransferClicked);
             addItem(miFile, "Run Report...",           "Run Report",       Keys.Alt | Keys.Shift | Keys.R,       produceReportClicked);
@@ -14954,7 +14954,11 @@ namespace DbDo
             miWindowCurrent       = addItem(miFile, "Current Windows...",            "Current Windows",       Keys.F4,                              windowCurrentClicked);
             miWindowNext          = addItem(miFile, "Next Window",                   "Next Window",           Keys.Control | Keys.Tab,              windowNextClicked);
             miWindowPrevious      = addItem(miFile, "Previous Window",               "Previous Window",       Keys.Control | Keys.Shift | Keys.Tab, windowPreviousClicked);
-            miWindowToggle        = addItem(miFile, "Window Toggle",                 "Window Toggle",         Keys.None,                            windowToggleClicked);
+            // RETIRED ITEMS (25 November 2026, the menu review Jamal asked for: "a window-toggle command, which should be
+            // obsolete"). A retired item is hidden, which also keeps it out of the Alternate Menu, and has no key; its code
+            // stays, so showing it again is the whole rollback. Window Toggle: Control+Tab and Control+Shift+Tab move among
+            // the windows, and F4 picks one, so a toggle between the last two is a third way to do one job.
+            miWindowToggle        = addItem(miFile, "Window Toggle",                 "Window Toggle",         Keys.None,                            windowToggleClicked); miWindowToggle.Visible = false;
             miWindowSayOpen       = addItem(miFile, "Say Windows Open",              "Say Windows Open",      Keys.Shift | Keys.F4,                 windowSayOpenClicked);
             miWindowClose         = addItem(miFile, "Close Window",                  "Close Window",          Keys.Control | Keys.F4,               windowCloseClicked);
             miWindowCloseAllBut   = addItem(miFile, "Close All but Current Window",  "Close All but Current Window", Keys.Control | Keys.Shift | Keys.F4, windowCloseAllButClicked);
@@ -15109,13 +15113,22 @@ namespace DbDo
             // THE AGAIN GROUP (21 November 2026, key groups): Alt and a search's letter repeats that search, named "<command> Again", as Go to Percent
             // Again and Jump to Line Again in EdSharp and Jump Again and Keywords Again in FileDir. Repeat Go to is Go to Record
             // Again; Jump Again and Keywords Again are new here, so DbDo and FileDir share them.
-            miRecGoToRepeat  = addItem(miNavigate, "Go to Record Again",                 "Go to Record Again",  Keys.Alt | Keys.G,            repeatGoToClicked);
+            // RETIRED (25 November 2026, Jamal: "retire Alt+G and Alt+J for repeating a go-to or jump. Instead, use the F3
+            // and Shift+F3 mechanism."). F3 and Shift+F3 repeat a Go to Record as they repeat a search, both the same way,
+            // since the entry already says where to go: +5 goes 5 on again, either key. Hidden, so not in the Alternate
+            // Menu; its code stays for a rollback. Alt+G is free.
+            miRecGoToRepeat  = addItem(miNavigate, "Go to Record Again",                 "Go to Record Again",  Keys.None,            repeatGoToClicked); miRecGoToRepeat.Visible = false;
             // AGAIN ON ALT+SHIFT (25 November 2026, Jamal's request): Alt+J and Alt+K now read the records Jump and
             // Keywords find, without moving; their repeats keep a key with Shift added. This departs from the again
             // group of 21 November (Alt and a search's letter repeats it, as FileDir's Alt+J and Alt+K still do), so
             // it is one place to undo: swap the keys here and in Read Jump Matches and Read Keywords Matches.
-            addItem(miNavigate, "Jump Again",     "Jump Again",     Keys.Alt | Keys.Shift | Keys.J, jumpAgainClicked);
-            addItem(miNavigate, "Keywords Again", "Keywords Again", Keys.Alt | Keys.Shift | Keys.K, keywordsAgainClicked);
+            // RETIRED THE SAME DAY (25 November 2026, Jamal: use Alt+Shift+B, J and K "to say like the unshifted versions
+            // but only marked rows, consistent with that pattern" if they are unbound). Search Next (F3) repeats the last
+            // Jump or Keywords already, and Control+J or Control+K then Enter repeats either one by name, so these two
+            // did no job of their own; Alt+Shift+J and Alt+Shift+K now read the marked matches. List Bookmarks keeps
+            // Alt+Shift+B: it is the only way to go to a bookmark, so Read Bookmarked Records has no marked form.
+            ToolStripMenuItem miJumpAgain = addItem(miNavigate, "Jump Again",     "Jump Again",     Keys.None, jumpAgainClicked); miJumpAgain.Visible = false;
+            ToolStripMenuItem miKeywordsAgain = addItem(miNavigate, "Keywords Again", "Keywords Again", Keys.None, keywordsAgainClicked); miKeywordsAgain.Visible = false;
             addSep(miNavigate);
             // Search families. Three distinct families with their
             // own chord pairs, plus a unified F3 / Shift+F3 "repeat
@@ -15160,6 +15173,10 @@ namespace DbDo
             miRecEnterChild      = addItem(miNavigate, "Enter Child Table...", "Enter Child Table",      Keys.Alt | Keys.Right, recEnterChildClicked);
             miRecExitChild       = addItem(miNavigate, "Exit Child Table",        "Exit Child Table",       Keys.Alt | Keys.Left,  recExitChildClicked);
             miRecExitChildToRoot = addItem(miNavigate, "Exit to Root Table",    "Exit to Root Table", Keys.Alt | Keys.Home,  recExitChildToRootClicked);
+            // INITIAL CHANGE (25 November 2026, the menu review): FileDir's name for the same move, on the same menu,
+            // without a key in either. It was Jump to Next Initial, on the Misc menu, and asked which column to track;
+            // the column under the cursor is the one Jump, Say Header and every column command use, so it asks nothing.
+            miJumpNextInitial = addItem(miNavigate, "Initial Change",          "Initial Change",     Keys.None,             jumpNextInitialClicked);
 
             // ===== Query menu: read aspects of the data =====
             miQuery = addMenu("&Query");
@@ -15193,7 +15210,10 @@ namespace DbDo
             // ALT+Y SAYS ALL, SHIFT+Y THE MARKED (9 November 2026), as in FileDir.
             miSaySayYield        = addItem(miSay, "Say &Yield",       "Say Yield",        Keys.Alt | Keys.Y,                 saySayYield);
             // Alt+Y as well (suite manifest): the Say family's Alt+letter, as in EdSharp.
-            miSaySayTables       = addItem(miSay, "Say Tables",      "Say Tables",        Keys.None,              saySayTables);
+            // RETIRED (25 November 2026): Say Tables said the tables visited this session, the history behind Next and
+            // Previous Visited Table, which were retired when Open Table (Control+T) gave each table a window. Say
+            // Windows Open (Shift+F4) says the open ones, and Say Database (Shift+D) every table.
+            miSaySayTables       = addItem(miSay, "Say Tables",      "Say Tables",        Keys.None,              saySayTables); miSaySayTables.Visible = false;
             // Say Marked moved off Shift+L (which is now Say Column from
             // Cursor) to Alt+Shift+M. Mark Record itself uses Control+M.
             // Shift+E: Say Edited -- the 'edited' value, rendered in
@@ -15249,6 +15269,9 @@ namespace DbDo
             // those Say commands, so these have no trigger letter.
             addItem(miSay, "Read Jump Matches",                "Read Jump Matches",             Keys.Alt | Keys.J,                  readJumpMatches);
             addItem(miSay, "Read Keywords Matches",            "Read Keywords Matches",         Keys.Alt | Keys.K,                  readKeywordsMatches);
+            // SHIFT FOR MARKED (25 November 2026), as Alt+Shift+W, L, H and Y read or count only the marked records.
+            addItem(miSay, "Read Jump Matches Marked",         "Read Jump Matches Marked",      Keys.Alt | Keys.Shift | Keys.J,     readJumpMatchesMarked);
+            addItem(miSay, "Read Keywords Matches Marked",     "Read Keywords Matches Marked",  Keys.Alt | Keys.Shift | Keys.K,     readKeywordsMatchesMarked);
             addItem(miSay, "Read Bookmarked Records",          "Read Bookmarked Records",       Keys.Alt | Keys.B,                  readBookmarkedRecords);
             // READ HEADED (23 November 2026): H for headed, Read Wide with the row's number and each column's name.
             // Alt+Shift+H and Control+H, as Alt+Shift+W and Control+W; Alt+H is the Help menu. See readHeadedAll.
@@ -15501,18 +15524,18 @@ namespace DbDo
             // the user assigns chords from the Hotkey editor.
             miCopyColumn     = addItem(miMisc, "Copy Column",                  "Copy Column",        Keys.None,                          copyColumnClicked);
             miCopyGrid       = addItem(miMisc, "Copy Grid",             "Copy Grid",          Keys.Control | Keys.F8,             copyGridClicked);  // Control+F8 copies everything, as Copy All in EdSharp and HomerView (21 November 2026, key groups)
-            miJumpNextInitial = addItem(miMisc, "&Jump to Next Initial...", "Jump to Next Initial", Keys.None,                         jumpNextInitialClicked);
             addSep(miMisc);
             addSep(miQuery);
             miToolsInvokeSql = addItem(miQuery, "&Query...",                              "Query",             Keys.Control | Keys.Q,              toolsInvokeSqlClicked);
             miToolsSqlHistory= addItem(miQuery, "Query History...",                      "Query History",     Keys.Alt | Keys.Shift | Keys.Q,     sqlHistoryClicked);
             miToolsTest      = addItem(miMisc, "Test &Integrity",                        "Test Integrity",     Keys.None,                          toolsTestClicked);
-            miMiscHotkeySummary = addItem(miMisc, "&Hotkey Summary",      "Hotkey Summary",      Keys.None, hotkeySummaryClicked,
-                "List every command with its key and description",
-                "One listing of every command, its keys and its description, sorted by command name.");
+            // RETIRED (25 November 2026): Open Database (Control+O) now opens every file that is not a database as a
+            // working copy, and Save As (Control+Shift+S) keeps any database as a copy, so a managed copy of a database
+            // is a third way to one end.
             miMiscOpenManagedCopy = addItem(miMisc, "&Open as Managed Copy...", "Open as Managed Copy", Keys.None, openManagedCopyClicked,
                 "Open a SQLite database as a throwaway working copy: edits stay in the copy and the original is untouched until you Save As",
                 "The document model: the chosen SQLite database is copied to a temp working file that becomes the live database, so every edit, add, and delete lands in the copy and the original on disk is left alone. Use Save (Control+S), which writes the working copy out to a .db file (a -copy name is suggested, so the source is never overwritten); closing without saving discards the changes. To bring an Excel, Access, dBASE, or CSV file into a new DbDo database instead, use Import. Unbound by default.");
+            miMiscOpenManagedCopy.Visible = false;
             miMiscDescribeTable = addItem(miQuery, "Field Statistics", "Field Statistics", Keys.None, describeTableClicked,
                 "Per-column data profile of the current table: declared type and key/null/FK flags, plus live null and distinct counts with min and max values",
                 "A profile of the current base table, one column per entry: its declared type and any primary-key, not-null, or foreign-key flags from the schema, then the number of nulls, the number of distinct values, and the minimum and maximum values, each computed in SQL over the whole table. Read-only. It scans once per column, so it can take a moment on very large tables. Unbound by default.");
@@ -15598,8 +15621,12 @@ namespace DbDo
             // HOTKEY SUMMARY ON THE HELP MENU (24 November 2026), where EdSharp and FileDir have it and the suite's ruling of
             // 9 November puts it: the menu walk of 24 November found it on DbDo's Misc menu. It moves here, beside Hotkeys,
             // the shipped list it is the live form of.
-            miMisc.DropDownItems.Remove(miMiscHotkeySummary);
-            miHelp.DropDownItems.Add(miMiscHotkeySummary);
+            // MADE HERE, NOT MOVED (25 November 2026): the move from Misc left it on Misc in the menu walk of the
+            // installed 1.0.438 -- a menu item moved after it is made does not stay moved in DbDo's menus -- so it is
+            // now made on the Help menu in the first place.
+            miMiscHotkeySummary = addItem(miHelp, "&Hotkey Summary",      "Hotkey Summary",      Keys.None, hotkeySummaryClicked,
+                "List every command with its key and description",
+                "One listing of every command, its keys and its description, sorted by command name.");
             miHelpFaq          = addItem(miHelp, "&Frequently Asked Questions",          "Frequently Asked Questions",          Keys.None,                          (s, e) => openHelpDocument("FAQ", "Frequently Asked Questions"));
             // The documents almost nobody opens twice go one level down, which is
             // the case for a submenu: four items that would otherwise be arrowed
@@ -15849,6 +15876,10 @@ namespace DbDo
                 "Alt+J. Uses the last Jump text and field; the cursor and the filter stay as they are. Twice shows them.");
             add("Read Keywords Matches", "Read the records in view that Keywords finds, from the first, every shown column",
                 "Alt+K. Uses the last keywords; the cursor and the filter stay as they are. Twice shows them.");
+            add("Read Jump Matches Marked", "Read the marked records in view that Jump finds, from the first, every shown column",
+                "Alt+Shift+J. As Read Jump Matches, for marked records only.");
+            add("Read Keywords Matches Marked", "Read the marked records in view that Keywords finds, from the first, every shown column",
+                "Alt+Shift+K. As Read Keywords Matches, for marked records only.");
             add("Read Bookmarked Records", "Read the bookmarked records in view, from the first, every shown column",
                 "Alt+B. The records saved with Control+B in this table; the cursor and the filter stay as they are. Twice shows them.");
             add("List Bookmarks",     "Show saved bookmarks in a listbox; navigate to the selected one",
@@ -15860,8 +15891,9 @@ namespace DbDo
             add("Previous Record",   "Move up one row", "");
             add("First Record",  "Move to the first row", "");
             add("Last Record",   "Move to the last row", "");
-            add("Go to Record",       "Go to a record by its number, a percent or text", "");
-            add("Jump to Next Initial", "Move to the next row where the first display field's initial letter changes",
+            add("Go to Record",       "Go to a record by its number, a move or a percent, or a column by text",
+                "42 goes to record 42; +5 or -5 moves 5; %50 goes halfway; +%10 or -%10 moves 10 percent of the records in view. F3 or Shift+F3 does it again.");
+            add("Initial Change", "Go to the next record whose current field starts with another letter",
                 "Useful in alphabetically sorted lists for moving by letter group.");
             add("Keywords",           "Go to the next record whose fields hold the keywords",
                 "Searches every field of each record, shown or not, a link by the look it shows. Keywords Previous, Control+Shift+K, goes backward; F3 and Shift+F3 repeat.");
@@ -15872,8 +15904,8 @@ namespace DbDo
             add("Jump",        "Go to the next record whose current field holds the text", "");
             add("Reverse Jump","Go to the previous record whose current field holds the text", "");
             add("Jump Record Again",   "Repeat the last Jump Record", "");
-            add("Search Next",        "Repeat the last Find forward", "");
-            add("Search Previous",    "Repeat the last Find backward", "");
+            add("Search Next",        "Repeat the last Go to, Keywords, Jump or Find with Regex, forward", "");
+            add("Search Previous",    "Repeat the last Go to, Keywords, Jump or Find with Regex, backward", "A Go to is done again the same way by either key.");
 
             // ===== Query menu =====
             add("Show Object",        "Show the current row's fields plus parent and child related records",
@@ -19488,7 +19520,9 @@ namespace DbDo
 
         // readJumpMatches, Alt+J: the records whose field Jump last searched holds its text, by Jump's own test. The
         // field is the one Jump captured, as F3 keeps it; if this table lacks it, the field under the cursor.
-        private void readJumpMatches(object sender, EventArgs evArgs)
+        private void readJumpMatches(object sender, EventArgs evArgs) { readJumpMatchesFor(false); }
+        private void readJumpMatchesMarked(object sender, EventArgs evArgs) { readJumpMatchesFor(true); }
+        private void readJumpMatchesFor(bool bMarkedOnly)
         {
             if (db == null || !db.hasRecordset()) return;
             if (string.IsNullOrEmpty(sLastJumpSubstring)) sLastJumpSubstring = SearchHistory.lastText(SearchHistory.SectionJump);
@@ -19497,13 +19531,16 @@ namespace DbDo
             if (string.IsNullOrEmpty(sCol)) { Say.say("jump: no column at the cursor"); return; }
             List<List<Search.Term>> llPattern = Search.parse(sLastJumpSubstring);
             bool bCase = bLastJumpCaseSensitive;
-            readMatches("Read Jump Matches", "jump matches: none for " + sLastJumpSubstring + " in " + sCol,
-                delegate() { return Search.isMatch(db.getScreenValue(sCol) ?? "", llPattern, true, bCase); });
+            readMatches(bMarkedOnly ? "Read Jump Matches Marked" : "Read Jump Matches",
+                (bMarkedOnly ? "marked jump matches: none for " : "jump matches: none for ") + sLastJumpSubstring + " in " + sCol,
+                delegate() { return (!bMarkedOnly || isMarkedTrue(db.getScreenValue(Metadata.MarkedColumn))) && Search.isMatch(db.getScreenValue(sCol) ?? "", llPattern, true, bCase); });
         }
 
         // readKeywordsMatches, Alt+K: the records holding the last keywords, by Keywords' own test: the whole record,
         // every field as the screen shows it, read as one text.
-        private void readKeywordsMatches(object sender, EventArgs evArgs)
+        private void readKeywordsMatches(object sender, EventArgs evArgs) { readKeywordsMatchesFor(false); }
+        private void readKeywordsMatchesMarked(object sender, EventArgs evArgs) { readKeywordsMatchesFor(true); }
+        private void readKeywordsMatchesFor(bool bMarkedOnly)
         {
             if (db == null || !db.hasRecordset()) return;
             if (string.IsNullOrEmpty(sLastFindSubstring)) sLastFindSubstring = SearchHistory.lastText(SearchHistory.SectionFind);
@@ -19511,9 +19548,11 @@ namespace DbDo
             List<List<Search.Term>> llPattern = Search.parse(sLastFindSubstring);
             List<string> lFields = db.getFieldNames();
             bool bCase = bLastFindCaseSensitive;
-            readMatches("Read Keywords Matches", "keywords matches: none for " + sLastFindSubstring,
+            readMatches(bMarkedOnly ? "Read Keywords Matches Marked" : "Read Keywords Matches",
+                (bMarkedOnly ? "marked keywords matches: none for " : "keywords matches: none for ") + sLastFindSubstring,
                 delegate()
                 {
+                    if (bMarkedOnly && !isMarkedTrue(db.getScreenValue(Metadata.MarkedColumn))) return false;
                     StringBuilder sbRecord = new StringBuilder();
                     foreach (string sField in lFields) sbRecord.Append(db.getScreenValue(sField) ?? "").Append('\n');
                     return Search.isMatch(sbRecord.ToString(), llPattern, false, bCase);
@@ -21171,36 +21210,17 @@ namespace DbDo
         // for skipping through alphabetically sorted data: jump from
         // all "A..." rows past the last A to the first B.
         //
-        // The column is prompted via LBC dialog rather than read from
-        // any Tab-tracked state -- the listview doesn't visually
-        // highlight a "current column" so reading it from a state
-        // var would be a hidden coupling that screen-reader users
-        // can't see.
+        // The column is the one under the cursor (25 November 2026), which Shift+H names; it was asked for in a
+        // dialog when the grid had no current column a reader could hear.
         private void jumpNextInitialClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
             { Say.say("No record selected"); return; }
-            List<string> lFields = db.getDisplayFieldNames();
-            if (lFields == null || lFields.Count == 0)
-            { Say.say("No columns"); return; }
-            LbcDialog dlg = new LbcDialog("Next Initial Change", this);
-            string sColName;
+            string sColName = virtCurrentColumnName();
+            if (string.IsNullOrEmpty(sColName)) { Say.say("No current column"); return; }
             try
             {
-                string sDefault = virtCurrentColumnName();
-                if (string.IsNullOrEmpty(sDefault) || !lFields.Contains(sDefault)) sDefault = lFields[0];
-                ListBox lb = dlg.addPickBox(
-                    "&Column to track for an initial-letter change:",
-                    lFields, sDefault,
-                    "The command jumps to the next row whose value in this column starts with a different letter");
-                if (!dlg.runOkCancel()) return;
-                if (lb.SelectedItem == null) return;
-                sColName = lb.SelectedItem.ToString();
-            }
-            finally { dlg.Dispose(); }
-            try
-            {
-                string sCurrent = db.getFieldValue(sColName) ?? "";
+                string sCurrent = db.getScreenValue(sColName) ?? "";
                 char chCurrent = sCurrent.Length > 0
                     ? char.ToUpperInvariant(sCurrent[0])
                     : '\0';
@@ -21208,7 +21228,7 @@ namespace DbDo
                 for (int iPos = iStart + 1; iPos <= db.recordCount; iPos++)
                 {
                     db.absolutePosition = iPos;
-                    string sV = db.getFieldValue(sColName) ?? "";
+                    string sV = db.getScreenValue(sColName) ?? "";
                     char ch = sV.Length > 0 ? char.ToUpperInvariant(sV[0]) : '\0';
                     if (ch != chCurrent)
                     {
@@ -21221,7 +21241,7 @@ namespace DbDo
                 db.absolutePosition = iStart;
                 Say.say("No further initial change in " + sColName);
             }
-            catch (Exception ex) { Say.say("Next Initial Change: " + ex.Message); }
+            catch (Exception ex) { Say.say("Initial Change: " + ex.Message); }
         }
 
         // EXTRACT WITH REGEX, CONTROL+SHIFT+E (5 November 2026): the suite's name and key, as in EdSharp and FileDir;
@@ -27700,8 +27720,12 @@ namespace DbDo
                 case "regex":
                     doFindRegex(bForward, true);
                     break;
+                case "goto":
+                    // Go to has no direction of its own: F3 and Shift+F3 both do it again.
+                    repeatGoToClicked(null, EventArgs.Empty);
+                    break;
                 default:
-                    Say.sayForced("No previous search. Use Keywords, Jump or Find with Regex first.");
+                    Say.sayForced("No previous search. Use Go to Record, Keywords, Jump or Find with Regex first.");
                     break;
             }
         }
@@ -27715,9 +27739,10 @@ namespace DbDo
             int iCount = db.recordCount;
             if (iCount <= 0) { Say.say("No rows."); return; }
             string sInput = promptText("Go to Record",
-                "Row number (1 to " + iCount + "), percent (50%), relative (+10, -25%), or column text:",
+                "Record number (1 to " + iCount + "); +5 or -5 to move 5; %50 for halfway; +%10 or -%10 to move 10 percent; or column text:",
                 (db.absolutePosition).ToString());
             if (string.IsNullOrEmpty(sInput)) { cancelMacroCapture(); return; }
+            sLastSearchKind = "goto";
             applyGoTo(sInput, true);
         }
 
@@ -27737,12 +27762,11 @@ namespace DbDo
         // applyGoTo: the Go To interpreter. The input decides the
         // meaning:
         //   42      absolute row 42
-        //   50%     the row at 50 percent of the recordset,
+        //   %50     the row at 50 percent of the recordset (50% too),
         //           rounded to the nearest row (never below 1)
         //   +10     forward 10 rows;  -10  back 10 rows
-        //   +25%    forward by a quarter of the recordset;  -25%
-        //           back likewise (sign means relative, percent
-        //           means scaled by the row count)
+        //   +%25    forward by a quarter of the recordset;  -%25
+        //           back likewise (+25% and -25% too)
         //   text    anything with a letter: move the db cursor to
         //           the next COLUMN -- searching cyclically,
         //           starting with the current column -- whose
@@ -27784,22 +27808,12 @@ namespace DbDo
                 return;
             }
 
-            bool bRelative = sInput.StartsWith("+") || sInput.StartsWith("-");
-            bool bNegative = sInput.StartsWith("-");
-            bool bPercent = sInput.EndsWith("%");
-            string sDigits = sInput.TrimStart('+', '-').TrimEnd('%').Trim();
-            double nNumber;
-            if (!double.TryParse(sDigits, out nNumber) || nNumber < 0)
-            { Say.sayForced("Enter a row number, percent, relative offset, or column text."); return; }
-
-            int iAmount = bPercent
-                ? (int)Math.Round(iCount * nNumber / 100.0, MidpointRounding.AwayFromZero)
-                : (int)Math.Round(nNumber, MidpointRounding.AwayFromZero);
-            int iTarget = bRelative
-                ? db.absolutePosition + (bNegative ? -iAmount : iAmount)
-                : iAmount;
-            if (iTarget < 1) iTarget = 1;
-            if (iTarget > iCount) iTarget = iCount;
+            // THE KIT'S GRAMMAR (25 November 2026): 42, +5, -5, %50, +%10 and -%10, read by Homer.Util.goToTarget, so
+            // every Homer program reads a Go to entry the same way; 50% and +10% still work too.
+            string sGoError;
+            int iTarget = Homer.Util.goToTarget(sInput, db.absolutePosition, iCount, out sGoError);
+            if (iTarget < 1)
+            { Say.sayForced("Enter a record number, +5 or -5, %50, +%10 or -%10, or column text."); return; }
             try { virtMoveTo(iTarget, iVirtualCol); confirmMacroGoTo(sInput); }
             catch (Exception ex) { ErrorDialog.show(this, "Go to Record", ex, db); }
         }

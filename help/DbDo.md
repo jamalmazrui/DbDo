@@ -28,7 +28,6 @@ This matters for a screen-reader user because it keeps each table's state — it
 The window commands live on the **File menu**, just before Exit DbDo. DbDo has no Window menu, so Alt+W is free to read the grid wide (see "Reading the grid aloud: wide, lean and yield", below):
 
 - **Current Windows** (F4) lists every open window; pick one to jump to it.
-- **Window Toggle** flips between the current window and the one you were in before it.
 - **Next Window** (Control+Tab) and **Previous Window** (Control+Shift+Tab) cycle through them.
 - **Say Windows Open** (Shift+F4) speaks how many windows are open and their titles.
 - **Close Window** (Control+F4) closes the current one; **Close All but Current Window** (Control+Shift+F4) leaves only the active one. Closing the last window exits DbDo, because the menu bar lives in the window.
@@ -191,6 +190,8 @@ Three more keys read wide, but only the records a search picks out, from the fir
 - **Read Jump Matches** (Alt+J) reads the records Jump finds, with the last Jump text, in the field Jump searched.
 - **Read Keywords Matches** (Alt+K) reads the records Keywords finds, with the last keywords.
 
+Add Shift to Alt+J or Alt+K to read only the marked records among them, as Alt+Shift+W does for Read Wide. Alt+Shift+B stays List Bookmarks, the way to go to a bookmark.
+
 Each pairs with a Say key: Shift+B says the bookmark, Shift+J the Jump text and Shift+K the keywords; Alt with the same letter reads the records they find. Press twice to see them in a window.
 
 #### Key Help
@@ -276,10 +277,16 @@ In DbDo, Keywords and a filter's Keywords match read a whole record as text, so 
 
 Beyond the grid's keys, the cursor moves with these commands:
 
-- **Go to Record** (Control+G) jumps to a record number; **Go to Record Again** (Alt+G) repeats it. **Jump Again** (Alt+Shift+J) and **Keywords Again** (Alt+Shift+K) repeat those searches forward; F3 repeats whichever search came last. Alt+J and Alt+K read what those searches find without moving (see Reading the grid aloud).
+- **Go to Record** (Control+G) takes one of these:
+  - a number, such as 42, to go to that record;
+  - a plus or minus and a number, such as +5 or -5, to move that many records forward or back;
+  - a percent sign and a number, such as %50, to go that far through the records in view: %50 is halfway;
+  - a plus or minus, a percent sign and a number, such as +%10 or -%10, to move that percent of the records in view;
+  - or text, to go to the column whose name holds it.
+- **Search Next** (F3) and **Search Previous** (Shift+F3) repeat whichever came last: Go to Record, Jump, Keywords or Find with Regex. A Go to is done again the same way by either key, so +5 then F3 moves 5 more. Alt+J and Alt+K read what those searches find without moving (see Reading the grid aloud).
 - **Keywords** (Control+K) searches for text; **Reverse Keywords** (Control+Shift+K) searches backward; **Search Next** (F3) and **Search Previous** (Shift+F3) repeat the last search. **Forward Find with Regex** (Control+F3) and **Reverse Find with Regex** (Control+Shift+F3) search by regular expression.
 - **Jump** (Control+J) and **Reverse Jump** (Control+Shift+J) go to the next or previous record whose current field holds the text you type, whatever its case.
-- **Jump to Next Initial** steps to the next record whose current column starts with a new letter — type-ahead through a sorted column.
+- **Initial Change**, on the Navigate menu, goes to the next record whose current column starts with another letter: a quick way through a sorted column, as in FileDir.
 
 ### Editing records
 
@@ -663,9 +670,6 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | First / Last Record | — |
 | Next / Previous Record | — |
 | Go to Record | Control+G |
-| Go to Record Again | Alt+G |
-| Jump Again | Alt+Shift+J |
-| Keywords Again | Alt+Shift+K |
 | Keywords | Control+K |
 | Reverse Keywords | Control+Shift+K |
 | Jump | Control+J |
@@ -704,6 +708,8 @@ The Query menu holds record inspection and the Say-X status family.
 | Read Bookmarked Records | Alt+B |
 | Read Jump Matches | Alt+J |
 | Read Keywords Matches | Alt+K |
+| Read Jump Matches Marked | Alt+Shift+J |
+| Read Keywords Matches Marked | Alt+Shift+K |
 | Read Wide from Current | Control+W |
 | Read Wide Marked from Current | — |
 | Read Lean | Alt+L |
@@ -756,12 +762,11 @@ The Query menu holds record inspection and the Say-X status family.
 | Copy Visible Cells | — |
 | Copy Column | — |
 | Copy Grid | Control+F8 |
-| Jump to Next Initial | — |
+| Initial Change | — |
 | Query | Control+Q |
 | Query History | Alt+Shift+Q |
 | Test Integrity | — |
 | Hotkey Summary | Help menu; Control+Slash pressed twice |
-| Open as Managed Copy | — |
 | Field Statistics | — |
 | Facet Column | — |
 | Open in Explorer | Alt+Pipe |
@@ -784,7 +789,6 @@ DbDo has no Window menu. These commands sit on the File menu, just before Exit D
 | Current Windows | F4 |
 | Next Window | Control+Tab |
 | Previous Window | Control+Shift+Tab |
-| Window Toggle | — |
 | Say Windows Open | Shift+F4 |
 | Close Window | Control+F4 |
 | Close All but Current Window | Control+Shift+F4 |

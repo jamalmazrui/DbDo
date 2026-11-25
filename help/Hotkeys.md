@@ -295,23 +295,14 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Find the next record matching a regular expression. F3 searches; Control makes the search a pattern.\
   Control+F3
 - Go to Record\
-  Go to a record by its number, a percent or text. G for Go, as Control+G goes to a line in Windows editors.\
+  Go to a record by its number, a move or a percent, or a column by text. G for Go, as Control+G goes to a line in Windows editors.\
   Control+G
-- Go to Record Again\
-  G for Go.\
-  Alt+G
 - Jump\
   Go to the next record whose current field holds the text. J for Jump.\
   Control+J
-- Jump Again\
-  J for Jump.\
-  Alt+Shift+J
 - Keywords\
   Go to the next record whose fields hold the keywords. K for Keywords.\
   Control+K
-- Keywords Again\
-  K for Keywords.\
-  Alt+Shift+K
 - Reverse Find with Regex\
   Find the previous record matching a regular expression. F3 searches; Control makes it a pattern and Shift reverses it.\
   Control+Shift+F3
@@ -322,10 +313,10 @@ F8 starts a run and Shift completes it; Alt makes the run an unmark instead of a
   Go to the previous record whose fields hold the keywords. K for Keywords. Shift reverses Keywords.\
   Control+Shift+K
 - Search Next\
-  Repeat the last Find forward. F3 is searching and searching again.\
+  Repeat the last Go to, Keywords, Jump or Find with Regex, forward. F3 is searching and searching again.\
   F3
 - Search Previous\
-  Repeat the last Find backward. F3 searches; Shift reverses the direction.\
+  Repeat the last Go to, Keywords, Jump or Find with Regex, backward. F3 searches; Shift reverses the direction.\
   Shift+F3
 
 ### Query
@@ -382,9 +373,15 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Read Jump Matches\
   Read the records in view that Jump finds, from the first, every shown column. J for Jump.\
   Alt+J
+- Read Jump Matches Marked\
+  Read the marked records in view that Jump finds, from the first, every shown column. J for Jump.\
+  Alt+Shift+J
 - Read Keywords Matches\
   Read the records in view that Keywords finds, from the first, every shown column. K for Keywords.\
   Alt+K
+- Read Keywords Matches Marked\
+  Read the marked records in view that Keywords finds, from the first, every shown column. K for Keywords.\
+  Alt+Shift+K
 - Read Lean\
   Read the current column's values from the first record. L for Lean.\
   Alt+L
@@ -522,8 +519,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Say Position
 - Alt+Enter\
   Table Properties
-- Alt+G\
-  Go to Record Again
 - Alt+Home\
   Go back to the first table.\
   Exit to Root Table
@@ -596,9 +591,11 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Read the marked records in view from the first, each value after its column's name.\
   Read Headed Marked
 - Alt+Shift+J\
-  Jump Again
+  Read the marked records in view that Jump finds, from the first, every shown column.\
+  Read Jump Matches Marked
 - Alt+Shift+K\
-  Keywords Again
+  Read the marked records in view that Keywords finds, from the first, every shown column.\
+  Read Keywords Matches Marked
 - Alt+Shift+L\
   Read the current column's values in the marked records, from the first.\
   Read Lean Marked
@@ -657,7 +654,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Show only the records that match what you choose.\
   Filter Records
 - Control+G\
-  Go to a record by its number, a percent or text.\
+  Go to a record by its number, a move or a percent, or a column by text.\
   Go to Record
 - Control+GraveAccent\
   Send focus to the dot prompt console.\
@@ -836,7 +833,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Edit just the field under the virtual cursor.\
   Edit Cell
 - F3\
-  Repeat the last Find forward.\
+  Repeat the last Go to, Keywords, Jump or Find with Regex, forward.\
   Search Next
 - F4\
   Pick from the list of open recordset windows and activate the chosen one.\
@@ -852,7 +849,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Shift+F12\
   Chat about Table
 - Shift+F3\
-  Repeat the last Find backward.\
+  Repeat the last Go to, Keywords, Jump or Find with Regex, backward.\
   Search Previous
 - Shift+F4\
   Speak the count and titles of open recordset windows, marking the current one.\
@@ -1050,10 +1047,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Read statistics of the records and columns you choose: profile, summary, frequency, group, relation or cross-tab.\
   Alt+Shift+S
 - Go to Record\
-  Go to a record by its number, a percent or text.\
+  Go to a record by its number, a move or a percent, or a column by text.\
   Control+G
-- Go to Record Again\
-  Alt+G
 - History of Changes\
   Open the history of changes in the default browser.\
   Control+Shift+F1
@@ -1070,16 +1065,12 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Jump\
   Go to the next record whose current field holds the text.\
   Control+J
-- Jump Again\
-  Alt+Shift+J
 - Key Describer Toggle\
   Describe each key instead of running it.\
   Control+F1
 - Keywords\
   Go to the next record whose fields hold the keywords.\
   Control+K
-- Keywords Again\
-  Alt+Shift+K
 - List Bookmarks\
   Show saved bookmarks in a listbox; navigate to the selected one.\
   Alt+Shift+B
@@ -1148,9 +1139,15 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Read Jump Matches\
   Read the records in view that Jump finds, from the first, every shown column.\
   Alt+J
+- Read Jump Matches Marked\
+  Read the marked records in view that Jump finds, from the first, every shown column.\
+  Alt+Shift+J
 - Read Keywords Matches\
   Read the records in view that Keywords finds, from the first, every shown column.\
   Alt+K
+- Read Keywords Matches Marked\
+  Read the marked records in view that Keywords finds, from the first, every shown column.\
+  Alt+Shift+K
 - Read Lean\
   Read the current column's values from the first record.\
   Alt+L
@@ -1303,10 +1300,10 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Say how many records are marked.\
   Alt+Shift+Y
 - Search Next\
-  Repeat the last Find forward.\
+  Repeat the last Go to, Keywords, Jump or Find with Regex, forward.\
   F3
 - Search Previous\
-  Repeat the last Find backward.\
+  Repeat the last Go to, Keywords, Jump or Find with Regex, backward.\
   Shift+F3
 - Show Columns\
   Choose the columns the grid shows and their order.\

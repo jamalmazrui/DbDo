@@ -5,6 +5,19 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 25 November 2026, late afternoon -- Go to, again with F3
+
+- **F3 and Shift+F3 repeat a Go to Record,** as they repeat Jump, Keywords and Find with Regex. Either key does the Go to again the same way, so +5 then F3 moves 5 more.
+- **Go to Record Again is retired,** and Alt+G is free.
+- **Go to Record reads one grammar,** shared by every Homer program through the kit: 42 goes to record 42; +5 and -5 move 5; %50 goes halfway through the records in view; +%10 and -%10 move a tenth of them. 50% and +10% still work too.
+
+## 25 November 2026, afternoon -- Menu review
+
+- **Retired: Window Toggle, Say Tables, Open as Managed Copy, Jump Again and Keywords Again.** Control+Tab and F4 move among windows; Shift+F4 and Shift+D say the tables; Control+O opens every other file as a working copy and Save As copies a database; F3 repeats the last Jump or Keywords. A retired command is hidden from the menus and the Alternate Menu and has no key; its code stays, so it can come back. Merge Data, hidden this morning, is retired the same way: the Alternate Menu lists only what the menus show, so the note this morning that it was still there was wrong.
+- **Alt+Shift+J and Alt+Shift+K read the marked matches** of the last Jump and Keywords, as Alt+Shift+W reads the marked records wide: Read Jump Matches Marked and Read Keywords Matches Marked. Alt+Shift+B stays List Bookmarks, the only way to go to a bookmark.
+- **Initial Change replaces Jump to Next Initial,** on the Navigate menu as in FileDir, and uses the column under the cursor instead of asking for one.
+- **Hotkey Summary is on the Help menu.** The move of 24 November did not hold in the installed program; the item is now made there.
+
 ## 25 November 2026, midday -- Filter and read what a search finds
 
 - **Filter Records offers Keywords match, Jump match and Bookmarked records.** Keywords match replaces Any field, which always took the Keywords syntax; it keeps the records Keywords finds, now reading a link field by its look as Keywords does, and its box opens on the last keywords. Jump match keeps the records whose field under the cursor holds the text, as Jump finds them. Bookmarked records keeps the records saved with Control+B. They take K, J and B, and combine with Narrow, Expand and Invert like any condition.
@@ -22,7 +35,7 @@ Press **Control+Shift+F1** inside DbDo to open this file in your browser, or typ
 - **Open treats any file as a database,** as before for databases, workbooks and CSV files. An `.xls` or `.dbf` file still opens as itself through the Access Database Engine when the computer has the 64-bit engine.
 - **A missing engine is explained, not just reported.** When a task needs the 64-bit Access Database Engine and it is absent, DbDo says whether 32-bit Office is the reason and what else works: a converted copy of an `.xls` or `.dbf` file, which Control+S keeps as a DbDo database, or exporting an Access database's tables to `.xlsx` or CSV. Computers with the 64-bit engine work as before.
 - **Add Table's From file reads every format Import reads,** not only CSV and TSV.
-- **Merge Data is hidden and has no key,** since Import merges, from more formats. It is still in the Alternate Menu. Control+Shift+M is free.
+- **Merge Data is hidden and has no key,** since Import merges, from more formats. Control+Shift+M is free.
 
 ## 24 November 2026, late night -- What the menu walk found
 
