@@ -257,6 +257,11 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a
+href="#november-2026-late-night-full-text-search-confirmed-in-dbdos-driver"
+id="toc-november-2026-late-night-full-text-search-confirmed-in-dbdos-driver">25
+November 2026, late night – Full-text search confirmed in DbDo’s
+driver</a></li>
 <li><a href="#november-2026-night-carry-on-in-another-homer-program"
 id="toc-november-2026-night-carry-on-in-another-homer-program">25
 November 2026, night – Carry on in another Homer program</a></li>
@@ -993,6 +998,22 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Control+Shift+F1</strong> inside DbDo to open this file
 in your browser, or type <code>history</code> at the dot prompt.</p>
+<h2
+id="november-2026-late-night-full-text-search-confirmed-in-dbdos-driver">25
+November 2026, late night – Full-text search confirmed in DbDo’s
+driver</h2>
+<ul>
+<li><strong>DbDo’s SQLite driver has full-text search.</strong> The
+first build to test it found SQLite 3.39.4 in the driver with FTS5 built
+in, and on a copy of BrailleForum every search passed through it: 3,187
+articles for braille, 297 for Full-text match on “audio description”,
+every saved search, an edit that updates the index, and the index’s own
+check. Searches.md now says so.</li>
+<li><strong>The probe logs only SQLite’s own files beside the
+driver.</strong> The driver lives in the Windows system folder, so the
+first run listed 3,493 Windows files; the check now takes about two
+seconds.</li>
+</ul>
 <h2 id="november-2026-night-carry-on-in-another-homer-program">25
 November 2026, night – Carry on in another Homer program</h2>
 <ul>

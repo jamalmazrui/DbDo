@@ -16,6 +16,11 @@
 #      articles_fts, Filter Records' Full-text match condition, every saved .sql of the template, an edit of an
 #      article's title (which fires the index's triggers), and the index's integrity check.
 #
+# THE FIRST CYCLE'S ANSWER (25 November 2026, 19:37): yes. The driver's SQLite 3.39.4 has FTS5 built in, and through it
+# BrailleForum's MATCH, Full-text match, every saved search, an edit firing the index's triggers and the integrity check
+# all passed on a copy, though Python's newer SQLite (3.50.4) built the file. The probe stays, as a two-second check that
+# a new driver, a new template or a new kit has not broken full-text search.
+#
 # It never fails the build: the answer is information for the next cycle. The console gets one line; the log,
 # logs\DbDo-probeOdbcFts-<date>-<time>.log, gets every connection string, statement, result and error.
 
@@ -111,7 +116,10 @@ try {
     $lExtensions = @()
     if ($sDriverDll -and (Test-Path $sDriverDll)) {
         $sDriverFolder = Split-Path -Parent $sDriverDll
-        foreach ($oFile in Get-ChildItem -Path $sDriverFolder -Filter "*.dll" -ErrorAction SilentlyContinue) {
+        # ONLY SQLITE'S OWN DLLS (second cycle, 25 November 2026): the driver lives in system32, so the first run logged
+        # 3,493 Windows DLLs and spent nine seconds on them. Its findings: sqlite3odbc.dll 0.9998 with SQLite 3.39.4,
+        # FTS5 compiled in, and sqlite3_mod_*.dll extensions beside it (fts3, rtree, csvtable, zipfile and others).
+        foreach ($oFile in Get-ChildItem -Path $sDriverFolder -Filter "*sqlite*.dll" -ErrorAction SilentlyContinue) {
             writeLog ("BESIDE THE DRIVER " + $oFile.FullName + ", " + $oFile.Length + " bytes, version " + $oFile.VersionInfo.FileVersion) | Out-Null
             if ($oFile.Name -match "fts") { $lExtensions += $oFile.FullName }
         }

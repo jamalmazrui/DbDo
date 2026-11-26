@@ -58,6 +58,6 @@ The quickest way: in the articles table, press Control+F for Filter Records and 
 
 From a saved search's list: the search gives each article's title, author and published month. To read one, find it in the articles table by its title with Jump (Control+J), or mark the ones you want and run the reading_list report (Alt+Shift+R). An article that came from a web page has its words in body; one that came from the issue's text file has them in text.
 
-## If a search says "no such module: fts5"
+## Does DbDo have full-text search?
 
-The SQLite that DbDo opens databases with must include full-text search. DbDo's session log says whether it does, in the line that names the SQLite version: look for FTS5 yes or FTS5 no. With FTS5 no, the searches here cannot run in DbDo, though Keywords (Control+K) still works on any table.
+Yes. The SQLite inside the driver DbDo opens databases with includes it, and each DbDo build tests it on a copy of this database: a search, Full-text match, every saved search, an edit and the index's own check. If a search ever says "no such module: fts5", that check will have said why in its log, and Keywords (Control+K) still works on any table.

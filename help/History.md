@@ -5,6 +5,11 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 25 November 2026, late night -- Full-text search confirmed in DbDo's driver
+
+- **DbDo's SQLite driver has full-text search.** The first build to test it found SQLite 3.39.4 in the driver with FTS5 built in, and on a copy of BrailleForum every search passed through it: 3,187 articles for braille, 297 for Full-text match on "audio description", every saved search, an edit that updates the index, and the index's own check. Searches.md now says so.
+- **The probe logs only SQLite's own files beside the driver.** The driver lives in the Windows system folder, so the first run listed 3,493 Windows files; the check now takes about two seconds.
+
 ## 25 November 2026, night -- Carry on in another Homer program
 
 - **Export Data asks where the file goes next** when another Homer program suits it: Edit in EdSharp for Markdown, text, JSON and CSV, Show in FileDir for any file, and the Windows default app, which Enter still takes for a spreadsheet, a page or CSV. The formula warning keeps its own question. With no other Homer program installed, nothing is asked and the file opens as before.
