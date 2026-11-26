@@ -823,7 +823,13 @@ if not exist "!homerDev!\exec\%nvdaDll%" (
     echo ERROR: !homerDev!\exec\%nvdaDll% is missing.>> "!log!"
     goto :build_failed
 )
-copy /y "!homerDev!\exec\%nvdaDll%" "%nvdaDll%" >nul
+rem A RUNNING DbDo HOLDS THE DLL (26 November 2026): check's build ran while a DbDo window was open, and the copy failed
+rem with "being used by another process" though the copy in exec was already the kit's. When the files are the same,
+rem nothing needs copying, and the build goes on.
+set "bNvdaSame="
+if exist "%nvdaDll%" fc /b "!homerDev!\exec\%nvdaDll%" "%nvdaDll%" >nul 2>&1 && set "bNvdaSame=1"
+if defined bNvdaSame echo NVDA controller client in exec is already the kit's; not copied.>> "!log!"
+if not defined bNvdaSame copy /y "!homerDev!\exec\%nvdaDll%" "%nvdaDll%" >nul
 if errorlevel 1 (
     echo ERROR: could not copy %nvdaDll% from the kit.
     echo ERROR: copy of !homerDev!\exec\%nvdaDll% into exec failed.>> "!log!"

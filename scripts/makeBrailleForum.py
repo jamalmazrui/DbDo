@@ -67,7 +67,7 @@ for sPath in (os.path.join(sKit, "scripts"), os.path.join(sKit, "exec", "Python"
 import homerFetch, homerFts
 import makeMusicTrail as trail
 
-sVersion = "2026-11-26 version 4: a writers table, each article mapped to its writers; statistics in notes"
+sVersion = "2026-11-26 version 5: search_text from Pandoc's plain text, checked against the page's own words"
 sSource = "BrailleForum"
 sUserAgent = "DbDo makeBrailleForum/1 (+https://github.com/JamalMazrui/DbDo; a searchable archive of the ACB Braille Forum)"
 lsEntryPages = ["https://www.acb.org/acb-braille-forum-and-acb-e-forum", "https://www.acb.org/acb-braille-forum-past-issues"]
@@ -110,6 +110,7 @@ sTarget = os.path.join(sTemplate, "BrailleForum.db")
 sLogPath = os.path.join(sProject, "logs", "DbDo-makeBrailleForum-%s.log" % datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
 trail.sLogPath = sLogPath
 dReport = collections.defaultdict(list)
+dPlain = {}  # characters of search_text from Pandoc and from the tag stripper, compared in the log (version 5)
 
 
 def log(sText): return trail.log(sText)
@@ -335,12 +336,13 @@ def pandocPath():
     return ""
 
 
-def toMarkdown(sPandoc, lsFragments):
+def toMarkdown(sPandoc, lsFragments, sFormat=""):
     """Each fragment of markup as Pandoc's Markdown, in one run of Pandoc. Only what the markup holds is written:
-    raw HTML, classes and spans are dropped, and lines are not wrapped."""
+    raw HTML, classes and spans are dropped, and lines are not wrapped. sFormat "plain" gives Pandoc's plain text
+    instead: the same words with no markup, which is what search_text holds from version 5 on."""
     if not lsFragments: return []
     sJoined = "".join("<p>HOMERSPLIT%04d</p>\n%s\n" % (i, s) for i, s in enumerate(lsFragments))
-    sFormat = "markdown-raw_html-native_divs-native_spans-fenced_divs-bracketed_spans-link_attributes-header_attributes-raw_attribute"
+    sFormat = sFormat or "markdown-raw_html-native_divs-native_spans-fenced_divs-bracketed_spans-link_attributes-header_attributes-raw_attribute"
     oRun = subprocess.run([sPandoc, "-f", "html", "-t", sFormat, "--wrap=none"], input=sJoined.encode("utf-8"), capture_output=True)
     if oRun.returncode != 0: raise RuntimeError("Pandoc exit %d: %s" % (oRun.returncode, oRun.stderr.decode("utf-8", "replace")[:300]))
     lsParts = re.split(r"(?m)^HOMERSPLIT\d{4}\s*$", oRun.stdout.decode("utf-8").replace("\r\n", "\n"))[1:]
@@ -470,8 +472,20 @@ def readIssue(oCache, dIssue, sPandoc, bTrust):
         lsFragments.append(sBody)
     if lWeb:
         if not sPandoc: raise RuntimeError("Pandoc is needed to convert the article pages, and none could be found or installed")
-        for dWeb, sMarkdown, sFragment in zip(lWeb, toMarkdown(sPandoc, lsFragments), lsFragments):
-            dWeb.update({"format": "web page", "body": sMarkdown, "text": None, "search_text": htmlToPlain(sFragment)})
+        # SEARCH_TEXT FROM PANDOC'S PLAIN TEXT (26 November 2026, version 5). The build's own measure gave body 2.3 MB of
+        # Markdown but search_text only 0.2 MB, a tenth of it, though both hold the same words; the kit's tag stripper
+        # was losing most of the real pages' words. Pandoc reads these pages for body already, so its plain-text writer
+        # gives search_text from the same reading: every word, no marks, no addresses. The tag stripper still runs, and
+        # the two are compared at every build (SEARCHTEXT lines), so a page where they part ways is named in the log.
+        for dWeb, sMarkdown, sPlain, sFragment in zip(lWeb, toMarkdown(sPandoc, lsFragments), toMarkdown(sPandoc, lsFragments, "plain"), lsFragments):
+            sStripped = htmlToPlain(sFragment)
+            dPlain["pandoc"] = dPlain.get("pandoc", 0) + len(sPlain)
+            dPlain["stripped"] = dPlain.get("stripped", 0) + len(sStripped)
+            if len(sStripped) < len(sPlain) // 2 and dPlain.get("samples", 0) < 5:
+                dPlain["samples"] = dPlain.get("samples", 0) + 1
+                log("SEARCHTEXT %s: Pandoc's plain text %d characters, the tag stripper's %d; page markup begins %r; stripper gave %r"
+                    % (dWeb["url"], len(sPlain), len(sStripped), sFragment[:400], sStripped[:200]))
+            dWeb.update({"format": "web page", "body": sMarkdown, "text": None, "search_text": sPlain or sStripped})
             if not dWeb["author"]:
                 oBy = re.match(r"(?i)\**\s*(?:edited\s+)?by\s+([^*\n]+)", sMarkdown)
                 if oBy: dWeb["author"] = oBy.group(1).strip().rstrip(",.")
@@ -664,6 +678,7 @@ def build(lIssues, sPorter, sOut):
         sWeights = "file %.1f MB: body (Markdown) %.1f MB, search_text %.1f MB, text %.1f MB, full-text index about %.1f MB" % tuple(
             [iFile / 1048576.0] + [(i or 0) / 1048576.0 for i in lSizes] + [iIndexBytes / 1048576.0])
         log("SIZES " + sWeights)
+        if dPlain: log("SEARCHTEXT Pandoc's plain text %d characters in all, the tag stripper's %d; %d pages named above where the stripper kept less than half" % (dPlain.get("pandoc", 0), dPlain.get("stripped", 0), dPlain.get("samples", 0)))
         say("Sizes: " + sWeights + ".")
     except Exception as oError:
         log("SIZES not measured: %s" % oError)
@@ -960,7 +975,14 @@ def repairTemplate():
         # asking acb.org for nothing, so its index reads search_text; every key is kept.
         lsColumns = [r[1] for r in oDb.execute("PRAGMA table_info(articles)")]
         bAuthors = oDb.execute("SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = 'writers'").fetchone()[0] > 0
-        if "search_text" not in lsColumns or not bAuthors:
+        # VERSION 4 LOST MOST OF search_text (26 November 2026): when search_text holds less than half as much as body,
+        # the template is rebuilt the same way, fetching nothing.
+        bThin = False
+        if "search_text" in lsColumns:
+            iBody, iPlain = oDb.execute("SELECT coalesce(sum(length(body)), 0), coalesce(sum(length(search_text)), 0) FROM articles WHERE body IS NOT NULL").fetchone()
+            bThin = iBody > 0 and iPlain < iBody // 2
+            log("REPAIR body %d characters, search_text %d%s" % (iBody, iPlain, ": too thin, rebuilding" if bThin else ""))
+        if "search_text" not in lsColumns or not bAuthors or bThin:
             oDb.close()
             say("BrailleForum.db is being rebuilt from the saved pages, for the newest design (plain words in the index, a writers table). It takes a minute or two and fetches nothing.")
             return main(["--offline"])

@@ -5,6 +5,11 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 26 November 2026, evening -- BrailleForum's index holds every word
+
+- **BrailleForum's full-text index now reads every word of the web articles.** The build's own measure showed the plain words kept for the index, search_text, at a tenth of the Markdown they came from: 0.2 MB beside 2.3 MB. They now come from Pandoc's plain text, from the same reading of each page that gives the Markdown, so a search finds what an article says anywhere in it. The next build rebuilds the database from the saved pages, fetching nothing, and every build logs both measures side by side, naming any page where they part ways.
+- **A build while DbDo is open no longer fails on the NVDA library.** A running DbDo holds nvdaControllerClient.dll, so copying the kit's copy over it failed, and one check's build failed with it. When the two are the same file, nothing is copied and the build goes on.
+
 ## 26 November 2026, afternoon -- The Homer pattern, broadened
 
 - **Keywords, Keywords match and Full-text match take the whole Homer pattern,** as the search syntax is now called: near, `"guide uber"~10`; letters anywhere, `%brail`; a whole word in one field, `title:convention`; letters in one field, `title%conv`; and one field exactly, `title=Here and There`. `!` goes before any of them. The field parts use the filter form's own symbols, `%` contains and `=` is, and need a real field name, so 50% stays text.

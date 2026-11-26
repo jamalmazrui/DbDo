@@ -257,6 +257,10 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a
+href="#november-2026-evening-brailleforums-index-holds-every-word"
+id="toc-november-2026-evening-brailleforums-index-holds-every-word">26
+November 2026, evening – BrailleForum’s index holds every word</a></li>
 <li><a href="#november-2026-afternoon-the-homer-pattern-broadened"
 id="toc-november-2026-afternoon-the-homer-pattern-broadened">26 November
 2026, afternoon – The Homer pattern, broadened</a></li>
@@ -1025,6 +1029,23 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Control+Shift+F1</strong> inside DbDo to open this file
 in your browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="november-2026-evening-brailleforums-index-holds-every-word">26
+November 2026, evening – BrailleForum’s index holds every word</h2>
+<ul>
+<li><strong>BrailleForum’s full-text index now reads every word of the
+web articles.</strong> The build’s own measure showed the plain words
+kept for the index, search_text, at a tenth of the Markdown they came
+from: 0.2 MB beside 2.3 MB. They now come from Pandoc’s plain text, from
+the same reading of each page that gives the Markdown, so a search finds
+what an article says anywhere in it. The next build rebuilds the
+database from the saved pages, fetching nothing, and every build logs
+both measures side by side, naming any page where they part ways.</li>
+<li><strong>A build while DbDo is open no longer fails on the NVDA
+library.</strong> A running DbDo holds nvdaControllerClient.dll, so
+copying the kit’s copy over it failed, and one check’s build failed with
+it. When the two are the same file, nothing is copied and the build goes
+on.</li>
+</ul>
 <h2 id="november-2026-afternoon-the-homer-pattern-broadened">26 November
 2026, afternoon – The Homer pattern, broadened</h2>
 <ul>
