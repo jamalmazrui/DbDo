@@ -1307,8 +1307,11 @@ about five minutes. The build runs it when the database is missing.
 **BrailleForum** holds the articles of The ACB Braille Forum, the American Council
 of the Blind's magazine, with its sister the ACB E-Forum: every issue that acb.org
 offers. It is built on the development computer by
-**`scripts\makeBrailleForum`** and is not in the installer yet, since a database
-this large needs its own way to be downloaded.
+**`scripts\makeBrailleForum`** and is not in the installer, since a database this
+large needs its own way to be downloaded. A template installed apart from DbDo
+goes in its own folder of **%LOCALAPPDATA%\DbDo\templates**, where DbDo finds it
+as it finds the shipped ones, so it appears in Template Databases
+(Control+Shift+O). The build puts BrailleForum there on the development computer.
 
 DbDo opens on **articles**, and each row says the title, the author and the month
 it was **published**. Alt+Right on an **issue** goes to its articles, in order. An

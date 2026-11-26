@@ -5,6 +5,11 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 25 November 2026, nearly midnight -- BrailleForum in Template Databases
+
+- **Template Databases (Control+Shift+O) lists templates installed apart from DbDo.** Besides the templates shipped beside the program, DbDo now reads those in %LOCALAPPDATA%\DbDo\templates, one folder each, and treats them alike: listed, copied once into your data folder, and offered by Update Copies from Templates. This is where a template too large for the installer goes, by a build now and a download later.
+- **The build installs BrailleForum there** on the development computer, copying only what is newer. It was missing from the list because the installer leaves it out, and the installed DbDo read only its own templates folder.
+
 ## 25 November 2026, late night -- Full-text search confirmed in DbDo's driver
 
 - **DbDo's SQLite driver has full-text search.** The first build to test it found SQLite 3.39.4 in the driver with FTS5 built in, and on a copy of BrailleForum every search passed through it: 3,187 articles for braille, 297 for Full-text match on "audio description", every saved search, an edit that updates the index, and the index's own check. Searches.md now says so.

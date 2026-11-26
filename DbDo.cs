@@ -195,7 +195,11 @@ namespace DbDo
                 // installed into, climbing out of exec when it runs from there,
                 // so the shipped folders are found whether DbDo was installed or
                 // unzipped beside its own source.
-                string sSrcFolder = Homer.Paths.shippedTemplates();
+                // TWO SOURCES (25 November 2026): the templates shipped beside the program, and those installed for this
+                // person apart from it in %LOCALAPPDATA%\DbDo\templates -- BrailleForum, too large for the installer, is
+                // put there by the build on the developer's computer, and a download can put others there later. Each is
+                // seeded alike, by the same list, so a template new in either is copied once and a deleted copy stays gone.
+                foreach (string sSrcFolder in templateSourceFolders())
                 if (System.IO.Directory.Exists(sSrcFolder))
                 {
                     // Each template database lives in its own subfolder
@@ -422,6 +426,13 @@ namespace DbDo
             return iRemoved;
         }
 
+        // templateSourceFolders: where template originals are read from -- shipped with DbDo, then installed for this
+        // person apart from it (25 November 2026). A name in both is taken from the first.
+        public static List<string> templateSourceFolders()
+        {
+            return new List<string> { Homer.Paths.shippedTemplates(), Homer.Paths.userTemplates() };
+        }
+
         // installedTemplateFor: the template installed with DbDo that a database is a copy of, found by its name --
         // BookTrail.db anywhere is a copy of templates\BookTrail\BookTrail.db -- or null when DbDo installs none by
         // that name.
@@ -431,8 +442,12 @@ namespace DbDo
             {
                 string sName = System.IO.Path.GetFileNameWithoutExtension(sDbPath ?? "");
                 if (sName.Length == 0) return null;
-                string sTemplate = System.IO.Path.Combine(Homer.Paths.shippedTemplates(), sName, sName + ".db");
-                return System.IO.File.Exists(sTemplate) ? sTemplate : null;
+                foreach (string sFolder in templateSourceFolders())
+                {
+                    string sTemplate = System.IO.Path.Combine(sFolder, sName, sName + ".db");
+                    if (System.IO.File.Exists(sTemplate)) return sTemplate;
+                }
+                return null;
             }
             catch { return null; }
         }
