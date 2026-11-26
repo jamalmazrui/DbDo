@@ -5,6 +5,31 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 26 November 2026, afternoon -- The Homer pattern, broadened
+
+- **Keywords, Keywords match and Full-text match take the whole Homer pattern,** as the search syntax is now called: near, `"guide uber"~10`; letters anywhere, `%brail`; a whole word in one field, `title:convention`; letters in one field, `title%conv`; and one field exactly, `title=Here and There`. `!` goes before any of them. The field parts use the filter form's own symbols, `%` contains and `=` is, and need a real field name, so 50% stays text.
+- **Full-text match goes term by term.** Each term the full-text index can say goes to the index, by whole words; the rest -- letters anywhere, a field's letters or exact value, a star inside a word -- are checked on the fields, all in one filter. A search of only `!` terms and a star inside a word now work there, where they used to fall back to Keywords match. Without an index, near means every word present.
+- **The guide's search examples use the Homer pattern,** and each build still tries every one, now exactly as Full-text match runs it.
+
+## 26 November 2026, early afternoon -- Writers, the Keywords syntax for full text, and statistics
+
+- **Full-text match takes the Keywords syntax.** `&` both, `|` either, `!` not and a star at the end of a word mean what they mean in Keywords, written for the index by the kit's Search.toFullText, but matched by whole words, so art finds art and not start. The index's own syntax, NEAR, a field name and AND, OR and NOT in capitals, still works for more. A star inside a word, or a search of only `!` terms, is searched as Keywords match instead, and DbDo says so.
+- **BrailleForum's authors table is now writers,** since authors and articles shared a first letter, so typing a in the list of tables reached neither at once. The Authors saved search is now Writers.
+- **The search guide is part of DbDo's guide,** in a new Searching BrailleForum part, rather than a Searches.md beside the template, which was outside the Homer doc set. The build removes Searches.md, the old Coverage.md and Authors.sql from the template, its installed copy and DbDo's seeded copy.
+- **Each build writes notes\BrailleForum_Statistics.md,** computed from the finished database: the archive's span and size, the writers of the most articles and the most words, the longest careers, the writers present in the most years, the longest articles, the busiest years and each decade's average length, the biggest issues, the columns that recur, and the words the most articles use. The coverage notes moved beside it, as notes\BrailleForum_Coverage.md.
+
+## 26 November 2026, noon -- BrailleForum's authors, and its search language taught by example
+
+- **An authors table,** one row a person, found in every byline: a role after a comma is set aside (Kim Charlson, ACB President), several writers become several rows (Cynthia Hawkins, Kim Charlson and Dan Spoone), and a middle initial does not split one person in two. Each article is mapped to each of its writers by a maps row of kind written_by, as MusicTrail maps performers to albums, so Alt+Right goes both ways. The byline stays in articles.author as ACB printed it.
+- **Searches.md teaches the search language** in eight short rules, with nine searches that show what Keywords cannot do: nearness, choices and exclusions in one search, word starts, one field, and ranking. A new saved search, Topic-By-Year, counts a subject's articles by year. Authors now reads the authors table.
+- **Every example in Searches.md is run at each build** and its count logged. The first draft had four that FTS5 refused -- NEAR takes no OR, and a group in parentheses needs AND beside it -- which the build would now catch, and Coverage.md names any example that is refused or finds nothing.
+- **The build rebuilds BrailleForum from the saved pages** when it lacks the authors table, fetching nothing and keeping every article's key.
+
+## 26 November 2026, late morning -- A Markdown field opens as a web page
+
+- **Open Cell Value (Control+Enter) shows a Markdown field as a web page.** An article's body in BrailleForum, or any field declared TEXTMARKDOWN, is converted by the kit's conversions into DbDo's work folder and opened in your browser, titled by the record, with its headings, lists and links working, so a screen reader gives a structured view of the article.
+- **makeBrailleForum says what each part weighs** at every build: the file, body, search_text, text and the full-text index, so the cost of keeping plain words beside the Markdown is measured, not guessed.
+
 ## 26 November 2026, morning -- BrailleForum's index reads plain words
 
 - **The full-text index reads an article's words without Markdown.** Tested: Markdown's stars, pound signs and dashes cost no match, since the index skips punctuation. But a link's address was indexed as words, so a search for org or acb found every article linking to acb.org; an address could split or fake a phrase; and the passage a search reads aloud carried the markup, such as star star by Janet Dickelman. A new field, search_text, holds a web page's words taken straight from the page with no markup and no addresses, and the index reads it in place of body, which stays Markdown to read. Word counts and fingerprints come from it too, so an article fingerprints alike from either source.

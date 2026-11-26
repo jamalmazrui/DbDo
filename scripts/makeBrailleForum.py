@@ -24,7 +24,7 @@ format says which: "web page" or "plain text". A row has one or the other, never
 
 HOW THE .txt IS DIVIDED. ACB's text files mark each section with a line of five asterisks, and a section's title with
 asterisks before it ("** Looking Ahead to Jacksonville"). A byline is the next line when it begins "by" or "edited by".
-A file without those markers is kept whole, as one row of kind "issue", and Coverage.md names it. The masthead, the
+A file without those markers is kept whole, as one row of kind "issue", and notes\BrailleForum_Coverage.md names it. The masthead, the
 table of contents and the standing notices (ACB Officers, Are You Moving?, Accessing Your ACB Braille and E-Forums and
 the like) are kept, with kind saying so, so a search can leave them out: kind = 'article'.
 
@@ -32,7 +32,7 @@ AN ARTICLE KEEPS ITS KEY. article_key, such as bf-2023-11-007, is the issue's ke
 so a person's own copy of the database is updated from the template by it. A rebuild reads the previous template
 first and gives each article the key it had: same web page, else same words (fingerprint), else the only article of
 the issue with that title. A new article takes the issue's next number, which is kept on the issue row (next_number)
-and never reused. Coverage.md lists every article that is new, gone, or could not be matched for certain.
+and never reused. notes\BrailleForum_Coverage.md lists every article that is new, gone, or could not be matched for certain.
 
 THE FULL-TEXT INDEX, articles_fts, is the kit's homerFts: it indexes title, author, search_text and text, and keeps
 itself current through triggers.
@@ -45,7 +45,7 @@ links to acb.org; an address between two words could make a phrase miss, or a ph
 and the passages snippet gave for a match carried the markup, so a screen reader read star star by Janet Dickelman.
 So the index reads search_text, the same words taken from the page with every tag removed, link and picture addresses
 dropped and their words kept. body stays Markdown, to read. An edit to body in DbDo leaves search_text as it was, so
-the index still finds the words the article had when it was built. The saved searches beside the template, and the template's Searches.md, show how to use it.
+the index still finds the words the article had when it was built. The saved searches beside the template, and the BrailleForum section of help\\DbDo.md, show how to use it.
 
 WHAT IS KEPT WHERE. The fetched pages and files are in data\BrailleForum (the kit's homerFetch cache), so a rebuild
 asks acb.org only "has it changed?", and an issue older than four months is not asked about at all unless --refresh.
@@ -67,7 +67,7 @@ for sPath in (os.path.join(sKit, "scripts"), os.path.join(sKit, "exec", "Python"
 import homerFetch, homerFts
 import makeMusicTrail as trail
 
-sVersion = "2026-11-26 version 2: the index reads search_text, a web page's words without Markdown"
+sVersion = "2026-11-26 version 4: a writers table, each article mapped to its writers; statistics in notes"
 sSource = "BrailleForum"
 sUserAgent = "DbDo makeBrailleForum/1 (+https://github.com/JamalMazrui/DbDo; a searchable archive of the ACB Braille Forum)"
 lsEntryPages = ["https://www.acb.org/acb-braille-forum-and-acb-e-forum", "https://www.acb.org/acb-braille-forum-past-issues"]
@@ -89,6 +89,12 @@ dIssueTypes = {"articles": "INTEGER", "edition": "TEXTLINE", "issue_key": "TEXTL
                "published": "TEXTLINE", "published_end": "TEXTLINE", "text_url": "TEXTLINE", "title": "TEXTLINE", "volume": "TEXTLINE",
                "words": "INTEGER"}
 lsArticleFields = ["title", "author", "published", "issue_id", "position", "kind", "format", "words", "body", "text", "search_text", "article_key", "fingerprint"]
+dWriterTypes = {"articles": "INTEGER", "first_published": "TEXTLINE", "last_published": "TEXTLINE", "name": "TEXTLINE"}
+lsWriterFields = ["name", "articles", "first_published", "last_published"]
+# WORDS THAT NAME A ROLE, NOT A PERSON: what follows a comma in a byline ("Kim Charlson, ACB President").
+setRoleWords = {"acb", "affiliate", "american", "association", "assistant", "blind", "board", "chair", "chairman", "chairperson",
+                "chapter", "coordinator", "council", "committee", "director", "editor", "executive", "for", "founder", "manager",
+                "member", "officer", "of", "president", "secretary", "staff", "the", "treasurer", "vice"}
 lsIssueFields = ["title", "edition", "published", "published_end", "volume", "number", "articles", "words", "issue_key", "next_number", "text_url"]
 dKinds = {"article": "An article, column or letter: what a search usually wants.",
           "boilerplate": "A standing notice every issue repeats, such as ACB Officers or Are You Moving?",
@@ -386,6 +392,24 @@ def splitText(sText):
     return lSections, sHow
 
 
+def authorNames(sByline):
+    """The people a byline names, as written: "Janet Dickelman", "Kim Charlson, ACB President" (the role set aside) or
+    "Cynthia Hawkins, Kim Charlson and Dan Spoone" (three). A part that does not look like a person's name -- a role, an
+    office, a committee -- is left out, so an author row is always a person."""
+    sByline = re.sub(r"(?i)^\s*(?:compiled\s+|edited\s+|written\s+)?by\s+", "", (sByline or "").strip()).strip(" .,;")
+    if not sByline: return []
+    lsNames = []
+    for sPart in re.split(r"\s+and\s+|\s*&\s*|\s*;\s*|\s+with\s+", sByline):
+        for sPiece in sPart.split(","):
+            sName = re.sub(r"\s+", " ", sPiece).strip(" .:").replace("\u2019", "'")
+            lsWords = sName.split(" ")
+            if not (2 <= len(lsWords) <= 5) or len(sName) > 50: continue
+            if any(sWord.lower().strip(".") in setRoleWords for sWord in lsWords): continue
+            if not all(re.match(r"^(?:[A-Z][\w.'-]*|de|del|da|di|du|la|le|van|von|St\.?)$", sWord) for sWord in lsWords): continue
+            if sName not in lsNames: lsNames.append(sName)
+    return lsNames
+
+
 def kindOf(sTitle, iIndex, bBeforeContents):
     sKey = titleKey(sTitle)
     if sKey == "table of contents": return "table of contents"
@@ -561,6 +585,7 @@ def build(lIssues, sPorter, sOut):
     # failed the first push on it.
     for sStatement in [s for s in trail.systemDdl() if not s.startswith("CREATE TABLE views")]: oDb.execute(sStatement)
     for sStatement in trail.tableDdl("issues", "issue_id", lsIssueFields, ["title"], ["issue_key"], dIssueTypes): oDb.execute(sStatement)
+    for sStatement in trail.tableDdl("writers", "writer_id", lsWriterFields, ["name"], ["name"], dWriterTypes): oDb.execute(sStatement)
     for sStatement in trail.tableDdl("articles", "article_id", lsArticleFields, ["title", "published"], ["article_key"], dArticleTypes): oDb.execute(sStatement)
     oDb.execute("CREATE INDEX idx_articles_issue_id ON articles (issue_id)")
     trail.addLookups(oDb, "articles", "kind", dKinds, sSource)
@@ -582,6 +607,34 @@ def build(lIssues, sPorter, sOut):
                         (d["title"], d["author"] or None, d["published"], iIssue, d["position"], d["kind"], d["format"], d["words"], d["body"], d["text"], d["search_text"],
                          d["article_key"], d["fingerprint"] or None, d["url"] or None))
             iArticles += 1
+    # THE WRITERS TABLE (26 November 2026, Jamal: "an authors table in addition, properly mapped"; named writers the same
+    # morning, since authors and articles share a first letter, so typing a did not reach one table). One row a person,
+    # found in every article's byline by authorNames, with how many articles they wrote and the first and last month.
+    # Each article is mapped to each of its writers by a maps row of kind written_by -- the way DbDo links records many
+    # to many, by prime, as MusicTrail maps performers to albums -- so an article by three people reaches all three, and
+    # an author reaches every article. The byline stays in articles.author as ACB printed it.
+    dAuthors = collections.OrderedDict()
+    lMaps = []
+    for sKey, sByline, sPublished in oDb.execute("SELECT article_key, author, published FROM articles WHERE author IS NOT NULL ORDER BY published, position"):
+        for sName in authorNames(sByline):
+            # ONE PERSON, ONE ROW: "Cynthia G. Hawkins" and "Cynthia Hawkins" are the same writer, so a middle initial is
+            # set aside in matching, and the row takes the form the bylines use most.
+            sMatch = " ".join(sWord for sWord in sName.lower().split(" ") if not re.match(r"^[a-z]\.?$", sWord))
+            dAuthor = dAuthors.setdefault(sMatch, {"name": sName, "variants": collections.Counter(), "articles": 0, "first_published": sPublished, "last_published": sPublished})
+            dAuthor["variants"][sName] += 1
+            dAuthor["articles"] += 1
+            dAuthor["last_published"] = sPublished
+            lMaps.append((sKey, sMatch))
+    for dAuthor in dAuthors.values(): dAuthor["name"] = dAuthor["variants"].most_common(1)[0][0]
+    lMaps = [("articles", sKey, "written_by", "writers", dAuthors[sMatch]["name"]) for sKey, sMatch in lMaps]
+    for dAuthor in sorted(dAuthors.values(), key=lambda d: d["name"].lower()):
+        oDb.execute("INSERT INTO writers (name, articles, first_published, last_published) VALUES (?, ?, ?, ?)",
+                    (dAuthor["name"], dAuthor["articles"], dAuthor["first_published"], dAuthor["last_published"]))
+    for tMap in lMaps: oDb.execute("INSERT INTO maps (tbl1, prime1, kind, tbl2, prime2) VALUES (?, ?, ?, ?, ?)", tMap)
+    trail.addLookups(oDb, "maps", "kind", {"written_by": "The article (subject) was written by the writer (object), as its byline names them."}, sSource)
+    iBylines = oDb.execute("SELECT count(*) FROM articles WHERE author IS NOT NULL").fetchone()[0]
+    log("WRITERS %s from %s; %s" % (plural(len(dAuthors), "person", "people"), plural(iBylines, "byline"), plural(len(lMaps), "written_by map")))
+    say("Writers: %s, mapped to their articles by %s." % (plural(len(dAuthors), "person", "people"), plural(len(lMaps), "link")))
     sTokenize = ("porter " if sPorter else "") + homerFts.sDefaultTokenize
     homerFts.createIndex(oDb, "articles", "article_id", ["title", "author", "search_text", "text"], "articles_fts", sTokenize)
     oDb.execute("COMMIT")
@@ -602,6 +655,48 @@ def build(lIssues, sPorter, sOut):
     iIndexed = oDb.execute("SELECT count(*) FROM articles_fts").fetchone()[0]
     if iIndexed != iArticles: lsProblems.append("the index holds %d rows for %d articles" % (iIndexed, iArticles))
     if not iArticles: lsProblems.append("no article was read")
+    # WHAT EACH PART WEIGHS (26 November 2026, Jamal asked whether search_text makes the file much larger): the bytes of
+    # body, search_text and text, and the full-text index's own share, measured on the real archive at every build.
+    try:
+        lSizes = oDb.execute("SELECT sum(length(CAST(body AS BLOB))), sum(length(CAST(search_text AS BLOB))), sum(length(CAST(text AS BLOB))) FROM articles").fetchone()
+        iIndexBytes = sum(r[0] or 0 for r in oDb.execute("SELECT sum(length(block)) FROM articles_fts_data UNION ALL SELECT sum(length(term)) FROM articles_fts_idx"))
+        iFile = os.path.getsize(sTemp)
+        sWeights = "file %.1f MB: body (Markdown) %.1f MB, search_text %.1f MB, text %.1f MB, full-text index about %.1f MB" % tuple(
+            [iFile / 1048576.0] + [(i or 0) / 1048576.0 for i in lSizes] + [iIndexBytes / 1048576.0])
+        log("SIZES " + sWeights)
+        say("Sizes: " + sWeights + ".")
+    except Exception as oError:
+        log("SIZES not measured: %s" % oError)
+    # EVERY EXAMPLE IN THE GUIDE IS RUN (26 November 2026). help\\DbDo.md teaches searching BrailleForum by example; each
+    # example in backticks in its "Searching BrailleForum" part is tried on the new database, written for the index as
+    # Full-text match writes it (toFullText, the kit's Search.toFullText in Python), and its count logged. A search FTS5
+    # refuses (the first draft had four: NEAR takes no OR, and a group in parentheses needs AND beside it) or one that
+    # finds nothing is caught by the build, not by a reader, and named in the coverage notes.
+    sGuide = os.path.join(sProject, "help", "DbDo.md")
+    sGuideText = io.open(sGuide, encoding="utf-8-sig").read() if os.path.isfile(sGuide) else ""
+    oPart = re.search(r"(?ms)^#### Searching BrailleForum\s*$(.*?)(?=^#{1,4} )", sGuideText + "\n#### end\n")
+    if oPart:
+        iRun, lsRefused, lsEmpty = 0, [], []
+        lsFields = [r[1] for r in oDb.execute("PRAGMA table_info(articles)")]
+        lsIndexColumns = [r[1] for r in oDb.execute("PRAGMA table_info(articles_fts)")]
+        for sExample in re.findall(r"^[ \t]*- (?:\*\*[^*\n]+\*\*[^`\n]*)?`([^`\n]+)`", oPart.group(1), re.M):
+            iRun += 1
+            if isFullTextSyntax(sExample):
+                sWhere = '"article_id" IN (SELECT rowid FROM "articles_fts" WHERE "articles_fts" MATCH \'%s\')' % sExample.replace("'", "''")
+            else:
+                sWhere = patternWhere(sExample, lsFields, "articles_fts", "article_id", lsIndexColumns)
+            try:
+                iHits = oDb.execute("SELECT count(*) FROM articles WHERE " + sWhere).fetchone()[0]
+                log("EXAMPLE %s: %s  (as %s)" % (plural(iHits, "article"), sExample, sWhere))
+                if not iHits: lsEmpty.append(sExample)
+            except sqlite3.Error as oError:
+                log("EXAMPLE REFUSED (%s): %s  (as %s)" % (oError, sExample, sWhere))
+                lsRefused.append(sExample)
+        say("The guide's search examples: %s tried; %d refused, %d found nothing; the log gives each count." % (plural(iRun, "example"), len(lsRefused), len(lsEmpty)))
+        for sExample in lsRefused: dReport["examples"].append("Refused by FTS5: " + sExample)
+        for sExample in lsEmpty: dReport["examples"].append("Found nothing: " + sExample)
+    else:
+        log("EXAMPLES: help\\DbDo.md has no Searching BrailleForum part, so no example was tried")
     log("BUILT %s: %s, %s, tokenizer %s; problems: %s" % (sTemp, plural(len(lIssues), "issue"), plural(iArticles, "article"), sTokenize, "; ".join(lsProblems) or "none"))
     oDb.close()
     if lsProblems: raise RuntimeError("the new database failed its checks, so the old one was kept: " + "; ".join(lsProblems))
@@ -613,8 +708,215 @@ def build(lIssues, sPorter, sOut):
     return iArticles
 
 
-def writeCoverage(lIssues, iArticles, sPorter, sFolder):
-    """templates\\BrailleForum\\Coverage.md: what the archive holds and what it lacks, written every build."""
+# ---------------------------------------------------------------- the Homer pattern, for the index
+
+# A PYTHON TWIN OF THE KIT'S Search.parse, Search.ftsTerm AND DbDo'S patternWhere (26 November 2026), so each build tries
+# the guide's examples exactly as Full-text match will run them: a term the index can say goes to the index by whole
+# words; %letters, field%, field= and a star inside a word test their fields directly. Kept line for line with the C#.
+ANY, ONE = "\x01", "\x02"
+
+
+def isFullTextSyntax(sPattern):
+    """Whether a pattern is in FTS5's own language: a parenthesis, a ^, or AND, OR, NOT or NEAR in capitals."""
+    return bool(re.search(r"[()^]", sPattern or "")) or bool(re.search(r'(^|[\s"])(AND|OR|NOT|NEAR)($|[\s"(])', sPattern or ""))
+
+
+def parsePattern(sPattern, lsFields):
+    """The kit's Search.parse with fields: alternatives (|) of terms (&), each a dict of text, not, wild, field, op,
+    letters and near."""
+    llAlternatives, lTerms, lsChars = [], [], []
+    dState = dict(bQuote=False, bNot=False, bWild=False, bQuoted=False, bLetters=False, sField="", cOp="", iNear=0)
+    s = sPattern or ""
+    i = 0
+    while i <= len(s):
+        c = s[i] if i < len(s) else "\0"
+        bEnd = i == len(s)
+        if not bEnd and dState["bQuote"]:
+            if c == '"': dState["bQuote"] = False
+            else: lsChars.append(c)
+            i += 1; continue
+        if not bEnd and c == '"': dState["bQuote"] = dState["bQuoted"] = True; i += 1; continue
+        if not bEnd and c == "~" and dState["bQuoted"] and i + 1 < len(s) and s[i + 1].isdigit():
+            j = i + 1
+            while j < len(s) and s[j].isdigit(): j += 1
+            dState["iNear"] = int(s[i + 1:j]); i = j; continue
+        if not bEnd and lsFields is not None and not dState["sField"] and not dState["bQuoted"] and c in ":%=":
+            sHead = "".join(lsChars).strip()
+            sMatch = next((f for f in lsFields if f.lower() == sHead.lower()), None) if sHead and not dState["bWild"] else None
+            if sMatch: dState["sField"], dState["cOp"] = sMatch, c; lsChars = []; i += 1; continue
+            if c == "%" and not sHead and not dState["bLetters"]: dState["bLetters"] = True; i += 1; continue
+        if bEnd or c in "&|":
+            sTerm = "".join(lsChars).strip()
+            if sTerm: lTerms.append(dict(sText=sTerm, bNot=dState["bNot"], bWild=dState["bWild"], sField=dState["sField"], cOp=dState["cOp"], bLetters=dState["bLetters"], iNear=dState["iNear"]))
+            lsChars = []
+            dState.update(bNot=False, bWild=False, bQuoted=False, bLetters=False, sField="", cOp="", iNear=0)
+            if bEnd or c == "|":
+                if lTerms: llAlternatives.append(lTerms)
+                lTerms = []
+            i += 1; continue
+        if c == "!" and not "".join(lsChars).strip(): dState["bNot"] = True; lsChars = []; i += 1; continue
+        if c == "*": lsChars.append(ANY); dState["bWild"] = True; i += 1; continue
+        if c == "?": lsChars.append(ONE); dState["bWild"] = True; i += 1; continue
+        lsChars.append(c); i += 1
+    return llAlternatives
+
+
+def ftsTerm(t, lsIndexColumns):
+    """The kit's Search.ftsTerm: one term for FTS5, or "" when the index cannot say it."""
+    if t["bLetters"] or t["cOp"] in ("%", "="): return ""
+    sColumn = ""
+    if t["cOp"] == ":":
+        sColumn = next((c for c in lsIndexColumns if c.lower() == t["sField"].lower()), "")
+        if not sColumn: return ""
+    sText = t["sText"]
+    if t["iNear"]:
+        lsWords = []
+        for sWord in sText.split():
+            sStem = sWord.rstrip(ANY)
+            if ANY in sStem or ONE in sStem or not sStem: return ""
+            lsWords.append('"' + sStem.replace('"', '""') + '"' + ("*" if len(sStem) < len(sWord) else ""))
+        sQuery = "NEAR(%s, %d)" % (" ".join(lsWords), t["iNear"])
+    else:
+        bPrefix = sText.endswith(ANY)
+        sText = sText.rstrip(ANY)
+        if ANY in sText or ONE in sText: return ""
+        sText = sText.strip()
+        if not sText: return ""
+        sQuery = '"' + sText.replace('"', '""') + '"' + ("*" if bPrefix else "")
+    return sColumn + " : " + sQuery if sColumn else sQuery
+
+
+def likeBody(sText):
+    return "".join("%" if c == ANY else "_" if c == ONE else ("\\" + c if c in "\\%_" else c) for c in sText)
+
+
+def patternTermSql(t, lsExprs):
+    """DbDo's patternTermSql: a term tested on its fields directly."""
+    lsAny = []
+    for sExpr in lsExprs:
+        sValue = "lower(coalesce(%s, ''))" % sExpr
+        sText = t["sText"]
+        if t["iNear"]:
+            lsAny.append("(" + " AND ".join("instr(%s, lower('%s')) > 0" % (sValue, w.replace(ANY, "").replace("'", "''")) for w in sText.split()) + ")")
+        elif t["cOp"] == "=":
+            lsAny.append("%s LIKE lower('%s') ESCAPE '\\'" % (sValue, likeBody(sText).replace("'", "''")) if t["bWild"] else "trim(%s) = lower('%s')" % (sValue, sText.strip().replace("'", "''")))
+        elif t["cOp"] == ":":
+            sSpaced = sValue
+            for sMark in [".", ",", ";", ":", "!", "?", "(", ")", '"', "'", "-", "/", "\r", "\n", "\t"]: sSpaced = "replace(%s, '%s', ' ')" % (sSpaced, sMark.replace("'", "''"))
+            lsAny.append("(' ' || %s || ' ') LIKE lower('%% %s %%') ESCAPE '\\'" % (sSpaced, likeBody(sText).replace("'", "''")))
+        elif not t["bWild"]:
+            lsAny.append("instr(%s, lower('%s')) > 0" % (sValue, sText.replace("'", "''")))
+        else:
+            lsAny.append("%s LIKE lower('%%%s%%') ESCAPE '\\'" % (sValue, likeBody(sText).replace("'", "''")))
+    return "(" + " OR ".join(lsAny) + ")"
+
+
+def patternWhere(sPattern, lsFields, sIndex, sKey, lsIndexColumns):
+    """DbDo's patternWhere: a Homer pattern as one SQL condition on articles."""
+    llPattern = parsePattern(sPattern, lsFields)
+    lsAlternatives = []
+    for lTerms in llPattern:
+        lsAll = []
+        for t in lTerms:
+            sQuery = ftsTerm(t, lsIndexColumns)
+            sTest = '"%s" IN (SELECT rowid FROM "%s" WHERE "%s" MATCH \'%s\')' % (sKey, sIndex, sIndex, sQuery.replace("'", "''")) if sQuery else \
+                patternTermSql(t, ['CAST("%s" AS TEXT)' % t["sField"]] if t["sField"] else ['CAST("%s" AS TEXT)' % f for f in lsFields])
+            lsAll.append("NOT " + sTest if t["bNot"] else sTest)
+        lsAlternatives.append(lsAll[0] if len(lsAll) == 1 else "(" + " AND ".join(lsAll) + ")")
+    return lsAlternatives[0] if len(lsAlternatives) == 1 else "(" + " OR ".join(lsAlternatives) + ")"
+
+
+# ---------------------------------------------------------------- statistics
+
+lsStopWords = set("""a about after all also an and any are as at be been but by can could did do does for from had has have he her
+his how i if in into is it its just like may me more most my new no not now of on one only or other our out over said she so
+some such than that the their them then there these they this those through to two up us was we were what when where which
+while who will with would you your""".split())
+
+
+def writeStatistics(sDbPath, sPath):
+    """notes\\BrailleForum_Statistics.md: what the archive's numbers say, computed from the finished database at every
+    build (26 November 2026, Jamal: "a report file that computes and shows interesting stats, e.g., the writer of the
+    most articles or of the most total content"). Counts are of articles of kind article unless they say otherwise."""
+    oDb = sqlite3.connect(sDbPath)
+    sArticle = "a.kind = 'article'"
+    def rows(sSql, tArgs=()): return oDb.execute(sSql, tArgs).fetchall()
+    def one(sSql, tArgs=()): return oDb.execute(sSql, tArgs).fetchone()
+    def n(i): return "{:,}".format(i or 0)
+    lsLines = ["# BrailleForum Statistics", "",
+               "Computed by scripts\\makeBrailleForum on %s from BrailleForum.db. An article here is a row of kind article: the masthead, the table of contents and the standing notices are left out." % datetime.date.today().strftime("%d %B %Y").lstrip("0"), ""]
+    iIssues, sFirst, sLast = one("SELECT count(*), min(published), max(published) FROM issues")
+    iArticles, iWords = one("SELECT count(*), sum(words) FROM articles a WHERE " + sArticle)
+    lsLines += ["## The archive", "",
+                "- %s, from %s to %s." % (plural(iIssues, "issue"), sFirst, sLast)]
+    for sEdition, iCount in rows("SELECT edition, count(*) FROM issues GROUP BY edition ORDER BY edition"): lsLines.append("- %s: %s." % (sEdition, plural(iCount, "issue")))
+    lsLines += ["- %s and %s words, about %s words an article." % (plural(iArticles, "article"), n(iWords), n(round((iWords or 0) / max(iArticles, 1))))]
+    for sFormat, iCount in rows("SELECT format, count(*) FROM articles a WHERE " + sArticle + " GROUP BY format ORDER BY format"): lsLines.append("- From %s: %s." % ({"web page": "web pages", "plain text": "plain-text files"}.get(sFormat, sFormat), plural(iCount, "article")))
+    # Writers
+    lsLines += ["", "## Writers", ""]
+    iWriters = one("SELECT count(*) FROM writers")[0]
+    iOnce = one("SELECT count(*) FROM writers WHERE articles = 1")[0]
+    iShared = one("SELECT count(*) FROM (SELECT prime1 FROM maps WHERE kind = 'written_by' GROUP BY prime1 HAVING count(*) > 1)")[0]
+    lsLines += ["- %s named in bylines; %s wrote just one article." % (plural(iWriters, "writer"), n(iOnce)),
+                "- %s had more than one writer." % plural(iShared, "article")]
+    sJoin = "FROM maps m JOIN articles a ON a.article_key = m.prime1 AND m.tbl1 = 'articles' JOIN writers w ON w.name = m.prime2 AND m.tbl2 = 'writers' WHERE m.kind = 'written_by' AND " + sArticle
+    lsLines += ["", "### Most articles", ""]
+    for sName, iCount, sFrom, sTo in rows("SELECT w.name, count(*), min(a.published), max(a.published) " + sJoin + " GROUP BY w.name ORDER BY count(*) DESC, w.name LIMIT 10"):
+        lsLines.append("- %s: %s, %s to %s" % (sName, plural(iCount, "article"), sFrom, sTo))
+    lsLines += ["", "### Most words", ""]
+    for sName, iSum, iCount in rows("SELECT w.name, sum(a.words), count(*) " + sJoin + " GROUP BY w.name ORDER BY sum(a.words) DESC LIMIT 10"):
+        lsLines.append("- %s: %s words in %s" % (sName, n(iSum), plural(iCount, "article")))
+    lsLines += ["", "### Longest careers", "", "From first article to last, for writers with at least five.", ""]
+    for sName, sFrom, sTo, iCount in rows("SELECT w.name, min(a.published), max(a.published), count(*) " + sJoin + " GROUP BY w.name HAVING count(*) >= 5 ORDER BY (CAST(substr(max(a.published),1,4) AS INTEGER) * 12 + CAST(substr(max(a.published),6,2) AS INTEGER)) - (CAST(substr(min(a.published),1,4) AS INTEGER) * 12 + CAST(substr(min(a.published),6,2) AS INTEGER)) DESC LIMIT 10"):
+        lsLines.append("- %s: %s to %s, %s" % (sName, sFrom, sTo, plural(iCount, "article")))
+    lsLines += ["", "### Most years", "", "Writers whose articles appear in the most different years.", ""]
+    for sName, iYears, iCount in rows("SELECT w.name, count(DISTINCT substr(a.published, 1, 4)), count(*) " + sJoin + " GROUP BY w.name ORDER BY 2 DESC, 3 DESC LIMIT 10"):
+        lsLines.append("- %s: %s, %s" % (sName, plural(iYears, "year"), plural(iCount, "article")))
+    lsLines += ["", "### Longest single articles", ""]
+    for sTitle, sByline, sPublished, iWordsHere in rows("SELECT title, author, published, words FROM articles a WHERE " + sArticle + " ORDER BY words DESC LIMIT 10"):
+        lsLines.append("- %s%s, %s: %s words" % (sTitle, ", by " + sByline if sByline else "", sPublished, n(iWordsHere)))
+    # Years
+    lsLines += ["", "## Years", ""]
+    lYears = rows("SELECT substr(a.published, 1, 4), count(*), sum(a.words) FROM articles a WHERE " + sArticle + " GROUP BY 1 ORDER BY 1")
+    if lYears:
+        tMost = max(lYears, key=lambda t: t[1]); tLeast = min(lYears, key=lambda t: t[1])
+        lsLines += ["- The most articles: %s, with %s." % (tMost[0], n(tMost[1])), "- The fewest: %s, with %s." % (tLeast[0], n(tLeast[1])), ""]
+        lsLines += ["Each decade's articles, with how long they ran on average:", ""]
+        dDecades = collections.OrderedDict()
+        for sYear, iCount, iSum in lYears:
+            dDecade = dDecades.setdefault(sYear[:3] + "0s", [0, 0]); dDecade[0] += iCount; dDecade[1] += iSum or 0
+        for sDecade, (iCount, iSum) in dDecades.items(): lsLines.append("- %s: %s, about %s words each" % (sDecade, plural(iCount, "article"), n(round(iSum / max(iCount, 1)))))
+    lsLines += ["", "## The biggest issues", ""]
+    for sTitle, iCount, iSum in rows("SELECT title, articles, words FROM issues ORDER BY words DESC LIMIT 5"):
+        lsLines.append("- %s: %s words in %s" % (sTitle, n(iSum), plural(iCount, "row")))
+    # Recurring titles
+    lsLines += ["", "## Columns that recur", "", "Titles that appear in the most issues, so the magazine's regular features.", ""]
+    dTitles = collections.Counter()
+    dShown = {}
+    for (sTitle,) in rows("SELECT title FROM articles a WHERE " + sArticle):
+        sKey = titleKey(sTitle)
+        if sKey: dTitles[sKey] += 1; dShown.setdefault(sKey, sTitle)
+    for sKey, iCount in dTitles.most_common(12):
+        if iCount < 3: break
+        lsLines.append("- %s: %s" % (dShown[sKey], plural(iCount, "issue")))
+    # Words
+    lsLines += ["", "## Words the most articles use", "", "From the full-text index, in the articles' words only (not titles or bylines), leaving out everyday words such as the and with; each word with how many articles use it, notices included."]
+    try:
+        oDb.execute("CREATE VIRTUAL TABLE temp.vocabulary USING fts5vocab(main, 'articles_fts', 'col')")
+        lWords = [(sTerm, iDocs) for sTerm, iDocs in rows("SELECT term, sum(doc) FROM temp.vocabulary WHERE col IN ('search_text', 'text') GROUP BY term ORDER BY 2 DESC LIMIT 400") if sTerm not in lsStopWords and len(sTerm) > 2 and not sTerm.isdigit()]
+        lsLines.append("")
+        lsLines += ["- %s: %s" % (sTerm, plural(iDocs, "article")) for sTerm, iDocs in lWords[:30]]
+    except sqlite3.Error as oError:
+        lsLines.append("- The index's words could not be counted: %s." % oError)
+    oDb.close()
+    with io.open(sPath, "w", encoding="utf-8-sig", newline="\r\n") as fOut: fOut.write("\n".join(lsLines) + "\n")
+    log("STATISTICS written to %s" % sPath)
+    return True
+
+
+def writeCoverage(lIssues, iArticles, sPorter, sPath):
+    """notes\\BrailleForum_Coverage.md: what the archive holds and what it lacks, written every build. In notes, with
+    the developer's other notes, not beside the template, since the Homer doc set has no place for a page there."""
     dYears = collections.OrderedDict()
     for dIssue in sorted(lIssues, key=lambda d: d["published"]):
         dYear = dYears.setdefault(dIssue["published"][:4], collections.Counter())
@@ -636,10 +938,11 @@ def writeCoverage(lIssues, iArticles, sPorter, sFolder):
                                   ("unread", "Pages without an article", "Every article page held its article."),
                                   ("conflicts", "Keys not matched for certain", "Every earlier article was matched one to one, or not at all."),
                                   ("new", "New since the last build", "No article is new since the last build, or this is the first."),
-                                  ("gone", "No longer found", "Every article of the last build is still here.")):
+                                  ("gone", "No longer found", "Every article of the last build is still here."),
+                                  ("examples", "Guide examples to fix", "Every search example in help\\DbDo.md runs and finds something.")):
         lsLines += ["", "## " + sHeading, ""]
         lsLines += ["- " + s for s in dReport[sKey]] if dReport[sKey] else [sNone]
-    with io.open(os.path.join(sFolder, "Coverage.md"), "w", encoding="utf-8-sig", newline="\r\n") as fOut: fOut.write("\n".join(lsLines) + "\n")
+    with io.open(sPath, "w", encoding="utf-8-sig", newline="\r\n") as fOut: fOut.write("\n".join(lsLines) + "\n")
     return True
 
 
@@ -656,9 +959,10 @@ def repairTemplate():
         # VERSION 1 INDEXED body, Markdown and all (26 November 2026): such a template is rebuilt from the kept pages,
         # asking acb.org for nothing, so its index reads search_text; every key is kept.
         lsColumns = [r[1] for r in oDb.execute("PRAGMA table_info(articles)")]
-        if "search_text" not in lsColumns:
+        bAuthors = oDb.execute("SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = 'writers'").fetchone()[0] > 0
+        if "search_text" not in lsColumns or not bAuthors:
             oDb.close()
-            say("BrailleForum.db is being rebuilt from the saved pages, so its index reads words without Markdown. It takes a few minutes and fetches nothing.")
+            say("BrailleForum.db is being rebuilt from the saved pages, for the newest design (plain words in the index, a writers table). It takes a minute or two and fetches nothing.")
             return main(["--offline"])
         lsMends = []
         if oDb.execute("SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = 'views'").fetchone()[0]:
@@ -736,9 +1040,14 @@ def main(lsArgs):
     # the template, whose keys a person's copy is updated by, is replaced only by a build of every issue.
     sOut = os.path.join(sProject, "data", "BrailleForum", "BrailleForum-pilot.db") if iLimit else sTarget
     iArticles = build(lBuilt, bPorter, sOut)
-    writeCoverage(lBuilt, iArticles, bPorter, os.path.dirname(sOut))
-    say("Built %s: %s and %s. Coverage.md beside it says what is in it and what is not." % (sOut, plural(len(lBuilt), "issue"), plural(iArticles, "row")))
-    if dReport["failed"]: say("%s could not be fetched; the log and Coverage.md name them." % plural(len(dReport["failed"]), "page or file", "pages or files"))
+    sNotes = os.path.dirname(sOut) if iLimit else os.path.join(sProject, "notes")
+    os.makedirs(sNotes, exist_ok=True)
+    sCoverage = os.path.join(sNotes, "BrailleForum_Coverage.md")
+    writeCoverage(lBuilt, iArticles, bPorter, sCoverage)
+    sStatistics = os.path.join(sNotes, "BrailleForum_Statistics.md")
+    writeStatistics(sOut, sStatistics)
+    say("Built %s: %s and %s. %s says what is in it and what is not; %s gives its statistics." % (sOut, plural(len(lBuilt), "issue"), plural(iArticles, "row"), sCoverage, sStatistics))
+    if dReport["failed"]: say("%s could not be fetched; the log and the coverage notes name them." % plural(len(dReport["failed"]), "page or file", "pages or files"))
     say("Log: " + sLogPath)
     return 0
 

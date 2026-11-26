@@ -256,9 +256,9 @@ A few of JAWS's and NVDA's own keys ask a question that has no good answer in a 
 
 The rest of the screen reader's keys work as always: JAWS+Tab or NVDA+Tab says the focused control, JAWS+T or NVDA+T the title, JAWS+Up Arrow or NVDA+Up Arrow the current row.
 
-### Search syntax
+### Homer patterns
 
-Every Homer search that is not a regular expression reads what you type the same way. A plain word is enough most of the time; the symbols are there when you need more.
+Every Homer search that is not a regex pattern reads what you type as a **Homer pattern**. A plain word is enough most of the time; the symbols are there when you need more.
 
 - **A word** is found anywhere, whatever its case: `river` finds "Riverside".
 - **`*`** stands for any run of characters, and **`?`** for any one character: `chap*`, `c?t`.
@@ -266,6 +266,16 @@ Every Homer search that is not a regular expression reads what you type the same
 - **`|`** means any of them: `red | blue`. `&` is read first, so `red & blue | green` means red and blue, or else green.
 - **`!`** before a word means not: `!draft`.
 - **Quotes** find exactly what is inside, symbols and all: `"C#"`, `"a & b"`.
+- **Quotes and a tilde** find words near each other: `"guide dog"~5` finds guide and dog with at most five words between them, in either order.
+
+Where there are fields, as in a DbDo table, a Homer pattern has four more parts. Each reuses a symbol of DbDo's filter form, where `%` means contains and `=` means is:
+
+- **`%`** before a word finds those letters anywhere, even inside words: `%brail` finds braille and Braillenote. In Keywords every word works this way already; in Full-text match, which matches whole words, `%` asks for letters instead.
+- **A field name and `:`** find a whole word in that field: `title:convention` finds Convention but not Conventional.
+- **A field name and `%`** find letters anywhere in that field: `title%conv` finds Convention and Conversation.
+- **A field name and `=`** find a field that is exactly the text, case aside: `title=Here and There`, or `title="Here and There"`.
+
+A field part works only with a real field name, so `50%` or `x=y` is still plain text. `!` goes before any of them: `!kind:article` leaves out articles.
 
 Where a wildcard counts depends on what is searched. When the search reads a **name** -- a file name, a line of a list, one field -- a word with `*` or `?` must match the whole name, so `*.md` means a name ending in .md, and `chap*` one starting with chap. When it reads **text** -- a file's contents, a whole record -- every word may match anywhere. A word with no wildcard is found anywhere in both.
 
@@ -291,7 +301,7 @@ Beyond the grid's keys, the cursor moves with these commands:
 ### Editing records
 
 - **New Record** (Control+N) adds a record; **New Copy** (Control+Shift+N) starts a new record pre-filled from the current one; **Copy Record** (Control+Shift+C) copies it to the clipboard.
-- **Edit Record** (Control+E) opens the whole record in a field-by-field dialog. **Edit Cell** (F2) edits just the current cell. **Open Cell Value** (Control+Enter) opens the url, file or folder a cell names. When the file or folder suits another Homer program -- a folder FileDir, Markdown or text EdSharp, a database or workbook DbDo -- it asks where to go next, that program first, with the Windows default app beside it.
+- **Edit Record** (Control+E) opens the whole record in a field-by-field dialog. **Edit Cell** (F2) edits just the current cell. **Open Cell Value** (Control+Enter) opens the url, file or folder a cell names. On a Markdown field, such as an article's body in BrailleForum, it shows the field as a web page in your browser, with real headings, lists and links to follow. When the file or folder suits another Homer program -- a folder FileDir, Markdown or text EdSharp, a database or workbook DbDo -- it asks where to go next, that program first, with the Windows default app beside it.
 - **Pick Value** (Control+F2) offers the legal values for a field whose choices are in defs.
 - **Edit Notes** (Alt+Shift+N), **Edit Tags** (Alt+Shift+T), and **Edit url** (Alt+Shift+U) each open one standard field in a focused single-field dialog with OK and Cancel — the quick way to touch a note, tags, or a link without opening the whole record.
 - **Replace** (Control+R) puts new text in place of old. One dialog asks what to find and what to put in its place, then where: **Columns** -- the current column, the shown columns, or all columns, hidden ones too -- and **Which records** -- all records in view, the marked records, or the current record. It starts on the current column, and on the marked records when some are marked, else all records in view; changing more than one record asks once, naming how many. Check **Use regex pattern** to find by regular expression, with $1 and $2 putting back the parts in parentheses; **Replace with Regex** (Control+Shift+R) opens the same dialog with it checked. **Dry run** counts what would change and changes nothing. Replace never writes the fields DbDo keeps itself: look, prime, added, edited, marked and the id.
@@ -325,7 +335,7 @@ Filtering and sorting reshape the grid without touching the physical table.
 
 - **Filter Records** (Control+F) limits the grid to the records that meet a condition.
   - **In a query window too.** A window holding the results of your own SQL is filtered the same way: DbDo runs your query again inside SQL, with the condition around it, so every choice works there, Invert filter included.
-  - **How to give a condition.** With no filter in force, it asks at once how to give one. **Keywords match** keeps the records Keywords (Control+K) finds; its box opens on the last keywords, and what you type there becomes Control+K's keywords too. **Jump match** does the same for Jump (Control+J): the records whose field under the cursor holds the text. **Bookmarked records** keeps the records of this table saved with Control+B; it is offered when there are some. **Full-text match** keeps the records a table's full-text index finds for your words; it is offered when the table has one. **Main columns**, **Standard columns** and **All columns** each give a box for those columns, and a value typed with no operator finds records whose field contains it, whatever its case: `seattle` in RadioTrail's city box finds "Seattle, Washington". A value with no operator also takes the Homer search syntax, reading the field as a name: `*.com` is a value ending in .com, `smith | jones` either, `!draft` not. A value may begin with an operator: `=` is, `!=` is not, `>` more than, `>=` at least, `<` less than, `<=` at most, `%` contains, `!%` does not contain. Is not and does not contain also keep records whose field is empty. An operator alone tests for an empty field: `=` alone finds records whose field is blank, and `!=` alone finds those whose field holds something. A number typed after `>`, `>=`, `<` or `<=` is compared as a number, so `> 35` in an age box finds ages above 35; a blank, or text that is not a number, never passes. Two values joined by two dots give a range, both ends included: `2025..2026` in date_read finds the books finished in those two years, `2026-01-01..2026-03-31` a span of dates, and `5..12` a span of numbers. A year stands for every day in it, since dates are kept as year-month-day. Several filled boxes must all match.
+  - **How to give a condition.** With no filter in force, it asks at once how to give one. **Keywords match** keeps the records Keywords (Control+K) finds; its box opens on the last keywords, and what you type there becomes Control+K's keywords too. **Jump match** does the same for Jump (Control+J): the records whose field under the cursor holds the text. **Bookmarked records** keeps the records of this table saved with Control+B; it is offered when there are some. **Full-text match** keeps the records a table's full-text index finds for your words; it is offered when the table has one. **Main columns**, **Standard columns** and **All columns** each give a box for those columns, and a value typed with no operator finds records whose field contains it, whatever its case: `seattle` in RadioTrail's city box finds "Seattle, Washington". A value with no operator also takes a Homer pattern, reading the field as a name: `*.com` is a value ending in .com, `smith | jones` either, `!draft` not. A value may begin with an operator: `=` is, `!=` is not, `>` more than, `>=` at least, `<` less than, `<=` at most, `%` contains, `!%` does not contain. Is not and does not contain also keep records whose field is empty. An operator alone tests for an empty field: `=` alone finds records whose field is blank, and `!=` alone finds those whose field holds something. A number typed after `>`, `>=`, `<` or `<=` is compared as a number, so `> 35` in an age box finds ages above 35; a blank, or text that is not a number, never passes. Two values joined by two dots give a range, both ends included: `2025..2026` in date_read finds the books finished in those two years, `2026-01-01..2026-03-31` a span of dates, and `5..12` a span of numbers. A year stands for every day in it, since dates are kept as year-month-day. Several filled boxes must all match.
   - **With a filter in force,** Control+F first offers its buttons. **Start over** begins a new filter. **Clear filter** shows every record again and returns you to the list on the same record. **Narrow filter** keeps only the records that also meet a new condition, joining it with AND. **Expand filter** also takes in the records that meet a new condition, joining it with OR. Then it asks how to give the new condition, as above.
   - **Grouping.** The condition in force, however many parts it has, is wrapped whole in parentheses before the AND or OR, and the new condition in its own. So narrowing and expanding in turn always mean exactly what was asked. Say Filter (Shift+F) speaks the whole condition, led by "where" and grouped the same way.
   - **Nothing found.** A condition that would keep no record says so and leaves the view as it was.
@@ -1049,21 +1059,22 @@ Each has its own letter, and the letter is the first letter of its own word.
     some field holds them, whatever the field and whatever the case: type Dallas
     Cowboys, and every station whose name, notes or tags mention the team stays.
     The box opens on the last keywords you searched for with Control+K.
-    It takes the Homer search syntax, as Keywords does: `red & blue` means
+    It takes a Homer pattern, as Keywords does: `red & blue` means
     both, `red | blue` either, `!red` not, and `re*d` lets a star stand for
-    anything (see Search syntax).
+    anything (see Homer patterns).
     Numbers and dates are searched as they read. Case is ignored for English
     letters; type accented letters as they appear. A search that finds nothing
     says so and leaves the list as it was.
   - **Full-text match** is offered only for a table with a full-text index,
-    such as the articles of BrailleForum. It asks for words and keeps the
-    records the index finds: `guide dog` both words, `"guide dog"` the phrase,
-    `guide OR dog` either, `braille NOT display` leaving out display,
-    `NEAR(guide dog, 5)` within five words, `advoca*` any word that starts so,
-    and `title: convention` one field. It matches whole words, not parts of
-    words as Keywords match does, and ignores case and accents. The records
-    stay in the table's own order; for the best matches first, run a saved
-    search instead.
+    such as the articles of BrailleForum. It takes a Homer pattern, as Keywords
+    does, but matches whole words through the index, so `art` finds art and not
+    start. Every part works: `"guide uber"~10` words near each other,
+    `title:convention` a word in one field, and `%brail`, `title%conv` and
+    `title=Here and There`, which DbDo checks on the fields themselves, in the
+    same search. The index's own language works too, for anyone who knows it:
+    parentheses, and AND, OR, NOT and NEAR in capitals. Case and accents never
+    matter. The records stay in the table's own order; for the best matches
+    first, run a saved search instead.
   - **Fields** asks which fields: **Main** (the fields about the table's
     subject), **Standard** (the id, added, edited, notes, tags, url and
     marked) or **All** (every field but look and prime). It then opens a form with one box per field, in
@@ -1314,7 +1325,9 @@ as it finds the shipped ones, so it appears in Template Databases
 (Control+Shift+O). The build puts BrailleForum there on the development computer.
 
 DbDo opens on **articles**, and each row says the title, the author and the month
-it was **published**. Alt+Right on an **issue** goes to its articles, in order. An
+it was **published**. The **writers** table has one row a person, found in the
+bylines, and each article is mapped to each of its writers, so Alt+Right goes
+from a writer to their articles and from an article to its writers. Alt+Right on an **issue** goes to its articles, in order. An
 article's words are in **body** when ACB published it as a web page, as Markdown
 with ACB's own headings, lists and links, and in **text** when it came only from
 the issue's plain-text file. **format** says which. **kind** tells an article
@@ -1323,9 +1336,50 @@ from the masthead, the table of contents and the notices every issue repeats.
 Its full-text index, **articles_fts**, finds a word, a phrase or words near each
 other across every article at once, and ranks the best matches first. Three saved
 searches come with it -- Audio-Description, Convention and Transportation -- with
-Authors and Articles-By-Year, and **Searches.md** beside the template shows every form a
-search takes, ready to paste. The reading_list report writes up the articles you
-have marked. Coverage.md says which issues are in it and which could not be read.
+Writers, Articles-By-Year and Topic-By-Year. The reading_list report writes up
+the articles you have marked. On the development computer, each build writes
+notes\BrailleForum_Coverage.md, which says which issues are in it and which
+could not be read, and notes\BrailleForum_Statistics.md, which gives the
+writers of the most articles and the most words, the longest careers, the
+columns that recur and the words the most articles use.
+
+#### Searching BrailleForum
+
+The quickest way is Filter Records (Control+F) on articles: choose **Full-text
+match** and type a search. The matches stay in the table, to read, mark and
+open. To read one with its headings and links, put the cursor on its **body**
+and press Control+Enter: it opens as a web page.
+
+What full-text search adds to Keywords:
+
+- **Whole words.** Keywords finds letters anywhere, so art also finds start and
+  party. Full-text match finds the word art, and `art*` finds art, artist and
+  artwork when you want them.
+- **Nearness, choices and one field** in one search, with the index's syntax.
+- **Best first, with the reason.** A saved search ranks its matches and reads
+  the passage that matched.
+
+Searches to try, each a Homer pattern:
+
+- `guide dog & uber | guide dog & lyft`: guide dog users and rideshare
+  drivers, a fight that ran for years.
+- `"guide uber"~20 | "guide lyft"~20`: the same, with the words close
+  together, so the article is about both.
+- `audio description & !movie* & !film* & !television`: description beyond
+  movies and TV.
+- `braille & literacy & !display*`: braille as reading, not braille displays.
+- `advoca* & congress*`: advocacy aimed at Congress, in every word form.
+- `title:letters`: the Letters to the Editor columns, by a word in the title.
+- `title%conv & published%2019`: articles from 2019 whose titles hold conv.
+- `title=Here and There`: every Here and There column, by its exact title.
+- `author:charlson & audio description`: one writer on one subject.
+- `%brail`: braille, Braillenote, brailler and every other word holding
+  those letters.
+
+The saved search Topic-By-Year counts a subject's articles in each year, so
+you hear when it rose and fell; change its words between the single quotes to
+follow another subject. Each build runs every search here and logs how many
+articles it finds.
 
 #### RadioTrail plays Internet radio
 

@@ -222,8 +222,8 @@ id="toc-opening-databases-and-recordsets">Opening databases and
 recordsets</a></li>
 <li><a href="#moving-in-the-grid" id="toc-moving-in-the-grid">Moving in
 the grid</a></li>
-<li><a href="#search-syntax" id="toc-search-syntax">Search
-syntax</a></li>
+<li><a href="#homer-patterns" id="toc-homer-patterns">Homer
+patterns</a></li>
 <li><a href="#navigating-records" id="toc-navigating-records">Navigating
 records</a></li>
 <li><a href="#editing-records" id="toc-editing-records">Editing
@@ -898,10 +898,10 @@ Arrow the column from the current record down, as Read Lean from Current
 <p>The rest of the screen reader’s keys work as always: JAWS+Tab or
 NVDA+Tab says the focused control, JAWS+T or NVDA+T the title, JAWS+Up
 Arrow or NVDA+Up Arrow the current row.</p>
-<h3 id="search-syntax">Search syntax</h3>
-<p>Every Homer search that is not a regular expression reads what you
-type the same way. A plain word is enough most of the time; the symbols
-are there when you need more.</p>
+<h3 id="homer-patterns">Homer patterns</h3>
+<p>Every Homer search that is not a regex pattern reads what you type as
+a <strong>Homer pattern</strong>. A plain word is enough most of the
+time; the symbols are there when you need more.</p>
 <ul>
 <li><strong>A word</strong> is found anywhere, whatever its case:
 <code>river</code> finds “Riverside”.</li>
@@ -918,7 +918,32 @@ green.</li>
 <code>!draft</code>.</li>
 <li><strong>Quotes</strong> find exactly what is inside, symbols and
 all: <code>"C#"</code>, <code>"a &amp; b"</code>.</li>
+<li><strong>Quotes and a tilde</strong> find words near each other:
+<code>"guide dog"~5</code> finds guide and dog with at most five words
+between them, in either order.</li>
 </ul>
+<p>Where there are fields, as in a DbDo table, a Homer pattern has four
+more parts. Each reuses a symbol of DbDo’s filter form, where
+<code>%</code> means contains and <code>=</code> means is:</p>
+<ul>
+<li><strong><code>%</code></strong> before a word finds those letters
+anywhere, even inside words: <code>%brail</code> finds braille and
+Braillenote. In Keywords every word works this way already; in Full-text
+match, which matches whole words, <code>%</code> asks for letters
+instead.</li>
+<li><strong>A field name and <code>:</code></strong> find a whole word
+in that field: <code>title:convention</code> finds Convention but not
+Conventional.</li>
+<li><strong>A field name and <code>%</code></strong> find letters
+anywhere in that field: <code>title%conv</code> finds Convention and
+Conversation.</li>
+<li><strong>A field name and <code>=</code></strong> find a field that
+is exactly the text, case aside: <code>title=Here and There</code>, or
+<code>title="Here and There"</code>.</li>
+</ul>
+<p>A field part works only with a real field name, so <code>50%</code>
+or <code>x=y</code> is still plain text. <code>!</code> goes before any
+of them: <code>!kind:article</code> leaves out articles.</p>
 <p>Where a wildcard counts depends on what is searched. When the search
 reads a <strong>name</strong> – a file name, a line of a list, one field
 – a word with <code>*</code> or <code>?</code> must match the whole
@@ -976,10 +1001,12 @@ the clipboard.</li>
 <li><strong>Edit Record</strong> (Control+E) opens the whole record in a
 field-by-field dialog. <strong>Edit Cell</strong> (F2) edits just the
 current cell. <strong>Open Cell Value</strong> (Control+Enter) opens the
-url, file or folder a cell names. When the file or folder suits another
-Homer program – a folder FileDir, Markdown or text EdSharp, a database
-or workbook DbDo – it asks where to go next, that program first, with
-the Windows default app beside it.</li>
+url, file or folder a cell names. On a Markdown field, such as an
+article’s body in BrailleForum, it shows the field as a web page in your
+browser, with real headings, lists and links to follow. When the file or
+folder suits another Homer program – a folder FileDir, Markdown or text
+EdSharp, a database or workbook DbDo – it asks where to go next, that
+program first, with the Windows default app beside it.</li>
 <li><strong>Pick Value</strong> (Control+F2) offers the legal values for
 a field whose choices are in defs.</li>
 <li><strong>Edit Notes</strong> (Alt+Shift+N), <strong>Edit
@@ -1108,26 +1135,25 @@ offered when the table has one. <strong>Main columns</strong>,
 give a box for those columns, and a value typed with no operator finds
 records whose field contains it, whatever its case: <code>seattle</code>
 in RadioTrail’s city box finds “Seattle, Washington”. A value with no
-operator also takes the Homer search syntax, reading the field as a
-name: <code>*.com</code> is a value ending in .com,
-<code>smith | jones</code> either, <code>!draft</code> not. A value may
-begin with an operator: <code>=</code> is, <code>!=</code> is not,
-<code>&gt;</code> more than, <code>&gt;=</code> at least,
-<code>&lt;</code> less than, <code>&lt;=</code> at most, <code>%</code>
-contains, <code>!%</code> does not contain. Is not and does not contain
-also keep records whose field is empty. An operator alone tests for an
-empty field: <code>=</code> alone finds records whose field is blank,
-and <code>!=</code> alone finds those whose field holds something. A
-number typed after <code>&gt;</code>, <code>&gt;=</code>,
-<code>&lt;</code> or <code>&lt;=</code> is compared as a number, so
-<code>&gt; 35</code> in an age box finds ages above 35; a blank, or text
-that is not a number, never passes. Two values joined by two dots give a
-range, both ends included: <code>2025..2026</code> in date_read finds
-the books finished in those two years,
-<code>2026-01-01..2026-03-31</code> a span of dates, and
-<code>5..12</code> a span of numbers. A year stands for every day in it,
-since dates are kept as year-month-day. Several filled boxes must all
-match.</li>
+operator also takes a Homer pattern, reading the field as a name:
+<code>*.com</code> is a value ending in .com, <code>smith | jones</code>
+either, <code>!draft</code> not. A value may begin with an operator:
+<code>=</code> is, <code>!=</code> is not, <code>&gt;</code> more than,
+<code>&gt;=</code> at least, <code>&lt;</code> less than,
+<code>&lt;=</code> at most, <code>%</code> contains, <code>!%</code>
+does not contain. Is not and does not contain also keep records whose
+field is empty. An operator alone tests for an empty field:
+<code>=</code> alone finds records whose field is blank, and
+<code>!=</code> alone finds those whose field holds something. A number
+typed after <code>&gt;</code>, <code>&gt;=</code>, <code>&lt;</code> or
+<code>&lt;=</code> is compared as a number, so <code>&gt; 35</code> in
+an age box finds ages above 35; a blank, or text that is not a number,
+never passes. Two values joined by two dots give a range, both ends
+included: <code>2025..2026</code> in date_read finds the books finished
+in those two years, <code>2026-01-01..2026-03-31</code> a span of dates,
+and <code>5..12</code> a span of numbers. A year stands for every day in
+it, since dates are kept as year-month-day. Several filled boxes must
+all match.</li>
 <li><strong>With a filter in force,</strong> Control+F first offers its
 buttons. <strong>Start over</strong> begins a new filter. <strong>Clear
 filter</strong> shows every record again and returns you to the list on
@@ -3016,23 +3042,25 @@ typing the letter lands on it.
 record where some field holds them, whatever the field and whatever the
 case: type Dallas Cowboys, and every station whose name, notes or tags
 mention the team stays. The box opens on the last keywords you searched
-for with Control+K. It takes the Homer search syntax, as Keywords does:
+for with Control+K. It takes a Homer pattern, as Keywords does:
 <code>red &amp; blue</code> means both, <code>red | blue</code> either,
 <code>!red</code> not, and <code>re*d</code> lets a star stand for
-anything (see Search syntax). Numbers and dates are searched as they
+anything (see Homer patterns). Numbers and dates are searched as they
 read. Case is ignored for English letters; type accented letters as they
 appear. A search that finds nothing says so and leaves the list as it
 was.</li>
 <li><strong>Full-text match</strong> is offered only for a table with a
-full-text index, such as the articles of BrailleForum. It asks for words
-and keeps the records the index finds: <code>guide dog</code> both
-words, <code>"guide dog"</code> the phrase, <code>guide OR dog</code>
-either, <code>braille NOT display</code> leaving out display,
-<code>NEAR(guide dog, 5)</code> within five words, <code>advoca*</code>
-any word that starts so, and <code>title: convention</code> one field.
-It matches whole words, not parts of words as Keywords match does, and
-ignores case and accents. The records stay in the table’s own order; for
-the best matches first, run a saved search instead.</li>
+full-text index, such as the articles of BrailleForum. It takes a Homer
+pattern, as Keywords does, but matches whole words through the index, so
+<code>art</code> finds art and not start. Every part works:
+<code>"guide uber"~10</code> words near each other,
+<code>title:convention</code> a word in one field, and
+<code>%brail</code>, <code>title%conv</code> and
+<code>title=Here and There</code>, which DbDo checks on the fields
+themselves, in the same search. The index’s own language works too, for
+anyone who knows it: parentheses, and AND, OR, NOT and NEAR in capitals.
+Case and accents never matter. The records stay in the table’s own
+order; for the best matches first, run a saved search instead.</li>
 <li><strong>Fields</strong> asks which fields: <strong>Main</strong>
 (the fields about the table’s subject), <strong>Standard</strong> (the
 id, added, edited, notes, tags, url and marked) or <strong>All</strong>
@@ -3343,10 +3371,13 @@ of **%LOCALAPPDATA%*, where DbDo finds it as it finds the shipped ones,
 so it appears in Template Databases (Control+Shift+O). The build puts
 BrailleForum there on the development computer.</p>
 <p>DbDo opens on <strong>articles</strong>, and each row says the title,
-the author and the month it was <strong>published</strong>. Alt+Right on
-an <strong>issue</strong> goes to its articles, in order. An article’s
-words are in <strong>body</strong> when ACB published it as a web page,
-as Markdown with ACB’s own headings, lists and links, and in
+the author and the month it was <strong>published</strong>. The
+<strong>writers</strong> table has one row a person, found in the
+bylines, and each article is mapped to each of its writers, so Alt+Right
+goes from a writer to their articles and from an article to its writers.
+Alt+Right on an <strong>issue</strong> goes to its articles, in order.
+An article’s words are in <strong>body</strong> when ACB published it as
+a web page, as Markdown with ACB’s own headings, lists and links, and in
 <strong>text</strong> when it came only from the issue’s plain-text
 file. <strong>format</strong> says which. <strong>kind</strong> tells an
 article from the masthead, the table of contents and the notices every
@@ -3354,11 +3385,56 @@ issue repeats.</p>
 <p>Its full-text index, <strong>articles_fts</strong>, finds a word, a
 phrase or words near each other across every article at once, and ranks
 the best matches first. Three saved searches come with it –
-Audio-Description, Convention and Transportation – with Authors and
-Articles-By-Year, and <strong>Searches.md</strong> beside the template
-shows every form a search takes, ready to paste. The reading_list report
-writes up the articles you have marked. Coverage.md says which issues
-are in it and which could not be read.</p>
+Audio-Description, Convention and Transportation – with Writers,
+Articles-By-Year and Topic-By-Year. The reading_list report writes up
+the articles you have marked. On the development computer, each build
+writes notes_Coverage.md, which says which issues are in it and which
+could not be read, and notes_Statistics.md, which gives the writers of
+the most articles and the most words, the longest careers, the columns
+that recur and the words the most articles use.</p>
+<h4 id="searching-brailleforum">Searching BrailleForum</h4>
+<p>The quickest way is Filter Records (Control+F) on articles: choose
+<strong>Full-text match</strong> and type a search. The matches stay in
+the table, to read, mark and open. To read one with its headings and
+links, put the cursor on its <strong>body</strong> and press
+Control+Enter: it opens as a web page.</p>
+<p>What full-text search adds to Keywords:</p>
+<ul>
+<li><strong>Whole words.</strong> Keywords finds letters anywhere, so
+art also finds start and party. Full-text match finds the word art, and
+<code>art*</code> finds art, artist and artwork when you want them.</li>
+<li><strong>Nearness, choices and one field</strong> in one search, with
+the index’s syntax.</li>
+<li><strong>Best first, with the reason.</strong> A saved search ranks
+its matches and reads the passage that matched.</li>
+</ul>
+<p>Searches to try, each a Homer pattern:</p>
+<ul>
+<li><code>guide dog &amp; uber | guide dog &amp; lyft</code>: guide dog
+users and rideshare drivers, a fight that ran for years.</li>
+<li><code>"guide uber"~20 | "guide lyft"~20</code>: the same, with the
+words close together, so the article is about both.</li>
+<li><code>audio description &amp; !movie* &amp; !film* &amp; !television</code>:
+description beyond movies and TV.</li>
+<li><code>braille &amp; literacy &amp; !display*</code>: braille as
+reading, not braille displays.</li>
+<li><code>advoca* &amp; congress*</code>: advocacy aimed at Congress, in
+every word form.</li>
+<li><code>title:letters</code>: the Letters to the Editor columns, by a
+word in the title.</li>
+<li><code>title%conv &amp; published%2019</code>: articles from 2019
+whose titles hold conv.</li>
+<li><code>title=Here and There</code>: every Here and There column, by
+its exact title.</li>
+<li><code>author:charlson &amp; audio description</code>: one writer on
+one subject.</li>
+<li><code>%brail</code>: braille, Braillenote, brailler and every other
+word holding those letters.</li>
+</ul>
+<p>The saved search Topic-By-Year counts a subject’s articles in each
+year, so you hear when it rose and fell; change its words between the
+single quotes to follow another subject. Each build runs every search
+here and logs how many articles it finds.</p>
 <h4 id="radiotrail-plays-internet-radio">RadioTrail plays Internet
 radio</h4>
 <p>Fourteen stations are in the template to start. To build the real

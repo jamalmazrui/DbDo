@@ -3878,15 +3878,16 @@ namespace DbDo
             // as its look), so the words of & may sit in different fields.
             // THE HOMER SEARCH SYNTAX (31 October 2026, kit 1.95.0): Homer.Search reads the record as text, so
             // ! (not), ? (one character), quotes and & before | now work as they do in every Homer search.
-            List<List<Search.Term>> llPattern = Search.parse(sSub);
+            // THE HOMER PATTERN'S FIELD PARTS (26 November 2026): title:word title%letters title=value read that field alone.
+            List<List<Search.Term>> llPattern = Search.parse(sSub, lFields);
             for (int iPos = iFrom; iPos >= 1 && iPos <= iCount; iPos += iStep)
             {
                 try
                 {
                     absolutePosition = iPos;
-                    StringBuilder sbRecord = new StringBuilder();
-                    foreach (string sCol in lFields) sbRecord.Append(getScreenValue(sCol) ?? "").Append('\n');
-                    if (Search.isMatch(sbRecord.ToString(), llPattern, false, bCaseSensitive)) return iPos;
+                    Dictionary<string, string> dRecord = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                    foreach (string sCol in lFields) dRecord[sCol] = getScreenValue(sCol) ?? "";
+                    if (Search.isMatchRecord(dRecord, llPattern, bCaseSensitive)) return iPos;
                 }
                 catch (Exception oError)
                 {
@@ -3906,14 +3907,103 @@ namespace DbDo
             // THE HOMER SEARCH SYNTAX (31 October 2026, kit 1.95.0): each term found in some field, read as text.
             // KEYWORDS MATCH (25 November 2026): a link field is also read by its linked look, as Keywords (Control+K)
             // reads it from the screen, so the filter keeps exactly the records Keywords stops on.
+            // THE HOMER PATTERN'S FIELD PARTS (26 November 2026): patternWhere reads title: title% title= and %.
+            return patternWhere(sText, null, null, null);
+        }
+
+        // fieldSearchExprs: the expressions a pattern term reads for one field -- the field as text, and a link
+        // field's linked look too -- as Keywords reads them from the screen.
+        private List<string> fieldSearchExprs(string sField)
+        {
             List<string> lsCols = new List<string>();
-            foreach (string sField in getFieldNames())
+            lsCols.Add("CAST(\"" + sField.Replace("\"", "\"\"") + "\" AS TEXT)");
+            string sLinked = linkLookSql(sField, sCurrentTable, "look");
+            if (sLinked.Length > 0) lsCols.Add(sLinked);
+            return lsCols;
+        }
+
+        // patternWhere: A HOMER PATTERN AS ONE SQL CONDITION (26 November 2026), for Keywords match and Full-text match
+        // alike. Each term becomes its own test, joined by AND within an alternative and OR between them, NOT for !:
+        //   - with a full-text index (sFtsIndex), a term the index can say -- words, a phrase, a word's start,
+        //     field: on an indexed field, "words"~n -- is the record's key IN the index's matches, by whole words;
+        //   - any other term tests its fields directly: %letters and field%letters anywhere (instr, or LIKE for a
+        //     wildcard), field= the whole value exactly, case aside, field: a whole word (the value with its
+        //     punctuation made spaces, LIKE '% word %'), and "words"~n, without an index, every word present.
+        // So one search mixes the index and letter tests freely, and a search of only ! terms works too.
+        public string patternWhere(string sPattern, string sFtsIndex, string sFtsKey, List<string> lsIndexColumns)
+        {
+            List<string> lsFields = getFieldNames();
+            List<List<Search.Term>> llPattern = Search.parse(sPattern, lsFields);
+            if (llPattern.Count == 0) return "";
+            string sLower = caseFoldFunction();
+            List<string> lsAllExprs = new List<string>();
+            foreach (string sField in lsFields) lsAllExprs.AddRange(fieldSearchExprs(sField));
+            string sIndexQuoted = sFtsIndex == null ? "" : "\"" + sFtsIndex.Replace("\"", "\"\"") + "\"";
+            List<string> lsAlternatives = new List<string>();
+            foreach (List<Search.Term> lTerms in llPattern)
             {
-                lsCols.Add("CAST(\"" + sField.Replace("\"", "\"\"") + "\" AS TEXT)");
-                string sLinked = linkLookSql(sField, sCurrentTable, "look");
-                if (sLinked.Length > 0) lsCols.Add(sLinked);
+                List<string> lsAll = new List<string>();
+                foreach (Search.Term t in lTerms)
+                {
+                    string sTest = null;
+                    if (sFtsIndex != null)
+                    {
+                        string sQuery = Search.ftsTerm(t, lsIndexColumns);
+                        if (sQuery.Length > 0)
+                            sTest = "\"" + sFtsKey.Replace("\"", "\"\"") + "\" IN (SELECT rowid FROM " + sIndexQuoted + " WHERE " + sIndexQuoted + " MATCH '" + sQuery.Replace("'", "''") + "')";
+                    }
+                    if (sTest == null) sTest = patternTermSql(t, t.sField.Length > 0 ? fieldSearchExprs(t.sField) : lsAllExprs, sLower);
+                    lsAll.Add(t.bNot ? "NOT " + sTest : sTest);
+                }
+                lsAlternatives.Add(lsAll.Count == 1 ? lsAll[0] : "(" + string.Join(" AND ", lsAll.ToArray()) + ")");
             }
-            return searchSql(sText, lsCols, false);
+            return lsAlternatives.Count == 1 ? lsAlternatives[0] : "(" + string.Join(" OR ", lsAlternatives.ToArray()) + ")";
+        }
+
+        // patternTermSql: one term tested on its expressions, any of which may hold it; see patternWhere.
+        private string patternTermSql(Search.Term t, List<string> lsExprs, string sLower)
+        {
+            List<string> lsAny = new List<string>();
+            string sText = t.sText;
+            foreach (string sExpr in lsExprs)
+            {
+                string sValue = sLower + "(coalesce(" + sExpr + ", ''))";
+                if (t.iNear > 0)
+                {
+                    // Near needs a full-text index; without one, every word of it must be present.
+                    List<string> lsWords = new List<string>();
+                    foreach (string sWord in Search.plainText(new Search.Term() { sText = sText }).Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries))
+                        lsWords.Add("instr(" + sValue + ", " + sLower + "('" + sWord.TrimEnd('*').Replace("'", "''") + "')) > 0");
+                    lsAny.Add("(" + string.Join(" AND ", lsWords.ToArray()) + ")");
+                }
+                else if (t.cFieldOp == '=')
+                    lsAny.Add(t.bWild ? sValue + " LIKE " + sLower + "('" + Search.likePattern(t, true).Replace("'", "''") + "') ESCAPE '\\'"
+                                      : "trim(" + sValue + ") = " + sLower + "('" + sText.Trim().Replace("'", "''") + "')");
+                else if (t.cFieldOp == ':')
+                {
+                    // A whole word: the value's punctuation made spaces, spaces around it, and the word between spaces.
+                    string sSpaced = sValue;
+                    foreach (string sMark in new string[] { ".", ",", ";", ":", "!", "?", "(", ")", "\"", "'", "-", "/", char.ConvertFromUtf32(13), char.ConvertFromUtf32(10), char.ConvertFromUtf32(9) })
+                        sSpaced = "replace(" + sSpaced + ", '" + sMark.Replace("'", "''") + "', ' ')";
+                    string sWord = Search.likeBody(t);
+                    lsAny.Add("(' ' || " + sSpaced + " || ' ') LIKE " + sLower + "('% " + sWord.Replace("'", "''") + " %') ESCAPE '\\'");
+                }
+                else if (!t.bWild)
+                    lsAny.Add("instr(" + sValue + ", " + sLower + "('" + sText.Replace("'", "''") + "')) > 0");
+                else
+                    lsAny.Add(sValue + " LIKE " + sLower + "('" + Search.likePattern(t, false).Replace("'", "''") + "') ESCAPE '\\'");
+            }
+            return "(" + string.Join(" OR ", lsAny.ToArray()) + ")";
+        }
+
+        // fullTextColumns: the columns of a full-text index, in order (title, author, search_text and text for
+        // BrailleForum's articles_fts), so title: knows it can use the index.
+        public List<string> fullTextColumns(string sIndex)
+        {
+            List<string> lsColumns = new List<string>();
+            int iFound;
+            foreach (string[] aRow in queryRowsSql("SELECT name FROM pragma_table_info('" + sIndex.Replace("'", "''") + "')", 100, out iFound)) lsColumns.Add(aRow[0]);
+            return lsColumns;
         }
 
         // columnSearchSql: one field matched by a pattern in the Homer search syntax, read as a name, as Jump
@@ -19605,17 +19695,17 @@ namespace DbDo
             if (db == null || !db.hasRecordset()) return;
             if (string.IsNullOrEmpty(sLastFindSubstring)) sLastFindSubstring = SearchHistory.lastText(SearchHistory.SectionFind);
             if (string.IsNullOrEmpty(sLastFindSubstring)) { Say.say("keywords: none yet. Control+K asks for some."); return; }
-            List<List<Search.Term>> llPattern = Search.parse(sLastFindSubstring);
             List<string> lFields = db.getFieldNames();
+            List<List<Search.Term>> llPattern = Search.parse(sLastFindSubstring, lFields);
             bool bCase = bLastFindCaseSensitive;
             readMatches(bMarkedOnly ? "Read Keywords Matches Marked" : "Read Keywords Matches",
                 (bMarkedOnly ? "marked keywords matches: none for " : "keywords matches: none for ") + sLastFindSubstring,
                 delegate()
                 {
                     if (bMarkedOnly && !isMarkedTrue(db.getScreenValue(Metadata.MarkedColumn))) return false;
-                    StringBuilder sbRecord = new StringBuilder();
-                    foreach (string sField in lFields) sbRecord.Append(db.getScreenValue(sField) ?? "").Append('\n');
-                    return Search.isMatch(sbRecord.ToString(), llPattern, false, bCase);
+                    Dictionary<string, string> dRecord = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
+                    foreach (string sField in lFields) dRecord[sField] = db.getScreenValue(sField) ?? "";
+                    return Search.isMatchRecord(dRecord, llPattern, bCase);
                 });
         }
 
@@ -27098,6 +27188,37 @@ namespace DbDo
             Homer.MediaPlayer.run(this, sDbName, db.currentTable, lsTracks, bRecordPlayback);
         }
 
+        // openMarkdownAsWebPage: a Markdown cell as a web page in the browser. The page's heading and title are the record's
+        // title field when it has one, else its look, so the browser's title bar and the first heading name the article.
+        // The files go in DbDo's work folder, named for the record, and are replaced the next time the same record opens.
+        private void openMarkdownAsWebPage(string sColName, string sMarkdown)
+        {
+            string sTitle = "";
+            try { if (db.getDisplayFieldNames().Contains("title")) sTitle = (db.getFieldValue("title") ?? "").Trim(); } catch { }
+            if (sTitle.Length == 0) { try { sTitle = (db.getFieldValue(Metadata.LookColumn) ?? "").Replace((char)31, ' ').Trim(); } catch { } }
+            if (sTitle.Length == 0) sTitle = sColName;
+            string sBase = System.Text.RegularExpressions.Regex.Replace(sTitle, @"[^\w\- ]+", "").Trim();
+            if (sBase.Length > 60) sBase = sBase.Substring(0, 60).Trim();
+            if (sBase.Length == 0) sBase = "cell";
+            string sFolder = Path.Combine(Homer.Paths.work(), "pages");
+            string sMd = Path.Combine(sFolder, sBase + ".md"), sHtm = Path.Combine(sFolder, sBase + ".htm");
+            try
+            {
+                Directory.CreateDirectory(sFolder);
+                File.WriteAllText(sMd, "# " + sTitle + "\r\n\r\n" + sMarkdown, new UTF8Encoding(true));
+                string sError;
+                if (!Homer.Conversion.convertAny(sMd, sHtm, out sError) || !File.Exists(sHtm))
+                {
+                    DbDoLog.write("Open Cell Value: " + sMd + " could not become a web page: " + sError);
+                    LbcMessage.show(this, "The field could not be shown as a web page: " + sError, "Open Cell Value", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    return;
+                }
+                DbDoLog.write("Open Cell Value: " + sColName + " shown as a web page, " + sHtm);
+                ComAutomation.shellOpen(sHtm);
+            }
+            catch (Exception ex) { ErrorDialog.show(this, "Open Cell Value", ex.Message); }
+        }
+
         private void recOpenCellClicked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset()) return;
@@ -27118,7 +27239,7 @@ namespace DbDo
                 ListBox lb = dlg.addPickBox(
                     "&Column whose cell value to open:",
                     lFields, sDefault,
-                    "The command opens the url, file path, or folder path stored in this column of the current record");
+                    "The command opens the url, file path, or folder path stored in this column of the current record, or shows a Markdown field, such as an article's body, as a web page in your browser");
                 if (!dlg.runOkCancel()) return;
                 if (lb.SelectedItem == null) return;
                 sColName = lb.SelectedItem.ToString();
@@ -27130,6 +27251,15 @@ namespace DbDo
             if (sValue.Length == 0)
             {
                 Say.say("Cell is empty");
+                return;
+            }
+            // A MARKDOWN FIELD OPENS AS A WEB PAGE (26 November 2026, Jamal: Markdown "could be converted to a temporary .htm
+            // file and then opened in a browser, giving the screen reader user a structured view of an article, including
+            // clickable links"). Its value is not a path to open but a document to read, so it is converted by the kit's
+            // conversions (Pandoc) into DbDo's work folder and opened in the browser, where headings, lists and links work.
+            if (string.Equals(db.getColumnDeclaredType(db.currentTable, sColName), "TEXTMARKDOWN", StringComparison.OrdinalIgnoreCase))
+            {
+                openMarkdownAsWebPage(sColName, sValue);
                 return;
             }
             try
@@ -28825,14 +28955,24 @@ namespace DbDo
             using (LbcDialog dlg = new LbcDialog("Full-Text Match", this))
             {
                 TextBox tb = dlg.addInputBox("&Words to find", sLastFullText,
-                    "Whole words, case and accents aside: guide dog finds both words; \"guide dog\" the phrase; guide OR dog either; braille NOT display leaves out display; NEAR(guide dog, 5) within 5 words; advoca* any word starting so; title: convention one field.");
+                    "A Homer pattern, matched by whole words: guide dog the words together; & both; | either; ! leaves out; a star at a word's end finds its starts; \"guide uber\"~10 within ten words; title:convention a word in one field; %brail letters anywhere; title%conv letters in one field; title=Here and There exactly.");
                 if (!dlg.runOkCancel()) return false;
                 sText = (tb.Text ?? "").Trim();
             }
             if (sText.Length == 0) return false;
             sLastFullText = sText;
+            // A HOMER PATTERN, TERM BY TERM (26 November 2026, kit 1.294.0): patternWhere gives each term to the index
+            // when the index can say it, by whole words, and tests the rest -- %letters, field%, field=, a star inside a
+            // word -- on their fields, all in one condition. FTS5's own syntax (NEAR, parentheses, ^, AND, OR or NOT in
+            // capitals) still passes through to the index as typed.
             string sQuotedIndex = "\"" + sIndex.Replace("\"", "\"\"") + "\"";
-            string sCondition = "\"" + sKey.Replace("\"", "\"\"") + "\" IN (SELECT rowid FROM " + sQuotedIndex + " WHERE " + sQuotedIndex + " MATCH '" + sText.Replace("'", "''") + "')";
+            string sCondition;
+            if (Homer.Search.isFullTextSyntax(sText))
+                sCondition = "\"" + sKey.Replace("\"", "\"\"") + "\" IN (SELECT rowid FROM " + sQuotedIndex + " WHERE " + sQuotedIndex + " MATCH '" + sText.Replace("'", "''") + "')";
+            else
+                sCondition = db.patternWhere(sText, sIndex, sKey, db.fullTextColumns(sIndex));
+            if (sCondition.Length == 0) return false;
+            DbDoLog.write("Full-text match: " + sText + " as the condition " + sCondition);
             try { db.countWhere(sTable, sCondition); }
             catch (Exception ex)
             {

@@ -166,7 +166,7 @@ rem 1.64.5: Play Tutorials calls MediaPlayer.playTutorials, which older kits lac
 rem a build against 1.64.4 failed to compile on 8 October 2026 rather than saying so.
 rem 1.231.0: the macro recorder compiles the kit's Macro.cs, with its expected-against-actual audit.
 rem 1.278.0: Show Columns and Order Records list each group's columns with Lbc's addChoiceButton.
-set "kitNeeded=1.293.1"
+set "kitNeeded=1.294.0"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -368,6 +368,18 @@ if exist "!sHere!scripts\makeBrailleForum.py" if not exist "!sHere!templates\Bra
   rem views table that the first version made failed the kit's checkDb at push).
   python "!sHere!scripts\makeBrailleForum.py" --repair >> "!log!" 2>&1
   echo BrailleForum repair: exit code !errorlevel!>> "!log!"
+)
+rem RETIRED BRAILLEFORUM FILES (26 November 2026). Searches.md and Coverage.md sat beside the template, outside the
+rem Homer doc set: the search guide is now the BrailleForum part of help\DbDo.md, and the coverage notes are
+rem notes\BrailleForum_Coverage.md, beside the new notes\BrailleForum_Statistics.md. Authors.sql became Writers.sql with
+rem the writers table. Each is removed from the template, its installed copy and DbDo's seeded copy, and logged.
+for %%D in ("!sHere!templates\BrailleForum" "%LOCALAPPDATA%\DbDo\templates\BrailleForum" "%LOCALAPPDATA%\DbDo\data\BrailleForum") do (
+  for %%F in (Searches.md Coverage.md Authors.sql) do (
+    if exist "%%~D\%%F" (
+      del /f /q "%%~D\%%F" >nul 2>&1
+      if exist "%%~D\%%F" (echo Retired BrailleForum file could not be removed: %%~D\%%F>> "!log!") else (echo Retired BrailleForum file removed: %%~D\%%F>> "!log!")
+    )
+  )
 )
 rem BRAILLEFORUM IS INSTALLED FOR YOU, APART FROM THE PROGRAM (25 November 2026). The installer leaves it out, so the
 rem installed DbDo never listed it in Template Databases (Control+Shift+O). DbDo now reads templates from two places:
