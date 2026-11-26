@@ -985,6 +985,9 @@ def logBodyBulk(oDb):
         oDb.execute("SELECT count(*), coalesce(sum(length(body)), 0) FROM articles WHERE body LIKE '%data:image%'").fetchone()))
 
 
+fnStale = None   # a builder's own test of an existing template: returns why it must be rebuilt, else ""
+
+
 def repairTemplate():
     """Mends a template built by an earlier version, in place and fetching nothing, as each build runs it. Each mend is
     logged, and the file is left untouched when there is nothing to mend.
@@ -1007,6 +1010,14 @@ def repairTemplate():
             iBody, iPlain = oDb.execute("SELECT coalesce(sum(length(body)), 0), coalesce(sum(length(search_text)), 0) FROM articles WHERE body IS NOT NULL").fetchone()
             log("REPAIR body %d characters, search_text %d" % (iBody, iPlain))
             logBodyBulk(oDb)
+        # A MAGAZINE'S OWN TEST (26 November 2026): a builder that shares this code may say its template lacks what a
+        # newer version gathers (makeBrailleMonitor version 2, the issues before 1985); the template is then rebuilt by
+        # an ordinary run, which reads the kept pages and asks the site only about what it does not have.
+        sStale = fnStale(oDb) if fnStale else ""
+        if sStale:
+            oDb.close()
+            say(sSource + ".db is being rebuilt: " + sStale + " Pages already saved are not fetched again.")
+            return main([])
         if "search_text" not in lsColumns or not bAuthors:
             oDb.close()
             say(sSource + ".db is being rebuilt from the saved pages, for the newest design (plain words in the index, a writers table). It takes a minute or two and fetches nothing.")

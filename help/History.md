@@ -5,6 +5,11 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 26 November 2026, night -- The Braille Monitor from 1957, and freezes logged
+
+- **BrailleMonitor now reaches back to 1957.** The first full build read 313 issues, from 1985 to 1986 and 2000 on, because it knew only the Monitor's issue folders. The older issues are single pages in many spellings, and the 1987 to 1999 issues have no folder. The builder now reads them too: a one-page issue is divided at its own headings, a table of contents without a folder is read like a folder's, and when a month has both, the folder wins. Issues of The Blind American, which the NFB published in 1961 and 1962 while the Monitor paused, are marked with that edition. The next build sees the older issues are missing and rebuilds the template from the pages already saved, asking nfb.org only about the few it lacks.
+- **A freeze is logged with where it stood.** Moving one row in BrailleMonitor sometimes froze DbDo for 14 to 18 seconds. DbDo now starts the kit's stall watch, so any pause of a second and a half or more writes a WARN line to DbDo's log, with DbDo's own call stack at that moment and the pause's whole length when it ends. The next cycle's log will say what to fix.
+
 ## 26 November 2026, late afternoon -- BrailleMonitor, the NFB Braille Monitor searchable
 
 - **A new template, BrailleMonitor,** holds the articles of the National Federation of the Blind's magazine, the Braille Monitor: every issue nfb.org offers, from 1957 on, one row an article, with the same tables, writers, keys and full-text index as BrailleForum. scripts\makeBrailleMonitor builds it with makeBrailleForum's own code, replacing only how nfb.org's issues are found and read: each article from its own page, as Markdown in body, with its plain words in search_text for the index. Its first build reads about ten thousand pages, one a second, so it takes some hours; the build runs it when the database is missing, then mends it in place, and installs it in %LOCALAPPDATA%\DbDo\templates beside BrailleForum.

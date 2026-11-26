@@ -24,6 +24,16 @@ August/September issue makes the later numbers run one behind the months. The fo
 The month comes from the archive's link text ("August/September 2025"); a folder linked without a month is dated from
 its own table of contents ("Vol. 68, No. 8   August/September 2025").
 
+OLDER ISSUES HAVE NO FOLDER (version 2, from the first full run's log: 313 issues came in, 1985 to 1986 and 2000 on,
+while the archive links about 420 more). Those issues are single pages under /publications/bm/, in many spellings:
+    Abm/bm1957/BrailleMonitorAugust1957.html, bm1965/65BM-APR.html, bm76/bm76-december.html    a whole issue in one page
+    bm61/BLIND-AMERICAN-DEC-1961.html, bm62/blindamerican-may1962.html    the same, for The Blind American
+    bm87/brlm8701.htm                                                    a whole issue, 1987 to 1998
+    bm99/bm9912tc.htm                                                    a table of contents, 1999, its articles beside it
+A dated link to such a page is an issue: a table of contents is read as the folders' are, its articles the pages in its
+own directory that it links to; a whole-issue page is divided at its own headings, as a folder's complete page is. When
+a month has both a folder and a single page, the folder wins: it has the articles one a page.
+
 ONE ARTICLE, ONE ROW, FROM ITS OWN PAGE. Every Monitor article is a web page with the NFB's own headings, lists and
 links, so body is always TEXTMARKDOWN, converted by Pandoc, and search_text the same words as Pandoc's plain text,
 which the full-text index reads; format is "web page". The article's title is its page's own heading matching the
@@ -58,15 +68,16 @@ import makeBrailleForum as core
 
 core.sSource = "BrailleMonitor"
 core.sSite = "nfb.org"
-core.sVersion = "2026-11-26 version 1: the Braille Monitor, one row an article, from each article's own page"
-core.sUserAgent = "DbDo makeBrailleMonitor/1 (+https://github.com/JamalMazrui/DbDo; a searchable archive of the NFB Braille Monitor)"
+core.sVersion = "2026-11-26 version 2: the Braille Monitor from 1957 on, adding the one-page issues of 1957 to 1984 and the 1987 to 1999 issues"
+core.sUserAgent = "DbDo makeBrailleMonitor/2 (+https://github.com/JamalMazrui/DbDo; a searchable archive of the NFB Braille Monitor)"
 core.sFirstRun = "The first run reads about ten thousand pages, one a second, so it takes some hours; later runs ask only about recent issues."
 core.sTemplate = os.path.join(core.sProject, "templates", "BrailleMonitor")
 core.sTarget = os.path.join(core.sTemplate, "BrailleMonitor.db")
 core.sLogPath = os.path.join(core.sProject, "logs", "DbDo-makeBrailleMonitor-%s.log" % datetime.datetime.now().strftime("%Y%m%d-%H%M%S"))
 core.trail.sLogPath = core.sLogPath
 core.lsBoilerplate = ["photo and web list"]
-core.dEditions = {"Braille Monitor": "The magazine of the National Federation of the Blind, published since 1957."}
+core.dEditions = {"Braille Monitor": "The magazine of the National Federation of the Blind, published since 1957.",
+                  "The Blind American": "The magazine the National Federation of the Blind published in 1961 and 1962, while the Braille Monitor paused."}
 core.dKinds = {"article": "An article, column or speech: what a search usually wants.",
                "boilerplate": "A list the issue repeats, such as its photo and web list.",
                "issue": "A whole issue whose page has no table of contents and too few headings to divide."}
@@ -77,8 +88,10 @@ lsEntryPages = ["https://nfb.org/node/3771", "https://nfb.org/resources/publicat
 reFolder = re.compile(r"/publications/bm/bm(\d\d)/bm(\d\d)(\d\d)/", re.I)
 reMedia = re.compile(r"\.(mp3|zip|doc|docx|brf|pdf|txt|m4a|wav)$", re.I)
 sMonths = core.sMonthPattern
-reDate = re.compile(r"(%s)(?:\s*[-/–&]\s*(%s))?,?\s+((?:19|20)\d\d)" % (sMonths, sMonths), re.I)
-reVolume = re.compile(r"Vol\.?\s*(\d+)\s*,?\s*No\.?\s*(\d+)\s+((?:%s)(?:\s*[-/–&]\s*(?:%s))?)\s*,?\s*((?:19|20)\d\d)" % (sMonths, sMonths), re.I)
+sJoin = r"(?:\s*[-/–&]\s*|\s*\b(?:through|thru|to|and)\b\s*)"
+reDate = re.compile(r"\b(%s)(?:%s(%s))?,?\s*((?:19|20)\d\d)" % (sMonths, sJoin, sMonths), re.I)
+reVolume = re.compile(r"Vol\.?\s*(\d+)\s*,?\s*No\.?\s*(\d+)\s+((?:%s)(?:%s(?:%s))?)\s*,?\s*((?:19|20)\d\d)" % (sMonths, sJoin, sMonths), re.I)
+rePage = re.compile(r"/publications/bm/(?:[^/?#]+/)*[^/?#]+\.html?$", re.I)
 
 log, say, plural = core.log, core.say, core.plural
 
@@ -105,6 +118,20 @@ def folderOf(sHref):
     return sHref[:oMatch.end()], "bm%s%s" % (oMatch.group(2), oMatch.group(3)), oMatch.group(1)
 
 
+def pageOf(sHref):
+    """(directory address, stem, whether a table of contents) when a link points to a one-page issue or a table of
+    contents under /publications/bm/ that is not in an issue folder (version 2)."""
+    if folderOf(sHref) or not rePage.search(urllib.parse.urlsplit(sHref).path): return None
+    sDir, sName = sHref.rsplit("/", 1)
+    sStem = re.sub(r"(?i)\.html?$", "", sName)
+    bToc = bool(re.search(r"(?i)tc$", sStem))
+    return sDir + "/", (sStem[:-2] if bToc else sStem), bToc
+
+
+def editionOf(sHref):
+    return "The Blind American" if re.search(r"(?i)blind-?american", sHref) else "Braille Monitor"
+
+
 def issueTitle(dIssue):
     iYear, iFirst = int(dIssue["published"][:4]), int(dIssue["published"][5:7])
     sMonths = datetime.date(iYear, iFirst, 1).strftime("%B")
@@ -117,6 +144,7 @@ def discoverIssues(oCache):
     link to another nfb.org page is followed one step, its folder links taking the date; a folder linked without a date
     is dated from its own table of contents."""
     dFolders = collections.OrderedDict()   # folder (lower case) -> issue facts
+    dPages = collections.OrderedDict()     # one-page issue or folderless contents (lower case) -> issue facts
     dLinkKinds, dSamples = collections.Counter(), collections.defaultdict(list)
     lQueue = [(s, 0, None) for s in lsEntryPages]
     setSeen = set()
@@ -134,6 +162,7 @@ def discoverIssues(oCache):
             tFolder = folderOf(sHref)
             tDate = datesOf(sText) or (datesOf(sText + " " + sHeading) if re.fullmatch(r"(?i)\s*(%s)(\s*[-/–&]\s*(%s))?\s*" % (sMonths, sMonths), sText or "") else None)
             sHost = urllib.parse.urlsplit(sHref).netloc.lower()
+            tPage = None if tFolder else pageOf(sHref)
             if tFolder:
                 dLinkKinds["issue folder"] += 1
                 sFolder, sStem, sYy = tFolder
@@ -141,12 +170,19 @@ def discoverIssues(oCache):
                 if tDate or tInherited:
                     if not dIssue["date"]: dIssue.update(date=tDate or tInherited, link_text=sText)
                 if sHref.lower().endswith("tc.htm"): dIssue["page"] = sHref
+            elif tPage and (tDate or tInherited) and sHost.endswith("nfb.org"):
+                sKind = "one-page issue" if not tPage[2] else "table of contents without a folder"
+                dLinkKinds[sKind] += 1
+                if len(dSamples[sKind]) < 5: dSamples[sKind].append("%s -> %s" % (sText, sHref))
+                dPages.setdefault(sHref.lower(), {"folder": tPage[0], "stem": tPage[1], "page": sHref, "single": True, "toc": tPage[2],
+                                                  "date": tDate or tInherited, "link_text": sText, "edition": editionOf(sHref)})
             elif "archive.org" in sHost:
                 dLinkKinds["archive.org"] += 1
                 if len(dSamples["archive.org"]) < 5: dSamples["archive.org"].append("%s -> %s" % (sText, sHref))
-            elif tDate and sHost.endswith("nfb.org") and not reMedia.search(sHref) and iDepth < 1:
+            elif tDate and sHost.endswith("nfb.org") and not reMedia.search(sHref) and iDepth < 1 and re.search(r"(?i)monitor", sHref):
+                # Version 2: only a page about the Monitor is followed; version 1 also read other publications' archives.
                 dLinkKinds["dated nfb.org page, followed"] += 1
-                if len(dSamples["dated nfb.org page"]) < 5: dSamples["dated nfb.org page"].append("%s -> %s" % (sText, sHref))
+                if len(dSamples["dated nfb.org page, followed"]) < 5: dSamples["dated nfb.org page, followed"].append("%s -> %s" % (sText, sHref))
                 lQueue.append((sHref, iDepth + 1, tDate))
             elif tDate:
                 dLinkKinds["dated, not used"] += 1
@@ -154,7 +190,7 @@ def discoverIssues(oCache):
             else:
                 dLinkKinds["other"] += 1
     for sKind, iCount in sorted(dLinkKinds.items()):
-        log("LINKKIND %s: %s%s" % (sKind, plural(iCount, "link"), (" -- for example " + "; ".join(dSamples.get(sKind.split(",")[0], []))) if dSamples.get(sKind.split(",")[0]) else ""))
+        log("LINKKIND %s: %s%s" % (sKind, plural(iCount, "link"), (" -- for example " + "; ".join(dSamples[sKind])) if dSamples.get(sKind) else ""))
     # A folder linked without a date: its table of contents says the month.
     for dIssue in dFolders.values():
         if dIssue["date"]: continue
@@ -167,31 +203,47 @@ def discoverIssues(oCache):
                 break
         if not dIssue["date"]: core.dReport["failed"].append("%s: an issue folder whose month could not be found" % dIssue["folder"])
     # Keys: bm-<year>-<first month>, with b, c ... for a second issue in the same month, in folder order.
+    # A single page whose month a folder already has, or that repeats another page's month, is left out and logged.
+    setFolderMonths = set((d["date"][0], d["date"][1], d["date"][3]) for d in dFolders.values() if d["date"])
+    dChosen = {}
+    for sLower, dPage in dPages.items():
+        tMonth = (dPage["date"][0], dPage["date"][1], dPage["date"][2], dPage["date"][3], dPage["edition"])
+        if (tMonth[0], tMonth[1], tMonth[3]) in setFolderMonths:
+            log("DUPLICATE %s: its month has an issue folder, which is read instead" % dPage["page"])
+        elif tMonth in dChosen:
+            log("DUPLICATE %s: the same issue as %s, which is read instead" % (dPage["page"], dChosen[tMonth]["page"]))
+        else:
+            dChosen[tMonth] = dPage
+    lAll = [dFolders[s] for s in sorted(dFolders)] + sorted(dChosen.values(), key=lambda d: (d["date"], d["page"].lower()))
     dIssues, dTaken = {}, collections.Counter()
-    for sLower in sorted(dFolders):
-        dIssue = dFolders[sLower]
+    for dIssue in sorted(lAll, key=lambda d: (d["date"] or (0, 0, 0, False))[:2]):
         if not dIssue["date"]: continue
         iYear, iFirst, iLast, bSpecial = dIssue["date"]
         sBase = "bm-%04d-%02d" % (iYear, iFirst)
         sKey = sBase + ("" if not dTaken[sBase] else "bcdefgh"[dTaken[sBase] - 1])
         dTaken[sBase] += 1
-        dIssues[sKey] = {"issue_key": sKey, "edition": "Braille Monitor", "year": iYear, "published": "%04d-%02d" % (iYear, iFirst),
+        dIssues[sKey] = {"issue_key": sKey, "edition": dIssue.get("edition", "Braille Monitor"), "year": iYear, "published": "%04d-%02d" % (iYear, iFirst),
                          "published_end": "%04d-%02d" % (iYear, iLast) if iLast != iFirst else "", "special": bSpecial,
-                         "page": dIssue["page"], "folder": dIssue["folder"], "stem": dIssue["stem"], "link_text": dIssue["link_text"]}
-    log("DISCOVERED %s from %s, in %s" % (plural(len(dIssues), "issue"), plural(len(setSeen), "listing page"), plural(len(dFolders), "folder")))
+                         "page": dIssue["page"], "folder": dIssue["folder"], "stem": dIssue["stem"], "link_text": dIssue["link_text"],
+                         "single": dIssue.get("single", False), "toc": dIssue.get("toc", False)}
+    log("DISCOVERED %s from %s: %s and %s" % (plural(len(dIssues), "issue"), plural(len(setSeen), "listing page"), plural(len(dFolders), "folder"),
+                                              plural(len(dChosen), "single page")))
+    for sEdition, iCount in sorted(collections.Counter(d["edition"] for d in dIssues.values()).items()):
+        log("EDITION %s: %s, %s to %s" % (sEdition, plural(iCount, "issue"), min(d["published"] for d in dIssues.values() if d["edition"] == sEdition),
+                                          max(d["published"] for d in dIssues.values() if d["edition"] == sEdition)))
     return dIssues
 
 
 def tableOfContents(lLinks, sFolder, sStem):
     """The article pages a table of contents lists, in its order, as (address, title): the folder's own bmYYNNxx.htm
     pages, the title without its "(HTML)"."""
-    reArticle = re.compile(r"^%s\d+\.htm$" % sStem, re.I)
+    reArticle = re.compile(r"^%s\w+\.html?$" % re.escape(sStem), re.I)
     lArticles, setSeen = [], set()
     for sHref, sText, sHeading in lLinks:
         sHref = tidyUrl(sHref)
         if not sHref.lower().startswith(sFolder.lower()): continue
         sName = sHref.rsplit("/", 1)[-1]
-        if not reArticle.match(sName): continue
+        if not reArticle.match(sName) or re.match(r"(?i)^%s(tc)?\.html?$" % re.escape(sStem), sName): continue
         sTitle = re.sub(r"\s*\((?:HTML|MP3)\)\s*$", "", sText or "", flags=re.I).strip()
         if not sTitle or re.fullmatch(r"(?i)\(?\s*(back|contents|next|previous)\s*\)?", sTitle) or sHref.lower() in setSeen: continue
         setSeen.add(sHref.lower())
@@ -235,13 +287,15 @@ def articleParts(sHtml, sTocTitle):
 
 def sectionsOf(sHtml):
     """A complete issue page divided at its own headings: [(title, markup)], or [] when it has fewer than three of
-    any one level from 1 to 3."""
+    any one level from 1 to 4."""
     sBody = cleaned(sHtml)
     lHeads = headings(sBody)
-    dLevels = collections.Counter(t[2] for t in lHeads if t[2] <= 3 and t[3])
+    dLevels = collections.Counter(t[2] for t in lHeads if t[2] <= 4 and t[3])
     lLevels = [i for i in sorted(dLevels) if dLevels[i] >= 3]
     if not lLevels: return []
-    lAt = [t for t in lHeads if t[2] == lLevels[0] and t[3] and not re.search(r"(?i)^contents$", t[3])]
+    # The masthead ("THE BRAILLE MONITOR", "The Blind American") and a bare "Contents" are not articles.
+    lAt = [t for t in lHeads if t[2] == lLevels[0] and t[3] and not re.search(r"(?i)^(contents|(the\s+)?(braille\s+monitor|blind\s+american)\b.{0,40})$", t[3])]
+    if len(lAt) < 2: return []
     return [(sText, sBody[iEnd:(lAt[i + 1][0] if i + 1 < len(lAt) else len(sBody))]) for i, (iStart, iEnd, iLevel, sText) in enumerate(lAt)]
 
 
@@ -259,10 +313,14 @@ def readIssue(oCache, dIssue, sPandoc, bTrust):
     oCache.bTrustKept = bTrust
     sFolder, sStem = dIssue["folder"], dIssue["stem"]
     lTries = []
-    for sTry in (dIssue["page"], sFolder + sStem + "tc.htm", sFolder + sStem + ".htm"):
+    lCandidates = [dIssue["page"]] if dIssue.get("single") else \
+        [dIssue["page"], sFolder + sStem + "tc.htm", sFolder + sStem + ".htm", sFolder + sStem + "tc.html", sFolder + sStem + ".html"]
+    for sTry in lCandidates:
         if sTry.lower() not in [s.lower() for s in lTries]: lTries.append(sTry)
     lPages, sWhole, sWholeUrl, sHow = [], "", "", "no page could be read"
     for sTry in lTries:
+        # The .html spellings (bm1206.html) are asked about only when the .htm ones gave no page.
+        if sWhole and sTry.lower().endswith(".html") and sTry.lower() != dIssue["page"].lower(): continue
         dPage = oCache.fetch(sTry)
         if dPage["body"] is None:
             log("ISSUE %s: %s not read (%s)" % (dIssue["issue_key"], sTry, dPage["error"]))
@@ -276,7 +334,10 @@ def readIssue(oCache, dIssue, sPandoc, bTrust):
             sHow = "the table of contents at " + sTry
             dIssue["page"] = sTry
             break
-        if not sWhole and sTry.lower().endswith(sStem + ".htm"): sWhole, sWholeUrl = sHtml, sTry
+        if dIssue.get("toc"):
+            # Test and learn: a folderless table of contents whose article links were not recognized shows its links.
+            log("TOCLINKS %s: no article links recognized; its links include %s" % (sTry, "; ".join("%s -> %s" % (t[1], t[0]) for t in lLinks[:12]) or "none"))
+        if not sWhole and (re.search(r"(?i)%s\.html?$" % re.escape(sStem), sTry) or (dIssue.get("single") and not dIssue.get("toc"))): sWhole, sWholeUrl = sHtml, sTry
     lsFragments, lWeb = [], []
     for sHref, sTocTitle in lPages:
         dArticle = oCache.fetch(sHref)
@@ -292,6 +353,7 @@ def readIssue(oCache, dIssue, sPandoc, bTrust):
         lsFragments.append(sBody)
     if not lPages and sWhole:
         lSections = sectionsOf(sWhole)
+        log("HEADINGS %s: %s" % (dIssue["issue_key"], ", ".join("h%d %d" % (i, n) for i, n in sorted(collections.Counter(t[2] for t in headings(cleaned(sWhole)) if t[3]).items())) or "none"))
         if lSections:
             sHow = "its complete page, divided at its %s" % plural(len(lSections), "heading")
             for sTitle, sBody in lSections:
@@ -317,6 +379,13 @@ def readIssue(oCache, dIssue, sPandoc, bTrust):
     return lWeb
 
 
+def stale(oDb):
+    """Why a template built by version 1 must be rebuilt: it has no issue before 1985."""
+    if oDb.execute("SELECT count(*) FROM issues WHERE published < '1985'").fetchone()[0]: return ""
+    return "version 1 missed the issues before 1985 and those of 1987 to 1999, which version 2 reads."
+
+
+core.fnStale = stale
 core.discoverIssues = discoverIssues
 core.readIssue = readIssue
 core.issueTitle = issueTitle

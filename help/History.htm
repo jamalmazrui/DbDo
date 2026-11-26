@@ -258,6 +258,11 @@
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
 <li><a
+href="#november-2026-night-the-braille-monitor-from-1957-and-freezes-logged"
+id="toc-november-2026-night-the-braille-monitor-from-1957-and-freezes-logged">26
+November 2026, night – The Braille Monitor from 1957, and freezes
+logged</a></li>
+<li><a
 href="#november-2026-late-afternoon-braillemonitor-the-nfb-braille-monitor-searchable"
 id="toc-november-2026-late-afternoon-braillemonitor-the-nfb-braille-monitor-searchable">26
 November 2026, late afternoon – BrailleMonitor, the NFB Braille Monitor
@@ -1035,6 +1040,29 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Control+Shift+F1</strong> inside DbDo to open this file
 in your browser, or type <code>history</code> at the dot prompt.</p>
+<h2
+id="november-2026-night-the-braille-monitor-from-1957-and-freezes-logged">26
+November 2026, night – The Braille Monitor from 1957, and freezes
+logged</h2>
+<ul>
+<li><strong>BrailleMonitor now reaches back to 1957.</strong> The first
+full build read 313 issues, from 1985 to 1986 and 2000 on, because it
+knew only the Monitor’s issue folders. The older issues are single pages
+in many spellings, and the 1987 to 1999 issues have no folder. The
+builder now reads them too: a one-page issue is divided at its own
+headings, a table of contents without a folder is read like a folder’s,
+and when a month has both, the folder wins. Issues of The Blind
+American, which the NFB published in 1961 and 1962 while the Monitor
+paused, are marked with that edition. The next build sees the older
+issues are missing and rebuilds the template from the pages already
+saved, asking nfb.org only about the few it lacks.</li>
+<li><strong>A freeze is logged with where it stood.</strong> Moving one
+row in BrailleMonitor sometimes froze DbDo for 14 to 18 seconds. DbDo
+now starts the kit’s stall watch, so any pause of a second and a half or
+more writes a WARN line to DbDo’s log, with DbDo’s own call stack at
+that moment and the pause’s whole length when it ends. The next cycle’s
+log will say what to fix.</li>
+</ul>
 <h2
 id="november-2026-late-afternoon-braillemonitor-the-nfb-braille-monitor-searchable">26
 November 2026, late afternoon – BrailleMonitor, the NFB Braille Monitor

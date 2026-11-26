@@ -41616,6 +41616,10 @@ namespace DbDo
                         }
                     }
 
+                    // A FREEZE IS LOGGED WITH WHERE IT STOOD (26 November 2026): with BrailleMonitor.db open, a
+                    // move of one row sometimes froze DbDo for 14 to 18 seconds, and the log showed only the gap.
+                    // The kit's stall watch notes any pause of 1.5 seconds or more with the window thread's stack.
+                    Homer.Log.watchUi(1500);
                     DbDoLog.write("Entering Application.Run message loop.");
                     // uiMode=both: spawn the dot-prompt console window in
                     // addition to the GUI form. The console runs on a worker

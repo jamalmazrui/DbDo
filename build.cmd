@@ -166,7 +166,8 @@ rem 1.64.5: Play Tutorials calls MediaPlayer.playTutorials, which older kits lac
 rem a build against 1.64.4 failed to compile on 8 October 2026 rather than saying so.
 rem 1.231.0: the macro recorder compiles the kit's Macro.cs, with its expected-against-actual audit.
 rem 1.278.0: Show Columns and Order Records list each group's columns with Lbc's addChoiceButton.
-set "kitNeeded=1.294.0"
+rem 1.297.0: Homer.Log.watchUi logs any freeze of the window with its call stack.
+set "kitNeeded=1.297.0"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
