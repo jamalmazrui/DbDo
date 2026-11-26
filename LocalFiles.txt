@@ -30,6 +30,14 @@ notes/
 results/
 temp/
 
+# THE BRAILLEFORUM ARCHIVE STAYS HERE (25 November 2026, Jamal's ruling). The ACB Braille Forum's words are ACB's, and
+# the database grows past what GitHub takes, so the template's database, the copy being built, the pilot and the cache
+# of fetched issues are kept on this computer only. Its settings, saved searches, report and Coverage.md are pushed;
+# the installer leaves the whole template out until there is a way to download large databases.
+data/BrailleForum/
+templates/BrailleForum/BrailleForum.db
+templates/BrailleForum/BrailleForum.db.building
+
 # The release scripts belong to the separate tagRelease project and stay out
 # of every repository.
 scripts/release.cmd

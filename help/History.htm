@@ -257,6 +257,14 @@
 <li><a href="#dbdo-history-of-changes"
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
+<li><a href="#november-2026-night-carry-on-in-another-homer-program"
+id="toc-november-2026-night-carry-on-in-another-homer-program">25
+November 2026, night – Carry on in another Homer program</a></li>
+<li><a
+href="#november-2026-evening-brailleforum-the-acb-braille-forum-searchable"
+id="toc-november-2026-evening-brailleforum-the-acb-braille-forum-searchable">25
+November 2026, evening – BrailleForum, the ACB Braille Forum
+searchable</a></li>
 <li><a href="#november-2026-late-afternoon-go-to-again-with-f3"
 id="toc-november-2026-late-afternoon-go-to-again-with-f3">25 November
 2026, late afternoon – Go to, again with F3</a></li>
@@ -985,6 +993,84 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Control+Shift+F1</strong> inside DbDo to open this file
 in your browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="november-2026-night-carry-on-in-another-homer-program">25
+November 2026, night – Carry on in another Homer program</h2>
+<ul>
+<li><strong>Export Data asks where the file goes next</strong> when
+another Homer program suits it: Edit in EdSharp for Markdown, text, JSON
+and CSV, Show in FileDir for any file, and the Windows default app,
+which Enter still takes for a spreadsheet, a page or CSV. The formula
+warning keeps its own question. With no other Homer program installed,
+nothing is asked and the file opens as before.</li>
+<li><strong>Open Cell Value asks the same</strong> for a file or folder
+a cell names: a folder Open in FileDir, Markdown or text Edit in
+EdSharp, the Windows default app beside them. A url opens in the browser
+as before.</li>
+<li><strong>Generate Graphics’ Folder shows the files in
+FileDir,</strong> the page selected, when FileDir is installed, and in
+Explorer otherwise.</li>
+<li><strong>Run Report and Edit Script open in EdSharp when it is
+installed,</strong> instead of Notepad. [Scripts] editor= in DbDo.inix
+still names any other editor.</li>
+<li><strong>BrailleForum’s builder mends the template in place on every
+build,</strong> asking acb.org for nothing: the first version made the
+retired views table, and the kit’s checkDb failed the first push on it
+and on the full-text index’s own tables, which it now leaves alone.</li>
+</ul>
+<h2
+id="november-2026-evening-brailleforum-the-acb-braille-forum-searchable">25
+November 2026, evening – BrailleForum, the ACB Braille Forum
+searchable</h2>
+<ul>
+<li><strong>A new template, BrailleForum,</strong> holds the articles of
+the American Council of the Blind’s magazine, The ACB Braille Forum,
+with its sister the ACB E-Forum: every issue acb.org offers, one row an
+issue in issues and one row an article in articles, each with its title,
+author, month, kind and words. DbDo opens it on articles.</li>
+<li><strong>Its words come in two fields, by where they came
+from.</strong> body is Markdown, converted by Pandoc from the article’s
+own web page at acb.org, with ACB’s headings, lists, links and bold.
+text is the article’s words exactly as the issue’s .txt file has them,
+used only when no web page holds it. No structure is ever guessed from
+plain text. format says which.</li>
+<li><strong>It is searched by full text.</strong> An FTS5 index,
+articles_fts, finds words, phrases and words near each other at once,
+and ranks the best first. Three saved searches come with it, with
+Authors and Articles-By-Year, and Searches.md beside it shows every form
+a search takes, ready to paste. kind keeps the masthead, the table of
+contents and the notices every issue repeats out of a search.</li>
+<li><strong>scriptsbuilds it,</strong> and the build runs it when the
+database is missing: about an hour the first time, then minutes, since
+it keeps what it fetched and asks again only about recent issues. –limit
+12 builds a pilot of the newest 12 issues beside the cache instead.
+Every article keeps its key across rebuilds, so a person’s copy can be
+updated from the template, and Coverage.md says what is in it and what
+is not.</li>
+<li><strong>The database stays on the development computer.</strong> It
+is not pushed to GitHub, and the installer leaves the template out,
+until there is a way to download large databases.</li>
+<li><strong>Filter Records offers Full-text match</strong> for a table
+with a full-text index, such as BrailleForum’s articles. It asks for
+words and keeps the records the index finds – phrases, OR, NOT, NEAR and
+word starts – as the table’s own records, so they can be marked, read
+wide, opened and followed with Alt+Right, which a saved search’s list
+cannot do. It combines with Narrow, Expand and Invert like any
+condition. A mistyped search, or an SQLite without full-text search, is
+explained and leaves the filter as it was. Keywords is unchanged: it
+finds text inside words too, and the index finds whole words, so the two
+would disagree.</li>
+<li><strong>Every build tests full-text search through DbDo’s own
+driver.</strong> scriptsasks the SQLite ODBC driver, opened as DbDo
+opens a database, whether FTS5 works; tries any full-text extension
+beside the driver when it does not; and runs BrailleForum’s searches,
+Full-text match, an edit and the index’s check on a copy. SQLean adds
+functions, not full-text search, so only the driver can say. The probe
+never stops the build; its log says what it found.</li>
+<li><strong>A full-text index is not listed as a table.</strong> DbDo
+leaves an FTS5 index and its four shadow tables out of its list of
+tables, as it does sqlite_ tables, and scriptsno longer checks them as
+tables.</li>
+</ul>
 <h2 id="november-2026-late-afternoon-go-to-again-with-f3">25 November
 2026, late afternoon – Go to, again with F3</h2>
 <ul>

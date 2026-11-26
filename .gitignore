@@ -89,6 +89,8 @@
 !/scripts/finish.cmd
 !/scripts/fixEncoding.cmd
 !/scripts/fixEncoding.py
+!/scripts/homerFetch.py
+!/scripts/homerFts.py
 !/scripts/installCommon.cmd
 !/scripts/installModels.cmd
 !/scripts/installOllama.cmd
@@ -98,6 +100,8 @@
 !/scripts/kind.py
 !/scripts/makeBlindSkills.cmd
 !/scripts/makeBlindSkills.py
+!/scripts/makeBrailleForum.cmd
+!/scripts/makeBrailleForum.py
 !/scripts/makeDescribedFilms.cmd
 !/scripts/makeDescribedFilms.py
 !/scripts/makeHotkeys.py
@@ -113,6 +117,8 @@
 !/scripts/nvda/appModules/homer/__init__.py
 !/scripts/nvda/manifest.ini
 !/scripts/nvda/readme.html
+!/scripts/probeOdbcFts.cmd
+!/scripts/probeOdbcFts.ps1
 !/scripts/push.cmd
 !/scripts/recordWalk.cmd
 !/scripts/recordWalk.py
@@ -159,6 +165,9 @@ logs/
 notes/
 results/
 temp/
+data/BrailleForum/
+templates/BrailleForum/BrailleForum.db
+templates/BrailleForum/BrailleForum.db.building
 scripts/release.cmd
 scripts/release.ps1
 

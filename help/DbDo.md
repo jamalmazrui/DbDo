@@ -291,7 +291,7 @@ Beyond the grid's keys, the cursor moves with these commands:
 ### Editing records
 
 - **New Record** (Control+N) adds a record; **New Copy** (Control+Shift+N) starts a new record pre-filled from the current one; **Copy Record** (Control+Shift+C) copies it to the clipboard.
-- **Edit Record** (Control+E) opens the whole record in a field-by-field dialog. **Edit Cell** (F2) edits just the current cell. **Open Cell Value** (Control+Enter) opens a large value in its own box for comfortable reading and editing.
+- **Edit Record** (Control+E) opens the whole record in a field-by-field dialog. **Edit Cell** (F2) edits just the current cell. **Open Cell Value** (Control+Enter) opens the url, file or folder a cell names. When the file or folder suits another Homer program -- a folder FileDir, Markdown or text EdSharp, a database or workbook DbDo -- it asks where to go next, that program first, with the Windows default app beside it.
 - **Pick Value** (Control+F2) offers the legal values for a field whose choices are in defs.
 - **Edit Notes** (Alt+Shift+N), **Edit Tags** (Alt+Shift+T), and **Edit url** (Alt+Shift+U) each open one standard field in a focused single-field dialog with OK and Cancel — the quick way to touch a note, tags, or a link without opening the whole record.
 - **Replace** (Control+R) puts new text in place of old. One dialog asks what to find and what to put in its place, then where: **Columns** -- the current column, the shown columns, or all columns, hidden ones too -- and **Which records** -- all records in view, the marked records, or the current record. It starts on the current column, and on the marked records when some are marked, else all records in view; changing more than one record asks once, naming how many. Check **Use regex pattern** to find by regular expression, with $1 and $2 putting back the parts in parentheses; **Replace with Regex** (Control+Shift+R) opens the same dialog with it checked. **Dry run** counts what would change and changes nothing. Replace never writes the fields DbDo keeps itself: look, prime, added, edited, marked and the id.
@@ -325,7 +325,7 @@ Filtering and sorting reshape the grid without touching the physical table.
 
 - **Filter Records** (Control+F) limits the grid to the records that meet a condition.
   - **In a query window too.** A window holding the results of your own SQL is filtered the same way: DbDo runs your query again inside SQL, with the condition around it, so every choice works there, Invert filter included.
-  - **How to give a condition.** With no filter in force, it asks at once how to give one. **Keywords match** keeps the records Keywords (Control+K) finds; its box opens on the last keywords, and what you type there becomes Control+K's keywords too. **Jump match** does the same for Jump (Control+J): the records whose field under the cursor holds the text. **Bookmarked records** keeps the records of this table saved with Control+B; it is offered when there are some. **Main columns**, **Standard columns** and **All columns** each give a box for those columns, and a value typed with no operator finds records whose field contains it, whatever its case: `seattle` in RadioTrail's city box finds "Seattle, Washington". A value with no operator also takes the Homer search syntax, reading the field as a name: `*.com` is a value ending in .com, `smith | jones` either, `!draft` not. A value may begin with an operator: `=` is, `!=` is not, `>` more than, `>=` at least, `<` less than, `<=` at most, `%` contains, `!%` does not contain. Is not and does not contain also keep records whose field is empty. An operator alone tests for an empty field: `=` alone finds records whose field is blank, and `!=` alone finds those whose field holds something. A number typed after `>`, `>=`, `<` or `<=` is compared as a number, so `> 35` in an age box finds ages above 35; a blank, or text that is not a number, never passes. Two values joined by two dots give a range, both ends included: `2025..2026` in date_read finds the books finished in those two years, `2026-01-01..2026-03-31` a span of dates, and `5..12` a span of numbers. A year stands for every day in it, since dates are kept as year-month-day. Several filled boxes must all match.
+  - **How to give a condition.** With no filter in force, it asks at once how to give one. **Keywords match** keeps the records Keywords (Control+K) finds; its box opens on the last keywords, and what you type there becomes Control+K's keywords too. **Jump match** does the same for Jump (Control+J): the records whose field under the cursor holds the text. **Bookmarked records** keeps the records of this table saved with Control+B; it is offered when there are some. **Full-text match** keeps the records a table's full-text index finds for your words; it is offered when the table has one. **Main columns**, **Standard columns** and **All columns** each give a box for those columns, and a value typed with no operator finds records whose field contains it, whatever its case: `seattle` in RadioTrail's city box finds "Seattle, Washington". A value with no operator also takes the Homer search syntax, reading the field as a name: `*.com` is a value ending in .com, `smith | jones` either, `!draft` not. A value may begin with an operator: `=` is, `!=` is not, `>` more than, `>=` at least, `<` less than, `<=` at most, `%` contains, `!%` does not contain. Is not and does not contain also keep records whose field is empty. An operator alone tests for an empty field: `=` alone finds records whose field is blank, and `!=` alone finds those whose field holds something. A number typed after `>`, `>=`, `<` or `<=` is compared as a number, so `> 35` in an age box finds ages above 35; a blank, or text that is not a number, never passes. Two values joined by two dots give a range, both ends included: `2025..2026` in date_read finds the books finished in those two years, `2026-01-01..2026-03-31` a span of dates, and `5..12` a span of numbers. A year stands for every day in it, since dates are kept as year-month-day. Several filled boxes must all match.
   - **With a filter in force,** Control+F first offers its buttons. **Start over** begins a new filter. **Clear filter** shows every record again and returns you to the list on the same record. **Narrow filter** keeps only the records that also meet a new condition, joining it with AND. **Expand filter** also takes in the records that meet a new condition, joining it with OR. Then it asks how to give the new condition, as above.
   - **Grouping.** The condition in force, however many parts it has, is wrapped whole in parentheses before the AND or OR, and the new condition in its own. So narrowing and expanding in turn always mean exactly what was asked. Say Filter (Shift+F) speaks the whole condition, led by "where" and grouped the same way.
   - **Nothing found.** A condition that would keep no record says so and leaves the view as it was.
@@ -1055,6 +1055,15 @@ Each has its own letter, and the letter is the first letter of its own word.
     Numbers and dates are searched as they read. Case is ignored for English
     letters; type accented letters as they appear. A search that finds nothing
     says so and leaves the list as it was.
+  - **Full-text match** is offered only for a table with a full-text index,
+    such as the articles of BrailleForum. It asks for words and keeps the
+    records the index finds: `guide dog` both words, `"guide dog"` the phrase,
+    `guide OR dog` either, `braille NOT display` leaving out display,
+    `NEAR(guide dog, 5)` within five words, `advoca*` any word that starts so,
+    and `title: convention` one field. It matches whole words, not parts of
+    words as Keywords match does, and ignores case and accents. The records
+    stay in the table's own order; for the best matches first, run a saved
+    search instead.
   - **Fields** asks which fields: **Main** (the fields about the table's
     subject), **Standard** (the id, added, edited, notes, tags, url and
     marked) or **All** (every field but look and prime). It then opens a form with one box per field, in
@@ -1292,6 +1301,28 @@ each service carries. The watch_list report writes up the films you have marked.
 The database is made from ADP's directory by **`scripts\makeDescribedFilms`** in
 DbDo's development folder, which fetches its pages, fifty movies to a page, in
 about five minutes. The build runs it when the database is missing.
+
+#### BrailleForum, searched by full text
+
+**BrailleForum** holds the articles of The ACB Braille Forum, the American Council
+of the Blind's magazine, with its sister the ACB E-Forum: every issue that acb.org
+offers. It is built on the development computer by
+**`scripts\makeBrailleForum`** and is not in the installer yet, since a database
+this large needs its own way to be downloaded.
+
+DbDo opens on **articles**, and each row says the title, the author and the month
+it was **published**. Alt+Right on an **issue** goes to its articles, in order. An
+article's words are in **body** when ACB published it as a web page, as Markdown
+with ACB's own headings, lists and links, and in **text** when it came only from
+the issue's plain-text file. **format** says which. **kind** tells an article
+from the masthead, the table of contents and the notices every issue repeats.
+
+Its full-text index, **articles_fts**, finds a word, a phrase or words near each
+other across every article at once, and ranks the best matches first. Three saved
+searches come with it -- Audio-Description, Convention and Transportation -- with
+Authors and Articles-By-Year, and **Searches.md** beside the template shows every form a
+search takes, ready to paste. The reading_list report writes up the articles you
+have marked. Coverage.md says which issues are in it and which could not be read.
 
 #### RadioTrail plays Internet radio
 

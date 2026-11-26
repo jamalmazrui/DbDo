@@ -1,0 +1,11 @@
+﻿-- Transportation.sql -- articles about getting around: paratransit, transit, rideshare, taxis and travel.
+--
+-- A full-text search: articles_fts MATCH finds the words, bm25 ranks the matches (a title match counts ten times a
+-- match in the words, an author match five times), and snippet gives a passage around them, as plain text. Change the
+-- words between the quotes to search for something else; Searches.md beside this file shows the forms a search takes.
+
+SELECT a.title, a.author, a.published, snippet(articles_fts, -1, '', '', ' ... ', 24) AS passage
+FROM articles_fts JOIN articles a ON a.article_id = articles_fts.rowid
+WHERE articles_fts MATCH 'paratransit OR transit OR rideshare OR taxi* OR uber OR lyft' AND a.kind = 'article'
+ORDER BY bm25(articles_fts, 10.0, 5.0, 1.0, 1.0)
+LIMIT 200;

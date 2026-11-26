@@ -1,0 +1,38 @@
+﻿; BrailleForum.inix -- how this database opens, and how its tables are heard.
+;
+; THE ACB BRAILLE FORUM, SEARCHABLE. Every issue of the American Council of the Blind's magazine that acb.org offers
+; electronically, with its sister the ACB E-Forum: one row an issue in issues, one row an article in articles. An
+; article's words are in body when ACB published it as a web page (Markdown, with ACB's own headings, lists and
+; links), and in text when it came only from the issue's plain-text file. format says which.
+;
+; FIND ONE. The row speaks title, author and published (the year and month). Keywords (Control+K) and Filter Records
+; work as on any table. For ranked full-text searches -- a phrase, words near each other, words starting alike --
+; run one of the saved searches here, or adapt one from Searches.md beside this file. kind tells an article from the
+; masthead, the table of contents and the standing notices every issue repeats; the searches keep kind = 'article'.
+;
+; READ ONE. Alt+Right on an issue goes to its articles, in the issue's order (position). Control+Shift+U opens the
+; article's page at acb.org, or the issue's text file. The reading_list report writes up the marked articles.
+;
+; scripts\makeBrailleForum in DbDo's development folder builds this file from acb.org; the build runs it when the
+; database is missing. The database stays on that computer: it is not on GitHub and not in the installer.
+;
+; Look is each table's default columns and prime its default order; a table's saved columns, order and filter are
+; written here only when a person chooses them.
+
+[Database]
+
+InitialTable = articles
+
+[Table:articles]
+
+; SelectFields, 25 November 2026: who wrote what, and when.
+SelectFields = title, author, published
+
+[Table:issues]
+
+SelectFields = title, articles, words
+
+[Table:defs]
+
+
+[Table:maps]

@@ -682,6 +682,11 @@ namespace DbDo
         {
             string sIniEditor = DbDoForm.IniSession.read("Scripts", "editor");
             if (!string.IsNullOrEmpty(sIniEditor)) return sIniEditor;
+            // EDSHARP BEFORE NOTEPAD (25 November 2026): a report, a script or the settings file opens in the suite's
+            // editor when it is installed, so Run Report and Edit Script carry on in a Homer app. [Scripts] editor=
+            // in DbDo.inix still names any other editor, and Notepad is the last resort.
+            string sEdSharp = Homer.SuiteCommands.homerProgram("EdSharp");
+            if (sEdSharp.Length > 0) return sEdSharp;
             return "notepad";
         }
 
@@ -4587,8 +4592,48 @@ namespace DbDo
                 // Provider without ADOX; caller will fall back to direct
                 // SQL against sqlite_master / INFORMATION_SCHEMA.
             }
+            hideFullTextTables(lResult);
             lResult.Sort(StringComparer.OrdinalIgnoreCase);
             return lResult;
+        }
+
+        // fullTextIndexFor: the SQLite FTS5 index that reads its text from this table, as (index name, the table's key
+        // column), or nulls when there is none. Such an index is made with content='<table>' and, usually,
+        // content_rowid='<key>' (the kit's homerFts makes it so); without content_rowid its rows match the table's
+        // rowid. Only SQLite has these, and only a table with one offers Full-text match in Filter Records.
+        public bool fullTextIndexFor(string sTable, out string sIndex, out string sKey)
+        {
+            sIndex = null; sKey = null;
+            if (string.IsNullOrEmpty(sTable) || !isOpen()) return false;
+            int iFound;
+            foreach (string[] aRow in queryRowsSql("SELECT name, sql FROM sqlite_master WHERE type = 'table' AND COALESCE(sql, '') LIKE 'CREATE VIRTUAL%' AND lower(sql) LIKE '%fts5%'", 50, out iFound))
+            {
+                System.Text.RegularExpressions.Match oContent = System.Text.RegularExpressions.Regex.Match(aRow[1], @"content\s*=\s*['""]*([^'"",)\s]+)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                if (!oContent.Success || !oContent.Groups[1].Value.Trim('"').Equals(sTable, StringComparison.OrdinalIgnoreCase)) continue;
+                System.Text.RegularExpressions.Match oRowid = System.Text.RegularExpressions.Regex.Match(aRow[1], @"content_rowid\s*=\s*['""]*([^'"",)\s]+)", System.Text.RegularExpressions.RegexOptions.IgnoreCase);
+                sIndex = aRow[0];
+                sKey = oRowid.Success ? oRowid.Groups[1].Value.Trim('"') : "rowid";
+                return true;
+            }
+            return false;
+        }
+
+        // A FULL-TEXT INDEX IS NOT A TABLE TO BROWSE (25 November 2026). An SQLite FTS5 index, such as
+        // articles_fts in the BrailleForum template, is a virtual table with four shadow tables beside it
+        // (_config, _data, _docsize, _idx). They are SQLite's bookkeeping, not anybody's records, so they are
+        // left out of the list of tables as sqlite_ tables are. The index stays reachable through SQL, where its
+        // MATCH searches are run. sqlite_master is asked only when a name ends as a shadow table's does, so a
+        // database without such an index, or a provider that is not SQLite, is never queried for it.
+        private void hideFullTextTables(List<string> lNames)
+        {
+            bool bMaybe = false;
+            int iFound;
+            foreach (string sName in lNames) if (sName.EndsWith("_config", StringComparison.OrdinalIgnoreCase) || sName.EndsWith("_data", StringComparison.OrdinalIgnoreCase)) bMaybe = true;
+            if (!bMaybe) return;
+            List<string> lVirtual = new List<string>();
+            foreach (string[] aRow in queryRowsSql("SELECT name FROM sqlite_master WHERE type = 'table' AND COALESCE(sql, '') LIKE 'CREATE VIRTUAL%'", int.MaxValue, out iFound)) lVirtual.Add(aRow[0]);
+            if (lVirtual.Count == 0) return;
+            lNames.RemoveAll(sListed => lVirtual.Exists(sVirtual => sListed.Equals(sVirtual, StringComparison.OrdinalIgnoreCase) || sListed.StartsWith(sVirtual + "_", StringComparison.OrdinalIgnoreCase)));
         }
 
         // True if the given name refers to a view rather than a base
@@ -15978,7 +16023,7 @@ namespace DbDo
                 "Plain text only; non-text and empty clipboards announce that fact rather than going silent. Double-press opens the read-only memo dialog for line-by-line review of long pasted content.");
             add("Say Filter and Order",    "Speak the current filter and order, or none for each",
                 "Single-press speaks; double-press opens the same text in the multi-line dialog. Useful when the filter or sort string is long.");
-            add("Filter Records",      "Show only the records that match what you choose", "Control+F. A list of choices, its first selected, so Enter takes it; each begins with its own letter. Keywords match asks for keywords, opening on the last ones, and keeps the records Keywords (Control+K) finds; Jump match does the same for the field under the cursor and Jump (Control+J); Bookmarked records keeps the records saved with Control+B. Fields asks Main, Standard or All, then opens a form with a box per field in DbDo's natural order: a value on its own matches anywhere in the field, case aside; = in front means is, and a symbol in front compares (> >= < <= !=); dates are typed as year-month-day; several boxes must all match. Marked and Unmarked take the records you have marked, or the rest. With a filter in force the list adds Clear, Edit (the field filter), Narrow (add a field condition) and, for a field filter, Widen. A search that finds nothing leaves the view as it was.");
+            add("Filter Records",      "Show only the records that match what you choose", "Control+F. A list of choices, its first selected, so Enter takes it; each begins with its own letter. Keywords match asks for keywords, opening on the last ones, and keeps the records Keywords (Control+K) finds; Jump match does the same for the field under the cursor and Jump (Control+J); Bookmarked records keeps the records saved with Control+B. Full-text match, offered only for a table with a full-text index, such as BrailleForum's articles, asks for words and keeps the records the index finds: whole words, a phrase in quotes, OR, NOT, NEAR and word starts. Fields asks Main, Standard or All, then opens a form with a box per field in DbDo's natural order: a value on its own matches anywhere in the field, case aside; = in front means is, and a symbol in front compares (> >= < <= !=); dates are typed as year-month-day; several boxes must all match. Marked and Unmarked take the records you have marked, or the rest. With a filter in force the list adds Clear, Edit (the field filter), Narrow (add a field condition) and, for a field filter, Widen. A search that finds nothing leaves the view as it was.");
             add("Filter with Regex",        "Filter to rows whose current column matches a regular expression (SQLean REGEXP)",
                 "Server-side, so it works on large tables and the result stays editable. Prompts for a pattern and applies it to the column under virtual focus; an empty pattern clears the filter. Needs sqlean.dll beside DbDo.exe. Unbound by default -- assign a chord if you use it often.");
             add("Clear Filter",       "Clear the active filter", "Control+Shift+F.");
@@ -25537,7 +25582,20 @@ namespace DbDo
                             + "To open it in a spreadsheet safely, export to .xlsx instead, which keeps every value as text.\r\n\r\nOpen this file now anyway?",
                             "Export Data", MessageBoxButtons.YesNo, MessageBoxIcon.Warning, MessageBoxDefaultButton.Button2) == DialogResult.Yes;
                     }
-                    if (bOpen) ComAutomation.shellOpen(dlgFile.FileName);
+                    // CARRY ON IN ANOTHER HOMER APP (25 November 2026): a file the suite has an app for is offered to
+                    // it -- Markdown, text and JSON to EdSharp, CSV to EdSharp, and any file to Show in FileDir -- beside
+                    // the Windows default app, which stays first for a spreadsheet, a page or CSV, as before. The formula
+                    // warning above keeps its own Yes or No, and with no other Homer app installed nothing is asked.
+                    if (bOpen && db.iLastFormulaLike == 0)
+                    {
+                        string sExtOut = Path.GetExtension(dlgFile.FileName).ToLowerInvariant();
+                        bool bWindowsFirst = sExtOut == ".csv" || sExtOut == ".tsv" || sExtOut == ".xlsx" || sExtOut == ".xls" || sExtOut == ".htm" || sExtOut == ".html";
+                        const string sWindows = "&Windows default app";
+                        string sNext = Homer.SuiteCommands.offerHomerApps(this, "Export Data", "Exported to " + Path.GetFileName(dlgFile.FileName) + ".",
+                            dlgFile.FileName, "DbDo", new string[] { sWindows }, bWindowsFirst ? sWindows : "");
+                        if (sNext == null || sNext == sWindows) ComAutomation.shellOpen(dlgFile.FileName);
+                    }
+                    else if (bOpen) ComAutomation.shellOpen(dlgFile.FileName);
                 }
                 catch (Exception ex)
                 {
@@ -27065,6 +27123,15 @@ namespace DbDo
                            || sValue.StartsWith("https://", StringComparison.OrdinalIgnoreCase)
                            || sValue.StartsWith("file://", StringComparison.OrdinalIgnoreCase)
                            || sValue.StartsWith("mailto:", StringComparison.OrdinalIgnoreCase);
+                // A FILE OR FOLDER THE SUITE HAS AN APP FOR (25 November 2026) is offered to it first -- a folder to FileDir,
+                // a database or workbook to DbDo, Markdown or text to EdSharp -- with the Windows default app beside it.
+                // With no Homer app that suits it, it opens in Windows as before, and a url always does.
+                if (!bIsUrl && (File.Exists(sValue) || Directory.Exists(sValue)))
+                {
+                    const string sWindows = "&Windows default app";
+                    string sNext = Homer.SuiteCommands.offerHomerApps(this, "Open Cell Value", "", sValue, "DbDo", new string[] { sWindows }, "");
+                    if (sNext == "homer" || sNext == "") return;
+                }
                 if (bIsUrl || File.Exists(sValue) || Directory.Exists(sValue))
                 {
                     System.Diagnostics.Process.Start(sValue);
@@ -28623,6 +28690,9 @@ namespace DbDo
             const string sAny = "&Keywords match";
             const string sJumpMatch = "&Jump match";
             const string sBookmarked = "&Bookmarked records";
+            // FULL-TEXT MATCH (25 November 2026, after BrailleForum): offered only for a table that has an SQLite FTS5
+            // index over it. See askFullTextCondition for why it is a filter.
+            const string sFullText = "&Full-text match";
             const string sMainCols = "Main columns", sStandardCols = "Standard columns", sAllCols = "All columns";
             // MARKED AND UNMARKED (19 October 2026, from DbDialog's Tagged and Untagged):
             // the records you have marked, or the rest, as a condition like any other, so
@@ -28639,13 +28709,17 @@ namespace DbDo
                 // same question one dialog later: each opens the boxes for those columns.
                 bool bJumpable = !string.IsNullOrEmpty(virtCurrentColumnName());
                 string sBookmarkWhere = bookmarkedWhere();
+                string sFtsIndex, sFtsKey;
+                bool bFullText = db.fullTextIndexFor(sTable, out sFtsIndex, out sFtsKey);
                 List<string> lsHow = new List<string> { sAny };
+                if (bFullText) lsHow.Add(sFullText);
                 if (bJumpable) lsHow.Add(sJumpMatch);
                 lsHow.AddRange(new string[] { sMainCols, sStandardCols, sAllCols });
                 if (bMarks) { lsHow.Add(sMarked); lsHow.Add(sUnmarked); }
                 if (sBookmarkWhere.Length > 0) lsHow.Add(sBookmarked);
                 sHow = chooseByButtons(sCombine == sNew ? "Filter Records" : sCombine.Replace(" filter", " Filter"),  // "Narrow Filter", not "Narrow filter Filter"
                     new List<string> { "Keywords match keeps the records Keywords finds, in any field, whatever its case."
+                        + (bFullText ? " Full-text match keeps the records whose words match a search of the table's full-text index: whole words, phrases in quotes, OR, NOT and NEAR." : "")
                         + (bJumpable ? " Jump match keeps the records whose " + virtCurrentColumnName() + " Jump finds." : "")
                         + " Main columns, Standard columns and All columns each give a box for those columns, whose value may begin with an operator: = is, != is not, > more than, >= at least, < less than, <= at most, % contains; = alone is blank and != alone is not blank."
                         + (bMarks ? " Marked records takes the records you have marked, and Unmarked records the rest." : "")
@@ -28657,6 +28731,7 @@ namespace DbDo
                 if (sHow == sMarked) { sNewWhere = "marked = 'true'"; sNewSpoken = "marked"; bGiven = true; }
                 else if (sHow == sBookmarked) { sNewWhere = sBookmarkWhere; sNewSpoken = "bookmarked"; bGiven = true; }
                 else if (sHow == sJumpMatch) bGiven = askJumpCondition(out sNewWhere, out sNewSpoken);
+                else if (sHow == sFullText) bGiven = askFullTextCondition(sTable, sFtsIndex, sFtsKey, out sNewWhere, out sNewSpoken);
                 else if (sHow == sUnmarked) { sNewWhere = "(marked IS NULL OR marked <> 'true')"; sNewSpoken = "unmarked"; bGiven = true; }
                 else bGiven = (sHow == sAny) ? askAnyFieldCondition(out sNewWhere, out sNewSpoken)
                                              : askFieldsCondition(out sNewWhere, out sNewSpoken, sHow);
@@ -28713,6 +28788,51 @@ namespace DbDo
             sWhere = db.anyFieldWhere(sText);
             sSpoken = "keywords " + sText;
             return sWhere.Length > 0;
+        }
+
+        // askFullTextCondition: Full-text match's question, for a table with an SQLite FTS5 index over it (BrailleForum's
+        // articles_fts). The condition keeps the records whose key the index returns for the search, so the matches
+        // are the table's own records: they can be marked, read with Alt+W, opened, edited and followed with Alt+Right,
+        // which a saved search's result list cannot do. It is a condition like the others, so Narrow, Expand and Invert
+        // combine it with them, and published >= '2015' or Marked records can narrow it.
+        // WHY NOT KEYWORDS ON THE INDEX: Keywords finds text anywhere, inside words too, case aside (re*d, red & blue);
+        // the index finds whole words and word starts, so the same search would find different records. Keywords
+        // stays as it is; this is a second way, named for what it is. Ranked order stays with the saved searches,
+        // since a filter keeps the table's own order.
+        // The search is tried before it is used, so a mistyped one (an unclosed quote) or an SQLite without FTS5 is
+        // explained here in plain words, and the filter stays as it was.
+        private string sLastFullText = "";
+
+        private bool askFullTextCondition(string sTable, string sIndex, string sKey, out string sWhere, out string sSpoken)
+        {
+            sWhere = ""; sSpoken = "";
+            string sText;
+            using (LbcDialog dlg = new LbcDialog("Full-Text Match", this))
+            {
+                TextBox tb = dlg.addInputBox("&Words to find", sLastFullText,
+                    "Whole words, case and accents aside: guide dog finds both words; \"guide dog\" the phrase; guide OR dog either; braille NOT display leaves out display; NEAR(guide dog, 5) within 5 words; advoca* any word starting so; title: convention one field.");
+                if (!dlg.runOkCancel()) return false;
+                sText = (tb.Text ?? "").Trim();
+            }
+            if (sText.Length == 0) return false;
+            sLastFullText = sText;
+            string sQuotedIndex = "\"" + sIndex.Replace("\"", "\"\"") + "\"";
+            string sCondition = "\"" + sKey.Replace("\"", "\"\"") + "\" IN (SELECT rowid FROM " + sQuotedIndex + " WHERE " + sQuotedIndex + " MATCH '" + sText.Replace("'", "''") + "')";
+            try { db.countWhere(sTable, sCondition); }
+            catch (Exception ex)
+            {
+                string sWhy = ex.Message ?? "";
+                bool bNoModule = sWhy.IndexOf("no such module", StringComparison.OrdinalIgnoreCase) >= 0;
+                DbDoLog.write("Full-text match refused: " + sCondition + " -- " + sWhy.Trim());
+                LbcMessage.show(this, bNoModule
+                    ? "The SQLite that DbDo opens databases with has no full-text search (FTS5), so this search cannot run here. Keywords match still works."
+                    : "The full-text search did not run: " + sWhy.Trim() + "\n\nA phrase needs both its quotation marks, and AND, OR, NOT and NEAR are written in capitals.",
+                    "Full-Text Match", MessageBoxButtons.OK, MessageBoxIcon.Information);
+                return false;
+            }
+            sWhere = sCondition;
+            sSpoken = "full text " + sText;
+            return true;
         }
 
         // askJumpCondition: Jump match's question. The field is the one under the cursor, as Jump (Control+J) takes
@@ -32914,8 +33034,12 @@ namespace DbDo
             string sOpen = chooseByButtons(c_sTitle, new string[] {
                 sSummary,
                 "Saved in " + sFolder + " as a page, a picture (PNG and SVG) and an Excel workbook with the chart, each named " + Path.GetFileName(sBase) + ".",
-                "Page opens it in your browser, with what the chart shows in words and the numbers as a table. Workbook opens the chart in Excel or another spreadsheet program. Folder opens the folder, to attach the files to a message." },
+                "Page opens it in your browser, with what the chart shows in words and the numbers as a table. Workbook opens the chart in Excel or another spreadsheet program. Folder shows the files in FileDir, or opens the folder in Explorer when FileDir is not installed, to attach them to a message." },
                 new List<string> { "Page", "Workbook", "Folder" });
+            // FOLDER SHOWS THE FILES IN FILEDIR (25 November 2026), the page selected, when FileDir is installed: the Homer
+            // way to see them and attach them to a message. Without FileDir, Explorer opens the folder as before.
+            if (sOpen == "Folder" && Homer.SuiteCommands.homerProgram("FileDir").Length > 0 && File.Exists(sHtm))
+            { Homer.SuiteCommands.openInHomerApp(this, "FileDir", sHtm); return; }
             string sTarget = sOpen == "Page" ? sHtm : (sOpen == "Workbook" ? sBase + ".xlsx" : (sOpen == "Folder" ? sFolder : ""));
             if (sTarget.Length > 0) { try { System.Diagnostics.Process.Start(sTarget); } catch (Exception ex) { Say.say("Could not open " + sTarget + ": " + ex.Message); } }
         }

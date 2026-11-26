@@ -166,7 +166,7 @@ rem 1.64.5: Play Tutorials calls MediaPlayer.playTutorials, which older kits lac
 rem a build against 1.64.4 failed to compile on 8 October 2026 rather than saying so.
 rem 1.231.0: the macro recorder compiles the kit's Macro.cs, with its expected-against-actual audit.
 rem 1.278.0: Show Columns and Order Records list each group's columns with Lbc's addChoiceButton.
-set "kitNeeded=1.291.6"
+set "kitNeeded=1.293.0"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -280,8 +280,9 @@ rem kit does not have is logged as missing rather than skipped in silence.
 rem recordWalk joined the list on 5 November 2026: DbDo's own older copy kept running, so walks never named
 rem the build they walked; now every build brings the kit's. runMacro and testSay joined on 17 November 2026: testSay
 rem is the kit's for every app now, and plays its Say commands as a macro script through runMacro. installDataTools joined
-rem on 21 November 2026: Generate Graphics offers it when Python or its chart packages are missing.
-for %%F in (buildTutorials.cmd buildTutorials.ps1 check.cmd check.py checkTutorial.cmd checkTutorial.py finish.cmd fixEncoding.cmd fixEncoding.py installCommon.cmd installDataTools.cmd installModels.cmd installMpv.cmd installOllama.cmd installScreenReaderSupport.cmd kind.cmd kind.py makeTutorials.cmd makeTutorials.py push.cmd release.cmd release.ps1 runMacro.cmd runMacro.py testSay.cmd testSay.py tidy.cmd tidy.py uiCheck.cmd uiCheck.py unpushed.cmd unpushed.py) do (
+rem on 21 November 2026: Generate Graphics offers it when Python or its chart packages are missing. homerFetch and homerFts
+rem joined on 25 November 2026: makeBrailleForum fetches with the first and builds its full-text index with the second.
+for %%F in (buildTutorials.cmd buildTutorials.ps1 check.cmd check.py checkTutorial.cmd checkTutorial.py finish.cmd fixEncoding.cmd fixEncoding.py homerFetch.py homerFts.py installCommon.cmd installDataTools.cmd installModels.cmd installMpv.cmd installOllama.cmd installScreenReaderSupport.cmd kind.cmd kind.py makeTutorials.cmd makeTutorials.py push.cmd release.cmd release.ps1 runMacro.cmd runMacro.py testSay.cmd testSay.py tidy.cmd tidy.py uiCheck.cmd uiCheck.py unpushed.cmd unpushed.py) do (
   if exist "!homerDev!\scripts\%%F" (
     copy /y "!homerDev!\scripts\%%F" scripts\ >nul
     echo Kit script copied: %%F, exit code !ERRORLEVEL! >> "!log!"
@@ -346,6 +347,27 @@ if exist "!sHere!scripts\makeDescribedFilms.py" if not exist "!sHere!templates\D
     echo makeDescribedFilms failed. Its log is in logs, named DbDo-makeDescribedFilms with the date and time.
     popd & exit /b 1
   )
+)
+rem BRAILLEFORUM IS FETCHED WHEN MISSING (25 November 2026), as DescribedFilms is. Its issues and articles come from
+rem acb.org: the first run asks for every issue page, text file and article page, about an hour at one request a
+rem second, and keeps them in data\BrailleForum, so scripts\makeBrailleForum rebuilds by hand later asking only about
+rem recent issues. The database and that cache stay on this computer: LocalFiles.txt keeps them off GitHub, and the
+rem installer leaves templates\BrailleForum out. A failed build stops this one, since the template check needs the file.
+if exist "!sHere!scripts\makeBrailleForum.py" if not exist "!sHere!templates\BrailleForum\BrailleForum.db" (
+  echo BrailleForum.db is missing, so the ACB Braille Forum's issues are being fetched from acb.org. The first time takes about an hour.
+  echo BrailleForum: no database; python scripts\makeBrailleForum.py >> "!log!"
+  python "!sHere!scripts\makeBrailleForum.py"
+  set "iForum=!errorlevel!"
+  echo BrailleForum fetch: exit code !iForum!>> "!log!"
+  if not "!iForum!"=="0" (
+    echo makeBrailleForum failed. Its log is in logs, named DbDo-makeBrailleForum with the date and time.
+    popd & exit /b 1
+  )
+) else if exist "!sHere!scripts\makeBrailleForum.py" (
+  rem An existing BrailleForum.db is mended in place by each build, fetching nothing (25 November 2026: the retired
+  rem views table that the first version made failed the kit's checkDb at push).
+  python "!sHere!scripts\makeBrailleForum.py" --repair >> "!log!" 2>&1
+  echo BrailleForum repair: exit code !errorlevel!>> "!log!"
 )
 rem THE DIRECTORY TEMPLATES FOLLOW THEIR PAGES (15 October 2026). BlindSkills and
 rem BlindCreations are made from Jamal Mazrui's directories in MyPages, by
@@ -420,6 +442,15 @@ if not "!iTemplates!"=="0" (
 rem A directory template rebuilt above is recorded now that the check has passed.
 if "!bSkillsMade!"=="1" python "!sDirPrint!" record "%CD%" "template BlindSkills" --in "!sPages!\BlindSkills\BlindSkills.md" scripts\makeBlindSkills.py scripts\makeMusicTrail.py --out templates\BlindSkills\BlindSkills.db >> "!log!" 2>&1
 if "!bCreationsMade!"=="1" python "!sDirPrint!" record "%CD%" "template BlindCreations" --in "!sPages!\BlindApps\BlindApps.md" "!sPages!\BlindBooks\BlindBooks.md" "!sPages!\BlindCreators\BlindCreators.md" "!sPages!\BlindPresenters\BlindPresenters.md" scripts\buildBlindCreations.py scripts\makeMusicTrail.py --out templates\BlindCreations\BlindCreations.db >> "!log!" 2>&1
+rem FULL-TEXT SEARCH THROUGH DbDo'S DRIVER IS TESTED EVERY BUILD (25 November 2026, Jamal: "incorporate tests, with
+rem catch guards, in the build_release process, so that you can learn from the results of one cycle to improve the
+rem next one"). Python's SQLite has FTS5; whether the SQLite3 ODBC Driver's does is what scripts\probeOdbcFts finds
+rem out, with BrailleForum's own searches on a copy. It never stops the build: its log is the next cycle's evidence.
+if exist "!sHere!scripts\probeOdbcFts.ps1" (
+  echo ODBC full-text probe: powershell -File scripts\probeOdbcFts.ps1 >> "!log!"
+  powershell -NoProfile -ExecutionPolicy Bypass -File "!sHere!scripts\probeOdbcFts.ps1" "!sHere:~0,-1!"
+  echo ODBC full-text probe: exit code !errorlevel!, which never stops the build>> "!log!"
+)
 
 rem Tools the kit has retired or renamed, and DbDo's own near-duplicates of
 rem them. Similar names are how the wrong tool gets run: makeTutorial beside

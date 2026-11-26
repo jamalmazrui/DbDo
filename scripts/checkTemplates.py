@@ -112,7 +112,7 @@ dIdPrimeKept = {
     "chinook|invoice_items": "an invoice line is only a track on an invoice",
     "northwind|order_details": "an order line is only a product on an order",
 }
-sVersion = "2026-11-24 version 7: no id in a prime; every table in its own order; char(31) separators; statistics"
+sVersion = "2026-11-25 version 8: a full-text index and its shadow tables are not checked as tables"
 
 lErrors = []
 lRepairs = []
@@ -192,8 +192,12 @@ def readInix(sPath):
 # ---------------------------------------------------------------- schema helpers
 
 def tables(oDb):
-    """The ordinary tables of a database."""
-    return [r[0] for r in oDb.execute("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name")]
+    """The ordinary tables of a database. A full-text index and its shadow tables (25 November 2026) are SQLite's
+    bookkeeping, not records: BrailleForum's articles_fts, with articles_fts_config, _data, _docsize and _idx, has no
+    id, prime or marked to check or repair, and DbDo leaves them out of its list of tables too."""
+    lRows = oDb.execute("SELECT name, COALESCE(sql, '') FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%' ORDER BY name").fetchall()
+    lVirtual = [sName for sName, sSql in lRows if sSql.lstrip().upper().startswith("CREATE VIRTUAL")]
+    return [sName for sName, sSql in lRows if sName not in lVirtual and not any(sName.startswith(s + "_") for s in lVirtual)]
 
 
 def columns(oDb, sTable):

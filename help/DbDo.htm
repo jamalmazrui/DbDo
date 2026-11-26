@@ -975,8 +975,11 @@ current one; <strong>Copy Record</strong> (Control+Shift+C) copies it to
 the clipboard.</li>
 <li><strong>Edit Record</strong> (Control+E) opens the whole record in a
 field-by-field dialog. <strong>Edit Cell</strong> (F2) edits just the
-current cell. <strong>Open Cell Value</strong> (Control+Enter) opens a
-large value in its own box for comfortable reading and editing.</li>
+current cell. <strong>Open Cell Value</strong> (Control+Enter) opens the
+url, file or folder a cell names. When the file or folder suits another
+Homer program – a folder FileDir, Markdown or text EdSharp, a database
+or workbook DbDo – it asks where to go next, that program first, with
+the Windows default app beside it.</li>
 <li><strong>Pick Value</strong> (Control+F2) offers the legal values for
 a field whose choices are in defs.</li>
 <li><strong>Edit Notes</strong> (Alt+Shift+N), <strong>Edit
@@ -1098,7 +1101,9 @@ keywords, and what you type there becomes Control+K’s keywords too.
 <strong>Jump match</strong> does the same for Jump (Control+J): the
 records whose field under the cursor holds the text. <strong>Bookmarked
 records</strong> keeps the records of this table saved with Control+B;
-it is offered when there are some. <strong>Main columns</strong>,
+it is offered when there are some. <strong>Full-text match</strong>
+keeps the records a table’s full-text index finds for your words; it is
+offered when the table has one. <strong>Main columns</strong>,
 <strong>Standard columns</strong> and <strong>All columns</strong> each
 give a box for those columns, and a value typed with no operator finds
 records whose field contains it, whatever its case: <code>seattle</code>
@@ -3018,6 +3023,16 @@ anything (see Search syntax). Numbers and dates are searched as they
 read. Case is ignored for English letters; type accented letters as they
 appear. A search that finds nothing says so and leaves the list as it
 was.</li>
+<li><strong>Full-text match</strong> is offered only for a table with a
+full-text index, such as the articles of BrailleForum. It asks for words
+and keeps the records the index finds: <code>guide dog</code> both
+words, <code>"guide dog"</code> the phrase, <code>guide OR dog</code>
+either, <code>braille NOT display</code> leaving out display,
+<code>NEAR(guide dog, 5)</code> within five words, <code>advoca*</code>
+any word that starts so, and <code>title: convention</code> one field.
+It matches whole words, not parts of words as Keywords match does, and
+ignores case and accents. The records stay in the table’s own order; for
+the best matches first, run a saved search instead.</li>
 <li><strong>Fields</strong> asks which fields: <strong>Main</strong>
 (the fields about the table’s subject), <strong>Standard</strong> (the
 id, added, edited, notes, tags, url and marked) or <strong>All</strong>
@@ -3315,6 +3330,32 @@ watch_list report writes up the films you have marked.</p>
 <strong><code>scripts\makeDescribedFilms</code></strong> in DbDo’s
 development folder, which fetches its pages, fifty movies to a page, in
 about five minutes. The build runs it when the database is missing.</p>
+<h4 id="brailleforum-searched-by-full-text">BrailleForum, searched by
+full text</h4>
+<p><strong>BrailleForum</strong> holds the articles of The ACB Braille
+Forum, the American Council of the Blind’s magazine, with its sister the
+ACB E-Forum: every issue that acb.org offers. It is built on the
+development computer by
+<strong><code>scripts\makeBrailleForum</code></strong> and is not in the
+installer yet, since a database this large needs its own way to be
+downloaded.</p>
+<p>DbDo opens on <strong>articles</strong>, and each row says the title,
+the author and the month it was <strong>published</strong>. Alt+Right on
+an <strong>issue</strong> goes to its articles, in order. An article’s
+words are in <strong>body</strong> when ACB published it as a web page,
+as Markdown with ACB’s own headings, lists and links, and in
+<strong>text</strong> when it came only from the issue’s plain-text
+file. <strong>format</strong> says which. <strong>kind</strong> tells an
+article from the masthead, the table of contents and the notices every
+issue repeats.</p>
+<p>Its full-text index, <strong>articles_fts</strong>, finds a word, a
+phrase or words near each other across every article at once, and ranks
+the best matches first. Three saved searches come with it –
+Audio-Description, Convention and Transportation – with Authors and
+Articles-By-Year, and <strong>Searches.md</strong> beside the template
+shows every form a search takes, ready to paste. The reading_list report
+writes up the articles you have marked. Coverage.md says which issues
+are in it and which could not be read.</p>
 <h4 id="radiotrail-plays-internet-radio">RadioTrail plays Internet
 radio</h4>
 <p>Fourteen stations are in the template to start. To build the real

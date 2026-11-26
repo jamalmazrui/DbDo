@@ -53,6 +53,15 @@ scripts/acceptCheck.cmd
 scripts/describeFields.cmd
 scripts/describeFields.py
 # recordWalk (3 November 2026): drives DbDo through a walk under the screen reader and records what is said.
+# makeBrailleForum (25 November 2026) builds the BrailleForum template from acb.org; homerFetch and homerFts are the kit's,
+# copied by the build. The database it makes stays local: see LocalFiles.txt.
+scripts/homerFetch.py
+scripts/homerFts.py
+scripts/makeBrailleForum.cmd
+scripts/makeBrailleForum.py
+# probeOdbcFts (25 November 2026): every build tests FTS5 through DbDo's ODBC driver, and logs what it finds.
+scripts/probeOdbcFts.cmd
+scripts/probeOdbcFts.ps1
 scripts/recordWalk.cmd
 scripts/recordWalk.py
 scripts/walks/pilot.inix

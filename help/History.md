@@ -5,6 +5,25 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 25 November 2026, night -- Carry on in another Homer program
+
+- **Export Data asks where the file goes next** when another Homer program suits it: Edit in EdSharp for Markdown, text, JSON and CSV, Show in FileDir for any file, and the Windows default app, which Enter still takes for a spreadsheet, a page or CSV. The formula warning keeps its own question. With no other Homer program installed, nothing is asked and the file opens as before.
+- **Open Cell Value asks the same** for a file or folder a cell names: a folder Open in FileDir, Markdown or text Edit in EdSharp, the Windows default app beside them. A url opens in the browser as before.
+- **Generate Graphics' Folder shows the files in FileDir,** the page selected, when FileDir is installed, and in Explorer otherwise.
+- **Run Report and Edit Script open in EdSharp when it is installed,** instead of Notepad. [Scripts] editor= in DbDo.inix still names any other editor.
+- **BrailleForum's builder mends the template in place on every build,** asking acb.org for nothing: the first version made the retired views table, and the kit's checkDb failed the first push on it and on the full-text index's own tables, which it now leaves alone.
+
+## 25 November 2026, evening -- BrailleForum, the ACB Braille Forum searchable
+
+- **A new template, BrailleForum,** holds the articles of the American Council of the Blind's magazine, The ACB Braille Forum, with its sister the ACB E-Forum: every issue acb.org offers, one row an issue in issues and one row an article in articles, each with its title, author, month, kind and words. DbDo opens it on articles.
+- **Its words come in two fields, by where they came from.** body is Markdown, converted by Pandoc from the article's own web page at acb.org, with ACB's headings, lists, links and bold. text is the article's words exactly as the issue's .txt file has them, used only when no web page holds it. No structure is ever guessed from plain text. format says which.
+- **It is searched by full text.** An FTS5 index, articles_fts, finds words, phrases and words near each other at once, and ranks the best first. Three saved searches come with it, with Authors and Articles-By-Year, and Searches.md beside it shows every form a search takes, ready to paste. kind keeps the masthead, the table of contents and the notices every issue repeats out of a search.
+- **scripts\makeBrailleForum builds it,** and the build runs it when the database is missing: about an hour the first time, then minutes, since it keeps what it fetched and asks again only about recent issues. --limit 12 builds a pilot of the newest 12 issues beside the cache instead. Every article keeps its key across rebuilds, so a person's copy can be updated from the template, and Coverage.md says what is in it and what is not.
+- **The database stays on the development computer.** It is not pushed to GitHub, and the installer leaves the template out, until there is a way to download large databases.
+- **Filter Records offers Full-text match** for a table with a full-text index, such as BrailleForum's articles. It asks for words and keeps the records the index finds -- phrases, OR, NOT, NEAR and word starts -- as the table's own records, so they can be marked, read wide, opened and followed with Alt+Right, which a saved search's list cannot do. It combines with Narrow, Expand and Invert like any condition. A mistyped search, or an SQLite without full-text search, is explained and leaves the filter as it was. Keywords is unchanged: it finds text inside words too, and the index finds whole words, so the two would disagree.
+- **Every build tests full-text search through DbDo's own driver.** scripts\probeOdbcFts asks the SQLite ODBC driver, opened as DbDo opens a database, whether FTS5 works; tries any full-text extension beside the driver when it does not; and runs BrailleForum's searches, Full-text match, an edit and the index's check on a copy. SQLean adds functions, not full-text search, so only the driver can say. The probe never stops the build; its log says what it found.
+- **A full-text index is not listed as a table.** DbDo leaves an FTS5 index and its four shadow tables out of its list of tables, as it does sqlite_ tables, and scripts\checkTemplates no longer checks them as tables.
+
 ## 25 November 2026, late afternoon -- Go to, again with F3
 
 - **F3 and Shift+F3 repeat a Go to Record,** as they repeat Jump, Keywords and Find with Regex. Either key does the Go to again the same way, so +5 then F3 moves 5 more.
