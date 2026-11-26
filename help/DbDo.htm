@@ -3435,6 +3435,44 @@ word holding those letters.</li>
 year, so you hear when it rose and fell; change its words between the
 single quotes to follow another subject. Each build runs every search
 here and logs how many articles it finds.</p>
+<h4 id="braillemonitor-searched-by-full-text">BrailleMonitor, searched
+by full text</h4>
+<p><strong>BrailleMonitor</strong> holds the articles of the Braille
+Monitor, the National Federation of the Blind’s magazine: every issue
+that nfb.org offers, from 1957 on. It is made just as BrailleForum is,
+by the same code, so everything said above about BrailleForum’s tables,
+writers, index and searches holds here too. It is built on the
+development computer by
+<strong><code>scripts\makeBrailleMonitor</code></strong>, which reads
+each article’s own page at nfb.org, no more than one page a second; the
+first build takes some hours and later ones minutes. Like BrailleForum,
+it is not in the installer, and the build puts it in **%LOCALAPPDATA%*,
+so it appears in Template Databases (Control+Shift+O).</p>
+<p>Every Monitor article is a web page, so its words are always in
+<strong>body</strong>, as Markdown with the NFB’s own headings, lists
+and links. Three saved searches come with it – Braille-Literacy,
+Employment and Structured-Discovery – with Writers, Articles-By-Year and
+Topic-By-Year, and the reading_list report. On the development computer,
+each build writes notes_Coverage.md and notes_Statistics.md.</p>
+<h4 id="searching-braillemonitor">Searching BrailleMonitor</h4>
+<p>Searches to try, each a Homer pattern, in Filter Records with
+<strong>Full-text match</strong>:</p>
+<ul>
+<li><code>"structured discovery"</code>: the NFB’s way of teaching
+blindness skills.</li>
+<li><code>minimum wage &amp; sheltered workshop*</code>: the long fight
+over subminimum wages.</li>
+<li><code>braille &amp; literacy &amp; !display*</code>: braille as
+reading, not braille displays.</li>
+<li><code>"guide dog"~5 &amp; airline*</code>: guide dog users and air
+travel.</li>
+<li><code>title:convention</code>: convention reports and plans, by a
+word in the title.</li>
+<li><code>author:jernigan &amp; philosophy</code>: one writer on one
+subject.</li>
+</ul>
+<p>Each build runs every search here and logs how many articles it
+finds.</p>
 <h4 id="radiotrail-plays-internet-radio">RadioTrail plays Internet
 radio</h4>
 <p>Fourteen stations are in the template to start. To build the real

@@ -1,0 +1,41 @@
+﻿; BrailleMonitor.inix -- how this database opens, and how its tables are heard.
+;
+; THE BRAILLE MONITOR, SEARCHABLE. Every issue of the National Federation of the Blind's magazine that nfb.org offers,
+; from 1957 on: one row an issue in issues, one row an article in articles. Every Monitor article is its own web page
+; at nfb.org, so its words are in body as Markdown, with the NFB's own headings, lists and links. search_text holds
+; the same words with no markup and no link addresses: the full-text index reads it, not body, so a search and the
+; passage it reads aloud carry no Markdown. The database is made the same way as BrailleForum, by the same code.
+;
+; FIND ONE. The row speaks title, author and published (the year and month). Keywords (Control+K) and Filter Records
+; work as on any table; Full-text match in Filter Records uses the index. The saved searches here rank their matches
+; and read the passage that matched; the BrailleMonitor part of DbDo's guide shows the forms a search takes.
+;
+; READ ONE. Alt+Right on an issue goes to its articles, in the issue's order (position). Control+Enter on body shows
+; the article as a web page; Control+Shift+U opens it at nfb.org. The reading_list report writes up marked articles.
+;
+; WRITERS. One row a person, from every byline; each article is mapped to each of its writers (maps, written_by),
+; so Alt+Right goes from a writer to their articles and from an article to its writers.
+;
+; scripts\makeBrailleMonitor in DbDo's development folder builds this file from nfb.org; the build runs it when the
+; database is missing. The database stays on that computer: it is not on GitHub and not in the installer.
+
+[Database]
+
+InitialTable = articles
+
+[Table:articles]
+
+SelectFields = title, author, published
+
+[Table:writers]
+
+SelectFields = name, articles, last_published
+
+[Table:issues]
+
+SelectFields = title, articles, words
+
+[Table:defs]
+
+
+[Table:maps]

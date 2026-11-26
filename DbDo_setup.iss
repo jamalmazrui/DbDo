@@ -429,7 +429,7 @@ Source: "data\defs.db"; DestDir: "{app}\data"; Flags: ignoreversion
 ; The templates' logs folders hold the build's database checks, not anything a user needs (9 October 2026).
 ; BRAILLEFORUM IS NOT SHIPPED (25 November 2026): its database stays on the development computer until large databases
 ; have a way to be downloaded, so the whole template folder is excluded here, by the leading backslash, from the templates root.
-Source: "templates\*"; DestDir: "{app}\templates"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist; Excludes: ".git,.venv,__pycache__,*.pyc,venv,logs,*.log,*.db-wal,*.db-shm,*.db-journal,\BrailleForum"
+Source: "templates\*"; DestDir: "{app}\templates"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist; Excludes: ".git,.venv,__pycache__,*.pyc,venv,logs,*.log,*.db-wal,*.db-shm,*.db-journal,\BrailleForum,\BrailleMonitor"
 ; ALWAYS REPLACED (7 November 2026). This copy is the program's own: its [Hotkeys] descriptions feed the
 ; Key Describer, and onlyifdoesntexist kept the FIRST install's copy forever, so removed keys went on being
 ; described. A person's settings live in %LOCALAPPDATA%\DbDo\DbDo.inix, which this line never touches.

@@ -1381,6 +1381,40 @@ you hear when it rose and fell; change its words between the single quotes to
 follow another subject. Each build runs every search here and logs how many
 articles it finds.
 
+#### BrailleMonitor, searched by full text
+
+**BrailleMonitor** holds the articles of the Braille Monitor, the National
+Federation of the Blind's magazine: every issue that nfb.org offers, from 1957
+on. It is made just as BrailleForum is, by the same code, so everything said
+above about BrailleForum's tables, writers, index and searches holds here too.
+It is built on the development computer by **`scripts\makeBrailleMonitor`**,
+which reads each article's own page at nfb.org, no more than one page a second;
+the first build takes some hours and later ones minutes. Like BrailleForum, it
+is not in the installer, and the build puts it in
+**%LOCALAPPDATA%\DbDo\templates**, so it appears in Template Databases
+(Control+Shift+O).
+
+Every Monitor article is a web page, so its words are always in **body**, as
+Markdown with the NFB's own headings, lists and links. Three saved searches come
+with it -- Braille-Literacy, Employment and Structured-Discovery -- with Writers,
+Articles-By-Year and Topic-By-Year, and the reading_list report. On the
+development computer, each build writes notes\BrailleMonitor_Coverage.md and
+notes\BrailleMonitor_Statistics.md.
+
+#### Searching BrailleMonitor
+
+Searches to try, each a Homer pattern, in Filter Records with **Full-text
+match**:
+
+- `"structured discovery"`: the NFB's way of teaching blindness skills.
+- `minimum wage & sheltered workshop*`: the long fight over subminimum wages.
+- `braille & literacy & !display*`: braille as reading, not braille displays.
+- `"guide dog"~5 & airline*`: guide dog users and air travel.
+- `title:convention`: convention reports and plans, by a word in the title.
+- `author:jernigan & philosophy`: one writer on one subject.
+
+Each build runs every search here and logs how many articles it finds.
+
 #### RadioTrail plays Internet radio
 
 Fourteen stations are in the template to start. To build the real thing, run

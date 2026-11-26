@@ -102,6 +102,8 @@
 !/scripts/makeBlindSkills.py
 !/scripts/makeBrailleForum.cmd
 !/scripts/makeBrailleForum.py
+!/scripts/makeBrailleMonitor.cmd
+!/scripts/makeBrailleMonitor.py
 !/scripts/makeDescribedFilms.cmd
 !/scripts/makeDescribedFilms.py
 !/scripts/makeHotkeys.py
@@ -168,6 +170,9 @@ temp/
 data/BrailleForum/
 templates/BrailleForum/BrailleForum.db
 templates/BrailleForum/BrailleForum.db.building
+data/BrailleMonitor/
+templates/BrailleMonitor/BrailleMonitor.db
+templates/BrailleMonitor/BrailleMonitor.db.building
 scripts/release.cmd
 scripts/release.ps1
 

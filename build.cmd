@@ -353,21 +353,27 @@ rem acb.org: the first run asks for every issue page, text file and article page
 rem second, and keeps them in data\BrailleForum, so scripts\makeBrailleForum rebuilds by hand later asking only about
 rem recent issues. The database and that cache stay on this computer: LocalFiles.txt keeps them off GitHub, and the
 rem installer leaves templates\BrailleForum out. A failed build stops this one, since the template check needs the file.
-if exist "!sHere!scripts\makeBrailleForum.py" if not exist "!sHere!templates\BrailleForum\BrailleForum.db" (
-  echo BrailleForum.db is missing, so the ACB Braille Forum's issues are being fetched from acb.org. The first time takes about an hour.
-  echo BrailleForum: no database; python scripts\makeBrailleForum.py >> "!log!"
-  python "!sHere!scripts\makeBrailleForum.py"
-  set "iForum=!errorlevel!"
-  echo BrailleForum fetch: exit code !iForum!>> "!log!"
-  if not "!iForum!"=="0" (
-    echo makeBrailleForum failed. Its log is in logs, named DbDo-makeBrailleForum with the date and time.
-    popd & exit /b 1
+rem BRAILLEMONITOR TOO (26 November 2026, Jamal asked for BrailleMonitor.db "structured in an analogous manner"):
+rem makeBrailleMonitor builds the NFB's Braille Monitor with makeBrailleForum's own code, from nfb.org, one page a
+rem second; its first run reads about ten thousand pages, so it takes some hours, saying how far it has got every five
+rem issues. Each magazine is fetched when its database is missing and mended in place otherwise.
+for %%M in (BrailleForum BrailleMonitor) do (
+  if exist "!sHere!scripts\make%%M.py" if not exist "!sHere!templates\%%M\%%M.db" (
+    echo %%M.db is missing, so its issues are being fetched. The first time takes an hour or more; progress shows here.
+    echo %%M: no database; python scripts\make%%M.py>> "!log!"
+    python "!sHere!scripts\make%%M.py"
+    set "iForum=!errorlevel!"
+    echo %%M fetch: exit code !iForum!>> "!log!"
+    if not "!iForum!"=="0" (
+      echo make%%M failed. Its log is in logs, named DbDo-make%%M with the date and time.
+      popd & exit /b 1
+    )
+  ) else if exist "!sHere!scripts\make%%M.py" (
+    rem An existing database is mended in place by each build, fetching nothing (25 November 2026: the retired
+    rem views table that the first version made failed the kit's checkDb at push).
+    python "!sHere!scripts\make%%M.py" --repair >> "!log!" 2>&1
+    echo %%M repair: exit code !errorlevel!>> "!log!"
   )
-) else if exist "!sHere!scripts\makeBrailleForum.py" (
-  rem An existing BrailleForum.db is mended in place by each build, fetching nothing (25 November 2026: the retired
-  rem views table that the first version made failed the kit's checkDb at push).
-  python "!sHere!scripts\makeBrailleForum.py" --repair >> "!log!" 2>&1
-  echo BrailleForum repair: exit code !errorlevel!>> "!log!"
 )
 rem RETIRED BRAILLEFORUM FILES (26 November 2026). Searches.md and Coverage.md sat beside the template, outside the
 rem Homer doc set: the search guide is now the BrailleForum part of help\DbDo.md, and the coverage notes are
@@ -387,16 +393,18 @@ rem the shipped ones beside the program and %LOCALAPPDATA%\DbDo\templates, the p
 rem from the program. This puts the master copy there, only what is newer, leaving out the copy being built and any
 rem stray logs; the next time DbDo lists its templates, it seeds its own copy into the data folder as it does any other.
 rem robocopy's exit codes below 8 mean success.
-if exist "!sHere!templates\BrailleForum\BrailleForum.db" (
-  set "sUserTemplates=%LOCALAPPDATA%\DbDo\templates\BrailleForum"
-  robocopy "!sHere!templates\BrailleForum" "!sUserTemplates!" /E /XO /XD logs /XF *.building *.db-journal *.db-wal *.db-shm /R:2 /W:2 /NP /NJH /NJS /NDL >> "!log!" 2>&1
-  set "iCopy=!errorlevel!"
-  if !iCopy! GEQ 8 (
-    echo BrailleForum could not be installed in !sUserTemplates!; robocopy said !iCopy!. The log has its words.
-    echo BrailleForum install: robocopy exit code !iCopy!, a failure>> "!log!"
-    popd & exit /b 1
-  ) else (
-    echo BrailleForum install: !sUserTemplates!, robocopy exit code !iCopy!>> "!log!"
+for %%M in (BrailleForum BrailleMonitor) do (
+  if exist "!sHere!templates\%%M\%%M.db" (
+    set "sUserTemplates=%LOCALAPPDATA%\DbDo\templates\%%M"
+    robocopy "!sHere!templates\%%M" "!sUserTemplates!" /E /XO /XD logs /XF *.building *.db-journal *.db-wal *.db-shm /R:2 /W:2 /NP /NJH /NJS /NDL >> "!log!" 2>&1
+    set "iCopy=!errorlevel!"
+    if !iCopy! GEQ 8 (
+      echo %%M could not be installed in !sUserTemplates!; robocopy said !iCopy!. The log has its words.
+      echo %%M install: robocopy exit code !iCopy!, a failure>> "!log!"
+      popd & exit /b 1
+    ) else (
+      echo %%M install: !sUserTemplates!, robocopy exit code !iCopy!>> "!log!"
+    )
   )
 )
 rem THE DIRECTORY TEMPLATES FOLLOW THEIR PAGES (15 October 2026). BlindSkills and

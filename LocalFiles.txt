@@ -37,6 +37,9 @@ temp/
 data/BrailleForum/
 templates/BrailleForum/BrailleForum.db
 templates/BrailleForum/BrailleForum.db.building
+data/BrailleMonitor/
+templates/BrailleMonitor/BrailleMonitor.db
+templates/BrailleMonitor/BrailleMonitor.db.building
 
 # The release scripts belong to the separate tagRelease project and stay out
 # of every repository.

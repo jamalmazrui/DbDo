@@ -5,9 +5,15 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
-## 26 November 2026, evening -- BrailleForum's index holds every word
+## 26 November 2026, late afternoon -- BrailleMonitor, the NFB Braille Monitor searchable
 
-- **BrailleForum's full-text index now reads every word of the web articles.** The build's own measure showed the plain words kept for the index, search_text, at a tenth of the Markdown they came from: 0.2 MB beside 2.3 MB. They now come from Pandoc's plain text, from the same reading of each page that gives the Markdown, so a search finds what an article says anywhere in it. The next build rebuilds the database from the saved pages, fetching nothing, and every build logs both measures side by side, naming any page where they part ways.
+- **A new template, BrailleMonitor,** holds the articles of the National Federation of the Blind's magazine, the Braille Monitor: every issue nfb.org offers, from 1957 on, one row an article, with the same tables, writers, keys and full-text index as BrailleForum. scripts\makeBrailleMonitor builds it with makeBrailleForum's own code, replacing only how nfb.org's issues are found and read: each article from its own page, as Markdown in body, with its plain words in search_text for the index. Its first build reads about ten thousand pages, one a second, so it takes some hours; the build runs it when the database is missing, then mends it in place, and installs it in %LOCALAPPDATA%\DbDo\templates beside BrailleForum.
+- **It comes with its searches:** Braille-Literacy, Employment and Structured-Discovery, with Writers, Articles-By-Year, Topic-By-Year and the reading_list report, and a part of the guide on searching it, whose every example each build tries.
+- **Writers with an inner capital,** such as Jacobus tenBroek, the NFB's founder, are now found in bylines, in BrailleForum too.
+
+## 26 November 2026, evening -- BrailleForum's index checked, and a build beside a running DbDo
+
+- **BrailleForum's full-text index did hold every word.** The build's own measure showed the plain words kept for the index, search_text, at a seventh of the Markdown they come from, which looked like lost words. Pandoc's own plain text of the same pages came to the same size, so the words were all there; the rest of body is markup. search_text now comes from Pandoc's plain text all the same, and each build logs which articles have the most markup and what it is, to decide whether body needs any change.
 - **A build while DbDo is open no longer fails on the NVDA library.** A running DbDo holds nvdaControllerClient.dll, so copying the kit's copy over it failed, and one check's build failed with it. When the two are the same file, nothing is copied and the build goes on.
 
 ## 26 November 2026, afternoon -- The Homer pattern, broadened

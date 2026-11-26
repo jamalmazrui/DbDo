@@ -67,8 +67,15 @@ for sPath in (os.path.join(sKit, "scripts"), os.path.join(sKit, "exec", "Python"
 import homerFetch, homerFts
 import makeMusicTrail as trail
 
-sVersion = "2026-11-26 version 5: search_text from Pandoc's plain text, checked against the page's own words"
+sVersion = "2026-11-26 version 6: no rebuild for a thin search_text, which was never thin; where body's bulk comes from is logged"
 sSource = "BrailleForum"
+# ONE BUILDER, TWO MAGAZINES (26 November 2026, Jamal asked for BrailleMonitor.db "structured in an analogous manner").
+# makeBrailleMonitor imports this file and sets these names and its own discoverIssues and readIssue, so the database,
+# its writers, keys, index, checks, statistics and coverage are made by one piece of code for both magazines.
+sSite = "acb.org"
+sFirstRun = "The first run fetches every article page, about an hour; later runs ask only about recent issues."
+dEditions = {"ACB Braille Forum": "The magazine in braille, large print, cartridge, email and on the web.",
+             "ACB E-Forum": "The magazine's electronic edition, which alternated months with the Braille Forum."}
 sUserAgent = "DbDo makeBrailleForum/1 (+https://github.com/JamalMazrui/DbDo; a searchable archive of the ACB Braille Forum)"
 lsEntryPages = ["https://www.acb.org/acb-braille-forum-and-acb-e-forum", "https://www.acb.org/acb-braille-forum-past-issues"]
 iTrustDays = 120          # an issue older than this is read from the cache without asking acb.org, unless --refresh
@@ -407,7 +414,9 @@ def authorNames(sByline):
             lsWords = sName.split(" ")
             if not (2 <= len(lsWords) <= 5) or len(sName) > 50: continue
             if any(sWord.lower().strip(".") in setRoleWords for sWord in lsWords): continue
-            if not all(re.match(r"^(?:[A-Z][\w.'-]*|de|del|da|di|du|la|le|van|von|St\.?)$", sWord) for sWord in lsWords): continue
+            # A NAME WITH AN INNER CAPITAL (26 November 2026): Jacobus tenBroek, the NFB's founder, starts his surname in
+            # lower case, so a word may also be lower case with a capital inside it.
+            if not all(re.match(r"^(?:[A-Z][\w.'-]*|[a-z]+[A-Z][\w'-]*|de|del|da|di|du|la|le|van|von|St\.?)$", sWord) for sWord in lsWords): continue
             if sName not in lsNames: lsNames.append(sName)
     return lsNames
 
@@ -604,8 +613,7 @@ def build(lIssues, sPorter, sOut):
     oDb.execute("CREATE INDEX idx_articles_issue_id ON articles (issue_id)")
     trail.addLookups(oDb, "articles", "kind", dKinds, sSource)
     trail.addLookups(oDb, "articles", "format", dFormats, sSource)
-    trail.addLookups(oDb, "issues", "edition", {"ACB Braille Forum": "The magazine in braille, large print, cartridge, email and on the web.",
-                                                "ACB E-Forum": "The magazine's electronic edition, which alternated months with the Braille Forum."}, sSource)
+    trail.addLookups(oDb, "issues", "edition", dEditions, sSource)
     iArticles = 0
     for dIssue in lIssues:
         lArticles = dIssue["lArticles"]
@@ -659,7 +667,7 @@ def build(lIssues, sPorter, sOut):
     # the whole file after every rebuild, to put defs in its order and add its lookup index. Done here, once, on the copy.
     import checkTemplates as templateCheck
     templateCheck.sLogPath = sLogPath
-    templateCheck.repair("BrailleForum", sTemp)
+    templateCheck.repair(sSource, sTemp)
     oDb = sqlite3.connect(sTemp, isolation_level=None)
     oDb.execute("VACUUM")
     lsProblems = ["DbDo's template repair: " + s for s in templateCheck.lErrors]
@@ -678,6 +686,7 @@ def build(lIssues, sPorter, sOut):
         sWeights = "file %.1f MB: body (Markdown) %.1f MB, search_text %.1f MB, text %.1f MB, full-text index about %.1f MB" % tuple(
             [iFile / 1048576.0] + [(i or 0) / 1048576.0 for i in lSizes] + [iIndexBytes / 1048576.0])
         log("SIZES " + sWeights)
+        logBodyBulk(oDb)
         if dPlain: log("SEARCHTEXT Pandoc's plain text %d characters in all, the tag stripper's %d; %d pages named above where the stripper kept less than half" % (dPlain.get("pandoc", 0), dPlain.get("stripped", 0), dPlain.get("samples", 0)))
         say("Sizes: " + sWeights + ".")
     except Exception as oError:
@@ -689,7 +698,7 @@ def build(lIssues, sPorter, sOut):
     # finds nothing is caught by the build, not by a reader, and named in the coverage notes.
     sGuide = os.path.join(sProject, "help", "DbDo.md")
     sGuideText = io.open(sGuide, encoding="utf-8-sig").read() if os.path.isfile(sGuide) else ""
-    oPart = re.search(r"(?ms)^#### Searching BrailleForum\s*$(.*?)(?=^#{1,4} )", sGuideText + "\n#### end\n")
+    oPart = re.search(r"(?ms)^#### Searching %s\s*$(.*?)(?=^#{1,4} )" % sSource, sGuideText + "\n#### end\n")
     if oPart:
         iRun, lsRefused, lsEmpty = 0, [], []
         lsFields = [r[1] for r in oDb.execute("PRAGMA table_info(articles)")]
@@ -711,15 +720,15 @@ def build(lIssues, sPorter, sOut):
         for sExample in lsRefused: dReport["examples"].append("Refused by FTS5: " + sExample)
         for sExample in lsEmpty: dReport["examples"].append("Found nothing: " + sExample)
     else:
-        log("EXAMPLES: help\\DbDo.md has no Searching BrailleForum part, so no example was tried")
+        log("EXAMPLES: help\\DbDo.md has no Searching %s part, so no example was tried" % sSource)
     log("BUILT %s: %s, %s, tokenizer %s; problems: %s" % (sTemp, plural(len(lIssues), "issue"), plural(iArticles, "article"), sTokenize, "; ".join(lsProblems) or "none"))
     oDb.close()
     if lsProblems: raise RuntimeError("the new database failed its checks, so the old one was kept: " + "; ".join(lsProblems))
     try:
         os.replace(sTemp, sOut)
     except OSError as oError:
-        raise RuntimeError("the new database is built, but %s could not be replaced (%s). Close any DbDo window showing the BrailleForum "
-                           "template and run scripts\\makeBrailleForum --offline, which rebuilds from the cache in a minute" % (sOut, oError))
+        raise RuntimeError("the new database is built, but %s could not be replaced (%s). Close any DbDo window showing the %s "
+                           "template and run scripts\\make%s --offline, which rebuilds from the cache in a minute" % (sOut, oError, sSource, sSource))
     return iArticles
 
 
@@ -858,8 +867,8 @@ def writeStatistics(sDbPath, sPath):
     def rows(sSql, tArgs=()): return oDb.execute(sSql, tArgs).fetchall()
     def one(sSql, tArgs=()): return oDb.execute(sSql, tArgs).fetchone()
     def n(i): return "{:,}".format(i or 0)
-    lsLines = ["# BrailleForum Statistics", "",
-               "Computed by scripts\\makeBrailleForum on %s from BrailleForum.db. An article here is a row of kind article: the masthead, the table of contents and the standing notices are left out." % datetime.date.today().strftime("%d %B %Y").lstrip("0"), ""]
+    lsLines = ["# %s Statistics" % sSource, "",
+               "Computed by scripts\\make%s on %s from %s.db. An article here is a row of kind article: mastheads, tables of contents, standing notices and whole issues are left out." % (sSource, datetime.date.today().strftime("%d %B %Y").lstrip("0"), sSource), ""]
     iIssues, sFirst, sLast = one("SELECT count(*), min(published), max(published) FROM issues")
     iArticles, iWords = one("SELECT count(*), sum(words) FROM articles a WHERE " + sArticle)
     lsLines += ["## The archive", "",
@@ -939,9 +948,9 @@ def writeCoverage(lIssues, iArticles, sPorter, sPath):
         for d in dIssue["lArticles"]:
             dYear["web page" if d["format"] == "web page" else "plain text"] += 1
             if d["kind"] == "article": dYear["articles"] += 1
-    lsLines = ["# BrailleForum Coverage", "",
-               "Written by scripts\\makeBrailleForum on %s. The template holds %s and %s, indexed with the %s tokenizer." % (
-                   datetime.date.today().strftime("%d %B %Y").lstrip("0"), plural(len(lIssues), "issue"), plural(iArticles, "row"),
+    lsLines = ["# %s Coverage" % sSource, "",
+               "Written by scripts\\make%s on %s. The template holds %s and %s, indexed with the %s tokenizer." % (
+                   sSource, datetime.date.today().strftime("%d %B %Y").lstrip("0"), plural(len(lIssues), "issue"), plural(iArticles, "row"),
                    "porter (stemming)" if sPorter else "unicode61"), "",
                "## By year", "",
                "Each line gives the issues, the articles (leaving out mastheads, contents and standing notices), and how many rows came from web pages and from plain text.", ""]
@@ -961,13 +970,28 @@ def writeCoverage(lIssues, iArticles, sPorter, sPath):
     return True
 
 
+def logBodyBulk(oDb):
+    """Where body's bulk comes from, in BODYBULK lines; run by the build and by every repair."""
+    # WHERE BODY'S BULK COMES FROM (26 November 2026): the Markdown is seven times the plain words. Each build names
+    # the three articles where the gap is widest and counts what could fill it -- embedded pictures (data: addresses),
+    # links and pictures by address -- so the next cycle can decide whether anything in body should change.
+    for sTitle, sUrl, iBody, iPlain, iData, iLinks, iPics, sSample in oDb.execute(
+            "SELECT title, url, length(body), length(coalesce(search_text, '')), "
+            "(length(body) - length(replace(body, 'data:', ''))) / 5, (length(body) - length(replace(body, '](http', ''))) / 6, "
+            "(length(body) - length(replace(body, '![', ''))) / 2, substr(body, max(1, instr(body, 'data:') - 20), 160) "
+            "FROM articles WHERE body IS NOT NULL ORDER BY length(body) - length(coalesce(search_text, '')) DESC LIMIT 3"):
+        log("BODYBULK %s (%s): body %d, plain words %d; data: addresses %d, links by address %d, pictures %d; around the first data: %r" % (sTitle, sUrl, iBody, iPlain, iData, iLinks, iPics, sSample))
+    log("BODYBULK %d articles hold an embedded picture (data:image), with %d characters of body among them" % tuple(
+        oDb.execute("SELECT count(*), coalesce(sum(length(body)), 0) FROM articles WHERE body LIKE '%data:image%'").fetchone()))
+
+
 def repairTemplate():
     """Mends a template built by an earlier version, in place and fetching nothing, as each build runs it. Each mend is
     logged, and the file is left untouched when there is nothing to mend.
       - The views table, retired on 4 November 2026, which version 1 still made: the kit's checkDb failed the first
         push on it (25 November 2026)."""
     if not os.path.isfile(sTarget):
-        say("There is no BrailleForum.db to repair.")
+        say("There is no %s.db to repair." % sSource)
         return 0
     oDb = sqlite3.connect(sTarget, isolation_level=None)
     try:
@@ -975,16 +999,17 @@ def repairTemplate():
         # asking acb.org for nothing, so its index reads search_text; every key is kept.
         lsColumns = [r[1] for r in oDb.execute("PRAGMA table_info(articles)")]
         bAuthors = oDb.execute("SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = 'writers'").fetchone()[0] > 0
-        # VERSION 4 LOST MOST OF search_text (26 November 2026): when search_text holds less than half as much as body,
-        # the template is rebuilt the same way, fetching nothing.
-        bThin = False
+        # NOT THIN AFTER ALL (26 November 2026, second cycle). Version 5 rebuilt whenever search_text held less than half
+        # as much as body, taking body's 2.3 MB for lost words. Pandoc's own plain text came to the same 0.3 MB, so the
+        # words were all there and the bulk of body is markup; the test rebuilt the database at every build. It is gone;
+        # the sizes are only logged, and the build logs where body's bulk comes from (BODYBULK lines).
         if "search_text" in lsColumns:
             iBody, iPlain = oDb.execute("SELECT coalesce(sum(length(body)), 0), coalesce(sum(length(search_text)), 0) FROM articles WHERE body IS NOT NULL").fetchone()
-            bThin = iBody > 0 and iPlain < iBody // 2
-            log("REPAIR body %d characters, search_text %d%s" % (iBody, iPlain, ": too thin, rebuilding" if bThin else ""))
-        if "search_text" not in lsColumns or not bAuthors or bThin:
+            log("REPAIR body %d characters, search_text %d" % (iBody, iPlain))
+            logBodyBulk(oDb)
+        if "search_text" not in lsColumns or not bAuthors:
             oDb.close()
-            say("BrailleForum.db is being rebuilt from the saved pages, for the newest design (plain words in the index, a writers table). It takes a minute or two and fetches nothing.")
+            say(sSource + ".db is being rebuilt from the saved pages, for the newest design (plain words in the index, a writers table). It takes a minute or two and fetches nothing.")
             return main(["--offline"])
         lsMends = []
         if oDb.execute("SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = 'views'").fetchone()[0]:
@@ -994,7 +1019,7 @@ def repairTemplate():
             oDb.execute("VACUUM")
             sProblem = homerFts.integrityProblem(oDb, "articles_fts")
             if sProblem: raise RuntimeError("the full-text index failed its check after the repair: " + sProblem)
-            say("BrailleForum.db repaired: " + "; ".join(lsMends) + ".")
+            say(sSource + ".db repaired: " + "; ".join(lsMends) + ".")
         else:
             log("REPAIR nothing to mend in " + sTarget)
     finally:
@@ -1003,7 +1028,7 @@ def repairTemplate():
 
 
 def main(lsArgs):
-    log("makeBrailleForum.py started; %s; script %s" % (sVersion, os.path.abspath(__file__)))
+    log("make%s.py started; %s; script %s" % (sSource, sVersion, os.path.abspath(sys.argv[0] if sys.argv and sys.argv[0].endswith(".py") else __file__)))
     log("Python %s at %s on %s; SQLite %s; cwd %s; command line %s" % (platform.python_version(), sys.executable, platform.platform(), sqlite3.sqlite_version,
                                                                       os.getcwd(), " ".join(sys.argv)))
     lsKnown = ("--limit", "--offline", "--porter", "--refresh", "--repair")
@@ -1023,9 +1048,9 @@ def main(lsArgs):
     bOffline, bPorter, bRefresh = "--offline" in lsLower, "--porter" in lsLower, "--refresh" in lsLower
     log("settings: limit %s; offline %s; porter %s; refresh %s; trust kept copies older than %d days; template %s"
         % (iLimit or "none", bOffline, bPorter, bRefresh, iTrustDays, sTarget))
-    oCache = homerFetch.Cache(os.path.join(sProject, "data", "BrailleForum"), fLog=log, nDelay=nDelay, iTimeout=iTimeout, iRetries=iRetries,
+    oCache = homerFetch.Cache(os.path.join(sProject, "data", sSource), fLog=log, nDelay=nDelay, iTimeout=iTimeout, iRetries=iRetries,
                               sUserAgent=sUserAgent, bOffline=bOffline)
-    say("Finding the issues at acb.org%s." % (" in the cache only" if bOffline else ""))
+    say("Finding the issues at %s%s." % (sSite, " in the cache only" if bOffline else ""))
     dIssues = discoverIssues(oCache)
     if not dIssues:
         oCache.save()
@@ -1035,7 +1060,7 @@ def main(lsArgs):
     if iLimit: lIssues = lIssues[:iLimit]
     say("Reading %s, from %s to %s. %s"
         % (plural(len(lIssues), "issue"), lIssues[-1]["published"], lIssues[0]["published"],
-           "A pilot takes a few minutes." if iLimit else "The first run fetches every article page, about an hour; later runs ask only about recent issues."))
+           "A pilot takes a few minutes." if iLimit else sFirstRun))
     sPandoc = pandocPath()
     log("PANDOC %s" % (sPandoc or "none"))
     dOld = previousKeys(sTarget)
@@ -1060,13 +1085,13 @@ def main(lsArgs):
         return 1
     # A PILOT IS NEVER THE TEMPLATE. --limit builds data\\BrailleForum\\BrailleForum-pilot.db, to try the searches in DbDo;
     # the template, whose keys a person's copy is updated by, is replaced only by a build of every issue.
-    sOut = os.path.join(sProject, "data", "BrailleForum", "BrailleForum-pilot.db") if iLimit else sTarget
+    sOut = os.path.join(sProject, "data", sSource, sSource + "-pilot.db") if iLimit else sTarget
     iArticles = build(lBuilt, bPorter, sOut)
     sNotes = os.path.dirname(sOut) if iLimit else os.path.join(sProject, "notes")
     os.makedirs(sNotes, exist_ok=True)
-    sCoverage = os.path.join(sNotes, "BrailleForum_Coverage.md")
+    sCoverage = os.path.join(sNotes, sSource + "_Coverage.md")
     writeCoverage(lBuilt, iArticles, bPorter, sCoverage)
-    sStatistics = os.path.join(sNotes, "BrailleForum_Statistics.md")
+    sStatistics = os.path.join(sNotes, sSource + "_Statistics.md")
     writeStatistics(sOut, sStatistics)
     say("Built %s: %s and %s. %s says what is in it and what is not; %s gives its statistics." % (sOut, plural(len(lBuilt), "issue"), plural(iArticles, "row"), sCoverage, sStatistics))
     if dReport["failed"]: say("%s could not be fetched; the log and the coverage notes name them." % plural(len(dReport["failed"]), "page or file", "pages or files"))
@@ -1079,5 +1104,5 @@ if __name__ == "__main__":
         sys.exit(main(sys.argv[1:]))
     except Exception as oError:
         log("CRASH " + traceback.format_exc())
-        print("makeBrailleForum stopped: %s. The log is %s." % (oError, sLogPath))
+        print("make%s stopped: %s. The log is %s." % (sSource, oError, sLogPath))
         sys.exit(1)

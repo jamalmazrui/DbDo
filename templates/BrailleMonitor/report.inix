@@ -1,0 +1,29 @@
+﻿; Report definitions for the BrailleMonitor database.
+;
+; Run them with Run Report (Alt+Shift+R). DbDo renders the chosen report and opens it in your editor, where it can be
+; read straight through or printed. Empty fields print nothing, because a field earns its line.
+
+FileTask = report
+
+; The articles you have marked, with their words, to read straight through.
+[reading_list]
+@table = articles
+@filter = marked = 1
+@sort = published, position
+header = """
+# Reading List
+
+Prepared {{ new Date().toISOString().substring(0,10) }} from BrailleMonitor, the Braille Monitor archive.
+"""
+detail = """
+## $title
+
+{{ $author ? "- By: " + $author : "" }}
+{{ $published ? "- Published: " + $published : "" }}
+{{ $url ? "- Source: " + $url : "" }}
+
+{{ $body ? $body : $text }}
+"""
+footer = """
+**$count {{ $count == 1 ? "article" : "articles" }} to read.**
+"""
