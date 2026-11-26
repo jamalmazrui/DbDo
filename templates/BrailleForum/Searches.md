@@ -1,6 +1,6 @@
 ﻿# Searching the Braille Forum
 
-BrailleForum.db has a full-text index called articles_fts. It knows every word of every article's title, author and words, so a search finds matches at once and ranks them, best first. This page shows the searches it can do. Each one is ready to paste into a query in DbDo and run.
+BrailleForum.db has a full-text index called articles_fts. It knows every word of every article's title, author and words, read as plain words without Markdown, so a search finds matches at once and ranks them, best first. This page shows the searches it can do. Each one is ready to paste into a query in DbDo and run.
 
 ## The search to start from
 
@@ -18,7 +18,7 @@ What each part does:
 
 - **MATCH** finds the articles that hold the words.
 - **a.kind = 'article'** leaves out the masthead, the table of contents and the standing notices every issue repeats. Take it out to search those too.
-- **bm25** ranks the matches. The four numbers weigh the title, author, body and text fields: a word in the title counts ten times a word in the article.
+- **bm25** ranks the matches. The four numbers weigh the title, author, search_text and text fields: a word in the title counts ten times a word in the article.
 - **snippet** gives about 24 words around a match as plain text, so you hear why the article was found.
 
 ## The forms a search takes
@@ -31,7 +31,7 @@ Each line gives what goes between the quotes after MATCH, then what it finds.
 - **Not a word:** `braille NOT display` finds braille, leaving out articles that also say display.
 - **Words near each other:** `NEAR(guide dog, 5)` finds guide and dog within 5 words of each other.
 - **A word's start:** `advoca*` finds advocate, advocacy and advocating.
-- **One field only:** `title: convention` finds convention in titles only. Use author, title, body or text.
+- **One field only:** `title: convention` finds convention in titles only. Use author, title, search_text or text.
 - **A group:** `(taxi OR uber) AND discrimination` combines the forms. AND, OR and NOT are in capitals.
 
 Accents are ignored, so cafe finds café. Case is ignored too.
@@ -56,7 +56,7 @@ WHERE articles_fts MATCH 'audio description' AND a.kind = 'article' AND a.publis
 
 The quickest way: in the articles table, press Control+F for Filter Records and choose Full-text match. Type the same words as between the quotes after MATCH, without the single quotes. The matching articles stay in the table, so you can read them, mark them and open them as usual. They keep the table's order; the searches on this page put the best matches first.
 
-From a saved search's list: the search gives each article's title, author and published month. To read one, find it in the articles table by its title with Jump (Control+J), or mark the ones you want and run the reading_list report (Alt+Shift+R). An article that came from a web page has its words in body; one that came from the issue's text file has them in text.
+From a saved search's list: the search gives each article's title, author and published month. To read one, find it in the articles table by its title with Jump (Control+J), or mark the ones you want and run the reading_list report (Alt+Shift+R). An article that came from a web page has its words in body, as Markdown to read, and in search_text as the plain words the index reads; one that came from the issue's text file has them in text.
 
 ## Does DbDo have full-text search?
 

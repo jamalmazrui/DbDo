@@ -5,6 +5,11 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 26 November 2026, morning -- BrailleForum's index reads plain words
+
+- **The full-text index reads an article's words without Markdown.** Tested: Markdown's stars, pound signs and dashes cost no match, since the index skips punctuation. But a link's address was indexed as words, so a search for org or acb found every article linking to acb.org; an address could split or fake a phrase; and the passage a search reads aloud carried the markup, such as star star by Janet Dickelman. A new field, search_text, holds a web page's words taken straight from the page with no markup and no addresses, and the index reads it in place of body, which stays Markdown to read. Word counts and fingerprints come from it too, so an article fingerprints alike from either source.
+- **The build rebuilds an older BrailleForum from the saved pages,** fetching nothing and keeping every article's key.
+
 ## 25 November 2026, nearly midnight -- BrailleForum in Template Databases
 
 - **Template Databases (Control+Shift+O) lists templates installed apart from DbDo.** Besides the templates shipped beside the program, DbDo now reads those in %LOCALAPPDATA%\DbDo\templates, one folder each, and treats them alike: listed, copied once into your data folder, and offered by Update Copies from Templates. This is where a template too large for the installer goes, by a build now and a download later.

@@ -4,6 +4,8 @@
 ; electronically, with its sister the ACB E-Forum: one row an issue in issues, one row an article in articles. An
 ; article's words are in body when ACB published it as a web page (Markdown, with ACB's own headings, lists and
 ; links), and in text when it came only from the issue's plain-text file. format says which.
+; search_text holds a web page's words again with no markup and no link addresses: the full-text index reads it, not
+; body, so a search and the passage it reads aloud carry no Markdown.
 ;
 ; FIND ONE. The row speaks title, author and published (the year and month). Keywords (Control+K) and Filter Records
 ; work as on any table. For ranked full-text searches -- a phrase, words near each other, words starting alike --

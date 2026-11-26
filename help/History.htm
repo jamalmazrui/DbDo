@@ -258,6 +258,10 @@
 id="toc-dbdo-history-of-changes">DbDo History of Changes</a>
 <ul>
 <li><a
+href="#november-2026-morning-brailleforums-index-reads-plain-words"
+id="toc-november-2026-morning-brailleforums-index-reads-plain-words">26
+November 2026, morning – BrailleForum’s index reads plain words</a></li>
+<li><a
 href="#november-2026-nearly-midnight-brailleforum-in-template-databases"
 id="toc-november-2026-nearly-midnight-brailleforum-in-template-databases">25
 November 2026, nearly midnight – BrailleForum in Template
@@ -1003,6 +1007,23 @@ recent release is at the top. For the overview of what DbDo is, see
 reference, see <code>DbDo.md</code>.</p>
 <p>Press <strong>Control+Shift+F1</strong> inside DbDo to open this file
 in your browser, or type <code>history</code> at the dot prompt.</p>
+<h2 id="november-2026-morning-brailleforums-index-reads-plain-words">26
+November 2026, morning – BrailleForum’s index reads plain words</h2>
+<ul>
+<li><strong>The full-text index reads an article’s words without
+Markdown.</strong> Tested: Markdown’s stars, pound signs and dashes cost
+no match, since the index skips punctuation. But a link’s address was
+indexed as words, so a search for org or acb found every article linking
+to acb.org; an address could split or fake a phrase; and the passage a
+search reads aloud carried the markup, such as star star by Janet
+Dickelman. A new field, search_text, holds a web page’s words taken
+straight from the page with no markup and no addresses, and the index
+reads it in place of body, which stays Markdown to read. Word counts and
+fingerprints come from it too, so an article fingerprints alike from
+either source.</li>
+<li><strong>The build rebuilds an older BrailleForum from the saved
+pages,</strong> fetching nothing and keeping every article’s key.</li>
+</ul>
 <h2
 id="november-2026-nearly-midnight-brailleforum-in-template-databases">25
 November 2026, nearly midnight – BrailleForum in Template Databases</h2>

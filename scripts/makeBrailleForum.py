@@ -19,6 +19,8 @@ source itself has structure; no heading, list, link or bold is ever inferred fro
   text    TEXTMEMO: the article's words exactly as the issue's .txt file has them, used only when there is no web
           page for it -- an older issue, or a section the issue page does not link, such as ACB Officers.
 format says which: "web page" or "plain text". A row has one or the other, never both.
+  search_text  TEXTMEMO: for a web page, its words with no markup at all, taken from the page itself; what the
+          full-text index reads in place of body (26 November 2026, see THE INDEX READS PLAIN WORDS below).
 
 HOW THE .txt IS DIVIDED. ACB's text files mark each section with a line of five asterisks, and a section's title with
 asterisks before it ("** Looking Ahead to Jacksonville"). A byline is the next line when it begins "by" or "edited by".
@@ -32,8 +34,18 @@ first and gives each article the key it had: same web page, else same words (fin
 the issue with that title. A new article takes the issue's next number, which is kept on the issue row (next_number)
 and never reused. Coverage.md lists every article that is new, gone, or could not be matched for certain.
 
-THE FULL-TEXT INDEX, articles_fts, is the kit's homerFts: it indexes title, author, body and text, and keeps itself
-current through triggers. The saved searches beside the template, and the template's Searches.md, show how to use it.
+THE FULL-TEXT INDEX, articles_fts, is the kit's homerFts: it indexes title, author, search_text and text, and keeps
+itself current through triggers.
+
+THE INDEX READS PLAIN WORDS (26 November 2026, Jamal: "if Markdown is used for article content, that could disrupt FTS
+searches ... because of Markdown related punctuation marks"). Tested: the tokenizer skips Markdown's punctuation, so
+**bold**, ## headings, list dashes and backslash escapes cost no match. But three things did harm: a link's address
+was indexed as words (https, www, acb, org and the path's words), so a search for org or acb found every article that
+links to acb.org; an address between two words could make a phrase miss, or a phrase inside an address could match;
+and the passages snippet gave for a match carried the markup, so a screen reader read star star by Janet Dickelman.
+So the index reads search_text, the same words taken from the page with every tag removed, link and picture addresses
+dropped and their words kept. body stays Markdown, to read. An edit to body in DbDo leaves search_text as it was, so
+the index still finds the words the article had when it was built. The saved searches beside the template, and the template's Searches.md, show how to use it.
 
 WHAT IS KEPT WHERE. The fetched pages and files are in data\BrailleForum (the kit's homerFetch cache), so a rebuild
 asks acb.org only "has it changed?", and an issue older than four months is not asked about at all unless --refresh.
@@ -55,7 +67,7 @@ for sPath in (os.path.join(sKit, "scripts"), os.path.join(sKit, "exec", "Python"
 import homerFetch, homerFts
 import makeMusicTrail as trail
 
-sVersion = "2026-11-25 version 1: web pages as Markdown, plain text otherwise, keys kept across rebuilds"
+sVersion = "2026-11-26 version 2: the index reads search_text, a web page's words without Markdown"
 sSource = "BrailleForum"
 sUserAgent = "DbDo makeBrailleForum/1 (+https://github.com/JamalMazrui/DbDo; a searchable archive of the ACB Braille Forum)"
 lsEntryPages = ["https://www.acb.org/acb-braille-forum-and-acb-e-forum", "https://www.acb.org/acb-braille-forum-past-issues"]
@@ -71,12 +83,12 @@ sMonthPattern = "|".join(dMonths)
 lsBoilerplate = ["accessing your acb braille", "acb officers", "acb board of directors", "acb board of publications",
                  "are you moving", "be a part of acb", "how to submit articles", "upcoming forum themes", "in memoriam dedication"]
 dArticleTypes = {"article_key": "TEXTLINE", "author": "TEXTLINE", "body": "TEXTMARKDOWN", "fingerprint": "TEXTLINE", "format": "TEXTLINE",
-                 "issue_id": "INTEGER", "kind": "TEXTLINE", "position": "INTEGER", "published": "TEXTLINE", "text": "TEXTMEMO",
+                 "issue_id": "INTEGER", "kind": "TEXTLINE", "position": "INTEGER", "published": "TEXTLINE", "search_text": "TEXTMEMO", "text": "TEXTMEMO",
                  "title": "TEXTLINE", "words": "INTEGER"}
 dIssueTypes = {"articles": "INTEGER", "edition": "TEXTLINE", "issue_key": "TEXTLINE", "next_number": "INTEGER", "number": "TEXTLINE",
                "published": "TEXTLINE", "published_end": "TEXTLINE", "text_url": "TEXTLINE", "title": "TEXTLINE", "volume": "TEXTLINE",
                "words": "INTEGER"}
-lsArticleFields = ["title", "author", "published", "issue_id", "position", "kind", "format", "words", "body", "text", "article_key", "fingerprint"]
+lsArticleFields = ["title", "author", "published", "issue_id", "position", "kind", "format", "words", "body", "text", "search_text", "article_key", "fingerprint"]
 lsIssueFields = ["title", "edition", "published", "published_end", "volume", "number", "articles", "words", "issue_key", "next_number", "text_url"]
 dKinds = {"article": "An article, column or letter: what a search usually wants.",
           "boilerplate": "A standing notice every issue repeats, such as ACB Officers or Are You Moving?",
@@ -255,6 +267,46 @@ def articleParts(sHtml):
     return sTitle, sHtml[iFrom: iFrom + oEnd.start()] if oEnd else "", "the text between the title and Need to reach us?"
 
 
+class plainParser(html.parser.HTMLParser):
+    """The words of a piece of HTML, with no markup: block elements end a paragraph, a line break ends a line, a
+    picture gives its alt text, and nothing of an address is kept."""
+    lsBlocks = {"address", "article", "blockquote", "dd", "div", "dl", "dt", "figcaption", "figure", "footer", "h1", "h2", "h3", "h4",
+                "h5", "h6", "header", "hr", "li", "ol", "p", "pre", "section", "table", "tr", "ul"}
+
+    def __init__(self):
+        super().__init__(convert_charrefs=True)
+        self.lsParts, self.iSkip = [], 0
+
+    def handle_starttag(self, sTag, lAttributes):
+        if sTag in ("script", "style"): self.iSkip += 1
+        elif sTag in self.lsBlocks: self.lsParts.append("\n\n")
+        elif sTag == "br": self.lsParts.append("\n")
+        elif sTag in ("td", "th"): self.lsParts.append(" ")
+        elif sTag == "img":
+            sAlt = dict(lAttributes).get("alt") or ""
+            if sAlt.strip(): self.lsParts.append(" " + sAlt.strip() + " ")
+        return True
+
+    def handle_endtag(self, sTag):
+        if sTag in ("script", "style") and self.iSkip: self.iSkip -= 1
+        elif sTag in self.lsBlocks: self.lsParts.append("\n\n")
+        return True
+
+    def handle_data(self, sText):
+        if not self.iSkip: self.lsParts.append(sText)
+        return True
+
+
+def htmlToPlain(sHtml):
+    """search_text: a web page's words, paragraphs kept apart by a blank line, no markup and no addresses."""
+    oParser = plainParser()
+    oParser.feed(sHtml)
+    oParser.close()
+    sText = "".join(oParser.lsParts).replace("\u00a0", " ")
+    lsParagraphs = [re.sub(r"[ \t]+", " ", re.sub(r" *\n *", "\n", s)).strip() for s in re.split(r"\n\s*\n", sText)]
+    return "\n\n".join(s for s in lsParagraphs if s)
+
+
 def pandocPath():
     """The newest Pandoc on the machine; the kit's installPandoc is run once when there is none."""
     try:
@@ -394,8 +446,8 @@ def readIssue(oCache, dIssue, sPandoc, bTrust):
         lsFragments.append(sBody)
     if lWeb:
         if not sPandoc: raise RuntimeError("Pandoc is needed to convert the article pages, and none could be found or installed")
-        for dWeb, sMarkdown in zip(lWeb, toMarkdown(sPandoc, lsFragments)):
-            dWeb.update({"format": "web page", "body": sMarkdown, "text": None})
+        for dWeb, sMarkdown, sFragment in zip(lWeb, toMarkdown(sPandoc, lsFragments), lsFragments):
+            dWeb.update({"format": "web page", "body": sMarkdown, "text": None, "search_text": htmlToPlain(sFragment)})
             if not dWeb["author"]:
                 oBy = re.match(r"(?i)\**\s*(?:edited\s+)?by\s+([^*\n]+)", sMarkdown)
                 if oBy: dWeb["author"] = oBy.group(1).strip().rstrip(",.")
@@ -433,11 +485,12 @@ def readIssue(oCache, dIssue, sPandoc, bTrust):
             # AN UNTITLED FIRST SECTION IS THE MASTHEAD, with or without a table of contents after it.
             sKind = "masthead" if not sTitle and iIndex == 0 else kindOf(sTitle, iIndex, bBeforeContents)
             sTitle = sTitle or ("Masthead" if sKind == "masthead" else "Untitled section")
-        lArticles.append({"title": sTitle, "author": sAuthor, "url": sTextUrl, "format": "plain text", "body": None, "text": sBody, "kind": sKind})
+        lArticles.append({"title": sTitle, "author": sAuthor, "url": sTextUrl, "format": "plain text", "body": None, "text": sBody, "search_text": None, "kind": sKind})
     for dWeb in lWeb:
         if id(dWeb) not in setUsed: lArticles.append(dict(dWeb, kind=kindOf(dWeb["title"], 99, False)))
     for iPosition, dArticle in enumerate(lArticles, 1):
-        sWords = dArticle["body"] if dArticle["body"] is not None else dArticle["text"]
+        # Words and fingerprint come from the plain words, so the same article fingerprints alike from either source.
+        sWords = dArticle["search_text"] if dArticle["body"] is not None else dArticle["text"]
         dArticle.update({"position": iPosition, "words": wordCount(sWords), "fingerprint": fingerprint(sWords), "published": dIssue["published"]})
     return lArticles
 
@@ -524,13 +577,13 @@ def build(lIssues, sPorter, sOut):
                                dIssue.get("text_url") or None, None if dIssue["page"].lower().endswith(".txt") else dIssue["page"]))
         iIssue = oCursor.lastrowid
         for d in lArticles:
-            oDb.execute("INSERT INTO articles (title, author, published, issue_id, position, kind, format, words, body, text, article_key, fingerprint, url) "
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                        (d["title"], d["author"] or None, d["published"], iIssue, d["position"], d["kind"], d["format"], d["words"], d["body"], d["text"],
+            oDb.execute("INSERT INTO articles (title, author, published, issue_id, position, kind, format, words, body, text, search_text, article_key, fingerprint, url) "
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        (d["title"], d["author"] or None, d["published"], iIssue, d["position"], d["kind"], d["format"], d["words"], d["body"], d["text"], d["search_text"],
                          d["article_key"], d["fingerprint"] or None, d["url"] or None))
             iArticles += 1
     sTokenize = ("porter " if sPorter else "") + homerFts.sDefaultTokenize
-    homerFts.createIndex(oDb, "articles", "article_id", ["title", "author", "body", "text"], "articles_fts", sTokenize)
+    homerFts.createIndex(oDb, "articles", "article_id", ["title", "author", "search_text", "text"], "articles_fts", sTokenize)
     oDb.execute("COMMIT")
     homerFts.optimize(oDb, "articles_fts")
     oDb.execute("ANALYZE")
@@ -600,6 +653,13 @@ def repairTemplate():
         return 0
     oDb = sqlite3.connect(sTarget, isolation_level=None)
     try:
+        # VERSION 1 INDEXED body, Markdown and all (26 November 2026): such a template is rebuilt from the kept pages,
+        # asking acb.org for nothing, so its index reads search_text; every key is kept.
+        lsColumns = [r[1] for r in oDb.execute("PRAGMA table_info(articles)")]
+        if "search_text" not in lsColumns:
+            oDb.close()
+            say("BrailleForum.db is being rebuilt from the saved pages, so its index reads words without Markdown. It takes a few minutes and fetches nothing.")
+            return main(["--offline"])
         lsMends = []
         if oDb.execute("SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = 'views'").fetchone()[0]:
             oDb.execute("DROP TABLE views")
