@@ -311,9 +311,9 @@ Control+Shift+N</li>
 Add a new record at the cursor. N for New.<br />
 Control+N</li>
 <li>Open Cell Value<br />
-Control+Enter acts from anywhere in a Homer dialog; here it opens the
-cell’s value.<br />
-Control+Enter</li>
+Enter goes into a record’s related records; Shift+Enter goes out to the
+url, file or folder a cell names, as in FileDir.<br />
+Shift+Enter</li>
 <li>Open url<br />
 U for url.<br />
 Control+Shift+U</li>
@@ -324,6 +324,10 @@ Control+F2</li>
 Play the current record’s stream address in the Homer Player; with
 records marked, play all of them. P for Play.<br />
 Control+P</li>
+<li>Preview Markdown in Web Browser<br />
+H for HTML: the record’s Markdown field opens as a web page, as
+EdSharp’s Control+H makes HTML.<br />
+Control+Shift+H</li>
 <li>Record Playback<br />
 P for Playback.<br />
 Control+Shift+P</li>
@@ -791,10 +795,6 @@ Shift+R</li>
 <li>Say Shown Columns<br />
 Say the columns the grid shows. S for Shown.<br />
 Shift+S</li>
-<li>Say Status<br />
-Say the table, record, order and filter. Z is the bottom of the
-alphabet, as the status bar is the bottom of the window.<br />
-Shift+Z</li>
 <li>Say Tags<br />
 Say the record’s tags. T for Tags.<br />
 Shift+T</li>
@@ -981,8 +981,6 @@ Delete Record</li>
 <li>Control+E<br />
 Edit every field of the current row.<br />
 Edit Record</li>
-<li>Control+Enter<br />
-Open Cell Value</li>
 <li>Control+Equals<br />
 Evaluate Expression</li>
 <li>Control+F<br />
@@ -1076,6 +1074,8 @@ Clear Filter</li>
 Open the bundled sqlean.exe shell in its own console window on the
 current database.<br />
 Sqlean Console</li>
+<li>Control+Shift+H<br />
+Preview Markdown in Web Browser</li>
 <li>Control+Shift+I<br />
 Bring one table of a file – a worksheet, a table of another database, a
 CSV, Markdown, JSON or Inix file – into this database, as a new table or
@@ -1227,6 +1227,8 @@ Say Database</li>
 <li>Shift+E<br />
 Say when the record was last edited.<br />
 Say Edited</li>
+<li>Shift+Enter<br />
+Open Cell Value</li>
 <li>Shift+F<br />
 Say Filter</li>
 <li>Shift+G<br />
@@ -1272,9 +1274,6 @@ Say url</li>
 Say Invoke Script</li>
 <li>Shift+W<br />
 Say Whole Record</li>
-<li>Shift+Z<br />
-Say the table, record, order and filter.<br />
-Say Status</li>
 </ul>
 <h2 id="by-command">By command</h2>
 <ul>
@@ -1452,7 +1451,7 @@ Control+N</li>
 Activate the next open window.<br />
 Control+Tab</li>
 <li>Open Cell Value<br />
-Control+Enter</li>
+Shift+Enter</li>
 <li>Open Command Prompt<br />
 Control+Backslash</li>
 <li>Open Database<br />
@@ -1487,6 +1486,8 @@ records marked, play all of them.<br />
 Control+P</li>
 <li>Play Tutorials<br />
 Alt+F12</li>
+<li>Preview Markdown in Web Browser<br />
+Control+Shift+H</li>
 <li>Previous Window<br />
 Activate the previous open window.<br />
 Control+Shift+Tab</li>
@@ -1658,9 +1659,6 @@ Shift+R</li>
 <li>Say Shown Columns<br />
 Say the columns the grid shows.<br />
 Shift+S</li>
-<li>Say Status<br />
-Say the table, record, order and filter.<br />
-Shift+Z</li>
 <li>Say Tags<br />
 Say the record’s tags.<br />
 Shift+T</li>

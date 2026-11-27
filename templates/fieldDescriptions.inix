@@ -599,4 +599,12 @@ BookTrail/books/look = title, author, series, volume
 ; section put them back, rebuilding and compacting RadioTrail's 52,440 stations twice a build. They now name the same
 ; fields checkTemplates does, and describeFields refuses a prime here that holds an id.
 northwind/orders/prime = order_date, ship_city, ship_country
+; REVIEWED 26 November 2026 (Jamal: a key made for a program, such as article_key, belongs in no look or prime). Every
+; template's tables were read against the rules: look says a record in words a person can read and is its default
+; columns; prime says what it is, is unique, and is its default order; neither holds an id, url, notes, tags, marked,
+; added, edited, or a program's key. Changed in their builders: BrailleForum and BrailleMonitor issues (published,
+; title, not issue_key) and articles (published, issue, position, not article_key); DescribedFilms offers (film, service,
+; terms, voice, not service and url). Kept, with reasons: RadioTrail's stream_url, below, since 52,000 stations share
+; names and a station is known by the stream it plays; chinook invoice_items and northwind order_details look by their
+; two links, which DbDo shows as the linked records' looks, since a line is only a product on an order.
 RadioTrail/stations/prime = name, stream_url

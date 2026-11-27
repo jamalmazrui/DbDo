@@ -44,10 +44,10 @@ sUserAgent = "DbDo makeDescribedFilms/1 (+https://github.com/JamalMazrui/DbDo; b
 sVersion = "2026-11-19 version 1: English movies from ADP's Film and Series Title Directory, with each service's offer"
 
 dFilmTypes = {"genres": "TEXTLINE", "rating": "TEXTLINE", "services": "TEXTLINE", "title": "TEXTLINE", "year": "TEXTLINE"}
-dOfferTypes = {"film_id": "INTEGER", "service": "TEXTLINE", "terms": "TEXTLINE", "voice": "TEXTLINE"}
+dOfferTypes = {"film": "TEXTLINE", "film_id": "INTEGER", "service": "TEXTLINE", "terms": "TEXTLINE", "voice": "TEXTLINE"}
 dVoices = {"synthetic": "ADP marks this description as text-to-speech: software reads the script, not a human narrator."}
 lsFilmFields = ["title", "year", "rating", "genres", "services"]
-lsOfferFields = ["film_id", "service", "terms", "voice"]
+lsOfferFields = ["film", "film_id", "service", "terms", "voice"]
 # A STARTER WATCH LIST: three well-known films come marked, so the watch_list report shows what it does the first time.
 # Unmark them freely. A film the directory no longer lists is logged and left alone.
 lsStarterMarks = ["A Fish Called Wanda", "Hidden Figures", "The Wizard of Oz"]
@@ -215,11 +215,13 @@ def build(lFilms, sTarget):
     # THE VIEWS TABLE IS RETIRED (4 November 2026): the shared helpers still make it for older builders, so it is left out.
     lsDdl = [s for s in trail.systemDdl() if not s.startswith("CREATE TABLE views")]
     lsDdl += trail.tableDdl("films", "film_id", lsFilmFields, ["title", "year"], ["title", "year"], dFilmTypes)
-    # AN OFFER IS KNOWN BY ITS SERVICE AND ADDRESS (24 November 2026; until then by its film too). No prime holds an id:
-    # film_id is this database's number for the film, which another copy numbers differently, so a merge could never
-    # find the offer already there. The address of an offer is its own, and all 17,197 are different; were one service
-    # ever to list two films at one address, the second film's offer is left out and logged below.
-    lsDdl += trail.tableDdl("offers", "offer_id", lsOfferFields, ["service", "terms", "voice"], ["service", "url"], dOfferTypes)
+    # AN OFFER IS KNOWN BY ITS FILM, SERVICE, TERMS AND VOICE (26 November 2026, Jamal: no look or prime should hold
+    # what only a program can read). From 24 November it was known by its service and address, since a prime holds no id
+    # and film_id is one; but a web address means nothing to a listener, and the prime is also the default order. So an
+    # offer now carries its film by name -- film, the title and year as the films table's prime has them -- and is known
+    # by film, service, terms and voice: "#realityhigh (2017)|Netflix". Of 17,197 offers, 12 repeated another's film,
+    # service, terms and voice at a second address; the first is kept and the rest logged below.
+    lsDdl += trail.tableDdl("offers", "offer_id", lsOfferFields, ["service", "terms", "voice"], ["film", "service", "terms", "voice"], dOfferTypes)
     for sDdl in lsDdl: oDb.execute(sDdl)
     oDb.execute("CREATE INDEX idx_offers_film_id ON offers (film_id)")
     oDb.execute("CREATE INDEX idx_offers_service ON offers (service)")
@@ -230,12 +232,14 @@ def build(lFilms, sTarget):
         oCursor = oDb.execute("INSERT INTO films (title, year, rating, genres, services, url) VALUES (?, ?, ?, ?, ?, ?)",
                               [dFilm[s] or None for s in ("title", "year", "rating", "genres", "services", "url")])
         iFilm = oCursor.lastrowid
+        sFilm = "%s (%s)" % (dFilm["title"], dFilm["year"]) if dFilm["year"] else dFilm["title"]
         for sService, sTerms, sVoice, sUrl in dFilm["offers"]:
-            if (sService, sUrl) in setSeen:
-                log("Offer listed twice, kept once: %s on %s at %s" % (dFilm["title"], sService, sUrl))
+            tOffer = (sFilm, sService, sTerms or "", sVoice or "")
+            if tOffer in setSeen:
+                log("Offer listed twice, kept once: %s on %s (%s, %s) at %s" % (sFilm, sService, sTerms or "no terms", sVoice or "no voice", sUrl))
                 continue
-            setSeen.add((sService, sUrl))
-            oDb.execute("INSERT INTO offers (film_id, service, terms, voice, url) VALUES (?, ?, ?, ?, ?)", (iFilm, sService, sTerms or None, sVoice or None, sUrl or None))
+            setSeen.add(tOffer)
+            oDb.execute("INSERT INTO offers (film, film_id, service, terms, voice, url) VALUES (?, ?, ?, ?, ?, ?)", (sFilm, iFilm, sService, sTerms or None, sVoice or None, sUrl or None))
             dCounts[sService] += 1
         log("Film: %s (%s) | %s | %s | %s" % (dFilm["title"], dFilm["year"] or "year unknown", dFilm["rating"], dFilm["services"], dFilm["url"]))
     dHomes = serviceHomes(lFilms)
@@ -269,6 +273,16 @@ def main(lsArgs):
     log("makeDescribedFilms.py started; %s; script %s" % (sVersion, os.path.abspath(__file__)))
     log("Python %s at %s on %s; cwd %s; command line %s" % (platform.python_version(), sys.executable, platform.platform(), os.getcwd(), " ".join(sys.argv)))
     sFrom, iLimit = "", 0
+    # --stale (26 November 2026): exit code 3 when the template predates the film column of offers, so the build fetches
+    # it again; 0 when it is current or missing.
+    if "--stale" in lsArgs:
+        sDb = os.path.join(sProject, "templates", "DescribedFilms", "DescribedFilms.db")
+        if not os.path.exists(sDb): return 0
+        oDb = sqlite3.connect(sDb)
+        try: lsColumns = [r[1] for r in oDb.execute("PRAGMA table_info(offers)")]
+        finally: oDb.close()
+        log("STALE check: offers columns %s" % ", ".join(lsColumns))
+        return 0 if "film" in lsColumns else 3
     if "--from" in lsArgs:
         iAt = lsArgs.index("--from")
         sFrom = lsArgs[iAt + 1] if iAt + 1 < len(lsArgs) else ""

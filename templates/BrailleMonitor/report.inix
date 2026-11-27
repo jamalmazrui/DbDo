@@ -18,7 +18,7 @@ Prepared {{ new Date().toISOString().substring(0,10) }} from BrailleMonitor, the
 detail = """
 ## $title
 
-{{ $author ? "- By: " + $author : "" }}
+{{ $writer ? "- By: " + $writer : "" }}
 {{ $published ? "- Published: " + $published : "" }}
 {{ $url ? "- Source: " + $url : "" }}
 

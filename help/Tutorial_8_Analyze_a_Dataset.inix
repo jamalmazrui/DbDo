@@ -42,9 +42,9 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=A column that holds only numbers comes in as numbers, so age compares and sorts as a number, and a blank age stays blank rather than counting as zero. Shift plus Z, Say Status.
-Key=Shift+Z
-Hear=status, titanic, record
+Say=A column that holds only numbers comes in as numbers, so age compares and sorts as a number, and a blank age stays blank rather than counting as zero. Alt plus Delete, Say Position.
+Key=Alt+Delete
+Hear=Position, 1 of 891, 0 percent through
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

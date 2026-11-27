@@ -35,17 +35,17 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Now the Say keys. Shift and a letter asks, and changes nothing. Shift plus Z is Say Status.
-Key=Shift+Z
-Hear=status, stations, record
+Say=Now the Say keys. Shift and a letter asks, and changes nothing. Shift plus O is Say Order: first its word, then the answer.
+Key=Shift+O
+Hear=Order, source, name
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=Table, count, filter and sort in one breath. Shift plus C, C for Cell, says only what is in the cell you are on; Shift plus H, H for Header, says which column it is.
+Say=One question a key. Shift plus C, C for Cell, says cell, then what is in the cell you are on; Shift plus H, H for Header, says header, then which column it is.
 Key=Shift+H
-Hear=country
-Note=Shift+C says the value alone since 24 November 2026, which depends on the data, so the walk presses Shift+H, whose answer does not. Confirm the wording with a live run: buildTutorials -live.
+Hear=Header, country
+Note=Since 26 November 2026 every Shift+letter says its word before its value. Shift+C's value depends on the data, so the walk presses Shift+H, whose answer does not. Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 

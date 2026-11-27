@@ -11,7 +11,7 @@
 ; Mark several (Space) and Alt+Shift+P plays them all, as a play list. None come
 ; marked, so the first Alt+Shift+P plays the lesson you are on. The whole
 ; directory is also a play list, BlindSkills.m3u, beside its web page, for
-; FileDir's Homer Player. Control+Enter on source_url opens the publisher's page,
+; FileDir's Homer Player. Shift+Enter on source_url opens the publisher's page,
 ; and on transcript_url opens the transcript.
 ;
 ; FIND ONE. The row speaks title, medium and source: what it is, whether you will

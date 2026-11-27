@@ -1109,25 +1109,25 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 5: Shift+Z
+### Step 5: Shift+O
 
-Now the Say keys. Shift and a letter asks, and changes nothing. Shift plus Z is Say Status.
+Now the Say keys. Shift and a letter asks, and changes nothing. Shift plus O is Say Order: first its word, then the answer.
 
 Screen reader:
 
-- status, stations, record
+- Order, source, name
 
 Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 6: Shift+H
 
-Table, count, filter and sort in one breath. Shift plus C, C for Cell, says only what is in the cell you are on; Shift plus H, H for Header, says which column it is.
+One question a key. Shift plus C, C for Cell, says cell, then what is in the cell you are on; Shift plus H, H for Header, says header, then which column it is.
 
 Screen reader:
 
-- country
+- Header, country
 
-Shift+C says the value alone since 24 November 2026, which depends on the data, so the walk presses Shift+H, whose answer does not. Confirm the wording with a live run: buildTutorials -live.
+Since 26 November 2026 every Shift+letter says its word before its value. Shift+C's value depends on the data, so the walk presses Shift+H, whose answer does not. Confirm the wording with a live run: buildTutorials -live.
 
 ### Step 7: Shift+W
 
@@ -1395,13 +1395,13 @@ Screen reader:
 - DbDo
 - DbDo ready
 
-### Step 9: Shift+Z
+### Step 9: Alt+Delete
 
-The first time, DbDo opens RadioTrail: internet radio stations, one to a row. The ten streams of the American Council of the Blind and the NFB Radio Network come first, then every other station by name. Shift plus Z says so.
+The first time, DbDo opens RadioTrail: internet radio stations, one to a row. The ten streams of the American Council of the Blind and the NFB Radio Network come first, then every other station by name. Alt plus Delete, Say Position, says how many.
 
 Screen reader:
 
-- stations, 49186 records, no filter, sorted by source, name
+- Position, 1 of 49186, 0 percent through
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -2097,13 +2097,13 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 9: Shift+Z
+### Step 9: Shift+F
 
-The third Holmes book, in text from Bookshare, then Frankenstein in braille. Shift plus Z confirms the view the script made.
+The third Holmes book, in text from Bookshare, then Frankenstein in braille. Shift plus F, Say Filter, confirms the filter the script made.
 
 Screen reader:
 
-- books, 2 records, filtered, sorted by status, series, volume, title
+- Filter
 
 Confirm the wording with a live run: buildTutorials -live.
 
@@ -2666,13 +2666,13 @@ Screen reader:
 
 Confirm the wording with a live run: buildTutorials -live.
 
-### Step 5: Shift+Z
+### Step 5: Alt+Delete
 
-A column that holds only numbers comes in as numbers, so age compares and sorts as a number, and a blank age stays blank rather than counting as zero. Shift plus Z, Say Status.
+A column that holds only numbers comes in as numbers, so age compares and sorts as a number, and a blank age stays blank rather than counting as zero. Alt plus Delete, Say Position.
 
 Screen reader:
 
-- status, titanic, record
+- Position, 1 of 891, 0 percent through
 
 Confirm the wording with a live run: buildTutorials -live.
 

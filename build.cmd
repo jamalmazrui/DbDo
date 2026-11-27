@@ -168,7 +168,8 @@ rem 1.231.0: the macro recorder compiles the kit's Macro.cs, with its expected-a
 rem 1.278.0: Show Columns and Order Records list each group's columns with Lbc's addChoiceButton.
 rem 1.297.0: Homer.Log.watchUi logs any freeze of the window with its call stack.
 rem 1.298.0: InixCodec.writeValues saves Recent Files in one write instead of about 2,000.
-set "kitNeeded=1.298.0"
+rem 1.299.0: KeyMap.answer says the say-word first, and answerPrecise spells the precise value on a second press.
+set "kitNeeded=1.303.0"
 powershell -NoProfile -Command "if ([version]'!homerVer!' -lt [version]'!kitNeeded!') { exit 1 } else { exit 0 }" >nul 2>&1
 if errorlevel 1 (
   echo ERROR: DbDo needs HomerDev !kitNeeded! or later, and C:\HomerDev is !homerVer!. >> "!log!"
@@ -335,10 +336,30 @@ if exist "!sHere!templates\RadioTrail\fetchStations.py" if exist "!sHere!templat
   python "!sHere!templates\RadioTrail\fetchStations.py" --conventions "!sHere!templates\RadioTrail\RadioTrail.db" >> "!log!" 2>&1
   echo RadioTrail conventions: exit code !errorlevel!>> "!log!"
 )
+rem DEAD TWINS, MONTHLY (26 November 2026). Two records of one name and home page, one on a stream the station left
+rem (Mushroom Escape's old server beside its new one): fetchStations asks each such stream, twice if it fails, and
+rem merges a dead one into its live twin. About five minutes, with a line every ten seconds; it says nothing and
+rem returns at once when the last check, kept in data\RadioTrail.inix, is under thirty days old.
+if exist "!sHere!templates\RadioTrail\fetchStations.py" if exist "!sHere!templates\RadioTrail\RadioTrail.db" (
+  echo RadioTrail: fetchStations --twins-due >> "!log!"
+  python "!sHere!templates\RadioTrail\fetchStations.py" --twins-due "!sHere!templates\RadioTrail\RadioTrail.db"
+  echo RadioTrail twins: exit code !errorlevel!>> "!log!"
+)
 rem DESCRIBEDFILMS IS FETCHED WHEN MISSING (19 November 2026). Its English movies come from the Audio
 rem Description Project's title directory at adp.acb.org, about two hundred pages fetched one a second, so the
 rem database is made here the first time and kept after that. scripts\makeDescribedFilms rebuilds it by hand.
 rem A failed fetch stops the build, since a template without its database would ship broken.
+rem A TEMPLATE FROM BEFORE THE FILM COLUMN IS FETCHED AGAIN (26 November 2026): offers are now known by film, service,
+rem terms and voice, not by a web address, and an older DescribedFilms.db lacks the film column that needs. It is set
+rem aside as .previous while the new one is fetched, and put back if the fetch fails.
+if exist "!sHere!scripts\makeDescribedFilms.py" if exist "!sHere!templates\DescribedFilms\DescribedFilms.db" (
+  python "!sHere!scripts\makeDescribedFilms.py" --stale
+  if "!errorlevel!"=="3" (
+    echo DescribedFilms.db is out of date: its offers have no film column, so it is fetched again.
+    echo DescribedFilms: stale, set aside as DescribedFilms.db.previous>> "!log!"
+    move /y "!sHere!templates\DescribedFilms\DescribedFilms.db" "!sHere!templates\DescribedFilms\DescribedFilms.db.previous" >nul
+  )
+)
 if exist "!sHere!scripts\makeDescribedFilms.py" if not exist "!sHere!templates\DescribedFilms\DescribedFilms.db" (
   echo DescribedFilms.db is missing, so the Audio Description Project's directory of English movies is being fetched. This takes about five minutes.
   echo DescribedFilms: no database; python scripts\makeDescribedFilms.py >> "!log!"
@@ -347,9 +368,11 @@ if exist "!sHere!scripts\makeDescribedFilms.py" if not exist "!sHere!templates\D
   echo DescribedFilms fetch: exit code !iFilms!>> "!log!"
   if not "!iFilms!"=="0" (
     echo makeDescribedFilms failed. Its log is in logs, named DbDo-makeDescribedFilms with the date and time.
+    if exist "!sHere!templates\DescribedFilms\DescribedFilms.db.previous" move /y "!sHere!templates\DescribedFilms\DescribedFilms.db.previous" "!sHere!templates\DescribedFilms\DescribedFilms.db" >nul
     popd & exit /b 1
   )
 )
+if exist "!sHere!templates\DescribedFilms\DescribedFilms.db.previous" if exist "!sHere!templates\DescribedFilms\DescribedFilms.db" del /q "!sHere!templates\DescribedFilms\DescribedFilms.db.previous"
 rem BRAILLEFORUM IS FETCHED WHEN MISSING (25 November 2026), as DescribedFilms is. Its issues and articles come from
 rem acb.org: the first run asks for every issue page, text file and article page, about an hour at one request a
 rem second, and keeps them in data\BrailleForum, so scripts\makeBrailleForum rebuilds by hand later asking only about

@@ -69,8 +69,8 @@ section says why each key is the one it is.
   Add a new record at the cursor. N for New.\
   Control+N
 - Open Cell Value\
-  Control+Enter acts from anywhere in a Homer dialog; here it opens the cell's value.\
-  Control+Enter
+  Enter goes into a record's related records; Shift+Enter goes out to the url, file or folder a cell names, as in FileDir.\
+  Shift+Enter
 - Open url\
   U for url.\
   Control+Shift+U
@@ -80,6 +80,9 @@ section says why each key is the one it is.
 - Play Media\
   Play the current record's stream address in the Homer Player; with records marked, play all of them. P for Play.\
   Control+P
+- Preview Markdown in Web Browser\
+  H for HTML: the record's Markdown field opens as a web page, as EdSharp's Control+H makes HTML.\
+  Control+Shift+H
 - Record Playback\
   P for Playback.\
   Control+Shift+P
@@ -474,9 +477,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Shown Columns\
   Say the columns the grid shows. S for Shown.\
   Shift+S
-- Say Status\
-  Say the table, record, order and filter. Z is the bottom of the alphabet, as the status bar is the bottom of the window.\
-  Shift+Z
 - Say Tags\
   Say the record's tags. T for Tags.\
   Shift+T
@@ -646,8 +646,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+E\
   Edit every field of the current row.\
   Edit Record
-- Control+Enter\
-  Open Cell Value
 - Control+Equals\
   Evaluate Expression
 - Control+F\
@@ -735,6 +733,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Control+Shift+GraveAccent\
   Open the bundled sqlean.exe shell in its own console window on the current database.\
   Sqlean Console
+- Control+Shift+H\
+  Preview Markdown in Web Browser
 - Control+Shift+I\
   Bring one table of a file -- a worksheet, a table of another database, a CSV, Markdown, JSON or Inix file -- into this database, as a new table or merged into the table in this window.\
   Import Data
@@ -875,6 +875,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Shift+E\
   Say when the record was last edited.\
   Say Edited
+- Shift+Enter\
+  Open Cell Value
 - Shift+F\
   Say Filter
 - Shift+G\
@@ -920,9 +922,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Say Invoke Script
 - Shift+W\
   Say Whole Record
-- Shift+Z\
-  Say the table, record, order and filter.\
-  Say Status
 
 ## By command
 
@@ -1087,7 +1086,7 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Activate the next open window.\
   Control+Tab
 - Open Cell Value\
-  Control+Enter
+  Shift+Enter
 - Open Command Prompt\
   Control+Backslash
 - Open Database\
@@ -1120,6 +1119,8 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
   Control+P
 - Play Tutorials\
   Alt+F12
+- Preview Markdown in Web Browser\
+  Control+Shift+H
 - Previous Window\
   Activate the previous open window.\
   Control+Shift+Tab
@@ -1276,9 +1277,6 @@ Shift and a letter asks. Nothing here changes anything; each answers a question 
 - Say Shown Columns\
   Say the columns the grid shows.\
   Shift+S
-- Say Status\
-  Say the table, record, order and filter.\
-  Shift+Z
 - Say Tags\
   Say the record's tags.\
   Shift+T

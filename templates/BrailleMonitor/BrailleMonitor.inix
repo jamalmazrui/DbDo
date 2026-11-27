@@ -6,12 +6,12 @@
 ; the same words with no markup and no link addresses: the full-text index reads it, not body, so a search and the
 ; passage it reads aloud carry no Markdown. The database is made the same way as BrailleForum, by the same code.
 ;
-; FIND ONE. The row speaks title, author and published (the year and month). Keywords (Control+K) and Filter Records
+; FIND ONE. The row speaks title, writer and published (the year and month). Keywords (Control+K) and Filter Records
 ; work as on any table; Full-text match in Filter Records uses the index. The saved searches here rank their matches
 ; and read the passage that matched; the BrailleMonitor part of DbDo's guide shows the forms a search takes.
 ;
-; READ ONE. Alt+Right on an issue goes to its articles, in the issue's order (position). Control+Enter on body shows
-; the article as a web page; Control+Shift+U opens it at nfb.org. The reading_list report writes up marked articles.
+; READ ONE. Alt+Right on an issue goes to its articles, in the issue's order (position). Control+Shift+H, Preview Markdown in Web
+; Browser, shows the article as a web page; Control+Shift+U opens it at nfb.org. The reading_list report writes up marked articles.
 ;
 ; WRITERS. One row a person, from every byline; each article is mapped to each of its writers (maps, written_by),
 ; so Alt+Right goes from a writer to their articles and from an article to its writers.
@@ -20,12 +20,15 @@
 ; database is missing. The database stays on that computer: it is not on GitHub and not in the installer.
 
 [Database]
+; A REFERENCE DATABASE (26 November 2026): rebuilt from the magazine, so the copy DbDo opens follows each newer
+; build, replaced whenever this template is newer. Notes, tags or marks made in the copy go with it.
+FollowTemplate = yes
 
 InitialTable = articles
 
 [Table:articles]
 
-SelectFields = title, author, published
+SelectFields = title, writer, published
 
 [Table:writers]
 

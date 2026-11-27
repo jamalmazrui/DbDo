@@ -7,9 +7,9 @@
 ; search_text holds a web page's words again with no markup and no link addresses: the full-text index reads it, not
 ; body, so a search and the passage it reads aloud carry no Markdown.
 ;
-; FIND ONE. The row speaks title, author and published (the year and month). Keywords (Control+K) and Filter Records
+; FIND ONE. The row speaks title, writer and published (the year and month). Keywords (Control+K) and Filter Records
 ; work as on any table. For ranked full-text searches -- a phrase, words near each other, words starting alike --
-; run one of the saved searches here, or adapt one from Searches.md beside this file. kind tells an article from the
+; run one of the saved searches here; the BrailleForum part of DbDo's guide shows the forms a search takes. kind tells an article from the
 ; masthead, the table of contents and the standing notices every issue repeats; the searches keep kind = 'article'.
 ;
 ; READ ONE. Alt+Right on an issue goes to its articles, in the issue's order (position). Control+Shift+U opens the
@@ -18,17 +18,27 @@
 ; scripts\makeBrailleForum in DbDo's development folder builds this file from acb.org; the build runs it when the
 ; database is missing. The database stays on that computer: it is not on GitHub and not in the installer.
 ;
+; WRITERS. One row a person, from every byline; each article is mapped to each of its writers (maps, written_by),
+; so Alt+Right goes from a writer to their articles and from an article to its writers.
+;
 ; Look is each table's default columns and prime its default order; a table's saved columns, order and filter are
 ; written here only when a person chooses them.
 
 [Database]
+; A REFERENCE DATABASE (26 November 2026): rebuilt from the magazine, so the copy DbDo opens follows each newer
+; build, replaced whenever this template is newer. Notes, tags or marks made in the copy go with it.
+FollowTemplate = yes
 
 InitialTable = articles
 
 [Table:articles]
 
 ; SelectFields, 25 November 2026: who wrote what, and when.
-SelectFields = title, author, published
+SelectFields = title, writer, published
+
+[Table:writers]
+
+SelectFields = name, articles, last_published
 
 [Table:issues]
 

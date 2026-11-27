@@ -540,7 +540,12 @@ def checkAccessLetters():
         # Alt+V, as in EdSharp; Shift added to the family's V edits the script that V invokes, so V stands for Script
         # here as it does for Invoke.
         bSoundV = sHot == "V" and re.search(r"voke|\bScript\b", sPlain, re.I)
-        bSoundX = bSoundX or bSleepZ or bSoundV
+        # H FOR HTML (26 November 2026, Jamal's ruling; moved 27 November 2026): Control+Shift+H -- H as in EdSharp's
+        # Control+H for HTML -- shows a record's Markdown field as an HTML page. The command keeps EdSharp's name for the
+        # same act, Preview Markdown in Web Browser, so H starts none of its words: a standing association he chose, like X
+        # for Export, scoped to that one command.
+        bHtmlH = sHot == "H" and sPlain.rstrip(". ") == "Preview Markdown in Web Browser"
+        bSoundX = bSoundX or bSleepZ or bSoundV or bHtmlH
         if oAmp:
             iAt = sCaption.index("&")
             bStart = iAt == 0 or not sCaption[iAt - 1].isalnum()

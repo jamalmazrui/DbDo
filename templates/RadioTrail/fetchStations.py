@@ -62,6 +62,8 @@
 #   fetchStations --affiliations        the networks each matched article names
 #                                       (Seahawks Radio Network, ESPN Radio), as tags
 #   fetchStations --no-official         skip step 4
+#   fetchStations --twins               merge a dead stream into its live twin: same name, same home page
+#   fetchStations --twins-due           the same, when the last check is over thirty days old (the build runs this)
 #   fetchStations --report              the quality report alone, nothing fetched
 #   fetchStations --force               every step, whatever the check says
 #   fetchStations --import              add the stations in every playlist -- .m3u,
@@ -1285,6 +1287,132 @@ def fetchSomaFm(logLine, say):
 iPage = 10000
 dPause = 0.5
 
+# NETWORKS WITH NO ROUND-THE-CLOCK STREAM (26 November 2026, Jamal: does RadioTrail have Westwood One Sports?). A
+# network that streams only while a game is on fails the catalog's check most of the time, so Radio Browser's
+# hidebroken leaves it out, though hundreds of stations here carry it and name it in their tags. Each gets one record
+# of its own: source "network", no stream address (Play Media says so), its web site as homepage, and tags that match
+# its affiliates', so Keywords on "Westwood One" finds the network beside the stations that air it. Added where missing
+# by every run, the build's --conventions included; a field a listener changed is never overwritten.
+lNetworks = [
+    {"name": "Westwood One Sports", "homepage": "https://www.westwoodonesports.com/", "genre": "Sports",
+     "language": "English", "countrycode": "US",
+     "descrip": "Westwood One's national play-by-play network: the NFL, college football, the NCAA basketball tournaments and more. Its games stream at its web site, and on the stations that carry it, only while a game is on, so it has no stream address here.",
+     "tags": "Westwood One\nplay-by-play\nNFL\nNCAA\ngame-day streams"},
+]
+
+def addNetworks(c):
+    """Adds each network in lNetworks that is not here yet; returns how many were added."""
+    lsCols = set(r[1] for r in c.execute("pragma table_info(stations)"))
+    if "source" not in lsCols: return 0
+    sUs = (c.execute("select country from stations where countrycode = 'US' and coalesce(country,'') <> '' group by country order by count(*) desc limit 1").fetchone() or ["The United States Of America"])[0]
+    iAdded = 0
+    for d in lNetworks:
+        if c.execute("select 1 from stations where lower(trim(name)) = lower(?) and coalesce(stream_url, '') = ''", (d["name"],)).fetchone(): continue
+        dRow = dict(d); dRow["country"] = sUs; dRow["source"] = "network"; dRow["status"] = "untried"; dRow["stream_url"] = ""
+        lsUse = [k for k in dRow if k in lsCols]
+        c.execute("insert into stations (%s) values (%s)" % (", ".join(quotedName(k) for k in lsUse), ", ".join("?" for _ in lsUse)), [dRow[k] for k in lsUse])
+        iAdded += 1
+    return iAdded
+
+
+# A DEAD TWIN JOINS ITS LIVE ONE (26 November 2026, from Mushroom Escape: two records, one on the station's new server
+# and one on the address it left). Records with the same name and the same home page but different streams are
+# usually one station's feeds at two bitrates, and both stay. When one of them no longer answers and another does,
+# the dead one is a stream the station moved away from: it joins the live one -- its tags and notes added, as the
+# duplicate merge does -- and goes. A stream is asked twice, a minute apart, before it counts as dead, so a moment's
+# outage loses nothing; a group where none answers is left alone; and a record a listener touched is never merged.
+# The build runs this when the last check is over thirty days old (--twins-due), about five minutes for the 3,000
+# streams involved, forty at a time; the date is kept in data\RadioTrail.inix.
+def streamAnswers(sUrl):
+    """True when the stream address answers with a success code."""
+    try:
+        oReq = urllib.request.Request(sUrl, headers={"User-Agent": sAgent, "Icy-MetaData": "1"})
+        with urllib.request.urlopen(oReq, timeout=iProbeSeconds) as oResp:
+            return 200 <= getattr(oResp, "status", 200) < 400
+    except Exception:
+        return False
+
+def answering(lsUrls, say, sWhat):
+    """The set of addresses that answer, asked iProbeThreads at a time, with a line of progress about every ten seconds."""
+    setYes = set(); lsQueue = list(lsUrls); oLock = threading.Lock(); dDone = {"n": 0}
+    def work():
+        while True:
+            with oLock:
+                if not lsQueue: return
+                sUrl = lsQueue.pop()
+            bYes = streamAnswers(sUrl)
+            with oLock:
+                dDone["n"] += 1
+                if bYes: setYes.add(sUrl)
+    lThreads = [threading.Thread(target=work, daemon=True) for _ in range(min(iProbeThreads, max(1, len(lsUrls))))]
+    for t in lThreads: t.start()
+    nLast = time.time()
+    while any(t.is_alive() for t in lThreads):
+        time.sleep(0.5)
+        if time.time() - nLast >= 10:
+            nLast = time.time(); say("  %s: %d of %d asked" % (sWhat, dDone["n"], len(lsUrls)))
+    return setYes
+
+def twinsStampPath():
+    return os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__file__)))), "data", "RadioTrail.inix")
+
+def twinsLastChecked():
+    try:
+        for sLine in open(twinsStampPath(), encoding="utf-8-sig"):
+            m = re.match(r"\s*TwinsChecked\s*=\s*(\d{4}-\d\d-\d\d)", sLine)
+            if m: return datetime.date.fromisoformat(m.group(1))
+    except Exception: pass
+    return None
+
+def noteTwinsChecked():
+    sPath = twinsStampPath()
+    try:
+        os.makedirs(os.path.dirname(sPath), exist_ok=True)
+        with open(sPath, "w", encoding="utf-8-sig", newline="\r\n") as f:
+            f.write("; RadioTrail.inix -- what fetchStations keeps between builds.\n[RadioTrail]\nTwinsChecked = " + datetime.date.today().isoformat() + "\n")
+    except Exception: pass
+
+def mergeDeadTwins(sDb, logLine, say):
+    """Merges each dead stream into a live twin of the same name and home page; returns 0, or 1 on failure."""
+    c = sqlite3.connect(sDb)
+    try:
+        sTouched = "coalesce(rating,'') <> '' or coalesce(plays,'') not in ('', '0') or coalesce(status,'') not in ('', 'untried', 'dead') or coalesce(marked, 0) <> 0 or source = 'mine'"
+        sKey = "lower(trim(name)) || char(31) || lower(rtrim(homepage, '/'))"
+        lGroups = c.execute("select " + sKey + " from stations where coalesce(stream_url,'') like 'http%' and coalesce(homepage,'') <> '' group by 1 having count(distinct stream_url) > 1").fetchall()
+        dRows = {}
+        for (sGroup,) in lGroups:
+            dRows[sGroup] = c.execute("select station_id, stream_url, tags, notes, (" + sTouched + ") from stations where " + sKey + " = ? and coalesce(stream_url,'') like 'http%' order by (coalesce(source, '') = 'Radio Browser'), cast(votes as integer) desc, station_id", (sGroup,)).fetchall()
+        lsUrls = sorted(set(r[1] for l in dRows.values() for r in l))
+        say("Twins: asking %d streams that share a name and home page, %d at a time; about %d min." % (len(lsUrls), iProbeThreads, max(1, len(lsUrls) * iProbeSeconds // iProbeThreads // 60 + 1)))
+        setYes = answering(lsUrls, say, "Twins")
+        lsNo = [u for u in lsUrls if u not in setYes]
+        if lsNo:
+            time.sleep(60)
+            setYes |= answering(lsNo, say, "Twins, asked again")
+        logLine("twins: %d groups, %d streams, %d answered" % (len(dRows), len(lsUrls), len(setYes)))
+        iMerged = 0
+        for sGroup, lRows in dRows.items():
+            if any(r[4] for r in lRows): continue
+            lLive = [r for r in lRows if r[1] in setYes]; lDead = [r for r in lRows if r[1] not in setYes]
+            if not lLive or not lDead: continue
+            iKeep, sTags, sNotes = lLive[0][0], lLive[0][2] or "", lLive[0][3] or ""
+            for r in lDead:
+                sTags = addLines(sTags, [t for t in (r[2] or "").split("\n") if t.strip()])
+                if r[3] and r[3].strip() and r[3].strip()[:60].lower() not in sNotes.lower(): sNotes = (sNotes + "\n\n" if sNotes else "") + r[3].strip()
+                c.execute("delete from stations where station_id = ?", (r[0],))
+                logLine("twins: merged %d (%s, no answer) into %d (%s)" % (r[0], r[1], iKeep, lLive[0][1]))
+                iMerged += 1
+            c.execute("update stations set tags = ?, notes = ?, edited = CURRENT_TIMESTAMP where station_id = ?", (sTags or None, sNotes or None, iKeep))
+        c.commit()
+        say("Twins: %d dead %s merged into a live one." % (iMerged, "stream" if iMerged == 1 else "streams"))
+        noteTwinsChecked()
+        return 0
+    except Exception as oError:
+        say("Twins could not be checked: %s" % oError); logLine("ERROR twins " + repr(oError)); return 1
+    finally:
+        c.close()
+
+
 def templatePath():
     return os.path.join(os.path.dirname(os.path.abspath(__file__)), "RadioTrail.db")
 
@@ -1454,6 +1582,9 @@ def main():
     if iCode == 0 and not lsOptions:
         print("Last, the networks each matched Wikipedia article names, such as a team's radio network.")
         iCode = mainCore([s for s in lsArgs if not s.startswith("--")] + ["--affiliations"])
+        if iCode == 0:
+            print("Then the networks with no stream of their own, and dead streams merged into their live twins.")
+            mainCore([s for s in lsArgs if not s.startswith("--")] + ["--twins"])
         # AND THE REPAIRS ONCE MORE (11 October 2026): the defs and the affiliations write after the first pass, and
         # the defs switch the copy to write-ahead logging; this pass leaves the shipped copy one file, clean.
         print("Finally, the repairs once more, over what this run added.")
@@ -1476,6 +1607,8 @@ def mainCore(lsArgs):
     bAffiliations = False
     bClean = False
     bSourcesOnly = False
+    bTwins = False
+    bTwinsDue = False
     sImport = ""
     bAgain = False
     bFresh = False
@@ -1504,6 +1637,8 @@ def mainCore(lsArgs):
         if sArg == "--affiliations": bAffiliations = True; i += 1; continue
         if sArg == "--clean": bClean = True; i += 1; continue
         if sArg == "--sources-only": bSourcesOnly = True; i += 1; continue
+        if sArg == "--twins": bTwins = True; i += 1; continue
+        if sArg == "--twins-due": bTwins = True; bTwinsDue = True; i += 1; continue
         if sArg.startswith("-"):
             print("Unknown option %s, so nothing was done. Read the top of fetchStations.py for the options." % sArg); return 2
         sDb = sArg; i += 1
@@ -1526,6 +1661,11 @@ def mainCore(lsArgs):
     elif sImport and os.path.normcase(os.path.abspath(sDb)) == os.path.normcase(os.path.join(os.path.dirname(os.path.abspath(__file__)), "RadioTrail.db")):
         print("That is the template DbDo's installer ships, and your own stations must not go to everyone. Run --import without a database, and they go to your own copy.")
         return 2
+    if bTwinsDue:
+        # NOT DUE, NOT A WORD (26 November 2026): the build asks every time, so a check made in the last thirty days
+        # returns at once, before a log is opened or a line is printed, keeping the build's console short.
+        dtLast = twinsLastChecked()
+        if dtLast and (datetime.date.today() - dtLast).days < 30: return 0
     if bConventionsOnly:
         # --conventions (9 October 2026): only the Trail indexes and triggers, added where missing, then stop. DbDo's
         # build runs this on the development tree's RadioTrail, so a catalog restored or fetched before the triggers
@@ -1534,7 +1674,7 @@ def mainCore(lsArgs):
             print("No database at " + sDb + "; nothing to do."); return 0
         cConventions = sqlite3.connect(sDb)
         try:
-            iAdded = ensureConventions(cConventions); cConventions.commit()
+            iAdded = ensureConventions(cConventions) + addNetworks(cConventions); cConventions.commit()
         finally:
             cConventions.close()
         print("Trail conventions for %s: %d added." % (sDb, iAdded)); return 0
@@ -1588,6 +1728,15 @@ def mainCore(lsArgs):
         for sList in lsLists:
             say("From " + sList + ":")
             iCode = max(iCode, importPlaylist(sDb, sList, logLine, say))
+        say("The log is " + sLog); logLine("finished " + datetime.datetime.now().isoformat()); return iCode
+    if bTwins:
+        cNetworks = sqlite3.connect(sDb)
+        try:
+            iNetworks = addNetworks(cNetworks); cNetworks.commit()
+        finally:
+            cNetworks.close()
+        if iNetworks: say("Networks with no stream of their own: %d added." % iNetworks)
+        iCode = mergeDeadTwins(sDb, logLine, say)
         say("The log is " + sLog); logLine("finished " + datetime.datetime.now().isoformat()); return iCode
     if bClean:
         bTemplate = os.path.normcase(os.path.abspath(sDb)) == os.path.normcase(templatePath())

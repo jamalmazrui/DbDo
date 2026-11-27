@@ -205,6 +205,7 @@ Each pairs with a Say key: Shift+B says the bookmark, Shift+J the Jump text and 
 ### Opening databases and recordsets
 
 - **Open Template Database** (Control+Shift+O) starts from one of the databases DbDo ships -- BookTrail, JobTrail and the rest -- opening your own copy of it.
+- **Get Database** (File menu, G) adds a DbDo database that someone has shared. A DbDo database is an SQLite file that keeps DbDo's conventions, so it opens with its fields described, its links working and its scripts inside it. Type, paste or browse to a .db file, or a .zip that holds one with its saved searches and scripts, on your computer or at a web address. DbDo copies it into its own folder and opens it, and from then on Open Template Database lists it with the others. If you already have a database by that name, **Replace database** puts the new one in its place and keeps yours beside it as a dated backup, and **Keep both** gives the new one a numbered name. A file that is not an SQLite database is refused before anything is copied; Open Database opens other kinds of file.
 - **Open Database** (Control+O) opens a database file, choosing the right driver from the extension. **New Database** creates a fresh SQLite database; **Add Table** adds a table to it.
 
   **Add Table** asks first whether to **Define** a new table, **Clone** the open one's fields (when a table is open), or make one **From file**: a CSV or TSV file becomes a table of the open database, named for the file and shaped as Import shapes it, numbers as numbers. That is how two files meet in one database, so a query can look a value up from one in the other. Define or Clone which then fill the form for you to name the new table and change what you like. Every new table gets DbDo's standard columns: its id, added, edited, notes, tags and marked. The form has ten name-and-type slots; its **Text** button opens the same fields as lines you can read and edit like any text, one field a line in the form `name: TYPE`, with no limit to how many, and you can paste a structure in. On OK, if fields begin with the same letter, DbDo says which, since only the first of each gets an Alt letter in the record form, and offers to go back and rename them.
@@ -232,7 +233,7 @@ The screen reader table keys work as they do in tables in web pages, Word and Ad
 - **Alt+Control+arrows** move one cell. Moving along a row, DbDo says the new column's name, then the cell. Moving down a column, it says the record's look, then the cell, just as a screen reader says a row header; when the cell is itself part of the look, it says the cell alone. At the edge of the grid, the cursor stays, and DbDo says First row, Last row, First column or Last column.
 - **Alt+Control+Home and Alt+Control+End** go to the top-left and bottom-right corners, as in JAWS and Narrator. (NVDA uses them for the first and last column of the row; in DbDo, Home and End do that.)
 - **Alt+Control+Page Up and Alt+Control+Page Down** go to the first and last row of the column, as in NVDA. Under JAWS they change the voice rate for the moment, as everywhere, so use Control+Home and Control+End, which do the same moves.
-- **Alt+Control+Number Pad 5** says the cell with its column's name and record number; **Shift+C** says the value alone.
+- **Alt+Control+Number Pad 5** says the cell with its column's name and record number; **Shift+C** says the word cell, then the value. Every Shift+letter Say command starts with its own word, so you know which one ran.
 
 Narrator's table reading keys read without moving:
 
@@ -301,7 +302,7 @@ Beyond the grid's keys, the cursor moves with these commands:
 ### Editing records
 
 - **New Record** (Control+N) adds a record; **New Copy** (Control+Shift+N) starts a new record pre-filled from the current one; **Copy Record** (Control+Shift+C) copies it to the clipboard.
-- **Edit Record** (Control+E) opens the whole record in a field-by-field dialog. **Edit Cell** (F2) edits just the current cell. **Open Cell Value** (Control+Enter) opens the url, file or folder a cell names. On a Markdown field, such as an article's body in BrailleForum, it shows the field as a web page in your browser, with real headings, lists and links to follow. When the file or folder suits another Homer program -- a folder FileDir, Markdown or text EdSharp, a database or workbook DbDo -- it asks where to go next, that program first, with the Windows default app beside it.
+- **Edit Record** (Control+E) opens the whole record in a field-by-field dialog. **Edit Cell** (F2) edits just the current cell. **Open Cell Value** (Shift+Enter) opens the url, file or folder a cell names: Enter goes into a record's related records, and Shift+Enter goes out to what the cell points at, as in FileDir. **Preview Markdown in Web Browser** (Control+Shift+H, H as in EdSharp's Control+H for HTML) shows the record's Markdown field, such as an article's body in BrailleForum, as a web page in your browser, with real headings, lists and links to follow. It finds the field itself, so the field need not be a shown column; with two or more, a list asks which. When the file or folder that Open Cell Value opens suits another Homer program -- a folder FileDir, Markdown or text EdSharp, a database or workbook DbDo -- it asks where to go next, that program first, with the Windows default app beside it.
 - **Pick Value** (Control+F2) offers the legal values for a field whose choices are in defs.
 - **Edit Notes** (Alt+Shift+N), **Edit Tags** (Alt+Shift+T), and **Edit url** (Alt+Shift+U) each open one standard field in a focused single-field dialog with OK and Cancel — the quick way to touch a note, tags, or a link without opening the whole record.
 - **Replace** (Control+R) puts new text in place of old. One dialog asks what to find and what to put in its place, then where: **Columns** -- the current column, the shown columns, or all columns, hidden ones too -- and **Which records** -- all records in view, the marked records, or the current record. It starts on the current column, and on the marked records when some are marked, else all records in view; changing more than one record asks once, naming how many. Check **Use regex pattern** to find by regular expression, with $1 and $2 putting back the parts in parentheses; **Replace with Regex** (Control+Shift+R) opens the same dialog with it checked. **Dry run** counts what would change and changes nothing. Replace never writes the fields DbDo keeps itself: look, prime, added, edited, marked and the id.
@@ -390,7 +391,7 @@ A table has two kinds of field, and every DbDo dialog lists them in the same ord
 
 **Look and prime, in one sentence each.** Look is how a record is said, and its fields are the **default columns**: the grid shows them unless you choose others. Prime is the **primary key**: its fields, together, make each record unique, and they set the **default order**. They are fields that say what the record is, never an id: Look and Prime Fields refuses an id, and Import leaves a file's own row numbers, such as the Titanic's passengerid, out of the prime. So a person is said first name first, by look, and sorted last name first, by prime, with tiebreakers until no two records can share a place. In Show Columns, Look columns brings back the default columns and Prime columns shows the primary key; in Order Records, Prime columns brings back the default order and Look columns sorts the way records are said. A short way to hold it: look is the record's label; prime is its key. Every change to the columns, sort or filter is saved at once with the table.
 
-Look and prime never include url, notes, tags, marked, added, edited or the record's own id.
+Look and prime never include url, notes, tags, marked, added, edited, the record's own id, or any key made for a program to read, such as BrailleMonitor's article_key. Both say what a record is in words a person can read.
 
 ### Links read as look
 
@@ -667,7 +668,8 @@ Chords use screen-reader-canonical key names. A command with no chord is reachab
 | Save Bookmark | Control+B |
 | List Bookmarks | Alt+Shift+B |
 | Clear Bookmark | Control+Shift+B |
-| Open Cell Value | Control+Enter |
+| Open Cell Value | Shift+Enter |
+| Preview Markdown in Web Browser | Control+Shift+H |
 | Open url | Control+Shift+U |
 | Pick Value | Control+F2 |
 
@@ -701,7 +703,6 @@ The Query menu holds record inspection and the Say-X status family.
 | Table Properties | Alt+Enter |
 | Related Records | — |
 | Show Schema | — |
-| Say Status | Shift+Z or Alt+Z |
 | Say Database | Shift+D |
 | Say Order | Shift+O |
 | Say Go to | Shift+G |
@@ -1039,8 +1040,7 @@ and each extra key picks a different kind of help.
 - **Hotkeys, Control+Shift+F1.** Every key, by menu, by key and by command. Control+F1 describes one key; adding Shift describes them all.
 - **Frequently Asked Questions.**
 - **Play Tutorials.** The spoken walkthroughs.
-- **Update from Template.** Brings your copy of a template up to date from the one installed with DbDo, by merging or replacing; see the template databases, below.
-- **Update Copies from Templates** (Alt+H, then C). Does the same for every copy of DbDo's templates at once. It names your copies first, then offers **Replace all**, which makes each copy its template again -- the quick way to the newest when you have added or changed nothing -- keeping each copy as it was beside it as a dated backup, or **Merge all**, which adds to each copy what its template has and it lacks, keeps everything of yours, and asks once how records in both are treated. The database you had open is opened again afterwards -- with the template's own settings, if it was one of the copies replaced -- and a report names what happened to each copy. Files SQLite keeps beside a database while it works, such as a -wal file, are never copied.
+- **Update from Template.** Brings your copy of a template up to date from the one installed with DbDo: **Merge template** adds what the template has and keeps everything of yours, and **Replace copy** makes your copy the template again. **All copies** does one or the other for every copy of DbDo's templates at once: it names your copies, then offers **Replace all**, keeping each copy as it was beside it as a dated backup, or **Merge all**, asking once how records in both are treated. With no copy of a template open, the command goes straight to All copies. The database you had open is opened again afterwards, and a report names what happened to each copy. Files SQLite keeps beside a database while it works, such as a -wal file, are never copied. See the template databases, below.
 - **More Documents.** The Announcement, the Developer Guide, the License, and the Tutorials Transcript. These are used rarely, so they sit one level down.
 
 ### Four ways to reach a record
@@ -1257,7 +1257,7 @@ conference, HomerDev's convention-database skill builds one afresh from its agen
 - **RadioTrail** -- Internet radio, some 55,000 working stations, with a script that refreshes the catalog
 - **TechTraining** -- about 1,170 free presentations on technology and accessibility, from the Tech Training directory, each with its year, length, description and source. Play Media (Control+P) plays the presentation itself, and marked ones play as a list; Quick-Lessons finds the ones of fifteen minutes or less.
 - **DescribedFilms** -- about 10,000 English movies with audio description in the United States, documentaries included, from the Audio Description Project of the American Council of the Blind. Each film has its year, rating, genres and the services that carry it, and Alt+Right lists each service's terms and link. Free-To-Watch finds the ones free with a subscription or ads.
-- **BlindSkills** -- 84 free videos and podcast episodes that teach blindness skills, from the Blind Skills directory: cane travel, guiding, braille, cooking, dressing, labeling, money, crafts and more, in twelve skill groups, each lesson with the task it teaches. Play Media (Control+P) plays a lesson and marked ones play as a list; none come marked. Control+Enter on transcript_url opens a transcript. Skill-Index lists lessons by task, With-Transcripts those you can read, and the skills_handbook report writes up the whole set by group. scripts\checkBlindSkillsMedia, in DbDo's development folder, asks every lesson for the start of its stream, with no sign-in, as an anonymous player would, and writes a play list of those that answer with audio or video.
+- **BlindSkills** -- 84 free videos and podcast episodes that teach blindness skills, from the Blind Skills directory: cane travel, guiding, braille, cooking, dressing, labeling, money, crafts and more, in twelve skill groups, each lesson with the task it teaches. Play Media (Control+P) plays a lesson and marked ones play as a list; none come marked. Shift+Enter on transcript_url opens a transcript. Skill-Index lists lessons by task, With-Transcripts those you can read, and the skills_handbook report writes up the whole set by group. scripts\checkBlindSkillsMedia, in DbDo's development folder, asks every lesson for the start of its stream, with no sign-in, as an anonymous player would, and writes a play list of those that answer with audio or video.
 - **RecipeTrail** -- recipes, their ingredients and the amounts each needs. Mark the recipes you mean to cook, and Shopping-List gives what to buy, aisle by aisle, with the amount each recipe needs; Quick-Meals finds dinner in half an hour.
 
 **chinook** and **northwind** keep their usual names. They are the two databases
@@ -1285,8 +1285,8 @@ Each presentation's **url** is the presentation itself, so Play Media
 YouTube or a similar site through yt-dlp. Mark several with Space, and
 Control+P plays them all, in order. The row speaks the title, the length in
 minutes, and the **medium**: audio or video play this way, and a page -- a
-presentation on its publisher's site -- opens in your browser with Control+Enter on
-its url. Control+Enter on **source_url** opens the publisher's page about it, and
+presentation on its publisher's site -- opens in your browser with Shift+Enter on
+its url. Shift+Enter on **source_url** opens the publisher's page about it, and
 **resources** lists any slides, transcripts or handouts. Filter on **category**
 to stay in one topic; its pick list gives each category's definition.
 
@@ -1324,7 +1324,7 @@ goes in its own folder of **%LOCALAPPDATA%\DbDo\templates**, where DbDo finds it
 as it finds the shipped ones, so it appears in Template Databases
 (Control+Shift+O). The build puts BrailleForum there on the development computer.
 
-DbDo opens on **articles**, and each row says the title, the author and the month
+DbDo opens on **articles**, and each row says the title, the writer and the month
 it was **published**. The **writers** table has one row a person, found in the
 bylines, and each article is mapped to each of its writers, so Alt+Right goes
 from a writer to their articles and from an article to its writers. Alt+Right on an **issue** goes to its articles, in order. An
@@ -1347,8 +1347,8 @@ columns that recur and the words the most articles use.
 
 The quickest way is Filter Records (Control+F) on articles: choose **Full-text
 match** and type a search. The matches stay in the table, to read, mark and
-open. To read one with its headings and links, put the cursor on its **body**
-and press Control+Enter: it opens as a web page.
+open. To read one with its headings and links, press Control+Shift+H, Preview
+Markdown in Web Browser, on its record: its body opens as a web page.
 
 What full-text search adds to Keywords:
 
@@ -1372,7 +1372,7 @@ Searches to try, each a Homer pattern:
 - `title:letters`: the Letters to the Editor columns, by a word in the title.
 - `title%conv & published%2019`: articles from 2019 whose titles hold conv.
 - `title=Here and There`: every Here and There column, by its exact title.
-- `author:charlson & audio description`: one writer on one subject.
+- `writer:charlson & audio description`: one writer on one subject.
 - `%brail`: braille, Braillenote, brailler and every other word holding
   those letters.
 
@@ -1392,7 +1392,12 @@ which reads each article's own page at nfb.org, no more than one page a second;
 the first build takes some hours and later ones minutes. Like BrailleForum, it
 is not in the installer, and the build puts it in
 **%LOCALAPPDATA%\DbDo\templates**, so it appears in Template Databases
-(Control+Shift+O).
+(Control+Shift+O). Issues of The Blind American, which the NFB published in 1961
+and 1962 while the Monitor paused, are included under that edition.
+
+Both magazines are reference databases: the copy DbDo opens follows the
+template. When a build makes a newer one, DbDo replaces the copy the next time
+it starts, so notes, tags and marks made in the copy do not last.
 
 Every Monitor article is a web page, so its words are always in **body**, as
 Markdown with the NFB's own headings, lists and links. Three saved searches come
@@ -1411,7 +1416,7 @@ match**:
 - `braille & literacy & !display*`: braille as reading, not braille displays.
 - `"guide dog"~5 & airline*`: guide dog users and air travel.
 - `title:convention`: convention reports and plans, by a word in the title.
-- `author:jernigan & philosophy`: one writer on one subject.
+- `writer:jernigan & philosophy`: one writer on one subject.
 
 Each build runs every search here and logs how many articles it finds.
 
@@ -1449,6 +1454,18 @@ added 4,059 network tags to 1,579 stations, but only KHTQ in Spokane and KIRO-FM
 in Seattle for the Seahawks, out of the 65 or so stations the team lists. A copy looked up before this was
 added gains its networks with `fetchStations --affiliations`, which takes
 minutes, not hours.
+
+Some networks have no stream that plays all day. Westwood One Sports, the national network for the NFL and the NCAA
+basketball tournaments, streams a game only while it is on, so the radio directory leaves it out. RadioTrail gives
+such a network a row of its own, from the source "network", with no stream address. Its tags match those of the
+stations that carry it, so Keywords for `westwood one` finds the network beside its stations. Play Media says the
+row has no stream address; **Control+Shift+U**, Open url, opens the network's web site, where its games play.
+
+A station that moves its stream to a new server can leave two rows behind: one with the new address and one with
+the old. Once a month the build asks every stream that shares a name and home page with another. When one answers
+and the other does not, even when asked again a minute later, the dead row joins the live one, which keeps its tags
+and notes, and the dead row goes. Rows that both answer are kept, since a station often streams at two quality
+levels. A row you have rated, played, marked or given a status is never merged.
 
 Finding a station is not the same as hearing the game. Leagues often require
 a station to block game audio on its stream for listeners outside its own
@@ -1552,13 +1569,14 @@ once covers all three.
 
 ### Two keys worth knowing early
 
-**Shift+C, Say Cell**, says only what is in the cell -- "Accessibility Analyst".
-**Shift+H, Say Header**, says which column you are in -- "title". Shift+Z says
-where the record is, so each key answers one question.
+**Shift+C, Say Cell**, says "Cell", then what is in the cell -- "Accessibility
+Analyst". **Shift+H, Say Header**, says "Header", then which column you are in --
+"title". **Alt+Delete, Say Position**, says which row of how many. Each key
+answers one question, and starts with its own word, so you know which one ran.
+Press a Say key twice quickly to hear its value spelled exactly as stored.
 
-**Shift+Z, Say Status**, gives the summary: which table, which row of how many,
-and the order. Z is the bottom of the alphabet, and the status bar is the bottom
-of the window.
+DbDo has no Say Status: your screen reader reads the status bar with its own
+key, and the window's title names the table.
 
 ### Tables DbDo keeps for itself
 
@@ -1664,32 +1682,21 @@ program, joined without them so it matches exactly.
 
 ### How a Say command answers
 
-Every Say command answers in one shape:
+Every Say command answers in one shape: first its word, then the answer, each
+heard on its own. Shift+C says "Cell", then "Accessibility Analyst"; Shift+F says
+"Filter", then "none". The word is the command's name after "Say", so the answer
+says which question was asked, which matters when you are walking the alphabet
+and lose your place.
 
-    <name>: <value>
+An empty answer says none -- "Keywords", "none" -- and every count matches its
+noun. Say Marked answers "yes" or "no". Say id gives the value, then the key
+column when it is named something else: "Id", "3, in job_id".
 
-The name is the word in the Say menu and in the hotkey list, so the answer says
-which question was asked. That matters when you are walking the alphabet and
-lose your place: "Unmarked" does not say which key produced it, and
-"mark: unmarked" does.
-
-An empty answer keeps its label and says none -- "keywords: none", not "No find
-string" -- and every count matches its noun.
-
-**One exception, and it is a rule of its own.** A two-state answer whose value
-already names the setting says the state alone: Say Marked answers "Marked" or
-"Unmarked", not "mark: marked". Prefixing it would say the same word twice, and
-only the second word carries information. It is the shape a toggle uses
-everywhere else: "<setting> on" and "no <setting>", never "<setting>: on".
-
-Two commands answer differently. Say id uses the column name instead of the menu
-word, because that is what the grid calls the field: `job_id: 3`. Say Cell says
-the value alone, `Example Widgets Company`, since Shift+H gives the column's
-name.
-
-One press speaks. A quick second press spells the answer, a character at a
-time. A third shows it in a read-only window you can read line by line,
-spell phonetically and copy from. Every Homer app's Say keys work this way.
+One press speaks. A quick second press does not say the word again: it spells
+the value, a character at a time, and spells it exactly as stored -- a date to
+the second, a cell as the database holds it -- since a closer reading is what a
+second press is for. A value too long to spell opens in a read-only window you
+can read line by line and copy from. Every Homer app's Say keys work this way.
 
 #### The Say keys
 
@@ -1715,7 +1722,6 @@ spell phonetically and copy from. Every Homer app's Say keys work this way.
 - Shift+U -- url
 - Shift+V -- script, the one Invoke Script (Alt+V) would choose
 - Shift+W -- whole record, every field with a value, hidden fields too, then the related records
-- Shift+Z -- status: the table, the record and the order
 
 Shift plus a letter answers a question. A letter on its own moves: type the
 first letters of a value and the list view goes there, in lower case and

@@ -60,7 +60,7 @@ off GitHub, and the installer leaves the BrailleMonitor template out. The NFB's 
 THE LOG is logs\DbDo-makeBrailleMonitor-<date>-<time>.log.
 """
 
-import collections, datetime, os, re, sys, traceback, urllib.parse
+import collections, datetime, html, os, re, sys, traceback, urllib.parse
 
 sHere = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, sHere)
@@ -68,7 +68,7 @@ import makeBrailleForum as core
 
 core.sSource = "BrailleMonitor"
 core.sSite = "nfb.org"
-core.sVersion = "2026-11-26 version 3: the Braille Monitor from 1957 on; a one-page issue whose parts leave a tag open is converted part by part"
+core.sVersion = "2026-11-26 version 4: the issues of 1987 to 1997 divided at the titles their own contents lists name"
 core.sUserAgent = "DbDo makeBrailleMonitor/2 (+https://github.com/JamalMazrui/DbDo; a searchable archive of the NFB Braille Monitor)"
 core.sFirstRun = "The first run reads about ten thousand pages, one a second, so it takes some hours; later runs ask only about recent issues."
 core.sTemplate = os.path.join(core.sProject, "templates", "BrailleMonitor")
@@ -299,6 +299,60 @@ def sectionsOf(sHtml):
     return [(sText, sBody[iEnd:(lAt[i + 1][0] if i + 1 < len(lAt) else len(sBody))]) for i, (iStart, iEnd, iLevel, sText) in enumerate(lAt)]
 
 
+def pageLines(sBody):
+    """A page's text, one line for each line break, paragraph or heading, with the markup gone."""
+    sText = re.sub(r"(?is)<br\s*/?>|</?(p|div|h[1-6]|li|tr|pre|center|blockquote)\b[^>]*>", "\n", sBody)
+    return [html.unescape(re.sub(r"<[^>]+>", "", s)).replace("\xa0", " ").strip() for s in sText.split("\n")]
+
+
+def isCapsLine(sLine):
+    """A title line of the 1987 to 1997 issues: four or more letters, none of them lower case."""
+    sLetters = re.sub(r"[^A-Za-z]", "", sLine)
+    return len(sLetters) >= 4 and sLetters == sLetters.upper() and not re.match(r"(?i)^by\s", sLine)
+
+
+def titlePattern(sTitle):
+    """A title found in the markup whatever lies between its words: spaces, line breaks, tags or entities."""
+    lsWords = []
+    for sWord in sTitle.split():
+        lsWords.append("".join(re.escape(ch) if ch.isalnum() else r"(?:&[#\w]+;|[^\s\w<])?" for ch in sWord))
+    return re.compile(r"(?:\s|<[^>]*>|&nbsp;|&#160;)+".join(lsWords))
+
+
+def contentsSections(sHtml):
+    """A one-page issue with no headings divided at the titles its own contents list names: [(title, markup)], or []
+    when fewer than three are found. Version 4 (26 November 2026): the 75 issues of 1987 to 1997 were each kept as one
+    row, since their titles are lines in capitals, not headings. Each issue's page begins with a plain list headed
+    Contents, and each title it names starts an article further down, in the same capitals. That is the page's own
+    structure, so nothing is inferred: a title the list names but the page does not repeat is left out and logged."""
+    sBody = cleaned(sHtml)
+    lsLines = pageLines(sBody)
+    iContents = next((i for i, s in enumerate(lsLines) if re.match(r"(?i)^(table\s+of\s+)?contents\b\W*$", s)), -1)
+    if iContents < 0: return []
+    lsTitles = []
+    for sLine in lsLines[iContents + 1:iContents + 200]:
+        if not sLine: continue
+        if lsTitles and core.titleKey(sLine) == core.titleKey(lsTitles[0]): break      # the first article has begun
+        if isCapsLine(sLine) and not re.search(r"(?i)^(the\s+)?braille\s+monitor\b", sLine): lsTitles.append(re.sub(r"\s+", " ", sLine))
+    if len(lsTitles) < 3: return []
+    oContents = re.search(r"(?i)contents", sBody)
+    iAt = oContents.end() if oContents else 0
+    # Past the list itself: each title's first appearance after "Contents" is in the list.
+    for sTitle in lsTitles:
+        oInList = titlePattern(sTitle).search(sBody, iAt)
+        if oInList: iAt = oInList.end()
+    lFound = []
+    for sTitle in lsTitles:
+        oHere = titlePattern(sTitle).search(sBody, iAt)
+        if not oHere:
+            log("CONTENTS title not found further down, left out: %s" % sTitle)
+            continue
+        lFound.append((sTitle, oHere.start(), oHere.end()))
+        iAt = oHere.end()
+    if len(lFound) < 3: return []
+    return [(sTitle, sBody[iEnd:(lFound[i + 1][1] if i + 1 < len(lFound) else len(sBody))]) for i, (sTitle, iStart, iEnd) in enumerate(lFound)]
+
+
 def bylineOf(sPlain):
     """The byline: the article's first line when it begins "by", "presented by", "reviewed by" or "edited by"."""
     for sLine in (sPlain or "").splitlines():
@@ -359,6 +413,16 @@ def readIssue(oCache, dIssue, sPandoc, bTrust):
             for sTitle, sBody in lSections:
                 lWeb.append({"title": sTitle, "author": "", "url": sWholeUrl, "kind": core.kindOf(sTitle, 99, False)})
                 lsFragments.append(sBody)
+        elif contentsSections(sWhole):
+            lSections = contentsSections(sWhole)
+            sHow = "its complete page, divided at the %s its contents list names" % plural(len(lSections), "title")
+            # Test and learn: how the titles are marked up, from the first one, for the next cycle's log.
+            sSample = cleaned(sWhole)
+            oFirst = titlePattern(lSections[0][0]).search(sSample, sSample.lower().find("contents") + 8 + len(lSections[0][0]))
+            if oFirst: log("CONTENTSMARKUP %s: %s" % (dIssue["issue_key"], re.sub(r"\s+", " ", sSample[max(0, oFirst.start() - 150):oFirst.end() + 150])))
+            for sTitle, sBody in lSections:
+                lWeb.append({"title": sTitle, "author": "", "url": sWholeUrl, "kind": core.kindOf(sTitle, 99, False)})
+                lsFragments.append(sBody)
         else:
             sHow = "its complete page, kept whole: it has no table of contents and too few headings to divide"
             core.dReport["undivided"].append("%s (%s)" % (dIssue["issue_key"], sWholeUrl))
@@ -382,7 +446,7 @@ def readIssue(oCache, dIssue, sPandoc, bTrust):
 def stale(oDb):
     """Why a template built by version 1 must be rebuilt: it has no issue before 1985."""
     if oDb.execute("SELECT count(*) FROM issues WHERE published < '1985'").fetchone()[0]: return ""
-    return "version 1 missed the issues before 1985 and those of 1987 to 1999, which version 2 reads."
+    return "it lacks the issues before 1985."
 
 
 core.fnStale = stale

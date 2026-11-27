@@ -61,9 +61,9 @@ Hear=DbDo ready
 
 [step]
 
-Say=The first time, DbDo opens RadioTrail: internet radio stations, one to a row. The ten streams of the American Council of the Blind and the NFB Radio Network come first, then every other station by name. Shift plus Z says so.
-Key=Shift+Z
-Hear=stations, 49186 records, no filter, sorted by source, name
+Say=The first time, DbDo opens RadioTrail: internet radio stations, one to a row. The ten streams of the American Council of the Blind and the NFB Radio Network come first, then every other station by name. Alt plus Delete, Say Position, says how many.
+Key=Alt+Delete
+Hear=Position, 1 of 49186, 0 percent through
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

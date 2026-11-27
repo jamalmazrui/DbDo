@@ -9,7 +9,7 @@
 ; Player: an audio file directly, a video on YouTube or the like through yt-dlp.
 ; Mark several (Space) and Alt+Shift+P plays them all, as a play list. Three short
 ; ones come marked, to show how. A presentation whose medium is "page" lives on a
-; web page instead: Control+Enter on its url opens it in your browser. Control+Enter
+; web page instead: Shift+Enter on its url opens it in your browser. Shift+Enter
 ; on source_url opens the publisher's page, and resources lists any slides,
 ; transcripts or handouts.
 ;

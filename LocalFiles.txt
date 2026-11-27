@@ -49,3 +49,6 @@ scripts/release.ps1
 # shipped with DbDo, so the repository carries it too. GitHub refuses a file over 100 MB and warns over 50 MB. Each
 # refresh that changes it adds its size to the history, so the build's search test now reads a copy and leaves it
 # unchanged; only a deliberate refresh by fetchStations changes it.
+
+# What fetchStations keeps between builds: the date dead twins were last checked (26 November 2026).
+data/RadioTrail.inix

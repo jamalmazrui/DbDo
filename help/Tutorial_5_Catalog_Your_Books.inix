@@ -64,9 +64,9 @@ Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]
 
-Say=The third Holmes book, in text from Bookshare, then Frankenstein in braille. Shift plus Z confirms the view the script made.
-Key=Shift+Z
-Hear=books, 2 records, filtered, sorted by status, series, volume, title
+Say=The third Holmes book, in text from Bookshare, then Frankenstein in braille. Shift plus F, Say Filter, confirms the filter the script made.
+Key=Shift+F
+Hear=Filter
 Note=Confirm the wording with a live run: buildTutorials -live.
 
 [step]

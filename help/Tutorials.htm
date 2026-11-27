@@ -439,8 +439,8 @@ Interface</a>
 Arrow</a></li>
 <li><a href="#step-4-right-arrow" id="toc-step-4-right-arrow">Step 4:
 Right Arrow</a></li>
-<li><a href="#step-5-shiftz-1" id="toc-step-5-shiftz-1">Step 5:
-Shift+Z</a></li>
+<li><a href="#step-5-shifto" id="toc-step-5-shifto">Step 5:
+Shift+O</a></li>
 <li><a href="#step-6-shifth" id="toc-step-6-shifth">Step 6:
 Shift+H</a></li>
 <li><a href="#step-7-shiftw" id="toc-step-7-shiftw">Step 7:
@@ -494,8 +494,8 @@ Enter</a></li>
 <li><a href="#step-7-space" id="toc-step-7-space">Step 7: Space</a></li>
 <li><a href="#step-8-altcontrold" id="toc-step-8-altcontrold">Step 8:
 Alt+Control+D</a></li>
-<li><a href="#step-9-shiftz" id="toc-step-9-shiftz">Step 9:
-Shift+Z</a></li>
+<li><a href="#step-9-altdelete" id="toc-step-9-altdelete">Step 9:
+Alt+Delete</a></li>
 <li><a href="#step-10-insertup-arrow"
 id="toc-step-10-insertup-arrow">Step 10: Insert+Up Arrow</a></li>
 <li><a href="#step-11-alti" id="toc-step-11-alti">Step 11:
@@ -625,8 +625,8 @@ Arrow</a></li>
 <li><a href="#step-7-altv" id="toc-step-7-altv">Step 7: Alt+V</a></li>
 <li><a href="#step-8-enter-1" id="toc-step-8-enter-1">Step 8:
 Enter</a></li>
-<li><a href="#step-9-shiftz-1" id="toc-step-9-shiftz-1">Step 9:
-Shift+Z</a></li>
+<li><a href="#step-9-shiftf" id="toc-step-9-shiftf">Step 9:
+Shift+F</a></li>
 <li><a href="#step-10-altshifts" id="toc-step-10-altshifts">Step 10:
 Alt+Shift+S</a></li>
 <li><a href="#step-11-uparrow" id="toc-step-11-uparrow">Step 11:
@@ -738,8 +738,8 @@ a Dataset</a>
 3: Control+Shift+I</a></li>
 <li><a href="#step-4-enter-6" id="toc-step-4-enter-6">Step 4:
 Enter</a></li>
-<li><a href="#step-5-shiftz-2" id="toc-step-5-shiftz-2">Step 5:
-Shift+Z</a></li>
+<li><a href="#step-5-altdelete" id="toc-step-5-altdelete">Step 5:
+Alt+Delete</a></li>
 <li><a href="#step-6-altshifts" id="toc-step-6-altshifts">Step 6:
 Alt+Shift+S</a></li>
 <li><a href="#step-7-controlenter" id="toc-step-7-controlenter">Step 7:
@@ -1846,25 +1846,26 @@ name and its value.</p>
 <li>country</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
-<h3 id="step-5-shiftz-1">Step 5: Shift+Z</h3>
+<h3 id="step-5-shifto">Step 5: Shift+O</h3>
 <p>Now the Say keys. Shift and a letter asks, and changes nothing. Shift
-plus Z is Say Status.</p>
+plus O is Say Order: first its word, then the answer.</p>
 <p>Screen reader:</p>
 <ul>
-<li>status, stations, record</li>
+<li>Order, source, name</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-6-shifth">Step 6: Shift+H</h3>
-<p>Table, count, filter and sort in one breath. Shift plus C, C for
-Cell, says only what is in the cell you are on; Shift plus H, H for
-Header, says which column it is.</p>
+<p>One question a key. Shift plus C, C for Cell, says cell, then what is
+in the cell you are on; Shift plus H, H for Header, says header, then
+which column it is.</p>
 <p>Screen reader:</p>
 <ul>
-<li>country</li>
+<li>Header, country</li>
 </ul>
-<p>Shift+C says the value alone since 24 November 2026, which depends on
-the data, so the walk presses Shift+H, whose answer does not. Confirm
-the wording with a live run: buildTutorials -live.</p>
+<p>Since 26 November 2026 every Shift+letter says its word before its
+value. Shift+C’s value depends on the data, so the walk presses Shift+H,
+whose answer does not. Confirm the wording with a live run:
+buildTutorials -live.</p>
 <h3 id="step-7-shiftw">Step 7: Shift+W</h3>
 <p>Shift plus L says the record lean, just its look: the short label
 DbDo gives it everywhere. Shift plus W says it whole: every field with a
@@ -2088,14 +2089,14 @@ anywhere.</p>
 <li>DbDo</li>
 <li>DbDo ready</li>
 </ul>
-<h3 id="step-9-shiftz">Step 9: Shift+Z</h3>
+<h3 id="step-9-altdelete">Step 9: Alt+Delete</h3>
 <p>The first time, DbDo opens RadioTrail: internet radio stations, one
 to a row. The ten streams of the American Council of the Blind and the
-NFB Radio Network come first, then every other station by name. Shift
-plus Z says so.</p>
+NFB Radio Network come first, then every other station by name. Alt plus
+Delete, Say Position, says how many.</p>
 <p>Screen reader:</p>
 <ul>
-<li>stations, 49186 records, no filter, sorted by source, name</li>
+<li>Position, 1 of 49186, 0 percent through</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-10-insertup-arrow">Step 10: Insert+Up Arrow</h3>
@@ -2666,13 +2667,13 @@ then what I want to read, each series in order.</p>
 Holmes, Bookshare, Row 1 of 2</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
-<h3 id="step-9-shiftz-1">Step 9: Shift+Z</h3>
+<h3 id="step-9-shiftf">Step 9: Shift+F</h3>
 <p>The third Holmes book, in text from Bookshare, then Frankenstein in
-braille. Shift plus Z confirms the view the script made.</p>
+braille. Shift plus F, Say Filter, confirms the filter the script
+made.</p>
 <p>Screen reader:</p>
 <ul>
-<li>books, 2 records, filtered, sorted by status, series, volume,
-title</li>
+<li>Filter</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-10-altshifts">Step 10: Alt+Shift+S</h3>
@@ -3150,13 +3151,13 @@ Enter.</p>
 <li>Imported titanic.csv into a new DbDo database</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
-<h3 id="step-5-shiftz-2">Step 5: Shift+Z</h3>
+<h3 id="step-5-altdelete">Step 5: Alt+Delete</h3>
 <p>A column that holds only numbers comes in as numbers, so age compares
 and sorts as a number, and a blank age stays blank rather than counting
-as zero. Shift plus Z, Say Status.</p>
+as zero. Alt plus Delete, Say Position.</p>
 <p>Screen reader:</p>
 <ul>
-<li>status, titanic, record</li>
+<li>Position, 1 of 891, 0 percent through</li>
 </ul>
 <p>Confirm the wording with a live run: buildTutorials -live.</p>
 <h3 id="step-6-altshifts">Step 6: Alt+Shift+S</h3>

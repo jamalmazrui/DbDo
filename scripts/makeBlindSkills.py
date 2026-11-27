@@ -17,7 +17,7 @@ lesson's own address, so Play Media (Alt+Shift+P) plays it in the Homer Player -
 yt-dlp -- and marked lessons play as a play list. defs hold the skill groups with the directory's own definition of
 each, the skills, the sources, the series, the audiences, the media and the two structured discovery values. skill is
 the task a lesson teaches; minutes is its Length; source_url and transcript_url open
-the publisher's page and the transcript with Control+Enter; tags repeat group, skill and source for Keywords.
+the publisher's page and the transcript with Shift+Enter; tags repeat group, skill and source for Keywords.
 
 The old file is replaced only when the new one is complete and passes its own check. The log,
 logs\\DbDo-makeBlindSkills-<date>-<time>.log, names every lesson it read.

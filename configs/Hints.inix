@@ -87,6 +87,13 @@ Clone fields = Starts a new table with the same fields as the table now open, an
 [Update from Template]
 Merge template = Adds what the template has and your copy lacks, keeping everything of yours.
 Replace copy = Makes your copy the template again, keeping your old copy beside it as a dated backup.
+All copies = Merges or replaces every copy of DbDo's templates at once, asking once which.
+
+[Get Database]
+Source path or url = A .db file, or a .zip holding one, on this computer or at a web address.
+Browse local file = Picks the .db or .zip file on this computer.
+Replace database = Puts the new database in place of yours, keeping yours beside it as a dated backup.
+Keep both = Gives the new database a numbered name, so both are kept.
 
 [Merge Database]
 Add new only = Adds records this database lacks, and leaves every record already here as it is.

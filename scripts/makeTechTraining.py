@@ -12,7 +12,7 @@ WHAT IT MAKES. templates\\TechTraining\\TechTraining.db, the Homer way (the home
 makeMusicTrail uses: one table, presentations, with the standard fields, look, prime and triggers. Its url field is
 the presentation's own address, so Play Media (Alt+Shift+P) plays it in the Homer Player -- audio files directly,
 YouTube and the like through yt-dlp -- and marked presentations play as a play list. medium says which: audio, video,
-or page (a presentation page, opened in the browser with Control+Enter on its url). minutes is the length in whole
+or page (a presentation page, opened in the browser with Shift+Enter on its url). minutes is the length in whole
 minutes, so lessons can be sorted and filtered by time. defs hold the categories with the directory's own
 definition of each, the sources, the series and the media.
 
@@ -32,7 +32,7 @@ dColumnTypes = {"category": "TEXTLINE", "medium": "TEXTLINE", "minutes": "INTEGE
 lsStarterMarks = ["Convert PowerPoint to PDF and Maintain Document Structure", "Quiet the Noise: Managing VoiceOver Sensory Overload on iOS",
                     "Transform PDFs with AI-Powered OCR: Your Guide to PDFgear for Mac"]
 dMediaKinds = {"audio": "An audio file: Play Media (Alt+Shift+P) plays it in the Homer Player.",
-            "page": "A presentation page: Control+Enter on its url opens it in the browser, where it plays.",
+            "page": "A presentation page: Shift+Enter on its url opens it in the browser, where it plays.",
             "video": "A video on a host such as YouTube: Play Media (Alt+Shift+P) plays it in the Homer Player, through yt-dlp."}
 
 sProject = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))

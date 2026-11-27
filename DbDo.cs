@@ -246,6 +246,20 @@ namespace DbDo
             catch { /* never let seeding block the picker */ }
         }
 
+        // followsTemplate: whether a template database's own .inix, beside it, says FollowTemplate = yes -- a reference
+        // database rebuilt from its source, whose copy should always be the newest build (26 November 2026).
+        private static bool followsTemplate(string sSrcPath)
+        {
+            try
+            {
+                string sInix = System.IO.Path.ChangeExtension(sSrcPath, ".inix");
+                if (!System.IO.File.Exists(sInix)) return false;
+                string sValue = InixCodec.readValue(sInix, "Database", "FollowTemplate", "");
+                return string.Equals(sValue, "yes", StringComparison.OrdinalIgnoreCase);
+            }
+            catch { return false; }
+        }
+
         // copyBundledTemplate: seed or refresh one bundled sample file.
         //   - missing destination: copied only on the first seed, so a
         //     sample the user has deliberately deleted stays gone;
@@ -300,19 +314,28 @@ namespace DbDo
                         try { DbDoLog.write("Seeding: " + sDstPath + " is open, so it is left as it is and will be checked the next time the templates are listed."); } catch { }
                         return;
                     }
-                    string sSeedRecord = sDstPath + ".seed";
-                    bool bRecorded = System.IO.File.Exists(sSeedRecord);
-                    bool bUntouched;
-                    if (bRecorded) bUntouched = string.Equals(System.IO.File.ReadAllText(sSeedRecord).Trim(), sha256Hex(sDstPath), StringComparison.OrdinalIgnoreCase);
-                    else bUntouched = System.IO.File.GetLastWriteTimeUtc(sDstPath) <= System.IO.File.GetCreationTimeUtc(sDstPath).AddSeconds(2);
+                    // NEWER FIRST, THEN THE FINGERPRINT (26 November 2026): the templates are now checked at every start, so
+                    // a copy is fingerprinted only when its template is newer; hashing BrailleMonitor's 370 MB at each start
+                    // would slow every launch for nothing.
                     bool bNewer = System.IO.File.GetLastWriteTimeUtc(sSrcPath) > System.IO.File.GetLastWriteTimeUtc(sDstPath);
+                    if (!bNewer) return;
+                    // A REFERENCE TEMPLATE IS FOLLOWED (26 November 2026). BrailleForum and BrailleMonitor are rebuilt from
+                    // their magazines, and Jamal treats them as read-only; but opening a copy writes to it, so the copy
+                    // counted as changed and kept the old 5,037 articles while the template had 11,514. A template whose
+                    // .inix says FollowTemplate = yes replaces its copy whenever the template is newer, with no backup.
+                    bool bFollow = followsTemplate(sSrcPath);
+                    string sSeedRecord = sDstPath + ".seed";
+                    bool bRecorded = System.IO.File.Exists(sSeedRecord) || bFollow;
+                    bool bUntouched;
+                    if (bFollow) bUntouched = true;
+                    else if (System.IO.File.Exists(sSeedRecord)) bUntouched = string.Equals(System.IO.File.ReadAllText(sSeedRecord).Trim(), sha256Hex(sDstPath), StringComparison.OrdinalIgnoreCase);
+                    else bUntouched = System.IO.File.GetLastWriteTimeUtc(sDstPath) <= System.IO.File.GetCreationTimeUtc(sDstPath).AddSeconds(2);
                     if (!bUntouched)
                     {
                         // Every outcome is said: a copy kept because it was changed is named as kept.
-                        if (bNewer) { try { DbDoLog.write("Seeding: " + sDstPath + " was kept: it has changed since it was seeded, so the newer template does not replace it."); } catch { } }
+                        try { DbDoLog.write("Seeding: " + sDstPath + " was kept: it has changed since it was seeded, so the newer template does not replace it."); } catch { }
                         return;
                     }
-                    if (!bNewer) return;
                     foreach (string sSide in new string[] { sDstPath + "-wal", sDstPath + "-shm" })
                     {
                         if (System.IO.File.Exists(sSide) && new System.IO.FileInfo(sSide).Length > 0)
@@ -13952,6 +13975,7 @@ namespace DbDo
         private ToolStripMenuItem miRecGotoBookmark;
         private ToolStripMenuItem miRecClearBookmark;
         private ToolStripMenuItem miRecOpenCell;
+        private ToolStripMenuItem miRecPreviewMarkdown;
         private ToolStripMenuItem miRecPlayStream;
 
         private ToolStripMenuItem miViewSelect;
@@ -15054,6 +15078,7 @@ namespace DbDo
             // the templates are DbDo's special databases, as FileDir's Open Special Folder, on the same key, opens Windows'
             // special folders. No menu letter: Open Database has O. Alt+D is free.
             miFileSampleDb= addItem(miFile, "Open Template Database...",  "Open Template Database", Keys.Control | Keys.Shift | Keys.O, openTemplateDbClicked);
+            addItem(miFile, "&Get Database...", "Get Database", Keys.None, fileGetDatabaseClicked);  // a DbDo database from a path or url, copied into DbDo's folder (26 November 2026)
             // MERGE DATA ON ALT+SHIFT+M (23 November 2026): on Alt+M it ran before Windows saw the menu letter, so Alt+M
             // could not open the Misc menu, as Alt+M does in EdSharp and FileDir. M for Merge still.
             // MERGE DATA ON CONTROL+SHIFT+M (24 November 2026): merging changes data, which prefers Control; Semicolon and
@@ -15224,7 +15249,15 @@ namespace DbDo
             addSep(miEdit);
             // Open Cell Value: open the url, file path, or folder
             // path stored in a cell of the current row.
-            miRecOpenCell    = addItem(miEdit, "Open Cell Value...",       "Open Cell Value",           Keys.Control | Keys.Enter,          recOpenCellClicked);
+            // TWO COMMANDS, TWO KEYS (27 November 2026, Jamal: a Markdown body should not have to be a shown column, heard on
+            // every DownArrow, before it can be read as a web page). Open Cell Value opens what a cell names -- a url, file or
+            // folder -- on Shift+Enter: Enter goes into the record's children, Shift+Enter out to what the cell points at, as
+            // Shift+Enter in FileDir opens the item itself. Control+Enter stays free, since it means OK in every Lbc dialog
+            // and a page break in EdSharp. Preview Markdown in Web Browser, the name EdSharp gives the same act, finds the
+            // record's Markdown field itself, shown or not, and takes Control+Shift+H: H as in EdSharp's Control+H for HTML,
+            // since the page it makes is HTML.
+            miRecOpenCell    = addItem(miEdit, "Open Cell Value...",       "Open Cell Value",           Keys.Shift | Keys.Enter, recOpenCellClicked);
+            miRecPreviewMarkdown = addItem(miEdit, "Preview Markdown in Web Browser", "Preview Markdown in Web Browser", Keys.Control | Keys.Shift | Keys.H, previewMarkdownClicked);
             // PLAY STREAM: the current record's stream address, in the Homer
             // Player. P for Play; Alt+Shift because the command has no control
             // of its own. No trigger letter, because Pick Value took P first.
@@ -15343,7 +15376,10 @@ namespace DbDo
             ToolStripMenuItem miSay = new ToolStripMenuItem("&Say");
             miQuery.DropDownItems.Add(miSay);
             miSaySayMarked       = addItem(miSay, "Say &Marked", "Say Marked", Keys.Shift | Keys.M, saySayMarked);
-            miSaySayStatus       = addItem(miSay, "Say Status",  "Say Status",     Keys.Shift | Keys.Z,               saySayStatus);
+            // SAY STATUS RETIRED (26 November 2026, Jamal: no Homer app needs to read its status bar whole; JAWS and
+            // NVDA have their own keys for that, and Homer gives each fact its own command). Everything it said has its
+            // own key: Shift+M marked, Alt+Delete position, Shift+F filter, Shift+O order, and the table is in the
+            // window's title. Shift+Z and Alt+Z are free.
             // Z FOR STATUS: Z is the bottom of the alphabet, and the status bar
             // is the bottom of the window. The caption carries no access letter,
             // since no word in it begins with Z and a letter from the middle of
@@ -15607,7 +15643,6 @@ namespace DbDo
             // Undo or Redo for it to meet -- and Say Status takes Alt+Z beside the
             // grid's Shift+Z, as the suite contract planned for stage 3.
             miToggleReadOnly = addItem(miMisc, "Read Only Toggle",                       "Read Only Toggle",  Keys.Control | Keys.Shift | Keys.Z, toggleReadOnlyClicked);
-            registerLocalAlias(Keys.Alt | Keys.Z, miSaySayStatus);
             // v1.0.67 deferred stubs. The chords are reserved so the
             // menu stays stable and the user can discover the planned
             // commands. The handlers display "Not yet implemented."
@@ -15804,7 +15839,9 @@ namespace DbDo
             // DbDo, by merging the template into it or replacing it. U for Update; no shortcut key, like Play Tutorials:
             // something done after an update, not a command reached for daily.
             addItem(miHelp, "&Update from Template...", "Update from Template", Keys.None, helpUpdateFromTemplateClicked);
-            addItem(miHelp, "Update &Copies from Templates...", "Update Copies from Templates", Keys.None, helpUpdateAllFromTemplatesClicked);  // C: every word of "Update All from Templates" began with a letter the Help menu already used (5 November 2026)
+            // ONE UPDATE ITEM (26 November 2026, Jamal: "can they be combined so as not to take multiple menu items for a similar
+            // idea"). Update Copies from Templates is now the All copies button of Update from Template, which goes straight
+            // to it when the open database is not a copy of a template.
 
             // The former per-sample items (Open Convention / Northwind /
             // Chinook) were removed: the Template Databases picker above
@@ -15970,7 +16007,9 @@ namespace DbDo
             add("Open Database",      "Open a database, workbook, CSV, dBASE or Inix file as a database",
                 "Databases open as themselves; a workbook or CSV opens as a working copy that Control+S writes back; an .xls or .dbf opens as a converted copy that Control+S keeps as a DbDo database.");
             add("Open Template Database", "Open one of the template databases that come with DbDo, such as RadioTrail or JobTrail",
-                "Alt+Shift+D. Your own copy of the template is opened, so changes are yours to keep.");
+                "Control+Shift+O. Your own copy of the template is opened, so changes are yours to keep. Databases added with Get Database are listed too.");
+            add("Get Database", "Copy a DbDo database from a path or url into DbDo's own folder, where Open Template Database lists it",
+                "A .db, or a .zip holding one with its saved searches and scripts. A database of the same name is replaced only when you say so, and kept beside it as a dated backup.");
             add("Play Media",        "Play the current record's stream address in the Homer Player; with records marked, play all of them",
                 "Control+P. Takes the first of stream_url, url, stream, link or address that begins with http, or the current cell. Marked records make a play list, current one first. The player is mpv; if it is not installed, DbDo offers to fetch it.");
             add("Close Database",     "Close the currently open database", "");
@@ -16064,7 +16103,6 @@ namespace DbDo
             add("Show Table",         "Show every row of the current table in a single read-only text view", "");
             add("Related Records",       "Jump to one related table via an outbound foreign key", "");
             add("Where Am I",        "Show the table, row, filter, and sort in a read-only dialog", "");
-            add("Say Status",         "Say the table, record, order and filter", "");
             add("Say Database",       "Say the database's name and folder",
                 "Shift+D. Replaces Say Path. Single-press announces just the filename for fast 'where am I' checks; double-press opens a memo dialog with the full path that can be copied via Ctrl+C.");
             add("Say Order",          "Say the order in force",
@@ -17944,6 +17982,7 @@ namespace DbDo
             miRecGotoBookmark.Enabled = bHasTable && lBookmarks.Count > 0;
             miRecClearBookmark.Enabled = lBookmarks.Count > 0;
             miRecOpenCell.Enabled = bHasTable;
+            miRecPreviewMarkdown.Enabled = bHasTable;
 
             miViewSelect.Enabled = bHasTable;
             if (miViewFilterRegex != null) miViewFilterRegex.Enabled = bHasTable;
@@ -18740,7 +18779,7 @@ namespace DbDo
         private void saySayDatabase(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
-            { Say.say("database: no database open"); return; }
+            { Homer.KeyMap.answer(null, "database: no database open"); return; }
             string sPath = db.filePath ?? "(unknown)";
             string sName = Path.GetFileName(sPath);
             // Single-press: name only. Double-press: full path
@@ -18784,9 +18823,9 @@ namespace DbDo
         private void saySayOrder(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
-            { Say.say("order: no database open"); return; }
+            { Homer.KeyMap.answer(null, "order: no database open"); return; }
             if (!db.hasRecordset())
-            { Say.say("order: no table selected"); return; }
+            { Homer.KeyMap.answer(null, "order: no table selected"); return; }
             // THERE IS ALWAYS AN ORDER (1 November 2026, from Jamal's speech history). Records always come in
             // some order; with no Order Records in force it is the order they are stored in, which for a DbDo
             // table is its id. Shift+O says that, where it said "no order applied".
@@ -18795,7 +18834,7 @@ namespace DbDo
             {
                 string sKey = "";
                 try { sKey = db.actualPrimaryKey(db.currentTable) ?? ""; } catch { }
-                Say.say("order: " + (sKey.Length > 0 ? sKey + ", as stored" : "as stored"));
+                Homer.KeyMap.answer(null, "order: " + (sKey.Length > 0 ? sKey + ", as stored" : "as stored"));
                 return;
             }
             speakOrShow("Order", "order: " + orderSpoken(s), 125);
@@ -18814,7 +18853,7 @@ namespace DbDo
         private void saySayGoto(object sender, EventArgs evArgs)
         {
             string sLast = SearchHistory.lastText(SearchHistory.SectionGoTo);
-            if (string.IsNullOrEmpty(sLast)) { Say.say("go to: none"); return; }
+            if (string.IsNullOrEmpty(sLast)) { Homer.KeyMap.answer(null, "go to: none"); return; }
             speakOrShow("Go to", "go to: " + sLast, 127);
         }
 
@@ -18871,7 +18910,7 @@ namespace DbDo
             // The column Jump Record searched is part of the answer (1 November 2026); it was on Shift+G.
             string sText = sLastJumpSubstring;
             if (string.IsNullOrEmpty(sText)) sText = SearchHistory.lastText(SearchHistory.SectionJump);
-            if (string.IsNullOrEmpty(sText)) { Say.say("jump: none"); return; }
+            if (string.IsNullOrEmpty(sText)) { Homer.KeyMap.answer(null, "jump: none"); return; }
             string sJumpCol = string.IsNullOrEmpty(sLastJumpColumn) ? "" : " in " + sLastJumpColumn;
             speakOrShow("Jump", "jump: " + sText + sJumpCol, 128);
         }
@@ -18881,7 +18920,7 @@ namespace DbDo
         {
             if (lBookmarks == null || lBookmarks.Count == 0)
             {
-                Say.say("bookmark: none");
+                Homer.KeyMap.answer(null, "bookmark: none");
                 return;
             }
             System.Text.StringBuilder sbMarks = new System.Text.StringBuilder();
@@ -18913,7 +18952,7 @@ namespace DbDo
                 sMatch = SearchHistory.lastText(SearchHistory.SectionReplace) ?? "";
                 sReplace = SearchHistory.lastText(SearchHistory.SectionReplaceWith) ?? "";
             }
-            if (sMatch.Length == 0 && sLastPattern.Length == 0) { Say.say("replace: none"); return; }
+            if (sMatch.Length == 0 && sLastPattern.Length == 0) { Homer.KeyMap.answer(null, "replace: none"); return; }
             lParts.Add(sMatch.Length > 0 ? "replace: match " + sMatch + ", replace " + sayableValue(sReplace) : "replace: none");
             lParts.Add(sLastPattern.Length > 0 ? "replace with regex: pattern " + sLastPattern + ", substitute " + sayableValue(sLastSubstitute) : "replace with regex: none");
             if (!string.IsNullOrEmpty(sLastReplaceHow)) lParts.Add(sLastReplaceHow);
@@ -18924,7 +18963,7 @@ namespace DbDo
         private void saySayScript(object sender, EventArgs evArgs)
         {
             System.Collections.Generic.SortedDictionary<string, string> dScripts = gatherScripts();
-            if (dScripts.Count == 0) { Say.say("script: none"); return; }
+            if (dScripts.Count == 0) { Homer.KeyMap.answer(null, "script: none"); return; }
             string sFirst = "";
             foreach (string sName in dScripts.Keys) { sFirst = sName; break; }
             speakOrShow("Script", "script: " + sFirst, 132);
@@ -18946,9 +18985,9 @@ namespace DbDo
         private void saySayMarked(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("No record selected"); return; }
+            { Homer.KeyMap.answer(null, "marked: no record selected"); return; }
             if (!db.hasField(Metadata.MarkedColumn))
-            { Say.say("marked: this table has no marked column"); return; }
+            { Homer.KeyMap.answer(null, "marked: this table has no marked column"); return; }
             bool bMarked;
             try { bMarked = isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn) ?? ""); }
             catch { bMarked = false; }
@@ -18959,7 +18998,7 @@ namespace DbDo
             // twice, and the second word is the only one carrying information.
             // The same shape a toggle uses elsewhere: "<setting> on" and
             // "no <setting>", never "<setting>: on".
-            Homer.KeyMap.answer("Marked", bMarked ? "Marked" : "Unmarked");
+            Homer.KeyMap.answer("Marked", bMarked ? "marked: yes" : "marked: no");
         }
 
 
@@ -18979,14 +19018,14 @@ namespace DbDo
         private void saySayEdited(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("edited: no record selected"); return; }
+            { Homer.KeyMap.answer(null, "edited: no record selected"); return; }
             string sCol = db.hasField("edited") ? "edited" : (db.hasField("added") ? "added" : null);
             if (sCol == null)
-            { Say.say("edited: no date column in this table"); return; }
+            { Homer.KeyMap.answer(null, "edited: no date column in this table"); return; }
             string sVal = db.getFieldValue(sCol);
             string sSpoken = formatDateHumanFriendly(sVal);
             if (string.IsNullOrEmpty(sSpoken)) sSpoken = "blank";
-            speakOrShow("Edited", sCol + ": " + sSpoken, 106);
+            Homer.KeyMap.answerPrecise("Edited", sVal, sCol == "edited" ? "edited: " + sSpoken : "edited: none; added " + sSpoken);
         }
 
         // formatDateHumanFriendly: parse the SQLite-text date / datetime
@@ -19084,9 +19123,9 @@ namespace DbDo
         private void saySayNotes(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("notes: no record selected"); return; }
+            { Homer.KeyMap.answer(null, "notes: no record selected"); return; }
             if (!db.hasField("notes"))
-            { Say.say("notes: this table has no notes column"); return; }
+            { Homer.KeyMap.answer(null, "notes: this table has no notes column"); return; }
             string sVal = db.getFieldValue("notes");
             if (string.IsNullOrEmpty(sVal)) sVal = "blank";
             speakOrShow("Notes", "notes: " + sVal, 109);
@@ -19097,9 +19136,9 @@ namespace DbDo
         private void saySayTags(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("tags: no record selected"); return; }
+            { Homer.KeyMap.answer(null, "tags: no record selected"); return; }
             if (!db.hasField("tags"))
-            { Say.say("tags: this table has no tags column"); return; }
+            { Homer.KeyMap.answer(null, "tags: this table has no tags column"); return; }
             string sVal = db.getFieldValue("tags");
             if (string.IsNullOrEmpty(sVal)) sVal = "blank";
             speakOrShow("Tags", "tags: " + sVal, 110);
@@ -19114,13 +19153,15 @@ namespace DbDo
         private void saySayAdded(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("added: no record selected"); return; }
+            { Homer.KeyMap.answer(null, "added: no record selected"); return; }
             if (!db.hasField("added"))
-            { Say.say("added: this table has no added column"); return; }
+            { Homer.KeyMap.answer(null, "added: this table has no added column"); return; }
             string sVal = db.getFieldValue("added");
             string sSpoken = formatDateHumanFriendly(sVal);
             if (string.IsNullOrEmpty(sSpoken)) sSpoken = "blank";
-            speakOrShow("Added", "added: " + sSpoken, 116);
+            // THE PRECISE VALUE ON A SECOND PRESS (26 November 2026, Jamal): the first press says the date in words; the
+            // second spells it as stored, to the second, since a more precise reading is what a double press is for.
+            Homer.KeyMap.answerPrecise("Added", sVal, "added: " + sSpoken);
         }
 
         // saySayCell: speak the value of the cell under the virtual
@@ -19151,9 +19192,9 @@ namespace DbDo
         private void saySayCell(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("No record selected"); return; }
+            { Homer.KeyMap.answer(null, "cell: no record selected"); return; }
             string sCol = virtCurrentColumnName();
-            if (string.IsNullOrEmpty(sCol)) { Say.say("cell: no column at the cursor"); return; }
+            if (string.IsNullOrEmpty(sCol)) { Homer.KeyMap.answer(null, "cell: no column at the cursor"); return; }
             string sVal = virtCellValue(iVirtualRow, iVirtualCol);
             // "none" when the column holds NULL, "blank" when it holds an empty
             // string. Same distinction everywhere, so the word is the answer.
@@ -19162,7 +19203,14 @@ namespace DbDo
             // header"). Shift+Z says where the record is and Shift+H the column's name, so Say Cell says only what is in
             // the cell, as a screen reader's Number Pad 5 says the character under the cursor. A second press spells a
             // short value and shows a long one in the read-only window, as every Say key does.
-            speakOrShow("Cell", sVal, 117);
+            // ITS WORD FIRST (26 November 2026, Jamal: every Shift+letter says its word before the value, "Cell", then the
+            // value, so each answer confirms which command ran). This replaces the value alone of 24 November; a second
+            // press still spells only the value, since answer sets the "cell: " label aside.
+            // The value as stored is the precise one for a second press: a link column shows its look, a date its
+            // friendly form, while the stored value is what the field holds.
+            string sStored = "";
+            try { sStored = db.getFieldValue(sCol) ?? ""; } catch { }
+            Homer.KeyMap.answerPrecise("Cell", sStored.Length > 0 ? sStored : null, "cell: " + sVal);
         }
 
         // saySayFilter: speak the active ADO filter expression. Empty
@@ -19180,9 +19228,9 @@ namespace DbDo
         private void saySayQuery(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
-            { Say.say("query: no database open"); return; }
+            { Homer.KeyMap.answer(null, "query: no database open"); return; }
             if (!db.hasRecordset())
-            { Say.say("query: no table selected"); return; }
+            { Homer.KeyMap.answer(null, "query: no table selected"); return; }
             string sQuery;
             if (!string.IsNullOrEmpty(db.sourceSql))
                 sQuery = db.sourceSql;
@@ -19194,14 +19242,14 @@ namespace DbDo
         private void saySaySelect(object sender, EventArgs evArgs)
         {
             if (db == null || !db.isOpen())
-            { Say.say("columns: no database open"); return; }
+            { Homer.KeyMap.answer(null, "columns: no database open"); return; }
             if (!db.hasRecordset())
-            { Say.say("columns: no table selected"); return; }
+            { Homer.KeyMap.answer(null, "columns: no table selected"); return; }
             List<string> lsCols = new List<string>();
             if (grid != null)
                 foreach (ColumnHeader oCol in grid.Columns) lsCols.Add(oCol.Text);
             if (lsCols.Count == 0)
-            { Say.say("columns: none"); return; }
+            { Homer.KeyMap.answer(null, "columns: none"); return; }
             // One queued message per column, for a natural pause
             // between column names rather than a run-on list.
             // One line rather than one part per column: the answer is a list,
@@ -19223,11 +19271,11 @@ namespace DbDo
         private void saySayFilter(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset())
-            { Say.say("filter: no recordset open"); return; }
+            { Homer.KeyMap.answer(null, "filter: no recordset open"); return; }
             string sFilter = db.filter ?? "";
             string sSql = db.sqlFilterSpoken;
             if (string.IsNullOrEmpty(sFilter) && string.IsNullOrEmpty(sSql))
-            { Say.say("filter: none"); return; }
+            { Homer.KeyMap.answer(null, "filter: none"); return; }
             // Both kinds, in the words each was asked in (8 October 2026).
             // WHERE FIRST (19 October 2026): a filter narrowed or expanded speaks its groups in parentheses, and a
             // sentence that opens with a parenthesis is read as an aside, by a listener and by the tutorial check
@@ -19255,7 +19303,7 @@ namespace DbDo
                 try { sFind = SearchHistory.lastText(SearchHistory.SectionFind) ?? ""; } catch { }
             }
             if (string.IsNullOrEmpty(sFind))
-            { Say.say("keywords: none"); return; }
+            { Homer.KeyMap.answer(null, "keywords: none"); return; }
             speakOrShow("Keywords", "keywords: " + sFind, 126);
         }
 
@@ -19270,7 +19318,7 @@ namespace DbDo
         // themselves, are left out, as is marked unless it is 1. Pressed twice, the kit shows the same lines to read.
         private void saySayWholeRecord(object sender, EventArgs evArgs)
         {
-            if (db == null || !db.hasRecordset() || db.recordCount == 0) { Say.say("whole record: no record selected"); return; }
+            if (db == null || !db.hasRecordset() || db.recordCount == 0) { Homer.KeyMap.answer(null, "whole record: no record selected"); return; }
             List<string> lParts = new List<string>();
             foreach (string sField in db.getNaturalFieldNames())
             {
@@ -19287,14 +19335,14 @@ namespace DbDo
             string sRelated = "";
             try { sRelated = buildRelatedSummary(); } catch { }
             if (!string.IsNullOrEmpty(sRelated)) lParts.Add("related: " + sRelated);
-            if (lParts.Count == 0) { Say.say("whole record: every field is empty"); return; }
+            if (lParts.Count == 0) { Homer.KeyMap.answer(null, "whole record: every field is empty"); return; }
             speakOrShowParts("Whole Record", lParts, 131);
         }
 
         private void saySayId(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("No record selected"); return; }
+            { Homer.KeyMap.answer(null, "id: no record selected"); return; }
             string sPk = "";
             try
             {
@@ -19302,11 +19350,11 @@ namespace DbDo
             }
             catch { }
             if (string.IsNullOrEmpty(sPk))
-            { Say.say("id: this table has no primary key"); return; }
+            { Homer.KeyMap.answer(null, "id: this table has no primary key"); return; }
             string sVal = "";
             try { sVal = db.getFieldValue(sPk) ?? ""; } catch { }
             if (string.IsNullOrEmpty(sVal)) sVal = "blank";
-            speakOrShow("Id", sPk + ": " + sVal, 119);
+            speakOrShow("Id", "id: " + sVal + (string.Equals(sPk, "id", StringComparison.OrdinalIgnoreCase) ? "" : ", in " + sPk), 119);
         }
 
         // saySayLook: speak the 'look' field of the current row.
@@ -19314,9 +19362,9 @@ namespace DbDo
         private void saySayLook(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("look: no record selected"); return; }
+            { Homer.KeyMap.answer(null, "look: no record selected"); return; }
             if (!db.hasField("look"))
-            { Say.say("look: this table has no look column"); return; }
+            { Homer.KeyMap.answer(null, "look: this table has no look column"); return; }
             // Each part in its own say call, so the pause marks the boundary (29 Oct 2026).
             string sRaw = db.getFieldValue("look");
             string sVal = db.getScreenValue("look");
@@ -19574,9 +19622,9 @@ namespace DbDo
         private void saySayUrl(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("url: no record selected"); return; }
+            { Homer.KeyMap.answer(null, "url: no record selected"); return; }
             if (!db.hasField(Metadata.UrlColumn))
-            { Say.say("url: this table has no url column"); return; }
+            { Homer.KeyMap.answer(null, "url: this table has no url column"); return; }
             string sVal = db.getFieldValue(Metadata.UrlColumn);
             if (string.IsNullOrEmpty(sVal)) sVal = "blank";
             speakOrShow("URL", Metadata.UrlColumn + ": " + sVal, 122);
@@ -19590,11 +19638,11 @@ namespace DbDo
         private void saySayPrime(object sender, EventArgs evArgs)
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
-            { Say.say("prime: no record selected"); return; }
+            { Homer.KeyMap.answer(null, "prime: no record selected"); return; }
             string sField = db.hasField(Metadata.PrimeColumn) ? Metadata.PrimeColumn
                           : (db.hasField(Metadata.PrimeColumn) ? Metadata.PrimeColumn : null);
             if (sField == null)
-            { Say.say("prime: this table has no prime column"); return; }
+            { Homer.KeyMap.answer(null, "prime: this table has no prime column"); return; }
             // Each part in its own say call, so the pause marks the boundary (29 Oct 2026).
             string sRaw = db.getFieldValue(sField);
             string sVal = db.getScreenValue(sField);
@@ -19812,7 +19860,7 @@ namespace DbDo
         // says the value of the record's look column, not the names of the columns it is computed from.
         private void saySayHeader(object sender, EventArgs evArgs)
         {
-            Say.say((grid != null && iVirtualCol >= 0 && iVirtualCol < grid.Columns.Count) ? grid.Columns[iVirtualCol].Text : "No columns");
+            Homer.KeyMap.answer(null, (grid != null && iVirtualCol >= 0 && iVirtualCol < grid.Columns.Count) ? "header: " + grid.Columns[iVirtualCol].Text : "header: no columns");
         }
 
         // saySayFieldType: the current column's declared type, with a few plain words for the types DbDo's own databases
@@ -24753,6 +24801,205 @@ namespace DbDo
             }
         }
 
+        // GET DATABASE (26 November 2026, Jamal: "if someone made a DbDo formatted db available ... it should be possible
+        // to in some way point to that file and then incorporate it in the DbDo environment"). THE TERM is "DbDo
+        // database": an SQLite file that keeps DbDo's conventions -- defs, maps, files, look and prime -- so it opens
+        // with its fields described, its links working and its scripts inside it. Other names were weighed and left:
+        // "Trail" already names the read-and-write templates; ".dbdo" is the extension of DbDo's script files; "package"
+        // and "collection" say nothing about what is inside. People say "an Access database" and "an Excel workbook";
+        // "a DbDo database" is said the same way, and needs no definition beyond that.
+        // THE COMMAND is Get Database, on the File menu, G (free there, and the first letter of its first word). It takes
+        // a path or a url -- typed, pasted, or picked with Browse local file -- to a .db, or to a .zip holding one with
+        // its companion files, and copies it into DbDo's own data folder, data\<Name>\<Name>.db, where Open Template
+        // Database (Control+Shift+O) lists it from then on, as it lists the templates. A url is downloaded first. A
+        // file that is not SQLite is refused before anything is copied. A database of the same name already there is
+        // replaced only when asked, and kept beside it as a dated backup; Keep both gives the new one a numbered name.
+        // Companion files -- its .inix, saved searches, scripts, report -- come with it from a zip, or from beside a
+        // .db that sits in a folder of its own name, DbDo's layout; a .db lying loose in Downloads comes alone, with
+        // its .inix if one is beside it, so nothing unrelated is swept in. No key: getting a database is occasional.
+        private void fileGetDatabaseClicked(object sender, EventArgs evArgs)
+        {
+            const string sTitle = "Get Database";
+            string sStart = "";
+            try
+            {
+                string sClip = Clipboard.ContainsText() ? Clipboard.GetText().Trim() : "";
+                if (sClip.IndexOf('\n') < 0 && (System.Text.RegularExpressions.Regex.IsMatch(sClip, @"^https?://\S+\.(db|zip)(\?\S*)?$", System.Text.RegularExpressions.RegexOptions.IgnoreCase)
+                    || (System.Text.RegularExpressions.Regex.IsMatch(sClip, @"\.(db|zip)$", System.Text.RegularExpressions.RegexOptions.IgnoreCase) && File.Exists(sClip)))) sStart = sClip;
+            }
+            catch { }
+            string sSource;
+            using (LbcDialog dlg = new LbcDialog(sTitle, this))
+            {
+                dlg.addBand();
+                TextBox txtSource = dlg.addInputBox("&Source path or url:", sStart, "A DbDo database to copy into DbDo's own folder: a .db file, or a .zip holding one, on this computer or at a web address.");
+                Button btnBrowse = dlg.addButton("&Browse local file", "Pick the .db or .zip file on this computer.");
+                dlg.endBand();
+                btnBrowse.Click += delegate(object o, EventArgs e)
+                {
+                    using (OpenFileDialog dlgFile = new OpenFileDialog())
+                    {
+                        dlgFile.Title = sTitle;
+                        prepareFileDialog(dlgFile);
+                        dlgFile.Filter = "DbDo database or zip (*.db;*.zip)|*.db;*.zip|All Files (*.*)|*.*";
+                        dlgFile.InitialDirectory = IniFolders.bestDirectory(IniFolders.openFolder, null);
+                        if (dlgFile.ShowDialog(dlg.form) == DialogResult.OK) { txtSource.Text = dlgFile.FileName; txtSource.Focus(); txtSource.SelectAll(); }
+                    }
+                };
+                if (!dlg.runOkCancel()) return;
+                sSource = txtSource.Text.Trim().Trim('"');
+            }
+            if (sSource.Length == 0) return;
+            DbDoLog.write(sTitle + ": source " + sSource);
+            string sWork = Path.Combine(Homer.Paths.work(), "GetDatabase-" + DateTime.Now.ToString("yyyyMMdd-HHmmss"));
+            try
+            {
+                Directory.CreateDirectory(sWork);
+                string sLocal = sSource;
+                if (System.Text.RegularExpressions.Regex.IsMatch(sSource, @"^https?://", System.Text.RegularExpressions.RegexOptions.IgnoreCase))
+                {
+                    Say.say("Downloading");
+                    Cursor = Cursors.WaitCursor;
+                    try { sLocal = Homer.Web.download(sSource, sWork, ""); } finally { Cursor = Cursors.Default; }
+                    if (string.IsNullOrEmpty(sLocal) || !File.Exists(sLocal)) { ErrorDialog.show(this, sTitle, "Nothing could be downloaded from " + sSource + "."); return; }
+                    DbDoLog.write(sTitle + ": downloaded " + sLocal + ", " + new FileInfo(sLocal).Length + " bytes");
+                }
+                else if (sSource.StartsWith("file:", StringComparison.OrdinalIgnoreCase))
+                {
+                    try { sLocal = new Uri(sSource).LocalPath; } catch { }
+                }
+                if (!File.Exists(sLocal)) { ErrorDialog.show(this, sTitle, "No file is at " + sLocal + "."); return; }
+                IniFolders.openFolder = Path.GetDirectoryName(Path.GetFullPath(sLocal));
+
+                // The database, and the folder its companions come from (null: the database and its .inix only).
+                string sDb = sLocal, sCompanions = null;
+                if (isZipFile(sLocal))
+                {
+                    string sUnzipped = Path.Combine(sWork, "unzipped");
+                    System.IO.Compression.ZipFile.ExtractToDirectory(sLocal, sUnzipped);
+                    List<string> lDbs = new List<string>();
+                    foreach (string sFound in Directory.GetFiles(sUnzipped, "*.db", SearchOption.AllDirectories)) if (isSqliteFile(sFound)) lDbs.Add(sFound);
+                    if (lDbs.Count == 0) { ErrorDialog.show(this, sTitle, Path.GetFileName(sLocal) + " holds no DbDo database."); return; }
+                    sDb = lDbs[0];
+                    if (lDbs.Count > 1)
+                    {
+                        List<string> lNames = new List<string>();
+                        foreach (string sOne in lDbs) lNames.Add(sOne.Substring(sUnzipped.Length).TrimStart('\\', '/'));
+                        string sPicked = promptListChoice(sTitle, "The zip holds " + lDbs.Count + " databases. Choose one:", lNames, null);
+                        if (string.IsNullOrEmpty(sPicked)) return;
+                        sDb = lDbs[lNames.IndexOf(sPicked)];
+                    }
+                    sCompanions = Path.GetDirectoryName(sDb);
+                }
+                else
+                {
+                    if (!isSqliteFile(sLocal)) { ErrorDialog.show(this, sTitle, Path.GetFileName(sLocal) + " is not a DbDo database: it is not an SQLite file, and nothing was copied. Open Database, Control+O, opens other kinds of file."); return; }
+                    string sFolder = Path.GetDirectoryName(Path.GetFullPath(sLocal));
+                    if (string.Equals(Path.GetFileName(sFolder), Path.GetFileNameWithoutExtension(sLocal), StringComparison.OrdinalIgnoreCase)) sCompanions = sFolder;
+                }
+
+                string sName = Path.GetFileNameWithoutExtension(sDb);
+                string sRoot = ScriptHelper.getTemplateDir();
+                string sDestDir = Path.Combine(sRoot, sName);
+                string sDest = Path.Combine(sDestDir, sName + ".db");
+                if (string.Equals(Path.GetFullPath(sDb), Path.GetFullPath(sDest), StringComparison.OrdinalIgnoreCase))
+                { ErrorDialog.show(this, sTitle, sName + " is already in DbDo's folder. Open Template Database, Control+Shift+O, opens it."); return; }
+                if (File.Exists(sDest))
+                {
+                    string sChoice;
+                    using (LbcDialog dlgAsk = new LbcDialog(sTitle, this))
+                    {
+                        dlgAsk.addLabel("You already have a database named " + sName + ". Replace database puts the new one in its place and keeps yours beside it as a dated backup. Keep both gives the new one a numbered name.");
+                        sChoice = dlgAsk.runWithButtons(new string[] { "&Replace database", "&Keep both", "Cancel" });
+                    }
+                    if (string.IsNullOrEmpty(sChoice) || sChoice.StartsWith("Cancel", StringComparison.OrdinalIgnoreCase)) return;
+                    if (sChoice.StartsWith("Keep", StringComparison.OrdinalIgnoreCase))
+                    {
+                        int iNumber = 2;
+                        while (Directory.Exists(Path.Combine(sRoot, sName + "-" + iNumber))) iNumber++;
+                        sName = sName + "-" + iNumber;
+                        sDestDir = Path.Combine(sRoot, sName);
+                        sDest = Path.Combine(sDestDir, sName + ".db");
+                    }
+                    else
+                    {
+                        if (db != null && db.isOpen() && string.Equals(Path.GetFullPath(db.filePath ?? ""), Path.GetFullPath(sDest), StringComparison.OrdinalIgnoreCase))
+                        { try { db.close(); } catch (Exception exClose) { DbDoLog.write(sTitle + ": closing " + sDest + ": " + exClose.Message); } }
+                        string sKept = Path.Combine(sDestDir, sName + "-before-get-" + DateTime.Now.ToString("yyyyMMdd-HHmmss") + ".db");
+                        File.SetAttributes(sDest, FileAttributes.Normal);
+                        File.Move(sDest, sKept);
+                        foreach (string sSide in new string[] { "-wal", "-shm" }) if (File.Exists(sDest + sSide)) { File.SetAttributes(sDest + sSide, FileAttributes.Normal); File.Move(sDest + sSide, sKept + sSide); }
+                        DbDoLog.write(sTitle + ": kept the database it replaces as " + sKept);
+                    }
+                }
+
+                Directory.CreateDirectory(sDestDir);
+                string sFromRoot = Path.Combine(Path.GetDirectoryName(Path.GetFullPath(sDb)), Path.GetFileNameWithoutExtension(sDb));
+                File.Copy(sDb, sDest, true);
+                File.SetAttributes(sDest, FileAttributes.Normal);
+                foreach (string sSide in new string[] { "-wal", "-shm" }) if (File.Exists(sDb + sSide)) File.Copy(sDb + sSide, sDest + sSide, true);
+                int iFiles = 0;
+                List<string> lCompanions = new List<string>();
+                if (sCompanions != null)
+                {
+                    foreach (string sFile in Directory.GetFiles(sCompanions))
+                    {
+                        string sLeaf = Path.GetFileName(sFile);
+                        if (string.Equals(sFile, sDb, StringComparison.OrdinalIgnoreCase) || sLeaf.EndsWith("-wal", StringComparison.OrdinalIgnoreCase) || sLeaf.EndsWith("-shm", StringComparison.OrdinalIgnoreCase)
+                            || sLeaf.EndsWith(".db", StringComparison.OrdinalIgnoreCase)) continue;
+                        lCompanions.Add(sFile);
+                    }
+                }
+                else if (File.Exists(sFromRoot + ".inix")) lCompanions.Add(sFromRoot + ".inix");
+                foreach (string sFile in lCompanions)
+                {
+                    string sLeaf = Path.GetFileName(sFile);
+                    // A companion named for the database takes the new name with it, when Keep both renamed it.
+                    if (sLeaf.StartsWith(Path.GetFileNameWithoutExtension(sDb) + ".", StringComparison.OrdinalIgnoreCase))
+                        sLeaf = sName + sLeaf.Substring(Path.GetFileNameWithoutExtension(sDb).Length);
+                    File.Copy(sFile, Path.Combine(sDestDir, sLeaf), true);
+                    iFiles++;
+                }
+                DbDoLog.write(sTitle + ": copied " + sDb + " to " + sDest + " with " + iFiles + " companion file" + (iFiles == 1 ? "" : "s"));
+                openDatabaseAndApplyState(sDest, null);
+                Say.say(sName + " is in your databases" + (iFiles == 0 ? "" : ", with " + iFiles + (iFiles == 1 ? " file" : " files") + " beside it")
+                    + ". Open Template Database lists it.");
+            }
+            catch (Exception ex)
+            {
+                DbDoLog.write(sTitle + ": " + ex.ToString());
+                ErrorDialog.show(this, sTitle, "The database could not be got, and nothing of yours was changed.\n\n" + ex.Message);
+            }
+            finally
+            {
+                try { if (Directory.Exists(sWork)) Directory.Delete(sWork, true); } catch { }
+            }
+        }
+
+        // isSqliteFile: true when the file begins with SQLite's own sixteen-byte header, "SQLite format 3" and a zero.
+        private static bool isSqliteFile(string sPath)
+        {
+            try
+            {
+                byte[] abHead = new byte[16];
+                using (FileStream fs = new FileStream(sPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    if (fs.Read(abHead, 0, 16) < 16) return false;
+                return Encoding.ASCII.GetString(abHead, 0, 15) == "SQLite format 3" && abHead[15] == 0;
+            }
+            catch { return false; }
+        }
+
+        // isZipFile: true when the file begins with a zip's "PK" signature, whatever its name ends with.
+        private static bool isZipFile(string sPath)
+        {
+            try
+            {
+                using (FileStream fs = new FileStream(sPath, FileMode.Open, FileAccess.Read, FileShare.ReadWrite))
+                    return fs.ReadByte() == 'P' && fs.ReadByte() == 'K';
+            }
+            catch { return false; }
+        }
+
         // The per-sample openers (Northwind / Chinook / Convention) were
         // removed with their menu items; the Template Databases picker
         // (helpSampleDbClicked) discovers and opens every bundled .db
@@ -27073,7 +27320,9 @@ namespace DbDo
         //   - Existing folder path: open in Windows Explorer.
         //   - Anything else: show a brief message in the live region
         //     and do nothing.
-        // Bound to Control+Enter.
+        // Bound to Control+Shift+H (26 November 2026; Control+Enter before). Jamal: Control+Enter presses OK in every Lbc
+        // dialog, so the same key should keep a like meaning; H for HTML, as Control+H was HTML format in EdSharp, and a
+        // Markdown value opens as a web page.
         // recPlayStreamClicked: play the current record's stream in the Homer
         // Player. The address is the first of these the record has and that
         // starts with http: a field named stream_url, url, stream, link or
@@ -27229,14 +27478,41 @@ namespace DbDo
                 string sError;
                 if (!Homer.Conversion.convertAny(sMd, sHtm, out sError) || !File.Exists(sHtm))
                 {
-                    DbDoLog.write("Open Cell Value: " + sMd + " could not become a web page: " + sError);
-                    LbcMessage.show(this, "The field could not be shown as a web page: " + sError, "Open Cell Value", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                    DbDoLog.write("Preview Markdown in Web Browser: " + sMd + " could not become a web page: " + sError);
+                    LbcMessage.show(this, "The field could not be shown as a web page: " + sError, "Preview Markdown in Web Browser", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                     return;
                 }
-                DbDoLog.write("Open Cell Value: " + sColName + " shown as a web page, " + sHtm);
+                DbDoLog.write("Preview Markdown in Web Browser: " + sColName + " shown as a web page, " + sHtm);
                 ComAutomation.shellOpen(sHtm);
             }
-            catch (Exception ex) { ErrorDialog.show(this, "Open Cell Value", ex.Message); }
+            catch (Exception ex) { ErrorDialog.show(this, "Preview Markdown in Web Browser", ex.Message); }
+        }
+
+        // previewMarkdownClicked: the current record's Markdown field as a web page in the browser. The field is found by its
+        // declared type, TEXTMARKDOWN, among all the record's fields, shown or not, so an article's body need not be a shown
+        // column heard on every DownArrow. With two or more such fields, a pick list chooses, opening on the last one chosen.
+        private void previewMarkdownClicked(object sender, EventArgs evArgs)
+        {
+            const string sTitle = "Preview Markdown in Web Browser";
+            if (db == null || !db.hasRecordset()) return;
+            List<string> lMarkdown = new List<string>();
+            foreach (string sOne in db.getFieldNames())
+            {
+                string sType = "";
+                try { sType = db.getColumnDeclaredType(db.currentTable, sOne) ?? ""; } catch { }
+                if (string.Equals(sType, "TEXTMARKDOWN", StringComparison.OrdinalIgnoreCase)) lMarkdown.Add(sOne);
+            }
+            if (lMarkdown.Count == 0) { Say.say("This table has no Markdown field."); return; }
+            string sField = lMarkdown[0];
+            if (lMarkdown.Count > 1)
+            {
+                sField = promptListChoice(sTitle, "Markdown field to preview:", lMarkdown, null);
+                if (string.IsNullOrEmpty(sField)) return;
+            }
+            string sValue = "";
+            try { sValue = db.getFieldValue(sField) ?? ""; } catch { }
+            if (sValue.Trim().Length == 0) { Say.say("The " + sField + " field is empty."); return; }
+            openMarkdownAsWebPage(sField, sValue);
         }
 
         private void recOpenCellClicked(object sender, EventArgs evArgs)
@@ -27259,7 +27535,7 @@ namespace DbDo
                 ListBox lb = dlg.addPickBox(
                     "&Column whose cell value to open:",
                     lFields, sDefault,
-                    "The command opens the url, file path, or folder path stored in this column of the current record, or shows a Markdown field, such as an article's body, as a web page in your browser");
+                    "The command opens the url, file path, or folder path stored in this column of the current record. Preview Markdown in Web Browser, Control+Shift+H, shows an article's body as a web page.");
                 if (!dlg.runOkCancel()) return;
                 if (lb.SelectedItem == null) return;
                 sColName = lb.SelectedItem.ToString();
@@ -27277,6 +27553,8 @@ namespace DbDo
             // file and then opened in a browser, giving the screen reader user a structured view of an article, including
             // clickable links"). Its value is not a path to open but a document to read, so it is converted by the kit's
             // conversions (Pandoc) into DbDo's work folder and opened in the browser, where headings, lists and links work.
+            // Since 27 November 2026 Preview Markdown in Web Browser is the command for this; a Markdown column chosen here
+            // still opens as a page, rather than failing as "not a url, file, or folder".
             if (string.Equals(db.getColumnDeclaredType(db.currentTable, sColName), "TEXTMARKDOWN", StringComparison.OrdinalIgnoreCase))
             {
                 openMarkdownAsWebPage(sColName, sValue);
@@ -28344,31 +28622,32 @@ namespace DbDo
         private void helpUpdateFromTemplateClicked(object sender, EventArgs e)
         {
             const string sTitle = "Update from Template";
-            if (db == null || !db.isOpen() || string.IsNullOrEmpty(db.filePath)) { Say.sayForced("No database is open."); return; }
+            // No copy of a template open: All copies is the only choice there is, so it is taken at once.
+            if (db == null || !db.isOpen() || string.IsNullOrEmpty(db.filePath)) { helpUpdateAllFromTemplatesClicked(sender, e); return; }
             string sCopy = db.filePath;
             string sName = Path.GetFileNameWithoutExtension(sCopy);
             string sTemplate = ScriptHelper.installedTemplateFor(sCopy);
             if (sTemplate == null)
             {
-                ErrorDialog.show(this, sTitle, sName + " is not one of the templates DbDo installs, so there is no template to update it from.");
+                helpUpdateAllFromTemplatesClicked(sender, e);
                 return;
             }
-            if (string.Equals(Path.GetFullPath(sTemplate), Path.GetFullPath(sCopy), StringComparison.OrdinalIgnoreCase))
+            if (string.Equals(Path.GetFullPath(sTemplate), Path.GetFullPath(sCopy), StringComparison.OrdinalIgnoreCase) || db.readOnly)
             {
-                ErrorDialog.show(this, sTitle, "This is the installed template itself. Open your own copy with Template Databases, Alt+Shift+D, and update that.");
+                helpUpdateAllFromTemplatesClicked(sender, e);
                 return;
             }
-            if (db.readOnly) { Say.sayForced("This database is open read only."); return; }
 
             string sChoice;
             using (LbcDialog dlgAsk = new LbcDialog(sTitle, this))
             {
                 dlgAsk.addLabel("Bring your " + sName + " up to date from the template installed with DbDo. Merge adds what the template has "
                     + "and your copy lacks, and keeps everything of yours. Replace makes your copy the template again; your copy as it is "
-                    + "now is kept beside it as a dated backup.");
-                sChoice = dlgAsk.runWithButtons(new string[] { "&Merge template", "&Replace copy", "Cancel" });
+                    + "now is kept beside it as a dated backup. All copies does one or the other for every copy of DbDo's templates at once.");
+                sChoice = dlgAsk.runWithButtons(new string[] { "&Merge template", "&Replace copy", "&All copies", "Cancel" });
             }
             if (string.IsNullOrEmpty(sChoice) || sChoice.StartsWith("Cancel", StringComparison.OrdinalIgnoreCase)) return;
+            if (sChoice.StartsWith("All", StringComparison.OrdinalIgnoreCase)) { helpUpdateAllFromTemplatesClicked(sender, e); return; }
             DbDoLog.write(sTitle + ": " + sChoice + " " + sCopy + " from " + sTemplate);
             int iFiles = ScriptHelper.copyMissingCompanions(sTemplate, sCopy);
             string sFiles = iFiles == 0 ? "" : (iFiles == 1 ? "1 file" : iFiles + " files") + " from the template, such as a query or report, added beside it.";
@@ -28431,7 +28710,7 @@ namespace DbDo
         // template has and it lacks, asking once how records in both are treated. The database open before is opened again.
         private void helpUpdateAllFromTemplatesClicked(object sender, EventArgs e)
         {
-            const string sTitle = "Update Copies from Templates";
+            const string sTitle = "Update All Copies";  // reached from Update from Template's All copies button
             List<string[]> lCopies = new List<string[]>();
             foreach (string sCopy in ScriptHelper.listSampleDatabases())
             {
@@ -28439,7 +28718,7 @@ namespace DbDo
                 if (sTemplate == null || string.Equals(Path.GetFullPath(sTemplate), Path.GetFullPath(sCopy), StringComparison.OrdinalIgnoreCase)) continue;
                 lCopies.Add(new string[] { sCopy, sTemplate });
             }
-            if (lCopies.Count == 0) { Say.sayForced("You have no copies of DbDo's templates yet; Template Databases, Alt+Shift+D, makes one when you open it."); return; }
+            if (lCopies.Count == 0) { Say.sayForced("You have no copies of DbDo's templates yet; Open Template Database, Control+Shift+O, makes one when you open it."); return; }
             List<string> lNames = new List<string>();
             foreach (string[] aPair in lCopies) lNames.Add(Path.GetFileNameWithoutExtension(aPair[0]));
             string sList = string.Join(", ", lNames.ToArray());
@@ -29598,8 +29877,8 @@ namespace DbDo
             lsNames = tableFamilyNames();
             if (lsNames == null || lsNames.Count == 0) { Say.say("No tables found in this database file."); return; }
             // EVERY TABLE IS OFFERED (24 November 2026). Open Table now does Choose Table's job too, so a table already in
-            // a window is still listed, and choosing it goes to that window rather than opening a second one. The first
-            // table not yet in a window is selected, as before.
+            // a window is still listed, and choosing it goes to that window rather than opening a second one.
+            // The pick list starts on the table chosen there last.
             Dictionary<string, DbDoForm> dOpen = new Dictionary<string, DbDoForm>(StringComparer.OrdinalIgnoreCase);
             foreach (Form frmChild in frame.MdiChildren)
             {
@@ -29609,10 +29888,8 @@ namespace DbDo
                     && !string.IsNullOrEmpty(formChild.openTableName) && !dOpen.ContainsKey(formChild.openTableName))
                     dOpen[formChild.openTableName] = formChild;
             }
-            string sFirstClosed = lsNames[0];
-            foreach (string sName in lsNames)
-                if (!dOpen.ContainsKey(sName)) { sFirstClosed = sName; break; }
-            sChosen = promptListChoice("Open Table", "Choose a table to open in a new window:", lsNames, sFirstClosed, db.getTableDescriptions(lsNames));
+            // The last table chosen here, else the first (26 November 2026), not the first table without a window.
+            sChosen = promptListChoice("Open Table", "Choose a table to open in a new window:", lsNames, null, db.getTableDescriptions(lsNames));
             if (string.IsNullOrEmpty(sChosen)) return;
             DbDoForm formOpen;
             if (dOpen.TryGetValue(sChosen, out formOpen)) { formOpen.Activate(); return; }
@@ -30127,7 +30404,11 @@ namespace DbDo
         {
             if (db == null || !db.hasRecordset() || db.recordCount == 0)
             { Say.say("No record selected"); return; }
-            if (!db.hasField("url"))
+            // THE HOME PAGE WHEN THERE IS NO url (26 November 2026): RadioTrail's stations keep a station's web site in
+            // homepage and its stream in stream_url, so Open url opens homepage in a table with no url -- a network such
+            // as Westwood One Sports, with no stream of its own, is reached at its web site.
+            string sUrlField = db.hasField("url") ? "url" : (db.hasField("homepage") ? "homepage" : "");
+            if (sUrlField.Length == 0)
             { Say.say("This table has no url column"); return; }
             // MARKED OR CURRENT (22 November 2026): each marked record's url, or the current one's. More than ten pages asks first.
             List<int> lOpen = scopePositions("Open url");
@@ -30135,7 +30416,7 @@ namespace DbDo
             if (lOpen.Count > 1 || (lOpen.Count == 1 && lOpen[0] != db.absolutePosition))
             {
                 List<string> lUrls = new List<string>();
-                forEachPosition(lOpen, delegate { string sOne = (db.getFieldValue("url") ?? "").Trim(); if (sOne.Length > 0) lUrls.Add(sOne); });
+                forEachPosition(lOpen, delegate { string sOne = (db.getFieldValue(sUrlField) ?? "").Trim(); if (sOne.Length > 0) lUrls.Add(sOne); });
                 if (lUrls.Count == 0) { Say.say("The marked records have no url"); return; }
                 if (lUrls.Count > 10 && LbcMessage.show(this, "Open " + lUrls.Count + " pages, one for each marked record?", "Open url",
                     MessageBoxButtons.YesNo, MessageBoxIcon.Question) != DialogResult.Yes) return;
@@ -30148,7 +30429,7 @@ namespace DbDo
                 Say.say("Opening " + iOpened + (iOpened == 1 ? " page" : " pages"));
                 return;
             }
-            string sUrl = db.getFieldValue("url") ?? "";
+            string sUrl = db.getFieldValue(sUrlField) ?? "";
             if (sUrl.Length == 0) { Say.say("Url is empty"); return; }
             try
             {
@@ -32566,7 +32847,18 @@ namespace DbDo
                 lb.Size = new Size(396, 270);
                 lb.Anchor = AnchorStyles.Top | AnchorStyles.Left | AnchorStyles.Right | AnchorStyles.Bottom;
                 foreach (string s in lItems) lb.Items.Add(s);
-                if (sCurrent != null && lb.Items.Contains(sCurrent)) lb.SelectedItem = sCurrent;
+                // THE LAST CHOICE, ELSE THE FIRST (26 November 2026, Jamal: Control+Shift+O and Control+T did not recall
+                // their previous choice, a Homer rule). A caller that names no item, or names the first, gets the item
+                // chosen last in the list of this title, kept across sessions by the kit; failing that, the first item.
+                // A caller that names another item -- the current table, the current window, a guessed match -- gets it.
+                string sChoiceKey = "DbDo" + System.Text.RegularExpressions.Regex.Replace(sTitle ?? "", @"[^A-Za-z0-9]", "");
+                string sStart = sCurrent;
+                if (string.IsNullOrEmpty(sStart) || (lItems.Count > 0 && sStart == lItems[0]))
+                {
+                    string sLast = Homer.LbcDialog.lastChoiceIn(sChoiceKey, lItems);
+                    sStart = (sLast.Length > 0) ? sLast : (lItems.Count > 0 ? lItems[0] : null);
+                }
+                if (sStart != null && lb.Items.Contains(sStart)) lb.SelectedItem = sStart;
                 else if (lb.Items.Count > 0) lb.SelectedIndex = 0;
                 lb.DoubleClick += (s, e) => { dlg.DialogResult = DialogResult.OK; dlg.Close(); };
                 dlg.Controls.Add(lb);
@@ -32602,7 +32894,9 @@ namespace DbDo
                 dlg.ActiveControl = lb;
 
                 if (dlg.ShowDialog(this) != DialogResult.OK) return null;
-                return lb.SelectedItem as string;
+                string sPicked = lb.SelectedItem as string;
+                if (!string.IsNullOrEmpty(sPicked)) Homer.LbcDialog.noteChoice(sChoiceKey, sPicked);
+                return sPicked;
             }
         }
 
@@ -41542,6 +41836,9 @@ namespace DbDo
                         {
                             try
                             {
+                                // TEMPLATES CHECKED BEFORE THE RESTORE (26 November 2026): a newer template now reaches its copy
+                                // at start, before the copy is opened and held, not only when the templates are listed.
+                                try { ScriptHelper.getTemplateDir(); } catch { }
                                 DbDoLog.write("Restoring last session: " + sSavedDb
                                     + (string.IsNullOrEmpty(sSavedTbl) ? "" : " (table: " + sSavedTbl + ")"));
                                 // THE LAST VIEW COMES BACK WITH THE LAST DATABASE (22 November 2026). This restore opened the

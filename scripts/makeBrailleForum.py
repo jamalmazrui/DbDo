@@ -28,13 +28,14 @@ A file without those markers is kept whole, as one row of kind "issue", and note
 table of contents and the standing notices (ACB Officers, Are You Moving?, Accessing Your ACB Braille and E-Forums and
 the like) are kept, with kind saying so, so a search can leave them out: kind = 'article'.
 
-AN ARTICLE KEEPS ITS KEY. article_key, such as bf-2023-11-007, is the issue's key and a number, and it is the prime,
-so a person's own copy of the database is updated from the template by it. A rebuild reads the previous template
+AN ARTICLE KEEPS ITS KEY. article_key, such as bf-2023-11-007, is the issue's key and a number. It was the prime until
+26 November 2026; the prime is now the month, the issue's title and the article's place in it, which a person can read,
+and the copy DbDo opens follows the template whole (FollowTemplate), so no copy is matched to it by key. A rebuild reads the previous template
 first and gives each article the key it had: same web page, else same words (fingerprint), else the only article of
 the issue with that title. A new article takes the issue's next number, which is kept on the issue row (next_number)
 and never reused. notes\BrailleForum_Coverage.md lists every article that is new, gone, or could not be matched for certain.
 
-THE FULL-TEXT INDEX, articles_fts, is the kit's homerFts: it indexes title, author, search_text and text, and keeps
+THE FULL-TEXT INDEX, articles_fts, is the kit's homerFts: it indexes title, writer, search_text and text, and keeps
 itself current through triggers.
 
 THE INDEX READS PLAIN WORDS (26 November 2026, Jamal: "if Markdown is used for article content, that could disrupt FTS
@@ -89,13 +90,13 @@ sMonthPattern = "|".join(dMonths)
 # THE STANDING NOTICES: sections every issue repeats. Matched on the start of the title, case and punctuation aside.
 lsBoilerplate = ["accessing your acb braille", "acb officers", "acb board of directors", "acb board of publications",
                  "are you moving", "be a part of acb", "how to submit articles", "upcoming forum themes", "in memoriam dedication"]
-dArticleTypes = {"article_key": "TEXTLINE", "author": "TEXTLINE", "body": "TEXTMARKDOWN", "fingerprint": "TEXTLINE", "format": "TEXTLINE",
-                 "issue_id": "INTEGER", "kind": "TEXTLINE", "position": "INTEGER", "published": "TEXTLINE", "search_text": "TEXTMEMO", "text": "TEXTMEMO",
+dArticleTypes = {"article_key": "TEXTLINE", "writer": "TEXTLINE", "body": "TEXTMARKDOWN", "fingerprint": "TEXTLINE", "format": "TEXTLINE",
+                 "issue": "TEXTLINE", "issue_id": "INTEGER", "kind": "TEXTLINE", "position": "INTEGER", "published": "TEXTLINE", "search_text": "TEXTMEMO", "text": "TEXTMEMO",
                  "title": "TEXTLINE", "words": "INTEGER"}
 dIssueTypes = {"articles": "INTEGER", "edition": "TEXTLINE", "issue_key": "TEXTLINE", "next_number": "INTEGER", "number": "TEXTLINE",
                "published": "TEXTLINE", "published_end": "TEXTLINE", "text_url": "TEXTLINE", "title": "TEXTLINE", "volume": "TEXTLINE",
                "words": "INTEGER"}
-lsArticleFields = ["title", "author", "published", "issue_id", "position", "kind", "format", "words", "body", "text", "search_text", "article_key", "fingerprint"]
+lsArticleFields = ["title", "writer", "published", "issue", "issue_id", "position", "kind", "format", "words", "body", "text", "search_text", "article_key", "fingerprint"]
 dWriterTypes = {"articles": "INTEGER", "first_published": "TEXTLINE", "last_published": "TEXTLINE", "name": "TEXTLINE"}
 lsWriterFields = ["name", "articles", "first_published", "last_published"]
 # WORDS THAT NAME A ROLE, NOT A PERSON: what follows a comma in a byline ("Kim Charlson, ACB President").
@@ -132,6 +133,13 @@ fLastSay = [time.time()]
 def say(sText):
     fLastSay[0] = time.time()
     return trail.say(sText)
+
+
+def shortTitle(dIssue):
+    """An issue's title for a status line: without the magazine's main name ("June 2026"), with any other edition's."""
+    sTitle = issueTitle(dIssue)
+    sMain = next(iter(dEditions), "")
+    return sTitle[len(sMain) + 2:] if sMain and sTitle.startswith(sMain + ", ") else sTitle
 
 
 def log(sText):
@@ -634,26 +642,42 @@ def build(lIssues, sPorter, sOut):
     # The views table was retired on 4 November 2026, so it is left out, as makeDescribedFilms does; the kit's checkDb
     # failed the first push on it.
     for sStatement in [s for s in trail.systemDdl() if not s.startswith("CREATE TABLE views")]: oDb.execute(sStatement)
-    for sStatement in trail.tableDdl("issues", "issue_id", lsIssueFields, ["title"], ["issue_key"], dIssueTypes): oDb.execute(sStatement)
+    # PRIMES A PERSON CAN READ (26 November 2026, Jamal: article_key "is meant for machine readable parsing", so no
+    # look or prime should use it). A prime says what a record is and sets the default order, so an issue is known by its
+    # month and title ("2026-07|Braille Monitor, July 2026"), and an article by its month, its issue's title and its place
+    # in the issue ("2026-07|Braille Monitor, July 2026|3"): unique, in the order the magazine printed them, and readable.
+    # The articles table gains issue, the issue's title, for it, since a prime holds no id. issue_key and article_key stay
+    # as fields, for the builder's own stable keys and for links from outside, but neither look nor prime uses them.
+    for sStatement in trail.tableDdl("issues", "issue_id", lsIssueFields, ["title"], ["published", "title"], dIssueTypes): oDb.execute(sStatement)
     for sStatement in trail.tableDdl("writers", "writer_id", lsWriterFields, ["name"], ["name"], dWriterTypes): oDb.execute(sStatement)
-    for sStatement in trail.tableDdl("articles", "article_id", lsArticleFields, ["title", "published"], ["article_key"], dArticleTypes): oDb.execute(sStatement)
+    for sStatement in trail.tableDdl("articles", "article_id", lsArticleFields, ["title", "published"], ["published", "issue", "position"], dArticleTypes): oDb.execute(sStatement)
     oDb.execute("CREATE INDEX idx_articles_issue_id ON articles (issue_id)")
     trail.addLookups(oDb, "articles", "kind", dKinds, sSource)
     trail.addLookups(oDb, "articles", "format", dFormats, sSource)
     trail.addLookups(oDb, "issues", "edition", dEditions, sSource)
     iArticles = 0
+    setTitles = set()
     for dIssue in lIssues:
         lArticles = dIssue["lArticles"]
+        # A second issue in one month with the same title (rare: a second Monitor in May 1959) is told apart in its title,
+        # which the prime needs; the log names it.
+        sIssueTitle = issueTitle(dIssue)
+        if (dIssue["published"], sIssueTitle) in setTitles:
+            iNth = 2
+            while (dIssue["published"], "%s, issue %d" % (sIssueTitle, iNth)) in setTitles: iNth += 1
+            log("ISSUETITLE %s: %s is already taken, so this one is %s, issue %d" % (dIssue["issue_key"], sIssueTitle, sIssueTitle, iNth))
+            sIssueTitle = "%s, issue %d" % (sIssueTitle, iNth)
+        setTitles.add((dIssue["published"], sIssueTitle))
         oCursor = oDb.execute("INSERT INTO issues (title, edition, published, published_end, volume, number, articles, words, issue_key, next_number, text_url, url) "
                               "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                              (issueTitle(dIssue), dIssue["edition"], dIssue["published"], dIssue["published_end"] or None, dIssue.get("volume"),
+                              (sIssueTitle, dIssue["edition"], dIssue["published"], dIssue["published_end"] or None, dIssue.get("volume"),
                                dIssue.get("number"), len(lArticles), sum(d["words"] for d in lArticles), dIssue["issue_key"], dIssue["next_number"],
                                dIssue.get("text_url") or None, None if dIssue["page"].lower().endswith(".txt") else dIssue["page"]))
         iIssue = oCursor.lastrowid
         for d in lArticles:
-            oDb.execute("INSERT INTO articles (title, author, published, issue_id, position, kind, format, words, body, text, search_text, article_key, fingerprint, url) "
-                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
-                        (d["title"], d["author"] or None, d["published"], iIssue, d["position"], d["kind"], d["format"], d["words"], d["body"], d["text"], d["search_text"],
+            oDb.execute("INSERT INTO articles (title, writer, published, issue, issue_id, position, kind, format, words, body, text, search_text, article_key, fingerprint, url) "
+                        "VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        (d["title"], d["author"] or None, d["published"], sIssueTitle, iIssue, d["position"], d["kind"], d["format"], d["words"], d["body"], d["text"], d["search_text"],
                          d["article_key"], d["fingerprint"] or None, d["url"] or None))
             iArticles += 1
     # THE WRITERS TABLE (26 November 2026, Jamal: "an authors table in addition, properly mapped"; named writers the same
@@ -661,10 +685,11 @@ def build(lIssues, sPorter, sOut):
     # found in every article's byline by authorNames, with how many articles they wrote and the first and last month.
     # Each article is mapped to each of its writers by a maps row of kind written_by -- the way DbDo links records many
     # to many, by prime, as MusicTrail maps performers to albums -- so an article by three people reaches all three, and
-    # an author reaches every article. The byline stays in articles.author as ACB printed it.
+    # a writer reaches every article. The byline stays in articles.writer as the magazine printed it (the column was
+    # named author until the evening of 26 November 2026, when Jamal noticed it; DbDo's word is writer, as in the writers table).
     dAuthors = collections.OrderedDict()
     lMaps = []
-    for sKey, sByline, sPublished in oDb.execute("SELECT article_key, author, published FROM articles WHERE author IS NOT NULL ORDER BY published, position"):
+    for sKey, sByline, sPublished in oDb.execute("SELECT article_key, writer, published FROM articles WHERE writer IS NOT NULL ORDER BY published, position"):
         for sName in authorNames(sByline):
             # ONE PERSON, ONE ROW: "Cynthia G. Hawkins" and "Cynthia Hawkins" are the same writer, so a middle initial is
             # set aside in matching, and the row takes the form the bylines use most.
@@ -675,17 +700,19 @@ def build(lIssues, sPorter, sOut):
             dAuthor["last_published"] = sPublished
             lMaps.append((sKey, sMatch))
     for dAuthor in dAuthors.values(): dAuthor["name"] = dAuthor["variants"].most_common(1)[0][0]
-    lMaps = [("articles", sKey, "written_by", "writers", dAuthors[sMatch]["name"]) for sKey, sMatch in lMaps]
+    # A maps row names each record by its prime, so the article's prime -- month, issue and place -- not its key.
+    dPrimes = dict(oDb.execute("SELECT article_key, prime FROM articles"))
+    lMaps = [("articles", dPrimes[sKey], "written_by", "writers", dAuthors[sMatch]["name"]) for sKey, sMatch in lMaps]
     for dAuthor in sorted(dAuthors.values(), key=lambda d: d["name"].lower()):
         oDb.execute("INSERT INTO writers (name, articles, first_published, last_published) VALUES (?, ?, ?, ?)",
                     (dAuthor["name"], dAuthor["articles"], dAuthor["first_published"], dAuthor["last_published"]))
     for tMap in lMaps: oDb.execute("INSERT INTO maps (tbl1, prime1, kind, tbl2, prime2) VALUES (?, ?, ?, ?, ?)", tMap)
     trail.addLookups(oDb, "maps", "kind", {"written_by": "The article (subject) was written by the writer (object), as its byline names them."}, sSource)
-    iBylines = oDb.execute("SELECT count(*) FROM articles WHERE author IS NOT NULL").fetchone()[0]
+    iBylines = oDb.execute("SELECT count(*) FROM articles WHERE writer IS NOT NULL").fetchone()[0]
     log("WRITERS %s from %s; %s" % (plural(len(dAuthors), "person", "people"), plural(iBylines, "byline"), plural(len(lMaps), "written_by map")))
     say("Writers: %s, mapped to their articles by %s." % (plural(len(dAuthors), "person", "people"), plural(len(lMaps), "link")))
     sTokenize = ("porter " if sPorter else "") + homerFts.sDefaultTokenize
-    homerFts.createIndex(oDb, "articles", "article_id", ["title", "author", "search_text", "text"], "articles_fts", sTokenize)
+    homerFts.createIndex(oDb, "articles", "article_id", ["title", "writer", "search_text", "text"], "articles_fts", sTokenize)
     oDb.execute("COMMIT")
     homerFts.optimize(oDb, "articles_fts")
     oDb.execute("ANALYZE")
@@ -910,7 +937,7 @@ def writeStatistics(sDbPath, sPath):
     iShared = one("SELECT count(*) FROM (SELECT prime1 FROM maps WHERE kind = 'written_by' GROUP BY prime1 HAVING count(*) > 1)")[0]
     lsLines += ["- %s named in bylines; %s wrote just one article." % (plural(iWriters, "writer"), n(iOnce)),
                 "- %s had more than one writer." % plural(iShared, "article")]
-    sJoin = "FROM maps m JOIN articles a ON a.article_key = m.prime1 AND m.tbl1 = 'articles' JOIN writers w ON w.name = m.prime2 AND m.tbl2 = 'writers' WHERE m.kind = 'written_by' AND " + sArticle
+    sJoin = "FROM maps m JOIN articles a ON a.prime = m.prime1 AND m.tbl1 = 'articles' JOIN writers w ON w.name = m.prime2 AND m.tbl2 = 'writers' WHERE m.kind = 'written_by' AND " + sArticle
     lsLines += ["", "### Most articles", ""]
     for sName, iCount, sFrom, sTo in rows("SELECT w.name, count(*), min(a.published), max(a.published) " + sJoin + " GROUP BY w.name ORDER BY count(*) DESC, w.name LIMIT 10"):
         lsLines.append("- %s: %s, %s to %s" % (sName, plural(iCount, "article"), sFrom, sTo))
@@ -924,7 +951,7 @@ def writeStatistics(sDbPath, sPath):
     for sName, iYears, iCount in rows("SELECT w.name, count(DISTINCT substr(a.published, 1, 4)), count(*) " + sJoin + " GROUP BY w.name ORDER BY 2 DESC, 3 DESC LIMIT 10"):
         lsLines.append("- %s: %s, %s" % (sName, plural(iYears, "year"), plural(iCount, "article")))
     lsLines += ["", "### Longest single articles", ""]
-    for sTitle, sByline, sPublished, iWordsHere in rows("SELECT title, author, published, words FROM articles a WHERE " + sArticle + " ORDER BY words DESC LIMIT 10"):
+    for sTitle, sByline, sPublished, iWordsHere in rows("SELECT title, writer, published, words FROM articles a WHERE " + sArticle + " ORDER BY words DESC LIMIT 10"):
         lsLines.append("- %s%s, %s: %s words" % (sTitle, ", by " + sByline if sByline else "", sPublished, n(iWordsHere)))
     # Years
     lsLines += ["", "## Years", ""]
@@ -1014,8 +1041,7 @@ def logBodyBulk(oDb):
 
 fnStale = None   # a builder's own test of an existing template: returns why it must be rebuilt, else ""
 bFromSaved = False   # set when a stale template is rebuilt from pages already saved
-sFromSaved = ("Most pages are already saved and are read from disk; the recent issues are checked with the site, one page "
-              "a second. Expect roughly half an hour to an hour, with a status message at least every 20 seconds.")
+sFromSaved = "Most pages are saved, so this takes half an hour to an hour."
 
 
 def repairTemplate():
@@ -1046,13 +1072,13 @@ def repairTemplate():
         sStale = fnStale(oDb) if fnStale else ""
         if sStale:
             oDb.close()
-            say(sSource + ".db is being rebuilt: " + sStale + " Pages already saved are not fetched again.")
+            say(sSource + ".db is being rebuilt: " + sStale)
             global bFromSaved
             bFromSaved = True
             return main([])
-        if "search_text" not in lsColumns or not bAuthors:
+        if "search_text" not in lsColumns or not bAuthors or "writer" not in lsColumns or "issue" not in lsColumns:
             oDb.close()
-            say(sSource + ".db is being rebuilt from the saved pages, for the newest design (plain words in the index, a writers table). It takes a minute or two and fetches nothing.")
+            say(sSource + ".db is being rebuilt from saved pages for the newest design.")
             return main(["--offline"])
         lsMends = []
         if oDb.execute("SELECT count(*) FROM sqlite_master WHERE type = 'table' AND name = 'views'").fetchone()[0]:
@@ -1103,7 +1129,7 @@ def main(lsArgs):
     if iLimit: lIssues = lIssues[:iLimit]
     say("Reading %s, from %s to %s. %s"
         % (plural(len(lIssues), "issue"), lIssues[-1]["published"], lIssues[0]["published"],
-           "A pilot takes a few minutes." if iLimit else (sFromSaved if bFromSaved else sFirstRun)))
+           "A pilot takes a few minutes." if iLimit else ("Saved pages only." if bOffline else (sFromSaved if bFromSaved else sFirstRun))))
     sPandoc = pandocPath()
     log("PANDOC %s" % (sPandoc or "none"))
     dOld = previousKeys(sTarget)
@@ -1111,8 +1137,10 @@ def main(lsArgs):
     lBuilt = []
     global sHeartbeat
     for iAt, dIssue in enumerate(lIssues, 1):
-        sHeartbeat = "Still working: reading issue %d of %d, %s%s." % (iAt, len(lIssues), issueTitle(dIssue),
-                     ", checking its pages with the site one a second" if bRefresh or dIssue["published"] >= sCutoff else "")
+        # SUCCINCT (26 November 2026, Jamal: the status lines reassure, but should be shorter): the issue's month, without
+        # the magazine's own name, which every line would repeat.
+        sShort = shortTitle(dIssue)
+        sHeartbeat = "Issue %d of %d, %s%s." % (iAt, len(lIssues), sShort, ", checking with the site" if bRefresh or dIssue["published"] >= sCutoff else "")
         dIssue["lArticles"] = readIssue(oCache, dIssue, sPandoc, not bRefresh and dIssue["published"] < sCutoff)
         if not dIssue["lArticles"]: continue
         dIssue["next_number"] = assignKeys(dIssue, dIssue["lArticles"], dOld)
@@ -1120,7 +1148,7 @@ def main(lsArgs):
         # PROGRESS ABOUT A MINUTE APART (25 November 2026, Jamal asked for more frequent status): every fifth issue, with
         # the one just read and the articles so far, so a long first run never goes quiet for long.
         if iAt % 5 == 0 or iAt == len(lIssues):
-            say("%d of %d issues read, through %s; %s so far." % (iAt, len(lIssues), issueTitle(dIssue), plural(sum(len(d["lArticles"]) for d in lBuilt), "row")))
+            say("%d of %d issues, %s: %s." % (iAt, len(lIssues), sShort, plural(sum(len(d["lArticles"]) for d in lBuilt), "row")))
             oCache.save()
     sHeartbeat = ""
     oCache.save()
