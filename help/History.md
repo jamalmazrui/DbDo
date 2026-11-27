@@ -5,6 +5,18 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 27 November 2026, evening -- Ready for release
+
+- **Marks are always 1 or 0.** Semicolon wrote 1, but marking a range and Toggle Marks wrote the word true, and Filter Records' Marked records looked only for the word. So a record marked one way could be missed by the Marked filter, a report or the marked count. Every way of marking now writes 1, the Marked filter and the count accept either, and a copy marked by an earlier version is set right when it opens. A new build check fails if a word ever creeps back.
+- **Enter on a book no longer pauses.** Going into a TalkingBookTopics book's related records took over two seconds, because finding records two links away read every link twice. It now uses the links table's indexes, and the same question takes a moment.
+- **TalkingBookTopics comes with DbDo**, since walk 7 searches it.
+- **More saved searches and reports.** BlindCreations gains Apps-By-Platform, Kindle-Books and an app_list report; MusicTrail, Top-5-By-Genre, Albums-By-Decade and a listening_list report; RadioTrail, Most-Voted and News-and-Talk; RecipeTrail, a cookbook report. Each build runs every one.
+- **In Brief, cleaner.** Titles lose stray backslashes, an untitled article is named by its first sentence, and lists of volunteers' home addresses are left out. Each issue now goes through Pandoc once, not twice.
+- **The live walk starts at the grid.** It presses Escape twice first, since the last run began inside a list left open and heard only half its lines.
+- **Walk 1's homework names a key DbDo still has,** Alt+Delete, in place of Shift+Z. The build now checks the keys a walk's homework names, as it checks the keys a walk presses.
+- **The guide, ReadMe and FAQ state DbDo's mission and goals,** name the new searches and reports, and answer how to search long text and how to use a shared database. **Announce.md** is rewritten as a short announcement to paste anywhere.
+
+
 ## 27 November 2026, late afternoon -- In Brief, and a walk for searching
 
 - **TalkingBookTopics gains the magazine's news.** A new table, updates, holds the In Brief articles: new services, BARD, the move from cassettes to digital players. Each is Markdown, so Preview Markdown in Web Browser (Control+Shift+H) shows it as a web page with its headings and links. It has its own full-text index and a saved search, Digital-Players, and opens newest first.

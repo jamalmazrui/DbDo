@@ -35,8 +35,8 @@ minutes each, meant to be heard in order.
 ## I forgot a key. How do I find it?
 
 Control+F1 is the Key Describer: press it, then any key, and DbDo says what that
-key does instead of doing it. Alt+F10 lists every command in one window you can
-filter by typing. Control+Shift+F1 opens the full list of keys.
+key does instead of doing it. Alt+F10, the Alternate Menu, lists every command in one window; Control+F there
+keeps only the commands whose names hold the words you type. Control+Shift+F1 opens the full list of keys.
 
 ## Why is the key for Order Alt+O, not Control+O?
 
@@ -48,6 +48,20 @@ Show Columns on Alt+S, since Control+S saves.
 
 Sleep. Every Z key is a toggle that wakes a behavior or puts it to sleep, such
 as Control+Shift+Z for Read Only Toggle.
+
+## Can DbDo search long text, such as descriptions?
+
+Yes. A table with a full-text index, such as the books of TalkingBookTopics,
+offers Full-text match in Filter Records (Control+F). It finds whole words in
+every field at once: a phrase, either word, a word left out, a word's start. The
+template's saved searches, Alt+V, put the best matches first. Walk 7 of the
+tutorials shows how.
+
+## How do I use a database someone shared with me?
+
+Get Database, on the File menu (Alt+F, then G), copies it into your own DbDo
+folder from its path or web address, and opens it. A zip holding a database
+works too.
 
 ## Can DbDo use AI?
 

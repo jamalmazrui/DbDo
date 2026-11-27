@@ -461,6 +461,17 @@ def checkTutorialKeys():
             iChecked += 1
             if frozenset(lsParts) not in lsBound:
                 lsBad.append("%s teaches %s, which DbDo does not bind" % (sName, sKey))
+        # HOMEWORK KEYS TOO (27 November 2026, from the release audit): walk 1's homework still said "Press Shift plus
+        # Z" a day after Say Status lost its key, since only Key= lines were checked. A key a walk's homework names,
+        # spoken as "Shift plus Z", is checked the same way.
+        for sLine in readText(os.path.join(sHelp, sName)).splitlines():
+            if not sLine.startswith("Homework="): continue
+            for oSpoken in re.finditer(r"\b((?:(?:Control|Alt|Shift) plus )+(?:[A-Z]\b|F\d{1,2}\b|Semicolon|Slash|Apostrophe|Delete|Home|End))", sLine):
+                lsParts = [dAlias.get(x.strip().lower(), x.strip().lower()) for x in oSpoken.group(1).split(" plus ")]
+                if "+".join(lsParts) in lsFree: continue
+                iChecked += 1
+                if frozenset(lsParts) not in lsBound:
+                    lsBad.append("%s's homework names %s, which DbDo does not bind" % (sName, oSpoken.group(1)))
     for s in lsBad: logLine("TUTORIAL KEY: " + s)
     if lsBad:
         return finding("tutorial keys", "fail", "%s; each is in the log" % countNoun(len(lsBad), "key"))
@@ -657,6 +668,35 @@ def checkTutorials():
                    countNoun(iChecked, "tutorial"))
 
 
+def checkMarkedValue():
+    """ONE VALUE FOR MARKED (27 November 2026, from the release audit). DbDo wrote marked as 1 in Mark Record and as
+    'true' in Mark over a range and Toggle Marks, and Filter Records tested only 'true', so marks went missing from
+    filters and reports. Every writer must write 1 or 0, no SQL in DbDo.cs may test marked against the text 'true'
+    alone, and every template report that filters on marked must test the number."""
+    lsBad = []
+    sSource = readText(os.path.join(sRoot, "DbDo.cs"))
+    for iLine, sLine in enumerate(sSource.split("\n"), 1):
+        if sLine.strip().startswith("//"): continue
+        if re.search(r'MarkedColumn,\s*[^;]*"(true|false)"', sLine, re.I):
+            lsBad.append("DbDo.cs line %d writes marked as a word: %s" % (iLine, sLine.strip()[:90]))
+        if re.search(r"marked\s*(=|<>)\s*'true'", sLine, re.I) and "1 OR" not in sLine:
+            lsBad.append("DbDo.cs line %d tests marked against 'true' alone: %s" % (iLine, sLine.strip()[:90]))
+    iReports = 0
+    sTemplates = os.path.join(sRoot, "templates")
+    for sDirPath, lsDirs, lsNames in os.walk(sTemplates):
+        for sName in lsNames:
+            if sName.lower() != "report.inix": continue
+            for iLine, sLine in enumerate(readText(os.path.join(sDirPath, sName)).split("\n"), 1):
+                if re.match(r"\s*@filter\s*=.*\bmarked\b", sLine, re.I):
+                    iReports += 1
+                    if re.search(r"'true'|\btrue\b", sLine, re.I):
+                        lsBad.append("%s line %d filters marked by a word: %s" % (os.path.relpath(os.path.join(sDirPath, sName), sRoot), iLine, sLine.strip()))
+    for s in lsBad: logLine("MARKED: " + s)
+    if lsBad:
+        return finding("marked", "fail", "%s break the rule that marked is 1 or 0" % countNoun(len(lsBad), "line"))
+    return finding("marked", "pass", "marked is written as 1 or 0, and %s filter it as a number" % countNoun(iReports, "report"))
+
+
 def usage(bBad):
     """What this script does, and what it accepts: nothing.
 
@@ -701,6 +741,7 @@ def main():
     checkTutorialKeys()
     checkAccessLetters()
     checkAccessibleNames()
+    checkMarkedValue()
 
     iFailed = len([t for t in lsFindings if t[1] == "fail"])
     iPassed = len([t for t in lsFindings if t[1] == "pass"])

@@ -244,6 +244,9 @@ Type: files; Name: "{app}\templates\RecipeTrail\*.db-journal"
 Type: files; Name: "{app}\templates\TechTraining\*.db-wal"
 Type: files; Name: "{app}\templates\TechTraining\*.db-shm"
 Type: files; Name: "{app}\templates\TechTraining\*.db-journal"
+Type: files; Name: "{app}\templates\TalkingBookTopics\*.db-wal"
+Type: files; Name: "{app}\templates\TalkingBookTopics\*.db-shm"
+Type: files; Name: "{app}\templates\TalkingBookTopics\*.db-journal"
 Type: files; Name: "{app}\templates\chinook\*.db-wal"
 Type: files; Name: "{app}\templates\chinook\*.db-shm"
 Type: files; Name: "{app}\templates\chinook\*.db-journal"
@@ -429,7 +432,12 @@ Source: "data\defs.db"; DestDir: "{app}\data"; Flags: ignoreversion
 ; The templates' logs folders hold the build's database checks, not anything a user needs (9 October 2026).
 ; BRAILLEFORUM IS NOT SHIPPED (25 November 2026): its database stays on the development computer until large databases
 ; have a way to be downloaded, so the whole template folder is excluded here, by the leading backslash, from the templates root.
-Source: "templates\*"; DestDir: "{app}\templates"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist; Excludes: ".git,.venv,__pycache__,*.pyc,venv,logs,*.log,*.db-wal,*.db-shm,*.db-journal,\BrailleForum,\BrailleMonitor,\TalkingBookTopics"
+; TALKINGBOOKTOPICS SHIPS (27 November 2026, for the release). Walk 7, Search a Library, opens it, so a person who
+; installs DbDo must have it. A download through Get Database was the other way; it adds a step to the walk and a
+; release asset to keep in step, on a release weekend. The database is 144 MB but mostly text, which lzma2 packs
+; tightly; the build log gives the installer's size. BrailleForum and BrailleMonitor stay out: they are Jamal's own,
+; named in no public document. A half-built TalkingBookTopics.db.building is never shipped (*.building).
+Source: "templates\*"; DestDir: "{app}\templates"; Flags: ignoreversion recursesubdirs createallsubdirs skipifsourcedoesntexist; Excludes: ".git,.venv,__pycache__,*.pyc,venv,logs,*.log,*.db-wal,*.db-shm,*.db-journal,*.building,\BrailleForum,\BrailleMonitor"
 ; ALWAYS REPLACED (7 November 2026). This copy is the program's own: its [Hotkeys] descriptions feed the
 ; Key Describer, and onlyifdoesntexist kept the FIRST install's copy forever, so removed keys went on being
 ; described. A person's settings live in %LOCALAPPDATA%\DbDo\DbDo.inix, which this line never touches.

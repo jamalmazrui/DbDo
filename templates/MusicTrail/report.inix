@@ -1,0 +1,28 @@
+﻿; Report definitions for the MusicTrail template.
+;
+; Run them with Run Report (Alt+Shift+R). DbDo renders the chosen report and opens it in your
+; editor, where it can be read straight through or printed. Empty fields print nothing.
+
+FileTask = report
+
+; The albums you have marked, as a list to hear.
+[listening_list]
+@table = albums
+@filter = marked = 1
+@sort = artist, year
+header = """
+# Albums to Hear
+
+Prepared {{ new Date().toISOString().substring(0,10) }} from MusicTrail.
+"""
+detail = """
+## $name
+
+- By: $artist
+{{ $year ? "- Year: " + $year : "" }}
+{{ $genre ? "- Genre: " + $genre : "" }}
+{{ $summary ? "- About: " + $summary : "" }}
+"""
+footer = """
+**$count {{ $count == 1 ? "album" : "albums" }} to hear.**
+"""

@@ -2,6 +2,8 @@
 
 DbDo is a relational database manager built from the ground up for people who work by keyboard and screen reader. It opens SQLite, Access, Excel, dBASE, and delimited-text files, presents their tables as ordinary Windows lists you can navigate cell by cell, and lets you query, edit, relate, analyze, and report on the data without ever needing a mouse or a glance at the screen.
 
+**Mission and goals.** DbDo's mission is to make keeping, finding and sharing records as quick by keyboard and screen reader as by mouse and sight. Its goals: open the files people already have; give every command a memorable key named for a word in it; teach with real data, in templates and spoken tutorials; and let one database file carry its own searches, reports and scripts, so it is the whole package to share.
+
 This guide is organized concepts first. The opening part explains the handful of ideas that everything else rests on: how windows are arranged, what the data list is, the difference between the grid you navigate and the physical table underneath it, how fields are categorized, and the keyboard patterns that recur throughout the program. Once those are clear, the later parts cover working with data, producing output, importing and exporting, SQL and scripting, and a full command reference. If you are new to DbDo, read Part 1 in order. If you are returning for a specific answer, jump to the reference tables near the end.
 
 ---
@@ -1253,13 +1255,13 @@ conference, HomerDev's convention-database skill builds one afresh from its agen
 - **BookTrail** -- books read, reading, and meant to be read. It comes with six sample books; bookFido fills your copy from your Audible, Kindle, Goodreads, Bookshare and BARD libraries, and removes the samples you have not touched once your own books are in. Reading-List shows what is next, series in order, and the reading_log report writes up what you have finished.
 - **ContactTrail** -- people, and the groups you sort them into. Emergency-Contacts gives the people to call with every number, Phone-List the short list to call from, Group-Roster each group's members, and the address_book report an address book to read through or print.
 - **JobTrail** -- a job search: applications, contacts, and what you did, with the work search record an unemployment office asks for
-- **MusicTrail** -- 100 great albums and 200 great musicians across ten genres, from two books by DbDo's author, with who recorded what and who played in which band
-- **RadioTrail** -- Internet radio, some 55,000 working stations, with a script that refreshes the catalog
+- **MusicTrail** -- 100 great albums and 200 great musicians across ten genres, from two books by DbDo's author, with who recorded what and who played in which band. Top-5-By-Genre lists each genre's best, Albums-By-Decade counts them by decade, and the listening_list report writes up the albums you mark.
+- **RadioTrail** -- Internet radio, some 50,000 working stations, with a script that refreshes the catalog. Most-Voted gives the 100 stations listeners like best, and News-and-Talk the news and talk stations of the United States.
 - **TechTraining** -- about 1,170 free presentations on technology and accessibility, from the Tech Training directory, each with its year, length, description and source. Play Media (Control+P) plays the presentation itself, and marked ones play as a list; Quick-Lessons finds the ones of fifteen minutes or less.
 - **DescribedFilms** -- about 10,000 English movies with audio description in the United States, documentaries included, from the Audio Description Project of the American Council of the Blind. Each film has its year, rating, genres and the services that carry it, and Alt+Right lists each service's terms and link. Free-To-Watch finds the ones free with a subscription or ads.
 - **BlindSkills** -- 84 free videos and podcast episodes that teach blindness skills, from the Blind Skills directory: cane travel, guiding, braille, cooking, dressing, labeling, money, crafts and more, in twelve skill groups, each lesson with the task it teaches. Play Media (Control+P) plays a lesson and marked ones play as a list; none come marked. Shift+Enter on transcript_url opens a transcript. Skill-Index lists lessons by task, With-Transcripts those you can read, and the skills_handbook report writes up the whole set by group. scripts\checkBlindSkillsMedia, in DbDo's development folder, asks every lesson for the start of its stream, with no sign-in, as an anonymous player would, and writes a play list of those that answer with audio or video.
 - **TalkingBookTopics** -- some sixty thousand talking books the National Library Service announced since 1997, searched by full text, with the magazine's own news articles
-- **RecipeTrail** -- recipes, their ingredients and the amounts each needs. Mark the recipes you mean to cook, and Shopping-List gives what to buy, aisle by aisle, with the amount each recipe needs; Quick-Meals finds dinner in half an hour.
+- **RecipeTrail** -- recipes, their ingredients and the amounts each needs. Mark the recipes you mean to cook, and Shopping-List gives what to buy, aisle by aisle, with the amount each recipe needs; Quick-Meals finds dinner in half an hour, and the cookbook report prints every recipe with its steps.
 
 **chinook** and **northwind** keep their usual names. They are the two databases
 most database tutorials use, so the names are how people recognise them.
@@ -1277,7 +1279,9 @@ each creator to their work: a creator is `author_of` a book, `developer_of` an
 app, or `presenter_of` a presentation. On a creator, Shift+W ends with what they made,
 and Alt+Right goes to it. An app's **platform** is where it runs, so Fields in
 Filter Records narrows the list to one system. Categories, platforms, formats and
-roles are also in **tags**, one to a line, so Keywords finds them.
+roles are also in **tags**, one to a line, so Keywords finds them. Apps-By-Platform counts the apps for each system,
+Kindle-Books lists the books you can read on a Kindle, and the app_list report writes
+up the apps you mark.
 
 #### TechTraining plays what it lists
 
@@ -1365,7 +1369,7 @@ Each build runs every search here and logs how many records it finds.
 
 #### RadioTrail plays Internet radio
 
-Fourteen stations are in the template to start. To build the real thing, run
+The template comes with the catalog already gathered. To refresh it, run
 **`fetchStations`** in the template's folder, `templates\RadioTrail`. It begins
 by measuring what is there -- how many stations, how recent the catalog, how
 many are playable, asked, looked up -- and says so; then it fetches only what

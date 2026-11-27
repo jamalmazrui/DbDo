@@ -1323,7 +1323,7 @@ Screen reader:
 
 - Alt plus F10
 
-**Something to try:** Press Shift plus Z in any table, and Alt plus F10 whenever a key will not come to mind.
+**Something to try:** Press Alt plus Delete in any table to hear where you are, and Alt plus F10 whenever a key will not come to mind.
 
 ## 2 - Install and Tune In
 

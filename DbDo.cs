@@ -5747,8 +5747,12 @@ namespace DbDo
         // untouched and no re-query happens (the clone shares the
         // client-side rowset). The clone does not inherit the live
         // Filter, so the base filter is re-applied combined with the
-        // marked test. DbDo writes marked as the literal 'true', so
-        // that is the value tested. Returns -1 when the clone path
+        // marked test. ONE VALUE FOR MARKED (27 November 2026, from the release audit): Mark Record wrote 1, while Mark
+        // and Unmark over a range and Toggle Marks wrote 'true' and 'false', and Filter Records' Marked records and this
+        // count tested only 'true' -- so in a template, whose marked is INTEGER 0 or 1, a record marked with Semicolon
+        // was missed by the Marked filter, and one marked over a range was missed by every report's @filter marked = 1.
+        // Every writer now writes 1 or 0; the SQL tests accept 1, true or yes; and upgradeWithoutLoss turns any 'true'
+        // or 'false' left in a copy into 1 or 0 when it opens. Returns -1 when the clone path
         // fails (complex base filters can exceed ADO's filter
         // grammar); callers fall back to a position walk.
         public int countMarked()
@@ -5777,7 +5781,7 @@ namespace DbDo
                     if (iTotal == recordCount)
                     {
                         foreach (string[] aRow in queryRowsSql("SELECT COUNT(*) FROM " + sQuoted
-                            + " WHERE " + Metadata.MarkedColumn + " = 'true'", 1, out iFound))
+                            + " WHERE (" + Metadata.MarkedColumn + " = 1 OR lower(CAST(" + Metadata.MarkedColumn + " AS TEXT)) IN ('true', 'yes'))", 1, out iFound))
                             if (aRow.Length > 0 && int.TryParse(aRow[0], out iParsed)) iMarkedSql = iParsed;
                         if (iMarkedSql >= 0) return iMarkedSql;
                     }
@@ -5790,7 +5794,7 @@ namespace DbDo
                 try
                 {
                     string sBase = filter ?? "";
-                    string sMarkTest = Metadata.MarkedColumn + " = 'true'";
+                    string sMarkTest = Metadata.MarkedColumn + " = 1";
                     oClone.Filter = (sBase.Length > 0)
                         ? sBase + " AND " + sMarkTest : sMarkTest;
                     return oClone.RecordCount;
@@ -6049,14 +6053,26 @@ namespace DbDo
             return lAll;
         }
 
-        // sMapsEdgesCte: the normalized undirected edge view of maps,
+        // sMapsEdgesCte (retired 27 November 2026, below): was the normalized undirected edge view of maps,
         // shared by the two-hop queries. Each map row contributes an
         // edge in each direction, so traversal logic never has to
         // case-split on which side a record sits.
-        private const string sMapsEdgesCte =
-            "WITH edges(ft, fu, tt, tu) AS ("
-            + "SELECT tbl1, prime1, tbl2, prime2 FROM maps "
-            + "UNION ALL SELECT tbl2, prime2, tbl1, prime1 FROM maps) ";
+        //
+        // TWO HOPS BY INDEX (27 November 2026, from the live walk's log): Enter on a TalkingBookTopics book stalled the
+        // window for 2.2 seconds in lMapsTwoHop. The edges view above joined to itself, and SQLite cannot use the maps
+        // indexes (tbl1, prime1) and (tbl2, prime2) through a UNION ALL view, so it read all 120,000 links twice. The
+        // CTE below asks the same question in steps the indexes answer: n1, the record's neighbours, from both sides;
+        // n2, each neighbour's neighbours, from both sides. A test on 120,000 links gave the same 18 rows in under a
+        // millisecond, against 316 milliseconds for the view.
+        private string sMapsTwoHopCte(string sT, string sU)
+        {
+            return "WITH n1(vt, vu) AS ("
+                + "SELECT tbl2, prime2 FROM maps WHERE tbl1 = " + sT + " AND prime1 = " + sU + " "
+                + "UNION SELECT tbl1, prime1 FROM maps WHERE tbl2 = " + sT + " AND prime2 = " + sU + "), "
+                + "n2(vt, tt, tu) AS ("
+                + "SELECT n1.vt, m.tbl2, m.prime2 FROM n1 JOIN maps m ON m.tbl1 = n1.vt AND m.prime1 = n1.vu "
+                + "UNION SELECT n1.vt, m.tbl1, m.prime1 FROM n1 JOIN maps m ON m.tbl2 = n1.vt AND m.prime2 = n1.vu) ";
+        }
 
         // lMapsTwoHop: records related to the given record THROUGH an
         // intermediate record -- contact -> events -> locations being
@@ -6074,11 +6090,8 @@ namespace DbDo
             string sT = sQuoteSqlLiteral(sTable);
             string sU = sQuoteSqlLiteral(sPrmValue);
             int iFound;
-            string sSql = sMapsEdgesCte
-                + "SELECT DISTINCT e1.tt, e2.tt, e2.tu FROM edges e1 "
-                + "JOIN edges e2 ON e2.ft = e1.tt AND e2.fu = e1.tu "
-                + "WHERE e1.ft = " + sT + " AND e1.fu = " + sU
-                + " AND NOT (e2.tt = " + sT + " AND e2.tu = " + sU + ")";
+            string sSql = sMapsTwoHopCte(sT, sU)
+                + "SELECT DISTINCT vt, tt, tu FROM n2 WHERE NOT (tt = " + sT + " AND tu = " + sU + ")";
             foreach (string[] aRow in queryRowsSql(sSql, iMaxRows, out iFound))
                 lAll.Add(aRow);
             return lAll;
@@ -6091,15 +6104,11 @@ namespace DbDo
             string sViaTable, string sTargetTable, int iMaxRows, out int iCountFound)
         {
             List<string> lTargets = new List<string>();
-            string sSql = sMapsEdgesCte
-                + "SELECT DISTINCT e2.tu FROM edges e1 "
-                + "JOIN edges e2 ON e2.ft = e1.tt AND e2.fu = e1.tu "
-                + "WHERE e1.ft = " + sQuoteSqlLiteral(sTable)
-                + " AND e1.fu = " + sQuoteSqlLiteral(sPrmValue)
-                + " AND e1.tt = " + sQuoteSqlLiteral(sViaTable)
-                + " AND e2.tt = " + sQuoteSqlLiteral(sTargetTable)
-                + " AND NOT (e2.tt = " + sQuoteSqlLiteral(sTable)
-                + " AND e2.tu = " + sQuoteSqlLiteral(sPrmValue) + ")";
+            string sT = sQuoteSqlLiteral(sTable), sU = sQuoteSqlLiteral(sPrmValue);
+            string sSql = sMapsTwoHopCte(sT, sU)
+                + "SELECT DISTINCT tu FROM n2 WHERE vt = " + sQuoteSqlLiteral(sViaTable)
+                + " AND tt = " + sQuoteSqlLiteral(sTargetTable)
+                + " AND NOT (tt = " + sT + " AND tu = " + sU + ")";
             foreach (string[] aRow in queryRowsSql(sSql, iMaxRows, out iCountFound))
                 lTargets.Add(aRow[0]);
             return lTargets;
@@ -18392,7 +18401,7 @@ namespace DbDo
         {
             if (string.IsNullOrEmpty(sValue)) return false;
             sValue = sValue.Trim();
-            if (sValue == "1") return true;
+            if (sValue == "1" || sValue == "-1") return true;
             if (string.Equals(sValue, "True", StringComparison.OrdinalIgnoreCase)) return true;
             if (string.Equals(sValue, "Yes",  StringComparison.OrdinalIgnoreCase)) return true;
             return false;
@@ -18468,7 +18477,7 @@ namespace DbDo
                         string sValue = db.getFieldValue(Metadata.MarkedColumn);
                         bool bCurrent = isMarkedTrue(sValue);
                         if (bCurrent == bMark) { iSkipped++; continue; }
-                        db.setFieldValue(Metadata.MarkedColumn, bMark ? "true" : "false");
+                        db.setFieldValue(Metadata.MarkedColumn, bMark ? "1" : "0");
                         db.update();
                         iChanged++;
                     }
@@ -18536,7 +18545,7 @@ namespace DbDo
                 bool bCurrent = isMarkedTrue(sValue);
                 if (bCurrent != bMark)
                 {
-                    db.setFieldValue(Metadata.MarkedColumn, bMark ? "true" : "false");
+                    db.setFieldValue(Metadata.MarkedColumn, bMark ? "1" : "0");
                     db.update();
                 }
             }
@@ -18589,7 +18598,7 @@ namespace DbDo
                         db.absolutePosition = i;
                         bool bCurrent = isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn));
                         if (bCurrent == bMark) { iSkipped++; continue; }
-                        db.setFieldValue(Metadata.MarkedColumn, bMark ? "true" : "false");
+                        db.setFieldValue(Metadata.MarkedColumn, bMark ? "1" : "0");
                         db.update();
                         iChanged++;
                     }
@@ -18639,7 +18648,7 @@ namespace DbDo
                     {
                         db.absolutePosition = i;
                         bool bCurrent = isMarkedTrue(db.getFieldValue(Metadata.MarkedColumn));
-                        db.setFieldValue(Metadata.MarkedColumn, bCurrent ? "false" : "true");
+                        db.setFieldValue(Metadata.MarkedColumn, bCurrent ? "0" : "1");
                         db.update();
                         iFlipped++;
                     }
@@ -28851,6 +28860,26 @@ namespace DbDo
                 }
             }
             catch (Exception exT) { DbDoLog.write("Upgrade without loss: template fields not added: " + exT.Message); }
+            // MARKED AS 1 OR 0 (27 November 2026, from the release audit): a copy marked by earlier versions may hold the
+            // text 'true' or 'false', which a report's @filter marked = 1 does not see. Each Homer table's marked is set to
+            // the number it meant, once; a table with no such values is untouched.
+            try
+            {
+                foreach (string sTable in db.getTableNames())
+                {
+                    List<string> lCols = db.getColumnsOfTable(sTable);
+                    if (!lCols.Exists(c => string.Equals(c, "prime", StringComparison.OrdinalIgnoreCase))) continue;
+                    if (!lCols.Exists(c => string.Equals(c, Metadata.MarkedColumn, StringComparison.OrdinalIgnoreCase))) continue;
+                    string sQuoted = "\"" + sTable.Replace("\"", "\"\"") + "\"";
+                    int iFound, iWords = 0, iParsed;
+                    foreach (string[] aRow in db.queryRowsSql("SELECT COUNT(*) FROM " + sQuoted + " WHERE typeof(marked) = 'text' AND lower(marked) IN ('true', 'false', 'yes', 'no')", 1, out iFound))
+                        if (aRow.Length > 0 && int.TryParse(aRow[0], out iParsed)) iWords = iParsed;
+                    if (iWords == 0) continue;
+                    db.invokeSql("UPDATE " + sQuoted + " SET marked = CASE WHEN lower(marked) IN ('true', 'yes') THEN 1 ELSE 0 END WHERE typeof(marked) = 'text' AND lower(marked) IN ('true', 'false', 'yes', 'no')", null);
+                    DbDoLog.write("Upgrade without loss: " + sTable + ": " + iWords + " marked " + (iWords == 1 ? "value" : "values") + " written as words set to 1 or 0");
+                }
+            }
+            catch (Exception exM) { DbDoLog.write("Upgrade without loss: marked values not normalized: " + exM.Message); }
             try
             {
                 foreach (string sTable in db.getTableNames())
@@ -29156,7 +29185,7 @@ namespace DbDo
             // MARKED AND UNMARKED (19 October 2026, from DbDialog's Tagged and Untagged):
             // the records you have marked, or the rest, as a condition like any other, so
             // New, Narrow and Expand combine them too. Offered when the table has DbDo's
-            // marked column, which DbDo writes as the text 'true'.
+            // marked column, which DbDo writes as 1 (27 November 2026; it was the text 'true' in places).
             const string sMarked = "Marked records";
             const string sUnmarked = "Unmarked records";
             string sHow = sInvert;
@@ -29187,11 +29216,11 @@ namespace DbDo
                 if (sHow == null) return;
 
                 bool bGiven;
-                if (sHow == sMarked) { sNewWhere = "marked = 'true'"; sNewSpoken = "marked"; bGiven = true; }
+                if (sHow == sMarked) { sNewWhere = sMarkedSql; sNewSpoken = "marked"; bGiven = true; }
                 else if (sHow == sBookmarked) { sNewWhere = sBookmarkWhere; sNewSpoken = "bookmarked"; bGiven = true; }
                 else if (sHow == sJumpMatch) bGiven = askJumpCondition(out sNewWhere, out sNewSpoken);
                 else if (sHow == sFullText) bGiven = askFullTextCondition(sTable, sFtsIndex, sFtsKey, out sNewWhere, out sNewSpoken);
-                else if (sHow == sUnmarked) { sNewWhere = "(marked IS NULL OR marked <> 'true')"; sNewSpoken = "unmarked"; bGiven = true; }
+                else if (sHow == sUnmarked) { sNewWhere = "(marked IS NULL OR NOT " + sMarkedSql + ")"; sNewSpoken = "unmarked"; bGiven = true; }
                 else bGiven = (sHow == sAny) ? askAnyFieldCondition(out sNewWhere, out sNewSpoken)
                                              : askFieldsCondition(out sNewWhere, out sNewSpoken, sHow);
                 if (!bGiven || string.IsNullOrEmpty(sNewWhere)) return;

@@ -10,6 +10,9 @@ App = DbDo
 Name = The Say family speaks, and the Key Describer describes
 
 [steps]
+; START AT THE GRID (27 November 2026): the run of 12:41 began with focus in a list DbDo had left open, so the
+; first two keys spoke nothing and the second reached another window. Escape twice closes any such list first.
+Press Escape twice
 Say Filter and Order
 Expect speech filter
 Say Position

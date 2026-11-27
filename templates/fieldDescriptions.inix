@@ -127,6 +127,7 @@ title = The film's title, as ADP's directory gives it.
 year = The year the film was released.
 
 [DescribedFilms/offers]
+film = The film's title and year, so each offer names its film when read on its own.
 film_id = The film this offer is for, by its number in films; DbDo says its title and year.
 service = The service that carries the film with audio description, such as Netflix or Prime Video; F4 offers the choices.
 terms = What watching it takes there, as ADP notes it, such as Buy, Rent, Free with Prime or Channel Subscription Required.

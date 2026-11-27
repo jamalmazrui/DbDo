@@ -377,6 +377,13 @@ Excel, dBASE, and delimited-text files, presents their tables as
 ordinary Windows lists you can navigate cell by cell, and lets you
 query, edit, relate, analyze, and report on the data without ever
 needing a mouse or a glance at the screen.</p>
+<p><strong>Mission and goals.</strong> DbDo’s mission is to make
+keeping, finding and sharing records as quick by keyboard and screen
+reader as by mouse and sight. Its goals: open the files people already
+have; give every command a memorable key named for a word in it; teach
+with real data, in templates and spoken tutorials; and let one database
+file carry its own searches, reports and scripts, so it is the whole
+package to share.</p>
 <p>This guide is organized concepts first. The opening part explains the
 handful of ideas that everything else rests on: how windows are
 arranged, what the data list is, the difference between the grid you
@@ -3291,9 +3298,13 @@ and what you did, with the work search record an unemployment office
 asks for</li>
 <li><strong>MusicTrail</strong> – 100 great albums and 200 great
 musicians across ten genres, from two books by DbDo’s author, with who
-recorded what and who played in which band</li>
-<li><strong>RadioTrail</strong> – Internet radio, some 55,000 working
-stations, with a script that refreshes the catalog</li>
+recorded what and who played in which band. Top-5-By-Genre lists each
+genre’s best, Albums-By-Decade counts them by decade, and the
+listening_list report writes up the albums you mark.</li>
+<li><strong>RadioTrail</strong> – Internet radio, some 50,000 working
+stations, with a script that refreshes the catalog. Most-Voted gives the
+100 stations listeners like best, and News-and-Talk the news and talk
+stations of the United States.</li>
 <li><strong>TechTraining</strong> – about 1,170 free presentations on
 technology and accessibility, from the Tech Training directory, each
 with its year, length, description and source. Play Media (Control+P)
@@ -3322,7 +3333,8 @@ full text, with the magazine’s own news articles</li>
 <li><strong>RecipeTrail</strong> – recipes, their ingredients and the
 amounts each needs. Mark the recipes you mean to cook, and Shopping-List
 gives what to buy, aisle by aisle, with the amount each recipe needs;
-Quick-Meals finds dinner in half an hour.</li>
+Quick-Meals finds dinner in half an hour, and the cookbook report prints
+every recipe with its steps.</li>
 </ul>
 <p><strong>chinook</strong> and <strong>northwind</strong> keep their
 usual names. They are the two databases most database tutorials use, so
@@ -3342,7 +3354,9 @@ ends with what they made, and Alt+Right goes to it. An app’s
 <strong>platform</strong> is where it runs, so Fields in Filter Records
 narrows the list to one system. Categories, platforms, formats and roles
 are also in <strong>tags</strong>, one to a line, so Keywords finds
-them.</p>
+them. Apps-By-Platform counts the apps for each system, Kindle-Books
+lists the books you can read on a Kindle, and the app_list report writes
+up the apps you mark.</p>
 <h4 id="techtraining-plays-what-it-lists">TechTraining plays what it
 lists</h4>
 <p>Each presentation’s <strong>url</strong> is the presentation itself,
@@ -3441,8 +3455,8 @@ players.</li>
 finds.</p>
 <h4 id="radiotrail-plays-internet-radio">RadioTrail plays Internet
 radio</h4>
-<p>Fourteen stations are in the template to start. To build the real
-thing, run <strong><code>fetchStations</code></strong> in the template’s
+<p>The template comes with the catalog already gathered. To refresh it,
+run <strong><code>fetchStations</code></strong> in the template’s
 folder, <code>templates\RadioTrail</code>. It begins by measuring what
 is there – how many stations, how recent the catalog, how many are
 playable, asked, looked up – and says so; then it fetches only what is

@@ -372,6 +372,13 @@ def toMarkdown(sPandoc, lsFragments, sFormat=""):
     raw HTML, classes and spans are dropped, and lines are not wrapped. sFormat "plain" gives Pandoc's plain text
     instead: the same words with no markup, which is what search_text holds from version 5 on."""
     if not lsFragments: return []
+    if len(lsFragments) == 1:
+        # ONE FRAGMENT, ONE RUN (27 November 2026): TalkingBookTopics sends each issue whole, and a whole page puts the
+        # split marker before its <html>, where Pandoc drops it -- so every issue logged "0 parts for 1 fragments" and
+        # was converted twice. A single fragment needs no marker.
+        oOne = subprocess.run([sPandoc, "-f", "html", "-t", sFormat or "markdown-raw_html-native_divs-native_spans-fenced_divs-bracketed_spans-link_attributes-header_attributes-raw_attribute", "--wrap=none"], input=lsFragments[0].encode("utf-8"), capture_output=True)
+        if oOne.returncode != 0: raise RuntimeError("Pandoc exit %d: %s" % (oOne.returncode, oOne.stderr.decode("utf-8", "replace")[:300]))
+        return [re.sub(r"\n{3,}", "\n\n", oOne.stdout.decode("utf-8").replace("\r\n", "\n")).strip()]
     sJoined = "".join("<p>HOMERSPLIT%04d</p>\n%s\n" % (i, s) for i, s in enumerate(lsFragments))
     sFormat = sFormat or "markdown-raw_html-native_divs-native_spans-fenced_divs-bracketed_spans-link_attributes-header_attributes-raw_attribute"
     oRun = subprocess.run([sPandoc, "-f", "html", "-t", sFormat, "--wrap=none"], input=sJoined.encode("utf-8"), capture_output=True)

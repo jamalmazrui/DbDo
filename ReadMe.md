@@ -8,6 +8,12 @@ Every table is a list you arrow through. Every command has a key, and every key
 is named for a word in its command, so it can be remembered rather than looked
 up.
 
+DbDo's mission is to make keeping, finding and sharing records as quick by
+keyboard and screen reader as by mouse and sight. Its goals: open the files
+people already have; give every command a memorable key; teach with real data;
+and let one database file carry its own searches, reports and scripts, so it is
+the whole package to share.
+
 ## Installing
 
 Download [the DbDo installer](https://github.com/JamalMazrui/DbDo/releases/latest/download/DbDo_setup.exe)
@@ -47,7 +53,7 @@ Six things to try:
   the current one.
 - **Open another database.** Control+Shift+O, Open Template Database, offers the
   others that come with DbDo: JobTrail for a job search, BookTrail for books,
-  MusicTrail for music and more. Control+O, Open Database, opens your own files,
+  TalkingBookTopics for sixty thousand talking books, and more. Control+O, Open Database, opens your own files,
   spreadsheets and text files included.
 
 ## Learning more
@@ -61,7 +67,8 @@ These keys work the same way in every Homer app:
 - **Alt+F10, Alternate Menu,** lists every command, by menu, name or key, and
   runs the one you choose.
 - **Alt+F12, Play Tutorials,** plays ten short spoken lessons, from an overview
-  to RadioTrail, JobTrail, BookTrail, MusicTrail and the analysis of a dataset.
+  to RadioTrail, JobTrail, BookTrail, MusicTrail, a search of TalkingBookTopics
+  and the analysis of a dataset.
   Take them in order: each one builds on the last.
 
 The documents are on the Help menu:
@@ -76,7 +83,7 @@ The documents are on the Help menu:
 
 ## Convention over configuration: a few nouns and one junction
 
-Most of the related records people actually keep -- a club roster, a project tracker, a record collection, a convention -- come down to a handful of nouns and how they relate. DbDo builds on that. Every table, the system tables included, has the same standard columns. First comes a `<singular>_id` key, then `added` and `edited` stamps kept by triggers, then the table's own fields. After them come `url`, `notes` and `tags`, a generated `look` that a row speaks, a generated `prime` that names the record, and `marked`.
+Most of the related records people actually keep -- a club roster, a project tracker, a record collection, a convention -- come down to a handful of nouns and how they relate. DbDo builds on that. Every table, the system tables included, has the same standard columns. First comes a `<singular>_id` key, then `added` and `edited` stamps kept by triggers, then the table's own fields. After them come `notes`, `tags` and `url`, a generated `look` that a row speaks, a generated `prime` that names the record, and `marked`.
 
 The **maps** table is the heart of the model. It is a general, typed link between any two records in any two tables. Each row holds `(tbl1, prime1, kind, tbl2, prime2)`: the subject, the kind of relationship, and the object. Records are named by their `prime` values rather than by number keys. So map rows read plainly in the grid, survive export and import, and can be written by a script. One-to-many and many-to-many links have the same row shape. In MusicTrail, a performer **recorded** an album, and a musician is a **member_of** a band, so John Bonham leads to Led Zeppelin and on to Led Zeppelin IV. In BlindCreations, a creator is **author_of** a book or **developer_of** an app.
 

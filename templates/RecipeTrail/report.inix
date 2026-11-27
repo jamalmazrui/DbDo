@@ -1,0 +1,32 @@
+﻿; Report definitions for the RecipeTrail template.
+;
+; Run them with Run Report (Alt+Shift+R). DbDo renders the chosen report and opens it in your
+; editor, where it can be read straight through or printed. Empty fields print nothing.
+
+FileTask = report
+
+; Every recipe, by name, with its times and steps: a cookbook of your own to print or share.
+[cookbook]
+@table = recipes
+@sort = name
+header = """
+# My Cookbook
+
+Prepared {{ new Date().toISOString().substring(0,10) }} from RecipeTrail.
+"""
+detail = """
+## $name
+
+{{ $summary ? $summary : "" }}
+
+{{ $course ? "- Course: " + $course : "" }}
+{{ $cuisine ? "- Cuisine: " + $cuisine : "" }}
+{{ $prep_minutes ? "- Preparation: " + $prep_minutes + " minutes" : "" }}
+{{ $cook_minutes ? "- Cooking: " + $cook_minutes + " minutes" : "" }}
+{{ $servings ? "- Serves: " + $servings : "" }}
+
+{{ $steps ? $steps : "" }}
+"""
+footer = """
+**$count {{ $count == 1 ? "recipe" : "recipes" }}.**
+"""

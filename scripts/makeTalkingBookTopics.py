@@ -45,7 +45,7 @@ sHere = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, sHere)
 import makeBrailleForum as core
 
-sVersion = "2026-11-27 version 5: In Brief articles as Markdown in updates; field sizes logged; the guide's search examples run"
+sVersion = "2026-11-27 version 6: In Brief titles unescaped, untitled articles named, contact lists left out"
 sSource = "TalkingBookTopics"
 sUserAgent = "DbDo makeTalkingBookTopics/1 (+https://github.com/JamalMazrui/DbDo; a searchable list of NLS Talking Book Topics books)"
 sProject = core.sProject
@@ -335,6 +335,9 @@ def bareLine(sLine):
     """A Markdown line's words, without heading marks, emphasis or a trailing colon."""
     sLine = re.sub(r"^#{1,6}\s+", "", sLine.strip())
     sLine = re.sub(r"\{[^}]*\}$", "", sLine).strip()
+    # VERSION 6: Pandoc's escapes and inner emphasis come off a title ("Children\'s", "*Talking Book Topic*").
+    sLine = re.sub(r"\\(.)", r"\1", sLine)
+    sLine = re.sub(r"(\*\*|__|\*|_)(.+?)\1", r"\2", sLine)
     return sLine.strip("*_ ").rstrip(":").strip()
 
 
@@ -381,8 +384,18 @@ def briefArticles(sText, bHtml, sKey):
     lArticles, sTitle, lsBody = [], "", []
     def keep():
         sBody = "\n\n".join(s for s in lsBody if not re.match(r"^\[?back to top", s, re.I))
-        if len(plainWords(sBody).split()) >= 15:
-            lArticles.append((sTitle or "In Brief", sBody))
+        sWords = plainWords(sBody)
+        # CONTACT LISTS ARE LEFT OUT (version 6). Version 5 kept the advisory group's member lists of 2005 to 2017:
+        # volunteers' home addresses and email. They are public record, but a shipped database has no need to carry
+        # them, and no reader searches for them. Two or more email addresses mark such a list.
+        if len(re.findall(r"[\w.+-]+@[\w-]+\.[\w.]+", sBody)) >= 2:
+            log("BRIEF %s: a contact list left out, %s" % (sKey, sTitle or "untitled"))
+            return
+        # AN UNTITLED ARTICLE (version 6) -- text before the first title, or a section with none -- is named by its
+        # first sentence, as a reader would refer to it, rather than all being called "In Brief".
+        sName = sTitle or re.split(r"(?<=[.!?])\s", sWords, 1)[0][:90].rstrip(" ,;:")
+        if len(sWords.split()) >= 15:
+            lArticles.append((sName, sBody))
         elif sBody:
             log("BRIEF %s: a part too short to keep, %s: %s" % (sKey, sTitle or "untitled", plainWords(sBody)[:120]))
     for sLine in lsLines[iStart + 1:]:

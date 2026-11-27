@@ -1,0 +1,29 @@
+﻿; Report definitions for the BlindCreations template.
+;
+; Run them with Run Report (Alt+Shift+R). DbDo renders the chosen report and opens it in your
+; editor, where it can be read straight through or printed. Empty fields print nothing.
+
+FileTask = report
+
+; The apps you have marked, with where to get each: a list to try or to share.
+[app_list]
+@table = apps
+@filter = marked = 1
+@sort = name
+header = """
+# Apps to Try
+
+Prepared {{ new Date().toISOString().substring(0,10) }} from BlindCreations.
+"""
+detail = """
+## $name
+
+{{ $by ? "- By: " + $by : "" }}
+{{ $category ? "- Kind: " + $category : "" }}
+{{ $platform ? "- Runs on: " + $platform : "" }}
+{{ $summary ? "- About: " + $summary : "" }}
+{{ $url ? "- Address: " + $url : "" }}
+"""
+footer = """
+**$count {{ $count == 1 ? "app" : "apps" }} to try.**
+"""
