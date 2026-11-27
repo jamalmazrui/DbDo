@@ -1,0 +1,44 @@
+﻿; TalkingBookTopics.inix -- how this database opens, and how its tables are heard.
+;
+; THE BOOKS OF TALKING BOOK TOPICS. Every issue of the National Library Service's bimonthly magazine that could be found,
+; from 1997 to mid-2017 in the web archive and from 2023 at loc.gov: one row an issue in issues, one row a book in books,
+; with its title, author, narrator, book number, length, year, category and advisories. A description is kept when NLS
+; wrote it; one NLS took from a publisher, Goodreads or Amazon is left out, and annotation_source says whose it was, so
+; every word here may be shared.
+;
+; FIND ONE. The row speaks title and author. Keywords (Control+K) and Filter Records work as on any table; Full-text
+; match in Filter Records uses the index on title, author, narrator, category, annotation and tags. The saved searches
+; here rank their matches and read the passage that matched.
+;
+; READ ONE. Control+Shift+U opens the book's page on BARD, where it can be downloaded. Alt+Right on a book goes to its
+; author and narrator; on an author or narrator, to their books; on an issue, to its books.
+;
+; scripts\makeTalkingBookTopics in DbDo's development folder builds this file; the build runs it when the database is
+; missing or older than the script.
+
+[Database]
+; A REFERENCE DATABASE: rebuilt from the magazine, so the copy DbDo opens follows each newer build.
+FollowTemplate = yes
+
+InitialTable = books
+
+[Table:books]
+
+SelectFields = title, author, issue
+
+[Table:authors]
+
+SelectFields = name, books, last_issue
+
+[Table:narrators]
+
+SelectFields = name, books, last_issue
+
+[Table:issues]
+
+SelectFields = title, books
+
+[Table:defs]
+
+
+[Table:maps]

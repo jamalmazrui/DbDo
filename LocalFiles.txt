@@ -42,6 +42,9 @@ templates/BrailleMonitor/BrailleMonitor.db
 templates/BrailleMonitor/BrailleMonitor.db.building
 # The Talking Book Topics pages and pilot (27 November 2026): fetched and built here, kept off GitHub.
 data/TalkingBookTopics/
+# The template itself until its size is known and it is decided how it ships (cycle 2, 27 November 2026).
+templates/TalkingBookTopics/TalkingBookTopics.db
+templates/TalkingBookTopics/TalkingBookTopics.db.building
 
 # The release scripts belong to the separate tagRelease project and stay out
 # of every repository.

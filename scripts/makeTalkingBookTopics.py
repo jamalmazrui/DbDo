@@ -1,9 +1,9 @@
 ﻿r"""makeTalkingBookTopics.py -- builds DbDo's TalkingBookTopics template, the books announced in the National Library
 Service's bimonthly magazine Talking Book Topics, searchable by full text. The plan is notes\TalkingBookTopics_Plan.md.
 
-    scripts\makeTalkingBookTopics                 finds every issue and builds a pilot of 24 (cycle 1, this version)
-    scripts\makeTalkingBookTopics --pilot-due     the same, only when no pilot is newer than this script (the build runs this)
-    scripts\makeTalkingBookTopics --limit 40      a pilot of a different size
+    scripts\makeTalkingBookTopics                 finds every issue and builds the template from all of them
+    scripts\makeTalkingBookTopics --due           the same, only when the template is missing or older than this script (the build runs this)
+    scripts\makeTalkingBookTopics --limit 24      a pilot of 24 issues instead, data\TalkingBookTopics\TalkingBookTopics-pilot.db
     scripts\makeTalkingBookTopics --offline       builds from the copies already kept, asking nobody
 
 CYCLE 1, DISCOVERY AND A PILOT (27 November 2026, Jamal: "go ahead. Make sure that I get succinct status updates as the
@@ -45,7 +45,7 @@ sHere = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, sHere)
 import makeBrailleForum as core
 
-sVersion = "2026-11-27 version 2: entries read as the live and 2015-2017 issues print them; conventional tables; more places searched for 2017 to 2022"
+sVersion = "2026-11-27 version 3: the whole template, with authors and narrators mapped to their books"
 sSource = "TalkingBookTopics"
 sUserAgent = "DbDo makeTalkingBookTopics/1 (+https://github.com/JamalMazrui/DbDo; a searchable list of NLS Talking Book Topics books)"
 sProject = core.sProject
@@ -54,6 +54,7 @@ sLogPath = os.path.join(sProject, "logs", "DbDo-make%s-%s.log" % (sSource, sStam
 sCoveragePath = os.path.join(sProject, "logs", "DbDo-tbtCoverage-%s.md" % sStamp)
 sDataDir = os.path.join(sProject, "data", sSource)
 sPilotPath = os.path.join(sDataDir, sSource + "-pilot.db")
+sTemplatePath = os.path.join(sProject, "templates", sSource, sSource + ".db")
 core.sLogPath = sLogPath
 core.trail.sLogPath = sLogPath
 core.iHeartbeatSeconds = 10
@@ -63,6 +64,10 @@ sLiveIndex = "https://www.loc.gov/nls/tbt"
 # VERSION 2: cycle 1 found the archive's issues from 1997 to May-June 2017 under /nls/tbt/ and the live list's from 2023,
 # and nothing between. NLS moved its pages in 2017; the new-materials and talking-book-topics addresses are asked too.
 lsCdxPrefixes = ["loc.gov/nls/tbt/", "lcweb.loc.gov/nls/tbt/", "loc.gov/nls/new-materials/", "loc.gov/nls/talking-book-topics"]
+# VERSION 3: versions 1 and 2 found nothing from July 2017 to 2022, and the live page offers 2023 on only. One wider
+# question to the archive's index: any page under loc.gov/nls/ captured from 2017 to 2023 whose address names tbt or
+# talking-book-topics. Whatever it finds is logged with its kind, so a missing period that exists anywhere shows.
+sCdxWide = "https://web.archive.org/cdx/search/cdx?url=loc.gov/nls/&matchType=prefix&output=json&fl=original,timestamp,mimetype,statuscode,length&filter=statuscode:200&filter=original:.*(tbt|talking-book-topics).*&from=2017&to=2023&collapse=urlkey&limit=20000"
 sCdx = "https://web.archive.org/cdx/search/cdx?url=%s&matchType=prefix&output=json&fl=original,timestamp,mimetype,statuscode,length&filter=statuscode:200&collapse=urlkey&limit=20000"
 iPilot = 24
 nDelay = 2.0
@@ -71,7 +76,7 @@ lsMonths = ["january", "february", "march", "april", "may", "june", "july", "aug
 dMonthAbbrev = {s[:3]: i + 1 for i, s in enumerate(lsMonths)}
 sMonthWord = r"(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)"
 oNumber = re.compile(r"\b(DBC|TBC|DB|RC|TB|BR)[  ]?(\d{3,6})\b")
-oByLine = re.compile(r"^\s*by\s+(.+?)\s*\.?\s*$", re.I)
+oByLine = re.compile(r"^\s*(?:by|edited by|compiled by|selected by|written and illustrated by|retold by)\s+(.+?)\s*\.?\s*$", re.I)
 oNarrator = re.compile(r"\b(?:read|narrated)\s+by\s+([^.;\n]+)", re.I)
 oHours = re.compile(r"\b(\d+)\s+hours?(?:,?\s+(?:and\s+)?(\d+)\s+minutes?)?", re.I)
 oMedia = re.compile(r"\b(\d+)\s+(cassettes?|discs?|cartridges?|volumes?)\b", re.I)
@@ -169,11 +174,12 @@ def issueTitle(tDate):
 def linkKind(sUrl, sMime, iLength):
     """What an archived address seems to be, from its shape. Logged with samples so the next cycle can read new shapes."""
     sLower = sUrl.lower().split("?")[0]
-    sLeaf = sLower.rsplit("/", 1)[-1]
-    if sLeaf in ("", "index.html", "index.htm", "tbt", "tbt/") or "index" in sLeaf: return "index"
+    sLeaf = sLower.rstrip("/").rsplit("/", 1)[-1]
+    # VERSION 3: an issue's address may end in a slash, as loc.gov's new-materials pages do; version 2 called those indexes.
+    if "talking-book-topics-" in sLower and issueDate(sLower): return "web issue"
+    if sLeaf in ("", "index.html", "index.htm", "tbt") or "index" in sLeaf or sLower.endswith("/"): return "index"
     if re.search(r"\.(pdf|mp3|zip|gif|jpg|png|css|js)$", sLower): return "other file"
     if sLower.endswith(".txt"): return "text issue" if issueDate(sLower) else "text other"
-    if "talking-book-topics-" in sLower and issueDate(sLower): return "web issue"
     if re.search(r"\.html?$", sLower):
         if issueDate(sLower): return "web issue" if iLength == 0 or iLength > 20000 else "web section"
         return "web other"
@@ -198,9 +204,9 @@ def discoverIssues(oCache, bOffline):
     log("LIVE %s: %s" % (sLiveIndex, plural(len(dIssues), "issue")))
     say("Live list: %s." % plural(len(dIssues), "issue"))
     # The web archive.
-    for sPrefix in lsCdxPrefixes:
+    for sPrefix in lsCdxPrefixes + ["wide"]:
         core.sHeartbeat = "Finding issues: the web archive's list for %s." % sPrefix
-        sQuery = sCdx % urllib.parse.quote(sPrefix, safe="")
+        sQuery = sCdxWide if sPrefix == "wide" else sCdx % urllib.parse.quote(sPrefix, safe="")
         dResult = oCache.fetch(sQuery)
         try: lRows = json.loads(core.decoded(dResult.get("body")) or "[]")
         except Exception as oError:
@@ -354,6 +360,12 @@ def readIssue(oCache, dIssue, iSamples):
         lBlock, sBlockHeading = [(sTitleBefore + " " + sLine).strip()], sHeading
         sPrevious = sLine
     close()
+    # NOT A BOOK (version 3, from version 2's log): an issue that explains its book numbers ("DB/ RC 12345") gave entries
+    # with no title worth the name and nothing else; an entry with no two letters together in its title, or with neither
+    # author, narrator nor length, is set aside and counted.
+    iJunk = len(lBooks)
+    lBooks = [d for d in lBooks if re.search(r"[A-Za-z]{2}", d["title"] or "") and (d["author"] or d["narrator"] or d["length"])]
+    if len(lBooks) < iJunk: log("ISSUE %s: %d entries that are not books set aside" % (dIssue["key"], iJunk - len(lBooks)))
     # A book listed twice in one issue (a closing line the rule above did not catch) is kept once.
     dSeen, lUnique = set(), []
     for dBook in lBooks:
@@ -376,7 +388,7 @@ def readIssue(oCache, dIssue, iSamples):
 
 # ---------------------------------------------------------------- the pilot database
 
-def buildPilot(lIssues, sOut):
+def buildDatabase(lIssues, sOut):
     """The pilot: issues and books as every DbDo template has them -- defs and maps, id, added and edited first, then the
     main fields, then notes, tags, url, look, prime and marked -- with a full-text index on books. VERSION 2: cycle 1's
     plain tables failed the kit's checkDb at push, which checks every database in the project."""
@@ -396,6 +408,11 @@ def buildPilot(lIssues, sOut):
                                                          "issue", "issue_id", "annotation", "annotation_source"], ["title", "author"], ["title", "author", "number"], dBookTypes):
         oDb.execute(sStatement)
     oDb.execute("CREATE INDEX idx_books_issue_id ON books (issue_id)")
+    # AUTHORS AND NARRATORS (version 3, the plan's people tables): one row a person, with how many books and the first and
+    # last issue, mapped to each book by maps rows -- written_by and read_by -- as BrailleMonitor maps writers to articles.
+    dPeopleTypes = {"name": "TEXTLINE", "books": "INTEGER", "first_issue": "TEXTLINE", "last_issue": "TEXTLINE"}
+    for sTable, sId in (("authors", "author_id"), ("narrators", "narrator_id")):
+        for sStatement in trail.tableDdl(sTable, sId, ["name", "books", "first_issue", "last_issue"], ["name"], ["name"], dPeopleTypes): oDb.execute(sStatement)
     iBooks = 0
     for dIssue in lIssues:
         oCursor = oDb.execute("INSERT INTO issues (title, published, books, kind, url) VALUES (?, ?, ?, ?, ?)",
@@ -410,9 +427,28 @@ def buildPilot(lIssues, sOut):
                          d["annotation_source"], "\n".join(d["tags"]) or None, d["url"] or None))
             if oCursor.rowcount: iBooks += 1
             else: log("PRIME %s: %s by %s, %s, is already in the pilot" % (dIssue["key"], d["title"], d["author"], d["number"]))
+    for sTable, sField, sKind, sMeaning in (("authors", "author", "written_by", "The book (subject) was written by the author (object), as the magazine names them."),
+                                            ("narrators", "narrator", "read_by", "The book (subject) was read by the narrator (object), as the magazine names them.")):
+        dPeople = collections.OrderedDict()
+        lMaps = []
+        for sPrime, sByline, sPublished in oDb.execute("SELECT b.prime, b.%s, i.published FROM books b JOIN issues i ON i.issue_id = b.issue_id "
+                                                       "WHERE b.%s IS NOT NULL ORDER BY i.published" % (sField, sField)).fetchall():
+            for sName in core.authorNames(sByline) or ([sByline.strip()] if 2 <= len(sByline.split()) <= 5 else []):
+                dPerson = dPeople.setdefault(sName.lower(), {"name": sName, "books": 0, "first": sPublished, "last": sPublished})
+                dPerson["books"] += 1
+                dPerson["last"] = sPublished
+                lMaps.append(("books", sPrime, sKind, sTable, dPerson["name"]))
+        for dPerson in sorted(dPeople.values(), key=lambda d: d["name"].lower()):
+            oDb.execute("INSERT INTO %s (name, books, first_issue, last_issue) VALUES (?, ?, ?, ?)" % sTable,
+                        (dPerson["name"], dPerson["books"], dPerson["first"][:7], dPerson["last"][:7]))
+        for tMap in lMaps: oDb.execute("INSERT OR IGNORE INTO maps (tbl1, prime1, kind, tbl2, prime2) VALUES (?, ?, ?, ?, ?)", tMap)
+        trail.addLookups(oDb, "maps", "kind", {sKind: sMeaning}, sSource)
+        log("PEOPLE %s: %s, %s" % (sTable, plural(len(dPeople), "person", "people"), plural(len(lMaps), sKind + " map")))
+        say("%s: %s." % (sTable.title(), plural(len(dPeople), "person", "people")))
     sFts = ""
     if core.homerFts.available(oDb):
         sFts = core.homerFts.createIndex(oDb, "books", "book_id", ["title", "author", "narrator", "category", "annotation", "tags"])
+        core.homerFts.optimize(oDb, sFts)
         sProblem = core.homerFts.integrityProblem(oDb, sFts)
         log("FTS %s: %s" % (sFts, sProblem or "sound"))
         for sMatch in ("blind*", "guide NEAR(dog, 5)", "\"civil war\"", "braille"):
@@ -470,23 +506,28 @@ def pickPilot(lIssues, iCount):
 
 def main(lsArgs):
     lsLower = [s.lower() for s in lsArgs]
-    if "--pilot-due" in lsLower and os.path.exists(sPilotPath) and os.path.getmtime(sPilotPath) >= os.path.getmtime(os.path.abspath(__file__)):
+    # --due (the build's): nothing to do, and nothing said, when the template is newer than this script. --pilot-due, the
+    # first cycles' word for it, is taken the same way, so an older build.cmd still works.
+    if ("--due" in lsLower or "--pilot-due" in lsLower) and os.path.exists(sTemplatePath) and os.path.getmtime(sTemplatePath) >= os.path.getmtime(os.path.abspath(__file__)):
         return 0
     log("makeTalkingBookTopics.py started; %s; script %s" % (sVersion, os.path.abspath(__file__)))
     log("Python %s at %s on %s; SQLite %s; cwd %s; command line %s" % (platform.python_version(), sys.executable, platform.platform(),
                                                                       sqlite3.sqlite_version, os.getcwd(), " ".join(sys.argv)))
-    lsKnown = ("--limit", "--offline", "--pilot-due")
+    lsKnown = ("--due", "--limit", "--offline", "--pilot-due")
     lsUnknown = [s for s in lsArgs if s.startswith("--") and s.lower() not in lsKnown]
     if lsUnknown:
         say("Unknown option %s. The options are %s." % (lsUnknown[0], ", ".join(lsKnown)))
         return 2
-    iLimit = iPilot
+    # THE WHOLE TEMPLATE unless --limit asks for a pilot (version 3). A pilot is never the template.
+    iLimit = 0
     if "--limit" in lsLower:
         iAt = lsLower.index("--limit")
         iLimit = int(lsArgs[iAt + 1]) if iAt + 1 < len(lsArgs) and lsArgs[iAt + 1].isdigit() else iPilot
+    sOut = sPilotPath if iLimit else sTemplatePath
     bOffline = "--offline" in lsLower
-    log("settings: pilot of %d issues; offline %s; delay %.1f s; data %s" % (iLimit, bOffline, nDelay, sDataDir))
-    say("Talking Book Topics: finding the issues, then reading %d of them. A few minutes." % iLimit)
+    log("settings: %s; offline %s; delay %.1f s; data %s; out %s" % ("pilot of %d issues" % iLimit if iLimit else "every issue", bOffline, nDelay, sDataDir, sOut))
+    say("Talking Book Topics: finding the issues, then reading %s. %s" % ("%d of them" % iLimit if iLimit else "all of them",
+        "A few minutes." if iLimit else "The first time takes about ten minutes; saved pages are not asked for again."))
     oCache = core.homerFetch.Cache(sDataDir, fLog=log, nDelay=nDelay, iTimeout=60, iRetries=3, sUserAgent=sUserAgent, bOffline=bOffline)
     dIssues, dKinds = discoverIssues(oCache, bOffline)
     oCache.save()
@@ -495,14 +536,14 @@ def main(lsArgs):
         return 1
     lsYears = sorted(set(d["date"][0] for d in dIssues.values()))
     say("Found %s, %d to %d." % (plural(len(dIssues), "issue"), lsYears[0], lsYears[-1]))
-    lPick = pickPilot(list(dIssues.values()), iLimit)
+    lPick = pickPilot(list(dIssues.values()), iLimit) if iLimit else sorted(dIssues.values(), key=lambda d: d["key"], reverse=True)
     lRead = []
     for iAt, dIssue in enumerate(lPick, 1):
         sTitle = issueTitle(dIssue["date"])
         core.sHeartbeat = "Issue %d of %d, %s, fetching." % (iAt, len(lPick), sTitle)
         # Archived pages never change: a kept copy is used without asking the archive again.
         oCache.bTrustKept = "web.archive.org" in dIssue["fetch"]
-        dIssue["books"] = readIssue(oCache, dIssue, 2 if iAt <= 4 or iAt % 6 == 0 else 1)
+        dIssue["books"] = readIssue(oCache, dIssue, 2 if iAt <= 4 or iAt % 12 == 0 else 0)
         oCache.bTrustKept = False
         core.sHeartbeat = ""
         say("Issue %d of %d, %s: %s." % (iAt, len(lPick), sTitle, plural(len(dIssue["books"]), "book")))
@@ -513,9 +554,9 @@ def main(lsArgs):
     if not lRead:
         say("No book could be read from the pilot's issues. The log and %s say why." % sCoveragePath)
         return 1
-    iBooks, sFts = buildPilot(lRead, sPilotPath)
-    say("Pilot built: %s from %s, %s. Coverage: %s" % (plural(iBooks, "book"), plural(len(lRead), "issue"),
-                                                     "searchable" if sFts else "no full-text index", sCoveragePath))
+    iBooks, sFts = buildDatabase(lRead, sOut)
+    say("%s built: %s from %s, %s, %s. Coverage: %s" % ("Pilot" if iLimit else "Template", plural(iBooks, "book"), plural(len(lRead), "issue"),
+        "searchable" if sFts else "no full-text index", "{:,} KB".format(os.path.getsize(sOut) // 1024), sCoveragePath))
     say("Log: " + sLogPath)
     return 0
 

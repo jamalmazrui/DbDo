@@ -176,6 +176,8 @@ data/BrailleMonitor/
 templates/BrailleMonitor/BrailleMonitor.db
 templates/BrailleMonitor/BrailleMonitor.db.building
 data/TalkingBookTopics/
+templates/TalkingBookTopics/TalkingBookTopics.db
+templates/TalkingBookTopics/TalkingBookTopics.db.building
 scripts/release.cmd
 scripts/release.ps1
 data/RadioTrail.inix

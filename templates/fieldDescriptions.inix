@@ -271,6 +271,39 @@ servings = How many people it serves.
 steps = How to make it, one step per line or paragraph.
 summary = What the dish is, in a sentence or two.
 
+[TalkingBookTopics/authors]
+books = How many books by this author the magazine announced.
+first_issue = The year and month of the first issue that named this author.
+last_issue = The year and month of the last issue that named this author.
+name = The author's name as the magazine prints it.
+
+[TalkingBookTopics/books]
+annotation = What the book is about, in the words NLS wrote; empty when NLS printed someone else's.
+annotation_source = Who wrote the description the magazine printed: NLS, publisher, Goodreads or Amazon.
+audience = Who the book is for: adult or children.
+author = The book's author as the magazine prints the byline.
+category = The magazine's heading for the book, such as Mystery and Detective or World History.
+fiction = Whether the book is fiction or nonfiction, from the magazine's heading.
+issue = The issue that announced the book, such as July-August 2012.
+issue_id = The issue's id, which links the book to its issue.
+length = How long the recording runs, or how many cassettes it fills, as the magazine says.
+narrator = Who reads the recording.
+number = The book's number in the NLS collection, such as DB139182, used to order it or find it on BARD.
+title = The book's title.
+year = The year of the print edition the recording was made from.
+
+[TalkingBookTopics/issues]
+books = How many books the issue announced.
+kind = Where the issue was read from: the live site, an archived web page or an archived text file.
+published = The first day of the issue's first month.
+title = The issue's months and year, such as July-August 2012.
+
+[TalkingBookTopics/narrators]
+books = How many books this narrator read that the magazine announced.
+first_issue = The year and month of the first issue that named this narrator.
+last_issue = The year and month of the last issue that named this narrator.
+name = The narrator's name as the magazine prints it.
+
 [TechTraining/presentations]
 category = The topic area, such as screen readers, phones or the web; F4 offers the choices.
 medium = Its form, such as audio, video or webinar.
@@ -433,6 +466,10 @@ MusicTrail/performers = Singers, players and bands, with what each is known for.
 RadioTrail/stations = Internet radio stations from Radio Browser and SomaFM, with your own verdicts and notes.
 RecipeTrail/ingredients = The ingredients your recipes use, by kind.
 RecipeTrail/recipes = Your recipes, with how long each takes and how many it serves.
+TalkingBookTopics/authors = The authors of the books, with how many each wrote.
+TalkingBookTopics/books = The books Talking Book Topics announced, one row a book.
+TalkingBookTopics/issues = The issues of Talking Book Topics that were read, one row an issue.
+TalkingBookTopics/narrators = The narrators of the books, with how many each read.
 TechTraining/presentations = Free audio and video presentations about technology and accessibility.
 chinook/albums = Albums in the Chinook sample music store.
 chinook/artists = Artists whose music the Chinook store sells.
@@ -587,6 +624,7 @@ MusicTrail = Albums and performers worth hearing.
 northwind = Northwind, a sample trading company database for practicing queries.
 RadioTrail = A catalog of Internet radio stations to find, try and keep, with your own verdicts.
 RecipeTrail = Recipes and the ingredients they use.
+TalkingBookTopics = The books announced in the National Library Service's magazine Talking Book Topics, searchable by full text.
 TechTraining = Free audio and video presentations about technology and accessibility.
 
 [lookprime]

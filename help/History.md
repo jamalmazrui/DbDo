@@ -5,6 +5,10 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 27 November 2026, midday -- Talking Book Topics, the whole template
+
+- **TalkingBookTopics is built from every issue found**, 1997 to mid-2017 from the web archive and 2023 on from loc.gov: each book with its title, author, narrator, number, length, year, category and advisories, a full-text index on them, and authors and narrators tables linked to their books. NLS's own descriptions are kept; descriptions NLS took from publishers, Goodreads or Amazon are not, and annotation_source says whose they were. Saved searches show the forms a full-text search takes: Blindness, Civil-War-Nonfiction, Guide-Dogs, Mysteries-in-Scotland, No-Strong-Language and Space-Flight, with Books-By-Year and Narrators. It stays on the development computer, like BrailleForum, until its size decides how it ships.
+
 ## 27 November 2026, late morning -- Talking Book Topics, a first look
 
 - **The build looks for every issue of Talking Book Topics** at loc.gov and in the web archive, and reads a pilot of 24 issues into a database you can open, data\TalkingBookTopics\TalkingBookTopics-pilot.db. It runs once for each new version of its script, with a line for each issue and a progress line at least every ten seconds. A report in logs, DbDo-tbtCoverage, says what was found year by year and who wrote the books' descriptions, which decides what the finished template can keep. The full TalkingBookTopics template comes in the next cycle.

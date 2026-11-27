@@ -406,19 +406,18 @@ for %%M in (BrailleForum BrailleMonitor) do (
     echo %%M repair: exit code !errorlevel!>> "!log!"
   )
 )
-rem TALKING BOOK TOPICS, CYCLE 1 (27 November 2026, Jamal: "go ahead. Make sure that I get succinct status updates as
-rem the harvest is occurring"). makeTalkingBookTopics finds every issue of the NLS magazine, live and in the web archive,
-rem and reads a pilot of 24 into data\TalkingBookTopics\TalkingBookTopics-pilot.db, with a line on the console for each
-rem issue and a heartbeat at least every ten seconds. --pilot-due returns at once, saying nothing, when the pilot is newer
-rem than the script, so it runs once per version of the script. A failure is reported and logged but does not stop
-rem the build: the pilot is for learning, and its log (DbDo-makeTalkingBookTopics) and coverage report (DbDo-tbtCoverage)
-rem are what the next cycle needs.
+rem TALKING BOOK TOPICS (27 November 2026, Jamal: "go ahead. Make sure that I get succinct status updates as the harvest
+rem is occurring"). makeTalkingBookTopics finds every issue of the NLS magazine, live and in the web archive, and builds
+rem templates\TalkingBookTopics\TalkingBookTopics.db from all of them (cycle 2; cycle 1 built a pilot of 24), with a line
+rem on the console for each issue and a heartbeat at least every ten seconds. --due returns at once, saying nothing, when
+rem the template is newer than the script, so it runs once per version of the script. A failure is reported and logged
+rem but does not stop the build: its log (DbDo-makeTalkingBookTopics) and coverage report (DbDo-tbtCoverage) say why.
 if exist "!sHere!scripts\makeTalkingBookTopics.py" (
-  echo TalkingBookTopics: python scripts\makeTalkingBookTopics.py --pilot-due>> "!log!"
-  python "!sHere!scripts\makeTalkingBookTopics.py" --pilot-due
+  echo TalkingBookTopics: python scripts\makeTalkingBookTopics.py --due>> "!log!"
+  python "!sHere!scripts\makeTalkingBookTopics.py" --due
   set "iTbt=!errorlevel!"
-  echo TalkingBookTopics pilot: exit code !iTbt!>> "!log!"
-  if not "!iTbt!"=="0" echo The Talking Book Topics pilot did not finish; its log in logs names why. The build goes on.
+  echo TalkingBookTopics: exit code !iTbt!>> "!log!"
+  if not "!iTbt!"=="0" echo The TalkingBookTopics template was not built; its log in logs names why. The build goes on.
 )
 rem RETIRED BRAILLEFORUM FILES (26 November 2026). Searches.md and Coverage.md sat beside the template, outside the
 rem Homer doc set: the search guide is now the BrailleForum part of help\DbDo.md, and the coverage notes are
@@ -438,7 +437,7 @@ rem the shipped ones beside the program and %LOCALAPPDATA%\DbDo\templates, the p
 rem from the program. This puts the master copy there, only what is newer, leaving out the copy being built and any
 rem stray logs; the next time DbDo lists its templates, it seeds its own copy into the data folder as it does any other.
 rem robocopy's exit codes below 8 mean success.
-for %%M in (BrailleForum BrailleMonitor) do (
+for %%M in (BrailleForum BrailleMonitor TalkingBookTopics) do (
   if exist "!sHere!templates\%%M\%%M.db" (
     set "sUserTemplates=%LOCALAPPDATA%\DbDo\templates\%%M"
     robocopy "!sHere!templates\%%M" "!sUserTemplates!" /E /XO /XD logs /XF *.building *.db-journal *.db-wal *.db-shm /R:2 /W:2 /NP /NJH /NJS /NDL >> "!log!" 2>&1
