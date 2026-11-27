@@ -45,7 +45,7 @@ sHere = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, sHere)
 import makeBrailleForum as core
 
-sVersion = "2026-11-27 version 3: the whole template, with authors and narrators mapped to their books"
+sVersion = "2026-11-27 version 4: sources only from their own marks; ranked by stored weights; no prefix indexes; vacuumed; sizes logged"
 sSource = "TalkingBookTopics"
 sUserAgent = "DbDo makeTalkingBookTopics/1 (+https://github.com/JamalMazrui/DbDo; a searchable list of NLS Talking Book Topics books)"
 sProject = core.sProject
@@ -289,7 +289,12 @@ def entryOf(lBlock, sHeading):
         sText = sText[:oYear.start()].strip()
     # WHO WROTE IT, after the advisories and year are taken out, so a description marked "From publisher" in its middle
     # still gives up the labels NLS put after it.
-    oSource = re.search(r"\b(From (?:the )?publisher|Goodreads|Amazon)\b", sText, re.I)
+    # ONLY ITS OWN MARK (version 4, from version 3's log): "From publisher." is how NLS marks a description it did not
+    # write, and "From Goodreads." and "From Amazon." likewise. Version 3 also took the word Amazon anywhere -- the river,
+    # the company -- and so dropped a few dozen of NLS's own descriptions, and mislabeled The Lost Tribe, whose
+    # description mentions the Amazon and ends "From publisher." The last such mark is the one that counts.
+    lMarks = list(re.finditer(r"\bFrom (?:the )?(publisher|Goodreads|Amazon)\b\.?", sText, re.I))
+    oSource = lMarks[-1] if lMarks else None
     if oSource:
         sWord = oSource.group(1).lower()
         dBook["annotation_source"] = "publisher" if "publisher" in sWord else ("Goodreads" if "goodreads" in sWord else "Amazon")
@@ -445,9 +450,26 @@ def buildDatabase(lIssues, sOut):
         trail.addLookups(oDb, "maps", "kind", {sKind: sMeaning}, sSource)
         log("PEOPLE %s: %s, %s" % (sTable, plural(len(dPeople), "person", "people"), plural(len(lMaps), sKind + " map")))
         say("%s: %s." % (sTable.title(), plural(len(dPeople), "person", "people")))
+    # WHAT THE FIXED VALUES MEAN (version 4): defs rows for the fields with a few set values, so Shift+F1 and the pick
+    # list on a value say what it is.
+    trail.addLookups(oDb, "books", "audience", {"adult": "A book for adults.", "children": "A book for children or young people."}, sSource)
+    trail.addLookups(oDb, "books", "fiction", {"fiction": "A made-up story.", "nonfiction": "A true account: history, biography, how-to and the like."}, sSource)
+    trail.addLookups(oDb, "books", "annotation_source", {"NLS": "NLS wrote the description, and it is kept here.",
+                     "publisher": "NLS printed the publisher's description, which is not kept here.",
+                     "Goodreads": "NLS printed a description from Goodreads, which is not kept here.",
+                     "Amazon": "NLS printed a description from Amazon, which is not kept here."}, sSource)
+    trail.addLookups(oDb, "issues", "kind", {"live web issue": "Read from the issue's page at loc.gov.", "web issue": "Read from an archived copy of the issue's web page.",
+                     "text issue": "Read from an archived copy of the issue's text file."}, sSource)
     sFts = ""
     if core.homerFts.available(oDb):
-        sFts = core.homerFts.createIndex(oDb, "books", "book_id", ["title", "author", "narrator", "category", "annotation", "tags"])
+        # NO PREFIX INDEXES (version 4): version 3's template was 174 MB. A word's start (space*) is still found without
+        # them, by a range in the main index, fast enough for sixty thousand books; the prefix indexes cost size for a
+        # speed nobody would hear.
+        sFts = core.homerFts.createIndex(oDb, "books", "book_id", ["title", "author", "narrator", "category", "annotation", "tags"], sPrefix="")
+        # THE WEIGHTS LIVE IN THE DATABASE (version 4, from the SQLite FTS tutorial Jamal had ChatGPT write): a title match
+        # counts ten times a match in the description, an author five, a narrator three, a category two. Stored as the
+        # index's default rank, so every search that orders by rank -- the saved searches, and any DbDo adds -- weighs alike.
+        oDb.execute("INSERT INTO books_fts (books_fts, rank) VALUES ('rank', 'bm25(10.0, 5.0, 3.0, 2.0, 1.0, 1.0)')")
         core.homerFts.optimize(oDb, sFts)
         sProblem = core.homerFts.integrityProblem(oDb, sFts)
         log("FTS %s: %s" % (sFts, sProblem or "sound"))
@@ -460,7 +482,16 @@ def buildDatabase(lIssues, sOut):
     else:
         log("FTS: this SQLite has no FTS5")
     oDb.commit()
+    # SMALLER ON DISK (version 4): VACUUM rewrites the file without the pages that building and optimizing left empty, and
+    # the log names what takes the room, table by table, for the next cycle's decisions.
+    oDb.execute("VACUUM")
+    try:
+        for sName, iBytes in oDb.execute("SELECT name, sum(pgsize) FROM dbstat GROUP BY name ORDER BY 2 DESC LIMIT 12").fetchall():
+            log("SIZE %s: %s KB" % (sName, "{:,}".format(iBytes // 1024)))
+    except Exception as oError:
+        log("SIZE: dbstat is not in this SQLite (%s)" % oError)
     oDb.close()
+    log("SIZE file: %s KB" % "{:,}".format(os.path.getsize(sNew) // 1024))
     if os.path.exists(sOut): os.remove(sOut)
     os.replace(sNew, sOut)
     return iBooks, sFts

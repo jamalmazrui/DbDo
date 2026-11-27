@@ -1,0 +1,32 @@
+﻿; Report definitions for the TalkingBookTopics database.
+;
+; Run them with Run Report (Alt+Shift+R). DbDo renders the chosen report and opens it in your editor, where it can be
+; read straight through or printed. Empty fields print nothing, because a field earns its line.
+
+FileTask = report
+
+; The books you have marked, with what each is about and where to download it: a wish list for BARD or your library.
+[wish_list]
+@table = books
+@filter = marked = 1
+@sort = title
+header = """
+# Wish List
+
+Prepared {{ new Date().toISOString().substring(0,10) }} from TalkingBookTopics, the books of Talking Book Topics.
+"""
+detail = """
+## $title
+
+{{ $author ? "- By: " + $author : "" }}
+{{ $narrator ? "- Read by: " + $narrator : "" }}
+{{ $number ? "- Book number: " + $number : "" }}
+{{ $length ? "- Length: " + $length : "" }}
+{{ $issue ? "- Announced: " + $issue : "" }}
+{{ $url ? "- BARD: " + $url : "" }}
+
+{{ $annotation ? $annotation : "" }}
+"""
+footer = """
+**$count {{ $count == 1 ? "book" : "books" }} on the list.**
+"""

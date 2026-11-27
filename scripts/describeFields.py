@@ -67,7 +67,10 @@ def describeDatabase(sDb, sTemplate, dSections, bDry):
             logLine(sTemplate + ": defs gained its pattern column")
         lWanted = []
         for sField, sSentence in dSections.get("*", {}).items(): lWanted.append(("*", sField, sSentence))
+        lVirtual = [r[0] for r in oConn.execute("SELECT name FROM sqlite_master WHERE type = 'table' AND sql LIKE 'CREATE VIRTUAL TABLE%'")]
         lTables = [r[0] for r in oConn.execute("SELECT name FROM sqlite_master WHERE type = 'table' AND name NOT LIKE 'sqlite_%'")]
+        # A full-text index and its shadow tables (name_data, name_idx, name_docsize, name_config) belong to SQLite, not to the user, so they get no descriptions.
+        lTables = [t for t in lTables if not any(t == v or t.startswith(v + "_") for v in lVirtual)]
         for sTable in lTables:
             dOwn = dSections.get(sTemplate + "/" + sTable) or dSections.get(sTable) or {}
             for oRow in oConn.execute('PRAGMA table_xinfo("' + sTable.replace('"', '""') + '")'):

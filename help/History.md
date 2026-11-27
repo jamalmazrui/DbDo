@@ -5,6 +5,16 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 27 November 2026, afternoon -- Talking Book Topics, tuned
+
+- **Searches list the best matches first.** The template stores how much each field counts: a word in a title counts most, then author, narrator and category, then description and tags. The saved searches sort by that.
+- **A description's source is read only from its own mark**, such as "From the publisher." A book that merely mentions Amazon keeps NLS's description.
+- **The template is smaller.** It drops the extra word-start indexes, which searches with an asterisk did not need, and is compacted when built. The build log lists the size of each table and index.
+- **Pick lists for fixed values**: audience, fiction or nonfiction, description source, and issue kind.
+- **A Wish List report** prints the books you mark, with author, narrator, number, length, issue, BARD url and description.
+- **Describing fields skips full-text indexes** and their hidden tables, so it no longer warns about them in BrailleForum or TalkingBookTopics.
+
+
 ## 27 November 2026, midday -- Talking Book Topics, the whole template
 
 - **TalkingBookTopics is built from every issue found**, 1997 to mid-2017 from the web archive and 2023 on from loc.gov: each book with its title, author, narrator, number, length, year, category and advisories, a full-text index on them, and authors and narrators tables linked to their books. NLS's own descriptions are kept; descriptions NLS took from publishers, Goodreads or Amazon are not, and annotation_source says whose they were. Saved searches show the forms a full-text search takes: Blindness, Civil-War-Nonfiction, Guide-Dogs, Mysteries-in-Scotland, No-Strong-Language and Space-Flight, with Books-By-Year and Narrators. It stays on the development computer, like BrailleForum, until its size decides how it ships.
