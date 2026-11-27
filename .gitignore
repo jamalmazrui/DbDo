@@ -109,6 +109,8 @@
 !/scripts/makeHotkeys.py
 !/scripts/makeMusicTrail.cmd
 !/scripts/makeMusicTrail.py
+!/scripts/makeTalkingBookTopics.cmd
+!/scripts/makeTalkingBookTopics.py
 !/scripts/makeTechTraining.cmd
 !/scripts/makeTechTraining.py
 !/scripts/makeTutorials.cmd
@@ -173,6 +175,7 @@ templates/BrailleForum/BrailleForum.db.building
 data/BrailleMonitor/
 templates/BrailleMonitor/BrailleMonitor.db
 templates/BrailleMonitor/BrailleMonitor.db.building
+data/TalkingBookTopics/
 scripts/release.cmd
 scripts/release.ps1
 data/RadioTrail.inix

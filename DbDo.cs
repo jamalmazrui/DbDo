@@ -27503,16 +27503,31 @@ namespace DbDo
                 if (string.Equals(sType, "TEXTMARKDOWN", StringComparison.OrdinalIgnoreCase)) lMarkdown.Add(sOne);
             }
             if (lMarkdown.Count == 0) { Say.say("This table has no Markdown field."); return; }
-            string sField = lMarkdown[0];
-            if (lMarkdown.Count > 1)
+            // ONLY FIELDS WITH WORDS IN THEM (27 November 2026, Jamal: "if notes is empty, then just open the article
+            // directly"). The record's empty Markdown fields are left out before anything is asked: one left opens at once,
+            // two or more are offered in the list, and none left is said, with nothing opened.
+            Dictionary<string, string> dValues = new Dictionary<string, string>();
+            List<string> lFilled = new List<string>();
+            foreach (string sOne in lMarkdown)
             {
-                sField = promptListChoice(sTitle, "Markdown field to preview:", lMarkdown, null);
+                string sOneValue = "";
+                try { sOneValue = db.getFieldValue(sOne) ?? ""; } catch { }
+                if (sOneValue.Trim().Length == 0) continue;
+                lFilled.Add(sOne);
+                dValues[sOne] = sOneValue;
+            }
+            if (lFilled.Count == 0)
+            {
+                Say.say(lMarkdown.Count == 1 ? "The " + lMarkdown[0] + " field is empty." : "Every Markdown field of this record is empty.");
+                return;
+            }
+            string sField = lFilled[0];
+            if (lFilled.Count > 1)
+            {
+                sField = promptListChoice(sTitle, "Markdown field to preview:", lFilled, null);
                 if (string.IsNullOrEmpty(sField)) return;
             }
-            string sValue = "";
-            try { sValue = db.getFieldValue(sField) ?? ""; } catch { }
-            if (sValue.Trim().Length == 0) { Say.say("The " + sField + " field is empty."); return; }
-            openMarkdownAsWebPage(sField, sValue);
+            openMarkdownAsWebPage(sField, dValues[sField]);
         }
 
         private void recOpenCellClicked(object sender, EventArgs evArgs)

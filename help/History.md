@@ -5,9 +5,14 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 27 November 2026, late morning -- Talking Book Topics, a first look
+
+- **The build looks for every issue of Talking Book Topics** at loc.gov and in the web archive, and reads a pilot of 24 issues into a database you can open, data\TalkingBookTopics\TalkingBookTopics-pilot.db. It runs once for each new version of its script, with a line for each issue and a progress line at least every ten seconds. A report in logs, DbDo-tbtCoverage, says what was found year by year and who wrote the books' descriptions, which decides what the finished template can keep. The full TalkingBookTopics template comes in the next cycle.
+- **The pilot reads books as the magazine prints them.** The first look found issues from 1997 to mid-2017 in the web archive and from 2023 at loc.gov. The second reads each book once, where the newer issues repeat a book's number on a closing line, takes the title from the line above the number, keeps narrators' initials, and builds its tables the way every DbDo template does, so the pilot passes the release checks. It also searches two more places for the issues of 2017 to 2022.
+
 ## 27 November 2026, morning -- Preview Markdown in Web Browser
 
-- **An article's body opens as a web page from any column.** Preview Markdown in Web Browser, Control+Shift+H, finds the record's Markdown field by its type, shown or not, and opens it in your browser as a page with headings, lists and links. With two or more Markdown fields, a list asks which. The name is EdSharp's for the same act; H is for HTML.
+- **An article's body opens as a web page from any column.** Preview Markdown in Web Browser, Control+Shift+H, finds the record's Markdown field by its type, shown or not, and opens it in your browser as a page with headings, lists and links. Empty Markdown fields are skipped, so one with words opens at once, a list asks only when two or more have words, and a record whose Markdown fields are all empty is said to be so, with nothing opened. The name is EdSharp's for the same act; H is for HTML.
 - **Open Cell Value moves to Shift+Enter.** Enter goes into a record's related records, and Shift+Enter goes out to the url, file or folder a cell names, as Shift+Enter opens the item itself in FileDir. Control+Enter stays free: it means OK in every DbDo dialog.
 - Needs HomerDev 1.303.0.
 

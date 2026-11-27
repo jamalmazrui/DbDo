@@ -40,6 +40,8 @@ templates/BrailleForum/BrailleForum.db.building
 data/BrailleMonitor/
 templates/BrailleMonitor/BrailleMonitor.db
 templates/BrailleMonitor/BrailleMonitor.db.building
+# The Talking Book Topics pages and pilot (27 November 2026): fetched and built here, kept off GitHub.
+data/TalkingBookTopics/
 
 # The release scripts belong to the separate tagRelease project and stay out
 # of every repository.

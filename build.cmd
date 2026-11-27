@@ -406,6 +406,20 @@ for %%M in (BrailleForum BrailleMonitor) do (
     echo %%M repair: exit code !errorlevel!>> "!log!"
   )
 )
+rem TALKING BOOK TOPICS, CYCLE 1 (27 November 2026, Jamal: "go ahead. Make sure that I get succinct status updates as
+rem the harvest is occurring"). makeTalkingBookTopics finds every issue of the NLS magazine, live and in the web archive,
+rem and reads a pilot of 24 into data\TalkingBookTopics\TalkingBookTopics-pilot.db, with a line on the console for each
+rem issue and a heartbeat at least every ten seconds. --pilot-due returns at once, saying nothing, when the pilot is newer
+rem than the script, so it runs once per version of the script. A failure is reported and logged but does not stop
+rem the build: the pilot is for learning, and its log (DbDo-makeTalkingBookTopics) and coverage report (DbDo-tbtCoverage)
+rem are what the next cycle needs.
+if exist "!sHere!scripts\makeTalkingBookTopics.py" (
+  echo TalkingBookTopics: python scripts\makeTalkingBookTopics.py --pilot-due>> "!log!"
+  python "!sHere!scripts\makeTalkingBookTopics.py" --pilot-due
+  set "iTbt=!errorlevel!"
+  echo TalkingBookTopics pilot: exit code !iTbt!>> "!log!"
+  if not "!iTbt!"=="0" echo The Talking Book Topics pilot did not finish; its log in logs names why. The build goes on.
+)
 rem RETIRED BRAILLEFORUM FILES (26 November 2026). Searches.md and Coverage.md sat beside the template, outside the
 rem Homer doc set: the search guide is now the BrailleForum part of help\DbDo.md, and the coverage notes are
 rem notes\BrailleForum_Coverage.md, beside the new notes\BrailleForum_Statistics.md. Authors.sql became Writers.sql with

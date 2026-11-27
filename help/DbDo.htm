@@ -1020,11 +1020,13 @@ FileDir. <strong>Preview Markdown in Web Browser</strong>
 (Control+Shift+H, H as in EdSharp’s Control+H for HTML) shows the
 record’s Markdown field, such as an article’s body in BrailleForum, as a
 web page in your browser, with real headings, lists and links to follow.
-It finds the field itself, so the field need not be a shown column; with
-two or more, a list asks which. When the file or folder that Open Cell
-Value opens suits another Homer program – a folder FileDir, Markdown or
-text EdSharp, a database or workbook DbDo – it asks where to go next,
-that program first, with the Windows default app beside it.</li>
+It finds the field itself, so the field need not be a shown column.
+Empty Markdown fields are skipped: when only one has words, it opens at
+once; with two or more, a list asks which; when all are empty, it says
+so and opens nothing. When the file or folder that Open Cell Value opens
+suits another Homer program – a folder FileDir, Markdown or text
+EdSharp, a database or workbook DbDo – it asks where to go next, that
+program first, with the Windows default app beside it.</li>
 <li><strong>Pick Value</strong> (Control+F2) offers the legal values for
 a field whose choices are in defs.</li>
 <li><strong>Edit Notes</strong> (Alt+Shift+N), <strong>Edit

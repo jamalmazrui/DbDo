@@ -1,0 +1,529 @@
+﻿r"""makeTalkingBookTopics.py -- builds DbDo's TalkingBookTopics template, the books announced in the National Library
+Service's bimonthly magazine Talking Book Topics, searchable by full text. The plan is notes\TalkingBookTopics_Plan.md.
+
+    scripts\makeTalkingBookTopics                 finds every issue and builds a pilot of 24 (cycle 1, this version)
+    scripts\makeTalkingBookTopics --pilot-due     the same, only when no pilot is newer than this script (the build runs this)
+    scripts\makeTalkingBookTopics --limit 40      a pilot of a different size
+    scripts\makeTalkingBookTopics --offline       builds from the copies already kept, asking nobody
+
+CYCLE 1, DISCOVERY AND A PILOT (27 November 2026, Jamal: "go ahead. Make sure that I get succinct status updates as the
+harvest is occurring"). The questions the plan left open are answered by this run's log and its coverage report, not
+guessed: how far back the issues go, in what shapes they were published, and from which year NLS printed publishers'
+descriptions instead of its own. Cycle 2 builds the whole template from what cycle 1 learns.
+
+WHERE THE ISSUES COME FROM.
+    The live list      https://www.loc.gov/nls/tbt links each issue since January-February 2023 as one long page.
+    The web archive    the Internet Archive's capture index (CDX) lists every page it kept under loc.gov/nls/tbt/
+                       and lcweb.loc.gov/nls/tbt/; a page is read raw, without the archive's toolbar (the "id_" form).
+Each page found is sorted into a kind (LINKKIND in the log, with samples): a whole issue as a web page or a text file,
+an index, a section of an issue, or something else. An issue is known by its year and months, from its address or,
+failing that, from its own first lines.
+
+ONE BOOK, ONE ROW. An entry is found by its book number (DB, RC, TB, DBC, TBC or BR and digits). Around it are read
+the title, author ("by"), narrator ("Read by", "Narrated by"), length, year, advisories (violence, strong language, sex,
+commercial audiobook, bestseller), the heading it falls under (category, audience, fiction or nonfiction), and the
+annotation with its source. KEEP ONLY WORDS THAT CAN BE GIVEN AWAY: an annotation is kept when NLS wrote it; one marked
+"From publisher", Goodreads or Amazon is left out and annotation_source names its writer. Facts are kept for every book.
+
+STATUS ON THE CONSOLE, SHORT. A line when each stage begins, a line per issue read, and a heartbeat at least every ten
+seconds while pages are fetched, so the console never goes quiet. Everything else goes to the log.
+
+RESPECTFUL FETCHING. The kit's homerFetch asks each server at most once every two seconds, keeps every page in
+data\TalkingBookTopics, and asks only "has it changed?" of a page it has; archived pages never change, so a kept copy
+is used without asking.
+
+WHAT IS WRITTEN.
+    data\TalkingBookTopics\TalkingBookTopics-pilot.db        the pilot, to open in DbDo and try searches on
+    logs\DbDo-tbtCoverage-<date>-<time>.md                   issues found by year and kind, books read, sources by year
+    logs\DbDo-makeTalkingBookTopics-<date>-<time>.log        every request, every count, sample entries
+The template itself, templates\TalkingBookTopics\TalkingBookTopics.db, is cycle 2's.
+"""
+
+import collections, datetime, html.parser, json, os, platform, re, sqlite3, sys, time, traceback, urllib.parse
+
+sHere = os.path.dirname(os.path.abspath(__file__))
+sys.path.insert(0, sHere)
+import makeBrailleForum as core
+
+sVersion = "2026-11-27 version 2: entries read as the live and 2015-2017 issues print them; conventional tables; more places searched for 2017 to 2022"
+sSource = "TalkingBookTopics"
+sUserAgent = "DbDo makeTalkingBookTopics/1 (+https://github.com/JamalMazrui/DbDo; a searchable list of NLS Talking Book Topics books)"
+sProject = core.sProject
+sStamp = datetime.datetime.now().strftime("%Y%m%d-%H%M%S")
+sLogPath = os.path.join(sProject, "logs", "DbDo-make%s-%s.log" % (sSource, sStamp))
+sCoveragePath = os.path.join(sProject, "logs", "DbDo-tbtCoverage-%s.md" % sStamp)
+sDataDir = os.path.join(sProject, "data", sSource)
+sPilotPath = os.path.join(sDataDir, sSource + "-pilot.db")
+core.sLogPath = sLogPath
+core.trail.sLogPath = sLogPath
+core.iHeartbeatSeconds = 10
+log, say, plural = core.log, core.say, core.plural
+
+sLiveIndex = "https://www.loc.gov/nls/tbt"
+# VERSION 2: cycle 1 found the archive's issues from 1997 to May-June 2017 under /nls/tbt/ and the live list's from 2023,
+# and nothing between. NLS moved its pages in 2017; the new-materials and talking-book-topics addresses are asked too.
+lsCdxPrefixes = ["loc.gov/nls/tbt/", "lcweb.loc.gov/nls/tbt/", "loc.gov/nls/new-materials/", "loc.gov/nls/talking-book-topics"]
+sCdx = "https://web.archive.org/cdx/search/cdx?url=%s&matchType=prefix&output=json&fl=original,timestamp,mimetype,statuscode,length&filter=statuscode:200&collapse=urlkey&limit=20000"
+iPilot = 24
+nDelay = 2.0
+
+lsMonths = ["january", "february", "march", "april", "may", "june", "july", "august", "september", "october", "november", "december"]
+dMonthAbbrev = {s[:3]: i + 1 for i, s in enumerate(lsMonths)}
+sMonthWord = r"(?:jan(?:uary)?|feb(?:ruary)?|mar(?:ch)?|apr(?:il)?|may|june?|july?|aug(?:ust)?|sep(?:t(?:ember)?)?|oct(?:ober)?|nov(?:ember)?|dec(?:ember)?)"
+oNumber = re.compile(r"\b(DBC|TBC|DB|RC|TB|BR)[  ]?(\d{3,6})\b")
+oByLine = re.compile(r"^\s*by\s+(.+?)\s*\.?\s*$", re.I)
+oNarrator = re.compile(r"\b(?:read|narrated)\s+by\s+([^.;\n]+)", re.I)
+oHours = re.compile(r"\b(\d+)\s+hours?(?:,?\s+(?:and\s+)?(\d+)\s+minutes?)?", re.I)
+oMedia = re.compile(r"\b(\d+)\s+(cassettes?|discs?|cartridges?|volumes?)\b", re.I)
+oYearEnd = re.compile(r"\b((?:19|20)\d\d)\.?\s*$")
+oSourceMark = re.compile(r"\b(From (?:the )?publisher|Goodreads|Amazon)\b[^\n]*$", re.I)
+lsAdvisories = ["some violence", "violence", "some strong language", "strong language", "some descriptions of sex",
+                "explicit descriptions of sex", "descriptions of sex", "some explicit descriptions of sex", "commercial audiobook",
+                "bestseller", "unrated", "some violence and strong language", "recreated", "prize winner", "prizewinner",
+                "for senior high and older readers", "for junior and senior high and older readers", "for junior high and older readers",
+                "for grades k-3", "for grades 2-4", "for grades 3-6", "for grades 4-7", "for grades 5-8", "for grades 6-9", "for preschool-grade 2"]
+lsDropLines = ["download from bard", "download", "order form", "back to top", "skip to"]
+
+
+# ---------------------------------------------------------------- reading a page into headed lines
+
+class linesParser(html.parser.HTMLParser):
+    """A web page as lines of text, each with the heading it falls under. A heading, paragraph, list item, table cell
+    or line break ends a line; script and style are skipped."""
+
+    def __init__(self):
+        html.parser.HTMLParser.__init__(self, convert_charrefs=True)
+        self.lLines, self.lsCurrent, self.sHeading, self.bHeading, self.iSkip = [], [], "", False, 0
+        self.iLevel, self.dLevels = 0, {}
+
+    def flush(self):
+        sText = re.sub(r"\s+", " ", "".join(self.lsCurrent)).strip()
+        self.lsCurrent = []
+        if not sText: return
+        if self.bHeading:
+            # THE HEADING PATH: a heading replaces those at its level and below, so "Adult Fiction > Mystery" is kept whole.
+            self.dLevels = {i: s for i, s in self.dLevels.items() if i < self.iLevel}
+            self.dLevels[self.iLevel] = sText
+            self.sHeading = " > ".join(self.dLevels[i] for i in sorted(self.dLevels))
+        self.lLines.append((self.sHeading, sText, self.bHeading))
+
+    def handle_starttag(self, sTag, lAttrs):
+        if sTag in ("script", "style", "nav", "header", "footer"): self.iSkip += 1
+        if sTag in ("p", "li", "br", "div", "tr", "td", "dd", "dt", "h1", "h2", "h3", "h4", "h5", "h6"): self.flush()
+        if sTag in ("h1", "h2", "h3", "h4", "h5", "h6"): self.bHeading, self.iLevel = True, int(sTag[1])
+
+    def handle_endtag(self, sTag):
+        if sTag in ("script", "style", "nav", "header", "footer"): self.iSkip = max(0, self.iSkip - 1)
+        if sTag in ("p", "li", "div", "tr", "td", "dd", "dt", "h1", "h2", "h3", "h4", "h5", "h6"): self.flush()
+        if sTag in ("h1", "h2", "h3", "h4", "h5", "h6"): self.bHeading = False
+
+    def handle_data(self, sData):
+        if not self.iSkip: self.lsCurrent.append(sData)
+
+
+def pageLines(sText, bHtml):
+    """(heading, line, is a heading) for each line of a page. A text file's headings are lines in capitals."""
+    if bHtml:
+        oParser = linesParser()
+        oParser.feed(sText)
+        oParser.flush()
+        return oParser.lLines
+    lResult, sHeading, lsPath = [], "", []
+    for sLine in sText.splitlines():
+        sLine = sLine.strip()
+        if not sLine: continue
+        bHeading = len(sLine) < 60 and sLine.upper() == sLine and re.search(r"[A-Z]{3}", sLine) is not None and not oNumber.search(sLine)
+        if bHeading:
+            lsPath = (lsPath + [sLine.title()])[-2:]
+            sHeading = " > ".join(lsPath)
+        lResult.append((sHeading, sLine, bHeading))
+    return lResult
+
+
+# ---------------------------------------------------------------- an issue's date
+
+def monthNumber(sWord):
+    return dMonthAbbrev.get(sWord.lower()[:3], 0)
+
+
+def issueDate(sText):
+    """(year, first month, last month) of an issue from its address or its first lines, or None."""
+    sLower = sText.lower()
+    oMatch = re.search(r"(" + sMonthWord + r")[\s\-/_,&and]*(" + sMonthWord + r")[\s\-/_,]*((?:19|20)\d\d)", sLower)
+    if oMatch: return (int(oMatch.group(3)), monthNumber(oMatch.group(1)), monthNumber(oMatch.group(2)))
+    oMatch = re.search(r"((?:19|20)\d\d)[/\-_]?\d{0,2}(" + sMonthWord + r")(" + sMonthWord + r")", sLower)
+    if oMatch: return (int(oMatch.group(1)), monthNumber(oMatch.group(2)), monthNumber(oMatch.group(3)))
+    oMatch = re.search(r"/((?:19|20)\d\d)/\d{0,2}(" + sMonthWord + r")(" + sMonthWord + r")?", sLower)
+    if oMatch: return (int(oMatch.group(1)), monthNumber(oMatch.group(2)), monthNumber(oMatch.group(3) or oMatch.group(2)))
+    return None
+
+
+def issueTitle(tDate):
+    iYear, iFirst, iLast = tDate
+    sFirst, sLast = lsMonths[iFirst - 1].title(), lsMonths[iLast - 1].title()
+    return "%s-%s %d" % (sFirst, sLast, iYear) if iFirst != iLast else "%s %d" % (sFirst, iYear)
+
+
+# ---------------------------------------------------------------- finding the issues
+
+def linkKind(sUrl, sMime, iLength):
+    """What an archived address seems to be, from its shape. Logged with samples so the next cycle can read new shapes."""
+    sLower = sUrl.lower().split("?")[0]
+    sLeaf = sLower.rsplit("/", 1)[-1]
+    if sLeaf in ("", "index.html", "index.htm", "tbt", "tbt/") or "index" in sLeaf: return "index"
+    if re.search(r"\.(pdf|mp3|zip|gif|jpg|png|css|js)$", sLower): return "other file"
+    if sLower.endswith(".txt"): return "text issue" if issueDate(sLower) else "text other"
+    if "talking-book-topics-" in sLower and issueDate(sLower): return "web issue"
+    if re.search(r"\.html?$", sLower):
+        if issueDate(sLower): return "web issue" if iLength == 0 or iLength > 20000 else "web section"
+        return "web other"
+    return "other"
+
+
+def discoverIssues(oCache, bOffline):
+    """Every issue found, as {key: dict}, the live ones first; the web archive fills the years before them."""
+    dIssues = {}
+    dKinds, dSamples = collections.Counter(), collections.defaultdict(list)
+    # The live list.
+    core.sHeartbeat = "Finding issues: the live list at loc.gov."
+    dResult = oCache.fetch(sLiveIndex)
+    sHtml = core.decoded(dResult.get("body"))
+    for sHref in sorted(set(re.findall(r'href="([^"]*talking-book-topics-[a-z\-]+-\d{4}[^"]*)"', sHtml, re.I))):
+        sUrl = urllib.parse.urljoin(sLiveIndex + "/", sHref.split("#")[0])
+        tDate = issueDate(sUrl)
+        if not tDate: continue
+        sKey = "%04d-%02d" % (tDate[0], tDate[1])
+        dIssues.setdefault(sKey, {"key": sKey, "date": tDate, "url": sUrl, "fetch": sUrl, "kind": "live web issue", "html": True})
+        dKinds["live web issue"] += 1
+    log("LIVE %s: %s" % (sLiveIndex, plural(len(dIssues), "issue")))
+    say("Live list: %s." % plural(len(dIssues), "issue"))
+    # The web archive.
+    for sPrefix in lsCdxPrefixes:
+        core.sHeartbeat = "Finding issues: the web archive's list for %s." % sPrefix
+        sQuery = sCdx % urllib.parse.quote(sPrefix, safe="")
+        dResult = oCache.fetch(sQuery)
+        try: lRows = json.loads(core.decoded(dResult.get("body")) or "[]")
+        except Exception as oError:
+            log("CDX %s could not be read: %s" % (sPrefix, oError)); lRows = []
+        lRows = lRows[1:] if lRows and lRows[0] and lRows[0][0] == "original" else lRows
+        log("CDX %s: %s" % (sPrefix, plural(len(lRows), "page")))
+        for lRow in lRows:
+            sOriginal, sTime, sMime = lRow[0], lRow[1], lRow[2]
+            iLength = int(lRow[4]) if len(lRow) > 4 and str(lRow[4]).isdigit() else 0
+            sKind = linkKind(sOriginal, sMime, iLength)
+            dKinds[sKind] += 1
+            if len(dSamples[sKind]) < 8: dSamples[sKind].append(sOriginal)
+            if sKind not in ("web issue", "text issue"): continue
+            tDate = issueDate(sOriginal)
+            sKey = "%04d-%02d" % (tDate[0], tDate[1])
+            dOld = dIssues.get(sKey)
+            dNew = {"key": sKey, "date": tDate, "url": sOriginal, "fetch": "https://web.archive.org/web/%sid_/%s" % (sTime, sOriginal),
+                    "kind": sKind, "html": sKind == "web issue"}
+            # A web page beats a text file, which has no headings to tell a category by; the live page beats both.
+            if dOld is None or (dOld["kind"] == "text issue" and sKind == "web issue"): dIssues[sKey] = dNew
+    for sKind in sorted(dKinds):
+        log("LINKKIND %s: %d; samples: %s" % (sKind, dKinds[sKind], " | ".join(dSamples.get(sKind, [])) or "(live list)"))
+    core.sHeartbeat = ""
+    return dIssues, dKinds
+
+
+# ---------------------------------------------------------------- reading one issue
+
+def entryOf(lBlock, sHeading):
+    """A book from the lines of one entry, or None. lBlock is a list of line texts, the book number in the first."""
+    sJoined = "\n".join(lBlock)
+    oNum = oNumber.search(sJoined)
+    if not oNum: return None
+    sNumber = oNum.group(1) + oNum.group(2)
+    sFirst = lBlock[0]
+    sTitle = sFirst[:sFirst.find(oNum.group(0))].strip(" .,:;-–—") if oNum.group(0) in sFirst else ""
+    lsRest = lBlock[1:]
+    # The rest of the number's line -- "8 hours 39 minutes" in the live issues -- is read with the lines after it.
+    sAfter = sFirst[sFirst.find(oNum.group(0)) + len(oNum.group(0)):].strip(" .,:;-\u2013\u2014") if oNum.group(0) in sFirst else ""
+    if sAfter: lsRest = [sAfter] + lsRest
+    if not sTitle and lsRest and not oByLine.match(lsRest[0]) and not (oHours.search(lsRest[0]) or oMedia.search(lsRest[0])): sTitle, lsRest = lsRest[0], lsRest[1:]
+    dBook = {"title": sTitle, "number": sNumber, "author": "", "narrator": "", "length": "", "year": "", "annotation": "",
+             "annotation_source": "NLS", "tags": [], "heading": sHeading}
+    lsKeep = []
+    # AN AUTHOR WITHOUT "BY": newer issues put the author's name alone on the line after the title. The first such line,
+    # short, with no digits and no sentence's end, is taken as the author; the log's samples show whether that holds.
+    if lsRest and not oByLine.match(lsRest[0]) and len(lsRest[0]) <= 70 and not re.search(r"\d", lsRest[0]) \
+            and not lsRest[0].rstrip().endswith((".", "!", "?")) and not oNarrator.search(lsRest[0]):
+        dBook["author"] = lsRest[0].strip(" ,;")
+        lsRest = lsRest[1:]
+    for sLine in lsRest:
+        sLow = sLine.lower().strip()
+        if any(sLow.startswith(s) for s in lsDropLines): continue
+        oBy = oByLine.match(sLine)
+        if oBy and not dBook["author"]: dBook["author"] = oBy.group(1).strip(" .,"); continue
+        # A LINE THAT IS ONLY THE NARRATOR keeps the whole name, initials and all ("read by B. J. Harrison").
+        oWhole = re.match(r"^\s*(?:read|narrated)\s+by\s+(.+?)\.?\s*$", sLine, re.I)
+        if oWhole and not dBook["narrator"]:
+            dBook["narrator"] = oWhole.group(1).strip(" ,")
+            continue
+        oRead = oNarrator.search(sLine)
+        if oRead and not dBook["narrator"]:
+            dBook["narrator"] = oRead.group(1).strip(" .,")
+            sLine = (sLine[:oRead.start()] + sLine[oRead.end():]).strip(" .,;")
+            if not sLine: continue
+        oLen = oHours.search(sLine) or oMedia.search(sLine)
+        if oLen and not dBook["length"]:
+            dBook["length"] = oLen.group(0)
+            sRemainder = (sLine[:oLen.start()] + sLine[oLen.end():]).strip(" .,;()")
+            if re.fullmatch(r"(?i)(reading time:?|length:?)?", sRemainder): continue
+        lsKeep.append(sLine)
+    sText = " ".join(lsKeep).strip()
+    for sAdvisory in sorted(lsAdvisories, key=len, reverse=True):
+        if re.search(r"\b" + re.escape(sAdvisory) + r"\b", sText, re.I):
+            dBook["tags"].append(sAdvisory[4:] if sAdvisory.startswith("for ") else sAdvisory)
+            sText = re.sub(r"\b" + re.escape(sAdvisory) + r"\b\.?", "", sText, count=1, flags=re.I)
+    oYear = oYearEnd.search(sText)
+    if oYear:
+        dBook["year"] = oYear.group(1)
+        sText = sText[:oYear.start()].strip()
+    # WHO WROTE IT, after the advisories and year are taken out, so a description marked "From publisher" in its middle
+    # still gives up the labels NLS put after it.
+    oSource = re.search(r"\b(From (?:the )?publisher|Goodreads|Amazon)\b", sText, re.I)
+    if oSource:
+        sWord = oSource.group(1).lower()
+        dBook["annotation_source"] = "publisher" if "publisher" in sWord else ("Goodreads" if "goodreads" in sWord else "Amazon")
+        sText = sText[:oSource.start()].strip()
+    sText = re.sub(r"\s+([.,;])", r"\1", re.sub(r"\s{2,}", " ", sText)).strip(" ,;")
+    # What taking the advisories out leaves behind: "and." or ". ." where they stood.
+    sText = re.sub(r"(?:\s*\band\b)?\s*\.(?:\s*\.)+", ".", re.sub(r"\.\s+and\s*\.", ".", sText)).strip(" ,;")
+    sText = re.sub(r"\s+and\.?$", "", sText).strip(" ,;")
+    if sText in (".", "and", "and."): sText = ""
+    dBook["annotation"] = sText if dBook["annotation_source"] == "NLS" else ""
+    dBook["annotation_seen"] = len(sText)
+    sHead = sHeading.lower()
+    dBook["audience"] = "children" if re.search(r"child|young|kids|grades|teen", sHead) else "adult"
+    dBook["fiction"] = "nonfiction" if "nonfiction" in sHead.replace("-", "") else ("fiction" if "fiction" in sHead else "")
+    dBook["category"] = sHeading.rsplit(" > ", 1)[-1]
+    dBook["url"] = "https://nlsbard.loc.gov/bard2-web/search/%s/" % sNumber if sNumber.startswith("DB") else ""
+    return dBook
+
+
+def readIssue(oCache, dIssue, iSamples):
+    """The books of one issue, with counts for the coverage report."""
+    dResult = oCache.fetch(dIssue["fetch"])
+    binBody = dResult.get("body")
+    if not binBody:
+        log("ISSUE %s %s: nothing fetched (%s)" % (dIssue["key"], dIssue["fetch"], dResult.get("error", "")))
+        return []
+    sText = core.decoded(binBody)
+    lLines = pageLines(sText, dIssue["html"])
+    lBooks, lBlock, sBlockHeading = [], [], ""
+    iNumberLines = 0
+    sPrevious = ""
+    lsHeadings = collections.Counter()
+    bInBrief = False
+    def close():
+        if lBlock:
+            dBook = entryOf(lBlock, sBlockHeading)
+            if dBook: lBooks.append(dBook)
+    for sHeading, sLine, bHeading in lLines:
+        if bHeading:
+            lsHeadings[sLine] += 1
+            if re.search(r"in brief", sLine, re.I): bInBrief = True
+            close()
+            lBlock, sBlockHeading, sPrevious = [], sHeading, ""
+            continue
+        oNum = oNumber.search(sLine)
+        if not oNum:
+            if lBlock: lBlock.append(sLine)
+            sPrevious = sLine
+            continue
+        iNumberLines += 1
+        sNumber = oNum.group(1) + oNum.group(2)
+        # THE CLOSING LINE (version 2, from cycle 1's log): the live issues, and those of 2015 to 2017, end an entry with
+        # its number again, as a link, "DB139182 Wolverine: Violent Tendencies". The same number as the open entry's
+        # closes it rather than starting a second book.
+        oOpen = oNumber.search(lBlock[0]) if lBlock else None
+        if oOpen and oOpen.group(1) + oOpen.group(2) == sNumber:
+            close()
+            lBlock, sPrevious = [], ""
+            continue
+        # A TITLE ON THE LINE BEFORE ITS NUMBER: when nothing stands before the number on its line, the title is the line
+        # just before -- which the open entry collected as its last line, or which stood alone after a heading.
+        sBefore = sLine[:oNum.start()].strip(" .,:;-\u2013\u2014")
+        sTitleBefore = ""
+        if not sBefore:
+            if len(lBlock) > 1 and lBlock[-1] == sPrevious: sTitleBefore = lBlock.pop()
+            elif not lBlock and sPrevious: sTitleBefore = sPrevious
+        close()
+        lBlock, sBlockHeading = [(sTitleBefore + " " + sLine).strip()], sHeading
+        sPrevious = sLine
+    close()
+    # A book listed twice in one issue (a closing line the rule above did not catch) is kept once.
+    dSeen, lUnique = set(), []
+    for dBook in lBooks:
+        if dBook["number"] in dSeen: continue
+        dSeen.add(dBook["number"])
+        lUnique.append(dBook)
+    if len(lUnique) < len(lBooks): log("ISSUE %s: %d repeated book numbers set aside" % (dIssue["key"], len(lBooks) - len(lUnique)))
+    lBooks = lUnique
+    dSources = collections.Counter(d["annotation_source"] for d in lBooks)
+    log("ISSUE %s (%s, %s): %d lines, %d with a book number, %s; sources %s; headings %d; In Brief %s; %d without author; %d without title"
+        % (dIssue["key"], dIssue["kind"], dIssue["url"], len(lLines), iNumberLines, plural(len(lBooks), "book"), dict(dSources),
+           len(lsHeadings), "yes" if bInBrief else "no", sum(1 for d in lBooks if not d["author"]), sum(1 for d in lBooks if not d["title"])))
+    log("HEADINGS %s: %s" % (dIssue["key"], " | ".join(s for s, _ in lsHeadings.most_common(25))))
+    for dBook in lBooks[:iSamples]:
+        log("SAMPLE %s: %s" % (dIssue["key"], json.dumps({k: v for k, v in dBook.items() if k != "url"}, ensure_ascii=False)[:900]))
+    if not lBooks:
+        log("NOBOOKS %s: first lines: %s" % (dIssue["key"], " || ".join(s for _, s, _ in lLines[:30])[:1500]))
+    return lBooks
+
+
+# ---------------------------------------------------------------- the pilot database
+
+def buildPilot(lIssues, sOut):
+    """The pilot: issues and books as every DbDo template has them -- defs and maps, id, added and edited first, then the
+    main fields, then notes, tags, url, look, prime and marked -- with a full-text index on books. VERSION 2: cycle 1's
+    plain tables failed the kit's checkDb at push, which checks every database in the project."""
+    os.makedirs(os.path.dirname(sOut), exist_ok=True)
+    sNew = sOut + ".building"
+    for sPath in (sNew, sNew + "-journal"):
+        if os.path.exists(sPath): os.remove(sPath)
+    oDb = sqlite3.connect(sNew)
+    trail = core.trail
+    for sStatement in [x for x in trail.systemDdl() if not x.startswith("CREATE TABLE views")]: oDb.execute(sStatement)
+    dIssueTypes = {"title": "TEXTLINE", "published": "TEXTLINE", "books": "INTEGER", "kind": "TEXTLINE"}
+    dBookTypes = {"title": "TEXTLINE", "author": "TEXTLINE", "narrator": "TEXTLINE", "number": "TEXTLINE", "audience": "TEXTLINE",
+                  "fiction": "TEXTLINE", "category": "TEXTLINE", "length": "TEXTLINE", "year": "TEXTLINE", "issue": "TEXTLINE",
+                  "issue_id": "INTEGER", "annotation": "TEXTMEMO", "annotation_source": "TEXTLINE"}
+    for sStatement in trail.tableDdl("issues", "issue_id", ["title", "published", "books", "kind"], ["title"], ["published", "title"], dIssueTypes): oDb.execute(sStatement)
+    for sStatement in trail.tableDdl("books", "book_id", ["title", "author", "narrator", "number", "audience", "fiction", "category", "length", "year",
+                                                         "issue", "issue_id", "annotation", "annotation_source"], ["title", "author"], ["title", "author", "number"], dBookTypes):
+        oDb.execute(sStatement)
+    oDb.execute("CREATE INDEX idx_books_issue_id ON books (issue_id)")
+    iBooks = 0
+    for dIssue in lIssues:
+        oCursor = oDb.execute("INSERT INTO issues (title, published, books, kind, url) VALUES (?, ?, ?, ?, ?)",
+                              (issueTitle(dIssue["date"]), "%04d-%02d-01" % (dIssue["date"][0], dIssue["date"][1]), len(dIssue["books"]),
+                               dIssue["kind"], dIssue["url"]))
+        iIssue = oCursor.lastrowid
+        for d in dIssue["books"]:
+            oCursor = oDb.execute("INSERT OR IGNORE INTO books (title, author, narrator, number, audience, fiction, category, length, year, issue, issue_id, "
+                        "annotation, annotation_source, tags, url) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                        (d["title"] or None, d["author"] or None, d["narrator"] or None, d["number"], d["audience"] or None, d["fiction"] or None,
+                         d["category"] or None, d["length"] or None, d["year"] or None, issueTitle(dIssue["date"]), iIssue, d["annotation"] or None,
+                         d["annotation_source"], "\n".join(d["tags"]) or None, d["url"] or None))
+            if oCursor.rowcount: iBooks += 1
+            else: log("PRIME %s: %s by %s, %s, is already in the pilot" % (dIssue["key"], d["title"], d["author"], d["number"]))
+    sFts = ""
+    if core.homerFts.available(oDb):
+        sFts = core.homerFts.createIndex(oDb, "books", "book_id", ["title", "author", "narrator", "category", "annotation", "tags"])
+        sProblem = core.homerFts.integrityProblem(oDb, sFts)
+        log("FTS %s: %s" % (sFts, sProblem or "sound"))
+        for sMatch in ("blind*", "guide NEAR(dog, 5)", "\"civil war\"", "braille"):
+            try:
+                iHits = oDb.execute("SELECT count(*) FROM books_fts WHERE books_fts MATCH ?", (sMatch,)).fetchone()[0]
+                log("SEARCH %s: %s" % (sMatch, plural(iHits, "book")))
+            except Exception as oError:
+                log("SEARCH %s failed: %s" % (sMatch, oError))
+    else:
+        log("FTS: this SQLite has no FTS5")
+    oDb.commit()
+    oDb.close()
+    if os.path.exists(sOut): os.remove(sOut)
+    os.replace(sNew, sOut)
+    return iBooks, sFts
+
+
+def writeCoverage(dIssues, dKinds, lRead, sPath):
+    """The coverage report: what was found by year, what the pilot read, and annotation sources by year."""
+    dYears = collections.defaultdict(list)
+    for d in dIssues.values(): dYears[d["date"][0]].append(d)
+    lsOut = ["# Talking Book Topics: what cycle 1 found", "", "Written by makeTalkingBookTopics, %s, %s." % (sVersion, datetime.datetime.now().strftime("%d %B %Y %H:%M")), ""]
+    lsOut += ["## Issues found, by year", ""]
+    for iYear in sorted(dYears):
+        lYear = sorted(dYears[iYear], key=lambda d: d["key"])
+        lsOut.append("- %d: %s (%s)" % (iYear, plural(len(lYear), "issue"), ", ".join("%s %s" % (issueTitle(d["date"]).rsplit(" ", 1)[0], d["kind"]) for d in lYear)))
+    lsOut += ["", "## Kinds of page found", ""] + ["- %s: %d" % (s, dKinds[s]) for s in sorted(dKinds)]
+    lsOut += ["", "## The pilot", ""]
+    dSourceYears = collections.defaultdict(collections.Counter)
+    for d in lRead:
+        dSources = collections.Counter(b["annotation_source"] for b in d["books"])
+        for sKey, iCount in dSources.items(): dSourceYears[d["date"][0]][sKey] += iCount
+        lsOut.append("- %s (%s): %s; without author %d; without narrator %d; annotations kept %d" % (
+            issueTitle(d["date"]), d["kind"], plural(len(d["books"]), "book"), sum(1 for b in d["books"] if not b["author"]),
+            sum(1 for b in d["books"] if not b["narrator"]), sum(1 for b in d["books"] if b["annotation"])))
+    lsOut += ["", "## Who wrote the annotations, by year read", ""]
+    for iYear in sorted(dSourceYears):
+        lsOut.append("- %d: %s" % (iYear, ", ".join("%s %d" % (s, n) for s, n in dSourceYears[iYear].most_common())))
+    with open(sPath, "w", encoding="utf-8-sig", newline="\r\n") as f: f.write("\n".join(lsOut) + "\n")
+    return True
+
+
+def pickPilot(lIssues, iCount):
+    """The newest half of the pilot, then issues spread evenly over the older years."""
+    lIssues = sorted(lIssues, key=lambda d: d["key"], reverse=True)
+    iNew = iCount // 2
+    lPick = lIssues[:iNew]
+    lOld = lIssues[iNew:]
+    iLeft = iCount - len(lPick)
+    if lOld and iLeft > 0:
+        nStep = max(1.0, len(lOld) / float(iLeft))
+        lPick += [lOld[int(i * nStep)] for i in range(min(iLeft, len(lOld)))]
+    return lPick
+
+
+def main(lsArgs):
+    lsLower = [s.lower() for s in lsArgs]
+    if "--pilot-due" in lsLower and os.path.exists(sPilotPath) and os.path.getmtime(sPilotPath) >= os.path.getmtime(os.path.abspath(__file__)):
+        return 0
+    log("makeTalkingBookTopics.py started; %s; script %s" % (sVersion, os.path.abspath(__file__)))
+    log("Python %s at %s on %s; SQLite %s; cwd %s; command line %s" % (platform.python_version(), sys.executable, platform.platform(),
+                                                                      sqlite3.sqlite_version, os.getcwd(), " ".join(sys.argv)))
+    lsKnown = ("--limit", "--offline", "--pilot-due")
+    lsUnknown = [s for s in lsArgs if s.startswith("--") and s.lower() not in lsKnown]
+    if lsUnknown:
+        say("Unknown option %s. The options are %s." % (lsUnknown[0], ", ".join(lsKnown)))
+        return 2
+    iLimit = iPilot
+    if "--limit" in lsLower:
+        iAt = lsLower.index("--limit")
+        iLimit = int(lsArgs[iAt + 1]) if iAt + 1 < len(lsArgs) and lsArgs[iAt + 1].isdigit() else iPilot
+    bOffline = "--offline" in lsLower
+    log("settings: pilot of %d issues; offline %s; delay %.1f s; data %s" % (iLimit, bOffline, nDelay, sDataDir))
+    say("Talking Book Topics: finding the issues, then reading %d of them. A few minutes." % iLimit)
+    oCache = core.homerFetch.Cache(sDataDir, fLog=log, nDelay=nDelay, iTimeout=60, iRetries=3, sUserAgent=sUserAgent, bOffline=bOffline)
+    dIssues, dKinds = discoverIssues(oCache, bOffline)
+    oCache.save()
+    if not dIssues:
+        say("No issue was found, so nothing was built. The log says why: " + sLogPath)
+        return 1
+    lsYears = sorted(set(d["date"][0] for d in dIssues.values()))
+    say("Found %s, %d to %d." % (plural(len(dIssues), "issue"), lsYears[0], lsYears[-1]))
+    lPick = pickPilot(list(dIssues.values()), iLimit)
+    lRead = []
+    for iAt, dIssue in enumerate(lPick, 1):
+        sTitle = issueTitle(dIssue["date"])
+        core.sHeartbeat = "Issue %d of %d, %s, fetching." % (iAt, len(lPick), sTitle)
+        # Archived pages never change: a kept copy is used without asking the archive again.
+        oCache.bTrustKept = "web.archive.org" in dIssue["fetch"]
+        dIssue["books"] = readIssue(oCache, dIssue, 2 if iAt <= 4 or iAt % 6 == 0 else 1)
+        oCache.bTrustKept = False
+        core.sHeartbeat = ""
+        say("Issue %d of %d, %s: %s." % (iAt, len(lPick), sTitle, plural(len(dIssue["books"]), "book")))
+        if dIssue["books"]: lRead.append(dIssue)
+        if iAt % 6 == 0: oCache.save()
+    oCache.save()
+    writeCoverage(dIssues, dKinds, lRead, sCoveragePath)
+    if not lRead:
+        say("No book could be read from the pilot's issues. The log and %s say why." % sCoveragePath)
+        return 1
+    iBooks, sFts = buildPilot(lRead, sPilotPath)
+    say("Pilot built: %s from %s, %s. Coverage: %s" % (plural(iBooks, "book"), plural(len(lRead), "issue"),
+                                                     "searchable" if sFts else "no full-text index", sCoveragePath))
+    say("Log: " + sLogPath)
+    return 0
+
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main(sys.argv[1:]))
+    except Exception as oError:
+        log("CRASH " + traceback.format_exc())
+        print("makeTalkingBookTopics stopped: %s. The log is %s." % (oError, sLogPath))
+        sys.exit(1)

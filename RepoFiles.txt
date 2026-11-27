@@ -61,6 +61,8 @@ scripts/makeBrailleForum.cmd
 scripts/makeBrailleForum.py
 scripts/makeBrailleMonitor.cmd
 scripts/makeBrailleMonitor.py
+scripts/makeTalkingBookTopics.cmd
+scripts/makeTalkingBookTopics.py
 # probeOdbcFts (25 November 2026): every build tests FTS5 through DbDo's ODBC driver, and logs what it finds.
 scripts/probeOdbcFts.cmd
 scripts/probeOdbcFts.ps1
