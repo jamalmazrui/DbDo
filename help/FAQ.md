@@ -49,6 +49,30 @@ Show Columns on Alt+S, since Control+S saves.
 Sleep. Every Z key is a toggle that wakes a behavior or puts it to sleep, such
 as Control+Shift+Z for Read Only Toggle.
 
+## Why do I see only two or three columns?
+
+A table first shows the columns that name a record, such as a book's title and
+author, so Down Arrow says just enough. Alt+S, Show Columns, then A for All
+columns, shows every column, and DbDo keeps that choice for the table. Shift+W,
+Say Whole Record, reads the whole record whatever is shown.
+
+## How do I find the radio stations of a city?
+
+In RadioTrail, Control+F, Filter Records, then Any field, and type the city:
+seattle finds stations with Seattle in their name, city or state. For a whole
+state, choose Main fields and type Washington in the state box. A station
+DbDo does not have can be added with Control+N, New Record.
+
+## How do I bring a spreadsheet into a database I already have?
+
+Open the database and the table, then Control+Shift+I, Import Data, and choose
+the workbook. Merge records adds its rows to the table, matching columns by
+name, so a column called Title fills the title field; DbDo says how many rows
+came in and how many were left out, and why. New table keeps it as a table of
+its own. To make a new database from a spreadsheet, open the spreadsheet with
+Control+O and use Save As, Control+Shift+S, with a .db name; Alt+R, Recent
+Databases, opens it again.
+
 ## Can DbDo search long text, such as descriptions?
 
 Yes. A table with a full-text index, such as the books of TalkingBookTopics,

@@ -35,15 +35,22 @@ The first time it runs, DbDo opens **RadioTrail**, a database of Internet radio
 stations that comes with it. One table of stations is easy to understand, and
 you hear DbDo do something useful at once.
 
-Six things to try:
+Seven things to try:
 
 - **Arrow through a table.** Each row is one record. Down and Up move between
   records; Left and Right move between fields. Shift+C, Say Cell, tells you
   what the field holds, and Shift+H, Say Header, which field it is.
+- **See more columns.** A table first shows the few columns that name a
+  record, such as title and author. Alt+S, Show Columns, then A for All
+  columns, shows every one; the choice is kept with the table. Shift+W, Say
+  Whole Record, reads the whole record without changing what shows.
 - **Listen.** Control+P, Play Media, plays the station you are on in the Homer
   Player. Escape closes the player.
-- **Filter.** Control+F, Filter Records, keeps only the records that match, such
-  as the stations in your city. Control+Shift+F clears the filter.
+- **Filter.** Control+F, Filter Records, keeps only the records that match.
+  Any field finds a word anywhere, so seattle finds the stations of Seattle;
+  the Main fields form gives a box for each field, so Seattle in the city box,
+  or Washington in the state box, does the same. Control+Shift+F clears the
+  filter.
 - **Find something.** Type the first letters of what you want and the list goes
   there. Control+K, Keywords, finds the next record with your words in any
   field.

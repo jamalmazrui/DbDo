@@ -45,7 +45,7 @@ sHere = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, sHere)
 import makeBrailleForum as core
 
-sVersion = "2026-11-27 version 6: In Brief titles unescaped, untitled articles named, contact lists left out"
+sVersion = "2026-11-27 version 7: only member lists left out of In Brief, not articles that give an office's address"
 sSource = "TalkingBookTopics"
 sUserAgent = "DbDo makeTalkingBookTopics/1 (+https://github.com/JamalMazrui/DbDo; a searchable list of NLS Talking Book Topics books)"
 sProject = core.sProject
@@ -388,7 +388,12 @@ def briefArticles(sText, bHtml, sKey):
         # CONTACT LISTS ARE LEFT OUT (version 6). Version 5 kept the advisory group's member lists of 2005 to 2017:
         # volunteers' home addresses and email. They are public record, but a shipped database has no need to carry
         # them, and no reader searches for them. Two or more email addresses mark such a list.
-        if len(re.findall(r"[\w.+-]+@[\w-]+\.[\w.]+", sBody)) >= 2:
+        # VERSION 7: two addresses also caught articles worth keeping -- museum tours, a tactile atlas, where to buy
+        # cartridges -- which give an office's email. A member list is now told by its title (representatives,
+        # readers-at-large, librarians) or by addresses packed close: four or more, at least one in every 35 words.
+        iEmails = len(re.findall(r"[\w.+-]+@[\w-]+\.[\w.]+", sBody))
+        bMemberTitle = bool(re.search(r"representatives|readers?[- ]at[- ]large|^librarians$", sTitle or "", re.I))
+        if bMemberTitle or (iEmails >= 4 and iEmails * 35 >= len(sWords.split())):
             log("BRIEF %s: a contact list left out, %s" % (sKey, sTitle or "untitled"))
             return
         # AN UNTITLED ARTICLE (version 6) -- text before the first title, or a section with none -- is named by its

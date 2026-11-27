@@ -5,6 +5,18 @@ This file is the chronological record of DbDo releases. The most recent release 
 Press **Control+Shift+F1** inside DbDo to open this file in your browser, or type `history` at the dot prompt.
 
 
+## 27 November 2026, night -- What testers ran into
+
+- **Typing a title's first letters is quick in a big table.** In TalkingBookTopics' 60,000 books, each letter took seven to ten seconds while DbDo moved through the records one by one. DbDo now reads the column once and searches that, so a letter lands at once.
+- **A saved copy is easy to find again.** A spreadsheet opened as a database and saved with Save As, Control+Shift+S, under a .db name, is now the database DbDo goes on working in, and Recent Databases, Alt+R, lists it. Any database saved as a copy is listed there too.
+- **A Fields box can name another field.** Typing city=seattle, or city:seattle, in a Filter Records box now tests the city field, whichever box it is typed in.
+- **RadioTrail spells each American state one way.** Stations listed WA, Washington, Tacoma WA or Seattle Washington are all Washington now, and a town written there moves to city, so a state or city filter finds them all.
+- **Added and edited are said in your own time.** They are stored in Coordinated Universal Time, but were said as if local, so in Seattle a record added at 1:47 PM was said to be added at 9:47 PM.
+- **BlindCreations leaves out books their author has withdrawn.**
+- **In Brief keeps articles that give an office's email,** such as museum tours and a tactile atlas, and leaves out only lists of members.
+- **The ReadMe and FAQ answer what testers asked:** why only two or three columns show at first, how to find a city's radio stations, and how to bring a spreadsheet into a database you already have.
+
+
 ## 27 November 2026, evening -- Ready for release
 
 - **Marks are always 1 or 0.** Semicolon wrote 1, but marking a range and Toggle Marks wrote the word true, and Filter Records' Marked records looked only for the word. So a record marked one way could be missed by the Marked filter, a report or the marked count. Every way of marking now writes 1, the Marked filter and the count accept either, and a copy marked by an earlier version is set right when it opens. A new build check fails if a word ever creeps back.

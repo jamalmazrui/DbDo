@@ -7132,6 +7132,35 @@ namespace DbDo
             return "(SELECT replace(CAST(l." + sField + " AS TEXT), char(31), ' ') FROM \"" + sLinkTable.Replace("\"", "\"\"") + "\" l WHERE l." + sQK + " = " + sOuter + ")";
         }
 
+        // getColumnScreenValues (27 November 2026, from the release logs): every row's screen value of one column, in the
+        // grid's order, read with one GetRows call rather than a move and a read per row. Type-ahead in TalkingBookTopics'
+        // 60,674 books spent seven to ten seconds a letter moving the cursor row by row. The cursor is put back where it
+        // was. Null when the column cannot be read this way; the caller then falls back to the row-by-row walk.
+        public string[] getColumnScreenValues(string sName)
+        {
+            if (!hasRecordset() || recordCount <= 0) return null;
+            int iSaved = absolutePosition;
+            try
+            {
+                const int iBookmarkFirst = 1;
+                object[,] aRows = oRecordset.GetRows(-1, iBookmarkFirst, sName) as object[,];
+                if (aRows == null) return null;
+                int iCount = aRows.GetLength(1);
+                string[] aValues = new string[iCount];
+                for (int i = 0; i < iCount; i++)
+                {
+                    object oValue = aRows[0, i];
+                    string sVal = (oValue == null || oValue is DBNull) ? ""
+                        : (oValue is double || oValue is float || oValue is decimal)
+                            ? Convert.ToString(oValue, System.Globalization.CultureInfo.InvariantCulture) : oValue.ToString();
+                    aValues[i] = linkLabel(sName, sVal) ?? Util.sScreenText(sVal);
+                }
+                return aValues;
+            }
+            catch (Exception ex) { DbDoLog.write("getColumnScreenValues " + sName + ": " + ex.Message); return null; }
+            finally { try { if (iSaved > 0) absolutePosition = iSaved; } catch { } }
+        }
+
         public string getScreenValue(string sName)
         {
             string sVal = getFieldValue(sName);
@@ -16878,6 +16907,10 @@ namespace DbDo
         // Returns the index of the matching row through Index on
         // the event args; the ListView then focuses that row.
         // Returns -1 (Index unset) if no match found.
+        private string[] aTypeAheadValues;
+        private string sTypeAheadKey = "";
+        private int iTypeAheadBuilt;
+
         private void gridSearchForVirtualItem(object sender, SearchForVirtualItemEventArgs evArgs)
         {
             if (db == null || !db.hasRecordset()) return;
@@ -16897,6 +16930,30 @@ namespace DbDo
             if (iTotal <= 0) return;
             int iStart = evArgs.StartIndex;
             if (iStart < 0 || iStart >= iTotal) iStart = 0;
+            // ONE READ OF THE COLUMN (27 November 2026): the column's values are read once with getColumnScreenValues and
+            // kept for the burst of typing, so each letter is a search of strings, not of rows. The cache is keyed by
+            // table, column, count, filter and sort, and lasts 15 seconds, so an edit is seen at the next burst.
+            string sCacheKey = (db.currentTable ?? "") + "\u001f" + sFieldName + "\u001f" + iTotal + "\u001f" + (db.filter ?? "") + "\u001f" + (db.sort ?? "");
+            bSuppressCellChanged = true;
+            try
+            {
+                if (aTypeAheadValues == null || sTypeAheadKey != sCacheKey || unchecked(Environment.TickCount - iTypeAheadBuilt) > 15000)
+                {
+                    aTypeAheadValues = db.getColumnScreenValues(sFieldName);
+                    sTypeAheadKey = sCacheKey;
+                    iTypeAheadBuilt = Environment.TickCount;
+                }
+                if (aTypeAheadValues != null && aTypeAheadValues.Length == iTotal)
+                {
+                    for (int i = 1; i <= iTotal; i++)
+                    {
+                        int iCheck = (iStart + i) % iTotal;
+                        if ((aTypeAheadValues[iCheck] ?? "").StartsWith(sNeedle, StringComparison.OrdinalIgnoreCase)) { evArgs.Index = iCheck; return; }
+                    }
+                    return;
+                }
+            }
+            finally { bSuppressCellChanged = false; }
             int iSavedPos = db.absolutePosition;
             bSuppressCellChanged = true;
             try
@@ -19041,16 +19098,25 @@ namespace DbDo
         // and re-render it in a long, screen-reader-friendly form using
         // the user's local time zone and culture preferences. Returns
         // the input verbatim if it doesn't parse as a date.
+        // ADDED AND EDITED ARE UTC (27 November 2026, from the release walk): SQLite's CURRENT_TIMESTAMP, which sets both,
+        // is Coordinated Universal Time, but a stamp was read as local time, so in Seattle a record added at 1:47 PM was
+        // said to be added at 9:47 PM. A stamp with a time is now read as UTC and said in local time; a date alone
+        // stays the date it says, since moving it would put it on the day before.
+        internal static System.Globalization.DateTimeStyles stampStyle(string sRaw)
+        {
+            return (sRaw ?? "").IndexOf(':') >= 0 ? System.Globalization.DateTimeStyles.AssumeUniversal : System.Globalization.DateTimeStyles.AssumeLocal;
+        }
+
         private static string formatDateHumanFriendly(string sRaw)
         {
             if (string.IsNullOrEmpty(sRaw)) return "";
             DateTime dt;
             if (!DateTime.TryParse(sRaw, System.Globalization.CultureInfo.CurrentCulture,
-                System.Globalization.DateTimeStyles.AssumeLocal, out dt))
+                stampStyle(sRaw), out dt))
             {
                 // Fall back to invariant culture for ISO-like "2026-05-15"
                 if (!DateTime.TryParse(sRaw, System.Globalization.CultureInfo.InvariantCulture,
-                    System.Globalization.DateTimeStyles.AssumeLocal, out dt))
+                    stampStyle(sRaw), out dt))
                 {
                     return sRaw;
                 }
@@ -25163,7 +25229,31 @@ namespace DbDo
                 {
                     db.saveAs(dlgFile.FileName);
                     invokeRefresh();
-                    LbcMessage.show(this, "Saved to: " + dlgFile.FileName, sTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
+                    // A SAVED COPY IS FOUND AGAIN (27 November 2026, from a tester's report: he imported a spreadsheet,
+                    // saved it as a database in his own folder, and could find it neither there nor in Recent Files). A
+                    // database copy is now put in Recent Files, so Alt+R opens it. And when what was open was a working
+                    // copy -- a spreadsheet or text file opened as a database, kept in a temporary file -- DbDo goes on in
+                    // the saved database, as a word processor does after Save As, so later changes are not left behind in
+                    // the temporary file.
+                    string sSavedExt = Path.GetExtension(dlgFile.FileName).TrimStart('.').ToLowerInvariant();
+                    bool bSavedDb = sSavedExt == "db" || sSavedExt == "sqlite" || sSavedExt == "sqlite3";
+                    string sSaid = "Saved to: " + dlgFile.FileName;
+                    if (bSavedDb && sTitle == "Save As")
+                    {
+                        RecentFiles.recordOpen(dlgFile.FileName);
+                        if (!string.IsNullOrEmpty(sManagedTempPath) && File.Exists(dlgFile.FileName))
+                        {
+                            string sOldTemp = sManagedTempPath;
+                            db.bDataModified = false;
+                            sManagedOriginPath = null; sManagedTempPath = null; iWorkbookUnwritten = 0;
+                            openDatabaseAndApplyState(dlgFile.FileName, null);
+                            try { if (File.Exists(sOldTemp)) File.Delete(sOldTemp); } catch { }
+                            sSaid += "\n\nDbDo now works in this database. Alt+R, Recent Databases, opens it again later.";
+                        }
+                        else sSaid += "\n\nAlt+R, Recent Databases, opens it.";
+                    }
+                    DbDoLog.write(sTitle + ": " + sSaid.Replace("\n", " "));
+                    LbcMessage.show(this, sSaid, sTitle, MessageBoxButtons.OK, MessageBoxIcon.Information);
                 }
                 catch (Exception ex)
                 {
@@ -29413,11 +29503,21 @@ namespace DbDo
                 {
                     string sVal;
                     if (!dlg.dValues.TryGetValue(sF, out sVal) || string.IsNullOrEmpty((sVal ?? "").Trim())) continue;
+                    // A FIELD NAMED IN THE BOX (27 November 2026, from a tester's report): "city=seattle" typed in the
+                    // first box found nothing, since the box tested its own field for those words. A box that begins with
+                    // another field's name and = or : now tests that field, as the Any field search reads city:seattle.
+                    string sTarget = sF;
+                    System.Text.RegularExpressions.Match oNamed = System.Text.RegularExpressions.Regex.Match(sVal.Trim(), @"^([A-Za-z_][A-Za-z0-9_]*)\s*[:=]\s*(.+)$");
+                    if (oNamed.Success)
+                    {
+                        string sNamed = (db.getFieldNames() ?? new List<string>()).Find(x => string.Equals(x, oNamed.Groups[1].Value, StringComparison.OrdinalIgnoreCase));
+                        if (sNamed != null) { sTarget = sNamed; sVal = oNamed.Groups[2].Value; }
+                    }
                     int iType = 0;
-                    try { iType = db.getFieldType(sF); } catch { }
+                    try { iType = db.getFieldType(sTarget); } catch { }
                     bool bText = iType == 8 || iType == 129 || iType == 130 || (iType >= 200 && iType <= 203);
                     string sWords;
-                    string sTest = db.fieldConditionSql(sF, sVal, bText, out sWords);
+                    string sTest = db.fieldConditionSql(sTarget, sVal, bText, out sWords);
                     if (sTest.Length == 0) continue;
                     lsTests.Add(sTest);
                     lsWords.Add(sWords);
@@ -36888,9 +36988,9 @@ namespace DbDo
             if (string.IsNullOrEmpty(sRaw)) return "";
             DateTime dt;
             if (!DateTime.TryParse(sRaw, System.Globalization.CultureInfo.CurrentCulture,
-                    System.Globalization.DateTimeStyles.AssumeLocal, out dt) &&
+                    DbDoForm.stampStyle(sRaw), out dt) &&
                 !DateTime.TryParse(sRaw, System.Globalization.CultureInfo.InvariantCulture,
-                    System.Globalization.DateTimeStyles.AssumeLocal, out dt))
+                    DbDoForm.stampStyle(sRaw), out dt))
             { return sRaw; }
             DateTime dtLocal = (dt.Kind == DateTimeKind.Utc) ? dt.ToLocalTime() : dt;
             bool bHasTime = sRaw.IndexOf(':') >= 0;

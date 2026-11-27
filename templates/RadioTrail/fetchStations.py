@@ -466,6 +466,53 @@ def primeWithoutIds(c, sTable="stations"):
     return 1 + len(lMerged)
 
 
+dUsStates = {"AL": "Alabama", "AK": "Alaska", "AZ": "Arizona", "AR": "Arkansas", "CA": "California", "CO": "Colorado",
+    "CT": "Connecticut", "DE": "Delaware", "DC": "District of Columbia", "FL": "Florida", "GA": "Georgia", "HI": "Hawaii",
+    "ID": "Idaho", "IL": "Illinois", "IN": "Indiana", "IA": "Iowa", "KS": "Kansas", "KY": "Kentucky", "LA": "Louisiana",
+    "ME": "Maine", "MD": "Maryland", "MA": "Massachusetts", "MI": "Michigan", "MN": "Minnesota", "MS": "Mississippi",
+    "MO": "Missouri", "MT": "Montana", "NE": "Nebraska", "NV": "Nevada", "NH": "New Hampshire", "NJ": "New Jersey",
+    "NM": "New Mexico", "NY": "New York", "NC": "North Carolina", "ND": "North Dakota", "OH": "Ohio", "OK": "Oklahoma",
+    "OR": "Oregon", "PA": "Pennsylvania", "PR": "Puerto Rico", "RI": "Rhode Island", "SC": "South Carolina",
+    "SD": "South Dakota", "TN": "Tennessee", "TX": "Texas", "UT": "Utah", "VT": "Vermont", "VA": "Virginia",
+    "WA": "Washington", "WV": "West Virginia", "WI": "Wisconsin", "WY": "Wyoming"}
+
+
+def usState(sState):
+    """A United States station's state field as (state, city): the state's full name, and any town written before it.
+    "WA" gives Washington; "Tacoma WA" gives Washington and Tacoma; "Seattle, Washington" gives Washington and Seattle.
+    A value with no state in it comes back as it was, with no town."""
+    sState = (sState or "").strip()
+    dNames = {v.lower(): v for v in dUsStates.values()}
+    if sState.upper() in dUsStates: return dUsStates[sState.upper()], ""
+    if sState.lower() in dNames: return dNames[sState.lower()], ""
+    lsWords = re.split(r"[\s,]+", sState.strip(" ,."))
+    for iTake in (3, 2, 1):
+        if len(lsWords) <= iTake: continue
+        sTail = " ".join(lsWords[-iTake:])
+        sFound = dNames.get(sTail.lower()) or (dUsStates.get(sTail.upper()) if iTake == 1 else None)
+        if sFound: return sFound, " ".join(lsWords[:-iTake]).strip(" ,.")
+    return sState, ""
+
+
+def normalizeUsStates(c):
+    """US STATES SPELLED ONE WAY (27 November 2026, from a tester's report). A tester could not list Seattle's stations
+    with the Fields filter: Radio Browser's state field held WA, Washington, Tacoma WA and Seattle Washington for the same
+    state. A United States station's state is now the full name, and a town written in it moves to city when city is
+    empty, so state Washington, or city Seattle, finds them. Run on every build by --conventions; it changes a row once."""
+    if not c.execute("select 1 from sqlite_master where type='table' and name='stations'").fetchone(): return 0
+    lsCols = [r[1] for r in c.execute("pragma table_info(stations)")]
+    if not all(x in lsCols for x in ("state", "city", "countrycode")): return 0
+    iChanged = 0
+    for iId, sState, sCity in c.execute("select rowid, state, city from stations where countrycode = 'US' and coalesce(state, '') <> ''").fetchall():
+        sNew, sTown = usState(sState)
+        sNewCity = sCity if (sCity or "").strip() else sTown
+        if sNew != sState or (sNewCity or "") != (sCity or ""):
+            c.execute("update stations set state = ?, city = ? where rowid = ?", (sNew, sNewCity or "", iId))
+            iChanged += 1
+    c.commit()
+    return iChanged
+
+
 def ensureConventions(c):
     """Adds the missing Trail indexes and triggers, after putting marked last; returns how many changes were made."""
     def quoted(s): return '"' + s.replace('"', '""') + '"'
@@ -476,6 +523,7 @@ def ensureConventions(c):
             iAdded += putInOrder(c, sOrdered, dMainOrders.get(sOrdered))
     iAdded += primeWithoutIds(c, "stations")
     iAdded += unitSeparatorEverywhere(c)
+    iAdded += normalizeUsStates(c)
     lsExisting = [r[0] for r in c.execute("select name from sqlite_master where type in ('index', 'trigger')")]
     for sTable in ("defs", "maps"):
         sName = "idx_" + sTable + "_prime"
